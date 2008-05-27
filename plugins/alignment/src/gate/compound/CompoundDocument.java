@@ -2,6 +2,8 @@ package gate.compound;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
 import gate.Document;
 import gate.TextualDocument;
 import gate.alignment.Alignment;
@@ -82,7 +84,21 @@ public interface CompoundDocument extends TextualDocument {
 	
 	/**
 	 * The alignment object contains information about the alignment of text.
+	 * If the alignment with given name doesn't exist, this method creates an
+	 * empty alignment object and returns it.
 	 * @return
 	 */
 	public Alignment getAlignmentInformation(String alignmentFeatureName);
+	
+	/**
+	 * This method returns all available alignment feature names
+	 * @return
+	 */
+	public Set<String> getAllAlignmentFeatureNames();
+	
+	/**
+	 * Alignment object with the provided feature name is deleted
+	 * @param alignmentFeatureName
+	 */
+	public void removeAlignmentInformation(String alignmentFeatureName);
 }

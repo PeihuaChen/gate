@@ -2,13 +2,10 @@
   <urlList class="gate.util.persistence.CollectionPersistence">
     <localList>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../../Ontology_Tools</urlString>
+        <urlString>$relpath$../../ANNIE</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
         <urlString>$relpath$../../alignment</urlString>
-      </gate.util.persistence.PersistenceManager-URLHolder>
-      <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../../ANNIE</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
         <urlString>$relpath$../../hindi</urlString>
@@ -21,17 +18,17 @@
       <docList>
         <gate.util.persistence.LRPersistence>
           <resourceType>gate.compound.impl.CompoundDocumentImpl</resourceType>
-          <resourceName>Compound Document_00016</resourceName>
+          <resourceName>Compound Document_00024</resourceName>
           <initParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap>
               <entry>
-                <string>markupAware</string>
-                <boolean>true</boolean>
+                <string>encoding</string>
+                <string>utf-8</string>
               </entry>
               <entry>
-                <string>encoding</string>
-                <string>UTF-8</string>
+                <string>preserveOriginalContent</string>
+                <boolean>false</boolean>
               </entry>
               <entry>
                 <string>collectRepositioningInfo</string>
@@ -40,12 +37,12 @@
               <entry>
                 <string>sourceUrl</string>
                 <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$relpath$data/File.hi.xml</urlString>
+                  <urlString>$relpath$data/File.en.xml</urlString>
                 </gate.util.persistence.PersistenceManager-URLHolder>
               </entry>
               <entry>
-                <string>preserveOriginalContent</string>
-                <boolean>false</boolean>
+                <string>markupAware</string>
+                <boolean>true</boolean>
               </entry>
               <entry>
                 <string>documentIDs</string>
@@ -53,7 +50,6 @@
                   <localList>
                     <string>hi</string>
                     <string>en</string>
-                    <string>Composite</string>
                   </localList>
                   <collectionType>java.util.ArrayList</collectionType>
                 </gate.util.persistence.CollectionPersistence>
@@ -63,7 +59,7 @@
         </gate.util.persistence.LRPersistence>
       </docList>
       <resourceType>gate.corpora.CorpusImpl</resourceType>
-      <resourceName>Corpus for Compound Document_00016</resourceName>
+      <resourceName>Corpus for Compound Document_00024</resourceName>
       <initParams class="gate.util.persistence.MapPersistence">
         <mapType>gate.util.SimpleFeatureMapImpl</mapType>
         <localMap>
@@ -81,17 +77,17 @@
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap>
               <entry>
-                <string>document</string>
-                <null/>
-              </entry>
-              <entry>
                 <string>documentID</string>
                 <string>en</string>
+              </entry>
+              <entry>
+                <string>document</string>
+                <null/>
               </entry>
             </localMap>
           </runtimeParams>
           <resourceType>gate.compound.impl.SwitchMemberPR</resourceType>
-          <resourceName>ToEng</resourceName>
+          <resourceName>Switch Member PR_00022</resourceName>
           <initParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap/>
@@ -106,17 +102,15 @@
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap>
               <entry>
-                <string>document</string>
-                <null/>
-              </entry>
-              <entry>
                 <string>setsToKeep</string>
                 <gate.util.persistence.CollectionPersistence>
-                  <localList>
-                    <string>Original markups</string>
-                  </localList>
+                  <localList/>
                   <collectionType>java.util.ArrayList</collectionType>
                 </gate.util.persistence.CollectionPersistence>
+              </entry>
+              <entry>
+                <string>document</string>
+                <null/>
               </entry>
               <entry>
                 <string>annotationTypes</string>
@@ -129,7 +123,7 @@
             </localMap>
           </runtimeParams>
           <resourceType>gate.creole.annotdelete.AnnotationDeletePR</resourceType>
-          <resourceName>Document Reset PR_0003C</resourceName>
+          <resourceName>Document Reset PR_00030</resourceName>
           <initParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap/>
@@ -144,24 +138,20 @@
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap>
               <entry>
-                <string>document</string>
+                <string>annotationSetName</string>
                 <null/>
               </entry>
               <entry>
-                <string>annotationSetName</string>
+                <string>document</string>
                 <null/>
               </entry>
             </localMap>
           </runtimeParams>
           <resourceType>gate.creole.tokeniser.DefaultTokeniser</resourceType>
-          <resourceName>ANNIE English Tokeniser_00035</resourceName>
+          <resourceName>ANNIE English Tokeniser_00016</resourceName>
           <initParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap>
-              <entry>
-                <string>encoding</string>
-                <string>UTF-8</string>
-              </entry>
               <entry>
                 <string>tokeniserRulesURL</string>
                 <gate.util.persistence.PersistenceManager-URLHolder>
@@ -173,6 +163,10 @@
                 <gate.util.persistence.PersistenceManager-URLHolder>
                   <urlString>$relpath$../../ANNIE/resources/tokeniser/postprocess.jape</urlString>
                 </gate.util.persistence.PersistenceManager-URLHolder>
+              </entry>
+              <entry>
+                <string>encoding</string>
+                <string>UTF-8</string>
               </entry>
             </localMap>
           </initParams>
@@ -186,11 +180,11 @@
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap>
               <entry>
-                <string>document</string>
+                <string>outputASName</string>
                 <null/>
               </entry>
               <entry>
-                <string>outputASName</string>
+                <string>document</string>
                 <null/>
               </entry>
               <entry>
@@ -200,7 +194,7 @@
             </localMap>
           </runtimeParams>
           <resourceType>gate.creole.splitter.SentenceSplitter</resourceType>
-          <resourceName>ANNIE Sentence Splitter_00038</resourceName>
+          <resourceName>ANNIE Sentence Splitter_00019</resourceName>
           <initParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap>
@@ -232,17 +226,17 @@
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap>
               <entry>
-                <string>document</string>
-                <null/>
-              </entry>
-              <entry>
                 <string>documentID</string>
                 <string>hi</string>
+              </entry>
+              <entry>
+                <string>document</string>
+                <null/>
               </entry>
             </localMap>
           </runtimeParams>
           <resourceType>gate.compound.impl.SwitchMemberPR</resourceType>
-          <resourceName>ToHin</resourceName>
+          <resourceName>Switch Member PR_00023</resourceName>
           <initParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap/>
@@ -257,17 +251,15 @@
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap>
               <entry>
-                <string>document</string>
-                <null/>
-              </entry>
-              <entry>
                 <string>setsToKeep</string>
                 <gate.util.persistence.CollectionPersistence>
-                  <localList>
-                    <string>Original markups</string>
-                  </localList>
+                  <localList/>
                   <collectionType>java.util.ArrayList</collectionType>
                 </gate.util.persistence.CollectionPersistence>
+              </entry>
+              <entry>
+                <string>document</string>
+                <null/>
               </entry>
               <entry>
                 <string>annotationTypes</string>
@@ -280,7 +272,7 @@
             </localMap>
           </runtimeParams>
           <resourceType>gate.creole.annotdelete.AnnotationDeletePR</resourceType>
-          <resourceName>Document Reset PR_0003D</resourceName>
+          <resourceName>Document Reset PR_00031</resourceName>
           <initParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap/>
@@ -295,29 +287,29 @@
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap>
               <entry>
-                <string>document</string>
+                <string>annotationSetName</string>
                 <null/>
               </entry>
               <entry>
-                <string>annotationSetName</string>
+                <string>document</string>
                 <null/>
               </entry>
             </localMap>
           </runtimeParams>
           <resourceType>hindi.HindiTokeniser</resourceType>
-          <resourceName>Hindi Tokeniser_00041</resourceName>
+          <resourceName>Hindi Tokeniser_0001C</resourceName>
           <initParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap>
-              <entry>
-                <string>encoding</string>
-                <string>UTF-8</string>
-              </entry>
               <entry>
                 <string>tokeniserRulesURL</string>
                 <gate.util.persistence.PersistenceManager-URLHolder>
                   <urlString>$relpath$../../hindi/resources/tokeniser/multiTokeniser.rules</urlString>
                 </gate.util.persistence.PersistenceManager-URLHolder>
+              </entry>
+              <entry>
+                <string>encoding</string>
+                <string>UTF-8</string>
               </entry>
               <entry>
                 <string>transducerGrammarURL</string>
@@ -337,11 +329,11 @@
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap>
               <entry>
-                <string>document</string>
+                <string>outputASName</string>
                 <null/>
               </entry>
               <entry>
-                <string>outputASName</string>
+                <string>document</string>
                 <null/>
               </entry>
               <entry>
@@ -351,15 +343,13 @@
             </localMap>
           </runtimeParams>
           <resourceType>hindi.HindiSplitter</resourceType>
-          <resourceName>Hindi Splitter_0003E</resourceName>
+          <resourceName>Hindi Splitter_0001F</resourceName>
           <initParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap>
               <entry>
-                <string>transducerURL</string>
-                <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$relpath$../../hindi/resources/splitter/grammar/main.jape</urlString>
-                </gate.util.persistence.PersistenceManager-URLHolder>
+                <string>encoding</string>
+                <string>UTF-8</string>
               </entry>
               <entry>
                 <string>gazetteerListsURL</string>
@@ -368,8 +358,10 @@
                 </gate.util.persistence.PersistenceManager-URLHolder>
               </entry>
               <entry>
-                <string>encoding</string>
-                <string>UTF-8</string>
+                <string>transducerURL</string>
+                <gate.util.persistence.PersistenceManager-URLHolder>
+                  <urlString>$relpath$../../hindi/resources/splitter/grammar/main.jape</urlString>
+                </gate.util.persistence.PersistenceManager-URLHolder>
               </entry>
             </localMap>
           </initParams>
@@ -383,25 +375,357 @@
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap>
               <entry>
+                <string>englishDocumentId</string>
+                <string>en</string>
+              </entry>
+              <entry>
                 <string>document</string>
                 <null/>
               </entry>
               <entry>
-                <string>parameters</string>
-                <string>unitAnnotationType=Sentence;inputASName=;copyUnderlyingAnnotations=true;</string>
+                <string>inputASName</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>alignmentFeatureName</string>
+                <string>alignment</string>
+              </entry>
+              <entry>
+                <string>hindiDocumentId</string>
+                <string>hi</string>
+              </entry>
+              <entry>
+                <string>considerAlignedWords</string>
+                <boolean>false</boolean>
+              </entry>
+              <entry>
+                <string>threshold</string>
+                <int>80</int>
               </entry>
             </localMap>
           </runtimeParams>
-          <resourceType>gate.composite.impl.CombineMembersPR</resourceType>
-          <resourceName>Combine Members PR_0003B</resourceName>
+          <resourceType>gate.alignment.languages.hindi.TransliterationSimilarityPR</resourceType>
+          <resourceName>Transliteration Similarity PR_0002B</resourceName>
           <initParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap>
               <entry>
-                <string>combiningMethod</string>
-                <string>gate.composite.impl.DefaultCombiningMethod</string>
+                <string>morphUrl</string>
+                <gate.util.persistence.PersistenceManager-URLHolder>
+                  <urlString>$relpath$../../Tools/resources/morph/default.rul</urlString>
+                </gate.util.persistence.PersistenceManager-URLHolder>
               </entry>
             </localMap>
+          </initParams>
+          <features class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap/>
+          </features>
+        </gate.util.persistence.PRPersistence>
+        <gate.util.persistence.PRPersistence>
+          <runtimeParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap>
+              <entry>
+                <string>englishDocumentId</string>
+                <string>en</string>
+              </entry>
+              <entry>
+                <string>useSynonyms</string>
+                <boolean>false</boolean>
+              </entry>
+              <entry>
+                <string>document</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>inputASName</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>alignmentFeatureName</string>
+                <string>alignment</string>
+              </entry>
+              <entry>
+                <string>hindiDocumentId</string>
+                <string>hi</string>
+              </entry>
+              <entry>
+                <string>considerAlignedWords</string>
+                <boolean>false</boolean>
+              </entry>
+            </localMap>
+          </runtimeParams>
+          <resourceType>gate.alignment.languages.hindi.DictionaryLookupPR</resourceType>
+          <resourceName>Dictionary PR_00027</resourceName>
+          <initParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap>
+              <entry>
+                <string>morphUrl</string>
+                <gate.util.persistence.PersistenceManager-URLHolder>
+                  <urlString>$relpath$../../Tools/resources/morph/default.rul</urlString>
+                </gate.util.persistence.PersistenceManager-URLHolder>
+              </entry>
+              <entry>
+                <string>dictionaryUrl</string>
+                <gate.util.persistence.PersistenceManager-URLHolder>
+                  <urlString>$relpath$../../../../phd/code/resources/dictionary/eng-hin.dic</urlString>
+                </gate.util.persistence.PersistenceManager-URLHolder>
+              </entry>
+            </localMap>
+          </initParams>
+          <features class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap/>
+          </features>
+        </gate.util.persistence.PRPersistence>
+        <gate.util.persistence.PRPersistence>
+          <runtimeParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap>
+              <entry>
+                <string>englishDocumentId</string>
+                <string>en</string>
+              </entry>
+              <entry>
+                <string>document</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>inputASName</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>alignmentFeatureName</string>
+                <string>alignment</string>
+              </entry>
+              <entry>
+                <string>hindiDocumentId</string>
+                <string>hi</string>
+              </entry>
+              <entry>
+                <string>considerAlignedWords</string>
+                <boolean>false</boolean>
+              </entry>
+              <entry>
+                <string>threshold</string>
+                <int>70</int>
+              </entry>
+            </localMap>
+          </runtimeParams>
+          <resourceType>gate.alignment.languages.hindi.TransliterationSimilarityPR</resourceType>
+          <resourceName>Transliteration Similarity PR_0002C</resourceName>
+          <initParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap>
+              <entry>
+                <string>morphUrl</string>
+                <gate.util.persistence.PersistenceManager-URLHolder>
+                  <urlString>$relpath$../../Tools/resources/morph/default.rul</urlString>
+                </gate.util.persistence.PersistenceManager-URLHolder>
+              </entry>
+            </localMap>
+          </initParams>
+          <features class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap/>
+          </features>
+        </gate.util.persistence.PRPersistence>
+        <gate.util.persistence.PRPersistence>
+          <runtimeParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap>
+              <entry>
+                <string>englishDocumentId</string>
+                <string>en</string>
+              </entry>
+              <entry>
+                <string>useSynonyms</string>
+                <boolean>true</boolean>
+              </entry>
+              <entry>
+                <string>document</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>inputASName</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>alignmentFeatureName</string>
+                <string>alignment</string>
+              </entry>
+              <entry>
+                <string>hindiDocumentId</string>
+                <string>hi</string>
+              </entry>
+              <entry>
+                <string>considerAlignedWords</string>
+                <boolean>false</boolean>
+              </entry>
+            </localMap>
+          </runtimeParams>
+          <resourceType>gate.alignment.languages.hindi.DictionaryLookupPR</resourceType>
+          <resourceName>Dictionary PR_00028</resourceName>
+          <initParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap>
+              <entry>
+                <string>morphUrl</string>
+                <gate.util.persistence.PersistenceManager-URLHolder>
+                  <urlString>$relpath$../../Tools/resources/morph/default.rul</urlString>
+                </gate.util.persistence.PersistenceManager-URLHolder>
+              </entry>
+              <entry>
+                <string>dictionaryUrl</string>
+                <gate.util.persistence.PersistenceManager-URLHolder>
+                  <urlString>$relpath$../../../../phd/code/resources/dictionary/eng-hin.dic</urlString>
+                </gate.util.persistence.PersistenceManager-URLHolder>
+              </entry>
+            </localMap>
+          </initParams>
+          <features class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap/>
+          </features>
+        </gate.util.persistence.PRPersistence>
+        <gate.util.persistence.PRPersistence>
+          <runtimeParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap>
+              <entry>
+                <string>englishDocumentId</string>
+                <string>en</string>
+              </entry>
+              <entry>
+                <string>document</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>inputASName</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>alignmentFeatureName</string>
+                <string>alignment</string>
+              </entry>
+              <entry>
+                <string>hindiDocumentId</string>
+                <string>hi</string>
+              </entry>
+              <entry>
+                <string>considerAlignedWords</string>
+                <boolean>false</boolean>
+              </entry>
+              <entry>
+                <string>threshold</string>
+                <int>60</int>
+              </entry>
+            </localMap>
+          </runtimeParams>
+          <resourceType>gate.alignment.languages.hindi.TransliterationSimilarityPR</resourceType>
+          <resourceName>Transliteration Similarity PR_00032</resourceName>
+          <initParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap>
+              <entry>
+                <string>morphUrl</string>
+                <gate.util.persistence.PersistenceManager-URLHolder>
+                  <urlString>$relpath$../../Tools/resources/morph/default.rul</urlString>
+                </gate.util.persistence.PersistenceManager-URLHolder>
+              </entry>
+            </localMap>
+          </initParams>
+          <features class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap/>
+          </features>
+        </gate.util.persistence.PRPersistence>
+        <gate.util.persistence.PRPersistence>
+          <runtimeParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap>
+              <entry>
+                <string>englishDocumentId</string>
+                <string>en</string>
+              </entry>
+              <entry>
+                <string>hindiDocumentId</string>
+                <string>hi</string>
+              </entry>
+              <entry>
+                <string>document</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>inputASName</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>alignmentFeatureName</string>
+                <string>alignment</string>
+              </entry>
+            </localMap>
+          </runtimeParams>
+          <resourceType>gate.alignment.languages.hindi.NearestUnalignedNeighboursPR</resourceType>
+          <resourceName>NearestUnalignedNeighbours PR_0002A</resourceName>
+          <initParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap/>
+          </initParams>
+          <features class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap/>
+          </features>
+        </gate.util.persistence.PRPersistence>
+        <gate.util.persistence.PRPersistence>
+          <runtimeParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap>
+              <entry>
+                <string>englishDocumentId</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>document</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>modelFile</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>inputASName</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>alignmentFeatureName</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>caseSensitive</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>hindiDocumentId</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>considerAlignedWords</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>learningMode</string>
+                <null/>
+              </entry>
+            </localMap>
+          </runtimeParams>
+          <resourceType>gate.alignment.languages.hindi.DiceCoeffientPR</resourceType>
+          <resourceName>Dice Coeffient PR_00029</resourceName>
+          <initParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap/>
           </initParams>
           <features class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
@@ -412,7 +736,7 @@
       <collectionType>java.util.ArrayList</collectionType>
     </prList>
     <resourceType>gate.creole.SerialAnalyserController</resourceType>
-    <resourceName>Corpus Pipeline_00034</resourceName>
+    <resourceName>Corpus Pipeline_00027</resourceName>
     <initParams class="gate.util.persistence.MapPersistence">
       <mapType>gate.util.SimpleFeatureMapImpl</mapType>
       <localMap/>

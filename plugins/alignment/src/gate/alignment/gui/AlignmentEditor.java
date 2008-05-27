@@ -6,13 +6,11 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.MouseInputAdapter;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.DefaultHighlighter;
-
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Line2D;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -23,10 +21,11 @@ import java.net.URL;
 
 import gate.*;
 import gate.alignment.*;
-import gate.composite.CompositeDocument;
 import gate.compound.CompoundDocument;
 import gate.creole.*;
+import gate.gui.MainFrame;
 import gate.swing.ColorGenerator;
+import gate.util.GateException;
 import gate.util.GateRuntimeException;
 
 /**
@@ -41,30 +40,49 @@ public class AlignmentEditor extends AbstractVisualResource implements
 
   private static final String ACTIONS_CONFIG_FILE = "actions.conf";
 
-  // mainPanel is a container for all, paramPanel is a container for
-  // user. parameters and waPanel contains JEditorPanes for each
-  // document
   private JPanel mainPanel, paramPanel, waPanel;
 
-  // TextFields for users to provide parameter
-  private JTextField inputASName, parentOfUnitOfAlignment, unitOfAlignment,
-          alignmentFeatureName;
+  private JComboBox sourceDocumentId;
 
-  private JButton populate, next, previous;
+  private JComboBox targetDocumentId;
 
-  private JEditorPane[] tas;
+  private JComboBox sourceASName;
+
+  private JComboBox targetASName;
+
+  private JComboBox sourceUnitOfAlignment;
+
+  private JComboBox targetUnitOfAlignment;
+
+  private JComboBox sourceParentOfUnitOfAlignment;
+
+  private JComboBox targetParentOfUnitOfAlignment;
+
+  private JComboBox alignmentFeatureNames;
+
+  private JCheckBox showLinks;
+
+  private JButton populate, next, previous, loadActions;
+
+  private JPanel sourcePanel;
+
+  private JPanel targetPanel;
+
+  private MappingsPanel linesCanvas;
 
   private CompoundDocument document;
-
-  private List<String> documentIDs;
 
   private AlignmentFactory alignFactory;
 
   private Alignment alignment;
 
-  private HashMap<JEditorPane, HashMap<Annotation, AnnotationHighlight>> highlights;
+  private HashMap<Annotation, AnnotationHighlight> sourceHighlights;
 
-  private HashMap<JEditorPane, List<Annotation>> latestAnnotationsSelection;
+  private HashMap<Annotation, AnnotationHighlight> targetHighlights;
+
+  private List<Annotation> sourceLatestAnnotationsSelection;
+
+  private List<Annotation> targetLatestAnnotationsSelection;
 
   private Color color, unitColor;
 
@@ -74,20 +92,45 @@ public class AlignmentEditor extends AbstractVisualResource implements
 
   private Map<JMenuItem, AlignmentAction> actions;
 
+  private Map<String, JMenuItem> actionsMenuItemByCaption;
+
   private AnnotationHighlight currentAnnotationHightlight = null;
 
   private AlignmentEditor thisInstance = null;
-  
+
   /*
    * (non-Javadoc)
    * 
    * @see gate.Resource#init()
    */
   public Resource init() throws ResourceInstantiationException {
-    highlights = new HashMap<JEditorPane, HashMap<Annotation, AnnotationHighlight>>();
-    latestAnnotationsSelection = new HashMap<JEditorPane, List<Annotation>>();
+    sourceHighlights = new HashMap<Annotation, AnnotationHighlight>();
+    targetHighlights = new HashMap<Annotation, AnnotationHighlight>();
+
+    sourceLatestAnnotationsSelection = new ArrayList<Annotation>();
+    targetLatestAnnotationsSelection = new ArrayList<Annotation>();
+
     actions = new HashMap<JMenuItem, AlignmentAction>();
-    readActions();
+    actionsMenuItemByCaption = new HashMap<String, JMenuItem>();
+
+    ResourceData myResourceData = (ResourceData)Gate.getCreoleRegister().get(
+            this.getClass().getName());
+    URL creoleXml = myResourceData.getXmlFileUrl();
+    URL alignmentHomeURL = null;
+    File actionsConfFile = null;
+    try {
+      alignmentHomeURL = new URL(creoleXml, ".");
+      actionsConfFile = new File(new File(new File(alignmentHomeURL.toURI()),
+              "resources"), ACTIONS_CONFIG_FILE);
+    }
+    catch(MalformedURLException mue) {
+      throw new GateRuntimeException(mue);
+    }
+    catch(URISyntaxException use) {
+      throw new GateRuntimeException(use);
+    }
+
+    readActions(actionsConfFile);
     thisInstance = this;
     return this;
   }
@@ -97,79 +140,340 @@ public class AlignmentEditor extends AbstractVisualResource implements
    */
   private void initGui() {
     mainPanel = new JPanel(new BorderLayout());
-    paramPanel = new JPanel(new GridLayout(5, 1));
+    paramPanel = new JPanel(new GridLayout(3, 1));
 
-    waPanel = new JPanel(new GridLayout(documentIDs.size(), 1));
+    waPanel = new JPanel(new BorderLayout());
 
-    inputASName = new JTextField(40);
-    parentOfUnitOfAlignment = new JTextField(40);
-    unitOfAlignment = new JTextField(40);
-    alignmentFeatureName = new JTextField(40);
-    populate = new JButton("Populate");
-    JPanel temp1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    JPanel temp2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    JPanel temp3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    JPanel temp6 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    JPanel temp7 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    sourceDocumentId = new JComboBox(new DefaultComboBoxModel());
+    sourceDocumentId.setEditable(false);
 
-    temp1.add(new JLabel("Input Annotation Set Name:"));
-    temp1.add(inputASName);
-    temp2.add(new JLabel("Parent of Unit of Alignment (e.g. Sentence):"));
-    temp2.add(parentOfUnitOfAlignment);
-    parentOfUnitOfAlignment.setText("Sentence");
-    temp3.add(new JLabel("Unit of Alignment (e.g. Token):"));
-    temp3.add(unitOfAlignment);
-    unitOfAlignment.setText("Token");
-    temp6.add(populate);
-    temp7.add(new JLabel("Alignment Feature Name:"));
-    temp7.add(alignmentFeatureName);
-    alignmentFeatureName.setText(AlignmentFactory.ALIGNMENT_FEATURE_NAME);
-    alignmentFeatureName.addActionListener(new ActionListener() {
+    targetDocumentId = new JComboBox(new DefaultComboBoxModel());
+    targetDocumentId.setEditable(false);
+
+    sourceDocumentId.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
-        alignment = document.getAlignmentInformation(alignmentFeatureName
-                .getText().trim());
-        if(alignment != null) {
-          alignment.removeAlignmentListener(thisInstance);
-          alignment.addAlignmentListener(thisInstance);
-          refresh();
-        }
+        populateAS((String)sourceDocumentId.getSelectedItem(), sourceASName);
       }
     });
 
-    paramPanel.add(temp1);
-    paramPanel.add(temp2);
-    paramPanel.add(temp3);
-    paramPanel.add(temp6);
-    paramPanel.add(temp7);
+    targetDocumentId.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent ae) {
+        populateAS((String)targetDocumentId.getSelectedItem(), targetASName);
+      }
+    });
 
-    mainPanel.add(paramPanel, BorderLayout.NORTH);
+    sourceASName = new JComboBox(new DefaultComboBoxModel());
+    sourceASName.setPrototypeDisplayValue("AnnotationSetName");
+    sourceASName.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent ae) {
+        populateParentOfUnitOfAlignment((String)sourceDocumentId
+                .getSelectedItem(), sourceParentOfUnitOfAlignment);
+      }
+    });
+
+    targetASName = new JComboBox(new DefaultComboBoxModel());
+    targetASName.setPrototypeDisplayValue("AnnotationSetName");
+    targetASName.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent ae) {
+        populateParentOfUnitOfAlignment((String)targetDocumentId
+                .getSelectedItem(), targetParentOfUnitOfAlignment);
+      }
+    });
+
+    sourceParentOfUnitOfAlignment = new JComboBox(new DefaultComboBoxModel());
+    sourceParentOfUnitOfAlignment.setPrototypeDisplayValue("AnnotationSetName");
+    sourceParentOfUnitOfAlignment.setEditable(false);
+    sourceParentOfUnitOfAlignment.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent ae) {
+        populateUnitOfAlignment((String)sourceDocumentId.getSelectedItem(),
+                sourceUnitOfAlignment);
+      }
+    });
+
+    targetParentOfUnitOfAlignment = new JComboBox(new DefaultComboBoxModel());
+    targetParentOfUnitOfAlignment.setPrototypeDisplayValue("AnnotationSetName");
+    targetParentOfUnitOfAlignment.setEditable(false);
+    targetParentOfUnitOfAlignment.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent ae) {
+        populateUnitOfAlignment((String)targetDocumentId.getSelectedItem(),
+                targetUnitOfAlignment);
+      }
+    });
+
+    sourceUnitOfAlignment = new JComboBox(new DefaultComboBoxModel());
+    sourceUnitOfAlignment.setPrototypeDisplayValue("AnnotationSetName");
+    sourceUnitOfAlignment.setEditable(false);
+
+    targetUnitOfAlignment = new JComboBox(new DefaultComboBoxModel());
+    targetUnitOfAlignment.setPrototypeDisplayValue("AnnotationSetName");
+    targetUnitOfAlignment.setEditable(false);
+
+    alignmentFeatureNames = new JComboBox(new DefaultComboBoxModel());
+    ((DefaultComboBoxModel)alignmentFeatureNames.getModel())
+            .addElement(AlignmentFactory.ALIGNMENT_FEATURE_NAME);
+    alignmentFeatureNames.setPrototypeDisplayValue("AnnotationSetName");
+
+    JPanel temp1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    JPanel temp2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    JPanel temp3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+    temp1.add(new JLabel("sourceDoc:"));
+    temp1.add(sourceDocumentId);
+    temp1.add(new JLabel("annotationSet:"));
+    temp1.add(sourceASName);
+    temp1.add(new JLabel("parentOfAlignmentUnit:"));
+    temp1.add(sourceParentOfUnitOfAlignment);
+    temp1.add(new JLabel("unitOfAlignment:"));
+    temp1.add(sourceUnitOfAlignment);
+
+    temp2.add(new JLabel("targetDoc:"));
+    temp2.add(targetDocumentId);
+    temp2.add(new JLabel("annotationSet:"));
+    temp2.add(targetASName);
+    temp2.add(new JLabel("parentOfAlignmentUnit:"));
+    temp2.add(targetParentOfUnitOfAlignment);
+    temp2.add(new JLabel("unitOfAlignment:"));
+    temp2.add(targetUnitOfAlignment);
+
+    alignmentFeatureNames
+            .setSelectedItem(AlignmentFactory.ALIGNMENT_FEATURE_NAME);
+    alignmentFeatureNames.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent ae) {
+        populateAlignmentFeatureNames();
+      }
+    });
+
+    populate = new JButton("Populate");
     populate.addActionListener(this);
 
     previous = new JButton("< Previous");
     previous.addActionListener(this);
+
     next = new JButton("Next >");
     next.addActionListener(this);
-    temp6.add(previous);
-    temp6.add(next);
 
-    tas = new JEditorPane[documentIDs.size()];
-    // now we need to create TextArea for each language
-    for(int i = 0; i < documentIDs.size(); i++) {
-      tas[i] = new JEditorPane();
-      tas[i].setBorder(new TitledBorder((String)documentIDs.get(i)));
-      waPanel.add(new JScrollPane(tas[i]));
-      tas[i]
-              .setFont(new Font(tas[i].getFont().getName(), Font.PLAIN,
-                      TEXT_SIZE));
-      tas[i].addMouseListener(new MouseActionListener());
-      tas[i].addMouseMotionListener(new MouseActionListener());
-      tas[i].setEditable(false);
-    }
-    mainPanel.add(waPanel);
+    showLinks = new JCheckBox("Show Links");
+    showLinks.setSelected(true);
+    showLinks.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent ae) {
+        if(linesCanvas != null) {
+          if(showLinks.isSelected()) {
+            waPanel.add(linesCanvas, BorderLayout.CENTER);
+          }
+          else {
+            waPanel.remove(linesCanvas);
+          }
+          waPanel.revalidate();
+          waPanel.updateUI();
+        }
+      }
+    });
+
+    loadActions = new JButton("Load Actions");
+    loadActions.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent ae) {
+        try {
+          JFileChooser fileChooser = Main.getMainFrame().getFileChooser();
+          int answer = fileChooser.showOpenDialog(MainFrame.getInstance());
+          if(answer == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            if(selectedFile == null) {
+              return;
+            }
+            else {
+              readActions(selectedFile);
+            }
+          }
+        }
+        catch(GateException ge) {
+          throw new GateRuntimeException(ge);
+        }
+      }
+    });
+
+    temp3.add(new JLabel("alignmentFeatureName:"));
+    temp3.add(alignmentFeatureNames);
+    temp3.add(populate);
+    temp3.add(previous);
+    temp3.add(next);
+    temp3.add(showLinks);
+    temp3.add(loadActions);
+
+    paramPanel.add(temp1);
+    paramPanel.add(temp2);
+    paramPanel.add(temp3);
+
+    temp1.setBorder(new TitledBorder("Source Document"));
+    temp2.setBorder(new TitledBorder("Target Document"));
+    temp3.setBorder(new TitledBorder("Alignment"));
+
+    mainPanel.add(new JScrollPane(paramPanel), BorderLayout.NORTH);
+
+    sourcePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    sourcePanel.setBackground(Color.WHITE);
+    targetPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    targetPanel.setBackground(Color.WHITE);
+    linesCanvas = new MappingsPanel();
+    linesCanvas.setBackground(Color.WHITE);
+    linesCanvas.setLayout(null);
+    linesCanvas.setPreferredSize(new Dimension(200, 50));
+    linesCanvas.setOpaque(true);
+
+    waPanel.add(sourcePanel, BorderLayout.NORTH);
+    waPanel.add(targetPanel, BorderLayout.SOUTH);
+    waPanel.add(linesCanvas, BorderLayout.CENTER);
+
+    mainPanel.add(new JScrollPane(waPanel), BorderLayout.CENTER);
     this.setLayout(new BorderLayout());
     this.add(mainPanel, BorderLayout.CENTER);
-    unitColor = getColor(new Color(234, 245, 246));
     color = getColor(null);
+  }
+
+  public String getSourceDocumentId() {
+    return sourceDocumentId.getSelectedItem().toString();
+  }
+
+  public String getTargetDocumentId() {
+    return targetDocumentId.getSelectedItem().toString();
+  }
+
+  public String getSourceAnnotationSetName() {
+    String as = sourceASName.getSelectedItem().toString();
+    return as.equals("<null>") ? null : as;
+  }
+
+  public String getTargetAnnotationSetName() {
+    String as = targetASName.getSelectedItem().toString();
+    return as.equals("<null>") ? null : as;
+  }
+
+  /**
+   * populates the annotation set combobox
+   * 
+   * @param documentID
+   * @param boxToPopulate
+   */
+  private void populateAS(String documentID, JComboBox boxToPopulate) {
+    Document doc = document.getDocument(documentID);
+    Map<String, AnnotationSet> annotSets = doc.getNamedAnnotationSets();
+    if(annotSets == null) {
+      annotSets = new HashMap<String, AnnotationSet>();
+    }
+
+    HashSet<String> setNames = new HashSet<String>(annotSets.keySet());
+    setNames.add("<null>");
+    DefaultComboBoxModel dcbm = new DefaultComboBoxModel(setNames
+            .toArray(new String[0]));
+    boxToPopulate.setModel(dcbm);
+    if(!setNames.isEmpty()) {
+      boxToPopulate.setSelectedIndex(0);
+    }
+  }
+
+  /**
+   * populates the documentIds combobox
+   * 
+   * @param documentID
+   * @param boxToPopulate
+   */
+  private void populateDocumentIds(JComboBox boxToPopulate, String[] documentIds) {
+    if(documentIds == null) documentIds = new String[0];
+    DefaultComboBoxModel dcbm = new DefaultComboBoxModel(documentIds);
+    boxToPopulate.setModel(dcbm);
+    if(documentIds.length == 0) {
+      boxToPopulate.setEnabled(false);
+    }
+  }
+
+  /**
+   * populates the documentIds combobox
+   * 
+   * @param documentID
+   * @param boxToPopulate
+   */
+  private void populateAlignmentFeatureNames() {
+    this.document
+            .getAlignmentInformation(AlignmentFactory.ALIGNMENT_FEATURE_NAME);
+    Set<String> alignmentFeatureNames = this.document
+            .getAllAlignmentFeatureNames();
+    DefaultComboBoxModel dcbm = new DefaultComboBoxModel(alignmentFeatureNames
+            .toArray(new String[0]));
+    Object selectedItem = this.alignmentFeatureNames.getSelectedItem();
+    this.alignmentFeatureNames.setModel(dcbm);
+    if(selectedItem != null) {
+      this.alignmentFeatureNames.setSelectedItem(selectedItem);
+    }
+
+    selectedItem = this.alignmentFeatureNames.getSelectedItem();
+    alignment = this.document.getAlignmentInformation((String)selectedItem);
+    if(alignment != null) {
+      alignment.removeAlignmentListener(thisInstance);
+      alignment.addAlignmentListener(thisInstance);
+      refresh();
+    }
+  }
+
+  /**
+   * populates the annotation set combobox
+   * 
+   * @param documentID
+   * @param boxToPopulate
+   */
+  private void populateParentOfUnitOfAlignment(String documentID,
+          JComboBox boxToPopulate) {
+    Document doc = document.getDocument(documentID);
+    String asName = null;
+    if(boxToPopulate == sourceParentOfUnitOfAlignment) {
+      asName = (String)sourceASName.getSelectedItem();
+    }
+    else {
+      asName = (String)targetASName.getSelectedItem();
+    }
+
+    AnnotationSet srcAnnotSet = asName.equals("<null>")
+            ? doc.getAnnotations()
+            : doc.getAnnotations(asName);
+    Set<String> annotTypes = srcAnnotSet.getAllTypes();
+    if(annotTypes == null) {
+      annotTypes = new HashSet<String>();
+    }
+
+    DefaultComboBoxModel dcbm = new DefaultComboBoxModel(annotTypes
+            .toArray(new String[0]));
+    boxToPopulate.setModel(dcbm);
+    if(!annotTypes.isEmpty()) {
+      boxToPopulate.setSelectedIndex(0);
+    }
+  }
+
+  /**
+   * populates the annotation set combobox
+   * 
+   * @param documentID
+   * @param boxToPopulate
+   */
+  private void populateUnitOfAlignment(String documentID,
+          JComboBox boxToPopulate) {
+    Document doc = document.getDocument(documentID);
+    String asName = null;
+    if(boxToPopulate == sourceUnitOfAlignment) {
+      asName = (String)sourceASName.getSelectedItem();
+    }
+    else {
+      asName = (String)targetASName.getSelectedItem();
+    }
+
+    AnnotationSet srcAnnotSet = asName.equals("<null>")
+            ? doc.getAnnotations()
+            : doc.getAnnotations(asName);
+    Set<String> annotTypes = srcAnnotSet.getAllTypes();
+    if(annotTypes == null) {
+      annotTypes = new HashSet<String>();
+    }
+
+    DefaultComboBoxModel dcbm = new DefaultComboBoxModel(annotTypes
+            .toArray(new String[0]));
+    boxToPopulate.setModel(dcbm);
   }
 
   /*
@@ -179,107 +483,91 @@ public class AlignmentEditor extends AbstractVisualResource implements
    */
   public void setTarget(Object target) {
     this.document = (CompoundDocument)target;
-    this.documentIDs = new ArrayList<String>(this.document.getDocumentIDs());
-    this.documentIDs.remove(CompositeDocument.COMPOSITE_DOC_NAME);
-    alignment = this.document.getAlignmentInformation(null);
-    alignment.addAlignmentListener(this);
+    thisInstance = this;
+    List<String> documentIDs = new ArrayList<String>(this.document
+            .getDocumentIDs());
     initGui();
+    populateDocumentIds(sourceDocumentId, documentIDs.toArray(new String[0]));
+    if(documentIDs.size() > 0) {
+      sourceDocumentId.setSelectedIndex(0);
+    }
+
+    populateDocumentIds(targetDocumentId, documentIDs.toArray(new String[0]));
+    if(documentIDs.size() > 1) {
+      targetDocumentId.setSelectedIndex(1);
+    }
+    else {
+      targetDocumentId.setSelectedIndex(0);
+    }
+
+    populateAlignmentFeatureNames();
   }
 
   /**
    * This method clears up the latest annotation selection
    */
   public void clearLatestAnnotationsSelection() {
-    for(int i = 0; i < this.documentIDs.size(); i++) {
-      List<Annotation> srcAnnotations = latestAnnotationsSelection.get(tas[i]);
-      if(srcAnnotations == null || srcAnnotations.isEmpty()) continue;
 
-      HashMap<Annotation, AnnotationHighlight> annotHighlights = this.highlights
-              .get(tas[i]);
-      for(Annotation annotation : srcAnnotations) {
-        AnnotationHighlight ah = annotHighlights.get(annotation);
-        ah.highlighted = false;
-        if(ah.getAlignedHighlight() != null)
-          tas[i].getHighlighter().removeHighlight(ah.getAlignedHighlight());
-        ah.setAlignedHighlight(null, null);
+    if(sourceLatestAnnotationsSelection != null
+            && !sourceLatestAnnotationsSelection.isEmpty()) {
+
+      for(Annotation annotation : sourceLatestAnnotationsSelection) {
+        AnnotationHighlight ah = sourceHighlights.get(annotation);
+        ah.setHighlighted(false, Color.WHITE);
       }
+      sourceLatestAnnotationsSelection.clear();
+
     }
-    latestAnnotationsSelection.clear();
+
+    if(targetLatestAnnotationsSelection != null
+            && !targetLatestAnnotationsSelection.isEmpty()) {
+
+      for(Annotation annotation : targetLatestAnnotationsSelection) {
+        AnnotationHighlight ah = targetHighlights.get(annotation);
+        ah.setHighlighted(false, Color.WHITE);
+      }
+      targetLatestAnnotationsSelection.clear();
+    }
+
   }
 
   protected void executeAction(AlignmentAction aa) {
-    Map<Document, Set<Annotation>> latestSelectedAnnotations = new HashMap<Document, Set<Annotation>>();
-    boolean clearCurrentSelection = true;
-    if(currentAnnotationHightlight == null) {
-      clearCurrentSelection = false;
-    }
 
-    for(int i = 0; i < this.documentIDs.size(); i++) {
-      Document aDocument = this.document.getDocument(documentIDs.get(i));
-      List<Annotation> srcAnnotations = latestAnnotationsSelection.get(tas[i]);
-      if(srcAnnotations == null) {
-        srcAnnotations = new ArrayList<Annotation>();
-        latestAnnotationsSelection.put(tas[i], srcAnnotations);
-      }
+    Document srcDocument = document.getDocument(sourceDocumentId
+            .getSelectedItem().toString());
+    Document tgtDocument = document.getDocument(targetDocumentId
+            .getSelectedItem().toString());
 
-      if(clearCurrentSelection
-              && srcAnnotations
-                      .contains(currentAnnotationHightlight.annotation)) {
-        clearCurrentSelection = false;
-      }
-      latestSelectedAnnotations.put(aDocument, new HashSet<Annotation>(
-              srcAnnotations));
-    }
+    Set<Annotation> srcSelectedAnnots = new HashSet<Annotation>(
+            sourceLatestAnnotationsSelection);
+    Set<Annotation> tgtSelectedAnnots = new HashSet<Annotation>(
+            targetLatestAnnotationsSelection);
 
-    if(clearCurrentSelection) {
-      clearLatestAnnotationsSelection();
-      // we need to find out the set of aligned annotations and put them
-      // under the lastestSelectedAnnotations
-      latestAnnotationsSelection = new HashMap<JEditorPane, List<Annotation>>();
-      Set<Annotation> alignedAnnotations = alignment
+    if(currentAnnotationHightlight != null) {
+
+      Set<Annotation> alignedAnnots = alignment
               .getAlignedAnnotations(currentAnnotationHightlight.annotation);
-      color = currentAnnotationHightlight.color;
-      Set<Annotation> otherAnnotations = new HashSet<Annotation>();
-      for(Annotation anAnnotation : alignedAnnotations) {
-        otherAnnotations.addAll(alignment.getAlignedAnnotations(anAnnotation));
-      }
-      alignedAnnotations.addAll(otherAnnotations);
-      otherAnnotations = null;
+      if(alignedAnnots == null) alignedAnnots = new HashSet<Annotation>();
+      alignedAnnots.add(currentAnnotationHightlight.annotation);
 
-      for(Annotation anAnnotation : alignedAnnotations) {
-        String docId = alignment.getDocument(anAnnotation).getName();
-        JEditorPane docPane = tas[documentIDs.indexOf(docId)];
-        List<Annotation> annots = latestAnnotationsSelection.get(docPane);
-        if(annots == null) {
-          annots = new ArrayList<Annotation>();
-          latestAnnotationsSelection.put(docPane, annots);
+      for(Annotation annot : alignedAnnots) {
+        Document tempDoc = alignment.getDocument(annot);
+        if(tempDoc == srcDocument) {
+          srcSelectedAnnots.add(annot);
         }
-
-        if(!annots.contains(anAnnotation)) {
-          annots.add(anAnnotation);
+        else if(tempDoc == tgtDocument) {
+          tgtSelectedAnnots.add(annot);
         }
-      }
-
-      latestSelectedAnnotations.clear();
-
-      for(int i = 0; i < this.documentIDs.size(); i++) {
-        Document aDocument = this.document.getDocument(documentIDs.get(i));
-        List<Annotation> srcAnnotations = latestAnnotationsSelection
-                .get(tas[i]);
-        if(srcAnnotations == null)
-          srcAnnotations = new ArrayList<Annotation>();
-        if(clearCurrentSelection
-                && srcAnnotations
-                        .contains(currentAnnotationHightlight.annotation)) {
-          clearCurrentSelection = false;
-        }
-        latestSelectedAnnotations.put(aDocument, new HashSet<Annotation>(
-                srcAnnotations));
       }
     }
+
+    Map<Document, Set<Annotation>> latestSelectedAnnotations = new HashMap<Document, Set<Annotation>>();
+    latestSelectedAnnotations.put(srcDocument, srcSelectedAnnots);
+    latestSelectedAnnotations.put(tgtDocument, tgtSelectedAnnots);
 
     try {
-      aa.execute(this, this.document, latestSelectedAnnotations);
+      color = Color.WHITE;
+      aa.execute(this, this.document, latestSelectedAnnotations, currentAnnotationHightlight.annotation);
     }
     catch(AlignmentException ae) {
       throw new GateRuntimeException(ae);
@@ -292,15 +580,22 @@ public class AlignmentEditor extends AbstractVisualResource implements
    * @return
    */
   public String getAlignmentFeatureName() {
-    return this.alignmentFeatureName.getText().trim();
+    return this.alignmentFeatureNames.getSelectedItem().toString();
   }
 
   public void actionPerformed(ActionEvent ae) {
     if(ae.getSource() == populate) {
       try {
-        AlignmentFactory af = new AlignmentFactory(document, inputASName
-                .getText(), unitOfAlignment.getText(), parentOfUnitOfAlignment
-                .getText(), "gate.util.OffsetComparator");
+        AlignmentFactory af = new AlignmentFactory(document, sourceDocumentId
+                .getSelectedItem().toString(), targetDocumentId
+                .getSelectedItem().toString(), sourceASName.getSelectedItem()
+                .toString(), targetASName.getSelectedItem().toString(),
+                sourceUnitOfAlignment.getSelectedItem().toString(),
+                targetUnitOfAlignment.getSelectedItem().toString(),
+                sourceParentOfUnitOfAlignment.getSelectedItem().toString(),
+                targetParentOfUnitOfAlignment.getSelectedItem().toString(),
+                "gate.util.OffsetComparator");
+
         // if there were no errors
         alignFactory = af;
         nextAction();
@@ -319,6 +614,7 @@ public class AlignmentEditor extends AbstractVisualResource implements
 
   private void nextAction() {
     if(alignFactory != null && alignFactory.hasNext()) {
+
       updateGUI(alignFactory.next());
     }
   }
@@ -336,73 +632,70 @@ public class AlignmentEditor extends AbstractVisualResource implements
    */
   private void updateGUI(HashMap<String, Annotation> docIDsAndAnnots) {
     // before refreshing, we remove all the highlights
-    latestAnnotationsSelection.clear();
-    this.highlights.clear();
+    clearLatestAnnotationsSelection();
+
+    sourcePanel.removeAll();
+    sourcePanel.updateUI();
+
+    targetPanel.removeAll();
+    targetPanel.updateUI();
+
+    linesCanvas.removeAllEdges();
+    linesCanvas.repaint();
 
     // first we show all the annotations and then highlight each unit
     // using a default highlight color.
     // docIDsAndAnnots has a docId (e.g. en or hi) as key and the
     // parent of the unit of alignment (e.g. Sentence) as the value.
     for(String docId : docIDsAndAnnots.keySet()) {
+      JPanel panelToUse = sourcePanel;
+      boolean isSourceDocument = true;
+      if(docId.equals(targetDocumentId.getSelectedItem().toString())) {
+        panelToUse = targetPanel;
+        isSourceDocument = false;
+      }
+
+      // sentence annotation
       Annotation annot = docIDsAndAnnots.get(docId);
-
-      // find out the index of JEditorPane (each doc has a different
-      // editor pane associated to it)
-      int index = documentIDs.indexOf(docId);
-
-      // gets the annotation's underlying text (e.g. full sentence)
-      String text = alignFactory.getText(annot, docId);
-
-      // remove all the highlights
-      tas[index].getHighlighter().removeAllHighlights();
-
-      // set the text
-      tas[index].setEditable(true);
-      tas[index].setText(text);
-      tas[index].setEditable(false);
-      tas[index].updateUI();
 
       // we need to highlight the unit type
       AnnotationSet underlyingUnitAnnotationsSet = alignFactory
-              .getUnderlyingAnnotations(annot, docId);
-
+              .getUnderlyingAnnotations(annot, docId, isSourceDocument
+                      ? sourceUnitOfAlignment.getSelectedItem().toString()
+                      : targetUnitOfAlignment.getSelectedItem().toString());
       // if there are not underlying annotations, just return
       if(underlyingUnitAnnotationsSet == null) {
         return;
       }
 
+      ArrayList<Annotation> units = new ArrayList<Annotation>(
+              underlyingUnitAnnotationsSet);
+      Collections.sort(units, new gate.util.OffsetComparator());
+
       // for each underlying unit of alignment, we create a default
-      // annotation highlight. highlight object contains the offsets,
-      // the source annotation and the colour object used for
-      // highlighting the annotation
+      // annotation highlight.
       HashMap<Annotation, AnnotationHighlight> annotationHighlightsMap = new HashMap<Annotation, AnnotationHighlight>();
-      for(Annotation underlyingUnitAnnotation : underlyingUnitAnnotationsSet) {
-        int start = underlyingUnitAnnotation.getStartNode().getOffset()
-                .intValue();
-        int end = underlyingUnitAnnotation.getEndNode().getOffset().intValue();
-
-        // read just the offset with respect to the offsets of the
-        // parent of unit of alignment annotation
-        start -= annot.getStartNode().getOffset().intValue();
-        end -= annot.getStartNode().getOffset().intValue();
-
-        // and finally add a new highlight
-        try {
-          AnnotationHighlight ah = new AnnotationHighlight(unitColor, start,
-                  end, underlyingUnitAnnotation);
-          annotationHighlightsMap.put(underlyingUnitAnnotation, ah);
-          tas[index].getHighlighter().addHighlight(start, end, ah);
-        }
-        catch(BadLocationException ble) {
-          throw new GateRuntimeException(ble);
-        }
+      for(Annotation underlyingUnitAnnotation : units) {
+        String text = alignFactory.getText(underlyingUnitAnnotation, docId);
+        AnnotationHighlight ah = new AnnotationHighlight(text, Color.WHITE,
+                underlyingUnitAnnotation, isSourceDocument);
+        annotationHighlightsMap.put(underlyingUnitAnnotation, ah);
+        panelToUse.add(ah);
       }
 
-      this.highlights.put(tas[index], annotationHighlightsMap);
+      if(isSourceDocument) {
+        this.sourceHighlights = annotationHighlightsMap;
+      }
+      else {
+        this.targetHighlights = annotationHighlightsMap;
+      }
+      panelToUse.revalidate();
+      panelToUse.updateUI();
     }
 
     // now we need to highlight the aligned annotations if there are any
     Set<Annotation> setOfAlignedAnnotations = alignment.getAlignedAnnotations();
+
     // we keep record of which annotations are already highlighted in
     // order to not highlight them again
     Set<Annotation> highlightedAnnotations = new HashSet<Annotation>();
@@ -413,109 +706,67 @@ public class AlignmentEditor extends AbstractVisualResource implements
       // if already highlighted, don't do it again
       if(highlightedAnnotations.contains(srcAnnotation)) continue;
 
+      // if the annotation doesn't belong to one of the source
+      // or target annotations, just skip it
+      if(!sourceHighlights.containsKey(srcAnnotation)
+              && !targetHighlights.containsKey(srcAnnotation)) {
+        continue;
+      }
+
       // find out the language/id of the document
       String docId = alignment.getDocument(srcAnnotation).getName();
 
-      // find out the editor pane
-      JEditorPane pane = tas[this.documentIDs.indexOf(docId)];
+      JPanel pane = null;
+      boolean isSrcDocument = false;
 
-      // and find out the default annotation highlight
-      AnnotationHighlight ah = getHighlight(pane, srcAnnotation);
-      if(ah == null) continue;
+      if(docId.equals(sourceDocumentId.getSelectedItem().toString())) {
+        pane = sourcePanel;
+        isSrcDocument = true;
+      }
+      else if(docId.equals(sourceDocumentId.getSelectedItem().toString())) {
+        pane = targetPanel;
+        isSrcDocument = false;
+      }
 
-      // ok we need to generate a new color
+      if(pane == null) continue;
+
+      Set<Annotation> sourceAnnots = new HashSet<Annotation>();
+      Set<Annotation> targetAnnots = new HashSet<Annotation>();
+
+      if(isSrcDocument) {
+        targetAnnots = alignment.getAlignedAnnotations(srcAnnotation);
+        for(Annotation tgtAnnot : targetAnnots) {
+          sourceAnnots.addAll(alignment.getAlignedAnnotations(tgtAnnot));
+        }
+      }
+      else {
+        sourceAnnots = alignment.getAlignedAnnotations(srcAnnotation);
+        for(Annotation srcAnnot : sourceAnnots) {
+          targetAnnots.addAll(alignment.getAlignedAnnotations(srcAnnot));
+        }
+      }
+
       Color newColor = getColor(null);
+      boolean firstTime = true;
+      for(Annotation srcAnnot : sourceAnnots) {
+        AnnotationHighlight sAh = sourceHighlights.get(srcAnnot);
+        sAh.setHighlighted(true, newColor);
+        for(Annotation tgtAnnot : targetAnnots) {
+          AnnotationHighlight ah = targetHighlights.get(tgtAnnot);
 
-      // and we add the highlight
-      try {
-        Object obj = pane.getHighlighter().addHighlight(ah.start, ah.end,
-                new DefaultHighlighter.DefaultHighlightPainter(newColor));
-        ah.setAlignedHighlight(obj, newColor);
-        ah.highlighted = true;
-        highlightedAnnotations.add(srcAnnotation);
-      }
-      catch(Exception e) {
-        e.printStackTrace();
-      }
-
-      // find out the annotations that are aligned to the srcAnnotation
-      Set<Annotation> alignedAnnotations = alignment
-              .getAlignedAnnotations(srcAnnotation);
-
-      for(Annotation targetAnnotation : alignedAnnotations) {
-
-        // already highlighted??
-        if(highlightedAnnotations.contains(targetAnnotation)) continue;
-
-        String targetAnnLang = alignment.getDocument(targetAnnotation)
-                .getName();
-
-        // find out text editor
-        pane = tas[this.documentIDs.indexOf(targetAnnLang)];
-        ah = getHighlight(pane, targetAnnotation);
-        if(ah == null || ah.highlighted) continue;
-
-        try {
-          Object obj = pane.getHighlighter().addHighlight(ah.start, ah.end,
-                  new DefaultHighlighter.DefaultHighlightPainter(newColor));
-          ah.setAlignedHighlight(obj, newColor);
-          highlightedAnnotations.add(targetAnnotation);
-          ah.highlighted = true;
-        }
-        catch(Exception e) {
-          e.printStackTrace();
-        }
-
-        // the following loop is necessary
-        // e.g. h1, h2, h3 are aligned with e1, e2 and e3
-        // h1 is the srcAnnotation and under consideration
-        // in the inner loop we are iterating over e1, e2 and e3
-        // say we are looking at the e1
-        // so the following loop will find out the e1 is aligned with h2
-        // and h3 and will highlight them.
-        // This helps as we want to use the
-        // same color for all h1, h2, h3, e1, e2 and e3
-        Set<Annotation> alignedAlignedAnnotations = alignment
-                .getAlignedAnnotations(targetAnnotation);
-
-        for(Annotation targetTargetAnnotation : alignedAlignedAnnotations) {
-          if(highlightedAnnotations.contains(targetTargetAnnotation)) continue;
-
-          String targetTargetAnnLang = alignment.getDocument(
-                  targetTargetAnnotation).getName();
-
-          // find out text editor
-          pane = tas[this.documentIDs.indexOf(targetTargetAnnLang)];
-          ah = getHighlight(pane, targetTargetAnnotation);
-          if(ah == null || ah.highlighted) continue;
-
-          try {
-            Object obj = pane.getHighlighter().addHighlight(ah.start, ah.end,
-                    new DefaultHighlighter.DefaultHighlightPainter(newColor));
-            ah.setAlignedHighlight(obj, newColor);
-            highlightedAnnotations.add(targetTargetAnnotation);
-            ah.highlighted = true;
+          if(firstTime) {
+            ah.setHighlighted(true, newColor);
           }
-          catch(Exception e) {
-            e.printStackTrace();
-          }
+
+          Edge edge = new Edge();
+          edge.srcAH = sAh;
+          edge.tgtAH = ah;
+          linesCanvas.addEdge(edge);
+          linesCanvas.repaint();
         }
+        firstTime = false;
       }
     }
-  }
-
-  /**
-   * Find out the annotation highlight for the given annotation
-   * 
-   * @param pane
-   * @param annot
-   * @return
-   */
-  private AnnotationHighlight getHighlight(JEditorPane pane, Annotation annot) {
-    HashMap<Annotation, AnnotationHighlight> highlights = this.highlights
-            .get(pane);
-    if(highlights == null || highlights.isEmpty()) return null;
-    return highlights.get(annot);
   }
 
   public void cleanup() {
@@ -537,176 +788,155 @@ public class AlignmentEditor extends AbstractVisualResource implements
   public void progressChanged(int prgress) {
   }
 
-  protected class AnnotationHighlight
-                                     extends
-                                       DefaultHighlighter.DefaultHighlightPainter {
-    int start;
-
-    int end;
-
+  protected class AnnotationHighlight extends JLabel {
     boolean highlighted = false;
 
-    Object alignedHighlight;
+    boolean sourceDocument = false;
 
-    Color color;
+    Color colorToUse = Color.WHITE;
 
     Annotation annotation;
 
-    public AnnotationHighlight(Color color, int start, int end, Annotation annot) {
-      super(color);
-      this.start = start;
-      this.end = end;
+    public AnnotationHighlight(String text, Color color, Annotation annot,
+            boolean sourceDocument) {
+      super(text);
+      this.setOpaque(true);
       this.annotation = annot;
+      this.sourceDocument = sourceDocument;
+      this.colorToUse = color;
+      setBackground(this.colorToUse);
+      this.addMouseListener(new MouseActionListener());
+      setFont(new Font(getFont().getName(), Font.PLAIN, TEXT_SIZE));
     }
 
-    public void setHighlighted(boolean val) {
+    public void setHighlighted(boolean val, Color color) {
       this.highlighted = val;
+      this.colorToUse = color;
+      this.setBackground(color);
+      this.updateUI();
     }
 
-    public void setAlignedHighlight(Object ah, Color color) {
-      this.alignedHighlight = ah;
-      this.color = color;
+    public boolean isHighlighted() {
+      return this.highlighted;
     }
 
-    public Object getAlignedHighlight() {
-      return this.alignedHighlight;
+    public void setHighlightColor(Color color) {
+      this.colorToUse = color;
+      this.setBackground(color);
+      this.updateUI();
     }
 
-    public boolean isWithinBoundaries(int location) {
-      return location >= start && location <= end;
+    public Color getHighlightColor() {
+      return this.colorToUse;
     }
-  }
 
-  protected class MouseActionListener extends MouseInputAdapter {
+    protected class MouseActionListener extends MouseInputAdapter {
 
-    public void mouseClicked(MouseEvent me) {
-      JEditorPane ta = (JEditorPane)me.getSource();
-
-      // firstly obtain all highlights for this editor pane
-      // it contains an annotationHighlight for each annotation
-      HashMap<Annotation, AnnotationHighlight> hilights = highlights.get(ta);
-
-      // and iterate through each annotation highlight
-      // and find out where did the user click
-      ArrayList<AnnotationHighlight> hilites = new ArrayList<AnnotationHighlight>();
-      if(hilights != null)
-        hilites = new ArrayList<AnnotationHighlight>(hilights.values());
-      boolean found = false;
-      for(AnnotationHighlight ah : hilites) {
-        if(found) break;
+      public void mouseClicked(MouseEvent me) {
+        AnnotationHighlight ah = (AnnotationHighlight)me.getSource();
         Point pt = me.getPoint();
-        int location = ta.viewToModel(pt);
+        currentAnnotationHightlight = ah;
 
-        // did user click on this annotation highlight?
-        if(ah.isWithinBoundaries(location)) {
-          found = true;
-          currentAnnotationHightlight = ah;
+        if(SwingUtilities.isRightMouseButton(me)) {
 
-          if(SwingUtilities.isRightMouseButton(me)) {
-            // we should show the option menu here
-            JPopupMenu optionsMenu = new JPopupMenu();
-            optionsMenu.add(new JLabel("Options"));
-            optionsMenu.addSeparator();
-            for(JMenuItem item : actions.keySet()) {
-              AlignmentAction aa = actions.get(item);
-              if(alignment.isAnnotationAligned(ah.annotation)) {
-                if(aa.invokeForAlignedAnnotation()) {
-                  optionsMenu.add(item);
-                }
-              }
-              else if(ah.highlighted) {
-                if(aa.invokeForHighlightedUnalignedAnnotation()) {
-                  optionsMenu.add(item);
-                }
-              }
-              else {
-                if(aa.invokeForUnhighlightedUnalignedAnnotation()) {
-                  optionsMenu.add(item);
-                }
+          if(alignment.isAnnotationAligned(ah.annotation)) {
+            // lets clear the latest selection
+            clearLatestAnnotationsSelection();
+          }
+
+          // we should show the option menu here
+          JPopupMenu optionsMenu = new JPopupMenu();
+          optionsMenu.setOpaque(true);
+          optionsMenu.add(new JLabel("Options"));
+          optionsMenu.addSeparator();
+          for(JMenuItem item : actions.keySet()) {
+            AlignmentAction aa = actions.get(item);
+            if(alignment.isAnnotationAligned(ah.annotation)) {
+              if(aa.invokeForAlignedAnnotation()) {
+                optionsMenu.add(item);
               }
             }
+            else if(ah.highlighted) {
+              if(aa.invokeForHighlightedUnalignedAnnotation()) {
+                optionsMenu.add(item);
+              }
+            }
+            else {
+              if(aa.invokeForUnhighlightedUnalignedAnnotation()) {
+                optionsMenu.add(item);
+              }
+            }
+          }
 
-            optionsMenu.show(ta, (int)pt.getX(), (int)pt.getY());
-            optionsMenu.setVisible(true);
+          optionsMenu.show(ah, (int)pt.getX(), (int)pt.getY());
+          optionsMenu.setVisible(true);
+          return;
+        }
+
+        // was this annotation highlighted?
+        // if yes, remove the highlight
+        if(ah.highlighted) {
+
+          // we need to check if the ah is aligned
+          // if so, we should prompt user to first reset the
+          // alignment
+          if(alignment.isAnnotationAligned(ah.annotation)) {
+            JOptionPane.showMessageDialog(gate.gui.MainFrame.getInstance(),
+                    "To remove this annotation from the current"
+                            + " aligment, please use the 'Remove Alignment'"
+                            + " from the options menu on right click");
             return;
           }
 
-          // was this annotation highlighted?
-          // if yes, unhighlight it
-          if(ah.highlighted) {
-            // try to obtain the highlight
-            if(ah.color != null && ah.color.equals(color)) {
+          // the annotation is not aligned but recently highlighted
+          // so remove the highlight
+          ah.setHighlighted(false, Color.WHITE);
 
-              // we need to check if the ah is aligned
-              // if so, we should prompt user to first reset the
-              // alignment
-              if(alignment.isAnnotationAligned(ah.annotation)) {
-                JOptionPane
-                        .showMessageDialog(
-                                gate.gui.MainFrame.getInstance(),
-                                "To remove this annotation from the current aligment, please use the 'Remove Alignment' from the options menu on right click");
-                return;
-              }
-
-              Object ah1 = ah.getAlignedHighlight();
-              if(ah1 != null) {
-                ta.getHighlighter().removeHighlight(ah1);
-              }
-              ah.highlighted = false;
-              ah.color = null;
-              ah.setAlignedHighlight(null, null);
-
-              // we stored the recent clicks in
-              // latestAnnotationsSelection
-              // sch that when user clicks on the align button
-              // we align the annotations from this hashmap
-              if(latestAnnotationsSelection == null)
-                latestAnnotationsSelection = new HashMap<JEditorPane, List<Annotation>>();
-
-              List<Annotation> annotations = latestAnnotationsSelection.get(ta);
-              if(annotations == null) {
-                annotations = new ArrayList<Annotation>();
-              }
-
-              annotations.remove(ah.annotation);
-              latestAnnotationsSelection.put(ta, annotations);
+          if(ah.isSourceDocument()) {
+            if(sourceLatestAnnotationsSelection == null) {
+              sourceLatestAnnotationsSelection = new ArrayList<Annotation>();
             }
+
+            sourceLatestAnnotationsSelection.remove(ah.annotation);
           }
           else {
-            try {
-              Color toUse = color;
-              if(ah.color != null) {
-                toUse = ah.color;
-              }
-              Object obj = ta.getHighlighter().addHighlight(ah.start, ah.end,
-                      new DefaultHighlighter.DefaultHighlightPainter(toUse));
-              ah.setAlignedHighlight(obj, toUse);
-              ah.highlighted = true;
-              if(latestAnnotationsSelection == null)
-                latestAnnotationsSelection = new HashMap<JEditorPane, List<Annotation>>();
-
-              List<Annotation> annotations = latestAnnotationsSelection.get(ta);
-              if(annotations == null) {
-                annotations = new ArrayList<Annotation>();
-              }
-
-              if(!annotations.contains(ah.annotation)) {
-                annotations.add(ah.annotation);
-              }
-
-              latestAnnotationsSelection.put(ta, annotations);
+            if(targetLatestAnnotationsSelection == null) {
+              targetLatestAnnotationsSelection = new ArrayList<Annotation>();
             }
-            catch(Exception e) {
-              e.printStackTrace();
-            }
+
+            targetLatestAnnotationsSelection.remove(ah.annotation);
           }
-          return;
         }
+        else {
+          if(color == Color.WHITE) color = getColor(null);
+          ah.setHighlighted(true, color);
+          if(ah.isSourceDocument()) {
+            if(sourceLatestAnnotationsSelection == null) {
+              sourceLatestAnnotationsSelection = new ArrayList<Annotation>();
+            }
+
+            if(!sourceLatestAnnotationsSelection.contains(ah.annotation))
+              sourceLatestAnnotationsSelection.add(ah.annotation);
+          }
+          else {
+            if(targetLatestAnnotationsSelection == null) {
+              targetLatestAnnotationsSelection = new ArrayList<Annotation>();
+            }
+            if(!targetLatestAnnotationsSelection.contains(ah.annotation))
+              targetLatestAnnotationsSelection.add(ah.annotation);
+          }
+        }
+
+      }
+
+      public void mouseMoved(MouseEvent me) {
       }
     }
 
-    public void mouseMoved(MouseEvent me) {
+    public boolean isSourceDocument() {
+      return sourceDocument;
     }
+
   }
 
   private Color getColor(Color c) {
@@ -732,61 +962,28 @@ public class AlignmentEditor extends AbstractVisualResource implements
       return;
     }
 
-    int indexOfSrcPane = documentIDs.indexOf(srcDocument.getName());
-    if(indexOfSrcPane < 0) {
-      System.err.println("Invalid document for alignment "
-              + srcDocument.getName());
-      return;
-    }
+    if(!srcDocument.getName().equals(getSourceDocumentId())) return;
+    if(!tgtDocument.getName().equals(getTargetDocumentId())) return;
 
-    int indexOfTgtPane = documentIDs.indexOf(tgtDocument.getName());
-    if(indexOfTgtPane < 0) {
-      System.err.println("Invalid document for alignment "
-              + tgtDocument.getName());
-      return;
-    }
-
-    JEditorPane srcPane = tas[indexOfSrcPane];
-    JEditorPane tgtPane = tas[indexOfTgtPane];
-
-    Map<Annotation, AnnotationHighlight> srcDocHighlights = this.highlights
-            .get(srcPane);
-    Map<Annotation, AnnotationHighlight> tgtDocHighlights = this.highlights
-            .get(tgtPane);
-
-    AnnotationHighlight srcAH = srcDocHighlights.get(srcAnnotation);
-    AnnotationHighlight tgtAH = tgtDocHighlights.get(tgtAnnotation);
+    AnnotationHighlight srcAH = sourceHighlights.get(srcAnnotation);
+    AnnotationHighlight tgtAH = targetHighlights.get(tgtAnnotation);
     if(srcAH == null || tgtAH == null) return;
 
     // if one of the two is already aligned
     Color toUse = null;
     if(srcAH.highlighted)
-      toUse = srcAH.color;
+      toUse = srcAH.colorToUse;
     else if(tgtAH.highlighted)
-      toUse = tgtAH.color;
+      toUse = tgtAH.colorToUse;
     else toUse = getColor(null);
-
-    try {
-
-      if(!srcAH.highlighted) {
-        Object obj = srcPane.getHighlighter().addHighlight(srcAH.start,
-                srcAH.end,
-                new DefaultHighlighter.DefaultHighlightPainter(toUse));
-        srcAH.setAlignedHighlight(obj, toUse);
-        srcAH.highlighted = true;
-      }
-
-      if(!tgtAH.highlighted) {
-        Object obj = tgtPane.getHighlighter().addHighlight(tgtAH.start,
-                tgtAH.end,
-                new DefaultHighlighter.DefaultHighlightPainter(toUse));
-        tgtAH.setAlignedHighlight(obj, toUse);
-        tgtAH.highlighted = true;
-      }
+    if(!srcAH.highlighted) {
+      srcAH.setHighlighted(true, toUse);
     }
-    catch(BadLocationException e) {
-      throw new GateRuntimeException("Error while adding highlights ", e);
+
+    if(!tgtAH.highlighted) {
+      tgtAH.setHighlighted(true, toUse);
     }
+    refresh();
   }
 
   public void annotationsUnaligned(Annotation srcAnnotation,
@@ -798,64 +995,27 @@ public class AlignmentEditor extends AbstractVisualResource implements
       return;
     }
 
-    int indexOfSrcPane = documentIDs.indexOf(srcDocument.getName());
-    if(indexOfSrcPane < 0) {
-      System.err.println("Invalid document for alignment "
-              + srcDocument.getName());
-      return;
-    }
+    if(!srcDocument.getName().equals(
+            sourceDocumentId.getSelectedItem().toString())) return;
 
-    int indexOfTgtPane = documentIDs.indexOf(tgtDocument.getName());
-    if(indexOfTgtPane < 0) {
-      System.err.println("Invalid document for alignment "
-              + tgtDocument.getName());
-      return;
-    }
+    if(!tgtDocument.getName().equals(
+            targetDocumentId.getSelectedItem().toString())) return;
 
-    JEditorPane srcPane = tas[indexOfSrcPane];
-    JEditorPane tgtPane = tas[indexOfTgtPane];
-
-    Map<Annotation, AnnotationHighlight> srcDocHighlights = this.highlights
-            .get(srcPane);
-    Map<Annotation, AnnotationHighlight> tgtDocHighlights = this.highlights
-            .get(tgtPane);
-
-    AnnotationHighlight srcAH = srcDocHighlights.get(srcAnnotation);
-    AnnotationHighlight tgtAH = tgtDocHighlights.get(tgtAnnotation);
+    AnnotationHighlight srcAH = sourceHighlights.get(srcAnnotation);
+    AnnotationHighlight tgtAH = targetHighlights.get(tgtAnnotation);
     if(srcAH == null || tgtAH == null) return;
 
     if(srcAH.highlighted) {
-      srcPane.getHighlighter().removeHighlight(srcAH.getAlignedHighlight());
-      srcAH.setAlignedHighlight(null, null);
-      srcAH.highlighted = false;
-      srcAH.color = null;
+      srcAH.setHighlighted(false, Color.WHITE);
     }
 
     if(tgtAH.highlighted) {
-      tgtPane.getHighlighter().removeHighlight(tgtAH.getAlignedHighlight());
-      tgtAH.setAlignedHighlight(null, null);
-      tgtAH.highlighted = false;
-      tgtAH.color = null;
+      tgtAH.setHighlighted(false, Color.WHITE);
     }
+    refresh();
   }
 
-  private void readActions() {
-    ResourceData myResourceData = (ResourceData)Gate.getCreoleRegister().get(
-            this.getClass().getName());
-    URL creoleXml = myResourceData.getXmlFileUrl();
-    URL alignmentHomeURL = null;
-    File actionsConfFile = null;
-    try {
-      alignmentHomeURL = new URL(creoleXml, ".");
-      actionsConfFile = new File(new File(new File(alignmentHomeURL.toURI()),
-              "resources"), ACTIONS_CONFIG_FILE);
-    }
-    catch(MalformedURLException mue) {
-      throw new GateRuntimeException(mue);
-    }
-    catch(URISyntaxException use) {
-      throw new GateRuntimeException(use);
-    }
+  private void readActions(File actionsConfFile) {
 
     if(actionsConfFile != null && actionsConfFile.exists()) {
       try {
@@ -868,17 +1028,40 @@ public class AlignmentEditor extends AbstractVisualResource implements
                     .getClassLoader());
             AlignmentAction aa = (AlignmentAction)actionClass.newInstance();
             String caption = aa.getCaption();
+
+            // lets check if we already have an action with this name
+
             Icon icon = aa.getIcon();
 
             final JMenuItem menuItem;
             if(caption == null && icon == null) {
               menuItem = new JMenuItem(aa.getClass().getName());
+              JMenuItem actionItem = actionsMenuItemByCaption.get(aa.getClass()
+                      .getName());
+              if(actionItem != null) {
+                actions.remove(actionItem);
+                actionsMenuItemByCaption.remove(aa.getClass().getName());
+              }
+              actionsMenuItemByCaption.put(aa.getClass().getName(), menuItem);
             }
             else if(caption == null) {
               menuItem = new JMenuItem(icon);
+              JMenuItem actionItem = actionsMenuItemByCaption.get(aa
+                      .getIconPath());
+              if(actionItem != null) {
+                actions.remove(actionItem);
+                actionsMenuItemByCaption.remove(aa.getIconPath());
+              }
+              actionsMenuItemByCaption.put(aa.getIconPath(), menuItem);
             }
             else {
               menuItem = new JMenuItem(caption);
+              JMenuItem actionItem = actionsMenuItemByCaption.get(caption);
+              if(actionItem != null) {
+                actions.remove(actionItem);
+                actionsMenuItemByCaption.remove(caption);
+              }
+              actionsMenuItemByCaption.put(caption, menuItem);
             }
             actions.put(menuItem, aa);
             menuItem.addActionListener(new ActionListener() {
@@ -886,7 +1069,6 @@ public class AlignmentEditor extends AbstractVisualResource implements
                 executeAction(actions.get(menuItem));
               }
             });
-
           }
           catch(ClassNotFoundException cnfe) {
             System.err.println("class " + line.trim() + " not found!");
@@ -909,6 +1091,57 @@ public class AlignmentEditor extends AbstractVisualResource implements
       }
       catch(IOException ioe) {
         throw new GateRuntimeException(ioe);
+      }
+    }
+  }
+
+  private class Edge {
+    AnnotationHighlight srcAH;
+
+    AnnotationHighlight tgtAH;
+  }
+
+  private class MappingsPanel extends JPanel {
+
+    private Set<Edge> edges = new HashSet<Edge>();
+
+    public MappingsPanel() {
+      // do nothing
+      setOpaque(true);
+      setBackground(Color.WHITE);
+    }
+
+    public void removeAllEdges() {
+      edges.clear();
+    }
+
+    public void addEdge(Edge edge) {
+      if(edge != null) edges.add(edge);
+    }
+
+    public void paintComponent(Graphics g) {
+      super.paintComponent(g);
+      Graphics2D g2d = (Graphics2D)g;
+      g2d.setBackground(Color.WHITE);
+      g2d.clearRect(0, 0, this.getWidth(), this.getHeight());
+
+      if(showLinks.isSelected()) {
+        for(Edge e : edges) {
+          int x = (int)(e.srcAH.getBounds().x + (double)((double)e.srcAH
+                  .getBounds().width / 2));
+          int y = 0;
+          int x1 = (int)(e.tgtAH.getBounds().x + (double)((double)e.tgtAH
+                  .getBounds().width / 2));
+          int y1 = this.getBounds().height;
+          Line2D line = new Line2D.Double(new Point((int)x, (int)y), new Point(
+                  (int)x1, (int)y1));
+          Stroke stroke = new BasicStroke(2.0f);
+          g2d.setStroke(stroke);
+          Color c = g2d.getColor();
+          g2d.setColor(e.srcAH.getBackground());
+          g2d.draw(line);
+          g2d.setColor(c);
+        }
       }
     }
   }
