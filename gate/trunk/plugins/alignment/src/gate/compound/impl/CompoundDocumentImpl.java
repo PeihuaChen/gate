@@ -2,6 +2,7 @@ package gate.compound.impl;
 
 import java.io.File;
 import java.util.*;
+
 import gate.*;
 import gate.alignment.Alignment;
 import gate.alignment.gui.AlignmentFactory;
@@ -139,7 +140,6 @@ public class CompoundDocumentImpl extends AbstractCompoundDocument {
         Document doc = (Document)Factory.createResource(
                 "gate.corpora.DocumentImpl", features, subFeatures);
         doc.setName(documentID);
-        System.out.println(documentID);
         documents.put(documentID, doc);
       }
 
@@ -237,4 +237,30 @@ public class CompoundDocumentImpl extends AbstractCompoundDocument {
     return (Alignment)this.features.get(alignmentFeatureName);
   }
 
+  /**
+   * This method returns all available alignment feature names
+   * @return
+   */
+  public Set<String> getAllAlignmentFeatureNames() {
+    Set<String> toReturn = new HashSet<String>();
+    if(this.features.keySet() != null) {
+      for(Object key : this.features.keySet()) {
+        if(this.features.get(key) instanceof Alignment) {
+         toReturn.add(key.toString()); 
+        }
+      }
+    }
+    return toReturn;
+  }
+  
+  /**
+   * Alignment object with the provided feature name is deleted
+   * @param alignmentFeatureName
+   */
+  public void removeAlignmentInformation(String alignmentFeatureName) {
+    if(this.features.keySet() != null) {
+      this.features.remove(alignmentFeatureName);
+    }
+  }
+  
 } // class CompoundDocumentImpl

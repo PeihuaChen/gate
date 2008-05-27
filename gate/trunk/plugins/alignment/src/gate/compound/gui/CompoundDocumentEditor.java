@@ -80,7 +80,6 @@ public class CompoundDocumentEditor extends AbstractVisualResource
    * resource.
    */
   public void setHandle(Handle handle) {
-    System.out.println("Called!");
     super.setHandle(handle);
     Map documents = ((CompoundDocument)this.document).getDocuments();
     ((CompoundDocument)this.document).addCompoundDocumentListener(this);

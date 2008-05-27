@@ -16,7 +16,7 @@ import javax.swing.Icon;
 public class RemoveAlignmentAction implements AlignmentAction {
 
   public void execute(AlignmentEditor editor, CompoundDocument document,
-          Map<Document, Set<Annotation>> alignedAnnotations)
+          Map<Document, Set<Annotation>> alignedAnnotations, Annotation clickedAnnotation)
           throws AlignmentException {
     // we don't really need to do anything here
     if(alignedAnnotations == null) {
@@ -56,6 +56,10 @@ public class RemoveAlignmentAction implements AlignmentAction {
 
   public String getCaption() {
     return "Remove Alignment";
+  }
+
+  public String getIconPath() {
+    return null;
   }
 
   public Icon getIcon() {

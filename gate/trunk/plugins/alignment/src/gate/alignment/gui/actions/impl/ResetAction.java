@@ -14,7 +14,9 @@ import javax.swing.Icon;
 
 public class ResetAction implements AlignmentAction {
 
-  public void execute(AlignmentEditor editor, CompoundDocument document, Map<Document, Set<Annotation>> alignedAnnotations) throws AlignmentException {
+  public void execute(AlignmentEditor editor, CompoundDocument document,
+          Map<Document, Set<Annotation>> alignedAnnotations, Annotation clickedAnnotation)
+          throws AlignmentException {
     editor.clearLatestAnnotationsSelection();
   }
 
@@ -25,23 +27,27 @@ public class ResetAction implements AlignmentAction {
   public Icon getIcon() {
     return null;
   }
-  
+
+  public String getIconPath() {
+    return null;
+  }
+
   public boolean invokeForAlignedAnnotation() {
     return false;
   }
-  
+
   public boolean invokeForHighlightedUnalignedAnnotation() {
     return true;
   }
-  
+
   public boolean invokeForUnhighlightedUnalignedAnnotation() {
     return false;
   }
-  
-  public void init(String [] args)  throws AlignmentActionInitializationException {
-    // no parameters 
+
+  public void init(String[] args) throws AlignmentActionInitializationException {
+    // no parameters
   }
-  
+
   public void cleanup() {
     // do nothing
   }

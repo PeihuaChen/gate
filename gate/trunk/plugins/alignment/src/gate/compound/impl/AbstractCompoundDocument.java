@@ -579,6 +579,7 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
       
       if(aDoc != null) cd.setCurrentDocument(aDoc.getName());
 
+      
       return cd;
     }
     catch(IOException ioe) {
@@ -586,6 +587,9 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
     }
     catch(ResourceInstantiationException rie) {
       throw new GateRuntimeException(rie);
+    } finally {
+      if(reader != null)
+        reader.close();
     }
 
   }

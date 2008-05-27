@@ -18,8 +18,9 @@ import javax.swing.Icon;
 public class AlignAction implements AlignmentAction {
 
   public void execute(AlignmentEditor editor, CompoundDocument document,
-          Map<Document, Set<Annotation>> alignedAnnotations)
+          Map<Document, Set<Annotation>> alignedAnnotations, Annotation clickedAnnotation)
           throws AlignmentException {
+
     // we don't really need to do anything here
     if(alignedAnnotations == null) {
       throw new AlignmentException("alignedAnnotations cannot be null");
@@ -62,6 +63,10 @@ public class AlignAction implements AlignmentAction {
   }
 
   public Icon getIcon() {
+    return null;
+  }
+
+  public String getIconPath() {
     return null;
   }
 
