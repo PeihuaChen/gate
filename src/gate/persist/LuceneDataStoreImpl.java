@@ -6,16 +6,21 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.SoftReference;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import gate.Corpus;
 import gate.DataStore;
@@ -51,17 +56,16 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
   private static final long serialVersionUID = 3618696392336421680L;
 
   /**
-   * To store documents to be indexed
+   * To store canonical lock objects for each LR ID.
    */
-  protected Set<Object> documentsToIndex = Collections
-          .synchronizedSet(new HashSet<Object>());
-
+  protected Map<Object, LabelledSoftReference> lockObjects =
+          new HashMap<Object, LabelledSoftReference>();
+  
   /**
-   * To store canonical IDs of the documents being synchronized and
-   * indexed
+   * Reference queue with which the soft references in the lockObjects
+   * map will be registered.
    */
-  protected Map<Object, Object> canonicalLrIDs = Collections
-          .synchronizedMap(new WeakHashMap<Object, Object>());
+  protected ReferenceQueue<Object> refQueue = new ReferenceQueue<Object>();
 
   /**
    * Indicates if the datastore is being closed.
@@ -69,9 +73,29 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
   protected boolean dataStoreClosing = false;
 
   /**
-   * Thread that looks after indexing
+   * Executor to run the indexing tasks
    */
-  protected Thread indexerThread = null;
+  protected ScheduledThreadPoolExecutor executor;
+  
+  /**
+   * Map keeping track of the most recent indexing task
+   * for each LR ID.
+   */
+  protected ConcurrentMap<Object, IndexingTask> currentTasks =
+          new ConcurrentHashMap<Object, IndexingTask>();
+  
+  /**
+   * Number of milliseconds we should wait after a sync
+   * before attempting to re-index a document.  If sync
+   * is called again for the same document within this time
+   * then the timer for the re-indexing task is reset.  Thus
+   * if several changes to the same document are made in
+   * quick succession it will only be re-indexed once.
+   * On the other hand, if the delay is set too long the 
+   * document may never be indexed until the data store is
+   * closed.  The default delay is 1000 (one second).
+   */
+  protected long indexDelay = 1000L;
 
   /**
    * Indexer to be used for indexing documents
@@ -98,28 +122,36 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
    */
   protected Map searchParameters;
 
-  private DataStore thisInstance;
-  
-  private IndexingStatus status = new IndexingStatus();
-
-    
   /** Close the data store. */
   public void close() throws PersistenceException {
-    synchronized(documentsToIndex) {
-      dataStoreClosing = true;
-      documentsToIndex.notify();
+    // shut down the executor.  We submit the shutdown request
+    // as a zero-delay task rather than calling shutdown directly,
+    // in order to interrupt any timed wait currently in progress.
+    executor.execute(new Runnable() {
+      public void run() {
+        executor.shutdown();
+      }
+    });
+    try {
+      // allow up to two minutes for indexing to finish
+      executor.awaitTermination(120, TimeUnit.SECONDS);
+    }
+    catch(InterruptedException e) {
+      // propagate the interruption
+      Thread.currentThread().interrupt();
     }
     
-    synchronized(status) {
-      while(!status.finished) {
-        try {
-          System.out.println("Indexing is not over yet...");
-          status.wait();
-        } catch(InterruptedException ie) {
-          throw new GateRuntimeException(ie);
-        }
-      }
-      System.out.println("Indexing is over... Closing the DataStore");
+    // At this point, any in-progress indexing tasks have
+    // finished.  We now process any tasks that were queued
+    // but not run, running them in the current thread.
+    Collection<IndexingTask> queuedTasks = currentTasks.values();
+    // copy the tasks into an array to avoid concurrent
+    // modification issues, as IndexingTask.run modifies
+    // the currentTasks map
+    IndexingTask[] queuedTasksArray = queuedTasks.toArray(
+            new IndexingTask[queuedTasks.size()]);
+    for(IndexingTask task : queuedTasksArray) {
+      task.run();
     }
     
     super.close();     
@@ -128,7 +160,6 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
   
   /** Open a connection to the data store. */
   public void open() throws PersistenceException {
-    thisInstance = this;
     super.open();
 
     /*
@@ -158,190 +189,71 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
 
     // Lets create a separate indexer thread which keeps running in the
     // background
-    indexerThread = new Thread("ANNIC indexer") {
-
-      // actual stuff for indexing
-      public void run() {
-
-        // keep running this thread until we know that the datastore is
-        // closing
-        while(!dataStoreClosing || documentsToIndex.size() > 0) {
-
-          // lets obtain the documents that need to be indexed
-          Object[] lrs = null;
-          synchronized(documentsToIndex) {
-            if(documentsToIndex.size() == 0) {
-              try {
-                documentsToIndex.wait();
-              } catch(InterruptedException ie) {
-                throw new GateRuntimeException(ie);
-              }
-            }
-            
-            lrs = documentsToIndex.toArray(new Object[documentsToIndex.size()]);
-            documentsToIndex.clear();
-          }
-
-          
-          
-          if(lrs.length > 0) {
-            synchronized(status) {
-              status.finished = false;
-            }
-          }
-          
-          // lets iterate through collected documents to be indexed
-          for(Object lrID : lrs) {
-
-            // remove the ID from the waiting set if it's been queued
-            // up again in the meantime
-            documentsToIndex.remove(lrID);
-
-            Document doc = null;
-            Object canonID = canonicalID(lrID);
-            synchronized(canonID) {
-              // read the document from datastore
-              FeatureMap features = Factory.newFeatureMap();
-              features.put(DataStore.LR_ID_FEATURE_NAME, lrID);
-              features.put(DataStore.DATASTORE_FEATURE_NAME, thisInstance);
-              FeatureMap hidefeatures = Factory.newFeatureMap();
-              Gate.setHiddenAttribute(hidefeatures, true);
-              try {
-                doc = (Document)Factory.createResource(
-                        "gate.corpora.DocumentImpl", features, hidefeatures);
-              }
-              catch(ResourceInstantiationException rie) {
-                // this means the canonicalID was null
-                doc = null;
-              }
-              // as soon as we have a document to be indexed, we relase
-              // the lock by ending the synchronized block
-            }
-            canonID = null;
-
-            // if the document is not null,
-            // proceed to indexing it
-            if(doc != null) {
-
-              /*
-               * we need to reindex this document in order to
-               * synchronize it lets first remove it from the index
-               */
-              ArrayList<Object> removed = new ArrayList<Object>();
-              removed.add(lrID);
-              try {
-                synchronized(indexer) {
-                  indexer.remove(removed);
-                }
-              }
-              catch(IndexException ie) {
-                throw new GateRuntimeException(ie);
-              }
-
-              // and add it back
-              ArrayList<Document> added = new ArrayList<Document>();
-              added.add(doc);
-
-              try {
-                String corpusPID = null;
-
-                /*
-                 * we need to find out the corpus which this document
-                 * belongs to one easy way is to check all instances of
-                 * serial corpus loaded in memory
-                 */
-                List scs = Gate.getCreoleRegister().getLrInstances(
-                        SerialCorpusImpl.class.getName());
-                if(scs != null) {
-                  /*
-                   * we need to check which corpus the deleted class
-                   * belonged to
-                   */
-                  Iterator iter = scs.iterator();
-                  while(iter.hasNext()) {
-                    SerialCorpusImpl sci = (SerialCorpusImpl)iter.next();
-                    if(sci != null) {
-                      if(sci.contains(doc)) {
-                        corpusPID = sci.getLRPersistenceId().toString();
-                        break;
-                      }
-                    }
-                  }
-                }
-
-                /*
-                 * it is also possible that the document is loaded from
-                 * datastore without being loaded from the corpus (e.g.
-                 * using getLR(...) method of datastore) in this case
-                 * the relevant corpus won't exist in memory
-                 */
-                if(corpusPID == null) {
-                  List corpusPIDs = getLrIds(SerialCorpusImpl.class.getName());
-                  if(corpusPIDs != null) {
-                    for(int i = 0; i < corpusPIDs.size(); i++) {
-                      Object corpusID = corpusPIDs.get(i);
-
-                      SerialCorpusImpl corpusLR = null;
-                      canonID = canonicalID(corpusID);
-                      synchronized(canonID) {
-                        // we will have to load this corpus
-                        FeatureMap params = Factory.newFeatureMap();
-                        params.put(DataStore.DATASTORE_FEATURE_NAME, thisInstance);
-                        params.put(DataStore.LR_ID_FEATURE_NAME, corpusID);
-                        FeatureMap hidefeatures = Factory.newFeatureMap();
-                        Gate.setHiddenAttribute(hidefeatures, true);
-                        corpusLR = (SerialCorpusImpl)Factory.createResource(
-                                SerialCorpusImpl.class.getCanonicalName(),
-                                params, hidefeatures);
-                        canonID.notify();
-                      }
-                      canonID = null;
-
-                      if(corpusLR != null) {
-                        if(corpusLR.contains(doc)) {
-                          corpusPID = corpusLR.getLRPersistenceId().toString();
-                        }
-                        Factory.deleteResource(corpusLR);
-                        if(corpusPID != null) break;
-                      }
-                    }
-                  }
-                }
-
-                synchronized(indexer) {
-                  indexer.add(corpusPID, added);
-                }
-                
-                Factory.deleteResource(doc);
-              }
-              catch(Exception ie) {
-                ie.printStackTrace();
-              }
-            }
-          }
-        }
-        synchronized(status) {
-          status.finished = true;
-          status.notify();
-        }
-      }
-    };
-
-    indexerThread.setPriority(Thread.MIN_PRIORITY);
-    indexerThread.start();
+    executor = new ScheduledThreadPoolExecutor(1, Executors.defaultThreadFactory());
+    // set up the executor so it does not execute delayed indexing tasks
+    // that are still waiting when it is shut down.  We run these tasks
+    // immediately at shutdown time rather than waiting.
+    executor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
+    executor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
   }
 
   /**
-   * Obtain the synchrnozed canonicalID for the given persisitance ID
+   * Obtain the lock object on which we must synchronize when
+   * loading or saving the LR with the given ID.
    * 
    * @param id
    * @return
    */
-  private synchronized Object canonicalID(Object id) {
-    if(!canonicalLrIDs.containsKey(id)) {
-      canonicalLrIDs.put(id, id);
+  private Object lockObjectForID(Object id) {
+    synchronized(lockObjects) {
+      processRefQueue();
+      Object lock = null;
+      if(lockObjects.containsKey(id)) {
+        lock = lockObjects.get(id).get();
+      }
+      if(lock == null) {
+        lockObjects.remove(id);
+        lock = new Object();
+        LabelledSoftReference ref = new LabelledSoftReference(lock);
+        ref.label = id;
+        lockObjects.put(id, ref);
+      }
+      
+      return lock;
     }
-    return canonicalLrIDs.get(id);
+  }
+  
+  /**
+   * Cleans up the lockObjects map by removing any entries
+   * whose SoftReference values have been cleared by the
+   * garbage collector.
+   */
+  private void processRefQueue() {
+    LabelledSoftReference ref = null;
+    while((ref = LabelledSoftReference.class.cast(refQueue.poll())) != null) {
+      // check that the queued ref hasn't already been replaced in the map
+      if(lockObjects.get(ref.label) == ref) {
+        lockObjects.remove(ref.label);
+      }
+    }
+  }
+  
+  /**
+   * Submits the given LR ID for indexing.  The task is delayed
+   * by 5 seconds, so multiple updates to the same LR in close
+   * succession do not un-necessarily trigger multiple re-indexing
+   * passes.
+   */
+  protected void queueForIndexing(Object lrID) {
+    IndexingTask existingTask = currentTasks.get(lrID);
+    if(existingTask != null) {
+      existingTask.disable();
+    }
+    
+    IndexingTask newTask = new IndexingTask(lrID);
+    currentTasks.put(lrID, newTask);
+    // set the LR to be indexed after the configured delay
+    executor.schedule(newTask, indexDelay, TimeUnit.MILLISECONDS);
   }
 
   /**
@@ -350,22 +262,20 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
   public void delete(String lrClassName, Object lrPersistenceId)
           throws PersistenceException {
 
-    synchronized(documentsToIndex) {
-      // we check if the lrPersistenceId appears in this
-      // documentsToIndex
-      // if so we need to remove it from there as well
-      documentsToIndex.remove(lrPersistenceId);
+    IndexingTask task = currentTasks.get(lrPersistenceId);
+    if(task != null) {
+      task.disable();
     }
-
+    
     // and we delete it from the datastore
     // we obtained the lock on this - in order to avoid clashing between
     // the object being loaded by the indexer thread and the thread that
     // deletes it
-    Object canonID = canonicalID(lrPersistenceId);
-    synchronized(canonID) {
+    Object lock = lockObjectForID(lrPersistenceId);
+    synchronized(lock) {
       super.delete(lrClassName, lrPersistenceId);
     }
-    canonID = null;
+    lock = null;
 
     /*
      * lets first find out if the deleted resource is a corpus. Deleting
@@ -394,14 +304,9 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
             return;
           }
 
-          synchronized(documentsToIndex) {
-            for(int i = 0; i < hits.length; i++) {
-              String docID = hits[i].getDocumentID();
-              documentsToIndex.add(docID);
-            }
-
-            // we've added enough docs in this so let the indexer thread know about this
-            documentsToIndex.notify();
+          for(int i = 0; i < hits.length; i++) {
+            String docID = hits[i].getDocumentID();
+            queueForIndexing(docID);
           }
         }
         catch(SearchException se) {
@@ -448,21 +353,19 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
    */
   public void sync(LanguageResource lr) throws PersistenceException {
     if(lr.getLRPersistenceId() != null) {
-      Object canonID = canonicalID(lr.getLRPersistenceId());
-      synchronized(canonID) {
+      // lock the LR ID so we don't write to the file while an
+      // indexer task is reading it
+      Object lock = lockObjectForID(lr.getLRPersistenceId());
+      synchronized(lock) {
         super.sync(lr);
       }
-      canonID = null;
+      lock = null;
     } else {
       super.sync(lr);
     }
 
     if(lr instanceof Document) {
-      synchronized(documentsToIndex) {
-        documentsToIndex.add(lr.getLRPersistenceId());
-        // we've added a doc in this so let the indexer thread know about this
-        documentsToIndex.notify();
-      }
+      queueForIndexing(lr.getLRPersistenceId());
     }
   }
 
@@ -505,6 +408,25 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
   public Searcher getSearcher() {
     return this.searcher;
   }
+  
+  /**
+   * Sets the delay in milliseconds that we should wait after a sync
+   * before attempting to re-index a document.  If sync is called
+   * again for the same document within this time then the timer
+   * for the re-indexing task is reset.  Thus if several changes
+   * to the same document are made in quick succession it will only
+   * be re-indexed once. On the other hand, if the delay is set too
+   * long the document may never be indexed until the data store is
+   * closed.  The default delay is 1000ms (one second), which should
+   * be appropriate for usage in the GATE GUI.
+   */
+  public void setIndexDelay(long indexDelay) {
+    this.indexDelay = indexDelay;
+  }
+  
+  public long getIndexDelay() {
+    return indexDelay;
+  }
 
   /**
    * Search the datastore
@@ -535,11 +457,8 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
      * we need to reindex this document in order to synchronize it lets
      * first remove it from the index
      */
-    ArrayList removed = new ArrayList();
     if(doc.getLRPersistenceId() != null) {
-      synchronized(documentsToIndex) {
-        documentsToIndex.add(doc.getLRPersistenceId());
-      }
+      queueForIndexing(doc.getLRPersistenceId());
     }
   }
 
@@ -555,7 +474,161 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
      */
   }
   
-  private class IndexingStatus {
-    boolean finished = false;
+  protected class IndexingTask implements Runnable {
+    private AtomicBoolean disabled = new AtomicBoolean(false);
+    
+    private Object lrID;
+    
+    public IndexingTask(Object lrID) {
+      this.lrID = lrID;
+    }
+    
+    public void disable() {
+      disabled.set(true);
+    }
+
+    public void run() {
+      // remove this task from the currentTasks map if it has not been
+      // superseded by a later task
+      currentTasks.remove(lrID, this);
+      // only run the rest of the process if this task has not been
+      // disabled (because a newer task for the same LR was scheduled).
+      // We set the disabled flag at this point so the same task cannot
+      // be run twice.
+      if(disabled.compareAndSet(false, true)) {
+        Document doc = null;
+        // read the document from datastore
+        FeatureMap features = Factory.newFeatureMap();
+        features.put(DataStore.LR_ID_FEATURE_NAME, lrID);
+        features.put(DataStore.DATASTORE_FEATURE_NAME, LuceneDataStoreImpl.this);
+        FeatureMap hidefeatures = Factory.newFeatureMap();
+        Gate.setHiddenAttribute(hidefeatures, true);
+        try {
+          // lock the LR ID so we don't try and read a file
+          // which is in the process of being written
+          Object lock = lockObjectForID(lrID);
+          synchronized(lock) {
+            doc = (Document)Factory.createResource(
+                    "gate.corpora.DocumentImpl", features, hidefeatures);
+          }
+          lock = null;
+        }
+        catch(ResourceInstantiationException rie) {
+          // this means the LR ID was null
+          doc = null;
+        }
+      
+        // if the document is not null,
+        // proceed to indexing it
+        if(doc != null) {
+
+          /*
+           * we need to reindex this document in order to
+           * synchronize it lets first remove it from the index
+           */
+          ArrayList<Object> removed = new ArrayList<Object>();
+          removed.add(lrID);
+          try {
+            synchronized(indexer) {
+              indexer.remove(removed);
+            }
+          }
+          catch(IndexException ie) {
+            throw new GateRuntimeException(ie);
+          }
+
+          // and add it back
+          ArrayList<Document> added = new ArrayList<Document>();
+          added.add(doc);
+
+          try {
+            String corpusPID = null;
+
+            /*
+             * we need to find out the corpus which this document
+             * belongs to one easy way is to check all instances of
+             * serial corpus loaded in memory
+             */
+            List scs = Gate.getCreoleRegister().getLrInstances(
+                    SerialCorpusImpl.class.getName());
+            if(scs != null) {
+              /*
+               * we need to check which corpus the deleted class
+               * belonged to
+               */
+              Iterator iter = scs.iterator();
+              while(iter.hasNext()) {
+                SerialCorpusImpl sci = (SerialCorpusImpl)iter.next();
+                if(sci != null) {
+                  if(sci.contains(doc)) {
+                    corpusPID = sci.getLRPersistenceId().toString();
+                    break;
+                  }
+                }
+              }
+            }
+
+            /*
+             * it is also possible that the document is loaded from
+             * datastore without being loaded from the corpus (e.g.
+             * using getLR(...) method of datastore) in this case
+             * the relevant corpus won't exist in memory
+             */
+            if(corpusPID == null) {
+              List corpusPIDs = getLrIds(SerialCorpusImpl.class.getName());
+              if(corpusPIDs != null) {
+                for(int i = 0; i < corpusPIDs.size(); i++) {
+                  Object corpusID = corpusPIDs.get(i);
+
+                  SerialCorpusImpl corpusLR = null;
+                  // we will have to load this corpus
+                  FeatureMap params = Factory.newFeatureMap();
+                  params.put(DataStore.DATASTORE_FEATURE_NAME, LuceneDataStoreImpl.this);
+                  params.put(DataStore.LR_ID_FEATURE_NAME, corpusID);
+                  hidefeatures = Factory.newFeatureMap();
+                  Gate.setHiddenAttribute(hidefeatures, true);
+                  Object lock = lockObjectForID(corpusID);
+                  synchronized(lock) {
+                    corpusLR = (SerialCorpusImpl)Factory.createResource(
+                            SerialCorpusImpl.class.getCanonicalName(),
+                            params, hidefeatures);
+                  }
+                  lock = null;
+
+                  if(corpusLR != null) {
+                    if(corpusLR.contains(doc)) {
+                      corpusPID = corpusLR.getLRPersistenceId().toString();
+                    }
+                    Factory.deleteResource(corpusLR);
+                    if(corpusPID != null) break;
+                  }
+                }
+              }
+            }
+
+            synchronized(indexer) {
+              indexer.add(corpusPID, added);
+            }
+            
+            Factory.deleteResource(doc);
+          }
+          catch(Exception ie) {
+            ie.printStackTrace();
+          }
+        }
+      }
+    }
+    
+  }
+  
+  /**
+   * Soft reference with an associated label.
+   */
+  private class LabelledSoftReference extends SoftReference<Object> {
+    Object label;
+    
+    public LabelledSoftReference(Object referent) {
+      super(referent);
+    }
   }
 }
