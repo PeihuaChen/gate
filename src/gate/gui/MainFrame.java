@@ -28,6 +28,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationHandler;
+import java.util.prefs.*;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -132,6 +133,10 @@ public class MainFrame extends JFrame implements ProgressListener,
 
   protected WaitDialog waitDialog;
 
+  protected HelpFrame helpFrame;
+  
+  protected JCheckBox toggleToolTipsCheckBoxMenuItem;
+
   /**
    * Holds all the icons used in the Gate GUI indexed by filename. This is
    * needed so we do not need to decode the icon everytime we need it as that
@@ -157,6 +162,17 @@ public class MainFrame extends JFrame implements ProgressListener,
   protected static final String[] ICON_EXTENSIONS = {"", ".png", ".gif"};
 
   private static JDialog guiLock = null;
+
+  /**
+   * Contains the last directories selected when using resources.
+   */
+  static private Preferences prefs =
+    Preferences.userNodeForPackage(MainFrame.class);
+  
+  /**
+   * Name of the current resource class used by the file chooser.
+   */
+  private static String currentResourceClassName;
 
   static public Icon getIcon(String baseName) {
     Icon result = (Icon)iconByName.get(baseName);
@@ -187,6 +203,9 @@ public class MainFrame extends JFrame implements ProgressListener,
     return instance;
   }
 
+  /**
+   * Get the file chooser.
+   */
   static public JFileChooser getFileChooser() {
     return fileChooser;
   }
@@ -282,13 +301,6 @@ public class MainFrame extends JFrame implements ProgressListener,
     if(fileChooser == null) {
       fileChooser = new GateFileChooser();
       fileChooser.setMultiSelectionEnabled(false);
-      String lastUsedDir =
-        Gate.getUserConfig().getString(GateConstants.LAST_FILECHOOSER_LOCATION);
-      if(lastUsedDir != null && lastUsedDir.length() > 0) {
-        File lastDir = new File(lastUsedDir);
-        if(lastDir.exists() && lastDir.isDirectory())
-          fileChooser.setCurrentDirectory(new File(lastUsedDir));
-      }
       guiRoots.add(fileChooser);
 
       // the JFileChooser seems to size itself better once it's been
@@ -517,6 +529,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     menuBar = new JMenuBar();
 
     JMenu fileMenu = new XJMenu("File");
+    fileMenu.setMnemonic(KeyEvent.VK_F);
 
     LiveMenu newAPPMenu = new LiveMenu(LiveMenu.APP);
     newAPPMenu.setText("New application");
@@ -560,6 +573,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     menuBar.add(fileMenu);
 
     JMenu optionsMenu = new JMenu("Options");
+    optionsMenu.setMnemonic(KeyEvent.VK_O);
 
     optionsDialog = new OptionsDialog(MainFrame.this);
     optionsMenu.add(new XJMenuItem(new AbstractAction("Configuration") {
@@ -627,6 +641,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     menuBar.add(optionsMenu);
 
     JMenu toolsMenu = new XJMenu("Tools");
+    toolsMenu.setMnemonic(KeyEvent.VK_T);
     toolsMenu.add(new NewAnnotDiffAction());
     // toolsMenu.add(newCorpusAnnotDiffAction);
     toolsMenu.add(new NewBootStrapAction());
@@ -676,7 +691,13 @@ public class MainFrame extends JFrame implements ProgressListener,
     menuBar.add(toolsMenu);
 
     JMenu helpMenu = new JMenu("Help");
-    // helpMenu.add(new HelpUserGuideAction());
+    helpMenu.setMnemonic(KeyEvent.VK_H);
+    helpMenu.add(new HelpUserGuideAction());
+    helpMenu.add(new HelpUserGuideInContextAction());
+    toggleToolTipsCheckBoxMenuItem =
+      new JCheckBox(new ToggleToolTipsAction());
+    toggleToolTipsCheckBoxMenuItem.setSelected(true);
+    helpMenu.add(toggleToolTipsCheckBoxMenuItem);
     helpMenu.add(new HelpAboutAction());
     menuBar.add(helpMenu);
 
@@ -804,6 +825,8 @@ public class MainFrame extends JFrame implements ProgressListener,
             value = ((DefaultMutableTreeNode)value).getUserObject();
             if(value instanceof Handle) {
               handle = (Handle)value;
+              currentResourceClassName =
+                handle.getTarget().getClass().getName();
               popup = handle.getPopup();
             }
           }
@@ -828,6 +851,10 @@ public class MainFrame extends JFrame implements ProgressListener,
               popup.insert(new JPopupMenu.Separator(), 2);
               popup.insert(new XJMenuItem(new RenameResourceAction(path),
                 MainFrame.this), 3);
+
+              // add a help action
+              popup.insert(new XJMenuItem(new HelpOnItemTreeAction(
+                handle.getTarget().getClass().getName()), MainFrame.this), 4);
 
               // Put the action command in the component's action map
               // if (handle.getLargeView() != null){
@@ -1503,6 +1530,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     // get the URL (a file in this case)
     fileChooser.setDialogTitle("Please create a new empty directory");
     fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+    currentResourceClassName = "gate.persist.SerialDataStore";
     if(fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
       try {
         URL dsURL = fileChooser.getSelectedFile().toURI().toURL();
@@ -1532,6 +1560,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     // get the URL (a file in this case)
     fileChooser.setDialogTitle("Select the datastore directory");
     fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+    currentResourceClassName = "gate.persist.SerialDataStore";
     if(fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
       try {
         URL dsURL = fileChooser.getSelectedFile().toURI().toURL();
@@ -1641,6 +1670,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             + "the documents to be evaluated");
           chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
           chooser.setMultiSelectionEnabled(false);
+          currentResourceClassName = CorpusBenchmarkTool.class.toString();
           int state = chooser.showOpenDialog(MainFrame.this);
           File startDir = chooser.getSelectedFile();
           if(state == JFileChooser.CANCEL_OPTION || startDir == null) return;
@@ -1648,6 +1678,8 @@ public class MainFrame extends JFrame implements ProgressListener,
           chooser
             .setDialogTitle("Please select the application that you want to run");
           chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+          currentResourceClassName =
+            CorpusBenchmarkTool.class.toString()+".application";
           state = chooser.showOpenDialog(MainFrame.this);
           File testApp = chooser.getSelectedFile();
           if(state == JFileChooser.CANCEL_OPTION || startDir == null) return;
@@ -1700,6 +1732,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             + "the documents to be evaluated");
           chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
           chooser.setMultiSelectionEnabled(false);
+          currentResourceClassName = CorpusBenchmarkTool.class.toString();
           int state = chooser.showOpenDialog(MainFrame.this);
           File startDir = chooser.getSelectedFile();
           if(state == JFileChooser.CANCEL_OPTION || startDir == null) return;
@@ -1755,6 +1788,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             + "the documents to be evaluated");
           chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
           chooser.setMultiSelectionEnabled(false);
+          currentResourceClassName = CorpusBenchmarkTool.class.toString();
           int state = chooser.showOpenDialog(MainFrame.this);
           File startDir = chooser.getSelectedFile();
           if(state == JFileChooser.CANCEL_OPTION || startDir == null) return;
@@ -1762,6 +1796,8 @@ public class MainFrame extends JFrame implements ProgressListener,
           chooser
             .setDialogTitle("Please select the application that you want to run");
           chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+          currentResourceClassName =
+            CorpusBenchmarkTool.class.toString()+".application";
           state = chooser.showOpenDialog(MainFrame.this);
           File testApp = chooser.getSelectedFile();
           if(state == JFileChooser.CANCEL_OPTION || startDir == null) return;
@@ -1816,6 +1852,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             + "the documents to be evaluated");
           chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
           chooser.setMultiSelectionEnabled(false);
+          currentResourceClassName = CorpusBenchmarkTool.class.toString();
           int state = chooser.showOpenDialog(MainFrame.this);
           File startDir = chooser.getSelectedFile();
           if(state == JFileChooser.CANCEL_OPTION || startDir == null) return;
@@ -1823,6 +1860,8 @@ public class MainFrame extends JFrame implements ProgressListener,
           chooser
             .setDialogTitle("Please select the application that you want to run");
           chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+          currentResourceClassName =
+            CorpusBenchmarkTool.class.toString()+".application";
           state = chooser.showOpenDialog(MainFrame.this);
           File testApp = chooser.getSelectedFile();
           if(state == JFileChooser.CANCEL_OPTION || startDir == null) return;
@@ -1974,6 +2013,7 @@ public class MainFrame extends JFrame implements ProgressListener,
               // get the params for the Current PR
               ResourceData resData =
                 (ResourceData)Gate.getCreoleRegister().get(PR_NAMES[i]);
+              currentResourceClassName = resData.getClassName();
               if(newResourceDialog.show(resData, "Parameters for the new "
                 + resData.getName())) {
                 sac.add((ProcessingResource)Factory.createResource(PR_NAMES[i],
@@ -2026,6 +2066,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             new NewResourceDialog(MainFrame.this, "Resource parameters", true);
           resourceDialog
             .setTitle("Parameters for the new " + resData.getName());
+          currentResourceClassName = resData.getClassName();
           resourceDialog.show(resData);
         }
         else {
@@ -2087,6 +2128,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         int y = (screenSize.height - height) / 2;
         pluginManager.setLocation(x, y);
       }
+      currentResourceClassName = "gate.PluginManager";
       pluginManager.setVisible(true);
       // free resources after the dialog is hidden
       pluginManager.dispose();
@@ -2122,6 +2164,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           fileChooser.setMultiSelectionEnabled(false);
           fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
           fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
+          currentResourceClassName = "gate.CreoleRegister";
           int result = fileChooser.showOpenDialog(MainFrame.this);
           if(result == JFileChooser.APPROVE_OPTION) {
             try {
@@ -2187,6 +2230,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         public void run() {
           newResourceDialog.setTitle("Parameters for the new "
             + rData.getName());
+          currentResourceClassName = rData.getClassName();
           newResourceDialog.show(rData);
         }
       };
@@ -2314,6 +2358,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           fileChooser
             .setDialogTitle("Please create a new empty directory for datastore");
           fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+          currentResourceClassName = "gate.DataStore.data";
           if(fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
             try {
               dsLocation.setText(fileChooser.getSelectedFile().toURI().toURL()
@@ -2332,6 +2377,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           fileChooser
             .setDialogTitle("Please create a new empty directory for datastore");
           fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+          currentResourceClassName = "gate.DataStore.index";
           if(fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
             try {
               indexLocation.setText(fileChooser.getSelectedFile().toURI()
@@ -2633,6 +2679,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     // get the URL (a file in this case)
     fileChooser.setDialogTitle("Select the datastore directory");
     fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+    currentResourceClassName = "gate.DataStore.data";
     if(fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
       try {
         URL dsURL = fileChooser.getSelectedFile().toURI().toURL();
@@ -2722,6 +2769,8 @@ public class MainFrame extends JFrame implements ProgressListener,
         public void run() {
           fileChooser.setDialogTitle("Select a file for this resource");
           fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+          fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
+          currentResourceClassName = "gate.ApplicationRestore";
           if(fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
             try {
@@ -2834,15 +2883,6 @@ public class MainFrame extends JFrame implements ProgressListener,
             userConfig.put(GateConstants.MAIN_FRAME_WIDTH, width);
             userConfig.put(GateConstants.MAIN_FRAME_HEIGHT, height);
             try {
-              File lastCurrentDirectory = fileChooser.getCurrentDirectory();
-              userConfig.put(GateConstants.LAST_FILECHOOSER_LOCATION,
-                lastCurrentDirectory == null ? "" : lastCurrentDirectory
-                  .getCanonicalPath());
-            }
-            catch(IOException ioe) {
-              // ignore
-            }
-            try {
               Gate.writeUserConfig();
             }
             catch(GateException ge) {
@@ -2909,6 +2949,9 @@ public class MainFrame extends JFrame implements ProgressListener,
               window.dispose();
             }
           }
+
+          // only hidden when closed
+          helpFrame.dispose();
 
           // trying to release all resources occupied by all
           try {
@@ -3370,31 +3413,173 @@ public class MainFrame extends JFrame implements ProgressListener,
 
   class HelpUserGuideAction extends AbstractAction {
     public HelpUserGuideAction() {
-      super("User Guide");
+      super("User Guide Content");
       putValue(SHORT_DESCRIPTION, "This option needs an internet connection");
+      putValue(ACCELERATOR_KEY,
+        KeyStroke.getKeyStroke(KeyEvent.VK_F1, InputEvent.CTRL_MASK));
     }
 
     public void actionPerformed(ActionEvent e) {
+      showHelpFrame("http://www.gate.ac.uk/sale/tao/splitli1.html");
+    }
+  }
 
+  private void showHelpFrame(String urlString) {
+    final URL url;
+    try {
+      url = new URL(urlString);
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
+      return;
+    }
+    Runnable runnable = new Runnable() {
+      public void run() {
+        if (helpFrame == null) {
+          helpFrame = new HelpFrame();
+          helpFrame.setSize(800, 600);
+          helpFrame.setDefaultCloseOperation(HIDE_ON_CLOSE);
+          // center on screen
+          Dimension frameSize = helpFrame.getSize();
+          Dimension ownerSize = Toolkit.getDefaultToolkit().getScreenSize();
+          Point ownerLocation = new Point(0, 0);
+          helpFrame.setLocation(ownerLocation.x
+             + (ownerSize.width - frameSize.width) / 2, ownerLocation.y
+             + (ownerSize.height - frameSize.height) / 2);
+        }
+        try {
+          helpFrame.setPage(url);
+        } catch (IOException e) {
+          e.printStackTrace();
+          return;
+        }
+        helpFrame.setVisible(false);
+        helpFrame.setVisible(true);
+      }
+    };
+    Thread thread = new Thread(runnable);
+    thread.start();
+  }
+
+  class HelpUserGuideInContextAction extends AbstractAction {
+    public HelpUserGuideInContextAction() {
+      super("Contextual User Guide");
+      putValue(SHORT_DESCRIPTION, "This option needs an internet connection");
+      putValue(ACCELERATOR_KEY,
+        KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F1, 0));
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      String tabToolTip = mainTabbedPane.getToolTipTextAt(
+        mainTabbedPane.getSelectedIndex());
+      showHelpFrame(getHelpUrlStringForRessourceClassOrComment(tabToolTip));
+    }
+  }
+
+  private String getHelpUrlStringForRessourceClassOrComment(String classOrComment) {
+    String url = "http://gate.ac.uk/sale/tao/";
+    if (classOrComment.contains("gate.creole.SerialAnalyserController")
+     || classOrComment.contains("gate.creole.SerialController")) {
+      url += "splitch3.html#sec:howto:apps";
+    } else if (classOrComment.contains("gate.creole.ConditionalSerialAnalyserController")
+            || classOrComment.contains("gate.creole.ConditionalSerialController")) {
+      url += "splitch3.html#sec:howto:cond";
+    } else if (classOrComment.contains("gate.creole.RealtimeCorpusController")) {
+      url += "splitch4.html#sec:applications";
+    } else if (classOrComment.contains("gate.corpora.DocumentImpl")) {
+      url += "splitch3.html#sec:howto:edit";
+    } else if (classOrComment.contains("gate.corpora.CorpusImpl")) {
+      url += "splitch3.html#sec:howto:loadlr";
+    } else if (classOrComment.contains("gate.creole.AnnotationSchema")) {
+      url += "splitch6.html#sec:schemas";
+    } else if (classOrComment.contains("gate.creole.ontology.owlim.OWLIMOntologyLR")) {
+      url += "splitch10.html#sec:ontologies:lr";
+    } else if (classOrComment.contains("gate.creole.orthomatcher.OrthoMatcher")) {
+      url += "splitch8.html#sec:annie:orthomatcher";
+    } else if (classOrComment.contains("gate.creole.ANNIETransducer")) {
+      url += "splitch7.html#chap:jape";
+    } else if (classOrComment.contains("gate.creole.POSTagger")) {
+      url += "splitch8.html#sec:tagger";
+    } else if (classOrComment.contains("gate.creole.splitter.SentenceSplitter")) {
+      url += "splitch8.html#sec:splitter";
+    } else if (classOrComment.contains("gate.creole.tokeniser.DefaultTokeniser")) {
+      url += "splitch8.html#sec:tokeniser";
+    } else if (classOrComment.contains("gate.creole.annotdelete.AnnotationDeletePR")) {
+      url += "splitch9.html#sec:misc-creole:reset";
+    } else if (classOrComment.contains("gate.creole.gazetteer.DefaultGazetteer")) {
+      url += "splitch8.html#sec:gazetteer";
+    } else if (classOrComment.contains("gate.creole.splitter.RegexSentenceSplitter")) {
+      url += "splitch8.html#sec:regex-splitter";
+    } else if (classOrComment.contains("gate.creole.gazetteer.OntoGazetteerImpl")) {
+      url += "splitch5.html#sect:ontogaz";
+    } else if (classOrComment.contains("com.ontotext.gate.gazetteer.HashGazetteer")) {
+      url += "splitch5.html#sect:gaze";
+    } else if (classOrComment.contains("gate.creole.Transducer")) {
+      url += "splitch7.html#chap:jape";
+    } else if (classOrComment.contains("gate.creole.annotransfer.AnnotationSetTransfer")) {
+      url += "splitch9.html#sec:misc-creole:ast";
+    } else if (classOrComment.contains("gate.creole.tokeniser.SimpleTokeniser")) {
+      url += "splitch8.html#sec:tokeniser";
+    } else if (classOrComment.contains("gate.compound.impl")) {
+      url += "splitch12.html#chapt:alignment";
+    } else if (classOrComment.contains("gate.merger.AnnotationMergingMain")) {
+      url += "splitch9.html#sec:misc-creole:merging";
+    } else if (classOrComment.contains("gate.creole.coref.Coreferencer")) {
+      url += "splitch8.html#sec:annie:pronom-coref";
+    } else if (classOrComment.contains("gate.creole.coref.NominalCoref")) {
+      url += "splitch8.html#sec:annie:pronom-coref";
+    } else if (classOrComment.contains("gate.creole.GazetteerListsCollector")) {
+      url += "splitch9.html#sec:misc-creole:listscollector";
+    } else if (classOrComment.contains("gate.creole.morph.Morph")) {
+      url += "splitch9.html#sec:misc-creole:morpher";
+    } else if (classOrComment.contains("gate.creole.dumpingPR.DumpingPR")) {
+      url += "splitch9.html#sec:misc-creole:flexexport";
+    } else if (classOrComment.contains("gate.creole.VPChunker")) {
+      url += "splitch9.html#sec:misc-creole:npchunker";
+    } else if (classOrComment.contains("gate.creole.ml.MachineLearningPR")) {
+      url += "splitch11.html#chapt:mlapi";
+    } else if (classOrComment.contains("GATE serial datastore")
+     || classOrComment.contains("gate.persist.LuceneDataStoreImpl")) {
+      url += "splitch9.html#sec:misc-creole:annic";
+    } else if (classOrComment.contains("gate.persist.SerialDataStore")) {
+      url += "splitch3.html#sec:howto:datastores";
+    } else if (classOrComment.contains("GATE log")) {
+      url += "splitch3.html#sec:howto:guistart";
+    } else {
+      url += "splitli1.html";
+    }
+    return url;
+  }
+  
+  class HelpOnItemTreeAction extends AbstractAction {
+    HelpOnItemTreeAction(String className) {
+      super("Help");
+      putValue(SHORT_DESCRIPTION, "Help on this resource");
+      this.className = className;
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      showHelpFrame(getHelpUrlStringForRessourceClassOrComment(className));
+    }
+
+    String className;
+  }
+
+  class ToggleToolTipsAction extends AbstractAction {
+    public ToggleToolTipsAction() {
+      super("Show tooltips");
+      putValue(SHORT_DESCRIPTION,
+        "Show or hide the help balloon under the cursor.");
+    }
+
+    public void actionPerformed(ActionEvent e) {
       Runnable runnable = new Runnable() {
         public void run() {
-          try {
-            HelpFrame helpFrame = new HelpFrame();
-            helpFrame.setPage(new URL(
-              "http://www.gate.ac.uk/sale/tao/index.html"));
-            helpFrame.setSize(800, 600);
-            // center on screen
-            Dimension frameSize = helpFrame.getSize();
-            Dimension ownerSize = Toolkit.getDefaultToolkit().getScreenSize();
-            Point ownerLocation = new Point(0, 0);
-            helpFrame.setLocation(ownerLocation.x
-              + (ownerSize.width - frameSize.width) / 2, ownerLocation.y
-              + (ownerSize.height - frameSize.height) / 2);
-
-            helpFrame.setVisible(true);
-          }
-          catch(IOException ioe) {
-            ioe.printStackTrace(Err.getPrintWriter());
+          javax.swing.ToolTipManager toolTipManager;
+          toolTipManager = ToolTipManager.sharedInstance();
+          if (toggleToolTipsCheckBoxMenuItem.isSelected()) {
+            toolTipManager.setEnabled(true);
+          } else {
+            toolTipManager.setEnabled(false);
           }
         }
       };
@@ -3403,7 +3588,8 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
   }
 
-  protected class ResourcesTreeCellRenderer extends DefaultTreeCellRenderer {
+
+    protected class ResourcesTreeCellRenderer extends DefaultTreeCellRenderer {
     public ResourcesTreeCellRenderer() {
       setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
     }
@@ -3531,6 +3717,56 @@ public class MainFrame extends JFrame implements ProgressListener,
         return super.showDialog(getInstance(), approveButtonText);
       else return super.showDialog(parent, approveButtonText);
     }
+
+    @Override
+    public int showOpenDialog(Component parent) throws HeadlessException {
+      // if possible, set the last directory used
+      // by the resource as the current directory.
+      if (currentResourceClassName != null) {
+      String resourcePath = currentResourceClassName.replaceAll("\\.", "/");
+      String lastUsedPath = null;
+      try {
+        if(prefs.nodeExists("filechooserlocations/" + resourcePath)) {
+          Preferences node =
+            prefs.node("filechooserlocations/" + resourcePath);
+          lastUsedPath = node.get("location", null);
+        }
+      } catch (BackingStoreException e) {
+        e.printStackTrace();
+      }
+      if (lastUsedPath != null && lastUsedPath.length() > 0) {
+        File file = new File(lastUsedPath);
+        if (file.exists()) {
+            fileChooser.setSelectedFile(file);
+        }
+      }
+      }
+      return super.showOpenDialog(parent);
+    }
+
+    @Override
+    public void approveSelection() {
+      // Save the location of the file chooser for the current resource.
+      if (currentResourceClassName == null) { return; }
+      String resourcePath =
+        currentResourceClassName.replaceAll("\\.", "/");
+      Preferences node = null;
+      node = prefs.node("filechooserlocations/" + resourcePath);
+      try {
+        node.put("location", fileChooser.getSelectedFile().getCanonicalPath());
+      } catch (IOException e) {
+        e.printStackTrace();
+        return;
+      }
+      try {
+        prefs.flush();
+      } catch (BackingStoreException be) {
+        be.printStackTrace();
+        return;
+      }
+      super.approveSelection();
+    }
+
   }
 
   class ProgressBarUpdater implements Runnable {
