@@ -4,7 +4,6 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -201,20 +200,23 @@ public class Interpret {
 			return word;
 		}
 
+		return executeRHSes(rhses, word, category);
+	}
+
+	protected String executeRHSes(TreeSet rhses, String word, String category) {
     foundRule = false;
-    
     // rhses are in sorted order
     // we need to check if the word is compatible with pattern
-		Iterator rhsiter = rhses.iterator();
+    Iterator rhsiter = rhses.iterator();
     while (rhsiter.hasNext()){
       RHS r1 = (RHS) rhsiter.next();
       String answer = executeRHS(word, category, r1);
       if (foundRule) return answer;
     }
-		return word;
+    return word;
 	}
-
-	boolean foundRule = false;
+	
+	protected boolean foundRule = false;
 
 	private String executeRHS(String word, String category, RHS rhs) {
 		if (category.equals("*")) {
