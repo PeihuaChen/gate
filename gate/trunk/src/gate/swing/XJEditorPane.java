@@ -66,7 +66,7 @@ public class XJEditorPane extends JEditorPane {
             try {
               backUrls.addLast(getPage());
               forwardUrls.clear();
-              setPage(e.getURL());
+              setPage(e.getURL().toExternalForm());
             }catch (Throwable t){
               t.printStackTrace(Err.getPrintWriter());
             }
@@ -115,7 +115,7 @@ public class XJEditorPane extends JEditorPane {
 
   class BackAction extends AbstractAction{
     private BackAction() throws IOException{
-      super("Back", new ImageIcon(new URL("gate:/img/back")));
+      super("Back", MainFrame.getIcon("back"));
     }
 
     public void actionPerformed(ActionEvent e){

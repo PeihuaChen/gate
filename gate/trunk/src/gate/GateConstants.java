@@ -34,10 +34,6 @@ public interface GateConstants {
   public static final String
     ORIGINAL_MARKUPS_ANNOT_SET_NAME = "Original markups";
 
-  /** The option name for the last filechooser location. */
-  public static final String 
-    LAST_FILECHOOSER_LOCATION = "Last_filechooser_location";
-
   /** The look and feel option name*/
   public static final String LOOK_AND_FEEL = "Look_and_Feel";
 
@@ -189,4 +185,9 @@ public interface GateConstants {
    * Key used in resource features for hiding the resource fromthe GUI.
    */
   public static final String HIDDEN_FEATURE_KEY = "gate.HIDDEN"; 
+  
+  /**
+   * List of annotation rows to display in the central view of ANNIC GUI.
+   */
+  public static final String ANNIC_ANNOTATION_ROWS = "ANNIC_annotation_rows";
 } // GateConstants
