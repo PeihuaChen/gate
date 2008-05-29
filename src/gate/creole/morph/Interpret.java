@@ -218,7 +218,7 @@ public class Interpret {
 	
 	protected boolean foundRule = false;
 
-	private String executeRHS(String word, String category, RHS rhs) {
+	protected String executeRHS(String word, String category, RHS rhs) {
 		if (category.equals("*")) {
 			return executeRule(word, rhs);
 		} else if (rhs.isVerb() && vPat.matcher(category).matches()) {
