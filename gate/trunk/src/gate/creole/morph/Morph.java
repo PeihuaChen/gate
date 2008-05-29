@@ -37,27 +37,27 @@ public class Morph
 
 
   /** Document to be processed by the morpher, must be provided at Runtime. */
-  private gate.Document document;
+  protected gate.Document document;
 
   /** File which cotains rules to be processed */
-  private URL rulesFile;
+  protected URL rulesFile;
 
   /** Instance of BaseWord class - English Morpher */
-  private Interpret interpret;
+  protected Interpret interpret;
 
   /** Feature Name that should be displayed for the root word */
-  private String rootFeatureName;
+  protected String rootFeatureName;
 
   /** Feature Name that should be displayed for the affix */
-  private String affixFeatureName;
+  protected String affixFeatureName;
 
   /** The name of the annotation set used for input */
-  private String annotationSetName;
+  protected String annotationSetName;
 
   /** Boolean value that tells if parser should behave in caseSensitive mode */
-  private Boolean caseSensitive;
+  protected Boolean caseSensitive;
 
-  private Boolean considerPOSTag;
+  protected Boolean considerPOSTag;
 
   /** Default Constructor */
   public Morph() {
