@@ -26,6 +26,7 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.BadLocationException;
 
 import gate.*;
 import gate.event.*;
@@ -83,6 +84,11 @@ public class SearchAndAnnotatePanel extends JPanel {
    */
   protected JCheckBox searchRegExpChk;
   
+  /**
+   * Help button that gives predefined regular expressions.
+   */
+  protected JButton helpRegExpButton;
+
   /**
    * Checkbox for enabling case sensitive searching.
    */
@@ -160,11 +166,6 @@ public class SearchAndAnnotatePanel extends JPanel {
     // there will never be any selection in it so we force it
     getOwner().getTextComponent().requestFocusInWindow();
 
-    // put the selection of the document into the search text field
-    if (getOwner().getTextComponent().getSelectedText() != null) {
-      searchTextField.setText(getOwner().getTextComponent().getSelectedText());
-    }
-
     initListeners();
     
     content = getOwner().getDocument().getContent().toString();
@@ -177,7 +178,7 @@ public class SearchAndAnnotatePanel extends JPanel {
    * _                    _        _          _         _
    * V Search & Annotate |_| Case |_| Regexp |_| Whole |_| Highlights
    *  _______________________________________________
-   * |V_Searched_Expression__________________________|
+   * |V_Searched_Expression__________________________| |?|
    * 
    * |First| |Prev.| |Next| |Annotate| |Ann. all next|
    */
@@ -217,9 +218,7 @@ public class SearchAndAnnotatePanel extends JPanel {
     hBox.add(searchCaseSensChk);
     hBox.add(Box.createHorizontalStrut(5));
       searchRegExpChk = new JCheckBox("Regexp", false);
-      searchRegExpChk.setToolTipText(
-        "<html>Regular expression search."+
-        "<br>See java.util.regex.Pattern.</html>");
+      searchRegExpChk.setToolTipText("Regular expression search.");
       searchRegExpChk.setBackground(color);
     hBox.add(searchRegExpChk);
     hBox.add(Box.createHorizontalStrut(5));
@@ -246,7 +245,7 @@ public class SearchAndAnnotatePanel extends JPanel {
       hBox.setBorder(BorderFactory.createEmptyBorder(3, 0, 5, 0));
       hBox.add(Box.createHorizontalStrut(5));
         searchTextField = new JTextField(10);
-        searchTextField.setToolTipText("Searched expression.");
+        searchTextField.setToolTipText("Enter an expression to search for.");
         //disallow vertical expansion
         searchTextField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 
             searchTextField.getPreferredSize().height));
@@ -256,6 +255,201 @@ public class SearchAndAnnotatePanel extends JPanel {
           }
         });
       hBox.add(searchTextField);
+      hBox.add(Box.createHorizontalStrut(2));
+      helpRegExpButton = new JButton("?");
+      helpRegExpButton.setMargin(new Insets(0, 2, 0, 2));
+      helpRegExpButton.setToolTipText("Predefined search expressions.");
+      helpRegExpButton.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent arg0) {
+            String[] possibleValues = {
+              "--New search expression--",
+              "Number",
+              "Person",
+              "--Insert at the caret position--",
+              "Any character",
+              "The beginning of a line",
+              "The end of a line",
+              "All letters",
+              "Letter uppercase",
+              "Letter lowercase",
+              "Letter titlecase",
+              "Letter modifier",
+              "Letter other",
+              "All Numbers",
+              "Number decimal digit",
+              "Number letter",
+              "Number other",
+              "All punctuations",
+              "Punctuation connector",
+              "Punctuation dash",
+              "Punctuation open",
+              "Punctuation close",
+              "Punctuation initial quote",
+              "Punctuation final quote",
+              "Punctuation other",
+              "All symbols",
+              "Symbol math",
+              "Symbol currency",
+              "Symbol modifier",
+              "Symbol other",
+              "All separators",
+              "Separator space",
+              "Separator line",
+              "Separator paragraph",
+              "All Marks",
+              "Mark nonspacing",
+              "Mark spacing combining",
+              "Mark enclosing",
+              "All others",
+              "Other control",
+              "Other format",
+              "Other surrogate",
+              "Other private use",
+              "Other not assigned",
+              "Any character except Category (negation)",
+              "Category1 and/or Category2 (union)",
+              "Category1 and Category2 (intersection)",
+              "--Modify the selection--",
+              "Either the selection or X",
+              "Once or not at all",
+              "Zero or more times",
+              "One or more times",
+              "Capturing group, used when annotating",
+              "Non-capturing group"
+            };
+            String selectedValue = (String)JOptionPane.showInputDialog(
+              gate.gui.MainFrame.getInstance(), "<html>"+
+              "Choose a predefined search expression:"+
+              "</html>", "GATE",
+              JOptionPane.QUESTION_MESSAGE, null,
+              possibleValues, possibleValues[0]);
+            if (selectedValue == null || selectedValue.startsWith("-")) {
+              return;
+            } else {
+              searchCaseSensChk.setSelected(true);
+              searchRegExpChk.setSelected(true);
+              searchWholeWordsChk.setSelected(false);
+            }
+            int p = searchTextField.getCaretPosition();
+            int s1 = searchTextField.getSelectionStart();
+            int s2 = searchTextField.getSelectionEnd();
+            try {
+            if (selectedValue.equals("Number")) {
+              searchTextField.setText("\\b[\\p{N}][\\p{N},.]*\\b");
+            } else if (selectedValue.equals("Person")) {
+              searchTextField.setText("\\p{Lu}\\p{L}+, \\p{Lu}\\.(?: \\p{Lu}\\.)*");
+            } else if (selectedValue.equals("Either the selection or X")) {
+              searchTextField.getDocument().insertString(s1, "(?:", null);
+              searchTextField.getDocument().insertString(s2+3, ")|(?:X)", null);
+            } else if (selectedValue.equals("Once or not at all")) {
+              searchTextField.getDocument().insertString(s1, "(?:", null);
+              searchTextField.getDocument().insertString(s2+3, ")?", null);
+            } else if (selectedValue.equals("Zero or more times")) {
+              searchTextField.getDocument().insertString(s1, "(?:", null);
+              searchTextField.getDocument().insertString(s2+3, ")*", null);
+            } else if (selectedValue.equals("One or more times")) {
+              searchTextField.getDocument().insertString(s1, "(?:", null);
+              searchTextField.getDocument().insertString(s2+3, ")+", null);
+            } else if (selectedValue.equals("Capturing group, used when annotating")) {
+              searchTextField.getDocument().insertString(s1, "(?:", null);
+              searchTextField.getDocument().insertString(s2+3, ")", null);
+            } else if (selectedValue.equals("Non-capturing group")) {
+              searchTextField.getDocument().insertString(s1, "(?:", null);
+              searchTextField.getDocument().insertString(s2+3, ")", null);
+            } else if (selectedValue.equals("Any character")) {
+              searchTextField.getDocument().insertString(p, ".", null);
+            } else if (selectedValue.equals("The beginning of a line")) {
+              searchTextField.getDocument().insertString(p, "^", null);
+            } else if (selectedValue.equals("The end of a line")) {
+              searchTextField.getDocument().insertString(p, "$", null);
+            } else if (selectedValue.equals("Any character except Category")) {
+              searchTextField.getDocument().insertString(p, "\\P{Category}", null);
+            } else if (selectedValue.equals("Category1 and/or Category2")) {
+              searchTextField.getDocument().insertString(p, "[\\p{Category1}\\p{Category2}]", null);
+            } else if (selectedValue.equals("Category1 and Category2")) {
+              searchTextField.getDocument().insertString(p, "[\\p{Category1}&&\\p{Category2}]", null);
+            } else if (selectedValue.equals("All letters")) {
+              searchTextField.getDocument().insertString(p, "\\p{L}", null);
+            } else if (selectedValue.equals("Letter uppercase")) {
+              searchTextField.getDocument().insertString(p, "\\p{Lu}", null);
+            } else if (selectedValue.equals("Letter lowercase")) {
+              searchTextField.getDocument().insertString(p, "\\p{Ll}", null);
+            } else if (selectedValue.equals("Letter titlecase")) {
+              searchTextField.getDocument().insertString(p, "\\p{Lt}", null);
+            } else if (selectedValue.equals("Letter modifier")) {
+              searchTextField.getDocument().insertString(p, "\\p{Lm}", null);
+            } else if (selectedValue.equals("Letter other")) {
+              searchTextField.getDocument().insertString(p, "\\p{Lo}", null);
+            } else if (selectedValue.equals("All Marks")) {
+              searchTextField.getDocument().insertString(p, "\\p{M}", null);
+            } else if (selectedValue.equals("Mark nonspacing")) {
+              searchTextField.getDocument().insertString(p, "\\p{Mn}", null);
+            } else if (selectedValue.equals("Mark spacing combining")) {
+              searchTextField.getDocument().insertString(p, "\\p{Mc}", null);
+            } else if (selectedValue.equals("Mark enclosing")) {
+              searchTextField.getDocument().insertString(p, "\\p{Me}", null);
+            } else if (selectedValue.equals("All Numbers")) {
+              searchTextField.getDocument().insertString(p, "\\p{N}", null);
+            } else if (selectedValue.equals("Number decimal digit")) {
+              searchTextField.getDocument().insertString(p, "\\p{Nd}", null);
+            } else if (selectedValue.equals("Number letter")) {
+              searchTextField.getDocument().insertString(p, "\\p{Nl}", null);
+            } else if (selectedValue.equals("Number other")) {
+              searchTextField.getDocument().insertString(p, "\\p{No}", null);
+            } else if (selectedValue.equals("All separators")) {
+              searchTextField.getDocument().insertString(p, "\\p{Z}", null);
+            } else if (selectedValue.equals("Separator space")) {
+              searchTextField.getDocument().insertString(p, "\\p{Zs}", null);
+            } else if (selectedValue.equals("Separator line")) {
+              searchTextField.getDocument().insertString(p, "\\p{Zl}", null);
+            } else if (selectedValue.equals("Separator paragraph")) {
+              searchTextField.getDocument().insertString(p, "\\p{Zp}", null);
+            } else if (selectedValue.equals("All others")) {
+              searchTextField.getDocument().insertString(p, "\\p{C}", null);
+            } else if (selectedValue.equals("Other control")) {
+              searchTextField.getDocument().insertString(p, "\\p{Cc}", null);
+            } else if (selectedValue.equals("Other format")) {
+              searchTextField.getDocument().insertString(p, "\\p{Cf}", null);
+            } else if (selectedValue.equals("Other surrogate")) {
+              searchTextField.getDocument().insertString(p, "\\p{Cs}", null);
+            } else if (selectedValue.equals("Other private use")) {
+              searchTextField.getDocument().insertString(p, "\\p{Co}", null);
+            } else if (selectedValue.equals("Other not assigned")) {
+              searchTextField.getDocument().insertString(p, "\\p{Cn}", null);
+            } else if (selectedValue.equals("All punctuations")) {
+              searchTextField.getDocument().insertString(p, "\\p{P}", null);
+            } else if (selectedValue.equals("Punctuation connector")) {
+              searchTextField.getDocument().insertString(p, "\\p{Pc}", null);
+            } else if (selectedValue.equals("Punctuation dash")) {
+              searchTextField.getDocument().insertString(p, "\\p{Pd}", null);
+            } else if (selectedValue.equals("Punctuation open")) {
+              searchTextField.getDocument().insertString(p, "\\p{Ps}", null);
+            } else if (selectedValue.equals("Punctuation close")) {
+              searchTextField.getDocument().insertString(p, "\\p{Pe}", null);
+            } else if (selectedValue.equals("Punctuation initial quote")) {
+              searchTextField.getDocument().insertString(p, "\\p{Pi}", null);
+            } else if (selectedValue.equals("Punctuation final quote")) {
+              searchTextField.getDocument().insertString(p, "\\p{Pf}", null);
+            } else if (selectedValue.equals("Punctuation other")) {
+              searchTextField.getDocument().insertString(p, "\\p{Po}", null);
+            } else if (selectedValue.equals("All symbols")) {
+              searchTextField.getDocument().insertString(p, "\\p{S}", null);
+            } else if (selectedValue.equals("Symbol math")) {
+              searchTextField.getDocument().insertString(p, "\\p{Sm}", null);
+            } else if (selectedValue.equals("Symbol currency")) {
+              searchTextField.getDocument().insertString(p, "\\p{Sc}", null);
+            } else if (selectedValue.equals("Symbol modifier")) {
+              searchTextField.getDocument().insertString(p, "\\p{Sk}", null);
+            } else if (selectedValue.equals("Symbol other")) {
+              searchTextField.getDocument().insertString(p, "\\p{So}", null);
+            }
+            } catch (BadLocationException e) {
+              // should never happend
+              throw new LuckyException(e);
+            }
+          }
+        });
+      hBox.add(helpRegExpButton);
       hBox.add(Box.createHorizontalGlue());
     searchPane.add(hBox);
       hBox = Box.createHorizontalBox();
@@ -301,13 +495,13 @@ public class SearchAndAnnotatePanel extends JPanel {
             //annotation
             String searchText = searchTextField.getText(); 
             if (searchText == null || searchText.trim().length() == 0) {
-              if (getAnnotationEditor().getAnnotationCurrentlyEdited() != null
+              if (annotationEditor.getAnnotationCurrentlyEdited() != null
                 && getOwner() != null) {
                 String annText = getOwner().getDocument().getContent().
                     toString().substring(
-                      getAnnotationEditor().getAnnotationCurrentlyEdited()
+                      annotationEditor.getAnnotationCurrentlyEdited()
                         .getStartNode().getOffset().intValue(),
-                      getAnnotationEditor().getAnnotationCurrentlyEdited()
+                      annotationEditor.getAnnotationCurrentlyEdited()
                         .getEndNode().getOffset().intValue());
                 searchTextField.setText(annText);
               }
@@ -321,7 +515,7 @@ public class SearchAndAnnotatePanel extends JPanel {
           searchHighlightsChk.setVisible(true);
           searchTextField.requestFocusInWindow();
           searchTextField.selectAll();
-          getAnnotationEditorWindow().pack();
+          annotationEditorWindow.pack();
           annotationEditor.setPinnedMode(true);
 
         } else {
@@ -332,7 +526,7 @@ public class SearchAndAnnotatePanel extends JPanel {
             searchRegExpChk.setVisible(false);
             searchWholeWordsChk.setVisible(false);
             searchHighlightsChk.setVisible(false);
-            getAnnotationEditorWindow().pack();
+            annotationEditorWindow.pack();
           }
         }
       }
@@ -340,7 +534,10 @@ public class SearchAndAnnotatePanel extends JPanel {
 
     this.addAncestorListener(new AncestorListener() {
       public void ancestorAdded(AncestorEvent event) {
-        // do nothing
+        // put the selection of the document into the search text field
+        if (getOwner().getTextComponent().getSelectedText() != null) {
+          searchTextField.setText(getOwner().getTextComponent().getSelectedText());
+        }
       }
       public void ancestorRemoved(AncestorEvent event) {
         // if the editor window is closed
@@ -400,6 +597,20 @@ public class SearchAndAnnotatePanel extends JPanel {
     }
   }
 
+  private boolean isAnnotationEditorReady() {
+    if (!annotationEditor.editingFinished()
+     || getOwner() == null
+     || annotationEditor.getAnnotationCurrentlyEdited() == null
+     || annotationEditor.getAnnotationSetCurrentlyEdited() == null) {
+      JOptionPane.showMessageDialog(annotationEditorWindow,
+        "Please set all required features first.", "GATE",
+        JOptionPane.INFORMATION_MESSAGE);
+      return false;
+    } else {
+      return true; 
+    }
+  }
+
   protected class FindFirstAction extends AbstractAction{
 
     private static final long serialVersionUID = 1L;
@@ -411,13 +622,7 @@ public class SearchAndAnnotatePanel extends JPanel {
     }
 
     public void actionPerformed(ActionEvent evt){
-      if(getOwner() == null) { return; }
-      if (!annotationEditor.editingFinished()) {
-        JOptionPane.showMessageDialog(getAnnotationEditorWindow(),
-          "Please set all required features first.", "GATE",
-          JOptionPane.INFORMATION_MESSAGE);
-        return;
-      }
+      if (!isAnnotationEditorReady()) { return; }
       annotationEditor.setPinnedMode(true);
       String patternText = searchTextField.getText();
       Pattern pattern = null;
@@ -437,16 +642,17 @@ public class SearchAndAnnotatePanel extends JPanel {
       } catch(PatternSyntaxException e) {
         // FIXME: put this error dialog in front of the editor dialog
         // when the dialog is a JWindow
-//        getAnnotationEditorWindow().setAlwaysOnTop(false);
-//          getAnnotationEditorWindow().toBack();
+//        annotationEditorWindow.setAlwaysOnTop(false);
+//          annotationEditorWindow.toBack();
         JOptionPane errorOptionsPane = new JOptionPane(
                 "Invalid pattern!\n" + e.toString(),
                 JOptionPane.ERROR_MESSAGE);
         JDialog errorDialog = errorOptionsPane
-                .createDialog(getAnnotationEditorWindow(), "GATE");
+                .createDialog(annotationEditorWindow, "GATE");
 //          errorDialog.setAlwaysOnTop(true);
         errorDialog.setVisible(true);
 //          errorDialog.toFront();
+        return;
       }
 
       matcher = pattern.matcher(content);
@@ -455,8 +661,8 @@ public class SearchAndAnnotatePanel extends JPanel {
       int end = -1;
       nextMatchStartsFrom = 0;
       while (matcher.find(nextMatchStartsFrom) && !found) {
-        start = matcher.start();
-        end = matcher.end();
+        start = (matcher.groupCount()>0)?matcher.start(1):matcher.start();
+        end = (matcher.groupCount()>0)?matcher.end(1):matcher.end();
         found = false;
         if (searchHighlightsChk.isSelected()) {
           javax.swing.text.Highlighter.Highlight[] highlights =
@@ -483,7 +689,7 @@ public class SearchAndAnnotatePanel extends JPanel {
         v.add(new Integer(end));
         matchedIndexes.add(v);
         getOwner().getTextComponent().select(start, end);
-        getAnnotationEditor().placeDialog(start, end);
+        annotationEditor.placeDialog(start, end);
 
       } else {
         // no match found
@@ -505,12 +711,7 @@ public class SearchAndAnnotatePanel extends JPanel {
     }
 
     public void actionPerformed(ActionEvent evt) {
-      if (!annotationEditor.editingFinished()) {
-        JOptionPane.showMessageDialog(getAnnotationEditorWindow(),
-          "Please set all required features first.", "GATE",
-          JOptionPane.INFORMATION_MESSAGE);
-        return;
-      }
+      if (!isAnnotationEditorReady()) { return; }
       // the first time we invoke previous action we want to go two
       // previous matches back not just one
       matchedIndexes.removeLast();
@@ -524,7 +725,7 @@ public class SearchAndAnnotatePanel extends JPanel {
       int start = (v.firstElement()).intValue();
       int end = (v.lastElement()).intValue();
       getOwner().getTextComponent().select(start, end);
-      getAnnotationEditor().placeDialog(start, end);
+      annotationEditor.placeDialog(start, end);
       // reset the matcher for the next FindNextAction
       nextMatchStartsFrom = start;
       findNextAction.setEnabled(true);
@@ -543,20 +744,15 @@ public class SearchAndAnnotatePanel extends JPanel {
     }
 
     public void actionPerformed(ActionEvent evt){
-      if (!annotationEditor.editingFinished()) {
-        JOptionPane.showMessageDialog(getAnnotationEditorWindow(),
-          "Please set all required features first.", "GATE",
-          JOptionPane.INFORMATION_MESSAGE);
-        return;
-      }
+      if (!isAnnotationEditorReady()) { return; }
       boolean found = false;
       int start = -1;
       int end = -1;
       nextMatchStartsFrom = getOwner().getTextComponent().getCaretPosition();
 
       while (matcher.find(nextMatchStartsFrom) && !found) {
-        start = matcher.start();
-        end = matcher.end();
+        start = (matcher.groupCount()>0)?matcher.start(1):matcher.start();
+        end = (matcher.groupCount()>0)?matcher.end(1):matcher.end();
         found = false;
         if (searchHighlightsChk.isSelected()) {
           javax.swing.text.Highlighter.Highlight[] highlights =
@@ -579,7 +775,7 @@ public class SearchAndAnnotatePanel extends JPanel {
         v.add(new Integer(end));
         matchedIndexes.add(v);
         getOwner().getTextComponent().select(start, end);
-        getAnnotationEditor().placeDialog(start, end);
+        annotationEditor.placeDialog(start, end);
         findPreviousAction.setEnabled(true);
       } else {
         //no more matches possible
@@ -600,31 +796,24 @@ public class SearchAndAnnotatePanel extends JPanel {
     }
     
     public void actionPerformed(ActionEvent evt){
-      if (!annotationEditor.editingFinished()) {
-        JOptionPane.showMessageDialog(getAnnotationEditorWindow(),
-          "Please set all required features first.", "GATE",
-          JOptionPane.INFORMATION_MESSAGE);
-        return;
-      }
+      if (!isAnnotationEditorReady()) { return; }
       int start = getOwner().getTextComponent().getSelectionStart();
       int end = getOwner().getTextComponent().getSelectionEnd();
       FeatureMap features = Factory.newFeatureMap();
-      if(getAnnotationEditor().getAnnotationCurrentlyEdited().getFeatures() != null) 
-        features.putAll(getAnnotationEditor().getAnnotationCurrentlyEdited().getFeatures());
+      if(annotationEditor.getAnnotationCurrentlyEdited().getFeatures() != null) 
+        features.putAll(annotationEditor.getAnnotationCurrentlyEdited().getFeatures());
       try {
-        Integer id =
-          getAnnotationEditor().getAnnotationSetCurrentlyEdited().add(
-             new Long(start), new Long(end), 
-             getAnnotationEditor().getAnnotationCurrentlyEdited().getType(),
-             features);
+        Integer id = annotationEditor.getAnnotationSetCurrentlyEdited().add(
+          new Long(start), new Long(end), 
+          annotationEditor.getAnnotationCurrentlyEdited().getType(), features);
         Annotation newAnn =
-          getAnnotationEditor().getAnnotationSetCurrentlyEdited().get(id);
+          annotationEditor.getAnnotationSetCurrentlyEdited().get(id);
         getOwner().getTextComponent().select(end, end);
-        getAnnotationEditor().editAnnotation(newAnn,
-           getAnnotationEditor().getAnnotationSetCurrentlyEdited());
+        annotationEditor.editAnnotation(newAnn,
+           annotationEditor.getAnnotationSetCurrentlyEdited());
         annotateAllMatchesAction.setEnabled(true);
         if (annotateAllMatchesSmallButton.getAction()
-                .equals(undoAnnotateAllMatchesAction)) {
+              .equals(undoAnnotateAllMatchesAction)) {
           annotateAllMatchesSmallButton.setAction(annotateAllMatchesAction);
         }
       }
@@ -646,12 +835,7 @@ public class SearchAndAnnotatePanel extends JPanel {
     }
 
     public void actionPerformed(ActionEvent evt){
-      if (!annotationEditor.editingFinished()) {
-        JOptionPane.showMessageDialog(getAnnotationEditorWindow(),
-          "Please set all required features first.", "GATE",
-          JOptionPane.INFORMATION_MESSAGE);
-        return;
-      }
+      if (!isAnnotationEditorReady()) { return; }
       annotateAllAnnotationsID = new LinkedList<Annotation>();
       boolean found = false;
       int start = -1;
@@ -662,8 +846,8 @@ public class SearchAndAnnotatePanel extends JPanel {
       do {
       found = false;
       while (matcher.find(nextMatchStartsFrom) && !found) {
-        start = matcher.start();
-        end = matcher.end();
+        start = (matcher.groupCount()>0)?matcher.start(1):matcher.start();
+        end = (matcher.groupCount()>0)?matcher.end(1):matcher.end();
         if (searchHighlightsChk.isSelected()) {
           javax.swing.text.Highlighter.Highlight[] highlights =
             getOwner().getTextComponent().getHighlighter().getHighlights();
@@ -688,15 +872,15 @@ public class SearchAndAnnotatePanel extends JPanel {
     private void annotateCurrentMatch(int start, int end){
         FeatureMap features = Factory.newFeatureMap();
         features.put("safe.regex", "true");
-        if(getAnnotationEditor().getAnnotationCurrentlyEdited().getFeatures() != null) 
-          features.putAll(getAnnotationEditor().getAnnotationCurrentlyEdited().getFeatures());
+        if(annotationEditor.getAnnotationCurrentlyEdited().getFeatures() != null) 
+          features.putAll(annotationEditor.getAnnotationCurrentlyEdited().getFeatures());
         try {
-          Integer id = getAnnotationEditor().getAnnotationSetCurrentlyEdited().add(
+          Integer id = annotationEditor.getAnnotationSetCurrentlyEdited().add(
             new Long(start), new Long(end), 
-            getAnnotationEditor().getAnnotationCurrentlyEdited().getType(),
+            annotationEditor.getAnnotationCurrentlyEdited().getType(),
             features);
           Annotation newAnn =
-            getAnnotationEditor().getAnnotationSetCurrentlyEdited().get(id);
+            annotationEditor.getAnnotationSetCurrentlyEdited().get(id);
           annotateAllAnnotationsID.add(newAnn);
         }
         catch(InvalidOffsetException e) {
@@ -723,11 +907,11 @@ public class SearchAndAnnotatePanel extends JPanel {
 
       Iterator<Annotation> it = annotateAllAnnotationsID.iterator();
       while (it.hasNext()) {
-        getAnnotationEditor().getAnnotationSetCurrentlyEdited().remove(it.next());
+        annotationEditor.getAnnotationSetCurrentlyEdited().remove(it.next());
       }
 
       // just hide the editor to avoid editing null annotation
-      getAnnotationEditorWindow().setVisible(false);
+      annotationEditorWindow.setVisible(false);
       annotationEditor.setPinnedMode(false);
 
       annotateAllMatchesSmallButton.setAction(annotateAllMatchesAction);
@@ -752,21 +936,7 @@ public class SearchAndAnnotatePanel extends JPanel {
    * @return the owner
    */
   public AnnotationEditorOwner getOwner() {
-    return getAnnotationEditor().getOwner();
-  }
-
-  /**
-   * @return the annotation editor
-   */
-  public AnnotationEditor getAnnotationEditor() {
-    return annotationEditor;
-  }
-
-  /**
-   * @return The annotation editor window.
-   */
-  public Window getAnnotationEditorWindow() {
-    return annotationEditorWindow;
+    return annotationEditor.getOwner();
   }
 
 }
