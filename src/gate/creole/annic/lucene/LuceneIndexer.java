@@ -95,9 +95,15 @@ public class LuceneIndexer implements Indexer {
 
     String baseTokenAnnotationType = (String)parameters
             .get(Constants.BASE_TOKEN_ANNOTATION_TYPE);
+    if(baseTokenAnnotationType.indexOf(".") > -1 || baseTokenAnnotationType.indexOf("=") > -1
+        || baseTokenAnnotationType.indexOf(";") > -1 || baseTokenAnnotationType.indexOf(",") > -1) {
+      throw new IndexException(
+      "Base token annotation type cannot have '.' , '=', ',' or ';; in it");
+    }
+    
     String indexUnitAnnotationType = (String)parameters
             .get(Constants.INDEX_UNIT_ANNOTATION_TYPE);
-
+    
     if(DEBUG) {
       System.out.println("BTAT : " + baseTokenAnnotationType);
       System.out.println("IUAT : " + indexUnitAnnotationType);
