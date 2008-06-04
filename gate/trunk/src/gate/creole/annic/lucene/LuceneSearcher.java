@@ -533,7 +533,7 @@ public class LuceneSearcher implements Searcher {
                   String [] features = indexedFeatures.split(";");
                   for(String aFeature : features) {
                     // AnnotationType.FeatureName
-                    int index = aFeature.lastIndexOf(".");
+                    int index = aFeature.indexOf(".");
                     if(index == -1) {
                       continue;
                     }
