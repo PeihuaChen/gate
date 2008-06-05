@@ -157,6 +157,13 @@ public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
                              document.getAnnotations(outputASName);
     
     String docText = document.getContent().toString();
+    
+    /* If the document's content is empty or contains only whitespace,
+     * we drop out right here, since there's nothing to sentence-split.     */
+    if (docText.trim().length() < 1)  {
+      return;
+    }
+    
     Matcher internalSplitMatcher = internalSplitsPattern.matcher(docText);
     Matcher externalSplitMatcher = externalSplitsPattern.matcher(docText);
 
