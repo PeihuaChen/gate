@@ -1,9 +1,16 @@
 package gate.stanford;
 
+import java.io.Serializable;
+
 /**
  * Simple class representing a single dependency relation.
  */
-public class DependencyRelation {
+public class DependencyRelation implements Serializable {
+  /**
+   * Serial version UID.
+   */
+  private static final long serialVersionUID = -7842607116149222052L;
+
   /**
    * The type of the dependency relation (det, amod, etc.).
    */
