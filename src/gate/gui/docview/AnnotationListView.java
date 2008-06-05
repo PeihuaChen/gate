@@ -438,7 +438,7 @@ public class AnnotationListView extends AbstractDocumentView
     }
 
     public int getColumnCount(){
-      return 5;
+      return 6;
     }
 
     public String getColumnName(int column){
@@ -447,6 +447,7 @@ public class AnnotationListView extends AbstractDocumentView
         case SET_COL: return "Set";
         case START_COL: return "Start";
         case END_COL: return "End";
+        case ID_COL: return "Id";
         case FEATURES_COL: return "Features";
         default: return "?";
       }
@@ -458,6 +459,7 @@ public class AnnotationListView extends AbstractDocumentView
         case SET_COL: return String.class;
         case START_COL: return Long.class;
         case END_COL: return Long.class;
+        case ID_COL: return Integer.class;
         case FEATURES_COL: return String.class;
         default: return String.class;
       }
@@ -475,6 +477,7 @@ public class AnnotationListView extends AbstractDocumentView
         case SET_COL: return aData.getAnnotationSet().getName();
         case START_COL: return aData.getAnnotation().getStartNode().getOffset();
         case END_COL: return aData.getAnnotation().getEndNode().getOffset();
+        case ID_COL: return aData.getAnnotation().getId();
         case FEATURES_COL:
           //sort the features by name
           FeatureMap features = aData.getAnnotation().getFeatures();
@@ -572,6 +575,7 @@ public class AnnotationListView extends AbstractDocumentView
   private static final int SET_COL = 1;
   private static final int START_COL = 2;
   private static final int END_COL = 3;
-  private static final int FEATURES_COL = 4;
+  private static final int ID_COL = 4;
+  private static final int FEATURES_COL = 5;
 
 }
