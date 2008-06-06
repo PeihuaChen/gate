@@ -185,11 +185,23 @@ public class NekoHtmlDocumentFormat extends HtmlDocumentFormat {
                         .getSourceUrl().toString());
       }
 
+      /* The following line can forward an
+       * ArrayIndexOutOfBoundsException from
+       * org.cyberneko.html.HTMLConfiguration.parse and crash GATE.    */ 
       parser.parse(is);
       // Angel - end
       ((DocumentImpl)doc).setNextAnnotationId(handler.getCustomObjectsId());
     }
-    catch(XNIException e) {
+
+    /* Handle IOException specially.      */
+    catch(IOException e) {
+      throw new DocumentFormatException("I/O exception for "
+              + doc.getSourceUrl().toString(), e);
+    }
+    
+    /* Handle XNIException and ArrayIndexOutOfBoundsException:
+     * flag the parsing error and keep going.     */
+    catch(Exception e) {
       doc.getFeatures().put("parsingError", Boolean.TRUE);
 
       Boolean bThrow =
@@ -207,10 +219,6 @@ public class NekoHtmlDocumentFormat extends HtmlDocumentFormat {
         e.printStackTrace(Out.getPrintWriter());
       } // if
 
-    }
-    catch(IOException e) {
-      throw new DocumentFormatException("I/O exception for "
-              + doc.getSourceUrl().toString(), e);
     }
     finally {
       if(handler != null) handler.removeStatusListener(statusListener);
