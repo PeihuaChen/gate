@@ -2,13 +2,18 @@ package gate.alignment.gui;
 
 import java.util.*;
 import java.util.List;
+import java.util.Timer;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.MouseInputAdapter;
+import javax.swing.table.DefaultTableModel;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.io.BufferedReader;
@@ -21,6 +26,9 @@ import java.net.URL;
 
 import gate.*;
 import gate.alignment.*;
+import gate.alignment.gui.actions.impl.AlignAction;
+import gate.alignment.gui.actions.impl.RemoveAlignmentAction;
+import gate.alignment.gui.actions.impl.ResetAction;
 import gate.compound.CompoundDocument;
 import gate.creole.*;
 import gate.gui.MainFrame;
@@ -41,6 +49,8 @@ public class AlignmentEditor extends AbstractVisualResource implements
   private static final String ACTIONS_CONFIG_FILE = "actions.conf";
 
   private JPanel mainPanel, paramPanel, waPanel;
+
+  private JPanel propertiesPanel;
 
   private JComboBox sourceDocumentId;
 
@@ -84,7 +94,9 @@ public class AlignmentEditor extends AbstractVisualResource implements
 
   private List<Annotation> targetLatestAnnotationsSelection;
 
-  private Color color, unitColor;
+  private List<AlignmentAction> allActions;
+
+  private Color color;
 
   private ColorGenerator colorGenerator = new ColorGenerator();
 
@@ -98,6 +110,14 @@ public class AlignmentEditor extends AbstractVisualResource implements
 
   private AlignmentEditor thisInstance = null;
 
+  private AlignAction alignAction = null;
+
+  private HashMap<AlignmentAction, PropertyActionCB> actionsCBMap = null;
+
+  private RemoveAlignmentAction removeAlignmentAction = null;
+
+  private List<PreDisplayAction> preDisplayActions = null;
+
   /*
    * (non-Javadoc)
    * 
@@ -106,12 +126,14 @@ public class AlignmentEditor extends AbstractVisualResource implements
   public Resource init() throws ResourceInstantiationException {
     sourceHighlights = new HashMap<Annotation, AnnotationHighlight>();
     targetHighlights = new HashMap<Annotation, AnnotationHighlight>();
-
+    actionsCBMap = new HashMap<AlignmentAction, PropertyActionCB>();
     sourceLatestAnnotationsSelection = new ArrayList<Annotation>();
     targetLatestAnnotationsSelection = new ArrayList<Annotation>();
 
     actions = new HashMap<JMenuItem, AlignmentAction>();
     actionsMenuItemByCaption = new HashMap<String, JMenuItem>();
+    allActions = new ArrayList<AlignmentAction>();
+    preDisplayActions = new ArrayList<PreDisplayAction>();
 
     ResourceData myResourceData = (ResourceData)Gate.getCreoleRegister().get(
             this.getClass().getName());
@@ -130,6 +152,11 @@ public class AlignmentEditor extends AbstractVisualResource implements
       throw new GateRuntimeException(use);
     }
 
+    readAction(new ResetAction());
+    alignAction = new AlignAction();
+    readAction(alignAction);
+    removeAlignmentAction = new RemoveAlignmentAction();
+    readAction(removeAlignmentAction);
     readActions(actionsConfFile);
     thisInstance = this;
     return this;
@@ -150,18 +177,30 @@ public class AlignmentEditor extends AbstractVisualResource implements
     targetDocumentId = new JComboBox(new DefaultComboBoxModel());
     targetDocumentId.setEditable(false);
 
-    sourceDocumentId.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent ae) {
+//    sourceDocumentId.addActionListener(new ActionListener() {
+//      public void actionPerformed(ActionEvent ae) {
+//        populateAS((String)sourceDocumentId.getSelectedItem(), sourceASName);
+//      }
+//    });
+    
+    sourceDocumentId.addItemListener(new ItemListener() {
+      public void itemStateChanged(ItemEvent ie) {
         populateAS((String)sourceDocumentId.getSelectedItem(), sourceASName);
       }
     });
 
-    targetDocumentId.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent ae) {
+//    targetDocumentId.addActionListener(new ActionListener() {
+//      public void actionPerformed(ActionEvent ae) {
+//        populateAS((String)targetDocumentId.getSelectedItem(), targetASName);
+//      }
+//    });
+
+    targetDocumentId.addItemListener(new ItemListener() {
+      public void itemStateChanged(ItemEvent ie) {
         populateAS((String)targetDocumentId.getSelectedItem(), targetASName);
       }
     });
-
+    
     sourceASName = new JComboBox(new DefaultComboBoxModel());
     sourceASName.setPrototypeDisplayValue("AnnotationSetName");
     sourceASName.addActionListener(new ActionListener() {
@@ -319,14 +358,46 @@ public class AlignmentEditor extends AbstractVisualResource implements
     linesCanvas.setPreferredSize(new Dimension(200, 50));
     linesCanvas.setOpaque(true);
 
+    propertiesPanel = new JPanel();
+    propertiesPanel.setLayout(new BoxLayout(propertiesPanel, BoxLayout.Y_AXIS));
+    JScrollPane pane = new JScrollPane(propertiesPanel);
+    propertiesPanel.add(new JLabel("Options"));
+    propertiesPanel.add(Box.createGlue());
+
     waPanel.add(sourcePanel, BorderLayout.NORTH);
     waPanel.add(targetPanel, BorderLayout.SOUTH);
     waPanel.add(linesCanvas, BorderLayout.CENTER);
+    JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+    JPanel waParentPanel = new JPanel(new BorderLayout());
+    JScrollPane scrollPane = new JScrollPane(waPanel);
+    scrollPane.setPreferredSize(new Dimension(800, 200));
 
-    mainPanel.add(new JScrollPane(waPanel), BorderLayout.CENTER);
+    waParentPanel.add(scrollPane, BorderLayout.CENTER);
+    splitPane.add(waParentPanel);
+    splitPane.add(pane);
+    mainPanel.add(splitPane, BorderLayout.CENTER);
     this.setLayout(new BorderLayout());
     this.add(mainPanel, BorderLayout.CENTER);
     color = getColor(null);
+    splitPane.setDividerLocation(0.8);
+    splitPane.revalidate();
+    splitPane.updateUI();
+  }
+
+  public String getSourceParentOfUnitOfAlignment() {
+    return sourceParentOfUnitOfAlignment.getSelectedItem().toString();
+  }
+
+  public String getTargetParentOfUnitOfAlignment() {
+    return targetParentOfUnitOfAlignment.getSelectedItem().toString();
+  }
+
+  public String getSourceUnitOfAlignment() {
+    return sourceUnitOfAlignment.getSelectedItem().toString();
+  }
+
+  public String getTargetUnitOfAlignment() {
+    return targetUnitOfAlignment.getSelectedItem().toString();
   }
 
   public String getSourceDocumentId() {
@@ -442,7 +513,12 @@ public class AlignmentEditor extends AbstractVisualResource implements
             .toArray(new String[0]));
     boxToPopulate.setModel(dcbm);
     if(!annotTypes.isEmpty()) {
-      boxToPopulate.setSelectedIndex(0);
+      if(dcbm.getIndexOf("Sentence") >= 0) {
+        boxToPopulate.setSelectedIndex(dcbm.getIndexOf("Sentence"));
+      }
+      else {
+        boxToPopulate.setSelectedIndex(0);
+      }
     }
   }
 
@@ -474,6 +550,15 @@ public class AlignmentEditor extends AbstractVisualResource implements
     DefaultComboBoxModel dcbm = new DefaultComboBoxModel(annotTypes
             .toArray(new String[0]));
     boxToPopulate.setModel(dcbm);
+    if(annotTypes.size() > 0) {
+      if(dcbm.getIndexOf("Token") >= 0) {
+        boxToPopulate.setSelectedIndex(dcbm.getIndexOf("Token"));
+      }
+      else {
+        boxToPopulate.setSelectedIndex(0);
+      }
+
+    }
   }
 
   /*
@@ -567,7 +652,32 @@ public class AlignmentEditor extends AbstractVisualResource implements
 
     try {
       color = Color.WHITE;
-      aa.execute(this, this.document, latestSelectedAnnotations, currentAnnotationHightlight.annotation);
+      aa.execute(this, this.document, latestSelectedAnnotations,
+              currentAnnotationHightlight.annotation);
+
+      if(aa == alignAction) {
+        for(AlignmentAction a : allActions) {
+          if(a.invokeWithAlignAction()) {
+            JCheckBox cb = actionsCBMap.get(a);
+            if(cb != null && cb.isSelected())
+              a.execute(this, this.document, latestSelectedAnnotations,
+                      currentAnnotationHightlight.annotation);
+
+          }
+
+        }
+      }
+      else if(aa == removeAlignmentAction) {
+        for(AlignmentAction a : allActions) {
+          if(a.invokeWithRemoveAction()) {
+            JCheckBox cb = actionsCBMap.get(a);
+            if(cb != null && cb.isSelected())
+
+              a.execute(this, this.document, latestSelectedAnnotations,
+                      currentAnnotationHightlight.annotation);
+          }
+        }
+      }
     }
     catch(AlignmentException ae) {
       throw new GateRuntimeException(ae);
@@ -614,8 +724,16 @@ public class AlignmentEditor extends AbstractVisualResource implements
 
   private void nextAction() {
     if(alignFactory != null && alignFactory.hasNext()) {
-
-      updateGUI(alignFactory.next());
+      HashMap<String, Annotation> next = alignFactory.next();
+      for(PreDisplayAction pda : preDisplayActions) {
+        try {
+          pda.execute(this, document, next);
+        }
+        catch(AlignmentException ae) {
+          ae.printStackTrace();
+        }
+      }
+      updateGUI(next);
     }
   }
 
@@ -773,6 +891,11 @@ public class AlignmentEditor extends AbstractVisualResource implements
     for(JMenuItem item : actions.keySet()) {
       actions.get(item).cleanup();
     }
+
+    for(PreDisplayAction pda : preDisplayActions) {
+      pda.cleanup();
+    }
+
   }
 
   private void previousAction() {
@@ -833,6 +956,7 @@ public class AlignmentEditor extends AbstractVisualResource implements
     protected class MouseActionListener extends MouseInputAdapter {
 
       public void mouseClicked(MouseEvent me) {
+        mouseExited(me);
         AnnotationHighlight ah = (AnnotationHighlight)me.getSource();
         Point pt = me.getPoint();
         currentAnnotationHightlight = ah;
@@ -929,7 +1053,33 @@ public class AlignmentEditor extends AbstractVisualResource implements
 
       }
 
-      public void mouseMoved(MouseEvent me) {
+      JPopupMenu menu = new JPopupMenu();
+      FeaturesModel model = new FeaturesModel();
+      JTable featuresTable = new JTable(model);
+      Timer timer = new Timer();
+      TimerTask task;
+      
+      public void mouseEntered(final MouseEvent me) {
+        final AnnotationHighlight ah = (AnnotationHighlight)me.getSource();
+        model.setAnnotation(ah.annotation);
+        task = new TimerTask() {
+          public void run() {
+            menu.add(featuresTable);
+            menu.show(ah, me.getX(), me.getY()+10);
+            menu.revalidate();
+            menu.updateUI();
+          }
+        };
+        timer.schedule(task, 2000);
+      }
+      
+      public void mouseExited(MouseEvent me) {
+        if(task != null) {
+          task.cancel();
+        }
+        if(menu != null && menu.isVisible()) {
+          menu.setVisible(false);
+        }
       }
     }
 
@@ -962,8 +1112,12 @@ public class AlignmentEditor extends AbstractVisualResource implements
       return;
     }
 
-    if(!srcDocument.getName().equals(getSourceDocumentId())) return;
-    if(!tgtDocument.getName().equals(getTargetDocumentId())) return;
+    if(!srcDocument.getName().equals(getSourceDocumentId())) {
+      return;
+    }
+    if(!tgtDocument.getName().equals(getTargetDocumentId())) {
+      return;
+    }
 
     AnnotationHighlight srcAH = sourceHighlights.get(srcAnnotation);
     AnnotationHighlight tgtAH = targetHighlights.get(tgtAnnotation);
@@ -1015,73 +1169,108 @@ public class AlignmentEditor extends AbstractVisualResource implements
     refresh();
   }
 
+  private void readAction(AlignmentAction action) {
+
+    String caption = action.getCaption();
+    Icon icon = action.getIcon();
+
+    if(caption == null) {
+      System.err.println(action.getClass().getName()
+              + " has a null caption - cannot be loaded");
+      return;
+    }
+
+    boolean addToMenu = true;
+
+    if(action.invokeWithAlignAction()) {
+      allActions.add(action);
+      addToMenu = false;
+    }
+
+    if(action.invokeWithRemoveAction()) {
+      if(!allActions.contains(action)) {
+        allActions.add(action);
+      }
+      addToMenu = false;
+    }
+
+    if(addToMenu) {
+      final JMenuItem menuItem;
+      if(icon != null) {
+        menuItem = new JMenuItem(caption, icon);
+        JMenuItem actionItem = actionsMenuItemByCaption.get(action
+                .getIconPath());
+        if(actionItem != null) {
+          actions.remove(actionItem);
+          actionsMenuItemByCaption.remove(action.getIconPath());
+        }
+        actionsMenuItemByCaption.put(action.getIconPath(), menuItem);
+      }
+      else {
+        menuItem = new JMenuItem(caption);
+        JMenuItem actionItem = actionsMenuItemByCaption.get(caption);
+        if(actionItem != null) {
+          actions.remove(actionItem);
+          actionsMenuItemByCaption.remove(caption);
+        }
+        actionsMenuItemByCaption.put(caption, menuItem);
+      }
+      if(menuItem != null) {
+        menuItem.setToolTipText(action.getToolTip());
+        actions.put(menuItem, action);
+        menuItem.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent ae) {
+            executeAction(actions.get(menuItem));
+          }
+        });
+      }
+    }
+  }
+
   private void readActions(File actionsConfFile) {
 
     if(actionsConfFile != null && actionsConfFile.exists()) {
       try {
         BufferedReader br = new BufferedReader(new FileReader(actionsConfFile));
         String line = br.readLine();
+        String cName = "";
         while(line != null) {
           // each line will have a class name
           try {
-            Class actionClass = Class.forName(line.trim(), true, Gate
+            if(line.trim().startsWith("#") || line.trim().length()==0) {
+              line = br.readLine();
+              continue;
+            }
+            
+            int index = line.indexOf(",");
+            cName = index < 0 ? line.trim() : line.substring(0, index);
+            line = index < 0 ? "" : line.substring(index + 1);
+
+            Class actionClass = Class.forName(cName, true, Gate
                     .getClassLoader());
-            AlignmentAction aa = (AlignmentAction)actionClass.newInstance();
-            String caption = aa.getCaption();
 
-            // lets check if we already have an action with this name
+            Object action = actionClass.newInstance();
+            String[] args = line.split("[,]");
+            if(action instanceof AlignmentAction) {
+              AlignmentAction aa = (AlignmentAction)actionClass.newInstance();
+              loadAlignmentAction(aa, args);
+            }
 
-            Icon icon = aa.getIcon();
-
-            final JMenuItem menuItem;
-            if(caption == null && icon == null) {
-              menuItem = new JMenuItem(aa.getClass().getName());
-              JMenuItem actionItem = actionsMenuItemByCaption.get(aa.getClass()
-                      .getName());
-              if(actionItem != null) {
-                actions.remove(actionItem);
-                actionsMenuItemByCaption.remove(aa.getClass().getName());
-              }
-              actionsMenuItemByCaption.put(aa.getClass().getName(), menuItem);
+            if(action instanceof PreDisplayAction) {
+              loadPreDisplayAction((PreDisplayAction)action, args);
             }
-            else if(caption == null) {
-              menuItem = new JMenuItem(icon);
-              JMenuItem actionItem = actionsMenuItemByCaption.get(aa
-                      .getIconPath());
-              if(actionItem != null) {
-                actions.remove(actionItem);
-                actionsMenuItemByCaption.remove(aa.getIconPath());
-              }
-              actionsMenuItemByCaption.put(aa.getIconPath(), menuItem);
-            }
-            else {
-              menuItem = new JMenuItem(caption);
-              JMenuItem actionItem = actionsMenuItemByCaption.get(caption);
-              if(actionItem != null) {
-                actions.remove(actionItem);
-                actionsMenuItemByCaption.remove(caption);
-              }
-              actionsMenuItemByCaption.put(caption, menuItem);
-            }
-            actions.put(menuItem, aa);
-            menuItem.addActionListener(new ActionListener() {
-              public void actionPerformed(ActionEvent ae) {
-                executeAction(actions.get(menuItem));
-              }
-            });
           }
           catch(ClassNotFoundException cnfe) {
-            System.err.println("class " + line.trim() + " not found!");
+            System.err.println("class " + cName + " not found!");
             continue;
           }
           catch(IllegalAccessException ilae) {
-            System.err.println("class " + line.trim()
+            System.err.println("class " + cName
                     + " threw the illegal access exception!");
             continue;
           }
           catch(InstantiationException ie) {
-            System.err.println("class " + line.trim()
-                    + " could not be instantiated");
+            System.err.println("class " + cName + " could not be instantiated");
             continue;
           }
           finally {
@@ -1095,10 +1284,58 @@ public class AlignmentEditor extends AbstractVisualResource implements
     }
   }
 
+  private void loadAlignmentAction(AlignmentAction aa, String[] args) {
+    try {
+      aa.init(args);
+    }
+    catch(AlignmentActionInitializationException aaie) {
+      throw new GateRuntimeException(aaie);
+    }
+
+    readAction(aa);
+    if(aa.invokeWithAlignAction() || aa.invokeWithRemoveAction()) {
+      String title = aa.getCaption();
+      PropertyActionCB pab = new PropertyActionCB(title, false, aa);
+      pab.setToolTipText(aa.getToolTip());
+      actionsCBMap.put(aa, pab);
+      int count = propertiesPanel.getComponentCount();
+      propertiesPanel.add(pab, count - 1);
+      propertiesPanel.validate();
+      propertiesPanel.updateUI();
+    }
+  }
+
+  private void loadPreDisplayAction(PreDisplayAction pda, String[] args) {
+    try {
+      pda.init(args);
+      preDisplayActions.add(pda);
+    }
+    catch(AlignmentActionInitializationException aaie) {
+      throw new GateRuntimeException(aaie);
+    }
+  }
+
   private class Edge {
     AnnotationHighlight srcAH;
 
     AnnotationHighlight tgtAH;
+  }
+
+  private class PropertyActionCB extends JCheckBox {
+    AlignmentAction aa;
+
+    JCheckBox thisInstance;
+
+    String key;
+
+    public PropertyActionCB(String propKey, boolean value,
+            AlignmentAction action) {
+      super(propKey);
+      setSelected(value);
+      this.aa = action;
+      thisInstance = this;
+      key = propKey;
+    }
   }
 
   private class MappingsPanel extends JPanel {
@@ -1145,4 +1382,58 @@ public class AlignmentEditor extends AbstractVisualResource implements
       }
     }
   }
+
+  public class FeaturesModel extends DefaultTableModel {
+    Annotation toShow;
+
+    ArrayList<String> features;
+
+    ArrayList<String> values;
+
+    public FeaturesModel() {
+      super(new String[] {"Feature", "Value"}, 0);
+    }
+
+    public void setAnnotation(Annotation annot) {
+      features = new ArrayList<String>();
+      values = new ArrayList<String>();
+      for(Object key : annot.getFeatures().keySet()) {
+        features.add(key.toString());
+        values.add(annot.getFeatures().get(key).toString());
+      }
+      super.fireTableDataChanged();
+    }
+
+    public Class getColumnClass(int column) {
+      return String.class;
+    }
+
+    public int getRowCount() {
+      return values == null ? 0 : values.size();
+    }
+
+    public int getColumnCount() {
+      return 2;
+    }
+
+    public String getColumnName(int column) {
+      switch(column) {
+        case 0:
+          return "Feature";
+        default:
+          return "Value";
+      }
+    }
+
+    public Object getValueAt(int row, int column) {
+      switch(column) {
+        case 0:
+          return features.get(row);
+        default:
+          return values.get(row);
+      }
+    }
+
+  }
+
 }

@@ -8,14 +8,11 @@ import java.util.Set;
 import gate.Annotation;
 import gate.Document;
 import gate.alignment.Alignment;
-import gate.alignment.AlignmentActionInitializationException;
 import gate.alignment.AlignmentException;
-import gate.alignment.gui.AlignmentAction;
 import gate.alignment.gui.AlignmentEditor;
 import gate.compound.CompoundDocument;
-import javax.swing.Icon;
 
-public class AlignAction implements AlignmentAction {
+public class AlignAction extends AbstractAlignmentAction {
 
   public void execute(AlignmentEditor editor, CompoundDocument document,
           Map<Document, Set<Annotation>> alignedAnnotations, Annotation clickedAnnotation)
@@ -62,32 +59,16 @@ public class AlignAction implements AlignmentAction {
     return "Align";
   }
 
-  public Icon getIcon() {
-    return null;
-  }
-
-  public String getIconPath() {
-    return null;
-  }
 
   public boolean invokeForAlignedAnnotation() {
     return false;
   }
 
-  public boolean invokeForHighlightedUnalignedAnnotation() {
-    return true;
-  }
-
   public boolean invokeForUnhighlightedUnalignedAnnotation() {
     return false;
   }
-
-  public void init(String[] args) throws AlignmentActionInitializationException {
-    // no parameters
+  
+  public String getToolTip() {
+    return "Aligns the selected source and target annotations";
   }
-
-  public void cleanup() {
-    // do nothing
-  }
-
 }
