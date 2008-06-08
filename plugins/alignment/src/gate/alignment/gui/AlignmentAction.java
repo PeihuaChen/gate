@@ -17,8 +17,16 @@ public interface AlignmentAction {
           Map<Document, Set<Annotation>> alignedAnnotations, Annotation clickedAnnotation)
           throws AlignmentException;
 
+  /**
+   * Keep this null in order to be called along with the default align action.
+   * @return
+   */
   public String getCaption();
 
+  /**
+   * Keep this null in order to be called along with the default align action.
+   * @return
+   */
   public Icon getIcon();
 
   public String getIconPath();
@@ -32,4 +40,10 @@ public interface AlignmentAction {
   public void init(String[] args) throws AlignmentActionInitializationException;
 
   public void cleanup();
+  
+  public boolean invokeWithAlignAction();
+  
+  public boolean invokeWithRemoveAction();
+  
+  public String getToolTip();
 }

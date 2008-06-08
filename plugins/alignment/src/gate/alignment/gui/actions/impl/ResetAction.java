@@ -5,14 +5,11 @@ import java.util.Set;
 
 import gate.Annotation;
 import gate.Document;
-import gate.alignment.AlignmentActionInitializationException;
 import gate.alignment.AlignmentException;
-import gate.alignment.gui.AlignmentAction;
 import gate.alignment.gui.AlignmentEditor;
 import gate.compound.CompoundDocument;
-import javax.swing.Icon;
 
-public class ResetAction implements AlignmentAction {
+public class ResetAction extends AbstractAlignmentAction {
 
   public void execute(AlignmentEditor editor, CompoundDocument document,
           Map<Document, Set<Annotation>> alignedAnnotations, Annotation clickedAnnotation)
@@ -24,31 +21,17 @@ public class ResetAction implements AlignmentAction {
     return "Reset Selection";
   }
 
-  public Icon getIcon() {
-    return null;
-  }
-
-  public String getIconPath() {
-    return null;
-  }
-
   public boolean invokeForAlignedAnnotation() {
     return false;
-  }
-
-  public boolean invokeForHighlightedUnalignedAnnotation() {
-    return true;
   }
 
   public boolean invokeForUnhighlightedUnalignedAnnotation() {
     return false;
   }
 
-  public void init(String[] args) throws AlignmentActionInitializationException {
-    // no parameters
+  public String getToolTip() {
+    return "Dehighlight selected annotations";
   }
-
-  public void cleanup() {
-    // do nothing
-  }
+  
+  
 }
