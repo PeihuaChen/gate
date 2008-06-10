@@ -325,7 +325,7 @@ public class OntoRootGaz extends DefaultGazetteer {
               lookupFeatures.put(CATConstants.ONTORES_TYPE,
                 CATConstants.TYPE_INSTANCE);
               lookupFeatures.put(CATConstants.FEATURE_URI, uri);
-              lookupFeatures.put(CATConstants.FEATURE_PROPERTY_NAME,
+              lookupFeatures.put(CATConstants.FEATURE_PROPERTY_URI,
                 propUri);
               lookupFeatures.put(CATConstants.FEATURE_PROPERTY_VALUE,
                 propValue);
@@ -370,7 +370,7 @@ public class OntoRootGaz extends DefaultGazetteer {
               lookupFeatures.put(CATConstants.ONTORES_TYPE,
                 CATConstants.TYPE_CLASS);
               lookupFeatures.put(CATConstants.FEATURE_URI, uri);
-              lookupFeatures.put(CATConstants.FEATURE_PROPERTY_NAME,
+              lookupFeatures.put(CATConstants.FEATURE_PROPERTY_URI,
                 propUri);
               Lookup aLookup = new Lookup(propValue, "", null, null);
               aLookup.features = lookupFeatures;
@@ -408,7 +408,7 @@ public class OntoRootGaz extends DefaultGazetteer {
               lookupFeatures.put(CATConstants.ONTORES_TYPE,
                 CATConstants.TYPE_PROPERTY);
               lookupFeatures.put(CATConstants.FEATURE_URI, uri);
-              lookupFeatures.put(CATConstants.FEATURE_PROPERTY_NAME,
+              lookupFeatures.put(CATConstants.FEATURE_PROPERTY_URI,
                 propUri);
               lookupFeatures.put(CATConstants.FEATURE_PROPERTY_VALUE,
                 propValue);
