@@ -25,7 +25,7 @@ public class CATConstants {
   /* used to set feature names for Lookups inside OntoRootGaz */
   public static String FEATURE_URI = "URI";
 
-  public static String FEATURE_PROPERTY_NAME = "propertyName";
+  public static String FEATURE_PROPERTY_URI = "propertyURI";
 
   public static String FEATURE_PROPERTY_VALUE = "propertyValue";
 
