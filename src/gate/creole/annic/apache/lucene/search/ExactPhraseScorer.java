@@ -18,7 +18,6 @@ package gate.creole.annic.apache.lucene.search;
 
 import java.io.IOException;
 import gate.creole.annic.apache.lucene.index.*;
-import gate.creole.annic.lucene.LuceneIndexSearcher;
 
 final class ExactPhraseScorer extends PhraseScorer {
 
@@ -58,11 +57,12 @@ final class ExactPhraseScorer extends PhraseScorer {
             // here 1 represents the ExactPhraseQuery
             if(searcher instanceof IndexSearcher) {
               ((IndexSearcher)searcher).setFirstTermPositions(1, first.doc,
-                      firstPositions, patternSize, 1);
+                      firstPositions, patternSize, freq);
             }
             /* End */
             return (float)freq;
           }
+          
         } while(first.position < last.position);
         firstToLast();
       }
@@ -73,7 +73,7 @@ final class ExactPhraseScorer extends PhraseScorer {
     /* Niraj */
     if(searcher instanceof IndexSearcher)
     ((IndexSearcher)searcher).setFirstTermPositions(1, first.doc,
-            firstPositions, patternSize, 1);
+            firstPositions, patternSize, freq);
     /* End */
     return (float)freq;
   }

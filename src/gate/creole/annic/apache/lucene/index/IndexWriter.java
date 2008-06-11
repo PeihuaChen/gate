@@ -99,7 +99,7 @@ public class IndexWriter {
    */
   public static final int DEFAULT_MAX_FIELD_LENGTH =
     Integer.parseInt(System.getProperty("gate.creole.annic.apache.lucene.maxFieldLength",
-      "10000"));
+      "300000"));
 
 
   private Directory directory;  // where this index resides

@@ -72,7 +72,7 @@ public class LuceneDocument {
     ArrayList<String> annotSetsToIndex = new ArrayList<String>();
 
     // by default merge set must be created
-    boolean createMergeSet = true;
+    //boolean createMergeSet = true;
 
     // if user has provided annotation sets to include, we don't bother
     // about annotation sets to exclude
@@ -81,7 +81,7 @@ public class LuceneDocument {
 
       // if there's only one annotation to index, we don't need to
       // create a MergeSet
-      if(annotSetsToIndex.size() == 1) createMergeSet = false;
+      //if(annotSetsToIndex.size() == 1) createMergeSet = false;
     }
     else if(annotSetsToExclude.size() > 0) {
       // if there were no annotation sets to include, check if user has
@@ -177,10 +177,10 @@ public class LuceneDocument {
       searchBaseTokensInAllAnnotationSets = true;
     }
 
-    if(searchBaseTokensInAllAnnotationSets) {
-      System.out.println("Searching for the base token annotation type \""
-        + baseTokenAnnotationType + "\"in all sets");
-    }
+//    if(searchBaseTokensInAllAnnotationSets) {
+//      System.out.println("Searching for the base token annotation type \""
+//        + baseTokenAnnotationType + "\"in all sets");
+//    }
 
     if(baseTokenAnnotationType != null && baseTokenAnnotationType.length() > 0
       && searchBaseTokensInAllAnnotationSets) {
@@ -195,6 +195,7 @@ public class LuceneDocument {
             gateDoc.getAnnotations().get(baseTokenAnnotationType);
           if(tempSet.size() > 0) {
             baseTokenAnnotationSet = tempSet;
+//            System.out.println("found in default annotation set");
             createManualTokens = false;
             break;
           }
@@ -204,6 +205,7 @@ public class LuceneDocument {
             gateDoc.getAnnotations(aSet).get(baseTokenAnnotationType);
           if(tempSet.size() > 0) {
             baseTokenAnnotationSet = tempSet;
+//            System.out.println("found in "+aSet);
             createManualTokens = false;
             break;
           }
@@ -343,33 +345,38 @@ public class LuceneDocument {
 
       // this is enabled only if there are more than one annotation sets
       // available to search in
-      if(createMergeSet) {
-        if(mergedSet == null) mergedSet = new AnnotationSetImpl(gateDoc);
+//      if(createMergeSet) {
+//        if(mergedSet == null) mergedSet = new AnnotationSetImpl(gateDoc);
+//
+//        // we need to merge all annotations but the
+//        // baseTokenAnnotationType
+//        for(String aType : aSetToIndex.getAllTypes()) {
+//
+//          if(aType.equals(baseTokenAnnotationType)) {
+//            continue;
+//          }
+//
+//          if(indexUnitAnnotationType != null
+//            && aType.equals(indexUnitAnnotationType)) {
+//            continue;
+//          }
+//
+//          for(Annotation a : aSetToIndex.get(aType)) {
+//            try {
+//              mergedSet.add(a.getStartNode().getOffset(), a.getEndNode()
+//                .getOffset(), a.getType(), a.getFeatures());
+//            }
+//            catch(InvalidOffsetException ioe) {
+//              throw new GateRuntimeException(ioe);
+//            }
+//          }
+//
+//        }
+//      }
 
-        // we need to merge all annotations but the
-        // baseTokenAnnotationType
-        for(String aType : aSetToIndex.getAllTypes()) {
-
-          if(aType.equals(baseTokenAnnotationType)) {
-            continue;
-          }
-
-          if(indexUnitAnnotationType != null
-            && aType.equals(indexUnitAnnotationType)) {
-            continue;
-          }
-
-          for(Annotation a : aSetToIndex.get(aType)) {
-            try {
-              mergedSet.add(a.getStartNode().getOffset(), a.getEndNode()
-                .getOffset(), a.getType(), a.getFeatures());
-            }
-            catch(InvalidOffsetException ioe) {
-              throw new GateRuntimeException(ioe);
-            }
-          }
-
-        }
+      StringBuffer indexedFeaturesString = new StringBuffer();
+      for(String aFeat : indexedFeatures) {
+        indexedFeaturesString.append(aFeat + ";");
       }
 
       Document[] toReturn = new Document[tokenStreams.length];
@@ -383,10 +390,6 @@ public class LuceneDocument {
         doc.add(Field.Keyword(Constants.DOCUMENT_ID, documentID));
         doc.add(Field.Keyword(Constants.DOCUMENT_ID_FOR_SERIALIZED_FILE,
           documentID + "-" + j));
-        StringBuffer indexedFeaturesString = new StringBuffer();
-        for(String aFeat : indexedFeatures) {
-          indexedFeaturesString.append(aFeat + ";");
-        }
         doc.add(Field.Keyword(Constants.INDEXED_FEATURES, indexedFeaturesString
           .substring(0, indexedFeaturesString.length() - 1)));
 
@@ -414,58 +417,58 @@ public class LuceneDocument {
       toReturnBack.addAll(Arrays.asList(toReturn));
     }
 
-    // one again do an index with everything merged all together
-    if(createMergeSet && mergedSet != null) {
-      Set<String> indexedFeatures = new HashSet<String>();
-      ArrayList<Token>[] tokenStreams =
-        getTokens(gateDoc, mergedSet, featuresToInclude, featuresToExclude,
-          baseTokenAnnotationType, baseTokenAnnotationSet,
-          indexUnitAnnotationType, indexUnitAnnotationSet, indexedFeatures);
-
-      if(tokenStreams == null) return null;
-
-      Document[] toReturn = new Document[tokenStreams.length];
-
-      for(int i = 0; i < tokenStreams.length; i++, j++) {
-        // make a new, empty document
-        Document doc = new Document();
-
-        // and then create the document
-        LuceneReader reader = new LuceneReader(gateDoc, tokenStreams[i]);
-        doc.add(Field.Keyword(Constants.DOCUMENT_ID, documentID));
-        doc.add(Field.Keyword(Constants.DOCUMENT_ID_FOR_SERIALIZED_FILE,
-          documentID + "-" + j));
-        StringBuffer indexedFeaturesString = new StringBuffer();
-        for(String aFeat : indexedFeatures) {
-          indexedFeaturesString.append(aFeat + ";");
-        }
-        doc.add(Field.Keyword(Constants.INDEXED_FEATURES, indexedFeaturesString
-          .substring(0, indexedFeaturesString.length() - 1)));
-
-        if(corpusPersistenceID != null)
-          doc.add(Field.Keyword(Constants.CORPUS_ID, corpusPersistenceID));
-        doc.add(Field.Keyword(Constants.ANNOTATION_SET_ID,
-          Constants.COMBINED_SET));
-
-        doc.add(Field.Text("contents", reader));
-        // here we store token stream on the file system
-        try {
-          writeOnDisk(tokenStreams[i], documentID, documentID + "-" + j,
-            indexLocation);
-        }
-        catch(Exception e) {
-          Err.println("\nIgnoring the document : " + gateDoc.getName()
-            + " since its token stream cannot be written on the disk");
-          Err.println("Reason: " + e.getMessage());
-          return null;
-        }
-
-        // return the document
-        toReturn[i] = doc;
-      }
-
-      toReturnBack.addAll(Arrays.asList(toReturn));
-    }
+//    // once again do an index with everything merged all together
+//    if(createMergeSet && mergedSet != null) {
+//      Set<String> indexedFeatures = new HashSet<String>();
+//      ArrayList<Token>[] tokenStreams =
+//        getTokens(gateDoc, mergedSet, featuresToInclude, featuresToExclude,
+//          baseTokenAnnotationType, baseTokenAnnotationSet,
+//          indexUnitAnnotationType, indexUnitAnnotationSet, indexedFeatures);
+//
+//      if(tokenStreams == null) return null;
+//
+//      Document[] toReturn = new Document[tokenStreams.length];
+//
+//      for(int i = 0; i < tokenStreams.length; i++, j++) {
+//        // make a new, empty document
+//        Document doc = new Document();
+//
+//        // and then create the document
+//        LuceneReader reader = new LuceneReader(gateDoc, tokenStreams[i]);
+//        doc.add(Field.Keyword(Constants.DOCUMENT_ID, documentID));
+//        doc.add(Field.Keyword(Constants.DOCUMENT_ID_FOR_SERIALIZED_FILE,
+//          documentID + "-" + j));
+//        StringBuffer indexedFeaturesString = new StringBuffer();
+//        for(String aFeat : indexedFeatures) {
+//          indexedFeaturesString.append(aFeat + ";");
+//        }
+//        doc.add(Field.Keyword(Constants.INDEXED_FEATURES, indexedFeaturesString
+//          .substring(0, indexedFeaturesString.length() - 1)));
+//
+//        if(corpusPersistenceID != null)
+//          doc.add(Field.Keyword(Constants.CORPUS_ID, corpusPersistenceID));
+//        doc.add(Field.Keyword(Constants.ANNOTATION_SET_ID,
+//          Constants.COMBINED_SET));
+//
+//        doc.add(Field.Text("contents", reader));
+//        // here we store token stream on the file system
+//        try {
+//          writeOnDisk(tokenStreams[i], documentID, documentID + "-" + j,
+//            indexLocation);
+//        }
+//        catch(Exception e) {
+//          Err.println("\nIgnoring the document : " + gateDoc.getName()
+//            + " since its token stream cannot be written on the disk");
+//          Err.println("Reason: " + e.getMessage());
+//          return null;
+//        }
+//
+//        // return the document
+//        toReturn[i] = doc;
+//      }
+//
+//      toReturnBack.addAll(Arrays.asList(toReturn));
+//    }
 
     return toReturnBack;
   }
@@ -699,7 +702,6 @@ public class LuceneDocument {
         byte inc = 1;
         Annotation annot = tokens.get(i);
         String type = annot.getType();
-
         // if the feature is specified in featuresToExclude -exclude it
         if(excludeFeatures && featuresToExclude.contains(type)) continue;
 
@@ -714,6 +716,7 @@ public class LuceneDocument {
         if(text == null) {
           continue;
         }
+
 
         Token token1 = new Token(type, startOffset, endOffset, "*");
 
@@ -763,7 +766,7 @@ public class LuceneDocument {
 
           String text1 = (String)tempText.toString();
           // we need to qualify the type names
-          // for each annotation type feature we add AT.Feature=="*" to be able
+          // for each annotation type feature we add AT.Feature=="**" to be able
           // to search for it
           // to calculate stats
 
