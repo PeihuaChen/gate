@@ -20,7 +20,6 @@ import java.io.IOException;
 
 import gate.creole.annic.apache.lucene.index.TermDocs;
 import gate.creole.annic.apache.lucene.index.Term;
-import gate.creole.annic.lucene.LuceneIndexSearcher;
 
 final class TermScorer extends Scorer {
   private Weight weight;

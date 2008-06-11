@@ -285,7 +285,6 @@ public class LuceneSearchThread {
            * first term in the found pattern
            */
           ArrayList[] firstTermPositions = searcher.getFirstTermPositions();
-  
           // if no result available, set null to our scores
           if(firstTermPositions[0].size() == 0) {
             // do nothing
@@ -293,7 +292,7 @@ public class LuceneSearchThread {
           }
   
   
-          
+         
           // iterate through each result and collect necessary
           // information
           for(int hitIndex = 0; hitIndex < hits.length(); hitIndex++) {
@@ -303,7 +302,7 @@ public class LuceneSearchThread {
             // we fetch all the first term positions for the query
             // issued
             ArrayList ftp = (ArrayList)firstTermPositions[1].get(index);
-  
+
             /*
              * pattern length (in terms of total number of annotations
              * following one other)
@@ -343,10 +342,10 @@ public class LuceneSearchThread {
               serializedFilesIDsList.add(serializedFileID);
             }
             else {
-              // before inserting we check if it is already added
-              if(!doesAlreadyExist(queryItem, queryItemsList)) {
+//              // before inserting we check if it is already added
+//              if(!doesAlreadyExist(queryItem, queryItemsList)) {
                 queryItemsList.add(queryItem);
-              }
+//              }
             }
           }
         }
@@ -1093,18 +1092,18 @@ public class LuceneSearchThread {
 
     String annotationSetName;
 
-    public boolean equals(Object m) {
-      if(m instanceof QueryItem) {
-        QueryItem n = (QueryItem)m;
-        // no need to compare documentID as we don't compare documents with different docIDs anyway
-        return n.score == score && n.id == id && n.patLen == patLen
-                && n.qType == qType && n.ftp.size() == ftp.size()
-                && n.queryString.equals(queryString)
-                && n.annotationSetName.equals(annotationSetName)
-                && areTheyEqual(n.ftp, ftp, qType);
-      }
-      return false;
-    }
+//    public boolean equals(Object m) {
+//      if(m instanceof QueryItem) {
+//        QueryItem n = (QueryItem)m;
+//        // no need to compare documentID as we don't compare documents with different docIDs anyway
+//        return n.score == score && n.id == id && n.patLen == patLen
+//                && n.qType == qType && n.ftp.size() == ftp.size()
+//                && n.queryString.equals(queryString)
+//                && n.annotationSetName.equals(annotationSetName)
+//                && areTheyEqual(n.ftp, ftp, qType);
+//      }
+//      return false;
+//    }
   }
 
   /**
@@ -1114,14 +1113,14 @@ public class LuceneSearchThread {
    * @param top
    * @return
    */
-  private boolean doesAlreadyExist(QueryItem n, List<QueryItem> top) {
-
-    for(int i = 0; i < top.size(); i++) {
-      QueryItem m = top.get(i);
-      if(m.equals(n)) return true;
-    }
-    return false;
-  }
+//  private boolean doesAlreadyExist(QueryItem n, List<QueryItem> top) {
+//
+//    for(int i = 0; i < top.size(); i++) {
+//      QueryItem m = top.get(i);
+//      if(m.equals(n)) return true;
+//    }
+//    return false;
+//  }
 
   /**
    * Checks if two first term positions are identical. 

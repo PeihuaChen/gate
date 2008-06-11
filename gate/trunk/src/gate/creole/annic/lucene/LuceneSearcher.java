@@ -43,8 +43,7 @@ import gate.persist.LuceneDataStoreImpl;
 public class LuceneSearcher implements Searcher {
 
   /**
-   * A List of index locations. It allows searching at multiple
-   * locations.
+   * A List of index locations. It allows searching at multiple locations.
    */
   private List<String> indexLocations = null;
 
@@ -54,13 +53,8 @@ public class LuceneSearcher implements Searcher {
   private String query = null;
 
   /**
-   * An object where we store our results.
-   */
-  private gate.creole.annic.lucene.LuceneQueryResultList resultList = null;
-
-  /**
-   * The number of base token annotations to show in left and right
-   * context of the pattern. By default 5.
+   * The number of base token annotations to show in left and right context of
+   * the pattern. By default 5.
    */
   private int contextWindow = 5;
 
@@ -70,10 +64,11 @@ public class LuceneSearcher implements Searcher {
   private List<Pattern> annicPatterns = new ArrayList<Pattern>();
 
   /**
-   * Found annotation types in the annic patterns. The maps keeps record
-   * of found annotation types and features for each of them.
+   * Found annotation types in the annic patterns. The maps keeps record of
+   * found annotation types and features for each of them.
    */
-  public Map<String, List<String>> annotationTypesMap = new HashMap<String, List<String>>();
+  public Map<String, List<String>> annotationTypesMap =
+    new HashMap<String, List<String>>();
 
   /**
    * Search parameters.
@@ -99,11 +94,10 @@ public class LuceneSearcher implements Searcher {
    * Indicates if the query was to delete certain documents.
    */
   private boolean wasDeleteQuery = false;
- 
+
   /**
-   * A query can result into multiple queries. For example: (A|B)C is
-   * converted into two queries: AC and AD. For each query a separate
-   * thread is started.
+   * A query can result into multiple queries. For example: (A|B)C is converted
+   * into two queries: AC and AD. For each query a separate thread is started.
    */
   private List<LuceneSearchThread> luceneSearchThreads = null;
 
@@ -162,7 +156,7 @@ public class LuceneSearcher implements Searcher {
           else {
             if(!setNames.get(index).equals(annotationSetID)) {
               docIDs.add(documentID);
-              setNames.add(annotationSetID);  
+              setNames.add(annotationSetID);
             }
           }
         }
@@ -175,7 +169,8 @@ public class LuceneSearcher implements Searcher {
       }
 
       for(; luceneSearchThreadIndex < luceneSearchThreads.size(); luceneSearchThreadIndex++) {
-        LuceneSearchThread lst = luceneSearchThreads.get(luceneSearchThreadIndex);
+        LuceneSearchThread lst =
+          luceneSearchThreads.get(luceneSearchThreadIndex);
         List<Pattern> results = lst.next(numberOfHits);
         if(results != null) {
           if(numberOfHits != -1) {
@@ -183,9 +178,7 @@ public class LuceneSearcher implements Searcher {
           }
 
           this.annicPatterns.addAll(results);
-          if(numberOfHits == 0) {
-            return getHits();
-          }
+          if(numberOfHits == 0) { return getHits(); }
         }
       }
 
@@ -200,12 +193,11 @@ public class LuceneSearcher implements Searcher {
     }
   }
 
-  
   /**
-   * Method retunrs true/false indicating whether results were found or
-   * not.
+   * Method retunrs true/false indicating whether results were found or not.
    */
-  public boolean search(String query, Map<String, Object> parameters) throws SearchException {
+  public boolean search(String query, Map<String, Object> parameters)
+    throws SearchException {
     luceneHits = null;
     annicPatterns = new ArrayList<Pattern>();
     annotationTypesMap = new HashMap<String, List<String>>();
@@ -221,27 +213,32 @@ public class LuceneSearcher implements Searcher {
     this.parameters = parameters;
 
     /*
-     * lets first check if the query is to search the document names
-     * This is used when we only wants to search for documents stored
-     * under the specific corpus
+     * lets first check if the query is to search the document names This is
+     * used when we only wants to search for documents stored under the specific
+     * corpus
      */
     if(parameters.size() == 2
-            && parameters.get(Constants.INDEX_LOCATION_URL) != null) {
+      && parameters.get(Constants.INDEX_LOCATION_URL) != null) {
       String corpusID = (String)parameters.get(Constants.CORPUS_ID);
       String indexLocation = null;
       try {
-        indexLocation = new File(((URL)parameters.get(Constants.INDEX_LOCATION_URL)).toURI()).getAbsolutePath();
-      } catch(URISyntaxException use) {
-        indexLocation = new File(((URL)parameters.get(Constants.INDEX_LOCATION_URL)).getFile()).getAbsolutePath();
+        indexLocation =
+          new File(((URL)parameters.get(Constants.INDEX_LOCATION_URL)).toURI())
+            .getAbsolutePath();
       }
-      
+      catch(URISyntaxException use) {
+        indexLocation =
+          new File(((URL)parameters.get(Constants.INDEX_LOCATION_URL))
+            .getFile()).getAbsolutePath();
+      }
+
       if(corpusID != null && indexLocation != null) {
         wasDeleteQuery = true;
         Term term = new Term(Constants.CORPUS_ID, corpusID);
         TermQuery tq = new TermQuery(term);
         try {
-          gate.creole.annic.apache.lucene.search.Searcher searcher = new IndexSearcher(
-                  indexLocation);
+          gate.creole.annic.apache.lucene.search.Searcher searcher =
+            new IndexSearcher(indexLocation);
           // and now execute the query
           // result of which will be stored in hits
           luceneHits = searcher.search(tq);
@@ -259,25 +256,24 @@ public class LuceneSearcher implements Searcher {
     if(parameters.get(Constants.INDEX_LOCATIONS) == null) {
       String indexLocation;
       try {
-        indexLocation = new File(((URL)datastore
-          .getIndexer().getParameters().get(Constants.INDEX_LOCATION_URL))
-          .toURI()).getAbsolutePath();
+        indexLocation =
+          new File(((URL)datastore.getIndexer().getParameters().get(
+            Constants.INDEX_LOCATION_URL)).toURI()).getAbsolutePath();
 
-      } catch(URISyntaxException use) {
-        indexLocation = new File(((URL)datastore
-          .getIndexer().getParameters().get(Constants.INDEX_LOCATION_URL))
-          .getFile()).getAbsolutePath();
+      }
+      catch(URISyntaxException use) {
+        indexLocation =
+          new File(((URL)datastore.getIndexer().getParameters().get(
+            Constants.INDEX_LOCATION_URL)).getFile()).getAbsolutePath();
       }
       ArrayList<String> indexLocations = new ArrayList<String>();
       indexLocations.add(indexLocation);
       parameters.put(Constants.INDEX_LOCATIONS, indexLocations);
     }
-//      throw new SearchException("Parameter " + Constants.INDEX_LOCATIONS
-//              + " has not been provided!");
 
-
-    indexLocations = new ArrayList<String>((List<? extends String>)parameters
-            .get(Constants.INDEX_LOCATIONS));
+    indexLocations =
+      new ArrayList<String>((List<? extends String>)parameters
+        .get(Constants.INDEX_LOCATIONS));
 
     if(indexLocations.size() == 0)
       throw new SearchException("Corpus is not initialized");
@@ -285,10 +281,10 @@ public class LuceneSearcher implements Searcher {
     // check for valid context window
     if(parameters.get(Constants.CONTEXT_WINDOW) == null)
       throw new SearchException("Parameter " + Constants.CONTEXT_WINDOW
-              + " is not provided!");
+        + " is not provided!");
 
-    contextWindow = ((Integer)parameters.get(Constants.CONTEXT_WINDOW))
-            .intValue();
+    contextWindow =
+      ((Integer)parameters.get(Constants.CONTEXT_WINDOW)).intValue();
 
     if(getContextWindow().intValue() <= 0)
       throw new SearchException("Context Window must be atleast 1 or > 1");
@@ -297,12 +293,11 @@ public class LuceneSearcher implements Searcher {
 
     this.query = query;
     this.corpusToSearchIn = (String)parameters.get(Constants.CORPUS_ID);
-    this.annotationSetToSearchIn = (String)parameters
-            .get(Constants.ANNOTATION_SET_ID);
+    this.annotationSetToSearchIn =
+      (String)parameters.get(Constants.ANNOTATION_SET_ID);
 
     annicPatterns = new ArrayList<Pattern>();
     annotationTypesMap = new HashMap<String, List<String>>();
-    resultList = null;
 
     luceneSearchThreads = new ArrayList<LuceneSearchThread>();
 
@@ -314,7 +309,7 @@ public class LuceneSearcher implements Searcher {
       // we create a separate Thread for each index
       LuceneSearchThread lst = new LuceneSearchThread();
       if(lst.search(query, contextWindow, location, corpusToSearchIn,
-              annotationSetToSearchIn, this)) {
+        annotationSetToSearchIn, this)) {
         luceneSearchThreads.add(lst);
       }
     }
@@ -323,107 +318,6 @@ public class LuceneSearcher implements Searcher {
     return success;
   }
 
-  /**
-   * For each query lucene tells us the position of the first term that
-   * matched the pattern. This method given required parameters, goes
-   * through each such position and tries to retrieve other required
-   * annotations information from the token streams. Finally a list of
-   * annic patterns is returned.
-   * 
-   * @param docID
-   * @param gateAnnotations
-   * @param positions
-   * @param patternLength
-   * @param queryString
-   * @return
-   */
-  private List<Pattern> locatePatterns(String docID, String annotationSetName,
-          List<List<PatternAnnotation>> gateAnnotations, List<Integer> positions,
-          List<Integer> patternLength, String queryString) {
-
-    // patterns
-    List<Pattern> pat = new ArrayList<Pattern>();
-    for(int i = 0; i < gateAnnotations.size(); i++) {
-
-      // each element in the tokens stream is a pattern
-      List<PatternAnnotation> annotations = gateAnnotations.get(i);
-      if(annotations.size() == 0) {
-        continue;
-      }
-      // from this annotations we need to create a text string
-      // so lets find out the smallest and the highest offsets
-      int smallest = Integer.MAX_VALUE;
-      int highest = -1;
-      for(int j = 0; j < annotations.size(); j++) {
-        // each annotation is an instance of GateAnnotation
-        PatternAnnotation ga = annotations.get(j);
-        if(ga.getStartOffset() < smallest) {
-          smallest = ga.getStartOffset();
-        }
-
-        if(ga.getEndOffset() > highest) {
-          highest = ga.getEndOffset();
-        }
-      }
-
-      // we have smallest and highest offsets
-      char[] patternText = new char[highest - smallest];
-
-      for(int j = 0; j < patternText.length; j++) {
-        patternText[j] = ' ';
-      }
-
-      // and now place the text
-      for(int j = 0; j < annotations.size(); j++) {
-        // each annotation is an instance of GateAnnotation
-        PatternAnnotation ga = annotations.get(j);
-        if(ga.getText() == null) {
-          // this is to avoid annotations such as split
-          continue;
-        }
-
-        for(int k = ga.getStartOffset() - smallest, m = 0; m < ga.getText()
-                .length()
-                && k < patternText.length; m++, k++) {
-          patternText[k] = ga.getText().charAt(m);
-        }
-      }
-
-      // we have the text
-      // smallest is the textStOffset
-      // highest is the textEndOffset
-      // how to find the patternStartOffset
-      int stPos = ((Integer)positions.get(i)).intValue();
-      int endOffset = ((Integer)patternLength.get(i)).intValue();
-      int patStart = Integer.MAX_VALUE;
-
-      for(int j = 0; j < annotations.size(); j++) {
-        // each annotation is an instance of GateAnnotation
-        PatternAnnotation ga = annotations.get(j);
-        if(ga.getPosition() == stPos) {
-          if(ga.getStartOffset() < patStart) {
-            patStart = ga.getStartOffset();
-          }
-        }
-
-      }
-
-      if(patStart == Integer.MAX_VALUE) {
-        continue;
-      }
-
-      if(patStart < smallest || endOffset > highest) {
-        continue;
-      }
-
-      // now create the pattern for this
-      Pattern ap = new Pattern(docID, annotationSetName,
-              new String(patternText), patStart, endOffset, smallest, highest,
-              annotations, queryString);
-      pat.add(ap);
-    }
-    return pat;
-  }
 
   /**
    * Gets the submitted query.
@@ -454,108 +348,121 @@ public class LuceneSearcher implements Searcher {
   }
 
   /**
-   * Gets the map of found annotation types and annotation features.
-   * This call must be invoked only
-   * after a call to the getIndexedAnnotationSetNames(String indexLocation) method.
-   * Otherwise this method doesn't guranttee the correct results.
-   * The results obtained has the following format.
-   * Key: CorpusName;AnnotationSetName;AnnotationType
-   * Value: respective features
+   * Gets the map of found annotation types and annotation features. This call
+   * must be invoked only after a call to the
+   * getIndexedAnnotationSetNames(String indexLocation) method. Otherwise this
+   * method doesn't guranttee the correct results. The results obtained has the
+   * following format. Key: CorpusName;AnnotationSetName;AnnotationType Value:
+   * respective features
    */
   public Map<String, List<String>> getAnnotationTypesMap() {
-      return annotationTypesMap;
+    return annotationTypesMap;
   }
 
   /**
-   * This method returns a set of annotation set names that are indexed.
-   * Each entry has the following format:
-   * <p>corpusName;annotationSetName</p>
-   * where, the corpusName is the name of the corpus the annotationSetName belongs to.
+   * This method returns a set of annotation set names that are indexed. Each
+   * entry has the following format:
+   * <p>
+   * corpusName;annotationSetName
+   * </p>
+   * where, the corpusName is the name of the corpus the annotationSetName
+   * belongs to.
+   * 
    * @return
    */
   public String[] getIndexedAnnotationSetNames() throws SearchException {
     String indexLocation;
     try {
-      indexLocation = new File(((URL)datastore
-        .getIndexer().getParameters().get(Constants.INDEX_LOCATION_URL))
-        .toURI()).getAbsolutePath();
+      indexLocation =
+        new File(((URL)datastore.getIndexer().getParameters().get(
+          Constants.INDEX_LOCATION_URL)).toURI()).getAbsolutePath();
 
-    } catch(URISyntaxException use) {
-      indexLocation = new File(((URL)datastore
-        .getIndexer().getParameters().get(Constants.INDEX_LOCATION_URL))
-        .getFile()).getAbsolutePath();
+    }
+    catch(URISyntaxException use) {
+      indexLocation =
+        new File(((URL)datastore.getIndexer().getParameters().get(
+          Constants.INDEX_LOCATION_URL)).getFile()).getAbsolutePath();
     }
     annotationTypesMap = new HashMap<String, List<String>>();
     Set<String> toReturn = new HashSet<String>();
     try {
       IndexReader reader = IndexReader.open(indexLocation);
-      
+
       try {
         // lets first obtain stored corpora
         TermEnum corpusTerms = reader.terms(new Term(Constants.CORPUS_ID, ""));
-        if(corpusTerms == null || corpusTerms.term() == null) return new String[0];
-        
-        
+        if(corpusTerms == null || corpusTerms.term() == null)
+          return new String[0];
+
         Set<String> corpora = new HashSet<String>();
         while(Constants.CORPUS_ID.equals(corpusTerms.term().field())) {
           corpora.add(corpusTerms.term().text());
           if(!corpusTerms.next()) break;
         }
-        
+
         // for each corpus we obtain its annotation set ids
         for(String corpus : corpora) {
           Term term = new Term(Constants.CORPUS_ID, corpus);
           TermQuery tq = new TermQuery(term);
           try {
-            gate.creole.annic.apache.lucene.search.Searcher searcher = new IndexSearcher(indexLocation);
+            gate.creole.annic.apache.lucene.search.Searcher searcher =
+              new IndexSearcher(indexLocation);
             try {
-            Hits corpusHits = searcher.search(tq);
-            for(int i = 0; i < corpusHits.length(); i++) {
-              Document luceneDoc = corpusHits.doc(i);
-              String annotationSetID = luceneDoc.get(Constants.ANNOTATION_SET_ID);
-              if(toReturn.contains(corpus+";"+annotationSetID)) continue;
-              toReturn.add(corpus+";"+annotationSetID);
-              
-              // lets create a boolean query
-              Term annotSetTerm = new Term(Constants.ANNOTATION_SET_ID, annotationSetID);
-              TermQuery atq = new TermQuery(annotSetTerm);
-              
-              BooleanQuery bq = new BooleanQuery();
-              bq.add(tq, true, false);
-              bq.add(atq, true, false);
-              gate.creole.annic.apache.lucene.search.Searcher indexFeatureSearcher = new IndexSearcher(indexLocation);
-              try {
-              Hits indexFeaturesHits = searcher.search(bq);
-              for(int j=0;j < indexFeaturesHits.length();j++) {
-                Document aDoc = indexFeaturesHits.doc(j);
-                String indexedFeatures = aDoc.get(Constants.INDEXED_FEATURES);
-                if(indexedFeatures != null) {
-                  String [] features = indexedFeatures.split(";");
-                  for(String aFeature : features) {
-                    // AnnotationType.FeatureName
-                    int index = aFeature.indexOf(".");
-                    if(index == -1) {
-                      continue;
-                    }
-                    String type = aFeature.substring(0, index);
-                    String featureName = aFeature.substring(index+1);
-                    String key = corpus+";"+annotationSetID+";"+type;
-                    List<String> listOfFeatures = annotationTypesMap.get(key);
-                    if(listOfFeatures == null) {
-                      listOfFeatures = new ArrayList<String>();
-                      annotationTypesMap.put(key, listOfFeatures);
-                    }
-                    if(!listOfFeatures.contains(featureName)) {
-                      listOfFeatures.add(featureName);
+              Hits corpusHits = searcher.search(tq);
+              for(int i = 0; i < corpusHits.length(); i++) {
+                Document luceneDoc = corpusHits.doc(i);
+                String annotationSetID =
+                  luceneDoc.get(Constants.ANNOTATION_SET_ID);
+                if(toReturn.contains(corpus + ";" + annotationSetID)) continue;
+                toReturn.add(corpus + ";" + annotationSetID);
+
+                // lets create a boolean query
+                Term annotSetTerm =
+                  new Term(Constants.ANNOTATION_SET_ID, annotationSetID);
+                TermQuery atq = new TermQuery(annotSetTerm);
+
+                BooleanQuery bq = new BooleanQuery();
+                bq.add(tq, true, false);
+                bq.add(atq, true, false);
+                gate.creole.annic.apache.lucene.search.Searcher indexFeatureSearcher =
+                  new IndexSearcher(indexLocation);
+                try {
+                  Hits indexFeaturesHits = searcher.search(bq);
+                  for(int j = 0; j < indexFeaturesHits.length(); j++) {
+                    Document aDoc = indexFeaturesHits.doc(j);
+                    String indexedFeatures =
+                      aDoc.get(Constants.INDEXED_FEATURES);
+                    if(indexedFeatures != null) {
+                      String[] features = indexedFeatures.split(";");
+                      for(String aFeature : features) {
+                        // AnnotationType.FeatureName
+                        int index = aFeature.indexOf(".");
+                        if(index == -1) {
+                          continue;
+                        }
+                        String type = aFeature.substring(0, index);
+                        String featureName = aFeature.substring(index + 1);
+                        String key =
+                          corpus + ";" + annotationSetID + ";" + type;
+                        List<String> listOfFeatures =
+                          annotationTypesMap.get(key);
+                        if(listOfFeatures == null) {
+                          listOfFeatures = new ArrayList<String>();
+                          annotationTypesMap.put(key, listOfFeatures);
+                        }
+                        if(!listOfFeatures.contains(featureName)) {
+                          listOfFeatures.add(featureName);
+                        }
+                      }
                     }
                   }
                 }
-              }
-              } finally {
-                indexFeatureSearcher.close();
+                finally {
+                  indexFeatureSearcher.close();
+                }
               }
             }
-            } finally {
+            finally {
               searcher.close();
             }
           }
@@ -574,8 +481,7 @@ public class LuceneSearcher implements Searcher {
     }
     return toReturn.toArray(new String[0]);
   }
-  
-  
+
   /**
    * Gets the search parameters set by user.
    */
@@ -586,7 +492,8 @@ public class LuceneSearcher implements Searcher {
   /**
    * A Map used for caching query tokens created for a query.
    */
-  private Map<String, List<String>> queryTokens = new HashMap<String, List<String>>();
+  private Map<String, List<String>> queryTokens =
+    new HashMap<String, List<String>>();
 
   /**
    * Gets the query tokens for the given query.
@@ -609,84 +516,80 @@ public class LuceneSearcher implements Searcher {
   }
 
   /**
-   * This method allow exporting results in to the provided file. This
-   * method has not been implemented yet.
+   * This method allow exporting results in to the provided file. This method
+   * has not been implemented yet.
    */
   public void exportResults(File outputFile) {
     throw new RuntimeException("ExportResults method is not implemented yet!");
   }
 
-  public int freq(String corpusToSearchIn,
-          String annotationSetToSearchIn, String annotationType,
-          String featureName, String value) throws SearchException {
+  public int freq(String corpusToSearchIn, String annotationSetToSearchIn,
+    String annotationType, String featureName, String value)
+    throws SearchException {
 
     String indexLocation;
     try {
-      indexLocation = new File(((URL)datastore
-        .getIndexer().getParameters().get(Constants.INDEX_LOCATION_URL))
-        .toURI()).getAbsolutePath();
+      indexLocation =
+        new File(((URL)datastore.getIndexer().getParameters().get(
+          Constants.INDEX_LOCATION_URL)).toURI()).getAbsolutePath();
 
-    } catch(URISyntaxException use) {
-      indexLocation = new File(((URL)datastore
-        .getIndexer().getParameters().get(Constants.INDEX_LOCATION_URL))
-        .getFile()).getAbsolutePath();
+    }
+    catch(URISyntaxException use) {
+      indexLocation =
+        new File(((URL)datastore.getIndexer().getParameters().get(
+          Constants.INDEX_LOCATION_URL)).getFile()).getAbsolutePath();
     }
     IndexSearcher indexSearcher;
     try { // open the IndexSearcher
       indexSearcher = new IndexSearcher(indexLocation);
-    } catch (IOException e) {
+    }
+    catch(IOException e) {
       e.printStackTrace();
       return -1;
     }
-    int result = StatsCalculator.freq(indexSearcher,
-      corpusToSearchIn, annotationSetToSearchIn,
-      annotationType, featureName, value);
+    int result =
+      StatsCalculator.freq(indexSearcher, corpusToSearchIn,
+        annotationSetToSearchIn, annotationType, featureName, value);
     try { // close the IndexSearcher
       indexSearcher.close();
-    } catch (IOException ioe) {
+    }
+    catch(IOException ioe) {
       ioe.printStackTrace();
       return -1;
     }
     return result;
   }
 
-  public int freq(String corpusToSearchIn,
-          String annotationSetToSearchIn, String annotationType)
-          throws SearchException {
-    return this.freq(corpusToSearchIn,
-          annotationSetToSearchIn, annotationType,
-          null, null);
+  public int freq(String corpusToSearchIn, String annotationSetToSearchIn,
+    String annotationType) throws SearchException {
+    return this.freq(corpusToSearchIn, annotationSetToSearchIn, annotationType,
+      null, null);
   }
 
-  public int freq(String corpusToSearchIn,
-          String annotationSetToSearchIn, String annotationType,
-          String featureName) throws SearchException {
-    return this.freq(corpusToSearchIn,
-          annotationSetToSearchIn, annotationType,
-          featureName, null);
+  public int freq(String corpusToSearchIn, String annotationSetToSearchIn,
+    String annotationType, String featureName) throws SearchException {
+    return this.freq(corpusToSearchIn, annotationSetToSearchIn, annotationType,
+      featureName, null);
   }
 
-  public int freq(List<Hit> patternsToSearchIn,
-          String annotationType, String feature, String value,
-          boolean inMatchedSpan, boolean inContext) throws SearchException {
-    return StatsCalculator.freq(patternsToSearchIn,
-          annotationType, feature, value,
-          inMatchedSpan, inContext);
+  public int freq(List<Hit> patternsToSearchIn, String annotationType,
+    String feature, String value, boolean inMatchedSpan, boolean inContext)
+    throws SearchException {
+    return StatsCalculator.freq(patternsToSearchIn, annotationType, feature,
+      value, inMatchedSpan, inContext);
   }
 
-  public int freq(List<Hit> patternsToSearchIn,
-          String annotationType, boolean inMatchedSpan, boolean inContext) throws SearchException {
-    return StatsCalculator.freq(patternsToSearchIn,
-          annotationType, inMatchedSpan, inContext);
+  public int freq(List<Hit> patternsToSearchIn, String annotationType,
+    boolean inMatchedSpan, boolean inContext) throws SearchException {
+    return StatsCalculator.freq(patternsToSearchIn, annotationType,
+      inMatchedSpan, inContext);
   }
 
-  public Map<String, Integer> freqForAllValues(
-          List<Hit> patternsToSearchIn, String annotationType,
-          String feature, boolean inMatchedSpan, boolean inContext)
-          throws SearchException {
-    return StatsCalculator.freqForAllValues(
-          patternsToSearchIn, annotationType,
-          feature, inMatchedSpan, inContext);
+  public Map<String, Integer> freqForAllValues(List<Hit> patternsToSearchIn,
+    String annotationType, String feature, boolean inMatchedSpan,
+    boolean inContext) throws SearchException {
+    return StatsCalculator.freqForAllValues(patternsToSearchIn, annotationType,
+      feature, inMatchedSpan, inContext);
   }
 
   public void setLuceneDatastore(gate.persist.LuceneDataStoreImpl datastore) {
