@@ -21,6 +21,7 @@ import java.util.List;
 import gate.Document;
 import gate.creole.AbstractResource;
 import gate.gui.Handle;
+import gate.gui.annedit.AnnotationData;
 
 /**
  * A convenience implementation of {@link gate.gui.docview.DocumentView} that
@@ -58,6 +59,9 @@ public abstract class AbstractDocumentView extends AbstractResource
     return active;
   }
 
+  public void setSelectedAnnotations(List<AnnotationData> selectedAnnots){
+    //do nothing
+  }
   
   /* 
    * By default return an empty list of actions.

@@ -25,6 +25,7 @@ import gate.*;
 import gate.creole.*;
 import gate.gui.ActionsPublisher;
 import gate.gui.MainFrame;
+import gate.gui.annedit.AnnotationData;
 import gate.swing.VerticalTextIcon;
 import gate.util.GateRuntimeException;
 
@@ -444,7 +445,34 @@ public class DocumentEditor extends AbstractVisualResource
     validate();
   }  
   
-
+  /**
+   * Called to change the set of selected annotations. This new value will be 
+   * sent to all active constituent views.
+   * @param selectedAnnots
+   */
+  public void setSelectedAnnotations(List<AnnotationData> selectedAnnots){
+    selectedAnnotations.clear();
+    selectedAnnotations.addAll(selectedAnnots);
+    //notify all active views
+    for(DocumentView aView : centralViews){
+      if(aView.isActive()) aView.setSelectedAnnotations(selectedAnnotations);
+    }
+    for(DocumentView aView : horizontalViews){
+      if(aView.isActive()) aView.setSelectedAnnotations(selectedAnnotations);
+    }
+    for(DocumentView aView : verticalViews){
+      if(aView.isActive()) aView.setSelectedAnnotations(selectedAnnotations);
+    }
+  }
+  
+  /**
+   * Gets the current set of selected annotations.
+   * @return
+   */
+  public List<AnnotationData> getSelectedAnnotations(){
+    return selectedAnnotations;
+  }
+  
   protected void updateSplitLocation(JSplitPane split, int foo){
     Component left = split.getLeftComponent();
     Component right = split.getRightComponent();
@@ -906,6 +934,11 @@ public class DocumentEditor extends AbstractVisualResource
   /** The dialog used for text search */
   private SearchDialog searchDialog;
 
+  /**
+   * Cahced value for the selected annotations.
+   */
+  private List<AnnotationData> selectedAnnotations = new ArrayList<AnnotationData>();
+  
   protected JToolBar topBar;
 //  protected JToolBar rightBar;
 //  protected JToolBar leftBar;
@@ -917,19 +950,19 @@ public class DocumentEditor extends AbstractVisualResource
   /**
    * A list of {@link DocumentView} objects of type {@link DocumentView#CENTRAL}
    */
-  protected List centralViews;
+  protected List<DocumentView> centralViews;
   
   /**
    * A list of {@link DocumentView} objects of type 
    * {@link DocumentView#VERTICAL}
    */
-  protected List verticalViews;
+  protected List<DocumentView> verticalViews;
 
   /**
    * A list of {@link DocumentView} objects of type 
    * {@link DocumentView#HORIZONTAL}
    */
-  protected List horizontalViews;
+  protected List<DocumentView> horizontalViews;
 
   /**
    * The index in {@link #centralViews} of the currently active central view.

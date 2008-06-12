@@ -123,7 +123,9 @@ public class SchemaFeaturesEditor extends JPanel{
           
           if(featureMap != null && e.getSource() != SchemaFeaturesEditor.this){
             if(newValue != null){
-              featureMap.put(featureName, newValue);
+              if(newValue != featureMap.get(featureName)){ 
+                featureMap.put(featureName, newValue);
+              }
             }else{
               featureMap.remove(featureName);
             }

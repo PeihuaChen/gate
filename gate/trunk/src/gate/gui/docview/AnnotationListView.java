@@ -151,9 +151,23 @@ public class AnnotationListView extends AbstractDocumentView
                   " Annotations (" +
                   Integer.toString(table.getSelectedRowCount()) +
                   "selected)");
+          //update the list of selected annotations globally
+          synchronized(this) {
+            if(localSelectionUpating) return;
+          }          
+          int[] viewRows = table.getSelectedRows();
+          AnnotationData aHandler = null;
+          List<AnnotationData> selAnns = new ArrayList<AnnotationData>();
+          for(int i = 0; i < viewRows.length; i++){
+            int modelRow = table.rowViewToModel(viewRows[i]);
+            if(modelRow >= 0){
+              selAnns.add(annDataList.get(modelRow));
+            }
+          }
+          owner.setSelectedAnnotations(selAnns);
           //blink the selected annotations
-          textView.removeAllBlinkingHighlights();
-          showHighlights();
+//          textView.removeAllBlinkingHighlights();
+//          showHighlights();
         }
     });
 
@@ -250,7 +264,7 @@ public class AnnotationListView extends AbstractDocumentView
    */
   protected void registerHooks() {
     //this is called on activation
-    showHighlights();
+//    showHighlights();
   }
 
   /* (non-Javadoc)
@@ -259,7 +273,7 @@ public class AnnotationListView extends AbstractDocumentView
   protected void unregisterHooks() {
     //this is called on de-activation
     //remove highlights
-    textView.removeAllBlinkingHighlights();
+//    textView.removeAllBlinkingHighlights();
   }
 
   /* (non-Javadoc)
@@ -272,17 +286,17 @@ public class AnnotationListView extends AbstractDocumentView
     tableModel.fireTableDataChanged();
   }
 
-  protected void showHighlights(){
-    int[] viewRows = table.getSelectedRows();
-    AnnotationData aHandler = null;
-    for(int i = 0; i < viewRows.length; i++){
-      int modelRow = table.rowViewToModel(viewRows[i]);
-      if(modelRow >= 0){
-        aHandler = annDataList.get(modelRow);
-        textView.addBlinkingHighlight(aHandler.getAnnotation());
-      }
-    }    
-  }
+//  protected void showHighlights(){
+//    int[] viewRows = table.getSelectedRows();
+//    AnnotationData aHandler = null;
+//    for(int i = 0; i < viewRows.length; i++){
+//      int modelRow = table.rowViewToModel(viewRows[i]);
+//      if(modelRow >= 0){
+//        aHandler = annDataList.get(modelRow);
+//        textView.addBlinkingHighlight(aHandler.getAnnotation());
+//      }
+//    }    
+//  }
 
   /**
    * Adds an annotation to be displayed in the list.
@@ -306,14 +320,18 @@ public class AnnotationListView extends AbstractDocumentView
     if(row >= 0){
       AnnotationData aHandler = annDataList.get(row);
       //remove from selection, if the table is built
-      if(table != null){
-        int viewRow = table.rowModelToView(row);
-        if(table.isRowSelected(viewRow)){
-          table.getSelectionModel().removeIndexInterval(viewRow, viewRow);
-          //remove the blinking highlight
-          textView.removeBlinkingHighlight(aHandler.getAnnotation());
-        }
+      List<AnnotationData> selAnns = owner.getSelectedAnnotations();
+      if(selAnns.remove(tag)){
+        owner.setSelectedAnnotations(selAnns);
       }
+//      if(table != null){
+//        int viewRow = table.rowModelToView(row);
+//        if(table.isRowSelected(viewRow)){
+//          table.getSelectionModel().removeIndexInterval(viewRow, viewRow);
+//          //remove the blinking highlight
+//          textView.removeBlinkingHighlight(aHandler.getAnnotation());
+//        }
+//      }
       aHandler.getAnnotation().removeAnnotationListener(AnnotationListView.this);
       annDataList.remove(row);
       if(tableModel != null) tableModel.fireTableRowsDeleted(row, row);
@@ -409,6 +427,59 @@ public class AnnotationListView extends AbstractDocumentView
       }
     }
   }
+
+  
+  /* (non-Javadoc)
+   * @see gate.gui.docview.AbstractDocumentView#setSelectedAnnotations(java.util.List)
+   */
+  @Override
+  public void setSelectedAnnotations(List<AnnotationData> selectedAnnots) {
+    //if the list of selected annotations differs from the current selection,
+    //update the selection.
+    //otherwise do nothing (to break infinite looping)
+    
+    //first get the local list of selected annotations
+    int[] viewRows = table.getSelectedRows();
+    AnnotationData aHandler = null;
+    List<AnnotationData> localSelAnns = new ArrayList<AnnotationData>();
+    for(int i = 0; i < viewRows.length; i++){
+      int modelRow = table.rowViewToModel(viewRows[i]);
+      if(modelRow >= 0){
+        localSelAnns.add(annDataList.get(modelRow));
+      }
+    }
+    //now compare with the new value 
+    if(localSelAnns.size() == selectedAnnots.size()){
+      //same size, we need to actually compare contents
+      localSelAnns.removeAll(selectedAnnots);
+      if(localSelAnns.isEmpty()){
+        //lists are the same -> exit!
+        return;
+      }
+    }
+    //if we got this far, the selection lists were different
+    try{
+      //block upward events
+      synchronized(this) {
+        localSelectionUpating = true;
+      }
+      //update the local selection
+      table.getSelectionModel().clearSelection();
+      for(AnnotationData aData : selectedAnnots){
+        int modelRow = annDataList.indexOf(aData);
+        if(modelRow != -1){
+          int viewRow = table.rowModelToView(modelRow);
+          table.getSelectionModel().addSelectionInterval(viewRow, viewRow);
+        }
+      }
+    }finally{
+      //re-enable upward events
+      synchronized(this) {
+        localSelectionUpating = false;
+      }      
+    }
+  }
+
 
   /**
    * Selects the annotation for the given tag.
@@ -561,6 +632,14 @@ public class AnnotationListView extends AbstractDocumentView
    * displayed by this view.
    */
   protected List<AnnotationData> annDataList;
+  
+  /**
+   * Flag used to mark the fact that the table selection is currently being 
+   * updated, to synchronise it with the global selection.
+   * This is used to block update events being sent to the owner, while the 
+   * current selection is adjusted.
+   */
+  protected boolean localSelectionUpating = false;
   
   protected JPanel mainPanel;
   protected JLabel statusLabel;

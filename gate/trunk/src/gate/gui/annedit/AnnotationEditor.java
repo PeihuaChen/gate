@@ -36,6 +36,13 @@ public interface AnnotationEditor extends VisualResource{
   public boolean editingFinished();
   
   /**
+   * Checks whether the annotation editor is active (shown on screen and ready 
+   * to edit annotations. 
+   * @return <tt>true</tt> iff the editor is active.
+   */
+  public boolean isActive();
+  
+  /**
    * Finds the best location for the editor dialog for a given span of text
    */
   public void placeDialog(int start, int end);

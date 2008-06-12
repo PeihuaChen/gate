@@ -14,9 +14,11 @@
 package gate.gui.docview;
 
 import java.awt.Component;
+import java.util.List;
 
 import gate.VisualResource;
 import gate.gui.ActionsPublisher;
+import gate.gui.annedit.AnnotationData;
 
 /**
  * A document viewer is composed out of several views (like the one showing the
@@ -62,6 +64,15 @@ public interface DocumentView extends ActionsPublisher, VisualResource{
    * @param editor the {@link DocumentEditor} that contains this view.
    */
   public void setOwner(DocumentEditor editor);
+  
+  /**
+   * Some document views can use the concept of selected annotations. This 
+   * method is called to change the set of selected annotations.
+   * The recommended way to change the selected annotations set is by calling
+   * the {@link DocumentEditor#setSelectedAnnotations(List)} method. 
+   * @param selectedAnnots
+   */
+  public void setSelectedAnnotations(List<AnnotationData> selectedAnnots);
   
   /**
    * Constant for the CENTRAL type of the view inside the document editor. Views
