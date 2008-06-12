@@ -470,6 +470,7 @@ public class AnnotationListView extends AbstractDocumentView
         if(modelRow != -1){
           int viewRow = table.rowModelToView(modelRow);
           table.getSelectionModel().addSelectionInterval(viewRow, viewRow);
+          table.scrollRectToVisible(table.getCellRect(viewRow, 0, true));
         }
       }
     }finally{
