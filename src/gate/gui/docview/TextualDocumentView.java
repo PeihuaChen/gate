@@ -29,6 +29,7 @@ import gate.Document;
 import gate.corpora.DocumentContentImpl;
 import gate.event.DocumentEvent;
 import gate.event.DocumentListener;
+import gate.gui.annedit.AnnotationData;
 import gate.util.*;
 
 
@@ -39,13 +40,13 @@ import gate.util.*;
 public class TextualDocumentView extends AbstractDocumentView {
 
   public TextualDocumentView(){
-    blinkingTagsForAnnotations = new HashMap<Integer, HighlightData>();
+    blinkingTagsForAnnotations = new HashMap<AnnotationData, HighlightData>();
     //use linked lists as they grow and shrink in constant time and direct access
     //is not required.
     highlightsToAdd = new LinkedList<HighlightData>();
     highlightsToRemove = new LinkedList<HighlightData>();
-    blinkingHighlightsToRemove = new LinkedList<Integer>();
-    blinkingHighlightsToAdd = new LinkedList<Annotation>();
+    blinkingHighlightsToRemove = new LinkedList<AnnotationData>();
+    blinkingHighlightsToAdd = new LinkedList<AnnotationData>();
     gateDocListener = new GateDocumentListener();
   }
   
@@ -55,8 +56,8 @@ public class TextualDocumentView extends AbstractDocumentView {
     highlightsMinder.stop();
   }
 
-  public Object addHighlight(Annotation ann, AnnotationSet set, Color colour){
-    HighlightData hData = new HighlightData(ann, set, colour);
+  public Object addHighlight(AnnotationData aData, Color colour){
+    HighlightData hData = new HighlightData(aData, colour);
     synchronized(TextualDocumentView.this) {
       highlightsToAdd.add(hData);
     }
@@ -75,10 +76,9 @@ public class TextualDocumentView extends AbstractDocumentView {
    * elements corresponds to the order defined by the iterator of the 
    * collection of annotations provided. 
    */
-  public List addHighlights(Collection<Annotation> annotations, 
-          AnnotationSet set, Color colour){
-    List tags = new ArrayList();
-    for(Annotation ann : annotations) tags.add(addHighlight(ann, set, colour));
+  public List addHighlights(Collection<AnnotationData> annotations, Color colour){
+    List<Object> tags = new ArrayList<Object>();
+    for(AnnotationData aData : annotations) tags.add(addHighlight(aData, colour));
     return tags;
   }
   
@@ -138,43 +138,65 @@ public class TextualDocumentView extends AbstractDocumentView {
     textView.getHighlighter().changeHighlight(tag, newStart, newEnd);
   }
 
-  public void addBlinkingHighlight(Annotation ann){
-    synchronized(TextualDocumentView.this){
-      blinkingHighlightsToAdd.add(ann);
-      
-//      blinkingTagsForAnnotations.put(ann.getId(), 
-//              new HighlightData(ann, null, null));
-      highlightsMinder.restart();
-    }
-  }
-  
-  public void removeBlinkingHighlight(Annotation ann){
-    synchronized(TextualDocumentView.this) {
-      blinkingHighlightsToRemove.add(ann.getId());
-      highlightsMinder.restart();
-    }
-  }
   
   
-  public void removeAllBlinkingHighlights(){
+  /**
+   * Removes all blinking highlights and shows the new ones, corresponding to 
+   * the new set of selected annotations 
+   */
+  @Override
+  public void setSelectedAnnotations(List<AnnotationData> selectedAnnots) {
     synchronized(TextualDocumentView.this){
       //clear the pending queue, if any
       blinkingHighlightsToAdd.clear();
       //request the removal of existing highlights 
       blinkingHighlightsToRemove.addAll(blinkingTagsForAnnotations.keySet());
-//      Iterator annIdIter = new ArrayList(blinkingTagsForAnnotations.keySet()).
-//        iterator();
-//      while(annIdIter.hasNext()){
-//        HighlightData annTag = blinkingTagsForAnnotations.remove(annIdIter.next());
-//        Object tag = annTag.tag;
-//        if(tag != null){
-//          Highlighter highlighter = textView.getHighlighter();
-//          highlighter.removeHighlight(tag);
-//        }
-//      }
-      highlightsMinder.restart();
+      //add all the new annotations to the "to add" queue
+      for(AnnotationData aData : selectedAnnots){
+        blinkingHighlightsToAdd.add(aData);
+      }
+      //restart the timer
+      highlightsMinder.restart(); 
     }
   }
+
+//  public void addBlinkingHighlight(Annotation ann){
+//    synchronized(TextualDocumentView.this){
+//      blinkingHighlightsToAdd.add(ann);
+//      
+////      blinkingTagsForAnnotations.put(ann.getId(), 
+////              new HighlightData(ann, null, null));
+//      highlightsMinder.restart();
+//    }
+//  }
+  
+//  public void removeBlinkingHighlight(Annotation ann){
+//    synchronized(TextualDocumentView.this) {
+//      blinkingHighlightsToRemove.add(ann.getId());
+//      highlightsMinder.restart();
+//    }
+//  }
+  
+  
+//  public void removeAllBlinkingHighlights(){
+//    synchronized(TextualDocumentView.this){
+//      //clear the pending queue, if any
+//      blinkingHighlightsToAdd.clear();
+//      //request the removal of existing highlights 
+//      blinkingHighlightsToRemove.addAll(blinkingTagsForAnnotations.keySet());
+////      Iterator annIdIter = new ArrayList(blinkingTagsForAnnotations.keySet()).
+////        iterator();
+////      while(annIdIter.hasNext()){
+////        HighlightData annTag = blinkingTagsForAnnotations.remove(annIdIter.next());
+////        Object tag = annTag.tag;
+////        if(tag != null){
+////          Highlighter highlighter = textView.getHighlighter();
+////          highlighter.removeHighlight(tag);
+////        }
+////      }
+//      highlightsMinder.restart();
+//    }
+//  }
   
   
   public int getType() {
@@ -291,8 +313,8 @@ public class TextualDocumentView extends AbstractDocumentView {
       
       //first remove the queued highlights
       Highlighter highlighter = textView.getHighlighter();      
-      for(Integer annId : blinkingHighlightsToRemove){
-        HighlightData annTag = blinkingTagsForAnnotations.remove(annId);
+      for(AnnotationData aData : blinkingHighlightsToRemove){
+        HighlightData annTag = blinkingTagsForAnnotations.remove(aData);
         if(annTag != null){
           Object tag = annTag.tag;
           if(tag != null) highlighter.removeHighlight(tag);
@@ -301,9 +323,9 @@ public class TextualDocumentView extends AbstractDocumentView {
       }
       blinkingHighlightsToRemove.clear();
       //then add the queued highlights
-      for(Annotation ann : blinkingHighlightsToAdd){
-        blinkingTagsForAnnotations.put(ann.getId(), 
-                new HighlightData(ann, null, null));
+      for(AnnotationData aData : blinkingHighlightsToAdd){
+        blinkingTagsForAnnotations.put(aData, 
+                new HighlightData(aData, null));
       }
       blinkingHighlightsToAdd.clear();
 
@@ -396,9 +418,9 @@ public class TextualDocumentView extends AbstractDocumentView {
     Color colour;
     Object tag;
 
-    public HighlightData(Annotation annotation, AnnotationSet set, Color colour) {
-      this.annotation = annotation;
-      this.set = set;
+    public HighlightData(AnnotationData aData, Color colour) {
+      this.annotation = aData.getAnnotation();
+      this.set = aData.getAnnotationSet();
       this.colour = colour;
     }
   }
@@ -501,9 +523,9 @@ public class TextualDocumentView extends AbstractDocumentView {
 
   /**
    * The annotations used for blinking highlights and their tags. A map from 
-   * {@link Annotation} ID to tag(i.e. {@link Object}).
+   * {@link AnnotationData} to tag(i.e. {@link Object}).
    */
-  protected Map<Integer, HighlightData> blinkingTagsForAnnotations;
+  protected Map<AnnotationData, HighlightData> blinkingTagsForAnnotations;
   
   /**
    * This map stores the highlight tags from the text view's highlighter 
@@ -527,13 +549,13 @@ public class TextualDocumentView extends AbstractDocumentView {
    * Used internally to store the annotations for which blinking highlights 
    * need to be removed.
    */
-  protected List<Integer> blinkingHighlightsToRemove;  
+  protected List<AnnotationData> blinkingHighlightsToRemove;  
   
   /**
    * Used internally to store the annotations for which blinking highlights 
    * need to be added.
    */
-  protected List<Annotation> blinkingHighlightsToAdd;  
+  protected List<AnnotationData> blinkingHighlightsToAdd;  
   
   protected Timer highlightsMinder;
   

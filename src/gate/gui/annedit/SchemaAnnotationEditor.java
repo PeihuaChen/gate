@@ -49,7 +49,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     //update the selection in the list view
     //this is necessary because sometimes the call to eidtAnnotaiton is 
     //internally received from the search and annotate function.
-    updateListSelection(3);
+//    updateListSelection(3);
     //update the editor display
     String annType = annotation == null ? null : annotation.getType();
     //update the border for the types choice
@@ -226,6 +226,14 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     return true;
   }
 
+  
+  /* (non-Javadoc)
+   * @see gate.gui.annedit.AnnotationEditor#isActive()
+   */
+  public boolean isActive() {
+    return dialog.isVisible();
+  }
+
   /**
    * Finds the best location for the editor dialog for a given span of text
    */
@@ -318,12 +326,6 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
   private JTextComponent textComponent;
   
   /**
-   * The list selection model (originatig from the list annoation view) that 
-   * this editor listens to.
-   */
-  private ListSelectionModel listSelectionModel;
-  
-  /**
    * JChoice used for selecting the annotation type.
    */
   protected JChoice typesChoice;
@@ -349,13 +351,6 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
    * Listener used to hide the editing window when the text is hidden.
    */
   protected AncestorListener textAncestorListener;
-  
-  /**
-   * A listener for selection event from the list view used to either follow
-   * selection changes or to veto a change when the current editing action
-   * has not completed.
-   */
-  protected ListSelectionListener listSelectionListener;
   
   
   /**
@@ -420,28 +415,10 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
          textComponent.addAncestorListener(textAncestorListener);
        }
       }
-      ListSelectionModel newListSelModel = 
-          getOwner().getListComponent() == null ? 
-          null : 
-          getOwner().getListComponent().getSelectionModel(); 
-      if(listSelectionModel != newListSelModel){
-        //remove old listener
-        if(listSelectionModel != null){
-          listSelectionModel.removeListSelectionListener(listSelectionListener);
-        }
-        listSelectionModel = newListSelModel;
-        //register new listener
-        if(listSelectionModel != null){
-          listSelectionModel.addListSelectionListener(listSelectionListener);
-        }
-      }
     }else{
       //no new owner -> just remove old listeners
       if(textComponent != null){
         textComponent.removeAncestorListener(textAncestorListener);
-      }
-      if(listSelectionModel != null){
-        listSelectionModel.removeListSelectionListener(listSelectionListener);
       }
     }
   }
@@ -517,52 +494,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
         }
       }
     };
-    
-    listSelectionListener = new ListSelectionListener(){
-      /**
-       * Flag used to disable this listener while it's making changes to the 
-       * selection itself.
-       * All calls to this listener should happen from the Swing thread so
-       * synchronization should not be necessary. 
-       */
-      private boolean changeInProgress = false;
-      public void valueChanged(ListSelectionEvent e) {
-        if(changeInProgress) return;
-        try{
-          changeInProgress = true;
-          AnnotationList annListView = getOwner().getListComponent();
-          if(annListView != null){
-            int selectedIndex = annListView.getSelectionModel().
-                getMaxSelectionIndex();
-            if(selectedIndex != -1){
-              //get the new annotation
-              AnnotationData aData = annListView.getAnnotationAtRow(
-                      selectedIndex);
-              //and check it's really new
-              if(aData.getAnnotationSet() != annSet || 
-                      aData.getAnnotation() != annotation){
-                if(editingFinished()){
-                  //ok, we can move to the new annotation
-                    editAnnotation(aData.getAnnotation(), aData.getAnnotationSet());
-                }else{
-                  //current annotation not finished, block selection change
-                  annListView.getSelectionModel().clearSelection();
-                  int annRow = annListView.getRowForAnnotation(
-                          new AnnotationDataImpl(annSet, annotation));
-                  if(annRow >= 0){
-                    annListView.getSelectionModel().addSelectionInterval(annRow, 
-                            annRow);
-                  }
-                }
-              }
-            }
-          }
-        }finally{
-          //make sure we re-enable the listener once we're done.
-          changeInProgress = false;
-        }
-      }      
-    };
+
   }  
   
   public void cleanup(){

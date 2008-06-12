@@ -65,7 +65,9 @@ public class AnnotationSetsView extends AbstractDocumentView
     //show new annotation type
     setTypeSelected(set.getName(), ann.getType(), true);
     //select new annotation
-    selectAnnotation(ann, set);
+    List<AnnotationData> selAnns = new ArrayList<AnnotationData>();
+    selAnns.add(new AnnotationDataImpl(set, ann));
+    owner.setSelectedAnnotations(selAnns);
   }
 
   /* (non-Javadoc)
@@ -629,32 +631,48 @@ public class AnnotationSetsView extends AbstractDocumentView
   }
   
  
+  
+  /* (non-Javadoc)
+   * @see gate.gui.docview.AbstractDocumentView#setSelectedAnnotations(java.util.List)
+   */
+  @Override
+  public void setSelectedAnnotations(List<AnnotationData> selectedAnnots) {
+    //for this view, only a single selected annotation makes sense.
+    //by convention, we use the first one
+    if(selectedAnnots.size() > 0){
+      final AnnotationData aData = selectedAnnots.get(0);
+      //queue the select action to the events minder
+      PerformActionEvent actionEvent = new PerformActionEvent(new Runnable(){
+        public void run(){
+          //select the annotation for editing, if editing enabled
+          if(annotationEditor != null && annotationEditor.isActive()){
+            if(annotationEditor.getAnnotationSetCurrentlyEdited() != 
+                   aData.getAnnotationSet() ||
+               annotationEditor.getAnnotationCurrentlyEdited() != 
+                   aData.getAnnotation()){
+              annotationEditor.editAnnotation(aData.getAnnotation(),
+                      aData.getAnnotationSet());
+            }
+          }
+        }
+      });
+      synchronized(AnnotationSetsView.this) {
+        pendingEvents.offer(actionEvent);
+        eventMinder.restart();
+      }
+    }
+  }
+
   /**
-   * Make sure the given annotation is selected in the annotation list view, if
-   * appropriate. 
+   * Sets a particular annotation as selected. If the list view is visible
+   * and active, it makes sure that the same annotation is selected there.
+   * If the annotation editor exists and is active, it switches it to this 
+   * current annotation.
    * @param ann the annotation
    * @param annSet the parent set
    */
-  protected void selectAnnotation(final Annotation ann, 
+  public void selectAnnotation(final Annotation ann, 
           final AnnotationSet annSet){
-    //queue the select action to the events minder
-    PerformActionEvent actionEvent = new PerformActionEvent(new Runnable(){
-      public void run(){
-        if(listView != null && listView.isActive() &&
-                listView.getGUI().isVisible()){
-          TypeHandler tHandler = getTypeHandler(annSet.getName(), ann.getType());
-          if(tHandler != null){
-            Object tag = tHandler.annListTagsForAnn.get(ann.getId());
-            listView.selectAnnotationForTag(tag);
-          }else{
-          }
-        }
-      }
-    });
-    synchronized(AnnotationSetsView.this) {
-      pendingEvents.offer(actionEvent);
-      eventMinder.restart();
-    }
   }
   
   protected class SetsTableModel extends AbstractTableModel{
@@ -1074,7 +1092,7 @@ public class AnnotationSetsView extends AbstractDocumentView
       this.setHandler = setHandler;
       this.name = name;
       colour = getColor(name);
-      hghltTagsForAnn = new HashMap();
+      hghltTagsForAnnId = new HashMap<Integer, Object>();
       annListTagsForAnn = new HashMap();
       changeColourAction = new ChangeColourAction();
       annotationCount = 0;
@@ -1094,14 +1112,18 @@ public class AnnotationSetsView extends AbstractDocumentView
       if(isSelected()){
         //redraw the highlights
         //hide highlights
-        textView.removeHighlights(hghltTagsForAnn.values());
-        hghltTagsForAnn.clear();
+        textView.removeHighlights(hghltTagsForAnnId.values());
+        hghltTagsForAnnId.clear();
         //show highlights
-        List<Annotation> annots = new ArrayList<Annotation>(setHandler.set.get(name));
-        List tags = textView.addHighlights(annots, setHandler.set, 
-                TypeHandler.this.colour);
+        List<Annotation> annots = new ArrayList<Annotation>(
+                setHandler.set.get(name));
+        List<AnnotationData>aDataList = new ArrayList<AnnotationData>();
+        for(Annotation ann : annots){
+          aDataList.add(new AnnotationDataImpl(setHandler.set, ann));
+        }
+        List tags = textView.addHighlights(aDataList, TypeHandler.this.colour);
         for(int i = 0; i < annots.size(); i++){
-          hghltTagsForAnn.put(annots.get(i).getId(), tags.get(i));
+          hghltTagsForAnnId.put(annots.get(i).getId(), tags.get(i));
         }
       }
       //update the table display
@@ -1116,25 +1138,26 @@ public class AnnotationSetsView extends AbstractDocumentView
       if(selected){
         //make sure set is expanded
         setHandler.setExpanded(true);
-      	//show highlights
-        hghltTagsForAnn.clear();
-        List tags = textView.addHighlights(annots, setHandler.set, colour);
-        for(int i = 0; i < annots.size(); i++){
-          hghltTagsForAnn.put(annots.get(i).getId(), tags.get(i));
-        }
         //add to the list view
         annListTagsForAnn.clear();
         List<AnnotationData> listTags = 
             listView.addAnnotations(annots, setHandler.set);
         for(AnnotationData aData: listTags)
           annListTagsForAnn.put(aData.getAnnotation().getId(), aData);
+        //show highlights
+        hghltTagsForAnnId.clear();
+//        List tags = textView.addHighlights(annots, setHandler.set, colour);
+        List tags = textView.addHighlights(listTags, colour);
+        for(int i = 0; i < annots.size(); i++){
+          hghltTagsForAnnId.put(annots.get(i).getId(), tags.get(i));
+        }        
       }else{
         //hide highlights
         try{
           listView.removeAnnotations(annListTagsForAnn.values());
-          textView.removeHighlights(hghltTagsForAnn.values());
+          textView.removeHighlights(hghltTagsForAnnId.values());
         }finally{
-          hghltTagsForAnn.clear();
+          hghltTagsForAnnId.clear();
           annListTagsForAnn.clear();
         }
       }
@@ -1156,9 +1179,11 @@ public class AnnotationSetsView extends AbstractDocumentView
       annotationCount++;
       if(selected){
         //add new highlight
-        if(!hghltTagsForAnn.containsKey(ann.getId())) 
-            hghltTagsForAnn.put(ann.getId(), 
-            textView.addHighlight(ann, setHandler.set, colour));
+        if(!hghltTagsForAnnId.containsKey(ann.getId())) 
+            hghltTagsForAnnId.put(ann.getId(), 
+                    textView.addHighlight(
+                            new AnnotationDataImpl(setHandler.set, ann),
+                            colour));
         if(!annListTagsForAnn.containsKey(ann.getId())) 
             annListTagsForAnn.put(ann.getId(), 
             listView.addAnnotation(ann, setHandler.set));
@@ -1173,7 +1198,7 @@ public class AnnotationSetsView extends AbstractDocumentView
       annotationCount--;
       if(selected){
         //single annotation removal
-        Object tag = hghltTagsForAnn.remove(ann.getId());
+        Object tag = hghltTagsForAnnId.remove(ann.getId());
         if(tag != null) textView.removeHighlight(tag);
         AnnotationData listTag = annListTagsForAnn.remove(ann.getId());
         if(tag != null) listView.removeAnnotation(listTag);
@@ -1187,19 +1212,19 @@ public class AnnotationSetsView extends AbstractDocumentView
     
     protected void repairHighlights(int start, int end){
       //map from tag to annotation
-      List tags = new ArrayList(hghltTagsForAnn.size());
-      List<Annotation> annots = new ArrayList<Annotation>(hghltTagsForAnn.size());
-      Iterator annIter = hghltTagsForAnn.keySet().iterator();
+      List tags = new ArrayList(hghltTagsForAnnId.size());
+      List<Annotation> annots = new ArrayList<Annotation>(hghltTagsForAnnId.size());
+      Iterator annIter = hghltTagsForAnnId.keySet().iterator();
       while(annIter.hasNext()){
         Annotation ann = setHandler.set.get((Integer)annIter.next());
         int annStart = ann.getStartNode().getOffset().intValue();
         int annEnd = ann.getEndNode().getOffset().intValue();
         if((annStart <= start && start <= annEnd) ||
            (start <= annStart && annStart <= end)){
-          if(!hghltTagsForAnn.containsKey(ann.getId())){
+          if(!hghltTagsForAnnId.containsKey(ann.getId())){
             System.out.println("Error!!!");
           }
-          tags.add(hghltTagsForAnn.get(ann.getId()));
+          tags.add(hghltTagsForAnnId.get(ann.getId()));
           annots.add(ann);
         }
       }
@@ -1239,7 +1264,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     /**
      * Map from annotation ID (which is immutable) to highlight tag
      */
-    Map hghltTagsForAnn;
+    Map<Integer, Object> hghltTagsForAnnId;
 
     /**
      * Map from annotation ID (which is immutable) to AnnotationListView tag
@@ -1415,10 +1440,13 @@ public class AnnotationSetsView extends AbstractDocumentView
           }
 	        //make sure new annotation is visible
 	        setTypeSelected(set.getName(), ann.getType(), true);
+	        //edit the new annotation
+	        new EditAnnotationAction(new AnnotationDataImpl(set, ann)).
+	          actionPerformed(null);
 	        //select the newly created annotation
-	        selectAnnotation(ann, set);
+//	        selectAnnotation(ann, set);
 	        //show the editor
-	        annotationEditor.editAnnotation(ann, set);
+//	        annotationEditor.editAnnotation(ann, set);
 //	        annotationEditor.show(true);
         }catch(InvalidOffsetException ioe){
           //this should never happen
@@ -1829,7 +1857,11 @@ public class AnnotationSetsView extends AbstractDocumentView
       //if the editor is done with the current annotation, we can move to the 
       //next one
       if(annotationEditor.editingFinished()){
-        selectAnnotation(aData.getAnnotation(), aData.getAnnotationSet());
+        //set the annotation as selected
+        List<AnnotationData> selAnns = new ArrayList<AnnotationData>();
+        selAnns.add(aData);
+        owner.setSelectedAnnotations(selAnns);
+        //show the annotation editor
         annotationEditor.editAnnotation(aData.getAnnotation(), 
                 aData.getAnnotationSet());
       }

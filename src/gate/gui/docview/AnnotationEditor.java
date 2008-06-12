@@ -391,6 +391,14 @@ public class AnnotationEditor extends AbstractVisualResource
     owner.getTextComponent().addAncestorListener(textAncestorListener);
   }
   
+  
+  /* (non-Javadoc)
+   * @see gate.gui.annedit.AnnotationEditor#isActive()
+   */
+  public boolean isActive() {
+    return popupWindow.isVisible();
+  }
+
   public void editAnnotation(Annotation ann, AnnotationSet set){
     this.ann = ann;
     this.set = set;
