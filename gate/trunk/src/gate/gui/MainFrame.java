@@ -3413,7 +3413,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
   class HelpUserGuideAction extends AbstractAction {
     public HelpUserGuideAction() {
-      super("User Guide Content");
+      super("User Guide Contents");
       putValue(SHORT_DESCRIPTION, "This option needs an internet connection");
       putValue(ACCELERATOR_KEY,
         KeyStroke.getKeyStroke(KeyEvent.VK_F1, InputEvent.CTRL_MASK));
@@ -3476,76 +3476,76 @@ public class MainFrame extends JFrame implements ProgressListener,
   }
 
   private String getHelpUrlStringForRessourceClassOrComment(String classOrComment) {
-    String url = "http://gate.ac.uk/sale/tao/";
+    String url = "http://gate.ac.uk/sale/tao/split";
     if (classOrComment.contains("gate.creole.SerialAnalyserController")
      || classOrComment.contains("gate.creole.SerialController")) {
-      url += "splitch3.html#sec:howto:apps";
+      url += "ch3.html#sec:howto:apps";
     } else if (classOrComment.contains("gate.creole.ConditionalSerialAnalyserController")
             || classOrComment.contains("gate.creole.ConditionalSerialController")) {
-      url += "splitch3.html#sec:howto:cond";
+      url += "ch3.html#sec:howto:cond";
     } else if (classOrComment.contains("gate.creole.RealtimeCorpusController")) {
-      url += "splitch4.html#sec:applications";
+      url += "ch4.html#sec:applications";
     } else if (classOrComment.contains("gate.corpora.DocumentImpl")) {
-      url += "splitch3.html#sec:howto:edit";
+      url += "ch3.html#sec:howto:edit";
     } else if (classOrComment.contains("gate.corpora.CorpusImpl")) {
-      url += "splitch3.html#sec:howto:loadlr";
+      url += "ch3.html#sec:howto:loadlr";
     } else if (classOrComment.contains("gate.creole.AnnotationSchema")) {
-      url += "splitch6.html#sec:schemas";
+      url += "ch6.html#sec:schemas";
     } else if (classOrComment.contains("gate.creole.ontology.owlim.OWLIMOntologyLR")) {
-      url += "splitch10.html#sec:ontologies:lr";
+      url += "ch10.html#sec:ontologies:lr";
     } else if (classOrComment.contains("gate.creole.orthomatcher.OrthoMatcher")) {
-      url += "splitch8.html#sec:annie:orthomatcher";
+      url += "ch8.html#sec:annie:orthomatcher";
     } else if (classOrComment.contains("gate.creole.ANNIETransducer")) {
-      url += "splitch7.html#chap:jape";
+      url += "ch7.html#chap:jape";
     } else if (classOrComment.contains("gate.creole.POSTagger")) {
-      url += "splitch8.html#sec:tagger";
+      url += "ch8.html#sec:tagger";
     } else if (classOrComment.contains("gate.creole.splitter.SentenceSplitter")) {
-      url += "splitch8.html#sec:splitter";
+      url += "ch8.html#sec:splitter";
     } else if (classOrComment.contains("gate.creole.tokeniser.DefaultTokeniser")) {
-      url += "splitch8.html#sec:tokeniser";
+      url += "ch8.html#sec:tokeniser";
     } else if (classOrComment.contains("gate.creole.annotdelete.AnnotationDeletePR")) {
-      url += "splitch9.html#sec:misc-creole:reset";
+      url += "ch9.html#sec:misc-creole:reset";
     } else if (classOrComment.contains("gate.creole.gazetteer.DefaultGazetteer")) {
-      url += "splitch8.html#sec:gazetteer";
+      url += "ch8.html#sec:gazetteer";
     } else if (classOrComment.contains("gate.creole.splitter.RegexSentenceSplitter")) {
-      url += "splitch8.html#sec:regex-splitter";
+      url += "ch8.html#sec:regex-splitter";
     } else if (classOrComment.contains("gate.creole.gazetteer.OntoGazetteerImpl")) {
-      url += "splitch5.html#sect:ontogaz";
+      url += "ch5.html#sect:ontogaz";
     } else if (classOrComment.contains("com.ontotext.gate.gazetteer.HashGazetteer")) {
-      url += "splitch5.html#sect:gaze";
+      url += "ch5.html#sect:gaze";
     } else if (classOrComment.contains("gate.creole.Transducer")) {
-      url += "splitch7.html#chap:jape";
+      url += "ch7.html#chap:jape";
     } else if (classOrComment.contains("gate.creole.annotransfer.AnnotationSetTransfer")) {
-      url += "splitch9.html#sec:misc-creole:ast";
+      url += "ch9.html#sec:misc-creole:ast";
     } else if (classOrComment.contains("gate.creole.tokeniser.SimpleTokeniser")) {
-      url += "splitch8.html#sec:tokeniser";
+      url += "ch8.html#sec:tokeniser";
     } else if (classOrComment.contains("gate.compound.impl")) {
-      url += "splitch12.html#chapt:alignment";
+      url += "ch12.html#chapt:alignment";
     } else if (classOrComment.contains("gate.merger.AnnotationMergingMain")) {
-      url += "splitch9.html#sec:misc-creole:merging";
+      url += "ch9.html#sec:misc-creole:merging";
     } else if (classOrComment.contains("gate.creole.coref.Coreferencer")) {
-      url += "splitch8.html#sec:annie:pronom-coref";
+      url += "ch8.html#sec:annie:pronom-coref";
     } else if (classOrComment.contains("gate.creole.coref.NominalCoref")) {
-      url += "splitch8.html#sec:annie:pronom-coref";
+      url += "ch8.html#sec:annie:pronom-coref";
     } else if (classOrComment.contains("gate.creole.GazetteerListsCollector")) {
-      url += "splitch9.html#sec:misc-creole:listscollector";
+      url += "ch9.html#sec:misc-creole:listscollector";
     } else if (classOrComment.contains("gate.creole.morph.Morph")) {
-      url += "splitch9.html#sec:misc-creole:morpher";
+      url += "ch9.html#sec:misc-creole:morpher";
     } else if (classOrComment.contains("gate.creole.dumpingPR.DumpingPR")) {
-      url += "splitch9.html#sec:misc-creole:flexexport";
+      url += "ch9.html#sec:misc-creole:flexexport";
     } else if (classOrComment.contains("gate.creole.VPChunker")) {
-      url += "splitch9.html#sec:misc-creole:npchunker";
+      url += "ch9.html#sec:misc-creole:npchunker";
     } else if (classOrComment.contains("gate.creole.ml.MachineLearningPR")) {
-      url += "splitch11.html#chapt:mlapi";
+      url += "ch11.html#chapt:mlapi";
     } else if (classOrComment.contains("GATE serial datastore")
      || classOrComment.contains("gate.persist.LuceneDataStoreImpl")) {
-      url += "splitch9.html#sec:misc-creole:annic";
+      url += "ch9.html#sec:misc-creole:annic";
     } else if (classOrComment.contains("gate.persist.SerialDataStore")) {
-      url += "splitch3.html#sec:howto:datastores";
+      url += "ch3.html#sec:howto:datastores";
     } else if (classOrComment.contains("GATE log")) {
-      url += "splitch3.html#sec:howto:guistart";
+      url += "ch3.html#sec:howto:guistart";
     } else {
-      url += "splitli1.html";
+      url += "li1.html";
     }
     return url;
   }
@@ -3713,15 +3713,22 @@ public class MainFrame extends JFrame implements ProgressListener,
      */
     public int showDialog(Component parent, String approveButtonText)
       throws HeadlessException {
-      if(parent == null)
+      if (this.getDialogType() != JFileChooser.SAVE_DIALOG) {
+        setSelectedFileInFileChooser();
+      }
+      if(parent == null) {
         return super.showDialog(getInstance(), approveButtonText);
-      else return super.showDialog(parent, approveButtonText);
+      }
+      else {
+        return super.showDialog(parent, approveButtonText);
+      }
     }
 
-    @Override
-    public int showOpenDialog(Component parent) throws HeadlessException {
-      // if possible, set the last directory used
-      // by the resource as the current directory.
+    /**
+     * If possible, set the last directory/file used
+     * by the resource as the current directory/file.
+     */
+    private void setSelectedFileInFileChooser() {
       if (currentResourceClassName != null) {
       String resourcePath = currentResourceClassName.replaceAll("\\.", "/");
       String lastUsedPath = null;
@@ -3738,10 +3745,10 @@ public class MainFrame extends JFrame implements ProgressListener,
         File file = new File(lastUsedPath);
         if (file.exists()) {
             fileChooser.setSelectedFile(file);
+            fileChooser.ensureFileIsVisible(file);
         }
       }
       }
-      return super.showOpenDialog(parent);
     }
 
     @Override

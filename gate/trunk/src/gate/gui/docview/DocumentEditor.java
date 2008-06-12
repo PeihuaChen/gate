@@ -681,7 +681,7 @@ public class DocumentEditor extends AbstractVisualResource
 
       hBox = Box.createHorizontalBox();
       hBox.add(Box.createHorizontalStrut(5));
-      hBox.add(ignoreCaseChk = new JCheckBox("Ignore case", false));
+      hBox.add(ignoreCaseChk = new JCheckBox("Ignore case", true));
       hBox.add(Box.createHorizontalStrut(5));
       hBox.add(wholeWordsChk = new JCheckBox("Whole word", false));
       hBox.add(Box.createHorizontalStrut(5));

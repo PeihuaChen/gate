@@ -1442,9 +1442,15 @@ public class AnnotationSetsView extends AbstractDocumentView
           fileChooser.setMultiSelectionEnabled(false);
           fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
           fileChooser.setDialogTitle("Select document to save ...");
-          fileChooser.setSelectedFiles(null);
+          File file = new File(document.getSourceUrl().getPath());
+          if (file.exists()) {
+            fileChooser.setSelectedFile(file);
+            fileChooser.ensureFileIsVisible(file);
+          } else {
+            fileChooser.setSelectedFile(null);
+          }
 
-          int res = fileChooser.showDialog(owner, "Save");
+          int res = fileChooser.showSaveDialog(owner);
           if(res == JFileChooser.APPROVE_OPTION){
             selectedFile = fileChooser.getSelectedFile();
             fileChooser.setCurrentDirectory(fileChooser.getCurrentDirectory());
