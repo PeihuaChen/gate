@@ -487,6 +487,8 @@ public class DefaultGazetteer extends AbstractGazetteer {
 
       if(null != currentLookup.minorType)
         fm.put(LOOKUP_MINOR_TYPE_FEATURE_NAME, currentLookup.minorType);
+      if(null != currentLookup.languages)
+        fm.put(LOOKUP_LANGUAGE_FEATURE_NAME, currentLookup.languages);      
       if(null != currentLookup.features) {
         fm.putAll(currentLookup.features);
       }
