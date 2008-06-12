@@ -602,12 +602,18 @@ public class NameBearerHandle implements Handle, StatusListener,
           fileChooser.setMultiSelectionEnabled(false);
           fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
           fileChooser.setDialogTitle("Select document to save ...");
-          fileChooser.setSelectedFiles(null);
+          File file = new File(((gate.Document)target).getSourceUrl().getPath());
+          if (file.exists()) {
+            fileChooser.setSelectedFile(file);
+            fileChooser.ensureFileIsVisible(file);
+          } else {
+            fileChooser.setSelectedFile(null);
+          }
 
           int res =
-            (getLargeView() != null) ? fileChooser.showDialog(getLargeView(),
-              "Save") : (getSmallView() != null) ? fileChooser.showDialog(
-              getSmallView(), "Save") : fileChooser.showDialog(null, "Save");
+            (getLargeView() != null) ? fileChooser.showSaveDialog(getLargeView())
+                    : (getSmallView() != null) ? fileChooser.showSaveDialog(
+              getSmallView()) : fileChooser.showSaveDialog(null);
           if(res == JFileChooser.APPROVE_OPTION) {
             selectedFile = fileChooser.getSelectedFile();
             File currentDir = fileChooser.getCurrentDirectory();

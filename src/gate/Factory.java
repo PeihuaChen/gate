@@ -21,10 +21,12 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
 import gate.creole.*;
+import gate.creole.ontology.owlim.OWLIMOntologyLR;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
 import gate.jape.constraint.ConstraintFactory;
@@ -229,7 +231,31 @@ public abstract class Factory {
 
     //set the name
     if(resourceName == null){
-      resourceName = resData.getName() + "_" + Gate.genSym();
+      if (parameterValues.get(Document.DOCUMENT_URL_PARAMETER_NAME) != null) {
+        resourceName = (String)
+          parameterValues.get(Document.DOCUMENT_URL_PARAMETER_NAME);
+      } else if (parameterValues.get(AnnotationSchema.FILE_URL_PARAM_NAME) != null) {
+        resourceName = (String)
+          parameterValues.get(AnnotationSchema.FILE_URL_PARAM_NAME);
+      } else if (parameterValues.get("rdfXmlURL") != null) {
+        resourceName = (String)parameterValues.get("rdfXmlURL");
+      } else if (parameterValues.get("ntriplesURL") != null) {
+        resourceName = (String)parameterValues.get("ntriplesURL");
+      } else if (parameterValues.get("turtleURL") != null) {
+        resourceName = (String)parameterValues.get("turtleURL");
+      }
+      if (resourceName != null) {
+        try {
+          resourceName = new java.io.File(
+            new URL(resourceName).getFile()).getName();
+        } catch (MalformedURLException e) {
+          // relative URL not input by the user
+          resourceName = resData.getName();
+        }
+      } else {
+        resourceName = resData.getName();
+      }
+      resourceName += "_" + Gate.genSym();
     }
     res.setName(resourceName);
 

@@ -681,10 +681,10 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     add(mainPane, BorderLayout.CENTER);
 
     // add the search and annotate GUI at the bottom of the annotator editor
-//    SearchAndAnnotatePanel searchPanel =
-//      new SearchAndAnnotatePanel(mainPane.getBackground(), this, dialog);
-//
-//    add(searchPanel, BorderLayout.SOUTH);
+    SearchAndAnnotatePanel searchPanel =
+      new SearchAndAnnotatePanel(mainPane.getBackground(), this, dialog);
+
+    add(searchPanel, BorderLayout.SOUTH);
             
     dialog.add(this);
     dialog.pack();
