@@ -2951,7 +2951,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           }
 
           // only hidden when closed
-          helpFrame.dispose();
+          if(helpFrame != null) helpFrame.dispose();
 
           // trying to release all resources occupied by all
           try {
