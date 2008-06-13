@@ -3,8 +3,8 @@ package gate.alignment.gui;
 import gate.Annotation;
 import gate.AnnotationSet;
 import gate.Document;
-import gate.composite.CompositeDocument;
 import gate.compound.CompoundDocument;
+import gate.util.GateRuntimeException;
 import gate.util.InvalidOffsetException;
 
 import java.util.ArrayList;
@@ -12,8 +12,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-
-import sun.security.jgss.TokenTracker;
 
 /**
  * This class provides various methods that help in alignment process.
@@ -26,19 +24,21 @@ public class AlignmentFactory {
 
   protected CompoundDocument compoundDocument;
 
-  protected String inputAS;
-
-  protected String tokenAnnotationType;
-
   protected String comparatorClass;
 
   protected Comparator<Object> comparator;
 
-  private String unitAnnotationType;
+  private String srcTokenAnnotationType;
 
-  private List<String> documentIDs;
+  private String tgtTokenAnnotationType;
 
-  private HashMap<String, AASequence> asMap;
+  private String srcDocumentID;
+
+  private String tgtDocumentID;
+
+  private AASequence srcSequence;
+
+  private AASequence tgtSequence;
 
   /**
    * AlignmentFactory makes alignment easier
@@ -53,53 +53,7 @@ public class AlignmentFactory {
    *          sentences are already aligned)
    * @throws Exception
    */
-  public AlignmentFactory(CompoundDocument alignedDocument, String inputAS,
-          String tokenAnnotationType, String unitAnnotationType,
-          String comparatorClass) throws Exception {
-
-    this.compoundDocument = alignedDocument;
-    this.inputAS = inputAS;
-    this.tokenAnnotationType = tokenAnnotationType;
-    this.unitAnnotationType = unitAnnotationType;
-    this.comparatorClass = comparatorClass;
-    init();
-  }
-
   @SuppressWarnings("unchecked")
-  private void init() throws ClassNotFoundException, IllegalAccessException,
-          InstantiationException {
-    comparator = (Comparator)Class.forName(comparatorClass).newInstance();
-    documentIDs = compoundDocument.getDocumentIDs();
-    asMap = new HashMap<String, AASequence>();
-    for(int i = 0; i < documentIDs.size(); i++) {
-      String lang = documentIDs.get(i);
-      Document doc = compoundDocument.getDocument(lang);
-      if(doc instanceof CompositeDocument) {
-        documentIDs.remove(i);
-        i--;
-        continue;
-      }
-
-      AnnotationSet as = inputAS == null || inputAS.trim().length() == 0 ? doc
-              .getAnnotations() : doc.getAnnotations(inputAS);
-      AASequence aas = new AASequence(doc, as, unitAnnotationType);
-      asMap.put(lang, aas);
-    }
-  }
-
-  /**
-   * AlignmentFactory makes alignment easier
-   * 
-   * @param compoundDocument -> document where we want to achieve
-   *          alignment
-   * @param inputAS -> name of the inputAnnotationSet
-   * @param tokenAnnotationType -> the level at what we want to achieve
-   *          alignment (e.g. Token or may be some other annotation
-   *          type)
-   * @param unitAnnotationType -> AlignedParentAnnotationType (e.g. if
-   *          sentences are already aligned)
-   * @throws Exception
-   */
   public AlignmentFactory(CompoundDocument alignedDocument,
           String srcDocumentId, String tgtDocumentId, String srcInputAS,
           String tgtInputAS, String srcTokenAnnotationType,
@@ -108,67 +62,63 @@ public class AlignmentFactory {
           throws Exception {
 
     this.compoundDocument = alignedDocument;
-
+    this.srcDocumentID = srcDocumentId;
+    this.tgtDocumentID = tgtDocumentId;
+    this.srcTokenAnnotationType = srcTokenAnnotationType;
+    this.tgtTokenAnnotationType = tgtTokenAnnotationType;
+    
     comparator = (Comparator)Class.forName(comparatorClass).newInstance();
-
-    asMap = new HashMap<String, AASequence>();
     Document doc = compoundDocument.getDocument(srcDocumentId);
     AnnotationSet as = srcInputAS.equals("<null>")
             || srcInputAS.trim().length() == 0 ? doc.getAnnotations() : doc
             .getAnnotations(srcInputAS);
-    AASequence aas = new AASequence(doc, as, srcUnitAnnotationType);
-    asMap.put(srcDocumentId, aas);
-
+    srcSequence = new AASequence(doc, as, srcUnitAnnotationType);
     doc = compoundDocument.getDocument(tgtDocumentId);
     AnnotationSet as1 = tgtInputAS.equals("<null>")
             || tgtInputAS.trim().length() == 0 ? doc.getAnnotations() : doc
             .getAnnotations(tgtInputAS);
-    AASequence aas1 = new AASequence(doc, as1, tgtUnitAnnotationType);
-    asMap.put(tgtDocumentId, aas1);
-    documentIDs = new ArrayList<String>();
-    documentIDs.add(srcDocumentId);
-    documentIDs.add(tgtDocumentId);
+    tgtSequence = new AASequence(doc, as1, tgtUnitAnnotationType);
   }
 
   public String getText(Annotation annot, String language) {
-    AASequence seq = asMap.get(language);
-    if(seq == null) {
-      return null;
+    try {
+      if(language.equals(srcDocumentID)) {
+        return srcSequence.getText(annot);
+      }
+      else if(language.equals(tgtDocumentID)) {
+        return tgtSequence.getText(annot);
+      }
+    }
+    catch(InvalidOffsetException ioe) {
+      throw new GateRuntimeException(ioe);
     }
 
-    try {
-      return seq.getText(annot);
-    }
-    catch(Exception e) {
-      e.printStackTrace();
-      return null;
-    }
+    return null;
   }
 
   public AnnotationSet getAnnotationSet(String language) {
-    AASequence seq = asMap.get(language);
-    if(seq == null) {
-      return null;
+    if(language.equals(srcDocumentID)) {
+      return srcSequence.set;
     }
-    return seq.set;
+    else if(language.equals(tgtDocumentID)) {
+      return tgtSequence.set;
+    }
+    return null;
   }
 
   public AnnotationSet getUnderlyingAnnotations(Annotation annot,
           String language, String tokenAnnotationType) {
-    AASequence seq = asMap.get(language);
-    if(seq == null) {
-      return null;
-    }
-
-    try {
-      return seq.getUnderlyingAnnotations(annot, tokenAnnotationType == null
-              ? this.tokenAnnotationType
+    if(language.equals(srcDocumentID)) {
+      return srcSequence.getUnderlyingAnnotations(annot, tokenAnnotationType == null
+              ? this.srcTokenAnnotationType
               : tokenAnnotationType);
     }
-    catch(Exception e) {
-      e.printStackTrace();
-      return null;
+    else if(language.equals(tgtDocumentID)) {
+      return tgtSequence.getUnderlyingAnnotations(annot, tokenAnnotationType == null
+              ? this.tgtTokenAnnotationType
+              : tokenAnnotationType);
     }
+    return null;
   }
 
   private HashMap<String, Annotation> currentAnnotations;
@@ -182,18 +132,16 @@ public class AlignmentFactory {
    */
   public HashMap<String, Annotation> next() {
     HashMap<String, Annotation> annotations = new HashMap<String, Annotation>();
-    for(String lang : documentIDs) {
-      annotations.put(lang, ((AASequence)asMap.get(lang)).next());
-    }
+    annotations.put(srcDocumentID, srcSequence.next());
+    annotations.put(tgtDocumentID, tgtSequence.next());
     this.currentAnnotations = annotations;
     return annotations;
   }
 
   public HashMap<String, Annotation> previous() {
     HashMap<String, Annotation> annotations = new HashMap<String, Annotation>();
-    for(String lang : documentIDs) {
-      annotations.put(lang, ((AASequence)asMap.get(lang)).previous());
-    }
+    annotations.put(srcDocumentID, srcSequence.previous());
+    annotations.put(tgtDocumentID, tgtSequence.previous());
     this.currentAnnotations = annotations;
     return annotations;
   }
@@ -203,25 +151,11 @@ public class AlignmentFactory {
   }
 
   public boolean hasNext() {
-    boolean available = true;
-    for(int i = 0; i < documentIDs.size(); i++) {
-      String lang = (String)documentIDs.get(i);
-      available = (available && ((AASequence)asMap.get(lang)).hasNext());
-    }
-    return available;
+    return srcSequence.hasNext() && tgtSequence.hasNext();
   }
 
   public boolean hasPrevious() {
-    boolean available = true;
-    for(int i = 0; i < documentIDs.size(); i++) {
-      String lang = (String)documentIDs.get(i);
-      available = (available && ((AASequence)asMap.get(lang)).hasPrevious());
-    }
-    return available;
-  }
-
-  public List<String> getDocumentIDs() {
-    return documentIDs;
+    return srcSequence.hasPrevious() && tgtSequence.hasPrevious();
   }
 
   class AASequence {
@@ -284,5 +218,13 @@ public class AlignmentFactory {
       return document.getContent().getContent(ann.getStartNode().getOffset(),
               ann.getEndNode().getOffset()).toString();
     }
+  }
+
+  public String getSrcDocumentID() {
+    return srcDocumentID;
+  }
+
+  public String getTgtDocumentID() {
+    return tgtDocumentID;
   }
 }

@@ -72,7 +72,9 @@ public class AlignmentEditor extends AbstractVisualResource implements
 
   private JCheckBox showLinks;
 
-  private JButton populate, next, previous, loadActions;
+  private JButton next, previous, loadActions;
+
+  private JToggleButton populate;
 
   private JPanel sourcePanel;
 
@@ -177,30 +179,18 @@ public class AlignmentEditor extends AbstractVisualResource implements
     targetDocumentId = new JComboBox(new DefaultComboBoxModel());
     targetDocumentId.setEditable(false);
 
-//    sourceDocumentId.addActionListener(new ActionListener() {
-//      public void actionPerformed(ActionEvent ae) {
-//        populateAS((String)sourceDocumentId.getSelectedItem(), sourceASName);
-//      }
-//    });
-    
     sourceDocumentId.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent ie) {
         populateAS((String)sourceDocumentId.getSelectedItem(), sourceASName);
       }
     });
 
-//    targetDocumentId.addActionListener(new ActionListener() {
-//      public void actionPerformed(ActionEvent ae) {
-//        populateAS((String)targetDocumentId.getSelectedItem(), targetASName);
-//      }
-//    });
-
     targetDocumentId.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent ie) {
         populateAS((String)targetDocumentId.getSelectedItem(), targetASName);
       }
     });
-    
+
     sourceASName = new JComboBox(new DefaultComboBoxModel());
     sourceASName.setPrototypeDisplayValue("AnnotationSetName");
     sourceASName.addActionListener(new ActionListener() {
@@ -282,7 +272,7 @@ public class AlignmentEditor extends AbstractVisualResource implements
       }
     });
 
-    populate = new JButton("Populate");
+    populate = new JToggleButton("Populate");
     populate.addActionListener(this);
 
     previous = new JButton("< Previous");
@@ -382,6 +372,7 @@ public class AlignmentEditor extends AbstractVisualResource implements
     splitPane.setDividerLocation(0.8);
     splitPane.revalidate();
     splitPane.updateUI();
+    waPanel.setVisible(false);
   }
 
   public String getSourceParentOfUnitOfAlignment() {
@@ -646,13 +637,11 @@ public class AlignmentEditor extends AbstractVisualResource implements
       }
     }
 
-    Map<Document, Set<Annotation>> latestSelectedAnnotations = new HashMap<Document, Set<Annotation>>();
-    latestSelectedAnnotations.put(srcDocument, srcSelectedAnnots);
-    latestSelectedAnnotations.put(tgtDocument, tgtSelectedAnnots);
-
     try {
       color = Color.WHITE;
-      aa.execute(this, this.document, latestSelectedAnnotations,
+      aa.execute(this, this.document, srcDocument,
+              getSourceAnnotationSetName(), srcSelectedAnnots, tgtDocument,
+              getTargetAnnotationSetName(), tgtSelectedAnnots,
               currentAnnotationHightlight.annotation);
 
       if(aa == alignAction) {
@@ -660,8 +649,12 @@ public class AlignmentEditor extends AbstractVisualResource implements
           if(a.invokeWithAlignAction()) {
             JCheckBox cb = actionsCBMap.get(a);
             if(cb != null && cb.isSelected())
-              a.execute(this, this.document, latestSelectedAnnotations,
-                      currentAnnotationHightlight.annotation);
+              a
+                      .execute(this, this.document, srcDocument,
+                              getSourceAnnotationSetName(), srcSelectedAnnots,
+                              tgtDocument, getTargetAnnotationSetName(),
+                              tgtSelectedAnnots,
+                              currentAnnotationHightlight.annotation);
 
           }
 
@@ -673,8 +666,12 @@ public class AlignmentEditor extends AbstractVisualResource implements
             JCheckBox cb = actionsCBMap.get(a);
             if(cb != null && cb.isSelected())
 
-              a.execute(this, this.document, latestSelectedAnnotations,
-                      currentAnnotationHightlight.annotation);
+              a
+                      .execute(this, this.document, srcDocument,
+                              getSourceAnnotationSetName(), srcSelectedAnnots,
+                              tgtDocument, getTargetAnnotationSetName(),
+                              tgtSelectedAnnots,
+                              currentAnnotationHightlight.annotation);
           }
         }
       }
@@ -695,23 +692,59 @@ public class AlignmentEditor extends AbstractVisualResource implements
 
   public void actionPerformed(ActionEvent ae) {
     if(ae.getSource() == populate) {
-      try {
-        AlignmentFactory af = new AlignmentFactory(document, sourceDocumentId
-                .getSelectedItem().toString(), targetDocumentId
-                .getSelectedItem().toString(), sourceASName.getSelectedItem()
-                .toString(), targetASName.getSelectedItem().toString(),
-                sourceUnitOfAlignment.getSelectedItem().toString(),
-                targetUnitOfAlignment.getSelectedItem().toString(),
-                sourceParentOfUnitOfAlignment.getSelectedItem().toString(),
-                targetParentOfUnitOfAlignment.getSelectedItem().toString(),
-                "gate.util.OffsetComparator");
+      if(!populate.isSelected()) {
+        // we need to disable the alignment gui
+        sourceUnitOfAlignment.setEnabled(true);
+        targetUnitOfAlignment.setEnabled(true);
+        sourceParentOfUnitOfAlignment.setEnabled(true);
+        targetParentOfUnitOfAlignment.setEnabled(true);
+        sourceASName.setEnabled(true);
+        targetASName.setEnabled(true);
+        sourceDocumentId.setEnabled(true);
+        targetDocumentId.setEnabled(true);
+        next.setEnabled(false);
+        previous.setEnabled(false);
+        showLinks.setEnabled(false);
+        waPanel.setVisible(false);
 
-        // if there were no errors
-        alignFactory = af;
-        nextAction();
       }
-      catch(Exception e) {
-        e.printStackTrace();
+      else {
+        sourceUnitOfAlignment.setEnabled(false);
+        targetUnitOfAlignment.setEnabled(false);
+        sourceParentOfUnitOfAlignment.setEnabled(false);
+        targetParentOfUnitOfAlignment.setEnabled(false);
+        sourceASName.setEnabled(false);
+        targetASName.setEnabled(false);
+        sourceDocumentId.setEnabled(false);
+        targetDocumentId.setEnabled(false);
+        next.setEnabled(true);
+        previous.setEnabled(true);
+        showLinks.setEnabled(true);
+        waPanel.setVisible(true);
+
+        try {
+          if(sourceUnitOfAlignment.getSelectedItem() == null) return;
+          if(targetUnitOfAlignment.getSelectedItem() == null) return;
+          if(sourceParentOfUnitOfAlignment.getSelectedItem() == null) return;
+          if(targetParentOfUnitOfAlignment.getSelectedItem() == null) return;
+
+          AlignmentFactory af = new AlignmentFactory(document, sourceDocumentId
+                  .getSelectedItem().toString(), targetDocumentId
+                  .getSelectedItem().toString(), sourceASName.getSelectedItem()
+                  .toString(), targetASName.getSelectedItem().toString(),
+                  sourceUnitOfAlignment.getSelectedItem().toString(),
+                  targetUnitOfAlignment.getSelectedItem().toString(),
+                  sourceParentOfUnitOfAlignment.getSelectedItem().toString(),
+                  targetParentOfUnitOfAlignment.getSelectedItem().toString(),
+                  "gate.util.OffsetComparator");
+
+          // if there were no errors
+          alignFactory = af;
+          nextAction();
+        }
+        catch(Exception e) {
+          e.printStackTrace();
+        }
       }
     }
     else if(ae.getSource() == next) {
@@ -725,9 +758,17 @@ public class AlignmentEditor extends AbstractVisualResource implements
   private void nextAction() {
     if(alignFactory != null && alignFactory.hasNext()) {
       HashMap<String, Annotation> next = alignFactory.next();
+      Annotation srcAnnotation = next.get(alignFactory.getSrcDocumentID());
+      Annotation tgtAnnotation = next.get(alignFactory.getTgtDocumentID());
+      Document srcDocument = document.getDocument(alignFactory
+              .getSrcDocumentID());
+      Document tgtDocument = document.getDocument(alignFactory
+              .getTgtDocumentID());
       for(PreDisplayAction pda : preDisplayActions) {
         try {
-          pda.execute(this, document, next);
+          pda.execute(this, document, srcDocument,
+                  getSourceAnnotationSetName(), srcAnnotation, tgtDocument,
+                  getTargetAnnotationSetName(), tgtAnnotation);
         }
         catch(AlignmentException ae) {
           ae.printStackTrace();
@@ -1054,25 +1095,29 @@ public class AlignmentEditor extends AbstractVisualResource implements
       }
 
       JPopupMenu menu = new JPopupMenu();
+
       FeaturesModel model = new FeaturesModel();
+
       JTable featuresTable = new JTable(model);
+
       Timer timer = new Timer();
+
       TimerTask task;
-      
+
       public void mouseEntered(final MouseEvent me) {
         final AnnotationHighlight ah = (AnnotationHighlight)me.getSource();
         model.setAnnotation(ah.annotation);
         task = new TimerTask() {
           public void run() {
             menu.add(featuresTable);
-            menu.show(ah, me.getX(), me.getY()+10);
+            menu.show(ah, me.getX(), me.getY() + 10);
             menu.revalidate();
             menu.updateUI();
           }
         };
         timer.schedule(task, 2000);
       }
-      
+
       public void mouseExited(MouseEvent me) {
         if(task != null) {
           task.cancel();
@@ -1103,8 +1148,9 @@ public class AlignmentEditor extends AbstractVisualResource implements
     return colour;
   }
 
-  public void annotationsAligned(Annotation srcAnnotation,
-          Document srcDocument, Annotation tgtAnnotation, Document tgtDocument) {
+  public void annotationsAligned(Annotation srcAnnotation, String srcAS,
+          Document srcDocument, Annotation tgtAnnotation, String tgtAS,
+          Document tgtDocument) {
 
     if(srcAnnotation == null || tgtAnnotation == null || srcDocument == null
             || tgtDocument == null) {
@@ -1140,8 +1186,9 @@ public class AlignmentEditor extends AbstractVisualResource implements
     refresh();
   }
 
-  public void annotationsUnaligned(Annotation srcAnnotation,
-          Document srcDocument, Annotation tgtAnnotation, Document tgtDocument) {
+  public void annotationsUnaligned(Annotation srcAnnotation, String srcAS,
+          Document srcDocument, Annotation tgtAnnotation, String tgtAS,
+          Document tgtDocument) {
 
     if(srcAnnotation == null || tgtAnnotation == null || srcDocument == null
             || tgtDocument == null) {
@@ -1237,11 +1284,11 @@ public class AlignmentEditor extends AbstractVisualResource implements
         while(line != null) {
           // each line will have a class name
           try {
-            if(line.trim().startsWith("#") || line.trim().length()==0) {
+            if(line.trim().startsWith("#") || line.trim().length() == 0) {
               line = br.readLine();
               continue;
             }
-            
+
             int index = line.indexOf(",");
             cName = index < 0 ? line.trim() : line.substring(0, index);
             line = index < 0 ? "" : line.substring(index + 1);

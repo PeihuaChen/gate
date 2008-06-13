@@ -33,12 +33,13 @@ public class Alignment implements Serializable {
 	protected Map<Annotation, Set<Annotation>> alignmentMatrix;
 
 	/**
-	 * For each annotation we store the information about its document. This is
-	 * used for letting the user know which document the given annotation
+	 * For each annotation we store the information about its annotation set. This is
+	 * used for letting the user know which annotation set the given annotation
 	 * belongs to.
 	 */
 	protected Map<Annotation, String> annotation2Document;
-
+	protected Map<Annotation, String> annotation2AS;
+	
 	protected transient List<AlignmentListener> listeners = new ArrayList<AlignmentListener>();
 	protected transient CompoundDocument compoundDocument;
 	
@@ -49,6 +50,7 @@ public class Alignment implements Serializable {
 		this.compoundDocument = compoundDocument;
     alignmentMatrix = new HashMap<Annotation, Set<Annotation>>();
 		annotation2Document = new HashMap<Annotation, String>();
+		annotation2AS = new HashMap<Annotation, String>();
 		counter++;
 	}
 
@@ -80,8 +82,8 @@ public class Alignment implements Serializable {
 	 * @param targetAnnotation
 	 * @param targetDocument
 	 */
-	public void align(Annotation srcAnnotation, Document srcDocument,
-			Annotation targetAnnotation, Document targetDocument) {
+	public void align(Annotation srcAnnotation, String srcAS, Document srcDocument,
+			Annotation targetAnnotation, String tgtAS, Document targetDocument) {
 
 	  
 	  if(srcAnnotation == null || targetAnnotation == null) return;
@@ -100,10 +102,13 @@ public class Alignment implements Serializable {
     
     alignedToT.add(targetAnnotation);
     annotation2Document.put(srcAnnotation, srcDocument.getName());
-
+    annotation2AS.put(srcAnnotation, srcAS);
+    
     alignedToS.add(srcAnnotation);
     annotation2Document.put(targetAnnotation, targetDocument.getName());
-    fireAnnotationsAligned(srcAnnotation, srcDocument, targetAnnotation, targetDocument);
+    annotation2AS.put(targetAnnotation, tgtAS);
+    
+    fireAnnotationsAligned(srcAnnotation, srcAS, srcDocument, targetAnnotation, tgtAS, targetDocument);
 	}
 
   /**
@@ -114,8 +119,8 @@ public class Alignment implements Serializable {
    * @param targetAnnotation
    * @param targetDocument
    */
-  public void unalign(Annotation srcAnnotation, Document srcDocument,
-      Annotation targetAnnotation, Document targetDocument) {
+  public void unalign(Annotation srcAnnotation, String srcAS, Document srcDocument,
+      Annotation targetAnnotation, String tgtAS, Document targetDocument) {
 
     if(srcAnnotation == null || targetAnnotation == null) return;
     if(!areTheyAligned(srcAnnotation, targetAnnotation)) return;
@@ -128,6 +133,7 @@ public class Alignment implements Serializable {
       if(alignedToT.isEmpty()) {
         alignmentMatrix.remove(srcAnnotation);
         annotation2Document.remove(srcAnnotation);
+        annotation2AS.remove(srcAnnotation);
       } else {
         alignmentMatrix.put(srcAnnotation, alignedToT);
       }
@@ -138,11 +144,12 @@ public class Alignment implements Serializable {
       if(alignedToS.isEmpty()) {
         alignmentMatrix.remove(targetAnnotation);
         annotation2Document.remove(targetAnnotation);
+        annotation2AS.remove(targetAnnotation);
       } else {
         alignmentMatrix.put(targetAnnotation, alignedToS);
       }
     }
-    fireAnnotationsUnAligned(srcAnnotation, srcDocument, targetAnnotation, targetDocument);
+    fireAnnotationsUnAligned(srcAnnotation, srcAS, srcDocument, targetAnnotation, tgtAS, targetDocument);
   }
 	
 	
@@ -167,6 +174,10 @@ public class Alignment implements Serializable {
 	 */
 	public Document getDocument(Annotation annotation) {
 		return compoundDocument.getDocument(annotation2Document.get(annotation));
+	}
+	
+	public String getAnnotationSetName(Annotation annotation) {
+	  return annotation2AS.get(annotation);
 	}
 
 	/**
@@ -212,17 +223,21 @@ public class Alignment implements Serializable {
     if(listener !=null) this.listeners.remove(listener);
 	}
 	
-	protected void fireAnnotationsAligned(Annotation srcAnnotation, Document srcDocument,
-	        Annotation targetAnnotation, Document targetDocument) {
+	protected void fireAnnotationsAligned(Annotation srcAnnotation, String srcAS, Document srcDocument,
+	        Annotation targetAnnotation, String tgtAS, Document targetDocument) {
 	  for(AlignmentListener aListener : listeners) {
-	    aListener.annotationsAligned(srcAnnotation, srcDocument, targetAnnotation, targetDocument);
+	    aListener.annotationsAligned(srcAnnotation, srcAS, srcDocument, targetAnnotation, tgtAS, targetDocument);
 	  }
 	}
 	
-  protected void fireAnnotationsUnAligned(Annotation srcAnnotation, Document srcDocument,
-          Annotation targetAnnotation, Document targetDocument) {
+  protected void fireAnnotationsUnAligned(Annotation srcAnnotation, String srcAS, Document srcDocument,
+          Annotation targetAnnotation, String tgtAS, Document targetDocument) {
     for(AlignmentListener aListener : listeners) {
-      aListener.annotationsUnaligned(srcAnnotation, srcDocument, targetAnnotation, targetDocument);
+      aListener.annotationsUnaligned(srcAnnotation, srcAS, srcDocument, targetAnnotation, tgtAS, targetDocument);
     }
+  }
+  
+  public List<AlignmentListener> getAlignmentListeners() {
+    return new ArrayList<AlignmentListener>(this.listeners);
   }
 }
