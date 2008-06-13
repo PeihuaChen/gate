@@ -232,17 +232,17 @@ public abstract class Factory {
     //set the name
     if(resourceName == null){
       if (parameterValues.get(Document.DOCUMENT_URL_PARAMETER_NAME) != null) {
-        resourceName = (String)
-          parameterValues.get(Document.DOCUMENT_URL_PARAMETER_NAME);
+        resourceName =
+          parameterValues.get(Document.DOCUMENT_URL_PARAMETER_NAME).toString();
       } else if (parameterValues.get(AnnotationSchema.FILE_URL_PARAM_NAME) != null) {
-        resourceName = (String)
-          parameterValues.get(AnnotationSchema.FILE_URL_PARAM_NAME);
+        resourceName =
+          parameterValues.get(AnnotationSchema.FILE_URL_PARAM_NAME).toString();
       } else if (parameterValues.get("rdfXmlURL") != null) {
-        resourceName = (String)parameterValues.get("rdfXmlURL");
+        resourceName = parameterValues.get("rdfXmlURL").toString();
       } else if (parameterValues.get("ntriplesURL") != null) {
-        resourceName = (String)parameterValues.get("ntriplesURL");
+        resourceName = parameterValues.get("ntriplesURL").toString();
       } else if (parameterValues.get("turtleURL") != null) {
-        resourceName = (String)parameterValues.get("turtleURL");
+        resourceName = parameterValues.get("turtleURL").toString();
       }
       if (resourceName != null) {
         try {
