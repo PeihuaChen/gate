@@ -927,10 +927,12 @@ System.out.println("Window up");
       //clear the dialog
       editAnnotation(null, annSet);
 
-      if(!pinnedButton.isSelected()){
-        //if not pinned, hide the dialog.
+//      if(!pinnedButton.isSelected()){
+//        //if not pinned, hide the dialog.
+      // better to always close the dialog or you need to disabled
+      // all the actions
         dialog.setVisible(false);
-      }
+//      }
     }
   }
 
