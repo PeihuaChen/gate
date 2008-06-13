@@ -340,10 +340,12 @@ public class TextualDocumentView extends AbstractDocumentView {
         while(annIdIter.hasNext()){
           HighlightData annTag = 
               blinkingTagsForAnnotations.get(annIdIter.next());
-          Annotation ann = annTag.annotation;
-          Object tag = annTag.tag;
-          if(tag != null) highlighter.removeHighlight(tag);
-          annTag.tag = null;
+//          Annotation ann = annTag.annotation;
+          if (annTag != null) {
+            Object tag = annTag.tag;
+            if(tag != null) highlighter.removeHighlight(tag);
+            annTag.tag = null;
+          }
         }
         highlightsShown = false;
       }else{
@@ -351,18 +353,20 @@ public class TextualDocumentView extends AbstractDocumentView {
         while(annIdIter.hasNext()){
           HighlightData annTag = 
               blinkingTagsForAnnotations.get(annIdIter.next());
-          Annotation ann = annTag.annotation;
-          try{
-            Object tag = highlighter.addHighlight(
-                    ann.getStartNode().getOffset().intValue(),
-                    ann.getEndNode().getOffset().intValue(),
-                    new DefaultHighlighter.DefaultHighlightPainter(
-                            textView.getSelectionColor()));
-            annTag.tag = tag;
+          if (annTag != null) {
+            Annotation ann = annTag.annotation;
+            try{
+              Object tag = highlighter.addHighlight(
+                      ann.getStartNode().getOffset().intValue(),
+                      ann.getEndNode().getOffset().intValue(),
+                      new DefaultHighlighter.DefaultHighlightPainter(
+                              textView.getSelectionColor()));
+              annTag.tag = tag;
 //              scrollAnnotationToVisible(ann);
-          }catch(BadLocationException ble){
-            //this should never happen
-            throw new GateRuntimeException(ble);
+            }catch(BadLocationException ble){
+              //this should never happen
+              throw new GateRuntimeException(ble);
+            }
           }
         }
         highlightsShown = true;
