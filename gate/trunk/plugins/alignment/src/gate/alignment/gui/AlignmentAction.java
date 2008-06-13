@@ -1,8 +1,6 @@
 package gate.alignment.gui;
 
-import java.util.Map;
 import java.util.Set;
-
 import gate.Annotation;
 import gate.Document;
 import gate.alignment.AlignmentActionInitializationException;
@@ -14,23 +12,29 @@ import javax.swing.Icon;
 public interface AlignmentAction {
 
   public void execute(AlignmentEditor editor, CompoundDocument document,
-          Map<Document, Set<Annotation>> alignedAnnotations, Annotation clickedAnnotation)
-          throws AlignmentException;
+          Document srcDocument, String srcAS,
+          Set<Annotation> srcAlignedAnnotations, Document tgtDocument,
+          String tgtAS, Set<Annotation> tgtAlignedAnnotations,
+          Annotation clickedAnnotation) throws AlignmentException;
 
   /**
-   * Keep this null in order to be called along with the default align action.
+   * Keep this null in order to be called along with the default align
+   * action.
+   * 
    * @return
    */
   public String getCaption();
 
   /**
-   * Keep this null in order to be called along with the default align action.
+   * Keep this null in order to be called along with the default align
+   * action.
+   * 
    * @return
    */
   public Icon getIcon();
 
   public String getIconPath();
-  
+
   public boolean invokeForAlignedAnnotation();
 
   public boolean invokeForHighlightedUnalignedAnnotation();
@@ -40,10 +44,10 @@ public interface AlignmentAction {
   public void init(String[] args) throws AlignmentActionInitializationException;
 
   public void cleanup();
-  
+
   public boolean invokeWithAlignAction();
-  
+
   public boolean invokeWithRemoveAction();
-  
+
   public String getToolTip();
 }
