@@ -196,7 +196,17 @@ public class DocumentEditor extends AbstractVisualResource
     remove(progressBar);
     add(horizontalSplit, BorderLayout.CENTER);
     topBar.addSeparator();
-    topBar.add(new SearchAction());
+    Action searchAction = new SearchAction();
+    searchAction.putValue(Action.SHORT_DESCRIPTION,
+      "<html>"+searchAction.getValue(Action.SHORT_DESCRIPTION)
+      +"&nbsp;&nbsp;<font color=#667799><small>Ctrl-F"
+      +"&nbsp;&nbsp;</small></font></html>");
+    topBar.add(searchAction);
+    // add a key binding for the search function
+    getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(
+      KeyStroke.getKeyStroke("control F"), "Search in text");
+    getActionMap().put("Search in text", searchAction);
+    
     
     validate();
   }
@@ -224,25 +234,43 @@ public class DocumentEditor extends AbstractVisualResource
    */
   protected void addView(DocumentView view, String name){
     topBar.add(Box.createHorizontalStrut(5));
+    final ViewButton viewButton = new ViewButton(view, name);
     switch(view.getType()){
       case DocumentView.CENTRAL :
         centralViews.add(view);
 //      	leftBar.add(new ViewButton(view, name));
-        topBar.add(new ViewButton(view, name));
+        topBar.add(viewButton);
         break;
       case DocumentView.VERTICAL :
         verticalViews.add(view);
 //      	rightBar.add(new ViewButton(view, name));
-        topBar.add(new ViewButton(view, name));
+        topBar.add(viewButton);
         break;
       case DocumentView.HORIZONTAL :
         horizontalViews.add(view);
-      	topBar.add(new ViewButton(view, name));
+      	topBar.add(viewButton);
 //      	bottomBar.add(new ViewButton(view, name));
       	break;
       default :
         throw new GateRuntimeException(getClass().getName() +  ": Invalid view type");
     }
+
+    // binds a F-key to each view toggle button
+    // F1 key is already used for help so start at F2
+    getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+      .put(KeyStroke.getKeyStroke("F"+(numberOfViews+1)),
+      "Shows view "+numberOfViews);
+    getActionMap().put("Shows view "+numberOfViews,
+        new AbstractAction() {
+            public void actionPerformed(ActionEvent evt) {
+              viewButton.doClick();
+            }
+        }
+    );
+    viewButton.setToolTipText("<html>Toggle the view of "+name
+      +"&nbsp;&nbsp;<font color=#667799><small>F"+(numberOfViews+1)
+      +"&nbsp;&nbsp;</small></font></html>");
+    numberOfViews++;
   }
   
   
@@ -990,4 +1018,8 @@ public class DocumentEditor extends AbstractVisualResource
   
   protected boolean viewsInited = false;
 
+  /**
+   * Used to know the number of views when adding a new view.
+   */
+  protected int numberOfViews = 1;
 }

@@ -797,6 +797,42 @@ public class MainFrame extends JFrame implements ProgressListener,
   protected void initListeners(boolean isShellSlacGIU) {
     Gate.getCreoleRegister().addCreoleListener(this);
 
+    resourcesTree.addKeyListener(new KeyAdapter() {
+      public void keyPressed(KeyEvent e) {
+        // shows in the central tabbed pane, the selected resources
+        // in the resource tree when the Enter key is pressed
+        if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+          TreePath[] paths = resourcesTree.getSelectionPaths();
+          if (paths == null) { return; }
+          if (paths.length > 10) {
+            Object[] possibleValues =
+              { "Open the "+paths.length+" objects", "Don't open" };
+            int selectedValue =
+              JOptionPane.showOptionDialog(instance, "Do you want to open "
+              +paths.length+" objects in the central tabbed pane ?",
+              "Warning", JOptionPane.DEFAULT_OPTION,
+              JOptionPane.QUESTION_MESSAGE, null,
+              possibleValues, possibleValues[1]);
+            if (selectedValue == 1
+             || selectedValue == JOptionPane.CLOSED_OPTION) {
+              return;
+            }
+          }
+          Handle handle = null;
+          for (TreePath path : paths) {
+            if(path != null) {
+              Object value = path.getLastPathComponent();
+              value = ((DefaultMutableTreeNode)value).getUserObject();
+              if(value instanceof Handle) {
+                handle = (Handle)value;
+                select(handle);
+              }
+            }
+          }
+        }
+      }
+    });
+
     resourcesTree.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
         // where inside the tree?
@@ -887,50 +923,59 @@ public class MainFrame extends JFrame implements ProgressListener,
       }
     });
 
-    // Add the keyboard listeners for CTRL+F4 and ALT+F4
-    this.addKeyListener(new KeyAdapter() {
-      public void keyTyped(KeyEvent e) {
-      }
+//    // Add the keyboard listeners for CTRL+F4 and ALT+F4
+//    this.addKeyListener(new KeyAdapter() {
+//      public void keyTyped(KeyEvent e) {
+//      }
+//
+//      public void keyPressed(KeyEvent e) {
+//        // If Ctrl+F4 was pressed then close the active resource
+//        if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_F4) {
+//          JComponent resource =
+//            (JComponent)mainTabbedPane.getSelectedComponent();
+//          if(resource != null) {
+//            Action act = resource.getActionMap().get("Close resource");
+//            if(act != null) act.actionPerformed(null);
+//          }// End if
+//        }// End if
+//        // If CTRL+H was pressed then hide the active view.
+//        if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_H) {
+//          JComponent resource =
+//            (JComponent)mainTabbedPane.getSelectedComponent();
+//          if(resource != null) {
+//            Action act = resource.getActionMap().get("Hide current view");
+//            if(act != null) act.actionPerformed(null);
+//          }// End if
+//        }// End if
+//        // If CTRL+X was pressed then save as XML
+//        if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_X) {
+//          JComponent resource =
+//            (JComponent)mainTabbedPane.getSelectedComponent();
+//          if(resource != null) {
+//            Action act = resource.getActionMap().get("Save As XML");
+//            if(act != null) act.actionPerformed(null);
+//          }// End if
+//        }// End if
+//      }// End keyPressed();
+//
+//      public void keyReleased(KeyEvent e) {
+//      }
+//    });
 
-      public void keyPressed(KeyEvent e) {
-        // If Ctrl+F4 was pressed then close the active resource
-        if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_F4) {
-          JComponent resource =
-            (JComponent)mainTabbedPane.getSelectedComponent();
-          if(resource != null) {
-            Action act = resource.getActionMap().get("Close resource");
-            if(act != null) act.actionPerformed(null);
-          }// End if
-        }// End if
-        // If CTRL+H was pressed then hide the active view.
-        if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_H) {
-          JComponent resource =
-            (JComponent)mainTabbedPane.getSelectedComponent();
-          if(resource != null) {
-            Action act = resource.getActionMap().get("Hide current view");
-            if(act != null) act.actionPerformed(null);
-          }// End if
-        }// End if
-        // If CTRL+X was pressed then save as XML
-        if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_X) {
-          JComponent resource =
-            (JComponent)mainTabbedPane.getSelectedComponent();
-          if(resource != null) {
-            Action act = resource.getActionMap().get("Save As XML");
-            if(act != null) act.actionPerformed(null);
-          }// End if
-        }// End if
-      }// End keyPressed();
-
-      public void keyReleased(KeyEvent e) {
-      }
-    });
+    // define keystrokes action bindings at the level of the main window
+    InputMap inputMap = ((JComponent)this.getContentPane()).
+      getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+    // If Ctrl+F4 was pressed then close the active resource
+    inputMap.put(KeyStroke.getKeyStroke("control F4"), "Close resource");
+    // If CTRL+H was pressed then hide the active view.
+    inputMap.put(KeyStroke.getKeyStroke("control H"), "Hide current view");
+    // If CTRL+X was pressed then save as XML
+    inputMap.put(KeyStroke.getKeyStroke("control X"), "Save As XML");
 
     mainTabbedPane.getModel().addChangeListener(new ChangeListener() {
       public void stateChanged(ChangeEvent e) {
         // use this to synchronise the selection in the tabbed pane with
-        // the one
-        // in the resources tree
+        // the one in the resources tree
         JComponent largeView =
           (JComponent)mainTabbedPane.getSelectedComponent();
         Enumeration nodesEnum = resourcesTreeRoot.preorderEnumeration();
@@ -943,16 +988,39 @@ public class MainFrame extends JFrame implements ProgressListener,
               && ((Handle)node.getUserObject()).viewsBuilt()
               && ((Handle)node.getUserObject()).getLargeView() == largeView;
         }
+        ActionMap actionMap =
+          ((JComponent)instance.getContentPane()).getActionMap();
         if(done) {
           Handle handle = (Handle)node.getUserObject();
           TreePath nodePath = new TreePath(node.getPath());
           resourcesTree.setSelectionPath(nodePath);
           resourcesTree.scrollPathToVisible(nodePath);
           lowerScroll.getViewport().setView(handle.getSmallView());
+
+          // redefine MainFrame actionMaps for the selected tab 
+          JComponent resource =
+            (JComponent)mainTabbedPane.getSelectedComponent();
+          Action action = resource.getActionMap().get("Close resource");
+          if(action != null) {
+            actionMap.put("Close resource", action);
+          } else {
+            actionMap.put("Close resource", null);
+          }
+          actionMap.put("Hide current view", new CloseViewAction(handle)); 
+          action = resource.getActionMap().get("Save As XML");
+          if(action != null) {
+            actionMap.put("Save As XML", action);
+          } else {
+            actionMap.put("Save As XML", null);
+          }
         }
         else {
           // the selected item is not a resource (maybe the log area?)
           lowerScroll.getViewport().setView(null);
+          // disabled actions on the selected tabbed pane
+          actionMap.put("Close resource", null);
+          actionMap.put("Hide current view", null); 
+          actionMap.put("Save As XML", null);
         }
       }
     });
@@ -1252,6 +1320,11 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     handle.addProgressListener(MainFrame.this);
     handle.addStatusListener(MainFrame.this);
+
+    // shows then selects the resource to give the user a feedback
+    // on its location in the resource tree
+    resourcesTree.scrollPathToVisible(new TreePath(node.getPath()));
+    resourcesTree.setSelectionPath(new TreePath(node.getPath()));
 
     // JPopupMenu popup = handle.getPopup();
     //
@@ -2805,6 +2878,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     public CloseViewAction(Handle handle) {
       super("Hide this view");
       putValue(SHORT_DESCRIPTION, "Hides this view");
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control H"));
       this.handle = handle;
     }
 
@@ -2822,6 +2896,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     RenameResourceAction(TreePath path) {
       super("Rename");
       putValue(SHORT_DESCRIPTION, "Renames the resource");
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control R"));
       this.path = path;
     }
 
@@ -3286,6 +3361,9 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     public ResourcesTree() {
       myToolTip = new ResourceToolTip();
+      // disable F2 key for renaming because we use it in the Document editor
+      getInputMap(WHEN_FOCUSED)
+        .put(KeyStroke.getKeyStroke("F2"), null);
     }
 
     /**
@@ -3415,8 +3493,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     public HelpUserGuideAction() {
       super("User Guide Contents");
       putValue(SHORT_DESCRIPTION, "This option needs an internet connection");
-      putValue(ACCELERATOR_KEY,
-        KeyStroke.getKeyStroke(KeyEvent.VK_F1, InputEvent.CTRL_MASK));
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control F1"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -3424,7 +3501,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
   }
 
-  private void showHelpFrame(String urlString) {
+  protected void showHelpFrame(String urlString) {
     final URL url;
     try {
       url = new URL(urlString);
@@ -3464,8 +3541,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     public HelpUserGuideInContextAction() {
       super("Contextual User Guide");
       putValue(SHORT_DESCRIPTION, "This option needs an internet connection");
-      putValue(ACCELERATOR_KEY,
-        KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F1, 0));
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("F1"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -3475,7 +3551,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
   }
 
-  private String getHelpUrlStringForRessourceClassOrComment(String classOrComment) {
+  protected String getHelpUrlStringForRessourceClassOrComment(String classOrComment) {
     String url = "http://gate.ac.uk/sale/tao/split";
     if (classOrComment.contains("gate.creole.SerialAnalyserController")
      || classOrComment.contains("gate.creole.SerialController")) {

@@ -602,12 +602,14 @@ public class NameBearerHandle implements Handle, StatusListener,
           fileChooser.setMultiSelectionEnabled(false);
           fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
           fileChooser.setDialogTitle("Select document to save ...");
-          File file = new File(((gate.Document)target).getSourceUrl().getPath());
-          if (file.exists()) {
+          if (((gate.Document)target).getSourceUrl() != null) {
+            String fileName = ((gate.Document)target).getSourceUrl().getPath();
+            fileName = fileName.replaceAll("%20", " "); // spaces in URL
+            fileName = fileName.replaceAll("\\.[^. ]{1,5}$", ".xml");
+            if (!fileName.endsWith(".xml")) { fileName += ".xml"; }
+            File file = new File(fileName);
             fileChooser.setSelectedFile(file);
             fileChooser.ensureFileIsVisible(file);
-          } else {
-            fileChooser.setSelectedFile(null);
           }
 
           int res =

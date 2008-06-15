@@ -246,8 +246,11 @@ public abstract class Factory {
       }
       if (resourceName != null) {
         try {
-          resourceName = new java.io.File(
-            new URL(resourceName).getFile()).getName();
+          resourceName = new java.io.File(new URL(resourceName)
+            .getPath()).getName();
+          // clean the file name
+          resourceName = resourceName.replaceAll("%20", " ");
+
         } catch (MalformedURLException e) {
           // relative URL not input by the user
           resourceName = resData.getName();
