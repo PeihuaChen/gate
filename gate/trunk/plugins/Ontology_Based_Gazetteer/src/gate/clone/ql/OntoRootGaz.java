@@ -687,8 +687,11 @@ public class OntoRootGaz extends DefaultGazetteer {
                   ANNIEConstants.TOKEN_CATEGORY_FEATURE_NAME);
               
               /* category "IN" means it is a preposition, and these are used to
-              be a stop words, so crop everything afterwards*/
-              if(!category.equals("IN")) {
+              be a stop words, so crop everything afterwards, but ONLY if 
+              parameter considerHeuristicRules is set to be true */
+              if (considerHeuristicRules==true && category.equals("IN")){
+                break;
+              } else {
                 String root = (String)ann.getFeatures().get("root");
                 if(root != null) {
                   rootForText.append(root);
@@ -697,9 +700,6 @@ public class OntoRootGaz extends DefaultGazetteer {
                   throw new ResourceInstantiationException(
                     "No root found for annotation " + ann.toString());
                 }
-              }
-              else {
-                break;
               }
             }
             else if(ann.getType().equals(
