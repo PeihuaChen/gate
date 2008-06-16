@@ -45,7 +45,7 @@ public class TextualDocumentView extends AbstractDocumentView {
     //is not required.
     highlightsToAdd = new LinkedList<HighlightData>();
     highlightsToRemove = new LinkedList<HighlightData>();
-    blinkingHighlightsToRemove = new LinkedList<AnnotationData>();
+    blinkingHighlightsToRemove = new HashSet<AnnotationData>();
     blinkingHighlightsToAdd = new LinkedList<AnnotationData>();
     gateDocListener = new GateDocumentListener();
   }
@@ -146,7 +146,7 @@ public class TextualDocumentView extends AbstractDocumentView {
    */
   @Override
   public void setSelectedAnnotations(List<AnnotationData> selectedAnnots) {
-    synchronized(TextualDocumentView.this){
+    synchronized(blinkingTagsForAnnotations){
       //clear the pending queue, if any
       blinkingHighlightsToAdd.clear();
       //request the removal of existing highlights 
@@ -312,13 +312,16 @@ public class TextualDocumentView extends AbstractDocumentView {
       //this needs to either add or remove the highlights
       
       //first remove the queued highlights
-      Highlighter highlighter = textView.getHighlighter();      
+      Highlighter highlighter = textView.getHighlighter();    
       for(AnnotationData aData : blinkingHighlightsToRemove){
         HighlightData annTag = blinkingTagsForAnnotations.remove(aData);
         if(annTag != null){
           Object tag = annTag.tag;
-          if(tag != null) highlighter.removeHighlight(tag);
-          annTag.tag = null;
+          if(tag != null){
+            //highlight was visible and will be removed
+            highlighter.removeHighlight(tag);
+            annTag.tag = null;
+          }
         }
       }
       blinkingHighlightsToRemove.clear();
@@ -553,7 +556,7 @@ public class TextualDocumentView extends AbstractDocumentView {
    * Used internally to store the annotations for which blinking highlights 
    * need to be removed.
    */
-  protected List<AnnotationData> blinkingHighlightsToRemove;  
+  protected Set<AnnotationData> blinkingHighlightsToRemove;  
   
   /**
    * Used internally to store the annotations for which blinking highlights 
