@@ -47,7 +47,8 @@ public class AnnotationDataImpl implements AnnotationData {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((ann == null) ? 0 : ann.hashCode());
-    result = prime * result + ((set == null) ? 0 : set.hashCode());
+    String setName = set.getName();
+    result = prime * result + ((setName == null) ? 0 : setName.hashCode());
     return result;
   }
   /* (non-Javadoc)
@@ -66,7 +67,7 @@ public class AnnotationDataImpl implements AnnotationData {
     if(set == null) {
       if(other.set != null) return false;
     }
-    else if(!set.equals(other.set)) return false;
+    else if(set != other.set) return false;
     return true;
   }
 }
