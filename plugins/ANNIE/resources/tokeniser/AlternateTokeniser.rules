@@ -54,6 +54,7 @@
 #MODIFIER_SYMBOL
 #OTHER_SYMBOL
 #...representing the corresponding enumerated Unicode category types
+# See java.lang.Character for the Java version you are using
 
 #------- The rules start here -----------------
 
@@ -85,6 +86,7 @@
 #numbers#
 // a number is any combination of digits
 "DECIMAL_DIGIT_NUMBER"+ >Token;kind=number;
+"OTHER_NUMBER"+ >Token;kind=number;
 
 #whitespace#
 (SPACE_SEPARATOR) >SpaceToken;kind=space;
@@ -97,10 +99,5 @@ CURRENCY_SYMBOL > Token;kind=symbol;symbolkind=currency;
 #punctuation#
 "DASH_PUNCTUATION" >Token;kind=punctuation;subkind=dashpunct;
 (CONNECTOR_PUNCTUATION|OTHER_PUNCTUATION)>Token;kind=punctuation;
-"START_PUNCTUATION" >Token;kind=punctuation;position=startpunct;
-"END_PUNCTUATION" >Token;kind=punctuation;position=endpunct;
-
-
-
-
-
+("START_PUNCTUATION"|"INITIAL_QUOTE_PUNCTUATION") >Token;kind=punctuation;position=startpunct;
+("END_PUNCTUATION"|"FINAL_QUOTE_PUNCTUATION") >Token;kind=punctuation;position=endpunct;
