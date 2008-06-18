@@ -74,7 +74,14 @@ public class Scratch
   }
   
     
-  public static void main(String args[]) throws Exception {   
+  public static void main(String args[]) throws Exception {
+    String input = "’“”";
+    for(int i = 0; i< input.length(); i++){
+      char c = input.charAt(i);
+      System.out.println("Character: '" + c + "', type: " + Character.getType(input.charAt(i)));
+    }
+    
+    if(true) return;
     System.out.println(System.getenv());
     
     System.out.println("Text fg: " + UIManager.getColor("Tree.textForeground"));
