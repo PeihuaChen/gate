@@ -5,19 +5,7 @@ package gate.creole.ontology.owlim;
 
 import org.openrdf.vocabulary.OWL;
 
-import gate.creole.ontology.AllValuesFromRestriction;
-import gate.creole.ontology.CardinalityRestriction;
-import gate.creole.ontology.HasValueRestriction;
-import gate.creole.ontology.MaxCardinalityRestriction;
-import gate.creole.ontology.MinCardinalityRestriction;
-import gate.creole.ontology.OClass;
-import gate.creole.ontology.OConstants;
-import gate.creole.ontology.OInstance;
-import gate.creole.ontology.Ontology;
-import gate.creole.ontology.RDFProperty;
-import gate.creole.ontology.Restriction;
-import gate.creole.ontology.SomeValuesFromRestriction;
-import gate.creole.ontology.URI;
+import gate.creole.ontology.*;
 import gate.util.GateRuntimeException;
 
 /**
@@ -184,12 +172,19 @@ public class Utils {
    */
   public static OInstance createOInstance(String repositoryID,
           Ontology ontology, OWLIM owlim, String uri) {
-    OInstance anInstance = (OInstance)ontology.getOResourceFromMap(uri);
-    if(anInstance != null) return anInstance;
-    anInstance = new OInstanceImpl(new URI(uri, false), ontology, repositoryID,
-            owlim);
-    ontology.addOResourceToMap(uri, anInstance);
-    return anInstance;
+    OResource aResource = ontology.getOResourceFromMap(uri);
+    if(aResource instanceof OInstance || aResource == null){
+      OInstance anInstance = (OInstance)aResource;
+      if(anInstance != null) return anInstance;
+      anInstance = new OInstanceImpl(new URI(uri, false), ontology, repositoryID,
+              owlim);
+      ontology.addOResourceToMap(uri, anInstance);
+      return anInstance;
+    }else{
+      throw new GateOntologyException("Expecting " + uri + 
+              " to be an instance but it is a \"" + 
+              aResource.getClass().getCanonicalName() + "\" instead!");
+    }
   }
 
   /**
