@@ -60,26 +60,23 @@ import javax.swing.event.DocumentEvent;
  * GUI allowing to write a query with a JAPE derived syntax for querying
  * a Lucene Datastore and display the results with a stacked view of the
  * annotations and their values.
- *
+ * <br>
  * This VR is associated to {@link gate.creole.ir.SearchPR}.
  * You have to set the target with setTarget().
- * 
+ * <br>
  * Features: query auto-completion, syntactic error checker,
  * display of very big values, export of results in a file,
  * 16 different type of statistics.
- * 
+ * <br>
  * TODO:
- *
- * - when someone invokes a search gui, in which case, entire datastore and
- *   "all sets" options are selected, it should also check if there are any
- *   annotations available to search in - if none available, and show an
- *   information message, the same when the corpus / annotation set change
- * - could be interesting to have statistics per document
- *   it is just adding one condition to the query that retrieves data out of
- *   the index
- * - add shortcut to autocompletion ?
- * - where to store the configuration for shortcut: user config or datastore ?
- * - plus other todos in this file
+ * <ul>
+ * <li>could be interesting to have statistics per document</li>
+ * <li>it is just adding one condition to the query that retrieves data out of
+ *   the index</li>
+ * <li>add shortcut to autocompletion ?</li>
+ * <li>where to store the configuration for shortcut: user config or datastore ?</li>
+ * <li>plus other todos in this file</li>
+ * </ul>
  */
 public class LuceneDataStoreSearchGUI extends AbstractVisualResource
                implements DatastoreListener {
@@ -91,11 +88,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
    */
   private Object target;
 
-  /**
-   * URL or file path of the index location of the searcher.
-   */
-//  private String indexLocation;
-  
   /**
    * arraylist consist of instances of patterns associated found in the
    * document
@@ -143,7 +135,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
    * Contains statistics of one row each.
    */
   private XJTable oneRowStatisticsTable;
-
+  
   /**
    *  Comparator for Integer in statistics tables.
    */
@@ -247,9 +239,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
    */
   private NextResultsAction nextResultsAction;
 
-  /** Instance of ClearQueryAction */
-//  private ClearQueryAction clearQueryAction;
-
   /** Instance of ExportResultsAction */
   private ExportResultsAction exportResultsAction;
 
@@ -292,6 +281,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     new String[maxAnnotationRows+1][columnNames.length];
 
   private AnnotationRowsManagerTableModel annotationRowsManagerTableModel;
+
+
+  private DefaultTableModel oneRowStatisticsTableModel;
 
   /**
    * Contains the tooltips of the first column.
@@ -337,10 +329,10 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     userConfig = Gate.getUserConfig();
 
     // read the user config data
-    if (userConfig.get("Annotation_rows") != null) {
+    if (userConfig.get(GateConstants.ANNIC_ANNOTATION_ROWS) != null) {
       // saved as a string: "[[true, Cat, Token, category, Crop end], [...]]"
       String annotationRowsString =
-        (String)userConfig.get("Annotation_rows");
+        (String)userConfig.get(GateConstants.ANNIC_ANNOTATION_ROWS);
       annotationRowsString = annotationRowsString.replaceAll("^\\[\\[", "");
       annotationRowsString = annotationRowsString.replaceAll("\\]\\]$", "");
       String[] rows = annotationRowsString.split("\\], \\[");
@@ -371,25 +363,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       }
     });
 
-//    // unless the AnnicSerachPR is initialized, we don't have any data
-//    // to show
-//    if(target != null) {
-//      if(target instanceof Searcher) {
-//        searcher = (Searcher)target;
-//      } else if(target instanceof LuceneDataStoreImpl) {
-//        searcher = ((LuceneDataStoreImpl)target).getSearcher();
-//      } else {
-//        throw new GateRuntimeException("Invalid target specified for the GUI");
-//      }
     updateDisplay();
-//    }
     validate();
-
-//    LogArea log = new LogArea();
-//    JFrame logFrame = new JFrame();
-//    logFrame.add(new JScrollPane(log));
-//    logFrame.setSize(400, 400);
-//    logFrame.setVisible(true);
 
     return this;
   }
@@ -507,8 +482,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     topPanel.add(noOfPatternsLabel, gbc);
     numberOfResultsSpinner =
       new JSpinner(new SpinnerNumberModel(50, 1, 10000, 5));
-//    numberOfResultsSpinner.setPreferredSize(new Dimension(50,
-//      numberOfResultsSpinner.getPreferredSize().height));
     numberOfResultsSpinner.setToolTipText("Number of results per page.");
     numberOfResultsSpinner.setEnabled(true);
     topPanel.add(numberOfResultsSpinner, gbc);
@@ -901,19 +874,85 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         return false;
       }
     };
+
     statisticsTabbedPane.addTab("Global", null,
       new JScrollPane(globalStatisticsTable),
       "Global statistics on the Corpus and Annotation Set selected.");
 
+    statisticsTabbedPane.addMouseListener(new MouseAdapter() {
+      private JPopupMenu mousePopup;
+      JMenuItem menuItem;
+      public void mousePressed(MouseEvent e) {
+        if (e.isPopupTrigger()
+         && statisticsTabbedPane.indexAtLocation(e.getX(), e.getY()) > 1) {
+          createPopup(e.getX(), e.getY());
+          mousePopup.show(e.getComponent(), e.getX(), e.getY());
+        }
+      }
+      public void mouseReleased(MouseEvent e) {
+        if (e.isPopupTrigger()
+         && statisticsTabbedPane.indexAtLocation(e.getX(), e.getY()) > 1) {
+          createPopup(e.getX(), e.getY());
+          mousePopup.show(e.getComponent(), e.getX(), e.getY());
+        }
+      }
+      private void createPopup(final int x, final int y) {
+        mousePopup = new JPopupMenu();
+        menuItem = new JMenuItem("Close tab");
+        menuItem.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent ie) {
+            statisticsTabbedPane.remove(
+              statisticsTabbedPane.indexAtLocation(x, y));
+          }
+        });
+        mousePopup.add(menuItem);
+      }
+    });
+
+    class RemoveCellEditorRenderer extends AbstractCellEditor
+      implements TableCellRenderer, TableCellEditor, ActionListener {
+      private static final long serialVersionUID = 1L;
+      private int row;
+      private JButton button;
+      public RemoveCellEditorRenderer() {
+        button = new JButton();
+        button.setHorizontalAlignment(SwingConstants.CENTER);
+        button.setIcon(MainFrame.getIcon("delete.gif"));
+        button.setToolTipText("Click to remove this line.");
+        button.addActionListener(this);
+      }
+      public Component getTableCellRendererComponent(
+        JTable table, Object color, boolean isSelected,
+        boolean hasFocus, int row, int col) {
+        button.setSelected(isSelected);
+        return button;
+      }
+      public boolean shouldSelectCell(EventObject anEvent) {
+        return false;
+      }
+      public void actionPerformed(ActionEvent e) {
+        oneRowStatisticsTableModel.removeRow(
+          oneRowStatisticsTable.rowViewToModel(row));
+      }
+      public Object getCellEditorValue() {
+        return null;
+      }
+      public Component getTableCellEditorComponent(JTable table,
+              Object value, boolean isSelected, int row, int col) {
+        this.row = row;
+        return button;
+      }
+    }
+
     oneRowStatisticsTable = new XJTable() {
       private static final long serialVersionUID = 1L;
       public boolean isCellEditable(int rowIndex, int vColIndex) {
-        return false;
+        return vColIndex == 2;
       }
       public Component prepareRenderer(TableCellRenderer renderer,
               int row, int col) {
         Component c = super.prepareRenderer(renderer, row, col);
-        if (c instanceof JComponent) {
+        if (c instanceof JComponent && col != 2) {
           // display a custom tooltip saved when adding statistics
           ((JComponent)c).setToolTipText("<html>"
             +oneRowStatisticsTableToolTips.get(rowViewToModel(row))+"</html>");
@@ -921,6 +960,19 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         return c;
       }
     };
+
+    oneRowStatisticsTableModel = new DefaultTableModel(
+      new Object[]{"Annotation Type/Feature","Count",""}, 0);
+    oneRowStatisticsTable.setModel(oneRowStatisticsTableModel);
+    oneRowStatisticsTable.getColumnModel().getColumn(2)
+      .setMaxWidth(MainFrame.getIcon("delete.gif").getIconWidth()+6);
+    oneRowStatisticsTable.getColumnModel().getColumn(2)
+      .setCellEditor(new RemoveCellEditorRenderer());
+    oneRowStatisticsTable.getColumnModel().getColumn(2)
+      .setCellRenderer(new RemoveCellEditorRenderer());
+    oneRowStatisticsTable.setComparator(0, stringCollator);
+    oneRowStatisticsTable.setComparator(1, integerComparator);
+
     statisticsTabbedPane.addTab("One item", null,
       new JScrollPane(oneRowStatisticsTable),
       "One item statistics.");
@@ -1042,7 +1094,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         }
         annotationRowsManagerTableModel.fireTableDataChanged();
       }
-//      updateCentralView();
       exportResultsAction.setEnabled(true);
       if (!showAllResultsCheckBox.isSelected()) {
         nextResultsAction.setEnabled(true);
@@ -1111,7 +1162,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
   protected void updateCentralView() {
 //    numberOfCall++;
 //    System.out.println("numberOfCall = "+numberOfCall);
-    // maximum number of columns to display, i.e. maximum number of characters
+
+    // maximum number of columns to display in the match,
+    // i.e. maximum number of characters
     int maxColumns = 150;
     // maximum length of a feature value displayed
     int maxValueLength = 30;
@@ -1139,7 +1192,10 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     Pattern pattern = (Pattern)patterns
       .get(patternTable.rowViewToModel(patternTable.getSelectedRow()));
 
-    // display on the first line the text matching the pattern and its context
+    /*********************************************************
+     * Display on the first line the text matching the query *
+     *********************************************************/
+    
     gbc.gridwidth = 1;
     gbc.insets = new java.awt.Insets(10, 10, 10, 10);
     JLabel labelTitle = new JLabel("Pattern Text");
@@ -1153,7 +1209,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       pattern.getStartOffset() - pattern.getLeftContextStartOffset();
     int endOffsetPattern =
       pattern.getEndOffset() - pattern.getLeftContextStartOffset();
-    boolean textTooLong = pattern.getPatternText().length() > maxColumns;
+    boolean textTooLong = (endOffsetPattern - startOffsetPattern) > maxColumns;
     int upperBound = pattern.getPatternText().length() - (maxColumns/2);
 //    System.out.println("upperBound = "+upperBound);
 
@@ -1202,6 +1258,10 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     }
 //    System.out.println(message+"\n");
 
+      /**************************************************
+       * Display on the next lines each annotation type *
+       **************************************************/
+
     // for each annotation type to display
     for (int row = 0; row < numAnnotationRows; row++) {
       if (annotationRows[row][DISPLAY].equals("false")) { continue; }
@@ -1246,7 +1306,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 //      message = "";
       // add a JLabel in the gridbag layout for each feature value
       // of the current annotation type
-      HashMap<Integer,Integer> gridSet = new HashMap<Integer,Integer>();
+      HashMap<Integer,TreeSet<Integer>> gridSet =
+        new HashMap<Integer,TreeSet<Integer>>();
+      int gridyMax = gbc.gridy;
       for (int k = 0; k < annots.length; k++) {
         PatternAnnotation ann = (PatternAnnotation)annots[k];
 //        System.out.println(type+"."+feature+"["+k+"] = "+ann.getFeatures().toString()+", ["+ann.getStartOffset()+", "+ann.getEndOffset()+"]");
@@ -1254,7 +1316,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           - pattern.getLeftContextStartOffset() + 1;
         gbc.gridwidth = ann.getEndOffset()
           - pattern.getLeftContextStartOffset() - gbc.gridx + 1;
-//        message += "[("+gbc.gridx+","+gbc.gridwidth+")";
+//        message += "[("+gbc.gridx+","+gbc.gridy+","+gbc.gridwidth+")";
         if (textTooLong) {
           if (gbc.gridx > (upperBound+1)) {
             // x starts after the hidden middle part
@@ -1292,7 +1354,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         if (value.length() > maxValueLength) {
           label.setToolTipText((value.length()>500)?
             "<html><textarea rows=\"30\" cols=\"40\" readonly=\"readonly\">"
-            +value.replaceAll("(.{60})", "$1\n")+"</textarea></html>":
+            +value.replaceAll("(.{50,60})\\b", "$1\n")+"</textarea></html>":
             ((value.length()>100)?
             "<html><table width=\"500\" border=\"0\" cellspacing=\"0\">"
             +"<tr><td>"+value.replaceAll("\n", "<br>")
@@ -1321,7 +1383,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
                       +map.getKey()+"</td><td>"
                       +((map.getValue().length()>500)?
                        "<textarea rows=\"20\" cols=\"40\" readonly=\"readonly\">"
-                      +map.getValue().replaceAll("(.{60})", "$1\n")+"</textarea>":
+                      +map.getValue().replaceAll("(.{50,60})\\b", "$1\n")+"</textarea>":
                        map.getValue().replaceAll("\n", "<br>"))
                       +"</td></tr>";
           }
@@ -1329,37 +1391,47 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           // make the tooltip indefinitely shown when the mouse is over
           label.addMouseListener(new MouseAdapter() {
             int dismissDelay;
+            boolean enabled;
+            ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
             public void mouseEntered(MouseEvent e) {
-              dismissDelay =
-                ToolTipManager.sharedInstance().getDismissDelay();
-              ToolTipManager.sharedInstance()
-                .setDismissDelay(Integer.MAX_VALUE);
+              dismissDelay = toolTipManager.getDismissDelay();
+              toolTipManager.setDismissDelay(Integer.MAX_VALUE);
+              enabled = toolTipManager.isEnabled();
+              toolTipManager.setEnabled(true);
             }
             public void mouseExited(MouseEvent e) {
-              ToolTipManager.sharedInstance().setDismissDelay(dismissDelay);
+              toolTipManager.setDismissDelay(dismissDelay);
+              toolTipManager.setEnabled(enabled);
             }
           });
         } else {
           label.addMouseListener(new AnnotationRowValueMouseListener(
             type, feature, (String)ann.getFeatures().get(feature)));
         }
-        if (gridSet.containsKey(gbc.gridx)) {
-          // two values for the same row and column
-          int oldGridy = gbc.gridy;
-          gbc.gridy = gridSet.get(gbc.gridx)+1;
-          centerPanel.add(label, gbc);
-          for (int w = 0; w < gbc.gridwidth; w++) {
-            gridSet.put(gbc.gridx+w, gbc.gridy);
+        // find the first empty row span for this annotation
+        int oldGridy = gbc.gridy;
+        for (int y = oldGridy; y <= (gridyMax+1); y++) {
+          // for each cell of this row where spans the annotation
+          boolean xSpanIsEmpty = true;
+          for (int x = gbc.gridx;
+              (x < (gbc.gridx+gbc.gridwidth)) && xSpanIsEmpty; x++) {
+            xSpanIsEmpty = !(gridSet.containsKey(x)
+                         && gridSet.get(x).contains(y));
           }
-          gbc.gridy = oldGridy;
-        } else {
-          centerPanel.add(label, gbc);
-          // save the row x and column y locations of the current value
-          for (int w = 0; w < gbc.gridwidth; w++) {
-            gridSet.put(gbc.gridx+w, gbc.gridy);
-          }
+          if (xSpanIsEmpty) { gbc.gridy = y; break; }
         }
-//        message += ",("+gbc.gridx+","+gbc.gridwidth+")] ";
+        // save the column x and row y of the current value
+        TreeSet<Integer> ts;
+        for (int x = gbc.gridx; x < (gbc.gridx+gbc.gridwidth); x++) {
+          ts = gridSet.get(x);
+          if (ts == null) { ts = new TreeSet<Integer>(); }
+          ts.add(gbc.gridy);
+          gridSet.put(x, ts);
+        }
+        centerPanel.add(label, gbc);
+//        message += ",("+gbc.gridx+","+gbc.gridy+","+gbc.gridwidth+")] ";
+        gridyMax = Math.max(gridyMax, gbc.gridy);
+        gbc.gridy = oldGridy;
       }
 //      System.out.println(message+"\n");
 
@@ -1383,7 +1455,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       removePattern.setMargin(new Insets(0, 0, 0, 0));
       gbc.gridwidth = 1;
       // last cell of the row
-      gbc.gridx = Math.min(pattern.getPatternText().length()+1, maxColumns+1);
+      gbc.gridx = Math.min(pattern.getPatternText().length(), maxColumns) + 1;
       gbc.insets = new Insets(0, 10, 3, 0);
       gbc.fill = GridBagConstraints.NONE;
       gbc.anchor = GridBagConstraints.WEST;
@@ -1393,9 +1465,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       gbc.anchor = GridBagConstraints.CENTER;
 
       // set the new gridy to the maximum row we put a value
-      if (gridSet.size() > 0) {
-        gbc.gridy = Collections.max(gridSet.values()).intValue();
-      }
+      gbc.gridy = gridyMax;
     }
 
     // add a annotation rows manager button on the last row
@@ -1703,7 +1773,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       annotationRowsString += "]";
     }
     annotationRowsString += "]";
-    userConfig.put("Annotation_rows", annotationRowsString);
+    userConfig.put(GateConstants.ANNIC_ANNOTATION_ROWS,
+            annotationRowsString);
   }
   
   /**
@@ -1714,11 +1785,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     private static final long serialVersionUID = 3257286928859412277L;
 
     public ExportResultsAction() {
-      super("Export");
-//      super("", MainFrame.getIcon("annic-export"));
+      super("Export...");
       super.putValue(SHORT_DESCRIPTION,
         "Export results and statistics to a HTML file.");
-//      super.putValue(MNEMONIC_KEY, KeyEvent.VK_E);
     }
 
     public void actionPerformed(ActionEvent ae) {
@@ -1727,15 +1796,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
       // no results
       if(patterns == null || patterns.isEmpty()) {
-        try {
           JOptionPane.showMessageDialog(thisInstance,
                   "No patterns found to export");
           return;
-        }
-        catch(Exception e) {
-          e.printStackTrace();
-          return;
-        }
       }
 
       try {
@@ -1788,14 +1851,17 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         bw.newLine();
         bw.write("<HTML><HEAD><TITLE>Annic Results and Statistics</TITLE>");
         bw.newLine();
-        bw.write("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">");
+        bw.write("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">");
         bw.newLine();
         bw.write("</HEAD><BODY>");
         bw.newLine();
+
         bw.write("<H1 align=\"center\">Annic Results and Statistics</H1>");
         bw.newLine();
+
         bw.write("<H2>Parameters</H2>");
         bw.newLine();
+
         bw.write("<UL><LI>Corpus: <B>"+(String)corpusToSearchIn.getSelectedItem()+"</B></LI>");
         bw.newLine();
         bw.write("<LI>Annotation set: <B>"+(String)annotationSetsToSearchIn.getSelectedItem()+"</B></LI>");
@@ -1805,6 +1871,13 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
                 .intValue()+"</B></LI>");
         bw.newLine();
         bw.write("<LI>Queries:<UL>");
+        Collections.sort(patternsToExport, new Comparator<Hit>() {
+          public int compare(Hit a, Hit b) {
+            Pattern p1 = (Pattern)a;
+            Pattern p2 = (Pattern)b;
+            return p1.getQueryString().compareTo(p2.getQueryString());
+          }
+        });
         String queryString = "";
         for(int i = 0; i < patternsToExport.size(); i++) {
           Pattern ap = (Pattern)patternsToExport.get(i);
@@ -1824,13 +1897,12 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         for(int i = 0; i < patternsToExport.size(); i++) {
           Pattern ap = (Pattern)patternsToExport.get(i);
           if(!ap.getQueryString().equals(queryString)) {
-//            if(!queryString.equals("")) {
-//              bw.write("</TABLE>");
-//              bw.newLine();
-//            }
             queryString = ap.getQueryString();
 
             bw.newLine();
+            if(i != 0) {
+              bw.write("</TABLE>");
+            }
             bw.write("<P><a name=\"" + ap.getQueryString()
                     + "\">Query Pattern:</a> <B>" + ap.getQueryString()
                     + "</B></P>");
@@ -1838,6 +1910,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
             bw.write("<TABLE border=\"1\"><TR>");
             bw.write("<TH>No.</TH>");
             bw.write("<TH>Document ID</TH>");
+            bw.write("<TH>Annotation Set</TH>");
             bw.write("<TH>Left Context</TH>");
             bw.write("<TH>Pattern</TH>");
             bw.write("<TH>Right Context</TH>");
@@ -1847,6 +1920,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
           bw.write("<TR><TD>" + (i + 1) + "</TD>");
           bw.write("<TD>" + ap.getDocumentID() + "</TD>");
+          bw.write("<TD>" + ap.getAnnotationSetName() + "</TD>");
           bw.write("<TD align=\"right\">"
                   + ap.getPatternText(ap.getLeftContextStartOffset(), ap
                           .getStartOffset()) + "</TD>");
@@ -1878,6 +1952,30 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           bw.write("<TR>");
           for (int col = 0; col < globalStatisticsTable.getColumnCount(); col++) {
             bw.write("<TD>"+globalStatisticsTable.getValueAt(row, col)+"</TD>");
+            bw.newLine();
+          }
+          bw.write("</TR>");
+          bw.newLine();
+        }
+        bw.write("</TABLE>");
+        bw.newLine();
+
+        bw.write("<H2>One item Statistics</H2>");
+        bw.newLine();
+
+        bw.write("<TABLE border=\"1\">");
+        bw.newLine();
+        bw.write("<TR>");
+        for (int col = 0; col < (oneRowStatisticsTable.getColumnCount()-1); col++) {
+          bw.write("<TH>"+oneRowStatisticsTable.getColumnName(col)+"</TH>");
+          bw.newLine();
+        }
+        bw.write("</TR>");
+        bw.newLine();
+        for (int row = 0; row < oneRowStatisticsTable.getRowCount(); row++) {
+          bw.write("<TR>");
+          for (int col = 0; col < (oneRowStatisticsTable.getColumnCount()-1); col++) {
+            bw.write("<TD>"+oneRowStatisticsTable.getValueAt(row, col)+"</TD>");
             bw.newLine();
           }
           bw.write("</TR>");
@@ -1946,10 +2044,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
             parameters = new HashMap<String, Object>();
 
           if(target instanceof LuceneDataStoreImpl) {
-//            ArrayList<String> indexLocations = new ArrayList<String>();
-//            indexLocations.add(indexLocation);
-//            parameters.put(Constants.INDEX_LOCATIONS, indexLocations);
-//
             String corpus2SearchIn = 
               (corpusToSearchIn.getSelectedItem().equals(Constants.ENTIRE_DATASTORE))?
                       null:(String)corpusIds.get(corpusToSearchIn.getSelectedIndex() - 1);
@@ -2039,7 +2133,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
     public NextResultsAction() {
       super("Next Page of Results");
-//      super("", MainFrame.getIcon("annic-next"));
       super.putValue(SHORT_DESCRIPTION, "Show next page of results.");
       super.putValue(MNEMONIC_KEY, KeyEvent.VK_RIGHT);
     }
@@ -2077,8 +2170,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     private static final long serialVersionUID = 1L;
 
     public DisplayAnnotationRowsManagerAction() {
-      super("Modify Rows");
-//      super("", MainFrame.getIcon("add.gif"));
+      super("Select annotations to display...");
       super.putValue(SHORT_DESCRIPTION, "Display the annotation rows manager.");
       super.putValue(MNEMONIC_KEY, KeyEvent.VK_LEFT);
     }
@@ -2220,19 +2312,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               se.printStackTrace();
               return;
             }
-            DefaultTableModel model = new DefaultTableModel();
-            model.addColumn("Annotation Type/Feature");
-            model.addColumn("Count");
-            for (int row = 0; row < oneRowStatisticsTable.getRowCount(); row++) {
-              model.addRow(new Object[]{
-                oneRowStatisticsTable.getValueAt(row,0),
-                oneRowStatisticsTable.getValueAt(row,1)});
-            }
-            model.addRow(new Object[]{type+"."+feature+"==\""+value+"\""
-              +" (datastore)", new Integer(count)});
-            oneRowStatisticsTable.setModel(model);
-            oneRowStatisticsTable.setComparator(0, stringCollator);
-            oneRowStatisticsTable.setComparator(1, integerComparator);
+            oneRowStatisticsTableModel.addRow(
+              new Object[]{type+"."+feature+"==\""+value+"\""
+              +" (datastore)", new Integer(count), ""});
             oneRowStatisticsTableToolTips.add("Statistics in data store"
               +"<br>on Corpus: "+corpusName
               +"<br>and Annotation Set: "+annotationSetName
@@ -2256,19 +2338,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               se.printStackTrace();
               return;
             }
-            DefaultTableModel model = new DefaultTableModel();
-            model.addColumn("Annotation Type/Feature");
-            model.addColumn("Count");
-            for (int row = 0; row < oneRowStatisticsTable.getRowCount(); row++) {
-              model.addRow(new Object[]{
-                oneRowStatisticsTable.getValueAt(row,0),
-                oneRowStatisticsTable.getValueAt(row,1)});
-            }
-            model.addRow(new Object[]{type+"."+feature+"==\""+value+"\""
+            oneRowStatisticsTableModel.addRow(new Object[]{type+"."+feature+"==\""+value+"\""
               +" (matches)", new Integer(count)});
-            oneRowStatisticsTable.setModel(model);
-            oneRowStatisticsTable.setComparator(0, stringCollator);
-            oneRowStatisticsTable.setComparator(1, integerComparator);
             oneRowStatisticsTableToolTips.add("Statistics in matches"
               +"<br>on Corpus: "+corpusName
               +"<br>and Annotation Set: "+annotationSetName
@@ -2292,19 +2363,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               se.printStackTrace();
               return;
             }
-            DefaultTableModel model = new DefaultTableModel();
-            model.addColumn("Annotation Type/Feature");
-            model.addColumn("Count");
-            for (int row = 0; row < oneRowStatisticsTable.getRowCount(); row++) {
-              model.addRow(new Object[]{
-                oneRowStatisticsTable.getValueAt(row,0),
-                oneRowStatisticsTable.getValueAt(row,1)});
-            }
-            model.addRow(new Object[]{type+"."+feature+"==\""+value+"\""
+            oneRowStatisticsTableModel.addRow(new Object[]{type+"."+feature+"==\""+value+"\""
               +" (contexts)", new Integer(count)});
-            oneRowStatisticsTable.setModel(model);
-            oneRowStatisticsTable.setComparator(0, stringCollator);
-            oneRowStatisticsTable.setComparator(1, integerComparator);
             oneRowStatisticsTableToolTips.add("Statistics in contexts"
               +"<br>on Corpus: "+corpusName
               +"<br>and Annotation Set: "+annotationSetName
@@ -2328,19 +2388,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               se.printStackTrace();
               return;
             }
-            DefaultTableModel model = new DefaultTableModel();
-            model.addColumn("Annotation Type/Feature");
-            model.addColumn("Count");
-            for (int row = 0; row < oneRowStatisticsTable.getRowCount(); row++) {
-              model.addRow(new Object[]{
-                oneRowStatisticsTable.getValueAt(row,0),
-                oneRowStatisticsTable.getValueAt(row,1)});
-            }
-            model.addRow(new Object[]{type+"."+feature+"==\""+value+"\""
+            oneRowStatisticsTableModel.addRow(new Object[]{type+"."+feature+"==\""+value+"\""
               +" (mch+ctxt)", new Integer(count)});
-            oneRowStatisticsTable.setModel(model);
-            oneRowStatisticsTable.setComparator(0, stringCollator);
-            oneRowStatisticsTable.setComparator(1, integerComparator);
             oneRowStatisticsTableToolTips.add(
               "Statistics in matches+contexts"
               +"<br>on Corpus: "+corpusName
@@ -2418,19 +2467,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               se.printStackTrace();
               return;
             }
-            DefaultTableModel model = new DefaultTableModel();
-            model.addColumn("Annotation Type/Feature");
-            model.addColumn("Count");
-            for (int row = 0; row < oneRowStatisticsTable.getRowCount(); row++) {
-              model.addRow(new Object[]{
-                oneRowStatisticsTable.getValueAt(row,0),
-                oneRowStatisticsTable.getValueAt(row,1)});
-            }
-            model.addRow(new Object[]{type+"."+feature
+            oneRowStatisticsTableModel.addRow(new Object[]{type+"."+feature
               +" (datastore)", new Integer(count)});
-            oneRowStatisticsTable.setModel(model);
-            oneRowStatisticsTable.setComparator(0, stringCollator);
-            oneRowStatisticsTable.setComparator(1, integerComparator);
             oneRowStatisticsTableToolTips.add("Statistics in data store"
               +"<br>on Corpus: "+corpusName
               +"<br>and Annotation Set: "+annotationSetName
@@ -2454,19 +2492,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               se.printStackTrace();
               return;
             }
-            DefaultTableModel model = new DefaultTableModel();
-            model.addColumn("Annotation Type/Feature");
-            model.addColumn("Count");
-            for (int row = 0; row < oneRowStatisticsTable.getRowCount(); row++) {
-              model.addRow(new Object[]{
-                oneRowStatisticsTable.getValueAt(row,0),
-                oneRowStatisticsTable.getValueAt(row,1)});
-            }
-            model.addRow(new Object[]{type+"."+feature
+            oneRowStatisticsTableModel.addRow(new Object[]{type+"."+feature
               +" (matches)", new Integer(count)});
-            oneRowStatisticsTable.setModel(model);
-            oneRowStatisticsTable.setComparator(0, stringCollator);
-            oneRowStatisticsTable.setComparator(1, integerComparator);
             oneRowStatisticsTableToolTips.add("Statistics in matches"
               +"<br>on Corpus: "+corpusName
               +"<br>and Annotation Set: "+annotationSetName
@@ -2490,19 +2517,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               se.printStackTrace();
               return;
             }
-            DefaultTableModel model = new DefaultTableModel();
-            model.addColumn("Annotation Type/Feature");
-            model.addColumn("Count");
-            for (int row = 0; row < oneRowStatisticsTable.getRowCount(); row++) {
-              model.addRow(new Object[]{
-                oneRowStatisticsTable.getValueAt(row,0),
-                oneRowStatisticsTable.getValueAt(row,1)});
-            }
-            model.addRow(new Object[]{type+"."+feature
+            oneRowStatisticsTableModel.addRow(new Object[]{type+"."+feature
               +" (contexts)", new Integer(count)});
-            oneRowStatisticsTable.setModel(model);
-            oneRowStatisticsTable.setComparator(0, stringCollator);
-            oneRowStatisticsTable.setComparator(1, integerComparator);
             oneRowStatisticsTableToolTips.add("Statistics in contexts"
               +"<br>on Corpus: "+corpusName
               +"<br>and Annotation Set: "+annotationSetName
@@ -2526,19 +2542,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               se.printStackTrace();
               return;
             }
-            DefaultTableModel model = new DefaultTableModel();
-            model.addColumn("Annotation Type/Feature");
-            model.addColumn("Count");
-            for (int row = 0; row < oneRowStatisticsTable.getRowCount(); row++) {
-              model.addRow(new Object[]{
-                oneRowStatisticsTable.getValueAt(row,0),
-                oneRowStatisticsTable.getValueAt(row,1)});
-            }
-            model.addRow(new Object[]{type+"."+feature
+            oneRowStatisticsTableModel.addRow(new Object[]{type+"."+feature
               +" (mch+ctxt)", new Integer(count)});
-            oneRowStatisticsTable.setModel(model);
-            oneRowStatisticsTable.setComparator(0, stringCollator);
-            oneRowStatisticsTable.setComparator(1, integerComparator);
             oneRowStatisticsTableToolTips.add(
               "Statistics in matches+contexts"
               +"<br>on Corpus: "+corpusName
@@ -2582,10 +2587,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
             table.setModel(model);
             table.setComparator(0, stringCollator);
             table.setComparator(1, integerComparator);
-            JScrollPane scrollPaneTable = new JScrollPane(table);
             statisticsTabbedPane.addTab(
               String.valueOf(statisticsTabbedPane.getTabCount()-1),
-              null, scrollPaneTable,
+              null, new JScrollPane(table),
               "<html>Statistics in matches"
               +"<br>on Corpus: "+corpusName
               +"<br>and Annotation Set: "+annotationSetName
@@ -2699,19 +2703,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               se.printStackTrace();
               return;
             }
-            DefaultTableModel model = new DefaultTableModel();
-            model.addColumn("Annotation Type/Feature");
-            model.addColumn("Count");
-            for (int row = 0; row < oneRowStatisticsTable.getRowCount(); row++) {
-              model.addRow(new Object[]{
-                oneRowStatisticsTable.getValueAt(row,0),
-                oneRowStatisticsTable.getValueAt(row,1)});
-            }
-            model.addRow(new Object[]{type+" (datastore)",
+            oneRowStatisticsTableModel.addRow(new Object[]{type+" (datastore)",
               new Integer(count)});
-            oneRowStatisticsTable.setModel(model);
-            oneRowStatisticsTable.setComparator(0, stringCollator);
-            oneRowStatisticsTable.setComparator(1, integerComparator);
             oneRowStatisticsTableToolTips.add("Statistics in data store"
               +"<br>on Corpus: "+corpusName
               +"<br>and Annotation Set: "+annotationSetName
@@ -2734,19 +2727,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               se.printStackTrace();
               return;
             }
-            DefaultTableModel model = new DefaultTableModel();
-            model.addColumn("Annotation Type/Feature");
-            model.addColumn("Count");
-            for (int row = 0; row < oneRowStatisticsTable.getRowCount(); row++) {
-              model.addRow(new Object[]{
-                oneRowStatisticsTable.getValueAt(row,0),
-                oneRowStatisticsTable.getValueAt(row,1)});
-            }
-            model.addRow(new Object[]{type+" (matches)",
+            oneRowStatisticsTableModel.addRow(new Object[]{type+" (matches)",
               new Integer(count)});
-            oneRowStatisticsTable.setModel(model);
-            oneRowStatisticsTable.setComparator(0, stringCollator);
-            oneRowStatisticsTable.setComparator(1, integerComparator);
             oneRowStatisticsTableToolTips.add("Statistics in matches"
               +"<br>on Corpus: "+corpusName
               +"<br>and Annotation Set: "+annotationSetName
@@ -2769,19 +2751,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               se.printStackTrace();
               return;
             }
-            DefaultTableModel model = new DefaultTableModel();
-            model.addColumn("Annotation Type/Feature");
-            model.addColumn("Count");
-            for (int row = 0; row < oneRowStatisticsTable.getRowCount(); row++) {
-              model.addRow(new Object[]{
-                oneRowStatisticsTable.getValueAt(row,0),
-                oneRowStatisticsTable.getValueAt(row,1)});
-            }
-            model.addRow(new Object[]{type+" (contexts)",
+            oneRowStatisticsTableModel.addRow(new Object[]{type+" (contexts)",
               new Integer(count)});
-            oneRowStatisticsTable.setModel(model);
-            oneRowStatisticsTable.setComparator(0, stringCollator);
-            oneRowStatisticsTable.setComparator(1, integerComparator);
             oneRowStatisticsTableToolTips.add("Statistics in contexts"
               +"<br>on Corpus: "+corpusName
               +"<br>and Annotation Set: "+annotationSetName
@@ -2804,19 +2775,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               se.printStackTrace();
               return;
             }
-            DefaultTableModel model = new DefaultTableModel();
-            model.addColumn("Annotation Type/Feature");
-            model.addColumn("Count");
-            for (int row = 0; row < oneRowStatisticsTable.getRowCount(); row++) {
-              model.addRow(new Object[]{
-                oneRowStatisticsTable.getValueAt(row,0),
-                oneRowStatisticsTable.getValueAt(row,1)});
-            }
-            model.addRow(new Object[]{type+" (mch+ctxt)",
+            oneRowStatisticsTableModel.addRow(new Object[]{type+" (mch+ctxt)",
               new Integer(count)});
-            oneRowStatisticsTable.setModel(model);
-            oneRowStatisticsTable.setComparator(0, stringCollator);
-            oneRowStatisticsTable.setComparator(1, integerComparator);
             oneRowStatisticsTableToolTips.add(
               "Statistics in matches+contexts"
               +"<br>on Corpus: "+corpusName
@@ -3101,37 +3061,31 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         }
       });
 
-      annotationRowsJTable.getColumnModel().getColumn(REMOVE)
-        .setCellRenderer(new DefaultTableCellRenderer() {
-          private static final long serialVersionUID = 1L;
-          public Component getTableCellRendererComponent(
-            JTable table, Object color, boolean isSelected,
-            boolean hasFocus, int row, int col) {
-            JButton button = new JButton();
-            button.setHorizontalAlignment(SwingConstants.CENTER);
-            if (row == numAnnotationRows) {
-              // add button if it's the last row of the table
-              button.setIcon(MainFrame.getIcon("add.gif"));
-              button.setToolTipText("Click to add this line.");
-            } else {
-              // remove button otherwise
-              button.setIcon(MainFrame.getIcon("delete.gif"));
-              button.setToolTipText("Click to remove this line.");
-            }
-            return button;
-          }
-        });
-
-      final class AddRemoveCellEditor extends AbstractCellEditor
-      implements TableCellEditor, ActionListener {
+      final class AddRemoveCellEditorRenderer extends AbstractCellEditor
+      implements TableCellRenderer, TableCellEditor, ActionListener {
         private static final long serialVersionUID = 1L;
         private JButton button;
         private int row;
         private boolean addButton;
-        public AddRemoveCellEditor() {
+        public AddRemoveCellEditorRenderer() {
           button = new JButton();
           button.setHorizontalAlignment(SwingConstants.CENTER);
           button.addActionListener(this);
+        }
+        public Component getTableCellRendererComponent(
+                JTable table, Object color, boolean isSelected,
+                boolean hasFocus, int row, int col) {
+          if (row == numAnnotationRows) {
+            // add button if it's the last row of the table
+            button.setIcon(MainFrame.getIcon("add.gif"));
+            button.setToolTipText("Click to add this line.");
+          } else {
+            // remove button otherwise
+            button.setIcon(MainFrame.getIcon("delete.gif"));
+            button.setToolTipText("Click to remove this line.");
+          }
+          button.setSelected(isSelected);
+          return button;
         }
         public boolean shouldSelectCell(EventObject anEvent) {
           return false;
@@ -3164,20 +3118,22 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
             updateCentralView();
             saveConfiguration();
           }
-          fireEditingStopped();
         }
         public Object getCellEditorValue() {
           return null;
         }
         public Component getTableCellEditorComponent(JTable table,
                 Object value, boolean isSelected, int row, int col) {
-          this.row = row;
           this.addButton = (row == numAnnotationRows);
+          this.row = row;
+          button.setIcon(MainFrame.getIcon((addButton)?"add.gif":"delete.gif"));
           return button;
         }
       }
       annotationRowsJTable.getColumnModel().getColumn(REMOVE)
-        .setCellEditor(new AddRemoveCellEditor());
+        .setCellEditor(new AddRemoveCellEditorRenderer());
+      annotationRowsJTable.getColumnModel().getColumn(REMOVE)
+        .setCellRenderer(new AddRemoveCellEditorRenderer());
 
       scrollPane.setViewportView(annotationRowsJTable);
 
@@ -3250,11 +3206,11 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       if (!annotationRows[row][SHORTCUT].equals("")) {
         if (annotationRows[row][ANNOTATION_TYPE].equals("")
          || annotationRows[row][FEATURE].equals("")) {
-          // TODO table should be update
-          annotationRows[row][col] = previousValue;
-          fireTableCellUpdated(row, col);
+          // TODO table should be updated
           annotationRowsManager.getTable().getColumnModel().getColumn(col)
             .getCellEditor().cancelCellEditing();
+          fireTableCellUpdated(row, col);
+          annotationRows[row][col] = previousValue;
           JOptionPane.showMessageDialog(annotationRowsManager,
             "A Shortcut need to have a Feature.\n"
             +"Please choose a Feature or delete the Shortcut value.",
@@ -3266,9 +3222,10 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
                   FEATURE,         annotationRows[row][FEATURE]);
           if (row2 >= 0 && row2 != row
            && !annotationRows[row2][SHORTCUT].equals("")) {
-            annotationRows[row][col] = previousValue;
             annotationRowsManager.getTable().getColumnModel().getColumn(col)
               .getCellEditor().cancelCellEditing();
+            annotationRows[row][col] = previousValue;
+            fireTableCellUpdated(row, col);
             JOptionPane.showMessageDialog(annotationRowsManager,
               "You can only have one Shortcut for a couple (Annotation "
               +"type, Feature).", "Alert", JOptionPane.ERROR_MESSAGE);
@@ -4077,17 +4034,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       annotationSetsToSearchIn.setEnabled(true);
       searcher = ((LuceneDataStoreImpl)target).getSearcher();
 
-//      try {
-//        indexLocation = new File(((URL)((LuceneDataStoreImpl)target)
-//          .getIndexer().getParameters().get(Constants.INDEX_LOCATION_URL))
-//          .toURI()).getAbsolutePath();
-//
-//      } catch(URISyntaxException use) {
-//        indexLocation = new File(((URL)((LuceneDataStoreImpl)target)
-//          .getIndexer().getParameters().get(Constants.INDEX_LOCATION_URL))
-//          .getFile()).getAbsolutePath();
-//      }
-
       updateAnnotationSetsTypesFeatures();
 
       try {
@@ -4145,7 +4091,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     queryTextArea.setEnabled(true);
     numberOfResultsSpinner.setEnabled(true);
     contextSizeSpinner.setEnabled(true);
-//    clearQueryAction.setEnabled(true);
   }
 
   /**
@@ -4168,7 +4113,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           numberOfResultsSpinner.setEnabled(true);
         }
         contextSizeSpinner.setEnabled(true);
-//        clearQueryAction.setEnabled(true);
 //        animation.deactivate();
         updateDisplay();
       }
