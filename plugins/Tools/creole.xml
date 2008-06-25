@@ -62,8 +62,8 @@
         COMMENT="If true, the annotations will remain in the inputAS, otherwise they will be removed"
         DEFAULT="false"
         RUNTIME="true">java.lang.Boolean</PARAMETER>
-      <PARAMETER NAME="copyAllUnlessFound"
-        COMMENT="If true (default), all annotations are copied if no annotation of the type specified for textTagName is found"
+      <PARAMETER NAME="transferAllUnlessFound"
+        COMMENT="If true (default), all annotations are copied/moved if no annotation of the type specified for textTagName is found"
         DEFAULT="true"
         RUNTIME="true">java.lang.Boolean</PARAMETER>
     </RESOURCE>
