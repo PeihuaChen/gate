@@ -56,7 +56,7 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
   protected gate.AnnotationSet    bodyAnnotations = null;
   protected List annotationTypes;
   protected Boolean copyAnnotations = false;
-  protected Boolean copyAllUnlessFound = true;
+  protected Boolean transferAllUnlessFound = true;
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException
@@ -106,8 +106,7 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
     if (annotationTypes != null && annotationTypes.size() > 0) {
       //inputAS = inputAS.get(new HashSet(annotationTypes));
       annotsToTransfer = inputAS.get(new HashSet(annotationTypes));
-    }
-    else {
+    } else {
       // transfer everything
       annotsToTransfer = inputAS.get();
     }
@@ -121,6 +120,9 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
     if (textTagName == null || textTagName.equals("")) {
       //outputAS.addAll(inputAS);
       outputAS.addAll(annotsToTransfer);
+      // remove from input set unless we copy only
+      if(!copyAnnotations)
+        inputAS.removeAll(annotsToTransfer);
       return;
     }
 
@@ -133,8 +135,11 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
                  + "' found, so transferring all annotations to the target set");
       }
       //outputAS.addAll(inputAS);
-      if(copyAllUnlessFound) {
+      if(transferAllUnlessFound) {
         outputAS.addAll(annotsToTransfer);
+        // remove from input set unless we copy only
+        if(!copyAnnotations)
+          inputAS.removeAll(annotsToTransfer);
       }
       return;
     }
@@ -211,11 +216,11 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
     this.copyAnnotations = copyAnnotations;
   }
 
-  public Boolean getCopyAllUnlessFound() {
-    return this.copyAllUnlessFound;
+  public Boolean getTransferAllUnlessFound() {
+    return this.transferAllUnlessFound;
   }
   
-  public void setCopyAllUnlessFound(Boolean value) {
-    this.copyAllUnlessFound = value;
+  public void setTransferAllUnlessFound(Boolean value) {
+    this.transferAllUnlessFound = value;
   }
 } // class AnnotationSetTransfer
