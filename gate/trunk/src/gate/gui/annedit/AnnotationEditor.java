@@ -73,4 +73,11 @@ public interface AnnotationEditor extends VisualResource{
    * when an annotation is selected.
    */
   public void setPinnedMode(boolean pinned);
+  
+  /**
+   * Enable or disable the editing GUI components.
+   * @param isEditingEnabled true to enable the editing,
+   * false to disable it
+   */
+  public void setEnableEditing(boolean isEditingEnabled);
 }
