@@ -94,8 +94,7 @@ public interface Document extends SimpleDocument {
    *  @return whether the Document is markup aware.
    */
   public Boolean getMarkupAware();
-  public void setDocumentType(String s);
-  public String getDocumentType();
+
   /**
    * Allow/disallow preserving of the original document content.
    * If is <B>true</B> the original content will be retrieved from
