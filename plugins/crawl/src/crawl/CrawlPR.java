@@ -24,105 +24,101 @@ import gate.*;
 
 import websphinx.*;
 
-public class CrawlPR extends AbstractLanguageAnalyser
-    implements ProcessingResource {
+public class CrawlPR extends AbstractLanguageAnalyser implements
+                                                     ProcessingResource {
 
-    private String root = null;
-    private int depth = -1;
-    private Corpus corpus = null;
-    private Boolean dfs = null;
-    private SphinxWrapper crawler;
-    private String domain = null;
-    private Corpus source = null;
-    private int max = -1;
+  private String root = null;
+  private int depth = -1;
+  private Corpus outputCorpus = null;
+  private Boolean dfs = null;
+  private SphinxWrapper crawler;
+  private String domain = null;
+  private Corpus source = null;
+  private int max = -1;
 
-  /** Constructor of the class*/
+  /** Constructor of the class */
   public CrawlPR() {
-     
+
   }
 
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
-    corpus = Factory.newCorpus("crawl");
     return super.init();
   }
 
   /**
    * Reinitialises the processing resource. After calling this method the
-   * resource should be in the state it is after calling init.
-   * If the resource depends on external resources (such as rules files) then
-   * the resource will re-read those resources. If the data used to create
-   * the resource has changed since the resource has been created then the
-   * resource will change too after calling reInit().
+   * resource should be in the state it is after calling init. If the resource
+   * depends on external resources (such as rules files) then the resource will
+   * re-read those resources. If the data used to create the resource has
+   * changed since the resource has been created then the resource will change
+   * too after calling reInit().
    */
   public void reInit() throws ResourceInstantiationException {
     init();
   }
 
   /**
-       * This method runs the coreferencer. It assumes that all the needed parameters
-   * are set. If they are not, an exception will be fired.
+   * This method runs the coreferencer. It assumes that all the needed
+   * parameters are set. If they are not, an exception will be fired.
    */
   public void execute() throws ExecutionException {
     crawler = new SphinxWrapper();
+    if(outputCorpus == null) { throw new ExecutionException(
+      "Output Corpus cannot be null"); }
 
-    if (root == null && source == null) {
-      throw new ExecutionException("Either root or source must be initialized");
-    }
-    if (depth == -1) {
-      throw new ExecutionException("Limit is not initialized");
-    }
-    if (dfs == null) {
-	throw new ExecutionException("dfs is not initialized");
-    }
-    if (domain == null) {
-	throw new ExecutionException("domain type is not initialized.. Set to either SERVER/SUBTREE/WEB");
-    }
-    
+    if(root == null && source == null) { throw new ExecutionException(
+      "Either root or source must be initialized"); }
+    if(depth == -1) { throw new ExecutionException("Limit is not initialized"); }
+    if(dfs == null) { throw new ExecutionException("dfs is not initialized"); }
+    if(domain == null) { throw new ExecutionException(
+      "domain type is not initialized.. Set to either SERVER/SUBTREE/WEB"); }
+
     try {
-	crawler.setCorpus(corpus);
-	crawler.setDepth(depth);
-	crawler.setDepthFirst(dfs.booleanValue());
-	if (domain == "SUBTREE") {
-	    crawler.setDomain(Crawler.SUBTREE);
-	}else 
-	    if (domain == "SERVER") {
-		crawler.setDomain(Crawler.SERVER);
-	    }else {
-		crawler.setDomain(Crawler.WEB);
-	    }
-	if (max != -1) {
-	    crawler.setMaxPages(max);
-	}
-	if (root != null && root !="") {
-	    crawler.setStart(root);
-	}
-	else {
-	    CorpusImpl roots = (CorpusImpl) source;
-	    //System.out.println("using the corpus"+roots.getDocumentName(0));
-	    Object rootArray[] = roots.toArray();
-	    for (int i=0; i<rootArray.length; i++) {
-		DocumentImpl doc = (DocumentImpl) rootArray[i];
-		System.out.println("adding ... "+doc.getSourceUrl().toString()+"\n");
-		crawler.setStart(doc.getSourceUrl());
-	    }
-	}
-	//crawler.setDomain(crawlType);
-	
-	crawler.start();
-	
+      crawler.setCorpus(outputCorpus);
+      crawler.setDepth(depth);
+      crawler.setDepthFirst(dfs.booleanValue());
+      if(domain == "SUBTREE") {
+        crawler.setDomain(Crawler.SUBTREE);
+      }
+      else if(domain == "SERVER") {
+        crawler.setDomain(Crawler.SERVER);
+      }
+      else {
+        crawler.setDomain(Crawler.WEB);
+      }
+      if(max != -1) {
+        crawler.setMaxPages(max);
+      }
+      if(root != null && root != "") {
+        crawler.setStart(root);
+      }
+      else {
+        CorpusImpl roots = (CorpusImpl)source;
+        // System.out.println("using the
+        // outputCorpus"+roots.getDocumentName(0));
+        Object rootArray[] = roots.toArray();
+        for(int i = 0; i < rootArray.length; i++) {
+          DocumentImpl doc = (DocumentImpl)rootArray[i];
+          System.out.println("adding ... " + doc.getSourceUrl().toString()
+            + "\n");
+          crawler.setStart(doc.getSourceUrl());
+        }
+      }
+
+      crawler.start();
+
     }
-    catch (Exception e) {
-	String nl = Strings.getNl();
-	Err.prln(
-		 "  Exception was: " + e + nl + nl
-		 );
+    catch(Exception e) {
+      String nl = Strings.getNl();
+      Err.prln("  Exception was: " + e + nl + nl);
     }
   }
-    public void setRoot(String root) {
-	this.root = root;
-    }
-    
+
+  public void setRoot(String root) {
+    this.root = root;
+  }
+
   public String getRoot() {
     return this.root;
   }
@@ -134,37 +130,45 @@ public class CrawlPR extends AbstractLanguageAnalyser
   public Integer getDepth() {
     return new Integer(this.depth);
   }
-    
-    public void setDfs(Boolean dfs) {
-	this.dfs = dfs;
-    }
- 
-    public Boolean getDfs() {
-	return this.dfs;
-    }
-    
-    public void setDomain(String domain) {
-	this.domain = domain;
-    }
-    
-    public String getDomain() {
-	return this.domain;
-    }
-    
-    public void setSource(Corpus source) {
-	this.source = source;
-    }
-    
-    public Corpus getSource() {
-	return this.source;
-    }
 
-    public void setMax(Integer max) {
-	this.max = max.intValue();
-    }
-    
-    public Integer getMax() {
-	return new Integer(this.max);
-    }
+  public void setDfs(Boolean dfs) {
+    this.dfs = dfs;
+  }
+
+  public Boolean getDfs() {
+    return this.dfs;
+  }
+
+  public void setDomain(String domain) {
+    this.domain = domain;
+  }
+
+  public String getDomain() {
+    return this.domain;
+  }
+
+  public void setSource(Corpus source) {
+    this.source = source;
+  }
+
+  public Corpus getSource() {
+    return this.source;
+  }
+
+  public void setMax(Integer max) {
+    this.max = max.intValue();
+  }
+
+  public Integer getMax() {
+    return new Integer(this.max);
+  }
+
+  public Corpus getOutputCorpus() {
+    return outputCorpus;
+  }
+
+  public void setOutputCorpus(Corpus outputCorpus) {
+    this.outputCorpus = outputCorpus;
+  }
 
 }
