@@ -4192,6 +4192,33 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
     }
   }
 
+  public String executeQuery(String repositoryID, String serqlQuery)
+    throws GateOntologyException {
+    loadRepositoryDetails(repositoryID);
+    QueryResultsTable resultsTable = null;
+    try {
+      resultsTable =
+        currentRepository.performTableQuery(QueryLanguage.SERQL, serqlQuery);
+    }
+    catch(IOException e) {
+      throw new GateOntologyException("Repository: " + repositoryID
+        + "\nError ocurred while executing the query:\n" + serqlQuery, e);
+    }
+    catch(MalformedQueryException e) {
+      throw new GateOntologyException("Repository: " + repositoryID
+        + "\nError ocurred while executing the query:\n" + serqlQuery, e);
+    }
+    catch(QueryEvaluationException e) {
+      throw new GateOntologyException("Repository: " + repositoryID
+        + "\nError ocurred while executing the query:\n" + serqlQuery, e);
+    }
+    catch(AccessDeniedException e) {
+      throw new GateOntologyException("Repository: " + repositoryID
+        + "\nError ocurred while executing the query:\n" + serqlQuery, e);
+    }
+    return resultsTable.toString();
+  }
+
   /**
    * The method is useful for adding statements into the graph. All three values
    * must exist in repository. These values are cast in Resources and then added

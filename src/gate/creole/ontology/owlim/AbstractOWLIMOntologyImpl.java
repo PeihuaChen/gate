@@ -1631,4 +1631,14 @@ public abstract class AbstractOWLIMOntologyImpl
     }
     return toReturn;
   }
+  
+  /**
+   * The method executes the query on repository and returns the toString()
+   * result of the QueryResultTable.
+   * @param serqlQuery
+   * @return
+   */
+  public String executeQuery(String serqlQuery) {
+    return owlim.executeQuery(sesameRepositoryID, serqlQuery);
+  }
 }

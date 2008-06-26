@@ -2037,4 +2037,17 @@ public interface OWLIM extends java.rmi.Remote {
           @WebParam(name = "datatype") String datatype)
           throws GateOntologyException;
 
+  
+  /**
+   * The method executes the query on repository and returns the toString()
+   * result of the QueryResultTable.
+   * @param sparqlQuery
+   * @return
+   */
+  @WebMethod(operationName = "executeSerqlQuery")
+  @WebResult(targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
+  public String executeQuery(
+          @WebParam(name = "repositoryID") String repositoryID, 
+          @WebParam(name = "serqlQuery")  String serqlQuery) 
+          throws GateOntologyException;
 }
