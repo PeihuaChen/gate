@@ -644,6 +644,12 @@ public class SerialControllerEditor extends AbstractVisualResource
                     }
                   });
     }
+
+    // binds F3 key to the run action
+    getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+      .put(KeyStroke.getKeyStroke("F3"), "Run");
+    getActionMap().put("Run", runAction);
+  
   }//protected void initListeners()
 
 
@@ -1175,6 +1181,9 @@ public class SerialControllerEditor extends AbstractVisualResource
   class RunAction extends AbstractAction {
     RunAction(){
       super("Run");
+      super.putValue(SHORT_DESCRIPTION, "<html>Run"
+      +"&nbsp;&nbsp;<font color=#667799><small>F3"
+      +"&nbsp;&nbsp;</small></font></html>");
     }
 
     public void actionPerformed(ActionEvent e){

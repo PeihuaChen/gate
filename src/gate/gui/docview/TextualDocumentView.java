@@ -240,8 +240,20 @@ public class TextualDocumentView extends AbstractDocumentView {
 
     textView.setText(document.getContent().toString());
     textView.getDocument().addDocumentListener(new SwingDocumentListener());
-    scroller.getViewport().setViewPosition(new Point(0, 0));
-    
+    // display and put the caret at the beginning of the file
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        try {
+          if (textView.modelToView(0) != null) {
+            textView.scrollRectToVisible(textView.modelToView(0));
+          }
+          textView.select(0, 0);
+          textView.requestFocus();
+        } catch(BadLocationException e) {
+          e.printStackTrace();
+        }
+      }
+    });
 //    contentPane = new JPanel(new BorderLayout());
 //    contentPane.add(scroller, BorderLayout.CENTER);
     

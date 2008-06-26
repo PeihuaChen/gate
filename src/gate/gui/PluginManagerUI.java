@@ -60,6 +60,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     mainTable = new XJTable();
 //    mainTable.setSortable(false);
     mainTable.setModel(mainTableModel);
+    mainTable.setSortedColumn(NAME_COLUMN);
 //    mainTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
     mainTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     DeleteColumnCellRendererEditor rendererEditor = new DeleteColumnCellRendererEditor();

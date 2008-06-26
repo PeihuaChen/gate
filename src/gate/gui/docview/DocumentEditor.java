@@ -20,6 +20,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.text.BadLocationException;
 
 import gate.*;
 import gate.creole.*;
@@ -28,6 +31,7 @@ import gate.gui.MainFrame;
 import gate.gui.annedit.AnnotationData;
 import gate.swing.VerticalTextIcon;
 import gate.util.GateRuntimeException;
+import gate.util.LuckyException;
 
 /**
  * This is the GATE Document viewer/editor. This class is only the shell of the
@@ -256,11 +260,16 @@ public class DocumentEditor extends AbstractVisualResource
     }
 
     // binds a F-key to each view toggle button
-    // F1 key is already used for help so start at F2
-    getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
-      .put(KeyStroke.getKeyStroke("F"+(numberOfViews+1)),
-      "Shows view "+numberOfViews);
-    getActionMap().put("Shows view "+numberOfViews,
+    // avoid the F-Key F1,2,6,8,10 because already used
+    if ((numberOfTheFKeyforLastView == 5)
+     || (numberOfTheFKeyforLastView == 7)
+     || (numberOfTheFKeyforLastView == 9)) {
+      numberOfTheFKeyforLastView++;
+    }
+    getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+      .put(KeyStroke.getKeyStroke("F"+(numberOfTheFKeyforLastView+1)),
+      "Shows view "+numberOfTheFKeyforLastView);
+    getActionMap().put("Shows view "+numberOfTheFKeyforLastView,
         new AbstractAction() {
             public void actionPerformed(ActionEvent evt) {
               viewButton.doClick();
@@ -268,12 +277,12 @@ public class DocumentEditor extends AbstractVisualResource
         }
     );
     viewButton.setToolTipText("<html>Toggle the view of "+name
-      +"&nbsp;&nbsp;<font color=#667799><small>F"+(numberOfViews+1)
+      +"&nbsp;&nbsp;<font color=#667799><small>F"
+      +(numberOfTheFKeyforLastView+1)
       +"&nbsp;&nbsp;</small></font></html>");
-    numberOfViews++;
+    numberOfTheFKeyforLastView++;
   }
-  
-  
+
   /**
    * Gets the currently showing top view
    * @return a {@link DocumentView} object.
@@ -729,6 +738,324 @@ public class DocumentEditor extends AbstractVisualResource
       hBox.add(new JLabel("Find what:"));
       hBox.add(Box.createHorizontalStrut(5));
       hBox.add(patternTextField = new JTextField(20));
+      hBox.add(Box.createHorizontalStrut(2));
+      JButton helpRegExpButton = new JButton("?");
+      helpRegExpButton.setMargin(new Insets(0, 2, 0, 2));
+      helpRegExpButton.setToolTipText("Predefined search expressions.");
+      helpRegExpButton.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent arg0) {
+            String[] values1 = {
+              "Number",
+              "Person"
+            };
+            String[] values2 = {
+              "Any character",
+              "The beginning of a line",
+              "The end of a line",
+              "All letters",
+              "Letter uppercase",
+              "Letter lowercase",
+              "Letter titlecase",
+              "Letter modifier",
+              "Letter other",
+              "All Numbers",
+              "Number decimal digit",
+              "Number letter",
+              "Number other",
+              "All punctuations",
+              "Punctuation connector",
+              "Punctuation dash",
+              "Punctuation open",
+              "Punctuation close",
+              "Punctuation initial quote",
+              "Punctuation final quote",
+              "Punctuation other",
+              "All symbols",
+              "Symbol math",
+              "Symbol currency",
+              "Symbol modifier",
+              "Symbol other",
+              "All separators",
+              "Separator space",
+              "Separator line",
+              "Separator paragraph",
+              "All Marks",
+              "Mark nonspacing",
+              "Mark spacing combining",
+              "Mark enclosing",
+              "All others",
+              "Other control",
+              "Other format",
+              "Other surrogate",
+              "Other private use",
+              "Other not assigned",
+              "Any character except Category",
+              "Category1 and/or Category2",
+              "Category1 and Category2"
+            };
+            String[] values3 = {
+              "Either the selection or X",
+              "Once or not at all",
+              "Zero or more times",
+              "One or more times",
+              "Capturing group",
+              "Non-capturing group"
+            };
+            JPanel vspace1 = new JPanel();
+            vspace1.setSize(0, 5);
+            final JList list1 = new JList(values1);
+            list1.setVisibleRowCount(Math.min(10, values1.length));
+            list1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            JScrollPane jsp1 = new JScrollPane(list1);
+            final JButton b1 = new JButton("Replace search expression");
+            b1.setEnabled(false);
+            JPanel vspace2 = new JPanel();
+            vspace2.setSize(0, 5);
+            final JList list2 = new JList(values2);
+            list2.setVisibleRowCount(Math.min(10, values2.length));
+            list2.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            JScrollPane jsp2 = new JScrollPane(list2);
+            final JButton b2 = new JButton("Insert at the caret position");
+            b2.setEnabled(false);
+            JPanel vspace3 = new JPanel();
+            vspace3.setSize(0, 5);
+            final JList list3 = new JList(values3);
+            list3.setVisibleRowCount(Math.min(10, values3.length));
+            list3.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            JScrollPane jsp3 = new JScrollPane(list3);
+            final JButton b3 = new JButton("Modify the selection");
+            b3.setEnabled(false);
+            if (patternTextField.getSelectedText() == null) {
+              list3.setEnabled(false);
+            }
+            Object[] messageObjects = {
+              "Choose a predefined search:",
+              vspace1, jsp1, b1, vspace2, jsp2, b2, vspace3, jsp3, b3
+            };
+            String options[] = {"Cancel"};
+            final JOptionPane optionPane = new JOptionPane(
+              messageObjects,
+              JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION,
+              null, options, "Cancel");
+            b1.addActionListener(new ActionListener() {
+              public void actionPerformed(ActionEvent e) {
+                if (list1.getSelectedValue() != null) {
+                  optionPane.setValue(list1.getSelectedValue().toString());
+                  optionPane.setVisible(false);
+                } else {
+                  optionPane.setValue("");
+                }
+              }
+            });
+            list1.addMouseListener(new MouseAdapter() {
+              public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                if (e.getClickCount() == 2) {
+                  optionPane.setValue(list1.getSelectedValue().toString());
+                  optionPane.setVisible(false);
+                }
+              }
+            });
+            list1.addListSelectionListener(new ListSelectionListener() {
+              public void valueChanged(ListSelectionEvent e) {
+                if (list1.getSelectedValue() != null) {
+                  b1.setEnabled(true);
+                } else {
+                  b1.setEnabled(false);
+                }
+              }
+            });
+            b2.addActionListener(new ActionListener() {
+              public void actionPerformed(ActionEvent e) {
+                if (list2.getSelectedValue() != null) {
+                  optionPane.setValue(list2.getSelectedValue().toString());
+                  optionPane.setVisible(false);
+                } else {
+                  optionPane.setValue("");
+                }
+              }
+            });
+            list2.addMouseListener(new MouseAdapter() {
+              public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                if (e.getClickCount() == 2) {
+                  optionPane.setValue(list2.getSelectedValue().toString());
+                  optionPane.setVisible(false);
+                }
+              }
+            });
+            list2.addListSelectionListener(new ListSelectionListener() {
+              public void valueChanged(ListSelectionEvent e) {
+                if (list2.getSelectedValue() != null) {
+                  b2.setEnabled(true);
+                } else {
+                  b2.setEnabled(false);
+                }
+              }
+            });
+            b3.addActionListener(new ActionListener() {
+              public void actionPerformed(ActionEvent e) {
+                if (list3.getSelectedValue() != null) {
+                  optionPane.setValue(list3.getSelectedValue().toString());
+                  optionPane.setVisible(false);
+                } else {
+                  optionPane.setValue("");
+                }
+              }
+            });
+            list3.addMouseListener(new MouseAdapter() {
+              public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                if (e.getClickCount() == 2) {
+                  optionPane.setValue(list3.getSelectedValue().toString());
+                  optionPane.setVisible(false);
+                }
+              }
+            });
+            list3.addListSelectionListener(new ListSelectionListener() {
+              public void valueChanged(ListSelectionEvent e) {
+                if (list3.getSelectedValue() != null) {
+                  b3.setEnabled(true);
+                } else {
+                  b3.setEnabled(false);
+                }
+              }
+            });
+            JDialog optionDialog = optionPane.createDialog(
+              gate.gui.MainFrame.getInstance(), "GATE");
+            optionDialog.setVisible(true);
+            Object selectedValue = optionPane.getValue();
+            if (selectedValue == null
+             || !(selectedValue instanceof String)
+             || selectedValue.equals("Cancel")) {
+              return;
+            } else {
+              ignoreCaseChk.setSelected(false);
+              regularExpressionChk.setSelected(true);
+              wholeWordsChk.setSelected(false);
+            }
+            int p = patternTextField.getCaretPosition();
+            int s1 = patternTextField.getSelectionStart();
+            int s2 = patternTextField.getSelectionEnd();
+            try {
+            if (selectedValue.equals("Number")) {
+              patternTextField.setText("\\b[\\p{N}][\\p{N},.]*\\b");
+            } else if (selectedValue.equals("Person")) {
+              patternTextField.setText("\\p{Lu}\\p{L}+, \\p{Lu}\\.(?: \\p{Lu}\\.)*");
+            } else if (selectedValue.equals("Either the selection or X")) {
+              patternTextField.getDocument().insertString(s1, "(?:", null);
+              patternTextField.getDocument().insertString(s2+3, ")|(?:X)", null);
+            } else if (selectedValue.equals("Once or not at all")) {
+              patternTextField.getDocument().insertString(s1, "(?:", null);
+              patternTextField.getDocument().insertString(s2+3, ")?", null);
+            } else if (selectedValue.equals("Zero or more times")) {
+              patternTextField.getDocument().insertString(s1, "(?:", null);
+              patternTextField.getDocument().insertString(s2+3, ")*", null);
+            } else if (selectedValue.equals("One or more times")) {
+              patternTextField.getDocument().insertString(s1, "(?:", null);
+              patternTextField.getDocument().insertString(s2+3, ")+", null);
+            } else if (selectedValue.equals("Capturing group")) {
+              patternTextField.getDocument().insertString(s1, "(?:", null);
+              patternTextField.getDocument().insertString(s2+3, ")", null);
+            } else if (selectedValue.equals("Non-capturing group")) {
+              patternTextField.getDocument().insertString(s1, "(?:", null);
+              patternTextField.getDocument().insertString(s2+3, ")", null);
+            } else if (selectedValue.equals("Any character")) {
+              patternTextField.getDocument().insertString(p, ".", null);
+            } else if (selectedValue.equals("The beginning of a line")) {
+              patternTextField.getDocument().insertString(p, "^", null);
+            } else if (selectedValue.equals("The end of a line")) {
+              patternTextField.getDocument().insertString(p, "$", null);
+            } else if (selectedValue.equals("Any character except Category")) {
+              patternTextField.getDocument().insertString(p, "\\P{Category}", null);
+            } else if (selectedValue.equals("Category1 and/or Category2")) {
+              patternTextField.getDocument().insertString(p, "[\\p{Category1}\\p{Category2}]", null);
+            } else if (selectedValue.equals("Category1 and Category2")) {
+              patternTextField.getDocument().insertString(p, "[\\p{Category1}&&\\p{Category2}]", null);
+            } else if (selectedValue.equals("All letters")) {
+              patternTextField.getDocument().insertString(p, "\\p{L}", null);
+            } else if (selectedValue.equals("Letter uppercase")) {
+              patternTextField.getDocument().insertString(p, "\\p{Lu}", null);
+            } else if (selectedValue.equals("Letter lowercase")) {
+              patternTextField.getDocument().insertString(p, "\\p{Ll}", null);
+            } else if (selectedValue.equals("Letter titlecase")) {
+              patternTextField.getDocument().insertString(p, "\\p{Lt}", null);
+            } else if (selectedValue.equals("Letter modifier")) {
+              patternTextField.getDocument().insertString(p, "\\p{Lm}", null);
+            } else if (selectedValue.equals("Letter other")) {
+              patternTextField.getDocument().insertString(p, "\\p{Lo}", null);
+            } else if (selectedValue.equals("All Marks")) {
+              patternTextField.getDocument().insertString(p, "\\p{M}", null);
+            } else if (selectedValue.equals("Mark nonspacing")) {
+              patternTextField.getDocument().insertString(p, "\\p{Mn}", null);
+            } else if (selectedValue.equals("Mark spacing combining")) {
+              patternTextField.getDocument().insertString(p, "\\p{Mc}", null);
+            } else if (selectedValue.equals("Mark enclosing")) {
+              patternTextField.getDocument().insertString(p, "\\p{Me}", null);
+            } else if (selectedValue.equals("All Numbers")) {
+              patternTextField.getDocument().insertString(p, "\\p{N}", null);
+            } else if (selectedValue.equals("Number decimal digit")) {
+              patternTextField.getDocument().insertString(p, "\\p{Nd}", null);
+            } else if (selectedValue.equals("Number letter")) {
+              patternTextField.getDocument().insertString(p, "\\p{Nl}", null);
+            } else if (selectedValue.equals("Number other")) {
+              patternTextField.getDocument().insertString(p, "\\p{No}", null);
+            } else if (selectedValue.equals("All separators")) {
+              patternTextField.getDocument().insertString(p, "\\p{Z}", null);
+            } else if (selectedValue.equals("Separator space")) {
+              patternTextField.getDocument().insertString(p, "\\p{Zs}", null);
+            } else if (selectedValue.equals("Separator line")) {
+              patternTextField.getDocument().insertString(p, "\\p{Zl}", null);
+            } else if (selectedValue.equals("Separator paragraph")) {
+              patternTextField.getDocument().insertString(p, "\\p{Zp}", null);
+            } else if (selectedValue.equals("All others")) {
+              patternTextField.getDocument().insertString(p, "\\p{C}", null);
+            } else if (selectedValue.equals("Other control")) {
+              patternTextField.getDocument().insertString(p, "\\p{Cc}", null);
+            } else if (selectedValue.equals("Other format")) {
+              patternTextField.getDocument().insertString(p, "\\p{Cf}", null);
+            } else if (selectedValue.equals("Other surrogate")) {
+              patternTextField.getDocument().insertString(p, "\\p{Cs}", null);
+            } else if (selectedValue.equals("Other private use")) {
+              patternTextField.getDocument().insertString(p, "\\p{Co}", null);
+            } else if (selectedValue.equals("Other not assigned")) {
+              patternTextField.getDocument().insertString(p, "\\p{Cn}", null);
+            } else if (selectedValue.equals("All punctuations")) {
+              patternTextField.getDocument().insertString(p, "\\p{P}", null);
+            } else if (selectedValue.equals("Punctuation connector")) {
+              patternTextField.getDocument().insertString(p, "\\p{Pc}", null);
+            } else if (selectedValue.equals("Punctuation dash")) {
+              patternTextField.getDocument().insertString(p, "\\p{Pd}", null);
+            } else if (selectedValue.equals("Punctuation open")) {
+              patternTextField.getDocument().insertString(p, "\\p{Ps}", null);
+            } else if (selectedValue.equals("Punctuation close")) {
+              patternTextField.getDocument().insertString(p, "\\p{Pe}", null);
+            } else if (selectedValue.equals("Punctuation initial quote")) {
+              patternTextField.getDocument().insertString(p, "\\p{Pi}", null);
+            } else if (selectedValue.equals("Punctuation final quote")) {
+              patternTextField.getDocument().insertString(p, "\\p{Pf}", null);
+            } else if (selectedValue.equals("Punctuation other")) {
+              patternTextField.getDocument().insertString(p, "\\p{Po}", null);
+            } else if (selectedValue.equals("All symbols")) {
+              patternTextField.getDocument().insertString(p, "\\p{S}", null);
+            } else if (selectedValue.equals("Symbol math")) {
+              patternTextField.getDocument().insertString(p, "\\p{Sm}", null);
+            } else if (selectedValue.equals("Symbol currency")) {
+              patternTextField.getDocument().insertString(p, "\\p{Sc}", null);
+            } else if (selectedValue.equals("Symbol modifier")) {
+              patternTextField.getDocument().insertString(p, "\\p{Sk}", null);
+            } else if (selectedValue.equals("Symbol other")) {
+              patternTextField.getDocument().insertString(p, "\\p{So}", null);
+            }
+            } catch (BadLocationException e) {
+              // should never happend
+              throw new LuckyException(e);
+            }
+          }
+        });
+      hBox.add(helpRegExpButton);
+      hBox.add(Box.createHorizontalGlue());
+
       hBox.add(Box.createHorizontalStrut(5));
       hBox.add(Box.createHorizontalGlue());
       getContentPane().add(hBox);
@@ -1019,7 +1346,7 @@ public class DocumentEditor extends AbstractVisualResource
   protected boolean viewsInited = false;
 
   /**
-   * Used to know the number of views when adding a new view.
+   * Used to know the last F-key used when adding a new view.
    */
-  protected int numberOfViews = 1;
+  protected int numberOfTheFKeyforLastView = 2;
 }

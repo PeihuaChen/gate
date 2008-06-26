@@ -26,6 +26,8 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.text.BadLocationException;
 
 import gate.*;
@@ -261,11 +263,11 @@ public class SearchAndAnnotatePanel extends JPanel {
       helpRegExpButton.setToolTipText("Predefined search expressions.");
       helpRegExpButton.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent arg0) {
-            String[] possibleValues = {
-              "--New search expression--",
+            String[] values1 = {
               "Number",
-              "Person",
-              "--Insert at the caret position--",
+              "Person"
+            };
+            String[] values2 = {
               "Any character",
               "The beginning of a line",
               "The end of a line",
@@ -306,24 +308,145 @@ public class SearchAndAnnotatePanel extends JPanel {
               "Other surrogate",
               "Other private use",
               "Other not assigned",
-              "Any character except Category (negation)",
-              "Category1 and/or Category2 (union)",
-              "Category1 and Category2 (intersection)",
-              "--Modify the selection--",
+              "Any character except Category",
+              "Category1 and/or Category2",
+              "Category1 and Category2"
+            };
+            String[] values3 = {
               "Either the selection or X",
               "Once or not at all",
               "Zero or more times",
               "One or more times",
-              "Capturing group, used when annotating",
+              "Capturing group",
               "Non-capturing group"
             };
-            String selectedValue = (String)JOptionPane.showInputDialog(
-              gate.gui.MainFrame.getInstance(), "<html>"+
-              "Choose a predefined search expression:"+
-              "</html>", "GATE",
-              JOptionPane.QUESTION_MESSAGE, null,
-              possibleValues, possibleValues[0]);
-            if (selectedValue == null || selectedValue.startsWith("-")) {
+            JPanel vspace1 = new JPanel();
+            vspace1.setSize(0, 5);
+            final JList list1 = new JList(values1);
+            list1.setVisibleRowCount(Math.min(10, values1.length));
+            list1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            JScrollPane jsp1 = new JScrollPane(list1);
+            final JButton b1 = new JButton("Replace search expression");
+            b1.setEnabled(false);
+            JPanel vspace2 = new JPanel();
+            vspace2.setSize(0, 5);
+            final JList list2 = new JList(values2);
+            list2.setVisibleRowCount(Math.min(10, values2.length));
+            list2.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            JScrollPane jsp2 = new JScrollPane(list2);
+            final JButton b2 = new JButton("Insert at the caret position");
+            b2.setEnabled(false);
+            JPanel vspace3 = new JPanel();
+            vspace3.setSize(0, 5);
+            final JList list3 = new JList(values3);
+            list3.setVisibleRowCount(Math.min(10, values3.length));
+            list3.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            JScrollPane jsp3 = new JScrollPane(list3);
+            final JButton b3 = new JButton("Modify the selection");
+            b3.setEnabled(false);
+            if (searchTextField.getSelectedText() == null) {
+              list3.setEnabled(false);
+            }
+            Object[] messageObjects = {
+              "Choose a predefined search:",
+              vspace1, jsp1, b1, vspace2, jsp2, b2, vspace3, jsp3, b3
+            };
+            String options[] = {"Cancel"};
+            final JOptionPane optionPane = new JOptionPane(
+              messageObjects,
+              JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION,
+              null, options, "Cancel");
+            b1.addActionListener(new ActionListener() {
+              public void actionPerformed(ActionEvent e) {
+                if (list1.getSelectedValue() != null) {
+                  optionPane.setValue(list1.getSelectedValue().toString());
+                  optionPane.setVisible(false);
+                } else {
+                  optionPane.setValue("");
+                }
+              }
+            });
+            list1.addMouseListener(new MouseAdapter() {
+              public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                if (e.getClickCount() == 2) {
+                  optionPane.setValue(list1.getSelectedValue().toString());
+                  optionPane.setVisible(false);
+                }
+              }
+            });
+            list1.addListSelectionListener(new ListSelectionListener() {
+              public void valueChanged(ListSelectionEvent e) {
+                if (list1.getSelectedValue() != null) {
+                  b1.setEnabled(true);
+                } else {
+                  b1.setEnabled(false);
+                }
+              }
+            });
+            b2.addActionListener(new ActionListener() {
+              public void actionPerformed(ActionEvent e) {
+                if (list2.getSelectedValue() != null) {
+                  optionPane.setValue(list2.getSelectedValue().toString());
+                  optionPane.setVisible(false);
+                } else {
+                  optionPane.setValue("");
+                }
+              }
+            });
+            list2.addMouseListener(new MouseAdapter() {
+              public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                if (e.getClickCount() == 2) {
+                  optionPane.setValue(list2.getSelectedValue().toString());
+                  optionPane.setVisible(false);
+                }
+              }
+            });
+            list2.addListSelectionListener(new ListSelectionListener() {
+              public void valueChanged(ListSelectionEvent e) {
+                if (list2.getSelectedValue() != null) {
+                  b2.setEnabled(true);
+                } else {
+                  b2.setEnabled(false);
+                }
+              }
+            });
+            b3.addActionListener(new ActionListener() {
+              public void actionPerformed(ActionEvent e) {
+                if (list3.getSelectedValue() != null) {
+                  optionPane.setValue(list3.getSelectedValue().toString());
+                  optionPane.setVisible(false);
+                } else {
+                  optionPane.setValue("");
+                }
+              }
+            });
+            list3.addMouseListener(new MouseAdapter() {
+              public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                if (e.getClickCount() == 2) {
+                  optionPane.setValue(list3.getSelectedValue().toString());
+                  optionPane.setVisible(false);
+                }
+              }
+            });
+            list3.addListSelectionListener(new ListSelectionListener() {
+              public void valueChanged(ListSelectionEvent e) {
+                if (list3.getSelectedValue() != null) {
+                  b3.setEnabled(true);
+                } else {
+                  b3.setEnabled(false);
+                }
+              }
+            });
+            JDialog optionDialog = optionPane.createDialog(
+              gate.gui.MainFrame.getInstance(), "GATE");
+            optionDialog.setVisible(true);
+            Object selectedValue = optionPane.getValue();
+            if (selectedValue == null
+             || !(selectedValue instanceof String)
+             || selectedValue.equals("Cancel")) {
               return;
             } else {
               searchCaseSensChk.setSelected(true);
@@ -350,7 +473,7 @@ public class SearchAndAnnotatePanel extends JPanel {
             } else if (selectedValue.equals("One or more times")) {
               searchTextField.getDocument().insertString(s1, "(?:", null);
               searchTextField.getDocument().insertString(s2+3, ")+", null);
-            } else if (selectedValue.equals("Capturing group, used when annotating")) {
+            } else if (selectedValue.equals("Capturing group")) {
               searchTextField.getDocument().insertString(s1, "(?:", null);
               searchTextField.getDocument().insertString(s2+3, ")", null);
             } else if (selectedValue.equals("Non-capturing group")) {
@@ -624,6 +747,7 @@ public class SearchAndAnnotatePanel extends JPanel {
     public void actionPerformed(ActionEvent evt){
       if (!isAnnotationEditorReady()) { return; }
       annotationEditor.setPinnedMode(true);
+      annotationEditor.setEnableEditing(false);
       String patternText = searchTextField.getText();
       Pattern pattern = null;
 
@@ -712,6 +836,7 @@ public class SearchAndAnnotatePanel extends JPanel {
 
     public void actionPerformed(ActionEvent evt) {
       if (!isAnnotationEditorReady()) { return; }
+      annotationEditor.setEnableEditing(false);
       // the first time we invoke previous action we want to go two
       // previous matches back not just one
       matchedIndexes.removeLast();
@@ -745,6 +870,7 @@ public class SearchAndAnnotatePanel extends JPanel {
 
     public void actionPerformed(ActionEvent evt){
       if (!isAnnotationEditorReady()) { return; }
+      annotationEditor.setEnableEditing(false);
       boolean found = false;
       int start = -1;
       int end = -1;
