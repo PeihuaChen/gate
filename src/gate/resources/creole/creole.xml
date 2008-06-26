@@ -35,9 +35,7 @@
         DEFAULT="false">java.lang.Boolean</PARAMETER>
       <PARAMETER NAME="collectRepositioningInfo"
         COMMENT="Should the document collect repositioning information"
-        DEFAULT="false">java.lang.Boolean</PARAMETER>
-      <PARAMETER NAME="documentType" OPTIONAL="true" COMMENT="document type" DEFAULT="">
-        java.lang.String</PARAMETER>        
+        DEFAULT="false">java.lang.Boolean</PARAMETER>      
       <ICON>document</ICON>
     </RESOURCE>
     <!-- Corpora -->
