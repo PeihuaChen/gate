@@ -153,6 +153,8 @@ public class DocumentImpl extends AbstractLanguageResource implements
    */
   private Annotation crossedOverAnnotation = null;
 
+  protected String documentType;
+  
   /** Default construction. Content left empty. */
   public DocumentImpl() {
     content = new DocumentContentImpl();
@@ -568,6 +570,16 @@ public class DocumentImpl extends AbstractLanguageResource implements
     this.encoding = encoding;
   }
 
+  /** Get the encoding of the document content source */
+  public String getDocumentType() {
+    return documentType;
+  }
+
+  /** Set the encoding of the document content source */
+  public void setDocumentType(String docType) {
+    this.documentType = docType;
+  }
+  
   /**
    * Get the default set of annotations. The set is created if it doesn't exist
    * yet.
