@@ -751,4 +751,11 @@ public interface Ontology extends LanguageResource {
   public List<OResource> getOResourcesWith(RDFProperty aProperty,
           OResource aValue);
 
+  /**
+   * The method executes the query on repository and returns the toString()
+   * result of the QueryResultTable.
+   * @param serqlQuery
+   * @return
+   */
+  public String executeQuery(String serqlQuery);
 }
