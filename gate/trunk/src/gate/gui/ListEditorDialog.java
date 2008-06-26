@@ -388,6 +388,7 @@ public class ListEditorDialog extends JDialog {
           }
         }
         textField.setText("");
+        textField.requestFocus();
       }
     }
   }

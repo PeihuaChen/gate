@@ -68,11 +68,11 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
 
     toolbar = new JToolBar();
     toolbar.setFloatable(false);
-    toolbar.add(new NewDocumentAction());
-    toolbar.add(new RemoveDocumentsAction());
+    toolbar.add(newDocumentAction = new NewDocumentAction());
+    toolbar.add(removeDocumentsAction = new RemoveDocumentsAction());
     toolbar.addSeparator();
-    toolbar.add(new MoveUpAction());
-    toolbar.add(new MoveDownAction());
+    toolbar.add(moveUpAction = new MoveUpAction());
+    toolbar.add(moveDownAction = new MoveDownAction());
 
     add(toolbar, BorderLayout.NORTH);
   }
@@ -107,6 +107,21 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
       public void mouseExited(MouseEvent e) {
       }
     });
+
+    // binds F-keys to actions
+    getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+      .put(KeyStroke.getKeyStroke("F3"), "Add");
+    getActionMap().put("Add", newDocumentAction);
+    getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+      .put(KeyStroke.getKeyStroke("F4"), "Remove");
+    getActionMap().put("Remove", removeDocumentsAction);
+    getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+      .put(KeyStroke.getKeyStroke("F5"), "Up");
+    getActionMap().put("Up", moveUpAction);
+    getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+      .put(KeyStroke.getKeyStroke("F7"), "Down");
+    getActionMap().put("Down", moveDownAction);
+
   }
 
   public void cleanup(){
@@ -243,7 +258,9 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
   class MoveUpAction extends AbstractAction{
     public MoveUpAction(){
       super("Move up", MainFrame.getIcon("up"));
-      putValue(SHORT_DESCRIPTION, "Moves selected document(s) up.");
+      putValue(SHORT_DESCRIPTION, "<html>Moves selected document(s) up"
+        +"&nbsp;&nbsp;<font color=#667799><small>F5"
+        +"&nbsp;&nbsp;</small></font></html>");
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -283,7 +300,9 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
   class MoveDownAction extends AbstractAction{
     public MoveDownAction(){
       super("Move down", MainFrame.getIcon("down"));
-      putValue(SHORT_DESCRIPTION, "Moves selected document(s) down.");
+      putValue(SHORT_DESCRIPTION, "<html>Moves selected document(s) down"
+        +"&nbsp;&nbsp;<font color=#667799><small>F7"
+        +"&nbsp;&nbsp;</small></font></html>");
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -322,7 +341,9 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
   class NewDocumentAction extends AbstractAction{
     public NewDocumentAction(){
       super("Add document", MainFrame.getIcon("add-document"));
-      putValue(SHORT_DESCRIPTION, "Add a new document to this corpus");
+      putValue(SHORT_DESCRIPTION, "<html>Add a new document to this corpus"
+        +"&nbsp;&nbsp;<font color=#667799><small>F3"
+        +"&nbsp;&nbsp;</small></font></html>");
     }
 
     public void actionPerformed(ActionEvent e){
@@ -370,7 +391,9 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
   class RemoveDocumentsAction extends AbstractAction{
     public RemoveDocumentsAction(){
       super("Remove documents", MainFrame.getIcon("remove-document"));
-      putValue(SHORT_DESCRIPTION, "Removes selected documents from this corpus");
+      putValue(SHORT_DESCRIPTION, "<html>Removes selected documents from this corpus"
+        +"&nbsp;&nbsp;<font color=#667799><small>F4"
+        +"&nbsp;&nbsp;</small></font></html>");
     }
 
     public void actionPerformed(ActionEvent e){
@@ -394,4 +417,8 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
   protected DocumentNameRenderer renderer;
   protected JToolBar toolbar;
   protected Corpus corpus;
+  protected NewDocumentAction newDocumentAction;
+  protected RemoveDocumentsAction removeDocumentsAction;
+  protected MoveUpAction moveUpAction;
+  protected MoveDownAction moveDownAction;
 }

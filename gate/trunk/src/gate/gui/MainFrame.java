@@ -258,17 +258,16 @@ public class MainFrame extends JFrame implements ProgressListener,
   }
 
   protected void select(Handle handle) {
+    final JComponent largeView = handle.getLargeView();
     if(handle.viewsBuilt()
       && mainTabbedPane.indexOfComponent(handle.getLargeView()) != -1) {
       // select
-      JComponent largeView = handle.getLargeView();
       if(largeView != null) {
         mainTabbedPane.setSelectedComponent(largeView);
       }
     }
     else {
       // show
-      JComponent largeView = handle.getLargeView();
       if(largeView != null) {
         mainTabbedPane.addTab(handle.getTitle(), handle.getIcon(), largeView,
           handle.getTooltipText());
@@ -283,6 +282,19 @@ public class MainFrame extends JFrame implements ProgressListener,
     else {
       lowerScroll.getViewport().setView(null);
     }
+    // select the tab
+    SwingUtilities.invokeLater(new Runnable() {
+    public void run() {
+    if (largeView != null) {
+      if ((largeView instanceof JTabbedPane)
+      && (((JTabbedPane)largeView).getSelectedComponent() != null)) {
+        ((JTabbedPane)largeView).getSelectedComponent().requestFocus();
+      } else {
+        largeView.requestFocus();
+      }
+    }
+    }
+    });
   }// protected void select(ResourceHandle handle)
 
   public MainFrame() {
@@ -1323,8 +1335,13 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     // shows then selects the resource to give the user a feedback
     // on its location in the resource tree
-    resourcesTree.scrollPathToVisible(new TreePath(node.getPath()));
-    resourcesTree.setSelectionPath(new TreePath(node.getPath()));
+    final DefaultMutableTreeNode nodeF = node;
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        resourcesTree.scrollPathToVisible(new TreePath(nodeF.getPath()));
+        resourcesTree.setSelectionPath(new TreePath(nodeF.getPath()));
+      }
+    });
 
     // JPopupMenu popup = handle.getPopup();
     //
@@ -2896,7 +2913,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     RenameResourceAction(TreePath path) {
       super("Rename");
       putValue(SHORT_DESCRIPTION, "Renames the resource");
-      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control R"));
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("F2"));
       this.path = path;
     }
 
@@ -3361,9 +3378,6 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     public ResourcesTree() {
       myToolTip = new ResourceToolTip();
-      // disable F2 key for renaming because we use it in the Document editor
-      getInputMap(WHEN_FOCUSED)
-        .put(KeyStroke.getKeyStroke("F2"), null);
     }
 
     /**
