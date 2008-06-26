@@ -92,6 +92,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
       }
       featuresEditor.editFeatureMap(features);
     }
+    setEnableEditing(true);
     if(dialog != null){
       if(annotation != null){
         placeDialog(annotation.getStartNode().getOffset().intValue(),
@@ -527,34 +528,34 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     constraints.gridy = 0;
     constraints.weightx = 0;
     
-    IconOnlyButton iob = new IconOnlyButton(new StartOffsetLeftAction());
-    iob.setIcon(MainFrame.getIcon("bounds-sol"));
-    iob.setPressedIcon(MainFrame.getIcon("bounds-sol-pressed"));
-    tBar.add(iob, constraints);
+    solButton = new IconOnlyButton(new StartOffsetLeftAction());
+    solButton.setIcon(MainFrame.getIcon("bounds-sol"));
+    solButton.setPressedIcon(MainFrame.getIcon("bounds-sol-pressed"));
+    tBar.add(solButton, constraints);
     JLabel aLabel = new JLabel(MainFrame.getIcon("bounds-left"));
     aLabel.setBorder(null);
     tBar.add(aLabel, constraints);
-    iob = new IconOnlyButton(new StartOffsetRightAction());
-    iob.setIcon(MainFrame.getIcon("bounds-sor"));
-    iob.setPressedIcon(MainFrame.getIcon("bounds-sor-pressed"));
-    tBar.add(iob, constraints);
+    sorButton = new IconOnlyButton(new StartOffsetRightAction());
+    sorButton.setIcon(MainFrame.getIcon("bounds-sor"));
+    sorButton.setPressedIcon(MainFrame.getIcon("bounds-sor-pressed"));
+    tBar.add(sorButton, constraints);
     aLabel = new JLabel(MainFrame.getIcon("bounds-span"));
     aLabel.setBorder(null);
     tBar.add(aLabel, constraints);
-    iob = new IconOnlyButton(new EndOffsetLeftAction());
-    iob.setIcon(MainFrame.getIcon("bounds-eol"));
-    iob.setPressedIcon(MainFrame.getIcon("bounds-eol-pressed"));
-    tBar.add(iob, constraints);
+    eolButton = new IconOnlyButton(new EndOffsetLeftAction());
+    eolButton.setIcon(MainFrame.getIcon("bounds-eol"));
+    eolButton.setPressedIcon(MainFrame.getIcon("bounds-eol-pressed"));
+    tBar.add(eolButton, constraints);
     aLabel = new JLabel(MainFrame.getIcon("bounds-right"));
     aLabel.setBorder(null);
     tBar.add(aLabel, constraints);
-    iob = new IconOnlyButton(new EndOffsetRightAction());
-    iob.setIcon(MainFrame.getIcon("bounds-eor"));
-    iob.setPressedIcon(MainFrame.getIcon("bounds-eor-pressed"));
-    tBar.add(iob, constraints);
+    eorButton = new IconOnlyButton(new EndOffsetRightAction());
+    eorButton.setIcon(MainFrame.getIcon("bounds-eor"));
+    eorButton.setPressedIcon(MainFrame.getIcon("bounds-eor-pressed"));
+    tBar.add(eorButton, constraints);
     
     tBar.add(Box.createHorizontalStrut(15), constraints);
-    tBar.add(new SmallButton(new DeleteAnnotationAction()), constraints);
+    tBar.add(delButton = new SmallButton(new DeleteAnnotationAction()), constraints);
     constraints.weightx = 1;
     tBar.add(Box.createHorizontalGlue(), constraints);
     
@@ -571,7 +572,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     add(tBar, BorderLayout.NORTH);
     
     //build the main pane
-    JPanel mainPane = new JPanel();
+    mainPane = new JPanel();
     mainPane.setLayout(new BorderLayout());
     
     featureEditorsByType = new HashMap<String, SchemaFeaturesEditor>();
@@ -1002,7 +1003,14 @@ System.out.println("Window up");
     }
   }
   
-  /**
+  protected IconOnlyButton solButton;
+  protected IconOnlyButton sorButton;
+  protected SmallButton delButton;
+  protected IconOnlyButton eolButton;
+  protected IconOnlyButton eorButton;
+  protected JPanel mainPane;
+
+/**
    * @return the owner
    */
   public AnnotationEditorOwner getOwner() {
@@ -1031,5 +1039,29 @@ System.out.println("Window up");
   public void setPinnedMode(boolean pinned) {
     pinnedButton.setSelected(pinned);
   }
-  
+
+  public void setEnableEditing(boolean isEditingEnabled) {
+    solButton.setEnabled(isEditingEnabled);
+    sorButton.setEnabled(isEditingEnabled);
+    delButton.setEnabled(isEditingEnabled);
+    eolButton.setEnabled(isEditingEnabled);
+    eorButton.setEnabled(isEditingEnabled);
+    for (Component c : typesChoice.getComponents()) {
+      c.setEnabled(isEditingEnabled);
+    }
+    for (Component c1 : featuresBox.getComponents()) {
+      if (!(c1 instanceof SchemaFeaturesEditor)) { continue; }
+      for (Component c2 : ((SchemaFeaturesEditor)c1).getComponents()) {
+        if (!(c2 instanceof Container)) { continue; }
+        for (Component c3 : ((Container)c2).getComponents()) {
+          if (c3 instanceof JTextField
+           || c3 instanceof JCheckBox
+           || c3 instanceof JChoice) {
+            c3.setEnabled(isEditingEnabled);
+          }
+        }
+      }
+    }
+  }
+
 }

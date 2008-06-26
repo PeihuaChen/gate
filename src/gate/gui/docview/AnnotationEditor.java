@@ -25,6 +25,7 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import javax.swing.event.TableModelListener;
 import javax.swing.event.TableModelEvent;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.text.BadLocationException;
 
 import gate.*;
@@ -34,7 +35,9 @@ import gate.event.CreoleListener;
 import gate.gui.FeaturesSchemaEditor;
 import gate.gui.MainFrame;
 import gate.gui.annedit.AnnotationEditorOwner;
+import gate.gui.annedit.SchemaFeaturesEditor;
 import gate.gui.annedit.SearchAndAnnotatePanel;
+import gate.swing.JChoice;
 import gate.util.*;
 
 
@@ -414,8 +417,8 @@ public class AnnotationEditor extends AbstractVisualResource
    
     featuresEditor.setSchema((AnnotationSchema)schemasByType.get(annType));
     featuresEditor.setTargetFeatures(ann.getFeatures());
-    featuresEditorRowCount = 0;
     popupWindow.doLayout();
+    setEnableEditing(true);
     if (pinnedButton.isSelected()) {
       setVisible(true);
     } else {
@@ -797,12 +800,6 @@ public class AnnotationEditor extends AbstractVisualResource
   protected AnnotationEditor annotationEditorInstance;
 
   /**
-   * Features table row count.
-   * Exists only because its TableModelEvent gives no usable information.
-   */
-  protected int featuresEditorRowCount;
-
-  /**
    * Key bindings for the popup window.
    */
   InputMap inputMap;
@@ -836,5 +833,29 @@ public class AnnotationEditor extends AbstractVisualResource
   public void setPinnedMode(boolean pinned) {
     pinnedButton.setSelected(pinned);
   }
-  
+
+  public void setEnableEditing(boolean isEditingEnabled) {
+    solButton.setEnabled(isEditingEnabled);
+    sorButton.setEnabled(isEditingEnabled);
+    delButton.setEnabled(isEditingEnabled);
+    eolButton.setEnabled(isEditingEnabled);
+    eorButton.setEnabled(isEditingEnabled);
+    typeCombo.setEnabled(isEditingEnabled);
+    featuresEditor.getTable().setEnabled(isEditingEnabled);
+    for (Component c1 : featuresEditor.getTable().getComponents()) {
+      if (!(c1 instanceof Container)) { continue; }
+      for (Component c2 : ((Container)c1).getComponents()) {
+        if (!(c2 instanceof Container)) { continue; }
+        for (Component c3 : ((Container)c2).getComponents()) {
+          if (!(c3 instanceof Container)) { continue; }
+          for (Component c4 : ((Container)c3).getComponents()) {
+            if (c4 instanceof JLabel) {
+              c4.setForeground(isEditingEnabled?null:Color.gray);
+            }
+          }
+        }
+      }
+    }
+  }
+
 }
