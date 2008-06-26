@@ -53,7 +53,12 @@ public interface Document extends SimpleDocument {
 
   public static final String
     DOCUMENT_END_OFFSET_PARAMETER_NAME = "sourceUrlEndOffset";
-
+ 
+  /* parameter to store additional info about the document type, 
+   * e.g. publication, javadoc, etc. */
+  public static final String
+  DOCUMENT_TYPE_PARAMETER_NAME = "documentType";
+  
   /** Documents may be packed within files; in this case an optional pair of
    *  offsets refer to the location of the document.
    */
