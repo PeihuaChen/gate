@@ -38,6 +38,7 @@ import gate.Gate;
 import gate.Resource;
 import gate.clone.ql.CATConstants;
 import gate.clone.ql.FakeSentenceSplitter;
+import gate.clone.ql.Ontology2MapManager;
 import gate.clone.ql.regex.ExpressionFinder;
 import gate.clone.ql.utils.Ontology2Map;
 import gate.creole.ANNIEConstants;
@@ -234,7 +235,7 @@ public class OntoRootGaz extends DefaultGazetteer {
       throw new ResourceInstantiationException("No ontology provided!");
     }
     else {
-      Ontology2Map.getInstance().reInit(ontology);
+      Ontology2MapManager.getInstance().addOntologyToIndex(ontology);
     }
     /* set default values if they are not set already */
     if(this.useResourceUri == null) useResourceUri = true;
@@ -298,12 +299,12 @@ public class OntoRootGaz extends DefaultGazetteer {
     if(considerProperties) {
       /*************************************************************************
        * instances with all set properties returned in a table with 3 columns:
-       * ... instanceUri, propertyUri, propertyValue [new line]
-       *     instanceUri, propertyUri, propertyValue [new line]
-       *                          ...                 
-       * **********************************************************************/
+       * ... instanceUri, propertyUri, propertyValue [new line] instanceUri,
+       * propertyUri, propertyValue [new line] ...
+       ************************************************************************/
       String[] rows =
-        Ontology2Map.getInstance().getListOfInstances().split(
+        Ontology2MapManager.getInstance().getOntology2Map(
+          ontology.getURL().toString()).getListOfInstances().split(
           CATConstants.NEW_LINE);
       for(String eachRow : rows) {
         String[] columns = eachRow.split("\\|");
@@ -313,27 +314,27 @@ public class OntoRootGaz extends DefaultGazetteer {
             /* create uriURI for validation purposes */
             URI uriUri = new URI(uri, false);
             String propUri = columns[1].trim();
-            
-            if((propertiesToIncludeList.size() == 0 || 
-                propertiesToIncludeList.contains(propUri))
-                && 
-                (propertiesToExcludeList.size() == 0 || 
-               !(propertiesToExcludeList.contains(propUri)))) {              
+
+            if((propertiesToIncludeList.size() == 0 || propertiesToIncludeList
+              .contains(propUri))
+              && (propertiesToExcludeList.size() == 0 || !(propertiesToExcludeList
+                .contains(propUri)))) {
               String propValue = columns[2].trim();
               Map<String, Object> lookupFeatures =
                 new HashMap<String, Object>();
               lookupFeatures.put(CATConstants.ONTORES_TYPE,
                 CATConstants.TYPE_INSTANCE);
               lookupFeatures.put(CATConstants.FEATURE_URI, uri);
-              lookupFeatures.put(CATConstants.FEATURE_PROPERTY_URI,
-                propUri);
-              lookupFeatures.put(CATConstants.FEATURE_PROPERTY_VALUE,
-                propValue);
-              lookupFeatures.put(CATConstants.CLASS_URI_LIST, Ontology2Map
-                .getInstance().getInstanceTypes().get(uri));
-              lookupFeatures.put(CATConstants.CLASS_URI,
-                new ArrayList<String>(Ontology2Map.getInstance()
-                  .getInstanceTypes().get(uri)).get(0));
+              lookupFeatures.put(CATConstants.FEATURE_PROPERTY_URI, propUri);
+              lookupFeatures
+                .put(CATConstants.FEATURE_PROPERTY_VALUE, propValue);
+              lookupFeatures.put(CATConstants.CLASS_URI_LIST,
+                Ontology2MapManager.getInstance().getOntology2Map(
+                  ontology.getURL().toString()).getInstanceTypes().get(uri));
+              lookupFeatures.put(CATConstants.CLASS_URI, new ArrayList<String>(
+                Ontology2MapManager.getInstance().getOntology2Map(
+                  ontology.getURL().toString()).getInstanceTypes().get(uri))
+                .get(0));
               Lookup aLookup = new Lookup(propValue, "", null, null);
               aLookup.features = lookupFeatures;
               allLookups.add(aLookup);
@@ -350,7 +351,8 @@ public class OntoRootGaz extends DefaultGazetteer {
        * ************************************************************ *
        ************************************************************************/
       rows =
-        Ontology2Map.getInstance().getListOfClasses().split(
+        Ontology2MapManager.getInstance().getOntology2Map(
+          ontology.getURL().toString()).getListOfClasses().split(
           CATConstants.NEW_LINE);
       for(String eachRow : rows) {
         String[] columns = eachRow.split("\\|");
@@ -359,19 +361,17 @@ public class OntoRootGaz extends DefaultGazetteer {
           try {
             URI uriUri = new URI(uri, false);
             String propUri = columns[1].trim();
-            if((propertiesToIncludeList.size() == 0 || 
-                propertiesToIncludeList.contains(propUri))
-                && 
-               (propertiesToExcludeList.size() == 0 || 
-              !(propertiesToExcludeList.contains(propUri)))) {
+            if((propertiesToIncludeList.size() == 0 || propertiesToIncludeList
+              .contains(propUri))
+              && (propertiesToExcludeList.size() == 0 || !(propertiesToExcludeList
+                .contains(propUri)))) {
               String propValue = columns[2].trim();
               Map<String, Object> lookupFeatures =
                 new HashMap<String, Object>();
               lookupFeatures.put(CATConstants.ONTORES_TYPE,
                 CATConstants.TYPE_CLASS);
               lookupFeatures.put(CATConstants.FEATURE_URI, uri);
-              lookupFeatures.put(CATConstants.FEATURE_PROPERTY_URI,
-                propUri);
+              lookupFeatures.put(CATConstants.FEATURE_PROPERTY_URI, propUri);
               Lookup aLookup = new Lookup(propValue, "", null, null);
               aLookup.features = lookupFeatures;
               allLookups.add(aLookup);
@@ -388,7 +388,8 @@ public class OntoRootGaz extends DefaultGazetteer {
        * ************************************************************ *
        ************************************************************************/
       rows =
-        Ontology2Map.getInstance().getListOfProperties().split(
+        Ontology2MapManager.getInstance().getOntology2Map(
+          ontology.getURL().toString()).getListOfProperties().split(
           CATConstants.NEW_LINE);
       for(String eachRow : rows) {
         String[] columns = eachRow.split("\\|");
@@ -397,21 +398,19 @@ public class OntoRootGaz extends DefaultGazetteer {
           try {
             URI uriUri = new URI(uri, false);
             String propUri = columns[1].trim();
-            if((propertiesToIncludeList.size() == 0 || 
-                propertiesToIncludeList.contains(propUri))
-                && 
-               (propertiesToExcludeList.size() == 0 || 
-              !(propertiesToExcludeList.contains(propUri)))) {
+            if((propertiesToIncludeList.size() == 0 || propertiesToIncludeList
+              .contains(propUri))
+              && (propertiesToExcludeList.size() == 0 || !(propertiesToExcludeList
+                .contains(propUri)))) {
               String propValue = columns[2].trim();
               Map<String, Object> lookupFeatures =
                 new HashMap<String, Object>();
               lookupFeatures.put(CATConstants.ONTORES_TYPE,
                 CATConstants.TYPE_PROPERTY);
               lookupFeatures.put(CATConstants.FEATURE_URI, uri);
-              lookupFeatures.put(CATConstants.FEATURE_PROPERTY_URI,
-                propUri);
-              lookupFeatures.put(CATConstants.FEATURE_PROPERTY_VALUE,
-                propValue);
+              lookupFeatures.put(CATConstants.FEATURE_PROPERTY_URI, propUri);
+              lookupFeatures
+                .put(CATConstants.FEATURE_PROPERTY_VALUE, propValue);
               Lookup aLookup = new Lookup(propValue, "", null, null);
               aLookup.features = lookupFeatures;
               allLookups.add(aLookup);
@@ -425,11 +424,12 @@ public class OntoRootGaz extends DefaultGazetteer {
     }// end consider properties
     /* uri retrieval */
     if(useResourceUri) {
-      /************************************************************** 
-       class uris 
-      ***************************************************************/
+      /*************************************************************************
+       * class uris
+       ************************************************************************/
       String[] rows =
-        Ontology2Map.getInstance().getClassURIs().split(
+        Ontology2MapManager.getInstance().getOntology2Map(
+          ontology.getURL().toString()).getClassURIs().split(
           CATConstants.NEW_LINE);
       for(String eachRow : rows) {
         String uri = eachRow.trim();
@@ -437,8 +437,8 @@ public class OntoRootGaz extends DefaultGazetteer {
           URI uriUri = new URI(uri, false);
           String shortName = uriUri.getResourceName();
           Map<String, Object> lookupFeatures = new HashMap<String, Object>();
-          lookupFeatures.put(CATConstants.ONTORES_TYPE,
-            CATConstants.TYPE_CLASS);
+          lookupFeatures
+            .put(CATConstants.ONTORES_TYPE, CATConstants.TYPE_CLASS);
           lookupFeatures.put(CATConstants.FEATURE_URI, uri.trim());
           Lookup aLookup = new Lookup(shortName, "", null, null);
           aLookup.features = lookupFeatures;
@@ -448,11 +448,12 @@ public class OntoRootGaz extends DefaultGazetteer {
           logger.info("URI:" + uri + " is not valid.\n");
         }
       }
-      /*************************************************************** 
-          instance uris
-      ****************************************************************/
+      /*************************************************************************
+       * instance uris
+       ************************************************************************/
       Set<String> setOfInstanceTypes =
-        Ontology2Map.getInstance().getInstanceTypes().keySet();
+        Ontology2MapManager.getInstance().getOntology2Map(
+          ontology.getURL().toString()).getInstanceTypes().keySet();
       for(String uri : setOfInstanceTypes) {
         try {
           URI uriUri = new URI(uri, false);
@@ -462,10 +463,11 @@ public class OntoRootGaz extends DefaultGazetteer {
             CATConstants.TYPE_INSTANCE);
           lookupFeatures.put(CATConstants.FEATURE_URI, uri);
           Set<String> l =
-            Ontology2Map.getInstance().getInstanceTypes().get(uri);
+            Ontology2MapManager.getInstance().getOntology2Map(
+              ontology.getURL().toString()).getInstanceTypes().get(uri);
           lookupFeatures.put(CATConstants.CLASS_URI_LIST, l);
-          lookupFeatures.put(CATConstants.CLASS_URI, new ArrayList<String>(
-            l).get(0));
+          lookupFeatures.put(CATConstants.CLASS_URI, new ArrayList<String>(l)
+            .get(0));
           Lookup aLookup = new Lookup(shortName, "", null, null);
           aLookup.features = lookupFeatures;
           allLookups.add(aLookup);
@@ -474,11 +476,12 @@ public class OntoRootGaz extends DefaultGazetteer {
           logger.info("URI:" + uri + " is not valid.\n");
         }
       }
-      /**************************************************************
-                            property uris
-      ****************************************************************/
+      /*************************************************************************
+       * property uris
+       ************************************************************************/
       rows =
-        Ontology2Map.getInstance().getPropertyURIs().split(
+        Ontology2MapManager.getInstance().getOntology2Map(
+          ontology.getURL().toString()).getPropertyURIs().split(
           CATConstants.NEW_LINE);
       for(String eachRow : rows) {
         String uri = eachRow.trim();
@@ -500,7 +503,7 @@ public class OntoRootGaz extends DefaultGazetteer {
     }
     addLookups(allLookups);
     allLookups = new ArrayList<Lookup>();
-    /*release GATE resources*/
+    /* release GATE resources */
     Factory.deleteResource(applicationCorpus);
     applicationCorpus = null;
     rootFinderApplication.remove(morpher);
@@ -522,17 +525,14 @@ public class OntoRootGaz extends DefaultGazetteer {
    * returns a list of new Lookups that are than added to the gazetteer.
    * 'Processing' means replacing lookup.list feature with its root.
    * Additionally during the processing a new list if Lookups is created called
-   * additionalList: this list contains a new Lookups that needs to be 
-   * processed by calling this method again afterwards: 
-   * - if lookup.list contains "-" or "_", replace these chars by space, add new
-   * lookups to the additionalList and then extract the root in the next call 
-   * to this method
-   * - if separateCamelCasedWords=true, separate
-   * them by adding a space, add new lookups to the additionalList and then 
-   * extract the root later
-   * - if considerHeuristicRules=true then separate words as proposed by these
-   * rules, add new lookups to the additionalList and then extract the root 
-   * later
+   * additionalList: this list contains a new Lookups that needs to be processed
+   * by calling this method again afterwards: - if lookup.list contains "-" or
+   * "_", replace these chars by space, add new lookups to the additionalList
+   * and then extract the root in the next call to this method - if
+   * separateCamelCasedWords=true, separate them by adding a space, add new
+   * lookups to the additionalList and then extract the root later - if
+   * considerHeuristicRules=true then separate words as proposed by these rules,
+   * add new lookups to the additionalList and then extract the root later
    * 
    * @param List
    *          <Lookup> lookups
@@ -558,8 +558,7 @@ public class OntoRootGaz extends DefaultGazetteer {
       if(root != null) {
         /*
          * check if the root has spaces and if considerHeuristicRules is set to
-         * true, if yes, than split words and add
-         * heuristical_level to each
+         * true, if yes, than split words and add heuristical_level to each
          */
         if(root.contains(" ") && considerHeuristicRules == true) {
           Lookup aNewLookup = new Lookup(aLookup.list, "", null, null);
@@ -568,10 +567,8 @@ public class OntoRootGaz extends DefaultGazetteer {
             newFeatures.put((String)key, aLookup.features.get(key));
           }
           aNewLookup.features = newFeatures;
-          aNewLookup.features.put(CATConstants.FEATURE_HEURISTIC_LEVEL,
-            hLevel);
-          aNewLookup.features.put(CATConstants.FEATURE_HEURISTIC_VALUE,
-            root);
+          aNewLookup.features.put(CATConstants.FEATURE_HEURISTIC_LEVEL, hLevel);
+          aNewLookup.features.put(CATConstants.FEATURE_HEURISTIC_VALUE, root);
           addLookup(root.trim(), aNewLookup);
           logger.info("NEW ENTRY: " + root + "\n");
           int firstIndex = root.trim().indexOf(" ");
@@ -586,10 +583,10 @@ public class OntoRootGaz extends DefaultGazetteer {
               anotherFeatures.put((String)key, aLookup.features.get(key));
             }
             anotherLookup.features = anotherFeatures;
-            anotherLookup.features.put(
-              CATConstants.FEATURE_HEURISTIC_LEVEL, hLevel);
-            anotherLookup.features.put(
-              CATConstants.FEATURE_HEURISTIC_VALUE, newRoot.trim());
+            anotherLookup.features.put(CATConstants.FEATURE_HEURISTIC_LEVEL,
+              hLevel);
+            anotherLookup.features.put(CATConstants.FEATURE_HEURISTIC_VALUE,
+              newRoot.trim());
             addLookup(newRoot.trim(), anotherLookup);
             logger.info("NEW ENTRY: " + newRoot + "\n");
             firstIndex = newRoot.trim().indexOf(" ");
@@ -617,10 +614,10 @@ public class OntoRootGaz extends DefaultGazetteer {
 
   /**
    * This method process given lookups so that their entries are converted to
-   * the root of the entry i.e. lookup.list is processed and 'root' feature
-   * is used to be lookup.list for resulting lookups.
-   * All unprocessed lookups are added to
-   * the additionalList and they are processed later with the same method
+   * the root of the entry i.e. lookup.list is processed and 'root' feature is
+   * used to be lookup.list for resulting lookups. All unprocessed lookups are
+   * added to the additionalList and they are processed later with the same
+   * method
    */
   private List<Lookup> runRootFinderApplication(List<Lookup> lookups)
     throws ResourceInstantiationException {
@@ -628,7 +625,7 @@ public class OntoRootGaz extends DefaultGazetteer {
     for(Lookup lookup : lookups) {
       String list = lookup.list;
       if(list != null && list.trim().length() > 0) {
-        
+
         if(list.contains("_")) {
           String newText = list.replace('_', ' ');
           Lookup aLookup = new Lookup(newText, "", null, null);
@@ -648,7 +645,7 @@ public class OntoRootGaz extends DefaultGazetteer {
           }
         }
         lookupsToBeReturned.add(lookup);
-        /* set new documents to be hidden inside the GATE GUI*/
+        /* set new documents to be hidden inside the GATE GUI */
         FeatureMap docParams = Factory.newFeatureMap();
         docParams.put("stringContent", list);
         FeatureMap docFeatures = Factory.newFeatureMap();
@@ -664,7 +661,7 @@ public class OntoRootGaz extends DefaultGazetteer {
         catch(ExecutionException ee) {
           throw new ResourceInstantiationException(ee);
         }
-        
+
         Iterator it = applicationCorpus.iterator();
         while(it.hasNext()) {
           Document doc = (Document)it.next();
@@ -685,13 +682,16 @@ public class OntoRootGaz extends DefaultGazetteer {
               String category =
                 (String)ann.getFeatures().get(
                   ANNIEConstants.TOKEN_CATEGORY_FEATURE_NAME);
-              
-              /* category "IN" means it is a preposition, and these are used to
-              be a stop words, so crop everything afterwards, but ONLY if 
-              parameter considerHeuristicRules is set to be true */
-              if (considerHeuristicRules==true && category.equals("IN")){
+
+              /*
+               * category "IN" means it is a preposition, and these are used to
+               * be a stop words, so crop everything afterwards, but ONLY if
+               * parameter considerHeuristicRules is set to be true
+               */
+              if(considerHeuristicRules == true && category.equals("IN")) {
                 break;
-              } else {
+              }
+              else {
                 String root = (String)ann.getFeatures().get("root");
                 if(root != null) {
                   rootForText.append(root);

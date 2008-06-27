@@ -31,13 +31,13 @@ public class StringUtil {
 
   /**
    * This method assume that given string is in the form of
-   * QueryResultsTable.toString() with 2 columns and converts it to HashMap 
-   * where key is the
-   * first entry from the table and the value is the set of second entries.
+   * QueryResultsTable.toString() with 2 columns and converts it to HashMap
+   * where key is the first entry from the table and the value is the set of
+   * second entries.
    * 
    * @param resultsTable
    * @return a Map with a key taken from the first column of the table and a
-   * value being a set of values taken from the second column.
+   *         value being a set of values taken from the second column.
    */
   public static Map<String, Set<String>> fromStringToMap(String resultsTable) {
     Map<String, Set<String>> map = new HashMap<String, Set<String>>();
@@ -67,12 +67,12 @@ public class StringUtil {
 
   /**
    * This method assume that given string is in the form of
-   * QueryResultsTable.toString() with 1 column and converts it to the Set of 
+   * QueryResultsTable.toString() with 1 column and converts it to the Set of
    * strings i.e. values from the each row of the table
    * 
    * @param resultsTable
-   * @return a Set of Strings from the given table (string separated by 
-   * new lines)
+   * @return a Set of Strings from the given table (string separated by new
+   *         lines)
    */
   public static Set<String> fromStringToSet(String resultsTable) {
     Set<String> set = new HashSet<String>();

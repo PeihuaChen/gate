@@ -26,42 +26,33 @@ import gate.creole.ontology.Ontology;
  * singlenton.
  */
 public class Ontology2Map {
-  /* reference to the only instance of this class*/
-  static private Ontology2Map myInstance;
-  
+
   // read ontology and store data
- 
+
   /* String is instanceURI, and Set is the list i.e. set of classURIs */
-  static protected Map<String, Set<String>> instanceTypes =
+  protected Map<String, Set<String>> instanceTypes =
     new HashMap<String, Set<String>>();
-  
-  static protected String listOfClasses;
-  
-  static private String listOfInstances;
-  
-  static private String listOfProperties;
-  
-  static private String classURIs;
-  
-  static private String propertyURIs;
 
-  private Ontology2Map() {
-  }
+  protected String listOfClasses;
 
-  public void reInit(Ontology o) {
-    SerqlUtils.init(o);
+  private String listOfInstances;
+
+  private String listOfProperties;
+
+  private String classURIs;
+
+  private String propertyURIs;
+
+  public Ontology2Map(Ontology o) {
+
+    // SerqlUtils.init(o);
     // for OntoRoot Gazetteer
-    instanceTypes = StringUtil.fromStringToMap(SerqlUtils.getInstanceTypes());
-    listOfClasses = SerqlUtils.getClasses();
-    listOfProperties = SerqlUtils.getPropertiesOfProperties();
-    listOfInstances = SerqlUtils.getInstances();
-    classURIs = SerqlUtils.getClassURIs();
-    propertyURIs = SerqlUtils.getPropertyURIs();
-  }
-
-  public static Ontology2Map getInstance() {
-    if(myInstance == null) myInstance = new Ontology2Map();
-    return myInstance;
+    instanceTypes = StringUtil.fromStringToMap(SerqlUtils.getInstanceTypes(o));
+    listOfClasses = SerqlUtils.getClasses(o);
+    listOfProperties = SerqlUtils.getPropertiesOfProperties(o);
+    listOfInstances = SerqlUtils.getInstances(o);
+    classURIs = SerqlUtils.getClassURIs(o);
+    propertyURIs = SerqlUtils.getPropertyURIs(o);
   }
 
   public Map<String, Set<String>> getInstanceTypes() {
@@ -69,7 +60,7 @@ public class Ontology2Map {
   }
 
   public void setInstanceTypes(Map<String, Set<String>> instanceTypes) {
-    Ontology2Map.instanceTypes = instanceTypes;
+    this.instanceTypes = instanceTypes;
   }
 
   public String getListOfClasses() {
@@ -86,14 +77,6 @@ public class Ontology2Map {
 
   public String getPropertyURIs() {
     return propertyURIs;
-  }
-
-  public Ontology2Map getMyInstance() {
-    return myInstance;
-  }
-
-  public void setMyInstance(Ontology2Map myInstance) {
-    Ontology2Map.myInstance = myInstance;
   }
 
   public String getListOfInstances() {
