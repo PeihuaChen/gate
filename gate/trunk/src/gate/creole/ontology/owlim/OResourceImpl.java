@@ -314,23 +314,13 @@ public class OResourceImpl implements OResource {
     List<Literal> literals = getAnnotationPropertyValues(aProperty);
     for(Literal l : literals) {
       if(l.getValue().equals(aValue.getValue())) {
-        if(l.getDataType() == null) {
-          if(aValue.getDataType() != null) continue;
+        if(l.getDataType() != null && aValue.getDataType() != null) {
+          if(!aValue.getDataType().getXmlSchemaURI().toString().equals(
+                  l.getDataType().getXmlSchemaURI().toString())) continue;
         }
-        else {
-          if(aValue.getDataType() == null)
-            continue;
-          else if(!aValue.getDataType().getXmlSchemaURI().equals(
-                  l.getDataType().getXmlSchemaURI())) continue;
-        }
-
-        if(l.getLanguage() == null) {
-          if(aValue.getLanguage() != null) continue;
-        }
-        else {
-          if(aValue.getLanguage() == null)
-            continue;
-          else if(!aValue.getLanguage().equals(l.getLanguage())) continue;
+        
+        if(l.getLanguage() != null && aValue.getLanguage() != null) {
+          if(!aValue.getLanguage().toString().equals(l.getLanguage().toString())) continue;          
         }
         return true;
       }
