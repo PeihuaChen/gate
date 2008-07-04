@@ -72,6 +72,8 @@ public class AlignmentEditor extends AbstractVisualResource implements
 
   private JCheckBox showLinks;
 
+  private JLabel alignmentComplete = new JLabel("false");
+
   private JButton next, previous, loadActions;
 
   private JToggleButton populate;
@@ -120,6 +122,8 @@ public class AlignmentEditor extends AbstractVisualResource implements
 
   private List<PreDisplayAction> preDisplayActions = null;
 
+  private List<FinishedAlignmentAction> finishedAlignmentActions = null;
+
   /*
    * (non-Javadoc)
    * 
@@ -136,6 +140,7 @@ public class AlignmentEditor extends AbstractVisualResource implements
     actionsMenuItemByCaption = new HashMap<String, JMenuItem>();
     allActions = new ArrayList<AlignmentAction>();
     preDisplayActions = new ArrayList<PreDisplayAction>();
+    finishedAlignmentActions = new ArrayList<FinishedAlignmentAction>();
 
     ResourceData myResourceData = (ResourceData)Gate.getCreoleRegister().get(
             this.getClass().getName());
@@ -281,7 +286,7 @@ public class AlignmentEditor extends AbstractVisualResource implements
     next = new JButton("Next >");
     next.addActionListener(this);
 
-    showLinks = new JCheckBox("Show Links");
+    showLinks = new JCheckBox("Links");
     showLinks.setSelected(true);
     showLinks.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
@@ -326,6 +331,8 @@ public class AlignmentEditor extends AbstractVisualResource implements
     temp3.add(previous);
     temp3.add(next);
     temp3.add(showLinks);
+    temp3.add(new JLabel("Status:"));
+    temp3.add(alignmentComplete);
     temp3.add(loadActions);
 
     paramPanel.add(temp1);
@@ -648,7 +655,7 @@ public class AlignmentEditor extends AbstractVisualResource implements
         for(AlignmentAction a : allActions) {
           if(a.invokeWithAlignAction()) {
             JCheckBox cb = actionsCBMap.get(a);
-            if(cb != null && cb.isSelected())
+            if((cb != null && cb.isSelected()) || cb == null)
               a
                       .execute(this, this.document, srcDocument,
                               getSourceAnnotationSetName(), srcSelectedAnnots,
@@ -664,7 +671,7 @@ public class AlignmentEditor extends AbstractVisualResource implements
         for(AlignmentAction a : allActions) {
           if(a.invokeWithRemoveAction()) {
             JCheckBox cb = actionsCBMap.get(a);
-            if(cb != null && cb.isSelected())
+            if((cb != null && cb.isSelected()) || cb == null)
 
               a
                       .execute(this, this.document, srcDocument,
@@ -690,9 +697,9 @@ public class AlignmentEditor extends AbstractVisualResource implements
     return this.alignmentFeatureNames.getSelectedItem().toString();
   }
 
-  public void actionPerformed(ActionEvent ae) {
-    if(ae.getSource() == populate) {
-      if(!populate.isSelected()) {
+  public void populate() {
+    if(!populate.isSelected()) {
+      if(!disableUserSelections) {
         // we need to disable the alignment gui
         sourceUnitOfAlignment.setEnabled(true);
         targetUnitOfAlignment.setEnabled(true);
@@ -706,9 +713,10 @@ public class AlignmentEditor extends AbstractVisualResource implements
         previous.setEnabled(false);
         showLinks.setEnabled(false);
         waPanel.setVisible(false);
-
       }
-      else {
+    }
+    else {
+      if(!disableUserSelections) {
         sourceUnitOfAlignment.setEnabled(false);
         targetUnitOfAlignment.setEnabled(false);
         sourceParentOfUnitOfAlignment.setEnabled(false);
@@ -721,42 +729,117 @@ public class AlignmentEditor extends AbstractVisualResource implements
         previous.setEnabled(true);
         showLinks.setEnabled(true);
         waPanel.setVisible(true);
+      }
 
-        try {
-          if(sourceUnitOfAlignment.getSelectedItem() == null) return;
-          if(targetUnitOfAlignment.getSelectedItem() == null) return;
-          if(sourceParentOfUnitOfAlignment.getSelectedItem() == null) return;
-          if(targetParentOfUnitOfAlignment.getSelectedItem() == null) return;
+      try {
+        if(sourceUnitOfAlignment.getSelectedItem() == null) return;
+        if(targetUnitOfAlignment.getSelectedItem() == null) return;
+        if(sourceParentOfUnitOfAlignment.getSelectedItem() == null) return;
+        if(targetParentOfUnitOfAlignment.getSelectedItem() == null) return;
 
-          AlignmentFactory af = new AlignmentFactory(document, sourceDocumentId
-                  .getSelectedItem().toString(), targetDocumentId
-                  .getSelectedItem().toString(), sourceASName.getSelectedItem()
-                  .toString(), targetASName.getSelectedItem().toString(),
-                  sourceUnitOfAlignment.getSelectedItem().toString(),
-                  targetUnitOfAlignment.getSelectedItem().toString(),
-                  sourceParentOfUnitOfAlignment.getSelectedItem().toString(),
-                  targetParentOfUnitOfAlignment.getSelectedItem().toString(),
-                  "gate.util.OffsetComparator");
+        AlignmentFactory af = new AlignmentFactory(document, sourceDocumentId
+                .getSelectedItem().toString(), targetDocumentId
+                .getSelectedItem().toString(), sourceASName.getSelectedItem()
+                .toString(), targetASName.getSelectedItem().toString(),
+                sourceUnitOfAlignment.getSelectedItem().toString(),
+                targetUnitOfAlignment.getSelectedItem().toString(),
+                sourceParentOfUnitOfAlignment.getSelectedItem().toString(),
+                targetParentOfUnitOfAlignment.getSelectedItem().toString(),
+                "gate.util.OffsetComparator");
 
-          // if there were no errors
-          alignFactory = af;
-          nextAction();
-        }
-        catch(Exception e) {
-          e.printStackTrace();
-        }
+        // if there were no errors
+        alignFactory = af;
+        nextAction();
+      }
+      catch(Exception e) {
+        e.printStackTrace();
       }
     }
+
+  }
+
+  public void actionPerformed(ActionEvent ae) {
+    if(ae.getSource() == populate) {
+      populate();
+    }
     else if(ae.getSource() == next) {
+      if(alignFactory != null && !alignFactory.isCompleted()) {
+        int answer = JOptionPane.showConfirmDialog(mainPanel,
+                "Is alignment complete for this pair?");
+        if(answer == JOptionPane.YES_OPTION) {
+          alignFactory.setCompleted(true);
+          callFinishedAlignmentActions();
+
+        }
+        else {
+          alignFactory.setCompleted(false);
+        }
+      }
       nextAction();
     }
     else if(ae.getSource() == previous) {
+      if(alignFactory != null && !alignFactory.isCompleted()) {
+        int answer = JOptionPane.showConfirmDialog(mainPanel,
+                "Is alignment complete for this pair?");
+        if(answer == JOptionPane.YES_OPTION) {
+          alignFactory.setCompleted(true);
+          callFinishedAlignmentActions();
+        }
+        else {
+          alignFactory.setCompleted(false);
+        }
+      }
       previousAction();
     }
   }
 
+  private void callFinishedAlignmentActions() {
+
+    HashMap<String, Annotation> docIDsAndAnnots = alignFactory.current();
+    Set<Annotation> srcAnnotations = null;
+    Set<Annotation> tgtAnnotations = null;
+    Document srcDocument = null;
+    Document tgtDocument = null;
+
+    for(String docId : docIDsAndAnnots.keySet()) {
+
+      boolean isSourceDocument = true;
+      if(docId.equals(targetDocumentId.getSelectedItem().toString())) {
+        isSourceDocument = false;
+        tgtDocument = document.getDocument(docId);
+      }
+      else {
+        srcDocument = document.getDocument(docId);
+      }
+
+      // sentence annotation
+      Annotation annot = docIDsAndAnnots.get(docId);
+      if(isSourceDocument) {
+        srcAnnotations = alignFactory.getUnderlyingAnnotations(annot, docId,
+                sourceUnitOfAlignment.getSelectedItem().toString());
+      }
+      else {
+        tgtAnnotations = alignFactory.getUnderlyingAnnotations(annot, docId,
+                targetUnitOfAlignment.getSelectedItem().toString());
+      }
+    }
+
+    for(FinishedAlignmentAction faa : finishedAlignmentActions) {
+      try {
+        faa.execute(this, document, srcDocument, (String)sourceASName
+                .getSelectedItem(), srcAnnotations, tgtDocument,
+                (String)targetASName.getSelectedItem(), tgtAnnotations);
+      }
+      catch(AlignmentException ae) {
+        throw new GateRuntimeException(ae);
+      }
+    }
+
+  }
+
   private void nextAction() {
     if(alignFactory != null && alignFactory.hasNext()) {
+
       HashMap<String, Annotation> next = alignFactory.next();
       Annotation srcAnnotation = next.get(alignFactory.getSrcDocumentID());
       Annotation tgtAnnotation = next.get(alignFactory.getTgtDocumentID());
@@ -792,7 +875,7 @@ public class AlignmentEditor extends AbstractVisualResource implements
   private void updateGUI(HashMap<String, Annotation> docIDsAndAnnots) {
     // before refreshing, we remove all the highlights
     clearLatestAnnotationsSelection();
-
+    alignmentComplete.setText(alignFactory.isCompleted() + "");
     sourcePanel.removeAll();
     sourcePanel.updateUI();
 
@@ -937,6 +1020,9 @@ public class AlignmentEditor extends AbstractVisualResource implements
       pda.cleanup();
     }
 
+    for(FinishedAlignmentAction faa : finishedAlignmentActions) {
+      faa.cleanup();
+    }
   }
 
   private void previousAction() {
@@ -1218,14 +1304,6 @@ public class AlignmentEditor extends AbstractVisualResource implements
 
   private void readAction(AlignmentAction action) {
 
-    String caption = action.getCaption();
-    Icon icon = action.getIcon();
-
-    if(caption == null) {
-      System.err.println(action.getClass().getName()
-              + " has a null caption - cannot be loaded");
-      return;
-    }
 
     boolean addToMenu = true;
 
@@ -1240,8 +1318,13 @@ public class AlignmentEditor extends AbstractVisualResource implements
       }
       addToMenu = false;
     }
+    
+    String caption = action.getCaption();
+    Icon icon = action.getIcon();
 
+   
     if(addToMenu) {
+
       final JMenuItem menuItem;
       if(icon != null) {
         menuItem = new JMenuItem(caption, icon);
@@ -1306,6 +1389,10 @@ public class AlignmentEditor extends AbstractVisualResource implements
             if(action instanceof PreDisplayAction) {
               loadPreDisplayAction((PreDisplayAction)action, args);
             }
+
+            if(action instanceof FinishedAlignmentAction) {
+              loadFinishedAlignmentAction((FinishedAlignmentAction)action, args);
+            }
           }
           catch(ClassNotFoundException cnfe) {
             System.err.println("class " + cName + " not found!");
@@ -1342,6 +1429,7 @@ public class AlignmentEditor extends AbstractVisualResource implements
     readAction(aa);
     if(aa.invokeWithAlignAction() || aa.invokeWithRemoveAction()) {
       String title = aa.getCaption();
+      if(title == null || title.trim().length() == 0) return;
       PropertyActionCB pab = new PropertyActionCB(title, false, aa);
       pab.setToolTipText(aa.getToolTip());
       actionsCBMap.put(aa, pab);
@@ -1349,6 +1437,17 @@ public class AlignmentEditor extends AbstractVisualResource implements
       propertiesPanel.add(pab, count - 1);
       propertiesPanel.validate();
       propertiesPanel.updateUI();
+    }
+  }
+
+  private void loadFinishedAlignmentAction(FinishedAlignmentAction faa,
+          String[] args) {
+    try {
+      faa.init(args);
+      finishedAlignmentActions.add(faa);
+    }
+    catch(AlignmentActionInitializationException aaie) {
+      throw new GateRuntimeException(aaie);
     }
   }
 
@@ -1483,4 +1582,81 @@ public class AlignmentEditor extends AbstractVisualResource implements
 
   }
 
+  public void setAlignmentFeatureName(String alignmentFeatureName) {
+    document.getAlignmentInformation(alignmentFeatureName);
+    alignmentFeatureNames.setSelectedItem(alignmentFeatureName);
+    if(!alignmentFeatureNames.getSelectedItem().equals(alignmentFeatureName)) {
+      alignmentFeatureNames.setEditable(true);
+      alignmentFeatureNames.addItem(alignmentFeatureNames);
+      alignmentFeatureNames.setSelectedItem(alignmentFeatureName);
+      alignmentFeatureNames.setEditable(false);
+    }
+  }
+
+  public void setSourceDocumentId(String docId) {
+    sourceDocumentId.setSelectedItem(docId);
+  }
+
+  public void setTargetDocumentId(String docId) {
+    targetDocumentId.setSelectedItem(docId);
+  }
+
+  public void setSourceAnnotationSetName(String annotSet) {
+    if(annotSet == null) {
+      sourceASName.setSelectedItem("<null>");
+    }
+    else {
+      sourceASName.setSelectedItem(annotSet);
+    }
+  }
+
+  public void setTargetAnnotationSetName(String annotSet) {
+    if(annotSet == null) {
+      targetASName.setSelectedItem("<null>");
+    }
+    else {
+      targetASName.setSelectedItem(annotSet);
+    }
+  }
+
+  public void setSourceUnitOfAlignment(String unit) {
+    sourceUnitOfAlignment.setSelectedItem(unit);
+  }
+
+  public void setTargetUnitOfAlignment(String unit) {
+    targetUnitOfAlignment.setSelectedItem(unit);
+  }
+
+  public void setSourceParentOfUnitOfAlignment(String unit) {
+    sourceParentOfUnitOfAlignment.setSelectedItem(unit);
+  }
+
+  public void setTargetParentOfUnitOfAlignment(String unit) {
+    targetParentOfUnitOfAlignment.setSelectedItem(unit);
+  }
+
+  public void disableUserSelections(boolean disableUserSelections) {
+    this.disableUserSelections = disableUserSelections;
+    if(!this.disableUserSelections) {
+      populate.setEnabled(false);
+      loadActions.setEnabled(false);
+      sourceUnitOfAlignment.setEnabled(false);
+      targetUnitOfAlignment.setEnabled(false);
+      sourceParentOfUnitOfAlignment.setEnabled(false);
+      targetParentOfUnitOfAlignment.setEnabled(false);
+      sourceASName.setEnabled(false);
+      targetASName.setEnabled(false);
+      sourceDocumentId.setEnabled(false);
+      targetDocumentId.setEnabled(false);
+      alignmentFeatureNames.setEnabled(false);
+    }
+    else {
+      populate.setEnabled(true);
+      loadActions.setEnabled(true);
+      alignmentFeatureNames.setEnabled(true);
+      populate();
+    }
+  }
+
+  boolean disableUserSelections = false;
 }
