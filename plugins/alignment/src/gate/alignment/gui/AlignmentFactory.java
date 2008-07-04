@@ -40,6 +40,8 @@ public class AlignmentFactory {
 
   private AASequence tgtSequence;
 
+  private boolean showCompletedPairs = false;
+
   /**
    * AlignmentFactory makes alignment easier
    * 
@@ -66,7 +68,7 @@ public class AlignmentFactory {
     this.tgtDocumentID = tgtDocumentId;
     this.srcTokenAnnotationType = srcTokenAnnotationType;
     this.tgtTokenAnnotationType = tgtTokenAnnotationType;
-    
+
     comparator = (Comparator)Class.forName(comparatorClass).newInstance();
     Document doc = compoundDocument.getDocument(srcDocumentId);
     AnnotationSet as = srcInputAS.equals("<null>")
@@ -109,14 +111,16 @@ public class AlignmentFactory {
   public AnnotationSet getUnderlyingAnnotations(Annotation annot,
           String language, String tokenAnnotationType) {
     if(language.equals(srcDocumentID)) {
-      return srcSequence.getUnderlyingAnnotations(annot, tokenAnnotationType == null
-              ? this.srcTokenAnnotationType
-              : tokenAnnotationType);
+      return srcSequence.getUnderlyingAnnotations(annot,
+              tokenAnnotationType == null
+                      ? this.srcTokenAnnotationType
+                      : tokenAnnotationType);
     }
     else if(language.equals(tgtDocumentID)) {
-      return tgtSequence.getUnderlyingAnnotations(annot, tokenAnnotationType == null
-              ? this.tgtTokenAnnotationType
-              : tokenAnnotationType);
+      return tgtSequence.getUnderlyingAnnotations(annot,
+              tokenAnnotationType == null
+                      ? this.tgtTokenAnnotationType
+                      : tokenAnnotationType);
     }
     return null;
   }
@@ -138,6 +142,15 @@ public class AlignmentFactory {
     return annotations;
   }
 
+  public void setCompleted(boolean completed) {
+    srcSequence.setCompleted(completed);
+    tgtSequence.setCompleted(completed);
+  }
+
+  public boolean isCompleted() {
+    return srcSequence.isCompleted() && tgtSequence.isCompleted();
+  }
+  
   public HashMap<String, Annotation> previous() {
     HashMap<String, Annotation> annotations = new HashMap<String, Annotation>();
     annotations.put(srcDocumentID, srcSequence.previous());
@@ -167,6 +180,8 @@ public class AlignmentFactory {
 
     List<Annotation> annotations;
 
+    boolean[] completed;
+
     int counter = -1;
 
     public AASequence(Document doc, AnnotationSet set, String parentType) {
@@ -174,6 +189,7 @@ public class AlignmentFactory {
       this.set = set;
       // collecting all sentences for example
       annotations = new ArrayList<Annotation>(set.get(parentType));
+      completed = new boolean[annotations.size()];
       Collections.sort(annotations, comparator);
     }
 
@@ -208,6 +224,16 @@ public class AlignmentFactory {
       counter = -1;
     }
 
+    public void setCompleted(boolean completed) {
+      if(counter == -1) return;
+      this.completed[counter] = completed;
+    }
+
+    public boolean isCompleted() {
+      if(counter == -1) return false;
+      return this.completed[counter];
+    }
+    
     public AnnotationSet getUnderlyingAnnotations(Annotation parentAnnot,
             String annotationType) {
       return set.getContained(parentAnnot.getStartNode().getOffset(),
@@ -226,5 +252,13 @@ public class AlignmentFactory {
 
   public String getTgtDocumentID() {
     return tgtDocumentID;
+  }
+
+  public boolean isShowCompletedPairs() {
+    return showCompletedPairs;
+  }
+
+  public void setShowCompletedPairs(boolean showCompletedPairs) {
+    this.showCompletedPairs = showCompletedPairs;
   }
 }
