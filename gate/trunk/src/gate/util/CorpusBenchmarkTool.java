@@ -1270,7 +1270,8 @@ public class CorpusBenchmarkTool {
       //check the recall now
       if (isVerboseMode) {
         Out.prln("<TD>");
-        if (annotDiffer.getRecallAverage() < threshold) {
+        if (annotDiffer.getRecallAverage() < threshold
+            || annotDiffer.getPrecisionAverage() < threshold) {
           printAnnotations(annotDiffer, markedDoc, cleanDoc);
         }
         else {
@@ -1329,7 +1330,8 @@ public class CorpusBenchmarkTool {
           // create error file and start writing
 
           Out.prln("<TD>");
-          if (annotDiffer.getRecallAverage() < threshold) {
+        if (annotDiffer.getRecallAverage() < threshold
+            || annotDiffer.getPrecisionAverage() < threshold) {
             printAnnotations(annotDiffer, markedDoc, cleanDoc);
           }
           else {
@@ -1396,7 +1398,7 @@ public class CorpusBenchmarkTool {
       AnnotationDiffer annotDiff = measureDocs(keyDoc, respDoc, annotType);
       //we don't have this annotation type in this document
       if (annotDiff == null)
-        continue;
+         continue;
 
       //increase the number of processed documents
       docNumber++;
@@ -1418,7 +1420,8 @@ public class CorpusBenchmarkTool {
       //check the recall now
       if (isVerboseMode) {
         Out.prln("<TD>");
-        if (annotDiff.getRecallAverage() < threshold) {
+        if (annotDiff.getRecallAverage() < threshold
+            || annotDiff.getPrecisionAverage() < threshold) {
           printAnnotations(annotDiff, keyDoc, respDoc);
         }
         else {
