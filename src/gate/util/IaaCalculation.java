@@ -46,7 +46,7 @@ public class IaaCalculation {
   /** Name of annotation type. */
   String nameAnnType;
   /** Using label or not. */
-  boolean isUsingLabel = false;
+  public boolean isUsingLabel = false;
   /**
    * Array of annotation sets, first dimension is for document, and second
    * dimension is for annotator.
@@ -117,7 +117,7 @@ public class IaaCalculation {
         + " Annotator(s) and " + numDocs + " document(s).");
     }
     else {
-      if(verbosity>0) System.out.println("Compute the IAA for" + numAnnotators + " Annotator(s) and on "
+      if(verbosity>0) System.out.println("Compute the IAA for " + numAnnotators + " Annotator(s) and on "
       + numDocs + " document(s).");
     }
   }
@@ -461,6 +461,9 @@ public class IaaCalculation {
     if(isUsingLabel) {
       HashSet<String> signSet = new HashSet<String>();
       signSet.add(nameClassFeat);
+      
+      //System.out.println("nameClassFeat=*"+nameClassFeat+"*");
+      
       // Create an annotationDiffer()
       AnnotationDiffer annDiff = new AnnotationDiffer();
       annDiff.setSignificantFeaturesSet(signSet);
@@ -473,6 +476,9 @@ public class IaaCalculation {
           AnnotationSet responseAnns = annsTest.get(nameAnnType, featMap);
           // Apply the AnnotationDiffer()
           annDiff.calculateDiff(keyAnns, responseAnns);
+          
+          //System.out.println("label="+labelsArr[iLabel]+", correct="+annDiff.getCorrectMatches()+"*");
+          
           // Add the number
           fMeasures[num11][iLabel].correct += annDiff.getCorrectMatches();
           fMeasures[num11][iLabel].partialCor += annDiff
