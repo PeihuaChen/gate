@@ -62,7 +62,8 @@ public class OptionsDialog extends JDialog {
                                              BoxLayout.Y_AXIS));
     getContentPane().add(mainTabbedPane);
 
-    Box appearanceBox = Box.createVerticalBox();
+    JPanel appearanceBox = new JPanel();
+    appearanceBox.setLayout(new BoxLayout(appearanceBox, BoxLayout.Y_AXIS));
     //the LNF combo
     List supportedLNFs = new ArrayList();
     LNFData currentLNF = null;
@@ -88,14 +89,15 @@ public class OptionsDialog extends JDialog {
     lnfCombo.setSelectedItem(currentLNF);
 
     Box horBox = Box.createHorizontalBox();
+    horBox.setBorder(BorderFactory.createTitledBorder(" Look and Feel "));
     horBox.add(Box.createHorizontalStrut(5));
-    horBox.add(new JLabel("Look and feel:"));
-    horBox.add(Box.createHorizontalStrut(5));
+//    horBox.add(new JLabel("Look and feel:"));
+//    horBox.add(Box.createHorizontalStrut(5));
     horBox.add(lnfCombo);
     horBox.add(Box.createHorizontalStrut(5));
-    appearanceBox.add(Box.createVerticalStrut(10));
+//    appearanceBox.add(Box.createVerticalStrut(10));
     appearanceBox.add(horBox);
-    appearanceBox.add(Box.createVerticalStrut(10));
+//    appearanceBox.add(Box.createVerticalStrut(10));
 
     JPanel panel = new JPanel();
     panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
@@ -179,10 +181,8 @@ public class OptionsDialog extends JDialog {
     vBox.add(Box.createVerticalStrut(10));
     vBox.add(addSpaceOnMarkupUnpackChk);
     vBox.add(Box.createVerticalStrut(10));
-    vBox.setBorder(BorderFactory.createTitledBorder(
-        BorderFactory.createEtchedBorder() , " Advanced features "));
+    vBox.setBorder(BorderFactory.createTitledBorder(" Advanced features "));
     advancedBox.add(vBox);
-    advancedBox.add(Box.createVerticalStrut(10));
 
 
     vBox = new JPanel();
@@ -192,8 +192,7 @@ public class OptionsDialog extends JDialog {
     vBox.add(Box.createVerticalStrut(10));
     vBox.add(saveSessionChk);
     vBox.add(Box.createVerticalStrut(10));
-    vBox.setBorder(BorderFactory.createTitledBorder(
-        BorderFactory.createEtchedBorder() , " Session persistence "));
+    vBox.setBorder(BorderFactory.createTitledBorder(" Session persistence "));
     advancedBox.add(vBox);
 
     vBox = new JPanel();
@@ -204,8 +203,7 @@ public class OptionsDialog extends JDialog {
     vBox.add(doceditInsertPrependChk);
     vBox.add(Box.createVerticalStrut(10));
     vBox.setBorder(BorderFactory.createTitledBorder(
-        BorderFactory.createEtchedBorder() ,
-        " Document editor insert behaviour "));
+            " Document editor insert behaviour "));
     advancedBox.add(vBox);
 
     mainTabbedPane.add("Advanced", advancedBox);
