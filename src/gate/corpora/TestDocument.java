@@ -251,7 +251,7 @@ public class TestDocument extends TestCase
     try {
       String testXmlString = "<p>This is a <strong>TEST</strong>.</p>";
       String xmlParsedContent = "This is a TEST.";
-      String htmlParsedContent = "This is a TEST .\n";
+      String htmlParsedContent = "This is a TEST.\n";
 
       // if we create a Document from this string WITHOUT setting a mime type,
       // it should be treated as plain text and not parsed.

@@ -17,6 +17,7 @@ package gate.html;
 
 import gate.Factory;
 import gate.FeatureMap;
+import gate.Gate;
 import gate.GateConstants;
 import gate.corpora.DocumentContentImpl;
 import gate.corpora.RepositioningInfo;
@@ -107,6 +108,14 @@ public class NekoHtmlDocumentHandler
     customObjectsId = 0;
 
     this.ignorableTags = ignorableTags;
+    
+    if ( Gate.getUserConfig().get(
+            GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME)!= null) {
+      addSpaceOnUnpack =
+        Gate.getUserConfig().getBoolean(
+          GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME
+        ).booleanValue();
+    }
   }// HtmlDocumentHandler
 
   /**
@@ -248,10 +257,10 @@ public class NekoHtmlDocumentHandler
 
     // the number of whitespace characters trimmed off the front of this
     // chunk of characters
-    boolean leadingWhitespace = Character.isWhitespace(contentBuffer.charAt(0));
+    boolean thisChunkStartsWithWS = Character.isWhitespace(contentBuffer.charAt(0));
 
     // trim leading whitespace
-    if(leadingWhitespace) {
+    if(thisChunkStartsWithWS) {
       contentBuffer.deleteCharAt(0);
     }
 
@@ -259,11 +268,15 @@ public class NekoHtmlDocumentHandler
       if(DEBUG_CHARACTERS) {
         Out.println("  whitespace only: ignoring");
       }
+      // if this chunk starts with whitespace and is whitespace only, then
+      // it ended with whitespace too
+      previousChunkEndedWithWS = thisChunkStartsWithWS;
       return;
     } // if
 
     // trim trailing whitespace
-    if(Character.isWhitespace(contentBuffer.charAt(contentBuffer.length() - 1))) {
+    boolean trailingWhitespace = Character.isWhitespace(contentBuffer.charAt(contentBuffer.length() - 1));
+    if(trailingWhitespace) {
       contentBuffer.setLength(contentBuffer.length() - 1);
     }
 
@@ -273,15 +286,20 @@ public class NekoHtmlDocumentHandler
 
     int tmpDocContentSize = tmpDocContent.length();
     boolean incrementStartIndex = false;
-    // If the first char of the text just read "text[0]" is NOT
-    // whitespace AND
-    // the last char of the tmpDocContent[SIZE-1] is NOT whitespace then
-    // concatenation "tmpDocContent + content" will result into a new
-    // different
-    // word... and we want to avoid that...
+    // correct for whitespace.  Since charactersAction never leaves
+    // tmpDocContent with a trailing whitespace character, we may
+    // need to add space before we append the current chunk to prevent
+    // two chunks either side of a tag from running into one.  We need
+    // to do this if there is whitespace in the original content on
+    // one side or other of the tag (i.e. the previous chunk ended
+    // with space or the current chunk starts with space).  Also, if
+    // the user's "add space on markup unpack" option is true, we add
+    // space anyway so as not to run things like
+    // "...foo</td><td>bar..." together into "foobar".
     if(tmpDocContentSize != 0
             && !Character.isWhitespace(tmpDocContent
-                    .charAt(tmpDocContentSize - 1))) {
+                    .charAt(tmpDocContentSize - 1))
+            && (previousChunkEndedWithWS || thisChunkStartsWithWS || addSpaceOnUnpack)) {
       if(DEBUG_CHARACTERS) {
         Out
                 .println(String
@@ -300,7 +318,7 @@ public class NekoHtmlDocumentHandler
     // put the repositioning information
     if(reposInfo != null) {
       long actualStartOffset = charactersStartOffset;
-      if(leadingWhitespace) {
+      if(thisChunkStartsWithWS) {
         actualStartOffset = fixStartOffsetForWhitespace(actualStartOffset);
       }
       int extractedPos = tmpDocContentSize;
@@ -327,6 +345,9 @@ public class NekoHtmlDocumentHandler
       // sets its End index
       obj.setEnd(end);
     }// End while
+    
+    // remember whether this chunk ended with whitespace for next time
+    previousChunkEndedWithWS = trailingWhitespace;
   }
 
   /**
@@ -777,6 +798,20 @@ public class NekoHtmlDocumentHandler
   // transformed into annotation over the gate document...
   // the transformation will take place inside onDocumentEnd() method
   private LinkedList<CustomObject> colector = null;
+  
+  /**
+   * Initialised from the user config, stores whether to add extra space
+   * characters to separate words that would otherwise be run together,
+   * e.g. "...foo&lt;/td&gt;&lt;td&gt;bar...".  If true, this becomes
+   * "foo bar", if false it is "foobar".
+   */
+  protected boolean addSpaceOnUnpack = true;
+  
+  /**
+   * During parsing, keeps track of whether the previous chunk of
+   * character data ended with a whitespace character.
+   */
+  protected boolean previousChunkEndedWithWS = false;
 
   // Inner class
   /**
