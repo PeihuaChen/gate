@@ -99,6 +99,22 @@ public class Benchmark {
   public static long startPoint() {
     return System.currentTimeMillis();
   }
+  
+  /**
+   * Like {@link #startPoint()} but also logs a message with the starting
+   * time if benchmarking is enabled.  This is intended to be used in
+   * conjuntion with the three-argument version of checkPoint.
+   * 
+   * @param benchmarkID the identifier of the process that is just starting.
+   * @return the current time, as logged.
+   */
+  public static long startPoint(String benchmarkID) {
+    long time = startPoint();
+    if(benchmarkingEnabled) {
+      logger.info(time + " START " + benchmarkID);
+    }
+    return time;
+  }
 
   /**
    * This method is responsible for making entries into the log.
@@ -117,7 +133,7 @@ public class Benchmark {
    *          message. toString() method will be invoked on the objects.
    */
   public static void checkPoint(long startTime, String benchmarkID,
-    Object objectInvokingThisCheckPoint, Map benchmarkingFeatures) {
+          Object objectInvokingThisCheckPoint, Map benchmarkingFeatures) {
 
     // check if logging is disabled
     if(!benchmarkingEnabled) return;
@@ -126,10 +142,36 @@ public class Benchmark {
     // the time to convert featureMapToString
     long processingTime = System.currentTimeMillis() - startTime;
 
+    logCheckPoint(String.valueOf(processingTime), benchmarkID,
+            objectInvokingThisCheckPoint, benchmarkingFeatures);
+  }
+  
+  /**
+   * Logs the end of a process.  There must previously have been a call
+   * to {@link #startPoint(String)} with the same benchmark ID.
+   * 
+   * @see #checkPoint(long, String, Object, Map)
+   */
+  public static void checkPoint(String benchmarkID,
+          Object objectInvokingThisCheckPoint, Map benchmarkingFeatures) {
+    if(!benchmarkingEnabled) return;
+    logCheckPoint("END", benchmarkID, objectInvokingThisCheckPoint,
+            benchmarkingFeatures);
+  }
+
+  /**
+   * Private method to create a line in the benchmark log.
+   * 
+   * @param processingTimeOrFlag either the duration of the task in ms
+   *            or the string "END" if no start time was provided.
+   */
+  private static void logCheckPoint(String processingTimeOrFlag,
+          String benchmarkID, Object objectInvokingThisCheckPoint,
+          Map benchmarkingFeatures) {
     // finally build the string to be logged
     StringBuilder messageToLog = new StringBuilder();
-    messageToLog.append("" + new Date().getTime() + " ");
-    messageToLog.append(processingTime + " " + benchmarkID + " "
+    messageToLog.append("" + System.currentTimeMillis() + " ");
+    messageToLog.append(processingTimeOrFlag + " " + benchmarkID + " "
       + objectInvokingThisCheckPoint.getClass().getName() + " ");
 
     messageToLog.append(benchmarkingFeatures.toString().replaceAll("\n", ""))
