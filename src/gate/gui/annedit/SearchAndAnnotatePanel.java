@@ -19,6 +19,7 @@ package gate.gui.annedit;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import java.util.List;
 import java.util.regex.*;
 
 import javax.swing.*;
@@ -935,6 +936,9 @@ public class SearchAndAnnotatePanel extends JPanel {
         Annotation newAnn =
           annotationEditor.getAnnotationSetCurrentlyEdited().get(id);
         getOwner().getTextComponent().select(end, end);
+        //set the annotation as selected
+        getOwner().selectAnnotation(new AnnotationDataImpl(
+                annotationEditor.getAnnotationSetCurrentlyEdited(), newAnn));
         annotationEditor.editAnnotation(newAnn,
            annotationEditor.getAnnotationSetCurrentlyEdited());
         annotateAllMatchesAction.setEnabled(true);

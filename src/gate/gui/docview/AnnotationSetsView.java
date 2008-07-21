@@ -65,10 +65,27 @@ public class AnnotationSetsView extends AbstractDocumentView
     //show new annotation type
     setTypeSelected(set.getName(), ann.getType(), true);
     //select new annotation
-    List<AnnotationData> selAnns = new ArrayList<AnnotationData>();
-    selAnns.add(new AnnotationDataImpl(set, ann));
-    owner.setSelectedAnnotations(selAnns);
+//    selectAnnotation(new AnnotationDataImpl(set, ann));
   }
+  
+  
+
+  /**
+   * Queues an an action for selecting the provided annotation
+   */
+  public void selectAnnotation(final AnnotationData aData) {
+    Runnable action = new Runnable(){
+      public void run(){
+        List<AnnotationData> selAnns = new LinkedList<AnnotationData>();
+        selAnns.add(aData);
+        owner.setSelectedAnnotations(selAnns);        
+      }
+    };
+    pendingEvents.offer(new PerformActionEvent(action));
+    eventMinder.restart();
+  }
+
+
 
   /* (non-Javadoc)
    * @see gate.gui.annedit.AnnotationEditorOwner#getNextAnnotation()
@@ -1443,11 +1460,6 @@ public class AnnotationSetsView extends AbstractDocumentView
 	        //edit the new annotation
 	        new EditAnnotationAction(new AnnotationDataImpl(set, ann)).
 	          actionPerformed(null);
-	        //select the newly created annotation
-//	        selectAnnotation(ann, set);
-	        //show the editor
-//	        annotationEditor.editAnnotation(ann, set);
-//	        annotationEditor.show(true);
         }catch(InvalidOffsetException ioe){
           //this should never happen
           throw new GateRuntimeException(ioe);
@@ -1861,9 +1873,7 @@ public class AnnotationSetsView extends AbstractDocumentView
       //next one
       if(annotationEditor.editingFinished()){
         //set the annotation as selected
-        List<AnnotationData> selAnns = new ArrayList<AnnotationData>();
-        selAnns.add(aData);
-        owner.setSelectedAnnotations(selAnns);
+        selectAnnotation(aData);
         //show the annotation editor
         annotationEditor.editAnnotation(aData.getAnnotation(), 
                 aData.getAnnotationSet());
