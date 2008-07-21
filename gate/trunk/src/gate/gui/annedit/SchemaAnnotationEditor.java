@@ -473,34 +473,34 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     constraints.gridy = 0;
     constraints.weightx = 0;
     
-    solButton = new IconOnlyButton(new StartOffsetLeftAction());
+    solButton = new IconOnlyButton(null);
     solButton.setIcon(MainFrame.getIcon("bounds-sol"));
     solButton.setPressedIcon(MainFrame.getIcon("bounds-sol-pressed"));
     tBar.add(solButton, constraints);
     JLabel aLabel = new JLabel(MainFrame.getIcon("bounds-left"));
     aLabel.setBorder(null);
     tBar.add(aLabel, constraints);
-    sorButton = new IconOnlyButton(new StartOffsetRightAction());
+    sorButton = new IconOnlyButton(null);
     sorButton.setIcon(MainFrame.getIcon("bounds-sor"));
     sorButton.setPressedIcon(MainFrame.getIcon("bounds-sor-pressed"));
     tBar.add(sorButton, constraints);
     aLabel = new JLabel(MainFrame.getIcon("bounds-span"));
     aLabel.setBorder(null);
     tBar.add(aLabel, constraints);
-    eolButton = new IconOnlyButton(new EndOffsetLeftAction());
+    eolButton = new IconOnlyButton(null);
     eolButton.setIcon(MainFrame.getIcon("bounds-eol"));
     eolButton.setPressedIcon(MainFrame.getIcon("bounds-eol-pressed"));
     tBar.add(eolButton, constraints);
     aLabel = new JLabel(MainFrame.getIcon("bounds-right"));
     aLabel.setBorder(null);
     tBar.add(aLabel, constraints);
-    eorButton = new IconOnlyButton(new EndOffsetRightAction());
+    eorButton = new IconOnlyButton(null);
     eorButton.setIcon(MainFrame.getIcon("bounds-eor"));
     eorButton.setPressedIcon(MainFrame.getIcon("bounds-eor-pressed"));
     tBar.add(eorButton, constraints);
     
     tBar.add(Box.createHorizontalStrut(15), constraints);
-    tBar.add(delButton = new SmallButton(new DeleteAnnotationAction()), constraints);
+    tBar.add(delButton = new SmallButton(null), constraints);
     constraints.weightx = 1;
     tBar.add(Box.createHorizontalGlue(), constraints);
     
@@ -644,7 +644,71 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
         }
       }
     });
-    
+
+    inputMap = ((JComponent)dialog.getContentPane()).
+        getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    actionMap = ((JComponent)dialog.getContentPane()).getActionMap();
+    // add the key-action bindings of this Component to the parent window
+
+    StartOffsetLeftAction solAction =
+      new StartOffsetLeftAction("", MainFrame.getIcon("extend-left"),
+      "<html><b>Extend start</b><small>" +
+      "<br>LEFT = 1 character" +
+      "<br> + SHIFT = 5 characters, "+
+      "<br> + CTRL + SHIFT = 10 characters</small></html>",
+       KeyEvent.VK_LEFT);
+    solButton.setAction(solAction);
+    inputMap.put(KeyStroke.getKeyStroke("LEFT"), "solAction");
+    inputMap.put(KeyStroke.getKeyStroke("shift LEFT"), "solAction");
+    inputMap.put(KeyStroke.getKeyStroke("control shift released LEFT"), "solAction");
+    actionMap.put("solAction", solAction);
+
+   StartOffsetRightAction sorAction =
+     new StartOffsetRightAction("", MainFrame.getIcon("extend-right"),
+      "<html><b>Shrink start</b><small>" +
+      "<br>RIGHT = 1 character" +
+      "<br> + SHIFT = 5 characters, "+
+      "<br> + CTRL + SHIFT = 10 characters</small></html>",
+      KeyEvent.VK_RIGHT);
+    sorButton.setAction(sorAction);
+    inputMap.put(KeyStroke.getKeyStroke("RIGHT"), "sorAction");
+    inputMap.put(KeyStroke.getKeyStroke("shift RIGHT"), "sorAction");
+    inputMap.put(KeyStroke.getKeyStroke("control shift released RIGHT"), "sorAction");
+    actionMap.put("sorAction", sorAction);
+
+    DeleteAnnotationAction delAction =
+      new DeleteAnnotationAction("", MainFrame.getIcon("remove-annotation"),
+      "Delete the annotation", KeyEvent.VK_DELETE);
+    delButton.setAction(delAction);
+    inputMap.put(KeyStroke.getKeyStroke("alt DELETE"), "delAction");
+    actionMap.put("delAction", delAction);
+
+    EndOffsetLeftAction eolAction =
+      new EndOffsetLeftAction("", MainFrame.getIcon("extend-left"),
+      "<html><b>Shrink end</b><small>" +
+      "<br>ALT + LEFT = 1 character" +
+      "<br> + SHIFT = 5 characters, "+
+      "<br> + CTRL + SHIFT = 10 characters</small></html>",
+       KeyEvent.VK_LEFT);
+    eolButton.setAction(eolAction);
+    inputMap.put(KeyStroke.getKeyStroke("alt LEFT"), "eolAction");
+    inputMap.put(KeyStroke.getKeyStroke("alt shift LEFT"), "eolAction");
+    inputMap.put(KeyStroke.getKeyStroke("control alt shift released LEFT"), "eolAction");
+    actionMap.put("eolAction", eolAction);
+
+    EndOffsetRightAction eorAction =
+      new EndOffsetRightAction("", MainFrame.getIcon("extend-right"),
+      "<html><b>Extend end</b><small>" +
+      "<br>ALT + RIGHT = 1 character" +
+      "<br> + SHIFT = 5 characters, "+
+      "<br> + CTRL + SHIFT = 10 characters</small></html>",
+      KeyEvent.VK_RIGHT);
+    eorButton.setAction(eorAction);
+    inputMap.put(KeyStroke.getKeyStroke("alt RIGHT"), "eorAction");
+    inputMap.put(KeyStroke.getKeyStroke("alt shift RIGHT"), "eorAction");
+    inputMap.put(KeyStroke.getKeyStroke("control alt shift released RIGHT"), "eorAction");
+    actionMap.put("eorAction", eorAction);
+
   }
 
   /**
@@ -728,22 +792,20 @@ System.out.println("Window up");
    * Base class for actions on annotations.
    */
   protected abstract class AnnotationAction extends AbstractAction{
-    public AnnotationAction(String name, Icon icon){
-      super("", icon);
-      putValue(SHORT_DESCRIPTION, name);
-      
+    public AnnotationAction(String text, Icon icon,
+                            String desc, int mnemonic){
+      super(text, icon);
+      putValue(SHORT_DESCRIPTION, desc);
+      putValue(MNEMONIC_KEY, mnemonic);
     }
   }
 
   protected class StartOffsetLeftAction extends AnnotationAction{
-
     private static final long serialVersionUID = 1L;
-
-    public StartOffsetLeftAction(){
-      super("<html><b>Extend</b><br><small>SHIFT = 5 characters, CTRL-SHIFT = 10 characters</small></html>", 
-              MainFrame.getIcon("extend-left"));
+    public StartOffsetLeftAction(String text, Icon icon,
+                                 String desc, int mnemonic) {
+      super(text, icon, desc, mnemonic);
     }
-    
     public void actionPerformed(ActionEvent evt){
       int increment = 1;
       if((evt.getModifiers() & ActionEvent.SHIFT_MASK) > 0){
@@ -765,15 +827,11 @@ System.out.println("Window up");
   }
   
   protected class StartOffsetRightAction extends AnnotationAction{
-
     private static final long serialVersionUID = 1L;
-
-    public StartOffsetRightAction(){
-      super("<html><b>Shrink</b><br><small>SHIFT = 5 characters, " +
-            "CTRL-SHIFT = 10 characters</small></html>", 
-            MainFrame.getIcon("extend-right"));
+    public StartOffsetRightAction(String text, Icon icon,
+                                 String desc, int mnemonic) {
+      super(text, icon, desc, mnemonic);
     }
-    
     public void actionPerformed(ActionEvent evt){
       long endOffset = annotation.getEndNode().getOffset().longValue(); 
       int increment = 1;
@@ -797,15 +855,11 @@ System.out.println("Window up");
   }
 
   protected class EndOffsetLeftAction extends AnnotationAction{
-
     private static final long serialVersionUID = 1L;
-
-    public EndOffsetLeftAction(){
-      super("<html><b>Shrink</b><br><small>SHIFT = 5 characters, " +
-            "CTRL-SHIFT = 10 characters</small></html>",
-            MainFrame.getIcon("extend-left"));
+    public EndOffsetLeftAction(String text, Icon icon,
+                                 String desc, int mnemonic) {
+      super(text, icon, desc, mnemonic);
     }
-    
     public void actionPerformed(ActionEvent evt){
       long startOffset = annotation.getStartNode().getOffset().longValue(); 
       int increment = 1;
@@ -829,19 +883,14 @@ System.out.println("Window up");
   }
   
   protected class EndOffsetRightAction extends AnnotationAction{
-
     private static final long serialVersionUID = 1L;
-
-    public EndOffsetRightAction(){
-      super("<html><b>Extend</b><br><small>SHIFT = 5 characters, " +
-            "CTRL-SHIFT = 10 characters</small></html>", 
-            MainFrame.getIcon("extend-right"));
+    public EndOffsetRightAction(String text, Icon icon,
+                                 String desc, int mnemonic) {
+      super(text, icon, desc, mnemonic);
     }
-    
     public void actionPerformed(ActionEvent evt){
       long maxOffset = owner.getDocument().
           getContent().size().longValue() -1; 
-//      Long newEndOffset = ann.getEndNode().getOffset();
       int increment = 1;
       if((evt.getModifiers() & ActionEvent.SHIFT_MASK) > 0){
         //CTRL pressed -> use tokens for advancing
@@ -862,13 +911,11 @@ System.out.println("Window up");
   }
 
   protected class DeleteAnnotationAction extends AnnotationAction{
-
     private static final long serialVersionUID = 1L;
-
-    public DeleteAnnotationAction(){
-      super("Delete annotation", MainFrame.getIcon("remove-annotation"));
+    public DeleteAnnotationAction(String text, Icon icon,
+                                 String desc, int mnemonic) {
+      super(text, icon, desc, mnemonic);
     }
-    
     public void actionPerformed(ActionEvent evt){
       annSet.remove(annotation);
 
@@ -959,7 +1006,17 @@ System.out.println("Window up");
   protected IconOnlyButton eorButton;
   protected JPanel mainPane;
 
-/**
+  /**
+   * Key bindings for the popup window.
+   */
+  InputMap inputMap;
+
+  /**
+   * Action bindings for the popup window.
+   */
+  ActionMap actionMap;
+
+  /**
    * @return the owner
    */
   public AnnotationEditorOwner getOwner() {
