@@ -1922,14 +1922,22 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           bw.write("<TD>" + ap.getDocumentID() + "</TD>");
           bw.write("<TD>" + ap.getAnnotationSetName() + "</TD>");
           bw.write("<TD align=\"right\">"
-                  + ap.getPatternText(ap.getLeftContextStartOffset(), ap
-                          .getStartOffset()) + "</TD>");
+                  + ap.getPatternText(ap.getLeftContextStartOffset(),
+                    ap.getStartOffset()).replaceAll("&", "&amp;")
+                    .replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+                    .replaceAll("\"", "&quot;")
+                  +"</TD>");
           bw.write("<TD align=\"center\">"
                   + ap.getPatternText(ap.getStartOffset(), ap.getEndOffset())
+                  .replaceAll("&", "&amp;").replaceAll("<", "&lt;")
+                  .replaceAll(">", "&gt;").replaceAll("\"", "&quot;")
                   + "</TD>");
           bw.write("<TD align=\"left\">"
-                  + ap.getPatternText(ap.getEndOffset(), ap
-                          .getRightContextEndOffset()) + "</TD>");
+                  + ap.getPatternText(ap.getEndOffset(),
+                    ap.getRightContextEndOffset()).replaceAll("&", "&amp;")
+                    .replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+                    .replaceAll("\"", "&quot;")
+                  + "</TD>");
           bw.write("</TR>");
           bw.newLine();
         }
