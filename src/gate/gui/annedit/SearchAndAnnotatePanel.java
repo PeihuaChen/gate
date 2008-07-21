@@ -1043,9 +1043,9 @@ public class SearchAndAnnotatePanel extends JPanel {
         annotationEditor.getAnnotationSetCurrentlyEdited().remove(it.next());
       }
 
-      // just hide the editor to avoid editing null annotation
-      annotationEditorWindow.setVisible(false);
-      annotationEditor.setPinnedMode(false);
+      if (annotationEditor.getAnnotationSetCurrentlyEdited() == null) {
+        annotationEditor.setEditingEnabled(false);
+      }
 
       annotateAllMatchesSmallButton.setAction(annotateAllMatchesAction);
       annotateAllMatchesAction.setEnabled(false);

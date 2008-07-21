@@ -269,68 +269,74 @@ public class AnnotationEditor extends AbstractVisualResource
     actionMap = ((JComponent)popupWindow.getContentPane()).getActionMap();
     // add the key-action bindings of this Component to the parent window
 
-    solAction = new StartOffsetLeftAction("", MainFrame.getIcon("extend-left"),
+    StartOffsetLeftAction solAction =
+      new StartOffsetLeftAction("", MainFrame.getIcon("extend-left"),
       "<html><b>Extend start</b><small>" +
-      "<br>ALT + LEFT = 1 character" +
+      "<br>LEFT = 1 character" +
       "<br> + SHIFT = 5 characters, "+
       "<br> + CTRL + SHIFT = 10 characters</small></html>",
        KeyEvent.VK_LEFT);
     solButton.setAction(solAction);
-    inputMap.put(KeyStroke.getKeyStroke("alt LEFT"), "solAction");
-    inputMap.put(KeyStroke.getKeyStroke("alt shift LEFT"), "solAction");
-    inputMap.put(KeyStroke.getKeyStroke("control alt shift released LEFT"), "solAction");
+    inputMap.put(KeyStroke.getKeyStroke("LEFT"), "solAction");
+    inputMap.put(KeyStroke.getKeyStroke("shift LEFT"), "solAction");
+    inputMap.put(KeyStroke.getKeyStroke("control shift released LEFT"), "solAction");
     actionMap.put("solAction", solAction);
 
-    sorAction = new StartOffsetRightAction("", MainFrame.getIcon("extend-right"),
+   StartOffsetRightAction sorAction =
+     new StartOffsetRightAction("", MainFrame.getIcon("extend-right"),
       "<html><b>Shrink start</b><small>" +
-      "<br>ALT + RIGHT = 1 character" +
+      "<br>RIGHT = 1 character" +
       "<br> + SHIFT = 5 characters, "+
       "<br> + CTRL + SHIFT = 10 characters</small></html>",
       KeyEvent.VK_RIGHT);
     sorButton.setAction(sorAction);
-    inputMap.put(KeyStroke.getKeyStroke("alt RIGHT"), "sorAction");
-    inputMap.put(KeyStroke.getKeyStroke("alt shift RIGHT"), "sorAction");
-    inputMap.put(KeyStroke.getKeyStroke("control alt shift released RIGHT"), "sorAction");
+    inputMap.put(KeyStroke.getKeyStroke("RIGHT"), "sorAction");
+    inputMap.put(KeyStroke.getKeyStroke("shift RIGHT"), "sorAction");
+    inputMap.put(KeyStroke.getKeyStroke("control shift released RIGHT"), "sorAction");
     actionMap.put("sorAction", sorAction);
 
-    delAction = new DeleteAnnotationAction("", MainFrame.getIcon("remove-annotation"),
+    DeleteAnnotationAction delAction =
+      new DeleteAnnotationAction("", MainFrame.getIcon("remove-annotation"),
       "Delete the annotation", KeyEvent.VK_DELETE);
     delButton.setAction(delAction);
     inputMap.put(KeyStroke.getKeyStroke("alt DELETE"), "delAction");
     actionMap.put("delAction", delAction);
 
-    eolAction = new EndOffsetLeftAction("", MainFrame.getIcon("extend-left"),
+    EndOffsetLeftAction eolAction =
+      new EndOffsetLeftAction("", MainFrame.getIcon("extend-left"),
       "<html><b>Shrink end</b><small>" +
-      "<br>ALT + DOWN = 1 character" +
+      "<br>ALT + LEFT = 1 character" +
       "<br> + SHIFT = 5 characters, "+
       "<br> + CTRL + SHIFT = 10 characters</small></html>",
-       KeyEvent.VK_DOWN);
+       KeyEvent.VK_LEFT);
     eolButton.setAction(eolAction);
-    inputMap.put(KeyStroke.getKeyStroke("alt DOWN"), "eolAction");
-    inputMap.put(KeyStroke.getKeyStroke("alt shift DOWN"), "eolAction");
-    inputMap.put(KeyStroke.getKeyStroke("control alt shift released DOWN"), "eolAction");
+    inputMap.put(KeyStroke.getKeyStroke("alt LEFT"), "eolAction");
+    inputMap.put(KeyStroke.getKeyStroke("alt shift LEFT"), "eolAction");
+    inputMap.put(KeyStroke.getKeyStroke("control alt shift released LEFT"), "eolAction");
     actionMap.put("eolAction", eolAction);
 
-    eorAction = new EndOffsetRightAction("", MainFrame.getIcon("extend-right"),
+    EndOffsetRightAction eorAction =
+      new EndOffsetRightAction("", MainFrame.getIcon("extend-right"),
       "<html><b>Extend end</b><small>" +
-      "<br>ALT + UP = 1 character" +
+      "<br>ALT + RIGHT = 1 character" +
       "<br> + SHIFT = 5 characters, "+
       "<br> + CTRL + SHIFT = 10 characters</small></html>",
-      KeyEvent.VK_UP);
+      KeyEvent.VK_RIGHT);
     eorButton.setAction(eorAction);
-    inputMap.put(KeyStroke.getKeyStroke("alt UP"), "eorAction");
-    inputMap.put(KeyStroke.getKeyStroke("alt shift UP"), "eorAction");
-    inputMap.put(KeyStroke.getKeyStroke("control alt shift released UP"), "eorAction");
+    inputMap.put(KeyStroke.getKeyStroke("alt RIGHT"), "eorAction");
+    inputMap.put(KeyStroke.getKeyStroke("alt shift RIGHT"), "eorAction");
+    inputMap.put(KeyStroke.getKeyStroke("control alt shift released RIGHT"), "eorAction");
     actionMap.put("eorAction", eorAction);
 
-    dismissAction = new DismissAction("", null,
+    DismissAction dismissAction = new DismissAction("", null,
       "Close the window", KeyEvent.VK_ESCAPE);
     dismissButton.setAction(dismissAction);
     inputMap.put(KeyStroke.getKeyStroke("ESCAPE"), "dismissAction");
     inputMap.put(KeyStroke.getKeyStroke("alt ESCAPE"), "dismissAction");
     actionMap.put("dismissAction", dismissAction);
 
-    applyAction = new ApplyAction("Apply", null, "", KeyEvent.VK_ENTER);
+    ApplyAction applyAction =
+      new ApplyAction("Apply", null, "", KeyEvent.VK_ENTER);
     inputMap.put(KeyStroke.getKeyStroke("alt ENTER"), "applyAction");
     actionMap.put("applyAction", applyAction);
 
@@ -664,11 +670,11 @@ public class AnnotationEditor extends AbstractVisualResource
   }
   
   protected class EndOffsetRightAction extends AnnotationAction{
+    private static final long serialVersionUID = 1L;
     public EndOffsetRightAction(String text, Icon icon,
                                  String desc, int mnemonic) {
       super(text, icon, desc, mnemonic);
     }
-    private static final long serialVersionUID = 1L;
     public void actionPerformed(ActionEvent evt){
       long maxOffset = owner.getDocument().
       		getContent().size().longValue() -1; 
@@ -756,14 +762,6 @@ public class AnnotationEditor extends AbstractVisualResource
    * Component for features editing.
    */
   protected FeaturesSchemaEditor featuresEditor;
-  
-  protected StartOffsetLeftAction solAction;
-  protected StartOffsetRightAction sorAction;
-  protected DeleteAnnotationAction delAction;
-  protected EndOffsetLeftAction eolAction;
-  protected EndOffsetRightAction eorAction;
-  protected DismissAction dismissAction;
-  protected ApplyAction applyAction;
   
   protected JButton solButton;
   protected JButton sorButton;
