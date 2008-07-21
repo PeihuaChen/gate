@@ -615,8 +615,8 @@ public class SearchAndAnnotatePanel extends JPanel {
         if (searchEnabledCheck.isSelected()) {
           //add the search box if not already there
           if (!searchBox.isAncestorOf(searchPane)) {
-            //if empty, initialise the search field to the text of the current
-            //annotation
+            // if empty, initialise the search field to the text
+            // of the current annotation
             String searchText = searchTextField.getText(); 
             if (searchText == null || searchText.trim().length() == 0) {
               if (annotationEditor.getAnnotationCurrentlyEdited() != null
@@ -650,6 +650,9 @@ public class SearchAndAnnotatePanel extends JPanel {
             searchRegExpChk.setVisible(false);
             searchWholeWordsChk.setVisible(false);
             searchHighlightsChk.setVisible(false);
+            if (annotationEditor.getAnnotationCurrentlyEdited() != null) {
+              annotationEditor.setEditingEnabled(true);
+            }
             annotationEditorWindow.pack();
           }
         }
@@ -748,7 +751,7 @@ public class SearchAndAnnotatePanel extends JPanel {
     public void actionPerformed(ActionEvent evt){
       if (!isAnnotationEditorReady()) { return; }
       annotationEditor.setPinnedMode(true);
-      annotationEditor.setEnableEditing(false);
+      annotationEditor.setEditingEnabled(false);
       String patternText = searchTextField.getText();
       Pattern pattern = null;
 
@@ -837,7 +840,7 @@ public class SearchAndAnnotatePanel extends JPanel {
 
     public void actionPerformed(ActionEvent evt) {
       if (!isAnnotationEditorReady()) { return; }
-      annotationEditor.setEnableEditing(false);
+      annotationEditor.setEditingEnabled(false);
       // the first time we invoke previous action we want to go two
       // previous matches back not just one
       matchedIndexes.removeLast();
@@ -871,7 +874,7 @@ public class SearchAndAnnotatePanel extends JPanel {
 
     public void actionPerformed(ActionEvent evt){
       if (!isAnnotationEditorReady()) { return; }
-      annotationEditor.setEnableEditing(false);
+      annotationEditor.setEditingEnabled(false);
       boolean found = false;
       int start = -1;
       int end = -1;

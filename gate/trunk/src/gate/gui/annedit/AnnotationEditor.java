@@ -79,5 +79,5 @@ public interface AnnotationEditor extends VisualResource{
    * @param isEditingEnabled true to enable the editing,
    * false to disable it
    */
-  public void setEnableEditing(boolean isEditingEnabled);
+  public void setEditingEnabled(boolean isEditingEnabled);
 }

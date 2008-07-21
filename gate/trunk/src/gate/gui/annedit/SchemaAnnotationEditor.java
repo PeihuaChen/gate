@@ -93,7 +93,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
       }
       featuresEditor.editFeatureMap(features);
     }
-    setEnableEditing(true);
+    setEditingEnabled(true);
     if(dialog != null){
       if(annotation != null){
         placeDialog(annotation.getStartNode().getOffset().intValue(),
@@ -875,12 +875,12 @@ System.out.println("Window up");
       //clear the dialog
       editAnnotation(null, annSet);
 
-//      if(!pinnedButton.isSelected()){
-//        //if not pinned, hide the dialog.
-      // better to always close the dialog or you need to disabled
-      // all the actions
+      if(!pinnedButton.isSelected()){
+        //if not pinned, hide the dialog.
         dialog.setVisible(false);
-//      }
+      } else {
+        setEditingEnabled(false);
+      }
     }
   }
 
@@ -989,7 +989,7 @@ System.out.println("Window up");
     pinnedButton.setSelected(pinned);
   }
 
-  public void setEnableEditing(boolean isEditingEnabled) {
+  public void setEditingEnabled(boolean isEditingEnabled) {
     solButton.setEnabled(isEditingEnabled);
     sorButton.setEnabled(isEditingEnabled);
     delButton.setEnabled(isEditingEnabled);
@@ -998,17 +998,17 @@ System.out.println("Window up");
     for (Component c : typesChoice.getComponents()) {
       c.setEnabled(isEditingEnabled);
     }
-    for (Component c1 : featuresBox.getComponents()) {
-      if (!(c1 instanceof SchemaFeaturesEditor)) { continue; }
-      for (Component c2 : ((SchemaFeaturesEditor)c1).getComponents()) {
-        if (!(c2 instanceof Container)) { continue; }
-        for (Component c3 : ((Container)c2).getComponents()) {
-          if (c3 instanceof JTextField
-           || c3 instanceof JCheckBox
-           || c3 instanceof JChoice) {
-            c3.setEnabled(isEditingEnabled);
-          }
-        }
+    // en/disable the components in the featuresBox
+    Vector<Component> components = new Vector<Component>();
+    Collections.addAll(components, featuresBox.getComponents());
+    while (!components.isEmpty()) {
+      Component component = components.remove(0);
+      if (component instanceof JToggleButton
+       || component instanceof JTextField) {
+        component.setEnabled(isEditingEnabled);
+      } else if (component instanceof Container) {
+        Collections.addAll(components,
+          ((Container)component).getComponents());
       }
     }
   }
