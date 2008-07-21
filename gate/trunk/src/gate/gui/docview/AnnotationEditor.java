@@ -406,6 +406,12 @@ public class AnnotationEditor extends AbstractVisualResource
   public void editAnnotation(Annotation ann, AnnotationSet set){
     this.ann = ann;
     this.set = set;
+    if (ann == null) {
+      typeCombo.setModel(new DefaultComboBoxModel());
+      featuresEditor.setSchema(new AnnotationSchema());
+      popupWindow.doLayout();
+      return;
+    }
     //repopulate the types combo
     String annType = ann.getType();
     Set<String> types = new HashSet<String>(schemasByType.keySet());
@@ -419,7 +425,7 @@ public class AnnotationEditor extends AbstractVisualResource
     featuresEditor.setSchema((AnnotationSchema)schemasByType.get(annType));
     featuresEditor.setTargetFeatures(ann.getFeatures());
     popupWindow.doLayout();
-    setEnableEditing(true);
+    setEditingEnabled(true);
     if (pinnedButton.isSelected()) {
       setVisible(true);
     } else {
@@ -693,7 +699,16 @@ public class AnnotationEditor extends AbstractVisualResource
     }
     public void actionPerformed(ActionEvent evt){
       set.remove(ann);
-      annotationEditorInstance.setVisible(false);
+
+      //clear the dialog
+      editAnnotation(null, set);
+
+      if(!pinnedButton.isSelected()){
+        //if not pinned, hide the dialog.
+        annotationEditorInstance.setVisible(false);
+      } else {
+        setEditingEnabled(false);
+      }
     }
   }
   
@@ -838,27 +853,44 @@ public class AnnotationEditor extends AbstractVisualResource
     pinnedButton.setSelected(pinned);
   }
 
-  public void setEnableEditing(boolean isEditingEnabled) {
+  public void setEditingEnabled(boolean isEditingEnabled) {
     solButton.setEnabled(isEditingEnabled);
     sorButton.setEnabled(isEditingEnabled);
     delButton.setEnabled(isEditingEnabled);
     eolButton.setEnabled(isEditingEnabled);
     eorButton.setEnabled(isEditingEnabled);
     typeCombo.setEnabled(isEditingEnabled);
+    // cancel editing, if any
+    if (featuresEditor.getTable().isEditing()) {
+      featuresEditor.getTable().getColumnModel()
+        .getColumn(featuresEditor.getTable().getEditingColumn())
+        .getCellEditor().cancelCellEditing();
+    }
+   // en/disable the featuresEditor table, no easy way unfortunately : |
     featuresEditor.getTable().setEnabled(isEditingEnabled);
-    for (Component c1 : featuresEditor.getTable().getComponents()) {
-      if (!(c1 instanceof Container)) { continue; }
-      for (Component c2 : ((Container)c1).getComponents()) {
-        if (!(c2 instanceof Container)) { continue; }
-        for (Component c3 : ((Container)c2).getComponents()) {
-          if (!(c3 instanceof Container)) { continue; }
-          for (Component c4 : ((Container)c3).getComponents()) {
-            if (c4 instanceof JLabel) {
-              c4.setForeground(isEditingEnabled?null:Color.gray);
-            }
-          }
-        }
+    if (isEditingEnabled) {
+      // avoid the background to be incorrectly reset to the default color
+      Color tableBG = featuresEditor.getBackground();
+      tableBG = new Color(tableBG.getRGB());
+      featuresEditor.setBackground(tableBG);
+    }
+    final boolean isEditingEnabledF = isEditingEnabled;
+    for (int col = 0;
+         col < featuresEditor.getTable().getColumnCount(); col++) {
+      final TableCellRenderer previousTcr = featuresEditor.getTable()
+        .getColumnModel().getColumn(col).getCellRenderer();
+      TableCellRenderer tcr = new TableCellRenderer() {
+      public Component getTableCellRendererComponent(JTable table,
+        Object value, boolean isSelected, boolean hasFocus,
+        int row, int column) {
+        Component c = previousTcr.getTableCellRendererComponent(
+          table, value, isSelected, hasFocus, row, column);
+        c.setEnabled(isEditingEnabledF);
+        return c;
       }
+    };
+    featuresEditor.getTable().getColumnModel().getColumn(col)
+      .setCellRenderer(tcr);
     }
   }
 
