@@ -21,8 +21,7 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.*;
 import java.util.*;
 
 import gate.creole.*;
@@ -229,38 +228,6 @@ public abstract class Factory {
       );
     }
 
-    //set the name
-    if(resourceName == null){
-      if (parameterValues.get(Document.DOCUMENT_URL_PARAMETER_NAME) != null) {
-        resourceName =
-          parameterValues.get(Document.DOCUMENT_URL_PARAMETER_NAME).toString();
-      } else if (parameterValues.get(AnnotationSchema.FILE_URL_PARAM_NAME) != null) {
-        resourceName =
-          parameterValues.get(AnnotationSchema.FILE_URL_PARAM_NAME).toString();
-      } else if (parameterValues.get("rdfXmlURL") != null) {
-        resourceName = parameterValues.get("rdfXmlURL").toString();
-      } else if (parameterValues.get("ntriplesURL") != null) {
-        resourceName = parameterValues.get("ntriplesURL").toString();
-      } else if (parameterValues.get("turtleURL") != null) {
-        resourceName = parameterValues.get("turtleURL").toString();
-      }
-      if (resourceName != null) {
-        try {
-          resourceName = new java.io.File(new URL(resourceName)
-            .getPath()).getName();
-          // clean the file name
-          resourceName = resourceName.replaceAll("%20", " ");
-
-        } catch (MalformedURLException e) {
-          // relative URL not input by the user
-          resourceName = resData.getName();
-        }
-      } else {
-        resourceName = resData.getName();
-      }
-      resourceName += "_" + Gate.genSym();
-    }
-    res.setName(resourceName);
 
     if(LanguageResource.class.isAssignableFrom(resClass)) {
       // type-specific stuff for LRs
@@ -309,6 +276,58 @@ public abstract class Factory {
                   );
     }
 
+    //set the name
+    if(resourceName == null || resourceName.trim().length() == 0){
+      //no name provided -> let's try and find a reasonable one
+      try{
+        //first try to get a filename from the various parameters
+        URL sourceUrl = null;
+        if(res instanceof SimpleDocument){
+          sourceUrl = ((SimpleDocument)res).getSourceUrl();
+        }else if(res instanceof AnnotationSchema){
+          sourceUrl = ((AnnotationSchema)res).getXmlFileUrl();
+        }else if(res instanceof OWLIMOntologyLR){
+          sourceUrl = ((OWLIMOntologyLR)res).getRdfXmlURL();
+          if(sourceUrl == null){
+            sourceUrl = ((OWLIMOntologyLR)res).getN3URL();
+          }
+          if(sourceUrl == null){
+            sourceUrl = ((OWLIMOntologyLR)res).getNtriplesURL();
+          }
+          if(sourceUrl == null){
+            sourceUrl = ((OWLIMOntologyLR)res).getTurtleURL();
+          }
+        }
+        if(sourceUrl != null){
+          URI sourceURI = sourceUrl.toURI();
+          resourceName = sourceURI.getPath().trim();
+          if(resourceName == null || 
+             resourceName.length() == 0 || 
+             resourceName.equals("/")){
+            //this URI has no path -> use the whole string
+            resourceName = sourceURI.toString();
+          }else{
+            //there is a significant path value -> get the last element
+            int lastSlash = resourceName.lastIndexOf('/');
+            if(lastSlash >=0){
+              String subStr = resourceName.substring(lastSlash + 1);
+              if(subStr.trim().length() > 0) resourceName = subStr;
+            }
+          }
+        }
+      }catch(Exception t){
+        //there were problems while trying to guess a name  
+        //we can safely ignore them
+      }finally{
+        //make sure there is a name provided, whatever happened
+        if(resourceName == null || resourceName.trim().length() == 0){
+          resourceName = resData.getName();
+        }
+      }
+      resourceName += "_" + Gate.genSym();
+    }
+    res.setName(resourceName);
+    
     Map listeners = new HashMap(gate.gui.MainFrame.getListeners());
     // set the listeners if any
     if(listeners != null && !listeners.isEmpty()) {
