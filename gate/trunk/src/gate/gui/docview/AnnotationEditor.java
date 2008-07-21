@@ -18,6 +18,7 @@ package gate.gui.docview;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import java.util.List;
 
 import javax.swing.*;
 import javax.swing.Timer;
@@ -34,9 +35,7 @@ import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
 import gate.gui.FeaturesSchemaEditor;
 import gate.gui.MainFrame;
-import gate.gui.annedit.AnnotationEditorOwner;
-import gate.gui.annedit.SchemaFeaturesEditor;
-import gate.gui.annedit.SearchAndAnnotatePanel;
+import gate.gui.annedit.*;
 import gate.swing.JChoice;
 import gate.util.*;
 
@@ -347,7 +346,9 @@ public class AnnotationEditor extends AbstractVisualResource
           set.add(oldId, oldAnn.getStartNode().getOffset(), 
                   oldAnn.getEndNode().getOffset(), 
                   newType, oldAnn.getFeatures());
-          Annotation newAnn = set.get(oldId); 
+          Annotation newAnn = set.get(oldId);
+          //update the selection to the new annotation
+          getOwner().selectAnnotation(new AnnotationDataImpl(set, newAnn));
           editAnnotation(newAnn, set);
           owner.annotationChanged(newAnn, set, oldAnn.getType());
         }catch(InvalidOffsetException ioe){
@@ -552,7 +553,10 @@ public class AnnotationEditor extends AbstractVisualResource
     set.remove(oldAnnotation);
     set.add(oldID, newStartOffset, newEndOffset,
             oldAnnotation.getType(), oldAnnotation.getFeatures());
-    Annotation newAnn = set.get(oldID); 
+    Annotation newAnn = set.get(oldID);
+    //update the selection to the new annotation
+    getOwner().selectAnnotation(new AnnotationDataImpl(set, newAnn));
+
     editAnnotation(newAnn, set);
     //remove the temporary annotation
     if(tempAnn != null) set.remove(tempAnn);

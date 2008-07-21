@@ -16,6 +16,7 @@ import javax.swing.text.JTextComponent;
 
 import gate.*;
 import gate.gui.docview.AnnotationList;
+import gate.gui.docview.DocumentEditor;
 
 /**
  * Objects of this type control the interaction with an 
@@ -36,12 +37,7 @@ public interface AnnotationEditorOwner {
    */
   public JTextComponent getTextComponent();
   
-  /**
-   * Gets the UI component used to display a list view for annotations.
-   * @return an {@link AnnotationList} object
-   */
-  public AnnotationList getListComponent();
-  
+
   /**
    * Called by the annotation editor when an annotation has been 
    * changed.
@@ -52,6 +48,11 @@ public interface AnnotationEditorOwner {
    */
   public void annotationChanged(Annotation ann, AnnotationSet set, 
           String oldType);
+  
+  /**
+   * Called by the editor when a new annotation needs to be selected.
+   */
+  public void selectAnnotation(AnnotationData aData);
   
   /**
    * Called by the editor for obtaining the next annotation to be edited.

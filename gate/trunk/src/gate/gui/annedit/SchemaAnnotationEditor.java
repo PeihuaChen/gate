@@ -44,6 +44,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     //the external components we listen to (the text and the list view) can
     //change outside of our control, so we need to update the values frequently
     updateListeners();
+    
     this.annotation = ann;
     this.annSet = set;
     //update the selection in the list view
@@ -105,62 +106,6 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     }
   }
 
-  /**
-   * Tries to synchronise the selection in the list view to the currently
-   * edited annotation. In the case on newly added annotations, this may require
-   * some waiting, because the list view may be slow to show the new annotation.
-   * @param retries how many time should this be retried?
-   */
-  private void updateListSelection(final int retries){
-    MainFrame.getInstance().getOriginalOut().println(
-            "Start (retries remaining " + retries + ").");       
-    if(retries < 0 ) return;
-    //If the annotation was recently added, then the list may not show it yet
-    //so we'll enqueue an action on the Swing thread.
-    SwingUtilities.invokeLater(new Runnable(){
-      public void run(){
-        if(getOwner() != null && getOwner().getListComponent() != null){
-          AnnotationList annListView = getOwner().getListComponent();
-          //see if the list has a different annotation
-          if(annListView.getSelectionModel() != null){
-            int selectedIndex = annListView.getSelectionModel().
-                getMaxSelectionIndex();
-            boolean differentSelection = true;
-            if(selectedIndex != -1){
-              //get the list annotation
-              AnnotationData listData = annListView.getAnnotationAtRow(
-                      selectedIndex);
-              //and check it's different
-              if(listData.getAnnotationSet() == annSet && 
-                      listData.getAnnotation() == annotation){
-                differentSelection = false;
-              }
-            }
-            if(differentSelection){
-              //update the selection in the list
-                annListView.getSelectionModel().clearSelection();
-                int annRow = annListView.getRowForAnnotation(
-                        new AnnotationDataImpl(annSet, annotation));
-                if(annRow >= 0){
-                  annListView.getSelectionModel().addSelectionInterval(annRow, 
-                          annRow);
-              }else{
-                //start a delayed thread to re-queue this
-                new Thread(new Runnable(){
-                  public void run(){
-                    try {
-                      Thread.sleep(300);
-                    }catch(InterruptedException e) {/*ignore*/}
-                    updateListSelection(retries - 1);
-                  }
-                }).start();
-              }
-            }
-          }      
-        }        
-      }
-    });
-  }
   /**
    * This editor implementation is designed to enforce schema compliance. This
    * method will return <tt>false</tt> if the current annotation type does not
@@ -643,10 +588,12 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
                     oldAnn.getEndNode().getOffset(), 
                     newType, oldAnn.getFeatures());
             Annotation newAnn = annSet.get(oldId); 
+            //update the selection to the new annotation
+            getOwner().selectAnnotation(new AnnotationDataImpl(annSet, newAnn));            
             editAnnotation(newAnn, annSet);
             owner.annotationChanged(newAnn, annSet, oldAnn.getType());
           }catch(InvalidOffsetException ioe){
-            //this should never hapen 
+            //this should never happen 
             throw new LuckyException(ioe);
           }
         }
@@ -966,7 +913,9 @@ System.out.println("Window up");
     set.remove(oldAnnotation);
     set.add(oldID, newStartOffset, newEndOffset,
             oldAnnotation.getType(), oldAnnotation.getFeatures());
-    Annotation newAnn = set.get(oldID); 
+    Annotation newAnn = set.get(oldID);
+    //update the selection to the new annotation
+    getOwner().selectAnnotation(new AnnotationDataImpl(set, newAnn));
     editAnnotation(newAnn, set);
     //remove the temporary annotation
     if(tempAnn != null) set.remove(tempAnn);
