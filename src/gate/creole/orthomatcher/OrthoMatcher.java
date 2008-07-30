@@ -20,12 +20,15 @@ import java.io.*;
 import java.net.URL;
 import java.util.*;
 
+import org.apache.log4j.Logger;
+
 import gate.*;
 import gate.creole.*;
 import gate.util.*;
 
 public class OrthoMatcher extends AbstractLanguageAnalyser
                           implements ANNIEConstants{
+  protected static final Logger log = Logger.getLogger(OrthoMatcher.class);
 
   public static final String
     OM_DOCUMENT_PARAMETER_NAME = "document";
@@ -184,37 +187,37 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
           "No document for namematch!"
         );
       }
-  
+
       // get the annotations from document
       if ((annotationSetName == null)|| (annotationSetName.equals("")))
         nameAllAnnots = document.getAnnotations();
       else
         nameAllAnnots = document.getAnnotations(annotationSetName);
-  
+
       //if none found, print warning and exit
       if ((nameAllAnnots == null) || nameAllAnnots.isEmpty()) {
         Out.prln("OrthoMatcher Warning: No annotations found for processing");
         return;
       }
-  
+
       //check if we've been run on this document before
       //and clean the doc if needed
       docCleanup();
       Map matchesMap = (Map)document.getFeatures().
                        get(DOCUMENT_COREF_FEATURE_NAME);
-  
+
       // creates the cdg list from the document
       //no need to create otherwise, coz already done in init()
       if (!extLists)
         buildTables(nameAllAnnots);
-  
+
       //first match all name annotations
       matchNameAnnotations();
-  
+
       //then match the unknown ones to all name ones
       if (matchingUnknowns)
         matchUnknown();
-  
+
       // set the matches of the document
   //    determineMatchesDocument();
       if (! matchesDocFeature.isEmpty()) {
@@ -225,7 +228,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
         //we need to put it even if it was already present in order to triger
         //the update events
         document.getFeatures().put(DOCUMENT_COREF_FEATURE_NAME, matchesMap);
-  
+
         //cannot do clear() as this has already been put on the document
         //so I need a new one for the next run of matcher
         matchesDocFeature = new ArrayList();
@@ -256,11 +259,11 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
 
       // continue if no such annotations exist
       if (nameAnnots.isEmpty()) continue;
-      
+
       AnnotationSet tokensNameAS = nameAllAnnots.get(TOKEN_ANNOTATION_TYPE);
       if (tokensNameAS.isEmpty()) continue;
-      
-      
+
+
       Iterator<Annotation> iterNames = nameAnnots.iterator();
       while (iterNames.hasNext()) {
         Annotation nameAnnot = iterNames.next();
@@ -290,11 +293,11 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
 //                          nameAnnot.getStartNode().getOffset(),
 //                          nameAnnot.getEndNode().getOffset()
 //                        ));
-        
+
         // get the tokens
         List tokens = new ArrayList(tokensNameAS.getContained(nameAnnot.getStartNode().getOffset(),
                 nameAnnot.getEndNode().getOffset()));
-        
+
         //if no tokens to match, do nothing
         if (tokens.isEmpty())
           continue;
@@ -345,8 +348,8 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
     //get all Unknown annotations
     AnnotationSet unknownAnnots = nameAllAnnots.get(unknownType);
     if (unknownAnnots.isEmpty()) return;
-    
-    AnnotationSet nameAllTokens = nameAllAnnots.get(TOKEN_ANNOTATION_TYPE); 
+
+    AnnotationSet nameAllTokens = nameAllAnnots.get(TOKEN_ANNOTATION_TYPE);
     if (nameAllTokens.isEmpty()) return;
 
     Iterator<Annotation> iter = unknownAnnots.iterator();
@@ -1148,8 +1151,12 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
   public boolean matchRule2(String s1,
            String s2) {
 
-    if (alias.containsKey(s1) && alias.containsKey(s2))
-      return (alias.get(s1).toString().equals(alias.get(s2).toString()));
+    if (alias.containsKey(s1) && alias.containsKey(s2)) {
+      if (alias.get(s1).toString().equals(alias.get(s2).toString())) {
+          log.debug("rule2 matched " + s1 + " to " + s2);
+          return true;
+      }
+    }
 
     return false;
   }//matchRule2
@@ -1174,7 +1181,10 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
       if (!s2.endsWith("'s")) s2_poss = s2.concat("'s");
       else s2_poss = s2.concat("'");
 
-      if (s2_poss != null && matchRule1(s1, s2_poss,caseSensitive)) return true;
+      if (s2_poss != null && matchRule1(s1, s2_poss,caseSensitive)) {
+        log.debug("rule3 matched " + s1 + " to " + s2);
+        return true;
+      }
 
       // now check the second case i.e. "Standard and Poor" == "Standard's"
       String token = (String)
@@ -1183,7 +1193,10 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
       if (!token.endsWith("'s")) s2_poss = token.concat("'s");
       else s2_poss = token.concat("'");
 
-      if (s2_poss != null && matchRule1(s2_poss,s2,caseSensitive)) return true;
+      if (s2_poss != null && matchRule1(s2_poss,s2,caseSensitive)) {
+        log.debug("rule3 matched " + s1 + " to " + s2);
+        return true;
+      }
 
     } // if (s2.endsWith("'s")
     return false;
@@ -1214,8 +1227,8 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
         break;
       } // if (!tokensLongAnnot.nextToken()
     } // while
-//    if (allTokensMatch)
-//      Out.prln("rule4 fired. result is: " + allTokensMatch);
+    if (allTokensMatch)
+      log.debug("rule4 matched " + s1 + "(id: " + longAnnot.getId() + ") to " + s2+ "(id: " + longAnnot.getId() + ")");
     return allTokensMatch;
   }//matchRule4
 
@@ -1259,6 +1272,9 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
 
 //    if (s1.startsWith("Patrick") || s2.startsWith("Patrick"))
 //      Out.prln("rule 5 result: " + result);
+    if (result)
+      log.debug("rule5 matched " + s1 + " to " + s2);
+
     return result;
 
   }//matchRule5
@@ -1638,10 +1654,10 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
                       ((Annotation) tokensLongAnnot.get(
                           tokensLongAnnot.size()-1)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
 //    Out.prln("Converted to " + s1_short);
-    if (tokensLongAnnot.size()>1)
-      return matchRule1(s1_short,
-                      s2,
-                      caseSensitive);
+    if (tokensLongAnnot.size()>1 && matchRule1(s1_short, s2, caseSensitive)) {
+      log.debug("rule14 matched " + s1 + " to " + s2);
+      return true;
+    }
 
     return false;
 
@@ -1655,43 +1671,46 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
   public boolean matchRule15(String s1,
             String s2) {
 
-    int matched_tokens = 0;
-
-    // if names < 2 words then rule is invalid
-
-//    if (s1.equalsIgnoreCase("chin") || s2.equalsIgnoreCase("chin")) {
-//      Out.prln("Rule 15:" );
-//      Out.prln("with tokens " + tokensShortAnnot);
-//    }
-
-    // now do the matching
+    //do a token-by-token test
     Annotation token1, token2;
-    for (int i=0; i < tokensShortAnnot.size() && matched_tokens == 0; i++) {
+    for (int i=0; i < tokensShortAnnot.size(); i++) {
       token1 = (Annotation) tokensShortAnnot.get(i);
       //first check if not punctuation, because we need to skip it
       if (token1.getFeatures().get(TOKEN_KIND_FEATURE_NAME).equals(PUNCTUATION_VALUE))
         continue;
 
-      for (int j=0; j<tokensLongAnnot.size() && matched_tokens ==0; j++) {
+      String ts1 = (String)token1.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
+      boolean foundMatch = false;
+      for (int j=0; j<tokensLongAnnot.size(); j++) {
 //      Out.prln("i = " + i);
         token2 = (Annotation) tokensLongAnnot.get(j);
         if (token2.getFeatures().get(TOKEN_KIND_FEATURE_NAME).equals(PUNCTUATION_VALUE))
           continue;
-        if ( token1.getFeatures().get(TOKEN_STRING_FEATURE_NAME).equals(
-             token2.getFeatures().get(TOKEN_STRING_FEATURE_NAME)) )
-          matched_tokens++;
+        String ts2 = (String)token2.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
+        if (caseSensitive) {
+          if (ts2.equals(ts1)) {
+            foundMatch = true;
+            break;
+          }
+        }
+        else {
+          if (ts2.equalsIgnoreCase(ts1)) {
+            foundMatch = true;
+            break;
+          }
+        }
       }//for
+      //if no match for the current tokenShortAnnot, then it is not a coref of the
+      //longer annot
+      if (!foundMatch)
+        return false;
     } // for
 
-    //19 February 2002: kalina
-    //was originally > 0 (i.e., any match is good)
-    //ensure that we've matched all the tokens in the short annotation
-    //the reason for that is, because otherwise we match
-    //Patrick Viera and Patrick Somebody - not good!
-    if (matched_tokens == tokensShortAnnot.size())
-      return true;
+    //only get to here if all word tokens in the short annot were found in
+    //the long annot, so there is a coref relation
+    log.debug("rule15 matched " + s1 + " to " + s2);
+    return true;
 
-    return false;
   }//matchRule15
 
 
@@ -1735,7 +1754,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser
     }//if
   }//buildTables
 
-  
+
   public void setDefinitionFileURL(java.net.URL definitionFileURL) {
     this.definitionFileURL = definitionFileURL;
   }
