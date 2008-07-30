@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -35,8 +37,7 @@ import junit.framework.TestSuite;
   */
 public class TestJape extends BaseJapeTests
 {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+  private static final Logger log = Logger.getLogger(TestJape.class);
 
   /** Construction */
   public TestJape(String name) { super(name); }
@@ -153,8 +154,8 @@ public class TestJape extends BaseJapeTests
     boolean gotException = false;
 
     try {
-      if(DEBUG) {
-        Out.print(
+      if(log.isDebugEnabled()) {
+        log.info(
           "Opening Jape grammar... " + Gate.getUrl("tests/RhsError.jape")
         );
       }
@@ -170,7 +171,8 @@ public class TestJape extends BaseJapeTests
       // run jape on the document
       batch.transduce(doc);
     } catch(Exception e) {
-      if(DEBUG) Out.prln(e);
+      if(log.isDebugEnabled())
+        log.info("Exception in Jape rule: " + e);
       gotException = true;
     }
 
