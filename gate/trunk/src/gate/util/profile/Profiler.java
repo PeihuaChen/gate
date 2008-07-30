@@ -42,13 +42,16 @@ package gate.util.profile;
  *  machine as well as on the other applications running in parallel.
  */
 
-import java.io.PrintStream;
+//import java.io.PrintStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-public class Profiler {
+import org.apache.log4j.Logger;
 
-  private PrintStream m_out;
+public class Profiler {
+  protected static final Logger log = Logger.getLogger(Profiler.class);
+
+  //private PrintStream m_out;
   private boolean m_enabled = true;
   private boolean m_garbageCollection = true;
   /** Indicates whether just to return the string dumps (false) or also print them
@@ -76,7 +79,7 @@ public class Profiler {
 
   public Profiler() {
     m_rt = Runtime.getRuntime();
-    m_out = System.out;
+    //m_out = System.out;
   }
 
   /**
@@ -144,7 +147,7 @@ public class Profiler {
 //        long auxTime1 = (System.currentTimeMillis() - m_startTime1000)/10;
 //        return ((double)auxTime1)/100;
   } ;
- 
+
   public long getLastDuration() {
     return m_lastDuration;
   }
@@ -170,7 +173,7 @@ public class Profiler {
     m_categorySums = new Hashtable();
     m_categoryLasts = new Hashtable();
     if ( m_doPrintToStdOut ) {
-      m_out.print(buf.toString());
+      log.debug(buf.toString());
     }
     return buf.toString();
   } // initRun
@@ -270,7 +273,7 @@ public class Profiler {
     }
 
     if (buff.length() > 0 && m_doPrintToStdOut) {
-        m_out.println(buff.toString());
+        log.debug(buff.toString());
     }
     return buff.toString();
   } // showResults
@@ -295,7 +298,7 @@ public class Profiler {
    * Prints the time for all the categories of activities
    */
   public void showCategoryTimes() {
-    m_out.println("Time spent by categories:");
+    log.debug("Time spent by categories:");
     Enumeration categNames = m_categorySums.keys();
     String categ;
     while (categNames.hasMoreElements()) {
@@ -308,7 +311,7 @@ public class Profiler {
    * Prints the time for certain category of activities
    */
   public void showCategoryTime(String categ) {
-    m_out.println(categ + ", sum=" +
+    log.debug(categ + ", sum=" +
             printTime(getCategoryTimeSum(categ)) +
             ", last=" + printTime(getCategoryTimeLast(categ)));
   } // showCategoryTimes
@@ -354,10 +357,10 @@ public class Profiler {
   {
     long time = getCategoryTimeSum(categ);
     if (time==0) {
-      m_out.println("Category \"" + categ + "\" not found");
+      log.debug("Category \"" + categ + "\" not found");
     }
 
-    m_out.println("Category \"" + categ + "\",  Time= " +
+    log.debug("Category \"" + categ + "\",  Time= " +
         printTime(time) + "; avg. time= " +
         printTime(time/items) +  "; speed= " +
         printSpeed(time, volume, whateverMeasure));

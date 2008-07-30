@@ -17,6 +17,8 @@ package gate.creole;
 
 import java.util.*;
 
+import org.apache.log4j.Logger;
+
 import gate.*;
 import gate.event.*;
 import gate.util.Benchmark;
@@ -32,19 +34,19 @@ import gate.util.Out;
 public class SerialController extends AbstractController implements
                                                         CreoleListener {
 
-  private final static boolean DEBUG = false;
+  protected static final Logger log = Logger.getLogger(SerialController.class);
 
   /** Profiler to track PR execute time */
   protected Profiler prof;
   protected HashMap timeMap;
   protected HashMap<String, Long> prTimeMap;
-  
+
   public SerialController() {
     prList = Collections.synchronizedList(new ArrayList());
     sListener = new InternalStatusListener();
     prTimeMap = new HashMap<String, Long>();
-    
-    if(DEBUG) {
+
+    if(log.isDebugEnabled()) {
       prof = new Profiler();
       prof.enableGCCalling(false);
       prof.printToSystemOut(true);
@@ -64,10 +66,10 @@ public class SerialController extends AbstractController implements
   /**
    * Populates this controller from a collection of {@link ProcessingResource}s
    * (optional operation).
-   * 
+   *
    * Controllers that are serializable must implement this method needed by GATE
    * to restore the contents of the controllers.
-   * 
+   *
    * @throws UnsupportedOperationException
    *           if the <tt>setPRs</tt> method is not supported by this
    *           controller.
@@ -133,7 +135,7 @@ public class SerialController extends AbstractController implements
     // check all the PRs have the right parameters
     checkParameters();
 
-    if(DEBUG) {
+    if(log.isDebugEnabled()) {
       prof.initRun("Execute controller [" + getName() + "]");
     }
 
@@ -146,7 +148,7 @@ public class SerialController extends AbstractController implements
         + getName() + " application has been abruptly interrupted!"); }
 
       runComponent(i);
-      if(DEBUG) {
+      if(log.isDebugEnabled()) {
         prof.checkPoint("~Execute PR ["
           + ((ProcessingResource)prList.get(i)).getName() + "]");
         Long timeOfPR =
@@ -156,14 +158,14 @@ public class SerialController extends AbstractController implements
             prof.getLastDuration()));
         else timeMap.put(((ProcessingResource)prList.get(i)).getName(),
           new Long(timeOfPR.longValue() + prof.getLastDuration()));
-        Out.println("Time taken so far by "
+        log.debug("Time taken so far by "
           + ((ProcessingResource)prList.get(i)).getName() + ": "
           + timeMap.get(((ProcessingResource)prList.get(i)).getName()));
 
       }
     }
 
-    if(DEBUG) {
+    if(log.isDebugEnabled()) {
       prof.checkPoint("Execute controller [" + getName() + "] finished");
     }
 
@@ -175,7 +177,7 @@ public class SerialController extends AbstractController implements
   public void resetPrTimeMap() {
     prTimeMap.clear();
   }
-  
+
   /**
    * Returns the HashMap that lists the total time taken by each PR
    * @return
@@ -183,7 +185,7 @@ public class SerialController extends AbstractController implements
   public HashMap<String, Long> getPrTimeMap() {
     return this.prTimeMap;
   }
-  
+
   /**
    * Executes a {@link ProcessingResource}.
    */
@@ -205,7 +207,7 @@ public class SerialController extends AbstractController implements
     }
     catch(Exception e) {
       // the listeners setting failed; nothing important
-      Err.prln("Could not set listeners for " + currentPR.getClass().getName()
+      log.error("Could not set listeners for " + currentPR.getClass().getName()
         + "\n" + e.toString() + "\n...nothing to lose any sleep over.");
     }
 
@@ -244,8 +246,8 @@ public class SerialController extends AbstractController implements
     }
     time = new Long(time.longValue() + timeTakenByThePR);
     prTimeMap.put(currentPR.getName(), time);
-    
-    
+
+
     // reset the parent benchmark id of the PR
     if(currentPR instanceof Benchmarkable) {
       ((Benchmarkable)currentPR).setParentBenchmarkId(oldParentIDOfThePR);
@@ -257,7 +259,7 @@ public class SerialController extends AbstractController implements
     }
     catch(Exception e) {
       // the listeners removing failed; nothing important
-      Err.prln("Could not clear listeners for "
+      log.error("Could not clear listeners for "
         + currentPR.getClass().getName() + "\n" + e.toString()
         + "\n...nothing to lose any sleep over.");
     }
