@@ -29,13 +29,13 @@ import java.util.*;
  * together in order to avoid doing separate selectAnnotations calls for
  * each one.
  * <p>
- * <b>Matching Logic:<b>The matching function of a non-negated
+ * <b>Matching Logic:</b>The matching function of a non-negated
  * constraint can be defined as, "There exists an annotation for which
  * all of the predicates are true." Thus, given a collection of
  * annotations, only a single annotation must meet all of the predicates
  * of the constraint in order for the match to be successful.
  * <p>
- * <b>Negation:<b> A negated constraint means strictly the opposite -
+ * <b>Negation:</b> A negated constraint means strictly the opposite -
  * "There does not exist an annotation for which any of these predicates
  * are true." Negation does <b>not</b> mean "There exists an annotation
  * for which all of these predicates are false." Thus, negation makes
