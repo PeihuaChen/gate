@@ -17,7 +17,7 @@ import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
+import java.net.URISyntaxException;
 import java.util.*;
 import java.util.List;
 import java.util.prefs.Preferences;
@@ -26,9 +26,9 @@ import javax.swing.*;
 import javax.swing.Timer;
 import javax.swing.border.Border;
 import javax.swing.event.*;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.table.*;
 import javax.swing.text.*;
-import javax.swing.text.Highlighter.Highlight;
 
 import gate.*;
 import gate.creole.ResourceData;
@@ -39,7 +39,6 @@ import gate.event.DocumentListener;
 import gate.gui.*;
 import gate.gui.annedit.*;
 import gate.gui.annedit.AnnotationEditor;
-import gate.gui.annedit.SchemaAnnotationEditor;
 import gate.swing.ColorGenerator;
 import gate.swing.XJTable;
 import gate.util.*;
@@ -122,7 +121,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   public AnnotationSetsView(){
     setHandlers = new ArrayList<SetHandler>();
     tableRows = new ArrayList();
-    visibleAnnotationTypes = new ArrayList();
+    visibleAnnotationTypes = new ArrayList<TypeSpec>();
     colourGenerator = new ColorGenerator();
     actions = new ArrayList();
     actions.add(new SavePreserveFormatAction());
@@ -1468,6 +1467,9 @@ public class AnnotationSetsView extends AbstractDocumentView
     }
   }
   
+  /**
+   * The beginning is the same as {@link NameBearerHandle.SaveAsXmlAction}.
+   */
   protected class SavePreserveFormatAction extends AbstractAction{
     public SavePreserveFormatAction(){
       super("Save preserving document format");
@@ -1479,14 +1481,63 @@ public class AnnotationSetsView extends AbstractDocumentView
           JFileChooser fileChooser = MainFrame.getFileChooser();
           File selectedFile = null;
 
+          List filters = Arrays.asList(fileChooser.getChoosableFileFilters());
+          Iterator filtersIter = filters.iterator();
+          FileFilter filter = null;
+          if(filtersIter.hasNext()) {
+            filter = (FileFilter)filtersIter.next();
+            while(filtersIter.hasNext()
+              && filter.getDescription().indexOf("XML") == -1) {
+              filter = (FileFilter)filtersIter.next();
+            }
+          }
+          if(filter == null || filter.getDescription().indexOf("XML") == -1) {
+            // no suitable filter found, create a new one
+            ExtensionFileFilter xmlFilter = new ExtensionFileFilter();
+            xmlFilter.setDescription("XML files");
+            xmlFilter.addExtension("xml");
+            xmlFilter.addExtension("gml");
+            fileChooser.addChoosableFileFilter(xmlFilter);
+            filter = xmlFilter;
+          }
+          fileChooser.setFileFilter(filter);
+
           fileChooser.setMultiSelectionEnabled(false);
           fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
           fileChooser.setDialogTitle("Select document to save ...");
 
           if (document.getSourceUrl() != null) {
-            String fileName = document.getSourceUrl().getPath();
-            fileName = fileName.replaceAll("%20", " "); // spaces in URL
-            fileName = fileName.replaceAll("\\.[^. ]{1,5}$", ".xml");
+            String fileName = "";
+            try {
+              fileName = document.getSourceUrl().toURI().getPath().trim();
+            } catch (URISyntaxException e) {
+              fileName = document.getSourceUrl().getPath().trim();
+            }
+            if (fileName.equals("") || fileName.equals("/")) {
+              if (document.getNamedAnnotationSets().containsKey("Original markups")
+               && !document.getAnnotations("Original markups").get("title").isEmpty()) {
+                // use the title annotation if any
+                try {
+                  fileName = document.getContent().getContent(
+                    document.getAnnotations("Original markups").get("title").firstNode().getOffset(),
+                    document.getAnnotations("Original markups").get("title").lastNode().getOffset())
+                    .toString();
+                } catch(InvalidOffsetException e) {
+                  e.printStackTrace();
+                }
+              } else {
+                fileName = document.getSourceUrl().toString();
+              }
+              // cleans the file name
+              fileName = fileName.replaceAll("/", "_");
+            } else {
+              // replaces the extension with .xml
+              fileName = fileName.replaceAll("\\.[a-zA-Z]{1,4}$", ".xml");
+            }
+            // cleans the file name
+            fileName = fileName.replaceAll("[^/a-zA-Z0-9._-]", "_");
+            fileName = fileName.replaceAll("__+", "_");
+            // adds a .xml extension if not present
             if (!fileName.endsWith(".xml")) { fileName += ".xml"; }
             File file = new File(fileName);
             fileChooser.setSelectedFile(file);

@@ -19,6 +19,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.*;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.util.*;
@@ -602,10 +603,40 @@ public class NameBearerHandle implements Handle, StatusListener,
           fileChooser.setMultiSelectionEnabled(false);
           fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
           fileChooser.setDialogTitle("Select document to save ...");
-          if (((gate.Document)target).getSourceUrl() != null) {
-            String fileName = ((gate.Document)target).getSourceUrl().getPath();
-            fileName = fileName.replaceAll("%20", " "); // spaces in URL
-            fileName = fileName.replaceAll("\\.[^. ]{1,5}$", ".xml");
+
+          gate.Document doc = (gate.Document)target;
+          if (doc.getSourceUrl() != null) {
+            String fileName = "";
+            try {
+              fileName = doc.getSourceUrl().toURI().getPath().trim();
+            } catch (URISyntaxException e) {
+              fileName = doc.getSourceUrl().getPath().trim();
+            }
+            if (fileName.equals("") || fileName.equals("/")) {
+              if (doc.getNamedAnnotationSets().containsKey("Original markups")
+               && !doc.getAnnotations("Original markups").get("title").isEmpty()) {
+                // use the title annotation if any
+                try {
+                  fileName = doc.getContent().getContent(
+                    doc.getAnnotations("Original markups").get("title").firstNode().getOffset(),
+                    doc.getAnnotations("Original markups").get("title").lastNode().getOffset())
+                    .toString();
+                } catch(InvalidOffsetException e) {
+                  e.printStackTrace();
+                }
+              } else {
+                fileName = doc.getSourceUrl().toString();
+              }
+              // cleans the file name
+              fileName = fileName.replaceAll("/", "_");
+            } else {
+              // replaces the extension with .xml
+              fileName = fileName.replaceAll("\\.[a-zA-Z]{1,4}$", ".xml");
+            }
+            // cleans the file name
+            fileName = fileName.replaceAll("[^/a-zA-Z0-9._-]", "_");
+            fileName = fileName.replaceAll("__+", "_");
+            // adds a .xml extension if not present
             if (!fileName.endsWith(".xml")) { fileName += ".xml"; }
             File file = new File(fileName);
             fileChooser.setSelectedFile(file);
@@ -985,6 +1016,28 @@ public class NameBearerHandle implements Handle, StatusListener,
 
     public void actionPerformed(ActionEvent ae) {
       JFileChooser fileChooser = MainFrame.getFileChooser();
+
+      // add a .gapp extension filter if not existing
+      List filters = Arrays.asList(fileChooser.getChoosableFileFilters());
+      Iterator filtersIter = filters.iterator();
+      FileFilter filter = null;
+      if(filtersIter.hasNext()) {
+        filter = (FileFilter)filtersIter.next();
+        while(filtersIter.hasNext()
+           && filter.getDescription().indexOf("GATE Application") == -1) {
+          filter = (FileFilter)filtersIter.next();
+        }
+      }
+      if(filter == null
+      || filter.getDescription().indexOf("GATE Application") == -1) {
+        // no suitable filter found, create a new one
+        ExtensionFileFilter gappFilter = new ExtensionFileFilter();
+        gappFilter.setDescription("GATE Application files");
+        gappFilter.addExtension("gapp");
+        fileChooser.addChoosableFileFilter(gappFilter);
+        filter = gappFilter;
+      }
+      fileChooser.setFileFilter(filter);
 
       fileChooser.setDialogTitle("Select a file for this resource");
       fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);

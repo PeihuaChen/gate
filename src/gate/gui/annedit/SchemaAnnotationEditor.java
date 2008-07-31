@@ -31,7 +31,6 @@ import gate.*;
 import gate.creole.*;
 import gate.event.*;
 import gate.gui.MainFrame;
-import gate.gui.docview.AnnotationList;
 import gate.swing.JChoice;
 import gate.util.*;
 
@@ -708,6 +707,15 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     inputMap.put(KeyStroke.getKeyStroke("alt shift RIGHT"), "eorAction");
     inputMap.put(KeyStroke.getKeyStroke("control alt shift released RIGHT"), "eorAction");
     actionMap.put("eorAction", eorAction);
+
+    Action dismissAction = new AbstractAction() {
+      private static final long serialVersionUID = 1L;
+      public void actionPerformed(ActionEvent evt){
+        dialog.setVisible(false);
+      }
+    };
+    inputMap.put(KeyStroke.getKeyStroke("ESCAPE"), "dismissAction");
+    actionMap.put("dismissAction", dismissAction);
 
   }
 

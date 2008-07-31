@@ -19,7 +19,6 @@ import gate.*;
 import gate.creole.*;
 import gate.event.AnnotationEvent;
 import gate.event.AnnotationListener;
-import gate.gui.ResizableVisualResource;
 import gate.gui.annedit.AnnotationData;
 import gate.gui.annedit.AnnotationDataImpl;
 import gate.swing.XJTable;
@@ -31,7 +30,6 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.AbstractTableModel;
-import org.omg.PortableServer.AdapterActivator;
 
 /**
  * A tabular view for a list of annotations.
@@ -156,7 +154,6 @@ public class AnnotationListView extends AbstractDocumentView
             if(localSelectionUpating) return;
           }          
           int[] viewRows = table.getSelectedRows();
-          AnnotationData aHandler = null;
           List<AnnotationData> selAnns = new ArrayList<AnnotationData>();
           for(int i = 0; i < viewRows.length; i++){
             int modelRow = table.rowViewToModel(viewRows[i]);
@@ -168,6 +165,15 @@ public class AnnotationListView extends AbstractDocumentView
           //blink the selected annotations
 //          textView.removeAllBlinkingHighlights();
 //          showHighlights();
+
+          if(table.getSelectedRowCount() >= 1){
+            int modelRow = table.rowViewToModel(
+              table.getSelectionModel().getLeadSelectionIndex());
+            AnnotationData aHandler = annDataList.get(modelRow);
+            //scroll to show the last highlight
+            if(aHandler != null && aHandler.getAnnotation() != null)
+              textView.scrollAnnotationToVisible(aHandler.getAnnotation());
+          }
         }
     });
 
@@ -242,20 +248,21 @@ public class AnnotationListView extends AbstractDocumentView
             }
           }
           popup.show(table, me.getX(), me.getY());
-        }else{
-          //not popup trigger (most likely normal click)
-        //if the clicked row is now selected, scroll the text view
-          if(me.getID() == MouseEvent.MOUSE_CLICKED &&
-             table.getSelectionModel().isSelectedIndex(viewRow) &&
-             modelRow >= 0){
-            AnnotationData aHandler = annDataList.get(modelRow);
-            //scroll to show the last highlight
-            if(aHandler != null && aHandler.getAnnotation() != null)
-                textView.scrollAnnotationToVisible(aHandler.getAnnotation());
-          }
         }
       }
     });
+
+    table.addAncestorListener(new AncestorListener() {
+      public void ancestorAdded(AncestorEvent event) {
+        // force the table to be sorted when the view is shown
+        tableModel.fireTableDataChanged();
+      }
+      public void ancestorMoved(AncestorEvent event) {
+      }
+      public void ancestorRemoved(AncestorEvent event) {
+      }
+    });
+
     /* End */
 
   }
@@ -281,9 +288,6 @@ public class AnnotationListView extends AbstractDocumentView
    */
   public int getType() {
     return HORIZONTAL;
-  }
-  protected void guiShown(){
-    tableModel.fireTableDataChanged();
   }
 
 //  protected void showHighlights(){
