@@ -1,5 +1,8 @@
-Note: The NekoHTML parser provided here is version 1.9.8, but with the
-HTMLScanner patch from http://sourceforge.net/support/tracker.php?aid=2039483.
+Note: The NekoHTML parser provided here is version 1.9.8, but with two patches
+to HTMLScanner that have been submitted to the NekoHTML developers:
+
+http://sourceforge.net/support/tracker.php?aid=2039483
+http://sourceforge.net/support/tracker.php?aid=2039915
 
 ------------------------------------------------------------------------------
 
