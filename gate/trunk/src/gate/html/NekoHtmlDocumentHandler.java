@@ -137,10 +137,7 @@ public class NekoHtmlDocumentHandler
   public void startElement(QName element, XMLAttributes attributes,
           Augmentations augs) throws XNIException {
     // deal with any outstanding character content
-    if(readCharacterStatus) {
-      readCharacterStatus = false;
-      charactersAction();
-    }
+    charactersAction();
 
     if(DEBUG_ELEMENTS) {
       Out.println("startElement: " + element.localpart);
@@ -211,6 +208,11 @@ public class NekoHtmlDocumentHandler
           int line = evInfo.getBeginLineNumber() - 1;
           int col = evInfo.getBeginColumnNumber() - 1;
           charactersStartOffset = lineOffsets[line] + col;
+          if(DEBUG_CHARACTERS) {
+            Out.println("characters: line = " + line + " (offset " +
+                lineOffsets[line] + "), col = " + col + " : file offset = " +
+                charactersStartOffset);
+          }
         }
       }
 
@@ -241,6 +243,12 @@ public class NekoHtmlDocumentHandler
    * Called when all text between two tags has been processed.
    */
   public void charactersAction() throws XNIException {
+    // check whether there are actually any characters to process
+    if(!readCharacterStatus) {
+      return;
+    }
+    readCharacterStatus = false;
+
     if(DEBUG_CHARACTERS) {
       Out.println("charactersAction: offset = " + charactersStartOffset);
     }
@@ -372,11 +380,7 @@ public class NekoHtmlDocumentHandler
    */
   public void endElement(QName element, Augmentations augs,
           boolean wasEmptyElement) throws XNIException {
-    // call characterActions
-    if(readCharacterStatus) {
-      readCharacterStatus = false;
-      charactersAction();
-    }
+    charactersAction();
 
     // localName = localName.toLowerCase();
     if(DEBUG_ELEMENTS) {
@@ -469,6 +473,30 @@ public class NekoHtmlDocumentHandler
           throws XNIException {
     throw e;
   }
+
+  // we don't do anything with processing instructions, comments or CDATA
+  // markers, but if we encounter them they interrupt the flow of text.  Thus
+  // we must call charactersAction so the repositioning info is correctly
+  // generated.
+
+  public void processingInstruction(String target, XMLString data,
+          Augmentations augs) throws XNIException {
+    charactersAction();
+  }
+
+  public void comment(XMLString content,
+          Augmentations augs) throws XNIException {
+    charactersAction();
+  }
+
+  public void startCDATA(Augmentations augs) throws XNIException {
+    charactersAction();
+  }
+
+  public void endCDATA(Augmentations augs) throws XNIException {
+    charactersAction();
+  }
+
 
   /**
    * A comparator that compares two RepositioningInfo.PositionInfo
@@ -904,22 +932,10 @@ public class NekoHtmlDocumentHandler
 
   // //// Unused methods from XNI interfaces //////
 
-  public void comment(XMLString arg0, Augmentations arg1) throws XNIException {
-    if(DEBUG_UNUSED) {
-      Out.println("comment: " + arg0);
-    }
-  }
-
   public void doctypeDecl(String arg0, String arg1, String arg2,
           Augmentations arg3) throws XNIException {
     if(DEBUG_UNUSED) {
       Out.println("doctypeDecl");
-    }
-  }
-
-  public void endCDATA(Augmentations arg0) throws XNIException {
-    if(DEBUG_UNUSED) {
-      Out.println("endCDATA");
     }
   }
 
@@ -944,22 +960,9 @@ public class NekoHtmlDocumentHandler
     }
   }
 
-  public void processingInstruction(String arg0, XMLString arg1,
-          Augmentations arg2) throws XNIException {
-    if(DEBUG_UNUSED) {
-      Out.println("processingInstruction: " + arg0 + ": " + arg1);
-    }
-  }
-
   public void setDocumentSource(XMLDocumentSource arg0) {
     if(DEBUG_UNUSED) {
       Out.println("setDocumentSource");
-    }
-  }
-
-  public void startCDATA(Augmentations arg0) throws XNIException {
-    if(DEBUG_UNUSED) {
-      Out.println("startCDATA");
     }
   }
 
