@@ -277,8 +277,14 @@ public abstract class Factory {
     }
 
     //set the name
-    if(resourceName == null || resourceName.trim().length() == 0){
-      //no name provided -> let's try and find a reasonable one
+    // if we have an explicitly provided name, use that, otherwise generate a
+    // suitable name if the resource doesn't already have one
+    if(resourceName != null && resourceName.trim().length() > 0) {
+      res.setName(resourceName);
+    }
+    else if(res.getName() == null) {
+      //no name provided, and the resource doesn't have a name already (e.g. calculated in init())
+      // -> let's try and find a reasonable one
       try{
         //first try to get a filename from the various parameters
         URL sourceUrl = null;
@@ -325,8 +331,9 @@ public abstract class Factory {
         }
       }
       resourceName += "_" + Gate.genSym();
-    }
-    res.setName(resourceName);
+      res.setName(resourceName);
+    } // else if(res.getName() == null)
+    // if res.getName() != null, leave it as it is
     
     Map listeners = new HashMap(gate.gui.MainFrame.getListeners());
     // set the listeners if any
@@ -400,10 +407,7 @@ public abstract class Factory {
   public static Corpus newCorpus(String name)
                                           throws ResourceInstantiationException
   {
-    FeatureMap parameterValues = newFeatureMap();
-    parameterValues.put(Corpus.CORPUS_NAME_PARAMETER_NAME, name);
-//    parameterValues.put("features", Factory.newFeatureMap());
-    return (Corpus) createResource("gate.corpora.CorpusImpl", parameterValues);
+    return (Corpus) createResource("gate.corpora.CorpusImpl", newFeatureMap(), newFeatureMap(), name);
   } // newCorpus
 
   /** Create a new transient Document from a URL. */
