@@ -208,7 +208,7 @@ public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
             //find the first non whitespace character starting from where the 
             //last sentence ended
             while(lastSentenceEnd < endOffset &&
-                  Character.isSpaceChar(
+                  Character.isWhitespace(
                           Character.codePointAt(docText, lastSentenceEnd))){
               lastSentenceEnd++;
             }
