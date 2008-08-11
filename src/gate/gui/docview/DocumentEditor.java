@@ -298,7 +298,7 @@ public class DocumentEditor extends AbstractVisualResource
    * @param index the index in {@link #horizontalViews} list for the new
    * view to be shown.
    */
-  protected void setTopView(int index){
+  public void setTopView(int index){
     //deactivate current view
     DocumentView oldView = getTopView();
     if(oldView != null){
@@ -349,7 +349,7 @@ public class DocumentEditor extends AbstractVisualResource
    * @param index the index in {@link #centralViews} list for the new
    * view to be shown.
    */
-  protected void setCentralView(int index){
+  public void setCentralView(int index){
     //deactivate current view
     DocumentView oldView = getCentralView();
     if(oldView != null){
@@ -397,7 +397,7 @@ public class DocumentEditor extends AbstractVisualResource
    * @param index the index in {@link #horizontalViews} list for the new
    * view to be shown.
    */
-  protected void setBottomView(int index){
+  public void setBottomView(int index){
     //deactivate current view
     DocumentView oldView = getBottomView();
     if(oldView != null){
@@ -451,7 +451,7 @@ public class DocumentEditor extends AbstractVisualResource
    * @param index the index in {@link #verticalViews} list for the new
    * view to be shown.
    */
-  protected void setRightView(int index){
+  public void setRightView(int index){
     //deactivate current view
     DocumentView oldView = getRightView();
     if(oldView != null){
