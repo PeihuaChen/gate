@@ -990,11 +990,26 @@ public class AlignmentEditor extends AbstractVisualResource implements
 
       Color newColor = getColor(null);
       boolean firstTime = true;
+      
+      
+      Set<Annotation> toRemove = new HashSet<Annotation>();
+      for(Annotation tgtAnnot : targetAnnots) {
+        AnnotationHighlight ah = targetHighlights.get(tgtAnnot);
+        if(ah == null) {
+          toRemove.add(tgtAnnot);
+        }
+      } 
+      
+      targetAnnots.removeAll(toRemove);
+      
       for(Annotation srcAnnot : sourceAnnots) {
         AnnotationHighlight sAh = sourceHighlights.get(srcAnnot);
         sAh.setHighlighted(true, newColor);
+        
         for(Annotation tgtAnnot : targetAnnots) {
+          
           AnnotationHighlight ah = targetHighlights.get(tgtAnnot);
+          
 
           if(firstTime) {
             ah.setHighlighted(true, newColor);
