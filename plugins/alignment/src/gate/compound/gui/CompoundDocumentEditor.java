@@ -49,6 +49,8 @@ public class CompoundDocumentEditor extends AbstractVisualResource
     actions.add(new SaveAsASingleXML());
     actions.add(new SwitchDocument());
     actions.add(new LoadFromXML());
+    actions.add(new PopulateCorpus());
+    actions.add(new PopulateCorpusFromXML());
     return actions;
   }
 
@@ -182,8 +184,110 @@ public class CompoundDocumentEditor extends AbstractVisualResource
       }
     }
   }
-  
-  
+
+  class PopulateCorpusFromXML extends AbstractAction {
+
+    private static final long serialVersionUID = -1377052643002026640L;
+
+    public PopulateCorpusFromXML() {
+      super("Populate Corpus From XML");
+    }
+
+    public void actionPerformed(ActionEvent ae) {
+      JFileChooser fileChooser = new JFileChooser();
+      fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+      try {
+        fileChooser.showOpenDialog(Main.getMainFrame());
+        File fileToOpen = null;
+        if((fileToOpen = fileChooser.getSelectedFile()) == null) {
+          return;
+        }
+
+        File[] files = fileToOpen.listFiles(new FilenameFilter() {
+          public boolean accept(File dir, String name) {
+            if(name.endsWith(".xml")) {
+              return true;
+            }
+            return false;
+          }
+        });
+
+        for(File aFile : files) {
+          StringBuilder xmlString = new StringBuilder();
+          BufferedReader br = new BufferedReader(new InputStreamReader(
+                  new FileInputStream(aFile), "utf-8"));
+          String line = br.readLine();
+          while(line != null) {
+            xmlString.append("\n").append(line);
+            line = br.readLine();
+          }
+          AbstractCompoundDocument.fromXml(xmlString.toString());
+          br.close();
+        }
+      }
+      catch(Exception e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  class PopulateCorpus extends AbstractAction {
+
+    private static final long serialVersionUID = -1377052643002026640L;
+
+    public PopulateCorpus() {
+      super("Populate Corpus With Compound Documents");
+    }
+
+    public void actionPerformed(ActionEvent ae) {
+      JFileChooser fileChooser = new JFileChooser();
+      fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+      try {
+        fileChooser.showOpenDialog(Main.getMainFrame());
+        File fileToOpen = null;
+        if((fileToOpen = fileChooser.getSelectedFile()) == null) {
+          return;
+        }
+
+        // file to Open is a directory
+        String corpusName = JOptionPane.showInputDialog("Enter CorpusName");
+        Corpus corpusToUse = Factory.newCorpus(corpusName);
+
+        // file to Open is a directory
+        String langCodes = JOptionPane
+                .showInputDialog("Enter language codes (comma separated)");
+        final String[] codes = langCodes.split(",");
+
+        File[] files = fileToOpen.listFiles(new FilenameFilter() {
+          public boolean accept(File dir, String name) {
+            if(name.indexOf("." + codes[0] + ".") > 0) {
+              return true;
+            }
+            return false;
+          }
+        });
+
+        List<String> docIds = new ArrayList<String>();
+        for(String code : codes) {
+          docIds.add(code);
+        }
+
+        for(File aFile : files) {
+          FeatureMap fets = Factory.newFeatureMap();
+          fets.put("sourceUrl", aFile.toURL());
+          fets.put("documentIDs", docIds);
+          fets.put("encoding", "UTF-8");
+          CompoundDocument cd = (CompoundDocument)Factory.createResource(
+                  "gate.compound.impl.CompoundDocumentImpl", fets);
+          corpusToUse.add(cd);
+        }
+      }
+      catch(Exception e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
   class SaveAsASingleXML extends AbstractAction {
 
     private static final long serialVersionUID = -1377052643002026640L;
