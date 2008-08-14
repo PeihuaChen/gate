@@ -299,10 +299,6 @@ public class Gate implements GateConstants {
         "true")) {
       Benchmark.setBenchmarkingEnabled(true);
     }
-    else {
-      Benchmark.setBenchmarkingEnabled(false);
-    }
-    
     
   }
 
