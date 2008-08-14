@@ -244,10 +244,10 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
       throw new ExecutionException("No Document found in corpus!");
 
     // set benchmark ID on the lightWeightApi
-    String oldLightWeightApiParentId = null;
+    String oldLightWeightApiId = null;
     if(lightWeightApi instanceof Benchmarkable) {
-      oldLightWeightApiParentId = lightWeightApi.getParentBenchmarkId();
-      lightWeightApi.createBenchmarkId(getBenchmarkId());
+      oldLightWeightApiId = lightWeightApi.getBenchmarkId();
+      lightWeightApi.setBenchmarkId(Benchmark.createBenchmarkId("LightWeightLearningAPI", getBenchmarkId()));
     }
 
     // first, get the NLP features from the documents, according to the
@@ -874,8 +874,8 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
       }
 
       // reset the parentBenchmarkID
-      if(oldLightWeightApiParentId != null) {
-        lightWeightApi.setParentBenchmarkId(oldLightWeightApiParentId);
+      if(oldLightWeightApiId != null) {
+        lightWeightApi.setBenchmarkId(oldLightWeightApiId);
       }
 
       if(LogService.minVerbosityLevel > 0)
@@ -947,17 +947,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
 
   // /////// Benchmarkable ////////////////
 
-  private String parentBenchmarkID;
   private String benchmarkID;
-
-  /**
-   * Returns the benchmark ID of the parent of this resource.
-   * 
-   * @return
-   */
-  public String getParentBenchmarkId() {
-    return this.parentBenchmarkID;
-  }
 
   /**
    * Returns the benchmark ID of this resource.
@@ -971,34 +961,9 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
     }
     return this.benchmarkID;
   }
-
-  /**
-   * Given an ID of the parent resource, this method is responsible for
-   * producing the Benchmark ID, unique to this resource.
-   * 
-   * @param parentID
-   */
-  public void createBenchmarkId(String parentID) {
-    parentBenchmarkID = parentID;
-    benchmarkID = Benchmark.createBenchmarkId(getName(), parentID);
-  }
-
-  /**
-   * This method sets the benchmarkID for this resource.
-   * 
-   * @param benchmarkID
-   */
-  public void setParentBenchmarkId(String benchmarkID) {
-    parentBenchmarkID = benchmarkID;
-  }
-
-  /**
-   * Returns the logger object being used by this resource.
-   * 
-   * @return
-   */
-  public Logger getLogger() {
-    return Benchmark.logger;
+  
+  public void setBenchmarkId(String benchmarkID) {
+    this.benchmarkID = benchmarkID;
   }
 
 }

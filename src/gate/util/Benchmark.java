@@ -11,14 +11,18 @@
 
 package gate.util;
 
+import gate.Executable;
+import gate.creole.ExecutionException;
+
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import org.apache.log4j.Logger;
 
 /**
- * This class provides methods for making entries in the shared log maintained
- * by the GATE system. User should use various methods provided by this class
- * and as described in the following example.
+ * This class provides methods for making entries in the shared log
+ * maintained by the GATE system. User should use various methods
+ * provided by this class and as described in the following example.
  * 
  * <p>
  * 
@@ -61,31 +65,51 @@ public class Benchmark {
   public final static String MESSAGE_FEATURE = "message";
 
   // various check point ids
-  public final static String PROCESS_INTERRUPTED = "processInterrupted";
-  public final static String APPLICATION_EXECUTION = "applicationExecution";
-  public final static String PR_EXECUTION = "prExecution";
+
+  public final static String PR_PREFIX = "pr_";
+
   public final static String DOCUMENT_LOADED = "documentLoaded";
+
+  public final static String DOCUMENT_SAVED = "documentSaved";
+
   public final static String WRITING_FVS_TO_DISK = "writingFVsToDisk";
+
   public final static String ANNOTS_TO_NLP_FEATURES = "annotsToNlpFeatures";
+
   public final static String NLP_FEATURES_TO_FVS = "nlpFeaturesToFVs";
+
   public final static String READING_LEARNING_INFO = "readingLearningInfo";
+
   public final static String MODEL_APPLICATION = "modelApplication";
+
   public final static String WRITING_NGRAM_MODEL = "writingNgramModel";
+
   public final static String TERM_DOC_STATS = "termDocStats";
+
   public final static String FILTERING = "filtering";
+
   public final static String MODEL_TRAINING = "modelTraining";
+
   public final static String EVALUATION = "evaluation";
-  public final static String NLP_LABELS_TO_DATA_LABELS =
-    "nlpLabelsToDataLabels";
+
+  public final static String NLP_LABELS_TO_DATA_LABELS = "nlpLabelsToDataLabels";
+
   public final static String READING_NLP_FEATURES = "readingNlpFeatures";
+
   public final static String READING_FVS = "readingFVs";
+
   public final static String WEKA_MODEL_TRAINING = "wekaModelTraining";
+
   public final static String PAUM_MODEL_TRAINING = "paumModelTraining";
-  public final static String READING_CHUNK_LEARNING_DATA =
-    "readingChunkLearningData";
+
+  public final static String READING_CHUNK_LEARNING_DATA = "readingChunkLearningData";
+
   public final static String WEKA_MODEL_APPLICATION = "wekaModelApplication";
+
   public final static String PAUM_MODEL_APPLICATION = "paumModelApplication";
+
   public final static String POST_PROCESSING = "postProcessing";
+
   /**
    * Static shared logger used for logging.
    */
@@ -99,13 +123,14 @@ public class Benchmark {
   public static long startPoint() {
     return System.currentTimeMillis();
   }
-  
+
   /**
-   * Like {@link #startPoint()} but also logs a message with the starting
-   * time if benchmarking is enabled.  This is intended to be used in
-   * conjuntion with the three-argument version of checkPoint.
+   * Like {@link #startPoint()} but also logs a message with the
+   * starting time if benchmarking is enabled. This is intended to be
+   * used in conjuntion with the three-argument version of checkPoint.
    * 
-   * @param benchmarkID the identifier of the process that is just starting.
+   * @param benchmarkID the identifier of the process that is just
+   *          starting.
    * @return the current time, as logged.
    */
   public static long startPoint(String benchmarkID) {
@@ -119,18 +144,16 @@ public class Benchmark {
   /**
    * This method is responsible for making entries into the log.
    * 
-   * @param startTime -
-   *          when did the actual process started. This value should be the
-   *          value obtained by Benchmark.startPoint() method invoked at the
-   *          begining of the process.
-   * @param benchmarkID -
-   *          a unique ID of the resource that should be logged with this
-   *          message.
-   * @param objectInvokingThisCheckPoint -
-   *          The benchmarkable object that invokes this method.
-   * @param features -
-   *          any features (key-value pairs) that should be reported in the log
-   *          message. toString() method will be invoked on the objects.
+   * @param startTime - when did the actual process started. This value
+   *          should be the value obtained by Benchmark.startPoint()
+   *          method invoked at the begining of the process.
+   * @param benchmarkID - a unique ID of the resource that should be
+   *          logged with this message.
+   * @param objectInvokingThisCheckPoint - The benchmarkable object that
+   *          invokes this method.
+   * @param features - any features (key-value pairs) that should be
+   *          reported in the log message. toString() method will be
+   *          invoked on the objects.
    */
   public static void checkPoint(long startTime, String benchmarkID,
           Object objectInvokingThisCheckPoint, Map benchmarkingFeatures) {
@@ -145,9 +168,9 @@ public class Benchmark {
     logCheckPoint(String.valueOf(processingTime), benchmarkID,
             objectInvokingThisCheckPoint, benchmarkingFeatures);
   }
-  
+
   /**
-   * Logs the end of a process.  There must previously have been a call
+   * Logs the end of a process. There must previously have been a call
    * to {@link #startPoint(String)} with the same benchmark ID.
    * 
    * @see #checkPoint(long, String, Object, Map)
@@ -163,7 +186,7 @@ public class Benchmark {
    * Private method to create a line in the benchmark log.
    * 
    * @param processingTimeOrFlag either the duration of the task in ms
-   *            or the string "END" if no start time was provided.
+   *          or the string "END" if no start time was provided.
    */
   private static void logCheckPoint(String processingTimeOrFlag,
           String benchmarkID, Object objectInvokingThisCheckPoint,
@@ -172,10 +195,15 @@ public class Benchmark {
     StringBuilder messageToLog = new StringBuilder();
     messageToLog.append("" + System.currentTimeMillis() + " ");
     messageToLog.append(processingTimeOrFlag + " " + benchmarkID + " "
-      + objectInvokingThisCheckPoint.getClass().getName() + " ");
+            + objectInvokingThisCheckPoint.getClass().getName() + " ");
 
-    messageToLog.append(benchmarkingFeatures.toString().replaceAll("\n", ""))
-      .append("\n");
+    if(benchmarkingFeatures == null) {
+      messageToLog.append("{}");
+    }
+    else {
+      messageToLog.append(benchmarkingFeatures.toString().replaceAll("\n", ""))
+            .append("\n");
+    }
     logger.info(messageToLog.toString());
   }
 
@@ -187,7 +215,7 @@ public class Benchmark {
    * @return
    */
   public static String createBenchmarkId(String resourceName,
-    String parentBenchmarkID) {
+          String parentBenchmarkID) {
     if(parentBenchmarkID != null) {
       if(resourceName != null) {
         return (parentBenchmarkID + "." + resourceName).replaceAll("[ ]+", "_");
@@ -223,5 +251,63 @@ public class Benchmark {
    */
   public static void setBenchmarkingEnabled(boolean benchmarkingEnabled) {
     Benchmark.benchmarkingEnabled = benchmarkingEnabled;
+  }
+
+  /**
+   * Executes the given {@link Executable}, logging its runtime under
+   * the given benchmark ID (which is propagated to the Executable if it
+   * is itself {@link Benchmarkable}).
+   * 
+   * @param executable the object to execute
+   * @param benchmarkID the benchmark ID
+   * @param objectInvokingThisCheckPoint the object invoking this method
+   *          (typically the caller would pass <code>this</code> here)
+   * @param benchmarkingFeatures features to include in the check point
+   *          log
+   * @throws ExecutionException any exceptions thrown by the underlying
+   *           Executable are propagated.
+   */
+  public static void executeWithBenchmarking(Executable executable,
+          String benchmarkID, Object objectInvokingThisCheckPoint,
+          Map benchmarkingFeatures) throws ExecutionException {
+    if(!benchmarkingEnabled) {
+      executable.execute();
+    }
+    else {
+      long startTime = startPoint();
+      String savedBenchmarkID = null;
+      try {
+        if(executable instanceof Benchmarkable) {
+          savedBenchmarkID = ((Benchmarkable)executable).getBenchmarkId();
+          ((Benchmarkable)executable).setBenchmarkId(benchmarkID);
+        }
+
+        executable.execute();
+      }
+      catch(Exception e) {
+        Map tempFeatures = new HashMap();
+        if(benchmarkingFeatures != null) {
+          tempFeatures.putAll(benchmarkingFeatures);
+        }
+        tempFeatures.put("exceptionThrown", e);
+        checkPoint(startTime, benchmarkID, objectInvokingThisCheckPoint,
+                tempFeatures);
+        if(e instanceof ExecutionException) {
+          throw (ExecutionException)e;
+        }
+        else {
+          throw (RuntimeException)e;
+        }
+      }
+      finally {
+        if(savedBenchmarkID != null) {
+          ((Benchmarkable)executable).setBenchmarkId(savedBenchmarkID);
+        }
+      }
+
+      // succeeded, so log checkpoint with the original features
+      checkPoint(startTime, benchmarkID, objectInvokingThisCheckPoint,
+              benchmarkingFeatures);
+    }
   }
 }

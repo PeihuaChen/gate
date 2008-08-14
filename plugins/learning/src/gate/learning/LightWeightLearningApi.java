@@ -1723,19 +1723,9 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
   }
 
   // /////// Benchmarkable ////////////////
-  private String parentBenchmarkID;
   private String benchmarkID;
 
-  /**
-   * Returns the benchmark ID of the parent of this resource.
-   * 
-   * @return
-   */
-  public String getParentBenchmarkId() {
-    return this.parentBenchmarkID;
-  }
-
-  /**
+   /**
    * Returns the benchmark ID of this resource.
    * 
    * @return
@@ -1748,32 +1738,12 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
   }
 
   /**
-   * Given an ID of the parent resource, this method is responsible for
-   * producing the Benchmark ID, unique to this resource.
-   * 
-   * @param parentID
-   */
-  public void createBenchmarkId(String parentID) {
-    parentBenchmarkID = parentID;
-    benchmarkID = Benchmark.createBenchmarkId("LightWeightLearningApi",
-      parentID);
-  }
-
-  /**
    * This method sets the benchmarkID for this resource.
    * 
    * @param benchmarkID
    */
-  public void setParentBenchmarkId(String benchmarkID) {
-    parentBenchmarkID = benchmarkID;
+  public void setBenchmarkId(String benchmarkID) {
+    this.benchmarkID = benchmarkID;
   }
 
-  /**
-   * Returns the logger object being used by this resource.
-   * 
-   * @return
-   */
-  public Logger getLogger() {
-    return Benchmark.logger;
-  }
 }

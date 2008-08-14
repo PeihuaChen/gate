@@ -50,14 +50,27 @@ public class ConditionalSerialAnalyserController
     if(corpus == null) throw new ExecutionException(
       "(ConditionalSerialAnalyserController) \"" + getName() + "\":\n" +
       "The corpus supplied for execution was null!");
+    
+    benchmarkFeatures.put(Benchmark.CORPUS_NAME_FEATURE, corpus.getName());
+    
     //iterate through the documents in the corpus
     for(int i = 0; i < corpus.size(); i++){
       if(isInterrupted()) throw new ExecutionInterruptedException(
         "The execution of the " + getName() +
         " application has been abruptly interrupted!");
-
+      
       boolean docWasLoaded = corpus.isDocumentLoaded(i);
+      
+      // record the time before loading the document
+      long documentLoadingStartTime = Benchmark.startPoint();
+
       Document doc = (Document)corpus.get(i);
+
+      // report the document loading
+      benchmarkFeatures.put(Benchmark.DOCUMENT_NAME_FEATURE, doc.getName());
+      Benchmark.checkPoint(documentLoadingStartTime,
+              Benchmark.createBenchmarkId(Benchmark.DOCUMENT_LOADED,
+                      getBenchmarkId()), this, benchmarkFeatures);
       //run the system over this document
       //set the doc and corpus
       for(int j = 0; j < prList.size(); j++){
@@ -81,8 +94,12 @@ public class ConditionalSerialAnalyserController
       }
 
       if(!docWasLoaded){
-        //trigger saving
+        long documentSavingStartTime = Benchmark.startPoint();
+        // trigger saving
         corpus.unloadDocument(doc);
+        Benchmark.checkPoint(documentSavingStartTime,
+                Benchmark.createBenchmarkId(Benchmark.DOCUMENT_SAVED,
+                        getBenchmarkId()), this, benchmarkFeatures);
         //close the previoulsy unloaded Doc
         Factory.deleteResource(doc);
       }

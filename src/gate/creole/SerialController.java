@@ -211,31 +211,14 @@ public class SerialController extends AbstractController implements
         + "\n" + e.toString() + "\n...nothing to lose any sleep over.");
     }
 
-    // id that holds the existing parent ID ofthe PR
-    String oldParentIDOfThePR = null;
-
-    // check if the PR is benchmarkable
-    // if so we need to set the appropriate IDs on it.
-    if(currentPR instanceof Benchmarkable) {
-      Benchmarkable b = (Benchmarkable)currentPR;
-
-      // obtain its old parentBenchmarkID
-      oldParentIDOfThePR = b.getParentBenchmarkId();
-
-      // create a new ID for the PR
-      b.createBenchmarkId(getBenchmarkId());
-    }
-
-    // report the starting of execution
-    long startTime = Benchmark.startPoint();
     benchmarkFeatures.put(Benchmark.PR_NAME_FEATURE, currentPR.getName());
 
+    long startTime = System.currentTimeMillis();
     // run the thing
-    currentPR.execute();
+    Benchmark.executeWithBenchmarking(currentPR,
+            Benchmark.createBenchmarkId(Benchmark.PR_PREFIX + currentPR.getName(),
+                    getBenchmarkId()), this, benchmarkFeatures);
 
-    // report the end of execution
-    Benchmark.checkPoint(startTime, getBenchmarkId() + "."
-      + Benchmark.PR_EXECUTION, this, benchmarkFeatures);
     benchmarkFeatures.remove(Benchmark.PR_NAME_FEATURE);
 
     // calculate the time taken by the PR
@@ -247,11 +230,6 @@ public class SerialController extends AbstractController implements
     time = new Long(time.longValue() + timeTakenByThePR);
     prTimeMap.put(currentPR.getName(), time);
 
-
-    // reset the parent benchmark id of the PR
-    if(currentPR instanceof Benchmarkable) {
-      ((Benchmarkable)currentPR).setParentBenchmarkId(oldParentIDOfThePR);
-    }
 
     // remove the listeners
     try {
