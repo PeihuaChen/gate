@@ -1215,10 +1215,8 @@ public class SerialControllerEditor extends AbstractVisualResource
                 "GATE", JOptionPane.ERROR_MESSAGE);
               return;
             }
-            if(controller instanceof SerialAnalyserController)
-              ((SerialAnalyserController)controller).setCorpus(corpus);
-            else if(controller instanceof ConditionalSerialAnalyserController)
-              ((ConditionalSerialAnalyserController)controller).setCorpus(corpus);
+            if(controller instanceof CorpusController)
+              ((CorpusController)controller).setCorpus(corpus);
           }
           //check the runtime parameters
           List badPRs;
@@ -1259,7 +1257,8 @@ public class SerialControllerEditor extends AbstractVisualResource
           fireProgressChanged(0);
 
           try {
-            controller.execute();
+            Benchmark.executeWithBenchmarking(controller, controller.getName(),
+                    RunAction.this, null);
           }catch(ExecutionInterruptedException eie){
             MainFrame.unlockGUI();
             JOptionPane.showMessageDialog(

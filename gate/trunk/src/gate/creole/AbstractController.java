@@ -32,11 +32,6 @@ public abstract class AbstractController extends AbstractResource implements
   protected String benchmarkID;
 
   /**
-   * Benchmark ID of the parent object.
-   */
-  protected String parentBenchmarkID;
-
-  /**
    * Shared featureMap
    */
   protected Map benchmarkFeatures = new HashMap();
@@ -56,19 +51,8 @@ public abstract class AbstractController extends AbstractResource implements
     }
     Throwable thrown = null;
     try {
-
-      // record when the execution started
-      long startTime = Benchmark.startPoint();
-      benchmarkFeatures.put(Benchmark.APPLICATION_NAME_FEATURE, getName());
-
       // do the real work
       this.executeImpl();
-
-      // report the end of execution
-      Benchmark.checkPoint(startTime, getBenchmarkId() + "."
-        + Benchmark.APPLICATION_EXECUTION, this, benchmarkFeatures);
-      benchmarkFeatures.remove(Benchmark.APPLICATION_NAME_FEATURE);
-
     }
     catch(Throwable t) {
       thrown = t;
@@ -414,18 +398,16 @@ public abstract class AbstractController extends AbstractResource implements
       }
     }
   }
-
+  
   /**
-   * Returns the benchmark ID of the parent of this resource.
-   * 
-   * @return
+   * Sets the benchmark ID of this controller.
    */
-  public String getParentBenchmarkId() {
-    return parentBenchmarkID;
+  public void setBenchmarkId(String benchmarkID) {
+    this.benchmarkID = benchmarkID;
   }
 
   /**
-   * Returns the benchmark ID of this resource.
+   * Returns the benchmark ID of this controller.
    * 
    * @return
    */
@@ -435,35 +417,4 @@ public abstract class AbstractController extends AbstractResource implements
     }
     return benchmarkID;
   }
-
-  /**
-   * Given an ID of the parent resource, this method is responsible for
-   * producing the Benchmark ID, unique to this resource.
-   * 
-   * @param parentID
-   */
-  public void createBenchmarkId(String parentBenchmarkID) {
-    this.parentBenchmarkID = parentBenchmarkID;
-    this.benchmarkID =
-      Benchmark.createBenchmarkId(getName(), parentBenchmarkID);
-  }
-
-  /**
-   * This method sets the benchmarkID for this resource.
-   * 
-   * @param benchmarkID
-   */
-  public void setParentBenchmarkId(String parentBenchmarkID) {
-    this.parentBenchmarkID = parentBenchmarkID;
-  }
-
-  /**
-   * Returns the logger object being used by this resource.
-   * 
-   * @return
-   */
-  public Logger getLogger() {
-    return Benchmark.logger;
-  }
-
 }
