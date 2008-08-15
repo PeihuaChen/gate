@@ -36,6 +36,8 @@ public interface ConstraintPredicate {
   // parsers
   public String EQUAL = "==";
 
+  public String NOT_EQUAL = "!=";
+  
   public String GREATER = ">";
 
   public String LESSER = "<";
@@ -44,13 +46,13 @@ public interface ConstraintPredicate {
 
   public String LESSER_OR_EQUAL = "<=";
 
-  public String REGEXP = "=~";
+  public String REGEXP_FIND = "=~";
+  
+  public String NOT_REGEXP_FIND = "!~";
+  
+  public String REGEXP_MATCH = "==~";
 
-  // Note that the != and !~ operators are syntactic shortcuts and not
-  // encapsulated in distinct predicates. The parser translates these
-  // to be negated versions of == and =~
-  // public String NOT_EQUAL = "!=";
-  // public String NOT_REGEXP = "!~";
+  public String NOT_REGEXP_MATCH = "!=~";
 
   /**
    * The accessor associated with this predicate.

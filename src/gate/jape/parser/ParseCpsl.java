@@ -713,18 +713,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       accessor = Accessor();
       opTok = jj_consume_token(attrOp);
       attrValPair = AttrVal();
-      // check for some "short cut" negation operators that need to be translated
-      // to the positive equivalents.  Change the sign of the constraint when
-      // using these.
       opString = opTok.image;
-      if (opString.equals("!=")) {
-          opString = "==";
-          c.changeSign();
-      }
-      else if (opString.equals("!~")) {
-          opString = "=~";
-          c.changeSign();
-      }
       c.addAttribute(Factory.getConstraintFactory().createPredicate(opString, accessor, attrValPair.second));
       break;
     default:
@@ -1172,6 +1161,13 @@ existingAttrName + "\");" + nl +
     return false;
   }
 
+  final private boolean jj_3R_13() {
+    if (jj_scan_token(colon)) return true;
+    if (jj_scan_token(ident)) return true;
+    if (jj_scan_token(leftBrace)) return true;
+    return false;
+  }
+
   final private boolean jj_3R_14() {
     if (jj_scan_token(ident)) return true;
     return false;
@@ -1214,11 +1210,6 @@ existingAttrName + "\");" + nl +
     return false;
   }
 
-  final private boolean jj_3_2() {
-    if (jj_3R_13()) return true;
-    return false;
-  }
-
   final private boolean jj_3R_17() {
     Token xsp;
     xsp = jj_scanpos;
@@ -1229,10 +1220,8 @@ existingAttrName + "\");" + nl +
     return false;
   }
 
-  final private boolean jj_3R_13() {
-    if (jj_scan_token(colon)) return true;
-    if (jj_scan_token(ident)) return true;
-    if (jj_scan_token(leftBrace)) return true;
+  final private boolean jj_3_2() {
+    if (jj_3R_13()) return true;
     return false;
   }
 
