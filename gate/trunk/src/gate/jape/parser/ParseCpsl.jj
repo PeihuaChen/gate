@@ -217,7 +217,7 @@ PARSER_END(ParseCpsl)
 <DEFAULT> TOKEN [IGNORE_CASE]: { <priority:     "Priority:"> }
 <DEFAULT> TOKEN: { <pling: "!"> }
 <DEFAULT> TOKEN: { <kleeneOp: "*" | "+" | "?"> }
-<DEFAULT> TOKEN: { <attrOp: "==" | "!=" | ">" | "<" | ">=" | "<=" | "=~" | "!~"> }
+<DEFAULT> TOKEN: { <attrOp: "==" | "!=" | ">" | "<" | ">=" | "<=" | "=~" | "!~" | "==~" | "!=~"> }
 <DEFAULT> TOKEN: { <integer: ( ["0"-"9"] )+ > }
 
 
@@ -736,18 +736,7 @@ Constraint Constraint() :
   (
     accessor=Accessor() opTok=<attrOp> attrValPair=AttrVal()
     {
-      // check for some "short cut" negation operators that need to be translated
-      // to the positive equivalents.  Change the sign of the constraint when
-      // using these.
       opString = opTok.image;
-      if (opString.equals("!=")) {
-          opString = "==";
-          c.changeSign();
-      }
-      else if (opString.equals("!~")) {
-          opString = "=~";
-          c.changeSign();
-      }
       c.addAttribute(Factory.getConstraintFactory().createPredicate(opString, accessor, attrValPair.second));
     }
   )?

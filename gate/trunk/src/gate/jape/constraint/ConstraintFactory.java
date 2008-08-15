@@ -37,12 +37,16 @@ public class ConstraintFactory {
 
   protected void initMap() {
     addOperator(ConstraintPredicate.EQUAL, EqualPredicate.class);
+    addOperator(ConstraintPredicate.NOT_EQUAL, NotEqualPredicate.class);
     addOperator(ConstraintPredicate.GREATER, GreaterPredicate.class);
     addOperator(ConstraintPredicate.LESSER, LesserPredicate.class);
     addOperator(ConstraintPredicate.GREATER_OR_EQUAL,
             GreaterEqualPredicate.class);
     addOperator(ConstraintPredicate.LESSER_OR_EQUAL, LesserEqualPredicate.class);
-    addOperator(ConstraintPredicate.REGEXP, RegExpPredicate.class);
+    addOperator(ConstraintPredicate.REGEXP_FIND, RegExpFindPredicate.class);
+    addOperator(ConstraintPredicate.NOT_REGEXP_FIND, NotRegExpFindPredicate.class);
+    addOperator(ConstraintPredicate.REGEXP_MATCH, RegExpMatchPredicate.class);
+    addOperator(ConstraintPredicate.NOT_REGEXP_MATCH, NotRegExpMatchPredicate.class);
   }
 
   public void addOperator(String operator,

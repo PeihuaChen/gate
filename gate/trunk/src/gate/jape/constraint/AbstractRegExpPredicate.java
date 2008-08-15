@@ -16,14 +16,21 @@ package gate.jape.constraint;
 
 import gate.jape.JapeException;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-public class RegExpPredicate extends AbstractConstraintPredicate {
-
-  public String getOperator() {
-    return REGEXP;
-  }
+/**
+ * Abstract regular expression based predicate implementation. This
+ * class handles parsing of the regexp into a {@link Pattern} object,
+ * and at match time it creates a {@link Matcher} for the annotation
+ * value. Concrete subclasses define the different criteria for what
+ * counts as a "match" in terms of {@link Matcher#find()} and
+ * {@link Matcher#matches()}.
+ */
+public abstract class AbstractRegExpPredicate
+                                             extends
+                                               AbstractConstraintPredicate {
 
   @Override
   public String toString() {
@@ -45,7 +52,8 @@ public class RegExpPredicate extends AbstractConstraintPredicate {
 
   /**
    * Returns true if the given value matches the set pattern. If the
-   * value is null it is treated as an empty string.
+   * value is null it is treated as an empty string. The actual matching
+   * logic is defined by {@link #matcherResult}.
    */
   public boolean doMatch(Object annotValue, Object context)
           throws JapeException {
@@ -55,7 +63,7 @@ public class RegExpPredicate extends AbstractConstraintPredicate {
     if(annotValue instanceof String) {
       String annotValueString = (String)annotValue;
       Pattern constraintPattern = (Pattern)getValue();
-      return constraintPattern.matcher(annotValueString).matches();
+      return matcherResult(constraintPattern.matcher(annotValueString));
     }
     else {
       throw new JapeException("Cannot do pattern matching on attribute '"
@@ -63,4 +71,15 @@ public class RegExpPredicate extends AbstractConstraintPredicate {
     }
   }
 
+  /**
+   * Must be implemented by subclasses to define the matching logic,
+   * typically one of {@link Matcher#find()} and
+   * {@link Matcher#matches()}, possibly negated.
+   * 
+   * @param m a {@link Matcher} for the annotation value string,
+   *          obtained from the constraint pattern.
+   * @return true if this constraint should be considered to match,
+   *         false otherwise.
+   */
+  protected abstract boolean matcherResult(Matcher m);
 }
