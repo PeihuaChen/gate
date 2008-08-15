@@ -115,9 +115,8 @@ public class TestJape extends BaseJapeTests
     //load the application
     URL applicationURL = Files.getGateResource(
             "gate.ac.uk/tests/jape/jape-test.xgapp");
-    java.io.File applicationFile = Files.fileFromURL(applicationURL);
     CorpusController application = (CorpusController)
-        PersistenceManager.loadObjectFromFile(applicationFile);
+        PersistenceManager.loadObjectFromUrl(applicationURL);
     //load the test file
     Document testDoc = Factory.newDocument(Files.getGateResource(
             "gate.ac.uk/tests/jape/test-doc.xml"), "UTF-8");
