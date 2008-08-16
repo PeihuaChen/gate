@@ -297,9 +297,7 @@
   -->
   <target name="test.uimaingate" depends="core.jar, examples.jar, test.jar" >
     <parallel>
-      <daemons>
-        <ant target="vns" />
-      </daemons>
+      <ant target="vns" />
       <sequential>
         <!-- wait for vns to start before starting service -->
         <sleep seconds="10" />
@@ -329,6 +327,7 @@
           <sysproperty key="java.awt.headless" value="true" />
           <arg value="gate.uima.TokenHandlerService" />
         </java>
+        <touch file="${vns.tmpdir}/quit" />
       </sequential>
     </parallel>
   </target>
