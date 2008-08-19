@@ -27,6 +27,18 @@
       <ICON>lr.gif</ICON>
     </RESOURCE>
 
+	<RESOURCE>
+      <NAME>Compound Document From Xml</NAME>
+      <CLASS>gate.compound.impl.CompoundDocumentFromXml</CLASS>
+      <JAR>aligntools.jar</JAR>
+      <INTERFACE>gate.compound.CompoundDocument</INTERFACE>
+      <COMMENT>GATE Compound Document (http://gate.ac.uk/sale/tao/#sec:alignment:compounddocument)</COMMENT>
+      <PARAMETER NAME="sourceUrl"
+          SUFFIXES="xml"
+          COMMENT="Source URL">java.net.URL</PARAMETER>
+      <ICON>lr.gif</ICON>
+    </RESOURCE>
+
     <RESOURCE>
       <NAME>Compound Document Editor</NAME>
       <JAR>aligntools.jar</JAR>      
