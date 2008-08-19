@@ -539,6 +539,12 @@ public class OntologyTreePanel extends JPanel {
     catch(Exception e) {
       e.printStackTrace();
     }
+    // chop off the class name at the max key length to avoid Preferences
+    // exception
+    if(className.length() > java.util.prefs.Preferences.MAX_KEY_LENGTH) {
+      className = className.substring(0,
+          java.util.prefs.Preferences.MAX_KEY_LENGTH);
+    }
     int rgba = prefRoot.getInt(className, -1);
     Color colour;
     if(rgba == -1) {
