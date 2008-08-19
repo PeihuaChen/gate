@@ -20,6 +20,7 @@ import javax.swing.*;
 import javax.swing.tree.*;
 import javax.swing.event.*;
 import java.util.*;
+import java.util.prefs.Preferences;
 import gate.*;
 import gate.creole.*;
 import java.io.*;
@@ -1996,9 +1997,15 @@ public class CorefEditor
    * @return
    */
   private Color getColor(String annotationType) {
-    java.util.prefs.Preferences prefRoot = null;
+    // chop off the annotation type at the max preferences key length if
+    // necessary.
+    if(annotationType != null
+        && annotationType.length() > Preferences.MAX_KEY_LENGTH) {
+      annotationType = annotationType.substring(0, Preferences.MAX_KEY_LENGTH);
+    }
+    Preferences prefRoot = null;
     try {
-      prefRoot = java.util.prefs.Preferences.userNodeForPackage(Class.forName(
+      prefRoot = Preferences.userNodeForPackage(Class.forName(
           "gate.gui.docview.AnnotationSetsView"));
     }
     catch (Exception e) {
