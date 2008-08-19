@@ -293,6 +293,12 @@ public class AnnotationSetsView extends AbstractDocumentView
   }
 
   protected Color getColor(String annotationType){
+    // chop off the annotation type at the max preferences key length if
+    // necessary.
+    if(annotationType != null
+        && annotationType.length() > Preferences.MAX_KEY_LENGTH) {
+      annotationType = annotationType.substring(0, Preferences.MAX_KEY_LENGTH);
+    }
     Preferences prefRoot = Preferences.userNodeForPackage(getClass());
     int rgba = prefRoot.getInt(annotationType, -1);
     Color colour;
@@ -314,6 +320,12 @@ public class AnnotationSetsView extends AbstractDocumentView
   }
   
   protected void saveColor(String annotationType, Color colour){
+    // chop off the annotation type at the max preferences key length if
+    // necessary.
+    if(annotationType != null
+        && annotationType.length() > Preferences.MAX_KEY_LENGTH) {
+      annotationType = annotationType.substring(0, Preferences.MAX_KEY_LENGTH);
+    }
     Preferences prefRoot = Preferences.userNodeForPackage(getClass());
     int rgb = colour.getRGB();
     int alpha = colour.getAlpha();
