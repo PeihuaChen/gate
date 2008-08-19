@@ -51,7 +51,6 @@
 	<classpathentry kind="lib" path="lib/ant-junit.jar"/>
 	<classpathentry kind="lib" path="lib/ant-contrib-1.0b2.jar"/>
 	<classpathentry kind="lib" path="lib/activation.jar"/>
-	<classpathentry kind="lib" path="lib/nekohtml-0.9.5.jar"/>
 	<classpathentry kind="lib" path="lib/geronimo-ws-metadata_2.0_spec-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/jaxb-api-2.0.jar"/>
 	<classpathentry kind="lib" path="lib/jaxws-api-2.0.jar"/>
@@ -108,5 +107,6 @@
 	<classpathentry kind="lib" path="lib/lucene-core-2.2.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/tools.jar"/>
 	<classpathentry kind="lib" path="plugins/Stanford/lib/stanford-parser.jar"/>
+	<classpathentry kind="lib" path="lib/nekohtml-1.9.8+2039483.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
