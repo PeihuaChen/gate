@@ -749,55 +749,44 @@ public class MainFrame extends JFrame implements ProgressListener,
     toolbar = new JToolBar(JToolBar.HORIZONTAL);
     toolbar.setFloatable(false);
     toolbar.add(new LoadResourceFromFileAction());
-    JMenuBar smallMenuBar = new JMenuBar();
-    smallMenuBar.setBorderPainted(false);
-    smallMenuBar.setAlignmentY(JComponent.CENTER_ALIGNMENT);
-    JMenu annieMenu = new JMenu();
-    annieMenu.setIcon(getIcon("annie-application"));
-    annieMenu.setToolTipText("Load ANNIE System");
+    toolbar.addSeparator();
+    
+    JPopupMenu annieMenu = new JPopupMenu();
     annieMenu.add(new LoadANNIEWithDefaultsAction());
     annieMenu.add(new LoadANNIEWithoutDefaultsAction());
-    smallMenuBar.add(annieMenu);
-    toolbar.add(smallMenuBar);
+    JMenuButton menuButton = new JMenuButton(annieMenu);
+    menuButton.setIcon(getIcon("annie-application"));
+    menuButton.setToolTipText("Load ANNIE System");
+    toolbar.add(menuButton);
     toolbar.addSeparator();
-    smallMenuBar = new JMenuBar();
-    smallMenuBar.setBorderPainted(false);
-    smallMenuBar.setAlignmentY(JComponent.CENTER_ALIGNMENT);
+    
     LiveMenu tbNewLRMenu = new LiveMenu(LiveMenu.LR);
-    tbNewLRMenu.setToolTipText("New Language Resource");
-    tbNewLRMenu.setIcon(getIcon("lrs"));
-    smallMenuBar.add(tbNewLRMenu);
-    toolbar.add(smallMenuBar);
-
-    smallMenuBar = new JMenuBar();
-    smallMenuBar.setBorderPainted(false);
-    smallMenuBar.setAlignmentY(JComponent.CENTER_ALIGNMENT);
+    menuButton = new JMenuButton(tbNewLRMenu);
+    menuButton.setToolTipText("New Language Resource");
+    menuButton.setIcon(getIcon("lrs"));
+    toolbar.add(menuButton);
+    
     LiveMenu tbNewPRMenu = new LiveMenu(LiveMenu.PR);
-    tbNewPRMenu.setToolTipText("New Processing Resource");
-    tbNewPRMenu.setIcon(getIcon("prs"));
-    smallMenuBar.add(tbNewPRMenu);
-    toolbar.add(smallMenuBar);
+    menuButton = new JMenuButton(tbNewPRMenu);
+    menuButton.setToolTipText("New Processing Resource");
+    menuButton.setIcon(getIcon("prs"));
+    toolbar.add(menuButton);
 
-    smallMenuBar = new JMenuBar();
-    smallMenuBar.setBorderPainted(false);
-    smallMenuBar.setAlignmentY(JComponent.CENTER_ALIGNMENT);
     LiveMenu tbNewAppMenu = new LiveMenu(LiveMenu.APP);
-    tbNewAppMenu.setToolTipText("New Application");
-    tbNewAppMenu.setIcon(getIcon("applications"));
-    smallMenuBar.add(tbNewAppMenu);
-    toolbar.add(smallMenuBar);
-
-    smallMenuBar = new JMenuBar();
-    smallMenuBar.setBorderPainted(false);
-    smallMenuBar.setAlignmentY(JComponent.CENTER_ALIGNMENT);
-    JMenu tbDsMenu = new JMenu();
-    tbDsMenu.setToolTipText("Datastores");
-    tbDsMenu.setIcon(getIcon("datastores"));
+    menuButton = new JMenuButton(tbNewAppMenu);
+    menuButton.setToolTipText("New Application");
+    menuButton.setIcon(getIcon("applications"));
+    toolbar.add(menuButton);
+    toolbar.addSeparator();
+    
+    JPopupMenu tbDsMenu = new JPopupMenu();
     tbDsMenu.add(new NewDSAction());
     tbDsMenu.add(new OpenDSAction());
-    smallMenuBar.add(tbDsMenu);
-    toolbar.add(smallMenuBar);
-
+    menuButton = new JMenuButton(tbDsMenu);
+    menuButton.setToolTipText("Datastores");
+    menuButton.setIcon(getIcon("datastores"));
+    toolbar.add(menuButton);
+    
     toolbar.addSeparator();
     toolbar.add(new ManagePluginsAction());
     toolbar.addSeparator();
@@ -3331,14 +3320,14 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
 
     protected void init() {
-      addMenuListener(new MenuListener() {
-        public void menuCanceled(MenuEvent e) {
+      getPopupMenu().addPopupMenuListener(new PopupMenuListener(){
+
+        public void popupMenuCanceled(PopupMenuEvent e) {         
+        }
+        public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
         }
 
-        public void menuDeselected(MenuEvent e) {
-        }
-
-        public void menuSelected(MenuEvent e) {
+        public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
           removeAll();
           // find out the available types of LRs and repopulate the menu
           CreoleRegister reg = Gate.getCreoleRegister();
@@ -3373,6 +3362,18 @@ public class MainFrame extends JFrame implements ProgressListener,
               add(new XJMenuItem(new NewResourceAction(rData), MainFrame.this));
             }
           }
+        }
+        
+      });
+      
+      addMenuListener(new MenuListener() {
+        public void menuCanceled(MenuEvent e) {
+        }
+
+        public void menuDeselected(MenuEvent e) {
+        }
+
+        public void menuSelected(MenuEvent e) {
         }
       });
     }
