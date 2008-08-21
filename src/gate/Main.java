@@ -91,6 +91,7 @@ public class Main {
     } else {
       runGui();
     }
+//    Gate.setUseXMLSerialization(false);
   } // main
 
   /** Register any CREOLE URLs that we got on the command line */
