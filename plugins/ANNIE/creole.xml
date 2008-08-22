@@ -457,6 +457,16 @@
 				NAME="definitionFileURL">
 				java.net.URL
 			</PARAMETER>
+			<PARAMETER DEFAULT="0.50"
+				COMMENT="Minimum likelihood that a name is a nickname of a formal name to be allowed as a nickname" 
+				NAME="minimumNicknameLikelihood">
+				java.lang.Double
+			</PARAMETER>
+			<PARAMETER NAME="highPrecisionOrgs" DEFAULT="false"
+			    COMMENT="True indicates that we only use very safe features for matching orgs, such as ACME = ACME, Inc."
+				OPTIONAL="true">
+				java.lang.Boolean
+			</PARAMETER>
 			<PARAMETER DEFAULT="UTF-8"
 				COMMENT="The encoding used for reading the definitions"
 				NAME="encoding">
