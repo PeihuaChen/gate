@@ -17,6 +17,7 @@ package gate.creole;
 import java.util.*;
 
 import gate.*;
+import gate.creole.metadata.CreoleResource;
 import gate.event.CreoleEvent;
 import gate.util.*;
 
@@ -30,6 +31,9 @@ import gate.util.*;
  * from {@link SerialController} which makes it a <b>conditional</b> serial
  * analyser controller.
  */
+@CreoleResource(name = "Conditional Corpus Pipeline",
+    comment = "A serial controller for conditionally run PR pipelines "
+        + "over corpora")
 public class ConditionalSerialAnalyserController
        extends ConditionalSerialController implements CorpusController {
 

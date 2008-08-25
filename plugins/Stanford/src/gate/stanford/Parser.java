@@ -5,6 +5,7 @@ import edu.stanford.nlp.trees.*;
 import gate.*;
 import gate.util.*;
 import gate.creole.*;
+import gate.creole.metadata.*;
 
 import java.io.*;
 import java.net.*;
@@ -21,6 +22,7 @@ import edu.stanford.nlp.ling.*;
  * parameters.
  * @author adam
  */
+@CreoleResource(name = "StanfordParser", comment = "Stanford parser wrapper")
 public class Parser extends AbstractLanguageAnalyser 
 implements ProcessingResource {
 
@@ -86,6 +88,10 @@ implements ProcessingResource {
     return tlppClass;
   }
 
+  @CreoleParameter(comment = "Class name of the TreebankLangParserParams "
+      + "implementation used to extract the dependencies",
+      defaultValue = 
+          "edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams")
   public void setTlppClass(String tlppClass) {
     this.tlppClass = tlppClass;
   }
@@ -532,6 +538,10 @@ implements ProcessingResource {
 
   /* get & set methods for the CREOLE parameters */
 
+  @Optional
+  @RunTime
+  @CreoleParameter(comment = "annotationSet used for input (Token and "
+      + "Sentence annotations) and output")
   public void setAnnotationSetName(String annotationSetName) {
     this.annotationSetName = annotationSetName;
   }
@@ -540,6 +550,9 @@ implements ProcessingResource {
     return this.annotationSetName;
   }
 
+  @Optional
+  @CreoleParameter(comment = "path to the parser's grammar file",
+      defaultValue = "resources/englishPCFG.ser.gz")
   public void setParserFile(URL parserFile) {
     this.parserFile = parserFile;
   }
@@ -548,6 +561,8 @@ implements ProcessingResource {
     return this.parserFile;
   }
 
+  @RunTime
+  @CreoleParameter(comment = "The document to be processed")
   public void setDocument(gate.Document document) {
     this.document = document;
   }
@@ -556,6 +571,9 @@ implements ProcessingResource {
     return this.document;
   }
 
+  @RunTime
+  @CreoleParameter(comment = "verbose mode for debugging",
+      defaultValue = "false")
   public void setDebug(Boolean debug) {
     this.debugMode = debug.booleanValue();
   }
@@ -564,6 +582,9 @@ implements ProcessingResource {
     return new Boolean(this.debugMode);
   }
   
+  @RunTime
+  @CreoleParameter(comment = "Re-use existing POS tags on tokens",
+      defaultValue = "false")
   public void setReusePosTags(Boolean reusePosTags) {
     this.reusePosTags = reusePosTags.booleanValue();
   }
@@ -572,6 +593,9 @@ implements ProcessingResource {
     return new Boolean(this.reusePosTags);
   }
   
+  @RunTime
+  @CreoleParameter(comment = "Create POS tags on the Token annotations",
+      defaultValue = "false")
   public void setAddPosTags(Boolean posTagTokens) {
     this.addPosTags = posTagTokens.booleanValue();
   }
@@ -580,6 +604,9 @@ implements ProcessingResource {
     return new Boolean(this.addPosTags);
   }
 
+  @RunTime
+  @CreoleParameter(comment = "use tag mapping",
+      defaultValue = "false")
   public void setUseMapping(Boolean useMapping) {
     this.useMapping = useMapping.booleanValue();
   }
@@ -588,6 +615,9 @@ implements ProcessingResource {
     return new Boolean(this.useMapping);
   }
   
+  @RunTime
+  @CreoleParameter(comment = "Create dependency features on Token annotations",
+      defaultValue = "true")
   public void setAddDependencyFeatures(Boolean useDependency) {
     this.addDependencyFeatures = useDependency.booleanValue();
   }
@@ -596,6 +626,9 @@ implements ProcessingResource {
     return new Boolean(this.addDependencyFeatures);
   }
   
+  @RunTime
+  @CreoleParameter(comment = "Create annotations to show dependencies",
+      defaultValue = "true")
   public void setAddDependencyAnnotations(Boolean useDependency) {
     this.addDependencyAnnotations = useDependency.booleanValue();
   }
@@ -604,6 +637,9 @@ implements ProcessingResource {
     return new Boolean(this.addDependencyAnnotations);
   }
   
+  @RunTime
+  @CreoleParameter(comment = "Create annotations to show phrase structures",
+      defaultValue = "true")
   public void setAddConstituentAnnotations(Boolean usePhraseStructure) {
     this.addConstituentAnnotations = usePhraseStructure.booleanValue();
   }
@@ -615,6 +651,8 @@ implements ProcessingResource {
   /* Made mappingFile an init parameter to simplify things.
    * The CREOLE parameter is called "mappingFile" but it's actually a URL.
    */
+  @Optional
+  @CreoleParameter(comment = "path to the tag mapping file")
   public void setMappingFile(URL mappingFileURL) {
     this.mappingFile = null; // override below
     this.mappingFileURL = mappingFileURL;

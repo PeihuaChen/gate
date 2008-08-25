@@ -18,10 +18,12 @@ import java.util.*;
 import org.apache.log4j.Logger;
 
 import gate.*;
+import gate.creole.metadata.CreoleResource;
 import gate.event.*;
 import gate.util.Benchmark;
 import gate.util.Benchmarkable;
 
+@CreoleResource(icon = "application")
 public abstract class AbstractController extends AbstractResource implements
                                                                  Controller,
                                                                  Benchmarkable {

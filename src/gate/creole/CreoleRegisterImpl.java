@@ -26,6 +26,7 @@ import gate.Gate.DirectoryInfo;
 import gate.Gate.ResourceInfo;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
+import gate.util.CreoleXmlUpperCaseFilter;
 import gate.util.Err;
 import gate.util.GateClassLoader;
 import gate.util.GateException;
@@ -41,6 +42,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -48,6 +50,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -55,8 +58,18 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
+import org.jdom.output.Format;
+import org.jdom.output.SAXOutputter;
+import org.jdom.output.XMLOutputter;
+import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.DefaultHandler;
+import org.xml.sax.helpers.XMLFilterImpl;
 
 
 /** This class implements the CREOLE register interface. DO NOT
@@ -80,7 +93,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   protected Set<URL> directories;
 
   /** The parser for the CREOLE directory files */
-  protected transient SAXParser parser = null;
+  protected transient SAXBuilder jdomBuilder = null;
 
   /**
    * Default constructor. Sets up directory files parser. <B>NOTE:</B>
@@ -96,27 +109,8 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
     toolTypes = new HashSet<String>();
 
     // construct a SAX parser for parsing the CREOLE directory files
-    try {
-      // Get a parser factory.
-      SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-
-      // Set up the factory to create the appropriate type of parser:
-      // non validating one
-      saxParserFactory.setValidating(false);
-      // non namespace aware one
-      saxParserFactory.setNamespaceAware(true);
-
-      // create the parser
-      parser = saxParserFactory.newSAXParser();
-
-    } catch (SAXException e) {
-      if(DEBUG) Out.println(e);
-      throw(new GateException(e));
-    } catch (ParserConfigurationException e) {
-      if(DEBUG) Out.println(e);
-      throw(new GateException(e));
-    }
-
+    jdomBuilder = new SAXBuilder(false);
+    jdomBuilder.setXMLFilter(new CreoleXmlUpperCaseFilter());
   } // default constructor
 
   /** Add a CREOLE directory URL to the register and to the GATE classloader.
@@ -190,6 +184,8 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
     // add the URL
     //if already present do nothing
     if(directories.add(directoryUrl)){
+      //add it to the list of known directories
+      Gate.addKnownPlugin(directoryUrl);
       // parse the directory file
       try {
         parseDirectory(directoryXmlFileUrl.openStream(), directoryUrl, 
@@ -198,10 +194,9 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
       } catch(IOException e) {
         //it failed: remove it
         directories.remove(directoryUrl);
+        Gate.removeKnownPlugin(directoryUrl);
         throw(new GateException("couldn't open creole.xml: " + e.toString()));
       }
-      //add it to the list of known directories
-      Gate.addKnownPlugin(directoryUrl);
     }
   } // registerDirectories(URL)
 
@@ -217,9 +212,30 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
     // create a handler for the directory file and parse it;
     // this will create ResourceData entries in the register
     try {
+      Document jdomDoc = jdomBuilder.build(directoryStream, creoleFileUrl.toExternalForm());
+      // Add any JARs from the creole.xml to the GATE ClassLoader
+      addJarsToClassLoader(jdomDoc.getRootElement(), creoleFileUrl);
+
+      // Make sure there is a RESOURCE element for every resource type the
+      // directory defines
+      createResourceElementsForDirInfo(jdomDoc.getRootElement(), directoryUrl, creoleFileUrl);
+
+      // now we can process any annotations on the new classes
+      // and augment the XML definition
+      CreoleAnnotationHandler annotationHandler = new CreoleAnnotationHandler(creoleFileUrl);
+      annotationHandler.processAnnotations(jdomDoc);
+      
+      // debugging
+      if(DEBUG) {
+        XMLOutputter xmlOut = new XMLOutputter(Format.getPrettyFormat());
+        xmlOut.output(jdomDoc, System.out);
+      }
+      
+      // finally, parse the augmented definition with the normal parser
       DefaultHandler handler = new CreoleXmlHandler(this, directoryUrl, 
               creoleFileUrl);
-      parser.parse(directoryStream, handler);
+      SAXOutputter outputter = new SAXOutputter(handler, handler, handler, handler);
+      outputter.output(jdomDoc);
       if(DEBUG) {
         Out.prln(
           "done parsing " +
@@ -228,12 +244,57 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
       }
     } catch (IOException e) {
       throw(new GateException(e));
-    } catch (SAXException se) {
-      if(DEBUG) se.printStackTrace(Err.getPrintWriter());
-      throw(new GateException(se));
+    } catch (JDOMException je) {
+      if(DEBUG) je.printStackTrace(Err.getPrintWriter());
+      throw(new GateException(je));
     }
 
   } // parseDirectory
+
+  private void addJarsToClassLoader(Element jdomElt, URL creoleFileUrl) throws MalformedURLException{
+    if("JAR".equals(jdomElt.getName())) {
+      URL url = new URL(creoleFileUrl, jdomElt.getTextTrim());
+      Gate.getClassLoader().addURL(url);
+    }
+    else {
+      for(Element child : (List<Element>)jdomElt.getChildren()) {
+        addJarsToClassLoader(child, creoleFileUrl);
+      }
+    }
+  }
+
+  private void createResourceElementsForDirInfo(Element jdomElt, URL directoryUrl, URL creoleFileUrl) {
+    DirectoryInfo dirInfo = Gate.getDirectoryInfo(directoryUrl);
+    if(dirInfo != null) {
+      Map<String, Element> resourceElements = new HashMap<String, Element>();
+      findResourceElements(resourceElements, jdomElt);
+      for(ResourceInfo resInfo : (List<ResourceInfo>)dirInfo.getResourceInfoList()) {
+        if(!resourceElements.containsKey(resInfo.getResourceClassName())) {
+          // no existing RESOURCE element for this resource type (so it was
+          // auto-discovered from a <JAR SCAN="true">), so add a minimal
+          // RESOURCE element which will be filled in by the annotation
+          // processor.
+          jdomElt.addContent(new Element("RESOURCE")
+                    .addContent(new Element("CLASS")
+                        .setText(resInfo.getResourceClassName())));
+        }
+      }
+    }
+  }
+
+  private void findResourceElements(Map<String, Element> map, Element elt) {
+    if(elt.getName().equals("RESOURCE")) {
+      String className = elt.getChildTextTrim("CLASS");
+      if(className != null) {
+        map.put(className, elt);
+      }
+    }
+    else {
+      for(Element child : (List<Element>)elt.getChildren()) {
+        findResourceElements(map, child);
+      }
+    }
+  }
 
   /** Register resources that are built in to the GATE distribution.
     * These resources are described by the <TT>creole.xml</TT> file in

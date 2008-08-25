@@ -8,6 +8,7 @@ import java.lang.*;
 
 import gate.*;
 import gate.creole.*;
+import gate.creole.metadata.*;
 import gate.util.*;
 
 /**
@@ -17,6 +18,10 @@ import gate.util.*;
  * Results are stored in the document's TreeTaggerToken annotations
  */
 
+@CreoleResource(comment = "The TreeTagger is a language-independent "
+    + "part-of-speech tagger, which currently supports English, French, "
+    + "German, and Spanish "
+    + "(http://gate.ac.uk/sale/tao/#sec:misc-creole:treetagger)")
 public class TreeTagger
     extends AbstractLanguageAnalyser
     implements ProcessingResource {
@@ -294,6 +299,8 @@ public class TreeTagger
   /**
    * Set the document to process.
    */
+  @RunTime
+  @CreoleParameter(comment = "The document to process")
   public void setDocument(gate.Document document) {
     this.document = document;
   }
@@ -309,6 +316,10 @@ public class TreeTagger
    * Set the name of the annotation set to place the generated TreeTaggerToken
    * annotations in.
    */
+  @Optional
+  @RunTime
+  @CreoleParameter(
+      comment = "The annotation set to be used for the generated annotations")
   public void setAnnotationSetName(String annotationSetName) {
     this.annotationSetName = annotationSetName;
   }
@@ -323,6 +334,8 @@ public class TreeTagger
   /**
    * Set the location of the TreeTagger script.
    */
+  @RunTime
+  @CreoleParameter(comment = "Name of the TreeTagger command file")
   public void setTreeTaggerBinary(URL treeTaggerBinary) {
     this.treeTaggerBinary = treeTaggerBinary;
   }
@@ -341,6 +354,10 @@ public class TreeTagger
    * @throws IllegalCharsetNameException if the specified string is not a valid
    * encoding name.
    */
+  @RunTime
+  @CreoleParameter(defaultValue = "ISO-8859-1",
+      comment = "Character encoding for temporary files, must match "
+        + "the encoding of your tree tagger data files")
   public void setEncoding(String newEncoding) {
     this.charset = Charset.forName(newEncoding);
     // if the line above didn't throw an exception, we are OK.
@@ -358,6 +375,10 @@ public class TreeTagger
    * Set the flag for whether we should fail if an unmappable character is
    * found.
    */
+  @RunTime
+  @CreoleParameter(defaultValue = "true",
+        comment = "Should the tagger fail if it encounters a character which "
+          + "is not mappable into the specified encoding?")
   public void setFailOnUnmappableChar(Boolean newValue) {
     failOnUnmappableChar = (newValue == null) ? true : newValue.booleanValue();
   }

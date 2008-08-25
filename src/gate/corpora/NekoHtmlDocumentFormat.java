@@ -20,6 +20,9 @@ import gate.GateConstants;
 import gate.Resource;
 import gate.TextualDocument;
 import gate.creole.ResourceInstantiationException;
+import gate.creole.metadata.AutoInstance;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
 import gate.event.StatusListener;
 import gate.html.NekoHtmlDocumentHandler;
 import gate.util.DocumentFormatException;
@@ -53,6 +56,8 @@ import org.cyberneko.html.HTMLConfiguration;
  * format's ampCodingInfo.
  * </p>
  */
+@CreoleResource(name = "GATE HTML Document Format", isPrivate = true,
+    autoinstances = {@AutoInstance(hidden = true)})
 public class NekoHtmlDocumentFormat extends HtmlDocumentFormat {
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -67,6 +72,8 @@ public class NekoHtmlDocumentFormat extends HtmlDocumentFormat {
    */
   private Set<String> ignorableTags = null;
 
+  @CreoleParameter(comment = "HTML tags whose text content should be ignored",
+      defaultValue = "script;style")
   public void setIgnorableTags(Set<String> newTags) {
     this.ignorableTags = newTags;
   }

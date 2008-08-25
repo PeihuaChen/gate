@@ -22,6 +22,8 @@ import javax.swing.text.rtf.RTFEditorKit;
 
 import gate.Resource;
 import gate.creole.ResourceInstantiationException;
+import gate.creole.metadata.AutoInstance;
+import gate.creole.metadata.CreoleResource;
 import gate.util.DocumentFormatException;
 //import org.w3c.www.mime.*;
 
@@ -34,6 +36,8 @@ import gate.util.DocumentFormatException;
   * getDocumentFormat methods can then be used to get the appropriate
   * format class for a particular document.
   */
+@CreoleResource(name = "GATE RTF Document Format", isPrivate = true,
+    autoinstances = {@AutoInstance(hidden = true)})
 public class RtfDocumentFormat extends TextualDocumentFormat{
 
   /** Debug flag */

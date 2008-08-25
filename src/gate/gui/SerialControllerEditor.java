@@ -29,10 +29,14 @@ import javax.swing.table.TableCellRenderer;
 
 import gate.*;
 import gate.creole.*;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.GuiType;
 import gate.event.*;
 import gate.swing.*;
 import gate.util.*;
 
+@CreoleResource(name = "Serial Application Editor", guiType = GuiType.LARGE,
+    resourceDisplayed = "gate.creole.SerialController", mainViewer = true)
 public class SerialControllerEditor extends AbstractVisualResource
                                implements CreoleListener, ControllerListener,
                                           ActionsPublisher{

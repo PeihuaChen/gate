@@ -16,6 +16,7 @@ package gate.creole;
 import java.util.*;
 
 import gate.*;
+import gate.creole.metadata.CreoleResource;
 import gate.event.ControllerEvent;
 import gate.util.Err;
 
@@ -27,6 +28,8 @@ import gate.util.Err;
  * strategies and they only work with {@link LanguageAnalyser}s so the PRs that
  * are not analysers will get a default &quot;run always&quot; strategy.
  */
+@CreoleResource(name = "Conditional Pipeline",
+    comment = "A simple serial controller for conditionally run PRs")
 public class ConditionalSerialController extends SerialController
                                          implements ConditionalController{
 

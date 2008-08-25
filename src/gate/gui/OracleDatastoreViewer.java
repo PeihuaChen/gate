@@ -24,11 +24,15 @@ import javax.swing.tree.*;
 
 import gate.*;
 import gate.creole.*;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.GuiType;
 import gate.event.DatastoreEvent;
 import gate.event.DatastoreListener;
 import gate.persist.PersistenceException;
 import gate.util.*;
 
+@CreoleResource(name = "JDBC Datastore Viewer", guiType = GuiType.LARGE,
+    resourceDisplayed = "gate.persist.JDBCDataStore", mainViewer = true)
 public class OracleDatastoreViewer extends JTree
                                    implements VisualResource,
                                               DatastoreListener {

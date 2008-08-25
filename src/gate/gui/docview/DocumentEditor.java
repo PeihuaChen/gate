@@ -26,6 +26,8 @@ import javax.swing.text.BadLocationException;
 
 import gate.*;
 import gate.creole.*;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.GuiType;
 import gate.gui.ActionsPublisher;
 import gate.gui.MainFrame;
 import gate.gui.annedit.AnnotationData;
@@ -39,6 +41,8 @@ import gate.util.LuckyException;
  * the {@link DocumentView} interface.
  */
 
+@CreoleResource(name = "Document Editor", guiType = GuiType.LARGE,
+    resourceDisplayed = "gate.Document", mainViewer = true)
 public class DocumentEditor extends AbstractVisualResource
                             implements ActionsPublisher {
 

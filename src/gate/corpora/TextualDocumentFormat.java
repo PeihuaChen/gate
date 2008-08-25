@@ -19,6 +19,8 @@ import java.io.IOException;
 
 import gate.*;
 import gate.creole.ResourceInstantiationException;
+import gate.creole.metadata.AutoInstance;
+import gate.creole.metadata.CreoleResource;
 import gate.util.DocumentFormatException;
 
 //import org.w3c.www.mime.*;
@@ -32,6 +34,8 @@ import gate.util.DocumentFormatException;
   * getDocumentFormat methods can then be used to get the appropriate
   * format class for a particular document.
   */
+@CreoleResource(name = "GATE Textual Document Format", isPrivate = true,
+    autoinstances = {@AutoInstance(hidden = true)})
 public class TextualDocumentFormat extends DocumentFormat
 {
 

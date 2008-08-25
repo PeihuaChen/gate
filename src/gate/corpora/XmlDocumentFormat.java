@@ -21,6 +21,8 @@ import gate.GateConstants;
 import gate.Resource;
 import gate.TextualDocument;
 import gate.creole.ResourceInstantiationException;
+import gate.creole.metadata.AutoInstance;
+import gate.creole.metadata.CreoleResource;
 import gate.event.StatusListener;
 import gate.util.DocumentFormatException;
 import gate.util.Out;
@@ -54,6 +56,8 @@ import org.xml.sax.SAXException;
  * constructed. Static getDocumentFormat methods can then be used to get
  * the appropriate format class for a particular document.
  */
+@CreoleResource(name = "GATE XML Document Format", isPrivate = true,
+    autoinstances = {@AutoInstance(hidden = true)})
 public class XmlDocumentFormat extends TextualDocumentFormat {
   /** Debug flag */
   private static final boolean DEBUG = false;
