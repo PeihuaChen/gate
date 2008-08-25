@@ -23,6 +23,7 @@ import java.util.*;
 import gate.*;
 import gate.creole.AbstractLanguageResource;
 import gate.creole.ResourceInstantiationException;
+import gate.creole.metadata.*;
 import gate.event.*;
 import gate.util.Err;
 import gate.util.Strings;
@@ -31,6 +32,8 @@ import gate.util.Strings;
  * Corpora are sets of Document. They are ordered by lexicographic collation on
  * Url.
  */
+@CreoleResource(name = "GATE corpus", comment = "GATE transient corpus",
+    interfaceName = "gate.Corpus", icon = "corpus-trans")
 public class CorpusImpl extends AbstractLanguageResource implements Corpus,
                                                         CreoleListener {
 
@@ -607,6 +610,9 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
     }
   }
 
+  @Optional
+  @CreoleParameter(collectionElementType = Document.class,
+      comment = "A list of GATE documents")
   public void setDocumentsList(java.util.List documentsList) {
     this.documentsList = documentsList;
   }

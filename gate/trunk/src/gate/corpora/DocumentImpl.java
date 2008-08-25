@@ -21,6 +21,7 @@ import gate.*;
 import gate.annotation.AnnotationSetImpl;
 import gate.creole.AbstractLanguageResource;
 import gate.creole.ResourceInstantiationException;
+import gate.creole.metadata.*;
 import gate.event.*;
 import gate.util.*;
 
@@ -126,6 +127,8 @@ import gate.util.*;
  * 
  * </PRE>
  */
+@CreoleResource(name = "GATE Document", interfaceName = "gate.Document",
+    comment = "GATE transient document", icon = "document")
 public class DocumentImpl extends AbstractLanguageResource implements
                                                           TextualDocument,
                                                           CreoleListener,
@@ -438,6 +441,10 @@ public class DocumentImpl extends AbstractLanguageResource implements
   }
   
   /** Set the specific MIME type for this document */
+  @Optional
+  @CreoleParameter(
+      comment = "MIME type of the document.  If unspecified it will be "
+            + "inferred from the file extension, etc.")
   public void setMimeType(String newMimeType) {
     this.mimeType = newMimeType;
   }
@@ -448,6 +455,8 @@ public class DocumentImpl extends AbstractLanguageResource implements
   }
 
   /** Set method for the document's URL */
+  @CreoleParameter(disjunction = "source", comment = "Source URL",
+      suffixes = "txt;text;xml;xhtm;xhtml;html;htm;sgml;sgm;mail;email;eml;rtf;pdf;doc")
   public void setSourceUrl(URL sourceUrl) {
     this.sourceUrl = sourceUrl;
   } // setSourceUrl
@@ -468,6 +477,8 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * the original content will be retrieved from the DocumentContent object and
    * preserved as document feature.
    */
+  @CreoleParameter(comment = "Should the document preserve the original content?",
+      defaultValue = "false")
   public void setPreserveOriginalContent(Boolean b) {
     preserveOriginalContent = b;
   } // setPreserveOriginalContent
@@ -488,6 +499,8 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * converting of coordinates between the original document content and
    * extracted from the document text.
    */
+  @CreoleParameter(defaultValue = "false",
+      comment = "Should the document collect repositioning information")
   public void setCollectRepositioningInfo(Boolean b) {
     collectRepositioningInfo = b;
   } // setCollectRepositioningInfo
@@ -519,6 +532,9 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * offsets refer to the location of the document. This method sets the start
    * offset.
    */
+  @Optional
+  @CreoleParameter(
+      comment = "Start offset for documents based on ranges")
   public void setSourceUrlStartOffset(Long sourceUrlStartOffset) {
     this.sourceUrlStartOffset = sourceUrlStartOffset;
   } // setSourceUrlStartOffset
@@ -537,6 +553,9 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * offsets refer to the location of the document. This method sets the end
    * offset.
    */
+  @Optional
+  @CreoleParameter(
+      comment = "End offset for documents based on ranges")
   public void setSourceUrlEndOffset(Long sourceUrlEndOffset) {
     this.sourceUrlEndOffset = sourceUrlEndOffset;
   } // setSourceUrlStartOffset
@@ -564,6 +583,8 @@ public class DocumentImpl extends AbstractLanguageResource implements
   }
 
   /** Set the encoding of the document content source */
+  @Optional
+  @CreoleParameter(comment = "Encoding")
   public void setEncoding(String encoding) {
     this.encoding = encoding;
   }
@@ -609,6 +630,8 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * @param newMarkupAware
    *          markup awareness status.
    */
+  @CreoleParameter(defaultValue = "true",
+      comment = "Should the document read the original markup?")
   public void setMarkupAware(Boolean newMarkupAware) {
     this.markupAware = newMarkupAware;
   }
@@ -2131,6 +2154,8 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * from a URL. <B>Use the <TT>setContent</TT> method instead to update the
    * actual document content.</B>
    */
+  @CreoleParameter(disjunction = "source",
+      comment = "The content of the document")
   public void setStringContent(String stringContent) {
     this.stringContent = stringContent;
   } // set StringContent

@@ -25,12 +25,16 @@ import javax.swing.tree.*;
 
 import gate.*;
 import gate.creole.*;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.GuiType;
 import gate.event.DatastoreEvent;
 import gate.event.DatastoreListener;
 import gate.persist.PersistenceException;
 import gate.security.SecurityException;
 import gate.util.*;
 
+@CreoleResource(name = "Serial Datastore Viewer", guiType = GuiType.LARGE,
+    resourceDisplayed = "gate.persist.SerialDataStore", mainViewer = true)
 public class SerialDatastoreViewer extends JScrollPane implements
                                                       VisualResource,
                                                       DatastoreListener {

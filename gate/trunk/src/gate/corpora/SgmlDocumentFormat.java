@@ -24,6 +24,8 @@ import org.xml.sax.SAXException;
 import gate.Document;
 import gate.Resource;
 import gate.creole.ResourceInstantiationException;
+import gate.creole.metadata.AutoInstance;
+import gate.creole.metadata.CreoleResource;
 import gate.event.StatusListener;
 import gate.sgml.Sgml2Xml;
 import gate.util.DocumentFormatException;
@@ -38,6 +40,8 @@ import gate.xml.XmlDocumentHandler;
   * getDocumentFormat methods can then be used to get the appropriate
   * format class for a particular document.
   */
+@CreoleResource(name = "GATE SGML Document Format", isPrivate = true,
+    autoinstances = {@AutoInstance(hidden = true)})
 public class SgmlDocumentFormat extends TextualDocumentFormat
 {
   /** Debug flag */

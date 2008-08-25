@@ -20,6 +20,8 @@ import java.util.Iterator;
 
 import gate.*;
 import gate.creole.ResourceInstantiationException;
+import gate.creole.metadata.AutoInstance;
+import gate.creole.metadata.CreoleResource;
 import gate.email.EmailDocumentHandler;
 import gate.event.StatusListener;
 import gate.util.DocumentFormatException;
@@ -36,6 +38,8 @@ import gate.util.InvalidOffsetException;
   * getDocumentFormat methods can then be used to get the appropriate
   * format class for a particular document.
   */
+@CreoleResource(name = "GATE EMAIL Document Format", isPrivate = true,
+    autoinstances = {@AutoInstance(hidden = true)})
 public class EmailDocumentFormat extends TextualDocumentFormat
 {
   /** Debug flag */

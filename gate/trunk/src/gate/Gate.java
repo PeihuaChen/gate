@@ -18,6 +18,8 @@ package gate;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.jar.*;
+import org.jdom.Attribute;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
@@ -25,8 +27,15 @@ import org.jdom.input.SAXBuilder;
 import gate.config.ConfigDataProcessor;
 import gate.creole.CreoleRegisterImpl;
 import gate.creole.ResourceData;
+import gate.creole.metadata.CreoleResource;
 import gate.event.CreoleListener;
 import gate.util.*;
+import gate.util.asm.AnnotationVisitor;
+import gate.util.asm.ClassReader;
+import gate.util.asm.ClassVisitor;
+import gate.util.asm.Opcodes;
+import gate.util.asm.Type;
+import gate.util.asm.commons.EmptyVisitor;
 
 /**
  * The class is responsible for initialising the GATE libraries, and providing
@@ -1225,19 +1234,37 @@ public class Gate implements GateConstants {
       try {
         URL creoleFileURL = new URL(url, "creole.xml");
         org.jdom.Document creoleDoc = builder.build(creoleFileURL);
+
+        final Map<String, ResourceInfo> resInfos = new LinkedHashMap<String, ResourceInfo>();
         List jobsList = new ArrayList();
+        List<String> jarsToScan = new ArrayList<String>();
+        List<String> allJars = new ArrayList<String>();
         jobsList.add(creoleDoc.getRootElement());
         while(!jobsList.isEmpty()) {
           Element currentElem = (Element)jobsList.remove(0);
-          if(currentElem.getName().equalsIgnoreCase("RESOURCE")) {
+          if(currentElem.getName().equalsIgnoreCase("JAR")) {
+            List attrs = currentElem.getAttributes();
+            Iterator attrsIt = attrs.iterator();
+            while(attrsIt.hasNext()) {
+              Attribute attr = (Attribute)attrsIt.next();
+              if(attr.getName().equalsIgnoreCase("SCAN") && attr.getBooleanValue()) {
+                jarsToScan.add(currentElem.getTextTrim());
+                break;
+              }
+            }
+            allJars.add(currentElem.getTextTrim());
+          }
+          else if(currentElem.getName().equalsIgnoreCase("RESOURCE")) {
             // we don't go deeper than resources so no recursion here
             String resName = currentElem.getChildTextTrim("NAME");
             String resClass = currentElem.getChildTextTrim("CLASS");
             String resComment = currentElem.getChildTextTrim("COMMENT");
-            // create the handler
-            ResourceInfo rHandler =
-              new ResourceInfo(resName, resClass, resComment);
-            resourceInfoList.add(rHandler);
+            if(!resInfos.containsKey(resClass)) {
+              // create the handler
+              ResourceInfo rHandler =
+                new ResourceInfo(resName, resClass, resComment);
+              resInfos.put(resClass, rHandler);
+            }
           }
           else {
             // this is some higher level element -> simulate recursion
@@ -1247,6 +1274,38 @@ public class Gate implements GateConstants {
             jobsList = newJobsList;
           }
         }
+
+        // now process the jar files with SCAN="true", looking for any extra
+        // CreoleResource annotated classes.
+        for(String jarFile : jarsToScan) {
+          URL jarUrl = new URL(url, jarFile);
+          scanJar(jarUrl, resInfos);
+        }
+
+        // see whether any of the ResourceInfo objects are still incomplete
+        // (don't have a name)
+        List<ResourceInfo> incompleteResInfos = new ArrayList<ResourceInfo>();
+        for(ResourceInfo ri : resInfos.values()) {
+          if(ri.getResourceName() == null) {
+            incompleteResInfos.add(ri);
+          }
+        }
+
+        if(!incompleteResInfos.isEmpty()) {
+          fillInResInfos(incompleteResInfos, allJars);
+        }
+
+        // if any of the resource infos still don't have a name, take it from
+        // the class name.
+        for(ResourceInfo ri : incompleteResInfos) {
+          if(ri.getResourceName() == null) {
+            ri.resourceName = ri.resourceClassName.substring(
+                    ri.resourceClassName.lastIndexOf('.') + 1);
+          }
+        }
+
+        // finally, we have the complete list of ResourceInfos
+        resourceInfoList.addAll(resInfos.values());
       }
       catch(IOException ioe) {
         valid = false;
@@ -1257,6 +1316,56 @@ public class Gate implements GateConstants {
         valid = false;
         Err.prln("Problem while parsing plugin " + url.toExternalForm() + "!\n"
           + jde.toString() + "\nPlugin not available!");
+      }
+    }
+
+    protected void scanJar(URL jarUrl, Map<String, ResourceInfo> resInfos) throws IOException {
+      JarInputStream jarInput = new JarInputStream(jarUrl.openStream(), false);
+      JarEntry entry = null;
+      while((entry = jarInput.getNextJarEntry()) != null) {
+        String entryName = entry.getName();
+        if(entryName != null && entryName.endsWith(".class")) {
+          final String className = entryName.substring(0,
+                   entryName.length() - 6).replace('/', '.');
+          if(!resInfos.containsKey(className)) {
+            ClassReader classReader = new ClassReader(jarInput);
+            ResourceInfo resInfo = new ResourceInfo(null, className, null);
+            ResourceInfoVisitor visitor = new ResourceInfoVisitor(resInfo);
+
+            classReader.accept(visitor, ClassReader.SKIP_CODE |
+                ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
+            if(visitor.isCreoleResource()) {
+              resInfos.put(className, resInfo);
+            }
+          }
+        }
+      }
+
+      jarInput.close();
+    }
+
+    protected void fillInResInfos(List<ResourceInfo> incompleteResInfos,
+              List<String> allJars) throws IOException {
+      // now create a temporary class loader with all the JARs (scanned or
+      // not), so we can look up all the referenced classes in the normal
+      // way and read their CreoleResource annotations (if any).
+      URL[] jarUrls = new URL[allJars.size()];
+      for(int i = 0; i < jarUrls.length; i++) {
+        jarUrls[i] = new URL(url, allJars.get(i));
+      }
+      ClassLoader tempClassLoader = new URLClassLoader(jarUrls,
+                Gate.class.getClassLoader());
+      for(ResourceInfo ri : incompleteResInfos) {
+        String classFile = ri.getResourceClassName().replace('.', '/')
+                + ".class";
+        InputStream classStream = tempClassLoader.getResourceAsStream(classFile);
+        if(classStream != null) {
+          ClassReader classReader = new ClassReader(classStream);
+          ClassVisitor visitor = new ResourceInfoVisitor(ri);
+          classReader.accept(visitor, ClassReader.SKIP_CODE |
+              ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
+          classStream.close();
+        }
       }
     }
 
@@ -1346,6 +1455,72 @@ public class Gate implements GateConstants {
      * The comment for the resource.
      */
     protected String resourceComment;
+  }
+
+  /**
+   * ClassVisitor that uses information from a CreoleResource annotation on the
+   * visited class (if such exists) to fill in the name and comment in the
+   * corresponding ResourceInfo.
+   */
+  private static class ResourceInfoVisitor extends EmptyVisitor {
+    private ResourceInfo resInfo;
+
+    private boolean foundCreoleResource = false;
+
+    private boolean isAbstract = false;
+
+    public ResourceInfoVisitor(ResourceInfo resInfo) {
+      this.resInfo = resInfo;
+    }
+
+    public boolean isCreoleResource() {
+      return foundCreoleResource && !isAbstract;
+    }
+
+    /**
+     * Type descriptor for the CreoleResource annotation type.
+     */
+    private static final String CREOLE_RESOURCE_DESC =
+            Type.getDescriptor(CreoleResource.class);
+
+    /**
+     * Visit the class header, checking whether this is an abstract class or
+     * interface and setting the isAbstract flag appropriately.
+     */
+    public void visit(int version, int access, String name, String signature,
+            String superName, String[] interfaces) {
+      isAbstract = ((access &
+            (Opcodes.ACC_INTERFACE | Opcodes.ACC_ABSTRACT)) != 0);
+    }
+
+    /**
+     * Visit an annotation on the class.
+     */
+    public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+      // we've found a CreoleResource annotation on this class
+      if(desc.equals(CREOLE_RESOURCE_DESC)) {
+        foundCreoleResource = true;
+        return new EmptyVisitor() {
+          public void visit(String name, Object value) {
+            if(name.equals("name") && resInfo.resourceName == null) {
+              resInfo.resourceName = (String)value;
+            }
+            else if(name.equals("comment") && resInfo.resourceComment == null) {
+              resInfo.resourceComment = (String)value;
+            }
+          }
+
+          public AnnotationVisitor visitAnnotation(String name,
+                    String desc) {
+            // don't want to recurse into AutoInstance annotations
+            return new EmptyVisitor();
+          }
+        };
+      }
+      else {
+        return super.visitAnnotation(desc, visible);
+      }
+    }
   }
 
   /**

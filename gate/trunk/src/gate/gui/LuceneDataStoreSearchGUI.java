@@ -20,6 +20,8 @@ package gate.gui;
 import gate.*;
 import gate.corpora.SerialCorpusImpl;
 import gate.creole.AbstractVisualResource;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.GuiType;
 import gate.event.DatastoreEvent;
 import gate.event.DatastoreListener;
 import gate.gui.MainFrame;
@@ -78,6 +80,8 @@ import javax.swing.event.DocumentEvent;
  * <li>plus other todos in this file</li>
  * </ul>
  */
+@CreoleResource(name = "Lucene Datastore Searcher", guiType = GuiType.LARGE,
+    resourceDisplayed = "gate.creole.annic.SearchableDataStore")
 public class LuceneDataStoreSearchGUI extends AbstractVisualResource
                implements DatastoreListener {
 

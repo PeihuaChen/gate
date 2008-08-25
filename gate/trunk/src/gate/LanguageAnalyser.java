@@ -15,18 +15,28 @@
 
 package gate;
 
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.RunTime;
+
 /**
  * A special type of {@link ProcessingResource} that processes {@link Document}s
  */
+@CreoleResource(name = "Language analyser",
+        comment = "A processing resource that takes document and corpus parameters")
 public interface LanguageAnalyser extends ProcessingResource {
 
   /** Set the document property for this analyser. */
+  @RunTime
+  @CreoleParameter(comment = "The document to process")
   public void setDocument(Document document);
 
   /** Get the document property for this analyser. */
   public Document getDocument();
 
   /** Set the corpus property for this analyser. */
+  @RunTime
+  @CreoleParameter(comment = "The corpus containing the document to process")
   public void setCorpus(Corpus corpus);
 
   /** Get the corpus property for this analyser. */

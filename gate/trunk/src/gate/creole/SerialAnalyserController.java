@@ -17,6 +17,7 @@ package gate.creole;
 import java.util.*;
 
 import gate.*;
+import gate.creole.metadata.CreoleResource;
 import gate.event.CreoleEvent;
 import gate.util.*;
 
@@ -26,6 +27,8 @@ import gate.util.*;
  * method runs all the analysers in turn over each of the documents in the
  * corpus.
  */
+@CreoleResource(name = "Corpus Pipeline",
+    comment = "A serial controller for PR pipelines over corpora")
 public class SerialAnalyserController extends SerialController implements
                                                               CorpusController {
 

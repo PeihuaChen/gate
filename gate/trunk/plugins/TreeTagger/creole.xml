@@ -1,53 +1,5 @@
 <?xml version="1.0"?>
 
 <CREOLE-DIRECTORY>
-
-<CREOLE>
-  <RESOURCE>
-    <NAME>TreeTagger</NAME>
-    <JAR>TreeTagger.jar</JAR>
-    <CLASS>gate.treetagger.TreeTagger</CLASS>
-    <COMMENT>The TreeTagger is a language-independent part-of-speech tagger, which currently supports English, French, German, and Spanish (http://gate.ac.uk/sale/tao/#sec:misc-creole:treetagger)</COMMENT>
-    <PARAMETER 
-        NAME="document" 
-        RUNTIME="true"
-        COMMENT="The document to be processed">
-        gate.Document
-    </PARAMETER>
-    
-    <PARAMETER 
-        NAME="annotationSetName"
-        RUNTIME="true"
-        DEFAULT=""
-        OPTIONAL="true"
-        COMMENT="The annotation set to be used for the generated annotations">
-        java.lang.String
-    </PARAMETER>    
-    
-    <PARAMETER 
-        NAME="treeTaggerBinary" 
-        RUNTIME="true"
-        COMMENT="Name of the TreeTagger command file">
-        java.net.URL
-    </PARAMETER>   
-
-    <PARAMETER
-        NAME="encoding"
-        RUNTIME="true"
-        COMMENT="Character encoding for temporary files"
-        DEFAULT="ISO-8859-1">
-        java.lang.String
-    </PARAMETER>
-
-    <PARAMETER
-        NAME="failOnUnmappableChar"
-        RUNTIME="true"
-        COMMENT="Should the tagger fail if it encounters a character which is not mappable into the specified encoding?"
-        DEFAULT="true">
-        java.lang.Boolean
-    </PARAMETER>
-    
-  </RESOURCE>
-</CREOLE>
-
+  <JAR SCAN="true">TreeTagger.jar</JAR>
 </CREOLE-DIRECTORY>

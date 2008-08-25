@@ -25,6 +25,8 @@ import javax.swing.table.*;
 import gate.*;
 import gate.creole.AbstractVisualResource;
 import gate.event.CorpusEvent;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.GuiType;
 import gate.event.CorpusListener;
 import gate.swing.XJTable;
 import gate.util.GateException;
@@ -35,6 +37,8 @@ import gate.util.GateRuntimeException;
  * list of documents inside a corpus along withe their features.
  * It will also allow addition and removal of documents.
  */
+@CreoleResource(name = "Corpus editor", guiType = GuiType.LARGE,
+    resourceDisplayed = "gate.Corpus", mainViewer = true)
 public class CorpusEditor extends AbstractVisualResource implements CorpusListener {
 
   public Resource init(){

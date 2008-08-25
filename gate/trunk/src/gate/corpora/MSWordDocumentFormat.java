@@ -20,6 +20,8 @@ import gate.*;
 import gate.Document;
 import gate.DocumentFormat;
 import gate.creole.ResourceInstantiationException;
+import gate.creole.metadata.AutoInstance;
+import gate.creole.metadata.CreoleResource;
 import gate.util.DocumentFormatException;
 
 // Addition by Ting Wang
@@ -28,6 +30,8 @@ import java.io.*;
 
 /**
  */
+@CreoleResource(name = "GATE MSWord Document Format", isPrivate = true,
+    autoinstances = {@AutoInstance(hidden = true)})
 public class MSWordDocumentFormat extends DocumentFormat{
 
 

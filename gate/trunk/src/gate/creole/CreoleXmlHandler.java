@@ -382,9 +382,8 @@ public class CreoleXmlHandler extends DefaultHandler {
             resourceData.setJarFileUrl(jarFileUrl);
           }
 
-          // add the jar URL to the class loader
-          if(DEBUG) Out.prln("adding URL to classloader: " + jarFileUrl);
-          Gate.getClassLoader().addURL(jarFileUrl);
+          // We no longer need to add the jar URL to the class loader, as this
+          // is done before the SAX parse
         } catch(MalformedURLException e) {
           throw new GateSaxException("bad URL " + jarFileUrl + e);
         }// End try

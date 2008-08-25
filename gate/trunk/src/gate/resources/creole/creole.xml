@@ -6,48 +6,11 @@
   <CREOLE>
     <!-- Documents -->
     <RESOURCE>
-      <NAME>GATE document</NAME>
       <CLASS>gate.corpora.DocumentImpl</CLASS>
-      <INTERFACE>gate.Document</INTERFACE>
-      <COMMENT>GATE transient document</COMMENT>
-      <OR>
-        <PARAMETER NAME="sourceUrl"
-          SUFFIXES="txt;text;xml;xhtm;xhtml;html;htm;sgml;sgm;mail;email;eml;rtf;pdf;doc"
-          COMMENT="Source URL">java.net.URL</PARAMETER>
-        <PARAMETER NAME="stringContent" COMMENT="The content of the document">
-          java.lang.String</PARAMETER>
-      </OR>
-      <PARAMETER COMMENT="Should the document read the original markup"
-        NAME="markupAware" DEFAULT="true">java.lang.Boolean</PARAMETER>
-      <PARAMETER NAME="encoding" OPTIONAL="true" COMMENT="Encoding" DEFAULT="">
-        java.lang.String</PARAMETER>
-      <PARAMETER NAME="mimeType" OPTIONAL="true"
-        COMMENT="MIME type of the document.  If unspecified it will be inferred from the file extension, etc.">
-        java.lang.String</PARAMETER>
-      <PARAMETER NAME="sourceUrlStartOffset"
-        COMMENT="Start offset for documents based on ranges" OPTIONAL="true">
-        java.lang.Long</PARAMETER>
-      <PARAMETER NAME="sourceUrlEndOffset"
-        COMMENT="End offset for documents based on ranges" OPTIONAL="true">
-        java.lang.Long</PARAMETER>
-      <PARAMETER NAME="preserveOriginalContent"
-        COMMENT="Should the document preserve the original content"
-        DEFAULT="false">java.lang.Boolean</PARAMETER>
-      <PARAMETER NAME="collectRepositioningInfo"
-        COMMENT="Should the document collect repositioning information"
-        DEFAULT="false">java.lang.Boolean</PARAMETER>      
-      <ICON>document</ICON>
     </RESOURCE>
     <!-- Corpora -->
     <RESOURCE>
-      <NAME>GATE corpus</NAME>
       <CLASS>gate.corpora.CorpusImpl</CLASS>
-      <COMMENT>GATE transient corpus</COMMENT>
-      <INTERFACE>gate.Corpus</INTERFACE>
-      <PARAMETER NAME="documentsList" COMMENT="A list of GATE documents"
-        OPTIONAL="true" ITEM_CLASS_NAME="gate.Document" >
-        java.util.List</PARAMETER>
-      <ICON>corpus-trans</ICON>
     </RESOURCE>
     <RESOURCE>
       <NAME>GATE Database Document</NAME>
@@ -58,12 +21,7 @@
       <PRIVATE/>
     </RESOURCE>
     <RESOURCE>
-      <NAME>GATE Serial Corpus</NAME>
       <CLASS>gate.corpora.SerialCorpusImpl</CLASS>
-      <COMMENT>GATE persistent corpus (serialisation)</COMMENT>
-      <INTERFACE>gate.Corpus</INTERFACE>
-      <ICON>corpus</ICON>
-      <PRIVATE/>
     </RESOURCE>
     <RESOURCE>
       <NAME>GATE Database Corpus</NAME>
@@ -74,128 +32,63 @@
       <PRIVATE/>
     </RESOURCE>
     <RESOURCE>
-      <NAME>GATE XML Document Format</NAME>
       <CLASS>gate.corpora.XmlDocumentFormat</CLASS>
-      <AUTOINSTANCE/>
-      <PRIVATE/>
     </RESOURCE>
     <RESOURCE>
-      <NAME>GATE Textual Document Format</NAME>
       <CLASS>gate.corpora.TextualDocumentFormat</CLASS>
-      <AUTOINSTANCE/>
-      <PRIVATE/>
     </RESOURCE>
     <RESOURCE>
-      <NAME>GATE HTML Document Format</NAME>
       <CLASS>gate.corpora.NekoHtmlDocumentFormat</CLASS>
-      <PARAMETER NAME="ignorableTags" DEFAULT="script;style"
-        COMMENT="HTML tags whose text content should be ignored"
-        ITEM_CLASS_NAME="java.lang.String">java.util.Set</PARAMETER>
-      <AUTOINSTANCE/>
-      <PRIVATE/>
     </RESOURCE>
     <RESOURCE>
-      <NAME>GATE SGML Document Format</NAME>
       <CLASS>gate.corpora.SgmlDocumentFormat</CLASS>
-      <AUTOINSTANCE/>
-      <PRIVATE/>
     </RESOURCE>
     <RESOURCE>
-      <NAME>GATE RTF Document Format</NAME>
       <CLASS>gate.corpora.RtfDocumentFormat</CLASS>
-      <AUTOINSTANCE/>
-      <PRIVATE/>
     </RESOURCE>
     <RESOURCE>
-      <NAME>GATE EMAIL Document Format</NAME>
       <CLASS>gate.corpora.EmailDocumentFormat</CLASS>
-      <AUTOINSTANCE/>
-      <PRIVATE/>
     </RESOURCE>
     <RESOURCE>
-      <NAME>GATE PDF Document Format</NAME>
       <CLASS>gate.corpora.PdfDocumentFormat</CLASS>
-      <AUTOINSTANCE/>
-      <PRIVATE/>
     </RESOURCE> 
     <RESOURCE>
-      <NAME>GATE MSWord Document Format</NAME>
       <CLASS>gate.corpora.MSWordDocumentFormat</CLASS>
-      <AUTOINSTANCE/>
-      <PRIVATE/>
     </RESOURCE>
   </CREOLE>
 
   <!-- creole.xml for Controllers -->
   <CREOLE>
     <RESOURCE>
-      <NAME>Pipeline</NAME>
-      <COMMENT>A simple serial controller for PR pipelines</COMMENT>
       <CLASS>gate.creole.SerialController</CLASS>
-      <ICON>application</ICON>
     </RESOURCE>
     <RESOURCE>
-      <NAME>Corpus Pipeline</NAME>
-      <COMMENT>A serial controller for PR pipelines over corpora</COMMENT>
       <CLASS>gate.creole.SerialAnalyserController</CLASS>
-      <ICON>application</ICON>
     </RESOURCE>
     <RESOURCE>
-      <NAME>Conditional Pipeline</NAME>
-      <COMMENT>A simple serial controller for conditionally run PRs</COMMENT>
       <CLASS>gate.creole.ConditionalSerialController</CLASS>
-      <ICON>application</ICON>
     </RESOURCE>
     <RESOURCE>
-      <NAME>Conditional Corpus Pipeline</NAME>
-      <COMMENT>A serial controller for conditionally run PR pipelines over
-        corpora</COMMENT>
       <CLASS>gate.creole.ConditionalSerialAnalyserController</CLASS>
-      <ICON>application</ICON>
     </RESOURCE>
     <RESOURCE>
-      <NAME>Real-time Corpus Pipeline</NAME>
-      <COMMENT>A serial controller for PR pipelines over corpora</COMMENT>
       <CLASS>gate.creole.RealtimeCorpusController</CLASS>
-      <PARAMETER NAME="timeout"
-                 COMMENT="Timeout in milliseconds before execution on a document is stopped."
-                 OPTIONAL="false"
-                 DEFAULT="60000"
-                 RUNTIME="false">java.lang.Long</PARAMETER>      
-      <ICON>application-realtime</ICON>
     </RESOURCE>
   </CREOLE>
   
   <!-- creole.xml for Visual Resources -->
   <CREOLE>
     <RESOURCE>
-      <NAME>Features</NAME>
       <CLASS>gate.gui.FeaturesSchemaEditor</CLASS>
-      <!-- type values can be "large" or "small"-->
-      <GUI TYPE="small">
-        <RESOURCE_DISPLAYED>gate.util.FeatureBearer</RESOURCE_DISPLAYED>
-      </GUI>
     </RESOURCE>
 
 
     <RESOURCE>
-      <NAME>Initialisation Parameters</NAME>
       <CLASS>gate.gui.PRViewer</CLASS>
-      <!-- type values can be "large" or "small"-->
-      <GUI TYPE="large">
-        <MAIN_VIEWER/>
-        <RESOURCE_DISPLAYED>gate.Resource</RESOURCE_DISPLAYED>
-      </GUI>
     </RESOURCE>
     
     <RESOURCE>
-      <NAME>Document Editor</NAME>
       <CLASS>gate.gui.docview.DocumentEditor</CLASS>
-      <!-- type values can be "large" or "small"-->
-      <GUI TYPE="large">
-        <MAIN_VIEWER/>
-        <RESOURCE_DISPLAYED>gate.Document</RESOURCE_DISPLAYED>
-      </GUI>
     </RESOURCE>
     
     <RESOURCE>
@@ -223,52 +116,23 @@
     </RESOURCE>
     
     <RESOURCE>
-      <NAME>Corpus Editor</NAME>
       <CLASS>gate.gui.CorpusEditor</CLASS>
-      <!-- type values can be "large" or "small"-->
-      <GUI TYPE="large">
-        <MAIN_VIEWER/>
-        <RESOURCE_DISPLAYED>gate.Corpus</RESOURCE_DISPLAYED>
-      </GUI>
     </RESOURCE>
     
     <RESOURCE>
-      <NAME>Serial Application editor</NAME>
       <CLASS>gate.gui.SerialControllerEditor</CLASS>
-      <!-- type values can be "large" or "small" -->
-      <GUI TYPE="large">
-        <MAIN_VIEWER/>
-        <RESOURCE_DISPLAYED>gate.creole.SerialController</RESOURCE_DISPLAYED>
-      </GUI>
     </RESOURCE>
     
     <RESOURCE>
-      <NAME>Serial Datastore Viewer</NAME>
       <CLASS>gate.gui.SerialDatastoreViewer</CLASS>
-      <!-- type values can be "large" or "small"-->
-      <GUI TYPE="large">
-        <MAIN_VIEWER/>
-        <RESOURCE_DISPLAYED>gate.persist.SerialDataStore</RESOURCE_DISPLAYED>
-      </GUI>
     </RESOURCE>
 
     <RESOURCE>
-      <NAME>JDBC Datastore Viewer</NAME>
       <CLASS>gate.gui.OracleDatastoreViewer</CLASS>
-      <!-- type values can be "large" or "small"-->
-      <GUI TYPE="large">
-        <MAIN_VIEWER/>
-        <RESOURCE_DISPLAYED>gate.persist.JDBCDataStore</RESOURCE_DISPLAYED>
-      </GUI>
     </RESOURCE>
     
     <RESOURCE>
-      <NAME>Lucene Datastore Searcher</NAME>
       <CLASS>gate.gui.LuceneDataStoreSearchGUI</CLASS>
-      <!-- type values can be "large" or "small" -->
-      <GUI TYPE="large">
-        <RESOURCE_DISPLAYED>gate.creole.annic.SearchableDataStore</RESOURCE_DISPLAYED>
-      </GUI>
     </RESOURCE>
 
 <!--    <RESOURCE>-->

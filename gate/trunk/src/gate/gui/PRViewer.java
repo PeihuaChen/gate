@@ -22,10 +22,13 @@ import gate.Gate;
 import gate.Resource;
 import gate.creole.AbstractVisualResource;
 import gate.creole.ResourceData;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.GuiType;
 import gate.swing.XJTable;
 import gate.util.GateRuntimeException;
 
-
+@CreoleResource(name = "Initialisation Parameters", guiType = GuiType.LARGE,
+    resourceDisplayed = "gate.Resource", mainViewer = true)
 public class PRViewer extends AbstractVisualResource {
 
   public PRViewer() {

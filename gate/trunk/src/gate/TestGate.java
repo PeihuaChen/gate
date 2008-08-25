@@ -280,6 +280,7 @@ public class TestGate {
 //        suite.addTest(TestSplitterTagger.suite());
         suite.addTest(TestFeatureMap.suite());
         suite.addTest(TestTools.suite());
+        suite.addTest(TestCreoleAnnotationHandler.suite());
         suite.addTest(TestPR.suite());
         suite.addTest(TestMorph.suite());
         // suite.addTest(TestMaxentWrapper.suite());

@@ -23,6 +23,7 @@ import gate.*;
 import gate.creole.AbstractLanguageResource;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.ir.*;
+import gate.creole.metadata.*;
 import gate.event.*;
 import gate.persist.PersistenceException;
 import gate.security.SecurityException;
@@ -36,6 +37,8 @@ import gate.util.*;
 // a documentUnload() method, which sets the in-memory copy to null but can
 // always restore the doc, because it has its persistence ID.
 
+@CreoleResource(name = "GATE Serial Corpus", isPrivate = true,
+    comment = "GATE persistent corpus (serialisation)", icon = "corpus")
 public class SerialCorpusImpl extends AbstractLanguageResource
                                                               implements
                                                               Corpus,

@@ -20,6 +20,7 @@ import java.util.*;
 import org.apache.log4j.Logger;
 
 import gate.*;
+import gate.creole.metadata.*;
 import gate.event.*;
 import gate.util.Benchmark;
 import gate.util.Benchmarkable;
@@ -31,6 +32,8 @@ import gate.util.Out;
 /**
  * Execute a list of PRs serially.
  */
+@CreoleResource(name = "Pipeline",
+    comment = "A simple serial controller for PR pipelines")
 public class SerialController extends AbstractController implements
                                                         CreoleListener {
 

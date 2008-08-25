@@ -76,6 +76,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/owlim-2.8.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/openrdf-util.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/openrdf-model.jar"/>
+	<classpathentry kind="lib" path="lib/xmlunit-1.2.jar"/>
 	<classpathentry kind="lib" path="plugins/learning/lib/weka.jar"/>
 	<classpathentry kind="lib" path="plugins/crawl/lib/websphinx.jar"/>
 	<classpathentry kind="lib" path="plugins/google/lib/googleapi.jar"/>

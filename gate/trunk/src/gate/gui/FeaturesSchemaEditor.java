@@ -24,12 +24,15 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import gate.*;
 import gate.creole.*;
+import gate.creole.metadata.*;
 import gate.event.FeatureMapListener;
 import gate.swing.XJTable;
 import gate.util.*;
 
 /**
  */
+@CreoleResource(name = "Features", guiType = GuiType.SMALL,
+    resourceDisplayed = "gate.util.FeatureBearer")
 public class FeaturesSchemaEditor extends AbstractVisualResource
         implements ResizableVisualResource, FeatureMapListener{
   public FeaturesSchemaEditor(){

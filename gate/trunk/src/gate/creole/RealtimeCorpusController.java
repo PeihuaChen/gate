@@ -16,6 +16,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.HashMap;
 import gate.*;
+import gate.creole.metadata.*;
 import gate.util.Err;
 import gate.util.profile.Profiler;
 import gate.util.Out;
@@ -28,6 +29,10 @@ import gate.util.Out;
  * @author Valentin Tablan
  *
  */
+@CreoleResource(name = "Real-time Corpus Pipeline",
+    comment = "A serial controller for PR pipelines over corpora which "
+        + "limits the run time of each PR",
+    icon = "application-realtime")
 public class RealtimeCorpusController extends SerialAnalyserController {
 	
   private final static boolean DEBUG = false;
@@ -196,6 +201,8 @@ public class RealtimeCorpusController extends SerialAnalyserController {
     return timeout;
   }
 
+  @CreoleParameter(defaultValue = "60000",
+      comment = "Timout in milliseconds before execution on a document is stopped")
   public void setTimeout(Long timeout) {
     this.timeout = timeout;
   }
