@@ -8,7 +8,7 @@ Options: control = appelt
 Macro: RegExDe
 (
 
-  {Token.string =~ "[v|V][a|o]n"}
+  {Token.string ==~ "[v|V][a|o]n"}
   |
   ({Token.string == "[d|D[e|i]([L|l]a)?"})
 )
@@ -18,10 +18,10 @@ Macro: RegExDe
   -->
 	:abc.Result = {rule="AndEqual"}
 
-  Rule: SimpleRegEx
-  ({B.f1=~".text"}):abc
+  Rule: RegExMatch
+  ({B.f1==~".text"}):abc
   -->
-    :abc.Result = {rule="SimpleRegEx"}
+    :abc.Result = {rule="RegExMatch"}
 
   Rule: DoNotMatch
   ({B,!C}):abc
@@ -38,20 +38,32 @@ Macro: RegExDe
   -->
     :abc.Result = {rule="NotEqual"}
 
-  Rule: EqualAndNotEqualRexEx
-  ({D,D.f1 !~ "..text",D.f3 == 3}):abc
+  Rule: EqualAndNotEqualRegEx
+  ({D,D.f1 !=~ "..text",D.f3 == 3}):abc
   -->
-    :abc.Result = {rule="EqualAndNotEqualRexEx"}
+    :abc.Result = {rule="EqualAndNotEqualRegEx"}
+
+  Rule: DoNotMatch2
+  // Written this way, a C must exist at the spot
+  ({D,D.f2 == 2,C.f1 !=~ ".*"}):abc
+  -->
+    :abc.Result = {rule="DoNotMatch2"}
 
   Rule: EqualAndNotExistance
-  ({D,D.f1 !~ ""}):abc
+  // Written this way, a C does not have to exist
+  ({D,D.f2 == 2,!C.f1 ==~ ".*"}):abc
   -->
     :abc.Result = {rule="EqualAndNotExistance"}
 
   Rule: OntoTest
-  ({D.ontology=="http://gate.ac.uk/tests/demo.owl", D.class=="Person"}):abc
+  ({D.ontology=="http://gate.ac.uk/tests/demo.owl", D.class=="Businessman"}):abc
   -->
     :abc.Result = {rule="OntoTest"}
+
+  Rule: OntoTest2
+  ({D.ontology=="http://gate.ac.uk/tests/demo.owl", D.class=="Location"}):abc
+  -->
+    :abc.Result = {rule="OntoTest2"}
 
       // $Log$
 

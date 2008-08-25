@@ -45,9 +45,9 @@ public class TestConstraints extends BaseJapeTests {
 
   public void testGoodOperators() throws Exception {
     String japeFile = "/jape/operators/operator_tests.jape";
-    String[] expectedResults = {"AndEqual", "SimpleRegEx",
-        "NotEqualandGreaterEqual", "NotEqual", "EqualAndNotEqualRexEx",
-        "EqualAndNotExistance", "OntoTest"};
+    String[] expectedResults = {"AndEqual", "RegExMatch",
+        "NotEqualandGreaterEqual", "NotEqual", "EqualAndNotEqualRegEx",
+        "EqualAndNotExistance", "OntoTest", "OntoTest2"};
 
     Set<Annotation> actualResults = doTest(DEFAULT_DATA_FILE, japeFile, annotCreator);
     Out.println(actualResults);
@@ -82,6 +82,23 @@ public class TestConstraints extends BaseJapeTests {
     }
   }
 
+  /**
+   * Visually, this creates an annot set like this:
+         1         2
+12345678901234567890
+ AA
+ B
+   BB
+     B
+     CC
+       CC
+           DD
+             DD
+               DD
+                 D
+12345678901234567890
+         1         2
+   */
   protected AnnotationCreator annotCreator = new AnnotationCreator() {
     public AnnotationSet createAnnots(Document doc) {
       AnnotationSet defaultAS = doc.getAnnotations();
@@ -91,14 +108,13 @@ public class TestConstraints extends BaseJapeTests {
         feat.put("f1", "atext");
         feat.put("f2", "2");
         feat.put("f3", 3);
-
         defaultAS.add(new Long(2), new Long(4), "A", feat);
+
         feat = Factory.newFeatureMap();
         feat.put("f1", "btext");
         feat.put("f2", "2");
         feat.put("f4", "btext4");
         defaultAS.add(new Long(2), new Long(3), "B", feat);
-
         defaultAS.add(new Long(4), new Long(6), "B", feat);
 
         feat = Factory.newFeatureMap();
@@ -121,13 +137,18 @@ public class TestConstraints extends BaseJapeTests {
         defaultAS.add(new Long(12), new Long(14), "D", feat);
 
         feat = Factory.newFeatureMap();
-        feat.put("f1", "dtext");
+        feat.put("f2", 2l);
         defaultAS.add(new Long(14), new Long(16), "D", feat);
 
         feat = Factory.newFeatureMap();
         feat.put("ontology", "http://gate.ac.uk/tests/demo.owl");
         feat.put("class", "Businessman");
         defaultAS.add(new Long(16), new Long(18), "D", feat);
+
+        feat = Factory.newFeatureMap();
+        feat.put("ontology", "http://gate.ac.uk/tests/demo.owl");
+        feat.put("class", "Country");
+        defaultAS.add(new Long(18), new Long(19), "D", feat);
 
       }
       catch(gate.util.InvalidOffsetException ioe) {
