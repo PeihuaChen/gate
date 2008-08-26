@@ -67,7 +67,7 @@ public class Interpret {
 	public void init(URL ruleFileURL) throws ResourceInstantiationException {
 		RHS.patIndex = 0;
 		vPat = Pattern.compile("(VB)[DGNPZ]?");
-		nPat = Pattern.compile("(NN)(.)*");
+		nPat = Pattern.compile("(NN)(S)*");
 		variables = new Storage();
 		prepareListOfMorphMethods();
 		file = new ReadFile(ruleFileURL);
