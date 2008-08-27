@@ -523,6 +523,11 @@
 				OPTIONAL="true">
 				java.lang.String
 			</PARAMETER>
+			<PARAMETER NAME="inanimatedEntityTypes" RUNTIME="true"
+        		COMMENT="List of annotation types for non animated entities"
+        		DEFAULT="Organization;Location"
+        		OPTIONAL="true">java.lang.String
+        	</PARAMETER>	
 			<PARAMETER NAME="resolveIt" RUNTIME="true"
 				COMMENT="Whether or not to resolve it pronouns" DEFAULT="false"
 				OPTIONAL="true">

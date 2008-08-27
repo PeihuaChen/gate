@@ -76,6 +76,11 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   private static final FeatureMap PRP_RESTRICTION;
 
   private boolean resolveIt = true;
+  
+  /** default ORGANIZATIONS,LOCATION**/
+  private Set<String> inanimatedSet;
+  
+  private String inanimatedEntityTypes;
 
   /** --- */
   static {
@@ -91,6 +96,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     this.anaphor2antecedent = new HashMap();
     this.qtTransducer = new gate.creole.Transducer();
     this.pleonTransducer = new gate.creole.Transducer();
+    this.inanimatedSet = new HashSet();
   }
 
   /** Initialise this resource, and return it. */
@@ -122,7 +128,6 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     this.pleonTransducer.setGrammarURL(pleonGrammarURL);
     this.pleonTransducer.setEncoding("UTF-8");
     this.pleonTransducer.init();
-
 
     //3. delegate
     return super.init();
@@ -498,11 +503,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     while (currSentenceIndex >= scopeFirstIndex) {
 
       Sentence currSentence = this.textSentences[currSentenceIndex];
-      AnnotationSet org = currSentence.getOrganizations();
-      AnnotationSet loc = currSentence.getLocations();
-      //combine them
-      Set<Annotation> org_loc = new HashSet<Annotation>(org);
-      org_loc.addAll(loc);
+      Set<Annotation> org_loc = currSentence.getInanimated();
 
       Iterator it = org_loc.iterator();
       while (it.hasNext()) {
@@ -666,8 +667,13 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       return;
     }
 
-
-
+    // get the list of inanimated entity types 
+    if (inanimatedEntityTypes==null||inanimatedEntityTypes.equals(""))
+      inanimatedEntityTypes="Organization;Location";
+    
+    String[] types = inanimatedEntityTypes.split(";");
+    this.inanimatedSet.addAll(Arrays.asList(types));
+        
     //2.1 remove QT annotations if left from previous execution
     AnnotationSet qtSet = this.defaultAnnotations.get(QUOTED_TEXT_TYPE);
     if (qtSet != null && !qtSet.isEmpty()) {
@@ -699,30 +705,24 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       Annotation currSentence = (Annotation)sentenceArray[i];
       Long sentStartOffset = currSentence.getStartNode().getOffset();
       Long sentEndOffset = currSentence.getEndNode().getOffset();
+      
+      AnnotationSet tempASOffsets = this.defaultAnnotations.getContained(
+              sentStartOffset,sentEndOffset);
 
-      //4.1. get PERSOSNS in this sentence
-      AnnotationSet sentPersons = this.defaultAnnotations.get(PERSON_ANNOTATION_TYPE,
-                                                              sentStartOffset,
-                                                              sentEndOffset);
+      //4.1. get PERSONS in this sentence
+      AnnotationSet sentPersons = tempASOffsets.get(PERSON_ANNOTATION_TYPE);
 
-      //4.2. get ORGANIZATIONS in this sentence
-      AnnotationSet sentOrgs = this.defaultAnnotations.get(ORGANIZATION_ANNOTATION_TYPE,
-                                                              sentStartOffset,
-                                                              sentEndOffset);
+      //4.2. get inanimated entities (ORGANIZATIONS,LOCATION) in this sentence
+     
+      AnnotationSet sentInans = tempASOffsets.get(this.inanimatedSet);
 
-      //4.3. get LOCATION in this sentence
-      AnnotationSet sentLocs = this.defaultAnnotations.get(LOCATION_ANNOTATION_TYPE,
-                                                              sentStartOffset,
-                                                              sentEndOffset);
-
-      //4.5. create a Sentence for thei SENTENCE annotation
+      //4.5. create a Sentence for the SENTENCE annotation
       this.textSentences[i] = new Sentence(i,
                                             0,
                                             sentStartOffset,
                                             sentEndOffset,
                                             sentPersons,
-                                            sentOrgs,
-                                            sentLocs
+                                            sentInans
                                   );
 
       //4.6. for all PERSONs in the sentence - find their gender using the
@@ -1217,9 +1217,7 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     /** --- */
     private AnnotationSet persons;
     /** --- */
-    private AnnotationSet organizations;
-    /** --- */
-    private AnnotationSet locations;
+    private AnnotationSet inanimated;
 
     /** --- */
     public Sentence(int sentNumber,
@@ -1227,16 +1225,14 @@ public class PronominalCoref extends AbstractLanguageAnalyser
                     Long startOffset,
                     Long endOffset,
                     AnnotationSet persons,
-                    AnnotationSet organizations,
-                    AnnotationSet locations) {
+                    AnnotationSet inanimated) {
 
       this.sentNumber = sentNumber;
       this.paraNumber = paraNumber;
       this.startOffset = startOffset;
       this.endOffset = endOffset;
       this.persons = persons;
-      this.organizations = organizations;
-      this.locations = locations;
+      this.inanimated = inanimated;
     }
 
     /** --- */
@@ -1254,15 +1250,19 @@ public class PronominalCoref extends AbstractLanguageAnalyser
       return this.persons;
     }
 
-    /** --- */
-    public AnnotationSet getOrganizations() {
-      return this.organizations;
+    public AnnotationSet getInanimated() {
+      return this.inanimated;
     }
+    
+  }
 
-    /** --- */
-    public AnnotationSet getLocations() {
-      return this.locations;
-    }
+
+  public String getInanimatedEntityTypes() {
+    return inanimatedEntityTypes;
+  }
+
+  public void setInanimatedEntityTypes(String inanimatedEntityTypes) {
+    this.inanimatedEntityTypes = inanimatedEntityTypes;
   }
 
 }

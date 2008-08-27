@@ -104,8 +104,10 @@ public class Coreferencer extends AbstractLanguageAnalyser
    */
   public void execute() throws ExecutionException {
 
+    fireStatusChanged("Pronominal Coreferencer processing: " +  document.getName());
     this.pronominalModule.execute();
     generateCorefChains();
+    fireStatusChanged("Pronominal Coreferencer completed");
   }
 
   /** --- */
@@ -191,6 +193,16 @@ public class Coreferencer extends AbstractLanguageAnalyser
                                     features);
       matches.add(annID);
     }
+  }
+
+
+  public String getInanimatedEntityTypes() {
+    return this.pronominalModule.getInanimatedEntityTypes();
+  }
+
+
+  public void setInanimatedEntityTypes(String inanimatedEntityTypes) {
+    this.pronominalModule.setInanimatedEntityTypes(inanimatedEntityTypes);
   }
 
 }
