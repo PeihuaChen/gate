@@ -914,7 +914,7 @@ public class DocumentStaxUtils {
     // illegal control character
     if(buf[i] <= 0x0008 || buf[i] == 0x000B || buf[i] == 0x000C
             || (buf[i] >= 0x000E && buf[i] <= 0x001F)) {
-      return false;
+      return true;
     }
 
     // buf[i] is a high surrogate...
