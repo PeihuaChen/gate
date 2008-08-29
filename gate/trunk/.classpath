@@ -109,5 +109,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/tools.jar"/>
 	<classpathentry kind="lib" path="plugins/Stanford/lib/stanford-parser.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/nekohtml-1.9.8+2039483.jar"/>
+	<classpathentry kind="lib" path="lib/gate-asm.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
