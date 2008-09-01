@@ -457,7 +457,7 @@ public class DocumentStaxUtils {
    * @return the name or value represented by this element.
    * @throws XMLStreamException
    */
-  private static Object readFeatureNameOrValue(XMLStreamReader xsr)
+  static Object readFeatureNameOrValue(XMLStreamReader xsr)
           throws XMLStreamException {
     String className = xsr.getAttributeValue(null, "className");
     if(className == null) {
@@ -896,33 +896,81 @@ public class DocumentStaxUtils {
    * 
    * @param buf the buffer to process
    */
-  private static void replaceXMLIllegalCharacters(char[] buf) {
+  static void replaceXMLIllegalCharacters(char[] buf) {
+    ArrayCharSequence bufSequence = new ArrayCharSequence(buf);
     for(int i = 0; i < buf.length; i++) {
-      if(isInvalidXmlChar(buf, i)) {
+      if(isInvalidXmlChar(bufSequence, i)) {
         buf[i] = INVALID_CHARACTER_REPLACEMENT;
       }
     }
   }
 
   /**
+   * Return a string containing the same characters as the supplied string,
+   * except that any characters that are illegal in XML will be replaced with
+   * spaces. Characters that are illegal in XML are:
+   * <ul>
+   * <li>Control characters U+0000 to U+001F, <i>except</i> U+0009,
+   * U+000A and U+000D, which are permitted.</li>
+   * <li><i>Unpaired</i> surrogates U+D800 to U+D8FF (valid surrogate
+   * pairs are OK).</li>
+   * <li>U+FFFE and U+FFFF (only allowed as part of the Unicode byte
+   * order mark).</li>
+   * </ul>
+   * 
+   * A new string is only created if required - if the supplied string contains
+   * no illegal characters then the same object is returned.
+   * 
+   * @param str the string to process
+   * @return <code>str</code>, unless it contains illegal characters in which
+   *         case a new string the same as str but with the illegal characters
+   *         replaced by spaces.
+   */
+  static String replaceXMLIllegalCharactersInString(String str) {
+    StringBuilder builder = null;
+    for(int i = 0; i < str.length(); i++) {
+      if(isInvalidXmlChar(str, i)) {
+        // lazily create the StringBuilder
+        if(builder == null) {
+          builder = new StringBuilder(str.substring(0, i));
+        }
+        builder.append(INVALID_CHARACTER_REPLACEMENT);
+      }
+      else if(builder != null) {
+        builder.append(str.charAt(i));
+      }
+    }
+
+    if(builder == null) {
+      // no illegal characters were found
+      return str;
+    }
+    else {
+      return builder.toString();
+    }
+  }
+
+  /**
    * Check whether a character is illegal in XML.
    * 
-   * @param buf the character buffer in which to look
-   * @param i the index of the character to check
+   * @param buf the character sequence in which to look (must not be null)
+   * @param i the index of the character to check (must be within the valid
+   *         range of characters in <code>buf</code>)
    */
-  private static final boolean isInvalidXmlChar(char[] buf, int i) {
+  static final boolean isInvalidXmlChar(CharSequence buf, int i) {
     // illegal control character
-    if(buf[i] <= 0x0008 || buf[i] == 0x000B || buf[i] == 0x000C
-            || (buf[i] >= 0x000E && buf[i] <= 0x001F)) {
+    if(buf.charAt(i) <= 0x0008 || buf.charAt(i) == 0x000B
+            || buf.charAt(i) == 0x000C
+            || (buf.charAt(i) >= 0x000E && buf.charAt(i) <= 0x001F)) {
       return true;
     }
 
-    // buf[i] is a high surrogate...
-    if(buf[i] >= 0xD800 && buf[i] <= 0xDBFF) {
+    // buf.charAt(i) is a high surrogate...
+    if(buf.charAt(i) >= 0xD800 && buf.charAt(i) <= 0xDBFF) {
       // if we're not at the end of the buffer we can look ahead
-      if(i < buf.length - 1) {
+      if(i < buf.length() - 1) {
         // followed by a low surrogate is OK
-        if(buf[i + 1] >= 0xDC00 && buf[i + 1] <= 0xDFFF) {
+        if(buf.charAt(i + 1) >= 0xDC00 && buf.charAt(i + 1) <= 0xDFFF) {
           return false;
         }
       }
@@ -932,12 +980,12 @@ public class DocumentStaxUtils {
       return true;
     }
 
-    // buf[i] is a low surrogate...
-    if(buf[i] >= 0xDC00 && buf[i] <= 0xDFFF) {
+    // buf.charAt(i) is a low surrogate...
+    if(buf.charAt(i) >= 0xDC00 && buf.charAt(i) <= 0xDFFF) {
       // if we're not at the start of the buffer we can look behind
       if(i > 0) {
         // preceded by a high surrogate is OK
-        if(buf[i - 1] >= 0xD800 && buf[i - 1] <= 0xDBFF) {
+        if(buf.charAt(i - 1) >= 0xD800 && buf.charAt(i - 1) <= 0xDBFF) {
           return false;
         }
       }
@@ -947,8 +995,8 @@ public class DocumentStaxUtils {
       return true;
     }
 
-    // buf[i] is a BOM character
-    if(buf[i] == 0xFFFE || buf[i] == 0xFFFF) {
+    // buf.charAt(i) is a BOM character
+    if(buf.charAt(i) == 0xFFFE || buf.charAt(i) == 0xFFFF) {
       return true;
     }
 
@@ -961,6 +1009,10 @@ public class DocumentStaxUtils {
    * as a sequence of "Feature" elements, each having "Name" and "Value"
    * children. Note that there is no enclosing element - the caller must
    * write the enclosing "GateDocumentFeatures" or "Annotation" element.
+   * Characters in feature values that are illegal in XML are replaced by
+   * {@link #INVALID_CHARACTER_REPLACEMENT} (a space).  Feature <i>names</i>
+   * are not modified - an illegal character in a feature name will cause the
+   * serialization to fail.
    * 
    * @param features
    * @param xsw
@@ -1061,7 +1113,8 @@ public class DocumentStaxUtils {
         if(valueItemClassName != null) {
           xsw.writeAttribute("itemClassName", valueItemClassName);
         }
-        writeCharactersOrCDATA(xsw, value2String);
+        writeCharactersOrCDATA(xsw,
+                replaceXMLIllegalCharactersInString(value2String));
         xsw.writeEndElement();
         newLine(xsw);
 
@@ -1078,7 +1131,7 @@ public class DocumentStaxUtils {
    * @param xsw the XMLStreamWriter to write to.
    * @throws XMLStreamException
    */
-  private static void newLine(XMLStreamWriter xsw) throws XMLStreamException {
+  static void newLine(XMLStreamWriter xsw) throws XMLStreamException {
     xsw.writeCharacters("\n");
   }
 
@@ -1102,7 +1155,7 @@ public class DocumentStaxUtils {
    * @param string the string to write
    * @throws XMLStreamException
    */
-  private static void writeCharactersOrCDATA(XMLStreamWriter xsw, String string)
+  static void writeCharactersOrCDATA(XMLStreamWriter xsw, String string)
           throws XMLStreamException {
     if(containsEnoughLTs(string)) {
       Matcher m = CDATA_END_PATTERN.matcher(string);
@@ -1222,4 +1275,32 @@ public class DocumentStaxUtils {
 
     private Integer id = null;
   } // AnnotationObject
+
+  /**
+   * Thin wrapper class to use a char[] as a CharSequence.  The array is not
+   * copied - changes to the array are reflected by the CharSequence methods.
+   */
+  static class ArrayCharSequence implements CharSequence {
+    char[] array;
+
+    ArrayCharSequence(char[] array) {
+      this.array = array;
+    }
+
+    public final char charAt(int i) {
+      return array[i];
+    }
+
+    public final int length() {
+      return array.length;
+    }
+
+    public CharSequence subSequence(int start, int end) {
+      throw new UnsupportedOperationException("subSequence not implemented");
+    }
+
+    public String toString() {
+      return String.valueOf(array);
+    }
+  } // ArrayCharSequence
 }
