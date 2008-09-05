@@ -773,9 +773,7 @@ public class Gate implements GateConstants {
       try {
         Class aClass = Class.forName(classname, true, Gate.getClassLoader());
         res =
-          Resource.class.isAssignableFrom(aClass)
-            || Controller.class.isAssignableFrom(aClass)
-            || DataStore.class.isAssignableFrom(aClass);
+          Resource.class.isAssignableFrom(aClass);
       }
       catch(ClassNotFoundException cnfe) {
         return false;
