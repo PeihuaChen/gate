@@ -15,6 +15,7 @@
 
 package gate.util.spring;
 
+import gate.Factory;
 import gate.creole.ResourceInstantiationException;
 import gate.util.GateException;
 import gate.util.persistence.PersistenceManager;
@@ -23,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.core.io.Resource;
 
@@ -46,7 +48,8 @@ import org.springframework.core.io.Resource;
  * the application after it is loaded.
  */
 public class SavedApplicationFactoryBean extends GateAwareObject implements
-                                                                FactoryBean {
+                                                                FactoryBean,
+                                                                DisposableBean {
 
   private Resource location;
 
@@ -62,6 +65,12 @@ public class SavedApplicationFactoryBean extends GateAwareObject implements
     this.customisers = customisers;
   }
 
+  /**
+   * Loads the saved application file and applies any registered
+   * customisers.
+   * 
+   * @return the (possibly customised) application
+   */
   public Object getObject() throws GateException, IOException {
     if(object == null) {
       ensureGateInit();
@@ -96,7 +105,8 @@ public class SavedApplicationFactoryBean extends GateAwareObject implements
             throw rx;
           }
           catch(Exception e) {
-            throw new ResourceInstantiationException("Exception in resource customiser", e);
+            throw new ResourceInstantiationException(
+                    "Exception in resource customiser", e);
           }
         }
       }
@@ -111,6 +121,17 @@ public class SavedApplicationFactoryBean extends GateAwareObject implements
 
   public boolean isSingleton() {
     return true;
+  }
+
+  /**
+   * Destroy the resource created by this bean, by passing it to
+   * {@link Factory#deleteResource}.  This will in turn delete
+   * any PRs that the application contains.
+   */
+  public void destroy() throws Exception {
+    if(object != null && object instanceof gate.Resource) {
+      Factory.deleteResource((gate.Resource)object);
+    }
   }
 
 }

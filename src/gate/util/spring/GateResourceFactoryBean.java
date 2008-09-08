@@ -20,6 +20,7 @@ import java.util.List;
 import gate.Factory;
 import gate.FeatureMap;
 
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 
 /**
@@ -54,7 +55,8 @@ import org.springframework.beans.factory.FactoryBean;
  * <code>gate</code> namespace, see {@link Init}.
  */
 public class GateResourceFactoryBean extends GateAwareObject implements
-                                                            FactoryBean {
+                                                            FactoryBean,
+                                                            DisposableBean {
 
   private String resourceClass;
 
@@ -63,11 +65,14 @@ public class GateResourceFactoryBean extends GateAwareObject implements
   private FeatureMap parameters;
 
   private FeatureMap features;
-  
+
   private List<ResourceCustomiser> customisers;
 
   private gate.Resource object;
 
+  /**
+   * Create the resource specified by this bean.
+   */
   public Object getObject() throws Exception {
     if(object == null) {
       ensureGateInit();
@@ -87,7 +92,7 @@ public class GateResourceFactoryBean extends GateAwareObject implements
         object = Factory.createResource(resourceClass, parameters, features,
                 resourceName);
       }
-      
+
       if(customisers != null) {
         for(ResourceCustomiser c : customisers) {
           c.customiseResource(object);
@@ -109,6 +114,16 @@ public class GateResourceFactoryBean extends GateAwareObject implements
     return true;
   }
 
+  /**
+   * Destroy the resource created by this bean, by passing it to
+   * {@link Factory#deleteResource}.
+   */
+  public void destroy() throws Exception {
+    if(object != null) {
+      Factory.deleteResource(object);
+    }
+  }
+
   public void setResourceClass(String resourceClass) {
     this.resourceClass = resourceClass;
   }
@@ -124,7 +139,7 @@ public class GateResourceFactoryBean extends GateAwareObject implements
   public void setFeatures(FeatureMap features) {
     this.features = features;
   }
-  
+
   public void setCustomisers(List<ResourceCustomiser> customisers) {
     this.customisers = customisers;
   }
