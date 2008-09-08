@@ -268,9 +268,6 @@ implements ANNIEConstants{
                 "No document for namematch!"
         );
       }
-      if (log.isInfoEnabled()) {
-        log.info("OrthoMatcher started processing: " + document.getName() + "---------------");
-      }
       fireStatusChanged("OrthoMatcher processing: " +  document.getName());
 
       // get the annotations from document
@@ -315,7 +312,6 @@ implements ANNIEConstants{
         //so I need a new one for the next run of matcher
         matchesDocFeature = new ArrayList();
         fireStatusChanged("OrthoMatcher completed");
-        log.info("OrthoMatcher completed-----------------------------------------------");
       }
     }finally{
       //make sure the cleanup happens even if there are errors.
@@ -714,7 +710,7 @@ implements ANNIEConstants{
         Out.prln("We discovered that the following string is null!:  " + prevAnnot.getId() +
                 " For the previous annotation " + getStringForAnnotation(prevAnnot, document) +
                 " which has annotation type " + prevAnnot.getType() +
-                " with the annotation string " + annotString);
+                " Tried to compared it to the annotation string " + annotString);
         return false;
       }
     }
@@ -1024,7 +1020,6 @@ implements ANNIEConstants{
   protected String stripCDG (String annotString, Annotation annot){
 
     ArrayList<Annotation> tokens = (ArrayList) tokensMap.get(annot.getId());
-    // ArrayList tokens = (ArrayList) tokensMap.get(annot.getId());
 
     //strip starting The first
     if ( ((String) ((Annotation) tokens.get(0)
@@ -1032,34 +1027,37 @@ implements ANNIEConstants{
     .equalsIgnoreCase(THE_VALUE))
       tokens.remove(0);
 
+    if (tokens.size() > 0) {
 
-    // New code by A. Borthwick of Spock Networks
-    // June 13, 2008
-    // Strip everything on the cdg list, which now encompasses not just cdg's, but also other stopwords
-    // Start from the right side so we don't mess up the arraylist
-    for (int i = tokens.size() - 1; i >= 0; i--) {
-      String tokenString = ((String) tokens.get(i).getFeatures().get(TOKEN_STRING_FEATURE_NAME));
-      String kind = (String) tokens.get(i).getFeatures().get(TOKEN_KIND_FEATURE_NAME);
-      String category = (String) tokens.get(i).getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME);
-      if (!caseSensitive)  {
-        tokenString = tokenString.toLowerCase();
+      // New code by A. Borthwick of Spock Networks
+      // June 13, 2008
+      // Strip everything on the cdg list, which now encompasses not just cdg's, but also other stopwords
+      // Start from the right side so we don't mess up the arraylist
+      for (int i = tokens.size() - 1; i >= 0; i--) {
+        String tokenString = ((String) tokens.get(i).getFeatures().get(TOKEN_STRING_FEATURE_NAME));
+        String kind = (String) tokens.get(i).getFeatures().get(TOKEN_KIND_FEATURE_NAME);
+        String category = (String) tokens.get(i).getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME);
+        if (!caseSensitive)  {
+          tokenString = tokenString.toLowerCase();
+        }
+        // Out.prln("tokenString: " + tokenString + " kind: " + kind + " category: " + category);
+        if (kind.equals(PUNCTUATION_VALUE) || category.equals("DT") || category.equals("IN")
+                || cdg.contains(tokenString)) {
+          // Out.prln("Now tagging it!");
+          tokens.get(i).getFeatures().put("ortho_stop", true);
+        }
       }
-      // Out.prln("tokenString: " + tokenString + " kind: " + kind + " category: " + category);
-      if (kind.equals(PUNCTUATION_VALUE) || category.equals("DT") || category.equals("IN")
-              || cdg.contains(tokenString)) {
-        // Out.prln("Now tagging it!");
-        tokens.get(i).getFeatures().put("ortho_stop", true);
-      }
-    }
 
-    // AB, Spock:  Need to check for CDG even for 1 token so we don't automatically match
-    // a one-token annotation called "Company", for instance
-    String compareString = (String) tokens.get(tokens.size()-1).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-    if (!caseSensitive) {
-      compareString = compareString.toLowerCase();
-    }
-    if (cdg.contains(compareString)) {
-      tokens.remove(tokens.size()-1);
+      // AB, Spock:  Need to check for CDG even for 1 token so we don't automatically match
+      // a one-token annotation called "Company", for instance
+      String compareString = (String) tokens.get(tokens.size()-1).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
+      if (!caseSensitive) {
+        compareString = compareString.toLowerCase();
+      }
+      if (cdg.contains(compareString)) {
+        tokens.remove(tokens.size()-1);
+      }
+
     }
 
     StringBuffer newString = new StringBuffer(50);
