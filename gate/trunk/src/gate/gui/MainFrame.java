@@ -53,6 +53,7 @@ import gate.util.*;
  */
 public class MainFrame extends JFrame implements ProgressListener,
                                      StatusListener, CreoleListener {
+  private static final long serialVersionUID = 1L;
 
   protected JMenuBar menuBar;
 
@@ -141,10 +142,10 @@ public class MainFrame extends JFrame implements ProgressListener,
   /**
    * Holds all the icons used in the Gate GUI indexed by filename. This is
    * needed so we do not need to decode the icon everytime we need it as that
-   * would use unecessary CPU time and memory. Access to this data is avaialable
+   * would use unecessary CPU time and memory. Access to this data is available
    * through the {@link #getIcon(String)} method.
    */
-  protected static Map iconByName = new HashMap();
+  protected static Map<String, Icon> iconByName = new HashMap<String, Icon>();
 
   /**
    * A Map which holds listeners that are singletons (e.g. the status listener
@@ -153,9 +154,11 @@ public class MainFrame extends JFrame implements ProgressListener,
    * names of the listener interface and the values are the actual listeners
    * (e.g "gate.event.StatusListener" -> this).
    */
-  private static java.util.Map listeners = new HashMap();
+  private static java.util.Map<String, JFrame> listeners =
+    new HashMap<String, JFrame>();
 
-  protected static java.util.Collection guiRoots = new ArrayList();
+  protected static java.util.Collection<Component> guiRoots =
+    new ArrayList<Component>();
 
   /**
    * Extensions for icon files to be tried in this order.
@@ -590,6 +593,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     optionsDialog = new OptionsDialog(MainFrame.this);
     optionsMenu.add(new XJMenuItem(new AbstractAction("Configuration") {
+      private static final long serialVersionUID = 1L;
       {
         putValue(SHORT_DESCRIPTION, "Edit gate options");
       }
@@ -601,7 +605,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     }, this));
 
     JMenu imMenu = null;
-    List installedLocales = new ArrayList();
+    List<Locale> installedLocales = new ArrayList<Locale>();
     try {
       // if this fails guk is not present
       Class.forName("guk.im.GateIMDescriptor");
@@ -627,10 +631,9 @@ public class MainFrame extends JFrame implements ProgressListener,
       // just drop it, is not vital.
     }
 
-    Collections.sort(installedLocales, new Comparator() {
-      public int compare(Object o1, Object o2) {
-        return ((Locale)o1).getDisplayName().compareTo(
-          ((Locale)o2).getDisplayName());
+    Collections.sort(installedLocales, new Comparator<Locale>() {
+      public int compare(Locale o1, Locale o2) {
+        return o1.getDisplayName().compareTo(o2.getDisplayName());
       }
     });
     JMenuItem item;
@@ -678,6 +681,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     // new JCheckBoxMenuItem(datastoreModeCorpusEvalToolAction);
     // corpusEvalMenu.add(datastoreModeItem);
     toolsMenu.add(new AbstractAction("Unicode editor", getIcon("unicode")) {
+      private static final long serialVersionUID = 1L;
       public void actionPerformed(ActionEvent evt) {
         new guk.Editor();
       }
@@ -693,6 +697,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       // by Shafirin Andrey start
       toolsMenu
         .add(new AbstractAction("JAPE Debugger", getIcon("application")) {
+          private static final long serialVersionUID = 1L;
           public void actionPerformed(ActionEvent evt) {
             System.out.println("Creating Jape Debugger");
             new debugger.JapeDebugger();
@@ -804,33 +809,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         // shows in the central tabbed pane, the selected resources
         // in the resource tree when the Enter key is pressed
         if(e.getKeyCode() == KeyEvent.VK_ENTER) {
-          TreePath[] paths = resourcesTree.getSelectionPaths();
-          if (paths == null) { return; }
-          if (paths.length > 10) {
-            Object[] possibleValues =
-              { "Open the "+paths.length+" objects", "Don't open" };
-            int selectedValue =
-              JOptionPane.showOptionDialog(instance, "Do you want to open "
-              +paths.length+" objects in the central tabbed pane ?",
-              "Warning", JOptionPane.DEFAULT_OPTION,
-              JOptionPane.QUESTION_MESSAGE, null,
-              possibleValues, possibleValues[1]);
-            if (selectedValue == 1
-             || selectedValue == JOptionPane.CLOSED_OPTION) {
-              return;
-            }
-          }
-          Handle handle = null;
-          for (TreePath path : paths) {
-            if(path != null) {
-              Object value = path.getLastPathComponent();
-              value = ((DefaultMutableTreeNode)value).getUserObject();
-              if(value instanceof Handle) {
-                handle = (Handle)value;
-                select(handle);
-              }
-            }
-          }
+          (new ShowResourcesAction()).actionPerformed(null);
         }
       }
     });
@@ -871,34 +850,48 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
         if(SwingUtilities.isRightMouseButton(e)) {
           if(resourcesTree.getSelectionCount() > 1) {
-            // multiple selection in tree-> show a popup for delete all
+            // multiple selection in tree
             popup = new XJPopupMenu();
+
+            // add a show all action
+            popup.add(new XJMenuItem(new ShowResourcesAction(),
+              MainFrame.this));
+
+            // add a remove all action
             popup.add(new XJMenuItem(new CloseSelectedResourcesAction(),
               MainFrame.this));
             popup.show(resourcesTree, e.getX(), e.getY());
           }
           else if(popup != null) {
             if(handle != null) {
-              // // Create a CloseViewAction and a menu item based on it
-              // CloseViewAction cva = new CloseViewAction(handle);
-              // XJMenuItem menuItem = new XJMenuItem(cva,
-              // MainFrame.this);
-              // popup.insert(menuItem, 1);
+              // add a show/hide action
+              if (handle.getLargeView() != null
+              && (mainTabbedPane.indexOfComponent(
+                      handle.getLargeView()) != -1)) {
+               popup.insert(new XJMenuItem(new CloseViewAction(handle),
+                 MainFrame.this), 0);
+              } else {
+                popup.insert(new XJMenuItem(new ShowResourceAction(handle),
+                  MainFrame.this), 0);
+              }
+              
+              // add a remove action
+              if(handle instanceof NameBearerHandle) {
+                popup.insert(new XJMenuItem(((NameBearerHandle)handle)
+                  .getCloseAction(), MainFrame.this), 1);
+              }
+
+              // add a separator
+              popup.insert(new JPopupMenu.Separator(), 2);
 
               // add a rename action
-              popup.insert(new JPopupMenu.Separator(), 2);
               popup.insert(new XJMenuItem(new RenameResourceAction(path),
                 MainFrame.this), 3);
 
               // add a help action
               popup.insert(new XJMenuItem(new HelpOnItemTreeAction(
-                handle.getTarget().getClass().getName()), MainFrame.this), 4);
-
-              // Put the action command in the component's action map
-              // if (handle.getLargeView() != null){
-              // handle.getLargeView().getActionMap().
-              // put("Hide current view",cva);
-              // }
+                handle.getTarget().getClass().getName()),
+                MainFrame.this), 4);
             }
 
             popup.show(resourcesTree, e.getX(), e.getY());
@@ -925,58 +918,17 @@ public class MainFrame extends JFrame implements ProgressListener,
       }
     });
 
-//    // Add the keyboard listeners for CTRL+F4 and ALT+F4
-//    this.addKeyListener(new KeyAdapter() {
-//      public void keyTyped(KeyEvent e) {
-//      }
-//
-//      public void keyPressed(KeyEvent e) {
-//        // If Ctrl+F4 was pressed then close the active resource
-//        if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_F4) {
-//          JComponent resource =
-//            (JComponent)mainTabbedPane.getSelectedComponent();
-//          if(resource != null) {
-//            Action act = resource.getActionMap().get("Close resource");
-//            if(act != null) act.actionPerformed(null);
-//          }// End if
-//        }// End if
-//        // If CTRL+H was pressed then hide the active view.
-//        if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_H) {
-//          JComponent resource =
-//            (JComponent)mainTabbedPane.getSelectedComponent();
-//          if(resource != null) {
-//            Action act = resource.getActionMap().get("Hide current view");
-//            if(act != null) act.actionPerformed(null);
-//          }// End if
-//        }// End if
-//        // If CTRL+X was pressed then save as XML
-//        if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_X) {
-//          JComponent resource =
-//            (JComponent)mainTabbedPane.getSelectedComponent();
-//          if(resource != null) {
-//            Action act = resource.getActionMap().get("Save As XML");
-//            if(act != null) act.actionPerformed(null);
-//          }// End if
-//        }// End if
-//      }// End keyPressed();
-//
-//      public void keyReleased(KeyEvent e) {
-//      }
-//    });
-
     // define keystrokes action bindings at the level of the main window
     InputMap inputMap = ((JComponent)this.getContentPane()).
       getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-    // If Ctrl+F4 was pressed then close the active resource
     inputMap.put(KeyStroke.getKeyStroke("control F4"), "Close resource");
-    // If CTRL+H was pressed then hide the active view.
-    inputMap.put(KeyStroke.getKeyStroke("control H"), "Hide current view");
-    // If CTRL+X was pressed then save as XML
+    inputMap.put(KeyStroke.getKeyStroke("control H"), "Hide");
+    inputMap.put(KeyStroke.getKeyStroke("control shift H"), "Hide all");
     inputMap.put(KeyStroke.getKeyStroke("control X"), "Save As XML");
 
     mainTabbedPane.getModel().addChangeListener(new ChangeListener() {
       public void stateChanged(ChangeEvent e) {
-        // use this to synchronise the selection in the tabbed pane with
+        // synchronise the selection in the tabbed pane with
         // the one in the resources tree
         JComponent largeView =
           (JComponent)mainTabbedPane.getSelectedComponent();
@@ -1002,26 +954,20 @@ public class MainFrame extends JFrame implements ProgressListener,
           // redefine MainFrame actionMaps for the selected tab 
           JComponent resource =
             (JComponent)mainTabbedPane.getSelectedComponent();
-          Action action = resource.getActionMap().get("Close resource");
-          if(action != null) {
-            actionMap.put("Close resource", action);
-          } else {
-            actionMap.put("Close resource", null);
-          }
-          actionMap.put("Hide current view", new CloseViewAction(handle)); 
-          action = resource.getActionMap().get("Save As XML");
-          if(action != null) {
-            actionMap.put("Save As XML", action);
-          } else {
-            actionMap.put("Save As XML", null);
-          }
+          actionMap.put("Close resource",
+            resource.getActionMap().get("Close resource"));
+          actionMap.put("Hide", new CloseViewAction(handle));
+          actionMap.put("Hide all", new HideAllAction());
+          actionMap.put("Save As XML",
+            resource.getActionMap().get("Save As XML"));
         }
         else {
           // the selected item is not a resource (maybe the log area?)
           lowerScroll.getViewport().setView(null);
           // disabled actions on the selected tabbed pane
           actionMap.put("Close resource", null);
-          actionMap.put("Hide current view", null); 
+          actionMap.put("Hide", null); 
+          actionMap.put("Hide all", null); 
           actionMap.put("Save As XML", null);
         }
       }
@@ -1038,19 +984,25 @@ public class MainFrame extends JFrame implements ProgressListener,
             DefaultMutableTreeNode node = resourcesTreeRoot;
             while(!done && nodesEnum.hasMoreElements()) {
               node = (DefaultMutableTreeNode)nodesEnum.nextElement();
-              done =
-                node.getUserObject() instanceof Handle
+              done = node.getUserObject() instanceof Handle
                   && ((Handle)node.getUserObject()).viewsBuilt()
                   && ((Handle)node.getUserObject()).getLargeView() == view;
             }
             if(done) {
               Handle handle = (Handle)node.getUserObject();
               JPopupMenu popup = handle.getPopup();
-              // Create a CloseViewAction and a menu item based on it
+
+              // add a remove action
               CloseViewAction cva = new CloseViewAction(handle);
               XJMenuItem menuItem = new XJMenuItem(cva, MainFrame.this);
-              popup.insert(menuItem, 1);
-              popup.insert(new JPopupMenu.Separator(), 2);
+              popup.insert(menuItem, 0);
+
+              // add a hide all action
+              if (mainTabbedPane.getTabCount() > 2) {
+                HideAllAction haa = new HideAllAction();
+                menuItem = new XJMenuItem(haa, MainFrame.this);
+                popup.insert(menuItem, 1);
+              }
 
               popup.show(mainTabbedPane, e.getX(), e.getY());
             }
@@ -1482,11 +1434,11 @@ public class MainFrame extends JFrame implements ProgressListener,
    * this). The returned map is the actual data member used to store the
    * listeners so any changes in this map will be visible to everyone.
    */
-  public static java.util.Map getListeners() {
+  public static java.util.Map<String, JFrame> getListeners() {
     return listeners;
   }
 
-  public static java.util.Collection getGuiRoots() {
+  public static java.util.Collection<Component> getGuiRoots() {
     return guiRoots;
   }
 
@@ -1521,6 +1473,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     else parentWindow = SwingUtilities.getWindowAncestor(parentComp);
     if(parentWindow instanceof Frame) {
       dialog = new JDialog((Frame)parentWindow, "Please wait", true) {
+        private static final long serialVersionUID = 1L;
         protected void processWindowEvent(WindowEvent e) {
           if(e.getID() == WindowEvent.WINDOW_CLOSING) {
             getToolkit().beep();
@@ -1530,6 +1483,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
     else if(parentWindow instanceof Dialog) {
       dialog = new JDialog((Dialog)parentWindow, "Please wait", true) {
+        private static final long serialVersionUID = 1L;
         protected void processWindowEvent(WindowEvent e) {
           if(e.getID() == WindowEvent.WINDOW_CLOSING) {
             getToolkit().beep();
@@ -1539,6 +1493,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
     else {
       dialog = new JDialog(JOptionPane.getRootFrame(), "Please wait", true) {
+        private static final long serialVersionUID = 1L;
         protected void processWindowEvent(WindowEvent e) {
           if(e.getID() == WindowEvent.WINDOW_CLOSING) {
             getToolkit().beep();
@@ -1709,6 +1664,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
   /** This class represent an action which brings up the Annot Diff tool */
   class NewAnnotDiffAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public NewAnnotDiffAction() {
       super("Annotation Diff", getIcon("annotation-diff"));
       putValue(SHORT_DESCRIPTION, "Open a new Annotation Diff window");
@@ -1736,6 +1692,7 @@ public class MainFrame extends JFrame implements ProgressListener,
    * This class represent an action which brings up the corpus evaluation tool
    */
   class NewCorpusEvalAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public NewCorpusEvalAction() {
       super("Default mode");
       putValue(SHORT_DESCRIPTION, "Run the Benchmark Tool in its default mode");
@@ -1798,6 +1755,7 @@ public class MainFrame extends JFrame implements ProgressListener,
    * This class represent an action which brings up the corpus evaluation tool
    */
   class StoredMarkedCorpusEvalAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public StoredMarkedCorpusEvalAction() {
       super("Human marked against stored processing results");
       putValue(SHORT_DESCRIPTION, "Run the Benchmark Tool -stored_clean");
@@ -1854,6 +1812,7 @@ public class MainFrame extends JFrame implements ProgressListener,
    * This class represent an action which brings up the corpus evaluation tool
    */
   class CleanMarkedCorpusEvalAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public CleanMarkedCorpusEvalAction() {
       super("Human marked against current processing results");
       putValue(SHORT_DESCRIPTION, "Run the Benchmark Tool -marked_clean");
@@ -1918,6 +1877,7 @@ public class MainFrame extends JFrame implements ProgressListener,
    * This class represent an action which brings up the corpus evaluation tool
    */
   class GenerateStoredCorpusEvalAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public GenerateStoredCorpusEvalAction() {
       super("Store corpus for future evaluation");
       putValue(SHORT_DESCRIPTION, "Run the Benchmark Tool -generate");
@@ -1973,6 +1933,7 @@ public class MainFrame extends JFrame implements ProgressListener,
    * This class represent an action which brings up the corpus evaluation tool
    */
   class VerboseModeCorpusEvalToolAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public VerboseModeCorpusEvalToolAction() {
       super("Verbose mode");
       putValue(SHORT_DESCRIPTION, "Run the Benchmark Tool in verbose mode");
@@ -2013,6 +1974,7 @@ public class MainFrame extends JFrame implements ProgressListener,
    */
   class LoadANNIEWithDefaultsAction extends AbstractAction implements
                                                           ANNIEConstants {
+    private static final long serialVersionUID = 1L;
     public LoadANNIEWithDefaultsAction() {
       super("With defaults");
       putValue(SHORT_DESCRIPTION, "Load ANNIE system using defaults");
@@ -2067,6 +2029,7 @@ public class MainFrame extends JFrame implements ProgressListener,
    */
   class LoadANNIEWithoutDefaultsAction extends AbstractAction implements
                                                              ANNIEConstants {
+    private static final long serialVersionUID = 1L;
     public LoadANNIEWithoutDefaultsAction() {
       super("Without defaults");
       putValue(SHORT_DESCRIPTION, "Load ANNIE system without defaults");
@@ -2077,7 +2040,6 @@ public class MainFrame extends JFrame implements ProgressListener,
       // Loads ANNIE with defaults
       Runnable runnable = new Runnable() {
         public void run() {
-          FeatureMap params = Factory.newFeatureMap();
           try {
             // Create a serial analyser
             SerialAnalyserController sac =
@@ -2102,7 +2064,8 @@ public class MainFrame extends JFrame implements ProgressListener,
               else {
                 // the user got bored and aborted the operation
                 statusChanged("Loading cancelled! Removing traces...");
-                Iterator loadedPRsIter = new ArrayList(sac.getPRs()).iterator();
+                Iterator<ProcessingResource> loadedPRsIter =
+                  new ArrayList<ProcessingResource>(sac.getPRs()).iterator();
                 while(loadedPRsIter.hasNext()) {
                   Factory.deleteResource((ProcessingResource)loadedPRsIter
                     .next());
@@ -2131,6 +2094,7 @@ public class MainFrame extends JFrame implements ProgressListener,
    */
   class LoadANNIEWithoutDefaultsAction1 extends AbstractAction implements
                                                               ANNIEConstants {
+    private static final long serialVersionUID = 1L;
     public LoadANNIEWithoutDefaultsAction1() {
       super("Without defaults");
     }// NewAnnotDiffAction
@@ -2165,6 +2129,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   }// class LoadANNIEWithoutDefaultsAction
 
   class NewBootStrapAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public NewBootStrapAction() {
       super("BootStrap Wizard", getIcon("application"));
     }// NewBootStrapAction
@@ -2176,6 +2141,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   }// class NewBootStrapAction
 
   class ManagePluginsAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public ManagePluginsAction() {
       super("Manage CREOLE plugins");
       putValue(SHORT_DESCRIPTION, "Manage CREOLE plugins");
@@ -2216,6 +2182,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   }
 
   class LoadCreoleRepositoryAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public LoadCreoleRepositoryAction() {
       super("Load a CREOLE repository");
       putValue(SHORT_DESCRIPTION, "Load a CREOLE repository");
@@ -2234,6 +2201,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       messageBox.add(Box.createHorizontalStrut(10));
 
       class URLfromFileAction extends AbstractAction {
+        private static final long serialVersionUID = 1L;
         URLfromFileAction(JTextField textField) {
           super(null, getIcon("open-file"));
           putValue(SHORT_DESCRIPTION, "Click to select a directory");
@@ -2295,6 +2263,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   }// class LoadCreoleRepositoryAction extends AbstractAction
 
   class NewResourceAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     /** Used for creation of resource menu item and creation dialog */
     ResourceData rData;
 
@@ -2319,6 +2288,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   } // class NewResourceAction extends AbstractAction
 
   static class StopAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public StopAction() {
       super(" Stop! ");
       putValue(SHORT_DESCRIPTION, "Stops the current action");
@@ -2657,7 +2627,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         Object indexer =
           constructor.newInstance(new URL(indexLocation.getText()));
 
-        Map parameters = new HashMap();
+        Map<String, Object> parameters = new HashMap<String, Object>();
         parameters.put(Constants.INDEX_LOCATION_URL, new URL(indexLocation
           .getText()));
         parameters.put(Constants.BASE_TOKEN_ANNOTATION_TYPE, btat.getText());
@@ -2783,6 +2753,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   } // openSerialDataStore()
 
   class NewDSAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public NewDSAction() {
       super("Create datastore");
       putValue(SHORT_DESCRIPTION, "Create a new Datastore");
@@ -2790,7 +2761,6 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
 
     public void actionPerformed(ActionEvent e) {
-      DataStoreRegister reg = Gate.getDataStoreRegister();
       Map dsTypes = DataStoreRegister.getDataStoreClassNames();
       HashMap dsTypeByName = new HashMap();
       Iterator dsTypesIter = dsTypes.entrySet().iterator();
@@ -2838,6 +2808,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   }// class NewDSAction extends AbstractAction
 
   class LoadResourceFromFileAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public LoadResourceFromFileAction() {
       super("Restore application from file");
       putValue(SHORT_DESCRIPTION, "Restores a previously saved application");
@@ -2905,9 +2876,10 @@ public class MainFrame extends JFrame implements ProgressListener,
    * the system, only its view.
    */
   class CloseViewAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public CloseViewAction(Handle handle) {
-      super("Hide this view");
-      putValue(SHORT_DESCRIPTION, "Hides this view");
+      super("Hide");
+      putValue(SHORT_DESCRIPTION, "Hide this resource view");
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control H"));
       this.handle = handle;
     }
@@ -2923,9 +2895,10 @@ public class MainFrame extends JFrame implements ProgressListener,
   }// class CloseViewAction
 
   class RenameResourceAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     RenameResourceAction(TreePath path) {
       super("Rename");
-      putValue(SHORT_DESCRIPTION, "Renames the resource");
+      putValue(SHORT_DESCRIPTION, "Rename this resource");
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("F2"));
       this.path = path;
     }
@@ -2938,9 +2911,10 @@ public class MainFrame extends JFrame implements ProgressListener,
   }
 
   class CloseSelectedResourcesAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public CloseSelectedResourcesAction() {
-      super("Close all");
-      putValue(SHORT_DESCRIPTION, "Closes the selected resources");
+      super("Remove all");
+      putValue(SHORT_DESCRIPTION, "Remove the selected resources");
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -2964,11 +2938,105 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
   }
 
+  class HideAllAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
+    public HideAllAction() {
+      super("Hide all");
+      putValue(SHORT_DESCRIPTION, "Hide all resource views");
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control shift H"));
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      // for each element in the tree look if it is in the tab panel
+      // if yes, remove it from the tab panel
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          Enumeration nodesEnum = resourcesTreeRoot.preorderEnumeration();
+          DefaultMutableTreeNode node = null;
+          while(nodesEnum.hasMoreElements()) {
+            node = (DefaultMutableTreeNode)nodesEnum.nextElement();
+            if ((node.getUserObject() instanceof Handle)
+             && (mainTabbedPane.indexOfComponent(
+                ((Handle)node.getUserObject()).getLargeView()) != -1)) {
+              final DefaultMutableTreeNode nodeF = node;
+              Handle handle = (Handle)nodeF.getUserObject();
+              (new CloseViewAction(handle)).actionPerformed(null);
+            }
+          }
+        }
+      });
+    }
+  }
+
+  class ShowResourcesAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
+    public ShowResourcesAction() {
+      super("Show all");
+      putValue(SHORT_DESCRIPTION, "Show this resources");
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("Enter"));
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      Runnable runner = new Runnable() {
+        public void run() {
+          TreePath[] paths = resourcesTree.getSelectionPaths();
+          if (paths == null) { return; }
+          if (paths.length > 10) {
+            Object[] possibleValues =
+              { "Open the "+paths.length+" objects", "Don't open" };
+            int selectedValue =
+              JOptionPane.showOptionDialog(instance, "Do you want to open "
+              +paths.length+" objects in the central tabbed pane ?",
+              "Warning", JOptionPane.DEFAULT_OPTION,
+              JOptionPane.QUESTION_MESSAGE, null,
+              possibleValues, possibleValues[1]);
+            if (selectedValue == 1
+             || selectedValue == JOptionPane.CLOSED_OPTION) {
+              return;
+            }
+          }
+          Handle handle = null;
+          for (TreePath path : paths) {
+            if(path != null) {
+              Object value = path.getLastPathComponent();
+              value = ((DefaultMutableTreeNode)value).getUserObject();
+              if(value instanceof Handle) {
+                handle = (Handle)value;
+                select(handle);
+              }
+            }
+          }
+        }
+      };
+      Thread thread = new Thread(runner);
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
+    }
+  }
+
+  class ShowResourceAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
+    Handle handle;
+    public ShowResourceAction(Handle handle) {
+      super("Show");
+      putValue(SHORT_DESCRIPTION, "Show this resource");
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("Enter"));
+      this.handle = handle;
+    }
+    
+    public void actionPerformed(ActionEvent e) {
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() { select(handle); }
+      });
+    }
+  }
+
   /**
    * Closes the view associated to a resource. Does not remove the resource from
    * the system, only its view.
    */
   class ExitGateAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public ExitGateAction() {
       super("Exit GATE");
       putValue(SHORT_DESCRIPTION, "Closes the application");
@@ -3018,9 +3086,8 @@ public class MainFrame extends JFrame implements ProgressListener,
             .booleanValue()) {
             // save all the open applications
             try {
-              ArrayList appList =
-                new ArrayList(Gate.getCreoleRegister().getAllInstances(
-                  "gate.Controller"));
+              ArrayList<Resource> appList = new ArrayList<Resource>(
+                Gate.getCreoleRegister().getAllInstances("gate.Controller"));
               // remove all hidden instances
               Iterator appIter = appList.iterator();
               while(appIter.hasNext())
@@ -3044,9 +3111,9 @@ public class MainFrame extends JFrame implements ProgressListener,
           System.setErr(logArea.getOriginalErr());
           System.setOut(logArea.getOriginalOut());
           // now we need to dispose all GUI roots
-          List<Window> roots = new ArrayList<Window>(getGuiRoots());
+          List<Component> roots = new ArrayList<Component>(getGuiRoots());
           while(!roots.isEmpty()) {
-            Object aRoot = roots.remove(0);
+            Component aRoot = roots.remove(0);
             if(aRoot instanceof Window) {
               Window window = (Window)aRoot;
               roots.addAll(Arrays.asList(window.getOwnedWindows()));
@@ -3113,6 +3180,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   }
 
   class OpenDSAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public OpenDSAction() {
       super("Open datastore");
       putValue(SHORT_DESCRIPTION, "Open a datastore");
@@ -3120,7 +3188,6 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
 
     public void actionPerformed(ActionEvent e) {
-      DataStoreRegister reg = Gate.getDataStoreRegister();
       Map dsTypes = DataStoreRegister.getDataStoreClassNames();
       HashMap dsTypeByName = new HashMap();
       Iterator dsTypesIter = dsTypes.entrySet().iterator();
@@ -3313,6 +3380,7 @@ public class MainFrame extends JFrame implements ProgressListener,
    * shown. Used for creating new resources of all possible types.
    */
   class LiveMenu extends XJMenu {
+    private static final long serialVersionUID = 1L;
     public LiveMenu(int type) {
       super();
       this.type = type;
@@ -3347,13 +3415,15 @@ public class MainFrame extends JFrame implements ProgressListener,
           }
 
           if(resTypes != null && !resTypes.isEmpty()) {
-            HashMap resourcesByName = new HashMap();
+            HashMap<String, ResourceData> resourcesByName
+            = new HashMap<String, ResourceData>();
             Iterator resIter = resTypes.iterator();
             while(resIter.hasNext()) {
               ResourceData rData = (ResourceData)reg.get(resIter.next());
               resourcesByName.put(rData.getName(), rData);
             }
-            List resNames = new ArrayList(resourcesByName.keySet());
+            List<String> resNames =
+              new ArrayList<String>(resourcesByName.keySet());
             Collections.sort(resNames);
             resIter = resNames.iterator();
             while(resIter.hasNext()) {
@@ -3400,6 +3470,7 @@ public class MainFrame extends JFrame implements ProgressListener,
    * Overrides default JTree behaviour for tooltips.
    */
   class ResourcesTree extends JTree {
+    private static final long serialVersionUID = 1L;
 
     public ResourcesTree() {
       myToolTip = new ResourceToolTip();
@@ -3446,6 +3517,7 @@ public class MainFrame extends JFrame implements ProgressListener,
    * 
    */
   class ResourceToolTip extends JToolTip {
+    private static final long serialVersionUID = 1L;
     public ResourceToolTip() {
       this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
@@ -3519,6 +3591,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   }
 
   class HelpAboutAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public HelpAboutAction() {
       super("About");
     }
@@ -3529,6 +3602,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   }
 
   class HelpUserGuideAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public HelpUserGuideAction() {
       super("User Guide Contents");
       putValue(SHORT_DESCRIPTION, "This option needs an internet connection");
@@ -3577,6 +3651,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   }
 
   class HelpUserGuideInContextAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public HelpUserGuideInContextAction() {
       super("Contextual User Guide");
       putValue(SHORT_DESCRIPTION, "This option needs an internet connection");
@@ -3666,6 +3741,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   }
   
   class HelpOnItemTreeAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     HelpOnItemTreeAction(String className) {
       super("Help");
       putValue(SHORT_DESCRIPTION, "Help on this resource");
@@ -3680,6 +3756,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   }
 
   class ToggleToolTipsAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public ToggleToolTipsAction() {
       super("Show tooltips");
       putValue(SHORT_DESCRIPTION,
@@ -3705,6 +3782,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
 
     protected class ResourcesTreeCellRenderer extends DefaultTreeCellRenderer {
+    private static final long serialVersionUID = 1L;
     public ResourcesTreeCellRenderer() {
       setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
     }
@@ -3798,6 +3876,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   // DefaultTreeCellEditor {
 
   protected class ResourcesTreeModel extends DefaultTreeModel {
+    private static final long serialVersionUID = 1L;
     ResourcesTreeModel(TreeNode root, boolean asksAllowChildren) {
       super(root, asksAllowChildren);
     }
@@ -3822,6 +3901,7 @@ public class MainFrame extends JFrame implements ProgressListener,
    * instance is used as a parent.
    */
   public static class GateFileChooser extends JFileChooser {
+    private static final long serialVersionUID = 1L;
     /**
      * Overridden to make sure the shared MainFrame instance is used as a parent
      * when no parent is specified
@@ -4048,6 +4128,7 @@ public class MainFrame extends JFrame implements ProgressListener,
    * String oldText; }
    */
   class LocaleSelectorMenuItem extends JRadioButtonMenuItem {
+    private static final long serialVersionUID = 1L;
     public LocaleSelectorMenuItem(Locale locale) {
       super(locale.getDisplayName());
       me = this;
@@ -4093,6 +4174,7 @@ public class MainFrame extends JFrame implements ProgressListener,
    * This class represent an action which brings up the Gazetteer Editor tool
    */
   class NewGazetteerEditorAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public NewGazetteerEditorAction() {
       super("Gazetteer Editor", getIcon("gazetteer"));
       putValue(SHORT_DESCRIPTION, "Start the Gazetteer Editor");
@@ -4106,9 +4188,9 @@ public class MainFrame extends JFrame implements ProgressListener,
         frame.setTitle("Gazetteer Editor");
         frame.getContentPane().add(editor);
 
-        Set gazetteers =
-          new HashSet(Gate.getCreoleRegister().getLrInstances(
-            "gate.creole.gazetteer.DefaultGazetteer"));
+        Set<LanguageResource> gazetteers = new HashSet<LanguageResource>(
+          Gate.getCreoleRegister().getLrInstances(
+          "gate.creole.gazetteer.DefaultGazetteer"));
         if(gazetteers == null || gazetteers.isEmpty()) return;
         Iterator iter = gazetteers.iterator();
         while(iter.hasNext()) {

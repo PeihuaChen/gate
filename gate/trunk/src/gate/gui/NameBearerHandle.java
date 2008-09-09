@@ -16,7 +16,6 @@ package gate.gui;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -53,7 +52,7 @@ public class NameBearerHandle implements Handle, StatusListener,
   public NameBearerHandle(NameBearer target, Window window) {
     this.target = target;
     this.window = window;
-    actionPublishers = new ArrayList();
+    actionPublishers = new ArrayList<ActionsPublisher>();
 
     sListenerProxy = new ProxyStatusListener();
     String iconName = null;
@@ -89,7 +88,8 @@ public class NameBearerHandle implements Handle, StatusListener,
 
     Gate.getCreoleRegister().addCreoleListener(this);
 
-    if(target instanceof ActionsPublisher) actionPublishers.add(target);
+    if(target instanceof ActionsPublisher)
+      actionPublishers.add((ActionsPublisher)target);
 
     buildStaticPopupItems();
 
@@ -188,7 +188,7 @@ public class NameBearerHandle implements Handle, StatusListener,
   }
 
   /** Fill HMM Save and Save As... actions */
-  private void fillHMMActions(List popupItems) {
+  private void fillHMMActions(List<XJMenuItem> popupItems) {
     Action action;
 
     com.ontotext.gate.hmm.agent.AlternativeHMMAgent hmmPR =
@@ -289,35 +289,30 @@ public class NameBearerHandle implements Handle, StatusListener,
 
   protected void buildStaticPopupItems() {
     // build the static part of the popup
-    staticPopupItems = new ArrayList();
-
-    XJMenuItem closeItem = new XJMenuItem(new CloseAction(), sListenerProxy);
-    closeItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4,
-      ActionEvent.CTRL_MASK));
-    staticPopupItems.add(closeItem);
+    staticPopupItems = new ArrayList<XJMenuItem>();
 
     if(target instanceof ProcessingResource) {
       staticPopupItems.add(null);
       staticPopupItems.add(new XJMenuItem(new ReloadAction(), sListenerProxy));
       if(target instanceof com.ontotext.gate.hmm.agent.AlternativeHMMAgent) {
         fillHMMActions(staticPopupItems);
-      } // if
+      }
     }
+
     else if(target instanceof LanguageResource) {
       // Language Resources
       staticPopupItems.add(null);
-      staticPopupItems.add(new XJMenuItem(new SaveAction(), sListenerProxy));
-      staticPopupItems.add(new XJMenuItem(new SaveToAction(), sListenerProxy));
+      if(target instanceof Document) {
+        staticPopupItems.add(new XJMenuItem(new CreateCorpusForDocAction(),
+                sListenerProxy));
+      }
       if(target instanceof gate.TextualDocument) {
         XJMenuItem saveAsXmlItem =
           new XJMenuItem(new SaveAsXmlAction(), sListenerProxy);
-        saveAsXmlItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X,
-          ActionEvent.CTRL_MASK));
-
+        staticPopupItems.add(null);
         staticPopupItems.add(saveAsXmlItem);
       }
       else if(target instanceof Corpus) {
-        staticPopupItems.add(null);
         corpusFiller = new CorpusFillerComponent();
         trecWebFileInputDialog = new TrecWebFileInputDialog();
         staticPopupItems.add(new XJMenuItem(new PopulateCorpusAction(),
@@ -336,7 +331,6 @@ public class NameBearerHandle implements Handle, StatusListener,
             // do nothing
           }
           else {
-            staticPopupItems.add(null);
             staticPopupItems.add(new XJMenuItem(new CreateIndexAction(),
               sListenerProxy));
             staticPopupItems.add(new XJMenuItem(new OptimizeIndexAction(),
@@ -346,14 +340,10 @@ public class NameBearerHandle implements Handle, StatusListener,
           }
         }
       }
-
-      if(target instanceof Document) {
-        staticPopupItems.add(null);
-        staticPopupItems.add(new XJMenuItem(new CreateCorpusForDocAction(),
-          sListenerProxy));
-      }
-
+      staticPopupItems.add(new XJMenuItem(new SaveAction(), sListenerProxy));
+      staticPopupItems.add(new XJMenuItem(new SaveToAction(), sListenerProxy));
     }
+
     else if(target instanceof Controller) {
       // Applications
       staticPopupItems.add(null);
@@ -388,7 +378,8 @@ public class NameBearerHandle implements Handle, StatusListener,
           ((JTabbedPane)largeView).add((Component)view, rData.getName());
           // if view provide actions, add it to the list of action
           // puiblishers
-          if(view instanceof ActionsPublisher) actionPublishers.add(view);
+          if(view instanceof ActionsPublisher)
+            actionPublishers.add((ActionsPublisher)view);
         }
         catch(ResourceInstantiationException rie) {
           rie.printStackTrace(Err.getPrintWriter());
@@ -422,7 +413,8 @@ public class NameBearerHandle implements Handle, StatusListener,
           view.setTarget(target);
           view.setHandle(this);
           ((JTabbedPane)smallView).add((Component)view, rData.getName());
-          if(view instanceof ActionsPublisher) actionPublishers.add(view);
+          if(view instanceof ActionsPublisher)
+            actionPublishers.add((ActionsPublisher)view);
         }
         catch(ResourceInstantiationException rie) {
           rie.printStackTrace(Err.getPrintWriter());
@@ -451,9 +443,11 @@ public class NameBearerHandle implements Handle, StatusListener,
     return title;
   }
 
+  @SuppressWarnings("unchecked")
   public synchronized void removeProgressListener(ProgressListener l) {
     if(progressListeners != null && progressListeners.contains(l)) {
-      Vector v = (Vector)progressListeners.clone();
+      Vector<ProgressListener> v =
+        (Vector<ProgressListener>)progressListeners.clone();
       v.removeElement(l);
       progressListeners = v;
     }
@@ -461,10 +455,11 @@ public class NameBearerHandle implements Handle, StatusListener,
 
   // l)
 
+  @SuppressWarnings("unchecked")
   public synchronized void addProgressListener(ProgressListener l) {
-    Vector v =
-      progressListeners == null ? new Vector(2) : (Vector)progressListeners
-        .clone();
+    Vector<ProgressListener> v =
+      progressListeners == null ? new Vector<ProgressListener>(2)
+              : (Vector<ProgressListener>)progressListeners.clone();
     if(!v.contains(l)) {
       v.addElement(l);
       progressListeners = v;
@@ -481,13 +476,13 @@ public class NameBearerHandle implements Handle, StatusListener,
    * Stores all the action providers for this resource. They will be questioned
    * when the getPopup() method is called.
    */
-  protected List actionPublishers;
+  protected List<ActionsPublisher> actionPublishers;
 
   /**
    * A list of menu items that constitute the static part of the popup. Null
    * values are used for separators.
    */
-  protected List staticPopupItems;
+  protected List<XJMenuItem> staticPopupItems;
 
   /**
    * The top level GUI component this hadle belongs to.
@@ -512,15 +507,17 @@ public class NameBearerHandle implements Handle, StatusListener,
 
   StatusListener sListenerProxy;
 
-  // File currentDir = null;
-  private transient Vector progressListeners;
+  private transient Vector<ProgressListener> progressListeners;
 
-  private transient Vector statusListeners;
+  private transient Vector<StatusListener> statusListeners;
 
   class CloseAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
+
     public CloseAction() {
-      super("Close");
-      putValue(SHORT_DESCRIPTION, "Removes this resource from the system");
+      super("Remove");
+      putValue(SHORT_DESCRIPTION, "Remove this resource");
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control F4"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -568,9 +565,11 @@ public class NameBearerHandle implements Handle, StatusListener,
    * Used to save a document as XML
    */
   class SaveAsXmlAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public SaveAsXmlAction() {
       super("Save As Xml...");
       putValue(SHORT_DESCRIPTION, "Saves this resource in XML");
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control X"));
     }// SaveAsXmlAction()
 
     public void actionPerformed(ActionEvent e) {
@@ -649,7 +648,6 @@ public class NameBearerHandle implements Handle, StatusListener,
               getSmallView()) : fileChooser.showSaveDialog(null);
           if(res == JFileChooser.APPROVE_OPTION) {
             selectedFile = fileChooser.getSelectedFile();
-            File currentDir = fileChooser.getCurrentDirectory();
             if(selectedFile == null) return;
             long start = System.currentTimeMillis();
             NameBearerHandle.this.statusChanged("Saving as XML to "
@@ -701,6 +699,7 @@ public class NameBearerHandle implements Handle, StatusListener,
    * Saves a corpus as a set of xml files in a directory.
    */
   class SaveCorpusAsXmlAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     private boolean preserveFormat;
 
     public SaveCorpusAsXmlAction(boolean preserveFormat) {
@@ -919,6 +918,7 @@ public class NameBearerHandle implements Handle, StatusListener,
    * Saves a corpus as a set of xml files in a directory.
    */
   class ReloadClassAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public ReloadClassAction() {
       super("Reload resource class");
       putValue(SHORT_DESCRIPTION, "Reloads the java class for this resource");
@@ -951,6 +951,7 @@ public class NameBearerHandle implements Handle, StatusListener,
   }
 
   class SaveAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public SaveAction() {
       super("Save");
       putValue(SHORT_DESCRIPTION, "Save back to the datastore");
@@ -1008,6 +1009,7 @@ public class NameBearerHandle implements Handle, StatusListener,
   }// class SaveAction
 
   class DumpToFileAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public DumpToFileAction() {
       super("Save application state");
       putValue(SHORT_DESCRIPTION,
@@ -1065,6 +1067,7 @@ public class NameBearerHandle implements Handle, StatusListener,
   }
 
   class SaveToAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     public SaveToAction() {
       super("Save to...");
       putValue(SHORT_DESCRIPTION, "Save this resource to a datastore");
@@ -1075,7 +1078,7 @@ public class NameBearerHandle implements Handle, StatusListener,
         public void run() {
           try {
             DataStoreRegister dsReg = Gate.getDataStoreRegister();
-            Map dsByName = new HashMap();
+            Map<String, DataStore> dsByName = new HashMap<String, DataStore>();
             Iterator dsIter = dsReg.iterator();
             while(dsIter.hasNext()) {
               DataStore oneDS = (DataStore)dsIter.next();
@@ -1094,7 +1097,7 @@ public class NameBearerHandle implements Handle, StatusListener,
               }
               dsByName.put(name, oneDS);
             }
-            List dsNames = new ArrayList(dsByName.keySet());
+            List<String> dsNames = new ArrayList<String>(dsByName.keySet());
             if(dsNames.isEmpty()) {
               JOptionPane.showMessageDialog(getLargeView(),
                 "There are no open datastores!\n "
@@ -1225,6 +1228,7 @@ public class NameBearerHandle implements Handle, StatusListener,
   }// class SaveToAction extends AbstractAction
 
   class ReloadAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     ReloadAction() {
       super("Reinitialise");
       putValue(SHORT_DESCRIPTION, "Reloads this resource");
@@ -1237,7 +1241,8 @@ public class NameBearerHandle implements Handle, StatusListener,
           try {
             long startTime = System.currentTimeMillis();
             fireStatusChanged("Reinitialising " + target.getName());
-            Map listeners = new HashMap();
+            Map<String, EventListener> listeners =
+              new HashMap<String, EventListener>();
             StatusListener sListener = new StatusListener() {
               public void statusChanged(String text) {
                 fireStatusChanged(text);
@@ -1300,6 +1305,7 @@ public class NameBearerHandle implements Handle, StatusListener,
   }// class ReloadAction
 
   class PopulateCorpusAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
     PopulateCorpusAction() {
       super("Populate");
       putValue(SHORT_DESCRIPTION,
@@ -1388,6 +1394,11 @@ public class NameBearerHandle implements Handle, StatusListener,
   }
 
   class PopulateCorpusWithTrecWebDataAction extends AbstractAction {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 2342321851865139492L;
+
     PopulateCorpusWithTrecWebDataAction() {
       super("Populate With TrecWebData");
       putValue(SHORT_DESCRIPTION,
@@ -1463,6 +1474,8 @@ public class NameBearerHandle implements Handle, StatusListener,
   }
 
   class CreateIndexAction1 extends AbstractAction {
+    private static final long serialVersionUID = -3951091972912846869L;
+
     CreateIndexAction1() {
       super("Create Index");
       putValue(SHORT_DESCRIPTION, "Create index with documents from a corpus");
@@ -1481,6 +1494,8 @@ public class NameBearerHandle implements Handle, StatusListener,
   }
 
   class CreateIndexAction extends AbstractAction {
+    private static final long serialVersionUID = -292879296310753260L;
+
     CreateIndexAction() {
       super("Index corpus");
       putValue(SHORT_DESCRIPTION, "Create index with documents from the corpus");
@@ -1551,6 +1566,8 @@ public class NameBearerHandle implements Handle, StatusListener,
   }
 
   class OptimizeIndexAction extends AbstractAction {
+    private static final long serialVersionUID = 261845730081082766L;
+
     OptimizeIndexAction() {
       super("Optimize Index");
       putValue(SHORT_DESCRIPTION, "Optimize existing index");
@@ -1561,7 +1578,6 @@ public class NameBearerHandle implements Handle, StatusListener,
     }
 
     public void actionPerformed(ActionEvent e) {
-      IndexedCorpus ic = (IndexedCorpus)target;
       Thread thread = new Thread(new Runnable() {
         public void run() {
           try {
@@ -1593,6 +1609,8 @@ public class NameBearerHandle implements Handle, StatusListener,
   }
 
   class DeleteIndexAction extends AbstractAction {
+    private static final long serialVersionUID = 6121632107964572415L;
+
     DeleteIndexAction() {
       super("Delete Index");
       putValue(SHORT_DESCRIPTION, "Delete existing index");
@@ -1632,6 +1650,11 @@ public class NameBearerHandle implements Handle, StatusListener,
   }
 
   class CreateCorpusForDocAction extends AbstractAction {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -3698451324578510407L;
+
     public CreateCorpusForDocAction() {
       super("New corpus with this document");
     }
@@ -1729,17 +1752,21 @@ public class NameBearerHandle implements Handle, StatusListener,
     }
   }// protected void fireProcessFinished()
 
+  @SuppressWarnings("unchecked")
   public synchronized void removeStatusListener(StatusListener l) {
     if(statusListeners != null && statusListeners.contains(l)) {
-      Vector v = (Vector)statusListeners.clone();
+      Vector<StatusListener> v =
+        (Vector<StatusListener>)statusListeners.clone();
       v.removeElement(l);
       statusListeners = v;
     }
   }// public synchronized void removeStatusListener(StatusListener l)
 
+  @SuppressWarnings("unchecked")
   public synchronized void addStatusListener(StatusListener l) {
-    Vector v =
-      statusListeners == null ? new Vector(2) : (Vector)statusListeners.clone();
+    Vector<StatusListener> v =
+      statusListeners == null ? new Vector<StatusListener>(2) :
+        (Vector<StatusListener>)statusListeners.clone();
     if(!v.contains(l)) {
       v.addElement(l);
       statusListeners = v;
