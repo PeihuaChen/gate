@@ -365,8 +365,8 @@ implements ANNIEConstants{
 
         //if no tokens to match, do nothing
         if (tokens.isEmpty()) {
-          Out.prln("Didn't find any tokens for the following annotation.  This is weird.  \n String:  " + getStringForAnnotation(nameAnnot, document) +
-                  "\tOffset:  " + nameAnnot.getStartNode().getOffset());
+          log.debug("Didn't find any tokens for the following annotation.  We will be unable to perform coref on this annotation.  \n String:  " 
+                  + getStringForAnnotation(nameAnnot, document) + " Id: " + nameAnnot.getId() + " Type: " + nameAnnot.getType());
           continue;
         }
         Collections.sort(tokens, new gate.util.OffsetComparator());
@@ -409,7 +409,7 @@ implements ANNIEConstants{
           annotString = stripCDG(annotString, nameAnnot);
 
         if(null == annotString || "".equals(annotString)) {
-          Out.prln("Just found a null or empty string");
+          log.debug("Annotation ID " + nameAnnot.getId() + " of type" + nameAnnot.getType() +  " refers to a null or empty string.  Unable to process further.");
           continue;
         }
         //otherwise try matching with previous annotations
@@ -704,17 +704,14 @@ implements ANNIEConstants{
     // find which annotation string of the two is longer
     //  this is useful for some of the matching rules
     String prevAnnotString = (String) processedAnnots.get(prevAnnot.getId());
-    try {
-      // Out.prln("matchAnnotations processing " + annotString + " and " + prevAnnotString);
-      if (prevAnnotString == null) {
-        Out.prln("We discovered that the following string is null!:  " + prevAnnot.getId() +
-                " For the previous annotation " + getStringForAnnotation(prevAnnot, document) +
-                " which has annotation type " + prevAnnot.getType() +
-                " Tried to compared it to the annotation string " + annotString);
-        return false;
-      }
+    // Out.prln("matchAnnotations processing " + annotString + " and " + prevAnnotString);
+    if (prevAnnotString == null) {
+//    Out.prln("We discovered that the following string is null!:  " + prevAnnot.getId() +
+//    " For the previous annotation " + getStringForAnnotation(prevAnnot, document) +
+//    " which has annotation type " + prevAnnot.getType() +
+//    " Tried to compared it to the annotation string " + annotString);
+      return false;
     }
-    catch (ExecutionException e) {}
 
     String longName = prevAnnotString;
     String shortName = annotString;
