@@ -69,6 +69,67 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
   protected void finishBPE(BasicPatternElement bpe) {
   }
 
+  /**
+   * Append the given string to the end of the given buffer as a Java string
+   * literal.  If <code>str</code> is <code>null</code>, we append the four
+   * characters n, u, l, l.  Otherwise, we append the contents of str surrounded
+   * by double quotes, except that characters in str are escaped as necessary
+   * to be a legal Java string literal: backspace, formfeed, tab, newline and
+   * return are replaced by their escape sequences \b, \f, etc.; single and double
+   * quote and backslash are preceded by an extra backslash; other non-ASCII
+   * and non-printing characters are rendered as Unicode escapes (backslash-u
+   * followed by four hex digits).
+   */
+  protected void appendJavaStringLiteral(StringBuffer buf, String str) {
+        if(str == null) {
+          buf.append("null");
+        }
+        else {
+          Formatter formatter = null;
+          buf.append("\"");
+          for(int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+            switch(c) {
+              case '\b':
+                buf.append("\\b");
+                break;
+              case '\f':
+                buf.append("\\f");
+                break;
+              case '\n':
+                buf.append("\\n");
+                break;
+              case '\r':
+                buf.append("\\r");
+                break;
+              case '\t':
+                buf.append("\\t");
+                break;
+              case '\"':
+                buf.append("\\\"");
+                break;
+              case '\'':
+                buf.append("\\\'");
+                break;
+              case '\\':
+                buf.append("\\\\");
+                break;
+
+              default:
+                if(c < 32 || c > 127) {
+                  if(formatter == null) formatter = new Formatter(buf);
+                  formatter.format("\\u%04X", Integer.valueOf(c));
+                }
+                else {
+                  buf.append(c);
+                }
+                break;
+            }
+          }
+          buf.append("\"");
+        }
+  }
+
   protected void appendAnnotationAdd(StringBuffer blockBuffer, String newAnnotType, String annotSetName)
   {
       String nl = Strings.getNl();
@@ -76,7 +137,9 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       blockBuffer.append("        outputAS.add(" + nl);
       blockBuffer.append("          " + annotSetName + ".firstNode(), ");
       blockBuffer.append(annotSetName + ".lastNode(), " + nl);
-      blockBuffer.append("          \"" + newAnnotType + "\", features" + nl);
+      blockBuffer.append("          ");
+      appendJavaStringLiteral(blockBuffer, newAnnotType);
+      blockBuffer.append(", features" + nl);
       blockBuffer.append("        );" + nl);
       blockBuffer.append("      }" + nl);
       blockBuffer.append("      else { // use offsets" + nl);
@@ -84,7 +147,9 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       blockBuffer.append("          outputAS.add(" + nl);
       blockBuffer.append("            " + annotSetName + ".firstNode().getOffset(), ");
       blockBuffer.append(annotSetName + ".lastNode().getOffset(), " + nl);
-      blockBuffer.append("            \"" + newAnnotType + "\", features" + nl);
+      blockBuffer.append("            ");
+      appendJavaStringLiteral(blockBuffer, newAnnotType);
+      blockBuffer.append(", features" + nl);
       blockBuffer.append("          );" + nl);
       blockBuffer.append("        }" + nl);
       blockBuffer.append("        catch(InvalidOffsetException ioe) {" + nl);
@@ -990,42 +1055,48 @@ AnnotationAccessor accessor = null;
         switch(((Integer) attrVal.first).intValue()) {
           case string:
             blockBuffer.append(
-              "      val = new String(\"" + attrVal.second.toString() +
-              "\");" + nl
-            );
+              "      val = ");
+            appendJavaStringLiteral(blockBuffer, attrVal.second.toString());
+            blockBuffer.append(";" + nl);
             break;
           case integer:
             blockBuffer.append("      try { " +
-              "val = new Long(" + attrVal.second.toString() + "); }" +
+              "val = Long.valueOf(");
+            appendJavaStringLiteral(blockBuffer, attrVal.second.toString());
+            blockBuffer.append("); }" +
               nl + "      catch(NumberFormatException e) { }" + nl
             );
             break;
           case ident:
             blockBuffer.append(
-              "      val = new String(\"" + attrVal.second.toString() +
-              "\");" + nl
-            );
+              "      val = ");
+            appendJavaStringLiteral(blockBuffer, attrVal.second.toString());
+            blockBuffer.append(";" + nl);
             break;
           case bool:
             blockBuffer.append(
-              "      val = new Boolean(\"" +
-              attrVal.second.toString() + "\");" + nl
-            );
+              "      val = Boolean.valueOf(");
+            appendJavaStringLiteral(blockBuffer, attrVal.second.toString());
+            blockBuffer.append(");" + nl);
             break;
           case floatingPoint:
             blockBuffer.append("      try { " +
-              "val = new Double(" + attrVal.second.toString() + "); }" + nl +
-              "      catch(NumberFormatException e) { }" + nl
+              "val = Double.valueOf(");
+            appendJavaStringLiteral(blockBuffer, attrVal.second.toString());
+            blockBuffer.append("); }" +
+              nl + "      catch(NumberFormatException e) { }" + nl
             );
             break;
           default:
             blockBuffer.append(
-              "      val = new String(\"\");" + nl
+              "      val = \"\";" + nl
             );
             break;
         } // switch
 
-        blockBuffer.append("      features.put(\"" + newAttrName + "\", val);");
+        blockBuffer.append("      features.put(");
+        appendJavaStringLiteral(blockBuffer, newAttrName);
+        blockBuffer.append(", val);");
         blockBuffer.append(nl);
         break;
       case colon:
@@ -1042,8 +1113,9 @@ AnnotationAccessor accessor = null;
           blockBuffer.append(
             "      { // need a block for the existing annot set" + nl +
             "        AnnotationSet " + existingAnnotSetName +
-            " = (AnnotationSet)bindings.get(\"" + nameTok.image + "\"); " + nl
-          );
+            " = (AnnotationSet)bindings.get(");
+          appendJavaStringLiteral(blockBuffer, nameTok.image);
+          blockBuffer.append("); " + nl);
         jj_consume_token(period);
         nameTok = jj_consume_token(ident);
                                    existingAnnotType = nameTok.image;
@@ -1053,15 +1125,20 @@ AnnotationAccessor accessor = null;
           blockBuffer.append(
 "        if (" + existingAnnotSetName + " != null) {" + nl +
 "          AnnotationSet existingAnnots = " + nl +
-"          " + existingAnnotSetName + ".get(\"" + existingAnnotType + "\");" + nl +
+"          " + existingAnnotSetName + ".get(");
+          appendJavaStringLiteral(blockBuffer, existingAnnotType);
+          blockBuffer.append(");" + nl +
 "          if (existingAnnots != null) {" + nl +
 "            Iterator iter = existingAnnots.iterator();" + nl +
 "            while(iter.hasNext()) {" + nl +
 "              Annotation existingA = (Annotation) iter.next();" + nl +
-"              Object existingFeatureValue = existingA.getFeatures().get(\"" +
-existingAttrName + "\");" + nl +
+"              Object existingFeatureValue = existingA.getFeatures().get(");
+          appendJavaStringLiteral(blockBuffer, existingAttrName);
+          blockBuffer.append(");" + nl +
 "              if(existingFeatureValue != null) {" + nl +
-"                features.put(\"" + newAttrName + "\", existingFeatureValue);" + nl +
+"                features.put(");
+          appendJavaStringLiteral(blockBuffer, newAttrName);
+          blockBuffer.append(", existingFeatureValue);" + nl +
 "                break;" + nl +
 "              }" + nl + "        } // while" + nl +
 "            } // if not null" + nl +
@@ -1146,6 +1223,27 @@ existingAttrName + "\");" + nl +
     finally { jj_save(1, xla); }
   }
 
+  final private boolean jj_3R_20() {
+    if (jj_scan_token(string)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_18() {
+    if (jj_scan_token(leftBracket)) return true;
+    if (jj_3R_21()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_23() {
+    if (jj_3R_12()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_16() {
+    if (jj_3R_18()) return true;
+    return false;
+  }
+
   final private boolean jj_3R_21() {
     Token xsp;
     if (jj_3R_23()) return true;
@@ -1222,27 +1320,6 @@ existingAttrName + "\");" + nl +
 
   final private boolean jj_3_2() {
     if (jj_3R_13()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_20() {
-    if (jj_scan_token(string)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_18() {
-    if (jj_scan_token(leftBracket)) return true;
-    if (jj_3R_21()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_23() {
-    if (jj_3R_12()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_16() {
-    if (jj_3R_18()) return true;
     return false;
   }
 
