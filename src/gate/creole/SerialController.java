@@ -33,7 +33,8 @@ import gate.util.Out;
  * Execute a list of PRs serially.
  */
 @CreoleResource(name = "Pipeline",
-    comment = "A simple serial controller for PR pipelines")
+    comment = "A simple serial controller for PR pipelines.",
+    helpURL = "http://gate.ac.uk/cgi-bin/userguide/sec:howto:apps")
 public class SerialController extends AbstractController implements
                                                         CreoleListener {
 

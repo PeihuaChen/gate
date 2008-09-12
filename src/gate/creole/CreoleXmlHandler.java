@@ -207,6 +207,7 @@ public class CreoleXmlHandler extends DefaultHandler {
         }// End for
       }// End if
       currentParam.comment = currentAttributes.getValue("COMMENT");
+      currentParam.helpURL = currentAttributes.getValue("HELPURL");
       currentParam.defaultValueString = currentAttributes.getValue("DEFAULT");
       currentParam.optional =
         Boolean.valueOf(currentAttributes.getValue("OPTIONAL")).booleanValue();
@@ -399,6 +400,11 @@ public class CreoleXmlHandler extends DefaultHandler {
       checkStack("endElement", "COMMENT");
       resourceData.setComment((String) contentStack.pop());
     // End COMMENT processing
+    //////////////////////////////////////////////////////////////////
+    } else if(elementName.toUpperCase().equals("HELPURL")) {
+      checkStack("endElement", "HELPURL");
+      resourceData.setHelpURL((String) contentStack.pop());
+    // End HELPURL processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("INTERFACE")) {
       checkStack("endElement", "INTERFACE");

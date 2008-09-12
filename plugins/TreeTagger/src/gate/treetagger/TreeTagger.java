@@ -20,8 +20,8 @@ import gate.util.*;
 
 @CreoleResource(comment = "The TreeTagger is a language-independent "
     + "part-of-speech tagger, which currently supports English, French, "
-    + "German, and Spanish "
-    + "(http://gate.ac.uk/sale/tao/#sec:misc-creole:treetagger)")
+    + "German, and Spanish.",
+    helpURL = "http://gate.ac.uk/cgi-bin/userguide/sec:misc-creole:treetagger")
 public class TreeTagger
     extends AbstractLanguageAnalyser
     implements ProcessingResource {

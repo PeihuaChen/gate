@@ -180,6 +180,7 @@ public class CreoleAnnotationHandler {
     CreoleResource cr = clazz.getAnnotation(CreoleResource.class);
     if(cr != null) {
       addElement(element, cr.comment(), "COMMENT");
+      addElement(element, cr.helpURL(), "HELPURL");
       addElement(element, cr.interfaceName(), "INTERFACE");
       addElement(element, cr.icon(), "ICON");
       if(cr.guiType() != GuiType.NONE && element.getChild("GUI") == null) {

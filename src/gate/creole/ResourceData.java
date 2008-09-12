@@ -274,6 +274,15 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
   /** Set method for the resource comment */
   public void setComment(String comment) { this.comment = comment; }
 
+  /** The helpURL string */
+  protected String helpURL;
+  
+  /** Get method for the resource helpURL */
+  public String getHelpURL() { return helpURL; }
+  
+  /** Set method for the resource helpURL */
+  public void setHelpURL(String helpURL) { this.helpURL = helpURL; }
+  
   /** The set of parameter lists */
   protected ParameterList parameterList = new ParameterList();
 

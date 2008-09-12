@@ -54,6 +54,12 @@ public @interface CreoleResource {
   String comment() default "";
 
   /**
+   * A  help URL about this resource, which is used to
+   * display the help page in the GATE help browser.
+   */
+  String helpURL() default "";
+  
+  /**
    * Defines any instances of this resource that should be created
    * automatically when the plugin is loaded.
    */

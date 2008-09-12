@@ -864,23 +864,24 @@ public class MainFrame extends JFrame implements ProgressListener,
           }
           else if(popup != null) {
             if(handle != null) {
+
+              // add a remove action
+              if(handle instanceof NameBearerHandle) {
+                popup.insert(new XJMenuItem(((NameBearerHandle)handle)
+                        .getCloseAction(), MainFrame.this), 0);
+              }
+              
               // add a show/hide action
               if (handle.getLargeView() != null
               && (mainTabbedPane.indexOfComponent(
                       handle.getLargeView()) != -1)) {
                popup.insert(new XJMenuItem(new CloseViewAction(handle),
-                 MainFrame.this), 0);
+                 MainFrame.this), 1);
               } else {
                 popup.insert(new XJMenuItem(new ShowResourceAction(handle),
-                  MainFrame.this), 0);
+                  MainFrame.this), 1);
               }
               
-              // add a remove action
-              if(handle instanceof NameBearerHandle) {
-                popup.insert(new XJMenuItem(((NameBearerHandle)handle)
-                  .getCloseAction(), MainFrame.this), 1);
-              }
-
               // add a separator
               popup.insert(new JPopupMenu.Separator(), 2);
 
@@ -889,9 +890,10 @@ public class MainFrame extends JFrame implements ProgressListener,
                 MainFrame.this), 3);
 
               // add a help action
-              popup.insert(new XJMenuItem(new HelpOnItemTreeAction(
-                handle.getTarget().getClass().getName()),
-                MainFrame.this), 4);
+              if(handle instanceof NameBearerHandle) {
+                popup.insert(new XJMenuItem(new HelpOnItemTreeAction(
+                  (NameBearerHandle)handle), MainFrame.this), 4);
+              }
             }
 
             popup.show(resourcesTree, e.getX(), e.getY());
@@ -915,6 +917,23 @@ public class MainFrame extends JFrame implements ProgressListener,
       }
 
       public void mouseExited(MouseEvent e) {
+      }
+    });
+
+    resourcesTree.addTreeSelectionListener(new TreeSelectionListener() {
+      public void valueChanged(TreeSelectionEvent e) {
+        // synchronise the selected tabbed pane with
+        // the resource tree selection
+        if (resourcesTree.getSelectionPaths() != null
+         && resourcesTree.getSelectionPaths().length == 1) {
+          Object value = e.getPath().getLastPathComponent();
+          Object object = ((DefaultMutableTreeNode)value).getUserObject();
+          if (object instanceof Handle
+          && (mainTabbedPane.indexOfComponent(
+             ((Handle)object).getLargeView()) != -1)) {
+            select((Handle)object);
+          }
+        }
       }
     });
 
@@ -2958,8 +2977,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             if ((node.getUserObject() instanceof Handle)
              && (mainTabbedPane.indexOfComponent(
                 ((Handle)node.getUserObject()).getLargeView()) != -1)) {
-              final DefaultMutableTreeNode nodeF = node;
-              Handle handle = (Handle)nodeF.getUserObject();
+              Handle handle = (Handle)node.getUserObject();
               (new CloseViewAction(handle)).actionPerformed(null);
             }
           }
@@ -3610,16 +3628,22 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
 
     public void actionPerformed(ActionEvent e) {
-      showHelpFrame("http://www.gate.ac.uk/sale/tao/splitli1.html");
+      showHelpFrame("http://gate.ac.uk/cgi-bin/userguide", null);
     }
   }
 
-  protected void showHelpFrame(String urlString) {
+  protected void showHelpFrame(String urlString, String resourceName) {
     final URL url;
     try {
       url = new URL(urlString);
     } catch (MalformedURLException e) {
-      e.printStackTrace();
+      JOptionPane.showMessageDialog(MainFrame.this,
+        (urlString == null)?"There is no help page for this resource !\n\n" +
+        "Find the developper of the resource:\n" +
+        resourceName + "\n" +
+        "and force him/her to put one.":
+        "The URL of the help page is invalid.\n" + urlString.toString(),
+        "GATE", JOptionPane.INFORMATION_MESSAGE);
       return;
     }
     Runnable runnable = new Runnable() {
@@ -3639,6 +3663,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         try {
           helpFrame.setPage(url);
         } catch (IOException e) {
+          
           e.printStackTrace();
           return;
         }
@@ -3659,100 +3684,57 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
 
     public void actionPerformed(ActionEvent e) {
-      String tabToolTip = mainTabbedPane.getToolTipTextAt(
-        mainTabbedPane.getSelectedIndex());
-      showHelpFrame(getHelpUrlStringForRessourceClassOrComment(tabToolTip));
+      if (resourcesTree.getSelectionPath() != null) {
+        // get the selected element in the resource tree
+        Object userObject = ((DefaultMutableTreeNode)resourcesTree
+          .getSelectionPath().getLastPathComponent()).getUserObject();
+        if(userObject instanceof NameBearerHandle) {
+          new HelpOnItemTreeAction((NameBearerHandle)userObject)
+            .actionPerformed(null);
+        }
+      } else {
+        JOptionPane.showMessageDialog(MainFrame.this,
+        "Please select a resource in resource tree\n" +
+        "before to use the help function.",
+        "GATE", JOptionPane.INFORMATION_MESSAGE);
+      }
     }
   }
 
-  protected String getHelpUrlStringForRessourceClassOrComment(String classOrComment) {
-    String url = "http://gate.ac.uk/sale/tao/split";
-    if (classOrComment.contains("gate.creole.SerialAnalyserController")
-     || classOrComment.contains("gate.creole.SerialController")) {
-      url += "ch3.html#sec:howto:apps";
-    } else if (classOrComment.contains("gate.creole.ConditionalSerialAnalyserController")
-            || classOrComment.contains("gate.creole.ConditionalSerialController")) {
-      url += "ch3.html#sec:howto:cond";
-    } else if (classOrComment.contains("gate.creole.RealtimeCorpusController")) {
-      url += "ch4.html#sec:applications";
-    } else if (classOrComment.contains("gate.corpora.DocumentImpl")) {
-      url += "ch3.html#sec:howto:edit";
-    } else if (classOrComment.contains("gate.corpora.CorpusImpl")) {
-      url += "ch3.html#sec:howto:loadlr";
-    } else if (classOrComment.contains("gate.creole.AnnotationSchema")) {
-      url += "ch6.html#sec:schemas";
-    } else if (classOrComment.contains("gate.creole.ontology.owlim.OWLIMOntologyLR")) {
-      url += "ch10.html#sec:ontologies:lr";
-    } else if (classOrComment.contains("gate.creole.orthomatcher.OrthoMatcher")) {
-      url += "ch8.html#sec:annie:orthomatcher";
-    } else if (classOrComment.contains("gate.creole.ANNIETransducer")) {
-      url += "ch7.html#chap:jape";
-    } else if (classOrComment.contains("gate.creole.POSTagger")) {
-      url += "ch8.html#sec:tagger";
-    } else if (classOrComment.contains("gate.creole.splitter.SentenceSplitter")) {
-      url += "ch8.html#sec:splitter";
-    } else if (classOrComment.contains("gate.creole.tokeniser.DefaultTokeniser")) {
-      url += "ch8.html#sec:tokeniser";
-    } else if (classOrComment.contains("gate.creole.annotdelete.AnnotationDeletePR")) {
-      url += "ch9.html#sec:misc-creole:reset";
-    } else if (classOrComment.contains("gate.creole.gazetteer.DefaultGazetteer")) {
-      url += "ch8.html#sec:gazetteer";
-    } else if (classOrComment.contains("gate.creole.splitter.RegexSentenceSplitter")) {
-      url += "ch8.html#sec:regex-splitter";
-    } else if (classOrComment.contains("gate.creole.gazetteer.OntoGazetteerImpl")) {
-      url += "ch5.html#sect:ontogaz";
-    } else if (classOrComment.contains("com.ontotext.gate.gazetteer.HashGazetteer")) {
-      url += "ch5.html#sect:gaze";
-    } else if (classOrComment.contains("gate.creole.Transducer")) {
-      url += "ch7.html#chap:jape";
-    } else if (classOrComment.contains("gate.creole.annotransfer.AnnotationSetTransfer")) {
-      url += "ch9.html#sec:misc-creole:ast";
-    } else if (classOrComment.contains("gate.creole.tokeniser.SimpleTokeniser")) {
-      url += "ch8.html#sec:tokeniser";
-    } else if (classOrComment.contains("gate.compound.impl")) {
-      url += "ch12.html#chapt:alignment";
-    } else if (classOrComment.contains("gate.merger.AnnotationMergingMain")) {
-      url += "ch9.html#sec:misc-creole:merging";
-    } else if (classOrComment.contains("gate.creole.coref.Coreferencer")) {
-      url += "ch8.html#sec:annie:pronom-coref";
-    } else if (classOrComment.contains("gate.creole.coref.NominalCoref")) {
-      url += "ch8.html#sec:annie:pronom-coref";
-    } else if (classOrComment.contains("gate.creole.GazetteerListsCollector")) {
-      url += "ch9.html#sec:misc-creole:listscollector";
-    } else if (classOrComment.contains("gate.creole.morph.Morph")) {
-      url += "ch9.html#sec:misc-creole:morpher";
-    } else if (classOrComment.contains("gate.creole.dumpingPR.DumpingPR")) {
-      url += "ch9.html#sec:misc-creole:flexexport";
-    } else if (classOrComment.contains("gate.creole.VPChunker")) {
-      url += "ch9.html#sec:misc-creole:npchunker";
-    } else if (classOrComment.contains("gate.creole.ml.MachineLearningPR")) {
-      url += "ch11.html#chapt:mlapi";
-    } else if (classOrComment.contains("GATE serial datastore")
-     || classOrComment.contains("gate.persist.LuceneDataStoreImpl")) {
-      url += "ch9.html#sec:misc-creole:annic";
-    } else if (classOrComment.contains("gate.persist.SerialDataStore")) {
-      url += "ch3.html#sec:howto:datastores";
-    } else if (classOrComment.contains("GATE log")) {
-      url += "ch3.html#sec:howto:guistart";
-    } else {
-      url += "li1.html";
-    }
-    return url;
-  }
-  
   class HelpOnItemTreeAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
-    HelpOnItemTreeAction(String className) {
+    HelpOnItemTreeAction(NameBearerHandle resource) {
       super("Help");
       putValue(SHORT_DESCRIPTION, "Help on this resource");
-      this.className = className;
+      this.resource = resource;
     }
 
     public void actionPerformed(ActionEvent e) {
-      showHelpFrame(getHelpUrlStringForRessourceClassOrComment(className));
+      String helpURL = null;
+      String resourceClassName = resource.getTarget().getClass().getName();
+
+      if (resource.getTarget() instanceof Resource) {
+        // search the help URL associated to the resource
+        ResourceData rd = Gate.getCreoleRegister().get(resourceClassName);
+        helpURL = rd.getHelpURL();
+      }
+      
+      if(helpURL == null) {
+        // otherwise search in the associated VRs of the resource
+        List<String> vrList = Gate.getCreoleRegister()
+          .getLargeVRsForResource(resourceClassName);
+        for(String vrClass : vrList) {
+          ResourceData vrd = Gate.getCreoleRegister().get(vrClass);
+          if(vrd != null && vrd.getHelpURL() != null) {
+            helpURL = vrd.getHelpURL();
+            break;
+          }
+        }
+      }
+      showHelpFrame(helpURL, resourceClassName);
     }
 
-    String className;
+    NameBearerHandle resource;
   }
 
   class ToggleToolTipsAction extends AbstractAction {

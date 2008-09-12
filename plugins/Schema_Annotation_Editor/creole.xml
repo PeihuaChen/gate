@@ -8,6 +8,7 @@
       <NAME>Annotations Editor</NAME>
       <CLASS>gate.gui.annedit.SchemaAnnotationEditor</CLASS>
       <COMMENT>An annotation editor restricted by schemas.</COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:schemas</HELPURL>
     </RESOURCE>
   </CREOLE>
 </CREOLE-DIRECTORY>

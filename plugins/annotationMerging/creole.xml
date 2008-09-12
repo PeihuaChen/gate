@@ -6,8 +6,8 @@
     <!-- creole.xml for the Learning PR -->
     <RESOURCE>
       <NAME>Annotation Merging PR</NAME>
-      <COMMENT>Merge Annotations from different annotators
-      (http://gate.ac.uk/sale/tao/#chapt:mlapi)</COMMENT>
+      <COMMENT>Merge Annotations from different annotators.</COMMENT>
+		<HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:misc-creole:merging</HELPURL>
       <CLASS>gate.merger.AnnotationMergingMain</CLASS>
       <JAR>annotationMerging.jar</JAR>
 

@@ -29,7 +29,8 @@ import gate.util.Err;
  * are not analysers will get a default &quot;run always&quot; strategy.
  */
 @CreoleResource(name = "Conditional Pipeline",
-    comment = "A simple serial controller for conditionally run PRs")
+    comment = "A simple serial controller for conditionally run PRs.",
+    helpURL = "http://gate.ac.uk/cgi-bin/userguide/sec:howto:cond")
 public class ConditionalSerialController extends SerialController
                                          implements ConditionalController{
 

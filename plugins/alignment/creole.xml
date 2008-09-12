@@ -8,7 +8,8 @@
       <CLASS>gate.compound.impl.CompoundDocumentImpl</CLASS>
       <JAR>aligntools.jar</JAR>
       <INTERFACE>gate.compound.CompoundDocument</INTERFACE>
-      <COMMENT>GATE Compound Document (http://gate.ac.uk/sale/tao/#sec:alignment:compounddocument)</COMMENT>
+      <COMMENT>GATE Compound Document.</COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:alignment:compounddocument</HELPURL>
       <PARAMETER NAME="sourceUrl"
           SUFFIXES="txt;text;xml;xhtm;xhtml;html;htm;sgml;sgm;mail;email;eml;rtf;pdf;doc"
           COMMENT="Source URL">java.net.URL</PARAMETER>
@@ -32,7 +33,8 @@
       <CLASS>gate.compound.impl.CompoundDocumentFromXml</CLASS>
       <JAR>aligntools.jar</JAR>
       <INTERFACE>gate.compound.CompoundDocument</INTERFACE>
-      <COMMENT>GATE Compound Document (http://gate.ac.uk/sale/tao/#sec:alignment:compounddocument)</COMMENT>
+      <COMMENT>GATE Compound Document.</COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:alignment:compounddocument</HELPURL>
       <PARAMETER NAME="sourceUrl"
           SUFFIXES="xml"
           COMMENT="Source URL">java.net.URL</PARAMETER>
@@ -43,7 +45,8 @@
       <NAME>Compound Document Editor</NAME>
       <JAR>aligntools.jar</JAR>      
       <CLASS>gate.compound.gui.CompoundDocumentEditor</CLASS>
-      <COMMENT>Editor for compound documents (http://gate.ac.uk/sale/tao/#sec:alignment:compounddoceditor)</COMMENT>
+      <COMMENT>Editor for compound documents.</COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:alignment:compounddoceditor</HELPURL>
       <GUI TYPE="large">
         <MAIN_VIEWER/>
         <RESOURCE_DISPLAYED>gate.compound.CompoundDocument</RESOURCE_DISPLAYED>
@@ -54,7 +57,8 @@
       <NAME>GATE Composite document</NAME>
       <CLASS>gate.composite.impl.CompositeDocumentImpl</CLASS>
       <INTERFACE>gate.Document</INTERFACE>
-      <COMMENT>GATE Composite document (http://gate.ac.uk/sale/tao/#sec:alignment:compositedoc)</COMMENT>
+      <COMMENT>GATE Composite document.</COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:alignment:compositedoc</HELPURL>
       <ICON>document</ICON>
       <PRIVATE/>
     </RESOURCE>
@@ -63,7 +67,8 @@
     <RESOURCE>
       <NAME>Alignment Editor</NAME>
       <CLASS>gate.alignment.gui.AlignmentEditor</CLASS>
-      <COMMENT>Alignment editor (http://gate.ac.uk/sale/tao/#sec:alignment:editor)</COMMENT>
+      <COMMENT>Alignment editor.</COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:alignment:editor</HELPURL>
       <GUI TYPE="large">
         <RESOURCE_DISPLAYED>gate.compound.impl.CompoundDocumentImpl</RESOURCE_DISPLAYED>
       </GUI>
@@ -73,7 +78,8 @@
 	<RESOURCE>
       <NAME>Switch Member PR</NAME>
       <CLASS>gate.compound.impl.SwitchMemberPR</CLASS>
-      <COMMENT>Sets the focus of a compound document to a specified member document (http://gate.ac.uk/sale/tao/#sec:alignment:switchmembers)</COMMENT>
+      <COMMENT>Sets the focus of a compound document to a specified member document.</COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:alignment:switchmembers</HELPURL>
       <JAR>aligntools.jar</JAR>
      <PARAMETER NAME="document"  
          COMMENT="The document to be processed"  
@@ -85,7 +91,8 @@
 	<RESOURCE>
       <NAME>Delete Member PR</NAME>
       <CLASS>gate.compound.impl.DeleteMemberPR</CLASS>
-      <COMMENT>Deletes one member document from a compound doc (http://gate.ac.uk/sale/tao/#sec:alignment:deletemembers)</COMMENT>
+      <COMMENT>Deletes one member document from a compound doc.</COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:alignment:deletemembers</HELPURL>
       <JAR>aligntools.jar</JAR>
      <PARAMETER NAME="document"  
          COMMENT="The document to be processed"  
@@ -97,7 +104,8 @@
 	<RESOURCE>
       <NAME>Combine Members PR</NAME>
       <CLASS>gate.composite.impl.CombineMembersPR</CLASS>
-      <COMMENT>Combines documents in a composite (http://gate.ac.uk/sale/tao/#sec:alignment:compositedoc)</COMMENT>
+      <COMMENT>Combines documents in a composite document.</COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:alignment:compositedoc</HELPURL>
       <JAR>aligntools.jar</JAR>
      <PARAMETER NAME="document"  
          COMMENT="The document to be processed"  

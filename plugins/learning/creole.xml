@@ -7,8 +7,8 @@
     <RESOURCE>
       <NAME>Batch Learning PR</NAME>
       <COMMENT>Supports training, application and evaluation of machine
-      learning models for NLP tasks
-      (http://gate.ac.uk/sale/tao/#chapt:mlapi)</COMMENT>
+      learning models for NLP tasks</COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/chapt:mlapi</HELPURL>
       <CLASS>gate.learning.LearningAPIMain</CLASS>
       <JAR>learningapi.jar</JAR>
       <JAR>lib/weka.jar</JAR>

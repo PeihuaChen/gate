@@ -9,9 +9,8 @@
       <NAME>OWLIM Ontology LR</NAME>
       <CLASS>gate.creole.ontology.owlim.OWLIMOntologyLR</CLASS>
       <INTERFACE>gate.creole.ontology.Ontology</INTERFACE>
-      
-      <COMMENT>Ontology which connects to Sesame Repository via OWLIM SAIL
-      (http://gate.ac.uk/sale/tao/#sec:ontologies:lr)</COMMENT>
+      <COMMENT>Ontology which connects to Sesame Repository via OWLIM SAIL.</COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:ontologies:lr</HELPURL>
 	 <OR>
       <PARAMETER NAME="rdfXmlURL"
           COMMENT="Ontology URL" RUNTIME="FALSE" OPTIONAL="TRUE">java.net.URL</PARAMETER>
@@ -32,7 +31,8 @@
     <RESOURCE>
       <NAME>OntoGazetteer</NAME>
       <CLASS>gate.creole.gazetteer.OntoGazetteerImpl</CLASS>
-      <COMMENT>A list lookup component based on mapping between ontology classes and gazetteer lists (http://gate.ac.uk/sale/tao/#sect:misc-creole:ontotext)</COMMENT>
+      <COMMENT>A list lookup component based on mapping between ontology classes and gazetteer lists.</COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sect:misc-creole:ontotext</HELPURL>
       <PARAMETER NAME="document" RUNTIME="true" COMMENT="The document to be processed">gate.Document</PARAMETER>
       <PARAMETER NAME="annotationSetName" RUNTIME="true" COMMENT="The annotation set to be used for the generated annotations" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="listsURL" DEFAULT="../ANNIE/resources/gazetteer/lists.def" COMMENT="The URL to the file with list of lists" SUFFIXES="def">java.net.URL</PARAMETER>
@@ -50,7 +50,8 @@
     <!-- VR NEW Ontology Editor -->
     <RESOURCE>
       <NAME>GATE Ontology Editor</NAME>
-      <COMMENT>Ontology editing tool (http://gate.ac.uk/sale/tao/#sec:ontologies:vr)</COMMENT>
+      <COMMENT>Ontology editing tool.</COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:ontologies:vr</HELPURL>
       <CLASS>gate.gui.ontology.OntologyEditor</CLASS>
       <GUI TYPE="large">
         <MAIN_VIEWER/>
@@ -61,7 +62,8 @@
     <!-- Ontology Annotation Tool -->    
     <RESOURCE>
       <NAME>OAT</NAME>
-      <COMMENT>Ontology Annotation Tool (http://gate.ac.uk/sale/tao/#sec:ontologies:ocat)</COMMENT>
+      <COMMENT>Ontology Annotation Tool.</COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:ontologies:ocat</HELPURL>
       <JAR>ontology_tools.jar</JAR>
       <CLASS>gate.creole.ontology.ocat.OntologyViewer</CLASS>
     </RESOURCE>

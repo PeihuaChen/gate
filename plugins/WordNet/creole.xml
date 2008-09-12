@@ -7,7 +7,8 @@
       <NAME>WordNet 1.6</NAME>
       <CLASS>gate.wordnet.IndexFileWordNetImpl</CLASS>
       <INTERFACE>gate.wordnet.WordNet</INTERFACE>
-      <COMMENT>Princeton WordNet 1.6 (http://gate.ac.uk/sale/tao/#sect:wn)</COMMENT>
+      <COMMENT>Princeton WordNet 1.6.</COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sect:wn</HELPURL>
       <PARAMETER   NAME="propertyUrl" SUFFIXES="xml" COMMENT="Property File">java.net.URL</PARAMETER>      
       <ICON>controller.gif</ICON>
     </RESOURCE>
