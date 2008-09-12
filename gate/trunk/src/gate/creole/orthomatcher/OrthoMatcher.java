@@ -1,7 +1,7 @@
 /*
  *  OrthoMatcher.java
  *
- *  Copyright (c) 1998-2007, The University of Sheffield.
+ *  Copyright (c) 1998-2008, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -16,7 +16,7 @@
  *    for a match (because it used an iterator across an AnnotationSet, whereas now we iterate across an ArrayList<Annotation>)
  *    2.  We no longer require that identical strings always refer to the same entity.  We can correctly match
  *    the sequence "David Jones ... David ... David Smith ... David" as referring to two people, tying the first
- *    David to "David Jones" and the second David to "David Smith".  Ditto with David Jones .. Mr. Jones .. 
+ *    David to "David Jones" and the second David to "David Smith".  Ditto with David Jones .. Mr. Jones ..
  *    Richard Jones .. Mr. Jones
  *    3.  We now allow for nickname matches for Persons (David = Dave) via the "fuzzyMatch" method which is referenced
  *    in some of the matching rules.
@@ -365,8 +365,10 @@ implements ANNIEConstants{
 
         //if no tokens to match, do nothing
         if (tokens.isEmpty()) {
-          log.debug("Didn't find any tokens for the following annotation.  We will be unable to perform coref on this annotation.  \n String:  " 
-                  + getStringForAnnotation(nameAnnot, document) + " Id: " + nameAnnot.getId() + " Type: " + nameAnnot.getType());
+          if (log.isDebugEnabled()) {
+            log.debug("Didn't find any tokens for the following annotation.  We will be unable to perform coref on this annotation.  \n String:  "
+                    + getStringForAnnotation(nameAnnot, document) + " Id: " + nameAnnot.getId() + " Type: " + nameAnnot.getType());
+          }
           continue;
         }
         Collections.sort(tokens, new gate.util.OffsetComparator());
@@ -409,7 +411,10 @@ implements ANNIEConstants{
           annotString = stripCDG(annotString, nameAnnot);
 
         if(null == annotString || "".equals(annotString)) {
-          log.debug("Annotation ID " + nameAnnot.getId() + " of type" + nameAnnot.getType() +  " refers to a null or empty string.  Unable to process further.");
+          if (log.isDebugEnabled()) {
+            log.debug("Annotation ID " + nameAnnot.getId() + " of type" + nameAnnot.getType() +
+                    " refers to a null or empty string.  Unable to process further.");
+          }
           continue;
         }
         //otherwise try matching with previous annotations
@@ -464,7 +469,7 @@ implements ANNIEConstants{
       if (processedAnnots.containsValue(unknownString)) {
         Annotation matchedAnnot = updateMatches(unknown, unknownString);
         if (matchedAnnot == null) {
-          System.out.println("Unable to find the annotation: " +
+          log.info("Unable to find the annotation: " +
                   getStringForAnnotation(unknown, document) +
           " in matchUnknown");
         }
@@ -672,7 +677,7 @@ implements ANNIEConstants{
       }
     }
     catch (Exception e) {
-      System.out.println("Very strange!!!!!  Error in propogatePropertyToExactMatchingMatches!!!!!!!!!");
+      log.error("Error in propogatePropertyToExactMatchingMatches", e);
     }
   }
 
@@ -689,8 +694,7 @@ implements ANNIEConstants{
       return d.getContent().getContent(start, end).toString();
     }
     catch (InvalidOffsetException e) {
-      System.out.println("Weird offset exception in getStringForSpan");
-      e.printStackTrace();
+      log.error("Weird offset exception in getStringForSpan", e);
       throw new ExecutionException(e);
     }
   }
@@ -855,7 +859,7 @@ implements ANNIEConstants{
       if (annotString.equals(oldString)) {
         Annotation tempAnnot = nameAllAnnots.get(id);
         if (tempAnnot == null) {
-          System.out.println("Oh no!!!  tempAnnot is null when looking at " + annotString
+          log.warn("TempAnnot is null when looking at " + annotString
                   + " | " + oldString + " | old id: " + id);
           return null;
         }
@@ -1430,8 +1434,9 @@ implements ANNIEConstants{
     if (!retVal)
       retVal = fuzzyMatch(s1, s2);
 
-    if (retVal) {
-      log.debug("rule1Name matched " + s1 + "(id: " + longAnnot.getId() + ") to " + s2+ "(id: " + shortAnnot.getId() + ")");
+    if (retVal && log.isDebugEnabled()) {
+      log.debug("rule1Name matched " + s1 + "(id: " + longAnnot.getId() + ") to "
+              + s2+ "(id: " + shortAnnot.getId() + ")");
     }
     return retVal;
   }//matchRule1Name
@@ -1448,7 +1453,8 @@ implements ANNIEConstants{
 
     if (alias.containsKey(s1) && alias.containsKey(s2)) {
       if (alias.get(s1).toString().equals(alias.get(s2).toString())) {
-        log.debug("rule2 matched " + s1 + " to " + s2);
+        if (log.isDebugEnabled())
+          log.debug("rule2 matched " + s1 + " to " + s2);
         return true;
       }
     }
@@ -1477,7 +1483,8 @@ implements ANNIEConstants{
       else s2_poss = s2.concat("'");
 
       if (s2_poss != null && matchRule1(s1, s2_poss,caseSensitive)) {
-        log.debug("rule3 matched " + s1 + " to " + s2);
+        if (log.isDebugEnabled())
+          log.debug("rule3 matched " + s1 + " to " + s2);
         return true;
       }
 
@@ -1489,7 +1496,8 @@ implements ANNIEConstants{
       else s2_poss = token.concat("'");
 
       if (s2_poss != null && matchRule1(s2_poss,s2,caseSensitive)) {
-        log.debug("rule3 matched " + s1 + " to " + s2);
+        if (log.isDebugEnabled())
+          log.debug("rule3 matched " + s1 + " to " + s2);
         return true;
       }
 
@@ -1528,7 +1536,7 @@ implements ANNIEConstants{
     } // while
 //  if (allTokensMatch)
 //  Out.prln("rule4 fired. result is: " + allTokensMatch);
-    if (allTokensMatch)
+    if (allTokensMatch && log.isDebugEnabled())
       log.debug("rule4 matched " + s1 + "(id: " + longAnnot.getId() + ") to " + s2+ "(id: " + shortAnnot.getId() + ")");
     return allTokensMatch;
   }//matchRule4
@@ -1562,7 +1570,7 @@ implements ANNIEConstants{
         break;
       }
     }
-    if (allTokensMatch)
+    if (allTokensMatch && log.isDebugEnabled())
       log.debug("rule4n matched " + s1 + "(id: " + longAnnot.getId() + ") to " + s2+ "(id: " + shortAnnot.getId() + ")");
     return allTokensMatch;
   }//matchRule4
@@ -1609,7 +1617,7 @@ implements ANNIEConstants{
             ).getFeatures().get(TOKEN_STRING_FEATURE_NAME),
             s2,
             caseSensitive);
-    if (result)
+    if (result && log.isDebugEnabled())
       log.debug("rule5 matched " + s1 + " to " + s2);
     return result;
 
@@ -2031,7 +2039,8 @@ implements ANNIEConstants{
             tokensLongAnnot.size()-1)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
 //  Out.prln("Converted to " + s1_short);
     if (tokensLongAnnot.size()>1 && matchRule1(s1_short, s2, caseSensitive)) {
-      log.debug("rule14 matched " + s1 + " to " + s2);
+      if (log.isDebugEnabled())
+        log.debug("rule14 matched " + s1 + " to " + s2);
       return true;
     }
 
@@ -2090,7 +2099,8 @@ implements ANNIEConstants{
 
     //only get to here if all word tokens in the short annot were found in
     //the long annot, so there is a coref relation
-    log.debug("rule15 matched " + s1 + " to " + s2);
+    if (log.isDebugEnabled())
+      log.debug("rule15 matched " + s1 + " to " + s2);
     return true;
   }//matchRule15
 
