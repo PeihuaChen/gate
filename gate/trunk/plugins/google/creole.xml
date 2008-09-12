@@ -8,7 +8,8 @@
       <JAR>lib/googleapi.jar</JAR>
       <NAME>GooglePR</NAME>
       <CLASS>google.GooglePR</CLASS>
-      <COMMENT>Provides an interface to Google API (http://gate.ac.uk/sale/tao/#sec:misc-creole:google)</COMMENT>
+      <COMMENT>Provides an interface to Google API.</COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:misc-creole:google</HELPURL>
       <PARAMETER NAME="corpus" RUNTIME="true" COMMENT="Corpus where the results are stored">gate.Corpus</PARAMETER>
       <PARAMETER NAME="query" RUNTIME="true" COMMENT="The Search Query">java.lang.String</PARAMETER>
       <PARAMETER NAME="key" RUNTIME="false" COMMENT="The registration key for Google API">java.lang.String</PARAMETER>

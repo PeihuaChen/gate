@@ -11,7 +11,8 @@
     <RESOURCE>
       <NAME>GATE OntoLex Mapping</NAME>
       <CLASS>gate.lexicon.OntoLexKBImpl</CLASS>
-      <COMMENT>GATE OntoLex mapping (http://gate.ac.uk/sale/tao/#sec:misc-creole:nlg).</COMMENT>
+      <COMMENT>GATE OntoLex mapping.</COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:misc-creole:nlg</HELPURL>
       <INTERFACE>gate.lexicon.OntoLexLR</INTERFACE>
       <ICON>lrs.gif</ICON>
         <PARAMETER NAME="ontologyIdentifier"
@@ -27,7 +28,8 @@
     <RESOURCE>
       <NAME>GATE NLG Lexicon</NAME>
       <CLASS>gate.lexicon.NLGLexiconImpl</CLASS>
-      <COMMENT>GATE NLG Lexicon (http://gate.ac.uk/sale/tao/#sec:misc-creole:nlg).</COMMENT>
+      <COMMENT>GATE NLG Lexicon.</COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:misc-creole:nlg</HELPURL>
       <INTERFACE>gate.lexicon.NLGLexicon</INTERFACE>
       <ICON>lrs.gif</ICON>
     </RESOURCE>
@@ -37,7 +39,8 @@
   <CREOLE>
     <RESOURCE>
       <NAME>NLG Lexicon Editor</NAME>
-      <COMMENT>NLG Lexicon Editor (http://gate.ac.uk/sale/tao/#sec:misc-creole:nlg).</COMMENT>
+      <COMMENT>NLG Lexicon Editor.</COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:misc-creole:nlg</HELPURL>
       <CLASS>gate.gui.lexicon.NLGLexiconVR</CLASS>
 	<JAR>miakt.jar</JAR>
       <!-- type values can be "large" or "small"-->
@@ -50,7 +53,8 @@
     <!--
     <RESOURCE>
       <NAME>OntoLex Mapping Editor</NAME>
-      <COMMENT>An Editor for mapping between NLG lexicon entries and ontology classes (http://gate.ac.uk/sale/tao/#sec:misc-creole:nlg).</COMMENT>
+      <COMMENT>An Editor for mapping between NLG lexicon entries and ontology classes.</COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:misc-creole:nlg</HELPURL>
       <CLASS>gate.gui.lexicon.OntoLexEditorVR</CLASS>
 	<JAR>miakt.jar</JAR>
       <GUI TYPE="large">

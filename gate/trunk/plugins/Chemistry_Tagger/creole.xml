@@ -3,7 +3,8 @@
   <CREOLE>
     <RESOURCE>
       <NAME>Chemistry Tagger</NAME>
-      <COMMENT>A tagger for chemical names (http://gate.ac.uk/sale/tao/#sec:misc-creole:chemistrytagger)</COMMENT>
+      <COMMENT>A tagger for chemical names.</COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:misc-creole:chemistrytagger</HELPURL>
       <JAR>ChemTagger.jar</JAR>
       <CLASS>mark.chemistry.Tagger</CLASS>
       <PARAMETER NAME="document"

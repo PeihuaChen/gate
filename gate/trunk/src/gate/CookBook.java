@@ -63,7 +63,7 @@ import gate.util.*;
   *
   * <P>
   * For more details and for a conceptual view, see
-  * <A HREF=http://gate.ac.uk/sale/tao/>Developing Language Processing
+  * <A HREF=http://gate.ac.uk/cgi-bin/userguide/>Developing Language Processing
   * Components with GATE</A> (for which this class provides some of the
   * examples).
   *

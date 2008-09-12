@@ -7,7 +7,8 @@
       <JAR>ir.jar</JAR>
       <NAME>SearchPR</NAME>
       <CLASS>gate.creole.ir.SearchPR</CLASS>
-      <COMMENT>Provides IR functionality (http://gate.ac.uk/sale/tao/#sect:ir)</COMMENT>
+      <COMMENT>Provides IR functionality.</COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sect:ir</HELPURL>
       <PARAMETER NAME="corpus" RUNTIME="true"
         COMMENT="The indexed  corpus to be searched">
         gate.creole.ir.IndexedCorpus</PARAMETER>

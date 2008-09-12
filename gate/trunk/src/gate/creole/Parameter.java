@@ -333,6 +333,15 @@ public class Parameter implements Serializable
   /** Get the comment for this parameter */
   public String getComment() { return comment; }
 
+  /** helpURL for the parameter */
+  String helpURL;
+  
+  /** Set the helpURL for this parameter */
+  public void sethelpURL(String helpURL) { this.helpURL = helpURL; }
+  
+  /** Get the helpURL for this parameter */
+  public String gethelpURL() { return helpURL; }
+  
   /** Name for the parameter */
   String name;
 
@@ -408,7 +417,8 @@ public class Parameter implements Serializable
              "; optional=" + optional +
              "; defaultValueString=" + defaultValueString +
              "; defaultValue=" + getDefaultValue() + "; comment=" +
-             comment + "; runtime=" + runtime +
+             comment + "; helpURL=" +
+             helpURL + "; runtime=" + runtime +
              "; itemClassName=" + itemClassName +
              "; suffixes=" + suffixes;
     }catch(ParameterException pe){

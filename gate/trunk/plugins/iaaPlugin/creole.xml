@@ -6,8 +6,8 @@
     <!-- creole.xml for the IAA PR -->
     <RESOURCE>
       <NAME>IAA Computation PR</NAME>
-      <COMMENT>Compute inter-annotator agreement (IAA)
-      (http://gate.ac.uk/sale/tao/#chapt:mlapi)</COMMENT>
+      <COMMENT>Compute inter-annotator agreement (IAA).</COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/chapt:mlapi</HELPURL>
       <CLASS>gate.iaaplugin.IaaMain</CLASS>
       <JAR>iaaMain.jar</JAR>
 

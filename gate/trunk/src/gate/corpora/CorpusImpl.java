@@ -32,8 +32,9 @@ import gate.util.Strings;
  * Corpora are sets of Document. They are ordered by lexicographic collation on
  * Url.
  */
-@CreoleResource(name = "GATE corpus", comment = "GATE transient corpus",
-    interfaceName = "gate.Corpus", icon = "corpus-trans")
+@CreoleResource(name = "GATE corpus", comment = "GATE transient corpus.",
+    interfaceName = "gate.Corpus", icon = "corpus-trans",
+    helpURL = "http://gate.ac.uk/cgi-bin/userguide/sec:howto:loadlr")
 public class CorpusImpl extends AbstractLanguageResource implements Corpus,
                                                         CreoleListener {
 

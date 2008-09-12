@@ -8,7 +8,8 @@
       <JAR>lib/websphinx.jar</JAR>
       <NAME>CrawlerPR</NAME>
       <CLASS>crawl.CrawlPR</CLASS>
-      <COMMENT>Provides interface to the webspinx API (http://gate.ac.uk/sale/tao/#sec:misc-creole:crawler)</COMMENT>
+      <COMMENT>Provides interface to the webspinx API.</COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:misc-creole:crawler</HELPURL>
       <PARAMETER NAME="root" RUNTIME="true" COMMENT="The Starting root for the crawl" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="domain" RUNTIME="true" DEFAULT="SUBTREE" COMMENT="The domain for the crawl [SERVER/SUBTREE/WEB]" OPTIONAL="false">java.lang.String</PARAMETER>
       <PARAMETER NAME="depth" RUNTIME="true" DEFAULT="3" COMMENT="The depth to which the crawl must proceed">java.lang.Integer</PARAMETER> 
