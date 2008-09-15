@@ -1,14 +1,17 @@
 /**
  * 
  */
-package gate.creole.ontology.owlim;
+package gate.creole.ontology.owlim; 
 
 import gate.creole.ontology.HasValueRestriction;
+import gate.creole.ontology.InvalidValueException;
+import gate.creole.ontology.Literal;
 import gate.creole.ontology.OConstants;
 import gate.creole.ontology.OResource;
 import gate.creole.ontology.Ontology;
 import gate.creole.ontology.RDFProperty;
 import gate.creole.ontology.URI;
+import gate.util.GateRuntimeException;
 
 /**
  * @author niraj
@@ -33,9 +36,17 @@ public class HasValueRestrictionImpl extends OClassImpl implements
    * 
    * @see gate.creole.ontology.HasValuesFromRestriction#getHasValue()
    */
-  public OResource getHasValue() {
+  public Object getHasValue() {
       ResourceInfo resource = owlim.getRestrictionValue(this.repositoryID,
               this.uri.toString(), OConstants.HAS_VALUE_RESTRICTION);
+      RDFProperty prop = getOnPropertyValue();
+      if(prop instanceof DatatypePropertyImpl) {
+        try {
+          return new Literal(resource.getUri(),((DatatypePropertyImpl)prop).getDataType());
+        } catch(InvalidValueException ive) {
+          throw new GateRuntimeException(ive);
+        }
+      }
       return Utils.createOClass(this.repositoryID, this.ontology, this.owlim,
               resource.getUri(), resource.getClassType());
   }
@@ -52,6 +63,16 @@ public class HasValueRestrictionImpl extends OClassImpl implements
   }
   
 
+  /**
+   * Sets the resource as a restricted value.
+   * 
+   * @param resource
+   */
+  public void setHasValue(Literal literal) {
+    owlim.setRestrictionValue(this.repositoryID, this.uri.toString(),
+            OConstants.HAS_VALUE_RESTRICTION, literal.getValue());
+  }
+  
   /*
    * (non-Javadoc)
    * 

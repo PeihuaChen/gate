@@ -253,7 +253,7 @@ public class OntologyEditor extends AbstractVisualResource
         }
       }
     });
-    // toolBar.add(queryBtn);
+    //toolBar.add(queryBtn);
 
     topClassAction = new TopClassAction("", MainFrame
             .getIcon("ontology-topclass"));

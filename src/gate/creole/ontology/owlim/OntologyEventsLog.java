@@ -56,7 +56,12 @@ public class OntologyEventsLog implements OConstants {
         addEvent(new OEvent(res.getURI().toString(), OWL.SOMEVALUESFROM, hasValue, true));
       } else if(res instanceof HasValueRestriction) {
         HasValueRestriction cr = (HasValueRestriction) res;
-        String hasValue = cr.getHasValue().getURI().toString();
+        String hasValue = "";
+        if(cr.getOnPropertyValue() instanceof DatatypePropertyImpl) {
+          hasValue = ((Literal)cr.getHasValue()).getValue();
+        } else {
+          hasValue = ((OResource)cr.getHasValue()).getURI().toString();
+        }
         addEvent(new OEvent(res.getURI().toString(), RDF.TYPE, OWL.HASVALUE, true));
         addEvent(new OEvent(res.getURI().toString(), OWL.ONPROPERTY, property, true));
         addEvent(new OEvent(res.getURI().toString(), OWL.HASVALUE, hasValue, true));

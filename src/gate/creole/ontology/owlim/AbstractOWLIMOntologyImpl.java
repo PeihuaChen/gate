@@ -52,8 +52,8 @@ import gate.creole.ontology.URI;
 
 /**
  * This class provides implementation of most of the methods of Ontology
- * interface. This implementation is based on the OWLIM (a SAIL) that
- * stores data in repository using SESAME.
+ * interface. This implementation is based on the OWLIM (a SAIL) that stores
+ * data in repository using SESAME.
  * 
  * @author niraj
  * 
@@ -109,8 +109,8 @@ public abstract class AbstractOWLIMOntologyImpl
   protected Map<String, OResource> urisToOResouceMap;
 
   /**
-   * Map where the key is a resource name and value is a list of
-   * resources with that name.
+   * Map where the key is a resource name and value is a list of resources with
+   * that name.
    */
   protected Map<String, List<OResource>> resourceNamesToOResourcesMap;
 
@@ -165,15 +165,14 @@ public abstract class AbstractOWLIMOntologyImpl
    * (non-Javadoc)
    * 
    * @see gate.creole.ontology.Ontology#writeOntologyData(java.io.OutputStream,
-   *      byte)
+   * byte)
    */
   public abstract void writeOntologyData(OutputStream out, byte format);
 
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.Ontology#writeOntologyData(java.io.Writer,
-   *      byte)
+   * @see gate.creole.ontology.Ontology#writeOntologyData(java.io.Writer, byte)
    */
   public abstract void writeOntologyData(Writer out, byte format);
 
@@ -198,7 +197,8 @@ public abstract class AbstractOWLIMOntologyImpl
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.Ontology#setDefaultNameSpace(gate.creole.ontology.URI)
+   * @see
+   * gate.creole.ontology.Ontology#setDefaultNameSpace(gate.creole.ontology.URI)
    */
   public void setDefaultNameSpace(String theURI) {
     defaultNameSpace = theURI;
@@ -241,12 +241,11 @@ public abstract class AbstractOWLIMOntologyImpl
    */
   public OClass addOClass(URI aURI, byte classType) {
     OResource resource = getOResourceFromMap(aURI.toString());
-    if(resource != null) {
-      return (OClass)resource;
-    }
+    if(resource != null) { return (OClass)resource; }
     owlim.addClass(this.sesameRepositoryID, aURI.toString(), classType);
-    OClass oClass = Utils.createOClass(this.sesameRepositoryID, this, owlim,
-            aURI.toString(), classType);
+    OClass oClass =
+      Utils.createOClass(this.sesameRepositoryID, this, owlim, aURI.toString(),
+        classType);
 
     fireOntologyResourceAdded(oClass);
 
@@ -259,12 +258,13 @@ public abstract class AbstractOWLIMOntologyImpl
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.Ontology#addOClass(gate.creole.ontology.URI, byte)
+   * @see gate.creole.ontology.Ontology#addOClass(gate.creole.ontology.URI,
+   * byte)
    */
   public OClass addOClass(URI aURI) {
     return addOClass(aURI, OConstants.OWL_CLASS);
   }
-  
+
   /*
    * (non-Javadoc)
    * 
@@ -272,14 +272,12 @@ public abstract class AbstractOWLIMOntologyImpl
    */
   public OClass getOClass(URI theClassURI) {
     OResource resource = getOResourceFromMap(theClassURI.toString());
-    if(resource != null) {
-      return (OClass)resource;
-    }
+    if(resource != null) { return (OClass)resource; }
     if(owlim.hasClass(this.sesameRepositoryID, theClassURI.toString())) {
-      byte classType = owlim.getClassType(this.sesameRepositoryID, theClassURI
-              .toString());
+      byte classType =
+        owlim.getClassType(this.sesameRepositoryID, theClassURI.toString());
       return Utils.createOClass(this.sesameRepositoryID, this, owlim,
-              theClassURI.toString(), classType);
+        theClassURI.toString(), classType);
     }
     return null;
   }
@@ -287,7 +285,8 @@ public abstract class AbstractOWLIMOntologyImpl
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.Ontology#removeOClass(gate.creole.ontology.OClass)
+   * @see
+   * gate.creole.ontology.Ontology#removeOClass(gate.creole.ontology.OClass)
    */
   public void removeOClass(OClass theClass) {
 
@@ -296,8 +295,9 @@ public abstract class AbstractOWLIMOntologyImpl
       return;
     }
 
-    String[] deletedResources = owlim.removeClass(this.sesameRepositoryID,
-            theClass.getURI().toString(), true);
+    String[] deletedResources =
+      owlim.removeClass(this.sesameRepositoryID, theClass.getURI().toString(),
+        true);
     fireOntologyResourcesRemoved(deletedResources);
   }
 
@@ -313,7 +313,8 @@ public abstract class AbstractOWLIMOntologyImpl
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.Ontology#containsOClass(gate.creole.ontology.OClass)
+   * @see
+   * gate.creole.ontology.Ontology#containsOClass(gate.creole.ontology.OClass)
    */
   public boolean containsOClass(OClass theClass) {
     return containsOClass(theClass.getURI());
@@ -329,7 +330,7 @@ public abstract class AbstractOWLIMOntologyImpl
     Set<OClass> set = new HashSet<OClass>();
     for(int i = 0; i < oClasses.length; i++) {
       set.add(Utils.createOClass(this.sesameRepositoryID, this, this.owlim,
-              oClasses[i].getUri(), oClasses[i].getClassType()));
+        oClasses[i].getUri(), oClasses[i].getClassType()));
     }
     return set;
   }
@@ -338,7 +339,7 @@ public abstract class AbstractOWLIMOntologyImpl
    * (non-Javadoc)
    * 
    * @see gate.creole.ontology.Ontology#getDistance(gate.creole.ontology.OClass,
-   *      gate.creole.ontology.OClass)
+   * gate.creole.ontology.OClass)
    */
   public int getDistance(OClass class1, OClass class2) {
 
@@ -393,7 +394,7 @@ public abstract class AbstractOWLIMOntologyImpl
    * (non-Javadoc)
    * 
    * @see gate.creole.ontology.Ontology#addOInstance(gate.creole.ontology.URI,
-   *      gate.creole.ontology.OClass)
+   * gate.creole.ontology.OClass)
    */
   public OInstance addOInstance(URI theInstanceURI, OClass theClass) {
     if(!containsOClass(theClass.getURI())) {
@@ -404,23 +405,24 @@ public abstract class AbstractOWLIMOntologyImpl
     OResource anInst = getOResourceFromMap(theInstanceURI.toString());
     if(anInst != null && !(anInst instanceof OInstance)) {
       Utils.error(anInst.getURI().toString() + " already exists but "
-              + " is not an ontology instance!");
+        + " is not an ontology instance!");
       return null;
     }
 
     if(anInst != null
-            && ((OInstance)anInst).getOClasses(OConstants.TRANSITIVE_CLOSURE)
-                    .contains(theClass)) {
+      && ((OInstance)anInst).getOClasses(OConstants.TRANSITIVE_CLOSURE)
+        .contains(theClass)) {
       Utils.warning(theInstanceURI.toString()
-              + " is already registered as an instanceof "
-              + theClass.getURI().toString());
+        + " is already registered as an instanceof "
+        + theClass.getURI().toString());
       return (OInstance)anInst;
     }
 
     owlim.addIndividual(this.sesameRepositoryID, theClass.getURI().toString(),
-            theInstanceURI.toString());
-    OInstance oInst = Utils.createOInstance(this.sesameRepositoryID, this,
-            owlim, theInstanceURI.toString());
+      theInstanceURI.toString());
+    OInstance oInst =
+      Utils.createOInstance(this.sesameRepositoryID, this, owlim,
+        theInstanceURI.toString());
     fireOntologyResourceAdded(oInst);
 
     // we need to add a label on this but after the new class addition
@@ -433,7 +435,9 @@ public abstract class AbstractOWLIMOntologyImpl
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.Ontology#removeOInstance(gate.creole.ontology.OInstance)
+   * @see
+   * gate.creole.ontology.Ontology#removeOInstance(gate.creole.ontology.OInstance
+   * )
    */
   public void removeOInstance(OInstance theInstance) {
     if(!containsOInstance(theInstance.getURI())) {
@@ -441,8 +445,9 @@ public abstract class AbstractOWLIMOntologyImpl
       return;
     }
 
-    String[] deletedResources = owlim.removeIndividual(this.sesameRepositoryID,
-            theInstance.getURI().toString());
+    String[] deletedResources =
+      owlim.removeIndividual(this.sesameRepositoryID, theInstance.getURI()
+        .toString());
     fireOntologyResourcesRemoved(deletedResources);
   }
 
@@ -456,7 +461,7 @@ public abstract class AbstractOWLIMOntologyImpl
     Set<OInstance> set = new HashSet<OInstance>();
     for(int i = 0; i < oInsts.length; i++) {
       set.add(Utils.createOInstance(this.sesameRepositoryID, this, this.owlim,
-              oInsts[i]));
+        oInsts[i]));
     }
     return set;
   }
@@ -464,12 +469,14 @@ public abstract class AbstractOWLIMOntologyImpl
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.Ontology#getOInstances(gate.creole.ontology.OClass,
-   *      boolean)
+   * @see
+   * gate.creole.ontology.Ontology#getOInstances(gate.creole.ontology.OClass,
+   * boolean)
    */
   public Set<OInstance> getOInstances(OClass theClass, byte closure) {
-    String[] oInsts = owlim.getIndividuals(this.sesameRepositoryID, theClass
-            .getURI().toString(), closure);
+    String[] oInsts =
+      owlim.getIndividuals(this.sesameRepositoryID, theClass.getURI()
+        .toString(), closure);
     Set<OInstance> set = new HashSet<OInstance>();
 
     if(!containsOClass(theClass.getURI())) {
@@ -479,7 +486,7 @@ public abstract class AbstractOWLIMOntologyImpl
 
     for(int i = 0; i < oInsts.length; i++) {
       set.add(Utils.createOInstance(this.sesameRepositoryID, this, this.owlim,
-              oInsts[i]));
+        oInsts[i]));
     }
     return set;
   }
@@ -492,19 +499,20 @@ public abstract class AbstractOWLIMOntologyImpl
   public OInstance getOInstance(URI theInstanceURI) {
     OResource resource = getOResourceFromMap(theInstanceURI.toString());
     if(resource != null) return (OInstance)resource;
-    List<String> individuals = Arrays.asList(owlim
-            .getIndividuals(this.sesameRepositoryID));
-    if(individuals.contains(theInstanceURI.toString())) {
-      return Utils.createOInstance(this.sesameRepositoryID, this, owlim,
-              theInstanceURI.toString());
-    }
+    List<String> individuals =
+      Arrays.asList(owlim.getIndividuals(this.sesameRepositoryID));
+    if(individuals.contains(theInstanceURI.toString())) { return Utils
+      .createOInstance(this.sesameRepositoryID, this, owlim, theInstanceURI
+        .toString()); }
     return null;
   }
 
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.Ontology#containsOInstance(gate.creole.ontology.OInstance)
+   * @see
+   * gate.creole.ontology.Ontology#containsOInstance(gate.creole.ontology.OInstance
+   * )
    */
   public boolean containsOInstance(OInstance theInstance) {
     return containsOInstance(theInstance.getURI());
@@ -513,11 +521,12 @@ public abstract class AbstractOWLIMOntologyImpl
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.Ontology#containsOInstance(gate.creole.ontology.URI)
+   * @see
+   * gate.creole.ontology.Ontology#containsOInstance(gate.creole.ontology.URI)
    */
   public boolean containsOInstance(URI theInstanceURI) {
-    List<String> individuals = Arrays.asList(owlim
-            .getIndividuals(this.sesameRepositoryID));
+    List<String> individuals =
+      Arrays.asList(owlim.getIndividuals(this.sesameRepositoryID));
     return individuals.contains(theInstanceURI.toString());
   }
 
@@ -525,10 +534,10 @@ public abstract class AbstractOWLIMOntologyImpl
    * (non-Javadoc)
    * 
    * @see gate.creole.ontology.Ontology#addRDFProperty(gate.creole.ontology.URI,
-   *      java.util.Set, java.util.Set)
+   * java.util.Set, java.util.Set)
    */
   public RDFProperty addRDFProperty(URI aPropertyURI, Set<OResource> domain,
-          Set<OResource> range) {
+    Set<OResource> range) {
     OResource res = getOResourceFromMap(aPropertyURI.toString());
     if(res != null) {
       if(res instanceof RDFProperty) {
@@ -537,7 +546,7 @@ public abstract class AbstractOWLIMOntologyImpl
       }
       else {
         Utils.error(aPropertyURI.toString()
-                + " already exists but it is not an RDFProperty");
+          + " already exists but it is not an RDFProperty");
         return null;
       }
     }
@@ -555,9 +564,10 @@ public abstract class AbstractOWLIMOntologyImpl
       rangeURIs[counter] = iter.next().getURI().toString();
     }
     owlim.addRDFProperty(this.sesameRepositoryID, aPropertyURI.toString(),
-            domainURIs, rangeURIs);
-    RDFProperty rp = Utils.createOProperty(this.sesameRepositoryID, this,
-            owlim, aPropertyURI.toString(), OConstants.RDF_PROPERTY);
+      domainURIs, rangeURIs);
+    RDFProperty rp =
+      Utils.createOProperty(this.sesameRepositoryID, this, owlim, aPropertyURI
+        .toString(), OConstants.RDF_PROPERTY);
     fireOntologyResourceAdded(rp);
 
     // we need to add a label on this but after the new resource
@@ -577,7 +587,7 @@ public abstract class AbstractOWLIMOntologyImpl
     Set<RDFProperty> set = new HashSet<RDFProperty>();
     for(int i = 0; i < properties.length; i++) {
       set.add((RDFProperty)Utils.createOProperty(this.sesameRepositoryID, this,
-              owlim, properties[i].getUri(), properties[i].getType()));
+        owlim, properties[i].getUri(), properties[i].getType()));
     }
     return set;
   }
@@ -589,13 +599,15 @@ public abstract class AbstractOWLIMOntologyImpl
    */
   public boolean isRDFProperty(URI thePropertyURI) {
     return owlim.isRDFProperty(this.sesameRepositoryID, thePropertyURI
-            .toString());
+      .toString());
   }
 
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.Ontology#addAnnotationProperty(gate.creole.ontology.URI)
+   * @see
+   * gate.creole.ontology.Ontology#addAnnotationProperty(gate.creole.ontology
+   * .URI)
    */
   public AnnotationProperty addAnnotationProperty(URI aPropertyURI) {
     OResource res = getOResourceFromMap(aPropertyURI.toString());
@@ -606,16 +618,16 @@ public abstract class AbstractOWLIMOntologyImpl
       }
       else {
         Utils.error(aPropertyURI.toString()
-                + " already exists but it is not an AnnotationProperty");
+          + " already exists but it is not an AnnotationProperty");
         return null;
       }
     }
 
     owlim.addAnnotationProperty(this.sesameRepositoryID, aPropertyURI
-            .toString());
-    AnnotationProperty ap = (AnnotationProperty)Utils.createOProperty(
-            this.sesameRepositoryID, this, owlim, aPropertyURI.toString(),
-            OConstants.ANNOTATION_PROPERTY);
+      .toString());
+    AnnotationProperty ap =
+      (AnnotationProperty)Utils.createOProperty(this.sesameRepositoryID, this,
+        owlim, aPropertyURI.toString(), OConstants.ANNOTATION_PROPERTY);
     fireOntologyResourceAdded(ap);
 
     // we need to add a label on this but after the new resource
@@ -631,13 +643,13 @@ public abstract class AbstractOWLIMOntologyImpl
    * @see gate.creole.ontology.Ontology#getAnnotationProperties()
    */
   public Set<AnnotationProperty> getAnnotationProperties() {
-    Property[] properties = owlim
-            .getAnnotationProperties(this.sesameRepositoryID);
+    Property[] properties =
+      owlim.getAnnotationProperties(this.sesameRepositoryID);
     Set<AnnotationProperty> set = new HashSet<AnnotationProperty>();
     for(int i = 0; i < properties.length; i++) {
       set.add((AnnotationProperty)Utils.createOProperty(
-              this.sesameRepositoryID, this, owlim, properties[i].getUri(),
-              properties[i].getType()));
+        this.sesameRepositoryID, this, owlim, properties[i].getUri(),
+        properties[i].getType()));
     }
     return set;
   }
@@ -645,21 +657,24 @@ public abstract class AbstractOWLIMOntologyImpl
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.Ontology#isAnnotationProperty(gate.creole.ontology.URI)
+   * @see
+   * gate.creole.ontology.Ontology#isAnnotationProperty(gate.creole.ontology
+   * .URI)
    */
   public boolean isAnnotationProperty(URI thePropertyURI) {
     return owlim.isAnnotationProperty(this.sesameRepositoryID, thePropertyURI
-            .toString());
+      .toString());
   }
 
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.Ontology#addDatatypeProperty(gate.creole.ontology.URI,
-   *      java.util.Set, gate.creole.ontology.DataType)
+   * @see
+   * gate.creole.ontology.Ontology#addDatatypeProperty(gate.creole.ontology.URI,
+   * java.util.Set, gate.creole.ontology.DataType)
    */
   public DatatypeProperty addDatatypeProperty(URI aPropertyURI,
-          Set<OClass> domain, DataType aDatatype) {
+    Set<OClass> domain, DataType aDatatype) {
     OResource res = getOResourceFromMap(aPropertyURI.toString());
     if(res != null) {
       if(res instanceof DatatypeProperty) {
@@ -668,7 +683,7 @@ public abstract class AbstractOWLIMOntologyImpl
       }
       else {
         Utils.error(aPropertyURI.toString()
-                + " already exists but it is not a DatatypeProperty");
+          + " already exists but it is not a DatatypeProperty");
         return null;
       }
     }
@@ -680,10 +695,10 @@ public abstract class AbstractOWLIMOntologyImpl
       domainURIs[counter] = iter.next().getURI().toString();
     }
     owlim.addDataTypeProperty(this.sesameRepositoryID, aPropertyURI.toString(),
-            domainURIs, aDatatype.getXmlSchemaURI().toString());
-    DatatypeProperty dp = (DatatypeProperty)Utils.createOProperty(
-            this.sesameRepositoryID, this, owlim, aPropertyURI.toString(),
-            OConstants.DATATYPE_PROPERTY);
+      domainURIs, aDatatype.getXmlSchemaURI().toString());
+    DatatypeProperty dp =
+      (DatatypeProperty)Utils.createOProperty(this.sesameRepositoryID, this,
+        owlim, aPropertyURI.toString(), OConstants.DATATYPE_PROPERTY);
     fireOntologyResourceAdded(dp);
 
     // we need to add a label on this but after the new resource
@@ -699,12 +714,12 @@ public abstract class AbstractOWLIMOntologyImpl
    * @see gate.creole.ontology.Ontology#getDatatypeProperties()
    */
   public Set<DatatypeProperty> getDatatypeProperties() {
-    Property[] properties = owlim
-            .getDatatypeProperties(this.sesameRepositoryID);
+    Property[] properties =
+      owlim.getDatatypeProperties(this.sesameRepositoryID);
     Set<DatatypeProperty> set = new HashSet<DatatypeProperty>();
     for(int i = 0; i < properties.length; i++) {
       set.add((DatatypeProperty)Utils.createOProperty(this.sesameRepositoryID,
-              this, owlim, properties[i].getUri(), properties[i].getType()));
+        this, owlim, properties[i].getUri(), properties[i].getType()));
     }
     return set;
   }
@@ -712,21 +727,23 @@ public abstract class AbstractOWLIMOntologyImpl
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.Ontology#isDatatypeProperty(gate.creole.ontology.URI)
+   * @see
+   * gate.creole.ontology.Ontology#isDatatypeProperty(gate.creole.ontology.URI)
    */
   public boolean isDatatypeProperty(URI thePropertyURI) {
     return owlim.isDatatypeProperty(this.sesameRepositoryID, thePropertyURI
-            .toString());
+      .toString());
   }
 
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.Ontology#addObjectProperty(gate.creole.ontology.URI,
-   *      java.util.Set, java.util.Set)
+   * @see
+   * gate.creole.ontology.Ontology#addObjectProperty(gate.creole.ontology.URI,
+   * java.util.Set, java.util.Set)
    */
   public ObjectProperty addObjectProperty(URI aPropertyURI, Set<OClass> domain,
-          Set<OClass> range) {
+    Set<OClass> range) {
     OResource res = getOResourceFromMap(aPropertyURI.toString());
     if(res != null) {
       if(res instanceof ObjectProperty) {
@@ -735,7 +752,7 @@ public abstract class AbstractOWLIMOntologyImpl
       }
       else {
         Utils.error(aPropertyURI.toString()
-                + " already exists but it is not an ObjectProperty");
+          + " already exists but it is not an ObjectProperty");
         return null;
       }
     }
@@ -755,10 +772,10 @@ public abstract class AbstractOWLIMOntologyImpl
       counter++;
     }
     owlim.addObjectProperty(this.sesameRepositoryID, aPropertyURI.toString(),
-            domainURIs, rangeURIs);
-    ObjectProperty op = (ObjectProperty)Utils.createOProperty(
-            this.sesameRepositoryID, this, owlim, aPropertyURI.toString(),
-            OConstants.OBJECT_PROPERTY);
+      domainURIs, rangeURIs);
+    ObjectProperty op =
+      (ObjectProperty)Utils.createOProperty(this.sesameRepositoryID, this,
+        owlim, aPropertyURI.toString(), OConstants.OBJECT_PROPERTY);
     fireOntologyResourceAdded(op);
 
     // we need to add a label on this but after the new resource
@@ -778,7 +795,7 @@ public abstract class AbstractOWLIMOntologyImpl
     Set<ObjectProperty> set = new HashSet<ObjectProperty>();
     for(int i = 0; i < properties.length; i++) {
       set.add((ObjectProperty)Utils.createOProperty(this.sesameRepositoryID,
-              this, owlim, properties[i].getUri(), properties[i].getType()));
+        this, owlim, properties[i].getUri(), properties[i].getType()));
     }
     return set;
   }
@@ -786,21 +803,23 @@ public abstract class AbstractOWLIMOntologyImpl
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.Ontology#isObjectProperty(gate.creole.ontology.URI)
+   * @see
+   * gate.creole.ontology.Ontology#isObjectProperty(gate.creole.ontology.URI)
    */
   public boolean isObjectProperty(URI thePropertyURI) {
     return owlim.isObjectProperty(this.sesameRepositoryID, thePropertyURI
-            .toString());
+      .toString());
   }
 
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.Ontology#addSymmetricProperty(gate.creole.ontology.URI,
-   *      java.util.Set)
+   * @see
+   * gate.creole.ontology.Ontology#addSymmetricProperty(gate.creole.ontology
+   * .URI, java.util.Set)
    */
   public SymmetricProperty addSymmetricProperty(URI aPropertyURI,
-          Set<OClass> domainAndRange) {
+    Set<OClass> domainAndRange) {
     OResource res = getOResourceFromMap(aPropertyURI.toString());
     if(res != null) {
       if(res instanceof SymmetricProperty) {
@@ -809,7 +828,7 @@ public abstract class AbstractOWLIMOntologyImpl
       }
       else {
         Utils.error(aPropertyURI.toString()
-                + " already exists but it is not an SymmetricProperty");
+          + " already exists but it is not an SymmetricProperty");
         return null;
       }
     }
@@ -822,10 +841,10 @@ public abstract class AbstractOWLIMOntologyImpl
       counter++;
     }
     owlim.addSymmetricProperty(this.sesameRepositoryID,
-            aPropertyURI.toString(), domainURIs);
-    SymmetricProperty sp = (SymmetricProperty)Utils.createOProperty(
-            this.sesameRepositoryID, this, owlim, aPropertyURI.toString(),
-            OConstants.SYMMETRIC_PROPERTY);
+      aPropertyURI.toString(), domainURIs);
+    SymmetricProperty sp =
+      (SymmetricProperty)Utils.createOProperty(this.sesameRepositoryID, this,
+        owlim, aPropertyURI.toString(), OConstants.SYMMETRIC_PROPERTY);
     fireOntologyResourceAdded(sp);
 
     // we need to add a label on this but after the new resource
@@ -841,12 +860,12 @@ public abstract class AbstractOWLIMOntologyImpl
    * @see gate.creole.ontology.Ontology#getSymmetricProperties()
    */
   public Set<SymmetricProperty> getSymmetricProperties() {
-    Property[] properties = owlim
-            .getSymmetricProperties(this.sesameRepositoryID);
+    Property[] properties =
+      owlim.getSymmetricProperties(this.sesameRepositoryID);
     Set<SymmetricProperty> set = new HashSet<SymmetricProperty>();
     for(int i = 0; i < properties.length; i++) {
       set.add((SymmetricProperty)Utils.createOProperty(this.sesameRepositoryID,
-              this, owlim, properties[i].getUri(), properties[i].getType()));
+        this, owlim, properties[i].getUri(), properties[i].getType()));
     }
     return set;
   }
@@ -854,21 +873,23 @@ public abstract class AbstractOWLIMOntologyImpl
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.Ontology#isSymmetricProperty(gate.creole.ontology.URI)
+   * @see
+   * gate.creole.ontology.Ontology#isSymmetricProperty(gate.creole.ontology.URI)
    */
   public boolean isSymmetricProperty(URI thePropertyURI) {
     return owlim.isSymmetricProperty(this.sesameRepositoryID, thePropertyURI
-            .toString());
+      .toString());
   }
 
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.Ontology#addTransitiveProperty(gate.creole.ontology.URI,
-   *      java.util.Set, java.util.Set)
+   * @see
+   * gate.creole.ontology.Ontology#addTransitiveProperty(gate.creole.ontology
+   * .URI, java.util.Set, java.util.Set)
    */
   public TransitiveProperty addTransitiveProperty(URI aPropertyURI,
-          Set<OClass> domain, Set<OClass> range) {
+    Set<OClass> domain, Set<OClass> range) {
     OResource res = getOResourceFromMap(aPropertyURI.toString());
     if(res != null) {
       if(res instanceof TransitiveProperty) {
@@ -877,7 +898,7 @@ public abstract class AbstractOWLIMOntologyImpl
       }
       else {
         Utils.error(aPropertyURI.toString()
-                + " already exists but it is not a TransitiveProperty");
+          + " already exists but it is not a TransitiveProperty");
         return null;
       }
     }
@@ -897,10 +918,10 @@ public abstract class AbstractOWLIMOntologyImpl
       counter++;
     }
     owlim.addTransitiveProperty(this.sesameRepositoryID, aPropertyURI
-            .toString(), domainURIs, rangeURIs);
-    TransitiveProperty tp = (TransitiveProperty)Utils.createOProperty(
-            this.sesameRepositoryID, this, owlim, aPropertyURI.toString(),
-            OConstants.TRANSITIVE_PROPERTY);
+      .toString(), domainURIs, rangeURIs);
+    TransitiveProperty tp =
+      (TransitiveProperty)Utils.createOProperty(this.sesameRepositoryID, this,
+        owlim, aPropertyURI.toString(), OConstants.TRANSITIVE_PROPERTY);
     fireOntologyResourceAdded(tp);
 
     // we need to add a label on this but after the new resource
@@ -916,14 +937,14 @@ public abstract class AbstractOWLIMOntologyImpl
    * @see gate.creole.ontology.Ontology#getTransitiveProperties()
    */
   public Set<TransitiveProperty> getTransitiveProperties() {
-    Property[] properties = owlim
-            .getTransitiveProperties(this.sesameRepositoryID);
+    Property[] properties =
+      owlim.getTransitiveProperties(this.sesameRepositoryID);
     Set<TransitiveProperty> set = new HashSet<TransitiveProperty>();
     for(int i = 0; i < properties.length; i++) {
 
       set.add((TransitiveProperty)Utils.createOProperty(
-              this.sesameRepositoryID, this, owlim, properties[i].getUri(),
-              properties[i].getType()));
+        this.sesameRepositoryID, this, owlim, properties[i].getUri(),
+        properties[i].getType()));
     }
     return set;
   }
@@ -931,11 +952,13 @@ public abstract class AbstractOWLIMOntologyImpl
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.Ontology#isTransitiveProperty(gate.creole.ontology.URI)
+   * @see
+   * gate.creole.ontology.Ontology#isTransitiveProperty(gate.creole.ontology
+   * .URI)
    */
   public boolean isTransitiveProperty(URI thePropertyURI) {
     return owlim.isTransitiveProperty(this.sesameRepositoryID, thePropertyURI
-            .toString());
+      .toString());
   }
 
   /*
@@ -958,17 +981,20 @@ public abstract class AbstractOWLIMOntologyImpl
    * @see gate.creole.ontology.Ontology#getProperty(gate.creole.ontology.URI)
    */
   public RDFProperty getProperty(URI thePropertyURI) {
-    Property property = owlim.getPropertyFromOntology(this.sesameRepositoryID,
-            thePropertyURI.toString());
+    Property property =
+      owlim.getPropertyFromOntology(this.sesameRepositoryID, thePropertyURI
+        .toString());
     if(property == null) return null;
     return Utils.createOProperty(this.sesameRepositoryID, this, owlim,
-            thePropertyURI.toString(), property.getType());
+      thePropertyURI.toString(), property.getType());
   }
 
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.Ontology#removeProperty(gate.creole.ontology.RDFProperty)
+   * @see
+   * gate.creole.ontology.Ontology#removeProperty(gate.creole.ontology.RDFProperty
+   * )
    */
   public void removeProperty(RDFProperty theProperty) {
     OResource res = getOResourceFromMap(theProperty.getURI().toString());
@@ -977,231 +1003,234 @@ public abstract class AbstractOWLIMOntologyImpl
       return;
     }
 
-    String[] deletedResources = owlim.removePropertyFromOntology(
-            this.sesameRepositoryID, theProperty.getURI().toString(), true);
+    String[] deletedResources =
+      owlim.removePropertyFromOntology(this.sesameRepositoryID, theProperty
+        .getURI().toString(), true);
     fireOntologyResourcesRemoved(deletedResources);
   }
 
   /**
-   * Adds a new MinCardinality Restriction to the ontology. It
-   * automatically creates a randon anonymous class, which it uses to
-   * denote the restriction. The default datatype is set to
-   * NonNegativeIntegerNumber
+   * Adds a new MinCardinality Restriction to the ontology. It automatically
+   * creates a randon anonymous class, which it uses to denote the restriction.
+   * The default datatype is set to NonNegativeIntegerNumber
    * 
-   * @param onProperty - Specifies the property for which the
-   *          restriction is being set.
-   * @param minCardinalityValue - generally a numeric number.
+   * @param onProperty
+   *          - Specifies the property for which the restriction is being set.
+   * @param minCardinalityValue
+   *          - generally a numeric number.
    * @return
-   * @throws InvalidValueException - if a value is not compatible with
-   *           the nonNegativeIntegerNumber datatype.
+   * @throws InvalidValueException
+   *           - if a value is not compatible with the nonNegativeIntegerNumber
+   *           datatype.
    */
   public MinCardinalityRestriction addMinCardinalityRestriction(
-          RDFProperty onProperty, String minCardinalityValue)
-          throws InvalidValueException {
+    RDFProperty onProperty, String minCardinalityValue)
+    throws InvalidValueException {
     String restId = getAutoGeneratedRestrictionName();
-    DataType datatype = OntologyUtilities
-            .getDataType(XmlSchema.NON_NEGATIVE_INTEGER);
+    DataType datatype =
+      OntologyUtilities.getDataType(XmlSchema.NON_NEGATIVE_INTEGER);
 
     owlim.addClass(this.sesameRepositoryID, restId,
-            OConstants.MIN_CARDINALITY_RESTRICTION);
+      OConstants.MIN_CARDINALITY_RESTRICTION);
 
     owlim.setOnPropertyValue(this.sesameRepositoryID, restId, onProperty
-            .getURI().toString());
+      .getURI().toString());
 
     if(!datatype.isValidValue(minCardinalityValue))
       throw new InvalidValueException(minCardinalityValue
-              + " is not valid for datatype "
-              + datatype.getXmlSchemaURI().toString());
+        + " is not valid for datatype " + datatype.getXmlSchemaURI().toString());
 
     owlim.setPropertyValue(this.sesameRepositoryID, restId,
-            OConstants.MIN_CARDINALITY_RESTRICTION, minCardinalityValue,
-            datatype.getXmlSchemaURI().toString());
+      OConstants.MIN_CARDINALITY_RESTRICTION, minCardinalityValue, datatype
+        .getXmlSchemaURI().toString());
 
-    MinCardinalityRestriction mcr = (MinCardinalityRestriction)Utils
-            .createOClass(this.sesameRepositoryID, this, owlim, restId,
-                    OConstants.MIN_CARDINALITY_RESTRICTION);
+    MinCardinalityRestriction mcr =
+      (MinCardinalityRestriction)Utils.createOClass(this.sesameRepositoryID,
+        this, owlim, restId, OConstants.MIN_CARDINALITY_RESTRICTION);
 
     fireOntologyResourceAdded(mcr);
     return mcr;
   }
 
   /**
-   * Adds a new MaxCardinality Restriction to the ontology. It
-   * automatically creates a randon anonymous class, which it uses to
-   * denote the restriction. The default datatype is set to
-   * NonNegativeIntegerNumber
+   * Adds a new MaxCardinality Restriction to the ontology. It automatically
+   * creates a randon anonymous class, which it uses to denote the restriction.
+   * The default datatype is set to NonNegativeIntegerNumber
    * 
-   * @param onProperty - Specifies the property for which the
-   *          restriction is being set.
-   * @param maxCardinalityValue - generally a numeric number.
+   * @param onProperty
+   *          - Specifies the property for which the restriction is being set.
+   * @param maxCardinalityValue
+   *          - generally a numeric number.
    * @return
-   * @throws InvalidValueException - if a value is not compatible with
-   *           the nonNegativeIntegerNumber datatype.
+   * @throws InvalidValueException
+   *           - if a value is not compatible with the nonNegativeIntegerNumber
+   *           datatype.
    */
   public MaxCardinalityRestriction addMaxCardinalityRestriction(
-          RDFProperty onProperty, String maxCardinalityValue)
-          throws InvalidValueException {
+    RDFProperty onProperty, String maxCardinalityValue)
+    throws InvalidValueException {
     String restId = getAutoGeneratedRestrictionName();
-    DataType datatype = OntologyUtilities
-            .getDataType(XmlSchema.NON_NEGATIVE_INTEGER);
+    DataType datatype =
+      OntologyUtilities.getDataType(XmlSchema.NON_NEGATIVE_INTEGER);
 
     owlim.addClass(this.sesameRepositoryID, restId,
-            OConstants.MAX_CARDINALITY_RESTRICTION);
+      OConstants.MAX_CARDINALITY_RESTRICTION);
 
     owlim.setOnPropertyValue(this.sesameRepositoryID, restId, onProperty
-            .getURI().toString());
+      .getURI().toString());
 
     if(!datatype.isValidValue(maxCardinalityValue))
       throw new InvalidValueException(maxCardinalityValue
-              + " is not valid for datatype "
-              + datatype.getXmlSchemaURI().toString());
+        + " is not valid for datatype " + datatype.getXmlSchemaURI().toString());
 
     owlim.setPropertyValue(this.sesameRepositoryID, restId,
-            OConstants.MAX_CARDINALITY_RESTRICTION, maxCardinalityValue,
-            datatype.getXmlSchemaURI().toString());
+      OConstants.MAX_CARDINALITY_RESTRICTION, maxCardinalityValue, datatype
+        .getXmlSchemaURI().toString());
 
-    MaxCardinalityRestriction mcr = (MaxCardinalityRestriction)Utils
-            .createOClass(this.sesameRepositoryID, this, owlim, restId,
-                    OConstants.MAX_CARDINALITY_RESTRICTION);
+    MaxCardinalityRestriction mcr =
+      (MaxCardinalityRestriction)Utils.createOClass(this.sesameRepositoryID,
+        this, owlim, restId, OConstants.MAX_CARDINALITY_RESTRICTION);
     fireOntologyResourceAdded(mcr);
     return mcr;
   }
 
   /**
-   * Adds a new Cardinality Restriction to the ontology. It
-   * automatically creates a randon anonymous class, which it uses to
-   * denote the restriction. The default datatype is set to
-   * NonNegativeIntegerNumber
+   * Adds a new Cardinality Restriction to the ontology. It automatically
+   * creates a randon anonymous class, which it uses to denote the restriction.
+   * The default datatype is set to NonNegativeIntegerNumber
    * 
-   * @param onProperty - Specifies the property for which the
-   *          restriction is being set.
-   * @param cardinalityValue - generally a numeric number.
+   * @param onProperty
+   *          - Specifies the property for which the restriction is being set.
+   * @param cardinalityValue
+   *          - generally a numeric number.
    * @return
-   * @throws InvalidValueException - if a value is not compatible with
-   *           the nonNegativeIntegerNumber datatype.
+   * @throws InvalidValueException
+   *           - if a value is not compatible with the nonNegativeIntegerNumber
+   *           datatype.
    */
   public CardinalityRestriction addCardinalityRestriction(
-          RDFProperty onProperty, String cardinalityValue)
-          throws InvalidValueException {
+    RDFProperty onProperty, String cardinalityValue)
+    throws InvalidValueException {
     String restId = getAutoGeneratedRestrictionName();
-    DataType datatype = OntologyUtilities
-            .getDataType(XmlSchema.NON_NEGATIVE_INTEGER);
+    DataType datatype =
+      OntologyUtilities.getDataType(XmlSchema.NON_NEGATIVE_INTEGER);
 
     owlim.addClass(this.sesameRepositoryID, restId,
-            OConstants.CARDINALITY_RESTRICTION);
+      OConstants.CARDINALITY_RESTRICTION);
 
     owlim.setOnPropertyValue(this.sesameRepositoryID, restId, onProperty
-            .getURI().toString());
+      .getURI().toString());
 
     if(!datatype.isValidValue(cardinalityValue))
       throw new InvalidValueException(cardinalityValue
-              + " is not valid for datatype "
-              + datatype.getXmlSchemaURI().toString());
+        + " is not valid for datatype " + datatype.getXmlSchemaURI().toString());
 
     owlim.setPropertyValue(this.sesameRepositoryID, restId,
-            OConstants.CARDINALITY_RESTRICTION, cardinalityValue, datatype
-                    .getXmlSchemaURI().toString());
+      OConstants.CARDINALITY_RESTRICTION, cardinalityValue, datatype
+        .getXmlSchemaURI().toString());
 
-    CardinalityRestriction cr = (CardinalityRestriction)Utils.createOClass(
-            this.sesameRepositoryID, this, owlim, restId,
-            OConstants.CARDINALITY_RESTRICTION);
+    CardinalityRestriction cr =
+      (CardinalityRestriction)Utils.createOClass(this.sesameRepositoryID, this,
+        owlim, restId, OConstants.CARDINALITY_RESTRICTION);
 
     fireOntologyResourceAdded(cr);
     return cr;
   }
 
   /**
-   * Adds a new HasValue Restriction to the ontology. It automatically
-   * creates a randon anonymous class, which it uses to denote the
-   * restriction.
+   * Adds a new HasValue Restriction to the ontology. It automatically creates a
+   * randon anonymous class, which it uses to denote the restriction.
    * 
-   * @param onProperty - Specifies the property for which the
-   *          restriction is being set.
-   * @param hasValue - a resource used as a value for hasValue element
-   *          of the restriction.
+   * @param onProperty
+   *          - Specifies the property for which the restriction is being set.
+   * @param hasValue
+   *          - a resource or a literal used as a value for hasValue element of
+   *          the restriction.
    * @return
    */
   public HasValueRestriction addHasValueRestriction(RDFProperty onProperty,
-          OResource hasValue) {
+    OResource hasValue) {
 
     String restId = getAutoGeneratedRestrictionName();
 
     owlim.addClass(this.sesameRepositoryID, restId,
-            OConstants.HAS_VALUE_RESTRICTION);
+      OConstants.HAS_VALUE_RESTRICTION);
 
     owlim.setOnPropertyValue(this.sesameRepositoryID, restId, onProperty
-            .getURI().toString());
+      .getURI().toString());
 
+    String valueString =
+      hasValue instanceof Literal
+        ? ((Literal)hasValue).getValue()
+        : ((OResource)hasValue).getURI().toString();
     owlim.setRestrictionValue(this.sesameRepositoryID, restId,
-            OConstants.HAS_VALUE_RESTRICTION, hasValue.getURI().toString());
+      OConstants.HAS_VALUE_RESTRICTION, valueString);
 
-    HasValueRestriction hvr = (HasValueRestriction)Utils.createOClass(
-            this.sesameRepositoryID, this, owlim, restId,
-            OConstants.HAS_VALUE_RESTRICTION);
+    HasValueRestriction hvr =
+      (HasValueRestriction)Utils.createOClass(this.sesameRepositoryID, this,
+        owlim, restId, OConstants.HAS_VALUE_RESTRICTION);
     fireOntologyResourceAdded(hvr);
     return hvr;
   }
 
   /**
-   * Adds a new AllValuesFrom Restriction to the ontology. It
-   * automatically creates a randon anonymous class, which it uses to
-   * denote the restriction.
+   * Adds a new AllValuesFrom Restriction to the ontology. It automatically
+   * creates a randon anonymous class, which it uses to denote the restriction.
    * 
-   * @param onProperty - Specifies the property for which the
-   *          restriction is being set.
-   * @param hasValue - a resource used as a value for hasValue element
-   *          of the restriction.
+   * @param onProperty
+   *          - Specifies the property for which the restriction is being set.
+   * @param hasValue
+   *          - a resource used as a value for hasValue element of the
+   *          restriction.
    * @return
    */
   public AllValuesFromRestriction addAllValuesFromRestriction(
-          RDFProperty onProperty, OResource hasValue) {
+    RDFProperty onProperty, OResource hasValue) {
     String restId = getAutoGeneratedRestrictionName();
 
     owlim.addClass(this.sesameRepositoryID, restId,
-            OConstants.ALL_VALUES_FROM_RESTRICTION);
+      OConstants.ALL_VALUES_FROM_RESTRICTION);
 
     owlim.setOnPropertyValue(this.sesameRepositoryID, restId, onProperty
-            .getURI().toString());
+      .getURI().toString());
 
     owlim.setRestrictionValue(this.sesameRepositoryID, restId,
-            OConstants.ALL_VALUES_FROM_RESTRICTION, hasValue.getURI()
-                    .toString());
+      OConstants.ALL_VALUES_FROM_RESTRICTION, hasValue.getURI().toString());
 
-    AllValuesFromRestriction avfr = (AllValuesFromRestriction)Utils
-            .createOClass(this.sesameRepositoryID, this, owlim, restId,
-                    OConstants.ALL_VALUES_FROM_RESTRICTION);
+    AllValuesFromRestriction avfr =
+      (AllValuesFromRestriction)Utils.createOClass(this.sesameRepositoryID,
+        this, owlim, restId, OConstants.ALL_VALUES_FROM_RESTRICTION);
     fireOntologyResourceAdded(avfr);
     return avfr;
   }
 
   /**
-   * Adds a new AllValuesFrom Restriction to the ontology. It
-   * automatically creates a randon anonymous class, which it uses to
-   * denote the restriction.
+   * Adds a new AllValuesFrom Restriction to the ontology. It automatically
+   * creates a randon anonymous class, which it uses to denote the restriction.
    * 
-   * @param onProperty - Specifies the property for which the
-   *          restriction is being set.
-   * @param hasValue - a resource used as a value for hasValue element
-   *          of the restriction.
+   * @param onProperty
+   *          - Specifies the property for which the restriction is being set.
+   * @param hasValue
+   *          - a resource used as a value for hasValue element of the
+   *          restriction.
    * @return
    */
   public SomeValuesFromRestriction addSomeValuesFromRestriction(
-          RDFProperty onProperty, OResource hasValue) {
+    RDFProperty onProperty, OResource hasValue) {
     String restId = getAutoGeneratedRestrictionName();
 
     owlim.addClass(this.sesameRepositoryID, restId,
-            OConstants.SOME_VALUES_FROM_RESTRICTION);
+      OConstants.SOME_VALUES_FROM_RESTRICTION);
 
     owlim.setOnPropertyValue(this.sesameRepositoryID, restId, onProperty
-            .getURI().toString());
+      .getURI().toString());
 
     owlim.setRestrictionValue(this.sesameRepositoryID, restId,
-            OConstants.SOME_VALUES_FROM_RESTRICTION, hasValue.getURI()
-                    .toString());
+      OConstants.SOME_VALUES_FROM_RESTRICTION, hasValue.getURI().toString());
 
-    SomeValuesFromRestriction svfr = (SomeValuesFromRestriction)Utils
-            .createOClass(this.sesameRepositoryID, this, owlim, restId,
-                    OConstants.SOME_VALUES_FROM_RESTRICTION);
+    SomeValuesFromRestriction svfr =
+      (SomeValuesFromRestriction)Utils.createOClass(this.sesameRepositoryID,
+        this, owlim, restId, OConstants.SOME_VALUES_FROM_RESTRICTION);
     fireOntologyResourceAdded(svfr);
     return svfr;
   }
@@ -1227,11 +1256,14 @@ public abstract class AbstractOWLIMOntologyImpl
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.Ontology#addOntologyModificationListener(gate.creole.ontology.OntologyModificationListener)
+   * @see
+   * gate.creole.ontology.Ontology#addOntologyModificationListener(gate.creole
+   * .ontology.OntologyModificationListener)
    */
   public synchronized void addOntologyModificationListener(
-          OntologyModificationListener oml) {
-    List<OntologyModificationListener> newListeners = new ArrayList<OntologyModificationListener>();
+    OntologyModificationListener oml) {
+    List<OntologyModificationListener> newListeners =
+      new ArrayList<OntologyModificationListener>();
     if(this.modificationListeners != null) {
       newListeners.addAll(this.modificationListeners);
     }
@@ -1242,16 +1274,19 @@ public abstract class AbstractOWLIMOntologyImpl
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.Ontology#removeOntologyModificationListener(gate.creole.ontology.OntologyModificationListener)
+   * @see
+   * gate.creole.ontology.Ontology#removeOntologyModificationListener(gate.creole
+   * .ontology.OntologyModificationListener)
    */
   public synchronized void removeOntologyModificationListener(
-          OntologyModificationListener oml) {
+    OntologyModificationListener oml) {
     if(this.modificationListeners == null
-            || !this.modificationListeners.contains(oml)) {
+      || !this.modificationListeners.contains(oml)) {
       return;
     }
     else {
-      List<OntologyModificationListener> newListeners = new ArrayList<OntologyModificationListener>();
+      List<OntologyModificationListener> newListeners =
+        new ArrayList<OntologyModificationListener>();
       for(OntologyModificationListener l : this.modificationListeners) {
         if(l != oml) {
           newListeners.add(l);
@@ -1267,11 +1302,13 @@ public abstract class AbstractOWLIMOntologyImpl
    * @param resource
    * @param eventType
    */
-  public void fireResourcePropertyValueChanged(OResource resource, RDFProperty property, Object value, int eventType) {
+  public void fireResourcePropertyValueChanged(OResource resource,
+    RDFProperty property, Object value, int eventType) {
     List<OntologyModificationListener> listeners = this.modificationListeners;
     if(listeners != null) {
       for(OntologyModificationListener l : listeners) {
-        l.resourcePropertyValueChanged(this, resource, property, value, eventType);
+        l.resourcePropertyValueChanged(this, resource, property, value,
+          eventType);
       }
     }
   }
@@ -1282,7 +1319,8 @@ public abstract class AbstractOWLIMOntologyImpl
    * @param resource
    * @param eventType
    */
-  public void fireResourceRelationChanged(OResource resource1, OResource resource2,int eventType) {
+  public void fireResourceRelationChanged(OResource resource1,
+    OResource resource2, int eventType) {
     List<OntologyModificationListener> listeners = this.modificationListeners;
     if(listeners != null) {
       for(OntologyModificationListener l : listeners) {
@@ -1290,7 +1328,7 @@ public abstract class AbstractOWLIMOntologyImpl
       }
     }
   }
-  
+
   public void fireOntologyReset() {
     List<OntologyModificationListener> listeners = this.modificationListeners;
     if(listeners != null) {
@@ -1383,7 +1421,7 @@ public abstract class AbstractOWLIMOntologyImpl
    * (non-Javadoc)
    * 
    * @see gate.creole.ontology.Ontology#addOResourceToMap(java.lang.String,
-   *      gate.creole.ontology.OResource)
+   * gate.creole.ontology.OResource)
    */
   public void addOResourceToMap(String uri, OResource resource) {
     urisToOResouceMap.put(uri, resource);
@@ -1419,7 +1457,7 @@ public abstract class AbstractOWLIMOntologyImpl
       callFromCleanup = true;
       cleanOntology();
       owlim.removeRepository(this.sesameRepositoryID, getPersistRepository()
-              .booleanValue());
+        .booleanValue());
     }
     urisToOResouceMap.clear();
   }
@@ -1461,11 +1499,10 @@ public abstract class AbstractOWLIMOntologyImpl
   }
 
   /**
-   * This method checks in its cache find out the URI for the given
-   * resource name. However, doesn't guranttee that it will be able to
-   * return the URI. It is also possible for two resources to have a
-   * same name but different name spaces. This method returns a List
-   * containing all such URIs.
+   * This method checks in its cache find out the URI for the given resource
+   * name. However, doesn't guranttee that it will be able to return the URI. It
+   * is also possible for two resources to have a same name but different name
+   * spaces. This method returns a List containing all such URIs.
    * 
    * @param resourceName
    * @return
@@ -1475,8 +1512,8 @@ public abstract class AbstractOWLIMOntologyImpl
     if(resources != null) {
       if(resources.size() > 1)
         System.err
-                .print("Warning : there are more than one resources matching with the name "
-                        + resourceName);
+          .print("Warning : there are more than one resources matching with the name "
+            + resourceName);
 
       return resources.get(0);
     }
@@ -1484,13 +1521,13 @@ public abstract class AbstractOWLIMOntologyImpl
   }
 
   /**
-   * This method checks in its cache to find out the OResources for the
-   * given resource name. It is possible for two resources to have a
-   * same name but different name spaces. This method returns a list of
-   * resources with the common name. Please note that deleting an
-   * instance from this list (e.g. list.remove(int/Object)) does not
-   * delete the resource from an ontology. One must use appropriate
-   * method from the Ontology interface to delete such resources.
+   * This method checks in its cache to find out the OResources for the given
+   * resource name. It is possible for two resources to have a same name but
+   * different name spaces. This method returns a list of resources with the
+   * common name. Please note that deleting an instance from this list (e.g.
+   * list.remove(int/Object)) does not delete the resource from an ontology. One
+   * must use appropriate method from the Ontology interface to delete such
+   * resources.
    * 
    * @param resourceName
    * @return
@@ -1504,11 +1541,10 @@ public abstract class AbstractOWLIMOntologyImpl
   }
 
   /**
-   * This method returns a list of OResources from the ontology. Please
-   * note that deleting an instance from this list (e.g.
-   * list.remove(int/Object)) does not delete the resource from an
-   * ontology. One must use appropriate method from the Ontology
-   * interface to delete such resources.
+   * This method returns a list of OResources from the ontology. Please note
+   * that deleting an instance from this list (e.g. list.remove(int/Object))
+   * does not delete the resource from an ontology. One must use appropriate
+   * method from the Ontology interface to delete such resources.
    * 
    * @return
    */
@@ -1528,8 +1564,9 @@ public abstract class AbstractOWLIMOntologyImpl
    * Tries to save the ontology at the provided File
    */
   public void store(File newOntology) throws IOException {
-    String output = owlim.getOntologyData(sesameRepositoryID,
-            OConstants.ONTOLOGY_FORMAT_NTRIPLES);
+    String output =
+      owlim.getOntologyData(sesameRepositoryID,
+        OConstants.ONTOLOGY_FORMAT_NTRIPLES);
     BufferedWriter writer = new BufferedWriter(new FileWriter(newOntology));
     writer.write(output);
     writer.flush();
@@ -1537,9 +1574,8 @@ public abstract class AbstractOWLIMOntologyImpl
   }
 
   /**
-   * This method given a property (either an annotation or datatype),
-   * retrieves a list of resources which have the provided literal set
-   * as a value.
+   * This method given a property (either an annotation or datatype), retrieves
+   * a list of resources which have the provided literal set as a value.
    * 
    * @param aProperty
    * @param aValue
@@ -1566,17 +1602,15 @@ public abstract class AbstractOWLIMOntologyImpl
     // and on each resource we need to check if it has the above
     // property set on it
     for(OResource aResource : resources) {
-      switch(propType) {
+      switch(propType){
         case 1:
           if(aResource.hasAnnotationPropertyWithValue(
-                  (AnnotationProperty)aProperty, aValue))
-            toReturn.add(aResource);
+            (AnnotationProperty)aProperty, aValue)) toReturn.add(aResource);
           break;
         case 2:
           if(aResource instanceof OInstance
-                  && ((OInstance)aResource).hasDatatypePropertyWithValue(
-                          (DatatypeProperty)aProperty, aValue))
-            toReturn.add(aResource);
+            && ((OInstance)aResource).hasDatatypePropertyWithValue(
+              (DatatypeProperty)aProperty, aValue)) toReturn.add(aResource);
           break;
       }
     }
@@ -1584,16 +1618,16 @@ public abstract class AbstractOWLIMOntologyImpl
   }
 
   /**
-   * This method given a property (either object, transitive, symmetric
-   * or rdf), retrieves a list of resources which have the provided
-   * resource set as a value.
+   * This method given a property (either object, transitive, symmetric or rdf),
+   * retrieves a list of resources which have the provided resource set as a
+   * value.
    * 
    * @param aProperty
    * @param aValue
    * @return
    */
   public List<OResource> getOResourcesWith(RDFProperty aProperty,
-          OResource aValue) {
+    OResource aValue) {
     List<OResource> toReturn = new ArrayList<OResource>();
 
     int propType = 1;
@@ -1614,27 +1648,29 @@ public abstract class AbstractOWLIMOntologyImpl
     // and on each resource we need to check if it has the above
     // property set on it
     for(OResource aResource : resources) {
-      switch(propType) {
+      switch(propType){
         case 1:
           if(aResource instanceof OInstance
-                  && aValue instanceof OInstance
-                  && ((OInstance)aResource).hasObjectPropertyWithValue(
-                          (ObjectProperty)aProperty, (OInstance)aValue))
+            && aValue instanceof OInstance
+            && ((OInstance)aResource).hasObjectPropertyWithValue(
+              (ObjectProperty)aProperty, (OInstance)aValue))
             toReturn.add(aResource);
           break;
         case 2:
           if(aResource instanceof OInstance
-                  && ((OInstance)aResource).hasRDFPropertyWithValue(aProperty,
-                          aValue)) toReturn.add(aResource);
+            && ((OInstance)aResource)
+              .hasRDFPropertyWithValue(aProperty, aValue))
+            toReturn.add(aResource);
           break;
       }
     }
     return toReturn;
   }
-  
+
   /**
    * The method executes the query on repository and returns the toString()
    * result of the QueryResultTable.
+   * 
    * @param serqlQuery
    * @return
    */

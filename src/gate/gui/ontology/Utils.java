@@ -12,6 +12,7 @@ import gate.creole.ontology.AnnotationProperty;
 import gate.creole.ontology.CardinalityRestriction;
 import gate.creole.ontology.DatatypeProperty;
 import gate.creole.ontology.HasValueRestriction;
+import gate.creole.ontology.Literal;
 import gate.creole.ontology.MaxCardinalityRestriction;
 import gate.creole.ontology.MinCardinalityRestriction;
 import gate.creole.ontology.OResource;
@@ -101,13 +102,19 @@ public class Utils {
         datatypeString = ((MaxCardinalityRestriction)res).getDataType()
                 .getXmlSchemaURI().toString();
         toAdd.add(new KeyValuePair(res, "DATATYPE", datatypeString, false));
-        toAdd.add(new KeyValuePair(res, "VALUE", valueString, true));
+        toAdd.add(new KeyValuePair(res, "VALUE", valueString, false));
       }
       else if(res instanceof HasValueRestriction) {
-        valueString = ((HasValueRestriction)res).getHasValue().getURI()
-                .toString();
-        toAdd.add(new KeyValuePair(((HasValueRestriction)res).getHasValue(),
-                "VALUE", valueString, false));
+        Object value = ((HasValueRestriction)res).getHasValue(); 
+        if(value instanceof Literal) {
+          valueString = ((Literal)value).getValue();
+          datatypeString = ((DatatypeProperty)((HasValueRestriction)res).getOnPropertyValue()).getDataType().getXmlSchemaURI().toString();
+          toAdd.add(new KeyValuePair(res, "DATATYPE", datatypeString, false));
+          toAdd.add(new KeyValuePair(res, "VALUE", valueString, true));
+        } else {
+          valueString = ((OResource)value).getURI().toString();
+          toAdd.add(new KeyValuePair((OResource)value, "VALUE", valueString, false));
+        }
       }
       else if(res instanceof AllValuesFromRestriction) {
         valueString = ((AllValuesFromRestriction)res).getHasValue().getURI()
