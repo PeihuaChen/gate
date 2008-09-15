@@ -177,8 +177,8 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   }
 
   /**
-   * Should the sesame service be shut down on a logout? <code>true</code> for
-   * a standalone service, <code>false</code> for a shared service.
+   * Should the sesame service be shut down on a logout? <code>true</code> for a
+   * standalone service, <code>false</code> for a shared service.
    */
   private boolean shutDownOnLogout = true;
 
@@ -339,7 +339,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
     }
 
     hasSystemNameSpace.put("http://www.w3.org/2002/07/owl#Thing", new Boolean(
-      false));
+      true));
 
     try {
       if(owlRDFS == null) {
@@ -2106,9 +2106,9 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
    * want to keep alive all our resources // until the logout method is called }
    */
 
-  // ****************************************************************************
+  //****************************************************************************
   // user management methods
-  // ****************************************************************************
+  //****************************************************************************
   /**
    * Call to this method is necessary in order to login in to the Sesame server.
    * Unless user is registered with Sesame server, he/she cannot have write or
@@ -2148,9 +2148,9 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
     // System.gc();
   }
 
-  // ****************************************************************************
+  //****************************************************************************
   // repository methods
-  // ****************************************************************************
+  //****************************************************************************
   /**
    * Find out the list of repository list
    */
@@ -2274,7 +2274,6 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
     if(persist) saveConfiguration();
     if(debug) System.out.println("Repository created!");
 
-    // and here we check if there's any statement referring to owl:Thing
     loadRepositoryDetails(repositoryID);
     return repositoryID;
   }
@@ -2332,7 +2331,6 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
     if(debug) System.out.println("Repository created!");
     this.ontologyUrl = ontoFileUrl;
 
-    // and here we check if there's any statement referring to owl:Thing
     loadRepositoryDetails(repositoryID);
     return repositoryID;
   }
@@ -2491,9 +2489,10 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
    * 
    * @param repositoryID
    * @param classURI
-   * @param removeSubTree -
-   *          if set to true, removes all its subclasses and instances as well,
-   *          otherwise shifts all subclasses and instances to its parent node
+   * @param removeSubTree
+   *          - if set to true, removes all its subclasses and instances as
+   *          well, otherwise shifts all subclasses and instances to its parent
+   *          node
    * @return a list of other resources, which got removed as a result of this
    *         deletion
    */
@@ -2640,9 +2639,32 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
     String query = "";
     if(top) {
       query =
-        "(Select DISTINCT A from {A} rdf:type {<http://www.w3.org/2002/07/owl#Class>} MINUS Select P FROM {P} rdfs:subClassOf {Q} WHERE P!=Q AND P!=ALL(SELECT D FROM {D} owl:equivalentClass {Q}))"
-          + " UNION "
-          + "SELECT DISTINCT B from {B} rdf:type {<http://www.w3.org/2002/07/owl#Restriction> }";
+        "((Select DISTINCT A FROM "
+          + "{A} rdf:type {<http://www.w3.org/2002/07/owl#Class>} UNION SELECT DISTINCT B from {B} rdf:type {<http://www.w3.org/2002/07/owl#Restriction> })"
+          + " MINUS "
+          + "Select P FROM {P} rdfs:subClassOf {Q} "
+          + "WHERE "
+          + "P!=Q AND "
+          + "P!=ALL(SELECT D FROM {D} owl:equivalentClass {Q})"
+          + "AND "
+          + "Q!=ALL(SELECT M FROM {J} owl:unionOf {M})"
+          + "AND "
+          + "Q!=ALL(SELECT N FROM {N} owl:unionOf {K}))";
+      // every class is a subclass of itself in owlim
+      // query =
+      // "(Select DISTINCT Q FROM {P} rdfs:subClassOf {Q} "
+      // + "WHERE P!=Q AND "
+      // + "P!=ALL(SELECT D FROM {D} owl:equivalentClass {Q}) "
+      // + "AND"
+      // +
+      // " Q!=ALL(SELECT M FROM {M} rdf:type {<http://www.w3.org/2002/07/owl#Restriction>}) "
+      // + "INTERSECT"
+      // +
+      // " (SELECT A FROM {A} rdf:type {<http://www.w3.org/2002/07/owl#Class>}))"
+      // +
+      // " UNION " +
+      // "SELECT DISTINCT B from {B} rdf:type {<http://www.w3.org/2002/07/owl#Restriction>}"
+      // ;
     }
     else {
       query =
@@ -2685,9 +2707,9 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
       OConstants.DIRECT_CLOSURE).length == 0;
   }
 
-  // ****************************************************************************
+  //****************************************************************************
   // relations among classes
-  // ****************************************************************************
+  //****************************************************************************
   /**
    * The method creates a new class with the URI as specified in className and
    * adds it as a subClassOf the parentClass. It also adds the provided comment
@@ -2965,8 +2987,8 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
    * 
    * @param repositoryID
    * @param aPropertyURI
-   * @param removeSubTree -
-   *          if set to true, removes all its subproperties, otherwise shifts
+   * @param removeSubTree
+   *          - if set to true, removes all its subproperties, otherwise shifts
    *          subproperties to its parent property
    * @return a list of URIs of resources deleted as a result of deleting this
    *         property.
@@ -4022,8 +4044,8 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
    * 
    * @param repositoryID
    * @param restrictionURI
-   * @param restrictionType -
-   *          either of the following constants from the OConstants -
+   * @param restrictionType
+   *          - either of the following constants from the OConstants -
    *          ALL_VALUES_FROM_RESTRICTION, SOME_VALUES_FROM_RESTRICTION, and
    *          HAS_VALUE_RESTRICTION
    * @return
@@ -4089,8 +4111,8 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
    * 
    * @param repositoryID
    * @param restrictionURI
-   * @param restrictionType -
-   *          either of the following constants from the OConstants -
+   * @param restrictionType
+   *          - either of the following constants from the OConstants -
    *          ALL_VALUES_FROM_RESTRICTION, SOME_VALUES_FROM_RESTRICTION, and
    *          HAS_VALUE_RESTRICTION
    * @param value
@@ -4634,14 +4656,17 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   }
 
   /*
-   * private SystemConfig readConfiguration() throws IOException { if(systemConf ==
-   * null) { String s = "<?xml version='1.0'?>" + "<system-conf>" + "<admin
-   * password=''/>" + "<log dir='plugins/Ontology_Tools/logs' level='3'/>" + "<tmp
-   * dir='plugins/Ontology_Tools/tmp'/>" + "<rmi-factory enabled='false'
-   * class='com.ontotext.util.rmi.CustomRMIFactory' port='1099'/>" + "<userlist>" + "<user
-   * id='1' login='admin'><fullname>Admin</fullname><password>admin</password></user>" + "<user
-   * id='3' login='guest'><fullname>Guest</fullname><password>guest</password></user>" + "</userlist>" + "<repositorylist></repositorylist></system-conf>";
-   * Reader reader = new StringReader(s); SystemConfig config =
+   * private SystemConfig readConfiguration() throws IOException { if(systemConf
+   * == null) { String s = "<?xml version='1.0'?>" + "<system-conf>" + "<admin
+   * password=''/>" + "<log dir='plugins/Ontology_Tools/logs' level='3'/>" +
+   * "<tmp dir='plugins/Ontology_Tools/tmp'/>" + "<rmi-factory enabled='false'
+   * class='com.ontotext.util.rmi.CustomRMIFactory' port='1099'/>" +
+   * "<userlist>" + "<user id='1'
+   * login='admin'><fullname>Admin</fullname><password>admin</password></user>"
+   * + "<user id='3'
+   * login='guest'><fullname>Guest</fullname><password>guest</password></user>"
+   * + "</userlist>" + "<repositorylist></repositorylist></system-conf>"; Reader
+   * reader = new StringReader(s); SystemConfig config =
    * SystemConfigFileHandler.readConfiguration(reader); reader.close(); return
    * config; } else { Reader reader = new BufferedReader(new
    * InputStreamReader(systemConf .openStream())); SystemConfig config =

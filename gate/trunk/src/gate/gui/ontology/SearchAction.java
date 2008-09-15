@@ -201,7 +201,11 @@ public class SearchAction extends AbstractAction {
             JOptionPane.QUESTION_MESSAGE, MainFrame.getIcon("search"),
             new String[] {"Find", "Cancel"}, "Find");
     if(returnValue == JOptionPane.OK_OPTION) {
-      OResource selectedR = (OResource)resourcesBox.getSelectedItem();
+      Object selectedItem = resourcesBox.getSelectedItem();
+      if(!(selectedItem instanceof OResource))
+        return;
+      
+      OResource selectedR = (OResource) selectedItem;
       if(selectedR instanceof RDFProperty) {
         ontologyEditor.propertyTree.setSelectionPath(new TreePath(
                 ontologyEditor.uri2TreeNodesListMap.get(
