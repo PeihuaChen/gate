@@ -34,12 +34,12 @@ import java.io.*;
 import java.util.*;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 
 import gate.*;
 import gate.corpora.DocumentImpl;
 import gate.event.*;
-import gate.util.InvalidOffsetException;
-import gate.util.RBTreeMap;
+import gate.util.*;
 
 /**
  * Implementation of AnnotationSet. Has a number of indices, all bar one of
@@ -61,6 +61,7 @@ import gate.util.RBTreeMap;
  */
 public class AnnotationSetImpl extends AbstractSet<Annotation> implements
                                                               AnnotationSet {
+  private static final Logger log = Logger.getLogger(AnnotationSetImpl.class);
   /** Freeze the serialization UID. */
   static final long serialVersionUID = 1479426765310434166L;
   /** The name of this set */
@@ -85,6 +86,22 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   transient Map<Integer, Object> annotsByStartNode;
   protected transient Vector<AnnotationSetListener> annotationSetListeners;
   private transient Vector<GateListener> gateListeners;
+
+  /**
+   * A caching value that greatly improves the performance of get
+   * methods that have a defined beginning and end. By tracking the
+   * maximum length that an annotation can be, we know the maximum
+   * amount of nodes outside of a specified range that must be checked
+   * to see if an annotation starting at one of those nodes crosses into
+   * the range. This mechanism is not perfect because we do not check if
+   * we have to decrease it if an annotation is removed from the set.
+   * However, usually annotations are removed because they are about to
+   * be replaced with another one that is >= to the length of the one
+   * being replaced, so this isn't a big deal. At worst, it means that
+   * the get methods simply checks a few more start positions than it
+   * needs to.
+   */
+  protected transient Long longestAnnot = 0l;
 
   // Empty AnnotationSet to be returned instead of null
    public static AnnotationSet emptyAnnotationSet;
@@ -457,7 +474,10 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     // find all the annots that start strictly before the start offset
     // and end
     // strictly after it
-    nodesIter = nodesByOffset.headMap(startOffset).values().iterator();
+    Long searchStart = (startOffset - longestAnnot);
+    if (searchStart < 0) searchStart = 0l;
+    //nodesIter = nodesByOffset.headMap(startOffset).values().iterator();
+    nodesIter = nodesByOffset.subMap(searchStart, startOffset).values().iterator();
     while(nodesIter.hasNext()) {
       currentNode = nodesIter.next();
       Collection<Annotation> objFromPoint = getAnnotsByStartNode(currentNode
@@ -475,7 +495,6 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
       } // while
     }
     // find all the annots that start at or after the start offset but
-    // strictly
     // before the end offset
     nodesIter = nodesByOffset.subMap(startOffset, endOffset).values()
             .iterator();
@@ -525,7 +544,13 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     boolean checkType = StringUtils.isNotBlank(neededType);
     // find all the annots with startNode <= startOffset.  Need the + 1 because
     // headMap returns strictly less than.
-    nodesIter = nodesByOffset.headMap(startOffset + 1).values().iterator();
+    // the length of the longest annot from the endOffset since we know that nothing
+    // that starts earlier will be long enough to cover the entire span.
+    Long searchStart = ((endOffset - 1) - longestAnnot);
+    if (searchStart < 0) searchStart = 0l;
+    //nodesIter = nodesByOffset.headMap(startOffset + 1).values().iterator();
+    nodesIter = nodesByOffset.subMap(searchStart, startOffset + 1).values().iterator();
+
     while(nodesIter.hasNext()) {
       currentNode = nodesIter.next();
       Collection<Annotation> objFromPoint = getAnnotsByStartNode(currentNode
@@ -640,6 +665,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     Integer id = doc.getNextAnnotationId();
     // construct an annotation
     annFactory.createAnnotationInSet(this, id, start, end, type, features);
+
     return id;
   } // add(Node, Node, String, FeatureMap)
 
@@ -808,6 +834,12 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
       nodesByOffset.put(start, startNode);
       nodesByOffset.put(end, endNode);
     }
+
+    //add marking for longest annot
+    long annotLength = end - start;
+    if (annotLength > longestAnnot)
+        longestAnnot = annotLength;
+
     // if there's no appropriate index give up
     if(annotsByStartNode == null) return;
     // get the annotations that start at the same node, or create new
@@ -1117,6 +1149,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
 
   private void readObject(java.io.ObjectInputStream in) throws IOException,
           ClassNotFoundException {
+    this.longestAnnot = 0l;
     ObjectInputStream.GetField gf = in.readFields();
     this.name = (String)gf.get("name", null);
     this.doc = (DocumentImpl)gf.get("doc", null);
