@@ -36,17 +36,22 @@ public class BaseJapeTests extends TestCase {
     super(name);
   }
 
-  /** Fixture set up */
-  public void setUp() {
-    // Out.println("TestConstraints.setUp()");
-  } // setUp
-
   protected Set<Annotation> doTest(String dataFile, String japeFile, AnnotationCreator ac)
           throws ResourceInstantiationException, JapeException,
           ExecutionException {
     Corpus c = createCorpus(dataFile);
     // add some annotations
     Document doc = (Document)c.get(0);
+    ac.createAnnots(doc);
+
+    Set<Annotation> orderedResults = runTransducer(c, japeFile);
+    return orderedResults;
+  }
+
+  protected Set<Annotation> doTest(Document doc, String japeFile,
+          AnnotationCreator ac) throws ResourceInstantiationException,
+          JapeException, ExecutionException {
+    Corpus c = createCorpus(doc);
     ac.createAnnots(doc);
 
     Set<Annotation> orderedResults = runTransducer(c, japeFile);
@@ -70,20 +75,44 @@ public class BaseJapeTests extends TestCase {
 
   protected Corpus createCorpus(String fileName)
           throws ResourceInstantiationException {
-    Corpus c = Factory.newCorpus("TestJape corpus");
-
     try {
-      c.add(Factory.newDocument(Files.getGateResourceAsString(fileName)));
+      Document doc = Factory.newDocument(Files.getGateResourceAsString(fileName));
+      return createCorpus(doc);
     }
     catch(Exception e) {
       e.printStackTrace(Err.getPrintWriter());
+      assertTrue("Error creating corpus", false);
     }
+    return null;
+  }
 
-    if(c.isEmpty()) {
-      assertTrue("Missing corpus !", false);
-    }
+  protected Corpus createCorpus(Document doc)
+          throws ResourceInstantiationException {
+    Corpus c = Factory.newCorpus("TestJape corpus");
+    c.add(doc);
     return c;
   }
+
+
+  /**
+   * Creates a document with the given text
+   * @param text
+   * @return
+   */
+  protected Document createDoc(String text) {
+    FeatureMap params = Factory.newFeatureMap();
+    params.put("stringContent", text);
+    params.put("markupAware", "true");
+    params.put("mimeType", "text/plain");
+    Document d = null;
+    try {
+        d = (Document) Factory.createResource("gate.corpora.DocumentImpl", params);
+    }
+    catch (ResourceInstantiationException e) {
+        throw new RuntimeException(e);
+    }
+    return d;
+}
 
   protected Set<Annotation> runTransducer(Corpus c, String japeFile)
           throws JapeException, ExecutionException {

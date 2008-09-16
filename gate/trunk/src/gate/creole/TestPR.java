@@ -26,6 +26,8 @@ import gate.creole.gazetteer.DefaultGazetteer;
 import gate.creole.orthomatcher.OrthoMatcher;
 import gate.creole.splitter.SentenceSplitter;
 import gate.creole.tokeniser.DefaultTokeniser;
+import gate.jape.JapeException;
+import gate.jape.constraint.*;
 import gate.util.AnnotationDiffer;
 
 /** Test the PRs on three documents */
@@ -38,7 +40,7 @@ public class TestPR extends TestCase
   protected static Document doc2;
   protected static Document doc3;
 
-  protected static List annotationTypes = new ArrayList(10);
+  protected static List<String> annotationTypes = new ArrayList<String>(10);
 
   static{
     annotationTypes.add(ANNIEConstants.SENTENCE_ANNOTATION_TYPE);
@@ -180,7 +182,7 @@ public class TestPR extends TestCase
       doc2.getAnnotations().get(ANNIEConstants.SENTENCE_ANNOTATION_TYPE).size() +
       " Sentence annotations, instead of the expected 51.",
       doc2.getAnnotations().get(ANNIEConstants.SENTENCE_ANNOTATION_TYPE).size()== 51);
-    
+
     assertTrue("Found in "+ doc2.getSourceUrl().getFile()+ " "+
       doc2.getAnnotations().get("Split").size() +
       " Split annotations, instead of the expected 74.",
@@ -212,7 +214,7 @@ public class TestPR extends TestCase
     tagger.setDocument(doc1);
     tagger.execute();
 
-    HashSet fType = new HashSet();
+    HashSet<String> fType = new HashSet<String>();
     fType.add(ANNIEConstants.TOKEN_CATEGORY_FEATURE_NAME);
     AnnotationSet annots =
       doc1.getAnnotations().get(ANNIEConstants.TOKEN_ANNOTATION_TYPE, fType);
@@ -319,6 +321,34 @@ public class TestPR extends TestCase
     Factory.deleteResource(transducer);
   }//testTransducer
 
+  public void testCustomConstraintDefs() throws Exception {
+    FeatureMap params = Factory.newFeatureMap();
+
+    List<String> operators = new ArrayList<String>();
+    params.put("operators", operators);
+    ConstraintPredicate testPred = new TestConstraintPredicate();
+    operators.add(testPred.getClass().getName());
+
+    List<String> accessors = new ArrayList<String>();
+    params.put("annotationAccessors", accessors);
+    AnnotationAccessor testAccessor = new TestAnnotationAccessor();
+    accessors.add(testAccessor.getClass().getName());
+
+    ANNIETransducer transducer = (ANNIETransducer) Factory.createResource(
+                          "gate.creole.ANNIETransducer", params);
+
+    assertEquals(accessors, transducer.getAnnotationAccessors());
+    assertEquals(operators, transducer.getOperators());
+
+    ConstraintPredicate returnedPred = Factory.getConstraintFactory().createPredicate("fooOp", testAccessor, "fooValue");
+    assertNotNull(returnedPred);
+    assertEquals("Operator not set", testPred.getClass(), returnedPred.getClass());
+
+    AnnotationAccessor returnAccessor = Factory.getConstraintFactory().createMetaPropertyAccessor("fooProp");
+    assertNotNull(returnAccessor);
+    assertEquals("Accessor not set", testAccessor.getClass(), returnAccessor.getClass());
+  }
+
   public void testOrthomatcher() throws Exception {
     FeatureMap params = Factory.newFeatureMap();
 
@@ -330,7 +360,7 @@ public class TestPR extends TestCase
     orthomatcher.setDocument(doc1);
     orthomatcher.execute();
 
-    HashSet fType = new HashSet();
+    HashSet<String> fType = new HashSet<String>();
     fType.add(ANNIEConstants.ANNOTATION_COREF_FEATURE_NAME);
     AnnotationSet annots =
                   doc1.getAnnotations().get(null,fType);
@@ -503,14 +533,14 @@ public class TestPR extends TestCase
    public void compareAnnots(Document keyDocument, Document responseDocument)
                 throws Exception{
       // organization type
-      Iterator iteratorTypes = annotationTypes.iterator();
+      Iterator<String> iteratorTypes = annotationTypes.iterator();
       while (iteratorTypes.hasNext()){
         // get the type of annotation
-        String annotType = (String)iteratorTypes.next();
+        String annotType = iteratorTypes.next();
 
         // create an annotation diff
         AnnotationDiffer annotDiffer = new AnnotationDiffer();
-        Set significantFeatures = new HashSet(Arrays.asList(
+        Set<String> significantFeatures = new HashSet<String>(Arrays.asList(
                       new String[]{"NMRule", "kind", "orgType", "rule",
                                    "rule1", "rule2", "locType", "gender",
                                    "majorType", "minorType", "category",
@@ -538,6 +568,27 @@ public class TestPR extends TestCase
       }//while
      }// public void compareAnnots
 
+   public static class TestConstraintPredicate extends AbstractConstraintPredicate {
+     @Override
+     protected boolean doMatch(Object value, Object context)
+             throws JapeException {
+       return false;
+     }
+     public String getOperator() {
+       return "fooOp";
+     }
+   };
+
+   public static class TestAnnotationAccessor extends MetaPropertyAccessor {
+     public Object getValue(Annotation annot, Object context) {
+       return "foo";
+     }
+
+    @Override
+    public Object getKey() {
+      return "fooProp";
+    }
+   };
 
   /** Test suite routine for the test runner */
   public static Test suite() {

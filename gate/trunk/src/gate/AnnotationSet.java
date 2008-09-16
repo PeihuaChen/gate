@@ -15,13 +15,12 @@
 
 package gate;
 
-import java.io.Serializable;
-import java.util.Iterator;
-import java.util.Set;
-
 import gate.event.AnnotationSetListener;
 import gate.event.GateListener;
 import gate.util.InvalidOffsetException;
+
+import java.io.Serializable;
+import java.util.Set;
 
 /**
  * <p>
@@ -32,7 +31,7 @@ import gate.util.InvalidOffsetException;
  * cannot be constructed directly, but are obtained via the
  * <code>getAnnotations</code> methods of {@link Document}.
  * </p>
- * 
+ *
  * <p>
  * This interface provides methods to extract subsets of annotations
  * from the current set given various constraints. Note that the
@@ -41,7 +40,7 @@ import gate.util.InvalidOffsetException;
  * called. Subsequent changes to the underlying set are not reflected in
  * the subset view.
  * </p>
- * 
+ *
  * <p>
  * This interface extends {@link java.util.Set}&lt;Annotation&gt;, so
  * can be used anywhere a Java Collections Framework <code>Set</code>
@@ -57,7 +56,7 @@ public interface AnnotationSet extends SimpleAnnotationSet, Serializable {
    * the method
    * {@link SimpleAnnotationSet#add(Long, Long, String, FeatureMap)},
    * which allows the set to assign a unique ID.
-   * 
+   *
    * @param id the ID for the new annotation
    * @param start the start offset for the new annotation
    * @param end the end offset for the new annotation
@@ -82,7 +81,7 @@ public interface AnnotationSet extends SimpleAnnotationSet, Serializable {
    * but it will not return any annotations that do not have all the
    * specified feature-value pairs.)
    * </p>
-   * 
+   *
    * <p>
    * However, if constraints contains a feature whose value is equal to
    * {@link gate.creole.ANNIEConstants#LOOKUP_CLASS_FEATURE_NAME} (which
@@ -95,7 +94,7 @@ public interface AnnotationSet extends SimpleAnnotationSet, Serializable {
    * and the annotation will not be added. In summary, this method will
    * not work normally for features with the name "class".
    * </p>
-   * 
+   *
    * @param type The type of the annotations to return.
    * @param constraints A feature map containing all of the feature
    *          value pairs that the annotation must have in order for
@@ -113,7 +112,7 @@ public interface AnnotationSet extends SimpleAnnotationSet, Serializable {
    * annotations of the given type that have the given set of features,
    * regardless of their concrete values If the type == null, then
    * select regardless of type
-   * 
+   *
    * @param type the annotation type to return. If <code>null</code>
    *          then all annotation types are searched.
    * @param featureNames the feature names which an annotation must have
@@ -132,7 +131,7 @@ public interface AnnotationSet extends SimpleAnnotationSet, Serializable {
    * by type and feature constraints but considers only those
    * annotations that start as close as possible to the right of the
    * given offset.
-   * 
+   *
    * @param type the annotation type to search for
    * @param constraints the set of features an annotation must have to
    *          be matched
@@ -149,7 +148,7 @@ public interface AnnotationSet extends SimpleAnnotationSet, Serializable {
    * to <code>offset</code>. In other words it finds the first
    * annotation that starts at or after the given offset and returns all
    * annotations which start at the same place.
-   * 
+   *
    * @param offset the offset at which to start the search.
    * @return a set of annotations, all of which start at the same offset
    *         &gt;= <code>offset</code>. The returned set is
@@ -163,7 +162,7 @@ public interface AnnotationSet extends SimpleAnnotationSet, Serializable {
    * provided offsets, i.e. that start strictly before
    * <code>endOffset</code> and end strictly after
    * <code>startOffset</code>.
-   * 
+   *
    * @param startOffset the start of the interval
    * @param endOffset the end of the interval
    * @return the set of annotations that overlap the given interval, or
@@ -179,7 +178,7 @@ public interface AnnotationSet extends SimpleAnnotationSet, Serializable {
    * is effectively a combination of {@link #get(Long, Long)} and
    * {@link SimpleAnnotationSet#get(String)} but may admit more
    * efficient implementation.
-   * 
+   *
    * @param type the annotation type to search for
    * @param startOffset the start of the interval
    * @param endOffset the end of the interval
@@ -190,13 +189,32 @@ public interface AnnotationSet extends SimpleAnnotationSet, Serializable {
   public AnnotationSet get(String type, Long startOffset, Long endOffset);
 
   /**
+   * Select annotations of the given type that complete span the range.
+   * Formally, for any annotation a, a will be included in the return
+   * set if:
+   * <ul>
+   * <li>a.getStartNode().getOffset() <= startOffset</li>
+   * <li>and</li>
+   * <li>a.getEndNode().getOffset() >= endOffset</li>
+   *
+   * @param neededType Type of annotation to return. If empty, all
+   *          annotation types will be returned.
+   * @param startOffset the start of the interval
+   * @param endOffset the end of the interval
+   * @return the set of annotations matching the parameters, or an empty
+   *         set if no such annotations exist. The returned set is
+   *         immutable.
+   */
+  public AnnotationSet getCovering(String neededType, Long startOffset, Long endOffset);
+
+  /**
    * Select annotations by offset. This returns the set of annotations
    * that are contained in the interval defined by the two provided
    * offsets. The difference with get(startOffset, endOffset) is that
    * the latter also provides annotations that have a span which covers
    * completely and is bigger than the given one. Here we only get the
    * annotations between the two offsets.
-   * 
+   *
    * @param startOffset the start of the interval
    * @param endOffset the end of the interval
    * @return the set of annotations from this set contained completely

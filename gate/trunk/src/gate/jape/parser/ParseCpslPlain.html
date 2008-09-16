@@ -55,10 +55,10 @@
 <TR>
 <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod12">Constraint</A></TD>
 <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
-<TD ALIGN=LEFT VALIGN=BASELINE>( &lt;pling&gt; )? &lt;ident&gt; ( <A HREF="#prod13">Accessor</A> &lt;attrOp&gt; <A HREF="#prod14">AttrVal</A> )?</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( &lt;pling&gt; )? &lt;ident&gt; ( ( <A HREF="#prod13">FeatureAccessor</A> &lt;attrOp&gt; <A HREF="#prod14">AttrVal</A> ) | ( &lt;metaPropOp&gt; &lt;ident&gt; &lt;attrOp&gt; <A HREF="#prod14">AttrVal</A> ) | ( &lt;ident&gt; ( ( &lt;leftBrace&gt; <A HREF="#prod12">Constraint</A> &lt;rightBrace&gt; ) | ( <A HREF="#prod12">Constraint</A> ) ) ) )?</TD>
 </TR>
 <TR>
-<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod13">Accessor</A></TD>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod13">FeatureAccessor</A></TD>
 <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
 <TD ALIGN=LEFT VALIGN=BASELINE>( &lt;period&gt; &lt;ident&gt; )</TD>
 </TR>

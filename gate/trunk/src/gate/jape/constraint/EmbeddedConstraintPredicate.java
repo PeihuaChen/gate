@@ -1,0 +1,105 @@
+/*
+ *  Constraint Predicate implementation
+ *
+ *  Copyright (c) 1998-2008, The University of Sheffield.
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Eric Sword, 09/03/08
+ *
+ *  $Id$
+ */
+package gate.jape.constraint;
+
+import java.util.Collection;
+import java.util.Collections;
+
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.jape.Constraint;
+import gate.jape.JapeException;
+
+/**
+ * Predicate whose {@link #getValue()} property may be set to a
+ * Constraint itself, allowing for recursive evaluations.
+ *
+ * @version $Revision$
+ * @author esword
+ */
+public abstract class EmbeddedConstraintPredicate extends AbstractConstraintPredicate {
+
+  protected Constraint valueConstraint;
+  protected String annotType;
+
+  public EmbeddedConstraintPredicate() {
+    super();
+  }
+
+  public EmbeddedConstraintPredicate(AnnotationAccessor accessor, Object value) {
+    super(accessor, value);
+  }
+
+  /**
+   * Sets up environment for concreate class to do the specific matching check
+   */
+  public boolean doMatch(Object annotValue, Object context)
+          throws JapeException {
+
+    Annotation annot = (Annotation)annotValue;
+    AnnotationSet as = getAnnotationSet(context);
+
+    Collection<Annotation> containedSet = doMatch(annot, as);
+
+    containedSet = filterMatches(containedSet);
+
+    return !containedSet.isEmpty();
+  }
+
+  protected abstract Collection<Annotation> doMatch(Annotation annot, AnnotationSet as);
+
+  /**
+   * If there are attribute constraints, filter the set.
+   * @param containedSet
+   * @return
+   */
+  protected Collection<Annotation> filterMatches(Collection<Annotation> containedSet) {
+    if (containedSet == null)
+      return Collections.emptySet();
+
+    if (valueConstraint != null && !containedSet.isEmpty()) {
+      containedSet = valueConstraint.matches(containedSet, null, containedSet);
+    }
+    return containedSet;
+  }
+
+  /**
+   * If the given value is a {@link Constraint}, then check if there
+   * are any additional attribute/feature-checks on the constraint. If
+   * so, then store the constraint for use during matching calls. If
+   * not, then only the annotation type for the constraint is stored
+   * since the full constraint is not needed.
+   */
+  @Override
+  public void setValue(Object v) {
+    if(v instanceof Constraint) {
+      Constraint c = (Constraint)v;
+      annotType = c.getAnnotType();
+      if(!c.getAttributeSeq().isEmpty()) {
+        // store full constraint for later use. It's stored in the
+        // main value object for toString purposes.
+        valueConstraint = c;
+        value = c;
+      }
+    }
+
+    // if the given value is not a constraint, then just store it
+    // directly as the annotationType
+    if(annotType == null && valueConstraint == null) {
+      value = v;
+      annotType = String.valueOf(v);
+    }
+  }
+}

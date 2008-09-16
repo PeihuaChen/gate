@@ -31,11 +31,15 @@ public class ConstraintFactory {
   protected Map<String, Class<? extends ConstraintPredicate>> operatorImplMap =
     new HashMap<String, Class<? extends ConstraintPredicate>>();
 
+  protected Map<String, Class<? extends AnnotationAccessor>> metaPropertyMap =
+    new HashMap<String, Class<? extends AnnotationAccessor>>();
+
   public ConstraintFactory() {
-    initMap();
+    initOperatorMap();
+    initMetaPropertyMap();
   }
 
-  protected void initMap() {
+  protected void initOperatorMap() {
     addOperator(ConstraintPredicate.EQUAL, EqualPredicate.class);
     addOperator(ConstraintPredicate.NOT_EQUAL, NotEqualPredicate.class);
     addOperator(ConstraintPredicate.GREATER, GreaterPredicate.class);
@@ -47,11 +51,24 @@ public class ConstraintFactory {
     addOperator(ConstraintPredicate.NOT_REGEXP_FIND, NotRegExpFindPredicate.class);
     addOperator(ConstraintPredicate.REGEXP_MATCH, RegExpMatchPredicate.class);
     addOperator(ConstraintPredicate.NOT_REGEXP_MATCH, NotRegExpMatchPredicate.class);
+    addOperator(ContainsPredicate.OPERATOR, ContainsPredicate.class);
+    addOperator(WithinPredicate.OPERATOR, WithinPredicate.class);
+  }
+
+  protected void initMetaPropertyMap() {
+    addMetaProperty("string", StringAccessor.class);
+    addMetaProperty("cleanString", CleanStringAccessor.class);
+    addMetaProperty("length", LengthAccessor.class);
   }
 
   public void addOperator(String operator,
           Class<? extends ConstraintPredicate> clazz) {
     operatorImplMap.put(operator, clazz);
+  }
+
+  public void addMetaProperty(String metaProperty,
+          Class<? extends AnnotationAccessor> clazz) {
+    metaPropertyMap.put(metaProperty, clazz);
   }
 
   /**
@@ -66,6 +83,24 @@ public class ConstraintFactory {
 
   public AnnotationAccessor createDefaultAccessor(Object key) {
     return new AnnotationFeatureAccessor(key);
+  }
+
+  public AnnotationAccessor createMetaPropertyAccessor(String propName) {
+    AnnotationAccessor retVal = null;
+    Class<?> clazz = metaPropertyMap.get(propName);
+    if(clazz == null)
+      throw new IllegalArgumentException(
+              "No meta property associated with name: " + propName);
+
+    try {
+      retVal = (AnnotationAccessor)clazz.newInstance();
+    }
+    catch(Exception e) {
+      throw new RuntimeException("Could not create accessor for name '"
+              + propName + "'", e);
+    }
+
+    return retVal;
   }
 
   /**

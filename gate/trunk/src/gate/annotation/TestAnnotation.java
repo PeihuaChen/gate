@@ -45,7 +45,8 @@ public class TestAnnotation extends TestCase
   public void setUp() throws Exception
   {
 	Gate.setNetConnected(false);
-    Gate.init();
+	  if (Gate.getGateHome() == null)
+	    Gate.init();
     FeatureMap params = Factory.newFeatureMap();
     params.put(Document.DOCUMENT_URL_PARAMETER_NAME, Gate.getUrl("tests/doc0.html"));
     params.put(Document.DOCUMENT_MARKUP_AWARE_PARAMETER_NAME, "false");
@@ -130,115 +131,115 @@ public class TestAnnotation extends TestCase
     Long l0= new Long(0);
     Long l1= new Long(20);
     FeatureMap fm = new SimpleFeatureMapImpl();
-    
+
     // simple get
     AnnotationSet immutable = basicAS.get();
     assertTrue(_subtestImmutability(immutable));
-    
+
     // get Long
     immutable = basicAS.get(l0);
     assertTrue(_subtestImmutability(immutable));
-    
+
     // get two Longs
     immutable = basicAS.get(l0, l1);
     assertTrue(_subtestImmutability(immutable));
-    
+
     // get Type
     immutable = basicAS.get("T1");
     assertTrue(_subtestImmutability(immutable));
-    
+
     // get Types
-    Set<String> types = new HashSet();
+    Set<String> types = new HashSet<String>();
     types.add ("T1");
     types.add ("T2");
     immutable = basicAS.get(types);
     assertTrue(_subtestImmutability(immutable));
-    
+
     // get type + constraint
     immutable = basicAS.get("T1", fm);
     assertTrue(_subtestImmutability(immutable));
-    
+
     // get type + constraint + Long
     immutable = basicAS.get("T1", fm, l0);
     assertTrue(_subtestImmutability(immutable));
-    
+
     // type + Long + Long
     immutable = basicAS.get("T1", l0, l1);
     assertTrue(_subtestImmutability(immutable));
-    
+
     // type + Set of feature names
-    Set annotset = new HashSet();
+    Set<String> annotset = new HashSet<String>();
     annotset.add("pos");
     immutable = basicAS.get("T3",annotset);
     assertTrue(_subtestImmutability(immutable));
   }
-  
+
   // try all possible sorts of changes to an immutable AS
   private final boolean _subtestImmutability(AnnotationSet immutable){
     boolean threwException  = false;
     Node startNode = null;
-    
+
     try {
       immutable.add(null, null, null, null, null);
-    } 
+    }
     catch(InvalidOffsetException e) {}
     catch(UnsupportedOperationException e) {threwException=true;}
-    
+
     if (threwException==false)return false;
-    
+
     try {
     immutable.add(startNode, null, null, null);
     }
     catch(UnsupportedOperationException e){threwException=true;}
-    
+
     if (threwException==false)return false;
-    
+
     try {
       immutable.add(new Long(0), null, null, null);
-    } 
+    }
     catch(InvalidOffsetException e) {}
     catch(UnsupportedOperationException e){threwException=true;}
-    
+
     if (threwException==false)return false;
-    
+
     try {
     immutable.add(null);}
     catch(UnsupportedOperationException e){threwException=true;}
-    
+
     if (threwException==false)return false;
-    
+
     try {
     immutable.removeAll(null);}
     catch(UnsupportedOperationException e){threwException=true;}
-    
+
     if (threwException==false)return false;
-    
+
     try {
     immutable.addAll(null);}
     catch(UnsupportedOperationException e){threwException=true;}
-    
+
     if (threwException==false)return false;
-    
+
     try {
     immutable.remove(null);}
     catch(UnsupportedOperationException e){threwException=true;}
-    
+
     if (threwException==false)return false;
-    
+
     try {
     immutable.retainAll(null);}
     catch(UnsupportedOperationException e){threwException=true;}
-    
+
     if (threwException==false)return false;
-    
+
     try {
     immutable.clear();}
     catch(UnsupportedOperationException e){threwException=true;}
-    
+
     return threwException;
   }
-  
-  
+
+
   /** Test exception throwing */
   public void testExceptions() {
     AnnotationSet as = new AnnotationSetImpl(doc1);
@@ -343,13 +344,13 @@ public class TestAnnotation extends TestCase
 
     // let's check that we've only got two nodes, what the ids are and so on;
     // first construct a sorted set of annotations
-    SortedSet sortedAnnots = new TreeSet(as);
+    SortedSet<Annotation> sortedAnnots = new TreeSet<Annotation>(as);
 
     // for checking the annotation id
     int idCounter = 0;
-    Iterator iter = sortedAnnots.iterator();
+    Iterator<Annotation> iter = sortedAnnots.iterator();
     while(iter.hasNext()) {
-      a = (Annotation) iter.next();
+      a = iter.next();
 
       // check annot ids
       assertEquals(idCounter++, a.getId().intValue());
@@ -417,13 +418,13 @@ public class TestAnnotation extends TestCase
 
     // let's check that we've only got two nodes, what the ids are and so on;
     // first construct a sorted set of annotations
-    SortedSet sortedAnnots = new TreeSet(as);
+    Set<Annotation> sortedAnnots = new TreeSet<Annotation>(as);
 
     // for checking the annotation id
     int idCounter = 0;
-    Iterator iter = sortedAnnots.iterator();
+    Iterator<Annotation> iter = sortedAnnots.iterator();
     while(iter.hasNext()) {
-      a = (Annotation) iter.next();
+      a = iter.next();
       // check annot ids
       assertEquals(idCounter++, a.getId().intValue());
 
@@ -446,7 +447,7 @@ public class TestAnnotation extends TestCase
   } // testAddWithNodes()
 
   /** Test complex get (with type, offset and feature contraints) */
-  public void testComplexGet() throws InvalidOffsetException {
+  public void testGetFeatureMapOffset() throws InvalidOffsetException {
     AnnotationSet asBuf;
 
     FeatureMap constraints = new SimpleFeatureMapImpl();
@@ -490,7 +491,54 @@ public class TestAnnotation extends TestCase
     asBuf = basicAS.get("T1", constraints, new Long(14));
     assertEquals(0, asBuf.size());
 
-  } // testComplexGet()
+  } // testGetFeatureMapOffset()
+
+  public void testGetStringLongLong() throws InvalidOffsetException {
+    FeatureMap fm = new SimpleFeatureMapImpl();
+    basicAS.add(21l, 25l, "T1", fm);
+    basicAS.add(22l, 25l, "T1", fm);
+    basicAS.add(45l, 50l, "T3", fm);
+
+    assertEquals(0, basicAS.get(0l, 5l).size());
+    assertEquals(0, basicAS.get("T1", 0l, 5l).size());
+
+    assertEquals(5, basicAS.get(10l, 12l).size());
+    assertEquals(3, basicAS.get("T1", 10l, 12l).size());
+
+    assertEquals(11, basicAS.get(10l, 16l).size());
+    assertEquals(7, basicAS.get("T1", 10l, 16l).size());
+
+    assertEquals(11, basicAS.get(10l, 20l).size());
+    assertEquals(7, basicAS.get("T1", 10l, 20l).size());
+
+    assertEquals(6, basicAS.get(20l, 21l).size());
+    assertEquals(4, basicAS.get("T1", 20l, 21l).size());
+
+    assertEquals(0, basicAS.get(41l, 42l).size());
+    assertEquals(0, basicAS.get("T1", 41l, 42l).size());
+  } // testGetStringLongLong()
+
+  public void testGetCovering() throws InvalidOffsetException {
+    assertEquals(0, basicAS.getCovering(null, 0l, 5l).size());
+    assertEquals(0, basicAS.getCovering("T1", 0l, 5l).size());
+
+    //null and blank strings should be treated the same.  Just test
+    //with both a couple of times.  Mostly can just test with null.
+    assertEquals(0, basicAS.getCovering(null, 9l, 12l).size());
+    assertEquals(0, basicAS.getCovering("  ", 9l, 12l).size());
+    assertEquals(0, basicAS.getCovering("T1", 9l, 12l).size());
+
+    assertEquals(5, basicAS.getCovering(null, 10l, 20l).size());
+    assertEquals(5, basicAS.getCovering("  ", 10l, 20l).size());
+    assertEquals(3, basicAS.getCovering("T1", 10l, 20l).size());
+
+    assertEquals(11, basicAS.getCovering(null, 16l, 20l).size());
+    assertEquals(7, basicAS.getCovering("T1", 16l, 20l).size());
+
+    assertEquals(6, basicAS.getCovering(null, 16l, 21l).size());
+    assertEquals(4, basicAS.getCovering("T1", 16l, 21l).size());
+
+  } // testGetCovering()
 
   /** Test remove */
   public void testRemove() {
@@ -509,7 +557,7 @@ public class TestAnnotation extends TestCase
 
     asBuf = basicAS.get(new Long(9));
     assertEquals(4, asBuf.size());
-    
+
     assertEquals(null, basicAS.get(new Integer(0)));
     basicAS.remove(basicAS.get(new Integer(8)));
     assertEquals(9, basicAS.size());
@@ -542,9 +590,9 @@ public class TestAnnotation extends TestCase
       ann = iter.next();
     }
     iter.remove();
-    assertEquals("Last annotation from iterator not ID 0!", 0, 
+    assertEquals("Last annotation from iterator not ID 0!", 0,
              ann.getId().intValue());
-    
+
     assertEquals(10, basicAS.size());
     assertEquals(10, ((AnnotationSetImpl) basicAS).annotsById.size());
     asBuf = basicAS.get("T1");
@@ -588,20 +636,19 @@ public class TestAnnotation extends TestCase
     Annotation a = basicAS.get(new Integer(6));
     assertTrue(basicAS.contains(a));
 
-    Annotation[] annotArray =
-      (Annotation[]) basicAS.toArray(new Annotation[0]);
+    Annotation[] annotArray = basicAS.toArray(new Annotation[0]);
     Object[] annotObjectArray = basicAS.toArray();
     assertEquals(11, annotArray.length);
     assertEquals(11, annotObjectArray.length);
 
-    SortedSet sortedAnnots = new TreeSet(basicAS);
-    annotArray = (Annotation[]) sortedAnnots.toArray(new Annotation[0]);
+    SortedSet<Annotation> sortedAnnots = new TreeSet<Annotation>(basicAS);
+    annotArray = sortedAnnots.toArray(new Annotation[0]);
     for(int i = 0; i<11; i++)
       assertTrue( annotArray[i].getId().equals(new Integer(i)) );
 
     Annotation a1 = basicAS.get(new Integer(3));
     Annotation a2 = basicAS.get(new Integer(4));
-    Set a1a2 = new HashSet();
+    Set<Annotation> a1a2 = new HashSet<Annotation>();
     a1a2.add(a1);
     a1a2.add(a2);
     assertTrue(basicAS.contains(a1));
@@ -687,7 +734,7 @@ public class TestAnnotation extends TestCase
       as.add(new Long(15), new Long(22), "Syntax", new SimpleFeatureMapImpl());
 
     //get by feature names
-    HashSet hs = new HashSet();
+    Set<String> hs = new HashSet<String>();
     hs.add("test");
     AnnotationSet fnSet = as.get("Token", hs);
     assertEquals(fnSet.size(), 2);
@@ -725,18 +772,18 @@ public class TestAnnotation extends TestCase
     as.add(new Long(10), new Long(11), "space", fm);
 
     //do the input selection (ignore spaces)
-    Set input = new HashSet();
+    Set<String> input = new HashSet<String>();
     input.add("foo");
     input.add("foofoo");
     AnnotationSet annotations = null;
 
     if(input.isEmpty()) annotations = as;
     else{
-      Iterator typesIter = input.iterator();
+      Iterator<String> typesIter = input.iterator();
       AnnotationSet ofOneType = null;
 
       while(typesIter.hasNext()){
-        ofOneType = as.get((String)typesIter.next());
+        ofOneType = as.get(typesIter.next());
 
         if(ofOneType != null){
           //System.out.println("Adding " + ofOneType.getAllTypes());
@@ -978,7 +1025,7 @@ public class TestAnnotation extends TestCase
   assertTrue("Those annotations("+ annot5 +" & " +
                                annot2+ ") are not partially compatible!",
                                !annot5.isPartiallyCompatible(annot2,null));
-  Set keySet = new HashSet();
+  Set<Object> keySet = new HashSet<Object>();
   // They don't overlap
   assertTrue("Those annotations("+ annot2 +" & " +
                                annot4+ ") are not partially compatible!",
@@ -1013,11 +1060,11 @@ public class TestAnnotation extends TestCase
                                       annot2.isCompatible(annot3,null));
   assertTrue("Those annotations("+ annot2 +" & " +
                                annot3+ ") should be compatible!",
-                                     annot2.isCompatible(annot3,new HashSet()));
+                                     annot2.isCompatible(annot3,new HashSet<String>()));
   assertTrue("Those annotations("+ annot4 +" & " +
                                annot4+ ") should be compatible!",
                                         annot4.isCompatible(annot4));
-  keySet = new HashSet();
+  keySet = new HashSet<Object>();
   keySet.add("color");
   keySet.add(new Long(23));
   assertTrue("Those annotations("+ annot3 +" & " +
@@ -1054,7 +1101,7 @@ public class TestAnnotation extends TestCase
     FeatureMap fm2 = Factory.newFeatureMap();
     fm2.put("k1","v1");
 
-    Set featKeysSet1 = new HashSet();
+    Set<String> featKeysSet1 = new HashSet<String>();
     featKeysSet1.add("k1");
     featKeysSet1.add("k2");
     featKeysSet1.add("k3");
@@ -1071,7 +1118,7 @@ public class TestAnnotation extends TestCase
     fm3.put("k2","v2");
     fm3.put("k3",new Integer(3));
 
-    Set featKeysSet2 = new HashSet();
+    Set<String> featKeysSet2 = new HashSet<String>();
     featKeysSet2.add("k1");
 
     assertTrue(fm1 + " should subsume " + fm3 + " using the key set" +
@@ -1085,7 +1132,7 @@ public class TestAnnotation extends TestCase
     fm4.put("k2","v2");
     fm4.put("k3","v3");
 
-    Set featKeysSet3 = new HashSet();
+    Set<String> featKeysSet3 = new HashSet<String>();
     featKeysSet3.add("k2");
 
     assertTrue(fm3 + " should subsume " + fm4 + " using the key set" +
@@ -1101,7 +1148,7 @@ public class TestAnnotation extends TestCase
     (Integer id, Node start, Node end, String type, FeatureMap features) {
       return new AnnotationImpl(id, start, end, type, features);
   }
-  
+
   public static void main(String[] args){
 
     try{
