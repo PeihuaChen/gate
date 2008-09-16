@@ -14,7 +14,7 @@
  */
 package gate.jape.constraint;
 
-import gate.Annotation;
+import gate.*;
 import gate.jape.JapeException;
 
 /**
@@ -27,14 +27,13 @@ import gate.jape.JapeException;
 public abstract class AbstractConstraintPredicate implements
                                                  ConstraintPredicate {
   protected AnnotationAccessor accessor;
-
   protected Object value;
 
   public AbstractConstraintPredicate() {
   }
 
-  public AbstractConstraintPredicate(AnnotationAccessor name, Object value) {
-    setAccessor(name);
+  public AbstractConstraintPredicate(AnnotationAccessor accessor, Object value) {
+    setAccessor(accessor);
     setValue(value);
   }
 
@@ -78,6 +77,27 @@ public abstract class AbstractConstraintPredicate implements
 
   protected abstract boolean doMatch(Object value, Object context)
           throws JapeException;
+
+
+  /**
+   * Returns the context if it is a AnnotationSet, or, if the context is
+   * a Document, get the default annotation set from it.
+   *
+   * @param context
+   * @return
+   */
+  protected AnnotationSet getAnnotationSet(Object context) {
+    AnnotationSet as = null;
+    if (context instanceof AnnotationSet)
+      as = (AnnotationSet)context;
+    else if (context instanceof Document) {
+      as = ((Document)context).getAnnotations();
+    }
+    else
+      throw new IllegalArgumentException("Context must be a Document or an AnnotationSet, not: "
+            + (context != null ? context.getClass() : "null"));
+    return as;
+  }
 
   public void setAccessor(AnnotationAccessor accessor) {
     this.accessor = accessor;

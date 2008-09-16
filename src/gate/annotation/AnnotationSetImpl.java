@@ -32,6 +32,9 @@ package gate.annotation;
 
 import java.io.*;
 import java.util.*;
+
+import org.apache.commons.lang.StringUtils;
+
 import gate.*;
 import gate.corpora.DocumentImpl;
 import gate.event.*;
@@ -80,16 +83,16 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    * start from that node
    */
   transient Map<Integer, Object> annotsByStartNode;
-  protected transient Vector annotationSetListeners;
-  private transient Vector gateListeners;
+  protected transient Vector<AnnotationSetListener> annotationSetListeners;
+  private transient Vector<GateListener> gateListeners;
 
   // Empty AnnotationSet to be returned instead of null
    public static AnnotationSet emptyAnnotationSet;
-  
+
    static {
    emptyAnnotationSet = new ImmutableAnnotationSetImpl(null,null);
    }
-  
+
   /** Construction from Document. */
   public AnnotationSetImpl(Document doc) {
     annotsById = new HashMap<Integer, Annotation>();
@@ -124,9 +127,9 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     // the implementation is not the default one
     // let's add the annotations one by one
     else {
-      Iterator iterannots = c.iterator();
+      Iterator<Annotation> iterannots = c.iterator();
       while(iterannots.hasNext()) {
-        add((Annotation)iterannots.next());
+        add(iterannots.next());
       }
     }
   }
@@ -153,10 +156,10 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     public void remove() {
       // this takes care of the ID index
       iter.remove();
-      
+
       // what if lastNext is null
       if(lastNext == null) return;
-      
+
       // remove from type index
       removeFromTypeIndex(lastNext);
       // remove from offset indices
@@ -165,7 +168,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
       // apart from calling remove() on the set itself
       fireAnnotationRemoved(new AnnotationSetEvent(AnnotationSetImpl.this,
               AnnotationSetEvent.ANNOTATION_REMOVED, getDocument(),
-              (Annotation)lastNext));
+              lastNext));
     } // remove()
   }; // AnnotationSetIterator
 
@@ -243,7 +246,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
 
   /**
    * Get all annotations.
-   * 
+   *
    * @return an ImmutableAnnotationSet, empty or not
    */
   public AnnotationSet get() {
@@ -253,20 +256,20 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
 
   /**
    * Select annotations by type
-   * 
+   *
    * @return an ImmutableAnnotationSet
    */
   public AnnotationSet get(String type) {
     if(annotsByType == null) indexByType();
     AnnotationSet byType = annotsByType.get(type);
-    if (byType==null)return emptyAnnotationSet;    
+    if (byType==null)return emptyAnnotationSet;
     // convert the mutable AS into an immutable one
     return byType.get();
   } // get(type)
 
   /**
    * Select annotations by a set of types. Expects a Set of String.
-   * 
+   *
    * @return an ImmutableAnnotationSet
    */
   public AnnotationSet get(Set<String> types) throws ClassCastException {
@@ -277,9 +280,9 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
       String type = iter.next();
       AnnotationSet as = annotsByType.get(type);
       if(as != null) {
-        Iterator iterAnnot = as.iterator();
+        Iterator<Annotation> iterAnnot = as.iterator();
         while(iterAnnot.hasNext()) {
-          annotations.add((Annotation)iterAnnot.next());
+          annotations.add(iterAnnot.next());
         }
       }
     } // while
@@ -289,13 +292,13 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
 
   /**
    * Select annotations by type and features
-   * 
+   *
    * This will return an annotation set containing just those annotations of a
    * particular type (i.e. with a particular name) and which have features with
    * specific names and values. (It will also return annotations that have
    * features besides those specified, but it will not return any annotations
    * that do not have all the specified feature-value pairs.)
-   * 
+   *
    * However, if constraints contains a feature whose value is equal to
    * gate.creole.ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME (which is normally
    * "class"), then GATE will attempt to match that feature using an ontology
@@ -304,7 +307,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    * the annotation or constraints does not contain an ontology, then matching
    * will fail, and the annotation will not be added. In summary, this method
    * will not work normally for features with the name "class".
-   * 
+   *
    * @param type
    *          The name of the annotations to return.
    * @param constraints
@@ -393,50 +396,11 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    * <li>start before the start offset and end strictly after it</li>
    * <li>OR</li>
    * <li>start at a position between the start and the end offsets</li>
-   * 
+   *
    * @return an ImmutableAnnotationSet
    */
   public AnnotationSet get(Long startOffset, Long endOffset) {
-    // the result will include all the annotations that either:
-    // -start before the start offset and end strictly after it
-    // or
-    // -start at a position between the start and the end offsets
-    if(annotsByStartNode == null) indexByStartOffset();
-    List<Annotation> annotationsToAdd = new ArrayList<Annotation>();
-    Iterator nodesIter;
-    Iterator<Annotation> annotsIter;
-    Node currentNode;
-    Annotation currentAnnot;
-    // find all the annots that start strictly before the start offset
-    // and end
-    // strictly after it
-    nodesIter = nodesByOffset.headMap(startOffset).values().iterator();
-    while(nodesIter.hasNext()) {
-      currentNode = (Node)nodesIter.next();
-      Collection<Annotation> objectAtNode = getAnnotsByStartNode(currentNode
-              .getId());
-      if(objectAtNode == null) continue;
-      annotsIter = objectAtNode.iterator();
-      while(annotsIter.hasNext()) {
-        currentAnnot = annotsIter.next();
-        if(currentAnnot.getEndNode().getOffset().compareTo(startOffset) > 0) {
-          annotationsToAdd.add(currentAnnot);
-        }
-      }
-    }
-    // find all the annots that start at or after the start offset but
-    // strictly
-    // before the end offset
-    nodesIter = nodesByOffset.subMap(startOffset, endOffset).values()
-            .iterator();
-    while(nodesIter.hasNext()) {
-      currentNode = (Node)nodesIter.next();
-      Collection<Annotation> objectAtNode = getAnnotsByStartNode(currentNode
-              .getId());
-      if(objectAtNode == null) continue;
-      annotationsToAdd.addAll(objectAtNode);
-    }
-    return new ImmutableAnnotationSetImpl(doc, annotationsToAdd);
+    return get(null, startOffset, endOffset);
   } // get(startOfset, endOffset)
 
   /**
@@ -483,30 +447,29 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    * <li>start at a position between the start and the end offsets</li>
    */
   public AnnotationSet get(String neededType, Long startOffset, Long endOffset) {
-    // the result will include all the annotations that either:
-    // -start before the start offset and end strictly after it
-    // or
-    // -start at a position between the start and the end offsets
     if(annotsByStartNode == null) indexByStartOffset();
     List<Annotation> annotationsToAdd = new ArrayList<Annotation>();
-    Iterator nodesIter;
+    Iterator<Node> nodesIter;
     Iterator<Annotation> annotsIter;
     Node currentNode;
     Annotation currentAnnot;
+    boolean checkType = StringUtils.isNotBlank(neededType);
     // find all the annots that start strictly before the start offset
     // and end
     // strictly after it
     nodesIter = nodesByOffset.headMap(startOffset).values().iterator();
     while(nodesIter.hasNext()) {
-      currentNode = (Node)nodesIter.next();
+      currentNode = nodesIter.next();
       Collection<Annotation> objFromPoint = getAnnotsByStartNode(currentNode
               .getId());
       if(objFromPoint == null) continue;
       annotsIter = objFromPoint.iterator();
       while(annotsIter.hasNext()) {
         currentAnnot = annotsIter.next();
-        if(currentAnnot.getType().equals(neededType)
-                && currentAnnot.getEndNode().getOffset().compareTo(startOffset) > 0) {
+        //if neededType is set, make sure this is the right type
+        if (checkType && !currentAnnot.getType().equals(neededType))
+          continue;
+        if(currentAnnot.getEndNode().getOffset().compareTo(startOffset) > 0) {
           annotationsToAdd.add(currentAnnot);
         } // if
       } // while
@@ -517,16 +480,66 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     nodesIter = nodesByOffset.subMap(startOffset, endOffset).values()
             .iterator();
     while(nodesIter.hasNext()) {
-      currentNode = (Node)nodesIter.next();
+      currentNode = nodesIter.next();
+      Collection<Annotation> objFromPoint = getAnnotsByStartNode(currentNode
+              .getId());
+      if(objFromPoint == null) continue;
+      //if no specific type requested, add all of the annots
+      if (!checkType)
+        annotationsToAdd.addAll(objFromPoint);
+      else {
+        //check the type of each annot
+        annotsIter = objFromPoint.iterator();
+        while(annotsIter.hasNext()) {
+          currentAnnot = annotsIter.next();
+          if (currentAnnot.getType().equals(neededType))
+            annotationsToAdd.add(currentAnnot);
+        } // while
+      }
+    }
+    return new ImmutableAnnotationSetImpl(doc, annotationsToAdd);
+  } // get(type, startOfset, endOffset)
+
+  /**
+   * Select annotations of the given type that complete span the range.
+   * Formally, for any annotation a, a will be included in the return
+   * set if:
+   * <ul>
+   * <li>a.getStartNode().getOffset() <= startOffset</li>
+   * <li>and</li>
+   * <li>a.getEndNode().getOffset() >= endOffset</li>
+   *
+   * @param neededType Type of annotation to return. If empty, all
+   *          annotation types will be returned.
+   * @param startOffset
+   * @param endOffset
+   * @return
+   */
+  public AnnotationSet getCovering(String neededType, Long startOffset, Long endOffset) {
+    if(annotsByStartNode == null) indexByStartOffset();
+    List<Annotation> annotationsToAdd = new ArrayList<Annotation>();
+    Iterator<Node> nodesIter;
+    Iterator<Annotation> annotsIter;
+    Node currentNode;
+    Annotation currentAnnot;
+    boolean checkType = StringUtils.isNotBlank(neededType);
+    // find all the annots with startNode <= startOffset.  Need the + 1 because
+    // headMap returns strictly less than.
+    nodesIter = nodesByOffset.headMap(startOffset + 1).values().iterator();
+    while(nodesIter.hasNext()) {
+      currentNode = nodesIter.next();
       Collection<Annotation> objFromPoint = getAnnotsByStartNode(currentNode
               .getId());
       if(objFromPoint == null) continue;
       annotsIter = objFromPoint.iterator();
       while(annotsIter.hasNext()) {
         currentAnnot = annotsIter.next();
-        if(currentAnnot.getType().equals(neededType)) {
+        //if neededType is set, make sure this is the right type
+        if (checkType && !currentAnnot.getType().equals(neededType))
+          continue;
+        //check that the annot ends at or after the endOffset
+        if(currentAnnot.getEndNode().getOffset().compareTo(endOffset) >= 0)
           annotationsToAdd.add(currentAnnot);
-        } // if
       } // while
     }
     return new ImmutableAnnotationSetImpl(doc, annotationsToAdd);
@@ -535,7 +548,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   /** Select annotations by type, features and offset */
   public AnnotationSet get(String type, FeatureMap constraints, Long offset) {
     // select by offset
-    AnnotationSet nextAnnots = (AnnotationSet)get(offset);
+    AnnotationSet nextAnnots = get(offset);
     if(nextAnnots == null) return emptyAnnotationSet;
     // select by type and constraints from the next annots
     return nextAnnots.get(type, constraints);
@@ -551,7 +564,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     // offsets
     if(annotsByStartNode == null) indexByStartOffset();
     List<Annotation> annotationsToAdd = null;
-    Iterator nodesIter;
+    Iterator<Node> nodesIter;
     Node currentNode;
     Iterator<Annotation> annotIter;
     // find all the annots that start at or after the start offset but
@@ -560,7 +573,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     nodesIter = nodesByOffset.subMap(startOffset, endOffset).values()
             .iterator();
     while(nodesIter.hasNext()) {
-      currentNode = (Node)nodesIter.next();
+      currentNode = nodesIter.next();
       Collection<Annotation> objFromPoint = getAnnotsByStartNode(currentNode
               .getId());
       if(objFromPoint == null) continue;
@@ -650,7 +663,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    * The new annotations will have different IDs from the old ones (which is
    * required in order to preserve the uniqueness of IDs inside an annotation
    * set).
-   * 
+   *
    * @param c
    *          a collection of annotations
    * @return <tt>true</tt> if the set has been modified as a result of this
@@ -679,7 +692,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    * the annotations like addAll() does but simply adds the new annotations to
    * the set. It is intended to be used solely by annotation sets in order to
    * construct the results for various get(...) methods.
-   * 
+   *
    * @param c
    *          a collection of annotations
    * @return <tt>true</tt> if the set has been modified as a result of this
@@ -696,7 +709,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   }
 
   /** Returns the nodes corresponding to the Longs. The Nodes are created if
-   * they don't exist. 
+   * they don't exist.
    **/
   private final Node[] getNodes(Long start, Long end) throws InvalidOffsetException
   {
@@ -712,21 +725,21 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     Node startNode = (Node)nodesByOffset.get(start);
     if(startNode == null)
       startNode = new NodeImpl(doc.getNextNodeId(), start);
-    
+
     Node endNode = null;
     if(start.equals(end)){
       endNode = startNode;
       return new Node[]{startNode,endNode};
     }
-    
+
     endNode = (Node)nodesByOffset.get(end);
     if(endNode == null)
-      endNode = new NodeImpl(doc.getNextNodeId(), end);    
-    
+      endNode = new NodeImpl(doc.getNextNodeId(), end);
+
     return new Node[]{startNode,endNode};
   }
-  
-  
+
+
   /** Create and add an annotation and return its id */
   public Integer add(Long start, Long end, String type, FeatureMap features)
           throws InvalidOffsetException {
@@ -834,7 +847,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
       // get the nodes that need to be processed (the nodes internal to
       // the
       // removed section plus the marginal ones
-      List affectedNodes = new ArrayList(nodesByOffset.subMap(start,
+      List<Node> affectedNodes = new ArrayList<Node>(nodesByOffset.subMap(start,
               new Long(end.longValue() + 1)).values());
       // if we have more than 1 node we need to delete all apart from
       // the first
@@ -844,21 +857,21 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
       NodeImpl firstNode = null;
       if(!affectedNodes.isEmpty()) {
         firstNode = (NodeImpl)affectedNodes.get(0);
-        List startingAnnotations = new ArrayList();
-        List endingAnnotations = new ArrayList();
+        List<Annotation> startingAnnotations = new ArrayList<Annotation>();
+        List<Annotation> endingAnnotations = new ArrayList<Annotation>();
         // now we need to find all the annotations
         // ending in the zone
-        List beforeNodes = new ArrayList(nodesByOffset.subMap(new Long(0),
+        List<Node> beforeNodes = new ArrayList<Node>(nodesByOffset.subMap(new Long(0),
                 new Long(end.longValue() + 1)).values());
-        Iterator beforeNodesIter = beforeNodes.iterator();
+        Iterator<Node> beforeNodesIter = beforeNodes.iterator();
         while(beforeNodesIter.hasNext()) {
-          Node currentNode = (Node)beforeNodesIter.next();
-          Collection annotations = getAnnotsByStartNode(currentNode.getId());
+          Node currentNode = beforeNodesIter.next();
+          Collection<Annotation> annotations = getAnnotsByStartNode(currentNode.getId());
           if(annotations == null) continue;
           // iterates on the annotations in this set
-          Iterator localIterator = ((Collection)annotations).iterator();
+          Iterator<Annotation> localIterator = annotations.iterator();
           while(localIterator.hasNext()) {
-            Annotation annotation = (Annotation)localIterator.next();
+            Annotation annotation = localIterator.next();
             long offsetEndAnnotation = annotation.getEndNode().getOffset()
                     .longValue();
             // we are interested only in the annotations ending
@@ -869,8 +882,8 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
           }
         }
         for(int i = 1; i < affectedNodes.size(); i++) {
-          Node aNode = (Node)affectedNodes.get(i);
-          Collection annSet = getAnnotsByStartNode(aNode.getId());
+          Node aNode = affectedNodes.get(i);
+          Collection<Annotation> annSet = getAnnotsByStartNode(aNode.getId());
           if(annSet != null) {
             startingAnnotations.addAll(annSet);
           }
@@ -879,7 +892,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
           // annotsByStartNode.remove(aNode);
         }
         // modify the annotations so they point to the saved node
-        Iterator annIter = startingAnnotations.iterator();
+        Iterator<Annotation> annIter = startingAnnotations.iterator();
         while(annIter.hasNext()) {
           AnnotationImpl anAnnot = (AnnotationImpl)annIter.next();
           anAnnot.start = firstNode;
@@ -903,7 +916,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
         }
         // remove the unused nodes inside the area
         for(int i = 1; i < affectedNodes.size(); i++) {
-          Node aNode = (Node)affectedNodes.get(i);
+          Node aNode = affectedNodes.get(i);
           nodesByOffset.remove(aNode.getOffset());
           annotsByStartNode.remove(aNode);
         }
@@ -926,10 +939,10 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     ((replacement == null) ? 0 : replacement.size().longValue());
     // update the offsets and the index by offset for the rest of the
     // nodes
-    List nodesAfterReplacement = new ArrayList(nodesByOffset.tailMap(start)
+    List<Node> nodesAfterReplacement = new ArrayList<Node>(nodesByOffset.tailMap(start)
             .values());
     // remove from the index by offset
-    Iterator nodesAfterReplacementIter = nodesAfterReplacement.iterator();
+    Iterator<Node> nodesAfterReplacementIter = nodesAfterReplacement.iterator();
     while(nodesAfterReplacementIter.hasNext()) {
       NodeImpl n = (NodeImpl)nodesAfterReplacementIter.next();
       nodesByOffset.remove(n.getOffset());
@@ -1003,7 +1016,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   }
 
   /**
-   * 
+   *
    * @return a clone of this set.
    * @throws CloneNotSupportedException
    */
@@ -1013,16 +1026,16 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
 
   public synchronized void removeAnnotationSetListener(AnnotationSetListener l) {
     if(annotationSetListeners != null && annotationSetListeners.contains(l)) {
-      Vector v = (Vector)annotationSetListeners.clone();
+      Vector<AnnotationSetListener> v = (Vector<AnnotationSetListener>)annotationSetListeners.clone();
       v.removeElement(l);
       annotationSetListeners = v;
     }
   }
 
   public synchronized void addAnnotationSetListener(AnnotationSetListener l) {
-    Vector v = annotationSetListeners == null
-            ? new Vector(2)
-            : (Vector)annotationSetListeners.clone();
+    Vector<AnnotationSetListener> v = annotationSetListeners == null
+            ? new Vector<AnnotationSetListener>(2)
+            : (Vector<AnnotationSetListener>)annotationSetListeners.clone();
     if(!v.contains(l)) {
       v.addElement(l);
       annotationSetListeners = v;
@@ -1031,34 +1044,34 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
 
   protected void fireAnnotationAdded(AnnotationSetEvent e) {
     if(annotationSetListeners != null) {
-      Vector listeners = annotationSetListeners;
+      Vector<AnnotationSetListener> listeners = annotationSetListeners;
       int count = listeners.size();
       for(int i = 0; i < count; i++) {
-        ((AnnotationSetListener)listeners.elementAt(i)).annotationAdded(e);
+        listeners.elementAt(i).annotationAdded(e);
       }
     }
   }
 
   protected void fireAnnotationRemoved(AnnotationSetEvent e) {
     if(annotationSetListeners != null) {
-      Vector listeners = annotationSetListeners;
+      Vector<AnnotationSetListener> listeners = annotationSetListeners;
       int count = listeners.size();
       for(int i = 0; i < count; i++) {
-        ((AnnotationSetListener)listeners.elementAt(i)).annotationRemoved(e);
+        listeners.elementAt(i).annotationRemoved(e);
       }
     }
   }
 
   public synchronized void removeGateListener(GateListener l) {
     if(gateListeners != null && gateListeners.contains(l)) {
-      Vector v = (Vector)gateListeners.clone();
+      Vector<GateListener> v = (Vector<GateListener>)gateListeners.clone();
       v.removeElement(l);
       gateListeners = v;
     }
   }
 
   public synchronized void addGateListener(GateListener l) {
-    Vector v = gateListeners == null ? new Vector(2) : (Vector)gateListeners
+    Vector<GateListener> v = gateListeners == null ? new Vector<GateListener>(2) : (Vector<GateListener>)gateListeners
             .clone();
     if(!v.contains(l)) {
       v.addElement(l);
@@ -1068,10 +1081,10 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
 
   protected void fireGateEvent(GateEvent e) {
     if(gateListeners != null) {
-      Vector listeners = gateListeners;
+      Vector<GateListener> listeners = gateListeners;
       int count = listeners.size();
       for(int i = 0; i < count; i++) {
-        ((GateListener)listeners.elementAt(i)).processGateEvent(e);
+        listeners.elementAt(i).processGateEvent(e);
       }
     }
   }
@@ -1084,7 +1097,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     ObjectOutputStream.PutField pf = out.putFields();
     pf.put("name", this.name);
     pf.put("doc", this.doc);
-    //    
+    //
     // out.writeObject(this.name);
     // out.writeObject(this.doc);
     // save only the annotations

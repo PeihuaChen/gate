@@ -31,30 +31,33 @@ public interface ParseCpslConstants {
   int pling = 25;
   int kleeneOp = 26;
   int attrOp = 27;
-  int integer = 28;
-  int string = 35;
-  int bool = 36;
-  int ident = 37;
-  int floatingPoint = 38;
-  int exponent = 39;
-  int colon = 40;
-  int semicolon = 41;
-  int period = 42;
-  int bar = 43;
-  int comma = 44;
-  int leftBrace = 45;
-  int rightBrace = 46;
-  int leftBracket = 47;
-  int rightBracket = 48;
-  int assign = 49;
-  int colonplus = 50;
-  int whiteSpace = 51;
-  int singleLineCStyleComment = 52;
-  int singleLineCpslStyleComment = 53;
-  int commentStart = 54;
-  int commentChars = 55;
-  int commentEnd = 56;
-  int other = 57;
+  int metaPropOp = 28;
+  int integer = 29;
+  int string = 36;
+  int bool = 37;
+  int ident = 38;
+  int floatingPoint = 39;
+  int exponent = 40;
+  int colon = 41;
+  int semicolon = 42;
+  int period = 43;
+  int bar = 44;
+  int comma = 45;
+  int leftBrace = 46;
+  int rightBrace = 47;
+  int leftBracket = 48;
+  int rightBracket = 49;
+  int leftSquare = 50;
+  int rightSquare = 51;
+  int assign = 52;
+  int colonplus = 53;
+  int whiteSpace = 54;
+  int singleLineCStyleComment = 55;
+  int singleLineCpslStyleComment = 56;
+  int commentStart = 57;
+  int commentChars = 58;
+  int commentEnd = 59;
+  int other = 60;
 
   int DEFAULT = 0;
   int IN_PHASES = 1;
@@ -91,13 +94,14 @@ public interface ParseCpslConstants {
     "\"!\"",
     "<kleeneOp>",
     "<attrOp>",
+    "\"@\"",
     "<integer>",
     "\"\\\"\"",
     "\"\\\\n\"",
     "\"\\\\r\"",
     "\"\\\\t\"",
     "\"\\\\\\\"\"",
-    "<token of kind 34>",
+    "<token of kind 35>",
     "\"\\\"\"",
     "<bool>",
     "<ident>",
@@ -112,6 +116,8 @@ public interface ParseCpslConstants {
     "\"}\"",
     "\"(\"",
     "\")\"",
+    "\"[\"",
+    "\"]\"",
     "\"=\"",
     "\":+\"",
     "<whiteSpace>",

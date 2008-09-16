@@ -258,6 +258,14 @@
 				RUNTIME="true">
 				gate.creole.ontology.Ontology
 			</PARAMETER>
+			<PARAMETER NAME="operators" RUNTIME="false" OPTIONAL="true"
+				ITEM_CLASS_NAME="java.lang.String">
+				java.util.ArrayList
+			</PARAMETER>
+			<PARAMETER NAME="annotationAccessors" RUNTIME="false" OPTIONAL="true"
+				ITEM_CLASS_NAME="java.lang.String">
+				java.util.ArrayList
+			</PARAMETER>
 			<ICON>jape</ICON>
 		</RESOURCE>
 
@@ -289,6 +297,14 @@
 			<PARAMETER NAME="encoding" DEFAULT="UTF-8"
 				COMMENT="The encoding used for reading the grammar">
 				java.lang.String
+			</PARAMETER>
+			<PARAMETER NAME="operators" RUNTIME="false" OPTIONAL="true"
+				ITEM_CLASS_NAME="java.lang.String">
+				java.util.ArrayList
+			</PARAMETER>
+			<PARAMETER NAME="annotationAccessors" RUNTIME="false" OPTIONAL="true"
+				ITEM_CLASS_NAME="java.lang.String">
+				java.util.ArrayList
 			</PARAMETER>
 			<ICON>ne-transducer</ICON>
 		</RESOURCE>
@@ -370,7 +386,7 @@
 				COMMENT="The URL to the non splits pattern list"
 				OPTIONAL="false" SUFFIXES="txt">
 				java.net.URL
-			</PARAMETER>			
+			</PARAMETER>
 			<ICON>sentence-splitter</ICON>
 		</RESOURCE>
 
@@ -440,7 +456,7 @@
 				java.net.URL
 			</PARAMETER>
 			<PARAMETER DEFAULT="0.50"
-				COMMENT="Minimum likelihood that a name is a nickname of a formal name to be allowed as a nickname" 
+				COMMENT="Minimum likelihood that a name is a nickname of a formal name to be allowed as a nickname"
 				NAME="minimumNicknameLikelihood">
 				java.lang.Double
 			</PARAMETER>
@@ -508,7 +524,7 @@
         		COMMENT="List of annotation types for non animated entities"
         		DEFAULT="Organization;Location"
         		OPTIONAL="true">java.lang.String
-        	</PARAMETER>	
+        	</PARAMETER>
 			<PARAMETER NAME="resolveIt" RUNTIME="true"
 				COMMENT="Whether or not to resolve it pronouns" DEFAULT="false"
 				OPTIONAL="true">

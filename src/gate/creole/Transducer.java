@@ -12,20 +12,21 @@
  */
 package gate.creole;
 
-import gate.Resource;
+import gate.*;
 import gate.gui.MainFrame;
 import gate.jape.Batch;
 import gate.jape.JapeException;
+import gate.jape.constraint.AnnotationAccessor;
+import gate.jape.constraint.ConstraintPredicate;
 import gate.util.Err;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.List;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
+import java.util.*;
+
+import javax.swing.*;
 
 /**
  * A cascaded multi-phase transducer using the Jape language which is a variant
@@ -46,7 +47,12 @@ public class Transducer extends AbstractLanguageAnalyser
 
   public static final String TRANSD_BINARY_GRAMMAR_URL_PARAMETER_NAME = "binaryGrammarURL";
 
-  protected List actionList;
+  public static final String TRANSD_OPERATORS_PARAMETER_NAME = "operators";
+
+  public static final String TRANSD_ANNOTATION_ACCESSORS_PARAMETER_NAME = "annotationAccessors";
+
+
+  protected List<Action> actionList;
 
   /**
    * Default constructor. Does nothing apart from calling the default
@@ -54,7 +60,7 @@ public class Transducer extends AbstractLanguageAnalyser
    * via the {@link #init} method.
    */
   public Transducer() {
-    actionList = new ArrayList();
+    actionList = new ArrayList<Action>();
     actionList.add(null);
     actionList.add(new SerializeTransducerAction());
   }
@@ -68,12 +74,15 @@ public class Transducer extends AbstractLanguageAnalyser
    * This method is the one responsible for initialising the transducer. It
    * assumes that all the needed parameters have been already set using the
    * appropiate setXXX() methods.
-   * 
+   *
    * @return a reference to <b>this</b>
    */
   public Resource init() throws ResourceInstantiationException {
     try {
       fireProgressChanged(0);
+
+      initCustomConstraints();
+
       if(binaryGrammarURL != null) {
         ObjectInputStream s = new ObjectInputStream(binaryGrammarURL
                 .openStream());
@@ -128,18 +137,92 @@ public class Transducer extends AbstractLanguageAnalyser
 
   /**
    * Gets the list of actions that can be performed on this resource.
-   * 
+   *
    * @return a List of Action objects (or null values)
    */
-  public List getActions() {
-    List result = new ArrayList();
+  public List<Action> getActions() {
+    List<Action> result = new ArrayList<Action>();
     result.addAll(actionList);
     return result;
   }
 
   /**
+   * Loads any custom operators and annotation accessors into the ConstraintFactory.
+   * @throws ResourceInstantiationException
+   */
+  protected void initCustomConstraints() throws ResourceInstantiationException {
+    //Load operators
+    if (operators != null) {
+      for(String opName : operators) {
+        Class<ConstraintPredicate> clazz = null;
+        try {
+          clazz = (Class<ConstraintPredicate>)Class.forName(opName);
+        }
+        catch(ClassNotFoundException e) {
+          //if couldn't find it that way, try with current thread class loader
+          try {
+            clazz = (Class<ConstraintPredicate>)Class.forName(opName, true, Thread.currentThread().getContextClassLoader());
+          }
+          catch(ClassNotFoundException e1) {
+            throw new ResourceInstantiationException("Cannot load class for operator: " + opName, e1);
+          }
+        }
+        //check that the class instantiates ConstraintPredicate
+        if (!ConstraintPredicate.class.isAssignableFrom(clazz))
+          throw new ResourceInstantiationException("Operator class '" + opName + "' must implement ConstraintPredicate");
+
+        //instantiate an instance of the class so can get the operator string
+        try {
+          ConstraintPredicate predicate = clazz.newInstance();
+          String opSymbol = predicate.getOperator();
+          //now store it in ConstraintFactory
+          Factory.getConstraintFactory().addOperator(opSymbol, clazz);
+        }
+        catch(Exception e) {
+          throw new ResourceInstantiationException("Cannot instantiate class for operator: " + opName, e);
+        }
+      }
+    }
+
+    //Load annotationAccessors
+    if (annotationAccessors != null) {
+      for(String accessorName : annotationAccessors) {
+        Class<AnnotationAccessor> clazz = null;
+        try {
+          clazz = (Class<AnnotationAccessor>)Class.forName(accessorName);
+        }
+        catch(ClassNotFoundException e) {
+          //if couldn't find it that way, try with current thread class loader
+          try {
+            clazz = (Class<AnnotationAccessor>)Class.forName(accessorName, true, Thread.currentThread().getContextClassLoader());
+          }
+          catch(ClassNotFoundException e1) {
+            throw new ResourceInstantiationException("Cannot load class for accessor: " + accessorName, e1);
+          }
+        }
+        //check that the class instantiates ConstraintPredicate
+        if (!AnnotationAccessor.class.isAssignableFrom(clazz))
+          throw new ResourceInstantiationException("Operator class '" + accessorName + "' must implement AnnotationAccessor");
+
+        //instantiate an instance of the class so can get the meta-property name string
+        try {
+          AnnotationAccessor aa = clazz.newInstance();
+          String accSymbol = (String)aa.getKey();
+          //now store it in ConstraintFactory
+          Factory.getConstraintFactory().addMetaProperty(accSymbol, clazz);
+        }
+        catch(Exception e) {
+          throw new ResourceInstantiationException("Cannot instantiate class for accessor: " + accessorName, e);
+        }
+
+      }
+    }
+  }
+
+
+  /**
    * Saves the Jape Transuder to the binary file.
-   * 
+   *
    * @author niraj
    */
   protected class SerializeTransducerAction extends javax.swing.AbstractAction {
@@ -192,7 +275,7 @@ public class Transducer extends AbstractLanguageAnalyser
 
   /**
    * Sets the grammar to be used for building this transducer.
-   * 
+   *
    * @param newGrammarURL
    *          an URL to a file containing a Jape grammar.
    */
@@ -202,7 +285,7 @@ public class Transducer extends AbstractLanguageAnalyser
 
   /**
    * Gets the URL to the grammar used to build this transducer.
-   * 
+   *
    * @return a {@link java.net.URL} pointing to the grammar file.
    */
   public java.net.URL getGrammarURL() {
@@ -210,12 +293,12 @@ public class Transducer extends AbstractLanguageAnalyser
   }
 
   /**
-   * 
+   *
    * Sets the encoding to be used for reding the input file(s) forming the Jape
    * grammar. Note that if the input grammar is a multi-file one than the same
    * encoding will be used for reding all the files. Multi file grammars with
    * different encoding across the composing files are not supported!
-   * 
+   *
    * @param newEncoding
    *          a {link String} representing the encoding.
    */
@@ -232,7 +315,7 @@ public class Transducer extends AbstractLanguageAnalyser
 
   /**
    * Sets the {@link gate.AnnotationSet} to be used as input for the transducer.
-   * 
+   *
    * @param newInputASName
    *          a {@link gate.AnnotationSet}
    */
@@ -242,7 +325,7 @@ public class Transducer extends AbstractLanguageAnalyser
 
   /**
    * Gets the {@link gate.AnnotationSet} used as input by this transducer.
-   * 
+   *
    * @return a {@link gate.AnnotationSet}
    */
   public String getInputASName() {
@@ -251,7 +334,7 @@ public class Transducer extends AbstractLanguageAnalyser
 
   /**
    * Sets the {@link gate.AnnotationSet} to be used as output by the transducer.
-   * 
+   *
    * @param newOutputASName
    *          a {@link gate.AnnotationSet}
    */
@@ -261,7 +344,7 @@ public class Transducer extends AbstractLanguageAnalyser
 
   /**
    * Gets the {@link gate.AnnotationSet} used as output by this transducer.
-   * 
+   *
    * @return a {@link gate.AnnotationSet}
    */
   public String getOutputASName() {
@@ -274,6 +357,38 @@ public class Transducer extends AbstractLanguageAnalyser
 
   public void setEnableDebugging(Boolean enableDebugging) {
     this.enableDebugging = enableDebugging;
+  }
+
+  /**
+   * Gets the list of class names for any custom boolean operators.
+   * Classes must implement {@link gate.jape.constraint.ConstraintPredicate}.
+   */
+  public List<String> getOperators() {
+    return operators;
+  }
+
+  /**
+   * Sets the list of class names for any custom boolean operators.
+   * Classes must implement {@link gate.jape.constraint.ConstraintPredicate}.
+   */
+  public void setOperators(List<String> operators) {
+    this.operators = operators;
+  }
+
+  /**
+   * Gets the list of class names for any custom
+   * {@link gate.jape.constraint.AnnotationAccessor}s.
+   */
+  public List<String> getAnnotationAccessors() {
+    return annotationAccessors;
+  }
+
+  /**
+   * Sets the list of class names for any custom
+   * {@link gate.jape.constraint.AnnotationAccessor}s.
+   */
+  public void setAnnotationAccessors(List<String> annotationAccessors) {
+    this.annotationAccessors = annotationAccessors;
   }
 
   /**
@@ -312,8 +427,20 @@ public class Transducer extends AbstractLanguageAnalyser
   protected gate.creole.ontology.Ontology ontology;
 
   /**
+   * List of class names for any custom
+   * {@link gate.jape.constraint.ConstraintPredicate}.
+   */
+  protected List<String> operators = null;
+
+  /**
+   * List of class names for any custom
+   * {@link gate.jape.constraint.AnnotationAccessor}s.
+   */
+  protected List<String> annotationAccessors = null;
+
+  /**
    * Gets the ontology used by this transducer.
-   * 
+   *
    * @return an {@link gate.creole.ontology.Ontology} value.
    */
   public gate.creole.ontology.Ontology getOntology() {
@@ -322,13 +449,13 @@ public class Transducer extends AbstractLanguageAnalyser
 
   /**
    * Sets the ontology used by this transducer.
-   * 
+   *
    * @param ontology
    *          an {@link gate.creole.ontology.Ontology} value.
    */
   public void setOntology(gate.creole.ontology.Ontology ontology) {
     this.ontology = ontology;
-    //ontology is now a run-time param so we need to propagate it down to the 
+    //ontology is now a run-time param so we need to propagate it down to the
     //actual SPTs included in this transducer.
     if(batch!= null) batch.setOntology(ontology);
   }

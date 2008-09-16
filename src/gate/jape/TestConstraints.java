@@ -15,13 +15,10 @@
 package gate.jape;
 
 import gate.*;
-import gate.jape.parser.ParseCpsl;
 import gate.jape.parser.ParseException;
 import gate.util.Err;
 import gate.util.Out;
 
-import java.io.StringReader;
-import java.util.HashMap;
 import java.util.Set;
 
 import junit.framework.Test;
@@ -38,10 +35,6 @@ public class TestConstraints extends BaseJapeTests {
   public TestConstraints(String name) {
     super(name);
   }
-  /** Fixture set up */
-  public void setUp() {
-    // Out.println("TestConstraints.setUp()");
-  } // setUp
 
   public void testGoodOperators() throws Exception {
     String japeFile = "/jape/operators/operator_tests.jape";
@@ -49,7 +42,7 @@ public class TestConstraints extends BaseJapeTests {
         "NotEqualandGreaterEqual", "NotEqual", "EqualAndNotEqualRegEx",
         "EqualAndNotExistance", "OntoTest", "OntoTest2"};
 
-    Set<Annotation> actualResults = doTest(DEFAULT_DATA_FILE, japeFile, annotCreator);
+    Set<Annotation> actualResults = doTest(DEFAULT_DATA_FILE, japeFile, basicAnnotCreator);
     Out.println(actualResults);
     compareResults(expectedResults, actualResults);
   }
@@ -57,7 +50,7 @@ public class TestConstraints extends BaseJapeTests {
   public void testBadCompare() throws Exception {
     String japeFile = "/jape/operators/bad_operator_tests.jape";
 
-    Set<Annotation> orderedResults = doTest(DEFAULT_DATA_FILE, japeFile, annotCreator);
+    Set<Annotation> orderedResults = doTest(DEFAULT_DATA_FILE, japeFile, basicAnnotCreator);
     assertTrue("No results should be found", orderedResults.isEmpty());
   }
 
@@ -99,7 +92,7 @@ public class TestConstraints extends BaseJapeTests {
 12345678901234567890
          1         2
    */
-  protected AnnotationCreator annotCreator = new AnnotationCreator() {
+  protected AnnotationCreator basicAnnotCreator = new AnnotationCreator() {
     public AnnotationSet createAnnots(Document doc) {
       AnnotationSet defaultAS = doc.getAnnotations();
 
@@ -157,6 +150,118 @@ public class TestConstraints extends BaseJapeTests {
       return defaultAS;
     }
   };
+
+  public void testMetaPropertyAccessors() throws Exception {
+    String data = "foo bar blah word4    word5  ";
+    String japeFile = "/jape/operators/meta_property_tests.jape";
+    String[] expectedResults = {"LengthAccessorEqual", "StringAccessorEqual", "CleanStringAccessorEqual"};
+
+    AnnotationCreator ac = new AnnotationCreator() {
+      public AnnotationSet createAnnots(Document doc) {
+        AnnotationSet defaultAS = doc.getAnnotations();
+
+        try {
+          FeatureMap feat = Factory.newFeatureMap();
+          feat.put("f1", "aval");
+          feat.put("f2", "2");
+          feat.put("f3", 3);
+          defaultAS.add(new Long(4), new Long(7), "A", feat);
+
+          feat = Factory.newFeatureMap();
+          defaultAS.add(new Long(8), new Long(12), "A", feat);
+
+          feat = Factory.newFeatureMap();
+          defaultAS.add(new Long(12), new Long(28), "B", feat);
+        }
+        catch(gate.util.InvalidOffsetException ioe) {
+          ioe.printStackTrace(Err.getPrintWriter());
+        }
+        return defaultAS;
+      }
+    };
+
+    Set<Annotation> actualResults = doTest(createDoc(data), japeFile, ac);
+    Out.println(actualResults);
+    compareResults(expectedResults, actualResults);
+  }
+
+  public void testCustomPredicates() throws Exception {
+    String japeFile = "/jape/operators/custom_predicates_tests.jape";
+    String[] expectedResults = {"Contains", "IsContained"};
+
+    AnnotationCreator ac = new AnnotationCreator() {
+      public AnnotationSet createAnnots(Document doc) {
+        AnnotationSet defaultAS = doc.getAnnotations();
+
+        try {
+          FeatureMap feat = Factory.newFeatureMap();
+          defaultAS.add(new Long(4), new Long(7), "A", feat);
+
+          feat = Factory.newFeatureMap();
+          feat.put("f2", "bar");
+          defaultAS.add(new Long(5), new Long(6), "B", feat);
+
+          feat = Factory.newFeatureMap();
+          defaultAS.add(new Long(12), new Long(28), "B", feat);
+          feat = Factory.newFeatureMap();
+          defaultAS.add(new Long(14), new Long(20), "A", feat);
+        }
+        catch(gate.util.InvalidOffsetException ioe) {
+          ioe.printStackTrace(Err.getPrintWriter());
+        }
+        return defaultAS;
+      }
+    };
+
+    Set<Annotation> actualResults = doTest(DEFAULT_DATA_FILE, japeFile, ac);
+    Out.println(actualResults);
+    compareResults(expectedResults, actualResults);
+  }
+
+  public void testCustomPredicatesWithConstraints() throws Exception {
+    String japeFile = "/jape/operators/custom_predicates_tests.jape";
+    String[] expectedResults = {"ContainsWithConstraints","ContainsWithMetaProperty"};
+
+    AnnotationCreator ac = new AnnotationCreator() {
+      public AnnotationSet createAnnots(Document doc) {
+        AnnotationSet defaultAS = doc.getAnnotations();
+
+        try {
+          FeatureMap cFeat = Factory.newFeatureMap();
+          cFeat = Factory.newFeatureMap();
+          cFeat.put("f1", "foo");
+          defaultAS.add(new Long(4), new Long(7), "C", cFeat);
+          defaultAS.add(new Long(4), new Long(8), "C", Factory.newFeatureMap());
+
+          FeatureMap bFeat = Factory.newFeatureMap();
+          bFeat.put("f2", "bar");
+          defaultAS.add(new Long(5), new Long(6), "B", bFeat);
+
+          //this combo won't work because B doesn't have the feature and isn't long enough
+          defaultAS.add(new Long(8), new Long(10), "C", cFeat);
+          defaultAS.add(new Long(8), new Long(9), "B", Factory.newFeatureMap());
+
+          defaultAS.add(new Long(11), new Long(13), "C", Factory.newFeatureMap());
+          //a combo that should work
+          defaultAS.add(new Long(12), new Long(16), "C", cFeat);
+          defaultAS.add(new Long(12), new Long(15), "C", Factory.newFeatureMap());
+          defaultAS.add(new Long(12), new Long(16), "B", Factory.newFeatureMap());
+
+          //here's one with no B at all
+          defaultAS.add(new Long(17), new Long(20), "C", cFeat);
+
+        }
+        catch(gate.util.InvalidOffsetException ioe) {
+          ioe.printStackTrace(Err.getPrintWriter());
+        }
+        return defaultAS;
+      }
+    };
+
+    Set<Annotation> actualResults = doTest(DEFAULT_DATA_FILE, japeFile, ac);
+    Out.println(actualResults);
+    compareResults(expectedResults, actualResults);
+  }
 
   /** Test suite routine for the test runner */
   public static Test suite() {

@@ -95,7 +95,7 @@ public class ParseCpsl implements JapeConstants {
 
   protected void finishBPE(BasicPatternElement bpe) {
   }
-  
+
   /**
    * Append the given string to the end of the given buffer as a Java string
    * literal.  If <code>str</code> is <code>null</code>, we append the four
@@ -283,6 +283,7 @@ PARSER_END(ParseCpsl)
 <DEFAULT> TOKEN: { <pling: "!"> }
 <DEFAULT> TOKEN: { <kleeneOp: "*" | "+" | "?"> }
 <DEFAULT> TOKEN: { <attrOp: "==" | "!=" | ">" | "<" | ">=" | "<=" | "=~" | "!~" | "==~" | "!=~"> }
+<DEFAULT> TOKEN: { <metaPropOp: "@"> }
 <DEFAULT> TOKEN: { <integer: ( ["0"-"9"] )+ > }
 
 
@@ -336,6 +337,8 @@ PARSER_END(ParseCpsl)
 <DEFAULT> TOKEN: { <rightBrace: "}"> }
 <DEFAULT> TOKEN: { <leftBracket: "("> }
 <DEFAULT> TOKEN: { <rightBracket: ")"> }
+<DEFAULT> TOKEN: { <leftSquare: "["> }
+<DEFAULT> TOKEN: { <rightSquare: "]"> }
 <DEFAULT> TOKEN: { <assign: "="> }
 <DEFAULT> TOKEN: { <colonplus: ":+"> }
 /*<DEFAULT> SPECIAL_TOKEN: { // catch all for Java block processing
@@ -778,12 +781,14 @@ ComplexPatternElement ComplexPatternElement(LeftHandSide lhs) :
 Constraint Constraint() :
 {
   Token annotTypeTok = null;
+  Token metaPropertyTok = null;
   AnnotationAccessor accessor = null;
   Token opTok = null;
   Object attrValObj = null;
   Pair attrValPair = null;
   boolean negate = false;
   Constraint c = null;
+  Constraint embeddedConstraint = null;
   String opString = null;
 }
 {
@@ -797,13 +802,42 @@ Constraint Constraint() :
     if(negate) c.negate();
   }
 
-  // optional attribute value with comparison operator
+  //optional additions
   (
-    accessor=Accessor() opTok=<attrOp> attrValPair=AttrVal()
-    {
-      opString = opTok.image;
-      c.addAttribute(Factory.getConstraintFactory().createPredicate(opString, accessor, attrValPair.second));
-    }
+    // feature attribute value with comparison operator
+    (
+      accessor=FeatureAccessor() opTok=<attrOp> attrValPair=AttrVal()
+      {
+        opString = opTok.image;
+        c.addAttribute(Factory.getConstraintFactory().createPredicate(opString, accessor, attrValPair.second));
+      }
+    )
+    |
+    (
+      // meta-property name with comparison operator
+      <metaPropOp> metaPropertyTok=<ident> opTok=<attrOp> attrValPair=AttrVal()
+      {
+        accessor = Factory.getConstraintFactory().createMetaPropertyAccessor(metaPropertyTok.image);
+        opString = opTok.image;
+        c.addAttribute(Factory.getConstraintFactory().createPredicate(opString, accessor, attrValPair.second));
+      }
+    )
+    |
+    (
+      // custom string operator name with value
+      opTok=<ident>
+      (
+        //optional braces.  Which way of writing depends on the exact rule
+        (<leftBrace> embeddedConstraint=Constraint() <rightBrace>)
+        |
+        (embeddedConstraint=Constraint())
+      )
+      {
+        opString = opTok.image;
+        accessor = new SimpleAnnotationAccessor();
+        c.addAttribute(Factory.getConstraintFactory().createPredicate(opString, accessor, embeddedConstraint));
+      }
+    )
   )?
 
   // return value
@@ -814,7 +848,7 @@ Constraint Constraint() :
 
 //attribute values: strings, identifers (=strings), integers, floats,
 //booleans
-AnnotationAccessor Accessor() :
+AnnotationAccessor FeatureAccessor() :
 {
 Token attrNameTok = null;
 AnnotationAccessor accessor = null;
