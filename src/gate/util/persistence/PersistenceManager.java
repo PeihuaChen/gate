@@ -465,7 +465,11 @@ public class PersistenceManager {
       if(Gate.getUseXMLSerialization()) {
         // Just create the xstream and the filewriter that will later be
         // used to serialize objects.
-        xstream = new XStream();
+        xstream = new XStream(new StaxDriver(new XStream11XmlFriendlyReplacer())) {
+          protected boolean useXStream11XmlFriendlyMapper() {
+            return true;
+          }
+        };
         FileWriter fileWriter = new FileWriter(file);
         writer = new PrettyPrintWriter(fileWriter,
             new XmlFriendlyReplacer("-", "_"));
@@ -559,7 +563,11 @@ public class PersistenceManager {
         throw new PersistenceException("Error creating reader", xse);
       }
       
-      xstream = new XStream(new StaxDriver());
+      xstream = new XStream(new StaxDriver(new XStream11XmlFriendlyReplacer())) {
+        protected boolean useXStream11XmlFriendlyMapper() {
+          return true;
+        }
+      };
       // make XStream load classes through the GATE ClassLoader
       xstream.setClassLoader(Gate.getClassLoader());
       // make the XML stream appear as a normal ObjectInputStream
