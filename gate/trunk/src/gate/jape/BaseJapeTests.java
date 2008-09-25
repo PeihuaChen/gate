@@ -135,7 +135,7 @@ public class BaseJapeTests extends TestCase {
    */
   protected void parseJapeString(String japeRules) throws Exception {
     StringReader sr = new StringReader(japeRules);
-    ParseCpsl parser = Factory.newJapeParser(sr, new HashMap());
+    ParseCpsl parser = Factory.newJapeParser(sr, new HashMap<Object, Object>());
     Transducer transducer = parser.MultiPhaseTransducer();
     transducer.finish();
   }
@@ -146,7 +146,66 @@ public class BaseJapeTests extends TestCase {
    * @version $Revision$
    * @author esword
    */
-  protected static interface AnnotationCreator {
+  public static interface AnnotationCreator {
+    public void setDoc(Document doc);
     public AnnotationSet createAnnots(Document doc);
+    public AnnotationCreator addInc(String type);
+    public AnnotationCreator add(int start, int end, String type);
+    public AnnotationCreator add(int start, int end, String type, FeatureMap fm);
+    public AnnotationCreator add(String type);
+  }
+
+  public static abstract class BaseAnnotationCreator implements AnnotationCreator {
+    protected AnnotationSet as;
+    protected int curOffset = 0;
+    protected int annotLength = 2;
+    protected static FeatureMap emptyFeat = Factory.newFeatureMap();
+
+    public void setDoc(Document doc) {
+      as = doc.getAnnotations();
+    }
+
+    /**
+     * Add an annotation of the given type over the given range.  Does not increment curOffset.
+     */
+    public AnnotationCreator add(int start, int end, String type) {
+      return add(start, end, type, emptyFeat);
+    }
+
+    /**
+     * Add an annotation of the given type over the given range.  Does not increment curOffset.
+     */
+    public AnnotationCreator add(int start, int end, String type, FeatureMap fm) {
+      try {
+        as.add(new Long(start), new Long(end), type, fm);
+      }
+      catch(InvalidOffsetException ioe) {
+        ioe.printStackTrace(Err.getPrintWriter());
+      }
+      return this;
+    }
+
+    /**
+     * Add an annotation of the given type at the current offset and increment the placement
+     * counter.
+     */
+    public AnnotationCreator addInc(String type) {
+      add(type);
+      curOffset += annotLength;
+      return this;
+    }
+
+    /**
+     * Add annot at the current offset
+     */
+    public AnnotationCreator add(String type) {
+      try {
+        as.add(new Long(curOffset), new Long(curOffset + annotLength), type, emptyFeat);
+      }
+      catch(InvalidOffsetException ioe) {
+        ioe.printStackTrace(Err.getPrintWriter());
+      }
+      return this;
+    }
   }
 }
