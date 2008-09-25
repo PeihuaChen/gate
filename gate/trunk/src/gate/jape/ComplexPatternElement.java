@@ -16,11 +16,11 @@
 
 package gate.jape;
 
-import java.util.Iterator;
-
 import gate.AnnotationSet;
 import gate.Document;
 import gate.util.Strings;
+
+import java.util.Iterator;
 
 
 /**
@@ -30,12 +30,9 @@ import gate.util.Strings;
 public class ComplexPatternElement extends PatternElement
 implements JapeConstants, java.io.Serializable
 {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
-
   /** Kleene operator (defaults to none). Other values: KLEENE_STAR (*);
     * KLEENE_PLUS (+); KLEENE_QUERY (?) */
-  private int kleeneOp = NO_KLEENE_OP;
+  private KleeneOperator kleeneOp = null;
 
   /** Binding name (may be null). */
   private String bindingName = null;
@@ -44,7 +41,7 @@ implements JapeConstants, java.io.Serializable
   public String getBindingName() { return bindingName; }
 
   /** Get a list of CPEs that we contain. */
-  protected Iterator getCPEs() {
+  protected Iterator<ComplexPatternElement> getCPEs() {
     return constraintGroup.getCPEs();
   } // getCPEs
 
@@ -53,14 +50,46 @@ implements JapeConstants, java.io.Serializable
 
   /** Construction from ConstraintGroup, Kleene operator type and binding
     * name. Kleene types are defined in JapeConstants.
+    * @deprecated Use {@link #ComplexPatternElement(ConstraintGroup, KleeneOperator.Type, String)} instead.
     */
   public ComplexPatternElement(
     ConstraintGroup constraintGroup,
     int kleeneOp,
     String bindingName
   ) {
+    this(constraintGroup, KleeneOperator.Type.getFromJapeConstant(kleeneOp), bindingName);
+  }
+
+  public ComplexPatternElement(
+    ConstraintGroup constraintGroup,
+    KleeneOperator.Type kleeneType,
+    String bindingName
+  ) {
+    this(constraintGroup, new KleeneOperator(kleeneType), bindingName);
+  }
+
+  public ComplexPatternElement(
+          ConstraintGroup constraintGroup,
+          KleeneOperator kleeneOp,
+          String bindingName
+        ) {
+          if (kleeneOp == null)
+            kleeneOp = new KleeneOperator(KleeneOperator.Type.SINGLE);
+          this.constraintGroup = constraintGroup;
+          this.kleeneOp = kleeneOp;
+          this.bindingName = bindingName;
+        }
+
+  /** Construction from ConstraintGroup, min and max legal occurance limits,
+   * and binding name.
+   */
+  public ComplexPatternElement(
+    ConstraintGroup constraintGroup,
+    int minOccurance, int maxOccurance,
+    String bindingName
+  ) {
     this.constraintGroup = constraintGroup;
-    this.kleeneOp = kleeneOp;
+    this.kleeneOp = new KleeneOperator(minOccurance, maxOccurance);
     this.bindingName = bindingName;
   }
 
@@ -124,20 +153,20 @@ implements JapeConstants, java.io.Serializable
     }
     int theEndOfTheDocument = doc.getContent().size().intValue();
 
-    if(kleeneOp == NO_KLEENE_OP) {
+    if(kleeneOp == null) {
       if(firstTry) matchHistory.push(new Integer(matchArity));
       return firstTry;
     }
-    else if(kleeneOp == KLEENE_QUERY) {
+    else if(kleeneOp.getType() == KleeneOperator.Type.OPTIONAL) {
       if(firstTry) matchHistory.push(new Integer(matchArity));
       /* Debug.pr(this, "CPE.matches: true, QUERY rule"); */
       return true;
     }
-    else if(kleeneOp == KLEENE_PLUS) {
+    else if(kleeneOp.getType() == KleeneOperator.Type.PLUS) {
       if(! firstTry)
         return false; // no cache purge: maybe we're under another * etc.
     }
-    else if(kleeneOp == KLEENE_STAR && !firstTry) {
+    else if(kleeneOp.getType() == KleeneOperator.Type.STAR && !firstTry) {
       /*Debug.pr(this,
         "CPE.matches: true, STAR rule, newPos("+newPosition.value+")");*/
       matchHistory.push(new Integer(matchArity));
@@ -174,13 +203,8 @@ implements JapeConstants, java.io.Serializable
       pad + "CPE: bindingName(" + bindingName + "); kleeneOp("
     );
 
-    switch(kleeneOp) {
-      case NO_KLEENE_OP: buf.append("NO_KLEENE_OP"); break;
-      case KLEENE_STAR:  buf.append("KLEENE_STAR");  break;
-      case KLEENE_QUERY: buf.append("KLEENE_QUERY"); break;
-      case KLEENE_PLUS:  buf.append("KLEENE_PLUS");  break;
-      default: break;
-    }
+    if (kleeneOp != null)
+      buf.append(kleeneOp);
 
     buf.append(
       "); constraintGroup(" + newline +
@@ -192,9 +216,9 @@ implements JapeConstants, java.io.Serializable
   } // toString
   //needed by FSM
 
-  public int getKleeneOp(){ return kleeneOp; };
+  public KleeneOperator getKleeneOp(){ return kleeneOp; };
 
-  public ConstraintGroup getConstraintGroup(){ return constraintGroup; };
+  public ConstraintGroup getConstraintGroup(){ return constraintGroup; }
 
 } // class ComplexPatternElement
 

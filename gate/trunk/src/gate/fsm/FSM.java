@@ -19,6 +19,7 @@ import java.util.*;
 
 import gate.jape.*;
 import gate.util.SimpleArraySet;
+import static gate.jape.KleeneOperator.Type.*;
 
 /**
   * This class implements a standard Finite State Machine.
@@ -235,15 +236,114 @@ public class FSM implements JapeConstants {
     * as described in the pattern
     */
   private State convertComplexPE(State startState,
-                                ComplexPatternElement cpe, LinkedList<String> labels){
+          ComplexPatternElement cpe, LinkedList<String> labels){
+
+    State endState = generateStates(startState, cpe, labels);
+
+    // now take care of the kleene operator
+    KleeneOperator kleeneOp = cpe.getKleeneOp();
+    KleeneOperator.Type type = kleeneOp.getType();
+    if (type == OPTIONAL) {
+      //allow to skip everything via a null transition
+      startState.addTransition(new Transition(null,endState));
+    }
+    else if (type == PLUS) {
+      // allow to return to startState
+      endState.addTransition(new Transition(null,startState));
+    }
+    else if (type == STAR) {
+      // allow to skip everything via a null transition
+      startState.addTransition(new Transition(null,endState));
+
+      // allow to return to startState
+      endState.addTransition(new Transition(null,startState));
+    }
+    else if (type == RANGE) {
+      Integer min = kleeneOp.getMin();
+      Integer max = kleeneOp.getMax();
+
+      // keep a list of the start states for each possible optional sets so can make
+      // direct transitions from them to the final end state
+      List<State> startStateList = new ArrayList<State>();
+
+      if (min == null || min == 0) {
+        //if min is empty or 0, allow to skip everything via a null transition
+        startStateList.add(startState);
+      }
+      else if (min > 1) {
+        // add min-1 copies of the set of states for the CPE.  It's -1 because
+        // one set was already added by the first generateStates call
+        int numCopies = min - 1;
+        for(int i = 1; i <= numCopies; i++) {
+          // the end state of the previous set always moves up to be the
+          // start state of the next set.
+          startState = endState;
+          endState = generateStates(startState, cpe, labels);
+        }
+      }
+
+      if (max == null) {
+        // if there is no defined max, allow to return to startState any
+        // number of times.  Start state may be the original start or, if
+        // min > 1, then it's the start of the last set of states added.
+        // Example: A range with min 3 and max = unbounded will look like
+        // this:
+        //                                  v------|
+        // start1...end1->start2...end2->start3...end3->...
+        //
+        endState.addTransition(new Transition(null,startState));
+      }
+      else if (max > min) {
+        // there are some optional state sets.  Make a copy of the state
+        // set for each.
+        int numCopies = max-min;
+
+        //if min == 0 then reduce numCopies by one since we already added
+        //one set of states that are optional
+        if (min == 0)
+          numCopies--;
+
+        for(int i = 1; i <= numCopies; i++) {
+          startState = endState;
+          startStateList.add(startState);
+          endState = generateStates(startState, cpe, labels);
+        }
+      }
+
+      //each of the optional stages can transition directly to the final end
+      for(State state : startStateList) {
+        state.addTransition(new Transition(null,endState));
+      }
+
+    } //end if type == RANGE
+
+    return endState;
+  } // convertComplexPE
+
+  /**
+   * Receives a state to start from and a complex pattern element.
+   * Parses the complex pattern element and creates all the necessary states
+   * and transitions for traversing the annotations described by the given PE
+   * exactly once.  Does not add any transitions for kleene operators.
+   * @param startState the state to start from
+   * @param cpe the pattern to be recognized
+   * @param labels the bindings name for all the annotation accepted along
+   * the way. This is actually a list of Strings. It is necessary to use
+   * a list because of the recursive definition of ComplexPatternElement.
+   * @return the final state reached after accepting a sequence of annotations
+   * as described in the pattern
+   */
+  private State generateStates(State startState, ComplexPatternElement cpe,
+          LinkedList<String> labels) {
     //create a copy
     LinkedList<String> newBindings = (LinkedList<String>)labels.clone();
     String localLabel = cpe.getBindingName ();
 
     if(localLabel != null)newBindings.add(localLabel);
 
+    ConstraintGroup constraintGroup = cpe.getConstraintGroup();
     PatternElement[][] constraints =
-                       cpe.getConstraintGroup().getPatternElementDisjunction();
+                       constraintGroup.getPatternElementDisjunction();
 
     // the rectangular array constraints is a disjunction of sequences of
     // constraints = [[PE]:[PE]...[PE] ||
@@ -310,39 +410,8 @@ public class FSM implements JapeConstants {
         // an empty transition.
         currentRowState.addTransition(new Transition(null,endState));
     } // for i
-
-    // let's take care of the kleene operator
-    int kleeneOp = cpe.getKleeneOp();
-    switch (kleeneOp){
-      case NO_KLEENE_OP:{
-        break;
-      }
-      case KLEENE_QUERY:{
-        //allow to skip everything via a null transition
-        startState.addTransition(new Transition(null,endState));
-        break;
-      }
-      case KLEENE_PLUS:{
-
-        // allow to return to startState
-        endState.addTransition(new Transition(null,startState));
-        break;
-      }
-      case KLEENE_STAR:{
-
-        // allow to skip everything via a null transition
-        startState.addTransition(new Transition(null,endState));
-
-        // allow to return to startState
-        endState.addTransition(new Transition(null,startState));
-        break;
-      }
-      default:{
-        throw new RuntimeException("Unknown Kleene operator"+kleeneOp);
-      }
-    } // switch (cpe.getKleeneOp())
     return endState;
-  } // convertComplexPE
+  }
 
   /**
     * Converts this FSM from a non-deterministic to a deterministic one by
@@ -726,16 +795,8 @@ public class FSM implements JapeConstants {
       }
       binds += ind + "   |\n";
     }
-    String kleene = "";
-    int klInt = cpe.getKleeneOp();
-    if (klInt == KLEENE_PLUS)
-      kleene = "+";
-    if (klInt == KLEENE_QUERY)
-      kleene = "?";
-    if (klInt == KLEENE_STAR)
-      kleene = "*";
     binds = binds.substring(0, binds.length() - 5);
-    binds += ")" + kleene + "\n";
+    binds += ")" + cpe.getKleeneOp().toString() + "\n";
     if (indent == 0)
       bpeId = 0;
     return binds;
