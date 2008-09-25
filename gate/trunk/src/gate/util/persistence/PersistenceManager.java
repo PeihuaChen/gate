@@ -30,6 +30,7 @@ import gate.creole.*;
 import gate.event.ProgressListener;
 import gate.event.StatusListener;
 import gate.gui.MainFrame;
+import gate.persist.GateAwareObjectInputStream;
 import gate.persist.PersistenceException;
 import gate.util.*;
 
@@ -574,7 +575,11 @@ public class PersistenceManager {
       ois = xstream.createObjectInputStream(reader);
     }
     else {
-      ois = new ObjectInputStream(url.openStream());
+      // use GateAwareObjectInputStream to load classes through the
+      // GATE ClassLoader if they can't be loaded through the one
+      // ObjectInputStream would normally use
+      ois = new GateAwareObjectInputStream(url.openStream());
+      
     }
     Object res = null;
     try {
