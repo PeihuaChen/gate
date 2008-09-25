@@ -698,7 +698,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
 
   // BasicPatternElement
   final public ComplexPatternElement ComplexPatternElement(LeftHandSide lhs) throws ParseException {
-  Token kleeneOpTok = null;
+  KleeneOperator kleeneOperator = null;
   Token bindingNameTok = null;
   ConstraintGroup cg = new ConstraintGroup();
     jj_consume_token(leftBracket);
@@ -706,7 +706,8 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     jj_consume_token(rightBracket);
     switch (jj_nt.kind) {
     case kleeneOp:
-      kleeneOpTok = jj_consume_token(kleeneOp);
+    case leftSquare:
+      kleeneOperator = KleeneOperator();
       break;
     default:
       jj_la1[19] = jj_gen;
@@ -732,25 +733,64 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       jj_la1[21] = jj_gen;
       ;
     }
-    int kleeneOp = NO_KLEENE_OP;
-    if(kleeneOpTok != null) {
-      String k = kleeneOpTok.image;
-      if(k.equals("*"))         kleeneOp = KLEENE_STAR;
-      else if(k.equals("?"))    kleeneOp = KLEENE_QUERY;
-      else if(k.equals("+"))    kleeneOp = KLEENE_PLUS;
-      else
-        System.err.println(errorMsgPrefix(kleeneOpTok)+
-          "ignoring uninterpretable Kleene op " + k);
-    }
-
     String bindingName = null;
     if(bindingNameTok != null)
       bindingName = bindingNameTok.image;
-    {if (true) return new ComplexPatternElement(cg, kleeneOp, bindingName);}
+    {if (true) return new ComplexPatternElement(cg, kleeneOperator, bindingName);}
     throw new Error("Missing return statement in function");
   }
 
   // ComplexPatternElement
+  final public KleeneOperator KleeneOperator() throws ParseException {
+  Token kleeneOpTok = null;
+  Token minTok = null;
+  Token maxTok = null;
+  Integer min = null;
+  Integer max = null;
+    switch (jj_nt.kind) {
+    case kleeneOp:
+      kleeneOpTok = jj_consume_token(kleeneOp);
+        if (kleeneOpTok == null) {
+          {if (true) return new KleeneOperator(KleeneOperator.Type.SINGLE);}
+        }
+
+        KleeneOperator.Type type = KleeneOperator.Type.getFromSymbol(kleeneOpTok.image);
+        if (type != null)
+            {if (true) return new KleeneOperator(type);}
+        else {
+          System.err.println(errorMsgPrefix(kleeneOpTok)+
+              "ignoring uninterpretable Kleene op " + kleeneOpTok.image);
+          {if (true) return new KleeneOperator(KleeneOperator.Type.SINGLE);}
+        }
+      break;
+    case leftSquare:
+      jj_consume_token(leftSquare);
+      minTok = jj_consume_token(integer);
+      switch (jj_nt.kind) {
+      case comma:
+        jj_consume_token(comma);
+        maxTok = jj_consume_token(integer);
+        break;
+      default:
+        jj_la1[22] = jj_gen;
+        ;
+      }
+      jj_consume_token(rightSquare);
+          if (minTok != null)
+              min = new Integer(minTok.image);
+          if (maxTok != null)
+              max = new Integer(maxTok.image);
+          {if (true) return new KleeneOperator(min, max);}
+      break;
+    default:
+      jj_la1[23] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+    throw new Error("Missing return statement in function");
+  }
+
+  // KleeneOperator
   final public Constraint Constraint() throws ParseException {
   Token annotTypeTok = null;
   Token metaPropertyTok = null;
@@ -768,7 +808,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
              negate = true;
       break;
     default:
-      jj_la1[22] = jj_gen;
+      jj_la1[24] = jj_gen;
       ;
     }
     // the annotation type
@@ -810,7 +850,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
           embeddedConstraint = Constraint();
           break;
         default:
-          jj_la1[23] = jj_gen;
+          jj_la1[25] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
         }
@@ -819,13 +859,13 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         c.addAttribute(Factory.getConstraintFactory().createPredicate(opString, accessor, embeddedConstraint));
         break;
       default:
-        jj_la1[24] = jj_gen;
+        jj_la1[26] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
       break;
     default:
-      jj_la1[25] = jj_gen;
+      jj_la1[27] = jj_gen;
       ;
     }
     {if (true) return c;}
@@ -868,7 +908,7 @@ AnnotationAccessor accessor = null;
       attrValTok = jj_consume_token(bool);
       break;
     default:
-      jj_la1[26] = jj_gen;
+      jj_la1[28] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -936,7 +976,7 @@ AnnotationAccessor accessor = null;
         ;
         break;
       default:
-        jj_la1[27] = jj_gen;
+        jj_la1[29] = jj_gen;
         break label_10;
       }
       jj_consume_token(comma);
@@ -997,7 +1037,7 @@ AnnotationAccessor accessor = null;
       }
         break;
       default:
-        jj_la1[28] = jj_gen;
+        jj_la1[30] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -1057,7 +1097,7 @@ AnnotationAccessor accessor = null;
         ParseException(":+ not a legal operator (no multi-span annots)");}
       break;
     default:
-      jj_la1[29] = jj_gen;
+      jj_la1[31] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1080,7 +1120,7 @@ AnnotationAccessor accessor = null;
         ;
         break;
       default:
-        jj_la1[30] = jj_gen;
+        jj_la1[32] = jj_gen;
         break label_11;
       }
       // the name of the attribute, and equals sign
@@ -1190,7 +1230,7 @@ AnnotationAccessor accessor = null;
           );
         break;
       default:
-        jj_la1[31] = jj_gen;
+        jj_la1[33] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -1199,7 +1239,7 @@ AnnotationAccessor accessor = null;
         jj_consume_token(comma);
         break;
       default:
-        jj_la1[32] = jj_gen;
+        jj_la1[34] = jj_gen;
         ;
       }
     }
@@ -1286,21 +1326,13 @@ AnnotationAccessor accessor = null;
     return false;
   }
 
-  final private boolean jj_3R_24() {
-    if (jj_scan_token(pling)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_22() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_24()) jj_scanpos = xsp;
-    if (jj_scan_token(ident)) return true;
-    return false;
-  }
-
   final private boolean jj_3R_14() {
     if (jj_scan_token(ident)) return true;
+    return false;
+  }
+
+  final private boolean jj_3_2() {
+    if (jj_3R_13()) return true;
     return false;
   }
 
@@ -1338,15 +1370,15 @@ AnnotationAccessor accessor = null;
     return false;
   }
 
-  final private boolean jj_3_2() {
-    if (jj_3R_13()) return true;
-    return false;
-  }
-
   final private boolean jj_3R_13() {
     if (jj_scan_token(colon)) return true;
     if (jj_scan_token(ident)) return true;
     if (jj_scan_token(leftBrace)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_24() {
+    if (jj_scan_token(pling)) return true;
     return false;
   }
 
@@ -1366,6 +1398,14 @@ AnnotationAccessor accessor = null;
     return false;
   }
 
+  final private boolean jj_3R_22() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_24()) jj_scanpos = xsp;
+    if (jj_scan_token(ident)) return true;
+    return false;
+  }
+
   public ParseCpslTokenManager token_source;
   SimpleCharStream jj_input_stream;
   public Token token, jj_nt;
@@ -1374,7 +1414,7 @@ AnnotationAccessor accessor = null;
   public boolean lookingAhead = false;
   private boolean jj_semLA;
   private int jj_gen;
-  final private int[] jj_la1 = new int[33];
+  final private int[] jj_la1 = new int[35];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static {
@@ -1382,10 +1422,10 @@ AnnotationAccessor accessor = null;
       jj_la1_1();
    }
    private static void jj_la1_0() {
-      jj_la1_0 = new int[] {0x400,0x80000,0x1000,0x80800,0x0,0x100000,0x0,0x0,0x200000,0xc00000,0xc00000,0x1000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x4000000,0x20000000,0x0,0x2000000,0x2000000,0x10000000,0x10000000,0x20000000,0x0,0x0,0x0,0x0,0x20000000,0x0,};
+      jj_la1_0 = new int[] {0x400,0x80000,0x1000,0x80800,0x0,0x100000,0x0,0x0,0x200000,0xc00000,0xc00000,0x1000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x4000000,0x20000000,0x0,0x0,0x4000000,0x2000000,0x2000000,0x10000000,0x10000000,0x20000000,0x0,0x0,0x0,0x0,0x20000000,0x0,};
    }
    private static void jj_la1_1() {
-      jj_la1_1 = new int[] {0x0,0x0,0x0,0x0,0x40,0x0,0x40,0x60,0x0,0x0,0x0,0x0,0x204240,0x14050,0x1000,0x14050,0x14050,0x2000,0x4010,0x0,0x40,0x200,0x0,0x4040,0x840,0x840,0xf0,0x2000,0x204240,0x200200,0x40,0x2f0,0x2000,};
+      jj_la1_1 = new int[] {0x0,0x0,0x0,0x0,0x40,0x0,0x40,0x60,0x0,0x0,0x0,0x0,0x204240,0x14050,0x1000,0x14050,0x14050,0x2000,0x4010,0x40000,0x40,0x200,0x2000,0x40000,0x0,0x4040,0x840,0x840,0xf0,0x2000,0x204240,0x200200,0x40,0x2f0,0x2000,};
    }
   final private JJCalls[] jj_2_rtns = new JJCalls[2];
   private boolean jj_rescan = false;
@@ -1400,7 +1440,7 @@ AnnotationAccessor accessor = null;
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
     jj_gen = 0;
-    for (int i = 0; i < 33; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 35; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1413,7 +1453,7 @@ AnnotationAccessor accessor = null;
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
     jj_gen = 0;
-    for (int i = 0; i < 33; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 35; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1423,7 +1463,7 @@ AnnotationAccessor accessor = null;
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
     jj_gen = 0;
-    for (int i = 0; i < 33; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 35; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1433,7 +1473,7 @@ AnnotationAccessor accessor = null;
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
     jj_gen = 0;
-    for (int i = 0; i < 33; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 35; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1442,7 +1482,7 @@ AnnotationAccessor accessor = null;
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
     jj_gen = 0;
-    for (int i = 0; i < 33; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 35; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1451,7 +1491,7 @@ AnnotationAccessor accessor = null;
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
     jj_gen = 0;
-    for (int i = 0; i < 33; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 35; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1562,7 +1602,7 @@ AnnotationAccessor accessor = null;
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 33; i++) {
+    for (int i = 0; i < 35; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {

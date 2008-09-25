@@ -749,34 +749,63 @@ BasicPatternElement BasicPatternElement() :
 
 ComplexPatternElement ComplexPatternElement(LeftHandSide lhs) :
 {
-  Token kleeneOpTok = null;
+  KleeneOperator kleeneOperator = null;
   Token bindingNameTok = null;
   ConstraintGroup cg = new ConstraintGroup();
 }
 {
   <leftBracket> ConstraintGroup(lhs, cg) <rightBracket>
-  (kleeneOpTok=<kleeneOp>)?
+  (kleeneOperator=KleeneOperator())?
   ( <colon> ( bindingNameTok=<ident> | bindingNameTok=<integer> ) )?
   {
-    int kleeneOp = NO_KLEENE_OP;
-    if(kleeneOpTok != null) {
-      String k = kleeneOpTok.image;
-      if(k.equals("*"))         kleeneOp = KLEENE_STAR;
-      else if(k.equals("?"))    kleeneOp = KLEENE_QUERY;
-      else if(k.equals("+"))    kleeneOp = KLEENE_PLUS;
-      else
-        System.err.println(errorMsgPrefix(kleeneOpTok)+
-          "ignoring uninterpretable Kleene op " + k);
-    }
-
     String bindingName = null;
     if(bindingNameTok != null)
       bindingName = bindingNameTok.image;
-    return new ComplexPatternElement(cg, kleeneOp, bindingName);
+    return new ComplexPatternElement(cg, kleeneOperator, bindingName);
   }
 
 } // ComplexPatternElement
 
+KleeneOperator KleeneOperator() :
+{
+  Token kleeneOpTok = null;
+  Token minTok = null;
+  Token maxTok = null;
+  Integer min = null;
+  Integer max = null;
+}
+{
+    (
+      kleeneOpTok = <kleeneOp>
+      {
+        if (kleeneOpTok == null) {
+          return new KleeneOperator(KleeneOperator.Type.SINGLE);
+        }
+
+        KleeneOperator.Type type = KleeneOperator.Type.getFromSymbol(kleeneOpTok.image);
+        if (type != null)
+            return new KleeneOperator(type);
+        else {
+          System.err.println(errorMsgPrefix(kleeneOpTok)+
+              "ignoring uninterpretable Kleene op " + kleeneOpTok.image);
+          return new KleeneOperator(KleeneOperator.Type.SINGLE);
+        }
+      }
+    )
+    |
+    (
+      <leftSquare>
+          (minTok=<integer> (<comma> maxTok=<integer>)?)
+      <rightSquare>
+      {
+          if (minTok != null)
+              min = new Integer(minTok.image);
+          if (maxTok != null)
+              max = new Integer(maxTok.image);
+          return new KleeneOperator(min, max);
+      }
+    )
+} // KleeneOperator
 
 Constraint Constraint() :
 {

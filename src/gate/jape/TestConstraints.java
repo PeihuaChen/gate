@@ -92,62 +92,56 @@ public class TestConstraints extends BaseJapeTests {
 12345678901234567890
          1         2
    */
-  protected AnnotationCreator basicAnnotCreator = new AnnotationCreator() {
+  protected AnnotationCreator basicAnnotCreator = new BaseAnnotationCreator() {
     public AnnotationSet createAnnots(Document doc) {
-      AnnotationSet defaultAS = doc.getAnnotations();
+      setDoc(doc);
 
-      try {
-        FeatureMap feat = Factory.newFeatureMap();
-        feat.put("f1", "atext");
-        feat.put("f2", "2");
-        feat.put("f3", 3);
-        defaultAS.add(new Long(2), new Long(4), "A", feat);
+      FeatureMap feat = Factory.newFeatureMap();
+      feat.put("f1", "atext");
+      feat.put("f2", "2");
+      feat.put("f3", 3);
+      add(2, 4, "A", feat);
 
-        feat = Factory.newFeatureMap();
-        feat.put("f1", "btext");
-        feat.put("f2", "2");
-        feat.put("f4", "btext4");
-        defaultAS.add(new Long(2), new Long(3), "B", feat);
-        defaultAS.add(new Long(4), new Long(6), "B", feat);
+      feat = Factory.newFeatureMap();
+      feat.put("f1", "btext");
+      feat.put("f2", "2");
+      feat.put("f4", "btext4");
+      add(2, 3, "B", feat);
+      add(4, 6, "B", feat);
 
-        feat = Factory.newFeatureMap();
-        feat.put("f1", "cctext");
-        feat.put("f2", "2");
-        feat.put("f3", 3l);
-        feat.put("f4", "ctext4");
-        defaultAS.add(new Long(6), new Long(7), "B", feat);
-        defaultAS.add(new Long(6), new Long(8), "C", feat);
+      feat = Factory.newFeatureMap();
+      feat.put("f1", "cctext");
+      feat.put("f2", "2");
+      feat.put("f3", 3l);
+      feat.put("f4", "ctext4");
+      add(6, 7, "B", feat);
+      add(6, 8, "C", feat);
 
-        feat = Factory.newFeatureMap();
-        feat.put("f1", "cctext");
-        feat.put("f2", "1");
-        feat.put("f4", "ctext4");
-        defaultAS.add(new Long(8), new Long(10), "C", feat);
+      feat = Factory.newFeatureMap();
+      feat.put("f1", "cctext");
+      feat.put("f2", "1");
+      feat.put("f4", "ctext4");
+      add(8, 10, "C", feat);
 
-        feat = Factory.newFeatureMap();
-        feat.put("f1", "dtext");
-        feat.put("f3", 3l);
-        defaultAS.add(new Long(12), new Long(14), "D", feat);
+      feat = Factory.newFeatureMap();
+      feat.put("f1", "dtext");
+      feat.put("f3", 3l);
+      add(12, 14, "D", feat);
 
-        feat = Factory.newFeatureMap();
-        feat.put("f2", 2l);
-        defaultAS.add(new Long(14), new Long(16), "D", feat);
+      feat = Factory.newFeatureMap();
+      feat.put("f2", 2l);
+      add(14, 16, "D", feat);
 
-        feat = Factory.newFeatureMap();
-        feat.put("ontology", "http://gate.ac.uk/tests/demo.owl");
-        feat.put("class", "Businessman");
-        defaultAS.add(new Long(16), new Long(18), "D", feat);
+      feat = Factory.newFeatureMap();
+      feat.put("ontology", "http://gate.ac.uk/tests/demo.owl");
+      feat.put("class", "Businessman");
+      add(16, 18, "D", feat);
 
-        feat = Factory.newFeatureMap();
-        feat.put("ontology", "http://gate.ac.uk/tests/demo.owl");
-        feat.put("class", "Country");
-        defaultAS.add(new Long(18), new Long(19), "D", feat);
-
-      }
-      catch(gate.util.InvalidOffsetException ioe) {
-        ioe.printStackTrace(Err.getPrintWriter());
-      }
-      return defaultAS;
+      feat = Factory.newFeatureMap();
+      feat.put("ontology", "http://gate.ac.uk/tests/demo.owl");
+      feat.put("class", "Country");
+      add(18, 19, "D", feat);
+      return as;
     }
   };
 
@@ -156,27 +150,18 @@ public class TestConstraints extends BaseJapeTests {
     String japeFile = "/jape/operators/meta_property_tests.jape";
     String[] expectedResults = {"LengthAccessorEqual", "StringAccessorEqual", "CleanStringAccessorEqual"};
 
-    AnnotationCreator ac = new AnnotationCreator() {
+    AnnotationCreator ac = new BaseAnnotationCreator() {
       public AnnotationSet createAnnots(Document doc) {
-        AnnotationSet defaultAS = doc.getAnnotations();
+        setDoc(doc);
+        FeatureMap feat = Factory.newFeatureMap();
+        feat.put("f1", "aval");
+        feat.put("f2", "2");
+        feat.put("f3", 3);
+        add(4, 7, "A", feat);
 
-        try {
-          FeatureMap feat = Factory.newFeatureMap();
-          feat.put("f1", "aval");
-          feat.put("f2", "2");
-          feat.put("f3", 3);
-          defaultAS.add(new Long(4), new Long(7), "A", feat);
-
-          feat = Factory.newFeatureMap();
-          defaultAS.add(new Long(8), new Long(12), "A", feat);
-
-          feat = Factory.newFeatureMap();
-          defaultAS.add(new Long(12), new Long(28), "B", feat);
-        }
-        catch(gate.util.InvalidOffsetException ioe) {
-          ioe.printStackTrace(Err.getPrintWriter());
-        }
-        return defaultAS;
+        add(8, 12, "A");
+        add(12, 28, "B");
+        return as;
       }
     };
 
@@ -189,27 +174,19 @@ public class TestConstraints extends BaseJapeTests {
     String japeFile = "/jape/operators/custom_predicates_tests.jape";
     String[] expectedResults = {"Contains", "IsContained"};
 
-    AnnotationCreator ac = new AnnotationCreator() {
+    AnnotationCreator ac = new BaseAnnotationCreator() {
       public AnnotationSet createAnnots(Document doc) {
-        AnnotationSet defaultAS = doc.getAnnotations();
+        setDoc(doc);
+        add(4, 7, "A");
 
-        try {
-          FeatureMap feat = Factory.newFeatureMap();
-          defaultAS.add(new Long(4), new Long(7), "A", feat);
+        FeatureMap feat = Factory.newFeatureMap();
+        feat.put("f2", "bar");
+        add(5, 6, "B", feat);
 
-          feat = Factory.newFeatureMap();
-          feat.put("f2", "bar");
-          defaultAS.add(new Long(5), new Long(6), "B", feat);
+        add(12, 28, "B");
+        add(14, 20, "A");
 
-          feat = Factory.newFeatureMap();
-          defaultAS.add(new Long(12), new Long(28), "B", feat);
-          feat = Factory.newFeatureMap();
-          defaultAS.add(new Long(14), new Long(20), "A", feat);
-        }
-        catch(gate.util.InvalidOffsetException ioe) {
-          ioe.printStackTrace(Err.getPrintWriter());
-        }
-        return defaultAS;
+        return as;
       }
     };
 
@@ -222,39 +199,167 @@ public class TestConstraints extends BaseJapeTests {
     String japeFile = "/jape/operators/custom_predicates_tests.jape";
     String[] expectedResults = {"ContainsWithConstraints","ContainsWithMetaProperty"};
 
-    AnnotationCreator ac = new AnnotationCreator() {
+    AnnotationCreator ac = new BaseAnnotationCreator() {
       public AnnotationSet createAnnots(Document doc) {
-        AnnotationSet defaultAS = doc.getAnnotations();
+        setDoc(doc);
+        FeatureMap cFeat = Factory.newFeatureMap();
+        cFeat.put("f1", "foo");
+        add(4, 7, "C", cFeat);
+        add(4, 8, "C", Factory.newFeatureMap());
 
-        try {
-          FeatureMap cFeat = Factory.newFeatureMap();
-          cFeat = Factory.newFeatureMap();
-          cFeat.put("f1", "foo");
-          defaultAS.add(new Long(4), new Long(7), "C", cFeat);
-          defaultAS.add(new Long(4), new Long(8), "C", Factory.newFeatureMap());
+        FeatureMap bFeat = Factory.newFeatureMap();
+        bFeat.put("f2", "bar");
+        add(5, 6, "B", bFeat);
 
-          FeatureMap bFeat = Factory.newFeatureMap();
-          bFeat.put("f2", "bar");
-          defaultAS.add(new Long(5), new Long(6), "B", bFeat);
+        //this combo won't work because B doesn't have the feature and isn't long enough
+        add(8, 10, "C", cFeat);
+        add(8, 9, "B");
 
-          //this combo won't work because B doesn't have the feature and isn't long enough
-          defaultAS.add(new Long(8), new Long(10), "C", cFeat);
-          defaultAS.add(new Long(8), new Long(9), "B", Factory.newFeatureMap());
+        add(11, 13, "C");
+        //a combo that should work
+        add(12, 16, "C", cFeat);
+        add(12, 15, "C");
+        add(12, 16, "B");
 
-          defaultAS.add(new Long(11), new Long(13), "C", Factory.newFeatureMap());
-          //a combo that should work
-          defaultAS.add(new Long(12), new Long(16), "C", cFeat);
-          defaultAS.add(new Long(12), new Long(15), "C", Factory.newFeatureMap());
-          defaultAS.add(new Long(12), new Long(16), "B", Factory.newFeatureMap());
+        //here's one with no B at all
+        add(17, 20, "C", cFeat);
 
-          //here's one with no B at all
-          defaultAS.add(new Long(17), new Long(20), "C", cFeat);
+        return as;
+      }
+    };
 
-        }
-        catch(gate.util.InvalidOffsetException ioe) {
-          ioe.printStackTrace(Err.getPrintWriter());
-        }
-        return defaultAS;
+    Set<Annotation> actualResults = doTest(DEFAULT_DATA_FILE, japeFile, ac);
+    Out.println(actualResults);
+    compareResults(expectedResults, actualResults);
+  }
+
+  public void testRanges() throws Exception {
+    String japeFile = "/jape/operators/range_tests.jape";
+    String[] expectedResults = {"OneToTwoB", "ThreeA", "OneToTwoB", "ZeroToThreeC", "ThreeToFourB", "ThreeToFourB", "ZeroToThreeC", "ZeroToThreeC"};
+
+    AnnotationCreator ac = new BaseAnnotationCreator() {
+      public AnnotationSet createAnnots(Document doc) {
+        setDoc(doc);
+
+        //OneToTwoB check
+        addInc("F");
+        addInc("B");
+        addInc("G");
+
+        //ThreeA check
+        addInc("A");
+        addInc("A");
+        addInc("A");
+
+        //should not trigger OneToTwoB
+        addInc("F");
+        addInc("G");
+
+        //ThreeA check - should not match
+        addInc("A");
+        addInc("A");
+
+        //OneToTwoB - trigger it once for two different variants
+        addInc("F");
+        addInc("B");
+        addInc("G");
+        addInc("F");
+        addInc("B");
+        addInc("B");
+        addInc("G");
+
+        //ZeroToThreeC check - no Cs
+        addInc("D");
+        addInc("E");
+
+        //ThreeToFourB
+        addInc("F");
+        addInc("B");
+        addInc("B");
+        addInc("B");
+        addInc("G");
+        addInc("F");
+        addInc("B");
+        addInc("B");
+        addInc("B");
+        addInc("B");
+        addInc("G");
+
+        //ZeroToThreeC check - 1 C
+        addInc("D");
+        addInc("C");
+        addInc("E");
+
+        //ZeroToThreeC check - 3 C
+        addInc("D");
+        addInc("C");
+        addInc("C");
+        addInc("C");
+        addInc("E");
+
+        //ZeroToThreeC check - 4 C = no match
+        addInc("D");
+        addInc("C");
+        addInc("C");
+        addInc("C");
+        addInc("C");
+        addInc("E");
+
+        return as;
+      }
+    };
+
+    Set<Annotation> actualResults = doTest(DEFAULT_DATA_FILE, japeFile, ac);
+    Out.println(actualResults);
+    compareResults(expectedResults, actualResults);
+  }
+
+  public void testKleeneOperators() throws Exception {
+    String japeFile = "/jape/operators/kleene_tests.jape";
+    String[] expectedResults = {"OptionalB", "PlusA", "OptionalB", "PlusA", "StarC", "StarC", "StarC"};
+
+
+    AnnotationCreator ac = new BaseAnnotationCreator() {
+      public AnnotationSet createAnnots(Document doc) {
+        setDoc(doc);
+
+        //OptionalB check
+        addInc("C");
+        addInc("B");
+        addInc("C");
+
+        //PlusA check
+        addInc("A");
+        addInc("A");
+        addInc("A");
+
+        //OptionalB check
+        addInc("C");
+        addInc("C");
+        //PlusA
+        addInc("A");
+        addInc("A");
+
+        //no match
+        addInc("B");
+
+        //StarC
+        addInc("D");
+        addInc("E");
+
+        //StarC
+        addInc("D");
+        addInc("C");
+        addInc("E");
+
+        //StarC
+        addInc("D");
+        addInc("C");
+        addInc("C");
+        addInc("C");
+        addInc("E");
+
+        return as;
       }
     };
 
