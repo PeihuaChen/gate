@@ -183,25 +183,19 @@ public class TestJape extends BaseJapeTests
     String japeFile = "/gate.ac.uk/tests/jape/control_mode_tests/brill_test.jape";
     String[] expectedResults = {"Find_A", "Find_A", "Find_A_B", "Find_A_B", "Find_A_B_C"};
 
-    AnnotationCreator annotCreator = new AnnotationCreator() {
+    AnnotationCreator annotCreator = new BaseAnnotationCreator() {
       public AnnotationSet createAnnots(Document doc) {
-        AnnotationSet defaultAS = doc.getAnnotations();
+        setDoc(doc);
 
-        try {
-          FeatureMap feat = Factory.newFeatureMap();
+        add(2, 4, "A");
+        add(2, 5, "A");
+        add(3, 5, "A");
+        add(4, 6, "B");
+        add(5, 7, "B");
+        add(6, 8, "C");
+        add(8, 10, "D");
 
-          defaultAS.add(new Long(2), new Long(4), "A", feat);
-          defaultAS.add(new Long(2), new Long(5), "A", feat);
-          defaultAS.add(new Long(3), new Long(5), "A", feat);
-          defaultAS.add(new Long(4), new Long(6), "B", feat);
-          defaultAS.add(new Long(5), new Long(7), "B", feat);
-          defaultAS.add(new Long(6), new Long(8), "C", feat);
-          defaultAS.add(new Long(8), new Long(10), "D", feat);
-        }
-        catch(gate.util.InvalidOffsetException ioe) {
-          ioe.printStackTrace(Err.getPrintWriter());
-        }
-        return defaultAS;
+        return as;
       }
     };
 
@@ -215,25 +209,18 @@ public class TestJape extends BaseJapeTests
     String japeFile = "/gate.ac.uk/tests/jape/control_mode_tests/appelt_test.jape";
     String[] expectedResults = {"Find_A_B_C"};
 
-    AnnotationCreator annotCreator = new AnnotationCreator() {
+    AnnotationCreator annotCreator = new BaseAnnotationCreator() {
       public AnnotationSet createAnnots(Document doc) {
-        AnnotationSet defaultAS = doc.getAnnotations();
+        setDoc(doc);
 
-        try {
-          FeatureMap feat = Factory.newFeatureMap();
-
-          defaultAS.add(new Long(2), new Long(4), "A", feat);
-          defaultAS.add(new Long(4), new Long(6), "B", feat);
-          defaultAS.add(new Long(2), new Long(3), "C", feat);
-          defaultAS.add(new Long(3), new Long(8), "D", feat);
-          defaultAS.add(new Long(2), new Long(3), "A", feat);
-          defaultAS.add(new Long(3), new Long(4), "B", feat);
-          defaultAS.add(new Long(4), new Long(9), "C", feat);
-        }
-        catch(gate.util.InvalidOffsetException ioe) {
-          ioe.printStackTrace(Err.getPrintWriter());
-        }
-        return defaultAS;
+        add(2, 4, "A");
+        add(4, 6, "B");
+        add(2, 3, "C");
+        add(3, 8, "D");
+        add(2, 3, "A");
+        add(3, 4, "B");
+        add(4, 9, "C");
+        return as;
       }
     };
 
@@ -249,31 +236,18 @@ public class TestJape extends BaseJapeTests
     String[] expectedResults = {"Find_A", "Find_A", "Find_A_B", "Find_A_B", "Find_A_B_C",
             "Find_A", "Find_A_B", "Find_B_C"};
 
-    AnnotationCreator annotCreator = new AnnotationCreator() {
+    AnnotationCreator annotCreator = new BaseAnnotationCreator() {
       public AnnotationSet createAnnots(Document doc) {
-        AnnotationSet defaultAS = doc.getAnnotations();
+        setDoc(doc);
 
-        try {
-          FeatureMap feat = Factory.newFeatureMap();
-
-/*          defaultAS.add(new Long(2), new Long(4), "A", feat);
-          defaultAS.add(new Long(2), new Long(6), "A", feat);
-          defaultAS.add(new Long(4), new Long(6), "B", feat);
-          defaultAS.add(new Long(6), new Long(8), "C", feat);
-          defaultAS.add(new Long(8), new Long(10), "D", feat);
-*/
-          defaultAS.add(new Long(2), new Long(4), "A", feat);
-          defaultAS.add(new Long(2), new Long(5), "A", feat);
-          defaultAS.add(new Long(3), new Long(5), "A", feat);
-          defaultAS.add(new Long(4), new Long(6), "B", feat);
-          defaultAS.add(new Long(5), new Long(7), "B", feat);
-          defaultAS.add(new Long(6), new Long(8), "C", feat);
-          defaultAS.add(new Long(8), new Long(10), "D", feat);
-        }
-        catch(gate.util.InvalidOffsetException ioe) {
-          ioe.printStackTrace(Err.getPrintWriter());
-        }
-        return defaultAS;
+        add(2, 4, "A");
+        add(2, 5, "A");
+        add(3, 5, "A");
+        add(4, 6, "B");
+        add(5, 7, "B");
+        add(6, 8, "C");
+        add(8, 10, "D");
+        return as;
       }
     };
 
