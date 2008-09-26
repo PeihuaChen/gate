@@ -152,6 +152,26 @@ public class PersistenceManager {
         } else if(urlString.startsWith(gatepluginsPathMarker)) {
           URL gateplugins = Gate.getPluginsHome().toURI().toURL();
           return new URL(gateplugins, urlString.substring(gatepluginsPathMarker.length()));
+        } else if(urlString.startsWith(syspropMarker)) {
+          String urlRestString = urlString.substring(syspropMarker.length());
+          int dollarindex = urlRestString.indexOf("$");
+          if(dollarindex > 0) {
+            String syspropname = urlRestString.substring(0,dollarindex);
+            String propvalue = System.getProperty(syspropname);
+            if(propvalue == null) {
+              throw new PersistenceException("Property '"+syspropname+"' is null in "+urlString);
+            }
+            URL propuri = (new File(propvalue)).toURI().toURL();
+            if(dollarindex == urlRestString.length()) {
+              return propuri;
+            } else {
+              return new URL(propuri, urlRestString.substring(dollarindex+1));
+            }
+          } else if(dollarindex == 0) {
+            throw new PersistenceException("No property name after '"+syspropMarker+"' in "+urlString);
+          } else {
+            throw new PersistenceException("No ending $ after '"+syspropMarker+"' in "+urlString);
+          }
         } else {
           return new URL(urlString);
         }
@@ -170,6 +190,7 @@ public class PersistenceManager {
     private static final String relativePathMarker = "$relpath$";
     private static final String gatehomePathMarker = "$gatehome$";
     private static final String gatepluginsPathMarker = "$gateplugins$";
+    private static final String syspropMarker = "$sysprop:";
 
     static final long serialVersionUID = 7943459208429026229L;
   }
