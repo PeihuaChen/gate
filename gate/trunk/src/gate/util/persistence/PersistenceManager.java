@@ -146,8 +146,15 @@ public class PersistenceManager {
           URL context = persistenceURL;
           return new URL(context, urlString.substring(relativePathMarker
                   .length()));
+        } else if(urlString.startsWith(gatehomePathMarker)) {
+          URL gatehome =  Gate.getGateHome().toURI().toURL();
+          return new URL(gatehome, urlString.substring(gatehomePathMarker.length()));
+        } else if(urlString.startsWith(gatepluginsPathMarker)) {
+          URL gateplugins = Gate.getPluginsHome().toURI().toURL();
+          return new URL(gateplugins, urlString.substring(gatepluginsPathMarker.length()));
+        } else {
+          return new URL(urlString);
         }
-        else return new URL(urlString);
       }
       catch(MalformedURLException mue) {
         throw new PersistenceException(mue);
@@ -161,6 +168,8 @@ public class PersistenceManager {
      * represent relative paths.
      */
     private static final String relativePathMarker = "$relpath$";
+    private static final String gatehomePathMarker = "$gatehome$";
+    private static final String gatepluginsPathMarker = "$gateplugins$";
 
     static final long serialVersionUID = 7943459208429026229L;
   }
