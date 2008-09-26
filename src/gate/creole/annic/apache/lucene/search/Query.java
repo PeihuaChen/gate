@@ -27,15 +27,8 @@ import gate.creole.annic.apache.lucene.index.IndexReader;
     <p>Instantiable subclasses are:
     <ul>
     <li> {@link TermQuery}
-    <li> {@link MultiTermQuery}
     <li> {@link BooleanQuery}
-    <li> {@link WildcardQuery}
     <li> {@link PhraseQuery}
-    <li> {@link PrefixQuery}
-    <li> {@link PhrasePrefixQuery}
-    <li> {@link FuzzyQuery}
-    <li> {@link RangeQuery}
-    <li> {@link gate.creole.annic.apache.lucene.search.spans.SpanQuery}
     </ul>
     <p>A parser for queries is contained in:
     <ul>
