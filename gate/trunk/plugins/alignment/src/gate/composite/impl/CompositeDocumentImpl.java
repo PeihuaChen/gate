@@ -3,6 +3,7 @@ package gate.composite.impl;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import gate.Annotation;
@@ -17,6 +18,8 @@ import gate.composite.OffsetDetails;
 import gate.compound.CompoundDocument;
 import gate.corpora.DocumentImpl;
 import gate.creole.ResourceInstantiationException;
+import gate.event.AnnotationEvent;
+import gate.event.AnnotationListener;
 import gate.event.AnnotationSetEvent;
 import gate.event.AnnotationSetListener;
 import gate.event.DocumentEvent;
@@ -30,7 +33,7 @@ import gate.util.InvalidOffsetException;
  * @author niraj
  */
 public class CompositeDocumentImpl extends DocumentImpl implements
-		CompositeDocument, AnnotationSetListener, DocumentListener {
+		CompositeDocument, AnnotationSetListener, DocumentListener, AnnotationListener {
 
 	private static final long serialVersionUID = -1379936764549428131L;
 
@@ -100,6 +103,7 @@ public class CompositeDocumentImpl extends DocumentImpl implements
 		if (!disableListener && ase.getSourceDocument() == this) {
 			AnnotationSet as = (AnnotationSet) ase.getSource();
 			Annotation annot = ase.getAnnotation();
+			annot.addAnnotationListener(this);
 			FeatureMap features = Factory.newFeatureMap();
 			features.putAll(annot.getFeatures());
 
@@ -267,4 +271,65 @@ public class CompositeDocumentImpl extends DocumentImpl implements
 		// do nothing
 	}
 
+  public void annotationUpdated(AnnotationEvent e) {
+    if(e.getType() == AnnotationEvent.FEATURES_UPDATED) {
+      if (!disableListener) {
+        Annotation annot = (Annotation) e.getSource();
+        // lets find out which annotation set it belongs to
+        boolean defaultAS = true;
+        AnnotationSet as = null;
+        if(getAnnotations().contains(annot)) {
+          defaultAS = true;
+          as = getAnnotations();
+        } else {
+          Map ass = getNamedAnnotationSets();
+          if(ass == null) return;
+          Iterator namesIter = getNamedAnnotationSets().keySet().iterator();
+          while(namesIter.hasNext()) {
+            String name = (String) namesIter.next();
+            as = (AnnotationSet) getNamedAnnotationSets().get(name);
+            if(as.contains(annot)) {
+              break;
+            } else as = null;
+          }
+        }
+        
+        if(as == null) return;
+        for (String docID : combinedDocumentIds) {
+          Document aDoc = compoundDocument.getDocument(docID);
+          long stOffset = getOffsetInSrcDocument(docID, annot
+              .getStartNode().getOffset().longValue());
+          if (stOffset == -1)
+            continue;
+          long enOffset = getOffsetInSrcDocument(docID, annot
+              .getEndNode().getOffset().longValue());
+          if (enOffset == -1)
+            continue;
+          AnnotationSet toUse = null;
+
+          if (defaultAS) {
+            toUse = aDoc.getAnnotations().getContained(
+                new Long(stOffset), new Long(enOffset)).get(
+                annot.getType());
+            if (toUse != null && !toUse.isEmpty()) {
+              for(Annotation a : toUse) {
+                a.setFeatures(annot.getFeatures());
+              }
+              return;
+            }
+          } else {
+            toUse = aDoc.getAnnotations(as.getName()).getContained(
+                new Long(stOffset), new Long(enOffset)).get(
+                annot.getType());
+            if (toUse != null && !toUse.isEmpty()) {
+              for(Annotation a : toUse) {
+                a.setFeatures(annot.getFeatures());
+              }
+              return;
+            }
+          }
+        }
+      }
+    }
+  }
 }

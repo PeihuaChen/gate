@@ -536,10 +536,12 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
       File tempFile = File.createTempFile("example", ".xml");
       File tempFolder = new File(tempFile.getParentFile(), "temp"
               + Gate.genSym());
-      if(!tempFolder.mkdirs()) {
+      
+      if(!tempFolder.exists() && !tempFolder.mkdirs()) {
         throw new GateRuntimeException("Temporary folder "
                 + tempFolder.getAbsolutePath() + " could not be created");
       }
+      tempFile.deleteOnExit();
       tempFolder.deleteOnExit();
 
       URL sourceUrl = null;
@@ -562,8 +564,10 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
         fets.put(s, features.get(s));
       }
 
+      FeatureMap hideFeats = Factory.newFeatureMap();
+      Gate.setHiddenAttribute(hideFeats, true);
       CompoundDocument cd = (CompoundDocument)Factory.createResource(
-              "gate.compound.impl.CompoundDocumentImpl", fets);
+              "gate.compound.impl.CompoundDocumentImpl", fets, hideFeats);
       cd.setName(name);
       Document aDoc = cd.getCurrentDocument();
       cd.setCurrentDocument(null);
