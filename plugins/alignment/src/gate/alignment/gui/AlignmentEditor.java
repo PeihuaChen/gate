@@ -124,6 +124,8 @@ public class AlignmentEditor extends AbstractVisualResource implements
 
   private List<FinishedAlignmentAction> finishedAlignmentActions = null;
 
+  private JScrollPane waScrollPane;
+
   /*
    * (non-Javadoc)
    * 
@@ -330,9 +332,9 @@ public class AlignmentEditor extends AbstractVisualResource implements
     temp3.add(populate);
     temp3.add(previous);
     temp3.add(next);
-    temp3.add(showLinks);
-    temp3.add(new JLabel("Status:"));
-    temp3.add(alignmentComplete);
+    //temp3.add(showLinks);
+    //temp3.add(new JLabel("Status:"));
+    //temp3.add(alignmentComplete);
     temp3.add(loadActions);
 
     paramPanel.add(temp1);
@@ -366,10 +368,10 @@ public class AlignmentEditor extends AbstractVisualResource implements
     waPanel.add(linesCanvas, BorderLayout.CENTER);
     JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
     JPanel waParentPanel = new JPanel(new BorderLayout());
-    JScrollPane scrollPane = new JScrollPane(waPanel);
-    scrollPane.setPreferredSize(new Dimension(800, 200));
+    waScrollPane = new JScrollPane(waPanel);
+    waScrollPane.setPreferredSize(new Dimension(800, 200));
 
-    waParentPanel.add(scrollPane, BorderLayout.CENTER);
+    waParentPanel.add(waScrollPane, BorderLayout.CENTER);
     splitPane.add(waParentPanel);
     splitPane.add(pane);
     mainPanel.add(splitPane, BorderLayout.CENTER);
@@ -769,10 +771,10 @@ public class AlignmentEditor extends AbstractVisualResource implements
         if(answer == JOptionPane.YES_OPTION) {
           alignFactory.setCompleted(true);
           callFinishedAlignmentActions();
-
-        }
-        else {
+        } else if(answer == JOptionPane.NO_OPTION) {
           alignFactory.setCompleted(false);
+        } else {
+          return;
         }
       }
       nextAction();
@@ -784,9 +786,11 @@ public class AlignmentEditor extends AbstractVisualResource implements
         if(answer == JOptionPane.YES_OPTION) {
           alignFactory.setCompleted(true);
           callFinishedAlignmentActions();
+        } else if(answer == JOptionPane.NO_OPTION) {
+          alignFactory.setCompleted(false);
         }
         else {
-          alignFactory.setCompleted(false);
+          return;
         }
       }
       previousAction();
@@ -858,6 +862,8 @@ public class AlignmentEditor extends AbstractVisualResource implements
         }
       }
       updateGUI(next);
+    } else {
+      JOptionPane.showMessageDialog(mainPanel, "Reached End of the Document");
     }
   }
 
@@ -1041,8 +1047,10 @@ public class AlignmentEditor extends AbstractVisualResource implements
   }
 
   private void previousAction() {
-    if(alignFactory.hasPrevious()) {
+    if(alignFactory != null && alignFactory.hasPrevious()) {
       updateGUI(alignFactory.previous());
+    } else {
+      JOptionPane.showMessageDialog(mainPanel, "Reached Start of the Document");
     }
   }
 
