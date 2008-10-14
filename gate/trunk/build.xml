@@ -2,21 +2,21 @@
 <!-- $Id$ -->
 <project name="GATE" default="all" basedir=".">
     <description>
-        GATE 
+        GATE
         see http://gate.ac.uk
     </description>
-  <!-- ******************************************************************* 
-       ****************  USER OPTIONS ************************************ 
+  <!-- *******************************************************************
+       ****************  USER OPTIONS ************************************
        *******************************************************************
-       
-       Make changes to this section of the build file to customise your 
-       GATE start-up and build script -->    
+
+       Make changes to this section of the build file to customise your
+       GATE start-up and build script -->
 
   <!-- Load user properties from build.properties.  If you need to override
        any of the properties set in this build file, you should create
        build.properties in the same directory.  Property definitions in
        the properties file will override those in the build file.
-       
+
        Also, if you need to pass specific system properties when you run
        the GATE GUI, you should set them in build.properties, prefixed with
        "run.", for example to override the default directory for GATE to
@@ -28,7 +28,7 @@
        note that Ant properties are expanded in this file, this can be a
        very powerful tool. -->
     <property file="build.properties" />
-  
+
   <!-- TOOLS.JAR -->
   <!-- GATE will normally try to guess which tools.jar library to use based on
        your Java installation.
@@ -41,10 +41,10 @@
   <!-- RUNTIME MEMORY -->
   <property name="runtime.max.memory" value="1000M"/>
   <property name="runtime.start.memory" value="200M"/>
-  
+
   <!-- Should Ant exit as soon as it has started the GUI? -->
   <property name="runtime.spawn" value="true" />
-  
+
   <!-- OS specific properties
        To set a system property for GATE running on a specific platform, define
        it here:
@@ -56,33 +56,33 @@
   -->
   <!-- If you use a 3D accelerated X server, such as Xgl or Aiglx and
        your windows are not resizing properly, then you need to uncomment
-       the following line -->	
+       the following line -->
 <!--  <property name="os.Linux.awt.toolkit" value="sun.awt.motif.MToolkit"/>  -->
 
-  <!-- ******************************************************************* 
-       ****************  USER OPTIONS END HERE! ************************** 
+  <!-- *******************************************************************
+       ****************  USER OPTIONS END HERE! **************************
        ******************************************************************* -->
-       
+
   <!-- set global properties for this build -->
-  
+
   <!-- Directories -->
   <property name="gate.home" location="${basedir}" />
-  
+
   <!-- Sources -->
   <property name="srcDir" location="src"/>
-  
+
   <!-- Files required by the build process -->
   <property name="buildDir" location="build"/>
 
   <!-- Files required by the build process -->
   <property name="binDir" location="bin"/>
-  
+
   <!-- Output directory for the build process -->
   <property name="outputDir"  location="classes"/>
 
   <!-- Libraries directory for the build process -->
   <property name="libDir"  location="lib"/>
-  
+
   <!-- Extensions directory for the build process -->
   <property name="extDir"  location="lib/ext"/>
 
@@ -113,10 +113,10 @@
   <fileset id="exts" dir="${extDir}">
     <include name="*.jar"/>
   </fileset>
-  
-  
+
+
   <!-- tools.jar path -->
-  
+
   <!-- GATE will attempt to guess where the Sun Javac classes live -->
   <!-- First try the two variants of $JAVA_HOME/lib/tools.jar -->
   <condition property="tools.jar.location"
@@ -137,8 +137,8 @@
       </not>
       <available file="${java.home}/lib/tools.jar"
                  type="file"/>
-    </and>             
-  </condition>  
+    </and>
+  </condition>
 
   <!-- Maybe this is a Mac?  The following should work for a typical Mac OS X
        java.home like:
@@ -152,7 +152,7 @@
       </not>
       <available file="${java.home}/../Classes/classes.jar"
                  type="file"/>
-    </and>             
+    </and>
   </condition>
 
   <!-- Save tools.jar as a <path>.  If no tools.jar was found, make an empty
@@ -183,13 +183,13 @@
   <!-- Default to the server VM (slower startup but faster running) unless
        overridden above -->
   <property name="server.or.client" value="-server" />
-  
+
   <!-- The build CLASSPATH -->
   <path id="build.class.path">
 		<fileset refid="libs"/>
     <fileset refid="exts"/>
   </path>
-  
+
   <!-- The run CLASSPATH -->
   <path id="run.class.path">
     <pathelement location="${binDir}" />
@@ -197,44 +197,44 @@
     <path refid="tools.jar.path"/>
 		<fileset refid="libs"/>
   </path>
-  
+
   <tstamp>
     <format property="TODAY_UK" pattern="d-MMMM-yyyy" locale="en"/>
     <format property="TSTAMP_UK" pattern="hh:mm" locale="en"/>
   </tstamp>
-  
-  
+
+
   <!-- Prints out some information messages -->
   <echo level="info">
     This is the ANT build script for GATE (http://gate.ac.uk).
     Type &quot;ant help&quot; for details about the targets available.
     GATE ${gate.version}, build ${gate.build}
     Java version ${java.version}</echo>
-    
+
   <!-- Prints out details about the targets -->
   <target name="help">
     <echo level="info">
       This is the ANT build script for gate (http://gate.ac.uk).
       The following targets are available
         -all (default target): compiles GUK and GATE classes and makes the gate.jar archive.
-        
+
         -compile: compiles all the .java files
         -resources: copies the resources to the output directory (${outputDir})
         -jar: creates the gate.jar archive
         -run: starts GATE
         -clean: cleans up the output from all previous builds
-        
+
         -doc: creates the Javadoc and Java2HTML documentation
         -docclean: deletes all built documentation
         -jape: rebuilds the JAPE parser files and associated documentation
         -guk: compiles the GUK classes and builds the guk.jar archive
         -gukdemo: starts the GUK Editor (a.k.a. GATE Unicode Editor)
         -test: runs the GATE test suite
-        
+
         -distro: make a GATE distribution (calls all build tasks in the process)
     </echo>
   </target>
-  
+
 	<!-- Copies resources to the output directory -->
   <target name="resources">
 		<copy todir="${outputDir}/gate/resources"
@@ -267,12 +267,12 @@
 	</target>
 
 
-	<!-- This target compiles the GUK classes which are required by the main  
-       GATE compile task -->  
+	<!-- This target compiles the GUK classes which are required by the main
+       GATE compile task -->
   <target name="guk" depends="depend">
     <mkdir dir="${outputDir}"/>
     <javac classpathref="build.class.path"
-           destdir="${outputDir}" 
+           destdir="${outputDir}"
            includes="guk/**"
            encoding="UTF-8"
            debug="true"
@@ -280,7 +280,7 @@
            source="1.5"
            target="1.5"
            srcdir="${srcDir}"/>
-		<jar destfile="${libDir}/ext/guk.jar" 
+		<jar destfile="${libDir}/ext/guk.jar"
          update="false"
          index="true">
       <fileset dir="${outputDir}"
@@ -297,13 +297,13 @@
             cache="${buildDir}/depcache"
             closure="yes"/>
   </target>
-  
-	<!-- This target compiles all the classes -->  
+
+	<!-- This target compiles all the classes -->
   <target name="compile"
           depends="depend, guk"
           description="compile the source " >
     <!-- Compile the java code from ${srcDir} into ${buildDir} -->
-    <javac srcdir="${srcDir}" 
+    <javac srcdir="${srcDir}"
 		       destdir="${outputDir}"
            source="1.5"
            target="1.5"
@@ -315,26 +315,26 @@
 					 classpathref="build.class.path"/>
   </target>
 
-	<!-- This target compiles all the classes including debug information -->  
+	<!-- This target compiles all the classes including debug information -->
   <target name="compile_debug"
           depends="depend, guk"
           description="compile the source " >
     <!-- Compile the java code from ${srcDir} into ${buildDir} -->
-    <javac srcdir="${srcDir}" 
+    <javac srcdir="${srcDir}"
 		       destdir="${outputDir}"
            encoding="UTF-8"
            source="1.5"
            target="1.5"
            debug="true"
-           deprecation="true"    	
+           deprecation="true"
            includes="gate/**,com/**,debugger/**,hepple/**"
 					 classpathref="build.class.path"/>
   </target>
 
-	
+
   <!-- Make gate.jar archive -->
 	<target name="jar" depends="compile,resources">
-		<jar destfile="${binDir}/gate.jar" 
+		<jar destfile="${binDir}/gate.jar"
          update="false"
          index="true">
       <fileset dir="${outputDir}/"
@@ -343,9 +343,72 @@
     </jar>
 	</target>
 
+    <!-- Optional target useful for creating jars for embedded apps.  It splits
+    the contents that would go into gate.jar into subjars for easier updating,
+    omitting classes and test files not required for normal execution. -->
+  	<target name="split_jars" depends="compile,resources">
+  	  <jar destfile="${binDir}/gate-core.jar"
+           update="false"
+           index="true">
+        <fileset dir="${outputDir}/">
+            <include name="**/*.class"/>
+            <include name="gate/resources/creole/creole.xml"/>
+            <include name="gate/resources/build.txt"/>
+            <include name="gate/resources/version.txt"/>
+            <exclude name="**/*Test*.class"/>
+            <exclude name="debugger/**"/>                
+            <exclude name="gate/creole/annic/**"/>
+            <exclude name="gate/**/gui/**"/>
+            <exclude name="gate/swing/**"/>
+        </fileset>
+      </jar>
+	  <jar destfile="${binDir}/gate-gui.jar"
+         update="false"
+         index="true">
+        <fileset dir="${outputDir}/">
+            <include name="gate/**/gui/**/*.class"/>
+            <include name="gate/swing/**/*.class"/>
+            <include name="debugger/**/*.class"/>
+	        <exclude name="**/*Test*.class"/>
+	    </fileset>
+      </jar>
+	  <jar destfile="${binDir}/gate-annic.jar"
+         update="false"
+         index="true">
+        <fileset dir="${outputDir}/">
+            <include name="gate/creole/annic/**/*.class"/>
+	        <exclude name="**/*Test*.class"/>
+	    </fileset>
+      </jar>
+	  <jar destfile="${binDir}/gate-resources.jar"
+         update="false"
+         index="true">
+         <fileset dir="${outputDir}/">
+            <include name="**/img/**"/>
+            <include name="gate/resources/splash.html"/>
+            <include name="gate/resources/**/bootstrap/**"/>
+            <exclude name="**/img/splash_large.png"/>
+	    </fileset>
+      </jar>
+      <!-- I don't think any of these files are needed for running the UI. 
+      Uncomment if this turns out to be incorrect-->
+      <!--
+	  <jar destfile="${binDir}/gate-resources-ext.jar"
+         update="false"
+         index="true">
+         <fileset dir="${outputDir}/" 
+                  includes="META-INF/**,gate/**,com/**,debugger/**,hepple/**">
+            <exclude name="**/test/**"/>
+	        <exclude name="**/*.class"/>
+            <exclude name="**/img/**"/>
+	    </fileset>
+      </jar>
+      -->
+  	</target>
+
   <!-- Make gate.jar archive -->
 	<target name="bigjar" depends="compile,resources">
-		<jar destfile="${binDir}/gate.jar" 
+		<jar destfile="${binDir}/gate.jar"
          update="false"
          index="true">
       <fileset dir="${outputDir}/"
@@ -360,7 +423,7 @@
     files="Chemistry_Tagger Jape_Compiler Kea Machine_Learning Minipar
        Montreal_Transducer NP_Chunking Ontology_Tools TreeTagger
        Stanford
-       arabic cebuano chinese crawl google hindi alignment annotationMerging 
+       arabic cebuano chinese crawl google hindi alignment annotationMerging
        learning iaaPlugin rasp romanian uima yahoo Ontology_Based_Gazetteer" />
 
   <target name="plugins.build" depends="jar" >
@@ -414,11 +477,11 @@
   <!-- Everything! -->
 	<target name="all" depends="jar, plugins.build">
 	</target>
-  
+
   <!-- Run the beast -->
   <target name="run" depends="run-pre,run-nonmac,run-mac" >
   </target>
-  
+
   <!-- Prepares for running GATE -->
   <target name="run-pre">
     <property name="class.path.debug" refid="run.class.path"/>
@@ -445,18 +508,18 @@
       <os family="mac"/>
     </condition>
   </target>
-  
-  <!-- Starts GATE on non MAC platforms -->  
+
+  <!-- Starts GATE on non MAC platforms -->
   <target name="run-nonmac" unless="running.on.mac">
-    <java classname="gate.Main" 
-          classpathref="run.class.path" 
+    <java classname="gate.Main"
+          classpathref="run.class.path"
           fork="true"
           spawn="${runtime.spawn}"
-          dir="." 
+          dir="."
           maxmemory="${runtime.max.memory}">
 <!--	     <jvmarg value="-Xms${runtime.start.memory}"/> -->
-      <jvmarg value="${server.or.client}"/> 
-    	<sysproperty key="gate.home" value="${basedir}"/>   
+      <jvmarg value="${server.or.client}"/>
+    	<sysproperty key="gate.home" value="${basedir}"/>
        <sysproperty key="java.ext.dirs" value="${extDir}"/>
  <!--<sysproperty key="awt.toolkit" value="sun.awt.motif.MToolkit"/>-->
  <!-- <sysproperty key="sun.java2d.opengl" value="true"/>-->
@@ -464,19 +527,19 @@
        <syspropertyset refid="os.properties" />
      </java>
   </target>
-  
+
   <!-- Starts GATE on MAC platforms -->
   <target name="run-mac" if="running.on.mac">
     <property name="gate.icon.location"
               location="GATE.app/Contents/Resources/gate-icon.icns" />
-    <java classname="gate.Main" 
-          classpathref="run.class.path" 
+    <java classname="gate.Main"
+          classpathref="run.class.path"
           fork="true"
           spawn="${runtime.spawn}"
-          dir="." 
+          dir="."
           maxmemory="${runtime.max.memory}">
 <!--	     <jvmarg value="-Xms${runtime.start.memory}"/> -->
-       <sysproperty key="gate.home" value="${basedir}"/>   
+       <sysproperty key="gate.home" value="${basedir}"/>
        <sysproperty key="java.ext.dirs" value="${extDir}"/>
        <sysproperty key="sun.java2d.opengl" value="true"/>
        <sysproperty key="apple.laf.useScreenMenuBar" value="true"/>
@@ -488,16 +551,16 @@
        <syspropertyset refid="os.properties" />
      </java>
   </target>
-  
+
   <!-- Run the GUK editor -->
   <target name="gukdemo">
-    <java classname="guk.Editor" 
+    <java classname="guk.Editor"
           fork="true"
           spawn="false">
       <sysproperty key="java.ext.dirs" value="${extDir}"/>
      </java>
   </target>
-  
+
   <!-- Clear all build output -->
   <target name="clean.gate">
     <delete includeemptydirs="true">
@@ -507,7 +570,7 @@
 
   <!-- Clean everything (including buildable plugins) -->
   <target name="clean" depends="clean.gate, plugins.clean" />
-  
+
   <!-- Make documentation -->
   <target name="java2html.taskdef">
     <taskdef name="java2html"
@@ -517,7 +580,7 @@
   </target>
 
   <target name="javadoc" depends="java2html.taskdef">
-    <javadoc access="protected" 
+    <javadoc access="protected"
               destdir="${docDir}/javadoc"
               classpathref="run.class.path"
               Extdirs="${extDir}"
@@ -532,7 +595,7 @@
               breakiterator="true"
     	        linksource="yes"
               maxmemory="${runtime.max.memory}">
-      <fileset dir="${srcDir}"/>        
+      <fileset dir="${srcDir}"/>
     </javadoc>
     <!-- Now replace the ugly Java-html files with a better version -->
     <delete dir="${docDir}/javadoc/src-html"/>
@@ -550,12 +613,12 @@
                addLineAnchors="true"
                showDefaultTitle="true"
                useShortFileName="true"
-               overwrite="true"/>  	
+               overwrite="true"/>
   </target>
-  
+
   <!-- Make documentation - internal -->
   <target name="internaljavadoc" depends="java2html.taskdef">
-   <javadoc access="private" 
+   <javadoc access="private"
               destdir="${docDir}/javadoc/internal"
               classpathref="run.class.path"
               Extdirs="${extDir}"
@@ -570,7 +633,7 @@
               breakiterator="true"
               linksource="yes"
               maxmemory="${runtime.max.memory}">
-      <fileset dir="${srcDir}"/>        
+      <fileset dir="${srcDir}"/>
     </javadoc>
     <delete dir="${docDir}/javadoc/internal/src-html"/>
     <java2html srcdir="${srcDir}"
@@ -589,10 +652,10 @@
                useShortFileName="true"
                overwrite="true"/>
   </target>
-	
+
   <target name="doc" depends="javadoc, internaljavadoc"/>
- 
-  
+
+
   <!-- Clear all built documentation -->
   <target name="docclean">
     <delete includeemptydirs="true">
@@ -602,12 +665,12 @@
       <fileset dir="${docDir}/javadoc/internal" excludes="**/CVS,**/CVS/**,**/.cvsignore"/>
     </delete>
   </target>
-  
-  <!-- Rebuild the JAPE file parser. 
-       Uses JavaCC 0.8pre1 from ../lib for the java, and 0.7 
+
+  <!-- Rebuild the JAPE file parser.
+       Uses JavaCC 0.8pre1 from ../lib for the java, and 0.7
        from ./JavaCC-071.zip for the HTML to avoid JJDoc bug in 0.8pre1 -->
   <target name="jape">
-    <java classname="javacc" 
+    <java classname="javacc"
           fork="true"
           spawn="false"
           dir="${srcDir}/gate/jape/parser">
@@ -616,8 +679,8 @@
       </classpath>
       <arg value="ParseCpsl.jj"/>
     </java>
-    
-    <java classname="jjdoc" 
+
+    <java classname="jjdoc"
           fork="true"
           spawn="false"
           dir="${srcDir}/gate/jape/parser">
@@ -629,8 +692,8 @@
 
     <move file="${srcDir}/gate/jape/parser/ParseCpsl.html"
           toFile="${srcDir}/gate/jape/parser/ParseCpslPlain.html"/>
-          
-    <java classname="jjdoc" 
+
+    <java classname="jjdoc"
           fork="true"
           spawn="false"
           dir="${srcDir}/gate/jape/parser">
@@ -641,10 +704,10 @@
       <arg value="ParseCpsl.jj"/>
     </java>
   </target>
-  
-  
+
+
   <target name="test.gate" depends="jar">
-    <junit fork="true" 
+    <junit fork="true"
            showoutput="true"
            printsummary="yes"
            maxmemory="300m">
@@ -669,18 +732,18 @@
   </target>
 
   <target name="test" depends="test.gate, plugins.build, plugins.test" />
-  
+
   <target name="guitest" depends="plugins.build">
-    <java classname="junit.swingui.TestRunner" 
-          classpathref="run.class.path" 
+    <java classname="junit.swingui.TestRunner"
+          classpathref="run.class.path"
           fork="true"
           spawn="false"
-          dir="." 
+          dir="."
           logError="true"
           maxmemory="${runtime.max.memory}">
-       <sysproperty key="gate.home" value="${basedir}"/>  
+       <sysproperty key="gate.home" value="${basedir}"/>
        <sysproperty key="gate.config" value="${buildDir}/gate.xml"/>
-       <sysproperty key="load.plugin.path" value="file:${basedir}/plugins/ANNIE;file:${basedir}/plugins/Information_Retrieval;file:${basedir}/plugins/Machine_Learning;file:${basedir}/plugins/Obsolete;file:${basedir}/plugins/Ontology_Tools;file:${basedir}/plugins/Tools;file:${basedir}/plugins/WordNet"/>      
+       <sysproperty key="load.plugin.path" value="file:${basedir}/plugins/ANNIE;file:${basedir}/plugins/Information_Retrieval;file:${basedir}/plugins/Machine_Learning;file:${basedir}/plugins/Obsolete;file:${basedir}/plugins/Ontology_Tools;file:${basedir}/plugins/Tools;file:${basedir}/plugins/WordNet"/>
        <sysproperty key="java.ext.dirs" value="${extDir}"/>
        <syspropertyset refid="run.properties" />
       <arg value="gate.TestGate"/>
@@ -692,7 +755,7 @@
           depends="compile, jar, doc, plugins.build, plugins.distro.prepare">
     <ant antfile="build/deploy/build.xml" target="make-zips" />
   </target>
-	
+
   <!-- build the installer .jar -->
   <target name="installer"
           depends="compile, jar, doc, plugins.build, plugins.distro.prepare">
