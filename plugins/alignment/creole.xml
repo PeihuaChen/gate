@@ -15,7 +15,7 @@
           COMMENT="Source URL">java.net.URL</PARAMETER>
       <PARAMETER COMMENT="Should the document read the original markup"
         NAME="markupAware" DEFAULT="true">java.lang.Boolean</PARAMETER>
-      <PARAMETER NAME="encoding" OPTIONAL="false" COMMENT="Encoding" DEFAULT="">
+      <PARAMETER NAME="encoding" OPTIONAL="false" COMMENT="Encoding" DEFAULT="UTF-8">
         java.lang.String</PARAMETER>
       <PARAMETER NAME="preserveOriginalContent"
         COMMENT="Should the document preserve the original content"
