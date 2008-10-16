@@ -24,13 +24,14 @@ import gate.event.CreoleListener;
  * Records all the open DataStores.
  */
 public class DataStoreRegister extends HashSet {
+  private static final long serialVersionUID = 1L;
 
   /**
    * All the DataStore classes available. This is a map of class name to
    * descriptive text.
    */
-  public static Map getDataStoreClassNames() {
-    Map names = new HashMap();
+  public static Map<String,String> getDataStoreClassNames() {
+    Map<String,String> names = new HashMap<String,String>();
 
     // no plugability here at present.... at some future point there should
     // be a capability to add new data store classes via creole.xml metadata

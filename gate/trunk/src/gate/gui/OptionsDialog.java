@@ -61,9 +61,13 @@ public class OptionsDialog extends JDialog {
     getContentPane().setLayout(new BoxLayout(getContentPane(),
                                              BoxLayout.Y_AXIS));
     getContentPane().add(mainTabbedPane);
+    Box vBox;
+    Box hBox;
 
-    JPanel appearanceBox = new JPanel();
-    appearanceBox.setLayout(new BoxLayout(appearanceBox, BoxLayout.Y_AXIS));
+    /*******************
+     * Appearance pane *
+     *******************/
+
     //the LNF combo
     List supportedLNFs = new ArrayList();
     LNFData currentLNF = null;
@@ -88,21 +92,6 @@ public class OptionsDialog extends JDialog {
     lnfCombo = new JComboBox(supportedLNFs.toArray());
     lnfCombo.setSelectedItem(currentLNF);
 
-    Box horBox = Box.createHorizontalBox();
-    horBox.setBorder(BorderFactory.createTitledBorder(" Look and Feel "));
-    horBox.add(Box.createHorizontalStrut(5));
-//    horBox.add(new JLabel("Look and feel:"));
-//    horBox.add(Box.createHorizontalStrut(5));
-    horBox.add(lnfCombo);
-    horBox.add(Box.createHorizontalStrut(5));
-//    appearanceBox.add(Box.createVerticalStrut(10));
-    appearanceBox.add(horBox);
-//    appearanceBox.add(Box.createVerticalStrut(10));
-
-    JPanel panel = new JPanel();
-    panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-    panel.setBorder(BorderFactory.createTitledBorder(" Font options "));
-
     fontBG = new ButtonGroup();
     textBtn = new JRadioButton("Text components font");
     textBtn.setActionCommand("text");
@@ -113,25 +102,52 @@ public class OptionsDialog extends JDialog {
     otherCompsBtn = new JRadioButton("Other components font");
     otherCompsBtn.setActionCommand("other");
     fontBG.add(otherCompsBtn);
-    Box verBox = Box.createVerticalBox();
-    verBox.add(Box.createVerticalStrut(5));
-    verBox.add(textBtn);
-    verBox.add(Box.createVerticalStrut(5));
-    verBox.add(menuBtn);
-    verBox.add(Box.createVerticalStrut(5));
-    verBox.add(otherCompsBtn);
-    verBox.add(Box.createVerticalStrut(5));
-    verBox.add(Box.createVerticalGlue());
-    panel.add(verBox);
 
+    JPanel appearanceBox = new JPanel();
+    appearanceBox.setLayout(new BoxLayout(appearanceBox, BoxLayout.Y_AXIS));
+    appearanceBox.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+    appearanceBox.add(Box.createVerticalStrut(5));
+
+    vBox = Box.createVerticalBox();
+    vBox.setBackground(getContentPane().getBackground());
+    vBox.setBorder(BorderFactory.createTitledBorder(" Look and Feel "));
+    vBox.add(Box.createVerticalStrut(5));
+      hBox = Box.createHorizontalBox();
+      hBox.add(Box.createHorizontalStrut(5));
+      hBox.add(lnfCombo);
+      hBox.add(Box.createHorizontalStrut(5));
+    vBox.add(hBox);
+    vBox.add(Box.createVerticalStrut(5));
+    appearanceBox.add(vBox);
+
+    appearanceBox.add(Box.createVerticalStrut(5));
+
+    hBox = Box.createHorizontalBox();
+    hBox.setBorder(BorderFactory.createTitledBorder(" Font options "));
+    hBox.add(Box.createHorizontalStrut(5));
+      vBox = Box.createVerticalBox();
+      vBox.add(textBtn);
+      vBox.add(Box.createVerticalStrut(5));
+      vBox.add(menuBtn);
+      vBox.add(Box.createVerticalStrut(5));
+      vBox.add(otherCompsBtn);
+      vBox.add(Box.createVerticalStrut(5));
+      vBox.add(Box.createVerticalGlue());
+    hBox.add(Box.createHorizontalStrut(5));
+    hBox.add(vBox);
     fontChooser = new JFontChooser();
-    panel.add(fontChooser);
+    hBox.add(fontChooser);
+    hBox.add(Box.createHorizontalStrut(5));
 
-    appearanceBox.add(panel);
+    appearanceBox.add(hBox);
 
     mainTabbedPane.add("Appearance", appearanceBox);
 
-    Box advancedBox = Box.createVerticalBox();
+    /*****************
+     * Advanced pane *
+     *****************/
+
     saveOptionsChk = new JCheckBox(
         "Save options on exit",
         Gate.getUserConfig().getBoolean(GateConstants.SAVE_OPTIONS_ON_EXIT).
@@ -175,45 +191,108 @@ public class OptionsDialog extends JDialog {
          doceditInsertPrependChk.isSelected()))
       doceditInsertAppendChk.setSelected(true);
 
-    JPanel vBox = new JPanel();
-    vBox.setLayout(new BoxLayout(vBox, BoxLayout.Y_AXIS));
-    vBox.add(includeFeaturesOnPreserveFormatChk);
-    vBox.add(Box.createVerticalStrut(10));
-    vBox.add(addSpaceOnMarkupUnpackChk);
-    vBox.add(Box.createVerticalStrut(10));
-    vBox.setBorder(BorderFactory.createTitledBorder(" Advanced features "));
-    advancedBox.add(vBox);
+    browserComboBox = new JComboBox(new String[] {"Java", "Firefox",
+        "Internet Explorer", "Safari", "Custom"});
+    browserComboBox.setPrototypeDisplayValue("Internet Explorer");
+    browserCommandLineTextField = new JTextField(15);
+    String commandLine =
+      Gate.getUserConfig().getString(GateConstants.HELP_BROWSER_COMMAND_LINE);
+    if(commandLine == null || commandLine.trim().length() == 0) {
+      browserComboBox.setSelectedItem("Java");
+      browserCommandLineTextField.setEnabled(false);
+    }
+    else if(commandLine.contains("firefox")) {
+      browserComboBox.setSelectedItem("Firefox");
+      browserCommandLineTextField.setText(commandLine);
+    }
+    else if(commandLine.contains("iexplore")) {
+      browserComboBox.setSelectedItem("Internet Explorer");
+      browserCommandLineTextField.setText(commandLine);
+    }
+    else if(commandLine.contains("Safari")) {
+      browserComboBox.setSelectedItem("Safari");
+      browserCommandLineTextField.setText(commandLine);
+    }
+    else {
+      browserComboBox.setSelectedItem("Custom");
+      browserCommandLineTextField.setText(commandLine);
+    }
 
+    JPanel advancedBox =  new JPanel();
+    advancedBox.setLayout(new BoxLayout(advancedBox, BoxLayout.Y_AXIS));
+    advancedBox.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-    vBox = new JPanel();
-    vBox.setLayout(new BoxLayout(vBox, BoxLayout.Y_AXIS));
-    vBox.add(Box.createVerticalStrut(10));
-    vBox.add(saveOptionsChk);
-    vBox.add(Box.createVerticalStrut(10));
-    vBox.add(saveSessionChk);
-    vBox.add(Box.createVerticalStrut(10));
-    vBox.setBorder(BorderFactory.createTitledBorder(" Session persistence "));
-    advancedBox.add(vBox);
+    advancedBox.add(Box.createVerticalStrut(5));
 
-    vBox = new JPanel();
-    vBox.setLayout(new BoxLayout(vBox, BoxLayout.Y_AXIS));
-    vBox.add(Box.createVerticalStrut(10));
-    vBox.add(doceditInsertAppendChk);
-    vBox.add(Box.createVerticalStrut(10));
-    vBox.add(doceditInsertPrependChk);
-    vBox.add(Box.createVerticalStrut(10));
-    vBox.setBorder(BorderFactory.createTitledBorder(
+    hBox = Box.createHorizontalBox();
+    hBox.setBorder(BorderFactory.createTitledBorder(" Advanced features "));
+    hBox.add(Box.createHorizontalStrut(5));
+      vBox = Box.createVerticalBox();
+      vBox.add(includeFeaturesOnPreserveFormatChk);
+      vBox.add(Box.createVerticalStrut(5));
+      vBox.add(addSpaceOnMarkupUnpackChk);
+      vBox.add(Box.createVerticalStrut(5));
+    hBox.add(vBox);
+    hBox.add(Box.createHorizontalStrut(5));
+    hBox.add(Box.createHorizontalGlue());
+    advancedBox.add(hBox);
+
+    advancedBox.add(Box.createVerticalStrut(5));
+
+    hBox = Box.createHorizontalBox();
+    hBox.setBorder(BorderFactory.createTitledBorder(" Session persistence "));
+    hBox.add(Box.createHorizontalStrut(5));
+      vBox = Box.createVerticalBox();
+      vBox.add(saveOptionsChk);
+      vBox.add(Box.createVerticalStrut(5));
+      vBox.add(saveSessionChk);
+      vBox.add(Box.createVerticalStrut(5));
+    hBox.add(vBox);
+    hBox.add(Box.createHorizontalStrut(5));
+    hBox.add(Box.createHorizontalGlue());
+    advancedBox.add(hBox);
+
+    advancedBox.add(Box.createVerticalStrut(5));
+
+    hBox = Box.createHorizontalBox();
+    hBox.setBorder(BorderFactory.createTitledBorder(
             " Document editor insert behaviour "));
-    advancedBox.add(vBox);
+    hBox.add(Box.createHorizontalStrut(5));
+      vBox = Box.createVerticalBox();
+      vBox.add(doceditInsertAppendChk);
+      vBox.add(Box.createVerticalStrut(5));
+      vBox.add(doceditInsertPrependChk);
+      vBox.add(Box.createVerticalStrut(5));
+    hBox.add(vBox);
+    hBox.add(Box.createHorizontalStrut(5));
+    hBox.add(Box.createHorizontalGlue());
+    advancedBox.add(hBox);
+
+    advancedBox.add(Box.createVerticalStrut(5));
+
+    hBox = Box.createHorizontalBox();
+    hBox.setBorder(BorderFactory.createTitledBorder(
+      " Browser used to display help "));
+    hBox.add(Box.createHorizontalStrut(5));
+      vBox = Box.createVerticalBox();
+      vBox.add(browserComboBox);
+      vBox.add(Box.createVerticalStrut(5));
+      vBox.add(browserCommandLineTextField);
+      vBox.add(Box.createVerticalStrut(5));
+    hBox.add(vBox);
+    hBox.add(Box.createHorizontalStrut(5));
+    advancedBox.add(hBox);
 
     mainTabbedPane.add("Advanced", advancedBox);
 
+    /******************
+     * Dialog buttons *
+     ******************/
+
     Box buttonsBox = Box.createHorizontalBox();
-    buttonsBox.add(Box.createHorizontalGlue());
     buttonsBox.add(okButton = new JButton(new OKAction()));
     buttonsBox.add(Box.createHorizontalStrut(10));
     buttonsBox.add(cancelButton = new JButton("Cancel"));
-    buttonsBox.add(Box.createHorizontalGlue());
 
     getContentPane().add(Box.createVerticalStrut(10));
     getContentPane().add(buttonsBox);
@@ -281,6 +360,29 @@ public class OptionsDialog extends JDialog {
       }
     });
     textBtn.setSelected(true);
+
+    browserComboBox.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        if(browserComboBox.getSelectedItem() == null) {
+          return;
+        }
+        String item = (String)browserComboBox.getSelectedItem();
+        browserCommandLineTextField.setEnabled(!item.equals("Java"));
+        if(item.equals("Java")) {
+          browserCommandLineTextField.setText("");
+        }
+        else if(item.equals("Firefox")) {
+          browserCommandLineTextField.setText("firefox %file");
+        }
+        else if(item.equals("Internet Explorer")) {
+          browserCommandLineTextField.setText("@start /b iexplore.exe %file");
+        }
+        else if(item.equals("Safari")) {
+          browserCommandLineTextField
+                  .setText("open -a /Applications/Safari.app %file");
+        }
+      }
+    });
   }
 
   protected void selectedFontChanged(){
@@ -406,6 +508,8 @@ public class OptionsDialog extends JDialog {
                      new Boolean(doceditInsertAppendChk.isSelected()));
       userConfig.put(GateConstants.DOCEDIT_INSERT_PREPEND,
                      new Boolean(doceditInsertPrependChk.isSelected()));
+      userConfig.put(GateConstants.HELP_BROWSER_COMMAND_LINE,
+                     browserCommandLineTextField.getText());
       setVisible(false);
     }// void actionPerformed(ActionEvent evt)
   }
@@ -569,4 +673,14 @@ public class OptionsDialog extends JDialog {
    * The combobox for the look and feel selection
    */
   protected JComboBox lnfCombo;
+
+  /**
+   * List of browsers. Update the browserCommandLineTextField.
+   */
+  protected JComboBox browserComboBox;
+
+  /**
+   * Browser command line.
+   */
+  protected JTextField browserCommandLineTextField;
 }

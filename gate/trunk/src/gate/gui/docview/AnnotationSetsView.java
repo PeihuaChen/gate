@@ -1602,6 +1602,7 @@ public class AnnotationSetsView extends AbstractDocumentView
                 document.toXml(annotationsToDump, saveFeatures));
               writer.flush();
               writer.close();
+              document.setSourceUrl(selectedFile.toURI().toURL());
             } catch (Exception ex){
               ex.printStackTrace(Out.getPrintWriter());
             }// End try
