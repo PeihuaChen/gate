@@ -190,4 +190,7 @@ public interface GateConstants {
    * List of annotation rows to display in the central view of ANNIC GUI.
    */
   public static final String ANNIC_ANNOTATION_ROWS = "ANNIC_annotation_rows";
+
+  public static final String HELP_BROWSER_COMMAND_LINE =
+    "Help_browser_command_line";
 } // GateConstants

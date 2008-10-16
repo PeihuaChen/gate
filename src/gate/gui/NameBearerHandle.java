@@ -340,7 +340,10 @@ public class NameBearerHandle implements Handle, StatusListener,
           }
         }
       }
-      staticPopupItems.add(new XJMenuItem(new SaveAction(), sListenerProxy));
+      if (((LanguageResource)target).getDataStore() != null) {
+        // this item can be used only if the resource belongs to a datastore
+        staticPopupItems.add(new XJMenuItem(new SaveAction(), sListenerProxy));
+      }
       staticPopupItems.add(new XJMenuItem(new SaveToAction(), sListenerProxy));
     }
 
@@ -638,8 +641,8 @@ public class NameBearerHandle implements Handle, StatusListener,
             // adds a .xml extension if not present
             if (!fileName.endsWith(".xml")) { fileName += ".xml"; }
             File file = new File(fileName);
-            fileChooser.setSelectedFile(file);
             fileChooser.ensureFileIsVisible(file);
+            fileChooser.setSelectedFile(file);
           }
 
           int res =
@@ -675,6 +678,8 @@ public class NameBearerHandle implements Handle, StatusListener,
               // write directly to the file using StAX
               DocumentStaxUtils.writeDocument((gate.Document)target,
                 selectedFile);
+              ((gate.Document)target)
+                .setSourceUrl(selectedFile.toURI().toURL());
             }
             catch(Exception ex) {
               ex.printStackTrace(Out.getPrintWriter());
@@ -953,8 +958,8 @@ public class NameBearerHandle implements Handle, StatusListener,
   class SaveAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public SaveAction() {
-      super("Save");
-      putValue(SHORT_DESCRIPTION, "Save back to the datastore");
+      super("Save to its datastore");
+      putValue(SHORT_DESCRIPTION, "Save back to its datastore");
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -998,7 +1003,7 @@ public class NameBearerHandle implements Handle, StatusListener,
           else {
             JOptionPane.showMessageDialog(getLargeView(),
               "This resource has not been loaded from a datastore.\n"
-                + "Please use the \"Save to\" option!\n", "GATE",
+                + "Please use the \"Save to datastore...\" option.\n", "GATE",
               JOptionPane.ERROR_MESSAGE);
 
           }
@@ -1043,6 +1048,16 @@ public class NameBearerHandle implements Handle, StatusListener,
 
       fileChooser.setDialogTitle("Select a file for this resource");
       fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+      Object URL = null;
+      if(((URL = ((Resource)target).getFeatures().remove("URL")) != null)) {
+        try {
+          fileChooser.ensureFileIsVisible(new File(((URL)URL).toURI()));
+          fileChooser.setSelectedFile(new File(((URL)URL).toURI()));
+        }
+        catch(URISyntaxException e) {
+          e.printStackTrace();
+        }
+      }
       if(fileChooser.showSaveDialog(largeView) == JFileChooser.APPROVE_OPTION) {
         final File file = fileChooser.getSelectedFile();
         Runnable runnable = new Runnable() {
@@ -1050,6 +1065,7 @@ public class NameBearerHandle implements Handle, StatusListener,
             try {
               gate.util.persistence.PersistenceManager.saveObjectToFile(
                 (Resource)target, file);
+              ((Resource)target).getFeatures().put("URL", file.toURI().toURL());
             }
             catch(Exception e) {
               JOptionPane.showMessageDialog(getLargeView(), "Error!\n"
@@ -1062,6 +1078,9 @@ public class NameBearerHandle implements Handle, StatusListener,
         thread.setPriority(Thread.MIN_PRIORITY);
         thread.start();
       }
+      else if (URL != null) {
+        ((Resource)target).getFeatures().put("URL", (URL)URL);
+      }
     }
 
   }
@@ -1069,7 +1088,7 @@ public class NameBearerHandle implements Handle, StatusListener,
   class SaveToAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public SaveToAction() {
-      super("Save to...");
+      super("Save to datastore...");
       putValue(SHORT_DESCRIPTION, "Save this resource to a datastore");
     }
 
