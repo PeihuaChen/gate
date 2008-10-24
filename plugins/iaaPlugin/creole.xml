@@ -19,6 +19,11 @@
         COMMENT="The name of the annotation types and probably features used for merging" 
         RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
 
+        <PARAMETER NAME="problemT"
+        COMMENT="The type of problem determing the type of IAA measures" RUNTIME="true" 
+              DEFAULT="ENTITYRecognition"
+        OPTIONAL="false">gate.iaaplugin.ProblemTypes</PARAMETER>
+
        <PARAMETER NAME="verbosity"
         COMMENT="The verbosity level for the IAA results outputs" 
         RUNTIME="true" OPTIONAL="false" DEFAULT="1">java.lang.String</PARAMETER>
