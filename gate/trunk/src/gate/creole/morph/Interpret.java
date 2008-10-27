@@ -141,7 +141,6 @@ public class Interpret {
 	}
 
 	private boolean validCategory(String category) {
-		//System.out.println(category);
 		if (category.equals("*")) {
 			return true;
 		} else if (vPat.matcher(category).matches()) {
@@ -160,7 +159,6 @@ public class Interpret {
 	 * @return set of the Lookups associated with the parameter
 	 */
 	public String runMorpher(String word, String category) {
-		//System.out.println("=========="+word);
 		affix = null;
 		if(!validCategory(category)) {
 			return word;
@@ -173,7 +171,6 @@ public class Interpret {
 			char ch = word.charAt(i);
 			states = getStates(ch, states);
 			if (states.isEmpty()) {
-				//System.out.println("No state found!");
 				return word;
 			}
 
@@ -196,13 +193,17 @@ public class Interpret {
 		}
 
 		if (rhses.isEmpty()) {
-			//System.out.println("No RHS found!");
 			return word;
 		}
 
 		return executeRHSes(rhses, word, category);
 	}
 
+	protected int patternIndex = -1;
+	public int getPatternIndex() {
+	  return patternIndex;
+	}
+	
 	protected String executeRHSes(TreeSet rhses, String word, String category) {
     foundRule = false;
     // rhses are in sorted order
@@ -211,7 +212,11 @@ public class Interpret {
     while (rhsiter.hasNext()){
       RHS r1 = (RHS) rhsiter.next();
       String answer = executeRHS(word, category, r1);
-      if (foundRule) return answer;
+      
+      if (foundRule) {
+        patternIndex = r1.getPatternIndex();
+        return answer;
+      }
     }
     return word;
 	}
@@ -231,10 +236,9 @@ public class Interpret {
 
 	private String executeRule(String word, RHS rhs) {
 		Pattern p = (Pattern) patterns.get(rhs.getPatternIndex());
-		//System.out.println(p.toString());	
+
 		short methodIndex = rhs.getMethodIndex();
 		if (!p.matcher(word).matches()) {
-			//System.out.println("Nope!!!!!");
 			foundRule = false;
 			return word;
 		}
@@ -517,18 +521,11 @@ public class Interpret {
 			HashSet newSet = new HashSet();
 			newSet.add(initialState);
 			lss.add(newSet);
-			// lastStates.add(initialState);
 			PatternPart parts[] = ParsingFunctions
 					.getPatternParts(rules[m].trim());
 			for (int j = 0; j < parts.length; j++) {
 				lss = ParsingFunctions.createFSMs(parts[j].getPartString(), parts[j].getType(), lss, this);
 			}
-			// for all lastStates, we need to add RHS
-			// Iterator iter = lastStates.iterator();
-			// while (iter.hasNext()) {
-			// FSMState st = (FSMState) iter.next();
-			// st.addRHS(rhs);
-			// }
 			Iterator iter = lss.iterator();
 			while (iter.hasNext()) {
 				HashSet set = (HashSet) iter.next();
