@@ -25,6 +25,7 @@ import gate.util.GateException;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import gate.iaaplugin.ProblemTypes;
 /**
  * Test the IAA computation by using the test
  * methods and small dataset.
@@ -137,11 +138,43 @@ public class TestIaaPlugin extends TestCase {
       nPwF[2] = (int)Math.ceil((double)iaaM.fMeasureOverallTypes.spurious*100);
       nPwF[3] = (int)Math.ceil((double)iaaM.fMeasureOverallTypes.missing*100);
       
-      
       assertEquals(nPwF[0], 425);
       assertEquals(nPwF[1], 50);
       assertEquals(nPwF[2], 167);
       assertEquals(nPwF[3], 234);
+      
+      //test f-measure on named entity recognition
+      iaaM.setAnnTypesAndFeats("Os");
+      iaaM.setVerbosity("0");
+      
+      controller.execute();
+      
+      nPwF[0] = (int)Math.ceil((double)iaaM.fMeasureOverallTypes.correct*100);
+      nPwF[1] = (int)Math.ceil((double)iaaM.fMeasureOverallTypes.partialCor*100);
+      nPwF[2] = (int)Math.ceil((double)iaaM.fMeasureOverallTypes.spurious*100);
+      nPwF[3] = (int)Math.ceil((double)iaaM.fMeasureOverallTypes.missing*100);
+      
+      assertEquals(nPwF[0], 167);
+      assertEquals(nPwF[1], 100);
+      assertEquals(nPwF[2], 117);
+      assertEquals(nPwF[3], 150);
+      
+      //Test kappa on sentence classification
+      iaaM.setAnnTypesAndFeats("sent->Op");
+      iaaM.setVerbosity("0");
+      ProblemTypes pt = ProblemTypes.CLASSIFICATION;
+      iaaM.setProblemT(pt);
+      
+      controller.execute();
+      
+      nPwF[0] = (int)Math.ceil((double)iaaM.overallTypesPairs[0]*1000);
+      nPwF[1] = (int)Math.ceil((double)iaaM.overallTypesPairs[1]*1000);
+      nPwF[2] = (int)Math.ceil((double)iaaM.overallTypesPairs[2]*1000);
+      
+      assertEquals(nPwF[0], 847);
+      assertEquals(nPwF[1], 761);
+      assertEquals(nPwF[2], 759);
+      
     }
     finally {
       Gate.getUserConfig().put(
