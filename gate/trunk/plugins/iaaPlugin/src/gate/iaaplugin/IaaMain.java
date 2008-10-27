@@ -47,6 +47,8 @@ public class IaaMain extends AbstractLanguageAnalyser implements
   private ProblemTypes problemT;
   private ProblemTypes problemER;
   private ProblemTypes problemClassification;
+  /** The overall Cohen's kappa value over all pairs and types. */
+  public float []overallTypesPairs = null;
   /** The overall Cohen's kappa value for each type. */
   private float[][] kappaOverall = null;
   /** The contingency table for each pair of annotator and each type. */
@@ -301,14 +303,14 @@ public class IaaMain extends AbstractLanguageAnalyser implements
   }
   
   private void printOverallResultsKappa(Vector<String>typeNames, String[] annsArray) {
-    if(verbo>0) System.out.println("\nFor each pair of annotators and each type:");
     int numDoc = corpus.size();
     numDoc -= numDocNotCounted;
     if(numDoc<1) ++numDoc;
     if(verbo>0) System.out.println("\nMacro averaged over "+numDoc+" documents:");
-    if(verbo>0) System.out.println("for each type:" );
+    if(verbo>1) System.out.println("\nFor each pair of annotators and each type:");
+    //if(verbo>0) System.out.println("for each type:" );
     int numTypes = annsTypes.keySet().size();
-    float []overallTypesPairs = new float[this.numTypesKappa];
+    overallTypesPairs = new float[this.numTypesKappa];
     for(int i=0; i<numTypes; ++i) {
       String typeN = typeNames.get(i);
       if(verbo>0) System.out.println("Annotation type *"+ typeN+"*");
@@ -359,7 +361,6 @@ public class IaaMain extends AbstractLanguageAnalyser implements
   }
   
   private void printOverallResultsFmeasure(Vector<String>typeNames, String[] annsArray) {
-    if(verbo>0) System.out.println("\nFor each pair of annotators, each type and each label:");
     ArrayList<String>keyList = new ArrayList(fMeasuresPairwiseLabel.keySet());
     Collections.sort(keyList);
     int numDoc = corpus.size();
@@ -367,7 +368,8 @@ public class IaaMain extends AbstractLanguageAnalyser implements
     if(numDoc<1) ++numDoc;
     int numTypes = annsTypes.keySet().size();
     if(verbo>0) System.out.println("\nMacro averaged over "+numDoc+" documents:");
-    if(verbo>0) System.out.println("for each type:");
+    if(verbo>0) System.out.println("\nFor each pair of annotators, each type and each label:");
+    //if(verbo>0) System.out.println("for each type:");
     for(int i=0; i<numTypes; ++i) {
       String typeN = typeNames.get(i);
       if(verbo>0) System.out.println("Annotation type *"+ typeN+"*");
