@@ -97,6 +97,8 @@ public class IaaMain extends AbstractLanguageAnalyser implements
       verbo = Integer.parseInt(verbosity);
       numDocNotCounted=0;
       
+      if(verbo>0) System.out.println("\n\n------------------------------------------------\n");
+      
       annsTypes.clear();
       
       String[] annTs = this.annTypesAndFeats.split(ConstantParameters.TERMSeparator);
@@ -143,12 +145,10 @@ public class IaaMain extends AbstractLanguageAnalyser implements
 		}
 		int numAnns = annsArray.length;
     
-    if(verbo>0) System.out.println("\n\n------------------------------------------------\n");
-    
-    if(verbo>0) System.out.println("annotation sets:");
+    if(verbo>1 && positionDoc == 0) System.out.println("annotation sets:");
 		for (int i = 0; i < numAnns; ++i) {
 			annsArray[i] = annsArray[i].trim();
-      if(verbo>0) System.out.println("*"+annsArray[i]+"*");
+      if(verbo>1 && positionDoc == 0) System.out.println("*"+annsArray[i]+"*");
       //Check if each annotation set for merging exist in the current
       // document
       if (!annsExisting.contains(annsArray[i]))
@@ -193,7 +193,7 @@ public class IaaMain extends AbstractLanguageAnalyser implements
     
     if(!isAvailabelAllAnnSets) {
       ++numDocNotCounted;
-      System.out.println("The document "+document.getName() + 
+      System.out.println("\nThe document "+document.getName() + 
         " doesn't have all the annotation set required!");
     } else {
       //Put the types and features into the map for all documents
@@ -207,14 +207,14 @@ public class IaaMain extends AbstractLanguageAnalyser implements
     for(int i=0; i<annSAll.length; ++i)
       annSAll[i] = document.getAnnotations(annsArray[i]);
     
-    if(verbo>0) System.out.println("For the document " +document.getName());
+    if(verbo>1) System.out.println("\nFor the document: " +document.getName());
     
     //Sort the types names
     Collections.sort(typeNames);
     
     for(int i=0; i<typeNames.size(); ++i) { //for each annotation type
       String typeN = typeNames.get(i);
-      if(verbo>0) System.out.println("For the annotation type *"+typeN+"*");
+      if(verbo>1) System.out.println("For the annotation type *"+typeN+"*");
       IaaCalculation iaaC = null;
       AnnotationSet[][] annSs= new AnnotationSet[1][annsArray.length];
       for(int j=0; j<annSs[0].length; ++j)
@@ -231,7 +231,7 @@ public class IaaMain extends AbstractLanguageAnalyser implements
         
         isUsingLabel = true;
         
-        if(verbo>0) System.out.println("Annotation feature=*"+nameF+"*");
+        if(verbo>1) System.out.println("Annotation feature=*"+nameF+"*");
       } else {
         iaaC = new IaaCalculation(typeN, annSs, verbo);
       }
@@ -258,7 +258,7 @@ public class IaaMain extends AbstractLanguageAnalyser implements
   
   private void computeKappa(int i, IaaCalculation iaaC, String[] annsArray) {
     iaaC.pairwiseIaaKappa();
-    iaaC.printResultsPairwiseIaa();
+    if(verbo>1) iaaC.printResultsPairwiseIaa();
     //get the kappa values from this document and add them to overall.
     this.kappaOverall[0][i] += iaaC.contingencyOverall.observedAgreement;
     this.kappaOverall[1][i] += iaaC.contingencyOverall.kappaCohen;
@@ -276,7 +276,7 @@ public class IaaMain extends AbstractLanguageAnalyser implements
     String [] labels, String[] annsArray) {
     iaaC.pairwiseIaaFmeasure();
     //if(verbo>0) System.out.println("For the annotation type *"+typeN+"*");
-    iaaC.printResultsPairwiseFmeasures();
+    if(verbo>1) iaaC.printResultsPairwiseFmeasures();
     //sum the fmeasure of all documents
     fMeasureOverall[i].add(iaaC.fMeasureOverall);
     
@@ -306,7 +306,7 @@ public class IaaMain extends AbstractLanguageAnalyser implements
     numDoc -= numDocNotCounted;
     if(numDoc<1) ++numDoc;
     if(verbo>0) System.out.println("\nMacro averaged over "+numDoc+" documents:");
-    if(verbo>0) System.out.println("for each type:");
+    if(verbo>0) System.out.println("for each type:" );
     int numTypes = annsTypes.keySet().size();
     float []overallTypesPairs = new float[this.numTypesKappa];
     for(int i=0; i<numTypes; ++i) {
@@ -315,7 +315,7 @@ public class IaaMain extends AbstractLanguageAnalyser implements
       for(int ii=0; ii<this.numTypesKappa; ++ii) {
         this.kappaOverall[ii][i] /= numDoc;
       }
-      for(int j=0; j<this.kappaPairwise[0].length; ++j)
+      for(int j=0; j<this.kappaPairwise[0][0].length; ++j)
         for(int ii=0; ii<this.numTypesKappa; ++ii) {
           this.kappaPairwise[ii][i][j] /= numDoc;
         }
@@ -408,7 +408,7 @@ public class IaaMain extends AbstractLanguageAnalyser implements
     fMeasureOverallTypes.macroAverage(numTypes);
     if(verbo>0) System.out.println("Overall pairs and types: "+  fMeasureOverallTypes.printResults());
     
-    if(verbo>0) System.out.println("\nMicro averaged over "+numDoc+" documents:");
+    /*if(verbo>0) System.out.println("\nMicro averaged over "+numDoc+" documents:");
     if(verbo>0) System.out.println("For each pair of annotators");
     for(int i=0; i<numTypes; ++i) {
       String typeN = typeNames.get(i);
@@ -448,7 +448,7 @@ public class IaaMain extends AbstractLanguageAnalyser implements
     }
     fMeasureOverallTypes.computeFmeasure();
     fMeasureOverallTypes.computeFmeasureLenient();
-    if(verbo>0) System.out.println("Overall pairs and types: "+  fMeasureOverallTypes.printResults());
+    if(verbo>0) System.out.println("Overall pairs and types: "+  fMeasureOverallTypes.printResults());*/
     
   }
   
