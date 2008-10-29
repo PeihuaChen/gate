@@ -268,6 +268,7 @@ public class TestGate {
          */
 //        suite.addTest(TestJacl.suite());
         suite.addTest(TestDocument.suite());
+        suite.addTest(TestDocumentStaxUtils.suite());
         suite.addTest(TestRBTreeMap.suite());
         suite.addTest(TestCorpus.suite());
         suite.addTest(TestSerialCorpus.suite());
