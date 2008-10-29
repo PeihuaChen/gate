@@ -16,8 +16,21 @@ public interface PreDisplayAction {
   /**
    * This method is called just before the pair is displayed.
    * 
-   * @param editor - the editor from which this action is called.
-   * @param document - the compoound document.
+   * @param editor - alignment editor
+   * @param document - compound document that the alignment editor
+   *          belongs to
+   * @param srcDocument - a member of the compound document that has
+   *          been selected as the source document
+   * @param srcAS - annotation set of the source document from which to
+   *          obtain annotations from.
+   * @param srcAnnotation - annotation from the source document that is
+   *          a parent of alignment unit being displayed
+   * @param tgtDocument - a member of the compound document that has
+   *          been selected as the target document
+   * @param tgtAS - annotation set of the target document from which to
+   *          obtain annotations from.
+   * @param tgtAnnotation - annotation from the target document that is
+   *          a parent of alignment unit being displayed
    * @throws AlignmentException
    */
   public void execute(AlignmentEditor editor, CompoundDocument document,
@@ -25,8 +38,21 @@ public interface PreDisplayAction {
           Document tgtDocument, String tgtAS, Annotation tgtAnnotation)
           throws AlignmentException;
 
+  /**
+   * This method should be used for initializing any resources required
+   * by the execute() method. This method is called whenever it loaded
+   * for the first time.
+   * 
+   * @param args
+   * @throws AlignmentActionInitializationException
+   */
   public void init(String[] args) throws AlignmentActionInitializationException;
 
+  /**
+   * This method should free up the memory by releasing any resources
+   * occupied this method. It is called just before the alignment editor
+   * is closed.
+   */
   public void cleanup();
 
 }

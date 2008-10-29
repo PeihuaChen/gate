@@ -1,6 +1,5 @@
 package gate.alignment.gui.actions.impl;
 
-
 import java.util.Set;
 import gate.Annotation;
 import gate.Document;
@@ -9,8 +8,20 @@ import gate.alignment.AlignmentException;
 import gate.alignment.gui.AlignmentEditor;
 import gate.compound.CompoundDocument;
 
+/**
+ * It uses the highlighted annotations from the editor and unaligns them
+ * with one other.
+ * 
+ * @author niraj
+ * 
+ */
 public class RemoveAlignmentAction extends AbstractAlignmentAction {
 
+  /**
+   * non-javadoc
+   * 
+   * @see AlignmentAction.execute(...)
+   */
   public void execute(AlignmentEditor editor, CompoundDocument document,
           Document srcDocument, String srcAS,
           Set<Annotation> srcAlignedAnnotations, Document tgtDocument,
@@ -35,18 +46,30 @@ public class RemoveAlignmentAction extends AbstractAlignmentAction {
     editor.clearLatestAnnotationsSelection();
   }
 
+  /**
+   * @return "Remove Alignment"
+   */
   public String getCaption() {
     return "Remove Alignment";
   }
 
+  /**
+   * @return false
+   */
   public boolean invokeForHighlightedUnalignedAnnotation() {
     return false;
   }
 
+  /**
+   * @return false
+   */
   public boolean invokeForUnhighlightedUnalignedAnnotation() {
     return false;
   }
 
+  /**
+   * Description of the class
+   */
   public String getToolTip() {
     return "Removes the alignment for selected annotations";
   }

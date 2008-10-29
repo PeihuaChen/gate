@@ -2,6 +2,11 @@ package gate.alignment;
 
 import java.io.Serializable;
 
+/**
+ * Exception that could occur while aligning annotations with one other
+ * @author gate
+ *
+ */
 public class AlignmentException extends Exception implements Serializable {
 
   private static final long serialVersionUID = 1147261517821203797L;
