@@ -63,10 +63,10 @@ public class TestOntologyAPI extends TestCase {
             "gate.creole.ontology.owlim.OWLIMOntologyLR", fm);
 
     int classNum = ontology.getOClasses(false).size();
-    assertEquals(20, classNum);
+    assertEquals(19, classNum);
     // count the number of top classes
     Set topclasses = ontology.getOClasses(true);
-    assertEquals(7, topclasses.size());
+    assertEquals(6, topclasses.size());
     // get the class Department
     OClass aClass = ontology.getOClass(new URI(ontology.getDefaultNameSpace()
             + "Department", false));
