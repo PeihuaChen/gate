@@ -22,7 +22,9 @@ File::Find::find(
     },
     qw(../plugins));
 
-my @elementsToGet = ("NAME", "COMMENT", "CLASS");
+# Sort alphabetically
+@creoleFileList = sort @creoleFileList;
+
 # **************************************************
 
 print "Extracting information on GATE plugins\n";
@@ -106,7 +108,8 @@ foreach my $creoleFileName (@creoleFileList)
         if(@nodes) {
                 print HTMLFILE "<li><a href='#$1'>$1</a></li>\n";
                 push @creoleFileData, { NAME => $1,
-                                        DATA => $nodeset };
+                                        DATA => $nodeset,
+                                        XPATH => $xp };
         }
 }
 
@@ -124,10 +127,20 @@ foreach my $creoleFile (@creoleFileData)
                 my $creoleFragment = XML::XPath::XMLParser::as_string($node);
                 print HTMLFILE "\t<tr>\n";
                 
-                foreach my $elementToGet (@elementsToGet)
-                {
-                        print HTMLFILE "\t\t<td>", getElement($creoleFragment, $elementToGet), "</td>\n";
+                # NAME
+                print HTMLFILE "\t\t<td>", $creoleFile->{XPATH}->findvalue('NAME', $node), "</td>\n";
+
+                # COMMENT and HELPURL
+                print HTMLFILE "\t\t<td>", $creoleFile->{XPATH}->findvalue('COMMENT', $node);
+                if($creoleFile->{XPATH}->exists('HELPURL', $node)) {
+                        print HTMLFILE " (<a href=\"", $creoleFile->{XPATH}->findvalue('HELPURL', $node), "\">docs</a>)";
                 }
+
+                print HTMLFILE "</td>\n";
+
+                # CLASS
+                print HTMLFILE "\t\t<td>", $creoleFile->{XPATH}->findvalue('CLASS', $node), "</td>\n";
+
                 print HTMLFILE "\t</tr>\n";
         }
 }
@@ -175,21 +188,3 @@ close(HTMLFILE);
 # **************************************************
 
 print "\nAll done. ($htmlFilename created)\n";
-
-# Get the value of an element
-# $_[0] is the resource node
-# $_[1] is the element name
-sub getElement {
-
-	if($_[0] =~ /<$_[1]>(.*)<\/$_[1]>/s)
-	{
-		my $elementValue = $1;
-		# Finds all urls and converts them to links.
-		$elementValue =~ s|(http://[^\s)]+)|<a href="$1">docs</a>|g;
-		return $elementValue;
-	}
-	else 
-	{
-		return "&nbsp;";
-	}
-}
