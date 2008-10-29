@@ -209,6 +209,9 @@ public class CompositeDocumentImpl extends DocumentImpl implements
 		return -1;
 	}
 
+	/**
+	 * sets the offset mapping information
+	 */
 	public void setOffsetMappingInformation(
 			HashMap<String, List<OffsetDetails>> offsetMappings) {
 		this.offsetMappings = offsetMappings;

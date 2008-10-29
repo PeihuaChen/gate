@@ -2,6 +2,11 @@ package gate.alignment;
 
 import java.io.Serializable;
 
+/**
+ * Exception that could occur while initializing AlilgnmentAction
+ * @author gate
+ *
+ */
 public class AlignmentActionInitializationException extends Exception implements Serializable {
 
   private static final long serialVersionUID = 1147261517821203797L;

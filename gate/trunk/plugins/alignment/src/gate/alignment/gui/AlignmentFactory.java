@@ -2,16 +2,7 @@ package gate.alignment.gui;
 
 import gate.Annotation;
 import gate.AnnotationSet;
-import gate.Document;
 import gate.compound.CompoundDocument;
-import gate.util.GateRuntimeException;
-import gate.util.InvalidOffsetException;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * This class provides various methods that help in alignment process.
@@ -20,27 +11,30 @@ import java.util.List;
  */
 public class AlignmentFactory {
 
+  /**
+   * Alignments are stored as a document feature by default under this feature name 
+   */
   public static final String ALIGNMENT_FEATURE_NAME = "alignment";
 
+  /**
+   * The document that is being processed for alignment
+   */
   protected CompoundDocument compoundDocument;
 
-  protected String comparatorClass;
+  /**
+   * An instance of IteratingMethod that decides iterating order
+   */
+  protected IteratingMethod iteratingMethod;
 
-  protected Comparator<Object> comparator;
-
-  private String srcTokenAnnotationType;
-
-  private String tgtTokenAnnotationType;
-
+  /**
+   * ID of the source document
+   */
   private String srcDocumentID;
 
+  /**
+   * ID of the target document
+   */
   private String tgtDocumentID;
-
-  private AASequence srcSequence;
-
-  private AASequence tgtSequence;
-
-  private boolean showCompletedPairs = false;
 
   /**
    * AlignmentFactory makes alignment easier
@@ -60,205 +54,96 @@ public class AlignmentFactory {
           String srcDocumentId, String tgtDocumentId, String srcInputAS,
           String tgtInputAS, String srcTokenAnnotationType,
           String tgtTokenAnnotationType, String srcUnitAnnotationType,
-          String tgtUnitAnnotationType, String comparatorClass)
+          String tgtUnitAnnotationType, String iteratingMethodClassName)
           throws Exception {
 
     this.compoundDocument = alignedDocument;
     this.srcDocumentID = srcDocumentId;
     this.tgtDocumentID = tgtDocumentId;
-    this.srcTokenAnnotationType = srcTokenAnnotationType;
-    this.tgtTokenAnnotationType = tgtTokenAnnotationType;
 
-    comparator = (Comparator)Class.forName(comparatorClass).newInstance();
-    Document doc = compoundDocument.getDocument(srcDocumentId);
-    AnnotationSet as = srcInputAS.equals("<null>")
-            || srcInputAS.trim().length() == 0 ? doc.getAnnotations() : doc
-            .getAnnotations(srcInputAS);
-    srcSequence = new AASequence(doc, as, srcUnitAnnotationType);
-    doc = compoundDocument.getDocument(tgtDocumentId);
-    AnnotationSet as1 = tgtInputAS.equals("<null>")
-            || tgtInputAS.trim().length() == 0 ? doc.getAnnotations() : doc
-            .getAnnotations(tgtInputAS);
-    tgtSequence = new AASequence(doc, as1, tgtUnitAnnotationType);
+    iteratingMethod = (IteratingMethod)Class.forName(iteratingMethodClassName)
+            .newInstance();
+    iteratingMethod.init(alignedDocument, srcDocumentId, tgtDocumentId,
+            srcInputAS, tgtInputAS, srcTokenAnnotationType,
+            tgtTokenAnnotationType, srcUnitAnnotationType,
+            tgtUnitAnnotationType);
   }
-
-  public String getText(Annotation annot, String language) {
-    try {
-      if(language.equals(srcDocumentID)) {
-        return srcSequence.getText(annot);
-      }
-      else if(language.equals(tgtDocumentID)) {
-        return tgtSequence.getText(annot);
-      }
-    }
-    catch(InvalidOffsetException ioe) {
-      throw new GateRuntimeException(ioe);
-    }
-
-    return null;
-  }
-
-  public AnnotationSet getAnnotationSet(String language) {
-    if(language.equals(srcDocumentID)) {
-      return srcSequence.set;
-    }
-    else if(language.equals(tgtDocumentID)) {
-      return tgtSequence.set;
-    }
-    return null;
-  }
-
-  public AnnotationSet getUnderlyingAnnotations(Annotation annot,
-          String language, String tokenAnnotationType) {
-    if(language.equals(srcDocumentID)) {
-      return srcSequence.getUnderlyingAnnotations(annot,
-              tokenAnnotationType == null
-                      ? this.srcTokenAnnotationType
-                      : tokenAnnotationType);
-    }
-    else if(language.equals(tgtDocumentID)) {
-      return tgtSequence.getUnderlyingAnnotations(annot,
-              tokenAnnotationType == null
-                      ? this.tgtTokenAnnotationType
-                      : tokenAnnotationType);
-    }
-    return null;
-  }
-
-  private HashMap<String, Annotation> currentAnnotations;
 
   /**
-   * The method returns a hashmap that has the following format e.g. en ->
-   * english sentence (if document is sentence algined and user wants to
-   * perform word alignment) e.g. hi -> hindi sentence
-   * 
+   * Gets the text for the given annotation
+   * @param annot
+   * @param documentID - id of the document that the annot belongs to
    * @return
    */
-  public HashMap<String, Annotation> next() {
-    HashMap<String, Annotation> annotations = new HashMap<String, Annotation>();
-    annotations.put(srcDocumentID, srcSequence.next());
-    annotations.put(tgtDocumentID, tgtSequence.next());
-    this.currentAnnotations = annotations;
-    return annotations;
+  public String getText(Annotation annot, String documentID) {
+    return iteratingMethod.getText(annot, documentID);
   }
 
-  public void setCompleted(boolean completed) {
-    srcSequence.setCompleted(completed);
-    tgtSequence.setCompleted(completed);
+  /**
+   * Gets the underlying annotations with the given type under the given annotation
+   * @param annot
+   * @param documentID - id of the document that the annot belongs to.
+   * @param tokenAnnotationType
+   * @return
+   */
+  public AnnotationSet getUnderlyingAnnotations(Annotation annot,
+          String language, String tokenAnnotationType) {
+    return iteratingMethod.getUnderlyingAnnotations(annot, language, tokenAnnotationType);
   }
 
-  public boolean isCompleted() {
-    return srcSequence.isCompleted() && tgtSequence.isCompleted();
-  }
-  
-  public HashMap<String, Annotation> previous() {
-    HashMap<String, Annotation> annotations = new HashMap<String, Annotation>();
-    annotations.put(srcDocumentID, srcSequence.previous());
-    annotations.put(tgtDocumentID, tgtSequence.previous());
-    this.currentAnnotations = annotations;
-    return annotations;
+  /**
+   * Returns the next possible pair
+   * @return
+   */
+  public Pair next() {
+    return iteratingMethod.next();
   }
 
-  public HashMap<String, Annotation> current() {
-    return currentAnnotations;
+  /**
+   * Returns the previous pair
+   * @return
+   */
+  public Pair previous() {
+    return iteratingMethod.previous();
   }
 
+  /**
+   * Returns the current pair
+   * @return
+   */
+  public Pair current() {
+    return iteratingMethod.current();
+  }
+
+  /**
+   * Returns true if there is any next pair available 
+   * @return
+   */
   public boolean hasNext() {
-    return srcSequence.hasNext() && tgtSequence.hasNext();
+    return iteratingMethod.hasNext();
   }
 
+  /**
+   * Returns true if there is any previous pair available
+   * @return
+   */
   public boolean hasPrevious() {
-    return srcSequence.hasPrevious() && tgtSequence.hasPrevious();
+    return iteratingMethod.hasPrevious();
   }
 
-  class AASequence {
-    Document document;
-
-    AnnotationSet set;
-
-    // String parentType;
-
-    List<Annotation> annotations;
-
-    boolean[] completed;
-
-    int counter = -1;
-
-    public AASequence(Document doc, AnnotationSet set, String parentType) {
-      this.document = doc;
-      this.set = set;
-      // collecting all sentences for example
-      annotations = new ArrayList<Annotation>(set.get(parentType));
-      completed = new boolean[annotations.size()];
-      Collections.sort(annotations, comparator);
-    }
-
-    public boolean hasNext() {
-      if(counter + 1 < annotations.size()) {
-        return true;
-      }
-      else {
-        return false;
-      }
-    }
-
-    // return next sentence
-    public Annotation next() {
-      counter++;
-      return annotations.get(counter);
-    }
-
-    public Annotation previous() {
-      counter--;
-      return annotations.get(counter);
-    }
-
-    public boolean hasPrevious() {
-      if(counter - 1 >= 0) {
-        return true;
-      }
-      return false;
-    }
-
-    public void reset() {
-      counter = -1;
-    }
-
-    public void setCompleted(boolean completed) {
-      if(counter == -1) return;
-      this.completed[counter] = completed;
-    }
-
-    public boolean isCompleted() {
-      if(counter == -1) return false;
-      return this.completed[counter];
-    }
-    
-    public AnnotationSet getUnderlyingAnnotations(Annotation parentAnnot,
-            String annotationType) {
-      return set.getContained(parentAnnot.getStartNode().getOffset(),
-              parentAnnot.getEndNode().getOffset()).get(annotationType);
-    }
-
-    public String getText(Annotation ann) throws InvalidOffsetException {
-      return document.getContent().getContent(ann.getStartNode().getOffset(),
-              ann.getEndNode().getOffset()).toString();
-    }
-  }
-
+  /**
+   * ID of the source document
+   * @return
+   */
   public String getSrcDocumentID() {
     return srcDocumentID;
   }
 
+  /**
+   * ID of the target document
+   * @return
+   */
   public String getTgtDocumentID() {
     return tgtDocumentID;
-  }
-
-  public boolean isShowCompletedPairs() {
-    return showCompletedPairs;
-  }
-
-  public void setShowCompletedPairs(boolean showCompletedPairs) {
-    this.showCompletedPairs = showCompletedPairs;
   }
 }

@@ -288,7 +288,7 @@ public class CompoundDocumentEditor extends AbstractVisualResource
     }
   }
 
-  class SaveAsASingleXML extends AbstractAction {
+  public class SaveAsASingleXML extends AbstractAction {
 
     private static final long serialVersionUID = -1377052643002026640L;
 
