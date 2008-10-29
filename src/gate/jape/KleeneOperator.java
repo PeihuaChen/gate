@@ -15,6 +15,8 @@ package gate.jape;
 import org.apache.log4j.Logger;
 import gate.jape.JapeConstants;
 
+import java.io.Serializable;
+
 /**
  * Representation of Kleene operators on expressions. Kleene operators
  * indicate the number of repetitions over an expression that are legal.
@@ -26,7 +28,7 @@ import gate.jape.JapeConstants;
  * @version $Revision$
  * @author esword
  */
-public class KleeneOperator {
+public class KleeneOperator implements Serializable {
   protected static final Logger log = Logger.getLogger(KleeneOperator.class);
 
   /**

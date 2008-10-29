@@ -17,6 +17,8 @@ package gate.jape.constraint;
 import gate.Annotation;
 import gate.jape.JapeException;
 
+import java.io.Serializable;
+
 /**
  * A predicate defines a single boolean operation on an
  * {@link gate.Annotation} or some property of an annotation. These are
@@ -29,7 +31,7 @@ import gate.jape.JapeException;
  * @version $Revision$
  * @author esword
  */
-public interface ConstraintPredicate {
+public interface ConstraintPredicate extends Serializable {
 
   // Standard operators. Note that this was purposefully not done as an
   // enum so that additional operators could be added dynamically for other

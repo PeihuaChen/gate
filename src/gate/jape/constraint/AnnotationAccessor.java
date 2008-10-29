@@ -17,6 +17,8 @@ package gate.jape.constraint;
 import gate.Annotation;
 import gate.Document;
 
+import java.io.Serializable;
+
 /**
  * Provides way to access some property of an {@link Annotation} or
  * otherwise get a value associated with an annotation (such as the
@@ -26,7 +28,7 @@ import gate.Document;
  * @version $Revision$
  * @author esword
  */
-public interface AnnotationAccessor {
+public interface AnnotationAccessor extends Serializable {
 
   /**
    * Store a key or name for the accessor to reference when it attempts
