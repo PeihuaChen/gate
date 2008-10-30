@@ -763,4 +763,38 @@
   </target>
 
   <target name="distro" depends="distro-zips, installer" />
+
+  <!--
+  Regenerate plugins.html.
+
+  Notes:
+    1) This target may not work properly with the ant bundled in gate/bin.  If
+       you have problems, try using a standalone ant instead.
+    2) All plugins need to be compiled and in a state where they could be
+       loaded into GATE from the plugin manager.  Most plugins are handled by
+       running "bin/ant all" but you will need to build SUPPLE manually.
+  -->
+  <target name="plugins.html">
+    <taskdef name="expandcreoles" classname="gate.util.ant.ExpandCreoleXmls"
+             classpathref="run.class.path"/>
+    <!-- clean out previous run -->
+    <delete dir="build/plugins" />
+    <mkdir dir="build/plugins" />
+
+    <!-- expand the plugin creole.xml files with information from any
+         @CreoleResource annotations on their resources -->
+    <expandcreoles todir="build/plugins" gatehome="${basedir}">
+      <fileset dir="plugins" includes="*/creole.xml" />
+    </expandcreoles>
+
+    <!-- Copy the 'obsolete' creole.xmls directly, without annotation
+    processing -->
+    <copy todir="build/plugins">
+      <fileset dir="plugins" includes="Obsolete/**/creole.xml" />
+    </copy>
+
+    <property name="plugins-info-to-HTML.script"
+              location="bin/plugins-info-to-HTML.pl" />
+    <exec dir="bin" executable="${plugins-info-to-HTML.script}" />
+  </target>
 </project>

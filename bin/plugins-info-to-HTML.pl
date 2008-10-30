@@ -20,7 +20,7 @@ File::Find::find(
     sub {
       push (@creoleFileList, $File::Find::name) if $_ eq 'creole.xml';
     },
-    qw(../plugins));
+    qw(../build/plugins));
 
 # Sort alphabetically
 @creoleFileList = sort @creoleFileList;
@@ -128,7 +128,7 @@ foreach my $creoleFile (@creoleFileData)
                 print HTMLFILE "\t<tr>\n";
                 
                 # NAME
-                print HTMLFILE "\t\t<td>", $creoleFile->{XPATH}->findvalue('NAME', $node), "</td>\n";
+                print HTMLFILE "\t\t<td>", $creoleFile->{XPATH}->findvalue('NAME', $node), "&nbsp;</td>\n";
 
                 # COMMENT and HELPURL
                 print HTMLFILE "\t\t<td>", $creoleFile->{XPATH}->findvalue('COMMENT', $node);
@@ -136,7 +136,7 @@ foreach my $creoleFile (@creoleFileData)
                         print HTMLFILE " (<a href=\"", $creoleFile->{XPATH}->findvalue('HELPURL', $node), "\">docs</a>)";
                 }
 
-                print HTMLFILE "</td>\n";
+                print HTMLFILE "&nbsp;</td>\n";
 
                 # CLASS
                 print HTMLFILE "\t\t<td>", $creoleFile->{XPATH}->findvalue('CLASS', $node), "</td>\n";
