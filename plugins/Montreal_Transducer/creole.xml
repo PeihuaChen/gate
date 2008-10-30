@@ -9,7 +9,11 @@
     <NAME>Montreal Transducer</NAME>
     <JAR>MtlTransducer.jar</JAR>
     <CLASS>ca.umontreal.iro.rali.gate.creole.MtlTransducer</CLASS>
-    <COMMENT>A module for executing augmented Jape grammars</COMMENT>
+    <COMMENT>
+      A module for executing augmented Jape grammars.  Many of its features
+      have now been subsumed into the standard JAPE implementation.
+    </COMMENT>
+    <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:misc-creole:montrealtransducer</HELPURL>
     <PARAMETER NAME="document" RUNTIME="true"
       COMMENT="The document to be processed">gate.Document</PARAMETER>
     <PARAMETER NAME="inputASName" RUNTIME="true"
