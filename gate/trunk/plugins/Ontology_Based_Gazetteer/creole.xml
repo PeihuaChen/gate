@@ -10,6 +10,7 @@
 		<COMMENT>
 			A ontology  lookup component
 		</COMMENT>
+    <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:misc-creole:ontoRootGaz</HELPURL>
 	<PARAMETER NAME="ontology"
 			COMMENT="The Ontology to be used" 
 			>gate.creole.ontology.Ontology
