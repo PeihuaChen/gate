@@ -39,7 +39,8 @@ public class CreoleXmlUpperCaseFilter extends XMLFilterImpl {
           "CREOLE-DIRECTORY", "CREOLE", "RESOURCE", "AUTOINSTANCE",
           "HIDDEN-AUTOINSTANCE", "PARAM", "PARAMETER", "GUI", "OR", "NAME",
           "JAR", "CLASS", "COMMENT", "INTERFACE", "ICON", "PRIVATE", "TOOL",
-          "MAIN_VIEWER", "RESOURCE_DISPLAYED", "ANNOTATION_TYPE_DISPLAYED"));
+          "MAIN_VIEWER", "RESOURCE_DISPLAYED", "ANNOTATION_TYPE_DISPLAYED",
+          "HELPURL"));
 
   /**
    * Process the end of an element. If the element is a standard
