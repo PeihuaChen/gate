@@ -7,7 +7,7 @@
     <RESOURCE>
       <NAME>IAA Computation PR</NAME>
       <COMMENT>Compute inter-annotator agreement (IAA).</COMMENT>
-      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/chapt:mlapi</HELPURL>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:gui:iaaplugin</HELPURL>
       <CLASS>gate.iaaplugin.IaaMain</CLASS>
       <JAR>iaaMain.jar</JAR>
 
