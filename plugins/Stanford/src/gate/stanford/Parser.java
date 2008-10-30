@@ -22,7 +22,8 @@ import edu.stanford.nlp.ling.*;
  * parameters.
  * @author adam
  */
-@CreoleResource(name = "StanfordParser", comment = "Stanford parser wrapper")
+@CreoleResource(name = "StanfordParser", comment = "Stanford parser wrapper",
+        helpURL = "http://gate.ac.uk/cgi-bin/userguide/sec:misc-creole:stanford")
 public class Parser extends AbstractLanguageAnalyser 
 implements ProcessingResource {
 
