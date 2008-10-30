@@ -16,6 +16,8 @@
 package gate.creole;
 
 import gate.Gate;
+import gate.Gate.DirectoryInfo;
+import gate.Gate.ResourceInfo;
 import gate.creole.metadata.AutoInstance;
 import gate.creole.metadata.AutoInstanceParam;
 import gate.creole.metadata.CreoleParameter;
@@ -25,11 +27,13 @@ import gate.creole.metadata.HiddenCreoleParameter;
 import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
 import gate.util.GateException;
+import gate.util.GateRuntimeException;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
@@ -41,7 +45,8 @@ import org.jdom.Element;
 
 /**
  * Class to take a creole.xml file (as a JDOM tree) and add elements
- * corresponding to the CREOLE annotations on the RESOURCE classes it declares.
+ * corresponding to the CREOLE annotations on the RESOURCE classes it
+ * declares.
  */
 public class CreoleAnnotationHandler {
 
@@ -54,6 +59,83 @@ public class CreoleAnnotationHandler {
    */
   public CreoleAnnotationHandler(URL creoleFileUrl) {
     this.creoleFileUrl = creoleFileUrl;
+  }
+
+  /**
+   * Extract all JAR elements from the given JDOM document and add the
+   * jars they reference to the GateClassLoader.
+   * 
+   * @param jdomDoc JDOM document representing a parsed creole.xml file.
+   */
+  public void addJarsToClassLoader(Document jdomDoc)
+          throws MalformedURLException {
+    addJarsToClassLoader(jdomDoc.getRootElement());
+  }
+
+  /**
+   * Recursively search the given element for JAR entries and add these
+   * jars to the GateClassLoader
+   * 
+   * @param jdomElt JDOM element representing a creole.xml file
+   */
+  private void addJarsToClassLoader(Element jdomElt)
+          throws MalformedURLException {
+    if("JAR".equals(jdomElt.getName())) {
+      URL url = new URL(creoleFileUrl, jdomElt.getTextTrim());
+      Gate.getClassLoader().addURL(url);
+    }
+    else {
+      for(Element child : (List<Element>)jdomElt.getChildren()) {
+        addJarsToClassLoader(child);
+      }
+    }
+  }
+
+  /**
+   * Fetches the directory information for this handler's creole plugin
+   * and adds additional RESOURCE elements to the given JDOM document so
+   * that it contains a RESOURCE for every resource type defined in the
+   * plugin's directory info.
+   * 
+   * @param jdomDoc JDOM document which should be the parsed creole.xml
+   *          that this handler was configured for.
+   */
+  public void createResourceElementsForDirInfo(Document jdomDoc)
+          throws MalformedURLException {
+    Element jdomElt = jdomDoc.getRootElement();
+    URL directoryUrl = new URL(creoleFileUrl, ".");
+    DirectoryInfo dirInfo = Gate.getDirectoryInfo(directoryUrl);
+    if(dirInfo != null) {
+      Map<String, Element> resourceElements = new HashMap<String, Element>();
+      findResourceElements(resourceElements, jdomElt);
+      for(ResourceInfo resInfo : (List<ResourceInfo>)dirInfo
+              .getResourceInfoList()) {
+        if(!resourceElements.containsKey(resInfo.getResourceClassName())) {
+          // no existing RESOURCE element for this resource type (so it
+          // was
+          // auto-discovered from a <JAR SCAN="true">), so add a minimal
+          // RESOURCE element which will be filled in by the annotation
+          // processor.
+          jdomElt.addContent(new Element("RESOURCE").addContent(new Element(
+                  "CLASS").setText(resInfo.getResourceClassName())));
+        }
+      }
+    }
+
+  }
+
+  private void findResourceElements(Map<String, Element> map, Element elt) {
+    if(elt.getName().equals("RESOURCE")) {
+      String className = elt.getChildTextTrim("CLASS");
+      if(className != null) {
+        map.put(className, elt);
+      }
+    }
+    else {
+      for(Element child : (List<Element>)elt.getChildren()) {
+        findResourceElements(map, child);
+      }
+    }
   }
 
   /**
@@ -326,19 +408,19 @@ public class CreoleAnnotationHandler {
             addAttribute(paramElt, paramAnnot.suffixes(), "", "SUFFIXES");
             addAttribute(paramElt, paramAnnot.defaultValue(),
                     CreoleParameter.NO_DEFAULT_VALUE, "DEFAULT");
-            
+
             // runtime and optional are based on marker annotations
             String runtimeParam = "";
             if(method.isAnnotationPresent(RunTime.class)) {
-              runtimeParam = String.valueOf(
-                  method.getAnnotation(RunTime.class).value());
+              runtimeParam = String.valueOf(method.getAnnotation(RunTime.class)
+                      .value());
             }
             addAttribute(paramElt, runtimeParam, "", "RUNTIME");
 
             String optionalParam = "";
             if(method.isAnnotationPresent(Optional.class)) {
-              optionalParam = String.valueOf(
-                  method.getAnnotation(Optional.class).value());
+              optionalParam = String.valueOf(method.getAnnotation(
+                      Optional.class).value());
             }
             addAttribute(paramElt, optionalParam, "", "OPTIONAL");
           }
