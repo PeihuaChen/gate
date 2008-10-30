@@ -11,6 +11,7 @@
 		only a 'string' feature. Requires annotations of type Sentence. See RASP package for 
 		platform restrictions.
 	  </COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:misc-creole:rasp</HELPURL>
       <PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
       <PARAMETER NAME="inputASName" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="outputASName" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
@@ -28,6 +29,7 @@
 				Converts from PennTreebank POS tags to the C2 tagset used by RASP.
 				Generates annotations of type MorphObj which hold the tag and lemma
 			</COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:misc-creole:rasp</HELPURL>
 			<PARAMETER NAME="document" RUNTIME="true"
 				COMMENT="The document to be processed">
 				gate.Document
@@ -59,6 +61,8 @@
       <NAME>RASP2 POS Tagger</NAME>
       <CLASS>com.digitalpebble.rasp2.tagger.PosTagger</CLASS>
       <JAR>rasp2.jar</JAR>
+      <COMMENT>RASP part-of-speech tagger, creating WordForm annotations</COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:misc-creole:rasp</HELPURL>
       <PARAMETER NAME="raspHome" RUNTIME="false" DEFAULT="file:/usr/local/bin/RASP" OPTIONAL="false">java.net.URL</PARAMETER>
       <PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
       <PARAMETER NAME="inputASName" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
@@ -75,6 +79,12 @@
       <NAME>RASP2 Morphological Analyser</NAME>
       <CLASS>com.digitalpebble.rasp2.morph.MorphoAnnotator</CLASS>
       <JAR>rasp2.jar</JAR>
+      <COMMENT>
+        RASP morphological analyser, which adds lemma and suffix to the
+        WordForm annotations produced by the RASP POS tagger (or the ANNIE POS
+        tagger plus the RASP converter)
+      </COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:misc-creole:rasp</HELPURL>
       <PARAMETER NAME="raspHome" RUNTIME="false" DEFAULT="file:/usr/local/bin/RASP" OPTIONAL="false">java.net.URL</PARAMETER>
       <PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
       <PARAMETER NAME="inputASName" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
@@ -90,6 +100,8 @@
       <NAME>RASP2 Parser</NAME>
       <CLASS>com.digitalpebble.rasp2.parser.ParserAnnotator</CLASS>
       <JAR>rasp2.jar</JAR>
+      <COMMENT>RASP dependency parser</COMMENT>
+      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:misc-creole:rasp</HELPURL>
       <PARAMETER NAME="raspHome" RUNTIME="false" DEFAULT="file:/usr/local/bin/RASP" OPTIONAL="false">java.net.URL</PARAMETER>
       <PARAMETER NAME="outputFormat" DEFAULT="-og" RUNTIME="true" OPTIONAL="false">java.lang.String</PARAMETER>
 	  <!--
