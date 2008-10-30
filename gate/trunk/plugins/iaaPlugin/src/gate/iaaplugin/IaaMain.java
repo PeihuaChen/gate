@@ -56,7 +56,7 @@ public class IaaMain extends AbstractLanguageAnalyser implements
   /** Number of types of kappa, now it's 3: Obeserved agreement, Cohen's kappa, and Scott's pi. */
   private final int numTypesKappa = 3;
   private final String[] namesKappa = 
-    {"Obeserved agreement", "Cohen's kappa", "Scott's pi"}; 
+    {"Observed agreement", "Cohen's kappa", "Scott's pi"}; 
   /** The overall F-measure for each type. */
   private FMeasure[]fMeasureOverall;
   /** Fmeaures for each pair of annotator and each label. */
