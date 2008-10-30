@@ -8,7 +8,6 @@
     <JAR>rasp.jar</JAR>
     <CLASS>gate.rasp.rasp</CLASS>
     <COMMENT>RASP (Robust Accurate Statistical Parsing) is a robust parsing system for English.</COMMENT>
-    <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:misc-creole:rasp</HELPURL>
     <PARAMETER 
         NAME="document" 
         RUNTIME="true"
