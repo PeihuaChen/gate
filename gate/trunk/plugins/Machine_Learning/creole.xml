@@ -10,7 +10,7 @@
       <JAR>lib/troveForMaxent.jar</JAR>
       <JAR>lib/weka-3.4.6.jar</JAR>
       <JAR>machinelearning.jar</JAR>
-      <COMMENT>Trains a machine learning algorithm from a corpus. For new code, consider using the "learning" plugin unstead.</COMMENT>
+      <COMMENT>Trains a machine learning algorithm from a corpus. For new code, consider using the "learning" plugin instead.</COMMENT>
       <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sect:ml</HELPURL>
       <CLASS>gate.creole.ml.MachineLearningPR</CLASS>
       <PARAMETER NAME="document" COMMENT="The document to be processed"
