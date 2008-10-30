@@ -40,9 +40,7 @@ import java.util.Collection;
  * </p>
  *
  * @see Optional
- * @see Required
  * @see RunTime
- * @see InitTime
  */
 @Documented
 @Target( {ElementType.METHOD})
