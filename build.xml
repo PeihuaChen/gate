@@ -793,8 +793,8 @@
       <fileset dir="plugins" includes="Obsolete/**/creole.xml" />
     </copy>
 
-    <property name="plugins-info-to-HTML.script"
-              location="bin/plugins-info-to-HTML.pl" />
-    <exec dir="bin" executable="${plugins-info-to-HTML.script}" />
+    <exec dir="bin" executable="perl">
+      <arg file="bin/plugins-info-to-HTML.pl" />
+    </exec>
   </target>
 </project>
