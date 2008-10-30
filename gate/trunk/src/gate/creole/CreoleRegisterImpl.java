@@ -213,18 +213,19 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
     // this will create ResourceData entries in the register
     try {
       Document jdomDoc = jdomBuilder.build(directoryStream, creoleFileUrl.toExternalForm());
+      CreoleAnnotationHandler annotationHandler = new CreoleAnnotationHandler(creoleFileUrl);
+      
       // Add any JARs from the creole.xml to the GATE ClassLoader
-      addJarsToClassLoader(jdomDoc.getRootElement(), creoleFileUrl);
+      annotationHandler.addJarsToClassLoader(jdomDoc);
 
       // Make sure there is a RESOURCE element for every resource type the
       // directory defines
-      createResourceElementsForDirInfo(jdomDoc.getRootElement(), directoryUrl, creoleFileUrl);
+      annotationHandler.createResourceElementsForDirInfo(jdomDoc);
 
       // now we can process any annotations on the new classes
       // and augment the XML definition
-      CreoleAnnotationHandler annotationHandler = new CreoleAnnotationHandler(creoleFileUrl);
       annotationHandler.processAnnotations(jdomDoc);
-      
+
       // debugging
       if(DEBUG) {
         XMLOutputter xmlOut = new XMLOutputter(Format.getPrettyFormat());
@@ -250,51 +251,6 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
     }
 
   } // parseDirectory
-
-  private void addJarsToClassLoader(Element jdomElt, URL creoleFileUrl) throws MalformedURLException{
-    if("JAR".equals(jdomElt.getName())) {
-      URL url = new URL(creoleFileUrl, jdomElt.getTextTrim());
-      Gate.getClassLoader().addURL(url);
-    }
-    else {
-      for(Element child : (List<Element>)jdomElt.getChildren()) {
-        addJarsToClassLoader(child, creoleFileUrl);
-      }
-    }
-  }
-
-  private void createResourceElementsForDirInfo(Element jdomElt, URL directoryUrl, URL creoleFileUrl) {
-    DirectoryInfo dirInfo = Gate.getDirectoryInfo(directoryUrl);
-    if(dirInfo != null) {
-      Map<String, Element> resourceElements = new HashMap<String, Element>();
-      findResourceElements(resourceElements, jdomElt);
-      for(ResourceInfo resInfo : (List<ResourceInfo>)dirInfo.getResourceInfoList()) {
-        if(!resourceElements.containsKey(resInfo.getResourceClassName())) {
-          // no existing RESOURCE element for this resource type (so it was
-          // auto-discovered from a <JAR SCAN="true">), so add a minimal
-          // RESOURCE element which will be filled in by the annotation
-          // processor.
-          jdomElt.addContent(new Element("RESOURCE")
-                    .addContent(new Element("CLASS")
-                        .setText(resInfo.getResourceClassName())));
-        }
-      }
-    }
-  }
-
-  private void findResourceElements(Map<String, Element> map, Element elt) {
-    if(elt.getName().equals("RESOURCE")) {
-      String className = elt.getChildTextTrim("CLASS");
-      if(className != null) {
-        map.put(className, elt);
-      }
-    }
-    else {
-      for(Element child : (List<Element>)elt.getChildren()) {
-        findResourceElements(map, child);
-      }
-    }
-  }
 
   /** Register resources that are built in to the GATE distribution.
     * These resources are described by the <TT>creole.xml</TT> file in
