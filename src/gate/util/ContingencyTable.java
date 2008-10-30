@@ -105,13 +105,16 @@ public class ContingencyTable {
     // Compute the specific agreement for each label using marginal sums
     sAgreements = new float[numCats][2];
     for(int i = 0; i < numCats; ++i) {
-      sAgreements[i][0] = (2 * confusionMatrix[i][i])
-        / (marginalArrayC[i] + marginalArrayR[i]);
-      sAgreements[i][1] = (2 * (totalSum - marginalArrayC[i]
-        - marginalArrayR[i] + confusionMatrix[i][i]))
-        / (2 * totalSum - marginalArrayC[i] - marginalArrayR[i]);
+      if(marginalArrayC[i] + marginalArrayR[i]>0) 
+        sAgreements[i][0] = (2 * confusionMatrix[i][i])
+          / (marginalArrayC[i] + marginalArrayR[i]);
+      else sAgreements[i][0] = 0.0f;
+      if(2 * totalSum - marginalArrayC[i] - marginalArrayR[i]>0)
+        sAgreements[i][1] = (2 * (totalSum - marginalArrayC[i]
+          - marginalArrayR[i] + confusionMatrix[i][i]))
+          / (2 * totalSum - marginalArrayC[i] - marginalArrayR[i]);
+      else sAgreements[i][1] = 0.0f;
     }
-
   }
 
   /** Compute the observed agreement. */
@@ -185,7 +188,7 @@ public class ContingencyTable {
   /** Print out the results. */
   public String printResultsPairwise() {
     StringBuffer logMessage = new StringBuffer();
-    logMessage.append("Obeserved agreement: " + observedAgreement + ";  ");
+    logMessage.append("Observed agreement: " + observedAgreement + ";  ");
     logMessage.append("Cohen's kappa: " + kappaCohen + "; ");
     logMessage.append("Scott's pi: " + kappaPi + "\n");
     return logMessage.toString();
@@ -219,7 +222,7 @@ public class ContingencyTable {
   /** Print out the results. */
   public String printResultsAllway() {
     StringBuffer logMessage = new StringBuffer();
-    logMessage.append("Obeserved agreement: " + observedAgreement + "; ");
+    logMessage.append("Observed agreement: " + observedAgreement + "; ");
     logMessage.append("Cohen's kappa extended for  " + numJudges
       + " annotators: " + kappaDF + "; ");
     logMessage.append("S&C kappa for " + numJudges + " annotators: " + kappaSC
