@@ -3703,12 +3703,27 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
     Runnable runnable = new Runnable() {
       public void run() {
+        // add gateVersion=... to the end of the URL
+        StringBuilder actualURL = new StringBuilder(url.toString());
+        int insertPoint = actualURL.length();
+        if(url.getRef() != null) {
+          // adjust for a #something on the end
+          insertPoint -= url.getRef().length() + 1;
+        }
+        if(url.getQuery() == null) {
+          actualURL.insert(insertPoint, '?');
+        }
+        else {
+          actualURL.insert(insertPoint, "&");
+        }
+        actualURL.insert(insertPoint + 1, "gateVersion=" + gate.Main.version);
+
         String commandLine = Gate.getUserConfig().getString(
           GateConstants.HELP_BROWSER_COMMAND_LINE);
         if(commandLine != null
          && commandLine.trim().length() > 0) {
           // external browser
-          commandLine = commandLine.replaceFirst("%file", url.toString());
+          commandLine = commandLine.replaceFirst("%file", actualURL.toString());
           try {
             Runtime.getRuntime().exec(commandLine);
           }
@@ -3734,7 +3749,7 @@ public class MainFrame extends JFrame implements ProgressListener,
              + (ownerSize.height - frameSize.height) / 2);
         }
         try {
-          helpFrame.setPage(url);
+          helpFrame.setPage(new URL(actualURL.toString()));
         } catch (IOException e) {
           
           e.printStackTrace();
