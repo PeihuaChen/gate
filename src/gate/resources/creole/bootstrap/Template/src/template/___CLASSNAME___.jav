@@ -14,6 +14,9 @@
  *  ___AUTHOR___, ___DATE___
  *
  *  $Id$
+ *
+ * For details on the configuration options, see the user guide:
+ * http://gate.ac.uk/cgi-bin/userguide/sec:creole-model:config
  */
 
 package ___PACKAGE___;
@@ -22,12 +25,15 @@ import java.util.*;
 
 import gate.*;
 import gate.creole.*;
+import gate.creole.metadata.*;
 import gate.util.*;
 import ___packages___.*;
 
 /** 
  * This class is the implementation of the resource TEMPLATE.
  */
+@CreoleResource(name = "Template",
+        comment = "Add a descriptive comment about this resource")
 public class ___CLASSNAME___ ___INTERFACES___ {
 
 ___CONTENT___
