@@ -28,12 +28,15 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationHandler;
+import java.lang.SecurityException;
 import java.util.prefs.*;
 
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.*;
+
+import org.apache.log4j.Logger;
 
 import junit.framework.Assert;
 
@@ -54,6 +57,8 @@ import gate.util.*;
 public class MainFrame extends JFrame implements ProgressListener,
                                      StatusListener, CreoleListener {
   private static final long serialVersionUID = 1L;
+
+  private static final Logger log = Logger.getLogger(MainFrame.class);
 
   protected JMenuBar menuBar;
 
@@ -169,13 +174,14 @@ public class MainFrame extends JFrame implements ProgressListener,
   private static JDialog guiLock = null;
 
   /**
-   * Contains the last directories selected when using resources.
+   * Contains the last directories selected when loading/saving resources.
    */
   static private Preferences prefs =
     Preferences.userNodeForPackage(MainFrame.class);
   
   /**
-   * Name of the current resource class used by the file chooser.
+   * Name of the current resource class. Used by the file chooser to remember
+   * the last directory selected.
    */
   private static String currentResourceClassName;
 
@@ -210,6 +216,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
   /**
    * Get the file chooser.
+   * @return the current file chooser
    */
   static public JFileChooser getFileChooser() {
     return fileChooser;
@@ -1455,6 +1462,7 @@ public class MainFrame extends JFrame implements ProgressListener,
    * (e.g "gate.event.StatusListener" -> this). The returned map is the
    * actual data member used to store the listeners so any changes in
    * this map will be visible to everyone.
+   * @return the listeners map
    */
   public static java.util.Map<String, JFrame> getListeners() {
     return listeners;
@@ -1546,6 +1554,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         Thread.sleep(100);
       }
       catch(InterruptedException ie) {
+        log.debug("Interrupted sleep wen the GUI is locked", ie);
       }
     }
   }
@@ -1579,7 +1588,10 @@ public class MainFrame extends JFrame implements ProgressListener,
     } // if
   } // setTitle(String title)
 
-  /** Method is used in NewDSAction */
+  /**
+   * Method is used in NewDSAction
+   * @return the new datastore or null if an error occurs
+   */
   protected DataStore createSerialDataStore() {
     DataStore ds = null;
 
@@ -1609,7 +1621,10 @@ public class MainFrame extends JFrame implements ProgressListener,
     return ds;
   } // createSerialDataStore()
 
-  /** Method is used in OpenDSAction */
+  /**
+   * Method is used in OpenDSAction
+   * @return the opened datastore or null if an error occurs
+   */
   protected DataStore openSerialDataStore() {
     DataStore ds = null;
 
@@ -1639,7 +1654,10 @@ public class MainFrame extends JFrame implements ProgressListener,
     return ds;
   } // openSerialDataStore()
 
-  /** Method is used in ....OpenDSAction */
+  /**
+   * Method is used in ....OpenDSAction
+   * @return the opened datastore or null if an error occurs
+   */
   protected DataStore openDocServiceDataStore() {
     DataStore ds = null;
     try {
@@ -1745,7 +1763,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             CorpusBenchmarkTool.class.toString()+".application";
           state = chooser.showOpenDialog(MainFrame.this);
           File testApp = chooser.getSelectedFile();
-          if(state == JFileChooser.CANCEL_OPTION || startDir == null) return;
+          if(state == JFileChooser.CANCEL_OPTION || testApp == null) return;
 
           // first create the tool and set its parameters
           CorpusBenchmarkTool theTool = new CorpusBenchmarkTool();
@@ -1867,7 +1885,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             CorpusBenchmarkTool.class.toString()+".application";
           state = chooser.showOpenDialog(MainFrame.this);
           File testApp = chooser.getSelectedFile();
-          if(state == JFileChooser.CANCEL_OPTION || startDir == null) return;
+          if(state == JFileChooser.CANCEL_OPTION || testApp == null) return;
 
           // first create the tool and set its parameters
           CorpusBenchmarkTool theTool = new CorpusBenchmarkTool();
@@ -1933,7 +1951,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             CorpusBenchmarkTool.class.toString()+".application";
           state = chooser.showOpenDialog(MainFrame.this);
           File testApp = chooser.getSelectedFile();
-          if(state == JFileChooser.CANCEL_OPTION || startDir == null) return;
+          if(state == JFileChooser.CANCEL_OPTION || testApp == null) return;
 
           // first create the tool and set its parameters
           CorpusBenchmarkTool theTool = new CorpusBenchmarkTool();
@@ -2261,8 +2279,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
 
         JTextField textField;
-      }
-      ;// class URLfromFileAction extends AbstractAction
+      } // class URLfromFileAction extends AbstractAction
 
       Box rightBox = Box.createVerticalBox();
       rightBox.add(new JLabel("Select a directory"));
@@ -2339,7 +2356,10 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
   }
 
-  /** Method is used in NewDSAction */
+  /**
+   * Method is used in NewDSAction
+   * @return the new datastore or null if an error occurs
+   */
   protected DataStore createSearchableDataStore() {
     try {
       JPanel mainPanel = new JPanel(new GridBagLayout());
@@ -2757,7 +2777,10 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
   } // createSearchableDataStore()
 
-  /** Method is used in OpenDSAction */
+  /**
+   * Method is used in OpenDSAction
+   * @return the opened datastore or null if an error occurs
+   */
   protected DataStore openSearchableDataStore() {
     DataStore ds = null;
 
@@ -2798,11 +2821,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     public void actionPerformed(ActionEvent e) {
       Map<String,String> dsTypes = DataStoreRegister.getDataStoreClassNames();
       HashMap<String,String> dsTypeByName = new HashMap<String,String>();
-      Iterator<Map.Entry<String,String>> dsTypesIter =
-        dsTypes.entrySet().iterator();
-      while(dsTypesIter.hasNext()) {
-        Map.Entry<String,String> entry =
-          (Map.Entry<String,String>)dsTypesIter.next();
+      for(Map.Entry<String, String> entry : dsTypes.entrySet()) {
         dsTypeByName.put(entry.getValue(), entry.getKey());
       }
 
@@ -2810,13 +2829,15 @@ public class MainFrame extends JFrame implements ProgressListener,
         String[] names = new String[dsTypeByName.keySet().size()];
         dsTypeByName.keySet().toArray(names);
         String previousChoice = getPreferenceValue("datastorelist", "item");
-        Object answer =
-          JOptionPane.showInputDialog(MainFrame.this,
+        if (!dsTypeByName.containsKey(previousChoice)) {
+          previousChoice = null;
+        }
+        Object answer = JOptionPane.showInputDialog(MainFrame.this,
             "Select type of Datastore", "GATE", JOptionPane.QUESTION_MESSAGE,
             null, names, (previousChoice==null)?names[0]:previousChoice);
-        if(answer != null) {
+        if(answer != null && answer instanceof String) {
           setPreferenceValue("datastorelist", "item", (String)answer);
-          String className = dsTypeByName.get(answer);
+          String className = dsTypeByName.get((String)answer);
           if(className.equals("gate.persist.SerialDataStore")) {
             createSerialDataStore();
           }
@@ -3236,11 +3257,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     public void actionPerformed(ActionEvent e) {
       Map<String,String> dsTypes = DataStoreRegister.getDataStoreClassNames();
       HashMap<String,String> dsTypeByName = new HashMap<String,String>();
-      Iterator<Map.Entry<String,String>> dsTypesIter =
-        dsTypes.entrySet().iterator();
-      while(dsTypesIter.hasNext()) {
-        Map.Entry<String,String> entry =
-          (Map.Entry<String,String>)dsTypesIter.next();
+      for(Map.Entry<String, String> entry : dsTypes.entrySet()) {
         dsTypeByName.put(entry.getValue(), entry.getKey());
       }
 
@@ -3248,13 +3265,15 @@ public class MainFrame extends JFrame implements ProgressListener,
         String[] names = new String[dsTypeByName.keySet().size()];
         dsTypeByName.keySet().toArray(names);
         String previousChoice = getPreferenceValue("datastorelist", "item");
-        Object answer =
-          JOptionPane.showInputDialog(MainFrame.this,
+        if (!dsTypeByName.containsKey(previousChoice)) {
+          previousChoice = null;
+        }
+        Object answer = JOptionPane.showInputDialog(MainFrame.this,
             "Select type of Datastore", "GATE", JOptionPane.QUESTION_MESSAGE,
             null, names, (previousChoice==null)?names[0]:previousChoice);
-        if(answer != null) {
+        if(answer != null && answer instanceof String) {
           setPreferenceValue("datastorelist", "item", (String)answer);
-          String className = dsTypeByName.get(answer);
+          String className = dsTypeByName.get((String)answer);
           if(className.indexOf("SerialDataStore") != -1) {
             openSerialDataStore();
           }
@@ -3611,7 +3630,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     /**
      * Sets the value to be displayed
      * 
-     * @param value
+     * @param value to be displayed as tooltip
      */
     public void setValue(Object value) {
       if(value != null) {
@@ -3693,11 +3712,13 @@ public class MainFrame extends JFrame implements ProgressListener,
       url = new URL(urlString);
     } catch (MalformedURLException e) {
       JOptionPane.showMessageDialog(MainFrame.this,
-        (urlString == null)?"There is no help page for this resource !\n\n" +
+        (urlString == null)?
+        "There is no help page for this resource !\n\n" +
         "Find the developper of the resource:\n" +
         resourceName + "\n" +
-        "and force him/her to put one.":
-        "The URL of the help page is invalid.\n" + urlString.toString(),
+        "and force him/her to put one."
+        :
+        "The URL of the help page is invalid.\n" + urlString,
         "GATE", JOptionPane.INFORMATION_MESSAGE);
       return;
     }
@@ -3720,18 +3741,65 @@ public class MainFrame extends JFrame implements ProgressListener,
 
         String commandLine = Gate.getUserConfig().getString(
           GateConstants.HELP_BROWSER_COMMAND_LINE);
-        if(commandLine != null
-         && commandLine.trim().length() > 0) {
+        if(commandLine == null
+        || commandLine.equals("Set dynamically when you display help.")) {
+          // try to find the default browser
+          Process process = null;
+          try {
+            // Mac
+            commandLine = "open " + url.toString();
+            try { process = Runtime.getRuntime().exec(commandLine);
+            } catch (IOException ioe1) {/* skip to next try catch */}
+            if (process == null || process.waitFor() != 0) {
+            // Windows
+            commandLine = "rundll32 url.dll,FileProtocolHandler "
+              + url.toString();
+            try { process = Runtime.getRuntime().exec(commandLine);
+            } catch (IOException ioe2) {/* skip to next try catch */}
+            if (process == null || process.waitFor() != 0) {
+            // Linux
+            commandLine = "xdg-open " + url.toString();
+            try { process = Runtime.getRuntime().exec(commandLine);
+            } catch (IOException ioe3) {/* skip to next try catch */}
+            if (process == null || process.waitFor() != 0) {
+            // Linux KDE
+            commandLine = "kfmclient exec " + url.toString();
+            try { process = Runtime.getRuntime().exec(commandLine);
+            } catch (IOException ioe4) {/* skip to next try catch */}
+            if (process == null || process.waitFor() != 0) {
+            // Linux Gnome
+            commandLine = "gnome-open " + url.toString();
+            try { process = Runtime.getRuntime().exec(commandLine);
+            } catch (IOException ioe5) {/* skip to next try catch */}
+            if (process == null || process.waitFor() != 0) {
+              JOptionPane.showMessageDialog(MainFrame.getInstance(),
+                "Unable to determine the default browser.\n"
+                + "Please go to the Options menu then Configuration.",
+                "Configuration error", JOptionPane.ERROR_MESSAGE);
+            }}}}}
+          } catch(SecurityException se) {
+            JOptionPane.showMessageDialog(MainFrame.getInstance(),
+              se.getMessage(), "Help Error", JOptionPane.ERROR_MESSAGE);
+            log.error("Help browser Error", se);
+          } catch (InterruptedException ie) {
+            JOptionPane.showMessageDialog(MainFrame.getInstance(),
+              ie.getMessage(), "Help Error", JOptionPane.ERROR_MESSAGE);
+            log.error("Help browser Error", ie);
+          }
+
+        } else if(!commandLine.equals("Internal Java browser.")) {
           // external browser
           commandLine = commandLine.replaceFirst("%file", actualURL.toString());
           try {
             Runtime.getRuntime().exec(commandLine);
           }
           catch(IOException e) {
-            System.out.println("Please change the browser command in " +
-              "the menu Options->Configuration.");
-            System.out.println("The command was [" + commandLine + "].");
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(MainFrame.getInstance(),
+              "Unable to call the custom browser command.\n"
+              + "Please go to the Options menu then Configuration.",
+              "Configuration error", JOptionPane.ERROR_MESSAGE);
+            log.error("Browser command = " + commandLine);
+            log.error("Help browser Error", e);
           }
 
         } else {
@@ -3780,12 +3848,11 @@ public class MainFrame extends JFrame implements ProgressListener,
         if(userObject instanceof NameBearerHandle) {
           new HelpOnItemTreeAction((NameBearerHandle)userObject)
             .actionPerformed(null);
+        } else {
+          new HelpUserGuideAction().actionPerformed(null);
         }
       } else {
-        JOptionPane.showMessageDialog(MainFrame.this,
-        "Please select a resource in resource tree\n" +
-        "before to use the help function.",
-        "GATE", JOptionPane.INFORMATION_MESSAGE);
+        new HelpUserGuideAction().actionPerformed(null);
       }
     }
   }
@@ -3890,19 +3957,6 @@ public class MainFrame extends JFrame implements ProgressListener,
           setText(((Handle)value).getTitle());
           setToolTipText(((Handle)value).getTooltipText());
         }
-      }
-      return this;
-    }
-
-    public Component getTreeCellRendererComponent1(JTree tree, Object value,
-      boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-      super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf,
-        row, hasFocus);
-      Object handle = ((DefaultMutableTreeNode)value).getUserObject();
-      if(handle != null && handle instanceof Handle) {
-        setIcon(((Handle)handle).getIcon());
-        setText(((Handle)handle).getTitle());
-        setToolTipText(((Handle)handle).getTooltipText());
       }
       return this;
     }
@@ -4032,8 +4086,8 @@ public class MainFrame extends JFrame implements ProgressListener,
   /**
    * Get the value of a preference key for the given path.
    * 
-   * @param path
-   * @param key
+   * @param path location in the preference tree
+   * @param key associated key to the value to get
    * @return a string that is the value of the preference or null if not
    *         existing
    */
@@ -4057,9 +4111,9 @@ public class MainFrame extends JFrame implements ProgressListener,
   /**
    * Set the value of a preference key for the given path.
    * 
-   * @param path
-   * @param key
-   * @param value
+   * @param path location in the preference tree
+   * @param key associated key to the value to set
+   * @param value a string that is the value of the preference
    */
   public static void setPreferenceValue(String path, String key, String value) {
     Preferences node = null;
@@ -4191,6 +4245,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           Thread.sleep(300);
         }
         catch(InterruptedException ie) {
+          log.debug("Animation interrupted", ie);
         }
 
         synchronized(lock) {
@@ -4203,7 +4258,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     boolean active;
 
-    String lock = "lock";
+    final String lock = "lock";
 
     JPanel targetPanel;
 
