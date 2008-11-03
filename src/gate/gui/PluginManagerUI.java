@@ -138,6 +138,19 @@ public class PluginManagerUI extends JDialog implements GateConstants{
         mainSplit.setDividerLocation(-100);
       }
     });
+
+    // add F1 help keystroke
+    InputMap inputMap = ((JComponent)this.getContentPane()).
+      getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+    ActionMap actionMap = ((JComponent)this.getContentPane()).getActionMap();
+    inputMap.put(KeyStroke.getKeyStroke("F1"), "Help");
+    actionMap.put("Help", new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        MainFrame.getInstance().showHelpFrame(
+          "http://gate.ac.uk/cgi-bin/userguide/sec:howto:plugins",
+          "gate.gui.PluginManagerUI");
+      }
+    });
   }
   
   protected Boolean getLoadNow(URL url){

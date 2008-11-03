@@ -191,32 +191,26 @@ public class OptionsDialog extends JDialog {
          doceditInsertPrependChk.isSelected()))
       doceditInsertAppendChk.setSelected(true);
 
-    browserComboBox = new JComboBox(new String[] {"Java", "Firefox",
-        "Internet Explorer", "Safari", "Custom"});
-    browserComboBox.setPrototypeDisplayValue("Internet Explorer");
+    browserComboBox = new JComboBox(new String[] {
+      "Default browser", "Java", "Custom"});
+    browserComboBox.setPrototypeDisplayValue("Default browser");
     browserCommandLineTextField = new JTextField(15);
     String commandLine =
       Gate.getUserConfig().getString(GateConstants.HELP_BROWSER_COMMAND_LINE);
-    if(commandLine == null || commandLine.trim().length() == 0) {
+    if(commandLine == null || commandLine.trim().length() == 0
+    || commandLine.equals("Set dynamically when you display help.")) {
+      // option not configured or empty or default browser
+      browserComboBox.setSelectedItem("Default browser");
+      browserCommandLineTextField.setEnabled(false);
+    }
+    else if(commandLine.equals("Internal Java browser.")) {
       browserComboBox.setSelectedItem("Java");
       browserCommandLineTextField.setEnabled(false);
     }
-    else if(commandLine.contains("firefox")) {
-      browserComboBox.setSelectedItem("Firefox");
-      browserCommandLineTextField.setText(commandLine);
-    }
-    else if(commandLine.contains("iexplore")) {
-      browserComboBox.setSelectedItem("Internet Explorer");
-      browserCommandLineTextField.setText(commandLine);
-    }
-    else if(commandLine.contains("Safari")) {
-      browserComboBox.setSelectedItem("Safari");
-      browserCommandLineTextField.setText(commandLine);
-    }
     else {
       browserComboBox.setSelectedItem("Custom");
-      browserCommandLineTextField.setText(commandLine);
     }
+    browserCommandLineTextField.setText((commandLine == null)?"":commandLine);
 
     JPanel advancedBox =  new JPanel();
     advancedBox.setLayout(new BoxLayout(advancedBox, BoxLayout.Y_AXIS));
@@ -367,19 +361,16 @@ public class OptionsDialog extends JDialog {
           return;
         }
         String item = (String)browserComboBox.getSelectedItem();
-        browserCommandLineTextField.setEnabled(!item.equals("Java"));
-        if(item.equals("Java")) {
-          browserCommandLineTextField.setText("");
+        browserCommandLineTextField.setEnabled(item.equals("Custom"));
+        if(item.equals("Default browser")) {
+          browserCommandLineTextField.setText(
+            "Set dynamically when you display help.");
         }
-        else if(item.equals("Firefox")) {
+        else if(item.equals("Java")) {
+          browserCommandLineTextField.setText("Internal Java browser.");
+        }
+        else if(item.equals("Custom")) {
           browserCommandLineTextField.setText("firefox %file");
-        }
-        else if(item.equals("Internet Explorer")) {
-          browserCommandLineTextField.setText("@start /b iexplore.exe %file");
-        }
-        else if(item.equals("Safari")) {
-          browserCommandLineTextField
-                  .setText("open -a /Applications/Safari.app %file");
         }
       }
     });
