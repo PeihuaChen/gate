@@ -35,6 +35,7 @@ public class StanfordSentence {
    * in the Penn documentation.    */
   private static final String  UNKNOWN_TAG     = "NN";
   
+  @SuppressWarnings("unchecked")
   public StanfordSentence(Annotation sentence, String tokenType, 
     AnnotationSet inputAS, boolean usePosTags) {
     
@@ -157,7 +158,7 @@ public class StanfordSentence {
   /**
    * Convert a Stanford start position to a GATE offset.
    * @param startPos
-   * @return
+   * @return the offset in the GATE document
    */
   public Long startPos2offset(int startPos) {
     return startPosToOffset.get(new Integer(startPos));
@@ -166,7 +167,7 @@ public class StanfordSentence {
   /**
    * Convert a Stanford end position to a GATE offset.
    * @param endPos
-   * @return
+   * @return the offset in the GATE document
    */
   public Long endPos2offset(int endPos) {
     return endPosToOffset.get(new Integer(endPos));

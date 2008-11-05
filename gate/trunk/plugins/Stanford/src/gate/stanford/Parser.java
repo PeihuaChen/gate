@@ -106,8 +106,10 @@ implements ProcessingResource {
 
 
 
-  
-
+  /**
+   * Parse the current document.  (This is the principal 
+   * method called by a CorpusController.)
+   */
   public void execute() throws ExecutionException {
     annotationSet  = convertASName(annotationSetName);
     
@@ -130,7 +132,10 @@ implements ProcessingResource {
   }
 
   
-
+  /**
+   * Initialize the Parser resource.  In particular, load the trained data
+   * file.
+   */
   public Resource init() throws ResourceInstantiationException {
     instantiateStanfordParser();
     if (mappingFile != null) {
@@ -169,6 +174,10 @@ implements ProcessingResource {
   }
 
 
+  /**
+   * Re-initialize the Parser resource.  In particular, reload the trained
+   * data file.
+   */
   public void reinit() throws ResourceInstantiationException {
     init();
   }  
@@ -231,7 +240,6 @@ implements ProcessingResource {
    *          total number of sentences for debugging output
    * @return  null if the sentence is empty
    */
-  @SuppressWarnings("unchecked")
   private Tree parseOneSentence(Annotation sentence, int sentenceNo) {
     Tree result = null;
     
@@ -268,7 +276,7 @@ implements ProcessingResource {
    * 
    * @param tree  the current subtree
    * @param rootTree  the whole sentence, used to find the span of the current subtree
-   * @return
+   * @return a GATE Annotation of type "SyntaxTreeNode"
    */
   protected Annotation annotatePhraseStructureRecursively(Tree tree, Tree rootTree) {
     Annotation annotation = null;
@@ -322,7 +330,7 @@ implements ProcessingResource {
    * @return
    */
   private Annotation annotatePhraseStructureConstituent(Long startOffset, Long endOffset, String label, 
-    List consists, int depth) {
+    List<Integer> consists, int depth) {
     Annotation phrAnnotation = null;
     Integer phrID;
 
@@ -375,6 +383,7 @@ implements ProcessingResource {
 
   
   
+  @SuppressWarnings("unchecked")
   private void annotateDependencies(Tree tree) {
     GrammaticalStructure gs = gsf.newGrammaticalStructure(tree);
     Collection<TypedDependency> deps = gs.typedDependencies();
