@@ -16,8 +16,10 @@
 package gate.swing;
 
 import java.awt.Point;
+import java.awt.Component;
 
 import javax.swing.JTabbedPane;
+import javax.swing.Icon;
 
 /**
  * An extended version of {@link javax.swing.JTabbedPane}.
@@ -37,4 +39,25 @@ public class XJTabbedPane extends JTabbedPane {
     }
     return -1;
   }// int getIndexAt(Point p)
+
+  public void setTitleAt(int index, String title) {
+    if (title.length() > 15) { // shorten the tab title with ellipsis
+      setToolTipText("<html>" + title + "<br>" + getToolTipText() + "</html>");
+      title = title.substring(0, 15) + "\u2026";
+      super.setTitleAt(index, title);
+    } else {
+      super.setTitleAt(index, title);
+    }
+  }
+
+  public void insertTab(String title, Icon icon, Component component, String tip, int index) {
+    if (title.length() > 15) { // shorten the tab title with ellispsis
+      tip = "<html>" + title + "<br>" + tip + "</html>";
+      title = title.substring(0, 15) + "\u2026";
+      super.insertTab(title, icon, component, tip, index);
+    } else {
+      super.insertTab(title, icon, component, tip, index);
+    }
+  }
+
 }// class XJTabbedPane extends JTabbedPane
