@@ -316,9 +316,10 @@ public class SerialControllerEditor extends AbstractVisualResource
     horBox.setAlignmentX(Component.LEFT_ALIGNMENT);
     horBox.add(Box.createHorizontalGlue());
     horBox.add(new JButton(runAction));
-    horBox.add(Box.createHorizontalStrut(10));
+    horBox.add(Box.createHorizontalGlue());
     add(horBox);
-    add(Box.createVerticalStrut(10));
+    add(Box.createVerticalGlue());
+    add(Box.createVerticalStrut(5));
 
     addMenu = new XJMenu("Add");
     removeMenu = new XJMenu("Remove");
@@ -1184,8 +1185,8 @@ public class SerialControllerEditor extends AbstractVisualResource
   /** Runs the Application*/
   class RunAction extends AbstractAction {
     RunAction(){
-      super("Run");
-      super.putValue(SHORT_DESCRIPTION, "<html>Run"
+      super(" Run this application ");
+      super.putValue(SHORT_DESCRIPTION, "<html>Run this application"
       +"&nbsp;&nbsp;<font color=#667799><small>F3"
       +"&nbsp;&nbsp;</small></font></html>");
     }
