@@ -18,7 +18,6 @@ package gate.gui.docview;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
-import java.util.List;
 
 import javax.swing.*;
 import javax.swing.Timer;
@@ -36,7 +35,6 @@ import gate.event.CreoleListener;
 import gate.gui.FeaturesSchemaEditor;
 import gate.gui.MainFrame;
 import gate.gui.annedit.*;
-import gate.swing.JChoice;
 import gate.util.*;
 
 
@@ -262,14 +260,13 @@ public class AnnotationEditor extends AbstractVisualResource
 
     popupWindow.getRootPane().addMouseListener(windowMouseListener);
     popupWindow.getRootPane().addMouseMotionListener(windowMouseMotionListener);
-//    featuresEditor.addMouseListener(windowMouseListener);
 
-    inputMap = ((JComponent)popupWindow.getContentPane()).
-        getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    InputMap inputMap = ((JComponent) popupWindow.getContentPane()).
+      getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     actionMap = ((JComponent)popupWindow.getContentPane()).getActionMap();
-    // add the key-action bindings of this Component to the parent window
 
-    StartOffsetLeftAction solAction =
+    // add the key-action bindings of this Component to the parent window
+    solAction =
       new StartOffsetLeftAction("", MainFrame.getIcon("extend-left"),
       "<html><b>Extend start</b><small>" +
       "<br>LEFT = 1 character" +
@@ -279,10 +276,11 @@ public class AnnotationEditor extends AbstractVisualResource
     solButton.setAction(solAction);
     inputMap.put(KeyStroke.getKeyStroke("LEFT"), "solAction");
     inputMap.put(KeyStroke.getKeyStroke("shift LEFT"), "solAction");
-    inputMap.put(KeyStroke.getKeyStroke("control shift released LEFT"), "solAction");
+    inputMap.put(KeyStroke.getKeyStroke("control shift released LEFT"),
+      "solAction");
     actionMap.put("solAction", solAction);
 
-   StartOffsetRightAction sorAction =
+   sorAction =
      new StartOffsetRightAction("", MainFrame.getIcon("extend-right"),
       "<html><b>Shrink start</b><small>" +
       "<br>RIGHT = 1 character" +
@@ -292,17 +290,18 @@ public class AnnotationEditor extends AbstractVisualResource
     sorButton.setAction(sorAction);
     inputMap.put(KeyStroke.getKeyStroke("RIGHT"), "sorAction");
     inputMap.put(KeyStroke.getKeyStroke("shift RIGHT"), "sorAction");
-    inputMap.put(KeyStroke.getKeyStroke("control shift released RIGHT"), "sorAction");
+    inputMap.put(KeyStroke.getKeyStroke("control shift released RIGHT"),
+      "sorAction");
     actionMap.put("sorAction", sorAction);
 
-    DeleteAnnotationAction delAction =
+    delAction =
       new DeleteAnnotationAction("", MainFrame.getIcon("remove-annotation"),
       "Delete the annotation", KeyEvent.VK_DELETE);
     delButton.setAction(delAction);
     inputMap.put(KeyStroke.getKeyStroke("alt DELETE"), "delAction");
     actionMap.put("delAction", delAction);
 
-    EndOffsetLeftAction eolAction =
+    eolAction =
       new EndOffsetLeftAction("", MainFrame.getIcon("extend-left"),
       "<html><b>Shrink end</b><small>" +
       "<br>ALT + LEFT = 1 character" +
@@ -312,10 +311,11 @@ public class AnnotationEditor extends AbstractVisualResource
     eolButton.setAction(eolAction);
     inputMap.put(KeyStroke.getKeyStroke("alt LEFT"), "eolAction");
     inputMap.put(KeyStroke.getKeyStroke("alt shift LEFT"), "eolAction");
-    inputMap.put(KeyStroke.getKeyStroke("control alt shift released LEFT"), "eolAction");
+    inputMap.put(KeyStroke.getKeyStroke("control alt shift released LEFT"),
+      "eolAction");
     actionMap.put("eolAction", eolAction);
 
-    EndOffsetRightAction eorAction =
+    eorAction =
       new EndOffsetRightAction("", MainFrame.getIcon("extend-right"),
       "<html><b>Extend end</b><small>" +
       "<br>ALT + RIGHT = 1 character" +
@@ -325,7 +325,8 @@ public class AnnotationEditor extends AbstractVisualResource
     eorButton.setAction(eorAction);
     inputMap.put(KeyStroke.getKeyStroke("alt RIGHT"), "eorAction");
     inputMap.put(KeyStroke.getKeyStroke("alt shift RIGHT"), "eorAction");
-    inputMap.put(KeyStroke.getKeyStroke("control alt shift released RIGHT"), "eorAction");
+    inputMap.put(KeyStroke.getKeyStroke("control alt shift released RIGHT"),
+      "eorAction");
     actionMap.put("eorAction", eorAction);
 
     DismissAction dismissAction = new DismissAction("", null,
@@ -428,7 +429,7 @@ public class AnnotationEditor extends AbstractVisualResource
     typeCombo.setModel(new DefaultComboBoxModel(typeList.toArray()));
     typeCombo.setSelectedItem(annType);
    
-    featuresEditor.setSchema((AnnotationSchema)schemasByType.get(annType));
+    featuresEditor.setSchema(schemasByType.get(annType));
     featuresEditor.setTargetFeatures(ann.getFeatures());
     popupWindow.doLayout();
     setEditingEnabled(true);
@@ -817,14 +818,15 @@ public class AnnotationEditor extends AbstractVisualResource
   protected AnnotationEditor annotationEditorInstance;
 
   /**
-   * Key bindings for the popup window.
-   */
-  InputMap inputMap;
-
-  /**
    * Action bindings for the popup window.
    */
-  ActionMap actionMap;
+  private ActionMap actionMap;
+
+  private StartOffsetLeftAction solAction;
+  private StartOffsetRightAction sorAction;
+  private DeleteAnnotationAction delAction;
+  private EndOffsetLeftAction eolAction;
+  private EndOffsetRightAction eorAction;
 
   /* (non-Javadoc)
    * @see gate.gui.annedit.AnnotationEditor#getAnnotationSetCurrentlyEdited()
@@ -889,6 +891,20 @@ public class AnnotationEditor extends AbstractVisualResource
     };
     featuresEditor.getTable().getColumnModel().getColumn(col)
       .setCellRenderer(tcr);
+    }
+    // enable/disable the key binding actions
+    if (isEditingEnabled) {
+      actionMap.put("solAction", solAction);
+      actionMap.put("sorAction", sorAction);
+      actionMap.put("delAction", delAction);
+      actionMap.put("eolAction", eolAction);
+      actionMap.put("eorAction", eorAction);
+    } else {
+      actionMap.put("solAction", null);
+      actionMap.put("sorAction", null);
+      actionMap.put("delAction", null);
+      actionMap.put("eolAction", null);
+      actionMap.put("eorAction", null);
     }
   }
 

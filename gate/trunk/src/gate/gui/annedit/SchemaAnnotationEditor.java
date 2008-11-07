@@ -644,12 +644,12 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
       }
     });
 
-    inputMap = ((JComponent)dialog.getContentPane()).
+    InputMap inputMap = ((JComponent)dialog.getContentPane()).
         getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     actionMap = ((JComponent)dialog.getContentPane()).getActionMap();
     // add the key-action bindings of this Component to the parent window
 
-    StartOffsetLeftAction solAction =
+    solAction =
       new StartOffsetLeftAction("", MainFrame.getIcon("extend-left"),
       "<html><b>Extend start</b><small>" +
       "<br>LEFT = 1 character" +
@@ -662,7 +662,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     inputMap.put(KeyStroke.getKeyStroke("control shift released LEFT"), "solAction");
     actionMap.put("solAction", solAction);
 
-   StartOffsetRightAction sorAction =
+   sorAction =
      new StartOffsetRightAction("", MainFrame.getIcon("extend-right"),
       "<html><b>Shrink start</b><small>" +
       "<br>RIGHT = 1 character" +
@@ -675,14 +675,14 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     inputMap.put(KeyStroke.getKeyStroke("control shift released RIGHT"), "sorAction");
     actionMap.put("sorAction", sorAction);
 
-    DeleteAnnotationAction delAction =
+    delAction =
       new DeleteAnnotationAction("", MainFrame.getIcon("remove-annotation"),
       "Delete the annotation", KeyEvent.VK_DELETE);
     delButton.setAction(delAction);
     inputMap.put(KeyStroke.getKeyStroke("alt DELETE"), "delAction");
     actionMap.put("delAction", delAction);
 
-    EndOffsetLeftAction eolAction =
+    eolAction =
       new EndOffsetLeftAction("", MainFrame.getIcon("extend-left"),
       "<html><b>Shrink end</b><small>" +
       "<br>ALT + LEFT = 1 character" +
@@ -695,7 +695,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     inputMap.put(KeyStroke.getKeyStroke("control alt shift released LEFT"), "eolAction");
     actionMap.put("eolAction", eolAction);
 
-    EndOffsetRightAction eorAction =
+    eorAction =
       new EndOffsetRightAction("", MainFrame.getIcon("extend-right"),
       "<html><b>Extend end</b><small>" +
       "<br>ALT + RIGHT = 1 character" +
@@ -1015,14 +1015,15 @@ System.out.println("Window up");
   protected JPanel mainPane;
 
   /**
-   * Key bindings for the popup window.
-   */
-  InputMap inputMap;
-
-  /**
    * Action bindings for the popup window.
    */
   ActionMap actionMap;
+
+  private StartOffsetLeftAction solAction;
+  private StartOffsetRightAction sorAction;
+  private DeleteAnnotationAction delAction;
+  private EndOffsetLeftAction eolAction;
+  private EndOffsetRightAction eorAction;
 
   /**
    * @return the owner
@@ -1075,6 +1076,20 @@ System.out.println("Window up");
         Collections.addAll(components,
           ((Container)component).getComponents());
       }
+    }
+    // enable/disable the key binding actions
+    if (isEditingEnabled) {
+      actionMap.put("solAction", solAction);
+      actionMap.put("sorAction", sorAction);
+      actionMap.put("delAction", delAction);
+      actionMap.put("eolAction", eolAction);
+      actionMap.put("eorAction", eorAction);
+    } else {
+      actionMap.put("solAction", null);
+      actionMap.put("sorAction", null);
+      actionMap.put("delAction", null);
+      actionMap.put("eolAction", null);
+      actionMap.put("eorAction", null);
     }
   }
 
