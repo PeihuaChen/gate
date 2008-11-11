@@ -202,10 +202,10 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
     for(int i = 0; i < docFV.numInstances; ++i) {
       double sum = 0;
       for(int j = 0; j < docFV.fvs[i].len; ++j)
-        sum += docFV.fvs[i].values[j] * docFV.fvs[i].values[j];
+        sum += docFV.fvs[i].nodes[j].value * docFV.fvs[i].nodes[j].value;
       sum = Math.sqrt(sum);
       for(int j = 0; j < docFV.fvs[i].len; ++j)
-        docFV.fvs[i].values[j] /= sum;
+        docFV.fvs[i].nodes[j].value /= sum;
     }
   }
 
@@ -290,8 +290,8 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
           + new Integer(labels[i]));
         for(int j = 0; j < docFV.fvs[i].len; ++j)
           line.append(ConstantParameters.ITEMSEPARATOR
-            + docFV.fvs[i].indexes[j] + ConstantParameters.INDEXVALUESEPARATOR
-            + docFV.fvs[i].values[j]);
+            + docFV.fvs[i].nodes[j].index + ConstantParameters.INDEXVALUESEPARATOR
+            + docFV.fvs[i].nodes[j].value);
         out.write(line.toString());
         out.newLine();
       }
@@ -316,8 +316,8 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
             + multiLabels[i].labels[j]);
         for(int j = 0; j < docFV.fvs[i].len; ++j)
           line.append(ConstantParameters.ITEMSEPARATOR
-            + docFV.fvs[i].indexes[j] + ConstantParameters.INDEXVALUESEPARATOR
-            + docFV.fvs[i].values[j]);
+            + docFV.fvs[i].nodes[j].index + ConstantParameters.INDEXVALUESEPARATOR
+            + docFV.fvs[i].nodes[j].value);
         out.write(line.toString());
         out.newLine();
       }
@@ -751,7 +751,12 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         // training
         startTime = Benchmark.startPoint();
         benchmarkingFeatures.put("modelFile", modelFile.getAbsolutePath());
-        chunkLearning.training(paumLearner, modelFile);
+        //using different method for one thread or multithread
+        if(engineSettings.numThreadUsed >1 )//for using thread
+          chunkLearning.training(paumLearner, modelFile);
+        else //for not using thread
+          chunkLearning.trainingNoThread(paumLearner, modelFile);
+        
         Benchmark.checkPoint(startTime,
           benchmarkID + "." + "paumModelTraining", this, benchmarkingFeatures);
         benchmarkingFeatures.remove("modelFile");
@@ -860,7 +865,12 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         // apply
         startTime = Benchmark.startPoint();
         benchmarkingFeatures.put("modelFile", modelFile.getAbsolutePath());
-        chunkLearning.apply(paumLearner, modelFile);
+        //      using different method for one thread or multithread
+        if(engineSettings.numThreadUsed>1) //for using thread
+          chunkLearning.apply(paumLearner, modelFile);
+        else //for not using thread
+          chunkLearning.applyNoThread(paumLearner, modelFile);
+        
         Benchmark.checkPoint(startTime, benchmarkID + "."
           + "paumModelApplication", this, benchmarkingFeatures);
         benchmarkingFeatures.remove("modelFile");
@@ -1014,7 +1024,11 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         LogService.logMessage("The learners: " + paumLearner.getLearnerName(),
           1);
         // apply
-        chunkLearning.apply(paumLearner, modelFile);
+        //      using different method for one thread or multithread
+        if(engineSettings.numThreadUsed>1) //for using thread
+          chunkLearning.apply(paumLearner, modelFile);
+        else //for not using thread
+          chunkLearning.applyNoThread(paumLearner, modelFile);
         labelsFVDoc = chunkLearning.dataFVinDoc.labelsFVDoc;
         numClasses = chunkLearning.numClasses;
         break;
@@ -1387,10 +1401,17 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
             + "in the training data!");
       return;
     }
-    chunkLearning.training(paumLearner, modelFile);
-    // applying the learning model to training example and get the
-    // confidence score for each example
-    chunkLearning.apply(paumLearner, modelFile);
+    //  using different method for one thread or multithread
+    if(engineSettings.numThreadUsed>1) {//using thread
+      chunkLearning.training(paumLearner, modelFile);
+      // applying the learning model to training example and get the
+      // confidence score for each example
+      chunkLearning.apply(paumLearner, modelFile);
+    } else { //not using thread
+      chunkLearning.trainingNoThread(paumLearner, modelFile);
+      chunkLearning.applyNoThread(paumLearner, modelFile);
+    }
+      
     // Store the scores of negative examples.
     float[] scoresNegB = new float[numNeg];
     float[] scoresNeg = new float[numNeg];
@@ -1455,8 +1476,8 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
             }
             SparseFeatureVector fv = chunkLearning.dataFVinDoc.trainingFVinDoc[i].fvs[j];
             for(int j1 = 0; j1 < fv.len; ++j1)
-              line.append(ConstantParameters.ITEMSEPARATOR + fv.indexes[j1]
-                + ConstantParameters.INDEXVALUESEPARATOR + fv.values[j1]);
+              line.append(ConstantParameters.ITEMSEPARATOR + fv.nodes[j1].index
+                + ConstantParameters.INDEXVALUESEPARATOR + fv.nodes[j1].value);
             out.write(line.toString());
             out.newLine();
           }
@@ -1723,9 +1744,19 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
   }
 
   // /////// Benchmarkable ////////////////
+  private String parentBenchmarkID;
   private String benchmarkID;
 
-   /**
+  /**
+   * Returns the benchmark ID of the parent of this resource.
+   * 
+   * @return
+   */
+  public String getParentBenchmarkId() {
+    return this.parentBenchmarkID;
+  }
+
+  /**
    * Returns the benchmark ID of this resource.
    * 
    * @return
@@ -1738,12 +1769,37 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
   }
 
   /**
+   * Given an ID of the parent resource, this method is responsible for
+   * producing the Benchmark ID, unique to this resource.
+   * 
+   * @param parentID
+   */
+  public void createBenchmarkId(String parentID) {
+    parentBenchmarkID = parentID;
+    benchmarkID = Benchmark.createBenchmarkId("LightWeightLearningApi",
+      parentID);
+  }
+
+  /**
    * This method sets the benchmarkID for this resource.
    * 
    * @param benchmarkID
    */
-  public void setBenchmarkId(String benchmarkID) {
-    this.benchmarkID = benchmarkID;
+  public void setParentBenchmarkId(String benchmarkID) {
+    parentBenchmarkID = benchmarkID;
   }
 
+  /**
+   * Returns the logger object being used by this resource.
+   * 
+   * @return
+   */
+  public Logger getLogger() {
+    return Benchmark.logger;
+  }
+
+  public void setBenchmarkId(String arg0) {
+    // TODO Auto-generated method stub
+    
+  }
 }

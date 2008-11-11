@@ -53,29 +53,28 @@ public class DocFeatureVectors {
       int n = 0;
       String[] feat = nlpDoc.featuresInLine[i].toString().split(
         ConstantParameters.ITEMSEPARATOR);
-      //Some variables for normalising the feature values of the same ngram
-      //boolean sameNgram=true;
+      // Some variables for normalising the feature values of the same ngram
+      // boolean sameNgram=true;
       int prevPosition = -99999;
-      float [] tempVals = new float[9999];
-      long [] tempInds = new long[9999];
+      float[] tempVals = new float[9999];
+      long[] tempInds = new long[9999];
       int tempSize = 0;
-      int positionCurr=0;
-      
+      int positionCurr = 0;
       for(int j = 0; j < feat.length; ++j) {
-        //First get the position information for the current NLP feature
-        positionCurr=0;
-        if(feat[j] != null && Pattern.matches((".+\\[[-0-9]+\\]$"),feat[j])) {
+        // First get the position information for the current NLP feature
+        positionCurr = 0;
+        if(feat[j] != null && Pattern.matches((".+\\[[-0-9]+\\]$"), feat[j])) {
           int ind = feat[j].lastIndexOf('[');
-          String positionStr = feat[j].substring(ind+1, feat[j].length()-1);
+          String positionStr = feat[j].substring(ind + 1, feat[j].length() - 1);
           positionCurr = Integer.parseInt(positionStr);
-          feat[j] = feat[j].substring(0,ind);
+          feat[j] = feat[j].substring(0, ind);
         }
-        if(prevPosition != positionCurr && tempSize>0) {
-          double sum=0.0;
-          for(int ii=0; ii<tempSize; ++ii)
-            sum += tempVals[ii]*tempVals[ii];
+        if(prevPosition != positionCurr && tempSize > 0) {
+          double sum = 0.0;
+          for(int ii = 0; ii < tempSize; ++ii)
+            sum += tempVals[ii] * tempVals[ii];
           sum = Math.sqrt(sum);
-          for(int ii=0; ii<tempSize; ++ii){
+          for(int ii = 0; ii < tempSize; ++ii) {
             tempVals[ii] /= sum;
             indexValues.put(new Long(tempInds[ii]), new Float(tempVals[ii]));
           }
@@ -92,14 +91,15 @@ public class DocFeatureVectors {
         if(featCur.length() > 0) { // if there is any feature
           if(featList.featuresList.containsKey(featCur)) {
             if(featCur.contains(NLPFeaturesList.SYMBOLNGARM)) {
-              int shiftNum=0;
-              if(positionCurr >0)
-                shiftNum = maxNegPosition+ positionCurr;
+              int shiftNum = 0;
+              if(positionCurr > 0)
+                shiftNum = maxNegPosition + positionCurr;
               else shiftNum = -positionCurr;
-              long featInd= Long.parseLong(featList.featuresList.get(featCur).toString()) 
-                + shiftNum*ConstantParameters.MAXIMUMFEATURES;
+              long featInd = Long.parseLong(featList.featuresList.get(featCur)
+                .toString())
+                + shiftNum * ConstantParameters.MAXIMUMFEATURES;
               double val = 0.0;
-              switch(valueType) {
+              switch(valueType){
                 case 1: // for only the presence of Ngram in the sentence
                   val = 1.0;
                   break;
@@ -108,19 +108,20 @@ public class DocFeatureVectors {
                   break;
                 case 3: // for tf*idf representation
                   val = (Long.parseLong(featVal) + 1)
-                  * Math.log((double)numDocs
-                    / (Long.parseLong(featList.idfFeatures.get(featCur)
-                      .toString())));
+                    * Math.log((double)numDocs
+                      / (Long.parseLong(featList.idfFeatures.get(featCur)
+                        .toString())));
                   break;
-                  default:
-                    try {
-                    throw new GateException("The value type for ngram is not defined!");
+                default:
+                  try {
+                    throw new GateException(
+                      "The value type for ngram is not defined!");
                   } catch(GateException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                   }
               }
-             // indexValues.put(featInd, new Float(val));
+              // indexValues.put(featInd, new Float(val));
               tempInds[tempSize] = featInd;
               tempVals[tempSize] = (float)val;
               ++tempSize;
@@ -143,31 +144,32 @@ public class DocFeatureVectors {
         }
         prevPosition = positionCurr;
       } // end of the loop on the features of one instances
-      //For the last ngram features
-      if(tempSize>0) {
+      // For the last ngram features
+      if(tempSize > 0) {
         if(valueType == 3) {
-          double sum=0.0;
-          for(int ii=0; ii<tempSize; ++ii)
-            sum += tempVals[ii]*tempVals[ii];
+          double sum = 0.0;
+          for(int ii = 0; ii < tempSize; ++ii)
+            sum += tempVals[ii] * tempVals[ii];
           sum = Math.sqrt(sum);
-          for(int ii=0; ii<tempSize; ++ii){
+          for(int ii = 0; ii < tempSize; ++ii) {
             tempVals[ii] /= sum;
             tempVals[ii] *= ngramWeight;
             indexValues.put(new Long(tempInds[ii]), new Float(tempVals[ii]));
           }
         } else {
-          for(int ii=0; ii<tempSize; ++ii){
-            indexValues.put(new Long(tempInds[ii]), new Integer((int)tempVals[ii]));
+          for(int ii = 0; ii < tempSize; ++ii) {
+            indexValues.put(new Long(tempInds[ii]), new Integer(
+              (int)tempVals[ii]));
           }
         }
         tempSize = 0;
       }
-      //if(LogService.minVerbosityLevel > 1)
-        //if(n != nlpDoc.featuresCounted[i]) {
-          //System.out.println("Error: the number of features (" + n
-          //  + ") is not the same as the number recorded ("
-            //+ nlpDoc.featuresCounted[i] + ")in document " + docId);
-        //}
+      // if(LogService.minVerbosityLevel > 1)
+      // if(n != nlpDoc.featuresCounted[i]) {
+      // System.out.println("Error: the number of features (" + n
+      // + ") is not the same as the number recorded ("
+      // + nlpDoc.featuresCounted[i] + ")in document " + docId);
+      // }
       // sort the indexes in ascending order
       List indexes = new ArrayList(indexValues.keySet());
       Collections.sort(indexes, new LongCompactor());
@@ -181,11 +183,11 @@ public class DocFeatureVectors {
       for(int j = 0; j < indexes.size(); ++j) {
         // System.out.println(new Integer(j) +" index=*"+
         // indexes.get(j)+"*");
-        fvs[i].indexes[j] = Integer.parseInt(indexes.get(j).toString());
+        fvs[i].nodes[j].index = Integer.parseInt(indexes.get(j).toString());
         // for the constant value 1
         // fvs[i].values[j] = DEFAULTVALUE;
         // for the tf or tf*idf value
-        fvs[i].values[j] = Float.parseFloat(indexValues.get(indexes.get(j))
+        fvs[i].nodes[j].value = Double.parseDouble(indexValues.get(indexes.get(j))
           .toString());
       }
     } // end of the loop on the instances
@@ -219,16 +221,15 @@ public class DocFeatureVectors {
         iEndLabel = obtainMultiLabels(items, labelsDoc.multiLabels, i);
         // get the feature vector
         int len = items.length - iEndLabel;
-        if(len==0) {
-          //If there is no feature vector, creat one for it 
+        if(len == 0) {
+          // If there is no feature vector, creat one for it
           fvs[i] = new SparseFeatureVector(1);
-          fvs[i].indexes[0]=1;
-          fvs[i].values[0]=0;
+          fvs[i].nodes[0].index = 1;
+          fvs[i].nodes[0].value = 0;
         } else {
           fvs[i] = new SparseFeatureVector(len);
           obtainFVs(items, iEndLabel, len, fvs[i]);
         }
-        
       }
     } catch(IOException e) {
       // TODO Auto-generated catch block
@@ -261,8 +262,8 @@ public class DocFeatureVectors {
       if(indexValue.length <= 1) {
         System.out.println("i=" + i + " item=" + items[i + iEndLabel]);
       }
-      fv.indexes[i] = (new Integer(indexValue[0])).intValue();
-      fv.values[i] = (new Float(indexValue[1])).floatValue();
+      fv.nodes[i].index = (new Integer(indexValue[0])).intValue();
+      fv.nodes[i].value = (new Float(indexValue[1])).floatValue();
     }
     return;
   }
@@ -276,55 +277,56 @@ public class DocFeatureVectors {
   public SparseFeatureVector[] getFvs() {
     return fvs;
   }
+
   /** Set the DocID. */
   public void setDocID(String docI) {
     this.docId = docI;
   }
-  
+
   /** Expand the feature vector to including the context tokens. */
   public void expandFV(int winSizeLeft, int winSizeRight) {
     SparseFeatureVector[] fvsExpand = new SparseFeatureVector[fvs.length];
-    for(int i=0; i<fvs.length; ++i) {
+    for(int i = 0; i < fvs.length; ++i) {
       int lenT0 = fvs[i].len;
-      for(int j=-1; j>= -winSizeLeft; --j) {
-        if(j+i>=0) lenT0 += fvs[j+i].len;
-      } 
-      for(int j=1; j<=winSizeRight; ++j)
-        if(j+i<fvs.length) lenT0 += fvs[j+i].len;
-      
+      for(int j = -1; j >= -winSizeLeft; --j) {
+        if(j + i >= 0) lenT0 += fvs[j + i].len;
+      }
+      for(int j = 1; j <= winSizeRight; ++j)
+        if(j + i < fvs.length) lenT0 += fvs[j + i].len;
       fvsExpand[i] = new SparseFeatureVector(lenT0);
-      //System.out.println("lent0="+lenT0);
-      for(int j1=0; j1<fvs[i].len; ++j1) {
-        fvsExpand[i].indexes[j1]  = fvs[i].indexes[j1];
-        fvsExpand[i].values[j1]  = fvs[i].values[j1];
+      // System.out.println("lent0="+lenT0);
+      for(int j1 = 0; j1 < fvs[i].len; ++j1) {
+        fvsExpand[i].nodes[j1].index = fvs[i].nodes[j1].index;
+        fvsExpand[i].nodes[j1].value = fvs[i].nodes[j1].value;
       }
-      
       int lenTotal = fvs[i].len;
-      for(int j=-1; j>= -winSizeLeft; --j) {
-        int kk = j+i;
-        if(kk>=0) {
+      for(int j = -1; j >= -winSizeLeft; --j) {
+        int kk = j + i;
+        if(kk >= 0) {
           int gapLen = -j * (int)ConstantParameters.MAXIMUMFEATURES;
-          for(int j1=0; j1<fvs[kk].len; ++j1) {
-            if(j1+lenTotal>=lenT0)
-              System.out.println("i="+i+", j="+j+",j1="+j1+", newlen="+lenTotal);
-            fvsExpand[i].indexes[j1+lenTotal]  = fvs[kk].indexes[j1]+gapLen;
-            fvsExpand[i].values[j1+lenTotal]  = fvs[kk].values[j1]/(-j);
+          for(int j1 = 0; j1 < fvs[kk].len; ++j1) {
+            if(j1 + lenTotal >= lenT0)
+              System.out.println("i=" + i + ", j=" + j + ",j1=" + j1
+                + ", newlen=" + lenTotal);
+            fvsExpand[i].nodes[j1 + lenTotal].index = fvs[kk].nodes[j1].index + gapLen;
+            fvsExpand[i].nodes[j1 + lenTotal].value = fvs[kk].nodes[j1].value / (-j);
           }
           lenTotal += fvs[kk].len;
         }
       }
-      for(int j=1; j<=winSizeRight; ++j) {
-        int kk = j+i;
-        if(kk<fvs.length) {
-          int gapLen = (j+winSizeLeft) * (int)ConstantParameters.MAXIMUMFEATURES;
-          for(int j1=0; j1<fvs[kk].len; ++j1) {
-            fvsExpand[i].indexes[j1+lenTotal]  = fvs[kk].indexes[j1]+gapLen;
-            fvsExpand[i].values[j1+lenTotal]  = fvs[kk].values[j1]/j;
+      for(int j = 1; j <= winSizeRight; ++j) {
+        int kk = j + i;
+        if(kk < fvs.length) {
+          int gapLen = (j + winSizeLeft)
+            * (int)ConstantParameters.MAXIMUMFEATURES;
+          for(int j1 = 0; j1 < fvs[kk].len; ++j1) {
+            fvsExpand[i].nodes[j1 + lenTotal].index = fvs[kk].nodes[j1].index + gapLen;
+            fvsExpand[i].nodes[j1 + lenTotal].value = fvs[kk].nodes[j1].value / j;
           }
           lenTotal += fvs[kk].len;
         }
       }
-    }//end of the loop for each fv
+    }// end of the loop for each fv
     fvs = fvsExpand;
   }
 }

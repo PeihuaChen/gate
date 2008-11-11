@@ -13,7 +13,6 @@ import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import gate.creole.ResourceInstantiationException;
@@ -25,6 +24,8 @@ import gate.util.GateException;
 public class LearningEngineSettings {
   /** Storing date set definition. */
   public DataSetDefinition datasetDefinition;
+  /** Number of threads used **/;
+  int numThreadUsed = 1;
   /** Threshold of the probability for the boundary token of chunk. */
   float thrBoundaryProb = 0.4f;
   /** The threshold of the probability for the chunk. */
@@ -51,15 +52,13 @@ public class LearningEngineSettings {
    * mode conversion.
    */
   final static String multi2BinaryN = "multiClassification2BinaryMethod";
-  
   /**
    * Executor used to run the individual binary training and classification
-   * tasks in multi-binary mode.  If this is not set, {@link MultiClassLearning}
+   * tasks in multi-binary mode. If this is not set, {@link MultiClassLearning}
    * will simply run the tasks sequentially in its main thread, but as the
    * binary tasks are independent they could instead be run in a thread pool.
    */
   public ExecutorService multiBinaryExecutor;
-  
   /** The settings of learner specified. */
   public LearnerSettings learnerSettings;
   /** The surround mode. */
@@ -83,21 +82,26 @@ public class LearningEngineSettings {
   /** The setting for evaluation. */
   public EvaluationConfiguration evaluationconfig = null;
   /** Number of document as interval between trainings in MI-learning mode. */
-  public int miDocInterval=1;
+  public int miDocInterval = 1;
   /** The document number interval for one applicataion in batch learning mode. */
-  public int docNumIntevalApp=100;
-  /** Define the number of the NLP features with the biggest weights in linear SVM model. */
+  public int docNumIntevalApp = 100;
+  /**
+   * Define the number of the NLP features with the biggest weights in linear
+   * SVM model.
+   */
   public int numPosSVMModel;
-  /** Define the number of the NLP features with the smallest weight in linear SVM model. */
+  /**
+   * Define the number of the NLP features with the smallest weight in linear
+   * SVM model.
+   */
   public int numNegSVMModel;
   /** Active learning settings. */
   ActiveLearningSetting alSetting;
-  
-  /** The verbosity level for writing information into log file. 
-   * 0: no real output.
-   * 1: normal output including results and setting information.
-   * 2: warning information.
-   * */
+  /**
+   * The verbosity level for writing information into log file. 0: no real
+   * output. 1: normal output including results and setting information. 2:
+   * warning information.
+   */
   public int verbosityLogService = LogService.NORMAL;
 
   /** Loading the learning settings from the configuration file. */
@@ -109,7 +113,6 @@ public class LearningEngineSettings {
       jdomDoc = saxBuilder.build(xmlengines);
     } catch(Exception e) {
     }
- 
     Element rootElement = jdomDoc.getRootElement();
     if(!rootElement.getName().equals("ML-CONFIG"))
       throw new ResourceInstantiationException(
@@ -126,15 +129,15 @@ public class LearningEngineSettings {
     /** Set the number of documents as training interval for mi-learning. */
     learningSettings.miDocInterval = 1;
     if(rootElement.getChild("MI-TRAINING-INTERVAL") != null) {
-      String value = rootElement.getChild("MI-TRAINING-INTERVAL").getAttribute("num")
-        .getValue();
+      String value = rootElement.getChild("MI-TRAINING-INTERVAL").getAttribute(
+        "num").getValue();
       learningSettings.miDocInterval = Integer.parseInt(value);
     }
     /** Set the number of documents as interval for batch application. */
     learningSettings.docNumIntevalApp = 100;
     if(rootElement.getChild("BATCH-APP-INTERVAL") != null) {
-      String value = rootElement.getChild("BATCH-APP-INTERVAL").getAttribute("num")
-        .getValue();
+      String value = rootElement.getChild("BATCH-APP-INTERVAL").getAttribute(
+        "num").getValue();
       learningSettings.docNumIntevalApp = Integer.parseInt(value);
     }
     /** Get the setting for verbosity. */
@@ -175,30 +178,35 @@ public class LearningEngineSettings {
         learningSettings.multi2BinaryMode = 2;
       // thread-pool-size attribute causes multi-binary learning to use
       // a pool of threads to run the binary learning tasks, rather than
-      // running them sequentially.  This can give a big speedup on large
+      // running them sequentially. This can give a big speedup on large
       // training sets with a multi-processor machine.
       String threadPoolSize = mc2b.getAttributeValue("thread-pool-size");
       if(threadPoolSize != null) {
         try {
           int poolSize = Integer.parseInt(threadPoolSize);
-          // override the default thread factory with one that returns daemon threads
+          learningSettings.numThreadUsed = poolSize;
+          // override the default thread factory with one that returns daemon
+          // threads
           // so as not to stop the VM from exiting
-          learningSettings.multiBinaryExecutor = Executors.newFixedThreadPool(poolSize, new ThreadFactory() {
-            private ThreadFactory fac = Executors.defaultThreadFactory();
-            public Thread newThread(Runnable r) {
-              Thread t = fac.newThread(r);
-              t.setDaemon(true);
-              return t;
-            }
-          });
-        }
-        catch(NumberFormatException nfe) {
+          learningSettings.multiBinaryExecutor = Executors.newFixedThreadPool(
+            poolSize, new ThreadFactory() {
+              private ThreadFactory fac = Executors.defaultThreadFactory();
+
+              public Thread newThread(Runnable r) {
+                Thread t = fac.newThread(r);
+                t.setDaemon(true);
+                return t;
+              }
+            });
+        } catch(NumberFormatException nfe) {
           throw new ResourceInstantiationException(threadPoolSize
-                  + " is not a valid thread-pool-size: integer expected");
+            + " is not a valid thread-pool-size: integer expected");
         }
+      } else {
+        learningSettings.numThreadUsed = 1;
       }
     }
-    //Read the parameter for displaying the NLP features from linear SVM model
+    // Read the parameter for displaying the NLP features from linear SVM model
     learningSettings.numPosSVMModel = 10;
     learningSettings.numNegSVMModel = 0;
     if(rootElement.getChild("DISPLAY-NLPFEATURES-LINEARSVM") != null) {
@@ -211,22 +219,23 @@ public class LearningEngineSettings {
       if(value != null)
         learningSettings.numNegSVMModel = Integer.parseInt(value);
     }
-    //  for active learning setting
+    // for active learning setting
     learningSettings.alSetting = new ActiveLearningSetting();
     if(rootElement.getChild("ACTIVELEARNING") != null) {
-      String value = rootElement.getChild("ACTIVELEARNING").
-      getAttributeValue("numTokensPerDoc");
+      String value = rootElement.getChild("ACTIVELEARNING").getAttributeValue(
+        "numTokensPerDoc");
       learningSettings.alSetting.numTokensSelect = Integer.parseInt(value);
     }
-    //Read the evaluation method: k-fold CV or k-run hold-out
+    // Read the evaluation method: k-fold CV or k-run hold-out
     try {
       Element evalelem = rootElement.getChild("EVALUATION");
-      if(evalelem!= null)
+      if(evalelem != null)
         learningSettings.evaluationconfig = EvaluationConfiguration
           .fromXML(evalelem);
       else {
-        System.out.println("! Warning no evaluation scheme is specified. So it will use the default scheme.");
-        learningSettings.evaluationconfig=new EvaluationConfiguration();
+        System.out
+          .println("! Warning no evaluation scheme is specified. So it will use the default scheme.");
+        learningSettings.evaluationconfig = new EvaluationConfiguration();
       }
     } catch(RuntimeException e) {
     }
@@ -255,9 +264,9 @@ public class LearningEngineSettings {
     learningSettings.learnerSettings = new LearnerSettings();
     Element UEelement = rootElement.getChild("ENGINE");
     if(UEelement == null)
-      System.out.println(
-        "!! Warning: the Engine element in the configureation file is missing or invalid. " +
-        "You CANNOT learn and apply model, but it's OK for producing the feature files.");
+      System.out
+        .println("!! Warning: the Engine element in the configureation file is missing or invalid. "
+          + "You CANNOT learn and apply model, but it's OK for producing the feature files.");
     else {
       if(UEelement.getAttribute("nickname") != null)
         learningSettings.learnerSettings.learnerNickName = UEelement
