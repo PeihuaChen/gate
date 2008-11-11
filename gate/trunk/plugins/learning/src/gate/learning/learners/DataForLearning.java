@@ -77,9 +77,12 @@ public class DataForLearning {
       for(int i = 0; i < numTrainingDocs; ++i) {
         SparseFeatureVector[] fvs = trainingFVinDoc[i].getFvs();
         for(int j = 0; j < trainingFVinDoc[i].getNumInstances(); ++j) {
-          int[] indexes = fvs[j].getIndexes();
-          if(totalNumFeatures < indexes[indexes.length - 1])
-            totalNumFeatures = indexes[indexes.length - 1];
+          //int[] indexes = fvs[j].getIndexes();
+          //if(totalNumFeatures < indexes[indexes.length - 1])
+            //totalNumFeatures = indexes[indexes.length - 1];
+          int len = fvs[j].nodes.length;
+          if(totalNumFeatures < fvs[j].nodes[len - 1].index)
+            totalNumFeatures = fvs[j].nodes[len - 1].index;
         }
       }
       // add 3 for safety, because the index is counted from 1, not 0
@@ -122,9 +125,12 @@ public class DataForLearning {
       for(int i = 0; i < numTrainingDocs; ++i) {
         SparseFeatureVector[] fvs = trainingFVinDoc[i].getFvs();
         for(int j = 0; j < trainingFVinDoc[i].getNumInstances(); ++j) {
-          int[] indexes = fvs[j].getIndexes();
-          if(totalNumFeatures < indexes[indexes.length - 1])
-            totalNumFeatures = indexes[indexes.length - 1];
+          //int[] indexes = fvs[j].getIndexes();
+          //if(totalNumFeatures < indexes[indexes.length - 1])
+            //totalNumFeatures = indexes[indexes.length - 1];
+          int len = fvs[j].nodes.length;
+          if(totalNumFeatures < fvs[j].nodes[len-1].index)
+            totalNumFeatures = fvs[j].nodes[len - 1].index;
         }
       }
       // add 3 for safety, because the index is counted from 1, not 0

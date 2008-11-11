@@ -16,7 +16,6 @@ import gate.learning.learners.svm.svm_node;
 import gate.learning.learners.svm.svm_parameter;
 import gate.learning.learners.svm.svm_problem;
 import gate.learning.learners.svm.svm.decision_function;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -43,9 +42,9 @@ public class SvmLibSVM extends SupervisedLearner {
   public void getParametersFromCommmand() {
     param = new svm_parameter();
     if(commandLine == null) {
-      if(LogService.minVerbosityLevel>1)
+      if(LogService.minVerbosityLevel > 1)
         System.out.println("no options specified, using the default ones!");
-        parseCommandLine(" ");
+      parseCommandLine(" ");
     } else {
       String[] items = commandLine.split("[ \t]+");
       // Get the tau value
@@ -72,24 +71,25 @@ public class SvmLibSVM extends SupervisedLearner {
       svmProb.y[i] = classLabels[i]; // set the label
     svmProb.x = new svm_node[svmProb.l][];
     for(int i = 0; i < numTraining; ++i) {
-      int len = dataLearning[i].getLen();
-      svmProb.x[i] = new svm_node[len];
-      for(int j = 0; j < len; ++j) { // set each FV
-        svmProb.x[i][j] = new svm_node();
-        svmProb.x[i][j].index = dataLearning[i].indexes[j];
-        svmProb.x[i][j].value = dataLearning[i].values[j];
-      }
+      //int len = dataLearning[i].getLen();
+      //svmProb.x[i] = new svm_node[len];
+      //for(int j = 0; j < len; ++j) { // set each FV
+        //svmProb.x[i][j] = new svm_node();
+        //svmProb.x[i][j].index = dataLearning[i].indexes[j];
+        //svmProb.x[i][j].value = dataLearning[i].values[j];
+      //}
+      svmProb.x[i] = dataLearning[i].nodes;
     }
     // We got the parameter setting already in svmTrain
     // Call the svm_train_one to train a binary classification
     // set the weight for two class as 1.0, namely j=1 in svm_light
-    //System.out.println("svm_one learning begins... ");
-    //System.out.println("kernelType="+param.kernel_type);
-    //System.out.println("cost="+param.C);
-    //System.out.println("cachsize="+param.cache_size);
-    decision_function decisionFunc = 
-      svm.svm_train_one(svmProb, param, 1.0, 1.0);
-    //System.out.println("end of the SVM_one.");
+    // System.out.println("svm_one learning begins... ");
+    // System.out.println("kernelType="+param.kernel_type);
+    // System.out.println("cost="+param.C);
+    // System.out.println("cachsize="+param.cache_size);
+    decision_function decisionFunc = svm
+      .svm_train_one(svmProb, param, 1.0, 1.0);
+    // System.out.println("end of the SVM_one.");
     // decisionFunc includes the alphas (with *y) and rho (=-b)
     // Write the svm model into the model file
     try {
@@ -143,11 +143,13 @@ public class SvmLibSVM extends SupervisedLearner {
     DataForLearning dataFVinDoc, int totalNumFeatures, int classIndex,
     float optB, svm_parameter svmParam, boolean isUseTauAll) {
     if(svmParam.kernel_type == svm_parameter.LINEAR) {
-      if(LogService.minVerbosityLevel > 1) System.out.println("Linear kernel used.");
+      if(LogService.minVerbosityLevel > 1)
+        System.out.println("Linear kernel used.");
       applyLinearModel(modelFile, dataFVinDoc, totalNumFeatures, classIndex,
         optB, isUseTauAll);
     } else {
-      if(LogService.minVerbosityLevel > 1) System.out.println("Non-linear kernel used.");
+      if(LogService.minVerbosityLevel > 1)
+        System.out.println("Non-linear kernel used.");
       applyingDualFormModel(modelFile, dataFVinDoc, classIndex, optB, svmParam,
         isUseTauAll);
     }
@@ -159,7 +161,7 @@ public class SvmLibSVM extends SupervisedLearner {
     svm_parameter svmParam, boolean isUseTauAll) {
     try {
       // for each class
-      if(LogService.minVerbosityLevel>1) {
+      if(LogService.minVerbosityLevel > 1) {
         System.out.println("****  classIndex=" + classIndex);
         System.out.println("  d=" + svmParam.degree + ", g=" + svmParam.gamma
           + ", r=" + svmParam.coef0);
@@ -221,8 +223,8 @@ public class SvmLibSVM extends SupervisedLearner {
     svFVs[i] = new SparseFeatureVector(len);
     for(int j = 0; j < len; ++j) {
       String[] indexValue = items[j + 1].split(":");
-      svFVs[i].indexes[j] = new Integer(indexValue[0]).intValue();
-      svFVs[i].values[j] = new Float(indexValue[1]).floatValue();
+      svFVs[i].nodes[j].index = new Integer(indexValue[0]).intValue();
+      svFVs[i].nodes[j].value = new Float(indexValue[1]).floatValue();
     }
     return alpha;
   }
@@ -242,23 +244,23 @@ public class SvmLibSVM extends SupervisedLearner {
         int i = 0;
         int j = 0;
         while(i < xlen && j < ylen) {
-          if(x.indexes[i] == y.indexes[j]) {
-            double d = x.values[i++] - y.values[j++];
+          if(x.nodes[i].index == y.nodes[j].index) {
+            double d = x.nodes[i++].value - y.nodes[j++].value;
             sum += d * d;
-          } else if(x.indexes[i] > y.indexes[i]) {
-            sum += y.values[j] * y.values[j];
+          } else if(x.nodes[i].index > y.nodes[i].index) {
+            sum += y.nodes[j].value * y.nodes[j].value;
             ++j;
           } else {
-            sum += x.values[i] * x.values[i];
+            sum += x.nodes[i].value * x.nodes[i].value;
             ++i;
           }
         }
         while(i < xlen) {
-          sum += x.values[i] * x.values[i];
+          sum += x.nodes[i].value * x.nodes[i].value;
           ++i;
         }
         while(j < ylen) {
-          sum += y.values[j] * y.values[j];
+          sum += y.nodes[j].value * y.nodes[j].value;
           ++j;
         }
         return Math.exp(-param.gamma * sum);
@@ -290,10 +292,10 @@ public class SvmLibSVM extends SupervisedLearner {
     int i = 0;
     int j = 0;
     while(i < xlen && j < ylen) {
-      if(x.indexes[i] == y.indexes[j])
-        sum += x.values[i++] * y.values[j++];
+      if(x.nodes[i].index == y.nodes[j].index)
+        sum += x.nodes[i++].value * y.nodes[j++].value;
       else {
-        if(x.indexes[i] > y.indexes[j])
+        if(x.nodes[i].index > y.nodes[j].index)
           ++j;
         else ++i;
       }
@@ -335,19 +337,17 @@ public class SvmLibSVM extends SupervisedLearner {
     }
     return b;
   }
-  
+
   /** Normalisation of weight vector */
-  public static float normalisation(float [] w, float b) {
-    double sum=0;
-    for(int i=0; i<w.length; ++i)
-      if(Math.abs(w[i])>0.0000000001)
-        sum += w[i]*w[i];
-    sum += b*b;
+  public static float normalisation(float[] w, float b) {
+    double sum = 0;
+    for(int i = 0; i < w.length; ++i)
+      if(Math.abs(w[i]) > 0.0000000001) sum += w[i] * w[i];
+    sum += b * b;
     sum = Math.sqrt(sum);
-    if(sum>0.000000000001) {
-      for(int i=0; i<w.length; ++i)
-        if(Math.abs(w[i])>0.0000000001)
-          w[i] /= sum;
+    if(sum > 0.000000000001) {
+      for(int i = 0; i < w.length; ++i)
+        if(Math.abs(w[i]) > 0.0000000001) w[i] /= sum;
       b /= sum;
     }
     return b;
@@ -365,8 +365,8 @@ public class SvmLibSVM extends SupervisedLearner {
       int[] instDist = new int[2];
       obtainInstDist(items, instDist);
       b = readWeightVectorFromFile(modelFile, w);
-      //normalise the weight vector
-      //b = normalisation(w, b);
+      // normalise the weight vector
+      // b = normalisation(w, b);
       // modify the b by using the uneven margins parameter tau
       if(isUseTauAll)
         b += optB;
@@ -377,11 +377,11 @@ public class SvmLibSVM extends SupervisedLearner {
       for(int i = 0; i < dataFVinDoc.getNumTrainingDocs(); ++i) {
         SparseFeatureVector[] fvs = dataFVinDoc.trainingFVinDoc[i].getFvs();
         for(int j = 0; j < dataFVinDoc.trainingFVinDoc[i].getNumInstances(); ++j) {
-          int[] index = fvs[j].getIndexes();
-          float[] value = fvs[j].getValues();
+          //int[] index = fvs[j].getIndexes();
+          //float[] value = fvs[j].getValues();
           double sum = 0.0;
           for(int j1 = 0; j1 < fvs[j].getLen(); ++j1)
-            sum += value[j1] * w[index[j1]];
+            sum += fvs[j].nodes[j1].value * w[fvs[j].nodes[j1].index];
           sum += b;
           sum = UsefulFunctions.sigmoid(sum);
           dataFVinDoc.labelsFVDoc[i].multiLabels[j].probs[classIndex] = (float)sum;
@@ -417,7 +417,7 @@ public class SvmLibSVM extends SupervisedLearner {
    */
   public void parseCommandLine(String commandSVM) {
     commandSVM = commandSVM.trim();
-    //System.out.println("The command in parse: *"+commandSVM+"*");
+    // System.out.println("The command in parse: *"+commandSVM+"*");
     String[] argv = commandSVM.split("[ \t]+");
     // default values
     param.svm_type = svm_parameter.C_SVC;
@@ -439,8 +439,9 @@ public class SvmLibSVM extends SupervisedLearner {
     int i = 0;
     while(i < argv.length) {
       if(argv[i].charAt(0) != '-') {
-        if(LogService.minVerbosityLevel>1)
-          System.out.println("no other options specified for the SVM, using the default options.");
+        if(LogService.minVerbosityLevel > 1)
+          System.out
+            .println("no other options specified for the SVM, using the default options.");
         break;
       }
       ++i;

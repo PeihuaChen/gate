@@ -32,10 +32,10 @@ import gate.learning.LabelsOfFeatureVectorDoc;
 import gate.learning.NLPFeaturesList;
 import gate.learning.SparseFeatureVector;
 import gate.learning.learners.MultiClassLearning;
+
 /**
- * The interface between the Weka learner and the data defined
- * in the ML Api, which convert the data into the format a Weka
- * learner can use.
+ * The interface between the Weka learner and the data defined in the ML Api,
+ * which convert the data into the format a Weka learner can use.
  */
 public class WekaLearning {
   /** The data in the Weka object for training or application. */
@@ -46,6 +46,7 @@ public class WekaLearning {
   public final static short SPARSEFVDATA = 2;
   /** For using the NLP feature data. */
   public final static short NLPFEATUREFVDATA = 1;
+
   /** Learn a model and save it into the model file. */
   public void train(WekaLearner wekaCl, File modelFile) {
     // Training.
@@ -69,24 +70,20 @@ public class WekaLearning {
       e.printStackTrace();
     }
   }
-  
+
   /**
    * Recursively delete a file or directory (think "rm -rf file").
    */
   private void deleteRecursively(File file) throws IOException {
-    if(!file.exists()) {
-      return;
-    }
+    if(!file.exists()) { return; }
     if(file.isDirectory()) {
       for(File f : file.listFiles()) {
         deleteRecursively(f);
       }
     }
-    if(!file.delete()) {
-      throw new IOException("Couldn't delete file " + file);
-    }
+    if(!file.delete()) { throw new IOException("Couldn't delete file " + file); }
   }
-  
+
   /** Read the model from the file and apply it to the data. */
   public void apply(WekaLearner wekaCl, File modelFile,
     boolean distributionOutput) {
@@ -110,8 +107,10 @@ public class WekaLearning {
     // Apply the model to the data.
     wekaCl.applying(instancesData, labelsFVDoc, distributionOutput);
   }
-  /** Read the sparse feature vector data from the data file
-   * and convert it into the Weka's instance format.
+
+  /**
+   * Read the sparse feature vector data from the data file and convert it into
+   * the Weka's instance format.
    */
   public void readSparseFVsFromFile(File dataFile, int numDocs,
     boolean trainingMode, int numLabels, boolean surroundMode) {
@@ -150,15 +149,18 @@ public class WekaLearning {
       for(int i = 0; i < fvs.length; ++i) {
         // Object valueO = fvs[i].getValues();
         double[] values = new double[fvs[i].getLen()];
-        for(int j = 0; j < fvs[i].getLen(); ++j)
-          values[j] = (double)fvs[i].values[j];
-        SparseInstance inst = new SparseInstance(1.0, values, fvs[i]
-          .getIndexes(), 50000);
+        int[] indexes = new int[fvs[i].getLen()];
+        for(int j = 0; j < fvs[i].getLen(); ++j) {
+          //values[j] = (double)fvs[i].values[j];
+          values[j] = fvs[i].nodes[j].value;
+          indexes[j] = fvs[i].nodes[j].index;
+        }
+        SparseInstance inst = new SparseInstance(1.0, values, indexes, 50000);
         inst.setDataset(instancesData);
         if(trainingMode && labelsFVDoc[iDoc].multiLabels[i].num > 0)
           for(int j1 = 0; j1 < labelsFVDoc[iDoc].multiLabels[i].num; ++j1) {
             inst.setClassValue((labelsFVDoc[iDoc].multiLabels[i].labels[j1])); // label
-                                                                                // >0
+            // >0
             instancesData.add(inst);
           }
         else {
@@ -169,8 +171,10 @@ public class WekaLearning {
     }
     return;
   }
-  /** Read the NLP feature data from the data file
-   * and convert it into the Weka's instance format.
+
+  /**
+   * Read the NLP feature data from the data file and convert it into the Weka's
+   * instance format.
    */
   public void readNLPFeaturesFromFile(File dataFile, int numDocs,
     NLPFeaturesList nlpFeatList, boolean trainingMode, int numLabels,
@@ -178,8 +182,8 @@ public class WekaLearning {
     labelsFVDoc = new LabelsOfFeatureVectorDoc[numDocs];
     try {
       BufferedReader inData;
-      inData = new BufferedReader(new InputStreamReader(
-        new FileInputStream(dataFile), "UTF-8"));
+      inData = new BufferedReader(new InputStreamReader(new FileInputStream(
+        dataFile), "UTF-8"));
       // Get the number of attributes in the data
       String[] items = inData.readLine()
         .split(ConstantParameters.ITEMSEPARATOR);
@@ -218,12 +222,11 @@ public class WekaLearning {
           ++numFeats;
         } else {
           feat = feat.substring(feat.indexOf("_") + 1);
-          //Name of the entity
+          // Name of the entity
           String feat1 = feat.substring(0, feat.indexOf("_"));
-          //Term itself
+          // Term itself
           String feat2 = feat.substring(feat.indexOf("_") + 1);
           ((HashSet)metaFeats.get(feat1)).add(feat2);
-         
         }
       }
       numFeats += 1; // include the class feature
@@ -268,13 +271,13 @@ public class WekaLearning {
       attributes.addElement(new Attribute("Class", classValues));
       // Create the dataset with capacity of all FVs, and set index of class
       instancesData = new Instances("NLPFeatureData", attributes, numDocs * 10);
-      //The first attribute is for class.
+      // The first attribute is for class.
       instancesData.setClassIndex(attributes.size() - 1);
       // Read data from file and copy the data into the instance;
       for(int iDoc = 0; iDoc < numDocs; ++iDoc) { // For each document
         items = inData.readLine().split(ConstantParameters.ITEMSEPARATOR);
-        //The third item is for number of instances in the doc.
-        int num = Integer.parseInt(items[2]); 
+        // The third item is for number of instances in the doc.
+        int num = Integer.parseInt(items[2]);
         labelsFVDoc[iDoc] = new LabelsOfFeatureVectorDoc();
         labelsFVDoc[iDoc].multiLabels = new LabelsOfFV[num];
         for(int i = 0; i < num; ++i) { // For each instance
@@ -282,27 +285,27 @@ public class WekaLearning {
           Instance inst = new Instance(numFeats);
           inst.setDataset(instancesData);
           int numLabel = Integer.parseInt(items[0]); // number of labels for
-                                                      // the instance
+          // the instance
           entityTerm = "";
           numEntity = 0;
-          //For each NLP feature term
-          for(int j = numLabel + 1; j < items.length; ++j) { 
-            //Skip the feature if it is not in the list
-            if(!allTerms.contains(items[j])) continue; 
+          // For each NLP feature term
+          for(int j = numLabel + 1; j < items.length; ++j) {
+            // Skip the feature if it is not in the list
+            if(!allTerms.contains(items[j])) continue;
             if(isNgramFeat(items[j])) {// if it's a ngram
               items[j] = items[j].substring(0, items[j]
                 .lastIndexOf(NLPFeaturesList.SYMBOLNGARM));
               inst.setValue(Integer.parseInt(featToAttr.get(items[j])
                 .toString()), items[j]);
             } else {// if not a ngram
-              //For real features, not "_NA"
-              if(!items[j].equals(ConstantParameters.NAMENONFEATURE)) { 
-                //Get the feature term
-                items[j] = items[j].substring(items[j].indexOf("_") + 1); 
-                //Entity name
-                String feat1 = items[j].substring(0, items[j].indexOf("_")); 
-                //Feature name 
-                String feat2 = items[j].substring(items[j].indexOf("_") + 1); 
+              // For real features, not "_NA"
+              if(!items[j].equals(ConstantParameters.NAMENONFEATURE)) {
+                // Get the feature term
+                items[j] = items[j].substring(items[j].indexOf("_") + 1);
+                // Entity name
+                String feat1 = items[j].substring(0, items[j].indexOf("_"));
+                // Feature name
+                String feat2 = items[j].substring(items[j].indexOf("_") + 1);
                 if(!feat1.equals(entityTerm)) {
                   numEntity = 0;
                   entityTerm = feat1;
@@ -337,16 +340,17 @@ public class WekaLearning {
     }
     return;
   }
+
   /** Check if the item is a n-gram or not. */
   private boolean isNgramFeat(String item) {
     if(item.contains(NLPFeaturesList.SYMBOLNGARM))
       return true;
     else return false;
   }
-  
-  /** 
-   * Determining a learner from Weka using the NLP. 
-   * feature data or the feature vector data.
+
+  /**
+   * Determining a learner from Weka using the NLP. feature data or the feature
+   * vector data.
    */
   public static short obtainWekaLeanerDataType(String learnerName) {
     if(learnerName.contains("C4.5") || learnerName.contains("NaiveBayes")) {
@@ -355,23 +359,24 @@ public class WekaLearning {
       return SPARSEFVDATA;
     }
   }
+
   /** Obtaining the Weka learners. */
-  public static WekaLearner obtainWekaLearner(String learnerName, String learningOpts) {
+  public static WekaLearner obtainWekaLearner(String learnerName,
+    String learningOpts) {
     WekaLearner wekaL = null;
     if(learnerName.contains("KNN")) {
       if(learningOpts != null) {
         wekaL = new KNNIBK(learningOpts);
-      } else 
-        wekaL = new KNNIBK();
+      } else wekaL = new KNNIBK();
     } else if(learnerName.contains("NaiveBayes")) {
       wekaL = new NaiveBayesC();
     } else if(learnerName.contains("C4.5")) {
       wekaL = new C45();
     }
-    if(learningOpts != null)
-      wekaL.getParametersFromOptionsLine(learningOpts);
+    if(learningOpts != null) wekaL.getParametersFromOptionsLine(learningOpts);
     return wekaL;
   }
+
   /** Determing the output type of a Weka learner. */
   public static boolean obtainWekaLearnerOutputType(String learnerName) {
     /*
@@ -382,5 +387,4 @@ public class WekaLearning {
     return true;
     // return false;
   }
-  
 }
