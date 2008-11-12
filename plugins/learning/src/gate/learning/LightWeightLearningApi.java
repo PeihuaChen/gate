@@ -717,8 +717,6 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         benchmarkingFeatures.remove("modelFile");
         break;
       case 2: // for learner of multi to binary conversion
-        if(LogService.minVerbosityLevel > 1)
-          System.out.println("Using the SVM");
         LogService.logMessage("Multi to binary conversion.", 1);
         MultiClassLearning chunkLearning = new MultiClassLearning(
           engineSettings.multi2BinaryMode);
@@ -735,7 +733,10 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         LogService.logMessage("The number of classes in dataset: "
           + chunkLearning.numClasses, 1);
         // get a learner
-        String learningCommand = engineSettings.learnerSettings.paramsOfLearning;
+        String learningCommand = "";
+        if(engineSettings.learnerSettings.executableTraining != null)
+          learningCommand = engineSettings.learnerSettings.executableTraining+ " ";
+        learningCommand += engineSettings.learnerSettings.paramsOfLearning;
         learningCommand = learningCommand.trim();
         learningCommand = learningCommand.replaceAll("[ \t]+", " ");
         String dataSetFile = null;
@@ -748,6 +749,8 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
           .setLearnerParams(engineSettings.learnerSettings.paramsOfLearning);
         LogService.logMessage("The learners: " + paumLearner.getLearnerName(),
           1);
+        if(LogService.minVerbosityLevel > 1)
+          System.out.println("Using the "+ paumLearner.getLearnerName());
         // training
         startTime = Benchmark.startPoint();
         benchmarkingFeatures.put("modelFile", modelFile.getAbsolutePath());
@@ -1498,7 +1501,8 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
    */
   public static int obtainLearnerType(String learnerName) throws GateException {
     if(learnerName.equals("SVMLibSvmJava") || learnerName.equals("C4.5Weka")
-      || learnerName.equals("KNNWeka") || learnerName.equals("NaiveBayesWeka")) {
+      || learnerName.equals("KNNWeka") || learnerName.equals("NaiveBayesWeka")
+      || learnerName.equals("PAUM") || learnerName.equals("SVMExec") ) {
       if(learnerName.endsWith("Weka")) {
         return 1;
       } else {

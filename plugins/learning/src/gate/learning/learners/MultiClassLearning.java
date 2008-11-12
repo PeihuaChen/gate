@@ -670,27 +670,6 @@ public class MultiClassLearning {
     return numN;
   }
 
-  /**
-   * Obtain the learner from the learner's name speficied by the learning
-   * configuration file.
-   * 
-   * @throws GateException
-   */
-  public static SupervisedLearner obtainLearnerFromName(String learnerName,
-    String commandLine, String dataFilesName) throws GateException {
-    SupervisedLearner learner = null;
-    if(learnerName.equalsIgnoreCase("SVMLibSvmJava")) {
-      learner = new SvmLibSVM();
-      learner.setLearnerName(learnerName);
-      learner.setCommandLine(commandLine + " " + dataFilesName);
-      learner.getParametersFromCommmand();
-    } else {
-      throw new GateException("The learner's name \"" + learnerName
-        + "\" is not defined!");
-    }
-    return learner;
-  }
-  
   /** Learn the models and write them into a file -- not use thread*/
   public void trainingNoThread(SupervisedLearner learner, File modelFile) {
     final int totalNumFeatures = dataFVinDoc.getTotalNumFeatures();
@@ -990,6 +969,36 @@ public class MultiClassLearning {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
+  }
+  
+  /**
+   * Obtain the learner from the learner's name speficied by the learning
+   * configuration file.
+   * 
+   * @throws GateException
+   */
+  public static SupervisedLearner obtainLearnerFromName(String learnerName,
+    String commandLine, String dataFilesName) throws GateException {
+    SupervisedLearner learner = null;
+    if(learnerName.equalsIgnoreCase("SVMLibSvmJava")) {
+      learner = new SvmLibSVM();
+      learner.setLearnerName(learnerName);
+      learner.setCommandLine(commandLine + " " + dataFilesName);
+      learner.getParametersFromCommmand();
+    } else if(learnerName.equalsIgnoreCase("SVMExec")) {
+      learner = new SvmForExec();
+      learner.setLearnerName(learnerName);
+      learner.setCommandLine(commandLine);
+      learner.getParametersFromCommmand();
+    } else if(learnerName.equalsIgnoreCase("PAUM")) {
+      learner = new Paum();
+      learner.setCommandLine(commandLine);
+      learner.getParametersFromCommmand();
+    } else {
+      throw new GateException("The learner's name \"" + learnerName
+        + "\" is not defined!");
+    }
+    return learner;
   }
   
 }
