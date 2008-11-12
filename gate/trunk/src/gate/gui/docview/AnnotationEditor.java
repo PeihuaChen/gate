@@ -199,22 +199,19 @@ public class AnnotationEditor extends AbstractVisualResource
     }catch(ResourceInstantiationException rie){
       throw new GateRuntimeException(rie);
     }
-    JScrollPane scroller = new JScrollPane(featuresEditor.getTable());
-    scroller.getViewport().setBackground(UIManager.getLookAndFeelDefaults().
-      getColor("ToolTip.background"));
     // resize the annotation editor window when some data
     // are modified in the features table
     featuresEditor.getTable().getModel().addTableModelListener(
       new TableModelListener() {
         public void tableChanged(TableModelEvent e) {
-            popupWindow.pack();
+          popupWindow.pack();
         }
       });
 
     constraints.gridy = 2;
     constraints.weighty = 1;
     constraints.fill = GridBagConstraints.BOTH;
-    pane.add(scroller, constraints);
+    pane.add(featuresEditor, constraints);
 
     // add the search and annotate GUI at the bottom of the annotator editor
     SearchAndAnnotatePanel searchPanel =

@@ -83,6 +83,7 @@ public class AnnotationListView extends AbstractDocumentView
     table.setSortable(true);
     table.setSortedColumn(START_COL);
     table.setIntercellSpacing(new Dimension(2, 0));
+    table.setEnableHiddingColumns(true);
     //the background colour seems to change somewhere when using the GTK+ 
     //look and feel on Linux, so we copy the value now and set it 
     Color tableBG = table.getBackground();

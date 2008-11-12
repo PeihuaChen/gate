@@ -143,6 +143,7 @@ public class AnnotationDiffGUI extends JFrame{
         return match1 - match2;
       }
     });
+    diffTable.setEnableHiddingColumns(true);
 
     Comparator startEndComparator = new Comparator() {
       public int compare(Object o1, Object o2) {
@@ -651,18 +652,10 @@ public class AnnotationDiffGUI extends JFrame{
           fw.write("Missing: " + differ.getMissing() + "<br>" + nl);
           fw.write("False positives: " + differ.getSpurious() + "<br>" + nl);
 //          fw.write("<hr>" + nl);
-          //get a list of columns that need to be displayed
-          int[] cols = new int[diffTableModel.getColumnCount()];
-          int maxColIdx = -1;
-          for(int i = 0; i < cols.length; i++){
-            if(!diffTable.isColumnHidden(i)){
-              maxColIdx ++;
-              cols[maxColIdx] = i;
-            }
-          }
           fw.write(HEADER_3 + nl + "<TR>" + nl);
+          int maxColIdx = diffTable.getColumnCount() - 1;
           for(int col = 0; col <= maxColIdx; col++){
-            fw.write("\t<TH align=\"left\">" + diffTable.getColumnName(cols[col]) +
+            fw.write("\t<TH align=\"left\">" + diffTable.getColumnName(col) +
                     "</TH>" + nl);
           }
           fw.write("</TR>");
@@ -672,11 +665,11 @@ public class AnnotationDiffGUI extends JFrame{
             for(int col = 0; col <= maxColIdx; col++){
               Color bgCol = diffTableModel.getBackgroundAt(
                       diffTable.rowViewToModel(row),
-                      diffTable.convertColumnIndexToModel(cols[col]));
+                      diffTable.convertColumnIndexToModel(col));
               fw.write("\t<TD bgcolor=\"#" +
                       Integer.toHexString(bgCol.getRGB()).substring(2) +
                       "\">" +
-                      diffTable.getValueAt(row, cols[col]) +
+                      diffTable.getValueAt(row, col) +
                       "</TD>" + nl);
             }
             fw.write("</TR>");
@@ -736,7 +729,7 @@ public class AnnotationDiffGUI extends JFrame{
         case COL_KEY_END: return "End";
         case COL_KEY_STRING: return "Key";
         case COL_KEY_FEATURES: return "Features";
-        case COL_MATCH: return "";
+        case COL_MATCH: return "=?";
         case COL_RES_START: return "Start";
         case COL_RES_END: return "End";
         case COL_RES_STRING: return "Response";
@@ -893,7 +886,7 @@ public class AnnotationDiffGUI extends JFrame{
   protected JLabel fmeasureAveLbl;
 
   protected static final Color PARTIALLY_CORRECT_BG = new Color(173,215,255);
-  protected static final Color MISSING_BG = new Color(255,173,181);;
+  protected static final Color MISSING_BG = new Color(255,173,181);
   protected static final Color FALSE_POZITIVE_BG = new Color(255,231,173);
   protected static final String[] matchLabel;
   static{
