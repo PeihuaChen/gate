@@ -356,7 +356,7 @@
             <include name="gate/resources/build.txt"/>
             <include name="gate/resources/version.txt"/>
             <exclude name="**/*Test*.class"/>
-            <exclude name="debugger/**"/>                
+            <exclude name="debugger/**"/>
             <exclude name="gate/creole/annic/**"/>
             <exclude name="gate/**/gui/**"/>
             <exclude name="gate/swing/**"/>
@@ -385,18 +385,19 @@
          index="true">
          <fileset dir="${outputDir}/">
             <include name="**/img/**"/>
+            <include name="**/icons/**"/>
             <include name="gate/resources/splash.html"/>
             <include name="gate/resources/**/bootstrap/**"/>
             <exclude name="**/img/splash_large.png"/>
 	    </fileset>
       </jar>
-      <!-- I don't think any of these files are needed for running the UI. 
+      <!-- I don't think any of these files are needed for running the UI.
       Uncomment if this turns out to be incorrect-->
       <!--
 	  <jar destfile="${binDir}/gate-resources-ext.jar"
          update="false"
          index="true">
-         <fileset dir="${outputDir}/" 
+         <fileset dir="${outputDir}/"
                   includes="META-INF/**,gate/**,com/**,debugger/**,hepple/**">
             <exclude name="**/test/**"/>
 	        <exclude name="**/*.class"/>
