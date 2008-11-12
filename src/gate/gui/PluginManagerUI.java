@@ -18,21 +18,17 @@ package gate.gui;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
-import java.util.List;
+import java.text.Collator;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.*;
-import org.jdom.*;
-import org.jdom.input.SAXBuilder;
 import gate.Gate;
 import gate.GateConstants;
-import gate.event.CreoleListener;
 import gate.swing.XJTable;
 import gate.util.*;
 
@@ -58,10 +54,11 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     setTitle("Plugin Management Console");
     mainTableModel = new MainTableModel();
     mainTable = new XJTable();
-//    mainTable.setSortable(false);
     mainTable.setModel(mainTableModel);
     mainTable.setSortedColumn(NAME_COLUMN);
-//    mainTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+    Collator collator = Collator.getInstance(Locale.ENGLISH);
+    collator.setStrength(Collator.TERTIARY);
+    mainTable.setComparator(NAME_COLUMN, collator);
     mainTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     DeleteColumnCellRendererEditor rendererEditor = new DeleteColumnCellRendererEditor();
     mainTable.getColumnModel().getColumn(DELETE_COLUMN).
@@ -519,7 +516,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
           }
         }
         JTextField textField;
-      };//class URLfromFileAction extends AbstractAction
+      } //class URLfromFileAction extends AbstractAction
 
       Box rightBox = Box.createVerticalBox();
       rightBox.add(new JLabel("Select a directory"));

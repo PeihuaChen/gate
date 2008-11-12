@@ -25,7 +25,6 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.*;
 
-import gate.swing.XJTable.SortingModel.ValueHolder;
 import gate.util.ObjectComparator;
 
 /**
@@ -42,7 +41,7 @@ import gate.util.ObjectComparator;
  * rows.
  */
 public class XJTable extends JTable{
-  
+
   public XJTable(){
     this(null);
   }
@@ -63,8 +62,10 @@ public class XJTable extends JTable{
    */
   protected void newColumns(){
     columnData = new ArrayList<ColumnData>(dataModel.getColumnCount());
-    for(int i = 0; i < dataModel.getColumnCount(); i++)
+    hiddenColumns = new ArrayList<TableColumn>();
+    for(int i = 0; i < dataModel.getColumnCount(); i++) {
       columnData.add(new ColumnData(i));
+    }
   }
   
   
@@ -166,15 +167,8 @@ public class XJTable extends JTable{
   public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
     Component cellComponent =  super.prepareRenderer(renderer, row, column);
     TableColumn tColumn = getColumnModel().getColumn(column);
-    column = convertColumnIndexToModel(column);
-    ColumnData cData = columnData.get(column);
     Dimension spacing = getIntercellSpacing();
     
-    if(cData.isHidden()){
-      //do nothing - the sizes are already fixed
-      tColumn.setMinWidth(ColumnData.HIDDEN_WIDTH + spacing.width);
-      tColumn.setPreferredWidth(ColumnData.HIDDEN_WIDTH + spacing.width);
-    }else{
       //fix the minimum size
       Dimension dim = cellComponent.getMinimumSize();
       if(tColumn.getMinWidth() < (dim.width + spacing.width))
@@ -183,9 +177,8 @@ public class XJTable extends JTable{
       dim = cellComponent.getPreferredSize();
       if(tColumn.getPreferredWidth() < (dim.width + spacing.width))
         tColumn.setPreferredWidth(dim.width + spacing.width);
-    }
     //now fix the row height
-    Dimension dim = cellComponent.getPreferredSize();
+    dim = cellComponent.getPreferredSize();
     if(getRowHeight(row) < (dim.height + spacing.height)) 
             setRowHeight(row, dim.height + spacing.height);
     return cellComponent;
@@ -210,11 +203,14 @@ public class XJTable extends JTable{
   
   /**
    * Gets the hidden state for a column
+   * @deprecated The columns are really hidden now so you can get
+   * the TableColumnModel to get the visible columns and the TableModel
+   * to get all the columns.
    * @param columnIndex the column
-   * @return the hidden state
+   * @return always false
    */
   public boolean isColumnHidden(int columnIndex){
-    return columnData.get(columnIndex).isHidden();
+    return false;
   }
   
   /**
@@ -231,7 +227,24 @@ public class XJTable extends JTable{
   public int rowViewToModel(int viewRow){
     return sortingModel.targetToSource(viewRow);
   }
-  
+
+  /**
+   * Set the possibility for the user to hide/show a column by right-clicking
+   * on a column header. False by default.
+   * @param enable true if and only if the columns can be hidden.
+   */
+  public void setEnableHiddingColumns(boolean enable) {
+    this.enableHiddingColumns = enable;
+  }
+
+  /**
+   * Get the possibility for the user to hide/show a column.
+   * @return true if and only if the columns can be hidden.
+   */
+  public boolean getEnableHiddingColumns() {
+    return this.enableHiddingColumns;
+  }
+
   /**
    * Sets the custom comparator to be used for a particular column. Columns that
    * don't have a custom comparator will be sorted using the natural order.
@@ -309,7 +322,6 @@ public class XJTable extends JTable{
       }
 
       public int compare(ValueHolder o1, ValueHolder o2) {
-        // TODO Auto-generated method stub
         return ascending ? comparator.compare(o1.value, o2.value) :
           comparator.compare(o1.value, o2.value) * -1;
       }
@@ -435,8 +447,8 @@ public class XJTable extends JTable{
     
     /**
      * Sorts the table using the values in the specified column and sorting order.
-     * @param sortedColumn the column used for sorting the data.
-     * @param ascending the sorting order.
+     * sortedColumn is the column used for sorting the data.
+     * ascending is the sorting order.
      */
     public void sort(){
       try {
@@ -565,13 +577,39 @@ public class XJTable extends JTable{
     }
 
     protected void process(MouseEvent e){
-      int viewColumn = columnModel.getColumnIndexAtX(e.getX());
+      final int viewColumn = columnModel.getColumnIndexAtX(e.getX());
       if(viewColumn != -1){
-        int column = convertColumnIndexToModel(viewColumn);
-        ColumnData cData = columnData.get(column);
-        if(e.isPopupTrigger()){
+        final int column = convertColumnIndexToModel(viewColumn);
+        if(e.isPopupTrigger() && enableHiddingColumns){
           //show pop-up
-          cData.popup.show(e.getComponent(), e.getX(), e.getY());
+          JPopupMenu popup = new JPopupMenu();
+          if (columnModel.getColumnCount() > 1) {
+            popup.add(new AbstractAction("Hide column "
+              + dataModel.getColumnName(column)){
+              public void actionPerformed(ActionEvent e) {
+                TableColumn columnToHide = columnModel.getColumn(viewColumn);
+                columnModel.removeColumn(columnToHide);
+                hiddenColumns.add(columnToHide);
+              }
+            });
+          }
+          if (hiddenColumns.size() > 0) {
+            popup.addSeparator();
+          }
+          for (TableColumn hiddenColumn : hiddenColumns) {
+            final TableColumn hiddenColumnF = hiddenColumn;
+            popup.add(new AbstractAction("Show column "
+              + dataModel.getColumnName(hiddenColumn.getModelIndex())){
+              public void actionPerformed(ActionEvent e) {
+                columnModel.addColumn(hiddenColumnF);
+                columnModel.moveColumn(
+                  columnModel.getColumnCount()-1, viewColumn);
+                hiddenColumns.remove(hiddenColumnF);
+
+              }
+            });
+          }
+          popup.show(e.getComponent(), e.getX(), e.getY());
         }else if(e.getID() == MouseEvent.MOUSE_CLICKED &&
                e.getButton() == MouseEvent.BUTTON1){
           //normal click -> re-sort
@@ -588,54 +626,12 @@ public class XJTable extends JTable{
   protected class ColumnData{
     public ColumnData(int column){
       this.column = column;
-      popup = new JPopupMenu();
-      hideMenuItem = new JCheckBoxMenuItem("Hide", false);
-      popup.add(hideMenuItem);
-      hidden = false;
-      initListeners();
     }
     
-    protected void initListeners(){
-      hideMenuItem.addActionListener(new ActionListener(){
-        public void actionPerformed(ActionEvent evt){
-          TableColumn tCol = getColumnModel().getColumn(column);
-          if(hideMenuItem.isSelected()){
-            //hide column
-            //the state has already changed to hidden, the sizes will change
-            //accordingly automatically
-          }else{
-            //show column
-            if(tCol.getHeaderRenderer() == null){
-              TableCellRenderer defaultRenderer = getDefaultRenderer(Object.class);
-              if(defaultRenderer != null){
-                Component c = defaultRenderer.getTableCellRendererComponent(
-                        XJTable.this, tCol.getHeaderValue(), false, false, 0, 0);
-                tCol.setMinWidth(c.getMinimumSize().width);
-                tCol.setPreferredWidth(c.getPreferredSize().width);
-              }else{
-                tCol.setMinWidth(1);
-                tCol.setPreferredWidth(1);          
-              }
-            }else{
-              tCol.sizeWidthToFit();
-            }
-          }
-        }
-      });
-    }
-    
-    public boolean isHidden(){
-      return hideMenuItem.isSelected();
-    }
-
     JCheckBoxMenuItem autoSizeMenuItem;
-    JCheckBoxMenuItem hideMenuItem;
-    JPopupMenu popup;
     int column;
     int columnWidth;
-    boolean hidden;
     Comparator comparator;
-    private static final int HIDDEN_WIDTH = 10;
   }
   
   protected SortingModel sortingModel;
@@ -661,4 +657,11 @@ public class XJTable extends JTable{
   protected List<ColumnData> columnData;
   
   protected HeaderMouseListener headerMouseListener;
+
+  /**
+   * Contains the hidden columns in no particular order.
+   */
+  protected List<TableColumn> hiddenColumns;
+
+  private boolean enableHiddingColumns = false;
 }

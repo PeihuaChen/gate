@@ -37,8 +37,9 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
         implements ResizableVisualResource, FeatureMapListener{
   public FeaturesSchemaEditor(){
 //    setBackground(UIManager.getDefaults().getColor("Table.background"));
+    instance = this;
   }
-  
+
   public void setTargetFeatures(FeatureMap features){
     if(targetFeatures != null) targetFeatures.removeFeatureMapListener(this);
     this.targetFeatures = features;
@@ -77,6 +78,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
 
   /* (non-Javadoc)
    * @see gate.event.FeatureMapListener#featureMapUpdated()
+   * Called each time targetFeatures is changed.
    */
   public void featureMapUpdated(){
     SwingUtilities.invokeLater(new Runnable(){
@@ -98,12 +100,18 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
   
   protected void initGUI(){
     featuresModel = new FeaturesTableModel();
-    mainTable = new XJTable();
+    mainTable = new XJTable() {
+      public void changeSelection(int rowIndex, int columnIndex,
+                                  boolean toggle, boolean extend) {
+        super.changeSelection(rowIndex, columnIndex, toggle, extend);
+        // start cell editing as soon as a cell is selected
+        this.editCellAt(rowIndex, columnIndex);
+      }
+    };
     mainTable.setModel(featuresModel);
     mainTable.setTableHeader(null);
     mainTable.setSortable(false);
     mainTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-//    mainTable.setShowVerticalLines(false);
     mainTable.setShowGrid(false);
     mainTable.setBackground(getBackground());
     mainTable.setIntercellSpacing(new Dimension(2,2));
@@ -130,6 +138,51 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
     tableBG = new Color(tableBG.getRGB());
     mainTable.setBackground(tableBG);
 
+    // allow Tab key to select the next cell in the table
+    mainTable.setFocusCycleRoot(true);
+    mainTable.setSurrendersFocusOnKeystroke(true);
+
+    // remove control tab as traversal key
+    Set<AWTKeyStroke> keySet = new HashSet<AWTKeyStroke>(
+      mainTable.getFocusTraversalKeys(
+      KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS));
+    keySet.remove(KeyStroke.getKeyStroke("control TAB"));
+    mainTable.setFocusTraversalKeys(
+      KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, keySet);
+
+    // add control tab to go the container of this component
+    keySet.clear();
+    keySet.add(KeyStroke.getKeyStroke("control TAB"));
+    mainTable.setFocusTraversalKeys(
+      KeyboardFocusManager.UP_CYCLE_TRAVERSAL_KEYS, keySet);
+
+    // skip non editable cells when tabbing
+    InputMap im =
+      mainTable.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    KeyStroke tab = KeyStroke.getKeyStroke("TAB");
+    final Action oldTabAction = mainTable.getActionMap().get(im.get(tab));
+    Action tabAction = new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        oldTabAction.actionPerformed(e);
+        JTable table = (JTable) e.getSource();
+        int row = table.getSelectedRow();
+        int originalRow = row;
+        int column = table.getSelectedColumn();
+        int originalColumn = column;
+        while(!table.isCellEditable(row, column)) {
+          oldTabAction.actionPerformed(e);
+          row = table.getSelectedRow();
+          column = table.getSelectedColumn();
+          //  back to where we started, get out
+          if(row == originalRow
+            && column == originalColumn) {
+            break;
+          }
+        }
+      }
+    };
+    mainTable.getActionMap().put(im.get(tab), tabAction);
+
     scroller = new JScrollPane(mainTable);
     scroller.getViewport().setOpaque(true);
     scroller.getViewport().setBackground(tableBG);
@@ -139,7 +192,10 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
   
   /**
    * Called internally whenever the data represented changes.
-   *  
+   * Get feature names from targetFeatures and schema then sort them
+   * and add them to featureList.
+   * Fire a table data changed event for the feature table whith featureList
+   * used as data model.
    */
   protected void populate(){
     featureList.clear();
@@ -150,18 +206,15 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
       //add all the schema features
       fNames.addAll(targetFeatures.keySet());
       if(schema != null && schema.getFeatureSchemaSet() != null){
-        Iterator fSchemaIter = schema.getFeatureSchemaSet().iterator();
-        while(fSchemaIter.hasNext()){
-          FeatureSchema fSchema = (FeatureSchema)fSchemaIter.next();
-  //        if(fSchema.isRequired()) 
-            fNames.add(fSchema.getFeatureName());
+        for(FeatureSchema featureSchema : schema.getFeatureSchemaSet()) {
+          //        if(featureSchema.isRequired())
+          fNames.add(featureSchema.getFeatureName());
         }
       }
       List featureNames = new ArrayList(fNames);
       Collections.sort(featureNames);
-      Iterator namIter = featureNames.iterator();
-      while(namIter.hasNext()){
-        String name = (String)namIter.next();
+      for(Object featureName : featureNames) {
+        String name = (String) featureName;
         Object value = targetFeatures.get(name);
         featureList.add(new Feature(name, value));
       }
@@ -182,6 +235,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
   FeatureEditorRenderer featureEditorRenderer;
   XJTable mainTable;
   JScrollPane scroller;
+  FeaturesSchemaEditor instance;
   
   private static final int COLUMNS = 4;
   private static final int ICON_COL = 0;
@@ -232,7 +286,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
     }
     
     public Object getValueAt(int row, int column){
-      Feature feature = (Feature)featureList.get(row);
+      Feature feature = featureList.get(row);
       switch(column){
         case NAME_COL:
           return feature.name;
@@ -249,7 +303,8 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
     }
     
     public void setValueAt(Object aValue, int rowIndex,  int columnIndex){
-      Feature feature = (Feature)featureList.get(rowIndex);
+      Feature feature = featureList.get(rowIndex);
+      if (feature == null) { return; }
       if(targetFeatures == null){
         targetFeatures = Factory.newFeatureMap();
         target.setFeatures(targetFeatures);
@@ -258,15 +313,22 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
       switch(columnIndex){
         case VALUE_COL:
           if (feature.value != null
-           && feature.value.equals((String)aValue)) { return; }
+           && feature.value.equals(aValue)) { return; }
           feature.value = aValue;
           if(feature.name != null && feature.name.length() > 0){
+            targetFeatures.removeFeatureMapListener(instance);
             targetFeatures.put(feature.name, aValue);
-            fireTableRowsUpdated(rowIndex, rowIndex);
+            targetFeatures.addFeatureMapListener(instance);
+            SwingUtilities.invokeLater(new Runnable() {
+              public void run() {
+                // edit the last row that is empty
+                mainTable.editCellAt(mainTable.getRowCount() - 1, NAME_COL);
+              }
+            });
           }
           break;
         case NAME_COL:
-          if (feature.name.equals((String)aValue)) {
+          if (feature.name.equals(aValue)) {
             return;
           }
           targetFeatures.remove(feature.name);
@@ -274,7 +336,19 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
           targetFeatures.put(feature.name, feature.value);
           if(feature == emptyFeature) emptyFeature = new Feature("", null);
           populate();
-          requestFocusInWindow();
+          int newRow;
+          for (newRow = 0; newRow < mainTable.getRowCount(); newRow++) {
+            if (mainTable.getValueAt(newRow, NAME_COL).equals(feature.name)) {
+              break; // find the previously selected row in the new table
+            }
+          }
+          final int newRowF = newRow;
+          SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+              // edit the cell containing the value associated with this name
+              mainTable.editCellAt(newRowF, VALUE_COL);
+            }
+          });
           break;
         case DELETE_COL:
           //nothing
@@ -298,9 +372,10 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
       }
     }
   }
-  
-  
-  protected class FeatureEditorRenderer extends DefaultCellEditor implements TableCellRenderer{
+
+
+  protected class FeatureEditorRenderer extends DefaultCellEditor
+                                        implements TableCellRenderer {
     public FeatureEditorRenderer(){
       super(new JComboBox());
       defaultComparator = new ObjectComparator();
@@ -372,7 +447,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
         public void actionPerformed(ActionEvent evt){
           int row = mainTable.getEditingRow();
           if(row < 0) return;
-          Feature feature = (Feature)featureList.get(row);
+          Feature feature = featureList.get(row);
           if(feature == emptyFeature){
             feature.value = null;
           }else{
@@ -386,8 +461,8 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
     }    
 		
   	public Component getTableCellRendererComponent(JTable table, Object value,
-  	        									   boolean isSelected, boolean hasFocus, int row, int column){
-      Feature feature = (Feature)featureList.get(row);
+         boolean isSelected, boolean hasFocus, int row, int column){
+      Feature feature = featureList.get(row);
       switch(column){
         case ICON_COL: 
           return feature.isSchemaFeature() ? 
@@ -425,7 +500,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
     }
   
     protected void prepareCombo(JComboBox combo, int row, int column){
-      Feature feature = (Feature)featureList.get(row);
+      Feature feature = featureList.get(row);
       DefaultComboBoxModel comboModel = (DefaultComboBoxModel)combo.getModel(); 
       comboModel.removeAllElements();
       switch(column){
