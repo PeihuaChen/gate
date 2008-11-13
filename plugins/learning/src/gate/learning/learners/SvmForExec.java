@@ -7,11 +7,14 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 
 public class SvmForExec extends SupervisedLearner{
   /** The uneven margins parameter. */
@@ -121,6 +124,7 @@ public class SvmForExec extends SupervisedLearner{
       String commandLineSVM = obtainSVMCommandline(commandLine);
       //Run the external svm learn exectuable
       runExternalCommand(commandLineSVM);
+      //runExternalCommandWithRedirect(commandLineSVM);
       
       //Read the model from the svm results file and write it into our model file
       writeSVMModelIntoFile(modelSVMFile, kernelType, modelFile, totalNumFeatures);
@@ -161,27 +165,10 @@ public class SvmForExec extends SupervisedLearner{
       float b=0;
       String line;
       line = svmModelBuff.readLine();
-      while(!(line.contains("# threshold b,") || line.contains("SV"))) {
+      while(!(line.contains("# threshold b,") || line.contains("nr_sv "))) {
         if(line.contains("# number of support vectors plus 1")) {
           numSV = new Integer(line.substring(0, line.indexOf(" "))).intValue();
           numSV -= 1; //since it's number of SVs plus 1 in svm_light
-        }
-        if(line.contains("nr_sv")) { //for the model from libsvm
-          String [] items = line.split(" ");
-          if(items.length>1) {
-             numSV = new Integer(items[1]).intValue();
-             if(items.length>2)
-               numSV += new Integer(items[2]).intValue();
-          } else {
-            System.out.println("Error: no information for num_sv in the model file from libsvm!!");
-            try {
-              throw new Exception();
-            } catch(Exception e) {
-              // TODO Auto-generated catch block
-              e.printStackTrace();
-            }
-          }
-          
         }
         if(line.contains("rho ")) { //for the model from libsvm
           b = new Float(line.substring(line.indexOf(" ")+1)).floatValue();
@@ -192,6 +179,23 @@ public class SvmForExec extends SupervisedLearner{
       if(line.contains("# threshold b,")) {
         b = new Float(line.substring(0, line.indexOf(" "))).floatValue();
         b = -b; //since the b in the svm model file is -b
+      }
+      if(line.contains("nr_sv ")) { //for the model from libsvm
+        String [] items = line.split(" ");
+        if(items.length>1) {
+           numSV = new Integer(items[1]).intValue();
+           if(items.length>2)
+             numSV += new Integer(items[2]).intValue();
+        } else {
+          System.out.println("Error: no information for num_sv in the model file from libsvm!!");
+          try {
+            throw new Exception();
+          } catch(Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+        }
+        line = svmModelBuff.readLine(); //read in one more line for the libsvm model file
       }
       
       System.out.println("b="+b+", num_sv="+numSV+"*");
@@ -249,8 +253,7 @@ public class SvmForExec extends SupervisedLearner{
   
 
 //a class used for execute an external command
-  class StreamGobbler extends Thread
-  {
+  class StreamGobbler extends Thread {
       InputStream is;
       String type;
       
@@ -277,8 +280,7 @@ public class SvmForExec extends SupervisedLearner{
   }
   
 
-  public void runExternalCommand(String command)
-  {
+  public void runExternalCommand(String command) {
       
       try
       {            
@@ -321,6 +323,106 @@ public class SvmForExec extends SupervisedLearner{
           // any error???
           int exitVal = proc.waitFor();
           //System.out.println("ExitValue: " + exitVal);        
+      } catch (Throwable t)
+        {
+          t.printStackTrace();
+        }
+  }
+  
+//a class used for execute an external command
+  class StreamGobblerForDirect extends Thread {
+      InputStream is;
+      String type;
+      OutputStream os;
+      
+      StreamGobblerForDirect(InputStream is, String type)
+      {
+          this.is = is;
+          this.type = type;
+      }
+      
+      StreamGobblerForDirect(InputStream is, String type, OutputStream redirect)
+      {
+          this.is = is;
+          this.type = type;
+          this.os = redirect;
+      }
+
+      public void run()
+      {
+          try
+          {
+              PrintWriter pw = null;
+              if (os != null)
+                  pw = new PrintWriter(os);
+                  
+              InputStreamReader isr = new InputStreamReader(is);
+              BufferedReader br = new BufferedReader(isr);
+              String line=null;
+              while ( (line = br.readLine()) != null)
+              {
+                  if (pw != null)
+                      pw.println(line);
+                  System.out.println(type + ">" + line);    
+              }
+              if (pw != null)
+                  pw.flush();
+          } catch (IOException ioe)
+              {
+              ioe.printStackTrace();  
+              }
+      }
+
+  }
+  
+  
+  public void runExternalCommandWithRedirect(String command) {
+      
+      try
+      {            
+          String osName = System.getProperty("os.name" );
+          String[] cmd = new String[3];
+
+          if( osName.equals( "Windows XP") || osName.equals("Windows NT") )
+          {
+              cmd[0] = "cmd.exe" ;
+              cmd[1] = "/C" ;
+              cmd[2] = command;
+          }
+          else if( osName.equals( "Windows 95" ) )
+          {
+              cmd[0] = "command.com" ;
+              cmd[1] = "/C" ;
+              cmd[2] = command;
+          } else {
+            cmd[0] = " " ;
+              cmd[1] = " " ;
+              cmd[2] = command;
+          }
+          
+          Runtime rt = Runtime.getRuntime();
+          System.out.println("Execing " + cmd[0] + " " + cmd[1] 
+                             + " " + cmd[2]);
+          Process proc = rt.exec(cmd);
+          // any error message?
+          StreamGobblerForDirect errorGobbler = new 
+              StreamGobblerForDirect(proc.getErrorStream(), "ERROR");            
+          
+          // any output?
+          String outFileName = command.substring(command.lastIndexOf('>')+1);
+          FileOutputStream fos = new FileOutputStream(outFileName);
+          StreamGobblerForDirect outputGobbler = new 
+              StreamGobblerForDirect(proc.getInputStream(), "OUTPUT", fos);
+              
+          // kick them off
+          errorGobbler.start();
+          outputGobbler.start();
+                                  
+          // any error???
+          int exitVal = proc.waitFor();
+          System.out.println("ExitValue: " + exitVal); 
+          fos.flush();
+          fos.close();        
       } catch (Throwable t)
         {
           t.printStackTrace();
