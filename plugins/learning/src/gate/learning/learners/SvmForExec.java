@@ -286,18 +286,21 @@ public class SvmForExec extends SupervisedLearner{
       {            
           String osName = System.getProperty("os.name" );
           String[] cmd = new String[3];
+          boolean isWindows = false;
 
           if( osName.equals( "Windows XP") || osName.equals("Windows NT") )
           {
               cmd[0] = "cmd.exe" ;
               cmd[1] = "/C" ;
               cmd[2] = command;
+              isWindows = true;
           }
           else if( osName.equals( "Windows 95" ) )
           {
               cmd[0] = "command.com" ;
               cmd[1] = "/C" ;
               cmd[2] = command;
+              isWindows = true;
           } else {
             cmd[0] = " " ;
               cmd[1] = " " ;
@@ -307,7 +310,11 @@ public class SvmForExec extends SupervisedLearner{
           Runtime rt = Runtime.getRuntime();
           //System.out.println("Execing " + cmd[0] + " " + cmd[1] 
               //               + " " + cmd[2]);
-          Process proc = rt.exec(cmd);
+          Process proc = null;
+          if(isWindows) 
+            proc = rt.exec(cmd);
+          else 
+            proc = rt.exec(command); //linux cannot run the empty command
           // any error message?
           StreamGobbler errorGobbler = new 
               StreamGobbler(proc.getErrorStream(), "ERROR");            
