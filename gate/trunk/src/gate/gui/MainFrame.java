@@ -590,26 +590,34 @@ public class MainFrame extends JFrame implements ProgressListener,
     // this));
 
     fileMenu.add(new XJMenuItem(new ManagePluginsAction(), this));
-    fileMenu.addSeparator();
 
-    fileMenu.add(new XJMenuItem(new ExitGateAction(), this));
+    if(!Gate.runningOnMac()) {
+      fileMenu.addSeparator();
+      fileMenu.add(new XJMenuItem(new ExitGateAction(), this));
+    }
+
     menuBar.add(fileMenu);
 
     JMenu optionsMenu = new JMenu("Options");
     optionsMenu.setMnemonic(KeyEvent.VK_O);
 
-    optionsDialog = new OptionsDialog(MainFrame.this);
-    optionsMenu.add(new XJMenuItem(new AbstractAction("Configuration") {
-      private static final long serialVersionUID = 1L;
-      {
-        putValue(SHORT_DESCRIPTION, "Edit gate options");
-      }
+    boolean optionsMenuHasEntries = false;
 
-      public void actionPerformed(ActionEvent evt) {
-        optionsDialog.showDialog();
-        optionsDialog.dispose();
-      }
-    }, this));
+    optionsDialog = new OptionsDialog(MainFrame.this);
+    if(!Gate.runningOnMac()) {
+      optionsMenu.add(new XJMenuItem(new AbstractAction("Configuration") {
+        private static final long serialVersionUID = 1L;
+        {
+          putValue(SHORT_DESCRIPTION, "Edit gate options");
+        }
+
+        public void actionPerformed(ActionEvent evt) {
+          optionsDialog.showDialog();
+          optionsDialog.dispose();
+        }
+      }, this));
+      optionsMenuHasEntries = true;
+    }
 
     JMenu imMenu = null;
     List<Locale> installedLocales = new ArrayList<Locale>();
@@ -659,9 +667,14 @@ public class MainFrame extends JFrame implements ProgressListener,
         bg.add(item);
       }
     }
-    if(imMenu != null) optionsMenu.add(imMenu);
+    if(imMenu != null) {
+      optionsMenu.add(imMenu);
+      optionsMenuHasEntries = true;
+    }
 
-    menuBar.add(optionsMenu);
+    if(optionsMenuHasEntries) {
+      menuBar.add(optionsMenu);
+    }
 
     JMenu toolsMenu = new XJMenu("Tools");
     toolsMenu.setMnemonic(KeyEvent.VK_T);
@@ -724,7 +737,9 @@ public class MainFrame extends JFrame implements ProgressListener,
       new JCheckBox(new ToggleToolTipsAction());
     toggleToolTipsCheckBoxMenuItem.setSelected(true);
     helpMenu.add(toggleToolTipsCheckBoxMenuItem);
-    helpMenu.add(new HelpAboutAction());
+    if(!Gate.runningOnMac()) {
+      helpMenu.add(new HelpAboutAction());
+    }
     menuBar.add(helpMenu);
 
     this.setJMenuBar(menuBar);
@@ -1132,7 +1147,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     listeners.put("gate.event.StatusListener", MainFrame.this);
     listeners.put("gate.event.ProgressListener", MainFrame.this);
-    if(System.getProperty("mrj.version") != null) {
+    if(Gate.runningOnMac()) {
       // mac-specific initialisation
       initMacListeners();
     }
@@ -1159,7 +1174,8 @@ public class MainFrame extends JFrame implements ProgressListener,
     // }
     // public void handlePreferences(ApplicationEvent e) {
     // e.setHandled(true);
-    // optionsDialog.show();
+    // optionsDialog.showDialog();
+    // optionsDialog.dispose();
     // }
     // });
     // 
@@ -1179,8 +1195,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
       // method used in the InvocationHandler
       final Method appEventSetHandledMethod =
-        eawtApplicationEventClass.getMethod("setHandled",
-          new Class[]{boolean.class});
+        eawtApplicationEventClass.getMethod("setHandled", boolean.class);
 
       // Invocation handler used to process Apple application events
       InvocationHandler handler = new InvocationHandler() {
@@ -1192,19 +1207,17 @@ public class MainFrame extends JFrame implements ProgressListener,
           throws Throwable {
           Object appEvent = args[0];
           if("handleAbout".equals(method.getName())) {
-            appEventSetHandledMethod.invoke(appEvent,
-              new Object[]{Boolean.TRUE});
+            appEventSetHandledMethod.invoke(appEvent, Boolean.TRUE);
             aboutAction.actionPerformed(null);
           }
           else if("handleQuit".equals(method.getName())) {
-            appEventSetHandledMethod.invoke(appEvent,
-              new Object[]{Boolean.FALSE});
+            appEventSetHandledMethod.invoke(appEvent, Boolean.FALSE);
             exitAction.actionPerformed(null);
           }
           else if("handlePreferences".equals(method.getName())) {
-            appEventSetHandledMethod.invoke(appEvent,
-              new Object[]{Boolean.TRUE});
+            appEventSetHandledMethod.invoke(appEvent, Boolean.TRUE);
             optionsDialog.showDialog();
+            optionsDialog.dispose();
           }
 
           return null;
@@ -1218,29 +1231,28 @@ public class MainFrame extends JFrame implements ProgressListener,
 
       // get hold of the Application object
       Method getApplicationMethod =
-        eawtApplicationClass.getMethod("getApplication", new Class[0]);
-      Object applicationObject =
-        getApplicationMethod.invoke(null, new Object[0]);
+        eawtApplicationClass.getMethod("getApplication");
+      Object applicationObject = getApplicationMethod.invoke(null);
 
       // enable the preferences menu item
       Method setEnabledPreferencesMenuMethod =
         eawtApplicationClass.getMethod("setEnabledPreferencesMenu",
-          new Class[]{boolean.class});
-      setEnabledPreferencesMenuMethod.invoke(applicationObject,
-        new Object[]{Boolean.TRUE});
+          boolean.class);
+      setEnabledPreferencesMenuMethod.invoke(applicationObject, Boolean.TRUE);
 
       // Register our proxy instance as an ApplicationListener
       Method addApplicationListenerMethod =
         eawtApplicationClass.getMethod("addApplicationListener",
-          new Class[]{eawtApplicationListenerInterface});
+          eawtApplicationListenerInterface);
       addApplicationListenerMethod.invoke(applicationObject,
-        new Object[]{applicationListenerObject});
+        applicationListenerObject);
     }
     catch(Throwable t) {
       // oh well, we tried
       System.out.println("Warning: there was a problem setting up the Mac "
         + "application\nmenu.  Your options/session will not be saved if "
-        + "you exit\nwith command-Q, use \"File/Exit GATE\" instead");
+        + "you exit\nwith command-Q, use the close button at the top-left"
+        + "corner\nof this window instead.");
     }
   }
 
