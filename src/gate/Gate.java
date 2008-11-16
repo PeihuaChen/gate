@@ -1091,6 +1091,17 @@ public class Gate implements GateConstants {
   } // runningOnUnix
 
   /**
+   * This method tries to guess if we are on a Mac OS X system.  It does this
+   * by checking the value of <TT>System.getProperty("os.name")</TT>.  Note
+   * that if this method returns true, {@link #runningOnUnix()} will also
+   * return true (i.e. Mac is considered a Unix platform) but the reverse is
+   * not necessarily the case.
+   */
+  public static boolean runningOnMac() {
+    return System.getProperty("os.name").toLowerCase().startsWith("mac os x");
+  }
+
+  /**
    * Returns the list of CREOLE directories the system knows about (either
    * pre-installed plugins in the plugins directory or CREOLE directories that
    * have previously been loaded manually).
