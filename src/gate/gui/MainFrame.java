@@ -1251,7 +1251,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       // oh well, we tried
       System.out.println("Warning: there was a problem setting up the Mac "
         + "application\nmenu.  Your options/session will not be saved if "
-        + "you exit\nwith command-Q, use the close button at the top-left"
+        + "you exit\nwith \u2318Q, use the close button at the top-left"
         + "corner\nof this window instead.");
     }
   }
