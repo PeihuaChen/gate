@@ -26,6 +26,7 @@ import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.*;
 import gate.event.*;
 import gate.util.Err;
+import gate.util.Files;
 import gate.util.Strings;
 
 /**
@@ -315,7 +316,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
       throw new IllegalArgumentException(
         "The URL provided is not of type \"file:\"!");
 
-    File dir = new File(directory.getPath());
+    File dir = Files.fileFromURL(directory);
     if(!dir.exists()) throw new FileNotFoundException(dir.toString());
 
     if(!dir.isDirectory())
