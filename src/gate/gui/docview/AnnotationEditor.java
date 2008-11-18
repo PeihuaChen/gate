@@ -44,13 +44,15 @@ import gate.util.*;
  * does not enforce the schemas, allowing the user full control.
  */
 public class AnnotationEditor extends AbstractVisualResource 
-    implements gate.gui.annedit.AnnotationEditor{
+    implements gate.gui.annedit.OwnedAnnotationEditor{
   
   private static final long serialVersionUID = 1L;
 
   public AnnotationEditor(){
     
   }
+  
+  
   
   /* (non-Javadoc)
    * @see gate.creole.AbstractVisualResource#init()
@@ -907,4 +909,31 @@ public class AnnotationEditor extends AbstractVisualResource
     }
   }
 
+  /**
+   * Does nothing, as this editor does not support cancelling and rollbacks.
+   */
+  public void cancelAction() throws GateException {
+  }
+
+  /**
+   * Returns <tt>true</tt> always as this editor is generic and can edit any
+   * annotation type.
+   */
+  public boolean canDisplayAnnotationType(String annotationType) {
+    return true;
+  }
+
+  /**
+   * Does nothing as this editor works in auto-commit mode (changes are 
+   * implemented immediately).
+   */
+  public void okAction() throws GateException {
+  }
+
+  /**
+   * Returns <tt>false</tt>, as this editor does not support cancel operations.
+   */
+  public boolean supportsCancel() {
+    return false;
+  }
 }

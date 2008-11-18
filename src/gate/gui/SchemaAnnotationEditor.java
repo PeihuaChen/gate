@@ -27,11 +27,18 @@ import javax.swing.table.TableCellEditor;
 
 import gate.*;
 import gate.creole.*;
+import gate.gui.docview.AnnotationEditor;
 import gate.util.GateException;
 import gate.util.LuckyException;
 
-/** This class is a viewer which adds/edits features on a GATE annotation.
+  /** This class is a viewer which adds/edits features on a GATE annotation.
   * This viewer is {@link gate.creole.AnnotationSchema} driven.
+  * 
+  * This class has been deprecated! This functionality is now provided by the 
+  * {@link AnnotationEditor} and {@link gate.gui.annedit.SchemaAnnotationEditor}
+  * classes. 
+  * 
+  * @deprecated
   */
 public class SchemaAnnotationEditor extends AbstractVisualResource
                                     implements AnnotationVisualResource,
@@ -56,11 +63,13 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     * @param ann the annotation to be displayed or edited. If ann is null then
     * the method simply returns
     */
-  public void setAnnotation(Annotation ann){
+  public void editAnnotation(Annotation ann, AnnotationSet set){
     // If ann is null, then simply return.
     if (ann == null) return;
 
     currentAnnot = ann;
+    currentAnnotSet = set;
+    
     currentStartOffset = currentAnnot.getStartNode().getOffset();
     currentEndOffset = currentAnnot.getEndNode().getOffset();
     currentAnnotFeaturesMap = Factory.newFeatureMap();
@@ -92,53 +101,6 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     initListeners();
   }// setAnnotation();
 
-  /**
-    * Used when the viewer has to create new annotations.
-    * @param startOffset the start offset of the span covered by the new
-    * annotation(s). If is <b>null</b> the method will simply return.
-    * @param endOffset the end offset of the span covered by the new
-    * annotation(s). If is <b>null</b> the method will simply return.
-    */
-  public void setSpan(Long startOffset, Long endOffset, String annotType){
-    // If one of them is null, then simply return.
-    if (startOffset == null || endOffset == null) return;
-    currentStartOffset = startOffset;
-    currentEndOffset = endOffset;
-    currentAnnot = null;
-    currentAnnotFeaturesMap = null;
-    currentAnnotSchema = null;
-    CreoleRegister creoleReg = Gate.getCreoleRegister();
-    List currentAnnotationSchemaList = null;
-    try{
-      currentAnnotationSchemaList =
-              creoleReg.getAllInstances("gate.creole.AnnotationSchema");
-    } catch (GateException e){
-      // This exception shouldn't happen. If it happens then something went
-      // terribly wrong.
-      throw new LuckyException("gate.creole.AnnotationSchema or a class that"+
-      " extends it, is not registered in the creole.xml register.Edit your"+
-      " creole.xml and try again.");
-    }// End try
-    // If there is no Annotation schema loaded, the editor can only do nothing
-    if (currentAnnotationSchemaList.isEmpty()) return;
-    name2annotSchemaMap = new TreeMap();
-    Iterator annotSchemaIter = currentAnnotationSchemaList.iterator();
-    // currentAnnotationSchemaList is not empty (see the above comment)
-    currentAnnotSchema = (AnnotationSchema) currentAnnotationSchemaList.get(0);
-
-    AnnotationSchema annotSch;
-    String annotSchName;
-    while (annotSchemaIter.hasNext()){
-      annotSch = (AnnotationSchema)annotSchemaIter.next();
-      annotSchName = annotSch.getAnnotationName();
-      if(annotSch != null && annotSchName != null)
-        name2annotSchemaMap.put(annotSchName, annotSch);
-    }// End while
-
-    initLocalData();
-    buildGuiComponents();
-    initListeners();
-  }// setSpan();
 
   /**
    * Called by the GUI when the user has pressed the "OK" button. This should
@@ -199,7 +161,42 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     return false;
   }// canDisplayAnnotationType();
 
-  // The Schema Editor functionality
+  
+  /**
+   * Always returns <tt>true</tt>.
+   */
+  public boolean editingFinished() {
+    return true;
+  }
+
+  /**
+   * Returns the anntoation curerntly edited.
+   */
+  public Annotation getAnnotationCurrentlyEdited() {
+    return currentAnnot;
+  }
+
+  /* (non-Javadoc)
+   * @see gate.creole.AnnotationVisualResource#getAnnotationSetCurrentlyEdited()
+   */
+  public AnnotationSet getAnnotationSetCurrentlyEdited() {
+    return currentAnnotSet;
+  }
+
+  /* (non-Javadoc)
+   * @see gate.creole.AnnotationVisualResource#isActive()
+   */
+  public boolean isActive() {
+    return isVisible();
+  }
+
+  /**
+   * Returns <tt>true</tt>
+   */
+  public boolean supportsCancel() {
+    return true;
+  }
+
 
   // Local data
   /** The annotation schema present into the system*/

@@ -38,7 +38,7 @@ import gate.event.DocumentEvent;
 import gate.event.DocumentListener;
 import gate.gui.*;
 import gate.gui.annedit.*;
-import gate.gui.annedit.AnnotationEditor;
+import gate.gui.annedit.OwnedAnnotationEditor;
 import gate.swing.ColorGenerator;
 import gate.swing.XJTable;
 import gate.util.*;
@@ -237,26 +237,29 @@ public class AnnotationSetsView extends AbstractDocumentView
    * @param textView
    * @param asView
    * @return
-   * @throws ResourceInstantiationException 
+   * @throws ResourceInstantiationException
    */
-  protected gate.gui.annedit.AnnotationEditor createAnnotationEditor(TextualDocumentView textView,
-          AnnotationSetsView asView) throws ResourceInstantiationException {
-    //find the last VR that implements the AnnotationEditor interface
-    List<String> vrTypes = new ArrayList<String>(
-            Gate.getCreoleRegister().getPublicVrTypes());
+  protected gate.gui.annedit.OwnedAnnotationEditor createAnnotationEditor(
+          TextualDocumentView textView, AnnotationSetsView asView)
+          throws ResourceInstantiationException {
+    // find the last VR that implements the AnnotationEditor interface
+    List<String> vrTypes = new ArrayList<String>(Gate.getCreoleRegister()
+            .getPublicVrTypes());
     Collections.reverse(vrTypes);
-    for(String aVrType : vrTypes){
+    for(String aVrType : vrTypes) {
       ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(aVrType);
-      try{
+      try {
         Class resClass = rData.getResourceClass();
-        if(AnnotationEditor.class.isAssignableFrom(resClass)){
-          AnnotationEditor newEditor = (AnnotationEditor) resClass.newInstance();
+        if(OwnedAnnotationEditor.class.isAssignableFrom(resClass)) {
+          OwnedAnnotationEditor newEditor = (OwnedAnnotationEditor)resClass
+                  .newInstance();
           newEditor.setOwner(this);
           newEditor.init();
           return newEditor;
         }
-      }catch(ClassNotFoundException cnfe){
-        //ignore
+      }
+      catch(ClassNotFoundException cnfe) {
+        // ignore
         Err.prln("Invalid CREOLE data:");
         cnfe.printStackTrace(Err.getPrintWriter());
       }
@@ -269,7 +272,7 @@ public class AnnotationSetsView extends AbstractDocumentView
         e.printStackTrace();
       }
     }
-    //if we got this far, we couldn't find an editor
+    // if we got this far, we couldn't find an editor
     Err.prln("Could not find any annotation editors. Editing annotations disabled.");
     return null;
   }
@@ -1991,7 +1994,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   TextualDocumentView textView;
   AnnotationListView listView;
   JTextArea textPane;
-  gate.gui.annedit.AnnotationEditor annotationEditor;
+  gate.gui.annedit.OwnedAnnotationEditor annotationEditor;
   NewAnnotationSetAction newSetAction;
   
   /**

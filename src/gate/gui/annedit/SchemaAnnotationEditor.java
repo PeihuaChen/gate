@@ -35,7 +35,7 @@ import gate.swing.JChoice;
 import gate.util.*;
 
 public class SchemaAnnotationEditor extends AbstractVisualResource 
-    implements AnnotationEditor{
+    implements OwnedAnnotationEditor{
 
   private static final long serialVersionUID = 1L;
 
@@ -110,7 +110,7 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
    * method will return <tt>false</tt> if the current annotation type does not
    * have a schema or if the features of the current annotation do not comply
    * with the schema. 
-   * @see gate.gui.annedit.AnnotationEditor#editingFinished()
+   * @see gate.gui.annedit.OwnedAnnotationEditor#editingFinished()
    */
   public boolean editingFinished() {
     if(annotation == null) return true;
@@ -171,7 +171,34 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     return true;
   }
 
-  
+  /**
+   * Does nothing, as this editor does not support cancelling and rollbacks.
+   */
+  public void cancelAction() throws GateException {
+  }
+
+  /**
+   * Returns <tt>true</tt> always as this editor is generic and can edit any
+   * annotation type.
+   */
+  public boolean canDisplayAnnotationType(String annotationType) {
+    return true;
+  }
+
+  /**
+   * Does nothing as this editor works in auto-commit mode (changes are 
+   * implemented immediately).
+   */
+  public void okAction() throws GateException {
+  }
+
+  /**
+   * Returns <tt>false</tt>, as this editor does not support cancel operations.
+   */
+  public boolean supportsCancel() {
+    return false;
+  }
+
   /* (non-Javadoc)
    * @see gate.gui.annedit.AnnotationEditor#isActive()
    */
