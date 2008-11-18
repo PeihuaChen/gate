@@ -413,7 +413,8 @@ public class AnnotationEditor extends AbstractVisualResource
     if (ann == null) {
       typeCombo.setModel(new DefaultComboBoxModel());
       featuresEditor.setSchema(new AnnotationSchema());
-      popupWindow.doLayout();
+//      popupWindow.doLayout();
+      popupWindow.validate();
       return;
     }
     //repopulate the types combo
@@ -428,7 +429,8 @@ public class AnnotationEditor extends AbstractVisualResource
    
     featuresEditor.setSchema(schemasByType.get(annType));
     featuresEditor.setTargetFeatures(ann.getFeatures());
-    popupWindow.doLayout();
+//    popupWindow.doLayout();
+    popupWindow.validate();
     setEditingEnabled(true);
     if (pinnedButton.isSelected()) {
       setVisible(true);
