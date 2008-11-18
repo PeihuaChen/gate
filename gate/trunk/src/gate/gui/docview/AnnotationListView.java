@@ -19,8 +19,7 @@ import gate.*;
 import gate.creole.*;
 import gate.event.AnnotationEvent;
 import gate.event.AnnotationListener;
-import gate.gui.annedit.AnnotationData;
-import gate.gui.annedit.AnnotationDataImpl;
+import gate.gui.annedit.*;
 import gate.swing.XJTable;
 import gate.util.*;
 import java.awt.*;
@@ -30,6 +29,7 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.text.JTextComponent;
 
 /**
  * A tabular view for a list of annotations.
@@ -37,7 +37,7 @@ import javax.swing.table.AbstractTableModel;
  * highlighted.
  */
 public class AnnotationListView extends AbstractDocumentView
-		implements AnnotationListener, AnnotationList{
+		implements AnnotationListener, AnnotationList, AnnotationEditorOwner{
   
   public AnnotationListView(){
     annDataList = new ArrayList<AnnotationData>();
@@ -76,7 +76,7 @@ public class AnnotationListView extends AbstractDocumentView
    * @see gate.gui.docview.AbstractDocumentView#initGUI()
    */
   protected void initGUI() {
-    editorsCache = new HashMap();
+    editorsCache = new HashMap<String, AnnotationVisualResource>();
     tableModel = new AnnotationTableModel();
     table = new XJTable(tableModel);
     table.setAutoResizeMode(XJTable.AUTO_RESIZE_OFF);
@@ -224,11 +224,13 @@ public class AnnotationListView extends AbstractDocumentView
           //add the custom edit actions
           if(modelRow != -1){
             AnnotationData aHandler = annDataList.get(modelRow);
-            List editorClasses = Gate.getCreoleRegister().
+            //add the specific editors
+            List<String> specificEditorClasses = Gate.getCreoleRegister().
               getAnnotationVRs(aHandler.getAnnotation().getType());
-            if(editorClasses != null && editorClasses.size() > 0){
+            if(specificEditorClasses != null && 
+               specificEditorClasses.size() > 0){
               popup.addSeparator();
-              Iterator editorIter = editorClasses.iterator();
+              Iterator<String> editorIter = specificEditorClasses.iterator();
               while(editorIter.hasNext()){
                 String editorClass = (String) editorIter.next();
                 AnnotationVisualResource editor = (AnnotationVisualResource)
@@ -246,6 +248,42 @@ public class AnnotationListView extends AbstractDocumentView
                 popup.add(new EditAnnotationAction(aHandler.getAnnotationSet(), 
                         aHandler.getAnnotation(), editor));
               }
+            }
+            //add generic editors
+            List<String> genericEditorClasses = Gate.getCreoleRegister().
+              getAnnotationVRs();
+            if(genericEditorClasses != null && 
+               genericEditorClasses.size() > 0){
+              popup.addSeparator();
+              Iterator<String> genEditorIter = genericEditorClasses.iterator();
+              while(genEditorIter.hasNext()){
+                String editorClass = (String) genEditorIter.next();
+                if(specificEditorClasses.contains(editorClass)) continue;
+                AnnotationVisualResource editor = (AnnotationVisualResource)
+                  editorsCache.get(editorClass);
+                if(editor == null){
+                  //create the new type of editor
+                  try{
+                    ResourceData resData = Gate.getCreoleRegister().get(editorClass); 
+                    Class<?> resClass = resData.getResourceClass();
+                    if(OwnedAnnotationEditor.class.isAssignableFrom(resClass)) {
+                      OwnedAnnotationEditor newEditor = (OwnedAnnotationEditor)resClass
+                              .newInstance();
+                      newEditor.setOwner(AnnotationListView.this);
+                      newEditor.init();
+                      editor = newEditor;
+                    }else{
+                      editor = (AnnotationVisualResource)
+                               Factory.createResource(editorClass);
+                    }
+                    editorsCache.put(editorClass, editor);
+                  }catch(Exception rie){
+                    rie.printStackTrace(Err.getPrintWriter());
+                  }
+                }
+                popup.add(new EditAnnotationAction(aHandler.getAnnotationSet(), 
+                        aHandler.getAnnotation(), editor));
+              }      
             }
           }
           popup.show(table, me.getX(), me.getY());
@@ -303,6 +341,7 @@ public class AnnotationListView extends AbstractDocumentView
 //    }    
 //  }
 
+  
   /**
    * Adds an annotation to be displayed in the list.
    * @param ann the annotation
@@ -502,6 +541,45 @@ public class AnnotationListView extends AbstractDocumentView
     }
   }
   
+  
+  
+  /* (non-Javadoc)
+   * @see gate.gui.annedit.AnnotationEditorOwner#annotationChanged(gate.Annotation, gate.AnnotationSet, java.lang.String)
+   */
+  public void annotationChanged(Annotation ann, AnnotationSet set,
+          String oldType) {
+    //do nothing
+  }
+
+  /* (non-Javadoc)
+   * @see gate.gui.annedit.AnnotationEditorOwner#getNextAnnotation()
+   */
+  public Annotation getNextAnnotation() {
+    return null;
+  }
+
+
+  /* (non-Javadoc)
+   * @see gate.gui.annedit.AnnotationEditorOwner#getPreviousAnnotation()
+   */
+  public Annotation getPreviousAnnotation() {
+    return null;
+  }
+
+
+  /* (non-Javadoc)
+   * @see gate.gui.annedit.AnnotationEditorOwner#getTextComponent()
+   */
+  public JTextComponent getTextComponent() {
+    return (JTextArea)((JScrollPane)textView.getGUI()).getViewport().getView();
+  }
+
+  /* (non-Javadoc)
+   * @see gate.gui.annedit.AnnotationEditorOwner#selectAnnotation(gate.gui.annedit.AnnotationData)
+   */
+  public void selectAnnotation(AnnotationData data) {
+  }
+
   /* (non-Javadoc)
    * @see gate.gui.docview.AnnotationList#getRowForAnnotation(gate.gui.annedit.AnnotationData)
    */
@@ -600,27 +678,42 @@ public class AnnotationListView extends AbstractDocumentView
     }
     
     public void actionPerformed(ActionEvent evt){
-      JScrollPane scroller = new JScrollPane((Component)editor); 
-      editor.setTarget(set);
-      editor.setAnnotation(ann);
-      JOptionPane optionPane = new JOptionPane(scroller,
-              JOptionPane.QUESTION_MESSAGE, 
-              JOptionPane.OK_CANCEL_OPTION, 
-              null, new String[]{"OK", "Cancel"});
-      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-      scroller.setMaximumSize(new Dimension((int)(screenSize.width * .75), 
-              (int)(screenSize.height * .75)));
-      JDialog dialog = optionPane.createDialog(AnnotationListView.this.getGUI(),
-              title);
-      dialog.setModal(true);
-      dialog.setResizable(true);
-      dialog.setVisible(true);
-      try{
-        if(optionPane.getValue().equals("OK")) editor.okAction();
-        else editor.cancelAction();
-      }catch(GateException ge){
-        throw new GateRuntimeException(ge);
+//      editor.setTarget(set);
+//      editor.setAnnotation(ann);
+      if(editor instanceof OwnedAnnotationEditor){
+        //we need to unpin the editor so that it actually calculates the 
+        //position
+        ((OwnedAnnotationEditor)editor).setPinnedMode(false);
+        ((OwnedAnnotationEditor)editor).placeDialog(
+                ann.getStartNode().getOffset().intValue(),
+                ann.getEndNode().getOffset().intValue());
+        //now we need to [pin it so that it does not disappear automatically
+        ((OwnedAnnotationEditor)editor).setPinnedMode(true);        
+        editor.editAnnotation(ann, set);
+      }else{
+        editor.editAnnotation(ann, set);
+        JScrollPane scroller = new JScrollPane((Component)editor); 
+        JOptionPane optionPane = new JOptionPane(scroller,
+                JOptionPane.QUESTION_MESSAGE, 
+                JOptionPane.OK_CANCEL_OPTION, 
+                null, new String[]{"OK", "Cancel"});
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        scroller.setMaximumSize(new Dimension((int)(screenSize.width * .75), 
+                (int)(screenSize.height * .75)));
+        JDialog dialog = optionPane.createDialog(AnnotationListView.this.getGUI(),
+                title);
+        dialog.setModal(true);
+        dialog.setResizable(true);
+        dialog.setVisible(true);
+        try{
+          if(optionPane.getValue().equals("OK")) editor.okAction();
+          else editor.cancelAction();
+        }catch(GateException ge){
+          throw new GateRuntimeException(ge);
+        }
+        
       }
+
     }
     
     String title;
@@ -654,7 +747,7 @@ public class AnnotationListView extends AbstractDocumentView
    * A map that stores instantiated annotations editors in order to avoid the 
    * delay of building them at each request;
    */
-  protected Map editorsCache;
+  protected Map<String, AnnotationVisualResource> editorsCache;
 
   private static final int TYPE_COL = 0;
   private static final int SET_COL = 1;

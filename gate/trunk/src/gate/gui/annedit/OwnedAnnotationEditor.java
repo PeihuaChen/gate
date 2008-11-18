@@ -13,34 +13,12 @@
 package gate.gui.annedit;
 
 import gate.*;
+import gate.creole.AnnotationVisualResource;
 
 /**
  * Interface for all annotation editor components
  */
-public interface AnnotationEditor extends VisualResource{
-  /**
-   * Changes the annotation currently being edited.
-   * @param ann the new annotation.
-   * @param set the set to which the new annotation belongs. 
-   */
-  public void editAnnotation(Annotation ann, AnnotationSet set);
-  
-  /**
-   * Checks whether the annotation currently being edited can be considered
-   * complete.
-   * @return <tt>true</tt> iff the editor has finished editing the current 
-   * annotation. This might return <tt>false</tt> for instance when the current 
-   * annotation does not yet comply with the schema and the editor 
-   * implementation is designed to enforce schemas. 
-   */
-  public boolean editingFinished();
-  
-  /**
-   * Checks whether the annotation editor is active (shown on screen and ready 
-   * to edit annotations. 
-   * @return <tt>true</tt> iff the editor is active.
-   */
-  public boolean isActive();
+public interface OwnedAnnotationEditor extends AnnotationVisualResource{
   
   /**
    * Finds the best location for the editor dialog for a given span of text
@@ -57,16 +35,6 @@ public interface AnnotationEditor extends VisualResource{
    * @return owner The owner (i.e. controller) for this editor.
    */
   public AnnotationEditorOwner getOwner();
-
-  /**
-   * @return the annotation currently edited
-   */
-  public Annotation getAnnotationCurrentlyEdited();
-
-  /**
-   * @return the annotation set currently edited
-   */
-  public AnnotationSet getAnnotationSetCurrentlyEdited();
 
   /**
    * @param pinned true if the window should not move

@@ -47,6 +47,11 @@ import gate.util.*;
  * system at a given moment. If there are no such objects the editing of
  * annotations will be restricted to a very crude method allowing the user to
  * add any type of annotations having any features with any String values.
+ * 
+ * This class has been deprecated! The document editing functionality is now
+ * provided by the {@link gate.gui.docview.DocumentEditor} class.
+ * 
+ * @deprecated
  */
 public class DocumentEditor extends AbstractVisualResource
                             implements ANNIEConstants{
@@ -3781,9 +3786,9 @@ Out.prln("NULL size");
                             get(editorType)).getName());
           }
 
-
-          editor.setTarget(set);
-          editor.setAnnotation(annotation);
+//          editor.setTarget(set);
+//          editor.setAnnotation(annotation);
+          editor.editAnnotation(annotation, set);
         }catch(ResourceInstantiationException rie){
           rie.printStackTrace(Err.getPrintWriter());
         }
@@ -3799,8 +3804,9 @@ Out.prln("NULL size");
           editor  = (AnnotationVisualResource)
                                           Factory.createResource(editorType);
           if(editor.canDisplayAnnotationType(annotation.getType())){
-            editor.setTarget(set);
-            editor.setAnnotation(annotation);
+//            editor.setTarget(set);
+//            editor.setAnnotation(annotation);
+            editor.editAnnotation(annotation, set);
             if(editor instanceof ResizableVisualResource){
               tabbedPane.add((Component)editor,
                              ((ResourceData)Gate.getCreoleRegister().
@@ -3911,86 +3917,101 @@ Out.prln("NULL size");
         if(setName == null) return;
         this.set = document.getAnnotations(setName);
       }
-      //get the lists of editors
-      java.util.List specificEditors;
-      if(type != null) specificEditors = Gate.getCreoleRegister().
-                                         getAnnotationVRs(type);
-      else specificEditors = new ArrayList();
-
-      java.util.List genericEditors = Gate.getCreoleRegister().
-                                      getAnnotationVRs();
-      //create the GUI
-      JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.BOTTOM);
-      //add all the specific editors
-      Iterator editorIter = specificEditors.iterator();
-      while(editorIter.hasNext()){
-        String editorType = (String)editorIter.next();
-        //create the editor
-        AnnotationVisualResource editor;
-        try{
-          editor = (AnnotationVisualResource)
-                                          Factory.createResource(editorType);
-          tabbedPane.add(new JScrollPane((Component)editor),
-                        ((ResourceData)Gate.getCreoleRegister().get(editorType)).
-                                                                getName());
-          editor.setTarget(set);
-          editor.setSpan(startOffset, endOffset, type);
-
-        }catch(ResourceInstantiationException rie){
-          rie.printStackTrace(Err.getPrintWriter());
-        }
+      try{
+        //create the new annotation
+        Integer annId = set.add(startOffset, endOffset,
+                (type == null ? "_New_" : type),
+                Factory.newFeatureMap());
+        Annotation ann = set.get(annId);
+        new EditAnnotationAction(set, ann).actionPerformed(e);
+      }catch (GateException ge) {
+        JOptionPane.showMessageDialog(
+                DocumentEditor.this,
+                "There was an error:\n" +
+                ge.toString(),
+                "GATE", JOptionPane.ERROR_MESSAGE);
       }
-
-      //add all the generic editors
-      editorIter = genericEditors.iterator();
-      while(editorIter.hasNext()){
-        String editorType = (String)editorIter.next();
-        //create the editor
-        AnnotationVisualResource editor;
-        try{
-          editor  = (AnnotationVisualResource)
-                                          Factory.createResource(editorType);
-
-          if(type == null ||
-             (type != null && editor.canDisplayAnnotationType(type))){
-            editor.setTarget(set);
-            editor.setSpan(startOffset, endOffset, type);
-            tabbedPane.add(new JScrollPane((Component)editor),
-                           ((ResourceData)Gate.getCreoleRegister().
-                                              get(editorType)).getName());
-          }
-        }catch(ResourceInstantiationException rie){
-          rie.printStackTrace(Err.getPrintWriter());
-        }
-
-      }
-
-      //show the modal dialog until the data is OK or the user cancels
-      boolean allOK = false;
-      while(!allOK){
-        if(OkCancelDialog.showDialog(DocumentEditor.this,
-                                     tabbedPane, "Edit Annotation")){
-          try{
-            ((AnnotationVisualResource)((JScrollPane)tabbedPane.
-                                        getSelectedComponent()).getViewport().
-                                                                getView()
-             ).okAction();
-             allOK = true;
-          }catch(GateException ge){
-            JOptionPane.showMessageDialog(
-              DocumentEditor.this,
-              "There was an error:\n" +
-              ge.toString(),
-              "GATE", JOptionPane.ERROR_MESSAGE);
-//            ge.printStackTrace(Err.getPrintWriter());
-            allOK = false;
-          }
-        }else{
-          allOK = true;
-        }
-      }//while(!allOK)
-
-
+//      
+//      //get the lists of editors
+//      java.util.List specificEditors;
+//      if(type != null) specificEditors = Gate.getCreoleRegister().
+//                                         getAnnotationVRs(type);
+//      else specificEditors = new ArrayList();
+//
+//      java.util.List genericEditors = Gate.getCreoleRegister().
+//                                      getAnnotationVRs();
+//      //create the GUI
+//      JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.BOTTOM);
+//      //add all the specific editors
+//      Iterator editorIter = specificEditors.iterator();
+//      while(editorIter.hasNext()){
+//        String editorType = (String)editorIter.next();
+//        //create the editor
+//        AnnotationVisualResource editor;
+//        try{
+//          editor = (AnnotationVisualResource)
+//                                          Factory.createResource(editorType);
+//          tabbedPane.add(new JScrollPane((Component)editor),
+//                        ((ResourceData)Gate.getCreoleRegister().get(editorType)).
+//                                                                getName());
+//          editor.setTarget(set);
+//          editor.setSpan(startOffset, endOffset, type);
+//
+//        }catch(ResourceInstantiationException rie){
+//          rie.printStackTrace(Err.getPrintWriter());
+//        }
+//      }
+//
+//      //add all the generic editors
+//      editorIter = genericEditors.iterator();
+//      while(editorIter.hasNext()){
+//        String editorType = (String)editorIter.next();
+//        //create the editor
+//        AnnotationVisualResource editor;
+//        try{
+//          editor  = (AnnotationVisualResource)
+//                                          Factory.createResource(editorType);
+//
+//          if(type == null ||
+//             (type != null && editor.canDisplayAnnotationType(type))){
+//            editor.setTarget(set);
+//            editor.setSpan(startOffset, endOffset, type);
+//            tabbedPane.add(new JScrollPane((Component)editor),
+//                           ((ResourceData)Gate.getCreoleRegister().
+//                                              get(editorType)).getName());
+//          }
+//        }catch(ResourceInstantiationException rie){
+//          rie.printStackTrace(Err.getPrintWriter());
+//        }
+//
+//      }
+//
+//      //show the modal dialog until the data is OK or the user cancels
+//      boolean allOK = false;
+//      while(!allOK){
+//        if(OkCancelDialog.showDialog(DocumentEditor.this,
+//                                     tabbedPane, "Edit Annotation")){
+//          try{
+//            ((AnnotationVisualResource)((JScrollPane)tabbedPane.
+//                                        getSelectedComponent()).getViewport().
+//                                                                getView()
+//             ).okAction();
+//             allOK = true;
+//          }catch(GateException ge){
+//            JOptionPane.showMessageDialog(
+//              DocumentEditor.this,
+//              "There was an error:\n" +
+//              ge.toString(),
+//              "GATE", JOptionPane.ERROR_MESSAGE);
+////            ge.printStackTrace(Err.getPrintWriter());
+//            allOK = false;
+//          }
+//        }else{
+//          allOK = true;
+//        }
+//      }//while(!allOK)
+//
+//
     }//public void actionPerformed(ActionEvent e)
 
     AnnotationSet set;

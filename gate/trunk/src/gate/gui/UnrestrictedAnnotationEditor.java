@@ -20,12 +20,18 @@ import javax.swing.*;
 import gate.*;
 import gate.creole.AbstractVisualResource;
 import gate.creole.AnnotationVisualResource;
+import gate.gui.docview.AnnotationEditor;
 import gate.util.*;
 
 /** This class visually adds/edits features and annot type of an annotation
   * It does this without using an {@link gate.creole.AnnotationSchema}.
   * The user can manipulate annotation and features at his own will.
   * It's his responsability.
+  * 
+  * This class has been deprecated! The functionality is now provided by the 
+  * {@link AnnotationEditor} class.
+  * 
+  * @deprecated
   */
 public class UnrestrictedAnnotationEditor extends AbstractVisualResource
                                           implements AnnotationVisualResource,
@@ -37,23 +43,15 @@ public class UnrestrictedAnnotationEditor extends AbstractVisualResource
   // Methods required by AnnotationVisualResource
 
   /**
-    * Called by the GUI when this viewer/editor has to initialise itself for a
-    * specific annotation or text span.
-    * @param target the object which will always be a {@link gate.AnnotationSet}
-    */
-  public void setTarget(Object target){
-    currentAnnotSet = (AnnotationSet) target;
-  }// setTarget();
-
-  /**
     * Used when the viewer/editor has to display/edit an existing annotation
     * @param ann the annotation to be displayed or edited. If ann is null then
     * the method simply returns
     */
-  public void setAnnotation(Annotation ann){
+  public void editAnnotation(Annotation ann, AnnotationSet set){
     // If ann is null, then simply return.
     if (ann == null) return;
     currentAnnot = ann;
+    currentAnnotSet = set;
     currentStartOffset = currentAnnot.getStartNode().getOffset();
     currentEndOffset = currentAnnot.getEndNode().getOffset();
 
@@ -62,24 +60,6 @@ public class UnrestrictedAnnotationEditor extends AbstractVisualResource
 
   }// setAnnotation();
 
-  /**
-    * Used when the viewer has to create new annotations.
-    * @param startOffset the start offset of the span covered by the new
-    * annotation(s). If is <b>null</b> the method will simply return.
-    * @param endOffset the end offset of the span covered by the new
-    * annotation(s). If is <b>null</b> the method will simply return.
-    */
-  public void setSpan(Long startOffset, Long endOffset, String annotationType){
-    // If one of them is null, then simply return.
-    if (startOffset == null || endOffset == null) return;
-
-    currentStartOffset = startOffset;
-    currentEndOffset = endOffset;
-    currentAnnot = null;
-
-    initLocalData();
-    initGuiComponents();
-  }// setSpan();
 
   /**
    * Called by the GUI when the user has pressed the "OK" button. This should
@@ -141,9 +121,44 @@ public class UnrestrictedAnnotationEditor extends AbstractVisualResource
     return true;
   }// canDisplayAnnotationType();
 
+
+  /**
+   * Returns true
+   */
+  public boolean editingFinished() {
+    return true;
+  }
+
+  /* (non-Javadoc)
+   * @see gate.creole.AnnotationVisualResource#getAnnotationCurrentlyEdited()
+   */
+  public Annotation getAnnotationCurrentlyEdited() {
+    return currentAnnot;
+  }
+
+  /* (non-Javadoc)
+   * @see gate.creole.AnnotationVisualResource#getAnnotationSetCurrentlyEdited()
+   */
+  public AnnotationSet getAnnotationSetCurrentlyEdited() {
+    return currentAnnotSet;
+  }
+
+  /* (non-Javadoc)
+   * @see gate.creole.AnnotationVisualResource#isActive()
+   */
+  public boolean isActive() {
+    return isVisible();
+  }
+
+  /**
+   * Returns <tt>true</tt>.
+   */
+  public boolean supportsCancel() {
+    return true;
+  }  
+  
   // The Unrestricted Editor functionality
   // Local data
-
   /** The curent annotation set used by the editor*/
   AnnotationSet currentAnnotSet = null;
   /** The curent annotation used by the editor*/

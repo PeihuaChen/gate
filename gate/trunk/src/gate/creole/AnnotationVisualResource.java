@@ -14,8 +14,7 @@
  */
 package gate.creole;
 
-import gate.Annotation;
-import gate.VisualResource;
+import gate.*;
 import gate.util.GateException;
 
 /**
@@ -24,28 +23,6 @@ import gate.util.GateException;
  * annotations or to create new annotations.
  */
 public interface AnnotationVisualResource extends VisualResource {
-  /**
-   * Called by the GUI when this viewer/editor has to initialise itself for a
-   * specific annotation or text span.
-   * @param target the object which will always be a {@link gate.AnnotationSet}
-   */
-  public void setTarget(Object target);
-
-
-  /**
-   * Used when the viewer/editor has to display/edit an existing annotation
-   * @param ann the annotation to be displayed or edited
-   */
-  public void setAnnotation(Annotation ann);
-
-  /**
-   * Used when the viewer has to create new annotations.
-   * @param startOffset the start offset of the span covered by the new
-   * annotation(s)
-   * @param endOffset the end offset of the span covered by the new
-   * annotation(s)
-   */
-  public void setSpan(Long startOffset, Long endOffset, String annotationType);
 
   /**
    * Called by the GUI when the user has pressed the "OK" button. This should
@@ -60,10 +37,53 @@ public interface AnnotationVisualResource extends VisualResource {
    */
   public void cancelAction() throws GateException;
 
+  /**
+   * Checks whether this editor supports the cancel option
+   * @return <tt>true</tt> iff this editor can rollback changes.
+   */
+  public boolean supportsCancel();
 
   /**
    * Checks whether this viewer/editor can handle a specific annotation type.
+   * If the annotation type provided is <tt>null</tt>, then the check is whether
+   * the viewer/editor can handle any arbitrary annotation. 
    */
   public boolean canDisplayAnnotationType(String annotationType);
+  
+  /**
+   * Changes the annotation currently being edited.
+   * @param ann the new annotation.
+   * @param set the set to which the new annotation belongs. 
+   */
+  public void editAnnotation(Annotation ann, AnnotationSet set);
+  
+  /**
+   * Checks whether the annotation currently being edited can be considered
+   * complete.
+   * @return <tt>true</tt> iff the editor has finished editing the current 
+   * annotation. This might return <tt>false</tt> for instance when the current 
+   * annotation does not yet comply with the schema and the editor 
+   * implementation is designed to enforce schemas. 
+   */
+  public boolean editingFinished();
+  
+  /**
+   * Checks whether the annotation editor is active (shown on screen and ready 
+   * to edit annotations. 
+   * @return <tt>true</tt> iff the editor is active.
+   */
+  public boolean isActive();
+
+  /**
+   * @return the annotation currently edited
+   */
+  public Annotation getAnnotationCurrentlyEdited();
+
+  /**
+   * @return the annotation set currently edited
+   */
+  public AnnotationSet getAnnotationSetCurrentlyEdited();
+
+
 
 }//public interface AnnotationVisualResource extends VisualResource

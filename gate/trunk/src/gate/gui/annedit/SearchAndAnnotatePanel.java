@@ -47,7 +47,7 @@ public class SearchAndAnnotatePanel extends JPanel {
   /**
    * The annotation editor that use this search and annotate panel.
    */
-  private AnnotationEditor annotationEditor;
+  private OwnedAnnotationEditor annotationEditor;
 
   /**
    * Window that contains the annotation editor.
@@ -143,7 +143,7 @@ public class SearchAndAnnotatePanel extends JPanel {
 
 
   public SearchAndAnnotatePanel(Color color,
-          AnnotationEditor annotationEditor, Window window) {
+          OwnedAnnotationEditor annotationEditor, Window window) {
 
     this.annotationEditor = annotationEditor;
     annotationEditorWindow = window;

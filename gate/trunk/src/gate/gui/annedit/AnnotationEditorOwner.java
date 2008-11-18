@@ -20,7 +20,7 @@ import gate.gui.docview.DocumentEditor;
 
 /**
  * Objects of this type control the interaction with an 
- * {@link AnnotationEditor}.
+ * {@link OwnedAnnotationEditor}.
  */
 public interface AnnotationEditorOwner {
 

@@ -264,26 +264,16 @@ public class SyntaxTreeViewer extends AbstractVisualResource
   // Methods required by AnnotationVisualResource
 
   /**
-    * Called by the GUI when this viewer/editor has to initialise itself for a
-    * specific annotation or text span.
-    * @param target the object which will always be a {@link gate.AnnotationSet}
-    */
-
-  public void setTarget(Object target) {
-    if (target == null) return;
-    currentSet = (AnnotationSet) target;
-    document = currentSet.getDocument();
-  }
-
-  /**
     * Used when the viewer/editor has to display/edit an existing annotation
     * @param ann the annotation to be displayed or edited. If ann is null then
     * the method simply returns
     */
-  public void setAnnotation(Annotation ann){
-    if (ann == null) return;
+  public void editAnnotation(Annotation ann, AnnotationSet set){
+    if (ann == null || set == null) return;
 
     utterance = ann;
+    currentSet = set;
+    document = set.getDocument();
     utteranceStartOffset = utterance.getStartNode().getOffset();
     utteranceEndOffset = utterance.getEndNode().getOffset();
     textAnnotationType = ann.getType();
@@ -293,32 +283,6 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     annotations2Trees();
     this.setVisible(true);
     repaint();
-  }
-
-  /**
-    * Used when the viewer has to create new annotations.
-    * @param startOffset the start offset of the span covered by the new
-    * annotation(s). If is <b>null</b> the method will simply return.
-    * @param endOffset the end offset of the span covered by the new
-    * annotation(s). If is <b>null</b> the method will simply return.
-    */
-  public void setSpan(Long startOffset, Long endOffset, String annotType){
-    // If one of them is null, then simply return.
-    if (startOffset == null || endOffset == null) return;
-    if (document == null) return;
-
-    try {
-      Integer newId = currentSet.add( startOffset, endOffset, annotType,
-                                Factory.newFeatureMap());
-      utterance = currentSet.get(newId);
-      utteranceAdded = true;
-      textAnnotationType = annotType;
-      setAnnotation(utterance);
-
-    } catch (InvalidOffsetException ioe) {
-      ioe.printStackTrace(Err.getPrintWriter());
-    }
-
   }
 
   /**
@@ -346,8 +310,43 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     //to cache the added and deleted tree annotations
     STreeNode.undo(document);
 
-  } //okAction()
+  } //cancelAction()
 
+  /**
+   * Returns <tt>true</tt>.
+   */
+  public boolean supportsCancel() {
+    return true;
+  }
+
+  
+  /**
+   * Returns <tt>true</tt>. 
+   */
+  public boolean editingFinished() {
+    return true;
+  }
+
+  /* (non-Javadoc)
+   * @see gate.creole.AnnotationVisualResource#getAnnotationCurrentlyEdited()
+   */
+  public Annotation getAnnotationCurrentlyEdited() {
+    return utterance;
+  }
+
+  /* (non-Javadoc)
+   * @see gate.creole.AnnotationVisualResource#getAnnotationSetCurrentlyEdited()
+   */
+  public AnnotationSet getAnnotationSetCurrentlyEdited() {
+    return currentSet;
+  }
+
+  /* (non-Javadoc)
+   * @see gate.creole.AnnotationVisualResource#isActive()
+   */
+  public boolean isActive() {
+    return isVisible();
+  }
 
   /**
     * Checks whether this viewer/editor can handle a specific annotation type.
@@ -362,14 +361,14 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     if (annotationType == null) return false;
     boolean found = false;
 
-    java.util.List specificEditors = Gate.getCreoleRegister().
+    java.util.List<String> specificEditors = Gate.getCreoleRegister().
                                      getAnnotationVRs(annotationType);
-    Iterator editorIter = specificEditors.iterator();
+    Iterator<String> editorIter = specificEditors.iterator();
     while(editorIter.hasNext() && !found){
       String editorClass = (String)editorIter.next();
 
-      Out.println(editorClass);
-      if (editorClass.indexOf(this.getClass().getName()) > -1) {
+//      Out.println(editorClass);
+      if (editorClass.equals(this.getClass().getCanonicalName())) {
         textAnnotationType = annotationType;
         found = true;
       }
@@ -799,6 +798,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
 
     JButton button = new JButton((String) node.getUserObject());
     button.setBorderPainted(false);
+    button.setMargin(new Insets(0,0,0,0));
 
     FontMetrics fm = button.getFontMetrics(button.getFont());
 
