@@ -800,25 +800,35 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     button.setBorderPainted(false);
     button.setMargin(new Insets(0,0,0,0));
 
-    FontMetrics fm = button.getFontMetrics(button.getFont());
+//    FontMetrics fm = button.getFontMetrics(button.getFont());
 
-    int buttonWidth,
-        buttonHeight;
+    
+//    int buttonWidth,
+//        buttonHeight;
 
     // Out.print
     //  ("Button width " + b1.getWidth() + "Button height " + b1.getHeight());
 
-    buttonWidth = fm.stringWidth(button.getText())
-                  + button.getMargin().left + button.getMargin().right
-                  + extraButtonWidth;
-    buttonHeight = fm.getHeight() + button.getMargin().top +
-                      button.getMargin().bottom;
-    buttonY = buttonY - buttonHeight;
+//    buttonWidth = fm.stringWidth(button.getText())
+//                  + button.getMargin().left + button.getMargin().right
+//                  + extraButtonWidth;
+//    buttonHeight = fm.getHeight() + button.getMargin().top +
+//                      button.getMargin().bottom;
+    
+//    buttonWidth = buttonSize.width;
+//    buttonHeight = buttonSize.height;
+    
+//    buttonY = buttonY - buttonHeight;
 
 //     Out.print("New Button X " + buttonX +
 //        "New Button Y" + buttonY);
 
-    button.setBounds(buttonX, buttonY, buttonWidth, buttonHeight);
+//    button.setBounds(buttonX, buttonY, buttonWidth, buttonHeight);
+    
+    Dimension buttonSize = button.getPreferredSize();
+    button.setSize(buttonSize);
+    buttonY = buttonY - buttonSize.height;
+    button.setLocation(buttonX, buttonY);
     button.addActionListener(this);
     button.addMouseListener(this);
     button.setActionCommand("" + node.getID());
@@ -828,7 +838,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     this.add(button);
     buttons.put(new Integer(node.getID()), button);
 
-    buttonX += buttonWidth + horizButtonGap;
+    buttonX +=  buttonSize.width + horizButtonGap;
     return buttonX;
 
   }// private int createButton4Node(STreeNode node, int buttonX, int buttonY)
@@ -838,7 +848,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     FocusButton button = new FocusButton((String) newNode.getUserObject());
     button.setBorderPainted(false);
 
-    FontMetrics fm = button.getFontMetrics(button.getFont());
+//    FontMetrics fm = button.getFontMetrics(button.getFont());
 
     int buttonWidth,
         buttonHeight,
@@ -848,12 +858,17 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     // Out.print("Button width " + b1.getWidth() + ";
     //    Button height " + b1.getHeight());
 
-    buttonWidth = fm.stringWidth(button.getText())
-                  + button.getMargin().left + button.getMargin().right
-                  + extraButtonWidth;
-    buttonHeight = fm.getHeight() + button.getMargin().top +
-                      button.getMargin().bottom;
+    Dimension buttonSize = button.getPreferredSize();
+    
+//    buttonWidth = fm.stringWidth(button.getText())
+//                  + button.getMargin().left + button.getMargin().right
+//                  + extraButtonWidth;
+//    buttonHeight = fm.getHeight() + button.getMargin().top +
+//                      button.getMargin().bottom;
 
+    buttonWidth = buttonSize.width;
+    buttonHeight = buttonSize.height;
+    
     int left = this.getWidth(), right =0 , top = this.getHeight();
 
     // determine the left, right, top
