@@ -5,7 +5,7 @@
   <!-- creole.xml for Visual Resources -->
   <CREOLE>
     <RESOURCE>
-      <NAME>Annotations Editor</NAME>
+      <NAME>Schema Annotations Editor</NAME>
       <CLASS>gate.gui.annedit.SchemaAnnotationEditor</CLASS>
       <COMMENT>An annotation editor restricted by schemas.</COMMENT>
       <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:schemas</HELPURL>
