@@ -895,9 +895,10 @@ public class MainFrame extends JFrame implements ProgressListener,
               }
               
               // add a show/hide action
-              if (handle.getLargeView() != null
-              && (mainTabbedPane.indexOfComponent(
-                      handle.getLargeView()) != -1)) {
+              if (handle.viewsBuilt() &&
+                  handle.getLargeView() != null
+                  && (mainTabbedPane.indexOfComponent(
+                          handle.getLargeView()) != -1)) {
                popup.insert(new XJMenuItem(new CloseViewAction(handle),
                  MainFrame.this), 1);
               } else {
@@ -952,8 +953,9 @@ public class MainFrame extends JFrame implements ProgressListener,
           Object value = e.getPath().getLastPathComponent();
           Object object = ((DefaultMutableTreeNode)value).getUserObject();
           if (object instanceof Handle
-          && (mainTabbedPane.indexOfComponent(
-             ((Handle)object).getLargeView()) != -1)) {
+              && ((Handle)object).viewsBuilt()
+              && (mainTabbedPane.indexOfComponent(
+                      ((Handle)object).getLargeView()) != -1)) {
             select((Handle)object);
           }
         }
