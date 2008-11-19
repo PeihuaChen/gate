@@ -97,7 +97,8 @@ public class DocumentContentImpl implements DocumentContent
   void edit(Long start, Long end, DocumentContent replacement)
   {
     int s = start.intValue(), e = end.intValue();
-    String repl = ((DocumentContentImpl) replacement).content;
+    String repl = replacement == null ? "" : 
+      ((DocumentContentImpl) replacement).content;
     StringBuffer newContent = new StringBuffer(content);
     newContent.replace(s, e, repl);
     content = newContent.toString();
