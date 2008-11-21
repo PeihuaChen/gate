@@ -29,7 +29,7 @@ implements ProcessingResource {
 
   private static final long serialVersionUID = -3062171258011850283L;
 
-  private edu.stanford.nlp.parser.lexparser.LexicalizedParser stanfordParser;
+  protected edu.stanford.nlp.parser.lexparser.LexicalizedParser stanfordParser;
 
   /* Type "SyntaxTreeNode" with feature "cat" is compatible with the 
    * classic SyntaxTreeViewer.  */
