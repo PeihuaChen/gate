@@ -229,7 +229,12 @@ public class FlexibleGazetteer extends AbstractLanguageAnalyser implements
     gazetteerInst.setAnnotationSetName(this.outputAnnotationSetName);
 
     fireStatusChanged("Executing Gazetteer...");
-    gazetteerInst.execute();
+    try {
+      gazetteerInst.execute();
+    }
+    finally {
+      gazetteerInst.setDocument(null);
+    }
 
     // now the tempDoc has been looked up, we need to shift the tokens
     // from
