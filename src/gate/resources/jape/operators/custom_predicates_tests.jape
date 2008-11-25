@@ -28,7 +28,7 @@ Options: control = appelt
 /////////////////////////////////////////////////////////////////
 
   Rule:	IsContained
-  ({A within B}):abc
+  ({E within F}):abc
   -->
 	:abc.Result = {rule="IsContained"}
 
