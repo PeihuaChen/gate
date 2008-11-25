@@ -172,19 +172,37 @@ public class TestConstraints extends BaseJapeTests {
 
   public void testCustomPredicates() throws Exception {
     String japeFile = "/jape/operators/custom_predicates_tests.jape";
-    String[] expectedResults = {"Contains", "IsContained"};
+    String[] expectedResults = {"Contains", "IsContained", "Contains", "IsContained"};
 
     AnnotationCreator ac = new BaseAnnotationCreator() {
       public AnnotationSet createAnnots(Document doc) {
         setDoc(doc);
         add(4, 7, "A");
 
+        // this feature map isn't necessary.  Just including it
+        // to make sure it doesn't interfere with anything.
         FeatureMap feat = Factory.newFeatureMap();
         feat.put("f2", "bar");
         add(5, 6, "B", feat);
 
-        add(12, 28, "B");
-        add(14, 20, "A");
+        add(12, 28, "F");
+        add(14, 20, "E");
+
+        //test exact length matches
+        add(30, 35, "A");
+        add(30, 35, "B");
+
+        add(40, 45, "F");
+        add(40, 45, "E");
+
+        //these shouldn't match
+        add(36, 37, "A");
+        add(36, 38, "B");
+        add(37, 38, "B");
+
+        add(40, 45, "F");
+        add(40, 46, "E");
+        add(41, 46, "E");
 
         return as;
       }
