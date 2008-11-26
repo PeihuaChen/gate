@@ -277,6 +277,12 @@ public class DocFeatureVectors {
   public SparseFeatureVector[] getFvs() {
     return fvs;
   }
+  
+  /** Delete the fv array. */
+  public void deleteFvs() {
+    for(int i=0; i<fvs.length; ++i)
+      fvs[i] = null;
+  }
 
   /** Set the DocID. */
   public void setDocID(String docI) {

@@ -39,6 +39,8 @@ import java.util.concurrent.Future;
 public class MultiClassLearning {
   /** The training data -- FVs in doc format. */
   public DataForLearning dataFVinDoc;
+  /** Use the data file to save the memory or not. */
+  boolean isUsingDataFile = false;
   /** Labels for training instances */
   ThreadLocal<short[]> labelsTraining;
   /** Feature vectors for training instances. */
@@ -69,10 +71,12 @@ public class MultiClassLearning {
 
   /** Constructor */
   public MultiClassLearning() {
+    isUsingDataFile = false;
   }
 
   /** Constructor with conversion mode. */
   public MultiClassLearning(short mode) {
+    isUsingDataFile = false;
     multi2BinaryMode = mode;
   }
 
@@ -682,6 +686,8 @@ public class MultiClassLearning {
         + array1.size());
     LogService.logMessage("total Number of classes for learning is "
       + array1.size(), 1);
+    if(learner.getLearnerName().equals("SVMExec"))
+      isUsingDataFile = true;
     //Open the mode file for writing the model into it
     try {
       if(modelFile.exists() && !modelFile.isDirectory()) {
@@ -699,6 +705,31 @@ public class MultiClassLearning {
       }
       if(!tmpDirFile.mkdir()) { throw new IOException(
         "Couldn't create temporary directory for training"); }
+      
+      File tempFVDataFile = new File(modelFile, "fvTemp.dat");
+      //BufferedReader fvTempRd =null;
+      if(this.isUsingDataFile) {
+        //put the feature vector into a temp file if using the data file
+        BufferedWriter fvTempWr = new BufferedWriter(new OutputStreamWriter(
+          new FileOutputStream(tempFVDataFile), "UTF-8"));
+        int numTraining = dataFVinDoc.trainingFVinDoc.length;
+        for(int i=0; i<numTraining; ++i) {
+          SparseFeatureVector[] fvsInDoc = dataFVinDoc.trainingFVinDoc[i].getFvs();
+          // For each instance
+          for(int j = 0; j < fvsInDoc.length; ++j) {
+            int lenM1 = fvsInDoc[j].getLen()-1;
+            if(lenM1>0) {
+              for(int j1=0; j1<lenM1; ++j1)
+                fvTempWr.append(fvsInDoc[j].nodes[j1].index+":"+fvsInDoc[j].nodes[j1].value+" ");
+              fvTempWr.append(fvsInDoc[j].nodes[lenM1].index+":"+fvsInDoc[j].nodes[lenM1].value+"\n");
+            }
+            //fvsInDoc[j] = null; //trying to remove the data from the memory
+          }
+          dataFVinDoc.trainingFVinDoc[i].deleteFvs(); //trying to remove the fv data from memory
+        }
+        fvTempWr.close();
+      }
+      
       File metaDataFile = new File(tmpDirFile,
         ConstantParameters.FILENAMEOFModelMetaData);
       BufferedWriter metaDataBuff = new BufferedWriter(new OutputStreamWriter(
@@ -736,8 +767,15 @@ public class MultiClassLearning {
             modelBuff.append("Class=" + array1.get(i).toString()
               + " numTraining=" + numTraining + " numPos=" + numP + "\n");
             long time1 = new Date().getTime();
-            learner.training(modelBuff, fvsTrainingNT, totalNumFeatures,
-              labelsTrainingNT, numTraining);
+            if(this.isUsingDataFile) {//using the data file
+              BufferedReader fvTempRd = new BufferedReader(new InputStreamReader(
+                new FileInputStream(tempFVDataFile), "UTF-8"));
+              learner.trainingWithDataFile(modelBuff, fvTempRd, totalNumFeatures,
+                labelsTrainingNT, numTraining);
+              fvTempRd.close();
+            } else
+              learner.training(modelBuff, fvsTrainingNT, totalNumFeatures,
+                labelsTrainingNT, numTraining);
             modelBuff.close();
             long time2 = new Date().getTime();
             time2 -= time1;
@@ -779,8 +817,15 @@ public class MultiClassLearning {
                 + array1.get(j).toString() + " numTraining=" + numTraining
                 + " numPos=" + numP + "\n");
               long time1 = new Date().getTime();
-              learner.training(modelBuff, fvsTrainingNT, totalNumFeatures,
-                labelsTrainingNT, numTraining);
+              if(this.isUsingDataFile) {//using the data file
+                BufferedReader fvTempRd = new BufferedReader(new InputStreamReader(
+                  new FileInputStream(tempFVDataFile), "UTF-8"));
+                learner.trainingWithDataFile(modelBuff, fvTempRd, totalNumFeatures,
+                  labelsTrainingNT, numTraining);
+                fvTempRd.close();
+              } else
+                learner.training(modelBuff, fvsTrainingNT, totalNumFeatures,
+                  labelsTrainingNT, numTraining);
               modelBuff.close();
               long time2 = new Date().getTime();
               time2 -= time1;
@@ -811,8 +856,15 @@ public class MultiClassLearning {
                 + array1.get(j).toString() + " numTraining=" + numTraining
                 + " numPos=" + numP + "\n");
               long time1 = new Date().getTime();
-              learner.training(modelBuff, fvsTrainingNT, totalNumFeatures,
-                labelsTrainingNT, numTraining);
+              if(this.isUsingDataFile) { //using the data file
+                BufferedReader fvTempRd = new BufferedReader(new InputStreamReader(
+                  new FileInputStream(tempFVDataFile), "UTF-8"));
+                learner.trainingWithDataFile(modelBuff, fvTempRd, totalNumFeatures,
+                  labelsTrainingNT, numTraining);
+                fvTempRd.close();
+              } else
+                learner.training(modelBuff, fvsTrainingNT, totalNumFeatures,
+                  labelsTrainingNT, numTraining);
               modelBuff.close();
               long time2 = new Date().getTime();
               time2 -= time1;
@@ -832,6 +884,8 @@ public class MultiClassLearning {
       //    replace the old model with the new one
       moveAllFiles(tmpDirFile, modelFile);
       deleteRecursively(tmpDirFile);
+      //delete the temp data file
+      tempFVDataFile.delete();
     } catch(IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -864,7 +918,7 @@ public class MultiClassLearning {
         ConstantParameters.FILENAMEOFModelMetaData);
       BufferedReader metaDataBuff = new BufferedReader(new InputStreamReader(
         new FileInputStream(metaDataFile), "UTF-8"));
-//    Read the training meta information from the model file's header
+       //    Read the training meta information from the model file's header
       // include the total number of features and number of tags (numClasses)
       int totalNumFeatures;
       String learnerNameFromModel = learner.getLearnerName();

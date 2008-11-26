@@ -100,6 +100,48 @@ public class SvmForExec extends SupervisedLearner{
         
   }
   
+  /** Method for training, by reading from data file for feature vectors, and 
+   * with label as input. */
+  public void trainingWithDataFile(BufferedWriter modelFile,
+      BufferedReader dataFile, int totalNumFeatures,
+      short[] classLabels, int numTraining) {
+    try {
+      //Write the data into the data file for svm learning
+      BufferedWriter svmDataBuff = new BufferedWriter(new FileWriter(new File(svmDat)));
+      for(int iCounter=0; iCounter<numTraining; ++iCounter) {
+        final int i = iCounter;
+        if(classLabels[i]>0)
+          svmDataBuff.append("1 ");
+        else 
+          svmDataBuff.append("-1 ");
+        //int [] indexes = dataLearning[i].getIndexes();
+        //float [] values = dataLearning[i].getValues();
+        //for(int j=0; j<dataLearning[i].getLen(); ++j)
+          //svmDataBuff.append(" "+dataLearning[i].nodes[j].index+":"+dataLearning[i].nodes[j].value);
+        String line = dataFile.readLine();
+        svmDataBuff.append(line);
+        svmDataBuff.append("\n");
+      }
+      svmDataBuff.close();
+      
+      //Execute the command for the SVM  learning
+      //Get the command line for the svm_learn, by getting rid of the tau parameter
+      String commandLineSVM = obtainSVMCommandline(commandLine);
+      //Run the external svm learn exectuable
+      runExternalCommand(commandLineSVM);
+      //runExternalCommandWithRedirect(commandLineSVM);
+      
+      //Read the model from the svm results file and write it into our model file
+      writeSVMModelIntoFile(modelSVMFile, kernelType, modelFile, totalNumFeatures);
+      
+      
+    } catch(IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+
+  
   public void training(BufferedWriter modelFile, SparseFeatureVector [] dataLearning, 
           int totalNumFeatures, short [] classLabels, int numTraining) {
     try {
