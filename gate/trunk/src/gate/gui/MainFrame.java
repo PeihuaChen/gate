@@ -316,7 +316,13 @@ public class MainFrame extends JFrame implements ProgressListener,
     this(false, gc);
   } // MainFrame
 
-  /** Construct the frame */
+  /**
+   * Construct the frame.
+   * @param isShellSlacGIU true for embedded uses of GATE where a simpler GUI
+   *                       should be displayed.
+   * @param gc graphics configuration used,
+   *   see {@link javax.swing.JFrame#JFrame(java.awt.GraphicsConfiguration)}
+   */
   public MainFrame(boolean isShellSlacGIU, GraphicsConfiguration gc) {
     super(gc);
     instance = this;
@@ -1414,6 +1420,16 @@ public class MainFrame extends JFrame implements ProgressListener,
     // if (handle.getLargeView() != null)
     // handle.getLargeView().getActionMap().put("Hide current
     // view",cva);
+
+    // shows then selects the resource to give the user a feedback
+    // on its location in the resource tree
+    final DefaultMutableTreeNode nodeF = node;
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        resourcesTree.scrollPathToVisible(new TreePath(nodeF.getPath()));
+        resourcesTree.setSelectionPath(new TreePath(nodeF.getPath()));
+      }
+    });
   }// datastoreOpened();
 
   /** Called when a {@link gate.DataStore} has been created */

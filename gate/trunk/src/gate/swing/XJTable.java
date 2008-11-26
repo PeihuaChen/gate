@@ -628,7 +628,6 @@ public class XJTable extends JTable{
       this.column = column;
     }
     
-    JCheckBoxMenuItem autoSizeMenuItem;
     int column;
     int columnWidth;
     Comparator comparator;
