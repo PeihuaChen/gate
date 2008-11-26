@@ -132,5 +132,13 @@ public class Paum extends SupervisedLearner {
     SvmLibSVM.applyLinearModel(modelFile, dataFVinDoc, totalNumFeatures, numClasses, optB, this.isUseTauALLCases);
     return;
   }
+  
+  /** Method for training, by reading from data file for feature vectors, and 
+   * with label as input. */
+  public void trainingWithDataFile(BufferedWriter modelFile,
+    BufferedReader dataFile, int totalNumFeatures,
+    short[] classLabels, int numTraining) {
+    
+  }
    
 }

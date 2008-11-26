@@ -536,4 +536,12 @@ public class SvmLibSVM extends SupervisedLearner {
     }
     return commandSVM.toString().trim();
   }
+  
+  /** Method for training, by reading from data file for feature vectors, and 
+   * with label as input. */
+  public void trainingWithDataFile(BufferedWriter modelFile,
+    BufferedReader dataFile, int totalNumFeatures,
+    short[] classLabels, int numTraining) {
+    
+  }
 }
