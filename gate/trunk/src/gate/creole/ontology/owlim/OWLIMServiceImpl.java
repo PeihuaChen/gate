@@ -4696,7 +4696,9 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   private Property createPropertyObject(String repositoryID, String uri)
     throws GateOntologyException {
     byte type = OConstants.ANNOTATION_PROPERTY;
-    if(isObjectProperty(repositoryID, uri)) {
+    if(isAnnotationProperty(repositoryID, uri)) {
+      type = OConstants.ANNOTATION_PROPERTY;
+    } else if(isObjectProperty(repositoryID, uri)) {
       type = OConstants.OBJECT_PROPERTY;
     }
     else if(isDatatypeProperty(null, uri)) {
