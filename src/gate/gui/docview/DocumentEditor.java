@@ -269,18 +269,34 @@ public class DocumentEditor extends AbstractVisualResource
     }
     getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
       .put(KeyStroke.getKeyStroke("F"+(numberOfTheFKeyforLastView+1)),
-      "Shows view "+numberOfTheFKeyforLastView);
-    getActionMap().put("Shows view "+numberOfTheFKeyforLastView,
+      "Shows view "+numberOfTheFKeyforLastView+1);
+    getActionMap().put("Shows view "+numberOfTheFKeyforLastView+1,
         new AbstractAction() {
             public void actionPerformed(ActionEvent evt) {
               viewButton.doClick();
             }
         }
     );
-    viewButton.setToolTipText("<html>Toggle the view of "+name
-      +"&nbsp;&nbsp;<font color=#667799><small>F"
-      +(numberOfTheFKeyforLastView+1)
-      +"&nbsp;&nbsp;</small></font></html>");
+    if (view instanceof AnnotationSetsView) {
+      getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+        .put(KeyStroke.getKeyStroke("shift F"+(numberOfTheFKeyforLastView+1)),
+        "Shows view "+numberOfTheFKeyforLastView+1);
+
+      viewButton.setToolTipText("<html>Toggle the view of "+name
+        +"&nbsp;&nbsp;<font color=#667799><small>F"
+        +(numberOfTheFKeyforLastView+1)
+        +"&nbsp;&nbsp;</small></font>"
+        +"<br>Set last selected annotations "
+        +"&nbsp;&nbsp;<font color=#667799><small>Shift+F"
+        +(numberOfTheFKeyforLastView+1)
+        +"&nbsp;&nbsp;</small></font></html>");
+
+    } else {
+      viewButton.setToolTipText("<html>Toggle the view of "+name
+        +"&nbsp;&nbsp;<font color=#667799><small>F"
+        +(numberOfTheFKeyforLastView+1)
+        +"&nbsp;&nbsp;</small></font></html>");
+    }
     numberOfTheFKeyforLastView++;
   }
 
@@ -932,6 +948,35 @@ public class DocumentEditor extends AbstractVisualResource
 //                }
                 break;
             }
+
+            // the view is an annotation sets view
+            if (view instanceof AnnotationSetsView
+            && annotationSetsViewFirstTime) {
+              annotationSetsViewFirstTime = false;
+              AnnotationSetsView asv = (AnnotationSetsView)view;
+
+              // shift key was pressed
+              if (evt.getModifiers() == ActionEvent.SHIFT_MASK
+              || (evt.getModifiers() == ActionEvent.SHIFT_MASK
+                  + ActionEvent.MOUSE_EVENT_MASK)) {
+                asv.restoreSavedSelectedTypes();
+
+              } else {
+                // expand default set
+                asv.getSetHandler(null).setExpanded(true);
+                for (Object setName : document.getAnnotationSetNames()) {
+                  if (!setName.equals("Original markups")) {
+                    // expand other annotation sets
+                    asv.getSetHandler((String)setName).setExpanded(true);
+                  }
+                }
+              }
+
+              // remove the tooltip for the shift key
+              setToolTipText(getToolTipText().replaceFirst(
+                "<br>.*</html>$", "</html>"));
+            }
+
           }else{
             //hide this view
             switch(view.getType()){
@@ -972,6 +1017,7 @@ public class DocumentEditor extends AbstractVisualResource
       }
     }
     DocumentView view;
+    boolean annotationSetsViewFirstTime = true;
   }
 
   protected JSplitPane horizontalSplit;

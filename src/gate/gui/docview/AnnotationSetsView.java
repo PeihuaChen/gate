@@ -21,6 +21,7 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.List;
 import java.util.prefs.Preferences;
+import java.util.prefs.BackingStoreException;
 
 import javax.swing.*;
 import javax.swing.Timer;
@@ -44,10 +45,8 @@ import gate.swing.XJTable;
 import gate.util.*;
 
 /**
- * @author valyt
- *
- * To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
+ * Display document annotation sets and types in a tree view like with a table.
+ * Allow the selection of annotation type and modification of their color.
  */
 public class AnnotationSetsView extends AbstractDocumentView 
 		                        implements DocumentListener,
@@ -90,7 +89,6 @@ public class AnnotationSetsView extends AbstractDocumentView
    * @see gate.gui.annedit.AnnotationEditorOwner#getNextAnnotation()
    */
   public Annotation getNextAnnotation() {
-    // TODO Auto-generated method stub
     return null;
   }
 
@@ -98,7 +96,6 @@ public class AnnotationSetsView extends AbstractDocumentView
    * @see gate.gui.annedit.AnnotationEditorOwner#getPreviousAnnotation()
    */
   public Annotation getPreviousAnnotation() {
-    // TODO Auto-generated method stub
     return null;
   }
 
@@ -106,7 +103,6 @@ public class AnnotationSetsView extends AbstractDocumentView
    * @see gate.gui.annedit.AnnotationEditorOwner#getTextComponent()
    */
   public JTextComponent getTextComponent() {
-    // TODO Auto-generated method stub
     return textPane;
   }
 
@@ -163,7 +159,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     }
     mainTable = new XJTable();
     tableModel = new SetsTableModel();
-    ((XJTable)mainTable).setSortable(false);
+    mainTable.setSortable(false);
     mainTable.setModel(tableModel);
     mainTable.setRowMargin(0);
     mainTable.getColumnModel().setColumnMargin(0);
@@ -175,6 +171,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     mainTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     mainTable.setColumnSelectionAllowed(false);
     mainTable.setRowSelectionAllowed(true);
+    mainTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     //block autocreation of new columns from now on
     mainTable.setAutoCreateColumnsFromModel(false);
     mainTable.setTableHeader(null);
@@ -224,8 +221,8 @@ public class AnnotationSetsView extends AbstractDocumentView
 
     populateUI();
     tableModel.fireTableDataChanged();
-    
-    
+
+
     eventMinder.start();    
     initListeners();
   }
@@ -264,11 +261,9 @@ public class AnnotationSetsView extends AbstractDocumentView
         cnfe.printStackTrace(Err.getPrintWriter());
       }
       catch(InstantiationException e) {
-        // TODO Auto-generated catch block
         e.printStackTrace();
       }
       catch(IllegalAccessException e) {
-        // TODO Auto-generated catch block
         e.printStackTrace();
       }
     }
@@ -334,6 +329,54 @@ public class AnnotationSetsView extends AbstractDocumentView
     int alpha = colour.getAlpha();
     int rgba = rgb | (alpha << 24);
     prefRoot.putInt(annotationType, rgba);
+  }
+
+  /**
+   * Save type or remove unselected type in the preferences.
+   * @param setName set name to save/remove or null for the default set
+   * @param typeName type name to save/remove
+   * @param selected state of the selection
+   */
+  public void saveType(String setName,
+                       String typeName,
+                       boolean selected) {
+    String set = (setName == null) ? "" :
+      (setName.length() > Preferences.MAX_KEY_LENGTH) ?
+      setName.substring(0, Preferences.MAX_KEY_LENGTH) : setName;
+    String path = set.equals("") ?
+      "selectedtypes" : "selectedtypes/" + set;
+    Preferences prefRoot = Preferences.userNodeForPackage(getClass());
+    Preferences node = prefRoot.node(path);
+    String type = (typeName.length() > Preferences.MAX_KEY_LENGTH) ?
+      typeName.substring(0, Preferences.MAX_KEY_LENGTH) : typeName;
+    if (selected) {
+      node.put(type, "");
+    } else {
+      node.remove(type);
+    }
+  }
+
+  /**
+   * Restore previously selected types from the preferences.
+   */
+  public void restoreSavedSelectedTypes() {
+    Preferences prefRoot = Preferences.userNodeForPackage(getClass());
+    for(SetHandler sHandler : setHandlers){
+      String path = sHandler.set.getName() == null ?
+        "selectedtypes" : "selectedtypes/" + sHandler.set.getName();
+      for(TypeHandler tHandler : sHandler.typeHandlers){
+        try {
+          if (prefRoot.nodeExists(path)) {
+            Preferences node = prefRoot.node(path);
+            if (node.get(tHandler.name, null) != null) {
+              tHandler.setSelected(true);
+            }
+          }
+        } catch (BackingStoreException e) {
+          e.printStackTrace();
+        }
+      }
+    }
   }
 
   /**
@@ -410,49 +453,47 @@ public class AnnotationSetsView extends AbstractDocumentView
     document.addDocumentListener(this);
     mainTable.addMouseListener(new MouseAdapter(){
       public void mouseClicked(MouseEvent evt){
-        int row =  mainTable.rowAtPoint(evt.getPoint());
-        int column = mainTable.columnAtPoint(evt.getPoint());
-        if(row >= 0 && column == NAME_COL){
-          Object handler = tableRows.get(row);
-          if(handler instanceof TypeHandler){
-            TypeHandler tHandler = (TypeHandler)handler;
-            if(evt.getClickCount() >= 2){
-              //double click
-              tHandler.changeColourAction.actionPerformed(null);
-            }
-          }
-        }
+        mouseEvent(evt);
       }
       public void mousePressed(MouseEvent evt){
         int row =  mainTable.rowAtPoint(evt.getPoint());
-        int column = mainTable.columnAtPoint(evt.getPoint());
-        if(row >= 0 && column == NAME_COL){
-          Object handler = tableRows.get(row);
-          if(handler instanceof TypeHandler){
-            TypeHandler tHandler = (TypeHandler)handler;
-            if(evt.isPopupTrigger()){
-              //show popup
-              JPopupMenu popup = new JPopupMenu();
-              popup.add(tHandler.changeColourAction);
-              popup.show(mainTable, evt.getX(), evt.getY());
-            }
-          }
+        if(evt.isPopupTrigger()
+        && !mainTable.isRowSelected(row)) {
+          // if right click outside the selection then reset selection
+          mainTable.getSelectionModel().setSelectionInterval(row, row);
         }
+        mouseEvent(evt);
       }
       
       public void mouseReleased(MouseEvent evt){
+        mouseEvent(evt);
+      }
+
+      public void mouseEvent(MouseEvent evt) {
         int row =  mainTable.rowAtPoint(evt.getPoint());
-        int column = mainTable.columnAtPoint(evt.getPoint());
-        if(row >= 0 && column == NAME_COL){
+        int col = mainTable.columnAtPoint(evt.getPoint());
+        if(row >= 0 && col == NAME_COL){
           Object handler = tableRows.get(row);
-          if(handler instanceof TypeHandler){
-            TypeHandler tHandler = (TypeHandler)handler;
-            if(evt.isPopupTrigger()){
-              //show popup
-              JPopupMenu popup = new JPopupMenu();
-              popup.add(tHandler.changeColourAction);
-              popup.show(mainTable, evt.getX(), evt.getY());
+          if(evt.getClickCount() >= 2){
+            //double click
+            if(handler instanceof TypeHandler){
+              TypeHandler tHandler = (TypeHandler)handler;
+              tHandler.changeColourAction.actionPerformed(null);
             }
+          } else if(evt.isPopupTrigger()){
+            // popup menu
+            JPopupMenu popup = new JPopupMenu();
+            if(handler instanceof TypeHandler
+            && mainTable.getSelectedRowCount() == 1){
+              TypeHandler tHandler = (TypeHandler)handler;
+              popup.add(tHandler.changeColourAction);
+            } else if (mainTable.getSelectedRowCount() > 1
+                    || handler instanceof SetHandler) {
+              popup.add(new SetSelectedAnnotationGroupAction(true));
+              popup.add(new SetSelectedAnnotationGroupAction(false));
+            }
+            popup.add(new DeleteSelectedAnnotationGroupAction());
+            popup.show(mainTable, evt.getX(), evt.getY());
           }
         }
       }
@@ -616,6 +657,10 @@ public class AnnotationSetsView extends AbstractDocumentView
     }
   }
   
+  /**
+   * Get an annotation set handler in this annotation set view.
+   * @param name name of the annotation set or null for the default set
+   */
   protected SetHandler getSetHandler(String name){
     Iterator shIter = setHandlers.iterator();
     while(shIter.hasNext()){
@@ -629,6 +674,11 @@ public class AnnotationSetsView extends AbstractDocumentView
     return null;
   }
   
+  /**
+   * Get an annotation type handler in this annotation set view.
+   * @param set name of the annotation set or null for the default set
+   * @param type type of the annotation
+   */
   public TypeHandler getTypeHandler(String set, String type){
     SetHandler sHandler = getSetHandler(set);
     TypeHandler tHandler = null;
@@ -639,7 +689,14 @@ public class AnnotationSetsView extends AbstractDocumentView
     }
     return tHandler;
   }
-  
+
+  /**
+   * Un/select an annotation type in this annotation set view
+   * and indirectly highlight it in the document view.
+   * @param setName name of the annotation set or null for the default set
+   * @param typeName type of the annotation
+   * @param selected state of the selection
+   */
   public void setTypeSelected(final String setName, 
                               final String typeName, 
                               final boolean selected){
@@ -862,7 +919,7 @@ public class AnnotationSetsView extends AbstractDocumentView
 																			             boolean hasFocus,
 																			             int row,
 																			             int column){
-      
+
       value = tableRows.get(row);
       if(value instanceof SetHandler){
         SetHandler sHandler = (SetHandler)value;
@@ -1181,7 +1238,7 @@ public class AnnotationSetsView extends AbstractDocumentView
         List tags = textView.addHighlights(listTags, colour);
         for(int i = 0; i < annots.size(); i++){
           hghltTagsForAnnId.put(annots.get(i).getId(), tags.get(i));
-        }        
+        }
       }else{
         //hide highlights
         try{
@@ -1195,6 +1252,7 @@ public class AnnotationSetsView extends AbstractDocumentView
       //update the table display
       int row = tableRows.indexOf(this);
       tableModel.fireTableRowsUpdated(row, row);
+      saveType(setHandler.set.getName(), name, selected);
     }
     
     public boolean isSelected(){
@@ -1950,22 +2008,74 @@ public class AnnotationSetsView extends AbstractDocumentView
     private AnnotationData aData;
   }
   
-  protected class DeleteSelectedAnnotationGroupAction extends AbstractAction{
-    public DeleteSelectedAnnotationGroupAction(){
+  protected class SetSelectedAnnotationGroupAction extends AbstractAction{
+    public SetSelectedAnnotationGroupAction(boolean selected){
+      super();
+      String title = (selected) ? "Select all" : "Unselect all";
+      super.putValue(NAME, title);
+      super.putValue(SHORT_DESCRIPTION, title + " annotations.");
+      super.putValue(MNEMONIC_KEY, KeyEvent.VK_ENTER);
+      this.selected = selected;
     }
     public void actionPerformed(ActionEvent evt){
-      int row = mainTable.getSelectedRow();
-      if(row >= 0){
+      List<Object> handlersToSelect = new ArrayList<Object>();
+      int[] selectedRows = mainTable.getSelectedRows();
+      Arrays.sort(selectedRows);
+      for (int row : selectedRows) {
         Object handler = tableRows.get(row);
+        if(handler instanceof SetHandler){
+          // store the set handler
+          handlersToSelect.add(0, handler);
+        } else if(handler instanceof TypeHandler
+        && !handlersToSelect.contains(((TypeHandler)handler).setHandler)){
+          // store the type handler
+          // only if not included in a previous selected set handler
+          handlersToSelect.add(handlersToSelect.size(), handler);
+        }
+      }
+      for (Object handler : handlersToSelect) {
         if(handler instanceof TypeHandler){
           TypeHandler tHandler = (TypeHandler)handler;
-          AnnotationSet set = tHandler.setHandler.set;
-          AnnotationSet toDeleteAS = set.get(tHandler.name);
-          if(toDeleteAS != null){
-            List toDelete = new ArrayList(toDeleteAS);
-            set.removeAll(toDelete);
-          }
+          tHandler.setSelected(selected);
         }else if(handler instanceof SetHandler){
+          SetHandler sHandler = (SetHandler)handler;
+          for (String setName : sHandler.set.getAllTypes()) {
+            TypeHandler tHandler = sHandler.getTypeHandler(setName);
+            tHandler.setSelected(selected);
+          }
+        }
+      }
+    }
+    boolean selected;
+  }
+
+  protected class DeleteSelectedAnnotationGroupAction extends AbstractAction{
+    public DeleteSelectedAnnotationGroupAction(){
+      super();
+      String title = "Delete";
+      if (mainTable.getSelectedRowCount() > 1) { title += " all"; }
+      super.putValue(NAME, title);
+      super.putValue(SHORT_DESCRIPTION, title + " annotations.");
+      super.putValue(MNEMONIC_KEY, KeyEvent.VK_DELETE);
+    }
+    public void actionPerformed(ActionEvent evt){
+      List<Object> handlersToDelete = new ArrayList<Object>();
+      int[] selectedRows = mainTable.getSelectedRows();
+      Arrays.sort(selectedRows);
+      for (int row : selectedRows) {
+        Object handler = tableRows.get(row);
+        if(handler instanceof SetHandler){
+          // store the set handler
+          handlersToDelete.add(0, handler);
+        } else if(handler instanceof TypeHandler
+        && !handlersToDelete.contains(((TypeHandler)handler).setHandler)){
+          // store the type handler
+          // only if not included in a previous selected set handler
+          handlersToDelete.add(handlersToDelete.size(), handler);
+        }
+      }
+      for (Object handler : handlersToDelete) {
+        if(handler instanceof SetHandler){
           SetHandler sHandler = (SetHandler)handler;
           if(sHandler.set == document.getAnnotations()){
             //the default annotation set - clear
@@ -1973,17 +2083,21 @@ public class AnnotationSetsView extends AbstractDocumentView
           }else{
             document.removeAnnotationSet(sHandler.set.getName());
           }
+        } else if(handler instanceof TypeHandler){
+          TypeHandler tHandler = (TypeHandler)handler;
+          AnnotationSet set = tHandler.setHandler.set;
+          AnnotationSet toDeleteAS = set.get(tHandler.name);
+          if(toDeleteAS != null && toDeleteAS.size() > 0){
+            List<Annotation> toDelete = new ArrayList<Annotation>(toDeleteAS);
+            set.removeAll(toDelete);
+          }
         }
-        //restore selection
-        if(mainTable.getRowCount() <= row){
-          row = mainTable.getRowCount() -1;
-        }
-        mainTable.getSelectionModel().setSelectionInterval(row, row);
       }
     }
   }  
   
   List<SetHandler> setHandlers;
+  /** Contains the data of the main table. */
   List tableRows; 
   XJTable mainTable;
   SetsTableModel tableModel;
