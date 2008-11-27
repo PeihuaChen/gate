@@ -382,15 +382,11 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         case 2: // for learner of multi to binary conversion
           LogService.logMessage("Multi to binary conversion.", 1);
           // System.out.println("** multi to binary:");
-          MultiClassLearning chunkLearning = new MultiClassLearning(
-            engineSettings.multi2BinaryMode);
-          // read data
-          chunkLearning.getDataFromFile(numDocs, dataFile);
-          // get a learner
+          String dataSetFile = null;
+          //get a learner
           String learningCommand = engineSettings.learnerSettings.paramsOfLearning;
           learningCommand = learningCommand.trim();
           learningCommand = learningCommand.replaceAll("[ \t]+", " ");
-          String dataSetFile = null;
           SupervisedLearner paumLearner = MultiClassLearning
             .obtainLearnerFromName(engineSettings.learnerSettings.learnerName,
               learningCommand, dataSetFile);
@@ -400,6 +396,15 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
             .setLearnerParams(engineSettings.learnerSettings.paramsOfLearning);
           LogService.logMessage(
             "The learners: " + paumLearner.getLearnerName(), 1);
+          MultiClassLearning chunkLearning = new MultiClassLearning(
+            engineSettings.multi2BinaryMode);
+          // read data
+          File  tempDataFile= new File(wdResults, 
+            ConstantParameters.TempFILENAMEofFVData);
+          boolean isUsingTempDataFile = false;
+          //if(paumLearner.getLearnerName().equals("SVMExec"))
+            //isUsingTempDataFile = true;
+          chunkLearning.getDataFromFile(numDocs, dataFile, isUsingTempDataFile, tempDataFile);
           // Apply the model to the data which was read already.
           chunkLearning.apply(paumLearner, modelFile);
           // labelsFVDoc = chunkLearning.dataFVinDoc.labelsFVDoc;
@@ -718,21 +723,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         break;
       case 2: // for learner of multi to binary conversion
         LogService.logMessage("Multi to binary conversion.", 1);
-        MultiClassLearning chunkLearning = new MultiClassLearning(
-          engineSettings.multi2BinaryMode);
-        if(engineSettings.multiBinaryExecutor != null) {
-          chunkLearning.setExecutor(engineSettings.multiBinaryExecutor);
-        }
-        // read data
-        startTime = Benchmark.startPoint();
-        benchmarkingFeatures.put("dataFile", dataFile.getAbsolutePath());
-        chunkLearning.getDataFromFile(numDocs, dataFile);
-        Benchmark.checkPoint(startTime, benchmarkID + "."
-          + "readingChunkLearningData", this, benchmarkingFeatures);
-        benchmarkingFeatures.remove("dataFile");
-        LogService.logMessage("The number of classes in dataset: "
-          + chunkLearning.numClasses, 1);
-        // get a learner
+         //      get a learner
         String learningCommand = "";
         if(engineSettings.learnerSettings.executableTraining != null)
           learningCommand = engineSettings.learnerSettings.executableTraining+ " ";
@@ -751,6 +742,26 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
           1);
         if(LogService.minVerbosityLevel > 1)
           System.out.println("Using the "+ paumLearner.getLearnerName());
+        MultiClassLearning chunkLearning = new MultiClassLearning(
+          engineSettings.multi2BinaryMode);
+        if(engineSettings.multiBinaryExecutor != null) {
+          chunkLearning.setExecutor(engineSettings.multiBinaryExecutor);
+        }
+        startTime = Benchmark.startPoint();
+        benchmarkingFeatures.put("dataFile", dataFile.getAbsolutePath());
+        //      read data
+        File  tempDataFile= new File(wdResults, 
+          ConstantParameters.TempFILENAMEofFVData);
+        boolean isUsingTempDataFile = false;
+        if(paumLearner.getLearnerName().equals("SVMExec"))
+          isUsingTempDataFile = true; //using the temp data file 
+        chunkLearning.getDataFromFile(numDocs, dataFile, isUsingTempDataFile, tempDataFile);
+        Benchmark.checkPoint(startTime, benchmarkID + "."
+          + "readingChunkLearningData", this, benchmarkingFeatures);
+        benchmarkingFeatures.remove("dataFile");
+        LogService.logMessage("The number of classes in dataset: "
+          + chunkLearning.numClasses, 1);
+        
         // training
         startTime = Benchmark.startPoint();
         benchmarkingFeatures.put("modelFile", modelFile.getAbsolutePath());
@@ -758,7 +769,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         if(engineSettings.numThreadUsed >1 )//for using thread
           chunkLearning.training(paumLearner, modelFile);
         else //for not using thread
-          chunkLearning.trainingNoThread(paumLearner, modelFile);
+          chunkLearning.trainingNoThread(paumLearner, modelFile, isUsingTempDataFile, tempDataFile);
         
         Benchmark.checkPoint(startTime,
           benchmarkID + "." + "paumModelTraining", this, benchmarkingFeatures);
@@ -844,14 +855,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       case 2: // for learner of multi to binary conversion
         LogService.logMessage("Multi to binary conversion.", 1);
         // System.out.println("** multi to binary:");
-        MultiClassLearning chunkLearning = new MultiClassLearning(
-          engineSettings.multi2BinaryMode);
-        // read data
-        startTime = Benchmark.startPoint();
-        chunkLearning.getDataFromFile(numDocs, dataFile);
-        Benchmark.checkPoint(startTime, benchmarkID + "."
-          + "readingChunkLearningData", this, benchmarkingFeatures);
-        // get a learner
+        //      get a learner
         String learningCommand = engineSettings.learnerSettings.paramsOfLearning;
         learningCommand = learningCommand.trim();
         learningCommand = learningCommand.replaceAll("[ \t]+", " ");
@@ -865,6 +869,19 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
           .setLearnerParams(engineSettings.learnerSettings.paramsOfLearning);
         LogService.logMessage("The learners: " + paumLearner.getLearnerName(),
           1);
+        MultiClassLearning chunkLearning = new MultiClassLearning(
+          engineSettings.multi2BinaryMode);
+        // read data
+        startTime = Benchmark.startPoint();
+        //get the fv data
+        File  tempDataFile= new File(wdResults, 
+          ConstantParameters.TempFILENAMEofFVData);
+        boolean isUsingTempDataFile = false;
+        //if(paumLearner.getLearnerName().equals("SVMExec"))
+          //isUsingTempDataFile = true;
+        chunkLearning.getDataFromFile(numDocs, dataFile, isUsingTempDataFile, tempDataFile);
+        Benchmark.checkPoint(startTime, benchmarkID + "."
+          + "readingChunkLearningData", this, benchmarkingFeatures);
         // apply
         startTime = Benchmark.startPoint();
         benchmarkingFeatures.put("modelFile", modelFile.getAbsolutePath());
@@ -1006,12 +1023,6 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         break;
       case 2: // for learner of multi to binary conversion
         LogService.logMessage("Multi to binary conversion.", 1);
-        // System.out.println("** multi to binary:");
-        MultiClassLearning chunkLearning = new MultiClassLearning(
-          engineSettings.multi2BinaryMode);
-        // read data
-        chunkLearning.getDataFromFile(numDocs, dataFile); // corpus.size(),
-        // dataFile);
         // get a learner
         String learningCommand = engineSettings.learnerSettings.paramsOfLearning;
         learningCommand = learningCommand.trim();
@@ -1026,6 +1037,19 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
           .setLearnerParams(engineSettings.learnerSettings.paramsOfLearning);
         LogService.logMessage("The learners: " + paumLearner.getLearnerName(),
           1);
+        // System.out.println("** multi to binary:");
+        MultiClassLearning chunkLearning = new MultiClassLearning(
+          engineSettings.multi2BinaryMode);
+        // read data
+         //      get the fv data
+        File  tempDataFile= new File(wdResults, 
+          ConstantParameters.TempFILENAMEofFVData);
+        boolean isUsingTempDataFile = false;
+        //if(paumLearner.getLearnerName().equals("SVMExec"))
+          //isUsingTempDataFile = true;
+        chunkLearning.getDataFromFile(numDocs, dataFile, isUsingTempDataFile, tempDataFile);
+        // dataFile);
+
         // apply
         //      using different method for one thread or multithread
         if(engineSettings.numThreadUsed>1) //for using thread
@@ -1357,7 +1381,12 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
     MultiClassLearning chunkLearning = new MultiClassLearning(
       engineSettings.multi2BinaryMode);
     // read data
-    chunkLearning.getDataFromFile(numDocs, dataFile);
+    File  tempDataFile= new File(wdResults, 
+      ConstantParameters.TempFILENAMEofFVData);
+    boolean isUsingTempDataFile = false;
+    //if(paumLearner.getLearnerName().equals("SVMExec"))
+      //isUsingTempDataFile = true; //using the temp data file     
+    chunkLearning.getDataFromFile(numDocs, dataFile, isUsingTempDataFile, tempDataFile);
     // Back up the label data before it is reset.
     LabelsOfFeatureVectorDoc[] labelsFVDocB = new LabelsOfFeatureVectorDoc[numDocs];
     for(int i = 0; i < numDocs; ++i) {
@@ -1411,7 +1440,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       // confidence score for each example
       chunkLearning.apply(paumLearner, modelFile);
     } else { //not using thread
-      chunkLearning.trainingNoThread(paumLearner, modelFile);
+      chunkLearning.trainingNoThread(paumLearner, modelFile, isUsingTempDataFile, tempDataFile);
       chunkLearning.applyNoThread(paumLearner, modelFile);
     }
       

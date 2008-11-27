@@ -282,6 +282,7 @@ public class DocFeatureVectors {
   public void deleteFvs() {
     for(int i=0; i<fvs.length; ++i)
       fvs[i] = null;
+    //fvs= null;
   }
 
   /** Set the DocID. */
