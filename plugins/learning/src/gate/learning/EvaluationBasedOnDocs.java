@@ -79,40 +79,39 @@ public class EvaluationBasedOnDocs {
     inputASName = inputAsN;
   }
 
-  /** Main method for evluation. 
-   * @throws IOException */
+  /**
+   * Main method for evluation.
+   * 
+   * @throws IOException
+   */
   public void evaluation(LearningEngineSettings learningSettings,
-    LightWeightLearningApi lightWeightApi)
-    throws GateException, IOException {
-    //first obtain the feature vectors from documents
-    /*BufferedWriter outNLPFeatures=null;
-    BufferedReader inNLPFeatures = null;
-    BufferedWriter outFeatureVectors = null;
-    boolean isTraining = true;
-    outNLPFeatures = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(wdResults,
-      ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
-    for(int i = 0; i < corpusOn.size(); ++i) {
-        Document toProcess=  (Document)corpusOn.get(i);
-        lightWeightApi.annotations2NLPFeatures(toProcess, i,
-          outNLPFeatures, isTraining, learningSettings);
-        if(toProcess.getDataStore() != null && corpusOn.getDataStore() != null)
-          Factory.deleteResource(toProcess);
-        //++numDoc;
-    }
-    outNLPFeatures.flush();
-    outNLPFeatures.close();
-    lightWeightApi.finishFVs(wdResults, numDoc, isTraining, learningSettings);
-    // Open the normal NLP feature file. 
-    inNLPFeatures = new BufferedReader(new InputStreamReader(new FileInputStream(new File(wdResults,
-      ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
-    outFeatureVectors = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-      new File(wdResults,ConstantParameters.FILENAMEOFFeatureVectorTotalData)), "UTF-8"));
-    lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, outFeatureVectors, numDoc, isTraining, learningSettings);
-    inNLPFeatures.close();
-    outFeatureVectors.flush();
-    outFeatureVectors.close();*/
-      
-      //outFeatureVectors.close();
+    LightWeightLearningApi lightWeightApi) throws GateException, IOException {
+    // first obtain the feature vectors from documents
+    /*
+     * BufferedWriter outNLPFeatures=null; BufferedReader inNLPFeatures = null;
+     * BufferedWriter outFeatureVectors = null; boolean isTraining = true;
+     * outNLPFeatures = new BufferedWriter(new OutputStreamWriter(new
+     * FileOutputStream(new File(wdResults,
+     * ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8")); for(int i = 0;
+     * i < corpusOn.size(); ++i) { Document toProcess=
+     * (Document)corpusOn.get(i);
+     * lightWeightApi.annotations2NLPFeatures(toProcess, i, outNLPFeatures,
+     * isTraining, learningSettings); if(toProcess.getDataStore() != null &&
+     * corpusOn.getDataStore() != null) Factory.deleteResource(toProcess);
+     * //++numDoc; } outNLPFeatures.flush(); outNLPFeatures.close();
+     * lightWeightApi.finishFVs(wdResults, numDoc, isTraining,
+     * learningSettings); // Open the normal NLP feature file. inNLPFeatures =
+     * new BufferedReader(new InputStreamReader(new FileInputStream(new
+     * File(wdResults, ConstantParameters.FILENAMEOFNLPFeaturesData)),
+     * "UTF-8")); outFeatureVectors = new BufferedWriter(new
+     * OutputStreamWriter(new FileOutputStream( new
+     * File(wdResults,ConstantParameters.FILENAMEOFFeatureVectorTotalData)),
+     * "UTF-8")); lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures,
+     * outFeatureVectors, numDoc, isTraining, learningSettings);
+     * inNLPFeatures.close(); outFeatureVectors.flush();
+     * outFeatureVectors.close();
+     */
+    // outFeatureVectors.close();
     // k-fold
     if(learningSettings.evaluationconfig.mode == EvaluationConfiguration.kfold)
       kfoldEval(learningSettings, lightWeightApi);
@@ -121,21 +120,19 @@ public class EvaluationBasedOnDocs {
       holdoutEval(learningSettings, lightWeightApi);
     else throw new GateException("The evaluation configuration mode as "
       + learningSettings.evaluationconfig.mode + " is not implemented!");
-    StringBuffer logMes =new StringBuffer();
-    logMes.append("\n*** Averaged results for each label over "+
-        learningSettings.evaluationconfig.kk +" runs as:\n");
+    StringBuffer logMes = new StringBuffer();
+    logMes.append("\n*** Averaged results for each label over "
+      + learningSettings.evaluationconfig.kk + " runs as:\n");
     logMes.append(printFmeasureForEachLabel(labels2InstNum, labels2MMR));
     logMes.append("\nOverall results as:\n");
     logMes.append(macroMeasuresOfResults.printResults());
-    LogService.logMessage(logMes.toString(),1);
-    if(LogService.minVerbosityLevel > 0)
-      System.out.println(logMes);
+    LogService.logMessage(logMes.toString(), 1);
+    if(LogService.minVerbosityLevel > 0) System.out.println(logMes);
   }
 
   /** K-fold evalution. */
   public void kfoldEval(LearningEngineSettings learningSettings,
-    LightWeightLearningApi lightWeightApi)
-    throws GateException {
+    LightWeightLearningApi lightWeightApi) throws GateException {
     int k = learningSettings.evaluationconfig.kk;
     LogService.logMessage("K-fold evaluation: k=" + k, 1);
     int lenPerFold = (new Double(Math.floor((double)numDoc / k))).intValue();
@@ -146,7 +143,7 @@ public class EvaluationBasedOnDocs {
         + new Integer(numDoc) + ", len=" + new Integer(lenPerFold) + ".");
     }
     LogService.logMessage("Kfold k=" + new Integer(k) + ", numDoc="
-        + new Integer(numDoc) + ", len=" + new Integer(lenPerFold) + ".", 1);
+      + new Integer(numDoc) + ", len=" + new Integer(lenPerFold) + ".", 1);
     for(int nr = 0; nr < k; ++nr) {
       EvaluationMeasuresComputation measuresOfResults = new EvaluationMeasuresComputation();
       // Label to measure of result of the label
@@ -163,30 +160,30 @@ public class EvaluationBasedOnDocs {
       for(i = endIndex; i < numDoc; ++i)
         isUsedForTraining[i] = true;
       StringBuffer logMes = new StringBuffer();
-      int nr0 = nr+1;
-      logMes.append("\n*** Fold " + nr0+"\n");
+      int nr0 = nr + 1;
+      logMes.append("\n*** Fold " + nr0 + "\n");
       logMes.append("Number of docs for training: "
-        + (int)(numDoc - endIndex + beginIndex)+"\n");
-      int ik=0;
-      for(i=0; i<numDoc; ++i) {
+        + (int)(numDoc - endIndex + beginIndex) + "\n");
+      int ik = 0;
+      for(i = 0; i < numDoc; ++i) {
         if(isUsedForTraining[i]) {
           ++ik;
-          logMes.append(ik+" "+((Document)corpusOn.get(i)).getName()+"\n");
+          logMes
+            .append(ik + " " + ((Document)corpusOn.get(i)).getName() + "\n");
         }
       }
       logMes.append("Number of docs for application: "
-        + (int)(endIndex - beginIndex)+"\n");
-      ik=0;
-      for(i=0; i<numDoc; ++i) {
+        + (int)(endIndex - beginIndex) + "\n");
+      ik = 0;
+      for(i = 0; i < numDoc; ++i) {
         if(!isUsedForTraining[i]) {
           ++ik;
-          logMes.append(ik +" "+((Document)corpusOn.get(i)).getName()+"\n");
+          logMes
+            .append(ik + " " + ((Document)corpusOn.get(i)).getName() + "\n");
         }
       }
-      LogService.logMessage(logMes.toString(),1);
-      if(LogService.minVerbosityLevel>1)
-        System.out.println(logMes);
-      
+      LogService.logMessage(logMes.toString(), 1);
+      if(LogService.minVerbosityLevel > 1) System.out.println(logMes);
       // call the training or application
       oneRun(learningSettings, lightWeightApi, isUsedForTraining,
         measuresOfResults, labels2MR, labels2InstNum);
@@ -197,8 +194,7 @@ public class EvaluationBasedOnDocs {
     macroMeasuresOfResults.macroAverage(k);
     for(Object obj : labels2MMR.keySet()) {
       int num = new Integer(labels2RunsNum.get(obj).toString()).intValue();
-      ((EvaluationMeasuresComputation)labels2MMR.get(obj))
-        .macroAverage(num);
+      ((EvaluationMeasuresComputation)labels2MMR.get(obj)).macroAverage(num);
       num = (int)(new Float(labels2InstNum.get(obj).toString()).floatValue() / num);
       labels2InstNum.put(obj, new Integer(num));
     }
@@ -206,8 +202,7 @@ public class EvaluationBasedOnDocs {
 
   /** Hold-out testing. */
   public void holdoutEval(LearningEngineSettings learningSettings,
-    LightWeightLearningApi lightWeightApi)
-    throws GateException {
+    LightWeightLearningApi lightWeightApi) throws GateException {
     int k = learningSettings.evaluationconfig.kk;
     LogService.logMessage("Hold-out test: runs=" + k
       + ", ratio of training docs is "
@@ -270,30 +265,29 @@ public class EvaluationBasedOnDocs {
       for(int i = 0; i < testNum; ++i)
         isUsedForTraining[indexRand[i]] = false;
       StringBuffer logMes = new StringBuffer();
-      int nr0 = nr+1;
-      logMes.append("\n*** Run " + nr0+"\n");
-      logMes.append("Number of docs for training: "
-        + (int)(numDoc - testNum)+"\n");
-      int ik=0;
-      for(int i=0; i<numDoc; ++i) {
+      int nr0 = nr + 1;
+      logMes.append("\n*** Run " + nr0 + "\n");
+      logMes.append("Number of docs for training: " + (int)(numDoc - testNum)
+        + "\n");
+      int ik = 0;
+      for(int i = 0; i < numDoc; ++i) {
         if(isUsedForTraining[i]) {
           ++ik;
-          logMes.append(ik+" "+((Document)corpusOn.get(i)).getName()+"\n");
+          logMes
+            .append(ik + " " + ((Document)corpusOn.get(i)).getName() + "\n");
         }
       }
-      logMes.append("Number of docs for application: " + testNum+"\n");
-      ik=0;
-      for(int i=0; i<numDoc; ++i) {
+      logMes.append("Number of docs for application: " + testNum + "\n");
+      ik = 0;
+      for(int i = 0; i < numDoc; ++i) {
         if(!isUsedForTraining[i]) {
           ++ik;
-          logMes.append(ik +" "+((Document)corpusOn.get(i)).getName()+"\n");
+          logMes
+            .append(ik + " " + ((Document)corpusOn.get(i)).getName() + "\n");
         }
       }
-
-      LogService.logMessage(logMes.toString(),1);
-      if(LogService.minVerbosityLevel>1)
-        System.out.println(logMes);
-      
+      LogService.logMessage(logMes.toString(), 1);
+      if(LogService.minVerbosityLevel > 1) System.out.println(logMes);
       // One run, call the training and application and do evaluation
       oneRun(learningSettings, lightWeightApi, isUsedForTraining,
         measuresOfResults, labels2MR, labels2InstNum);
@@ -311,9 +305,12 @@ public class EvaluationBasedOnDocs {
     }
   }
 
-  /** One run of the evaluation: training, testing and measuring results. 
-   * @throws  
-   * @throws UnsupportedEncodingException */
+  /**
+   * One run of the evaluation: training, testing and measuring results.
+   * 
+   * @throws
+   * @throws UnsupportedEncodingException
+   */
   private void oneRun(LearningEngineSettings learningSettings,
     LightWeightLearningApi lightWeightApi, boolean isUsedForTraining[],
     EvaluationMeasuresComputation measuresOfResults, HashMap labels2MR,
@@ -325,18 +322,20 @@ public class EvaluationBasedOnDocs {
     lightWeightApi.featuresList.clearAllData();
     boolean isTraining = true;
     int numDoc = 0;
-    BufferedWriter outNLPFeatures=null;
+    BufferedWriter outNLPFeatures = null;
     BufferedReader inNLPFeatures = null;
     BufferedWriter outFeatureVectors = null;
     try {
-      outNLPFeatures = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(wdResults,
-        ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
+      outNLPFeatures = new BufferedWriter(new OutputStreamWriter(
+        new FileOutputStream(new File(wdResults,
+          ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
       for(int i = 0; i < corpusOn.size(); ++i)
         if(isUsedForTraining[i]) {
-          Document toProcess=  (Document)corpusOn.get(i);
+          Document toProcess = (Document)corpusOn.get(i);
           lightWeightApi.annotations2NLPFeatures(toProcess, numDoc,
             outNLPFeatures, isTraining, learningSettings);
-          if(toProcess.getDataStore() != null && corpusOn.getDataStore() != null)
+          if(toProcess.getDataStore() != null
+            && corpusOn.getDataStore() != null)
             Factory.deleteResource(toProcess);
           ++numDoc;
         }
@@ -344,49 +343,42 @@ public class EvaluationBasedOnDocs {
       outNLPFeatures.close();
       lightWeightApi.finishFVs(wdResults, numDoc, isTraining, learningSettings);
       // Open the normal NLP feature file.
-      inNLPFeatures = new BufferedReader(new InputStreamReader(new FileInputStream(new File(wdResults,
-        ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
-      outFeatureVectors = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-        new File(wdResults,ConstantParameters.FILENAMEOFFeatureVectorData)), "UTF-8"));
-      lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, outFeatureVectors, numDoc, isTraining, learningSettings);
+      inNLPFeatures = new BufferedReader(new InputStreamReader(
+        new FileInputStream(new File(wdResults,
+          ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
+      outFeatureVectors = new BufferedWriter(new OutputStreamWriter(
+        new FileOutputStream(new File(wdResults,
+          ConstantParameters.FILENAMEOFFeatureVectorData)), "UTF-8"));
+      lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures,
+        outFeatureVectors, numDoc, isTraining, learningSettings);
       inNLPFeatures.close();
       outFeatureVectors.flush();
       outFeatureVectors.close();
-      //outFeatureVectors.close();
-      //read the fv data from total file and write them into fv files for training and application, respectively 
-      /*BufferedReader inFVs = new BufferedReader(new InputStreamReader(new FileInputStream(new File(wdResults,
-        ConstantParameters.FILENAMEOFFeatureVectorTotalData)), "UTF-8"));
-      BufferedWriter outFVs = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-        new File(wdResults,ConstantParameters.FILENAMEOFFeatureVectorData)), "UTF-8"));
-      BufferedWriter outFVsApp = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-        new File(wdResults,ConstantParameters.FILENAMEOFFeatureVectorDataApp)), "UTF-8"));
-      for(int i = 0; i < corpusOn.size(); ++i) {
-        String str = inFVs.readLine();
-        int numLines = Integer.parseInt(str.substring(str.indexOf(ConstantParameters.ITEMSEPARATOR)+1, 
-          str.lastIndexOf(ConstantParameters.ITEMSEPARATOR)));
-        if(isUsedForTraining[i]) {
-          outFVs.append(str);
-          outFVs.newLine();
-          for(int j=0; j<numLines; ++j) {
-            outFVs.append(inFVs.readLine());
-            outFVs.newLine();
-          }
-          ++numDoc;
-        } else {
-          outFVsApp.append(str);
-          outFVsApp.newLine();
-          for(int j=0; j<numLines; ++j) {
-            outFVsApp.append(inFVs.readLine());
-            outFVsApp.newLine();
-          }
-        }
-      }
-      inFVs.close();
-      outFVs.flush();
-      outFVs.close();
-      outFVsApp.flush();
-      outFVsApp.close();*/
-      
+      // outFeatureVectors.close();
+      // read the fv data from total file and write them into fv files for
+      // training and application, respectively
+      /*
+       * BufferedReader inFVs = new BufferedReader(new InputStreamReader(new
+       * FileInputStream(new File(wdResults,
+       * ConstantParameters.FILENAMEOFFeatureVectorTotalData)), "UTF-8"));
+       * BufferedWriter outFVs = new BufferedWriter(new OutputStreamWriter(new
+       * FileOutputStream( new
+       * File(wdResults,ConstantParameters.FILENAMEOFFeatureVectorData)),
+       * "UTF-8")); BufferedWriter outFVsApp = new BufferedWriter(new
+       * OutputStreamWriter(new FileOutputStream( new
+       * File(wdResults,ConstantParameters.FILENAMEOFFeatureVectorDataApp)),
+       * "UTF-8")); for(int i = 0; i < corpusOn.size(); ++i) { String str =
+       * inFVs.readLine(); int numLines =
+       * Integer.parseInt(str.substring(str.indexOf(ConstantParameters.ITEMSEPARATOR)+1,
+       * str.lastIndexOf(ConstantParameters.ITEMSEPARATOR)));
+       * if(isUsedForTraining[i]) { outFVs.append(str); outFVs.newLine();
+       * for(int j=0; j<numLines; ++j) { outFVs.append(inFVs.readLine());
+       * outFVs.newLine(); } ++numDoc; } else { outFVsApp.append(str);
+       * outFVsApp.newLine(); for(int j=0; j<numLines; ++j) {
+       * outFVsApp.append(inFVs.readLine()); outFVsApp.newLine(); } } }
+       * inFVs.close(); outFVs.flush(); outFVs.close(); outFVsApp.flush();
+       * outFVsApp.close();
+       */
       // if fitering the training data
       if(learningSettings.fiteringTrainingData
         && learningSettings.filteringRatio > 0.0)
@@ -394,14 +386,15 @@ public class EvaluationBasedOnDocs {
       // lightWeightApi.trainDirect();
       lightWeightApi.trainingJava(numDoc, learningSettings);
       // then application to the test set
-      //First we empty the NLP feature file and feature vector file; but not the list files.
+      // First we empty the NLP feature file and feature vector file; but not
+      // the list files.
       emptyDatafile(wdResults, false);
-      //  We have to use two class types for the evaluation purpose
+      // We have to use two class types for the evaluation purpose
       String classTypeOriginal = null;
       String classTypeTest = null;
       String classFeature = null;
-      classTypeOriginal = learningSettings.datasetDefinition.getClassAttribute()
-        .getType();
+      classTypeOriginal = learningSettings.datasetDefinition
+        .getClassAttribute().getType();
       classTypeTest = classTypeOriginal.concat("Test");
       classFeature = learningSettings.datasetDefinition.getClassAttribute()
         .getFeature();
@@ -411,45 +404,75 @@ public class EvaluationBasedOnDocs {
         System.out.println("classType=" + classTypeOriginal + ", testType="
           + classTypeTest + ".");
       isTraining = false;
-      
-      //numDoc = isUsedForTraining.length - numDoc;
+      // numDoc = isUsedForTraining.length - numDoc;
       numDoc = 0;
-      outNLPFeatures = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(wdResults,
-        ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
+      outNLPFeatures = new BufferedWriter(new OutputStreamWriter(
+        new FileOutputStream(new File(wdResults,
+          ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
       for(int i = 0; i < corpusOn.size(); ++i)
         if(!isUsedForTraining[i]) {
-          lightWeightApi.annotations2NLPFeatures((Document)corpusOn.get(i), numDoc,
-            outNLPFeatures, isTraining, learningSettings);
+          Document toProcess = (Document)corpusOn.get(i);
+          lightWeightApi.annotations2NLPFeatures(toProcess,
+            numDoc, outNLPFeatures, isTraining, learningSettings);
           ++numDoc;
+          if(toProcess.getDataStore() != null
+            && corpusOn.getDataStore() != null) {
+            corpusOn.getDataStore().sync(corpusOn);
+            Factory.deleteResource(toProcess);
+          }
         }
       outNLPFeatures.flush();
       outNLPFeatures.close();
       lightWeightApi.finishFVs(wdResults, numDoc, isTraining, learningSettings);
-      inNLPFeatures = new BufferedReader(new InputStreamReader(new FileInputStream(new File(wdResults,
-        ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
-      outFeatureVectors = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-        new File(wdResults,ConstantParameters.FILENAMEOFFeatureVectorDataApp)), "UTF-8"));
-      lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures, outFeatureVectors, numDoc, isTraining, learningSettings);
+      inNLPFeatures = new BufferedReader(new InputStreamReader(
+        new FileInputStream(new File(wdResults,
+          ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
+      outFeatureVectors = new BufferedWriter(new OutputStreamWriter(
+        new FileOutputStream(new File(wdResults,
+          ConstantParameters.FILENAMEOFFeatureVectorDataApp)), "UTF-8"));
+      lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures,
+        outFeatureVectors, numDoc, isTraining, learningSettings);
       inNLPFeatures.close();
       outFeatureVectors.flush();
       outFeatureVectors.close();
-      
       // lightWeightApi.finishDocAnnotation();
       Corpus corpusTest;
       corpusTest = Factory.newCorpus("testCorpus");
+      if(corpusOn.getDataStore() != null) {
+        Corpus corpusTestTemp = (Corpus)corpusOn.getDataStore().adopt(corpusTest, null);
+        Factory.deleteResource(corpusTest);
+        corpusTest = corpusTestTemp;
+        corpusTest.getDataStore().sync(corpusTest);
+      }
       numDoc = 0;
       for(int i = 0; i < corpusOn.size(); ++i)
         if(!isUsedForTraining[i]) {
-          corpusTest.add((Document)corpusOn.get(i));
+          Document d = (Document)corpusOn.get(i);
+          corpusTest.add(d);
+          if(corpusTest.getDataStore() != null) {
+            corpusTest.getDataStore().sync(corpusTest);
+            Factory.deleteResource(d);            
+          }
           ++numDoc;
         }
       String fvFileName = wdResults.toString() + File.separator
-      + ConstantParameters.FILENAMEOFFeatureVectorDataApp;
-      lightWeightApi.applyModelInJava(corpusTest, 0, corpusTest.size(), classTypeTest,
-        learningSettings, fvFileName);
+        + ConstantParameters.FILENAMEOFFeatureVectorDataApp;
+      lightWeightApi.applyModelInJava(corpusTest, 0, corpusTest.size(),
+        classTypeTest, learningSettings, fvFileName);
+      //unload the documents in the test corpus from memory
+      /*for(int i=0; i<corpusTest.size(); ++i) {
+        Document toProcess = (Document)corpusOn.get(i);
+        if(corpusOn.getDataStore() != null) {
+          corpusOn.getDataStore().sync(corpusOn);
+          Factory.deleteResource(toProcess);
+        }
+      }*/
       corpusTest.clear();
       Factory.deleteResource(corpusTest);
-    
+      if(corpusTest.getDataStore() != null) {
+        corpusTest.getDataStore().delete(corpusTest.getClass().getName(), corpusTest.getLRPersistenceId());
+      }
+      
       // Do the evaluation on test using the AnnotationDiff
       // First get all the labels in the training data,
       // so that we can do evaluation on each single label
@@ -458,19 +481,19 @@ public class EvaluationBasedOnDocs {
       for(int i = 0; i < corpusOn.size(); ++i)
         if(isUsedForTraining[i]) {
           Document toProcess = (Document)corpusOn.get(i);
-          AnnotationSet keyAnns = getInputAS(toProcess).get(
-            classTypeOriginal);
+          AnnotationSet keyAnns = getInputAS(toProcess).get(classTypeOriginal);
           for(Object obj : keyAnns) {
             if(((Annotation)obj).getFeatures().get(classFeature) != null) {
               String label = ((Annotation)obj).getFeatures().get(classFeature)
                 .toString();
               if(uniqueLabels.containsKey(label))
-                uniqueLabels.put(label, new Integer(new Integer(uniqueLabels.get(
-                  label).toString()).intValue() + 1));
+                uniqueLabels.put(label, new Integer(new Integer(uniqueLabels
+                  .get(label).toString()).intValue() + 1));
               else uniqueLabels.put(label, "1");
             }
           }
-          if(toProcess.getDataStore() != null && corpusOn.getDataStore() != null) {
+          if(toProcess.getDataStore() != null
+            && corpusOn.getDataStore() != null) {
             corpusOn.getDataStore().sync(corpusOn);
             Factory.deleteResource(toProcess);
           }
@@ -484,8 +507,9 @@ public class EvaluationBasedOnDocs {
       for(Object obj : uniqueLabels.keySet()) {
         if(labels2InstNum.containsKey(obj)) {
           int num = new Integer(uniqueLabels.get(obj).toString()).intValue();
-          labels2InstNum.put(obj, new Integer(new Integer(labels2InstNum.get(obj)
-            .toString()).intValue()+ num));
+          labels2InstNum.put(obj, new Integer(new Integer(labels2InstNum.get(
+            obj).toString()).intValue()
+            + num));
         } else labels2InstNum.put(obj, uniqueLabels.get(obj));
       }
       // Do the evaluation on the test set
@@ -498,67 +522,80 @@ public class EvaluationBasedOnDocs {
         String arg2F = relAttr.getArg2();
         for(int i = 0; i < corpusOn.size(); ++i) {
           if(!isUsedForTraining[i]) {
-            evaluateAnnotationsRel((Document)corpusOn.get(i), classTypeOriginal,
-              classTypeTest, classFeature, arg1F, arg2F, uniqueLabels.keySet(),
-              labels2MR);
+            Document toProcess = (Document)corpusOn.get(i);
+            evaluateAnnotationsRel(toProcess,
+              classTypeOriginal, classTypeTest, classFeature, arg1F, arg2F,
+              uniqueLabels.keySet(), labels2MR);
+            if(toProcess.getDataStore() != null
+              && corpusOn.getDataStore() != null) {
+              corpusOn.getDataStore().sync(corpusOn);
+              Factory.deleteResource(toProcess);
+            }
           }
         }
       } else {
-      /*
-       * for(int i=0; i<corpusOn.size(); ++i) { if(! isUsedForTraining[i]) {
-       * evaluateAnnotations((Document)corpusOn.get(i), classTypeOriginal,
-       * classTypeTest, classFeature, uniqueLabels.keySet(), labels2MR); } }
-       */
-      // evaluation on each label using the AnnDiff method of Gate
-      for(int i = 0; i < corpusOn.size(); ++i)
+        /*
+         * for(int i=0; i<corpusOn.size(); ++i) { if(! isUsedForTraining[i]) {
+         * evaluateAnnotations((Document)corpusOn.get(i), classTypeOriginal,
+         * classTypeTest, classFeature, uniqueLabels.keySet(), labels2MR); } }
+         */
+        // evaluation on each label using the AnnDiff method of Gate
+        for(int i = 0; i < corpusOn.size(); ++i)
+          if(!isUsedForTraining[i]) {
+            Document toProcess = (Document)corpusOn.get(i);
+            evaluateAnnDiff(toProcess, classTypeOriginal,
+              classTypeTest, classFeature, uniqueLabels.keySet(), labels2MR);
+            if(toProcess.getDataStore() != null
+              && corpusOn.getDataStore() != null) {
+              corpusOn.getDataStore().sync(corpusOn);
+              Factory.deleteResource(toProcess);
+            }
+          }
+      }
+      // Pool the results of all labels together
+      for(Object obj : uniqueLabels.keySet())
+        measuresOfResults
+          .add((EvaluationMeasuresComputation)labels2MR.get(obj));
+      measuresOfResults.computeFmeasure();
+      measuresOfResults.computeFmeasureLenient();
+      for(Object obj : uniqueLabels.keySet()) {
+        EvaluationMeasuresComputation emc = (EvaluationMeasuresComputation)labels2MR
+          .get(obj);
+        emc.computeFmeasure();
+        emc.computeFmeasureLenient();
+      }
+      StringBuffer logMes = new StringBuffer();
+      logMes.append("Results of this run:\n\n");
+      logMes.append(printFmeasureForEachLabel(uniqueLabels, labels2MR));
+      logMes.append("\nOverall results(micro-averaged over all labels):\n");
+      logMes.append(measuresOfResults.printResults());
+      if(LogService.minVerbosityLevel > 1) {
+        System.out.println(logMes);
+      }
+      LogService.logMessage(logMes.toString(), 1);
+      // finally, change the class type back for training,
+      // and remove the test annotations
+      learningSettings.datasetDefinition.getClassAttribute().setType(
+        classTypeOriginal);
+      for(int i = 0; i < corpusOn.size(); ++i) {
         if(!isUsedForTraining[i]) {
-          evaluateAnnDiff((Document)corpusOn.get(i), classTypeOriginal,
-            classTypeTest, classFeature, uniqueLabels.keySet(), labels2MR);
-        }
-    }
-    // Pool the results of all labels together
-    for(Object obj : uniqueLabels.keySet())
-      measuresOfResults.add((EvaluationMeasuresComputation)labels2MR.get(obj));
-    measuresOfResults.computeFmeasure();
-    measuresOfResults.computeFmeasureLenient();
-    for(Object obj : uniqueLabels.keySet()) {
-      EvaluationMeasuresComputation emc = (EvaluationMeasuresComputation)labels2MR
-        .get(obj);
-      emc.computeFmeasure();
-      emc.computeFmeasureLenient();
-    }
-    StringBuffer logMes = new StringBuffer();
-    logMes.append("Results of this run:\n\n"); 
-    logMes.append(printFmeasureForEachLabel(uniqueLabels, labels2MR));
-    logMes.append("\nOverall results(micro-averaged over all labels):\n");
-    logMes.append(measuresOfResults.printResults());
-    if(LogService.minVerbosityLevel > 1) {
-      System.out.println(logMes);
-    }
-    LogService.logMessage(logMes.toString(), 1);
-    // finally, change the class type back for training,
-    // and remove the test annotations
-    learningSettings.datasetDefinition.getClassAttribute().setType(
-      classTypeOriginal);
-    for(int i = 0; i < corpusOn.size(); ++i) {
-      if(!isUsedForTraining[i]) {
-        Document toProcess = (Document)corpusOn.get(i);
-        AnnotationSet annsInput = getInputAS(toProcess);
-        AnnotationSet anns = annsInput.get(classTypeTest);
-        Iterator iter = anns.iterator();
-        while(iter.hasNext())
-          annsInput.remove((Annotation)iter.next());
-        if(toProcess.getDataStore() != null && corpusOn.getDataStore() != null) {
-          corpusOn.getDataStore().sync(corpusOn);
-          Factory.deleteResource(toProcess);
+          Document toProcess = (Document)corpusOn.get(i);
+          AnnotationSet annsInput = getInputAS(toProcess);
+          AnnotationSet anns = annsInput.get(classTypeTest);
+          Iterator iter = anns.iterator();
+          while(iter.hasNext())
+            annsInput.remove((Annotation)iter.next());
+          if(toProcess.getDataStore() != null
+            && corpusOn.getDataStore() != null) {
+            corpusOn.getDataStore().sync(corpusOn);
+            Factory.deleteResource(toProcess);
+          }
         }
       }
-    }
     } catch(ResourceInstantiationException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
-    }
-     catch(UnsupportedEncodingException e1) {
+    } catch(UnsupportedEncodingException e1) {
       // TODO Auto-generated catch block
       e1.printStackTrace();
     } catch(FileNotFoundException e1) {
@@ -571,12 +608,13 @@ public class EvaluationBasedOnDocs {
   }
 
   /** Empty the label list and feature list. */
-  public static void emptyDatafile(File wdResults,
-    boolean isRemoveList) {
+  public static void emptyDatafile(File wdResults, boolean isRemoveList) {
     if(isRemoveList) {
-      (new File(wdResults, ConstantParameters.FILENAMEOFNLPFeatureList)).delete();
+      (new File(wdResults, ConstantParameters.FILENAMEOFNLPFeatureList))
+        .delete();
       (new File(wdResults, ConstantParameters.FILENAMEOFLabelList)).delete();
-      (new File(wdResults, ConstantParameters.FILENAMEOFChunkLenStats)).delete();
+      (new File(wdResults, ConstantParameters.FILENAMEOFChunkLenStats))
+        .delete();
       (new File(wdResults, ConstantParameters.FILENAMEOFLabelsInData)).delete();
       try {
         (new File(wdResults, ConstantParameters.FILENAMEOFNLPFeatureList))
@@ -586,10 +624,12 @@ public class EvaluationBasedOnDocs {
         e.printStackTrace();
       }
     }
-    (new File(wdResults, ConstantParameters.FILENAMEOFNLPFeaturesData)).delete();
-    (new File(wdResults, ConstantParameters.FILENAMEOFFeatureVectorData)).delete();
+    (new File(wdResults, ConstantParameters.FILENAMEOFNLPFeaturesData))
+      .delete();
+    (new File(wdResults, ConstantParameters.FILENAMEOFFeatureVectorData))
+      .delete();
     (new File(wdResults, ConstantParameters.FILENAMEOFNLPDataLabel)).delete();
-    System.gc(); //to make effort to delete the files.
+    System.gc(); // to make effort to delete the files.
   }
 
   /** Add the F-measure of each label to the overal F-measure */
@@ -619,19 +659,19 @@ public class EvaluationBasedOnDocs {
   /** Print the F-measure results for each label. */
   public String printFmeasureForEachLabel(HashMap uniqueLabels,
     HashMap labels2MR) {
-    StringBuffer logMes= new StringBuffer();
+    StringBuffer logMes = new StringBuffer();
     logMes.append("\nResults of single label:\n");
-    //LogService.logMessage("\nResults of single label", 1);
+    // LogService.logMessage("\nResults of single label", 1);
     List labels = new ArrayList(uniqueLabels.keySet());
     Collections.sort(labels);
     for(int i = 0; i < labels.size(); ++i) {
       String labelName = labels.get(i).toString();
-      logMes.append(i + " LabelName=" + labelName
-        + ", number of instances="
-        + new Integer(uniqueLabels.get(labelName).toString())+"\n");
-      logMes.append(((EvaluationMeasuresComputation)labels2MR.get(labelName)).printResults());
-      //((EvaluationMeasuresComputation)labels2MR.get(labelName))
-        //.printResults(logFileIn);
+      logMes.append(i + " LabelName=" + labelName + ", number of instances="
+        + new Integer(uniqueLabels.get(labelName).toString()) + "\n");
+      logMes.append(((EvaluationMeasuresComputation)labels2MR.get(labelName))
+        .printResults());
+      // ((EvaluationMeasuresComputation)labels2MR.get(labelName))
+      // .printResults(logFileIn);
     }
     return logMes.toString();
   }
