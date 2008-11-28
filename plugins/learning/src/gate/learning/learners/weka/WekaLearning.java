@@ -119,7 +119,9 @@ public class WekaLearning {
     labelsFVDoc = new LabelsOfFeatureVectorDoc[numDocs];
     // Read the sparse FVs by using the method in MultiClassLearning class
     MultiClassLearning multiClassL = new MultiClassLearning();
-    multiClassL.getDataFromFile(numDocs, dataFile);
+    boolean isUsingDataFile = false;
+    File tempFVDataFile = null;
+    multiClassL.getDataFromFile(numDocs, dataFile, isUsingDataFile, tempFVDataFile);
     // Create the attributes.
     numFeats = multiClassL.dataFVinDoc.getTotalNumFeatures();
     FastVector attributes = new FastVector(numFeats + 1);
