@@ -168,8 +168,12 @@ public class EvaluationBasedOnDocs {
       for(i = 0; i < numDoc; ++i) {
         if(isUsedForTraining[i]) {
           ++ik;
+          Document toProcess = (Document)corpusOn.get(i);
           logMes
-            .append(ik + " " + ((Document)corpusOn.get(i)).getName() + "\n");
+            .append(ik + " " + toProcess.getName() + "\n");
+          if(toProcess.getDataStore() != null
+            && corpusOn.getDataStore() != null)
+            Factory.deleteResource(toProcess);
         }
       }
       logMes.append("Number of docs for application: "
@@ -178,8 +182,12 @@ public class EvaluationBasedOnDocs {
       for(i = 0; i < numDoc; ++i) {
         if(!isUsedForTraining[i]) {
           ++ik;
+          Document toProcess = (Document)corpusOn.get(i);
           logMes
-            .append(ik + " " + ((Document)corpusOn.get(i)).getName() + "\n");
+            .append(ik + " " + toProcess.getName() + "\n");
+          if(toProcess.getDataStore() != null
+            && corpusOn.getDataStore() != null)
+            Factory.deleteResource(toProcess);
         }
       }
       LogService.logMessage(logMes.toString(), 1);
@@ -273,8 +281,12 @@ public class EvaluationBasedOnDocs {
       for(int i = 0; i < numDoc; ++i) {
         if(isUsedForTraining[i]) {
           ++ik;
+          Document toProcess = (Document)corpusOn.get(i);
           logMes
-            .append(ik + " " + ((Document)corpusOn.get(i)).getName() + "\n");
+            .append(ik + " " + toProcess.getName() + "\n");
+          if(toProcess.getDataStore() != null
+            && corpusOn.getDataStore() != null)
+            Factory.deleteResource(toProcess);
         }
       }
       logMes.append("Number of docs for application: " + testNum + "\n");
@@ -282,8 +294,12 @@ public class EvaluationBasedOnDocs {
       for(int i = 0; i < numDoc; ++i) {
         if(!isUsedForTraining[i]) {
           ++ik;
+          Document toProcess = (Document)corpusOn.get(i);
           logMes
-            .append(ik + " " + ((Document)corpusOn.get(i)).getName() + "\n");
+            .append(ik + " " + toProcess.getName() + "\n");
+          if(toProcess.getDataStore() != null
+            && corpusOn.getDataStore() != null)
+            Factory.deleteResource(toProcess);
         }
       }
       LogService.logMessage(logMes.toString(), 1);
