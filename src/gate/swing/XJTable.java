@@ -34,7 +34,9 @@ import gate.util.ObjectComparator;
  * <li>updating the widths of the columns so they accommodate the contents to
  * their preferred sizes.</li>
  * <li>sizing the rows according to the preferred sizes of the renderers</li>
- * <li>ability to hide columns</li>
+ * <li>ability to hide/show columns</li>
+ * <li>ability for tab key to skip uneditable cells
+ * <li>ability to get in editing mode as soon as a cell gets the focus
  * </ul>
  * It uses a custom made model that stands between the table model set by the
  * user and the GUI component. This middle model is responsible for sorting the
@@ -56,7 +58,7 @@ public class XJTable extends JTable{
     super.setModel(sortingModel);
     newColumns();
   }
-  
+
   /**
    * Called when the columns have changed.
    */
@@ -189,6 +191,7 @@ public class XJTable extends JTable{
    * Converts a row number from the model co-ordinates system to the view's. 
    * @param modelRow the row number in the model
    * @return the corresponding row number in the view. 
+   * @see #rowViewToModel(int) 
    */
   public int rowModelToView(int modelRow){
     return sortingModel.sourceToTarget(modelRow);
@@ -214,7 +217,7 @@ public class XJTable extends JTable{
   }
   
   /**
-   * @param ascending The ascending to set.
+   * @param ascending The ascending to set. True by default.
    */
   public void setAscending(boolean ascending) {
     this.ascending = ascending;
@@ -222,7 +225,8 @@ public class XJTable extends JTable{
   /**
    * Converts a row number from the view co-ordinates system to the model's. 
    * @param viewRow the row number in the view.
-   * @return the corresponding row number in the model. 
+   * @return the corresponding row number in the model.
+   * @see #rowModelToView(int)
    */
   public int rowViewToModel(int viewRow){
     return sortingModel.targetToSource(viewRow);
@@ -231,19 +235,119 @@ public class XJTable extends JTable{
   /**
    * Set the possibility for the user to hide/show a column by right-clicking
    * on a column header. False by default.
-   * @param enable true if and only if the columns can be hidden.
+   * @param enableHiddingColumns true if and only if the columns can be hidden.
    */
-  public void setEnableHiddingColumns(boolean enable) {
-    this.enableHiddingColumns = enable;
+  public void setEnableHiddingColumns(boolean enableHiddingColumns) {
+    this.enableHiddingColumns = enableHiddingColumns;
   }
 
   /**
-   * Get the possibility for the user to hide/show a column.
+   * Returns the state for hidding a column.
    * @return true if and only if the columns can be hidden.
    */
-  public boolean getEnableHiddingColumns() {
+  public boolean isEnableHiddingColumns() {
     return this.enableHiddingColumns;
   }
+
+  /**
+   * Returns the state for editing a cell as soon as it gets the focus.
+   * @return true if and only if a cell get in editing mode when
+   * it receives the focus.
+   */
+  public boolean isEditCellAsSoonAsFocus() {
+    return editCellAsSoonAsFocus;
+  }
+
+  /**
+   * Set the possibility for a cell to be in editing mode as soon as
+   * it gets the focus. False by default.
+   * @param editCellAsSoonAsFocus true if and only if a cell get in editing
+   * mode when it receives the focus.
+   */
+  public void setEditCellAsSoonAsFocus(boolean editCellAsSoonAsFocus) {
+    this.editCellAsSoonAsFocus = editCellAsSoonAsFocus;
+  }
+
+  /**
+   * Returns the state for enabling tab key to skip uneditable cells.
+   * @return true if and only if the tab key skip uneditable cells.
+   */
+  public boolean isTabSkipUneditableCell() {
+    return tabSkipUneditableCell;
+  }
+
+  /**
+   * Set the possibility for the tab key to skip uneditable cells.
+   * False by default.
+   * @param tabSkipUneditableCell true if and only if the tab key skip
+   * uneditable cells.
+   */
+  public void setTabSkipUneditableCell(boolean tabSkipUneditableCell) {
+
+    this.tabSkipUneditableCell = tabSkipUneditableCell;
+
+    InputMap im = getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    KeyStroke tab = KeyStroke.getKeyStroke("TAB");
+    KeyStroke shiftTab = KeyStroke.getKeyStroke("shift TAB");
+    if (oldTabAction == null) {
+      oldTabAction = getActionMap().get(im.get(tab));
+      oldShiftTabAction = getActionMap().get(im.get(shiftTab));
+    }
+
+    if (tabSkipUneditableCell) {
+
+      // skip non editable cells when tabbing
+      Action tabAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+          oldTabAction.actionPerformed(e);
+          JTable table = (JTable) e.getSource();
+          int row = table.getSelectedRow();
+          int originalRow = row;
+          int column = table.getSelectedColumn();
+          int originalColumn = column;
+          while(!table.isCellEditable(row, column)) {
+            oldTabAction.actionPerformed(e);
+            row = table.getSelectedRow();
+            column = table.getSelectedColumn();
+            //  back to where we started, get out
+            if(row == originalRow
+              && column == originalColumn) {
+              break;
+            }
+          }
+        }
+      };
+      getActionMap().put(im.get(tab), tabAction);
+
+      // skip non editable cells when shift tabbing
+      Action shiftTabAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+          oldShiftTabAction.actionPerformed(e);
+          JTable table = (JTable) e.getSource();
+          int row = table.getSelectedRow();
+          int originalRow = row;
+          int column = table.getSelectedColumn();
+          int originalColumn = column;
+          while(!table.isCellEditable(row, column)) {
+            oldShiftTabAction.actionPerformed(e);
+            row = table.getSelectedRow();
+            column = table.getSelectedColumn();
+            //  back to where we started, get out
+            if(row == originalRow
+              && column == originalColumn) {
+              break;
+            }
+          }
+        }
+      };
+      getActionMap().put(im.get(shiftTab), shiftTabAction);
+
+    } else {
+      getActionMap().put(im.get(tab), oldTabAction);
+      getActionMap().put(im.get(shiftTab), oldShiftTabAction);
+    }
+  }
+
 
   /**
    * Sets the custom comparator to be used for a particular column. Columns that
@@ -262,7 +366,7 @@ public class XJTable extends JTable{
     return sortable;
   }
   /**
-   * @param sortable The sortable to set.
+   * @param sortable The sortable to set. True by default.
    */
   public void setSortable(boolean sortable){
     this.sortable = sortable;
@@ -274,7 +378,7 @@ public class XJTable extends JTable{
     return sortedColumn;
   }
   /**
-   * @param sortColumn The sortColumn to set.
+   * @param sortColumn The sortColumn to set. None (-1) by default.
    */
   public void setSortedColumn(int sortColumn){
     this.sortedColumn = sortColumn;
@@ -282,6 +386,8 @@ public class XJTable extends JTable{
   
   /**
    * Get the row in the table for a row in the model.
+   * @param modelRow row in the model
+   * @return row in the table view
    */
   public int getTableRow(int modelRow){
     return sortingModel.sourceToTarget(modelRow);
@@ -571,8 +677,12 @@ public class XJTable extends JTable{
     public void mouseClicked(MouseEvent e){
       process(e);
     }
-    
+
     public void mousePressed(MouseEvent e){
+      process(e);
+    }
+
+    public void mouseReleased(MouseEvent e){
       process(e);
     }
 
@@ -580,7 +690,8 @@ public class XJTable extends JTable{
       final int viewColumn = columnModel.getColumnIndexAtX(e.getX());
       if(viewColumn != -1){
         final int column = convertColumnIndexToModel(viewColumn);
-        if(e.isPopupTrigger() && enableHiddingColumns){
+        if(e.isPopupTrigger()
+        && enableHiddingColumns){
           //show pop-up
           JPopupMenu popup = new JPopupMenu();
           if (columnModel.getColumnCount() > 1) {
@@ -610,8 +721,10 @@ public class XJTable extends JTable{
             });
           }
           popup.show(e.getComponent(), e.getX(), e.getY());
-        }else if(e.getID() == MouseEvent.MOUSE_CLICKED &&
-               e.getButton() == MouseEvent.BUTTON1){
+        }
+        else if(!e.isPopupTrigger()
+              && e.getID() == MouseEvent.MOUSE_CLICKED
+              && e.getClickCount() == 1){
           //normal click -> re-sort
           if(sortable && column != -1) {
             ascending = (column == sortedColumn) ? !ascending : true;
@@ -632,7 +745,16 @@ public class XJTable extends JTable{
     int columnWidth;
     Comparator comparator;
   }
-  
+
+  public void changeSelection(int rowIndex, int columnIndex,
+                              boolean toggle, boolean extend) {
+    super.changeSelection(rowIndex, columnIndex, toggle, extend);
+    if (!toggle && !extend && editCellAsSoonAsFocus) {
+      // start cell editing as soon as a cell is selected
+      this.editCellAt(rowIndex, columnIndex);
+    }
+  }
+
   protected SortingModel sortingModel;
   protected ObjectComparator defaultComparator;
   
@@ -663,4 +785,12 @@ public class XJTable extends JTable{
   protected List<TableColumn> hiddenColumns;
 
   private boolean enableHiddingColumns = false;
+
+  private boolean tabSkipUneditableCell = false;
+
+  private boolean editCellAsSoonAsFocus = false;
+
+  private Action oldTabAction;
+
+  private Action oldShiftTabAction;
 }

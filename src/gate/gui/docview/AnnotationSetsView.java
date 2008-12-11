@@ -450,10 +450,14 @@ public class AnnotationSetsView extends AbstractDocumentView
   }
 
   protected void initListeners(){
+
     document.addDocumentListener(this);
+
+    // popup menu to change the color, select, unselect
+    // and delete annotation types
     mainTable.addMouseListener(new MouseAdapter(){
       public void mouseClicked(MouseEvent evt){
-        mouseEvent(evt);
+        processMouseEvent(evt);
       }
       public void mousePressed(MouseEvent evt){
         int row =  mainTable.rowAtPoint(evt.getPoint());
@@ -462,44 +466,100 @@ public class AnnotationSetsView extends AbstractDocumentView
           // if right click outside the selection then reset selection
           mainTable.getSelectionModel().setSelectionInterval(row, row);
         }
-        mouseEvent(evt);
+        processMouseEvent(evt);
       }
-      
       public void mouseReleased(MouseEvent evt){
-        mouseEvent(evt);
+        processMouseEvent(evt);
       }
-
-      public void mouseEvent(MouseEvent evt) {
-        int row =  mainTable.rowAtPoint(evt.getPoint());
+      protected void processMouseEvent(MouseEvent evt){
+        int row = mainTable.rowAtPoint(evt.getPoint());
         int col = mainTable.columnAtPoint(evt.getPoint());
+
         if(row >= 0 && col == NAME_COL){
           Object handler = tableRows.get(row);
-          if(evt.getClickCount() >= 2){
-            //double click
-            if(handler instanceof TypeHandler){
-              TypeHandler tHandler = (TypeHandler)handler;
-              tHandler.changeColourAction.actionPerformed(null);
-            }
-          } else if(evt.isPopupTrigger()){
+          if(evt.isPopupTrigger()){
             // popup menu
             JPopupMenu popup = new JPopupMenu();
             if(handler instanceof TypeHandler
             && mainTable.getSelectedRowCount() == 1){
               TypeHandler tHandler = (TypeHandler)handler;
               popup.add(tHandler.changeColourAction);
+              popup.add(new DeleteSelectedAnnotationGroupAction("Delete"));
             } else if (mainTable.getSelectedRowCount() > 1
                     || handler instanceof SetHandler) {
               popup.add(new SetSelectedAnnotationGroupAction(true));
               popup.add(new SetSelectedAnnotationGroupAction(false));
+              popup.add(new DeleteSelectedAnnotationGroupAction("Delete all"));
             }
-            popup.add(new DeleteSelectedAnnotationGroupAction());
-            popup.show(mainTable, evt.getX(), evt.getY());
+            if (popup.getComponentCount() > 0) {
+              popup.show(mainTable, evt.getX(), evt.getY());
+            }
+          } else if(evt.getClickCount() >= 2
+            && evt.getID() == MouseEvent.MOUSE_CLICKED
+            && handler instanceof TypeHandler){
+              //double click
+              TypeHandler tHandler = (TypeHandler)handler;
+              tHandler.changeColourAction.actionPerformed(null);
           }
         }
       }
     });
-    
-    
+
+    // Enter key to change the color of annotation type 
+    // Space key to select/unselect annotation type
+    // Left/Right keys to close/open an annotation set
+    mainTable.addKeyListener(new KeyAdapter(){
+      public void keyPressed(KeyEvent e) {
+        int row = mainTable.getSelectedRow();
+        int col = mainTable.getSelectedColumn();
+        if(row <= 0
+        || mainTable.getSelectedRowCount() > 1) {
+          return;
+        }
+        Object handler = tableRows.get(row);
+        if (col == NAME_COL) {
+          if(e.getKeyCode() == KeyEvent.VK_ENTER
+            && handler instanceof TypeHandler){
+              TypeHandler tHandler = (TypeHandler)handler;
+              tHandler.changeColourAction.actionPerformed(null);
+            e.consume();
+          } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+            if (handler instanceof TypeHandler){
+              TypeHandler tHandler = (TypeHandler)handler;
+              (new SetSelectedAnnotationGroupAction(!tHandler.selected))
+                .actionPerformed(null);
+            } else if (handler instanceof SetHandler) {
+              SetHandler sHandler = (SetHandler)handler;
+              boolean allUnselected = true;
+              for (TypeHandler tHandler : sHandler.typeHandlers) {
+                if (tHandler.selected) {
+                  allUnselected = false;
+                  break;
+                }
+              }
+              (new SetSelectedAnnotationGroupAction(allUnselected))
+                .actionPerformed(null);
+            }
+          } else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+            if (handler instanceof SetHandler) {
+              ((SetHandler)handler).setExpanded(false);
+              mainTable.setColumnSelectionInterval(col, col);
+              mainTable.setRowSelectionInterval(row, row);
+            }
+            e.consume();
+
+          } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+            if (handler instanceof SetHandler) {
+              ((SetHandler)handler).setExpanded(true);
+              mainTable.setColumnSelectionInterval(col, col);
+              mainTable.setRowSelectionInterval(row, row);
+            }
+            e.consume();
+          }
+        }
+      }
+    });
+
     mouseStoppedMovingAction = new MouseStoppedMovingAction();
     mouseMovementTimer = new javax.swing.Timer(MOUSE_MOVEMENT_TIMER_DELAY, 
             mouseStoppedMovingAction);
@@ -523,12 +583,41 @@ public class AnnotationSetsView extends AbstractDocumentView
     };
     
     mainTable.getInputMap().put(
-            KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "deleteAll");
+            KeyStroke.getKeyStroke("DELETE"), "deleteAll");
     mainTable.getActionMap().put("deleteAll", 
-            new DeleteSelectedAnnotationGroupAction());
+            new DeleteSelectedAnnotationGroupAction("Delete"));
     newSetNameTextField.getInputMap().put(
             KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "newSet");
     newSetNameTextField.getActionMap().put("newSet", newSetAction);
+
+    // skip first column when tabbing
+    InputMap im =
+      mainTable.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    KeyStroke tab = KeyStroke.getKeyStroke("TAB");
+    final Action oldTabAction = mainTable.getActionMap().get(im.get(tab));
+    Action tabAction = new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        oldTabAction.actionPerformed(e);
+        JTable table = (JTable) e.getSource();
+        if(table.getSelectedColumn() == SELECTED_COL) {
+          oldTabAction.actionPerformed(e);
+        }
+      }
+    };
+    mainTable.getActionMap().put(im.get(tab), tabAction);
+    KeyStroke shiftTab = KeyStroke.getKeyStroke("shift TAB");
+    final Action oldShiftTabAction =
+      mainTable.getActionMap().get(im.get(shiftTab));
+    Action shiftTabAction = new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        oldShiftTabAction.actionPerformed(e);
+        JTable table = (JTable) e.getSource();
+        if(table.getSelectedColumn() == SELECTED_COL) {
+          oldShiftTabAction.actionPerformed(e);
+        }
+      }
+    };
+    mainTable.getActionMap().put(im.get(shiftTab), shiftTabAction);
   }
     
 	
@@ -830,7 +919,7 @@ public class AnnotationSetsView extends AbstractDocumentView
       }
       return columnIndex == SELECTED_COL;
     }
-    
+
     public void setValueAt(Object aValue, int rowIndex, int columnIndex){
       Object receiver = tableRows.get(rowIndex);
       switch(columnIndex){
@@ -1032,7 +1121,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     }
     
     public boolean shouldSelectCell(EventObject anEvent){
-      return true;
+      return false;
     }
     
     public boolean isCellEditable(EventObject anEvent){
@@ -2050,12 +2139,10 @@ public class AnnotationSetsView extends AbstractDocumentView
   }
 
   protected class DeleteSelectedAnnotationGroupAction extends AbstractAction{
-    public DeleteSelectedAnnotationGroupAction(){
+    public DeleteSelectedAnnotationGroupAction(String name){
       super();
-      String title = "Delete";
-      if (mainTable.getSelectedRowCount() > 1) { title += " all"; }
-      super.putValue(NAME, title);
-      super.putValue(SHORT_DESCRIPTION, title + " annotations.");
+      super.putValue(NAME, name);
+      super.putValue(SHORT_DESCRIPTION, name + " annotations.");
       super.putValue(MNEMONIC_KEY, KeyEvent.VK_DELETE);
     }
     public void actionPerformed(ActionEvent evt){

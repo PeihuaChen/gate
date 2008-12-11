@@ -178,20 +178,20 @@ public class AnnotationListView extends AbstractDocumentView
         }
     });
 
-    table.addMouseListener(new MouseListener() {
+    table.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent me) {
         processMouseEvent(me);
       }
       public void mouseReleased(MouseEvent me) {
         processMouseEvent(me);
       }
-      public void mouseEntered(MouseEvent me) {
-        processMouseEvent(me);
-      }
-      public void mouseExited(MouseEvent me) { 
-        processMouseEvent(me);
-      }
       public void mousePressed(MouseEvent me) {
+        int row = table.rowAtPoint(me.getPoint());
+        if(me.isPopupTrigger()
+        && !table.isRowSelected(row)) {
+          // if right click outside the selection then reset selection
+          table.getSelectionModel().setSelectionInterval(row, row);
+        }
         processMouseEvent(me);
       }
       protected void processMouseEvent(MouseEvent me){
@@ -200,7 +200,7 @@ public class AnnotationListView extends AbstractDocumentView
                              viewRow : 
                              table.rowViewToModel(viewRow);
         
-        // right click
+        // popup menu
         if(me.isPopupTrigger()) {
           JPopupMenu popup = new JPopupMenu();
           Action deleteAction = new AbstractAction("Delete"){
