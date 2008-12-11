@@ -21,7 +21,6 @@ import gate.util.Err;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.text.NumberFormat;
 import javax.swing.*;
 import javax.swing.table.TableCellEditor;
@@ -91,7 +90,7 @@ public class NewResourceDialog extends JDialog {
 
 
   protected void initListeners(){
-    okBtn.addActionListener(new ActionListener() {
+    Action applyAction = new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
         userCanceled = false;
         TableCellEditor cellEditor = parametersEditor.getCellEditor();
@@ -99,16 +98,28 @@ public class NewResourceDialog extends JDialog {
           cellEditor.stopCellEditing();
         }
         setVisible(false);
-      }//public void actionPerformed(ActionEvent e)
-    });
-
-    cancelBtn.addActionListener(new ActionListener() {
+      }
+    };
+    Action cancelAction = new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
         userCanceled = true;
         setVisible(false);
-      }//public void actionPerformed(ActionEvent e)
-    });
-  }//protected void initListeners()
+      }
+    };
+
+    okBtn.addActionListener(applyAction);
+    cancelBtn.addActionListener(cancelAction);
+
+    // define keystrokes action bindings at the level of the main window
+    InputMap inputMap = ((JComponent)this.getContentPane()).
+      getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+    ActionMap actionMap =
+      ((JComponent)this.getContentPane()).getActionMap();
+    inputMap.put(KeyStroke.getKeyStroke("ENTER"), "Apply");
+    actionMap.put("Apply", applyAction);
+    inputMap.put(KeyStroke.getKeyStroke("ESCAPE"), "Cancel");
+    actionMap.put("Cancel", cancelAction);
+  }
 
   JButton okBtn, cancelBtn;
   JTextField nameField;

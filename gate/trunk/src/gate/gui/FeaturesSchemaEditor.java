@@ -100,14 +100,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
   
   protected void initGUI(){
     featuresModel = new FeaturesTableModel();
-    mainTable = new XJTable() {
-      public void changeSelection(int rowIndex, int columnIndex,
-                                  boolean toggle, boolean extend) {
-        super.changeSelection(rowIndex, columnIndex, toggle, extend);
-        // start cell editing as soon as a cell is selected
-        this.editCellAt(rowIndex, columnIndex);
-      }
-    };
+    mainTable = new XJTable();
     mainTable.setModel(featuresModel);
     mainTable.setTableHeader(null);
     mainTable.setSortable(false);
@@ -115,6 +108,8 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
     mainTable.setShowGrid(false);
     mainTable.setBackground(getBackground());
     mainTable.setIntercellSpacing(new Dimension(2,2));
+    mainTable.setTabSkipUneditableCell(true);
+    mainTable.setEditCellAsSoonAsFocus(true);
     featureEditorRenderer = new FeatureEditorRenderer();
     mainTable.getColumnModel().getColumn(ICON_COL).
         setCellRenderer(featureEditorRenderer);
@@ -139,49 +134,31 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
     mainTable.setBackground(tableBG);
 
     // allow Tab key to select the next cell in the table
-    mainTable.setFocusCycleRoot(true);
     mainTable.setSurrendersFocusOnKeystroke(true);
 
-    // remove control tab as traversal key
+    // remove (shift) control tab as traversal keys
     Set<AWTKeyStroke> keySet = new HashSet<AWTKeyStroke>(
       mainTable.getFocusTraversalKeys(
       KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS));
     keySet.remove(KeyStroke.getKeyStroke("control TAB"));
     mainTable.setFocusTraversalKeys(
       KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, keySet);
+    keySet = new HashSet<AWTKeyStroke>(
+      mainTable.getFocusTraversalKeys(
+      KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS));
+    keySet.remove(KeyStroke.getKeyStroke("shift control TAB"));
+    mainTable.setFocusTraversalKeys(
+      KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, keySet);
 
-    // add control tab to go the container of this component
+    // add (shift) control tab to go the container of this component
     keySet.clear();
     keySet.add(KeyStroke.getKeyStroke("control TAB"));
     mainTable.setFocusTraversalKeys(
       KeyboardFocusManager.UP_CYCLE_TRAVERSAL_KEYS, keySet);
-
-    // skip non editable cells when tabbing
-    InputMap im =
-      mainTable.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-    KeyStroke tab = KeyStroke.getKeyStroke("TAB");
-    final Action oldTabAction = mainTable.getActionMap().get(im.get(tab));
-    Action tabAction = new AbstractAction() {
-      public void actionPerformed(ActionEvent e) {
-        oldTabAction.actionPerformed(e);
-        JTable table = (JTable) e.getSource();
-        int row = table.getSelectedRow();
-        int originalRow = row;
-        int column = table.getSelectedColumn();
-        int originalColumn = column;
-        while(!table.isCellEditable(row, column)) {
-          oldTabAction.actionPerformed(e);
-          row = table.getSelectedRow();
-          column = table.getSelectedColumn();
-          //  back to where we started, get out
-          if(row == originalRow
-            && column == originalColumn) {
-            break;
-          }
-        }
-      }
-    };
-    mainTable.getActionMap().put(im.get(tab), tabAction);
+    keySet.clear();
+    keySet.add(KeyStroke.getKeyStroke("shift control TAB"));
+    mainTable.setFocusTraversalKeys(
+      KeyboardFocusManager.DOWN_CYCLE_TRAVERSAL_KEYS, keySet);
 
     scroller = new JScrollPane(mainTable);
     scroller.getViewport().setOpaque(true);

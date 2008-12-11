@@ -112,7 +112,19 @@ public class AnnotationEditor extends AbstractVisualResource
   }
   
   protected void initBottomWindow(Window parent){
-    popupWindow = new JWindow(parent);
+    popupWindow = new JWindow(parent) {
+      public void pack() {
+        // increase the feature table size only if not bigger
+        // than the main frame
+        if (featuresEditor.getHeight()
+            > MainFrame.getInstance().getHeight()) {
+          featuresEditor.setPreferredSize(
+            new Dimension(featuresEditor.getPreferredSize().width,
+                          MainFrame.getInstance().getHeight()));
+        }
+        super.pack();
+      }
+    };
     JPanel pane = new JPanel();
     pane.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
     pane.setLayout(new GridBagLayout());

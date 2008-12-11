@@ -22,7 +22,6 @@ import java.util.*;
 import java.util.List;
 
 import javax.swing.*;
-import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.*;
 
@@ -49,6 +48,8 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
     setSortable(true);
     setSortedColumn(0);
     setComparator(0, new ParameterDisjunctionComparator());
+    setTabSkipUneditableCell(true);
+    setEditCellAsSoonAsFocus(true);
   }
 
   /**
@@ -99,6 +100,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
 
   protected void initListeners() {
     Gate.getCreoleRegister().addCreoleListener(this);
+
     addKeyListener(new KeyAdapter() {
       public void keyTyped(KeyEvent e) {
         if(e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -106,12 +108,6 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
             getParent().dispatchEvent(e);
           }
         }
-      }
-
-      public void keyPressed(KeyEvent e) {
-      }
-
-      public void keyReleased(KeyEvent e) {
       }
     });
   }
@@ -370,7 +366,6 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
           return this;
         }
       }
-      ;
       combo.setRenderer(new CustomRenderer());
     }
 
@@ -409,11 +404,11 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
    */
   class ParameterValueRenderer extends ObjectRenderer {
     ParameterValueRenderer() {
-      fileButton = new JButton(MainFrame.getIcon("open-file"));
+      fileButton = new JButton("Browse...", MainFrame.getIcon("open-file"));
       fileButton.setToolTipText("Set from file...");
-      listButton = new JButton(MainFrame.getIcon("edit-list"));
+      listButton = new JButton("Edit...", MainFrame.getIcon("edit-list"));
       listButton.setToolTipText("Edit the list");
-      fmButton = new JButton(MainFrame.getIcon("edit-list"));
+      fmButton = new JButton("Edit...", MainFrame.getIcon("edit-list"));
       fmButton.setToolTipText("Edit the feature map");
       textField = new JTextField();
       textButtonBox = new JPanel();
@@ -642,7 +637,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       textField = new JTextField();
 
       fileChooser = MainFrame.getFileChooser();
-      fileButton = new JButton(MainFrame.getIcon("open-file"));
+      fileButton = new JButton("Browse...", MainFrame.getIcon("open-file"));
       fileButton.setToolTipText("Set from file...");
       fileButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -664,7 +659,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
         }
       });
 
-      listButton = new JButton(MainFrame.getIcon("edit-list"));
+      listButton = new JButton("Edit...", MainFrame.getIcon("edit-list"));
       listButton.setToolTipText("Edit the collection");
       listButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -679,7 +674,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
         }
       });
 
-      fmButton = new JButton(MainFrame.getIcon("edit-list"));
+      fmButton = new JButton("Edit...", MainFrame.getIcon("edit-list"));
       fmButton.setToolTipText("Edit the feature map");
       fmButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -722,15 +717,22 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
 
       textButtonBox.addFocusListener(new FocusAdapter() {
         public void focusGained(FocusEvent e) {
-          if(comboUsed) {
-
-          }
-          else {
+          if(!comboUsed) {
+            // needed because the focus would otherwise stay
+            // on the textButtonBox panel
             textField.requestFocusInWindow();
           }
         }
-
-        public void focusLost(FocusEvent e) {
+      });
+      // select the opposite element when tab/right key is pressed
+      textField.addKeyListener(new KeyAdapter() {
+        public void keyPressed(KeyEvent e) {
+          JTextField textField = (JTextField) e.getSource();
+          if((e.getKeyCode() == KeyEvent.VK_TAB
+          || e.getKeyCode() == KeyEvent.VK_RIGHT)
+          && textField.getParent().getComponentCount() == 3) {
+            textField.getParent().getComponent(2).requestFocusInWindow();
+          }
         }
       });
 

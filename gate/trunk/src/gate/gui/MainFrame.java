@@ -283,6 +283,19 @@ public class MainFrame extends JFrame implements ProgressListener,
         mainTabbedPane.addTab(handle.getTitle(), handle.getIcon(), largeView,
           handle.getTooltipText());
         mainTabbedPane.setSelectedComponent(handle.getLargeView());
+        // put the focus on the new tab
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            if (largeView != null) {
+              if ((largeView instanceof JTabbedPane)
+              && (((JTabbedPane)largeView).getSelectedComponent() != null)) {
+                ((JTabbedPane)largeView).getSelectedComponent().requestFocus();
+              } else {
+                largeView.requestFocus();
+              }
+            }
+          }
+        });
       }
     }
     // show the small view
@@ -293,19 +306,6 @@ public class MainFrame extends JFrame implements ProgressListener,
     else {
       lowerScroll.getViewport().setView(null);
     }
-    // select the tab
-    SwingUtilities.invokeLater(new Runnable() {
-    public void run() {
-    if (largeView != null) {
-      if ((largeView instanceof JTabbedPane)
-      && (((JTabbedPane)largeView).getSelectedComponent() != null)) {
-        ((JTabbedPane)largeView).getSelectedComponent().requestFocus();
-      } else {
-        largeView.requestFocus();
-      }
-    }
-    }
-    });
   }// protected void select(ResourceHandle handle)
 
   public MainFrame() {
@@ -844,7 +844,22 @@ public class MainFrame extends JFrame implements ProgressListener,
     });
 
     resourcesTree.addMouseListener(new MouseAdapter() {
+      public void mousePressed(MouseEvent e) {
+        TreePath path = resourcesTree.getPathForLocation(e.getX(), e.getY());
+        if(e.isPopupTrigger()
+        && !resourcesTree.isPathSelected(path)) {
+          // if right click outside the selection then reset selection
+          resourcesTree.getSelectionModel().setSelectionPath(path);
+        }
+        processMouseEvent(e);
+      }
+      public void mouseReleased(MouseEvent e) {
+          processMouseEvent(e);
+      }
       public void mouseClicked(MouseEvent e) {
+        processMouseEvent(e);
+      }
+      protected void processMouseEvent(MouseEvent e){
         // where inside the tree?
         int x = e.getX();
         int y = e.getY();
@@ -854,6 +869,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         if(path != null) {
           Object value = path.getLastPathComponent();
           if(value == resourcesTreeRoot) {
+            // no default item for this menu
           }
           else if(value == applicationsRoot) {
             popup = appsPopup;
@@ -873,15 +889,16 @@ public class MainFrame extends JFrame implements ProgressListener,
               handle = (Handle)value;
               currentResourceClassName =
                 handle.getTarget().getClass().getName();
-              popup = handle.getPopup();
+              if(e.isPopupTrigger()) { popup = handle.getPopup(); }
             }
           }
         }
-        if(SwingUtilities.isRightMouseButton(e)) {
+        // popup menu
+        if(e.isPopupTrigger()) {
           if(resourcesTree.getSelectionCount() > 1) {
             // multiple selection in tree
             popup = new XJPopupMenu();
-            
+
             // add a remove all action
             popup.add(new XJMenuItem(new CloseSelectedResourcesAction(),
                     MainFrame.this));
@@ -929,24 +946,12 @@ public class MainFrame extends JFrame implements ProgressListener,
             popup.show(resourcesTree, e.getX(), e.getY());
           }
         }
-        else if(SwingUtilities.isLeftMouseButton(e)) {
-          if(e.getClickCount() == 2 && handle != null) {
+        else if(e.getID() == MouseEvent.MOUSE_CLICKED
+             && e.getClickCount() == 2
+             && handle != null) {
             // double click - show the resource
             select(handle);
-          }
         }
-      }
-
-      public void mousePressed(MouseEvent e) {
-      }
-
-      public void mouseReleased(MouseEvent e) {
-      }
-
-      public void mouseEntered(MouseEvent e) {
-      }
-
-      public void mouseExited(MouseEvent e) {
       }
     });
 
@@ -975,6 +980,57 @@ public class MainFrame extends JFrame implements ProgressListener,
     inputMap.put(KeyStroke.getKeyStroke("control H"), "Hide");
     inputMap.put(KeyStroke.getKeyStroke("control shift H"), "Hide all");
     inputMap.put(KeyStroke.getKeyStroke("control X"), "Save As XML");
+
+    // add the support of the context menu key for user without mouse
+    // TODO: remove when JAVA SWING will take care of it
+    if (inputMap.get(KeyStroke.getKeyStroke("CONTEXT_MENU")) == null) {
+      inputMap.put(KeyStroke.getKeyStroke("CONTEXT_MENU"), "Show context menu");
+    }
+    ActionMap actionMap =
+      ((JComponent)instance.getContentPane()).getActionMap();
+    actionMap.put("Show context menu", new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        KeyboardFocusManager focusManager =
+          KeyboardFocusManager.getCurrentKeyboardFocusManager();
+        // get the current focused component
+        Component focusedComponent = focusManager.getFocusOwner();
+        if (focusedComponent != null) {
+          Point menuLocation = null;
+          Rectangle selectionRectangle = null;
+          if (focusedComponent instanceof JTable
+          && ((JTable)focusedComponent).getSelectedRowCount() > 0) {
+            // in case of a JTable get the location of the selection
+            JTable table = (JTable)focusedComponent;
+            selectionRectangle = table.getCellRect(
+              table.getSelectionModel().getLeadSelectionIndex(),
+              table.convertColumnIndexToView(table.getSelectedColumn()),
+              false);
+          } else if (focusedComponent instanceof JTree
+          && ((JTree)focusedComponent).getSelectionCount() > 0) {
+            JTree tree = (JTree)focusedComponent;
+            selectionRectangle = tree.getRowBounds(
+              tree.getSelectionModel().getLeadSelectionRow());
+          } else {
+            // set the menu location at the top left corner
+            menuLocation = new Point(focusedComponent.getX()-1,
+                                     focusedComponent.getY()-1);
+          }
+          if (menuLocation == null) {
+            // menu location at the bottom left of the selected component
+            menuLocation = new Point(
+              new Double(selectionRectangle.getMinX()+1).intValue(),
+              new Double(selectionRectangle.getMaxY()-1).intValue());
+          }
+
+          // generate a right/button 3/popup menu mouse click
+          focusedComponent.dispatchEvent(
+            new MouseEvent(focusedComponent, MouseEvent.MOUSE_PRESSED,
+              e.getWhen(), MouseEvent.BUTTON3_DOWN_MASK,
+              menuLocation.x, menuLocation.y,
+              1, true, MouseEvent.BUTTON3));
+        }
+      }
+    });
 
     mainTabbedPane.getModel().addChangeListener(new ChangeListener() {
       public void stateChanged(ChangeEvent e) {
@@ -1024,8 +1080,14 @@ public class MainFrame extends JFrame implements ProgressListener,
     });
 
     mainTabbedPane.addMouseListener(new MouseAdapter() {
-      public void mouseClicked(MouseEvent e) {
-        if(SwingUtilities.isRightMouseButton(e)) {
+      public void mousePressed(MouseEvent e) {
+        processMouseEvent(e);
+      }
+      public void mouseReleased(MouseEvent e) {
+        processMouseEvent(e);
+      }
+      protected void processMouseEvent(MouseEvent e){
+        if(e.isPopupTrigger()) {
           int index = mainTabbedPane.getIndexAt(e.getPoint());
           if(index != -1) {
             JComponent view = (JComponent)mainTabbedPane.getComponentAt(index);
@@ -1042,7 +1104,7 @@ public class MainFrame extends JFrame implements ProgressListener,
               Handle handle = (Handle)node.getUserObject();
               JPopupMenu popup = handle.getPopup();
 
-              // add a remove action
+              // add a hide action
               CloseViewAction cva = new CloseViewAction(handle);
               XJMenuItem menuItem = new XJMenuItem(cva, MainFrame.this);
               popup.insert(menuItem, 0);
@@ -1059,31 +1121,9 @@ public class MainFrame extends JFrame implements ProgressListener,
           }
         }
       }
-
-      public void mousePressed(MouseEvent e) {
-      }
-
-      public void mouseReleased(MouseEvent e) {
-      }
-
-      public void mouseEntered(MouseEvent e) {
-      }
-
-      public void mouseExited(MouseEvent e) {
-      }
     });
 
     addComponentListener(new ComponentAdapter() {
-      public void componentHidden(ComponentEvent e) {
-
-      }
-
-      public void componentMoved(ComponentEvent e) {
-      }
-
-      public void componentResized(ComponentEvent e) {
-      }
-
       public void componentShown(ComponentEvent e) {
         leftSplit.setDividerLocation((double)0.7);
       }
