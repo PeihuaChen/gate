@@ -379,7 +379,7 @@ public class Main {
           "UTF-8"));
       Main.version = reader.readLine();
     } catch(IOException ioe) {
-      Main.version = "3.0";
+      Main.version = "5.0";
     }
 
     // find out the build number
