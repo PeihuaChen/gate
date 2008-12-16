@@ -16,6 +16,7 @@
 package gate.jape;
 
 import java.util.*;
+import java.util.concurrent.*;
 
 import org.apache.log4j.Logger;
 
@@ -64,6 +65,41 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     }
   }
 
+
+  private class FSMMatcher implements Runnable{
+    
+    /**
+     * @param currentInstance
+     * @param acceptingFSMs
+     * @param offsets
+     * @param annotationsByOffset
+     * @param document
+     */
+    public FSMMatcher(FSMInstance currentInstance,
+            List<FSMInstance> acceptingFSMs, SimpleSortedSet offsets,
+            SimpleSortedSet annotationsByOffset, Document document) {
+      this.currentInstance = currentInstance;
+      this.acceptingFSMs = acceptingFSMs;
+      this.offsets = offsets;
+      this.annotationsByOffset = annotationsByOffset;
+      this.document = document;
+    }
+    public void run(){
+      List<FSMInstance> newFSMs = attemptAdvance(currentInstance,
+              acceptingFSMs, offsets, annotationsByOffset, document);
+      synchronized(activeFSMInstances) {
+        if(newFSMs.size() > 0){
+          activeFSMInstances.addAll(newFSMs);
+        }
+      }            
+
+    }
+    FSMInstance currentInstance;
+    List<FSMInstance> acceptingFSMs;
+    SimpleSortedSet offsets;
+    SimpleSortedSet annotationsByOffset;
+    Document document;
+  }
   // by Shafirin Andrey start
   PhaseController phaseController = null;
 
@@ -105,6 +141,11 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 
   protected FSM fsm;
 
+  /**
+   * A list of FSM instances that haven't blocked yet, used during matching.
+   */
+  protected List<FSMInstance> activeFSMInstances;
+  
   public FSM getFSM() {
     return fsm;
   }
@@ -232,13 +273,17 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     annotationsByOffset.sort();
     // define data structures
     // FSM instances that haven't blocked yet
-    java.util.ArrayList activeFSMInstances = new java.util.ArrayList();
+    if(activeFSMInstances == null){
+      activeFSMInstances = new java.util.ArrayList<FSMInstance>(); 
+    }else{
+      activeFSMInstances.clear();
+    }
 
     // FSM instances that have reached a final state
     // This is a list and the contained objects are sorted by the length
     // of the document content covered by the matched annotations
-    java.util.ArrayList acceptingFSMInstances = new ArrayList();
-    FSMInstance currentFSM;
+    java.util.ArrayList<FSMInstance> acceptingFSMInstances = 
+        new ArrayList<FSMInstance>();
 
     // find the first node of the document
     Node startNode = ((Annotation)((List)annotationsByOffset.get(offsets
@@ -262,13 +307,16 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     }
     // by Shafirin Andrey end
 
+    ExecutorService fsmRunnerPool = Executors.newFixedThreadPool(3);
+    
+    
     // the big while for the actual parsing
     while(state.startNodeOff != -1) {
       // while there are more annotations to parse
       // create initial active FSM instance starting parsing from new
       // startNode
       // currentFSM = FSMInstance.getNewInstance(
-      currentFSM = new FSMInstance(fsm, fsm.getInitialState(),// fresh
+      FSMInstance firstCurrentFSM = new FSMInstance(fsm, fsm.getInitialState(),// fresh
                                                               // start
               state.startNode,// the matching starts form the current
                               // startNode
@@ -280,16 +328,43 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       // at this point ActiveFSMInstances should always be empty!
       activeFSMInstances.clear();
       acceptingFSMInstances.clear();
-      activeFSMInstances.add(currentFSM);
+      activeFSMInstances.add(firstCurrentFSM);
 
       // far each active FSM Instance, try to advance
-      while(!activeFSMInstances.isEmpty()) {
+      boolean finished = false;
+      while(!finished){
+//      while(!activeFSMInstances.isEmpty()) {
+        if(interrupted)
+          throw new ExecutionInterruptedException("The execution of the \""
+                  + getName() + "\" Jape transducer has been abruptly interrupted!");
 
-        boolean isFinal = attemptAdvance(activeFSMInstances,
+        // take the first active FSM instance
+        FSMInstance currentFSM;
+        synchronized(acceptingFSMInstances) {
+          currentFSM = (FSMInstance)activeFSMInstances.remove(0);  
+        }
+        // process the current FSM instance
+        if(currentFSM.getFSMPosition().isFinal()) {
+          // the current FSM is in a final state
+          synchronized(acceptingFSMInstances) {
+            acceptingFSMInstances.add((FSMInstance)currentFSM.clone());  
+          }
+          // if we're only looking for the shortest stop here
+          if(ruleApplicationStyle == FIRST_STYLE) break;
+        }
+
+        
+        FSMMatcher fsmMatcher = new FSMMatcher(currentFSM, 
                 acceptingFSMInstances, offsets, annotationsByOffset, doc);
 
-        // if we're only looking for the shortest stop here
-        if(isFinal && ruleApplicationStyle == FIRST_STYLE) break;
+      fsmMatcher.run();
+//        Future runResult = fsmRunnerPool.submit(fsmMatcher);
+
+      synchronized(activeFSMInstances) {
+          //we're finished if all threads have finished and there are no more
+          //active FSMs
+          finished = activeFSMInstances.isEmpty();
+        }
       }
       boolean keepGoing = fireRule(acceptingFSMInstances, state, lastNodeOff,
               offsets, inputAS, outputAS, doc, annotationsByOffset);
@@ -302,40 +377,36 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   /**
    * Try to advance the activeFSMInstances.
    *
-   * @return true if we ended in a 'final' state, false otherwise.
+   * @return a list of newly created FSMInstances
    */
   @SuppressWarnings("unchecked")
-  protected boolean attemptAdvance(java.util.ArrayList activeFSMInstances,
-          java.util.ArrayList acceptingFSMInstances, SimpleSortedSet offsets,
-          SimpleSortedSet annotationsByOffset, Document doc)
-          throws ExecutionInterruptedException {
+  protected List<FSMInstance> attemptAdvance(FSMInstance currentFSM, 
+          List<FSMInstance> acceptingFSMInstances, SimpleSortedSet offsets,
+          SimpleSortedSet annotationsByOffset, Document doc){
+//    // take the first active FSM instance
+//    FSMInstance currentFSM = (FSMInstance)activeFSMInstances.remove(0);
+//
+//    // process the current FSM instance
+//    if(currentFSM.getFSMPosition().isFinal()) {
+//      // the current FSM is in a final state
+//      acceptingFSMInstances.add(currentFSM.clone());
+//
+//      // if we're only looking for the shortest stop here
+//      if(ruleApplicationStyle == FIRST_STYLE) return true;
+//    }
 
-    if(interrupted)
-      throw new ExecutionInterruptedException("The execution of the \""
-              + getName() + "\" Jape transducer has been abruptly interrupted!");
-
-    // take the first active FSM instance
-    FSMInstance currentFSM = (FSMInstance)activeFSMInstances.remove(0);
-
-    // process the current FSM instance
-    if(currentFSM.getFSMPosition().isFinal()) {
-      // the current FSM is in a final state
-      acceptingFSMInstances.add(currentFSM.clone());
-
-      // if we're only looking for the shortest stop here
-      if(ruleApplicationStyle == FIRST_STYLE) return true;
-    }
-
+    List<FSMInstance> retVal = new ArrayList<FSMInstance>();
+    
     // get all the annotations that start where the current FSM finishes
     SimpleSortedSet offsetsTailSet = offsets.tailSet(currentFSM.getAGPosition()
             .getOffset().longValue());
     List<Annotation> paths;
     long theFirst = offsetsTailSet.first();
-    if(theFirst < 0) return false;
+    if(theFirst < 0) return retVal;
 
     paths = (List)annotationsByOffset.get(theFirst);
 
-    if(paths.isEmpty()) return false;
+    if(paths.isEmpty()) return retVal;
 
     // get the transitions for the current state of the FSM
     State currentState = currentFSM.getFSMPosition();
@@ -486,11 +557,11 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 
           binds.put(oneLabel, newSet);
         }// while(labelsIter.hasNext())
-        activeFSMInstances.add(newFSMI);
+        retVal.add(newFSMI);
       } // iter over matching combinations
 
     }// while(transitionsIter.hasNext())
-    return false;
+    return retVal;
   }
 
   /**
