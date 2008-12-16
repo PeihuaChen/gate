@@ -12,7 +12,7 @@
  *
  */
 package gate.util;
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * The purpose of this Map is to combine the functionality found in
@@ -80,11 +80,11 @@ public class SimpleSortedSet {
         {
 // there is no such offset in the map
 // create one empty list
-            f = new ArrayList();
+            f = new LinkedList();
 // put it in the map
             m.put(elValue, f);
 // add the annotation to it
-            ((ArrayList)f).add(o);
+            ((List)f).add(o);
 // update the size of the offsets array if necessery
             if (theArray.length == size)
             {
@@ -104,7 +104,7 @@ public class SimpleSortedSet {
         }
         // yes we already have an annotation liss for this offset
         // add the annotation to it
-        ((ArrayList)f).add(o);
+        ((List)f).add(o);
 
         return true;
     } // add

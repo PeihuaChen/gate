@@ -587,13 +587,6 @@ public class Main {
         case 's':
           Gate.setSlugGui(true);
           break;
-          // -j enable Jape Debugger
-          case 'j':
-            Gate.setEnableJapeDebug(true);
-            break;
-
-
-
 /*
         // -c collname
         case '-c':

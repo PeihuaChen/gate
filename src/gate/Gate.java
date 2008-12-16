@@ -1691,19 +1691,6 @@ public class Gate implements GateConstants {
     slugGui = b;
   }
 
-  /** Flag for Jape Debugger integration. */
-  private static boolean enableJapeDebug = true;
-
-  /** Should we enable Jape Debugger. */
-  public static boolean isEnableJapeDebug() {
-    return enableJapeDebug;
-  }
-
-  /** Tell GATE whether to enable Jape Debugger. */
-  public static void setEnableJapeDebug(boolean b) {
-    enableJapeDebug = b;
-  }
-
   /**
    * Flag for whether to use native serialization or xml serialization when
    * saving applications.

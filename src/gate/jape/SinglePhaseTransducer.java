@@ -241,7 +241,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     FSMInstance currentFSM;
 
     // find the first node of the document
-    Node startNode = ((Annotation)((ArrayList)annotationsByOffset.get(offsets
+    Node startNode = ((Annotation)((List)annotationsByOffset.get(offsets
             .first())).get(0)).getStartNode();
 
     // used to calculate the percentage of processing done
@@ -255,12 +255,10 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     SearchState state = new SearchState(startNode, startNodeOff, 0);
 
     // by Shafirin Andrey start (according to Vladimir Karasev)
-    if(gate.Gate.isEnableJapeDebug()) {
-      // by Shafirin Andrey --> if (null != phaseController) {
-      if(null != phaseController) {
-        rulesTrace = new TraceContainer();
-        rulesTrace.putPhaseCut(this, inputAS);
-      }
+    // by Shafirin Andrey --> if (null != phaseController) {
+    if(null != phaseController) {
+      rulesTrace = new TraceContainer();
+      rulesTrace.putPhaseCut(this, inputAS);
     }
     // by Shafirin Andrey end
 
@@ -358,12 +356,16 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
               .getConstraints();
 
       boolean hasPositiveConstraint = false;
-      Map<Constraint, Collection<Annotation>> matchingMap =
-        new LinkedHashMap<Constraint, Collection<Annotation>>();
-
+      List<Annotation>[] matchesByConstraint = new List[currentConstraints.length];
+      for(int i = 0; i < matchesByConstraint.length; i++) matchesByConstraint[i] = null;
+//      Map<Constraint, Collection<Annotation>> matchingMap =
+//        new LinkedHashMap<Constraint, Collection<Annotation>>();
+      
       // check all negated constraints first.  If any annotation matches any
       // negated constraint, then the transition fails.
-      for(Constraint c : currentConstraints) {
+      for(int i = 0;  i < currentConstraints.length; i++){
+//      for(Constraint c : currentConstraints) {
+        Constraint c = currentConstraints[i];
         if (!c.isNegated()) {
           hasPositiveConstraint = true;
           continue;
@@ -376,14 +378,18 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       // Now check all non-negated constraints.  At least one annotation must
       // match each constraint.
       if (hasPositiveConstraint){
-        for(Constraint c : currentConstraints) {
+        for(int i = 0;  i < currentConstraints.length; i++){
+//        for(Constraint c : currentConstraints) {
+          Constraint c = currentConstraints[i];
           if (c.isNegated()) continue;
           List<Annotation> matchList = c.matches(paths, ontology, doc);
           //if no annotations matched, then the transition fails.
-          if (matchList.isEmpty())
+          if (matchList.isEmpty()){
             continue transitionsWhile;
-          else
-            matchingMap.put(c, matchList);
+          } else {
+            //matchingMap.put(c, matchList);
+            matchesByConstraint[i] = matchList;
+          }
         }
       } //end if hasPositiveConstraint
       else {
@@ -391,7 +397,8 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
         // did not fail, this means that all of the current annotations
         // are potentially valid.  Add the whole set to the matchingMap.
         // Use the first negated constraint for the debug trace since any will do.
-        matchingMap.put(currentConstraints[0], paths);
+//        matchingMap.put(currentConstraints[0], paths);
+        matchesByConstraint[0] = paths;
       }
 
       // We have a match if every positive constraint is met by at least one annot.
@@ -399,34 +406,30 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       // compute all tuples (A1, A2, ..., An) where Ax comes from the
       // set Sx and n is the number of constraints
       List<List<Annotation>> matchLists = new ArrayList<List<Annotation>>();
-      for(Map.Entry<Constraint,Collection<Annotation>> entry : matchingMap.entrySet()) {
-        //seeing the constaint is useful when debugging
+      for(int i = 0; i < currentConstraints.length; i++){
+//      for(Map.Entry<Constraint,Collection<Annotation>> entry : matchingMap.entrySet()) {
+        //seeing the constraint is useful when debugging
         @SuppressWarnings("unused")
-        Constraint c = entry.getKey();
-        Collection<Annotation> matchList = entry.getValue();
-        if (matchList instanceof List)
-          matchLists.add((List<Annotation>)matchList);
-        else
-          matchLists.add(new ArrayList<Annotation>(matchList));
+        Constraint c = currentConstraints[i];
+//        Constraint c = entry.getKey();
+        List<Annotation> matchList = matchesByConstraint[i];
+//        Collection<Annotation> matchList = entry.getValue();
+        if(matchList != null){
+          matchLists.add(matchList);
+        }
+//        if (matchList instanceof List)
+//          matchLists.add((List<Annotation>)matchList);
+//        else
+//          matchLists.add(new ArrayList<Annotation>(matchList));
       }
       List<List<Annotation>> combinations = combine(matchLists, matchLists.size(), new LinkedList());
 
       // Create a new FSM for every tuple of annot
       for(List<Annotation> tuple : combinations) {
-
         // Find longest annotation and use that to mark the start of the
         // new FSM
         Annotation matchingAnnot = getRightMostAnnotation(tuple);
 
-        // figure out which constaint this came from so can include it in
-        // debug trace
-        Constraint matchingConstraint = null;
-        for(Map.Entry<Constraint,Collection<Annotation>> entry : matchingMap.entrySet()) {
-          if (entry.getValue().contains(matchingAnnot)) {
-            matchingConstraint = entry.getKey();
-            break;
-          }
-        }
 
         // we have a match. create a new FSMInstance, advance it over the current
         // annotation take care of the bindings and add it to ActiveFSM
@@ -435,21 +438,31 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
         newFSMI.setFSMPosition(currentTransition.getTarget());
 
         // by Shafirin Andrey start (according to Vladimir Karasev)
-        if(gate.Gate.isEnableJapeDebug()) {
-          if(null != phaseController) {
-            currRuleTrace = rulesTrace.getStateContainer(currentFSM
-                    .getFSMPosition());
-            if(currRuleTrace == null) {
-              currRuleTrace = new RuleTrace(newFSMI.getFSMPosition(), doc);
-              currRuleTrace.addAnnotation(matchingAnnot);
-              currRuleTrace.putPattern(matchingAnnot, matchingConstraint);
-              rulesTrace.add(currRuleTrace);
+        if(null != phaseController) {
+          // figure out which constraint this came from so can include it in
+          // debug trace
+          Constraint matchingConstraint = null;
+          for(int i = 0; i < matchesByConstraint.length; i++){
+//            for(Map.Entry<Constraint,Collection<Annotation>> entry : matchingMap.entrySet()) {
+            if(matchesByConstraint[i] != null && matchesByConstraint[i].contains(matchingAnnot)){
+//              if (entry.getValue().contains(matchingAnnot)) {
+              matchingConstraint = currentConstraints[i];
+//                matchingConstraint = entry.getKey();
+              break;
             }
-            else {
-              currRuleTrace.addState(newFSMI.getFSMPosition());
-              currRuleTrace.addAnnotation(matchingAnnot);
-              currRuleTrace.putPattern(matchingAnnot, matchingConstraint);
-            }
+          }            
+          currRuleTrace = rulesTrace.getStateContainer(currentFSM
+                  .getFSMPosition());
+          if(currRuleTrace == null) {
+            currRuleTrace = new RuleTrace(newFSMI.getFSMPosition(), doc);
+            currRuleTrace.addAnnotation(matchingAnnot);
+            currRuleTrace.putPattern(matchingAnnot, matchingConstraint);
+            rulesTrace.add(currRuleTrace);
+          }
+          else {
+            currRuleTrace.addState(newFSMI.getFSMPosition());
+            currRuleTrace.addAnnotation(matchingAnnot);
+            currRuleTrace.putPattern(matchingAnnot, matchingConstraint);
           }
         }
         // by Shafirin Andrey end
@@ -569,14 +582,12 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 
         // by Shafirin Andrey start
         // debugger callback
-        if(gate.Gate.isEnableJapeDebug()) {
-          if(null != phaseController) {
-            SPTLock lock = new SPTLock();
-            phaseController.TraceTransit(rulesTrace);
-            rulesTrace = new TraceContainer();
-            phaseController.RuleMatched(lock, this, currentRHS, doc,
-                    currentAcceptor.getBindings(), inputAS, outputAS);
-          }
+        if(null != phaseController) {
+          SPTLock lock = new SPTLock();
+          phaseController.TraceTransit(rulesTrace);
+          rulesTrace = new TraceContainer();
+          phaseController.RuleMatched(lock, this, currentRHS, doc,
+                  currentAcceptor.getBindings(), inputAS, outputAS);
         }
         // by Shafirin Andrey end
 
@@ -585,12 +596,10 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 
         // by Shafirin Andrey start
         // debugger callback
-        if(gate.Gate.isEnableJapeDebug()) {
-          if(null != phaseController) {
-            SPTLock lock = new SPTLock();
-            phaseController.RuleFinished(lock, this, currentRHS, doc,
-                    currentAcceptor.getBindings(), inputAS, outputAS);
-          }
+        if(null != phaseController) {
+          SPTLock lock = new SPTLock();
+          phaseController.RuleFinished(lock, this, currentRHS, doc,
+                  currentAcceptor.getBindings(), inputAS, outputAS);
         }
         // by Shafirin Andrey end
         if(ruleApplicationStyle == BRILL_STYLE) {
@@ -645,15 +654,13 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 
       // by Shafirin Andrey start
       // debugger callback
-      if(gate.Gate.isEnableJapeDebug()) {
-        if(null != phaseController) {
-          SPTLock lock = new SPTLock();
-          rulesTrace.leaveLast(currentRHS);
-          phaseController.TraceTransit(rulesTrace);
-          rulesTrace = new TraceContainer();
-          phaseController.RuleMatched(lock, this, currentRHS, doc,
-                  currentAcceptor.getBindings(), inputAS, outputAS);
-        }
+      if(null != phaseController) {
+        SPTLock lock = new SPTLock();
+        rulesTrace.leaveLast(currentRHS);
+        phaseController.TraceTransit(rulesTrace);
+        rulesTrace = new TraceContainer();
+        phaseController.RuleMatched(lock, this, currentRHS, doc,
+                currentAcceptor.getBindings(), inputAS, outputAS);
       }
       // by Shafirin Andrey end
 
@@ -662,12 +669,10 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 
       // by Shafirin Andrey start
       // debugger callback
-      if(gate.Gate.isEnableJapeDebug()) {
-        if(null != phaseController) {
-          SPTLock lock = new SPTLock();
-          phaseController.RuleFinished(lock, this, currentRHS, doc,
-                  currentAcceptor.getBindings(), inputAS, outputAS);
-        }
+      if(null != phaseController) {
+        SPTLock lock = new SPTLock();
+        phaseController.RuleFinished(lock, this, currentRHS, doc,
+                currentAcceptor.getBindings(), inputAS, outputAS);
       }
       // by Shafirin Andrey end
 
@@ -709,15 +714,13 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 
               // by Shafirin Andrey start
               // debugger callback
-              if(gate.Gate.isEnableJapeDebug()) {
-                if(null != phaseController) {
-                  SPTLock lock = new SPTLock();
-                  rulesTrace.leaveLast(currentRHS);
-                  phaseController.TraceTransit(rulesTrace);
-                  rulesTrace = new TraceContainer();
-                  phaseController.RuleMatched(lock, this, currentRHS, doc,
-                          rivalAcceptor.getBindings(), inputAS, outputAS);
-                }
+              if(null != phaseController) {
+                SPTLock lock = new SPTLock();
+                rulesTrace.leaveLast(currentRHS);
+                phaseController.TraceTransit(rulesTrace);
+                rulesTrace = new TraceContainer();
+                phaseController.RuleMatched(lock, this, currentRHS, doc,
+                        rivalAcceptor.getBindings(), inputAS, outputAS);
               }
               // by Shafirin Andrey end
 
@@ -726,12 +729,10 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 
               // by Shafirin Andrey start
               // debugger callback
-              if(gate.Gate.isEnableJapeDebug()) {
-                if(null != phaseController) {
-                  SPTLock lock = new SPTLock();
-                  phaseController.RuleFinished(lock, this, currentRHS, doc,
-                          rivalAcceptor.getBindings(), inputAS, outputAS);
-                }
+              if(null != phaseController) {
+                SPTLock lock = new SPTLock();
+                phaseController.RuleFinished(lock, this, currentRHS, doc,
+                        rivalAcceptor.getBindings(), inputAS, outputAS);
               }
               // by Shafirin Andrey end
             } // equal rival
@@ -765,7 +766,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       fireProcessFinished();
     } else {
       long nextKey = theFirst;
-      startNode = ((Annotation)((ArrayList)annotationsByOffset.get(nextKey))
+      startNode = ((Annotation)((List)annotationsByOffset.get(nextKey))
               .get(0)). // nextKey
               getStartNode();
       startNodeOff = startNode.getOffset().longValue();
