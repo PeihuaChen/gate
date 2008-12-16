@@ -301,7 +301,7 @@ public class Constraint implements JapeConstants, gate.creole.ANNIEConstants,
    */
   public List<Annotation> matches(Collection<Annotation> annots,
           Ontology ontology, Object context) {
-    List<Annotation> retVal = new ArrayList<Annotation>();
+    List<Annotation> retVal = new LinkedList<Annotation>();
 
     if(annots == null) return retVal;
 

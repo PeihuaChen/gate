@@ -55,10 +55,8 @@ public class FSM implements JapeConstants {
     while(rulesEnum.hasNext()){
       FSM ruleFSM = spawn((Rule) rulesEnum.next());
 
-      //added by Karter start
-      if(gate.Gate.isEnableJapeDebug()) {
-        ruleHash.putAll(ruleFSM.ruleHash);
-      }
+      //added by Karter start -> JapeDebugger
+      ruleHash.putAll(ruleFSM.ruleHash);
       //added by Karter end
 
       initialState.addTransition(new Transition(null,
@@ -88,13 +86,11 @@ public class FSM implements JapeConstants {
 
     LeftHandSide lhs = rule.getLHS();
 
-    //added by Karter start
+    //added by Karter start -> JapeDebugger
     LinkedList<String> ll = new LinkedList<String>();
-    if(gate.Gate.isEnableJapeDebug()) {
-      String label = currentLHSBinding(lhs);
-      ll.add(label);
-      ruleHash.put(rule.getName(), label);
-    }
+    String label = currentLHSBinding(lhs);
+    ll.add(label);
+    ruleHash.put(rule.getName(), label);
     //added by Karter end
 
 
@@ -134,18 +130,13 @@ public class FSM implements JapeConstants {
           //the easy case
           nextRowState = new State();
 
-          //added by Karter start
+          //added by Karter start -> JapeDebugger
           LinkedList<String> sll = new LinkedList<String>();
-          if(gate.Gate.isEnableJapeDebug()) {
-            sll.add(currentBasicBinding( (BasicPatternElement) currentPattern));
-            currentRowState.addTransition(
-                new Transition( (BasicPatternElement) currentPattern,
-                               nextRowState
-                               /*added by Karter*/, sll));
-          } else {
-            currentRowState.addTransition(
-              new Transition((BasicPatternElement)currentPattern, nextRowState));
-          }
+          sll.add(currentBasicBinding( (BasicPatternElement) currentPattern));
+          currentRowState.addTransition(
+              new Transition( (BasicPatternElement) currentPattern,
+                             nextRowState
+                             /*added by Karter*/, sll));
           //added by Karter end
 
           currentRowState = nextRowState;
@@ -154,20 +145,11 @@ public class FSM implements JapeConstants {
           // the current pattern is a complex pattern element
           // ..it will probaly be converted into a sequence of states itself.
 
-          // Angel debugger cut
-          if(gate.Gate.isEnableJapeDebug()) {
-            currentRowState = convertComplexPE(
-                currentRowState,
-                (ComplexPatternElement) currentPattern,
-                /*changed by Karter "new LinkedList()"*/ll);
-          } else {
-            currentRowState =  convertComplexPE(
-                                currentRowState,
-                                (ComplexPatternElement)currentPattern,
-                                new LinkedList<String>());
-
-          }
-          // Angel debugger cut
+          //  -> JapeDebugger
+          currentRowState = convertComplexPE(
+              currentRowState,
+              (ComplexPatternElement) currentPattern,
+              /*changed by Karter "new LinkedList()"*/ll);
 
         } else {
           // we got an unknown kind of pattern
@@ -379,11 +361,9 @@ public class FSM implements JapeConstants {
           //the easy case
           nextRowState = new State();
 
-          //added by Karter start
-          if(gate.Gate.isEnableJapeDebug()) {
-            newBindings.add(currentBasicBinding( (BasicPatternElement)
-                                                currentPattern));
-          }
+          //added by Karter start -> JapeDebugger
+          newBindings.add(currentBasicBinding( (BasicPatternElement)
+                                              currentPattern));
           //added by Karter end
 
 
