@@ -104,7 +104,7 @@ public class Constraint implements JapeConstants, gate.creole.ANNIEConstants,
   /**
    * The list of predicates that must match the annotation features.
    */
-  private List<ConstraintPredicate> predicates = new LinkedList<ConstraintPredicate>();
+  private List<ConstraintPredicate> predicates = new ArrayList<ConstraintPredicate>();
 
   /** Get the attributes that must be present on the matched annotation. */
   public List<ConstraintPredicate> getAttributeSeq() {
@@ -201,8 +201,7 @@ public class Constraint implements JapeConstants, gate.creole.ANNIEConstants,
       throw (new InternalError(e.toString()));
     }
     newC.annotType = annotType;
-    newC.predicates = (List<ConstraintPredicate>)((LinkedList<ConstraintPredicate>)predicates)
-            .clone();
+    newC.predicates = (List<ConstraintPredicate>)((ArrayList)predicates).clone();
     return newC;
   } // clone
 
@@ -301,7 +300,7 @@ public class Constraint implements JapeConstants, gate.creole.ANNIEConstants,
    */
   public List<Annotation> matches(Collection<Annotation> annots,
           Ontology ontology, Object context) {
-    List<Annotation> retVal = new LinkedList<Annotation>();
+    List<Annotation> retVal = new ArrayList<Annotation>();
 
     if(annots == null) return retVal;
 

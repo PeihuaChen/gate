@@ -80,7 +80,7 @@ public class SimpleSortedSet {
         {
 // there is no such offset in the map
 // create one empty list
-            f = new LinkedList();
+            f = new ArrayList();
 // put it in the map
             m.put(elValue, f);
 // add the annotation to it
