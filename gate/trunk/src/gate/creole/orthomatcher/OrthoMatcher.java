@@ -133,10 +133,12 @@ implements ANNIEConstants{
   protected List matchesDocFeature = new ArrayList();
   //maps annotation ids to array lists of tokens
   protected HashMap tokensMap = new HashMap(150);
+  protected HashMap normalizedTokensMap = new HashMap(150);
 
   protected Annotation shortAnnot, longAnnot;
 
   protected ArrayList<Annotation> tokensLongAnnot, tokensShortAnnot;
+  protected ArrayList<Annotation> normalizedTokensLongAnnot, normalizedTokensShortAnnot;
 
   /** a feature map to be used when retrieving annotations
    *  declared here so can be reused for efficiency
@@ -321,6 +323,7 @@ implements ANNIEConstants{
       processedAnnots.clear();
       annots2Remove.clear();
       tokensMap.clear();
+      normalizedTokensMap.clear();
       matchesDocFeature = new ArrayList();
       longAnnot = null;
       shortAnnot = null;
@@ -378,6 +381,7 @@ implements ANNIEConstants{
         //instead of three. So cannot match properly British Gas
 //      tokens = checkTokens(tokens);
         tokensMap.put(nameAnnot.getId(), tokens);
+        normalizedTokensMap.put(nameAnnot.getId(), new ArrayList<Annotation>(tokens));
 
 //      Out.prln("Matching annot " + nameAnnot + ": string " + annotString);
 
@@ -405,15 +409,17 @@ implements ANNIEConstants{
         }
 
         //if a person, then remove their title before matching
-        if (nameAnnot.getType().equals(personType))
-          annotString = containTitle(annotString, nameAnnot);
+        if (nameAnnot.getType().equals(personType)) {
+          annotString = stripPersonTitle(annotString, nameAnnot);
+          normalizePersonName(nameAnnot);
+        }
         else if (nameAnnot.getType().equals(organizationType))
-          annotString = stripCDG(annotString, nameAnnot);
+          annotString = normalizeOrganizationName(annotString, nameAnnot);
 
-        if(null == annotString || "".equals(annotString)) {
+        if(null == annotString || "".equals(annotString) || tokens.isEmpty()) {
           if (log.isDebugEnabled()) {
             log.debug("Annotation ID " + nameAnnot.getId() + " of type" + nameAnnot.getType() +
-                    " refers to a null or empty string.  Unable to process further.");
+                    " refers to a null or empty string or one with no tokens after normalization.  Unable to process further.");
           }
           continue;
         }
@@ -462,6 +468,7 @@ implements ANNIEConstants{
         continue;
       Collections.sort(tokens, new gate.util.OffsetComparator());
       tokensMap.put(unknown.getId(), tokens);
+      normalizedTokensMap.put(unknown.getId(), tokens);
 
 
       //first check whether we have not matched such a string already
@@ -734,7 +741,9 @@ implements ANNIEConstants{
     }//if
 
     tokensLongAnnot = (ArrayList) tokensMap.get(longAnnot.getId());
+    normalizedTokensLongAnnot = (ArrayList) normalizedTokensMap.get(longAnnot.getId());
     tokensShortAnnot = (ArrayList) tokensMap.get(shortAnnot.getId());
+    normalizedTokensShortAnnot = (ArrayList) normalizedTokensMap.get(shortAnnot.getId());
 
     List matchesList = (List) prevAnnot.getFeatures().
     get(ANNOTATION_COREF_FEATURE_NAME);
@@ -817,7 +826,9 @@ implements ANNIEConstants{
         }//if
 
         tokensLongAnnot = (ArrayList) tokensMap.get(longAnnot.getId());
+        normalizedTokensLongAnnot = (ArrayList) normalizedTokensMap.get(longAnnot.getId());
         tokensShortAnnot = (ArrayList) tokensMap.get(shortAnnot.getId());
+        normalizedTokensShortAnnot = (ArrayList) normalizedTokensMap.get(shortAnnot.getId());
 
         matchedAll = apply_rules_namematch(prevAnnot.getType(), shortName,longName,prevAnnot,newAnnot,
                 longerPrevious);
@@ -958,9 +969,42 @@ implements ANNIEConstants{
         iter.next().getFeatures().remove(ANNOTATION_COREF_FEATURE_NAME);
     } //while
   }//cleanup
+  
+  static Pattern periodPat = Pattern.compile("[\\.]+");
+  
+  protected void normalizePersonName (Annotation annot) throws ExecutionException {
+    ArrayList<Annotation> tokens = (ArrayList) normalizedTokensMap.get(annot.getId());
+    for (int i = tokens.size() - 1; i >= 0; i--) {
+      String tokenString = ((String) tokens.get(i).getFeatures().get(TOKEN_STRING_FEATURE_NAME));
+      String kind = (String) tokens.get(i).getFeatures().get(TOKEN_KIND_FEATURE_NAME);
+      String category = (String) tokens.get(i).getFeatures().get(TOKEN_CATEGORY_FEATURE_NAME);
+      if (!caseSensitive)  {
+        tokenString = tokenString.toLowerCase();
+      }
+      // log.debug("tokenString: " + tokenString + " kind: " + kind + " category: " + category);
+      if (kind.equals(PUNCTUATION_VALUE) ) {
+        // log.debug("Now tagging it!");
+        tokens.get(i).getFeatures().put("ortho_stop", true);
+      }
+    }
+    
+    ArrayList<Annotation> normalizedTokens = new ArrayList<Annotation>(tokens);
+    for (int j = normalizedTokens.size() - 1; j >=  0;j--) {
+      if (normalizedTokens.get(j).getFeatures().containsKey("ortho_stop")) {
+        // log.debug("Now removing " + normalizedTokens.get(j).getFeatures().get(TOKEN_STRING_FEATURE_NAME));
+        normalizedTokens.remove(j);
+      }
+    }
+    // log.debug("normalizedTokens size is: " + normalizedTokens.size());
+    normalizedTokensMap.put(annot.getId(), normalizedTokens);
+  }
+  
 
-  /** return a person name without title */
-  protected String containTitle (String annotString, Annotation annot)
+  /**
+   * Return a person name without a title.  Also remove title from global variable
+   * tokensMap
+   */
+  protected String stripPersonTitle (String annotString, Annotation annot)
   throws ExecutionException {
     // get the offsets
     Long startAnnot = annot.getStartNode().getOffset();
@@ -1000,10 +1044,11 @@ implements ANNIEConstants{
           if (annotTitle.length()<annotString.length()) {
             //remove from the array of tokens, so then we can compare properly
             //the remaining tokens
-//          Out.prln("Removing title from: " + annot + " with string " + annotString);
-//          Out.prln("Tokens are" + tokensMap.get(annot.getId()));
-//          Out.prln("Title is" + annotTitle);
+//            log.debug("Removing title from: " + annot + " with string " + annotString);
+//            log.debug("Tokens are " + tokensMap.get(annot.getId()));
+//            log.debug("Title is " + annotTitle);
             ((ArrayList) tokensMap.get(annot.getId())).remove(0);
+            ((ArrayList) normalizedTokensMap.get(annot.getId())).remove(0);
             return annotString.substring(
                     annotTitle.length()+1,annotString.length());
           }
@@ -1018,7 +1063,7 @@ implements ANNIEConstants{
   }
 
   /** return an organization  without a designator and starting The*/
-  protected String stripCDG (String annotString, Annotation annot){
+  protected String normalizeOrganizationName (String annotString, Annotation annot){
 
     ArrayList<Annotation> tokens = (ArrayList) tokensMap.get(annot.getId());
 
@@ -1060,6 +1105,15 @@ implements ANNIEConstants{
       }
 
     }
+    
+    ArrayList<Annotation> normalizedTokens = new ArrayList<Annotation>(tokens);
+    for (int j = normalizedTokens.size() - 1; j >=  0;j--) {
+      if (normalizedTokens.get(j).getFeatures().containsKey("ortho_stop")) {
+        normalizedTokens.remove(j);
+      }
+    }
+    
+    normalizedTokensMap.put(annot.getId(), normalizedTokens);
 
     StringBuffer newString = new StringBuffer(50);
     for (int i = 0; i < tokens.size(); i++){
@@ -1153,7 +1207,7 @@ implements ANNIEConstants{
         return true;
       }
       else {
-        return (matchRule1Name(longName, shortName,true));
+        return (matchRule1Name(longName, shortName,true, true));
         // boolean throwAway[] = new boolean[17];
         // return basic_person_match_criteria(shortName,longName,throwAway);
         // The above doesn't work because basic_person_match_criteria is reliant on the global
@@ -1173,7 +1227,7 @@ implements ANNIEConstants{
    */
   private boolean basic_person_match_criteria(String shortName,
           String longName, boolean mr[]) {
-    if (  (mr[1] = matchRule1Name(longName, shortName,true))
+    if (  (mr[1] = matchRule1Name(longName, shortName,true, true))
             ||   // For 4, 5, 14, and 15, need to mark shorter annot
             (mr[4] = matchRule4Name(longName, shortName))
             ||
@@ -1260,7 +1314,8 @@ implements ANNIEConstants{
 
     if  (// rules for person annotations
             (    annotationType.equals(personType))) {
-      if (noMatchRule1(longName, shortName,prevAnnot, longerPrevious)) {
+      if (noMatchRule1(longName, shortName,prevAnnot, longerPrevious) || 
+              noMatchRule2(longName, shortName)) {
         // Out.prln("noMatchRule1 rejected match between " + longName + " and " + shortName);
         return false;
       }
@@ -1428,13 +1483,13 @@ implements ANNIEConstants{
 
   public boolean matchRule1Name(String s1,
           String s2,
-          boolean matchCase) {
+          boolean matchCase, boolean logResult) {
     boolean retVal = matchRule1(s1, s2, matchCase);
     //if straight compare didn't work, try a little extra logic
     if (!retVal)
       retVal = fuzzyMatch(s1, s2);
 
-    if (retVal && log.isDebugEnabled()) {
+    if (logResult && retVal && log.isDebugEnabled()) {
       log.debug("rule1Name matched " + s1 + "(id: " + longAnnot.getId() + ") to "
               + s2+ "(id: " + shortAnnot.getId() + ")");
     }
@@ -1542,21 +1597,24 @@ implements ANNIEConstants{
   }//matchRule4
 
   /**
-   * RULE #4: Does the first non-punctuation token from the long string match
-   * the first token from the short string?
-   * e.g. "fred jones" == "fred"
-   * Condition(s): case-insensitive match
+   * RULE #4Name: Does all the non-punctuation tokens from the long string match the corresponding tokens 
+   * in the short string?  
+   * This basically identifies cases where the two strings match token for token, excluding punctuation
    * Applied to: person annotations
    *
    * Modified by Andrew Borthwick, Spock Networks:  Allowed for nickname match
    */
   public boolean matchRule4Name(String s1,
           String s2) {
-
     boolean allTokensMatch = true;
-    // Out.prln("MR4 Name: Matching" + tokensLongAnnot + " with " + tokensShortAnnot);
-    // Out.prln("MR4 Name: Matching " + s1 + " with " + s2);
-
+//    if (s1.equals("wilson")) {
+//      log.debug("MR4 Name: Matching" + tokensLongAnnot + " with " + tokensShortAnnot);
+//      log.debug("MR4 Name: Matching " + s1 + " with " + s2);
+//    }  
+    if (tokensLongAnnot.size() == 0 || tokensShortAnnot.size() == 0) {
+      log.debug("Rule4n rejecting " + s1 + " and " + s2 + " because one doesn't have any tokens");
+      return false;
+    }
     Iterator tokensLongAnnotIter = tokensLongAnnot.iterator();
     Iterator tokensShortAnnotIter = tokensShortAnnot.iterator();
     while (tokensLongAnnotIter.hasNext() && tokensShortAnnotIter.hasNext()) {
@@ -1573,7 +1631,7 @@ implements ANNIEConstants{
     if (allTokensMatch && log.isDebugEnabled())
       log.debug("rule4n matched " + s1 + "(id: " + longAnnot.getId() + ") to " + s2+ "(id: " + shortAnnot.getId() + ")");
     return allTokensMatch;
-  }//matchRule4
+  }//matchRule4Name
 
   /**
    * RULE #5: if the 1st token of one name
@@ -1933,7 +1991,13 @@ implements ANNIEConstants{
       String s2_last = (String)
       ((Annotation) tokensShortAnnot.get(tokensShortAnnot.size()-1)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
 
-      return matchRule1(s1_last,s2_last,caseSensitive);
+      boolean retVal =  matchRule1(s1_last,s2_last,caseSensitive);
+      if (retVal && log.isDebugEnabled()) {
+        log.debug("rule12 matched " + s1 + "(id: " + longAnnot.getId() + ") to "
+                + s2+ "(id: " + shortAnnot.getId() + ")");
+      }
+      return retVal;
+      
     } // if (tokensLongAnnot.countTokens()>1
     return false;
   }//matchRule12
@@ -1958,7 +2022,7 @@ implements ANNIEConstants{
       String s2_first = (String)
       ((Annotation) tokensShortAnnot.get(0)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
 
-      if (!matchRule1Name(s1_first,s2_first,caseSensitive))
+      if (!(matchRule1Name(s1_first,s2_first,caseSensitive, false) || initialMatch(s1_first,s2_first)))
         return false;
 
       String s1_last = (String)
@@ -1966,7 +2030,12 @@ implements ANNIEConstants{
       String s2_last = (String)
       ((Annotation) tokensShortAnnot.get(tokensShortAnnot.size()-1)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
 
-      return matchRule1(s1_last,s2_last,caseSensitive);
+      boolean retVal =  matchRule1(s1_last,s2_last,caseSensitive);
+      if (retVal && log.isDebugEnabled()) {
+        log.debug("rule12Name matched " + s1 + "(id: " + longAnnot.getId() + ") to "
+                + s2+ "(id: " + shortAnnot.getId() + ")");
+      }
+      return retVal;
     } // if (tokensLongAnnot.countTokens()>1
     return false;
   }//matchRule12
@@ -2040,7 +2109,8 @@ implements ANNIEConstants{
 //  Out.prln("Converted to " + s1_short);
     if (tokensLongAnnot.size()>1 && matchRule1(s1_short, s2, caseSensitive)) {
       if (log.isDebugEnabled())
-        log.debug("rule14 matched " + s1 + " to " + s2);
+        log.debug("rule14 matched " + s1 + "(id: " + longAnnot.getId() + ") to "  + s2 
+                + "(id: " + shortAnnot.getId() + ")");
       return true;
     }
 
@@ -2164,6 +2234,104 @@ implements ANNIEConstants{
       return true;
     }
   }//noMatchRule1
+  
+  /***
+   * returns true if it detects a middle name which indicates that the name string contains a nickname or a 
+   * compound last name
+   */
+  private boolean detectBadMiddleTokens(ArrayList<Annotation> tokArray) {
+    for (int j = 1;j < tokArray.size() - 1;j++) {
+      String currentToken = (String) tokArray.get(j).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
+      Matcher matcher = badMiddleTokens.matcher(currentToken.toLowerCase().trim());
+      if (matcher.find()) {
+        // We have found a case of a ", ', 
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  /**
+   * NoMatch Rule #2: Do we have a mismatch of middle initial?  
+   * Condition(s):  Only applies to person names with more than two tokens in the name
+   * 
+   * Want George W. Bush != George H. W. Bush and George Walker Bush != George Herbert Walker Bush
+   * and
+   * John T. Smith != John Q. Smith
+   * however
+   * John T. Smith == John Thomas Smith
+   * be careful about
+   * Hillary Rodham Clinton == Hillary Rodham-Clinton
+   * be careful about
+   * Carlos Bueno de Lopez == Bueno de Lopez
+   * and 
+   * Cynthia Morgan de Rothschild == Cynthia de Rothschild
+   */
+  public boolean noMatchRule2(String s1,String s2) {
+    if (normalizedTokensLongAnnot.size()>2 && normalizedTokensShortAnnot.size()>2) {
+      boolean retval = false;
+      if (normalizedTokensLongAnnot.size() != normalizedTokensShortAnnot.size()) {
+        String firstNameLong = (String) normalizedTokensLongAnnot.get(0).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
+        String firstNameShort = (String) normalizedTokensShortAnnot.get(0).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
+        String lastNameLong = (String) normalizedTokensLongAnnot.get(normalizedTokensLongAnnot.size() - 1).
+          getFeatures().get(TOKEN_STRING_FEATURE_NAME);
+        String lastNameShort = (String) normalizedTokensShortAnnot.get(normalizedTokensShortAnnot.size() - 1).
+          getFeatures().get(TOKEN_STRING_FEATURE_NAME);
+        if (matchRule1Name(firstNameLong,firstNameShort,caseSensitive,false) && 
+                (matchRule1Name(lastNameLong,lastNameShort,caseSensitive,false))) {
+          // Must have a match on first and last name for this non-match rule to take effect when the number of tokens differs
+          if (detectBadMiddleTokens(tokensLongAnnot) || detectBadMiddleTokens(tokensShortAnnot)) {
+            // Exclude the William (Bill) H. Gates vs. William H. Gates case and the 
+            // Cynthia Morgan de Rothschild vs. Cynthia de Rothschild case 
+            if (DEBUG && log.isDebugEnabled()) {
+              log.debug("noMatchRule2Name did not non-match because of bad middle tokens " + s1 + "(id: " + longAnnot.getId() + ") to "
+                      + s2+ "(id: " + shortAnnot.getId() + ")");
+            }
+            return false;
+          }
+          else {
+            // Covers the George W. Bush vs George H. W. Bush and George Walker Bush vs. George Herbert Walker Bush cases
+            retval = true;
+          }
+        }
+      }
+      else {
+        for (int i = 1; i < normalizedTokensLongAnnot.size() - 1;i++) {
+          String s1_middle = (String) ((Annotation) normalizedTokensLongAnnot.get(i)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
+          String s2_middle = (String) ((Annotation) normalizedTokensShortAnnot.get(i)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
+          if (!caseSensitive) {
+            s1_middle = s1_middle.toLowerCase();
+            s2_middle = s2_middle.toLowerCase();
+          }
+//          log.debug("noMatchRule2 comparing substring " + s1_middle + " to " + s2_middle);
+          if (!(matchRule1Name(s1_middle,s2_middle,caseSensitive, false) ||
+                  initialMatch(s1_middle, s2_middle))) {
+            // We found a mismatching middle name
+            retval = true;
+            break;
+          }
+        }
+      }
+      if (retval && log.isDebugEnabled() && DEBUG)  {
+        log.debug("noMatchRule2Name non-matched  " + s1 + "(id: " + longAnnot.getId() + ") to "
+                + s2+ "(id: " + shortAnnot.getId() + ")");
+      }
+      return retval;
+    } // if (normalizedTokensLongAnnot.size()>2 && normalizedTokensShortAnnot.size()>2)
+    return false; 
+  }//noMatchRule2
+
+  /**
+   * Returns true if only one of s1 and s2 is a single character and the two strings match on that
+   * initial
+   * 
+   * @param s1  
+   * @param s2
+   * @return
+   */
+  private boolean initialMatch(String s1, String s2) {
+    return (((s1.length() == 1) ^ (s2.length() == 1) ) && (s1.charAt(0) == s2.charAt(0)));
+  }
 
 
   /** Tables for namematch info
@@ -2267,6 +2435,8 @@ implements ANNIEConstants{
   }
 
   static Pattern punctPat = Pattern.compile("[\\p{Punct}]+");
+  // The UTF characters are right and left double and single curly quotes
+  static Pattern badMiddleTokens = Pattern.compile("[\u201c\u201d\u2018\u2019\'\\(\\)\"]+|^de$|^von$");
 
 
 
