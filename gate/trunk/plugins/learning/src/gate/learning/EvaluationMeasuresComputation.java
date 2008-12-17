@@ -29,17 +29,17 @@ public class EvaluationMeasuresComputation {
   /** F1 for exact and partial matches. */
   public float f1Lenient;
   /** Number of exact matches. */
-  public int correct;
-  /** Number of instances incorretly with predicted label. */
-  public int spurious;
+  public float correct;
+  /** Number of instances incorrectly with predicted label. */
+  public float spurious;
   /** Number of positive instances missed by the system. */
-  public int missing;
+  public float missing;
   /** Number of only partial matches. */
-  public int partialCor;
+  public float partialCor;
   /** Number of positive examples in key set. */
-  private int keySize;
+  private float keySize;
   /** Number of positive examples in the results. */
-  private int resSize;
+  private float resSize;
 
   /** Constructor. Set everything as zero. */
   public EvaluationMeasuresComputation() {
@@ -125,15 +125,14 @@ public class EvaluationMeasuresComputation {
 
   /** Print out the results. */
   public String printResults() {
-    StringBuffer logMessage= new StringBuffer();
+    StringBuffer logMessage = new StringBuffer();
     logMessage.append("  (correct, paritalCorrect, spurious, missing)= ("
-      + new Integer(correct) + ", " + new Integer(partialCor) + ", "
-      + new Integer(spurious) + ", " + new Integer(missing) + ");  ");
-    logMessage.append("(precision, recall, F1)= (" + (new Float(precision))
-      + ", " + (new Float(recall)) + ", " + new Float(f1) + ");  ");
-    logMessage.append("Lenient: (" + (new Float(precisionLenient)) + ", "
-      + (new Float(recallLenient)) + ", " + new Float(f1Lenient) + ")\n");
+      + correct + ", " + partialCor + ", "
+      + spurious + ", " + missing + ");  ");
+    logMessage.append("(precision, recall, F1)= (" + precision
+      + ", " + recall + ", " + f1 + ");  ");
+    logMessage.append("Lenient: (" + precisionLenient + ", "
+      + recallLenient + ", " + f1Lenient + ")\n");
     return logMessage.toString();
   }
-
 }

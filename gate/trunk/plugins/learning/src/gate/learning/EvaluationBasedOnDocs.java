@@ -39,8 +39,8 @@ import java.util.Random;
 import java.util.Set;
 
 /**
- * Do evaluation by spliting the documents into training and testing datasets.
- * Two methods of spliting are implemented, namely k-fold and hold-out test.
+ * Do evaluation by splitting the documents into training and testing datasets.
+ * Two methods of splitting are implemented, namely k-fold and hold-out test.
  */
 public class EvaluationBasedOnDocs {
   /** Corpus referring to the corpus used as data. */
@@ -55,7 +55,7 @@ public class EvaluationBasedOnDocs {
   File wdResults;
   /** Name of the annotation set as input. */
   String inputASName;
-  /** Storing the macro averaged overall F-meausre results of the evaluation. */
+  /** Storing the macro averaged overall F-measure results of the evaluation. */
   public EvaluationMeasuresComputation macroMeasuresOfResults = new EvaluationMeasuresComputation();
   /** Storing the macro averaged results of every label. */
   HashMap labels2MMR = new HashMap();
@@ -80,7 +80,7 @@ public class EvaluationBasedOnDocs {
   }
 
   /**
-   * Main method for evluation.
+   * Main method for evaluation.
    * 
    * @throws IOException
    */
@@ -130,7 +130,7 @@ public class EvaluationBasedOnDocs {
     if(LogService.minVerbosityLevel > 0) System.out.println(logMes);
   }
 
-  /** K-fold evalution. */
+  /** K-fold evaluation. */
   public void kfoldEval(LearningEngineSettings learningSettings,
     LightWeightLearningApi lightWeightApi) throws GateException {
     int k = learningSettings.evaluationconfig.kk;
@@ -530,7 +530,7 @@ public class EvaluationBasedOnDocs {
       }
       // Do the evaluation on the test set
       if(learningSettings.datasetDefinition.dataType == DataSetDefinition.RelationData) {
-        // For relation type, we cannot use the evalutation method AnnDiff
+        // For relation type, we cannot use the evaluation method AnnDiff
         // of Gate
         AttributeRelation relAttr = (AttributeRelation)learningSettings.datasetDefinition
           .getClassAttribute();
