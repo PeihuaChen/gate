@@ -332,7 +332,7 @@ public class Constraint implements JapeConstants, gate.creole.ANNIEConstants,
    *         an annotation need only match a single predicate to return
    *         true.
    */
-  public boolean matches(Annotation annot, Ontology ontologyLR, Object context) {
+  public final boolean matches(Annotation annot, Ontology ontologyLR, Object context) {
     if(annot == null) return false;
     if(!annot.getType().equals(getAnnotType())) return false;
 
