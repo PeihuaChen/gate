@@ -46,6 +46,20 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   protected static final Logger log = Logger
           .getLogger(SinglePhaseTransducer.class);
 
+  private static final boolean USE_MULTI_THREADING = false;
+  
+  // The executor service used to advance FSM Instances when using 
+  // multi-threading
+  private static ThreadPoolExecutor fsmRunnerPool = null;
+  static{
+    if(USE_MULTI_THREADING){
+      fsmRunnerPool = new ThreadPoolExecutor(1, 1 /* Integer.MAX_VALUE*/, 
+              10, TimeUnit.SECONDS, 
+              new LinkedBlockingQueue());
+      fsmRunnerPool.allowCoreThreadTimeOut(true);
+    }
+  }
+
   /*
    * A structure to pass information to/from the fireRule() method.
    * Since Java won't let us return multiple values, we stuff them into
@@ -65,8 +79,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     }
   }
 
-
-  private class FSMMatcher implements Runnable{
+  private class FSMMatcher implements Callable<List<FSMInstance>>{
     
     /**
      * @param currentInstance
@@ -75,27 +88,20 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
      * @param annotationsByOffset
      * @param document
      */
-    public FSMMatcher(FSMInstance currentInstance,
-            List<FSMInstance> acceptingFSMs, SimpleSortedSet offsets,
+    public FSMMatcher(FSMInstance currentInstance, SimpleSortedSet offsets,
             SimpleSortedSet annotationsByOffset, Document document) {
       this.currentInstance = currentInstance;
-      this.acceptingFSMs = acceptingFSMs;
       this.offsets = offsets;
       this.annotationsByOffset = annotationsByOffset;
       this.document = document;
     }
-    public void run(){
-      List<FSMInstance> newFSMs = attemptAdvance(currentInstance,
-              acceptingFSMs, offsets, annotationsByOffset, document);
-      synchronized(activeFSMInstances) {
-        if(newFSMs.size() > 0){
-          activeFSMInstances.addAll(newFSMs);
-        }
-      }            
+    
+    public List<FSMInstance> call() {
+      return attemptAdvance(currentInstance, offsets, annotationsByOffset, 
+              document);
+    }            
 
-    }
     FSMInstance currentInstance;
-    List<FSMInstance> acceptingFSMs;
     SimpleSortedSet offsets;
     SimpleSortedSet annotationsByOffset;
     Document document;
@@ -273,17 +279,17 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     annotationsByOffset.sort();
     // define data structures
     // FSM instances that haven't blocked yet
-    if(activeFSMInstances == null){
-      activeFSMInstances = new java.util.ArrayList<FSMInstance>(); 
-    }else{
+    if(activeFSMInstances == null) {
+      activeFSMInstances = new LinkedList<FSMInstance>();
+    }
+    else {
       activeFSMInstances.clear();
     }
 
     // FSM instances that have reached a final state
     // This is a list and the contained objects are sorted by the length
     // of the document content covered by the matched annotations
-    java.util.ArrayList<FSMInstance> acceptingFSMInstances = 
-        new ArrayList<FSMInstance>();
+    List<FSMInstance> acceptingFSMInstances = new LinkedList<FSMInstance>();
 
     // find the first node of the document
     Node startNode = ((Annotation)((List)annotationsByOffset.get(offsets
@@ -307,9 +313,13 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     }
     // by Shafirin Andrey end
 
-    ExecutorService fsmRunnerPool = Executors.newFixedThreadPool(3);
-    
-    
+    // A list storing the active tasks and used to obtain the results
+    // from them
+    List<Future<List<FSMInstance>>> runningTasks = null;
+    if(USE_MULTI_THREADING){
+      runningTasks = new LinkedList<Future<List<FSMInstance>>>();
+    }
+
     // the big while for the actual parsing
     while(state.startNodeOff != -1) {
       // while there are more annotations to parse
@@ -317,11 +327,11 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       // startNode
       // currentFSM = FSMInstance.getNewInstance(
       FSMInstance firstCurrentFSM = new FSMInstance(fsm, fsm.getInitialState(),// fresh
-                                                              // start
+              // start
               state.startNode,// the matching starts form the current
-                              // startNode
+              // startNode
               state.startNode,// current position in AG is the start
-                              // position
+              // position
               new java.util.HashMap(),// no bindings yet!
               doc);
 
@@ -331,39 +341,75 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       activeFSMInstances.add(firstCurrentFSM);
 
       // far each active FSM Instance, try to advance
-      boolean finished = false;
-      while(!finished){
-//      while(!activeFSMInstances.isEmpty()) {
+      // while(!finished){
+      while(!activeFSMInstances.isEmpty()) {
         if(interrupted)
           throw new ExecutionInterruptedException("The execution of the \""
-                  + getName() + "\" Jape transducer has been abruptly interrupted!");
+                  + getName()
+                  + "\" Jape transducer has been abruptly interrupted!");
 
         // take the first active FSM instance
-        FSMInstance currentFSM;
-        synchronized(acceptingFSMInstances) {
-          currentFSM = (FSMInstance)activeFSMInstances.remove(0);  
-        }
+        FSMInstance currentFSM = (FSMInstance)activeFSMInstances.remove(0);
         // process the current FSM instance
         if(currentFSM.getFSMPosition().isFinal()) {
           // the current FSM is in a final state
-          synchronized(acceptingFSMInstances) {
-            acceptingFSMInstances.add((FSMInstance)currentFSM.clone());  
-          }
+          acceptingFSMInstances.add((FSMInstance)currentFSM.clone());
           // if we're only looking for the shortest stop here
           if(ruleApplicationStyle == FIRST_STYLE) break;
         }
 
-        
-        FSMMatcher fsmMatcher = new FSMMatcher(currentFSM, 
-                acceptingFSMInstances, offsets, annotationsByOffset, doc);
+        if(USE_MULTI_THREADING) {
+          // multi-threaded alternative
+          // queue a task to advance the current FSM Instance
+          FSMMatcher fsmMatcher = new FSMMatcher(currentFSM, offsets,
+                  annotationsByOffset, doc);
+          runningTasks.add(fsmRunnerPool.submit(fsmMatcher));
 
-      fsmMatcher.run();
-//        Future runResult = fsmRunnerPool.submit(fsmMatcher);
-
-      synchronized(activeFSMInstances) {
-          //we're finished if all threads have finished and there are no more
-          //active FSMs
-          finished = activeFSMInstances.isEmpty();
+          // we're finished if all threads have finished and there are
+          // no more
+          // active FSMs
+          // if there are still running tasks, wait for them to finish,
+          // in case
+          // they create more active FSM Instances
+          while(activeFSMInstances.isEmpty() && !runningTasks.isEmpty()) {
+            // remove finished tasks
+            Iterator<Future<List<FSMInstance>>> taskIter = runningTasks
+                    .iterator();
+            while(taskIter.hasNext()) {
+              Future<List<FSMInstance>> aTask = taskIter.next();
+              if(aTask.isDone()) {
+                taskIter.remove();
+                if(!aTask.isCancelled()) {
+                  try {
+                    List<FSMInstance> newActiveFSMs = aTask.get();
+                    if(newActiveFSMs != null && !newActiveFSMs.isEmpty()) {
+                      activeFSMInstances.addAll(newActiveFSMs);
+                      // we already have some more active instances: no
+                      // point
+                      // looking for more just yet.
+                      break;
+                    }
+                  }
+                  catch(InterruptedException e) {
+                    throw new GateRuntimeException(
+                            "JAPE FSM Matcher was interrupted!", e);
+                  }
+                  catch(java.util.concurrent.ExecutionException e) {
+                    fsmRunnerPool.shutdownNow();
+                    throw new GateRuntimeException(
+                            "JAPE FSM Matcher exception!", e.getCause());
+                  }
+                }
+              }
+            }
+          }
+        } else {
+          // single threaded solution
+          List<FSMInstance> newActiveFSMs = attemptAdvance(currentFSM, offsets,
+                  annotationsByOffset, doc);
+          if(newActiveFSMs != null && !newActiveFSMs.isEmpty()) {
+            activeFSMInstances.addAll(newActiveFSMs);
+          }
         }
       }
       boolean keepGoing = fireRule(acceptingFSMInstances, state, lastNodeOff,
@@ -371,45 +417,36 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       if(!keepGoing) return;
 
     }// while(state.startNodeOff != -1)
+    // fsmRunnerPool.shutdown();
+
     fireProcessFinished();
   } // transduce
 
   /**
    * Try to advance the activeFSMInstances.
-   *
+   * 
    * @return a list of newly created FSMInstances
    */
   @SuppressWarnings("unchecked")
-  protected List<FSMInstance> attemptAdvance(FSMInstance currentFSM, 
-          List<FSMInstance> acceptingFSMInstances, SimpleSortedSet offsets,
-          SimpleSortedSet annotationsByOffset, Document doc){
-//    // take the first active FSM instance
-//    FSMInstance currentFSM = (FSMInstance)activeFSMInstances.remove(0);
-//
-//    // process the current FSM instance
-//    if(currentFSM.getFSMPosition().isFinal()) {
-//      // the current FSM is in a final state
-//      acceptingFSMInstances.add(currentFSM.clone());
-//
-//      // if we're only looking for the shortest stop here
-//      if(ruleApplicationStyle == FIRST_STYLE) return true;
-//    }
+  protected List<FSMInstance> attemptAdvance(FSMInstance currentInstance,
+          SimpleSortedSet offsets, SimpleSortedSet annotationsByOffset,
+          Document document) {
+    List<FSMInstance> newActiveInstances = null;
 
-    List<FSMInstance> retVal = new ArrayList<FSMInstance>();
-    
-    // get all the annotations that start where the current FSM finishes
-    SimpleSortedSet offsetsTailSet = offsets.tailSet(currentFSM.getAGPosition()
-            .getOffset().longValue());
+    // get all the annotations that start where the current FSM
+    // finishes
+    SimpleSortedSet offsetsTailSet = offsets.tailSet(currentInstance
+            .getAGPosition().getOffset().longValue());
     List<Annotation> paths;
     long theFirst = offsetsTailSet.first();
-    if(theFirst < 0) return retVal;
+    if(theFirst < 0) return null;
 
     paths = (List)annotationsByOffset.get(theFirst);
 
-    if(paths.isEmpty()) return retVal;
+    if(paths.isEmpty()) return null;
 
     // get the transitions for the current state of the FSM
-    State currentState = currentFSM.getFSMPosition();
+    State currentState = currentInstance.getFSMPosition();
     Iterator transitionsIter = currentState.getTransitions().iterator();
 
     // for each transition, keep the set of annotations starting at
@@ -418,114 +455,132 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     transitionsWhile: while(transitionsIter.hasNext()) {
       Transition currentTransition = (Transition)transitionsIter.next();
 
-      // There will only be multiple constraints if this transition is over
-      // a written constraint that has the "and" operator (comma) and the
-      // parts referr to different annotation types.  For example -
+      // There will only be multiple constraints if this transition is
+      // over
+      // a written constraint that has the "and" operator (comma) and
+      // the
+      // parts referr to different annotation types. For example -
       // {A,B} would result in 2 constraints in the array, while
-      // {A.foo=="val", A.bar=="val"} would only be a single constraint.
+      // {A.foo=="val", A.bar=="val"} would only be a single
+      // constraint.
       Constraint[] currentConstraints = currentTransition.getConstraints()
               .getConstraints();
 
       boolean hasPositiveConstraint = false;
       List<Annotation>[] matchesByConstraint = new List[currentConstraints.length];
-      for(int i = 0; i < matchesByConstraint.length; i++) matchesByConstraint[i] = null;
-//      Map<Constraint, Collection<Annotation>> matchingMap =
-//        new LinkedHashMap<Constraint, Collection<Annotation>>();
-      
-      // check all negated constraints first.  If any annotation matches any
+      for(int i = 0; i < matchesByConstraint.length; i++)
+        matchesByConstraint[i] = null;
+      // Map<Constraint, Collection<Annotation>> matchingMap =
+      // new LinkedHashMap<Constraint, Collection<Annotation>>();
+
+      // check all negated constraints first. If any annotation
+      // matches any
       // negated constraint, then the transition fails.
-      for(int i = 0;  i < currentConstraints.length; i++){
-//      for(Constraint c : currentConstraints) {
+      for(int i = 0; i < currentConstraints.length; i++) {
+        // for(Constraint c : currentConstraints) {
         Constraint c = currentConstraints[i];
-        if (!c.isNegated()) {
+        if(!c.isNegated()) {
           hasPositiveConstraint = true;
           continue;
         }
-        List<Annotation> matchList = c.matches(paths, ontology, doc);
-        if (!matchList.isEmpty())
-            continue transitionsWhile;
+        List<Annotation> matchList = c.matches(paths, ontology, document);
+        if(!matchList.isEmpty()) continue transitionsWhile;
       }
 
-      // Now check all non-negated constraints.  At least one annotation must
+      // Now check all non-negated constraints. At least one
+      // annotation must
       // match each constraint.
-      if (hasPositiveConstraint){
-        for(int i = 0;  i < currentConstraints.length; i++){
-//        for(Constraint c : currentConstraints) {
+      if(hasPositiveConstraint) {
+        for(int i = 0; i < currentConstraints.length; i++) {
+          // for(Constraint c : currentConstraints) {
           Constraint c = currentConstraints[i];
-          if (c.isNegated()) continue;
-          List<Annotation> matchList = c.matches(paths, ontology, doc);
-          //if no annotations matched, then the transition fails.
-          if (matchList.isEmpty()){
+          if(c.isNegated()) continue;
+          List<Annotation> matchList = c.matches(paths, ontology, document);
+          // if no annotations matched, then the transition fails.
+          if(matchList.isEmpty()) {
             continue transitionsWhile;
-          } else {
-            //matchingMap.put(c, matchList);
+          }
+          else {
+            // matchingMap.put(c, matchList);
             matchesByConstraint[i] = matchList;
           }
         }
-      } //end if hasPositiveConstraint
+      } // end if hasPositiveConstraint
       else {
-        // There are no non-negated constraints.  Since the negated constraints
-        // did not fail, this means that all of the current annotations
-        // are potentially valid.  Add the whole set to the matchingMap.
-        // Use the first negated constraint for the debug trace since any will do.
-//        matchingMap.put(currentConstraints[0], paths);
+        // There are no non-negated constraints. Since the negated
+        // constraints
+        // did not fail, this means that all of the current
+        // annotations
+        // are potentially valid. Add the whole set to the
+        // matchingMap.
+        // Use the first negated constraint for the debug trace since
+        // any will do.
+        // matchingMap.put(currentConstraints[0], paths);
         matchesByConstraint[0] = paths;
       }
 
-      // We have a match if every positive constraint is met by at least one annot.
+      // We have a match if every positive constraint is met by at
+      // least one annot.
       // Given the sets Sx of the annotations that match constraint x,
       // compute all tuples (A1, A2, ..., An) where Ax comes from the
       // set Sx and n is the number of constraints
       List<List<Annotation>> matchLists = new ArrayList<List<Annotation>>();
-      for(int i = 0; i < currentConstraints.length; i++){
-//      for(Map.Entry<Constraint,Collection<Annotation>> entry : matchingMap.entrySet()) {
-        //seeing the constraint is useful when debugging
+      for(int i = 0; i < currentConstraints.length; i++) {
+        // for(Map.Entry<Constraint,Collection<Annotation>> entry :
+        // matchingMap.entrySet()) {
+        // seeing the constraint is useful when debugging
         @SuppressWarnings("unused")
         Constraint c = currentConstraints[i];
-//        Constraint c = entry.getKey();
+        // Constraint c = entry.getKey();
         List<Annotation> matchList = matchesByConstraint[i];
-//        Collection<Annotation> matchList = entry.getValue();
-        if(matchList != null){
+        // Collection<Annotation> matchList = entry.getValue();
+        if(matchList != null) {
           matchLists.add(matchList);
         }
-//        if (matchList instanceof List)
-//          matchLists.add((List<Annotation>)matchList);
-//        else
-//          matchLists.add(new ArrayList<Annotation>(matchList));
+        // if (matchList instanceof List)
+        // matchLists.add((List<Annotation>)matchList);
+        // else
+        // matchLists.add(new ArrayList<Annotation>(matchList));
       }
-      List<List<Annotation>> combinations = combine(matchLists, matchLists.size(), new LinkedList());
+      List<List<Annotation>> combinations = combine(matchLists, matchLists
+              .size(), new LinkedList());
 
       // Create a new FSM for every tuple of annot
       for(List<Annotation> tuple : combinations) {
-        // Find longest annotation and use that to mark the start of the
+        // Find longest annotation and use that to mark the start of
+        // the
         // new FSM
         Annotation matchingAnnot = getRightMostAnnotation(tuple);
 
-
-        // we have a match. create a new FSMInstance, advance it over the current
-        // annotation take care of the bindings and add it to ActiveFSM
-        FSMInstance newFSMI = (FSMInstance)currentFSM.clone();
+        // we have a match. create a new FSMInstance, advance it over
+        // the current
+        // annotation take care of the bindings and add it to
+        // ActiveFSM
+        FSMInstance newFSMI = (FSMInstance)currentInstance.clone();
         newFSMI.setAGPosition(matchingAnnot.getEndNode());
         newFSMI.setFSMPosition(currentTransition.getTarget());
 
         // by Shafirin Andrey start (according to Vladimir Karasev)
         if(null != phaseController) {
-          // figure out which constraint this came from so can include it in
+          // figure out which constraint this came from so can include
+          // it in
           // debug trace
           Constraint matchingConstraint = null;
-          for(int i = 0; i < matchesByConstraint.length; i++){
-//            for(Map.Entry<Constraint,Collection<Annotation>> entry : matchingMap.entrySet()) {
-            if(matchesByConstraint[i] != null && matchesByConstraint[i].contains(matchingAnnot)){
-//              if (entry.getValue().contains(matchingAnnot)) {
+          for(int i = 0; i < matchesByConstraint.length; i++) {
+            // for(Map.Entry<Constraint,Collection<Annotation>> entry
+            // : matchingMap.entrySet()) {
+            if(matchesByConstraint[i] != null
+                    && matchesByConstraint[i].contains(matchingAnnot)) {
+              // if (entry.getValue().contains(matchingAnnot)) {
               matchingConstraint = currentConstraints[i];
-//                matchingConstraint = entry.getKey();
+              // matchingConstraint = entry.getKey();
               break;
             }
-          }            
-          currRuleTrace = rulesTrace.getStateContainer(currentFSM
+          }
+          currRuleTrace = rulesTrace.getStateContainer(currentInstance
                   .getFSMPosition());
           if(currRuleTrace == null) {
-            currRuleTrace = new RuleTrace(newFSMI.getFSMPosition(), doc);
+            currRuleTrace = new RuleTrace(newFSMI.getFSMPosition(), document);
             currRuleTrace.addAnnotation(matchingAnnot);
             currRuleTrace.putPattern(matchingAnnot, matchingConstraint);
             rulesTrace.add(currRuleTrace);
@@ -549,7 +604,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
           boundAnnots = (AnnotationSet)binds.get(oneLabel);
           if(boundAnnots != null)
             newSet = new AnnotationSetImpl(boundAnnots);
-          else newSet = new AnnotationSetImpl(doc);
+          else newSet = new AnnotationSetImpl(document);
 
           for(Annotation annot : tuple) {
             newSet.add(annot);
@@ -557,11 +612,14 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 
           binds.put(oneLabel, newSet);
         }// while(labelsIter.hasNext())
-        retVal.add(newFSMI);
+        if(newActiveInstances == null) {
+          newActiveInstances = new ArrayList<FSMInstance>();
+        }
+        newActiveInstances.add(newFSMI);
       } // iter over matching combinations
 
     }// while(transitionsIter.hasNext())
-    return retVal;
+    return newActiveInstances;
   }
 
   /**
