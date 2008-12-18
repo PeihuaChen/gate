@@ -55,10 +55,9 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   static{
     //temporary solution used for experiments only!
     if(USE_MULTI_THREADING){
-      fsmRunnerPool = new ThreadPoolExecutor(10, Integer.MAX_VALUE, 
+      fsmRunnerPool = new ThreadPoolExecutor(0, Integer.MAX_VALUE, 
               10, TimeUnit.SECONDS, 
               new LinkedBlockingQueue());
-      fsmRunnerPool.allowCoreThreadTimeOut(true);
     }
   }
 
