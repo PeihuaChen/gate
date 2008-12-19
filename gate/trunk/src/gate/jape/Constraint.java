@@ -290,7 +290,7 @@ public class Constraint implements JapeConstants, gate.creole.ANNIEConstants,
   } // shortDesc
 
   /**
-   * Invoke {@link #matches(Annotation, Ontology)} on all provided
+   * Invoke {@link #matches(Annotation, Ontology, Object)} on all provided
    * annotations.
    *
    * @param annots collection of Annotations to test
