@@ -85,31 +85,31 @@ public class SimpleFeatureMapImpl
       /*ontology aware subsume implementation
       ontotext.bp*/
       if ((keyValueFromThis != null) && (keyValueFromAFeatureMap != null)) {
-
-        if ( key.equals(LOOKUP_CLASS_FEATURE_NAME) ) {
-          /* ontology aware processing */
-          Object sfmOntoObj = sfm.get(LOOKUP_ONTOLOGY_FEATURE_NAME);
-          Object thisOntoObj = this.get(LOOKUP_ONTOLOGY_FEATURE_NAME);
-          if (null!=sfmOntoObj && null!= thisOntoObj) {
-            if (sfmOntoObj.equals(thisOntoObj)) {
-              boolean doSubsume = ontologySubsume(
-                          sfmOntoObj.toString(),
-                          keyValueFromAFeatureMap.toString(),
-                          keyValueFromThis.toString());
-              if (!doSubsume ) {
-                return false;
-              }
-            } // if ontologies are with the same url
-          } //if not null objects
-          else {
-            // incomplete feature set: missing ontology feature
-            return false;
-          }
-        } else {
+// commented out as ontology subsumes is now explicitly called if
+// an ontology is provided. <valyt>       
+//        if ( key.equals(LOOKUP_CLASS_FEATURE_NAME) ) {
+//          /* ontology aware processing */
+//          Object sfmOntoObj = sfm.get(LOOKUP_ONTOLOGY_FEATURE_NAME);
+//          Object thisOntoObj = this.get(LOOKUP_ONTOLOGY_FEATURE_NAME);
+//          if (null!=sfmOntoObj && null!= thisOntoObj) {
+//            if (sfmOntoObj.equals(thisOntoObj)) {
+//              boolean doSubsume = ontologySubsume(
+//                          sfmOntoObj.toString(),
+//                          keyValueFromAFeatureMap.toString(),
+//                          keyValueFromThis.toString());
+//              if (!doSubsume ) {
+//                return false;
+//              }
+//            } // if ontologies are with the same url
+//          } //if not null objects
+//          else {
+//            // incomplete feature set: missing ontology feature
+//            return false;
+//          }
+//        } else {
           /* processing without ontology awareness */
           if (!keyValueFromThis.equals(keyValueFromAFeatureMap)) return false;
-        }  // else
-
+//        }  // else
       } // if
     } // for
 
@@ -175,7 +175,9 @@ public class SimpleFeatureMapImpl
               Out.prln("\nisSubClassOf: " + subClass.isSubClassOf(superClass, OConstants.TRANSITIVE_CLOSURE));
             }
 
-            return subClass.isSubClassOf(superClass, OConstants.TRANSITIVE_CLOSURE);
+            return subClass == superClass || 
+                subClass.isSubClassOf(superClass, 
+                        OConstants.TRANSITIVE_CLOSURE);
           } catch (Exception ex) {
             throw new gate.util.GateRuntimeException(ex);
           }
@@ -244,30 +246,32 @@ public class SimpleFeatureMapImpl
           ) return false;
 
       if ((keyValueFromThis != null) && (keyValueFromAFeatureMap != null)) {
-        if ( key.equals(LOOKUP_CLASS_FEATURE_NAME) ) {
-          /* ontology aware processing */
-          if (!aFeatureNamesSet.contains(LOOKUP_ONTOLOGY_FEATURE_NAME))
-            continue;
-
-          Object sfmOntoObj = sfm.get(LOOKUP_ONTOLOGY_FEATURE_NAME);
-          Object thisOntoObj = this.get(LOOKUP_ONTOLOGY_FEATURE_NAME);
-          if (null!=sfmOntoObj && null!= thisOntoObj) {
-            if (sfmOntoObj.equals(thisOntoObj)) {
-              if (! ontologySubsume(
-                          sfmOntoObj.toString(),
-                          keyValueFromAFeatureMap.toString(),
-                          keyValueFromThis.toString()))
-                return false;
-            } // if ontologies are with the same url
-          } //if not null objects
-          else {
-            // incomplete feature set: missing ontology feature
-            return false;
-          }
-        } else {
+// Commented out as ontology subsumes is now explicitly called when an ontology
+// is provided. <valyt>
+//        if ( key.equals(LOOKUP_CLASS_FEATURE_NAME) ) {
+//          /* ontology aware processing */
+//          if (!aFeatureNamesSet.contains(LOOKUP_ONTOLOGY_FEATURE_NAME))
+//            continue;
+//
+//          Object sfmOntoObj = sfm.get(LOOKUP_ONTOLOGY_FEATURE_NAME);
+//          Object thisOntoObj = this.get(LOOKUP_ONTOLOGY_FEATURE_NAME);
+//          if (null!=sfmOntoObj && null!= thisOntoObj) {
+//            if (sfmOntoObj.equals(thisOntoObj)) {
+//              if (! ontologySubsume(
+//                          sfmOntoObj.toString(),
+//                          keyValueFromAFeatureMap.toString(),
+//                          keyValueFromThis.toString()))
+//                return false;
+//            } // if ontologies are with the same url
+//          } //if not null objects
+//          else {
+//            // incomplete feature set: missing ontology feature
+//            return false;
+//          }
+//        } else {
           /*processing without ontology awareness*/
           if (!keyValueFromThis.equals(keyValueFromAFeatureMap)) return false;
-        } //else
+//        } //else
       } // if values not null
     } // for
 
@@ -348,44 +352,45 @@ public class SimpleFeatureMapImpl
     }
   }//fireMapUpdatedEvent
 
-
-  /**ontology enhanced subsume
-   * @param ontoUrl the url of the ontology to be used
-   * @return true if value1 subsumes value2 in the specified ontology */
-  protected boolean ontologySubsume(String ontoUrl,String value1,String value2) {
-    boolean result = false;
-    try {
-      URL url;
-      try {
-        url = new URL(ontoUrl);
-      } catch (MalformedURLException e){
-        throw new RuntimeException(
-        "\nin SimpleFeatureMapImpl on ontologySubsume()\n"
-        +e.getMessage()+"\n");
-      }
-
-      /* GET ONTOLOGY BY URL : a bit tricky reference
-      since the behaviour behind the getOntology method is
-      certainly static.
-      : should be temporary */
-      Ontology o = OntologyUtilities.getOntology(url);
-      OClass superClass = (OClass) o.getOResourceByName(value1);
-      OClass subClass = (OClass) o.getOResourceByName(value2);
-      if (subClass.equals(superClass))
-        return true;
-
-      if (subClass.isSubClassOf(superClass, OConstants.TRANSITIVE_CLOSURE))
-        return true;
-
-      //check for equivalency
-      Set<OClass> equiv = superClass.getEquivalentClasses();
-      result = equiv.contains(subClass);
-
-    } catch  (gate.creole.ResourceInstantiationException x) {
-      x.printStackTrace(Err.getPrintWriter());
-    }
-    return result;
-  } // ontologySubsume
+//Commented out as ontology subsumes is now explicitly called when an ontology
+//is provided. <valyt>
+//  /**ontology enhanced subsume
+//   * @param ontoUrl the url of the ontology to be used
+//   * @return true if value1 subsumes value2 in the specified ontology */
+//  protected boolean ontologySubsume(String ontoUrl,String value1,String value2) {
+//    boolean result = false;
+//    try {
+//      URL url;
+//      try {
+//        url = new URL(ontoUrl);
+//      } catch (MalformedURLException e){
+//        throw new RuntimeException(
+//        "\nin SimpleFeatureMapImpl on ontologySubsume()\n"
+//        +e.getMessage()+"\n");
+//      }
+//
+//      /* GET ONTOLOGY BY URL : a bit tricky reference
+//      since the behaviour behind the getOntology method is
+//      certainly static.
+//      : should be temporary */
+//      Ontology o = OntologyUtilities.getOntology(url);
+//      OClass superClass = (OClass) o.getOResourceByName(value1);
+//      OClass subClass = (OClass) o.getOResourceByName(value2);
+//      if (subClass.equals(superClass))
+//        return true;
+//
+//      if (subClass.isSubClassOf(superClass, OConstants.TRANSITIVE_CLOSURE))
+//        return true;
+//
+//      //check for equivalency
+//      Set<OClass> equiv = superClass.getEquivalentClasses();
+//      result = equiv.contains(subClass);
+//
+//    } catch  (gate.creole.ResourceInstantiationException x) {
+//      x.printStackTrace(Err.getPrintWriter());
+//    }
+//    return result;
+//  } // ontologySubsume
 
 } // class SimpleFeatureMapImpl
 
