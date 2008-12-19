@@ -70,8 +70,8 @@ import javax.swing.event.*;
  * <br>
  * TODO:
  * <ul>
- * <li>could be interesting to have statistics per document</li>
- * <li>it is just adding one condition to the query that retrieves data out of
+ * <li>could be interesting to have statistics per document,
+ * it is just adding one condition to the query that retrieves data out of
  *   the index</li>
  * <li>add shortcut to autocompletion ?</li>
  * <li>where to store the configuration for shortcut: user config or datastore ?</li>
@@ -680,12 +680,11 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               for(int i = 0; i < rows.length; i++) {
                 rows[i] = patternTable.rowViewToModel(rows[i]);
               }
-
-              rows = sortRows(rows);
-              // here all rows are in ascending order
+              Arrays.sort(rows);
               for(int i = rows.length - 1; i >= 0; i--) {
                 patterns.remove(rows[i]);
               }
+              patternTable.clearSelection();
               patternTableModel.fireTableDataChanged();
               mousePopup.setVisible(false);
             }
@@ -1614,25 +1613,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
   }
 
   /**
-   * Sort use for the pattern table.
-   * 
-   * @param rows table of rows to sort
-   * @return rows sorted 
-   */
-  protected int[] sortRows(int[] rows) {
-    for(int i = 0; i < rows.length; i++) {
-      for(int j = 0; j < rows.length - 1; j++) {
-        if(rows[j] > rows[j + 1]) {
-          int temp = rows[j];
-          rows[j] = rows[j + 1];
-          rows[j + 1] = temp;
-        }
-      }
-    }
-    return rows;
-  }
-
-  /**
    * This method uses the java.util.prefs.Preferences and get the color
    * for particular annotationType.. This color could have been saved by
    * the AnnotationSetsView
@@ -2469,7 +2449,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         tip.setTipText(kind + " = " + count);
         PopupFactory popupFactory = PopupFactory.getSharedInstance();
         final Popup tipWindow = popupFactory.getPopup(label, tip,
-          e.getXOnScreen(), e.getYOnScreen());
+          e.getX()+e.getComponent().getLocationOnScreen().x,
+          e.getY()+e.getComponent().getLocationOnScreen().y);
         tipWindow.show();
         Timer timer = new Timer(2000, new AbstractAction() {
           public void actionPerformed(ActionEvent e) {
@@ -2705,7 +2686,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         tip.setTipText(kind + " = " + count);
         PopupFactory popupFactory = PopupFactory.getSharedInstance();
         final Popup tipWindow = popupFactory.getPopup(label, tip,
-          e.getXOnScreen(), e.getYOnScreen());
+          e.getX()+e.getComponent().getLocationOnScreen().x,
+          e.getY()+e.getComponent().getLocationOnScreen().y);
         tipWindow.show();
         Timer timer = new Timer(2000, new AbstractAction() {
           public void actionPerformed(ActionEvent e) {
@@ -3157,13 +3139,13 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           return aResult.getAnnotationSetName();
         case LEFT_CONTEXT_COLUMN:
           return aResult.getPatternText(aResult.getLeftContextStartOffset(),
-                  aResult.getStartOffset());
+                  aResult.getStartOffset()).replaceAll("[\n ]+", " ");
         case PATTERN_COLUMN:
           return aResult.getPatternText(aResult.getStartOffset(), aResult
-                  .getEndOffset());
+                  .getEndOffset()).replaceAll("[\n ]+", " ");
         case RIGHT_CONTEXT_COLUMN:
           return aResult.getPatternText(aResult.getEndOffset(), aResult
-                  .getRightContextEndOffset());
+                  .getRightContextEndOffset()).replaceAll("[\n ]+", " ");
         default:
           return Object.class;
       }
