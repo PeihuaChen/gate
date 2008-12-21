@@ -95,6 +95,15 @@ extends SimpleAnnotation, Serializable {
     * they don't.
     */
   public boolean overlaps(Annotation aAnnot);
+  
+  /** This method tells if <b>this</b> annotation's text range is 
+   * fully contained within the text annotated by <code>aAnnot</code>'s
+   * annotation. 
+   * @param aAnnot a gate Annotation.
+   * @return <code>true</code> if this annotation is fully contained in the 
+   * other one.
+   */
+  public boolean withinSpanOf(Annotation aAnnot);
 
   /**
    *
