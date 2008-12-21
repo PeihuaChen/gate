@@ -350,6 +350,31 @@ public class AnnotationImpl extends AbstractFeatureBearer
     return true;
   }//overlaps
 
+  
+  /** This method tells if <b>this</b> annotation's text range is 
+   * fully contained within the text annotated by <code>aAnnot</code>'s
+   * annotation. 
+   * @param aAnnot a gate Annotation.
+   * @return <code>true</code> if this annotation is fully contained in the 
+   * other one.
+   */
+ public boolean withinSpanOf(Annotation aAnnot){
+   if (aAnnot == null) return false;
+   if (aAnnot.getStartNode() == null ||
+       aAnnot.getEndNode() == null ||
+       aAnnot.getStartNode().getOffset() == null ||
+       aAnnot.getEndNode().getOffset() == null) return false;
+
+   if ( ( aAnnot.getEndNode().getOffset().longValue() >=
+          this.getEndNode().getOffset().longValue() ) &&
+        ( aAnnot.getStartNode().getOffset().longValue() <= 
+          this.getStartNode().getOffset().longValue() ) )
+     return true;
+   else 
+     return false;
+ }//withinSpanOf
+
+  
 //////////////////THE EVENT HANDLING CODE/////////////////////
 //Needed so an annotation set can listen to its annotations//
 //and update correctly the database/////////////////////////
