@@ -453,7 +453,8 @@ implements ProcessingResource {
   private void instantiateStanfordParser()
     throws ResourceInstantiationException {
     try {
-      stanfordParser = new LexicalizedParser(parserFile.getFile());
+      String filepath = Files.fileFromURL(parserFile).getAbsolutePath();
+      stanfordParser = new LexicalizedParser(filepath);
     }
     catch(Exception e) {
       throw new ResourceInstantiationException(e);
