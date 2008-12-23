@@ -249,8 +249,8 @@ public class Minipar extends AbstractLanguageAnalyser implements
 
 		// this should be the miniparBinary + "-p " + getMiniparDataDir +
 		// GATETEXTFILE
-		File binary = new File(getMiniparBinary().getFile());
-		File dataFile = new File(getMiniparDataDir().getFile());
+		File binary = Files.fileFromURL(getMiniparBinary());
+		File dataFile = Files.fileFromURL(getMiniparDataDir());
 		//String cmdline = binary.getAbsolutePath() + " -p "
 		//		+ dataFile.getAbsolutePath() + " -file "
 		//		+ gateTextFile.getAbsolutePath();
