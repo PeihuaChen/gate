@@ -545,7 +545,9 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
       tempFolder.deleteOnExit();
 
       URL sourceUrl = null;
+      List<String> docIDs = new ArrayList<String>();
       for(String id : docXmls.keySet()) {
+        docIDs.add(id);
         File newFile = new File("X." + id + ".xml");
         newFile.deleteOnExit();
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
@@ -565,7 +567,13 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
       }
 
       FeatureMap hideFeats = Factory.newFeatureMap();
-      Gate.setHiddenAttribute(hideFeats, true);
+      //Gate.setHiddenAttribute(hideFeats, true);
+//      CompoundDocument cd = new gate.compound.impl.CompoundDocumentImpl();
+//      cd.setName(name);
+//      cd.setSourceUrl(sourceUrl);
+//      ((CompoundDocumentImpl) cd).setEncoding(encoding);
+//      ((CompoundDocumentImpl) cd).setDocumentIDs(docIDs);
+//      cd.init();
       CompoundDocument cd = (CompoundDocument)Factory.createResource(
               "gate.compound.impl.CompoundDocumentImpl", fets, hideFeats);
       cd.setName(name);
