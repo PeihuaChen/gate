@@ -3766,7 +3766,6 @@ public class MainFrame extends JFrame implements ProgressListener,
     public HelpUserGuideAction() {
       super("User Guide Contents");
       putValue(SHORT_DESCRIPTION, "This option needs an internet connection");
-      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control F1"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -4132,7 +4131,6 @@ public class MainFrame extends JFrame implements ProgressListener,
       }
     }
 
-    @Override
     public void approveSelection() {
       // Save the location of the file chooser for the current resource.
       if (currentResourceClassName == null) { return; }
@@ -4157,7 +4155,7 @@ public class MainFrame extends JFrame implements ProgressListener,
    * @param path location in the preference tree
    * @param key associated key to the value to get
    * @return a string that is the value of the preference or null if not
-   *         existing
+   *         existing or empty
    */
   public static String getPreferenceValue(String path, String key) {
     String previousValue = null;
@@ -4186,7 +4184,12 @@ public class MainFrame extends JFrame implements ProgressListener,
   public static void setPreferenceValue(String path, String key, String value) {
     Preferences node = null;
     node = prefs.node(path);
-    node.put(key, value);
+    try {
+      node.put(key, value);
+    } catch (IllegalArgumentException e) {
+      log.debug("Error when trying to save the file location.", e);
+      return;
+    }
     try {
       prefs.flush();
     } catch (BackingStoreException e) {

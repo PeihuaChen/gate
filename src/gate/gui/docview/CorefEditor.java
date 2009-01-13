@@ -32,6 +32,11 @@ import gate.gui.MainFrame;
 import javax.swing.text.Highlighter;
 import javax.swing.text.DefaultHighlighter;
 
+/**
+ * Display a tree that contains the co-references type of the document,
+ * highlight co-references in the document, allow creating
+ * co-references from existing annotations, editing and deleting co-references.
+ */
 public class CorefEditor
     extends AbstractDocumentView
     implements ActionListener, gate.event.FeatureMapListener,
@@ -1117,8 +1122,9 @@ public class CorefEditor
   }
 
   /**
-       * This method removes the reference of this annotatation from the current chain
-   * @param ann
+   * Removes the reference of this annotation from the current chain.
+   * @param annot annotation to remove
+   * @param chainHead co-reference chain to modify
    */
   public void removeChainReference(Annotation annot, CorefTreeNode chainHead) {
 
@@ -2043,8 +2049,7 @@ public class CorefEditor
     private JLabel label;
 
     /**
-     * Constructor
-     * @param owner
+     * Constructor.
      */
     public CorefTreeCellRenderer() {
       setOpaque(true);
