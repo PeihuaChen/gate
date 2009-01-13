@@ -1662,8 +1662,7 @@ public class AlignmentEditor extends AbstractVisualResource implements
             Object action = actionClass.newInstance();
             String[] args = line.split("[,]");
             if(action instanceof AlignmentAction) {
-              AlignmentAction aa = (AlignmentAction)actionClass.newInstance();
-              loadAlignmentAction(aa, args);
+              loadAlignmentAction((AlignmentAction)action, args);
             }
 
             if(action instanceof PreDisplayAction) {
