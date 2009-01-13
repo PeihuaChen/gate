@@ -212,6 +212,10 @@ public class CompoundDocumentEditor extends AbstractVisualResource
           }
         });
 
+        // file to Open is a directory
+        String corpusName = JOptionPane.showInputDialog("Enter CorpusName");
+        Corpus corpusToUse = Factory.newCorpus(corpusName);
+
         for(File aFile : files) {
           StringBuilder xmlString = new StringBuilder();
           BufferedReader br = new BufferedReader(new InputStreamReader(
@@ -221,7 +225,9 @@ public class CompoundDocumentEditor extends AbstractVisualResource
             xmlString.append("\n").append(line);
             line = br.readLine();
           }
-          AbstractCompoundDocument.fromXml(xmlString.toString());
+          CompoundDocument doc = AbstractCompoundDocument.fromXml(xmlString
+                  .toString());
+          corpusToUse.add(doc);
           br.close();
         }
       }
