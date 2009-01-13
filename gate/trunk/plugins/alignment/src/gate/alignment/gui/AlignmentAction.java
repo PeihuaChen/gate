@@ -10,9 +10,13 @@ import gate.compound.CompoundDocument;
 import javax.swing.Icon;
 
 /**
- * This interface represents an AlignmentAction. In other words actions
- * that should be executed when user clicks on the "Align" button in the
- * GUI.
+ * This interface represents an AlignmentAction. AlignAction,
+ * ResetAction and RemoveAlignmentAction are examples of the
+ * AlignmentAction. In other words, it represents an action that could
+ * take place after the pair is displayed and before the user specifies
+ * to change his/her focus onto a new sentence pair. If not one of the
+ * above three, such an action could be executed with any of the
+ * AlignAction or RemoveAlignmentAction.
  * 
  * @author niraj
  * 
