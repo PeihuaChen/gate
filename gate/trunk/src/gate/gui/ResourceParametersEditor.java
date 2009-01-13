@@ -102,7 +102,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
     Gate.getCreoleRegister().addCreoleListener(this);
 
     addKeyListener(new KeyAdapter() {
-      public void keyTyped(KeyEvent e) {
+      public void keyPressed(KeyEvent e) {
         if(e.getKeyCode() == KeyEvent.VK_ENTER) {
           if(getEditingColumn() == -1 && getEditingRow() == -1) {
             getParent().dispatchEvent(e);

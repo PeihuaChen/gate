@@ -30,7 +30,7 @@ import gate.util.*;
 
 /**
  * Build a GUI for searching and annotating annotations in a text.
- * It needs to be called from a gate.gui.docview.AnnotationEditor.
+ * It needs to be called from a {@link gate.gui.annedit.OwnedAnnotationEditor}.
  * 
  * <p>Here is an example how to add it to a JPanel panel.
  *
