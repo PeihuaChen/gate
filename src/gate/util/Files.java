@@ -119,13 +119,18 @@ public class Files {
     throws IOException
   {
     InputStream resourceStream = getResourceAsStream(resourceName);
+    if(resourceStream == null) return null;
     BufferedReader resourceReader;
-    if(encoding == null)
-      resourceReader =
-        new BufferedReader(new InputStreamReader(resourceStream));
-    else
-      resourceReader =
-        new BufferedReader(new InputStreamReader(resourceStream, encoding));
+    InputStreamReader inputStreamReader;
+    if(encoding == null) {
+      inputStreamReader = new InputStreamReader(resourceStream);
+      if(inputStreamReader == null) return null;
+    } else {
+      inputStreamReader = new InputStreamReader(resourceStream, encoding);
+      if(inputStreamReader == null) return null;
+    }
+    resourceReader = new BufferedReader(inputStreamReader);
+    if(resourceReader == null) return null;
     StringBuffer resourceBuffer = new StringBuffer();
 
     int i;
