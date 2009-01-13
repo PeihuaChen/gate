@@ -1,10 +1,11 @@
-#!/usr/bin/perl -w -CDS
+#!/usr/bin/perl
 
 # Script to read all the creole.xml files for every plugin
 # to produce a summary HTML page (GATE/doc/plugins.html)
 # by Andrew Golightly
 
 use strict;
+use warnings;
 use XML::Simple;
 use XML::XPath;
 use XML::XPath::XMLParser;
@@ -20,7 +21,7 @@ File::Find::find(
     sub {
       push (@creoleFileList, $File::Find::name) if $_ eq 'creole.xml';
     },
-    qw(../build/plugins));
+    qw(../plugins));
 
 # Sort alphabetically
 @creoleFileList = sort @creoleFileList;
