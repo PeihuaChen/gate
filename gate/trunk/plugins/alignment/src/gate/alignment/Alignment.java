@@ -56,6 +56,11 @@ public class Alignment implements Serializable {
   protected transient CompoundDocument compoundDocument;
 
   /**
+   * A feature that PRs can use to specify which method was used to align that particular annotation.
+   */
+  public static final String ALIGNMENT_METHOD_FEATURE_NAME = "align-method"; 
+  
+  /**
    * Constructor
    */
   public Alignment(CompoundDocument compoundDocument) {
@@ -85,7 +90,7 @@ public class Alignment implements Serializable {
   public boolean areTheyAligned(Annotation srcAnnotation,
           Annotation targetAnnotation) {
     Set<Annotation> alignedTo = alignmentMatrix.get(srcAnnotation);
-    if(alignedTo == null)
+    if(alignedTo == null || alignedTo.isEmpty())
       return false;
     else return alignedTo.contains(targetAnnotation);
   }
@@ -183,7 +188,7 @@ public class Alignment implements Serializable {
   public Set<Annotation> getAlignedAnnotations() {
     Set<Annotation> annots = alignmentMatrix.keySet();
     if(annots == null)
-      return null;
+      return new HashSet<Annotation>();
     else {
       return new HashSet<Annotation>(annots);
     }
@@ -214,7 +219,7 @@ public class Alignment implements Serializable {
     Set<Annotation> annots = alignmentMatrix.get(srcAnnotation);
     if(annots != null)
       return new HashSet<Annotation>(annots);
-    else return null;
+    else return new HashSet<Annotation>();
   }
 
   /**
@@ -225,7 +230,7 @@ public class Alignment implements Serializable {
    */
   public boolean isAnnotationAligned(Annotation srcAnnotation) {
     Set<Annotation> alignedTo = alignmentMatrix.get(srcAnnotation);
-    if(alignedTo == null)
+    if(alignedTo == null || alignedTo.isEmpty())
       return false;
     else {
       return !alignedTo.isEmpty();
