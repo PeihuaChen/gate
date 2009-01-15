@@ -40,6 +40,16 @@ public class RemoveAlignmentAction extends AbstractAlignmentAction {
         if(alignment.areTheyAligned(srcAnnotation, tgtAnnotation)) {
           alignment.unalign(srcAnnotation, srcAS, srcDocument, tgtAnnotation,
                   tgtAS, tgtDocument);
+
+          if(alignment.getAlignedAnnotations(srcAnnotation).size() == 0) {
+            srcAnnotation.getFeatures().remove(
+                    Alignment.ALIGNMENT_METHOD_FEATURE_NAME);
+          }
+
+          if(alignment.getAlignedAnnotations(tgtAnnotation).size() == 0) {
+            tgtAnnotation.getFeatures().remove(
+                    Alignment.ALIGNMENT_METHOD_FEATURE_NAME);
+          }
         }
       }
     }

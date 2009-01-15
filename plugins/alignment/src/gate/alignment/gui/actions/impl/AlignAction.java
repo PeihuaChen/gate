@@ -42,8 +42,20 @@ public class AlignAction extends AbstractAlignmentAction {
     for(Annotation srcAnnotation : srcAlignedAnnotations) {
       for(Annotation tgtAnnotation : tgtAlignedAnnotations) {
         if(!alignment.areTheyAligned(srcAnnotation, tgtAnnotation)) {
+
+          if(!alignment.isAnnotationAligned(srcAnnotation)) {
+            srcAnnotation.getFeatures().put(
+                    Alignment.ALIGNMENT_METHOD_FEATURE_NAME, "manual");
+          }
+
+          if(!alignment.isAnnotationAligned(tgtAnnotation)) {
+            tgtAnnotation.getFeatures().put(
+                    Alignment.ALIGNMENT_METHOD_FEATURE_NAME, "manual");
+          }
+
           alignment.align(srcAnnotation, srcAS, srcDocument, tgtAnnotation,
                   tgtAS, tgtDocument);
+
         }
       }
     }
