@@ -135,6 +135,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
 
     // allow Tab key to select the next cell in the table
     mainTable.setSurrendersFocusOnKeystroke(true);
+    mainTable.setFocusCycleRoot(true);
 
     // remove (shift) control tab as traversal keys
     Set<AWTKeyStroke> keySet = new HashSet<AWTKeyStroke>(
