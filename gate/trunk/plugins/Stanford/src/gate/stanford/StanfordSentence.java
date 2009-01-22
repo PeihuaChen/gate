@@ -62,7 +62,7 @@ public class StanfordSentence {
 
     while(tokenIter.hasNext()) {
       token = tokenIter.next();
-      tokenString = (String) token.getFeatures().get(STRING_FEATURE);
+      tokenString = escapeToken(token.getFeatures().get(STRING_FEATURE).toString());
       add(tokenNo, token);
       
       /* The FAQ says the parser will automatically use existing POS tags
@@ -71,7 +71,7 @@ public class StanfordSentence {
        */
       
       if (usePosTags)  {
-        words.add(new TaggedWord(tokenString, getPosTag(token)));
+        words.add(new TaggedWord(tokenString, getEscapedPosTag(token)));
       }
       else {
         words.add(new Word(tokenString));
@@ -86,7 +86,7 @@ public class StanfordSentence {
 
   
   
-  private String getPosTag(Annotation token)  {
+  private String getEscapedPosTag(Annotation token)  {
     String pos = UNKNOWN_TAG;
     FeatureMap tokenFeatures = token.getFeatures();
 
@@ -105,7 +105,7 @@ public class StanfordSentence {
       nbrOfMissingPosTags++;
     }
     
-    return pos;
+    return escapePosTag(pos);
   }
   
 
@@ -144,6 +144,66 @@ public class StanfordSentence {
   
   public boolean isNotEmpty() {
     return (nbrOfTokens > 0);
+  }
+  
+  
+  /**
+   * Change the Token's string to match the Penn Treebank's 
+   * escaping system.
+   * See Stanford parser FAQ "How can I provide the correct tokenization of my 
+   * sentence to the parser?"  
+
+   * @param token original string feature of Token
+   * @return escaped version of string
+   */
+  protected static String escapeToken(String token) {
+    //   (  -->  -LRB-
+    if (token.equals("(")) {
+      return "-LRB-";
+    }
+    
+    //   )  -->  -RRB-
+    if (token.equals(")")) {
+      return "-RRB-";
+    }
+    
+    //   /  -->  \/
+    //   *  -->  \*
+    if (token.contains("/") || token.contains("*")) {
+      return token.replace("/", "\\/").replace("*", "\\*");
+    }
+    
+    return token;
+  }
+  
+
+  protected static String escapePosTag(String tag) {
+    //   (  -->  -LRB-
+    if (tag.equals("(")) {
+      return "-LRB-";
+    }
+    
+    //   )  -->  -RRB-
+    if (tag.equals(")")) {
+      return "-RRB-";
+    }
+    
+    return tag;
+  }
+
+  
+  protected static String unescapePosTag(String tag) {
+    //   (  <--  -LRB-
+    if (tag.equals("-LRB-")) {
+      return "(";
+    }
+    
+    //   )  <--  -RRB-
+    if (tag.equals("-RRB-")) {
+      return ")";
+    }
+    
+    return tag;
   }
   
 

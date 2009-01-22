@@ -52,20 +52,21 @@ implements ProcessingResource {
   protected boolean                        debugMode;
   private   boolean                        reusePosTags;
 
+  private OffsetComparator                 offsetComparator;
+  private Map<String, String>              tagMap;
+  protected StanfordSentence               stanfordSentence;
+  protected GrammaticalStructureFactory gsf;
+  
+
   /*  CREOLE parameters for optional mapping  */
   private boolean                          useMapping = false; 
   private URL                              mappingFileURL;
+  
   /*  internal variables for mapping  */
   private File                             mappingFile;
   private boolean                          mappingLoaded = false;
-
   
-  private OffsetComparator                 offsetComparator;
-  private Map<String, String>              tagMap;
-  
-  protected StanfordSentence               stanfordSentence;
-  
-  /*  What are we going to annotate, and how?  */
+  /*  CREOLE parameters: what are we going to annotate, and how?  */
   private boolean                          addConstituentAnnotations;
   private boolean                          addDependencyFeatures;
   private boolean                          addDependencyAnnotations;
@@ -73,7 +74,6 @@ implements ProcessingResource {
 
 
   
-  protected GrammaticalStructureFactory gsf;
 
   /**
    * The {@link TreebankLangParserParams} implementation to use. This is
@@ -365,8 +365,11 @@ implements ProcessingResource {
         if (tokenSet.size() == 1) {
           Annotation token = tokenSet.iterator().next();
 
-          /* add POS tag to token */
-          token.getFeatures().put(POS_TAG_FEATURE, cat);
+          /* Add POS tag to token.  
+           * (Note: GATE/Hepple uses "(" and ")" for Penn/Stanford's
+           * "-LRB-" and "-RRB-". */
+          String hepCat = StanfordSentence.unescapePosTag(cat);
+          token.getFeatures().put(POS_TAG_FEATURE, hepCat);
           
         }
         else {
@@ -399,11 +402,11 @@ implements ProcessingResource {
         System.out.println(d);
       }
 
-      governorToken  = stanfordSentence.startPos2token(((AbstractMapLabel) d.gov()
-        .label()).index() - 1);
+      int governorIndex = ((HasIndex) d.gov().label()).index() - 1;
+      governorToken  = stanfordSentence.startPos2token(governorIndex);
       
-      dependentToken = stanfordSentence.startPos2token(((AbstractMapLabel) d.dep()
-        .label()).index() - 1);
+      int dependentIndex = ((HasIndex) d.dep().label()).index() - 1;
+      dependentToken = stanfordSentence.startPos2token(dependentIndex);
 
       dependencyKind = d.reln().toString();
       governorTokenID = governorToken.getId();
