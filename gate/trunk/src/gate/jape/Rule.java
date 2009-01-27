@@ -89,47 +89,8 @@ implements JapeConstants, java.io.Serializable
     lhs.finish();
   } // finish
 
-  /** If another match at or beyond <CODE>position</CODE> is possible return
-    * the position we want to fire in, else -1.
-    */
-  public int getNextMatch(Document doc, int position, int end) {
-    MutableInteger newPosition = new MutableInteger();
-    newPosition.value = position;
-    while(position < end) {
 
-      if(matches(doc, position, newPosition)) {
-        pendingPosition = getStartPosition();
-        return pendingPosition;
-      }
-      position = Math.max(position + 1, newPosition.value);
 
-    } // while position not final
-
-    weFinished = true;
-    return -1;
-  } // getNextMatch
-
-  /** Return the ending position of a match. This is the rightmost span
-    * end of the matched annotations.
-    */
-  public int getEndPosition() {
-    return lhs.getMatchedAnnots().lastNode().getOffset().intValue();
-  }
-
-  /** Return the starting position of a match. This is the leftmost span
-    * start of the matched annotations.
-    */
-  public int getStartPosition() {
-    return lhs.getMatchedAnnots().firstNode().getOffset().intValue();
-  }
-
-  /** Does this element match the document at this position? */
-  public boolean matches(
-    Document doc, int position, MutableInteger newPosition
-  ) {
-    if(DEBUG) Out.println("trying rule " + name + " at " + position);
-    return lhs.matches(doc, position, newPosition);
-  } // matches
 
   /** Apply the RHS of this rule (LHS must have been matched first). */
   public void transduce(Document doc, AnnotationSet inputAS,
@@ -144,19 +105,11 @@ implements JapeConstants, java.io.Serializable
     );*/
 
     // clear the caches of matched annotations in the LHS
-    reset();
+//    reset();
     //Debug.pr(this, "LHS after reset: " + lhs.toString());
 
   } // transduce
 
-  /** Clear away the results of a match. */
-  public void reset() {
-     if(weFinished) // no annotations cached
-       weFinished = false;
-     else
-       lhs.reset();
-     pendingPosition = -1;
-  }
 
   /** For debugging. */
   // public String getName() { return name; }

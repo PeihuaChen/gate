@@ -75,53 +75,6 @@ public class PrioritisedRuleList extends ArrayList implements java.io.Serializab
     this.add(i, newRule);
   } // add(Rule)
 
-  /** Adds a rule in order. Used for matched rules. Implements the
-    * ordering based on length/priority/position. Length is given as
-    * a parameter.
-    */
-  public synchronized void add(Rule newRule, int newRuleLength) {
-    /* for each rule,
-     *   if it is longer than the new one, continue;
-     *   else if it is the same length
-     *     if it is higher priority, continue;
-     *     else if it is same priority
-     *       if it is higher position, continue;
-     *       else break;
-     *     else (it is lower priority) break;
-     *   else (it is shorter) break;
-     * insert newRule before current position (which may be finish)
-     */
-    Iterator iterator = this.iterator();
-    int i = 0;
-    for(  ; iterator.hasNext(); i++) {
-      Rule rule	=	(Rule) iterator.next();
-      int rulePriority =	rule.getPriority();
-      int newRulePriority =	newRule.getPriority();
-      int rulePosition =	rule.getPosition();
-      int newRulePosition =	newRule.getPosition();
-      int ruleLength = rule.getEndPosition() - rule.getStartPosition();
-
-      if(ruleLength > newRuleLength)
-        continue;
-      else if(ruleLength == newRuleLength) {
-        if(rulePriority > newRulePriority)
-          continue;
-        else if(rulePriority == newRulePriority) {
-          if(rulePosition < newRulePosition)
-            continue;
-          else
-            break;
-        } else {
-          break;
-        }
-      } else {
-        break;
-      }
-
-    } // while not hit the end of the rules
-
-    add(i, newRule);
-  } // add(Rule,int)
 
 } // class PrioritisedRuleList
 
