@@ -54,9 +54,6 @@ extends PatternElement implements JapeConstants, java.io.Serializable
   /** The set of annotations we have matched. */
   private AnnotationSet matchedAnnots;
 
-  /** Access to the annotations that have been matched. */
-  public AnnotationSet getMatchedAnnots() { return matchedAnnots; }
-
   /** Construction. */
   public BasicPatternElement() {
     constraintsMap = new HashMap<Object, Constraint>();
@@ -128,181 +125,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
     constraints1 = null;
   } // finish
 
-  /** Reset: clear last failure point and matched annotations list. */
-  public void reset() {
-    super.reset();
-    lastFailurePoint = -1;
-    //nextAvailable.value = -1;
-    matchedAnnots = new AnnotationSetImpl((Document) null);
-  } // reset
 
-  /** Multilevel rollback of the annotation cache. */
-  public void rollback(int arity) {
-    //Debug.pr(this, "BPE rollback(" + arity + "), matchHistory.size() = " +
-    //          matchHistory.size());
-    //Debug.nl(this);
-
-    for(int i=0; i<arity; i++) {
-      matchedAnnots.removeAll((AnnotationSet) matchHistory.pop());
-    }
-  } // rollback
-
-  /** Does this element match the document at this position? */
-  public boolean matches (
-    Document doc, int position, MutableInteger newPosition
-  ) {
-    @SuppressWarnings("unused")
-    final int startingCacheSize = matchedAnnots.size();
-    AnnotationSet addedAnnots = new AnnotationSetImpl((Document) null);
-
-    //Debug.pr(this, "BPE.matches: trying at position " + position);
-    //Debug.nl(this);
-    int rightmostEnd = -1;
-    int end = doc.getContent().size().intValue();
-    MutableInteger nextAvailable = new MutableInteger();
-    int nextAvailOfFirstConstraint = -1;
-
-    for(int len = constraints2.length, i = 0; i < len; i++) {
-      Constraint constraint = constraints2[i];
-      MutableBoolean moreToTry = new MutableBoolean();
-
-      if(DEBUG) {
-        Out.println(
-          "BPE.matches: selectAnn on lFP = " + lastFailurePoint +
-          "; max(pos,lfp) = " + Math.max(position, lastFailurePoint) +
-          "; constraint = " + constraint.getDisplayString("") + Strings.getNl()
-        );
-      }
-
-      // ERS change begin:
-      // I changed this just to compile, but as far as I can tell this
-      // code is not used any more.
-      //
-      // Do not screen on the feature set or type from the Constraint
-      // when selecting annotations that may match it. The Constraint
-      // will do that. This allows the use of predicates other than equals
-      // and for testing for non-existence of a given annotation type
-      //
-      // Of course, the previous code was incorrect as well because of a
-      // change 8 years ago - it would never retrieve the attributes from
-      // the constraint.
-      AnnotationSet match = null;
-      AnnotationSet potentialMatches = doc.getAnnotations().get(
-        // this loses "April 2" on the frozen tests:
-        // Math.max(nextAvailable.value, Math.max(position, lastFailurePoint)),
-        //annotType,
-        //(FeatureMap)null,
-        new Long(Math.max(position, lastFailurePoint))  /*,
-        nextAvailable,
-        moreToTry */
-      );
-      List<Annotation> matchList = constraint.matches(potentialMatches, null, doc);
-      if (!matchList.isEmpty()) {
-        match = doc.getAnnotations().get("");
-        for(Annotation annot : matchList) {
-          match.add(annot);
-        }
-      }
-      //ERS change end
-
-      if(DEBUG) Out.println(
-        "BPE.matches: selectAnn returned " + match + ".... moreToTry = " +
-        moreToTry.value + "    nextAvailable = " + nextAvailable.value
-      );
-
-      // store first constraint's next available
-      if(nextAvailOfFirstConstraint == -1)
-        nextAvailOfFirstConstraint = nextAvailable.value;
-
-      // if there are no more annotations of this type, then we can
-      // say that we failed this BPE and that we tried the whole document
-      if(! moreToTry.value) {
-        if(match != null)
-          throw(new RuntimeException("BPE: no more annots but found one!"));
-        lastFailurePoint = end;
-        newPosition.value = end;
-      }
-
-      // selectNextAnnotation ensures that annotations matched will
-      // all start >= position. we also need to ensure that second and
-      // subsequent matches start <= to the rightmost end. otherwise
-      // BPEs can match non-contiguous annotations, which is not the
-      // intent. so we record the rightmostEnd, and reject annotations
-      // whose leftmostStart is > this value.
-      int matchEnd = -1;
-      if(match != null) {
-        matchEnd = match.lastNode().getOffset().intValue();
-        if(rightmostEnd == -1) { // first time through
-          rightmostEnd = matchEnd;
-        }
-        else if(match.firstNode().getOffset().intValue() >= rightmostEnd) {
-          // reject
-          lastFailurePoint = matchEnd;
-          match = null;
-        }
-        else { // this one is ok; reset rightmostEnd
-          if(rightmostEnd < matchEnd)
-            rightmostEnd = matchEnd;
-        }
-      } // match != null
-
-      // negation
-      if(constraint.isNegated()) {
-        if(match == null) {
-          //Debug.pr(
-          //  this, "BPE.matches: negating failed constraint" + Debug.getNl()
-          //);
-          continue;
-        }
-        else {
-          // Debug.pr(
-          //  this, "BPE.matches: negating successful constraint, match = " +
-          //  match.toString() + Debug.getNl()
-          //);
-          lastFailurePoint = matchEnd;
-          match = null;
-        }
-      } // constraint is negated
-
-      if(match == null) { // clean up
-        //Debug.pr(this, "BPE.matches: selectNextAnnotation returned null");
-        //Debug.nl(this);
-
-        newPosition.value = Math.max(position + 1, nextAvailOfFirstConstraint);
-        lastFailurePoint = nextAvailable.value;
-
-        // we clear cached annots added this time, not all: maybe we were
-        // applied under *, for example, and failure doesn't mean we should
-        // purge the whole cache
-        //for(int j = matchedAnnots.size() - 1; j >= startingCacheSize; j--)
-        //  matchedAnnots.removeNth(j);
-        matchedAnnots.removeAll(addedAnnots);
-
-        //Debug.pr(
-        //  this, "BPE.matches: false, newPosition.value(" +
-        //  newPosition.value + ")" + Debug.getNl()
-        //);
-        return false;
-      } else {
-
-        //Debug.pr(this,"BPE.matches: match= "+match.toString()+Debug.getNl());
-        matchedAnnots.addAll(match);
-        addedAnnots.addAll(match);
-        newPosition.value = Math.max(newPosition.value, matchEnd);
-      }
-
-    } // for each constraint
-
-    // success: store the annots added this time
-    matchHistory.push(addedAnnots);
-
-    //Debug.pr(this, "BPE.matches: returning true" + Debug.getNl());
-    // under negation we may not have advanced...
-    if(newPosition.value == position)
-      newPosition.value++;
-
-    return true;
-  } // matches
 
   /** Create a string representation of the object. */
   public String toString() {
@@ -336,10 +159,10 @@ extends PatternElement implements JapeConstants, java.io.Serializable
     }
 
     // matched annots
-    buf.append(
-      newline + pad + "matchedAnnots: " + matchedAnnots +
-      newline + pad + ") BPE."
-    );
+//    buf.append(
+//      newline + pad + "matchedAnnots: " + matchedAnnots +
+//      newline + pad + ") BPE."
+//    );
 
     return buf.toString();
   } // toString

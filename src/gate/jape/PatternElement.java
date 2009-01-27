@@ -27,7 +27,7 @@ import gate.AnnotationSet;
   * Provides access to the annotations that are cached by subclasses, and
   * multilevel rollback of those caches. Stores the match history.
   */
-abstract public class PatternElement implements Cloneable, Matcher,
+abstract public class PatternElement implements Cloneable, 
 		      JapeConstants, java.io.Serializable
 {
   /** Debug flag */
@@ -64,19 +64,12 @@ abstract public class PatternElement implements Cloneable, Matcher,
     }
   } // clone
 
-  /** Access to the annotations that have been matched. */
-  abstract public AnnotationSet getMatchedAnnots();
 
-  /** Multilevel rollback of annotation caches. */
-  abstract public void rollback(int arity);
-
-  /** Reset: clear annotation caches etc. Most of the behaviour of
-    * this method is the responsibility of subclasses.
-    */
-  public void reset() {
-    matchHistory = new Stack();
-  } // reset
-
+  /**
+   * Finishes the JAPE language parsing, building all the in-memory structures 
+   * required. 
+   */
+  public abstract void finish();
   /** Create a string representation of the object with padding. */
   abstract public String toString(String pad);
 

@@ -29,7 +29,7 @@ import gate.util.Strings;
   * binding information that associates labels with ComplexPatternElements.
   * Provides the Matcher interface.
   */
-public class LeftHandSide implements Matcher, JapeConstants, Serializable
+public class LeftHandSide implements JapeConstants, Serializable
 {
 
   /** Debug flag */
@@ -41,14 +41,10 @@ public class LeftHandSide implements Matcher, JapeConstants, Serializable
   /** Mapping of binding names to ComplexPatternElements */
   private HashMap bindingTable;
 
-  /** Flag for whether our last match was successful or not. */
-  private boolean hasMatched = false;
-
   /** Construction from a ConstraintGroup */
   public LeftHandSide(ConstraintGroup constraintGroup) {
     this.constraintGroup = constraintGroup;
     bindingTable = new HashMap();
-    hasMatched = false;
   } // construction from ConstraintGroup
 
   /** Add a binding record. */
@@ -91,47 +87,6 @@ public class LeftHandSide implements Matcher, JapeConstants, Serializable
     constraintGroup.finish();
   } // finish
 
-  /** Get annotations via a binding name. */
-  public AnnotationSet getBoundAnnots(String bindingName) {
-    ComplexPatternElement pat =
-      (ComplexPatternElement) bindingTable.get(bindingName);
-    if(pat == null) return null;
-    return pat.getMatchedAnnots();
-  } // getBoundAnnots
-
-  /** For debugging only.
-    * Return a set of all annotations matched by the LHS during the
-    * last call to matches. (May be null.)
-    */
-  AnnotationSet getMatchedAnnots() {
-    return constraintGroup.getMatchedAnnots();
-  } // getMatchedAnnots
-
-  /** Clear the matched annotations cached in pattern elements. */
-  public void reset() {
-    constraintGroup.reset();
-    hasMatched = false;
-  } // reset
-
-  /** Was the last match successful? */
-  public boolean hasMatched() { return hasMatched; }
-
-  /** Does the LHS match the document at this position? */
-  public boolean matches(
-    Document doc, int position, MutableInteger newPosition
-  ) {
-     boolean status = constraintGroup.matches(doc, position, newPosition);
-     //Debug.pr(this, "LHS: status(" + status + "); this: " + this.toString());
-
-     if(! status) { // purge caches of matched annotations
-       constraintGroup.reset();
-       hasMatched = false;
-     } else {
-       hasMatched = true;
-     }
-     return status;
-  }  // matches
-
   /** Create a string representation of the object. */
   public String toString() { return toString(""); }
 
@@ -141,7 +96,8 @@ public class LeftHandSide implements Matcher, JapeConstants, Serializable
     String newPad = Strings.addPadding(pad, INDENT_PADDING);
 
     StringBuffer buf = new StringBuffer(pad +
-      "LHS: hasMatched(" + hasMatched + "); constraintGroup(" + newline +
+      /*"LHS: hasMatched(" + hasMatched + ")*/ 
+      "; constraintGroup(" + newline +
       constraintGroup.toString(newPad) + newline + pad +
       "); bindingTable(" + newline + pad
     );
