@@ -14,6 +14,7 @@
  */
 package gate.jape.constraint;
 
+import gate.AnnotationSet;
 import gate.jape.JapeException;
 
 public class NotEqualPredicate extends EqualPredicate {
@@ -22,7 +23,7 @@ public class NotEqualPredicate extends EqualPredicate {
     return NOT_EQUAL;
   }
 
-  public boolean doMatch(Object annotValue, Object context) throws JapeException {
+  public boolean doMatch(Object annotValue, AnnotationSet context) throws JapeException {
     return !super.doMatch(annotValue, context);
   }
 

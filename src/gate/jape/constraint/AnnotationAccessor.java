@@ -14,8 +14,7 @@
  */
 package gate.jape.constraint;
 
-import gate.Annotation;
-import gate.Document;
+import gate.*;
 
 import java.io.Serializable;
 
@@ -60,5 +59,5 @@ public interface AnnotationAccessor extends Serializable {
    *
    * @return
    */
-  public Object getValue(Annotation annot, Object context);
+  public Object getValue(Annotation annot, AnnotationSet context);
 }

@@ -17,7 +17,6 @@ package gate.jape.constraint;
 import gate.Annotation;
 import gate.AnnotationSet;
 
-import java.util.Collection;
 
 /**
  * Returns true if the given annotation is entirely spanned by an annotation
@@ -35,7 +34,7 @@ public class WithinPredicate extends EmbeddedConstraintPredicate {
    * Get all the annots of the right type that completely span the
    * length of the test annot
    */
-  public Collection<Annotation> doMatch(Annotation annot, AnnotationSet as) {
+  public AnnotationSet doMatch(Annotation annot, AnnotationSet as) {
     return as.getCovering(annotType, annot.getStartNode().getOffset(), annot
             .getEndNode().getOffset());
   }

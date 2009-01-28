@@ -14,6 +14,7 @@
  */
 package gate.jape.constraint;
 
+import gate.AnnotationSet;
 import gate.jape.JapeException;
 
 public class EqualPredicate extends AbstractConstraintPredicate {
@@ -22,7 +23,7 @@ public class EqualPredicate extends AbstractConstraintPredicate {
     return EQUAL;
   }
 
-  public boolean doMatch(Object annotValue, Object context)
+  public boolean doMatch(Object annotValue, AnnotationSet context)
           throws JapeException {
 
     if(value == null && annotValue != null) return false;

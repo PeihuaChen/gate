@@ -15,6 +15,7 @@
 package gate.jape.constraint;
 
 import gate.Annotation;
+import gate.AnnotationSet;
 
 /**
  * Accessor that returns a named feature value.
@@ -36,7 +37,7 @@ public class AnnotationFeatureAccessor implements AnnotationAccessor {
   /**
    * Obtain a named feature
    */
-  public Object getValue(Annotation annot, Object context) {
+  public Object getValue(Annotation annot, AnnotationSet context) {
 
     if(featureName == null || featureName.length() == 00)
       throw new IllegalStateException("setKey has not been called with "

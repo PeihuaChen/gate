@@ -520,7 +520,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   } // get(type, startOfset, endOffset)
 
   /**
-   * Select annotations of the given type that complete span the range.
+   * Select annotations of the given type that completely span the range.
    * Formally, for any annotation a, a will be included in the return
    * set if:
    * <ul>

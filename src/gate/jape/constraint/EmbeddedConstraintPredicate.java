@@ -45,34 +45,34 @@ public abstract class EmbeddedConstraintPredicate extends AbstractConstraintPred
   /**
    * Sets up environment for concreate class to do the specific matching check
    */
-  public boolean doMatch(Object annotValue, Object context)
+  public boolean doMatch(Object annotValue, AnnotationSet context)
           throws JapeException {
 
     Annotation annot = (Annotation)annotValue;
-    AnnotationSet as = getAnnotationSet(context);
+    AnnotationSet containedSet = doMatch(annot, context);
 
-    Collection<Annotation> containedSet = doMatch(annot, as);
+    Collection<Annotation> filteredSet = filterMatches(containedSet);
 
-    containedSet = filterMatches(containedSet);
-
-    return !containedSet.isEmpty();
+    return !filteredSet.isEmpty();
   }
 
-  protected abstract Collection<Annotation> doMatch(Annotation annot, AnnotationSet as);
+  protected abstract AnnotationSet doMatch(Annotation annot, AnnotationSet as);
 
   /**
    * If there are attribute constraints, filter the set.
    * @param containedSet
    * @return
    */
-  protected Collection<Annotation> filterMatches(Collection<Annotation> containedSet) {
+  protected Collection<Annotation> filterMatches(AnnotationSet containedSet) {
     if (containedSet == null)
       return Collections.emptySet();
 
-    if (valueConstraint != null && !containedSet.isEmpty()) {
-      containedSet = valueConstraint.matches(containedSet, null, containedSet);
+    if (valueConstraint == null || containedSet.isEmpty()) {
+      return containedSet;
     }
-    return containedSet;
+    else {
+      return valueConstraint.matches(containedSet, null, containedSet);
+    }
   }
 
   /**

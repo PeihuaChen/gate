@@ -299,7 +299,7 @@ public class Constraint implements JapeConstants, gate.creole.ANNIEConstants,
    *         against predicates.
    */
   public List<Annotation> matches(Collection<Annotation> annots,
-          Ontology ontology, Object context) {
+          Ontology ontology, AnnotationSet context) {
     List<Annotation> retVal = new ArrayList<Annotation>();
 
     if(annots == null) return retVal;
@@ -332,7 +332,8 @@ public class Constraint implements JapeConstants, gate.creole.ANNIEConstants,
    *         an annotation need only match a single predicate to return
    *         true.
    */
-  public final boolean matches(Annotation annot, Ontology ontologyLR, Object context) {
+  public final boolean matches(Annotation annot, Ontology ontologyLR, 
+          AnnotationSet context) {
     if(annot == null) return false;
     if(!annot.getType().equals(getAnnotType())) return false;
 
@@ -382,7 +383,7 @@ public class Constraint implements JapeConstants, gate.creole.ANNIEConstants,
    *         an annotation need only match a single predicate to return
    *         true.
    */
-  public boolean matches(Annotation annot, Object context) {
+  public boolean matches(Annotation annot, AnnotationSet context) {
     return matches(annot, null, context);
   }
 

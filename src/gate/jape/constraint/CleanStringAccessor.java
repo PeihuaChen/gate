@@ -30,7 +30,7 @@ public class CleanStringAccessor extends StringAccessor {
    * must be a {@link Document} or an {@link AnnotationSet} which points
    * to the document.
    */
-  public Object getValue(Annotation annot, Object context) {
+  public Object getValue(Annotation annot, AnnotationSet context) {
     String retVal = (String)super.getValue(annot, context);
     if (retVal != null)
       retVal = retVal.replaceAll("\\s+", " ").trim();
