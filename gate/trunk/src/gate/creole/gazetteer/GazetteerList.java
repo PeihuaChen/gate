@@ -232,7 +232,7 @@ implements List {
   }
 
   public Object[] toArray(Object[] a) {
-    return toArray(a);
+    return entries.toArray(a);
   }
 
   public boolean add(Object o) {
