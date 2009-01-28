@@ -14,12 +14,16 @@
 
 package gate.gui;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.*;
 import java.text.NumberFormat;
 import java.util.*;
+import java.io.IOException;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -64,45 +68,34 @@ public class SerialControllerEditor extends AbstractVisualResource
 
     loadedPRsTableModel.fireTableDataChanged();
     memberPRsTableModel.fireTableDataChanged();
-//    parametersEditor.
-    
+
   }//setController
 
 
   public void setHandle(Handle handle) {
     this.handle = handle;
 
-//    popup.addPopupMenuListener(new PopupMenuListener() {
-//      public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
-//        buildInternalMenus();
-//        addMenu.setEnabled(addMenu.getItemCount() > 0);
-//        removeMenu.setEnabled(removeMenu.getItemCount() > 0);
-//      }
-//      public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-//      }
-//      public void popupMenuCanceled(PopupMenuEvent e) {
-//      }
-//    });
-
     //register the listeners
     if(handle instanceof StatusListener)
       addStatusListener((StatusListener)handle);
     if(handle instanceof ProgressListener)
       addProgressListener((ProgressListener)handle);
-  }//setHandle
+  }
 
   public Resource init() throws ResourceInstantiationException{
     super.init();
     return this;
-  }//init
+  }
 
   protected void initLocalData() {
-    actionList = new ArrayList();
+    actionList = new ArrayList<Action>();
     runAction = new RunAction();
     //add the items to the popup
     actionList.add(null);
     actionList.add(runAction);
-  }//initLocalData
+    addPRAction = new AddPRAction();
+    removePRAction = new RemovePRAction();
+  }
 
   protected void initGuiComponents() {
     setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -117,11 +110,46 @@ public class SerialControllerEditor extends AbstractVisualResource
     loadedPRsTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
     loadedPRsTable.setSortable(false);
     loadedPRsTable.setModel(loadedPRsTableModel);
-
+    loadedPRsTable.setDragEnabled(true);
+    loadedPRsTable.setTransferHandler(new TransferHandler() {
+      // minimal drag and drop that only call the removePRAction when importing
+      String source = "";
+      public int getSourceActions(JComponent c) {
+        return MOVE;
+      }
+      protected Transferable createTransferable(JComponent c) {
+        return new StringSelection("loadedPRsTable");
+      }
+      protected void exportDone(JComponent c, Transferable data, int action) {
+      }
+      public boolean canImport(JComponent c, DataFlavor[] flavors) {
+        for(DataFlavor flavor : flavors) {
+          if(DataFlavor.stringFlavor.equals(flavor)) {
+            return true;
+          }
+        }
+        return false;
+      }
+      public boolean importData(JComponent c, Transferable t) {
+        if (canImport(c, t.getTransferDataFlavors())) {
+          try {
+              source = (String)t.getTransferData(DataFlavor.stringFlavor);
+              if (source.startsWith("memberPRsTable")) {
+                removePRAction.actionPerformed(null);
+                return true;
+              } else {
+                return false;
+              }
+          } catch (UnsupportedFlavorException ufe) { // just return false later
+          } catch (IOException ioe) { // just return false later
+          }
+        }
+        return false;
+      }
+    });
     loadedPRsTable.setDefaultRenderer(ProcessingResource.class,
                                       new ResourceRenderer());
 
-//    loadedPRsTable.setIntercellSpacing(new Dimension(5, 5));
     final int width1 = new JLabel("Loaded Processing resources").
                 getPreferredSize().width + 30;
     JScrollPane scroller = new JScrollPane(){
@@ -144,12 +172,16 @@ public class SerialControllerEditor extends AbstractVisualResource
     topBox.add(scroller);
     topBox.add(Box.createHorizontalGlue());
 
-    addButon = new JButton(MainFrame.getIcon("right-arrow"));
-    removeButton = new JButton(MainFrame.getIcon("left-arrow"));
+    addButton = new JButton(addPRAction);
+    addButton.setText("");
+    addButton.setEnabled(false);
+    removeButton = new JButton(removePRAction);
+    removeButton.setText("");
+    removeButton.setEnabled(false);
 
     Box buttonsBox =Box.createVerticalBox();
     buttonsBox.add(Box.createVerticalGlue());
-    buttonsBox.add(addButon);
+    buttonsBox.add(addButton);
     buttonsBox.add(Box.createVerticalStrut(5));
     buttonsBox.add(removeButton);
     buttonsBox.add(Box.createVerticalGlue());
@@ -165,7 +197,86 @@ public class SerialControllerEditor extends AbstractVisualResource
     memberPRsTable.setDefaultRenderer(ProcessingResource.class,
                                       new ResourceRenderer());
     memberPRsTable.setDefaultRenderer(JLabel.class, new LabelRenderer());
-//    memberPRsTable.setIntercellSpacing(new Dimension(5, 5));
+    memberPRsTable.setDragEnabled(true);
+    memberPRsTable.setTransferHandler(new TransferHandler() {
+      // minimal drag and drop that only call the addPRAction when importing
+      String source = "";
+      public int getSourceActions(JComponent c) {
+        return MOVE;
+      }
+      protected Transferable createTransferable(JComponent c) {
+        int selectedRows[] = memberPRsTable.getSelectedRows();
+        Arrays.sort(selectedRows);
+        return new StringSelection("memberPRsTable"
+          + Arrays.toString(selectedRows));
+      }
+      protected void exportDone(JComponent c, Transferable data, int action) {
+      }
+      public boolean canImport(JComponent c, DataFlavor[] flavors) {
+        for(DataFlavor flavor : flavors) {
+          if(DataFlavor.stringFlavor.equals(flavor)) {
+            return true;
+          }
+        }
+        return false;
+      }
+      public boolean importData(JComponent c, Transferable t) {
+        if (!canImport(c, t.getTransferDataFlavors())) {
+          return false;
+        }
+        try {
+          source = (String)t.getTransferData(DataFlavor.stringFlavor);
+          if (source.startsWith("memberPRsTable")) {
+            int insertion = memberPRsTable.getSelectedRow();
+            int initialInsertion = insertion;
+            List<ProcessingResource> prs = new ArrayList<ProcessingResource>();
+            source = source.replaceFirst("^memberPRsTable\\[", "");
+            source = source.replaceFirst("\\]$", "");
+            String selectedRows[] = source.split(", ");
+            if (Integer.valueOf(selectedRows[0]) < insertion) { insertion++; }
+            // get the list of PRs selected when dragging started
+            for(String row : selectedRows) {
+              if (Integer.valueOf(row) == initialInsertion) {
+                // the user draged the selected rows on themselves, do nothing
+                return false;
+              }
+              prs.add((ProcessingResource) memberPRsTable.getValueAt(
+                Integer.valueOf(row),
+                memberPRsTable.convertColumnIndexToView(1)));
+              if (Integer.valueOf(row) < initialInsertion) { insertion--; }
+            }
+            // remove the PRs selected when dragging started
+            for (ProcessingResource pr : prs) {
+              controller.remove(pr);
+            }
+            // add the PRs at the insertion point
+            for (ProcessingResource pr : prs) {
+              controller.add(insertion, pr);
+              insertion++;
+            }
+            // select the moved PRs
+            for (ProcessingResource pr : prs) {
+              for (int row = 0; row < memberPRsTable.getRowCount(); row++) {
+                if (memberPRsTable.getValueAt(row,
+                      memberPRsTable.convertColumnIndexToView(1)) == pr) {
+                  memberPRsTable.addRowSelectionInterval(row, row);
+                }
+              }
+            }
+            return true;
+          } else if (source.equals("loadedPRsTable")) {
+            addPRAction.actionPerformed(null);
+            return true;
+          } else {
+            return false;
+          }
+        } catch (UnsupportedFlavorException ufe) {
+          return false;
+        } catch (IOException ioe) {
+          return false;
+        }
+      }
+    });
 
     final int width2 = new JLabel("Selected Processing resources").
                            getPreferredSize().width + 30;
@@ -190,7 +301,13 @@ public class SerialControllerEditor extends AbstractVisualResource
     topBox.add(scroller);
 
     moveUpButton = new JButton(MainFrame.getIcon("up"));
+    moveUpButton.setMnemonic(KeyEvent.VK_UP);
+    moveUpButton.setToolTipText("Move the selected resources up.");
+    moveUpButton.setEnabled(false);
     moveDownButton = new JButton(MainFrame.getIcon("down"));
+    moveDownButton.setMnemonic(KeyEvent.VK_DOWN);
+    moveDownButton.setToolTipText("Move the selected resources down.");
+    moveDownButton.setEnabled(false);
 
     buttonsBox =Box.createVerticalBox();
     buttonsBox.add(Box.createVerticalGlue());
@@ -321,67 +438,28 @@ public class SerialControllerEditor extends AbstractVisualResource
     add(Box.createVerticalGlue());
     add(Box.createVerticalStrut(5));
 
-    addMenu = new XJMenu("Add");
-    removeMenu = new XJMenu("Remove");
   }// initGuiComponents()
 
   protected void initListeners() {
     Gate.getCreoleRegister().addCreoleListener(this);
 
     this.addMouseListener(new MouseAdapter() {
-      public void mouseClicked(MouseEvent e) {
-        if(SwingUtilities.isRightMouseButton(e)){
-          if(handle != null && handle.getPopup()!= null)
-            handle.getPopup().show(SerialControllerEditor.this, e.getX(), e.getY());
-        }
+      public void mousePressed(MouseEvent e) {
+        processMouseEvent(e);
       }
-    });
-
-    addButon.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        int rows[] = loadedPRsTable.getSelectedRows();
-        if(rows == null || rows.length == 0){
-          JOptionPane.showMessageDialog(
-              SerialControllerEditor.this,
-              "Please select some components from the list of available components!\n" ,
-              "GATE", JOptionPane.ERROR_MESSAGE);
-        } else {
-          List actions = new ArrayList();
-          for(int i = 0; i < rows.length; i++) {
-            Action act =(Action)new AddPRAction((ProcessingResource)
-                                     loadedPRsTable.getValueAt(rows[i], 0));
-            if(act != null) actions.add(act);
-          }
-          Iterator actIter = actions.iterator();
-          while(actIter.hasNext()){
-            ((Action)actIter.next()).actionPerformed(null);
+      public void mouseReleased(MouseEvent e) {
+        processMouseEvent(e);
+      }
+      protected void processMouseEvent(MouseEvent e) {
+        if(e.isPopupTrigger()) {
+          // context menu
+          if(handle != null
+          && handle.getPopup() != null) {
+            handle.getPopup().show(SerialControllerEditor.this,
+                                   e.getX(), e.getY());
           }
         }
       }
-    });
-
-    removeButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        int rows[] = memberPRsTable.getSelectedRows();
-        if(rows == null || rows.length == 0){
-          JOptionPane.showMessageDialog(
-              SerialControllerEditor.this,
-              "Please select some components to be removed "+
-              "from the list of used components!\n" ,
-              "GATE", JOptionPane.ERROR_MESSAGE);
-        } else {
-          List actions = new ArrayList();
-          for(int i = 0; i < rows.length; i++){
-            Action act =(Action)new RemovePRAction((ProcessingResource)
-                                     memberPRsTable.getValueAt(rows[i], 1));
-            if(act != null) actions.add(act);
-          }
-          Iterator actIter = actions.iterator();
-          while(actIter.hasNext()){
-            ((Action)actIter.next()).actionPerformed(null);
-          }
-        }// else
-      }//  public void actionPerformed(ActionEvent e)
     });
 
     moveUpButton.addActionListener(new ActionListener() {
@@ -397,9 +475,8 @@ public class SerialControllerEditor extends AbstractVisualResource
           //we need to make sure the rows are sorted
           Arrays.sort(rows);
           //get the list of PRs
-          for(int i = 0; i < rows.length; i++){
-            int row = rows[i];
-            if(row > 0){
+          for(int row : rows) {
+            if(row > 0) {
               //move it up
               ProcessingResource value = controller.remove(row);
               controller.add(row - 1, value);
@@ -407,15 +484,16 @@ public class SerialControllerEditor extends AbstractVisualResource
           }
 //          memberPRsTableModel.fireTableDataChanged();
           //restore selection
-          for(int i = 0; i < rows.length; i++){
-            int newRow = -1;
-            if(rows[i] > 0) newRow = rows[i] - 1;
-            else newRow = rows[i];
+          for(int row : rows) {
+            int newRow;
+            if(row > 0) newRow = row - 1;
+            else newRow = row;
             memberPRsTable.addRowSelectionInterval(newRow, newRow);
           }
+          memberPRsTable.requestFocusInWindow();
         }
 
-      }//public void actionPerformed(ActionEvent e)
+      }
     });
 
 
@@ -442,111 +520,135 @@ public class SerialControllerEditor extends AbstractVisualResource
           }
 //          memberPRsTableModel.fireTableDataChanged();
           //restore selection
-          for(int i = 0; i < rows.length; i++){
-            int newRow = -1;
-            if(rows[i] < controller.getPRs().size() - 1) newRow = rows[i] + 1;
-            else newRow = rows[i];
+          for(int row : rows) {
+            int newRow;
+            if(row < controller.getPRs().size() - 1) newRow = row + 1;
+            else newRow = row;
             memberPRsTable.addRowSelectionInterval(newRow, newRow);
           }
+          memberPRsTable.requestFocusInWindow();
         }
 
-      }//public void actionPerformed(ActionEvent e)
+      }
     });
 
+    // mouse click edit the resource
+    // mouse double click or context menu add the resource to the application
     loadedPRsTable.addMouseListener(new MouseAdapter() {
-      public void mouseClicked(MouseEvent e) {
-        int row = loadedPRsTable.rowAtPoint(e.getPoint());
-        if(row != -1){
-          //load modules on double click
-          ProcessingResource pr = (ProcessingResource)
-                                  loadedPRsTableModel.getValueAt(row, 0);
-          if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2){
-            new AddPRAction(pr).actionPerformed(null);
-          }else if(SwingUtilities.isRightMouseButton(e)){
-              JPopupMenu popup = new XJPopupMenu();
-              popup.add(new AddPRAction(pr){
-                {
-                  putValue(NAME, "Add \"" + this.pr.getName() +
-                                 "\" to the \"" + controller.getName() +
-                                 "\" application");
-                }
-              });
-              popup.show(loadedPRsTable, e.getPoint().x, e.getPoint().y);
-            }
-        }
-      }
-
       public void mousePressed(MouseEvent e) {
+        if(e.isPopupTrigger()) { processMouseEvent(e); }
       }
-
       public void mouseReleased(MouseEvent e) {
+        if(e.isPopupTrigger()) { processMouseEvent(e); }
       }
-
-      public void mouseEntered(MouseEvent e) {
-      }
-
-      public void mouseExited(MouseEvent e) {
-      }
-    });
-
-    memberPRsTable.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
-        final int row = memberPRsTable.rowAtPoint(e.getPoint());
-        if(row != -1){
-          //edit parameters on click
-          if(SwingUtilities.isLeftMouseButton(e) /*&& e.getClickCount() == 2*/){
-            ProcessingResource pr = (ProcessingResource)
-                                    memberPRsTableModel.getValueAt(row, 1);
-            selectPR(row);
-          }else if(SwingUtilities.isRightMouseButton(e)){
-            JPopupMenu popup = new XJPopupMenu();
-            popup.add(new AbstractAction("Edit parameters"){
-              public void actionPerformed(ActionEvent e){
-                ProcessingResource pr = (ProcessingResource)
-                                        memberPRsTableModel.getValueAt(row, 1);
-                selectPR(row);
-              }
-            });
-            popup.show(memberPRsTable, e.getPoint().x, e.getPoint().y);
+        processMouseEvent(e);
+      }
+      protected void processMouseEvent(MouseEvent e) {
+        int row = loadedPRsTable.rowAtPoint(e.getPoint());
+        if(row == -1) { return; }
+        ProcessingResource pr = (ProcessingResource) loadedPRsTable
+          .getValueAt(row, loadedPRsTable.convertColumnIndexToView(0));
+
+        if(e.isPopupTrigger()) {
+          // context menu
+          if(!loadedPRsTable.isRowSelected(row)) {
+            // if right click outside the selection then reset selection
+            loadedPRsTable.getSelectionModel().setSelectionInterval(row, row);
+          }
+          JPopupMenu popup = new XJPopupMenu();
+          popup.add(addPRAction);
+          popup.show(loadedPRsTable, e.getPoint().x, e.getPoint().y);
+
+        } else if(e.getID() == MouseEvent.MOUSE_CLICKED) {
+          if (e.getClickCount() == 2) {
+            //add selected modules on double click
+            addPRAction.actionPerformed(null);
+
+          } else if(e.getClickCount() == 1) {
+            //edit parameters on one click
+            showParamsEditor(pr);
           }
         }
       }
+    });
 
+    // mouse click edit the resource
+    // mouse double click or context menu remove the resource from the
+    // application
+    memberPRsTable.addMouseListener(new MouseAdapter() {
       public void mousePressed(MouseEvent e) {
+        if(e.isPopupTrigger()) { processMouseEvent(e); }
       }
-
       public void mouseReleased(MouseEvent e) {
+        if(e.isPopupTrigger()) { processMouseEvent(e); }
       }
-
-      public void mouseEntered(MouseEvent e) {
+      public void mouseClicked(MouseEvent e) {
+        processMouseEvent(e);
       }
+      protected void processMouseEvent(MouseEvent e) {
+        int row = memberPRsTable.rowAtPoint(e.getPoint());
+        if(row == -1) { return; }
 
-      public void mouseExited(MouseEvent e) {
+        if(e.isPopupTrigger()) {
+          // context menu
+          if(!memberPRsTable.isRowSelected(row)) {
+            // if right click outside the selection then reset selection
+            memberPRsTable.getSelectionModel().setSelectionInterval(row, row);
+          }
+          JPopupMenu popup = new XJPopupMenu();
+          popup.add(removePRAction);
+          popup.show(memberPRsTable, e.getPoint().x, e.getPoint().y);
+
+        } else if(e.getID() == MouseEvent.MOUSE_CLICKED) {
+          if (e.getClickCount() == 2) {
+            //remove selected modules on double click
+            removePRAction.actionPerformed(null);
+
+          } else if(e.getClickCount() == 1) {
+            //edit parameters on one click
+            selectPR(row);
+          }
+        }
       }
     });
 
-    addMenu.addMenuListener(new MenuListener() {
-      public void menuCanceled(MenuEvent e) {
+    loadedPRsTable.getSelectionModel().addListSelectionListener(
+      new ListSelectionListener() {
+        public void valueChanged(ListSelectionEvent e) {
+          // disable Add button if no selection
+          addButton.setEnabled(loadedPRsTable.getSelectedRowCount() > 0);
+        }
+      });
 
-      }
+    memberPRsTable.getSelectionModel().addListSelectionListener(
+      new ListSelectionListener() {
+        public void valueChanged(ListSelectionEvent e) {
+          // disable Remove and Move buttons if no selection
+          removeButton.setEnabled(memberPRsTable.getSelectedRowCount() > 0);
+          moveUpButton.setEnabled(memberPRsTable.getSelectedRowCount() > 0
+            && !memberPRsTable.isRowSelected(0));
+          moveDownButton.setEnabled(memberPRsTable.getSelectedRowCount() > 0
+            && !memberPRsTable.isRowSelected(memberPRsTable.getRowCount() - 1));
+        }
+      });
 
-      public void menuDeselected(MenuEvent e) {
-      }
+     loadedPRsTable.addKeyListener(new KeyAdapter() {
+       public void keyPressed(KeyEvent e) {
+         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+           ProcessingResource pr = (ProcessingResource) loadedPRsTable
+             .getValueAt(loadedPRsTable.getSelectedRow(),
+               loadedPRsTable.convertColumnIndexToView(0));
+           showParamsEditor(pr);
+         }
+       }
+     });
 
-      public void menuSelected(MenuEvent e) {
-        buildInternalMenus();
-      }
-    });
-
-    removeMenu.addMenuListener(new MenuListener() {
-      public void menuCanceled(MenuEvent e) {
-      }
-
-      public void menuDeselected(MenuEvent e) {
-      }
-
-      public void menuSelected(MenuEvent e) {
-        buildInternalMenus();
+    memberPRsTable.addKeyListener(new KeyAdapter() {
+      public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+          selectPR(memberPRsTable.getSelectedRow());
+        }
       }
     });
 
@@ -672,39 +774,12 @@ public class SerialControllerEditor extends AbstractVisualResource
     progressListeners.clear();
     statusListeners.clear();
     parametersEditor.cleanup();
-    addMenu.removeAll();
-    removeMenu.removeAll();
     handle = null;
-  }
-
-  protected void buildInternalMenus(){
-    addMenu.removeAll();
-    Iterator prIter = Gate.getCreoleRegister().getPrInstances().iterator();
-    while(prIter.hasNext()){
-      ProcessingResource pr = (ProcessingResource)prIter.next();
-      if(Gate.getHiddenAttribute(pr.getFeatures())){
-        //ignore this resource
-      }else{
-        Action act = new AddPRAction(pr);
-        if(act.isEnabled()) addMenu.add(act);
-      }
-    }// while
-
-    removeMenu.removeAll();
-    prIter = Gate.getCreoleRegister().getPrInstances().iterator();
-    while(prIter.hasNext()){
-      ProcessingResource pr = (ProcessingResource)prIter.next();
-      if(Gate.getHiddenAttribute(pr.getFeatures())){
-        //ignore this resource
-      }else{
-        Action act = new RemovePRAction(pr);
-        if(act.isEnabled()) removeMenu.add(act);
-      }
-    }// while
   }
 
   /**
    * Called when a PR has been selected in the member PRs table;
+   * @param index row index in {@link #memberPRsTable}
    */
   protected void selectPR(int index){
     ProcessingResource pr = (ProcessingResource)
@@ -790,21 +865,20 @@ public class SerialControllerEditor extends AbstractVisualResource
                                 "\" " + rData.getName() + " ");
 
       //this is a list of lists
-      List parameters = rData.getParameterList().getRuntimeParameters();
+      List<List<Parameter>> parameters =
+        rData.getParameterList().getRuntimeParameters();
 
       if(analyserMode){
         //remove corpus and document
         //create a new list so we don't change the one from CreoleReg.
-        List newParameters = new ArrayList();
-        Iterator pDisjIter = parameters.iterator();
-        while(pDisjIter.hasNext()){
-          List aDisjunction = (List)pDisjIter.next();
-          List newDisjunction = new ArrayList(aDisjunction);
-          Iterator internalParIter = newDisjunction.iterator();
-          while(internalParIter.hasNext()){
-            Parameter parameter = (Parameter)internalParIter.next();
-            if(parameter.getName().equals("corpus") ||
-               parameter.getName().equals("document")) internalParIter.remove();
+        List<List<Parameter>> newParameters = new ArrayList<List<Parameter>>();
+        for(List<Parameter> aDisjunction : parameters) {
+          List<Parameter> newDisjunction = new ArrayList<Parameter>();
+          for(Parameter parameter : aDisjunction) {
+            if(!parameter.getName().equals("corpus")
+            && !parameter.getName().equals("document")) {
+              newDisjunction.add(parameter);
+            }
           }
           if(!newDisjunction.isEmpty()) newParameters.add(newDisjunction);
         }
@@ -832,14 +906,14 @@ public class SerialControllerEditor extends AbstractVisualResource
         corpusComboModel.fireDataChanged();
       }
     }
-  }// public void resourceLoaded
+  }
 
   public void resourceUnloaded(CreoleEvent e) {
     if(Gate.getHiddenAttribute(e.getResource().getFeatures())) return;
     if(e.getResource() instanceof ProcessingResource){
       ProcessingResource pr = (ProcessingResource)e.getResource();
       if(controller.getPRs().contains(pr)){
-        new RemovePRAction(pr).actionPerformed(null);
+        controller.remove(pr);
       }
       loadedPRsTableModel.fireTableDataChanged();
       memberPRsTableModel.fireTableDataChanged();
@@ -864,7 +938,7 @@ public class SerialControllerEditor extends AbstractVisualResource
         corpusComboModel.fireDataChanged();
       }
     }
-  }//public void resourceUnloaded(CreoleEvent e)
+  }
 
   public void resourceRenamed(Resource resource, String oldName,
                               String newName){
@@ -882,7 +956,7 @@ public class SerialControllerEditor extends AbstractVisualResource
   }
   public synchronized void removeStatusListener(StatusListener l) {
     if (statusListeners != null && statusListeners.contains(l)) {
-      Vector v = (Vector) statusListeners.clone();
+      Vector<StatusListener> v = (Vector) statusListeners.clone();
       v.removeElement(l);
       statusListeners = v;
     }
@@ -908,8 +982,8 @@ public class SerialControllerEditor extends AbstractVisualResource
   
   
   public synchronized void addStatusListener(StatusListener l) {
-    Vector v = statusListeners == null ? new Vector(2) :
-                                  (Vector) statusListeners.clone();
+    Vector<StatusListener> v = statusListeners == null ?
+      new Vector(2) : (Vector) statusListeners.clone();
     if (!v.contains(l)) {
       v.addElement(l);
       statusListeners = v;
@@ -924,7 +998,8 @@ public class SerialControllerEditor extends AbstractVisualResource
    */
   class LoadedPRsTableModel extends AbstractTableModel{
     public int getRowCount(){
-      List loadedPRs = new ArrayList(Gate.getCreoleRegister().getPrInstances());
+      List<ProcessingResource> loadedPRs = new ArrayList<ProcessingResource>(
+        Gate.getCreoleRegister().getPrInstances());
       if(controller != null) loadedPRs.removeAll(controller.getPRs());
       Iterator prsIter = loadedPRs.iterator();
       while(prsIter.hasNext()){
@@ -936,7 +1011,8 @@ public class SerialControllerEditor extends AbstractVisualResource
     }
 
     public Object getValueAt(int row, int column){
-      List loadedPRs = new ArrayList(Gate.getCreoleRegister().getPrInstances());
+      List<ProcessingResource> loadedPRs = new ArrayList<ProcessingResource>(
+        Gate.getCreoleRegister().getPrInstances());
       if(controller != null) loadedPRs.removeAll(controller.getPRs());
       Iterator prsIter = loadedPRs.iterator();
       while(prsIter.hasNext()){
@@ -945,7 +1021,7 @@ public class SerialControllerEditor extends AbstractVisualResource
       }
 
       Collections.sort(loadedPRs, nameComparator);
-      ProcessingResource pr = (ProcessingResource)loadedPRs.get(row);
+      ProcessingResource pr = loadedPRs.get(row);
       switch(column){
         case 0 : return pr;
         case 1 : {
@@ -1136,49 +1212,78 @@ public class SerialControllerEditor extends AbstractVisualResource
     }
 
     protected JLabel green, red, yellow;
-  }//protected class MemeberPRsTableModel extends AbstractTableModel
+  }//protected class MemberPRsTableModel extends AbstractTableModel
 
   /** Adds a PR to the controller*/
   class AddPRAction extends AbstractAction {
-    AddPRAction(ProcessingResource aPR){
-      super(aPR.getName());
-      this.pr = aPR;
-      setEnabled(!controller.getPRs().contains(aPR));
+    AddPRAction(){
+      putValue(NAME, "Add selected resources to the application");
+      putValue(SHORT_DESCRIPTION, "Add selected resources to the application");
+      putValue(SMALL_ICON, MainFrame.getIcon("right-arrow"));
+      putValue(MNEMONIC_KEY, KeyEvent.VK_RIGHT);
     }
 
     public void actionPerformed(ActionEvent e){
-      controller.add(pr);
-//      loadedPRsTableModel.fireTableDataChanged();
-//      memberPRsTableModel.fireTableDataChanged();
-//      SerialControllerEditor.this.validate();
-//      SerialControllerEditor.this.repaint(100);
+      List<ProcessingResource> prs = new ArrayList<ProcessingResource>();
+      int selectedRows[] = loadedPRsTable.getSelectedRows();
+      Arrays.sort(selectedRows);
+      for (int row : selectedRows) {
+        prs.add((ProcessingResource) loadedPRsTable
+          .getValueAt(row, loadedPRsTable.convertColumnIndexToView(0)));
+      }
+      int insertion = memberPRsTable.getSelectedRow();
+      if (insertion == -1) { insertion = memberPRsTable.getRowCount(); }
+      for (ProcessingResource pr : prs) {
+        controller.add(insertion, pr);
+        insertion++;
+      }
+      // transfer the selection
+      for (ProcessingResource pr : prs) {
+        for (int row = 0; row < memberPRsTable.getRowCount(); row++) {
+          if (memberPRsTable.getValueAt(row,
+                memberPRsTable.convertColumnIndexToView(1)) == pr) {
+            memberPRsTable.addRowSelectionInterval(row, row);
+          }
+        }
+      }
+      memberPRsTable.requestFocusInWindow();
     }
-
-    ProcessingResource pr;
   }
 
   /** Removes a PR from the controller*/
   class RemovePRAction extends AbstractAction {
-    RemovePRAction(ProcessingResource pr){
-      super(pr.getName());
-      this.pr = pr;
-      setEnabled(controller.getPRs().contains(pr));
+    RemovePRAction(){
+      putValue(NAME, "Remove selected resouces from the application");
+      putValue(SHORT_DESCRIPTION,
+        "Remove selected resouces from the application");
+      putValue(SMALL_ICON, MainFrame.getIcon("left-arrow"));
+      putValue(MNEMONIC_KEY, KeyEvent.VK_LEFT);
     }
 
     public void actionPerformed(ActionEvent e){
-      if(controller.remove(pr)){
-//        loadedPRsTableModel.fireTableDataChanged();
-//        memberPRsTableModel.fireTableDataChanged();
-        if(parametersEditor.getResource() == pr){
-          parametersEditor.init(null, null);
-          parametersBorder.setTitle("No selected processing resource");
+      List<ProcessingResource> prs = new ArrayList<ProcessingResource>();
+      for (int row : memberPRsTable.getSelectedRows()) {
+        prs.add((ProcessingResource) memberPRsTable
+          .getValueAt(row, memberPRsTable.convertColumnIndexToView(1)));
+      }
+      for (ProcessingResource pr : prs) {
+        controller.remove(pr);
+      }
+      // transfer the selection
+      for (ProcessingResource pr : prs) {
+        for (int row = 0; row < loadedPRsTable.getRowCount(); row++) {
+          if (loadedPRsTable.getValueAt(row,
+                loadedPRsTable.convertColumnIndexToView(0)) == pr) {
+            loadedPRsTable.addRowSelectionInterval(row, row);
+          }
         }
-//        SerialControllerEditor.this.validate();
-//        SerialControllerEditor.this.repaint(100);
+      }
+      loadedPRsTable.requestFocusInWindow();
+      if (memberPRsTable.getSelectedRowCount() == 0) {
+        parametersEditor.init(null, null);
+        parametersBorder.setTitle("No selected processing resource");
       }
     }
-
-    ProcessingResource pr;
   }
 
 
@@ -1194,6 +1299,15 @@ public class SerialControllerEditor extends AbstractVisualResource
     public void actionPerformed(ActionEvent e){
       Runnable runnable = new Runnable(){
         public void run(){
+
+          if (memberPRsTable.getRowCount() == 0) {
+            JOptionPane.showMessageDialog(SerialControllerEditor.this,
+              "Add at least one processing resource in the right table\n"
+              +"that contains the resources of the application to be run.",
+              "GATE", JOptionPane.ERROR_MESSAGE);
+            return;
+          }
+
           //stop editing the parameters
           try{
             parametersEditor.setParameters();
@@ -1218,6 +1332,7 @@ public class SerialControllerEditor extends AbstractVisualResource
                 "No corpus provided!\n" +
                 "Please select a corpus and try again!",
                 "GATE", JOptionPane.ERROR_MESSAGE);
+              corpusCombo.requestFocusInWindow();
               return;
             }
             if(controller instanceof CorpusController)
@@ -1236,11 +1351,18 @@ public class SerialControllerEditor extends AbstractVisualResource
             return;
           }
           if(badPRs != null && !badPRs.isEmpty()){
+            String badPRsString = "";
+            for (Object badPR : badPRs) {
+              badPRsString += "- "
+                + ((ProcessingResource) badPR).getName() + "\n";
+            }
             //we know what PRs have problems so it would be nice to show
             //them in red or something
             JOptionPane.showMessageDialog(
               SerialControllerEditor.this,
-              "Some required runtime parameters are not set!",
+              "Some required runtime parameters are not set\n"+
+              "in the following resources:\n"+
+              badPRsString,
               "GATE", JOptionPane.ERROR_MESSAGE);
             return;
           }
@@ -1343,7 +1465,7 @@ public class SerialControllerEditor extends AbstractVisualResource
   /**
    * The list of actions provided by this editor
    */
-  protected List actionList;
+  protected List<Action> actionList;
   /**
    * Contains all the PRs loaded in the sytem that are not already part of the
    * serial controller
@@ -1364,7 +1486,7 @@ public class SerialControllerEditor extends AbstractVisualResource
   protected MemberPRsTableModel memberPRsTableModel;
 
   /** Adds one or more PR(s) to the controller*/
-  protected JButton addButon;
+  protected JButton addButton;
 
   /** Removes one or more PR(s) from the controller*/
   protected JButton removeButton;
@@ -1429,12 +1551,6 @@ public class SerialControllerEditor extends AbstractVisualResource
 
   protected CorporaComboModel corpusComboModel;
 
-  /**The "Add PR" menu; part of the popup menu*/
-  protected JMenu addMenu;
-
-  /**The "Remove PR" menu; part of the popup menu*/
-  protected JMenu removeMenu;
-
   /** Action that runs the application*/
   protected RunAction runAction;
 
@@ -1458,29 +1574,32 @@ public class SerialControllerEditor extends AbstractVisualResource
    */
   protected RunningStrategy selectedPRRunStrategy = null;
 
-  private transient Vector statusListeners;
-  private transient Vector progressListeners;
+  private transient Vector<StatusListener> statusListeners;
+  private transient Vector<ProgressListener> progressListeners;
 
+  private AddPRAction addPRAction;
+  private RemovePRAction removePRAction;
 
 
   protected void fireStatusChanged(String e) {
     if (statusListeners != null) {
-      Vector listeners = statusListeners;
+      Vector<StatusListener> listeners = statusListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
-        ((StatusListener) listeners.elementAt(i)).statusChanged(e);
+        listeners.elementAt(i).statusChanged(e);
       }
     }
   }
   public synchronized void removeProgressListener(ProgressListener l) {
     if (progressListeners != null && progressListeners.contains(l)) {
-      Vector v = (Vector) progressListeners.clone();
+      Vector<ProgressListener> v = (Vector) progressListeners.clone();
       v.removeElement(l);
       progressListeners = v;
     }
   }
   public synchronized void addProgressListener(ProgressListener l) {
-    Vector v = progressListeners == null ? new Vector(2) : (Vector) progressListeners.clone();
+    Vector<ProgressListener> v = progressListeners == null ?
+      new Vector(2) : (Vector) progressListeners.clone();
     if (!v.contains(l)) {
       v.addElement(l);
       progressListeners = v;
@@ -1488,20 +1607,21 @@ public class SerialControllerEditor extends AbstractVisualResource
   }
   protected void fireProgressChanged(int e) {
     if (progressListeners != null) {
-      Vector listeners = progressListeners;
+      Vector<ProgressListener> listeners = progressListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
-        ((ProgressListener) listeners.elementAt(i)).progressChanged(e);
+        listeners.elementAt(i).progressChanged(e);
       }
     }
   }
   protected void fireProcessFinished() {
     if (progressListeners != null) {
-      Vector listeners = progressListeners;
+      Vector<ProgressListener> listeners = progressListeners;
       int count = listeners.size();
       for (int i = 0; i < count; i++) {
-        ((ProgressListener) listeners.elementAt(i)).processFinished();
+        listeners.elementAt(i).processFinished();
       }
     }
   }
-  }//SerialControllerEditor
+
+}
