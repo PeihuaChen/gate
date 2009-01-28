@@ -47,6 +47,7 @@ import gate.creole.ResourceInstantiationException;
 import gate.creole.SerialAnalyserController;
 import gate.creole.gazetteer.DefaultGazetteer;
 import gate.creole.gazetteer.FSMState;
+import gate.creole.gazetteer.LinearDefinition;
 import gate.creole.gazetteer.Lookup;
 import gate.creole.morph.Morph;
 import gate.creole.ontology.*;
@@ -840,5 +841,15 @@ public class OntoRootGaz extends DefaultGazetteer {
   public void setConsiderHeuristicRules(Boolean considerHeuristicRules) {
     this.considerHeuristicRules = considerHeuristicRules;
   }
-
+  
+  /**
+   * Gets the linear definition of the gazetteer. This method is added
+   * so that Gaze does not complain when rendering views and showing 
+   * initialisation parameters.
+   * 
+   * @return the linear definition of the gazetteer
+   */
+  public LinearDefinition getLinearDefinition() {
+    return new LinearDefinition();
+  }
 }
