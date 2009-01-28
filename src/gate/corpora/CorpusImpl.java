@@ -256,7 +256,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
   }
 
   public int lastIndexOf(Object o) {
-    return lastIndexOf(o);
+    return supportList.lastIndexOf(o);
   }
 
   public ListIterator listIterator() {
