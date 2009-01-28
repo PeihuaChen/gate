@@ -104,7 +104,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   protected transient Long longestAnnot = 0l;
 
   // Empty AnnotationSet to be returned instead of null
-   public static AnnotationSet emptyAnnotationSet;
+   public final static AnnotationSet emptyAnnotationSet;
 
    static {
    emptyAnnotationSet = new ImmutableAnnotationSetImpl(null,null);
@@ -536,6 +536,11 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    */
   public AnnotationSet getCovering(String neededType, Long startOffset, Long endOffset) {
     if(annotsByStartNode == null) indexByStartOffset();
+    //if the requested range is longer than the longest annotation in this set, 
+    //then there can be no annotations covering the range
+    // so we return an empty set.
+    if(endOffset - startOffset > longestAnnot) return emptyAnnotationSet;
+    
     List<Annotation> annotationsToAdd = new ArrayList<Annotation>();
     Iterator<Node> nodesIter;
     Iterator<Annotation> annotsIter;
