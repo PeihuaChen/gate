@@ -570,7 +570,7 @@ public class TestPR extends TestCase
 
    public static class TestConstraintPredicate extends AbstractConstraintPredicate {
      @Override
-     protected boolean doMatch(Object value, Object context)
+     protected boolean doMatch(Object value, AnnotationSet context)
              throws JapeException {
        return false;
      }
@@ -580,7 +580,7 @@ public class TestPR extends TestCase
    };
 
    public static class TestAnnotationAccessor extends MetaPropertyAccessor {
-     public Object getValue(Annotation annot, Object context) {
+     public Object getValue(Annotation annot, AnnotationSet context) {
        return "foo";
      }
 

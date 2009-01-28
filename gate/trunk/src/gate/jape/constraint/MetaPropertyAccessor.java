@@ -51,26 +51,6 @@ public abstract class MetaPropertyAccessor implements AnnotationAccessor {
     return this.getClass().getSimpleName();
   }
 
-  /**
-   * Returns the context if it is a Document, or, if the context is
-   * an AnnotationSet, returns the Document from it.
-   *
-   * @param context
-   * @return
-   */
-  protected Document getDocument(Object context) {
-    Document doc = null;
-    if (context instanceof Document)
-      doc = (Document)context;
-    else if (context instanceof AnnotationSet) {
-      doc = ((AnnotationSet)context).getDocument();
-    }
-    else
-      throw new IllegalArgumentException("Context must be a Document or an AnnotationSet, not: "
-            + (context != null ? context.getClass() : "null"));
-    return doc;
-  }
-
   public void setKey(Object key) {
     if(key != null || !(key.equals("")))
       log.warn(this.getClass().getName() + " doesn't use key values.  Key was: " + key);

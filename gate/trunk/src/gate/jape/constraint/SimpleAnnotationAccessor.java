@@ -22,7 +22,7 @@ import gate.*;
  */
 public class SimpleAnnotationAccessor extends MetaPropertyAccessor {
 
-  public Object getValue(Annotation annot, Object context) {
+  public Object getValue(Annotation annot, AnnotationSet context) {
     return annot;
   }
 

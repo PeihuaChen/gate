@@ -105,22 +105,25 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
      * @param document
      */
     public FSMMatcher(FSMInstance currentInstance, SimpleSortedSet offsets,
-            SimpleSortedSet annotationsByOffset, Document document) {
+            SimpleSortedSet annotationsByOffset, Document document, 
+            AnnotationSet inputAS) {
       this.currentInstance = currentInstance;
       this.offsets = offsets;
       this.annotationsByOffset = annotationsByOffset;
       this.document = document;
+      this.inputAS = inputAS;
     }
     
     public FSMMatcherResult call() {
       return attemptAdvance(currentInstance, offsets, annotationsByOffset, 
-              document);
+              document, inputAS);
     }            
 
     FSMInstance currentInstance;
     SimpleSortedSet offsets;
     SimpleSortedSet annotationsByOffset;
     Document document;
+    AnnotationSet inputAS;
   }
   // by Shafirin Andrey start
   PhaseController phaseController = null;
@@ -378,7 +381,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
           // multi-threaded alternative
           // queue a task to advance the current FSM Instance
           FSMMatcher fsmMatcher = new FSMMatcher(currentFSM, offsets,
-                  annotationsByOffset, doc);
+                  annotationsByOffset, doc, inputAS);
           runningTasks.add(fsmRunnerPool.submit(fsmMatcher));
 
           // we're finished if all threads have finished and there are
@@ -431,7 +434,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
         } else {
           // single threaded solution
           FSMMatcherResult result = attemptAdvance(currentFSM, offsets,
-                  annotationsByOffset, doc);
+                  annotationsByOffset, doc, inputAS);
           if(result != null){
             if(result.acceptingFSMInstances != null && 
                     !result.acceptingFSMInstances.isEmpty()) {
@@ -464,7 +467,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   @SuppressWarnings("unchecked")
   private FSMMatcherResult attemptAdvance(FSMInstance currentInstance,
           SimpleSortedSet offsets, SimpleSortedSet annotationsByOffset,
-          Document document) {
+          Document document, AnnotationSet inputAS) {
     List<FSMInstance> newActiveInstances = null;
     List<FSMInstance> newAcceptingInstances = null;
 
@@ -548,7 +551,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
             hasPositiveConstraint = true;
             continue;
           }
-          List<Annotation> matchList = c.matches(paths, ontology, document);
+          List<Annotation> matchList = c.matches(paths, ontology, inputAS);
           if(!matchList.isEmpty()) continue transitionsWhile;
         }
   
@@ -560,7 +563,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
             // for(Constraint c : currentConstraints) {
             Constraint c = currentConstraints[i];
             if(c.isNegated()) continue;
-            List<Annotation> matchList = c.matches(paths, ontology, document);
+            List<Annotation> matchList = c.matches(paths, ontology, inputAS);
             // if no annotations matched, then the transition fails.
             if(matchList.isEmpty()) {
               continue transitionsWhile;

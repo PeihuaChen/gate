@@ -15,6 +15,7 @@
 package gate.jape.constraint;
 
 import gate.Annotation;
+import gate.AnnotationSet;
 import gate.jape.JapeException;
 
 import java.io.Serializable;
@@ -99,5 +100,5 @@ public interface ConstraintPredicate extends Serializable {
    * @return
    * @throws JapeException
    */
-  public boolean matches(Annotation annot, Object context) throws JapeException;
+  public boolean matches(Annotation annot, AnnotationSet context) throws JapeException;
 }

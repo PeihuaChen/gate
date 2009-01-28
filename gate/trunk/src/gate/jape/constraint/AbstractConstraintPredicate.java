@@ -69,35 +69,16 @@ public abstract class AbstractConstraintPredicate implements
     return accessor + getOperator() + val;
   }
 
-  public boolean matches(Annotation annot, Object context) throws JapeException {
+  public boolean matches(Annotation annot, AnnotationSet context) throws JapeException {
     //get the appropriate value using the accessor and then have
     //concrete subclasses do the eval
     return doMatch(accessor.getValue(annot, context), context);
   }
 
-  protected abstract boolean doMatch(Object value, Object context)
+  protected abstract boolean doMatch(Object value, AnnotationSet context)
           throws JapeException;
 
 
-  /**
-   * Returns the context if it is a AnnotationSet, or, if the context is
-   * a Document, get the default annotation set from it.
-   *
-   * @param context
-   * @return
-   */
-  protected AnnotationSet getAnnotationSet(Object context) {
-    AnnotationSet as = null;
-    if (context instanceof AnnotationSet)
-      as = (AnnotationSet)context;
-    else if (context instanceof Document) {
-      as = ((Document)context).getAnnotations();
-    }
-    else
-      throw new IllegalArgumentException("Context must be a Document or an AnnotationSet, not: "
-            + (context != null ? context.getClass() : "null"));
-    return as;
-  }
 
   public void setAccessor(AnnotationAccessor accessor) {
     this.accessor = accessor;

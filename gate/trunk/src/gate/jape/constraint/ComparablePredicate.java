@@ -14,6 +14,7 @@
  */
 package gate.jape.constraint;
 
+import gate.AnnotationSet;
 import gate.jape.JapeException;
 
 /**
@@ -44,7 +45,7 @@ public abstract class ComparablePredicate extends AbstractConstraintPredicate {
     super.setValue(value);
   }
 
-  public boolean doMatch(Object value, Object context) throws JapeException {
+  public boolean doMatch(Object value, AnnotationSet context) throws JapeException {
     if(value == null) return false;
 
     return doMatch(value);

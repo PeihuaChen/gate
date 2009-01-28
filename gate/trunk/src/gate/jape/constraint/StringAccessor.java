@@ -26,10 +26,10 @@ public class StringAccessor extends MetaPropertyAccessor {
    * must be a {@link Document} or an {@link AnnotationSet} which
    * points to the document.
    */
-  public Object getValue(Annotation annot, Object context) {
+  public Object getValue(Annotation annot, AnnotationSet context) {
     if(annot == null) return null;
 
-    Document doc = getDocument(context);
+    Document doc = context.getDocument();
 
     String retVal = doc.getContent().toString().substring(
             annot.getStartNode().getOffset().intValue(),

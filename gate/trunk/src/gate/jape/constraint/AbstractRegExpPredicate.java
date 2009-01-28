@@ -14,6 +14,7 @@
  */
 package gate.jape.constraint;
 
+import gate.AnnotationSet;
 import gate.jape.JapeException;
 
 import java.util.regex.Matcher;
@@ -55,7 +56,7 @@ public abstract class AbstractRegExpPredicate
    * value is null it is treated as an empty string. The actual matching
    * logic is defined by {@link #matcherResult}.
    */
-  public boolean doMatch(Object annotValue, Object context)
+  public boolean doMatch(Object annotValue, AnnotationSet context)
           throws JapeException {
 
     if(annotValue == null) annotValue = "";

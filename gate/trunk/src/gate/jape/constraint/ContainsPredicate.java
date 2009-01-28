@@ -17,7 +17,6 @@ package gate.jape.constraint;
 import gate.Annotation;
 import gate.AnnotationSet;
 
-import java.util.Collection;
 
 /**
  * Returns true if there is an annotation of the type set in value that is entirely
@@ -35,7 +34,7 @@ public class ContainsPredicate extends EmbeddedConstraintPredicate {
    * Get all the annots of the right type that are within the span of
    * this annot.
    */
-  public Collection<Annotation> doMatch(Annotation annot, AnnotationSet as) {
+  public AnnotationSet doMatch(Annotation annot, AnnotationSet as) {
     return as.getContained(annot.getStartNode().getOffset(),
             annot.getEndNode().getOffset()).get(annotType);
   }

@@ -13,6 +13,7 @@
 package gate.jape.constraint;
 
 import gate.Annotation;
+import gate.AnnotationSet;
 
 /**
  * Accessor that returns the length of the characters spanned by the annotation
@@ -25,7 +26,7 @@ public class LengthAccessor extends MetaPropertyAccessor {
   /**
    * Return the length of the span of the annotation.
    */
-  public Object getValue(Annotation annot, Object context) {
+  public Object getValue(Annotation annot, AnnotationSet context) {
     if(annot == null) return 0;
     Long retVal = annot.getEndNode().getOffset()
             - annot.getStartNode().getOffset();
