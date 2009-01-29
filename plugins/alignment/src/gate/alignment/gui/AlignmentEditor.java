@@ -1072,6 +1072,11 @@ public class AlignmentEditor extends AbstractVisualResource implements
     docIDsAndAnnots.put(pair.getSourceDocumentId(), pair.getSrcAnnotation());
     docIDsAndAnnots.put(pair.getTargetDocumentId(), pair.getTgtAnnotation());
 
+    Annotation srcSentence = null;
+    Annotation tgtSentence = null;
+    String srcDocID = null;
+    String tgtDocID = null;
+    
     for(String docId : docIDsAndAnnots.keySet()) {
       JPanel panelToUse = sourcePanel;
       boolean isSourceDocument = true;
@@ -1082,7 +1087,14 @@ public class AlignmentEditor extends AbstractVisualResource implements
 
       // sentence annotation
       Annotation annot = docIDsAndAnnots.get(docId);
-
+      if(isSourceDocument) {
+        srcSentence = annot;
+        srcDocID = docId;
+      } else {
+        tgtSentence = annot;
+        tgtDocID = docId;
+      }
+      
       // we need to highlight the unit type
       AnnotationSet underlyingUnitAnnotationsSet = alignFactory
               .getUnderlyingAnnotations(annot, docId, isSourceDocument
@@ -1162,16 +1174,34 @@ public class AlignmentEditor extends AbstractVisualResource implements
       if(isSrcDocument) {
         targetAnnots = alignment.getAlignedAnnotations(srcAnnotation);
         for(Annotation tgtAnnot : targetAnnots) {
-          sourceAnnots.addAll(alignment.getAlignedAnnotations(tgtAnnot));
+          Set<Annotation> setOfAnnots = alignment.getAlignedAnnotations(tgtAnnot);
+          for(Annotation sAnnot : setOfAnnots) {
+            Set<Annotation> setOfTargetAnnots = alignment.getAlignedAnnotations(sAnnot);
+            if(setOfTargetAnnots.size() == targetAnnots.size()) {
+              if(setOfTargetAnnots.containsAll(targetAnnots)) {
+                sourceAnnots.add(sAnnot);
+              }
+            }
+          }
         }
       }
       else {
         sourceAnnots = alignment.getAlignedAnnotations(srcAnnotation);
         for(Annotation srcAnnot : sourceAnnots) {
-          targetAnnots.addAll(alignment.getAlignedAnnotations(srcAnnot));
+          Set<Annotation> setOfAnnots = alignment.getAlignedAnnotations(srcAnnot);
+          for(Annotation tAnnot : setOfAnnots) {
+            Set<Annotation> setOfSourceAnnots = alignment.getAlignedAnnotations(tAnnot);
+            if(setOfSourceAnnots.size() == sourceAnnots.size()) {
+              if(setOfSourceAnnots.containsAll(sourceAnnots)) {
+                targetAnnots.add(tAnnot);
+              }
+            }
+          }
         }
       }
 
+
+      
       Color newColor = getColor(null);
       boolean firstTime = true;
 
