@@ -57,7 +57,7 @@
   <target name="test" />
   <target name="distro.prepare" depends="clean.classes" />
  
-   <target name="run">
+   <target name="run" depends="jar">
     <java classname="gate.clone.ql.query.sparql.SparqlUtils" dir="." maxmemory="1024M" fork="true"> 
       <classpath> 
       	<pathelement path="${jar.location}" />
