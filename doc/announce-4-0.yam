@@ -51,14 +51,14 @@ of benefits:
 - Java 5.0 syntax is now available on the right hand side of JAPE rules
   with the default Eclipse compiler
   (%(http://gate.ac.uk/sale/tao/#sec:japeimpl:javacompiler,details)).
-- =enum= types are now supported for resource parameters.  see
+- ^enum^ types are now supported for resource parameters.  see
   %(http://gate.ac.uk/sale/tao/#sec:howto:creoleconfig,here) for details on
   defining the parameters of a resource.
-- =AnnotationSet= and the =CreoleRegister= take advantage of
-  generic types.  The =AnnotationSet= interface is now an extension of
-  =Set<Annotation>= rather than just =Set=, which should make for
+- ^AnnotationSet^ and the ^CreoleRegister^ take advantage of
+  generic types.  The ^AnnotationSet^ interface is now an extension of
+  ^Set<Annotation>^ rather than just ^Set^, which should make for
   cleaner and more type-safe code when programming to the API, and the
-  =CreoleRegister= now uses parameterized types, which are
+  ^CreoleRegister^ now uses parameterized types, which are
   backwards-compatible but provide better type-safety for new code.
 
 %1 Other new features and improvements
@@ -80,15 +80,15 @@ of benefits:
   or document name.
 
 - Support has been added for resource parameters of type
-  =gate.FeatureMap=, and it is also possible to specify a default value
-  for parameters whose type is =Collection=, =List= or
-  =Set= (%(http://gate.ac.uk/sale/tao/#sec:howto:creoleconfig,details)).
+  ^gate.FeatureMap^, and it is also possible to specify a default value
+  for parameters whose type is ^Collection^, ^List^ or
+  ^Set^ (%(http://gate.ac.uk/sale/tao/#sec:howto:creoleconfig,details)).
 
 - (Feature Request
   %(https://sourceforge.net/support/tracker.php?aid=1446642,1446642))
   After several requests, a mechanism has been added to allow overriding of
   GATE's document format detection routine.  A new creation-time parameter
-  =mimeType= has been added to the standard document implementation, which
+  ^mimeType^ has been added to the standard document implementation, which
   forces a document to be interpreted as a specific MIME type and prevents the
   usual detection based on file name extension and other information
   (%(http://gate.ac.uk/sale/tao/#subsect:DetectingTheReader,details)).
@@ -121,7 +121,7 @@ of benefits:
   main GATE window will not kill the JVM process any more.
 
 - The set of AnnotationSchemas that used to be included in the core
-  =gate.jar= and laoded as builtins have now been moved to the ANNIE plugin.
+  ^gate.jar^ and laoded as builtins have now been moved to the ANNIE plugin.
   When the plugin is loaded, the default annotation schemas are instantiated
   automatically and are available when doing manual annotation.
 
@@ -153,7 +153,7 @@ of benefits:
   with Cygwin this makes it much easier to use the tagger on Windows
   (%(http://gate.ac.uk/sale/tao/#sec:misc-creole:treetagger,details)).
 
-- The =Buchart= plugin has been removed; it is superseded by SUPPLE.  The
+- The ^Buchart^ plugin has been removed; it is superseded by SUPPLE.  The
   probability finder plugin has also been removed, as it is no longer
   maintained.
 
@@ -187,12 +187,12 @@ of benefits:
 - The implementation of the _OrthoMatcher_ component has been
   improved.  This resources takes significantly less time on large documents.
 
-- The implementation of =AnnotationSets= has been improved. GATE now
+- The implementation of ^AnnotationSets^ has been improved. GATE now
   requires up to 40\% less memory to run and is also 20\% faster on average.
-  The =get= methods of =AnnotationSet= return instances of
-  =ImmutableAnnotationSet=. Any attempt at modifying the content of
-  these objects will trigger an =Exception=. An empty
-  =ImmutableAnnotationSet= is returned instead of =null=.
+  The ^get^ methods of ^AnnotationSet^ return instances of
+  ^ImmutableAnnotationSet^. Any attempt at modifying the content of
+  these objects will trigger an ^Exception^. An empty
+  ^ImmutableAnnotationSet^ is returned instead of ^null^.
 
 - The Chemistry tagger has been updated with a number of bugfixes and
   improvements
