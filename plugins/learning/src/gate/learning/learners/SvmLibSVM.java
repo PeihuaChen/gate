@@ -211,9 +211,7 @@ public class SvmLibSVM extends SupervisedLearner {
     SparseFeatureVector[] svFVs, double[] alphas) throws IOException {
     for(int i = 0; i < numSV; ++i) {
       String line = svmModelBuff.readLine();
-      if(line.endsWith("#"))
-        line = line.substring(0, line.length()-1);
-      line = line.trim();
+      
       alphas[i] = readOneSV(line, svFVs, i);
     }
   }
@@ -222,7 +220,9 @@ public class SvmLibSVM extends SupervisedLearner {
   public static double readOneSV(String line, SparseFeatureVector[] svFVs, int iCounter) {
     final int i = iCounter;
     String[] items;
-    items = line.split(" ");
+    if(line.endsWith("#"))
+      line = line.substring(0, line.length()-1);
+    line = line.trim();items = line.split(" ");
     double alpha = new Double(items[0]).doubleValue();
     int len = 0;
     len = items.length-1;
