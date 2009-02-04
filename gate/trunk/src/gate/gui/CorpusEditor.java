@@ -15,11 +15,17 @@ package gate.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.*;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.io.IOException;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.*;
 
 import gate.*;
@@ -29,17 +35,19 @@ import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.GuiType;
 import gate.event.CorpusListener;
 import gate.swing.XJTable;
+import gate.swing.XJPopupMenu;
 import gate.util.GateException;
 import gate.util.GateRuntimeException;
 
 /**
  * A simple viewer/editor for corpora. It will allow the visualisation of the
- * list of documents inside a corpus along withe their features.
+ * list of documents inside a corpus along with their features.
  * It will also allow addition and removal of documents.
  */
 @CreoleResource(name = "Corpus editor", guiType = GuiType.LARGE,
     resourceDisplayed = "gate.Corpus", mainViewer = true)
-public class CorpusEditor extends AbstractVisualResource implements CorpusListener {
+public class CorpusEditor extends AbstractVisualResource
+  implements CorpusListener {
 
   public Resource init(){
     initLocalData();
@@ -63,6 +71,76 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
     docTable.setAutoResizeMode(XJTable.AUTO_RESIZE_OFF);
     docTable.getColumnModel().getColumn(DocumentTableModel.COL_NAME).
         setCellRenderer(renderer);
+    docTable.setDragEnabled(true);
+    docTable.setTransferHandler(new TransferHandler() {
+      // minimal drag and drop to move up and down the table rows
+      String source = "";
+      public int getSourceActions(JComponent c) {
+        return MOVE;
+      }
+      protected Transferable createTransferable(JComponent c) {
+        int selectedRows[] = docTable.getSelectedRows();
+        Arrays.sort(selectedRows);
+        return new StringSelection("docTable"
+          + Arrays.toString(selectedRows));
+      }
+      protected void exportDone(JComponent c, Transferable data, int action) {
+      }
+      public boolean canImport(JComponent c, DataFlavor[] flavors) {
+        for(DataFlavor flavor : flavors) {
+          if(DataFlavor.stringFlavor.equals(flavor)) {
+            return true;
+          }
+        }
+        return false;
+      }
+      public boolean importData(JComponent c, Transferable t) {
+        if (!canImport(c, t.getTransferDataFlavors())) {
+          return false;
+        }
+        try {
+          source = (String)t.getTransferData(DataFlavor.stringFlavor);
+          if (source.startsWith("docTable")) {
+            int insertion = docTable.getSelectedRow();
+            int initialInsertion = insertion;
+            List<Document> documents = new ArrayList<Document>();
+            source = source.replaceFirst("^docTable\\[", "");
+            source = source.replaceFirst("\\]$", "");
+            String selectedRows[] = source.split(", ");
+            if (Integer.valueOf(selectedRows[0]) < insertion) { insertion++; }
+            // get the list of documents selected when dragging started
+            for(String row : selectedRows) {
+              if (Integer.valueOf(row) == initialInsertion) {
+                // the user draged the selected rows on themselves, do nothing
+                return false;
+              }
+              documents.add((Document) corpus.get(
+                docTable.rowViewToModel(Integer.valueOf(row))));
+              if (Integer.valueOf(row) < initialInsertion) { insertion--; }
+            }
+            // remove the documents selected when dragging started
+            for(Document document : documents) {
+              corpus.remove(document);
+            }
+            // add the documents at the insertion point
+            for (Document document : documents) {
+              corpus.add(docTable.rowViewToModel(insertion), document);
+              insertion++;
+            }
+            // select the moved documents
+            docTable.addRowSelectionInterval(
+              insertion - selectedRows.length, insertion - 1);
+            return true;
+          } else {
+            return false;
+          }
+        } catch (UnsupportedFlavorException ufe) {
+          return false;
+        } catch (IOException ioe) {
+          return false;
+        }
+      }
+    });
 
     JScrollPane scroller = new JScrollPane(docTable);
     scroller.setHorizontalScrollBarPolicy(
@@ -77,54 +155,76 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
     toolbar.addSeparator();
     toolbar.add(moveUpAction = new MoveUpAction());
     toolbar.add(moveDownAction = new MoveDownAction());
+    toolbar.addSeparator();
+    toolbar.add(openDocumentsAction = new OpenDocumentsAction());
+
+    removeDocumentsAction.setEnabled(false);
+    moveUpAction.setEnabled(false);
+    moveDownAction.setEnabled(false);
+    openDocumentsAction.setEnabled(false);
 
     add(toolbar, BorderLayout.NORTH);
   }
 
   protected void initListeners(){
+
+    // mouse double-click to open the document
+    // context menu to get the actions for the selection
     docTable.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
-        if(SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2){
-          int row = docTable.rowAtPoint(e.getPoint());
-          if(row != -1){
-            row = docTable.rowViewToModel(row);
-            Document doc = (Document) corpus.get(row);
-            //try to select the document in the main frame
-            Component root = SwingUtilities.getRoot(CorpusEditor.this);
-            if(root instanceof MainFrame){
-              MainFrame mainFrame = (MainFrame)root;
-              mainFrame.select(doc);
-            }
-          }
-        }
+        processMouseEvent(e);
       }
-
       public void mousePressed(MouseEvent e) {
+        if(e.isPopupTrigger()) { processMouseEvent(e); }
       }
-
       public void mouseReleased(MouseEvent e) {
+        if(e.isPopupTrigger()) { processMouseEvent(e); }
       }
+      private void processMouseEvent(MouseEvent e) {
+        int row = docTable.rowAtPoint(e.getPoint());
+        if(row == -1) { return; }
+        row = docTable.rowViewToModel(row);
 
-      public void mouseEntered(MouseEvent e) {
-      }
+        if(e.isPopupTrigger()) {
+          // context menu
+          if(!docTable.isRowSelected(row)) {
+            // if right click outside the selection then reset selection
+            docTable.getSelectionModel().setSelectionInterval(row, row);
+          }
+          JPopupMenu popup = new XJPopupMenu();
+          popup.add(openDocumentsAction);
+          popup.add(removeDocumentsAction);
+          popup.show(docTable, e.getPoint().x, e.getPoint().y);
 
-      public void mouseExited(MouseEvent e) {
+        } else if(e.getID() == MouseEvent.MOUSE_CLICKED
+               && e.getClickCount() == 2) {
+          // open document on double-click
+          openDocumentsAction.actionPerformed(null);
+        }
       }
     });
 
-    // binds F-keys to actions
-    getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-      .put(KeyStroke.getKeyStroke("F3"), "Add");
-    getActionMap().put("Add", newDocumentAction);
-    getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-      .put(KeyStroke.getKeyStroke("F4"), "Remove");
-    getActionMap().put("Remove", removeDocumentsAction);
-    getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-      .put(KeyStroke.getKeyStroke("F5"), "Up");
-    getActionMap().put("Up", moveUpAction);
-    getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-      .put(KeyStroke.getKeyStroke("F7"), "Down");
-    getActionMap().put("Down", moveDownAction);
+    // Enter key opens the selected documents
+    docTable.addKeyListener(new KeyAdapter() {
+      public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+          openDocumentsAction.actionPerformed(null);
+        }
+      }
+    });
+
+    docTable.getSelectionModel().addListSelectionListener(
+      new ListSelectionListener() {
+        public void valueChanged(ListSelectionEvent e) {
+          // enable/disable buttons according to the selection
+          removeDocumentsAction.setEnabled(docTable.getSelectedRowCount() > 0);
+          openDocumentsAction.setEnabled(docTable.getSelectedRowCount() > 0);
+          moveUpAction.setEnabled(docTable.getSelectedRowCount() > 0
+            && !docTable.isRowSelected(0));
+          moveDownAction.setEnabled(docTable.getSelectedRowCount() > 0
+            && !docTable.isRowSelected(docTable.getRowCount() - 1));
+        }
+      });
 
   }
 
@@ -206,7 +306,7 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
          columnIndex < 0 || columnIndex > COLUMN_COUNT) return null;
       switch(columnIndex) {
         case COL_INDEX:
-          return new Integer(rowIndex);
+          return rowIndex;
         case COL_NAME:
           return documentNames.get(rowIndex);
         default:
@@ -255,16 +355,15 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
       // prepare the renderer
 
       return getTableCellRendererComponent(docTable, value, isSelected, 
-              cellHasFocus, index, docTableModel.COL_NAME);
+              cellHasFocus, index, DocumentTableModel.COL_NAME);
     }
   }
   
   class MoveUpAction extends AbstractAction{
     public MoveUpAction(){
       super("Move up", MainFrame.getIcon("up"));
-      putValue(SHORT_DESCRIPTION, "<html>Moves selected document(s) up"
-        +"&nbsp;&nbsp;<font color=#667799><small>F5"
-        +"&nbsp;&nbsp;</small></font></html>");
+      putValue(SHORT_DESCRIPTION, "Moves selected document(s) up");
+      putValue(MNEMONIC_KEY, KeyEvent.VK_UP);
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -304,9 +403,8 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
   class MoveDownAction extends AbstractAction{
     public MoveDownAction(){
       super("Move down", MainFrame.getIcon("down"));
-      putValue(SHORT_DESCRIPTION, "<html>Moves selected document(s) down"
-        +"&nbsp;&nbsp;<font color=#667799><small>F7"
-        +"&nbsp;&nbsp;</small></font></html>");
+      putValue(SHORT_DESCRIPTION, "Moves selected document(s) down");
+      putValue(MNEMONIC_KEY, KeyEvent.VK_DOWN);
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -345,9 +443,8 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
   class NewDocumentAction extends AbstractAction{
     public NewDocumentAction(){
       super("Add document", MainFrame.getIcon("add-document"));
-      putValue(SHORT_DESCRIPTION, "<html>Add a new document to this corpus"
-        +"&nbsp;&nbsp;<font color=#667799><small>F3"
-        +"&nbsp;&nbsp;</small></font></html>");
+      putValue(SHORT_DESCRIPTION, "Add new document(s) to this corpus");
+      putValue(MNEMONIC_KEY, KeyEvent.VK_ENTER);
     }
 
     public void actionPerformed(ActionEvent e){
@@ -358,8 +455,8 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
         if(loadedDocuments == null || loadedDocuments.isEmpty()){
           JOptionPane.showMessageDialog(
               CorpusEditor.this,
-              "There are no documents available in the system!\n" +
-              "Please load some and try again!" ,
+              "There are no documents available in the system.\n" +
+              "Please load some and try again." ,
               "GATE", JOptionPane.ERROR_MESSAGE);
           return;
         }
@@ -390,14 +487,14 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
           "Something must be terribly wrong...take a vacation!");
       }
     }
-  }//class NewDocumentAction extends AbstractAction
+  }
 
   class RemoveDocumentsAction extends AbstractAction{
     public RemoveDocumentsAction(){
       super("Remove documents", MainFrame.getIcon("remove-document"));
-      putValue(SHORT_DESCRIPTION, "<html>Removes selected documents from this corpus"
-        +"&nbsp;&nbsp;<font color=#667799><small>F4"
-        +"&nbsp;&nbsp;</small></font></html>");
+      putValue(SHORT_DESCRIPTION,
+        "Removes selected document(s) from this corpus");
+      putValue(MNEMONIC_KEY, KeyEvent.VK_DELETE);
     }
 
     public void actionPerformed(ActionEvent e){
@@ -412,8 +509,41 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
       }
 //      documentsList.clearSelection();
     }
-  }//class RemoveDocumentsAction extends AbstractAction
+  }
 
+  class OpenDocumentsAction extends AbstractAction{
+    public OpenDocumentsAction(){
+      super("Open documents", MainFrame.getIcon("document"));
+      putValue(SHORT_DESCRIPTION,
+        "Opens selected document(s) in a document editor");
+    }
+
+    public void actionPerformed(ActionEvent e){
+      Component root = SwingUtilities.getRoot(CorpusEditor.this);
+      if(! (root instanceof MainFrame)){ return; }
+      MainFrame mainFrame = (MainFrame)root;
+      int[] selectedRows = docTable.getSelectedRows();
+      if (selectedRows.length > 10) {
+        Object[] possibleValues =
+          { "Open the "+selectedRows.length+" documents", "Don't open" };
+        int selectedValue =
+          JOptionPane.showOptionDialog(docTable, "Do you want to open "
+          +selectedRows.length+" documents in the central tabbed pane ?",
+          "Warning", JOptionPane.DEFAULT_OPTION,
+          JOptionPane.QUESTION_MESSAGE, null,
+          possibleValues, possibleValues[1]);
+        if (selectedValue == 1
+         || selectedValue == JOptionPane.CLOSED_OPTION) {
+          return;
+        }
+      }
+      for(int row : selectedRows) {
+        Document doc = (Document) corpus.get(docTable.rowViewToModel(row));
+        // try to select the document in the main frame
+        mainFrame.select(doc);
+      }
+    }
+  }
 
 //  protected JList documentsList;
   protected XJTable docTable;
@@ -425,4 +555,5 @@ public class CorpusEditor extends AbstractVisualResource implements CorpusListen
   protected RemoveDocumentsAction removeDocumentsAction;
   protected MoveUpAction moveUpAction;
   protected MoveDownAction moveDownAction;
+  protected OpenDocumentsAction openDocumentsAction;
 }
