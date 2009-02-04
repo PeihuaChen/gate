@@ -1046,9 +1046,15 @@ public class NameBearerHandle implements Handle, StatusListener,
       }
       fileChooser.setFileFilter(filter);
 
-      fileChooser.setDialogTitle("Select a file for this resource");
+      fileChooser.setDialogTitle("Select a file where to save the application "
+        + ((target instanceof CorpusController
+           && ((CorpusController)target).getCorpus() != null) ?
+        "WITH" : "WITHOUT") + " corpus.");
       fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-      Object URL = null;
+      // this URL has been added as a feature when loading the application from
+      // a file and it is used now to select this location in the file chooser
+      Object URL;
+      // remove the URL feature to not save it in the application
       if(((URL = ((Resource)target).getFeatures().remove("URL")) != null)) {
         try {
           fileChooser.ensureFileIsVisible(new File(((URL)URL).toURI()));
@@ -1063,8 +1069,9 @@ public class NameBearerHandle implements Handle, StatusListener,
         Runnable runnable = new Runnable() {
           public void run() {
             try {
-              gate.util.persistence.PersistenceManager.saveObjectToFile(
-                (Resource)target, file);
+              gate.util.persistence.PersistenceManager
+                .saveObjectToFile(target, file);
+              // re-add the URL feature just after saving the application
               ((Resource)target).getFeatures().put("URL", file.toURI().toURL());
             }
             catch(Exception e) {
@@ -1079,7 +1086,7 @@ public class NameBearerHandle implements Handle, StatusListener,
         thread.start();
       }
       else if (URL != null) {
-        ((Resource)target).getFeatures().put("URL", (URL)URL);
+        ((Resource)target).getFeatures().put("URL", URL);
       }
     }
 

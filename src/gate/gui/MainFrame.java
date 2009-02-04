@@ -2974,12 +2974,15 @@ public class MainFrame extends JFrame implements ProgressListener,
           fileChooser.setDialogTitle("Select a file for this resource");
           fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
           currentResourceClassName = "gate.ApplicationRestore";
-          if(fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
+          if(fileChooser.showOpenDialog(MainFrame.this)
+          == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
             try {
               Object resource = gate.util.persistence
                 .PersistenceManager.loadObjectFromFile(file);
               if(resource instanceof Resource) {
+                // add the location of the loaded file as a URL feature
+                // it will be used as default location when saving
                 ((Resource)resource).getFeatures()
                   .put("URL", file.toURI().toURL());
               }
@@ -3747,7 +3750,10 @@ public class MainFrame extends JFrame implements ProgressListener,
     
     public void actionPerformed(ActionEvent e) {
       String keywords =
-        JOptionPane.showInputDialog("Please enter your search keywords.");
+        JOptionPane.showInputDialog(instance,
+          "Please enter your search keywords.",
+          (String) this.getValue(NAME),
+          JOptionPane.QUESTION_MESSAGE);
       if (keywords == null) { return; }
       try {
       showHelpFrame("http://sourceforge.net/search/index.php?" +
