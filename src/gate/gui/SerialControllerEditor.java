@@ -255,14 +255,8 @@ public class SerialControllerEditor extends AbstractVisualResource
               insertion++;
             }
             // select the moved PRs
-            for (ProcessingResource pr : prs) {
-              for (int row = 0; row < memberPRsTable.getRowCount(); row++) {
-                if (memberPRsTable.getValueAt(row,
-                      memberPRsTable.convertColumnIndexToView(1)) == pr) {
-                  memberPRsTable.addRowSelectionInterval(row, row);
-                }
-              }
-            }
+            memberPRsTable.addRowSelectionInterval(
+              insertion - selectedRows.length, insertion - 1);
             return true;
           } else if (source.equals("loadedPRsTable")) {
             addPRAction.actionPerformed(null);
