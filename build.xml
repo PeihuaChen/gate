@@ -776,7 +776,7 @@
        running "bin/ant all" but you will need to build SUPPLE manually.
   -->
   <target name="plugins.html">
-    <taskdef name="expandcreoles" classname="gate.util.ant.ExpandCreoleXmls"
+    <typedef resource="gate/util/ant/antlib.xml"
              classpathref="run.class.path"/>
     <!-- clean out previous run -->
     <delete dir="build/plugins" />
