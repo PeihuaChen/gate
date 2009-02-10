@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Antlib defining the tasks and types provided by GATE -->
+<antlib>
+  <!-- Expand creole.xml (used to regenerate the plugins.html page) -->
+  <taskdef name="expandcreoles" classname="gate.util.ant.ExpandCreoleXmls" />
+
+  <!-- GAPP file packager -->
+  <taskdef name="packagegapp" classname="gate.util.ant.packager.PackageGappTask" />
+  <typedef name="gazetteerlists" classname="gate.util.ant.packager.extraresources.GazetteerLists" />
+</antlib>
