@@ -288,7 +288,8 @@ public class TreeTagger
     }
     catch (Exception err) {
       throw (ExecutionException)new ExecutionException(
-          "Error occurred running TreeTagger")
+          "Error occurred running TreeTagger with command line "
+                + Arrays.asList(cmdline))
           .initCause(err);
     }
 
