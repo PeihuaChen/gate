@@ -32,6 +32,7 @@ import gate.corpora.DocumentStaxUtils;
 import gate.creole.*;
 import gate.creole.ir.*;
 import gate.event.*;
+import gate.gui.teamware.InputOutputAnnotationSetsDialog;
 import gate.persist.LuceneDataStoreImpl;
 import gate.persist.PersistenceException;
 import gate.security.*;
@@ -44,6 +45,7 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.BuildListener;
 import org.apache.tools.ant.BuildEvent;
 import org.apache.tools.ant.types.FileSet;
+import org.apache.tools.ant.taskdefs.Delete;
 import org.apache.tools.ant.taskdefs.Zip;
 
 /**
@@ -1107,6 +1109,52 @@ public class NameBearerHandle implements Handle, StatusListener,
       putValue(SHORT_DESCRIPTION,
         "Saves the resources of this application in a ZIP file");
     }
+    
+    class ExporterBuildListener implements BuildListener {
+      private Throwable lastException = null;
+      
+      public void buildStarted(BuildEvent buildEvent) {
+      }
+      public void buildFinished(BuildEvent buildEvent) {
+      }
+      public void targetStarted(BuildEvent buildEvent) {
+      }
+      public void targetFinished(BuildEvent buildEvent) {
+      }
+      public void taskStarted(BuildEvent buildEvent) {
+      }
+      // receive any exceptions
+      // thrown from task calls in taskFinished
+      public void taskFinished(BuildEvent buildEvent) {
+        if(buildEvent.getException() != null) {
+          lastException = buildEvent.getException();
+          JOptionPane.showMessageDialog(getLargeView(), "Error!\n"
+            + lastException.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
+          lastException.printStackTrace(Err.getPrintWriter());
+          statusChanged("Error exporting application");
+        }
+        else {
+          statusChanged("Export complete");
+          lastException = null;
+        }
+      }
+      // pass INFO and higher messageLogged calls through to the GATE
+      // StatusListener (higher priority = lower getPriority() value)
+      public void messageLogged(BuildEvent buildEvent) {
+        if(buildEvent.getPriority() <= Project.MSG_INFO) {
+          statusChanged(buildEvent.getMessage());
+        }
+      }
+
+      
+      /**
+       * Gets the exception that ended the last task execution, or null
+       * if the last task completed successfully.
+       */
+      Throwable getLastException() {
+        return lastException;
+      }
+    }
 
     public void actionPerformed(ActionEvent ae) {
       JFileChooser fileChooser = MainFrame.getFileChooser();
@@ -1139,35 +1187,18 @@ public class NameBearerHandle implements Handle, StatusListener,
         "WITH" : "WITHOUT") + " corpus.");
       fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 
-      // TODO: Ian, you can remove this if you don't need to take parameter
-      // from the file chooser
-      Box fileOptionsBox = Box.createVerticalBox();
-      fileOptionsBox.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-      fileOptionsBox.add(Box.createVerticalGlue());
-      fileOptionsBox.add(new JLabel("Input Annotation Set:"));
-      JTextField inputAnnotationSet = new JTextField();
-      inputAnnotationSet.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
-      fileOptionsBox.add(inputAnnotationSet);
-      fileOptionsBox.add(Box.createVerticalStrut(5));
-      fileOptionsBox.add(new JLabel("Output Annotation Set:"));
-      JTextField outputAnnotationSet = new JTextField();
-      outputAnnotationSet.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
-      fileOptionsBox.add(outputAnnotationSet);
-      fileOptionsBox.add(Box.createVerticalGlue());
-      fileChooser.setAccessory(fileOptionsBox);
-
       // this URL has been added as a feature when loading the application from
       // a file and it is used now to select this location in the file chooser
-      Object URL;
+      Object url;
       // remove the URL feature to not save it in the application
-      if(((URL = ((Resource)target).getFeatures().remove("URL")) != null)) {
+      if(((url = ((Resource)target).getFeatures().remove("URL")) != null)) {
         try {
-          if (!URL.toString().endsWith(".zip")) {
+          if (!url.toString().endsWith(".zip")) {
             // replace extension with .zip
-            URL = new URL(URL.toString().replaceFirst("\\.[^.]{3,4}$", ".zip"));
+            url = new URL(url.toString().replaceFirst("\\.[^.]{3,4}$", ".zip"));
           }
-          fileChooser.ensureFileIsVisible(new File(((URL)URL).toURI()));
-          fileChooser.setSelectedFile(new File(((URL)URL).toURI()));
+          fileChooser.ensureFileIsVisible(new File(((URL)url).toURI()));
+          fileChooser.setSelectedFile(new File(((URL)url).toURI()));
         }
         catch(URISyntaxException e) {
           e.printStackTrace();
@@ -1178,114 +1209,97 @@ public class NameBearerHandle implements Handle, StatusListener,
       }
       if(fileChooser.showSaveDialog(largeView) == JFileChooser.APPROVE_OPTION) {
         final File targetZipFile = fileChooser.getSelectedFile();
-        Runnable runnable = new Runnable() {
-          public void run() {
-            try {
-            // create a temporary directory, and save the application
-            // in the normal way to that directory
-            File temporaryDirectory =
-              File.createTempFile("gapp-packager", "", null);
-            if (!temporaryDirectory.delete()
-             || !temporaryDirectory.mkdir()) {
-              throw new IOException("Unable to create temporary directory.\n"
-                + temporaryDirectory.getCanonicalPath());
+        InputOutputAnnotationSetsDialog inOutDialog = new InputOutputAnnotationSetsDialog((Controller)target);
+        if(inOutDialog.showDialog(window)) {
+          Runnable runnable = new Runnable() {
+            public void run() {
+              try {
+              // create a temporary directory, and save the application
+              // in the normal way to that directory
+              File temporaryDirectory =
+                File.createTempFile("gapp-packager", "", null);
+              if (!temporaryDirectory.delete()
+               || !temporaryDirectory.mkdir()) {
+                throw new IOException("Unable to create temporary directory.\n"
+                  + temporaryDirectory.getCanonicalPath());
+              }
+              File originalGapp = new File(temporaryDirectory, "original.xgapp");
+              File targetGapp = new File(temporaryDirectory, "application.xgapp");
+              gate.util.persistence.PersistenceManager
+                .saveObjectToFile(target, originalGapp);
+  
+              // create and configure Ant Project
+              Project project = new Project();
+              ExporterBuildListener buildListener = new ExporterBuildListener();
+              project.addBuildListener(buildListener);
+              project.init();
+  
+              // create instance of packager task and configure it
+              PackageGappTask task = new PackageGappTask();
+              task.setProject(project);
+              task.setSrc(originalGapp);
+              task.setDestFile(targetGapp);
+              // sensible default settings
+              task.setCopyPlugins(true);
+              task.setCopyResourceDirs(true);
+              task.setOnUnresolved(PackageGappTask.UnresolvedAction.recover);
+              task.init();
+  
+              // run the task.  Errors are reported to the BuildListener
+              // taskFinished method via a BuildEvent whose getException()
+              // method returns non-null
+              task.perform();
+              if(buildListener.getLastException() != null) {
+                return;
+              }
+  
+              // TODO: generate the service definition from the annotation
+              // set names (I still have to write the code to do this)
+              // inputAnnotationSet.getText()
+              // outputAnnotationSet.getText()
+  
+              // create zip file using standard Ant zip task
+              Zip zipTask = new Zip();
+              zipTask.setProject(project);
+              zipTask.setDestFile(targetZipFile);
+              FileSet fs = new FileSet();
+              fs.setProject(project);
+              zipTask.addFileset(fs);
+              fs.setDir(temporaryDirectory);
+              // exclude the unpackaged gapp file from the zip
+              fs.setExcludes("original.xgapp");
+              zipTask.perform(); // errors to BuildListener as above
+              if(buildListener.getLastException() != null) {
+                return;
+              }
+  
+              // delete temporary files
+              Delete deleteTask = new Delete();
+              deleteTask.setProject(project);
+              deleteTask.setDir(temporaryDirectory);
+              deleteTask.perform();
+              if(buildListener.getLastException() != null) {
+                return;
+              }
+  
+              // re-add the URL feature just after saving the application
+              ((Resource)target).getFeatures().put(
+                "URL", targetZipFile.toURI().toURL());
+              }
+              catch(Exception e) {
+                JOptionPane.showMessageDialog(getLargeView(), "Error!\n"
+                  + e.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace(Err.getPrintWriter());
+              }
             }
-            File originalGapp = new File(temporaryDirectory, "original.xgapp");
-            File targetGapp = new File(temporaryDirectory, "application.xgapp");
-            gate.util.persistence.PersistenceManager
-              .saveObjectToFile(target, originalGapp);
-
-            // create and configure Ant Project
-            Project project = new Project();
-            project.addBuildListener(new BuildListener() {
-              public void buildStarted(BuildEvent buildEvent) {
-              }
-              public void buildFinished(BuildEvent buildEvent) {
-              }
-              public void targetStarted(BuildEvent buildEvent) {
-              }
-              public void targetFinished(BuildEvent buildEvent) {
-              }
-              public void taskStarted(BuildEvent buildEvent) {
-              }
-              // receive any exceptions
-              // thrown from task calls in taskFinished
-              public void taskFinished(BuildEvent buildEvent) {
-                try {
-                  Throwable t;
-                  if ((t = buildEvent.getException()) != null) { throw t; }
-                } catch (Throwable e) {
-                  JOptionPane.showMessageDialog(getLargeView(), "Error!\n"
-                    + e.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
-                  e.printStackTrace(Err.getPrintWriter());
-                }
-              }
-              // pass messageLogged calls through to the GATE
-              // StatusListener
-              public void messageLogged(BuildEvent buildEvent) {
-                statusChanged(buildEvent.getMessage());
-              }
-            });
-            project.init();
-
-            // create instance of packager task and configure it
-            PackageGappTask task = new PackageGappTask();
-            task.setProject(project);
-            task.setSrc(originalGapp);
-            task.setDestFile(targetGapp);
-            // sensible default settings
-            task.setCopyPlugins(true);
-            task.setCopyResourceDirs(true);
-            task.setOnUnresolved(PackageGappTask.UnresolvedAction.recover);
-            task.init();
-
-            // run the task.  Errors are reported to the BuildListener
-            // taskFinished method via a BuildEvent whose getException()
-            // method returns non-null
-            task.perform();
-
-            // TODO: generate the service definition from the annotation
-            // set names (I still have to write the code to do this)
-            // inputAnnotationSet.getText()
-            // outputAnnotationSet.getText()
-
-            // create zip file using standard Ant zip task
-            Zip zipTask = new Zip();
-            zipTask.setProject(project);
-            zipTask.setDestFile(targetZipFile);
-            FileSet fs = new FileSet();
-            fs.setProject(project);
-            zipTask.addFileset(fs);
-            fs.setDir(temporaryDirectory);
-            // exclude the unpackaged gapp file from the zip
-            fs.setExcludes("original.xgapp");
-            zipTask.perform(); // errors to BuildListener as above
-
-            // delete temporary files
-            if (!originalGapp.delete()
-             || !targetGapp.delete()) {
-              throw new IOException("Unable to delete temporary files.\n"
-                + originalGapp.getCanonicalPath() + "\n"
-                + targetGapp.getCanonicalPath());
-            }
-
-            // re-add the URL feature just after saving the application
-            ((Resource)target).getFeatures().put(
-              "URL", targetZipFile.toURI().toURL());
-            }
-            catch(Exception e) {
-              JOptionPane.showMessageDialog(getLargeView(), "Error!\n"
-                + e.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
-              e.printStackTrace(Err.getPrintWriter());
-            }
-          }
-        };
-        Thread thread = new Thread(runnable);
-        thread.setPriority(Thread.MIN_PRIORITY);
-        thread.start();
+          };
+          Thread thread = new Thread(runnable);
+          thread.setPriority(Thread.MIN_PRIORITY);
+          thread.start();
+        }
       }
-      else if (URL != null) {
-        ((Resource)target).getFeatures().put("URL", URL);
+      else if (url != null) {
+        ((Resource)target).getFeatures().put("URL", url);
       }
     }
 
