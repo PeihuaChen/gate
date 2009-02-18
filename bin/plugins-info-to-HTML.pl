@@ -3,6 +3,9 @@
 # Script to read all the creole.xml files for every plugin
 # to produce a summary HTML page (GATE/doc/plugins.html)
 # by Andrew Golightly
+#
+# This script should not be run directly, use "ant plugins.html" in the
+# top-level GATE directory instead.
 
 use strict;
 use warnings;
@@ -21,7 +24,7 @@ File::Find::find(
     sub {
       push (@creoleFileList, $File::Find::name) if $_ eq 'creole.xml';
     },
-    qw(../plugins));
+    qw(../build/plugins));
 
 # Sort alphabetically
 @creoleFileList = sort @creoleFileList;
