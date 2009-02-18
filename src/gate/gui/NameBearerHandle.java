@@ -41,6 +41,8 @@ import gate.swing.XJMenuItem;
 import gate.swing.XJPopupMenu;
 import gate.util.*;
 import gate.util.ant.packager.PackageGappTask;
+
+import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.BuildListener;
 import org.apache.tools.ant.BuildEvent;
@@ -1105,56 +1107,70 @@ public class NameBearerHandle implements Handle, StatusListener,
   class ExportToTeamware extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public ExportToTeamware() {
-      super("Export to Teamware");
+      super("Export for Teamware");
       putValue(SHORT_DESCRIPTION,
         "Saves the resources of this application in a ZIP file");
     }
     
-    class ExporterBuildListener implements BuildListener {
-      private Throwable lastException = null;
+    /**
+     * Build listener to receive log messages from Ant tasks and forward
+     * them to the GATE status listener (i.e. the status bar).  This class
+     * implements Executable not because it is itself executed, but in
+     * order to support interruption.  If the user presses the stop button
+     * in the GUI lock window this object will be interrupted, and will
+     * throw an exception at the next call to messageLogged, which has
+     * the effect of interrupting the currently executing Ant task.
+     */
+    class ExporterBuildListener implements BuildListener, Executable {
+      private boolean interrupted = false;
       
-      public void buildStarted(BuildEvent buildEvent) {
+      public boolean isInterrupted() {
+        return interrupted;
       }
-      public void buildFinished(BuildEvent buildEvent) {
+      public void interrupt() {
+        interrupted = true;
       }
-      public void targetStarted(BuildEvent buildEvent) {
-      }
-      public void targetFinished(BuildEvent buildEvent) {
-      }
-      public void taskStarted(BuildEvent buildEvent) {
-      }
-      // receive any exceptions
-      // thrown from task calls in taskFinished
+      
+      /**
+       * Set status message appropriately when task completes or fails.
+       */
       public void taskFinished(BuildEvent buildEvent) {
         if(buildEvent.getException() != null) {
-          lastException = buildEvent.getException();
-          JOptionPane.showMessageDialog(getLargeView(), "Error!\n"
-            + lastException.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
-          lastException.printStackTrace(Err.getPrintWriter());
           statusChanged("Error exporting application");
         }
         else {
           statusChanged("Export complete");
-          lastException = null;
         }
       }
-      // pass INFO and higher messageLogged calls through to the GATE
-      // StatusListener (higher priority = lower getPriority() value)
+
+      /**
+       * This is called for every log message (of any priority).  If the
+       * current process has been interrupted (the user pressed the stop
+       * button) then we throw an exception to interrupt the currently
+       * executing Ant task.  Other than that, we simply pass INFO and
+       * higher messages to the GATE status listener.
+       */
       public void messageLogged(BuildEvent buildEvent) {
+        // check for interruption
+        if(interrupted) {
+          interrupted = false;
+          throw new BuildException("Export interrupted");
+        }
         if(buildEvent.getPriority() <= Project.MSG_INFO) {
           statusChanged(buildEvent.getMessage());
         }
       }
-
       
-      /**
-       * Gets the exception that ended the last task execution, or null
-       * if the last task completed successfully.
-       */
-      Throwable getLastException() {
-        return lastException;
+      // not interested in these events
+      public void buildStarted(BuildEvent buildEvent) {}
+      public void buildFinished(BuildEvent buildEvent) {}
+      public void targetStarted(BuildEvent buildEvent) {}
+      public void targetFinished(BuildEvent buildEvent) {}
+      public void taskStarted(BuildEvent buildEvent) {}
+      public void execute() {
+        // do nothing, only here to match the interface
       }
-    }
+   }
 
     public void actionPerformed(ActionEvent ae) {
       JFileChooser fileChooser = MainFrame.getFileChooser();
@@ -1214,82 +1230,78 @@ public class NameBearerHandle implements Handle, StatusListener,
           Runnable runnable = new Runnable() {
             public void run() {
               try {
-              // create a temporary directory, and save the application
-              // in the normal way to that directory
-              File temporaryDirectory =
-                File.createTempFile("gapp-packager", "", null);
-              if (!temporaryDirectory.delete()
-               || !temporaryDirectory.mkdir()) {
-                throw new IOException("Unable to create temporary directory.\n"
-                  + temporaryDirectory.getCanonicalPath());
-              }
-              File originalGapp = new File(temporaryDirectory, "original.xgapp");
-              File targetGapp = new File(temporaryDirectory, "application.xgapp");
-              gate.util.persistence.PersistenceManager
-                .saveObjectToFile(target, originalGapp);
-  
-              // create and configure Ant Project
-              Project project = new Project();
-              ExporterBuildListener buildListener = new ExporterBuildListener();
-              project.addBuildListener(buildListener);
-              project.init();
-  
-              // create instance of packager task and configure it
-              PackageGappTask task = new PackageGappTask();
-              task.setProject(project);
-              task.setSrc(originalGapp);
-              task.setDestFile(targetGapp);
-              // sensible default settings
-              task.setCopyPlugins(true);
-              task.setCopyResourceDirs(true);
-              task.setOnUnresolved(PackageGappTask.UnresolvedAction.recover);
-              task.init();
-  
-              // run the task.  Errors are reported to the BuildListener
-              // taskFinished method via a BuildEvent whose getException()
-              // method returns non-null
-              task.perform();
-              if(buildListener.getLastException() != null) {
-                return;
-              }
-  
-              // TODO: generate the service definition from the annotation
-              // set names (I still have to write the code to do this)
-              // inputAnnotationSet.getText()
-              // outputAnnotationSet.getText()
-  
-              // create zip file using standard Ant zip task
-              Zip zipTask = new Zip();
-              zipTask.setProject(project);
-              zipTask.setDestFile(targetZipFile);
-              FileSet fs = new FileSet();
-              fs.setProject(project);
-              zipTask.addFileset(fs);
-              fs.setDir(temporaryDirectory);
-              // exclude the unpackaged gapp file from the zip
-              fs.setExcludes("original.xgapp");
-              zipTask.perform(); // errors to BuildListener as above
-              if(buildListener.getLastException() != null) {
-                return;
-              }
-  
-              // delete temporary files
-              Delete deleteTask = new Delete();
-              deleteTask.setProject(project);
-              deleteTask.setDir(temporaryDirectory);
-              deleteTask.perform();
-              if(buildListener.getLastException() != null) {
-                return;
-              }
-  
-              // re-add the URL feature just after saving the application
-              ((Resource)target).getFeatures().put(
-                "URL", targetZipFile.toURI().toURL());
+                // create and configure Ant Project
+                Project project = new Project();
+                ExporterBuildListener buildListener = new ExporterBuildListener();
+                Gate.setExecutable(buildListener);
+                project.addBuildListener(buildListener);
+                project.init();
+                MainFrame.lockGUI("Exporting application...");
+
+                // create a temporary directory, and save the application
+                // in the normal way to that directory
+                File temporaryDirectory =
+                  File.createTempFile("gapp-packager", "", null);
+                if (!temporaryDirectory.delete()
+                 || !temporaryDirectory.mkdir()) {
+                  throw new IOException("Unable to create temporary directory.\n"
+                    + temporaryDirectory.getCanonicalPath());
+                }
+                File originalGapp = new File(temporaryDirectory, "original.xgapp");
+                File targetGapp = new File(temporaryDirectory, "application.xgapp");
+                gate.util.persistence.PersistenceManager
+                  .saveObjectToFile(target, originalGapp);
+    
+                // create instance of packager task and configure it
+                PackageGappTask task = new PackageGappTask();
+                task.setProject(project);
+                task.setSrc(originalGapp);
+                task.setDestFile(targetGapp);
+                // sensible default settings
+                task.setCopyPlugins(true);
+                task.setCopyResourceDirs(true);
+                task.setOnUnresolved(PackageGappTask.UnresolvedAction.recover);
+                task.init();
+    
+                // run the task.
+                task.perform();
+    
+                // TODO: generate the service definition from the annotation
+                // set names (I still have to write the code to do this)
+                // inputAnnotationSet.getText()
+                // outputAnnotationSet.getText()
+    
+                // create zip file using standard Ant zip task
+                Zip zipTask = new Zip();
+                zipTask.setProject(project);
+                zipTask.setDestFile(targetZipFile);
+                FileSet fs = new FileSet();
+                fs.setProject(project);
+                zipTask.addFileset(fs);
+                fs.setDir(temporaryDirectory);
+                // exclude the unpackaged gapp file from the zip
+                fs.setExcludes("original.xgapp");
+                zipTask.perform();
+    
+                // delete temporary files
+                Delete deleteTask = new Delete();
+                deleteTask.setProject(project);
+                deleteTask.setDir(temporaryDirectory);
+                deleteTask.perform();
+    
+                // re-add the URL feature just after saving the application
+                ((Resource)target).getFeatures().put(
+                  "URL", targetZipFile.toURI().toURL());
               }
               catch(Exception e) {
+                MainFrame.unlockGUI();
                 JOptionPane.showMessageDialog(getLargeView(), "Error!\n"
                   + e.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
                 e.printStackTrace(Err.getPrintWriter());
+              }
+              finally {
+                MainFrame.unlockGUI();
+                Gate.setExecutable(null);
               }
             }
           };
