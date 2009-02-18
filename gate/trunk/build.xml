@@ -800,6 +800,7 @@
     </copy>
 
     <exec dir="bin" executable="perl">
+      <arg value="-CDS" />
       <arg file="bin/plugins-info-to-HTML.pl" />
     </exec>
   </target>
