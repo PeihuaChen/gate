@@ -264,6 +264,10 @@
       <fileset dir="${srcDir}/gate/util/spring/xml"
                includes="*.xsd" />
     </copy>
+    <!-- This is for the Ant tasks -->
+    <copy todir="${outputDir}/gate/util/ant" includeEmptyDirs="true">
+      <fileset dir="${srcDir}/gate/util/ant" includes="antlib.xml" />
+    </copy>
 	</target>
 
 
@@ -355,6 +359,7 @@
             <include name="gate/resources/creole/creole.xml"/>
             <include name="gate/resources/build.txt"/>
             <include name="gate/resources/version.txt"/>
+            <include name="gate/util/ant/antlib.xml" />
             <exclude name="**/*Test*.class"/>
             <exclude name="debugger/**"/>
             <exclude name="gate/creole/annic/**"/>

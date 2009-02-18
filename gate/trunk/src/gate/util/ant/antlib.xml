@@ -6,5 +6,5 @@
 
   <!-- GAPP file packager -->
   <taskdef name="packagegapp" classname="gate.util.ant.packager.PackageGappTask" />
-  <typedef name="gazetteerlists" classname="gate.util.ant.packager.extraresources.GazetteerLists" />
+  <typedef name="gazetteerlists" classname="gate.util.ant.packager.GazetteerLists" />
 </antlib>
