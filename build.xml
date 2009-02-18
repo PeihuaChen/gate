@@ -711,7 +711,7 @@
     <junit fork="true"
            showoutput="true"
            printsummary="yes"
-           maxmemory="300m">
+           maxmemory="512m">
       <classpath refid="run.class.path"/>
       <sysproperty key="gate.config" value="${buildDir}/gate.xml"/>
       <sysproperty key="gate.home" value="${basedir}"/>
