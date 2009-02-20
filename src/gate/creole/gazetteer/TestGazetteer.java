@@ -59,7 +59,7 @@ public class TestGazetteer extends TestCase {
     //test with partial words
     gaz.setWholeWordsOnly(false);
     gaz.execute();
-    assertEquals("Wrong number of annotations produced", 125, resultAS.size());
+    assertEquals("Wrong number of annotations produced", 135, resultAS.size());
     gaz.setWholeWordsOnly(true);
     resultAS.clear();
 
