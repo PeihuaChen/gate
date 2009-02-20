@@ -76,7 +76,9 @@ Priority: 50
 {
 //removes TempOrg annotation, gets the rule feature and adds a new Org annotation
 gate.AnnotationSet org = (gate.AnnotationSet)bindings.get("org");
-gate.Annotation orgAnn = (gate.Annotation)org.iterator().next();
+//locate the first TempOrganization annotation
+//(there will always be at least one)
+gate.Annotation orgAnn = org.get("TempOrganization").iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("orgType", orgAnn.getFeatures().get("orgType"));
 features.put("rule1", orgAnn.getFeatures().get("rule"));
