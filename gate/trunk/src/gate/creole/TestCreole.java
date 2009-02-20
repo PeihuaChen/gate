@@ -257,29 +257,11 @@ public class TestCreole extends TestCase
     ResourceData xmlDocFormatRD = (ResourceData) reg.get(docFormatName);
     assertTrue("Xml doc format not PRIVATE", xmlDocFormatRD.isPrivate());
     if(DEBUG) Out.prln(xmlDocFormatRD.getFeatures());
-
-    // Create an LR
-    FeatureMap params = Factory.newFeatureMap();
-    params.put("features", Factory.newFeatureMap());
-    params.put(Document.DOCUMENT_URL_PARAMETER_NAME, Gate.getUrl("tests/doc0.html"));
-    Resource res = Factory.createResource("gate.corpora.DocumentImpl", params);
-
-    List publics = reg.getPublicLrInstances();
-    List allLrs = reg.getLrInstances();
-
-    assertTrue(
-      "wrong number of public LR instances",
-      publics.size() == 1 && allLrs.size() == 3
-    );
-
-    if(DEBUG) {
-      Iterator iter = publics.iterator();
-      Out.prln("publics:");
-      while(iter.hasNext()) { Out.prln(iter.next()); }
-      iter = allLrs.iterator();
-      Out.prln("allLrs:");
-      while(iter.hasNext()) { Out.prln(iter.next()); }
-    }
+    
+    // this used to test the number of public and private LR
+    // instances known to the creole register, but this is no
+    // longer reliable as extras may (will) be defined by
+    // @CreoleResource annotations.
 
   } // testToolsAndPrivate()
 
@@ -433,7 +415,9 @@ public class TestCreole extends TestCase
             );
             break;
           default:
-            fail("Doc has more than 4 params; 5th is: " + param);
+            //fail("Doc has more than 4 params; 5th is: " + param);
+            // don't fail if document has more than 4 params - it now pulls in
+            // extra ones from the @CreoleParameter annotations
         } // switch
       }
     }
@@ -520,17 +504,13 @@ public class TestCreole extends TestCase
     // init time params
     Parameter param = null;
     List initimeParams = paramList.getInitimeParameters();
-    int initimeLen = initimeParams.size();
-    assertTrue(
-      "initime params has wrong number of elements: " + initimeLen,
-      initimeLen == 4
-    );
-    iter = initimeParams.iterator();
-    int paramDisjNumber = -1;
-    while(iter.hasNext()) {
-      List paramDisj = (List) iter.next();
+    // only check the four parameters we can control in tests/creole.xml
+    // there are more parameters after the fourth, but these come from
+    // @CreoleParameter annotations so we can't reliably control for them
+    // in this test
+    for(int paramDisjNumber = 0; paramDisjNumber < 4; paramDisjNumber++) {
+      List paramDisj = (List)initimeParams.get(paramDisjNumber);
       Iterator iter2 = paramDisj.iterator();
-      paramDisjNumber++;
 
       int paramDisjLen = paramDisj.size();
       assertTrue(
@@ -577,7 +557,7 @@ public class TestCreole extends TestCase
             );
             break;
           default:
-            fail("Doc has more than 4 params; 5th is: " + param);
+            // can't be reached
         } // switch
       }
     }
