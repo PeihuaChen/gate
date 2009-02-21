@@ -139,10 +139,10 @@ public class TestLearningAPI extends TestCase {
     // Using the evaluation mode for testing
     EvaluationBasedOnDocs evaluation = learningApi.getEvaluation();
     // Compare the overall results with the correct numbers
-    assertEquals((int)Math.floor(evaluation.macroMeasuresOfResults.correct), 44);
-    assertEquals((int)Math.floor(evaluation.macroMeasuresOfResults.partialCor), 10);
-    assertEquals((int)Math.floor(evaluation.macroMeasuresOfResults.spurious), 11);
-    assertEquals((int)Math.floor(evaluation.macroMeasuresOfResults.missing), 40);
+    assertEquals("Wrong value for correct: ", 44, (int)Math.floor(evaluation.macroMeasuresOfResults.correct));
+    assertEquals("Wrong value for partial: ", 10, (int)Math.floor(evaluation.macroMeasuresOfResults.partialCor));
+    assertEquals("Wrong value for spurious: ", 11, (int)Math.floor(evaluation.macroMeasuresOfResults.spurious));
+    assertEquals("Wrong value for missing: ", 40, (int)Math.floor(evaluation.macroMeasuresOfResults.missing));
     
     System.out.println("completed");
     // Remove the resources
@@ -176,10 +176,10 @@ public class TestLearningAPI extends TestCase {
     assertEquals(evaluation.macroMeasuresOfResults.partialCor, 1);
     assertEquals(evaluation.macroMeasuresOfResults.spurious, 19);
     assertEquals(evaluation.macroMeasuresOfResults.missing, 68);*/
-    assertEquals((int)Math.floor(evaluation.macroMeasuresOfResults.correct), 27);
-    assertEquals((int)Math.floor(evaluation.macroMeasuresOfResults.partialCor), 3);
-    assertEquals((int)Math.floor(evaluation.macroMeasuresOfResults.spurious), 26);
-    assertEquals((int)Math.floor(evaluation.macroMeasuresOfResults.missing), 42);
+    assertEquals("Wrong value for correct: ", 27, (int)Math.floor(evaluation.macroMeasuresOfResults.correct));
+    assertEquals("Wrong value for partial: ", 3, (int)Math.floor(evaluation.macroMeasuresOfResults.partialCor));
+    assertEquals("Wrong value for spurious: ", 27, (int)Math.floor(evaluation.macroMeasuresOfResults.spurious));
+    assertEquals("Wrong value for missing: ", 42, (int)Math.floor(evaluation.macroMeasuresOfResults.missing));
     // Remove the resources
     clearOneTest();
     System.out.println("completed");
