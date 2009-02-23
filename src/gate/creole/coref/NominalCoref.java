@@ -110,7 +110,7 @@ public class NominalCoref extends AbstractCoreferencer
   public void execute() throws ExecutionException{
 
     HashMap anaphorToAntecedent = new HashMap();
-    Object[] nominalArray;
+    Annotation[] nominalArray;
 
     //0. preconditions
     if (null == this.document) {
@@ -126,7 +126,8 @@ public class NominalCoref extends AbstractCoreferencer
     // The tests for job titles often require getting previous and subsequent
     // tokens, so to save work, we create a single, sorted list of 
     // tokens.
-    Object[] tokens = defaultAnnotations.get(TOKEN_ANNOTATION_TYPE).toArray();
+    Annotation[] tokens = defaultAnnotations.get(TOKEN_ANNOTATION_TYPE).
+        toArray(new Annotation[0]);
     java.util.Arrays.sort(tokens, new OffsetComparator());
 
     // The current token is the token at the start of the current annotation.
@@ -163,7 +164,7 @@ public class NominalCoref extends AbstractCoreferencer
       this.defaultAnnotations.get(orgConstraint);
 
     // combine them into a list of nominals
-    Set nominals = new HashSet();
+    Set<Annotation> nominals = new HashSet();
     if (people != null) {
       nominals.addAll(people);
     }
@@ -180,11 +181,11 @@ public class NominalCoref extends AbstractCoreferencer
     //  Out.println("total nominals: " + nominals.size());
 
     // sort them according to offset
-    nominalArray = nominals.toArray();
+    nominalArray = nominals.toArray(new Annotation[0]);
     java.util.Arrays.sort(nominalArray, new OffsetComparator());
     
-    ArrayList previousPeople = new ArrayList();
-    ArrayList previousOrgs = new ArrayList();
+    ArrayList<Annotation> previousPeople = new ArrayList<Annotation>();
+    ArrayList<Annotation> previousOrgs = new ArrayList<Annotation>();
     
         
     // process all nominals
@@ -366,10 +367,10 @@ public class NominalCoref extends AbstractCoreferencer
 	}
 	  
 	// Look into the tokens to get some info about POS.
-	Object[] orgNounTokens =
+	Annotation[] orgNounTokens =
 	  this.defaultAnnotations.get(TOKEN_ANNOTATION_TYPE,
 				      nominal.getStartNode().getOffset(),
-				      nominal.getEndNode().getOffset()).toArray();
+				      nominal.getEndNode().getOffset()).toArray(new Annotation[0]);
 	java.util.Arrays.sort(orgNounTokens, new OffsetComparator());
 	Annotation lastToken = (Annotation)
 	  orgNounTokens[orgNounTokens.length - 1];
@@ -400,9 +401,9 @@ public class NominalCoref extends AbstractCoreferencer
    */
   private boolean overlapsAnnotations(Annotation a,
                                       AnnotationSet annotations) {
-    Iterator iter = annotations.iterator();
+    Iterator<Annotation> iter = annotations.iterator();
     while (iter.hasNext()) {
-      Annotation current = (Annotation) iter.next();
+      Annotation current = iter.next();
       if (a.overlaps(current)) {
         return true;
       }
@@ -490,13 +491,12 @@ public class NominalCoref extends AbstractCoreferencer
   }
     
   /** Get a sorted array of the tokens that make up a given annotation. */
-  private Object[] getSortedTokens(Annotation a) {
-    Object[] annotationTokens =
+  private Annotation[] getSortedTokens(Annotation a) {
+    Annotation[] annotationTokens =
       this.defaultAnnotations.get(TOKEN_ANNOTATION_TYPE,
 				  a.getStartNode().getOffset(),
-				  a.getEndNode().getOffset()).toArray();
+				  a.getEndNode().getOffset()).toArray(new Annotation[0]);
     java.util.Arrays.sort(annotationTokens, new OffsetComparator());
-    
     return annotationTokens;
   }
 	
