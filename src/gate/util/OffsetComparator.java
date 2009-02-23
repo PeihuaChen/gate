@@ -20,11 +20,9 @@ import gate.Annotation;
 /**
  * Compares annotations by start offset
  */
-public class OffsetComparator implements Comparator {
+public class OffsetComparator implements Comparator<Annotation> {
 
-  public int compare(Object o1, Object o2){
-    Annotation a1 = (Annotation)o1;
-    Annotation a2 = (Annotation)o2;
+  public int compare(Annotation a1, Annotation a2){
     int result;
 
     // compare start offsets
