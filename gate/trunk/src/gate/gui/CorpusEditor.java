@@ -73,7 +73,8 @@ public class CorpusEditor extends AbstractVisualResource
         setCellRenderer(renderer);
     docTable.setDragEnabled(true);
     docTable.setTransferHandler(new TransferHandler() {
-      // minimal drag and drop to move up and down the table rows
+      // drag and drop to move up and down the table rows
+      // import selected documents from the resources tree
       String source = "";
       public int getSourceActions(JComponent c) {
         return MOVE;
@@ -81,7 +82,7 @@ public class CorpusEditor extends AbstractVisualResource
       protected Transferable createTransferable(JComponent c) {
         int selectedRows[] = docTable.getSelectedRows();
         Arrays.sort(selectedRows);
-        return new StringSelection("docTable"
+        return new StringSelection("CorpusEditor"
           + Arrays.toString(selectedRows));
       }
       protected void exportDone(JComponent c, Transferable data, int action) {
@@ -100,11 +101,56 @@ public class CorpusEditor extends AbstractVisualResource
         }
         try {
           source = (String)t.getTransferData(DataFlavor.stringFlavor);
-          if (source.startsWith("docTable")) {
+          if (source.startsWith("ResourcesTree")) {
+            int insertion = docTable.getSelectedRow();
+            List<Document> documents = new ArrayList<Document>();
+            source = source.replaceFirst("^ResourcesTree\\[", "");
+            source = source.replaceFirst("\\]$", "");
+            final String documentsNames[] = source.split(", ");
+            List<Resource> loadedDocuments;
+            try {
+              loadedDocuments =
+                Gate.getCreoleRegister().getAllInstances("gate.Document");
+            } catch(GateException e) {
+              e.printStackTrace();
+              return false;
+            }
+            // get the list of documents selected when dragging started
+            for(String documentName : documentsNames) {
+              for (Resource loadedDocument : loadedDocuments) {
+                if (loadedDocument.getName().equals(documentName)
+                 && !corpus.contains(loadedDocument)) {
+                  documents.add((Document) loadedDocument);
+                }
+              }
+            }
+            // add the documents at the insertion point
+            for (Document document : documents) {
+              corpus.add(docTable.rowViewToModel(insertion), document);
+              if (insertion == docTable.getRowCount()) { insertion++; }
+            }
+            // select the moved/already existing documents
+            SwingUtilities.invokeLater(new Runnable() {
+              public void run() {
+                docTable.clearSelection();
+                for (String documentName : documentsNames) {
+                  for (int row = 0; row < docTable.getRowCount(); row++) {
+                    if (docTable.getValueAt(
+                          row, docTable.convertColumnIndexToView(1))
+                        .equals(documentName)) {
+                      docTable.addRowSelectionInterval(row, row);
+                    }
+                  }
+                }
+              }
+            });
+            return true;
+
+          } else if (source.startsWith("CorpusEditor")) {
             int insertion = docTable.getSelectedRow();
             int initialInsertion = insertion;
             List<Document> documents = new ArrayList<Document>();
-            source = source.replaceFirst("^docTable\\[", "");
+            source = source.replaceFirst("^CorpusEditor\\[", "");
             source = source.replaceFirst("\\]$", "");
             String selectedRows[] = source.split(", ");
             if (Integer.valueOf(selectedRows[0]) < insertion) { insertion++; }
@@ -131,9 +177,11 @@ public class CorpusEditor extends AbstractVisualResource
             docTable.addRowSelectionInterval(
               insertion - selectedRows.length, insertion - 1);
             return true;
+
           } else {
             return false;
           }
+
         } catch (UnsupportedFlavorException ufe) {
           return false;
         } catch (IOException ioe) {
@@ -183,7 +231,6 @@ public class CorpusEditor extends AbstractVisualResource
       private void processMouseEvent(MouseEvent e) {
         int row = docTable.rowAtPoint(e.getPoint());
         if(row == -1) { return; }
-        row = docTable.rowViewToModel(row);
 
         if(e.isPopupTrigger()) {
           // context menu
@@ -507,7 +554,7 @@ public class CorpusEditor extends AbstractVisualResource
       for(int i = corpusIndexes.length-1; i >= 0; i--){
         corpus.remove(corpusIndexes[i]);
       }
-//      documentsList.clearSelection();
+      docTable.clearSelection();
     }
   }
 

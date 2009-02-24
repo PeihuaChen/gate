@@ -21,6 +21,7 @@ import java.net.URL;
 import java.util.*;
 
 import gate.*;
+import gate.gui.MainFrame;
 import gate.creole.AbstractLanguageResource;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.*;
@@ -308,9 +309,11 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
    *          directories (on as many levels as necessary) will be picked if
    *          accepted by the filter otherwise the children directories will be
    *          ignored.
+   * @throws java.io.IOException if a file doesn't exist
    */
   public static void populate(Corpus corpus, URL directory, FileFilter filter,
     String encoding, boolean recurseDirectories) throws IOException {
+
     // check input
     if(!directory.getProtocol().equalsIgnoreCase("file"))
       throw new IllegalArgumentException(
@@ -323,55 +326,60 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
       throw new IllegalArgumentException(dir.getAbsolutePath()
         + " is not a directory!");
 
+    File[] files;
     // populate the corpus
-    File[] files = dir.listFiles(filter);
-    if(files != null) {
-      for(int i = 0; i < files.length; i++) {
-        File aFile = files[i];
-        if(aFile.isDirectory()) {
-          // recurse dir if required
-          if(recurseDirectories) {
-            populate(corpus, aFile.toURI().toURL(), filter, encoding,
-              recurseDirectories);
-          }
-        }
-        else {
-          // create the doc
-          StatusListener sListener =
-            (StatusListener)gate.gui.MainFrame.getListeners().get(
-              "gate.event.StatusListener");
-          if(sListener != null)
-            sListener.statusChanged("Reading: " + aFile.getName());
-          String docName = aFile.getName() + "_" + Gate.genSym();
-          FeatureMap params = Factory.newFeatureMap();
-          params.put(Document.DOCUMENT_URL_PARAMETER_NAME, aFile.toURI()
-            .toURL());
-          if(encoding != null)
-            params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, encoding);
+    if (recurseDirectories) {
+      files = Files.listFilesRecursively(dir, filter);
+    } else {
+      files = dir.listFiles(filter);
+    }
 
-          try {
-            Document doc =
-              (Document)Factory.createResource(DocumentImpl.class.getName(),
-                params, null, docName);
-            corpus.add(doc);
-            if(corpus.getLRPersistenceId() != null) {
-              // persistent corpus -> unload the document
-              corpus.unloadDocument(doc);
-              Factory.deleteResource(doc);
-            }
-          }
-          catch(Throwable t) {
-            String nl = Strings.getNl();
-            Err.prln("WARNING: Corpus.populate could not instantiate document"
-              + nl + "  Document name was: " + docName + nl
-              + "  Exception was: " + t + nl + nl);
-            t.printStackTrace();
-          }
-          if(sListener != null)
-            sListener.statusChanged(aFile.getName() + " read");
+    if(files == null) { return; }
+
+    // sort the files alphabetically regardless of their paths
+    Arrays.sort(files, new Comparator<File>() {
+      public int compare(File f1, File f2) {
+        return f1.getName().compareTo(f2.getName());
+      }
+    });
+
+    // create the GATE documents
+    for(File file : files) {
+      if (file.isDirectory()) { continue; }
+      StatusListener sListener =
+        (StatusListener) MainFrame.getListeners().get(
+          "gate.event.StatusListener");
+      if(sListener != null)
+        sListener.statusChanged("Reading: " + file.getName());
+      String docName = file.getName() + "_" + Gate.genSym();
+      FeatureMap params = Factory.newFeatureMap();
+      params.put(Document.DOCUMENT_URL_PARAMETER_NAME,
+        file.toURI().toURL());
+      if(encoding != null)
+        params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, encoding);
+
+      try {
+        Document doc =
+          (Document) Factory.createResource(DocumentImpl.class.getName(),
+            params, null, docName);
+        corpus.add(doc);
+        if(corpus.getLRPersistenceId() != null) {
+          // persistent corpus -> unload the document
+          corpus.unloadDocument(doc);
+          Factory.deleteResource(doc);
         }
       }
+      catch(Throwable t) {
+        String nl = Strings.getNl();
+        Err.prln("WARNING: Corpus.populate could not instantiate document"
+          + nl + "  Document name was: " + docName + nl
+          + "  Exception was: " + t + nl + nl);
+        t.printStackTrace();
+      }
+      if(sListener != null)
+        sListener.statusChanged(file.getName() + " read");
     }
+
   }// public static void populate
 
   /**
@@ -414,16 +422,14 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
    * Fills the provided corpus with documents extracted from the provided trec
    * file.
    * 
-   * @param corpus
-   *          the corpus to be populated.
-   * @param trecfile
-   *          the trec file.
-   * @param encoding
-   *          the encoding of the trec file.
+   * @param corpus the corpus to be populated.
+   * @param trecFile the trec file.
+   * @param encoding the encoding of the trec file.
    * @param numberOfDocumentsToExtract
    *          extracts the specified number of documents from the trecweb file;
    *          -1 to indicate all files.
-   * @param total length of populated documents in the corpus in number of bytes
+   * @return total length of populated documents in the corpus in number of bytes
+   * @throws java.io.IOException
    */
   public static long populate(Corpus corpus, URL trecFile, String encoding,
     int numberOfDocumentsToExtract) throws IOException {
@@ -555,13 +561,12 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
    * Fills the provided corpus with documents extracted from the provided trec
    * file.
    * 
-   * @param trecfile
-   *          the trec file.
-   * @param encoding
-   *          the encoding of the trec file.
-   * @param numberOfFilesToExtract
-   *          indicates the number of files to extract from the trecweb file.
-   * @return total length of populated documents in the corpus in number of bytes
+   * @param trecFile the trec file.
+   * @param encoding the encoding of the trec file.
+   * @param numberOfFilesToExtract indicates the number of files to extract
+   *   from the trecweb file.
+   * @return total length of populated documents in the corpus
+   *   in number of bytes
    */
   public long populate(URL trecFile, String encoding, int numberOfFilesToExtract)
     throws IOException, ResourceInstantiationException {
