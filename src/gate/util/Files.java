@@ -641,4 +641,33 @@ public class Files {
     }
   }
 
+  /**
+   * Same as {@link java.io.File#listFiles(java.io.FileFilter)}
+   * but recursive on directories.
+   * @param directory file path to start the search, will not be include
+   *   in the results
+   * @param filter filter apply to the search
+   * @return an array of files (including directories) contained inside
+   *   <code>directory</code>. The array will be empty if the directory is
+   *   empty. Returns null if this abstract pathname does not denote a
+   *   directory, or if an I/O error occurs.
+   */
+  public static File[] listFilesRecursively(File directory, FileFilter filter) {
+    List<File> filesList = new ArrayList<File>();
+
+    File[] filesRootArray = directory.listFiles(filter);
+    if (filesRootArray == null) { return null; }
+
+    for (File file : filesRootArray) {
+      filesList.add(file);
+      if (file.isDirectory()) {
+        File[] filesDeepArray = listFilesRecursively(file, filter);
+        if (filesDeepArray == null) { return null; }
+        filesList.addAll(Arrays.asList(filesDeepArray));
+      }
+    }
+
+    return filesList.toArray(new File[filesList.size()]);
+  }
+
 } // class Files
