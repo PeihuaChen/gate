@@ -302,9 +302,26 @@ PARSER_END(ParseCpsl)
     |
       "\\t"  { image.setLength(image.length() - 2); image.append("\t"); }
     |
+      "\\b"  { image.setLength(image.length() - 2); image.append("\b"); }
+    |
+      "\\f"  { image.setLength(image.length() - 2); image.append("\f"); }
+    |
       "\\\""  { image.setLength(image.length() - 2); image.append("\""); }
     |
-      < ~["\""] >  // Note that here you don't need any action.
+      "\\\'"  { image.setLength(image.length() - 2); image.append("\'"); }
+    |
+      "\\\\"  { image.setLength(image.length() - 2); image.append("\\"); }
+    |
+      <"\\u" (["0"-"9","A"-"F","a"-"f"]) (["0"-"9","A"-"F","a"-"f"])
+             (["0"-"9","A"-"F","a"-"f"]) (["0"-"9","A"-"F","a"-"f"])>
+             {
+               String digits = image.substring(image.length() - 4, image.length());
+               image.setLength(image.length() - 6);
+               image.append((char)Integer.parseInt(digits, 16));
+             }
+    |
+      < ~["\"", "\\"] >  // Disallow backslashes that weren't caught by previous rules
+                         // Note that here you don't need any action.
    }
 
 //finishes the string
@@ -1272,8 +1289,16 @@ String ConsumeBlock() {
     }
 
     // add the image to the block string (but not the final "}")
-    if(nesting > 0)
-      block.append(nextTok.image);
+    if(nesting > 0) {
+      if(nextTok.kind == string) {
+        // deal with escapes in string literals
+        appendJavaStringLiteral(block,
+            nextTok.image.substring(1, nextTok.image.length() - 1));
+      }
+      else {
+        block.append(nextTok.image);
+      }
+    }
     /*Debug.pr(this, "ParseCpsl.ConsumeBlock: nextTok.image = ^" +
              nextTok.image + "^");*/
 

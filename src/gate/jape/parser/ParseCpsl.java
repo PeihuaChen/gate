@@ -464,7 +464,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       ;
     }
     lhs = LeftHandSide();
-    jj_consume_token(61);
+    jj_consume_token(66);
     rhs = RightHandSide(phaseName, ruleName, lhs);
     try {
       rhs.createActionClass();
@@ -1281,8 +1281,16 @@ AnnotationAccessor accessor = null;
     }
 
     // add the image to the block string (but not the final "}")
-    if(nesting > 0)
-      block.append(nextTok.image);
+    if(nesting > 0) {
+      if(nextTok.kind == string) {
+        // deal with escapes in string literals
+        appendJavaStringLiteral(block,
+            nextTok.image.substring(1, nextTok.image.length() - 1));
+      }
+      else {
+        block.append(nextTok.image);
+      }
+    }
     /*Debug.pr(this, "ParseCpsl.ConsumeBlock: nextTok.image = ^" +
              nextTok.image + "^");*/
 
@@ -1306,6 +1314,35 @@ AnnotationAccessor accessor = null;
     finally { jj_save(1, xla); }
   }
 
+  final private boolean jj_3R_24() {
+    if (jj_scan_token(pling)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_20() {
+    if (jj_scan_token(string)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_18() {
+    if (jj_scan_token(leftBracket)) return true;
+    if (jj_3R_21()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_23() {
+    if (jj_3R_12()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_22() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_24()) jj_scanpos = xsp;
+    if (jj_scan_token(ident)) return true;
+    return false;
+  }
+
   final private boolean jj_3R_16() {
     if (jj_3R_18()) return true;
     return false;
@@ -1326,13 +1363,13 @@ AnnotationAccessor accessor = null;
     return false;
   }
 
-  final private boolean jj_3R_14() {
-    if (jj_scan_token(ident)) return true;
+  final private boolean jj_3_2() {
+    if (jj_3R_13()) return true;
     return false;
   }
 
-  final private boolean jj_3_2() {
-    if (jj_3R_13()) return true;
+  final private boolean jj_3R_14() {
+    if (jj_scan_token(ident)) return true;
     return false;
   }
 
@@ -1377,35 +1414,6 @@ AnnotationAccessor accessor = null;
     return false;
   }
 
-  final private boolean jj_3R_24() {
-    if (jj_scan_token(pling)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_20() {
-    if (jj_scan_token(string)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_18() {
-    if (jj_scan_token(leftBracket)) return true;
-    if (jj_3R_21()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_23() {
-    if (jj_3R_12()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_22() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_24()) jj_scanpos = xsp;
-    if (jj_scan_token(ident)) return true;
-    return false;
-  }
-
   public ParseCpslTokenManager token_source;
   SimpleCharStream jj_input_stream;
   public Token token, jj_nt;
@@ -1417,15 +1425,20 @@ AnnotationAccessor accessor = null;
   final private int[] jj_la1 = new int[35];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
+  static private int[] jj_la1_2;
   static {
       jj_la1_0();
       jj_la1_1();
+      jj_la1_2();
    }
    private static void jj_la1_0() {
       jj_la1_0 = new int[] {0x400,0x80000,0x1000,0x80800,0x0,0x100000,0x0,0x0,0x200000,0xc00000,0xc00000,0x1000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x4000000,0x20000000,0x0,0x0,0x4000000,0x2000000,0x2000000,0x10000000,0x10000000,0x20000000,0x0,0x0,0x0,0x0,0x20000000,0x0,};
    }
    private static void jj_la1_1() {
-      jj_la1_1 = new int[] {0x0,0x0,0x0,0x0,0x40,0x0,0x40,0x60,0x0,0x0,0x0,0x0,0x204240,0x14050,0x1000,0x14050,0x14050,0x2000,0x4010,0x40000,0x40,0x200,0x2000,0x40000,0x0,0x4040,0x840,0x840,0xf0,0x2000,0x204240,0x200200,0x40,0x2f0,0x2000,};
+      jj_la1_1 = new int[] {0x0,0x0,0x0,0x0,0x800,0x0,0x800,0xc00,0x0,0x0,0x0,0x0,0x4084800,0x280a00,0x20000,0x280a00,0x280a00,0x40000,0x80200,0x800000,0x800,0x4000,0x40000,0x800000,0x0,0x80800,0x10800,0x10800,0x1e00,0x40000,0x4084800,0x4004000,0x800,0x5e00,0x40000,};
+   }
+   private static void jj_la1_2() {
+      jj_la1_2 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
    }
   final private JJCalls[] jj_2_rtns = new JJCalls[2];
   private boolean jj_rescan = false;
@@ -1594,8 +1607,8 @@ AnnotationAccessor accessor = null;
 
   public ParseException generateParseException() {
     jj_expentries.removeAllElements();
-    boolean[] la1tokens = new boolean[62];
-    for (int i = 0; i < 62; i++) {
+    boolean[] la1tokens = new boolean[67];
+    for (int i = 0; i < 67; i++) {
       la1tokens[i] = false;
     }
     if (jj_kind >= 0) {
@@ -1611,10 +1624,13 @@ AnnotationAccessor accessor = null;
           if ((jj_la1_1[i] & (1<<j)) != 0) {
             la1tokens[32+j] = true;
           }
+          if ((jj_la1_2[i] & (1<<j)) != 0) {
+            la1tokens[64+j] = true;
+          }
         }
       }
     }
-    for (int i = 0; i < 62; i++) {
+    for (int i = 0; i < 67; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;
