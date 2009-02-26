@@ -41,6 +41,7 @@ import gate.creole.annic.lucene.QueryParser;
 
 import java.util.*;
 import java.util.List;
+import java.util.Timer;
 import java.util.regex.*;
 
 import java.awt.*;
@@ -49,7 +50,6 @@ import java.awt.event.*;
 import javax.swing.table.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.*;
-import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.CompoundBorder;
@@ -713,12 +713,10 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
                 return;
               }
 
-              // wait until the document is displayed and then select
+              // wait 1 second until the document is displayed and then select
               // the same expression as in the result
-              int numberOfMillisecondsInTheFuture = 1000; // 1 sec
-              Date timeToRun = new Date(System.currentTimeMillis()
-                +numberOfMillisecondsInTheFuture);
-              java.util.Timer timer = new java.util.Timer();
+              Date timeToRun = new Date(System.currentTimeMillis() + 1000);
+              Timer timer = new Timer();
               timer.schedule(new TimerTask() {
                 public void run() {
                 try {
@@ -797,8 +795,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       }
     });
     // when user changes his/her selection in the rows,
-    // the graphical panel should change its ouput to reflect the new
-    // selection. incase where multiple rows are selected
+    // the graphical panel should change its output to reflect the new
+    // selection. in case where multiple rows are selected
     // the annotations of the first row will be highlighted
     patternTable.getSelectionModel().addListSelectionListener(
       new javax.swing.event.ListSelectionListener() {
@@ -2452,14 +2450,14 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           e.getX()+e.getComponent().getLocationOnScreen().x,
           e.getY()+e.getComponent().getLocationOnScreen().y);
         tipWindow.show();
-        Timer timer = new Timer(2000, new AbstractAction() {
-          public void actionPerformed(ActionEvent e) {
+        Date timeToRun = new Date(System.currentTimeMillis() + 2000);
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+          public void run() {
             // hide the tooltip after 2 seconds
             tipWindow.hide();
           }
-        });
-        timer.setRepeats(false);
-        timer.start();
+        }, timeToRun);
       }
     }
 
@@ -2689,14 +2687,14 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           e.getX()+e.getComponent().getLocationOnScreen().x,
           e.getY()+e.getComponent().getLocationOnScreen().y);
         tipWindow.show();
-        Timer timer = new Timer(2000, new AbstractAction() {
-          public void actionPerformed(ActionEvent e) {
+        Date timeToRun = new Date(System.currentTimeMillis() + 2000);
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+          public void run() {
             // hide the tooltip after 2 seconds
             tipWindow.hide();
           }
-        });
-        timer.setRepeats(false);
-        timer.start();
+        }, timeToRun);
       }
     }
 
@@ -3552,6 +3550,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     private javax.swing.undo.UndoManager undo;
     private UndoAction undoAction;
     private RedoAction redoAction;
+    private Timer timer;
     private int initialPosition;
     private int finalPosition;
     private int mode;
@@ -3757,6 +3756,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       initialPosition = 0;
       finalPosition = 0;
       mode = INSERT;
+      timer = new Timer();
       
       addCaretListener(new CaretListener() {
         public void caretUpdate(CaretEvent e) {
@@ -3776,7 +3776,10 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     }
 
     public void removeUpdate(DocumentEvent ev) {
-      int pos = ev.getOffset()-1;
+
+      timer.cancel();
+
+      int pos = ev.getOffset() - 1;
 
       if (ev.getLength() != 1
       || ( (pos+1 >= finalPosition || pos < initialPosition)
@@ -3786,6 +3789,26 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         cleanup();
         return;
       }
+
+      if (mode == POPUP_TYPES || mode == POPUP_FEATURES) {
+        removeUpdateCompletion(ev);
+
+      }  else {
+        final DocumentEvent evF = ev;
+        // schedule autocompletion in half a second
+        Date timeToRun = new Date(System.currentTimeMillis() + 500);
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+            public void run() {
+              removeUpdateCompletion(evF);
+            }
+          }, timeToRun);
+      }
+    }
+
+    public void removeUpdateCompletion(DocumentEvent ev) {
+
+      int pos = ev.getOffset() - 1;
 
       if (mode == POPUP_TYPES) {
         finalPosition = pos+1;
@@ -3815,15 +3838,35 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     }
 
     public void insertUpdate(DocumentEvent ev) {
-      if (mode == PROGRAMMATIC_INSERT) { return; }
 
-      int pos = ev.getOffset();
+      timer.cancel();
+
+      if (mode == PROGRAMMATIC_INSERT) { return; }
 
       if (ev.getLength() != 1) {
         // cancel any autocompletion if the user paste some text
         cleanup();
         return;
       }
+
+      if (mode == POPUP_TYPES || mode == POPUP_FEATURES) {
+        insertUpdateCompletion(ev);
+
+      }  else {
+        final DocumentEvent evF = ev;
+        // schedule autocompletion in half a second
+        Date timeToRun = new Date(System.currentTimeMillis() + 500);
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+            public void run() {
+              insertUpdateCompletion(evF);
+            }
+          }, timeToRun);
+      }
+    }
+    
+    public void insertUpdateCompletion(DocumentEvent ev) {
+      int pos = ev.getOffset();
 
       String typedChar = Character.toString(getText().charAt(pos));
       String previousChar = (pos > 0)?
