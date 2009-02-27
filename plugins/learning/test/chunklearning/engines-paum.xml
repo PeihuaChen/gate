@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <ML-CONFIG>
-  <VERBOSITY level="2"/>
+  <VERBOSITY level="0"/>
   <FILTERING ratio="0.0" dis="far"/>
  <SURROUND value="true"/>
 

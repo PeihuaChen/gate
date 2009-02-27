@@ -184,6 +184,42 @@ public class TestLearningAPI extends TestCase {
     clearOneTest();
     System.out.println("completed");
   }
+  /** Test the chunk learning by using the PAUM and
+   * a small part of the OntoNews corpus. */
+  public void testPAUMChunkLearnng() throws IOException, GateException {
+    // Initialisation
+    System.out.print("Testing the PAUM method on chunk learning...");
+    File chunklearningHome = new File(new File(learningHome, "test"),
+      "chunklearning");
+    String configFileURL = new File(chunklearningHome,
+      "engines-paum.xml").getAbsolutePath();
+    String corpusDirName = new File(chunklearningHome, "data-ontonews")
+      .getAbsolutePath();
+    //Remove the label list file, feature list file and chunk length files. 
+    String wdResults = new File(chunklearningHome, 
+      ConstantParameters.SUBDIRFORRESULTS).getAbsolutePath();
+    emptySavedFiles(wdResults);
+    String inputASN = "Key";
+    loadSettings(configFileURL, corpusDirName, inputASN, inputASN);
+    // Set the evaluation mode
+    RunMode runM=RunMode.EVALUATION;
+    learningApi.setLearningMode(runM);
+    controller.execute();
+    // Using the evaluation mode for testing
+    EvaluationBasedOnDocs evaluation = learningApi.getEvaluation();
+    // Compare the overall results with the correct numbers
+    /*assertEquals(evaluation.macroMeasuresOfResults.correct, 3);
+    assertEquals(evaluation.macroMeasuresOfResults.partialCor, 1);
+    assertEquals(evaluation.macroMeasuresOfResults.spurious, 19);
+    assertEquals(evaluation.macroMeasuresOfResults.missing, 68);*/
+    assertEquals("Wrong value for correct: ", 51, (int)Math.floor(evaluation.macroMeasuresOfResults.correct));
+    assertEquals("Wrong value for partial: ", 12, (int)Math.floor(evaluation.macroMeasuresOfResults.partialCor));
+    assertEquals("Wrong value for spurious: ", 25, (int)Math.floor(evaluation.macroMeasuresOfResults.spurious));
+    assertEquals("Wrong value for missing: ", 31, (int)Math.floor(evaluation.macroMeasuresOfResults.missing));
+    // Remove the resources
+    clearOneTest();
+    System.out.println("completed");
+  }
   /** Test the text classification by using the SVM with linear kernel
    * and the data for sentence classification. 
    */
