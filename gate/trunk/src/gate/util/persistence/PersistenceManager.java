@@ -563,7 +563,6 @@ public class PersistenceManager {
 
   public static Object loadObjectFromUrl(URL url) throws PersistenceException,
           IOException, ResourceInstantiationException {
-    exceptionOccured = false;
     ProgressListener pListener = (ProgressListener)MainFrame.getListeners()
             .get("gate.event.ProgressListener");
     StatusListener sListener = (gate.event.StatusListener)MainFrame
@@ -645,16 +644,20 @@ public class PersistenceManager {
                 + NumberFormat.getInstance().format(
                         (double)(endTime - startTime) / 1000) + " seconds");
       if(pListener != null) pListener.processFinished();
-      if(exceptionOccured) {
-        throw new PersistenceException("There were errors!\n"
-                + "See messages for details...");
-      }
+
       return res;
     }
     catch(ResourceInstantiationException rie) {
-      if(sListener != null) sListener.statusChanged("Loading failed!");
+      if(sListener != null) sListener.statusChanged(
+        "Failure during instantiation of resources.");
       if(pListener != null) pListener.processFinished();
       throw rie;
+    }
+    catch(PersistenceException pe) {
+      if(sListener != null) sListener.statusChanged(
+        "Failure during persistence operations.");
+      if(pListener != null) pListener.processFinished();
+      throw pe;
     }
     catch(Exception ex) {
       if(sListener != null) sListener.statusChanged("Loading failed!");
@@ -750,13 +753,6 @@ public class PersistenceManager {
   private static Map existingTransientValues;
 
   private static ClassComparator classComparator = new ClassComparator();
-
-  /**
-   * This flag is set to true when an exception occurs. It is used in
-   * order to allow error reporting without interrupting the current
-   * operation.
-   */
-  static boolean exceptionOccured = false;
 
   /**
    * The file currently used to write the persisten representation. Will
