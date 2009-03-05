@@ -127,10 +127,16 @@ public class DocumentEditor extends AbstractVisualResource
     //create the skeleton UI
     topSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, null, null);
     topSplit.setResizeWeight(0.3);
+    topSplit.setContinuousLayout(true);
+    topSplit.setOneTouchExpandable(true);
     bottomSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topSplit, null);
     bottomSplit.setResizeWeight(0.7);
+    bottomSplit.setContinuousLayout(true);
+    bottomSplit.setOneTouchExpandable(true);
     horizontalSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, bottomSplit, null);
     horizontalSplit.setResizeWeight(0.7);
+    horizontalSplit.setContinuousLayout(true);
+    horizontalSplit.setOneTouchExpandable(true);
 
     //create the bars
     topBar = new JToolBar(JToolBar.HORIZONTAL);
@@ -586,7 +592,7 @@ public class DocumentEditor extends AbstractVisualResource
           new SearchDialog((Dialog)parent):new SearchDialog((Frame)parent);
         searchDialog.pack();
         searchDialog.setLocationRelativeTo(DocumentEditor.this);
-        searchDialog.setResizable(false);
+        searchDialog.setResizable(true);
         MainFrame.getGuiRoots().add(searchDialog);
       }
 
