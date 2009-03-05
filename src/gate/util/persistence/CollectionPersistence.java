@@ -53,32 +53,39 @@ public class CollectionPersistence implements Persistence {
    */
   public Object createObject()throws PersistenceException,
                                      ResourceInstantiationException{
+    List<String> exceptionsOccurred = new ArrayList<String>();
     //let's try to create a collection of the same type as the original
     Collection result = null;
     try{
       result = (Collection)collectionType.newInstance();
     }catch(Exception e){
+      e.printStackTrace(Err.getPrintWriter());
     }
     if(result == null) result = new ArrayList(localList.size());
 
     //now we have the collection let's populate it
-    Iterator elemIter = localList.iterator();
-    while(elemIter.hasNext()){
-      try{
-        result.add(PersistenceManager.
-                   getTransientRepresentation(elemIter.next()));
-      }catch(PersistenceException pe){
-        PersistenceManager.exceptionOccured = true;
+    for(Object local : localList) {
+      try {
+        result.add(PersistenceManager.getTransientRepresentation(local));
+      }
+      catch(PersistenceException pe) {
+        exceptionsOccurred.add(pe.getMessage());
         pe.printStackTrace(Err.getPrintWriter());
-      }catch(ResourceInstantiationException rie){
-        PersistenceManager.exceptionOccured = true;
+      }
+      catch(ResourceInstantiationException rie) {
+        exceptionsOccurred.add(rie.getMessage());
         rie.printStackTrace(Err.getPrintWriter());
       }
     }
 
+    if(exceptionsOccurred.size() > 0) {
+      throw new PersistenceException("Some resources cannot be restored:\n" +
+        Arrays.toString(exceptionsOccurred
+        .toArray(new String[exceptionsOccurred.size()]))
+        .replaceAll("[\\]\\[]", "").replaceAll(", ", "\n"));
+    }
+
     return result;
-
-
   }
 
 
