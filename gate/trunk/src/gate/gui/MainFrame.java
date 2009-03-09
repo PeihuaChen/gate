@@ -15,6 +15,9 @@
 package gate.gui;
 
 import java.awt.*;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -406,6 +409,42 @@ public class MainFrame extends JFrame implements ProgressListener,
     ToolTipManager.sharedInstance().registerComponent(resourcesTree);
     resourcesTreeScroll = new JScrollPane(resourcesTree);
 
+    resourcesTree.setDragEnabled(true);
+    resourcesTree.setTransferHandler(new TransferHandler() {
+      // drag and drop that export a list of the selected documents
+      public int getSourceActions(JComponent c) {
+        return COPY;
+      }
+      protected Transferable createTransferable(JComponent c) {
+        TreePath[] paths = resourcesTree.getSelectionPaths();
+        if(paths == null) { return new StringSelection(""); }
+        Handle handle;
+        List<String> documentsNames = new ArrayList<String>();
+        for(TreePath path : paths) {
+          if(path != null) {
+            Object value = path.getLastPathComponent();
+            value = ((DefaultMutableTreeNode)value).getUserObject();
+            if(value instanceof Handle) {
+              handle = (Handle)value;
+              if(handle.getTarget() instanceof Document) {
+                documentsNames.add(((Document)handle.getTarget()).getName());
+              }
+            }
+          }
+        }
+        return new StringSelection("ResourcesTree"
+          + Arrays.toString(documentsNames.toArray()));
+      }
+      protected void exportDone(JComponent c, Transferable data, int action) {
+      }
+      public boolean canImport(JComponent c, DataFlavor[] flavors) {
+        return false;
+      }
+      public boolean importData(JComponent c, Transferable t) {
+        return false;
+      }
+    });
+
     lowerScroll = new JScrollPane();
     JPanel lowerPane = new JPanel();
     lowerPane.setLayout(new OverlayLayout(lowerPane));
@@ -441,8 +480,9 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     leftSplit =
       new JSplitPane(JSplitPane.VERTICAL_SPLIT, resourcesTreeScroll, lowerPane);
-
     leftSplit.setResizeWeight((double)0.7);
+    leftSplit.setContinuousLayout(true);
+    leftSplit.setOneTouchExpandable(true);
 
     // Create a new logArea and redirect the Out and Err output to it.
     logArea = new LogArea();
@@ -458,9 +498,10 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     mainSplit =
       new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftSplit, mainTabbedPane);
-
     mainSplit.setDividerLocation(leftSplit.getPreferredSize().width + 10);
     this.getContentPane().add(mainSplit, BorderLayout.CENTER);
+    mainSplit.setContinuousLayout(true);
+    mainSplit.setOneTouchExpandable(true);
 
     // status and progress bars
     statusBar = new JLabel(" ");
@@ -523,9 +564,9 @@ public class MainFrame extends JFrame implements ProgressListener,
     try {
       splashHtml = Files.getGateResourceAsString("splash.html");
     }
-    catch(IOException e1) {
+    catch(IOException e) {
       splashHtml = "GATE";
-      Err.prln("couldn't get splash.html resource: " + e1);
+      log.error("Couldn't get splash.html resource.", e);
     }
     JLabel htmlLbl = new JLabel(splashHtml);
     htmlLbl.setHorizontalAlignment(SwingConstants.CENTER);
@@ -1295,10 +1336,21 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
     catch(Throwable t) {
       // oh well, we tried
-      System.out.println("Warning: there was a problem setting up the Mac "
+      final Throwable error = t;
+      final String errorMessage =
+        "There was a problem setting up the Mac "
         + "application\nmenu.  Your options/session will not be saved if "
         + "you exit\nwith \u2318Q, use the close button at the top-left"
-        + "corner\nof this window instead.");
+        + "corner\nof this window instead.";
+      Action[] actions = {
+        new AbstractAction("Search in mailing list") {
+          public void actionPerformed(ActionEvent e) {
+            new HelpMailingListAction(error.getMessage())
+              .actionPerformed(null);
+      }}};
+      ErrorDialog.show(error, errorMessage, instance,
+        MainFrame.getIcon("root"), actions);
+      log.error(errorMessage, error);
     }
   }
 
@@ -1739,11 +1791,17 @@ public class MainFrame extends JFrame implements ProgressListener,
         Factory.openDataStore("gleam.docservice.gate.DocServiceDataStore",
           DSLocation);
     }
-    catch(Exception pe) {
-      pe.printStackTrace();
-      JOptionPane.showMessageDialog(MainFrame.this,
-        "Datastore opening error!\n " + pe.toString(), "GATE",
-        JOptionPane.ERROR_MESSAGE);
+    catch(Exception e) {
+      final Exception error = e;
+      final String errorMessage = "Error when opening the Datastore.";
+      Action[] actions = {
+        new AbstractAction("Search in mailing list") {
+          public void actionPerformed(ActionEvent e) {
+            new HelpMailingListAction(error.getMessage()).actionPerformed(null);
+      }}};
+      ErrorDialog.show(error, errorMessage, instance,
+        MainFrame.getIcon("root"), actions);
+      log.error(errorMessage, error);
     }
     return ds;
   } // openWSDataStore()
@@ -2088,20 +2146,19 @@ public class MainFrame extends JFrame implements ProgressListener,
    */
 
   /**
-   * This class represent an action which loads ANNIE with default
-   * params
+   * Loads ANNIE with default parameters.
    */
   class LoadANNIEWithDefaultsAction extends AbstractAction implements
                                                           ANNIEConstants {
     private static final long serialVersionUID = 1L;
+
     public LoadANNIEWithDefaultsAction() {
       super("With defaults");
-      putValue(SHORT_DESCRIPTION, "Load ANNIE system using defaults");
+      putValue(SHORT_DESCRIPTION, "Load ANNIE with default parameters");
       putValue(SMALL_ICON, getIcon("annie-application"));
-    }// NewAnnotDiffAction
+    }
 
     public void actionPerformed(ActionEvent e) {
-      // Loads ANNIE with defaults
       Runnable runnable = new Runnable() {
         public void run() {
           long startTime = System.currentTimeMillis();
@@ -2117,9 +2174,9 @@ public class MainFrame extends JFrame implements ProgressListener,
                   + Gate.genSym());
             // Load each PR as defined in
             // gate.creole.ANNIEConstants.PR_NAMES
-            for(int i = 0; i < PR_NAMES.length; i++) {
+            for(String PR_NAME : PR_NAMES) {
               ProcessingResource pr =
-                (ProcessingResource)Factory.createResource(PR_NAMES[i], params);
+                (ProcessingResource) Factory.createResource(PR_NAME, params);
               // Add the PR to the sac
               sac.add(pr);
             }// End for
@@ -2129,66 +2186,78 @@ public class MainFrame extends JFrame implements ProgressListener,
               + NumberFormat.getInstance().format(
                 (double)(endTime - startTime) / 1000) + " seconds");
           }
-          catch(gate.creole.ResourceInstantiationException ex) {
-            ex.printStackTrace(Err.getPrintWriter());
+          catch(ResourceInstantiationException e) {
+            final Exception error = e;
+            final String errorMessage =
+              "It seems that the ANNIE Plugin is not loaded.";
+            Action[] actions = {
+              new AbstractAction("Load plugins manager") {
+                public void actionPerformed(ActionEvent e) {
+                  (new ManagePluginsAction()).actionPerformed(null);
+              }},
+              new AbstractAction("Search in mailing list") {
+                public void actionPerformed(ActionEvent e) {
+                  new HelpMailingListAction(error.getMessage())
+                    .actionPerformed(null);
+            }}};
+            ErrorDialog.show(error, errorMessage, instance,
+              MainFrame.getIcon("root"), actions);
+            log.error(errorMessage, error);
           }
           finally {
             unlockGUI();
           }
-        }// run()
-      };// End Runnable
+        }
+      };
       Thread thread = new Thread(runnable, "");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
-    }// actionPerformed();
+    }
   }// class LoadANNIEWithDefaultsAction
 
   /**
-   * This class represent an action which loads ANNIE with default
-   * params
+   * Loads ANNIE without default parameters.
    */
   class LoadANNIEWithoutDefaultsAction extends AbstractAction implements
                                                              ANNIEConstants {
     private static final long serialVersionUID = 1L;
+
     public LoadANNIEWithoutDefaultsAction() {
       super("Without defaults");
-      putValue(SHORT_DESCRIPTION, "Load ANNIE system without defaults");
+      putValue(SHORT_DESCRIPTION, "Load ANNIE without default parameters");
       putValue(SMALL_ICON, getIcon("annie-application"));
-    }// NewAnnotDiffAction
+    }
 
     public void actionPerformed(ActionEvent e) {
-      // Loads ANNIE with defaults
-      Runnable runnable = new Runnable() {
+      SwingUtilities.invokeLater(new Runnable() {
         public void run() {
           try {
             // Create a serial analyser
-            SerialAnalyserController sac =
-              (SerialAnalyserController)Factory.createResource(
-                "gate.creole.SerialAnalyserController",
-                Factory.newFeatureMap(), Factory.newFeatureMap(), "ANNIE_"
-                  + Gate.genSym());
-            // NewResourceDialog resourceDialog = new NewResourceDialog(
-            // MainFrame.this, "Resource parameters", true );
+            SerialAnalyserController sac = (SerialAnalyserController)
+              Factory.createResource("gate.creole.SerialAnalyserController",
+                Factory.newFeatureMap(), Factory.newFeatureMap(),
+                "ANNIE_" + Gate.genSym());
             // Load each PR as defined in
             // gate.creole.ANNIEConstants.PR_NAMES
-            for(int i = 0; i < PR_NAMES.length; i++) {
+            for(String PR_NAME : PR_NAMES) {
               // get the params for the Current PR
-              ResourceData resData =
-                (ResourceData)Gate.getCreoleRegister().get(PR_NAMES[i]);
+              ResourceData resData = Gate.getCreoleRegister().get(PR_NAME);
+              if (resData == null) {
+                throw new ResourceInstantiationException(
+                  PR_NAME + "is not loaded.");
+              }
               currentResourceClassName = resData.getClassName();
               if(newResourceDialog.show(resData, "Parameters for the new "
                 + resData.getName())) {
-                sac.add((ProcessingResource)Factory.createResource(PR_NAMES[i],
+                sac.add((ProcessingResource) Factory.createResource(PR_NAME,
                   newResourceDialog.getSelectedParameters()));
               }
               else {
                 // the user got bored and aborted the operation
                 statusChanged("Loading cancelled! Removing traces...");
-                Iterator<ProcessingResource> loadedPRsIter =
-                  new ArrayList<ProcessingResource>(sac.getPRs()).iterator();
-                while(loadedPRsIter.hasNext()) {
-                  Factory.deleteResource((ProcessingResource)loadedPRsIter
-                    .next());
+                for(Object loadedProcessingResource : sac.getPRs()) {
+                  Factory.deleteResource(
+                    (ProcessingResource) loadedProcessingResource);
                 }
                 Factory.deleteResource(sac);
                 statusChanged("Loading cancelled!");
@@ -2197,21 +2266,33 @@ public class MainFrame extends JFrame implements ProgressListener,
             }// End for
             statusChanged("ANNIE loaded!");
           }
-          catch(gate.creole.ResourceInstantiationException ex) {
-            ex.printStackTrace(Err.getPrintWriter());
-          }// End try
-        }// run()
-      };// End Runnable
-      SwingUtilities.invokeLater(runnable);
-      // Thread thread = new Thread(runnable, "");
-      // thread.setPriority(Thread.MIN_PRIORITY);
-      // thread.start();
-    }// actionPerformed();
+          catch(ResourceInstantiationException e) {
+            final Exception error = e;
+            final String errorMessage =
+              "It seems that the ANNIE Plugin is not loaded.";
+            Action[] actions = {
+              new AbstractAction("Load plugins manager") {
+                public void actionPerformed(ActionEvent e) {
+                  (new ManagePluginsAction()).actionPerformed(null);
+              }},
+              new AbstractAction("Search in mailing list") {
+                public void actionPerformed(ActionEvent e) {
+                  new HelpMailingListAction(error.getMessage())
+                    .actionPerformed(null);
+            }}};
+            ErrorDialog.show(error, errorMessage, instance,
+              MainFrame.getIcon("root"), actions);
+            log.error(errorMessage, error);
+          }
+        }
+      });
+    }
   }// class LoadANNIEWithoutDefaultsAction
 
   /**
    * This class represent an action which loads ANNIE without default
    * param
+   * TODO: remove this?
    */
   class LoadANNIEWithoutDefaultsAction1 extends AbstractAction implements
                                                               ANNIEConstants {
@@ -2235,7 +2316,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           resourceDialog.show(resData);
         }
         else {
-          Err.prln(PR_NAMES[i] + " not found in Creole register");
+          log.error(PR_NAMES[i] + " not found in Creole register");
         }// End if
       }// End for
       try {
@@ -2244,7 +2325,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           .newFeatureMap(), Factory.newFeatureMap(), "ANNIE_" + Gate.genSym());
       }
       catch(gate.creole.ResourceInstantiationException ex) {
-        ex.printStackTrace(Err.getPrintWriter());
+        log.error(e);
       }// End try
     }// actionPerformed();
   }// class LoadANNIEWithoutDefaultsAction
@@ -2372,11 +2453,19 @@ public class MainFrame extends JFrame implements ProgressListener,
           URL creoleURL = new URL(urlTextField.getText());
           Gate.getCreoleRegister().registerDirectories(creoleURL);
         }
-        catch(Exception ex) {
-          JOptionPane.showMessageDialog(MainFrame.this,
-            "There was a problem with your selection:\n" + ex.toString(),
-            "GATE", JOptionPane.ERROR_MESSAGE);
-          ex.printStackTrace(Err.getPrintWriter());
+        catch(Exception err) {
+          final Exception error = err;
+          final String errorMessage =
+            "There was a problem when registering your CREOLE directory.";
+          Action[] actions = {
+            new AbstractAction("Search in mailing list") {
+              public void actionPerformed(ActionEvent e) {
+                new HelpMailingListAction(error.getMessage())
+                  .actionPerformed(null);
+          }}};
+          ErrorDialog.show(error, errorMessage, instance,
+            MainFrame.getIcon("root"), actions);
+          log.error(errorMessage, error);
         }
       }
     }
@@ -2977,6 +3066,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           if(fileChooser.showOpenDialog(MainFrame.this)
           == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
+
             try {
               Object resource = gate.util.persistence
                 .PersistenceManager.loadObjectFromFile(file);
@@ -2988,17 +3078,23 @@ public class MainFrame extends JFrame implements ProgressListener,
               }
               
             }
-            catch(ResourceInstantiationException rie) {
-              processFinished();
-              JOptionPane.showMessageDialog(MainFrame.this, "Error!\n"
-                + rie.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
-              rie.printStackTrace(Err.getPrintWriter());
+            catch(MalformedURLException e) {
+              log.error("Error when saving the resource URL.", e);
             }
-            catch(Exception ex) {
+            catch (Exception e) {
+              final String errorMessage = e.getMessage();
+              Action[] actions = {
+                new AbstractAction("Search in mailing list") {
+                  public void actionPerformed(ActionEvent e) {
+                    new HelpMailingListAction(errorMessage)
+                      .actionPerformed(null);
+              }}};
+              ErrorDialog.show(e, errorMessage, instance,
+                MainFrame.getIcon("root"), actions);
+              log.error(errorMessage, e);
+            }
+            finally {
               processFinished();
-              JOptionPane.showMessageDialog(MainFrame.this, "Error!\n"
-                + ex.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
-              ex.printStackTrace(Err.getPrintWriter());
             }
           }
         }
@@ -3185,64 +3281,74 @@ public class MainFrame extends JFrame implements ProgressListener,
         public void run() {
           // save the options
           OptionsMap userConfig = Gate.getUserConfig();
-          if(userConfig.getBoolean(GateConstants.SAVE_OPTIONS_ON_EXIT)
-            .booleanValue()) {
+          try {
+          if(userConfig.getBoolean(GateConstants.SAVE_OPTIONS_ON_EXIT)) {
             // save the window size
-            Integer width = new Integer(MainFrame.this.getWidth());
-            Integer height = new Integer(MainFrame.this.getHeight());
+            Integer width = MainFrame.this.getWidth();
+            Integer height = MainFrame.this.getHeight();
             userConfig.put(GateConstants.MAIN_FRAME_WIDTH, width);
             userConfig.put(GateConstants.MAIN_FRAME_HEIGHT, height);
-            try {
-              Gate.writeUserConfig();
-            }
-            catch(GateException ge) {
-              logArea.getOriginalErr().println("Failed to save config data:");
-              ge.printStackTrace(logArea.getOriginalErr());
-            }
+            Gate.writeUserConfig();
           }
           else {
             // don't save options on close
             // save the option not to save the options
             OptionsMap originalUserConfig = Gate.getOriginalUserConfig();
-            originalUserConfig.put(GateConstants.SAVE_OPTIONS_ON_EXIT,
-              new Boolean(false));
+            originalUserConfig.put(GateConstants.SAVE_OPTIONS_ON_EXIT, false);
             userConfig.clear();
             userConfig.putAll(originalUserConfig);
-            try {
-              Gate.writeUserConfig();
-            }
-            catch(GateException ge) {
-              logArea.getOriginalErr().println("Failed to save config data:");
-              ge.printStackTrace(logArea.getOriginalErr());
-            }
+            Gate.writeUserConfig();
+          }
+          }
+          catch(GateException e) {
+            final Exception error = e;
+            final String errorMessage = "Failed to save config data.";
+            Action[] actions = {
+              new AbstractAction("Search in mailing list") {
+                public void actionPerformed(ActionEvent e) {
+                  new HelpMailingListAction(error.getMessage())
+                    .actionPerformed(null);
+            }}};
+            ErrorDialog.show(error, errorMessage, instance,
+              MainFrame.getIcon("root"), actions);
+            log.error(errorMessage, error);
           }
 
           // save the session;
           File sessionFile = Gate.getUserSessionFile();
-          if(userConfig.getBoolean(GateConstants.SAVE_SESSION_ON_EXIT)
-            .booleanValue()) {
+          if(userConfig.getBoolean(GateConstants.SAVE_SESSION_ON_EXIT)) {
             // save all the open applications
             try {
               ArrayList<Resource> appList = new ArrayList<Resource>(
                 Gate.getCreoleRegister().getAllInstances("gate.Controller"));
               // remove all hidden instances
               Iterator appIter = appList.iterator();
-              while(appIter.hasNext())
+              while(appIter.hasNext()) {
                 if(Gate.getHiddenAttribute(((Controller)appIter.next())
-                  .getFeatures())) appIter.remove();
-
+                  .getFeatures())) { appIter.remove(); }
+              }
               gate.util.persistence.PersistenceManager.saveObjectToFile(
                 appList, sessionFile);
             }
-            catch(Exception ex) {
-              logArea.getOriginalErr().println("Failed to save session data:");
-              ex.printStackTrace(logArea.getOriginalErr());
+            catch(Exception e) {
+              final Exception error = e;
+              final String errorMessage = "Failed to save session data.";
+              Action[] actions = {
+                new AbstractAction("Search in mailing list") {
+                  public void actionPerformed(ActionEvent e) {
+                    new HelpMailingListAction(error.getMessage())
+                      .actionPerformed(null);
+              }}};
+              ErrorDialog.show(error, errorMessage, instance,
+                MainFrame.getIcon("root"), actions);
+              log.error(errorMessage, error);
             }
           }
           else {
             // we don't want to save the session
-            if(sessionFile.exists()) sessionFile.delete();
+            if(sessionFile.exists()) { sessionFile.delete(); }
           }
+
           // restore out and err streams as we're about to hide the
           // windows
           System.setErr(logArea.getOriginalErr());
@@ -3268,8 +3374,7 @@ public class MainFrame extends JFrame implements ProgressListener,
               Gate.getCreoleRegister().getAllInstances(
                 gate.Resource.class.getName());
 
-            // we need to call the clean up method for each of these
-            // resources
+            // we need to call the clean up method for each of these resources
             for(Resource aResource : resources) {
               try {
                 // System.out.print("Cleaning up :" +
@@ -3279,10 +3384,9 @@ public class MainFrame extends JFrame implements ProgressListener,
               }
               catch(Throwable e) {
                 // this may throw somekind of exception
-                // but we just ignore it as anyway we are closing
-                // everything
-                System.err.println(" Some problem cleaning up the resource "
-                  + e.getMessage());
+                // but we just ignore it as anyway we are closing everything
+                log.error(
+                  "Some problems occurred when cleaning up the resources.", e);
               }
             }
 
@@ -3296,15 +3400,16 @@ public class MainFrame extends JFrame implements ProgressListener,
                   }
                 }
                 catch(Throwable e) {
-                  System.err.println("Some problem in closing the datastore"
-                    + e.getMessage());
+                  log.error(
+                    "Some problems occurred when closing the datastores.", e);
                 }
               }
             }
 
           }
-          catch(GateException exception) {
+          catch(GateException e) {
             // we just ignore this
+            log.error("A problem occurred when exiting from GATE.", e);
           }
 
         }// run
@@ -3540,7 +3645,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           removeAll();
           // find out the available types of LRs and repopulate the menu
           CreoleRegister reg = Gate.getCreoleRegister();
-          List resTypes;
+          List<String> resTypes;
           switch(type){
             case LR:
               resTypes = reg.getPublicLrTypes();
@@ -3557,8 +3662,8 @@ public class MainFrame extends JFrame implements ProgressListener,
 
           if(resTypes != null && !resTypes.isEmpty()) {
             HashMap<String, ResourceData> resourcesByName
-            = new HashMap<String, ResourceData>();
-            Iterator resIter = resTypes.iterator();
+              = new HashMap<String, ResourceData>();
+            Iterator<String> resIter = resTypes.iterator();
             while(resIter.hasNext()) {
               ResourceData rData = (ResourceData)reg.get(resIter.next());
               resourcesByName.put(rData.getName(), rData);
@@ -3743,26 +3848,44 @@ public class MainFrame extends JFrame implements ProgressListener,
 
   class HelpMailingListAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
+    String keywords;
     public HelpMailingListAction() {
       super("Search in mailing list");
       putValue(SHORT_DESCRIPTION, "This option needs an internet connection");
+      this.keywords = null;
     }
-    
+    public HelpMailingListAction(String keywords) {
+      this.keywords = keywords;
+    }
     public void actionPerformed(ActionEvent e) {
-      String keywords =
-        JOptionPane.showInputDialog(instance,
-          "Please enter your search keywords.",
-          (String) this.getValue(NAME),
-          JOptionPane.QUESTION_MESSAGE);
-      if (keywords == null) { return; }
+      if (keywords == null) {
+        keywords = JOptionPane.showInputDialog(instance,
+            "Please enter your search keywords.",
+            (String) this.getValue(NAME),
+            JOptionPane.QUESTION_MESSAGE);
+        if (keywords == null || keywords.trim().length() == 0) { return; }
+      }
       try {
       showHelpFrame("http://sourceforge.net/search/index.php?" +
        "group_id=143829&form_submit=Search&search_subject=1&search_body=1" +
        "&type_of_search=mlists&ml_name=gate-users&limit=50&all_words=" +
        java.net.URLEncoder.encode(keywords, "UTF-8") +
        "#content", null);
-      } catch (UnsupportedEncodingException ex) {
-        ex.printStackTrace();
+
+      } catch (UnsupportedEncodingException err) {
+        final Exception error = err;
+        final String errorMessage = "The Character Encoding is not supported.";
+        Action[] actions = {
+          new AbstractAction("Search in mailing list") {
+            public void actionPerformed(ActionEvent e) {
+              new HelpMailingListAction(error.getMessage())
+                .actionPerformed(null);
+        }}};
+        ErrorDialog.show(error, errorMessage, instance,
+          MainFrame.getIcon("root"), actions);
+        log.error(errorMessage, error);
+      } finally {
+        keywords = null;
       }
     }
   }
@@ -3867,12 +3990,19 @@ public class MainFrame extends JFrame implements ProgressListener,
             Runtime.getRuntime().exec(commandLine);
           }
           catch(IOException e) {
-            JOptionPane.showMessageDialog(MainFrame.getInstance(),
-              "Unable to call the custom browser command.\n"
-              + "Please go to the Options menu then Configuration.",
-              "Configuration error", JOptionPane.ERROR_MESSAGE);
-            log.error("Browser command = " + commandLine);
-            log.error("Help browser Error", e);
+            final String errorMessage =
+              "<html>Unable to call the custom browser command.<br>" +
+              "(" +  commandLine + ")<br><br>" +
+              "Please go to the Options menu then Configuration.</html>";
+            Action[] actions = {
+              new AbstractAction("Load configuration") {
+                public void actionPerformed(ActionEvent e) {
+                  optionsDialog.showDialog();
+                  optionsDialog.dispose();
+            }}};
+            ErrorDialog.show(e, errorMessage, instance,
+              MainFrame.getIcon("root"), actions);
+            log.error(errorMessage, e);
           }
 
         } else {
@@ -3892,8 +4022,17 @@ public class MainFrame extends JFrame implements ProgressListener,
         try {
           helpFrame.setPage(new URL(actualURL.toString()));
         } catch (IOException e) {
-          
-          e.printStackTrace();
+          final Exception error = e;
+          final String errorMessage = "Error when loading help page.";
+          Action[] actions = {
+            new AbstractAction("Search in mailing list") {
+              public void actionPerformed(ActionEvent e) {
+                new HelpMailingListAction(error.getMessage())
+                  .actionPerformed(null);
+          }}};
+          ErrorDialog.show(error, errorMessage, instance,
+            MainFrame.getIcon("root"), actions);
+          log.error(errorMessage, error);
           return;
         }
         helpFrame.setVisible(false);
@@ -4146,7 +4285,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       try {
         filePath = fileChooser.getSelectedFile().getCanonicalPath();
       } catch (IOException e) {
-        e.printStackTrace();
+        log.error("Impossible to get the selected file path.", e);
         return;
       }
       setPreferenceValue(resourcePath, "location", filePath);
@@ -4171,7 +4310,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         previousValue = node.get(key, null);
       }
     } catch (BackingStoreException e) {
-      e.printStackTrace();
+      log.error("Error when getting preference.", e);
     }
     if (previousValue != null && previousValue.trim().length() > 0) {
       return previousValue;
@@ -4193,13 +4332,14 @@ public class MainFrame extends JFrame implements ProgressListener,
     try {
       node.put(key, value);
     } catch (IllegalArgumentException e) {
-      log.debug("Error when trying to save the file location.", e);
+      log.debug("Error when trying to save the file location.\n" +
+        "The preference key or the value is too long.", e);
       return;
     }
     try {
       prefs.flush();
     } catch (BackingStoreException e) {
-      e.printStackTrace();
+      log.error("Error when setting preference.", e);
     }
   }
 
@@ -4441,8 +4581,23 @@ public class MainFrame extends JFrame implements ProgressListener,
         frame.setVisible(true);
         editor.setVisible(true);
       }
-      catch(ResourceInstantiationException ex) {
-        ex.printStackTrace(Err.getPrintWriter());
+      catch(ResourceInstantiationException err) {
+        final Exception error = err;
+        final String errorMessage =
+          "Failed to instanciate the gazetteer editor.";
+        Action[] actions = {
+          new AbstractAction("Load plugins manager") {
+            public void actionPerformed(ActionEvent e) {
+              (new ManagePluginsAction()).actionPerformed(null);
+          }},
+          new AbstractAction("Search in mailing list") {
+            public void actionPerformed(ActionEvent e) {
+              new HelpMailingListAction(error.getMessage())
+                .actionPerformed(null);
+        }}};
+        ErrorDialog.show(error, errorMessage, instance,
+          MainFrame.getIcon("root"), actions);
+        log.error(errorMessage, error);
       }
     }// actionPerformed();
   }// class NewOntologyEditorAction
