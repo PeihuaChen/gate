@@ -96,8 +96,7 @@ public class Ngram {
       typesGate[i] = typesGate[i].replaceAll(ConstantParameters.ITEMSEPARATOR,
         ConstantParameters.ITEMSEPREPLACEMENT);
     } else throw new GateException(
-      "Required element \"TYPE\" not present in attribute:\n"
-        + anElement.toString() + "!");
+      "Required element \"TYPE\" not present in attribute!");
     lowerElement = anElement.getChild("FEATURE");
     if(anElement != null) {
       featuresGate[i] = lowerElement.getTextTrim();
@@ -105,8 +104,7 @@ public class Ngram {
         .replaceAll(ConstantParameters.ITEMSEPARATOR,
           ConstantParameters.ITEMSEPREPLACEMENT);
     } else throw new GateException(
-      "Required element \"FEATURE\" not present in attribute:\n"
-        + anElement.toString() + "!");
+      "Required element \"FEATURE\" not present in attribute!");
   }
 
   public Ngram() {
