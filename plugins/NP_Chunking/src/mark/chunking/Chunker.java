@@ -29,7 +29,7 @@ public class Chunker
 
 	public static void main(String args[]) throws Exception
 	{
-		Chunker c = new Chunker((new File(args[0])).toURL());
+		Chunker c = new Chunker((new File(args[0])).toURI().toURL());
 
 		BufferedReader in = new BufferedReader(new FileReader(args[1]));
 
