@@ -239,6 +239,7 @@ public class TextualDocumentView extends AbstractDocumentView {
           super.processKeyEvent(e);
 
         } else if (!(code == KeyEvent.VK_H && e.isControlDown()) // backspace
+         && !(code == KeyEvent.VK_X && e.isControlDown()) // cut
          && !(code == KeyEvent.VK_V && e.isControlDown()) // paste
          && (e.isActionKey() || e.isAltDown() || e.isAltGraphDown()
           || e.isControlDown() || e.isMetaDown() || e.isShiftDown()
