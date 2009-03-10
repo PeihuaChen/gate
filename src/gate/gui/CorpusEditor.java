@@ -126,8 +126,12 @@ public class CorpusEditor extends AbstractVisualResource
             }
             // add the documents at the insertion point
             for (Document document : documents) {
-              corpus.add(docTable.rowViewToModel(insertion), document);
-              if (insertion == docTable.getRowCount()) { insertion++; }
+              if (insertion != -1) {
+                corpus.add(docTable.rowViewToModel(insertion), document);
+                if (insertion == docTable.getRowCount()) { insertion++; }
+              } else {
+                corpus.add(document);
+              }
             }
             // select the moved/already existing documents
             SwingUtilities.invokeLater(new Runnable() {
@@ -157,7 +161,7 @@ public class CorpusEditor extends AbstractVisualResource
             // get the list of documents selected when dragging started
             for(String row : selectedRows) {
               if (Integer.valueOf(row) == initialInsertion) {
-                // the user draged the selected rows on themselves, do nothing
+                // the user dragged the selected rows on themselves, do nothing
                 return false;
               }
               documents.add((Document) corpus.get(
@@ -384,7 +388,7 @@ public class CorpusEditor extends AbstractVisualResource
     }
     
     private List<String> documentNames;
-    private final String[] COLUMN_NAMES = {"Index", "Name"}; 
+    private final String[] COLUMN_NAMES = {"Index", "Document name"}; 
     private static final int COL_INDEX = 0;
     private static final int COL_NAME = 1;
     private static final int COLUMN_COUNT = 2;
