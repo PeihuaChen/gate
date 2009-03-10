@@ -91,7 +91,7 @@ public class ValuesSelectionAction {
     remove.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent actionevent) {
         Object aobj[] = list.getSelectedValues();
-        if(aobj != null || aobj.length > 0) {
+        if(aobj != null && aobj.length > 0) {
           for(int i = 0; i < aobj.length; i++)
             ((DefaultListModel)list.getModel()).removeElement(aobj[i]);
         }
