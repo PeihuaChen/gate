@@ -63,13 +63,14 @@ public class OptionsDialog extends JDialog {
     getContentPane().add(mainTabbedPane);
     Box vBox;
     Box hBox;
+    Box hBox2;
 
     /*******************
      * Appearance pane *
      *******************/
 
     //the LNF combo
-    List supportedLNFs = new ArrayList();
+    List<LNFData> supportedLNFs = new ArrayList<LNFData>();
     LNFData currentLNF = null;
     UIManager.LookAndFeelInfo[] lnfs = UIManager.getInstalledLookAndFeels();
     for(int i = 0; i < lnfs.length; i++){
@@ -148,48 +149,44 @@ public class OptionsDialog extends JDialog {
      * Advanced pane *
      *****************/
 
-    saveOptionsChk = new JCheckBox(
-        "Save options on exit",
-        Gate.getUserConfig().getBoolean(GateConstants.SAVE_OPTIONS_ON_EXIT).
-        booleanValue());
+    saveOptionsChk = new JCheckBox("Save options on exit",
+      Gate.getUserConfig().getBoolean(GateConstants.SAVE_OPTIONS_ON_EXIT));
 
-    saveSessionChk = new JCheckBox(
-        "Save session on exit",
-        Gate.getUserConfig().getBoolean(GateConstants.SAVE_SESSION_ON_EXIT).
-        booleanValue());
+    saveSessionChk = new JCheckBox("Save session on exit",
+      Gate.getUserConfig().getBoolean(GateConstants.SAVE_SESSION_ON_EXIT));
 
     includeFeaturesOnPreserveFormatChk = new JCheckBox(
       "Include annotation features for \"Save preserving format\"",
-      Gate.getUserConfig().
-      getBoolean(GateConstants.SAVE_FEATURES_WHEN_PRESERVING_FORMAT).
-      booleanValue());
+      Gate.getUserConfig()
+        .getBoolean(GateConstants.SAVE_FEATURES_WHEN_PRESERVING_FORMAT));
 
     addSpaceOnMarkupUnpackChk = new JCheckBox(
-      "Add space on markup unpack if needed",
-      true);
+      "Add space on markup unpack if needed", true);
 
     if ( (Gate.getUserConfig().
        get(GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME) != null)
       &&
       !Gate.getUserConfig().
-        getBoolean(GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME).
-          booleanValue()
+        getBoolean(GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME)
       )
       addSpaceOnMarkupUnpackChk.setSelected(false);
 
     ButtonGroup bGroup = new ButtonGroup();
-    doceditInsertAppendChk = new JCheckBox("Append (default)");
+    doceditInsertAppendChk = new JCheckBox("Append");
     bGroup.add(doceditInsertAppendChk);
     doceditInsertPrependChk = new JCheckBox("Prepend");
     bGroup.add(doceditInsertPrependChk);
     doceditInsertPrependChk.setSelected(Gate.getUserConfig().
-        getBoolean(GateConstants.DOCEDIT_INSERT_PREPEND).booleanValue());
+      getBoolean(GateConstants.DOCEDIT_INSERT_PREPEND));
     doceditInsertAppendChk.setSelected(Gate.getUserConfig().
-        getBoolean(GateConstants.DOCEDIT_INSERT_APPEND).booleanValue());
+      getBoolean(GateConstants.DOCEDIT_INSERT_APPEND));
     //if none set then set the default one
     if(!(doceditInsertAppendChk.isSelected()||
          doceditInsertPrependChk.isSelected()))
       doceditInsertAppendChk.setSelected(true);
+    docReadOnlyChk = new JCheckBox("Read-only");
+    docReadOnlyChk.setSelected(Gate.getUserConfig().
+      getBoolean(GateConstants.DOCEDIT_READ_ONLY));
 
     browserComboBox = new JComboBox(new String[] {
       "Default browser", "Java", "Custom"});
@@ -211,6 +208,10 @@ public class OptionsDialog extends JDialog {
       browserComboBox.setSelectedItem("Custom");
     }
     browserCommandLineTextField.setText((commandLine == null)?"":commandLine);
+
+    annicDisableAutocompletionChk = new JCheckBox("Disable autocompletion",
+      Gate.getUserConfig()
+        .getBoolean(GateConstants.ANNIC_DISABLE_AUTOCOMPLETION));
 
     JPanel advancedBox =  new JPanel();
     advancedBox.setLayout(new BoxLayout(advancedBox, BoxLayout.Y_AXIS));
@@ -236,12 +237,12 @@ public class OptionsDialog extends JDialog {
     hBox = Box.createHorizontalBox();
     hBox.setBorder(BorderFactory.createTitledBorder(" Session persistence "));
     hBox.add(Box.createHorizontalStrut(5));
-      vBox = Box.createVerticalBox();
-      vBox.add(saveOptionsChk);
-      vBox.add(Box.createVerticalStrut(5));
-      vBox.add(saveSessionChk);
-      vBox.add(Box.createVerticalStrut(5));
-    hBox.add(vBox);
+      hBox2 = Box.createHorizontalBox();
+      hBox2.add(saveOptionsChk);
+      hBox2.add(Box.createVerticalStrut(5));
+      hBox2.add(saveSessionChk);
+      hBox2.add(Box.createVerticalStrut(5));
+    hBox.add(hBox2);
     hBox.add(Box.createHorizontalStrut(5));
     hBox.add(Box.createHorizontalGlue());
     advancedBox.add(hBox);
@@ -249,15 +250,19 @@ public class OptionsDialog extends JDialog {
     advancedBox.add(Box.createVerticalStrut(5));
 
     hBox = Box.createHorizontalBox();
-    hBox.setBorder(BorderFactory.createTitledBorder(
-            " Document editor insert behaviour "));
+    hBox.setBorder(BorderFactory.createTitledBorder(" Document editor "));
     hBox.add(Box.createHorizontalStrut(5));
-      vBox = Box.createVerticalBox();
-      vBox.add(doceditInsertAppendChk);
-      vBox.add(Box.createVerticalStrut(5));
-      vBox.add(doceditInsertPrependChk);
-      vBox.add(Box.createVerticalStrut(5));
-    hBox.add(vBox);
+      hBox2 = Box.createHorizontalBox();
+      hBox2.setBorder(BorderFactory.createTitledBorder(" Insert "));
+      hBox2.add(doceditInsertAppendChk);
+      hBox2.add(Box.createVerticalStrut(5));
+      hBox2.add(doceditInsertPrependChk);
+    hBox.add(hBox2);
+      hBox2 = Box.createHorizontalBox();
+      hBox2.add(Box.createVerticalStrut(5));
+      hBox2.add(docReadOnlyChk);
+      hBox2.add(Box.createVerticalStrut(5));
+    hBox.add(hBox2);
     hBox.add(Box.createHorizontalStrut(5));
     hBox.add(Box.createHorizontalGlue());
     advancedBox.add(hBox);
@@ -265,13 +270,22 @@ public class OptionsDialog extends JDialog {
     advancedBox.add(Box.createVerticalStrut(5));
 
     hBox = Box.createHorizontalBox();
-    hBox.setBorder(BorderFactory.createTitledBorder(
-      " Browser used to display help "));
+    hBox.setBorder(BorderFactory.createTitledBorder(" Help browser "));
     hBox.add(Box.createHorizontalStrut(5));
       vBox = Box.createVerticalBox();
       vBox.add(browserComboBox);
       vBox.add(Box.createVerticalStrut(5));
       vBox.add(browserCommandLineTextField);
+      vBox.add(Box.createVerticalStrut(5));
+    hBox.add(vBox);
+    hBox.add(Box.createHorizontalStrut(5));
+    advancedBox.add(hBox);
+
+    hBox = Box.createHorizontalBox();
+    hBox.setBorder(BorderFactory.createTitledBorder(" Annic (Lucene datastore) "));
+    hBox.add(Box.createHorizontalStrut(5));
+      vBox = Box.createVerticalBox();
+      vBox.add(annicDisableAutocompletionChk);
       vBox.add(Box.createVerticalStrut(5));
     hBox.add(vBox);
     hBox.add(Box.createHorizontalStrut(5));
@@ -486,21 +500,23 @@ public class OptionsDialog extends JDialog {
       }
 
       userConfig.put(GateConstants.SAVE_OPTIONS_ON_EXIT,
-                     new Boolean(saveOptionsChk.isSelected()));
+        saveOptionsChk.isSelected());
       userConfig.put(GateConstants.SAVE_SESSION_ON_EXIT,
-                     new Boolean(saveSessionChk.isSelected()));
+        saveSessionChk.isSelected());
       userConfig.put(GateConstants.SAVE_FEATURES_WHEN_PRESERVING_FORMAT,
-                     new Boolean(includeFeaturesOnPreserveFormatChk.
-                                 isSelected()));
+        includeFeaturesOnPreserveFormatChk.isSelected());
       userConfig.put(GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME,
-                     new Boolean(addSpaceOnMarkupUnpackChk.
-                                 isSelected()));
+        addSpaceOnMarkupUnpackChk.isSelected());
       userConfig.put(GateConstants.DOCEDIT_INSERT_APPEND,
-                     new Boolean(doceditInsertAppendChk.isSelected()));
+        doceditInsertAppendChk.isSelected());
       userConfig.put(GateConstants.DOCEDIT_INSERT_PREPEND,
-                     new Boolean(doceditInsertPrependChk.isSelected()));
+        doceditInsertPrependChk.isSelected());
+      userConfig.put(GateConstants.DOCEDIT_READ_ONLY,
+        docReadOnlyChk.isSelected());
       userConfig.put(GateConstants.HELP_BROWSER_COMMAND_LINE,
-                     browserCommandLineTextField.getText());
+        browserCommandLineTextField.getText());
+      userConfig.put(GateConstants.ANNIC_DISABLE_AUTOCOMPLETION,
+        annicDisableAutocompletionChk.isSelected());
       setVisible(false);
     }// void actionPerformed(ActionEvent evt)
   }
@@ -632,6 +648,9 @@ public class OptionsDialog extends JDialog {
   /** The Docedit prepend checkbox */
   protected JCheckBox doceditInsertPrependChk;
 
+  /** The Document read-only checkbox */
+  protected JCheckBox docReadOnlyChk;
+
   /**
    * The name of the look and feel class
    */
@@ -674,4 +693,7 @@ public class OptionsDialog extends JDialog {
    * Browser command line.
    */
   protected JTextField browserCommandLineTextField;
+
+  protected JCheckBox annicDisableAutocompletionChk;
+
 }

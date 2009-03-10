@@ -633,7 +633,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     // table of results
     patternTableModel = new PatternTableModel();
     patternTable = new XJTable(patternTableModel);
-    patternTable.setEnableHiddingColumns(true);
+    patternTable.setEnableHidingColumns(true);
     patternTable.addMouseMotionListener(new MouseMotionListener() {
       public void mouseMoved(MouseEvent me) {
         int row = patternTable.rowAtPoint(me.getPoint());
@@ -3550,7 +3550,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     private javax.swing.undo.UndoManager undo;
     private UndoAction undoAction;
     private RedoAction redoAction;
-    private Timer timer;
     private int initialPosition;
     private int finalPosition;
     private int mode;
@@ -3756,8 +3755,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       initialPosition = 0;
       finalPosition = 0;
       mode = INSERT;
-      timer = new Timer();
-      
+
       addCaretListener(new CaretListener() {
         public void caretUpdate(CaretEvent e) {
           if ( (mode == POPUP_TYPES || mode == POPUP_FEATURES)
@@ -3776,39 +3774,19 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     }
 
     public void removeUpdate(DocumentEvent ev) {
-
-      timer.cancel();
-
       int pos = ev.getOffset() - 1;
 
-      if (ev.getLength() != 1
+      if (Gate.getUserConfig()
+        .getBoolean(GateConstants.ANNIC_DISABLE_AUTOCOMPLETION)
+      || ev.getLength() != 1
       || ( (pos+1 >= finalPosition || pos < initialPosition)
         && (mode == POPUP_TYPES || mode == POPUP_FEATURES) )) {
-        // cancel any autocompletion if the user cut some text
+        // cancel any autocompletion if disabled in the options
+        // or the user cut some text
         // or delete outside brackets when in POPUP mode
         cleanup();
         return;
       }
-
-      if (mode == POPUP_TYPES || mode == POPUP_FEATURES) {
-        removeUpdateCompletion(ev);
-
-      }  else {
-        final DocumentEvent evF = ev;
-        // schedule autocompletion in half a second
-        Date timeToRun = new Date(System.currentTimeMillis() + 500);
-        timer = new Timer();
-        timer.schedule(new TimerTask() {
-            public void run() {
-              removeUpdateCompletion(evF);
-            }
-          }, timeToRun);
-      }
-    }
-
-    public void removeUpdateCompletion(DocumentEvent ev) {
-
-      int pos = ev.getOffset() - 1;
 
       if (mode == POPUP_TYPES) {
         finalPosition = pos+1;
@@ -3838,35 +3816,18 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     }
 
     public void insertUpdate(DocumentEvent ev) {
-
-      timer.cancel();
-
       if (mode == PROGRAMMATIC_INSERT) { return; }
 
-      if (ev.getLength() != 1) {
-        // cancel any autocompletion if the user paste some text
+      int pos = ev.getOffset();
+
+      if (Gate.getUserConfig()
+        .getBoolean(GateConstants.ANNIC_DISABLE_AUTOCOMPLETION)
+       || ev.getLength() != 1) {
+        // cancel any autocompletion if disabled in the options
+        // or the user paste some text
         cleanup();
         return;
       }
-
-      if (mode == POPUP_TYPES || mode == POPUP_FEATURES) {
-        insertUpdateCompletion(ev);
-
-      }  else {
-        final DocumentEvent evF = ev;
-        // schedule autocompletion in half a second
-        Date timeToRun = new Date(System.currentTimeMillis() + 500);
-        timer = new Timer();
-        timer.schedule(new TimerTask() {
-            public void run() {
-              insertUpdateCompletion(evF);
-            }
-          }, timeToRun);
-      }
-    }
-    
-    public void insertUpdateCompletion(DocumentEvent ev) {
-      int pos = ev.getOffset();
 
       String typedChar = Character.toString(getText().charAt(pos));
       String previousChar = (pos > 0)?
@@ -3874,7 +3835,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       String nextChar = ((pos+1) < getText().length())?
         Character.toString(getText().charAt(pos+1)):"";
 
-      // switch accordinly to the key pressed and the context
+      // switch accordingly to the key pressed and the context
       if (typedChar.equals("\"")
       && !previousChar.equals("\\")
       && mode == INSERT) {

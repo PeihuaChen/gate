@@ -143,7 +143,7 @@ public class AnnotationDiffGUI extends JFrame{
         return match1 - match2;
       }
     });
-    diffTable.setEnableHiddingColumns(true);
+    diffTable.setEnableHidingColumns(true);
 
     Comparator startEndComparator = new Comparator() {
       public int compare(Object o1, Object o2) {

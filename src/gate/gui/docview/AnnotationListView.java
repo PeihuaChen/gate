@@ -26,6 +26,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 import java.util.List;
+import java.util.Timer;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.AbstractTableModel;
@@ -83,7 +84,7 @@ public class AnnotationListView extends AbstractDocumentView
     table.setSortable(true);
     table.setSortedColumn(START_COL);
     table.setIntercellSpacing(new Dimension(2, 0));
-    table.setEnableHiddingColumns(true);
+    table.setEnableHidingColumns(true);
     //the background colour seems to change somewhere when using the GTK+ 
     //look and feel on Linux, so we copy the value now and set it 
     Color tableBG = table.getBackground();
@@ -100,12 +101,15 @@ public class AnnotationListView extends AbstractDocumentView
     GridBagConstraints constraints = new GridBagConstraints();
 
     constraints.gridx = 0;
+    constraints.gridwidth = 4;
     constraints.gridy = 0;
     constraints.weightx = 1;
     constraints.weighty = 1;
     constraints.fill= GridBagConstraints.BOTH;
     mainPanel.add(scroller, constraints);
 
+    constraints.gridx = GridBagConstraints.RELATIVE;
+    constraints.gridwidth = 1;
     constraints.gridy = 1;
     constraints.weightx = 0;
     constraints.weighty = 0;
@@ -113,6 +117,13 @@ public class AnnotationListView extends AbstractDocumentView
     constraints.anchor = GridBagConstraints.WEST;
     statusLabel = new JLabel();
     mainPanel.add(statusLabel, constraints);
+    constraints.fill= GridBagConstraints.HORIZONTAL;
+    constraints.anchor = GridBagConstraints.EAST;
+    mainPanel.add(Box.createHorizontalStrut(10), constraints);
+    mainPanel.add(new JLabel("Select: "), constraints);
+    filterTextField = new JTextField(20);
+    filterTextField.setToolTipText("Select the rows containing this text.");
+    mainPanel.add(filterTextField, constraints);
 
     //get a pointer to the text view used to display
     //the selected annotations
@@ -149,7 +160,7 @@ public class AnnotationListView extends AbstractDocumentView
                   Integer.toString(tableModel.getRowCount()) +
                   " Annotations (" +
                   Integer.toString(table.getSelectedRowCount()) +
-                  "selected)");
+                  " selected)");
           //update the list of selected annotations globally
           synchronized(this) {
             if(localSelectionUpating) return;
@@ -302,8 +313,46 @@ public class AnnotationListView extends AbstractDocumentView
       }
     });
 
-    /* End */
-
+    filterTextField.getDocument().addDocumentListener(new DocumentListener() {
+      private Timer timer = new Timer();
+      public void changedUpdate(DocumentEvent e) {
+      }
+      public void insertUpdate(DocumentEvent e) {
+        timer.cancel();
+        // one second delay
+        Date timeToRun = new Date(System.currentTimeMillis() + 1000);
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+            public void run() {
+              selectRows();
+            }
+          }, timeToRun);
+      }
+      public void removeUpdate(DocumentEvent e) {
+        timer.cancel();
+        // one second delay
+        Date timeToRun = new Date(System.currentTimeMillis() + 1000);
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+            public void run() {
+              selectRows();
+            }
+          }, timeToRun);
+      }
+      private void selectRows() {
+        table.clearSelection();
+        if (filterTextField.getText().trim().length() < 2) { return; }
+        for (int row = 0; row < table.getRowCount(); row++) {
+          for (int col = 0; col < table.getColumnCount(); col++) {
+            if (table.getValueAt(row, col).toString()
+                .contains(filterTextField.getText().trim())) {
+              table.addRowSelectionInterval(row, row);
+              break;
+            }
+          }
+        }
+      }
+    });
   }
   /* (non-Javadoc)
    * @see gate.gui.docview.AbstractDocumentView#registerHooks()
@@ -742,6 +791,7 @@ public class AnnotationListView extends AbstractDocumentView
   
   protected JPanel mainPanel;
   protected JLabel statusLabel;
+  protected JTextField filterTextField;
   protected TextualDocumentView textView;
   /**
    * A map that stores instantiated annotations editors in order to avoid the 

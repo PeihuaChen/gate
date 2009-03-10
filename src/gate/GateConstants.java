@@ -162,6 +162,8 @@ public interface GateConstants {
   /** The key used for document editor inser behaviour */
   public static final String DOCEDIT_INSERT_PREPEND = "docedit_insert_prepend";
 
+  public static final String DOCEDIT_READ_ONLY = "docedit_read-only";
+
   /** Document property to set throw of exception on parsing format error */
   public static final String THROWEX_FORMAT_PROPERTY_NAME =
     "throwExceptionOnFormatError";
@@ -193,4 +195,7 @@ public interface GateConstants {
 
   public static final String HELP_BROWSER_COMMAND_LINE =
     "Help_browser_command_line";
+
+  public static final String ANNIC_DISABLE_AUTOCOMPLETION =
+    "Annic_disable_autocompletion";
 } // GateConstants

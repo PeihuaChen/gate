@@ -161,6 +161,20 @@ public class XJTable extends JTable{
     }
   }
 
+  /**
+   * From Java 1.6. Allows an empty table to use all the height instead of
+   * being invisible. Needed to drop an object on an empty table.
+   * @return true if the preferred height of the table is smaller than the
+   *   viewport and getdragEnabled(), false otherwise.
+   */
+  public boolean getScrollableTracksViewportHeight() {
+    return getDragEnabled() ?
+      getParent() instanceof JViewport
+   && getParent().getHeight() > getPreferredSize().height
+    :
+      super.getScrollableTracksViewportHeight();
+  }
+
   private boolean componentSizedProperly = false;
   @Override
   /**
@@ -235,18 +249,18 @@ public class XJTable extends JTable{
   /**
    * Set the possibility for the user to hide/show a column by right-clicking
    * on a column header. False by default.
-   * @param enableHiddingColumns true if and only if the columns can be hidden.
+   * @param enableHidingColumns true if and only if the columns can be hidden.
    */
-  public void setEnableHiddingColumns(boolean enableHiddingColumns) {
-    this.enableHiddingColumns = enableHiddingColumns;
+  public void setEnableHidingColumns(boolean enableHidingColumns) {
+    this.enableHidingColumns = enableHidingColumns;
   }
 
   /**
-   * Returns the state for hidding a column.
+   * Returns the state for hiding a column.
    * @return true if and only if the columns can be hidden.
    */
-  public boolean isEnableHiddingColumns() {
-    return this.enableHiddingColumns;
+  public boolean isEnableHidingColumns() {
+    return this.enableHidingColumns;
   }
 
   /**
@@ -691,7 +705,7 @@ public class XJTable extends JTable{
       if(viewColumn != -1){
         final int column = convertColumnIndexToModel(viewColumn);
         if(e.isPopupTrigger()
-        && enableHiddingColumns){
+        && enableHidingColumns){
           //show pop-up
           JPopupMenu popup = new JPopupMenu();
           if (columnModel.getColumnCount() > 1) {
@@ -784,7 +798,7 @@ public class XJTable extends JTable{
    */
   protected List<TableColumn> hiddenColumns;
 
-  private boolean enableHiddingColumns = false;
+  private boolean enableHidingColumns = false;
 
   private boolean tabSkipUneditableCell = false;
 
