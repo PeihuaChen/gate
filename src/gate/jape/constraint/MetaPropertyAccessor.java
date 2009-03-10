@@ -52,7 +52,7 @@ public abstract class MetaPropertyAccessor implements AnnotationAccessor {
   }
 
   public void setKey(Object key) {
-    if(key != null || !(key.equals("")))
+    if(key != null && !key.equals(""))
       log.warn(this.getClass().getName() + " doesn't use key values.  Key was: " + key);
   }
 
