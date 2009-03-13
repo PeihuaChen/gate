@@ -88,7 +88,7 @@ public class SvmLibSVM extends SupervisedLearner {
     // System.out.println("cost="+param.C);
     // System.out.println("cachsize="+param.cache_size);
     decision_function decisionFunc = svm
-      .svm_train_one(svmProb, param, 1.0, 1.0);
+      .svm_train_one(svmProb, param, param.C, param.C); //1.0, 1.0);
     // System.out.println("end of the SVM_one.");
     // decisionFunc includes the alphas (with *y) and rho (=-b)
     // Write the svm model into the model file
