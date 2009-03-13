@@ -44,6 +44,7 @@ public class ErrorDialog extends JOptionPane {
                           Component parentComponent, Icon icon,
                           Action[] optionalActions) {
 
+    if (textMessage == null) { textMessage = ""; }
     final JDialog dialog;
     final String errorMessage = error.getMessage();
 
@@ -58,7 +59,7 @@ public class ErrorDialog extends JOptionPane {
     StringWriter sw = new StringWriter();
     error.printStackTrace(new PrintWriter(sw));
     detailedMessage += sw.toString()
-      .replaceAll("(at|Caused by:) ", "<strong>$1</strong> ")
+      .replaceAll("(at |Caused by:)", "<strong>$1</strong> ")
       .replaceAll("(\\([A-Za-z]+\\.java:[0-9])+\\)", "<strong>$1</strong>");
     detailedMessage += "<h2>System configuration</h2>";
     detailedMessage += "<strong>GATE Version</strong> = " + Main.version + "\n";
