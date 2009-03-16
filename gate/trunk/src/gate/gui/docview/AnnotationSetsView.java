@@ -1591,6 +1591,11 @@ public class AnnotationSetsView extends AbstractDocumentView
   }
 
   protected class NewAnnotationAction extends AbstractAction{
+    public NewAnnotationAction(String selection){
+      super("Create new annotation");
+      putValue(SHORT_DESCRIPTION,
+        "Creates a new annotation from the selection: [" + selection + "]");
+    }
     public void actionPerformed(ActionEvent evt){
       if(annotationEditor == null) return;
       int start = textPane.getSelectionStart();
@@ -1955,50 +1960,48 @@ public class AnnotationSetsView extends AbstractDocumentView
       //annotation is finished editing.
       if(!annotationEditor.editingFinished()) return;
       if(textLocation == -1) return;
-      //first check for selection hovering
-      //if inside selection, add new annotation.
+      JPopupMenu popup = new JPopupMenu();
+
+      //check for selection hovering
       if(textPane.getSelectionStart() <= textLocation &&
          textPane.getSelectionEnd() >= textLocation){
-        new NewAnnotationAction().actionPerformed(evt);
-      }else{
-        //now check for annotations at location
-        List annotsAtPoint = new ArrayList();
-        Iterator shIter = setHandlers.iterator();
-        while(shIter.hasNext()){
-          SetHandler sHandler = (SetHandler)shIter.next();
-          Iterator annIter = sHandler.set.get(new Long(textLocation - 1),
-                                              new Long(textLocation + 1)).iterator();
-          while(annIter.hasNext()){
-            Annotation ann = (Annotation)annIter.next();
-            TypeHandler tHandler = sHandler.getTypeHandler(ann.getType()); 
-            if(sHandler != null && tHandler.isSelected()){
-              annotsAtPoint.add(new AnnotationDataImpl(sHandler.set, ann));
-            }
+        //add 'New annotation' to the popup menu
+        popup.add(new NewAnnotationAction(textPane.getSelectedText()));
+        popup.addSeparator();
+      }
+
+      //check for annotations at location
+      for(SetHandler setHandler : setHandlers) {
+        for(Annotation ann :
+            setHandler.set.get((long)textLocation-1, (long)textLocation+1)) {
+          if(setHandler.getTypeHandler(ann.getType()).isSelected()) {
+            AnnotationDataImpl annotAtPoint =
+              new AnnotationDataImpl(setHandler.set, ann);
+            //add annotations to edit to the popup menu
+            popup.add(new HighlightMenuItem(
+              new EditAnnotationAction(annotAtPoint),
+              annotAtPoint.getAnnotation().getStartNode().getOffset().intValue(),
+              annotAtPoint.getAnnotation().getEndNode().getOffset().intValue(),
+              popup));
           }
         }
-        if(annotsAtPoint.size() > 0){
-          if(annotsAtPoint.size() > 1){
-            JPopupMenu popup = new JPopupMenu();
-            Iterator annIter = annotsAtPoint.iterator();
-            while(annIter.hasNext()){
-              AnnotationData aHandler = (AnnotationData)annIter.next();
-              popup.add(new HighlightMenuItem(
-                      new EditAnnotationAction(aHandler),
-                      aHandler.getAnnotation().getStartNode().getOffset().intValue(),
-                      aHandler.getAnnotation().getEndNode().getOffset().intValue(),
-                      popup));
-            }
-            try{
-              Rectangle rect =  textPane.modelToView(textLocation);
-              popup.show(textPane, rect.x + 10, rect.y);
-            }catch(BadLocationException ble){
-              throw new GateRuntimeException(ble);
-            }
-          }else{
-            //only one annotation: start the editing directly
-            new EditAnnotationAction((AnnotationData)annotsAtPoint.get(0)).
-              actionPerformed(null);
-          }
+      }
+
+      if (popup.getComponentCount() == 0) {
+        // nothing to do
+      } else if(popup.getComponentCount() == 1
+        || (popup.getComponentCount() == 2
+         && popup.getComponent(1) instanceof JSeparator)) {
+        //only one annotation, start the editing directly
+        //or only one selection, add new annotation
+        ((JMenuItem)popup.getComponent(0)).getAction().actionPerformed(evt);
+      } else { //mouse hover a selection AND annotation(s)
+        try{
+          Rectangle rect =  textPane.modelToView(textLocation);
+          //display the popup
+          popup.show(textPane, rect.x + 10, rect.y);
+        }catch(BadLocationException ble){
+          throw new GateRuntimeException(ble);
         }
       }
     }
