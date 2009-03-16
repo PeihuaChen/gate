@@ -4279,14 +4279,14 @@ public class MainFrame extends JFrame implements ProgressListener,
     public int showOpenDialog(Component parent, String currentResourceClassName)
       throws HeadlessException {
       GateFileChooser.currentResourceClassName = currentResourceClassName;
-      return super.showOpenDialog(parent);
+      return showOpenDialog(parent);
     }
 
     // use this to set directly currentResourceClassName
     public int showSaveDialog(Component parent, String currentResourceClassName)
       throws HeadlessException {
       GateFileChooser.currentResourceClassName = currentResourceClassName;
-      return super.showSaveDialog(parent);
+      return showSaveDialog(parent);
     }
 
     /**
@@ -4324,17 +4324,18 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     public void approveSelection() {
       // Save the location of the file chooser for the current resource.
-      if (currentResourceClassName == null) { return; }
-      String resourcePath = "filechooserlocations/" +
-        currentResourceClassName.replaceAll("\\.", "/");
-      String filePath;
-      try {
-        filePath = fileChooser.getSelectedFile().getCanonicalPath();
-      } catch (IOException e) {
-        log.error("Impossible to get the selected file path.", e);
-        return;
+      if (currentResourceClassName != null) {
+        String resourcePath = "filechooserlocations/" +
+          currentResourceClassName.replaceAll("\\.", "/");
+        String filePath;
+        try {
+          filePath = fileChooser.getSelectedFile().getCanonicalPath();
+        } catch (IOException e) {
+          log.error("Impossible to get the selected file path.", e);
+          return;
+        }
+        setPreferenceValue(resourcePath, "location", filePath);
       }
-      setPreferenceValue(resourcePath, "location", filePath);
       super.approveSelection();
     }
 
