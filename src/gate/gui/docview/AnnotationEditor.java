@@ -355,7 +355,7 @@ public class AnnotationEditor extends AbstractVisualResource
     typeCombo.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent evt){
         String newType = typeCombo.getSelectedItem().toString();
-        if(ann != null && ann.getType().equals(newType)) return;
+        if(ann == null || ann.getType().equals(newType)) return;
         //annotation editing
         Integer oldId = ann.getId();
         Annotation oldAnn = ann;
