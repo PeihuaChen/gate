@@ -67,8 +67,7 @@ public class NameBearerHandle implements Handle, StatusListener,
     sListenerProxy = new ProxyStatusListener();
     String iconName = null;
     if(target instanceof Resource) {
-      rData =
-        (ResourceData)Gate.getCreoleRegister().get(target.getClass().getName());
+      rData = Gate.getCreoleRegister().get(target.getClass().getName());
       if(rData != null) {
         iconName = rData.getIcon();
         if(iconName == null) {
@@ -93,7 +92,7 @@ public class NameBearerHandle implements Handle, StatusListener,
       tooltipText = ((DataStore)target).getComment();
     }
 
-    title = (String)target.getName();
+    title = target.getName();
     this.icon = MainFrame.getIcon(iconName);
 
     Gate.getCreoleRegister().addCreoleListener(this);
@@ -590,8 +589,8 @@ public class NameBearerHandle implements Handle, StatusListener,
     public void actionPerformed(ActionEvent e) {
       Runnable runableAction = new Runnable() {
         public void run() {
-          JFileChooser fileChooser = MainFrame.getFileChooser();
-          File selectedFile = null;
+          MainFrame.GateFileChooser fileChooser = MainFrame.getFileChooser();
+          File selectedFile;
 
           List filters = Arrays.asList(fileChooser.getChoosableFileFilters());
           Iterator filtersIter = filters.iterator();
@@ -657,9 +656,9 @@ public class NameBearerHandle implements Handle, StatusListener,
             fileChooser.setSelectedFile(file);
           }
 
-          int res =
-            (getLargeView() != null) ? fileChooser.showSaveDialog(getLargeView())
-                    : (getSmallView() != null) ? fileChooser.showSaveDialog(
+          int res = (getLargeView() != null) ?
+            fileChooser.showSaveDialog(getLargeView(), null)
+          : (getSmallView() != null) ? fileChooser.showSaveDialog(
               getSmallView()) : fileChooser.showSaveDialog(null);
           if(res == JFileChooser.APPROVE_OPTION) {
             selectedFile = fileChooser.getSelectedFile();
@@ -1034,7 +1033,7 @@ public class NameBearerHandle implements Handle, StatusListener,
     }
 
     public void actionPerformed(ActionEvent ae) {
-      JFileChooser fileChooser = MainFrame.getFileChooser();
+      MainFrame.GateFileChooser fileChooser = MainFrame.getFileChooser();
 
       // add a .gapp extension filter if not existing
       List filters = Arrays.asList(fileChooser.getChoosableFileFilters());
@@ -1063,28 +1062,30 @@ public class NameBearerHandle implements Handle, StatusListener,
            && ((CorpusController)target).getCorpus() != null) ?
         "WITH" : "WITHOUT") + " corpus.");
       fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-      // this URL has been added as a feature when loading the application from
-      // a file and it is used now to select this location in the file chooser
-      Object URL;
-      // remove the URL feature to not save it in the application
-      if(((URL = ((Resource)target).getFeatures().remove("URL")) != null)) {
-        try {
-          fileChooser.ensureFileIsVisible(new File(((URL)URL).toURI()));
-          fileChooser.setSelectedFile(new File(((URL)URL).toURI()));
-        }
-        catch(URISyntaxException e) {
-          e.printStackTrace();
-        }
-      }
-      if(fileChooser.showSaveDialog(largeView) == JFileChooser.APPROVE_OPTION) {
+
+      if(fileChooser.showSaveDialog(largeView, "gate.ApplicationRestore." +
+        target.getName())  == JFileChooser.APPROVE_OPTION) {
         final File file = fileChooser.getSelectedFile();
         Runnable runnable = new Runnable() {
           public void run() {
             try {
               gate.util.persistence.PersistenceManager
                 .saveObjectToFile(target, file);
-              // re-add the URL feature just after saving the application
-              ((Resource)target).getFeatures().put("URL", file.toURI().toURL());
+              // save also the location of the application as last application
+              MainFrame.setPreferenceValue(
+                "filechooserlocations/gate/ApplicationRestore",
+                "location", file.getCanonicalPath());
+              // add this application to the list of recent applications
+              String list = MainFrame.getPreferenceValue(
+                "filechooserlocations/gate/ApplicationRestore", "list");
+              if (list == null) { list = ""; }
+              list = list.replaceFirst("\\Q"+target.getName()+"\\E;?", "");
+              list = target.getName() + ";" + list;
+              if (list.split(";").length > 5) {
+                list = list.replaceFirst(";[^;]+;?$", "");
+              }
+              MainFrame.setPreferenceValue("filechooserlocations/"
+                + "gate/ApplicationRestore", "list", list);
             }
             catch(Exception e) {
               JOptionPane.showMessageDialog(getLargeView(), "Error!\n"
@@ -1096,9 +1097,6 @@ public class NameBearerHandle implements Handle, StatusListener,
         Thread thread = new Thread(runnable);
         thread.setPriority(Thread.MIN_PRIORITY);
         thread.start();
-      }
-      else if (URL != null) {
-        ((Resource)target).getFeatures().put("URL", URL);
       }
     }
 
@@ -1173,7 +1171,7 @@ public class NameBearerHandle implements Handle, StatusListener,
    }
 
     public void actionPerformed(ActionEvent ae) {
-      JFileChooser fileChooser = MainFrame.getFileChooser();
+      MainFrame.GateFileChooser fileChooser = MainFrame.getFileChooser();
 
       // add a .zip extension filter if not existing
       List filters = Arrays.asList(fileChooser.getChoosableFileFilters());
@@ -1203,115 +1201,99 @@ public class NameBearerHandle implements Handle, StatusListener,
         "WITH" : "WITHOUT") + " corpus.");
       fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 
-      // this URL has been added as a feature when loading the application from
-      // a file and it is used now to select this location in the file chooser
-      Object url;
-      // remove the URL feature to not save it in the application
-      if(((url = ((Resource)target).getFeatures().remove("URL")) != null)) {
-        try {
-          if (!url.toString().endsWith(".zip")) {
-            // replace extension with .zip
-            url = new URL(url.toString().replaceFirst("\\.[^.]{3,4}$", ".zip"));
-          }
-          fileChooser.ensureFileIsVisible(new File(((URL)url).toURI()));
-          fileChooser.setSelectedFile(new File(((URL)url).toURI()));
-        }
-        catch(URISyntaxException e) {
-          e.printStackTrace();
-        }
-        catch(MalformedURLException e) {
-          e.printStackTrace();
-        }
+      // try to find the location of this application
+      String location = MainFrame.getPreferenceValue("filechooserlocations/" +
+        "gate/ApplicationRestore/" + target.getName(), "location");
+      if (location != null) {
+        // replace extension with .zip
+        location = location.replaceFirst("\\.[^.]{3,5}$", ".zip");
+        File file = new File(location);
+        fileChooser.setSelectedFile(file);
+        fileChooser.ensureFileIsVisible(file);
       }
-      if(fileChooser.showSaveDialog(largeView) == JFileChooser.APPROVE_OPTION) {
+
+      if(fileChooser.showSaveDialog(largeView, "gate.ApplicationRestore."
+        + target.getName() + ".zip") == JFileChooser.APPROVE_OPTION) {
         final File targetZipFile = fileChooser.getSelectedFile();
-        InputOutputAnnotationSetsDialog inOutDialog = new InputOutputAnnotationSetsDialog((Controller)target);
+        InputOutputAnnotationSetsDialog inOutDialog =
+          new InputOutputAnnotationSetsDialog((Controller)target);
+
         if(inOutDialog.showDialog(window)) {
           Runnable runnable = new Runnable() {
             public void run() {
-              try {
-                // create and configure Ant Project
-                Project project = new Project();
-                ExporterBuildListener buildListener = new ExporterBuildListener();
-                Gate.setExecutable(buildListener);
-                project.addBuildListener(buildListener);
-                project.init();
-                MainFrame.lockGUI("Exporting application...");
+            try {
+            // create and configure Ant Project
+            Project project = new Project();
+            ExporterBuildListener buildListener = new ExporterBuildListener();
+            Gate.setExecutable(buildListener);
+            project.addBuildListener(buildListener);
+            project.init();
+            MainFrame.lockGUI("Exporting application...");
 
-                // create a temporary directory, and save the application
-                // in the normal way to that directory
-                File temporaryDirectory =
-                  File.createTempFile("gapp-packager", "", null);
-                if (!temporaryDirectory.delete()
-                 || !temporaryDirectory.mkdir()) {
-                  throw new IOException("Unable to create temporary directory.\n"
-                    + temporaryDirectory.getCanonicalPath());
-                }
-                File originalGapp = new File(temporaryDirectory, "original.xgapp");
-                File targetGapp = new File(temporaryDirectory, "application.xgapp");
-                gate.util.persistence.PersistenceManager
-                  .saveObjectToFile(target, originalGapp);
-    
-                // create instance of packager task and configure it
-                PackageGappTask task = new PackageGappTask();
-                task.setProject(project);
-                task.setSrc(originalGapp);
-                task.setDestFile(targetGapp);
-                // sensible default settings
-                task.setCopyPlugins(true);
-                task.setCopyResourceDirs(true);
-                task.setOnUnresolved(PackageGappTask.UnresolvedAction.recover);
-                task.init();
-    
-                // run the task.
-                task.perform();
-    
-                // TODO: generate the service definition from the annotation
-                // set names (I still have to write the code to do this)
-                // inputAnnotationSet.getText()
-                // outputAnnotationSet.getText()
-    
-                // create zip file using standard Ant zip task
-                Zip zipTask = new Zip();
-                zipTask.setProject(project);
-                zipTask.setDestFile(targetZipFile);
-                FileSet fs = new FileSet();
-                fs.setProject(project);
-                zipTask.addFileset(fs);
-                fs.setDir(temporaryDirectory);
-                // exclude the unpackaged gapp file from the zip
-                fs.setExcludes("original.xgapp");
-                zipTask.perform();
-    
-                // delete temporary files
-                Delete deleteTask = new Delete();
-                deleteTask.setProject(project);
-                deleteTask.setDir(temporaryDirectory);
-                deleteTask.perform();
-    
-                // re-add the URL feature just after saving the application
-                ((Resource)target).getFeatures().put(
-                  "URL", targetZipFile.toURI().toURL());
-              }
-              catch(Exception e) {
-                MainFrame.unlockGUI();
-                JOptionPane.showMessageDialog(getLargeView(), "Error!\n"
-                  + e.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
-                e.printStackTrace(Err.getPrintWriter());
-              }
-              finally {
-                MainFrame.unlockGUI();
-                Gate.setExecutable(null);
-              }
+            // create a temporary directory, and save the application
+            // in the normal way to that directory
+            File temporaryDirectory =
+              File.createTempFile("gapp-packager", "", null);
+            if (!temporaryDirectory.delete()
+             || !temporaryDirectory.mkdir()) {
+              throw new IOException("Unable to create temporary directory.\n"
+                + temporaryDirectory.getCanonicalPath());
+            }
+            File originalGapp = new File(temporaryDirectory, "original.xgapp");
+            File targetGapp = new File(temporaryDirectory, "application.xgapp");
+
+            // save the application in a gapp file
+            gate.util.persistence.PersistenceManager
+              .saveObjectToFile(target, originalGapp);
+
+            // create instance of packager task and configure it
+            PackageGappTask task = new PackageGappTask();
+            task.setProject(project);
+            task.setSrc(originalGapp);
+            task.setDestFile(targetGapp);
+            // sensible default settings
+            task.setCopyPlugins(true);
+            task.setCopyResourceDirs(true);
+            task.setOnUnresolved(PackageGappTask.UnresolvedAction.recover);
+            task.init();
+
+            // run the task.
+            task.perform();
+
+            // create zip file using standard Ant zip task
+            Zip zipTask = new Zip();
+            zipTask.setProject(project);
+            zipTask.setDestFile(targetZipFile);
+            FileSet fs = new FileSet();
+            fs.setProject(project);
+            zipTask.addFileset(fs);
+            fs.setDir(temporaryDirectory);
+            // exclude the unpackaged gapp file from the zip
+            fs.setExcludes("original.xgapp");
+            zipTask.perform();
+
+            // delete temporary files
+            Delete deleteTask = new Delete();
+            deleteTask.setProject(project);
+            deleteTask.setDir(temporaryDirectory);
+            deleteTask.perform();
+            }
+            catch(Exception e) {
+              MainFrame.unlockGUI();
+              JOptionPane.showMessageDialog(getLargeView(), "Error!\n"
+                + e.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
+              e.printStackTrace(Err.getPrintWriter());
+            }
+            finally {
+              MainFrame.unlockGUI();
+              Gate.setExecutable(null);
+            }
             }
           };
           Thread thread = new Thread(runnable);
           thread.setPriority(Thread.MIN_PRIORITY);
           thread.start();
         }
-      }
-      else if (url != null) {
-        ((Resource)target).getFeatures().put("URL", url);
       }
     }
 
