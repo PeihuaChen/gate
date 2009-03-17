@@ -762,7 +762,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
     }// ENd if
     // Identify and extract the root annotation from the dumpingSet.
     theRootAnnotation = identifyTheRootAnnotation(dumpingList);
-    // If a root annotation has been identified then add it eplicitley at the
+    // If a root annotation has been identified then add it explicitly at the
     // beginning of the document
     if(theRootAnnotation != null) {
       dumpingList.remove(theRootAnnotation);
@@ -1044,9 +1044,9 @@ public class DocumentImpl extends AbstractLanguageResource implements
 
   private String saveAnnotationSetAsXml(List aDumpAnnotList,
           boolean includeFeatures) {
-    String content = null;
+    String content;
     if(this.getContent() == null)
-      content = new String("");
+      content = "";
     else content = this.getContent().toString();
     StringBuffer docContStrBuff =
       DocumentXmlUtils.filterNonXmlChars(new StringBuffer(content));
@@ -1055,10 +1055,11 @@ public class DocumentImpl extends AbstractLanguageResource implements
             DOC_SIZE_MULTIPLICATION_FACTOR_AS
                     * (this.getContent().size().intValue()));
     // last offset position used to extract portions of text
-    Long lastOffset = new Long(0);
-    TreeMap offsets2CharsMap = new TreeMap();
-    HashMap annotsForOffset = new HashMap(100);
-    if(this.getContent().size().longValue() != 0) {
+    Long lastOffset = 0L;
+    TreeMap<Long, Character> offsets2CharsMap = new TreeMap<Long, Character>();
+    HashMap<Long, List<Annotation>> annotsForOffset =
+      new HashMap<Long, List<Annotation>>(100);
+    if(this.getContent().size() != 0) {
       // Fill the offsets2CharsMap with all the indices where
       // special chars appear
       buildEntityMapFromString(content, offsets2CharsMap);
@@ -1069,7 +1070,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
     // All annotations that end at that offset swap their place in descending
     // order. For each node write all the tags from left to right.
     // Construct the node set
-    TreeSet offsets = new TreeSet();
+    TreeSet<Long> offsets = new TreeSet<Long>();
     Iterator iter = aDumpAnnotList.iterator();
     Annotation annot;
     Long start;
@@ -1081,16 +1082,16 @@ public class DocumentImpl extends AbstractLanguageResource implements
       offsets.add(start);
       offsets.add(end);
       if(annotsForOffset.containsKey(start)) {
-        ((List)annotsForOffset.get(start)).add(annot);
+        annotsForOffset.get(start).add(annot);
       } else {
-        List newList = new ArrayList(10);
+        List<Annotation> newList = new ArrayList<Annotation>(10);
         newList.add(annot);
         annotsForOffset.put(start, newList);
       }
       if(annotsForOffset.containsKey(end)) {
-        ((List)annotsForOffset.get(end)).add(annot);
+        annotsForOffset.get(end).add(annot);
       } else {
-        List newList = new ArrayList(10);
+        List<Annotation> newList = new ArrayList<Annotation>(10);
         newList.add(annot);
         annotsForOffset.put(end, newList);
       }
@@ -1181,17 +1182,18 @@ public class DocumentImpl extends AbstractLanguageResource implements
       String replacement;
       // Before inserting tmpBuff into the buffer we need to check
       // if there are chars to be replaced in range
-      if(!offsetsInRange.isEmpty()) {
+      while(!offsetsInRange.isEmpty()) {
         tmpOffset = (Long)offsetsInRange.firstKey();
-        replacement = (String)DocumentXmlUtils.entitiesMap.get((Character)offsets2CharsMap
-                .get(tmpOffset));
-        partText.append(docContStrBuff.substring(tmpLastOffset.intValue(),
-                tmpOffset.intValue()));
+        replacement = (String)DocumentXmlUtils.entitiesMap.get(
+          offsets2CharsMap.get(tmpOffset));
+        partText.append(docContStrBuff.substring(
+          tmpLastOffset.intValue(), tmpOffset.intValue()));
         partText.append(replacement);
-        tmpLastOffset = new Long(tmpOffset.longValue() + 1);
+        tmpLastOffset = tmpOffset + 1;
+        offsetsInRange.remove(tmpOffset);
       }
-      partText.append(docContStrBuff.substring(tmpLastOffset.intValue(), offset
-              .intValue()));
+      partText.append(docContStrBuff.substring(
+        tmpLastOffset.intValue(), offset.intValue()));
       resultStrBuff.append(partText);
       // Insert tmpBuff to the result string
       resultStrBuff.append(tmpBuff.toString());
@@ -1200,25 +1202,26 @@ public class DocumentImpl extends AbstractLanguageResource implements
     // get text to the end of content
     // extract text from content and replace spec chars
     StringBuffer partText = new StringBuffer();
-    SortedMap offsetsInRange = offsets2CharsMap.subMap(lastOffset, new Long(
-            docContStrBuff.length()));
+    SortedMap offsetsInRange = offsets2CharsMap.subMap(
+      lastOffset, (long) docContStrBuff.length());
     Long tmpOffset;
     Long tmpLastOffset = lastOffset;
     String replacement;
     // Need to replace the entities in the remaining text, if there is any text
     // So, if there are any more items in offsets2CharsMap for remaining text
     // they need to be replaced
-    if(!offsetsInRange.isEmpty()) {
+    while(!offsetsInRange.isEmpty()) {
       tmpOffset = (Long)offsetsInRange.firstKey();
-      replacement = (String)DocumentXmlUtils.entitiesMap.get((Character)offsets2CharsMap
-              .get(tmpOffset));
-      partText.append(docContStrBuff.substring(tmpLastOffset.intValue(),
-              tmpOffset.intValue()));
+      replacement = (String)DocumentXmlUtils.entitiesMap.get(
+        offsets2CharsMap.get(tmpOffset));
+      partText.append(docContStrBuff.substring(
+        tmpLastOffset.intValue(), tmpOffset.intValue()));
       partText.append(replacement);
-      tmpLastOffset = new Long(tmpOffset.longValue() + 1);
+      tmpLastOffset = tmpOffset + 1;
+      offsetsInRange.remove(tmpOffset);
     }
-    partText.append(docContStrBuff.substring(tmpLastOffset.intValue(),
-            docContStrBuff.length()));
+    partText.append(docContStrBuff.substring(
+      tmpLastOffset.intValue(), docContStrBuff.length()));
     resultStrBuff.append(partText);
     return resultStrBuff.toString();
   }// saveAnnotationSetAsXml()
@@ -1914,7 +1917,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * serialize a GATE document in an XML format.
    * 
    * Implementation note: this method simply delegates to the static {@link
-   * DocumentXmlUtils.toXml(Document)} method
+   * DocumentStaxUtils#toXml(gate.Document)} method
    * 
    * @return a string representing a Gate Xml document.
    */
