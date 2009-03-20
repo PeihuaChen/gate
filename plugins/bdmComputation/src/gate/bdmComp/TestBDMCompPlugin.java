@@ -76,9 +76,9 @@ public class TestBDMCompPlugin extends TestCase {
       Corpus data = Factory.newCorpus("data");
       
       String corpusDirName; 
-      //corpusDirName = new File(bdmPluginHome, "test/ontology").getAbsolutePath();
+      corpusDirName = new File(bdmPluginHome, "test/ontology").getAbsolutePath();
       
-      corpusDirName = "C:\\svn\\gate\\plugins\\bdmComputation\\test\\ontology";
+      //corpusDirName = "C:\\svn\\gate\\plugins\\bdmComputation\\test\\ontology";
       
       
       //String testDir = "plugins/iaaPlugin/test/";
