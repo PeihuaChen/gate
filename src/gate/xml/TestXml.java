@@ -30,6 +30,7 @@ import gate.corpora.DocumentImpl;
 import gate.creole.SerialAnalyserController;
 import gate.util.Files;
 import gate.util.Err;
+import gate.util.persistence.PersistenceManager;
 import gate.creole.ANNIEConstants;
 
 //import org.w3c.www.mime.*;
@@ -230,7 +231,10 @@ public class TestXml extends TestCase
     verifyAnnotationIDGenerator(origDoc);
 
     // Load ANNIE with defaults and run it on the document
-    SerialAnalyserController annie = loadANNIEWithDefaults();
+    SerialAnalyserController annie = (SerialAnalyserController)
+      PersistenceManager.loadObjectFromFile(new File(new File(
+        Gate.getPluginsHome(), ANNIEConstants.PLUGIN_DIR),
+          ANNIEConstants.DEFAULT_FILE));
     assertTrue("ANNIE not loaded!", annie != null);
     Corpus c = Factory.newCorpus("test");
     c.add(origDoc);
@@ -444,35 +448,6 @@ public class TestXml extends TestCase
     }// End if
     return id2AnnMap;
   }// End of buildID2AnnotMap()
-
-  /**
-   * Load ANNIE with defaults
-   * @return
-   */
-  private SerialAnalyserController loadANNIEWithDefaults(){
-    FeatureMap params = Factory.newFeatureMap();
-    SerialAnalyserController sac = null;
-    try{
-      // Create a serial analyser
-      sac = (SerialAnalyserController)
-          Factory.createResource("gate.creole.SerialAnalyserController",
-                                 Factory.newFeatureMap(),
-                                 Factory.newFeatureMap(),
-                                 "ANNIE_" + Gate.genSym());
-      // Load each PR as defined in gate.creole.ANNIEConstants.PR_NAMES
-      for(int i = 0; i < ANNIEConstants.PR_NAMES.length; i++){
-      ProcessingResource pr = (ProcessingResource)
-          Factory.createResource(ANNIEConstants.PR_NAMES[i], params);
-        // Add the PR to the sac
-        sac.add(pr);
-      }// End for
-
-    }catch(gate.creole.ResourceInstantiationException ex){
-      ex.printStackTrace(Err.getPrintWriter());
-    }
-    return sac;
-  }// End of LoadANNIEWithDefaults()
-
 
   /** Test suite routine for the test runner */
   public static Test suite() {

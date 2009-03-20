@@ -320,7 +320,6 @@ public class Gate implements GateConstants {
     // get the list of know plugins from gate.xml
     // add all the installed plugins
     // get the list of loadable plugins
-    // or use ANNIE if value not set
     // load loadable plugins
 
     // process the known plugins list
@@ -353,7 +352,7 @@ public class Gate implements GateConstants {
           addKnownPlugin(pluginURL);
         }
         catch(MalformedURLException mue) {
-          // this shoulod never happen
+          // this should never happen
           throw new GateRuntimeException(mue);
         }
       }
@@ -366,14 +365,8 @@ public class Gate implements GateConstants {
     if(prop != null && prop.length() > 0) pluginPath = prop;
 
     if(pluginPath == null || pluginPath.length() == 0) {
-      // value not set -> use the default
-      try {
-        pluginPath = new File(pluginsHome, "ANNIE/").toURI().toURL().toString();
-        getUserConfig().put(AUTOLOAD_PLUGIN_PATH_KEY, pluginPath);
-      }
-      catch(MalformedURLException mue) {
-        throw new GateRuntimeException(mue);
-      }
+      // no plugin to load stop here
+      return;
     }
 
     // load all loadable plugins
