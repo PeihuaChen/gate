@@ -19,7 +19,14 @@ package gate.creole;
 public interface ANNIEConstants {
 
   /**
-   * This is an array of strings containing all class names for all ANNIE PRs
+   * This is an array of strings containing all class names for all ANNIE PRs.
+   * @deprecated ANNIE must now be loaded from a gapp application file:
+   * <pre>
+   * SerialAnalyserController annie = (SerialAnalyserController)
+   *   PersistenceManager.loadObjectFromFile(new File(new File(
+   *     Gate.getPluginsHome(), ANNIEConstants.PLUGIN_DIR),
+   *       ANNIEConstants.DEFAULT_FILE));
+   * </pre>
    */
   public static final String[] PR_NAMES = {
     "gate.creole.annotdelete.AnnotationDeletePR",
@@ -30,6 +37,8 @@ public interface ANNIEConstants {
     "gate.creole.ANNIETransducer",
     "gate.creole.orthomatcher.OrthoMatcher"
   };
+  public static final String PLUGIN_DIR = "ANNIE";
+  public static final String DEFAULT_FILE = "ANNIE_with_defaults.gapp";
 
   /** The name of the feature on Documents that holds coreference matches. */
   public static final String DOCUMENT_COREF_FEATURE_NAME = "MatchesAnnots";

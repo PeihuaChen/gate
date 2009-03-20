@@ -2188,40 +2188,25 @@ public class MainFrame extends JFrame implements ProgressListener,
     public void actionPerformed(ActionEvent e) {
       Runnable runnable = new Runnable() {
         public void run() {
-          long startTime = System.currentTimeMillis();
-          FeatureMap params = Factory.newFeatureMap();
+          lockGUI("ANNIE is being loaded...");
           try {
-            // lock the gui
-            lockGUI("ANNIE is being loaded...");
-            // Create a serial analyser
-            SerialAnalyserController sac =
-              (SerialAnalyserController)Factory.createResource(
-                "gate.creole.SerialAnalyserController",
-                Factory.newFeatureMap(), Factory.newFeatureMap(), "ANNIE_"
-                  + Gate.genSym());
-            // Load each PR as defined in
-            // gate.creole.ANNIEConstants.PR_NAMES
-            for(String PR_NAME : PR_NAMES) {
-              ProcessingResource pr =
-                (ProcessingResource) Factory.createResource(PR_NAME, params);
-              // Add the PR to the sac
-              sac.add(pr);
-            }// End for
+            long startTime = System.currentTimeMillis();
+
+            // load ANNIE as an application from a gapp file
+            PersistenceManager.loadObjectFromFile(new File(new File(
+              Gate.getPluginsHome(), ANNIEConstants.PLUGIN_DIR),
+                ANNIEConstants.DEFAULT_FILE));
 
             long endTime = System.currentTimeMillis();
             statusChanged("ANNIE loaded in "
               + NumberFormat.getInstance().format(
                 (double)(endTime - startTime) / 1000) + " seconds");
           }
-          catch(ResourceInstantiationException e) {
+          catch(Exception e) {
             final Exception error = e;
             final String errorMessage =
-              "It seems that the ANNIE Plugin is not loaded.";
+              "There was an error when loading the ANNIE application.";
             Action[] actions = {
-              new AbstractAction("Load plugins manager") {
-                public void actionPerformed(ActionEvent e) {
-                  (new ManagePluginsAction()).actionPerformed(null);
-              }},
               new AbstractAction("Search in mailing list") {
                 public void actionPerformed(ActionEvent e) {
                   new HelpMailingListAction(error.getMessage())
@@ -2256,53 +2241,26 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
 
     public void actionPerformed(ActionEvent e) {
-      SwingUtilities.invokeLater(new Runnable() {
+      Runnable runnable = new Runnable() {
         public void run() {
+          lockGUI("ANNIE is being loaded...");
+          final SerialAnalyserController controller;
           try {
-            // Create a serial analyser
-            SerialAnalyserController sac = (SerialAnalyserController)
-              Factory.createResource("gate.creole.SerialAnalyserController",
-                Factory.newFeatureMap(), Factory.newFeatureMap(),
-                "ANNIE_" + Gate.genSym());
-            // Load each PR as defined in
-            // gate.creole.ANNIEConstants.PR_NAMES
-            for(String PR_NAME : PR_NAMES) {
-              // get the params for the Current PR
-              ResourceData resData = Gate.getCreoleRegister().get(PR_NAME);
-              if (resData == null) {
-                throw new ResourceInstantiationException(
-                  PR_NAME + "is not loaded.");
-              }
-              GateFileChooser.setCurrentResourceClassName(
-                resData.getClassName());
-              if(newResourceDialog.show(resData, "Parameters for the new "
-                + resData.getName())) {
-                sac.add((ProcessingResource) Factory.createResource(PR_NAME,
-                  newResourceDialog.getSelectedParameters()));
-              }
-              else {
-                // the user got bored and aborted the operation
-                statusChanged("Loading cancelled! Removing traces...");
-                for(Object loadedProcessingResource : sac.getPRs()) {
-                  Factory.deleteResource(
-                    (ProcessingResource) loadedProcessingResource);
-                }
-                Factory.deleteResource(sac);
-                statusChanged("Loading cancelled!");
-                return;
-              }
-            }// End for
+            // load ANNIE as an application from a gapp file
+            controller = (SerialAnalyserController)
+              PersistenceManager.loadObjectFromFile(new File(new File(
+                Gate.getPluginsHome(), ANNIEConstants.PLUGIN_DIR),
+                  ANNIEConstants.DEFAULT_FILE));
+
             statusChanged("ANNIE loaded!");
+            unlockGUI();
           }
-          catch(ResourceInstantiationException e) {
+          catch(Exception e) {
+            unlockGUI();
             final Exception error = e;
             final String errorMessage =
-              "It seems that the ANNIE Plugin is not loaded.";
+              "There was an error when loading the ANNIE application.";
             Action[] actions = {
-              new AbstractAction("Load plugins manager") {
-                public void actionPerformed(ActionEvent e) {
-                  (new ManagePluginsAction()).actionPerformed(null);
-              }},
               new AbstractAction("Search in mailing list") {
                 public void actionPerformed(ActionEvent e) {
                   new HelpMailingListAction(error.getMessage())
@@ -2311,51 +2269,67 @@ public class MainFrame extends JFrame implements ProgressListener,
             ErrorDialog.show(error, errorMessage, instance,
               MainFrame.getIcon("root"), actions);
             log.error(errorMessage, error);
+            return;
           }
+
+          SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+              List<ProcessingResource> prs =
+                new ArrayList<ProcessingResource>(controller.getPRs());
+              for(ProcessingResource pr : prs) {
+                try {
+                  SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                      // select last processing resource in resources tree
+                      int selectedRow = resourcesTree.getRowForPath(
+                        new TreePath(processingResourcesRoot.getPath()));
+                      selectedRow += processingResourcesRoot.getChildCount();
+                      resourcesTree.setSelectionRow(selectedRow);
+                      resourcesTree.scrollRowToVisible(selectedRow);
+                    }
+                  });
+                  // get the parameters for each ANNIE PR
+                  ResourceData resData = Gate.getCreoleRegister()
+                    .get(pr.getClass().getName());
+                  if (resData == null) {
+                    throw new ResourceInstantiationException(
+                      pr.getName() + " was not possible to load.");
+                  }
+                  GateFileChooser.setCurrentResourceClassName(
+                    resData.getClassName());
+                  if(newResourceDialog.show(resData, "Parameters for the new "
+                    + resData.getName())) {
+                    // add the PR with user parameters
+                    controller.add((ProcessingResource)
+                      Factory.createResource(pr.getClass().getName(),
+                      newResourceDialog.getSelectedParameters()));
+                  }
+                  // remove the PR with default parameters
+                  Factory.deleteResource(pr);
+                }
+                catch(ResourceInstantiationException e) {
+                  final Exception error = e;
+                  final String errorMessage = "There was an error when creating"
+                    + " the resource: " + pr.getName() + ".";
+                  Action[] actions = {
+                    new AbstractAction("Search in mailing list") {
+                      public void actionPerformed(ActionEvent e) {
+                        new HelpMailingListAction(error.getMessage())
+                          .actionPerformed(null);
+                  }}};
+                  ErrorDialog.show(error, errorMessage, instance,
+                    MainFrame.getIcon("root"), actions);
+                  log.error(errorMessage, error);
+                }
+              } // for(Object loadedPR : loadedPRs)
+            }
+          });
         }
-      });
+      };
+      Thread thread = new Thread(runnable, "");
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
     }
-  }// class LoadANNIEWithoutDefaultsAction
-
-  /**
-   * This class represent an action which loads ANNIE without default
-   * param
-   * TODO: remove this?
-   */
-  class LoadANNIEWithoutDefaultsAction1 extends AbstractAction implements
-                                                              ANNIEConstants {
-    private static final long serialVersionUID = 1L;
-    public LoadANNIEWithoutDefaultsAction1() {
-      super("Without defaults");
-    }// NewAnnotDiffAction
-
-    public void actionPerformed(ActionEvent e) {
-      // Load ANNIE without defaults
-      CreoleRegister reg = Gate.getCreoleRegister();
-      // Load each PR as defined in gate.creole.ANNIEConstants.PR_NAMES
-      for(String PR_NAME : PR_NAMES) {
-        ResourceData resData = reg.get(PR_NAME);
-        if(resData != null) {
-          NewResourceDialog resourceDialog =
-            new NewResourceDialog(MainFrame.this, "Resource parameters", true);
-          resourceDialog.setTitle(
-            "Parameters for the new " + resData.getName());
-          GateFileChooser.setCurrentResourceClassName(resData.getClassName());
-          resourceDialog.show(resData);
-        }
-        else {
-          log.error(PR_NAME + " not found in Creole register");
-        }// End if
-      }// End for
-      try {
-        // Create an application at the end.
-        Factory.createResource("gate.creole.SerialAnalyserController", Factory
-          .newFeatureMap(), Factory.newFeatureMap(), "ANNIE_" + Gate.genSym());
-      }
-      catch(gate.creole.ResourceInstantiationException ex) {
-        log.error(e);
-      }// End try
-    }// actionPerformed();
   }// class LoadANNIEWithoutDefaultsAction
 
   class NewBootStrapAction extends AbstractAction {
