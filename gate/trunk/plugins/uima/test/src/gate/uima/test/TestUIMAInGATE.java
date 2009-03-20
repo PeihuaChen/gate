@@ -85,6 +85,8 @@ public class TestUIMAInGATE extends TestCase {
     if(!gateInited) {
       Gate.setGateHome(gateHomeDir);
       Gate.init();
+      // load ANNIE
+      Gate.getCreoleRegister().registerDirectories(new File(Gate.getPluginsHome(), "ANNIE").toURL());
       // load the uima plugin
       Gate.getCreoleRegister().registerDirectories(uimaPluginDir.toURL());
       // load the example annotators into the GATE classloader
