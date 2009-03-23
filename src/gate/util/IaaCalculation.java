@@ -32,26 +32,26 @@ import gate.util.AnnotationDiffer;
  */
 public class IaaCalculation {
   /** Non-category string. */
-  static String NONCAT = "Non-cat";
+  public static String NONCAT = "Non-cat";
   /** Number of annotators. */
   public int numAnnotators;
   /** Number of documents. */
   public int numDocs;
   /** Number of labels. */
-  int numLabels;
+  public int numLabels;
   /** Name of label feature. */
-  String nameClassFeat;
+  public String nameClassFeat;
   /** Array of labels. */
-  String[] labelsArr;
+  public String[] labelsArr;
   /** Name of annotation type. */
-  String nameAnnType;
+  public String nameAnnType;
   /** Using label or not. */
   public boolean isUsingLabel = false;
   /**
    * Array of annotation sets, first dimension is for document, and second
    * dimension is for annotator.
    */
-  AnnotationSet[][] annsArrArr;
+  public AnnotationSet[][] annsArrArr;
   /** The overall contingency table. */
   public ContingencyTable contingencyOverall;
   /** The contingency table for each pair of annotator. */
@@ -84,7 +84,7 @@ public class IaaCalculation {
     checkIsAnnsMissing();
   }
 
-  /** Constractor by giving the annotation sets and the name of annotation type. */
+  /** Constructor by giving the annotation sets and the name of annotation type. */
   public IaaCalculation(String nameAnnT, AnnotationSet[][] annsA2, int verbsy) {
     this.nameAnnType = nameAnnT;
     this.numLabels = 1;
