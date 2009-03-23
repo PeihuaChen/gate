@@ -85,12 +85,14 @@ public class TestIaaPlugin extends TestCase {
 
       // Load the documents into a corpus
       Corpus data = Factory.newCorpus("data");
-      
-      String corpusDirName = new File(iaaPluginHome, "test")
-      .getAbsolutePath();
-      
       ExtensionFileFilter fileFilter = new ExtensionFileFilter();
       fileFilter.addExtension("xml");
+      data.populate(new File(iaaPluginHome, "test").toURI().toURL(), fileFilter, "UTF-8", false);
+      
+      /*String corpusDirName = new File(iaaPluginHome, "test")
+      .getAbsolutePath();
+      
+      
       File[] xmlFiles = new File(corpusDirName).listFiles(fileFilter);
       Arrays.sort(xmlFiles, new Comparator<File>() {
         public int compare(File a, File b) {
@@ -103,9 +105,9 @@ public class TestIaaPlugin extends TestCase {
           doc.setName(f.getName());
           data.add(doc);
         }
-      }
+      }*/
       
-      String testDir = "plugins/iaaPlugin/test/";
+      //String testDir = "plugins/iaaPlugin/test/";
       
       //System.out.println("testDir00=*"+(new File(testDir,"beijing-opera.xml")).getAbsolutePath().toString()+"*");
       /*Document doc = Factory.newDocument(new File("C:\\svn\\gate\\plugins\\iaaPlugin\\test\\beijing-opera.xml").toURL(), "UTF-8");
@@ -127,10 +129,10 @@ public class TestIaaPlugin extends TestCase {
       gate.creole.SerialAnalyserController
       controller = (gate.creole.SerialAnalyserController)Factory
       .createResource("gate.creole.SerialAnalyserController");
-    controller.setCorpus(data);
-    controller.add(iaaM);
+      controller.setCorpus(data);
+      controller.add(iaaM);
       
-     controller.execute();
+      controller.execute();
       
       int[] nPwF = new int[4];
       nPwF[0] = (int)Math.ceil((double)iaaM.fMeasureOverallTypes.correct*100);

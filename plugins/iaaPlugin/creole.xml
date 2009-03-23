@@ -28,6 +28,10 @@
         COMMENT="The verbosity level for the IAA results outputs" 
         RUNTIME="true" OPTIONAL="false" DEFAULT="1">java.lang.String</PARAMETER>
 
+	<PARAMETER NAME="bdmScoreFile"
+        COMMENT="The URL storing the BDM scores" RUNTIME="true"
+        OPTIONAL="true">java.net.URL</PARAMETER>
+
      </RESOURCE>
      
   </CREOLE>
