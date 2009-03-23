@@ -4101,11 +4101,42 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
           classType = OConstants.MAX_CARDINALITY_RESTRICTION;
         }
       }
+      
+      if(classType == OConstants.OWL_CLASS) {
+        if(res instanceof BNode)
+          classType = OConstants.ANNONYMOUS_CLASS;
+        else {
+          // check if it is an instance
+          if(isIndividual(null, resourceURI)) {
+            classType = OConstants.INSTANCE;
+          }
+        }
+      }
+
       return new ResourceInfo(resourceURI, classType);
     }
     return null;
   }
 
+  /**
+   * tells if the given URI is registered as an individual
+   * @param repositoryID
+   * @param individualURI
+   * @return
+   * @throws GateOntologyException
+   */
+  public boolean isIndividual(String repositoryID, String individualURI)
+          throws GateOntologyException {
+    if(debug) print("isIndividual");
+
+    loadRepositoryDetails(repositoryID);
+    String query = "Select X from {<" + individualURI
+            + ">} rdf:type {X} rdf:type {<http://www.w3.org/2002/07/owl#Class>}";
+    QueryResultsTable iter = performQuery(query);
+    return iter.getRowCount() > 0;
+
+  }  
+  
   /**
    * Sets the cardinality value for the given restriction uri.
    * 

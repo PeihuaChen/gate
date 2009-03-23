@@ -112,6 +112,10 @@ public interface OConstants {
    */
   public static final byte ANNONYMOUS_CLASS = 7;
   
+  /**
+   * specifies that it is an instance
+   */
+  public static final byte INSTANCE = 8;
   
   /// ***********************************
   /// Ontology Types 

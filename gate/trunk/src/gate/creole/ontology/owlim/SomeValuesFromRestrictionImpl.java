@@ -36,6 +36,11 @@ public class SomeValuesFromRestrictionImpl extends OClassImpl implements
   public OResource getHasValue() {
       ResourceInfo resource = owlim.getRestrictionValue(this.repositoryID,
               this.uri.toString(), OConstants.SOME_VALUES_FROM_RESTRICTION);
+
+      if(resource.getClassType() == OConstants.INSTANCE)
+        return Utils.createOInstance(this.repositoryID, this.ontology,
+                this.owlim, resource.getUri());
+
       return Utils.createOClass(this.repositoryID, this.ontology, this.owlim,
               resource.getUri(), resource.getClassType());
   }

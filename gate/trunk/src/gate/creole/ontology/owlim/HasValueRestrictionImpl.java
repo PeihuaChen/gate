@@ -47,6 +47,11 @@ public class HasValueRestrictionImpl extends OClassImpl implements
           throw new GateRuntimeException(ive);
         }
       }
+      
+      if(resource.getClassType() == OConstants.INSTANCE)
+        return Utils.createOInstance(this.repositoryID, this.ontology,
+                this.owlim, resource.getUri());
+      
       return Utils.createOClass(this.repositoryID, this.ontology, this.owlim,
               resource.getUri(), resource.getClassType());
   }
