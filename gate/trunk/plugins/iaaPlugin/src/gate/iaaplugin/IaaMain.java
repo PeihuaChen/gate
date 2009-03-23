@@ -7,19 +7,32 @@
  */
 package gate.iaaplugin;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
+import gate.Annotation;
 import gate.AnnotationSet;
+import gate.Factory;
+import gate.FeatureMap;
 import gate.ProcessingResource;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
-import gate.util.ContingencyTable;
+import gate.util.AnnotationDiffer;
 import gate.util.FMeasure;
 import gate.util.IaaCalculation;
 
@@ -77,7 +90,22 @@ public class IaaMain extends AbstractLanguageAnalyser implements
   HashMap<String,String>allTypeFeats = null;
   /** Annotation type and the feature names. */
   HashMap<String, String> annsTypes = new HashMap<String, String>();
-
+  
+  /** The URL storing the BDM scores computed by bdmComputation plugin.*/
+  URL bdmScoreFile = null;
+  /** the map from a pair of concepts to their bdm score. */
+  HashMap<String,Float>conceptNames2BDM = null;
+  /** Whether or not using the BDM. */
+  boolean isUsingBDM;
+  /** The overall F-measure for each type for BDM. */
+  private FMeasure[]fMeasureOverallBDM;
+  /** Fmeaures for each pair of annotator and each label for BDM. */
+  private HashMap<String,FMeasure> fMeasuresPairwiseLabelBDM=null;
+  /** Fmeaures for each pair of annotator and over all labels for each type for BDM. */
+  private FMeasure[][]fMeasuresPairwiseBDM=null;
+  /** The overall F-measure for all types for BDM. */
+  public FMeasure fMeasureOverallTypesBDM;
+  
 	/** Initialise this resource, and return it. */
 	public gate.Resource init() throws ResourceInstantiationException {
     allTypeFeats = new HashMap<String,String>();
@@ -114,6 +142,14 @@ public class IaaMain extends AbstractLanguageAnalyser implements
         } else {
           annsTypes.put(annTs[i], ""); 
         }
+      }
+      //initialise the variables for bdm score.
+      if(bdmScoreFile != null && bdmScoreFile.toString() != "") {
+        isUsingBDM = true;
+        conceptNames2BDM = new HashMap<String,Float>();
+        read(bdmScoreFile, conceptNames2BDM); //read the bdm scores from the file into memory
+      } else {
+        isUsingBDM = false;
       }
     }
 
@@ -191,6 +227,18 @@ public class IaaMain extends AbstractLanguageAnalyser implements
       //Initialise the kappa measure: they should has zeros as initialisation values.
       kappaOverall = new float[numTypesKappa][numTypes];
       kappaPairwise = new float[numTypesKappa][numTypes][num1];
+      if(this.isUsingBDM) {
+        //Initialise the F-measures for the BDM
+        fMeasuresPairwiseBDM = new FMeasure[numTypes][num1];
+        fMeasureOverallBDM = new FMeasure[numTypes];
+        for(int j=0; j<numTypes; ++j) {
+          for(int i=0; i<num1; ++i) 
+            fMeasuresPairwiseBDM[j][i] = new FMeasure();
+          fMeasureOverallBDM[j] = new FMeasure();
+        }
+        fMeasureOverallTypesBDM = new FMeasure();
+        fMeasuresPairwiseLabelBDM = new HashMap<String,FMeasure>();
+      }
     }
     
     if(!isAvailabelAllAnnSets) {
@@ -209,14 +257,14 @@ public class IaaMain extends AbstractLanguageAnalyser implements
     for(int i=0; i<annSAll.length; ++i)
       annSAll[i] = document.getAnnotations(annsArray[i]);
     
-    if(verbo>1) System.out.println("\nFor the document: " +document.getName());
+    if(verbo>0) System.out.println("\nFor the document: " +document.getName());
     
     //Sort the types names
     Collections.sort(typeNames);
     
-    for(int i=0; i<typeNames.size(); ++i) { //for each annotation type
-      String typeN = typeNames.get(i);
-      if(verbo>1) System.out.println("For the annotation type *"+typeN+"*");
+    for(int iIndex=0; iIndex<typeNames.size(); ++iIndex) { //for each annotation type
+      String typeN = typeNames.get(iIndex);
+      if(verbo>0) System.out.println("For the annotation type *"+typeN+"*");
       IaaCalculation iaaC = null;
       AnnotationSet[][] annSs= new AnnotationSet[1][annsArray.length];
       for(int j=0; j<annSs[0].length; ++j)
@@ -239,19 +287,29 @@ public class IaaMain extends AbstractLanguageAnalyser implements
       }
       
       //Compute the F-measure
-      if(this.problemT.equals(this.problemER))
-        computeFmeasures(i, iaaC, typeN, labels, annsArray);
+      if(this.problemT.equals(this.problemER)) {
+        computeFmeasures(iIndex, iaaC, typeN, labels, annsArray);
+        //compute the F-measure for BDM
+        if(this.isUsingBDM) {
+          computeFmeasuresBDM(iIndex, iaaC, typeN, labels, annsArray);
+        }
+      }
       
       //Compute the cohen's Kappa
       if(this.problemT.equals(this.problemClassification))
-        computeKappa(i, iaaC, annsArray);
+        computeKappa(iIndex, iaaC, annsArray);
+      
     }
     }
     
     //Print out the overall results
     if(positionDoc == corpus.size()-1) {
-      if(this.problemT.equals(this.problemER))
+      if(this.problemT.equals(this.problemER)) {
         printOverallResultsFmeasure(typeNames, annsArray);
+        if(this.isUsingBDM) {
+          printOverallResultsFmeasureBDM(typeNames, annsArray);
+        }
+      }
       //print the kappa
       if(this.problemT.equals(this.problemClassification))
         printOverallResultsKappa(typeNames, annsArray);
@@ -274,16 +332,16 @@ public class IaaMain extends AbstractLanguageAnalyser implements
       
   }
   
-  private void computeFmeasures(int i, IaaCalculation iaaC, String typeN,
+  private void computeFmeasures(int iIndex, IaaCalculation iaaC, String typeN,
     String [] labels, String[] annsArray) {
     iaaC.pairwiseIaaFmeasure();
-    //if(verbo>0) System.out.println("For the annotation type *"+typeN+"*");
-    if(verbo>1) iaaC.printResultsPairwiseFmeasures();
+    if(verbo>0) System.out.println("For the annotation type *"+typeN+"*");
+    if(verbo>0) iaaC.printResultsPairwiseFmeasures();
     //sum the fmeasure of all documents
-    fMeasureOverall[i].add(iaaC.fMeasureOverall);
+    fMeasureOverall[iIndex].add(iaaC.fMeasureOverall);
     
     for(int j=0; j<fMeasuresPairwise[0].length; ++j)
-      fMeasuresPairwise[i][j].add(iaaC.fMeasuresPairwise[j]);
+      fMeasuresPairwise[iIndex][j].add(iaaC.fMeasuresPairwise[j]);
     
     //add the fmeasure for each sub-type label
     if(annsTypes.get(typeN) != null && annsTypes.get(typeN) != "") {
@@ -301,7 +359,7 @@ public class IaaMain extends AbstractLanguageAnalyser implements
         }
     }
   }
-  
+ 
   private void printOverallResultsKappa(Vector<String>typeNames, String[] annsArray) {
     int numDoc = corpus.size();
     numDoc -= numDocNotCounted;
@@ -454,6 +512,361 @@ public class IaaMain extends AbstractLanguageAnalyser implements
     
   }
   
+  private void printOverallResultsFmeasureBDM(Vector<String>typeNames, String[] annsArray) {
+    ArrayList<String>keyList = new ArrayList(fMeasuresPairwiseLabelBDM.keySet());
+    Collections.sort(keyList);
+    int numDoc = corpus.size();
+    numDoc -= numDocNotCounted;
+    if(numDoc<1) ++numDoc;
+    int numTypes = annsTypes.keySet().size();
+    if(verbo>0) System.out.println("\n******** The F-measure based on the BDM scores specified in the following:");
+    if(verbo>0) System.out.println("\nMacro averaged over "+numDoc+" documents:");
+    if(verbo>0) System.out.println("\nFor each pair of annotators, each type and each label:");
+    //if(verbo>0) System.out.println("for each type:");
+    for(int i=0; i<numTypes; ++i) {
+      String typeN = typeNames.get(i);
+      if(verbo>0) System.out.println("Annotation type *"+ typeN+"*");
+      fMeasureOverallBDM[i].macroAverage(numDoc); 
+      for(int j=0; j<fMeasuresPairwiseBDM[0].length; ++j)
+        fMeasuresPairwiseBDM[i][j].macroAverage(numDoc);
+      if(verbo>0) System.out.println("For each pair of annotators");
+      int num11=0;
+      for(int i1=0; i1<annsArray.length; ++i1)
+        for(int j=i1+1; j<annsArray.length; ++j) {
+          if(verbo>0) System.out.println("For pair ("+annsArray[i1]+","+annsArray[j]+"): "+
+            fMeasuresPairwiseBDM[i][num11].printResults());
+          ++num11;
+        }
+      if(verbo>1) {
+        isUsingLabel = false;
+        if(annsTypes.get(typeN) != null && annsTypes.get(typeN) != "")
+          isUsingLabel = true;
+          
+        /*if(isUsingLabel) {
+          
+          for(int i1=0; i1<keyList.size(); ++i1) {
+            String key = keyList.get(i1);
+            if(key.contains("):"+typeN+"->")) {
+              fMeasuresPairwiseLabelBDM.get(key).macroAverage(numDoc);
+              String pairAnns = key.substring(0,key.indexOf("):")+1);
+              String typeAnn = key.substring(key.indexOf("):")+2, key.indexOf("->"));
+              String labelAnn = key.substring(key.indexOf("->")+2);
+              System.out.println("pairAnns="+pairAnns+", type="+typeAnn+", label="+labelAnn+": "
+              +fMeasuresPairwiseLabelBDM.get(key).printResults());
+            }
+          }
+        }*/
+      }
+      if(verbo>0) System.out.println("Overall pairs: "+fMeasureOverallBDM[i].printResults());
+      fMeasureOverallTypesBDM.add(fMeasureOverallBDM[i]);
+    }
+    fMeasureOverallTypesBDM.macroAverage(numTypes);
+    if(verbo>0) System.out.println("Overall pairs and types: "+  fMeasureOverallTypesBDM.printResults());
+    
+    System.out.println("\n ********");
+    
+  }
+  /** Read the BDM scores from the file to the Hashmap*/
+  void read(URL bdmFile, HashMap<String,Float>conceptNames2BDM) {
+    try {
+      BufferedReader bdmResultsReader = new BufferedReader(new InputStreamReader(
+        new FileInputStream(new File(bdmFile.toURI())), "UTF-8"));
+      bdmResultsReader.readLine(); //read the first line as the header line.
+      String oneLine = bdmResultsReader.readLine();
+      while(oneLine != null) {
+        String[] terms = oneLine.split(", ");
+        //int leftB = terms[0].indexOf("Key=");
+        if(terms.length>3) {
+          String oneCon = terms[0].substring(4);
+          String anoCon = terms[1].substring(9);
+          String bdmS = terms[2].substring(4);
+          conceptNames2BDM.put(oneCon+", "+anoCon, new Float(bdmS));
+          //System.out.println("("+oneCon+","+anoCon+"), bdm="+bdmS);
+        } else {
+          this.isUsingBDM = false;
+          if(bdmFile!= null) 
+            System.out.println("The file "+bdmFile.toString()+" is not a BDM results file!");
+          else 
+            System.out.println("There is no BDM results file specified!");
+          break;
+        }
+        oneLine = bdmResultsReader.readLine();
+      }
+      bdmResultsReader.close();
+      return;
+    }
+    catch(UnsupportedEncodingException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    catch(FileNotFoundException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    catch(URISyntaxException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    catch(IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+  
+  /** Compute the F-measures based on BDM by computing the pairwise fmeasure for annotators. */
+  public void computeFmeasuresBDM(int iIndex, IaaCalculation iaaC, String typeN,
+    String [] labels, String[] annsArray) {
+    // Create one fmeasure object for each pair of annotators and each label
+    int num1 = iaaC.numAnnotators * (iaaC.numAnnotators - 1) / 2;
+    FMeasure[][] fMeasures = new FMeasure[num1][iaaC.numLabels];
+    for(int i = 0; i < num1; ++i) {
+      //for(int j = 0; j < iaaC.numLabels; ++j) {
+      int j = 0;
+        fMeasures[i][j] = new FMeasure();
+      }
+    // Count the F-measure numbers for each case
+    for(int iDoc = 0; iDoc < iaaC.numDocs; ++iDoc) {
+      int num11 = 0;
+      for(int iAnr1 = 0; iAnr1 < iaaC.numAnnotators; ++iAnr1)
+        for(int iAnr2 = iAnr1 + 1; iAnr2 < iaaC.numAnnotators; ++iAnr2) {
+          countFmeasureNumberBDM(iaaC, iaaC.annsArrArr[iDoc][iAnr1], iaaC.annsArrArr[iDoc][iAnr2],
+            fMeasures, num11);
+          ++num11;
+        }
+    }
+    // Compute the precision, recall and F1
+    for(int i = 0; i < num1; ++i) {
+      //for(int j = 0; j < iaaC.numLabels; ++j) {
+      int j=0;
+        fMeasures[i][j].computeFmeasure();
+        fMeasures[i][j].computeFmeasureLenient();
+      }
+    // Compute the averaged result over the pairs of annotators
+    FMeasure fMAve = new FMeasure();
+    FMeasure[] fMPair = new FMeasure[num1];
+    if(isUsingLabel) {
+      // Create one fmeasure for each pair of annotators for all labels
+      for(int i = 0; i < num1; ++i) {
+        fMPair[i] = new FMeasure();
+        //for(int j = 0; j < iaaC.numLabels; ++j)
+        int j=0;
+          fMPair[i].add(fMeasures[i][j]);
+        // fMPair[i].macroAverage(numLabels);
+        fMPair[i].computeFmeasure();
+        fMPair[i].computeFmeasureLenient();
+        fMAve.add(fMPair[i]);
+      }
+    }
+    else {
+      for(int i = 0; i < num1; ++i) {
+        fMPair[i] = fMeasures[i][0];
+        fMAve.add(fMeasures[i][0]);
+      }
+    }
+    fMAve.macroAverage(num1);
+    //this.fMeasureOverall = fMAve;
+    //this.fMeasuresPairwiseLabel = fMeasures;
+    //this.fMeasuresPairwise = fMPair;
+    if(verbo>0) System.out.println("For the annotation type *"+typeN+"*");
+    
+    if(verbo>0) {
+      printResultsPairwiseFmeasuresDBM(iaaC, fMAve, fMeasures, fMPair);
+    }
+    //sum the fmeasure of all documents
+    fMeasureOverallBDM[iIndex].add(fMAve); //(iaaC.fMeasureOverall);
+    
+    for(int j=0; j<fMeasuresPairwiseBDM[0].length; ++j) {
+      fMeasuresPairwiseBDM[iIndex][j].add(fMPair[j]); //iaaC.fMeasuresPairwise[j]);
+    }
+    //add the fmeasure for each sub-type label
+    if(annsTypes.get(typeN) != null && annsTypes.get(typeN) != "") {
+      //for(int i1=0; i1<labels.length; ++i1) {
+      int i1 = 0;
+        int num11 = 0;
+        for(int i11 = 0; i11 <annsArray.length; ++i11)
+          for(int j11 = i11 + 1; j11 <annsArray.length; ++j11) {
+            String key = typeN.concat("->"+labels[i1]);
+            key = "("+annsArray[i11]+","+annsArray[j11]+"):"+key;
+            if(!fMeasuresPairwiseLabelBDM.containsKey(key))
+              fMeasuresPairwiseLabelBDM.put(key, new FMeasure());
+            fMeasuresPairwiseLabelBDM.get(key).add(fMeasures[num11][i1]); //iaaC.fMeasuresPairwiseLabel[num11][i1]);
+            ++num11;
+          }
+    }
+  }
+  
+  void countFmeasureNumberBDM(IaaCalculation iaaC, AnnotationSet annsOriginal, 
+    AnnotationSet annsTest, FMeasure[][]  fMeasures, int num11) {
+    if(iaaC.isUsingLabel) {
+      //HashSet<String> signSet = new HashSet<String>();
+      //signSet.add(iaaC.nameClassFeat);
+      
+      //System.out.println("nameClassFeat=*"+nameClassFeat+"*");
+      
+      // Create an annotationDiffer()
+      //AnnotationDiffer annDiff = new AnnotationDiffer();
+      //annDiff.setSignificantFeaturesSet(signSet);
+      float [] fNumbers = new float[4]; //the numbers for correct, partial correct, missing and spurious.
+      //for(int iLabel = 0; iLabel < iaaC.numLabels; ++iLabel) {
+        
+        // Get key and response annotation sets by ann type and feature
+        //FeatureMap featMap = Factory.newFeatureMap();
+        //featMap.put(iaaC.nameClassFeat, iaaC.labelsArr[iLabel]);
+      int iLabel = 0;
+        if(annsOriginal != null && annsTest != null) {
+          AnnotationSet keyAnns = annsOriginal.get(iaaC.nameAnnType);
+          AnnotationSet responseAnns = annsTest.get(iaaC.nameAnnType);
+          //System.out.println("*** iLabel="+iLabel+", name="+iaaC.labelsArr[iLabel]+", keyS="+keyAnns.size()
+           // +", resS="+responseAnns.size());
+          // Apply the AnnotationDiffer()
+          //annDiff.calculateDiff(keyAnns, responseAnns);
+          computeFNumbersBDM(keyAnns, responseAnns, iaaC.nameClassFeat, fNumbers);
+          
+          //System.out.println("label="+labelsArr[iLabel]+", correct="+annDiff.getCorrectMatches()+"*");
+          
+          // Add the number
+          fMeasures[num11][iLabel].correct += fNumbers[0]; //annDiff.getCorrectMatches();
+          fMeasures[num11][iLabel].partialCor += fNumbers[1]; //annDiff
+            //.getPartiallyCorrectMatches();
+          fMeasures[num11][iLabel].missing += fNumbers[2]; //annDiff.getMissing();
+          fMeasures[num11][iLabel].spurious += fNumbers[3]; //annDiff.getSpurious();
+        }
+        else if(annsOriginal == null && annsTest != null) {
+          AnnotationSet responseAnns = annsTest.get(iaaC.nameAnnType);
+          // Add the number
+          if(responseAnns != null)
+            fMeasures[num11][iLabel].spurious += responseAnns.size();
+        }
+        else if(annsOriginal != null && annsTest == null) {
+          AnnotationSet keyAnns = annsOriginal.get(iaaC.nameAnnType);
+          // Add the number
+          if(keyAnns != null)
+            fMeasures[num11][iLabel].missing += keyAnns.size();
+        }
+      }
+     else { //because there is no label, there is no need of using the BDM.
+      HashSet<String> signSet = new HashSet<String>();
+      AnnotationDiffer annDiff = new AnnotationDiffer();
+      annDiff.setSignificantFeaturesSet(signSet);
+      int iLabel = 0;
+      if(annsOriginal != null && annsTest != null) {
+        // Get key and response annotation sets by ann type and feature
+        AnnotationSet keyAnns = annsOriginal.get(iaaC.nameAnnType);
+        AnnotationSet responseAnns = annsTest.get(iaaC.nameAnnType);
+        // Apply the AnnotationDiffer()
+        annDiff.calculateDiff(keyAnns, responseAnns);
+        
+        // Add the number
+        fMeasures[num11][iLabel].correct += annDiff.getCorrectMatches();
+        fMeasures[num11][iLabel].partialCor += annDiff
+          .getPartiallyCorrectMatches();
+        fMeasures[num11][iLabel].missing += annDiff.getMissing();
+        fMeasures[num11][iLabel].spurious += annDiff.getSpurious();
+      }
+      else if(annsOriginal == null && annsTest != null) {
+        AnnotationSet responseAnns = annsTest.get(iaaC.nameAnnType);
+        // Add the number
+        if(responseAnns != null)
+          fMeasures[num11][iLabel].spurious += responseAnns.size();
+      }
+      else if(annsOriginal != null && annsTest == null) {
+        AnnotationSet keyAnns = annsOriginal.get(iaaC.nameAnnType);
+        // Add the number
+        if(keyAnns != null)
+          fMeasures[num11][iLabel].missing += keyAnns.size();
+      }
+    }
+    // }
+  }
+  
+  void computeFNumbersBDM(AnnotationSet keyAnns, AnnotationSet responseAnns, 
+    String nameClassFeat, float[]fNumbers) {
+    Set<Annotation>matchKey = new HashSet<Annotation>();
+    Set<Annotation>matchRes = new HashSet<Annotation>();
+    for(int i=0; i<fNumbers.length; ++i)
+      fNumbers[i] = 0.0f;
+    for(Annotation annK:keyAnns) {
+      String labelKey = annK.getFeatures().get(nameClassFeat).toString();
+      for(Annotation annR:responseAnns) {
+        if(matchRes.contains(annR))
+          continue;
+        String labelRes = annR.getFeatures().get(nameClassFeat).toString();
+        if(annK.coextensive(annR)) { //exact matching
+          float bdm = 0;
+          String onePair = labelKey+", "+labelRes;
+          String anoPair = labelRes+", "+labelKey;
+          
+          //System.out.println("!!!the two concepts *"+labelKey+"* and *"+labelRes+"*");
+          
+          if(this.conceptNames2BDM.containsKey(onePair))
+            bdm = this.conceptNames2BDM.get(onePair).floatValue();
+          else if(this.conceptNames2BDM.containsKey(anoPair)) 
+            bdm = this.conceptNames2BDM.get(anoPair).floatValue();
+          else 
+            System.out.println("No BDM entry for the two concepts *"+labelKey+"* and *"+labelRes+"*");
+          
+          System.out.println("bbbbbb ("+labelKey+","+labelRes+"), bdmS="+ bdm);
+          
+          fNumbers[0] += bdm; //exact match
+          if(bdm>0.0f) {
+            matchRes.add(annR);
+            matchKey.add(annK);
+          }
+        } else if(annK.overlaps(annR)){ //partial matching
+          float bdm = 0;
+          String onePair = labelKey+", "+labelRes;
+          String anoPair = labelRes+", "+labelKey;
+          if(this.conceptNames2BDM.containsKey(onePair))
+            bdm = this.conceptNames2BDM.get(onePair).floatValue();
+          else if(this.conceptNames2BDM.containsKey(anoPair)) 
+            bdm = this.conceptNames2BDM.get(anoPair).floatValue();
+          else 
+            System.out.println("No BDM entry for the two concepts *"+labelKey+"* and *"+labelRes+"*");
+          fNumbers[1] += bdm; //partial match
+          if(bdm>0) {
+            matchRes.add(annR);
+            matchKey.add(annK);
+          }
+        }
+      }//end of the loop for response ann.
+    }//end of the loop for the key ann.
+    fNumbers[2] = keyAnns.size() - matchKey.size(); //for Missing
+    fNumbers[3] = responseAnns.size() - matchRes.size(); //for Spurious
+  }
+  
+  void printResultsPairwiseFmeasuresDBM(IaaCalculation iaaC, 
+    FMeasure fMeasureOverall, FMeasure[][] fMeasuresPairwiseLabel, FMeasure[] fMeasuresPairwise) {
+//  Print out the FMeasures for pairwise comparison
+    int num1 = iaaC.numAnnotators * (iaaC.numAnnotators - 1) / 2;
+    System.out.println("\n ******** The Fmeasures based on the BDM scores specified in the following: ");
+      System.out.println("Fmeasures averaged over " + num1
+        + " pairs of annotators.");
+      System.out.println(fMeasureOverall.printResults());
+      System.out.println("For each pair of annotators:");
+      int num11 = 0;
+      for(int i = 0; i < iaaC.numAnnotators; ++i)
+        for(int j = i + 1; j < iaaC.numAnnotators; ++j) {
+          System.out.println("(" + i + "," + j + "): "
+            + fMeasuresPairwise[num11].printResults());
+          ++num11;
+        }
+      /*if(isUsingLabel) {
+        if(verbo >= 2) {
+          System.out
+            .println("For each pair of annotators, and for each label:");
+          num11 = 0;
+          for(int i = 0; i < iaaC.numAnnotators; ++i)
+            for(int j = i + 1; j < iaaC.numAnnotators; ++j) {
+              for(int iL = 0; iL < iaaC.numLabels; ++iL)
+                System.out.println("(" + i + "," + j + "), label= "
+                  + iaaC.labelsArr[iL] + ": " + fMeasuresPairwiseLabel[num11][iL].printResults());
+              ++num11;
+            }
+        }
+      }*/
+      System.out.println("\n ********\n");
+  }
+  
 	public void setAnnSetsForIaa(String annSetSeq) {
 		this.annSetsForIaa = annSetSeq;
 	}
@@ -485,6 +898,12 @@ public class IaaMain extends AbstractLanguageAnalyser implements
   public ProblemTypes getProblemT() {
     return this.problemT;
   }
-  
+  public void setBdmScoreFile(URL bf) {
+    this.bdmScoreFile = bf;
+  }
 
+  public URL getBdmScoreFile() {
+    return this.bdmScoreFile;
+  }
+  
 }
