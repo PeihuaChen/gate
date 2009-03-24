@@ -3667,21 +3667,38 @@ public class MainFrame extends JFrame implements ProgressListener,
               throw new GateRuntimeException("Unknown LiveMenu type: " + type);
           }
 
-          if(resTypes != null && !resTypes.isEmpty()) {
-            HashMap<String, ResourceData> resourcesByName
-              = new HashMap<String, ResourceData>();
-            Iterator<String> resIter = resTypes.iterator();
-            while(resIter.hasNext()) {
-              ResourceData rData = reg.get(resIter.next());
-              resourcesByName.put(rData.getName(), rData);
-            }
-            List<String> resNames =
-              new ArrayList<String>(resourcesByName.keySet());
-            Collections.sort(resNames);
-            resIter = resNames.iterator();
-            while(resIter.hasNext()) {
-              ResourceData rData = resourcesByName.get(resIter.next());
-              add(new XJMenuItem(new NewResourceAction(rData), MainFrame.this));
+          if(resTypes != null) {
+            if (!resTypes.isEmpty()) {
+              HashMap<String, ResourceData> resourcesByName
+                = new HashMap<String, ResourceData>();
+              Iterator<String> resIter = resTypes.iterator();
+              while(resIter.hasNext()) {
+                ResourceData rData = reg.get(resIter.next());
+                resourcesByName.put(rData.getName(), rData);
+              }
+              List<String> resNames =
+                new ArrayList<String>(resourcesByName.keySet());
+              Collections.sort(resNames);
+              resIter = resNames.iterator();
+              while(resIter.hasNext()) {
+                ResourceData rData = resourcesByName.get(resIter.next());
+                add(new XJMenuItem(new NewResourceAction(rData), MainFrame.this));
+              }
+            } else if (type == PR) {
+              // empty PR menu -> add an action to load ANNIE plugin
+              add(new AbstractAction("Add ANNIE resources to this menu") {
+                { putValue(SHORT_DESCRIPTION, "Load the ANNIE plugin."); }
+                public void actionPerformed(ActionEvent e) {
+                try {
+                  URL pluginUrl = new File(Gate.getPluginsHome(),
+                    ANNIEConstants.PLUGIN_DIR).toURI().toURL();
+                  Gate.getCreoleRegister().registerDirectories(pluginUrl);
+	                Gate.getUserConfig().put(Gate.AUTOLOAD_PLUGIN_PATH_KEY,
+                    pluginUrl.toString());
+                } catch(Exception ex) {
+                  log.error("Unable to load ANNIE plugin.", ex);
+                }
+              }});
             }
           }
         }
