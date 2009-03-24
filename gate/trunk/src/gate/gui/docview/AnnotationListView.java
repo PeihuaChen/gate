@@ -342,7 +342,10 @@ import javax.swing.text.JTextComponent;
           }
           private void selectRows() {
             table.clearSelection();
-            if (filterTextField.getText().trim().length() < 2) { return; }
+            if (filterTextField.getText().trim().length() < 2
+             || table.getRowCount() == 0) {
+              return;
+            }
             // block upward events
             synchronized(this) { localSelectionUpdating = true; }
             for (int row = 0; row < table.getRowCount(); row++) {
