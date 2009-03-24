@@ -140,10 +140,10 @@ public class TestIaaPlugin extends TestCase {
       nPwF[2] = (int)Math.ceil((double)iaaM.fMeasureOverallTypes.spurious*100);
       nPwF[3] = (int)Math.ceil((double)iaaM.fMeasureOverallTypes.missing*100);
       
-      assertEquals(nPwF[0], 425);
-      assertEquals(nPwF[1], 50);
-      assertEquals(nPwF[2], 167);
-      assertEquals(nPwF[3], 234);
+      assertEquals("Wrong value for correct: ", nPwF[0], 425);
+      assertEquals("Wrong value for correct: ", nPwF[1], 50);
+      assertEquals("Wrong value for correct: ", nPwF[2], 167);
+      assertEquals("Wrong value for correct: ", nPwF[3], 234);
       
       //test f-measure on named entity recognition
       iaaM.setAnnTypesAndFeats("Os");
@@ -156,10 +156,10 @@ public class TestIaaPlugin extends TestCase {
       nPwF[2] = (int)Math.ceil((double)iaaM.fMeasureOverallTypes.spurious*100);
       nPwF[3] = (int)Math.ceil((double)iaaM.fMeasureOverallTypes.missing*100);
       
-      assertEquals(nPwF[0], 167);
-      assertEquals(nPwF[1], 100);
-      assertEquals(nPwF[2], 117);
-      assertEquals(nPwF[3], 150);
+      assertEquals("Wrong value for correct: ", nPwF[0], 167);
+      assertEquals("Wrong value for correct: ", nPwF[1], 100);
+      assertEquals("Wrong value for correct: ", nPwF[2], 117);
+      assertEquals("Wrong value for correct: ", nPwF[3], 150);
       
       //Test kappa on sentence classification
       iaaM.setAnnTypesAndFeats("sent->Op");
@@ -173,9 +173,74 @@ public class TestIaaPlugin extends TestCase {
       nPwF[1] = (int)Math.ceil((double)iaaM.overallTypesPairs[1]*1000);
       nPwF[2] = (int)Math.ceil((double)iaaM.overallTypesPairs[2]*1000);
       
-      assertEquals(nPwF[0], 847);
-      assertEquals(nPwF[1], 761);
-      assertEquals(nPwF[2], 759);
+      assertEquals("Wrong value for correct: ", nPwF[0], 847);
+      assertEquals("Wrong value for correct: ", nPwF[1], 761);
+      assertEquals("Wrong value for correct: ", nPwF[2], 759);
+      
+    }
+    finally {
+      Gate.getUserConfig().put(
+              GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME,
+              savedSpaceSetting);
+    }
+
+  }
+  
+  /** The test the IAA using BDM. */
+  public void testIaaBDM() throws Exception {
+
+    Boolean savedSpaceSetting = Gate.getUserConfig().getBoolean(
+            GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME);
+    Gate.getUserConfig().put(
+            GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME,
+            Boolean.FALSE);
+    try {
+      
+      // Load the documents into a corpus
+      Corpus data = Factory.newCorpus("data");
+      ExtensionFileFilter fileFilter = new ExtensionFileFilter();
+      fileFilter.addExtension("xml");
+      File testDir = new File(new File(iaaPluginHome, "test"), "ontoData");
+      data.populate(testDir.toURI().toURL(), fileFilter, "UTF-8", false);
+      
+      //String testDir = "plugins/iaaPlugin/test/";
+      
+      //System.out.println("testDir00=*"+(new File(testDir,"beijing-opera.xml")).getAbsolutePath().toString()+"*");
+      /*Document doc = Factory.newDocument(new File("C:\\svn\\gate\\plugins\\iaaPlugin\\test\\beijing-opera.xml").toURL(), "UTF-8");
+      Document doc1 = Factory.newDocument(new File("C:\\svn\\gate\\plugins\\iaaPlugin\\test\\beijing-opera-2.xml").toURL(), "UTF-8");
+      data.add(doc);
+      data.add(doc1);*/
+      
+      IaaMain iaaM;
+
+      FeatureMap parameters = Factory.newFeatureMap();
+      
+      iaaM = (IaaMain)Factory.createResource(
+        "gate.iaaplugin.IaaMain", parameters);
+     
+      iaaM.setAnnSetsForIaa("Key;Response");
+      iaaM.setAnnTypesAndFeats("Mention->class");
+      iaaM.setVerbosity("0");
+      iaaM.setBdmScoreFile(new File(testDir, "protonU-bdm.txt").toURI().toURL());
+      /** The controller include the ML Api as one PR. */
+      gate.creole.SerialAnalyserController
+      controller = (gate.creole.SerialAnalyserController)Factory
+      .createResource("gate.creole.SerialAnalyserController");
+      controller.setCorpus(data);
+      controller.add(iaaM);
+      
+      controller.execute();
+      
+      int[] nPwF = new int[4];
+      nPwF[0] = (int)Math.ceil((double)iaaM.fMeasureOverallTypesBDM.correct*100);
+      nPwF[1] = (int)Math.ceil((double)iaaM.fMeasureOverallTypesBDM.partialCor*100);
+      nPwF[2] = (int)Math.ceil((double)iaaM.fMeasureOverallTypesBDM.spurious*100);
+      nPwF[3] = (int)Math.ceil((double)iaaM.fMeasureOverallTypesBDM.missing*100);
+      
+      assertEquals("Wrong value for correct: ", nPwF[0], 764);
+      assertEquals("Wrong value for correct: ", nPwF[1], 0);
+      assertEquals("Wrong value for correct: ", nPwF[2], 1050);
+      assertEquals("Wrong value for correct: ", nPwF[3], 5600);
       
     }
     finally {
