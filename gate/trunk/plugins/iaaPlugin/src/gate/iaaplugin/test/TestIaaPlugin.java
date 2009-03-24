@@ -25,7 +25,7 @@ import gate.util.GateException;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import gate.iaaplugin.ProblemTypes;
+import gate.iaaplugin.MeasureType;
 /**
  * Test the IAA computation by using the test
  * methods and small dataset.
@@ -164,8 +164,8 @@ public class TestIaaPlugin extends TestCase {
       //Test kappa on sentence classification
       iaaM.setAnnTypesAndFeats("sent->Op");
       iaaM.setVerbosity("0");
-      ProblemTypes pt = ProblemTypes.CLASSIFICATION;
-      iaaM.setProblemT(pt);
+      MeasureType pt = MeasureType.AGREEMENTANDKAPPA;
+      iaaM.setMeasureType(pt);
       
       controller.execute();
       
