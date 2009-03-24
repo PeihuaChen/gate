@@ -59,7 +59,11 @@ public class CollectionPersistence implements Persistence {
     try{
       result = (Collection)collectionType.newInstance();
     }catch(Exception e){
-      e.printStackTrace(Err.getPrintWriter());
+      // ignore - if we can't create a collection of the original type
+      // for any reason, just create an ArrayList as a fallback.  The
+      // main use for this class is to persist parameter values for
+      // GATE resources, and GATE can convert an ArrayList to any type
+      // required by a resource parameter.
     }
     if(result == null) result = new ArrayList(localList.size());
 
