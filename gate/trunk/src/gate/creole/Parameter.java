@@ -263,7 +263,9 @@ public class Parameter implements Serializable
       }
       else if(typeName.equals("java.net.URL"))
         try{
-          value = new URL(baseURL, stringValue);
+          if(stringValue != null && !stringValue.equals("")) {
+            value = new URL(baseURL, stringValue);
+          }
         }catch(MalformedURLException mue){
           value = null;
         }
