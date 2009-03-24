@@ -57,9 +57,9 @@ public class IaaMain extends AbstractLanguageAnalyser implements
    * For classification problem, compute and output the kappa measures as IAA.
    * Otherwise, compute and output the F-measures.
    */
-  private ProblemTypes problemT;
-  private ProblemTypes problemER;
-  private ProblemTypes problemClassification;
+  private MeasureType measureType;
+  private MeasureType fMeasure;
+  private MeasureType agreementAndKappa;
   /** The overall Cohen's kappa value over all pairs and types. */
   public float []overallTypesPairs = null;
   /** The overall Cohen's kappa value for each type. */
@@ -109,8 +109,8 @@ public class IaaMain extends AbstractLanguageAnalyser implements
 	/** Initialise this resource, and return it. */
 	public gate.Resource init() throws ResourceInstantiationException {
     allTypeFeats = new HashMap<String,String>();
-    this.problemClassification = ProblemTypes.CLASSIFICATION;
-    this.problemER = ProblemTypes.ENTITYRecognition;
+    this.agreementAndKappa = MeasureType.AGREEMENTANDKAPPA;
+    this.fMeasure = MeasureType.FMEASURE;
 		return this;
 	} // init()
 
@@ -288,7 +288,7 @@ public class IaaMain extends AbstractLanguageAnalyser implements
       }
       
       //Compute the F-measure
-      if(this.problemT.equals(this.problemER)) {
+      if(this.measureType.equals(this.fMeasure)) {
         computeFmeasures(iIndex, iaaC, typeN, labels, annsArray);
         //compute the F-measure for BDM
         if(this.isUsingBDM) {
@@ -297,7 +297,7 @@ public class IaaMain extends AbstractLanguageAnalyser implements
       }
       
       //Compute the cohen's Kappa
-      if(this.problemT.equals(this.problemClassification))
+      if(this.measureType.equals(this.agreementAndKappa))
         computeKappa(iIndex, iaaC, annsArray);
       
     }
@@ -305,14 +305,14 @@ public class IaaMain extends AbstractLanguageAnalyser implements
     
     //Print out the overall results
     if(positionDoc == corpus.size()-1) {
-      if(this.problemT.equals(this.problemER)) {
+      if(this.measureType.equals(this.fMeasure)) {
         printOverallResultsFmeasure(typeNames, annsArray);
         if(this.isUsingBDM) {
           printOverallResultsFmeasureBDM(typeNames, annsArray);
         }
       }
       //print the kappa
-      if(this.problemT.equals(this.problemClassification))
+      if(this.measureType.equals(this.agreementAndKappa))
         printOverallResultsKappa(typeNames, annsArray);
     }
   }
@@ -900,12 +900,12 @@ public class IaaMain extends AbstractLanguageAnalyser implements
     return this.verbosity;
   }
   
-  public void setProblemT(ProblemTypes v) {
-    this.problemT = v;
+  public void setMeasureType(MeasureType v) {
+    this.measureType = v;
   }
 
-  public ProblemTypes getProblemT() {
-    return this.problemT;
+  public MeasureType getMeasureType() {
+    return this.measureType;
   }
   public void setBdmScoreFile(URL bf) {
     this.bdmScoreFile = bf;
