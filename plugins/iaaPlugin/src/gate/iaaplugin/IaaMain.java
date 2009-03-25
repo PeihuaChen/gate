@@ -816,9 +816,8 @@ public class IaaMain extends AbstractLanguageAnalyser implements
           else 
             System.out.println("No BDM entry for the two concepts *"+labelKey+"* and *"+labelRes+"*");
           
-          if(bdm<0) bdm = -bdm; //since bdm could be a negative number (-1) 
-                   //in the BDM file, when two concepts don't have a common concepts.
-          
+          if(bdm<0) bdm = 0; //just in case that some bdm happens to be negative. 
+                  
           //System.out.println("bbbbbb ("+labelKey+","+labelRes+"), bdmS="+ bdm);
           
           fNumbers[0] += bdm; //exact match
