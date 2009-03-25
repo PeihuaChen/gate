@@ -268,8 +268,10 @@ public class IaaMain extends AbstractLanguageAnalyser implements
       if(verbo>0) System.out.println("For the annotation type *"+typeN+"*");
       IaaCalculation iaaC = null;
       AnnotationSet[][] annSs= new AnnotationSet[1][annsArray.length];
-      for(int j=0; j<annSs[0].length; ++j)
+      for(int j=0; j<annSs[0].length; ++j) {
         annSs[0][j] = annSAll[j].get(typeN);
+        annSs[0][j].setName(annsArray[j]);
+      }
       String [] labels=null;
       if(annsTypes.get(typeN) != null && annsTypes.get(typeN) != "") {
         String nameF = annsTypes.get(typeN);
@@ -520,7 +522,7 @@ public class IaaMain extends AbstractLanguageAnalyser implements
     numDoc -= numDocNotCounted;
     if(numDoc<1) ++numDoc;
     int numTypes = annsTypes.keySet().size();
-    if(verbo>0) System.out.println("\n********\nThe F-measure based on the BDM scores specified in the following:");
+    if(verbo>0) System.out.println("\n********  The F-measure based on the BDM scores specified in the following:");
     if(verbo>0) System.out.println("\nMacro averaged over "+numDoc+" documents:");
     if(verbo>0) System.out.println("\nFor each pair of annotators, each type and each label:");
     //if(verbo>0) System.out.println("for each type:");
@@ -814,6 +816,9 @@ public class IaaMain extends AbstractLanguageAnalyser implements
           else 
             System.out.println("No BDM entry for the two concepts *"+labelKey+"* and *"+labelRes+"*");
           
+          if(bdm<0) bdm = -bdm; //since bdm could be a negative number (-1) 
+                   //in the BDM file, when two concepts don't have a common concepts.
+          
           //System.out.println("bbbbbb ("+labelKey+","+labelRes+"), bdmS="+ bdm);
           
           fNumbers[0] += bdm; //exact match
@@ -847,7 +852,7 @@ public class IaaMain extends AbstractLanguageAnalyser implements
     FMeasure fMeasureOverall, FMeasure[][] fMeasuresPairwiseLabel, FMeasure[] fMeasuresPairwise) {
 //  Print out the FMeasures for pairwise comparison
     int num1 = iaaC.numAnnotators * (iaaC.numAnnotators - 1) / 2;
-    System.out.println("\n ******** \nThe Fmeasures based on the BDM scores specified in the following: ");
+    System.out.println("\n ********  The Fmeasures based on the BDM scores specified in the following: ");
       System.out.println("Fmeasures averaged over " + num1
         + " pairs of annotators.");
       System.out.println(fMeasureOverall.printResults());
