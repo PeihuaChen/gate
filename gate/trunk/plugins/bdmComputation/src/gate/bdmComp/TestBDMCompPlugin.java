@@ -142,7 +142,7 @@ public class TestBDMCompPlugin extends TestCase {
       //System.out.println("1="+nPwF[0]+", 2="+nPwF[1]+", 3="+nPwF[2]+", 4="+nPwF[3]+".");
       assertEquals("Wrong value for correct: ", 495, nPwF[0]);
       assertEquals("Wrong value for correct: ", 0, nPwF[1]);
-      assertEquals("Wrong value for correct: ", -1000, nPwF[2]);
+      assertEquals("Wrong value for correct: ", 0, nPwF[2]);
       assertEquals("Wrong value for correct: ", 296, nPwF[3]);
       
       

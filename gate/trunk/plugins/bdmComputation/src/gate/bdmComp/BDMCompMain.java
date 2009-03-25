@@ -1,3 +1,10 @@
+/*
+ *  BDMCompMain.java
+ * 
+ *  Yaoyong Li 15/03/2009
+ *
+ *  $Id: IaaMain.java, v 1.0 2009-03-15 12:58:16 +0000 yaoyong $
+ */
 package gate.bdmComp;
 
 import java.io.BufferedWriter;
@@ -258,7 +265,7 @@ ProcessingResource {
               m1 = con2ChainLen.get(curCon11).floatValue();
               m2 = con2ChainLen.get(curCon22).floatValue();
               if(cp==0) { //the two concepts are not in the same connect part of ontology
-                bdmS.setValues(-1, -1, len11-1, len22-1, n0BDM, m1, m2, 1.0f);
+                bdmS.setValues(0, -1, len11-1, len22-1, n0BDM, m1, m2, 1.0f);
               } else {
                 Integer commonConId;
                 commonConId=new Integer(chain11[len11-cp]); //get the common concept
