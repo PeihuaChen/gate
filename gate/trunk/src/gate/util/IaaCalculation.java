@@ -162,11 +162,12 @@ public class IaaCalculation {
       System.out.println("Overall resutls macro-averaged over " + num1
         + " pairs:");
       System.out.println(contingencyOverall.printResultsPairwise());
-      System.out.println("Results for pairwise of annotator:");
+      System.out.println("Results for each pair of annotator:");
       int num11 = 0;
       for(int i = 0; i < numAnnotators; ++i)
         for(int j = i + 1; j < numAnnotators; ++j) {
-          System.out.println("(" + i + "," + j + "): "
+          System.out.println("(" + this.annsArrArr[0][i].getName() + "," + 
+            this.annsArrArr[0][j].getName() + "): "
             + contingencyTables[num11].printResultsPairwise());
           System.out.println("Confusion Matrix:");
           System.out.println(contingencyTables[num11]
@@ -357,7 +358,8 @@ public class IaaCalculation {
       int num11 = 0;
       for(int i = 0; i < numAnnotators; ++i)
         for(int j = i + 1; j < numAnnotators; ++j) {
-          System.out.println("(" + i + "," + j + "): "
+          System.out.println("(" + this.annsArrArr[0][i].getName() + "," + 
+            this.annsArrArr[0][j].getName() + "): "
             + this.fMeasuresPairwise[num11].printResults());
           ++num11;
         }
@@ -369,7 +371,8 @@ public class IaaCalculation {
           for(int i = 0; i < numAnnotators; ++i)
             for(int j = i + 1; j < numAnnotators; ++j) {
               for(int iL = 0; iL < numLabels; ++iL)
-                System.out.println("(" + i + "," + j + "), label= "
+                System.out.println("(" + this.annsArrArr[0][i].getName() + "," + 
+                  this.annsArrArr[0][j].getName() + "), label= "
                   + labelsArr[iL] + ": " + this.fMeasuresPairwiseLabel[num11][iL].printResults());
               ++num11;
             }
@@ -439,14 +442,14 @@ public class IaaCalculation {
       System.out.println(this.fMeasureOverall.printResults());
       System.out.println("For each annotator:");
       for(int i = 0; i < numAnnotators; ++i)
-        System.out.println("Annotator " + i + ": " + this.fMeasuresPairwise[i].printResults());
+        System.out.println("Annotator: " + this.annsArrArr[0][i].getName() + ": " + this.fMeasuresPairwise[i].printResults());
       if(isUsingLabel) {
         if(verbosity >= 2) {
           System.out
             .println("For each pair of annotators, and for each label:");
           for(int i = 0; i < numAnnotators; ++i) {
             for(int iL = 0; iL < numLabels; ++iL)
-              System.out.println("Annotator " + i + ", label= " + labelsArr[iL]
+              System.out.println("Annotator: " + this.annsArrArr[0][i].getName() + ", label= " + labelsArr[iL]
                 + ": " + this.fMeasuresPairwiseLabel[i][iL].printResults());
           }
         }
