@@ -270,7 +270,7 @@ public class IaaMain extends AbstractLanguageAnalyser implements
       AnnotationSet[][] annSs= new AnnotationSet[1][annsArray.length];
       for(int j=0; j<annSs[0].length; ++j) {
         annSs[0][j] = annSAll[j].get(typeN);
-        annSs[0][j].setName(annsArray[j]);
+        //annSs[0][j].setName(annsArray[j]);
       }
       String [] labels=null;
       if(annsTypes.get(typeN) != null && annsTypes.get(typeN) != "") {
