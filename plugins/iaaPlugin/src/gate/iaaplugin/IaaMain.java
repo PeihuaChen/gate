@@ -288,6 +288,8 @@ public class IaaMain extends AbstractLanguageAnalyser implements
       } else {
         iaaC = new IaaCalculation(typeN, annSs, verbo);
       }
+      //transfer Annotators' names to iaaC
+      iaaC.setAnnotatorNames(annsArray);
       
       //Compute the F-measure
       if(this.measureType.equals(this.fMeasure)) {
