@@ -9,7 +9,7 @@
     <JAR>MiniparWrapper.jar</JAR>
     <CLASS>minipar.Minipar</CLASS>
     <COMMENT>MiniPar is a shallow parser. It determines the dependency relationships between the words of a sentence.</COMMENT>
-    <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:misc-creole:minipar</HELPURL>
+    <HELPURL>http://gate.ac.uk/userguide/sec:misc-creole:minipar</HELPURL>
     <PARAMETER NAME="document"
 	  RUNTIME="true"
 	  COMMENT="document to process">gate.Document</PARAMETER>

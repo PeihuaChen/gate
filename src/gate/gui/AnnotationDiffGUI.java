@@ -476,7 +476,7 @@ public class AnnotationDiffGUI extends JFrame{
     actionMap.put("Help", new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
         MainFrame.getInstance().showHelpFrame(
-          "http://gate.ac.uk/cgi-bin/userguide/sec:howto:adiff",
+          "http://gate.ac.uk/userguide/sec:howto:adiff",
           "gate.gui.AnnotationDiffGUI");
       }
     });

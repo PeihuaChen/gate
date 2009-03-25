@@ -33,7 +33,7 @@ import gate.util.Out;
     comment = "A serial controller for PR pipelines over corpora which "
         + "limits the run time of each PR.",
     icon = "application-realtime",
-    helpURL = "http://gate.ac.uk/cgi-bin/userguide/sec:applications")
+    helpURL = "http://gate.ac.uk/userguide/sec:applications")
 public class RealtimeCorpusController extends SerialAnalyserController {
 	
   private final static boolean DEBUG = false;

@@ -36,7 +36,7 @@ import gate.util.Strings;
  */
 @CreoleResource(name = "GATE corpus", comment = "GATE transient corpus.",
     interfaceName = "gate.Corpus", icon = "corpus-trans",
-    helpURL = "http://gate.ac.uk/cgi-bin/userguide/sec:howto:loadlr")
+    helpURL = "http://gate.ac.uk/userguide/sec:howto:loadlr")
 public class CorpusImpl extends AbstractLanguageResource implements Corpus,
                                                         CreoleListener {
 
