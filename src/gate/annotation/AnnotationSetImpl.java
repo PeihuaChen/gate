@@ -1018,12 +1018,6 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   public String getName() {
     return name;
   }
-  
-  /** Set the name of this set with a new name. */
-  public void setName(String newName) {
-    this.name = newName;
-  }
-
 
   /** Get the document this set is attached to. */
   public Document getDocument() {
