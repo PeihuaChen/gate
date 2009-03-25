@@ -314,7 +314,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     appsPopup.add(new XJMenuItem(new LoadResourceFromFileAction(), this));
 
     // add last loaded/saved applications names
-    String list = getPreferenceValue("filechooserlocations/"
+    final String list = getPreferenceValue("filechooserlocations/"
       + "gate/ApplicationRestore", "list");
     if (list != null) {
     appsPopup.addSeparator();
@@ -329,10 +329,11 @@ public class MainFrame extends JFrame implements ProgressListener,
         public void actionPerformed(ActionEvent e) {
           Runnable runnable = new Runnable() {
           public void run() {
-          File file = new File(location);
-          try { PersistenceManager.loadObjectFromFile(file); }
+          try { File file = new File(location);
+          PersistenceManager.loadObjectFromFile(file); }
           catch(Exception error) {
-            final String errorMessage = error.getMessage();
+            final String errorMessage = "Couldn't reload the application.\n"
+              + error.getMessage();
             Action[] actions = {
               new AbstractAction("Search in mailing list") {
                 public void actionPerformed(ActionEvent e) {
@@ -342,6 +343,10 @@ public class MainFrame extends JFrame implements ProgressListener,
             ErrorDialog.show(error, errorMessage, instance,
               MainFrame.getIcon("root"), actions);
             log.error(errorMessage, error);
+            // remove the element from the applications list
+            setPreferenceValue("filechooserlocations/"
+              + "gate/ApplicationRestore", "list",
+              list.replaceFirst(name + ";?", ""));
           } finally {
             processFinished();
           }}};
@@ -1053,7 +1058,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     inputMap.put(KeyStroke.getKeyStroke("control F4"), "Close resource");
     inputMap.put(KeyStroke.getKeyStroke("control H"), "Hide");
     inputMap.put(KeyStroke.getKeyStroke("control shift H"), "Hide all");
-    inputMap.put(KeyStroke.getKeyStroke("control X"), "Save As XML");
+    inputMap.put(KeyStroke.getKeyStroke("control S"), "Save As XML");
 
     // add the support of the context menu key for user without mouse
     // TODO: remove when JAVA SWING will take care of it
@@ -1073,7 +1078,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           Rectangle selectionRectangle = null;
           if (focusedComponent instanceof JTable
           && ((JTable)focusedComponent).getSelectedRowCount() > 0) {
-            // in case of a JTable get the location of the selection
+            // selection in a JTable
             JTable table = (JTable)focusedComponent;
             selectionRectangle = table.getCellRect(
               table.getSelectionModel().getLeadSelectionIndex(),
@@ -1081,16 +1086,17 @@ public class MainFrame extends JFrame implements ProgressListener,
               false);
           } else if (focusedComponent instanceof JTree
           && ((JTree)focusedComponent).getSelectionCount() > 0) {
+            // selection in a JTree
             JTree tree = (JTree)focusedComponent;
             selectionRectangle = tree.getRowBounds(
               tree.getSelectionModel().getLeadSelectionRow());
           } else {
-            // set the menu location at the top left corner
+            // for other component set the menu location at the top left corner
             menuLocation = new Point(focusedComponent.getX()-1,
                                      focusedComponent.getY()-1);
           }
           if (menuLocation == null) {
-            // menu location at the bottom left of the selected component
+            // menu location at the bottom left of the JTable or JTree
             menuLocation = new Point(
               new Double(selectionRectangle.getMinX()+1).intValue(),
               new Double(selectionRectangle.getMaxY()-1).intValue());
@@ -3693,8 +3699,7 @@ public class MainFrame extends JFrame implements ProgressListener,
                   URL pluginUrl = new File(Gate.getPluginsHome(),
                     ANNIEConstants.PLUGIN_DIR).toURI().toURL();
                   Gate.getCreoleRegister().registerDirectories(pluginUrl);
-	                Gate.getUserConfig().put(Gate.AUTOLOAD_PLUGIN_PATH_KEY,
-                    pluginUrl.toString());
+	                Gate.addAutoloadPlugin(pluginUrl);
                 } catch(Exception ex) {
                   log.error("Unable to load ANNIE plugin.", ex);
                 }
@@ -4453,7 +4458,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           targetPanel.add(imageLabel);
         }
       });
-      // wake the dorment thread
+      // wake the dormant thread
       synchronized(lock) {
         active = true;
       }
