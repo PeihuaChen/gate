@@ -26,8 +26,8 @@ File::Find::find(
     },
     qw(../build/plugins));
 
-# Sort alphabetically
-@creoleFileList = sort @creoleFileList;
+# Sort alphabetically, case insensitive
+@creoleFileList = sort {uc($a) cmp uc($b)} @creoleFileList;
 
 # **************************************************
 
