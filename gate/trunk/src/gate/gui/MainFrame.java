@@ -3921,7 +3921,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
 
     public void actionPerformed(ActionEvent e) {
-      showHelpFrame("http://gate.ac.uk/cgi-bin/userguide", null);
+      showHelpFrame("http://gate.ac.uk/userguide", null);
     }
   }
 

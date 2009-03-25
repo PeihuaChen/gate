@@ -30,7 +30,7 @@ import gate.util.Err;
  */
 @CreoleResource(name = "Conditional Pipeline",
     comment = "A simple serial controller for conditionally run PRs.",
-    helpURL = "http://gate.ac.uk/cgi-bin/userguide/sec:howto:cond")
+    helpURL = "http://gate.ac.uk/userguide/sec:howto:cond")
 public class ConditionalSerialController extends SerialController
                                          implements ConditionalController{
 

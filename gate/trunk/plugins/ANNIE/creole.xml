@@ -9,7 +9,7 @@
 			<NAME>Annotation schema</NAME>
 			<CLASS>gate.creole.AnnotationSchema</CLASS>
 			<COMMENT>An annotation type and its features.</COMMENT>
-			<HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:schemas</HELPURL>
+			<HELPURL>http://gate.ac.uk/userguide/sec:schemas</HELPURL>
 			<PARAMETER NAME="xmlFileUrl"
 				COMMENT="The url to the definition file" SUFFIXES="xml;xsd">
 				java.net.URL
@@ -75,7 +75,7 @@
 			<NAME>GATE Unicode Tokeniser</NAME>
 			<CLASS>gate.creole.tokeniser.SimpleTokeniser</CLASS>
 			<COMMENT>A customisable Unicode tokeniser.</COMMENT>
-			<HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:tokeniser</HELPURL>
+			<HELPURL>http://gate.ac.uk/userguide/sec:tokeniser</HELPURL>
 			<PARAMETER NAME="document"
 				COMMENT="The document to be tokenised" RUNTIME="true">
 				gate.Document
@@ -104,7 +104,7 @@
 			<NAME>ANNIE English Tokeniser</NAME>
 			<CLASS>gate.creole.tokeniser.DefaultTokeniser</CLASS>
 			<COMMENT>A customisable English tokeniser.</COMMENT>
-			<HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:tokeniser</HELPURL>
+			<HELPURL>http://gate.ac.uk/userguide/sec:tokeniser</HELPURL>
 			<PARAMETER NAME="document"
 				COMMENT="The document to be tokenised" RUNTIME="true">
 				gate.Document
@@ -138,7 +138,7 @@
 			<NAME>ANNIE Gazetteer</NAME>
 			<CLASS>gate.creole.gazetteer.DefaultGazetteer</CLASS>
 			<COMMENT>A list lookup component.</COMMENT>
-			<HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:gazetteer</HELPURL>
+			<HELPURL>http://gate.ac.uk/userguide/sec:gazetteer</HELPURL>
 			<PARAMETER NAME="document" RUNTIME="true"
 				COMMENT="The document to be processed">
 				gate.Document
@@ -224,7 +224,7 @@
 			<NAME>Jape Transducer</NAME>
 			<CLASS>gate.creole.Transducer</CLASS>
 			<COMMENT>A module for executing Jape grammars.</COMMENT>
-			<HELPURL>http://gate.ac.uk/cgi-bin/userguide/chap:jape</HELPURL>
+			<HELPURL>http://gate.ac.uk/userguide/chap:jape</HELPURL>
 			<PARAMETER NAME="document" RUNTIME="true"
 				COMMENT="The document to be processed">
 				gate.Document
@@ -274,7 +274,7 @@
 			<NAME>ANNIE NE Transducer</NAME>
 			<CLASS>gate.creole.ANNIETransducer</CLASS>
 			<COMMENT>ANNIE named entity grammar.</COMMENT>
-			<HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:semantic-tagger</HELPURL>
+			<HELPURL>http://gate.ac.uk/userguide/sec:semantic-tagger</HELPURL>
 			<PARAMETER NAME="document" RUNTIME="true"
 				COMMENT="The document to be processed">
 				gate.Document
@@ -313,7 +313,7 @@
 		<RESOURCE>
 			<NAME>ANNIE Sentence Splitter</NAME>
 			<COMMENT>ANNIE sentence splitter.</COMMENT>
-			<HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:splitter</HELPURL>
+			<HELPURL>http://gate.ac.uk/userguide/sec:splitter</HELPURL>
 			<CLASS>gate.creole.splitter.SentenceSplitter</CLASS>
 			<PARAMETER COMMENT="The document to be processed"
 				NAME="document" RUNTIME="true">
@@ -353,7 +353,7 @@
 		<RESOURCE>
 			<NAME>RegEx Sentence Splitter</NAME>
 			<COMMENT>A sentence splitter based on regular expressions.</COMMENT>
-			<HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:regex-splitter</HELPURL>
+			<HELPURL>http://gate.ac.uk/userguide/sec:regex-splitter</HELPURL>
 			<CLASS>gate.creole.splitter.RegexSentenceSplitter</CLASS>
 			<PARAMETER COMMENT="The document to be processed"
 				NAME="document" RUNTIME="true">
@@ -394,7 +394,7 @@
 		<RESOURCE>
 			<NAME>ANNIE POS Tagger</NAME>
 			<COMMENT>Mark Hepple's Brill-style POS tagger.</COMMENT>
-			<HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:tagger</HELPURL>
+			<HELPURL>http://gate.ac.uk/userguide/sec:tagger</HELPURL>
 			<CLASS>gate.creole.POSTagger</CLASS>
 			<PARAMETER NAME="document"
 				COMMENT="The document to be processed" RUNTIME="true">
@@ -448,7 +448,7 @@
 			<NAME>ANNIE OrthoMatcher</NAME>
 			<CLASS>gate.creole.orthomatcher.OrthoMatcher</CLASS>
 			<COMMENT>ANNIE orthographical coreference component.</COMMENT>
-			<HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:annie:orthomatcher
+			<HELPURL>http://gate.ac.uk/userguide/sec:annie:orthomatcher
          </HELPURL>
 			<PARAMETER DEFAULT="resources/othomatcher/listsNM.def"
 				COMMENT="The URL for the definition file" SUFFIXES="def"
@@ -509,7 +509,7 @@
 			<NAME>ANNIE Pronominal Coreferencer</NAME>
 			<CLASS>gate.creole.coref.Coreferencer</CLASS>
 			<COMMENT>Pronominal Coreference resolution component.</COMMENT>
-			<HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:annie:pronom-coref
+			<HELPURL>http://gate.ac.uk/userguide/sec:annie:pronom-coref
 			</HELPURL>
 			<PARAMETER NAME="document" RUNTIME="true"
 				COMMENT="The document to be processed">
@@ -538,7 +538,7 @@
 			<NAME>ANNIE Nominal Coreferencer</NAME>
 			<CLASS>gate.creole.coref.NominalCoref</CLASS>
 			<COMMENT>Nominal Coreference resolution component</COMMENT>
-			<HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:annie:pronom-coref
+			<HELPURL>http://gate.ac.uk/userguide/sec:annie:pronom-coref
 			</HELPURL>
 			<PARAMETER NAME="document" RUNTIME="true"
 				COMMENT="The document to be processed">
@@ -556,7 +556,7 @@
 			<NAME>Document Reset PR</NAME>
 			<CLASS>gate.creole.annotdelete.AnnotationDeletePR</CLASS>
 			<COMMENT>Document cleaner.</COMMENT>
-			<HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:misc-creole:reset
+			<HELPURL>http://gate.ac.uk/userguide/sec:misc-creole:reset
 			</HELPURL>
 			<PARAMETER NAME="document" RUNTIME="true">
 				gate.Document
@@ -583,7 +583,7 @@
 			<NAME>Jape Viewer</NAME>
 			<CLASS>gate.gui.jape.JapeViewer</CLASS>
 			<COMMENT>A JAPE grammar file viewer.</COMMENT>
-			<HELPURL>http://gate.ac.uk/cgi-bin/userguide/chap:jape</HELPURL>
+			<HELPURL>http://gate.ac.uk/userguide/chap:jape</HELPURL>
 			<!-- type values can be "large" or "small"-->
 			<GUI TYPE="large">
 				<MAIN_VIEWER />
@@ -597,7 +597,7 @@
 			<NAME>Gaze</NAME>
 			<CLASS>com.ontotext.gate.vr.Gaze</CLASS>
 			<COMMENT>Gazetteer viewer and editor.</COMMENT>
-			<HELPURL>http://gate.ac.uk/cgi-bin/userguide/sect:gaze</HELPURL>
+			<HELPURL>http://gate.ac.uk/userguide/sect:gaze</HELPURL>
 			<GUI TYPE="large">
 				<MAIN_VIEWER />
 				<RESOURCE_DISPLAYED>

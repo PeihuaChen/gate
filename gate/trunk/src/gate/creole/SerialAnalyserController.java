@@ -29,7 +29,7 @@ import gate.util.*;
  */
 @CreoleResource(name = "Corpus Pipeline",
     comment = "A serial controller for PR pipelines over corpora.",
-    helpURL = "http://gate.ac.uk/cgi-bin/userguide/sec:howto:apps")
+    helpURL = "http://gate.ac.uk/userguide/sec:howto:apps")
 public class SerialAnalyserController extends SerialController implements
                                                               CorpusController {
 

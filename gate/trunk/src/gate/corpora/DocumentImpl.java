@@ -129,7 +129,7 @@ import gate.util.*;
  */
 @CreoleResource(name = "GATE Document", interfaceName = "gate.Document",
     comment = "GATE transient document.", icon = "document",
-    helpURL = "http://gate.ac.uk/cgi-bin/userguide/sec:howto:viewing")
+    helpURL = "http://gate.ac.uk/userguide/sec:howto:viewing")
 public class DocumentImpl extends AbstractLanguageResource implements
                                                           TextualDocument,
                                                           CreoleListener,

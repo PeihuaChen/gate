@@ -407,7 +407,7 @@ public class BootStrapDialog extends JDialog{
     actionMap.put("Help", new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
         MainFrame.getInstance().showHelpFrame(
-          "http://gate.ac.uk/cgi-bin/userguide/sec:howto:bootstrap",
+          "http://gate.ac.uk/userguide/sec:howto:bootstrap",
           "gate.gui.BootStrapDialog");
       }
     });

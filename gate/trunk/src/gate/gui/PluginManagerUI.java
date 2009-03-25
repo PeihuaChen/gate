@@ -144,7 +144,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     actionMap.put("Help", new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
         MainFrame.getInstance().showHelpFrame(
-          "http://gate.ac.uk/cgi-bin/userguide/sec:howto:plugins",
+          "http://gate.ac.uk/userguide/sec:howto:plugins",
           "gate.gui.PluginManagerUI");
       }
     });

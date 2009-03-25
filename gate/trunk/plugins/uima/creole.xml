@@ -4,7 +4,7 @@
   <RESOURCE>
     <NAME>UIMA Analysis Engine</NAME>
     <COMMENT>Wrapper for a Text Analysis Engine from UIMA.</COMMENT>
-    <HELPURL>http://gate.ac.uk/cgi-bin/userguide/chap:uima</HELPURL>
+    <HELPURL>http://gate.ac.uk/userguide/chap:uima</HELPURL>
     <CLASS>gate.uima.AnalysisEnginePR</CLASS>
     <JAR>uima-gate.jar</JAR>
     <JAR>lib/uima_core.jar</JAR>

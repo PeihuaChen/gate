@@ -9,7 +9,7 @@
       <NAME>YahooPR</NAME>
       <CLASS>gate.yahoo.YahooPR</CLASS>
       <COMMENT>Provides an interface to Yahoo API.</COMMENT>
-      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:misc-creole:yahoo</HELPURL>
+      <HELPURL>http://gate.ac.uk/userguide/sec:misc-creole:yahoo</HELPURL>
       <PARAMETER NAME="corpus" RUNTIME="true" COMMENT="Corpus where the results are stored">gate.Corpus</PARAMETER>
       <PARAMETER NAME="query" RUNTIME="true" COMMENT="The Search Query">java.lang.String</PARAMETER>
       <PARAMETER NAME="applicationID" RUNTIME="false" COMMENT="The applicationID for Yahoo API">java.lang.String</PARAMETER>

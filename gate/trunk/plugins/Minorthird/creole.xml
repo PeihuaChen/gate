@@ -9,7 +9,7 @@
     <JAR>MinorthirdWrapper.jar</JAR>
     <CLASS>gate.minorthird.RunMixupWrapper</CLASS>
     <COMMENT>MinorThird is a collection of Java classes for storing text, annotating text, and learning to extract entities and categorize text.</COMMENT>
-    <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:misc-creole:minorthird</HELPURL>
+    <HELPURL>http://gate.ac.uk/userguide/sec:misc-creole:minorthird</HELPURL>
     <PARAMETER NAME="document"
         RUNTIME="true"
         COMMENT="document to be processed">

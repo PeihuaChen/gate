@@ -7,7 +7,7 @@
     <RESOURCE>
       <NAME>BDM Computation PR</NAME>
       <COMMENT>Compute BDM score for each  pair of concepts in the given ontology.</COMMENT>
-      <HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:gui:bdmComp</HELPURL>
+      <HELPURL>http://gate.ac.uk/userguide/sec:gui:bdmComp</HELPURL>
       <CLASS>gate.bdmComp.BDMCompMain</CLASS>
       <JAR>BDMCompMain.jar</JAR>
 
