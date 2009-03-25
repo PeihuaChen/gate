@@ -157,13 +157,6 @@ public interface SimpleAnnotationSet extends Set<Annotation>, Cloneable,
    *         another annotation set).
    */
   public String getName();
-  
-  /**
-   * Set the name of this set with a new name.
-   * 
-   * @param types String: the new name for this annotation set.
-   */
-  public void setName(String newName);
 
   /**
    * Get a set of java.lang.String objects representing all the
