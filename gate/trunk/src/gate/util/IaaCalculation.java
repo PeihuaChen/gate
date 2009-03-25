@@ -64,6 +64,8 @@ public class IaaCalculation {
   public FMeasure[] fMeasuresPairwise=null;
   /** The verbosity level for print the measures. */
   int verbosity = 2;
+  /** The name of annotators. */
+  public String [] annotatorNames = null;
 
   /** Constractor by giving the annotation sets and a list of labels. */
   public IaaCalculation(String nameAnnT, String nameF, String[] labels,
@@ -166,8 +168,8 @@ public class IaaCalculation {
       int num11 = 0;
       for(int i = 0; i < numAnnotators; ++i)
         for(int j = i + 1; j < numAnnotators; ++j) {
-          System.out.println("(" + this.annsArrArr[0][i].getName() + "," + 
-            this.annsArrArr[0][j].getName() + "): "
+          System.out.println("(" + this.annotatorNames[i] + "," + 
+            this.annotatorNames[j] + "): "
             + contingencyTables[num11].printResultsPairwise());
           System.out.println("Confusion Matrix:");
           System.out.println(contingencyTables[num11]
@@ -358,8 +360,8 @@ public class IaaCalculation {
       int num11 = 0;
       for(int i = 0; i < numAnnotators; ++i)
         for(int j = i + 1; j < numAnnotators; ++j) {
-          System.out.println("(" + this.annsArrArr[0][i].getName() + "," + 
-            this.annsArrArr[0][j].getName() + "): "
+          System.out.println("(" + this.annotatorNames[i] + "," + 
+            this.annotatorNames[j] + "): "
             + this.fMeasuresPairwise[num11].printResults());
           ++num11;
         }
@@ -371,8 +373,8 @@ public class IaaCalculation {
           for(int i = 0; i < numAnnotators; ++i)
             for(int j = i + 1; j < numAnnotators; ++j) {
               for(int iL = 0; iL < numLabels; ++iL)
-                System.out.println("(" + this.annsArrArr[0][i].getName() + "," + 
-                  this.annsArrArr[0][j].getName() + "), label= "
+                System.out.println("(" + this.annotatorNames[i] + "," + 
+                  this.annotatorNames[j] + "), label= "
                   + labelsArr[iL] + ": " + this.fMeasuresPairwiseLabel[num11][iL].printResults());
               ++num11;
             }
@@ -442,14 +444,14 @@ public class IaaCalculation {
       System.out.println(this.fMeasureOverall.printResults());
       System.out.println("For each annotator:");
       for(int i = 0; i < numAnnotators; ++i)
-        System.out.println("Annotator: " + this.annsArrArr[0][i].getName() + ": " + this.fMeasuresPairwise[i].printResults());
+        System.out.println("Annotator: " + this.annotatorNames[i] + ": " + this.fMeasuresPairwise[i].printResults());
       if(isUsingLabel) {
         if(verbosity >= 2) {
           System.out
             .println("For each pair of annotators, and for each label:");
           for(int i = 0; i < numAnnotators; ++i) {
             for(int iL = 0; iL < numLabels; ++iL)
-              System.out.println("Annotator: " + this.annsArrArr[0][i].getName() + ", label= " + labelsArr[iL]
+              System.out.println("Annotator: " + this.annotatorNames[i] + ", label= " + labelsArr[iL]
                 + ": " + this.fMeasuresPairwiseLabel[i][iL].printResults());
           }
         }
@@ -756,5 +758,9 @@ public class IaaCalculation {
     // If the annotated instances are the same for every annotators.
     Collections.sort(labelsSet);
     return labelsSet;
+  }
+  
+  public void setAnnotatorNames(String [] names) {
+    this.annotatorNames = names;
   }
 }
