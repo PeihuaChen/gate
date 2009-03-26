@@ -23,13 +23,15 @@ import gate.Gate;
 public class DBHelper {
 
   /** class name of the Oracle jdbc driver */
-  private static final String jdbcOracleDriverName = "oracle.jdbc.driver.OracleDriver";
-  private static final String jdbcPostgresDriverName = "org.postgresql.Driver";
-//  private static final String jdbcSapDBDriverName = "com.sap.dbtech.jdbc.DriverSapDB";
+  private static final String jdbcOracleDriverName 
+      = "oracle.jdbc.driver.OracleDriver";
+  private static final String jdbcPostgresDriverName 
+      = "org.postgresql.Driver";
 
   public static final int CHINK_SIZE_SMALL = 30;
   public static final int CHINK_SIZE_MEDIUM = 60;
   public static final int CHINK_SIZE_LARGE = 100;
+
   //WARNING!
   //DO NOT EDIT THESE CONSTANTS WITHOUT
   //SYNCHRONIZING WITH ERROR.SPC PL/SQL PACKAGE
@@ -191,7 +193,8 @@ public class DBHelper {
 
   private static final boolean DEBUG = false;
 
-  private static boolean  driversLoaded;
+    private static boolean oracleLoaded = false;
+    private static boolean postgresLoaded = false;
   private static HashMap pools;
 
   /** size (in elements) of the jdbc connection pool (if any) */
@@ -199,7 +202,6 @@ public class DBHelper {
 
   static {
     DUMMY_ID = new Long(Long.MIN_VALUE);
-    driversLoaded = false;
     pools = new HashMap();
   }
 
@@ -211,16 +213,14 @@ public class DBHelper {
   }
 
   /** --- */
-  private static synchronized void loadDrivers()
+  private static synchronized void loadDrivers(final int dbType)
     throws ClassNotFoundException {
 
-    if (!driversLoaded) {
-      Class.forName(jdbcOracleDriverName);
-      Class.forName(jdbcPostgresDriverName);
-//      Class.forName(jdbcSapDBDriverName);
-
-      driversLoaded = true;
-    }
+      if (!oracleLoaded && dbType == ORACLE_DB) {
+	  Class.forName(jdbcOracleDriverName);
+      } else if (!postgresLoaded && dbType == POSTGRES_DB) {
+	  Class.forName(jdbcPostgresDriverName);
+      }
   }
 
 
@@ -260,15 +260,15 @@ public class DBHelper {
   /**
    *  connects to DB
    */
-  public static Connection connect(String connectURL)
+  public static Connection connect(final String connectURL)
     throws SQLException,ClassNotFoundException{
 
-    loadDrivers();
+    loadDrivers( getDatabaseType(connectURL) );
     Connection conn = DriverManager.getConnection(connectURL);
 
     if (DEBUG) {
       DatabaseMetaData meta = conn.getMetaData();
-      gate.util.Err.println(
+      gate.util.Out.println(
             "JDBC driver name=["+meta.getDriverName() +
             "] version=["+ meta.getDriverVersion() +"]");
     }
@@ -279,10 +279,12 @@ public class DBHelper {
   /**
    *  connects to DB
    */
-  public static Connection connect(String connectURL, String user, String pass)
+  public static Connection connect(final String connectURL, 
+				   final String user, 
+				   final String pass)
     throws SQLException,ClassNotFoundException{
 
-    loadDrivers();
+    loadDrivers( getDatabaseType(connectURL) );
     Connection conn = DriverManager.getConnection(connectURL, user, pass);
 
     if (DEBUG) {
