@@ -16,6 +16,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 import java.util.List;
+import java.util.Timer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -158,46 +159,42 @@ public class DocumentEditor extends AbstractVisualResource
     progressBar.setValue(40);
 
     
-    centralViews = new ArrayList();
-    verticalViews = new ArrayList();
-    horizontalViews = new ArrayList();
+    centralViews = new ArrayList<DocumentView>();
+    verticalViews = new ArrayList<DocumentView>();
+    horizontalViews = new ArrayList<DocumentView>();
 
     //parse all Creole resources and look for document views
-    Set vrSet = Gate.getCreoleRegister().getVrTypes();
-    List viewTypes = new ArrayList();
-    Iterator vrIter = vrSet.iterator();
-    while(vrIter.hasNext()){
-      ResourceData rData = (ResourceData)Gate.getCreoleRegister().
-                           get(vrIter.next());
-      try{
-        if(DocumentView.class.isAssignableFrom(rData.getResourceClass())){
+    Set<String> vrSet = Gate.getCreoleRegister().getVrTypes();
+    List<ResourceData> viewTypes = new ArrayList<ResourceData>();
+    for(String vr : vrSet) {
+      ResourceData rData = Gate.getCreoleRegister().get(vr);
+      try {
+        if(DocumentView.class.isAssignableFrom(rData.getResourceClass())) {
           viewTypes.add(rData);
         }
-      }catch(ClassNotFoundException cnfe){
+      }
+      catch(ClassNotFoundException cnfe) {
         cnfe.printStackTrace();
       }
     }
     //sort view types by label
-    Collections.sort(viewTypes, new Comparator(){
-      public int compare(Object o1, Object o2){
-        ResourceData rd1 = (ResourceData)o1;
-        ResourceData rd2 = (ResourceData)o2;
+    Collections.sort(viewTypes, new Comparator<ResourceData>(){
+      public int compare(ResourceData rd1, ResourceData rd2){
         return rd1.getName().compareTo(rd2.getName());
       }
     });
-    Iterator viewIter = viewTypes.iterator();
-    while(viewIter.hasNext()){
-      ResourceData rData = (ResourceData)viewIter.next();
-      try{
+    for(ResourceData viewType : viewTypes) {
+      try {
         //create the resource
-        DocumentView aView = (DocumentView)Factory.
-                             createResource(rData.getClassName());
+        DocumentView aView = (DocumentView) Factory.
+          createResource(viewType.getClassName());
         aView.setTarget(document);
         aView.setOwner(this);
         //add the view
-        addView(aView, rData.getName());
-      }catch(ResourceInstantiationException rie){
-            rie.printStackTrace();
+        addView(aView, viewType.getName());
+      }
+      catch(ResourceInstantiationException rie) {
+        rie.printStackTrace();
       }
     }
     //select the main central view only
@@ -241,7 +238,8 @@ public class DocumentEditor extends AbstractVisualResource
   /**
    * Registers a new view by adding it to the right list and creating the 
    * activation button for it.
-   * @param view
+   * @param view view to add to the GUI as a button
+   * @param name name of the view used in the GUI as a button name
    */
   protected void addView(DocumentView view, String name){
     topBar.add(Box.createHorizontalStrut(5));
@@ -311,8 +309,7 @@ public class DocumentEditor extends AbstractVisualResource
    * @return a {@link DocumentView} object.
    */
   protected DocumentView getTopView(){
-    if(topViewIdx == -1) return null;
-    else return(DocumentView)horizontalViews.get(topViewIdx);
+    return (topViewIdx == -1) ? null : horizontalViews.get(topViewIdx);
   }
   
   /**
@@ -330,7 +327,7 @@ public class DocumentEditor extends AbstractVisualResource
     topViewIdx = index;
     if(topViewIdx == -1) setTopView(null);
     else{
-	    DocumentView newView = (DocumentView)horizontalViews.get(topViewIdx);
+	    DocumentView newView = horizontalViews.get(topViewIdx);
 	    //hide if shown at the bottom
 	    if(bottomViewIdx == topViewIdx){
 	      setBottomView(null);
@@ -362,8 +359,7 @@ public class DocumentEditor extends AbstractVisualResource
    * @return a {@link DocumentView} object.
    */
   protected DocumentView getCentralView(){
-    if(centralViewIdx == -1) return null;
-    else return(DocumentView)centralViews.get(centralViewIdx);
+    return (centralViewIdx == -1) ? null : centralViews.get(centralViewIdx);
   }
   
   /**
@@ -381,7 +377,7 @@ public class DocumentEditor extends AbstractVisualResource
     centralViewIdx = index;
     if(centralViewIdx == -1) setCentralView(null);
     else{
-	    DocumentView newView = (DocumentView)centralViews.get(centralViewIdx);
+	    DocumentView newView = centralViews.get(centralViewIdx);
 	    //activate if necessary
 	    if(!newView.isActive()){
 	      newView.setActive(true);
@@ -410,8 +406,7 @@ public class DocumentEditor extends AbstractVisualResource
    * @return a {@link DocumentView} object.
    */
   protected DocumentView getBottomView(){
-    if(bottomViewIdx == -1) return null;
-    else return(DocumentView)horizontalViews.get(bottomViewIdx);
+    return (bottomViewIdx == -1) ?  null : horizontalViews.get(bottomViewIdx);
   }
   
   /**
@@ -430,7 +425,7 @@ public class DocumentEditor extends AbstractVisualResource
     if(bottomViewIdx == -1){
       setBottomView(null);
     }else{
-	    DocumentView newView = (DocumentView)horizontalViews.get(bottomViewIdx);
+	    DocumentView newView = horizontalViews.get(bottomViewIdx);
 	    //hide if shown at the top
 	    if(topViewIdx == bottomViewIdx){
 	      setTopView(null);
@@ -464,8 +459,7 @@ public class DocumentEditor extends AbstractVisualResource
    * @return a {@link DocumentView} object.
    */
   protected DocumentView getRightView(){
-    if(rightViewIdx == -1) return null;
-    else return(DocumentView)verticalViews.get(rightViewIdx);
+    return (rightViewIdx == -1) ? null : verticalViews.get(rightViewIdx);
   }
   
   /**
@@ -483,7 +477,7 @@ public class DocumentEditor extends AbstractVisualResource
     rightViewIdx = index;
     if(rightViewIdx == -1) setRightView(null);
     else{
-	    DocumentView newView = (DocumentView)verticalViews.get(rightViewIdx);
+	    DocumentView newView = verticalViews.get(rightViewIdx);
 	    //activate if necessary
 	    if(!newView.isActive()){
 	      newView.setActive(true);
@@ -506,9 +500,9 @@ public class DocumentEditor extends AbstractVisualResource
   }  
   
   /**
-   * Called to change the set of selected annotations. This new value will be 
+   * Change the set of selected annotations. This new value will be
    * sent to all active constituent views.
-   * @param selectedAnnots
+   * @param selectedAnnots list of AnnotationData to select
    */
   public void setSelectedAnnotations(List<AnnotationData> selectedAnnots){
     selectedAnnotations.clear();
@@ -527,12 +521,15 @@ public class DocumentEditor extends AbstractVisualResource
   
   /**
    * Gets the current set of selected annotations.
-   * @return
+   * @return set of selected annotations
    */
   public List<AnnotationData> getSelectedAnnotations(){
     return selectedAnnotations;
   }
-  
+
+  /**
+   * TODO: to remove? doesn't seems to be used anywhere.
+   */
   protected void updateSplitLocation(JSplitPane split, int foo){
     Component left = split.getLeftComponent();
     Component right = split.getRightComponent();
@@ -561,27 +558,29 @@ public class DocumentEditor extends AbstractVisualResource
 
   /**
    * Updates the selected state of the buttons on one of the toolbars. 
-   * @param toolbar
+   * @param toolbar toolbar to update
    */
   protected void updateBar(JToolBar toolbar){
     Component btns[] = toolbar.getComponents();
     if(btns != null){
-      for(int i = 0; i < btns.length; i++){
-        if(btns[i] instanceof ViewButton) 
-          ((ViewButton)btns[i]).updateSelected();
+      for(Component btn : btns) {
+        if(btn instanceof ViewButton)
+          ((ViewButton) btn).updateSelected();
       }
     }
   }
 
   /**
-   * Code taken from gate.gui.DocumentEditor, the old DocumentEditor.
-   * Modified to work with gate 3.1.
+   * Dialog to search an expression in the document.
+   * Select the current match in the document.
+   * Options: incremental search, case insensitive, whole word,
+   * hightlighted annotations, regular expression.
    */
   protected class SearchAction extends AbstractAction {
 
     public SearchAction() {
-      super("Search text", MainFrame.getIcon("search"));
-      putValue(SHORT_DESCRIPTION, "Search within the text");
+      super("Search", MainFrame.getIcon("search"));
+      putValue(SHORT_DESCRIPTION, "Search within the document.");
     }
 
     public void actionPerformed(ActionEvent evt) {
@@ -617,7 +616,7 @@ public class DocumentEditor extends AbstractVisualResource
         searchDialog.setVisible(true);
       }
       searchDialog.patternTextField.selectAll();
-      searchDialog.patternTextField.requestFocus();
+      searchDialog.patternTextField.requestFocusInWindow();
     }
   }
 
@@ -625,7 +624,7 @@ public class DocumentEditor extends AbstractVisualResource
 
     SearchDialog(Frame owner) {
       super(owner, false);
-      setTitle("Find in \"" + document.getName() + "\"");
+      setTitle("Search in \"" + document.getName() + "\"");
       initLocalData();
       initGuiComponents();
       initListeners();
@@ -633,7 +632,7 @@ public class DocumentEditor extends AbstractVisualResource
 
     SearchDialog(Dialog owner) {
       super(owner, false);
-      setTitle("Find in \"" + document.getName() + "\"");
+      setTitle("Search in \"" + document.getName() + "\"");
       initLocalData();
       initGuiComponents();
       initListeners();
@@ -649,13 +648,9 @@ public class DocumentEditor extends AbstractVisualResource
           putValue(SHORT_DESCRIPTION, "Finds first match");
           putValue(MNEMONIC_KEY, KeyEvent.VK_F);
         }
-
         public void actionPerformed(ActionEvent evt) {
-          //needed to create the right RE
           refresh();
-          if(!validateRE()) return;
-          //remove selection
-          textPane.setCaretPosition(textPane.getCaretPosition());
+          if(!isValidRegularExpression()) return;
           boolean found = false;
           int start = -1;
           int end = -1;
@@ -682,14 +677,22 @@ public class DocumentEditor extends AbstractVisualResource
           }
 
           if (found) {
-            //display the result
+            setTitle("Found: \"" +
+              content.substring(Math.max(0, start-13), start)
+                .replaceAll("\\s+", " ") + "[" +
+              content.substring(start, end).replaceAll("\\s+", " ") + "]" +
+              content.substring(end, Math.min(content.length(), end+13))
+                .replaceAll("\\s+", " ") + "\"");
+            // select the match in the document
             textPane.setCaretPosition(start);
             textPane.moveCaretPosition(end);
 
           } else {
-            JOptionPane.showMessageDialog(searchDialog, "String not found.",
-              "GATE", JOptionPane.INFORMATION_MESSAGE);
+            setTitle("Expression not found at all in the document.");
+            findFirstAction.setEnabled(false);
+            findNextAction.setEnabled(false);
           }
+          patternTextField.requestFocusInWindow();
         }};
 
       findNextAction = new AbstractAction("Find next") {
@@ -698,15 +701,17 @@ public class DocumentEditor extends AbstractVisualResource
           putValue(MNEMONIC_KEY, KeyEvent.VK_N);
         }
         public void actionPerformed(ActionEvent evt) {
-          //needed to create the right RE
           refresh();
-          if(!validateRE()) return;
-          //remove selection
-          textPane.setCaretPosition(textPane.getCaretPosition());
+          if(!isValidRegularExpression()) return;
           boolean found = false;
           int start = -1;
           int end = -1;
-          nextMatchStartsFrom = textPane.getCaretPosition();
+          if (evt == null) {
+            // incremental search
+            nextMatchStartsFrom = textPane.getSelectionStart();
+          } else {
+            nextMatchStartsFrom = textPane.getCaretPosition();
+          }
 
           Matcher matcher = pattern.matcher(content);
           while (matcher.find(nextMatchStartsFrom) && !found) {
@@ -729,14 +734,21 @@ public class DocumentEditor extends AbstractVisualResource
           }
 
           if (found) {
-            //display the result
+            setTitle("Found: \"" +
+              content.substring(Math.max(0, start-13), start)
+                .replaceAll("\\s+", " ") + "[" +
+              content.substring(start, end).replaceAll("\\s+", " ") + "]" +
+              content.substring(end, Math.min(content.length(), end+13))
+                .replaceAll("\\s+", " ") + "\"");
+            // select the match in the document
             textPane.setCaretPosition(start);
             textPane.moveCaretPosition(end);
 
           } else {
-            JOptionPane.showMessageDialog(searchDialog, "String not found.",
-              "GATE", JOptionPane.INFORMATION_MESSAGE);
+            setTitle("Expression not found after the document caret.");
+            findNextAction.setEnabled(false);
           }
+          patternTextField.requestFocusInWindow();
         }};
 
       cancelAction = new AbstractAction("Cancel") {
@@ -756,11 +768,11 @@ public class DocumentEditor extends AbstractVisualResource
       getContentPane().add(Box.createVerticalStrut(5));
 
       Box hBox = Box.createHorizontalBox();
-      hBox.add(Box.createHorizontalStrut(5));
-      hBox.add(new JLabel("Find what:"));
-      hBox.add(Box.createHorizontalStrut(5));
+      hBox.add(Box.createHorizontalStrut(6));
+      hBox.add(new JLabel("Find:"));
+      hBox.add(Box.createHorizontalStrut(6));
       hBox.add(patternTextField = new JTextField(20));
-      hBox.add(Box.createHorizontalStrut(2));
+      hBox.add(Box.createHorizontalStrut(3));
       JButton helpRegExpButton = new JButton("?");
       helpRegExpButton.setMargin(new Insets(0, 2, 0, 2));
       helpRegExpButton.setToolTipText("GATE search expression builder.");
@@ -768,26 +780,26 @@ public class DocumentEditor extends AbstractVisualResource
       hBox.add(helpRegExpButton);
       hBox.add(Box.createHorizontalGlue());
 
-      hBox.add(Box.createHorizontalStrut(5));
+      hBox.add(Box.createHorizontalStrut(6));
       hBox.add(Box.createHorizontalGlue());
       getContentPane().add(hBox);
 
       getContentPane().add(Box.createVerticalStrut(5));
 
       hBox = Box.createHorizontalBox();
-      hBox.add(Box.createHorizontalStrut(5));
+      hBox.add(Box.createHorizontalStrut(6));
       hBox.add(ignoreCaseChk = new JCheckBox("Ignore case", true));
-      hBox.add(Box.createHorizontalStrut(5));
+      hBox.add(Box.createHorizontalStrut(6));
       hBox.add(wholeWordsChk = new JCheckBox("Whole word", false));
-      hBox.add(Box.createHorizontalStrut(5));
+      hBox.add(Box.createHorizontalStrut(6));
       hBox.add(regularExpressionChk =
         new JCheckBox("Regular Exp.", false));
       regularExpressionChk.setToolTipText("Regular expression search.");
-      hBox.add(Box.createHorizontalStrut(5));
+      hBox.add(Box.createHorizontalStrut(6));
       hBox.add(highlightsChk = new JCheckBox("Highlights", false));
       highlightsChk.setToolTipText(
         "Restrict the search on the highlighted annotations.");
-      hBox.add(Box.createHorizontalStrut(5));
+      hBox.add(Box.createHorizontalStrut(6));
       hBox.add(Box.createHorizontalGlue());
       getContentPane().add(hBox);
 
@@ -797,9 +809,9 @@ public class DocumentEditor extends AbstractVisualResource
       hBox.add(Box.createHorizontalGlue());
       JButton findFirstButton = new JButton(findFirstAction);
       hBox.add(findFirstButton);
-      hBox.add(Box.createHorizontalStrut(5));
+      hBox.add(Box.createHorizontalStrut(6));
       hBox.add(new JButton(findNextAction));
-      hBox.add(Box.createHorizontalStrut(5));
+      hBox.add(Box.createHorizontalStrut(6));
       hBox.add(new JButton(cancelAction));
       hBox.add(Box.createHorizontalGlue());
       getContentPane().add(hBox);
@@ -815,37 +827,64 @@ public class DocumentEditor extends AbstractVisualResource
     protected void initListeners() {
 
       addComponentListener(new ComponentAdapter() {
-        public void componentHidden(ComponentEvent e) {
-        }
-
-        public void componentMoved(ComponentEvent e) {
-        }
-
-        public void componentResized(ComponentEvent e) {
-        }
-
         public void componentShown(ComponentEvent e) {
           refresh();
         }
       });
 
+     // incremental search
       patternTextField.getDocument().addDocumentListener(
-              new javax.swing.event.DocumentListener() {
-                public void insertUpdate(javax.swing.event
-                        .DocumentEvent e) {
-                  refresh();
+        new javax.swing.event.DocumentListener() {
+          private Timer timer = new Timer();
+          public void insertUpdate(javax.swing.event.DocumentEvent e) {
+            refresh();
+            timer.cancel();
+            // add a delay
+            Date timeToRun = new Date(System.currentTimeMillis() + 250);
+            timer = new Timer();
+            timer.schedule(new TimerTask() {
+                public void run() {
+                  findNextAction.actionPerformed(null);
                 }
+              }, timeToRun);
+          }
+          public void removeUpdate(javax.swing.event.DocumentEvent e) {
+            refresh();
+            timer.cancel();
+            // add a delay
+            Date timeToRun = new Date(System.currentTimeMillis() + 250);
+            timer = new Timer();
+            timer.schedule(new TimerTask() {
+                public void run() {
+                  findNextAction.actionPerformed(null);
+                }
+              }, timeToRun);
+          }
+          public void changedUpdate(javax.swing.event.DocumentEvent e) {
+            refresh();
+          }
+        });
 
-                public void removeUpdate(javax.swing.event
-                        .DocumentEvent e) {
-                  refresh();
-                }
-
-                public void changedUpdate(javax.swing.event
-                        .DocumentEvent e) {
-                  refresh();
-                }
-              });
+      wholeWordsChk.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          refresh();
+        }
+      });
+      ignoreCaseChk.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          refresh();
+        }
+      });
+      regularExpressionChk.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          refresh();
+        }
+      });
+      highlightsChk.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          refresh();
+        }
+      });
 
       ((JComponent)getContentPane())
       .getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).
@@ -855,12 +894,12 @@ public class DocumentEditor extends AbstractVisualResource
     }
 
     /**
-     * Validates the regular expression before use.
+     * Builds and validates the regular expression before use.
      * @return true if the regular expression is valid, false otherwise.
      */
-    protected boolean validateRE(){
+    protected boolean isValidRegularExpression() {
       String patternText = patternTextField.getText();
-      boolean res = true;
+      boolean valid = true;
       //update patternRE
       try {
         String prefixPattern = wholeWordsChk.isSelected() ? "\\b":"";
@@ -873,14 +912,17 @@ public class DocumentEditor extends AbstractVisualResource
                   Pattern.compile(patternText);
 
       } catch (PatternSyntaxException e) {
-        JOptionPane.showMessageDialog(searchDialog,
-          "Invalid regular expression.\n\n"
-          + e.toString().replaceFirst("^.+PatternSyntaxException: ", ""),
-          "GATE",
-          JOptionPane.INFORMATION_MESSAGE);
-        res = false;
+        setTitle(e.getMessage().replaceFirst("(?s) near index .+$", "."));
+        int index = e.getMessage().indexOf(" near index ");
+        if (index != -1) {
+          index += " near index ".length();
+          patternTextField.setCaretPosition(Integer.valueOf(
+            e.getMessage().substring(index, index+1)));
+        }
+        patternTextField.requestFocusInWindow();
+        valid = false;
       }
-      return res;
+      return valid;
     }
 
     protected void refresh() {
@@ -894,8 +936,6 @@ public class DocumentEditor extends AbstractVisualResource
         findFirstAction.setEnabled(false);
         findNextAction.setEnabled(false);
       }
-
-      if (pattern == null) {}
     }
 
     // FIXME: that's ugly !!
