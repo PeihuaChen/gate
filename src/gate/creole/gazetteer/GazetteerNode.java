@@ -1,8 +1,10 @@
 package gate.creole.gazetteer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -146,7 +148,10 @@ public class GazetteerNode {
    */
   public String featureMapToString(Map featureMap) {
     String str = "";
-    for(Iterator it = featureMap.keySet().iterator(); it.hasNext();) {
+    // sort into a predictable order
+    List sortedKeys = new ArrayList(featureMap.keySet()); 
+    Collections.sort(sortedKeys);
+    for(Iterator it = sortedKeys.iterator(); it.hasNext();) {
       String key = (String)it.next();
       str += separator + key + "=" + featureMap.get(key);
     }
@@ -170,17 +175,12 @@ public class GazetteerNode {
    * Checks this node vs another one for equality.
    * 
    * @param o another node
-   * @return true if entry and weighting match.
+   * @return true if the string representation of the entry and weighting match.
    */
   public boolean equals(Object o) {
     boolean result = false;
     if(o instanceof GazetteerNode) {
-      GazetteerNode node = (GazetteerNode)o;
-      result = true;
-      if(null != this.getEntry())
-        result &= this.getEntry().equals(node.getEntry());
-      if(null != this.getFeatureMap())
-        result &= this.getFeatureMap().equals(node.getFeatureMap());
+      result = this.toString().equals(o.toString());
     }
     return result;
   }
