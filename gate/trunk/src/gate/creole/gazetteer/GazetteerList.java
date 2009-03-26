@@ -237,7 +237,7 @@ implements List {
 
   public boolean add(Object o) {
     boolean result = false;
-    if (o instanceof String) {
+    if (o instanceof GazetteerNode) {
       result = entries.add(o);
     }
     isModified |= result;
@@ -266,7 +266,7 @@ implements List {
 
     while (iter.hasNext()) {
       o = iter.next();
-      if (o instanceof String) {
+      if (o instanceof GazetteerNode) {
         result |= entries.add(o);
       }
     } // while
