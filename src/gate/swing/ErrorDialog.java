@@ -85,8 +85,8 @@ public class ErrorDialog extends JOptionPane {
     // with a toggle button to show/hide the stack trace
     Box messageBox = Box.createHorizontalBox();
     messageBox.add(new JLabel(textMessage.startsWith("<html>") ?
-      textMessage : "<html>" +
-      textMessage.replaceAll("\n", "<br>") + "</html>"));
+      textMessage : "<html><body>" +
+      textMessage.replaceAll("\n", "<br>") + "</body></html>"));
     messageBox.add(Box.createHorizontalStrut(5));
     final JToggleButton toggleButton = new JToggleButton();
     toggleButton.setToolTipText(
@@ -138,7 +138,7 @@ public class ErrorDialog extends JOptionPane {
     dialog.setVisible(true);
 
     // do the user selected action
-    String choice = (String) pane.getValue();
+    Object choice = pane.getValue();
     if (choice == null
      || choice.equals("Let it be")
      || optionalActions == null) {
