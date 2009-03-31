@@ -1,6 +1,9 @@
 #!/bin/sh
 
-unset ANT_HOME
+# When CDPATH is set, the cd command prints out the current directory, which 
+# breaks ANT's routine for finding ANT_HOME.
+# Because of this, ANT_HOME is now set by the gate.sh script.
+#unset ANT_HOME
 
 dir=`dirname $0`
 
