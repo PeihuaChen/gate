@@ -13,6 +13,12 @@ while [ -h "$PRG" ] ; do
 done
 GATE_HOME=`dirname "$PRG"`/..
 # make it fully qualified
-export GATE_HOME=`cd "$GATE_HOME" && pwd`
-cd $GATE_HOME 
+# When CDPATH is set, the cd command prints out the dir name. Because of this
+# wee need to execute the cd command separately, and only then get the value
+# via `pwd`
+cd "$GATE_HOME"
+export GATE_HOME=`pwd`
+export ANT_HOME=$GATE_HOME
+cd $GATE_HOME
+
 exec bin/ant run "$@"
