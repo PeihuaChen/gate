@@ -260,11 +260,14 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
           LabelsOfFeatureVectorDoc labelsDoc = new LabelsOfFeatureVectorDoc();
           labelsDoc.obtainMultiLabelsFromNLPDocSurround(nlpFeatDoc,
             labelsAndId, engineSettings.surround);
-          addDocFVsMultiLabelToFile(i, outFeatureVectors,
-            labelsDoc.multiLabels, docFV);
+          //addDocFVsMultiLabelToFile(i, outFeatureVectors,
+            //labelsDoc.multiLabels, docFV);
+          docFV.addDocFVsMultiLabelToFile(i, outFeatureVectors,
+            labelsDoc.multiLabels);
         } else {
           int[] labels = new int[nlpFeatDoc.numInstances];
-          addDocFVsToFile(i, outFeatureVectors, labels, docFV);
+          //addDocFVsToFile(i, outFeatureVectors, labels, docFV);
+          docFV.addDocFVsToFile(i, outFeatureVectors, labels);
         }
       }
       // outFeatureVectors.flush();
@@ -277,7 +280,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
   }
 
   /** Write the FVs of one document into file. */
-  void addDocFVsToFile(int index, BufferedWriter out, int[] labels,
+  /*void addDocFVsToFile(int index, BufferedWriter out, int[] labels,
     DocFeatureVectors docFV) {
     try {
       out.write(new Integer(index) + ConstantParameters.ITEMSEPARATOR
@@ -297,10 +300,10 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       }
     } catch(IOException e) {
     }
-  }
+  }*/
 
   /** Write the FVs with labels of one document into file. */
-  void addDocFVsMultiLabelToFile(int index, BufferedWriter out,
+  /*void addDocFVsMultiLabelToFile(int index, BufferedWriter out,
     LabelsOfFV[] multiLabels, DocFeatureVectors docFV) {
     try {
       out.write(new Integer(index) + ConstantParameters.ITEMSEPARATOR
@@ -323,7 +326,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       }
     } catch(IOException e) {
     }
-  }
+  }*/
 
   /** Order and select unlabelled documents for active learning. */
   public void orderDocsWithModels(File wdResults,

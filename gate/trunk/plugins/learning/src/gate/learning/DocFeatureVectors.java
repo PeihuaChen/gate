@@ -9,6 +9,7 @@ package gate.learning;
 
 import gate.util.GateException;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -336,4 +337,53 @@ public class DocFeatureVectors {
     }// end of the loop for each fv
     fvs = fvsExpand;
   }
+  
+  /** Write the FVs of one document into file. */
+  public void addDocFVsToFile(int index, BufferedWriter out, int[] labels) {
+    try {
+      out.write(new Integer(index) + ConstantParameters.ITEMSEPARATOR
+        + new Integer(numInstances) + ConstantParameters.ITEMSEPARATOR
+        + docId);
+      out.newLine();
+      for(int i = 0; i < numInstances; ++i) {
+        StringBuffer line = new StringBuffer();
+        line.append(new Integer(i + 1) + ConstantParameters.ITEMSEPARATOR
+          + new Integer(labels[i]));
+        for(int j = 0; j < fvs[i].len; ++j)
+          line.append(ConstantParameters.ITEMSEPARATOR
+            + fvs[i].nodes[j].index + ConstantParameters.INDEXVALUESEPARATOR
+            + fvs[i].nodes[j].value);
+        out.write(line.toString());
+        out.newLine();
+      }
+    } catch(IOException e) {
+    }
+  }
+
+  /** Write the FVs with labels of one document into file. */
+  public void addDocFVsMultiLabelToFile(int index, BufferedWriter out,
+    LabelsOfFV[] multiLabels) {
+    try {
+      out.write(new Integer(index) + ConstantParameters.ITEMSEPARATOR
+        + new Integer(numInstances) + ConstantParameters.ITEMSEPARATOR
+        + docId);
+      out.newLine();
+      for(int i = 0; i < numInstances; ++i) {
+        StringBuffer line = new StringBuffer();
+        line.append(new Integer(i + 1) + ConstantParameters.ITEMSEPARATOR
+          + multiLabels[i].num);
+        for(int j = 0; j < multiLabels[i].num; ++j)
+          line.append(ConstantParameters.ITEMSEPARATOR
+            + multiLabels[i].labels[j]);
+        for(int j = 0; j < fvs[i].len; ++j)
+          line.append(ConstantParameters.ITEMSEPARATOR
+            + fvs[i].nodes[j].index + ConstantParameters.INDEXVALUESEPARATOR
+            + fvs[i].nodes[j].value);
+        out.write(line.toString());
+        out.newLine();
+      }
+    } catch(IOException e) {
+    }
+  }
+
 }
