@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <ML-CONFIG>
-  <VERBOSITY level="0"/>
+  <VERBOSITY level="2"/>
   <SURROUND value="false"/>
 
   <IS-LABEL-UPDATABLE value="true"/>
