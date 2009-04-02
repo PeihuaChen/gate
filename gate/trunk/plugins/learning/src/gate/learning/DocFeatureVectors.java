@@ -23,13 +23,13 @@ import java.util.regex.Pattern;
  */
 public class DocFeatureVectors {
   /** Document ID. */
-  String docId = null;
+  public String docId = null;
   /** Number of instance in the document. */
-  int numInstances;
+  public int numInstances;
   /**
    * Array containing all sparse feature vectors of instances in the documents.
    */
-  SparseFeatureVector[] fvs;
+  public SparseFeatureVector[] fvs;
   /** Default value of one component of feature vector. */
   final static float DEFAULTVALUE = 1.0f;
 
