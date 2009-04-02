@@ -196,7 +196,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
       logMessage.append("Surroud mode (or chunk learning): "
         + learningSettings.surround);
       LogService.logMessage(logMessage.toString(), 1);
-      LogService.close();
+      //LogService.close();
     }
     catch(Exception e) {
       throw new ResourceInstantiationException(e);
@@ -301,7 +301,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
               + ConstantParameters.FILENAMEOFLOGFILE);
           System.out.println("The number of threads used is "+learningSettings.numThreadUsed);
         }
-        LogService.close();
+        //LogService.close();
         // logFileIn.println("EvaluationMode: " + evaluationMode);
         // logFileIn.println("TrainingMode: " + trainingMode);
         // logFileIn.println("InputAS: " + inputASName);
@@ -864,7 +864,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
             throw new GateException("The learning mode is not defined!");
         }
         LogService.logMessage("This learning session finished!.", 1);
-        LogService.close();
+        //LogService.close();
       }
       catch(IOException e) {
         // TODO Auto-generated catch block
