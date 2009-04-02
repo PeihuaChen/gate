@@ -192,6 +192,9 @@ implements ANNIEConstants{
           String nameFile = lineRead.substring(0,index);
           String nameList = lineRead.substring(index+1,lineRead.length());
           if (nameList.equals("nickname")) {
+            if (minimumNicknameLikelihood == null) {
+              throw new ResourceInstantiationException("No value for the required parameter minimumNicknameLikelihood!");
+            }
             initNicknames(nameFile,encoding, minimumNicknameLikelihood);
             foundANickname = true;
           }
@@ -637,11 +640,17 @@ implements ANNIEConstants{
       // Reasoning is that with the sequence David Jones . . . David  . . . David Smith, we don't want to match
       // David Smith with David.  However, with the sequence, David  . . . David Jones, it's okay to match the
       // shorter version with the longer, because it hasn't already been matched with a longer.
+      boolean prevAnnotUsedToMatchWithLonger = prevAnnot.getFeatures().containsKey("matchedWithLonger");
       if (matchAnnotations(nameAnnot, annotString,  prevAnnot)) {
-//      Out.prln("Matched " + shortName + "and " + longName);
         updateMatches(nameAnnot, prevAnnot);
-        boolean prevAnnotUsedToMatchWithLonger = prevAnnot.getFeatures().containsKey("matchedWithLonger");
+        if (DEBUG) {
+          log.debug("Just matched nameAnnot " + nameAnnot.getId() + " with prevAnnot " + prevAnnot.getId());
+        }
+
         if (!prevAnnotUsedToMatchWithLonger && prevAnnot.getFeatures().containsKey("matchedWithLonger")) {
+          // We have just matched the previous annotation with a longer annotation for the first time.  We need
+          // to propogate the matchedWithLonger property to all other annotations which coreffed with the previous annotation
+          // so that we don't match them with a longer annotation
           propagatePropertyToExactMatchingMatches(prevAnnot,"matchedWithLonger",true);
         }
         //if unknown annotation, we need to change to the new type
@@ -677,7 +686,10 @@ implements ANNIEConstants{
         for (Integer nextId : matchesList) {
           Annotation a = nameAllAnnots.get(nextId);
 
-          if (getStringForAnnotation(a, document).equalsIgnoreCase(updateAnnotString)) {
+          if (fuzzyMatch(getStringForAnnotation(a, document),updateAnnotString)) {
+            if (DEBUG) {
+              log.debug("propogateProperty: " + featureName + " " + value + " from: " + updateAnnot.getId() + " to: " + a.getId());
+            }
             a.getFeatures().put(featureName, value);
           }
         }
@@ -2220,12 +2232,14 @@ implements ANNIEConstants{
    */
   public boolean noMatchRule1(String s1,
           String s2,Annotation previousAnnot, boolean longerPrevious) {
-//  try {
-//  String annotString = getStringForAnnotation(previousAnnot, document );
+//    if (DEBUG) {
+//      try {
+//        String annotString = getStringForAnnotation(previousAnnot, document );
 
-//  Out.prln("Previous annotation was " + annotString + " features are " + previousAnnot.getFeatures());
-//  }
-//  catch (ExecutionException e) {}
+//        log.debug("Previous annotation was " + annotString +  "(id: " + previousAnnot.getId() + ")" + " features are " + previousAnnot.getFeatures());
+//      }
+//      catch (ExecutionException e) {}
+//    }
 
     if (longerPrevious || !previousAnnot.getFeatures().containsKey("matchedWithLonger")) {
       return false;
