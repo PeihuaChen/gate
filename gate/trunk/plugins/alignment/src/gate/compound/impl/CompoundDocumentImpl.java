@@ -24,6 +24,16 @@ public class CompoundDocumentImpl extends AbstractCompoundDocument {
 
   private transient ArrayList<CompoundDocumentListener> listeners;
 
+  /**
+   * Constructor
+   */
+  public CompoundDocumentImpl() {
+    listeners = new ArrayList<CompoundDocumentListener>();
+    this.features = Factory.newFeatureMap();
+    this.documents = new HashMap<String, Document>();
+    this.documentIDs = new ArrayList<String>();
+  }
+  
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
     // set up the source URL and create the content
@@ -58,8 +68,6 @@ public class CompoundDocumentImpl extends AbstractCompoundDocument {
       throw new ResourceInstantiationException(
               "You must select one of the files!");
     }
-
-    listeners = new ArrayList<CompoundDocumentListener>();
 
     // instancetiate all documents
     createDocuments(file);
@@ -156,6 +164,9 @@ public class CompoundDocumentImpl extends AbstractCompoundDocument {
    * Adds a new document member to the compound document.
    */
   public void addDocument(String documentID, Document document) {
+    if(document.getName() == null) {
+      document.setName(documentID);
+    }
     documents.put(documentID, document);
     documentIDs.add(documentID);
     fireDocumentAdded(documentID);
@@ -230,8 +241,7 @@ public class CompoundDocumentImpl extends AbstractCompoundDocument {
       alignmentFeatureName = AlignmentFactory.ALIGNMENT_FEATURE_NAME;
     }
     if(this.features.get(alignmentFeatureName) == null) {
-      this.features.put(alignmentFeatureName,
-              new Alignment(this));
+      this.features.put(alignmentFeatureName, new Alignment(this));
     }
 
     return (Alignment)this.features.get(alignmentFeatureName);
@@ -239,6 +249,7 @@ public class CompoundDocumentImpl extends AbstractCompoundDocument {
 
   /**
    * This method returns all available alignment feature names
+   * 
    * @return
    */
   public Set<String> getAllAlignmentFeatureNames() {
@@ -246,15 +257,16 @@ public class CompoundDocumentImpl extends AbstractCompoundDocument {
     if(this.features.keySet() != null) {
       for(Object key : this.features.keySet()) {
         if(this.features.get(key) instanceof Alignment) {
-         toReturn.add(key.toString()); 
+          toReturn.add(key.toString());
         }
       }
     }
     return toReturn;
   }
-  
+
   /**
    * Alignment object with the provided feature name is deleted
+   * 
    * @param alignmentFeatureName
    */
   public void removeAlignmentInformation(String alignmentFeatureName) {
@@ -262,5 +274,5 @@ public class CompoundDocumentImpl extends AbstractCompoundDocument {
       this.features.remove(alignmentFeatureName);
     }
   }
-  
+
 } // class CompoundDocumentImpl
