@@ -216,9 +216,18 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     case phase:
       label_1:
       while (true) {
-        s = SinglePhaseTransducer();
-      m.addPhase(s.getName(), s);
-      s.setBaseURL(baseURL);
+        try {
+          s = SinglePhaseTransducer();
+                m.addPhase(s.getName(), s);
+                s.setBaseURL(baseURL);
+        } catch (Throwable e) {
+            // try to wrap the exception with info about what file/resource
+            // it occurred in.
+            {if (true) throw(
+              new ParseException("Cannot parse phase " +
+                  baseURL + ": " + e.getMessage()
+              ));}
+        }
         switch (jj_nt.kind) {
         case phase:
           ;
@@ -1314,55 +1323,6 @@ AnnotationAccessor accessor = null;
     finally { jj_save(1, xla); }
   }
 
-  final private boolean jj_3R_24() {
-    if (jj_scan_token(pling)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_20() {
-    if (jj_scan_token(string)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_18() {
-    if (jj_scan_token(leftBracket)) return true;
-    if (jj_3R_21()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_23() {
-    if (jj_3R_12()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_22() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_24()) jj_scanpos = xsp;
-    if (jj_scan_token(ident)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_16() {
-    if (jj_3R_18()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_21() {
-    Token xsp;
-    if (jj_3R_23()) return true;
-    while (true) {
-      xsp = jj_scanpos;
-      if (jj_3R_23()) { jj_scanpos = xsp; break; }
-    }
-    return false;
-  }
-
-  final private boolean jj_3R_15() {
-    if (jj_3R_17()) return true;
-    return false;
-  }
-
   final private boolean jj_3_2() {
     if (jj_3R_13()) return true;
     return false;
@@ -1411,6 +1371,55 @@ AnnotationAccessor accessor = null;
     if (jj_scan_token(colon)) return true;
     if (jj_scan_token(ident)) return true;
     if (jj_scan_token(leftBrace)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_24() {
+    if (jj_scan_token(pling)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_20() {
+    if (jj_scan_token(string)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_18() {
+    if (jj_scan_token(leftBracket)) return true;
+    if (jj_3R_21()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_23() {
+    if (jj_3R_12()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_22() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_24()) jj_scanpos = xsp;
+    if (jj_scan_token(ident)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_16() {
+    if (jj_3R_18()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_21() {
+    Token xsp;
+    if (jj_3R_23()) return true;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_23()) { jj_scanpos = xsp; break; }
+    }
+    return false;
+  }
+
+  final private boolean jj_3R_15() {
+    if (jj_3R_17()) return true;
     return false;
   }
 

@@ -61,8 +61,8 @@ public class TestConstraints extends BaseJapeTests {
       parseJapeString(japeString);
       assertTrue("Should have thrown exception for bad grammer", false);
     }
-    catch(RuntimeException e) {
-      // insert test of error message if really want
+    catch(ParseException e) {
+     Out.println(e.getMessage());
     }
 
     japeString = JAPE_PREFIX + "({A.f1=~[a.*}):abc" + "-->{}";
@@ -71,6 +71,7 @@ public class TestConstraints extends BaseJapeTests {
       assertTrue("Should have thrown exception for bad grammer", false);
     }
     catch(ParseException e) {
+      Out.println(e.getMessage());
       // insert test of error message if really want
     }
   }
