@@ -407,10 +407,21 @@ MultiPhaseTransducer MultiPhaseTransducer() :
   // spts
   (
     // sptrannies in this file
-    ( s=SinglePhaseTransducer() {
-      m.addPhase(s.getName(), s);
-      s.setBaseURL(baseURL);
-     } )+
+    (
+        try {
+            s=SinglePhaseTransducer() {
+                m.addPhase(s.getName(), s);
+                s.setBaseURL(baseURL);
+            }
+        } catch (Throwable e) {
+            // try to wrap the exception with info about what file/resource
+            // it occurred in.
+            throw(
+              new ParseException("Cannot parse phase " +
+                  baseURL + ": " + e.getMessage()
+              ));
+          }
+    )+
     |
     // sptrannies in external files
     (
