@@ -286,6 +286,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
     return this;
   } // init()
 
+  
   /**
    * Fills the provided corpus with documents created on the fly from selected
    * files in a directory. Uses a {@link FileFilter} to select which files will
@@ -312,7 +313,39 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
    * @throws java.io.IOException if a file doesn't exist
    */
   public static void populate(Corpus corpus, URL directory, FileFilter filter,
-    String encoding, boolean recurseDirectories) throws IOException {
+    String encoding, boolean recurseDirectories) 
+      throws IOException {
+    populate(corpus, directory, filter, encoding, null, recurseDirectories);
+  }
+  
+  /**
+   * Fills the provided corpus with documents created on the fly from selected
+   * files in a directory. Uses a {@link FileFilter} to select which files will
+   * be used and which will be ignored. A simple file filter based on extensions
+   * is provided in the Gate distribution ({@link gate.util.ExtensionFileFilter}).
+   * 
+   * @param corpus
+   *          the corpus to be populated
+   * @param directory
+   *          the directory from which the files will be picked. This parameter
+   *          is an URL for uniformity. It needs to be a URL of type file
+   *          otherwise an InvalidArgumentException will be thrown.
+   * @param filter
+   *          the file filter used to select files from the target directory. If
+   *          the filter is <tt>null</tt> all the files will be accepted.
+   * @param encoding
+   *          the encoding to be used for reading the documents
+   * @param recurseDirectories
+   *          should the directory be parsed recursively?. If <tt>true</tt>
+   *          all the files from the provided directory and all its children
+   *          directories (on as many levels as necessary) will be picked if
+   *          accepted by the filter otherwise the children directories will be
+   *          ignored.
+   * @throws java.io.IOException if a file doesn't exist
+   */
+  public static void populate(Corpus corpus, URL directory, FileFilter filter,
+    String encoding, String mimeType, boolean recurseDirectories) 
+      throws IOException {
 
     // check input
     if(!directory.getProtocol().equalsIgnoreCase("file"))
@@ -357,6 +390,8 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
         file.toURI().toURL());
       if(encoding != null)
         params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, encoding);
+      if(mimeType != null)
+        params.put(Document.DOCUMENT_MIME_TYPE_PARAMETER_NAME, mimeType);
 
       try {
         Document doc =
@@ -406,9 +441,40 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
   public void populate(URL directory, FileFilter filter, String encoding,
     boolean recurseDirectories) throws IOException,
     ResourceInstantiationException {
-    populate(this, directory, filter, encoding, recurseDirectories);
+    populate(this, directory, filter, encoding, null, recurseDirectories);
   }
 
+  
+  /**
+   * Fills this corpus with documents created from files in a directory.
+   * 
+   * @param filter
+   *          the file filter used to select files from the target directory. If
+   *          the filter is <tt>null</tt> all the files will be accepted.
+   * @param directory
+   *          the directory from which the files will be picked. This parameter
+   *          is an URL for uniformity. It needs to be a URL of type file
+   *          otherwise an InvalidArgumentException will be thrown. An
+   *          implementation for this method is provided as a static method at
+   *          {@link gate.corpora.CorpusImpl#populate(Corpus, URL, FileFilter, String, boolean)}.
+   * @param encoding
+   *          the encoding to be used for reading the documents
+   *@param mimeType the mime type to be used when loading documents. If null, 
+   *then the mime type will be detected automatically.
+   *          
+   * @param recurseDirectories
+   *          should the directory be parsed recursively?. If <tt>true</tt>
+   *          all the files from the provided directory and all its children
+   *          directories (on as many levels as necessary) will be picked if
+   *          accepted by the filter otherwise the children directories will be
+   *          ignored.
+   */
+  public void populate(URL directory, FileFilter filter, String encoding, 
+          String mimeType, boolean recurseDirectories) throws IOException,
+    ResourceInstantiationException {
+    populate(this, directory, filter, encoding, mimeType, recurseDirectories);
+  }
+  
   private static String replaceAmpChars(String s) {
     s = s.replaceAll("&", "&amp;");
     // s = s.replaceAll("<","&lt;");

@@ -331,6 +331,34 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   }
 
   /**
+   * Fills this corpus with documents created from files in a directory.
+   * 
+   * @param filter
+   *          the file filter used to select files from the target directory. If
+   *          the filter is <tt>null</tt> all the files will be accepted.
+   * @param directory
+   *          the directory from which the files will be picked. This parameter
+   *          is an URL for uniformity. It needs to be a URL of type file
+   *          otherwise an InvalidArgumentException will be thrown. An
+   *          implementation for this method is provided as a static method at
+   *          {@link gate.corpora.CorpusImpl#populate(Corpus, URL, FileFilter, String, boolean)}.
+   * @param encoding
+   *          the encoding to be used for reading the documents
+   * @param recurseDirectories
+   *          should the directory be parsed recursively?. If <tt>true</tt>
+   *          all the files from the provided directory and all its children
+   *          directories (on as many levels as necessary) will be picked if
+   *          accepted by the filter otherwise the children directories will be
+   *          ignored.
+   */
+  public void populate(URL directory, FileFilter filter, String encoding,
+          String mimeType, boolean recurseDirectories) throws IOException,
+    ResourceInstantiationException {
+    CorpusImpl.populate(this, directory, filter, encoding, mimeType,
+            recurseDirectories);
+  }
+  
+  /**
    * Fills the provided corpus with documents extracted from the provided trec
    * file.
    * 
