@@ -516,8 +516,8 @@ public class NameBearerHandle implements Handle, StatusListener,
   /**
    * Component used to select the options for corpus populating
    */
-  CorpusFillerComponent corpusFiller;
-  TrecWebFileInputDialog trecWebFileInputDialog;
+  protected CorpusFillerComponent corpusFiller;
+  protected TrecWebFileInputDialog trecWebFileInputDialog;
 
   StatusListener sListenerProxy;
 
@@ -1569,9 +1569,16 @@ public class NameBearerHandle implements Handle, StatusListener,
                   filter.addExtension((String)extIter.next());
                 }
               }
-              ((Corpus)target)
-                .populate(url, filter, corpusFiller.getEncoding(), corpusFiller
-                  .isRecurseDirectories());
+              String encoding = corpusFiller.getEncoding();
+              if(encoding != null && encoding.trim().length() == 0){
+                encoding = null;
+              }
+              String mimeType = corpusFiller.getMimeType();
+              if(mimeType != null && mimeType.trim().length() == 0){
+                mimeType = null;
+              }
+              ((Corpus)target).populate(url, filter, encoding, mimeType,
+                        corpusFiller.isRecurseDirectories());
               if(((Corpus)target).getDataStore() != null) {
                 ((LanguageResource)target).getDataStore().sync(
                   (LanguageResource)target);

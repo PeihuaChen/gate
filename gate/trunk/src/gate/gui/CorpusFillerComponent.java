@@ -123,12 +123,31 @@ public class CorpusFillerComponent extends JPanel {
     add(encodingTextField = new JTextField(15), constraints);
 
     //fourth row
+    constraints = new GridBagConstraints();
+    constraints.gridx = GridBagConstraints.RELATIVE;
+    constraints.gridy = 3;
+    constraints.gridwidth = 2;
+    constraints.anchor = GridBagConstraints.WEST;
+    constraints.fill = GridBagConstraints.NONE;
+    constraints.insets = new Insets(0, 0, 0, 5);
+    add(new JLabel("Mime Type:"), constraints);
+
+
+    constraints = new GridBagConstraints();
+    constraints.gridx = GridBagConstraints.RELATIVE;
+    constraints.gridy = 3;
+    constraints.gridwidth = 4;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    add(mimeTypeTextField = new JTextField(15), constraints);
+
+    
+    //fifth row
     recurseCheckBox = new JCheckBox("Recurse directories");
     recurseCheckBox.setSelected(true);
     recurseCheckBox.setHorizontalTextPosition(SwingConstants.LEFT);
     constraints = new GridBagConstraints();
     constraints.gridx = GridBagConstraints.RELATIVE;
-    constraints.gridy = 3;
+    constraints.gridy = 4;
     constraints.gridwidth = 3;
     constraints.anchor = GridBagConstraints.NORTHWEST;
     add(recurseCheckBox, constraints);
@@ -201,6 +220,19 @@ public class CorpusFillerComponent extends JPanel {
     encodingTextField.setText(enc);
   }
 
+  /**
+   * Gets the mime type selected by the user.
+   */
+  public String getMimeType(){
+    return mimeTypeTextField.getText();
+  }
+
+  /**
+   * Sets the initial value for the mime type field.
+   */
+  public void setMimeType(String mimeType){
+    mimeTypeTextField.setText(mimeType);
+  }
   /**
    * Sets the current value for the list of permitted extensions.
    */
@@ -278,6 +310,12 @@ public class CorpusFillerComponent extends JPanel {
    * The textField for the encoding
    */
   JTextField encodingTextField;
+  
+  /**
+   * The textField for the encoding
+   */
+  JTextField mimeTypeTextField;
+  
   /**
    * The list of permitted extensions.
    */
