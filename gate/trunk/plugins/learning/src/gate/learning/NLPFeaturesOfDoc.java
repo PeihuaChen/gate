@@ -161,6 +161,9 @@ public class NLPFeaturesOfDoc {
         String[] features;
         features = obtainNgramFeatures(annsNgramType,
           featureGateNgram[0]);
+        int numFeats = features.length;
+        int number = ngram.getNumber();
+        if(numFeats>=number) { //if the instance has enough number of features for the defined ngram
         for(int j = 1; j < consNum; j++) {
           String[] features1;
           if(typeGateNgram[j].equals(typeGateNgram[0]))
@@ -172,14 +175,13 @@ public class NLPFeaturesOfDoc {
             features[j1] = features[j1] + "_" + features1[j1];
         }
         // get the ngram features
-        int numFeats = features.length;
-        int number = ngram.getNumber();
+        
         StringBuffer[] featuresNgram = new StringBuffer[numFeats - number + 1];
         for(int j = 0; j < featuresNgram.length; ++j)
           featuresNgram[j] = new StringBuffer();
         for(int j = 0; j < number; ++j) {
           for(int j1 = j; j1 < numFeats - number + 1 + j; ++j1) {
-            featuresNgram[j1 - j].append(features[j1]
+              featuresNgram[j1 - j].append(features[j1]
               + NLPFeaturesList.SYMBOLNGARM);
           }
         }
@@ -207,6 +209,7 @@ public class NLPFeaturesOfDoc {
             + ConstantParameters.ITEMSEPARATOR);
           ++featuresCounted[i];
         }
+        }//if the number of features is not less than the n of the n-gram
       }// end of the loop on instances
     } // end of the loop on number of ngrams
   }
@@ -428,6 +431,9 @@ public class NLPFeaturesOfDoc {
         AnnotationSet annsNgramType = annsArray[0].get(tokenStartOffset, tokenEndOffset);
         String[] features = obtainNgramFeatures(annsNgramType,
           featureGateNgram[0]);
+        int numFeats = features.length;
+        int number = ngram.getNumber();
+        if(numFeats>=number) {
         for(int j = 1; j < consNum; j++) {
           String[] features1;
           if(typeGateNgram[j].equals(typeGateNgram[0]))
@@ -439,8 +445,7 @@ public class NLPFeaturesOfDoc {
             features[j1] = features[j1] + "_" + features1[j1];
         }
         // get the ngram features
-        int numFeats = features.length;
-        int number = ngram.getNumber();
+        
         StringBuffer[] featuresNgram = new StringBuffer[numFeats - number + 1];
         for(int j = 0; j < featuresNgram.length; ++j)
           featuresNgram[j] = new StringBuffer();
@@ -481,6 +486,7 @@ public class NLPFeaturesOfDoc {
             }
           }//for each instance
         }
+      }
       }// end of the loop on instances
     } // end of the loop on number of ngrams
   }
