@@ -25,7 +25,7 @@
 	<!-- <property name="tools.jar.location" value="w:/jdk/jdk1.5.0/lib/tools.jar"/> -->
 
 	<!-- RUNTIME MEMORY -->
-	<property name="run.memory" value="700M" />
+	<property name="run.memory" value="1000M" />
 
 	<!-- ******************************************************************* 
        ****************  USER OPTIONS END HERE! ************************** 
@@ -112,7 +112,7 @@
 			</classpath>
 			<formatter type="xml" />
 
-			<test name="gate.chineseSeg.TestChineseSegPlugin" />
+			<test name="gate.chineseSeg.TestChineseSegMain" />
 		</junit>
 	</target>
 
