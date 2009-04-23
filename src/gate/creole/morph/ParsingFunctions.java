@@ -411,7 +411,8 @@ public class ParsingFunctions {
 				result.addAll(andStarFSMs(string, states,owner));
 				break;
 			default:
-				result.addAll(andFSMs(string, states,owner));
+			  if(string.length() > 0)
+				  result.addAll(andFSMs(string, states,owner));
 				break;
 			}
 		}
