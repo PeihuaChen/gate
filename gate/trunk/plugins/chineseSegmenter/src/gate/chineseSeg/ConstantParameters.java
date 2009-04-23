@@ -1,9 +1,18 @@
+/*
+ *  ConstantParameters.java
+ * 
+ *  Yaoyong Li 23/04/2009
+ *
+ *  $Id: ConstantParameters.java, v 1.0 2009-04-23 12:58:16 +0000 yaoyong $
+ */
+
 package gate.chineseSeg;
 
 public class ConstantParameters {
   final static String SEPARATTORLN = ";;";
   final static char SEPARATTOR_BLANK = ' ';
   final static char SEPARATTOR_BLANK_wide = '　';
+  final static char REPLACEMENT_BLANK = 'K';
   final static char REPLACEMENT_Letter = 'L';
   final static char REPLACEMENT_Digit = 'N';
   final static char BEGIN_Char = 'B';
@@ -18,7 +27,7 @@ public class ConstantParameters {
   
   public static final String FILETYPEOFSAVEDFILE = ".save";
   final static String FILENAME_TERMS = "terms.txt";
-  final static String FILENAME_resultsDir = "savedFiles";
+  final static String FILENAME_resultsDir = "segmented";
   final static String FILENAMEOFLabelList = "labels.txt";
   /** Name of the file storing the feature vectors in sparse format. */
   public static final String FILENAMEOFFeatureVectorData = 
