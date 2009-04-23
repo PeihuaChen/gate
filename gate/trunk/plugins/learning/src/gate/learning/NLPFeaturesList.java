@@ -47,12 +47,12 @@ public class NLPFeaturesList {
   }
 
   /** Loading the list from a file. */
-  public void loadFromFile(File parentDir, String filename) {
+  public void loadFromFile(File parentDir, String filename, String tcode) {
     File fileFeaturesList = new File(parentDir, filename);
     if(fileFeaturesList.exists()) {
       try {
         BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream
-          (fileFeaturesList), "UTF-8"));
+          (fileFeaturesList), tcode));
         // featuresList = new Hashtable();
         String line;
         if((line = in.readLine()) != null)
@@ -73,13 +73,13 @@ public class NLPFeaturesList {
   }
 
   /** Write back the list into the file, with updated information. */
-  public void writeListIntoFile(File parentDir, String filename) {
+  public void writeListIntoFile(File parentDir, String filename, String tcode) {
     File fileFeaturesList = new File(parentDir, filename);
     if(LogService.minVerbosityLevel > 1)
       System.out.println("Lengh of List = " + featuresList.size());
     try {
       PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(
-        fileFeaturesList), "UTF-8"));
+        fileFeaturesList), tcode));
       // for the total number of docs
       out.println("totalNumDocs=" + totalNumDocs);
       List keys = new ArrayList(featuresList.keySet());

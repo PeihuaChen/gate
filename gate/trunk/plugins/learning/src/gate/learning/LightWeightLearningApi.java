@@ -92,7 +92,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
     // read the NLP feature list
     featuresList = new NLPFeaturesList();
     featuresList.loadFromFile(wdResults,
-      ConstantParameters.FILENAMEOFNLPFeatureList);
+      ConstantParameters.FILENAMEOFNLPFeatureList, "UTF-8");
     labelsAndId = new Label2Id();
     labelsAndId.loadLabelAndIdFromFile(wdResults,
       ConstantParameters.FILENAMEOFLabelList);
@@ -218,7 +218,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
     LearningEngineSettings engineSettings) {
     if(isTraining && engineSettings.isNLPFeatListUpdatable)
       featuresList.writeListIntoFile(wdResults,
-        ConstantParameters.FILENAMEOFNLPFeatureList);
+        ConstantParameters.FILENAMEOFNLPFeatureList, "UTF-8");
     if(isTraining && engineSettings.isLabelListUpdatable)
       labelsAndId.writeLabelAndIdToFile(wdResults,
         ConstantParameters.FILENAMEOFLabelList);
