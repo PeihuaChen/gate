@@ -1,6 +1,20 @@
+/*
+ *  ChineseSegMain.java
+ * 
+ *  Yaoyong Li 23/04/2009
+ *
+ *  $Id: ChineseSegMain.java, v 1.0 2009-04-23 12:58:16 +0000 yaoyong $
+ */
+
 package gate.chineseSeg;
 
-import gate.Corpus;
+/**
+ * 
+ * Learn a model from the segmented Chinese text and apply the learned
+ * model to segment Chinese text. 
+ *
+ */
+
 import gate.Document;
 import gate.Factory;
 import gate.ProcessingResource;
@@ -18,7 +32,6 @@ import gate.learning.SparseFeatureVector;
 import gate.learning.learners.MultiClassLearning;
 import gate.learning.learners.PostProcessing;
 import gate.learning.learners.SupervisedLearner;
-import gate.util.Benchmark;
 import gate.util.ExtensionFileFilter;
 import gate.util.GateException;
 
@@ -28,14 +41,24 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Comparator;
 
 public class ChineseSegMain extends AbstractLanguageAnalyser implements
                                                             ProcessingResource {
   URL modelURL = null;
   URL textFilesURL = null;
+  String textCode = null;
+  String learningAlg = null;
+
+  private RunMode learningMode;
+  private RunMode learningModeAppl;
+  private RunMode learningModeTraining;
 
   /** Initialise this resource, and return it. */
   public gate.Resource init() throws ResourceInstantiationException {
+    this.learningModeAppl = RunMode.APPLICATION;
+    this.learningModeTraining = RunMode.LEARNING;
     return this;
   } // init()
 
@@ -45,25 +68,59 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
    * @throws ExecutionException
    */
   public void execute() throws ExecutionException {
+    System.out.println("\n\n------------ new session starts ------------\n");
+    
+    
+    if(corpus != null) {
+      if(corpus.size() != 0) if(corpus.indexOf(document) > 0) return;
+    }
 
     boolean isUpdateFeatList = true;
     // boolean isTraining = true;
     boolean isTraining = false;
-
-    // load the existing terms and labels
-    File wdResults = new File("C:\\yaoyong\\javawk\\chineseSeg\\test\\data\\",
-      ConstantParameters.FILENAME_resultsDir);
-    if(!wdResults.exists()) wdResults.mkdir();
-
-    File logFile = new File(wdResults, ConstantParameters.FILENAMEOFLOGFILE);
+    File wdResults = null;
+    File logFile = null;
     int verbosityLogService = 1;
+    BufferedWriter outFeatureVectors = null;
+
+    // do the initialisation work before the first document
+    isTraining = false;
+    if(this.learningMode.equals(this.learningModeTraining))
+      isTraining = true;
+    else isTraining = false;
+    //isUpdateFeatList = isTraining;
+    isUpdateFeatList = true;
+    
+    if(isTraining) {
+      System.out.println("Learning a new model from the segmented text...");
+      System.out.println("Learning algorithm used is "+this.learningAlg);
+      System.out.println("the model files will be stored in "+modelURL.toString());
+      System.out.println("the text used for learning are in "+this.textFilesURL.toExternalForm());
+    } else {
+      System.out.println("Applying the learned model to segment Chinese text...");
+      System.out.println("Learning algorithm used is "+this.learningAlg);
+      System.out.println("the model files used are stored in "+modelURL.toString());
+      System.out.println("the text for segmenting are in "+this.textFilesURL.toExternalForm());
+    }
+
+    verbosityLogService = 1;
+    // load the existing terms and labels
+    // File wdResults = new
+    // File("C:\\yaoyong\\javawk\\chineseSeg\\test\\data\\",
+    // ConstantParameters.FILENAME_resultsDir);
+    wdResults = new File(modelURL.getPath());
+    if(!wdResults.exists()) wdResults.mkdir();
+    
+    
+
+    logFile = new File(wdResults, ConstantParameters.FILENAMEOFLOGFILE);
     try {
       LogService.init(logFile, true, verbosityLogService);
 
       // read the feature list from the file
       NLPFeaturesList featuresList = null;
       featuresList = new NLPFeaturesList();
-      featuresList.loadFromFile(wdResults, ConstantParameters.FILENAME_TERMS);
+      featuresList.loadFromFile(wdResults, ConstantParameters.FILENAME_TERMS, this.textCode);
       if(!featuresList.featuresList.containsKey(ConstantParameters.NONFEATURE)) {
         int size = featuresList.featuresList.size() + 1;
         featuresList.featuresList.put(ConstantParameters.NONFEATURE,
@@ -78,141 +135,186 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
       labelsAndId.loadLabelAndIdFromFile(wdResults,
         ConstantParameters.FILENAMEOFLabelList);
 
-      // ConstantParameters.FILENAME_TERMS);
-      Corpus corpus = Factory.newCorpus("Data-chinese");
+      // determine the text files.
       ExtensionFileFilter fileFilter = new ExtensionFileFilter();
       fileFilter.addExtension("txt");
-      // corpus.populate(new
-      // File("C:\\yaoyong_h\\work\\bnc-kim\\small").toURL(),
-      // fileFilter, "UTF-8", false);
+      File[] xmlFiles = new File(this.textFilesURL.getPath())
+        .listFiles(fileFilter);
+      Arrays.sort(xmlFiles, new Comparator<File>() {
+        public int compare(File a, File b) {
+          return a.getName().compareTo(b.getName());
+        }
+      });
 
       // corpus.populate(new
       // File("C:\\yaoyong\\javawk\\chineseSeg\\test\\data").toURI().toURL(),
       // fileFilter, "UTF-8", false);
 
-      corpus.populate(new File(
-        "C:\\yaoyong\\javawk\\chineseSeg\\test\\data\\labels").toURI().toURL(),
-        fileFilter, "UTF-8", false);
+      // corpus.populate(new File(
+      // "C:\\yaoyong\\javawk\\chineseSeg\\test\\data\\labels").toURI().toURL(),
+      // fileFilter, "UTF-8", false);
 
       // corpus.populate(new
       // File("C:\\yaoyong\\javawk\\chineseSeg\\test\\data\\gb2312").toURI().toURL(),
       // fileFilter, "GB18030", false);
 
-      // corpus.populate(new File("C:\\yaoyong_h\
-
-      System.out.println("number of docs=" + corpus.size());
-      BufferedWriter outFeatureVectors = null;
-      if(isTraining) {
+      if(isTraining) { // open the feature vector file for storing the fvs
         outFeatureVectors = new BufferedWriter(new OutputStreamWriter(
           new FileOutputStream(new File(wdResults,
             ConstantParameters.FILENAMEOFFeatureVectorData)), "UTF-8"));
       }
-
-      int totalN = 0;
-      int numDocs = 0;
-      for(int iIndex = 0; iIndex < corpus.size(); ++iIndex) {
-        ++numDocs;
-        // read the text from a document
-        Document doc = (Document)corpus.get(iIndex);
-        System.out.println(iIndex + ", docName=" + doc.getName());
-        System.out.println(iIndex + ", content=" + doc.getContent() + "*");
-        String text = doc.getContent().toString();
-        // convert the document into an array of characters with replacements
-        char[] chs = new char[text.length()];
-        int num;
-        StringBuffer letterNum = new StringBuffer();
-        num = convert2Chs(text, chs, letterNum);
-        // get the labels
-        String[] labels = new String[chs.length];
-        if(isTraining) {
-          num = obtainLabels(num, chs, labels);
-          // update the labels
-          labelsAndId.updateMultiLabelFromDoc(labels);
-        }
-
-        // for(int j = 0; j < num; ++j) {
-        // System.out.println(j + ", ch=*" + chs[j] + "* type="
-        // + Character.getType(chs[j]) + ", labels=*" + labels[j] + "*");
-        // }
-        System.out.println("** LN=" + letterNum);
-        // get the features from the array
-        String[] termC1 = new String[num + 2]; // with begin and start char
-                                                // added
-        String[] termC12 = new String[num + 1]; // for the c0c1
-        String[] termC13 = new String[num]; // for the c-1c1 feature
-        obtainTerms(num, chs, termC1, termC12, termC13);
-        // update the feature list
-        if(isUpdateFeatList) {
-          updateFeatList(featuresList, termC1);
-          updateFeatList(featuresList, termC12);
-          updateFeatList(featuresList, termC13);
-        }
-        // get the real features from the terms
-        DocFeatureVectors docFV = new DocFeatureVectors();
-        docFV.docId = new String(doc.getName());
-
-        // System.out.println("888 feat=旅"+"*,
-        // id="+featuresList.featuresList.get("旅").toString()+"*");
-        // for(Object obj:featuresList.featuresList.keySet()) {
-        // System.out.println("feat="+obj.toString()+",
-        // id="+featuresList.featuresList.get(obj).toString());
-        // }
-
-        putFeatsIntoDocFV(featuresList, termC1, termC12, termC13, docFV);
-
-        LabelsOfFV[] multiLabels = new LabelsOfFV[num];
-        for(int j = 0; j < num; ++j) {
-          int[] labelsId = new int[1];
-          if(isTraining)
-            labelsId[0] = new Integer(labelsAndId.label2Id.get(labels[j])
-              .toString()).intValue();
-          else labelsId[0] = -1;
-          float[] labelPr = new float[1];
-          labelPr[0] = 1;
-          multiLabels[j] = new LabelsOfFV(1, labelsId, labelPr);
-        }
-
-        System.out.println("numInstance=" + docFV.numInstances);
-
-        if(!isTraining) {
-          outFeatureVectors = new BufferedWriter(new OutputStreamWriter(
-            new FileOutputStream(new File(wdResults,
-              ConstantParameters.FILENAMEOFFeatureVectorData)), "UTF-8"));
-        }
-
-        docFV.addDocFVsMultiLabelToFile(iIndex, outFeatureVectors, multiLabels);
-
-        if(!isTraining) {
-          outFeatureVectors.flush();
-          outFeatureVectors.close();
-        }
-
-        if(!isTraining) {
-          int[] selectedLabels = null;
-          selectedLabels = segementText(wdResults);
-          // get back to the replacements for letter, number and newline.
-          String[] terms = letterNum.toString().split(
-            ConstantParameters.SEPARATTORLN);
-          int kk = 0;
-          for(int j = 0; j < num; ++j) {
-            // System.out.println(j + ", ch=*" + chs[j] + "* type="
-            // + Character.getType(chs[j]) + ", labels=*" + selectedLabels[j] +
-            // "*");
-            String labelC = null;
-            String iObj = new Integer(selectedLabels[j]).toString();
-            if(labelsAndId.id2Label.containsKey(iObj))
-              labelC = labelsAndId.id2Label.get(iObj).toString();
-
-            if(chs[j] == ConstantParameters.REPLACEMENT_Digit
-              || chs[j] == ConstantParameters.REPLACEMENT_Letter
-              || chs[j] == ConstantParameters.NEWLINE_Char) {
-              System.out.print(terms[kk++] + "(" + labelC + ") ");
-            }
-            else System.out.print(chs[j] + "(" + labelC + ") ");
-          }
-        }
-
+      
+      File dirSeg = null;
+      
+      if(!isTraining) {
+        dirSeg = new File(this.textFilesURL.getPath(), ConstantParameters.FILENAME_resultsDir);
+        if(!dirSeg.exists())
+          dirSeg.mkdir();
       }
+
+      int numDocs = 0;
+      for(File f : xmlFiles) { //for each file in the directory
+        if(!f.isDirectory()) {
+
+          // for(; iIndex < corpus.size(); ++iIndex) {
+          ++numDocs;
+          // read the text from a document
+          Document doc = Factory.newDocument(f.toURI().toURL(), this.textCode);
+          doc.setName(f.getName());
+          System.out.println(numDocs + ", docName=" + doc.getName());
+          //System.out.println(numDocs + ", content=" + doc.getContent() + "*");
+          String text = doc.getContent().toString();
+          
+          // convert the document into an array of characters with replacements
+          char[] chs = new char[text.length()];
+          int num;
+          StringBuffer letterNum = new StringBuffer();
+          num = convert2Chs(text, chs, letterNum);
+          // get the labels
+          String[] labels = new String[chs.length];
+          if(isTraining) {
+            num = obtainLabels(num, chs, labels);
+            // update the labels
+            labelsAndId.updateMultiLabelFromDoc(labels);
+          }
+
+          /*for(int j = 0; j < num; ++j) {
+           System.out.println(j + ", ch=*" + chs[j] + "* type="
+           + Character.getType(chs[j]) + ", labels=*" + labels[j] + "*");
+          }*/
+          //System.out.println("** LN=" + letterNum);
+          // get the features from the array
+          String[] termC1 = new String[num + 2]; // with begin and start char
+          // added
+          String[] termC12 = new String[num + 1]; // for the c0c1
+          String[] termC13 = new String[num]; // for the c-1c1 feature
+          obtainTerms(num, chs, termC1, termC12, termC13);
+          // update the feature list
+          if(isUpdateFeatList) {
+            updateFeatList(featuresList, termC1);
+            updateFeatList(featuresList, termC12);
+            updateFeatList(featuresList, termC13);
+          }
+          // get the real features from the terms
+          DocFeatureVectors docFV = new DocFeatureVectors();
+          docFV.docId = new String(doc.getName());
+
+          // System.out.println("888 feat=旅"+"*,
+          // id="+featuresList.featuresList.get("旅").toString()+"*");
+          // for(Object obj:featuresList.featuresList.keySet()) {
+          // System.out.println("feat="+obj.toString()+",
+          // id="+featuresList.featuresList.get(obj).toString());
+          // }
+
+          putFeatsIntoDocFV(featuresList, termC1, termC12, termC13, docFV);
+
+          LabelsOfFV[] multiLabels = new LabelsOfFV[num];
+          for(int j = 0; j < num; ++j) {
+            int[] labelsId = new int[1];
+            if(isTraining)
+              labelsId[0] = new Integer(labelsAndId.label2Id.get(labels[j])
+                .toString()).intValue();
+            else labelsId[0] = -1;
+            float[] labelPr = new float[1];
+            labelPr[0] = 1;
+            multiLabels[j] = new LabelsOfFV(1, labelsId, labelPr);
+          }
+
+          System.out.println("numInstance=" + docFV.numInstances);
+
+          //BufferedWriter outSegTextLabel = null;
+          BufferedWriter outSegText = null;
+          if(!isTraining) {
+            outFeatureVectors = new BufferedWriter(new OutputStreamWriter(
+              new FileOutputStream(new File(wdResults,
+                ConstantParameters.FILENAMEOFFeatureVectorData)), "UTF-8"));
+            outSegText = new BufferedWriter(new OutputStreamWriter(
+              new FileOutputStream(new File(dirSeg,
+                f.getName()+".seg.txt")), this.textCode));
+            //outSegTextLabel = new BufferedWriter(new OutputStreamWriter(
+             // new FileOutputStream(new File(dirSeg,
+               // f.getName()+".segLabel.txt")), "UTF-8"));
+          }
+          
+          docFV.addDocFVsMultiLabelToFile(numDocs, outFeatureVectors,
+            multiLabels);
+
+          if(!isTraining) {
+            outFeatureVectors.flush();
+            outFeatureVectors.close();
+          }
+
+          if(!isTraining) { // for application of the models
+            int[] selectedLabels = null;
+            selectedLabels = segementText(wdResults, this.learningAlg);
+            // get back to the replacements for letter, number and newline.
+            String[] terms = letterNum.toString().split(
+              ConstantParameters.SEPARATTORLN);
+            int kk = 0;
+            StringBuffer textSeg = new StringBuffer();
+            for(int j = 0; j < num; ++j) { //for each character
+              // System.out.println(j + ", ch=*" + chs[j] + "* type="
+              // + Character.getType(chs[j]) + ", labels=*" + selectedLabels[j]
+              // +
+              // "*");
+              String labelC = null;
+              String iObj = new Integer(selectedLabels[j]+1).toString();
+              if(labelsAndId.id2Label.containsKey(iObj))
+                labelC = labelsAndId.id2Label.get(iObj).toString();
+
+              if(chs[j] == ConstantParameters.REPLACEMENT_Digit
+                || chs[j] == ConstantParameters.REPLACEMENT_Letter
+                || chs[j] == ConstantParameters.NEWLINE_Char) {
+               // System.out.print(terms[kk] + "(" + labelC + ") ");
+                //outSegTextLabel.append(terms[kk] + "(" + labelC + ") ");
+                textSeg.append(terms[kk]);
+                if(labelC.equals(ConstantParameters.LABEL_R) || 
+                  labelC.equals(ConstantParameters.LABEL_S))
+                  textSeg.append(ConstantParameters.SEPARATTOR_BLANK);
+                ++kk;
+              } else if(chs[j] == ConstantParameters.REPLACEMENT_BLANK) {
+                //System.out.print(ConstantParameters.SEPARATTOR_BLANK + "(null ) ");
+                //outSegTextLabel.append(ConstantParameters.SEPARATTOR_BLANK + "(null ) ");
+                textSeg.append(ConstantParameters.SEPARATTOR_BLANK);
+              } else {
+               // System.out.print(chs[j] + "(" + labelC + ") ");
+                //outSegTextLabel.append(chs[j] + "(" + labelC + ") ");
+                textSeg.append(chs[j]);
+                if(labelC.equals(ConstantParameters.LABEL_R) || labelC.equals(ConstantParameters.LABEL_S))
+                  textSeg.append(ConstantParameters.SEPARATTOR_BLANK);
+              }
+            }//end of the loop for each character
+            outSegText.append(textSeg);
+            outSegText.flush();
+            outSegText.close();
+            //outSegTextLabel.flush();
+            //outSegTextLabel.close();
+          }
+        //unload the document from GATE
+          Factory.deleteResource(doc);
+        }
+        
+      }// end of the loop for each document in the text dir
       if(isTraining) {
         outFeatureVectors.flush();
         outFeatureVectors.close();
@@ -220,7 +322,7 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
 
       if(isUpdateFeatList) {
         featuresList.writeListIntoFile(wdResults,
-          ConstantParameters.FILENAME_TERMS);
+          ConstantParameters.FILENAME_TERMS, this.textCode);
       }
       // write the labels into the file
       if(isTraining) {
@@ -228,9 +330,10 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
           ConstantParameters.FILENAMEOFLabelList);
       }
 
-      if(isTraining) learningNewModel(wdResults, numDocs);
+      if(isTraining) learningNewModel(wdResults, numDocs, this.learningAlg);
 
-      System.out.println("totalN=" + totalN);
+      //System.out.println("totalN=" + totalN);
+      System.out.println("Number of documents used is " + numDocs);
       System.out.println("Finished!");
     }
     catch(IOException e) {
@@ -247,7 +350,7 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
     }
   }
 
-  static void learningNewModel(File wdResults, int numDocs)
+  static void learningNewModel(File wdResults, int numDocs, String learningAlg)
     throws GateException {
 
     String fvFileName = wdResults.toString() + File.separator
@@ -259,10 +362,19 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
 
     String learningCommand = "  ";
     String dataSetFile = null;
-    SupervisedLearner paumLearner = MultiClassLearning.obtainLearnerFromName(
-      "PAUM", learningCommand, dataSetFile);
-    paumLearner.setLearnerExecutable("");
-    String learningParas = " -p 20 -n 1 -optB 0.0 ";
+    String learningParas = null;
+    SupervisedLearner paumLearner = null;
+    if(learningAlg.equalsIgnoreCase("SVM")) {
+      paumLearner = MultiClassLearning.obtainLearnerFromName(
+        "SVMLibSvmJava", learningCommand, dataSetFile);
+      paumLearner.setLearnerExecutable("");
+      learningParas = " -c 0.7 -t 0 -m 100 -tau 0.8 ";
+    } else {
+      paumLearner = MultiClassLearning.obtainLearnerFromName(
+        "PAUM", learningCommand, dataSetFile);
+      paumLearner.setLearnerExecutable("");
+      learningParas = " -p 20 -n 1 -optB 0.0 ";
+    }
     paumLearner.setLearnerParams(learningParas);
 
     MultiClassLearning chunkLearning = new MultiClassLearning(
@@ -291,7 +403,7 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
    * 
    * @throws GateException
    */
-  static int[] segementText(File wdResults) throws GateException {
+  static int[] segementText(File wdResults, String learningAlg) throws GateException {
     int numDocs = 1;
     String fvFileName = wdResults.toString() + File.separator
       + ConstantParameters.FILENAMEOFFeatureVectorData;
@@ -302,10 +414,19 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
 
     String learningCommand = "  ";
     String dataSetFile = null;
-    SupervisedLearner paumLearner = MultiClassLearning.obtainLearnerFromName(
-      "PAUM", learningCommand, dataSetFile);
-    paumLearner.setLearnerExecutable("");
-    String learningParas = " -p 50 -n 5 -optB 0.0 ";
+    String learningParas = null;
+    SupervisedLearner paumLearner = null;
+    if(learningAlg.equalsIgnoreCase("SVM")) {
+      paumLearner = MultiClassLearning.obtainLearnerFromName(
+        "SVMLibSvmJava", learningCommand, dataSetFile);
+      paumLearner.setLearnerExecutable("");
+      learningParas = " -c 0.7 -t 0 -m 100 -tau 0.8 ";
+    } else {
+      paumLearner = MultiClassLearning.obtainLearnerFromName(
+        "PAUM", learningCommand, dataSetFile);
+      paumLearner.setLearnerExecutable("");
+      learningParas = " -p 20 -n 1 -optB 0.0 ";
+    }
     paumLearner.setLearnerParams(learningParas);
 
     MultiClassLearning chunkLearning = new MultiClassLearning(
@@ -323,7 +444,7 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
     chunkLearning.applyNoThread(paumLearner, modelFile);
     LabelsOfFeatureVectorDoc[] labelsFVDoc = null;
     labelsFVDoc = chunkLearning.dataFVinDoc.labelsFVDoc;
-    int numClasses = chunkLearning.numClasses;
+    //int numClasses = chunkLearning.numClasses;
 
     // applying to text
     // String featName = engineSettings.datasetDefinition.arrs.classFeature;
@@ -358,7 +479,11 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
     boolean isR = false;
     for(int ind = 0; ind < text.length(); ++ind) {
       Character ch = text.charAt(ind);
-      if(isDelim(ch)) continue; // not use blank
+      if(isDelim(ch)) {//for the blank
+        chs[num] = ConstantParameters.REPLACEMENT_BLANK;
+        ++num;
+        continue; // not use blank
+      }
       int tc = Character.getType(ch);
       if(tc == Character.DIRECTIONALITY_RIGHT_TO_LEFT_EMBEDDING) continue;
       if(tc == Character.DIRECTIONALITY_LEFT_TO_RIGHT_OVERRIDE) {
@@ -419,9 +544,9 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
         chsSim11[num++] = chs[id];
       }
       else {
-        chsSim11[num++] = ConstantParameters.SEPARATTOR_BLANK;
+        chsSim11[num++] = ConstantParameters.REPLACEMENT_BLANK;
         chsSim11[num++] = chs[id];
-        chsSim11[num++] = ConstantParameters.SEPARATTOR_BLANK;
+        chsSim11[num++] = ConstantParameters.REPLACEMENT_BLANK;
       }
     }
     // Then remove the duplicate spaces
@@ -431,7 +556,7 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
     boolean isD = false;
     for(int id = 0; id < num; ++id) {
       // if(Character.isWhitespace(chsSim11[id])) {
-      if(isDelim(chsSim11[id])) {
+      if(chsSim11[id] == ConstantParameters.REPLACEMENT_BLANK) {
         if(!isD) {
           isD = true;
           chsSim[num11] = chsSim11[id];
@@ -476,8 +601,6 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
       }
 
     }
-
-    System.out.println("num=" + num + ", num11=" + num11);
 
     return num;
   }
@@ -562,8 +685,7 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
       if(ind + 2 < termC12.length)
         feats[8] = termC12[ind + 2]; // c1c2
       else feats[8] = ConstantParameters.NONFEATURE;
-      ;
-      feats[9] = termC13[ind];
+      feats[9] = termC13[ind]; //c-1c1
 
       /*
        * System.out.print(ind+", feat="); for(int i=0; i<10; ++i)
@@ -572,6 +694,12 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
       // get the features by using feature list
       // StringBuffer fv = new StringBuffer();
       docFV.fvs[ind] = new SparseFeatureVector(10);
+      //for(int i = 0; i < 10; i++) {
+        //System.out.print("*"+feats[i]+"("+featuresList.featuresList
+         // .get(feats[i]).toString()+")*");
+      //}
+      //System.out.println();
+      
       for(int i = 0; i < 10; i++) {
         docFV.fvs[ind].nodes[i].index = new Integer(featuresList.featuresList
           .get(feats[i]).toString()).intValue()
@@ -597,4 +725,27 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
     return this.textFilesURL;
   }
 
+  public RunMode getLearningMode() {
+    return this.learningMode;
+  }
+
+  public void setLearningMode(RunMode learningM) {
+    this.learningMode = learningM;
+  }
+  
+  public String getTextCode() {
+    return this.textCode;
+  }
+
+  public void setTextCode(String tcode) {
+    this.textCode = tcode;
+  }
+  
+  public String getLearningAlg() {
+    return this.learningAlg;
+  }
+
+  public void setLearningAlg(String la) {
+    this.learningAlg = la;
+  }
 }
