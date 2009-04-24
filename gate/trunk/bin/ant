@@ -2,13 +2,29 @@
 
 # When CDPATH is set, the cd command prints out the current directory, which 
 # breaks ANT's routine for finding ANT_HOME.
-# Because of this, ANT_HOME is now set by the gate.sh script.
-#unset ANT_HOME
+# Because of this, ANT_HOME is now set here
 
-dir=`dirname $0`
+PRG="$0"
+# need this for relative symlinks
+while [ -h "$PRG" ] ; do
+  ls=`ls -ld "$PRG"`
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '/.*' > /dev/null; then
+    PRG="$link"
+  else
+    PRG=`dirname "$PRG"`"/$link"
+  fi
+done
+ANT_HOME=`dirname "$PRG"`/..
+# make it fully qualified
+# When CDPATH is set, the cd command prints out the dir name. Because of this
+# wee need to execute the cd command separately, and only then get the value
+# via `pwd`
+cd "$ANT_HOME"
+export ANT_HOME=`pwd`
 
-if [ -x "$dir/real-ant" ]; then
-  exec $dir/real-ant --noconfig "$@"
+if [ -x "$ANT_HOME/bin/real-ant" ]; then
+  exec $ANT_HOME/bin/real-ant --noconfig "$@"
 else
   echo "Couldn't find real-ant"
 fi
