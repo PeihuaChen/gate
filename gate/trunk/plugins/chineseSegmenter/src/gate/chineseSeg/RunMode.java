@@ -12,5 +12,5 @@ package gate.chineseSeg;
  * Enum data type for learning mode in GUI.
  */
 public enum RunMode {
-  APPLICATION, LEARNING
+  SEGMENTING, LEARNING
 }

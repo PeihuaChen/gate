@@ -114,11 +114,11 @@ public class TestChineseSegMain extends TestCase {
       
       //Application
       chineseSeg.setTextFilesURL(testData.toURI().toURL());
-      chineseSeg.setLearningMode(RunMode.APPLICATION);
+      chineseSeg.setLearningMode(RunMode.SEGMENTING);
       
       controller.execute();
       
-      emptySavedFiles(modelDir); //remove the model files
+      //emptySavedFiles(modelDir); //remove the model files
       
       BufferedReader inSegText = null;
       inSegText = new BufferedReader(new InputStreamReader(

@@ -30,7 +30,7 @@
         DEFAULT="UTF-8" OPTIONAL="false">java.lang.String</PARAMETER>
 
 	 <PARAMETER NAME="learningMode"
-   COMMENT="segment Chinese text or learn a model" RUNTIME="true" DEFAULT="APPLICATION"
+   COMMENT="segment Chinese text or learn a model" RUNTIME="true" DEFAULT="SEGMENTING"
    OPTIONAL="false">gate.chineseSeg.RunMode</PARAMETER>
 
 
