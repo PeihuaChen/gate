@@ -1,8 +1,0 @@
-191 #numTrainingDocs
-4 #numClasses
-0 #numNullLabelInstances
-54600285 #totalFeatures
-E:\chinese\model-pku-gb\learnedModels.save #modelFile
-PAUM #learnerName
- #learnerExecutable
- -p 20 -n 1 -optB 0.0  #learnerParams
