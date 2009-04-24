@@ -780,7 +780,7 @@
        loaded into GATE from the plugin manager.  Most plugins are handled by
        running "bin/ant all" but you will need to build SUPPLE manually.
   -->
-  <target name="plugins.html">
+  <target name="plugins.html" depends="plugins.build">
     <typedef resource="gate/util/ant/antlib.xml"
              classpathref="run.class.path"/>
     <!-- clean out previous run -->
