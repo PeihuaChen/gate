@@ -137,7 +137,7 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
 
       // determine the text files.
       ExtensionFileFilter fileFilter = new ExtensionFileFilter();
-      fileFilter.addExtension("txt");
+      //fileFilter.addExtension("txt");
       File[] xmlFiles = new File(this.textFilesURL.getPath())
         .listFiles(fileFilter);
       Arrays.sort(xmlFiles, new Comparator<File>() {
