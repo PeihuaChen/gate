@@ -1,0 +1,24 @@
+24-Apr-2009 11:33:11: total Number of classes for learning is 4
+24-Apr-2009 11:33:11: One against others for multi to binary class conversion.
+24-Apr-2009 11:35:08: Training time for class 1: 116456ms
+24-Apr-2009 11:36:51: Training time for class 2: 100746ms
+24-Apr-2009 11:40:57: Training time for class 3: 245089ms
+24-Apr-2009 11:42:48: Training time for class 4: 109455ms
+24-Apr-2009 11:44:05: One against others for multi to binary class conversion.
+Number of classes in model: 4
+24-Apr-2009 11:44:17: Application time for class: 12344ms
+24-Apr-2009 11:44:19: One against others for multi to binary class conversion.
+Number of classes in model: 4
+24-Apr-2009 11:44:29: Application time for class: 9969ms
+24-Apr-2009 18:47:02: One against others for multi to binary class conversion.
+Number of classes in model: 4
+24-Apr-2009 18:47:15: Application time for class: 12672ms
+24-Apr-2009 18:47:16: One against others for multi to binary class conversion.
+Number of classes in model: 4
+24-Apr-2009 18:47:23: Application time for class: 7844ms
+24-Apr-2009 19:09:37: One against others for multi to binary class conversion.
+Number of classes in model: 4
+24-Apr-2009 19:09:48: Application time for class: 10937ms
+24-Apr-2009 19:09:48: One against others for multi to binary class conversion.
+Number of classes in model: 4
+24-Apr-2009 19:09:57: Application time for class: 8265ms
