@@ -57,7 +57,7 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
 
   /** Initialise this resource, and return it. */
   public gate.Resource init() throws ResourceInstantiationException {
-    this.learningModeAppl = RunMode.APPLICATION;
+    this.learningModeAppl = RunMode.SEGMENTING;
     this.learningModeTraining = RunMode.LEARNING;
     return this;
   } // init()
