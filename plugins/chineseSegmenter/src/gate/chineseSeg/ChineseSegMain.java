@@ -88,8 +88,8 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
     if(this.learningMode.equals(this.learningModeTraining))
       isTraining = true;
     else isTraining = false;
-    //isUpdateFeatList = isTraining;
-    isUpdateFeatList = true;
+    isUpdateFeatList = isTraining;
+    //isUpdateFeatList = true;
     
     if(isTraining) {
       System.out.println("Learning a new model from the segmented text...");
@@ -136,8 +136,9 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
         ConstantParameters.FILENAMEOFLabelList);
 
       // determine the text files.
-      ExtensionFileFilter fileFilter = new ExtensionFileFilter();
+      //ExtensionFileFilter fileFilter = new ExtensionFileFilter();
       //fileFilter.addExtension("txt");
+      ExtensionFileFilter fileFilter = null;
       File[] xmlFiles = new File(this.textFilesURL.getPath())
         .listFiles(fileFilter);
       Arrays.sort(xmlFiles, new Comparator<File>() {
@@ -701,10 +702,15 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
       //System.out.println();
       
       for(int i = 0; i < 10; i++) {
-        docFV.fvs[ind].nodes[i].index = new Integer(featuresList.featuresList
+        if(featuresList.featuresList.containsKey(feats[i])) {
+          docFV.fvs[ind].nodes[i].index = new Integer(featuresList.featuresList
           .get(feats[i]).toString()).intValue()
           + i * ConstantParameters.MAXIMUMFEATURES;
         docFV.fvs[ind].nodes[i].value = 1;
+        } else {
+          docFV.fvs[ind].nodes[i].index =  i * ConstantParameters.MAXIMUMFEATURES;
+          docFV.fvs[ind].nodes[i].value = 0;
+        }
       }
     }
   }
