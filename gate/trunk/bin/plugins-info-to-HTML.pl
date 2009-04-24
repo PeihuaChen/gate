@@ -4,7 +4,7 @@
 # to produce a summary HTML page (GATE/doc/plugins.html)
 # by Andrew Golightly
 #
-# This script should not be run directly, use "ant plugins.html" in the
+# DO NOT RUN THIS SCRIPT FROM THE COMMAND LINE, use "ant plugins.html" in the
 # top-level GATE directory instead.
 
 use strict;
@@ -13,6 +13,12 @@ use XML::Simple;
 use XML::XPath;
 use XML::XPath::XMLParser;
 use File::Find;
+
+if(!@ARGV || $ARGV[0] ne "runningFromAnt") {
+  print "This script should not be run directly.  Instead, you should do\n";
+  print "\"ant plugins.html\" in the top-level GATE directory.\n";
+  exit 1;
+}
 
 # ********** Some constants **********
 my $internalPluginsTitle = "Plugins included in the GATE distribution";
