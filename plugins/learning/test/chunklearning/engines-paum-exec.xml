@@ -19,7 +19,7 @@ next one.
 
   <ENGINE nickname="SVM" implementationName="PAUMExec" 
     executableTraining="C:\yaoyong\paum\paum-learning\paum_learn.exe "
-options=" -p 20 -n 5  C:\yaoyong\paum\paum-learning\short-trainingdata.txt C:\yaoyong\paum\paum-learning\model_svm.dat"/>
+options=" -p 20 -n 5 -optB 0 C:\yaoyong\paum\paum-learning\short-trainingdata.txt C:\yaoyong\paum\paum-learning\model_svm.dat"/>
 
 
 <DATASET>

@@ -183,7 +183,8 @@ public class PaumForExec extends SupervisedLearner {
     commandSVM.append(" -e "+numTrain);
     ++len;
     while(len < items.length) {
-      if(items[len].equalsIgnoreCase("-tau")) {
+      if(items[len].equalsIgnoreCase("-tau") ||
+        items[len].equalsIgnoreCase("-optB")) {
         ++len;
       } else {
         commandSVM.append(" " + items[len]);
