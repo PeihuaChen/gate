@@ -364,18 +364,36 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
     String learningCommand = "  ";
     String dataSetFile = null;
     String learningParas = null;
+    String learningExec = null;
     SupervisedLearner paumLearner = null;
     if(learningAlg.equalsIgnoreCase("SVM")) {
+      learningParas = " -c 0.7 -t 0 -m 100 -tau 0.8 ";
+      learningExec = " ";
+      learningCommand = learningExec + " "+ learningParas;
       paumLearner = MultiClassLearning.obtainLearnerFromName(
         "SVMLibSvmJava", learningCommand, dataSetFile);
-      paumLearner.setLearnerExecutable("");
-      learningParas = " -c 0.7 -t 0 -m 100 -tau 0.8 ";
+      
+    } else if(learningAlg.startsWith("PAUMExec ")) {
+      learningParas = " -p 20 -n 1 ";
+      String[] items = learningAlg.split(" ");
+      if(items.length<4) {
+        //System.out.println();
+        throw new GateException("There is no enough parameter for the learning "
+          +"algorithm PAUM");
+      }
+      learningExec = items[1];
+      learningCommand = learningExec + " "+ learningParas + " "
+        + items[2] + " "+items[3];
+      paumLearner = MultiClassLearning.obtainLearnerFromName(
+        "PAUMExec", learningCommand, dataSetFile);
     } else {
+      learningParas = " -p 20 -n 1 ";
+      learningExec = " ";
+      learningCommand = learningExec + " "+ learningParas;
       paumLearner = MultiClassLearning.obtainLearnerFromName(
         "PAUM", learningCommand, dataSetFile);
-      paumLearner.setLearnerExecutable("");
-      learningParas = " -p 20 -n 1 -optB 0.0 ";
     }
+    paumLearner.setLearnerExecutable(learningExec);
     paumLearner.setLearnerParams(learningParas);
 
     MultiClassLearning chunkLearning = new MultiClassLearning(
@@ -385,7 +403,8 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
     File tempDataFile = new File(wdResults,
       ConstantParameters.TempFILENAMEofFVData);
     boolean isUsingTempDataFile = false;
-    if(paumLearner.getLearnerName().equals("SVMExec"))
+    if(paumLearner.getLearnerName().equals("SVMExec") 
+      || paumLearner.getLearnerName().equals("PAUMExec"))
       isUsingTempDataFile = true; // using the temp data file
     chunkLearning.getDataFromFile(numDocs, dataFile, isUsingTempDataFile,
       tempDataFile);
@@ -416,18 +435,36 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
     String learningCommand = "  ";
     String dataSetFile = null;
     String learningParas = null;
+    String learningExec = null;
     SupervisedLearner paumLearner = null;
     if(learningAlg.equalsIgnoreCase("SVM")) {
+      learningParas = " -c 0.7 -t 0 -m 100 -tau 0.8 ";
+      learningExec = " ";
+      learningCommand = learningExec + " "+ learningParas;
       paumLearner = MultiClassLearning.obtainLearnerFromName(
         "SVMLibSvmJava", learningCommand, dataSetFile);
-      paumLearner.setLearnerExecutable("");
-      learningParas = " -c 0.7 -t 0 -m 100 -tau 0.8 ";
+      
+    } else if(learningAlg.startsWith("PAUMExec ")) {
+      learningParas = " -p 20 -n 1 -optB 0.0 ";
+      String[] items = learningAlg.split(" ");
+      if(items.length<4) {
+        //System.out.println();
+        throw new GateException("There is no enough parameter for the learning "
+          +"algorithm PAUM");
+      }
+      learningExec = items[1];
+      learningCommand = learningExec + " "+ learningParas + " "
+        + items[2] + " "+items[3];
+      paumLearner = MultiClassLearning.obtainLearnerFromName(
+        "PAUMExec", learningCommand, dataSetFile);
     } else {
+      learningParas = " -p 20 -n 1 -optB 0.0 ";
+      learningExec = " ";
+      learningCommand = learningExec + " "+ learningParas;
       paumLearner = MultiClassLearning.obtainLearnerFromName(
         "PAUM", learningCommand, dataSetFile);
-      paumLearner.setLearnerExecutable("");
-      learningParas = " -p 20 -n 1 -optB 0.0 ";
     }
+    paumLearner.setLearnerExecutable(learningExec);
     paumLearner.setLearnerParams(learningParas);
 
     MultiClassLearning chunkLearning = new MultiClassLearning(
@@ -437,8 +474,6 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
     File tempDataFile = new File(wdResults,
       ConstantParameters.TempFILENAMEofFVData);
     boolean isUsingTempDataFile = false;
-    if(paumLearner.getLearnerName().equals("SVMExec"))
-      isUsingTempDataFile = true; // using the temp data file
     chunkLearning.getDataFromFile(numDocs, dataFile, isUsingTempDataFile,
       tempDataFile);
 
