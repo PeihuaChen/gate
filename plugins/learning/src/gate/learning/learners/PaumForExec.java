@@ -80,7 +80,7 @@ public class PaumForExec extends SupervisedLearner {
       for(int iCounter = 0; iCounter < numTraining; ++iCounter) {
         final int i = iCounter;
         if(classLabels[i] > 0)
-          svmDataBuff.append("1 ");
+          svmDataBuff.append("+1 ");
         else svmDataBuff.append("-1 ");
         // int [] indexes = dataLearning[i].getIndexes();
         // float [] values = dataLearning[i].getValues();
@@ -95,7 +95,7 @@ public class PaumForExec extends SupervisedLearner {
       // Execute the command for the SVM learning
       // Get the command line for the svm_learn, by getting rid of the tau
       // parameter
-      String commandLineSVM = SvmForExec.obtainSVMCommandline(commandLine);
+      String commandLineSVM = obtainPAUMCommandline(commandLine, numTraining);
       // Run the external svm learn exectuable
       SvmForExec svmIns = new SvmForExec();
       svmIns.runExternalCommand(commandLineSVM);
@@ -132,7 +132,7 @@ public class PaumForExec extends SupervisedLearner {
       // Execute the command for the SVM learning
       // Get the command line for the svm_learn, by getting rid of the tau
       // parameter
-      String commandLineSVM = SvmForExec.obtainSVMCommandline(commandLine);
+      String commandLineSVM = obtainPAUMCommandline(commandLine, numTraining);
       // Run the external svm learn exectuable
       SvmForExec svmIns = new SvmForExec();
       svmIns.runExternalCommand(commandLineSVM);
@@ -174,7 +174,22 @@ public class PaumForExec extends SupervisedLearner {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-   
-    
+  }
+  public static String obtainPAUMCommandline(String commandLine, int numTrain) {
+    StringBuffer commandSVM = new StringBuffer();
+    String[] items = commandLine.split("[ \t]+");
+    int len = 0;
+    commandSVM.append(items[0]);
+    commandSVM.append(" -e "+numTrain);
+    ++len;
+    while(len < items.length) {
+      if(items[len].equalsIgnoreCase("-tau")) {
+        ++len;
+      } else {
+        commandSVM.append(" " + items[len]);
+      }
+      ++len;
+    }
+    return commandSVM.toString().trim();
   }
 }
