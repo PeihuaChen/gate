@@ -756,7 +756,8 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         File  tempDataFile= new File(wdResults, 
           ConstantParameters.TempFILENAMEofFVData);
         boolean isUsingTempDataFile = false;
-        if(paumLearner.getLearnerName().equals("SVMExec"))
+        if(paumLearner.getLearnerName().equals("SVMExec") || 
+          paumLearner.getLearnerName().equals("PAUMExec") )
           isUsingTempDataFile = true; //using the temp data file 
         chunkLearning.getDataFromFile(numDocs, dataFile, isUsingTempDataFile, tempDataFile);
         Benchmark.checkPoint(startTime, benchmarkID + "."
