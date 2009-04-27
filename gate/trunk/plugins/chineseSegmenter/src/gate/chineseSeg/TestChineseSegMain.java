@@ -143,7 +143,7 @@ public class TestChineseSegMain extends TestCase {
       assertEquals("Wrong value for correct: ", ConstantParameters.SEPARATTOR_BLANK, chs[2]);
       assertEquals("Wrong value for correct: ", '9', chs[4]);
       assertEquals("Wrong value for correct: ", ConstantParameters.SEPARATTOR_BLANK, chs[8]);
-      assertEquals("Wrong value for correct: ", ConstantParameters.SEPARATTOR_BLANK, chs[15]);
+      assertEquals("Wrong value for correct: ", ConstantParameters.SEPARATTOR_BLANK, chs[14]);
       
     }
     finally {
