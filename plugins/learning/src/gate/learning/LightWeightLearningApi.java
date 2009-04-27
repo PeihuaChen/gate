@@ -1534,7 +1534,8 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
   public static int obtainLearnerType(String learnerName) throws GateException {
     if(learnerName.equals("SVMLibSvmJava") || learnerName.equals("C4.5Weka")
       || learnerName.equals("KNNWeka") || learnerName.equals("NaiveBayesWeka")
-      || learnerName.equals("PAUM") || learnerName.equals("SVMExec") ) {
+      || learnerName.equals("PAUM") || learnerName.equals("SVMExec") ||
+      learnerName.equals("PAUMExec")) {
       if(learnerName.endsWith("Weka")) {
         return 1;
       } else {

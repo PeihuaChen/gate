@@ -1023,6 +1023,11 @@ public class MultiClassLearning {
       learner = new Paum();
       learner.setCommandLine(commandLine);
       learner.getParametersFromCommmand();
+    } else if(learnerName.equalsIgnoreCase("PAUMExec")) {
+      learner = new PaumForExec();
+      learner.setLearnerName(learnerName);
+      learner.setCommandLine(commandLine);
+      learner.getParametersFromCommmand();
     } else {
       throw new GateException("The learner's name \"" + learnerName
         + "\" is not defined!");

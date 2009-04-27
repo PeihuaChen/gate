@@ -319,7 +319,7 @@ public class SvmLibSVM extends SupervisedLearner {
     num = 0;
     for(int i = 0; i < totalFeatures; ++i)
       if(Math.abs(w[i]) > verySmallFloat) ++num;
-    modelFile.append(num + "\n");
+    modelFile.append(num + " "+totalFeatures+"\n");
     for(int i = 0; i < totalFeatures; ++i)
       if(Math.abs(w[i]) > verySmallFloat)
         modelFile.append(i + " " + w[i] + "\n");
@@ -332,8 +332,9 @@ public class SvmLibSVM extends SupervisedLearner {
     float b;
     b = new Float(modelFile.readLine()).floatValue();
     int num;
-    num = new Integer(modelFile.readLine()).intValue();
     String[] lineItems;
+    lineItems = modelFile.readLine().split(" ");
+    num = new Integer(lineItems[0]).intValue();
     int index;
     float value;
     for(int i = 0; i < num; ++i) {
