@@ -583,7 +583,7 @@ public class NameBearerHandle implements Handle, StatusListener,
     public SaveAsXmlAction() {
       super("Save As Xml...");
       putValue(SHORT_DESCRIPTION, "Saves this resource in XML");
-      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control X"));
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control S"));
     }// SaveAsXmlAction()
 
     public void actionPerformed(ActionEvent e) {

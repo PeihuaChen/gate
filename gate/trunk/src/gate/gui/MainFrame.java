@@ -145,7 +145,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
   protected HelpFrame helpFrame;
   
-  protected JCheckBox toggleToolTipsCheckBoxMenuItem;
+  protected JCheckBoxMenuItem toggleToolTipsCheckBoxMenuItem;
 
   /**
    * Holds all the icons used in the Gate GUI indexed by filename. This
@@ -644,7 +644,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     // MENUS
     menuBar = new JMenuBar();
 
-    JMenu fileMenu = new XJMenu("File");
+    JMenu fileMenu = new XJMenu("File", null, this);
     fileMenu.setMnemonic(KeyEvent.VK_F);
 
     LiveMenu newAPPMenu = new LiveMenu(LiveMenu.APP);
@@ -662,7 +662,8 @@ public class MainFrame extends JFrame implements ProgressListener,
     newPRMenu.setIcon(getIcon("prs"));
     fileMenu.add(newPRMenu);
 
-    JMenu dsMenu = new JMenu("Datastores");
+    final JMenu dsMenu = new XJMenu("Datastores",
+      "Repositories for large number of documents", this);
     dsMenu.setIcon(getIcon("datastores"));
     dsMenu.add(new XJMenuItem(new NewDSAction(), this));
     dsMenu.add(new XJMenuItem(new OpenDSAction(), this));
@@ -671,8 +672,8 @@ public class MainFrame extends JFrame implements ProgressListener,
     fileMenu.addSeparator();
     fileMenu.add(new XJMenuItem(new LoadResourceFromFileAction(), this));
 
-    fileMenu.addSeparator();
-    JMenu loadANNIEMenu = new JMenu("Load ANNIE system");
+    final JMenu loadANNIEMenu = new XJMenu("Load ANNIE system",
+      "Application that adds morphosyntaxic and semantic annotations", this);
     loadANNIEMenu.setIcon(getIcon("annie-application"));
     loadANNIEMenu.add(new XJMenuItem(new LoadANNIEWithDefaultsAction(), this));
     loadANNIEMenu
@@ -691,7 +692,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     menuBar.add(fileMenu);
 
-    JMenu optionsMenu = new JMenu("Options");
+    JMenu optionsMenu = new XJMenu("Options", null, this);
     optionsMenu.setMnemonic(KeyEvent.VK_O);
 
     boolean optionsMenuHasEntries = false;
@@ -768,36 +769,34 @@ public class MainFrame extends JFrame implements ProgressListener,
       menuBar.add(optionsMenu);
     }
 
-    JMenu toolsMenu = new XJMenu("Tools");
+    JMenu toolsMenu = new XJMenu("Tools", null, this);
     toolsMenu.setMnemonic(KeyEvent.VK_T);
-    toolsMenu.add(new NewAnnotDiffAction());
-    // toolsMenu.add(newCorpusAnnotDiffAction);
-    toolsMenu.add(new NewBootStrapAction());
-    // temporarily disabled till the evaluation tools are made to run
-    // within
-    // the GUI
-    JMenu corpusEvalMenu = new JMenu("Corpus Benchmark Tools");
+    toolsMenu.add(new XJMenuItem(new NewAnnotDiffAction(), this));
+    toolsMenu.add(new XJMenuItem(new NewBootStrapAction(), this));
+    final JMenu corpusEvalMenu = new XJMenu("Corpus Benchmark",
+      "Compares processed and human-annotated annotations", this);
     corpusEvalMenu.setIcon(getIcon("corpus-benchmark"));
     toolsMenu.add(corpusEvalMenu);
-    corpusEvalMenu.add(new NewCorpusEvalAction());
+    corpusEvalMenu.add(new XJMenuItem(new NewCorpusEvalAction(), this));
     corpusEvalMenu.addSeparator();
-    corpusEvalMenu.add(new GenerateStoredCorpusEvalAction());
+    corpusEvalMenu.add(new XJMenuItem(
+      new GenerateStoredCorpusEvalAction(), this));
     corpusEvalMenu.addSeparator();
-    corpusEvalMenu.add(new StoredMarkedCorpusEvalAction());
-    corpusEvalMenu.add(new CleanMarkedCorpusEvalAction());
+    corpusEvalMenu.add(new XJMenuItem(
+      new StoredMarkedCorpusEvalAction(), this));
+    corpusEvalMenu.add(new XJMenuItem(new CleanMarkedCorpusEvalAction(), this));
     corpusEvalMenu.addSeparator();
     verboseModeItem =
       new JCheckBoxMenuItem(new VerboseModeCorpusEvalToolAction());
     corpusEvalMenu.add(verboseModeItem);
-    // JCheckBoxMenuItem datastoreModeItem =
-    // new JCheckBoxMenuItem(datastoreModeCorpusEvalToolAction);
-    // corpusEvalMenu.add(datastoreModeItem);
-    toolsMenu.add(new AbstractAction("Unicode editor", getIcon("unicode")) {
+    toolsMenu.add(new XJMenuItem(
+      new AbstractAction("Unicode editor", getIcon("unicode")) {
+      { putValue(SHORT_DESCRIPTION, "Editor for testing character encoding"); }
       private static final long serialVersionUID = 1L;
       public void actionPerformed(ActionEvent evt) {
         new guk.Editor();
       }
-    });
+    }, this));
 
     /*
      * add the ontology editor to the tools menu ontotext.bp
@@ -807,28 +806,57 @@ public class MainFrame extends JFrame implements ProgressListener,
     // toolsMenu.add(new NewOntologyEditorAction());
 
     // by Shafirin Andrey start
-    toolsMenu.add(new AbstractAction("JAPE Debugger", getIcon("application")) {
+    toolsMenu.add(new XJMenuItem(
+        new AbstractAction("JAPE Debugger", getIcon("application")) {
+        { putValue(SHORT_DESCRIPTION, "Debugger for JAPE grammars"); }
         private static final long serialVersionUID = 1L;
         public void actionPerformed(ActionEvent evt) {
           System.out.println("Creating Jape Debugger");
           new debugger.JapeDebugger();
         }
-      });
+      }, this));
     // by Shafirin Andrey end
 
     menuBar.add(toolsMenu);
 
-    JMenu helpMenu = new JMenu("Help");
+    JMenu helpMenu = new XJMenu("Help", null, MainFrame.this);
     helpMenu.setMnemonic(KeyEvent.VK_H);
-    helpMenu.add(new HelpUserGuideAction());
-    helpMenu.add(new HelpUserGuideInContextAction());
-    helpMenu.add(new HelpMailingListAction());
+    helpMenu.add(new XJMenuItem(new HelpUserGuideAction(), this));
+    helpMenu.add(new XJMenuItem(new HelpUserGuideInContextAction(), this));
+    helpMenu.add(new XJMenuItem(new AbstractAction("Keyboard shortcuts") {
+      { this.putValue(Action.SHORT_DESCRIPTION, "Keyboard shortcuts"); }
+      public void actionPerformed(ActionEvent e) {
+        showHelpFrame("http://gate.ac.uk/userguide/chap:shortcuts", null);
+      }
+    }, this));
+    helpMenu.addSeparator();
+    helpMenu.add(new XJMenuItem(new AbstractAction("Howtos") {
+      { this.putValue(Action.SHORT_DESCRIPTION, "Howtos for newcomers"); }
+      public void actionPerformed(ActionEvent e) {
+        showHelpFrame("http://gate.ac.uk/userguide/chap:howto", null);
+      }
+    }, this));
+    helpMenu.add(new XJMenuItem(new AbstractAction("Demo movies") {
+      { this.putValue(Action.SHORT_DESCRIPTION, "Movie tutorials"); }
+      public void actionPerformed(ActionEvent e) {
+        showHelpFrame("http://gate.ac.uk/demos/movies.html", null);
+      }
+    }, this));
+    helpMenu.add(new XJMenuItem(new HelpMailingListAction(), this));
+    helpMenu.addSeparator();
     toggleToolTipsCheckBoxMenuItem =
-      new JCheckBox(new ToggleToolTipsAction());
+      new JCheckBoxMenuItem(new ToggleToolTipsAction());
     toggleToolTipsCheckBoxMenuItem.setSelected(true);
     helpMenu.add(toggleToolTipsCheckBoxMenuItem);
+    helpMenu.add(new XJMenuItem(new AbstractAction("What's new") {
+      { this.putValue(Action.SHORT_DESCRIPTION,
+          "List new features and important changes"); }
+      public void actionPerformed(ActionEvent e) {
+        showHelpFrame("http://gate.ac.uk/userguide/chap:changes", null);
+      }
+    }, this));
     if(!Gate.runningOnMac()) {
-      helpMenu.add(new HelpAboutAction());
+      helpMenu.add(new XJMenuItem(new HelpAboutAction(), this));
     }
     menuBar.add(helpMenu);
 
@@ -1060,7 +1088,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     inputMap.put(KeyStroke.getKeyStroke("control shift H"), "Hide all");
     inputMap.put(KeyStroke.getKeyStroke("control S"), "Save As XML");
 
-    // add the support of the context menu key for user without mouse
+    // add the support of the context menu key in tables and trees
     // TODO: remove when JAVA SWING will take care of it
     if (inputMap.get(KeyStroke.getKeyStroke("CONTEXT_MENU")) == null) {
       inputMap.put(KeyStroke.getKeyStroke("CONTEXT_MENU"), "Show context menu");
@@ -1877,7 +1905,8 @@ public class MainFrame extends JFrame implements ProgressListener,
     private static final long serialVersionUID = 1L;
     public NewAnnotDiffAction() {
       super("Annotation Diff", getIcon("annotation-diff"));
-      putValue(SHORT_DESCRIPTION, "Open a new Annotation Diff window");
+      putValue(SHORT_DESCRIPTION,
+        "Compare annotations and features in one or two documents");
     }// NewAnnotDiffAction
 
     public void actionPerformed(ActionEvent e) {
@@ -1906,7 +1935,8 @@ public class MainFrame extends JFrame implements ProgressListener,
     private static final long serialVersionUID = 1L;
     public NewCorpusEvalAction() {
       super("Default mode");
-      putValue(SHORT_DESCRIPTION, "Run the Benchmark Tool in its default mode");
+      putValue(SHORT_DESCRIPTION, "Compares stored processed set with current" +
+        " processed set and human-annotated set");
       putValue(SMALL_ICON, getIcon("corpus-benchmark"));
     }// newCorpusEvalAction
 
@@ -1968,7 +1998,8 @@ public class MainFrame extends JFrame implements ProgressListener,
     private static final long serialVersionUID = 1L;
     public StoredMarkedCorpusEvalAction() {
       super("Human marked against stored processing results");
-      putValue(SHORT_DESCRIPTION, "Run the Benchmark Tool -stored_clean");
+      putValue(SHORT_DESCRIPTION,
+        "Compares stored processed set with human-annotated set");
       putValue(SMALL_ICON, getIcon("corpus-benchmark"));
     }// newCorpusEvalAction
 
@@ -2025,7 +2056,8 @@ public class MainFrame extends JFrame implements ProgressListener,
     private static final long serialVersionUID = 1L;
     public CleanMarkedCorpusEvalAction() {
       super("Human marked against current processing results");
-      putValue(SHORT_DESCRIPTION, "Run the Benchmark Tool -marked_clean");
+      putValue(SHORT_DESCRIPTION,
+        "Compares current processed set with human-annotated set");
       putValue(SMALL_ICON, getIcon("corpus-benchmark"));
     }// newCorpusEvalAction
 
@@ -2088,7 +2120,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     private static final long serialVersionUID = 1L;
     public GenerateStoredCorpusEvalAction() {
       super("Store corpus for future evaluation");
-      putValue(SHORT_DESCRIPTION, "Run the Benchmark Tool -generate");
+      putValue(SHORT_DESCRIPTION, "Store corpus for future evaluation");
       putValue(SMALL_ICON, getIcon("corpus-benchmark"));
     }// newCorpusEvalAction
 
@@ -2143,7 +2175,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     private static final long serialVersionUID = 1L;
     public VerboseModeCorpusEvalToolAction() {
       super("Verbose mode");
-      putValue(SHORT_DESCRIPTION, "Run the Benchmark Tool in verbose mode");
+      putValue(SHORT_DESCRIPTION, "Set the Benchmark Tool in verbose mode");
     }// VerboseModeCorpusEvalToolAction
 
     public boolean isVerboseMode() {
@@ -2342,6 +2374,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     private static final long serialVersionUID = 1L;
     public NewBootStrapAction() {
       super("BootStrap Wizard", getIcon("application"));
+      putValue(SHORT_DESCRIPTION, "Create a generic resource to be completed");
     }// NewBootStrapAction
 
     public void actionPerformed(ActionEvent e) {
@@ -2354,7 +2387,8 @@ public class MainFrame extends JFrame implements ProgressListener,
     private static final long serialVersionUID = 1L;
     public ManagePluginsAction() {
       super("Manage CREOLE plugins");
-      putValue(SHORT_DESCRIPTION, "Manage CREOLE plugins");
+      putValue(SHORT_DESCRIPTION,
+        "Load, unload, add and remove CREOLE plugins");
       putValue(SMALL_ICON, getIcon("creole-plugins"));
     }
 
@@ -3286,6 +3320,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       super("Exit GATE");
       putValue(SHORT_DESCRIPTION, "Closes the application");
       putValue(SMALL_ICON, getIcon("exit"));
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("alt F4"));
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -3712,12 +3747,30 @@ public class MainFrame extends JFrame implements ProgressListener,
       
       addMenuListener(new MenuListener() {
         public void menuCanceled(MenuEvent e) {
+          // do nothing
         }
-
         public void menuDeselected(MenuEvent e) {
+          // clear the status
+          statusChanged("");
         }
-
         public void menuSelected(MenuEvent e) {
+          switch(type){
+            case LR:
+              setToolTipText("Data used for annotating");
+              statusChanged(getToolTipText());
+              break;
+            case PR:
+              setToolTipText("Process that annotate data");
+              statusChanged(getToolTipText());
+              break;
+            case APP:
+              setToolTipText("Bind processing and language resources");
+              statusChanged(getToolTipText());
+              break;
+            default:
+              setToolTipText("Unknown resource: " + type);
+              statusChanged(getToolTipText());
+          }
         }
       });
     }
@@ -3867,6 +3920,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     private static final long serialVersionUID = 1L;
     public HelpAboutAction() {
       super("About");
+      putValue(SHORT_DESCRIPTION, "Show developers names and version");
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -3879,7 +3933,8 @@ public class MainFrame extends JFrame implements ProgressListener,
     String keywords;
     public HelpMailingListAction() {
       super("Search in mailing list");
-      putValue(SHORT_DESCRIPTION, "This option needs an internet connection");
+      putValue(SHORT_DESCRIPTION,
+        "Search keywords in GATE users mailing list");
       this.keywords = null;
     }
     public HelpMailingListAction(String keywords) {
@@ -3922,7 +3977,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     private static final long serialVersionUID = 1L;
     public HelpUserGuideAction() {
       super("User Guide Contents");
-      putValue(SHORT_DESCRIPTION, "This option needs an internet connection");
+      putValue(SHORT_DESCRIPTION, "Contents of the online user guide");
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -4023,7 +4078,7 @@ public class MainFrame extends JFrame implements ProgressListener,
               "(" +  commandLine + ")<br><br>" +
               "Please go to the Options menu then Configuration.</html>";
             Action[] actions = {
-              new AbstractAction("Load configuration") {
+              new AbstractAction("Show configuration") {
                 public void actionPerformed(ActionEvent e) {
                   optionsDialog.showDialog();
                   optionsDialog.dispose();
@@ -4076,7 +4131,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     private static final long serialVersionUID = 1L;
     public HelpUserGuideInContextAction() {
       super("Contextual User Guide");
-      putValue(SHORT_DESCRIPTION, "This option needs an internet connection");
+      putValue(SHORT_DESCRIPTION, "Online help for the selected component");
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("F1"));
     }
 
@@ -4137,8 +4192,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     private static final long serialVersionUID = 1L;
     public ToggleToolTipsAction() {
       super("Show tooltips");
-      putValue(SHORT_DESCRIPTION,
-        "Show or hide the help balloon under the cursor.");
+      putValue(SHORT_DESCRIPTION, "Toggle the help balloon under the cursor");
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -4159,7 +4213,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   }
 
 
-    protected class ResourcesTreeCellRenderer extends DefaultTreeCellRenderer {
+  protected class ResourcesTreeCellRenderer extends DefaultTreeCellRenderer {
     private static final long serialVersionUID = 1L;
     public ResourcesTreeCellRenderer() {
       setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
@@ -4171,23 +4225,23 @@ public class MainFrame extends JFrame implements ProgressListener,
         hasFocus);
       if(value == resourcesTreeRoot) {
         setIcon(MainFrame.getIcon("root"));
-        setToolTipText("GATE");
+        setToolTipText("GATE resources tree root");
       }
       else if(value == applicationsRoot) {
         setIcon(MainFrame.getIcon("applications"));
-        setToolTipText("GATE applications");
+        setToolTipText("Applications: bind processing and language resources");
       }
       else if(value == languageResourcesRoot) {
         setIcon(MainFrame.getIcon("lrs"));
-        setToolTipText("Language Resources");
+        setToolTipText("Language Resources: data used for annotating");
       }
       else if(value == processingResourcesRoot) {
         setIcon(MainFrame.getIcon("prs"));
-        setToolTipText("Processing Resources");
+        setToolTipText("Processing Resources: process that annotate data");
       }
       else if(value == datastoresRoot) {
         setIcon(MainFrame.getIcon("datastores"));
-        setToolTipText("GATE Datastores");
+        setToolTipText("Datastores: repositories for large number of documents");
       }
       else {
         // not one of the default root nodes
@@ -4264,8 +4318,10 @@ public class MainFrame extends JFrame implements ProgressListener,
   /**
    * Extends {@link JFileChooser} to make sure the shared
    * {@link MainFrame} instance is used as a parent.
-   * <code>currentResourceClassName</code> is used to select automatically
-   * the last path used for this resource when loading/saving.
+   *
+   * Remember the last path used for the resource when loading/saving.
+   * The class of the resource must be given in the variable
+   * <code>currentResourceClassName</code>.
    */
   public static class GateFileChooser extends JFileChooser {
     private static final long serialVersionUID = 1L;
@@ -4534,26 +4590,6 @@ public class MainFrame extends JFrame implements ProgressListener,
     JLabel imageLabel;
   }
 
-  /*
-   * class JGateMenuItem extends JMenuItem {
-   * JGateMenuItem(javax.swing.Action a){ super(a);
-   * this.addMouseListener(new MouseAdapter() { public void
-   * mouseEntered(MouseEvent e) { oldText = statusBar.getText();
-   * statusChanged((String)getAction().
-   * getValue(javax.swing.Action.SHORT_DESCRIPTION)); }
-   * 
-   * public void mouseExited(MouseEvent e) { statusChanged(oldText); }
-   * }); } String oldText; }
-   * 
-   * class JGateButton extends JButton { JGateButton(javax.swing.Action
-   * a){ super(a); this.addMouseListener(new MouseAdapter() { public
-   * void mouseEntered(MouseEvent e) { oldText = statusBar.getText();
-   * statusChanged((String)getAction().
-   * getValue(javax.swing.Action.SHORT_DESCRIPTION)); }
-   * 
-   * public void mouseExited(MouseEvent e) { statusChanged(oldText); }
-   * }); } String oldText; }
-   */
   class LocaleSelectorMenuItem extends JRadioButtonMenuItem {
     private static final long serialVersionUID = 1L;
     public LocaleSelectorMenuItem(Locale locale) {
