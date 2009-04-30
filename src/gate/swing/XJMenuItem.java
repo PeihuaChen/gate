@@ -15,13 +15,19 @@
 
 package gate.swing;
 
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 
 import javax.swing.*;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 
 import gate.event.StatusListener;
 
+/**
+ * Extension of a JMenuItem that adds a description and a StatusListener
+ * as parameters. The description is used in the statusListener and as a
+ * tooltip.
+ */
 public class XJMenuItem extends JMenuItem {
 
   public XJMenuItem(Icon icon, String description, StatusListener listener){
@@ -29,6 +35,7 @@ public class XJMenuItem extends JMenuItem {
     this.description = description;
     this.listener = listener;
     initListeners();
+    setToolTipText(description);
   }// public XJMenuItem(Icon icon, String description, StatusListener listener)
 
   public XJMenuItem(String text, String description, StatusListener listener){
@@ -36,6 +43,7 @@ public class XJMenuItem extends JMenuItem {
     this.description = description;
     this.listener = listener;
     initListeners();
+    setToolTipText(description);
   }// XJMenuItem(String text, String description, StatusListener listener)
 
   public XJMenuItem(Action a, StatusListener listener){
@@ -51,6 +59,7 @@ public class XJMenuItem extends JMenuItem {
     this.description = description;
     this.listener = listener;
     initListeners();
+    setToolTipText(description);
   }// XJMenuItem
 
   public XJMenuItem(String text, int mnemonic,
@@ -59,19 +68,23 @@ public class XJMenuItem extends JMenuItem {
     this.description = description;
     this.listener = listener;
     initListeners();
+    setToolTipText(description);
   }
 
   protected void initListeners(){
     this.addMouseListener(new MouseAdapter() {
-      public void mouseEntered(MouseEvent e) {
-        listener.statusChanged(description);
-      }
-
       public void mouseExited(MouseEvent e) {
+        // clear the status
         listener.statusChanged("");
       }
     });
-  }// void initListeners()
+    this.addChangeListener(new ChangeListener() {
+      public void stateChanged(ChangeEvent e) {
+        // display the menu item description in the status
+        listener.statusChanged(description);
+      }
+    });
+  }
 
   private StatusListener listener;
   String description;
