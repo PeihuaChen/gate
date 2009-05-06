@@ -75,8 +75,7 @@ public class XJMenu extends JMenu {
     super.setPopupMenuVisible(aFlag);
     for (Component component : getMenuComponents()) {
       if (component instanceof JSeparator) {
-        if (component.getWidth() != 0) { break; }
-        // use the popupmenu width to set the separators width 
+        // use the popupmenu width to set the separators width
         component.setPreferredSize(
           new Dimension(getPopupMenu().getWidth()-2, 3));
       }
