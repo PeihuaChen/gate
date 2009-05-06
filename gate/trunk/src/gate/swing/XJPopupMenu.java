@@ -14,7 +14,8 @@
 package gate.swing;
 
 
-import javax.swing.JPopupMenu;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * A modified version of JPopupMenu that uses {@link MenuLayout} as its layout.
@@ -28,5 +29,23 @@ public class XJPopupMenu extends JPopupMenu {
   public XJPopupMenu(String label){
     super(label);
     setLayout(new MenuLayout());
+  }
+
+  /**
+   * Force separators to be the same width as the JPopupMenu.
+   * This is because the MenuLayout make separators invisible contrary
+   * to the default JPopupMenu layout manager.
+   * @param aFlag true if the popupmenu is visible
+   */
+  @Override
+  public void setVisible(boolean aFlag) {
+    super.setVisible(aFlag);
+    for (Component component : getComponents()) {
+      if (component instanceof JSeparator) {
+        // use the popupmenu width to set the separators width
+        component.setPreferredSize(new Dimension(getWidth()-2, 3));
+      }
+    }
+    revalidate();
   }
 }
