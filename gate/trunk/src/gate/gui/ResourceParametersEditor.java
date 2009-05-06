@@ -414,7 +414,6 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       textButtonBox = new JPanel();
       textButtonBox.setLayout(new BoxLayout(textButtonBox, BoxLayout.X_AXIS));
       textButtonBox.setOpaque(false);
-
       combo = new JComboBox();
       combo.setRenderer(new ResourceRenderer());
     }// CustomObjectRenderer()
@@ -428,6 +427,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       // set the tooltip
       combo.setToolTipText(pDisj.getComment());
       textField.setToolTipText(pDisj.getComment());
+      textButtonBox.setToolTipText(pDisj.getComment());
 
       if(Gate.isGateType(type)) {
         // Gate type
@@ -749,6 +749,8 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       // set the tooltip
       combo.setToolTipText(pDisj.getComment());
       textField.setToolTipText(pDisj.getComment());
+      textFieldBoolean.setToolTipText(pDisj.getComment());
+      textButtonBox.setToolTipText(pDisj.getComment());
       // ResourceData rData =
       // (ResourceData)Gate.getCreoleRegister().get(type);
 
@@ -765,7 +767,6 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
         values.add(0, "<none>");
         combo.setModel(new DefaultComboBoxModel(values.toArray()));
         combo.setSelectedItem(value == null ? "<none>" : value);
-        combo.setToolTipText(pDisj.getComment());
         return combo;
       }
       else {

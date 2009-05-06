@@ -75,6 +75,8 @@ public class NewResourceDialog extends JDialog {
     buttonsBox.add(Box.createHorizontalStrut(10));
     buttonsBox.add(okBtn = new JButton("OK"));
     buttonsBox.add(Box.createHorizontalStrut(10));
+    buttonsBox.add(helpBtn = new JButton("Help"));
+    buttonsBox.add(Box.createHorizontalStrut(10));
     buttonsBox.add(cancelBtn = new JButton("Cancel"));
     buttonsBox.add(Box.createHorizontalStrut(10));
     this.getContentPane().add(buttonsBox);
@@ -100,6 +102,12 @@ public class NewResourceDialog extends JDialog {
         setVisible(false);
       }
     };
+    Action helpAction = new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        MainFrame.getInstance().showHelpFrame(resourceData.getHelpURL(),
+          resourceData.getClassName());
+      }
+    };
     Action cancelAction = new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
         userCanceled = true;
@@ -108,6 +116,7 @@ public class NewResourceDialog extends JDialog {
     };
 
     okBtn.addActionListener(applyAction);
+    helpBtn.addActionListener(helpAction);
     cancelBtn.addActionListener(cancelAction);
 
     // define keystrokes action bindings at the level of the main window
@@ -117,11 +126,13 @@ public class NewResourceDialog extends JDialog {
       ((JComponent)this.getContentPane()).getActionMap();
     inputMap.put(KeyStroke.getKeyStroke("ENTER"), "Apply");
     actionMap.put("Apply", applyAction);
+    inputMap.put(KeyStroke.getKeyStroke("F1"), "Help");
+    actionMap.put("Help", helpAction);
     inputMap.put(KeyStroke.getKeyStroke("ESCAPE"), "Cancel");
     actionMap.put("Cancel", cancelAction);
   }
 
-  JButton okBtn, cancelBtn;
+  JButton okBtn, helpBtn, cancelBtn;
   JTextField nameField;
   ResourceParametersEditor parametersEditor;
   JScrollPane tableScroll;

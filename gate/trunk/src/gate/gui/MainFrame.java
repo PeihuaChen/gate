@@ -319,7 +319,6 @@ public class MainFrame extends JFrame implements ProgressListener,
     if (list != null) {
     appsPopup.addSeparator();
     appsPopup.add("Recent applications:");
-    appsPopup.addSeparator();
     for (final String name : list.split(";")) {
       final String location = getPreferenceValue("filechooserlocations"
         + "/gate/ApplicationRestore/"+name, "location");
@@ -1036,17 +1035,14 @@ public class MainFrame extends JFrame implements ProgressListener,
                   MainFrame.this), 1);
               }
               
-              // add a separator
-              popup.insert(new JPopupMenu.Separator(), 2);
-
               // add a rename action
               popup.insert(new XJMenuItem(new RenameResourceAction(path),
-                MainFrame.this), 3);
+                MainFrame.this), 2);
 
               // add a help action
               if(handle instanceof NameBearerHandle) {
                 popup.insert(new XJMenuItem(new HelpOnItemTreeAction(
-                  (NameBearerHandle)handle), MainFrame.this), 4);
+                  (NameBearerHandle)handle), MainFrame.this), 3);
               }
             }
 
@@ -3985,7 +3981,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
   }
 
-  protected void showHelpFrame(String urlString, String resourceName) {
+  public void showHelpFrame(String urlString, String resourceName) {
     final URL url;
     try {
       url = new URL(urlString);
