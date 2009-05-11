@@ -98,7 +98,7 @@ public class TestCopyAS2AnoDocPlugin extends TestCase {
     controller.add(copyAnnsOne);
     copyAnnsOne.setInputASName("ann1");
     copyAnnsOne.setOutputASName("ann5");
-    copyAnnsOne.setTextFilesURL(sourceDir.toURI().toURL());
+    copyAnnsOne.setSourceFilesURL(sourceDir.toURI().toURL());
     Vector<String>annTypes = new Vector<String>();
     annTypes.add("Os");
     annTypes.add("sent");
