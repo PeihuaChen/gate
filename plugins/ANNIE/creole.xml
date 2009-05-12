@@ -87,7 +87,7 @@
 			</PARAMETER>
 			<PARAMETER
 				DEFAULT="resources/tokeniser/DefaultTokeniser.rules"
-				COMMENT="The URL for the rules file" SUFFIXES="rules"
+				COMMENT="The URL to the rules file" SUFFIXES="rules"
 				NAME="rulesURL">
 				java.net.URL
 			</PARAMETER>
@@ -116,12 +116,12 @@
 			</PARAMETER>
 			<PARAMETER NAME="tokeniserRulesURL"
 				DEFAULT="resources/tokeniser/DefaultTokeniser.rules"
-				COMMENT="The URL for the rules file" SUFFIXES="rules">
+				COMMENT="The URL to the rules file" SUFFIXES="rules">
 				java.net.URL
 			</PARAMETER>
 			<PARAMETER NAME="transducerGrammarURL"
 				DEFAULT="resources/tokeniser/postprocess.jape"
-				COMMENT="The URL for the postprocessing transducer"
+				COMMENT="The URL to the postprocessing transducer"
 				SUFFIXES="jape">
 				java.net.URL
 			</PARAMETER>
@@ -155,7 +155,7 @@
 			</PARAMETER>
       <PARAMETER NAME="caseSensitive"
         DEFAULT="true"
-        COMMENT="Should this gazetteer diferentiate on case">
+        COMMENT="Should this gazetteer diferentiate on case?">
         java.lang.Boolean
       </PARAMETER>
 			<PARAMETER NAME="encoding"
@@ -170,7 +170,7 @@
       </PARAMETER>
 			<PARAMETER NAME="wholeWordsOnly"
         DEFAULT="true"
-				COMMENT="Should this gazetteer only match whole words"
+				COMMENT="Should this gazetteer only match whole words?"
         RUNTIME="true">
 				java.lang.Boolean
 			</PARAMETER>
@@ -213,7 +213,7 @@
 				java.lang.String
 			</PARAMETER>
 			<PARAMETER DEFAULT="true" NAME="caseSensitive"
-				COMMENT="Should this gazetteer diferentiate on case. Currently the Gazetteer works only in case sensitive mode.">
+				COMMENT="Should this gazetteer diferentiate on case? Currently the Gazetteer works only in case sensitive mode.">
 				java.lang.Boolean
 			</PARAMETER>
 			<ICON>gazetteer</ICON>
@@ -245,7 +245,7 @@
 					java.net.URL
 				</PARAMETER>
 				<PARAMETER NAME="binaryGrammarURL"
-					COMMENT="The URL to the grammar file" SUFFIXES="jape">
+					COMMENT="The URL to the binary grammar file" SUFFIXES="jape">
 					java.net.URL
 				</PARAMETER>
 			</OR>
@@ -259,10 +259,12 @@
 				gate.creole.ontology.Ontology
 			</PARAMETER>
 			<PARAMETER NAME="operators" RUNTIME="false" OPTIONAL="true"
+        COMMENT="Class names that implement gate.jape.constraint.ConstraintPredicate."
 				ITEM_CLASS_NAME="java.lang.String">
 				java.util.ArrayList
 			</PARAMETER>
 			<PARAMETER NAME="annotationAccessors" RUNTIME="false" OPTIONAL="true"
+        COMMENT="Class names that implement gate.jape.constraint.AnnotationAccessor."
 				ITEM_CLASS_NAME="java.lang.String">
 				java.util.ArrayList
 			</PARAMETER>
@@ -299,10 +301,12 @@
 				java.lang.String
 			</PARAMETER>
 			<PARAMETER NAME="operators" RUNTIME="false" OPTIONAL="true"
+        COMMENT="Class names that implement gate.jape.constraint.ConstraintPredicate."
 				ITEM_CLASS_NAME="java.lang.String">
 				java.util.ArrayList
 			</PARAMETER>
 			<PARAMETER NAME="annotationAccessors" RUNTIME="false" OPTIONAL="true"
+        COMMENT="Class names that implement gate.jape.constraint.AnnotationAccessor."
 				ITEM_CLASS_NAME="java.lang.String">
 				java.util.ArrayList
 			</PARAMETER>
@@ -320,12 +324,12 @@
 				gate.Document
 			</PARAMETER>
 			<PARAMETER NAME="inputASName"
-				COMMENT="The name used for the temporary annotation set"
+				COMMENT="The annotation set to be used as input that must contain 'Token' annotations"
 				RUNTIME="true" OPTIONAL="true">
 				java.lang.String
 			</PARAMETER>
 			<PARAMETER NAME="outputASName"
-				COMMENT="The name used for the temporary annotation set"
+				COMMENT="The annotation set to be used as output for 'Sentence' and 'Split' annotations"
 				RUNTIME="true" OPTIONAL="true">
 				java.lang.String
 			</PARAMETER>
@@ -360,7 +364,7 @@
 				gate.Document
 			</PARAMETER>
 			<PARAMETER NAME="outputASName"
-				COMMENT="The name used for the temporary annotation set"
+        COMMENT="The annotation set to be used as output for 'Sentence' and 'Split' annotations"
 				RUNTIME="true" OPTIONAL="true">
 				java.lang.String
 			</PARAMETER>
@@ -401,37 +405,37 @@
 				gate.Document
 			</PARAMETER>
 			<PARAMETER NAME="inputASName"
-				COMMENT="The name of the annotation set used for input"
+        COMMENT="The annotation set to be used as input that must contain 'Token' and 'Sentence' annotations"
 				RUNTIME="true" OPTIONAL="true">
 				java.lang.String
 			</PARAMETER>
 			<PARAMETER NAME="outputASName"
-				COMMENT="The name of the annotation set used for output"
+        COMMENT="The annotation set to be used as output for POS annotations"
 				RUNTIME="true" OPTIONAL="true">
 				java.lang.String
 			</PARAMETER>
 			<PARAMETER NAME="encoding"
-				COMMENT="Encoding to use to read rules and lexicons"
+				COMMENT="The encoding used for reading rules and lexicons"
 				OPTIONAL="true">
 				java.lang.String
 			</PARAMETER>
 			<PARAMETER NAME="lexiconURL"
 				DEFAULT="resources/heptag/lexicon"
-				COMMENT="The URL for the lexicon file" OPTIONAL="true">
+				COMMENT="The URL to the lexicon file" OPTIONAL="true">
 				java.net.URL
 			</PARAMETER>
 			<PARAMETER NAME="rulesURL"
 				DEFAULT="resources/heptag/ruleset"
-				COMMENT="The URL for the ruleset file" OPTIONAL="true">
+				COMMENT="The URL to the ruleset file" OPTIONAL="true">
 				java.net.URL
 			</PARAMETER>
 			<PARAMETER NAME="baseTokenAnnotationType"
-				COMMENT="The name of the base Token annotation type" RUNTIME="true"
+				COMMENT="The name of the base 'Token' annotation type" RUNTIME="true"
 				OPTIONAL="false" DEFAULT="Token">
 				java.lang.String
 			</PARAMETER>
 			<PARAMETER NAME="baseSentenceAnnotationType"
-				COMMENT="The name of the base Sentence annotation type"
+				COMMENT="The name of the base 'Sentence' annotation type"
 				RUNTIME="true" OPTIONAL="false" DEFAULT="Sentence">
 				java.lang.String
 			</PARAMETER>
@@ -451,22 +455,22 @@
 			<HELPURL>http://gate.ac.uk/userguide/sec:annie:orthomatcher
          </HELPURL>
 			<PARAMETER DEFAULT="resources/othomatcher/listsNM.def"
-				COMMENT="The URL for the definition file" SUFFIXES="def"
+				COMMENT="The URL to the definition file" SUFFIXES="def"
 				NAME="definitionFileURL">
 				java.net.URL
 			</PARAMETER>
 			<PARAMETER DEFAULT="0.50"
-				COMMENT="Minimum likelihood that a name is a nickname of a formal name to be allowed as a nickname"
+				COMMENT="Minimum likelihood that a name is a nickname"
 				NAME="minimumNicknameLikelihood">
 				java.lang.Double
 			</PARAMETER>
 			<PARAMETER NAME="highPrecisionOrgs" DEFAULT="false"
-			    COMMENT="True indicates that we only use very safe features for matching orgs, such as ACME = ACME, Inc."
+			  COMMENT="Use very safe features for matching orgs, such as ACME = ACME, Inc."
 				OPTIONAL="true">
 				java.lang.Boolean
 			</PARAMETER>
 			<PARAMETER DEFAULT="UTF-8"
-				COMMENT="The encoding used for reading the definitions"
+				COMMENT="The encoding used for reading the definition file"
 				NAME="encoding">
 				java.lang.String
 			</PARAMETER>
@@ -474,31 +478,38 @@
 				gate.Document
 			</PARAMETER>
 			<PARAMETER NAME="annotationSetName" RUNTIME="true"
+        COMMENT="Annotation set name where are the annotation types (annotationTypes)"
 				OPTIONAL="true">
 				java.lang.String
 			</PARAMETER>
 			<PARAMETER NAME="caseSensitive" DEFAULT="false"
+        COMMENT="Should this resource diferentiate on case?"
 				OPTIONAL="true">
 				java.lang.Boolean
 			</PARAMETER>
 			<PARAMETER NAME="annotationTypes"
 				DEFAULT="Organization;Person;Location;Date" RUNTIME="true"
+        COMMENT="Name of the annotation types to use"
 				OPTIONAL="true">
 				java.util.ArrayList
 			</PARAMETER>
 			<PARAMETER NAME="processUnknown" DEFAULT="true"
+        COMMENT="Should we process 'Unknown' annotations?"
 				OPTIONAL="true">
 				java.lang.Boolean
 			</PARAMETER>
 			<PARAMETER NAME="organizationType" DEFAULT="Organization"
+        COMMENT="Annotation name for the organizations"
 				OPTIONAL="true">
 				java.lang.String
 			</PARAMETER>
 			<PARAMETER NAME="personType" DEFAULT="Person"
+        COMMENT="Annotation name for the persons"
 				OPTIONAL="true">
 				java.lang.String
 			</PARAMETER>
-			<PARAMETER NAME="extLists" DEFAULT="true" OPTIONAL="true">
+			<PARAMETER NAME="extLists" DEFAULT="true" OPTIONAL="true"
+        COMMENT="External lists otherwise internal">
 				java.lang.Boolean
 			</PARAMETER>
 			<ICON>ortho-matcher</ICON>
@@ -521,10 +532,10 @@
 				java.lang.String
 			</PARAMETER>
 			<PARAMETER NAME="inanimatedEntityTypes" RUNTIME="true"
-        		COMMENT="List of annotation types for non animated entities"
-        		DEFAULT="Organization;Location"
-        		OPTIONAL="true">java.lang.String
-        	</PARAMETER>
+        COMMENT="List of annotation types for non animated entities"
+        DEFAULT="Organization;Location"
+        OPTIONAL="true">java.lang.String
+      </PARAMETER>
 			<PARAMETER NAME="resolveIt" RUNTIME="true"
 				COMMENT="Whether or not to resolve it pronouns" DEFAULT="false"
 				OPTIONAL="true">
@@ -562,15 +573,18 @@
 				gate.Document
 			</PARAMETER>
 			<PARAMETER NAME="annotationTypes" RUNTIME="true"
+        COMMENT="The annotation types to delete otherwise delete all"
 				OPTIONAL="true" ITEM_CLASS_NAME="java.lang.String">
 				java.util.ArrayList
 			</PARAMETER>
 			<PARAMETER NAME="setsToKeep" RUNTIME="true" OPTIONAL="true"
+        COMMENT="The annotation sets to keep otherwise delete all"
 				ITEM_CLASS_NAME="java.lang.String">
 				java.util.ArrayList
 			</PARAMETER>
 			<PARAMETER NAME="keepOriginalMarkupsAS" RUNTIME="true"
-			OPTIONAL="true" DEFAULT="true">
+        COMMENT="Should we keep the 'Original markups' annotation set?"
+        OPTIONAL="true" DEFAULT="true">
 				java.lang.Boolean
 			</PARAMETER>
 			<ICON>document-reset</ICON>
