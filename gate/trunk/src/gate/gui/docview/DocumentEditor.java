@@ -1010,10 +1010,12 @@ public class DocumentEditor extends AbstractVisualResource
               } else {
                 // expand default set
                 asv.getSetHandler(null).setExpanded(true);
-                for (Object setName : document.getAnnotationSetNames()) {
-                  if (!setName.equals("Original markups")) {
-                    // expand other annotation sets
-                    asv.getSetHandler((String)setName).setExpanded(true);
+                if (document.getAnnotationSetNames() != null) {
+                  for (Object setName : document.getAnnotationSetNames()) {
+                    if (!setName.equals("Original markups")) {
+                      // expand other annotation sets
+                      asv.getSetHandler((String)setName).setExpanded(true);
+                    }
                   }
                 }
               }
