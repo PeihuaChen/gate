@@ -74,7 +74,7 @@ public class TestCopyAS2AnoDocPlugin extends TestCase {
     Corpus corpus = Factory.newCorpus("DataSet");
     ExtensionFileFilter fileFilter = new ExtensionFileFilter();
     fileFilter.addExtension("xml");
-    File testData = new File(learningHome, "testdata");
+    File testData = new File(learningHome, "testData");
     File sourceDir = new File(testData, "source");
     String corpusDirName = new File(testData, "target").getAbsolutePath();
     File[] xmlFiles = new File(corpusDirName).listFiles(fileFilter);
