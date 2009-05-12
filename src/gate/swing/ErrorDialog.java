@@ -52,9 +52,6 @@ public class ErrorDialog extends JOptionPane {
     String detailedMessage = "";
     detailedMessage += "<h2>Message</h2>";
     detailedMessage += errorMessage;
-    detailedMessage += "<h2>Cause</h2>";
-    detailedMessage += error.getCause() == null ?
-      "Unknown" : error.getCause().toString();
     detailedMessage += "<h2>Stack trace</h2>";
     StringWriter sw = new StringWriter();
     error.printStackTrace(new PrintWriter(sw));
