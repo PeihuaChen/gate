@@ -1,6 +1,7 @@
 package gate.compound.gui;
 
 import java.awt.Component;
+import java.awt.Composite;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.*;
@@ -132,8 +133,14 @@ public class CompoundDocumentEditor extends AbstractVisualResource
         List<String> docIDs = cd.getDocumentIDs();
         for(int i = 0; i < docIDs.size(); i++) {
           Document doc = cd.getDocument(docIDs.get(i));
-          File file = new File(doc.getSourceUrl().getFile());
-          file = new File(dir.getAbsolutePath() + "/" + file.getName());
+          File file = null;
+          if(doc.getName().equals("Composite")) {
+            file = new File(dir.getAbsolutePath() + "/Composite.xml");
+          } else {
+            file = new File(doc.getSourceUrl().getFile());
+            file = new File(dir.getAbsolutePath() + "/" + file.getName());
+          }
+          
           BufferedWriter bw = new BufferedWriter(
                   new OutputStreamWriter(new FileOutputStream(file),
                           ((DocumentImpl)doc).getEncoding()));
