@@ -22,10 +22,7 @@ import org.apache.log4j.Logger;
 import gate.*;
 import gate.creole.metadata.*;
 import gate.event.*;
-import gate.util.Benchmark;
-import gate.util.Benchmarkable;
-import gate.util.Err;
-import gate.util.GateRuntimeException;
+import gate.util.*;
 import gate.util.profile.Profiler;
 import gate.util.Out;
 
@@ -253,9 +250,27 @@ public class SerialController extends AbstractController implements
   public void cleanup() {
     // close all PRs in this controller
     if(prList != null && !prList.isEmpty()) {
-      for(Iterator prIter = new ArrayList(prList).iterator(); prIter.hasNext(); Factory
-        .deleteResource((Resource)prIter.next()))
-        ;
+      try {
+        //get all the other controllers
+        List<Resource> allOtherControllers  = 
+          Gate.getCreoleRegister().getAllInstances("gate.Controller");
+        allOtherControllers.remove(this);
+        //get all the PRs in all the other controllers
+        List<Resource> prsInOtherControllers = new ArrayList<Resource>();
+        for(Resource aController : allOtherControllers){
+          prsInOtherControllers.addAll(((Controller)aController).getPRs());
+        }
+        //remove all PRs in this controller, that are not also in other 
+        //controllers
+        for(Object aPr : getPRs()){
+          if(!prsInOtherControllers.contains(aPr)){
+            Factory.deleteResource((Resource)aPr);
+          }
+        }
+      }
+      catch(GateException e) {
+        //ignore
+      }
     }
     Gate.getCreoleRegister().removeCreoleListener(this);
   }
