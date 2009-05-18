@@ -14,7 +14,7 @@
 */
 
 Phase:	First
-Input: Token SpaceToken
+Input: Token SpaceToken Foo
 Options: control = appelt
 
 // this has to be run first of all 
@@ -44,4 +44,5 @@ Rule: GOO
 (
  {Foo}
  ):foo
- -->:foo.Foo = {}
+ -->
+{}
