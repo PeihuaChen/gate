@@ -97,7 +97,13 @@
     <RESOURCE>
 	<NAME>Fake Sentence Splitter</NAME>
 	<COMMENT>
-		Fake Sentence Splitter
+		Fake Sentence Splitter is used by Onto Root Gazetteer internally as it 
+    creates 'fake' annotation type 'Sentence' without analysing the text by 
+    a proper Sentence Splitter. The reason for doing this is enabling the
+    POS Tagger to work properly, as the input text is usually not a proper 
+    sentence (i.e. ontology resource name or label). 'Faking' sentence splitting
+    optimises the processing as Onto Root Gazetteer usually does not process 
+    internally any multisentence text.
 	</COMMENT>
 	<CLASS>gate.clone.ql.FakeSentenceSplitter</CLASS>
 	<PARAMETER COMMENT="The document to be processed"
