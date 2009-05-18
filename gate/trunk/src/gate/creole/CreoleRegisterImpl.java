@@ -406,12 +406,12 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   /** Get the list of types of VR in the register. */
   public Set<String> getVrTypes() { return Collections.unmodifiableSet(new HashSet<String>(vrTypes));}
 
-  /** Get the list of types of VR in the register. */
+  /** Get the list of types of Controller in the register. */
   public Set<String> getControllerTypes() {
     return Collections.unmodifiableSet(controllerTypes);
   }
 
-  /** Get the list of types of TOOL respurces in the register. */
+  /** Get the list of types of TOOL resources in the register. */
   public Set<String> getToolTypes() { return Collections.unmodifiableSet(toolTypes);}
 
   /** Get a list of all instantiations of LR in the register. */
@@ -854,7 +854,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   /** A list of the types of VR in the register. */
   protected List<String> vrTypes;
 
-  /** A list of the types of VR in the register. */
+  /** A list of the types of Controller in the register. */
   protected Set<String> controllerTypes;
 
   /** A list of the types of TOOL in the register. */
