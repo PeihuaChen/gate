@@ -950,7 +950,9 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     resourcesTree.addMouseListener(new MouseAdapter() {
       public void mousePressed(MouseEvent e) {
-        TreePath path = resourcesTree.getPathForLocation(e.getX(), e.getY());
+        
+//        TreePath path = resourcesTree.getPathForLocation(e.getX(), e.getY());
+        TreePath path = resourcesTree.getClosestPathForLocation(e.getX(), e.getY());
         if(e.isPopupTrigger()
         && !resourcesTree.isPathSelected(path)) {
           // if right click outside the selection then reset selection
@@ -968,7 +970,8 @@ public class MainFrame extends JFrame implements ProgressListener,
         // where inside the tree?
         int x = e.getX();
         int y = e.getY();
-        TreePath path = resourcesTree.getPathForLocation(x, y);
+//        TreePath path = resourcesTree.getPathForLocation(x, y);
+        TreePath path = resourcesTree.getClosestPathForLocation(x, y);
         JPopupMenu popup = null;
         Handle handle = null;
         if(path != null) {
