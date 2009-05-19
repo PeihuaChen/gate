@@ -1539,8 +1539,9 @@ public class AnnotationSetsView extends AbstractDocumentView
         }
       }
       catch(BadLocationException e1) {
-        //this should not happen, as the text location comes from the text view 
-        throw new LuckyException(e1);
+        //this should not happen, as the text location comes from the text view
+        //if it does. we'll just ignore it.
+//        throw new LuckyException(e1);
       }finally{
         mouseMovementTimer.restart();
       }
