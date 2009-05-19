@@ -21,7 +21,7 @@ Rule: convert
 	
 	// default value for c2 tag
 	String c2 = "???";
-	if (penn.equals("``")) c2 = "\\"";
+	if (penn.equals("``")) c2 = "\\\"";
 	else if (penn.equals(",")) c2 = ",";
 	else if (penn.equals(":")) {
 		if (string.equalsIgnoreCase(":")) c2 = ":";
@@ -35,7 +35,7 @@ Rule: convert
 		else if (string.equalsIgnoreCase("?")) c2 = "?";
 		else c2 = ".";
 	}
-	else if (penn.equals("''")) c2 = "\\"";
+	else if (penn.equals("''")) c2 = "\\\"";
 	else if (penn.equals("(")) c2 = "(";
 	else if (penn.equals(")")) c2 = ")";
 	else if (penn.equals("$")) c2 = "NNU";
