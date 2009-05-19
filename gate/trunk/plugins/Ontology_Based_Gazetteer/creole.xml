@@ -57,12 +57,12 @@
 	COMMENT="Should this gazetteer consider properties or not">
 	java.lang.Boolean
 	</PARAMETER>
-	<PARAMETER NAME="propertiesToInclude"
+	<PARAMETER NAME="propertiesToInclude" OPTIONAL="true"
 			DEFAULT=""
 	COMMENT="The list of property names to be included, comma separated">
 	java.lang.String
 	</PARAMETER>
-	<PARAMETER NAME="propertiesToExclude"
+	<PARAMETER NAME="propertiesToExclude" OPTIONAL="true"
 		DEFAULT=""
 	COMMENT="The list of property names to be excluded, comma separated">
 	java.lang.String
