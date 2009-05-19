@@ -194,7 +194,7 @@ implements ANNIEConstants{
           if (nameList.equals("nickname")) {
             if (minimumNicknameLikelihood == null) {
               throw new ResourceInstantiationException("No value for the required parameter minimumNicknameLikelihood!");
-            }
+            } 
             initNicknames(nameFile,encoding, minimumNicknameLikelihood);
             foundANickname = true;
           }
@@ -205,7 +205,8 @@ implements ANNIEConstants{
       }//while
       reader.close();
       if (!foundANickname) {
-        throw new ResourceInstantiationException(
+        nicknameMap = new HashMap<String,HashSet<String>>();
+        System.err.println("WARNING: "+
                 "No entry for nickname provided in definition file!");
       }
 
