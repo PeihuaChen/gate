@@ -535,6 +535,9 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    * @return
    */
   public AnnotationSet getCovering(String neededType, Long startOffset, Long endOffset) {
+    //check the range
+    if(endOffset < startOffset) return emptyAnnotationSet;
+    //ensure index
     if(annotsByStartNode == null) indexByStartOffset();
     //if the requested range is longer than the longest annotation in this set, 
     //then there can be no annotations covering the range
@@ -592,6 +595,9 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     // the result will include all the annotations that either:
     // start at a position between the start and end before the end
     // offsets
+    //check the range
+    if(endOffset < startOffset) return emptyAnnotationSet;
+    //ensure index
     if(annotsByStartNode == null) indexByStartOffset();
     List<Annotation> annotationsToAdd = null;
     Iterator<Node> nodesIter;
