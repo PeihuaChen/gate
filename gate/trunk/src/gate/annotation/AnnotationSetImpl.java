@@ -1030,7 +1030,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    */
   public Set<String> getAllTypes() {
     indexByType();
-    return annotsByType.keySet();
+    return Collections.unmodifiableSet(annotsByType.keySet());
   }
 
   /**
