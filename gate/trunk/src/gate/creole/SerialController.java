@@ -248,7 +248,9 @@ public class SerialController extends AbstractController implements
    * Cleans the internal data and prepares this object to be collected
    */
   public void cleanup() {
-    // close all PRs in this controller
+    //stop listening to Creole events.
+    Gate.getCreoleRegister().removeCreoleListener(this);
+    // close all PRs in this controller, if not members of other apps.
     if(prList != null && !prList.isEmpty()) {
       try {
         //get all the other controllers
@@ -262,6 +264,13 @@ public class SerialController extends AbstractController implements
         }
         //remove all PRs in this controller, that are not also in other 
         //controllers
+//        for(Iterator prIter = getPRs().iterator(); prIter.hasNext();){
+//          ProcessingResource aPr = (ProcessingResource)prIter.next();
+//          if(!prsInOtherControllers.contains(aPr)){
+//            prIter.remove();
+//            Factory.deleteResource((Resource)aPr);
+//          }
+//        }
         for(Object aPr : getPRs()){
           if(!prsInOtherControllers.contains(aPr)){
             Factory.deleteResource((Resource)aPr);
@@ -272,7 +281,6 @@ public class SerialController extends AbstractController implements
         //ignore
       }
     }
-    Gate.getCreoleRegister().removeCreoleListener(this);
   }
 
   /** The list of contained PRs */
