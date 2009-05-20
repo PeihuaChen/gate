@@ -3978,11 +3978,11 @@ public class MainFrame extends JFrame implements ProgressListener,
           try {
             Runtime.getRuntime().exec(commandLine);
           }
-          catch(IOException error) {
+          catch(Exception error) {
             String message =
-              "<html>Unable to call the custom browser command.<br>" +
+              "Unable to call the custom browser command.<br>" +
               "(" +  commandLine + ")<br><br>" +
-              "Please go to the Options menu then Configuration.</html>";
+              "Please go to the Options menu then Configuration.";
             Action[] actions = {
               new AbstractAction("Show configuration") {
                 public void actionPerformed(ActionEvent e) {
