@@ -1,10 +1,6 @@
 package gate.merger;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 
 import gate.Annotation;
 import gate.AnnotationSet;
@@ -37,6 +33,9 @@ public class AnnotationMergingMain extends AbstractLanguageAnalyser implements
   /** Specifying the annotation types and features for merging. */
   private String annTypesAndFeats;
 
+  /** Should source annotations be kept when merged? */
+  private Boolean keepSourceForMergedAnnotations;
+
   /** Initialise this resource, and return it. */
   public gate.Resource init() throws ResourceInstantiationException {
     return this;
@@ -49,10 +48,10 @@ public class AnnotationMergingMain extends AbstractLanguageAnalyser implements
    */
   public void execute() throws ExecutionException {
     // get the annotation sets for merging
-    String termSeparator = new String(";");
+    String termSeparator = ";";
     // Get all the existing annotation sets from the current document
-    Set annsExisting = document.getAnnotationSetNames();
-    String[] annsArray = null;
+    Set<String> annsExisting = document.getAnnotationSetNames();
+    String[] annsArray;
     if(annSetsForMerging == null || annSetsForMerging.trim().length() == 0) {
       // throw new ExecutionException("No annotation set was specified for
       // merging!");
@@ -78,7 +77,7 @@ public class AnnotationMergingMain extends AbstractLanguageAnalyser implements
     for(int i = 0; i < numAnns; ++i)
       annsArray[i] = annsArray[i].trim();
 
-    // Check if each annotation set for merging exist in the current
+    // Check if each annotation set for merging exists in the current
     // document
     for(int i = 0; i < numAnns; ++i)
       if(!annsExisting.contains(annsArray[i]))
@@ -90,9 +89,9 @@ public class AnnotationMergingMain extends AbstractLanguageAnalyser implements
     if(this.annTypesAndFeats == null
       || this.annTypesAndFeats.trim().length() == 0)
       for(int i = 0; i < numAnns; ++i) {
-        Set types = document.getAnnotations(annsArray[i]).getAllTypes();
-        for(Object obj : types)
-          if(!annsTypes.containsKey(obj)) annsTypes.put(obj.toString(), null);
+        Set<String> types = document.getAnnotations(annsArray[i]).getAllTypes();
+        for(String obj : types)
+          if(!annsTypes.containsKey(obj)) annsTypes.put(obj, null);
       }
     else {
       String[] annTs = this.annTypesAndFeats.split(termSeparator);
@@ -146,6 +145,22 @@ public class AnnotationMergingMain extends AbstractLanguageAnalyser implements
       else document.getAnnotations("mergedAnns");
       //Add the merged annotations
       for(Annotation ann : mergeInfor.keySet()) {
+        if (!keepSourceForMergedAnnotations) {
+          // for each source annotation set
+          for(String ASName : annsArray) {
+            AnnotationSet sourceAS = document.getAnnotations(ASName);
+            // find source annotations for the annotation merged
+            // based only on their offsets
+            AnnotationSet containedAS = sourceAS.getContained(
+              ann.getStartNode().getOffset(), ann.getEndNode().getOffset());
+            for (Annotation annotation : containedAS) {
+              if (annotation.coextensive(ann)) {
+                // delete source annotations
+                sourceAS.remove(annotation);
+              }
+            }
+          }
+        }
         FeatureMap featM = Factory.newFeatureMap();
         FeatureMap feat0 = ann.getFeatures();
         for(Object obj : feat0.keySet()) {
@@ -164,7 +179,6 @@ public class AnnotationMergingMain extends AbstractLanguageAnalyser implements
             .getOffset(), annT, featM);
         }
         catch(InvalidOffsetException e) {
-          // TODO Auto-generated catch block
           e.printStackTrace();
         }
       }
@@ -216,6 +230,14 @@ public class AnnotationMergingMain extends AbstractLanguageAnalyser implements
 
   public void setMinimalAnnNum(String n) {
     this.minimalAnnNum = n;
+  }
+
+  public Boolean getkeepSourceForMergedAnnotations() {
+    return this.keepSourceForMergedAnnotations;
+  }
+
+  public void setkeepSourceForMergedAnnotations(Boolean b) {
+    this.keepSourceForMergedAnnotations = b;
   }
 
 }

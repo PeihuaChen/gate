@@ -12,28 +12,40 @@
       <JAR>annotationMerging.jar</JAR>
 
       <PARAMETER NAME="annSetsForMerging"
-        COMMENT="The name of the annotation sets used for merging" RUNTIME="true"
+        COMMENT="Annotation sets names used for merging. Example: 'as1;as2;as3'.
+If not defined, use all the annotation sets but the default annotation set."
+        RUNTIME="true"
         OPTIONAL="true">java.lang.String</PARAMETER>
 
        <PARAMETER NAME="annTypesAndFeats"
-        COMMENT="The name of the annotation types and probably features used for merging" 
+        COMMENT="Annotation types names and optionally features used for
+merging. Example: 'Location->type;Organisation->type'."
         RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
 
       <PARAMETER NAME="annSetOutput"
-        COMMENT="The name of the annotation set used for storing the merged annotations" 
-         RUNTIME="true" OPTIONAL="false">java.lang.String</PARAMETER>
+        COMMENT="Annotation set name used for storing the merged annotations"
+        RUNTIME="true" OPTIONAL="false">java.lang.String</PARAMETER>
 
       <PARAMETER NAME="document" COMMENT="Document to be processed"
         RUNTIME="true" OPTIONAL="false">gate.Document</PARAMETER>
 
       <PARAMETER NAME="mergingMethod"
-        COMMENT="merging method" RUNTIME="true" DEFAULT="MajorityVoting"
+        COMMENT="MergingByAnnotatorNum selects the annotation on which at least
+minimalAnnNum annotators agree and MajorityVoting selects the
+annotation that the majority of annotators support."
+        RUNTIME="true" DEFAULT="MajorityVoting"
         OPTIONAL="false">gate.merger.MergingMethodsEnum</PARAMETER>
 
       <PARAMETER NAME="minimalAnnNum"
-        COMMENT="The minimal number of the annotation sets used for merged annotations" 
+        COMMENT="Minimal number of annotators who must agree to merge
+the annotation with MergingByAnnotatorNum mergingMethod"
          RUNTIME="true" DEFAULT="1" OPTIONAL="true">java.lang.String</PARAMETER>
 
+      <PARAMETER NAME="keepSourceForMergedAnnotations" DEFAULT="true"
+        COMMENT="Should source annotations be kept when merged?"
+        RUNTIME="true" OPTIONAL="false">
+        java.lang.Boolean
+      </PARAMETER>
      </RESOURCE>
      
   </CREOLE>
