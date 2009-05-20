@@ -73,6 +73,8 @@ public class MainFrame extends JFrame implements ProgressListener,
 
   protected JLabel statusBar;
 
+  protected JButton alertButton;
+
   protected JProgressBar progressBar;
 
   protected XJTabbedPane mainTabbedPane;
@@ -331,17 +333,9 @@ public class MainFrame extends JFrame implements ProgressListener,
           try { File file = new File(location);
           PersistenceManager.loadObjectFromFile(file); }
           catch(Exception error) {
-            final String errorMessage = "Couldn't reload the application.\n"
-              + error.getMessage();
-            Action[] actions = {
-              new AbstractAction("Search in mailing list") {
-                public void actionPerformed(ActionEvent e) {
-                  new HelpMailingListAction(errorMessage)
-                    .actionPerformed(null);
-            }}};
-            ErrorDialog.show(error, errorMessage, instance,
-              MainFrame.getIcon("root"), actions);
-            log.error(errorMessage, error);
+            String message =
+              "Couldn't reload the application.\n" + error.getMessage();
+            alertButton.setAction(new AlertAction(error, message, null));
             // remove the element from the applications list
             setPreferenceValue("filechooserlocations/"
               + "gate/ApplicationRestore", "list",
@@ -550,30 +544,30 @@ public class MainFrame extends JFrame implements ProgressListener,
     mainSplit.setOneTouchExpandable(true);
 
     // status and progress bars
-    statusBar = new JLabel(" ");
-    statusBar.setPreferredSize(new Dimension(200,
+    statusBar = new JLabel();
+    statusBar.setPreferredSize(new Dimension(400,
       statusBar.getPreferredSize().height));
+    statusBar.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
 
     UIManager.put("ProgressBar.cellSpacing", 0);
     progressBar = new JProgressBar(JProgressBar.HORIZONTAL);
-    // progressBar.setBorder(BorderFactory.createEmptyBorder());
+    progressBar.setBorder(BorderFactory.createEmptyBorder());
     progressBar.setForeground(new Color(150, 75, 150));
-    // progressBar.setBorderPainted(false);
     progressBar.setStringPainted(false);
-    progressBar.setOrientation(JProgressBar.HORIZONTAL);
 
-    JPanel southBox = new JPanel();
-    southBox.setLayout(new GridLayout(1, 2));
-    southBox.setBorder(null);
+    Icon alertIcon = getIcon("crystal-clear-app-error");
+    alertButton = new JButton(alertIcon);
+    alertButton.setToolTipText("There was no error");
+    alertButton.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 5));
+    alertButton.setPreferredSize(new Dimension(alertIcon.getIconWidth(),
+      alertIcon.getIconHeight()));
+    alertButton.setEnabled(false);
 
-    Box tempHBox = Box.createHorizontalBox();
-    tempHBox.add(Box.createHorizontalStrut(5));
-    tempHBox.add(statusBar);
-    southBox.add(tempHBox);
-    tempHBox = Box.createHorizontalBox();
-    tempHBox.add(progressBar);
-    tempHBox.add(Box.createHorizontalStrut(5));
-    southBox.add(tempHBox);
+    JPanel southBox = new JPanel(new BorderLayout());
+    southBox.setBorder(BorderFactory.createEmptyBorder());
+    southBox.add(statusBar, BorderLayout.WEST);
+    southBox.add(progressBar, BorderLayout.CENTER);
+    southBox.add(alertButton, BorderLayout.EAST);
 
     this.getContentPane().add(southBox, BorderLayout.SOUTH);
     progressBar.setVisible(false);
@@ -701,7 +695,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       optionsMenu.add(new XJMenuItem(new AbstractAction("Configuration") {
         private static final long serialVersionUID = 1L;
         {
-          putValue(SHORT_DESCRIPTION, "Edit gate options");
+          putValue(SHORT_DESCRIPTION, "Edit GATE options");
         }
 
         public void actionPerformed(ActionEvent evt) {
@@ -1402,23 +1396,14 @@ public class MainFrame extends JFrame implements ProgressListener,
       addApplicationListenerMethod.invoke(applicationObject,
         applicationListenerObject);
     }
-    catch(Throwable t) {
+    catch(Throwable error) {
       // oh well, we tried
-      final Throwable error = t;
-      final String errorMessage =
+      String message =
         "There was a problem setting up the Mac "
         + "application\nmenu.  Your options/session will not be saved if "
         + "you exit\nwith \u2318Q, use the close button at the top-left"
         + "corner\nof this window instead.";
-      Action[] actions = {
-        new AbstractAction("Search in mailing list") {
-          public void actionPerformed(ActionEvent e) {
-            new HelpMailingListAction(error.getMessage())
-              .actionPerformed(null);
-      }}};
-      ErrorDialog.show(error, errorMessage, instance,
-        MainFrame.getIcon("root"), actions);
-      log.error(errorMessage, error);
+      alertButton.setAction(new AlertAction(error, message, null));
     }
   }
 
@@ -1859,17 +1844,9 @@ public class MainFrame extends JFrame implements ProgressListener,
         Factory.openDataStore("gleam.docservice.gate.DocServiceDataStore",
           DSLocation);
     }
-    catch(Exception e) {
-      final Exception error = e;
-      final String errorMessage = "Error when opening the Datastore.";
-      Action[] actions = {
-        new AbstractAction("Search in mailing list") {
-          public void actionPerformed(ActionEvent e) {
-            new HelpMailingListAction(error.getMessage()).actionPerformed(null);
-      }}};
-      ErrorDialog.show(error, errorMessage, instance,
-        MainFrame.getIcon("root"), actions);
-      log.error(errorMessage, error);
+    catch(Exception error) {
+      String message = "Error when opening the Datastore.";
+      alertButton.setAction(new AlertAction(error, message, null));
     }
     return ds;
   } // openWSDataStore()
@@ -2239,19 +2216,10 @@ public class MainFrame extends JFrame implements ProgressListener,
               + NumberFormat.getInstance().format(
                 (double)(endTime - startTime) / 1000) + " seconds");
           }
-          catch(Exception e) {
-            final Exception error = e;
-            final String errorMessage =
+          catch(Exception error) {
+            String message =
               "There was an error when loading the ANNIE application.";
-            Action[] actions = {
-              new AbstractAction("Search in mailing list") {
-                public void actionPerformed(ActionEvent e) {
-                  new HelpMailingListAction(error.getMessage())
-                    .actionPerformed(null);
-            }}};
-            ErrorDialog.show(error, errorMessage, instance,
-              MainFrame.getIcon("root"), actions);
-            log.error(errorMessage, error);
+            alertButton.setAction(new AlertAction(error, message, null));
           }
           finally {
             unlockGUI();
@@ -2292,20 +2260,11 @@ public class MainFrame extends JFrame implements ProgressListener,
             statusChanged("ANNIE loaded!");
             unlockGUI();
           }
-          catch(Exception e) {
+          catch(Exception error) {
             unlockGUI();
-            final Exception error = e;
-            final String errorMessage =
+            String message =
               "There was an error when loading the ANNIE application.";
-            Action[] actions = {
-              new AbstractAction("Search in mailing list") {
-                public void actionPerformed(ActionEvent e) {
-                  new HelpMailingListAction(error.getMessage())
-                    .actionPerformed(null);
-            }}};
-            ErrorDialog.show(error, errorMessage, instance,
-              MainFrame.getIcon("root"), actions);
-            log.error(errorMessage, error);
+            alertButton.setAction(new AlertAction(error, message, null));
             return;
           }
 
@@ -2344,19 +2303,10 @@ public class MainFrame extends JFrame implements ProgressListener,
                   // remove the PR with default parameters
                   Factory.deleteResource(pr);
                 }
-                catch(ResourceInstantiationException e) {
-                  final Exception error = e;
-                  final String errorMessage = "There was an error when creating"
+                catch(ResourceInstantiationException error) {
+                  String message = "There was an error when creating"
                     + " the resource: " + pr.getName() + ".";
-                  Action[] actions = {
-                    new AbstractAction("Search in mailing list") {
-                      public void actionPerformed(ActionEvent e) {
-                        new HelpMailingListAction(error.getMessage())
-                          .actionPerformed(null);
-                  }}};
-                  ErrorDialog.show(error, errorMessage, instance,
-                    MainFrame.getIcon("root"), actions);
-                  log.error(errorMessage, error);
+                  alertButton.setAction(new AlertAction(error, message, null));
                 }
               } // for(Object loadedPR : loadedPRs)
             }
@@ -2494,19 +2444,10 @@ public class MainFrame extends JFrame implements ProgressListener,
           URL creoleURL = new URL(urlTextField.getText());
           Gate.getCreoleRegister().registerDirectories(creoleURL);
         }
-        catch(Exception err) {
-          final Exception error = err;
-          final String errorMessage =
+        catch(Exception error) {
+          String message =
             "There was a problem when registering your CREOLE directory.";
-          Action[] actions = {
-            new AbstractAction("Search in mailing list") {
-              public void actionPerformed(ActionEvent e) {
-                new HelpMailingListAction(error.getMessage())
-                  .actionPerformed(null);
-          }}};
-          ErrorDialog.show(error, errorMessage, instance,
-            MainFrame.getIcon("root"), actions);
-          log.error(errorMessage, error);
+          alertButton.setAction(new AlertAction(error, message, null));
         }
       }
     }
@@ -2580,11 +2521,11 @@ public class MainFrame extends JFrame implements ProgressListener,
       final JTextField inputAS = new JTextField("", 20);
       inputAS.setText("Key");
       inputAS.setEditable(false);
-      JButton editInputAS = new JButton(MainFrame.getIcon("edit-list"));
+      JButton editInputAS = new JButton(getIcon("edit-list"));
       editInputAS.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent ae) {
           ListEditorDialog listEditor =
-            new ListEditorDialog(getInstance(), inputASList, "java.lang.String");
+            new ListEditorDialog(instance, inputASList, "java.lang.String");
           List result = listEditor.showDialog();
           if(result != null) {
             inputASList.clear();
@@ -2619,11 +2560,11 @@ public class MainFrame extends JFrame implements ProgressListener,
       final JTextField fte = new JTextField("", 20);
       fte.setText("SpaceToken;Split");
       fte.setEditable(false);
-      JButton editFTE = new JButton(MainFrame.getIcon("edit-list"));
+      JButton editFTE = new JButton(getIcon("edit-list"));
       editFTE.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent ae) {
           ListEditorDialog listEditor =
-            new ListEditorDialog(getInstance(), fteList, "java.lang.String");
+            new ListEditorDialog(instance, fteList, "java.lang.String");
           List result = listEditor.showDialog();
           if(result != null) {
             fteList.clear();
@@ -2653,8 +2594,8 @@ public class MainFrame extends JFrame implements ProgressListener,
       ftie.setSelectedIndex(1);
       fte.setToolTipText("Leave blank for inclusion of all features");
 
-      JButton dsBrowse = new JButton(MainFrame.getIcon("open-file"));
-      JButton indexBrowse = new JButton(MainFrame.getIcon("open-file"));
+      JButton dsBrowse = new JButton(getIcon("open-file"));
+      JButton indexBrowse = new JButton(getIcon("open-file"));
       dsBrowse.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent ae) {
           // first we need to ask for a new empty directory
@@ -2861,9 +2802,9 @@ public class MainFrame extends JFrame implements ProgressListener,
       editFTE.setContentAreaFilled(false);
 
       int returnValue =
-        JOptionPane.showOptionDialog(MainFrame.getInstance(), mainPanel,
+        JOptionPane.showOptionDialog(instance, mainPanel,
           "SearchableDataStore", JOptionPane.PLAIN_MESSAGE,
-          JOptionPane.OK_CANCEL_OPTION, MainFrame.getIcon("empty"),
+          JOptionPane.OK_CANCEL_OPTION, getIcon("empty"),
           new String[]{"OK", "Cancel"}, "OK");
       if(returnValue == JOptionPane.OK_OPTION) {
 
@@ -3126,17 +3067,9 @@ public class MainFrame extends JFrame implements ProgressListener,
             catch(MalformedURLException e) {
               log.error("Error when saving the resource URL.", e);
             }
-            catch (Exception e) {
-              final String errorMessage = e.getMessage();
-              Action[] actions = {
-                new AbstractAction("Search in mailing list") {
-                  public void actionPerformed(ActionEvent e) {
-                    new HelpMailingListAction(errorMessage)
-                      .actionPerformed(null);
-              }}};
-              ErrorDialog.show(e, errorMessage, instance,
-                MainFrame.getIcon("root"), actions);
-              log.error(errorMessage, e);
+            catch (Exception error) {
+              String message = error.getMessage();
+              alertButton.setAction(new AlertAction(error, message, null));
             }
             finally {
               processFinished();
@@ -3318,7 +3251,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     public ExitGateAction() {
       super("Exit GATE");
       putValue(SHORT_DESCRIPTION, "Closes the application");
-      putValue(SMALL_ICON, getIcon("exit"));
+      putValue(SMALL_ICON, getIcon("crystal-clear-action-exit"));
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("alt F4"));
     }
 
@@ -3346,18 +3279,9 @@ public class MainFrame extends JFrame implements ProgressListener,
             Gate.writeUserConfig();
           }
           }
-          catch(GateException e) {
-            final Exception error = e;
-            final String errorMessage = "Failed to save config data.";
-            Action[] actions = {
-              new AbstractAction("Search in mailing list") {
-                public void actionPerformed(ActionEvent e) {
-                  new HelpMailingListAction(error.getMessage())
-                    .actionPerformed(null);
-            }}};
-            ErrorDialog.show(error, errorMessage, instance,
-              MainFrame.getIcon("root"), actions);
-            log.error(errorMessage, error);
+          catch(GateException error) {
+            String message = "Failed to save config data.";
+            alertButton.setAction(new AlertAction(error, message, null));
           }
 
           // save the session;
@@ -3376,18 +3300,9 @@ public class MainFrame extends JFrame implements ProgressListener,
               gate.util.persistence.PersistenceManager.saveObjectToFile(
                 appList, sessionFile);
             }
-            catch(Exception e) {
-              final Exception error = e;
-              final String errorMessage = "Failed to save session data.";
-              Action[] actions = {
-                new AbstractAction("Search in mailing list") {
-                  public void actionPerformed(ActionEvent e) {
-                    new HelpMailingListAction(error.getMessage())
-                      .actionPerformed(null);
-              }}};
-              ErrorDialog.show(error, errorMessage, instance,
-                MainFrame.getIcon("root"), actions);
-              log.error(errorMessage, error);
+            catch(Exception error) {
+              String message = "Failed to save session data.";
+              alertButton.setAction(new AlertAction(error, message, null));
             }
           }
           else {
@@ -3937,6 +3852,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       this.keywords = null;
     }
     public HelpMailingListAction(String keywords) {
+      super("Search in mailing list");
       this.keywords = keywords;
     }
     public void actionPerformed(ActionEvent e) {
@@ -3954,18 +3870,9 @@ public class MainFrame extends JFrame implements ProgressListener,
        java.net.URLEncoder.encode(keywords, "UTF-8") +
        "#content", null);
 
-      } catch (UnsupportedEncodingException err) {
-        final Exception error = err;
-        final String errorMessage = "The Character Encoding is not supported.";
-        Action[] actions = {
-          new AbstractAction("Search in mailing list") {
-            public void actionPerformed(ActionEvent e) {
-              new HelpMailingListAction(error.getMessage())
-                .actionPerformed(null);
-        }}};
-        ErrorDialog.show(error, errorMessage, instance,
-          MainFrame.getIcon("root"), actions);
-        log.error(errorMessage, error);
+      } catch (UnsupportedEncodingException error) {
+        String message = "The Character Encoding is not supported.";
+        alertButton.setAction(new AlertAction(error, message, null));
       } finally {
         keywords = null;
       }
@@ -4050,17 +3957,17 @@ public class MainFrame extends JFrame implements ProgressListener,
             try { process = Runtime.getRuntime().exec(commandLine);
             } catch (IOException ioe5) {/* skip to next try catch */}
             if (process == null || process.waitFor() != 0) {
-              JOptionPane.showMessageDialog(MainFrame.getInstance(),
+              JOptionPane.showMessageDialog(instance,
                 "Unable to determine the default browser.\n"
                 + "Please go to the Options menu then Configuration.",
                 "Configuration error", JOptionPane.ERROR_MESSAGE);
             }}}}}
           } catch(SecurityException se) {
-            JOptionPane.showMessageDialog(MainFrame.getInstance(),
+            JOptionPane.showMessageDialog(instance,
               se.getMessage(), "Help Error", JOptionPane.ERROR_MESSAGE);
             log.error("Help browser Error", se);
           } catch (InterruptedException ie) {
-            JOptionPane.showMessageDialog(MainFrame.getInstance(),
+            JOptionPane.showMessageDialog(instance,
               ie.getMessage(), "Help Error", JOptionPane.ERROR_MESSAGE);
             log.error("Help browser Error", ie);
           }
@@ -4071,8 +3978,8 @@ public class MainFrame extends JFrame implements ProgressListener,
           try {
             Runtime.getRuntime().exec(commandLine);
           }
-          catch(IOException e) {
-            final String errorMessage =
+          catch(IOException error) {
+            String message =
               "<html>Unable to call the custom browser command.<br>" +
               "(" +  commandLine + ")<br><br>" +
               "Please go to the Options menu then Configuration.</html>";
@@ -4082,9 +3989,7 @@ public class MainFrame extends JFrame implements ProgressListener,
                   optionsDialog.showDialog();
                   optionsDialog.dispose();
             }}};
-            ErrorDialog.show(e, errorMessage, instance,
-              MainFrame.getIcon("root"), actions);
-            log.error(errorMessage, e);
+            alertButton.setAction(new AlertAction(error, message, actions));
           }
 
         } else {
@@ -4103,18 +4008,9 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
         try {
           helpFrame.setPage(new URL(actualURL.toString()));
-        } catch (IOException e) {
-          final Exception error = e;
-          final String errorMessage = "Error when loading help page.";
-          Action[] actions = {
-            new AbstractAction("Search in mailing list") {
-              public void actionPerformed(ActionEvent e) {
-                new HelpMailingListAction(error.getMessage())
-                  .actionPerformed(null);
-          }}};
-          ErrorDialog.show(error, errorMessage, instance,
-            MainFrame.getIcon("root"), actions);
-          log.error(errorMessage, error);
+        } catch (IOException error) {
+          String message = "Error when loading help page.";
+          alertButton.setAction(new AlertAction(error, message, null));
           return;
         }
         helpFrame.setVisible(false);
@@ -4345,14 +4241,10 @@ public class MainFrame extends JFrame implements ProgressListener,
      * a parent when no parent is specified
      */
     public int showDialog(Component parent, String approveButtonText)
-      throws HeadlessException {
-        setSelectedFileInFileChooser();
-      if(parent == null) {
-        return super.showDialog(getInstance(), approveButtonText);
-      }
-      else {
-        return super.showDialog(parent, approveButtonText);
-      }
+    throws HeadlessException {
+      setSelectedFileInFileChooser();
+      return super.showDialog((parent == null) ? getInstance() : parent,
+        approveButtonText);
     }
 
     /**
@@ -4367,8 +4259,8 @@ public class MainFrame extends JFrame implements ProgressListener,
         if ((lastUsedPath = getPreferenceValue(resourcePath, "location"))
                 != null) {
           File file = new File(lastUsedPath);
-            fileChooser.setSelectedFile(file);
-            fileChooser.ensureFileIsVisible(file);
+          setSelectedFile(file);
+          ensureFileIsVisible(file);
         }
       }
     }
@@ -4380,7 +4272,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           currentResourceClassName.replaceAll("\\.", "/");
         String filePath;
         try {
-          filePath = fileChooser.getSelectedFile().getCanonicalPath();
+          filePath = getSelectedFile().getCanonicalPath();
         } catch (IOException e) {
           log.error("Impossible to get the selected file path.", e);
           return;
@@ -4662,25 +4554,74 @@ public class MainFrame extends JFrame implements ProgressListener,
         frame.setVisible(true);
         editor.setVisible(true);
       }
-      catch(ResourceInstantiationException err) {
-        final Exception error = err;
-        final String errorMessage =
-          "Failed to instanciate the gazetteer editor.";
+      catch(ResourceInstantiationException error) {
+        String message = "Failed to instanciate the gazetteer editor.";
         Action[] actions = {
           new AbstractAction("Load plugins manager") {
             public void actionPerformed(ActionEvent e) {
               (new ManagePluginsAction()).actionPerformed(null);
-          }},
-          new AbstractAction("Search in mailing list") {
-            public void actionPerformed(ActionEvent e) {
-              new HelpMailingListAction(error.getMessage())
-                .actionPerformed(null);
         }}};
-        ErrorDialog.show(error, errorMessage, instance,
-          MainFrame.getIcon("root"), actions);
-        log.error(errorMessage, error);
+        alertButton.setAction(new AlertAction(error, message, actions));
       }
     }// actionPerformed();
   }// class NewOntologyEditorAction
+
+  /**
+   * Action for the alert button that shows the last error as a popup.
+   * An error dialog can be shown when clicked.
+   * Log the message as an error in the constructor method.
+   */
+  class AlertAction extends AbstractAction {
+    public AlertAction(Throwable error, String message, Action[] actions) {
+      log.error(message, error);
+      String description = "<html>An error happened:<br>" +
+        message.substring(0, Math.min(300, message.length()))
+          .replaceAll("(.{40,50}(?:\\b|\\.|/))", "$1<br>") + "</html>";
+      final int lines = description.split("<br>").length;
+      putValue(Action.SMALL_ICON, MainFrame.getIcon("crystal-clear-app-error"));
+      putValue(Action.SHORT_DESCRIPTION, description);
+      alertButton.setEnabled(true);
+      this.error = error;
+      this.message = message;
+      if (actions == null) {
+        this.actions = new Action[1];
+      } else {
+        this.actions = new Action[actions.length+1];
+        System.arraycopy(actions, 0, this.actions, 0, actions.length);
+      }
+      // add a 'search in mailing list' action
+      this.actions[this.actions.length-1] = new HelpMailingListAction(message);
+      // show for a few seconds a popup with the error message
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          JToolTip toolTip = alertButton.createToolTip();
+          toolTip.setTipText(alertButton.getToolTipText());
+          PopupFactory popupFactory = PopupFactory.getSharedInstance();
+          final Popup popup = popupFactory.getPopup(alertButton, toolTip,
+            instance.getLocationOnScreen().x+instance.getWidth()/2-100,
+            instance.getLocationOnScreen().y+instance.getHeight()-30-(lines*10));
+          toolTip.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+              popup.hide();
+              alertButton.doClick();
+            }
+          });
+          popup.show();
+          Date timeToRun = new Date(System.currentTimeMillis() + 4000);
+          (new java.util.Timer()).schedule(new TimerTask() {
+            public void run() {
+              popup.hide(); // hide the tooltip after some time
+            }
+          }, timeToRun);
+        }
+      });
+    }
+    public void actionPerformed(ActionEvent e) {
+      ErrorDialog.show(error, message, instance, getIcon("root"), actions);
+    }
+    Throwable error;
+    String message;
+    Action[] actions;
+  }
 
 } // class MainFrame
