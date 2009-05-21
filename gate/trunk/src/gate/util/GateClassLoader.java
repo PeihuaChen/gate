@@ -50,12 +50,14 @@ public class GateClassLoader extends URLClassLoader {
   /** Appends the specified URL to the list of URLs to search for classes
     * and resources.
     */
+  @Override
   public void addURL(URL url) { super.addURL(url); }
 
   /** Delegate loading to the super class (loadClass has protected
     * access there).
     */
-  public synchronized Class loadClass(String name, boolean resolve)
+  @Override
+  public synchronized Class<?> loadClass(String name, boolean resolve)
   throws ClassNotFoundException {
     return super.loadClass(name, resolve);
   } // loadClass(name, resolve)
@@ -63,7 +65,7 @@ public class GateClassLoader extends URLClassLoader {
   /** Forward a call to super.defineClass, which is protected and final
     * in super. This is used by JAPE and the Jdk compiler class.
     */
-  public Class defineGateClass(String name, byte[] bytes, int offset, int len)
+  public synchronized Class<?> defineGateClass(String name, byte[] bytes, int offset, int len)
   {
     return super.defineClass(name, bytes, offset, len);
   } // defineGateClass(name, bytes, offset, len);
@@ -71,7 +73,7 @@ public class GateClassLoader extends URLClassLoader {
   /** Forward a call to super.resolveClass, which is protected and final
     * in super. This is used by JAPE and the Jdk compiler class
     */
-  public void resolveGateClass(Class c) { super.resolveClass(c); }
+  public synchronized void resolveGateClass(Class<?> c) { super.resolveClass(c); }
 
   /**
    * Given a fully qualified class name, this method returns the instance of Class if it is already loaded using the ClassLoader
@@ -79,7 +81,7 @@ public class GateClassLoader extends URLClassLoader {
    * @param name
    * @return
    */
-  public Class findExistingClass(String name) {
+  public synchronized Class<?> findExistingClass(String name) {
 	  return findLoadedClass(name);
   }
   
@@ -98,8 +100,8 @@ public class GateClassLoader extends URLClassLoader {
     * An implication is that reloaded classes must always be instantiated
     * via the class returned from this method.
     */
-  public Class reloadClass(String name) throws ClassNotFoundException {
-    Class theClass = null;
+  public synchronized Class<?> reloadClass(String name) throws ClassNotFoundException {
+    Class<?> theClass = null;
 
     // if the class isn't already present in this class loader
     // we can just load it
