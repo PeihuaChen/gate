@@ -7,7 +7,7 @@
     <RESOURCE>
       <NAME>Chinese Segmenter PR</NAME>
       <COMMENT>Segment the Chinese text into words, based on the PAUM learning algorithm.</COMMENT>
-      <HELPURL>http://gate.ac.uk/userguide/sec:gui:bdmComp</HELPURL>
+      <HELPURL>http://gate.ac.uk/userguide/sec:misc-creole:chineseSeg</HELPURL>
       <CLASS>gate.chineseSeg.ChineseSegMain</CLASS>
       <JAR>ChineseSegMain.jar</JAR>
       <JAR>../learning/learningapi.jar</JAR>
