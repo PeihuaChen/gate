@@ -50,6 +50,7 @@ list</a>.</p>
 <li><a href='#cebuano'>cebuano</a></li>
 <li><a href='#Chemistry_Tagger'>Chemistry_Tagger</a></li>
 <li><a href='#chineseSegmenter'>chineseSegmenter</a></li>
+<li><a href='#copyAS2AnoDoc'>copyAS2AnoDoc</a></li>
 <li><a href='#crawl'>crawl</a></li>
 <li><a href='#google'>google</a></li>
 <li><a href='#hindi'>hindi</a></li>
@@ -258,7 +259,7 @@ list</a>.</p>
 	</tr>
 	<tr>
 		<td>BDM Computation PR&nbsp;</td>
-		<td>Compute BDM score for each  pair of concepts in the given ontology. (<a href="http://gate.ac.uk/userguide/sec:gui:bdmComp">docs</a>)&nbsp;</td>
+		<td>Compute BDM score for each  pair of concepts in the given ontology. (<a href="http://gate.ac.uk/userguide/sec:gui:bdmplugin">docs</a>)&nbsp;</td>
 		<td>gate.bdmComp.BDMCompMain</td>
 	</tr>
 	<tr>
@@ -309,6 +310,14 @@ list</a>.</p>
 		<td>Chinese Segmenter PR&nbsp;</td>
 		<td>Segment the Chinese text into words, based on the PAUM learning algorithm. (<a href="http://gate.ac.uk/userguide/sec:gui:bdmComp">docs</a>)&nbsp;</td>
 		<td>gate.chineseSeg.ChineseSegMain</td>
+	</tr>
+	<tr>
+		<th colspan='3'><a name='copyAS2AnoDoc'>copyAS2AnoDoc</a></th>
+	</tr>
+	<tr>
+		<td>Copy Anns to Another Doc PR&nbsp;</td>
+		<td>Copy the annotations from one document to another document. (<a href="http://gate.ac.uk/userguide/sec:misc-creole:copyAS2AnoDoc">docs</a>)&nbsp;</td>
+		<td>gate.copyAS2AnoDoc.CopyAS2AnoDocMain</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='crawl'>crawl</a></th>
@@ -536,7 +545,13 @@ list</a>.</p>
 	<tr>
 		<td>Fake Sentence Splitter&nbsp;</td>
 		<td>
-		Fake Sentence Splitter
+		Fake Sentence Splitter is used by Onto Root Gazetteer internally as it 
+    creates 'fake' annotation type 'Sentence' without analysing the text by 
+    a proper Sentence Splitter. The reason for doing this is enabling the
+    POS Tagger to work properly, as the input text is usually not a proper 
+    sentence (i.e. ontology resource name or label). 'Faking' sentence splitting
+    optimises the processing as Onto Root Gazetteer usually does not process 
+    internally any multisentence text.
 	&nbsp;</td>
 		<td>gate.clone.ql.FakeSentenceSplitter</td>
 	</tr>
