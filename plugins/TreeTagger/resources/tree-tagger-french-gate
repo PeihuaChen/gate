@@ -115,6 +115,9 @@ $2~/VER:[^a]/ && $3~/\352tre|avoir/{
   p1 = $0
   getline f1
   getline f2
+  if((match(f1, /SENT/)>0)) {
+    print p1; print f1; last=f2; next
+  }
   if((match(f1, /VER:pper/)>0) || (match(f2, /VER:pper/)>0)) {
     gsub(/VER:/, "VER:aux:", p1)
     print p1
