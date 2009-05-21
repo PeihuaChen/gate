@@ -22,17 +22,10 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import gate.Corpus;
-import gate.DataStore;
-import gate.Document;
-import gate.Factory;
-import gate.FeatureMap;
-import gate.Gate;
-import gate.LanguageResource;
+import gate.*;
 import gate.corpora.SerialCorpusImpl;
 import gate.creole.ResourceInstantiationException;
-import gate.event.CorpusEvent;
-import gate.event.CorpusListener;
+import gate.event.*;
 import gate.security.SecurityException;
 import gate.util.GateRuntimeException;
 import gate.util.Strings;
@@ -48,7 +41,8 @@ import gate.creole.annic.lucene.LuceneSearcher;
 
 public class LuceneDataStoreImpl extends SerialDataStore implements
                                                         SearchableDataStore,
-                                                        CorpusListener {
+                                                        CorpusListener, 
+                                                        CreoleListener {
 
   /**
    * serial version UID
@@ -122,8 +116,11 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
    */
   protected Map searchParameters;
 
+  
   /** Close the data store. */
   public void close() throws PersistenceException {
+    //stop listening to Creole events
+    Gate.getCreoleRegister().removeCreoleListener(this);
     // shut down the executor.  We submit the shutdown request
     // as a zero-delay task rather than calling shutdown directly,
     // in order to interrupt any timed wait currently in progress.
@@ -195,6 +192,8 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
     // immediately at shutdown time rather than waiting.
     executor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
     executor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+    //start listening to Creole events
+    Gate.getCreoleRegister().addCreoleListener(this);
   }
 
   /**
@@ -347,6 +346,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
     return lr;
   }
 
+  
   /**
    * Save: synchonise the in-memory image of the LR with the persistent
    * image.
@@ -474,6 +474,50 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
      */
   }
   
+  
+  
+  /* (non-Javadoc)
+   * @see gate.event.CreoleListener#datastoreClosed(gate.event.CreoleEvent)
+   */
+  public void datastoreClosed(CreoleEvent e) {}
+
+
+  /* (non-Javadoc)
+   * @see gate.event.CreoleListener#datastoreCreated(gate.event.CreoleEvent)
+   */
+  public void datastoreCreated(CreoleEvent e) {}
+
+
+  /* (non-Javadoc)
+   * @see gate.event.CreoleListener#datastoreOpened(gate.event.CreoleEvent)
+   */
+  public void datastoreOpened(CreoleEvent e) {}
+
+
+  /* (non-Javadoc)
+   * @see gate.event.CreoleListener#resourceLoaded(gate.event.CreoleEvent)
+   */
+  public void resourceLoaded(CreoleEvent e) {}
+
+
+  /* (non-Javadoc)
+   * @see gate.event.CreoleListener#resourceRenamed(gate.Resource, java.lang.String, java.lang.String)
+   */
+  public void resourceRenamed(Resource resource, String oldName, 
+          String newName) {}
+
+  /* (non-Javadoc)
+   * @see gate.event.CreoleListener#resourceUnloaded(gate.event.CreoleEvent)
+   */
+  public void resourceUnloaded(CreoleEvent e) {
+    //if the resource being close is one of our corpora. we need to remove
+    //the corpus listener associated with it
+    Resource res = e.getResource();
+    if(res instanceof Corpus){
+      ((Corpus)res).removeCorpusListener(this);
+    }
+  }
+
   protected class IndexingTask implements Runnable {
     private AtomicBoolean disabled = new AtomicBoolean(false);
     
