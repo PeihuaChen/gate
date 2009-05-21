@@ -7,7 +7,7 @@
     <RESOURCE>
       <NAME>Copy Anns to Another Doc PR</NAME>
       <COMMENT>Copy the annotations from one document to another document.</COMMENT>
-		<HELPURL>http://gate.ac.uk/cgi-bin/userguide/sec:misc-creole:merging</HELPURL>
+      <HELPURL>http://gate.ac.uk/userguide/sec:misc-creole:copyAS2AnoDoc</HELPURL>
       <CLASS>gate.copyAS2AnoDoc.CopyAS2AnoDocMain</CLASS>
       <JAR>copyAS2AnoDoc.jar</JAR>
 
