@@ -350,7 +350,8 @@ import javax.swing.text.JTextComponent;
             synchronized(this) { localSelectionUpdating = true; }
             for (int row = 0; row < table.getRowCount(); row++) {
               for (int col = 0; col < table.getColumnCount(); col++) {
-                if (table.getValueAt(row, col).toString()
+                if (table.getValueAt(row, col) != null
+                 && table.getValueAt(row, col).toString()
                     .contains(filterTextField.getText().trim())) {
                   table.addRowSelectionInterval(row, row);
                   break;
