@@ -39,11 +39,26 @@ public class CorpusEvent extends GateEvent {
    * {@link #DOCUMENT_REMOVED}).
    */
   public CorpusEvent(Corpus source, Document doc, int index, int type){
+    this(source, doc, index, null, type);
+  }
+
+  /**
+   * Creates a new CorpusEvent.
+   * @param source the corpus that fires the event
+   * @param doc the document this event refers to
+   * @param documentLRID the persistence ID of the document that has been added
+   * or removed.
+   * @param type the type of event ({@link #DOCUMENT_ADDED} or
+   * {@link #DOCUMENT_REMOVED}).
+   */
+  public CorpusEvent(Corpus source, Document doc, int index, 
+          Object documentLRID, int type){
     super(source, type);
     this.document = doc;
     this.documentIndex = index;
+    this.documentLRID = documentLRID;
   }
-
+  
   /**
    * Gets the dcument this event refers to
    */
@@ -58,15 +73,34 @@ public class CorpusEvent extends GateEvent {
     return this.documentIndex;
   }
 
+  
+  /**
+   * Gets the persistence ID of the document to which this event refers.
+   * This value could be <code>null</code>, if the document does not have a 
+   * persistence ID.
+   * @return the documentLRID
+   */
+  public Object getDocumentLRID() {
+    return documentLRID;
+  }
+
+
   /**
    * The document that has been added/removed.
    */
   private gate.Document document;
+  
   /**
    * The index of the document which has been removed. Needed because
    * the document itself might not have been loaded in memory, so the
    * index could be used instead.
    */
   private int documentIndex;
+  
+  /**
+   * The persistence ID of the document to which this event refers.
+   */
+  private Object documentLRID;
+  
 }
 

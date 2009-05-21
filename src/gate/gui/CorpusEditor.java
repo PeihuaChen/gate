@@ -427,9 +427,17 @@ public class CorpusEditor extends AbstractVisualResource
       for(int i = 0; i < rowsCorpus.length; i++){
         if(rowsCorpus[i] > 0){
           //swap the doc with the one before
-          Object doc = corpus.remove(rowsCorpus[i]);
+          //serial corpus does not load the document on remove, so we need
+          //to load the document explicitly
+          boolean wasLoaded = corpus.isDocumentLoaded(rowsCorpus[i]);
+          Document doc = (Document)corpus.get(rowsCorpus[i]);
+          corpus.remove(rowsCorpus[i]);
           rowsCorpus[i] = rowsCorpus[i] - 1;
           corpus.add(rowsCorpus[i], doc);
+          if(!wasLoaded){
+            corpus.unloadDocument(doc);
+            Factory.deleteResource(doc);
+          }
         }
       }
       //restore selection
@@ -468,9 +476,17 @@ public class CorpusEditor extends AbstractVisualResource
       for(int i = rowsCorpus.length -1; i >=0; i--){
         if(rowsCorpus[i] < corpus.size() -1){
           //swap the doc with the one before
-          Object doc = corpus.remove(rowsCorpus[i]);
+          //serial corpus does not load the document on remove, so we need
+          //to load the document explicitly
+          boolean wasLoaded = corpus.isDocumentLoaded(rowsCorpus[i]);
+          Document doc = (Document)corpus.get(rowsCorpus[i]);
+          corpus.remove(rowsCorpus[i]);
           rowsCorpus[i]++;
           corpus.add(rowsCorpus[i], doc);
+          if(!wasLoaded){
+            corpus.unloadDocument(doc);
+            Factory.deleteResource(doc);
+          }
         }
       }
       //restore selection
