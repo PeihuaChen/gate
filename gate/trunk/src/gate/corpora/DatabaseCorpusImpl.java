@@ -128,6 +128,7 @@ public class DatabaseCorpusImpl extends CorpusImpl
       fireDocumentAdded(new CorpusEvent(this,
                                         doc,
                                         this.supportList.size()-1,
+                                        doc.getLRPersistenceId(),
                                         CorpusEvent.DOCUMENT_ADDED));
     }
 
@@ -170,6 +171,7 @@ public class DatabaseCorpusImpl extends CorpusImpl
         fireDocumentAdded(new CorpusEvent(this,
                                           doc,
                                           index,
+                                          doc.getLRPersistenceId(),
                                           CorpusEvent.DOCUMENT_ADDED));
       }
     }
@@ -543,6 +545,7 @@ public class DatabaseCorpusImpl extends CorpusImpl
     fireDocumentRemoved(new CorpusEvent(DatabaseCorpusImpl.this,
                                         res,
                                         index,
+                                        removedID,
                                         CorpusEvent.DOCUMENT_REMOVED));
     return res;
 
@@ -597,6 +600,7 @@ public class DatabaseCorpusImpl extends CorpusImpl
       fireDocumentRemoved(new CorpusEvent(DatabaseCorpusImpl.this,
                                           oldDoc,
                                           index,
+                                          removedID,
                                           CorpusEvent.DOCUMENT_REMOVED));
     }
 

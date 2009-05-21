@@ -451,14 +451,23 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
    * This method is invoked whenever a document is removed from a corpus
    */
   public void documentRemoved(CorpusEvent ce) {
-    Document doc = ce.getDocument();
+    Object docLRID = ce.getDocumentLRID();
 
     /*
-     * we need to reindex this document in order to synchronize it lets
-     * first remove it from the index
+     * we need to remove this document from the index
      */
-    if(doc.getLRPersistenceId() != null) {
-      queueForIndexing(doc.getLRPersistenceId());
+    if(docLRID != null) {
+      ArrayList<Object> removed = new ArrayList<Object>();
+      removed.add(docLRID);
+      try {
+        synchronized(indexer) {
+          indexer.remove(removed);
+        }
+      }
+      catch(IndexException ie) {
+        throw new GateRuntimeException(ie);
+      }
+//      queueForIndexing(docLRID);
     }
   }
 

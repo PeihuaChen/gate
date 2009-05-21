@@ -613,7 +613,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     documents.add(doc);
     documentAdded(doc);
     fireDocumentAdded(new CorpusEvent(SerialCorpusImpl.this, doc, docDataList
-      .size() - 1, CorpusEvent.DOCUMENT_ADDED));
+      .size() - 1, doc.getLRPersistenceId(), CorpusEvent.DOCUMENT_ADDED));
 
     return result;
   }
@@ -631,7 +631,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
       // by Andrey Shafirin: this part of code can produce an exception if
       // document wasn't loaded
       String docName = ((DocumentData)docDataList.get(index)).getDocumentName();
-      String docPersistentID = getDocumentPersistentID(index).toString();
+      Object docPersistentID = getDocumentPersistentID(index);
       docDataList.remove(index);
       // Document oldDoc = (Document) documents.remove(index);
       documents.remove(index);
@@ -640,13 +640,13 @@ public class SerialCorpusImpl extends AbstractLanguageResource
       if(DEBUG)
         Out.prln("documents after remove of " + docName + " are " + documents);
       // documentRemoved(oldDoc.getLRPersistenceId().toString());
-      documentRemoved(docPersistentID);
+      documentRemoved(docPersistentID.toString());
       // fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this,
       // oldDoc,
       // index,
       // CorpusEvent.DOCUMENT_REMOVED));
       fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this, (Document)o,
-        index, CorpusEvent.DOCUMENT_REMOVED));
+        index, docPersistentID, CorpusEvent.DOCUMENT_REMOVED));
     }
 
     return true;
@@ -792,7 +792,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     documents.add(index, doc);
     documentAdded(doc);
     fireDocumentAdded(new CorpusEvent(SerialCorpusImpl.this, doc, index,
-      CorpusEvent.DOCUMENT_ADDED));
+            doc.getLRPersistenceId(), CorpusEvent.DOCUMENT_ADDED));
 
   }
 
@@ -800,12 +800,12 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     if(DEBUG) Out.prln("Remove index called");
     // try to get the actual document if it was loaded
     Document res = isDocumentLoaded(index) ? (Document)get(index) : null;
-    documentRemoved(((DocumentData)docDataList.get(index)).persistentID
-      .toString());
+    Object docLRID =((DocumentData)docDataList.get(index)).persistentID; 
+    documentRemoved(docLRID.toString());
     docDataList.remove(index);
     documents.remove(index);
     fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this, res, index,
-      CorpusEvent.DOCUMENT_REMOVED));
+            docLRID, CorpusEvent.DOCUMENT_REMOVED));
     return res;
   }
 
