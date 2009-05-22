@@ -422,11 +422,11 @@ public class AnnotationSetsView extends AbstractDocumentView
    */
   protected void storeSelectedTypes(){
     synchronized(AnnotationSetsView.this) {
-//    visibleAnnotationTypes.clear();
+      visibleAnnotationTypes.clear(); // for security
       for(SetHandler sHandler:setHandlers){
         for(TypeHandler tHandler: sHandler.typeHandlers){
           if(tHandler.isSelected()){
-            visibleAnnotationTypes.add(new TypeSpec(sHandler.set.getName(), 
+            visibleAnnotationTypes.add(new TypeSpec(sHandler.set.getName(),
               tHandler.name));
             tHandler.setSelected(false);
           }
@@ -442,8 +442,11 @@ public class AnnotationSetsView extends AbstractDocumentView
   protected void restoreSelectedTypes(){
     synchronized(AnnotationSetsView.this) {
       for(TypeSpec typeSpec: visibleAnnotationTypes){
-        TypeHandler tHandler = getTypeHandler(typeSpec.setName, typeSpec.type);
-        tHandler.setSelected(true);
+        TypeHandler typeHandler =
+          getTypeHandler(typeSpec.setName, typeSpec.type);
+        if (typeHandler != null) { // may have been deleted since
+          typeHandler.setSelected(true);
+        }
       }
       visibleAnnotationTypes.clear();
     }
@@ -749,17 +752,17 @@ public class AnnotationSetsView extends AbstractDocumentView
   /**
    * Get an annotation set handler in this annotation set view.
    * @param name name of the annotation set or null for the default set
+   * @return the annotation set handler
    */
   protected SetHandler getSetHandler(String name){
-    Iterator shIter = setHandlers.iterator();
-    while(shIter.hasNext()){
-      SetHandler sHandler = (SetHandler)shIter.next();
-      if(name == null){
-        if(sHandler.set.getName() == null) return sHandler;
-      }else{
-        if(name.equals(sHandler.set.getName())) return sHandler;
+    for (SetHandler setHandler : setHandlers) {
+      if (name == null) { // default annotation set
+        if (setHandler.set.getName() == null) return setHandler;
+      } else {
+        if (name.equals(setHandler.set.getName())) return setHandler;
       }
     }
+    // set handler not found
     return null;
   }
   
@@ -767,16 +770,16 @@ public class AnnotationSetsView extends AbstractDocumentView
    * Get an annotation type handler in this annotation set view.
    * @param set name of the annotation set or null for the default set
    * @param type type of the annotation
+   * @return the type handler
    */
   public TypeHandler getTypeHandler(String set, String type){
-    SetHandler sHandler = getSetHandler(set);
-    TypeHandler tHandler = null;
-    Iterator typeIter = sHandler.typeHandlers.iterator();
-    while(tHandler == null && typeIter.hasNext()){
-      TypeHandler aHandler = (TypeHandler)typeIter.next();
-      if(aHandler.name.equals(type)) tHandler = aHandler;
+    for(TypeHandler typeHandler : getSetHandler(set).typeHandlers){
+      if(typeHandler.name.equals(type)) {
+        return typeHandler;
+      }
     }
-    return tHandler;
+    // type handler not found
+    return null;
   }
 
   /**
