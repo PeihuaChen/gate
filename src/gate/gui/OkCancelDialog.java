@@ -77,20 +77,33 @@ public class OkCancelDialog extends JDialog {
 
     getContentPane().add(vBox, BorderLayout.SOUTH);
 
-
-    okButton.addActionListener(new ActionListener() {
+    Action applyAction = new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
         userHasPressedOK = true;
         setVisible(false);
       }
-    });
+    };
 
-    cancelButton.addActionListener(new ActionListener() {
+    Action cancelAction = new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
         userHasPressedCancel = true;
         setVisible(false);
       }
-    });
+    };
+
+    // define keystrokes action bindings at the level of the main window
+    InputMap inputMap = ((JComponent)this.getContentPane()).
+      getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+    ActionMap actionMap =
+      ((JComponent)this.getContentPane()).getActionMap();
+    inputMap.put(KeyStroke.getKeyStroke("ENTER"), "Apply");
+    actionMap.put("Apply", applyAction);
+    inputMap.put(KeyStroke.getKeyStroke("ESCAPE"), "Cancel");
+    actionMap.put("Cancel", cancelAction);
+
+    okButton.addActionListener(applyAction);
+    getRootPane().setDefaultButton(okButton);
+    cancelButton.addActionListener(cancelAction);
   }
 
   public void dispose(){
