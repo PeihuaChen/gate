@@ -31,7 +31,7 @@ public class ErrorDialog extends JOptionPane {
    * Display a user friendly error dialog with the possibility to show the
    * stack trace and configuration and add actions as buttons.
    *
-   * @param error exception that occurs, will be logged as an error
+   * @param error exception that occurs, can be null; can contain newlines
    * @param textMessage error message to display
    * @param parentComponent determines the Frame in which the dialog is
    *  displayed; if null, or if the parentComponent has no Frame, a default
@@ -46,18 +46,19 @@ public class ErrorDialog extends JOptionPane {
 
     if (textMessage == null) { textMessage = ""; }
     final JDialog dialog;
-    final String errorMessage = error.getMessage();
+    String detailedMessage = "";
 
     // add the error stack trace in a scrollable text area, hidden at start
-    String detailedMessage = "";
-    detailedMessage += "<h2>Message</h2>";
-    detailedMessage += errorMessage;
-    detailedMessage += "<h2>Stack trace</h2>";
-    StringWriter sw = new StringWriter();
-    error.printStackTrace(new PrintWriter(sw));
-    detailedMessage += sw.toString()
-      .replaceAll("(at |Caused by:)", "<strong>$1</strong> ")
-      .replaceAll("(\\([A-Za-z]+\\.java:[0-9])+\\)", "<strong>$1</strong>");
+    if (error != null) {
+      detailedMessage += "<h2>Message</h2>";
+      detailedMessage += error.getMessage();
+      detailedMessage += "<h2>Stack trace</h2>";
+      StringWriter sw = new StringWriter();
+      error.printStackTrace(new PrintWriter(sw));
+      detailedMessage += sw.toString()
+        .replaceAll("(at |Caused by:)", "<strong>$1</strong> ")
+        .replaceAll("(\\([A-Za-z]+\\.java:[0-9])+\\)", "<strong>$1</strong>");
+    }
     detailedMessage += "<h2>System configuration</h2>";
     detailedMessage += "<strong>GATE Version</strong> = " + Main.version + "\n";
     detailedMessage += "<strong>GATE Build</strong> = " + Main.build + "\n";
