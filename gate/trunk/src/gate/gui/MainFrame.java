@@ -3922,6 +3922,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
     Runnable runnable = new Runnable() {
       public void run() {
+
         // add gateVersion=... to the end of the URL
         StringBuilder actualURL = new StringBuilder(url.toString());
         int insertPoint = actualURL.length();
@@ -3937,43 +3938,53 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
         actualURL.insert(insertPoint + 1, "gateVersion=" + gate.Main.version);
 
+        Action[] actions = {
+          new AbstractAction("Show configuration") {
+            public void actionPerformed(ActionEvent e) {
+              optionsDialog.showDialog();
+              optionsDialog.dispose();
+        }}};
+
         String commandLine = Gate.getUserConfig().getString(
           GateConstants.HELP_BROWSER_COMMAND_LINE);
+
         if(commandLine == null
         || commandLine.equals("Set dynamically when you display help.")) {
           // try to find the default browser
           Process process = null;
           try {
-            // Mac
-            commandLine = "open " + url.toString();
-            try { process = Runtime.getRuntime().exec(commandLine);
-            } catch (IOException ioe1) {/* skip to next try catch */}
-            if (process == null || process.waitFor() != 0) {
             // Windows
             commandLine = "rundll32 url.dll,FileProtocolHandler "
-              + url.toString();
+              + actualURL.toString();
             try { process = Runtime.getRuntime().exec(commandLine);
             } catch (IOException ioe2) {/* skip to next try catch */}
             if (process == null || process.waitFor() != 0) {
             // Linux
-            commandLine = "xdg-open " + url.toString();
+            commandLine = "xdg-open " + actualURL.toString();
             try { process = Runtime.getRuntime().exec(commandLine);
             } catch (IOException ioe3) {/* skip to next try catch */}
             if (process == null || process.waitFor() != 0) {
             // Linux KDE
-            commandLine = "kfmclient exec " + url.toString();
+            commandLine = "kfmclient exec " + actualURL.toString();
             try { process = Runtime.getRuntime().exec(commandLine);
             } catch (IOException ioe4) {/* skip to next try catch */}
             if (process == null || process.waitFor() != 0) {
             // Linux Gnome
-            commandLine = "gnome-open " + url.toString();
+            commandLine = "gnome-open " + actualURL.toString();
             try { process = Runtime.getRuntime().exec(commandLine);
             } catch (IOException ioe5) {/* skip to next try catch */}
             if (process == null || process.waitFor() != 0) {
-              JOptionPane.showMessageDialog(instance,
-                "Unable to determine the default browser.\n"
-                + "Please go to the Options menu then Configuration.",
-                "Configuration error", JOptionPane.ERROR_MESSAGE);
+            // Mac
+            commandLine = "open " + actualURL.toString();
+            try { process = Runtime.getRuntime().exec(commandLine);
+            } catch (IOException ioe1) {/* skip to next try catch */}
+            if (process == null || process.waitFor() != 0) {
+            String message = "Unable to determine the default browser.\n"
+              + "Will use a Java browser. To use a custom command line\n"
+              + "go to the Options menu then Configuration.";
+            alertButton.setAction(new AlertAction(null, message, actions));
+            // Java help browser
+            displayJavaHelpBrowser(actualURL.toString());
             }}}}}
           } catch(SecurityException se) {
             JOptionPane.showMessageDialog(instance,
@@ -3992,47 +4003,43 @@ public class MainFrame extends JFrame implements ProgressListener,
             Runtime.getRuntime().exec(commandLine);
           }
           catch(Exception error) {
-            String message =
-              "Unable to call the custom browser command.<br>" +
-              "(" +  commandLine + ")<br><br>" +
+            String message = "Unable to call the custom browser command.\n" +
+              "(" +  commandLine + ")\n\n" +
               "Please go to the Options menu then Configuration.";
-            Action[] actions = {
-              new AbstractAction("Show configuration") {
-                public void actionPerformed(ActionEvent e) {
-                  optionsDialog.showDialog();
-                  optionsDialog.dispose();
-            }}};
             alertButton.setAction(new AlertAction(error, message, actions));
           }
 
         } else {
-          // java help browser
-        if (helpFrame == null) {
-          helpFrame = new HelpFrame();
-          helpFrame.setSize(800, 600);
-          helpFrame.setDefaultCloseOperation(HIDE_ON_CLOSE);
-          // center on screen
-          Dimension frameSize = helpFrame.getSize();
-          Dimension ownerSize = Toolkit.getDefaultToolkit().getScreenSize();
-          Point ownerLocation = new Point(0, 0);
-          helpFrame.setLocation(ownerLocation.x
-             + (ownerSize.width - frameSize.width) / 2, ownerLocation.y
-             + (ownerSize.height - frameSize.height) / 2);
-        }
-        try {
-          helpFrame.setPage(new URL(actualURL.toString()));
-        } catch (IOException error) {
-          String message = "Error when loading help page.";
-          alertButton.setAction(new AlertAction(error, message, null));
-          return;
-        }
-        helpFrame.setVisible(false);
-        helpFrame.setVisible(true);
+          displayJavaHelpBrowser(actualURL.toString());
       }
       }
     };
     Thread thread = new Thread(runnable);
     thread.start();
+  }
+
+  private void displayJavaHelpBrowser(String urlString) {
+    if (helpFrame == null) {
+      helpFrame = new HelpFrame();
+      helpFrame.setSize(800, 600);
+      helpFrame.setDefaultCloseOperation(HIDE_ON_CLOSE);
+      // center on screen
+      Dimension frameSize = helpFrame.getSize();
+      Dimension ownerSize = Toolkit.getDefaultToolkit().getScreenSize();
+      Point ownerLocation = new Point(0, 0);
+      helpFrame.setLocation(ownerLocation.x
+         + (ownerSize.width - frameSize.width) / 2, ownerLocation.y
+         + (ownerSize.height - frameSize.height) / 2);
+    }
+    try {
+      helpFrame.setPage(new URL(urlString));
+    } catch (IOException error) {
+      String message = "Error when loading help page.";
+      alertButton.setAction(new AlertAction(error, message, null));
+      return;
+    }
+    helpFrame.setVisible(false);
+    helpFrame.setVisible(true);
   }
 
   class HelpUserGuideInContextAction extends AbstractAction {
@@ -4582,11 +4589,15 @@ public class MainFrame extends JFrame implements ProgressListener,
   /**
    * Action for the alert button that shows the last error as a popup.
    * An error dialog can be shown when clicked.
-   * Log the message as an error in the constructor method.
+   * Log the message as an error as soon as the action is created.
    */
   class AlertAction extends AbstractAction {
     public AlertAction(Throwable error, String message, Action[] actions) {
-      log.error(message, error);
+      if (error == null) {
+        log.error(message);
+      } else {
+        log.error(message, error);
+      }
       String description = "<html>An error happened:<br>" +
         message.substring(0, Math.min(300, message.length()))
           .replaceAll("(.{40,50}(?:\\b|\\.|/))", "$1<br>") + "</html>";
