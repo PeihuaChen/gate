@@ -284,7 +284,7 @@ public class POSTagger {
    * Attempts to classify an unknown word.
    * @param wd the word to be classified
    */
-  private String[] classifyWord(String wd){
+  protected String[] classifyWord(String wd){
     String[] result;
 
     if (wd == staart) return staartLex;
