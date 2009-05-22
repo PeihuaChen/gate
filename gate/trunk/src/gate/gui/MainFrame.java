@@ -242,12 +242,11 @@ public class MainFrame extends JFrame implements ProgressListener,
   }
 
   /**
-   * Selects a resource if loaded in the system and not invisible.
-   * 
-   * @param res the resource to be selected.
+   * Locates the handle for a given resource.
+   * @param res the resource for which the handle is sought.
+   * @return the {@link Handle} for the resource, if it it was found.
    */
-  public void select(Resource res) {
-    // first find the handle for the resource
+  protected Handle findHandleForResource(Resource res){
     Handle handle = null;
     // go through all the nodes
     Enumeration nodesEnum = resourcesTreeRoot.breadthFirstEnumeration();
@@ -262,7 +261,17 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
       }
     }
-
+    return handle;
+  }
+  
+  /**
+   * Selects a resource if loaded in the system and not invisible.
+   * 
+   * @param res the resource to be selected.
+   */
+  public void select(Resource res) {
+    // first find the handle for the resource
+    Handle handle = findHandleForResource(res);
     // now select the handle if found
     if(handle != null) select(handle);
   }
@@ -1448,31 +1457,30 @@ public class MainFrame extends JFrame implements ProgressListener,
   }
 
   public void resourceLoaded(CreoleEvent e) {
-    Resource res = e.getResource();
+    final Resource res = e.getResource();
     if(Gate.getHiddenAttribute(res.getFeatures())
       || res instanceof VisualResource) return;
-    NameBearerHandle handle = new NameBearerHandle(res, MainFrame.this);
-    DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);
-    if(res instanceof ProcessingResource) {
-      resourcesTreeModel.insertNodeInto(node, processingResourcesRoot, 0);
-    }
-    else if(res instanceof LanguageResource) {
-      resourcesTreeModel.insertNodeInto(node, languageResourcesRoot, 0);
-    }
-    else if(res instanceof Controller) {
-      resourcesTreeModel.insertNodeInto(node, applicationsRoot, 0);
-    }
-
-    handle.addProgressListener(MainFrame.this);
-    handle.addStatusListener(MainFrame.this);
-
-    // shows then selects the resource to give the user a feedback
-    // on its location in the resource tree
-    final DefaultMutableTreeNode nodeF = node;
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-        resourcesTree.scrollPathToVisible(new TreePath(nodeF.getPath()));
-        resourcesTree.setSelectionPath(new TreePath(nodeF.getPath()));
+        NameBearerHandle handle = new NameBearerHandle(res, MainFrame.this);
+        DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);
+        if(res instanceof ProcessingResource) {
+          resourcesTreeModel.insertNodeInto(node, processingResourcesRoot, 0);
+        }
+        else if(res instanceof LanguageResource) {
+          resourcesTreeModel.insertNodeInto(node, languageResourcesRoot, 0);
+        }
+        else if(res instanceof Controller) {
+          resourcesTreeModel.insertNodeInto(node, applicationsRoot, 0);
+        }
+
+        handle.addProgressListener(MainFrame.this);
+        handle.addStatusListener(MainFrame.this);
+
+        // shows then selects the resource to give the user a feedback
+        // on its location in the resource tree
+        resourcesTree.scrollPathToVisible(new TreePath(node.getPath()));
+        resourcesTree.setSelectionPath(new TreePath(node.getPath()));
       }
     });
 
@@ -1607,11 +1615,16 @@ public class MainFrame extends JFrame implements ProgressListener,
   }
 
   public void resourceRenamed(Resource resource, String oldName, String newName) {
-    for(int i = 0; i < mainTabbedPane.getTabCount(); i++) {
-      if(mainTabbedPane.getTitleAt(i).equals(oldName)) {
-        mainTabbedPane.setTitleAt(i, newName);
-
-        return;
+    //first find the handle for the renamed resource
+    Handle handle = findHandleForResource(resource);
+    if(handle != null){
+      //next see if there is a tab for this resource and rename it
+      for(int i = 0; i < mainTabbedPane.getTabCount(); i++) {
+        if(mainTabbedPane.getTitleAt(i).equals(oldName) &&
+           mainTabbedPane.getComponentAt(i) == handle.getLargeView()) {
+          mainTabbedPane.setTitleAt(i, newName);
+          return;
+        }
       }
     }
   }
