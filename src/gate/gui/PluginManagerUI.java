@@ -54,21 +54,22 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     setTitle("Plugin Management Console");
     mainTableModel = new MainTableModel();
     mainTable = new XJTable();
+    mainTable.setTabSkipUneditableCell(true);
     mainTable.setModel(mainTableModel);
     mainTable.setSortedColumn(NAME_COLUMN);
     Collator collator = Collator.getInstance(Locale.ENGLISH);
     collator.setStrength(Collator.TERTIARY);
     mainTable.setComparator(NAME_COLUMN, collator);
     mainTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    DeleteColumnCellRendererEditor rendererEditor = new DeleteColumnCellRendererEditor();
+    DeleteColumnCellRendererEditor rendererEditor =
+      new DeleteColumnCellRendererEditor();
     mainTable.getColumnModel().getColumn(DELETE_COLUMN).
       setCellEditor(rendererEditor);
     mainTable.getColumnModel().getColumn(DELETE_COLUMN).
       setCellRenderer(rendererEditor);
-    
     mainTable.getColumnModel().getColumn(ICON_COLUMN).
-      setCellRenderer(new IconTableCellRenderer());    
-    
+      setCellRenderer(new IconTableCellRenderer());
+
     resourcesListModel = new ResourcesListModel();
     resourcesList = new JList(resourcesListModel);
     resourcesList.setCellRenderer(new ResourcesListCellRenderer());
@@ -116,10 +117,12 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     constraints.anchor = GridBagConstraints.CENTER;
     constraints.fill = GridBagConstraints.NONE;
     hBox = Box.createHorizontalBox();
-    hBox.add(new JButton(new OkAction()));
+    JButton okButton = new JButton(new OkAction());
+    hBox.add(okButton);
     hBox.add(Box.createHorizontalStrut(20));
     hBox.add(new JButton(new CancelAction()));
     getContentPane().add(hBox, constraints);
+    getRootPane().setDefaultButton(okButton);
   }
   
   protected void initListeners(){
@@ -129,6 +132,16 @@ public class PluginManagerUI extends JDialog implements GateConstants{
        resourcesListModel.dataChanged();
      }
     });
+    mainTable.addKeyListener(new KeyAdapter() {
+      public void keyPressed(KeyEvent e) {
+        // redefine Enter key
+        if (!mainTable.isEditing()
+         && e.getKeyCode() == KeyEvent.VK_ENTER) {
+          e.consume();
+          (new OkAction()).actionPerformed(null);
+        }
+      }
+    });
     mainSplit.addComponentListener(new ComponentAdapter(){
       public void componentShown(ComponentEvent e){
         //try to honour left component's preferred size 
@@ -136,10 +149,14 @@ public class PluginManagerUI extends JDialog implements GateConstants{
       }
     });
 
-    // add F1 help keystroke
+    // define keystrokes action bindings at the level of the main window
     InputMap inputMap = ((JComponent)this.getContentPane()).
       getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
     ActionMap actionMap = ((JComponent)this.getContentPane()).getActionMap();
+    inputMap.put(KeyStroke.getKeyStroke("ENTER"), "Apply");
+    actionMap.put("Apply", new OkAction());
+    inputMap.put(KeyStroke.getKeyStroke("ESCAPE"), "Cancel");
+    actionMap.put("Cancel", new CancelAction());
     inputMap.put(KeyStroke.getKeyStroke("F1"), "Help");
     actionMap.put("Help", new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
