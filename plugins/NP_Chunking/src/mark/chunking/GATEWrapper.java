@@ -19,283 +19,350 @@
 
 package mark.chunking;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.text.NumberFormat;
-
-import gate.*;
-import gate.creole.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.ProcessingResource;
+import gate.Resource;
+import gate.creole.AbstractLanguageAnalyser;
+import gate.creole.ExecutionException;
+import gate.creole.ResourceInstantiationException;
 import gate.util.GateRuntimeException;
+import gate.util.OffsetComparator;
 
-public class GATEWrapper extends AbstractLanguageAnalyser implements ProcessingResource, Serializable
-{
-	private Chunker c = null;
-	private Map chunkTags = null;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.Serializable;
+import java.net.URL;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-	private URL posTagURL;
-	public void setPosTagURL(URL posTagURL) { this.posTagURL = posTagURL; }
-	public URL getPosTagURL() { return posTagURL; }
+public class GATEWrapper extends AbstractLanguageAnalyser implements
+                                                         ProcessingResource,
+                                                         Serializable {
+  private Chunker c = null;
 
-	private URL rulesURL;
-	public void setRulesURL(URL rulesURL) { this.rulesURL = rulesURL; }
-	public URL getRulesURL() { return rulesURL; }
+  private Map chunkTags = null;
 
-	private String posFeature;
-	public void setPosFeature(String posFeature) { this.posFeature = posFeature; }
-	public String getPosFeature() { return posFeature; }
+  private OffsetComparator offsetComparator = new OffsetComparator();
 
-	private String unknownTag;
-	public void setUnknownTag(String unknownTag) { this.unknownTag = unknownTag; }
-	public String getUnknownTag() { return unknownTag; }
+  private URL posTagURL;
 
-	private String inputASName;
-	public void setInputASName(String inputASName) { this.inputASName = inputASName; }
-	public String getInputASName() { return inputASName; }
+  public void setPosTagURL(URL posTagURL) {
+    this.posTagURL = posTagURL;
+  }
 
-	private String outputASName;
-	public void setOutputASName(String outputASName) { this.outputASName = outputASName; }
-	public String getOutputASName() { return outputASName; }
+  public URL getPosTagURL() {
+    return posTagURL;
+  }
 
-	private String annotationName;
-	public void setAnnotationName(String annotationName) { this.annotationName = annotationName; }
-	public String getAnnotationName() { return annotationName; }
+  private URL rulesURL;
 
-	public Resource init() throws ResourceInstantiationException
-	{
-		if (rulesURL == null) {
-      throw new ResourceInstantiationException(
-          "Rules URL must be specified");
+  public void setRulesURL(URL rulesURL) {
+    this.rulesURL = rulesURL;
+  }
+
+  public URL getRulesURL() {
+    return rulesURL;
+  }
+
+  private String posFeature;
+
+  public void setPosFeature(String posFeature) {
+    this.posFeature = posFeature;
+  }
+
+  public String getPosFeature() {
+    return posFeature;
+  }
+
+  private String unknownTag;
+
+  public void setUnknownTag(String unknownTag) {
+    this.unknownTag = unknownTag;
+  }
+
+  public String getUnknownTag() {
+    return unknownTag;
+  }
+
+  private String inputASName;
+
+  public void setInputASName(String inputASName) {
+    this.inputASName = inputASName;
+  }
+
+  public String getInputASName() {
+    return inputASName;
+  }
+
+  private String outputASName;
+
+  public void setOutputASName(String outputASName) {
+    this.outputASName = outputASName;
+  }
+
+  public String getOutputASName() {
+    return outputASName;
+  }
+
+  private String annotationName;
+
+  public void setAnnotationName(String annotationName) {
+    this.annotationName = annotationName;
+  }
+
+  public String getAnnotationName() {
+    return annotationName;
+  }
+
+  public Resource init() throws ResourceInstantiationException {
+    if(rulesURL == null) {
+      throw new ResourceInstantiationException("Rules URL must be specified");
     }
 
-		if (posTagURL == null) {
+    if(posTagURL == null) {
       throw new ResourceInstantiationException(
-          "POS tag dictionary URL must be specified");
+              "POS tag dictionary URL must be specified");
     }
 
-		try
-		{
-			//lets create a new Chunker using the URL provided (which we know
-			//is not null as we already checked it).
-			c = new Chunker(rulesURL);
+    try {
+      // lets create a new Chunker using the URL provided (which we know
+      // is not null as we already checked it).
+      c = new Chunker(rulesURL);
 
-			//Open a reader over the pos_tag_dict file so we can load
-			//the database
-			BufferedReader in = new BufferedReader(new InputStreamReader(posTagURL.openStream()));
+      // Open a reader over the pos_tag_dict file so we can load
+      // the database
+      BufferedReader in = new BufferedReader(new InputStreamReader(posTagURL
+              .openStream()));
 
-			//read in the first line of the file
-			String line = in.readLine();
+      // read in the first line of the file
+      String line = in.readLine();
 
-			//create a new empty map to hold the pos and chunk tags
-			chunkTags = new HashMap();
+      // create a new empty map to hold the pos and chunk tags
+      chunkTags = new HashMap();
 
-			while (line != null)
-			{
-				//while there is still data in the file...
+      while(line != null) {
+        // while there is still data in the file...
 
-				//split the current line into two parts
-				String[] tags = line.split(" ");
+        // split the current line into two parts
+        String[] tags = line.split(" ");
 
-				//put the data in the map, POS tags as key
-				//chunk tag as value
-				chunkTags.put(tags[0],tags[1]);
+        // put the data in the map, POS tags as key
+        // chunk tag as value
+        chunkTags.put(tags[0], tags[1]);
 
-				//get the next line from the data file
-				line = in.readLine();
-			}
+        // get the next line from the data file
+        line = in.readLine();
+      }
 
-			//close the data file now we have finished with it
-			in.close();
-		}
-		catch (Exception e)
-		{
-			//if an error occurred then throw an exception so that the user knows
-			throw new ResourceInstantiationException("Unable to correctly init the chunker: " + e.getMessage());
-		}
+      // close the data file now we have finished with it
+      in.close();
+    }
+    catch(Exception e) {
+      // if an error occurred then throw an exception so that the user
+      // knows
+      throw new ResourceInstantiationException(
+              "Unable to correctly init the chunker: " + e.getMessage());
+    }
 
-		//if we get to here then everything has initialised correctly
-		//so return this instance
-		return this;
-	}
+    // if we get to here then everything has initialised correctly
+    // so return this instance
+    return this;
+  }
 
-	public void execute() throws ExecutionException
-	{
-		//lets get the AnnotationSet we are using as input. Get either the
-		//set the user has asked for or if they haven't specified use the default set
-		if(inputASName != null && inputASName.equals("")) inputASName = null;
-		AnnotationSet inputAS = (inputASName == null) ? document.getAnnotations() : document.getAnnotations(inputASName);
+  public void execute() throws ExecutionException {
+    // lets get the AnnotationSet we are using as input. Get either the
+    // set the user has asked for or if they haven't specified use the
+    // default set
+    if(inputASName != null && inputASName.equals("")) inputASName = null;
+    AnnotationSet inputAS = (inputASName == null)
+            ? document.getAnnotations()
+            : document.getAnnotations(inputASName);
 
-		//lets get the AnnotationSet we are using as output. Get either the
-		//set the user has asked for or if they haven't specified use the default set
-		if(outputASName != null && outputASName.equals("")) outputASName = null;
-		AnnotationSet outputAS = (outputASName == null) ? document.getAnnotations() : document.getAnnotations(outputASName);
+    // lets get the AnnotationSet we are using as output. Get either the
+    // set the user has asked for or if they haven't specified use the
+    // default set
+    if(outputASName != null && outputASName.equals("")) outputASName = null;
+    AnnotationSet outputAS = (outputASName == null)
+            ? document.getAnnotations()
+            : document.getAnnotations(outputASName);
 
-		//Get the set of sentences contained within the current document
-		AnnotationSet sentences = inputAS.get(SENTENCE_ANNOTATION_TYPE);
-		
-		// All annotations of type tokens
-		AnnotationSet tokenas = inputAS.get(TOKEN_ANNOTATION_TYPE);
+    // Get the set of sentences contained within the current document
+    AnnotationSet sentences = inputAS.get(SENTENCE_ANNOTATION_TYPE);
 
-		if (sentences != null && sentences.size() > 0)
-		{
-			//assuming there are sentences...
+    // All annotations of type tokens
+    AnnotationSet tokenas = inputAS.get(TOKEN_ANNOTATION_TYPE);
 
-			//get the current time to use as part of the progress feedback
-			long startTime = System.currentTimeMillis();
+    if(sentences != null && sentences.size() > 0) {
+      // assuming there are sentences...
 
-			//tell the user we are just starting to chunk the document
-			fireStatusChanged("Chunking " + document.getName());
-        	fireProgressChanged(0);
+      // get the current time to use as part of the progress feedback
+      long startTime = System.currentTimeMillis();
 
-			//we are just starting so we haven't processed a document yet
-			//so remember this ready for the progress feedback
-			int i = 0;
+      // tell the user we are just starting to chunk the document
+      fireStatusChanged("Chunking " + document.getName());
+      fireProgressChanged(0);
 
-        	//Loop through all the sentences
-        	Iterator sit = sentences.iterator();
-        	while(sit.hasNext())
-        	{
-				//get the current sentence to process
-				Annotation sentence = (Annotation)sit.next();
+      // we are just starting so we haven't processed a document yet
+      // so remember this ready for the progress feedback
+      int i = 0;
 
-				//Get a sorted list of the tokens within the current sentence
-				List tokens = new ArrayList();
-				tokens.addAll(tokenas.getContained(sentence.getStartNode().getOffset(), sentence.getEndNode().getOffset()));
-				Collections.sort(tokens);
+      // Loop through all the sentences
+      Iterator sit = sentences.iterator();
+      while(sit.hasNext()) {
+        // get the current sentence to process
+        Annotation sentence = (Annotation)sit.next();
 
-				//Create three empty lists to hold the words, pos and chunk
-				//tags of the tokens in the current sentence
-				List wl = new ArrayList();
-				List tl = new ArrayList();
-				List pl = new ArrayList();
+        // Get a sorted list of the tokens within the current sentence
+        List tokens = new ArrayList();
+        tokens.addAll(tokenas.getContained(sentence.getStartNode().getOffset(),
+                sentence.getEndNode().getOffset()));
+        Collections.sort(tokens, offsetComparator);
 
-				//Loop through all the tokens in the current sentence
-				Iterator tit = tokens.iterator();
-				while(tit.hasNext())
-				{
-					//get the current token to process
-					Annotation token = (Annotation)tit.next();
+        // Create three empty lists to hold the words, pos and chunk
+        // tags of the tokens in the current sentence
+        List wl = new ArrayList();
+        List tl = new ArrayList();
+        List pl = new ArrayList();
 
-					//add the string spanned by the current token to the list of words
-					wl.add(token.getFeatures().get("string"));
+        // Loop through all the tokens in the current sentence
+        Iterator tit = tokens.iterator();
+        while(tit.hasNext()) {
+          // get the current token to process
+          Annotation token = (Annotation)tit.next();
 
-					//get the POS tag for the current token
-					String pos = (String)token.getFeatures().get(posFeature);
+          // add the string spanned by the current token to the list of
+          // words
+          wl.add(token.getFeatures().get("string"));
 
-					//add the POS tag to the list of POS tags
-					pl.add(pos);
+          // get the POS tag for the current token
+          String pos = (String)token.getFeatures().get(posFeature);
 
-					//get the initial chunk tag for this POS tag
-					String chunkTag = (String)chunkTags.get(pos);
+          // add the POS tag to the list of POS tags
+          pl.add(pos);
 
-					//if the chunk tag is null then use the unknown chunk tag
-					if (chunkTag == null) chunkTag = unknownTag;
+          // get the initial chunk tag for this POS tag
+          String chunkTag = (String)chunkTags.get(pos);
 
-					//now add the chunk tag to the list of chunk tags
-					tl.add(chunkTag);
-				}
+          // if the chunk tag is null then use the unknown chunk tag
+          if(chunkTag == null) chunkTag = unknownTag;
 
-				//run the chunker over the current sentence and get back
-				//an updated list of chunk tags
-				tl = c.chunkSentence(wl,tl,pl);
+          // now add the chunk tag to the list of chunk tags
+          tl.add(chunkTag);
+        }
 
-				//a variable to hold the index of the token which
-				//starts the current noun chunk
-				int start = 0;
+        // run the chunker over the current sentence and get back
+        // an updated list of chunk tags
+        tl = c.chunkSentence(wl, tl, pl);
 
-				//a flag so we know if we are in an NP or not
-				boolean inBaseNP = false;
+        // a variable to hold the index of the token which
+        // starts the current noun chunk
+        int start = 0;
 
-				//Loop through all the chunk tags in the current sentence
-				//so we can find the noun chunks
-				for (int tIndex = 0 ; tIndex < tl.size() ; ++tIndex)
-				{
-					//get the current chunk tag
-					String ct = (String)tl.get(tIndex);
+        // a flag so we know if we are in an NP or not
+        boolean inBaseNP = false;
 
-					if (inBaseNP)
-					{
-						//if we are currently inside a noun chunk then...
+        // Loop through all the chunk tags in the current sentence
+        // so we can find the noun chunks
+        for(int tIndex = 0; tIndex < tl.size(); ++tIndex) {
+          // get the current chunk tag
+          String ct = (String)tl.get(tIndex);
 
-						if (ct.equals("B"))
-						{
-							//if the chunk tag is "B" then we are about to start a
-							//new chunk so record the one that has just finished
-							addAnnotation(outputAS, tokens, start, tIndex-1);
+          if(inBaseNP) {
+            // if we are currently inside a noun chunk then...
 
-							//now reset the beginning of the chunk to the current token
-							start = tIndex;
-						}
-						else if (ct.equals("O"))
-						{
-							//if the chunk tag is "O" then we have dropped out
-							//the end of a chunk so add the chunk we just finished
-							addAnnotation(outputAS, tokens, start, tIndex-1);
+            if(ct.equals("B")) {
+              // if the chunk tag is "B" then we are about to start a
+              // new chunk so record the one that has just finished
+              addAnnotation(outputAS, tokens, start, tIndex - 1);
 
-							//now flag that we are outside of any chunk
-							inBaseNP = false;
-						}
-					}
-					else
-					{
-						//we aren't currently in a noun chunk so...
+              // now reset the beginning of the chunk to the current
+              // token
+              start = tIndex;
+            }
+            else if(ct.equals("O")) {
+              // if the chunk tag is "O" then we have dropped out
+              // the end of a chunk so add the chunk we just finished
+              addAnnotation(outputAS, tokens, start, tIndex - 1);
 
-						if (ct.equals("B") || ct.equals("I"))
-						{
-							//if the chunk tag is "B" or "I" then we have found
-							//the beginning of a chunk, so....
+              // now flag that we are outside of any chunk
+              inBaseNP = false;
+            }
+          }
+          else {
+            // we aren't currently in a noun chunk so...
 
-							//record the start index
-							start = tIndex;
+            if(ct.equals("B") || ct.equals("I")) {
+              // if the chunk tag is "B" or "I" then we have found
+              // the beginning of a chunk, so....
 
-							//and flag that we are now inside a chunk
-							inBaseNP = true;
-						}
-					}
-				}
+              // record the start index
+              start = tIndex;
 
-				if (inBaseNP)
-				{
-					//if we got to the end of a sentence and we are still in a
-					//noun chunk then we need to close the end and add the annotation
-					addAnnotation(outputAS, tokens, start, tl.size()-1);
-				}
+              // and flag that we are now inside a chunk
+              inBaseNP = true;
+            }
+          }
+        }
 
-				//update the progress stuff to show the precentage of sentences
-				//we have processed so far
-				fireProgressChanged(i++ * 100 / sentences.size());
-			}
+        if(inBaseNP) {
+          // if we got to the end of a sentence and we are still in a
+          // noun chunk then we need to close the end and add the
+          // annotation
+          addAnnotation(outputAS, tokens, start, tl.size() - 1);
+        }
 
-			//we have finished! so update the progress and tell
-			//the user how long it took to chunk the document
-			fireProcessFinished();
-			fireStatusChanged(document.getName() + " chunked in " + NumberFormat.getInstance().format((double)(System.currentTimeMillis() - startTime) / 1000) + " seconds!");
-		}
-		else
-		{
-			//if there are no sentence annotations then throw an exception as theres
-			//not much we can do
-			throw new GateRuntimeException("No sentences to process! Please run a sentence splitter first!");
-		}
-	}
+        // update the progress stuff to show the precentage of sentences
+        // we have processed so far
+        fireProgressChanged(i++ * 100 / sentences.size());
+      }
 
-	private void addAnnotation(AnnotationSet outputAS, List tokens, int start, int end)
-	{
-		//Create a new FeatureMap to act as the features for the new annotation
-		//but we will leave it blank for now as we don't have anything to add
-		FeatureMap params = Factory.newFeatureMap();
+      // we have finished! so update the progress and tell
+      // the user how long it took to chunk the document
+      fireProcessFinished();
+      fireStatusChanged(document.getName()
+              + " chunked in "
+              + NumberFormat.getInstance().format(
+                      (double)(System.currentTimeMillis() - startTime) / 1000)
+              + " seconds!");
+    }
+    else {
+      // if there are no sentence annotations then throw an exception as
+      // theres
+      // not much we can do
+      throw new GateRuntimeException(
+              "No sentences to process! Please run a sentence splitter first!");
+    }
+  }
 
-		//Get the token annotation from the beginning of the chunk
-		Annotation aStart = (Annotation)tokens.get(start);
+  private void addAnnotation(AnnotationSet outputAS, List tokens, int start,
+          int end) {
+    // Create a new FeatureMap to act as the features for the new
+    // annotation
+    // but we will leave it blank for now as we don't have anything to
+    // add
+    FeatureMap params = Factory.newFeatureMap();
 
-		//Get the token annotation from the end of the chunk
-		Annotation aEnd = (Annotation)tokens.get(end);
+    // Get the token annotation from the beginning of the chunk
+    Annotation aStart = (Annotation)tokens.get(start);
 
-		//This spots errors where the start is after the end. What
-		//we should do is figure out why this occurs in the first place
-		if (aStart.getStartNode().getOffset().longValue() >= aEnd.getEndNode().getOffset().longValue()) return;
+    // Get the token annotation from the end of the chunk
+    Annotation aEnd = (Annotation)tokens.get(end);
 
-		//add a new annotation to mark the noun chunk
-		outputAS.add(aStart.getStartNode(), aEnd.getEndNode(), annotationName, params);
-	}
+    // This spots errors where the start is after the end. What
+    // we should do is figure out why this occurs in the first place
+    if(aStart.getStartNode().getOffset().longValue() >= aEnd.getEndNode()
+            .getOffset().longValue()) return;
+
+    // add a new annotation to mark the noun chunk
+    outputAS.add(aStart.getStartNode(), aEnd.getEndNode(), annotationName,
+            params);
+  }
 }
