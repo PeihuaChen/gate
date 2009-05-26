@@ -22,6 +22,7 @@
 	<classpathentry kind="src" output="plugins/cebuano/build" path="plugins/cebuano/src"/>
 	<classpathentry kind="src" output="plugins/alignment/classes" path="plugins/alignment/src"/>
 	<classpathentry kind="src" output="plugins/learning/build" path="plugins/learning/src"/>
+	<classpathentry kind="src" output="plugins/Stemmer/classes" path="plugins/Stemmer/src"/>
 	<classpathentry exported="true" kind="lib" path="lib/Bib2HTML.jar"/>
 	<classpathentry kind="lib" path="lib/ext/nl.mpi.lookup.jar"/>
 	<classpathentry kind="lib" path="lib/plugins/rdf_backend.jar"/>
