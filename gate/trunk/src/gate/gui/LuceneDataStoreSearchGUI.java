@@ -716,7 +716,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               // wait 1 second until the document is displayed and then select
               // the same expression as in the result
               Date timeToRun = new Date(System.currentTimeMillis() + 1000);
-              Timer timer = new Timer();
+              Timer timer = new Timer("Annic show document timer", true);
               timer.schedule(new TimerTask() {
                 public void run() {
                 try {
@@ -2451,7 +2451,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           e.getY()+e.getComponent().getLocationOnScreen().y);
         tipWindow.show();
         Date timeToRun = new Date(System.currentTimeMillis() + 2000);
-        Timer timer = new Timer();
+        Timer timer = new Timer("Annic statistics hide tooltip timer", true);
         timer.schedule(new TimerTask() {
           public void run() {
             // hide the tooltip after 2 seconds
@@ -2688,7 +2688,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           e.getY()+e.getComponent().getLocationOnScreen().y);
         tipWindow.show();
         Date timeToRun = new Date(System.currentTimeMillis() + 2000);
-        Timer timer = new Timer();
+        Timer timer = new Timer("Annic statistics hide tooltip timer", true);
         timer.schedule(new TimerTask() {
           public void run() {
             // hide the tooltip after 2 seconds

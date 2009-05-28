@@ -835,14 +835,15 @@ public class DocumentEditor extends AbstractVisualResource
      // incremental search
       patternTextField.getDocument().addDocumentListener(
         new javax.swing.event.DocumentListener() {
-          private Timer timer = new Timer("Document Editor search timer", true);
+          private Timer timerInsert;
+          private Timer timerRemove;
           public void insertUpdate(javax.swing.event.DocumentEvent e) {
             refresh();
-            timer.cancel();
+            if (timerInsert != null) { timerInsert.cancel(); }
             // add a delay
             Date timeToRun = new Date(System.currentTimeMillis() + 250);
-//            timer = new Timer();
-            timer.schedule(new TimerTask() {
+            timerInsert = new Timer("Document Editor search insert timer",true);
+            timerInsert.schedule(new TimerTask() {
                 public void run() {
                   findNextAction.actionPerformed(null);
                 }
@@ -850,11 +851,11 @@ public class DocumentEditor extends AbstractVisualResource
           }
           public void removeUpdate(javax.swing.event.DocumentEvent e) {
             refresh();
-            timer.cancel();
+            if (timerRemove != null) { timerRemove.cancel(); }
             // add a delay
             Date timeToRun = new Date(System.currentTimeMillis() + 250);
-//            timer = new Timer();
-            timer.schedule(new TimerTask() {
+            timerRemove = new Timer("Document Editor search remove timer",true);
+            timerRemove.schedule(new TimerTask() {
                 public void run() {
                   findNextAction.actionPerformed(null);
                 }

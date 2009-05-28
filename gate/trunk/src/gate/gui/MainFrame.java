@@ -4594,7 +4594,8 @@ public class MainFrame extends JFrame implements ProgressListener,
    * Log the message as an error as soon as the action is created.
    */
   class AlertAction extends AbstractAction {
-    private Timer timer = new java.util.Timer("MainFrame tooltip hide timer", true);
+    private Timer timer =
+      new java.util.Timer("MainFrame tooltip hide timer", true);
     
     public AlertAction(Throwable error, String message, Action[] actions) {
       if (error == null) {
