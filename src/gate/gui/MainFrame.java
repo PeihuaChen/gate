@@ -3347,27 +3347,32 @@ public class MainFrame extends JFrame implements ProgressListener,
 
           // trying to release all resources occupied by all
           try {
-            List<Resource> resources =
-              Gate.getCreoleRegister().getAllInstances(
-                gate.Resource.class.getName());
-
-            // we need to call the clean up method for each of these resources
-            for(Resource aResource : resources) {
-              try {
-                // System.out.print("Cleaning up :" +
-                // aResource.getName());
-//                aResource.cleanup();
-                Factory.deleteResource(aResource);
-                // System.out.println(" Done!");
-              }
-              catch(Throwable e) {
-                // this may throw somekind of exception
-                // but we just ignore it as anyway we are closing everything
-                log.error(
-                  "Some problems occurred when cleaning up the resources.", e);
+            //make a list of lists of resources of various kinds
+            List<List<Resource>> listOfListOfResoruces = 
+              new ArrayList<List<Resource>>();
+//            listOfListOfResoruces.add(Gate.getCreoleRegister().getAllInstances(
+//                    gate.VisualResource.class.getName()));
+            listOfListOfResoruces.add(Gate.getCreoleRegister().getAllInstances(
+                    gate.LanguageResource.class.getName()));
+            listOfListOfResoruces.add(Gate.getCreoleRegister().getAllInstances(
+                    gate.ProcessingResource.class.getName()));
+            listOfListOfResoruces.add(Gate.getCreoleRegister().getAllInstances(
+                    gate.Controller.class.getName()));
+            
+            for(List<Resource> resources :listOfListOfResoruces){
+              // we need to call the clean up method for each of these resources
+              for(Resource aResource : resources) {
+                try {
+                  Factory.deleteResource(aResource);
+                } catch(Throwable e) {
+                  // this may throw somekind of exception
+                  // but we just ignore it as anyway we are closing everything
+                  log.error(
+                    "Some problems occurred when cleaning up the resources.", e);
+                }
               }
             }
-
+            
             // close all the opened datastores
             if(Gate.getDataStoreRegister() != null) {
               Set dataStores = new HashSet(Gate.getDataStoreRegister());
