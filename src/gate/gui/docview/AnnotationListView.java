@@ -315,14 +315,14 @@ import javax.swing.text.JTextComponent;
 
         // select all the rows containing the text from filterTextField
         filterTextField.getDocument().addDocumentListener(new DocumentListener() {
-          private Timer timer = new Timer();
+          private Timer timer = new Timer("Annotation selection timer", true);
           public void changedUpdate(DocumentEvent e) {
           }
           public void insertUpdate(DocumentEvent e) {
             timer.cancel();
             // one second delay
             Date timeToRun = new Date(System.currentTimeMillis() + 1000);
-            timer = new Timer();
+//            timer = new Timer("Annotation selection timer", true);
             timer.schedule(new TimerTask() {
                 public void run() {
                   selectRows();
@@ -333,7 +333,7 @@ import javax.swing.text.JTextComponent;
             timer.cancel();
             // one second delay
             Date timeToRun = new Date(System.currentTimeMillis() + 1000);
-            timer = new Timer();
+//            timer = new Timer();
             timer.schedule(new TimerTask() {
                 public void run() {
                   selectRows();
