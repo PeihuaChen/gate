@@ -27,6 +27,7 @@ import java.net.URL;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
+import java.util.Timer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Method;
@@ -3355,7 +3356,8 @@ public class MainFrame extends JFrame implements ProgressListener,
               try {
                 // System.out.print("Cleaning up :" +
                 // aResource.getName());
-                aResource.cleanup();
+//                aResource.cleanup();
+                Factory.deleteResource(aResource);
                 // System.out.println(" Done!");
               }
               catch(Throwable e) {
@@ -4592,6 +4594,8 @@ public class MainFrame extends JFrame implements ProgressListener,
    * Log the message as an error as soon as the action is created.
    */
   class AlertAction extends AbstractAction {
+    private Timer timer = new java.util.Timer("MainFrame tooltip hide timer", true);
+    
     public AlertAction(Throwable error, String message, Action[] actions) {
       if (error == null) {
         log.error(message);
@@ -4632,7 +4636,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           });
           popup.show();
           Date timeToRun = new Date(System.currentTimeMillis() + 4000);
-          (new java.util.Timer()).schedule(new TimerTask() {
+          timer.schedule(new TimerTask() {
             public void run() {
               popup.hide(); // hide the tooltip after some time
             }
