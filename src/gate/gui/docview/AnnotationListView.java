@@ -314,27 +314,29 @@ import javax.swing.text.JTextComponent;
         });
 
         // select all the rows containing the text from filterTextField
-        filterTextField.getDocument().addDocumentListener(new DocumentListener() {
-          private Timer timer = new Timer("Annotation selection timer", true);
+        filterTextField.getDocument().addDocumentListener(
+          new DocumentListener() {
+          private Timer timerInsert;
+          private Timer timerRemove;
           public void changedUpdate(DocumentEvent e) {
           }
           public void insertUpdate(DocumentEvent e) {
-            timer.cancel();
+            if (timerInsert != null) { timerInsert.cancel(); }
             // one second delay
             Date timeToRun = new Date(System.currentTimeMillis() + 1000);
-//            timer = new Timer("Annotation selection timer", true);
-            timer.schedule(new TimerTask() {
+            timerInsert = new Timer("Annotation selection insert timer", true);
+            timerInsert.schedule(new TimerTask() {
                 public void run() {
                   selectRows();
                 }
               }, timeToRun);
           }
           public void removeUpdate(DocumentEvent e) {
-            timer.cancel();
+            if (timerRemove != null) { timerRemove.cancel(); }
             // one second delay
             Date timeToRun = new Date(System.currentTimeMillis() + 1000);
-//            timer = new Timer();
-            timer.schedule(new TimerTask() {
+            timerRemove = new Timer("Annotation selection remove timer", true);
+            timerRemove.schedule(new TimerTask() {
                 public void run() {
                   selectRows();
                 }
