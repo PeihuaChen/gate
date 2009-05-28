@@ -271,7 +271,7 @@ public class SerialController extends AbstractController implements
 //            Factory.deleteResource((Resource)aPr);
 //          }
 //        }
-        for(Object aPr : getPRs()){
+        for(Object aPr : new ArrayList(getPRs())){
           if(!prsInOtherControllers.contains(aPr)){
             Factory.deleteResource((Resource)aPr);
           }
