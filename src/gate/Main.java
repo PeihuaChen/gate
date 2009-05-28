@@ -514,7 +514,7 @@ public class Main {
 
   private static boolean runCorpusBenchmarkTool = false;
 
-  public static String name = "GATE";
+  public static String name = "GATE Developer";
   public static String version;
   public static String build;
 
