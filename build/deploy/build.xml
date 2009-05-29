@@ -255,7 +255,6 @@ build/deploy all paths are relative to the top-level GATE directory -->
     <izpack output="${distDir}/${gate.full.name}-installer.jar"
             basedir="${basedir}">			
       <config><![CDATA[
-<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <!-- 
 	This is the izPack script for building the GATE installer
 -->
@@ -273,6 +272,7 @@ build/deploy all paths are relative to the top-level GATE directory -->
  -->        
         <url>http://gate.ac.uk/</url>
         <javaversion>1.5</javaversion>
+        <run-privileged condition="izpack.windowsinstall.vista"/>
     </info>
     <!--  Load the native library used for generating Windows shortcuts -->
     <native type="izpack" name="ShellLink.dll"/>

@@ -12,7 +12,8 @@
      description="Starts the GATE $APP_VER GUI"
      initialState="normal"
      desktop="yes"
-		 type="Application"
+     type="Application"
+     Categories="Development;GATE;"
      encoding="UTF-8">
      <createForPack name="Core"/>
    </shortcut>
