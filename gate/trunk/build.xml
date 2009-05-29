@@ -601,7 +601,7 @@
               breakiterator="true"
     	        linksource="yes"
               maxmemory="${runtime.max.memory}">
-      <fileset dir="${srcDir}"/>
+      <fileset dir="${srcDir}" includes="**/*.java" excludes="gate/resources/**"/>
     </javadoc>
     <!-- Now replace the ugly Java-html files with a better version -->
     <delete dir="${docDir}/javadoc/src-html"/>
@@ -639,7 +639,7 @@
               breakiterator="true"
               linksource="yes"
               maxmemory="${runtime.max.memory}">
-      <fileset dir="${srcDir}"/>
+      <fileset dir="${srcDir}" includes="**/*.java" excludes="gate/resources/**"/>
     </javadoc>
     <delete dir="${docDir}/javadoc/internal/src-html"/>
     <java2html srcdir="${srcDir}"
@@ -771,7 +771,9 @@
   <target name="distro" depends="distro-zips, installer" />
 
   <!--
-  Regenerate plugins.html.
+  Regenerate plugins.html.  If perl is not on your path or you need to use a
+  non-default perl interpreter, set -Dperl.bin=/path/to/perl on the ant command
+  line.
 
   Notes:
     1) This target may not work properly with the ant bundled in gate/bin.  If
@@ -780,6 +782,8 @@
        loaded into GATE from the plugin manager.  Most plugins are handled by
        running "bin/ant all" but you will need to build SUPPLE manually.
   -->
+  <property name="perl.bin" value="perl" />
+
   <target name="plugins.html" depends="plugins.build">
     <typedef resource="gate/util/ant/antlib.xml"
              classpathref="run.class.path"/>
@@ -799,7 +803,7 @@
       <fileset dir="plugins" includes="Obsolete/**/creole.xml" />
     </copy>
 
-    <exec dir="bin" executable="perl">
+    <exec dir="bin" executable="${perl.bin}">
       <arg value="-CDS" />
       <arg file="bin/plugins-info-to-HTML.pl" />
       <arg value="runningFromAnt" />
