@@ -650,7 +650,7 @@ implements ANNIEConstants{
 
         if (!prevAnnotUsedToMatchWithLonger && prevAnnot.getFeatures().containsKey("matchedWithLonger")) {
           // We have just matched the previous annotation with a longer annotation for the first time.  We need
-          // to propogate the matchedWithLonger property to all other annotations which coreffed with the previous annotation
+          // to propagate the matchedWithLonger property to all other annotations which coreffed with the previous annotation
           // so that we don't match them with a longer annotation
           propagatePropertyToExactMatchingMatches(prevAnnot,"matchedWithLonger",true);
         }
@@ -1335,7 +1335,7 @@ implements ANNIEConstants{
       else {
         if (  basic_person_match_criteria(shortName,longName,mr))
         {
-          if ((longName.length() != shortName.length()) && (mr[4] || mr[5] || mr[14])) {
+          if ((longName.length() != shortName.length()) && (mr[4] || mr[5] || mr[14] || mr[15])) {
             if (longerPrevious) {
               followAnnot.getFeatures().put("matchedWithLonger", true);
             }
