@@ -3348,18 +3348,18 @@ public class MainFrame extends JFrame implements ProgressListener,
           // trying to release all resources occupied by all
           try {
             //make a list of lists of resources of various kinds
-            List<List<Resource>> listOfListOfResoruces = 
+            List<List<Resource>> listOfListOfResources = 
               new ArrayList<List<Resource>>();
 //            listOfListOfResoruces.add(Gate.getCreoleRegister().getAllInstances(
 //                    gate.VisualResource.class.getName()));
-            listOfListOfResoruces.add(Gate.getCreoleRegister().getAllInstances(
+            listOfListOfResources.add(Gate.getCreoleRegister().getAllInstances(
                     gate.LanguageResource.class.getName()));
-            listOfListOfResoruces.add(Gate.getCreoleRegister().getAllInstances(
+            listOfListOfResources.add(Gate.getCreoleRegister().getAllInstances(
                     gate.ProcessingResource.class.getName()));
-            listOfListOfResoruces.add(Gate.getCreoleRegister().getAllInstances(
+            listOfListOfResources.add(Gate.getCreoleRegister().getAllInstances(
                     gate.Controller.class.getName()));
             
-            for(List<Resource> resources :listOfListOfResoruces){
+            for(List<Resource> resources :listOfListOfResources){
               // we need to call the clean up method for each of these resources
               for(Resource aResource : resources) {
                 try {
