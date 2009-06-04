@@ -944,10 +944,13 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     resourcesTree.addKeyListener(new KeyAdapter() {
       public void keyPressed(KeyEvent e) {
-        // shows in the central tabbed pane, the selected resources
-        // in the resource tree when the Enter key is pressed
         if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+          // shows in the central tabbed pane, the selected resources
+          // in the resource tree when the Enter key is pressed
           (new ShowResourcesAction()).actionPerformed(null);
+        } else if(e.getKeyCode() == KeyEvent.VK_DELETE) {
+          // remove selected resources from GATE
+          (new CloseSelectedResourcesAction()).actionPerformed(null);
         }
       }
     });
