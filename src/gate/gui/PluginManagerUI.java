@@ -46,8 +46,8 @@ public class PluginManagerUI extends JDialog implements GateConstants{
   
   
   protected void initLocalData(){
-    loadNowByURL = new HashMap();
-    loadAlwaysByURL = new HashMap();
+    loadNowByURL = new HashMap<URL, Boolean>();
+    loadAlwaysByURL = new HashMap<URL, Boolean>();
   }
   
   protected void initGUI(){
@@ -69,6 +69,10 @@ public class PluginManagerUI extends JDialog implements GateConstants{
       setCellRenderer(rendererEditor);
     mainTable.getColumnModel().getColumn(ICON_COLUMN).
       setCellRenderer(new IconTableCellRenderer());
+    mainTable.getColumnModel().getColumn(LOAD_NOW_COLUMN)
+      .setCellEditor(new CheckBoxCellEditor());
+    mainTable.getColumnModel().getColumn(LOAD_ALWAYS_COLUMN)
+      .setCellEditor(new CheckBoxCellEditor());
 
     resourcesListModel = new ResourcesListModel();
     resourcesList = new JList(resourcesListModel);
@@ -135,8 +139,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     mainTable.addKeyListener(new KeyAdapter() {
       public void keyPressed(KeyEvent e) {
         // redefine Enter key
-        if (!mainTable.isEditing()
-         && e.getKeyCode() == KeyEvent.VK_ENTER) {
+        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
           e.consume();
           (new OkAction()).actionPerformed(null);
         }
@@ -168,18 +171,18 @@ public class PluginManagerUI extends JDialog implements GateConstants{
   }
   
   protected Boolean getLoadNow(URL url){
-    Boolean res = (Boolean)loadNowByURL.get(url);
+    Boolean res = loadNowByURL.get(url);
     if(res == null){
-      res = new Boolean(Gate.getCreoleRegister().getDirectories().contains(url));
+      res = Gate.getCreoleRegister().getDirectories().contains(url);
       loadNowByURL.put(url, res);
     }
     return res;
   }
   
   protected Boolean getLoadAlways(URL url){
-    Boolean res = (Boolean)loadAlwaysByURL.get(url);
+    Boolean res = loadAlwaysByURL.get(url);
     if(res == null){
-      res = new Boolean(Gate.getAutoloadPlugins().contains(url));
+      res = Gate.getAutoloadPlugins().contains(url);
       loadAlwaysByURL.put(url, res);
     }
     return res;
@@ -224,8 +227,8 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     }
     
     public Object getValueAt(int row, int column){
-      Gate.DirectoryInfo dInfo = Gate.getDirectoryInfo(
-              (URL)Gate.getKnownPlugins().get(row));
+      Gate.DirectoryInfo dInfo =
+        Gate.getDirectoryInfo(Gate.getKnownPlugins().get(row));
       switch (column){
         case NAME_COLUMN: return new File(dInfo.getUrl().getFile()).getName();
         case ICON_COLUMN: return
@@ -249,8 +252,8 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     
     public void setValueAt(Object aValue, int rowIndex, int columnIndex){
       Boolean valueBoolean = (Boolean)aValue;
-      Gate.DirectoryInfo dInfo = Gate.getDirectoryInfo(
-              (URL)Gate.getKnownPlugins().get(rowIndex));
+      Gate.DirectoryInfo dInfo =
+        Gate.getDirectoryInfo(Gate.getKnownPlugins().get(rowIndex));
       switch(columnIndex){
         case LOAD_NOW_COLUMN: 
           loadNowByURL.put(dInfo.getUrl(), valueBoolean);
@@ -271,9 +274,9 @@ public class PluginManagerUI extends JDialog implements GateConstants{
       int row = mainTable.getSelectedRow();
       if(row == -1) return null;
       row = mainTable.rowViewToModel(row);
-      Gate.DirectoryInfo dInfo = Gate.getDirectoryInfo(
-              (URL)Gate.getKnownPlugins().get(row));
-      return (Gate.ResourceInfo)dInfo.getResourceInfoList().get(index);
+      Gate.DirectoryInfo dInfo =
+        Gate.getDirectoryInfo(Gate.getKnownPlugins().get(row));
+      return dInfo.getResourceInfoList().get(index);
     }
     
     public int getSize(){
@@ -281,8 +284,8 @@ public class PluginManagerUI extends JDialog implements GateConstants{
       int row = mainTable.getSelectedRow();
       if(row == -1) return 0;
       row = mainTable.rowViewToModel(row);
-      Gate.DirectoryInfo dInfo = Gate.getDirectoryInfo(
-              (URL)Gate.getKnownPlugins().get(row));
+      Gate.DirectoryInfo dInfo =
+        Gate.getDirectoryInfo(Gate.getKnownPlugins().get(row));
       return dInfo.getResourceInfoList().size();
     }
     
@@ -332,7 +335,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
             currentEditor.cancelCellEditing();
           }
           row = mainTable.rowViewToModel(row);
-          URL toDelete = (URL)Gate.getKnownPlugins().get(row);
+          URL toDelete = Gate.getKnownPlugins().get(row);
           Gate.removeKnownPlugin(toDelete);
           loadAlwaysByURL.remove(toDelete);
           loadNowByURL.remove(toDelete);
@@ -421,7 +424,30 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     }
   }
   
-  
+  protected class CheckBoxCellEditor extends AbstractCellEditor
+    implements TableCellEditor, ActionListener {
+    JCheckBox checkBox;
+    public CheckBoxCellEditor() {
+      checkBox = new JCheckBox();
+      checkBox.setHorizontalAlignment(SwingConstants.CENTER);
+      checkBox.addActionListener(this);
+    }
+    public boolean shouldSelectCell(EventObject anEvent) {
+      return false;
+    }
+    public void actionPerformed(ActionEvent e) {
+      fireEditingStopped();
+    }
+    public Object getCellEditorValue() {
+      return checkBox.isSelected();
+    }
+    public Component getTableCellEditorComponent(JTable table,
+            Object value, boolean isSelected, int row, int col) {
+      checkBox.setSelected((table.getValueAt(row, col).equals(true)));
+      return checkBox;
+    }
+  }
+
   protected class OkAction extends AbstractAction {
     public OkAction(){
       super("OK");
@@ -432,7 +458,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
       Iterator pluginIter = loadNowByURL.keySet().iterator();
       while(pluginIter.hasNext()){
         URL aPluginURL = (URL)pluginIter.next();
-        boolean load = ((Boolean)loadNowByURL.get(aPluginURL)).booleanValue();
+        boolean load = loadNowByURL.get(aPluginURL);
         boolean loaded = Gate.getCreoleRegister().
             getDirectories().contains(aPluginURL); 
         if(load && !loaded){
@@ -453,7 +479,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
       pluginIter = loadAlwaysByURL.keySet().iterator();
       while(pluginIter.hasNext()){
         URL aPluginURL = (URL)pluginIter.next();
-        boolean load = ((Boolean)loadAlwaysByURL.get(aPluginURL)).booleanValue();
+        boolean load = loadAlwaysByURL.get(aPluginURL);
         boolean loaded = Gate.getAutoloadPlugins().contains(aPluginURL); 
         if(load && !loaded){
           //set autoload top true
@@ -572,12 +598,12 @@ public class PluginManagerUI extends JDialog implements GateConstants{
   /**
    * Map from URL to Boolean. Stores temporary values for the loadNow options.
    */
-  protected Map loadNowByURL;
+  protected Map<URL, Boolean> loadNowByURL;
   /**
    * Map from URL to Boolean. Stores temporary values for the loadAlways 
    * options.
    */
-  protected Map loadAlwaysByURL;
+  protected Map<URL, Boolean> loadAlwaysByURL;
  
   protected static final int ICON_COLUMN = 0;
   protected static final int NAME_COLUMN = 1;
