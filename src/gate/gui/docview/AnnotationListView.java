@@ -140,7 +140,9 @@ import javax.swing.text.JTextComponent;
    public Component getGUI(){
      return mainPanel;
    }
+
    protected void initListeners(){
+
         tableModel.addTableModelListener(new TableModelListener(){
           public void tableChanged(TableModelEvent e){
             statusLabel.setText(
@@ -150,7 +152,6 @@ import javax.swing.text.JTextComponent;
                     " selected)");
           }
         });
-
 
         table.getSelectionModel().
           addListSelectionListener(new ListSelectionListener(){
@@ -214,23 +215,7 @@ import javax.swing.text.JTextComponent;
             // popup menu
             if(me.isPopupTrigger()) {
               JPopupMenu popup = new JPopupMenu();
-              Action deleteAction = new AbstractAction("Delete"){
-                public void actionPerformed(ActionEvent evt){
-                  int[] rows = table.getSelectedRows();
-                  table.clearSelection();
-                  if(rows == null || rows.length == 0){
-                    //no selection -> use row under cursor
-                    if(modelRow == -1) return;
-                    rows = new int[]{modelRow};
-                  }
-                  for(int i = 0; i < rows.length; i++){
-                    AnnotationData aData = annDataList.
-                        get(table.rowViewToModel(rows[i]));
-                    aData.getAnnotationSet().remove(aData.getAnnotation());
-                  }
-                }
-              };
-              popup.add(deleteAction);
+              popup.add(new DeleteAction());
 
               //add the custom edit actions
               if(modelRow != -1){
@@ -241,23 +226,21 @@ import javax.swing.text.JTextComponent;
                 if(specificEditorClasses != null &&
                    specificEditorClasses.size() > 0){
                   popup.addSeparator();
-                  Iterator<String> editorIter = specificEditorClasses.iterator();
-                  while(editorIter.hasNext()){
-                    String editorClass = (String) editorIter.next();
-                    AnnotationVisualResource editor = (AnnotationVisualResource)
+                  for (String editorClass : specificEditorClasses) {
+                    AnnotationVisualResource editor =
                       editorsCache.get(editorClass);
-                    if(editor == null){
+                    if (editor == null) {
                       //create the new type of editor
-                      try{
+                      try {
                         editor = (AnnotationVisualResource)
-                                 Factory.createResource(editorClass);
+                          Factory.createResource(editorClass);
                         editorsCache.put(editorClass, editor);
-                      }catch(ResourceInstantiationException rie){
+                      } catch (ResourceInstantiationException rie) {
                         rie.printStackTrace(Err.getPrintWriter());
                       }
                     }
                     popup.add(new EditAnnotationAction(aHandler.getAnnotationSet(),
-                            aHandler.getAnnotation(), editor));
+                      aHandler.getAnnotation(), editor));
                   }
                 }
                 //add generic editors
@@ -286,16 +269,16 @@ import javax.swing.text.JTextComponent;
                         }else{
                           editor = (AnnotationVisualResource)
                                    Factory.createResource(editorClass);
-                        }
+                }
                         editorsCache.put(editorClass, editor);
                       }catch(Exception rie){
                         rie.printStackTrace(Err.getPrintWriter());
                       }
                     }
-                    popup.add(new EditAnnotationAction(aHandler.getAnnotationSet(),
-                            aHandler.getAnnotation(), editor));
-                  }
+                  popup.add(new EditAnnotationAction(aHandler.getAnnotationSet(),
+                    aHandler.getAnnotation(), editor));
                 }
+              }
               }
               popup.show(table, me.getX(), me.getY());
             }
@@ -369,7 +352,33 @@ import javax.swing.text.JTextComponent;
             }
           }
         });
+
+       // Delete key for deleting selected annotations
+       table.addKeyListener(new KeyAdapter() {
+         public void keyPressed(KeyEvent e) {
+           if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+             new DeleteAction().actionPerformed(null);
+           }
+         }
+       });
       }
+
+  protected class DeleteAction extends AbstractAction{
+    public DeleteAction() {
+      super("Delete");
+      putValue(SHORT_DESCRIPTION, "Delete selected annotations");
+    }
+    public void actionPerformed(ActionEvent evt){
+      List<AnnotationData> annotationsData = new ArrayList<AnnotationData>();
+      for (int selectedRow : table.getSelectedRows()) {
+        annotationsData.add(annDataList.get(table.rowViewToModel(selectedRow)));
+      }
+      for (AnnotationData annotationData : annotationsData) {
+        annotationData.getAnnotationSet().remove(annotationData.getAnnotation());
+      }
+    }
+  }
+
    /* (non-Javadoc)
        * @see gate.gui.docview.AbstractDocumentView#registerHooks()
        */
