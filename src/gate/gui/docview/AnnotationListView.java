@@ -296,62 +296,55 @@ import javax.swing.text.JTextComponent;
           }
         });
 
-        // select all the rows containing the text from filterTextField
-        filterTextField.getDocument().addDocumentListener(
-          new DocumentListener() {
-          private Timer timerInsert;
-          private Timer timerRemove;
-          public void changedUpdate(DocumentEvent e) {
-          }
-          public void insertUpdate(DocumentEvent e) {
-            if (timerInsert != null) { timerInsert.cancel(); }
-            // one second delay
-            Date timeToRun = new Date(System.currentTimeMillis() + 1000);
-            timerInsert = new Timer("Annotation selection insert timer", true);
-            timerInsert.schedule(new TimerTask() {
-                public void run() {
-                  selectRows();
-                }
-              }, timeToRun);
-          }
-          public void removeUpdate(DocumentEvent e) {
-            if (timerRemove != null) { timerRemove.cancel(); }
-            // one second delay
-            Date timeToRun = new Date(System.currentTimeMillis() + 1000);
-            timerRemove = new Timer("Annotation selection remove timer", true);
-            timerRemove.schedule(new TimerTask() {
-                public void run() {
-                  selectRows();
-                }
-              }, timeToRun);
-          }
-          private void selectRows() {
-            table.clearSelection();
-            if (filterTextField.getText().trim().length() < 2
-             || table.getRowCount() == 0) {
-              return;
-            }
-            // block upward events
-            synchronized(this) { localSelectionUpdating = true; }
-            for (int row = 0; row < table.getRowCount(); row++) {
-              for (int col = 0; col < table.getColumnCount(); col++) {
-                if (table.getValueAt(row, col) != null
-                 && table.getValueAt(row, col).toString()
-                    .contains(filterTextField.getText().trim())) {
-                  table.addRowSelectionInterval(row, row);
-                  break;
-                }
-              }
-            }
-            synchronized(this) { localSelectionUpdating = false; }
-            // update the highlights in the document
-            if (table.isCellSelected(0,0)) {
-              table.addRowSelectionInterval(0, 0);
-            } else {
-              table.removeRowSelectionInterval(0, 0);
+    // select all the rows containing the text from filterTextField
+    filterTextField.getDocument().addDocumentListener(
+      new DocumentListener() {
+      private Timer timer = new Timer("Annotation list selection timer", true);
+      private TimerTask timerTask;
+      public void changedUpdate(DocumentEvent e) {
+      }
+      public void insertUpdate(DocumentEvent e) {
+        update();
+      }
+      public void removeUpdate(DocumentEvent e) {
+        update();
+      }
+      private void update() {
+        if (timerTask != null) { timerTask.cancel(); }
+        Date timeToRun = new Date(System.currentTimeMillis() + 1000);
+        timerTask = new TimerTask() { public void run() {
+          selectRows();
+        }};
+        // add a delay
+        timer.schedule(timerTask, timeToRun);
+      }
+      private void selectRows() {
+        table.clearSelection();
+        if (filterTextField.getText().trim().length() < 2
+         || table.getRowCount() == 0) {
+          return;
+        }
+        // block upward events
+        synchronized(this) { localSelectionUpdating = true; }
+        for (int row = 0; row < table.getRowCount(); row++) {
+          for (int col = 0; col < table.getColumnCount(); col++) {
+            if (table.getValueAt(row, col) != null
+             && table.getValueAt(row, col).toString()
+                .contains(filterTextField.getText().trim())) {
+              table.addRowSelectionInterval(row, row);
+              break;
             }
           }
-        });
+        }
+        synchronized(this) { localSelectionUpdating = false; }
+        // update the highlights in the document
+        if (table.isCellSelected(0,0)) {
+          table.addRowSelectionInterval(0, 0);
+        } else {
+          table.removeRowSelectionInterval(0, 0);
+        }
+      }
+    });
 
        // Delete key for deleting selected annotations
        table.addKeyListener(new KeyAdapter() {
