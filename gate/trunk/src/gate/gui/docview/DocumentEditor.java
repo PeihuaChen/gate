@@ -835,34 +835,26 @@ public class DocumentEditor extends AbstractVisualResource
      // incremental search
       patternTextField.getDocument().addDocumentListener(
         new javax.swing.event.DocumentListener() {
-          private Timer timerInsert;
-          private Timer timerRemove;
+          private Timer timer = new Timer("Document Editor search timer", true);
+          private TimerTask timerTask;
           public void insertUpdate(javax.swing.event.DocumentEvent e) {
-            refresh();
-            if (timerInsert != null) { timerInsert.cancel(); }
-            // add a delay
-            Date timeToRun = new Date(System.currentTimeMillis() + 250);
-            timerInsert = new Timer("Document Editor search insert timer",true);
-            timerInsert.schedule(new TimerTask() {
-                public void run() {
-                  findNextAction.actionPerformed(null);
-                }
-              }, timeToRun);
+            update();
           }
           public void removeUpdate(javax.swing.event.DocumentEvent e) {
-            refresh();
-            if (timerRemove != null) { timerRemove.cancel(); }
-            // add a delay
-            Date timeToRun = new Date(System.currentTimeMillis() + 250);
-            timerRemove = new Timer("Document Editor search remove timer",true);
-            timerRemove.schedule(new TimerTask() {
-                public void run() {
-                  findNextAction.actionPerformed(null);
-                }
-              }, timeToRun);
+            update();
           }
           public void changedUpdate(javax.swing.event.DocumentEvent e) {
             refresh();
+          }
+          private void update() {
+            if (timerTask != null) { timerTask.cancel(); }
+            refresh();
+            Date timeToRun = new Date(System.currentTimeMillis() + 250);
+            timerTask = new TimerTask() { public void run() {
+              findNextAction.actionPerformed(null);
+            }};
+            // add a delay
+            timer.schedule(timerTask, timeToRun);
           }
         });
 
