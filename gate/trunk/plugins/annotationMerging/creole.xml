@@ -19,7 +19,7 @@ If not defined, use all the annotation sets but the default annotation set."
 
        <PARAMETER NAME="annTypesAndFeats"
         COMMENT="Annotation types names and optionally features used for
-merging. Example: 'Location->type;Organisation->type'."
+merging. Example: 'Location;Organisation->type'."
         RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
 
       <PARAMETER NAME="annSetOutput"
