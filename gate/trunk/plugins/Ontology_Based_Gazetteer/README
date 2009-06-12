@@ -27,7 +27,7 @@ First build the plugin, using the supplied Ant build file (command: ant jar).
 The only requirement is an installed copy of JDK 1.5 or above.
 
 =======================================================================
-USING THE GAZETTEER WITHIN GATE
+USING THE GAZETTEER WITHIN GATE GUI
 =======================================================================
 
 To get an idea of how it works start GATE and load a sample application from
@@ -130,3 +130,21 @@ application, for example, if created ontology was gate-kb, you can try processin
 gate home page: http://gate.ac.uk, and investigate the results further.
 All annotations are of type Lookup, with additional features that give details
 about the resources they are referring to in the given ontology.
+
+=======================================================================
+USING THE GAZETTEER OUTSIDE THE GATE GUI
+=======================================================================
+Follow the steps described in the previous section. After creating an 
+application using GATE GUI (USING THE GAZETTEER WITHIN GATE GUI, step 5), save 
+application as .xgapp file (Right click on it, and choose 'Save application 
+state'). Load this file from any external application using the GATE API:
+- init GATE
+- set GATE home (optional)
+- load plugins (optional)
+- load the application from file (by setting the URL to the previously created
+.xgapp file)
+ -create corpus, create document, add the document to the corpus
+ -set appliation to use the corpus
+ -run application
+ -use results i.e. annotations
+ -delete unneccesarry resources
