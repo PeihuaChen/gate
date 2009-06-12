@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 1998-2007, The University of Sheffield.
+ *  Copyright (c) 1998-2009, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -21,17 +21,27 @@ import java.io.*;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
+import java.util.Timer;
 import javax.swing.*;
-import javax.swing.event.TableModelListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.event.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import gate.*;
+import gate.creole.annic.Constants;
+import gate.gui.docview.TextualDocumentView;
+import gate.gui.docview.AnnotationSetsView;
 import gate.event.CreoleEvent;
 import gate.swing.XJTable;
 import gate.util.*;
 import gate.event.CreoleListener;
 
 /**
+ * Compare annotations in two annotation sets in one or two documents.
+ *
+ * Display a table with annotations compared side by side.
+ * Annotations offsets and features can be edited by modifying cells.
+ * Selected annotations can be moved to another annotation set.
  */
 public class AnnotationDiffGUI extends JFrame{
 
@@ -76,7 +86,10 @@ public class AnnotationDiffGUI extends JFrame{
     getContentPane().add(weightTxt, constraints);
     diffAction = new DiffAction();
     diffAction.setEnabled(false);
+
     doDiffBtn = new JButton(diffAction);
+    doDiffBtn.setForeground((Color)
+      UIManager.getDefaults().get("Button.disabledText"));
     doDiffBtn.setToolTipText("Choose two annotation sets "
             +"that have at least one annotation type in common.");
     constraints.gridx = 7;
@@ -92,8 +105,10 @@ public class AnnotationDiffGUI extends JFrame{
     getContentPane().add(new JLabel("Key:"), constraints);
     constraints.gridx = GridBagConstraints.RELATIVE;
     keyDocCombo = new JComboBox();
+    keyDocCombo.setPrototypeDisplayValue("very_long_document_name.xml");
     getContentPane().add(keyDocCombo, constraints);
     keySetCombo = new JComboBox();
+    keySetCombo.setPrototypeDisplayValue("long_set_name");
     getContentPane().add(keySetCombo, constraints);
     constraints.gridwidth = 2;
     getContentPane().add(new JLabel("Annotation Type:"), constraints);
@@ -229,7 +244,7 @@ public class AnnotationDiffGUI extends JFrame{
     falsePozLbl = new JLabel("0");
     resultsPane.add(falsePozLbl, constraints);
 
-    //COLMUN 2
+    //COLUMN 2
     constraints.gridx = 2;
     constraints.insets = new Insets(4, 30, 4, 4);
     resultsPane.add(Box.createGlue());
@@ -240,7 +255,7 @@ public class AnnotationDiffGUI extends JFrame{
     lbl = new JLabel("Average:");
     resultsPane.add(lbl, constraints);
 
-    //COLMUN 3
+    //COLUMN 3
     constraints.gridx = 3;
     constraints.insets = new Insets(4, 4, 4, 4);
     lbl = new JLabel("Recall");
@@ -252,7 +267,7 @@ public class AnnotationDiffGUI extends JFrame{
     recallAveLbl = new JLabel("0.0000");
     resultsPane.add(recallAveLbl, constraints);
 
-    //COLMUN 4
+    //COLUMN 4
     constraints.gridx = 4;
     lbl = new JLabel("Precision");
     resultsPane.add(lbl, constraints);
@@ -263,7 +278,7 @@ public class AnnotationDiffGUI extends JFrame{
     precisionAveLbl = new JLabel("0.0000");
     resultsPane.add(precisionAveLbl, constraints);
 
-    //COLMUN 5
+    //COLUMN 5
     constraints.gridx = 5;
     lbl = new JLabel("F-Measure");
     resultsPane.add(lbl, constraints);
@@ -274,27 +289,19 @@ public class AnnotationDiffGUI extends JFrame{
     fmeasureAveLbl = new JLabel("0.0000");
     resultsPane.add(fmeasureAveLbl, constraints);
 
-    //COLMUN 6
+    //COLUMN 6
     constraints.gridx = 6;
-    htmlExportAction = new HTMLExportAction();
-    htmlExportAction.setEnabled(false);
-    htmlExportBtn = new JButton(htmlExportAction);
-    htmlExportBtn.setToolTipText(
-      "Use first the \"Compute Differences\" button.");
-    constraints.gridwidth = 2;
-    resultsPane.add(htmlExportBtn, constraints);
-    constraints.gridwidth = 1;
-    constraints.gridy = 2;
-    resultsPane.add(new JLabel("Destination:"), constraints);
-    constraints.gridy = GridBagConstraints.RELATIVE;
     moveToConsensusASAction = new MoveToConsensusASAction();
     moveToConsensusASAction.setEnabled(false);
     moveToConsensusBtn = new JButton(moveToConsensusASAction);
     constraints.gridwidth = 2;
+    constraints.gridheight = 2;
     resultsPane.add(moveToConsensusBtn, constraints);
     constraints.gridwidth = 1;
+    constraints.gridheight = 1;
+    resultsPane.add(new JLabel("Destination:"), constraints);
 
-    //COLMUN 7
+    //COLUMN 7
     constraints.gridx = 7;
     constraints.gridy = 2;
     consensusASTextField = new JTextField("consensus", 10);
@@ -303,6 +310,23 @@ public class AnnotationDiffGUI extends JFrame{
     constraints.fill = GridBagConstraints.HORIZONTAL;
     resultsPane.add(consensusASTextField, constraints);
     constraints.fill = GridBagConstraints.NONE;
+    constraints.gridy = GridBagConstraints.RELATIVE;
+
+    //COLUMN 8
+    constraints.gridx = 8;
+    constraints.gridheight = 2;
+    showDocumentAction = new ShowDocumentAction();
+    showDocumentAction.setEnabled(false);
+    showDocumentBtn = new JButton(showDocumentAction);
+    showDocumentBtn.setToolTipText("Use first the \"Compute Differences\"" +
+      " button then select an annotation in the table.");
+    resultsPane.add(showDocumentBtn, constraints);
+    htmlExportAction = new HTMLExportAction();
+    htmlExportAction.setEnabled(false);
+    htmlExportBtn = new JButton(htmlExportAction);
+    htmlExportBtn.setToolTipText(
+      "Use first the \"Compute Differences\" button.");
+    resultsPane.add(htmlExportBtn, constraints);
 
     //Finished building the results pane
     //Add it to the dialog
@@ -323,10 +347,11 @@ public class AnnotationDiffGUI extends JFrame{
     // ROW 5
     constraints.gridy = 5;
     // status bar
-    statusLabel = new JLabel("Choose two annotation sets to compare");
+    statusLabel = new JLabel();
     constraints.gridx = 0;
     constraints.gridwidth = 7;
     constraints.anchor = GridBagConstraints.SOUTHWEST;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
     getContentPane().add(statusLabel, constraints);
 
     // the progress bar
@@ -334,7 +359,6 @@ public class AnnotationDiffGUI extends JFrame{
     constraints.gridx = 7;
     constraints.gridwidth = 1;
     constraints.anchor = GridBagConstraints.SOUTHEAST;
-    constraints.fill = GridBagConstraints.HORIZONTAL;
     getContentPane().add(progressBar, constraints);
 
     //set the colours
@@ -364,26 +388,51 @@ public class AnnotationDiffGUI extends JFrame{
       public void actionPerformed(ActionEvent evt){
         int keyDocSelectedIndex = keyDocCombo.getSelectedIndex();
         if (keyDocSelectedIndex == -1) { return; }
-        Document newDoc = (Document)documents.get(keyDocSelectedIndex);
-        if(keyDoc != newDoc){
-          pairings.clear();
-          diffTableModel.fireTableDataChanged();
-          moveToConsensusASAction.setEnabled(false);
-          keyDoc = newDoc;
-          keySets = new ArrayList<AnnotationSet>();
-          List<String> keySetNames = new ArrayList<String>();
-          keySets.add(keyDoc.getAnnotations());
-          keySetNames.add("[Default set]");
-
-          if(keyDoc.getNamedAnnotationSets() != null) {
-            for (Object o : keyDoc.getNamedAnnotationSets().keySet()) {
-              String name = (String) o;
-              keySetNames.add(name);
-              keySets.add(keyDoc.getAnnotations(name));
+        Document newDoc = (Document) documents.get(keyDocSelectedIndex);
+        if (keyDoc == newDoc) { return; }
+        pairings.clear();
+        diffTableModel.fireTableDataChanged();
+        moveToConsensusASAction.setEnabled(false);
+        keyDoc = newDoc;
+        keySets = new ArrayList<AnnotationSet>();
+        List<String> keySetNames = new ArrayList<String>();
+        keySets.add(keyDoc.getAnnotations());
+        keySetNames.add("[Default set]");
+        if(keyDoc.getNamedAnnotationSets() != null) {
+          for (Object o : keyDoc.getNamedAnnotationSets().keySet()) {
+            String name = (String) o;
+            keySetNames.add(name);
+            keySets.add(keyDoc.getAnnotations(name));
+          }
+        }
+        keySetCombo.setModel(new DefaultComboBoxModel(keySetNames.toArray()));
+        if(!keySetNames.isEmpty()) {
+          keySetCombo.setSelectedIndex(0);
+          if(resSetCombo.getItemCount() > 0) {
+            // find annotation sets with annotations in common
+            for(int res = 0; res < resSetCombo.getItemCount(); res++) {
+              resSetCombo.setSelectedIndex(res);
+              for(int key = 0; key < keySetCombo.getItemCount(); key++) {
+                if (keyDoc.equals(resDoc)
+                 && resSetCombo.getItemAt(res).equals(
+                    keySetCombo.getItemAt(key))) {
+                  continue;
+                }
+                keySetCombo.setSelectedIndex(key);
+                if (annTypeCombo.getSelectedItem() != null) { break; }
+              }
+              if (annTypeCombo.getSelectedItem() != null) { break; }
+            }
+            if (annTypeCombo.getSelectedItem() == null) {
+              statusLabel.setText("There is no annotations in common.");
+              statusLabel.setForeground(Color.RED);
+            } else if (statusLabel.getText().equals(
+              "There is no annotations in common.")) {
+              statusLabel.setText("The first annotation sets with" +
+                " annotations in common have been automatically selected.");
+              statusLabel.setForeground(Color.BLACK);
             }
           }
-          keySetCombo.setModel(new DefaultComboBoxModel(keySetNames.toArray()));
-          if(!keySetNames.isEmpty())keySetCombo.setSelectedIndex(0);
         }
       }
     });
@@ -392,25 +441,51 @@ public class AnnotationDiffGUI extends JFrame{
       public void actionPerformed(ActionEvent evt){
         int resDocSelectedIndex = resDocCombo.getSelectedIndex();
         if (resDocSelectedIndex == -1) { return; }
-        Document newDoc = (Document)documents.get(resDocSelectedIndex);
-        if(resDoc != newDoc){
-          resDoc = newDoc;
-          pairings.clear();
-          diffTableModel.fireTableDataChanged();
-          moveToConsensusASAction.setEnabled(false);
-          resSets = new ArrayList<AnnotationSet>();
-          List<String> resSetNames = new ArrayList<String>();
-          resSets.add(resDoc.getAnnotations());
-          resSetNames.add("[Default set]");
-          if(resDoc.getNamedAnnotationSets() != null) {
-            for (Object o : resDoc.getNamedAnnotationSets().keySet()) {
-              String name = (String) o;
-              resSetNames.add(name);
-              resSets.add(resDoc.getAnnotations(name));
+        Document newDoc = (Document) documents.get(resDocSelectedIndex);
+        if (resDoc == newDoc) { return; }
+        resDoc = newDoc;
+        pairings.clear();
+        diffTableModel.fireTableDataChanged();
+        moveToConsensusASAction.setEnabled(false);
+        resSets = new ArrayList<AnnotationSet>();
+        List<String> resSetNames = new ArrayList<String>();
+        resSets.add(resDoc.getAnnotations());
+        resSetNames.add("[Default set]");
+        if(resDoc.getNamedAnnotationSets() != null) {
+          for (Object o : resDoc.getNamedAnnotationSets().keySet()) {
+            String name = (String) o;
+            resSetNames.add(name);
+            resSets.add(resDoc.getAnnotations(name));
+          }
+        }
+        resSetCombo.setModel(new DefaultComboBoxModel(resSetNames.toArray()));
+        if(!resSetNames.isEmpty()) {
+          resSetCombo.setSelectedIndex(0);
+          if(keySetCombo.getItemCount() > 0) {
+            // find annotation sets with annotations in common
+            for(int res = 0; res < resSetCombo.getItemCount(); res++) {
+              resSetCombo.setSelectedIndex(res);
+              for(int key = 0; key < keySetCombo.getItemCount(); key++) {
+                if (keyDoc.equals(resDoc)
+                 && resSetCombo.getItemAt(res).equals(
+                    keySetCombo.getItemAt(key))) {
+                  continue;
+                }
+                keySetCombo.setSelectedIndex(key);
+                if (annTypeCombo.getSelectedItem() != null) { break; }
+              }
+              if (annTypeCombo.getSelectedItem() != null) { break; }
+            }
+            if (annTypeCombo.getSelectedItem() == null) {
+              statusLabel.setText("There is no annotations in common.");
+              statusLabel.setForeground(Color.RED);
+            } else if (statusLabel.getText().equals(
+              "There is no annotations in common.")) {
+              statusLabel.setText("The first annotation sets with" +
+                " annotations in common have been selected.");
+              statusLabel.setForeground(Color.BLACK);
             }
           }
-          resSetCombo.setModel(new DefaultComboBoxModel(resSetNames.toArray()));
-          if(!resSetNames.isEmpty())resSetCombo.setSelectedIndex(0);
         }
       }
     });
@@ -436,10 +511,14 @@ public class AnnotationDiffGUI extends JFrame{
         if(typesList.size() > 0) {
           annTypeCombo.setSelectedIndex(0);
           diffAction.setEnabled(true);
+          doDiffBtn.setForeground((Color)
+            UIManager.getDefaults().get("Button.foreground"));
           doDiffBtn.setToolTipText(
                   (String)diffAction.getValue(Action.SHORT_DESCRIPTION));
         } else {
           diffAction.setEnabled(false);
+          doDiffBtn.setForeground((Color)
+            UIManager.getDefaults().get("Button.disabledText"));
           doDiffBtn.setToolTipText("Choose two annotation sets "
                   +"that have at least one annotation type in common.");
         }
@@ -494,15 +573,85 @@ public class AnnotationDiffGUI extends JFrame{
       public void tableChanged(javax.swing.event.TableModelEvent e) {
         if (diffTableModel.getRowCount() > 0) {
           htmlExportAction.setEnabled(true);
-          htmlExportBtn.setToolTipText(
-                  (String)htmlExportAction.getValue(Action.SHORT_DESCRIPTION));
+          htmlExportBtn.setToolTipText((String)
+            htmlExportAction.getValue(Action.SHORT_DESCRIPTION));
+          showDocumentAction.setEnabled(true);
+          showDocumentBtn.setToolTipText((String)
+            showDocumentAction.getValue(Action.SHORT_DESCRIPTION));
         } else {
           htmlExportAction.setEnabled(false);
           htmlExportBtn.setToolTipText(
             "Use first the \"Compute Differences\" button.");
+          showDocumentAction.setEnabled(false);
+          showDocumentBtn.setToolTipText("Use first the \"Compute Differences\""
+            + " button then select an annotation in the table.");
         }
       }
     });
+
+    diffTable.getSelectionModel().addListSelectionListener(
+      new ListSelectionListener() {
+        public void valueChanged(ListSelectionEvent e) {
+          int row = diffTable.rowViewToModel(diffTable.getSelectedRow());
+          if (row == -1) { showDocumentAction.setEnabled(false); return; }
+          AnnotationDiffer.Pairing pairing = pairings.get(row);
+          Annotation key = pairing.getKey();
+          Annotation response = pairing.getResponse();
+          int column = diffTable.convertColumnIndexToModel(
+            diffTable.getSelectedColumn());
+          boolean enabled;
+          switch(column){
+            case DiffTableModel.COL_KEY_MOVE:
+            case DiffTableModel.COL_KEY_START:
+            case DiffTableModel.COL_KEY_END:
+            case DiffTableModel.COL_KEY_STRING:
+            case DiffTableModel.COL_KEY_FEATURES:
+              enabled = (key != null); break;
+            case DiffTableModel.COL_RES_MOVE:
+            case DiffTableModel.COL_RES_START:
+            case DiffTableModel.COL_RES_END:
+            case DiffTableModel.COL_RES_STRING:
+            case DiffTableModel.COL_RES_FEATURES:
+              enabled = (response != null); break;
+            default: enabled = false;
+          }
+          showDocumentAction.setEnabled(enabled);
+        }
+      });
+
+    diffTable.getColumnModel().addColumnModelListener(
+      new TableColumnModelListener() {
+        public void columnAdded(TableColumnModelEvent e) { /* do nothing */ }
+        public void columnRemoved(TableColumnModelEvent e) { /* do nothing */ }
+        public void columnMoved(TableColumnModelEvent e) { /* do nothing */ }
+        public void columnMarginChanged(ChangeEvent e) { /* do nothing */ }
+        public void columnSelectionChanged(ListSelectionEvent e) {
+          int row = diffTable.rowViewToModel(diffTable.getSelectedRow());
+          if (row == -1) { showDocumentAction.setEnabled(false); return; }
+          AnnotationDiffer.Pairing pairing = pairings.get(row);
+          Annotation key = pairing.getKey();
+          Annotation response = pairing.getResponse();
+          int column = diffTable.convertColumnIndexToModel(
+            diffTable.getSelectedColumn());
+          boolean enabled;
+          switch(column){
+            case DiffTableModel.COL_KEY_MOVE:
+            case DiffTableModel.COL_KEY_START:
+            case DiffTableModel.COL_KEY_END:
+            case DiffTableModel.COL_KEY_STRING:
+            case DiffTableModel.COL_KEY_FEATURES:
+              enabled = (key != null); break;
+            case DiffTableModel.COL_RES_MOVE:
+            case DiffTableModel.COL_RES_START:
+            case DiffTableModel.COL_RES_END:
+            case DiffTableModel.COL_RES_STRING:
+            case DiffTableModel.COL_RES_FEATURES:
+              enabled = (response != null); break;
+            default: enabled = false;
+          }
+          showDocumentAction.setEnabled(enabled);
+        }
+      });
 
     // inverse state of selected checkboxes when Space key is pressed
     diffTable.addKeyListener(new KeyAdapter() {
@@ -537,6 +686,7 @@ public class AnnotationDiffGUI extends JFrame{
         if (keyDoc.getAnnotationSetNames().contains(destination)) {
           statusLabel.setText("Be careful, the annotation set " + destination
             + " already exists.");
+          statusLabel.setForeground(Color.RED);
         }
       }
     });
@@ -569,8 +719,8 @@ public class AnnotationDiffGUI extends JFrame{
 
   public void pack(){
     super.pack();
-    // add some space
-    setSize(getWidth() + 200, getHeight() + 200);
+    // add some vertical space for the table
+    setSize(getWidth(), getHeight() + 200);
   }
 
   protected void populateGUI(){
@@ -596,8 +746,15 @@ public class AnnotationDiffGUI extends JFrame{
       if (resDocCombo.getSelectedIndex() == -1) {
         resDocCombo.setSelectedIndex(0);
       }
+      statusLabel.setText(documents.size() + " documents loaded");
+      if (annTypeCombo.getSelectedItem() == null) {
+        statusLabel.setText(statusLabel.getText() +
+          ". Choose two annotation sets to compare.");
+      }
+      statusLabel.setForeground(Color.BLACK);
     } else {
-      statusLabel.setText("You must load at least one document in GATE");
+      statusLabel.setText("You must load at least one document.");
+      statusLabel.setForeground(Color.RED);
     }
   }
 
@@ -606,6 +763,7 @@ public class AnnotationDiffGUI extends JFrame{
       super("<html>Compute<br>Differences</html>");
       putValue(SHORT_DESCRIPTION, "Performs comparisons between annotations");
       putValue(MNEMONIC_KEY, KeyEvent.VK_ENTER);
+      putValue(SMALL_ICON, MainFrame.getIcon("crystal-clear-action-run"));
     }
 
     public void actionPerformed(ActionEvent evt){
@@ -616,6 +774,7 @@ public class AnnotationDiffGUI extends JFrame{
 
       // animate the progress bar
       progressBar.setIndeterminate(true);
+      getContentPane().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
       // compute the differences
       SwingUtilities.invokeLater(new Runnable(){
@@ -676,29 +835,33 @@ public class AnnotationDiffGUI extends JFrame{
         }
         if (!command.equals("setvalue") && !command.equals("move")) {
           statusLabel.setText(pairings.size() + " pairings have been found");
+          statusLabel.setForeground(Color.BLACK);
         }
         diffTable.requestFocusInWindow();
         //stop the progress bar
         progressBar.setIndeterminate(false);
+        getContentPane().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        showDocumentAction.setEnabled(false);
 
         if (!command.equals("setvalue") && !command.equals("move")) { return; }
 
         SwingUtilities.invokeLater(new Runnable(){
         public void run(){
           if (command.equals("setvalue")) {
-          // select the cell containing the previously selected annotation
-          for (int row = 0; row < diffTable.getRowCount(); row++) {
-            AnnotationDiffer.Pairing pairing =
-              pairings.get(diffTable.rowViewToModel(row));
-            if ((pairing.getKey() != null
-               && pairing.getKey().getId() == id)
-             || (pairing.getResponse() != null
-               && pairing.getResponse().getId() == id)) {
-              diffTable.changeSelection(row, colView, false, false);
-              break;
+            // select the cell containing the previously selected annotation
+            for (int row = 0; row < diffTable.getRowCount(); row++) {
+              AnnotationDiffer.Pairing pairing =
+                pairings.get(diffTable.rowViewToModel(row));
+              if ((pairing.getKey() != null
+                 && pairing.getKey().getId() == id)
+               || (pairing.getResponse() != null
+                 && pairing.getResponse().getId() == id)) {
+                diffTable.changeSelection(row, colView, false, false);
+                break;
+              }
             }
-          }
-          } else if (command.equals("move")) { // select the previously selected cell
+          } else if (command.equals("move")) {
+            // select the previously selected cell
              diffTable.changeSelection(rowView, colView, false, false);
           }
           SwingUtilities.invokeLater(new Runnable(){
@@ -719,8 +882,11 @@ public class AnnotationDiffGUI extends JFrame{
       super("Move selected annotations");
       putValue(SHORT_DESCRIPTION,
         "<html>Move selected annotations to the destination annotation set" +
-          "<br>and hide their paired annotations if not moved.</html>");
+          "<br>and hide their paired annotations if not moved." +
+          "&nbsp;&nbsp;<font color=\"#667799\"><small>Alt-Right" +
+          "</small></font>&nbsp;&nbsp;</html>");
       putValue(MNEMONIC_KEY, KeyEvent.VK_RIGHT);
+      putValue(SMALL_ICON, MainFrame.getIcon("crystal-clear-action-loopnone"));
     }
     public void actionPerformed(ActionEvent evt){
       String step = (String) keyDoc.getFeatures().get("anndiffsteps");
@@ -762,12 +928,18 @@ public class AnnotationDiffGUI extends JFrame{
       }
       if (countMoved > 0) {
         step = String.valueOf(Integer.valueOf(step) + 1);
+        keyDoc.getFeatures().put("anndiffsteps", step);
+        diffAction.actionPerformed(new ActionEvent(this, -1, "move"));
+        statusLabel.setText(countMoved +
+          " annotations moved to " + consensusASTextField.getText().trim() +
+          " and " + countMarked + " hidden");
+        statusLabel.setForeground(Color.BLACK);
+      } else {
+        diffTable.requestFocusInWindow();
+        statusLabel.setText(
+          "You must select annotations by ticking the check boxes in the table.");
+        statusLabel.setForeground(Color.RED);
       }
-      keyDoc.getFeatures().put("anndiffsteps", step);
-      diffAction.actionPerformed(new ActionEvent(this, -1, "move"));
-      statusLabel.setText(countMoved +
-        " annotations moved to " + consensusASTextField.getText().trim() +
-        " and " + countMarked + " hidden");
     }
   }
 
@@ -787,6 +959,8 @@ public class AnnotationDiffGUI extends JFrame{
     public HTMLExportAction(){
       super("Export to HTML");
       putValue(SHORT_DESCRIPTION, "Export the results to HTML");
+      putValue(SMALL_ICON,
+        MainFrame.getIcon("crystal-clear-app-download-manager"));
     }
     public void actionPerformed(ActionEvent evt){
       JFileChooser fileChooser = getFileChooser();
@@ -892,6 +1066,97 @@ public class AnnotationDiffGUI extends JFrame{
     static final String FOOTER = "</table></body></html>";
   }
 
+  protected class ShowDocumentAction extends AbstractAction{
+    public ShowDocumentAction(){
+      super("Show document");
+      putValue(SHORT_DESCRIPTION,
+        "Show the selected annotation in the document editor.");
+      putValue(SMALL_ICON, MainFrame.getIcon("crystal-clear-app-xmag"));
+      putValue(MNEMONIC_KEY, KeyEvent.VK_UP);
+    }
+    public void actionPerformed(ActionEvent evt){
+
+      int rowModel = diffTable.rowViewToModel(diffTable.getSelectedRow());
+      boolean isKeySelected = (diffTable.convertColumnIndexToModel(
+        diffTable.getSelectedColumn()) < DiffTableModel.COL_MATCH);
+      final Document doc = isKeySelected ? keyDoc : resDoc;
+      final Annotation annotation = isKeySelected ?
+        pairings.get(rowModel).getKey() : pairings.get(rowModel).getResponse();
+      final String asname = isKeySelected ? keySet.getName() : resSet.getName();
+      // show the expression in the document
+      SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        MainFrame.getInstance().select(doc);
+        // wait some time for the document to be displayed
+        Date timeToRun = new Date(System.currentTimeMillis() + 1000);
+        Timer timer = new Timer("Annotation diff show document timer", true);
+        timer.schedule(new TimerTask() {
+          public void run() {
+            showExpressionInDocument(doc, annotation, asname);
+          }
+        }, timeToRun);
+      }});
+    }
+
+    private void showExpressionInDocument(Document doc, Annotation annotation,
+                                          String asname) {
+      try {
+      // find the document view associated with the document
+      TextualDocumentView t = null;
+      for (Resource r : Gate.getCreoleRegister().getAllInstances(
+          "gate.gui.docview.TextualDocumentView")) {
+        if (((TextualDocumentView)r).getDocument().getName()
+          .equals(doc.getName())) {
+          t = (TextualDocumentView)r;
+          break;
+        }
+      }
+
+      if (t != null && t.getOwner() != null) {
+        // display the annotation sets view
+        t.getOwner().setRightView(0);
+        try {
+          // scroll to the expression that matches the query result
+          t.getTextView().scrollRectToVisible(
+            t.getTextView().modelToView(
+            annotation.getStartNode().getOffset().intValue()));
+        } catch (BadLocationException e) {
+          e.printStackTrace();
+          return;
+        }
+        // select the expression that matches the query result
+        t.getTextView().select(
+          annotation.getStartNode().getOffset().intValue(),
+          annotation.getEndNode().getOffset().intValue());
+      }
+
+      // find the annotation sets view associated with the document
+      for (Resource r : Gate.getCreoleRegister().getAllInstances(
+          "gate.gui.docview.AnnotationSetsView")) {
+        AnnotationSetsView asv = (AnnotationSetsView)r;
+        if (asv.getDocument() != null
+        && asv.isActive()
+        && asv.getDocument().getName().equals(doc.getName())) {
+          // look if there is the type displayed
+          String type = annotation.getType();
+          if (asname.equals(Constants.DEFAULT_ANNOTATION_SET_NAME)
+          && doc.getAnnotations().getAllTypes().contains(type)) {
+            asv.setTypeSelected(null, type, true);
+          } else if (doc.getAnnotationSetNames().contains(asname)
+          && doc.getAnnotations(asname).getAllTypes().contains(type)) {
+            asv.setTypeSelected(asname, type, true);
+          }
+        }
+      }
+
+      diffTable.requestFocusInWindow();
+
+      } catch (gate.util.GateException e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
   protected class CloseAction extends AbstractAction {
     public CloseAction(){
       super("Close");
@@ -916,100 +1181,139 @@ public class AnnotationDiffGUI extends JFrame{
       }
       if (pairings.size() == 0) { return component; }
       AnnotationDiffer.Pairing pairing = pairings.get(rowModel);
+      // set fore and background colours
       component.setBackground(isSelected ? table.getSelectionBackground() :
         diffTableModel.getBackgroundAt(rowModel, column));
       component.setForeground(isSelected ? table.getSelectionForeground() :
         table.getForeground());
+      if (!(component instanceof JComponent)) { return component; }
       // add tooltips for each cell, disable some checkboxes
-      if (component instanceof JComponent) {
-        String tip;
-        try {
-        switch (colModel){
-          case DiffTableModel.COL_KEY_MOVE:
-            tip = "Select this key annotation to move";
-            if (pairing.getKey() == null) {
-              tip = "There is no key annotation";
+      // shorten features column values
+      String tip;
+      try {
+      switch (colModel){
+        case DiffTableModel.COL_KEY_MOVE:
+          tip = (pairing.getKey() == null) ?
+            "There is no key annotation"
+          : "Select this key annotation to move";
+          component.setEnabled(pairing.getKey() != null);
+          ((JCheckBox)component).setSelected(keyMoveValueRows.get(rowModel));
+          break;
+        case DiffTableModel.COL_RES_MOVE:
+          tip = (pairing.getResponse() == null) ?
+            "There is no response annotation"
+          : "Select this response annotation to move";
+          component.setEnabled(pairing.getResponse() != null);
+          ((JCheckBox)component).setSelected(resMoveValueRows.get(rowModel));
+           break;
+        case DiffTableModel.COL_KEY_STRING:
+          Annotation key = pairing.getKey();
+          if (key == null) {
+            tip = null;
+          } else { // reformat the text
+            tip = keyDoc.getContent().getContent(
+                key.getStartNode().getOffset(),
+                key.getEndNode().getOffset()).toString();
+            if (tip.length() > 1000) {
+              tip = tip.substring(0, 1000 / 2) + "<br>...<br>"
+                + tip.substring(tip.length() - (1000 / 2));
             }
-            component.setEnabled(pairing.getKey() != null);
-            ((JCheckBox)component).setSelected(keyMoveValueRows.get(rowModel));
-            break;
-          case DiffTableModel.COL_RES_MOVE:
-            tip = "Select this response annotation to move";
-            if (pairing.getResponse() == null) {
-              tip = "There is no response annotation";
+            tip = keyDoc.getContent().getContent(
+              Math.max(0, key.getStartNode().getOffset()-40),
+              Math.max(0, key.getStartNode().getOffset())).toString() +
+              "<strong>" + tip + "</strong>" +
+              keyDoc.getContent().getContent(
+              Math.min(keyDoc.getContent().size(),
+                key.getEndNode().getOffset()),
+              Math.min(keyDoc.getContent().size(),
+                key.getEndNode().getOffset()+40)).toString();
+            tip = tip.replaceAll("\\s*\n\\s*", "<br>");
+            tip = tip.replaceAll("\\s+", " ");
+            tip = "<html><table width=\""+(tip.length() > 150? "500": "100%")
+              + "\" border=\"0\" cellspacing=\"0\">"
+              + "<tr><td>" + tip + "</td></tr></table></html>";
+          }
+          break;
+        case DiffTableModel.COL_KEY_FEATURES:
+          if (pairing.getKey() == null) {
+            tip = null;
+          } else {
+            String features = pairing.getKey().getFeatures().toString();
+            tip = features + "<br><small><i>To edit, double-click, press F2," +
+              "Backspace, character or digit.</i></small>";
+            tip = "<html><table width=\""+(tip.length() > 150? "500": "100%")
+              + "\" border=\"0\" cellspacing=\"0\">"
+              + "<tr><td>" + tip + "</td></tr></table></html>";
+            if (features.length() > maxCellLength) {
+              features = features.substring(0, maxCellLength / 2) + "..."
+                + features.substring(features.length() - (maxCellLength / 2));
             }
-            component.setEnabled(pairing.getResponse() != null);
-            ((JCheckBox)component).setSelected(resMoveValueRows.get(rowModel));
-             break;
-          case DiffTableModel.COL_KEY_STRING:
-            Annotation key = pairing.getKey();
-            if (key == null) {
-              tip = null;
-            } else { // reformat the text
-              tip = keyDoc.getContent().getContent(
-                  key.getStartNode().getOffset(),
-                  key.getEndNode().getOffset()).toString();
-              if (tip.length() > 1000) {
-                tip = tip.substring(0, 1000 / 2) + "<br>...<br>"
-                  + tip.substring(tip.length() - (1000 / 2));
-              }
-              tip = keyDoc.getContent().getContent(
-                Math.max(0, key.getStartNode().getOffset()-30),
-                Math.max(0, key.getStartNode().getOffset())).toString() +
-                "<strong>" + tip + "</strong>" +
-                keyDoc.getContent().getContent(
-                Math.min(keyDoc.getContent().size(),
-                  key.getEndNode().getOffset()),
-                Math.min(keyDoc.getContent().size(),
-                  key.getEndNode().getOffset()+30)).toString();
-              tip = tip.replaceAll("\\s*\n\\s*", "<br>");
-              tip = tip.replaceAll("\\s+", " ");
-              tip = (tip.length() > 100) ?
-                "<html><table width=\"500\" border=\"0\" cellspacing=\"0\">"
-                    + "<tr><td>" + tip + "</td></tr></table></html>"
-                : "<html>" + tip + "</html>";
+            ((JLabel)component).setText(features);
+          }
+          break;
+        case DiffTableModel.COL_MATCH: tip =
+          "correct =, partial ~, mismatch <>, spurious ?-, missing -?";
+          break;
+        case DiffTableModel.COL_RES_STRING:
+          Annotation response = pairing.getResponse();
+          if (response == null) {
+            tip = null;
+          } else { // reformat the text
+            tip = resDoc.getContent().getContent(
+                response.getStartNode().getOffset(),
+                response.getEndNode().getOffset()).toString();
+            if (tip.length() > 1000) {
+              tip = tip.substring(0, 1000 / 2) + "<br>...<br>"
+                + tip.substring(tip.length() - (1000 / 2));
             }
-            break;
-          case DiffTableModel.COL_MATCH: tip =
-            "correct =, partial ~, mismatch <>, spurious ?-, missing -?";
-            break;
-          case DiffTableModel.COL_RES_STRING:
-            Annotation response = pairing.getResponse();
-            if (response == null) {
-              tip = null;
-            } else { // reformat the text
-              tip = resDoc.getContent().getContent(
-                  response.getStartNode().getOffset(),
-                  response.getEndNode().getOffset()).toString();
-              if (tip.length() > 1000) {
-                tip = tip.substring(0, 1000 / 2) + "<br>...<br>"
-                  + tip.substring(tip.length() - (1000 / 2));
-              }
-              tip = resDoc.getContent().getContent(
-                Math.max(0, response.getStartNode().getOffset()-30),
-                Math.max(0, response.getStartNode().getOffset())).toString() +
-                "<strong>" + tip + "</strong>" +
-                resDoc.getContent().getContent(
-                Math.min(resDoc.getContent().size(),
-                  response.getEndNode().getOffset()),
-                Math.min(resDoc.getContent().size(),
-                  response.getEndNode().getOffset()+30)).toString();
-              tip = tip.replaceAll("\\s*\n\\s*", "<br>");
-              tip = tip.replaceAll("\\s+", " ");
-              tip = (tip.length() > 100) ?
-                "<html><table width=\"500\" border=\"0\" cellspacing=\"0\">"
-                    + "<tr><td>" + tip + "</td></tr></table></html>"
-                : "<html>" + tip + "</html>";
+            tip = resDoc.getContent().getContent(
+              Math.max(0, response.getStartNode().getOffset()-40),
+              Math.max(0, response.getStartNode().getOffset())).toString() +
+              "<strong>" + tip + "</strong>" +
+              resDoc.getContent().getContent(
+              Math.min(resDoc.getContent().size(),
+                response.getEndNode().getOffset()),
+              Math.min(resDoc.getContent().size(),
+                response.getEndNode().getOffset()+40)).toString();
+            tip = tip.replaceAll("\\s*\n\\s*", "<br>");
+            tip = tip.replaceAll("\\s+", " ");
+            tip = "<html><table width=\""+(tip.length() > 150? "500": "100%")
+              + "\" border=\"0\" cellspacing=\"0\">"
+              + "<tr><td>" + tip + "</td></tr></table></html>";
+          }
+          break;
+        case DiffTableModel.COL_RES_FEATURES:
+          if (pairing.getResponse() == null) {
+            tip = null;
+          } else {
+            String features = pairing.getResponse().getFeatures().toString();
+            tip = features + "<br><small><i>To edit, double-click, press F2," +
+              "Backspace, character or digit.</i></small>";
+            tip = "<html><table width=\""+(tip.length() > 150? "500": "100%")
+              + "\" border=\"0\" cellspacing=\"0\">"
+              + "<tr><td>" + tip + "</td></tr></table></html>";
+            if (features.length() > maxCellLength) {
+              features = features.substring(0, maxCellLength / 2) + "..."
+                + features.substring(features.length() - (maxCellLength / 2));
             }
-            break;
-          default: tip = null;
-        }
-        } catch(InvalidOffsetException ioe){
-          //this should never happen
-          throw new GateRuntimeException(ioe);
-        }
-        ((JComponent)component).setToolTipText(tip);
+            ((JLabel)component).setText(features);
+          }
+          break;
+        default:
+          Annotation ann = (colModel < DiffTableModel.COL_MATCH) ?
+            pairing.getKey() : pairing.getResponse();
+          if (ann == null) {
+            tip = null;
+          } else {
+            tip = "<html><small><i>To edit, double-click, press F2,<br>" +
+              "Backspace, character or digit.</i></small></html>";
+          }
       }
+      } catch(InvalidOffsetException ioe){
+        //this should never happen
+        throw new GateRuntimeException(ioe);
+      }
+      ((JComponent)component).setToolTipText(tip);
       return component;
     }
   }
@@ -1091,7 +1395,6 @@ public class AnnotationDiffGUI extends JFrame{
     }
 
     public Object getValueAt(int row, int column){
-      final int maxValueLength = 50;
       AnnotationDiffer.Pairing pairing = pairings.get(row);
       Annotation key = pairing.getKey();
       Annotation res = pairing.getResponse();
@@ -1116,9 +1419,9 @@ public class AnnotationDiffGUI extends JFrame{
             throw new GateRuntimeException(ioe);
           }
           // cut annotated text in the middle if too long
-          if (keyStr.length() > maxValueLength) {
-            keyStr = keyStr.substring(0, maxValueLength / 2) + "..."
-              + keyStr.substring(keyStr.length() - (maxValueLength / 2));
+          if (keyStr.length() > maxCellLength) {
+            keyStr = keyStr.substring(0, maxCellLength / 2) + "..."
+              + keyStr.substring(keyStr.length() - (maxCellLength / 2));
           }
           return keyStr;
         case COL_KEY_FEATURES: return key == null ? "" :
@@ -1140,9 +1443,9 @@ public class AnnotationDiffGUI extends JFrame{
             //this should never happen
             throw new GateRuntimeException(ioe);
           }
-          if (resStr.length() > maxValueLength) {
-            resStr = resStr.substring(0, maxValueLength / 2) + "..."
-              + resStr.substring(resStr.length() - (maxValueLength / 2));
+          if (resStr.length() > maxCellLength) {
+            resStr = resStr.substring(0, maxCellLength / 2) + "..."
+              + resStr.substring(resStr.length() - (maxCellLength / 2));
           }
           return resStr;
         case COL_RES_FEATURES: return res == null ? "" :
@@ -1192,6 +1495,9 @@ public class AnnotationDiffGUI extends JFrame{
           id = keyAS.add(Long.valueOf((String)aValue),
             key.getEndNode().getOffset(), key.getType(), key.getFeatures());
           keyAS.remove(key);
+          statusLabel.setText("Offset changed: " +
+            key.getStartNode().getOffset() + " -> " + aValue + ".");
+          statusLabel.setForeground(Color.BLACK);
           break;
         case COL_KEY_END:
           if (Long.valueOf((String) aValue)
@@ -1199,17 +1505,24 @@ public class AnnotationDiffGUI extends JFrame{
           id = keyAS.add(key.getStartNode().getOffset(),
             Long.valueOf((String)aValue), key.getType(), key.getFeatures());
           keyAS.remove(key);
+          statusLabel.setText("Offset changed: " +
+            key.getEndNode().getOffset() + " -> " + aValue + ".");
+          statusLabel.setForeground(Color.BLACK);
           break;
         case COL_KEY_FEATURES:
           keysValues = (String) aValue;
           keysValues = keysValues.replaceAll("\\s+", " ").replaceAll("[}{]", "");
           features = Factory.newFeatureMap();
-          for (String keyValue : keysValues.split(",")) {
-            String[] keyOrValue = keyValue.split("=");
-            if (keyOrValue.length != 2) { throw new NumberFormatException(); }
-              features.put(keyOrValue[0].trim(), keyOrValue[1].trim());
+          if (keysValues.length() != 0) {
+            for (String keyValue : keysValues.split(",")) {
+              String[] keyOrValue = keyValue.split("=");
+              if (keyOrValue.length != 2) { throw new NumberFormatException(); }
+                features.put(keyOrValue[0].trim(), keyOrValue[1].trim());
+            }
           }
           key.setFeatures(features);
+          statusLabel.setText("Features changed.");
+          statusLabel.setForeground(Color.BLACK);
           break;
         case COL_RES_START:
           if (Long.valueOf((String) aValue)
@@ -1217,6 +1530,9 @@ public class AnnotationDiffGUI extends JFrame{
           id = responseAS.add(Long.valueOf((String)aValue),
             res.getEndNode().getOffset(), res.getType(), res.getFeatures());
           responseAS.remove(res);
+          statusLabel.setText("Offset changed: " +
+            res.getStartNode().getOffset() + " -> " + aValue + ".");
+          statusLabel.setForeground(Color.BLACK);
           break;
         case COL_RES_END:
           if (Long.valueOf((String) aValue)
@@ -1224,26 +1540,35 @@ public class AnnotationDiffGUI extends JFrame{
           id = responseAS.add(res.getStartNode().getOffset(),
             Long.valueOf((String)aValue), res.getType(), res.getFeatures());
           responseAS.remove(res);
+          statusLabel.setText("Offset changed: " +
+            res.getEndNode().getOffset() + " -> " + aValue + ".");
+          statusLabel.setForeground(Color.BLACK);
           break;
         case COL_RES_FEATURES:
           keysValues = (String) aValue;
           keysValues = keysValues.replaceAll("\\s+", " ").replaceAll("[}{]", "");
           features = Factory.newFeatureMap();
-          for (String keyValue : keysValues.split(",")) {
-            String[] keyOrValue = keyValue.split("=");
-            if (keyOrValue.length != 2) { throw new NumberFormatException(); }
-            features.put(keyOrValue[0].trim(), keyOrValue[1].trim());
+          if (keysValues.length() != 0) {
+            for (String keyValue : keysValues.split(",")) {
+              String[] keyOrValue = keyValue.split("=");
+              if (keyOrValue.length != 2) { throw new NumberFormatException(); }
+              features.put(keyOrValue[0].trim(), keyOrValue[1].trim());
+            }
           }
           res.setFeatures(features);
+          statusLabel.setText("Features changed.");
+          statusLabel.setForeground(Color.BLACK);
           break;
       }
       }catch(InvalidOffsetException e){
         statusLabel.setText(
           "This offset is incorrect. No changes have been made.");
+        statusLabel.setForeground(Color.RED);
         return;
       }catch(NumberFormatException e) {
         statusLabel.setText(
           "The format is incorrect. No changes have been made.");
+        statusLabel.setForeground(Color.RED);
         return;
       }
       if (id != -1) {
@@ -1281,6 +1606,7 @@ public class AnnotationDiffGUI extends JFrame{
   protected HTMLExportAction htmlExportAction;
   protected DiffAction diffAction;
   protected MoveToConsensusASAction moveToConsensusASAction;
+  protected ShowDocumentAction showDocumentAction;
 
   protected JList featuresList;
   protected DefaultListModel featureslistModel;
@@ -1303,6 +1629,7 @@ public class AnnotationDiffGUI extends JFrame{
   protected JTextField consensusASTextField;
   protected JButton moveToConsensusBtn;
   protected JButton htmlExportBtn;
+  protected JButton showDocumentBtn;
 
   protected JPanel resultsPane;
   protected JLabel correctLbl;
@@ -1331,4 +1658,5 @@ public class AnnotationDiffGUI extends JFrame{
     matchLabel[AnnotationDiffer.SPURIOUS_TYPE] = "?-";
     matchLabel[AnnotationDiffer.MISSING_TYPE] = "-?";
   }
+  protected final int maxCellLength = 40;
 }
