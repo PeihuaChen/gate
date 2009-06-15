@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="plugins/Ontology_Based_Gazetteer/src"/>
 	<classpathentry kind="src" output="plugins/Stanford/classes" path="plugins/Stanford/src"/>
 	<classpathentry kind="src" output="plugins/chinese/build" path="plugins/chinese/src"/>
 	<classpathentry kind="src" output="plugins/google/build" path="plugins/google/src"/>
