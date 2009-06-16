@@ -275,6 +275,9 @@ public class Alignment implements Serializable {
   protected void fireAnnotationsAligned(Annotation srcAnnotation, String srcAS,
           Document srcDocument, Annotation targetAnnotation, String tgtAS,
           Document targetDocument) {
+    if(listeners == null) {
+      listeners = new ArrayList<AlignmentListener>();
+    }
     for(AlignmentListener aListener : listeners) {
       aListener.annotationsAligned(srcAnnotation, srcAS, srcDocument,
               targetAnnotation, tgtAS, targetDocument);
@@ -293,6 +296,9 @@ public class Alignment implements Serializable {
   protected void fireAnnotationsUnAligned(Annotation srcAnnotation,
           String srcAS, Document srcDocument, Annotation targetAnnotation,
           String tgtAS, Document targetDocument) {
+    if(listeners == null) {
+      listeners = new ArrayList<AlignmentListener>();
+    }
     for(AlignmentListener aListener : listeners) {
       aListener.annotationsUnaligned(srcAnnotation, srcAS, srcDocument,
               targetAnnotation, tgtAS, targetDocument);
@@ -304,6 +310,9 @@ public class Alignment implements Serializable {
    * @return
    */
   public List<AlignmentListener> getAlignmentListeners() {
+    if(listeners == null) {
+      listeners = new ArrayList<AlignmentListener>();
+    }
     return new ArrayList<AlignmentListener>(this.listeners);
   }
 }
