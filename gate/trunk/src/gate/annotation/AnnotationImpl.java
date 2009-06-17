@@ -103,13 +103,20 @@ public class AnnotationImpl extends AbstractFeatureBearer
     */
 
   public int hashCode(){
-    int hashCodeRes = 0;
-    if (start != null && start.getOffset() != null)
-       hashCodeRes ^= start.getOffset().hashCode();
-    if (end != null && end.getOffset() != null)
-      hashCodeRes ^= end.getOffset().hashCode();
-    if(features != null)
-      hashCodeRes ^= features.hashCode();
+    // hash code based on type, id, start and end offsets (which should never
+    // change once the annotation has been created).
+    int hashCodeRes = 17;
+    hashCodeRes = 31*hashCodeRes
+        + ((type == null) ? 0 : type.hashCode());
+    hashCodeRes = 31*hashCodeRes
+        + ((id == null) ? 0 : id.hashCode());
+    hashCodeRes = 31*hashCodeRes
+        + ((start == null || start.getOffset() == null)
+            ? 0 : start.getOffset().hashCode());
+    hashCodeRes = 31*hashCodeRes
+        + ((end == null || end.getOffset() == null)
+            ? 0 : end.getOffset().hashCode());
+
     return  hashCodeRes;
   }// hashCode
 
