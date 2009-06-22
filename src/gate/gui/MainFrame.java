@@ -957,9 +957,8 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     resourcesTree.addMouseListener(new MouseAdapter() {
       public void mousePressed(MouseEvent e) {
-        
-//        TreePath path = resourcesTree.getPathForLocation(e.getX(), e.getY());
-        TreePath path = resourcesTree.getClosestPathForLocation(e.getX(), e.getY());
+        TreePath path =
+          resourcesTree.getClosestPathForLocation(e.getX(), e.getY());
         if(e.isPopupTrigger()
         && !resourcesTree.isPathSelected(path)) {
           // if right click outside the selection then reset selection
@@ -977,7 +976,6 @@ public class MainFrame extends JFrame implements ProgressListener,
         // where inside the tree?
         int x = e.getX();
         int y = e.getY();
-//        TreePath path = resourcesTree.getPathForLocation(x, y);
         TreePath path = resourcesTree.getClosestPathForLocation(x, y);
         JPopupMenu popup = null;
         Handle handle = null;
@@ -1900,25 +1898,39 @@ public class MainFrame extends JFrame implements ProgressListener,
       super("Annotation Diff", getIcon("annotation-diff"));
       putValue(SHORT_DESCRIPTION,
         "Compare annotations and features in one or two documents");
-    }// NewAnnotDiffAction
-
+    }
     public void actionPerformed(ActionEvent e) {
-      // AnnotDiffDialog annotDiffDialog = new
-      // AnnotDiffDialog(MainFrame.this);
-      // annotDiffDialog.setTitle("Annotation Diff Tool");
-      // annotDiffDialog.setVisible(true);
-      AnnotationDiffGUI frame = new AnnotationDiffGUI("Annotation Diff Tool");
+      // find the handle in the resource tree for the displayed view
+      Enumeration nodesEnum = resourcesTreeRoot.preorderEnumeration();
+      DefaultMutableTreeNode node;
+      Handle handle = null;
+      while(nodesEnum.hasMoreElements()) {
+        node = (DefaultMutableTreeNode)nodesEnum.nextElement();
+        if ((node.getUserObject() instanceof Handle)
+         && (mainTabbedPane.getSelectedComponent().equals(
+            ((Handle)node.getUserObject()).getLargeView()))) {
+          handle = (Handle)node.getUserObject();
+          break;
+        }
+      }
+      String documentName = null;
+      if(handle != null
+      && handle.getTarget() instanceof Document) {
+        documentName = ((Document)handle.getTarget()).getName();
+      }
+      AnnotationDiffGUI frame;
+      if (documentName != null) {
+        // use the document displayed in the view to compute the differences
+        frame = new AnnotationDiffGUI("Annotation Diff Tool",
+          documentName, documentName, null, null, null, null);
+      } else {
+        frame = new AnnotationDiffGUI("Annotation Diff Tool");
+      }
       frame.pack();
-      try {
-        frame.setIconImage(((ImageIcon)getIcon("annotation-diff")).getImage());
-      }
-      catch(Exception ex) {
-        // ignore exceptions here - this is only for aesthetic reasons
-      }
       frame.setLocationRelativeTo(MainFrame.this);
       frame.setVisible(true);
-    }// actionPerformed();
-  }// class NewAnnotDiffAction
+    }
+  }
 
   /**
    * This class represent an action which brings up the corpus
@@ -3178,21 +3190,20 @@ public class MainFrame extends JFrame implements ProgressListener,
     public void actionPerformed(ActionEvent e) {
       // for each element in the tree look if it is in the tab panel
       // if yes, remove it from the tab panel
-      SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-          Enumeration nodesEnum = resourcesTreeRoot.preorderEnumeration();
-          DefaultMutableTreeNode node;
-          while(nodesEnum.hasMoreElements()) {
-            node = (DefaultMutableTreeNode)nodesEnum.nextElement();
-            if ((node.getUserObject() instanceof Handle)
-             && (mainTabbedPane.indexOfComponent(
-                ((Handle)node.getUserObject()).getLargeView()) != -1)) {
-              Handle handle = (Handle)node.getUserObject();
-              (new CloseViewAction(handle)).actionPerformed(null);
-            }
-          }
+      Enumeration nodesEnum = resourcesTreeRoot.preorderEnumeration();
+      DefaultMutableTreeNode node;
+      while(nodesEnum.hasMoreElements()) {
+        node = (DefaultMutableTreeNode)nodesEnum.nextElement();
+        if ((node.getUserObject() instanceof Handle)
+         && (mainTabbedPane.indexOfComponent(
+            ((Handle)node.getUserObject()).getLargeView()) != -1)) {
+          final Handle handle = (Handle)node.getUserObject();
+          SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            (new CloseViewAction(handle)).actionPerformed(null);
+          }});
         }
-      });
+      }
     }
   }
 
