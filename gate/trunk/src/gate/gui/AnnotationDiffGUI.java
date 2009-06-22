@@ -47,6 +47,7 @@ public class AnnotationDiffGUI extends JFrame{
 
   public AnnotationDiffGUI(String title){
     super(title);
+    setIconImage(((ImageIcon)MainFrame.getIcon("annotation-diff")).getImage());
     MainFrame.getGuiRoots().add(this);
     setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     initLocalData();
@@ -55,14 +56,69 @@ public class AnnotationDiffGUI extends JFrame{
     populateGUI();
   }
 
+  /**
+   * Set all the parameters and compute the differences.
+   *
+   * @param title title of the frame
+   * @param keyDocumentName name of the key document
+   * @param responseDocumentName name of the response document
+   * @param keyAnnotationSetName key annotation set name, may be null
+   * @param responseAnnotationSetName response annotation set name, may be null
+   * @param annotationType annoation type, may be null
+   * @param featureName feature name, may be null
+   */
+
+  public AnnotationDiffGUI(String title,
+    final String keyDocumentName, final String responseDocumentName,
+    final String keyAnnotationSetName, final String responseAnnotationSetName,
+    final String annotationType, final String featureName){
+    super(title);
+    setIconImage(((ImageIcon)MainFrame.getIcon("annotation-diff")).getImage());
+    MainFrame.getGuiRoots().add(this);
+    setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+    initLocalData();
+    initGUI();
+    initListeners();
+    populateGUI();
+    SwingUtilities.invokeLater(new Runnable(){ public void run(){
+      keyDocCombo.setSelectedItem(keyDocumentName);
+      resDocCombo.setSelectedItem(responseDocumentName);
+      if (keyAnnotationSetName != null) {
+        keySetCombo.setSelectedItem(keyAnnotationSetName);
+      }
+      if (responseAnnotationSetName != null) {
+        resSetCombo.setSelectedItem(responseAnnotationSetName);
+      }
+      if (annotationType != null) {
+        annTypeCombo.setSelectedItem(annotationType);
+      }
+      if (featureName == null
+       || featureName.equals("None")) {
+        noFeaturesBtn.setSelected(true);
+      } else if (featureName.equals("All")
+              || featureName.equals("Expand All")) {
+        allFeaturesBtn.setSelected(true);
+      } else {
+        significantFeatures.clear();
+        significantFeatures.add(featureName);
+        someFeaturesBtn.setSelected(true);
+      }
+      SwingUtilities.invokeLater(new Runnable(){ public void run(){
+        diffAction.actionPerformed(new ActionEvent(this, -1, "corpus quality"));
+      }});
+    }});
+  }
+
   protected void initLocalData(){
     differ = new AnnotationDiffer();
     pairings = new ArrayList<AnnotationDiffer.Pairing>();
     keyMoveValueRows = new ArrayList<Boolean>();
     resMoveValueRows = new ArrayList<Boolean>();
-    significantFeatures = new HashSet();
+    significantFeatures = new HashSet<String>();
     keyDoc = null;
     resDoc = null;
+    Component root = SwingUtilities.getRoot(AnnotationDiffGUI.this);
+    standalone = (root instanceof MainFrame);
   }
 
 
@@ -315,12 +371,14 @@ public class AnnotationDiffGUI extends JFrame{
     //COLUMN 8
     constraints.gridx = 8;
     constraints.gridheight = 2;
-    showDocumentAction = new ShowDocumentAction();
-    showDocumentAction.setEnabled(false);
-    showDocumentBtn = new JButton(showDocumentAction);
-    showDocumentBtn.setToolTipText("Use first the \"Compute Differences\"" +
-      " button then select an annotation in the table.");
-    resultsPane.add(showDocumentBtn, constraints);
+    if (!standalone) {
+      showDocumentAction = new ShowDocumentAction();
+      showDocumentAction.setEnabled(false);
+      showDocumentBtn = new JButton(showDocumentAction);
+      showDocumentBtn.setToolTipText("Use first the \"Compute Differences\"" +
+        " button then select an annotation in the table.");
+      resultsPane.add(showDocumentBtn, constraints);
+    }
     htmlExportAction = new HTMLExportAction();
     htmlExportAction.setEnabled(false);
     htmlExportBtn = new JButton(htmlExportAction);
@@ -561,8 +619,8 @@ public class AnnotationDiffGUI extends JFrame{
            if(ret == JOptionPane.OK_OPTION){
              significantFeatures.clear();
              int[] selIdxs = featuresList.getSelectedIndices();
-             for(int i = 0; i < selIdxs.length; i++){
-               significantFeatures.add(featureslistModel.get(selIdxs[i]));
+             for (int selIdx : selIdxs) {
+               significantFeatures.add((String) featureslistModel.get(selIdx));
              }
            }
         }
@@ -683,7 +741,8 @@ public class AnnotationDiffGUI extends JFrame{
         if (destination.length() == 0) {
           consensusASTextField.setText("consensus");
         }
-        if (keyDoc.getAnnotationSetNames().contains(destination)) {
+        if (keyDoc != null
+         && keyDoc.getAnnotationSetNames().contains(destination)) {
           statusLabel.setText("Be careful, the annotation set " + destination
             + " already exists.");
           statusLabel.setForeground(Color.RED);
@@ -715,6 +774,12 @@ public class AnnotationDiffGUI extends JFrame{
         }
       }
     });
+
+    // add a key shortcut for the 'move to consensus' action
+    getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+      .put(KeyStroke.getKeyStroke("shift alt RIGHT"), "move to consensus");
+    getRootPane().getActionMap().put("move to consensus",
+      moveToConsensusASAction);
   }
 
   public void pack(){
@@ -884,6 +949,9 @@ public class AnnotationDiffGUI extends JFrame{
         "<html>Move selected annotations to the destination annotation set" +
           "<br>and hide their paired annotations if not moved." +
           "&nbsp;&nbsp;<font color=\"#667799\"><small>Alt-Right" +
+          "</small></font>&nbsp;&nbsp;<br>" +
+          "Move all matching annotations." +
+          "&nbsp;&nbsp;<font color=\"#667799\"><small>Shift+Alt-Right" +
           "</small></font>&nbsp;&nbsp;</html>");
       putValue(MNEMONIC_KEY, KeyEvent.VK_RIGHT);
       putValue(SMALL_ICON, MainFrame.getIcon("crystal-clear-action-loopnone"));
@@ -897,6 +965,15 @@ public class AnnotationDiffGUI extends JFrame{
         keyDoc.getAnnotations((String)keySetCombo.getSelectedItem());
       AnnotationSet responseAS =
         resDoc.getAnnotations((String)resSetCombo.getSelectedItem());
+      if ((evt.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
+        // add all matching key annotations whatever their selection state
+        for (int row = 0; row < pairings.size(); row++) {
+          if (diffTable.getValueAt(row, diffTable.convertColumnIndexToView(
+            DiffTableModel.COL_MATCH)).equals("=")) {
+            keyMoveValueRows.set(diffTable.rowViewToModel(row), true);
+          }
+        }
+      }
       int countMoved = 0, countMarked = 0;
       for (int row = 0; row < pairings.size(); row++) {
         if (keyMoveValueRows.get(row)) {
@@ -936,8 +1013,8 @@ public class AnnotationDiffGUI extends JFrame{
         statusLabel.setForeground(Color.BLACK);
       } else {
         diffTable.requestFocusInWindow();
-        statusLabel.setText(
-          "You must select annotations by ticking the check boxes in the table.");
+        statusLabel.setText("Check boxes in first two columns." +
+          "Add Shift Key to move all matching annotations.");
         statusLabel.setForeground(Color.RED);
       }
     }
@@ -1075,7 +1152,6 @@ public class AnnotationDiffGUI extends JFrame{
       putValue(MNEMONIC_KEY, KeyEvent.VK_UP);
     }
     public void actionPerformed(ActionEvent evt){
-
       int rowModel = diffTable.rowViewToModel(diffTable.getSelectedRow());
       boolean isKeySelected = (diffTable.convertColumnIndexToModel(
         diffTable.getSelectedColumn()) < DiffTableModel.COL_MATCH);
@@ -1231,7 +1307,9 @@ public class AnnotationDiffGUI extends JFrame{
             tip = tip.replaceAll("\\s+", " ");
             tip = "<html><table width=\""+(tip.length() > 150? "500": "100%")
               + "\" border=\"0\" cellspacing=\"0\">"
-              + "<tr><td>" + tip + "</td></tr></table></html>";
+              + "<tr><td>" + tip + "</td></tr><tr><td>";
+            tip += "<small><i>↓ = new line, → = tab, · = space</i></small>";
+            tip += "</td></tr></table></html>";
           }
           break;
         case DiffTableModel.COL_KEY_FEATURES:
@@ -1279,7 +1357,9 @@ public class AnnotationDiffGUI extends JFrame{
             tip = tip.replaceAll("\\s+", " ");
             tip = "<html><table width=\""+(tip.length() > 150? "500": "100%")
               + "\" border=\"0\" cellspacing=\"0\">"
-              + "<tr><td>" + tip + "</td></tr></table></html>";
+              + "<tr><td>" + tip + "</td></tr><tr><td>";
+            tip += "<small><i>↓ = new line, → = tab, · = space</i></small>";
+            tip += "</td></tr></table></html>";
           }
           break;
         case DiffTableModel.COL_RES_FEATURES:
@@ -1423,6 +1503,10 @@ public class AnnotationDiffGUI extends JFrame{
             keyStr = keyStr.substring(0, maxCellLength / 2) + "..."
               + keyStr.substring(keyStr.length() - (maxCellLength / 2));
           }
+          // use special characters for newline, tab and space
+          keyStr = keyStr.replaceAll("(?:\r?\n)|\r", "↓");
+          keyStr = keyStr.replaceAll("\t", "→");
+          keyStr = keyStr.replaceAll(" ", "·");
           return keyStr;
         case COL_KEY_FEATURES: return key == null ? "" :
           key.getFeatures().toString();
@@ -1447,6 +1531,10 @@ public class AnnotationDiffGUI extends JFrame{
             resStr = resStr.substring(0, maxCellLength / 2) + "..."
               + resStr.substring(resStr.length() - (maxCellLength / 2));
           }
+          // use special characters for newline, tab and space
+          resStr = resStr.replaceAll("(?:\r?\n)|\r", "↓");
+          resStr = resStr.replaceAll("\t", "→");
+          resStr = resStr.replaceAll(" ", "·");
           return resStr;
         case COL_RES_FEATURES: return res == null ? "" :
           res.getFeatures().toString();
@@ -1597,7 +1685,7 @@ public class AnnotationDiffGUI extends JFrame{
   protected List<Boolean> resMoveValueRows;
   protected Document keyDoc;
   protected Document resDoc;
-  protected Set significantFeatures;
+  protected Set<String> significantFeatures;
   protected List<Resource> documents;
   protected List<AnnotationSet> keySets;
   protected List<AnnotationSet> resSets;
@@ -1658,5 +1746,8 @@ public class AnnotationDiffGUI extends JFrame{
     matchLabel[AnnotationDiffer.SPURIOUS_TYPE] = "?-";
     matchLabel[AnnotationDiffer.MISSING_TYPE] = "-?";
   }
+  /** Maximum number of characters for Key, Response and Features columns. */
   protected final int maxCellLength = 40;
+  /** Is this GUI standalone or embedded in GATE? */
+  protected boolean standalone;
 }
