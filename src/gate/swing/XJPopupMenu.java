@@ -37,13 +37,16 @@ public class XJPopupMenu extends JPopupMenu {
    * to the default JPopupMenu layout manager.
    * @param aFlag true if the popupmenu is visible
    */
-  @Override
   public void setVisible(boolean aFlag) {
     super.setVisible(aFlag);
     for (Component component : getComponents()) {
       if (component instanceof JSeparator) {
+        JSeparator separator = (JSeparator) component;
         // use the popupmenu width to set the separators width
-        component.setPreferredSize(new Dimension(getWidth()-2, 3));
+        separator.setPreferredSize(new Dimension(
+          (int) getLayout().preferredLayoutSize(this).getWidth()
+          - getInsets().left - getInsets().right,
+          separator.getHeight()));
       }
     }
     revalidate();
