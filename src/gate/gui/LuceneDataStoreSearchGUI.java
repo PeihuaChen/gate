@@ -66,17 +66,7 @@ import javax.swing.event.*;
  * <br>
  * Features: query auto-completion, syntactic error checker,
  * display of very big values, export of results in a file,
- * 16 different type of statistics.
- * <br>
- * TODO:
- * <ul>
- * <li>could be interesting to have statistics per document,
- * it is just adding one condition to the query that retrieves data out of
- *   the index</li>
- * <li>add shortcut to autocompletion ?</li>
- * <li>where to store the configuration for shortcut: user config or datastore ?</li>
- * <li>plus other todos in this file</li>
- * </ul>
+ * 16 types of statistics, store display settings in gate config.
  */
 @CreoleResource(name = "Lucene Datastore Searcher", guiType = GuiType.LARGE,
     resourceDisplayed = "gate.creole.annic.SearchableDataStore",
@@ -433,14 +423,12 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       +"<br>Use [Control]+[Enter] to add a new line.</html>");
     queryTextArea.setLineWrap(true);
     gbc.gridheight = 3;
-    gbc.weightx = 2;
-    gbc.weighty = 1;
+    gbc.weightx = 1;
     gbc.fill = GridBagConstraints.BOTH;
     gbc.insets = new Insets(0, 0, 0, 4);
     topPanel.add(new JScrollPane(queryTextArea), gbc);
     gbc.gridheight = 1;
     gbc.weightx = 0;
-    gbc.weighty = 0;
     gbc.insets = new Insets(0, 0, 0, 0);
 
     // second column, first row
@@ -668,132 +656,136 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       }
 
       private void createPopup() {
-          mousePopup = new JPopupMenu();
-          menuItem = new JMenuItem("Remove the selected result");
-          if(patternTable.getSelectedRowCount() > 1) {
-            menuItem.setText(menuItem.getText()+"s");
-          }
-          mousePopup.add(menuItem);
-          menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-              int[] rows = patternTable.getSelectedRows();
-              for(int i = 0; i < rows.length; i++) {
-                rows[i] = patternTable.rowViewToModel(rows[i]);
-              }
-              Arrays.sort(rows);
-              for(int i = rows.length - 1; i >= 0; i--) {
-                patterns.remove(rows[i]);
-              }
-              patternTable.clearSelection();
-              patternTableModel.fireTableDataChanged();
-              mousePopup.setVisible(false);
+        mousePopup = new JPopupMenu();
+        menuItem = new JMenuItem("Remove the selected result");
+        if(patternTable.getSelectedRowCount() > 1) {
+          menuItem.setText(menuItem.getText()+"s");
+        }
+        mousePopup.add(menuItem);
+        menuItem.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent ae) {
+            int[] rows = patternTable.getSelectedRows();
+            for(int i = 0; i < rows.length; i++) {
+              rows[i] = patternTable.rowViewToModel(rows[i]);
             }
-          });
+            Arrays.sort(rows);
+            for(int i = rows.length - 1; i >= 0; i--) {
+              patterns.remove(rows[i]);
+            }
+            patternTable.clearSelection();
+            patternTableModel.fireTableDataChanged();
+            mousePopup.setVisible(false);
+          }
+        });
 
-          if(patternTable.getSelectedRowCount() == 1
-          && target instanceof LuceneDataStoreImpl) {
+        if(patternTable.getSelectedRowCount() == 1
+        && target instanceof LuceneDataStoreImpl) {
           menuItem = new JMenuItem("Open the selected document");
           menuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-
               // create and display the document for this result
               int row = patternTable.rowViewToModel(
                 patternTable.getSelectedRow());
               final Pattern result = (Pattern)patterns.get(row);
               FeatureMap features = Factory.newFeatureMap();
               features.put(DataStore.DATASTORE_FEATURE_NAME, target);
-              features.put(DataStore.LR_ID_FEATURE_NAME, result.getDocumentID());
+              features.put(DataStore.LR_ID_FEATURE_NAME,result.getDocumentID());
               final Document doc;
               try {
-              doc = (Document)Factory
-                .createResource("gate.corpora.DocumentImpl", features);
-              gate.Main.getMainFrame().select(doc);
+                doc = (Document)Factory
+                  .createResource("gate.corpora.DocumentImpl", features);
               } catch (gate.util.GateException e) {
                 e.printStackTrace();
                 return;
               }
-
-              // wait 1 second until the document is displayed and then select
-              // the same expression as in the result
-              Date timeToRun = new Date(System.currentTimeMillis() + 1000);
-              Timer timer = new Timer("Annic show document timer", true);
-              timer.schedule(new TimerTask() {
-                public void run() {
-                try {
-
-                // find the document view associated with the document
-                TextualDocumentView t = null;
-                for (Resource r : Gate.getCreoleRegister().getAllInstances(
-                    "gate.gui.docview.TextualDocumentView")) {
-                  if (((TextualDocumentView)r).getDocument().getName()
-                    .equals(doc.getName())) {
-                    t = (TextualDocumentView)r;
-                    break;
+              // show the expression in the document
+              SwingUtilities.invokeLater(new Runnable() {
+              public void run() {
+                MainFrame.getInstance().select(doc);
+                // wait some time for the document to be displayed
+                Date timeToRun = new Date(System.currentTimeMillis() + 1000);
+                Timer timer = new Timer("Annic show document timer", true);
+                timer.schedule(new TimerTask() {
+                  public void run() {
+                    showExpressionInDocument(doc, result);
                   }
-                }
-
-                if (t != null && t.getOwner() != null) {
-                  // display the annotation sets view
-                  t.getOwner().setRightView(0);
-                  try {
-                    // scroll to the expression that matches the query result
-                    t.getTextView().scrollRectToVisible(
-                      t.getTextView().modelToView(
-                      result.getRightContextEndOffset()));
-                  } catch (BadLocationException e) {
-                    e.printStackTrace();
-                    return;
-                  }
-                  // select the expression that matches the query result
-                  t.getTextView().select(
-                    result.getLeftContextStartOffset(),
-                    result.getRightContextEndOffset());
-                  t.getTextView().requestFocus();
-                }
-
-                // find the annotation sets view associated with the document
-                for (Resource r : Gate.getCreoleRegister().getAllInstances(
-                    "gate.gui.docview.AnnotationSetsView")) {
-                  AnnotationSetsView asv = (AnnotationSetsView)r;
-                  if (asv.isActive()
-                  && asv.getDocument().getName().equals(doc.getName())) {
-                    // display the same annotation types as in Annic
-                    for (int row = 0; row < numAnnotationRows; row++) {
-                      if (annotationRows[row][DISPLAY].equals("false")) {
-                        continue;
-                      }
-                      String type = annotationRows[row][ANNOTATION_TYPE];
-                      if (type.equals(Constants.ANNIC_TOKEN)) {
-                        // not interesting to display them
-                        continue;
-                      }
-                      // look if there is the type displayed in Annic
-                      String asn = result.getAnnotationSetName();
-                      if (asn.equals(Constants.DEFAULT_ANNOTATION_SET_NAME)
-                      && doc.getAnnotations().getAllTypes().contains(type)) {
-                        asv.setTypeSelected(null, type, true);
-                      } else if (doc.getAnnotationSetNames().contains(asn)
-                      && doc.getAnnotations(asn).getAllTypes().contains(type)) {
-                        asv.setTypeSelected(asn, type, true);
-                      }
-                    }
-                    break;
-                  }
-                }
-
-                } catch (gate.util.GateException e) {
-                  e.printStackTrace();
-                  return;
-                }
-                }
-              }, timeToRun);
+                }, timeToRun);
+              }});
             }
           });
           mousePopup.add(menuItem);
-          }
-
+        }
       }
-    });
+
+      private void showExpressionInDocument(Document doc, Pattern result) {
+        try {
+        // find the document view associated with the document
+        TextualDocumentView t = null;
+        for (Resource r : Gate.getCreoleRegister().getAllInstances(
+            "gate.gui.docview.TextualDocumentView")) {
+          if (((TextualDocumentView)r).getDocument().getName()
+            .equals(doc.getName())) {
+            t = (TextualDocumentView)r;
+            break;
+          }
+        }
+
+        if (t != null && t.getOwner() != null) {
+          // display the annotation sets view
+          t.getOwner().setRightView(0);
+          try {
+            // scroll to the expression that matches the query result
+            t.getTextView().scrollRectToVisible(
+              t.getTextView().modelToView(
+              result.getRightContextEndOffset()));
+          } catch (BadLocationException e) {
+            e.printStackTrace();
+            return;
+          }
+          // select the expression that matches the query result
+          t.getTextView().select(
+            result.getLeftContextStartOffset(),
+            result.getRightContextEndOffset());
+          t.getTextView().requestFocus();
+        }
+
+        // find the annotation sets view associated with the document
+        for (Resource r : Gate.getCreoleRegister().getAllInstances(
+            "gate.gui.docview.AnnotationSetsView")) {
+          AnnotationSetsView asv = (AnnotationSetsView)r;
+          if (asv == null) { continue; }
+          if (asv.isActive()
+          && asv.getDocument().getName().equals(doc.getName())) {
+            // display the same annotation types as in Annic
+            for (int row = 0; row < numAnnotationRows; row++) {
+              if (annotationRows[row][DISPLAY].equals("false")) {
+                continue;
+              }
+              String type = annotationRows[row][ANNOTATION_TYPE];
+              if (type.equals(Constants.ANNIC_TOKEN)) {
+                // not interesting to display them
+                continue;
+              }
+              // look if there is the type displayed in Annic
+              String asn = result.getAnnotationSetName();
+              if (asn.equals(Constants.DEFAULT_ANNOTATION_SET_NAME)
+              && doc.getAnnotations().getAllTypes().contains(type)) {
+                asv.setTypeSelected(null, type, true);
+              } else if (doc.getAnnotationSetNames().contains(asn)
+              && doc.getAnnotations(asn).getAllTypes().contains(type)) {
+                asv.setTypeSelected(asn, type, true);
+              }
+            }
+            break;
+          }
+        }
+
+        } catch (gate.util.GateException e) {
+          e.printStackTrace();
+        }
+      } // private void showExpressionInDocument
+    }); // patternTable.addMouseListener
+
     // when user changes his/her selection in the rows,
     // the graphical panel should change its output to reflect the new
     // selection. in case where multiple rows are selected
@@ -873,8 +865,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     gbc.insets = new Insets(0, 0, 0, 0);
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridheight = GridBagConstraints.REMAINDER;
-    gbc.weightx = 2;
-    gbc.weighty = 2;
+    gbc.weightx = 1;
+    gbc.weighty = 1;
     bottomLeftPanel.add(tableScrollPane, gbc);
 
     /**************************
@@ -1098,7 +1090,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           +"\\}").matcher(query);
         while (matcher.find()) {
           for (int i = 0; i <= 4; i += 4) { // first then second condition
-          String type = null, feature = null, shortcut = null; row = -1;
+          String type = null, feature = null, shortcut; row = -1;
           if (matcher.group(1+i) != null
            && matcher.group(2+i) == null
            && matcher.group(3+i) == null
@@ -1539,8 +1531,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     gbc.gridx = maxColumns+1;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridheight = GridBagConstraints.REMAINDER;
-    gbc.weightx = 10;
-    gbc.weighty = 10;
+    gbc.weightx = 1;
+    gbc.weighty = 1;
     centerPanel.add(new JLabel(""), gbc);
 
     validate();
@@ -1585,7 +1577,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
     int countTotal = 0;
     try {
-      int count = 0;
+      int count;
       TreeSet<String> ts = new TreeSet<String>(stringCollator);
       ts.addAll(populatedAnnotationTypesAndFeatures.keySet());
       globalStatisticsTableModel.setRowCount(0);
@@ -3764,7 +3756,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
             // cancel any autocompletion if the user put the caret
             // outside brackets when in POPUP mode
             cleanup();
-            return;
           }
         }
       });
