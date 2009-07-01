@@ -687,11 +687,16 @@ public class DocumentStaxUtils {
    * must be filled in by the caller if required.
    * 
    * @param doc the Document to write
+   * @param annotationSets the annotations to include.  If the map
+   *         contains an entry for the key <code>null</code>, this
+   *         will be treated as the default set.  All other entries
+   *         are treated as named annotation sets.
    * @param xsw the StAX XMLStreamWriter to use for output
    * @throws GateException if an error occurs during writing
    */
-  public static void writeDocument(Document doc, XMLStreamWriter xsw,
-          String namespaceURI) throws XMLStreamException {
+  public static void writeDocument(Document doc,
+          Map<String, Collection<Annotation>> annotationSets,
+          XMLStreamWriter xsw, String namespaceURI) throws XMLStreamException {
     xsw.writeStartElement(namespaceURI, "GateDocument");
     xsw.setDefaultNamespace(namespaceURI);
     if(namespaceURI.length() > 0) {
@@ -711,45 +716,66 @@ public class DocumentStaxUtils {
     xsw.writeComment(" The document content area with serialized nodes ");
     newLine(xsw);
     newLine(xsw);
-    writeTextWithNodes(doc, xsw, namespaceURI);
+    writeTextWithNodes(doc, annotationSets.values(), xsw, namespaceURI);
     newLine(xsw);
     // Serialize as XML all document's annotation sets
     // Serialize the default AnnotationSet
     StatusListener sListener = (StatusListener)gate.gui.MainFrame
             .getListeners().get("gate.event.StatusListener");
-    if(sListener != null)
-      sListener.statusChanged("Saving the default annotation set ");
-    xsw.writeComment(" The default annotation set ");
-    newLine(xsw);
-    newLine(xsw);
-    writeAnnotationSet(doc.getAnnotations(), xsw, namespaceURI);
-    newLine(xsw);
+    if(annotationSets.containsKey(null)) {
+      if(sListener != null)
+        sListener.statusChanged("Saving the default annotation set ");
+      xsw.writeComment(" The default annotation set ");
+      newLine(xsw);
+      newLine(xsw);
+      writeAnnotationSet(annotationSets.get(null), null, xsw, namespaceURI);
+      newLine(xsw);
+    }
 
     // Serialize all others AnnotationSets
     // namedAnnotSets is a Map containing all other named Annotation
     // Sets.
-    Map namedAnnotSets = doc.getNamedAnnotationSets();
-    if(namedAnnotSets != null) {
-      Iterator iter = namedAnnotSets.values().iterator();
-      while(iter.hasNext()) {
-        AnnotationSet annotSet = (AnnotationSet)iter.next();
+    Iterator<String> iter = annotationSets.keySet().iterator();
+    while(iter.hasNext()) {
+      String annotationSetName = iter.next();
+      // ignore the null entry, if present - we've already handled that above
+      if(annotationSetName != null) {
+        Collection<Annotation> annots = annotationSets.get(annotationSetName);
         xsw.writeComment(" Named annotation set ");
         newLine(xsw);
         newLine(xsw);
         // Serialize it as XML
         if(sListener != null)
-          sListener.statusChanged("Saving " + annotSet.getName()
+          sListener.statusChanged("Saving " + annotationSetName
                   + " annotation set ");
-        writeAnnotationSet(annotSet, xsw, namespaceURI);
+        writeAnnotationSet(annots, annotationSetName, xsw, namespaceURI);
         newLine(xsw);
-      }// End while
-    }// End if
+      }// End if
+    }// End while
 
     // close the GateDocument element
     xsw.writeEndElement();
     newLine(xsw);
   }
 
+  /**
+   * Write the specified GATE Document to an XMLStreamWriter. This
+   * method writes just the GateDocument element - the XML declaration
+   * must be filled in by the caller if required.  This method writes
+   * all the annotations in all the annotation sets on the document.
+   * To write just specific annotations, use
+   * {@link #writeDocument(Document, Map, XMLStreamWriter, String)}.
+   */
+  public static void writeDocument(Document doc, XMLStreamWriter xsw,
+          String namespaceURI) throws XMLStreamException {
+    Map<String, Collection<Annotation>> asMap = new HashMap<String, Collection<Annotation>>();
+    asMap.put(null, doc.getAnnotations());
+    if(doc.getNamedAnnotationSets() != null) {
+      asMap.putAll(doc.getNamedAnnotationSets());
+    }
+    writeDocument(doc, asMap, xsw, namespaceURI);
+  }
+  
   /**
    * Writes the given annotation set to an XMLStreamWriter as GATE XML
    * format. The Name attribute of the generated AnnotationSet element
@@ -762,9 +788,9 @@ public class DocumentStaxUtils {
    */
   public static void writeAnnotationSet(AnnotationSet annotations,
           XMLStreamWriter xsw, String namespaceURI) throws XMLStreamException {
-    writeAnnotationSet(annotations, annotations.getName(), xsw, namespaceURI);
+    writeAnnotationSet((Collection)annotations, annotations.getName(), xsw, namespaceURI);
   }
-
+  
   /**
    * Writes the given annotation set to an XMLStreamWriter as GATE XML
    * format. The value for the Name attribute of the generated
@@ -777,43 +803,47 @@ public class DocumentStaxUtils {
    * @param namespaceURI
    * @throws XMLStreamException
    */
-  public static void writeAnnotationSet(AnnotationSet annotations,
+  public static void writeAnnotationSet(Collection<Annotation> annotations,
           String asName, XMLStreamWriter xsw, String namespaceURI)
           throws XMLStreamException {
-    if(annotations == null) {
-      // write an empty AnnotationSet element
-      xsw.writeStartElement(namespaceURI, "AnnotationSet");
-      newLine(xsw);
-      xsw.writeEndElement();
-      newLine(xsw);
-    }
-
     xsw.writeStartElement(namespaceURI, "AnnotationSet");
     if(asName != null) {
       xsw.writeAttribute("Name", asName);
     }
     newLine(xsw);
 
-    Iterator<Annotation> iterator = annotations.iterator();
-    while(iterator.hasNext()) {
-      Annotation annot = iterator.next();
-      xsw.writeStartElement(namespaceURI, "Annotation");
-      xsw.writeAttribute("Id", String.valueOf(annot.getId()));
-      xsw.writeAttribute("Type", annot.getType());
-      xsw.writeAttribute("StartNode", String.valueOf(annot.getStartNode()
-              .getOffset()));
-      xsw.writeAttribute("EndNode", String.valueOf(annot.getEndNode()
-              .getOffset()));
-      newLine(xsw);
-      writeFeatures(annot.getFeatures(), xsw, namespaceURI);
-      xsw.writeEndElement();
-      newLine(xsw);
+    if(annotations != null) {
+      Iterator<Annotation> iterator = annotations.iterator();
+      while(iterator.hasNext()) {
+        Annotation annot = iterator.next();
+        xsw.writeStartElement(namespaceURI, "Annotation");
+        xsw.writeAttribute("Id", String.valueOf(annot.getId()));
+        xsw.writeAttribute("Type", annot.getType());
+        xsw.writeAttribute("StartNode", String.valueOf(annot.getStartNode()
+                .getOffset()));
+        xsw.writeAttribute("EndNode", String.valueOf(annot.getEndNode()
+                .getOffset()));
+        newLine(xsw);
+        writeFeatures(annot.getFeatures(), xsw, namespaceURI);
+        xsw.writeEndElement();
+        newLine(xsw);
+      }
     }
-
     // end AnnotationSet element
     xsw.writeEndElement();
+    newLine(xsw);
   }
 
+  /**
+   * Retained for binary compatibility, new code should call the
+   * <code>Collection&lt;Annotation&gt;</code> version instead.
+   */
+  public static void writeAnnotationSet(AnnotationSet annotations,
+          String asName, XMLStreamWriter xsw, String namespaceURI)
+          throws XMLStreamException {
+    writeAnnotationSet((Collection)annotations, asName, xsw, namespaceURI);
+  }
+  
   /**
    * Writes the content of the given document to an XMLStreamWriter as a
    * mixed content element called "TextWithNodes". At each point where
@@ -821,13 +851,17 @@ public class DocumentStaxUtils {
    * the document, a "Node" element is written with an "id" feature
    * whose value is the offset of that node.
    * 
-   * @param doc
-   * @param xsw
-   * @param namespaceURI
+   * @param doc the document whose content is to be written
+   * @param annotationSets the annotations for which nodes are required.
+   *         This is a collection of collections.
+   * @param xsw the {@link XMLStreamWriter} to write to.
+   * @param namespaceURI the namespace URI.  May be empty but may not
+   *         be null.
    * @throws XMLStreamException
    */
-  public static void writeTextWithNodes(Document doc, XMLStreamWriter xsw,
-          String namespaceURI) throws XMLStreamException {
+  public static void writeTextWithNodes(Document doc,
+          Collection<Collection<Annotation>> annotationSets,
+          XMLStreamWriter xsw, String namespaceURI) throws XMLStreamException {
     String aText = doc.getContent().toString();
     // no text, so return an empty element
     if(aText == null) {
@@ -837,26 +871,16 @@ public class DocumentStaxUtils {
 
     // build a set of all the offsets where Nodes are required
     TreeSet<Long> offsetsSet = new TreeSet<Long>();
-    Iterator<Annotation> annotSetIter = doc.getAnnotations().iterator();
-    while(annotSetIter.hasNext()) {
-      Annotation annot = annotSetIter.next();
-      offsetsSet.add(annot.getStartNode().getOffset());
-      offsetsSet.add(annot.getEndNode().getOffset());
-    }// end While
-    // Get the nodes from all other named annotation sets.
-    Map namedAnnotSets = doc.getNamedAnnotationSets();
-    if(namedAnnotSets != null) {
-      Iterator iter = namedAnnotSets.values().iterator();
-      while(iter.hasNext()) {
-        AnnotationSet annotSet = (AnnotationSet)iter.next();
-        Iterator iter2 = annotSet.iterator();
-        while(iter2.hasNext()) {
-          Annotation annotTmp = (Annotation)iter2.next();
-          offsetsSet.add(annotTmp.getStartNode().getOffset());
-          offsetsSet.add(annotTmp.getEndNode().getOffset());
-        }// End while
-      }// End while
-    }// End if
+    if(annotationSets != null) {
+      for(Collection<Annotation> set : annotationSets) {
+        if(set != null) {
+          for(Annotation annot : set) {
+            offsetsSet.add(annot.getStartNode().getOffset());
+            offsetsSet.add(annot.getEndNode().getOffset());
+          }
+        }
+      }
+    }
 
     // write the TextWithNodes element
     char[] textArray = aText.toCharArray();
@@ -880,6 +904,23 @@ public class DocumentStaxUtils {
             textArray.length - lastNodeOffset));
     // and the closing TextWithNodes
     xsw.writeEndElement();
+  }
+  
+  /**
+   * Write a TextWithNodes section containing nodes for all annotations
+   * in the given document.
+   * 
+   * @see #writeTextWithNodes(Document, Collection, XMLStreamWriter, String)
+   */
+  public static void writeTextWithNodes(Document doc, XMLStreamWriter xsw,
+          String namespaceURI) throws XMLStreamException {
+    Collection<Collection<Annotation>> annotationSets =
+      new ArrayList<Collection<Annotation>>();
+    annotationSets.add(doc.getAnnotations());
+    if(doc.getNamedAnnotationSets() != null) {
+      annotationSets.addAll(doc.getNamedAnnotationSets().values());
+    }
+    writeTextWithNodes(doc, annotationSets, xsw, namespaceURI);
   }
 
   /**
