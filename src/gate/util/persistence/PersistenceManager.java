@@ -561,7 +561,7 @@ public class PersistenceManager {
     return loadObjectFromUrl(file.toURI().toURL());
   }
 
-  public static Object loadObjectFromUrl(URL url) throws PersistenceException,
+  public synchronized static Object loadObjectFromUrl(URL url) throws PersistenceException,
           IOException, ResourceInstantiationException {
     ProgressListener pListener = (ProgressListener)MainFrame.getListeners()
             .get("gate.event.ProgressListener");
