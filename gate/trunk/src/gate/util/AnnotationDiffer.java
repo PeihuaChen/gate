@@ -781,17 +781,17 @@ public class AnnotationDiffer {
    */
   public static final int PARTIALLY_CORRECT_TYPE = 1;
   
-  /** 
-   * Type for spurious pairings (where the response is not matching any key).
-   */
-  public static final int SPURIOUS_TYPE = 2;
-  
-  /** 
+  /**
    * Type for missing pairings (where the key was not matched to a response).
    */
-  public static final int MISSING_TYPE = 3;
+  public static final int MISSING_TYPE = 2;
+
+  /**
+   * Type for spurious pairings (where the response is not matching any key).
+   */
+  public static final int SPURIOUS_TYPE = 3;
   
-  /** 
+  /**
    * Type for mismatched pairings (where the key and response are co-extensive
    * but they don't match).
    */
