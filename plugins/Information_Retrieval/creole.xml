@@ -4,7 +4,6 @@
   <CREOLE>   
    <!-- creole.xml for SearchPR -->
     <RESOURCE>
-      <JAR>ir.jar</JAR>
       <NAME>SearchPR</NAME>
       <CLASS>gate.creole.ir.SearchPR</CLASS>
       <COMMENT>Provides IR functionality.</COMMENT>
