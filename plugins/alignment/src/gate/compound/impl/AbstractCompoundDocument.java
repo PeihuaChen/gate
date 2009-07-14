@@ -610,12 +610,12 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
    * Returns a map with the named annotation sets. It returns
    * <code>null</code> if no named annotaton set exists.
    */
-  public Map getNamedAnnotationSets() {
+  public Map<String, AnnotationSet> getNamedAnnotationSets() {
     if(currentDocument == null) {
       System.err
               .println("CompoundDocumentImpl does not implement getNamedAnnotationSets() but its member does!"
                       + " Please use the setDocument(String documentID) to set a specific document!");
-      return new HashMap();
+      return new HashMap<String, AnnotationSet>();
     }
     else {
       return currentDocument.getNamedAnnotationSets();
@@ -625,12 +625,12 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
   /**
    * Returns a set of all named annotation sets in existence
    */
-  public Set getAnnotationSetNames() {
+  public Set<String> getAnnotationSetNames() {
     if(currentDocument == null) {
       System.err
               .println("CompoundDocumentImpl does not implement getAnnotationSetNames() but its member does!"
                       + " Please use the setDocument(String documentID) to set a specific document!");
-      return new HashSet();
+      return new HashSet<String>();
     }
     else {
       return currentDocument.getAnnotationSetNames();

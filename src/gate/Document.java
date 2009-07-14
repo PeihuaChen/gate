@@ -78,7 +78,7 @@ public interface Document extends SimpleDocument {
 
   /** Returns a map with the named annotation sets
     */
-  public Map getNamedAnnotationSets();
+  public Map<String, AnnotationSet> getNamedAnnotationSets();
 
   /** Make the document markup-aware. This will trigger the creation
    *  of a DocumentFormat object at Document initialisation time; the
