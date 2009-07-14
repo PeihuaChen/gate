@@ -853,6 +853,7 @@ public class AnnotationSetsView extends AbstractDocumentView
    */
   public void selectAnnotation(final Annotation ann, 
           final AnnotationSet annSet){
+    selectAnnotation(new AnnotationDataImpl(annSet, ann));
   }
   
   protected class SetsTableModel extends AbstractTableModel{
