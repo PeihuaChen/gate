@@ -610,8 +610,10 @@ public class DocumentImpl extends AbstractLanguageResource implements
    */
   public AnnotationSet getAnnotations(String name) {
     if(name == null) return getAnnotations();
-    if(namedAnnotSets == null) namedAnnotSets = new HashMap();
-    AnnotationSet namedSet = (AnnotationSet)namedAnnotSets.get(name);
+    if(namedAnnotSets == null) {
+      namedAnnotSets = new HashMap<String, AnnotationSet>();
+    }
+    AnnotationSet namedSet = namedAnnotSets.get(name);
     if(namedSet == null) {
       namedSet = new AnnotationSetImpl(this, name);
       namedAnnotSets.put(name, namedSet);
@@ -1944,14 +1946,14 @@ public class DocumentImpl extends AbstractLanguageResource implements
    * Returns a map with the named annotation sets. It returns <code>null</code>
    * if no named annotaton set exists.
    */
-  public Map getNamedAnnotationSets() {
+  public Map<String, AnnotationSet> getNamedAnnotationSets() {
     return namedAnnotSets;
   } // getNamedAnnotationSets
 
   /**
    * Returns a set of all named annotation sets in existence
    */
-  public Set getAnnotationSetNames() {
+  public Set<String> getAnnotationSetNames() {
     return (namedAnnotSets == null) ? null : namedAnnotSets.keySet();
   }
 
@@ -1963,7 +1965,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
    *          the name of the annotation set to be removed
    */
   public void removeAnnotationSet(String name) {
-    Object removed = namedAnnotSets.remove(name);
+    AnnotationSet removed = namedAnnotSets.remove(name);
     if(removed != null) {
       fireAnnotationSetRemoved(new DocumentEvent(this,
               DocumentEvent.ANNOTATION_SET_REMOVED, name));
@@ -2134,7 +2136,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
   protected AnnotationSet defaultAnnots;
 
   /** Named sets of annotations */
-  protected Map namedAnnotSets;
+  protected Map<String, AnnotationSet> namedAnnotSets;
 
   /**
    * A property of the document that will be set when the user wants to create

@@ -58,7 +58,7 @@ public interface SimpleDocument extends LanguageResource, Comparable {
 
   /** Returns a set of all named annotation sets in existence
     */
-  public Set getAnnotationSetNames();
+  public Set<String> getAnnotationSetNames();
 
   /**
    * Removes one of the named annotation sets.

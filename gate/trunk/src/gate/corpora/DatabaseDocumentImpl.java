@@ -339,7 +339,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
 
   /** Returns a map with the named annotation sets. It returns <code>null</code>
    *  if no named annotaton set exists. */
-  public Map getNamedAnnotationSets() {
+  public Map<String, AnnotationSet> getNamedAnnotationSets() {
 
     Vector annNames = new Vector();
 
