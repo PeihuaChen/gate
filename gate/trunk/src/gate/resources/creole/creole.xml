@@ -103,6 +103,10 @@
       <NAME>Annotations List</NAME>
       <CLASS>gate.gui.docview.AnnotationListView</CLASS>
     </RESOURCE>
+    <RESOURCE>
+      <NAME>Annotations Stack</NAME>
+      <CLASS>gate.gui.docview.AnnotationStackView</CLASS>
+    </RESOURCE>
 
     <RESOURCE>
       <NAME>Co-reference Editor</NAME>
