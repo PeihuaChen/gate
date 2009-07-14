@@ -149,9 +149,9 @@ public class AnnotationDiffGUI extends JFrame{
     constraints.gridx = 1;
     getContentPane().add(new JLabel("Document"), constraints);
     constraints.gridx = GridBagConstraints.RELATIVE;
-    getContentPane().add(new JLabel("Annotation Set"), constraints);
+    getContentPane().add(new JLabel("Annotation set"), constraints);
     constraints.gridwidth = 2;
-    getContentPane().add(new JLabel("F-Measure Weight"), constraints);
+    getContentPane().add(new JLabel("FScore weight"), constraints);
     constraints.gridwidth = 1;
     weightTxt = new JTextField("1.00");
     getContentPane().add(weightTxt, constraints);
@@ -173,28 +173,35 @@ public class AnnotationDiffGUI extends JFrame{
     //ROW 1
     constraints.gridx = 0;
     constraints.gridy = 1;
-    getContentPane().add(new JLabel("Key:"), constraints);
+    JLabel keyLabel = new JLabel("Key:");
+    keyLabel.setToolTipText("Key:");
+    getContentPane().add(keyLabel, constraints);
     constraints.gridx = GridBagConstraints.RELATIVE;
     keyDocCombo = new JComboBox();
-    keyDocCombo.setPrototypeDisplayValue("very_long_document_name.xml");
+    keyDocCombo.setPrototypeDisplayValue("long_document_name");
     getContentPane().add(keyDocCombo, constraints);
     keySetCombo = new JComboBox();
     keySetCombo.setPrototypeDisplayValue("long_set_name");
     getContentPane().add(keySetCombo, constraints);
     constraints.gridwidth = 2;
-    getContentPane().add(new JLabel("Annotation Type:"), constraints);
+    getContentPane().add(new JLabel("Annotation type:"), constraints);
     annTypeCombo = new JComboBox();
+    annTypeCombo.setPrototypeDisplayValue("long_type");
     getContentPane().add(annTypeCombo, constraints);
     constraints.gridwidth = 1;
 
     //ROW 2
     constraints.gridy = 2;
     constraints.gridx = 0;
-    getContentPane().add(new JLabel("Response:"), constraints);
+    JLabel responseLabel = new JLabel("Response:");
+    responseLabel.setToolTipText("Response:");
+    getContentPane().add(responseLabel, constraints);
     constraints.gridx = GridBagConstraints.RELATIVE;
     resDocCombo = new JComboBox();
+    resDocCombo.setPrototypeDisplayValue("long_document_name");
     getContentPane().add(resDocCombo, constraints);
     resSetCombo = new JComboBox();
+    resSetCombo.setPrototypeDisplayValue("long_set_name");
     getContentPane().add(resSetCombo, constraints);
     getContentPane().add(new JLabel("Features:"), constraints);
     ButtonGroup btnGrp = new ButtonGroup();
@@ -289,17 +296,21 @@ public class AnnotationDiffGUI extends JFrame{
     constraints.anchor = GridBagConstraints.WEST;
     constraints.fill = GridBagConstraints.NONE;
     JLabel lbl = new JLabel("Matching:");
+    lbl.setToolTipText("Matching:");
     lbl.setBackground(diffTable.getBackground());
     resultsPane.add(lbl, constraints);
     lbl = new JLabel("Overlapping:");
+    lbl.setToolTipText("Overlapping:");
     lbl.setBackground(PARTIALLY_CORRECT_BG);
     lbl.setOpaque(true);
     resultsPane.add(lbl, constraints);
     lbl = new JLabel("Missing:");
+    lbl.setToolTipText("Missing:");
     lbl.setBackground(MISSING_BG);
     lbl.setOpaque(true);
     resultsPane.add(lbl, constraints);
     lbl = new JLabel("Spurious:");
+    lbl.setToolTipText("Spurious:");
     lbl.setBackground(FALSE_POSITIVE_BG);
     lbl.setOpaque(true);
     resultsPane.add(lbl, constraints);
@@ -331,33 +342,33 @@ public class AnnotationDiffGUI extends JFrame{
     constraints.insets = new Insets(4, 4, 4, 4);
     lbl = new JLabel("Recall");
     resultsPane.add(lbl, constraints);
-    recallStrictLbl = new JLabel("0.0000");
+    recallStrictLbl = new JLabel("0.00");
     resultsPane.add(recallStrictLbl, constraints);
-    recallLenientLbl = new JLabel("0.0000");
+    recallLenientLbl = new JLabel("0.00");
     resultsPane.add(recallLenientLbl, constraints);
-    recallAveLbl = new JLabel("0.0000");
+    recallAveLbl = new JLabel("0.00");
     resultsPane.add(recallAveLbl, constraints);
 
     //COLUMN 4
     constraints.gridx = 4;
     lbl = new JLabel("Precision");
     resultsPane.add(lbl, constraints);
-    precisionStrictLbl = new JLabel("0.0000");
+    precisionStrictLbl = new JLabel("0.00");
     resultsPane.add(precisionStrictLbl, constraints);
-    precisionLenientLbl = new JLabel("0.0000");
+    precisionLenientLbl = new JLabel("0.00");
     resultsPane.add(precisionLenientLbl, constraints);
-    precisionAveLbl = new JLabel("0.0000");
+    precisionAveLbl = new JLabel("0.00");
     resultsPane.add(precisionAveLbl, constraints);
 
     //COLUMN 5
     constraints.gridx = 5;
-    lbl = new JLabel("F-Measure");
+    lbl = new JLabel("FScore");
     resultsPane.add(lbl, constraints);
-    fmeasureStrictLbl = new JLabel("0.0000");
+    fmeasureStrictLbl = new JLabel("0.00");
     resultsPane.add(fmeasureStrictLbl, constraints);
-    fmeasureLenientLbl = new JLabel("0.0000");
+    fmeasureLenientLbl = new JLabel("0.00");
     resultsPane.add(fmeasureLenientLbl, constraints);
-    fmeasureAveLbl = new JLabel("0.0000");
+    fmeasureAveLbl = new JLabel("0.00");
     resultsPane.add(fmeasureAveLbl, constraints);
 
     //COLUMN 6
@@ -370,7 +381,7 @@ public class AnnotationDiffGUI extends JFrame{
     resultsPane.add(copyToConsensusBtn, constraints);
     constraints.gridwidth = 1;
     constraints.gridheight = 1;
-    resultsPane.add(new JLabel("Destination:"), constraints);
+    resultsPane.add(new JLabel("To:"), constraints);
 
     //COLUMN 7
     constraints.gridx = 7;
@@ -386,6 +397,7 @@ public class AnnotationDiffGUI extends JFrame{
     //COLUMN 8
     constraints.gridx = 8;
     constraints.gridheight = 2;
+    constraints.gridwidth = GridBagConstraints.REMAINDER;
     if (!isStandalone) {
       showDocumentAction = new ShowDocumentAction();
       showDocumentAction.setEnabled(false);
@@ -985,7 +997,7 @@ public class AnnotationDiffGUI extends JFrame{
         missingLbl.setText(Integer.toString(differ.getMissing()));
         falsePozLbl.setText(Integer.toString(differ.getSpurious()));
         NumberFormat f = NumberFormat.getInstance();
-        f.setMaximumFractionDigits(4);
+        f.setMaximumFractionDigits(2);
         f.setMinimumFractionDigits(2);
         recallStrictLbl.setText(f.format(differ.getRecallStrict()));
         recallLenientLbl.setText(f.format(differ.getRecallLenient()));
@@ -1052,7 +1064,7 @@ public class AnnotationDiffGUI extends JFrame{
    */
   protected class CopyToConsensusASAction extends AbstractAction {
     public CopyToConsensusASAction(){
-      super("Copy selected annotations");
+      super("Copy selection");
       putValue(SHORT_DESCRIPTION,
         "<html>Move selected annotations to the destination annotation set" +
           "<br>and hide their paired annotations if not moved." +
@@ -1204,7 +1216,7 @@ public class AnnotationDiffGUI extends JFrame{
           format.setMaximumFractionDigits(4);
           fw.write("Recall: " + format.format(differ.getRecallStrict()) + "<br>" + nl);
           fw.write("Precision: " + format.format(differ.getPrecisionStrict()) + "<br>" + nl);
-          fw.write("F-measure: " + format.format(differ.getFMeasureStrict(1)) + "<br>" + nl);
+          fw.write("F-Score: " + format.format(differ.getFMeasureStrict(1)) + "<br>" + nl);
           fw.write("<br>");
           fw.write("Matching: " + differ.getCorrectMatches() + "<br>" + nl);
           fw.write("Overlapping: " +
