@@ -79,7 +79,9 @@ public class AnnotationDiffGUI extends JFrame{
     initGUI();
     initListeners();
     populateGUI();
-    SwingUtilities.invokeLater(new Runnable(){ public void run(){
+
+    // set programmatically the different settings
+    SwingUtilities.invokeLater(new Runnable(){ public void run() {
       keyDocCombo.setSelectedItem(keyDocumentName);
       resDocCombo.setSelectedItem(responseDocumentName);
       if (keyAnnotationSetName != null) {
@@ -102,9 +104,23 @@ public class AnnotationDiffGUI extends JFrame{
         significantFeatures.add(featureName);
         someFeaturesBtn.setSelected(true);
       }
-      SwingUtilities.invokeLater(new Runnable(){ public void run(){
-        diffAction.actionPerformed(new ActionEvent(this, -1, "corpus quality"));
-      }});
+      // compute differences automatically
+      if (keyAnnotationSetName != null
+       && responseAnnotationSetName != null
+       && annotationType != null) {
+        SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          // wait some time
+          Date timeToRun = new Date(System.currentTimeMillis() + 1000);
+          Timer timer = new Timer("Annotation diff init timer", true);
+          timer.schedule(new TimerTask() {
+            public void run() {
+              diffAction.actionPerformed(
+                new ActionEvent(this, -1, "corpus quality"));
+            }
+          }, timeToRun);
+        }});
+      }
     }});
   }
 
