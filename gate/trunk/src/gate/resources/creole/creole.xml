@@ -51,7 +51,7 @@
     </RESOURCE>
     <RESOURCE>
       <CLASS>gate.corpora.PdfDocumentFormat</CLASS>
-    </RESOURCE> 
+    </RESOURCE>
     <RESOURCE>
       <CLASS>gate.corpora.MSWordDocumentFormat</CLASS>
     </RESOURCE>
@@ -75,7 +75,7 @@
       <CLASS>gate.creole.RealtimeCorpusController</CLASS>
     </RESOURCE>
   </CREOLE>
-  
+
   <!-- creole.xml for Visual Resources -->
   <CREOLE>
     <RESOURCE>
@@ -86,11 +86,11 @@
     <RESOURCE>
       <CLASS>gate.gui.PRViewer</CLASS>
     </RESOURCE>
-    
+
     <RESOURCE>
       <CLASS>gate.gui.docview.DocumentEditor</CLASS>
     </RESOURCE>
-    
+
     <RESOURCE>
       <NAME>Text</NAME>
       <CLASS>gate.gui.docview.TextualDocumentView</CLASS>
@@ -112,21 +112,25 @@
       <NAME>Co-reference Editor</NAME>
       <CLASS>gate.gui.docview.CorefEditor</CLASS>
     </RESOURCE>
-		
+
 		<!-- The default annotation editor -->
     <RESOURCE>
       <NAME>Annotations Editor</NAME>
       <CLASS>gate.gui.docview.AnnotationEditor</CLASS>
     </RESOURCE>
-    
+
+    <RESOURCE>
+      <CLASS>gate.gui.CorpusQualityAssurance</CLASS>
+    </RESOURCE>
+
     <RESOURCE>
       <CLASS>gate.gui.CorpusEditor</CLASS>
     </RESOURCE>
-    
+
     <RESOURCE>
       <CLASS>gate.gui.SerialControllerEditor</CLASS>
     </RESOURCE>
-    
+
     <RESOURCE>
       <CLASS>gate.gui.SerialDatastoreViewer</CLASS>
     </RESOURCE>
@@ -134,7 +138,7 @@
     <RESOURCE>
       <CLASS>gate.gui.OracleDatastoreViewer</CLASS>
     </RESOURCE>
-    
+
     <RESOURCE>
       <CLASS>gate.gui.LuceneDataStoreSearchGUI</CLASS>
     </RESOURCE>
