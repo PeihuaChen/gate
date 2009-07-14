@@ -34,8 +34,7 @@ import gate.gui.docview.*;
 
 /**
  * This class provides a GUI frame for the OCAT tool, where one of the
- * components is the OntologyTree, the other one is Ontology Options and
- * so on.
+ * components is the OntologyTree, the other one is Ontology Options and so on.
  * 
  * @author niraj
  */
@@ -59,8 +58,7 @@ public class OntologyTreePanel extends JPanel {
   protected OntologyViewerOptions ontologyViewerOptions;
 
   /**
-   * Stores all the various ontology2OntoTreeModels for different
-   * ontologies
+   * Stores all the various ontology2OntoTreeModels for different ontologies
    */
   protected HashMap<Ontology, OntoTreeModel> ontology2OntoTreeModels;
 
@@ -96,11 +94,11 @@ public class OntologyTreePanel extends JPanel {
   private TextualDocumentView textView;
 
   /**
-   * Current Annotation Map that stores the annotation in arraylist for
-   * each concept
+   * Current Annotation Map that stores the annotation in arraylist for each
+   * concept
    */
   protected HashMap<String, ArrayList<Annotation>> currentOResourceName2AnnotationsListMap;
-  
+
   /** Instance of colorGenerator */
   private ColorGenerator colorGenerator;
 
@@ -108,8 +106,7 @@ public class OntologyTreePanel extends JPanel {
   private Ontology currentOntology;
 
   /**
-   * OntologyTreeListener that listens to the selection of ontology
-   * classes
+   * OntologyTreeListener that listens to the selection of ontology classes
    */
   protected OntologyTreeListener ontoTreeListener;
 
@@ -127,20 +124,21 @@ public class OntologyTreePanel extends JPanel {
     this.textView = ontoViewer.documentTextualDocumentView;
     this.ontologyViewerOptions = new OntologyViewerOptions(this);
     ontology2ColorSchemesMap = new HashMap<Ontology, HashMap<String, Color>>();
-    ontology2PropValuesAndInstances2ClassesMap = new HashMap<Ontology, HashMap<String, Set<OClass>>>();
+    ontology2PropValuesAndInstances2ClassesMap =
+      new HashMap<Ontology, HashMap<String, Set<OClass>>>();
     ontology2OntoTreeModels = new HashMap<Ontology, OntoTreeModel>();
     currentOResource2ColorMap = new HashMap<String, Color>();
-    ontology2OResourceSelectionMap = new HashMap<Ontology, HashMap<String, Boolean>>();
+    ontology2OResourceSelectionMap =
+      new HashMap<Ontology, HashMap<String, Boolean>>();
     currentOResource2IsSelectedMap = new HashMap<String, Boolean>();
     ontology2PropertiesMap = new HashMap<Ontology, Set<RDFProperty>>();
     colorGenerator = new ColorGenerator();
     initGUI();
   }
 
-  
   /**
-   * This method finds out the ClassNode node in the ontology Tree for
-   * given class
+   * This method finds out the ClassNode node in the ontology Tree for given
+   * class
    * 
    * @param classValue
    * @return
@@ -153,40 +151,34 @@ public class OntologyTreePanel extends JPanel {
     if(index >= 0) {
       classValue = classValue.substring(index + 1, classValue.length());
     }
-    
+
     ClassNode currentNode = (ClassNode)currentOntologyTree.getModel().getRoot();
     return getFirstClassNode(currentNode, classValue);
   }
 
-  
   /**
-   * Internal recursive method to find out the Node for given class
-   * Value under the heirarchy of given node
+   * Internal recursive method to find out the Node for given class Value under
+   * the heirarchy of given node
    * 
    * @param node
    * @param classValue
    * @return
    */
   private ClassNode getFirstClassNode(ClassNode node, String classValue) {
-    if(node.toString().intern() == classValue.intern()) {
-      return node;
-    }
+    if(node.toString().intern() == classValue.intern()) { return node; }
 
     Iterator children = node.getChildren();
     while(children.hasNext()) {
       ClassNode tempNode = (ClassNode)children.next();
       ClassNode returnedNode = getFirstClassNode(tempNode, classValue);
-      if(returnedNode != null) {
-        return returnedNode;
-      }
+      if(returnedNode != null) { return returnedNode; }
     }
     return null;
   }
 
-  
   /**
-   * This method finds out the ClassNode node in the ontology Tree for
-   * given class
+   * This method finds out the ClassNode node in the ontology Tree for given
+   * class
    * 
    * @param classValue
    * @return
@@ -199,16 +191,14 @@ public class OntologyTreePanel extends JPanel {
     if(index >= 0) {
       classValue = classValue.substring(index + 1, classValue.length());
     }
-    
+
     ClassNode currentNode = (ClassNode)currentOntologyTree.getModel().getRoot();
     return getClassNode(currentNode, classValue);
   }
 
-  
-  
   /**
-   * Internal recursive method to find out the Node for given class
-   * Value under the heirarchy of given node
+   * Internal recursive method to find out the Node for given class Value under
+   * the heirarchy of given node
    * 
    * @param node
    * @param classValue
@@ -229,7 +219,7 @@ public class OntologyTreePanel extends JPanel {
         cNodes.addAll(returnedNodes);
       }
     }
-    
+
     return cNodes;
   }
 
@@ -240,15 +230,13 @@ public class OntologyTreePanel extends JPanel {
     if(!(set.remove(annot))) {
       Map annotSetMap = ontoViewer.getDocument().getNamedAnnotationSets();
       if(annotSetMap != null) {
-        java.util.List<String> setNames = new ArrayList<String>(annotSetMap
-                .keySet());
+        java.util.List<String> setNames =
+          new ArrayList<String>(annotSetMap.keySet());
         Collections.sort(setNames);
         Iterator<String> setsIter = setNames.iterator();
         while(setsIter.hasNext()) {
           set = ontoViewer.getDocument().getAnnotations(setsIter.next());
-          if(set.remove(annot)) {
-            return;
-          }
+          if(set.remove(annot)) { return; }
         }
       }
     }
@@ -262,7 +250,7 @@ public class OntologyTreePanel extends JPanel {
   /** Returns the instance of highlighter */
   public javax.swing.text.Highlighter getHighlighter() {
     return ((JTextArea)((JScrollPane)textView.getGUI()).getViewport().getView())
-            .getHighlighter();
+      .getHighlighter();
   }
 
   /** Returns the associated color for the given class */
@@ -276,7 +264,7 @@ public class OntologyTreePanel extends JPanel {
 
     ToolTipManager.sharedInstance().registerComponent(currentOntologyTree);
     currentOntologyTree.getSelectionModel().setSelectionMode(
-            TreeSelectionModel.SINGLE_TREE_SELECTION);
+      TreeSelectionModel.SINGLE_TREE_SELECTION);
     this.setLayout(new BorderLayout());
     this.add(new JScrollPane(currentOntologyTree), BorderLayout.CENTER);
 
@@ -303,11 +291,11 @@ public class OntologyTreePanel extends JPanel {
   }
 
   /**
-   * This method is called to remove the stored ontology model and free
-   * up the memory with other resources occupied by the removed ontology
+   * This method is called to remove the stored ontology model and free up the
+   * memory with other resources occupied by the removed ontology
    */
   public void removeOntologyTreeModel(Ontology ontology,
-          boolean wasCurrentlySelected) {
+    boolean wasCurrentlySelected) {
     this.ontology2OntoTreeModels.remove(ontology);
     this.ontology2ColorSchemesMap.remove(ontology);
     this.ontology2OResourceSelectionMap.remove(ontology);
@@ -319,16 +307,17 @@ public class OntologyTreePanel extends JPanel {
   }
 
   /**
-   * This method is used to plot the ontology on the tree and
-   * generate/load the respective data in the memory
+   * This method is used to plot the ontology on the tree and generate/load the
+   * respective data in the memory
    * 
-   * @param ontology - the ontology to be ploted
-   * @param currentOResourceName2AnnotationsListMap - the annotationMap
-   *          which contains Key=concept(String)
+   * @param ontology
+   *          - the ontology to be ploted
+   * @param currentOResourceName2AnnotationsListMap
+   *          - the annotationMap which contains Key=concept(String)
    *          Value=annotations(ArrayList)
    */
   public void showOntologyInOntologyTreeGUI(Ontology ontology,
-          HashMap<String, ArrayList<Annotation>> annotMap) {
+    HashMap<String, ArrayList<Annotation>> annotMap) {
 
     this.currentOResourceName2AnnotationsListMap = annotMap;
     if(currentOntology != null && currentOResource2ColorMap != null)
@@ -336,52 +325,56 @@ public class OntologyTreePanel extends JPanel {
 
     if(currentOntology != null && currentOResource2IsSelectedMap != null)
       ontology2OResourceSelectionMap.put(currentOntology,
-              currentOResource2IsSelectedMap);
+        currentOResource2IsSelectedMap);
 
     if(currentOntology != null && currentOntologyTreeModel != null
-            && ontology2OntoTreeModels.containsKey(currentOntology))
+      && ontology2OntoTreeModels.containsKey(currentOntology))
       ontology2OntoTreeModels.put(currentOntology, currentOntologyTreeModel);
 
     if(currentOntology != null
-            && currentPropValuesAndInstances2ClassesMap != null
-            && ontology2OntoTreeModels.containsKey(currentOntology))
+      && currentPropValuesAndInstances2ClassesMap != null
+      && ontology2OntoTreeModels.containsKey(currentOntology))
       ontology2PropValuesAndInstances2ClassesMap.put(currentOntology,
-              currentPropValuesAndInstances2ClassesMap);
+        currentPropValuesAndInstances2ClassesMap);
 
     if(currentOntology != null && currentProperties != null
-            && ontology2OntoTreeModels.containsKey(currentOntology))
+      && ontology2OntoTreeModels.containsKey(currentOntology))
       ontology2PropertiesMap.put(currentOntology, currentProperties);
 
     currentOntology = ontology;
     ClassNode root = null;
     // lets create the new model for this new selected ontology
     if(ontology2OntoTreeModels != null
-            && ontology2OntoTreeModels.containsKey(ontology)) {
+      && ontology2OntoTreeModels.containsKey(ontology)) {
       currentOntologyTreeModel = ontology2OntoTreeModels.get(ontology);
       currentOResource2ColorMap = ontology2ColorSchemesMap.get(ontology);
-      currentOResource2IsSelectedMap = ontology2OResourceSelectionMap
-              .get(ontology);
-      currentPropValuesAndInstances2ClassesMap = ontology2PropValuesAndInstances2ClassesMap
-              .get(ontology);
+      currentOResource2IsSelectedMap =
+        ontology2OResourceSelectionMap.get(ontology);
+      currentPropValuesAndInstances2ClassesMap =
+        ontology2PropValuesAndInstances2ClassesMap.get(ontology);
       currentProperties = ontology2PropertiesMap.get(ontology);
     }
     else {
-      root = ClassNode.createRootNode(ontology, true, false);
+      root =
+        ClassNode.createRootNode(ontology, true, ontologyViewerOptions
+          .showAnonymousClasses());
       HashMap<String, Color> newColorScheme = new HashMap<String, Color>();
       setColorScheme(root, newColorScheme);
       currentOResource2ColorMap = newColorScheme;
       ontology2ColorSchemesMap.put(ontology, newColorScheme);
       currentOntologyTreeModel = new OntoTreeModel(root);
       ontology2OntoTreeModels.put(ontology, currentOntologyTreeModel);
-      HashMap<String, Boolean> newClassSelection = new HashMap<String, Boolean>();
+      HashMap<String, Boolean> newClassSelection =
+        new HashMap<String, Boolean>();
       setOntoTreeClassSelection(root, newClassSelection);
       currentOResource2IsSelectedMap = newClassSelection;
       ontology2OResourceSelectionMap.put(ontology, newClassSelection);
       currentProperties = obtainProperties(ontology);
       ontology2PropertiesMap.put(ontology, currentProperties);
-      currentPropValuesAndInstances2ClassesMap = obtainPVnInst2ClassesMap(ontology, currentProperties);
+      currentPropValuesAndInstances2ClassesMap =
+        obtainPVnInst2ClassesMap(ontology, currentProperties);
       ontology2PropValuesAndInstances2ClassesMap.put(ontology,
-              currentPropValuesAndInstances2ClassesMap);
+        currentPropValuesAndInstances2ClassesMap);
     }
     currentOntologyTree.setModel(currentOntologyTreeModel);
     // update the GUI part of the Tree
@@ -390,127 +383,130 @@ public class OntologyTreePanel extends JPanel {
 
   /**
    * This method returns the properties available in the ontology
+   * 
    * @param ontology
    * @return
    */
   private Set<RDFProperty> obtainProperties(Ontology ontology) {
-   Set<RDFProperty> toReturn = new HashSet<RDFProperty>();
-   // lets add all properties
-   Set<RDFProperty> props = ontology.getPropertyDefinitions();
-   Iterator<RDFProperty> iter = props.iterator();
-   while(iter.hasNext()) {
-     final RDFProperty p = iter.next();
-     if(p instanceof AnnotationProperty || p instanceof DatatypeProperty || p instanceof ObjectProperty) {
-       toReturn.add(p);
-       continue;
-     }
-   }
-   return toReturn;
+    Set<RDFProperty> toReturn = new HashSet<RDFProperty>();
+    // lets add all properties
+    Set<RDFProperty> props = ontology.getPropertyDefinitions();
+    Iterator<RDFProperty> iter = props.iterator();
+    while(iter.hasNext()) {
+      final RDFProperty p = iter.next();
+      if(p instanceof AnnotationProperty || p instanceof DatatypeProperty
+        || p instanceof ObjectProperty) {
+        toReturn.add(p);
+        continue;
+      }
+    }
+    return toReturn;
   }
-  
+
   /**
-   * This method iterates through each instance of the ontology and
-   * obtains its all set properties. For each set property, obtains its
-   * value and add it to the returning map as a key. A set of direct
-   * classes of the instance then becomes the value for this key.
+   * This method iterates through each instance of the ontology and obtains its
+   * all set properties. For each set property, obtains its value and add it to
+   * the returning map as a key. A set of direct classes of the instance then
+   * becomes the value for this key.
    * 
    * @param ontology
    * @return
    */
   private HashMap<String, Set<OClass>> obtainPVnInst2ClassesMap(
-          Ontology ontology, Set<RDFProperty> propertySet) {
+    Ontology ontology, Set<RDFProperty> propertySet) {
     HashMap<String, Set<OClass>> map = new HashMap<String, Set<OClass>>();
 
     Set<OInstance> instances = ontology.getOInstances();
     Iterator<OInstance> instIter = instances.iterator();
     while(instIter.hasNext()) {
       OInstance anInst = instIter.next();
-      Set<OClass> classes =  anInst.getOClasses(OConstants.DIRECT_CLOSURE);
+      Set<OClass> classes = anInst.getOClasses(OConstants.DIRECT_CLOSURE);
       updatePVnInst2ClassesMap(anInst, propertySet, classes, map);
     }
     return map;
   }
 
   /**
-   * This method iterates through each instance of the ontology and
-   * obtains its all set properties. For each set property, obtains its
-   * value and add it to the returning map as a key. A set of direct
-   * classes of the instance then becomes the value for this key.
+   * This method iterates through each instance of the ontology and obtains its
+   * all set properties. For each set property, obtains its value and add it to
+   * the returning map as a key. A set of direct classes of the instance then
+   * becomes the value for this key.
    * 
    * @param ontology
    * @return
    */
-  public void updatePVnInst2ClassesMap(
-          OInstance anInst, Set<RDFProperty> propertySet, Set<OClass> classes, HashMap<String, Set<OClass>> map) {
+  public void updatePVnInst2ClassesMap(OInstance anInst,
+    Set<RDFProperty> propertySet, Set<OClass> classes,
+    HashMap<String, Set<OClass>> map) {
 
-      String anInstName = anInst.getName();
-      if(map.containsKey(anInstName.toLowerCase())) {
-        Set<OClass> availableClasses = map.get(anInstName.toLowerCase());
-        availableClasses.addAll(classes);
+    String anInstName = anInst.getName();
+    if(map.containsKey(anInstName.toLowerCase())) {
+      Set<OClass> availableClasses = map.get(anInstName.toLowerCase());
+      availableClasses.addAll(classes);
+    }
+    else {
+      map.put(anInstName.toLowerCase(), classes);
+    }
+
+    Iterator<RDFProperty> propertyIter = propertySet.iterator();
+    while(propertyIter.hasNext()) {
+
+      RDFProperty anRDFProp = propertyIter.next();
+      Set<String> stringValues = new HashSet<String>();
+
+      // here we check what type of property it is
+      if(anRDFProp instanceof AnnotationProperty) {
+        java.util.List<Literal> values =
+          anInst.getAnnotationPropertyValues((AnnotationProperty)anRDFProp);
+        for(int i = 0; i < values.size(); i++) {
+          stringValues.add(values.get(i).getValue().toLowerCase());
+        }
+
       }
-      else {
-        map.put(anInstName.toLowerCase(), classes);
+      else if(anRDFProp instanceof DatatypeProperty) {
+        java.util.List<Literal> values =
+          anInst.getDatatypePropertyValues((DatatypeProperty)anRDFProp);
+        for(int i = 0; i < values.size(); i++) {
+          stringValues.add(values.get(i).getValue().toLowerCase());
+        }
+
       }
-
-      Iterator<RDFProperty> propertyIter = propertySet.iterator();
-      while(propertyIter.hasNext()) {
-
-        RDFProperty anRDFProp = propertyIter.next();
-        Set<String> stringValues = new HashSet<String>();
-
-        // here we check what type of property it is
-        if(anRDFProp instanceof AnnotationProperty) {
-          java.util.List<Literal> values = anInst
-                  .getAnnotationPropertyValues((AnnotationProperty)anRDFProp);
-          for(int i = 0; i < values.size(); i++) {
-            stringValues.add(values.get(i).getValue().toLowerCase());
-          }
-
-        }
-        else if(anRDFProp instanceof DatatypeProperty) {
-          java.util.List<Literal> values = anInst
-                  .getDatatypePropertyValues((DatatypeProperty)anRDFProp);
-          for(int i = 0; i < values.size(); i++) {
-            stringValues.add(values.get(i).getValue().toLowerCase());
-          }
-
-        }
-        else if(anRDFProp instanceof ObjectProperty) {
-          java.util.List<OInstance> values = anInst
-                  .getObjectPropertyValues((ObjectProperty)anRDFProp);
-          for(int i = 0; i < values.size(); i++) {
-            stringValues.add(values.get(i).toString().toLowerCase());
-          }
-        }
-
-        if(stringValues.isEmpty()) continue;
-
-        Iterator<String> stringValIter = stringValues.iterator();
-        while(stringValIter.hasNext()) {
-          String aValue = stringValIter.next();
-          if(map.containsKey(aValue)) {
-            Set<OClass> availableClasses = map.get(aValue);
-            availableClasses.addAll(classes);
-          }
-          else {
-            map.put(aValue, classes);
-          }
+      else if(anRDFProp instanceof ObjectProperty) {
+        java.util.List<OInstance> values =
+          anInst.getObjectPropertyValues((ObjectProperty)anRDFProp);
+        for(int i = 0; i < values.size(); i++) {
+          stringValues.add(values.get(i).toString().toLowerCase());
         }
       }
+
+      if(stringValues.isEmpty()) continue;
+
+      Iterator<String> stringValIter = stringValues.iterator();
+      while(stringValIter.hasNext()) {
+        String aValue = stringValIter.next();
+        if(map.containsKey(aValue)) {
+          Set<OClass> availableClasses = map.get(aValue);
+          availableClasses.addAll(classes);
+        }
+        else {
+          map.put(aValue, classes);
+        }
+      }
+    }
   }
-  
-  
+
   /**
-   * For every ontology it generates the colors only once at the
-   * begining which should remain same throughout the programe
+   * For every ontology it generates the colors only once at the begining which
+   * should remain same throughout the programe
    * 
-   * @param root - the root (top class) of the ontology
-   * @param colorScheme - and the colorScheme hashmap Key=conceptName,
-   *          Value:associated color map. if provided as a new fresh
-   *          instance of hashmap with size zero, it parses through the
-   *          whole ontology and generate the random color instances for
-   *          all the classes and stores them in the provided
-   *          colorScheme hashmap
+   * @param root
+   *          - the root (top class) of the ontology
+   * @param colorScheme
+   *          - and the colorScheme hashmap Key=conceptName, Value:associated
+   *          color map. if provided as a new fresh instance of hashmap with
+   *          size zero, it parses through the whole ontology and generate the
+   *          random color instances for all the classes and stores them in the
+   *          provided colorScheme hashmap
    */
   public void setColorScheme(IFolder root, HashMap<String, Color> colorScheme) {
     if(!colorScheme.containsKey(root.toString())) {
@@ -523,9 +519,9 @@ public class OntologyTreePanel extends JPanel {
   }
 
   /**
-   * This method uses the java.util.prefs.Preferences and get the color
-   * for particular selectedAnnotationType.. This color could have been
-   * saved by the AnnotationSetsView
+   * This method uses the java.util.prefs.Preferences and get the color for
+   * particular selectedAnnotationType.. This color could have been saved by the
+   * AnnotationSetsView
    * 
    * @param selectedAnnotationType
    * @return
@@ -533,8 +529,9 @@ public class OntologyTreePanel extends JPanel {
   public Color getColor(String className) {
     java.util.prefs.Preferences prefRoot = null;
     try {
-      prefRoot = java.util.prefs.Preferences.userNodeForPackage(Class
-              .forName("gate.creole.ontology.ocat.OntologyTreePanel"));
+      prefRoot =
+        java.util.prefs.Preferences.userNodeForPackage(Class
+          .forName("gate.creole.ontology.ocat.OntologyTreePanel"));
     }
     catch(Exception e) {
       e.printStackTrace();
@@ -542,8 +539,8 @@ public class OntologyTreePanel extends JPanel {
     // chop off the class name at the max key length to avoid Preferences
     // exception
     if(className.length() > java.util.prefs.Preferences.MAX_KEY_LENGTH) {
-      className = className.substring(0,
-          java.util.prefs.Preferences.MAX_KEY_LENGTH);
+      className =
+        className.substring(0, java.util.prefs.Preferences.MAX_KEY_LENGTH);
     }
     int rgba = prefRoot.getInt(className, -1);
     Color colour;
@@ -563,14 +560,13 @@ public class OntologyTreePanel extends JPanel {
   }
 
   /**
-   * This is to initialise the classSelection as false to all the
-   * classes
+   * This is to initialise the classSelection as false to all the classes
    * 
    * @param root
    * @param classSelection
    */
   public void setOntoTreeClassSelection(IFolder root,
-          HashMap<String, Boolean> classSelection) {
+    HashMap<String, Boolean> classSelection) {
     if(!classSelection.containsKey(root.toString())) {
       classSelection.put(root.toString(), new Boolean(true));
       Iterator children = root.getChildren();
@@ -598,7 +594,7 @@ public class OntologyTreePanel extends JPanel {
   public void setSelected(String className, boolean value) {
     currentOResource2IsSelectedMap.put(className, new Boolean(value));
     ontology2OResourceSelectionMap.put(currentOntology,
-            currentOResource2IsSelectedMap);
+      currentOResource2IsSelectedMap);
   }
 
   public void setColor(String className, Color col) {

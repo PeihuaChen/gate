@@ -18,7 +18,6 @@ import java.util.*;
 import java.util.List;
 
 import gate.*;
-import gate.creole.ANNIEConstants;
 import gate.creole.ontology.OClass;
 import gate.creole.ontology.OConstants;
 import gate.creole.ontology.OInstance;
@@ -30,11 +29,11 @@ import gate.event.*;
 import gate.gui.docview.*;
 
 /**
- * In this class we implement the basic structure of the ontology viewer
- * Which includes the total ontologies that has been loaded in the
- * system option for the new ontology, if someone wishes to load it into
- * the system the ontology viewer (which displays all the conetps)
- * Ontology instance viewer and the instance attribute viewer
+ * In this class we implement the basic structure of the ontology viewer Which
+ * includes the total ontologies that has been loaded in the system option for
+ * the new ontology, if someone wishes to load it into the system the ontology
+ * viewer (which displays all the conetps) Ontology instance viewer and the
+ * instance attribute viewer
  * 
  * @author niraj
  */
@@ -70,12 +69,12 @@ public class OntologyViewer extends AbstractDocumentView implements
   private OntologyTreePanel ontologyTreePanel;
 
   /**
-   * AnnotationMap which stores all the relavant annotations (i.e.
-   * annotation with class feature) in the following way className -->
-   * ArrayList (which contains all the annotations)
-   * </p>
+   * AnnotationMap which stores all the relavant annotations (i.e. annotation
+   * with class feature) in the following way className --> ArrayList (which
+   * contains all the annotations) </p>
    */
-  private HashMap<String, ArrayList<Annotation>> className2AnnotationList;
+  private HashMap<String, ArrayList<Annotation>> className2AnnotationList =
+    new HashMap<String, ArrayList<Annotation>>();
 
   /** TextualDocument View instance */
   protected TextualDocumentView documentTextualDocumentView;
@@ -86,16 +85,16 @@ public class OntologyViewer extends AbstractDocumentView implements
   protected JTextArea documentTextArea;
 
   /**
-   * This object provides a functionality to add/remove/change the
-   * annotations
+   * This object provides a functionality to add/remove/change the annotations
    */
   protected AnnotationAction annotationAction;
 
   /**
-   * Each Annotation Set is given a unique ID, which is used later in
-   * the annotationsID2ASID map.
+   * Each Annotation Set is given a unique ID, which is used later in the
+   * annotationsID2ASID map.
    */
-  protected HashMap<Integer, String> asID2ASName = new HashMap<Integer, String>();
+  protected HashMap<Integer, String> asID2ASName =
+    new HashMap<Integer, String>();
 
   /**
    * The highest Annotation Set ID
@@ -106,11 +105,12 @@ public class OntologyViewer extends AbstractDocumentView implements
    * We store the ID of each annotation and the ID of annotation set the
    * annotation belongs to.
    */
-  private HashMap<Integer, Integer> annotationsID2ASID = new HashMap<Integer, Integer>();
+  private HashMap<Integer, Integer> annotationsID2ASID =
+    new HashMap<Integer, Integer>();
 
   /**
-   * Given an annotation, this method tells which
-   * selectedAnnotationSetName it belongs to.
+   * Given an annotation, this method tells which selectedAnnotationSetName it
+   * belongs to.
    * 
    * @param ann
    * @return the name of the annotation set.
@@ -122,11 +122,6 @@ public class OntologyViewer extends AbstractDocumentView implements
 
   /** Initialises the GUI */
   public void initGUI() {
-    // first lets find out all the annotations
-    // which have ontology and a class feature in it
-    document.getAnnotations().addAnnotationSetListener(this);
-    initLocalData();
-
     // get a pointer to the textual view used for highlights
     Iterator centralViewsIter = owner.getCentralViews().iterator();
     while(documentTextualDocumentView == null && centralViewsIter.hasNext()) {
@@ -134,16 +129,23 @@ public class OntologyViewer extends AbstractDocumentView implements
       if(aView instanceof TextualDocumentView)
         documentTextualDocumentView = (TextualDocumentView)aView;
     }
-    documentTextArea = (JTextArea)((JScrollPane)documentTextualDocumentView
-            .getGUI()).getViewport().getView();
+    documentTextArea =
+      (JTextArea)((JScrollPane)documentTextualDocumentView.getGUI())
+        .getViewport().getView();
+
+    // lets create the OntologyTree Component
+    ontologyTreePanel = new OntologyTreePanel(this);
+
+    // first lets find out all the annotations
+    // which have ontology and a class feature in it
+    document.getAnnotations().addAnnotationSetListener(this);
+    initLocalData();
+
     // first creating ontologyCB GUI
     ontologyCB = new JComboBox();
     ontologyCBPanel = new JPanel();
     ontologyCBPanel.setLayout(new FlowLayout());
     ontologyCBPanel.add(ontologyCB);
-
-    // lets create the OntologyTree Component
-    ontologyTreePanel = new OntologyTreePanel(this);
 
     // then lets create main panel design
     mainPanel = new JPanel();
@@ -151,14 +153,14 @@ public class OntologyViewer extends AbstractDocumentView implements
     mainPanel.add(ontologyCBPanel, BorderLayout.NORTH);
     mainPanel.add(ontologyTreePanel.getGUI(), BorderLayout.CENTER);
     mainPanel.setBackground(Color.white);
-    int width = ontologyCB.getWidth() > ontologyTreePanel.getWidth()
-            ? ontologyCB.getWidth()
-            : ontologyTreePanel.getWidth();
+    int width =
+      ontologyCB.getWidth() > ontologyTreePanel.getWidth() ? ontologyCB
+        .getWidth() : ontologyTreePanel.getWidth();
     mainPanel.setMaximumSize(new Dimension(width, mainPanel.getHeight()));
     tabbedPane = new JTabbedPane();
     tabbedPane.addTab("Ontology Tree(s)", mainPanel);
     tabbedPane.addTab("Options", ontologyTreePanel.ontologyViewerOptions
-            .getGUI());
+      .getGUI());
 
     // load ontologies from the Gate environment
     loadOntologies();
@@ -167,7 +169,7 @@ public class OntologyViewer extends AbstractDocumentView implements
     addListeners();
     if(ontologies != null && ontologies.size() > 0) {
       ontologyTreePanel.showOntologyInOntologyTreeGUI(ontologies.get(0),
-              className2AnnotationList);
+        className2AnnotationList);
     }
     else {
       ontologyTreePanel.showEmptyOntologyTree();
@@ -176,28 +178,30 @@ public class OntologyViewer extends AbstractDocumentView implements
 
   /** ReIntializes all Maps used for local uses */
   protected void initLocalData() {
-    className2AnnotationList = new HashMap<String, ArrayList<Annotation>>();
-    HashMap<String, ArrayList<Annotation>> temp = getAnnotationsWithClassOrInstanceFeature(
-            document.getAnnotations(), null);
+    className2AnnotationList.clear();
+    asID2ASName.clear();
+    HashMap<String, ArrayList<Annotation>> temp =
+      getAnnotationsWithClassOrInstanceFeature(document.getAnnotations(), null);
     if(temp != null) {
       className2AnnotationList.putAll(temp);
     }
 
     Map<String, AnnotationSet> annotSetMap = document.getNamedAnnotationSets();
     if(annotSetMap != null) {
-      java.util.List<String> setNames = new ArrayList<String>(annotSetMap
-              .keySet());
+      java.util.List<String> setNames =
+        new ArrayList<String>(annotSetMap.keySet());
       Collections.sort(setNames);
       Iterator<String> setsIter = setNames.iterator();
       while(setsIter.hasNext()) {
-        temp = getAnnotationsWithClassOrInstanceFeature(document
-                .getAnnotations(setsIter.next()), null);
+        temp =
+          getAnnotationsWithClassOrInstanceFeature(document
+            .getAnnotations(setsIter.next()), null);
         if(temp != null) {
           Iterator<String> keyIter = temp.keySet().iterator();
           while(keyIter.hasNext()) {
             String key = keyIter.next();
             if(className2AnnotationList.containsKey(key)
-                    && temp.get(key) != null) {
+              && temp.get(key) != null) {
               className2AnnotationList.get(key).addAll(temp.get(key));
               continue;
             }
@@ -211,8 +215,8 @@ public class OntologyViewer extends AbstractDocumentView implements
   }
 
   /**
-   * This method is called by respective selectedAnnotationSetName from
-   * where an annotation is removed
+   * This method is called by respective selectedAnnotationSetName from where an
+   * annotation is removed
    */
   public void annotationRemoved(AnnotationSetEvent ase) {
     if(ontologyTreePanel.getCurrentOntology() == null) return;
@@ -222,13 +226,16 @@ public class OntologyViewer extends AbstractDocumentView implements
 
     // checks if it was of our interest
     FeatureMap map = currentAnnot.getFeatures();
-    String ontoClassName = gate.creole.ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME;
-    String ontoInstanceName = gate.creole.ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME;
+    String ontoClassName =
+      ontologyTreePanel.ontologyViewerOptions.getSelectedClassURIFeatureName();
+    String ontoInstanceName =
+      ontologyTreePanel.ontologyViewerOptions
+        .getSelectedInstanceURIFeatureName();
     if(map.containsKey(ontoClassName) || map.containsKey(ontoInstanceName)) {
       // yes this is of our interest we need to remove this from our
       // className2AnnotationList if it exists
-      Set<String> keySet = ontologyTreePanel.currentOResourceName2AnnotationsListMap
-              .keySet();
+      Set<String> keySet =
+        ontologyTreePanel.currentOResourceName2AnnotationsListMap.keySet();
       Iterator<String> iter = keySet.iterator();
       String className = "";
       ArrayList<Annotation> annots = null;
@@ -246,7 +253,7 @@ public class OntologyViewer extends AbstractDocumentView implements
       }
 
       ontologyTreePanel.currentOResourceName2AnnotationsListMap.put(className,
-              annots);
+        annots);
       // remove this from annotationsID2ASID
       annotationsID2ASID.remove(currentAnnot.getId());
       // and finally we need to highlight annotations
@@ -261,8 +268,11 @@ public class OntologyViewer extends AbstractDocumentView implements
     // what we need to do is to add this to className2AnnotationList if
     // it is relavant to our stuff
     FeatureMap map = currentAnnot.getFeatures();
-    String ontoClassName = gate.creole.ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME;
-    String ontoInstanceName = gate.creole.ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME;
+    String ontoClassName =
+      ontologyTreePanel.ontologyViewerOptions.getSelectedClassURIFeatureName();
+    String ontoInstanceName =
+      ontologyTreePanel.ontologyViewerOptions
+        .getSelectedInstanceURIFeatureName();
     String aName = null;
     String aValue = "";
 
@@ -342,7 +352,7 @@ public class OntologyViewer extends AbstractDocumentView implements
     // we have added the annotation to the annotation Map
     // so we would call the
     ontologyTreePanel.showOntologyInOntologyTreeGUI(ontologyTreePanel
-            .getCurrentOntology(), className2AnnotationList);
+      .getCurrentOntology(), className2AnnotationList);
     ontologyTreePanel.ontoTreeListener.refreshHighlights();
   }
 
@@ -358,8 +368,11 @@ public class OntologyViewer extends AbstractDocumentView implements
     // what we need to do is to add this to className2AnnotationList if
     // it is relavant to our stuff
     FeatureMap map = currentAnnot.getFeatures();
-    String ontoClassName = gate.creole.ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME;
-    String ontoInstanceName = ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME;
+    String ontoClassName =
+      ontologyTreePanel.ontologyViewerOptions.getSelectedClassURIFeatureName();
+    String ontoInstanceName =
+      ontologyTreePanel.ontologyViewerOptions
+        .getSelectedInstanceURIFeatureName();
 
     String aName = (String)map.get(ontoClassName);
     String aValue = "";
@@ -421,19 +434,20 @@ public class OntologyViewer extends AbstractDocumentView implements
     // we have added the annotation to the annotation Map
     // so we would call the
     ontologyTreePanel.showOntologyInOntologyTreeGUI(ontologyTreePanel
-            .getCurrentOntology(), className2AnnotationList);
+      .getCurrentOntology(), className2AnnotationList);
     ontologyTreePanel.ontoTreeListener.refreshHighlights();
   }
 
   /**
    * This method iterates through annotations and find out the ones with
-   * ontology and class features and returns the map<String, ArrayList<Annotation>>
+   * ontology and class features and returns the map<String,
+   * ArrayList<Annotation>>
    */
   private HashMap<String, ArrayList<Annotation>> getAnnotationsWithClassOrInstanceFeature(
-          AnnotationSet set, String aClassName) {
+    AnnotationSet set, String aClassName) {
     Integer setId = null;
     if(asID2ASName.values() != null
-            && asID2ASName.values().contains(set.getName())) {
+      && asID2ASName.values().contains(set.getName())) {
       Iterator<Integer> iter = asID2ASName.keySet().iterator();
       while(iter.hasNext()) {
         Integer tempId = iter.next();
@@ -450,12 +464,16 @@ public class OntologyViewer extends AbstractDocumentView implements
       asID2ASName.put(setId, set.getName());
     }
 
-    HashMap<String, ArrayList<Annotation>> subMap = new HashMap<String, ArrayList<Annotation>>();
+    HashMap<String, ArrayList<Annotation>> subMap =
+      new HashMap<String, ArrayList<Annotation>>();
     // now lets find out all the annotations which have ontology as a
     // feature
     Iterator<Annotation> setIter = set.iterator();
-    String ontoClassName = gate.creole.ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME;
-    String ontoInstanceName = gate.creole.ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME;
+    String ontoClassName =
+      ontologyTreePanel.ontologyViewerOptions.getSelectedClassURIFeatureName();
+    String ontoInstanceName =
+      ontologyTreePanel.ontologyViewerOptions
+        .getSelectedInstanceURIFeatureName();
     while(setIter.hasNext()) {
       Annotation currentAnnot = setIter.next();
       currentAnnot.removeAnnotationListener(this);
@@ -526,8 +544,7 @@ public class OntologyViewer extends AbstractDocumentView implements
   }
 
   /**
-   * gets the main tabbed pane that will be displayed as the OCAT
-   * component
+   * gets the main tabbed pane that will be displayed as the OCAT component
    */
   public Component getGUI() {
     return tabbedPane;
@@ -552,8 +569,8 @@ public class OntologyViewer extends AbstractDocumentView implements
     set.removeAnnotationSetListener(this);
     Map annotSetMap = document.getNamedAnnotationSets();
     if(annotSetMap != null) {
-      java.util.List<String> setNames = new ArrayList<String>(annotSetMap
-              .keySet());
+      java.util.List<String> setNames =
+        new ArrayList<String>(annotSetMap.keySet());
       Collections.sort(setNames);
       Iterator<String> setsIter = setNames.iterator();
       while(setsIter.hasNext()) {
@@ -564,8 +581,7 @@ public class OntologyViewer extends AbstractDocumentView implements
   }
 
   /**
-   * Searches within the GATE system to find out all the loaded
-   * ontologies
+   * Searches within the GATE system to find out all the loaded ontologies
    */
   private void loadOntologies() {
     if(ontologies == null) {
@@ -583,12 +599,12 @@ public class OntologyViewer extends AbstractDocumentView implements
   }
 
   /**
-   * Refresh the comboBox.. in case new ontology is loaded or one is
-   * removed
+   * Refresh the comboBox.. in case new ontology is loaded or one is removed
    * 
-   * @param ontology this could be either newly added ontology or that
-   *          removed one
-   * @param removed if true instance is removed otherwise added
+   * @param ontology
+   *          this could be either newly added ontology or that removed one
+   * @param removed
+   *          if true instance is removed otherwise added
    */
   private void refreshOntologyCB(Ontology ontology, boolean removed) {
     if(removed) {
@@ -604,7 +620,7 @@ public class OntologyViewer extends AbstractDocumentView implements
           wasCurrentlySelected = true;
 
         ontologyTreePanel.removeOntologyTreeModel(ontology,
-                wasCurrentlySelected);
+          wasCurrentlySelected);
         if(wasCurrentlySelected) if(ontologyCB.getItemCount() > 0) {
           ontologyCB.setSelectedIndex(0);
         }
@@ -621,8 +637,8 @@ public class OntologyViewer extends AbstractDocumentView implements
   }
 
   /**
-   * Description: an internal OntologySelectionChangeAction used to
-   * handle the ontology selection changes
+   * Description: an internal OntologySelectionChangeAction used to handle the
+   * ontology selection changes
    * 
    * @author Niraj Aswani
    * @version 1.0
@@ -634,7 +650,7 @@ public class OntologyViewer extends AbstractDocumentView implements
         int index = ontologyCB.getSelectedIndex();
         if(index >= 0) {
           ontologyTreePanel.showOntologyInOntologyTreeGUI(
-                  ontologies.get(index), className2AnnotationList);
+            ontologies.get(index), className2AnnotationList);
         }
         else {
           ontologyTreePanel.showEmptyOntologyTree();
@@ -661,8 +677,7 @@ public class OntologyViewer extends AbstractDocumentView implements
   }
 
   /**
-   * Gets executed whenever existing resource is unloaded in the GATE
-   * system
+   * Gets executed whenever existing resource is unloaded in the GATE system
    * 
    * @param creoleEvent
    */
@@ -708,14 +723,14 @@ public class OntologyViewer extends AbstractDocumentView implements
     if(ontologyCB.getSelectedIndex() == index) {
       shouldSelectAgain = true;
     }
-    HashMap<String, Boolean> selectionMap = ontologyTreePanel.ontology2OResourceSelectionMap
-            .get(ontology);
+    HashMap<String, Boolean> selectionMap =
+      ontologyTreePanel.ontology2OResourceSelectionMap.get(ontology);
 
     refreshOntologyCB(ontology, true);
     refreshOntologyCB(ontology, false);
     if(shouldSelectAgain) ontologyCB.setSelectedIndex(index);
-    HashMap<String, Boolean> newMap = ontologyTreePanel.ontology2OResourceSelectionMap
-            .get(ontology);
+    HashMap<String, Boolean> newMap =
+      ontologyTreePanel.ontology2OResourceSelectionMap.get(ontology);
     for(String key : selectionMap.keySet()) {
       Boolean val = selectionMap.get(key);
       if(newMap.containsKey(key)) {
@@ -725,68 +740,44 @@ public class OntologyViewer extends AbstractDocumentView implements
 
     documentTextArea.requestFocus();
   }
-  
-  public void resourceRelationChanged(Ontology ontology, OResource resource1, OResource resouce2, int eventType) {
+
+  public void resourceRelationChanged(Ontology ontology, OResource resource1,
+    OResource resouce2, int eventType) {
     this.ontologyModified(ontology, resource1, eventType);
   }
-  
-  public void resourcePropertyValueChanged(Ontology ontology, OResource resource, RDFProperty property, Object value, int eventType) {
+
+  public void resourcePropertyValueChanged(Ontology ontology,
+    OResource resource, RDFProperty property, Object value, int eventType) {
     this.ontologyModified(ontology, resource, eventType);
   }
-  
 
   public void ontologyModified(Ontology ontology, OResource resource,
-          int eventType) {
+    int eventType) {
     if(eventType == OConstants.SUB_CLASS_ADDED_EVENT
-            || eventType == OConstants.SUB_CLASS_REMOVED_EVENT) {
+      || eventType == OConstants.SUB_CLASS_REMOVED_EVENT) {
       ontologyReset(ontology);
     }
-
-    // boolean shouldSelectAgain = false;
-    // int index = ontologies.indexOf(ontology);
-    // if(index < 0) return;
-    //
-    // if(ontologyCB.getSelectedIndex() == index) {
-    // shouldSelectAgain = true;
-    // }
-    // HashMap<String, Boolean> selectionMap =
-    // ontologyTreePanel.ontologyName2ClassSelectionMap
-    // .get(ontology);
-    // refreshOntologyCB(ontology, true);
-    // refreshOntologyCB(ontology, false);
-    // if(shouldSelectAgain) ontologyCB.setSelectedIndex(index);
-    //    
-    // HashMap<String, Boolean> newMap =
-    // ontologyTreePanel.ontologyName2ClassSelectionMap
-    // .get(ontology);
-    // for(String key : selectionMap.keySet()) {
-    // Boolean val = selectionMap.get(key);
-    // if(newMap.containsKey(key)) {
-    // newMap.put(key, val);
-    // }
-    // }
-    //
-    // documentTextArea.requestFocus();
-
   }
 
   public void ontologyReset(Ontology ontology) {
     boolean shouldSelectAgain = false;
     int index = ontologies.indexOf(ontology);
     if(index < 0) return;
+
+    initLocalData();
     if(ontologyCB.getSelectedIndex() == index) {
       shouldSelectAgain = true;
     }
 
     // lets traverse through the ontology and find out the classes which
     // are selected
-    HashMap<String, Boolean> selectionMap = ontologyTreePanel.ontology2OResourceSelectionMap
-            .get(ontology);
+    HashMap<String, Boolean> selectionMap =
+      ontologyTreePanel.ontology2OResourceSelectionMap.get(ontology);
     refreshOntologyCB(ontology, true);
     refreshOntologyCB(ontology, false);
     if(shouldSelectAgain) ontologyCB.setSelectedIndex(index);
-    HashMap<String, Boolean> newMap = ontologyTreePanel.ontology2OResourceSelectionMap
-            .get(ontology);
+    HashMap<String, Boolean> newMap =
+      ontologyTreePanel.ontology2OResourceSelectionMap.get(ontology);
     for(String key : selectionMap.keySet()) {
       Boolean val = selectionMap.get(key);
       if(newMap.containsKey(key)) {
@@ -820,38 +811,37 @@ public class OntologyViewer extends AbstractDocumentView implements
           ClassNode instNode = new ClassNode(inst1);
           anode.addSubNode(instNode);
           // here we need to set a color for this new instance
+          ontologyTreePanel.setColorScheme(instNode,
+            (HashMap<String, Color>)ontologyTreePanel.ontology2ColorSchemesMap
+              .get(ontology));
           ontologyTreePanel
-                  .setColorScheme(
-                          instNode,
-                          (HashMap<String, Color>)ontologyTreePanel.ontology2ColorSchemesMap
-                                  .get(ontology));
-          ontologyTreePanel
-                  .setOntoTreeClassSelection(
-                          instNode,
-                          (HashMap<String, Boolean>)ontologyTreePanel.ontology2OResourceSelectionMap
-                                  .get(ontology));
+            .setOntoTreeClassSelection(
+              instNode,
+              (HashMap<String, Boolean>)ontologyTreePanel.ontology2OResourceSelectionMap
+                .get(ontology));
         }
       }
 
-      HashMap<String, Set<OClass>> map = ontologyTreePanel.ontology2PropValuesAndInstances2ClassesMap
-              .get(ontology);
-      Set<RDFProperty> rdfProps = ontologyTreePanel.ontology2PropertiesMap
-              .get(ontology);
+      HashMap<String, Set<OClass>> map =
+        ontologyTreePanel.ontology2PropValuesAndInstances2ClassesMap
+          .get(ontology);
+      Set<RDFProperty> rdfProps =
+        ontologyTreePanel.ontology2PropertiesMap.get(ontology);
       ontologyTreePanel
-              .updatePVnInst2ClassesMap(inst1, rdfProps, oClasses, map);
+        .updatePVnInst2ClassesMap(inst1, rdfProps, oClasses, map);
     }
     else {
 
       // lets traverse through the ontology and find out the classes
       // which
       // are selected
-      HashMap<String, Boolean> selectionMap = ontologyTreePanel.ontology2OResourceSelectionMap
-              .get(ontology);
+      HashMap<String, Boolean> selectionMap =
+        ontologyTreePanel.ontology2OResourceSelectionMap.get(ontology);
       refreshOntologyCB(ontology, true);
       refreshOntologyCB(ontology, false);
       if(shouldSelectAgain) ontologyCB.setSelectedIndex(index);
-      HashMap<String, Boolean> newMap = ontologyTreePanel.ontology2OResourceSelectionMap
-              .get(ontology);
+      HashMap<String, Boolean> newMap =
+        ontologyTreePanel.ontology2OResourceSelectionMap.get(ontology);
       for(String key : selectionMap.keySet()) {
         Boolean val = selectionMap.get(key);
         if(newMap.containsKey(key)) {

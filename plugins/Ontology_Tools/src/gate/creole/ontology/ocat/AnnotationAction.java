@@ -11,10 +11,9 @@ import javax.swing.event.MouseInputAdapter;
 import java.awt.event.*;
 
 /**
- * This class provides the GUI implementation for
- * creating/changing/deleting annotations from the text. It uses
- * OntologyTreePanel to display the list of available classes in the
- * ontology.
+ * This class provides the GUI implementation for creating/changing/deleting
+ * annotations from the text. It uses OntologyTreePanel to display the list of
+ * available classes in the ontology.
  * 
  * @author niraj
  */
@@ -31,22 +30,22 @@ public class AnnotationAction extends MouseInputAdapter {
   private javax.swing.Timer annotationWindowTimer;
 
   /**
-   * How long we should wait before showing a new annotation/change
-   * annotation window.
+   * How long we should wait before showing a new annotation/change annotation
+   * window.
    */
   private final int DELAY = 500;
 
   /**
-   * Action that is performed when user decides to create a new
-   * annotation.
+   * Action that is performed when user decides to create a new annotation.
    */
   private AnnotationEditor annotationEditor;
-  
+
   /**
    * Constructor
    * 
-   * @param ontologyTreePanel the instance this instance uses to obtain
-   *          the information about ontology
+   * @param ontologyTreePanel
+   *          the instance this instance uses to obtain the information about
+   *          ontology
    */
   public AnnotationAction(OntologyTreePanel ontoTreePanel) {
     this.ontologyTreePanel = ontoTreePanel;
@@ -72,7 +71,6 @@ public class AnnotationAction extends MouseInputAdapter {
     if(ontologyTreePanel.showingAnnotationWindow) {
       ontologyTreePanel.showingAnnotationWindow = false;
       annotationEditor.hideWindow();
-      //ontologyTreePanel.ontoViewer.documentTextArea.requestFocus();
     }
   }
 
@@ -82,10 +80,12 @@ public class AnnotationAction extends MouseInputAdapter {
    * @param e
    */
   public void mouseMoved(MouseEvent e) {
-    if(ontologyTreePanel.currentOntologyTree == null || ontologyTreePanel.showingAnnotationWindow) return;
+    if(ontologyTreePanel.currentOntologyTree == null
+      || ontologyTreePanel.showingAnnotationWindow) return;
     // mouse is moved so simply activate the timer
-    annotationEditor.setTextLocation(ontologyTreePanel.ontoViewer.documentTextArea
-                    .viewToModel(e.getPoint()));
+    annotationEditor
+      .setTextLocation(ontologyTreePanel.ontoViewer.documentTextArea
+        .viewToModel(e.getPoint()));
     annotationWindowTimer.restart();
     annotationEditor.setMousePoint(e.getPoint());
   }

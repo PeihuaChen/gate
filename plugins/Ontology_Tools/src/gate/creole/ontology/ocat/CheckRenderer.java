@@ -19,8 +19,7 @@ import com.ontotext.gate.vr.ClassNode;
 import com.ontotext.gate.vr.IFolder;
 
 /**
- * Description: This class provides the renderer for the Ontology Tree
- * Nodes.
+ * Description: This class provides the renderer for the Ontology Tree Nodes.
  * 
  * @author Niraj Aswani
  * @version 1.0
@@ -90,8 +89,8 @@ public class CheckRenderer extends JPanel implements TreeCellRenderer {
    * Renderer method
    */
   public Component getTreeCellRendererComponent(JTree tree, Object value,
-          boolean isSelected, boolean expanded, boolean leaf, int row,
-          boolean hasFocus) {
+    boolean isSelected, boolean expanded, boolean leaf, int row,
+    boolean hasFocus) {
 
     Object userObject = value;
     if(!(userObject instanceof IFolder)) {
@@ -117,15 +116,16 @@ public class CheckRenderer extends JPanel implements TreeCellRenderer {
       iconLabel.setVisible(true);
     }
 
-    Boolean bValue = ontologyTreePanel.currentOResource2IsSelectedMap.get(conceptName);
+    Boolean bValue =
+      ontologyTreePanel.currentOResource2IsSelectedMap.get(conceptName);
     if(bValue == null) {
       bValue = new Boolean(false);
       ontologyTreePanel.currentOResource2IsSelectedMap.put(conceptName, bValue);
     }
-    
+
     // if node should be selected
     boolean selected = bValue.booleanValue();
-    
+
     check.setSelected(selected);
     if(node.getSource() instanceof OClass) {
       iconLabel.setIcon(MainFrame.getIcon("ontology-class"));
@@ -146,8 +146,8 @@ public class CheckRenderer extends JPanel implements TreeCellRenderer {
     // place
     // only once when that ontology is loaded for the first time
     if(ontologyTreePanel.currentOResource2ColorMap.containsKey(conceptName)) {
-      Color color = (Color)ontologyTreePanel.currentOResource2ColorMap
-              .get(conceptName);
+      Color color =
+        (Color)ontologyTreePanel.currentOResource2ColorMap.get(conceptName);
       labelPanel.setBackground(color);
       iconPanel.setBackground(Color.WHITE);
     }
