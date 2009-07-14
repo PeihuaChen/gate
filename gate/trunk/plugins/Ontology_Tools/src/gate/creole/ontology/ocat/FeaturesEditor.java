@@ -60,7 +60,7 @@ public class FeaturesEditor extends JPanel {
   }
 
   /** Initialise this resource, and return it. */
-  public void init()  {
+  public void init() {
     featureList = new ArrayList<Feature>();
     emptyFeature = new Feature("", null);
     featureList.add(emptyFeature);
@@ -78,19 +78,19 @@ public class FeaturesEditor extends JPanel {
     mainTable.setIntercellSpacing(new Dimension(2, 2));
     featureEditorRenderer = new FeatureEditorRenderer();
     mainTable.getColumnModel().getColumn(ICON_COL).setCellRenderer(
-            featureEditorRenderer);
+      featureEditorRenderer);
     mainTable.getColumnModel().getColumn(NAME_COL).setCellRenderer(
-            featureEditorRenderer);
+      featureEditorRenderer);
     mainTable.getColumnModel().getColumn(NAME_COL).setCellEditor(
-            featureEditorRenderer);
+      featureEditorRenderer);
     mainTable.getColumnModel().getColumn(VALUE_COL).setCellRenderer(
-            featureEditorRenderer);
+      featureEditorRenderer);
     mainTable.getColumnModel().getColumn(VALUE_COL).setCellEditor(
-            featureEditorRenderer);
+      featureEditorRenderer);
     mainTable.getColumnModel().getColumn(DELETE_COL).setCellRenderer(
-            featureEditorRenderer);
+      featureEditorRenderer);
     mainTable.getColumnModel().getColumn(DELETE_COL).setCellEditor(
-            featureEditorRenderer);
+      featureEditorRenderer);
 
     scroller = new JScrollPane(mainTable);
     scroller.setBackground(getBackground());
@@ -123,7 +123,8 @@ public class FeaturesEditor extends JPanel {
       while(fSchemaIter.hasNext()) {
         FeatureSchema fSchema = (FeatureSchema)fSchemaIter.next();
         if(!features.contains(fSchema.getFeatureName())) {
-          featureList.add(new Feature(fSchema.getFeatureName(), new ArrayList()));
+          featureList
+            .add(new Feature(fSchema.getFeatureName(), new ArrayList()));
         }
       }
     }
@@ -180,7 +181,7 @@ public class FeaturesEditor extends JPanel {
       if(schema == null) return true;
       FeatureSchema fSchema = schema.getFeatureSchema(name);
       return fSchema == null || fSchema.getPermittedValues() == null
-              || fSchema.getPermittedValues().contains(value);
+        || fSchema.getPermittedValues().contains(value);
     }
 
     boolean isRequired() {
@@ -207,7 +208,7 @@ public class FeaturesEditor extends JPanel {
 
     public Object getValueAt(int row, int column) {
       Feature feature = (Feature)featureList.get(row);
-      switch(column) {
+      switch(column){
         case NAME_COL:
           return feature.name;
         case VALUE_COL:
@@ -219,7 +220,7 @@ public class FeaturesEditor extends JPanel {
 
     public boolean isCellEditable(int rowIndex, int columnIndex) {
       return columnIndex == VALUE_COL || columnIndex == NAME_COL
-              || columnIndex == DELETE_COL;
+        || columnIndex == DELETE_COL;
     }
 
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
@@ -228,7 +229,7 @@ public class FeaturesEditor extends JPanel {
         targetFeatures = Factory.newFeatureMap();
         populate();
       }
-      switch(columnIndex) {
+      switch(columnIndex){
         case VALUE_COL:
           feature.value = aValue;
           if(feature.name != null && feature.name.length() > 0) {
@@ -254,7 +255,7 @@ public class FeaturesEditor extends JPanel {
     }
 
     public String getColumnName(int column) {
-      switch(column) {
+      switch(column){
         case NAME_COL:
           return "Name";
         case VALUE_COL:
@@ -268,7 +269,7 @@ public class FeaturesEditor extends JPanel {
   }
 
   public int editingRow = -1;
-  
+
   protected class FeatureEditorRenderer extends DefaultCellEditor implements
                                                                  TableCellRenderer {
     public FeatureEditorRenderer() {
@@ -299,7 +300,8 @@ public class FeaturesEditor extends JPanel {
 
             String[] availableValues = new String[0];
             if(feature.isSchemaFeature()) {
-              Set pValues = schema.getFeatureSchema(feature.name).getPermittedValues();
+              Set pValues =
+                schema.getFeatureSchema(feature.name).getPermittedValues();
               if(pValues == null) pValues = new HashSet();
               List permValues = new ArrayList(pValues);
               if(permValues != null) {
@@ -311,13 +313,15 @@ public class FeaturesEditor extends JPanel {
                 }
               }
             }
-            // if there's no perm value specified, we allow users to provided their own value
-            // otherwise he is restricted to use one of the values from the availableValues
+            // if there's no perm value specified, we allow users to provided
+            // their own value
+            // otherwise he is restricted to use one of the values from the
+            // availableValues
             vsa.showGUI("Values for the \"" + feature.name + "\" feature",
-                    availableValues, selectedValues, availableValues.length == 0);
+              availableValues, selectedValues, availableValues.length == 0);
             selectedValues = vsa.getSelectedValues();
             ArrayList list = new ArrayList();
-            for(int i=0;i<selectedValues.length;i++) {
+            for(int i = 0; i < selectedValues.length; i++) {
               list.add(selectedValues[i]);
             }
 
@@ -328,11 +332,11 @@ public class FeaturesEditor extends JPanel {
         }
       });
       listItems = new JTextField(10);
-      listItems.setMargin(new Insets(0,0,0,0));
+      listItems.setMargin(new Insets(0, 0, 0, 0));
       listItems.setEditable(false);
       listItems.setBackground(mainTable.getBackground());
-      
-      listPanel = new JPanel(new BorderLayout(0,0));
+
+      listPanel = new JPanel(new BorderLayout(0, 0));
       listPanel.add(listItems, BorderLayout.CENTER);
       listPanel.add(listButton, BorderLayout.EAST);
       listPanel.setBackground(mainTable.getBackground());
@@ -367,7 +371,7 @@ public class FeaturesEditor extends JPanel {
         }
 
         protected void firePropertyChange(String propertyName, Object oldValue,
-                Object newValue) {
+          Object newValue) {
         }
 
       };
@@ -389,7 +393,7 @@ public class FeaturesEditor extends JPanel {
         }
 
         protected void firePropertyChange(String propertyName, Object oldValue,
-                Object newValue) {
+          Object newValue) {
         }
 
       };
@@ -411,7 +415,7 @@ public class FeaturesEditor extends JPanel {
         }
 
         protected void firePropertyChange(String propertyName, Object oldValue,
-                Object newValue) {
+          Object newValue) {
         }
 
       };
@@ -443,13 +447,13 @@ public class FeaturesEditor extends JPanel {
     }
 
     public Component getTableCellRendererComponent(JTable table, Object value,
-            boolean isSelected, boolean hasFocus, int row, int column) {
+      boolean isSelected, boolean hasFocus, int row, int column) {
       Feature feature = (Feature)featureList.get(row);
-      switch(column) {
+      switch(column){
         case ICON_COL:
           return feature.isSchemaFeature() ? (feature.isRequired()
-                  ? requiredIconLabel
-                  : optionalIconLabel) : nonSchemaIconLabel;
+            ? requiredIconLabel
+            : optionalIconLabel) : nonSchemaIconLabel;
         case NAME_COL:
           rendererCombo.setPreferredSize(null);
           prepareCombo(rendererCombo, row, column);
@@ -457,8 +461,8 @@ public class FeaturesEditor extends JPanel {
           return rendererCombo;
         case VALUE_COL:
           if(feature.value instanceof List) {
-              listItems.setText(feature.value.toString());
-              return listPanel;
+            listItems.setText(feature.value.toString());
+            return listPanel;
           }
           else {
             prepareCombo(rendererCombo, row, column);
@@ -472,16 +476,16 @@ public class FeaturesEditor extends JPanel {
     }
 
     public Component getTableCellEditorComponent(JTable table, Object value,
-            boolean isSelected, int row, int column) {
+      boolean isSelected, int row, int column) {
       Feature feature = (Feature)featureList.get(row);
-      switch(column) {
+      switch(column){
         case NAME_COL:
           prepareCombo(editorCombo, row, column);
           return editorCombo;
         case VALUE_COL:
           if(feature.value instanceof List) {
-              listItems.setText(feature.value.toString());
-              return listPanel;
+            listItems.setText(feature.value.toString());
+            return listPanel;
           }
           else {
             prepareCombo(editorCombo, row, column);
@@ -495,13 +499,11 @@ public class FeaturesEditor extends JPanel {
 
     }
 
-    
-    
     protected void prepareCombo(JComboBox combo, int row, int column) {
       Feature feature = (Feature)featureList.get(row);
       DefaultComboBoxModel comboModel = (DefaultComboBoxModel)combo.getModel();
       comboModel.removeAllElements();
-      switch(column) {
+      switch(column){
         case NAME_COL:
           List fNames = new ArrayList();
           if(schema != null && schema.getFeatureSchemaSet() != null) {
@@ -512,30 +514,28 @@ public class FeaturesEditor extends JPanel {
           if(!fNames.contains(feature.name)) fNames.add(feature.name);
           Collections.sort(fNames);
           for(Iterator nameIter = fNames.iterator(); nameIter.hasNext(); comboModel
-                  .addElement(nameIter.next()))
+            .addElement(nameIter.next()))
             ;
           combo.getEditor().getEditorComponent().setBackground(
-                  FeaturesEditor.this.getBackground());
+            FeaturesEditor.this.getBackground());
           combo.setSelectedItem(feature.name);
           break;
         case VALUE_COL:
           List fValues = new ArrayList();
           if(feature.isSchemaFeature()) {
-            Set permValues = schema.getFeatureSchema(feature.name)
-                    .getPermittedValues();
+            Set permValues =
+              schema.getFeatureSchema(feature.name).getPermittedValues();
             if(permValues != null) fValues.addAll(permValues);
           }
           if(!fValues.contains(feature.value)) fValues.add(feature.value);
           Collections.sort(fValues, defaultComparator);
           for(Iterator valIter = fValues.iterator(); valIter.hasNext(); comboModel
-                  .addElement(valIter.next()))
+            .addElement(valIter.next()))
             ;
           combo.getEditor().getEditorComponent().setBackground(
-                  feature.isCorrect()
-                          ? FeaturesEditor.this.getBackground()
-                          : (feature.isRequired()
-                                  ? REQUIRED_WRONG
-                                  : OPTIONAL_WRONG));
+            feature.isCorrect()
+              ? FeaturesEditor.this.getBackground()
+              : (feature.isRequired() ? REQUIRED_WRONG : OPTIONAL_WRONG));
           combo.setSelectedItem(feature.value);
           break;
         default:

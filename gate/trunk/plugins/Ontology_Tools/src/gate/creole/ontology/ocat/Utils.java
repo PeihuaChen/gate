@@ -17,8 +17,9 @@ public class Utils {
    * @param annot
    * @return
    */
-  public static String getClassFeatureValue(gate.Annotation annot) {
-    String ontoClassName = gate.creole.ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME;
+  public static String getClassFeatureValue(gate.Annotation annot,
+    OntologyViewerOptions options) {
+    String ontoClassName = options.getSelectedClassURIFeatureName();
     FeatureMap map = annot.getFeatures();
 
     String aName = (String)map.get(ontoClassName);
@@ -39,8 +40,9 @@ public class Utils {
    * @param annot
    * @return
    */
-  public static String getInstanceFeatureValue(gate.Annotation annot) {
-    String ontoInstanceName = gate.creole.ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME;
+  public static String getInstanceFeatureValue(gate.Annotation annot,
+    OntologyViewerOptions options) {
+    String ontoInstanceName = options.getSelectedInstanceURIFeatureName();
     FeatureMap map = annot.getFeatures();
 
     String aName = (String)map.get(ontoInstanceName);

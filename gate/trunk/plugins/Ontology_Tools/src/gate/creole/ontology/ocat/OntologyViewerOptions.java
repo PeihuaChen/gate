@@ -27,8 +27,8 @@ import gate.gui.MainFrame;
 import gate.util.GateRuntimeException;
 
 /**
- * Description: This class Provides options window to set the options
- * for Ontology Viewer
+ * Description: This class Provides options window to set the options for
+ * Ontology Viewer
  * 
  * @author Niraj Aswani
  * @version 1.0
@@ -36,39 +36,43 @@ import gate.util.GateRuntimeException;
 public class OntologyViewerOptions implements DocumentListener {
 
   private JScrollPane scroller;
-  
+
   private JPanel optionPanel;
 
   /**
-   * Indicates whether to select all subclasses when a super class is
-   * selected or not.
+   * Indicates whether to select all subclasses when a super class is selected
+   * or not.
    */
   private JCheckBox childFeatureCB;
 
   /**
-   * Indicates whether to confirm the deletion of an annotation with
-   * user or not.
+   * Indicates whether to confirm the deletion of an annotation with user or
+   * not.
    */
   private JCheckBox deleteConfirmationCB;
 
   /**
-   * selected text as annotation property?
-   * user or not.
+   * selected text as annotation property? user or not.
    */
   private JCheckBox selectedTextAsPropertyValue;
-  
+
   private JTextField propertyName;
-  
+
   /**
-   * Indicates whether to be case-sensitive or not when annotating text
-   * in the add All option
+   * Show annonymous classes
+   */
+  private JCheckBox showAnonymousClassesCB;
+
+  /**
+   * Indicates whether to be case-sensitive or not when annotating text in the
+   * add All option
    */
   private JCheckBox addAllFeatureCaseSensitiveCB;
 
   /**
-   * Indicates whether to use the provided ontology class filter file or
-   * not. If yes, it disables all the classes mentioned in the filter
-   * file from the ocat tree.
+   * Indicates whether to use the provided ontology class filter file or not. If
+   * yes, it disables all the classes mentioned in the filter file from the ocat
+   * tree.
    */
   private JRadioButton classesToHideRB;
 
@@ -92,16 +96,15 @@ public class OntologyViewerOptions implements DocumentListener {
    */
   private JButton saveClassesToHideFileButton;
 
-  
   /**
-   * Indicates whether to use the provided ontology class filter file or
-   * not. If yes, it disables all the classes mentioned in the filter
-   * file from the ocat tree.
+   * Indicates whether to use the provided ontology class filter file or not. If
+   * yes, it disables all the classes mentioned in the filter file from the ocat
+   * tree.
    */
   private JRadioButton classesToShowRB;
 
   private JRadioButton disableFilteringRB;
-  
+
   /**
    * Filter File URL
    */
@@ -121,8 +124,7 @@ public class OntologyViewerOptions implements DocumentListener {
    * Button that allows saving the filter file.
    */
   private JButton saveClassesToShowFileButton;
-  
-  
+
   /**
    * Default AnnotationSEt or otherAnnotationSets
    */
@@ -140,8 +142,22 @@ public class OntologyViewerOptions implements DocumentListener {
   private JRadioButton otherAT, mentionAT;
 
   /**
-   * All available annotation types, with a capability of adding new,
-   * are listed under this annotationTypesComboBox
+   * Default classURI feature which is "class". User can specify other than this
+   */
+  private JRadioButton otherClassURIFeatureName, classURIFeatureName;
+
+  /**
+   * Default instanceURI feature which is "inst". User can specify other than
+   * this
+   */
+  private JRadioButton otherInstanceURIFeatureName, instanceURIFeatureName;
+
+  /** Class and Instance URI Text Fields */
+  private JTextField otherClassURITF, otherInstanceURITF;
+
+  /**
+   * All available annotation types, with a capability of adding new, are listed
+   * under this annotationTypesComboBox
    */
   private JComboBox annotationTypesCB;
 
@@ -159,13 +175,15 @@ public class OntologyViewerOptions implements DocumentListener {
    * List of ontology classes to be filtered out.
    */
   protected HashSet<String> classesToShow;
-  
+
   /**
-   * Instead of a null value, we specify the defaultAnnotationSetName
-   * with some strange string
+   * Instead of a null value, we specify the defaultAnnotationSetName with some
+   * strange string
    */
   public static final String DEFAULT_ANNOTATION_SET = "00#Default#00",
-          DEFAULT_ANNOTATION_TYPE = "Mention";
+    DEFAULT_ANNOTATION_TYPE = "Mention",
+    DEFAULT_CLASS_URI_FEATURE_NAME = "class",
+    DEFAULT_INSTANCE_URI_FEATURE_NAME = "inst";
 
   /**
    * Currently selected annotationSetName
@@ -177,10 +195,9 @@ public class OntologyViewerOptions implements DocumentListener {
    */
   protected String selectedAnnotationType = DEFAULT_ANNOTATION_TYPE;
 
-  
   private boolean readClassesToHideFile = false;
   private boolean readClassesToShowFile = false;
-  
+
   /**
    * Constructor
    * 
@@ -202,8 +219,8 @@ public class OntologyViewerOptions implements DocumentListener {
   /** Returns the currently selected Annotation Set */
   public String getSelectedAnnotationSetName() {
     if(otherAS.isEnabled() && otherAS.isSelected()) {
-      selectedAnnotationSetName = (String)annotationSetsNamesCB
-              .getSelectedItem();
+      selectedAnnotationSetName =
+        (String)annotationSetsNamesCB.getSelectedItem();
     }
     else if(defaultAS.isEnabled()) {
       selectedAnnotationSetName = DEFAULT_ANNOTATION_SET;
@@ -212,9 +229,8 @@ public class OntologyViewerOptions implements DocumentListener {
   }
 
   /**
-   * The method disables the graphical selection of
-   * selectedAnnotationSetName and will allow user to provide the
-   * annotationSetName explicitly
+   * The method disables the graphical selection of selectedAnnotationSetName
+   * and will allow user to provide the annotationSetName explicitly
    * 
    * @param annotationSetName
    */
@@ -223,7 +239,7 @@ public class OntologyViewerOptions implements DocumentListener {
     // making sure the selectedAnnotationSetName exists, if not, it will
     // be created
     ontologyTreePanel.ontoViewer.getDocument().getAnnotations(
-            selectedAnnotationSetName);
+      selectedAnnotationSetName);
 
     otherAS.setEnabled(false);
     annotationSetsNamesCB.setEnabled(false);
@@ -258,61 +274,65 @@ public class OntologyViewerOptions implements DocumentListener {
   private void initGUI() {
     classesToHide = new HashSet<String>();
     classesToShow = new HashSet<String>();
-    childFeatureCB = new JCheckBox("Disable Child Feature");
-    selectedTextAsPropertyValue = new JCheckBox("Selected Text As Property Value?");
-    propertyName = new JTextField("alias",15);
+    
+    optionPanel = new JPanel(new GridBagLayout());
+    GridBagConstraints c = new GridBagConstraints();
+    c.fill = GridBagConstraints.NONE;
+    c.gridx = 0;
+    c.anchor = GridBagConstraints.FIRST_LINE_START;
+    
+    childFeatureCB = new JCheckBox("Disable child feature");
+    selectedTextAsPropertyValue =
+      new JCheckBox("Selected Text As Property Value?");
+    propertyName = new JTextField("alias", 15);
+    OntologyViewerOptionsActions ovoa = new OntologyViewerOptionsActions();
     
     deleteConfirmationCB = new JCheckBox("Enable confirm deletion");
-    addAllFeatureCaseSensitiveCB = new JCheckBox(
-            "Case Sensitive \"Annotate All\" Feature");
-    addAllFeatureCaseSensitiveCB.setSelected(true);
-
+    showAnonymousClassesCB = new JCheckBox("Show Anonymous classes");
+    addAllFeatureCaseSensitiveCB =
+      new JCheckBox("Case sensitive \"Annotate All\" feature");
     classesToHideRB = new JRadioButton("Classes to ommit");
-    classesToHideRB.addActionListener(new OntologyViewerOptionsActions());
     classesToHideFilePathTF = new JTextField(15);
     browseClassesToHideFileButton = new JButton("Browse");
-    browseClassesToHideFileButton
-            .addActionListener(new OntologyViewerOptionsActions());
     saveClassesToHideFileButton = new JButton("Save");
-    saveClassesToHideFileButton
-            .addActionListener(new OntologyViewerOptionsActions());
-
-    JPanel temp6 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    temp6.add(new JLabel("    File:"));
-    temp6.add(classesToHideFilePathTF);
-    temp6.add(browseClassesToHideFileButton);
-    temp6.add(saveClassesToHideFileButton);
-
+    disableFilteringRB = new JRadioButton("Disable filtering");
     classesToShowRB = new JRadioButton("Classes to show");
-    classesToShowRB.addActionListener(new OntologyViewerOptionsActions());
     classesToShowFilePathTF = new JTextField(15);
     browseClassesToShowFileButton = new JButton("Browse");
-    browseClassesToShowFileButton
-            .addActionListener(new OntologyViewerOptionsActions());
     saveClassesToShowFileButton = new JButton("Save");
-    saveClassesToShowFileButton
-            .addActionListener(new OntologyViewerOptionsActions());
-
-    JPanel temp8 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    temp8.add(new JLabel("    File:"));
-    temp8.add(classesToShowFilePathTF);
-    temp8.add(browseClassesToShowFileButton);
-    temp8.add(saveClassesToShowFileButton);
-
-    disableFilteringRB = new JRadioButton("Disable Filtering");
+    annotationSetsNamesCB = new JComboBox();
+    annotationTypesCB = new JComboBox();
+    defaultAS = new JRadioButton();
+    otherAS = new JRadioButton();
+    mentionAT = new JRadioButton();
+    otherAT = new JRadioButton();
+    classURIFeatureName = new JRadioButton();
+    otherClassURIFeatureName = new JRadioButton();
+    otherClassURITF = new JTextField(12);
+    instanceURIFeatureName = new JRadioButton();
+    otherInstanceURIFeatureName = new JRadioButton();
+    otherInstanceURITF = new JTextField(12);
     
+    showAnonymousClassesCB.setSelected(false);
+    addAllFeatureCaseSensitiveCB.setSelected(true);
+
+    JPanel classesToOmmitPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    classesToOmmitPanel.add(new JLabel("    File:"));
+    classesToOmmitPanel.add(classesToHideFilePathTF);
+    classesToOmmitPanel.add(browseClassesToHideFileButton);
+    classesToOmmitPanel.add(saveClassesToHideFileButton);
+
+    JPanel classesToShowPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    classesToShowPanel.add(new JLabel("    File:"));
+    classesToShowPanel.add(classesToShowFilePathTF);
+    classesToShowPanel.add(browseClassesToShowFileButton);
+    classesToShowPanel.add(saveClassesToShowFileButton);
+
     ButtonGroup bg8 = new ButtonGroup();
     bg8.add(classesToShowRB);
     bg8.add(classesToHideRB);
     bg8.add(disableFilteringRB);
     disableFilteringRB.setSelected(true);
-    
-    JPanel temp7 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    temp7.add(new JLabel("    Annotation Property : "));
-    temp7.add(propertyName);
-    
-    annotationSetsNamesCB = new JComboBox();
-    annotationTypesCB = new JComboBox();
 
     // lets find out all the annotations
     Document document = ontologyTreePanel.ontoViewer.getDocument();
@@ -327,13 +347,13 @@ public class OntologyViewerOptions implements DocumentListener {
           String setName = (String)setsIter.next();
           annotationSetsNamesCB.addItem(setName);
           ontologyTreePanel.ontoViewer.getDocument().getAnnotations(setName)
-                  .addAnnotationSetListener(ontologyTreePanel.ontoViewer);
+            .addAnnotationSetListener(ontologyTreePanel.ontoViewer);
         }
       }
     }
     annotationSetsNamesCB.setEnabled(false);
     annotationSetsNamesCB.setEditable(true);
-    annotationSetsNamesCB.addActionListener(new OntologyViewerOptionsActions());
+
 
     Set types = document.getAnnotations().getAllTypes();
     if(types != null) {
@@ -345,68 +365,121 @@ public class OntologyViewerOptions implements DocumentListener {
 
     annotationTypesCB.setEnabled(false);
     annotationTypesCB.setEditable(true);
-    annotationTypesCB.addActionListener(new OntologyViewerOptionsActions());
-
-    optionPanel = new JPanel();
-    optionPanel.setLayout(new GridLayout(16, 1));
-    optionPanel.add(childFeatureCB);
-    optionPanel.add(deleteConfirmationCB);
-    optionPanel.add(addAllFeatureCaseSensitiveCB);
-    optionPanel.add(disableFilteringRB);
-    optionPanel.add(classesToHideRB);
-    optionPanel.add(temp6);
-    optionPanel.add(classesToShowRB);
-    optionPanel.add(temp8);
-    optionPanel.add(selectedTextAsPropertyValue);
-    optionPanel.add(temp7);
-    
-    optionPanel.add(new JLabel("Annotation Set : "));
-    defaultAS = new JRadioButton();
     defaultAS.setSelected(true);
-    defaultAS.addActionListener(new OntologyViewerOptionsActions());
-    otherAS = new JRadioButton();
-    otherAS.addActionListener(new OntologyViewerOptionsActions());
+    mentionAT.setSelected(true);
+    classURIFeatureName.setSelected(true);
+    instanceURIFeatureName.setSelected(true);
+
 
     ButtonGroup group = new ButtonGroup();
     group.add(defaultAS);
     group.add(otherAS);
 
-    JPanel temp3 = new JPanel();
-    temp3.setLayout(new FlowLayout(FlowLayout.LEFT));
-    temp3.add(defaultAS);
-    temp3.add(new JLabel("Default Annotation Set"));
-
-    JPanel temp1 = new JPanel();
-    temp1.setLayout(new FlowLayout(FlowLayout.LEFT));
-    temp1.add(otherAS);
-    temp1.add(annotationSetsNamesCB);
-
-    optionPanel.add(temp3);
-    optionPanel.add(temp1);
-
-    optionPanel.add(new JLabel("Annotation Type : "));
-    mentionAT = new JRadioButton();
-    mentionAT.setSelected(true);
-    mentionAT.addActionListener(new OntologyViewerOptionsActions());
-    otherAT = new JRadioButton();
-    otherAT.addActionListener(new OntologyViewerOptionsActions());
-
     ButtonGroup group1 = new ButtonGroup();
     group1.add(mentionAT);
     group1.add(otherAT);
 
-    JPanel temp4 = new JPanel();
-    temp4.setLayout(new FlowLayout(FlowLayout.LEFT));
-    temp4.add(mentionAT);
-    temp4.add(new JLabel("Mention"));
+    ButtonGroup group2 = new ButtonGroup();
+    group2.add(classURIFeatureName);
+    group2.add(otherClassURIFeatureName);
 
-    JPanel temp5 = new JPanel();
-    temp5.setLayout(new FlowLayout(FlowLayout.LEFT));
-    temp5.add(otherAT);
-    temp5.add(annotationTypesCB);
+    ButtonGroup group3 = new ButtonGroup();
+    group3.add(instanceURIFeatureName);
+    group3.add(otherInstanceURIFeatureName);
 
-    optionPanel.add(temp4);
-    optionPanel.add(temp5);
+    showAnonymousClassesCB.addActionListener(ovoa);
+    classesToHideRB.addActionListener(ovoa);
+    browseClassesToHideFileButton.addActionListener(ovoa);
+    saveClassesToHideFileButton.addActionListener(ovoa);
+    classesToShowRB.addActionListener(ovoa);
+    browseClassesToShowFileButton.addActionListener(ovoa);
+    saveClassesToShowFileButton.addActionListener(ovoa);
+    annotationSetsNamesCB.addActionListener(ovoa);
+    annotationTypesCB.addActionListener(ovoa);
+    defaultAS.addActionListener(ovoa);
+    otherAS.addActionListener(ovoa);
+    mentionAT.addActionListener(ovoa);
+    otherAT.addActionListener(ovoa);
+    classURIFeatureName.addActionListener(ovoa);
+    otherClassURIFeatureName.addActionListener(ovoa);
+    otherClassURITF.addActionListener(ovoa);
+    instanceURIFeatureName.addActionListener(ovoa);
+    otherInstanceURITF.addActionListener(ovoa);
+    otherInstanceURIFeatureName.addActionListener(ovoa);
+
+    c.gridwidth = 5;
+    c.gridy = 0; optionPanel.add(showAnonymousClassesCB, c);
+    c.gridy = 1; optionPanel.add(childFeatureCB, c);
+    c.gridy = 2; optionPanel.add(deleteConfirmationCB, c);
+    c.gridy = 3; optionPanel.add(addAllFeatureCaseSensitiveCB, c);
+    c.gridy = 4; optionPanel.add(disableFilteringRB, c);
+    c.gridy = 5; optionPanel.add(classesToHideRB, c);
+    c.gridy = 6; optionPanel.add(classesToOmmitPanel, c);
+    c.gridy = 7; optionPanel.add(classesToShowRB, c);
+    c.gridy = 8; optionPanel.add(classesToShowPanel, c);
+    c.gridy = 9; optionPanel.add(selectedTextAsPropertyValue, c);
+    c.gridwidth = 1;
+    c.gridx = 0;
+    c.gridy = 10; 
+    optionPanel.add(new JLabel("Annotation property: "), c);
+    c.gridx = 1;
+    c.gridwidth = 4; 
+    optionPanel.add(propertyName, c);
+    c.gridwidth = 1;
+    c.gridy = 11;
+    c.gridx = 0;
+    optionPanel.add(new JLabel("Annotation set: "), c);
+    c.gridx = 1;
+    optionPanel.add(defaultAS, c);
+    c.gridx = 2;
+    optionPanel.add(new JLabel("Default"), c);
+    c.gridx = 3;
+    optionPanel.add(otherAS, c);
+    c.gridx = 4;
+    optionPanel.add(annotationSetsNamesCB, c);
+    c.gridy = 12;
+    c.gridx = 0;
+    optionPanel.add(new JLabel("Annotation type: "), c);
+    c.gridx = 1;
+    optionPanel.add(mentionAT, c);
+    c.gridx = 2;
+    optionPanel.add(new JLabel("Mention"), c);
+    c.gridx = 3;
+    optionPanel.add(otherAT, c);
+    c.gridx = 4;
+    optionPanel.add(annotationTypesCB, c);
+
+    
+    c.gridy = 13; 
+    c.gridx = 0;
+    optionPanel.add(new JLabel("Class URI feature name: "), c);
+    c.gridx = 1;
+    optionPanel.add(classURIFeatureName, c);
+    c.gridx = 2;
+    optionPanel.add(new JLabel(DEFAULT_CLASS_URI_FEATURE_NAME), c);
+    c.gridx = 3;
+    optionPanel.add(otherClassURIFeatureName, c);
+    c.gridx = 4;
+    optionPanel.add(otherClassURITF, c);
+
+    c.gridy = 14; 
+    c.gridx = 0;
+    optionPanel.add(new JLabel("Instance URI feature name: "), c);
+    c.gridx = 1;
+    optionPanel.add(instanceURIFeatureName, c);
+    c.gridx = 2;
+    optionPanel.add(new JLabel(DEFAULT_INSTANCE_URI_FEATURE_NAME), c);
+    c.gridx = 3;
+    optionPanel.add(otherInstanceURIFeatureName, c);
+    c.gridx = 4;
+    optionPanel.add(otherInstanceURITF, c);
+
+    c.fill = GridBagConstraints.BOTH;
+    c.weighty = 1.0;
+    c.gridwidth = 5;
+    c.gridx = 0;
+    c.gridy = 15; optionPanel.add(Box.createVerticalGlue(), c);
+
     scroller = new JScrollPane(optionPanel);
   }
 
@@ -417,10 +490,6 @@ public class OntologyViewerOptions implements DocumentListener {
    */
   public Component getGUI() {
     return scroller;
-//    JPanel myPanel = new JPanel();
-//    myPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-//    myPanel.add(scroller);
-//    return myPanel;
   }
 
   /**
@@ -435,13 +504,13 @@ public class OntologyViewerOptions implements DocumentListener {
      * Serial version ID
      */
     private static final long serialVersionUID = 3906926759864643636L;
-
+    
     public void actionPerformed(ActionEvent ae) {
 
       if(ae.getSource() == otherAS) {
         annotationSetsNamesCB.setEnabled(true);
         if(annotationSetsNamesCB.getSelectedItem() == null
-                && annotationSetsNamesCB.getItemCount() > 0) {
+          && annotationSetsNamesCB.getItemCount() > 0) {
           annotationSetsNamesCB.setSelectedIndex(0);
           return;
         }
@@ -451,19 +520,30 @@ public class OntologyViewerOptions implements DocumentListener {
         }
         else {
           annotationSetsNamesCB.setSelectedIndex(annotationSetsNamesCB
-                  .getSelectedIndex());
+            .getSelectedIndex());
           return;
         }
+      }
+      else if(ae.getSource() == classURIFeatureName
+        || ae.getSource() == otherClassURIFeatureName
+        || ae.getSource() == otherClassURITF
+        || ae.getSource() == instanceURIFeatureName
+        || ae.getSource() == otherInstanceURIFeatureName
+        || ae.getSource() == otherInstanceURITF
+        || ae.getSource() == showAnonymousClassesCB) {
+        ontologyTreePanel.ontoViewer.ontologyReset(ontologyTreePanel
+          .getCurrentOntology());
       }
       else if(ae.getSource() == annotationSetsNamesCB) {
 
         // see if user has entered a new Item
         String item = (String)annotationSetsNamesCB.getSelectedItem();
 
-        // we need to change the annotationTypesCB values as well
+        // we need to change the annotationTypesCBcomp values as well
         annotationTypesCB.removeAllItems();
-        Set types = ontologyTreePanel.ontoViewer.getDocument().getAnnotations(
-                (String)item).getAllTypes();
+        Set types =
+          ontologyTreePanel.ontoViewer.getDocument().getAnnotations(
+            (String)item).getAllTypes();
         if(types != null) {
           Iterator iter = types.iterator();
           while(iter.hasNext()) {
@@ -477,7 +557,7 @@ public class OntologyViewerOptions implements DocumentListener {
         }
         else {
           if(annotationTypesCB.getSelectedItem() == null
-                  && annotationTypesCB.getItemCount() > 0) {
+            && annotationTypesCB.getItemCount() > 0) {
             annotationTypesCB.setSelectedIndex(0);
             return;
           }
@@ -487,7 +567,7 @@ public class OntologyViewerOptions implements DocumentListener {
           }
           else {
             annotationTypesCB.setSelectedIndex(annotationTypesCB
-                    .getSelectedIndex());
+              .getSelectedIndex());
             return;
           }
         }
@@ -498,8 +578,9 @@ public class OntologyViewerOptions implements DocumentListener {
 
         // we need to change the annotationTypesCB values as well
         annotationTypesCB.removeAllItems();
-        Set types = ontologyTreePanel.ontoViewer.getDocument().getAnnotations()
-                .getAllTypes();
+        Set types =
+          ontologyTreePanel.ontoViewer.getDocument().getAnnotations()
+            .getAllTypes();
 
         if(types != null) {
           Iterator iter = types.iterator();
@@ -514,7 +595,7 @@ public class OntologyViewerOptions implements DocumentListener {
         }
         else {
           if(annotationTypesCB.getSelectedItem() == null
-                  && annotationTypesCB.getItemCount() > 0) {
+            && annotationTypesCB.getItemCount() > 0) {
             annotationTypesCB.setSelectedIndex(0);
             return;
           }
@@ -524,7 +605,7 @@ public class OntologyViewerOptions implements DocumentListener {
           }
           else {
             annotationTypesCB.setSelectedIndex(annotationTypesCB
-                    .getSelectedIndex());
+              .getSelectedIndex());
             return;
           }
         }
@@ -533,7 +614,7 @@ public class OntologyViewerOptions implements DocumentListener {
 
         annotationTypesCB.setEnabled(otherAT.isSelected());
         if(annotationTypesCB.getSelectedItem() == null
-                && annotationTypesCB.getItemCount() > 0) {
+          && annotationTypesCB.getItemCount() > 0) {
           annotationTypesCB.setSelectedIndex(0);
           return;
         }
@@ -543,7 +624,7 @@ public class OntologyViewerOptions implements DocumentListener {
         }
         else {
           annotationTypesCB.setSelectedIndex(annotationTypesCB
-                  .getSelectedIndex());
+            .getSelectedIndex());
           return;
         }
 
@@ -594,7 +675,7 @@ public class OntologyViewerOptions implements DocumentListener {
             try {
               String newURL = selectedFile.toURI().toURL().toString();
               if(!newURL.equalsIgnoreCase(classesToHideFilePathTF.getText()
-                      .trim())) {
+                .trim())) {
                 readClassesToHideFile = true;
               }
               else {
@@ -609,7 +690,7 @@ public class OntologyViewerOptions implements DocumentListener {
             }
             catch(MalformedURLException me) {
               JOptionPane.showMessageDialog(MainFrame.getInstance(),
-                      "Invalid URL");
+                "Invalid URL");
               return;
             }
           }
@@ -627,8 +708,8 @@ public class OntologyViewerOptions implements DocumentListener {
           else {
             try {
 
-              BufferedWriter bw = new BufferedWriter(new FileWriter(
-                      selectedFile));
+              BufferedWriter bw =
+                new BufferedWriter(new FileWriter(selectedFile));
               for(String s : classesToHide) {
                 bw.write(s);
                 bw.newLine();
@@ -638,7 +719,7 @@ public class OntologyViewerOptions implements DocumentListener {
             }
             catch(IOException ioe) {
               JOptionPane.showMessageDialog(MainFrame.getInstance(), ioe
-                      .getMessage());
+                .getMessage());
               throw new GateRuntimeException(ioe);
             }
           }
@@ -661,7 +742,7 @@ public class OntologyViewerOptions implements DocumentListener {
             try {
               String newURL = selectedFile.toURI().toURL().toString();
               if(!newURL.equalsIgnoreCase(classesToShowFilePathTF.getText()
-                      .trim())) {
+                .trim())) {
                 readClassesToShowFile = true;
               }
               else {
@@ -676,7 +757,7 @@ public class OntologyViewerOptions implements DocumentListener {
             }
             catch(MalformedURLException me) {
               JOptionPane.showMessageDialog(MainFrame.getInstance(),
-                      "Invalid URL");
+                "Invalid URL");
               return;
             }
           }
@@ -694,8 +775,8 @@ public class OntologyViewerOptions implements DocumentListener {
           else {
             try {
 
-              BufferedWriter bw = new BufferedWriter(new FileWriter(
-                      selectedFile));
+              BufferedWriter bw =
+                new BufferedWriter(new FileWriter(selectedFile));
               for(String s : classesToShow) {
                 bw.write(s);
                 bw.newLine();
@@ -705,7 +786,7 @@ public class OntologyViewerOptions implements DocumentListener {
             }
             catch(IOException ioe) {
               JOptionPane.showMessageDialog(MainFrame.getInstance(), ioe
-                      .getMessage());
+                .getMessage());
               throw new GateRuntimeException(ioe);
             }
           }
@@ -721,18 +802,36 @@ public class OntologyViewerOptions implements DocumentListener {
   public boolean isClassesToHideFilterOn() {
     return classesToHideRB.isSelected();
   }
-  
+
+  public String getSelectedClassURIFeatureName() {
+    if(classURIFeatureName.isSelected()) {
+      return DEFAULT_CLASS_URI_FEATURE_NAME;
+    }
+    else {
+      return otherClassURITF.getText().trim();
+    }
+  }
+
+  public String getSelectedInstanceURIFeatureName() {
+    if(instanceURIFeatureName.isSelected()) {
+      return DEFAULT_INSTANCE_URI_FEATURE_NAME;
+    }
+    else {
+      return otherInstanceURITF.getText().trim();
+    }
+  }
+
   public boolean isClassesToShowFilterOn() {
     return classesToShowRB.isSelected();
   }
 
-  
   private void updateClassesToHide() {
     try {
       if(classesToHideFileURL == null || !readClassesToHideFile) return;
       classesToHide.clear();
-      BufferedReader br = new BufferedReader(new InputStreamReader(
-              classesToHideFileURL.openStream()));
+      BufferedReader br =
+        new BufferedReader(new InputStreamReader(classesToHideFileURL
+          .openStream()));
       String line = br.readLine();
       while(line != null) {
         classesToHide.add(line.trim());
@@ -751,8 +850,9 @@ public class OntologyViewerOptions implements DocumentListener {
     try {
       if(classesToShowFileURL == null || !readClassesToShowFile) return;
       classesToShow.clear();
-      BufferedReader br = new BufferedReader(new InputStreamReader(
-              classesToShowFileURL.openStream()));
+      BufferedReader br =
+        new BufferedReader(new InputStreamReader(classesToShowFileURL
+          .openStream()));
       String line = br.readLine();
       while(line != null) {
         classesToShow.add(line.trim());
@@ -766,8 +866,7 @@ public class OntologyViewerOptions implements DocumentListener {
       throw new GateRuntimeException(ioe);
     }
   }
-  
-  
+
   /**
    * Use this method to switch on and off the filter.
    * 
@@ -791,8 +890,7 @@ public class OntologyViewerOptions implements DocumentListener {
     }
     updateClassesToShow();
   }
-  
-  
+
   /** Returns if Child Feature is set to ON/OFF */
   public boolean isChildFeatureDisabled() {
     return childFeatureCB.isSelected();
@@ -813,42 +911,37 @@ public class OntologyViewerOptions implements DocumentListener {
   }
 
   public void addToClassesToHide(HashSet<String> list) {
-    if(classesToHide == null)
-      classesToHide = new HashSet<String>();
+    if(classesToHide == null) classesToHide = new HashSet<String>();
     classesToHide.addAll(list);
     ontologyTreePanel.ontoTreeListener.refreshHighlights();
   }
 
   public void removeFromClassesToHide(HashSet<String> list) {
-    if(classesToHide == null)
-      classesToHide = new HashSet<String>();
+    if(classesToHide == null) classesToHide = new HashSet<String>();
     classesToHide.removeAll(list);
     ontologyTreePanel.ontoTreeListener.refreshHighlights();
   }
 
   public void addToClassesToShow(HashSet<String> list) {
-    if(classesToShow == null)
-      classesToShow = new HashSet<String>();
+    if(classesToShow == null) classesToShow = new HashSet<String>();
     classesToShow.addAll(list);
     ontologyTreePanel.ontoTreeListener.refreshHighlights();
   }
 
   public void removeFromClassesToShow(HashSet<String> list) {
-    if(classesToShow == null)
-      classesToShow = new HashSet<String>();
+    if(classesToShow == null) classesToShow = new HashSet<String>();
     classesToShow.removeAll(list);
     ontologyTreePanel.ontoTreeListener.refreshHighlights();
   }
-  
-  
+
   // DocumentListener Methods
   public void annotationSetAdded(DocumentEvent de) {
     // we need to update our annotationSetsNamesCB List
     String getSelected = (String)annotationSetsNamesCB.getSelectedItem();
     annotationSetsNamesCB.addItem(de.getAnnotationSetName());
     ontologyTreePanel.ontoViewer.getDocument().getAnnotations(
-            de.getAnnotationSetName()).addAnnotationSetListener(
-            ontologyTreePanel.ontoViewer);
+      de.getAnnotationSetName()).addAnnotationSetListener(
+      ontologyTreePanel.ontoViewer);
     ;
     annotationSetsNamesCB.setSelectedItem(getSelected);
   }
@@ -858,13 +951,13 @@ public class OntologyViewerOptions implements DocumentListener {
   }
 
   /**
-   * This methods implements the actions when any
-   * selectedAnnotationSetName is removed from
+   * This methods implements the actions when any selectedAnnotationSetName is
+   * removed from
    * 
    * @param de
    */
   public void annotationSetRemoved(DocumentEvent de) {
-    //String getSelected = (String)annotationSetsNamesCB.getSelectedItem();
+    // String getSelected = (String)annotationSetsNamesCB.getSelectedItem();
     annotationSetsNamesCB.removeItem(de.getAnnotationSetName());
     // Note: still removing the hook (listener) is remaining and we need
     // to
@@ -912,10 +1005,10 @@ public class OntologyViewerOptions implements DocumentListener {
       updateClassesToShow();
     }
   }
-  
-  
+
   /**
    * Gets a set of ontology classes disabled in the OCAT.
+   * 
    * @return
    */
   public HashSet<String> getClassesToHide() {
@@ -924,25 +1017,25 @@ public class OntologyViewerOptions implements DocumentListener {
 
   /**
    * Gets a set of ontology classes disabled in the OCAT.
+   * 
    * @return
    */
   public HashSet<String> getClassesToShow() {
     return classesToShow;
-  }  
-  
-  public String getPropertyName() {
-    return selectedTextAsPropertyValue.isSelected() ? propertyName.getText().trim() : null; 
   }
-  
-  
+
+  public String getPropertyName() {
+    return selectedTextAsPropertyValue.isSelected() ? propertyName.getText()
+      .trim() : null;
+  }
+
   /**
-   * This method should be called to specify the ontology classes that
-   * should be disabled from the ocat.
+   * This method should be called to specify the ontology classes that should be
+   * disabled from the ocat.
    * 
    * @param classesToHide
    */
-  public void setClassesToHide(
-          HashSet<String> ontologyClassesToFilterOut) {
+  public void setClassesToHide(HashSet<String> ontologyClassesToFilterOut) {
     // ok here we need to create a temporary file and add these classes
     // in it
     if(ontologyClassesToFilterOut == null) {
@@ -965,18 +1058,17 @@ public class OntologyViewerOptions implements DocumentListener {
     }
     catch(IOException ioe) {
       throw new GateRuntimeException(
-              "Not able to save the classes in a temporary file", ioe);
+        "Not able to save the classes in a temporary file", ioe);
     }
   }
 
   /**
-   * This method should be called to specify the ontology classes that
-   * should be disabled from the ocat.
+   * This method should be called to specify the ontology classes that should be
+   * disabled from the ocat.
    * 
    * @param classesToHide
    */
-  public void setClassesToShow(
-          HashSet<String> ontologyClassesToShow) {
+  public void setClassesToShow(HashSet<String> ontologyClassesToShow) {
     // ok here we need to create a temporary file and add these classes
     // in it
     if(ontologyClassesToShow == null) {
@@ -999,12 +1091,13 @@ public class OntologyViewerOptions implements DocumentListener {
     }
     catch(IOException ioe) {
       throw new GateRuntimeException(
-              "Not able to save the classes in a temporary file", ioe);
+        "Not able to save the classes in a temporary file", ioe);
     }
   }
-  
+
   /**
    * Disable Filtering.
+   * 
    * @param shouldDisable
    */
   public void disableFiltering(boolean shouldDisable) {
@@ -1015,17 +1108,20 @@ public class OntologyViewerOptions implements DocumentListener {
       }
     }
   }
-  
+
+  public boolean showAnonymousClasses() {
+    return showAnonymousClassesCB.isSelected();
+  }
+
   public boolean shouldShow(String aResourceName) {
-    if(disableFilteringRB.isSelected())
-      return true;
-    
+    if(disableFilteringRB.isSelected()) return true;
+
     if(classesToHideRB.isSelected() && classesToHide != null)
       return !classesToHide.contains(aResourceName);
-    
+
     else if(classesToShow != null)
       return classesToShow.contains(aResourceName);
-    
+
     return true;
   }
 
