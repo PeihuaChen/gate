@@ -5,7 +5,7 @@ import java.io.IOException;
 
 import gate.creole.ExecutionException;
 
-import shef.nlp.supple.utils.ProcessManager;
+import gate.util.ProcessManager;
 
 /**
  * Abstract superclass for prolog wrappers for SUPPLE running on SICStus prolog
