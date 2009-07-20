@@ -501,7 +501,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
               .getAGPosition().getOffset().longValue());
       List<Annotation> paths;
       long theFirst = offsetsTailSet.first();
-      if(theFirst < 0) new FSMMatcherResult(newActiveInstances, 
+      if(theFirst < 0) return new FSMMatcherResult(newActiveInstances, 
               newAcceptingInstances);
   
       paths = (List)annotationsByOffset.get(theFirst);
