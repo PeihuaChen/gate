@@ -1,0 +1,23 @@
+<!-- creole.xml for OpenCalais PR -->
+<CREOLE-DIRECTORY>
+  <CREOLE>
+    <RESOURCE>
+      <NAME>OpenCalais Tagger</NAME>
+      <COMMENT>An OpenCalais based semantic annotator</COMMENT>
+      <HELPURL>http://gate.ac.uk/userguide/sec:misc-creole:opencalais</HELPURL>
+      <JAR>OpenCalais.jar</JAR>
+      <CLASS>gate.opencalais.OpenCalais</CLASS>
+      <PARAMETER NAME="document"
+        COMMENT="The document to be analysed."
+        RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
+      <PARAMETER NAME="openCalaisURL"
+        COMMENT="The URL for the OpenCalais REST service"
+        DEFAULT="http://api.opencalais.com/enlighten/rest/">java.net.URL</PARAMETER>
+      <PARAMETER NAME="paramsXMLURL"
+        COMMENT="The OpenCalais paramsXML configuration file"
+        DEFAULT="resources/paramsXML.xml">java.net.URL</PARAMETER>
+      <PARAMETER NAME="licenseID"
+        COMMENT="The user licence ID with which to connect to OpenCalais">java.lang.String</PARAMETER>
+    </RESOURCE>
+  </CREOLE>
+</CREOLE-DIRECTORY>
