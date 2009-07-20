@@ -1,4 +1,4 @@
-package shef.nlp.supple.utils;
+package gate.util;
 
 import java.io.*;
 import gate.util.GateRuntimeException;

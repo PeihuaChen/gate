@@ -5,7 +5,7 @@ import java.io.IOException;
 
 import gate.creole.ExecutionException;
 
-import shef.nlp.supple.utils.ProcessManager;
+import gate.util.ProcessManager;
 
 /**
  * Prolog wrapper for SUPPLE running on SWI Prolog (http://www.swi-prolog.org).
