@@ -1,0 +1,14 @@
+<c:params xmlns:c="http://s.opencalais.com/1/pred/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+
+<c:processingDirectives c:contentType="text/txt" c:outputFormat="xml/rdf">
+
+</c:processingDirectives>
+
+<c:userDirectives>
+
+</c:userDirectives>
+
+<c:externalMetadata>
+</c:externalMetadata>
+
+</c:params>
