@@ -330,7 +330,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
             
             aSet.add(start, end, outputAnnotationType, features);
             
-            currentPosition = end.intValue();
+            currentPosition = (int)(end-currentInput.getStartNode().getOffset());
           }
         }
       }
