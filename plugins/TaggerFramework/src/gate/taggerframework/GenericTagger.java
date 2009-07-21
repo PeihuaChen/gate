@@ -278,8 +278,13 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
           if (next != null && updateAnnotations) {
             //TODO update existing annotation, check the annotations are in sync
             //TODO handle the fact that strings may not match due to different encodings
-            if (!next.getFeatures().get("string").equals(features.get("string")))
-              throw new Exception("annotations are out of sync: " + next.getFeatures().get("string") + " != " + features.get("string"));
+            
+            String encoded = charset.encode((String)next.getFeatures().get("string")).toString();
+            
+            if (!encoded.equals(features.get("string")))
+              throw new Exception("annotations are out of sync: " + encoded + " != " + features.get("string"));
+            
+            features.remove("string");
             
             next.getFeatures().putAll(features);
           }
