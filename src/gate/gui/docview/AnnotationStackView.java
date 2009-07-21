@@ -279,9 +279,9 @@ public class AnnotationStackView  extends AbstractDocumentView
       }
     });
     list.setSelectedValue(destinationSet, true);
-    Object[] messageObjects = { "Select a destination set:",
-      scroll, vspace, setsTextField };
-    String options[] = { "Use this annotation set", "Cancel" };
+    Object[] messageObjects = { "Existing annotation sets:",
+      scroll, vspace, "Destination annotation set:", setsTextField };
+    String options[] = { "Copy to this destination", "Cancel" };
     JOptionPane optionPane = new JOptionPane(
       messageObjects, JOptionPane.QUESTION_MESSAGE,
       JOptionPane.YES_NO_OPTION, null, options, "Cancel");
@@ -368,7 +368,7 @@ public class AnnotationStackView  extends AbstractDocumentView
           "" : label.getToolTipText();
         toolTip = toolTip.replaceAll("</?html>", "");
         toolTip = "<html>" + (toolTip.length() == 0 ? "" : toolTip + "<br>")
-          + "<em>Double click to copy this annotation.</em></html>";
+          + "Double click to copy this annotation.</html>";
         label.setToolTipText(toolTip);
       }
       // make the tooltip indefinitely shown when the mouse is over
@@ -400,10 +400,23 @@ public class AnnotationStackView  extends AbstractDocumentView
     public HeaderMouseListener(String type, String feature) {
       this.type = type;
       this.feature = feature;
+      init();
     }
 
     public HeaderMouseListener(String type) {
       this.type = type;
+      init();
+    }
+
+    void init() {
+      mainPanel.addAncestorListener(new AncestorListener() {
+        public void ancestorMoved(AncestorEvent event) {}
+        public void ancestorAdded(AncestorEvent event) {}
+        public void ancestorRemoved(AncestorEvent event) {
+          // no parent so need to be disposed explicitly
+          if (popupWindow != null) { popupWindow.dispose(); }
+        }
+      });
     }
 
     public MouseInputAdapter createListener(String... parameters) {
@@ -420,7 +433,6 @@ public class AnnotationStackView  extends AbstractDocumentView
     // when double clicked shows a list of features for this annotation type
     public void mouseClicked(MouseEvent e) {
       if (popupWindow != null && popupWindow.isVisible()) {
-        popupWindow.setVisible(false);
         popupWindow.dispose();
         return;
       }
@@ -439,17 +451,17 @@ public class AnnotationStackView  extends AbstractDocumentView
           if (count == 50) { break; } // to avoid slowing down
         }
       }
-      features.add("<None>");
+      features.add(" ");
+      // create the list component
       final JList list = new JList(features.toArray());
       list.setVisibleRowCount(Math.min(8, features.size()));
       list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
       list.setBackground(Color.WHITE);
-      popupWindow = new JWindow();
       list.addMouseListener(new MouseAdapter() {
         public void mouseClicked(MouseEvent e) {
           if (e.getClickCount() == 1) {
             String feature = (String) list.getSelectedValue();
-            if (feature.equals("<None>")) {
+            if (feature.equals(" ")) {
               typesFeatures.remove(type);
             } else {
               typesFeatures.put(type, feature);
@@ -460,6 +472,8 @@ public class AnnotationStackView  extends AbstractDocumentView
           }
         }
       });
+      // create the window that will contain the list
+      popupWindow = new JWindow();
       popupWindow.addKeyListener(new KeyAdapter() {
         public void keyPressed(KeyEvent e) {
           if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
@@ -477,15 +491,20 @@ public class AnnotationStackView  extends AbstractDocumentView
         Math.min(8*component.getHeight(), features.size()*component.getHeight()));
       popupWindow.pack();
       popupWindow.setVisible(true);
-      popupWindow.requestFocusInWindow();
+      SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        String newFeature = typesFeatures.get(type);
+        if (newFeature == null) { newFeature = " "; }
+        list.setSelectedValue(newFeature, true);
+        popupWindow.requestFocusInWindow();
+      }});
     }
 
     public void mouseEntered(MouseEvent e) {
       Component component = e.getComponent();
       if (component instanceof JLabel
       && ((JLabel)component).getToolTipText() == null) {
-        ((JLabel)component).setToolTipText(
-          "<html><em>Double click to choose a feature.</em></html>");
+        ((JLabel)component).setToolTipText("Double click to choose a feature.");
       }
     }
 

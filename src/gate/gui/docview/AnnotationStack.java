@@ -40,17 +40,17 @@ public class AnnotationStack extends JPanel {
 
   public AnnotationStack() {
     super();
-    setLayout(new GridBagLayout());
-    setOpaque(true);
-    setBackground(Color.WHITE);
-    stackRows = new ArrayList<StackRow>();
-    textMouseListener = new StackMouseListener();
-    headerMouseListener = new StackMouseListener();
-    annotationMouseListener = new StackMouseListener();
+    init();
   }
 
   public AnnotationStack(int maxColumns, int maxValueLength) {
     super();
+    this.maxColumns = maxColumns;
+    this.maxValueLength = maxValueLength;
+    init();
+  }
+
+  void init() {
     setLayout(new GridBagLayout());
     setOpaque(true);
     setBackground(Color.WHITE);
@@ -58,8 +58,6 @@ public class AnnotationStack extends JPanel {
     textMouseListener = new StackMouseListener();
     headerMouseListener = new StackMouseListener();
     annotationMouseListener = new StackMouseListener();
-    this.maxColumns = maxColumns;
-    this.maxValueLength = maxValueLength;
   }
 
   /**
@@ -298,16 +296,27 @@ public class AnnotationStack extends JPanel {
           String width = (ann.getFeatures().toString().length() > 100) ?
             "500" : "100%";
           String toolTip = "<html><table width=\"" + width
-            + "\" border=\"0\" cellspacing=\"0\">";
+            + "\" border=\"0\" cellspacing=\"0\" cellpadding=\"4\">";
+          Color color = (Color) UIManager.get("ToolTip.background");
+          float[] hsb = Color.RGBtoHSB(
+            color.getRed(), color.getGreen(), color.getBlue(), null);
+          color = Color.getHSBColor(hsb[0], hsb[1],
+            Math.max(0f, hsb[2] - hsb[2]*0.075f)); // darken the color
+          String hexColor = Integer.toHexString(color.getRed()) +
+            Integer.toHexString(color.getGreen()) +
+            Integer.toHexString(color.getBlue());
+          boolean odd = false; // alternate background color every other row
           for(Map.Entry<Object, Object> map : ann.getFeatures().entrySet()) {
-            toolTip += "<tr align=\"left\"><td bgcolor=\"#cccccc\">"
-              + map.getKey() + "</td><td>"
+            toolTip +="<tr align=\"left\""
+              + (odd?" bgcolor=\"#"+hexColor+"\"":"")+"><td><strong>"
+              + map.getKey() + "</strong></td><td>"
               + ((((String)map.getValue()).length() > 500) ?
               "<textarea rows=\"20\" cols=\"40\" cellspacing=\"0\">"
                 + ((String)map.getValue()).replaceAll("(.{50,60})\\b", "$1\n")
                 + "</textarea>" :
               ((String)map.getValue()).replaceAll("\n", "<br>"))
               + "</td></tr>";
+            odd = !odd;
           }
           label.setToolTipText(toolTip + "</table></html>");
 

@@ -1117,7 +1117,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         new Color(250,250,250), new Insets(0,3,0,3), true);
       removeRowButton.setIcon(
         MainFrame.getIcon("crystal-clear-action-edit-remove"));
-      removeRowButton.setToolTipText("Hide this stack row.");
+      removeRowButton.setToolTipText("Hide this row.");
       final String typeFinal = type;
       final String featureFinal = feature;
       removeRowButton.addActionListener(new ActionListener() {
@@ -1624,9 +1624,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
     public ClearQueryAction() {
       super("Clear", MainFrame.getIcon("crystal-clear-action-button-cancel"));
-      super.putValue(SHORT_DESCRIPTION, "<html>Clear the query text box."
-      +"&nbsp;&nbsp;<font color=#667799><small>Alt+Backspace"
-      +"&nbsp;&nbsp;</small></font></html>");
+      super.putValue(SHORT_DESCRIPTION, "Clear the query text box.");
       super.putValue(MNEMONIC_KEY, KeyEvent.VK_BACK_SPACE);
     }
 
@@ -1643,9 +1641,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
     public ExecuteQueryAction() {
       super("Search", MainFrame.getIcon("crystal-clear-app-xmag"));
-      super.putValue(SHORT_DESCRIPTION, "<html>Execute the query."
-      +"&nbsp;&nbsp;<font color=#667799><small>Enter"
-      +"&nbsp;&nbsp;</small></font></html>");
+      super.putValue(SHORT_DESCRIPTION, "Execute the query.");
       super.putValue(MNEMONIC_KEY, KeyEvent.VK_ENTER);
     }
 
@@ -1768,9 +1764,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     public NextResultsAction() {
       super("Next page of " + numberOfResultsSlider.getValue() + " results",
         MainFrame.getIcon("crystal-clear-action-loopnone"));
-      super.putValue(SHORT_DESCRIPTION, "<html>Show next page of results."
-      +"&nbsp;&nbsp;<font color=#667799><small>Alt+Right"
-      +"&nbsp;&nbsp;</small></font></html>");
+      super.putValue(SHORT_DESCRIPTION, "Show next page of results.");
       super.putValue(MNEMONIC_KEY, KeyEvent.VK_RIGHT);
     }
 
@@ -1823,10 +1817,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
     public ConfigureStackViewAction() {
       super("Configure", MainFrame.getIcon("crystal-clear-action-edit-add"));
-      super.putValue(SHORT_DESCRIPTION,
-        "<html>Configure the view."
-      +"&nbsp;&nbsp;<font color=#667799><small>Alt+Left"
-      +"&nbsp;&nbsp;</small></font></html>");
+      super.putValue(SHORT_DESCRIPTION, "Configure the view");
       super.putValue(MNEMONIC_KEY, KeyEvent.VK_LEFT);
     }
 
@@ -1968,8 +1959,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         String toolTip = label.getToolTipText();
         toolTip = (toolTip == null || toolTip.equals("")) ?
           "" : toolTip.replaceAll("</?html>", "") + "<br>";
-        toolTip = "<html>" + toolTip +
-          "<em>Right click for statistics.</em></html>";
+        toolTip = "<html>" + toolTip + "Right click to get statistics.</html>";
         label.setToolTipText(toolTip);
       }
       // make the tooltip indefinitely shown when the mouse is over
@@ -2221,6 +2211,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     JPopupMenu mousePopup;
     JMenuItem menuItem;
     XJTable table;
+    JWindow popupWindow;
+    int row;
 
     final String corpusID =
       (corpusToSearchIn.getSelectedItem().equals(Constants.ENTIRE_DATASTORE))?
@@ -2243,6 +2235,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         +"<br>on Corpus: "+corpusName
         +"<br>and Annotation Set: "+annotationSetName
         +"<br>for the query: "+results.get(0).getQueryString();
+      init();
     }
 
     public HeaderMouseListener(String type) {
@@ -2252,6 +2245,20 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         +"<br>on Corpus: "+corpusName
         +"<br>and Annotation Set: "+annotationSetName
         +"<br>for the query: "+results.get(0).getQueryString();
+      init();
+    }
+
+    void init() {
+      addAncestorListener(new AncestorListener() {
+        public void ancestorMoved(AncestorEvent event) {}
+        public void ancestorAdded(AncestorEvent event) {}
+        public void ancestorRemoved(AncestorEvent event) {
+          // no parent so need to be disposed explicitly
+          if (popupWindow != null) { popupWindow.dispose(); }
+        }
+      });
+      row = findStackRow(ANNOTATION_TYPE, type,
+        FEATURE, (feature == null ? "" : feature));
     }
 
     public MouseInputAdapter createListener(String... parameters) {
@@ -2279,13 +2286,70 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           }
         }
         label.setToolTipText("<html>" + shortcut +
-          "<em>Click to configure the view.<br>" +
-          "Right click for statistics.</em></html>");
+          "Double click to choose annotation feature.<br>" +
+          "Right click to get statistics.</html>");
       }
     }
 
+    // when double clicked shows a list of features for this annotation type
     public void mouseClicked(MouseEvent e) {
-      configureStackViewButton.doClick();
+      if (popupWindow != null && popupWindow.isVisible()) {
+        popupWindow.dispose();
+        return;
+      }
+      if (e.getButton() != MouseEvent.BUTTON1
+       || e.getClickCount() != 2) { return; }
+      // get a list of features for the current annotation type
+      TreeSet<String> features = new TreeSet<String>();
+      if (populatedAnnotationTypesAndFeatures.containsKey(type)) {
+        // this annotation type still exists in the datastore
+        features.addAll(populatedAnnotationTypesAndFeatures.get(type));
+      }
+      features.add(" ");
+      // create the list component
+      final JList list = new JList(features.toArray());
+      list.setVisibleRowCount(Math.min(8, features.size()));
+      list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+      list.setBackground(Color.WHITE);
+      list.addMouseListener(new MouseAdapter() {
+        public void mouseClicked(MouseEvent e) {
+          if (e.getClickCount() == 1) {
+            String newFeature = (String) list.getSelectedValue();
+            if (newFeature.equals(" ")) { newFeature = ""; }
+            stackRows[row][FEATURE] = newFeature;
+            saveStackViewConfiguration();
+            popupWindow.setVisible(false);
+            popupWindow.dispose();
+            updateStackView();
+          }
+        }
+      });
+      // create the window that will contain the list
+      popupWindow = new JWindow();
+      popupWindow.addKeyListener(new KeyAdapter() {
+        public void keyPressed(KeyEvent e) {
+          if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+            popupWindow.setVisible(false);
+            popupWindow.dispose();
+          }
+        }
+      });
+      popupWindow.add(new JScrollPane(list));
+      Component component = e.getComponent();
+      popupWindow.setBounds(
+        component.getLocationOnScreen().x,
+        component.getLocationOnScreen().y + component.getHeight(),
+        component.getWidth(),
+        Math.min(8*component.getHeight(), features.size()*component.getHeight()));
+      popupWindow.pack();
+      popupWindow.setVisible(true);
+      SwingUtilities.invokeLater(new Runnable() {
+      public void run() {
+        String newFeature = stackRows[row][FEATURE];
+        if (newFeature.equals("")) { newFeature = " "; }
+        list.setSelectedValue(newFeature, true);
+        popupWindow.requestFocusInWindow();
+      }});
     }
 
     public void mousePressed(MouseEvent e) {
@@ -3079,7 +3143,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     }
 
     public Class<?> getColumnClass(int c) {
-      return getValueAt(0, c).getClass();
+      return String.class;
     }
 
     public Object getValueAt(int row, int col) {
