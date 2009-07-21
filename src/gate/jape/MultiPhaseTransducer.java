@@ -26,6 +26,7 @@ import gate.creole.ExecutionInterruptedException;
 import gate.creole.ontology.Ontology;
 import gate.event.ProgressListener;
 import gate.event.StatusListener;
+import gate.util.Benchmark;
 import gate.util.Err;
 import gate.util.Strings;
 
@@ -127,7 +128,6 @@ implements JapeConstants, java.io.Serializable
   public void transduce(Document doc, AnnotationSet input,
                         AnnotationSet output) throws JapeException,
                                                      ExecutionException {
-
     interrupted = false;
     ProgressListener pListener = null;
     StatusListener sListener = null;
@@ -162,12 +162,25 @@ implements JapeConstants, java.io.Serializable
       try {
         fireStatusChanged("Transducing " + doc.getName() +
                              " (Phase: " + t.getName() + ")...");
+        String savedBenchmarkID = null;
+        String phaseBenchmarkID = null;
+        if(Benchmark.isBenchmarkingEnabled()) {
+          savedBenchmarkID = t.getBenchmarkId();
+          this.benchmarkFeatures.put(Benchmark.DOCUMENT_NAME_FEATURE, doc.getName());
+          phaseBenchmarkID = Benchmark.createBenchmarkId("phase__" + t.getName(), this.getBenchmarkId());
+          t.setBenchmarkId(phaseBenchmarkID);
+        }
+        long startTime = Benchmark.startPoint();
         t.addProgressListener(pListener);
         t.addStatusListener(sListener);
 
         t.transduce(doc, input, output);
         t.removeProgressListener(pListener);
         t.removeStatusListener(sListener);
+        if(Benchmark.isBenchmarkingEnabled()) {
+          Benchmark.checkPoint(startTime, phaseBenchmarkID, this, benchmarkFeatures);
+          t.setBenchmarkId(savedBenchmarkID);
+        }
         fireStatusChanged("");
       } catch(JapeException e) {
         String errorMessage = new String(
@@ -195,6 +208,8 @@ implements JapeConstants, java.io.Serializable
 
     for(Iterator i = phases.iterator(); i.hasNext(); )
       ((Transducer) i.next()).cleanUp();
+    
+    benchmarkFeatures.remove(Benchmark.DOCUMENT_NAME_FEATURE);
 
   } // cleanUp
 
