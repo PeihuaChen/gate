@@ -18,6 +18,8 @@ package gate.jape;
 
 import java.io.Serializable;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
 import gate.AnnotationSet;
@@ -26,12 +28,13 @@ import gate.creole.ExecutionException;
 import gate.creole.ontology.Ontology;
 import gate.event.ProgressListener;
 import gate.event.StatusListener;
+import gate.util.Benchmarkable;
 
 
 /**
   * Represents a single or multiphase transducer.
   */
-public abstract class Transducer implements Serializable
+public abstract class Transducer implements Serializable, Benchmarkable
 {
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -40,9 +43,38 @@ public abstract class Transducer implements Serializable
   protected String name;
 
   protected Ontology ontology = null;
+  
+  /**
+   * Shared featureMap
+   */
+  protected Map benchmarkFeatures = new HashMap();
+
+  /**
+   * Benchmark ID of this transducer.
+   */
+  protected String benchmarkID;
 
   /** Get the phase name of this transducer */
   public String getName() { return name; }
+
+  /**
+   * Gets the benchmark ID of this transducer.
+   */
+  public String getBenchmarkId() {
+    if(benchmarkID == null) {
+      return getName();
+    }
+    else {
+      return benchmarkID;
+    }
+  }
+
+  /**
+   * Set the benchmark ID for this transducer.
+   */
+  public void setBenchmarkId(String benchmarkId) {
+    this.benchmarkID = benchmarkId;
+  }
 
   /** Transduce a document.  */
   public abstract void transduce(Document doc, AnnotationSet inputAS,

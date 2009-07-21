@@ -18,6 +18,8 @@ import gate.jape.Batch;
 import gate.jape.JapeException;
 import gate.jape.constraint.AnnotationAccessor;
 import gate.jape.constraint.ConstraintPredicate;
+import gate.util.Benchmark;
+import gate.util.Benchmarkable;
 import gate.util.Err;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -34,7 +36,8 @@ import javax.swing.*;
  */
 public class Transducer extends AbstractLanguageAnalyser
                                                         implements
-                                                        gate.gui.ActionsPublisher {
+                                                        gate.gui.ActionsPublisher,
+                                                        Benchmarkable {
   public static final String TRANSD_DOCUMENT_PARAMETER_NAME = "document";
 
   public static final String TRANSD_INPUT_AS_PARAMETER_NAME = "inputASName";
@@ -389,6 +392,20 @@ public class Transducer extends AbstractLanguageAnalyser
    */
   public void setAnnotationAccessors(List<String> annotationAccessors) {
     this.annotationAccessors = annotationAccessors;
+  }
+  
+  /**
+   * Get the benchmark ID of this Transducers batch.
+   */
+  public String getBenchmarkId() {
+    return batch.getBenchmarkId();
+  }
+
+  /**
+   * Set the benchmark ID of this PR.
+   */
+  public void setBenchmarkId(String benchmarkId) {
+    batch.setBenchmarkId(benchmarkId);
   }
 
   /**

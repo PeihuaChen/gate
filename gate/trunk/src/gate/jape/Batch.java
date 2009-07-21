@@ -24,6 +24,7 @@ package gate.jape;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -31,13 +32,15 @@ import gate.*;
 import gate.creole.ExecutionException;
 import gate.event.ProgressListener;
 import gate.event.StatusListener;
+import gate.util.Benchmark;
+import gate.util.Benchmarkable;
 import gate.util.Err;
 import gate.util.Out;
 
 /** Batch processing of JAPE transducers against documents or collections.
   * Construction will parse or deserialise a transducer as required.
   */
-public class Batch implements JapeConstants {
+public class Batch implements JapeConstants, Benchmarkable {
   /** Debug flag */
   private static final boolean DEBUG = false;
 
@@ -339,7 +342,7 @@ public class Batch implements JapeConstants {
 
   /** Process a single document. */
   public void transduce(Document doc) throws JapeException, ExecutionException {
-    transducer.transduce(doc, doc.getAnnotations(), doc.getAnnotations());
+    transduce(doc, doc.getAnnotations(), doc.getAnnotations());
   } // transduce(doc)
 
   /** Process a single document. */
@@ -624,6 +627,19 @@ public class Batch implements JapeConstants {
     if(transducer != null) transducer.setEnableDebugging(enableDebugging);
   }
 
+  /* (non-Javadoc)
+   * @see gate.util.Benchmarkable#getBenchmarkId()
+   */
+  public String getBenchmarkId() {
+    return transducer.getBenchmarkId();
+  }
+
+  /* (non-Javadoc)
+   * @see gate.util.Benchmarkable#setBenchmarkId(java.lang.String)
+   */
+  public void setBenchmarkId(String benchmarkId) {
+    transducer.setBenchmarkId(benchmarkId);
+  }
   
   /*
   private void writeObject(ObjectOutputStream oos) throws IOException {
