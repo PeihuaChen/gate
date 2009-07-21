@@ -137,7 +137,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
       taggerCmd = new String[2+taggerFlags.size()];
     }
 
-    String[] flags = (String[])taggerFlags.toArray();
+    String[] flags = (String[])taggerFlags.toArray(new String[0]);
     
     System.arraycopy(flags, 0, taggerCmd, index, flags.length);
     
