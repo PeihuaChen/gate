@@ -240,7 +240,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
       //TODO: replace this with the ProcessManager from gate.util
       Process p = null;
       
-      if (taggerDir == null || taggerDir.trim().length() == 0)
+      if (taggerDir == null)
         p = Runtime.getRuntime().exec(cmdline);
       else
         p = Runtime.getRuntime().exec(cmdline, new String[]{}, Files.fileFromURL(taggerDir));
