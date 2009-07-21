@@ -141,9 +141,16 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
     
     System.arraycopy(flags, 0, taggerCmd, index, flags.length);
     
+    
     // generate tagger command line
     taggerCmd[taggerCmd.length-2] = scriptfile.getAbsolutePath();
     taggerCmd[taggerCmd.length-1] = textfile.getAbsolutePath();
+    
+    if (debug) {
+      String sanityCheck = "";
+      for (String s : taggerCmd) sanityCheck += " "+s;
+      System.out.println(sanityCheck);
+    }
     
     return taggerCmd;
   }
