@@ -226,11 +226,19 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   private void runTagger(String[] cmdline) throws ExecutionException {
     String line, word, tag, lemma;
     int indx = 0;
-    AnnotationSet aSet;
+    
+    //sorted list of input annotations
+    AnnotationSet annotSet = (inputAS == null || inputAS.trim().length() == 0) ? document.getAnnotations() : document.getAnnotations(inputAS);
+    annotSet = annotSet.get(inputAnnotationType);
+    List<Annotation> inputAnnotations = new ArrayList<Annotation>(annotSet);
+    Collections.sort(inputAnnotations, new OffsetComparator());
 
-    aSet = (outputAS == null || outputAS.trim().length() == 0)
+    Annotation currentInput = inputAnnotations.remove(0);
+    
+    AnnotationSet aSet = (outputAS == null || outputAS.trim().length() == 0)
             ? document.getAnnotations()
             : document.getAnnotations(outputAS);
+
 
             Charset charset = Charset.forName(encoding);
             
@@ -251,10 +259,14 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
 
       Pattern resultPattern = Pattern.compile(regex);
       
-      List<Annotation> annotations = new ArrayList<Annotation>(aSet.get(outputAnnotationType));
-      Collections.sort(annotations, new OffsetComparator());
       
       
+      List<Annotation> outputAnnotations = new ArrayList<Annotation>(aSet.get(outputAnnotationType,currentInput.getStartNode().getOffset(),currentInput.getEndNode().getOffset()));
+      
+      if (!updateAnnotations)
+        aSet.removeAll(outputAnnotations);
+      else      
+        Collections.sort(outputAnnotations, new OffsetComparator());      
       
       //TODO: change to use an array
       //TODO: mapping must map string=column of annotation text
@@ -274,11 +286,16 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
             features.put(kv.getKey(), m.group(kv.getValue()));
           }
           
-          //TODO update or add new
-          if (updateAnnotations && annotations.size() == 0)
-              throw new Exception("no remaining annotations of type " + outputAnnotationType + " to update");
+          while (updateAnnotations && outputAnnotations.size() == 0)
+          {
+            if (inputAnnotations.size() == 0) throw new Exception("no remaining annotations of type " + outputAnnotationType + " to update");
+            
+            currentInput = inputAnnotations.remove(0);
+            outputAnnotations.addAll(aSet.get(outputAnnotationType,currentInput.getStartNode().getOffset(),currentInput.getEndNode().getOffset()));
+            Collections.sort(outputAnnotations,new OffsetComparator());
+          }
           
-          Annotation next = (annotations.size() == 0 ? null : annotations.remove(0));
+          Annotation next = (outputAnnotations.size() == 0 ? null : outputAnnotations.remove(0));
           
           if (next != null && updateAnnotations) {
             //TODO update existing annotation, check the annotations are in sync
