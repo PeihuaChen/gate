@@ -10,6 +10,7 @@ import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.RunTime;
 import gate.util.Files;
 import gate.util.GateRuntimeException;
@@ -36,6 +37,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@CreoleResource(comment = "The Generic Tagger is Generic!")
 public class GenericTagger extends AbstractLanguageAnalyser implements
                                                            ProcessingResource {
 
