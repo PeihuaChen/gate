@@ -10,15 +10,14 @@
       <PARAMETER NAME="document"
         COMMENT="The document to be analysed."
         RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
+      <PARAMETER NAME="outputASName"
+        COMMENT="The name of the annotation set used for output" RUNTIME="true"
+        OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="licenseID"
         COMMENT="The user licence ID with which to connect to OpenCalais">java.lang.String</PARAMETER>
       <PARAMETER NAME="openCalaisURL"
         COMMENT="The URL for the OpenCalais REST service"
         DEFAULT="http://api.opencalais.com/enlighten/rest/">java.net.URL</PARAMETER>
-      <PARAMETER NAME="reltagBaseURL"
-        COMMENT="Base URL to be put in rel-tag microformats"
-        OPTIONAL="true" 
-        RUNTIME="true">java.net.URL</PARAMETER>
       <PARAMETER NAME="calculateRelevanceScore"
         COMMENT="Indicates whether the extracted metadata will include relevance score for each unique entity"
         DEFAULT="false"
