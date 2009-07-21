@@ -24,7 +24,7 @@ import java.awt.*;
 /**
  * A modified version of JMenu that uses {@link MenuLayout} as its layout.
  * Adds also a description and a StatusListener as parameters.
- * The description is used in the statusListener and as a tooltip.
+ * The description is used in the statusListener.
  */
 public class XJMenu extends JMenu {
   public XJMenu(){
@@ -34,6 +34,8 @@ public class XJMenu extends JMenu {
 
   public XJMenu(Action a){
     super(a);
+    // stop showing tooltip in the menu, status bar is enough
+    setToolTipText(null);
     getPopupMenu().setLayout(new MenuLayout());
   }
 
@@ -41,6 +43,8 @@ public class XJMenu extends JMenu {
     super(a);
     this.description = (String)a.getValue(Action.SHORT_DESCRIPTION);
     this.listener = listener;
+    // stop showing tooltip in the menu, status bar is enough
+    setToolTipText(null);
     initListeners();
     getPopupMenu().setLayout(new MenuLayout());
   }
@@ -56,7 +60,6 @@ public class XJMenu extends JMenu {
     this.listener = listener;
     initListeners();
     getPopupMenu().setLayout(new MenuLayout());
-    setToolTipText(description);
   }
 
   public XJMenu(String s, boolean b){
@@ -72,14 +75,17 @@ public class XJMenu extends JMenu {
    */
   public void setPopupMenuVisible(boolean aFlag) {
     super.setPopupMenuVisible(aFlag);
-    for (Component component : getMenuComponents()) {
+    if (!aFlag) { return; }
+    MenuLayout layout = (MenuLayout) getPopupMenu().getLayout();
+    for (int i = 0; i < getMenuComponents().length; i++) {
+      Component component = getMenuComponents()[i];
       if (component instanceof JSeparator) {
         JSeparator separator = (JSeparator) component;
+        int column = layout.getColumnForComponentIndex(i);
+        int preferredWidth = layout.getPreferredWidthForColumn(column);
         // use the popupmenu width to set the separators width
-        separator.setPreferredSize(new Dimension((int)getPopupMenu()
-          .getLayout().preferredLayoutSize(getPopupMenu()).getWidth()
-          - getPopupMenu().getInsets().left - getPopupMenu().getInsets().right,
-          separator.getHeight()));
+        separator.setPreferredSize(new Dimension(
+          preferredWidth, separator.getHeight()));
       }
     }
     getPopupMenu().revalidate();
