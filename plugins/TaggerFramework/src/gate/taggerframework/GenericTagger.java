@@ -41,6 +41,9 @@ import java.util.regex.Pattern;
 public class GenericTagger extends AbstractLanguageAnalyser implements
                                                            ProcessingResource {
 
+  //TODO Think about moving this to a runtime parameter
+  public static final String STRING_FEATURE_NAME = "string";
+  
   // The annotations sets used for input and output
   private String inputAS, outputAS;
 
@@ -85,7 +88,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
 
     if(taggerBinary == null)
       throw new ExecutionException(
-              "Cannot proceed unless a tagger script is specified.");
+              "Cannot proceed unless a tagger executable is specified.");
 
     if(encoding == null) {
       throw new ExecutionException("No encoding specified");
@@ -95,12 +98,12 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
     File textfile = getCurrentText();
 
     String[] taggerCmd = buildCommandLine(textfile);
-    
+
     // run the tagger
     runTagger(taggerCmd);
 
     // delete the temporary text file
-    if (!debug) textfile.delete();
+    if(!debug) textfile.delete();
   }
 
   protected String[] buildCommandLine(File textfile) throws ExecutionException {
@@ -110,48 +113,41 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
       throw new ExecutionException("Script " + scriptfile.getAbsolutePath()
               + " does not exist");
 
-    
     // build the command line.
-    // If the system property shell.path is set, use this as the
-    // path
-    // to the bourne shell interpreter and place it as the first item on
-    // the
-    // command line. If not, then just pass the script as the first
-    // item. The
-    // system property is useful on platforms that don't support shell
-    // scripts
-    // with #! lines natively, e.g. on Windows you can set the property
-    // to
-    // c:\cygwin\bin\sh.exe (or whatever is appropriate on your system)
-    // to
-    // invoke the script via Cygwin sh
+    // If the system property shell.path is set, use this as the path to
+    // the bourne shell interpreter and place it as the first item on
+    // the command line. If not, then just pass the script as the first
+    // item. The system property is useful on platforms that don't
+    // support shell scripts with #! lines natively, e.g. on Windows you
+    // can set the property to c:\cygwin\bin\sh.exe (or whatever is
+    // appropriate on your system) to invoke the script via Cygwin sh
     int index = 0;
     String[] taggerCmd;
-    String shPath = null;
-    if((shPath = System.getProperty("shell.path")) != null) {
-      taggerCmd = new String[3+taggerFlags.size()];
+    String shPath = System.getProperty("shell.path");
+    if(shPath != null) {
+      taggerCmd = new String[3 + taggerFlags.size()];
       taggerCmd[0] = shPath;
       index = 1;
     }
     else {
-      taggerCmd = new String[2+taggerFlags.size()];
+      taggerCmd = new String[2 + taggerFlags.size()];
     }
 
     String[] flags = (String[])taggerFlags.toArray(new String[0]);
-    
-    System.arraycopy(flags, 0, taggerCmd, index+1, flags.length);
-    
-    
+
+    System.arraycopy(flags, 0, taggerCmd, index + 1, flags.length);
+
     // generate tagger command line
     taggerCmd[index] = scriptfile.getAbsolutePath();
-    taggerCmd[taggerCmd.length-1] = textfile.getAbsolutePath();
-    
-    if (debug) {
+    taggerCmd[taggerCmd.length - 1] = textfile.getAbsolutePath();
+
+    if(debug) {
       String sanityCheck = "";
-      for (String s : taggerCmd) sanityCheck += " "+s;
+      for(String s : taggerCmd)
+        sanityCheck += " " + s;
       System.out.println(sanityCheck);
     }
-    
+
     return taggerCmd;
   }
 
@@ -160,10 +156,9 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
     try {
       gateTextFile = File.createTempFile("treetagger", ".txt");
       Charset charset = Charset.forName(encoding);
-      // depending on the failOnUnmappableChar parameter, we either make
-      // the
-      // output stream writer fail or replace the unmappable character
-      // with '?'
+      // depending on the failOnUnmappableCharacter parameter, we either
+      // make the output stream writer fail or replace the unmappable
+      // character with '?'
       CharsetEncoder charsetEncoder = charset.newEncoder()
               .onUnmappableCharacter(
                       failOnUnmappableCharacter
@@ -172,55 +167,33 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
       FileOutputStream fos = new FileOutputStream(gateTextFile);
       OutputStreamWriter osw = new OutputStreamWriter(fos, charsetEncoder);
       BufferedWriter bw = new BufferedWriter(osw);
-      AnnotationSet annotSet = (inputAS == null || inputAS.trim().length() == 0) ? document.getAnnotations() : document
-              .getAnnotations(inputAS);
+      AnnotationSet annotSet = (inputAS == null || inputAS.trim().length() == 0)
+              ? document.getAnnotations()
+              : document.getAnnotations(inputAS);
       annotSet = annotSet.get(inputAnnotationType);
       if(annotSet == null || annotSet.size() == 0) {
-        throw new GateRuntimeException(
-                "No "+inputAnnotationType+" found in the document.");
+        throw new GateRuntimeException("No " + inputAnnotationType
+                + " found in the document.");
       }
 
       // sort tokens according to their offsets
       List<Annotation> inputAnnotations = new ArrayList<Annotation>(annotSet);
       Collections.sort(inputAnnotations, new OffsetComparator());
+
       // and now start writing them in a file
       for(int i = 0; i < inputAnnotations.size(); i++) {
         FeatureMap features = inputAnnotations.get(i).getFeatures();
-        
-        //TODO: remove hard coded feature name
-        
-        if(features == null
-                || features.size() == 0
-                || !features
-                        .containsKey("string")) {
-          throw new GateRuntimeException(
-                  inputAnnotationType + " must have 'string' feature, which couldn't be found");
+
+        if(features == null || features.size() == 0
+                || !features.containsKey(STRING_FEATURE_NAME)) {
+          throw new GateRuntimeException(inputAnnotationType
+                  + " must have '"+STRING_FEATURE_NAME+"' feature, which couldn't be found");
         }
-        String string = (String)features
-                .get("string");
+        String string = (String)features.get(STRING_FEATURE_NAME);
         bw.write(string);
         if(i + 1 < inputAnnotations.size()) bw.newLine();
       }
       bw.close();
-
-      // now read the temp file back in and iterate over tokens pulling
-      // the
-      // string that has been passed to the tree tagger into a feature
-      // of the
-      // Token
-      
-      //TODO: Come back and think if this is really needed
-      
-      /*CharsetDecoder charsetDecoder = charset.newDecoder();
-      FileInputStream fis = new FileInputStream(gateTextFile);
-      InputStreamReader isr = new InputStreamReader(fis, charsetDecoder);
-      BufferedReader br = new BufferedReader(isr);
-
-      for(int i = 0; i < inputAnnotations.size(); i++) {
-        FeatureMap features = ((Annotation)inputAnnotations.get(i)).getFeatures();
-        features.put(TREE_TAGGER_STRING_FEATURE_NAME, br.readLine());
-      }*/
-
     }
     catch(CharacterCodingException cce) {
       throw (ExecutionException)new ExecutionException(
@@ -237,184 +210,136 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   private void runTagger(String[] cmdline) throws ExecutionException {
     String line, word, tag, lemma;
     int indx = 0;
-    
-    //sorted list of input annotations
-    AnnotationSet annotSet = (inputAS == null || inputAS.trim().length() == 0) ? document.getAnnotations() : document.getAnnotations(inputAS);
+
+    // sorted list of input annotations
+    AnnotationSet annotSet = (inputAS == null || inputAS.trim().length() == 0)
+            ? document.getAnnotations()
+            : document.getAnnotations(inputAS);
     annotSet = annotSet.get(inputAnnotationType);
     List<Annotation> inputAnnotations = new ArrayList<Annotation>(annotSet);
     Collections.sort(inputAnnotations, new OffsetComparator());
 
     Annotation currentInput = inputAnnotations.remove(0);
-    
+
     AnnotationSet aSet = (outputAS == null || outputAS.trim().length() == 0)
             ? document.getAnnotations()
             : document.getAnnotations(outputAS);
 
+    Charset charset = Charset.forName(encoding);
 
-            Charset charset = Charset.forName(encoding);
-            
     CharsetDecoder charsetDecoder = charset.newDecoder();
     // run tagger and save output
     try {
-      //TODO: replace this with the ProcessManager from gate.util
+      // TODO: replace this with the ProcessManager from gate.util
       Process p = null;
-      
-      if (taggerDir == null)
+
+      if(taggerDir == null)
         p = Runtime.getRuntime().exec(cmdline);
-      else
-        p = Runtime.getRuntime().exec(cmdline, new String[]{}, Files.fileFromURL(taggerDir));
+      else p = Runtime.getRuntime().exec(cmdline, new String[] {},
+              Files.fileFromURL(taggerDir));
 
       // get the tagger output (gate input)
       BufferedReader input = new BufferedReader(new InputStreamReader(p
               .getInputStream(), charsetDecoder));
 
       Pattern resultPattern = Pattern.compile(regex);
-      
-      
-      
-      List<Annotation> outputAnnotations = new ArrayList<Annotation>(aSet.get(outputAnnotationType,currentInput.getStartNode().getOffset(),currentInput.getEndNode().getOffset()));
-      
-      if (!updateAnnotations)
+
+      List<Annotation> outputAnnotations = new ArrayList<Annotation>(aSet.get(
+              outputAnnotationType, currentInput.getStartNode().getOffset(),
+              currentInput.getEndNode().getOffset()));
+
+      if(!updateAnnotations)
         aSet.removeAll(outputAnnotations);
-      else      
-        Collections.sort(outputAnnotations, new OffsetComparator());      
-      
-      //TODO: change to use an array
-      //TODO: mapping must map string=column of annotation text
-      Map<String,Integer> mapping = new HashMap<String,Integer>();
-      for (String pair : (ArrayList<String>)featureMapping) {
+      else Collections.sort(outputAnnotations, new OffsetComparator());
+
+      // TODO: mapping must map string=column of annotation text
+      Map<String, Integer> mapping = new HashMap<String, Integer>();
+      for(String pair : (ArrayList<String>)featureMapping) {
         String[] kv = pair.trim().split("=");
         mapping.put(kv[0], Integer.parseInt(kv[1]));
       }
-      
+
       int currentPosition = 0;
-      
-      while ((line = input.readLine()) != null) {
+
+      while((line = input.readLine()) != null) {
         Matcher m = resultPattern.matcher(line);
-        
-        if (m.matches()) {
+
+        if(m.matches()) {
           FeatureMap features = Factory.newFeatureMap();
-          
-          for (Map.Entry<String,Integer> kv : mapping.entrySet()) {
+
+          for(Map.Entry<String, Integer> kv : mapping.entrySet()) {
             features.put(kv.getKey(), m.group(kv.getValue()));
           }
-          
-          while (updateAnnotations && outputAnnotations.size() == 0)
-          {
-            if (inputAnnotations.size() == 0) throw new Exception("no remaining annotations of type " + outputAnnotationType + " to update");
-            
+
+          while(updateAnnotations && outputAnnotations.size() == 0) {
+            if(inputAnnotations.size() == 0)
+              throw new Exception("no remaining annotations of type "
+                      + outputAnnotationType + " to update");
+
             currentInput = inputAnnotations.remove(0);
-            outputAnnotations.addAll(aSet.get(outputAnnotationType,currentInput.getStartNode().getOffset(),currentInput.getEndNode().getOffset()));
-            Collections.sort(outputAnnotations,new OffsetComparator());
+            outputAnnotations.addAll(aSet.get(outputAnnotationType,
+                    currentInput.getStartNode().getOffset(), currentInput
+                            .getEndNode().getOffset()));
+            Collections.sort(outputAnnotations, new OffsetComparator());
           }
-          
-          Annotation next = (outputAnnotations.size() == 0 ? null : outputAnnotations.remove(0));
-          
-          if (next != null && updateAnnotations) {
-            //TODO update existing annotation, check the annotations are in sync
-            //TODO handle the fact that strings may not match due to different encodings
-            
-            String encoded = new String(charset.encode((String)next.getFeatures().get("string")).array(),encoding);
-            
-            if (!encoded.equals(features.get("string")))
-              throw new Exception("annotations are out of sync: " + encoded + " != " + features.get("string"));
-            
-            features.remove("string");
-            
+
+          Annotation next = (outputAnnotations.size() == 0
+                  ? null
+                  : outputAnnotations.remove(0));
+
+          if(next != null && updateAnnotations) {
+
+            String encoded = new String(charset.encode(
+                    (String)next.getFeatures().get(STRING_FEATURE_NAME)).array(), encoding);
+
+            if(!encoded.equals(features.get(STRING_FEATURE_NAME)))
+              throw new Exception("annotations are out of sync: " + encoded
+                      + " != " + features.get(STRING_FEATURE_NAME));
+
+            features.remove(STRING_FEATURE_NAME);
+
             next.getFeatures().putAll(features);
           }
           else {
-            //TODO add new annotation
 
-            String encodedInput = new String(charset.encode(document.getContent().getContent(currentInput.getStartNode().getOffset(), currentInput.getEndNode().getOffset()).toString()).array(),encoding);
-            
-            while ((currentPosition = encodedInput.indexOf((String)features.get("string"), currentPosition)) == -1) {     
-              if (inputAnnotations.size() == 0) throw new Exception("no remaning annotations of type " + inputAnnotationType +" to add within");
-              
+            String encodedInput = new String(charset.encode(
+                    document.getContent().getContent(
+                            currentInput.getStartNode().getOffset(),
+                            currentInput.getEndNode().getOffset()).toString())
+                    .array(), encoding);
+
+            while((currentPosition = encodedInput.indexOf((String)features
+                    .get("string"), currentPosition)) == -1) {
+              if(inputAnnotations.size() == 0)
+                throw new Exception("no remaning annotations of type "
+                        + inputAnnotationType + " to add within");
+
               currentInput = inputAnnotations.remove(0);
-              
-              aSet.removeAll(aSet.get(outputAnnotationType,currentInput.getStartNode().getOffset(),currentInput.getEndNode().getOffset()));
-              
+
+              aSet.removeAll(aSet.get(outputAnnotationType, currentInput
+                      .getStartNode().getOffset(), currentInput.getEndNode()
+                      .getOffset()));
+
               currentPosition = 0;
-              encodedInput = new String(charset.encode(document.getContent().getContent(currentInput.getStartNode().getOffset(), currentInput.getEndNode().getOffset()).toString()).array(),encoding);
+              encodedInput = new String(charset
+                      .encode(
+                              document.getContent().getContent(
+                                      currentInput.getStartNode().getOffset(),
+                                      currentInput.getEndNode().getOffset())
+                                      .toString()).array(), encoding);
             }
-            
-            Long start = currentPosition + currentInput.getStartNode().getOffset();
-            Long end = start + ((String)features.get("string")).length();
-            
+
+            Long start = currentPosition
+                    + currentInput.getStartNode().getOffset();
+            Long end = start + ((String)features.get(STRING_FEATURE_NAME)).length();
+
             aSet.add(start, end, outputAnnotationType, features);
-            
-            currentPosition = (int)(end-currentInput.getStartNode().getOffset());
+
+            currentPosition = (int)(end - currentInput.getStartNode()
+                    .getOffset());
           }
         }
       }
-      
-      /*
-      // let us store all tagged data in lines
-      // there must be at least the original form a tab a POS
-      // and possibly a lemma preceded by a tab
-      ArrayList lines = new ArrayList();
-      while((line = input.readLine()) != null) {
-        if(line.split("\t").length > 1) lines.add(line);
-      }
-
-      
-      // sort tokens according to their offsets
-      ArrayList tokens = new ArrayList(annotSet);
-      Collections.sort(tokens, new OffsetComparator());
-
-      if(tokens.size() != lines.size()) {
-        System.out.println("Tokens : " + tokens.size() + " lines : "
-                + lines.size());
-        throw new GateRuntimeException(
-                "Document does not have the expected number of tokens created by the treeTaggerBinary file");
-      }
-
-      // take one line at a time
-      // check its length and the string feature and go on addition
-      // features
-      for(int i = 0; i < lines.size(); i++) {
-        line = (String)lines.get(i);
-        StringTokenizer st = new StringTokenizer(line);
-        Annotation token = (Annotation)tokens.get(i);
-        FeatureMap features = token.getFeatures();
-
-        if(st.hasMoreTokens()) {
-          tag = null;
-          lemma = null;
-          word = st.nextToken();
-
-          // check if the word matches with the expected string (stored
-          // in the
-          // treeTaggerString feature of the token).
-          String expectedTokenString = (String)features
-                  .get(TREE_TAGGER_STRING_FEATURE_NAME);
-          if(expectedTokenString == null)
-            throw new GateException("Invalid Token in GATE document");
-          if(!word.equals(expectedTokenString)) {
-            throw new GateRuntimeException(
-                    "Document does not have the expected number/sequence of tokens created by the treeTaggerBinary file");
-          }
-
-          if(st.hasMoreTokens()) tag = st.nextToken();
-          if(tag != null && st.hasMoreTokens()) lemma = st.nextToken();
-
-          // finally add features on the top of tokens
-          if(lemma != null) features.put("lemma", lemma);
-          if(tag != null) features.put("category", tag);
-
-        }
-        else {
-          throw new GateRuntimeException(
-                  "Document does not have the expected number of tokens created by the treeTaggerBinary file");
-        }
-      }
-
-      // clean up the treeTaggerString features
-      for(int i = 0; i < tokens.size(); i++) {
-        FeatureMap features = ((Annotation)tokens.get(i)).getFeatures();
-        features.remove(TREE_TAGGER_STRING_FEATURE_NAME);
-      }*/
     }
     catch(Exception err) {
       err.printStackTrace();
@@ -430,8 +355,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   }
 
   @RunTime
-  @CreoleParameter(defaultValue = "string=1;category=2;lemma=3",
-        comment = "mapping from matching groups to feature names")
+  @CreoleParameter(defaultValue = "string=1;category=2;lemma=3", comment = "mapping from matching groups to feature names")
   public void setFeatureMapping(ArrayList featureMapping) {
     this.featureMapping = featureMapping;
   }
@@ -445,7 +369,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   public void setTaggerBinary(URL taggerBinary) {
     this.taggerBinary = taggerBinary;
   }
-  
+
   public URL getTaggerDir() {
     return taggerDir;
   }
@@ -461,8 +385,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   }
 
   @RunTime
-  @CreoleParameter(defaultValue = "",
-        comment = "flags passed to tagger script")  
+  @CreoleParameter(defaultValue = "", comment = "flags passed to tagger script")
   public void setTaggerFlags(ArrayList taggerFlags) {
     this.taggerFlags = taggerFlags;
   }
@@ -472,8 +395,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   }
 
   @RunTime
-  @CreoleParameter(defaultValue = "true",
-        comment = "do you want to update annotations or add new ones?")  
+  @CreoleParameter(defaultValue = "true", comment = "do you want to update annotations or add new ones?")
   public void setUpdateAnnotations(Boolean updateAnnotations) {
     this.updateAnnotations = updateAnnotations;
   }
@@ -483,8 +405,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   }
 
   @RunTime
-  @CreoleParameter(defaultValue = "(.+)\t(.+)\t(.+)",
-        comment = "regex to process tagger ouptut")  
+  @CreoleParameter(defaultValue = "(.+)\t(.+)\t(.+)", comment = "regex to process tagger ouptut")
   public void setRegex(String regex) {
     this.regex = regex;
   }
@@ -494,8 +415,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   }
 
   @RunTime
-  @CreoleParameter(defaultValue = "Token",
-        comment = "annotation used as input to tagger")
+  @CreoleParameter(defaultValue = "Token", comment = "annotation used as input to tagger")
   public void setInputAnnotationType(String inputAnnotationType) {
     this.inputAnnotationType = inputAnnotationType;
   }
@@ -505,8 +425,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   }
 
   @RunTime
-  @CreoleParameter(defaultValue = "Token",
-        comment = "annotation output by tagger")
+  @CreoleParameter(defaultValue = "Token", comment = "annotation output by tagger")
   public void setOutputAnnotationType(String outputAnnotationType) {
     this.outputAnnotationType = outputAnnotationType;
   }
@@ -516,8 +435,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   }
 
   @RunTime
-  @CreoleParameter(defaultValue = "true",
-      comment = "turn on debugging options")
+  @CreoleParameter(defaultValue = "true", comment = "turn on debugging options")
   public void setDebug(Boolean debug) {
     this.debug = debug;
   }
@@ -527,7 +445,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   }
 
   @RunTime
-  @CreoleParameter(comment = "annotation set in which annotations are created")  
+  @CreoleParameter(comment = "annotation set in which annotations are created")
   public void setInputAS(String inputAS) {
     this.inputAS = inputAS;
   }
@@ -537,7 +455,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   }
 
   @RunTime
-  @CreoleParameter(comment = "annotation set in which annotations are created")  
+  @CreoleParameter(comment = "annotation set in which annotations are created")
   public void setOutputAS(String outputAS) {
     this.outputAS = outputAS;
   }
@@ -547,9 +465,8 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   }
 
   @RunTime
-  @CreoleParameter(defaultValue = "ISO-8859-1",
-      comment = "Character encoding for temporary files, must match "
-        + "the encoding of your tagger data files")
+  @CreoleParameter(defaultValue = "ISO-8859-1", comment = "Character encoding for temporary files, must match "
+          + "the encoding of your tagger data files")
   public void setEncoding(String encoding) {
     this.encoding = encoding;
   }
@@ -559,8 +476,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   }
 
   @RunTime
-  @CreoleParameter(defaultValue = "true",
-        comment = "Should the tagger fail if it encounters a character which "
+  @CreoleParameter(defaultValue = "true", comment = "Should the tagger fail if it encounters a character which "
           + "is not mappable into the specified encoding?")
   public void setFailOnUnmappableCharacter(Boolean failOnUnmappableCharacter) {
     this.failOnUnmappableCharacter = failOnUnmappableCharacter;
