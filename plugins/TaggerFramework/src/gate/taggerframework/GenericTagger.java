@@ -65,7 +65,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
 
   // a comma separated list of feature names mapped to regex capturing
   // groups
-  private String featureMapping;
+  private ArrayList featureMapping;
 
   public Resource init() throws ResourceInstantiationException {
     String tmpDir = System.getProperty("java.io.tmpdir");
@@ -271,7 +271,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
       //TODO: change to use an array
       //TODO: mapping must map string=column of annotation text
       Map<String,Integer> mapping = new HashMap<String,Integer>();
-      for (String pair : featureMapping.split(",")) {
+      for (String pair : (ArrayList<String>)featureMapping) {
         String[] kv = pair.trim().split("=");
         mapping.put(kv[0], Integer.parseInt(kv[1]));
       }
@@ -414,14 +414,14 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
 
   }
 
-  public String getFeatureMapping() {
+  public ArrayList getFeatureMapping() {
     return featureMapping;
   }
 
   @RunTime
-  @CreoleParameter(defaultValue = "string=1,category=2,lemma=3",
+  @CreoleParameter(defaultValue = "string=1;category=2;lemma=3",
         comment = "mapping from matching groups to feature names")
-  public void setFeatureMapping(String featureMapping) {
+  public void setFeatureMapping(ArrayList featureMapping) {
     this.featureMapping = featureMapping;
   }
 
