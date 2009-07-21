@@ -15,6 +15,8 @@
 package gate.swing;
 
 import java.awt.*;
+import java.util.Arrays;
+import java.util.ArrayList;
 
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
@@ -54,17 +56,16 @@ public class MenuLayout implements LayoutManager {
     for(int i = 0; i < membersCnt; i++){
       componentPrefSizes[i] = target.getComponent(i).getPreferredSize();
     }
-    Dimension dim = getCompositeSize(target, componentPrefSizes);
-    return dim;
+    return getCompositeSize(target, componentPrefSizes);
   }
 
   /**
    * Calculates the size of the target container given the sizes of the
    * components.
-   * If the doLayout is <b>true</b> it will also ly out the container.
+   * If the doLayout is <b>true</b> it will also lay out the container.
    * Used by {@link #minimumLayoutSize} and {@link #preferredLayoutSize}.
-   * @param target
-   * @param componentSizes
+   * @param target  the component which needs to be laid out
+   * @param componentSizes array of dimensions for each menu component
    * @return a {@link Dimension} value.
    */
   protected Dimension getCompositeSize(Container target,
@@ -93,7 +94,6 @@ public class MenuLayout implements LayoutManager {
     if (gc != null) {
       contentsBounds = gc.getBounds();
       screenInsets = toolkit.getScreenInsets(gc);
-    }else{
     }
 
     // take screen insets (e.g. taskbar) into account
@@ -110,6 +110,10 @@ public class MenuLayout implements LayoutManager {
     Dimension dim = new Dimension(0, 0);
     int previousColumnsWidth = 0;
     int previousColumnsHeight = 0;
+    int columnIndex = 1;
+    int firstComponentIndexForColumn = 0;
+    columnForComponentIndex = new int[componentSizes.length];
+    preferredWidthForColumn = new ArrayList<Integer>();
     for (int i = 0; i < componentSizes.length; i++) {
       if ( (dim.height +
             componentSizes[i].height) <= contentsBounds.height) {
@@ -119,6 +123,11 @@ public class MenuLayout implements LayoutManager {
       }
       else {
         //we need to start a new column
+        Arrays.fill(columnForComponentIndex, firstComponentIndexForColumn,
+          i, columnIndex);
+        preferredWidthForColumn.add(dim.width);
+        firstComponentIndexForColumn = i;
+        columnIndex++;
         previousColumnsWidth += dim.width;
         previousColumnsHeight = Math.max(previousColumnsHeight, dim.height);
         dim.height = componentSizes[i].height;
@@ -126,6 +135,9 @@ public class MenuLayout implements LayoutManager {
       }
     }
 
+    Arrays.fill(columnForComponentIndex, firstComponentIndexForColumn,
+      columnForComponentIndex.length, columnIndex);
+    preferredWidthForColumn.add(dim.width);
     //Now dim contains the sizes for the last column
     dim.height = Math.max(previousColumnsHeight, dim.height);
     dim.width += previousColumnsWidth;
@@ -151,15 +163,12 @@ public class MenuLayout implements LayoutManager {
     }
     if(target.isShowing()){
       Point position = target.getLocationOnScreen();
-      Toolkit toolkit = Toolkit.getDefaultToolkit();
       gc = target.getGraphicsConfiguration();
       GraphicsEnvironment ge =
-          GraphicsEnvironment.getLocalGraphicsEnvironment();
-      GraphicsDevice[] gd = ge.getScreenDevices();
-      for (int i = 0; i < gd.length; i++) {
-        if (gd[i].getType() == GraphicsDevice.TYPE_RASTER_SCREEN) {
-          GraphicsConfiguration dgc =
-              gd[i].getDefaultConfiguration();
+        GraphicsEnvironment.getLocalGraphicsEnvironment();
+      for (GraphicsDevice gd : ge.getScreenDevices()) {
+        if (gd.getType() == GraphicsDevice.TYPE_RASTER_SCREEN) {
+          GraphicsConfiguration dgc = gd.getDefaultConfiguration();
           if (dgc.getBounds().contains(position)) {
             gc = dgc;
             break;
@@ -228,4 +237,15 @@ public class MenuLayout implements LayoutManager {
       }
     }
   }
+
+  public int getColumnForComponentIndex(int index) {
+    return columnForComponentIndex[index];
+  }
+
+  public int getPreferredWidthForColumn(int index) {
+    return preferredWidthForColumn.get(index-1);
+  }
+
+  private int[] columnForComponentIndex;
+  private ArrayList<Integer> preferredWidthForColumn;
 }

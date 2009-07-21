@@ -25,8 +25,7 @@ import gate.event.StatusListener;
 
 /**
  * Extension of a JMenuItem that adds a description and a StatusListener
- * as parameters. The description is used in the statusListener and as a
- * tooltip.
+ * as parameters. The description is used in the statusListener.
  */
 public class XJMenuItem extends JMenuItem {
 
@@ -35,23 +34,23 @@ public class XJMenuItem extends JMenuItem {
     this.description = description;
     this.listener = listener;
     initListeners();
-    setToolTipText(description);
-  }// public XJMenuItem(Icon icon, String description, StatusListener listener)
+  }
 
   public XJMenuItem(String text, String description, StatusListener listener){
     super(text);
     this.description = description;
     this.listener = listener;
     initListeners();
-    setToolTipText(description);
-  }// XJMenuItem(String text, String description, StatusListener listener)
+  }
 
   public XJMenuItem(Action a, StatusListener listener){
     super(a);
-    this.description = (String)a.getValue(Action.SHORT_DESCRIPTION);
+    this.description = (String) a.getValue(Action.SHORT_DESCRIPTION);
     this.listener = listener;
+    // stop showing tooltip in the menu, status bar is enough
+    setToolTipText(null);
     initListeners();
-  }// XJMenuItem(Action a, StatusListener listener)
+  }
 
   public XJMenuItem(String text, Icon icon,
                     String description, StatusListener listener){
@@ -59,8 +58,7 @@ public class XJMenuItem extends JMenuItem {
     this.description = description;
     this.listener = listener;
     initListeners();
-    setToolTipText(description);
-  }// XJMenuItem
+  }
 
   public XJMenuItem(String text, int mnemonic,
                     String description, StatusListener listener){
@@ -68,7 +66,6 @@ public class XJMenuItem extends JMenuItem {
     this.description = description;
     this.listener = listener;
     initListeners();
-    setToolTipText(description);
   }
 
   protected void initListeners(){
@@ -88,4 +85,4 @@ public class XJMenuItem extends JMenuItem {
 
   private StatusListener listener;
   String description;
-}// class XJMenuItem extends JMenuItem
+}

@@ -39,14 +39,17 @@ public class XJPopupMenu extends JPopupMenu {
    */
   public void setVisible(boolean aFlag) {
     super.setVisible(aFlag);
-    for (Component component : getComponents()) {
+    if (!aFlag) { return; }
+    MenuLayout layout = (MenuLayout) getLayout();
+    for (int i = 0; i < getComponents().length; i++) {
+      Component component = getComponents()[i];
       if (component instanceof JSeparator) {
         JSeparator separator = (JSeparator) component;
+        int column = layout.getColumnForComponentIndex(i);
+        int preferredWidth = layout.getPreferredWidthForColumn(column);
         // use the popupmenu width to set the separators width
         separator.setPreferredSize(new Dimension(
-          (int) getLayout().preferredLayoutSize(this).getWidth()
-          - getInsets().left - getInsets().right,
-          separator.getHeight()));
+          preferredWidth, separator.getHeight()));
       }
     }
     revalidate();
