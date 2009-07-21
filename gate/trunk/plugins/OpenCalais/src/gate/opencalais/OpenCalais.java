@@ -65,6 +65,22 @@ public class OpenCalais extends AbstractLanguageAnalyser implements
 
 
   /**
+   * The AnnotationSet to which output will be added
+   * 
+   */
+  private String outputASName;
+
+
+  public void setOutputASName(String oasn) {
+    this.outputASName = oasn;
+  }
+
+  public String getOutputASName() {
+    return this.outputASName;
+  }
+
+
+  /**
    * The URL of the OpenCalais REST service
    * 
    */
@@ -96,19 +112,6 @@ public class OpenCalais extends AbstractLanguageAnalyser implements
   }
 
 
-  /**
-   * The reltagBaseURL: Base URL to be put in rel-tag microformats
-   * 
-   */
-  private URL reltagBaseURL;
-
-  public void setReltagBaseURL(URL newValue) {
-    reltagBaseURL = newValue;
-  }
-
-  public URL getReltagBaseURL() {
-    return reltagBaseURL;
-  }
 
 
   /**
@@ -241,9 +244,6 @@ public class OpenCalais extends AbstractLanguageAnalyser implements
                        + "\" c:allowDistribution=\"" + allowDistribution
                        + "\" c:allowSearch=\"" + allowSearch;
     // for all other parameters, check if they have been set, before including
-    if (reltagBaseURL != null)
-      paramsXMLString += "\" c:reltagBaseURL=\"" + reltagBaseURL;
-    
     if (enableMetadataType != null) {
       if (enableMetadataType.equals("GenericRelations") || enableMetadataType.equals("SocialTags"))
         paramsXMLString += "\" c:enableMetadataType=\"" + enableMetadataType;
@@ -268,6 +268,14 @@ public class OpenCalais extends AbstractLanguageAnalyser implements
   public void execute() throws ExecutionException {
     Document doc = getDocument();
 
+    //  Get the output annotation set
+    AnnotationSet outputAS = null;
+    if(outputASName == null || outputASName.equals("")) {
+	outputAS = doc.getAnnotations();
+    } else {
+        outputAS = doc.getAnnotations(outputASName);
+    }
+
     // Get the text out of the document
     String docText = ((DocumentContentImpl) doc.getContent()).toString();
 
@@ -280,8 +288,6 @@ public class OpenCalais extends AbstractLanguageAnalyser implements
       throw new ExecutionException(
               "Problem talking to OpenCalais service: " + openCalaisURL);
     }
-
-
 
 
     // Parse the output into GATE annotations
