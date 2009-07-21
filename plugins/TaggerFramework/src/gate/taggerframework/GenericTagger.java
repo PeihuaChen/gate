@@ -357,6 +357,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
       }*/
     }
     catch(Exception err) {
+      err.printStackTrace();
       throw (ExecutionException)new ExecutionException(
               "Error occurred running TreeTagger with command line "
                       + Arrays.asList(cmdline)).initCause(err);
@@ -400,6 +401,9 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
     return updateAnnotations;
   }
 
+  @RunTime
+  @CreoleParameter(defaultValue = "true",
+        comment = "do you want to update annotations or add new ones?")  
   public void setUpdateAnnotations(Boolean updateAnnotations) {
     this.updateAnnotations = updateAnnotations;
   }
