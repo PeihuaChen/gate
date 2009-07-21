@@ -52,7 +52,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   private URL taggerBinary, taggerDir;
 
   // flags to pass to the tagger
-  private String taggerFlags;
+  private ArrayList taggerFlags;
 
   // should we...
   // fail if mapping between charsets fails
@@ -129,17 +129,21 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
     String[] taggerCmd;
     String shPath = null;
     if((shPath = System.getProperty("shell.path")) != null) {
-      taggerCmd = new String[3];
+      taggerCmd = new String[3+taggerFlags.size()];
       taggerCmd[0] = shPath;
       index = 1;
     }
     else {
-      taggerCmd = new String[2];
+      taggerCmd = new String[2+taggerFlags.size()];
     }
 
-    // generate TreeTagger command line
-    taggerCmd[index] = scriptfile.getAbsolutePath();
-    taggerCmd[index + 1] = textfile.getAbsolutePath();
+    String[] flags = (String[])taggerFlags.toArray();
+    
+    System.arraycopy(flags, 0, taggerCmd, index, flags.length);
+    
+    // generate tagger command line
+    taggerCmd[taggerCmd.length-2] = scriptfile.getAbsolutePath();
+    taggerCmd[taggerCmd.length-1] = textfile.getAbsolutePath();
     
     return taggerCmd;
   }
@@ -445,14 +449,14 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
     this.taggerDir = taggerDir;
   }
 
-  public String getTaggerFlags() {
+  public ArrayList getTaggerFlags() {
     return taggerFlags;
   }
 
   @RunTime
   @CreoleParameter(defaultValue = "",
         comment = "flags passed to tagger script")  
-  public void setTaggerFlags(String taggerFlags) {
+  public void setTaggerFlags(ArrayList taggerFlags) {
     this.taggerFlags = taggerFlags;
   }
 
