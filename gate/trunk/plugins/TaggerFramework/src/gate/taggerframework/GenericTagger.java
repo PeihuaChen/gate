@@ -139,11 +139,11 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
 
     String[] flags = (String[])taggerFlags.toArray(new String[0]);
     
-    System.arraycopy(flags, 0, taggerCmd, index, flags.length);
+    System.arraycopy(flags, 0, taggerCmd, index+1, flags.length);
     
     
     // generate tagger command line
-    taggerCmd[taggerCmd.length-2] = scriptfile.getAbsolutePath();
+    taggerCmd[index] = scriptfile.getAbsolutePath();
     taggerCmd[taggerCmd.length-1] = textfile.getAbsolutePath();
     
     if (debug) {
