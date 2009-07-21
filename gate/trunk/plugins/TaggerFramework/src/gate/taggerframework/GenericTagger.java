@@ -321,6 +321,9 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
               if (inputAnnotations.size() == 0) throw new Exception("no remaning annotations of type " + inputAnnotationType +" to add within");
               
               currentInput = inputAnnotations.remove(0);
+              
+              aSet.removeAll(aSet.get(outputAnnotationType,currentInput.getStartNode().getOffset(),currentInput.getEndNode().getOffset()));
+              
               currentPosition = 0;
               encodedInput = new String(charset.encode(document.getContent().getContent(currentInput.getStartNode().getOffset(), currentInput.getEndNode().getOffset()).toString()).array(),encoding);
             }
