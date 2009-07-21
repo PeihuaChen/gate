@@ -49,7 +49,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   private String encoding, regex;
 
   // the path to the tagger binary
-  private URL taggerBinary;
+  private URL taggerBinary, taggerDir;
 
   // flags to pass to the tagger
   private String taggerFlags;
@@ -238,7 +238,12 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
     // run tagger and save output
     try {
       //TODO: replace this with the ProcessManager from gate.util
-      Process p = Runtime.getRuntime().exec(cmdline);
+      Process p = null;
+      
+      if (taggerDir == null || taggerDir.trim().length() == 0)
+        p = Runtime.getRuntime().exec(cmdline);
+      else
+        p = Runtime.getRuntime().exec(cmdline, new String[]{}, Files.fileFromURL(taggerDir));
 
       // get the tagger output (gate input)
       BufferedReader input = new BufferedReader(new InputStreamReader(p
@@ -389,6 +394,16 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   @CreoleParameter(comment = "Name of the TreeTagger command file")
   public void setTaggerBinary(URL taggerBinary) {
     this.taggerBinary = taggerBinary;
+  }
+  
+  public URL getTaggerDir() {
+    return taggerDir;
+  }
+
+  @RunTime
+  @CreoleParameter(comment = "directory in which to run the tagger")
+  public void setTaggerDir(URL taggerDir) {
+    this.taggerDir = taggerDir;
   }
 
   public String getTaggerFlags() {
