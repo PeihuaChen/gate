@@ -276,6 +276,8 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
         mapping.put(kv[0], Integer.parseInt(kv[1]));
       }
       
+      int currentPosition = 0;
+      
       while ((line = input.readLine()) != null) {
         Matcher m = resultPattern.matcher(line);
         
@@ -312,6 +314,23 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
           }
           else {
             //TODO add new annotation
+
+            String encodedInput = new String(charset.encode(document.getContent().getContent(currentInput.getStartNode().getOffset(), currentInput.getEndNode().getOffset()).toString()).array(),encoding);
+            
+            while ((currentPosition = encodedInput.indexOf((String)features.get("string"), currentPosition)) == -1) {     
+              if (inputAnnotations.size() == 0) throw new Exception("no remaning annotations of type " + inputAnnotationType +" to add within");
+              
+              currentInput = inputAnnotations.remove(0);
+              currentPosition = 0;
+              encodedInput = new String(charset.encode(document.getContent().getContent(currentInput.getStartNode().getOffset(), currentInput.getEndNode().getOffset()).toString()).array(),encoding);
+            }
+            
+            Long start = currentPosition + currentInput.getStartNode().getOffset();
+            Long end = start + ((String)features.get("string")).length();
+            
+            aSet.add(start, end, outputAnnotationType, features);
+            
+            currentPosition = end.intValue();
           }
         }
       }
