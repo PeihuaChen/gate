@@ -18,6 +18,7 @@ package gate.jape;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import gate.*;
 import gate.creole.ontology.Ontology;
@@ -63,14 +64,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
   /** Cardinality of the action class set. Used for ensuring class name
     * uniqueness.
     */
-  private static int actionClassNumber = 0;
-
-  /** Allow setting of the initial action class number. Used for ensuring
-    * class name uniqueness when running more than one transducer. The
-    * long-term solution is to have separate class loaders for each
-    * transducer.
-    */
-  public static void setActionClassNumber(int n) { actionClassNumber = n; }
+  private static AtomicInteger actionClassNumber = new AtomicInteger();
 
   /** The set of block names.
     * Used to ensure we only get their annotations once in the action class.
@@ -105,7 +99,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     this.phaseName = transducerName;
     this.ruleName = ruleName;
     actionClassName = new String(
-      transducerName + ruleName + "ActionClass" + actionClassNumber++
+      transducerName + ruleName + "ActionClass" + actionClassNumber.getAndIncrement()
     );
     blockNames = new HashSet();
 
