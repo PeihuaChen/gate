@@ -9,6 +9,7 @@ Rule: Chunker
 ):chunk
 -->
 {
+try {
 	AnnotationSet chunk = (AnnotationSet)bindings.get("chunk");
 	Annotation annot = chunk.iterator().next();
 	
@@ -19,4 +20,8 @@ Rule: Chunker
 	features.put("type",type);
 	
 	outputAS.add(chunk.firstNode().getOffset(),chunk.lastNode().getOffset(),"Chunk",features);
+}
+catch (Exception e) {
+	throw new LuckyException(e);
+}
 }
