@@ -4,8 +4,8 @@ Options: control = appelt
 
 Rule: Chunker
 (
-	{Token.chunk ~= "B-.+"}
-	({Token.chunk ~= "I-.+"})*
+	{Token.chunk ==~ "B-.+"}
+	({Token.chunk ==~ "I-.+"})*
 ):chunk
 -->
 {
