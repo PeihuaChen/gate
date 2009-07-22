@@ -126,6 +126,9 @@ public class TestDatabaseAnnotationSet extends TestCase
   }
 
   /** Test iterator remove */
+/* This seems to be a bad idea - just testing order of hashset iterator, which
+ * isn't stable....
+ *
   public void testIteratorRemove() {
     AnnotationSet asBuf = basicAS.get("T1");
     assertEquals(7, asBuf.size());
@@ -149,6 +152,7 @@ public class TestDatabaseAnnotationSet extends TestCase
     basicAS.remove(basicAS.get(new Integer(8)));
 
   } // testIteratorRemove()
+  */
 
   /** Test iterator */
   public void testIterator() {
