@@ -4,13 +4,16 @@ import gate.Annotation;
 import gate.AnnotationSet;
 import gate.Factory;
 import gate.FeatureMap;
+import gate.Gate;
 import gate.ProcessingResource;
 import gate.Resource;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
+import gate.creole.Transducer;
 import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
 import gate.util.Files;
 import gate.util.GateRuntimeException;
@@ -41,11 +44,17 @@ import java.util.regex.Pattern;
 public class GenericTagger extends AbstractLanguageAnalyser implements
                                                            ProcessingResource {
 
+  //TODO change to outputASName and inputASName
+  
   //TODO Think about moving this to a runtime parameter
   public static final String STRING_FEATURE_NAME = "string";
   
+  private Transducer preProcess, postProcess;
+  
+  private URL preProcessURL, postProcessURL;
+  
   // The annotations sets used for input and output
-  private String inputAS, outputAS;
+  private String inputASName, outputASName;
 
   // The character encoding the tagger expects and a regex to process
   // the output
@@ -55,7 +64,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   private URL taggerBinary, taggerDir;
 
   // flags to pass to the tagger
-  private ArrayList taggerFlags;
+  private List<String> taggerFlags;
 
   // should we...
   // fail if mapping between charsets fails
@@ -68,7 +77,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
 
   // a comma separated list of feature names mapped to regex capturing
   // groups
-  private ArrayList featureMapping;
+  private FeatureMap featureMapping;
 
   public Resource init() throws ResourceInstantiationException {
     String tmpDir = System.getProperty("java.io.tmpdir");
@@ -79,6 +88,20 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
                       + "suitable value.");
     }
 
+    FeatureMap hidden = Factory.newFeatureMap();
+    Gate.setHiddenAttribute(hidden, true);
+    FeatureMap params = Factory.newFeatureMap();
+    
+    if (preProcessURL != null) {
+      params.put("grammarURL", preProcessURL);
+      preProcess = (Transducer)Factory.createResource("gate.creole.Transducer", params, hidden);
+    }
+    
+    if (postProcessURL != null) {
+      params.put("grammarURL", postProcessURL);
+      postProcess = (Transducer)Factory.createResource("gate.creole.Transducer", params, hidden);
+    }
+    
     return this;
   }
 
@@ -94,6 +117,18 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
       throw new ExecutionException("No encoding specified");
     }
 
+    if (preProcess != null) {
+      preProcess.setInputASName(inputASName);
+      preProcess.setOutputASName(inputASName);
+      preProcess.setDocument(document);
+
+      try {
+        preProcess.execute();
+      } finally {
+        preProcess.setDocument(null);
+      }
+    }
+    
     // get current text from GATE for the tagger
     File textfile = getCurrentText();
 
@@ -102,6 +137,18 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
     // run the tagger
     runTagger(taggerCmd);
 
+    if (postProcess != null) {
+      postProcess.setInputASName(outputASName);
+      postProcess.setOutputASName(outputASName);
+      postProcess.setDocument(document);
+
+      try {
+        postProcess.execute();
+      } finally {
+        postProcess.setDocument(null);
+      }
+    }
+    
     // delete the temporary text file
     if(!debug) textfile.delete();
   }
@@ -167,9 +214,9 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
       FileOutputStream fos = new FileOutputStream(gateTextFile);
       OutputStreamWriter osw = new OutputStreamWriter(fos, charsetEncoder);
       BufferedWriter bw = new BufferedWriter(osw);
-      AnnotationSet annotSet = (inputAS == null || inputAS.trim().length() == 0)
+      AnnotationSet annotSet = (inputASName == null || inputASName.trim().length() == 0)
               ? document.getAnnotations()
-              : document.getAnnotations(inputAS);
+              : document.getAnnotations(inputASName);
       annotSet = annotSet.get(inputAnnotationType);
       if(annotSet == null || annotSet.size() == 0) {
         throw new GateRuntimeException("No " + inputAnnotationType
@@ -212,18 +259,18 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
     int indx = 0;
 
     // sorted list of input annotations
-    AnnotationSet annotSet = (inputAS == null || inputAS.trim().length() == 0)
+    AnnotationSet annotSet = (inputASName == null || inputASName.trim().length() == 0)
             ? document.getAnnotations()
-            : document.getAnnotations(inputAS);
+            : document.getAnnotations(inputASName);
     annotSet = annotSet.get(inputAnnotationType);
     List<Annotation> inputAnnotations = new ArrayList<Annotation>(annotSet);
     Collections.sort(inputAnnotations, new OffsetComparator());
 
     Annotation currentInput = inputAnnotations.remove(0);
 
-    AnnotationSet aSet = (outputAS == null || outputAS.trim().length() == 0)
+    AnnotationSet aSet = (outputASName == null || outputASName.trim().length() == 0)
             ? document.getAnnotations()
-            : document.getAnnotations(outputAS);
+            : document.getAnnotations(outputASName);
 
     Charset charset = Charset.forName(encoding);
 
@@ -253,11 +300,11 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
       else Collections.sort(outputAnnotations, new OffsetComparator());
 
       // TODO: mapping must map string=column of annotation text
-      Map<String, Integer> mapping = new HashMap<String, Integer>();
-      for(String pair : (ArrayList<String>)featureMapping) {
-        String[] kv = pair.trim().split("=");
-        mapping.put(kv[0], Integer.parseInt(kv[1]));
-      }
+      //Map<String, Integer> mapping = new HashMap<String, Integer>();
+      //for(String pair : (ArrayList<String>)featureMapping) {
+      //  String[] kv = pair.trim().split("=");
+      //  mapping.put(kv[0], Integer.parseInt(kv[1]));
+      //}
 
       int currentPosition = 0;
 
@@ -267,8 +314,8 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
         if(m.matches()) {
           FeatureMap features = Factory.newFeatureMap();
 
-          for(Map.Entry<String, Integer> kv : mapping.entrySet()) {
-            features.put(kv.getKey(), m.group(kv.getValue()));
+          for(Map.Entry<Object, Object> kv : featureMapping.entrySet()) {
+            features.put(kv.getKey(), m.group(Integer.parseInt(String.valueOf(kv.getValue()))));
           }
 
           while(updateAnnotations && outputAnnotations.size() == 0) {
@@ -350,13 +397,13 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
 
   }
 
-  public ArrayList getFeatureMapping() {
+  public FeatureMap getFeatureMapping() {
     return featureMapping;
   }
 
   @RunTime
   @CreoleParameter(defaultValue = "string=1;category=2;lemma=3", comment = "mapping from matching groups to feature names")
-  public void setFeatureMapping(ArrayList featureMapping) {
+  public void setFeatureMapping(FeatureMap featureMapping) {
     this.featureMapping = featureMapping;
   }
 
@@ -380,13 +427,13 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
     this.taggerDir = taggerDir;
   }
 
-  public ArrayList getTaggerFlags() {
+  public List<String> getTaggerFlags() {
     return taggerFlags;
   }
 
   @RunTime
   @CreoleParameter(defaultValue = "", comment = "flags passed to tagger script")
-  public void setTaggerFlags(ArrayList taggerFlags) {
+  public void setTaggerFlags(List<String> taggerFlags) {
     this.taggerFlags = taggerFlags;
   }
 
@@ -441,23 +488,25 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   }
 
   public String getInputAS() {
-    return inputAS;
+    return inputASName;
   }
 
+  @Optional
   @RunTime
   @CreoleParameter(comment = "annotation set in which annotations are created")
-  public void setInputAS(String inputAS) {
-    this.inputAS = inputAS;
+  public void setInputASName(String inputASName) {
+    this.inputASName = inputASName;
   }
 
-  public String getOutputAS() {
-    return outputAS;
+  public String getOutputASName() {
+    return outputASName;
   }
 
+  @Optional
   @RunTime
   @CreoleParameter(comment = "annotation set in which annotations are created")
   public void setOutputAS(String outputAS) {
-    this.outputAS = outputAS;
+    this.outputASName = outputASName;
   }
 
   public String getEncoding() {
@@ -480,5 +529,25 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
           + "is not mappable into the specified encoding?")
   public void setFailOnUnmappableCharacter(Boolean failOnUnmappableCharacter) {
     this.failOnUnmappableCharacter = failOnUnmappableCharacter;
+  }
+
+  public URL getPreProcessURL() {
+    return preProcessURL;
+  }
+
+  @Optional
+  @CreoleParameter(comment = "JAPE grammar to use for pre-processing")
+  public void setPreProcessURL(URL preProcessURL) {
+    this.preProcessURL = preProcessURL;
+  }
+
+  public URL getPostProcessURL() {
+    return postProcessURL;
+  }
+
+  @Optional
+  @CreoleParameter(comment = "JAPE grammar to use for post-processing")
+  public void setPostProcessURL(URL postProcessURL) {
+    this.postProcessURL = postProcessURL;
   }
 }
