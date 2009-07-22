@@ -741,6 +741,23 @@
 
   <target name="test" depends="test.gate, plugins.build, plugins.test" />
 
+  <target name="test.reports">
+    <junitreport>
+      <fileset dir="${basedir}">
+        <include name="build/testResult.xml"/>
+        <include name="plugins/**/TEST-*.xml"/>		    
+      </fileset>
+      <report todir="build" format="noframes"/>
+    </junitreport>
+  </target>
+
+  <target name="cruise">
+    <antcall target="test">
+      <param name="write.xml" value="true" />
+    </antcall>
+    <antcall target="test.reports" />
+  </target>
+
   <target name="guitest" depends="plugins.build">
     <java classname="junit.swingui.TestRunner"
           classpathref="run.class.path"
