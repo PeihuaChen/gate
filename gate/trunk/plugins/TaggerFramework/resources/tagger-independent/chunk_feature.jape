@@ -3,10 +3,10 @@ Input: Token
 Options: control = appelt
 
 Rule: Chunker
-{
+(
 	{Token.chunk ~= "B-.+"}
 	({Token.chunk ~= "I-.+"})*
-}:chunk
+):chunk
 -->
 {
 	AnnotationSet chunk = (AnnotationSet)bindings.get("chunk");
