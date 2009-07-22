@@ -488,7 +488,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
     this.debug = debug;
   }
 
-  public String getInputAS() {
+  public String getInputASName() {
     return inputASName;
   }
 
@@ -506,7 +506,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   @Optional
   @RunTime
   @CreoleParameter(comment = "annotation set in which annotations are created")
-  public void setOutputAS(String outputAS) {
+  public void setOutputASName(String outputAS) {
     this.outputASName = outputASName;
   }
 
