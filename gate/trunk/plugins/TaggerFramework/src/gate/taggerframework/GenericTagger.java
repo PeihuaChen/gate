@@ -421,6 +421,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
     return taggerDir;
   }
 
+  @Optional
   @RunTime
   @CreoleParameter(comment = "directory in which to run the tagger")
   public void setTaggerDir(URL taggerDir) {
