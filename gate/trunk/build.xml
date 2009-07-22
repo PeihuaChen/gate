@@ -731,6 +731,8 @@
                  usefile="false"/>
       <formatter type="xml"
                  if="write.xml"/>
+      <formatter type="plain"
+                 if="write.plain"/>
       <test name="gate.TestGate"
             outfile="testResult"
             todir="${buildDir}"/>
