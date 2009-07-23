@@ -187,7 +187,7 @@
                 </entry>
                 <entry>
                   <string>debug</string>
-                  <boolean>true</boolean>
+                  <boolean>false</boolean>
                 </entry>
                 <entry>
                   <string>taggerBinary</string>

@@ -7,9 +7,6 @@
       <gate.util.persistence.PersistenceManager-URLHolder>
         <urlString>$relpath$../../../ANNIE</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
-      <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../../../ANNIE</urlString>
-      </gate.util.persistence.PersistenceManager-URLHolder>
     </localList>
     <collectionType>java.util.ArrayList</collectionType>
   </urlList>
@@ -51,6 +48,45 @@
             <initParams class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap/>
+            </initParams>
+            <features class="gate.util.persistence.MapPersistence">
+              <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+              <localMap/>
+            </features>
+          </pr>
+        </gate.util.persistence.AnalyserRunningStrategyPersistence>
+        <gate.util.persistence.AnalyserRunningStrategyPersistence>
+          <runMode>1</runMode>
+          <pr class="gate.util.persistence.LanguageAnalyserPersistence">
+            <runtimeParams class="gate.util.persistence.MapPersistence">
+              <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+              <localMap>
+                <entry>
+                  <string>annotationSetName</string>
+                  <null/>
+                </entry>
+                <entry>
+                  <string>document</string>
+                  <null/>
+                </entry>
+              </localMap>
+            </runtimeParams>
+            <resourceType>gate.creole.tokeniser.SimpleTokeniser</resourceType>
+            <resourceName>GATE Unicode Tokeniser</resourceName>
+            <initParams class="gate.util.persistence.MapPersistence">
+              <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+              <localMap>
+                <entry>
+                  <string>rulesURL</string>
+                  <gate.util.persistence.PersistenceManager-URLHolder>
+                    <urlString>$relpath$../../../ANNIE/resources/tokeniser/DefaultTokeniser.rules</urlString>
+                  </gate.util.persistence.PersistenceManager-URLHolder>
+                </entry>
+                <entry>
+                  <string>encoding</string>
+                  <string>UTF-8</string>
+                </entry>
+              </localMap>
             </initParams>
             <features class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
@@ -121,11 +157,11 @@
                 </entry>
                 <entry>
                   <string>regex</string>
-                  <string>(.+)	(.+)	(.+)</string>
+                  <string>(.+)-(.+)	\2/(.+)</string>
                 </entry>
                 <entry>
                   <string>inputASName</string>
-                  <null/>
+                  <string></string>
                 </entry>
                 <entry>
                   <string>featureMapping</string>
@@ -133,7 +169,7 @@
                     <mapType>gate.util.SimpleFeatureMapImpl</mapType>
                     <localMap>
                       <entry>
-                        <string>lemma</string>
+                        <string>chunk</string>
                         <string>3</string>
                       </entry>
                       <entry>
@@ -148,22 +184,22 @@
                   </gate.util.persistence.MapPersistence>
                 </entry>
                 <entry>
-                  <string>updateAnnotations</string>
+                  <string>debug</string>
                   <boolean>false</boolean>
                 </entry>
                 <entry>
-                  <string>debug</string>
+                  <string>updateAnnotations</string>
                   <boolean>false</boolean>
                 </entry>
                 <entry>
                   <string>taggerBinary</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>file:///usr/local/durmtools/TreeTagger/cmd/tree-tagger-german</urlString>
+                    <urlString>$relpath$tagger-chunker-german-nofilter</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
                 <entry>
                   <string>inputAnnotationType</string>
-                  <string>Sentence</string>
+                  <string>Token</string>
                 </entry>
                 <entry>
                   <string>document</string>
@@ -199,7 +235,7 @@
               </localMap>
             </runtimeParams>
             <resourceType>gate.taggerframework.GenericTagger</resourceType>
-            <resourceName>TreeTagger-DE-Tokenization</resourceName>
+            <resourceName>TreeTagger-DE-Chunking</resourceName>
             <initParams class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
@@ -211,7 +247,9 @@
                 </entry>
                 <entry>
                   <string>postProcessURL</string>
-                  <null/>
+                  <gate.util.persistence.PersistenceManager-URLHolder>
+                    <urlString>$relpath$../tagger-independent/chunkandentity-annots.jape</urlString>
+                  </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
               </localMap>
             </initParams>
@@ -228,12 +266,13 @@
       <localList>
         <gate.util.persistence.PRPersistence reference="../../../strategiesList/localList/gate.util.persistence.AnalyserRunningStrategyPersistence/pr"/>
         <gate.util.persistence.LanguageAnalyserPersistence reference="../../../strategiesList/localList/gate.util.persistence.AnalyserRunningStrategyPersistence[2]/pr"/>
-        <gate.util.persistence.PRPersistence reference="../../../strategiesList/localList/gate.util.persistence.AnalyserRunningStrategyPersistence[3]/pr"/>
+        <gate.util.persistence.LanguageAnalyserPersistence reference="../../../strategiesList/localList/gate.util.persistence.AnalyserRunningStrategyPersistence[3]/pr"/>
+        <gate.util.persistence.PRPersistence reference="../../../strategiesList/localList/gate.util.persistence.AnalyserRunningStrategyPersistence[4]/pr"/>
       </localList>
       <collectionType>java.util.ArrayList</collectionType>
     </prList>
     <resourceType>gate.creole.ConditionalSerialAnalyserController</resourceType>
-    <resourceName>TreeTagger-DE-Tokenization</resourceName>
+    <resourceName>TreeTagger-DE-Chunking</resourceName>
     <initParams class="gate.util.persistence.MapPersistence">
       <mapType>gate.util.SimpleFeatureMapImpl</mapType>
       <localMap/>

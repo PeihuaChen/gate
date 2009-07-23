@@ -158,7 +158,7 @@
                 <entry>
                   <string>taggerBinary</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>file:///usr/local/durmtools/TreeTagger/cmd/tree-tagger-german</urlString>
+                    <urlString>file:///usr/local/durmtools/TreeTagger/cmd/tree-tagger-spanish</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
                 <entry>
@@ -199,7 +199,7 @@
               </localMap>
             </runtimeParams>
             <resourceType>gate.taggerframework.GenericTagger</resourceType>
-            <resourceName>TreeTagger-DE-Tokenization</resourceName>
+            <resourceName>TreeTagger-ES-Tokenization</resourceName>
             <initParams class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
@@ -233,7 +233,7 @@
       <collectionType>java.util.ArrayList</collectionType>
     </prList>
     <resourceType>gate.creole.ConditionalSerialAnalyserController</resourceType>
-    <resourceName>TreeTagger-DE-Tokenization</resourceName>
+    <resourceName>TreeTagger-ES-Tokenization</resourceName>
     <initParams class="gate.util.persistence.MapPersistence">
       <mapType>gate.util.SimpleFeatureMapImpl</mapType>
       <localMap/>
