@@ -27,7 +27,8 @@ import gate.creole.*;
 import gate.util.*;
 
 public class PronominalCoref extends AbstractLanguageAnalyser
-                              implements ProcessingResource, ANNIEConstants{
+                              implements ProcessingResource, ANNIEConstants,
+                              Benchmarkable {
 
   public static final String COREF_DOCUMENT_PARAMETER_NAME = "document";
 
@@ -81,6 +82,8 @@ public class PronominalCoref extends AbstractLanguageAnalyser
   private Set<String> inanimatedSet;
   
   private String inanimatedEntityTypes;
+  
+  private String benchmarkId;
 
   /** --- */
   static {
@@ -681,7 +684,9 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     }
 
     //2.2. run quoted text transducer to generate "Quoted Text" annotations
-    this.qtTransducer.execute();
+    Benchmark.executeWithBenchmarking(this.qtTransducer,
+            Benchmark.createBenchmarkId("qtTransducer",
+                    getBenchmarkId()), this, null);
 
     //3.1 remove pleonastic annotations if left from previous execution
     AnnotationSet pleonSet = this.defaultAnnotations.get(PLEONASTIC_TYPE);
@@ -690,7 +695,9 @@ public class PronominalCoref extends AbstractLanguageAnalyser
     }
 
     //3.2 run quoted text transducer to generate "Pleonasm" annotations
-    this.pleonTransducer.execute();
+    Benchmark.executeWithBenchmarking(pleonTransducer,
+            Benchmark.createBenchmarkId("pleonTransducer",
+                    getBenchmarkId()), this, null);
 
     //4.get all SENTENCE annotations
     AnnotationSet sentenceAnnotations = this.defaultAnnotations.get(SENTENCE_ANNOTATION_TYPE);
@@ -1263,6 +1270,25 @@ public class PronominalCoref extends AbstractLanguageAnalyser
 
   public void setInanimatedEntityTypes(String inanimatedEntityTypes) {
     this.inanimatedEntityTypes = inanimatedEntityTypes;
+  }
+
+  /* (non-Javadoc)
+   * @see gate.util.Benchmarkable#getBenchmarkId()
+   */
+  public String getBenchmarkId() {
+    if(benchmarkId == null) {
+      return getName();
+    }
+    else {
+      return benchmarkId;
+    }
+  }
+
+  /* (non-Javadoc)
+   * @see gate.util.Benchmarkable#setBenchmarkId(java.lang.String)
+   */
+  public void setBenchmarkId(String benchmarkId) {
+    this.benchmarkId = benchmarkId;
   }
 
 }
