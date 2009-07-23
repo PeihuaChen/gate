@@ -18,12 +18,9 @@ import gate.creole.metadata.RunTime;
 import gate.util.Files;
 import gate.util.GateRuntimeException;
 import gate.util.OffsetComparator;
-import gate.util.ProcessManager;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -261,7 +258,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
     return (gateTextFile);
   }
 
-  private ProcessManager processManager = new ProcessManager();
+  //private ProcessManager processManager = new ProcessManager();
 
   private InputStream runTagger(String[] cmdline) throws ExecutionException {
     // TODO: replace this with the ProcessManager from gate.util
