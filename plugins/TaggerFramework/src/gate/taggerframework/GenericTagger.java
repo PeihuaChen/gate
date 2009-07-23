@@ -205,7 +205,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   private File getCurrentText() throws ExecutionException {
     File gateTextFile = null;
     try {
-      gateTextFile = File.createTempFile("treetagger", ".txt");
+      gateTextFile = File.createTempFile("tagger", ".txt");
       Charset charset = Charset.forName(encoding);
       // depending on the failOnUnmappableCharacter parameter, we either
       // make the output stream writer fail or replace the unmappable
@@ -430,7 +430,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   }
 
   @RunTime
-  @CreoleParameter(comment = "Name of the TreeTagger command file")
+  @CreoleParameter(comment = "Name of the tagger command file")
   public void setTaggerBinary(URL taggerBinary) {
     this.taggerBinary = taggerBinary;
   }
