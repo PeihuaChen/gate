@@ -53,6 +53,11 @@ public abstract class AbstractController extends AbstractResource implements
     }
     Throwable thrown = null;
     try {
+      if(Benchmark.isBenchmarkingEnabled()) {
+        // write a start marker to the benchmark log for this
+        // controller as a whole
+        Benchmark.startPoint(getBenchmarkId());
+      }
       // do the real work
       this.executeImpl();
     }
