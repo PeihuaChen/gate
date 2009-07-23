@@ -457,7 +457,17 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     // fsmRunnerPool.shutdown();
 
     fireProcessFinished();
+    if (Benchmark.isBenchmarkingEnabled()) {
+      for (RuleTime r : fsm.getRuleTimes()) {
+        String ruleName = r.getRuleName();
+        long timeSpentOnRule = r.getTimeSpent();
+        r.setTimeSpent(0); // Reset time to zero for next document
+        Benchmark.checkPointWithDuration(timeSpentOnRule, Benchmark.createBenchmarkId("rule__" + ruleName, this.getBenchmarkId()), this, this.benchmarkFeatures);
+      }
+    }
   } // transduce
+  
+  
 
   /**
    * Try to advance the activeFSMInstances.
@@ -468,6 +478,10 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   private FSMMatcherResult attemptAdvance(FSMInstance currentInstance,
           SimpleSortedSet offsets, SimpleSortedSet annotationsByOffset,
           Document document, AnnotationSet inputAS) {
+    long startTime = 0;
+    if (Benchmark.isBenchmarkingEnabled()) {
+      startTime = Benchmark.startPoint();
+    }
     List<FSMInstance> newActiveInstances = null;
     List<FSMInstance> newAcceptingInstances = null;
 
@@ -490,6 +504,9 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
         newAcceptingInstances.add((FSMInstance)currentClone);
         // if we're only looking for the shortest stop here
         if(ruleApplicationStyle == FIRST_STYLE) 
+          if (Benchmark.isBenchmarkingEnabled()) {
+            updateRuleTime(currentInstance, startTime);
+          }
           return new FSMMatcherResult(newActiveInstances, 
                   newAcceptingInstances);
       }
@@ -501,13 +518,24 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
               .getAGPosition().getOffset().longValue());
       List<Annotation> paths;
       long theFirst = offsetsTailSet.first();
-      if(theFirst < 0) return new FSMMatcherResult(newActiveInstances, 
-              newAcceptingInstances);
+      if(theFirst < 0) {
+        if (Benchmark.isBenchmarkingEnabled()) {
+          updateRuleTime(currentInstance, startTime);
+        }
+        return new FSMMatcherResult(newActiveInstances, newAcceptingInstances);
+      }
+        
   
       paths = (List)annotationsByOffset.get(theFirst);
   
-      if(paths == null || paths.isEmpty()) return new FSMMatcherResult(newActiveInstances, 
-              newAcceptingInstances);
+      if(paths == null || paths.isEmpty()) {
+        if (Benchmark.isBenchmarkingEnabled()) {
+          updateRuleTime(currentInstance, startTime);
+        }        
+        return new FSMMatcherResult(newActiveInstances, newAcceptingInstances);
+      }
+              
+        
   
       // get the transitions for the current state of the FSM
       State currentState = currentClone.getFSMPosition();
@@ -706,7 +734,20 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
         } // iter over matching combinations
       }// while(transitionsIter.hasNext())
     }//while(!currentInstanceBlocked){
+    if (Benchmark.isBenchmarkingEnabled()) {
+      updateRuleTime(currentInstance, startTime);
+    }
     return new FSMMatcherResult(newActiveInstances, newAcceptingInstances);
+  }
+
+  /**
+   * Increment the time spent by the rule associated with the FSM
+   * @param currentInstance  The FSMInstance which has been running since startTime
+   * @param startTime    The time that the FSMInstance started running
+   */
+  private void updateRuleTime(FSMInstance currentInstance, long startTime) {
+    int index = currentInstance.getFSMPosition().getIndexInRuleList();
+    currentInstance.getSupportGraph().getRuleTimes().get(index).addTime(Benchmark.startPoint() - startTime);
   }
 
   /**

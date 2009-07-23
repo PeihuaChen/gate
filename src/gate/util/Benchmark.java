@@ -168,6 +168,28 @@ public class Benchmark {
     logCheckPoint(String.valueOf(processingTime), benchmarkID,
             objectInvokingThisCheckPoint, benchmarkingFeatures);
   }
+  
+  /**
+   * This method is responsible for making entries into the log.
+   * 
+   * @param totalTime - Total time consumed by the process
+   * @param benchmarkID - a unique ID of the resource that should be
+   *          logged with this message.
+   * @param objectInvokingThisCheckPoint - The benchmarkable object that
+   *          invokes this method.
+   * @param features - any features (key-value pairs) that should be
+   *          reported in the log message. toString() method will be
+   *          invoked on the objects.
+   */
+  public static void checkPointWithDuration(long totalTime, String benchmarkID,
+          Object objectInvokingThisCheckPoint, Map benchmarkingFeatures) {
+
+    // check if logging is disabled
+    if(!benchmarkingEnabled) return;
+
+    logCheckPoint(String.valueOf(totalTime), benchmarkID,
+            objectInvokingThisCheckPoint, benchmarkingFeatures);
+  }
 
   /**
    * Logs the end of a process. There must previously have been a call
