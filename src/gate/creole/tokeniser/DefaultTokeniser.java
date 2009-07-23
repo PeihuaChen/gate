@@ -4,6 +4,8 @@ import gate.*;
 import gate.creole.*;
 import gate.event.ProgressListener;
 import gate.event.StatusListener;
+import gate.util.Benchmark;
+import gate.util.Benchmarkable;
 import gate.util.Out;
 
 /**
@@ -12,7 +14,7 @@ import gate.util.Out;
  * The simple tokeniser tokenises the document and the transducer processes its
  * output.
  */
-public class DefaultTokeniser extends AbstractLanguageAnalyser {
+public class DefaultTokeniser extends AbstractLanguageAnalyser implements Benchmarkable {
 
   public static final String
     DEF_TOK_DOCUMENT_PARAMETER_NAME = "document";
@@ -121,7 +123,9 @@ public class DefaultTokeniser extends AbstractLanguageAnalyser {
     tokeniser.addProgressListener(pListener);
     tokeniser.addStatusListener(sListener);
     try{
-      tokeniser.execute();
+      Benchmark.executeWithBenchmarking(tokeniser,
+              Benchmark.createBenchmarkId("simpleTokeniser",
+                      getBenchmarkId()), this, null);
     }catch(ExecutionInterruptedException eie){
       throw new ExecutionInterruptedException(
         "The execution of the \"" + getName() +
@@ -138,7 +142,9 @@ public class DefaultTokeniser extends AbstractLanguageAnalyser {
     transducer.addProgressListener(pListener);
     transducer.addStatusListener(sListener);
 
-    transducer.execute();
+    Benchmark.executeWithBenchmarking(transducer,
+            Benchmark.createBenchmarkId("transducer",
+                    getBenchmarkId()), this, null);
     transducer.removeProgressListener(pListener);
     transducer.removeStatusListener(sListener);
   }//execute
@@ -185,6 +191,7 @@ public class DefaultTokeniser extends AbstractLanguageAnalyser {
   private String encoding;
   private java.net.URL transducerGrammarURL;
   private String annotationSetName;
+  private String benchmarkId;
 
 
   public void setAnnotationSetName(String annotationSetName) {
@@ -192,5 +199,18 @@ public class DefaultTokeniser extends AbstractLanguageAnalyser {
   }
   public String getAnnotationSetName() {
     return annotationSetName;
-  }/////////class CustomProgressListener implements ProgressListener
+  }
+  
+  public void setBenchmarkId(String benchmarkId) {
+    this.benchmarkId = benchmarkId;
+  }
+  
+  public String getBenchmarkId() {
+    if(benchmarkId == null) {
+      return getName();
+    }
+    else {
+      return benchmarkId;
+    }
+  }
 }
