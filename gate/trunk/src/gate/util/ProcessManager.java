@@ -58,6 +58,21 @@ public class ProcessManager {
    */
   public synchronized int runProcess(String[] argv, boolean dumpOutput)
                           throws IOException {
+    return runProcess(argv, (dumpOutput ? System.out : null), (dumpOutput ? System.err : null));
+  }
+  
+  /**
+   * Run the given external process.  If an exception results from starting the
+   * process, or while reading the output from the process, it will be thrown.
+   * Otherwise, the exit value from the process is returned.
+   *
+   * @param argv the process command line, suitable for passing to
+   * <code>Runtime.exec</code>.
+   * @param dumpOutput should we copy the process output and error streams to
+   * the Java output and error streams or just consume them silently?
+   */
+  public synchronized int runProcess(String[] argv, OutputStream out, OutputStream err)
+                          throws IOException {
     // Start the process.  This may throw an exception
     if(DEBUG) {
       System.err.println("Starting process");
@@ -69,10 +84,10 @@ public class ProcessManager {
       System.err.println("Configuring gobblers");
     }
     stdout.setInputStream(proc.getInputStream());
-    stdout.setOutputStream(dumpOutput ? System.out : null);
+    stdout.setOutputStream(out);
 
     stderr.setInputStream(proc.getErrorStream());
-    stderr.setOutputStream(dumpOutput ? System.err : null);
+    stderr.setOutputStream(err);
 
     // start the gobblers
     if(DEBUG) {
