@@ -9,11 +9,19 @@
   <property name="jar.location" location="OpenCalais.jar" />
 
   <!-- Path to compile - includes gate.jar and GATE/lib/*.jar -->
-  <path id="compile.classpath">
+  <path id="gate.classpath">
     <pathelement location="${gate.jar}" />
     <fileset dir="${gate.lib}">
       <include name="**/*.jar" />
       <include name="**/*.zip" />
+    </fileset>
+  </path>
+  
+  <!-- GATE classes plus local lib jars -->
+  <path id="compile.classpath">
+    <path refid="gate.classpath" />
+    <fileset dir="lib"> 
+      <include name="*.jar"/>
     </fileset>
   </path>
   

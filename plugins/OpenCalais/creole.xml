@@ -6,6 +6,7 @@
       <COMMENT>An OpenCalais based semantic annotator</COMMENT>
       <HELPURL>http://gate.ac.uk/userguide/sec:misc-creole:opencalais</HELPURL>
       <JAR>OpenCalais.jar</JAR>
+      <JAR>./lib/jettison-1.1.jar</JAR>
       <CLASS>gate.opencalais.OpenCalais</CLASS>
       <PARAMETER NAME="document"
         COMMENT="The document to be analysed."
