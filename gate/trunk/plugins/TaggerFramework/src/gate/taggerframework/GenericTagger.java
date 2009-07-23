@@ -265,25 +265,27 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
 
   private InputStream runTagger(String[] cmdline) throws ExecutionException {
     // TODO: replace this with the ProcessManager from gate.util
-    /*
-     * Process p = null;
-     * 
-     * try { if(taggerDir == null) p =
-     * Runtime.getRuntime().exec(cmdline); else p =
-     * Runtime.getRuntime().exec(cmdline, new String[] {},
-     * Files.fileFromURL(taggerDir));
-     * 
-     * return p.getInputStream(); } catch(Exception e) { throw new
-     * ExecutionException(e); }
-     */
+
+    Process p = null;
+
     try {
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
-      processManager.runProcess(cmdline, out, null);
-      return new ByteArrayInputStream(out.toByteArray());
+      if(taggerDir == null)
+        p = Runtime.getRuntime().exec(cmdline);
+      else p = Runtime.getRuntime().exec(cmdline, new String[] {},
+              Files.fileFromURL(taggerDir));
+
+      return p.getInputStream();
     }
     catch(Exception e) {
       throw new ExecutionException(e);
     }
+
+    /*
+     * try { ByteArrayOutputStream out = new ByteArrayOutputStream();
+     * processManager.runProcess(cmdline, out, null); return new
+     * ByteArrayInputStream(out.toByteArray()); } catch(Exception e) {
+     * throw new ExecutionException(e); }
+     */
   }
 
   private void readOutput(InputStream in) throws ExecutionException {
