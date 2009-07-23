@@ -22,7 +22,7 @@ try {
 	sentenceString = sentenceString + doc.getContent().getContent(token.getStartNode().getOffset(), token.getEndNode().getOffset()).toString() + " ";
     }
 
-    sMap.put( "string", sentenceString );
+    sMap.put( gate.taggerframework.GenericTagger.STRING_FEATURE_NAME, sentenceString );
     } catch (Exception ex) {
       ex.printStackTrace();
     }
