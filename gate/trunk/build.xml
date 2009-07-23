@@ -426,7 +426,7 @@
 
   <!-- Plugins -->
   <filelist id="plugins.to.build" dir="plugins"
-    files="Chemistry_Tagger Jape_Compiler Kea Machine_Learning Minipar
+    files="TaggerFramework Chemistry_Tagger Jape_Compiler Kea Machine_Learning Minipar
        Montreal_Transducer NP_Chunking Ontology_Tools TreeTagger
        Stanford
        arabic bdmComputation cebuano chinese copyAS2AnoDoc crawl google hindi alignment annotationMerging
