@@ -7,9 +7,6 @@
       <gate.util.persistence.PersistenceManager-URLHolder>
         <urlString>$relpath$../../../ANNIE</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
-      <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../../../ANNIE</urlString>
-      </gate.util.persistence.PersistenceManager-URLHolder>
     </localList>
     <collectionType>java.util.ArrayList</collectionType>
   </urlList>
@@ -171,20 +168,20 @@
                         <string>2</string>
                       </entry>
                       <entry>
-                        <string>category</string>
-                        <string>3</string>
-                      </entry>
-                      <entry>
                         <string>chunk</string>
                         <string>4</string>
                       </entry>
                       <entry>
-                        <string>string</string>
-                        <string>1</string>
+                        <string>category</string>
+                        <string>3</string>
                       </entry>
                       <entry>
                         <string>entity</string>
                         <string>5</string>
+                      </entry>
+                      <entry>
+                        <string>string</string>
+                        <string>1</string>
                       </entry>
                     </localMap>
                   </gate.util.persistence.MapPersistence>
@@ -195,7 +192,7 @@
                 </entry>
                 <entry>
                   <string>debug</string>
-                  <boolean>true</boolean>
+                  <boolean>false</boolean>
                 </entry>
                 <entry>
                   <string>taggerBinary</string>
@@ -205,7 +202,7 @@
                 </entry>
                 <entry>
                   <string>inputAnnotationType</string>
-                  <string>Token</string>
+                  <string>Sentence</string>
                 </entry>
                 <entry>
                   <string>document</string>
@@ -236,8 +233,10 @@
                 <entry>
                   <string>taggerFlags</string>
                   <gate.util.persistence.CollectionPersistence>
-                    <localList/>
-                    <collectionType>java.util.ArrayList</collectionType>
+                    <localList>
+                      <string>-nt</string>
+                    </localList>
+                    <collectionType>java.util.Arrays$ArrayList</collectionType>
                   </gate.util.persistence.CollectionPersistence>
                 </entry>
               </localMap>
@@ -249,11 +248,15 @@
               <localMap>
                 <entry>
                   <string>preProcessURL</string>
-                  <null/>
+                  <gate.util.persistence.PersistenceManager-URLHolder>
+                    <urlString>$relpath$../tagger-independent/sentencestring_tokenized.jape</urlString>
+                  </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
                 <entry>
                   <string>postProcessURL</string>
-                  <null/>
+                  <gate.util.persistence.PersistenceManager-URLHolder>
+                    <urlString>$relpath$../tagger-independent/chunkandentity-annots.jape</urlString>
+                  </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
               </localMap>
             </initParams>
