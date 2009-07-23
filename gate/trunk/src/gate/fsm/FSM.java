@@ -18,6 +18,7 @@ package gate.fsm;
 import java.util.*;
 
 import gate.jape.*;
+import gate.util.Benchmark;
 import gate.util.SimpleArraySet;
 import static gate.jape.KleeneOperator.Type.*;
 
@@ -26,6 +27,24 @@ import static gate.jape.KleeneOperator.Type.*;
   * It is used for both deterministic and non-deterministic machines.
   */
 public class FSM implements JapeConstants {
+  
+  private ArrayList<RuleTime> ruleTimes = new ArrayList<RuleTime>();
+  
+  public ArrayList<RuleTime> getRuleTimes() {
+    return ruleTimes;
+  }
+
+  private void decorateStates() {
+    HashMap<String,Integer>  temporaryRuleNameToIndexMap = new HashMap<String,Integer>();
+    ruleTimes.add(new RuleTime(0,State.UNKNOWN_RULE));
+    int ruleIndex = State.UNKNOWN_INDEX;
+    for (Transition t : this.getInitialState().getTransitions()) {
+      ruleIndex = t.getTarget().getRuleForState(temporaryRuleNameToIndexMap, ruleTimes);
+      assert (ruleIndex != State.UNVISITED_INDEX);
+    }
+    this.getInitialState().setIndexInRuleList(ruleIndex);
+  }
+
 
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -44,6 +63,9 @@ public class FSM implements JapeConstants {
   public FSM(SinglePhaseTransducer spt){
     this();
     addRules(spt.getRules());
+    if (Benchmark.isBenchmarkingEnabled()) {
+      this.decorateStates();
+    }
   }
 
   /**

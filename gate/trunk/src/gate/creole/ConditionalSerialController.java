@@ -18,6 +18,7 @@ import java.util.*;
 import gate.*;
 import gate.creole.metadata.CreoleResource;
 import gate.event.ControllerEvent;
+import gate.util.Benchmark;
 import gate.util.Err;
 
 /**
@@ -144,7 +145,15 @@ public class ConditionalSerialController extends SerialController
 
     //run the thing
     if(((RunningStrategy)strategiesList.get(componentIndex)).shouldRun()){
-      currentPR.execute();
+      benchmarkFeatures.put(Benchmark.PR_NAME_FEATURE, currentPR.getName());
+
+      long startTime = System.currentTimeMillis();
+      // run the thing
+      Benchmark.executeWithBenchmarking(currentPR,
+              Benchmark.createBenchmarkId(Benchmark.PR_PREFIX + currentPR.getName(),
+                      getBenchmarkId()), this, benchmarkFeatures);
+
+      benchmarkFeatures.remove(Benchmark.PR_NAME_FEATURE);
     }
 
 

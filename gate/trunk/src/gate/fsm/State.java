@@ -15,6 +15,8 @@
 
 package gate.fsm;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import gate.jape.*;
@@ -28,7 +30,78 @@ public class State implements JapeConstants {
 
   /** Debug flag
    */
+
   private static final boolean DEBUG = false;
+  
+  public static final int VISITED_INDEX = -2;
+  public static final int UNVISITED_INDEX = -1;
+  public static final int UNKNOWN_INDEX = 0;
+  public static final String UNKNOWN_RULE = "_____Unknown_rule_name";
+  
+  // Points to the rule in the FSM which created this state
+  private int indexInRuleList = UNVISITED_INDEX;
+  
+  /**
+   * 
+   * @return  The index of the rule in the ruleTimes ArrayList held in the FSM
+   */
+  public int getIndexInRuleList() {
+    return indexInRuleList;
+  }
+
+  /**
+   * This should only need to be called by getRuleForState when the state is being initialized
+   * @param indexInRuleList
+   */
+  void setIndexInRuleList(int indexInRuleList) {
+    this.indexInRuleList = indexInRuleList;
+  }
+  
+  /**
+   * Sets the index of the rule for this state.
+   * Determines the appropriate rule by recursively searching this state's outbound transitions until
+   * we reach a final state.  Record this state in the ruleTimes and ruleNameToIndexMap structures
+   * @param ruleNameToIndexMap
+   * @param ruleTimes
+   * @return
+   */
+  public int getRuleForState(HashMap<String,Integer> ruleNameToIndexMap,ArrayList<RuleTime>ruleTimes) {
+    if (this.getIndexInRuleList() != UNVISITED_INDEX) {
+      return this.getIndexInRuleList();  
+    }
+    if (this.isFinal()) {
+      String ruleNameOfThisState = this.getAction().getRuleName();
+      int returnVal;
+      if (ruleNameToIndexMap.containsKey(ruleNameOfThisState)) {
+        returnVal =  ruleNameToIndexMap.get(ruleNameOfThisState);
+      }
+      else {
+        ruleTimes.add(new RuleTime(0,ruleNameOfThisState));
+        ruleNameToIndexMap.put(ruleNameOfThisState, ruleTimes.size() - 1);
+        returnVal =  ruleTimes.size() - 1;
+      }
+      this.setIndexInRuleList(returnVal);
+      return returnVal;
+    }
+    else {
+      this.setIndexInRuleList(VISITED_INDEX);
+      int returnVal = UNKNOWN_INDEX;
+      // Note that returnVal will always need to be the same for all returned elements
+      // (because a state is currently associated with only one rule), but
+      // we need to call it repeateadly to set the indexInRuleList for all states in 
+      // the tree
+      for (Transition t :getTransitions()) {
+        int tempReturn = t.getTarget().getRuleForState(ruleNameToIndexMap,ruleTimes);
+        if (tempReturn != UNKNOWN_INDEX && tempReturn != VISITED_INDEX) {
+          returnVal = tempReturn;
+        }
+      }
+      this.setIndexInRuleList(returnVal);
+      return returnVal;
+    }
+  }
+
+
 
   /**
    * Build a new state.
