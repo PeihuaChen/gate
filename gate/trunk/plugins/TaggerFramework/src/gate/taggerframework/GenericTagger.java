@@ -327,6 +327,8 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
       int currentPosition = 0;
 
       while((line = input.readLine()) != null) {
+        if (debug) System.out.println(line);
+        
         Matcher m = resultPattern.matcher(line);
 
         if(m.matches()) {
