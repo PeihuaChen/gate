@@ -18,11 +18,15 @@ import gate.creole.metadata.RunTime;
 import gate.util.Files;
 import gate.util.GateRuntimeException;
 import gate.util.OffsetComparator;
+import gate.util.ProcessManager;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URL;
@@ -32,9 +36,7 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -44,15 +46,15 @@ import java.util.regex.Pattern;
 public class GenericTagger extends AbstractLanguageAnalyser implements
                                                            ProcessingResource {
 
-  //TODO change to outputASName and inputASName
-  
-  //TODO Think about moving this to a runtime parameter
+  // TODO Think about moving this to a runtime parameter
   public static final String STRING_FEATURE_NAME = "string";
-  
+
+  // The transducers that will do the pre and post processing
   private Transducer preProcess, postProcess;
-  
+
+  // The URLs of the JAPE grammars for pre and post processing
   private URL preProcessURL, postProcessURL;
-  
+
   // The annotations sets used for input and output
   private String inputASName, outputASName;
 
@@ -91,17 +93,19 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
     FeatureMap hidden = Factory.newFeatureMap();
     Gate.setHiddenAttribute(hidden, true);
     FeatureMap params = Factory.newFeatureMap();
-    
-    if (preProcessURL != null) {
+
+    if(preProcessURL != null) {
       params.put("grammarURL", preProcessURL);
-      preProcess = (Transducer)Factory.createResource("gate.creole.Transducer", params, hidden);
+      preProcess = (Transducer)Factory.createResource("gate.creole.Transducer",
+              params, hidden);
     }
-    
-    if (postProcessURL != null) {
+
+    if(postProcessURL != null) {
       params.put("grammarURL", postProcessURL);
-      postProcess = (Transducer)Factory.createResource("gate.creole.Transducer", params, hidden);
+      postProcess = (Transducer)Factory.createResource(
+              "gate.creole.Transducer", params, hidden);
     }
-    
+
     return this;
   }
 
@@ -117,38 +121,41 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
       throw new ExecutionException("No encoding specified");
     }
 
-    if (preProcess != null) {
+    if(preProcess != null) {
       preProcess.setInputASName(inputASName);
       preProcess.setOutputASName(inputASName);
       preProcess.setDocument(document);
 
       try {
         preProcess.execute();
-      } finally {
+      }
+      finally {
         preProcess.setDocument(null);
       }
     }
-    
+
     // get current text from GATE for the tagger
     File textfile = getCurrentText();
 
+    // build the command line for running the tagger
     String[] taggerCmd = buildCommandLine(textfile);
 
-    // run the tagger
-    runTagger(taggerCmd);
+    // run the tagger and put the output back into GATE
+    readOutput(runTagger(taggerCmd));
 
-    if (postProcess != null) {
+    if(postProcess != null) {
       postProcess.setInputASName(outputASName);
       postProcess.setOutputASName(outputASName);
       postProcess.setDocument(document);
 
       try {
         postProcess.execute();
-      } finally {
+      }
+      finally {
         postProcess.setDocument(null);
       }
     }
-    
+
     // delete the temporary text file
     if(!debug) textfile.delete();
   }
@@ -180,7 +187,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
       taggerCmd = new String[2 + taggerFlags.size()];
     }
 
-    String[] flags = (String[])taggerFlags.toArray(new String[0]);
+    String[] flags = taggerFlags.toArray(new String[0]);
 
     System.arraycopy(flags, 0, taggerCmd, index + 1, flags.length);
 
@@ -214,9 +221,9 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
       FileOutputStream fos = new FileOutputStream(gateTextFile);
       OutputStreamWriter osw = new OutputStreamWriter(fos, charsetEncoder);
       BufferedWriter bw = new BufferedWriter(osw);
-      AnnotationSet annotSet = (inputASName == null || inputASName.trim().length() == 0)
-              ? document.getAnnotations()
-              : document.getAnnotations(inputASName);
+      AnnotationSet annotSet = (inputASName == null || inputASName.trim()
+              .length() == 0) ? document.getAnnotations() : document
+              .getAnnotations(inputASName);
       annotSet = annotSet.get(inputAnnotationType);
       if(annotSet == null || annotSet.size() == 0) {
         throw new GateRuntimeException("No " + inputAnnotationType
@@ -233,8 +240,8 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
 
         if(features == null || features.size() == 0
                 || !features.containsKey(STRING_FEATURE_NAME)) {
-          throw new GateRuntimeException(inputAnnotationType
-                  + " must have '"+STRING_FEATURE_NAME+"' feature, which couldn't be found");
+          throw new GateRuntimeException(inputAnnotationType + " must have '"
+                  + STRING_FEATURE_NAME + "' feature, which couldn't be found");
         }
         String string = (String)features.get(STRING_FEATURE_NAME);
         bw.write(string);
@@ -254,14 +261,38 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
     return (gateTextFile);
   }
 
-  private void runTagger(String[] cmdline) throws ExecutionException {
-    String line, word, tag, lemma;
-    int indx = 0;
+  private ProcessManager processManager = new ProcessManager();
+
+  private InputStream runTagger(String[] cmdline) throws ExecutionException {
+    // TODO: replace this with the ProcessManager from gate.util
+    /*
+     * Process p = null;
+     * 
+     * try { if(taggerDir == null) p =
+     * Runtime.getRuntime().exec(cmdline); else p =
+     * Runtime.getRuntime().exec(cmdline, new String[] {},
+     * Files.fileFromURL(taggerDir));
+     * 
+     * return p.getInputStream(); } catch(Exception e) { throw new
+     * ExecutionException(e); }
+     */
+    try {
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      processManager.runProcess(cmdline, out, null);
+      return new ByteArrayInputStream(out.toByteArray());
+    }
+    catch(Exception e) {
+      throw new ExecutionException(e);
+    }
+  }
+
+  private void readOutput(InputStream in) throws ExecutionException {
+    String line;
 
     // sorted list of input annotations
-    AnnotationSet annotSet = (inputASName == null || inputASName.trim().length() == 0)
-            ? document.getAnnotations()
-            : document.getAnnotations(inputASName);
+    AnnotationSet annotSet = (inputASName == null || inputASName.trim()
+            .length() == 0) ? document.getAnnotations() : document
+            .getAnnotations(inputASName);
     annotSet = annotSet.get(inputAnnotationType);
     List<Annotation> inputAnnotations = new ArrayList<Annotation>(annotSet);
     Collections.sort(inputAnnotations, new OffsetComparator());
@@ -277,17 +308,9 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
     CharsetDecoder charsetDecoder = charset.newDecoder();
     // run tagger and save output
     try {
-      // TODO: replace this with the ProcessManager from gate.util
-      Process p = null;
-
-      if(taggerDir == null)
-        p = Runtime.getRuntime().exec(cmdline);
-      else p = Runtime.getRuntime().exec(cmdline, new String[] {},
-              Files.fileFromURL(taggerDir));
-
       // get the tagger output (gate input)
-      BufferedReader input = new BufferedReader(new InputStreamReader(p
-              .getInputStream(), charsetDecoder));
+      BufferedReader input = new BufferedReader(new InputStreamReader(in,
+              charsetDecoder));
 
       Pattern resultPattern = Pattern.compile(regex);
 
@@ -299,13 +322,6 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
         aSet.removeAll(outputAnnotations);
       else Collections.sort(outputAnnotations, new OffsetComparator());
 
-      // TODO: mapping must map string=column of annotation text
-      //Map<String, Integer> mapping = new HashMap<String, Integer>();
-      //for(String pair : (ArrayList<String>)featureMapping) {
-      //  String[] kv = pair.trim().split("=");
-      //  mapping.put(kv[0], Integer.parseInt(kv[1]));
-      //}
-
       int currentPosition = 0;
 
       while((line = input.readLine()) != null) {
@@ -315,7 +331,8 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
           FeatureMap features = Factory.newFeatureMap();
 
           for(Map.Entry<Object, Object> kv : featureMapping.entrySet()) {
-            features.put(kv.getKey(), m.group(Integer.parseInt(String.valueOf(kv.getValue()))));
+            features.put(kv.getKey(), m.group(Integer.parseInt(String
+                    .valueOf(kv.getValue()))));
           }
 
           while(updateAnnotations && outputAnnotations.size() == 0) {
@@ -337,7 +354,8 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
           if(next != null && updateAnnotations) {
 
             String encoded = new String(charset.encode(
-                    (String)next.getFeatures().get(STRING_FEATURE_NAME)).array(), encoding);
+                    (String)next.getFeatures().get(STRING_FEATURE_NAME))
+                    .array(), encoding);
 
             if(!encoded.equals(features.get(STRING_FEATURE_NAME)))
               throw new Exception("annotations are out of sync: " + encoded
@@ -378,7 +396,8 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
 
             Long start = currentPosition
                     + currentInput.getStartNode().getOffset();
-            Long end = start + ((String)features.get(STRING_FEATURE_NAME)).length();
+            Long end = start
+                    + ((String)features.get(STRING_FEATURE_NAME)).length();
 
             aSet.add(start, end, outputAnnotationType, features);
 
@@ -391,10 +410,8 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
     catch(Exception err) {
       err.printStackTrace();
       throw (ExecutionException)new ExecutionException(
-              "Error occurred running TreeTagger with command line "
-                      + Arrays.asList(cmdline)).initCause(err);
+              "Error occurred running tagger").initCause(err);
     }
-
   }
 
   public FeatureMap getFeatureMapping() {
@@ -506,7 +523,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   @Optional
   @RunTime
   @CreoleParameter(comment = "annotation set in which annotations are created")
-  public void setOutputASName(String outputAS) {
+  public void setOutputASName(String outputASName) {
     this.outputASName = outputASName;
   }
 
