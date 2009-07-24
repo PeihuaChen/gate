@@ -1,8 +1,8 @@
 package gate.composite;
 
 import java.io.Serializable;
+import gate.Annotation;
 
-import gate.FeatureMap;
 
 /**
  * OffsetDetails is a utility class that is used by composite document to keep
@@ -22,10 +22,12 @@ public class OffsetDetails implements Serializable {
 
 	protected long newEndOffset;
 
-	protected String annotionType;
+	// optional
+	protected Annotation originalAnnotation;
 
-	protected FeatureMap features;
-
+	// optional
+	protected Annotation newAnnotation;
+	
 	/**
 	 * Gets the new end offset
 	 * @return
@@ -90,36 +92,19 @@ public class OffsetDetails implements Serializable {
 		this.oldStartOffset = oldStartOffset;
 	}
 
-	/**
-	 * Gets the annotation type
-	 * @return
-	 */
-	public String getAnnotionType() {
-		return annotionType;
-	}
+  public Annotation getOriginalAnnotation() {
+    return originalAnnotation;
+  }
 
-	/**
-	 * Sets the annotation type.
-	 * @param annotType
-	 */
-	public void setAnnotionType(String annotType) {
-		this.annotionType = annotType;
-	}
+  public void setOriginalAnnotation(Annotation originalAnnotation) {
+    this.originalAnnotation = originalAnnotation;
+  }
 
-	/**
-	 * Gets the feature map of the annotation
-	 * @return
-	 */
-	public FeatureMap getFeatures() {
-		return features;
-	}
+  public Annotation getNewAnnotation() {
+    return newAnnotation;
+  }
 
-	/**
-	 * Sets the feature map for the annotation
-	 * @param features
-	 */
-	public void setFeatures(FeatureMap features) {
-		this.features = features;
-	}
-
+  public void setNewAnnotation(Annotation newAnnotation) {
+    this.newAnnotation = newAnnotation;
+  }
 }

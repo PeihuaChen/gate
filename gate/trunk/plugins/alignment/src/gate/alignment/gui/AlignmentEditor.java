@@ -752,7 +752,7 @@ public class AlignmentEditor extends AbstractVisualResource implements
     if(documentIDs.size() > 1) {
       targetDocumentId.setSelectedIndex(1);
     }
-    else {
+    else if(documentIDs.size() > 0){
       targetDocumentId.setSelectedIndex(0);
     }
 

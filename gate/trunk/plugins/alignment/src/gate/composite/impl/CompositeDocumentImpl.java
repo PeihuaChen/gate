@@ -1,5 +1,6 @@
 package gate.composite.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -33,304 +34,307 @@ import gate.util.InvalidOffsetException;
  * @author niraj
  */
 public class CompositeDocumentImpl extends DocumentImpl implements
-		CompositeDocument, AnnotationSetListener, DocumentListener, AnnotationListener {
+                                                       CompositeDocument,
+                                                       AnnotationSetListener,
+                                                       DocumentListener,
+                                                       AnnotationListener {
 
-	private static final long serialVersionUID = -1379936764549428131L;
+  private static final long serialVersionUID = -1379936764549428131L;
 
-	/**
-	 * CombiningMethod that was used for creating this document.
-	 */
-	protected CombiningMethod combiningMethod;
+  /**
+   * CombiningMethod that was used for creating this document.
+   */
+  protected CombiningMethod combiningMethod;
 
-	/**
-	 * A Map that contains offet mappings. This is used for copying and removing
-	 * annotations to the respective documents.
-	 */
-	protected HashMap<String, List<OffsetDetails>> offsetMappings;
+  /**
+   * A Map that contains offet mappings. This is used for copying and
+   * removing annotations to the respective documents.
+   */
+  protected HashMap<String, List<OffsetDetails>> offsetMappings;
 
-	/**
-	 * Set of ids of combined documents.
-	 */
-	protected Set<String> combinedDocumentIds;
+  /**
+   * Set of ids of combined documents.
+   */
+  protected Set<String> combinedDocumentIds;
 
-	/**
-	 * The compound document which the current composite document belongs to.
-	 */
-	protected CompoundDocument compoundDocument;
+  /**
+   * The compound document which the current composite document belongs
+   * to.
+   */
+  protected CompoundDocument compoundDocument;
 
-	/**
-	 * When a new annotation is added to the composite document, this parameter
-	 * tells whether the annotation copying and deletion to their respective
-	 * documents should be carried out or not.
-	 */
-	protected boolean disableListener = false;
+  /**
+   * When a new annotation is added to the composite document, this
+   * parameter tells whether the annotation copying and deletion to
+   * their respective documents should be carried out or not.
+   */
+  protected boolean disableListener = false;
 
-	// init method
-	public Resource init() throws ResourceInstantiationException {
-		super.init();
-		this.getAnnotations().addAnnotationSetListener(this);
-		Set annotNames = this.getNamedAnnotationSets().keySet();
-		if (annotNames != null && !annotNames.isEmpty()) {
-			Iterator iter = annotNames.iterator();
-			while (iter.hasNext()) {
-				String asName = (String) iter.next();
-				this.getAnnotations(asName).addAnnotationSetListener(this);
-			}
-		}
-		this.addDocumentListener(this);
-		return this;
-	}
+  // init method
+  public Resource init() throws ResourceInstantiationException {
+    super.init();
+    this.getAnnotations().addAnnotationSetListener(this);
+    Set annotNames = this.getNamedAnnotationSets().keySet();
+    if(annotNames != null && !annotNames.isEmpty()) {
+      Iterator iter = annotNames.iterator();
+      while(iter.hasNext()) {
+        String asName = (String)iter.next();
+        this.getAnnotations(asName).addAnnotationSetListener(this);
+      }
+    }
+    this.addDocumentListener(this);
+    return this;
+  }
 
-	/**
-	 * Gets the combing method used for creating the composite document.
-	 */
-	public CombiningMethod getCombiningMethod() {
-		return combiningMethod;
-	}
+  /**
+   * Gets the combing method used for creating the composite document.
+   */
+  public CombiningMethod getCombiningMethod() {
+    return combiningMethod;
+  }
 
-	/**
-	 * Sets the combining method to be used for creating the composite document.
-	 */
-	public void setCombiningMethod(CombiningMethod combiningMethod) {
-		this.combiningMethod = combiningMethod;
-	}
+  /**
+   * Sets the combining method to be used for creating the composite
+   * document.
+   */
+  public void setCombiningMethod(CombiningMethod combiningMethod) {
+    this.combiningMethod = combiningMethod;
+  }
 
-	/**
-	 * Annotation added event
-	 */
-	public void annotationAdded(AnnotationSetEvent ase) {
+  /**
+   * Annotation added event
+   */
+  public void annotationAdded(AnnotationSetEvent ase) {
 
-		if (!disableListener && ase.getSourceDocument() == this) {
-			AnnotationSet as = (AnnotationSet) ase.getSource();
-			Annotation annot = ase.getAnnotation();
-			annot.addAnnotationListener(this);
-			FeatureMap features = Factory.newFeatureMap();
-			features.putAll(annot.getFeatures());
+    if(!disableListener && ase.getSourceDocument() == this) {
+      AnnotationSet as = (AnnotationSet)ase.getSource();
+      Annotation annot = ase.getAnnotation();
+      annot.addAnnotationListener(this);
 
-			boolean defaultAS = as.getName() == null;
-			for (String docID : combinedDocumentIds) {
-				Document aDoc = compoundDocument.getDocument(docID);
-				long stOffset = getOffsetInSrcDocument(docID, annot
-						.getStartNode().getOffset().longValue());
-				if (stOffset == -1)
-					continue;
-				long enOffset = getOffsetInSrcDocument(docID, annot
-						.getEndNode().getOffset().longValue());
-				if (enOffset == -1)
-					continue;
-				if (defaultAS) {
-					try {
-						aDoc.getAnnotations().add(new Long(stOffset),
-								new Long(enOffset), annot.getType(), features);
-						return;
-					} catch (InvalidOffsetException ioe) {
-						throw new GateRuntimeException(ioe);
-					}
-				} else {
-					try {
-						aDoc.getAnnotations(as.getName()).add(
-								new Long(stOffset), new Long(enOffset),
-								annot.getType(), features);
-						return;
-					} catch (InvalidOffsetException ioe) {
-						throw new GateRuntimeException(ioe);
-					}
-				}
-			}
-		}
-	}
+      FeatureMap features = Factory.newFeatureMap();
+      features.putAll(annot.getFeatures());
 
-	/**
-	 * Annotation remove event
-	 */
-	public void annotationRemoved(AnnotationSetEvent ase) {
-		if (!disableListener && ase.getSourceDocument() == this) {
-			AnnotationSet as = (AnnotationSet) ase.getSource();
-			Annotation annot = ase.getAnnotation();
-			FeatureMap features = Factory.newFeatureMap();
-			features.putAll(annot.getFeatures());
+      boolean defaultAS = as.getName() == null;
+      for(String docID : combinedDocumentIds) {
+        Document aDoc = compoundDocument.getDocument(docID);
+        long stOffset = getOffsetInSrcDocument(docID, annot.getStartNode()
+                .getOffset().longValue());
+        if(stOffset == -1) continue;
+        long enOffset = getOffsetInSrcDocument(docID, annot.getEndNode()
+                .getOffset().longValue());
+        if(enOffset == -1) continue;
+        Annotation originalAnnot = null;
+        try {
 
-			boolean defaultAS = as.getName() == null;
-			for (String docID : combinedDocumentIds) {
-				Document aDoc = compoundDocument.getDocument(docID);
-				long stOffset = getOffsetInSrcDocument(docID, annot
-						.getStartNode().getOffset().longValue());
-				if (stOffset == -1)
-					continue;
-				long enOffset = getOffsetInSrcDocument(docID, annot
-						.getEndNode().getOffset().longValue());
-				if (enOffset == -1)
-					continue;
-				AnnotationSet toRemove = null;
+          if(defaultAS) {
+            Integer id = aDoc.getAnnotations().add(new Long(stOffset),
+                    new Long(enOffset), annot.getType(), features);
+            originalAnnot = aDoc.getAnnotations().get(id);
+          }
+          else {
+            Integer id = aDoc.getAnnotations(as.getName()).add(
+                    new Long(stOffset), new Long(enOffset), annot.getType(),
+                    features);
+            originalAnnot = aDoc.getAnnotations(as.getName()).get(id);
+          }
+        }
+        catch(InvalidOffsetException ioe) {
+          throw new GateRuntimeException(ioe);
+        }
 
-				if (defaultAS) {
-					toRemove = aDoc.getAnnotations().getContained(
-							new Long(stOffset), new Long(enOffset)).get(
-							annot.getType(), features);
-					if (toRemove != null && !toRemove.isEmpty()) {
-						aDoc.getAnnotations()
-								.remove(toRemove.iterator().next());
-						return;
-					}
-				} else {
-					toRemove = aDoc.getAnnotations(as.getName()).getContained(
-							new Long(stOffset), new Long(enOffset)).get(
-							annot.getType(), features);
-					if (toRemove != null && !toRemove.isEmpty()) {
-						aDoc.getAnnotations(as.getName()).remove(
-								toRemove.iterator().next());
-						return;
-					}
-				}
-			}
-		}
-	}
+        OffsetDetails od = new OffsetDetails();
+        od.setOldStartOffset(stOffset);
+        od.setOldEndOffset(enOffset);
+        od.setNewStartOffset(annot.getStartNode().getOffset().longValue());
+        od.setNewEndOffset(annot.getEndNode().getOffset().longValue());
+        od.setOriginalAnnotation(originalAnnot);
+        od.setNewAnnotation(annot);
+        addNewOffsetDetails(docID, od);
+      }
+    }
+  }
 
-	/**
-	 * This method returns the respective offset in the source document.
-	 */
-	public long getOffsetInSrcDocument(String srcDocumentID, long offset) {
-		List<OffsetDetails> list = offsetMappings.get(srcDocumentID);
-		if (list == null)
-			return -1;
+  /**
+   * Annotation remove event
+   */
+  public void annotationRemoved(AnnotationSetEvent ase) {
+    if(!disableListener && ase.getSourceDocument() == this) {
+      AnnotationSet as = (AnnotationSet)ase.getSource();
+      Annotation annot = ase.getAnnotation();
+      FeatureMap features = Factory.newFeatureMap();
+      features.putAll(annot.getFeatures());
 
-		for (int i = 0; i < list.size(); i++) {
-			OffsetDetails od = list.get(i);
-			if (offset >= od.getNewStartOffset()
-					&& offset <= od.getNewEndOffset()) {
-				// so = 10 eo = 15
-				// offset = 15
-				// difference = offset - so = 5
-				// oso = 0 oeo = 5 newoffset = oso + diff = 0 + 5 = 5
-				long difference = offset - od.getNewStartOffset();
-				return od.getOldStartOffset() + difference;
-			}
-		}
-		return -1;
-	}
+      boolean defaultAS = as.getName() == null;
+      for(String docID : combinedDocumentIds) {
+        Document aDoc = compoundDocument.getDocument(docID);
 
-	/**
-	 * sets the offset mapping information
-	 */
-	public void setOffsetMappingInformation(
-			HashMap<String, List<OffsetDetails>> offsetMappings) {
-		this.offsetMappings = offsetMappings;
-	}
+        // find out the details which refer to the deleted annotation
+        OffsetDetails od = getOffsetDetails(docID, annot);
+        if(od == null) continue;
 
-	/**
-	 * return the IDs of combined documents
-	 * 
-	 * @return
-	 */
-	public Set<String> getCombinedDocumentsIds() {
-		return this.combinedDocumentIds;
-	}
+        if(defaultAS) {
+          aDoc.getAnnotations().remove(od.getOriginalAnnotation());
+        }
+        else {
+          aDoc.getAnnotations(as.getName()).remove(od.getOriginalAnnotation());
+        }
+        removeOffsetDetails(docID, od);
+      }
+    }
+  }
 
-	/**
-	 * Sets the combined document IDs
-	 * 
-	 * @param combinedDocumentIds
-	 */
-	public void setCombinedDocumentsIds(Set<String> combinedDocumentIds) {
-		this.combinedDocumentIds = combinedDocumentIds;
-	}
+  /**
+   * This method returns the respective offset in the source document.
+   */
+  public long getOffsetInSrcDocument(String srcDocumentID, long offset) {
+    List<OffsetDetails> list = offsetMappings.get(srcDocumentID);
+    if(list == null) return -1;
 
-	/**
-	 * This method returns the compoundDocument whose member this composite
-	 * document is.
-	 * 
-	 * @return
-	 */
-	public CompoundDocument getCompoundDocument() {
-		return this.compoundDocument;
-	}
+    for(int i = 0; i < list.size(); i++) {
+      OffsetDetails od = list.get(i);
+      if(offset >= od.getNewStartOffset() && offset <= od.getNewEndOffset()) {
+        // so = 10 eo = 15
+        // offset = 15
+        // difference = offset - so = 5
+        // oso = 0 oeo = 5 newoffset = oso + diff = 0 + 5 = 5
+        long difference = offset - od.getNewStartOffset();
+        return od.getOldStartOffset() + difference;
+      }
+    }
+    return -1;
+  }
 
-	/**
-	 * Sets the compound document.
-	 * 
-	 * @param compoundDocument
-	 */
-	public void setCompoundDocument(CompoundDocument compoundDocument) {
-		this.compoundDocument = compoundDocument;
-	}
+  /**
+   * This method returns the respective offset in the source document.
+   */
+  public OffsetDetails getOffsetDetails(String srcDocumentID,
+          Annotation newAnnot) {
+    List<OffsetDetails> list = offsetMappings.get(srcDocumentID);
+    if(list == null) return null;
 
-	public void annotationSetAdded(DocumentEvent de) {
-		Document doc = (Document) de.getSource();
-		if (this == doc) {
-			doc.getAnnotations(de.getAnnotationSetName())
-					.addAnnotationSetListener(this);
-		}
-	}
+    for(int i = 0; i < list.size(); i++) {
+      OffsetDetails od = list.get(i);
+      if(od.getNewAnnotation() != null
+              && od.getNewAnnotation().equals(newAnnot)) return od;
+    }
+    return null;
+  }
 
-	public void annotationSetRemoved(DocumentEvent de) {
-		Document doc = (Document) de.getSource();
-		if (this == doc) {
-			doc.getAnnotations(de.getAnnotationSetName())
-					.removeAnnotationSetListener(this);
-		}
-	}
+  /**
+   * This method returns the respective offset in the source document.
+   */
+  public void addNewOffsetDetails(String srcDocumentID, OffsetDetails od) {
+    List<OffsetDetails> list = offsetMappings.get(srcDocumentID);
+    if(list == null) {
+      list = new ArrayList<OffsetDetails>();
+      offsetMappings.put(srcDocumentID, list);
+    }
 
-	public void contentEdited(DocumentEvent de) {
-		// do nothing
-	}
+    list.add(od);
+  }
+
+  /**
+   * This method returns the respective offset in the source document.
+   */
+  public void removeOffsetDetails(String srcDocumentID, OffsetDetails od) {
+    List<OffsetDetails> list = offsetMappings.get(srcDocumentID);
+    if(list != null) list.remove(od);
+  }
+
+  /**
+   * sets the offset mapping information
+   */
+  public void setOffsetMappingInformation(
+          HashMap<String, List<OffsetDetails>> offsetMappings) {
+    this.offsetMappings = offsetMappings;
+  }
+
+  /**
+   * return the IDs of combined documents
+   * 
+   * @return
+   */
+  public Set<String> getCombinedDocumentsIds() {
+    return this.combinedDocumentIds;
+  }
+
+  /**
+   * Sets the combined document IDs
+   * 
+   * @param combinedDocumentIds
+   */
+  public void setCombinedDocumentsIds(Set<String> combinedDocumentIds) {
+    this.combinedDocumentIds = combinedDocumentIds;
+  }
+
+  /**
+   * This method returns the compoundDocument whose member this
+   * composite document is.
+   * 
+   * @return
+   */
+  public CompoundDocument getCompoundDocument() {
+    return this.compoundDocument;
+  }
+
+  /**
+   * Sets the compound document.
+   * 
+   * @param compoundDocument
+   */
+  public void setCompoundDocument(CompoundDocument compoundDocument) {
+    this.compoundDocument = compoundDocument;
+  }
+
+  public void annotationSetAdded(DocumentEvent de) {
+    Document doc = (Document)de.getSource();
+    if(this == doc) {
+      doc.getAnnotations(de.getAnnotationSetName()).addAnnotationSetListener(
+              this);
+    }
+  }
+
+  public void annotationSetRemoved(DocumentEvent de) {
+    Document doc = (Document)de.getSource();
+    if(this == doc) {
+      doc.getAnnotations(de.getAnnotationSetName())
+              .removeAnnotationSetListener(this);
+    }
+  }
+
+  public void contentEdited(DocumentEvent de) {
+    // do nothing
+  }
 
   public void annotationUpdated(AnnotationEvent e) {
     if(e.getType() == AnnotationEvent.FEATURES_UPDATED) {
-      if (!disableListener) {
-        Annotation annot = (Annotation) e.getSource();
+      if(!disableListener) {
+        Annotation annot = (Annotation)e.getSource();
         // lets find out which annotation set it belongs to
-        boolean defaultAS = true;
         AnnotationSet as = null;
         if(getAnnotations().contains(annot)) {
-          defaultAS = true;
           as = getAnnotations();
-        } else {
+        }
+        else {
           Map ass = getNamedAnnotationSets();
           if(ass == null) return;
           Iterator namesIter = getNamedAnnotationSets().keySet().iterator();
           while(namesIter.hasNext()) {
-            String name = (String) namesIter.next();
-            as = (AnnotationSet) getNamedAnnotationSets().get(name);
+            String name = (String)namesIter.next();
+            as = (AnnotationSet)getNamedAnnotationSets().get(name);
             if(as.contains(annot)) {
               break;
-            } else as = null;
+            }
+            else as = null;
           }
         }
-        
-        if(as == null) return;
-        for (String docID : combinedDocumentIds) {
-          Document aDoc = compoundDocument.getDocument(docID);
-          long stOffset = getOffsetInSrcDocument(docID, annot
-              .getStartNode().getOffset().longValue());
-          if (stOffset == -1)
-            continue;
-          long enOffset = getOffsetInSrcDocument(docID, annot
-              .getEndNode().getOffset().longValue());
-          if (enOffset == -1)
-            continue;
-          AnnotationSet toUse = null;
 
-          if (defaultAS) {
-            toUse = aDoc.getAnnotations().getContained(
-                new Long(stOffset), new Long(enOffset)).get(
-                annot.getType());
-            if (toUse != null && !toUse.isEmpty()) {
-              for(Annotation a : toUse) {
-                a.setFeatures(annot.getFeatures());
-              }
-              return;
-            }
-          } else {
-            toUse = aDoc.getAnnotations(as.getName()).getContained(
-                new Long(stOffset), new Long(enOffset)).get(
-                annot.getType());
-            if (toUse != null && !toUse.isEmpty()) {
-              for(Annotation a : toUse) {
-                a.setFeatures(annot.getFeatures());
-              }
-              return;
-            }
-          }
+        if(as == null) return;
+        for(String docID : combinedDocumentIds) {
+          OffsetDetails od = getOffsetDetails(docID, annot);
+          if(od == null) continue;
+          Annotation toUse = od.getOriginalAnnotation();
+          toUse.setFeatures(annot.getFeatures());
         }
       }
     }
