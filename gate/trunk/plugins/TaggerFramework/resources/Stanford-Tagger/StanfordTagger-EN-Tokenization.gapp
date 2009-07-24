@@ -138,11 +138,11 @@
                   </gate.util.persistence.MapPersistence>
                 </entry>
                 <entry>
-                  <string>debug</string>
+                  <string>updateAnnotations</string>
                   <boolean>false</boolean>
                 </entry>
                 <entry>
-                  <string>updateAnnotations</string>
+                  <string>debug</string>
                   <boolean>false</boolean>
                 </entry>
                 <entry>
@@ -182,8 +182,10 @@
                 <entry>
                   <string>taggerFlags</string>
                   <gate.util.persistence.CollectionPersistence>
-                    <localList/>
-                    <collectionType>java.util.ArrayList</collectionType>
+                    <localList>
+                      <string>left3words-wsj-0-18.tagger</string>
+                    </localList>
+                    <collectionType>java.util.Arrays$ArrayList</collectionType>
                   </gate.util.persistence.CollectionPersistence>
                 </entry>
               </localMap>
