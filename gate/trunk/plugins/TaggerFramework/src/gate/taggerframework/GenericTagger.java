@@ -23,6 +23,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -39,6 +40,17 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * This processing resource is designed to allow the easy use of a
+ * number of external (non Java) taggers within GATE. A number of
+ * assumptions have been made about the external taggers in order to
+ * provide this framework, but any tagger that expects one annotation
+ * type per line and outputs one annotation type per line (input and
+ * output do not have to be the same) should be compatible with this PR.
+ * 
+ * @author Mark A. Greenwood
+ * @author Rene W
+ */
 @CreoleResource(comment = "The Generic Tagger is Generic!")
 public class GenericTagger extends AbstractLanguageAnalyser implements
                                                            ProcessingResource {
@@ -78,7 +90,20 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   // groups
   private FeatureMap featureMapping;
 
+  /**
+   * This method initialises the tagger. This involves loading the pre
+   * and post processing JAPE grammars as well as a few sanity checks.
+   * 
+   * @throws ResourceInstantiationException if an error occurs while
+   *           initialising the PR
+   */
+  @Override
   public Resource init() throws ResourceInstantiationException {
+
+    // Not sure if this is definitely needed but it makes sense that on
+    // certain platforms the external call may well fail if the paths
+    // contain spaces as the shell could interpret the space as a change
+    // in command line argument rather than part of a path.
     String tmpDir = System.getProperty("java.io.tmpdir");
     if(tmpDir == null || tmpDir.indexOf(' ') >= 0) {
       throw new ResourceInstantiationException(
@@ -87,17 +112,22 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
                       + "suitable value.");
     }
 
+    // Create a feature map that we can use to load the two JAPE
+    // transducers making sure they are hidden (i.e. don't appear in the
+    // list of loaded PRs)
     FeatureMap hidden = Factory.newFeatureMap();
     Gate.setHiddenAttribute(hidden, true);
     FeatureMap params = Factory.newFeatureMap();
 
     if(preProcessURL != null) {
+      // if there is a pre-processing JAPE grammar then load it
       params.put("grammarURL", preProcessURL);
       preProcess = (Transducer)Factory.createResource("gate.creole.Transducer",
               params, hidden);
     }
 
     if(postProcessURL != null) {
+      // if there is a post-processing grammar then load it
       params.put("grammarURL", postProcessURL);
       postProcess = (Transducer)Factory.createResource(
               "gate.creole.Transducer", params, hidden);
@@ -106,7 +136,20 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
     return this;
   }
 
+  /**
+   * This method does all the work by calling the protected methods in
+   * the right order so that an input file is written, a command line is
+   * built, the tagger is run and then finally the output of the tagger
+   * is added as annotations onto the GATE document being processed.
+   * 
+   * @throws ExecutionException if an error occurs during any stage of
+   *           running the tagger
+   */
+  @Override
   public void execute() throws ExecutionException {
+    // do some sanity checking of the runtime parameters before we start
+    // doing any work
+
     if(document == null)
       throw new ExecutionException("No document to process!");
 
@@ -114,11 +157,19 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
       throw new ExecutionException(
               "Cannot proceed unless a tagger executable is specified.");
 
-    if(encoding == null) {
-      throw new ExecutionException("No encoding specified");
-    }
+    if(encoding == null) throw new ExecutionException("No encoding specified");
+
+    if(regex == null || regex.trim().equals(""))
+      throw new ExecutionException(
+              "A regular exception for processing the tagger output must be provided");
+
+    if(!featureMapping.containsKey("string"))
+      throw new ExecutionException(
+              "The feature mapping must include an entry for 'string' in order to map between the tagger and the GATE document/annotations");
 
     if(preProcess != null) {
+      // if there is a pre-processing work to be done then run the
+      // supplied JAPE grammar
       preProcess.setInputASName(inputASName);
       preProcess.setOutputASName(inputASName);
       preProcess.setDocument(document);
@@ -141,6 +192,8 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
     readOutput(runTagger(taggerCmd));
 
     if(postProcess != null) {
+      // /if there is post-processing work to be done then run the
+      // supplied JAPE grammar
       postProcess.setInputASName(outputASName);
       postProcess.setOutputASName(outputASName);
       postProcess.setDocument(document);
@@ -155,8 +208,28 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
 
     // delete the temporary text file
     if(!debug) textfile.delete();
+
+    // make sure we don't hold onto the document so that it can be
+    // correctly garbage collected
+    document = null;
   }
 
+  /**
+   * This method constructs an array of Strings which will be used as
+   * the command line for executing the external tagger through a call
+   * to Runtime.exec(). This uses the tagger binary and flags to build
+   * the command line. If the system property <code>shell.path</code>
+   * has been set then the command line will be built so that the tagger
+   * is run by the provided shell. This is useful on Windows where you
+   * will usually need to run the tagger under Cygwin or the Command
+   * Prompt.
+   * 
+   * @param textfile the file containing the input to the tagger
+   * @return a String array containing the correctly assembled command
+   *         line
+   * @throws ExecutionException if an error occurs whilst building the
+   *           command line
+   */
   protected String[] buildCommandLine(File textfile) throws ExecutionException {
     // check that the file exists
     File scriptfile = Files.fileFromURL(taggerBinary);
@@ -164,49 +237,74 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
       throw new ExecutionException("Script " + scriptfile.getAbsolutePath()
               + " does not exist");
 
-    // build the command line.
-    // If the system property shell.path is set, use this as the path to
-    // the bourne shell interpreter and place it as the first item on
-    // the command line. If not, then just pass the script as the first
-    // item. The system property is useful on platforms that don't
-    // support shell scripts with #! lines natively, e.g. on Windows you
-    // can set the property to c:\cygwin\bin\sh.exe (or whatever is
-    // appropriate on your system) to invoke the script via Cygwin sh
+    // a pointer to where to stuff the flags
     int index = 0;
+
+    // the array we are buiding
     String[] taggerCmd;
+
+    // the bath to a shell under which to run the script
     String shPath = System.getProperty("shell.path");
+
     if(shPath != null) {
+      // if there is a shell then use that as the first command line
+      // argument
       taggerCmd = new String[3 + taggerFlags.size()];
       taggerCmd[0] = shPath;
       index = 1;
     }
     else {
+      // there is no shell so we only need an array long enough to hold
+      // the binary, flags and file
       taggerCmd = new String[2 + taggerFlags.size()];
     }
 
+    // get an array from the list of flags
     String[] flags = taggerFlags.toArray(new String[0]);
 
+    // copy the flags into the array we are building
     System.arraycopy(flags, 0, taggerCmd, index + 1, flags.length);
 
-    // generate tagger command line
+    // add the binary and input file to the command line
     taggerCmd[index] = scriptfile.getAbsolutePath();
     taggerCmd[taggerCmd.length - 1] = textfile.getAbsolutePath();
 
     if(debug) {
+      // if we are doing debug work then echo the command line
       String sanityCheck = "";
       for(String s : taggerCmd)
         sanityCheck += " " + s;
       System.out.println(sanityCheck);
     }
 
+    // return the fully constructed command line
     return taggerCmd;
   }
 
-  private File getCurrentText() throws ExecutionException {
+  /**
+   * This method copies specific annotations from the current GATE
+   * document into a file that can be read by the tagger. The assumption
+   * here is that the string feature of each input annotation will be
+   * written to separate lines in the file. If this assumption does not
+   * match the tagger you wish to use then you will need to create a
+   * subclass and override this method.
+   * 
+   * @return a File object which contains the input to the tagger
+   * @throws ExecutionException if an error occurs while building the
+   *           tagger input file
+   */
+  protected File getCurrentText() throws ExecutionException {
+    // the file we are going to write
     File gateTextFile = null;
+
     try {
+      // create an empty temp file so we don't overwrite any existing
+      // files
       gateTextFile = File.createTempFile("tagger", ".txt");
+
+      // get the character set we should be using for encoding the file
       Charset charset = Charset.forName(encoding);
+
       // depending on the failOnUnmappableCharacter parameter, we either
       // make the output stream writer fail or replace the unmappable
       // character with '?'
@@ -215,15 +313,25 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
                       failOnUnmappableCharacter
                               ? CodingErrorAction.REPORT
                               : CodingErrorAction.REPLACE);
+
+      // Get a stream we can write to that handles the encoding etc.
       FileOutputStream fos = new FileOutputStream(gateTextFile);
       OutputStreamWriter osw = new OutputStreamWriter(fos, charsetEncoder);
       BufferedWriter bw = new BufferedWriter(osw);
+
+      // get the input annotation set that we should be using
       AnnotationSet annotSet = (inputASName == null || inputASName.trim()
-              .length() == 0) ? document.getAnnotations() : document
+              .equals("")) ? document.getAnnotations() : document
               .getAnnotations(inputASName);
+
+      // filter the set so we just get the input annotations we need for
+      // the tagger
       annotSet = annotSet.get(inputAnnotationType);
+
       if(annotSet == null || annotSet.size() == 0) {
-        throw new GateRuntimeException("No " + inputAnnotationType
+        // if there are no input annotations then we can't do anything
+        // so throw an exception
+        throw new ExecutionException("No " + inputAnnotationType
                 + " found in the document.");
       }
 
@@ -233,17 +341,25 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
 
       // and now start writing them in a file
       for(int i = 0; i < inputAnnotations.size(); i++) {
+        // get the features of the annotation
         FeatureMap features = inputAnnotations.get(i).getFeatures();
 
         if(features == null || features.size() == 0
                 || !features.containsKey(STRING_FEATURE_NAME)) {
-          throw new GateRuntimeException(inputAnnotationType + " must have '"
+          // if there is no string feature then throw an exception
+          throw new ExecutionException(inputAnnotationType + " must have '"
                   + STRING_FEATURE_NAME + "' feature, which couldn't be found");
         }
-        String string = (String)features.get(STRING_FEATURE_NAME);
-        bw.write(string);
+
+        // write the string to the file
+        bw.write((String)features.get(STRING_FEATURE_NAME));
+
+        // if there are more annotations to process then write a blank
+        // line as well
         if(i + 1 < inputAnnotations.size()) bw.newLine();
       }
+
+      // we have finished writing the file so close the streams
       bw.close();
     }
     catch(CharacterCodingException cce) {
@@ -251,18 +367,26 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
               "Document contains a character that cannot be represented "
                       + "in " + encoding).initCause(cce);
     }
-    catch(java.io.IOException except) {
+    catch(IOException ioe) {
       throw (ExecutionException)new ExecutionException(
-              "Error creating temporary file for tagger").initCause(except);
+              "Error creating temporary file for tagger").initCause(ioe);
     }
     return (gateTextFile);
   }
 
-  //private ProcessManager processManager = new ProcessManager();
-
-  private InputStream runTagger(String[] cmdline) throws ExecutionException {
+  /**
+   * This method is responsible for executing the external tagger. If a
+   * problem is going to occur this is likely to be the place!
+   * 
+   * @param cmdline the command line we want to execute
+   * @return an InputStream from which the output of the tagger can be
+   *         read
+   * @throws ExecutionException if an error occurs executing the tagger
+   */
+  protected InputStream runTagger(String[] cmdline) throws ExecutionException {
     // TODO: replace this with the ProcessManager from gate.util
 
+    // a handle to the process we are going to run
     Process p = null;
 
     try {
@@ -276,16 +400,9 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
     catch(Exception e) {
       throw new ExecutionException(e);
     }
-
-    /*
-     * try { ByteArrayOutputStream out = new ByteArrayOutputStream();
-     * processManager.runProcess(cmdline, out, null); return new
-     * ByteArrayInputStream(out.toByteArray()); } catch(Exception e) {
-     * throw new ExecutionException(e); }
-     */
   }
 
-  private void readOutput(InputStream in) throws ExecutionException {
+  protected void readOutput(InputStream in) throws ExecutionException {
     String line;
 
     // sorted list of input annotations
@@ -324,8 +441,8 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
       int currentPosition = 0;
 
       while((line = input.readLine()) != null) {
-        if (debug) System.out.println(line);
-        
+        if(debug) System.out.println(line);
+
         Matcher m = resultPattern.matcher(line);
 
         if(m.matches()) {
