@@ -708,7 +708,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   }
 
   @RunTime
-  @CreoleParameter(defaultValue = "true", comment = "turn on debugging options")
+  @CreoleParameter(defaultValue = "false", comment = "turn on debugging options")
   public void setDebug(Boolean debug) {
     this.debug = debug;
   }
