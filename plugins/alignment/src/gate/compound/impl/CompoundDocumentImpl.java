@@ -33,14 +33,10 @@ public class CompoundDocumentImpl extends AbstractCompoundDocument {
     this.documents = new HashMap<String, Document>();
     this.documentIDs = new ArrayList<String>();
   }
-  
+
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
     // set up the source URL and create the content
-    if(sourceUrl == null) {
-      throw new ResourceInstantiationException(
-              "The sourceURL and document's content were null.");
-    }
 
     if(markupAware == null) {
       throw new ResourceInstantiationException(
@@ -57,20 +53,27 @@ public class CompoundDocumentImpl extends AbstractCompoundDocument {
               "The preserveOriginalContent is null!");
     }
 
-    if(documentIDs == null || documentIDs.isEmpty()) {
-      throw new ResourceInstantiationException(
-              "Document IDs parameter is set to null!");
-    }
+    if(sourceUrl != null) {
 
-    // source URL can be a file
-    File file = new File(sourceUrl.getFile());
-    if(file.isDirectory()) {
-      throw new ResourceInstantiationException(
-              "You must select one of the files!");
-    }
+      if(documentIDs == null || documentIDs.isEmpty()) {
+        throw new ResourceInstantiationException(
+                "You must provide atleast one document id");
+      }
 
-    // instancetiate all documents
-    createDocuments(file);
+      // source URL can be a file
+      File file = new File(sourceUrl.getFile());
+      if(file.isDirectory()) {
+        throw new ResourceInstantiationException(
+                "You must select one of the files!");
+      }
+
+      // instancetiate all documents
+      createDocuments(file);
+    }
+    else {
+      documents = new HashMap<String, Document>();
+      documentIDs = new ArrayList<String>();
+    }
 
     currentDocument = null;
     return this;

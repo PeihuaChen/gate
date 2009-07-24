@@ -3,9 +3,12 @@ package gate.compound.gui;
 import java.awt.Component;
 import java.awt.Composite;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.*;
+
 import javax.swing.*;
+
 import gate.*;
 import gate.compound.CompoundDocument;
 import gate.compound.CompoundDocumentEvent;
@@ -15,9 +18,13 @@ import gate.corpora.DocumentImpl;
 import gate.creole.*;
 import gate.event.ProgressListener;
 import gate.gui.ActionsPublisher;
+import gate.gui.CorpusEditor;
 import gate.gui.Handle;
 import gate.gui.MainFrame;
 import gate.gui.NameBearerHandle;
+import gate.util.GateException;
+import gate.util.GateRuntimeException;
+
 import java.io.*;
 
 /**
@@ -52,6 +59,7 @@ public class CompoundDocumentEditor extends AbstractVisualResource
     actions.add(new LoadFromXML());
     actions.add(new PopulateCorpus());
     actions.add(new PopulateCorpusFromXML());
+    actions.add(new AddDocument());
     return actions;
   }
 
@@ -297,6 +305,65 @@ public class CompoundDocumentEditor extends AbstractVisualResource
       }
       catch(Exception e) {
         e.printStackTrace();
+      }
+    }
+  }
+
+  class AddDocument extends AbstractAction{
+    public AddDocument(){
+      super("Add document", MainFrame.getIcon("add-document"));
+      putValue(SHORT_DESCRIPTION, "Add new document(s) to this compound document");
+      putValue(MNEMONIC_KEY, KeyEvent.VK_ENTER);
+    }
+
+    public void actionPerformed(ActionEvent e){
+      try{
+        //get all the documents loaded in the system
+        java.util.List loadedDocuments = Gate.getCreoleRegister().
+                               getAllInstances("gate.Document");
+        java.util.List exclude = Gate.getCreoleRegister().getAllInstances("gate.compound.CompoundDocument");
+        
+        boolean terminate = false;
+        if(loadedDocuments == null) {
+          terminate = true;
+        } else if(loadedDocuments != null && exclude != null) {
+          loadedDocuments.removeAll(exclude);
+          terminate = loadedDocuments.isEmpty();
+        }
+        
+        if(terminate) {
+          JOptionPane.showMessageDialog(
+                  CompoundDocumentEditor.this,
+                  "There are no documents available in the system.\n" +
+                  "Please load some and try again." ,
+                  "GATE", JOptionPane.ERROR_MESSAGE);
+              return;
+        }
+
+        Vector docNames = new Vector(loadedDocuments.size());
+        for (int i = 0; i< loadedDocuments.size(); i++) {
+          docNames.add(((Document)loadedDocuments.get(i)).getName());
+        }
+        JList docList = new JList(docNames);
+
+        JOptionPane dialog = new JOptionPane(new JScrollPane(docList),
+                                             JOptionPane.QUESTION_MESSAGE,
+                                             JOptionPane.OK_CANCEL_OPTION);
+        dialog.createDialog(CompoundDocumentEditor.this,
+                            "Add document(s) to compound document").setVisible(true);
+
+        if(((Integer)dialog.getValue()).intValue() == JOptionPane.OK_OPTION){
+          int[] selection = docList.getSelectedIndices();
+          for (int i = 0; i< selection.length ; i++) {
+            Document aDoc = (Document)loadedDocuments.get(selection[i]);
+            ((CompoundDocument)document).addDocument(aDoc.getName(), aDoc);
+          }
+        }
+      }catch(GateException ge){
+        //gate.Document is not registered in creole.xml....what is!?
+        throw new GateRuntimeException(
+          "gate.Document is not registered in the creole register!\n" +
+          "Something must be terribly wrong...take a vacation!");
       }
     }
   }
