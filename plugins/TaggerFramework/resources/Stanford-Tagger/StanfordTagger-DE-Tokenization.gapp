@@ -183,7 +183,7 @@
                   <string>taggerFlags</string>
                   <gate.util.persistence.CollectionPersistence>
                     <localList>
-                      <string>left3words-wsj-0-18.tagger</string>
+                      <string>german.tagger</string>
                     </localList>
                     <collectionType>java.util.Arrays$ArrayList</collectionType>
                   </gate.util.persistence.CollectionPersistence>
@@ -191,7 +191,7 @@
               </localMap>
             </runtimeParams>
             <resourceType>gate.taggerframework.GenericTagger</resourceType>
-            <resourceName>StanfordTagger-EN-Tokenization</resourceName>
+            <resourceName>StanfordTagger-DE-Tokenization</resourceName>
             <initParams class="gate.util.persistence.MapPersistence">
               <mapType>gate.util.SimpleFeatureMapImpl</mapType>
               <localMap>
@@ -225,7 +225,7 @@
       <collectionType>java.util.ArrayList</collectionType>
     </prList>
     <resourceType>gate.creole.ConditionalSerialAnalyserController</resourceType>
-    <resourceName>StanfordTagger-EN-Tokenization</resourceName>
+    <resourceName>StanfordTagger-DE-Tokenization</resourceName>
     <initParams class="gate.util.persistence.MapPersistence">
       <mapType>gate.util.SimpleFeatureMapImpl</mapType>
       <localMap/>
