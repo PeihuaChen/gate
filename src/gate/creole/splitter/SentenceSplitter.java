@@ -19,6 +19,8 @@ import gate.creole.*;
 import gate.creole.gazetteer.DefaultGazetteer;
 import gate.event.ProgressListener;
 import gate.event.StatusListener;
+import gate.util.Benchmark;
+import gate.util.Benchmarkable;
 import gate.util.GateRuntimeException;
 import gate.util.InvalidOffsetException;
 import gate.util.LuckyException;
@@ -29,7 +31,7 @@ import gate.util.LuckyException;
  * some minor processing after running the components in order to extract the
  * results in a usable form.
  */
-public class SentenceSplitter extends AbstractLanguageAnalyser{
+public class SentenceSplitter extends AbstractLanguageAnalyser implements Benchmarkable{
 
   public static final String
     SPLIT_DOCUMENT_PARAMETER_NAME = "document";
@@ -48,6 +50,9 @@ public class SentenceSplitter extends AbstractLanguageAnalyser{
 
   public static final String
     SPLIT_TRANSD_URL_PARAMETER_NAME = "transducerURL";
+  
+  
+  private String benchmarkId;
 
   public Resource init()throws ResourceInstantiationException{
     //create all the componets
@@ -140,7 +145,9 @@ public class SentenceSplitter extends AbstractLanguageAnalyser{
     pListener = new IntervalProgressListener(11, 90);
     transducer.addProgressListener(pListener);
     transducer.addStatusListener(sListener);
-    transducer.execute();
+    Benchmark.executeWithBenchmarking(transducer,
+            Benchmark.createBenchmarkId("SentenceSplitterTransducer",
+                    getBenchmarkId()), this, null);
     transducer.removeProgressListener(pListener);
     transducer.removeStatusListener(sListener);
 
@@ -234,6 +241,25 @@ public class SentenceSplitter extends AbstractLanguageAnalyser{
   }
   public String getOutputASName() {
     return outputASName;
+  }
+  
+  /* (non-Javadoc)
+   * @see gate.util.Benchmarkable#getBenchmarkId()
+   */
+  public String getBenchmarkId() {
+    if(benchmarkId == null) {
+      return getName();
+    }
+    else {
+      return benchmarkId;
+    }
+  }
+
+  /* (non-Javadoc)
+   * @see gate.util.Benchmarkable#setBenchmarkId(java.lang.String)
+   */
+  public void setBenchmarkId(String benchmarkId) {
+    this.benchmarkId = benchmarkId;
   }
 
 
