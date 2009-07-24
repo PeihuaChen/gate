@@ -1466,14 +1466,13 @@ public class MainFrame extends JFrame implements ProgressListener,
       public void run() {
         NameBearerHandle handle = new NameBearerHandle(res, MainFrame.this);
         DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);
-        if(res instanceof ProcessingResource) {
+        if(res instanceof Controller) {
+          resourcesTreeModel.insertNodeInto(node, applicationsRoot, 0);
+        } else if(res instanceof ProcessingResource) {
           resourcesTreeModel.insertNodeInto(node, processingResourcesRoot, 0);
         }
         else if(res instanceof LanguageResource) {
           resourcesTreeModel.insertNodeInto(node, languageResourcesRoot, 0);
-        }
-        else if(res instanceof Controller) {
-          resourcesTreeModel.insertNodeInto(node, applicationsRoot, 0);
         }
 
         handle.addProgressListener(MainFrame.this);
