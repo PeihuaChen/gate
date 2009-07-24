@@ -41,6 +41,21 @@ public class ConditionalSerialAnalyserController
   /** Debug flag */
   private static final boolean DEBUG = false;
 
+  
+  /**
+   * @return the document
+   */
+  public Document getDocument() {
+    return document;
+  }
+
+  /**
+   * @param document the document to set
+   */
+  public void setDocument(Document document) {
+    this.document = document;
+  }
+  
   public gate.Corpus getCorpus() {
     return corpus;
   }
@@ -58,57 +73,145 @@ public class ConditionalSerialAnalyserController
     
     benchmarkFeatures.put(Benchmark.CORPUS_NAME_FEATURE, corpus.getName());
     
-    //iterate through the documents in the corpus
-    for(int i = 0; i < corpus.size(); i++){
-      if(isInterrupted()) throw new ExecutionInterruptedException(
-        "The execution of the " + getName() +
-        " application has been abruptly interrupted!");
-      
-      boolean docWasLoaded = corpus.isDocumentLoaded(i);
-      
-      // record the time before loading the document
-      long documentLoadingStartTime = Benchmark.startPoint();
+    
+    if(document == null){
+      //running as a top-level controller -> execute over all documents in 
+      //sequence
+      // iterate through the documents in the corpus
+      for(int i = 0; i < corpus.size(); i++) {
+        if(isInterrupted()) {
+          throw new ExecutionInterruptedException("The execution of the "
+            + getName() + " application has been abruptly interrupted!");
+        }
 
-      Document doc = (Document)corpus.get(i);
+        boolean docWasLoaded = corpus.isDocumentLoaded(i);
 
-      // report the document loading
-      benchmarkFeatures.put(Benchmark.DOCUMENT_NAME_FEATURE, doc.getName());
-      Benchmark.checkPoint(documentLoadingStartTime,
-              Benchmark.createBenchmarkId(Benchmark.DOCUMENT_LOADED,
-                      getBenchmarkId()), this, benchmarkFeatures);
-      //run the system over this document
-      //set the doc and corpus
-      for(int j = 0; j < prList.size(); j++){
-        ((LanguageAnalyser)prList.get(j)).setDocument(doc);
+        // record the time before loading the document
+        long documentLoadingStartTime = Benchmark.startPoint();
+
+        Document doc = (Document)corpus.get(i);
+
+        // report the document loading
+        benchmarkFeatures.put(Benchmark.DOCUMENT_NAME_FEATURE, doc.getName());
+        Benchmark.checkPoint(documentLoadingStartTime,
+                Benchmark.createBenchmarkId(Benchmark.DOCUMENT_LOADED,
+                        getBenchmarkId()), this, benchmarkFeatures);
+
+        // run the system over this document
+        // set the doc and corpus
+        for(int j = 0; j < prList.size(); j++) {
+          ((LanguageAnalyser)prList.get(j)).setDocument(doc);
+          ((LanguageAnalyser)prList.get(j)).setCorpus(corpus);
+        }
+
+        try {
+          if(DEBUG)
+            Out.pr("SerialAnalyserController processing doc=" + doc.getName()
+              + "...");
+
+          super.executeImpl();
+          if(DEBUG) Out.prln("done.");
+        }
+        finally {
+          // make sure we unset the doc and corpus even if we got an exception
+          for(int j = 0; j < prList.size(); j++) {
+            ((LanguageAnalyser)prList.get(j)).setDocument(null);
+            ((LanguageAnalyser)prList.get(j)).setCorpus(null);
+          }
+        }
+
+        if(!docWasLoaded) {
+          long documentSavingStartTime = Benchmark.startPoint();
+          // trigger saving
+          corpus.unloadDocument(doc);
+          Benchmark.checkPoint(documentSavingStartTime,
+                  Benchmark.createBenchmarkId(Benchmark.DOCUMENT_SAVED,
+                          getBenchmarkId()), this, benchmarkFeatures);
+          
+          // close the previously unloaded Doc
+          Factory.deleteResource(doc);
+        }
+      }      
+    }else{
+      //document is set, so we run as a contained controller (i.e. as a compound
+      //Language Analyser
+      // run the system over this document
+      // set the doc and corpus
+      for(int j = 0; j < prList.size(); j++) {
+        ((LanguageAnalyser)prList.get(j)).setDocument(document);
         ((LanguageAnalyser)prList.get(j)).setCorpus(corpus);
       }
 
-      try{
-        if (DEBUG) 
-          Out.pr("ConditionalSerialAnalyserController processing doc=" + doc.getName()+ "...");      
+      try {
+        if(DEBUG)
+          Out.pr("SerialAnalyserController processing doc=" + document.getName()
+            + "...");
+
         super.executeImpl();
-        if (DEBUG) 
-          Out.prln("done.");      
+        if(DEBUG) Out.prln("done.");
       }
       finally {
         // make sure we unset the doc and corpus even if we got an exception
-        for(int j = 0; j < prList.size(); j++){
+        for(int j = 0; j < prList.size(); j++) {
           ((LanguageAnalyser)prList.get(j)).setDocument(null);
           ((LanguageAnalyser)prList.get(j)).setCorpus(null);
         }
       }
+    }//document was not null
 
-      if(!docWasLoaded){
-        long documentSavingStartTime = Benchmark.startPoint();
-        // trigger saving
-        corpus.unloadDocument(doc);
-        Benchmark.checkPoint(documentSavingStartTime,
-                Benchmark.createBenchmarkId(Benchmark.DOCUMENT_SAVED,
-                        getBenchmarkId()), this, benchmarkFeatures);
-        //close the previoulsy unloaded Doc
-        Factory.deleteResource(doc);
-      }
-    }
+    
+    
+//    //iterate through the documents in the corpus
+//    for(int i = 0; i < corpus.size(); i++){
+//      if(isInterrupted()) throw new ExecutionInterruptedException(
+//        "The execution of the " + getName() +
+//        " application has been abruptly interrupted!");
+//      
+//      boolean docWasLoaded = corpus.isDocumentLoaded(i);
+//      
+//      // record the time before loading the document
+//      long documentLoadingStartTime = Benchmark.startPoint();
+//
+//      Document doc = (Document)corpus.get(i);
+//
+//      // report the document loading
+//      benchmarkFeatures.put(Benchmark.DOCUMENT_NAME_FEATURE, doc.getName());
+//      Benchmark.checkPoint(documentLoadingStartTime,
+//              Benchmark.createBenchmarkId(Benchmark.DOCUMENT_LOADED,
+//                      getBenchmarkId()), this, benchmarkFeatures);
+//      //run the system over this document
+//      //set the doc and corpus
+//      for(int j = 0; j < prList.size(); j++){
+//        ((LanguageAnalyser)prList.get(j)).setDocument(doc);
+//        ((LanguageAnalyser)prList.get(j)).setCorpus(corpus);
+//      }
+//
+//      try{
+//        if (DEBUG) 
+//          Out.pr("ConditionalSerialAnalyserController processing doc=" + doc.getName()+ "...");      
+//        super.executeImpl();
+//        if (DEBUG) 
+//          Out.prln("done.");      
+//      }
+//      finally {
+//        // make sure we unset the doc and corpus even if we got an exception
+//        for(int j = 0; j < prList.size(); j++){
+//          ((LanguageAnalyser)prList.get(j)).setDocument(null);
+//          ((LanguageAnalyser)prList.get(j)).setCorpus(null);
+//        }
+//      }
+//
+//      if(!docWasLoaded){
+//        long documentSavingStartTime = Benchmark.startPoint();
+//        // trigger saving
+//        corpus.unloadDocument(doc);
+//        Benchmark.checkPoint(documentSavingStartTime,
+//                Benchmark.createBenchmarkId(Benchmark.DOCUMENT_SAVED,
+//                        getBenchmarkId()), this, benchmarkFeatures);
+//        //close the previoulsy unloaded Doc
+//        Factory.deleteResource(doc);
+//      }
+//    }
   }
 
   /**
@@ -187,6 +290,15 @@ public class ConditionalSerialAnalyserController
 
   protected gate.Corpus corpus;
 
+  
+  /**
+   * The document being processed. This is part of the {@link LanguageAnalyser} 
+   * interface, so this value is only used when the controller is used as a 
+   * member of another controller.
+   */
+  protected Document document;
+  
+  
   /**
    * Overridden to also clean up the corpus value.
    */
