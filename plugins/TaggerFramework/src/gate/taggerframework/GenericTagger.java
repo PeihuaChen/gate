@@ -16,7 +16,6 @@ import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
 import gate.util.Files;
-import gate.util.GateRuntimeException;
 import gate.util.OffsetComparator;
 
 import java.io.BufferedReader;
@@ -396,7 +395,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
       }
       else {
         // if a dir is specified then make sure we run the tagger from
-        // there otheriwse it probably won't work
+        // there otherwise it probably won't work
         p = Runtime.getRuntime().exec(cmdline, new String[] {},
                 Files.fileFromURL(taggerDir));
       }
