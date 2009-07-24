@@ -503,12 +503,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 //        newAcceptingInstances.add((FSMInstance)currentInstance.clone());
         newAcceptingInstances.add((FSMInstance)currentClone);
         // if we're only looking for the shortest stop here
-        if(ruleApplicationStyle == FIRST_STYLE) 
-          if (Benchmark.isBenchmarkingEnabled()) {
-            updateRuleTime(currentInstance, startTime);
-          }
-          return new FSMMatcherResult(newActiveInstances, 
-                  newAcceptingInstances);
+        if(ruleApplicationStyle == FIRST_STYLE) break;
       }
 
       currentInstanceBlocked = true;
@@ -519,20 +514,14 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       List<Annotation> paths;
       long theFirst = offsetsTailSet.first();
       if(theFirst < 0) {
-        if (Benchmark.isBenchmarkingEnabled()) {
-          updateRuleTime(currentInstance, startTime);
-        }
-        return new FSMMatcherResult(newActiveInstances, newAcceptingInstances);
+        break;
       }
         
   
       paths = (List)annotationsByOffset.get(theFirst);
   
       if(paths == null || paths.isEmpty()) {
-        if (Benchmark.isBenchmarkingEnabled()) {
-          updateRuleTime(currentInstance, startTime);
-        }        
-        return new FSMMatcherResult(newActiveInstances, newAcceptingInstances);
+        break;
       }
               
         
