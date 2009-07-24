@@ -310,7 +310,8 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
       if(DEBUG) Out.prln("LR: " + resClass);
       if(lrTypes == null) lrTypes = new HashSet<String>(); // for deserialisation
       lrTypes.add(rd.getClassName());
-    } else if(ProcessingResource.class.isAssignableFrom(resClass)) {
+    }
+    if(ProcessingResource.class.isAssignableFrom(resClass)) {
       if(DEBUG) {
         Out.prln("PR: " + resClass);
         //Out.prln("prTypes: " + prTypes);
@@ -318,12 +319,14 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
       }
       if(prTypes == null) prTypes = new HashSet<String>(); // for deserialisation
       prTypes.add(rd.getClassName());
-    } else if(VisualResource.class.isAssignableFrom(resClass)) {
+    }
+    if(VisualResource.class.isAssignableFrom(resClass)) {
       if(DEBUG) Out.prln("VR: " + resClass);
       if(vrTypes == null) vrTypes = new LinkedList<String>(); // for deserialisation
       //we have to simulate Set behaviour as this is a list
       if(!vrTypes.contains(rd.getClassName())) vrTypes.add(rd.getClassName());
-    }else if(Controller.class.isAssignableFrom(resClass)) {
+    }
+    if(Controller.class.isAssignableFrom(resClass)) {
       if(DEBUG) Out.prln("Controller: " + resClass);
       if(controllerTypes == null) controllerTypes = new HashSet<String>(); // for deserialisation
       controllerTypes.add(rd.getClassName());
