@@ -36,16 +36,6 @@ public class SerialAnalyserController extends SerialController
   /** Debug flag */
   private static final boolean DEBUG = false;
 
-
-
-  
-  /* (non-Javadoc)
-   * @see gate.ProcessingResource#reInit()
-   */
-  public void reInit() throws ResourceInstantiationException {
-    init();
-  }
-
   /**
    * @return the document
    */
