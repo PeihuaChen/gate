@@ -627,7 +627,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   }
 
   @RunTime
-  @CreoleParameter(defaultValue = "string=1;category=2;lemma=3", comment = "mapping from matching groups to feature names")
+  @CreoleParameter(defaultValue = "string=1;category=2;lemma=3", comment = "mapping from matching groups to feature names, this must include a mapping for 'string'")
   public void setFeatureMapping(FeatureMap featureMapping) {
     this.featureMapping = featureMapping;
   }
@@ -678,7 +678,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   }
 
   @RunTime
-  @CreoleParameter(defaultValue = "(.+)\t(.+)\t(.+)", comment = "regex to process tagger ouptut")
+  @CreoleParameter(defaultValue = "(.+)\t(.+)\t(.+)", comment = "regex to process tagger ouptut, this must contain capturing groups which can then be referenced in the feature mapping")
   public void setRegex(String regex) {
     this.regex = regex;
   }
