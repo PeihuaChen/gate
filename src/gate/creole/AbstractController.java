@@ -24,9 +24,8 @@ import gate.util.Benchmark;
 import gate.util.Benchmarkable;
 
 @CreoleResource(icon = "application")
-public abstract class AbstractController extends AbstractResource implements
-                                                                 Controller,
-                                                                 Benchmarkable {
+public abstract class AbstractController extends AbstractResource 
+       implements Controller, ProcessingResource, Benchmarkable {
 
   /**
    * Benchmark ID of this resource.
@@ -140,6 +139,13 @@ public abstract class AbstractController extends AbstractResource implements
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
     return this;
+  }
+
+  /* (non-Javadoc)
+   * @see gate.ProcessingResource#reInit()
+   */
+  public void reInit() throws ResourceInstantiationException {
+    init();
   }
 
   /** Clears the internal data of the resource, when it gets released * */
