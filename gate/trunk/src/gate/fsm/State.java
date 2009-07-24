@@ -33,10 +33,11 @@ public class State implements JapeConstants {
 
   private static final boolean DEBUG = false;
   
+  public static final int UNKNOWN_INDEX = -3;
   public static final int VISITED_INDEX = -2;
   public static final int UNVISITED_INDEX = -1;
-  public static final int UNKNOWN_INDEX = 0;
-  public static final String UNKNOWN_RULE = "_____Unknown_rule_name";
+  public static final int INITIAL_INDEX = 0;
+  public static final String INITIAL_RULE = "_____Initial_State_for_all_rules";
   
   // Points to the rule in the FSM which created this state
   private int indexInRuleList = UNVISITED_INDEX;
@@ -90,18 +91,40 @@ public class State implements JapeConstants {
       // (because a state is currently associated with only one rule), but
       // we need to call it repeateadly to set the indexInRuleList for all states in 
       // the tree
-      for (Transition t :getTransitions()) {
+      for (Transition t :this.getTransitions()) {
         int tempReturn = t.getTarget().getRuleForState(ruleNameToIndexMap,ruleTimes);
         if (tempReturn != UNKNOWN_INDEX && tempReturn != VISITED_INDEX) {
           returnVal = tempReturn;
         }
       }
-      this.setIndexInRuleList(returnVal);
+      if (returnVal == UNKNOWN_INDEX) {
+        this.setIndexInRuleList(returnVal);
+      }
+      else {
+        this.propogateRuleForward(returnVal);
+      }
       return returnVal;
     }
   }
 
 
+  /**
+   * This sets the rule index for every descendant of the current state
+   * Note that we only need to set the state for states whose rule is Unknown
+   * Rules whose state is "VISITED_INDEX" are my ancestors.  Their states will be set
+   * when the recursion backs out.  Rules whose index is something other than VISITED_INDEX or
+   * UNKNOWN_RULE are finished and we know that all of their descendants have been set, by
+   * the properties of this algorithm 
+   * @param ruleForThisState   The rule to be associated with this state
+   */
+  private void propogateRuleForward(int ruleForThisState) {
+    this.setIndexInRuleList(ruleForThisState);
+    for (Transition t: this.getTransitions()) {
+      if (t.getTarget().getIndexInRuleList() == UNKNOWN_INDEX) {
+        t.getTarget().propogateRuleForward(ruleForThisState);
+      }
+    }
+  }
 
   /**
    * Build a new state.

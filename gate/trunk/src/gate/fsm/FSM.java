@@ -36,13 +36,13 @@ public class FSM implements JapeConstants {
 
   private void decorateStates() {
     HashMap<String,Integer>  temporaryRuleNameToIndexMap = new HashMap<String,Integer>();
-    ruleTimes.add(new RuleTime(0,State.UNKNOWN_RULE));
-    int ruleIndex = State.UNKNOWN_INDEX;
+    ruleTimes.add(new RuleTime(0,State.INITIAL_RULE));
+    int ruleIndex = State.INITIAL_INDEX;
     for (Transition t : this.getInitialState().getTransitions()) {
       ruleIndex = t.getTarget().getRuleForState(temporaryRuleNameToIndexMap, ruleTimes);
-      assert (ruleIndex != State.UNVISITED_INDEX);
+      assert (ruleIndex != State.UNVISITED_INDEX) && (ruleIndex != State.UNKNOWN_INDEX);
     }
-    this.getInitialState().setIndexInRuleList(ruleIndex);
+    this.getInitialState().setIndexInRuleList(State.INITIAL_INDEX);
   }
 
 
