@@ -559,7 +559,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
                     document.getContent().getContent(
                             currentInput.getStartNode().getOffset(),
                             currentInput.getEndNode().getOffset()).toString())
-                    .array(), encoding);
+                    .array(), encoding).trim();
 
             while((currentPosition = encodedInput.indexOf((String)features
                     .get("string"), currentPosition)) == -1) {
@@ -592,7 +592,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
                               document.getContent().getContent(
                                       currentInput.getStartNode().getOffset(),
                                       currentInput.getEndNode().getOffset())
-                                      .toString()).array(), encoding);
+                                      .toString()).array(), encoding).trim();
             }
 
             // if we get to here then we have found the right place to
