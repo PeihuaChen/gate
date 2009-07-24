@@ -15,7 +15,8 @@
 
 package gate;
 
-/** Models the execution of groups of ProcessingResources on a given corpus.
+ /** 
+  * Models the execution of groups of ProcessingResources on a given corpus.
   */
 public interface CorpusController extends Controller {
 
