@@ -115,7 +115,7 @@
                 </entry>
                 <entry>
                   <string>regex</string>
-                  <string>(.+)_(.+)</string>
+                  <string>(.+)#(.+)</string>
                 </entry>
                 <entry>
                   <string>inputASName</string>
@@ -138,11 +138,11 @@
                   </gate.util.persistence.MapPersistence>
                 </entry>
                 <entry>
-                  <string>updateAnnotations</string>
+                  <string>debug</string>
                   <boolean>false</boolean>
                 </entry>
                 <entry>
-                  <string>debug</string>
+                  <string>updateAnnotations</string>
                   <boolean>false</boolean>
                 </entry>
                 <entry>
@@ -182,8 +182,10 @@
                 <entry>
                   <string>taggerFlags</string>
                   <gate.util.persistence.CollectionPersistence>
-                    <localList/>
-                    <collectionType>java.util.ArrayList</collectionType>
+                    <localList>
+                      <string>arabic.tagger</string>
+                    </localList>
+                    <collectionType>java.util.Arrays$ArrayList</collectionType>
                   </gate.util.persistence.CollectionPersistence>
                 </entry>
               </localMap>
