@@ -186,7 +186,7 @@
                 <entry>
                   <string>preProcessURL</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>$relpath$../../../../../../GATE/gate/plugins/TaggerFramework/resources/tagger-independent/sentencestring_tokenized.jape</urlString>
+                    <urlString>$relpath$../../../TaggerFramework/resources/tagger-independent/sentencestring_tokenized.jape</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
                 <entry>
