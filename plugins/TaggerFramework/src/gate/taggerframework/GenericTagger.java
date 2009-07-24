@@ -514,7 +514,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
             // move onto the next input annotation
             currentInput = inputAnnotations.remove(0);
 
-            // find the matching ouptut annotations and then sort them
+            // find the matching output annotations and then sort them
             outputAnnotations.addAll(aSet.get(outputAnnotationType,
                     currentInput.getStartNode().getOffset(), currentInput
                             .getEndNode().getOffset()));
@@ -533,9 +533,9 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
             // feature
             String encoded = new String(charset.encode(
                     (String)next.getFeatures().get(STRING_FEATURE_NAME))
-                    .array(), encoding);
+                    .array(), encoding).trim();
 
-            // if the encoded verson isn't the same as the output from
+            // if the encoded version isn't the same as the output from
             // the tagger we have lost sync so throw an exception
             if(!encoded.equals(features.get(STRING_FEATURE_NAME)))
               throw new Exception("annotations are out of sync: " + encoded
