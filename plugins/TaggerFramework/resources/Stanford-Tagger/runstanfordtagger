@@ -8,4 +8,4 @@
 STANFORDTAG_DIR=/usr/local/durmtools/stanford-postagger
 
 cd ${STANFORDTAG_DIR}
-java -mx300m -classpath stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTagger -model models/bidirectional-wsj-0-18.tagger -textFile $1 | sed -e "s/ /\n/g"
+java -mx300m -classpath stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTagger -model models/$1 -textFile $2 | sed -e "s/ /\n/g"
