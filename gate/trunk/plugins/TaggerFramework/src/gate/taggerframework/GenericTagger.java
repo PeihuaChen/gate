@@ -390,11 +390,19 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
     Process p = null;
 
     try {
-      if(taggerDir == null)
+      if(taggerDir == null) {
+        // if there is no dir specified just run the tagger
         p = Runtime.getRuntime().exec(cmdline);
-      else p = Runtime.getRuntime().exec(cmdline, new String[] {},
-              Files.fileFromURL(taggerDir));
+      }
+      else {
+        // if a dir is specified then make sure we run the tagger from
+        // there otheriwse it probably won't work
+        p = Runtime.getRuntime().exec(cmdline, new String[] {},
+                Files.fileFromURL(taggerDir));
+      }
 
+      // return the input stream so that another method can read the
+      // output from the tagger
       return p.getInputStream();
     }
     catch(Exception e) {
@@ -402,89 +410,151 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
     }
   }
 
+  /**
+   * This method reads the output from the tagger adding the information
+   * back into the GATE document. If the tagger doesn't produce one line
+   * per output type then you will need to override this to do something
+   * different.
+   * 
+   * @param in the InputStream frmo which the method will read the
+   *          output from the tagger
+   * @throws ExecutionException if an error occurs while handling the
+   *           output from the tagger
+   */
   protected void readOutput(InputStream in) throws ExecutionException {
-    String line;
 
-    // sorted list of input annotations
+    // get the right output annotation set based on the runtime
+    // parameter settings
     AnnotationSet annotSet = (inputASName == null || inputASName.trim()
             .length() == 0) ? document.getAnnotations() : document
             .getAnnotations(inputASName);
+
+    // filter so we only keep the pre-existing output annotations
     annotSet = annotSet.get(inputAnnotationType);
+
+    // sort the pre-existing output annotations
     List<Annotation> inputAnnotations = new ArrayList<Annotation>(annotSet);
     Collections.sort(inputAnnotations, new OffsetComparator());
 
+    // get the first input annotation which we want to sync with
     Annotation currentInput = inputAnnotations.remove(0);
 
+    // get the output annotation set based on the runtime parameter
+    // settings
     AnnotationSet aSet = (outputASName == null || outputASName.trim().length() == 0)
             ? document.getAnnotations()
             : document.getAnnotations(outputASName);
 
+    // get a decoder using the charset
     Charset charset = Charset.forName(encoding);
-
     CharsetDecoder charsetDecoder = charset.newDecoder();
-    // run tagger and save output
+
     try {
-      // get the tagger output (gate input)
+      // get a reader over the output from the tagger remembering to
+      // handle the encoding
       BufferedReader input = new BufferedReader(new InputStreamReader(in,
               charsetDecoder));
 
+      // compile the regular expression so that we can interpret the
+      // output
       Pattern resultPattern = Pattern.compile(regex);
 
+      // get the outputAnnotations that occur from the current location
+      // onwards as we don't want to look at annotations we have already
+      // dealt with
       List<Annotation> outputAnnotations = new ArrayList<Annotation>(aSet.get(
               outputAnnotationType, currentInput.getStartNode().getOffset(),
               currentInput.getEndNode().getOffset()));
 
+      // if we are not updatind existing annotations then remove them
+      // all else make sure they are sorted by offset
       if(!updateAnnotations)
         aSet.removeAll(outputAnnotations);
       else Collections.sort(outputAnnotations, new OffsetComparator());
 
+      String line;
       int currentPosition = 0;
 
       while((line = input.readLine()) != null) {
+        // for each line in the output...
+
+        // if we are debugging then dump the output line
         if(debug) System.out.println(line);
 
+        // get the matcher for the line from the regex
         Matcher m = resultPattern.matcher(line);
 
         if(m.matches()) {
+          // if the line matches then it contains data we need to
+          // process
+
+          // create an empty feature map to store the data
           FeatureMap features = Factory.newFeatureMap();
 
           for(Map.Entry<Object, Object> kv : featureMapping.entrySet()) {
+            // for each feature in the provided mapping, get the
+            // associated capture group from the matcher and store the
+            // info in the feature map
             features.put(kv.getKey(), m.group(Integer.parseInt(String
                     .valueOf(kv.getValue()))));
           }
 
           while(updateAnnotations && outputAnnotations.size() == 0) {
-            if(inputAnnotations.size() == 0)
+            // if we are updating annotations but there is nothing to
+            // update then...
+
+            if(inputAnnotations.size() == 0) {
+              // if there are no new annotations then something has gone
+              // badly wrong and we are out of sync so throw an
+              // exception
               throw new Exception("no remaining annotations of type "
                       + outputAnnotationType + " to update");
+            }
 
+            // move onto the next input annotation
             currentInput = inputAnnotations.remove(0);
+
+            // find the matching ouptut annotations and then sort them
             outputAnnotations.addAll(aSet.get(outputAnnotationType,
                     currentInput.getStartNode().getOffset(), currentInput
                             .getEndNode().getOffset()));
             Collections.sort(outputAnnotations, new OffsetComparator());
           }
 
+          // get the next annotation if there is any
           Annotation next = (outputAnnotations.size() == 0
                   ? null
                   : outputAnnotations.remove(0));
 
           if(next != null && updateAnnotations) {
+            // if there is an annotation and we are updating then...
 
+            // get an encoded version of the input annotations string
+            // feature
             String encoded = new String(charset.encode(
                     (String)next.getFeatures().get(STRING_FEATURE_NAME))
                     .array(), encoding);
 
+            // if the encoded verson isn't the same as the output from
+            // the tagger we have lost sync so throw an exception
             if(!encoded.equals(features.get(STRING_FEATURE_NAME)))
               throw new Exception("annotations are out of sync: " + encoded
                       + " != " + features.get(STRING_FEATURE_NAME));
 
+            // remove the feature name so we use the existing one rather
+            // then the encoded version
             features.remove(STRING_FEATURE_NAME);
 
+            // add the features from the tagger to the existing
+            // annotation
             next.getFeatures().putAll(features);
           }
           else {
+            // if we aren't updating then...
 
+            // get a section of the document where we think the
+            // annotation will be and encode it so it matches the output
+            // from the tagger
             String encodedInput = new String(charset.encode(
                     document.getContent().getContent(
                             currentInput.getStartNode().getOffset(),
@@ -493,17 +563,30 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
 
             while((currentPosition = encodedInput.indexOf((String)features
                     .get("string"), currentPosition)) == -1) {
+              // whilst we can't find the current item from the tagger
+              // in the input...
+
+              // if there are no more input annotations then we are out
+              // of sync so panic and throw and exception
               if(inputAnnotations.size() == 0)
                 throw new Exception("no remaning annotations of type "
                         + inputAnnotationType + " to add within");
 
+              // move onto the next input annotation
               currentInput = inputAnnotations.remove(0);
 
+              // remove all the output annotations spanning the current
+              // input annotation
               aSet.removeAll(aSet.get(outputAnnotationType, currentInput
                       .getStartNode().getOffset(), currentInput.getEndNode()
                       .getOffset()));
 
+              // reset the position inside the current input annotation
+              // to 0
               currentPosition = 0;
+
+              // and finally get the encoded document section matching
+              // the input annotation again
               encodedInput = new String(charset
                       .encode(
                               document.getContent().getContent(
@@ -512,13 +595,20 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
                                       .toString()).array(), encoding);
             }
 
+            // if we get to here then we have found the right place to
+            // add an annotation, yeah!
+
+            // work out the start and end position of the new annotation
             Long start = currentPosition
                     + currentInput.getStartNode().getOffset();
             Long end = start
                     + ((String)features.get(STRING_FEATURE_NAME)).length();
 
+            // add the output annotation with the features
             aSet.add(start, end, outputAnnotationType, features);
 
+            // update the current position within the input annotation
+            // to the end of the annotation we just addeed
             currentPosition = (int)(end - currentInput.getStartNode()
                     .getOffset());
           }
