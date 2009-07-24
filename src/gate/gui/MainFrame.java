@@ -3646,7 +3646,10 @@ public class MainFrame extends JFrame implements ProgressListener,
               resTypes = reg.getPublicLrTypes();
               break;
             case PR:
-              resTypes = reg.getPublicPrTypes();
+              resTypes = new ArrayList<String>( reg.getPublicPrTypes() );
+              //GATE default controllers are now also PRs, but we don't want 
+              //them here
+              resTypes.removeAll(reg.getPublicControllerTypes());
               break;
             case APP:
               resTypes = reg.getPublicControllerTypes();
