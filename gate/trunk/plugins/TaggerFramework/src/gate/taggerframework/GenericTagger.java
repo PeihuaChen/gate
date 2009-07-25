@@ -48,7 +48,7 @@ import java.util.regex.Pattern;
  * output do not have to be the same) should be compatible with this PR.
  * 
  * @author Mark A. Greenwood
- * @author Rene W
+ * @author Rene Witte
  */
 @CreoleResource(comment = "The Generic Tagger is Generic!")
 public class GenericTagger extends AbstractLanguageAnalyser implements
