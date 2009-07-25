@@ -15,14 +15,16 @@ import gate.compound.CompoundDocument;
 public interface CombiningMethod extends Serializable {
 
 	/**
-	 * This method takes an instance of compound document and returns an
-	 * instance of composite document
+	 * This method takes an instance of compound document and after creating
+	 * an instance of a composite document based on the provided parameters returns
+	 * it.
 	 * 
 	 * @param compoundDocument
+	 * @param parameters
 	 * @return
 	 */
   @SuppressWarnings("unchecked")
 	public CompositeDocument combine(CompoundDocument compoundDocument,
-			Map parameters) throws CombiningMethodException;
+			Map<String, Object> parameters) throws CombiningMethodException;
 
 }

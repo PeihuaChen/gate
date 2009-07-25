@@ -1,23 +1,14 @@
 package gate.composite.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import gate.Annotation;
-import gate.AnnotationSet;
 import gate.Document;
-import gate.Factory;
-import gate.FeatureMap;
-import gate.Gate;
-import gate.composite.CombiningMethod;
 import gate.composite.CombiningMethodException;
 import gate.composite.CompositeDocument;
-import gate.composite.OffsetDetails;
 import gate.compound.CompoundDocument;
 import gate.compound.impl.AnnotationStream;
 import gate.util.OffsetComparator;
@@ -44,30 +35,9 @@ import gate.util.OffsetComparator;
  * 
  * @author niraj
  */
-public class DefaultCombiningMethod implements CombiningMethod {
+public class DefaultCombiningMethod extends AbstractCombiningMethod {
 
   private static final long serialVersionUID = 4050197561715800118L;
-
-  private String unitAnnotationType;
-
-  private String inputASName;
-
-  private boolean copyUnderlyingAnnotations;
-
-  private HashMap<String, List<OffsetDetails>> offsetMappings;
-
-  public DefaultCombiningMethod() {
-    offsetMappings = new HashMap<String, List<OffsetDetails>>();
-  }
-
-  /**
-   * Returns the Ids of combined documents
-   * 
-   * @return
-   */
-  public Set<String> getCombinedDocumentsIds() {
-    return offsetMappings.keySet();
-  }
 
   /**
    * The parameters must contain two parameters "unitAnnotationType" and
@@ -84,25 +54,25 @@ public class DefaultCombiningMethod implements CombiningMethod {
           Map parameters) throws CombiningMethodException {
     try {
 
-      // first find out what user has provided
-      // param1 = unitAnnotationType = what's the unit of combination.
-      // For example given two documents if user says Sentence, the new
-      // document will have the
-      // following arrangement
-      // doc1Sentence1
-      // doc2Sentence1
+      // parameters
+      String unitAnnotationType = (String)parameters.get("unitAnnotationType");
+      if(unitAnnotationType == null || unitAnnotationType.trim().length() == 0)
+        throw new CombiningMethodException("unitAnnotationType cannot be null");
 
-      // doc1Sentence2
-      // doc2Sentence2
-      this.unitAnnotationType = (String)parameters.get("unitAnnotationType");
-      this.inputASName = (String)parameters.get("inputASName");
+      String inputASName = (String)parameters.get("inputASName");
       String copy = (String)parameters.get("copyUnderlyingAnnotations");
-      this.copyUnderlyingAnnotations = copy == null
+      boolean copyUnderlyingAnnotations = copy == null
               ? false
               : Boolean.parseBoolean((String)parameters
                       .get("copyUnderlyingAnnotations"));
-      if(this.offsetMappings != null) this.offsetMappings.clear();
+      Set<String> annotationTypesToCopy = null;
+      if(!copyUnderlyingAnnotations)
+        annotationTypesToCopy = new HashSet<String>();
+
       
+      // initialize startDocument
+      startDocument(compoundDocument, inputASName, annotationTypesToCopy);
+
       // obtain a list of documentIDs
       List<String> documentIDs = compoundDocument.getDocumentIDs();
       int total = 0;
@@ -125,19 +95,6 @@ public class DefaultCombiningMethod implements CombiningMethod {
                 documentID, new OffsetComparator());
       }
 
-      // we also need to create a composite document
-      // for that we need text from all documents
-      // 1. alignment
-      // 2. unitAnnotationType
-      StringBuffer str = new StringBuffer();
-      CompositeDocument doc = null;
-
-      if(unitAnnotationType == null || unitAnnotationType.trim().length() == 0)
-        throw new CombiningMethodException("unitAnnotationType cannot be null");
-
-      String toAdd = "<?xml version=\"1.0\"?><composite>";
-      ArrayList<OffsetDetails> annotations = new ArrayList<OffsetDetails>();
-
       boolean breaked = false;
       while(true) {
         for(int i = 0; i < streams.length; i++) {
@@ -148,125 +105,18 @@ public class DefaultCombiningMethod implements CombiningMethod {
           }
 
           String docID = streams[i].getLanguage();
-          ArrayList<OffsetDetails> offsets = (ArrayList<OffsetDetails>)offsetMappings
-                  .get(docID);
-          if(offsets == null) offsets = new ArrayList<OffsetDetails>();
-
-          OffsetDetails offset = new OffsetDetails();
-          offset
-                  .setOldStartOffset(annot.getStartNode().getOffset()
-                          .longValue());
-          offset.setOldEndOffset(annot.getEndNode().getOffset().longValue());
-          offset.setNewStartOffset(str.length());
-          str.append(streams[i].getText(annot));
-          offset.setNewEndOffset(str.length());
-          offset.setOriginalAnnotation(annot);
-          offsets.add(offset);
-          annotations.add(offset);
-
-          OffsetDetails unitAnnotDetails = new OffsetDetails();
-          unitAnnotDetails.setOldStartOffset(offset.getOldStartOffset());
-          unitAnnotDetails.setOldEndOffset(offset.getOldEndOffset());
-          unitAnnotDetails.setNewStartOffset(offset.getNewStartOffset());
-          unitAnnotDetails.setNewEndOffset(offset.getNewEndOffset());
-          offsets.add(unitAnnotDetails);
-          
-          if(copyUnderlyingAnnotations) {
-            AnnotationSet tempSet = streams[i].getUnderlyingAnnotations(annot);
-            Iterator iter = tempSet.iterator();
-            while(iter.hasNext()) {
-              Annotation anAnnot = (Annotation)iter.next();
-              OffsetDetails anOffset = new OffsetDetails();
-              anOffset.setOldStartOffset(anAnnot.getStartNode().getOffset()
-                      .longValue());
-              anOffset.setOldEndOffset(anAnnot.getEndNode().getOffset()
-                      .longValue());
-
-              long stDiff = anOffset.getOldStartOffset()
-                      - offset.getOldStartOffset();
-              long enDiff = anOffset.getOldEndOffset()
-                      - offset.getOldEndOffset();
-
-              anOffset.setNewStartOffset(offset.getNewStartOffset() + stDiff);
-              anOffset.setNewEndOffset(offset.getNewEndOffset() + enDiff);
-              anOffset.setOriginalAnnotation(anAnnot);
-              offsets.add(anOffset);
-              annotations.add(anOffset);
-            }
-          }
-          str.append("\n");
-
-          offsetMappings.put(docID, offsets);
+          Document doc = compoundDocument.getDocument(docID);
+          // adding it to the composite document
+          addContent(doc, annot);
         }
         if(breaked) break;
       }
-
-      str = str.insert(0, toAdd);
-      str.append("</composite>");
-      FeatureMap features = Factory.newFeatureMap();
-      features.put("collectRepositioningInfo", compoundDocument
-              .getCollectRepositioningInfo());
-      features.put("encoding", compoundDocument.getEncoding());
-      features.put("markupAware", new Boolean(true));
-      features.put("preserveOriginalContent", compoundDocument
-              .getPreserveOriginalContent());
-      features.put("stringContent", str.toString());
-      FeatureMap subFeatures = Factory.newFeatureMap();
-      Gate.setHiddenAttribute(subFeatures, true);
-      doc = (CompositeDocument)Factory.createResource(
-              "gate.composite.impl.CompositeDocumentImpl", features,
-              subFeatures);
-
-      ((gate.composite.impl.CompositeDocumentImpl)doc).disableListener = true;
-      AnnotationSet aSet = (String)this.inputASName == null
-              || this.inputASName.trim().length() == 0
-              ? doc.getAnnotations()
-              : doc.getAnnotations(this.inputASName);
-
-      // lets add all annotations now
-      for(OffsetDetails od : annotations) {
-        String type = od.getOriginalAnnotation().getType();
-        gate.FeatureMap f = od.getOriginalAnnotation().getFeatures();
-        Integer id = aSet.add(new Long(od.getNewStartOffset()), new Long(od
-                .getNewEndOffset()), type, f);
-        od.setNewAnnotation(aSet.get(id));
-      }
-      ((gate.composite.impl.CompositeDocumentImpl)doc).disableListener = false;
-
-      doc.setName(CompositeDocument.COMPOSITE_DOC_NAME);
-      doc.setCombiningMethod(this);
-      doc.setOffsetMappingInformation(offsetMappings);
-      doc.setCombinedDocumentsIds(new HashSet<String>(compoundDocument
-              .getDocumentIDs()));
-      doc.setCompoundDocument(compoundDocument);
-      return doc;
+      
+      // finalize document
+      return finalizeDocument();
     }
     catch(Exception e) {
       throw new CombiningMethodException(e);
     }
-  }
-
-  public boolean isCopyUnderlyingAnnotations() {
-    return copyUnderlyingAnnotations;
-  }
-
-  public void setCopyUnderlyingAnnotations(boolean copyUnderlyingAnnotations) {
-    this.copyUnderlyingAnnotations = copyUnderlyingAnnotations;
-  }
-
-  public String getInputASName() {
-    return inputASName;
-  }
-
-  public void setInputASName(String inputASName) {
-    this.inputASName = inputASName;
-  }
-
-  public String getUnitAnnotationType() {
-    return unitAnnotationType;
-  }
-
-  public void setUnitAnnotationType(String unitAnnotationType) {
-    this.unitAnnotationType = unitAnnotationType;
   }
 }
