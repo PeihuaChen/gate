@@ -22,9 +22,9 @@ import gate.creole.ResourceInstantiationException;
 import gate.util.InvalidOffsetException;
 
 /**
- * Abstract implementation of the combining method. Classes extending this class
- * must use startDocument() before adding any content (i.e. addContent) and
- * must finalizeDocument() at the end of all additions.
+ * Abstract implementation of the combining method. Classes extending
+ * this class must use startDocument() before adding any content (i.e.
+ * addContent) and must finalizeDocument() at the end of all additions.
  * 
  * @author niraj
  */
@@ -45,6 +45,8 @@ public abstract class AbstractCombiningMethod implements CombiningMethod {
   protected Set<String> annotationTypesToCopy;
 
   protected String inputASName;
+
+  private boolean startDocumentCalled = false;
 
   /**
    * User must call this method to start a composite document
@@ -69,10 +71,17 @@ public abstract class AbstractCombiningMethod implements CombiningMethod {
     this.offsets = new ArrayList<OffsetDetails>();
     documentContent = new StringBuffer();
     toAdd = "<?xml version=\"1.0\"?><composite>";
+    startDocumentCalled = true;
   }
 
   protected CompositeDocument finalizeDocument()
           throws CombiningMethodException {
+    if(!startDocumentCalled)
+      throw new CombiningMethodException(
+              "CompositeDocument is not initialized - please "
+                      + "call the startDocument() method to initialize the "
+                      + "composite document");
+
     documentContent = documentContent.insert(0, toAdd);
     documentContent.append("</composite>");
     FeatureMap features = Factory.newFeatureMap();
@@ -146,7 +155,11 @@ public abstract class AbstractCombiningMethod implements CombiningMethod {
    */
   protected long[] addContent(Document srcDocument, Annotation unitAnnotation)
           throws CombiningMethodException {
-
+    if(!startDocumentCalled)
+      throw new CombiningMethodException(
+              "CompositeDocument is not initialized - please "
+                      + "call the startDocument() method to initialize the "
+                      + "composite document");
     AnnotationSet inputAS = inputASName == null
             || inputASName.trim().length() == 0
             ? srcDocument.getAnnotations()
