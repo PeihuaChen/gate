@@ -69,7 +69,7 @@ public class CombineMembersPR extends AbstractLanguageAnalyser implements
 
 		}
 
-		HashMap<String, String> params = new HashMap<String, String>();
+		HashMap<String, Object> params = new HashMap<String, Object>();
 		String[] prms = parameters.split(";");
 		if (prms != null) {
 			for (int i = 0; i < prms.length; i++) {
@@ -87,7 +87,6 @@ public class CombineMembersPR extends AbstractLanguageAnalyser implements
 		try {
 			Document compositeDocument = combiningMethodInst.combine(
 					(CompoundDocument) document, params);
-			compositeDocument.setName(CompositeDocument.COMPOSITE_DOC_NAME);
 			// we need to delete it first, incase if it is already there
 			((CompoundDocument) document)
 					.removeDocument(CompositeDocument.COMPOSITE_DOC_NAME);
