@@ -81,19 +81,23 @@ public class ProcessAnnotationsPR extends AbstractLanguageAnalyser implements
 
     // add the current document as a member of the compound document
     compoundDoc.addDocument(document.getName(), document);
+    Corpus tempCorpus = null;
+
     try {
       Map<String, Object> map = new HashMap<String, Object>();
       map.put(CombineFromAnnotID.INPUT_AS_NAME_FEATURE_NAME, inputAS);
       map.put(CombineFromAnnotID.DOCUMENT_ID_FEATURE_NAME, document.getName());
       map.put(CombineFromAnnotID.ANNOTATION_TYPES_TO_COPY_FEATURE_NAME,
               annotTypesToCopy);
+      tempCorpus = Factory.newCorpus("compoundDocCorpus");
+      tempCorpus.add(compoundDoc);
+      controller.setCorpus(tempCorpus);
 
       for(Annotation annotation : unitSet) {
 
         map.put(CombineFromAnnotID.ANNOTATION_ID_FEATURE_NAME, annotation
                 .getId());
         CompositeDocument compositeDoc = null;
-        Corpus corpus = null;
         try {
           compositeDoc = combiningMethodInst.combine(
                   compoundDoc, map);
@@ -105,36 +109,31 @@ public class ProcessAnnotationsPR extends AbstractLanguageAnalyser implements
           compoundDoc.setCurrentDocument(CompositeDocument.COMPOSITE_DOC_NAME);
           
           // now run the application on the composite document
-          corpus = gate.Factory.newCorpus("compoundDocCorpus");
-          corpus.add(compoundDoc);
-          controller.setCorpus(corpus);
           controller.execute();
           
-          // finally get rid of the composite document
-          compoundDoc.removeDocument(CompositeDocument.COMPOSITE_DOC_NAME);
-          gate.Factory.deleteResource(compositeDoc);
-          gate.Factory.deleteResource(corpus);
-          compositeDoc = null;
         }
         catch(CombiningMethodException e) {
           throw new ExecutionException(e);
-        }
-        catch(ResourceInstantiationException e) {
-          throw new ExecutionException(e);
         } finally {
+          // finally get rid of the composite document
+          compoundDoc.removeDocument(CompositeDocument.COMPOSITE_DOC_NAME);
+
           if(compositeDoc != null) {
             gate.Factory.deleteResource(compositeDoc);
-          }
-          
-          if(corpus != null) {
-            gate.Factory.deleteResource(corpus);
           }
         }
       }
     }
+    catch(ResourceInstantiationException e) {
+      throw new ExecutionException(e);
+    }
     finally {
       compoundDoc.removeDocument(document.getName());
       compoundDoc.removeDocument(CompositeDocument.COMPOSITE_DOC_NAME);
+      if(tempCorpus != null) {
+        gate.Factory.deleteResource(tempCorpus);
+      }
+
     }
   }
 

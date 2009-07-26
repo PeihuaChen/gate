@@ -25,6 +25,7 @@ import gate.event.AnnotationSetEvent;
 import gate.event.AnnotationSetListener;
 import gate.event.DocumentEvent;
 import gate.event.DocumentListener;
+import gate.event.FeatureMapListener;
 import gate.util.GateRuntimeException;
 import gate.util.InvalidOffsetException;
 
@@ -37,7 +38,8 @@ public class CompositeDocumentImpl extends DocumentImpl implements
                                                        CompositeDocument,
                                                        AnnotationSetListener,
                                                        DocumentListener,
-                                                       AnnotationListener {
+                                                       AnnotationListener,
+                                                       FeatureMapListener {
 
   private static final long serialVersionUID = -1379936764549428131L;
 
@@ -83,6 +85,7 @@ public class CompositeDocumentImpl extends DocumentImpl implements
       }
     }
     this.addDocumentListener(this);
+    this.getFeatures().addFeatureMapListener(this);
     return this;
   }
 
@@ -223,6 +226,21 @@ public class CompositeDocumentImpl extends DocumentImpl implements
   /**
    * This method returns the respective offset in the source document.
    */
+  public OffsetDetails getOffsetDetails(String srcDocumentID, Integer id) {
+    List<OffsetDetails> list = offsetMappings.get(srcDocumentID);
+    if(list == null) return null;
+
+    for(int i = 0; i < list.size(); i++) {
+      OffsetDetails od = list.get(i);
+      if(od.getNewAnnotation() != null
+              && od.getNewAnnotation().getId().equals(id)) return od;
+    }
+    return null;
+  }
+
+  /**
+   * This method returns the respective offset in the source document.
+   */
   public void addNewOffsetDetails(String srcDocumentID, OffsetDetails od) {
     List<OffsetDetails> list = offsetMappings.get(srcDocumentID);
     if(list == null) {
@@ -335,6 +353,49 @@ public class CompositeDocumentImpl extends DocumentImpl implements
           if(od == null) continue;
           Annotation toUse = od.getOriginalAnnotation();
           toUse.setFeatures(annot.getFeatures());
+        }
+      }
+    }
+  }
+
+  public void featureMapUpdated() {
+    Map<Object, List<List<Integer>>> matches = (Map<Object, List<List<Integer>>>)this
+            .getFeatures().get("MatchesAnnots");
+    if(matches == null) return;
+    for(List<List<Integer>> topList : matches.values()) {
+      for(List<Integer> list : topList) {
+        Map<String, List<Integer>> newList = new HashMap<String, List<Integer>>();
+        for(Integer id : list) {
+          for(String docID : combinedDocumentIds) {
+            // find out the details which refer to the deleted
+            // annotation
+            OffsetDetails od = getOffsetDetails(docID, id);
+            if(od == null) continue;
+
+            // bingo found it
+            List<Integer> subMatches = newList.get(docID);
+            if(subMatches == null) {
+              subMatches = new ArrayList<Integer>();
+              newList.put(docID, subMatches);
+            }
+            subMatches.add(od.getOriginalAnnotation().getId());
+          }
+        }
+        for(String docID : newList.keySet()) {
+          Document aDoc = compoundDocument.getDocument(docID);
+          Map<Object, List<List<Integer>>> docMatches = (Map<Object, List<List<Integer>>>)aDoc
+                  .getFeatures().get("MatchesAnnots");
+          if(docMatches == null) {
+            docMatches = new HashMap<Object, List<List<Integer>>>();
+            aDoc.getFeatures().put("MatchesAnnots", docMatches);
+          }
+          
+          List<List<Integer>> listOfList = docMatches.get(null);
+          if(listOfList == null) {
+            listOfList = new ArrayList<List<Integer>>();
+            docMatches.put(null, listOfList);
+          }
+          listOfList.add(newList.get(docID));
         }
       }
     }
