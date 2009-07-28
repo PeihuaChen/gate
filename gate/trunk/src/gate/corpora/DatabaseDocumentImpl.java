@@ -423,6 +423,7 @@ public class DatabaseDocumentImpl extends DocumentImpl
     */
   public AnnotationSet getAnnotations(String name) {
 
+    if(name == null || "".equals(name)) return getAnnotations();
     //0. preconditions
     Assert.assertNotNull(name);
 

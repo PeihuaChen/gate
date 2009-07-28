@@ -605,11 +605,11 @@ public class DocumentImpl extends AbstractLanguageResource implements
 
   /**
    * Get a named set of annotations. Creates a new set if one with this name
-   * doesn't exist yet. If the provided name is null then it returns the default
-   * annotation set.
+   * doesn't exist yet. If the provided name is null or the empty string then
+   * it returns the default annotation set.
    */
   public AnnotationSet getAnnotations(String name) {
-    if(name == null) return getAnnotations();
+    if(name == null || "".equals(name)) return getAnnotations();
     if(namedAnnotSets == null) {
       namedAnnotSets = new HashMap<String, AnnotationSet>();
     }
