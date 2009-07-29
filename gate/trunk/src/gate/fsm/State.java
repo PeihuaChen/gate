@@ -38,8 +38,8 @@ public class State implements JapeConstants {
   public static final int UNVISITED_INDEX = 2;
   public static final int INITIAL_INDEX = 0;
   public static final String INITIAL_RULE = "_____Initial_State_for_all_rules";
-  public static final String UNKNOWN_RULE = "_____UNKNOWN_RULE";
-  public static final String UNVISITED_RULE = "_____UNVISITED_STATE_PATHOLOGICAL";
+  public static final String UNKNOWN_RULE = "___UNKNOWN_RULES_TYPE_1";
+  public static final String UNVISITED_RULE = "___UNKNOWN_RULES_TYPE_2";
   
   // Points to the rule in the FSM which created this state
   private int indexInRuleList = UNVISITED_INDEX;
