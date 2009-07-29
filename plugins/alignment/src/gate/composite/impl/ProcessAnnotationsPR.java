@@ -89,7 +89,10 @@ public class ProcessAnnotationsPR extends AbstractLanguageAnalyser implements
       map.put(CombineFromAnnotID.DOCUMENT_ID_FEATURE_NAME, document.getName());
       map.put(CombineFromAnnotID.ANNOTATION_TYPES_TO_COPY_FEATURE_NAME,
               annotTypesToCopy);
-      tempCorpus = Factory.newCorpus("compoundDocCorpus");
+      FeatureMap hideMap = Factory.newFeatureMap();
+      Gate.setHiddenAttribute(hideMap, true);
+      tempCorpus = (Corpus)Factory.createResource("gate.corpora.CorpusImpl",
+              Factory.newFeatureMap(), hideMap, "compoundDocCorpus");
       tempCorpus.add(compoundDoc);
       controller.setCorpus(tempCorpus);
 
@@ -99,22 +102,22 @@ public class ProcessAnnotationsPR extends AbstractLanguageAnalyser implements
                 .getId());
         CompositeDocument compositeDoc = null;
         try {
-          compositeDoc = combiningMethodInst.combine(
-                  compoundDoc, map);
+          compositeDoc = combiningMethodInst.combine(compoundDoc, map);
           compoundDoc.removeDocument(CompositeDocument.COMPOSITE_DOC_NAME);
           compoundDoc.addDocument(CompositeDocument.COMPOSITE_DOC_NAME,
                   compositeDoc);
-          
+
           // change focus to composite document
           compoundDoc.setCurrentDocument(CompositeDocument.COMPOSITE_DOC_NAME);
-          
+
           // now run the application on the composite document
           controller.execute();
-          
+
         }
         catch(CombiningMethodException e) {
           throw new ExecutionException(e);
-        } finally {
+        }
+        finally {
           // finally get rid of the composite document
           compoundDoc.removeDocument(CompositeDocument.COMPOSITE_DOC_NAME);
 
