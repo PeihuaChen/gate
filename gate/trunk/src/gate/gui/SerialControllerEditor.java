@@ -1230,16 +1230,7 @@ public class SerialControllerEditor extends AbstractVisualResource
       for (ProcessingResource pr : prs) {
         controller.add(insertion, pr);
         insertion++;
-      }
-      // transfer the selection
-      for (ProcessingResource pr : prs) {
-        for (int row = 0; row < memberPRsTable.getRowCount(); row++) {
-          if (memberPRsTable.getValueAt(row,
-                memberPRsTable.convertColumnIndexToView(1)) == pr) {
-            memberPRsTable.addRowSelectionInterval(row, row);
-          }
-        }
-      }
+      }      
       memberPRsTable.requestFocusInWindow();
     }
   }
