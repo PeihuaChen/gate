@@ -21,6 +21,7 @@ import gate.util.Err;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.text.NumberFormat;
 import javax.swing.*;
 import javax.swing.table.TableCellEditor;
@@ -118,6 +119,12 @@ public class NewResourceDialog extends JDialog {
     okBtn.addActionListener(applyAction);
     helpBtn.addActionListener(helpAction);
     cancelBtn.addActionListener(cancelAction);
+
+    // disable Enter key in the table so this key will confirm the dialog
+    InputMap im = parametersEditor.getInputMap(
+      JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
+    im.put(enter, "none");
 
     // define keystrokes action bindings at the level of the main window
     InputMap inputMap = ((JComponent)this.getContentPane()).

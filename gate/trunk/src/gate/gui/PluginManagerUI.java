@@ -33,7 +33,7 @@ import gate.swing.XJTable;
 import gate.util.*;
 
 /**
- * This is the user interface used for plugin management 
+ * This is the user interface used for plugins management.
  */
 public class PluginManagerUI extends JDialog implements GateConstants{
   
@@ -69,10 +69,6 @@ public class PluginManagerUI extends JDialog implements GateConstants{
       setCellRenderer(rendererEditor);
     mainTable.getColumnModel().getColumn(ICON_COLUMN).
       setCellRenderer(new IconTableCellRenderer());
-    mainTable.getColumnModel().getColumn(LOAD_NOW_COLUMN)
-      .setCellEditor(new CheckBoxCellEditor());
-    mainTable.getColumnModel().getColumn(LOAD_ALWAYS_COLUMN)
-      .setCellEditor(new CheckBoxCellEditor());
 
     resourcesListModel = new ResourcesListModel();
     resourcesList = new JList(resourcesListModel);
@@ -124,7 +120,10 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     JButton okButton = new JButton(new OkAction());
     hBox.add(okButton);
     hBox.add(Box.createHorizontalStrut(20));
+    hBox.add(new JButton(new HelpAction()));
+    hBox.add(Box.createHorizontalStrut(20));
     hBox.add(new JButton(new CancelAction()));
+    constraints.insets = new Insets(2, 2, 8, 2);
     getContentPane().add(hBox, constraints);
     getRootPane().setDefaultButton(okButton);
   }
@@ -136,21 +135,18 @@ public class PluginManagerUI extends JDialog implements GateConstants{
        resourcesListModel.dataChanged();
      }
     });
-    mainTable.addKeyListener(new KeyAdapter() {
-      public void keyPressed(KeyEvent e) {
-        // redefine Enter key
-        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-          e.consume();
-          (new OkAction()).actionPerformed(null);
-        }
-      }
-    });
     mainSplit.addComponentListener(new ComponentAdapter(){
       public void componentShown(ComponentEvent e){
         //try to honour left component's preferred size 
         mainSplit.setDividerLocation(-100);
       }
     });
+
+    // disable Enter key in the table so this key will confirm the dialog
+    InputMap im = mainTable.getInputMap(
+      JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
+    im.put(enter, "none");
 
     // define keystrokes action bindings at the level of the main window
     InputMap inputMap = ((JComponent)this.getContentPane()).
@@ -161,13 +157,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     inputMap.put(KeyStroke.getKeyStroke("ESCAPE"), "Cancel");
     actionMap.put("Cancel", new CancelAction());
     inputMap.put(KeyStroke.getKeyStroke("F1"), "Help");
-    actionMap.put("Help", new AbstractAction() {
-      public void actionPerformed(ActionEvent e) {
-        MainFrame.getInstance().showHelpFrame(
-          "http://gate.ac.uk/userguide/sec:howto:plugins",
-          "gate.gui.PluginManagerUI");
-      }
-    });
+    actionMap.put("Help", new HelpAction());
   }
   
   protected Boolean getLoadNow(URL url){
@@ -257,9 +247,13 @@ public class PluginManagerUI extends JDialog implements GateConstants{
       switch(columnIndex){
         case LOAD_NOW_COLUMN: 
           loadNowByURL.put(dInfo.getUrl(), valueBoolean);
+          // for some reason the focus is sometime lost after editing
+          // however it is needed for Enter key to execute OkAction
+          mainTable.requestFocusInWindow();
           break;
         case LOAD_ALWAYS_COLUMN:
           loadAlwaysByURL.put(dInfo.getUrl(), valueBoolean);
+          mainTable.requestFocusInWindow();
           break;
       }
     }
@@ -424,30 +418,6 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     }
   }
   
-  protected class CheckBoxCellEditor extends AbstractCellEditor
-    implements TableCellEditor, ActionListener {
-    JCheckBox checkBox;
-    public CheckBoxCellEditor() {
-      checkBox = new JCheckBox();
-      checkBox.setHorizontalAlignment(SwingConstants.CENTER);
-      checkBox.addActionListener(this);
-    }
-    public boolean shouldSelectCell(EventObject anEvent) {
-      return false;
-    }
-    public void actionPerformed(ActionEvent e) {
-      fireEditingStopped();
-    }
-    public Object getCellEditorValue() {
-      return checkBox.isSelected();
-    }
-    public Component getTableCellEditorComponent(JTable table,
-            Object value, boolean isSelected, int row, int col) {
-      checkBox.setSelected((table.getValueAt(row, col).equals(true)));
-      return checkBox;
-    }
-  }
-
   protected class OkAction extends AbstractAction {
     public OkAction(){
       super("OK");
@@ -506,15 +476,26 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     }
     super.setVisible(visible);
   }
+
   protected class CancelAction extends AbstractAction {
     public CancelAction(){
       super("Cancel");
     }
-    
     public void actionPerformed(ActionEvent evt){
       setVisible(false);
       loadNowByURL.clear();
       loadAlwaysByURL.clear();      
+    }
+  }
+
+  protected class HelpAction extends AbstractAction {
+    public HelpAction() {
+      super("Help");
+    }
+    public void actionPerformed(ActionEvent evt) {
+      MainFrame.getInstance().showHelpFrame(
+        "http://gate.ac.uk/userguide/sec:howto:plugins",
+        "gate.gui.PluginManagerUI");
     }
   }
 
