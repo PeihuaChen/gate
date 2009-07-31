@@ -88,12 +88,12 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     toolbar.add(exportToHtmlAction = new ExportToHtmlAction());
     panel.add(toolbar);
     panel.add(Box.createHorizontalStrut(5));
-    panel.add(new JLabel("Key Annotation Set"));
+    panel.add(new JLabel("Key Set"));
     keyAnnotationSetCombo = new JComboBox();
     keyAnnotationSetCombo.setPrototypeDisplayValue("annotation set");
     panel.add(keyAnnotationSetCombo);
     panel.add(Box.createHorizontalStrut(5));
-    panel.add(new JLabel("Response Annotation Set"));
+    panel.add(new JLabel("Response Set"));
     responseAnnotationSetCombo = new JComboBox();
     responseAnnotationSetCombo.setPrototypeDisplayValue("annotation set");
     panel.add(responseAnnotationSetCombo);
@@ -160,7 +160,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     // when the view is shown update the tables
     addAncestorListener(new AncestorListener() {
       public void ancestorAdded(AncestorEvent event) {
-        if (!corpusChanged) { return; }
+        if (!isShowing() || !corpusChanged) { return; }
         SwingUtilities.invokeLater(new Runnable(){
           public void run(){
             updateAnnotationSets(null);
@@ -316,7 +316,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     corpus.addCorpusListener(this);
 
     corpusChanged = true;
-    if (!isVisible()) { return; }
+    if (!isShowing()) { return; }
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
         updateAnnotationSets(null);
@@ -326,7 +326,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
 
   public void documentAdded(final CorpusEvent e) {
     corpusChanged = true;
-    if (!isVisible()) { return; }
+    if (!isShowing()) { return; }
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
         updateAnnotationSets(e.getDocument());
@@ -336,7 +336,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
 
   public void documentRemoved(final CorpusEvent e) {
     corpusChanged = true;
-    if (!isVisible()) { return; }
+    if (!isShowing()) { return; }
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
         updateAnnotationSets(null);
@@ -365,18 +365,12 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       new DefaultComboBoxModel(annotationSetsNames.toArray()));
     if(!annotationSetsNames.isEmpty()){
       keyAnnotationSetCombo.setSelectedItem(selectedItem);
-      if (keyAnnotationSetCombo.getSelectedIndex() == -1) {
-        keyAnnotationSetCombo.setSelectedIndex(0);
-      }
     }
     selectedItem = responseAnnotationSetCombo.getSelectedItem();
     responseAnnotationSetCombo.setModel(
       new DefaultComboBoxModel(annotationSetsNames.toArray()));
     if(!annotationSetsNames.isEmpty()){
       responseAnnotationSetCombo.setSelectedItem(selectedItem);
-      if (responseAnnotationSetCombo.getSelectedIndex() == -1) {
-        responseAnnotationSetCombo.setSelectedIndex(0);
-      }
     }
   }
 
