@@ -136,96 +136,105 @@ public class AnnotationDiffGUI extends JFrame{
     isStandalone = (root instanceof MainFrame);
   }
 
-
   protected void initGUI(){
     getContentPane().setLayout(new GridBagLayout());
     GridBagConstraints constraints = new GridBagConstraints();
-    //changes from defaults
     constraints.anchor = GridBagConstraints.WEST;
-    constraints.fill = GridBagConstraints.HORIZONTAL;
-    constraints.insets = new Insets(2,4,2,4);
+    constraints.insets = new Insets(2, 2, 2, 2);
 
-    //ROW 0
-    constraints.gridx = 1;
-    getContentPane().add(new JLabel("Document"), constraints);
-    constraints.gridx = GridBagConstraints.RELATIVE;
-    getContentPane().add(new JLabel("Annotation set"), constraints);
-    constraints.gridwidth = 2;
-    getContentPane().add(new JLabel("FScore weight"), constraints);
+    /*******************************************
+     * First row - Settings and 'Compare' button *
+     *******************************************/
+
+    constraints.gridy = 0;
+    JLabel keyDocLabel = new JLabel("Key doc:");
+    keyDocLabel.setToolTipText("Key document");
+    getContentPane().add(keyDocLabel, constraints);
+    keyDocCombo = new JComboBox();
+    keyDocCombo.setPrototypeDisplayValue("long_document_name");
+    getContentPane().add(keyDocCombo, constraints);
+    JLabel keySetLabel = new JLabel("Key set:");
+    keySetLabel.setToolTipText("Key annotation set");
+    getContentPane().add(keySetLabel, constraints);
+    keySetCombo = new JComboBox();
+    keySetCombo.setPrototypeDisplayValue("long_set_name");
+    getContentPane().add(keySetCombo, constraints);
+    JLabel typeLabel = new JLabel("Type:");
+    typeLabel.setToolTipText("Annotation type");
+    getContentPane().add(typeLabel, constraints);
+    annTypeCombo = new JComboBox();
+    annTypeCombo.setPrototypeDisplayValue("very_long_type");
+    constraints.gridwidth = 3;
+    getContentPane().add(annTypeCombo, constraints);
     constraints.gridwidth = 1;
-    weightTxt = new JTextField("1.00");
-    getContentPane().add(weightTxt, constraints);
+    JLabel weightLabel = new JLabel("Weight");
+    weightLabel.setToolTipText("FScore weight");
+    getContentPane().add(weightLabel, constraints);
     diffAction = new DiffAction();
     diffAction.setEnabled(false);
-
     doDiffBtn = new JButton(diffAction);
     doDiffBtn.setForeground((Color)
       UIManager.getDefaults().get("Button.disabledText"));
     doDiffBtn.setToolTipText("Choose two annotation sets "
             +"that have at least one annotation type in common.");
-    constraints.gridx = 7;
-    constraints.gridheight = 3;
-    constraints.fill = GridBagConstraints.NONE;
+    constraints.gridheight = 2;
     getContentPane().add(doDiffBtn, constraints);
     constraints.gridheight = 1;
-    constraints.fill = GridBagConstraints.HORIZONTAL;
 
-    //ROW 1
-    constraints.gridx = 0;
-    constraints.gridy = 1;
-    JLabel keyLabel = new JLabel("Key:");
-    keyLabel.setToolTipText("Key:");
-    getContentPane().add(keyLabel, constraints);
-    constraints.gridx = GridBagConstraints.RELATIVE;
-    keyDocCombo = new JComboBox();
-    keyDocCombo.setPrototypeDisplayValue("long_document_name");
-    getContentPane().add(keyDocCombo, constraints);
-    keySetCombo = new JComboBox();
-    keySetCombo.setPrototypeDisplayValue("long_set_name");
-    getContentPane().add(keySetCombo, constraints);
-    constraints.gridwidth = 2;
-    getContentPane().add(new JLabel("Annotation type:"), constraints);
-    annTypeCombo = new JComboBox();
-    annTypeCombo.setPrototypeDisplayValue("long_type");
-    getContentPane().add(annTypeCombo, constraints);
-    constraints.gridwidth = 1;
+    /*************************
+     * Second row - Settings *
+     *************************/
 
-    //ROW 2
-    constraints.gridy = 2;
+    constraints.gridy++;
     constraints.gridx = 0;
-    JLabel responseLabel = new JLabel("Response:");
-    responseLabel.setToolTipText("Response:");
-    getContentPane().add(responseLabel, constraints);
+    JLabel responseDocLabel = new JLabel("Resp. doc:");
+    responseDocLabel.setToolTipText("Response document");
+    getContentPane().add(responseDocLabel, constraints);
     constraints.gridx = GridBagConstraints.RELATIVE;
     resDocCombo = new JComboBox();
     resDocCombo.setPrototypeDisplayValue("long_document_name");
     getContentPane().add(resDocCombo, constraints);
+    JLabel responseSetLabel = new JLabel("Resp. set:");
+    responseSetLabel.setToolTipText("Response annotation set");
+    getContentPane().add(responseSetLabel, constraints);
     resSetCombo = new JComboBox();
     resSetCombo.setPrototypeDisplayValue("long_set_name");
     getContentPane().add(resSetCombo, constraints);
     getContentPane().add(new JLabel("Features:"), constraints);
     ButtonGroup btnGrp = new ButtonGroup();
-    allFeaturesBtn = new JRadioButton("All");
+    allFeaturesBtn = new JRadioButton("all");
     allFeaturesBtn.setOpaque(false);
+    allFeaturesBtn.setMargin(new Insets(0, 0, 0, 1));
+    allFeaturesBtn.setIconTextGap(1);
     btnGrp.add(allFeaturesBtn);
+    constraints.insets = new Insets(0, 0, 0, 0);
     getContentPane().add(allFeaturesBtn, constraints);
-    someFeaturesBtn = new JRadioButton("Some");
+    someFeaturesBtn = new JRadioButton("some");
     someFeaturesBtn.setOpaque(false);
+    someFeaturesBtn.setMargin(new Insets(0, 0, 0, 1));
+    someFeaturesBtn.setIconTextGap(1);
     btnGrp.add(someFeaturesBtn);
     getContentPane().add(someFeaturesBtn, constraints);
-    noFeaturesBtn = new JRadioButton("None");
+    noFeaturesBtn = new JRadioButton("none");
     noFeaturesBtn.setOpaque(false);
+    noFeaturesBtn.setMargin(new Insets(0, 0, 0, 1));
+    noFeaturesBtn.setIconTextGap(1);
     btnGrp.add(noFeaturesBtn);
     getContentPane().add(noFeaturesBtn, constraints);
+    constraints.insets = new Insets(2, 2, 2, 2);
     noFeaturesBtn.setSelected(true);
+    weightTxt = new JTextField("1.00");
+    weightTxt.setToolTipText("FScore weight between key response");
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    getContentPane().add(weightTxt, constraints);
+    constraints.fill = GridBagConstraints.NONE;
 
-    //ROW 3 -> the table
-    constraints.gridy = 3;
+    /********************************
+     * Third row - Comparison table *
+     ********************************/
+
+    constraints.gridy++;
     constraints.gridx = 0;
-    constraints.gridwidth = 10;
-    constraints.weightx = 1;
-    constraints.weighty = 1;
-    constraints.fill = GridBagConstraints.BOTH;
     diffTableModel = new DiffTableModel();
     diffTable = new XJTable(diffTableModel);
     diffTable.setDefaultRenderer(String.class, new DiffTableCellRenderer());
@@ -247,6 +256,8 @@ public class AnnotationDiffGUI extends JFrame{
     diffTable.setRowSelectionAllowed(true);
     diffTable.setColumnSelectionAllowed(true);
     diffTable.setEnableHidingColumns(true);
+    diffTable.hideColumn(DiffTableModel.COL_KEY_COPY);
+    diffTable.hideColumn(DiffTableModel.COL_RES_COPY);
 
     Comparator startEndComparator = new Comparator() {
       public int compare(Object o1, Object o2) {
@@ -281,182 +292,203 @@ public class AnnotationDiffGUI extends JFrame{
     diffTable.setSortedColumn(DiffTableModel.COL_MATCH);
     diffTable.setAscending(true);
     scroller = new JScrollPane(diffTable);
+    constraints.gridwidth = GridBagConstraints.REMAINDER;
+    constraints.weightx = 1;
+    constraints.weighty = 1;
+    constraints.fill = GridBagConstraints.BOTH;
     getContentPane().add(scroller, constraints);
-
-    //build the results pane
-    resultsPane = new JPanel();
-    resultsPane.setLayout(new GridBagLayout());
-    //COLUMN 0
-    constraints.gridy = GridBagConstraints.RELATIVE;
-    constraints.gridx = 0;
+    constraints.gridwidth = 1;
     constraints.weightx = 0;
     constraints.weighty = 0;
-    constraints.gridwidth = 1;
-    constraints.gridheight = 1;
-    constraints.anchor = GridBagConstraints.WEST;
     constraints.fill = GridBagConstraints.NONE;
+
+    /*************************************************
+     * Fourth row - Tabbed panes, status and buttons *
+     *************************************************/
+
+    bottomTabbedPane = new JTabbedPane(
+      JTabbedPane.BOTTOM, JTabbedPane.WRAP_TAB_LAYOUT);
+
+    // statistics pane will be added to the bottom tabbed pane
+    statisticsPane = new JPanel(new GridBagLayout());
+    GridBagConstraints constraints2 = new GridBagConstraints();
+    constraints2.insets = new Insets(2, 2, 2, 2);
+
+    // first column
+    constraints2.gridx = 0;
+    constraints2.anchor = GridBagConstraints.WEST;
     JLabel lbl = new JLabel("Matching:");
     lbl.setToolTipText("Matching:");
     lbl.setBackground(diffTable.getBackground());
-    resultsPane.add(lbl, constraints);
+    statisticsPane.add(lbl, constraints2);
     lbl = new JLabel("Overlapping:");
     lbl.setToolTipText("Overlapping:");
     lbl.setBackground(PARTIALLY_CORRECT_BG);
     lbl.setOpaque(true);
-    resultsPane.add(lbl, constraints);
+    statisticsPane.add(lbl, constraints2);
     lbl = new JLabel("Missing:");
     lbl.setToolTipText("Missing:");
     lbl.setBackground(MISSING_BG);
     lbl.setOpaque(true);
-    resultsPane.add(lbl, constraints);
+    statisticsPane.add(lbl, constraints2);
     lbl = new JLabel("Spurious:");
     lbl.setToolTipText("Spurious:");
     lbl.setBackground(FALSE_POSITIVE_BG);
     lbl.setOpaque(true);
-    resultsPane.add(lbl, constraints);
+    statisticsPane.add(lbl, constraints2);
 
-    //COLUMN 1
-    constraints.gridx = 1;
+    // second column
+    constraints2.gridx++;
     correctLbl = new JLabel("0");
-    resultsPane.add(correctLbl, constraints);
+    statisticsPane.add(correctLbl, constraints2);
     partiallyCorrectLbl = new JLabel("0");
-    resultsPane.add(partiallyCorrectLbl, constraints);
+    statisticsPane.add(partiallyCorrectLbl, constraints2);
     missingLbl = new JLabel("0");
-    resultsPane.add(missingLbl, constraints);
+    statisticsPane.add(missingLbl, constraints2);
     falsePozLbl = new JLabel("0");
-    resultsPane.add(falsePozLbl, constraints);
+    statisticsPane.add(falsePozLbl, constraints2);
 
-    //COLUMN 2
-    constraints.gridx = 2;
-    constraints.insets = new Insets(4, 30, 4, 4);
-    resultsPane.add(Box.createGlue());
+    // third column
+    constraints2.gridx++;
+    constraints2.insets = new Insets(4, 30, 4, 4);
+    statisticsPane.add(Box.createGlue());
     lbl = new JLabel("Strict:");
-    resultsPane.add(lbl, constraints);
+    statisticsPane.add(lbl, constraints2);
     lbl = new JLabel("Lenient:");
-    resultsPane.add(lbl, constraints);
+    statisticsPane.add(lbl, constraints2);
     lbl = new JLabel("Average:");
-    resultsPane.add(lbl, constraints);
+    statisticsPane.add(lbl, constraints2);
 
-    //COLUMN 3
-    constraints.gridx = 3;
-    constraints.insets = new Insets(4, 4, 4, 4);
+    // fourth column
+    constraints2.gridx++;
+    constraints2.insets = new Insets(4, 4, 4, 4);
     lbl = new JLabel("Recall");
-    resultsPane.add(lbl, constraints);
+    statisticsPane.add(lbl, constraints2);
     recallStrictLbl = new JLabel("0.00");
-    resultsPane.add(recallStrictLbl, constraints);
+    statisticsPane.add(recallStrictLbl, constraints2);
     recallLenientLbl = new JLabel("0.00");
-    resultsPane.add(recallLenientLbl, constraints);
+    statisticsPane.add(recallLenientLbl, constraints2);
     recallAveLbl = new JLabel("0.00");
-    resultsPane.add(recallAveLbl, constraints);
+    statisticsPane.add(recallAveLbl, constraints2);
 
-    //COLUMN 4
-    constraints.gridx = 4;
+    // fifth column
+    constraints2.gridx++;
     lbl = new JLabel("Precision");
-    resultsPane.add(lbl, constraints);
+    statisticsPane.add(lbl, constraints2);
     precisionStrictLbl = new JLabel("0.00");
-    resultsPane.add(precisionStrictLbl, constraints);
+    statisticsPane.add(precisionStrictLbl, constraints2);
     precisionLenientLbl = new JLabel("0.00");
-    resultsPane.add(precisionLenientLbl, constraints);
+    statisticsPane.add(precisionLenientLbl, constraints2);
     precisionAveLbl = new JLabel("0.00");
-    resultsPane.add(precisionAveLbl, constraints);
+    statisticsPane.add(precisionAveLbl, constraints2);
 
-    //COLUMN 5
-    constraints.gridx = 5;
+    // sixth column
+    constraints2.gridx++;
     lbl = new JLabel("FScore");
-    resultsPane.add(lbl, constraints);
+    statisticsPane.add(lbl, constraints2);
     fmeasureStrictLbl = new JLabel("0.00");
-    resultsPane.add(fmeasureStrictLbl, constraints);
+    statisticsPane.add(fmeasureStrictLbl, constraints2);
     fmeasureLenientLbl = new JLabel("0.00");
-    resultsPane.add(fmeasureLenientLbl, constraints);
+    statisticsPane.add(fmeasureLenientLbl, constraints2);
     fmeasureAveLbl = new JLabel("0.00");
-    resultsPane.add(fmeasureAveLbl, constraints);
+    statisticsPane.add(fmeasureAveLbl, constraints2);
 
-    //COLUMN 6
-    constraints.gridx = 6;
+    bottomTabbedPane.add("Statistics", statisticsPane);
+
+    // adjudication pane will be added to the bottom tabbed pane
+    JPanel adjudicationPane = new JPanel(new GridBagLayout());
+    constraints2 = new GridBagConstraints();
+    constraints2.insets = new Insets(2, 2, 2, 2);
+
+    // first row
+    constraints2.gridy = 0;
+    adjudicationPane.add(new JLabel("Target set:"), constraints2);
+    consensusASTextField = new JTextField("consensus", 15);
+    consensusASTextField.setToolTipText(
+      "Annotation set name where to copy the selected annotations");
+    adjudicationPane.add(consensusASTextField, constraints2);
+
+    // second row
+    constraints2.gridy++;
+    constraints2.gridx = 0;
     copyToConsensusASAction = new CopyToConsensusASAction();
     copyToConsensusASAction.setEnabled(false);
     copyToConsensusBtn = new JButton(copyToConsensusASAction);
-    constraints.gridwidth = 2;
-    constraints.gridheight = 2;
-    resultsPane.add(copyToConsensusBtn, constraints);
-    constraints.gridwidth = 1;
-    constraints.gridheight = 1;
-    resultsPane.add(new JLabel("To:"), constraints);
+    constraints2.gridwidth = 2;
+    adjudicationPane.add(copyToConsensusBtn, constraints2);
 
-    //COLUMN 7
-    constraints.gridx = 7;
-    constraints.gridy = 2;
-    consensusASTextField = new JTextField("consensus", 10);
-    consensusASTextField.setToolTipText(
-      "Annotation set name where to copy the selected annotations");
-    constraints.fill = GridBagConstraints.HORIZONTAL;
-    resultsPane.add(consensusASTextField, constraints);
-    constraints.fill = GridBagConstraints.NONE;
-    constraints.gridy = GridBagConstraints.RELATIVE;
+    bottomTabbedPane.add("Adjudication", adjudicationPane);
 
-    //COLUMN 8
-    constraints.gridx = 8;
-    constraints.gridheight = 2;
-    constraints.gridwidth = GridBagConstraints.REMAINDER;
+    JPanel bottomPanel = new JPanel(new GridBagLayout());
+    constraints2 = new GridBagConstraints();
+    constraints2.insets = new Insets(2, 2, 2, 2);
+
+    // add the bottom tabbed pane to the bottom panel
+    constraints2.gridx = 0;
+    constraints2.gridy = 0;
+    constraints2.gridheight = 3;
+    constraints2.anchor = GridBagConstraints.WEST;
+    bottomPanel.add(bottomTabbedPane, constraints2);
+    constraints2.gridheight = 1;
+
+    // status bar
+    constraints2.gridx++;
+    statusLabel = new JLabel();
+    statusLabel.setBackground(diffTable.getBackground());
+    constraints2.insets = new Insets(2, 6, 6, 2);
+    bottomPanel.add(statusLabel, constraints2);
+
+    // progress bar
+    progressBar = new JProgressBar();
+    progressBar.setMinimumSize(new Dimension(5, 5));
+    progressBar.setBackground(diffTable.getBackground());
+    progressBar.setOpaque(true);
+    progressBar.setVisible(false);
+    bottomPanel.add(progressBar, constraints2);
+
+    // Show Document and Export to HTML buttons
+    constraints2.gridy++;
+    constraints2.gridwidth = 2;
+    constraints2.fill = GridBagConstraints.NONE;
     if (!isStandalone) {
       showDocumentAction = new ShowDocumentAction();
       showDocumentAction.setEnabled(false);
       showDocumentBtn = new JButton(showDocumentAction);
-      showDocumentBtn.setToolTipText("Use first the \"Compute Differences\"" +
+      showDocumentBtn.setToolTipText("Use first the \"Compare\"" +
         " button then select an annotation in the table.");
-      resultsPane.add(showDocumentBtn, constraints);
+      bottomPanel.add(showDocumentBtn, constraints2);
     }
+    constraints2.gridy++;
     htmlExportAction = new HTMLExportAction();
     htmlExportAction.setEnabled(false);
     htmlExportBtn = new JButton(htmlExportAction);
-    htmlExportBtn.setToolTipText(
-      "Use first the \"Compute Differences\" button.");
-    resultsPane.add(htmlExportBtn, constraints);
+    htmlExportBtn.setToolTipText("Use first the \"Compare\" button.");
+    bottomPanel.add(htmlExportBtn, constraints2);
 
-    //Finished building the results pane
-    //Add it to the dialog
-
-    resultsPane.setBackground(Color.red);
-
-    //ROW 4 - the results
-    constraints.gridy = 4;
+    // add the bottom panel to the fourth row
+    constraints.gridy++;
     constraints.gridx = 0;
-    constraints.weightx = 0;
-    constraints.weighty = 0;
-    constraints.gridwidth = 8;
-    constraints.gridheight = 1;
+    constraints.gridwidth = GridBagConstraints.REMAINDER;
+    constraints.gridheight = GridBagConstraints.REMAINDER;
     constraints.anchor = GridBagConstraints.WEST;
-    constraints.fill = GridBagConstraints.NONE;
-    getContentPane().add(resultsPane, constraints);
+    constraints.insets = new Insets(0, 0, 0, 0);
+    getContentPane().add(bottomPanel, constraints);
+    constraints.insets = new Insets(2, 2, 2, 2);
 
-    // ROW 5
-    constraints.gridy = 5;
-    // status bar
-    statusLabel = new JLabel();
-    constraints.gridx = 0;
-    constraints.gridwidth = 7;
-    constraints.anchor = GridBagConstraints.SOUTHWEST;
-    constraints.fill = GridBagConstraints.HORIZONTAL;
-    getContentPane().add(statusLabel, constraints);
-
-    // the progress bar
-    progressBar = new JProgressBar();
-    constraints.gridx = 7;
-    constraints.gridwidth = 1;
-    constraints.anchor = GridBagConstraints.SOUTHEAST;
-    getContentPane().add(progressBar, constraints);
-
-    //set the colours
+    // set the background colour
     Color background = diffTable.getBackground();
     getContentPane().setBackground(background);
     scroller.setBackground(background);
     scroller.getViewport().setBackground(background);
-    resultsPane.setBackground(background);
+    statisticsPane.setBackground(background);
+    adjudicationPane.setBackground(background);
+    bottomPanel.setBackground(background);
+    bottomTabbedPane.setBackground(background);
 
     featureslistModel = new DefaultListModel();
     featuresList = new JList(featureslistModel);
-    featuresList.
-        setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+    featuresList.setSelectionMode(
+      ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     keySetCombo.requestFocusInWindow();
   }
 
@@ -666,10 +698,9 @@ public class AnnotationDiffGUI extends JFrame{
             showDocumentAction.getValue(Action.SHORT_DESCRIPTION));
         } else {
           htmlExportAction.setEnabled(false);
-          htmlExportBtn.setToolTipText(
-            "Use first the \"Compute Differences\" button.");
+          htmlExportBtn.setToolTipText("Use first the \"Compare\" button.");
           showDocumentAction.setEnabled(false);
-          showDocumentBtn.setToolTipText("Use first the \"Compute Differences\""
+          showDocumentBtn.setToolTipText("Use first the \"Compare\""
             + " button then select an annotation in the table.");
         }
       }
@@ -876,17 +907,29 @@ public class AnnotationDiffGUI extends JFrame{
       }
     });
 
-    // add a key shortcut for the 'copy to consensus' action
-    getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-      .put(KeyStroke.getKeyStroke("shift alt RIGHT"), "copy to consensus");
-    getRootPane().getActionMap().put("copy to consensus",
-      copyToConsensusASAction);
+    bottomTabbedPane.addChangeListener(new ChangeListener(){
+      public void stateChanged(ChangeEvent e) {
+        if (bottomTabbedPane.getSelectedIndex() == 0) {
+          diffTable.hideColumn(DiffTableModel.COL_KEY_COPY);
+          diffTable.hideColumn(DiffTableModel.COL_RES_COPY);
+        } else {
+          int middleIndex = Math.round(diffTable.getColumnCount() / 2);
+          diffTable.showColumn(DiffTableModel.COL_KEY_COPY, middleIndex);
+          diffTable.showColumn(DiffTableModel.COL_RES_COPY, middleIndex + 2);
+          diffTable.getColumnModel().getColumn(DiffTableModel.COL_KEY_COPY)
+            .setPreferredWidth(10);
+          diffTable.getColumnModel().getColumn(DiffTableModel.COL_RES_COPY)
+            .setPreferredWidth(10);
+          diffTable.doLayout();
+        }
+      }
+    });
   }
 
   public void pack(){
     super.pack();
     // add some vertical space for the table
-    setSize(getWidth(), getHeight() + 200);
+    setSize(getWidth(), getHeight() + 300);
   }
 
   protected void populateGUI(){
@@ -926,7 +969,7 @@ public class AnnotationDiffGUI extends JFrame{
 
   protected class DiffAction extends AbstractAction{
     public DiffAction(){
-      super("<html>Compute<br>Differences</html>");
+      super("Compare");
       putValue(SHORT_DESCRIPTION, "Performs comparisons between annotations");
       putValue(MNEMONIC_KEY, KeyEvent.VK_ENTER);
       putValue(SMALL_ICON, MainFrame.getIcon("crystal-clear-action-run"));
@@ -940,6 +983,8 @@ public class AnnotationDiffGUI extends JFrame{
 
       // waiting animations
       progressBar.setIndeterminate(true);
+      statusLabel.setVisible(false);
+      progressBar.setVisible(true);
       getContentPane().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
       // compute the differences
@@ -1025,6 +1070,8 @@ public class AnnotationDiffGUI extends JFrame{
         diffTable.requestFocusInWindow();
         // stop waiting animations
         progressBar.setIndeterminate(false);
+        progressBar.setVisible(false);
+        statusLabel.setVisible(true);
         getContentPane().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         showDocumentAction.setEnabled(false);
 
@@ -1064,7 +1111,7 @@ public class AnnotationDiffGUI extends JFrame{
    */
   protected class CopyToConsensusASAction extends AbstractAction {
     public CopyToConsensusASAction(){
-      super("Copy selection");
+      super("Copy selection to target set");
       putValue(SHORT_DESCRIPTION,
         "<html>Move selected annotations to the destination annotation set" +
           "<br>and hide their paired annotations if not moved." +
@@ -1268,7 +1315,7 @@ public class AnnotationDiffGUI extends JFrame{
       super("Show document");
       putValue(SHORT_DESCRIPTION,
         "Show the selected annotation in the document editor.");
-      putValue(SMALL_ICON, MainFrame.getIcon("crystal-clear-app-xmag"));
+      putValue(SMALL_ICON, MainFrame.getIcon("document"));
       putValue(MNEMONIC_KEY, KeyEvent.VK_UP);
     }
     public void actionPerformed(ActionEvent evt){
@@ -1388,26 +1435,6 @@ public class AnnotationDiffGUI extends JFrame{
       String tip;
       try {
       switch (colModel){
-        case DiffTableModel.COL_KEY_COPY:
-          tip = (pairing.getKey() == null) ?
-            "<html>There is no key annotation."
-          : "<html>Select this key annotation to copy.";
-          tip += "<br><small><i>"
-            + "Space key invert the selected check boxes state."
-            + "<br>Right-click for context menu.</i></small></html>";
-          component.setEnabled(pairing.getKey() != null);
-          ((JCheckBox)component).setSelected(keyCopyValueRows.get(rowModel));
-          break;
-        case DiffTableModel.COL_RES_COPY:
-          tip = (pairing.getResponse() == null) ?
-            "<html>There is no response annotation."
-          : "<html>Select this response annotation to copy.";
-          tip += "<br><small><i>"
-            + "Space key invert the selected check boxes state."
-            + "<br>Right-click for context menu.</i></small></html>";
-          component.setEnabled(pairing.getResponse() != null);
-          ((JCheckBox)component).setSelected(resCopyValueRows.get(rowModel));
-           break;
         case DiffTableModel.COL_KEY_STRING:
           Annotation key = pairing.getKey();
           if (key == null) {
@@ -1455,9 +1482,29 @@ public class AnnotationDiffGUI extends JFrame{
             ((JLabel)component).setText(features);
           }
           break;
+        case DiffTableModel.COL_KEY_COPY:
+          tip = (pairing.getKey() == null) ?
+            "<html>There is no key annotation."
+          : "<html>Select this key annotation to copy.";
+          tip += "<br><small><i>"
+            + "Space key invert the selected check boxes state."
+            + "<br>Right-click for context menu.</i></small></html>";
+          component.setEnabled(pairing.getKey() != null);
+          ((JCheckBox)component).setSelected(keyCopyValueRows.get(rowModel));
+          break;
         case DiffTableModel.COL_MATCH: tip =
           "matching =, overlapping ~, missing -?, spurious ?-, mismatching <>";
           break;
+        case DiffTableModel.COL_RES_COPY:
+          tip = (pairing.getResponse() == null) ?
+            "<html>There is no response annotation."
+          : "<html>Select this response annotation to copy.";
+          tip += "<br><small><i>"
+            + "Space key invert the selected check boxes state."
+            + "<br>Right-click for context menu.</i></small></html>";
+          component.setEnabled(pairing.getResponse() != null);
+          ((JCheckBox)component).setSelected(resCopyValueRows.get(rowModel));
+           break;
         case DiffTableModel.COL_RES_STRING:
           Annotation response = pairing.getResponse();
           if (response == null) {
@@ -1539,18 +1586,18 @@ public class AnnotationDiffGUI extends JFrame{
     }
 
     public int getColumnCount(){
-      return COL_CNT;
+      return COL_COUNT;
     }
 
     public String getColumnName(int column){
       switch(column){
-        case COL_KEY_COPY: return "K";
-        case COL_RES_COPY: return "R";
         case COL_KEY_START: return "Start";
         case COL_KEY_END: return "End";
         case COL_KEY_STRING: return "Key";
         case COL_KEY_FEATURES: return "Features";
+        case COL_KEY_COPY: return "K";
         case COL_MATCH: return "=?";
+        case COL_RES_COPY: return "R";
         case COL_RES_START: return "Start";
         case COL_RES_END: return "End";
         case COL_RES_STRING: return "Response";
@@ -1606,8 +1653,6 @@ public class AnnotationDiffGUI extends JFrame{
       Annotation res = pairing.getResponse();
 
       switch(column){
-        case COL_KEY_COPY: return keyCopyValueRows.get(row);
-        case COL_RES_COPY: return resCopyValueRows.get(row);
         case COL_KEY_START: return key == null ? "" :
           key.getStartNode().getOffset().toString();
         case COL_KEY_END: return key == null ? "" :
@@ -1636,7 +1681,9 @@ public class AnnotationDiffGUI extends JFrame{
           return keyStr;
         case COL_KEY_FEATURES: return key == null ? "" :
           key.getFeatures().toString();
+        case COL_KEY_COPY: return keyCopyValueRows.get(row);
         case COL_MATCH: return matchLabel[pairing.getType()];
+        case COL_RES_COPY: return resCopyValueRows.get(row);
         case COL_RES_START: return res == null ? "" :
           res.getStartNode().getOffset().toString();
         case COL_RES_END: return res == null ? "" :
@@ -1699,12 +1746,6 @@ public class AnnotationDiffGUI extends JFrame{
       FeatureMap features;
       try {
       switch(columnIndex){
-        case COL_KEY_COPY:
-          keyCopyValueRows.set(rowIndex, (Boolean)aValue);
-          break;
-        case COL_RES_COPY:
-          resCopyValueRows.set(rowIndex, (Boolean)aValue);
-          break;
         case COL_KEY_START:
           if (Long.valueOf((String) aValue)
             .equals(key.getStartNode().getOffset())) { break; }
@@ -1759,6 +1800,12 @@ public class AnnotationDiffGUI extends JFrame{
           }
           statusLabel.setText("Features changed.");
           statusLabel.setForeground(Color.BLACK);
+          break;
+        case COL_KEY_COPY:
+          keyCopyValueRows.set(rowIndex, (Boolean)aValue);
+          break;
+        case COL_RES_COPY:
+          resCopyValueRows.set(rowIndex, (Boolean)aValue);
           break;
         case COL_RES_START:
           if (Long.valueOf((String) aValue)
@@ -1833,14 +1880,14 @@ public class AnnotationDiffGUI extends JFrame{
       }
     }
 
-    protected static final int COL_CNT = 11;
-    protected static final int COL_KEY_COPY = 0;
-    protected static final int COL_RES_COPY = 1;
-    protected static final int COL_KEY_START = 2;
-    protected static final int COL_KEY_END = 3;
-    protected static final int COL_KEY_STRING = 4;
-    protected static final int COL_KEY_FEATURES = 5;
-    protected static final int COL_MATCH = 6;
+    protected static final int COL_COUNT = 11;
+    protected static final int COL_KEY_START = 0;
+    protected static final int COL_KEY_END = 1;
+    protected static final int COL_KEY_STRING = 2;
+    protected static final int COL_KEY_FEATURES = 3;
+    protected static final int COL_KEY_COPY = 4;
+    protected static final int COL_MATCH = 5;
+    protected static final int COL_RES_COPY = 6;
     protected static final int COL_RES_START = 7;
     protected static final int COL_RES_END = 8;
     protected static final int COL_RES_STRING = 9;
@@ -1887,7 +1934,8 @@ public class AnnotationDiffGUI extends JFrame{
   protected JButton htmlExportBtn;
   protected JButton showDocumentBtn;
 
-  protected JPanel resultsPane;
+  protected JTabbedPane bottomTabbedPane;
+  protected JPanel statisticsPane;
   protected JLabel correctLbl;
   protected JLabel partiallyCorrectLbl;
   protected JLabel missingLbl;
