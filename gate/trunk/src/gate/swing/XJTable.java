@@ -220,16 +220,45 @@ public class XJTable extends JTable{
   
   /**
    * Gets the hidden state for a column
-   * @deprecated The columns are really hidden now so you can get
-   * the TableColumnModel to get the visible columns and the TableModel
-   * to get all the columns.
-   * @param columnIndex the column
-   * @return always false
+   * @param columnIndex index of the column in the table model
+   * @return hidden state for a column
    */
   public boolean isColumnHidden(int columnIndex){
+    for (TableColumn hiddenColumn : hiddenColumns) {
+      if (hiddenColumn.getModelIndex() == columnIndex) {
+        return true;
+      }
+    }
     return false;
   }
-  
+
+  /**
+   * Hide a column. Do nothing if already hidden.
+   * @param columnIndex index of the column in the table model
+   */
+  public void hideColumn(int columnIndex) {
+    int viewColumn = convertColumnIndexToView(columnIndex);
+    TableColumn columnToHide = columnModel.getColumn(viewColumn);
+    columnModel.removeColumn(columnToHide);
+    hiddenColumns.add(columnToHide);
+  }
+
+  /**
+   * Show a column. Do nothing if already shown.
+   * @param columnIndex index of the column in the table model
+   * @param insertionIndex index of the view where the colum will be inserted
+   */
+  public void showColumn(int columnIndex, int insertionIndex) {
+    for (TableColumn hiddenColumn : hiddenColumns) {
+      if (hiddenColumn.getModelIndex() == columnIndex) {
+        columnModel.addColumn(hiddenColumn);
+        columnModel.moveColumn(columnModel.getColumnCount()-1, insertionIndex);
+        hiddenColumns.remove(hiddenColumn);
+        break;
+      }
+    }
+  }
+
   /**
    * @param ascending The ascending to set. True by default.
    */
@@ -712,9 +741,7 @@ public class XJTable extends JTable{
             popup.add(new AbstractAction("Hide column "
               + dataModel.getColumnName(column)){
               public void actionPerformed(ActionEvent e) {
-                TableColumn columnToHide = columnModel.getColumn(viewColumn);
-                columnModel.removeColumn(columnToHide);
-                hiddenColumns.add(columnToHide);
+                hideColumn(column);
               }
             });
           }
@@ -726,11 +753,7 @@ public class XJTable extends JTable{
             popup.add(new AbstractAction("Show column "
               + dataModel.getColumnName(hiddenColumn.getModelIndex())){
               public void actionPerformed(ActionEvent e) {
-                columnModel.addColumn(hiddenColumnF);
-                columnModel.moveColumn(
-                  columnModel.getColumnCount()-1, viewColumn);
-                hiddenColumns.remove(hiddenColumnF);
-
+                showColumn(hiddenColumnF.getModelIndex(), viewColumn);
               }
             });
           }
