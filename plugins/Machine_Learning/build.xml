@@ -10,6 +10,7 @@
   <property name="gate.home" location="../.." />
   <property name="gate.lib" location="${gate.home}/lib" />
   <property name="gate.jar" location="${gate.home}/bin/gate.jar" />
+  <property name="docDir" location="doc" />
  
   <!-- Just the core GATE classes -->
   <path id="gate.classpath">
