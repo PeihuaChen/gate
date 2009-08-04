@@ -98,6 +98,23 @@
       <test name="gate.creole.ml.maxent.TestMaxentWrapper" />
     </junit>
   </target>
+
+  <target name="javadoc">
+    <javadoc access="protected" 
+              destdir="${docDir}/javadoc"
+              classpathref="compile.classpath"
+              Encoding="UTF-8"
+              Use="yes"
+              Windowtitle="GATE learning plugin JavaDoc"
+              link="http://java.sun.com/j2se/1.5.0/docs/api/"
+              docencoding="UTF-8"
+              charset="UTF-8"
+              source="1.5"
+              useexternalfile="yes"
+              breakiterator="true">
+      <fileset dir="${src}"/>        
+    </javadoc>
+  </target>
   
   <!-- Targets used by the main GATE build file -->
   <target name="build" depends="dist" />
