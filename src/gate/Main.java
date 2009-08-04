@@ -311,7 +311,16 @@ public class Main {
     try {
       UIManager.setLookAndFeel(lnfClassName);
     } catch(Exception e) {
-      throw new gate.util.GateRuntimeException(e.toString());
+      System.err.print("Could not set your preferred Look and Feel. The error was:\n" +
+              e.toString() + "\nReverting to using Java Look and Feel");
+      try {
+        UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+      }catch(Exception e1) {
+        //we just can't catch a break here. Let's forget about look and feel.
+        System.err.print(
+                "Could not set the cross-platform Look and Feel either. The error was:\n" +
+                e1.toString() + "\nGiving up on Look and Feel.");
+      }
     }
 
     //read the user config data
