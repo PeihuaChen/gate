@@ -71,11 +71,9 @@ public class NameBearerHandle implements Handle, StatusListener,
       if(rData != null) {
         iconName = rData.getIcon();
         if(iconName == null) {
-          if(target instanceof LanguageResource)
-            iconName = "lr";
-          else if(target instanceof ProcessingResource)
-            iconName = "pr";
-          else if(target instanceof Controller) iconName = "application";
+          if(target instanceof Controller) iconName = "application";
+          else if(target instanceof LanguageResource) iconName = "lr";
+          else if(target instanceof ProcessingResource) iconName = "pr";
         }
         if(target instanceof Controller && target.getName().startsWith("ANNIE"))
           iconName = "annie-application";
@@ -306,9 +304,7 @@ public class NameBearerHandle implements Handle, StatusListener,
       if(target instanceof com.ontotext.gate.hmm.agent.AlternativeHMMAgent) {
         fillHMMActions(staticPopupItems);
       }
-    }
-
-    else if(target instanceof LanguageResource) {
+    } else if(target instanceof LanguageResource) {
       // Language Resources
       staticPopupItems.add(null);
       if(target instanceof Document) {
@@ -356,7 +352,7 @@ public class NameBearerHandle implements Handle, StatusListener,
       staticPopupItems.add(new XJMenuItem(new SaveToAction(), sListenerProxy));
     }
 
-    else if(target instanceof Controller) {
+    if(target instanceof Controller) {
       // Applications
       staticPopupItems.add(null);
       staticPopupItems.add(
