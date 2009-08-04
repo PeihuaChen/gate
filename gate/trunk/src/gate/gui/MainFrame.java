@@ -1515,15 +1515,14 @@ public class MainFrame extends JFrame implements ProgressListener,
       public void run() {
         DefaultMutableTreeNode node;
         DefaultMutableTreeNode parent = null;
-        if(res instanceof ProcessingResource) {
+        if(res instanceof Controller) {
+          parent = applicationsRoot;
+        }else if(res instanceof ProcessingResource) {
           parent = processingResourcesRoot;
         }
         else if(res instanceof LanguageResource) {
           parent = languageResourcesRoot;
-        }
-        else if(res instanceof Controller) {
-          parent = applicationsRoot;
-        }
+        } 
         if(parent != null) {
           Enumeration children = parent.children();
           while(children.hasMoreElements()) {
