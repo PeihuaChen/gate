@@ -118,7 +118,6 @@ public class DocFeatureVectors {
                     throw new GateException(
                       "The value type for ngram is not defined!");
                   } catch(GateException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                   }
               }
@@ -233,7 +232,6 @@ public class DocFeatureVectors {
         }
       }
     } catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
     return;

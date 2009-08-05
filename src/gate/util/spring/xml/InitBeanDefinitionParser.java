@@ -49,7 +49,6 @@ public class InitBeanDefinitionParser
 
   @Override
   protected Class getBeanClass(Element element) {
-    // TODO Auto-generated method stub
     return Init.class;
   }
 

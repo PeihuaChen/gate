@@ -444,15 +444,12 @@ public class SchemaFeaturesEditor extends JPanel{
       
     }
     catch(HeadlessException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
     catch(MalformedURLException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
     catch(ResourceInstantiationException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
     

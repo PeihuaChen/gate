@@ -175,7 +175,6 @@ public class TestIaa extends TestCase {
                   .getOffset(), nameAnnType, featM);
         }
         catch(InvalidOffsetException e) {
-          // TODO Auto-generated catch block
           e.printStackTrace();
         }
       }

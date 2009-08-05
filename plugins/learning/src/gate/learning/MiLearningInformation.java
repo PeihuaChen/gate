@@ -43,13 +43,10 @@ public class MiLearningInformation {
       miNumDocsFromLast = Integer.parseInt(line[0]);
       in.close();
     } catch(UnsupportedEncodingException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     } catch(FileNotFoundException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     } catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
       
@@ -67,13 +64,10 @@ public class MiLearningInformation {
       out.flush();
       out.close();
     } catch(UnsupportedEncodingException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     } catch(FileNotFoundException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     } catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
       

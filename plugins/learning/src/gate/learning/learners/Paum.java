@@ -118,7 +118,6 @@ public class Paum extends SupervisedLearner {
     try {
       SvmLibSVM.writeLinearModelIntoFile(modelFile, b, w, totalNumFeatures);
     } catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
     

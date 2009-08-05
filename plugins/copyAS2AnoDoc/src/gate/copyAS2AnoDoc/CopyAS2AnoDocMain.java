@@ -128,15 +128,12 @@ ProcessingResource {
 
     }
     catch(ResourceInstantiationException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
     catch(MalformedURLException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
     catch(InvalidOffsetException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
    

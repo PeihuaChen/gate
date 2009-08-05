@@ -104,7 +104,6 @@ public class PaumForExec extends SupervisedLearner {
       // file
       writePAUMModelIntoFile(modelSVMFile, modelFile, totalNumFeatures);
     } catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
@@ -143,7 +142,6 @@ public class PaumForExec extends SupervisedLearner {
       // totalNumFeatures);
       writePAUMModelIntoFile(modelSVMFile, modelFile, totalNumFeatures);
     } catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
@@ -168,10 +166,8 @@ public class PaumForExec extends SupervisedLearner {
         line = svmModelBuff.readLine();
       }
     } catch(FileNotFoundException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     } catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }

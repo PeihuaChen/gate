@@ -216,7 +216,6 @@ public class JChoice extends JPanel implements ItemSelectable{
     fChoice.setMaximumFastChoices(20);
     fChoice.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e) {
-        // TODO Auto-generated method stub
         System.out.println("Action (" + e.getActionCommand() + ") :" + fChoice.getSelectedItem() + " selected!");
       }
     });

@@ -63,10 +63,8 @@ public class WekaLearning {
       modelOutputObjectFile.flush();
       modelOutputObjectFile.close();
     } catch(FileNotFoundException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     } catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
@@ -95,13 +93,10 @@ public class WekaLearning {
       wekaCl = (WekaLearner)modelInputObjectFile.readObject();
       modelInputObjectFile.close();
     } catch(FileNotFoundException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     } catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     } catch(ClassNotFoundException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
     // Apply the model to the data.
@@ -334,10 +329,8 @@ public class WekaLearning {
       }
       inData.close();
     } catch(FileNotFoundException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     } catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
     return;

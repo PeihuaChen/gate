@@ -307,7 +307,6 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
         // logFileIn.println("InputAS: " + inputASName);
       }
       catch(IOException e) {
-        // TODO Auto-generated catch block
         e.printStackTrace();
       }
     }
@@ -867,11 +866,9 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
         //LogService.close();
       }
       catch(IOException e) {
-        // TODO Auto-generated catch block
         e.printStackTrace();
       }
       catch(GateException e) {
-        // TODO Auto-generated catch block
         e.printStackTrace();
       }
 
@@ -1004,8 +1001,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
   }
 
   public void setBenchmarkId(String arg0) {
-    // TODO Auto-generated method stub
-    
+    // stub
   }
 
 }

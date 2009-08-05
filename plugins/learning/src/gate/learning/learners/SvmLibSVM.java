@@ -122,7 +122,6 @@ public class SvmLibSVM extends SupervisedLearner {
         }
       }
     } catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
@@ -198,10 +197,8 @@ public class SvmLibSVM extends SupervisedLearner {
         }
       }
     } catch(NumberFormatException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     } catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
@@ -396,10 +393,8 @@ public class SvmLibSVM extends SupervisedLearner {
         }
       }
     } catch(NumberFormatException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     } catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }

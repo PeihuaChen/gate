@@ -165,7 +165,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
      * if(numDocs == 0) { try { outNLPFeatures = new BufferedWriter(new
      * OutputStreamWriter(new FileOutputStream(new File(wdResults,
      * ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8")); }
-     * catch(IOException e) { // TODO Auto-generated catch block
+     * catch(IOException e) {
      * e.printStackTrace(); } }
      */
     // obtain the NLP features for the document
@@ -463,10 +463,8 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
           LogService.logMessage("Error! Wrong learner type.", 0);
       }
     } catch(GateException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     } catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
@@ -600,13 +598,10 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       outTFs.flush();
       outTFs.close();
     } catch(UnsupportedEncodingException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     } catch(FileNotFoundException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     } catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
@@ -635,13 +630,10 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       outNLPFeatures.flush();
       outNLPFeatures.close();
     } catch(UnsupportedEncodingException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     } catch(FileNotFoundException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     } catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
@@ -1356,10 +1348,8 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       labelInData.flush();
       labelInData.close();
     } catch(FileNotFoundException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     } catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
@@ -1524,7 +1514,6 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       out.flush();
       out.close();
     } catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
@@ -1736,7 +1725,6 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         }
       }
     } catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
@@ -1837,7 +1825,6 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
   }
 
   public void setBenchmarkId(String arg0) {
-    // TODO Auto-generated method stub
-    
+    // stub
   }
 }
