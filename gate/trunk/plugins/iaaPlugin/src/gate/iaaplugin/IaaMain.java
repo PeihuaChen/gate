@@ -601,25 +601,21 @@ public class IaaMain extends AbstractLanguageAnalyser implements
       return;
     }
     catch(UnsupportedEncodingException e) {
-      // TODO Auto-generated catch block
       this.isUsingBDM = false;
       System.out.println("There is something wrong with BDM file. So the BDM score cannot be used!");
       e.printStackTrace();
     }
     catch(FileNotFoundException e) {
-      // TODO Auto-generated catch block
       this.isUsingBDM = false;
       System.out.println("There is something wrong with BDM file. So the BDM score cannot be used!");
       e.printStackTrace();
     }
     catch(URISyntaxException e) {
-      // TODO Auto-generated catch block
       this.isUsingBDM = false;
       System.out.println("There is something wrong with BDM file. So the BDM score cannot be used!");
       e.printStackTrace();
     }
     catch(IOException e) {
-      // TODO Auto-generated catch block
       this.isUsingBDM = false;
       System.out.println("There is something wrong with BDM file. So the BDM score cannot be used!");
       e.printStackTrace();

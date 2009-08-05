@@ -64,7 +64,6 @@ public class SvmForExec extends SupervisedLearner{
       try {
         throw new Exception("no command to execute");
       } catch(Exception e) {
-        // TODO Auto-generated catch block
         e.printStackTrace();
       }
     } else {
@@ -136,7 +135,6 @@ public class SvmForExec extends SupervisedLearner{
       
       
     } catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
@@ -173,7 +171,6 @@ public class SvmForExec extends SupervisedLearner{
       
       
     } catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
 
@@ -233,7 +230,6 @@ public class SvmForExec extends SupervisedLearner{
           try {
             throw new Exception();
           } catch(Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
           }
         }
@@ -266,10 +262,8 @@ public class SvmForExec extends SupervisedLearner{
         }
       }
     } catch(FileNotFoundException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     } catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }

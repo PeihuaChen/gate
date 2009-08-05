@@ -339,10 +339,8 @@ public class MultiClassLearning {
       // delete the temporary directory
       deleteRecursively(tmpDirFile);
     } catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     } catch(InterruptedException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
@@ -538,10 +536,8 @@ public class MultiClassLearning {
       time2 -= time1;
       LogService.logMessage("Application time for class: " + time2 + "ms", 1);
     } catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     } catch(InterruptedException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
@@ -862,7 +858,6 @@ public class MultiClassLearning {
       //delete the temp data file
       tempFVDataFile.delete();
     } catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
@@ -995,7 +990,6 @@ public class MultiClassLearning {
       time2 -= time1;
       LogService.logMessage("Application time for class: " + time2 + "ms", 1);
     } catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }

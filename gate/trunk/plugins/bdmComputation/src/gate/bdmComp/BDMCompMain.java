@@ -51,7 +51,6 @@ ProcessingResource {
       Gate.getCreoleRegister().addDirectory(ontoHome.toURI().toURL());
     }
     catch(MalformedURLException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
     bdmScores = new HashSet<BDMOne>();
@@ -96,7 +95,6 @@ ProcessingResource {
           ontologyUsed = (Ontology)Factory.createResource("gate.creole.ontology.owlim.OWLIMOntologyLR", fm);
         }
         catch(ResourceInstantiationException e) {
-          // TODO Auto-generated catch block
           e.printStackTrace();
         } 
 	    }
@@ -328,19 +326,15 @@ ProcessingResource {
       
 	  }
     catch(UnsupportedEncodingException e1) {
-      // TODO Auto-generated catch block
       e1.printStackTrace();
     }
     catch(FileNotFoundException e1) {
-      // TODO Auto-generated catch block
       e1.printStackTrace();
     }
     catch(URISyntaxException e1) {
-      // TODO Auto-generated catch block
       e1.printStackTrace();
     }
     catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
       

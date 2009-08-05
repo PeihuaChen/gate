@@ -34,7 +34,6 @@ public abstract class WekaLearner implements Serializable {
         System.out.println("Learning start:");
       wekaCl.buildClassifier(instancesData);
     } catch(Exception e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
@@ -93,7 +92,6 @@ public abstract class WekaLearner implements Serializable {
         }
       }
     } catch(Exception e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }

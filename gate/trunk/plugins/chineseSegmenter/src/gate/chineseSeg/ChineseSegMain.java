@@ -338,15 +338,12 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
       System.out.println("Finished!");
     }
     catch(IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
     catch(ResourceInstantiationException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
     catch(GateException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
