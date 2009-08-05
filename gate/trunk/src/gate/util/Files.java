@@ -413,15 +413,20 @@ public class Files {
     else return getResource(resourcePath + "/" + resourceName);    
   }
 
-  /** This method takes a regular expression and a directory name and returns
-    * the set of Files that match the pattern under that directory.
-    */
-  public static Set Find(String regex, String pathFile) {
-    Set regexfinal = new HashSet();
+  /**
+   * This method takes a regular expression and a directory name and returns
+   * the set of Files that match the pattern under that directory.
+   *
+   * @param regex regular expression path that begins with <code>pathFile</code>
+   * @param pathFile directory path where to search for files
+   * @return set of file paths under <code>pathFile</code> that matches
+   *  <code>regex</code>
+   */
+  public static Set<String> Find(String regex, String pathFile) {
+    Set<String> regexfinal = new HashSet<String>();
     String[] tab;
     File file = null;
-    PrintStream printstr = null;
-    Object obj = new Object();
+
     //open a file
     try {
       file = new File(pathFile);
