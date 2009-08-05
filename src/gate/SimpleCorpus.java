@@ -38,7 +38,7 @@ public interface SimpleCorpus extends LanguageResource, List, NameBearer {
    * @return a {@link List} of Strings representing the names of the documents
    *         in this corpus.
    */
-  public List getDocumentNames();
+  public List<String> getDocumentNames();
 
   /**
    * Gets the name of a document in this corpus.
@@ -112,7 +112,7 @@ public interface SimpleCorpus extends LanguageResource, List, NameBearer {
    * Fills the provided corpus with documents extracted from the provided trec
    * file.
    * 
-   * @param trecfile
+   * @param trecFile
    *          the trec file.
    * @param encoding
    *          the encoding of the trec file.

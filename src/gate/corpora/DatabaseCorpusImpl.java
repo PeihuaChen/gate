@@ -437,16 +437,15 @@ public class DatabaseCorpusImpl extends CorpusImpl
    * @return a {@link List} of Strings representing the names of the documents
    * in this corpus.
    */
-  public List getDocumentNames(){
+  public List<String> getDocumentNames(){
 
-    List docsNames = new ArrayList();
+    List<String> docsNames = new ArrayList<String>();
 
     if(this.documentData == null)
       return docsNames;
 
-    Iterator iter = this.documentData.iterator();
-    while (iter.hasNext()) {
-      DocumentData data = (DocumentData)iter.next();
+    for (Object aDocumentData : this.documentData) {
+      DocumentData data = (DocumentData) aDocumentData;
       docsNames.add(data.getDocumentName());
     }
 

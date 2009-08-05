@@ -54,11 +54,10 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
    * @return a {@link List} of Strings representing the names of the documents
    *         in this corpus.
    */
-  public List getDocumentNames() {
-    ArrayList res = new ArrayList(supportList.size());
-    Iterator docIter = supportList.iterator();
-    while(docIter.hasNext()) {
-      res.add(((Document)docIter.next()).getName());
+  public List<String> getDocumentNames() {
+    ArrayList<String> res = new ArrayList<String>(supportList.size());
+    for (Object document : supportList) {
+      res.add(((Document) document).getName());
     }
     return res;
   }
