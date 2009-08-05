@@ -3837,8 +3837,29 @@ public class MainFrame extends JFrame implements ProgressListener,
     public void setValue(Object value) {
       if(value != null) {
         if(value instanceof String) {
-          textLabel.setText((String)value);
-          iconLabel.setIcon(null);
+          String text = (String) value;
+          if (text.equals("GATE")) {
+            textLabel.setText("GATE resources tree root ");
+            iconLabel.setIcon(getIcon("root"));
+          } else if (text.equals("Applications")) {
+            textLabel.setText(
+              "Applications: bind processing and language resources ");
+            iconLabel.setIcon(getIcon("applications"));
+          } else if (text.equals("Language Resources")) {
+            textLabel.setText("Language Resources: data used for annotating ");
+            iconLabel.setIcon(getIcon("lrs"));
+          } else if (text.equals("Processing Resources")) {
+            textLabel.setText(
+              "Processing Resources: process that annotate data ");
+            iconLabel.setIcon(getIcon("prs"));
+          } else if (text.equals("Data stores")) {
+            textLabel.setText(
+              "Datastores: repositories for large number of documents ");
+            iconLabel.setIcon(getIcon("datastores"));
+          } else {
+            textLabel.setText(text);
+            iconLabel.setIcon(null);
+          }
         }
         else if(value instanceof NameBearerHandle) {
           NameBearerHandle handle = (NameBearerHandle)value;
@@ -4168,18 +4189,23 @@ public class MainFrame extends JFrame implements ProgressListener,
         hasFocus);
       if(value == resourcesTreeRoot) {
         setIcon(MainFrame.getIcon("root"));
+        setToolTipText("GATE resources tree root ");
       }
       else if(value == applicationsRoot) {
         setIcon(MainFrame.getIcon("applications"));
+        setToolTipText("Applications: bind processing and language resources ");
       }
       else if(value == languageResourcesRoot) {
         setIcon(MainFrame.getIcon("lrs"));
+        setToolTipText("Language Resources: data used for annotating ");
       }
       else if(value == processingResourcesRoot) {
         setIcon(MainFrame.getIcon("prs"));
+        setToolTipText("Processing Resources: process that annotate data ");
       }
       else if(value == datastoresRoot) {
         setIcon(MainFrame.getIcon("datastores"));
+        setToolTipText("Datastores: repositories for large number of documents ");
       }
       else {
         // not one of the default root nodes
