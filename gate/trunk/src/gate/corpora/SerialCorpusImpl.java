@@ -100,12 +100,11 @@ public class SerialCorpusImpl extends AbstractLanguageResource
    * @return a {@link List} of Strings representing the names of the documents
    *         in this corpus.
    */
-  public List getDocumentNames() {
-    List docsNames = new ArrayList();
+  public List<String> getDocumentNames() {
+    List<String> docsNames = new ArrayList<String>();
     if(docDataList == null) return docsNames;
-    Iterator iter = docDataList.iterator();
-    while(iter.hasNext()) {
-      DocumentData data = (DocumentData)iter.next();
+    for (Object aDocDataList : docDataList) {
+      DocumentData data = (DocumentData) aDocDataList;
       docsNames.add(data.getDocumentName());
     }
     return docsNames;
