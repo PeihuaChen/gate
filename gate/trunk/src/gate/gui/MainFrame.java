@@ -3705,20 +3705,16 @@ public class MainFrame extends JFrame implements ProgressListener,
         public void menuSelected(MenuEvent e) {
           switch(type){
             case LR:
-              setToolTipText("Data used for annotating");
-              statusChanged(getToolTipText());
+              statusChanged("Data used for annotating");
               break;
             case PR:
-              setToolTipText("Process that annotate data");
-              statusChanged(getToolTipText());
+              statusChanged("Processes that annotate data");
               break;
             case APP:
-              setToolTipText("Bind processing and language resources");
-              statusChanged(getToolTipText());
+              statusChanged("Bind processing and language resources");
               break;
             default:
-              setToolTipText("Unknown resource: " + type);
-              statusChanged(getToolTipText());
+              statusChanged("Unknown resource: " + type);
           }
         }
       });
@@ -4068,23 +4064,33 @@ public class MainFrame extends JFrame implements ProgressListener,
     private static final long serialVersionUID = 1L;
     public HelpUserGuideInContextAction() {
       super("Contextual User Guide");
-      putValue(SHORT_DESCRIPTION, "Online help for the selected component");
+      putValue(SHORT_DESCRIPTION, "Online help for the selected view");
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("F1"));
     }
 
     public void actionPerformed(ActionEvent e) {
-      if (resourcesTree.getSelectionPath() != null) {
-        // get the selected element in the resource tree
-        Object userObject = ((DefaultMutableTreeNode)resourcesTree
-          .getSelectionPath().getLastPathComponent()).getUserObject();
-        if(userObject instanceof NameBearerHandle) {
-          new HelpOnItemTreeAction((NameBearerHandle)userObject)
-            .actionPerformed(null);
-        } else {
-          new HelpUserGuideAction().actionPerformed(null);
-        }
+      // get the handle for the selected tab pane resource view
+      // then call HelpOnItemTreeAction with this handle
+      JComponent largeView = (JComponent)
+        mainTabbedPane.getSelectedComponent();
+      if (largeView == null) { return; }
+      Enumeration nodesEnum = resourcesTreeRoot.preorderEnumeration();
+      boolean done = false;
+      DefaultMutableTreeNode node = resourcesTreeRoot;
+      while(!done && nodesEnum.hasMoreElements()) {
+        node = (DefaultMutableTreeNode) nodesEnum.nextElement();
+        done = node.getUserObject() instanceof Handle
+            && ((Handle)node.getUserObject()).viewsBuilt()
+            && ((Handle)node.getUserObject()).getLargeView() == largeView;
+      }
+      if(done && (Handle)node.getUserObject() instanceof NameBearerHandle) {
+        new HelpOnItemTreeAction((NameBearerHandle)node.getUserObject())
+          .actionPerformed(null);
+      } else if (mainTabbedPane.getTitleAt(mainTabbedPane
+                  .getSelectedIndex()).equals("Messages")) {
+        showHelpFrame("http://gate.ac.uk/userguide/sec:howto:guistart", null);
       } else {
-        new HelpUserGuideAction().actionPerformed(null);
+        showHelpFrame(null, node.getUserObject().getClass().getName());
       }
     }
   }
@@ -4162,23 +4168,18 @@ public class MainFrame extends JFrame implements ProgressListener,
         hasFocus);
       if(value == resourcesTreeRoot) {
         setIcon(MainFrame.getIcon("root"));
-        setToolTipText("GATE resources tree root");
       }
       else if(value == applicationsRoot) {
         setIcon(MainFrame.getIcon("applications"));
-        setToolTipText("Applications: bind processing and language resources");
       }
       else if(value == languageResourcesRoot) {
         setIcon(MainFrame.getIcon("lrs"));
-        setToolTipText("Language Resources: data used for annotating");
       }
       else if(value == processingResourcesRoot) {
         setIcon(MainFrame.getIcon("prs"));
-        setToolTipText("Processing Resources: process that annotate data");
       }
       else if(value == datastoresRoot) {
         setIcon(MainFrame.getIcon("datastores"));
-        setToolTipText("Datastores: repositories for large number of documents");
       }
       else {
         // not one of the default root nodes
@@ -4609,21 +4610,23 @@ public class MainFrame extends JFrame implements ProgressListener,
   }// class NewOntologyEditorAction
 
   /**
-   * Action for the alert button that shows the last error as a popup.
-   * An error dialog can be shown when clicked.
-   * Log the message as an error as soon as the action is created.
+   * Action for the alert button that shows a message in a popup.
+   * A detailed dialog can be shown when the button or popup are clicked.
+   * <code>error</code> can be null in case of info message.
+   * Log the message and error as soon as the action is created.
    */
   class AlertAction extends AbstractAction {
     private Timer timer =
-      new java.util.Timer("MainFrame tooltip hide timer", true);
+      new java.util.Timer("MainFrame alert tooltip hide timer", true);
     
     public AlertAction(Throwable error, String message, Action[] actions) {
       if (error == null) {
-        log.error(message);
+        log.info(message);
       } else {
         log.error(message, error);
       }
-      String description = "<html>An error happened:<br>" +
+      String description = "<html>" + (error == null ?
+        "Important information:<br>" : "There was a problem:<br>") +
         message.substring(0, Math.min(300, message.length()))
           .replaceAll("(.{40,50}(?:\\b|\\.|/))", "$1<br>") + "</html>";
       final int lines = description.split("<br>").length;
