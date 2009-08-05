@@ -34,6 +34,8 @@ import gate.event.CorpusEvent;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.GuiType;
 import gate.event.CorpusListener;
+import gate.event.CreoleListener;
+import gate.event.CreoleEvent;
 import gate.swing.XJTable;
 import gate.swing.XJPopupMenu;
 import gate.util.GateException;
@@ -148,6 +150,7 @@ public class CorpusEditor extends AbstractVisualResource
                 }
               }
             });
+            changeMessage();
             return true;
 
           } else if (source.startsWith("CorpusEditor")) {
@@ -198,7 +201,7 @@ public class CorpusEditor extends AbstractVisualResource
     scroller.setHorizontalScrollBarPolicy(
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     scroller.getViewport().setBackground(docTable.getBackground());
-    add(scroller);
+    add(scroller, BorderLayout.CENTER);
 
     toolbar = new JToolBar();
     toolbar.setFloatable(false);
@@ -215,7 +218,14 @@ public class CorpusEditor extends AbstractVisualResource
     moveDownAction.setEnabled(false);
     openDocumentsAction.setEnabled(false);
 
-    add(toolbar, BorderLayout.NORTH);
+    JPanel topPanel = new JPanel(new BorderLayout());
+    topPanel.add(toolbar, BorderLayout.NORTH);
+
+    messageLabel = new JLabel();
+    changeMessage();
+    topPanel.add(messageLabel, BorderLayout.SOUTH);
+
+    add(topPanel, BorderLayout.NORTH);
   }
 
   protected void initListeners(){
@@ -277,6 +287,23 @@ public class CorpusEditor extends AbstractVisualResource
         }
       });
 
+    Gate.getCreoleRegister().addCreoleListener(new CreoleListener() {
+      public void resourceLoaded(CreoleEvent e) {
+        if (e.getResource() instanceof Document) {
+          changeMessage();
+        }
+      }
+      public void resourceUnloaded(CreoleEvent e) {
+        if (e.getResource() instanceof Document) {
+          changeMessage();
+        }
+      }
+      public void datastoreOpened(CreoleEvent e) { /* do nothing */ }
+      public void datastoreCreated(CreoleEvent e) { /* do nothing */ }
+      public void datastoreClosed(CreoleEvent e) { /* do nothing */ }
+      public void resourceRenamed(Resource resource, String oldName,
+                                  String newName) { /* do nothing */ }
+    });
   }
 
   public void cleanup(){
@@ -309,7 +336,8 @@ public class CorpusEditor extends AbstractVisualResource
     docTableModel.dataChanged();
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
-        docTableModel.fireTableRowsInserted(e.getDocumentIndex(), 
+        changeMessage();
+        docTableModel.fireTableRowsInserted(e.getDocumentIndex(),
                 e.getDocumentIndex());
       }
     });
@@ -319,6 +347,7 @@ public class CorpusEditor extends AbstractVisualResource
     docTableModel.dataChanged();
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
+        changeMessage();
         docTableModel.fireTableRowsDeleted(e.getDocumentIndex(), 
                 e.getDocumentIndex());
       }
@@ -336,7 +365,7 @@ public class CorpusEditor extends AbstractVisualResource
     private void dataChanged(){
       List<String> newDocs = new ArrayList<String>();
       if(corpus != null){
-        newDocs.addAll((List<String>)corpus.getDocumentNames());
+        newDocs.addAll(corpus.getDocumentNames());
      }
       List<String> oldDocs = documentNames;
       documentNames = newDocs;
@@ -456,7 +485,6 @@ public class CorpusEditor extends AbstractVisualResource
         }
       });
     }
-    
   }
 
   class MoveDownAction extends AbstractAction{
@@ -505,8 +533,8 @@ public class CorpusEditor extends AbstractVisualResource
         }
       });
     }
-    
   }
+
   class NewDocumentAction extends AbstractAction{
     public NewDocumentAction(){
       super("Add document", MainFrame.getIcon("add-document"));
@@ -515,44 +543,48 @@ public class CorpusEditor extends AbstractVisualResource
     }
 
     public void actionPerformed(ActionEvent e){
-      try{
-        //get all the documents loaded in the system
-        java.util.List loadedDocuments = Gate.getCreoleRegister().
-                               getAllInstances("gate.Document");
-        if(loadedDocuments == null || loadedDocuments.isEmpty()){
-          JOptionPane.showMessageDialog(
-              CorpusEditor.this,
-              "There are no documents available in the system.\n" +
-              "Please load some and try again." ,
-              "GATE", JOptionPane.ERROR_MESSAGE);
-          return;
-        }
-
-        Vector docNames = new Vector(loadedDocuments.size());
-        for (int i = 0; i< loadedDocuments.size(); i++) {
-          docNames.add(((Document)loadedDocuments.get(i)).getName());
-        }
-        JList docList = new JList(docNames);
-        docList.setCellRenderer(renderer);
-
-        JOptionPane dialog = new JOptionPane(new JScrollPane(docList),
-                                             JOptionPane.QUESTION_MESSAGE,
-                                             JOptionPane.OK_CANCEL_OPTION);
-        dialog.createDialog(CorpusEditor.this,
-                            "Add document(s) to corpus").setVisible(true);
-
-        if(((Integer)dialog.getValue()).intValue() == JOptionPane.OK_OPTION){
-          int[] selection = docList.getSelectedIndices();
-          for (int i = 0; i< selection.length ; i++) {
-            corpus.add(loadedDocuments.get(selection[i]));
-          }
-        }
-      }catch(GateException ge){
+      List<Resource> loadedDocuments;
+      try {
+        // get all the documents loaded in the system
+        loadedDocuments = Gate.getCreoleRegister()
+          .getAllInstances("gate.Document");
+      } catch(GateException ge) {
         //gate.Document is not registered in creole.xml....what is!?
         throw new GateRuntimeException(
           "gate.Document is not registered in the creole register!\n" +
           "Something must be terribly wrong...take a vacation!");
       }
+      Vector<String> docNames = new Vector<String>();
+      for (Resource loadedDocument : new ArrayList<Resource>(loadedDocuments)) {
+        if (corpus.contains(loadedDocument)) {
+          loadedDocuments.remove(loadedDocument);
+        } else {
+          docNames.add(loadedDocument.getName());
+        }
+      }
+      JList docList = new JList(docNames);
+      docList.getSelectionModel().setSelectionInterval(0, docNames.size()-1);
+      docList.setCellRenderer(renderer);
+      final JOptionPane optionPane = new JOptionPane(new JScrollPane(docList),
+        JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
+      final JDialog dialog = optionPane.createDialog(CorpusEditor.this,
+        "Add document(s) to this corpus");
+      docList.addMouseListener(new MouseAdapter() {
+        public void mouseClicked(MouseEvent e) {
+          if (e.getClickCount() == 2) {
+            optionPane.setValue(JOptionPane.OK_OPTION);
+            dialog.dispose();
+          }
+        }
+      });
+      dialog.setVisible(true);
+      if(optionPane.getValue().equals(JOptionPane.OK_OPTION)){
+        int[] selectedIndices = docList.getSelectedIndices();
+        for (int selectedIndice : selectedIndices) {
+          corpus.add(loadedDocuments.get(selectedIndice));
+        }
+      }
+      changeMessage();
     }
   }
 
@@ -575,6 +607,7 @@ public class CorpusEditor extends AbstractVisualResource
         corpus.remove(corpusIndexes[i]);
       }
       docTable.clearSelection();
+      changeMessage();
     }
   }
 
@@ -612,7 +645,45 @@ public class CorpusEditor extends AbstractVisualResource
     }
   }
 
-//  protected JList documentsList;
+  protected void changeMessage() {
+    SwingUtilities.invokeLater(new Runnable(){ public void run() {
+    int documentCount;
+    try {
+      documentCount = Gate.getCreoleRegister()
+        .getAllInstances("gate.Document").size();
+    } catch (GateException exception) {
+      exception.printStackTrace();
+      return;
+    }
+    if (corpus != null
+    && documentCount > 0
+    && documentCount == corpus.size()) {
+      newDocumentAction.setEnabled(false);
+      messageLabel.setText("All the documents available in the " +
+        "system are in this corpus.");
+      messageLabel.setVisible(true);
+    } else if (documentCount == 0) {
+      newDocumentAction.setEnabled(false);
+      messageLabel.setText(
+        "There are no documents available in the system. " +
+        "Please load some first. Press F1 for help.");
+      messageLabel.setVisible(true);
+    } else if (corpus == null || corpus.size() == 0) {
+      newDocumentAction.setEnabled(true);
+      messageLabel.setText(
+        "<html>To add or remove documents to this corpus:<ul>" +
+        "<li>use the toolbar buttons at the top of this view" +
+        "<li>drag documents from the left resources tree and drop them below" +
+        "<li>right click on the corpus in the resources tree and choose 'Populate'" +
+        "</ul></html>");
+      messageLabel.setVisible(true);
+    } else {
+      newDocumentAction.setEnabled(true);
+      messageLabel.setVisible(false);
+    }
+    }});
+  }
+
   protected XJTable docTable;
   protected DocumentTableModel docTableModel;
   protected DocumentNameRenderer renderer;
@@ -623,4 +694,5 @@ public class CorpusEditor extends AbstractVisualResource
   protected MoveUpAction moveUpAction;
   protected MoveDownAction moveDownAction;
   protected OpenDocumentsAction openDocumentsAction;
+  protected JLabel messageLabel;
 }
