@@ -666,7 +666,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     fileMenu.add(newPRMenu);
 
     final JMenu dsMenu = new XJMenu("Datastores",
-      "Repositories for large number of documents", this);
+      "Repositories for large data", this);
     dsMenu.setIcon(getIcon("datastores"));
     dsMenu.add(new XJMenuItem(new NewDSAction(), this));
     dsMenu.add(new XJMenuItem(new OpenDSAction(), this));
@@ -891,7 +891,10 @@ public class MainFrame extends JFrame implements ProgressListener,
     // TOOLBAR
     toolbar = new JToolBar(JToolBar.HORIZONTAL);
     toolbar.setFloatable(false);
-    toolbar.add(new LoadResourceFromFileAction());
+    JButton button = new JButton(new LoadResourceFromFileAction());
+    button.setToolTipText(button.getText());
+    button.setText("");
+    toolbar.add(button);
     toolbar.addSeparator();
     
     JPopupMenu annieMenu = new JPopupMenu();
@@ -899,7 +902,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     annieMenu.add(new LoadANNIEWithoutDefaultsAction());
     JMenuButton menuButton = new JMenuButton(annieMenu);
     menuButton.setIcon(getIcon("annie-application"));
-    menuButton.setToolTipText("Load ANNIE System");
+    menuButton.setToolTipText("Load ANNIE system");
     toolbar.add(menuButton);
     toolbar.addSeparator();
     
@@ -931,9 +934,15 @@ public class MainFrame extends JFrame implements ProgressListener,
     toolbar.add(menuButton);
     
     toolbar.addSeparator();
-    toolbar.add(new ManagePluginsAction());
+    button = new JButton(new ManagePluginsAction());
+    button.setToolTipText(button.getText());
+    button.setText("");
+    toolbar.add(button);
     toolbar.addSeparator();
-    toolbar.add(new NewAnnotDiffAction());
+    button = new JButton(new NewAnnotDiffAction());
+    button.setToolTipText(button.getText());
+    button.setText("");
+    toolbar.add(button);
 
     toolbar.add(Box.createGlue());
     this.getContentPane().add(toolbar, BorderLayout.NORTH);
@@ -2362,9 +2371,9 @@ public class MainFrame extends JFrame implements ProgressListener,
   class ManagePluginsAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public ManagePluginsAction() {
-      super("Manage CREOLE plugins");
+      super("Manage plugins");
       putValue(SHORT_DESCRIPTION,
-        "Load, unload, add and remove CREOLE plugins");
+        "Load, unload, add and remove plugins");
       putValue(SMALL_ICON, getIcon("creole-plugins"));
     }
 
@@ -2404,8 +2413,8 @@ public class MainFrame extends JFrame implements ProgressListener,
   class LoadCreoleRepositoryAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public LoadCreoleRepositoryAction() {
-      super("Load a CREOLE repository");
-      putValue(SHORT_DESCRIPTION, "Load a CREOLE repository");
+      super("Load a plugin repository");
+      putValue(SHORT_DESCRIPTION, "Load a plugin repository");
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -2473,7 +2482,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
         catch(Exception error) {
           String message =
-            "There was a problem when registering your CREOLE directory.";
+            "There was a problem when registering your plugin directory.";
           alertButton.setAction(new AlertAction(error, message, null));
         }
       }
@@ -3034,7 +3043,8 @@ public class MainFrame extends JFrame implements ProgressListener,
     private static final long serialVersionUID = 1L;
     public LoadResourceFromFileAction() {
       super("Restore application from file");
-      putValue(SHORT_DESCRIPTION, "Restores a previously saved application");
+      putValue(SHORT_DESCRIPTION,
+        "Restores a previously saved application from a file");
       putValue(SMALL_ICON, getIcon("open-application"));
     }
 
@@ -3711,7 +3721,7 @@ public class MainFrame extends JFrame implements ProgressListener,
               statusChanged("Processes that annotate data");
               break;
             case APP:
-              statusChanged("Bind processing and language resources");
+              statusChanged("Run processes on data");
               break;
             default:
               statusChanged("Unknown resource: " + type);
@@ -3839,22 +3849,20 @@ public class MainFrame extends JFrame implements ProgressListener,
         if(value instanceof String) {
           String text = (String) value;
           if (text.equals("GATE")) {
-            textLabel.setText("GATE resources tree root ");
+            textLabel.setText("Resources tree root ");
             iconLabel.setIcon(getIcon("root"));
           } else if (text.equals("Applications")) {
-            textLabel.setText(
-              "Applications: bind processing and language resources ");
+            textLabel.setText("Applications: run processes on data ");
             iconLabel.setIcon(getIcon("applications"));
           } else if (text.equals("Language Resources")) {
             textLabel.setText("Language Resources: data used for annotating ");
             iconLabel.setIcon(getIcon("lrs"));
           } else if (text.equals("Processing Resources")) {
             textLabel.setText(
-              "Processing Resources: process that annotate data ");
+              "Processing Resources: processes that annotate data ");
             iconLabel.setIcon(getIcon("prs"));
           } else if (text.equals("Data stores")) {
-            textLabel.setText(
-              "Datastores: repositories for large number of documents ");
+            textLabel.setText("Datastores: repositories for large data ");
             iconLabel.setIcon(getIcon("datastores"));
           } else {
             textLabel.setText(text);
@@ -4189,23 +4197,23 @@ public class MainFrame extends JFrame implements ProgressListener,
         hasFocus);
       if(value == resourcesTreeRoot) {
         setIcon(MainFrame.getIcon("root"));
-        setToolTipText("GATE resources tree root ");
+        setToolTipText("Resources tree root ");
       }
       else if(value == applicationsRoot) {
         setIcon(MainFrame.getIcon("applications"));
-        setToolTipText("Applications: bind processing and language resources ");
+        setToolTipText("Run processes on data ");
       }
       else if(value == languageResourcesRoot) {
         setIcon(MainFrame.getIcon("lrs"));
-        setToolTipText("Language Resources: data used for annotating ");
+        setToolTipText("Data used for annotating ");
       }
       else if(value == processingResourcesRoot) {
         setIcon(MainFrame.getIcon("prs"));
-        setToolTipText("Processing Resources: process that annotate data ");
+        setToolTipText("Processes that annotate data ");
       }
       else if(value == datastoresRoot) {
         setIcon(MainFrame.getIcon("datastores"));
-        setToolTipText("Datastores: repositories for large number of documents ");
+        setToolTipText("Repositories for large data ");
       }
       else {
         // not one of the default root nodes
