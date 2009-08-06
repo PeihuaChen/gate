@@ -2371,9 +2371,9 @@ public class MainFrame extends JFrame implements ProgressListener,
   class ManagePluginsAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public ManagePluginsAction() {
-      super("Manage plugins");
+      super("Manage CREOLE plugins");
       putValue(SHORT_DESCRIPTION,
-        "Load, unload, add and remove plugins");
+        "Load, unload, add and remove CREOLE plugins");
       putValue(SMALL_ICON, getIcon("creole-plugins"));
     }
 
@@ -2413,8 +2413,8 @@ public class MainFrame extends JFrame implements ProgressListener,
   class LoadCreoleRepositoryAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public LoadCreoleRepositoryAction() {
-      super("Load a plugin repository");
-      putValue(SHORT_DESCRIPTION, "Load a plugin repository");
+      super("Load a CREOLE repository");
+      putValue(SHORT_DESCRIPTION, "Load a CREOLE repository");
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -2482,7 +2482,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
         catch(Exception error) {
           String message =
-            "There was a problem when registering your plugin directory.";
+            "There was a problem when registering your CREOLE directory.";
           alertButton.setAction(new AlertAction(error, message, null));
         }
       }
