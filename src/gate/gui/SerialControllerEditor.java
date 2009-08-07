@@ -746,6 +746,18 @@ public class SerialControllerEditor extends AbstractVisualResource
                   });
     }
 
+    addAncestorListener(new AncestorListener() {
+      public void ancestorAdded(AncestorEvent event) {
+        // need updating when another controller has just included this one
+        loadedPRsTableModel.fireTableDataChanged();
+        memberPRsTableModel.fireTableDataChanged();
+      }
+      public void ancestorRemoved(AncestorEvent event) { /* do nothing */ }
+      public void ancestorMoved(AncestorEvent event) { /* do nothing */
+      }
+    }
+    );
+
     // binds F3 key to the run action
     getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
       .put(KeyStroke.getKeyStroke("F3"), "Run");
@@ -962,7 +974,6 @@ public class SerialControllerEditor extends AbstractVisualResource
   public void resourceAdded(ControllerEvent evt){
     loadedPRsTableModel.fireTableDataChanged();
     memberPRsTableModel.fireTableDataChanged();
-
   }
   
   /* (non-Javadoc)
@@ -972,9 +983,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     loadedPRsTableModel.fireTableDataChanged();
     memberPRsTableModel.fireTableDataChanged();
   }
-  
-  
-  
+
   public synchronized void addStatusListener(StatusListener l) {
     Vector<StatusListener> v = statusListeners == null ?
       new Vector(2) : (Vector) statusListeners.clone();
@@ -984,7 +993,21 @@ public class SerialControllerEditor extends AbstractVisualResource
     }
   }
 
-
+  private boolean firstIncludesOrEqualsSecond(Controller first,
+                                              Controller second) {
+    if (first.equals(second)) {
+      return true;
+    } else {
+      for (Object object : first.getPRs()) {
+        if (object instanceof Controller) {
+          if (firstIncludesOrEqualsSecond((Controller)object, second)) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
 
   /**
    * Table model for all the loaded processing resources that are not part of
@@ -994,11 +1017,17 @@ public class SerialControllerEditor extends AbstractVisualResource
     public int getRowCount(){
       List<ProcessingResource> loadedPRs = new ArrayList<ProcessingResource>(
         Gate.getCreoleRegister().getPrInstances());
-      if(controller != null) loadedPRs.removeAll(controller.getPRs());
+      if(controller != null) {
+        loadedPRs.removeAll(controller.getPRs());
+      }
       Iterator prsIter = loadedPRs.iterator();
       while(prsIter.hasNext()){
         ProcessingResource aPR = (ProcessingResource)prsIter.next();
-        if(Gate.getHiddenAttribute(aPR.getFeatures())) prsIter.remove();
+        if(Gate.getHiddenAttribute(aPR.getFeatures())
+       || ( aPR instanceof Controller
+         && firstIncludesOrEqualsSecond((Controller)aPR, controller)) ) {
+          prsIter.remove();
+        }
       }
 
       return loadedPRs.size();
@@ -1007,11 +1036,17 @@ public class SerialControllerEditor extends AbstractVisualResource
     public Object getValueAt(int row, int column){
       List<ProcessingResource> loadedPRs = new ArrayList<ProcessingResource>(
         Gate.getCreoleRegister().getPrInstances());
-      if(controller != null) loadedPRs.removeAll(controller.getPRs());
+      if(controller != null) {
+        loadedPRs.removeAll(controller.getPRs());
+      }
       Iterator prsIter = loadedPRs.iterator();
       while(prsIter.hasNext()){
         ProcessingResource aPR = (ProcessingResource)prsIter.next();
-        if(Gate.getHiddenAttribute(aPR.getFeatures())) prsIter.remove();
+        if(Gate.getHiddenAttribute(aPR.getFeatures())
+       || ( aPR instanceof Controller
+         && firstIncludesOrEqualsSecond((Controller)aPR, controller)) ) {
+          prsIter.remove();
+        }
       }
 
       Collections.sort(loadedPRs, nameComparator);
@@ -1019,8 +1054,8 @@ public class SerialControllerEditor extends AbstractVisualResource
       switch(column){
         case 0 : return pr;
         case 1 : {
-          ResourceData rData = (ResourceData)Gate.getCreoleRegister().
-                                    get(pr.getClass().getName());
+          ResourceData rData = Gate.getCreoleRegister()
+            .get(pr.getClass().getName());
           if(rData == null) return pr.getClass();
           else return rData.getName();
         }

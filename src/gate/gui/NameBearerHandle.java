@@ -194,6 +194,10 @@ public class NameBearerHandle implements Handle, StatusListener,
     return new CloseAction();
   }
 
+  public Action getCloseRecursivelyAction() {
+    return new CloseRecursivelyAction();
+  }
+
   /** Fill HMM Save and Save As... actions */
   private void fillHMMActions(List<XJMenuItem> popupItems) {
     Action action;
@@ -443,6 +447,10 @@ public class NameBearerHandle implements Handle, StatusListener,
     JComponent largeView = this.getLargeView();
     if(largeView != null) {
       largeView.getActionMap().put("Close resource", new CloseAction());
+      if(target instanceof Controller) {
+        largeView.getActionMap().put("Close recursively",
+          new CloseRecursivelyAction());
+      }
       if(target instanceof gate.TextualDocument) {
         largeView.getActionMap().put("Save As XML", new SaveAsXmlAction());
       }// End if
@@ -522,16 +530,18 @@ public class NameBearerHandle implements Handle, StatusListener,
   private transient Vector<StatusListener> statusListeners;
 
   class CloseAction extends AbstractAction {
-    private static final long serialVersionUID = 1L;
-
     public CloseAction() {
-      super("Remove");
-      putValue(SHORT_DESCRIPTION, "Remove this resource");
+      super("Close");
+      putValue(SHORT_DESCRIPTION, "Close this resource");
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control F4"));
     }
-
     public void actionPerformed(ActionEvent e) {
-      if(target instanceof Resource) {
+      if(target instanceof Controller) {
+        Controller controller = (Controller) target;
+        // empty the controller of all its processing resources
+        controller.setPRs(Collections.emptyList());
+        Factory.deleteResource((Resource)target);
+      } else if(target instanceof Resource) {
         Factory.deleteResource((Resource)target);
       }
       else if(target instanceof DataStore) {
@@ -539,37 +549,31 @@ public class NameBearerHandle implements Handle, StatusListener,
           ((DataStore)target).close();
         }
         catch(PersistenceException pe) {
-          JOptionPane.showMessageDialog(largeView != null
-            ? largeView
-            : smallView, "Error!\n" + pe.toString(), "GATE",
-            JOptionPane.ERROR_MESSAGE);
+          JOptionPane.showMessageDialog(
+            largeView != null? largeView : smallView,
+            "Error!\n" + pe.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
         }
       }
-
       statusListeners.clear();
       progressListeners.clear();
-      // //delete the viewers
-      // if(largeView instanceof VisualResource){
-      // Factory.deleteResource((VisualResource)largeView);
-      // }else if(largeView instanceof JTabbedPane){
-      // Component[] comps = ((JTabbedPane)largeView).getComponents();
-      // for(int i = 0; i < comps.length; i++){
-      // if(comps[i] instanceof VisualResource)
-      // Factory.deleteResource((VisualResource)comps[i]);
-      // }
-      // }
-      // if(smallView instanceof VisualResource){
-      // Factory.deleteResource((VisualResource)smallView);
-      // }else if(smallView instanceof JTabbedPane){
-      // Component[] comps = ((JTabbedPane)smallView).getComponents();
-      // for(int i = 0; i < comps.length; i++){
-      // if(comps[i] instanceof VisualResource)
-      // Factory.deleteResource((VisualResource)comps[i]);
-      // }
-      // }
-      //
-    }// public void actionPerformed(ActionEvent e)
-  }// class CloseAction
+    }
+  }
+
+  class CloseRecursivelyAction extends AbstractAction {
+    public CloseRecursivelyAction() {
+      super("Close recursively");
+      putValue(SHORT_DESCRIPTION,
+        "Close this application and recursively all contained resources");
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("shift F4"));
+    }
+    public void actionPerformed(ActionEvent e) {
+      if(target instanceof Controller) {
+        Factory.deleteResource((Resource)target);
+      }
+      statusListeners.clear();
+      progressListeners.clear();
+    }
+  }
 
   /**
    * Used to save a document as XML

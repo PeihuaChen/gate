@@ -801,14 +801,6 @@ public class MainFrame extends JFrame implements ProgressListener,
       }
     }, this));
 
-    /*
-     * add the ontology editor to the tools menu ontotext.bp
-     */
-    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    // Removed as it is now obsolete.
-    // toolsMenu.add(new NewOntologyEditorAction());
-
-    // by Shafirin Andrey start
     toolsMenu.add(new XJMenuItem(
         new AbstractAction("JAPE Debugger", getIcon("application")) {
         { putValue(SHORT_DESCRIPTION, "Debugger for JAPE grammars"); }
@@ -818,7 +810,6 @@ public class MainFrame extends JFrame implements ProgressListener,
           new debugger.JapeDebugger();
         }
       }, this));
-    // by Shafirin Andrey end
 
     menuBar.add(toolsMenu);
 
@@ -956,10 +947,14 @@ public class MainFrame extends JFrame implements ProgressListener,
         if(e.getKeyCode() == KeyEvent.VK_ENTER) {
           // shows in the central tabbed pane, the selected resources
           // in the resource tree when the Enter key is pressed
-          (new ShowResourcesAction()).actionPerformed(null);
+          (new ShowSelectedResourcesAction()).actionPerformed(null);
         } else if(e.getKeyCode() == KeyEvent.VK_DELETE) {
-          // remove selected resources from GATE
+          // close selected resources from GATE
           (new CloseSelectedResourcesAction()).actionPerformed(null);
+        } else if(e.getKeyCode() == KeyEvent.VK_DELETE
+               && e.getModifiers() == InputEvent.SHIFT_DOWN_MASK) {
+          // close recursively selected resources from GATE
+          (new CloseRecursivelySelectedResourcesAction()).actionPerformed(null);
         }
       }
     });
@@ -1022,44 +1017,60 @@ public class MainFrame extends JFrame implements ProgressListener,
             // multiple selection in tree
             popup = new XJPopupMenu();
 
-            // add a remove all action
+            // add a close all action
             popup.add(new XJMenuItem(new CloseSelectedResourcesAction(),
                     MainFrame.this));
 
+            // add a close recursively all action
+            popup.add(new XJMenuItem(
+              new CloseRecursivelySelectedResourcesAction(), MainFrame.this));
+
             // add a show all action
-            popup.add(new XJMenuItem(new ShowResourcesAction(),
+            popup.add(new XJMenuItem(new ShowSelectedResourcesAction(),
               MainFrame.this));
+
+            // add a hide all action
+            popup.add(new XJMenuItem(new CloseViewsForSelectedResourcesAction(),
+              MainFrame.this));
+
             popup.show(resourcesTree, e.getX(), e.getY());
           }
           else if(popup != null) {
             if(handle != null) {
 
-              // add a remove action
+              // add a close action
               if(handle instanceof NameBearerHandle) {
                 popup.insert(new XJMenuItem(((NameBearerHandle)handle)
                         .getCloseAction(), MainFrame.this), 0);
               }
               
+              // if application then add a close recursively action
+              if(handle instanceof NameBearerHandle
+              && handle.getTarget() instanceof Controller) {
+                popup.insert(new XJMenuItem(((NameBearerHandle)handle)
+                  .getCloseRecursivelyAction(), MainFrame.this), 1);
+              }
+
               // add a show/hide action
               if (handle.viewsBuilt() &&
                   handle.getLargeView() != null
                   && (mainTabbedPane.indexOfComponent(
                           handle.getLargeView()) != -1)) {
                popup.insert(new XJMenuItem(new CloseViewAction(handle),
-                 MainFrame.this), 1);
+                 MainFrame.this), 2);
               } else {
                 popup.insert(new XJMenuItem(new ShowResourceAction(handle),
-                  MainFrame.this), 1);
+                  MainFrame.this), 2);
               }
               
               // add a rename action
               popup.insert(new XJMenuItem(new RenameResourceAction(path),
-                MainFrame.this), 2);
+                MainFrame.this), 3);
 
               // add a help action
               if(handle instanceof NameBearerHandle) {
                 popup.insert(new XJMenuItem(new HelpOnItemTreeAction(
-                  (NameBearerHandle)handle), MainFrame.this), 3);
+                  (NameBearerHandle)handle), MainFrame.this), 4);
               }
             }
 
@@ -1097,6 +1108,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     InputMap inputMap = ((JComponent)this.getContentPane()).
       getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
     inputMap.put(KeyStroke.getKeyStroke("control F4"), "Close resource");
+    inputMap.put(KeyStroke.getKeyStroke("shift F4"), "Close recursively");
     inputMap.put(KeyStroke.getKeyStroke("control H"), "Hide");
     inputMap.put(KeyStroke.getKeyStroke("control shift H"), "Hide all");
     inputMap.put(KeyStroke.getKeyStroke("control S"), "Save As XML");
@@ -1183,6 +1195,8 @@ public class MainFrame extends JFrame implements ProgressListener,
             (JComponent)mainTabbedPane.getSelectedComponent();
           actionMap.put("Close resource",
             resource.getActionMap().get("Close resource"));
+          actionMap.put("Close recursively",
+            resource.getActionMap().get("Close recursively"));
           actionMap.put("Hide", new CloseViewAction(handle));
           actionMap.put("Hide all", new HideAllAction());
           actionMap.put("Save As XML",
@@ -1193,7 +1207,8 @@ public class MainFrame extends JFrame implements ProgressListener,
           lowerScroll.getViewport().setView(null);
           // disabled actions on the selected tabbed pane
           actionMap.put("Close resource", null);
-          actionMap.put("Hide", null); 
+          actionMap.put("Close recursively", null);
+          actionMap.put("Hide", null);
           actionMap.put("Hide all", null); 
           actionMap.put("Save As XML", null);
         }
@@ -3163,10 +3178,36 @@ public class MainFrame extends JFrame implements ProgressListener,
       mainTabbedPane.setSelectedIndex(mainTabbedPane.getTabCount() - 1);
       // remove all GUI resources used by this handle
       handle.removeViews();
-    }// public void actionPerformed(ActionEvent e)
+    }
 
     Handle handle;
-  }// class CloseViewAction
+  }
+
+  class CloseViewsForSelectedResourcesAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
+    public CloseViewsForSelectedResourcesAction() {
+      super("Hide all");
+      putValue(SHORT_DESCRIPTION, "Hide the selected resources");
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      Runnable runner = new Runnable() {
+        public void run() {
+          TreePath[] paths = resourcesTree.getSelectionPaths();
+          for(TreePath path : paths) {
+            Object value = path.getLastPathComponent();
+            value = ((DefaultMutableTreeNode)value).getUserObject();
+            if(value instanceof Handle) {
+              new CloseViewAction((Handle)value).actionPerformed(null);
+            }
+          }
+        }
+      };
+      Thread thread = new Thread(runner);
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
+    }
+  }
 
   class RenameResourceAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
@@ -3187,8 +3228,8 @@ public class MainFrame extends JFrame implements ProgressListener,
   class CloseSelectedResourcesAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public CloseSelectedResourcesAction() {
-      super("Remove all");
-      putValue(SHORT_DESCRIPTION, "Remove the selected resources");
+      super("Close all");
+      putValue(SHORT_DESCRIPTION, "Close the selected resources");
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -3200,8 +3241,36 @@ public class MainFrame extends JFrame implements ProgressListener,
               ((DefaultMutableTreeNode) path.getLastPathComponent())
                 .getUserObject();
             if(userObject instanceof NameBearerHandle) {
-              ((NameBearerHandle) userObject).getCloseAction().actionPerformed(
-                null);
+              ((NameBearerHandle)userObject).getCloseAction()
+                .actionPerformed(null);
+            }
+          }
+        }
+      };
+      Thread thread = new Thread(runner);
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
+    }
+  }
+
+  class CloseRecursivelySelectedResourcesAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
+    public CloseRecursivelySelectedResourcesAction() {
+      super("Close recursively all");
+      putValue(SHORT_DESCRIPTION, "Close recursively the selected resources");
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      Runnable runner = new Runnable() {
+        public void run() {
+          TreePath[] paths = resourcesTree.getSelectionPaths();
+          for(TreePath path : paths) {
+            Object userObject =
+              ((DefaultMutableTreeNode) path.getLastPathComponent())
+                .getUserObject();
+            if(userObject instanceof NameBearerHandle) {
+              ((NameBearerHandle)userObject).getCloseRecursivelyAction()
+                .actionPerformed(null);
             }
           }
         }
@@ -3240,11 +3309,11 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
   }
 
-  class ShowResourcesAction extends AbstractAction {
+  class ShowSelectedResourcesAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
-    public ShowResourcesAction() {
+    public ShowSelectedResourcesAction() {
       super("Show all");
-      putValue(SHORT_DESCRIPTION, "Show this resources");
+      putValue(SHORT_DESCRIPTION, "Show the selected resources");
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("Enter"));
     }
 
