@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 1998-2007, The University of Sheffield.
+ *  Copyright (c) 1998-2009, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -64,7 +64,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
     cleanup();
     this.resource = resource;
     if(parameters != null) {
-      parameterDisjunctions = new ArrayList(parameters.size());
+      parameterDisjunctions = new ArrayList<ParameterDisjunction>(parameters.size());
       for(int i = 0; i < parameters.size(); i++) {
         parameterDisjunctions.add(new ParameterDisjunction(resource,
                 (List)parameters.get(i)));
@@ -86,7 +86,17 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
     getColumnModel().getColumn(0).setCellRenderer(
             new ParameterDisjunctionRenderer());
     getColumnModel().getColumn(1).setCellRenderer(
-            new DefaultTableCellRenderer());
+      new DefaultTableCellRenderer() {
+      public Component getTableCellRendererComponent(JTable table, Object value,
+        boolean isSelected, boolean hasFocus, int row, int column) {
+          // remove the package prefix for the value of the type column
+          String text = (String) value;
+          int index = text.lastIndexOf('.');
+          setText(text.substring(index+1));
+          setToolTipText((String)value);
+          return this;
+        }
+      });
     getColumnModel().getColumn(2).setCellRenderer(new BooleanRenderer());
     getColumnModel().getColumn(3).setCellRenderer(new ParameterValueRenderer());
     getColumnModel().getColumn(0).setCellEditor(
@@ -100,16 +110,6 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
 
   protected void initListeners() {
     Gate.getCreoleRegister().addCreoleListener(this);
-
-    addKeyListener(new KeyAdapter() {
-      public void keyPressed(KeyEvent e) {
-        if(e.getKeyCode() == KeyEvent.VK_ENTER) {
-          if(getEditingColumn() == -1 && getEditingRow() == -1) {
-            getParent().dispatchEvent(e);
-          }
-        }
-      }
-    });
   }
 
   /**
@@ -119,32 +119,11 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
     Gate.getCreoleRegister().removeCreoleListener(this);
     if(parameterDisjunctions != null && parameterDisjunctions.size() > 0) {
       for(int i = 0; i < parameterDisjunctions.size(); i++) {
-        ((ParameterDisjunction)parameterDisjunctions.get(i)).cleanup();
+        parameterDisjunctions.get(i).cleanup();
       }
     }
     resource = null;
   }
-
-  // /**
-  // * Disable key handling for most keys by JTable when not editing.
-  // */
-  // protected boolean processKeyBinding(KeyStroke ks, KeyEvent e,
-  // int condition, boolean pressed) {
-  // int keyCode = e.getKeyCode();
-  // if(isEditing() ||
-  // keyCode == KeyEvent.VK_UP ||
-  // keyCode == KeyEvent.VK_DOWN ||
-  // keyCode == KeyEvent.VK_LEFT ||
-  // keyCode == KeyEvent.VK_RIGHT ||
-  // keyCode == KeyEvent.VK_TAB) return super.processKeyBinding(ks, e,
-  // condition,
-  // pressed);
-  // return false;
-  // }
-
-  /**
-   * Should this GUI comonent allow editing?
-   */
 
   /**
    * Sets the parameters for the resource to their new values as
@@ -159,7 +138,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
     }
     // set the parameters
     for(int i = 0; i < parameterDisjunctions.size(); i++) {
-      ParameterDisjunction pDisj = (ParameterDisjunction)parameterDisjunctions
+      ParameterDisjunction pDisj = parameterDisjunctions
               .get(i);
       resource.setParameterValue(pDisj.getName(), pDisj.getValue());
     }
@@ -176,8 +155,8 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
   /**
    * Gets the current values for the parameters.
    * 
-   * @return a {@link FeatureMap} conatining the curent values for the
-   *         curently selected parameters in each disjunction.
+   * @return a {@link FeatureMap} containing the curent values for the
+   *         currently selected parameters in each disjunction.
    */
   public FeatureMap getParameterValues() {
     // stop current edits
@@ -189,8 +168,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
     FeatureMap values = Factory.newFeatureMap();
     if(parameterDisjunctions != null) {
       for(int i = 0; i < parameterDisjunctions.size(); i++) {
-        ParameterDisjunction pDisj = (ParameterDisjunction)parameterDisjunctions
-                .get(i);
+        ParameterDisjunction pDisj = parameterDisjunctions.get(i);
         values.put(pDisj.getName(), pDisj.getValue());
       }
     }
@@ -237,8 +215,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
     Gate.getCreoleRegister().removeCreoleListener(this);
     if(parameterDisjunctions != null && parameterDisjunctions.size() > 0) {
       for(int i = 0; i < parameterDisjunctions.size(); i++) {
-        ((ParameterDisjunction)parameterDisjunctions.get(i))
-                .removeCreoleListenerLink();
+        parameterDisjunctions.get(i).removeCreoleListenerLink();
       }
     }
 
@@ -251,7 +228,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
   /**
    * A list of {@link ParameterDisjunction}
    */
-  protected List parameterDisjunctions;
+  protected List<ParameterDisjunction> parameterDisjunctions;
 
   protected boolean editable = true;
 
@@ -295,8 +272,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
     public boolean isCellEditable(int rowIndex, int columnIndex) {
       switch(columnIndex) {
         case 0:
-          return ((ParameterDisjunction)parameterDisjunctions.get(rowIndex))
-                  .size() > 1;
+          return parameterDisjunctions.get(rowIndex).size() > 1;
         case 1:
           return false;
         case 2:
@@ -313,8 +289,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
     }
 
     public Object getValueAt(int rowIndex, int columnIndex) {
-      ParameterDisjunction pDisj = (ParameterDisjunction)parameterDisjunctions
-              .get(rowIndex);
+      ParameterDisjunction pDisj = parameterDisjunctions.get(rowIndex);
       switch(columnIndex) {
         case 0:
           return pDisj;
@@ -330,11 +305,10 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
     }// public Object getValueAt
 
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-      ParameterDisjunction pDisj = (ParameterDisjunction)parameterDisjunctions
-              .get(rowIndex);
+      ParameterDisjunction pDisj = parameterDisjunctions.get(rowIndex);
       switch(columnIndex) {
         case 0: {
-          pDisj.setSelectedIndex(((Integer)aValue).intValue());
+          pDisj.setSelectedIndex((Integer) aValue);
           tableModel.fireTableRowsUpdated(rowIndex, rowIndex);
           break;
         }
@@ -376,7 +350,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       String type = pDisj.getType();
       iconName = "param";
       if(Gate.isGateType(type)) {
-        ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(type);
+        ResourceData rData = Gate.getCreoleRegister().get(type);
         if(rData != null) iconName = rData.getIcon();
       }
       if(pDisj.size() > 1) {
@@ -384,8 +358,8 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
         return combo;
       }
       // prepare the renderer
-      Component comp = super.getTableCellRendererComponent(table, text,
-              isSelected, hasFocus, row, column);
+      super.getTableCellRendererComponent(table, text, isSelected,
+        hasFocus, row, column);
       setIcon(MainFrame.getIcon(iconName));
       return this;
     }// public Component getTableCellRendererComponent
@@ -404,11 +378,11 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
    */
   class ParameterValueRenderer extends ObjectRenderer {
     ParameterValueRenderer() {
-      fileButton = new JButton("Browse...", MainFrame.getIcon("open-file"));
-      fileButton.setToolTipText("Set from file...");
-      listButton = new JButton("Edit...", MainFrame.getIcon("edit-list"));
+      fileButton = new JButton(MainFrame.getIcon("open-file"));
+      fileButton.setToolTipText("Browse the file system");
+      listButton = new JButton(MainFrame.getIcon("edit-list"));
       listButton.setToolTipText("Edit the list");
-      fmButton = new JButton("Edit...", MainFrame.getIcon("edit-list"));
+      fmButton = new JButton(MainFrame.getIcon("edit-list"));
       fmButton.setToolTipText("Edit the feature map");
       textField = new JTextField();
       textButtonBox = new JPanel();
@@ -455,6 +429,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
           typeClass = Class.forName(type, true, Gate.getClassLoader());
         }
         catch(ClassNotFoundException cnfe) {
+          cnfe.printStackTrace();
         }
         // non Gate type -> we'll use the text field
         String text = (value == null)
@@ -580,11 +555,11 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
           String iconName = "param";
           Parameter[] params = pDisj.getParameters();
           for(int i = 0; i < params.length; i++) {
-            Parameter param = (Parameter)params[i];
+            Parameter param = params[i];
             if(param.getName().equals(value)) {
               String type = param.getTypeName();
               if(Gate.getCreoleRegister().containsKey(type)) {
-                ResourceData rData = (ResourceData)Gate.getCreoleRegister()
+                ResourceData rData = Gate.getCreoleRegister()
                         .get(type);
                 if(rData != null) iconName = rData.getIcon();
               }
@@ -595,8 +570,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
           setIcon(MainFrame.getIcon(iconName));
           return this;
         }
-      }
-      ;// class CustomRenderer extends JLabel implements
+      } // class CustomRenderer extends JLabel implements
         // ListCellRenderer
       combo.setRenderer(new CustomRenderer());
       combo.addActionListener(new ActionListener() {
@@ -614,7 +588,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
     }// public Component getTableCellEditorComponent
 
     public Object getCellEditorValue() {
-      return new Integer(combo.getSelectedIndex());
+      return combo.getSelectedIndex();
     }
 
     public boolean stopCellEditing() {
@@ -637,8 +611,8 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       textField = new JTextField();
 
       fileChooser = MainFrame.getFileChooser();
-      fileButton = new JButton("Browse...", MainFrame.getIcon("open-file"));
-      fileButton.setToolTipText("Set from file...");
+      fileButton = new JButton(MainFrame.getIcon("open-file"));
+      fileButton.setToolTipText("Browse the file system");
       fileButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
@@ -650,6 +624,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
                       .toExternalForm());
             }
             catch(IOException ioe) {
+              ioe.printStackTrace();
             }
             fireEditingStopped();
           }
@@ -659,8 +634,8 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
         }
       });
 
-      listButton = new JButton("Edit...", MainFrame.getIcon("edit-list"));
-      listButton.setToolTipText("Edit the collection");
+      listButton = new JButton(MainFrame.getIcon("edit-list"));
+      listButton.setToolTipText("Edit the list");
       listButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           List returnedList = listEditor.showDialog();
@@ -674,7 +649,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
         }
       });
 
-      fmButton = new JButton("Edit...", MainFrame.getIcon("edit-list"));
+      fmButton = new JButton(MainFrame.getIcon("edit-list"));
       fmButton.setToolTipText("Edit the feature map");
       fmButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -692,25 +667,19 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       textButtonBox = new JPanel();
       textButtonBox.setLayout(new BoxLayout(textButtonBox, BoxLayout.X_AXIS));
       textButtonBox.setOpaque(false);
-      // label = new JLabel(){
-      // public boolean isFocusable(){
-      // return true;
-      // }
-      // };
-      // label.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
       textFieldBoolean = new JTextField();
       textFieldBoolean.setEditable(false);
       textFieldBoolean.addMouseListener(new MouseAdapter() {
         public void mouseClicked(MouseEvent e) {
-          Boolean value = new Boolean(textFieldBoolean.getText());
-          value = new Boolean(!value.booleanValue());
+          Boolean value = Boolean.valueOf(textFieldBoolean.getText());
+          value = !value;
           textFieldBoolean.setText(value.toString());
         }
       });
       textFieldBoolean.addKeyListener(new KeyAdapter() {
         public void keyTyped(KeyEvent e) {
-          Boolean value = new Boolean(textFieldBoolean.getText());
-          value = new Boolean(!value.booleanValue());
+          Boolean value = Boolean.valueOf(textFieldBoolean.getText());
+          value = !value;
           textFieldBoolean.setText(value.toString());
         }
       });
@@ -750,14 +719,11 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       combo.setToolTipText(pDisj.getComment());
       textField.setToolTipText(pDisj.getComment());
       textFieldBoolean.setToolTipText(pDisj.getComment());
-      textButtonBox.setToolTipText(pDisj.getComment());
-      // ResourceData rData =
-      // (ResourceData)Gate.getCreoleRegister().get(type);
 
       if(Gate.isGateType(type)) {
         // Gate type
         comboUsed = true;
-        ArrayList values = new ArrayList();
+        ArrayList<Object> values = new ArrayList<Object>();
         try {
           values.addAll(Gate.getCreoleRegister().getAllInstances(type));
         }
@@ -777,6 +743,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
           typeClass = Class.forName(type, true, Gate.getClassLoader());
         }
         catch(ClassNotFoundException cnfe) {
+          cnfe.printStackTrace();
         }
 
         textField.setText((value == null) ? "" : value.toString());
@@ -850,8 +817,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
           comboUsed = true;
           try {
             // extract list of allowable values by reflection - every
-            // enum
-            // type has a values method returning an array of values
+            // enum type has a values method returning an array of values
             Method getValuesMethod = typeClass.getMethod("values");
             Object[] enumValues = (Object[])getValuesMethod.invoke(null);
             Object[] comboValues = null;
@@ -860,9 +826,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
             if(param.isOptional()) {
               comboValues = new Object[enumValues.length + 1];
               comboValues[0] = "<none>";
-              System
-                      .arraycopy(enumValues, 0, comboValues, 1,
-                              enumValues.length);
+              System.arraycopy(enumValues, 0, comboValues, 1,enumValues.length);
             }
             else {
               comboValues = enumValues;
@@ -897,7 +861,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       else {
         if(type.equals("java.lang.Boolean")) {
           // get the value from the label
-          return new Boolean(textFieldBoolean.getText());
+          return Boolean.valueOf(textFieldBoolean.getText());
         }
         else {
           // get the value from the text field
@@ -919,18 +883,13 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
      */
     JComboBox combo;
 
-    // /**
-    // * Editor used for boolean values
-    // */
-    // JLabel label;
-
     /**
      * Generic editor for all types that are not treated special
      */
     JTextField textField;
 
     /**
-     * Editor used for booelan values.
+     * Editor used for boolean values.
      */
     JTextField textFieldBoolean;
 
@@ -959,6 +918,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
 
     JButton fmButton;
 
+    /** Contains a textfield and a button */
     JPanel textButtonBox;
   }// /class ParameterValueEditor
 
@@ -972,9 +932,9 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
     while(elemIter.hasNext()) {
       Object elem = elemIter.next();
       if(elem != null)
-        res.append(((elem instanceof NameBearer) ? ((NameBearer)elem)
-                .getName() : elem.toString())
-                + ", ");
+        res.append((elem instanceof NameBearer) ?
+          ((NameBearer) elem).getName() : elem.toString())
+          .append(", ");
       else res.append("<null>, ");
     }
     res.delete(res.length() - 2, res.length() - 1);
