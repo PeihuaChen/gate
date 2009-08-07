@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 1998-2007, The University of Sheffield.
+ *  Copyright (c) 1998-2009, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -34,11 +34,12 @@ public class NewResourceDialog extends JDialog {
     initLocalData();
     initGuiComponents();
     initListeners();
-  }// public NewResourceDialog(Frame frame, String title, boolean modal)
+  }
 
 
   protected void initLocalData(){
-  }// protected void initLocalData()
+    // nothing
+  }
 
   protected void initGuiComponents(){
     this.getContentPane().setLayout(new BoxLayout(this.getContentPane(),
@@ -68,11 +69,9 @@ public class NewResourceDialog extends JDialog {
     this.getContentPane().add(tableScroll);
     this.getContentPane().add(Box.createVerticalStrut(5));
     this.getContentPane().add(Box.createVerticalGlue());
-//    ToolTipManager.sharedInstance().registerComponent(parametersEditor);
     //buttons box
     JPanel buttonsBox = new JPanel();
     buttonsBox.setLayout(new BoxLayout(buttonsBox, BoxLayout.X_AXIS));
-    //buttonsBox.setAlignmentX(Component.CENTER_ALIGNMENT);
     buttonsBox.add(Box.createHorizontalStrut(10));
     buttonsBox.add(okBtn = new JButton("OK"));
     buttonsBox.add(Box.createHorizontalStrut(10));
@@ -85,10 +84,6 @@ public class NewResourceDialog extends JDialog {
     setSize(400, 300);
 
     getRootPane().setDefaultButton(okBtn);
-//    getRootPane().setWindowDecorationStyle(JRootPane.QUESTION_DIALOG);
-//    //let the Window manager provide decorations
-//    setDefaultLookAndFeelDecorated(false);
-////    setUndecorated(true);
   }// protected void initGuiComponents()
 
 
