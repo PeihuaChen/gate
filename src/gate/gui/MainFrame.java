@@ -433,6 +433,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     this.setSize(new Dimension(width == null ? 800 : width,
       height == null ? 600 : height));
 
+    // TODO: when upgrading to Java 1.6 use setIconImages() instead
     this.setIconImage(Toolkit.getDefaultToolkit().getImage(
       Files.getGateResource("/img/gate-icon.png")));
     resourcesTree = new ResourcesTree();
@@ -521,9 +522,8 @@ public class MainFrame extends JFrame implements ProgressListener,
     lowerPane.add(lowerScroll);
 
     animator = new CartoonMinder(animationPane);
-    Thread thread =
-      new Thread(Thread.currentThread().getThreadGroup(), animator,
-        "MainFrame1");
+    Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+      animator, "MainFrame animation");
     thread.setDaemon(true);
     thread.setPriority(Thread.MIN_PRIORITY);
     thread.start();
@@ -1102,7 +1102,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     inputMap.put(KeyStroke.getKeyStroke("control S"), "Save As XML");
 
     // add the support of the context menu key in tables and trees
-    // TODO: remove when JAVA SWING will take care of it
+    // TODO: remove when Swing will take care of the context menu key
     if (inputMap.get(KeyStroke.getKeyStroke("CONTEXT_MENU")) == null) {
       inputMap.put(KeyStroke.getKeyStroke("CONTEXT_MENU"), "Show context menu");
     }
@@ -2997,18 +2997,44 @@ public class MainFrame extends JFrame implements ProgressListener,
       }
 
       if(!dsTypeByName.isEmpty()) {
-        String[] names = new String[dsTypeByName.keySet().size()];
-        dsTypeByName.keySet().toArray(names);
-        String previousChoice = getPreferenceValue("datastorelist", "item");
-        if (!dsTypeByName.containsKey(previousChoice)) {
-          previousChoice = null;
+        final JList list = new JList(dsTypeByName.keySet().toArray());
+        String initialSelection = getPreferenceValue("datastorelist", "item");
+        if (dsTypeByName.containsKey(initialSelection)) {
+          list.setSelectedValue(initialSelection, true);
+        } else {
+          list.setSelectedIndex(0);
         }
-        Object answer = JOptionPane.showInputDialog(MainFrame.this,
-            "Select type of Datastore", "GATE", JOptionPane.QUESTION_MESSAGE,
-            null, names, (previousChoice==null)?names[0]:previousChoice);
-        if(answer != null && answer instanceof String) {
-          setPreferenceValue("datastorelist", "item", (String)answer);
-          String className = dsTypeByName.get(answer);
+        list.setVisibleRowCount(Math.min(10, list.getModel().getSize()));
+        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JButton helpButton = new JButton(new AbstractAction("Help") {
+          public void actionPerformed(ActionEvent e) {
+            showHelpFrame("sec:datastores", "gate.persist.SerialDataStore");
+          }
+        });
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(new JLabel("Select a type of Datastore:"), BorderLayout.WEST);
+        panel.add(helpButton, BorderLayout.EAST);
+        final JOptionPane optionPane = new JOptionPane(
+          new Object[]{ panel, new JScrollPane(list) },
+          JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION,
+          getIcon("datastore"));
+        final JDialog dialog = optionPane.createDialog(
+          MainFrame.this, "Create a datastore");
+        list.addMouseListener(new MouseAdapter() {
+          public void mouseClicked(MouseEvent e) {
+            if (e.getClickCount() == 2) {
+              optionPane.setValue(JOptionPane.OK_OPTION);
+              dialog.dispose();
+            }
+          }
+        });
+        dialog.show();
+        Object answer = optionPane.getValue();
+        if(answer == null) { return; }
+        String className = dsTypeByName.get(list.getSelectedValue());
+        if(answer.equals(JOptionPane.OK_OPTION) && !list.isSelectionEmpty()) {
+          setPreferenceValue("datastorelist", "item",
+            (String)list.getSelectedValue());
           if(className.equals("gate.persist.SerialDataStore")) {
             createSerialDataStore();
           }
@@ -3022,7 +3048,6 @@ public class MainFrame extends JFrame implements ProgressListener,
               JOptionPane.ERROR_MESSAGE);
           }
           else {
-
             throw new UnsupportedOperationException("Unimplemented option!\n"
               + "Use a serial datastore");
           }
@@ -3443,18 +3468,44 @@ public class MainFrame extends JFrame implements ProgressListener,
       }
 
       if(!dsTypeByName.isEmpty()) {
-        String[] names = new String[dsTypeByName.keySet().size()];
-        dsTypeByName.keySet().toArray(names);
-        String previousChoice = getPreferenceValue("datastorelist", "item");
-        if (!dsTypeByName.containsKey(previousChoice)) {
-          previousChoice = null;
+        final JList list = new JList(dsTypeByName.keySet().toArray());
+        String initialSelection = getPreferenceValue("datastorelist", "item");
+        if (dsTypeByName.containsKey(initialSelection)) {
+          list.setSelectedValue(initialSelection, true);
+        } else {
+          list.setSelectedIndex(0);
         }
-        Object answer = JOptionPane.showInputDialog(MainFrame.this,
-            "Select type of Datastore", "GATE", JOptionPane.QUESTION_MESSAGE,
-            null, names, (previousChoice==null)?names[0]:previousChoice);
-        if(answer != null && answer instanceof String) {
-          setPreferenceValue("datastorelist", "item", (String)answer);
-          String className = dsTypeByName.get((String)answer);
+        list.setVisibleRowCount(Math.min(10, list.getModel().getSize()));
+        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JButton helpButton = new JButton(new AbstractAction("Help") {
+          public void actionPerformed(ActionEvent e) {
+            showHelpFrame("sec:datastores", "gate.persist.SerialDataStore");
+          }
+        });
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(new JLabel("Select a type of Datastore:"), BorderLayout.WEST);
+        panel.add(helpButton, BorderLayout.EAST);
+        final JOptionPane optionPane = new JOptionPane(
+          new Object[]{ panel, new JScrollPane(list) },
+          JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION,
+          getIcon("datastore"));
+        final JDialog dialog = optionPane.createDialog(
+          MainFrame.this, "Open a datastore");
+        list.addMouseListener(new MouseAdapter() {
+          public void mouseClicked(MouseEvent e) {
+            if (e.getClickCount() == 2) {
+              optionPane.setValue(JOptionPane.OK_OPTION);
+              dialog.dispose();
+            }
+          }
+        });
+        dialog.show();
+        Object answer = optionPane.getValue();
+        if(answer == null) { return; }
+        String className = dsTypeByName.get(list.getSelectedValue());
+        if(answer.equals(JOptionPane.OK_OPTION) && !list.isSelectionEmpty()) {
+          setPreferenceValue("datastorelist", "item",
+            (String)list.getSelectedValue());
           if(className.indexOf("SerialDataStore") != -1) {
             openSerialDataStore();
           }
@@ -3953,6 +4004,9 @@ public class MainFrame extends JFrame implements ProgressListener,
 
   public void showHelpFrame(String urlString, String resourceName) {
     final URL url;
+    if (urlString != null && !urlString.startsWith("http://")) {
+      urlString = "http://gate.ac.uk/userguide/" + urlString;
+    }
     try {
       url = new URL(urlString);
     } catch (MalformedURLException e) {
