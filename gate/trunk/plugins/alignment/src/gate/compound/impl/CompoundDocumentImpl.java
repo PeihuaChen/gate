@@ -170,6 +170,8 @@ public class CompoundDocumentImpl extends AbstractCompoundDocument {
     if(document.getName() == null) {
       document.setName(documentID);
     }
+    
+    if(documents.containsKey(documentID)) return;
     documents.put(documentID, document);
     documentIDs.add(documentID);
     fireDocumentAdded(documentID);
@@ -184,6 +186,7 @@ public class CompoundDocumentImpl extends AbstractCompoundDocument {
     if(documentIDs.contains(documentID)) {
       fireDocumentRemoved(documentID);
       documentIDs.remove(documentID);
+      documents.remove(documentID);
     }
   }
 
