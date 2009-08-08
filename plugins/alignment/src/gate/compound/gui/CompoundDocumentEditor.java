@@ -1,7 +1,7 @@
 package gate.compound.gui;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Composite;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
@@ -18,7 +18,6 @@ import gate.corpora.DocumentImpl;
 import gate.creole.*;
 import gate.event.ProgressListener;
 import gate.gui.ActionsPublisher;
-import gate.gui.CorpusEditor;
 import gate.gui.Handle;
 import gate.gui.MainFrame;
 import gate.gui.NameBearerHandle;
@@ -47,6 +46,12 @@ public class CompoundDocumentEditor extends AbstractVisualResource
 
   private HashMap<String, JComponent> documentsMap;
 
+  protected JToolBar toolbar;
+
+  protected NewDocumentAction newDocumentAction;
+
+  protected RemoveDocumentsAction removeDocumentsAction;
+
   /**
    * The document view is just an empty shell. This method publishes the
    * actions from the contained views.
@@ -59,7 +64,6 @@ public class CompoundDocumentEditor extends AbstractVisualResource
     actions.add(new LoadFromXML());
     actions.add(new PopulateCorpus());
     actions.add(new PopulateCorpusFromXML());
-    actions.add(new AddDocument());
     return actions;
   }
 
@@ -71,8 +75,14 @@ public class CompoundDocumentEditor extends AbstractVisualResource
   public Resource init() throws ResourceInstantiationException {
     tabbedPane = new JTabbedPane();
     documentsMap = new HashMap<String, JComponent>();
+    toolbar = new JToolBar();
+    toolbar.setFloatable(false);
+    toolbar.add(newDocumentAction = new NewDocumentAction());
+    toolbar.add(removeDocumentsAction = new RemoveDocumentsAction());
+
     this.setLayout(new java.awt.BorderLayout());
     this.add(tabbedPane, java.awt.BorderLayout.CENTER);
+    this.add(toolbar, BorderLayout.NORTH);
     return this;
   }
 
@@ -119,6 +129,77 @@ public class CompoundDocumentEditor extends AbstractVisualResource
     }
   }
 
+  class NewDocumentAction extends AbstractAction {
+    public NewDocumentAction() {
+      super("Add document", MainFrame.getIcon("add-document"));
+      putValue(SHORT_DESCRIPTION,
+              "Add new document(s) to this compound document");
+      putValue(MNEMONIC_KEY, KeyEvent.VK_ENTER);
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      try {
+        // get all the documents loaded in the system
+        java.util.List loadedDocuments = Gate.getCreoleRegister()
+                .getAllInstances("gate.Document");
+        if(loadedDocuments == null || loadedDocuments.isEmpty()) {
+          JOptionPane.showMessageDialog(CompoundDocumentEditor.this,
+                  "There are no documents available in the system.\n"
+                          + "Please load some and try again.", "GATE",
+                  JOptionPane.ERROR_MESSAGE);
+          return;
+        }
+
+        Vector docNames = new Vector();
+        for(int i = 0; i < loadedDocuments.size(); i++) {
+          Document doc = (Document)loadedDocuments.get(i);
+          if(doc instanceof CompoundDocument) {
+            loadedDocuments.remove(i);
+            i--;
+            continue;
+          }
+          docNames.add(doc.getName());
+        }
+
+        JList docList = new JList(docNames);
+        JOptionPane dialog = new JOptionPane(new JScrollPane(docList),
+                JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
+        dialog.createDialog(CompoundDocumentEditor.this,
+                "Add document(s) to compound document").setVisible(true);
+
+        if(((Integer)dialog.getValue()).intValue() == JOptionPane.OK_OPTION) {
+          int[] selection = docList.getSelectedIndices();
+          for(int i = 0; i < selection.length; i++) {
+            Document doc = (Document)loadedDocuments.get(selection[i]);
+            ((CompoundDocument)document).addDocument(doc.getName(), doc);
+          }
+        }
+      }
+      catch(GateException ge) {
+        // gate.Document is not registered in creole.xml....what is!?
+        throw new GateRuntimeException(
+                "gate.Document is not registered in the creole register!\n"
+                        + "Something must be terribly wrong...take a vacation!");
+      }
+    }
+  }
+
+  class RemoveDocumentsAction extends AbstractAction {
+    public RemoveDocumentsAction() {
+      super("Remove documents", MainFrame.getIcon("remove-document"));
+      putValue(SHORT_DESCRIPTION,
+              "Removes selected document(s) from this corpus");
+      putValue(MNEMONIC_KEY, KeyEvent.VK_DELETE);
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      if(tabbedPane.getSelectedIndex() >= 0) {
+        String docName = tabbedPane.getTitleAt(tabbedPane.getSelectedIndex());
+        ((CompoundDocument)document).removeDocument(docName);
+      }
+    }
+  }
+
   class SaveAllDocuments extends AbstractAction {
 
     private static final long serialVersionUID = -1377052643002026640L;
@@ -144,11 +225,12 @@ public class CompoundDocumentEditor extends AbstractVisualResource
           File file = null;
           if(doc.getName().equals("Composite")) {
             file = new File(dir.getAbsolutePath() + "/Composite.xml");
-          } else {
+          }
+          else {
             file = new File(doc.getSourceUrl().getFile());
             file = new File(dir.getAbsolutePath() + "/" + file.getName());
           }
-          
+
           BufferedWriter bw = new BufferedWriter(
                   new OutputStreamWriter(new FileOutputStream(file),
                           ((DocumentImpl)doc).getEncoding()));
@@ -309,65 +391,6 @@ public class CompoundDocumentEditor extends AbstractVisualResource
     }
   }
 
-  class AddDocument extends AbstractAction{
-    public AddDocument(){
-      super("Add document", MainFrame.getIcon("add-document"));
-      putValue(SHORT_DESCRIPTION, "Add new document(s) to this compound document");
-      putValue(MNEMONIC_KEY, KeyEvent.VK_ENTER);
-    }
-
-    public void actionPerformed(ActionEvent e){
-      try{
-        //get all the documents loaded in the system
-        java.util.List loadedDocuments = Gate.getCreoleRegister().
-                               getAllInstances("gate.Document");
-        java.util.List exclude = Gate.getCreoleRegister().getAllInstances("gate.compound.CompoundDocument");
-        
-        boolean terminate = false;
-        if(loadedDocuments == null) {
-          terminate = true;
-        } else if(loadedDocuments != null && exclude != null) {
-          loadedDocuments.removeAll(exclude);
-          terminate = loadedDocuments.isEmpty();
-        }
-        
-        if(terminate) {
-          JOptionPane.showMessageDialog(
-                  CompoundDocumentEditor.this,
-                  "There are no documents available in the system.\n" +
-                  "Please load some and try again." ,
-                  "GATE", JOptionPane.ERROR_MESSAGE);
-              return;
-        }
-
-        Vector docNames = new Vector(loadedDocuments.size());
-        for (int i = 0; i< loadedDocuments.size(); i++) {
-          docNames.add(((Document)loadedDocuments.get(i)).getName());
-        }
-        JList docList = new JList(docNames);
-
-        JOptionPane dialog = new JOptionPane(new JScrollPane(docList),
-                                             JOptionPane.QUESTION_MESSAGE,
-                                             JOptionPane.OK_CANCEL_OPTION);
-        dialog.createDialog(CompoundDocumentEditor.this,
-                            "Add document(s) to compound document").setVisible(true);
-
-        if(((Integer)dialog.getValue()).intValue() == JOptionPane.OK_OPTION){
-          int[] selection = docList.getSelectedIndices();
-          for (int i = 0; i< selection.length ; i++) {
-            Document aDoc = (Document)loadedDocuments.get(selection[i]);
-            ((CompoundDocument)document).addDocument(aDoc.getName(), aDoc);
-          }
-        }
-      }catch(GateException ge){
-        //gate.Document is not registered in creole.xml....what is!?
-        throw new GateRuntimeException(
-          "gate.Document is not registered in the creole register!\n" +
-          "Something must be terribly wrong...take a vacation!");
-      }
-    }
-  }
-
   public class SaveAsASingleXML extends AbstractAction {
 
     private static final long serialVersionUID = -1377052643002026640L;
@@ -438,17 +461,25 @@ public class CompoundDocumentEditor extends AbstractVisualResource
   public void documentAdded(CompoundDocumentEvent event) {
     try {
       Document doc = event.getSource().getDocument(event.getDocumentID());
-      NameBearerHandle nbHandle = new NameBearerHandle(doc, Main.getMainFrame());
-      JComponent largeView = nbHandle.getLargeView();
+      final NameBearerHandle nbHandle = new NameBearerHandle(doc, Main
+              .getMainFrame());
+      final JComponent largeView = nbHandle.getLargeView();
       if(largeView != null) {
-        tabbedPane.addTab(nbHandle.getTitle(), nbHandle.getIcon(), largeView,
-                nbHandle.getTooltipText());
+        SwingUtilities.invokeLater(new Runnable() {
+          public void run() {
+            tabbedPane.addTab(nbHandle.getTitle(), nbHandle.getIcon(),
+                    largeView, nbHandle.getTooltipText());
+          }
+        });
         documentsMap.put(doc.getName(), largeView);
       }
-      ResourceData rd = (ResourceData)Gate.getCreoleRegister().get(
-              doc.getClass().getName());
-      if(rd != null) rd.removeInstantiation(doc);
-      Gate.setHiddenAttribute(doc.getFeatures(), false);
+
+      if(Gate.getHiddenAttribute(doc.getFeatures())) {
+        ResourceData rd = (ResourceData)Gate.getCreoleRegister().get(
+                doc.getClass().getName());
+        if(rd != null) rd.removeInstantiation(doc);
+        Gate.setHiddenAttribute(doc.getFeatures(), false);
+      }
       tabbedPane.updateUI();
     }
     catch(Exception e) {
@@ -461,8 +492,15 @@ public class CompoundDocumentEditor extends AbstractVisualResource
     if(cmp != null) {
       tabbedPane.remove(cmp);
       tabbedPane.updateUI();
-      Factory.deleteResource(event.getSource().getDocument(
-              event.getDocumentID()));
+      Document doc = event.getSource().getDocument(event.getDocumentID());
+      ResourceData rd = (ResourceData)Gate.getCreoleRegister().get(
+              doc.getClass().getName());
+      if(rd != null) {
+        if(!rd.getInstantiations().contains(doc)) {
+          Factory.deleteResource(event.getSource().getDocument(
+                  event.getDocumentID()));
+        }
+      }
     }
   }
 

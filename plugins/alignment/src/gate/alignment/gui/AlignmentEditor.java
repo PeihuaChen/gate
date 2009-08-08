@@ -7,6 +7,7 @@ import java.util.Timer;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.MouseInputAdapter;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 
 import java.awt.*;
@@ -37,6 +38,7 @@ import gate.compound.impl.AbstractCompoundDocument;
 import gate.creole.*;
 import gate.gui.MainFrame;
 import gate.swing.ColorGenerator;
+import gate.swing.XJTable;
 import gate.util.GateException;
 import gate.util.GateRuntimeException;
 
@@ -108,6 +110,16 @@ public class AlignmentEditor extends AbstractVisualResource implements
    * aligning
    */
   private JPanel propertiesPanel;
+
+  /**
+   * Table Tabbed Pane that contains stats published by actions
+   */
+  private JPanel tableTabbedPanel;
+
+  /**
+   * holds tabbed panes
+   */
+  private JTabbedPane tableTabbedPane;
 
   /**
    * source panel that has labels for each individual alignment unit in
@@ -300,6 +312,8 @@ public class AlignmentEditor extends AbstractVisualResource implements
    */
   private List<FinishedAlignmentAction> finishedAlignmentActions = null;
 
+  private List<DataPublisherAction> dataPublisherActions = null;
+
   /*
    * (non-Javadoc)
    * 
@@ -317,6 +331,7 @@ public class AlignmentEditor extends AbstractVisualResource implements
     allActions = new ArrayList<AlignmentAction>();
     preDisplayActions = new ArrayList<PreDisplayAction>();
     finishedAlignmentActions = new ArrayList<FinishedAlignmentAction>();
+    dataPublisherActions = new ArrayList<DataPublisherAction>();
 
     ResourceData myResourceData = (ResourceData)Gate.getCreoleRegister().get(
             this.getClass().getName());
@@ -564,7 +579,7 @@ public class AlignmentEditor extends AbstractVisualResource implements
 
     propertiesPanel = new JPanel();
     propertiesPanel.setLayout(new BoxLayout(propertiesPanel, BoxLayout.Y_AXIS));
-    JScrollPane pane = new JScrollPane(propertiesPanel);
+    JScrollPane propertiesPane = new JScrollPane(propertiesPanel);
     propertiesPanel.add(new JLabel("Options"));
     propertiesPanel.add(Box.createGlue());
 
@@ -576,16 +591,26 @@ public class AlignmentEditor extends AbstractVisualResource implements
     waScrollPane = new JScrollPane(waPanel);
     waScrollPane.setPreferredSize(new Dimension(800, 200));
 
+    JSplitPane verticalPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
     waParentPanel.add(waScrollPane, BorderLayout.CENTER);
     splitPane.add(waParentPanel);
-    splitPane.add(pane);
+    splitPane.add(verticalPane);
     mainPanel.add(splitPane/* , BorderLayout.CENTER */);
+
+    verticalPane.add(propertiesPane);
+    tableTabbedPane = new JTabbedPane();
+    JScrollPane tableTabbedScroller = new JScrollPane(tableTabbedPane);
+    verticalPane.add(tableTabbedScroller);
+
     this.setLayout(new BorderLayout());
     this.add(mainPanel, BorderLayout.CENTER);
     color = getColor(null);
     splitPane.setDividerLocation(0.8);
     splitPane.revalidate();
     splitPane.updateUI();
+    verticalPane.setDividerLocation(0.5);
+    verticalPane.revalidate();
+    verticalPane.updateUI();
     waPanel.setVisible(false);
   }
 
@@ -752,7 +777,7 @@ public class AlignmentEditor extends AbstractVisualResource implements
     if(documentIDs.size() > 1) {
       targetDocumentId.setSelectedIndex(1);
     }
-    else if(documentIDs.size() > 0){
+    else if(documentIDs.size() > 0) {
       targetDocumentId.setSelectedIndex(0);
     }
 
@@ -1076,7 +1101,7 @@ public class AlignmentEditor extends AbstractVisualResource implements
     Annotation tgtSentence = null;
     String srcDocID = null;
     String tgtDocID = null;
-    
+
     for(String docId : docIDsAndAnnots.keySet()) {
       JPanel panelToUse = sourcePanel;
       boolean isSourceDocument = true;
@@ -1090,11 +1115,12 @@ public class AlignmentEditor extends AbstractVisualResource implements
       if(isSourceDocument) {
         srcSentence = annot;
         srcDocID = docId;
-      } else {
+      }
+      else {
         tgtSentence = annot;
         tgtDocID = docId;
       }
-      
+
       // we need to highlight the unit type
       AnnotationSet underlyingUnitAnnotationsSet = alignFactory
               .getUnderlyingAnnotations(annot, docId, isSourceDocument
@@ -1174,9 +1200,11 @@ public class AlignmentEditor extends AbstractVisualResource implements
       if(isSrcDocument) {
         targetAnnots = alignment.getAlignedAnnotations(srcAnnotation);
         for(Annotation tgtAnnot : targetAnnots) {
-          Set<Annotation> setOfAnnots = alignment.getAlignedAnnotations(tgtAnnot);
+          Set<Annotation> setOfAnnots = alignment
+                  .getAlignedAnnotations(tgtAnnot);
           for(Annotation sAnnot : setOfAnnots) {
-            Set<Annotation> setOfTargetAnnots = alignment.getAlignedAnnotations(sAnnot);
+            Set<Annotation> setOfTargetAnnots = alignment
+                    .getAlignedAnnotations(sAnnot);
             if(setOfTargetAnnots.size() == targetAnnots.size()) {
               if(setOfTargetAnnots.containsAll(targetAnnots)) {
                 sourceAnnots.add(sAnnot);
@@ -1188,9 +1216,11 @@ public class AlignmentEditor extends AbstractVisualResource implements
       else {
         sourceAnnots = alignment.getAlignedAnnotations(srcAnnotation);
         for(Annotation srcAnnot : sourceAnnots) {
-          Set<Annotation> setOfAnnots = alignment.getAlignedAnnotations(srcAnnot);
+          Set<Annotation> setOfAnnots = alignment
+                  .getAlignedAnnotations(srcAnnot);
           for(Annotation tAnnot : setOfAnnots) {
-            Set<Annotation> setOfSourceAnnots = alignment.getAlignedAnnotations(tAnnot);
+            Set<Annotation> setOfSourceAnnots = alignment
+                    .getAlignedAnnotations(tAnnot);
             if(setOfSourceAnnots.size() == sourceAnnots.size()) {
               if(setOfSourceAnnots.containsAll(sourceAnnots)) {
                 targetAnnots.add(tAnnot);
@@ -1200,8 +1230,6 @@ public class AlignmentEditor extends AbstractVisualResource implements
         }
       }
 
-
-      
       Color newColor = getColor(null);
       boolean firstTime = true;
 
@@ -1242,16 +1270,20 @@ public class AlignmentEditor extends AbstractVisualResource implements
    * does the cleaning up job to free up memory occupied by this editor
    */
   public void cleanup() {
-    for(JMenuItem item : actions.keySet()) {
-      actions.get(item).cleanup();
+    for(AlignmentAction a : allActions) {
+      a.cleanup();
     }
-
+    
     for(PreDisplayAction pda : preDisplayActions) {
       pda.cleanup();
     }
 
     for(FinishedAlignmentAction faa : finishedAlignmentActions) {
       faa.cleanup();
+    }
+    
+    for(DataPublisherAction dpa : dataPublisherActions) {
+      dpa.cleanup();
     }
   }
 
@@ -1702,6 +1734,11 @@ public class AlignmentEditor extends AbstractVisualResource implements
             if(action instanceof FinishedAlignmentAction) {
               loadFinishedAlignmentAction((FinishedAlignmentAction)action, args);
             }
+
+            if(action instanceof DataPublisherAction) {
+              loadDataPublisherAction((DataPublisherAction)action, args);
+            }
+
           }
           catch(ClassNotFoundException cnfe) {
             System.err.println("class " + cName + " not found!");
@@ -1760,6 +1797,31 @@ public class AlignmentEditor extends AbstractVisualResource implements
     try {
       faa.init(args);
       finishedAlignmentActions.add(faa);
+    }
+    catch(AlignmentActionInitializationException aaie) {
+      throw new GateRuntimeException(aaie);
+    }
+  }
+
+  /**
+   * load a data publishers action
+   * 
+   * @param faa
+   * @param args
+   */
+  private void loadDataPublisherAction(final DataPublisherAction dpa,
+          String[] args) {
+    try {
+      dpa.init(args);
+      dataPublisherActions.add(dpa);
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          DefaultDataModel ddm = new DefaultDataModel(dpa);
+          tableTabbedPane.add(dpa.getTableTitle(), new XJTable(
+                  ddm));
+          dpa.setDataModel(ddm);
+        }
+      });
     }
     catch(AlignmentActionInitializationException aaie) {
       throw new GateRuntimeException(aaie);
