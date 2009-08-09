@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 1998-2007, The University of Sheffield.
+ *  Copyright (c) 1998-2009, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -317,6 +317,10 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
   }// protected void select(ResourceHandle handle)
 
+  /**
+   *  Application context menu in the resources tree.
+   *  Remember previously loaded applications.
+   */
   private JPopupMenu createAppsPopup() {
     LiveMenu appsMenu = new LiveMenu(LiveMenu.APP);
     appsMenu.setText("New");
@@ -341,23 +345,29 @@ public class MainFrame extends JFrame implements ProgressListener,
           Runnable runnable = new Runnable() {
           public void run() {
           try { File file = new File(location);
-          PersistenceManager.loadObjectFromFile(file); }
-          catch(Exception error) {
+          PersistenceManager.loadObjectFromFile(file);
+          } catch(Exception error) {
             String message =
               "Couldn't reload the application.\n" + error.getMessage();
             alertButton.setAction(new AlertAction(error, message, null));
+            if (error instanceof IOException) {
             // remove the element from the applications list
-            setPreferenceValue("filechooserlocations/"
-              + "gate/ApplicationRestore", "list",
-              list.replaceFirst(name + ";?", ""));
-          } finally {
-            processFinished();
-          }}};
+            setPreferenceValue("filechooserlocations/gate/ApplicationRestore",
+              "list", list.replaceFirst(name + ";?", ""));
+            }
+          } finally { processFinished(); }}};
           Thread thread = new Thread(runnable);
           thread.setPriority(Thread.MIN_PRIORITY);
           thread.start();
       }}, MainFrame.this));
-    }}
+    }
+    appsPopup.add(new XJMenuItem(new AbstractAction("Remove last element") {
+      public void actionPerformed(ActionEvent e) {
+        // remove the last element from the applications list
+        setPreferenceValue("filechooserlocations/gate/ApplicationRestore",
+          "list", list.replaceFirst("[^;]+;?$", ""));
+    }}, MainFrame.this));
+    }
     return appsPopup;
   }
 
@@ -820,14 +830,14 @@ public class MainFrame extends JFrame implements ProgressListener,
     helpMenu.add(new XJMenuItem(new AbstractAction("Keyboard shortcuts") {
       { this.putValue(Action.SHORT_DESCRIPTION, "Keyboard shortcuts"); }
       public void actionPerformed(ActionEvent e) {
-        showHelpFrame("http://gate.ac.uk/userguide/chap:shortcuts", null);
+        showHelpFrame("chap:shortcuts", null);
       }
     }, this));
     helpMenu.addSeparator();
     helpMenu.add(new XJMenuItem(new AbstractAction("Howtos") {
       { this.putValue(Action.SHORT_DESCRIPTION, "Howtos for newcomers"); }
       public void actionPerformed(ActionEvent e) {
-        showHelpFrame("http://gate.ac.uk/userguide/chap:howto", null);
+        showHelpFrame("chap:howto", null);
       }
     }, this));
     helpMenu.add(new XJMenuItem(new AbstractAction("Demo movies") {
@@ -846,7 +856,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       { this.putValue(Action.SHORT_DESCRIPTION,
           "List new features and important changes"); }
       public void actionPerformed(ActionEvent e) {
-        showHelpFrame("http://gate.ac.uk/userguide/chap:changes", null);
+        showHelpFrame("chap:changes", null);
       }
     }, this));
     if(!Gate.runningOnMac()) {
@@ -3012,6 +3022,20 @@ public class MainFrame extends JFrame implements ProgressListener,
       }
 
       if(!dsTypeByName.isEmpty()) {
+        JPanel panel = new JPanel(new GridBagLayout());
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.gridy = 0;
+        constraints.insets = new Insets(0, 0, 8, 0);
+        JLabel label = new JLabel("Select a type of Datastore:");
+        constraints.anchor = GridBagConstraints.SOUTHWEST;
+        panel.add(label, constraints);
+        JButton helpButton = new JButton(new AbstractAction("Help") {
+          public void actionPerformed(ActionEvent e) {
+            showHelpFrame("sec:datastores", "gate.persist.SerialDataStore");
+          }
+        });
+        constraints.anchor = GridBagConstraints.SOUTHEAST;
+        panel.add(helpButton, constraints);
         final JList list = new JList(dsTypeByName.keySet().toArray());
         String initialSelection = getPreferenceValue("datastorelist", "item");
         if (dsTypeByName.containsKey(initialSelection)) {
@@ -3021,16 +3045,11 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
         list.setVisibleRowCount(Math.min(10, list.getModel().getSize()));
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        JButton helpButton = new JButton(new AbstractAction("Help") {
-          public void actionPerformed(ActionEvent e) {
-            showHelpFrame("sec:datastores", "gate.persist.SerialDataStore");
-          }
-        });
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.add(new JLabel("Select a type of Datastore:"), BorderLayout.WEST);
-        panel.add(helpButton, BorderLayout.EAST);
-        final JOptionPane optionPane = new JOptionPane(
-          new Object[]{ panel, new JScrollPane(list) },
+        constraints.gridy = 1;
+        constraints.insets = new Insets(0, 0, 0, 0);
+        constraints.anchor = GridBagConstraints.CENTER;
+        panel.add(new JScrollPane(list), constraints);
+        final JOptionPane optionPane = new JOptionPane(panel,
           JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION,
           getIcon("datastore"));
         final JDialog dialog = optionPane.createDialog(
@@ -3133,9 +3152,6 @@ public class MainFrame extends JFrame implements ProgressListener,
                 if (list == null) { list = ""; }
                 list = list.replaceFirst("\\Q"+res.getName()+"\\E;?", "");
                 list = res.getName() + ";" + list;
-                if (list.split(";").length > 5) {
-                  list = list.replaceFirst(";[^;]+;?$", "");
-                }
                 MainFrame.setPreferenceValue("filechooserlocations/"
                   + "gate/ApplicationRestore", "list", list);
               }
@@ -3154,7 +3170,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           }
         }
       };
-      Thread thread = new Thread(runnable);
+      Thread thread = new Thread(runnable, "LoadResourceFromFileAction");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }
@@ -3537,6 +3553,20 @@ public class MainFrame extends JFrame implements ProgressListener,
       }
 
       if(!dsTypeByName.isEmpty()) {
+        JPanel panel = new JPanel(new GridBagLayout());
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.gridy = 0;
+        constraints.insets = new Insets(0, 0, 8, 0);
+        JLabel label = new JLabel("Select a type of Datastore:");
+        constraints.anchor = GridBagConstraints.SOUTHWEST;
+        panel.add(label, constraints);
+        JButton helpButton = new JButton(new AbstractAction("Help") {
+          public void actionPerformed(ActionEvent e) {
+            showHelpFrame("sec:datastores", "gate.persist.SerialDataStore");
+          }
+        });
+        constraints.anchor = GridBagConstraints.SOUTHEAST;
+        panel.add(helpButton, constraints);
         final JList list = new JList(dsTypeByName.keySet().toArray());
         String initialSelection = getPreferenceValue("datastorelist", "item");
         if (dsTypeByName.containsKey(initialSelection)) {
@@ -3546,16 +3576,11 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
         list.setVisibleRowCount(Math.min(10, list.getModel().getSize()));
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        JButton helpButton = new JButton(new AbstractAction("Help") {
-          public void actionPerformed(ActionEvent e) {
-            showHelpFrame("sec:datastores", "gate.persist.SerialDataStore");
-          }
-        });
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.add(new JLabel("Select a type of Datastore:"), BorderLayout.WEST);
-        panel.add(helpButton, BorderLayout.EAST);
-        final JOptionPane optionPane = new JOptionPane(
-          new Object[]{ panel, new JScrollPane(list) },
+        constraints.gridy = 1;
+        constraints.insets = new Insets(0, 0, 0, 0);
+        constraints.anchor = GridBagConstraints.CENTER;
+        panel.add(new JScrollPane(list), constraints);
+        final JOptionPane optionPane = new JOptionPane(panel,
           JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION,
           getIcon("datastore"));
         final JDialog dialog = optionPane.createDialog(
@@ -4067,7 +4092,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
 
     public void actionPerformed(ActionEvent e) {
-      showHelpFrame("http://gate.ac.uk/userguide", null);
+      showHelpFrame("", null);
     }
   }
 
@@ -4240,7 +4265,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           .actionPerformed(null);
       } else if (mainTabbedPane.getTitleAt(mainTabbedPane
                   .getSelectedIndex()).equals("Messages")) {
-        showHelpFrame("http://gate.ac.uk/userguide/sec:howto:guistart", null);
+        showHelpFrame("sec:howto:guistart", null);
       } else {
         showHelpFrame(null, node.getUserObject().getClass().getName());
       }
