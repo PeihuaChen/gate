@@ -6,7 +6,7 @@
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
  *
- *  Thomas Heitz - 10 june 2009
+ *  Thomas Heitz - 10 June 2009
  *
  *  $Id$
  */
@@ -75,8 +75,8 @@ public class CorpusQualityAssurance extends AbstractVisualResource
   protected void initGuiComponents(){
     setLayout(new BorderLayout());
 
-    JPanel panel = new JPanel();
-    panel.setBorder(BorderFactory.createEmptyBorder());
+    topPanel = new JPanel();
+    topPanel.setBorder(BorderFactory.createEmptyBorder());
     JToolBar toolbar = new JToolBar();
     toolbar.setBorder(BorderFactory.createEmptyBorder());
     toolbar.setMargin(new Insets(0, 0, 0, 0));
@@ -86,18 +86,22 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     toolbar.add(openAnnotationDiffAction = new OpenAnnotationDiffAction());
     openAnnotationDiffAction.setEnabled(false);
     toolbar.add(exportToHtmlAction = new ExportToHtmlAction());
-    panel.add(toolbar);
-    panel.add(Box.createHorizontalStrut(5));
-    panel.add(new JLabel("Key Set"));
+    topPanel.add(toolbar);
+    topPanel.add(Box.createHorizontalStrut(5));
+    JLabel setALabel = new JLabel("Set A");
+    setALabel.setToolTipText("aka 'Key set'");
+    topPanel.add(setALabel);
     keyAnnotationSetCombo = new JComboBox();
     keyAnnotationSetCombo.setPrototypeDisplayValue("annotation set");
-    panel.add(keyAnnotationSetCombo);
-    panel.add(Box.createHorizontalStrut(5));
-    panel.add(new JLabel("Response Set"));
+    topPanel.add(keyAnnotationSetCombo);
+    topPanel.add(Box.createHorizontalStrut(5));
+    JLabel setBLabel = new JLabel("Set B");
+    setBLabel.setToolTipText("aka 'Response set'");
+    topPanel.add(setBLabel);
     responseAnnotationSetCombo = new JComboBox();
     responseAnnotationSetCombo.setPrototypeDisplayValue("annotation set");
-    panel.add(responseAnnotationSetCombo);
-    add(panel, BorderLayout.NORTH);
+    topPanel.add(responseAnnotationSetCombo);
+    add(topPanel, BorderLayout.NORTH);
 
     Comparator<String> integerComparator = new Comparator<String>() {
       public int compare(String o1, String o2) {
@@ -108,7 +112,20 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       }
     };
 
-    annotationTable = new XJTable(annotationTableModel);
+    annotationTable = new XJTable(annotationTableModel) {
+      // table header tool tips.
+      protected JTableHeader createDefaultTableHeader() {
+        return new JTableHeader(columnModel) {
+          public String getToolTipText(MouseEvent e) {
+            java.awt.Point p = e.getPoint();
+            int index = columnModel.getColumnIndexAtX(p.x);
+            if (index == -1) { return null; }
+            int realIndex = columnModel.getColumn(index).getModelIndex();
+            return annotationTableModel.HEADER_TOOLTIPS[realIndex];
+          }
+        };
+      }
+    };
     annotationTable.setSortable(true);
     annotationTable.setSortedColumn(AnnotationTableModel.COL_ANNOTATION);
     annotationTable.setComparator(AnnotationTableModel.COL_ANNOTATION,collator);
@@ -120,7 +137,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       AnnotationTableModel.COL_SPURIOUS, integerComparator);
     annotationTable.setComparator(
       AnnotationTableModel.COL_MISSING, integerComparator);
-    annotationTable.setAutoResizeMode(XJTable.AUTO_RESIZE_OFF);
+    annotationTable.setAutoResizeMode(XJTable.AUTO_RESIZE_ALL_COLUMNS);
     annotationTable.setEnableHidingColumns(true);
     JScrollPane annotationScroller = new JScrollPane(annotationTable);
     annotationScroller.setHorizontalScrollBarPolicy(
@@ -128,7 +145,20 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     annotationScroller.getViewport().setBackground(
       annotationTable.getBackground());
 
-    documentTable = new XJTable(documentTableModel);
+    documentTable = new XJTable(documentTableModel) {
+      // table header tool tips.
+      protected JTableHeader createDefaultTableHeader() {
+        return new JTableHeader(columnModel) {
+          public String getToolTipText(MouseEvent e) {
+            java.awt.Point p = e.getPoint();
+            int index = columnModel.getColumnIndexAtX(p.x);
+            if (index == -1) { return null; }
+            int realIndex = columnModel.getColumn(index).getModelIndex();
+            return documentTableModel.HEADER_TOOLTIPS[realIndex];
+          }
+        };
+      }
+    };
     documentTable.setSortable(true);
     documentTable.setSortedColumn(DocumentTableModel.COL_DOCUMENT);
     documentTable.setComparator(DocumentTableModel.COL_DOCUMENT, collator);
@@ -141,7 +171,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     documentTable.setComparator(
       DocumentTableModel.COL_MISSING, integerComparator);
     documentTable.setEnableHidingColumns(true);
-    documentTable.setAutoResizeMode(XJTable.AUTO_RESIZE_OFF);
+    documentTable.setAutoResizeMode(XJTable.AUTO_RESIZE_ALL_COLUMNS);
     JScrollPane docScroller = new JScrollPane(documentTable);
     docScroller.setHorizontalScrollBarPolicy(
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -345,6 +375,28 @@ public class CorpusQualityAssurance extends AbstractVisualResource
   }
 
   protected void updateAnnotationSets(Document documentAdded) {
+
+    if (corpus.size() > 20 && !warningAlreadyShown) {
+      final JPanel warningPanel = new JPanel();
+      warningPanel.add(new JLabel(
+        "<html>This corpus contains more than 20 documents.<br>" +
+          "The comparison of all theirs annotations can be very slow.</html>"));
+      warningPanel.add(Box.createVerticalStrut(10));
+      JButton button  = new JButton("I will be patient!");
+      button.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          remove(warningPanel);
+          add(topPanel, BorderLayout.NORTH);
+          warningAlreadyShown = true;
+          topPanel.updateUI();
+        }
+      });
+      warningPanel.add(button);
+      remove(topPanel);
+      add(warningPanel, BorderLayout.NORTH);
+      warningPanel.updateUI();
+    }
+
     corpusChanged = false;
     if (documentAdded == null) {
       annotationSetsNames.clear();
@@ -457,7 +509,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         differ = annotationDifferRows.get(rowIndex);
       }
       NumberFormat f = NumberFormat.getInstance();
-      f.setMaximumFractionDigits(4);
+      f.setMaximumFractionDigits(2);
       f.setMinimumFractionDigits(2);
       switch(columnIndex) {
         case COL_ANNOTATION:
@@ -550,7 +602,11 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     }
 
     private final String[] COLUMN_NAMES = {"Annotation", "Feature",
-      "COR", "MIS", "SPU", "PAR", "Recall", "Precision", "F-Measure"};
+      "Match", "Only A", "Only B", "Overlap", "Rec.B/A", "Prec.B/A", "F-Score"};
+    public final String[] HEADER_TOOLTIPS = {null, null,
+      "aka 'Correct'", "aka 'Missing'", "aka 'Spurious'", "aka 'Partial'",
+      "Recall for B relative to A", "Precision for B relative to A",
+      "Combine precision and recall with the same weight for each"};
     public static final int COL_ANNOTATION = 0;
     public static final int COL_FEATURE = 1;
     public static final int COL_CORRECT = 2;
@@ -644,7 +700,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         differ = annotationDifferRows.get(rowIndex);
       }
       NumberFormat f = NumberFormat.getInstance();
-      f.setMaximumFractionDigits(4);
+      f.setMaximumFractionDigits(2);
       f.setMinimumFractionDigits(2);
       switch(columnIndex) {
         case COL_DOCUMENT:
@@ -752,7 +808,11 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     }
 
     private final String[] COLUMN_NAMES = {"Document", "Annotation", "Feature",
-      "COR", "MIS", "SPU", "PAR", "Recall", "Precision", "F-Measure"};
+      "Match", "Only A", "Only B", "Overlap", "Rec.B/A", "Prec.B/A", "F-Score"};
+    public final String[] HEADER_TOOLTIPS = {null, null, null,
+      "aka 'Correct'", "aka 'Missing'", "aka 'Spurious'", "aka 'Partial'",
+      "Recall for B relative to A", "Precision for B relative to A",
+      "Combine precision and recall with the same weight for each"};
     public static final int COL_DOCUMENT = 0;
     public static final int COL_ANNOTATION = 1;
     public static final int COL_FEATURE = 2;
@@ -907,6 +967,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     static final String ENDTABLE = "</table>";
   }
 
+  protected JPanel topPanel;
   protected XJTable documentTable;
   protected DocumentTableModel documentTableModel;
   protected XJTable annotationTable;
@@ -922,4 +983,5 @@ public class CorpusQualityAssurance extends AbstractVisualResource
   protected OpenDocumentAction openDocumentAction;
   protected OpenAnnotationDiffAction openAnnotationDiffAction;
   protected ExportToHtmlAction exportToHtmlAction;
+  protected boolean warningAlreadyShown = false;
 }
