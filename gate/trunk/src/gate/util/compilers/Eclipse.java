@@ -287,6 +287,8 @@ public class Eclipse extends gate.util.Javac {
                  CompilerOptions.IGNORE);
     settings.put(CompilerOptions.OPTION_ReportUncheckedTypeOperation,
                  CompilerOptions.IGNORE);
+    settings.put(CompilerOptions.OPTION_ReportRawTypeReference,
+                 CompilerOptions.IGNORE);
 
     // source and target - force 1.5 as GATE only works on 1.5 or later.
     settings.put(CompilerOptions.OPTION_Source,
@@ -364,6 +366,7 @@ public class Eclipse extends gate.util.Javac {
     compiler.compile(compilationUnits);
 
     if(!problems.isEmpty()) {
+      boolean errors = false;
       Iterator problemsIt = problems.entrySet().iterator();
       while(problemsIt.hasNext()) {
         Map.Entry prob = (Map.Entry)problemsIt.next();
@@ -374,6 +377,7 @@ public class Eclipse extends gate.util.Javac {
           IProblem problem = (IProblem)probsForNameIt.next();
           if(problem.isError()) {
             Err.pr("Error: ");
+            errors = true;
           }
           else if(problem.isWarning()) {
             Err.pr("Warning: ");
@@ -386,8 +390,10 @@ public class Eclipse extends gate.util.Javac {
         Err.prln("\nThe offending input was:\n");
         Err.prln(Strings.addLineNumbers((String)sources.get(name)));
       }
-      throw new GateException(
-        "There were problems; see error log for details!");
+      if(errors) {
+        throw new GateException(
+          "There were errors; see error log for details!");
+      }
     }
   }
 
