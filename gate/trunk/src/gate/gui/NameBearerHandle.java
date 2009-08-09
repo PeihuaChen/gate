@@ -1081,9 +1081,6 @@ public class NameBearerHandle implements Handle, StatusListener,
               if (list == null) { list = ""; }
               list = list.replaceFirst("\\Q"+target.getName()+"\\E;?", "");
               list = target.getName() + ";" + list;
-              if (list.split(";").length > 5) {
-                list = list.replaceFirst(";[^;]+;?$", "");
-              }
               MainFrame.setPreferenceValue("filechooserlocations/"
                 + "gate/ApplicationRestore", "list", list);
             }
