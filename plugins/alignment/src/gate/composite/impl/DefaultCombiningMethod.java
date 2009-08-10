@@ -71,7 +71,7 @@ public class DefaultCombiningMethod extends AbstractCombiningMethod {
 
       
       // initialize startDocument
-      startDocument(compoundDocument, inputASName, annotationTypesToCopy);
+      startDocument(compoundDocument, annotationTypesToCopy);
 
       // obtain a list of documentIDs
       List<String> documentIDs = compoundDocument.getDocumentIDs();
