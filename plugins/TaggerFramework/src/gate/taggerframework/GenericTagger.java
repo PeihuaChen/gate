@@ -50,7 +50,8 @@ import java.util.regex.Pattern;
  * @author Mark A. Greenwood
  * @author Rene Witte
  */
-@CreoleResource(comment = "The Generic Tagger is Generic!")
+@CreoleResource(comment = "The Generic Tagger is Generic!", 
+        helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:taggerframework")
 public class GenericTagger extends AbstractLanguageAnalyser implements
                                                            ProcessingResource {
 
@@ -206,7 +207,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
     }
 
     // delete the temporary text file
-    if(!debug) textfile.delete();
+    if(!debug) if(!textfile.delete()) textfile.deleteOnExit();
 
     // make sure we don't hold onto the document so that it can be
     // correctly garbage collected
