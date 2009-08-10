@@ -1,8 +1,6 @@
 package gate.composite.impl;
 
 import java.util.Map;
-import java.util.Set;
-
 import gate.Annotation;
 import gate.AnnotationSet;
 import gate.Document;
@@ -24,8 +22,6 @@ public class CombineFromAnnotID extends AbstractCombiningMethod {
 
   public static final String INPUT_AS_NAME_FEATURE_NAME = "inputASName";
 
-  public static final String ANNOTATION_TYPES_TO_COPY_FEATURE_NAME = "annotationTypesToCopy";
-
   public static final String DOCUMENT_ID_FEATURE_NAME = "documentID";
 
   /**
@@ -34,8 +30,6 @@ public class CombineFromAnnotID extends AbstractCombiningMethod {
    * map.put(ANNOTATION_ID_FEATURE_NAME,annotation.getId());
    * <p>
    * map.put(INPUT_AS_NAME_FEATURE_NAME,"Key");
-   * <p>
-   * map.put(ANNOTATION_TYPES_TO_COPY_FEATURE_NAME,new HashSet<String>());
    * <p>
    * map.put(DOCUMENT_ID_FEATURE_NAME,document.getName());
    * <p>
@@ -50,12 +44,10 @@ public class CombineFromAnnotID extends AbstractCombiningMethod {
     // params
     Integer annotationID = (Integer)parameters.get(ANNOTATION_ID_FEATURE_NAME);
     String inputASName = (String)parameters.get(INPUT_AS_NAME_FEATURE_NAME);
-    Set<String> annotationTypesToCopy = (Set<String>)parameters
-            .get(ANNOTATION_TYPES_TO_COPY_FEATURE_NAME);
     String documentID = (String)parameters.get(DOCUMENT_ID_FEATURE_NAME);
 
     // start a document
-    startDocument(compoundDocument, inputASName, annotationTypesToCopy);
+    startDocument(compoundDocument, annotationTypesToCopy);
 
     Document adoc = compoundDocument.getDocument(documentID);
     AnnotationSet inputAS = inputASName == null

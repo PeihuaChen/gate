@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import gate.Annotation;
@@ -22,9 +23,9 @@ import gate.creole.ResourceInstantiationException;
 import gate.util.InvalidOffsetException;
 
 /**
- * Abstract implementation of the combining method. Classes extending
- * this class must use startDocument() before adding any content (i.e.
- * addContent) and must finalizeDocument() at the end of all additions.
+ * Abstract implementation of the combining method. Classes extending this class
+ * must use startDocument() before adding any content (i.e. addContent) and must
+ * finalizeDocument() at the end of all additions.
  * 
  * @author niraj
  */
@@ -44,28 +45,23 @@ public abstract class AbstractCombiningMethod implements CombiningMethod {
 
   protected Set<String> annotationTypesToCopy;
 
-  protected String inputASName;
-
   private boolean startDocumentCalled = false;
 
   /**
    * User must call this method to start a composite document
    * 
-   * @param containerDocument - instance of compound document that the
-   *          new composite is going to become member of.
-   * @param inputASName - name of the annotation set the input
-   *          annotations should be taken from and stored into the
-   *          composite document.
-   * @param annotationTypesToCopy - list of types of annotations to copy
-   *          underlying the unit annotation. Supply null to copy all
-   *          the annotations. Supply an empty set to copy nothing.
+   * @param containerDocument
+   *          - instance of compound document that the new composite is going to
+   *          become member of.
+   * @param annotationTypesToCopy
+   *          - list of types of annotations to copy underlying the unit
+   *          annotation. Supply null to copy all the annotations. Supply an
+   *          empty set to copy nothing.
    */
-  protected void startDocument(CompoundDocument containerDocument,
-          String inputASName, Set<String> annotationTypesToCopy)
-          throws CombiningMethodException {
+  protected void startDocument(CompoundDocument containerDocument, Set<String> annotationTypesToCopy)
+    throws CombiningMethodException {
     offsetMappings = new HashMap<String, List<OffsetDetails>>();
     this.containerDocument = containerDocument;
-    this.inputASName = inputASName;
     this.annotationTypesToCopy = annotationTypesToCopy;
     this.annotations = new ArrayList<OffsetDetails>();
     this.offsets = new ArrayList<OffsetDetails>();
@@ -75,49 +71,51 @@ public abstract class AbstractCombiningMethod implements CombiningMethod {
   }
 
   protected CompositeDocument finalizeDocument()
-          throws CombiningMethodException {
+    throws CombiningMethodException {
     if(!startDocumentCalled)
       throw new CombiningMethodException(
-              "CompositeDocument is not initialized - please "
-                      + "call the startDocument() method to initialize the "
-                      + "composite document");
+        "CompositeDocument is not initialized - please "
+          + "call the startDocument() method to initialize the "
+          + "composite document");
 
     documentContent = documentContent.insert(0, toAdd);
     documentContent.append("</composite>");
     FeatureMap features = Factory.newFeatureMap();
     features.put("collectRepositioningInfo", containerDocument
-            .getCollectRepositioningInfo());
+      .getCollectRepositioningInfo());
     features.put("encoding", containerDocument.getEncoding());
     features.put("markupAware", new Boolean(true));
     features.put("preserveOriginalContent", containerDocument
-            .getPreserveOriginalContent());
+      .getPreserveOriginalContent());
     features.put("stringContent", documentContent.toString());
     FeatureMap subFeatures = Factory.newFeatureMap();
     Gate.setHiddenAttribute(subFeatures, true);
     CompositeDocument doc = null;
     try {
-      doc = (CompositeDocument)Factory.createResource(
-              "gate.composite.impl.CompositeDocumentImpl", features,
-              subFeatures);
+      doc =
+        (CompositeDocument)Factory.createResource(
+          "gate.composite.impl.CompositeDocumentImpl", features, subFeatures);
     }
     catch(ResourceInstantiationException e1) {
       throw new CombiningMethodException(e1);
     }
 
     ((gate.composite.impl.CompositeDocumentImpl)doc).disableListener = true;
-    AnnotationSet aSet = (String)this.inputASName == null
-            || this.inputASName.trim().length() == 0
-            ? doc.getAnnotations()
-            : doc.getAnnotations(this.inputASName);
 
     // lets add all annotations now
     for(OffsetDetails od : annotations) {
+      // obtain annotation set to add annotations to
+      AnnotationSet aSet =
+        od.getAsName() == null || od.getAsName().trim().length() == 0
+          ? doc.getAnnotations()
+          : doc.getAnnotations(od.getAsName());
       String type = od.getOriginalAnnotation().getType();
       gate.FeatureMap f = od.getOriginalAnnotation().getFeatures();
       Integer id;
       try {
-        id = aSet.add(new Long(od.getNewStartOffset()), new Long(od
-                .getNewEndOffset()), type, f);
+        id =
+          aSet.add(new Long(od.getNewStartOffset()), new Long(od
+            .getNewEndOffset()), type, f);
         od.setNewAnnotation(aSet.get(id));
       }
       catch(InvalidOffsetException e) {
@@ -130,7 +128,7 @@ public abstract class AbstractCombiningMethod implements CombiningMethod {
     doc.setCombiningMethod(this);
     doc.setOffsetMappingInformation(offsetMappings);
     doc.setCombinedDocumentsIds(new HashSet<String>(containerDocument
-            .getDocumentIDs()));
+      .getDocumentIDs()));
     doc.setCompoundDocument(containerDocument);
     return doc;
   }
@@ -154,27 +152,29 @@ public abstract class AbstractCombiningMethod implements CombiningMethod {
    * @return
    */
   protected long[] addContent(Document srcDocument, Annotation unitAnnotation)
-          throws CombiningMethodException {
+    throws CombiningMethodException {
     if(!startDocumentCalled)
       throw new CombiningMethodException(
-              "CompositeDocument is not initialized - please "
-                      + "call the startDocument() method to initialize the "
-                      + "composite document");
-    AnnotationSet inputAS = inputASName == null
-            || inputASName.trim().length() == 0
-            ? srcDocument.getAnnotations()
-            : srcDocument.getAnnotations(inputASName);
+        "CompositeDocument is not initialized - please "
+          + "call the startDocument() method to initialize the "
+          + "composite document");
 
     String documentID = srcDocument.getName();
+    offsets = offsetMappings.get(documentID);
+    if(offsets == null) {
+      offsets = new ArrayList<OffsetDetails>();
+      offsetMappings.put(documentID, offsets);
+    }
+    
     OffsetDetails offset = new OffsetDetails();
     offset.setOldStartOffset(unitAnnotation.getStartNode().getOffset()
-            .longValue());
+      .longValue());
     offset.setOldEndOffset(unitAnnotation.getEndNode().getOffset().longValue());
     offset.setNewStartOffset(documentContent.length());
     try {
       documentContent.append(srcDocument.getContent().getContent(
-              unitAnnotation.getStartNode().getOffset(),
-              unitAnnotation.getEndNode().getOffset()));
+        unitAnnotation.getStartNode().getOffset(),
+        unitAnnotation.getEndNode().getOffset()));
     }
     catch(InvalidOffsetException e2) {
       throw new CombiningMethodException(e2);
@@ -192,34 +192,55 @@ public abstract class AbstractCombiningMethod implements CombiningMethod {
     offsets.add(unitAnnotDetails);
 
     if(annotationTypesToCopy == null || !annotationTypesToCopy.isEmpty()) {
-      AnnotationSet tempSet = inputAS.getContained(unitAnnotation
-              .getStartNode().getOffset(), unitAnnotation.getEndNode()
-              .getOffset());
-      if(annotationTypesToCopy != null && !annotationTypesToCopy.isEmpty()) {
-        tempSet = tempSet.get(annotationTypesToCopy);
-      }
 
-      Iterator iter = tempSet.iterator();
-      while(iter.hasNext()) {
-        Annotation anAnnot = (Annotation)iter.next();
-        OffsetDetails anOffset = new OffsetDetails();
-        anOffset.setOldStartOffset(anAnnot.getStartNode().getOffset()
-                .longValue());
-        anOffset.setOldEndOffset(anAnnot.getEndNode().getOffset().longValue());
-
-        long stDiff = anOffset.getOldStartOffset() - offset.getOldStartOffset();
-        long enDiff = anOffset.getOldEndOffset() - offset.getOldEndOffset();
-
-        anOffset.setNewStartOffset(offset.getNewStartOffset() + stDiff);
-        anOffset.setNewEndOffset(offset.getNewEndOffset() + enDiff);
-        anOffset.setOriginalAnnotation(anAnnot);
-        offsets.add(anOffset);
-        annotations.add(anOffset);
+      // copy annotations under the default annotation set
+      copyAnnotations(srcDocument.getAnnotations(), unitAnnotation, offset);
+      
+      // copy annotations from all the named annotation set
+      Map<String, AnnotationSet> annotationSets =
+        srcDocument.getNamedAnnotationSets();
+      if(annotationSets != null) {
+        for(String asName : annotationSets.keySet()) {
+          copyAnnotations(srcDocument.getAnnotations(asName), unitAnnotation,
+            offset);
+        }
       }
     }
     documentContent.append("\n");
     offsetMappings.put(documentID, offsets);
-    return new long[] {unitAnnotDetails.getNewStartOffset(),
-        unitAnnotDetails.getNewEndOffset()};
+    return new long[]{unitAnnotDetails.getNewStartOffset(),
+      unitAnnotDetails.getNewEndOffset()};
+  }
+
+  private void copyAnnotations(AnnotationSet inputAS,
+    Annotation unitAnnotation, OffsetDetails boundaries) {
+    AnnotationSet tempSet =
+      inputAS.getContained(unitAnnotation.getStartNode().getOffset(),
+        unitAnnotation.getEndNode().getOffset());
+    if(annotationTypesToCopy != null && !annotationTypesToCopy.isEmpty()) {
+      tempSet = tempSet.get(annotationTypesToCopy);
+    }
+
+    Iterator<Annotation> iter = tempSet.iterator();
+    while(iter.hasNext()) {
+      Annotation anAnnot = iter.next();
+      OffsetDetails anOffset = new OffsetDetails();
+      anOffset
+        .setOldStartOffset(anAnnot.getStartNode().getOffset().longValue());
+      anOffset.setOldEndOffset(anAnnot.getEndNode().getOffset().longValue());
+
+      long stDiff =
+        anOffset.getOldStartOffset() - boundaries.getOldStartOffset();
+      long enDiff = anOffset.getOldEndOffset() - boundaries.getOldEndOffset();
+
+      anOffset.setNewStartOffset(boundaries.getNewStartOffset() + stDiff);
+      anOffset.setNewEndOffset(boundaries.getNewEndOffset() + enDiff);
+      anOffset.setOriginalAnnotation(anAnnot);
+
+      // this will be interned - making it easier to store and less expensive
+      anOffset.setAsName(inputAS.getName());
+      offsets.add(anOffset);
+      annotations.add(anOffset);
+    }
   }
 }

@@ -28,7 +28,26 @@ public class OffsetDetails implements Serializable {
 	// optional
 	protected Annotation newAnnotation;
 	
+	// name of the annotation set annotations belong to
+	protected String asName;
+	
 	/**
+	 * Name of the annotation set
+	 * @return
+	 */
+	public String getAsName() {
+    return asName;
+  }
+
+	/**
+	 * Name of the annotation set
+	 * @param asName
+	 */
+  public void setAsName(String asName) {
+    this.asName = asName == null ? null : asName.intern();
+  }
+
+  /**
 	 * Gets the new end offset
 	 * @return
 	 */

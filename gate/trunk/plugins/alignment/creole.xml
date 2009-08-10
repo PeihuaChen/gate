@@ -116,18 +116,17 @@
     </RESOURCE>
 
 	<RESOURCE>
-      <NAME>Process Annotations PR</NAME>
-      <CLASS>gate.composite.impl.ProcessAnnotationsPR</CLASS>
-      <COMMENT>Processes annotations as separate documents</COMMENT>
+      <NAME>Segment Processing PR</NAME>
+      <CLASS>gate.composite.impl.SegmentProcessingPR</CLASS>
+      <COMMENT>Processes individual segments as separate documents</COMMENT>
       <HELPURL>http://gate.ac.uk/userguide/sec:alignment:compositedoc</HELPURL>
       <JAR>aligntools.jar</JAR>
      <PARAMETER NAME="document"  
          COMMENT="The document to be processed"  
          RUNTIME="true">gate.Document</PARAMETER>  
-      <PARAMETER NAME="unitAnnotationType" RUNTIME="true" DEFAULT="Section">java.lang.String</PARAMETER>
-      <PARAMETER NAME="inputAS" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="annotationTypesToCopy" RUNTIME="true" OPTIONAL="true">java.util.List</PARAMETER>
-      <PARAMETER NAME="controller" RUNTIME="true">gate.creole.SerialAnalyserController</PARAMETER>
+      <PARAMETER NAME="segmentAnnotationType" RUNTIME="true" DEFAULT="Section">java.lang.String</PARAMETER>
+      <PARAMETER NAME="inputASName" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
+      <PARAMETER NAME="controller" RUNTIME="true">gate.CorpusController</PARAMETER>
       <ICON>pr.gif</ICON>
     </RESOURCE>
   </CREOLE>
