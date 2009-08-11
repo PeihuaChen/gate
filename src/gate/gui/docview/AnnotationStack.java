@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 1998-2009, The University of Sheffield.
+ *  Copyright (c) 1998-2009, The University of Sheffield and Ontotext.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -43,10 +43,16 @@ public class AnnotationStack extends JPanel {
     init();
   }
 
-  public AnnotationStack(int maxColumns, int maxValueLength) {
+  /**
+   * @param maxTextLength maximum number of characters for the text,
+   * if too long an ellipsis is added in the middle
+   * @param maxFeatureValueLength maximum number of characters
+   *  for a feature value
+   */
+  public AnnotationStack(int maxTextLength, int maxFeatureValueLength) {
     super();
-    this.maxColumns = maxColumns;
-    this.maxValueLength = maxValueLength;
+    this.maxTextLength = maxTextLength;
+    this.maxFeatureValueLength = maxFeatureValueLength;
     init();
   }
 
@@ -114,6 +120,9 @@ public class AnnotationStack extends JPanel {
     // clear the panel
     removeAll();
 
+    boolean textTooLong = text.length() > maxTextLength;
+    int upperBound = text.length() - (maxTextLength/2);
+
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.gridx = 0;
     gbc.gridy = 0;
@@ -136,30 +145,28 @@ public class AnnotationStack extends JPanel {
     add(labelTitle, gbc);
     gbc.insets = new java.awt.Insets(10, 0, 10, 0);
 
-    int startContextOffset = contextSize;
-    int endContextOffset = contextSize + endOffset - startOffset;
-    boolean textTooLong = (endOffset - startOffset) > maxColumns;
-    int upperBound = text.length() - (maxColumns/2);
+    int expressionStart = contextBeforeSize;
+    int expressionEnd = text.length() - contextAfterSize;
 
     // for each character
     for (int charNum = 0; charNum < text.length(); charNum++) {
 
       gbc.gridx = charNum + 1;
       if (textTooLong) {
-        if (charNum == maxColumns/2) {
+        if (charNum == maxTextLength/2) {
           // add ellipsis dots in case of a too long text displayed
           add(new JLabel("..."), gbc);
           // skip the middle part of the text if too long
           charNum = upperBound + 1;
           continue;
         } else if (charNum > upperBound) {
-          gbc.gridx -= upperBound - (maxColumns/2) + 1;
+          gbc.gridx -= upperBound - (maxTextLength/2) + 1;
         }
       }
 
       // set the text and color of the feature value
       JLabel label = new JLabel(text.substring(charNum, charNum+1));
-      if (charNum >= startContextOffset && charNum < endContextOffset) {
+      if (charNum >= expressionStart && charNum < expressionEnd) {
         // this part is matched by the pattern, color it
         label.setBackground(new Color(240, 201, 184));
       } else {
@@ -221,15 +228,28 @@ public class AnnotationStack extends JPanel {
       int gridyMax = gbc.gridy;
       for(StackAnnotation ann : stackRow.getAnnotations()) {
         gbc.gridx = ann.getStartNode().getOffset().intValue()
-                  - startOffset + contextSize + 1;
+                  - expressionStartOffset + contextBeforeSize + 1;
         gbc.gridwidth = ann.getEndNode().getOffset().intValue()
                       - ann.getStartNode().getOffset().intValue();
+        if (gbc.gridx == 0) {
+          // column 0 is already the row header
+          gbc.gridwidth -= 1;
+          gbc.gridx = 1;
+        } else if (gbc.gridx < 0) {
+          // annotation starts before displayed text
+          gbc.gridwidth += gbc.gridx - 1;
+          gbc.gridx = 1;
+        }
+        if (gbc.gridx + gbc.gridwidth > text.length()) {
+          // annotation ends after displayed text
+          gbc.gridwidth = text.length() - gbc.gridx + 1;
+        }
         if(textTooLong) {
           if(gbc.gridx > (upperBound + 1)) {
             // x starts after the hidden middle part
-            gbc.gridx -= upperBound - (maxColumns / 2) + 1;
+            gbc.gridx -= upperBound - (maxTextLength / 2) + 1;
           }
-          else if(gbc.gridx > (maxColumns / 2)) {
+          else if(gbc.gridx > (maxTextLength / 2)) {
             // x starts in the hidden middle part
             if(gbc.gridx + gbc.gridwidth <= (upperBound + 3)) {
               // x ends in the hidden middle part
@@ -238,22 +258,22 @@ public class AnnotationStack extends JPanel {
             else {
               // x ends after the hidden middle part
               gbc.gridwidth -= upperBound - gbc.gridx + 2;
-              gbc.gridx = (maxColumns / 2) + 2;
+              gbc.gridx = (maxTextLength / 2) + 2;
             }
           }
           else {
             // x starts before the hidden middle part
-            if(gbc.gridx + gbc.gridwidth < (maxColumns / 2)) {
+            if(gbc.gridx + gbc.gridwidth < (maxTextLength / 2)) {
               // x ends before the hidden middle part
               // do nothing
             }
             else if(gbc.gridx + gbc.gridwidth < upperBound) {
               // x ends in the hidden middle part
-              gbc.gridwidth = (maxColumns / 2) - gbc.gridx + 1;
+              gbc.gridwidth = (maxTextLength / 2) - gbc.gridx + 1;
             }
             else {
               // x ends after the hidden middle part
-              gbc.gridwidth -= upperBound - (maxColumns / 2);
+              gbc.gridwidth -= upperBound - (maxTextLength / 2) + 1;
             }
           }
         }
@@ -264,7 +284,7 @@ public class AnnotationStack extends JPanel {
         JLabel label = new JLabel();
         String value = (String) ann.getFeatures().get(feature);
         if (value == null) { value = " "; }
-        if(value.length() > maxValueLength) {
+        if(value.length() > maxFeatureValueLength) {
           // show the full text in the tooltip
           label.setToolTipText((value.length() > 500) ?
             "<html><textarea rows=\"30\" cols=\"40\" readonly=\"readonly\">"
@@ -275,14 +295,15 @@ public class AnnotationStack extends JPanel {
                 + "</td></tr></table></html>" :
               value));
           if(stackRow.getCrop() == CROP_START) {
-            value = "..." + value.substring(value.length() - maxValueLength - 1);
+            value = "..." + value.substring(
+              value.length() - maxFeatureValueLength - 1);
           }
           else if(stackRow.getCrop() == CROP_END) {
-            value = value.substring(0, maxValueLength - 2) + "...";
+            value = value.substring(0, maxFeatureValueLength - 2) + "...";
           }
           else {// cut in the middle
-            value = value.substring(0, maxValueLength / 2) + "..."
-              + value.substring(value.length() - (maxValueLength / 2));
+            value = value.substring(0, maxFeatureValueLength / 2) + "..."
+              + value.substring(value.length() - (maxFeatureValueLength / 2));
           }
         }
         label.setText(value);
@@ -359,7 +380,7 @@ public class AnnotationStack extends JPanel {
       gbc.gridwidth = 1;
       if (stackRow.getLastColumnButton() != null) {
         // last cell of the row
-        gbc.gridx = Math.min(text.length(), maxColumns) + 1;
+        gbc.gridx = Math.min(text.length(), maxTextLength) + 1;
         gbc.insets = new Insets(0, 10, 3, 0);
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.WEST;
@@ -384,7 +405,7 @@ public class AnnotationStack extends JPanel {
     // add an empty cell that takes all remaining space to
     // align the visible cells at the top-left corner
     gbc.gridy++;
-    gbc.gridx = maxColumns+1;
+    gbc.gridx = Math.min(text.length(), maxTextLength) + 1;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridheight = GridBagConstraints.REMAINDER;
     gbc.weightx = 1;
@@ -461,7 +482,7 @@ public class AnnotationStack extends JPanel {
    * This class is only for AnnotationStack internal use
    * as it won't work with most of the methods that use gate.Annotation.
    */
-  static class StackAnnotation extends gate.annotation.AnnotationImpl {
+  private static class StackAnnotation extends gate.annotation.AnnotationImpl {
     StackAnnotation(Integer id, Node start, Node end, String type,
                          FeatureMap features) {
       super(id, start, end, type, features);
@@ -526,28 +547,33 @@ public class AnnotationStack extends JPanel {
     this.lastRowButton = lastRowButton;
   }
 
-  /** @param text first line of text that contains the main expression
+  /** @param text first line of text that contains the expression
    *  and its context */
   public void setText(String text) {
     this.text = text;
   }
 
-  /** @param startOffset document offset where starts the main expression */
-  public void setStartOffset(int startOffset) {
-    this.startOffset = startOffset;
+  /** @param expressionStartOffset document offset where starts the expression */
+  public void setExpressionStartOffset(int expressionStartOffset) {
+    this.expressionStartOffset = expressionStartOffset;
   }
 
-  /** @param endOffset document offset where ends the main expression */
-  public void setEndOffset(int endOffset) {
-    this.endOffset = endOffset;
+  /** @param expressionEndOffset document offset where ends the expression */
+  public void setExpressionEndOffset(int expressionEndOffset) {
+    this.expressionEndOffset = expressionEndOffset;
   }
 
-  /** @param contextSize size of the context to display in characters */
-  public void setContextSize(int contextSize) {
-    this.contextSize = contextSize;
+  /** @param contextBeforeSize number of characters before the expression */
+  public void setContextBeforeSize(int contextBeforeSize) {
+    this.contextBeforeSize = contextBeforeSize;
   }
 
-  /** @param expressionTooltip optional tooltip for the main expression */
+  /** @param contextAfterSize number of characters after the expression */
+  public void setContextAfterSize(int contextAfterSize) {
+    this.contextAfterSize = contextAfterSize;
+  }
+
+  /** @param expressionTooltip optional tooltip for the expression */
   public void setExpressionTooltip(String expressionTooltip) {
     this.expressionTooltip = expressionTooltip;
   }
@@ -569,16 +595,19 @@ public class AnnotationStack extends JPanel {
 
   /** rows of annotations that are displayed in the stack*/
   ArrayList<StackRow> stackRows;
-  /** maximum number of columns to display in the match,
-   *  i.e. maximum number of characters */
-  int maxColumns = 150;
-  /** maximum length of a feature value displayed */
-  int maxValueLength = 30;
+  /** maximum number of characters for the text,
+   * if too long an ellipsis is added in the middle */
+  int maxTextLength = 150;
+  /** maximum number of characters for a feature value */
+  int maxFeatureValueLength = 30;
   JButton lastRowButton;
   String text = "";
-  int startOffset = 0;
-  int endOffset = 0;
-  int contextSize = 0;
+  int expressionStartOffset = 0;
+  int expressionEndOffset = 0;
+  /** number of characters before the expression */
+  int contextBeforeSize = 10;
+  /** number of characters after the expression */
+  int contextAfterSize = 10;
   String expressionTooltip = "";
   StackMouseListener textMouseListener;
   StackMouseListener headerMouseListener;

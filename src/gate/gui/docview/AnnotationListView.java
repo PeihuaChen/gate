@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 1998-2007, The University of Sheffield.
+ *  Copyright (c) 1998-2009, The University of Sheffield and Ontotext.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -34,15 +34,16 @@ import javax.swing.text.JTextComponent;
 
 /**
  * A tabular view for a list of annotations.
-  * Used as part of the document viewer to display all the annotation currently
-  * highlighted.
-  */
- public class AnnotationListView extends AbstractDocumentView
-     implements AnnotationListener, AnnotationList, AnnotationEditorOwner{
+ * Used as part of the document viewer to display all the annotation currently
+ * highlighted.
+ */
+public class AnnotationListView extends AbstractDocumentView
+  implements AnnotationListener, AnnotationList, AnnotationEditorOwner{
 
-   public AnnotationListView(){
-     annDataList = new ArrayList<AnnotationData>();
-   }
+  public AnnotationListView(){
+    annDataList = new ArrayList<AnnotationData>();
+    editorsCache = new HashMap<String, AnnotationVisualResource>();
+  }
 
 
    /**
@@ -77,7 +78,6 @@ import javax.swing.text.JTextComponent;
     * @see gate.gui.docview.AbstractDocumentView#initGUI()
     */
    protected void initGUI() {
-     editorsCache = new HashMap<String, AnnotationVisualResource>();
      tableModel = new AnnotationTableModel();
      table = new XJTable(tableModel);
      table.setAutoResizeMode(XJTable.AUTO_RESIZE_OFF);
@@ -220,65 +220,25 @@ import javax.swing.text.JTextComponent;
               //add the custom edit actions
               if(modelRow != -1){
                 AnnotationData aHandler = annDataList.get(modelRow);
-                //add the specific editors
-                List<String> specificEditorClasses = Gate.getCreoleRegister().
-                  getAnnotationVRs(aHandler.getAnnotation().getType());
-                if(specificEditorClasses != null &&
-                   specificEditorClasses.size() > 0){
+                popup.addSeparator();
+                List<Action> specificEditorActions = getSpecificEditorActions(
+                  aHandler.getAnnotationSet(), aHandler.getAnnotation());
+                for (Action action : specificEditorActions) {
+                  popup.add(action);
+                }
+                if (!(popup.getComponent(popup.getComponentCount()-1)
+                    instanceof JSeparator)) {
                   popup.addSeparator();
-                  for (String editorClass : specificEditorClasses) {
-                    AnnotationVisualResource editor =
-                      editorsCache.get(editorClass);
-                    if (editor == null) {
-                      //create the new type of editor
-                      try {
-                        editor = (AnnotationVisualResource)
-                          Factory.createResource(editorClass);
-                        editorsCache.put(editorClass, editor);
-                      } catch (ResourceInstantiationException rie) {
-                        rie.printStackTrace(Err.getPrintWriter());
-                      }
-                    }
-                    popup.add(new EditAnnotationAction(aHandler.getAnnotationSet(),
-                      aHandler.getAnnotation(), editor));
-                  }
                 }
-                //add generic editors
-                List<String> genericEditorClasses = Gate.getCreoleRegister().
-                  getAnnotationVRs();
-                if(genericEditorClasses != null &&
-                   genericEditorClasses.size() > 0){
-                  popup.addSeparator();
-                  Iterator<String> genEditorIter = genericEditorClasses.iterator();
-                  while(genEditorIter.hasNext()){
-                    String editorClass = (String) genEditorIter.next();
-                    if(specificEditorClasses.contains(editorClass)) continue;
-                    AnnotationVisualResource editor = (AnnotationVisualResource)
-                      editorsCache.get(editorClass);
-                    if(editor == null){
-                      //create the new type of editor
-                      try{
-                        ResourceData resData = Gate.getCreoleRegister().get(editorClass);
-                        Class<?> resClass = resData.getResourceClass();
-                        if(OwnedAnnotationEditor.class.isAssignableFrom(resClass)) {
-                          OwnedAnnotationEditor newEditor = (OwnedAnnotationEditor)resClass
-                                  .newInstance();
-                          newEditor.setOwner(AnnotationListView.this);
-                          newEditor.init();
-                          editor = newEditor;
-                        }else{
-                          editor = (AnnotationVisualResource)
-                                   Factory.createResource(editorClass);
+                for (Action action : getGenericEditorActions(
+                  aHandler.getAnnotationSet(), aHandler.getAnnotation())) {
+                  if (specificEditorActions.contains(action)) { continue; }
+                  popup.add(action);
                 }
-                        editorsCache.put(editorClass, editor);
-                      }catch(Exception rie){
-                        rie.printStackTrace(Err.getPrintWriter());
-                      }
-                    }
-                  popup.add(new EditAnnotationAction(aHandler.getAnnotationSet(),
-                    aHandler.getAnnotation(), editor));
+                if ((popup.getComponent(popup.getComponentCount()-1)
+                    instanceof JSeparator)) {
+                  popup.remove(popup.getComponentCount()-1);
                 }
-              }
               }
               popup.show(table, me.getX(), me.getY());
             }
@@ -301,8 +261,7 @@ import javax.swing.text.JTextComponent;
       new DocumentListener() {
       private Timer timer = new Timer("Annotation list selection timer", true);
       private TimerTask timerTask;
-      public void changedUpdate(DocumentEvent e) {
-      }
+      public void changedUpdate(DocumentEvent e) { /* do nothing */ }
       public void insertUpdate(DocumentEvent e) {
         update();
       }
@@ -354,7 +313,70 @@ import javax.swing.text.JTextComponent;
            }
          }
        });
+   }
+
+  public List<Action> getSpecificEditorActions(AnnotationSet set,
+                                               Annotation annotation) {
+    List<Action> actions = new ArrayList<Action>();
+    //add the specific editors
+    List<String> specificEditorClasses =
+      Gate.getCreoleRegister().getAnnotationVRs(annotation.getType());
+    if (specificEditorClasses != null &&
+      specificEditorClasses.size() > 0) {
+      for (String editorClass : specificEditorClasses) {
+        AnnotationVisualResource editor =
+          editorsCache.get(editorClass);
+        if (editor == null) {
+          //create the new type of editor
+          try {
+            editor = (AnnotationVisualResource)
+              Factory.createResource(editorClass);
+            editorsCache.put(editorClass, editor);
+          } catch (ResourceInstantiationException rie) {
+            rie.printStackTrace(Err.getPrintWriter());
+          }
+        }
+        actions.add(new EditAnnotationAction(set, annotation, editor));
       }
+    }
+    return actions;
+  }
+
+  public List<Action> getGenericEditorActions(AnnotationSet set,
+                                              Annotation annotation) {
+    List<Action> actions = new ArrayList<Action>();
+    //add generic editors
+    List<String> genericEditorClasses = Gate.getCreoleRegister().
+      getAnnotationVRs();
+    if (genericEditorClasses != null &&
+      genericEditorClasses.size() > 0) {
+      for (String editorClass : genericEditorClasses) {
+        AnnotationVisualResource editor = editorsCache.get(editorClass);
+        if (editor == null) {
+          //create the new type of editor
+          try {
+            ResourceData resData = Gate.getCreoleRegister().get(editorClass);
+            Class<?> resClass = resData.getResourceClass();
+            if (OwnedAnnotationEditor.class.isAssignableFrom(resClass)) {
+              OwnedAnnotationEditor newEditor =
+                (OwnedAnnotationEditor) resClass.newInstance();
+              newEditor.setOwner(AnnotationListView.this);
+              newEditor.init();
+              editor = newEditor;
+            } else {
+              editor = (AnnotationVisualResource)
+                Factory.createResource(editorClass);
+            }
+            editorsCache.put(editorClass, editor);
+          } catch (Exception rie) {
+            rie.printStackTrace(Err.getPrintWriter());
+          }
+        }
+        actions.add(new EditAnnotationAction(set, annotation, editor));
+      }
+    }
+    return actions;
+  }
 
   protected class DeleteAction extends AbstractAction{
     public DeleteAction() {
@@ -638,6 +660,14 @@ import javax.swing.text.JTextComponent;
     * @see gate.gui.annedit.AnnotationEditorOwner#getTextComponent()
     */
    public JTextComponent getTextComponent() {
+     //get a pointer to the text view used to display
+     //the selected annotations
+     Iterator centralViewsIter = owner.getCentralViews().iterator();
+     while(textView == null && centralViewsIter.hasNext()){
+       DocumentView aView = (DocumentView)centralViewsIter.next();
+       if(aView instanceof TextualDocumentView)
+         textView = (TextualDocumentView)aView;
+     }
      return (JTextArea)((JScrollPane)textView.getGUI()).getViewport().getView();
    }
 
@@ -735,8 +765,8 @@ import javax.swing.text.JTextComponent;
          this.set = set;
          this.ann = ann;
          this.editor = editor;
-         ResourceData rData =(ResourceData)Gate.getCreoleRegister().
-             get(editor.getClass().getName());
+         ResourceData rData =
+           Gate.getCreoleRegister().get(editor.getClass().getName());
          if(rData != null){
            title = rData.getName();
            putValue(NAME, "Edit with " + title);
@@ -754,7 +784,7 @@ import javax.swing.text.JTextComponent;
            ((OwnedAnnotationEditor)editor).placeDialog(
                    ann.getStartNode().getOffset().intValue(),
                    ann.getEndNode().getOffset().intValue());
-           //now we need to [pin it so that it does not disappear automatically
+           //now we need to pin it so that it does not disappear automatically
            ((OwnedAnnotationEditor)editor).setPinnedMode(true);
            editor.editAnnotation(ann, set);
          }else{
