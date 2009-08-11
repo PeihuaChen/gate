@@ -3190,10 +3190,12 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
 
     public void actionPerformed(ActionEvent e) {
-      mainTabbedPane.remove(handle.getLargeView());
-      mainTabbedPane.setSelectedIndex(mainTabbedPane.getTabCount() - 1);
-      // remove all GUI resources used by this handle
-      handle.removeViews();
+      SwingUtilities.invokeLater(new Runnable() { public void run() {
+        mainTabbedPane.remove(handle.getLargeView());
+        mainTabbedPane.setSelectedIndex(mainTabbedPane.getTabCount() - 1);
+        // remove all GUI resources used by this handle
+        handle.removeViews();
+      }});
     }
 
     Handle handle;
@@ -3211,10 +3213,12 @@ public class MainFrame extends JFrame implements ProgressListener,
         public void run() {
           TreePath[] paths = resourcesTree.getSelectionPaths();
           for(TreePath path : paths) {
-            Object value = path.getLastPathComponent();
-            value = ((DefaultMutableTreeNode)value).getUserObject();
+            final Object value = ((DefaultMutableTreeNode)
+              path.getLastPathComponent()).getUserObject();
             if(value instanceof Handle) {
-              new CloseViewAction((Handle)value).actionPerformed(null);
+              SwingUtilities.invokeLater(new Runnable() { public void run() {
+                new CloseViewAction((Handle)value).actionPerformed(null);
+              }});
             }
           }
         }
@@ -3253,12 +3257,13 @@ public class MainFrame extends JFrame implements ProgressListener,
         public void run() {
           TreePath[] paths = resourcesTree.getSelectionPaths();
           for(TreePath path : paths) {
-            Object userObject =
-              ((DefaultMutableTreeNode) path.getLastPathComponent())
-                .getUserObject();
+            final Object userObject = ((DefaultMutableTreeNode)
+              path.getLastPathComponent()).getUserObject();
             if(userObject instanceof NameBearerHandle) {
-              ((NameBearerHandle)userObject).getCloseAction()
-                .actionPerformed(null);
+              SwingUtilities.invokeLater(new Runnable() { public void run() {
+                ((NameBearerHandle)userObject).getCloseAction()
+                  .actionPerformed(null);
+              }});
             }
           }
         }
@@ -3281,12 +3286,13 @@ public class MainFrame extends JFrame implements ProgressListener,
         public void run() {
           TreePath[] paths = resourcesTree.getSelectionPaths();
           for(TreePath path : paths) {
-            Object userObject =
-              ((DefaultMutableTreeNode) path.getLastPathComponent())
-                .getUserObject();
+            final Object userObject = ((DefaultMutableTreeNode)
+              path.getLastPathComponent()).getUserObject();
             if(userObject instanceof NameBearerHandle) {
-              ((NameBearerHandle)userObject).getCloseRecursivelyAction()
-                .actionPerformed(null);
+              SwingUtilities.invokeLater(new Runnable() { public void run() {
+                ((NameBearerHandle)userObject).getCloseRecursivelyAction()
+                  .actionPerformed(null);
+              }});
             }
           }
         }
@@ -3316,8 +3322,7 @@ public class MainFrame extends JFrame implements ProgressListener,
          && (mainTabbedPane.indexOfComponent(
             ((Handle)node.getUserObject()).getLargeView()) != -1)) {
           final Handle handle = (Handle)node.getUserObject();
-          SwingUtilities.invokeLater(new Runnable() {
-          public void run() {
+          SwingUtilities.invokeLater(new Runnable() { public void run() {
             (new CloseViewAction(handle)).actionPerformed(null);
           }});
         }
@@ -3352,14 +3357,15 @@ public class MainFrame extends JFrame implements ProgressListener,
               return;
             }
           }
-          Handle handle;
           for (TreePath path : paths) {
             if(path != null) {
               Object value = path.getLastPathComponent();
               value = ((DefaultMutableTreeNode)value).getUserObject();
               if(value instanceof Handle) {
-                handle = (Handle)value;
-                select(handle);
+                final Handle handle = (Handle)value;
+                SwingUtilities.invokeLater(new Runnable() { public void run() {
+                  select(handle);
+                }});
               }
             }
           }
