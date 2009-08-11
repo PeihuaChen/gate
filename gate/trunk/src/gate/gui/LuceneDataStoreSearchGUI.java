@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 1998-2009, The University of Sheffield.
+ *  Copyright (c) 1998-2009, The University of Sheffield and Ontotext.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -1092,10 +1092,12 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
     // initialize the annotation stack
     centerPanel.setText(result.getPatternText());
-    centerPanel.setStartOffset(result.getStartOffset());
-    centerPanel.setEndOffset(result.getEndOffset());
-    centerPanel.setContextSize(
+    centerPanel.setExpressionStartOffset(result.getStartOffset());
+    centerPanel.setExpressionEndOffset(result.getEndOffset());
+    centerPanel.setContextBeforeSize(
       result.getStartOffset()-result.getLeftContextStartOffset());
+    centerPanel.setContextAfterSize(
+      result.getRightContextEndOffset()-result.getEndOffset());
     centerPanel.setLastRowButton(configureStackViewButton);
     centerPanel.setTextMouseListener(new TextMouseListener());
     centerPanel.setHeaderMouseListener(new HeaderMouseListener());
@@ -1801,6 +1803,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           if (searcher.getHits().length < noOfResults) {
             nextResultsAction.setEnabled(false);
           }
+          queryTextArea.requestFocusInWindow();
           SwingUtilities.invokeLater(new Runnable() {
           public void run() {
             blockingGlassPane.block(false);

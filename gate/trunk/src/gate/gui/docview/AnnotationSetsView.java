@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 1998-2007, The University of Sheffield.
+ *  Copyright (c) 1998-2007, The University of Sheffield and Ontotext.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -109,6 +109,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   
   /* (non-Javadoc)
    * @see gate.gui.annedit.AnnotationEditorOwner#getListComponent()
+   * TODO: delete this obsolete method?
    */
   public AnnotationList getListComponent() {
     return listView;
@@ -156,6 +157,13 @@ public class AnnotationSetsView extends AbstractDocumentView
       DocumentView aView = (DocumentView)horizontalViewsIter.next();
       if(aView instanceof AnnotationListView) 
         listView = (AnnotationListView)aView;
+    }
+    //get a pointer to the stack view
+    horizontalViewsIter = owner.getHorizontalViews().iterator();
+    while(stackView == null && horizontalViewsIter.hasNext()){
+      DocumentView aView = (DocumentView)horizontalViewsIter.next();
+      if(aView instanceof AnnotationStackView)
+        stackView = (AnnotationStackView)aView;
     }
     mainTable = new XJTable();
     tableModel = new SetsTableModel();
@@ -1346,6 +1354,8 @@ public class AnnotationSetsView extends AbstractDocumentView
       int row = tableRows.indexOf(this);
       tableModel.fireTableRowsUpdated(row, row);
       saveType(setHandler.set.getName(), name, selected);
+      //update the stack view
+      stackView.updateStackView();
     }
     
     public boolean isSelected(){
@@ -1369,6 +1379,8 @@ public class AnnotationSetsView extends AbstractDocumentView
         if(!annListTagsForAnn.containsKey(ann.getId())) 
             annListTagsForAnn.put(ann.getId(), 
             listView.addAnnotation(ann, setHandler.set));
+        //update the stack view
+        stackView.updateStackView();
       }
     }
     
@@ -1384,6 +1396,8 @@ public class AnnotationSetsView extends AbstractDocumentView
         if(tag != null) textView.removeHighlight(tag);
         AnnotationData listTag = annListTagsForAnn.remove(ann.getId());
         if(tag != null) listView.removeAnnotation(listTag);
+        //update the stack view
+        stackView.updateStackView();
       }
       //if this was the last annotation of this type then the handler is no
       //longer required
@@ -1930,6 +1944,8 @@ public class AnnotationSetsView extends AbstractDocumentView
         setHandlers.clear();
         tableRows.clear();
         listView.removeAnnotations(listView.getAllAnnotations());
+        //update the stack view
+        stackView.updateStackView();
 //        textView.removeAllBlinkingHighlights();
         //rebuild the UI
         populateUI();
@@ -1968,8 +1984,9 @@ public class AnnotationSetsView extends AbstractDocumentView
       JPopupMenu popup = new JPopupMenu();
 
       //check for selection hovering
-      if(textPane.getSelectionStart() <= textLocation &&
-         textPane.getSelectionEnd() >= textLocation){
+      if(textPane.getSelectedText() != null
+      && textPane.getSelectionStart() <= textLocation
+      && textPane.getSelectionEnd() >= textLocation){
         //add 'New annotation' to the popup menu
         popup.add(new NewAnnotationAction(textPane.getSelectedText()));
         popup.addSeparator();
@@ -2203,6 +2220,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   
   TextualDocumentView textView;
   AnnotationListView listView;
+  AnnotationStackView stackView;
   JTextArea textPane;
   gate.gui.annedit.OwnedAnnotationEditor annotationEditor;
   NewAnnotationSetAction newSetAction;
