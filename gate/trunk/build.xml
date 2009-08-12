@@ -431,7 +431,7 @@
        Stanford
        arabic bdmComputation cebuano chinese copyAS2AnoDoc crawl google hindi alignment annotationMerging
        learning chineseSegmenter iaaPlugin rasp romanian Stemmer uima yahoo 
-       Ontology_Based_Gazetteer OpenCalais lingpipe" />
+       Ontology_Based_Gazetteer OpenCalais LingPipe" />
 
   <target name="plugins.build" depends="jar" >
     <for param="plugin">
