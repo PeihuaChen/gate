@@ -356,7 +356,7 @@ public class MainFrame extends JFrame implements ProgressListener,
               "list", list.replaceFirst(name + ";?", ""));
             }
           } finally { processFinished(); }}};
-          Thread thread = new Thread(runnable);
+          Thread thread = new Thread(runnable ,"Reload application");
           thread.setPriority(Thread.MIN_PRIORITY);
           thread.start();
       }}, MainFrame.this));
@@ -1032,16 +1032,52 @@ public class MainFrame extends JFrame implements ProgressListener,
                     MainFrame.this));
 
             // add a close recursively all action
-            popup.add(new XJMenuItem(
-              new CloseRecursivelySelectedResourcesAction(), MainFrame.this));
+            TreePath[] selectedPaths = resourcesTree.getSelectionPaths();
+            for(TreePath selectedPath : selectedPaths) {
+              Object userObject = ((DefaultMutableTreeNode)
+                selectedPath.getLastPathComponent()).getUserObject();
+              if(userObject instanceof NameBearerHandle
+                && ((NameBearerHandle)userObject).getTarget()
+                  instanceof Controller) {
+                // there is at least one application
+                popup.add(new XJMenuItem(new
+                  CloseRecursivelySelectedResourcesAction(), MainFrame.this));
+                break;
+              }
+            }
 
             // add a show all action
-            popup.add(new XJMenuItem(new ShowSelectedResourcesAction(),
-              MainFrame.this));
+            selectedPaths = resourcesTree.getSelectionPaths();
+            for(TreePath selectedPath : selectedPaths) {
+              Object userObject = ((DefaultMutableTreeNode)
+                selectedPath.getLastPathComponent()).getUserObject();
+              if (userObject instanceof Handle
+              && ( ((Handle)userObject).getLargeView() == null
+                || (mainTabbedPane.indexOfComponent(
+                  ((Handle)userObject).getLargeView()) == -1)) ) {
+                // there is at least one resource not shown
+                popup.add(new XJMenuItem(new ShowSelectedResourcesAction(),
+                  MainFrame.this));
+                break;
+              }
+            }
 
             // add a hide all action
-            popup.add(new XJMenuItem(new CloseViewsForSelectedResourcesAction(),
-              MainFrame.this));
+            selectedPaths = resourcesTree.getSelectionPaths();
+            for(TreePath selectedPath : selectedPaths) {
+              Object userObject = ((DefaultMutableTreeNode)
+                selectedPath.getLastPathComponent()).getUserObject();
+              if (userObject instanceof Handle
+              && ((Handle)userObject).viewsBuilt()
+              && ((Handle)userObject).getLargeView() != null
+              && (mainTabbedPane.indexOfComponent(
+                ((Handle)userObject).getLargeView()) != -1)) {
+                // there is at least one resource shown
+                popup.add(new XJMenuItem(new CloseViewsForSelectedResourcesAction(),
+                  MainFrame.this));
+                break;
+              }
+            }
 
             popup.show(resourcesTree, e.getX(), e.getY());
           }
@@ -2021,7 +2057,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       };
       Thread thread =
         new Thread(Thread.currentThread().getThreadGroup(), runnable,
-          "Eval thread");
+          "NewCorpusEvalAction");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }// actionPerformed();
@@ -2079,7 +2115,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       };
       Thread thread =
         new Thread(Thread.currentThread().getThreadGroup(), runnable,
-          "Eval thread");
+          "StoredMarkedCorpusEvalAction");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }// actionPerformed();
@@ -2143,7 +2179,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       };
       Thread thread =
         new Thread(Thread.currentThread().getThreadGroup(), runnable,
-          "Eval thread");
+          "CleanMarkedCorpusEvalAction");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }// actionPerformed();
@@ -2198,7 +2234,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       };
       Thread thread =
         new Thread(Thread.currentThread().getThreadGroup(), runnable,
-          "Eval thread");
+          "GenerateStoredCorpusEvalAction");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }// actionPerformed();
@@ -2287,7 +2323,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           }
         }
       };
-      Thread thread = new Thread(runnable, "");
+      Thread thread = new Thread(runnable, "LoadANNIEWithDefaultsAction");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }
@@ -2374,7 +2410,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           });
         }
       };
-      Thread thread = new Thread(runnable, "");
+      Thread thread = new Thread(runnable, "LoadANNIEWithoutDefaultsAction");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }
@@ -3223,7 +3259,8 @@ public class MainFrame extends JFrame implements ProgressListener,
           }
         }
       };
-      Thread thread = new Thread(runner);
+      Thread thread = new Thread(runner,
+        "CloseViewsForSelectedResourcesAction");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }
@@ -3268,7 +3305,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           }
         }
       };
-      Thread thread = new Thread(runner);
+      Thread thread = new Thread(runner, "CloseSelectedResourcesAction");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }
@@ -3297,7 +3334,8 @@ public class MainFrame extends JFrame implements ProgressListener,
           }
         }
       };
-      Thread thread = new Thread(runner);
+      Thread thread = new Thread(runner,
+        "CloseRecursivelySelectedResourcesAction");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }
@@ -3371,7 +3409,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           }
         }
       };
-      Thread thread = new Thread(runner);
+      Thread thread = new Thread(runner, "ShowSelectedResourcesAction");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }
@@ -4215,7 +4253,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       }
       }
     };
-    Thread thread = new Thread(runnable);
+    Thread thread = new Thread(runnable, "showHelpFrame");
     thread.start();
   }
 
@@ -4333,7 +4371,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           }
         }
       };
-      Thread thread = new Thread(runnable);
+      Thread thread = new Thread(runnable, "ToggleToolTipsAction");
       thread.start();
     }
   }
