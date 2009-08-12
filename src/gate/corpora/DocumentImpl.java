@@ -1950,9 +1950,6 @@ public class DocumentImpl extends AbstractLanguageResource implements
     return namedAnnotSets;
   } // getNamedAnnotationSets
 
-  /**
-   * Returns a set of all named annotation sets in existence
-   */
   public Set<String> getAnnotationSetNames() {
     return (namedAnnotSets == null) ? null : namedAnnotSets.keySet();
   }

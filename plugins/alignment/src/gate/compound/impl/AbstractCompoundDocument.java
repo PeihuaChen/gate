@@ -622,9 +622,6 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
     }
   } // getNamedAnnotationSets
 
-  /**
-   * Returns a set of all named annotation sets in existence
-   */
   public Set<String> getAnnotationSetNames() {
     if(currentDocument == null) {
       System.err
