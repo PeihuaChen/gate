@@ -31,10 +31,11 @@ import java.awt.event.*;
 import java.util.*;
 import java.util.Timer;
 import java.util.List;
+import java.text.Collator;
 
 /**
  * Show a stack view of highlighted annotations in the document
- * centred on the first selected annotation.
+ * centred on the document caret.
  *
  * When double clicked, an annotation is copied to another set in order
  * to create a gold standard set from several annoatator sets.
@@ -264,25 +265,34 @@ public class AnnotationStackView  extends AbstractDocumentView
 
   /** @return true if the user input a valid annotation set */
   boolean askTargetSet() {
-    Set<String> sets = new HashSet<String>(document.getAnnotationSetNames());
-    JList list = new JList(sets.toArray());
-    list.setVisibleRowCount(Math.min(10, sets.size()));
-    list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    JScrollPane scroll = new JScrollPane(list);
-    JPanel vspace = new JPanel();
-    vspace.setSize(0, 5);
+    Object[] messageObjects;
     final JTextField setsTextField = new JTextField("consensus", 15);
-    list.addListSelectionListener(new ListSelectionListener() {
-      public void valueChanged(ListSelectionEvent e) {
-        JList list = (JList) e.getSource();
-        if (list.getSelectedValue() != null) {
-          setsTextField.setText((String) list.getSelectedValue());
+    if (document.getAnnotationSetNames() != null
+     && !document.getAnnotationSetNames().isEmpty()) {
+      Collator collator = Collator.getInstance(Locale.ENGLISH);
+      collator.setStrength(Collator.TERTIARY);
+      SortedSet<String> setNames = new TreeSet<String>(collator);
+      setNames.addAll(document.getAnnotationSetNames());
+      JList list = new JList(setNames.toArray());
+      list.setVisibleRowCount(Math.min(10, setNames.size()));
+      list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+      list.setSelectedValue(targetSetName, true);
+      JScrollPane scroll = new JScrollPane(list);
+      JPanel vspace = new JPanel();
+      vspace.setSize(0, 5);
+      list.addListSelectionListener(new ListSelectionListener() {
+        public void valueChanged(ListSelectionEvent e) {
+          JList list = (JList) e.getSource();
+          if (list.getSelectedValue() != null) {
+            setsTextField.setText((String) list.getSelectedValue());
+          }
         }
-      }
-    });
-    list.setSelectedValue(targetSetName, true);
-    Object[] messageObjects = { "Existing annotation sets:",
-      scroll, vspace, "Target set:", setsTextField };
+      });
+      messageObjects = new Object[] { "Existing annotation sets:",
+        scroll, vspace, "Target set:", setsTextField };
+    } else {
+      messageObjects = new Object[] { "Target set:", setsTextField };
+    }
     String options[] = { "Use this target set", "Cancel" };
     JOptionPane optionPane = new JOptionPane(
       messageObjects, JOptionPane.QUESTION_MESSAGE,
@@ -308,8 +318,10 @@ public class AnnotationStackView  extends AbstractDocumentView
     }
 
     public AnnotationMouseListener(String annotationId) {
-      Set<String> setNames =
-        new HashSet<String>(document.getAnnotationSetNames());
+      Set<String> setNames = new HashSet<String>();
+      if (document.getAnnotationSetNames() != null) {
+        setNames.addAll(document.getAnnotationSetNames());
+      }
       setNames.add(null); // default set name
       for (String setName : setNames) {
         AnnotationSet set = document.getAnnotations(setName);
@@ -465,8 +477,10 @@ public class AnnotationStackView  extends AbstractDocumentView
        || e.getClickCount() != 2) { return; }
       // get a list of features for the current annotation type
       TreeSet<String> features = new TreeSet<String>();
-      Set<String> setNames =
-        new HashSet<String>(document.getAnnotationSetNames());
+      Set<String> setNames = new HashSet<String>();
+      if (document.getAnnotationSetNames() != null) {
+        setNames.addAll(document.getAnnotationSetNames());
+      }
       setNames.add(null); // default set name
       for (String setName : setNames) {
         int count = 0;
