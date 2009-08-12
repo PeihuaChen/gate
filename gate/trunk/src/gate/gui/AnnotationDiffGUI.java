@@ -168,7 +168,7 @@ public class AnnotationDiffGUI extends JFrame{
     getContentPane().add(annTypeCombo, constraints);
     constraints.gridwidth = 1;
     JLabel weightLabel = new JLabel("Weight");
-    weightLabel.setToolTipText("FScore weight");
+    weightLabel.setToolTipText("F-measure weight");
     getContentPane().add(weightLabel, constraints);
     diffAction = new DiffAction();
     diffAction.setEnabled(false);
@@ -223,8 +223,11 @@ public class AnnotationDiffGUI extends JFrame{
     getContentPane().add(noFeaturesBtn, constraints);
     constraints.insets = new Insets(2, 2, 2, 2);
     noFeaturesBtn.setSelected(true);
-    weightTxt = new JTextField("1.00");
-    weightTxt.setToolTipText("FScore weight between key response");
+    weightTxt = new JTextField("1.0");
+    weightTxt.setToolTipText("<html>Relative weight of precision and recall." +
+      "<ul><li>1 weights equally precision and recall" +
+      "<li>0.5 weights precision twice as much as recall" +
+      "<li>2 weights recall twice as much as precision</ul></html>");
     constraints.fill = GridBagConstraints.HORIZONTAL;
     getContentPane().add(weightTxt, constraints);
     constraints.fill = GridBagConstraints.NONE;
@@ -317,12 +320,12 @@ public class AnnotationDiffGUI extends JFrame{
     // first column
     constraints2.gridx = 0;
     constraints2.anchor = GridBagConstraints.WEST;
-    JLabel lbl = new JLabel("Matching:");
-    lbl.setToolTipText("Matching:");
+    JLabel lbl = new JLabel("Correct:");
+    lbl.setToolTipText("Correct:");
     lbl.setBackground(diffTable.getBackground());
     statisticsPane.add(lbl, constraints2);
-    lbl = new JLabel("Overlapping:");
-    lbl.setToolTipText("Overlapping:");
+    lbl = new JLabel("Partially correct:");
+    lbl.setToolTipText("Partially correct:");
     lbl.setBackground(PARTIALLY_CORRECT_BG);
     lbl.setOpaque(true);
     statisticsPane.add(lbl, constraints2);
@@ -331,8 +334,8 @@ public class AnnotationDiffGUI extends JFrame{
     lbl.setBackground(MISSING_BG);
     lbl.setOpaque(true);
     statisticsPane.add(lbl, constraints2);
-    lbl = new JLabel("Spurious:");
-    lbl.setToolTipText("Spurious:");
+    lbl = new JLabel("False positives:");
+    lbl.setToolTipText("False positives:");
     lbl.setBackground(FALSE_POSITIVE_BG);
     lbl.setOpaque(true);
     statisticsPane.add(lbl, constraints2);
@@ -384,7 +387,10 @@ public class AnnotationDiffGUI extends JFrame{
 
     // sixth column
     constraints2.gridx++;
-    lbl = new JLabel("FScore");
+    lbl = new JLabel("F-measure");
+    lbl.setToolTipText("<html>F-measure =<br>" +
+      "   ((weight + 1) * precision * recall)<br>" +
+      " / (weight * precision + recall))</html>");
     statisticsPane.add(lbl, constraints2);
     fmeasureStrictLbl = new JLabel("0.00");
     statisticsPane.add(fmeasureStrictLbl, constraints2);
@@ -411,9 +417,9 @@ public class AnnotationDiffGUI extends JFrame{
     // second row
     constraints2.gridy++;
     constraints2.gridx = 0;
-    copyToConsensusASAction = new CopyToConsensusASAction();
-    copyToConsensusASAction.setEnabled(false);
-    copyToConsensusBtn = new JButton(copyToConsensusASAction);
+    copyToTargetSetAction = new CopyToTargetSetAction();
+    copyToTargetSetAction.setEnabled(false);
+    copyToConsensusBtn = new JButton(copyToTargetSetAction);
     constraints2.gridwidth = 2;
     adjudicationPane.add(copyToConsensusBtn, constraints2);
 
@@ -509,7 +515,7 @@ public class AnnotationDiffGUI extends JFrame{
         if (keyDoc == newDoc) { return; }
         pairings.clear();
         diffTableModel.fireTableDataChanged();
-        copyToConsensusASAction.setEnabled(false);
+        copyToTargetSetAction.setEnabled(false);
         keyDoc = newDoc;
         keySets = new ArrayList<AnnotationSet>();
         List<String> keySetNames = new ArrayList<String>();
@@ -563,7 +569,7 @@ public class AnnotationDiffGUI extends JFrame{
         resDoc = newDoc;
         pairings.clear();
         diffTableModel.fireTableDataChanged();
-        copyToConsensusASAction.setEnabled(false);
+        copyToTargetSetAction.setEnabled(false);
         resSets = new ArrayList<AnnotationSet>();
         List<String> resSetNames = new ArrayList<String>();
         resSets.add(resDoc.getAnnotations());
@@ -836,8 +842,8 @@ public class AnnotationDiffGUI extends JFrame{
           mousePopup.add(menuItem);
         }
         mousePopup.addSeparator();
-        String[] types = new String[] {"matching", "overlapping", "missing",
-          "spurious", "mismatching"};
+        String[] types = new String[] {"correct", "partially correct", "missing",
+          "false positives", "mismatch"};
         String[] symbols = new String[] {"=", "~", "-?", "?-", "<>"};
         for (int i = 0; i < types.length; i++) {
           menuItem = new JMenuItem("Tick "+ types[i] + " annotations");
@@ -869,13 +875,13 @@ public class AnnotationDiffGUI extends JFrame{
     // revert to default name if the field is empty and lost focus
     consensusASTextField.addFocusListener(new FocusAdapter() {
       public void focusLost(FocusEvent e) {
-        String destination = consensusASTextField.getText().trim();
-        if (destination.length() == 0) {
+        String target = consensusASTextField.getText().trim();
+        if (target.length() == 0) {
           consensusASTextField.setText("consensus");
         }
         if (keyDoc != null
-         && keyDoc.getAnnotationSetNames().contains(destination)) {
-          statusLabel.setText("Be careful, the annotation set " + destination
+         && keyDoc.getAnnotationSetNames().contains(target)) {
+          statusLabel.setText("Be careful, the annotation set " + target
             + " already exists.");
           statusLabel.setForeground(Color.RED);
         }
@@ -988,8 +994,7 @@ public class AnnotationDiffGUI extends JFrame{
       getContentPane().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
       // compute the differences
-      SwingUtilities.invokeLater(new Runnable(){
-      public void run(){
+      Runnable runnable = new Runnable() { public void run() {
         Set<Annotation> keys = new HashSet<Annotation>(
           keySet.get((String)annTypeCombo.getSelectedItem()));
         Set<Annotation> responses = new HashSet<Annotation>(
@@ -1034,6 +1039,8 @@ public class AnnotationDiffGUI extends JFrame{
           }
         }
 
+        final int countHiddenF = countHidden;
+        SwingUtilities.invokeLater(new Runnable(){ public void run(){
         // update the GUI
         diffTableModel.fireTableDataChanged();
         correctLbl.setText(Integer.toString(differ.getCorrectMatches()));
@@ -1054,17 +1061,17 @@ public class AnnotationDiffGUI extends JFrame{
         fmeasureStrictLbl.setText(f.format(differ.getFMeasureStrict(weight)));
         fmeasureLenientLbl.setText(f.format(differ.getFMeasureLenient(weight)));
         fmeasureAveLbl.setText(f.format(differ.getFMeasureAverage(weight)));
-        copyToConsensusASAction.setEnabled(keyDoc.equals(resDoc));
+        copyToTargetSetAction.setEnabled(keyDoc.equals(resDoc));
         if (keyDoc.equals(resDoc)) {
           copyToConsensusBtn.setToolTipText((String)
-            copyToConsensusASAction.getValue(Action.SHORT_DESCRIPTION));
+            copyToTargetSetAction.getValue(Action.SHORT_DESCRIPTION));
         } else {
           copyToConsensusBtn.setToolTipText(
             "Key and response document must be the same");
         }
         if (!command.equals("setvalue") && !command.equals("copy")) {
           statusLabel.setText(pairings.size() + " pairings have been found " +
-            "(" + countHidden + " annotations are hidden)");
+            "(" + countHiddenF + " annotations are hidden)");
           statusLabel.setForeground(Color.BLACK);
         }
         diffTable.requestFocusInWindow();
@@ -1077,8 +1084,7 @@ public class AnnotationDiffGUI extends JFrame{
 
         if (!command.equals("setvalue") && !command.equals("copy")) { return; }
 
-        SwingUtilities.invokeLater(new Runnable(){
-        public void run(){
+        SwingUtilities.invokeLater(new Runnable(){ public void run(){
           if (command.equals("setvalue")) {
             // select the cell containing the previously selected annotation
             for (int row = 0; row < diffTable.getRowCount(); row++) {
@@ -1096,24 +1102,27 @@ public class AnnotationDiffGUI extends JFrame{
             // select the previously selected cell
              diffTable.changeSelection(rowView, colView, false, false);
           }
-          SwingUtilities.invokeLater(new Runnable(){
-          public void run(){
+          SwingUtilities.invokeLater(new Runnable(){ public void run(){
             diffTable.scrollRectToVisible(diffTable.getCellRect(
               diffTable.getSelectedRow(), diffTable.getSelectedColumn(), true));
           }});
         }});
-      }});
+        }});
+      }};
+      Thread thread = new Thread(runnable, "DiffAction");
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
     }
   }
 
   /**
-   * Copy selected annotations to the destination annotation set.
+   * Copy selected annotations to the target annotation set.
    */
-  protected class CopyToConsensusASAction extends AbstractAction {
-    public CopyToConsensusASAction(){
+  protected class CopyToTargetSetAction extends AbstractAction {
+    public CopyToTargetSetAction(){
       super("Copy selection to target set");
       putValue(SHORT_DESCRIPTION,
-        "<html>Move selected annotations to the destination annotation set" +
+        "<html>Move selected annotations to the target annotation set" +
           "<br>and hide their paired annotations if not moved." +
           "&nbsp;&nbsp;<font color=\"#667799\"><small>Alt-Right" +
           "</small></font></html>");
@@ -1123,7 +1132,7 @@ public class AnnotationDiffGUI extends JFrame{
     public void actionPerformed(ActionEvent evt){
       String step = (String) keyDoc.getFeatures().get("anndiffsteps");
       if (step == null) { step = "0"; }
-      AnnotationSet destination =
+      AnnotationSet target =
         keyDoc.getAnnotations(consensusASTextField.getText().trim());
       AnnotationSet keyAS =
         keyDoc.getAnnotations((String)keySetCombo.getSelectedItem());
@@ -1138,7 +1147,7 @@ public class AnnotationDiffGUI extends JFrame{
             ((SimpleFeatureMapImpl)key.getFeatures()).clone();
           features.put("anndiffsource", keySetCombo.getSelectedItem());
           try { // copy the key annotation
-            destination.add(key.getStartNode().getOffset(),
+            target.add(key.getStartNode().getOffset(),
               key.getEndNode().getOffset(), key.getType(), features);
           } catch (InvalidOffsetException e) { e.printStackTrace(); }
           if (key.getFeatures().containsKey("anndiffmodified")) {
@@ -1158,7 +1167,7 @@ public class AnnotationDiffGUI extends JFrame{
             ((SimpleFeatureMapImpl)response.getFeatures()).clone();
           features.put("anndiffsource", resSetCombo.getSelectedItem());
           try { // copy the response annotation
-            destination.add(response.getStartNode().getOffset(),
+            target.add(response.getStartNode().getOffset(),
               response.getEndNode().getOffset(), response.getType(), features);
           } catch (InvalidOffsetException e) { e.printStackTrace(); }
           if (response.getFeatures().containsKey("anndiffmodified")) {
@@ -1182,7 +1191,8 @@ public class AnnotationDiffGUI extends JFrame{
         statusLabel.setForeground(Color.BLACK);
       } else {
         diffTable.requestFocusInWindow();
-        statusLabel.setText("Check boxes in the first two columns.");
+        statusLabel.setText(
+          "Tick checkboxes in the columns K(ey) and R(esponse)");
         statusLabel.setForeground(Color.RED);
       }
     }
@@ -1263,13 +1273,13 @@ public class AnnotationDiffGUI extends JFrame{
           format.setMaximumFractionDigits(4);
           fw.write("Recall: " + format.format(differ.getRecallStrict()) + "<br>" + nl);
           fw.write("Precision: " + format.format(differ.getPrecisionStrict()) + "<br>" + nl);
-          fw.write("F-Score: " + format.format(differ.getFMeasureStrict(1)) + "<br>" + nl);
+          fw.write("F-measure: " + format.format(differ.getFMeasureStrict(1)) + "<br>" + nl);
           fw.write("<br>");
-          fw.write("Matching: " + differ.getCorrectMatches() + "<br>" + nl);
-          fw.write("Overlapping: " +
+          fw.write("Correct: " + differ.getCorrectMatches() + "<br>" + nl);
+          fw.write("Partially correct: " +
               differ.getPartiallyCorrectMatches() + "<br>" + nl);
           fw.write("Missing: " + differ.getMissing() + "<br>" + nl);
-          fw.write("Spurious: " + differ.getSpurious() + "<br>" + nl);
+          fw.write("False positives: " + differ.getSpurious() + "<br>" + nl);
           fw.write(HEADER_3 + nl + "<TR>" + nl);
           int maxColIdx = diffTable.getColumnCount() - 1;
           for(int col = 0; col <= maxColIdx; col++){
@@ -1422,7 +1432,9 @@ public class AnnotationDiffGUI extends JFrame{
         component = super.getTableCellRendererComponent(table, value,
           false, hasFocus, row, column);
       }
-      if (pairings.size() == 0) { return component; }
+      if (pairings.size() == 0 || rowModel >= pairings.size()) {
+        return component;
+      }
       AnnotationDiffer.Pairing pairing = pairings.get(rowModel);
       // set fore and background colours
       component.setBackground(isSelected ? table.getSelectionBackground() :
@@ -1493,7 +1505,8 @@ public class AnnotationDiffGUI extends JFrame{
           ((JCheckBox)component).setSelected(keyCopyValueRows.get(rowModel));
           break;
         case DiffTableModel.COL_MATCH: tip =
-          "matching =, overlapping ~, missing -?, spurious ?-, mismatching <>";
+          "correct =, partially correct ~, missing -?, false positives ?-," +
+          " mismatch <>";
           break;
         case DiffTableModel.COL_RES_COPY:
           tip = (pairing.getResponse() == null) ?
@@ -1908,7 +1921,7 @@ public class AnnotationDiffGUI extends JFrame{
   protected AnnotationSet resSet;
   protected HTMLExportAction htmlExportAction;
   protected DiffAction diffAction;
-  protected CopyToConsensusASAction copyToConsensusASAction;
+  protected CopyToTargetSetAction copyToTargetSetAction;
   protected ShowDocumentAction showDocumentAction;
 
   protected JList featuresList;
