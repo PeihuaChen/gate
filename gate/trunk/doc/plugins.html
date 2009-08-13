@@ -59,6 +59,7 @@ list</a>.</p>
 <li><a href='#Jape_Compiler'>Jape_Compiler</a></li>
 <li><a href='#Kea'>Kea</a></li>
 <li><a href='#learning'>learning</a></li>
+<li><a href='#LingPipe'>LingPipe</a></li>
 <li><a href='#Machine_Learning'>Machine_Learning</a></li>
 <li><a href='#Minipar'>Minipar</a></li>
 <li><a href='#Minorthird'>Minorthird</a></li>
@@ -71,12 +72,14 @@ list</a>.</p>
 <li><a href='#Obsolete/rasp'>Obsolete/rasp</a></li>
 <li><a href='#Ontology_Based_Gazetteer'>Ontology_Based_Gazetteer</a></li>
 <li><a href='#Ontology_Tools'>Ontology_Tools</a></li>
+<li><a href='#OpenCalais'>OpenCalais</a></li>
 <li><a href='#rasp'>rasp</a></li>
 <li><a href='#romanian'>romanian</a></li>
 <li><a href='#Schema_Annotation_Editor'>Schema_Annotation_Editor</a></li>
 <li><a href='#Stanford'>Stanford</a></li>
 <li><a href='#Stemmer'>Stemmer</a></li>
 <li><a href='#SUPPLE'>SUPPLE</a></li>
+<li><a href='#TaggerFramework'>TaggerFramework</a></li>
 <li><a href='#Tools'>Tools</a></li>
 <li><a href='#TreeTagger'>TreeTagger</a></li>
 <li><a href='#uima'>uima</a></li>
@@ -126,6 +129,11 @@ list</a>.</p>
 		<td>Combine Members PR&nbsp;</td>
 		<td>Combines documents in a composite document. (<a href="http://gate.ac.uk/userguide/sec:alignment:compositedoc">docs</a>)&nbsp;</td>
 		<td>gate.composite.impl.CombineMembersPR</td>
+	</tr>
+	<tr>
+		<td>Segment Processing PR&nbsp;</td>
+		<td>Processes individual segments as separate documents (<a href="http://gate.ac.uk/userguide/sec:alignment:compositedoc">docs</a>)&nbsp;</td>
+		<td>gate.composite.impl.SegmentProcessingPR</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='ANNIE'>ANNIE</a></th>
@@ -430,6 +438,34 @@ list</a>.</p>
 		<td>gate.learning.LearningAPIMain</td>
 	</tr>
 	<tr>
+		<th colspan='3'><a name='LingPipe'>LingPipe</a></th>
+	</tr>
+	<tr>
+		<td>Lingpipe Tokenizer PR&nbsp;</td>
+		<td>Provides a LingPipe tokenizer. (<a href="http://gate.ac.uk/userguide/">docs</a>)&nbsp;</td>
+		<td>gate.lingpipe.TokenizerPR</td>
+	</tr>
+	<tr>
+		<td>Lingpipe NER PR&nbsp;</td>
+		<td>Lingpipe Named Entity Recognizer&nbsp;</td>
+		<td>gate.lingpipe.NamedEntityRecognizerPR</td>
+	</tr>
+	<tr>
+		<td>Lingpipe Language Identifier PR&nbsp;</td>
+		<td>Lingpipe Identifier PR&nbsp;</td>
+		<td>gate.lingpipe.LanguageIdentifierPR</td>
+	</tr>
+	<tr>
+		<td>Lingpipe POS Tagger PR&nbsp;</td>
+		<td>Provides a LingPipe part of speech tagger. (<a href="http://gate.ac.uk/userguide/">docs</a>)&nbsp;</td>
+		<td>gate.lingpipe.POSTaggerPR</td>
+	</tr>
+	<tr>
+		<td>Lingpipe Sentence Splitter PR&nbsp;</td>
+		<td>Provides an interface to LingPipe sentence splitter API.&nbsp;</td>
+		<td>gate.lingpipe.SentenceSplitterPR</td>
+	</tr>
+	<tr>
 		<th colspan='3'><a name='Machine_Learning'>Machine_Learning</a></th>
 	</tr>
 	<tr>
@@ -579,6 +615,14 @@ list</a>.</p>
 		<td>gate.creole.ontology.ocat.OntologyViewer</td>
 	</tr>
 	<tr>
+		<th colspan='3'><a name='OpenCalais'>OpenCalais</a></th>
+	</tr>
+	<tr>
+		<td>OpenCalais Tagger&nbsp;</td>
+		<td>An OpenCalais based semantic annotator (<a href="http://gate.ac.uk/userguide/sec:misc-creole:opencalais">docs</a>)&nbsp;</td>
+		<td>gate.opencalais.OpenCalais</td>
+	</tr>
+	<tr>
 		<th colspan='3'><a name='rasp'>rasp</a></th>
 	</tr>
 	<tr>
@@ -666,6 +710,14 @@ list</a>.</p>
 		<td>SUPPLE Parser&nbsp;</td>
 		<td>SUPPLE bottom-up chart parser. (<a href="http://gate.ac.uk/userguide/sec:misc-creole:supple">docs</a>)&nbsp;</td>
 		<td>shef.nlp.supple.SUPPLE</td>
+	</tr>
+	<tr>
+		<th colspan='3'><a name='TaggerFramework'>TaggerFramework</a></th>
+	</tr>
+	<tr>
+		<td>GenericTagger&nbsp;</td>
+		<td>The Generic Tagger is Generic! (<a href="http://gate.ac.uk/userguide/sec:misc-creole:taggerframework">docs</a>)&nbsp;</td>
+		<td>gate.taggerframework.GenericTagger</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='Tools'>Tools</a></th>
@@ -846,8 +898,8 @@ list</a>.</p>
 	</tr>
 	<tr>
 		<th colspan='3'><a name="bwp"></a>BWP Gazetteer<br/>
-		<a href="http://paginas.terra.com.br/arte/lua/?content=Software/BWPGazetteer.html">website</a>
-	       	<a href="http://paginas.terra.com.br/arte/lua/?content=Software/BWPGazetteer.html">download</a></th>
+		<a href="http://sourceforge.net/projects/bwp-gazetteer/">website</a>
+	       	<a href="http://sourceforge.net/projects/bwp-gazetteer/">download</a></th>
 	</tr>
 	<tr><td colspan='3'><center><i>This plugin provides an approximate gazetteer for GATE, based on Levenshtein's Edit Distance for strings. Its goal is to handle texts with noise and errors, in which GATE's default gazetteers may have difficulties.</i></center></td></tr>
 	<tr>
