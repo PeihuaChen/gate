@@ -119,7 +119,7 @@
       <NAME>Segment Processing PR</NAME>
       <CLASS>gate.composite.impl.SegmentProcessingPR</CLASS>
       <COMMENT>Processes individual segments as separate documents</COMMENT>
-      <HELPURL>http://gate.ac.uk/userguide/sec:alignment:compositedoc</HELPURL>
+      <HELPURL>http://gate.ac.uk/userguide/sec:howto:segment-processing</HELPURL>
       <JAR>aligntools.jar</JAR>
      <PARAMETER NAME="document"  
          COMMENT="The document to be processed"  
