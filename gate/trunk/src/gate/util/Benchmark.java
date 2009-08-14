@@ -240,7 +240,7 @@ public class Benchmark {
           String parentBenchmarkID) {
     if(parentBenchmarkID != null) {
       if(resourceName != null) {
-        return (parentBenchmarkID + "." + resourceName).replaceAll("[ ]+", "_");
+        return (parentBenchmarkID + "." + resourceName.replaceAll("\\.","_")).replaceAll("[ ]+", "_");
       }
       else {
         return (parentBenchmarkID + ".null").replaceAll("[ ]+", "_");
@@ -248,7 +248,7 @@ public class Benchmark {
     }
     else {
       if(resourceName != null) {
-        return resourceName.replaceAll("[ ]+", "_");
+        return resourceName.replaceAll("[ .]+", "_");
       }
       else {
         return "null";
