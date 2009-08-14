@@ -75,9 +75,9 @@ public class NewResourceDialog extends JDialog {
     buttonsBox.add(Box.createHorizontalStrut(10));
     buttonsBox.add(okBtn = new JButton("OK"));
     buttonsBox.add(Box.createHorizontalStrut(10));
-    buttonsBox.add(helpBtn = new JButton("Help"));
-    buttonsBox.add(Box.createHorizontalStrut(10));
     buttonsBox.add(cancelBtn = new JButton("Cancel"));
+    buttonsBox.add(Box.createHorizontalStrut(10));
+    buttonsBox.add(helpBtn = new JButton("Help"));
     buttonsBox.add(Box.createHorizontalStrut(10));
     this.getContentPane().add(buttonsBox);
     this.getContentPane().add(Box.createVerticalStrut(5));
