@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 1998-2007, The University of Sheffield.
+ *  Copyright (c) 1998-2009, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -537,11 +537,14 @@ public class NameBearerHandle implements Handle, StatusListener,
     }
     public void actionPerformed(ActionEvent e) {
       if(target instanceof Controller) {
-        Controller controller = (Controller) target;
         // empty the controller of all its processing resources
-        controller.setPRs(Collections.emptyList());
-        Factory.deleteResource((Resource)target);
-      } else if(target instanceof Resource) {
+        ((Controller)target).setPRs(Collections.emptyList());
+        if(target instanceof ConditionalController) {
+          ((ConditionalController)target)
+            .setRunningStrategies(Collections.emptyList());
+        }
+      }
+      if(target instanceof Resource) {
         Factory.deleteResource((Resource)target);
       }
       else if(target instanceof DataStore) {
