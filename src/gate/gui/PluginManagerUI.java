@@ -1,5 +1,6 @@
 /*
- *  Copyright (c) 1998-2007, The University of Sheffield.
+ *  Copyright (c) 1998-2009, The University of Sheffield.
+ *  Copyright (c) 2009, Ontotext AD.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -21,11 +22,15 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
+import java.util.Timer;
+import java.util.List;
 import java.text.Collator;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.DocumentEvent;
 import javax.swing.table.*;
 import gate.Gate;
 import gate.GateConstants;
@@ -48,10 +53,37 @@ public class PluginManagerUI extends JDialog implements GateConstants{
   protected void initLocalData(){
     loadNowByURL = new HashMap<URL, Boolean>();
     loadAlwaysByURL = new HashMap<URL, Boolean>();
+    visibleRows = new ArrayList<URL>(Gate.getKnownPlugins());
   }
   
   protected void initGUI(){
     setTitle("Plugin Management Console");
+    JPanel leftPanel = new JPanel(new BorderLayout());
+
+    JPanel leftTopPanel = new JPanel(new BorderLayout());
+    JLabel titleLabel = new JLabel("Known CREOLE directories");
+    titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 40));
+    leftTopPanel.add(titleLabel, BorderLayout.WEST);
+    JPanel leftTopCenterPanel = new JPanel(new BorderLayout());
+    leftTopCenterPanel.add(new JLabel("Filter:"), BorderLayout.WEST);
+    filterTextField = new JTextField();
+    filterTextField.setToolTipText("Type some text to filter the table rows.");
+    leftTopCenterPanel.add(filterTextField, BorderLayout.CENTER);
+    JButton clearFilterButton = new JButton(
+      new AbstractAction("", MainFrame.getIcon("exit.gif")) {
+      { this.putValue(MNEMONIC_KEY, KeyEvent.VK_BACK_SPACE);
+        this.putValue(SHORT_DESCRIPTION, "Clear text field"); }
+      public void actionPerformed(ActionEvent e) {
+        filterTextField.setText("");
+        filterTextField.requestFocusInWindow();
+      }
+    });
+    clearFilterButton.setBorder(BorderFactory.createEmptyBorder());
+    clearFilterButton.setIconTextGap(0);
+    leftTopCenterPanel.add(clearFilterButton, BorderLayout.EAST);
+    leftTopPanel.add(leftTopCenterPanel, BorderLayout.CENTER);
+    leftPanel.add(leftTopPanel, BorderLayout.NORTH);
+
     mainTableModel = new MainTableModel();
     mainTable = new XJTable();
     mainTable.setTabSkipUneditableCell(true);
@@ -78,15 +110,11 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     ToolTipManager.sharedInstance().registerComponent(resourcesList);
     
     mainSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
-    mainSplit.setResizeWeight(.75);
+    mainSplit.setResizeWeight(0.70);
+    mainSplit.setContinuousLayout(true);
     JScrollPane scroller = new JScrollPane(mainTable);
-    scroller.setVerticalScrollBarPolicy(
-        ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-    scroller.setBorder(BorderFactory.createTitledBorder(
-            scroller.getBorder(), 
-            "Known CREOLE directories", 
-            TitledBorder.LEFT, TitledBorder.ABOVE_TOP));
-    mainSplit.setLeftComponent(scroller);
+    leftPanel.add(scroller, BorderLayout.CENTER);
+    mainSplit.setLeftComponent(leftPanel);
     
     scroller = new JScrollPane(resourcesList);
     scroller.setBorder(BorderFactory.createTitledBorder(
@@ -108,7 +136,6 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     constraints.gridy = 1;
     constraints.weighty = 0;
     Box hBox = Box.createHorizontalBox();
-    hBox.add(new JLabel("You can also "));
     hBox.add(new JButton(new AddCreoleRepositoryAction()));
     hBox.add(Box.createHorizontalGlue());
     getContentPane().add(hBox, constraints);
@@ -120,9 +147,9 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     JButton okButton = new JButton(new OkAction());
     hBox.add(okButton);
     hBox.add(Box.createHorizontalStrut(20));
-    hBox.add(new JButton(new HelpAction()));
-    hBox.add(Box.createHorizontalStrut(20));
     hBox.add(new JButton(new CancelAction()));
+    hBox.add(Box.createHorizontalStrut(20));
+    hBox.add(new JButton(new HelpAction()));
     constraints.insets = new Insets(2, 2, 8, 2);
     getContentPane().add(hBox, constraints);
     getRootPane().setDefaultButton(okButton);
@@ -135,22 +162,101 @@ public class PluginManagerUI extends JDialog implements GateConstants{
        resourcesListModel.dataChanged();
      }
     });
-    mainSplit.addComponentListener(new ComponentAdapter(){
+
+    // when typing a character in the table, use it for filtering
+    mainTable.addKeyListener(new KeyAdapter() {
+      public void keyTyped(KeyEvent e) {
+        if (e.getKeyChar() != KeyEvent.VK_TAB
+         && e.getKeyChar() != KeyEvent.VK_BACK_SPACE
+         && e.getKeyChar() != KeyEvent.VK_DELETE) {
+          filterTextField.requestFocusInWindow();
+          filterTextField.setText(String.valueOf(e.getKeyChar()));
+        }
+      }
+    });
+
+    addComponentListener(new ComponentAdapter(){
       public void componentShown(ComponentEvent e){
-        //try to honour left component's preferred size 
-        mainSplit.setDividerLocation(-100);
+        SwingUtilities.invokeLater(new Runnable() { public void run() {
+          mainSplit.setDividerLocation(0.70);
+        }});
+      }
+    });
+
+    // show only the rows containing the text from filterTextField
+    filterTextField.getDocument().addDocumentListener(new DocumentListener() {
+      private Timer timer = new Timer("Plugin manager table rows filter", true);
+      private TimerTask timerTask;
+      public void changedUpdate(DocumentEvent e) { /* do nothing */ }
+      public void insertUpdate(DocumentEvent e) { update(); }
+      public void removeUpdate(DocumentEvent e) { update(); }
+      private void update() {
+        if (timerTask != null) { timerTask.cancel(); }
+        Date timeToRun = new Date(System.currentTimeMillis() + 300);
+        timerTask = new TimerTask() { public void run() {
+          filterRows();
+        }};
+        // add a delay
+        timer.schedule(timerTask, timeToRun);
+      }
+      private void filterRows() {
+        mainTable.clearSelection();
+        String filter = filterTextField.getText().trim().toLowerCase();
+        ArrayList<URL> previousVisibleRows = new ArrayList<URL>(visibleRows);
+        if (filter.length() < 2) {
+          // one character or less, don't filter rows
+          visibleRows = new ArrayList<URL>(Gate.getKnownPlugins());
+        } else {
+          // filter rows case insensitively on each plugin URL and its resources
+          visibleRows.clear();
+          for (int i = 0; i < Gate.getKnownPlugins().size(); i++) {
+            Gate.DirectoryInfo dInfo = Gate.getDirectoryInfo(
+              Gate.getKnownPlugins().get(i));
+            String url = dInfo.getUrl().toString();
+            String resources = "";
+            for (int j = 0; j < dInfo.getResourceInfoList().size(); j++) {
+              resources += dInfo.getResourceInfoList().get(j).getResourceName()
+                + " ";
+            }
+            if (url.toLowerCase().contains(filter)
+             || resources.toLowerCase().contains(filter)) {
+              visibleRows.add(Gate.getKnownPlugins().get(i));
+            }
+          }
+        }
+        if (!previousVisibleRows.equals(visibleRows)) {
+          mainTableModel.fireTableDataChanged();
+          resourcesListModel.dataChanged();
+        }
+        SwingUtilities.invokeLater(new Runnable() { public void run() {
+          if (mainTable.getRowCount() > 0) {
+            mainTable.addRowSelectionInterval(0, 0);
+          }
+        }});
+      }
+    });
+
+    // Up/Down key events in filterTextField are transferred to the table
+    filterTextField.addKeyListener(new KeyAdapter() {
+      public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_UP
+         || e.getKeyCode() == KeyEvent.VK_DOWN
+         || e.getKeyCode() == KeyEvent.VK_PAGE_UP
+         || e.getKeyCode() == KeyEvent.VK_PAGE_DOWN) {
+          mainTable.dispatchEvent(e);
+        }
       }
     });
 
     // disable Enter key in the table so this key will confirm the dialog
-    InputMap im = mainTable.getInputMap(
+    InputMap inputMap = mainTable.getInputMap(
       JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
-    im.put(enter, "none");
+    inputMap.put(enter, "none");
 
     // define keystrokes action bindings at the level of the main window
-    InputMap inputMap = ((JComponent)this.getContentPane()).
-      getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+    inputMap = ((JComponent)this.getContentPane())
+      .getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
     ActionMap actionMap = ((JComponent)this.getContentPane()).getActionMap();
     inputMap.put(KeyStroke.getKeyStroke("ENTER"), "Apply");
     actionMap.put("Apply", new OkAction());
@@ -185,7 +291,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
       invalidIcon = MainFrame.getIcon("param");
     }
     public int getRowCount(){
-      return Gate.getKnownPlugins().size();
+      return visibleRows.size();
     }
     
     public int getColumnCount(){
@@ -217,8 +323,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     }
     
     public Object getValueAt(int row, int column){
-      Gate.DirectoryInfo dInfo =
-        Gate.getDirectoryInfo(Gate.getKnownPlugins().get(row));
+      Gate.DirectoryInfo dInfo = Gate.getDirectoryInfo(visibleRows.get(row));
       switch (column){
         case NAME_COLUMN: return new File(dInfo.getUrl().getFile()).getName();
         case ICON_COLUMN: return
@@ -226,7 +331,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
             dInfo.getUrl().getProtocol().equalsIgnoreCase("file") ? 
             localIcon : remoteIcon) :
           invalidIcon;
-        case URL_COLUMN: return dInfo.getUrl().toString();
+        case URL_COLUMN: return new File(dInfo.getUrl().getFile()).getParent();
         case LOAD_NOW_COLUMN: return  getLoadNow(dInfo.getUrl());
         case LOAD_ALWAYS_COLUMN: return getLoadAlways(dInfo.getUrl());
         case DELETE_COLUMN: return null;
@@ -242,8 +347,8 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     
     public void setValueAt(Object aValue, int rowIndex, int columnIndex){
       Boolean valueBoolean = (Boolean)aValue;
-      Gate.DirectoryInfo dInfo =
-        Gate.getDirectoryInfo(Gate.getKnownPlugins().get(rowIndex));
+      Gate.DirectoryInfo dInfo = Gate.getDirectoryInfo(
+        visibleRows.get(rowIndex));
       switch(columnIndex){
         case LOAD_NOW_COLUMN: 
           loadNowByURL.put(dInfo.getUrl(), valueBoolean);
@@ -268,8 +373,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
       int row = mainTable.getSelectedRow();
       if(row == -1) return null;
       row = mainTable.rowViewToModel(row);
-      Gate.DirectoryInfo dInfo =
-        Gate.getDirectoryInfo(Gate.getKnownPlugins().get(row));
+      Gate.DirectoryInfo dInfo = Gate.getDirectoryInfo(visibleRows.get(row));
       return dInfo.getResourceInfoList().get(index);
     }
     
@@ -278,8 +382,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
       int row = mainTable.getSelectedRow();
       if(row == -1) return 0;
       row = mainTable.rowViewToModel(row);
-      Gate.DirectoryInfo dInfo =
-        Gate.getDirectoryInfo(Gate.getKnownPlugins().get(row));
+      Gate.DirectoryInfo dInfo = Gate.getDirectoryInfo(visibleRows.get(row));
       return dInfo.getResourceInfoList().size();
     }
     
@@ -329,7 +432,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
             currentEditor.cancelCellEditing();
           }
           row = mainTable.rowViewToModel(row);
-          URL toDelete = Gate.getKnownPlugins().get(row);
+          URL toDelete = visibleRows.get(row);
           Gate.removeKnownPlugin(toDelete);
           loadAlwaysByURL.remove(toDelete);
           loadNowByURL.remove(toDelete);
@@ -403,15 +506,17 @@ public class PluginManagerUI extends JDialog implements GateConstants{
   }
   
   protected class ResourcesListCellRenderer extends DefaultListCellRenderer{
-    public Component getListCellRendererComponent(JList list,
-            Object value,
-            int index,
-            boolean isSelected,
-            boolean cellHasFocus){
+    public Component getListCellRendererComponent(JList list, Object value,
+        int index, boolean isSelected, boolean cellHasFocus){
       Gate.ResourceInfo rInfo = (Gate.ResourceInfo)value;
       //prepare the renderer
-      super.getListCellRendererComponent(list, 
-              rInfo.getResourceName(), index, isSelected, cellHasFocus);
+      String filter = filterTextField.getText().trim().toLowerCase();
+      if (filter.length() > 1
+      && rInfo.getResourceName().toLowerCase().contains(filter)) {
+        isSelected = true; // select resource if matching table row filter
+      }
+      super.getListCellRendererComponent(list, rInfo.getResourceName(),
+                                         index, isSelected, cellHasFocus);
       //add tooltip text
       setToolTipText(rInfo.getResourceComment());
       return this;
@@ -473,6 +578,8 @@ public class PluginManagerUI extends JDialog implements GateConstants{
       loadNowByURL.clear();
       loadAlwaysByURL.clear();      
       mainTableModel.fireTableDataChanged();
+    } else {
+      filterTextField.setText("");
     }
     super.setVisible(visible);
   }
@@ -501,7 +608,8 @@ public class PluginManagerUI extends JDialog implements GateConstants{
 
   protected class AddCreoleRepositoryAction extends AbstractAction {
     public AddCreoleRepositoryAction(){
-      super("Add a new CREOLE repository");
+      super("Add a CREOLE repository",
+        MainFrame.getIcon("crystal-clear-action-edit-add.png"));
       putValue(SHORT_DESCRIPTION,"Load a new CREOLE repository");
     }
 
@@ -571,11 +679,15 @@ public class PluginManagerUI extends JDialog implements GateConstants{
   }//class LoadCreoleRepositoryAction extends AbstractAction
 
   protected XJTable mainTable;
+  /** Contains the URLs from Gate.getKnownPlugins() that satisfy the filter
+   * filterTextField for the plugin URL and the plugin resources names */
+  protected List<URL> visibleRows;
   protected JSplitPane mainSplit;
   protected MainTableModel mainTableModel;
   protected ResourcesListModel resourcesListModel;
   protected JList resourcesList; 
-  
+  protected JTextField filterTextField;
+
   /**
    * Map from URL to Boolean. Stores temporary values for the loadNow options.
    */
@@ -592,5 +704,4 @@ public class PluginManagerUI extends JDialog implements GateConstants{
   protected static final int LOAD_NOW_COLUMN = 3;
   protected static final int LOAD_ALWAYS_COLUMN = 4;
   protected static final int DELETE_COLUMN = 5;
-  
 }
