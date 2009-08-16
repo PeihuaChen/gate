@@ -317,60 +317,6 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
   }// protected void select(ResourceHandle handle)
 
-  /**
-   *  Application context menu in the resources tree.
-   *  Remember previously loaded applications.
-   */
-  private JPopupMenu createAppsPopup() {
-    LiveMenu appsMenu = new LiveMenu(LiveMenu.APP);
-    appsMenu.setText("New");
-    guiRoots.add(appsMenu);
-    appsPopup = new XJPopupMenu();
-    appsPopup.add(appsMenu);
-    appsPopup.add(new XJMenuItem(new LoadResourceFromFileAction(), this));
-
-    // add last loaded/saved applications names
-    final String list = getPreferenceValue("filechooserlocations/"
-      + "gate/ApplicationRestore", "list");
-    if (list != null) {
-    appsPopup.addSeparator();
-    appsPopup.add("Recent applications:");
-    for (final String name : list.split(";")) {
-      final String location = getPreferenceValue("filechooserlocations"
-        + "/gate/ApplicationRestore/"+name, "location");
-      appsPopup.add(new XJMenuItem(new AbstractAction(name,
-        getIcon("open-application")) {
-        { this.putValue(Action.SHORT_DESCRIPTION, location); }
-        public void actionPerformed(ActionEvent e) {
-          Runnable runnable = new Runnable() {
-          public void run() {
-          try { File file = new File(location);
-          PersistenceManager.loadObjectFromFile(file);
-          } catch(Exception error) {
-            String message =
-              "Couldn't reload the application.\n" + error.getMessage();
-            alertButton.setAction(new AlertAction(error, message, null));
-            if (error instanceof IOException) {
-            // remove the element from the applications list
-            setPreferenceValue("filechooserlocations/gate/ApplicationRestore",
-              "list", list.replaceFirst(name + ";?", ""));
-            }
-          } finally { processFinished(); }}};
-          Thread thread = new Thread(runnable ,"Reload application");
-          thread.setPriority(Thread.MIN_PRIORITY);
-          thread.start();
-      }}, MainFrame.this));
-    }
-    appsPopup.add(new XJMenuItem(new AbstractAction("Remove last element") {
-      public void actionPerformed(ActionEvent e) {
-        // remove the last element from the applications list
-        setPreferenceValue("filechooserlocations/gate/ApplicationRestore",
-          "list", list.replaceFirst("[^;]+;?$", ""));
-    }}, MainFrame.this));
-    }
-    return appsPopup;
-  }
-
   public MainFrame() {
     this(null);
   }
@@ -549,8 +495,13 @@ public class MainFrame extends JFrame implements ProgressListener,
     logScroll = new JScrollPane(logArea);
     // Out has been redirected to the logArea
 
-    Out.prln("GATE " + Main.version + " build " + Main.build + " started at: "
+    Out.prln("GATE " + Main.version + " build " + Main.build + " started at "
       + new Date().toString());
+    Out.prln("and using Java " + System.getProperty("java.version") + " " +
+      System.getProperty("java.vendor") + " on " +
+      System.getProperty("os.name") + " " +
+      System.getProperty("os.arch") + " " +
+      System.getProperty("os.version") + ".");
     mainTabbedPane = new XJTabbedPane(JTabbedPane.TOP);
     mainTabbedPane.insertTab("Messages", null, logScroll, "GATE log", 0);
 
@@ -684,6 +635,11 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     fileMenu.addSeparator();
     fileMenu.add(new XJMenuItem(new LoadResourceFromFileAction(), this));
+
+    RecentAppsMenu recentAppsMenu = new RecentAppsMenu();
+    recentAppsMenu.setText("Recent applications");
+    recentAppsMenu.setIcon(getIcon("open-application"));
+    fileMenu.add(recentAppsMenu);
 
     final JMenu loadANNIEMenu = new XJMenu("Load ANNIE system",
       "Application that adds morphosyntaxic and semantic annotations", this);
@@ -867,9 +823,6 @@ public class MainFrame extends JFrame implements ProgressListener,
     this.setJMenuBar(menuBar);
 
     // popups
-    appsPopup = createAppsPopup();
-    guiRoots.add(appsPopup);
-
     lrsPopup = new XJPopupMenu();
     LiveMenu lrsMenu = new LiveMenu(LiveMenu.LR);
     lrsMenu.setText("New");
@@ -881,8 +834,8 @@ public class MainFrame extends JFrame implements ProgressListener,
     LiveMenu prsMenu = new LiveMenu(LiveMenu.PR);
     prsMenu.setText("New");
     prsPopup.add(prsMenu);
-    guiRoots.add(prsMenu);
     guiRoots.add(prsPopup);
+    guiRoots.add(prsMenu);
 
     dssPopup = new XJPopupMenu();
     dssPopup.add(new NewDSAction());
@@ -999,7 +952,23 @@ public class MainFrame extends JFrame implements ProgressListener,
             // no default item for this menu
           }
           else if(value == applicationsRoot) {
-            appsPopup = createAppsPopup();
+            appsPopup = new XJPopupMenu();
+            LiveMenu appsMenu = new LiveMenu(LiveMenu.APP);
+            appsMenu.setText("New");
+            appsPopup.add(appsMenu);
+            guiRoots.add(appsPopup);
+            guiRoots.add(appsMenu);
+            appsPopup.add(new XJMenuItem(new LoadResourceFromFileAction(),
+              MainFrame.this));
+            Component[] components = new RecentAppsMenu().getMenuComponents();
+            if (components.length > 0) {
+              appsPopup.addSeparator();
+              appsPopup.add("Recent applications:");
+            }
+            for (Component menuItem : components) {
+                // add each menu item from the application recent menu
+                appsPopup.add(menuItem);
+            }
             popup = appsPopup;
           }
           else if(value == languageResourcesRoot) {
@@ -3058,20 +3027,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       }
 
       if(!dsTypeByName.isEmpty()) {
-        JPanel panel = new JPanel(new GridBagLayout());
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.gridy = 0;
-        constraints.insets = new Insets(0, 0, 8, 0);
         JLabel label = new JLabel("Select a type of Datastore:");
-        constraints.anchor = GridBagConstraints.SOUTHWEST;
-        panel.add(label, constraints);
-        JButton helpButton = new JButton(new AbstractAction("Help") {
-          public void actionPerformed(ActionEvent e) {
-            showHelpFrame("sec:datastores", "gate.persist.SerialDataStore");
-          }
-        });
-        constraints.anchor = GridBagConstraints.SOUTHEAST;
-        panel.add(helpButton, constraints);
         final JList list = new JList(dsTypeByName.keySet().toArray());
         String initialSelection = getPreferenceValue("datastorelist", "item");
         if (dsTypeByName.containsKey(initialSelection)) {
@@ -3081,28 +3037,47 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
         list.setVisibleRowCount(Math.min(10, list.getModel().getSize()));
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        constraints.gridy = 1;
-        constraints.insets = new Insets(0, 0, 0, 0);
-        constraints.anchor = GridBagConstraints.CENTER;
-        panel.add(new JScrollPane(list), constraints);
-        final JOptionPane optionPane = new JOptionPane(panel,
+        final JOptionPane optionPane = new JOptionPane(
+          new Object[]{label, new JScrollPane(list)},
           JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION,
-          getIcon("datastore"));
-        final JDialog dialog = optionPane.createDialog(
-          MainFrame.this, "Create a datastore");
+          getIcon("datastore"), new String[]{"OK", "Cancel", "Help"}, "OK");
+        final JDialog dialog = new JDialog(
+          MainFrame.this, "Create a datastore", true);
+        dialog.setContentPane(optionPane);
         list.addMouseListener(new MouseAdapter() {
           public void mouseClicked(MouseEvent e) {
             if (e.getClickCount() == 2) {
-              optionPane.setValue(JOptionPane.OK_OPTION);
-              dialog.dispose();
+              optionPane.setValue("OK");
+              dialog.setVisible(false);
             }
           }
         });
-        dialog.show();
+        optionPane.addPropertyChangeListener(new PropertyChangeListener() {
+          public void propertyChange(PropertyChangeEvent e) {
+            Object value = optionPane.getValue();
+            if (value == null || value.equals(JOptionPane.UNINITIALIZED_VALUE)) {
+              return;
+            }
+            if (dialog.isVisible()
+            && e.getSource() == optionPane
+            && e.getPropertyName().equals(JOptionPane.VALUE_PROPERTY)) {
+              if (optionPane.getValue().equals("Help")) {
+                // don't close the dialog
+                optionPane.setValue(JOptionPane.UNINITIALIZED_VALUE);
+                showHelpFrame("sec:datastores", "gate.persist.SerialDataStore");
+              } else {
+                dialog.setVisible(false);
+              }
+            }
+          }
+        });
+        dialog.pack();
+        dialog.setLocationRelativeTo(MainFrame.this);
+        dialog.setVisible(true);
         Object answer = optionPane.getValue();
         if(answer == null) { return; }
         String className = dsTypeByName.get(list.getSelectedValue());
-        if(answer.equals(JOptionPane.OK_OPTION) && !list.isSelectionEmpty()) {
+        if(answer.equals("OK") && !list.isSelectionEmpty()) {
           setPreferenceValue("datastorelist", "item",
             (String)list.getSelectedValue());
           if(className.equals("gate.persist.SerialDataStore")) {
@@ -3597,20 +3572,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       }
 
       if(!dsTypeByName.isEmpty()) {
-        JPanel panel = new JPanel(new GridBagLayout());
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.gridy = 0;
-        constraints.insets = new Insets(0, 0, 8, 0);
         JLabel label = new JLabel("Select a type of Datastore:");
-        constraints.anchor = GridBagConstraints.SOUTHWEST;
-        panel.add(label, constraints);
-        JButton helpButton = new JButton(new AbstractAction("Help") {
-          public void actionPerformed(ActionEvent e) {
-            showHelpFrame("sec:datastores", "gate.persist.SerialDataStore");
-          }
-        });
-        constraints.anchor = GridBagConstraints.SOUTHEAST;
-        panel.add(helpButton, constraints);
         final JList list = new JList(dsTypeByName.keySet().toArray());
         String initialSelection = getPreferenceValue("datastorelist", "item");
         if (dsTypeByName.containsKey(initialSelection)) {
@@ -3620,28 +3582,47 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
         list.setVisibleRowCount(Math.min(10, list.getModel().getSize()));
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        constraints.gridy = 1;
-        constraints.insets = new Insets(0, 0, 0, 0);
-        constraints.anchor = GridBagConstraints.CENTER;
-        panel.add(new JScrollPane(list), constraints);
-        final JOptionPane optionPane = new JOptionPane(panel,
+        final JOptionPane optionPane = new JOptionPane(
+          new Object[]{label, new JScrollPane(list)},
           JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION,
-          getIcon("datastore"));
-        final JDialog dialog = optionPane.createDialog(
-          MainFrame.this, "Open a datastore");
+          getIcon("datastore"), new String[]{"OK", "Cancel", "Help"}, "OK");
+        final JDialog dialog = new JDialog(
+          MainFrame.this, "Open a datastore", true);
+        dialog.setContentPane(optionPane);
         list.addMouseListener(new MouseAdapter() {
           public void mouseClicked(MouseEvent e) {
             if (e.getClickCount() == 2) {
-              optionPane.setValue(JOptionPane.OK_OPTION);
-              dialog.dispose();
+              optionPane.setValue("OK");
+              dialog.setVisible(false);
             }
           }
         });
-        dialog.show();
+        optionPane.addPropertyChangeListener(new PropertyChangeListener() {
+          public void propertyChange(PropertyChangeEvent e) {
+            Object value = optionPane.getValue();
+            if (value == null || value.equals(JOptionPane.UNINITIALIZED_VALUE)) {
+              return;
+            }
+            if (dialog.isVisible()
+            && e.getSource() == optionPane
+            && e.getPropertyName().equals(JOptionPane.VALUE_PROPERTY)) {
+              if (optionPane.getValue().equals("Help")) {
+                // don't close the dialog
+                optionPane.setValue(JOptionPane.UNINITIALIZED_VALUE);
+                showHelpFrame("sec:datastores", "gate.persist.SerialDataStore");
+              } else {
+                dialog.setVisible(false);
+              }
+            }
+          }
+        });
+        dialog.pack();
+        dialog.setLocationRelativeTo(MainFrame.this);
+        dialog.setVisible(true);
         Object answer = optionPane.getValue();
         if(answer == null) { return; }
         String className = dsTypeByName.get(list.getSelectedValue());
-        if(answer.equals(JOptionPane.OK_OPTION) && !list.isSelectionEmpty()) {
+        if(answer.equals("OK") && !list.isSelectionEmpty()) {
           setPreferenceValue("datastorelist", "item",
             (String)list.getSelectedValue());
           if(className.indexOf("SerialDataStore") != -1) {
@@ -3819,7 +3800,6 @@ public class MainFrame extends JFrame implements ProgressListener,
    * being shown. Used for creating new resources of all possible types.
    */
   class LiveMenu extends XJMenu {
-    private static final long serialVersionUID = 1L;
     public LiveMenu(int type) {
       super();
       this.type = type;
@@ -3935,6 +3915,84 @@ public class MainFrame extends JFrame implements ProgressListener,
      * Switch for using Controller data.
      */
     public static final int APP = 3;
+  }
+
+  /**
+   *  Recent applications menu that remembers previously loaded applications.
+   */
+  class RecentAppsMenu extends XJMenu {
+    public RecentAppsMenu() {
+      super();
+      init();
+      addMenuItems();
+    }
+
+    protected void init() {
+      getPopupMenu().addPopupMenuListener(new PopupMenuListener(){
+        public void popupMenuCanceled(PopupMenuEvent e) { /* do nothing */ }
+        public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+          // do nothing
+        }
+        public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+          removeAll();
+          addMenuItems();
+          if (getMenuComponentCount() == 0) {
+            add("No recent applications");
+          }
+        }
+      });
+    }
+
+    protected void addMenuItems() {
+    final String list = getPreferenceValue("filechooserlocations/"
+      + "gate/ApplicationRestore", "list");
+    if (list == null) { return; }
+    for (final String name : list.split(";")) {
+      final String location = getPreferenceValue("filechooserlocations"
+        + "/gate/ApplicationRestore/"+name, "location");
+      final XJMenuItem item = new XJMenuItem(new AbstractAction(name,
+        MainFrame.getIcon("open-application")) {
+        { this.putValue(Action.SHORT_DESCRIPTION, location); }
+        public void actionPerformed(ActionEvent e) {
+          Runnable runnable = new Runnable() { public void run() {
+          try { File file = new File(location);
+            PersistenceManager.loadObjectFromFile(file);
+          } catch(Exception e) {
+            String message = "Couldn't reload application.\n" + e.getMessage();
+            alertButton.setAction(new AlertAction(e, message, null));
+            if (e instanceof IOException) {
+              // remove selected element from the applications list
+              setPreferenceValue("filechooserlocations/gate/ApplicationRestore",
+                "list", list.replaceFirst(name + ";?", ""));
+            }
+          } finally { processFinished(); }}};
+          Thread thread = new Thread(runnable ,"Reload application");
+          thread.setPriority(Thread.MIN_PRIORITY);
+          thread.start();
+      }}, MainFrame.this);
+      item.addMenuKeyListener(new MenuKeyListener() {
+        public void menuKeyTyped(MenuKeyEvent e) { /* do nothing */ }
+        public void menuKeyPressed(MenuKeyEvent e) {
+          if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+            // remove selected element from the applications list
+            setPreferenceValue("filechooserlocations/gate/ApplicationRestore",
+              "list", list.replaceFirst(name + ";?", ""));
+            // TODO: update the menu
+//            item.setVisible(false);
+//            item.revalidate();
+          }
+        }
+        public void menuKeyReleased(MenuKeyEvent e) {/* do nothing */ }
+      });
+      add(item);
+    }
+    add(new XJMenuItem(new AbstractAction("Remove last element") {
+      public void actionPerformed(ActionEvent e) {
+        // remove the last element from the applications list
+        setPreferenceValue("filechooserlocations/gate/ApplicationRestore",
+          "list", list.replaceFirst("[^;]+;?$", ""));
+    }}, MainFrame.this));
+    }
   }
 
   /**
@@ -4811,7 +4869,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         Set<LanguageResource> gazetteers = new HashSet<LanguageResource>(
           Gate.getCreoleRegister().getLrInstances(
           "gate.creole.gazetteer.DefaultGazetteer"));
-        if(gazetteers == null || gazetteers.isEmpty()) return;
+        if(gazetteers.isEmpty()) { return; }
         for(LanguageResource gazetteer : gazetteers) {
           Gazetteer gaz = (Gazetteer) gazetteer;
           if(gaz.getListsURL().toString().endsWith(
