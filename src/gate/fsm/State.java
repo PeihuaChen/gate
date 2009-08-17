@@ -222,7 +222,7 @@ public class State implements JapeConstants {
    *
    * @return the index associated to this state
    */
-  protected int getIndex() {
+  public int getIndex() {
     return myIndex;
   }// getIndex
 
