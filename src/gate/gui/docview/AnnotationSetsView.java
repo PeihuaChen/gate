@@ -1664,8 +1664,8 @@ public class AnnotationSetsView extends AbstractDocumentView
     public void actionPerformed(ActionEvent evt){
       Runnable runableAction = new Runnable(){
         public void run(){
-          JFileChooser fileChooser = MainFrame.getFileChooser();
-          File selectedFile = null;
+          MainFrame.GateFileChooser fileChooser = MainFrame.getFileChooser();
+          File selectedFile;
 
           List filters = Arrays.asList(fileChooser.getChoosableFileFilters());
           Iterator filtersIter = filters.iterator();
@@ -1726,14 +1726,13 @@ public class AnnotationSetsView extends AbstractDocumentView
             // adds a .xml extension if not present
             if (!fileName.endsWith(".xml")) { fileName += ".xml"; }
             File file = new File(fileName);
-            fileChooser.setSelectedFile(file);
             fileChooser.ensureFileIsVisible(file);
+            fileChooser.setSelectedFile(file);
           }
 
-          int res = fileChooser.showSaveDialog(owner);
+          int res = fileChooser.showSaveDialog(owner, null);
           if(res == JFileChooser.APPROVE_OPTION){
             selectedFile = fileChooser.getSelectedFile();
-            fileChooser.setCurrentDirectory(fileChooser.getCurrentDirectory());
             if(selectedFile == null) return;
             StatusListener sListener = (StatusListener)MainFrame.getListeners().
               get("gate.event.StatusListener");
