@@ -105,8 +105,6 @@ public class NamedEntityRecognizerPR extends AbstractLanguageAnalyser implements
       Chunking chunking = chunker.chunk(docText);
       for(Chunk c : chunking.chunkSet()) {
         FeatureMap fm = gate.Factory.newFeatureMap();
-        fm.put("score", new Double(c.score()));
-
         outputAs.add(new Long(c.start()), new Long(c.end()), c.type(), fm);
       }
 
