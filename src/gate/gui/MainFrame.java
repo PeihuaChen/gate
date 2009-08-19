@@ -652,8 +652,10 @@ public class MainFrame extends JFrame implements ProgressListener,
     // fileMenu.add(new XJMenuItem(new LoadCreoleRepositoryAction(),
     // this));
 
+    // lingpipe action
+    fileMenu.add(new XJMenuItem(new LoadLingPipeWithDefaultsAction(), this));
     fileMenu.add(new XJMenuItem(new ManagePluginsAction(), this));
-
+    
     if(!Gate.runningOnMac()) {
       fileMenu.addSeparator();
       fileMenu.add(new XJMenuItem(new ExitGateAction(), this));
@@ -2384,6 +2386,55 @@ public class MainFrame extends JFrame implements ProgressListener,
       thread.start();
     }
   }// class LoadANNIEWithoutDefaultsAction
+
+  /**
+   * Loads LingPipe with default parameters.
+   */
+  class LoadLingPipeWithDefaultsAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
+    private static final String PLUGIN_DIR = "LingPipe";
+    private static final String RESOURCE_DIR = "resources";
+    private static final String APPLICATION_FILE = "lingpipe.gapp";
+    
+    public LoadLingPipeWithDefaultsAction() {
+      super("Load LingPipe system");
+      putValue(SHORT_DESCRIPTION, "Load LingPipe with default parameters");
+      putValue(SMALL_ICON, getIcon("application"));
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      Runnable runnable = new Runnable() {
+        public void run() {
+          lockGUI("LingPipe is being loaded...");
+          try {
+            long startTime = System.currentTimeMillis();
+
+            // load LingPipe as an application from a gapp file
+            PersistenceManager.loadObjectFromFile(new File(new File(new File(
+              Gate.getPluginsHome(), PLUGIN_DIR), RESOURCE_DIR), 
+              APPLICATION_FILE));
+
+
+            long endTime = System.currentTimeMillis();
+            statusChanged("LingPipe loaded in "
+              + NumberFormat.getInstance().format(
+                (double)(endTime - startTime) / 1000) + " seconds");
+          }
+          catch(Exception error) {
+            String message =
+              "There was an error when loading the LingPipe application.";
+            alertButton.setAction(new AlertAction(error, message, null));
+          }
+          finally {
+            unlockGUI();
+          }
+        }
+      };
+      Thread thread = new Thread(runnable, "LoadLingPipeWithDefaultsAction");
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
+    }
+  }// class LoadLingPipeWithDefaultsAction
 
   class NewBootStrapAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
