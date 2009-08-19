@@ -8,7 +8,7 @@
       <NAME>Lingpipe Tokenizer PR</NAME>
       <CLASS>gate.lingpipe.TokenizerPR</CLASS>
       <COMMENT>Provides a LingPipe tokenizer.</COMMENT>
-      <HELPURL>http://gate.ac.uk/userguide/</HELPURL>
+      <HELPURL>http://gate.ac.uk/userguide/sec:misc-creole:lingpipe:tokenizer</HELPURL>
       <PARAMETER NAME="document" RUNTIME="true" COMMENT="Document to be tokenized">gate.Document</PARAMETER>
       <PARAMETER NAME="outputASName" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
     </RESOURCE>
@@ -19,6 +19,7 @@
       <NAME>Lingpipe NER PR</NAME>
       <CLASS>gate.lingpipe.NamedEntityRecognizerPR</CLASS>
       <COMMENT>Lingpipe Named Entity Recognizer</COMMENT>
+      <HELPURL>http://gate.ac.uk/userguide/sec:misc-creole:lingpipe:ner</HELPURL>      
       <PARAMETER NAME="document" RUNTIME="true" COMMENT="document to process">gate.Document</PARAMETER>
       <PARAMETER NAME="outputASName" RUNTIME="true" OPTIONAL="true" COMMENT="Annotationset to put annotations into">java.lang.String</PARAMETER>
       <PARAMETER NAME="modelFileUrl" RUNTIME="false" OPTIONAL="false" COMMENT="Model file to use for NE">java.net.URL</PARAMETER>
@@ -30,6 +31,7 @@
       <NAME>Lingpipe Language Identifier PR</NAME>
       <CLASS>gate.lingpipe.LanguageIdentifierPR</CLASS>
       <COMMENT>Lingpipe Identifier PR</COMMENT>
+      <HELPURL>http://gate.ac.uk/userguide/sec:misc-creole:lingpipe:langid</HELPURL>
       <PARAMETER NAME="document" RUNTIME="true" COMMENT="document to process">gate.Document</PARAMETER>
       <PARAMETER NAME="languageIdFeatureName" RUNTIME="true" OPTIONAL="true" COMMENT="The feature name to use as a document feature to hold the language id">java.lang.String</PARAMETER>
       <PARAMETER NAME="modelFileUrl" RUNTIME="false" OPTIONAL="false" COMMENT="Model file to use for Language Identification">java.net.URL</PARAMETER>
@@ -42,7 +44,7 @@
       <NAME>Lingpipe POS Tagger PR</NAME>
       <CLASS>gate.lingpipe.POSTaggerPR</CLASS>
       <COMMENT>Provides a LingPipe part of speech tagger.</COMMENT>
-      <HELPURL>http://gate.ac.uk/userguide/</HELPURL>
+      <HELPURL>http://gate.ac.uk/userguide/sec:misc-creole:lingpipe:postagger</HELPURL>
       <PARAMETER NAME="document" RUNTIME="true" COMMENT="Document to be tokenized">gate.Document</PARAMETER>
       <PARAMETER NAME="inputASName" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="modelFileUrl" RUNTIME="false" OPTIONAL="false" COMMENT="Model file to use for POS tags">java.net.URL</PARAMETER>
@@ -55,6 +57,7 @@
       <NAME>Lingpipe Sentence Splitter PR</NAME>
       <CLASS>gate.lingpipe.SentenceSplitterPR</CLASS>
       <COMMENT>Provides an interface to LingPipe sentence splitter API.</COMMENT>
+      <HELPURL>http://gate.ac.uk/userguide/sec:misc-creole:lingpipe:splitter</HELPURL>      
       <PARAMETER NAME="document" RUNTIME="true" COMMENT="Document where the results are stored">gate.Document</PARAMETER>
       <PARAMETER NAME="outputASName" RUNTIME="true" OPTIONAL="true" COMMENT="Where the anotation will be stored">java.lang.String</PARAMETER>
     </RESOURCE>
