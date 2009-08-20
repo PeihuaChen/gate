@@ -1,14 +1,35 @@
 package gate.gui.jape;
 
-import java.io.*;
-import javax.swing.*;
-import java.net.*;
-import java.awt.*;
-
-import gate.*;
-import gate.creole.*;
+import gate.Resource;
+import gate.creole.ANNIEConstants;
+import gate.creole.AbstractVisualResource;
+import gate.creole.Transducer;
 import gate.event.ProgressListener;
+import gate.jape.parser.ParseCpslConstants;
+import gate.jape.parser.ParseCpslTokenManager;
+import gate.jape.parser.SimpleCharStream;
+import gate.jape.parser.Token;
 import gate.util.GateRuntimeException;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.swing.JButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextPane;
+import javax.swing.JToolBar;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 
 /**
  * @author niraj
@@ -16,114 +37,206 @@ import gate.util.GateRuntimeException;
  */
 
 public class JapeViewer extends AbstractVisualResource implements
-		ANNIEConstants, ProgressListener {
+                                                      ANNIEConstants,
+                                                      ProgressListener {
 
-	public JapeViewer() {
-	}
+  public JapeViewer() {
+  }
 
-	// GUI components
-	/** The text display. */
-	protected JTextArea textArea;
+  // GUI components
+  /** The text display. */
+  protected JTextPane textArea;
 
-	/** Scroller used for the text diaplay */
-	protected JScrollPane textScroll;
+  /** Scroller used for the text diaplay */
+  protected JScrollPane textScroll;
 
-	/** The toolbar displayed on the top part of the component */
-	protected JToolBar toolbar;
+  /** The toolbar displayed on the top part of the component */
+  protected JToolBar toolbar;
 
-	/** Should this component bahave as an editor as well as an viewer */
-	private boolean editable = false;
+  /** Should this component behave as an editor as well as an viewer */
+  private boolean editable = false;
 
-	/** A Button for saving the contents in a Jape file */
-	private JButton saveButton;
+  /** A Button for saving the contents in a Jape file */
+  private JButton saveButton;
 
-	/** A Button for reverting contents */
-	private JButton revertButton;
+  /** A Button for reverting contents */
+  private JButton revertButton;
 
-	/** A field that holds the jape file name */
-	private URL japeFileURL;
+  /** A field that holds the jape file name */
+  private URL japeFileURL;
 
-	/** a field that holds the jape file contents */
-	private String japeFileContents;
+  /** a field that holds the jape file contents */
+  private String japeFileContents;
 
-	/** Transducer */
-	private Transducer transducer;
+  /** Transducer */
+  private Transducer transducer;
 
-	/** An Init method */
-	public Resource init() {
-		initGuiComponents();
-		japeFileContents = new String();
-		return this;
-	}
+  // should probably be static
 
-	private void initGuiComponents() {
-		setLayout(new BorderLayout());
-		textArea = new JTextArea();
-		textArea.setEditable(editable);
-		textScroll = new JScrollPane(textArea,
-				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		add(textScroll, BorderLayout.CENTER);
-	}
+  Map<Integer, Style> colorMap = new HashMap<Integer, Style>();
 
-	public void setTarget(Object target) {
-		if (!(target instanceof Transducer)) {
-			throw new IllegalArgumentException(
-					"The GATE jape editor can only be used with a GATE jape transducer!\n"
-							+ target.getClass().toString()
-							+ " is not a GATE Jape Transducer!");
-		}
-    
+  /** An Init method */
+  public Resource init() {
+    initGuiComponents();
+    japeFileContents = new String();
+    return this;
+  }
+
+  private void initGuiComponents() {
+    setLayout(new BorderLayout());
+    textArea = new JTextPane();
+    textArea.setEditable(editable);
+    textScroll =
+            new JScrollPane(textArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    add(textScroll, BorderLayout.CENTER);
+
+    // if we want to set the jape to be monospaced then do this...
+    /*
+     * MutableAttributeSet attrs = textArea.getInputAttributes();
+     * StyleConstants.setFontFamily(attrs, "monospaced"); StyledDocument doc =
+     * textArea.getStyledDocument(); doc.setCharacterAttributes(0,
+     * doc.getLength() + 1, attrs, false);
+     */
+
+    Style style = textArea.addStyle("Red", null);
+    StyleConstants.setForeground(style, Color.red);
+    colorMap.put(ParseCpslConstants.leftBrace, style);
+    colorMap.put(ParseCpslConstants.rightBrace, style);
+    colorMap.put(ParseCpslConstants.leftBracket, style);
+    colorMap.put(ParseCpslConstants.rightBracket, style);
+    colorMap.put(ParseCpslConstants.leftSquare, style);
+    colorMap.put(ParseCpslConstants.rightSquare, style);
+
+    style = textArea.addStyle("Blue", null);
+    StyleConstants.setForeground(style, Color.blue);
+    colorMap.put(ParseCpslConstants.rule, style);
+    colorMap.put(ParseCpslConstants.priority, style);
+    colorMap.put(ParseCpslConstants.macro, style);
+    colorMap.put(ParseCpslConstants.bool, style);
+    colorMap.put(ParseCpslConstants.phase, style);
+    colorMap.put(ParseCpslConstants.input, style);
+    colorMap.put(ParseCpslConstants.option, style);
+    colorMap.put(ParseCpslConstants.multiphase, style);
+    colorMap.put(ParseCpslConstants.phases, style);
+
+    style = textArea.addStyle("Dark_Cyan", null);
+    StyleConstants.setForeground(style, new Color(0, 128, 128));
+    colorMap.put(ParseCpslConstants.string, style);
+
+    style = textArea.addStyle("Green", null);
+    StyleConstants.setForeground(style, new Color(0, 128, 0));
+    colorMap.put(ParseCpslConstants.singleLineCStyleComment, style);
+    colorMap.put(ParseCpslConstants.singleLineCpslStyleComment, style);
+    colorMap.put(ParseCpslConstants.commentStart, style);
+    colorMap.put(ParseCpslConstants.commentChars, style);
+    colorMap.put(ParseCpslConstants.commentEnd, style);
+    colorMap.put(ParseCpslConstants.phasesSingleLineCStyleComment, style);
+    colorMap.put(ParseCpslConstants.phasesSingleLineCpslStyleComment, style);
+    colorMap.put(ParseCpslConstants.phasesCommentStart, style);
+    colorMap.put(ParseCpslConstants.phasesCommentChars, style);
+    colorMap.put(ParseCpslConstants.phasesCommentEnd, style);
+  }
+
+  public void setTarget(Object target) {
+    if(!(target instanceof Transducer)) { throw new IllegalArgumentException(
+            "The GATE jape editor can only be used with a GATE jape transducer!\n"
+                    + target.getClass().toString()
+                    + " is not a GATE Jape Transducer!"); }
+
     if(transducer != null) {
       transducer.removeProgressListener(this);
     }
 
-		this.transducer = (Transducer) target;
-		// Transducer inst =
-		// (Transducer)((Gate.getCreoleRegister().getPrInstances("gate.creole.Transducer")).get(0));
-		japeFileURL = transducer.getGrammarURL();
-		// reading japeFile
-		readJAPEFileContents();
-		((Transducer)target).addProgressListener(this);
-	}
+    this.transducer = (Transducer)target;
+    japeFileURL = transducer.getGrammarURL();
+    // reading japeFile
+    readJAPEFileContents();
+    ((Transducer)target).addProgressListener(this);
+  }
 
-	private void readJAPEFileContents() {
-		try {
-			if (japeFileURL != null) {
+  private void readJAPEFileContents() {
+    try {
+      if(japeFileURL != null) {
         Reader japeReader = null;
         if(transducer.getEncoding() == null) {
           japeReader = new InputStreamReader(japeFileURL.openStream());
+        } else {
+          japeReader =
+                  new InputStreamReader(japeFileURL.openStream(), transducer
+                          .getEncoding());
         }
-        else {
-          japeReader = new InputStreamReader(japeFileURL.openStream(),
-                  transducer.getEncoding());
+        BufferedReader br = new BufferedReader(japeReader);
+        String content = br.readLine();
+        japeFileContents = "";
+        while(content != null) {
+          japeFileContents += content + "\n";
+          content = br.readLine();
         }
-				BufferedReader br = new BufferedReader(japeReader);
-				String content = br.readLine();
-				japeFileContents = "";
-				while (content != null) {
-					japeFileContents += content + "\n";
-					content = br.readLine();
-				}
-				textArea.setEditable(true);
-				textArea.setText(japeFileContents);
-				textArea.updateUI();
-				textArea.setEditable(false);
-				br.close();
-			} else {
-				textArea
-						.setText("The JAPE Transducer Object was loaded from a serialised tranducer and therefore cannot show any text!");
-			}
-		} catch (IOException ioe) {
-			throw new GateRuntimeException(ioe);
-		}
-	}
 
-	public void processFinished() {
-		readJAPEFileContents();
-	}
+        textArea.setEditable(true);
+        textArea.setText(japeFileContents);
+        textArea.updateUI();
+        textArea.setEditable(false);
+        br.close();
 
-	public void progressChanged(int progress) {
+        ParseCpslTokenManager tokenManager =
+                new ParseCpslTokenManager(new SimpleCharStream(
+                        new StringReader(japeFileContents)));
 
-	}
+        StyledDocument doc = textArea.getStyledDocument();
+
+        java.util.List<Integer> lineOffsets = new ArrayList<Integer>();
+
+        lineOffsets.add(0);
+        int startFrom = 0;
+        int offset = 0;
+        while((offset = japeFileContents.indexOf("\n", startFrom)) != -1) {
+          lineOffsets.add(offset + 1);
+          startFrom = offset + 1;
+        }
+
+        Token t;
+        while((t = tokenManager.getNextToken()).kind != 0) {
+
+          Token special = t.specialToken;
+          while(special != null) {
+            Style style = colorMap.get(special.kind);
+            if(style != null) {
+              int start =
+                      lineOffsets.get(special.beginLine - 1)
+                              + special.beginColumn - 1;
+              int end =
+                      lineOffsets.get(special.endLine - 1) + special.endColumn
+                              - 1;
+              doc.setCharacterAttributes(start, end - start + 1, style, true);
+            }
+
+            special = special.specialToken;
+          }
+
+          Style style = colorMap.get(t.kind);
+
+          if(style != null) {
+            int start = lineOffsets.get(t.beginLine - 1) + t.beginColumn - 1;
+            int end = lineOffsets.get(t.endLine - 1) + t.endColumn - 1;
+            doc.setCharacterAttributes(start, end - start + 1, style, true);
+          }
+        }
+      } else {
+        textArea
+                .setText("The JAPE Transducer Object was loaded from a serialised tranducer and therefore cannot show any text!");
+      }
+    } catch(IOException ioe) {
+      throw new GateRuntimeException(ioe);
+    }
+  }
+
+  public void processFinished() {
+    readJAPEFileContents();
+  }
+
+  public void progressChanged(int progress) {
+
+  }
 }
