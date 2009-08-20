@@ -19,7 +19,7 @@ try {
 	FeatureMap features = Factory.newFeatureMap();
 	features.put("type",type);
 	
-	outputAS.add(chunk.firstNode().getOffset(),chunk.lastNode().getOffset(),"Entity",features);
+	outputAS.add(entity.firstNode().getOffset(),entity.lastNode().getOffset(),"Entity",features);
 }
 catch (Exception e) {
 	throw new LuckyException(e);
