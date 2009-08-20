@@ -22,7 +22,7 @@ import com.aliasi.util.AbstractExternalizable;
 
 /**
  * This PR is used for recognizing named entities such as location,
- * organizaiton etc. It uses the lingpipe models to achieve that.
+ * organizaiton etc. It uses the LingPipe models to achieve that.
  * 
  * @author niraj
  * 

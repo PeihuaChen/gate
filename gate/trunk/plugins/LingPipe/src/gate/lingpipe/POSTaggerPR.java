@@ -33,7 +33,7 @@ import com.aliasi.util.ScoredObject;
 import com.aliasi.util.Streams;
 
 /**
- * POS tagger based on lingpipe library.
+ * POS tagger based on the LingPipe library.
  * @author gate
  *
  */

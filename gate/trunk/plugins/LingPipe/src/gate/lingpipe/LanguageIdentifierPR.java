@@ -18,8 +18,8 @@ import com.aliasi.util.AbstractExternalizable;
 
 /**
  * A Processing resource to identify language of the document based on
- * Lingpipe language identifier classifier. Please download appropriate
- * models from the lingpipe website. see
+ * LingPipe language identifier classifier. Please download appropriate
+ * models from the LingPipe website. see
  * http://alias-i.com/lingpipe/web/models.html
  * 
  * The default model supplied with GATE distribution is based on the
