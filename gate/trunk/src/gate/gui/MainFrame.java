@@ -779,6 +779,50 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
       }, this));
 
+
+
+    // Groovy console menu: launches a groovy console, only visible if groovy
+    // is present. Move out to a groovy class at some point?
+    if(groovyPresent()) {
+      toolsMenu.add(new XJMenuItem(
+        new AbstractAction("Groovy console", getIcon("groovyConsole")) {
+        { putValue(SHORT_DESCRIPTION, "Console for Groovy scripting"); }
+        private static final long serialVersionUID = 1L;
+        public void actionPerformed(ActionEvent evt) {
+          try {
+            Class gcClass = Gate.class.getClassLoader().loadClass(
+              "groovy.ui.Console");
+            Constructor gccons = gcClass.getConstructor(null);
+            java.lang.reflect.Method setvar
+              = gcClass.getMethod("setVariable",
+                  new Class[]
+                  { String.class, Object.class });
+            java.lang.reflect.Method run = gcClass.getMethod("run", null);
+            Object gc = gccons.newInstance(null);
+            setvar.invoke(gc, new Object[]
+                   { "Gate", Gate.class });
+            setvar.invoke(gc, new Object[]
+                   { "corpora",
+                     Gate.getCreoleRegister()
+                         .getLrInstances("gate.corpora.CorpusImpl") });
+            setvar.invoke(gc, new Object[]
+                   { "docs",
+                     Gate.getCreoleRegister()
+                     .getLrInstances("gate.corpora.DocumentImpl") });
+            setvar.invoke(gc, new Object[]
+                   { "prs",
+                     Gate.getCreoleRegister().getPrInstances() });
+            setvar.invoke(gc, new Object[]
+                   { "factory", gate.Factory.class });
+
+            run.invoke(gc, null);
+          } catch (Exception ex) {
+            Out.prln("Groovy Console creation failed.");
+          }
+        }
+      }, this));
+    }
+
     menuBar.add(toolsMenu);
 
     JMenu helpMenu = new XJMenu("Help", null, MainFrame.this);
@@ -1929,6 +1973,35 @@ public class MainFrame extends JFrame implements ProgressListener,
    * ProjectData(fileChooser.getSelectedFile(), parentFrame);
    * addProject(pData); } } }
    */
+
+  /**
+   * Flag the presence of grooovy on the classpath
+   */
+  private static boolean groovyPresentFlag = false;
+
+  /**
+   * Searches for groovy on the class path.
+   * 
+   * @return true if groovy is on the classpath
+   */
+  private static boolean groovyPresent() {
+    if (!groovyPresentFlag ) {
+      log.debug("Looking for groovy.lang.GroovyObject");
+      try {
+        if (Gate.class.getClassLoader()
+                .loadClass("groovy.lang.GroovyObject") != null)
+        {
+          groovyPresentFlag = true;
+          log.debug("groovy.lang.GroovyObject loaded");
+        }
+      } catch (Exception e) {
+        groovyPresentFlag = false;
+        log.debug("groovy.lang.GroovyObject could not be loaded");
+      }
+    }
+    return groovyPresentFlag;
+  }
+
 
   /** This class represent an action which brings up the Annot Diff tool */
   class NewAnnotDiffAction extends AbstractAction {
