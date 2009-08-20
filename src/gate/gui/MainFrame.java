@@ -652,7 +652,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     // fileMenu.add(new XJMenuItem(new LoadCreoleRepositoryAction(),
     // this));
 
-    // lingpipe action
+    // LingPipe action
     fileMenu.add(new XJMenuItem(new LoadLingPipeWithDefaultsAction(), this));
     fileMenu.add(new XJMenuItem(new ManagePluginsAction(), this));
     
@@ -2472,7 +2472,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     public LoadLingPipeWithDefaultsAction() {
       super("Load LingPipe system");
       putValue(SHORT_DESCRIPTION, "Load LingPipe with default parameters");
-      putValue(SMALL_ICON, getIcon("application"));
+      putValue(SMALL_ICON, getIcon("open-application"));
     }
 
     public void actionPerformed(ActionEvent e) {
