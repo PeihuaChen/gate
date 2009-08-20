@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <CREOLE-DIRECTORY>
   <CREOLE>   
-    <!-- creole.xml for lingpipe resources -->
+    <!-- creole.xml for LingPipe resources -->
     <RESOURCE>
       <JAR>lingpipe.jar</JAR>
       <JAR>lib/lingpipe-3.8.1.jar</JAR>
-      <NAME>Lingpipe Tokenizer PR</NAME>
+      <NAME>LingPipe Tokenizer PR</NAME>
       <CLASS>gate.lingpipe.TokenizerPR</CLASS>
       <COMMENT>Provides a LingPipe tokenizer.</COMMENT>
       <HELPURL>http://gate.ac.uk/userguide/sec:misc-creole:lingpipe:tokenizer</HELPURL>
@@ -16,9 +16,9 @@
     <RESOURCE>
       <JAR>lingpipe.jar.jar</JAR>
       <JAR>lib/lingpipe-3.8.1.jar</JAR>
-      <NAME>Lingpipe NER PR</NAME>
+      <NAME>LingPipe NER PR</NAME>
       <CLASS>gate.lingpipe.NamedEntityRecognizerPR</CLASS>
-      <COMMENT>Lingpipe Named Entity Recognizer</COMMENT>
+      <COMMENT>LingPipe Named Entity Recognizer</COMMENT>
       <HELPURL>http://gate.ac.uk/userguide/sec:misc-creole:lingpipe:ner</HELPURL>      
       <PARAMETER NAME="document" RUNTIME="true" COMMENT="document to process">gate.Document</PARAMETER>
       <PARAMETER NAME="outputASName" RUNTIME="true" OPTIONAL="true" COMMENT="Annotationset to put annotations into">java.lang.String</PARAMETER>
@@ -28,9 +28,9 @@
     <RESOURCE>
       <JAR>lingpipe.jar.jar</JAR>
       <JAR>lib/lingpipe-3.8.1.jar</JAR>
-      <NAME>Lingpipe Language Identifier PR</NAME>
+      <NAME>LingPipe Language Identifier PR</NAME>
       <CLASS>gate.lingpipe.LanguageIdentifierPR</CLASS>
-      <COMMENT>Lingpipe Identifier PR</COMMENT>
+      <COMMENT>LingPipe Identifier PR</COMMENT>
       <HELPURL>http://gate.ac.uk/userguide/sec:misc-creole:lingpipe:langid</HELPURL>
       <PARAMETER NAME="document" RUNTIME="true" COMMENT="document to process">gate.Document</PARAMETER>
       <PARAMETER NAME="languageIdFeatureName" RUNTIME="true" OPTIONAL="true" COMMENT="The feature name to use as a document feature to hold the language id">java.lang.String</PARAMETER>
@@ -41,7 +41,7 @@
     <RESOURCE>
       <JAR>lingpipe.jar</JAR>
       <JAR>lib/lingpipe-3.8.1.jar</JAR>
-      <NAME>Lingpipe POS Tagger PR</NAME>
+      <NAME>LingPipe POS Tagger PR</NAME>
       <CLASS>gate.lingpipe.POSTaggerPR</CLASS>
       <COMMENT>Provides a LingPipe part of speech tagger.</COMMENT>
       <HELPURL>http://gate.ac.uk/userguide/sec:misc-creole:lingpipe:postagger</HELPURL>
@@ -54,7 +54,7 @@
     <RESOURCE>
       <JAR>lingpipe.jar</JAR>
       <JAR>lib/lingpipe-3.8.1.jar</JAR>
-      <NAME>Lingpipe Sentence Splitter PR</NAME>
+      <NAME>LingPipe Sentence Splitter PR</NAME>
       <CLASS>gate.lingpipe.SentenceSplitterPR</CLASS>
       <COMMENT>Provides an interface to LingPipe sentence splitter API.</COMMENT>
       <HELPURL>http://gate.ac.uk/userguide/sec:misc-creole:lingpipe:splitter</HELPURL>      

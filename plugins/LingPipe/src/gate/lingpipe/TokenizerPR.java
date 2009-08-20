@@ -11,7 +11,7 @@ import com.aliasi.tokenizer.IndoEuropeanTokenizerFactory;
 import com.aliasi.tokenizer.Tokenizer;
 
 /**
- * Lingpipe Tokenizer PR.
+ * LingPipe Tokenizer PR.
  * 
  * @author Ekaterina Stambolieva
  * 
@@ -41,8 +41,8 @@ public class TokenizerPR extends AbstractLanguageAnalyser implements
   }
 
   /**
-   * execute method. Makes lingpipe API calls to tokenize the document.
-   * It uses the document's string and passes it over to the lingpipe to
+   * execute method. Makes LingPipe API calls to tokenize the document.
+   * It uses the document's string and passes it over to the LingPipe to
    * tokenize. It also generates space tokens as well.
    */
   public void execute() throws ExecutionException {
