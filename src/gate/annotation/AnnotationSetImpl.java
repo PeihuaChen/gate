@@ -961,7 +961,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
         for(int i = 1; i < affectedNodes.size(); i++) {
           Node aNode = affectedNodes.get(i);
           nodesByOffset.remove(aNode.getOffset());
-          annotsByStartNode.remove(aNode);
+          annotsByStartNode.remove(aNode.getId());
         }
         // repair the first node
         // remove from offset index
