@@ -84,7 +84,7 @@ public class JapeViewer extends AbstractVisualResource implements
   /** An Init method */
   public Resource init() {
     initGuiComponents();
-    japeFileContents = new String();
+    japeFileContents = "";
     return this;
   }
 
@@ -224,9 +224,6 @@ public class JapeViewer extends AbstractVisualResource implements
         br.close();
 
         cboPhases.removeAllItems();
-        System.out.println(cboPhases.getItemCount());
-        String mainName = Files.fileFromURL(japeFileURL).getName();
-        mainName = mainName.substring(0,mainName.lastIndexOf("."));
         cboPhases.addItem("");
         
         ParseCpslTokenManager tokenManager =
