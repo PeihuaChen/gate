@@ -472,38 +472,31 @@ public class AnnotationListView extends AbstractDocumentView
    }
 
    public void removeAnnotations(Collection<AnnotationData> tags){
-     //cache the selected annotations
-     final List<AnnotationData> selectedAnns = new ArrayList<AnnotationData>();
+     //to speed-up things, first remove all blinking highlights
      if(table != null){
-       int[] selRows = table.getSelectedRows();
-       if(selRows != null && selRows.length > 0){
-         for(int viewRow : selRows){
-           int modelRow = table.rowViewToModel(viewRow);
-           AnnotationData aData = annDataList.get(modelRow);
-           //only save it if it's not to be removed
-           if(!tags.contains(aData)) selectedAnns.add(aData);
-         }
-       }
-       //to speed-up things, first remove all blinking highlights
        table.getSelectionModel().clearSelection();
      }
-     //now do the actual removal
-     for(AnnotationData aData : tags) removeAnnotation(aData);
-     //restore the selection, if necessary
-     if(selectedAnns.size() > 0){
+     //cache the selected annotations
+     final List<AnnotationData> selAnns = owner.getSelectedAnnotations();
+     boolean selectionChanged = false;
+     //now do the actual removal, in batch mode
+     for(AnnotationData aData : tags){
+       annDataList.remove(aData);
+       if(selAnns.remove(aData)){
+         selectionChanged = true;
+       }
+       aData.getAnnotation().removeAnnotationListener(AnnotationListView.this);
+     }
+     //update the table display
+     if(tableModel != null) tableModel.fireTableDataChanged();
+     //restore selection
+     if(selectionChanged){
        //this needs to happen after the table has caught up with all the changes
        //hence we need to queue it to the GUI thread
        SwingUtilities.invokeLater(new Runnable(){
-         public void run(){
-           for(AnnotationData aData : selectedAnns){
-             int modelRow = annDataList.indexOf(aData);
-             if(modelRow != -1){
-               int viewRow = table.rowModelToView(modelRow);
-               table.getSelectionModel().addSelectionInterval(viewRow, viewRow);
-             }
-           }
-         }
-       });
+       public void run(){
+         owner.setSelectedAnnotations(selAnns);  
+       }});
      }
    }
 
@@ -520,14 +513,15 @@ public class AnnotationListView extends AbstractDocumentView
    public List<AnnotationData> addAnnotations(List<Annotation> annotations,
            AnnotationSet set){
      List<AnnotationData> tags = new ArrayList<AnnotationData>();
-     for(Annotation ann : annotations) tags.add(new AnnotationDataImpl(set, ann));
-     annDataList.addAll(tags);
-     for(AnnotationData aData : tags) aData.getAnnotation().addAnnotationListener(
-             AnnotationListView.this);
+     for(Annotation ann : annotations){
+       AnnotationData aTag = new AnnotationDataImpl(set, ann);
+       tags.add(aTag);
+       annDataList.add(aTag);
+       ann.addAnnotationListener(AnnotationListView.this);
+     }
      if(tableModel != null) tableModel.fireTableDataChanged();
      return tags;
    }
-
 
    /**
     * Returns the tags for all the annotations currently displayed
