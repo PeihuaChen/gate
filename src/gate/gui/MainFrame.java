@@ -792,13 +792,13 @@ public class MainFrame extends JFrame implements ProgressListener,
           try {
             Class gcClass = Gate.class.getClassLoader().loadClass(
               "groovy.ui.Console");
-            Constructor gccons = gcClass.getConstructor(null);
+            Constructor gccons = gcClass.getConstructor();
             java.lang.reflect.Method setvar
               = gcClass.getMethod("setVariable",
                   new Class[]
                   { String.class, Object.class });
-            java.lang.reflect.Method run = gcClass.getMethod("run", null);
-            Object gc = gccons.newInstance(null);
+            java.lang.reflect.Method run = gcClass.getMethod("run");
+            Object gc = gccons.newInstance();
             setvar.invoke(gc, new Object[]
                    { "Gate", Gate.class });
             setvar.invoke(gc, new Object[]
@@ -815,7 +815,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             setvar.invoke(gc, new Object[]
                    { "factory", gate.Factory.class });
 
-            run.invoke(gc, null);
+            run.invoke(gc);
           } catch (Exception ex) {
             Out.prln("Groovy Console creation failed.");
           }
