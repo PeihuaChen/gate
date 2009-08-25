@@ -167,23 +167,21 @@ public class KleeneOperator implements Serializable {
    */
   @Override
   public String toString() {
-    if (type != Type.RANGE) {
-      return type.getSymbol();
+    if (type != Type.RANGE) return type.getSymbol();
+        
+    if(displayString != null) return displayString;
+
+    StringBuilder sb = new StringBuilder("[");
+    sb.append(getMin());
+    if(min != max) {
+      sb.append(",");
+      if(max != null) sb.append(max);
     }
-    else {
-      //build a string with the min and max
-      if (displayString == null) {
-        StringBuilder sb = new StringBuilder("[");
-        sb.append(getMin());
-        if (min != max) {
-          sb.append(",");
-          if (max != null)
-            sb.append(max);
-        }
-        sb.append("]");
-      }
-      return displayString;
-    }
+    sb.append("]");
+
+    displayString = sb.toString();
+    
+    return displayString;
   }
 
   /*
