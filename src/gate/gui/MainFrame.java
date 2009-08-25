@@ -4742,6 +4742,26 @@ public class MainFrame extends JFrame implements ProgressListener,
       String currentResourceClassName) {
       GateFileChooser.currentResourceClassName = currentResourceClassName;
     }
+
+    /* (non-Javadoc)
+     * @see javax.swing.JFileChooser#ensureFileIsVisible(java.io.File)
+     */
+    @Override
+    public void ensureFileIsVisible(File f) {
+      if(f.exists()) super.ensureFileIsVisible(f);
+    }
+
+    /* (non-Javadoc)
+     * @see javax.swing.JFileChooser#setSelectedFile(java.io.File)
+     */
+    @Override
+    public void setSelectedFile(File file) {
+      if(file.exists() || 
+         (file.getParentFile() != null && file.getParentFile().exists())){
+        super.setSelectedFile(file);
+      }
+    }
+    
   }
 
   /**
