@@ -173,7 +173,7 @@ public class KleeneOperator implements Serializable {
 
     StringBuilder sb = new StringBuilder("[");
     sb.append(getMin());
-    if(min != max) {
+    if(!min.equals(max)) {
       sb.append(",");
       if(max != null) sb.append(max);
     }
