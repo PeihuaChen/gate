@@ -150,7 +150,15 @@ public class Gate implements GateConstants {
     catch(ClassNotFoundException cnfe) {
       throw new GateRuntimeException(cnfe);
     }
+
+    initFinished = true;
   } // init()
+
+  /** Have we successfully run {@link #init()} before? */
+  public static boolean isInitialised() { return initFinished; }
+
+  /** Records initialisation status. */
+  protected static boolean initFinished = false;
 
   /**
    * Initialises the paths to local files of interest like the GATE home, the
