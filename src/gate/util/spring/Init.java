@@ -83,23 +83,28 @@ public class Init {
   private List<Resource> plugins;
   
   public void setGateHome(Resource gateHome) throws IOException {
-    Gate.setGateHome(gateHome.getFile());
+    if(! Gate.isInitialised())
+      Gate.setGateHome(gateHome.getFile());
   }
 
   public void setPluginsHome(Resource pluginsHome) throws IOException {
-    Gate.setPluginsHome(pluginsHome.getFile());
+    if(! Gate.isInitialised())
+      Gate.setPluginsHome(pluginsHome.getFile());
   }
 
   public void setSiteConfigFile(Resource siteConfigFile) throws IOException {
-    Gate.setSiteConfigFile(siteConfigFile.getFile());
+    if(! Gate.isInitialised())
+      Gate.setSiteConfigFile(siteConfigFile.getFile());
   }
 
   public void setUserConfigFile(Resource userConfigFile) throws IOException {
-    Gate.setUserConfigFile(userConfigFile.getFile());
+    if(! Gate.isInitialised())
+      Gate.setUserConfigFile(userConfigFile.getFile());
   }
 
   public void setBuiltinCreoleDir(Resource builtinCreoleDir) throws IOException {
-    Gate.setBuiltinCreoleDir(builtinCreoleDir.getURL());
+    if(! Gate.isInitialised())
+      Gate.setBuiltinCreoleDir(builtinCreoleDir.getURL());
   }
 
   public void setPreloadPlugins(List<Resource> plugins) {
@@ -110,24 +115,26 @@ public class Init {
    * Initialises GATE and loads any preloadPlugins that have been specified.
    */
   public void init() throws Exception {
-    Gate.init();
-    if(plugins != null && !plugins.isEmpty()) {
-      for(Resource plugin : plugins) {
-        File pluginFile = null;
-        try {
-          pluginFile = plugin.getFile();
-        }
-        catch(IOException e) {
-          // no problem, try just as URL
-        }
+    if(! Gate.isInitialised()) {
+      Gate.init();
+      if(plugins != null && !plugins.isEmpty()) {
+        for(Resource plugin : plugins) {
+          File pluginFile = null;
+          try {
+            pluginFile = plugin.getFile();
+          }
+          catch(IOException e) {
+            // no problem, try just as URL
+          }
 
-        if(pluginFile == null) {
-          Gate.getCreoleRegister().registerDirectories(plugin.getURL());
-        }
-        else {
-          Gate.getCreoleRegister().registerDirectories(pluginFile.toURI().toURL());
+          if(pluginFile == null) {
+            Gate.getCreoleRegister().registerDirectories(plugin.getURL());
+          }
+          else {
+            Gate.getCreoleRegister().registerDirectories(pluginFile.toURI().toURL());
+          }
         }
       }
     }
-  }
+  } // init()
 }
