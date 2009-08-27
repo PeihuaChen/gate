@@ -4748,7 +4748,7 @@ public class MainFrame extends JFrame implements ProgressListener,
      */
     @Override
     public void ensureFileIsVisible(File f) {
-      if(f.exists()) super.ensureFileIsVisible(f);
+      if(f != null && f.exists()) super.ensureFileIsVisible(f);
     }
 
     /* (non-Javadoc)
@@ -4756,12 +4756,13 @@ public class MainFrame extends JFrame implements ProgressListener,
      */
     @Override
     public void setSelectedFile(File file) {
-      if(file.exists() || 
-         (file.getParentFile() != null && file.getParentFile().exists())){
-        super.setSelectedFile(file);
+      if(file != null){
+        if(file.exists() || 
+           (file.getParentFile() != null && file.getParentFile().exists())){
+          super.setSelectedFile(file);
+        }
       }
     }
-    
   }
 
   /**
