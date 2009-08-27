@@ -1,0 +1,1 @@
+opennlp.jar hosts a variety of java-based NLP tools which perform sentence detection, tokenization, pos-tagging, chunking and parsing, named-entity detection, and coreference using the OpenNLP (http://opennlp.sourceforge.net/) Maxent machine learning package. The plugin by default uses the models for English which are in models/english directory.
