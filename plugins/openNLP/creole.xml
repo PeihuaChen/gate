@@ -10,6 +10,7 @@
 			<JAR>lib/opennlp-tools-1.1.0.jar</JAR>
 			<JAR>lib/opennlp-api-0.9.0.jar</JAR>
 			<JAR>lib/maxent-2.5.2.jar</JAR>
+			<JAR>lib/trove.jar</JAR>
 			<COMMENT>Gate wrapper of the OpenNlp Sentence Splitter.</COMMENT>
 			<HELPURL>http://opennlp.sourceforge.net/</HELPURL>
 			<CLASS>gate.opennlp.OpenNlpSentenceSplit</CLASS>
@@ -26,6 +27,7 @@
 			<JAR>lib/opennlp-tools-1.1.0.jar</JAR>
 			<JAR>lib/opennlp-api-0.9.0.jar</JAR>
 			<JAR>lib/maxent-2.5.2.jar</JAR>
+			<JAR>lib/trove.jar</JAR>
 			<COMMENT>Implementation of the OpenNlp Token Splitter.</COMMENT>
 			<HELPURL>http://opennlp.sourceforge.net/</HELPURL>
 			<CLASS>gate.opennlp.OpenNlpTokenizer</CLASS>
@@ -43,6 +45,7 @@
 			<JAR>lib/opennlp-tools-1.1.0.jar</JAR>
 			<JAR>lib/opennlp-api-0.9.0.jar</JAR>
 			<JAR>lib/maxent-2.5.2.jar</JAR>
+			<JAR>lib/trove.jar</JAR>
 			<COMMENT>Implementation of the OpenNlp POS Tagger.</COMMENT>
 			<HELPURL>http://opennlp.sourceforge.net/</HELPURL>
 			<CLASS>gate.opennlp.OpenNlpPOS</CLASS>
@@ -61,6 +64,7 @@
 			<JAR>lib/opennlp-tools-1.1.0.jar</JAR>
 			<JAR>lib/opennlp-api-0.9.0.jar</JAR>
 			<JAR>lib/maxent-2.5.2.jar</JAR>
+			<JAR>lib/trove.jar</JAR>
 			<COMMENT>Implementation of the OpenNlp Chunker.</COMMENT>
 			<HELPURL>http://opennlp.sourceforge.net/</HELPURL>
 			<CLASS>gate.opennlp.OpenNlpChunker</CLASS>
@@ -77,6 +81,7 @@
 			<JAR>lib/opennlp-tools-1.1.0.jar</JAR>
 			<JAR>lib/opennlp-api-0.9.0.jar</JAR>
 			<JAR>lib/maxent-2.5.2.jar</JAR>
+			<JAR>lib/trove.jar</JAR>
 			<COMMENT>Implementation of the OpenNlp Name Finder.</COMMENT>
 			<HELPURL>http://opennlp.sourceforge.net/</HELPURL>
 			<CLASS>gate.opennlp.OpenNLPNameFin</CLASS>
