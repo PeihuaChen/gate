@@ -6,11 +6,12 @@
 	<CREOLE>
 		<RESOURCE>
 			<NAME>AbnerTagger</NAME>
-			<JAR>abner_gate.jar</JAR>
-			<JAR>lib/abner.jar</JAR>
+			<JAR>abner.jar</JAR>
+			<JAR>lib/abner1.0.0.jar</JAR>
+			<JAR>lib/mallet.jar</JAR>
 			<COMMENT>Gate wrapper over Abner.</COMMENT>
 			<HELPURL>http://pages.cs.wisc.edu/~bsettles/abner/</HELPURL>
-			<CLASS>com.ontotext.lifeskim.gate.taggers.AbnerTagger</CLASS>
+			<CLASS>gate.abner.AbnerTagger</CLASS>
 			<PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
 			<PARAMETER NAME="outputASName" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
 			<PARAMETER NAME="abnerMode" DEFAULT="BIOCREATIVE" RUNTIME="true" OPTIONAL="false" COMMENT="This option allows tow different models to be used for tagging. Namely: NLPBA and BIOCREATIVE. NLPBA entity types are Gene, DNA, RNA, Cell Lines, Cell cultures. BIOCREATIVE entity type is Gene.">gate.abner.AbnerRunMode</PARAMETER>

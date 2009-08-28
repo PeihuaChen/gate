@@ -10,7 +10,7 @@ package gate.abner;
  */
 
 /*
- * Enum data type for learning mode in GUI.
+ * Enum data type for model mode in GUI.
  */
 
 public enum AbnerRunMode {
