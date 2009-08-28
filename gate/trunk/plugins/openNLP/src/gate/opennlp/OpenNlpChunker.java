@@ -157,9 +157,15 @@ public @SuppressWarnings("all") class OpenNlpChunker extends AbstractLanguageAna
 
 	@Override
 	public Resource init() throws ResourceInstantiationException {
-		logger.error("Chunker url is: " + model.getFile());
+//		logger.error("Chunker url is: " + model.getFile());
 		try {
-		chunker = new ChunkerME(getModel(new File(model.getFile())));
+			String file = null;
+			if (model == null)
+				file = "plugins/openNLP/models/english/chunker/EnglishChunk.bin.gz";
+			else
+				file = model.getFile();
+			
+		chunker = new ChunkerME(getModel(new File(file)));
 				//"/home/joro/work/m_learning/models/Chunker_Genia.bin.gz"));
 		}catch (Exception e){
 			e.printStackTrace();

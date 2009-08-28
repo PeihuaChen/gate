@@ -70,7 +70,7 @@ public @SuppressWarnings("all") class OpenNlpTokenizer extends AbstractLanguageA
 			fm.put("string", text.substring(spans[i].getStart(), spans[i]
 					.getEnd()));
 			// source
-			fm.put("type", "urn:lsid:ontotext.com:kim:iextraction:Token");
+//			fm.put("type", "urn:lsid:ontotext.com:kim:iextraction:Token");
 
 			try {
 				annotations.add(Long.valueOf(spans[i].getStart()), Long
@@ -107,9 +107,16 @@ public @SuppressWarnings("all") class OpenNlpTokenizer extends AbstractLanguageA
 
 	@Override
 	public Resource init() throws ResourceInstantiationException {
-		logger.info("The string of Tokenizer file is: "+model);
+		//logger.info("The string of Tokenizer file is: "+model);
+		
+		String file = null;
+		if (model == null)
+			 file = "plugins/openNLP/models/english/tokenize/EnglishTok.bin.gz";
+		else
+			file = model.getFile();
+		
 		tokenizer = new TokenizerME(
-				getModel(new File(model.getFile())));
+				getModel(new File(file)));
 		
 		logger.warn("OpenNLP Tokenizer initialized!");//System.out.println("OpenNLP Tokenizer initialized!");
 		

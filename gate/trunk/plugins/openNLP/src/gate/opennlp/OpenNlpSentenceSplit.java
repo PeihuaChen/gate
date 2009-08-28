@@ -24,15 +24,19 @@ import opennlp.tools.sentdetect.SentenceDetectorME;
 
 /**
  * Wrapper for the open nlp sentence splitter
- * @author <A HREF="mailto:georgiev@ontotext.com>georgi.georgiev@ontotext.com</A>
- * Created: Thu Dec 11 16:25:59 EET 2008
+ * 
+ * @author <A
+ *         HREF="mailto:georgiev@ontotext.com>georgi.georgiev@ontotext.com</A>
+ *         Created: Thu Dec 11 16:25:59 EET 2008
  */
 
-public @SuppressWarnings("all") class OpenNlpSentenceSplit extends AbstractLanguageAnalyser {
+public @SuppressWarnings("all")
+class OpenNlpSentenceSplit extends AbstractLanguageAnalyser {
 
 	public static final long serialVersionUID = 1L;
-	
-	private static final Logger logger = Logger.getLogger(OpenNlpSentenceSplit.class);
+
+	private static final Logger logger = Logger
+			.getLogger(OpenNlpSentenceSplit.class);
 
 	// private members
 	private String inputASName = null;
@@ -60,14 +64,14 @@ public @SuppressWarnings("all") class OpenNlpSentenceSplit extends AbstractLangu
 			// type
 			fm.put("source", "openNLP");
 			// source
-			fm.put("type", "urn:lsid:ontotext.com:kim:iextraction:Sentence");
+//			fm.put("type", "urn:lsid:ontotext.com:kim:iextraction:Sentence");
 
 			try {
 				// annotations.add(Long.valueOf(spans[i].getStart()),
 				// Long.valueOf(spans[i].getEnd()), "Sentence", fm);
 				annotations.add(i == 0 ? Long.valueOf(prevSpan) : Long
 						.valueOf(prevSpan + countSpaces(prevSpan - 1)),
-						i == (spans.length-1) ? Long.valueOf(spans[i]) : Long
+						i == (spans.length - 1) ? Long.valueOf(spans[i]) : Long
 								.valueOf(spans[i] - 1), "Sentence", fm);
 			} catch (InvalidOffsetException e) {
 				e.printStackTrace();
@@ -99,16 +103,23 @@ public @SuppressWarnings("all") class OpenNlpSentenceSplit extends AbstractLangu
 
 	@Override
 	public Resource init() throws ResourceInstantiationException {
-		logger.info("Sentence split url is: " + model.getFile());
-		try{
-		splitter = new SentenceDetectorME(
-				getModel(new File(model.getFile())));
-		}catch (Exception e){
+		//logger.info("Sentence split url is: " + model.getFile());
+		try {
+			String file = null;
+			if (model == null)
+				file = "plugins/openNLP/models/english/sentdetect/EnglishSD.bin.gz";
+			else
+				file = model.getFile();
+
+			splitter = new SentenceDetectorME(
+					getModel(new File(file)));
+		} catch (Exception e) {
 			logger.error("Sentence Splitter can not be initialized!");
-			throw new RuntimeException("Sentence Splitter cannot be initialized!", e);
+			throw new RuntimeException(
+					"Sentence Splitter cannot be initialized!", e);
 		}
-		
-		logger.warn("Sentence split initialized!");//System.out.println("Sentence split initialized!");
+
+		logger.warn("Sentence split initialized!");// System.out.println("Sentence split initialized!");
 
 		return this;
 
@@ -137,8 +148,7 @@ public @SuppressWarnings("all") class OpenNlpSentenceSplit extends AbstractLangu
 
 	/* getters and setters for the PR */
 	/* public members */
-	
-	
+
 	public void setInputASName(String a) {
 		inputASName = a;
 	}

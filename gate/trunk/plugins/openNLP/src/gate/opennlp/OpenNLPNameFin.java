@@ -169,9 +169,12 @@ public @SuppressWarnings("all") class OpenNLPNameFin extends AbstractLanguageAna
 	public Resource init() throws ResourceInstantiationException {
 		String dir = null;
 		if (model == null)
-			 dir = "models/english/namefind/";
+			 dir = "plugins/openNLP/models/english/namefind/";
 		else
-			dir = model.getPath();
+			dir = model.getFile();
+//		
+//		logger.info("current path is: " + System.getProperty("user.dir"));
+//		logger.info("current path is: " + System.getProperty("user.home"));
 		List<String> models = new LinkedList<String>();
 		models.add("person.bin.gz");
 		models.add("money.bin.gz");

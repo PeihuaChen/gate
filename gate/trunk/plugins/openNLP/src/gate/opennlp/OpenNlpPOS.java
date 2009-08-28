@@ -18,7 +18,6 @@ import opennlp.maxent.MaxentModel;
 import opennlp.maxent.io.BinaryGISModelReader;
 import opennlp.tools.postag.POSDictionary;
 import opennlp.tools.postag.POSTaggerME;
-import opennlp.tools.postag.TagDictionary;
 import opennlp.tools.sentdetect.SentenceDetectorME;
 import opennlp.tools.tokenize.TokenizerME;
 import opennlp.tools.util.Span;
@@ -141,7 +140,7 @@ public @SuppressWarnings("all") class OpenNlpPOS extends AbstractLanguageAnalyse
 				Annotation token = (Annotation) iterator2.next();
 				
 				FeatureMap fm = token.getFeatures();
-				fm.put("pos", postags[j]);
+				fm.put("category", postags[j]);
 				
 				token.setFeatures(fm);
 				
@@ -153,11 +152,23 @@ public @SuppressWarnings("all") class OpenNlpPOS extends AbstractLanguageAnalyse
 
 	@Override
 	public Resource init() throws ResourceInstantiationException {
-		logger.warn("OpenNLP POS initializing strings are: model - " + model.getFile() + 
-				" dictionary: "+dictionary.getFile());
+//		logger.warn("OpenNLP POS initializing strings are: model - " + model.getFile() + 
+//				" dictionary: "+dictionary.getFile());
 		try {
-			pos = new POSTaggerME(getModel(new File(model.getFile())), new POSDictionary(
-					dictionary.getFile()));
+			
+			String file = null;
+			String lexicon = null;
+			if (model == null||dictionary==null){
+				file = "plugins/openNLP/models/english/postag/EnglishPOS.bin.gz";
+				lexicon = "plugins/openNLP/models/english/postag/tagdict";
+			}
+			else{
+				file = model.getFile();
+				lexicon = dictionary.getFile();
+			}
+			
+			pos = new POSTaggerME(getModel(new File(file)), new POSDictionary(
+					lexicon));
 		} catch (IOException e) {
 			e.printStackTrace();
 			logger.error("OpenNLP POS can not be initialized!");
