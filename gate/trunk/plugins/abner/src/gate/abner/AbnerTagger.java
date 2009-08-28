@@ -44,8 +44,8 @@ public @SuppressWarnings("all") class AbnerTagger extends AbstractLanguageAnalys
 	public static final long serialVersionUID = 1L;
 
     /*private members*/
-	private Boolean toBeTolkenized = null;
-	private String abnerMode = null;
+	private Boolean toBeTolkenized = true;
+	private AbnerRunMode abnerMode = null;
 	private String outputASName = null;
 	private Long gateDocumentIndex = null;
 	// abner tagger
@@ -73,11 +73,11 @@ public @SuppressWarnings("all") class AbnerTagger extends AbstractLanguageAnalys
 		return toBeTolkenized;
 	}
 
-	public void setAbnerMode(String a) {
+	public void setAbnerMode(AbnerRunMode a) {
 		abnerMode = a;
 	}
 
-	public String getAbnerMode() {
+	public AbnerRunMode getAbnerMode() {
 		return abnerMode;
 	}
 
@@ -97,7 +97,9 @@ public @SuppressWarnings("all") class AbnerTagger extends AbstractLanguageAnalys
 		modes.put("NLPBA", Tagger.NLPBA);
 		modes.put("BIOCREATIVE", Tagger.BIOCREATIVE);
 		logger.info("Abner intializing the "+abnerMode+" model...");
-		abnerTagger = new Tagger(modes.get(abnerMode));
+//		logger.info("in the map: "+modes.get(abnerMode.toString())+" model...");
+//		logger.info("the map: "+modes.toString()+" model...");
+		abnerTagger = new Tagger(modes.get(abnerMode.toString()));//modes.get(abnerMode));
 		gateDocumentIndex = 0L;
 
 		return this;
@@ -119,10 +121,10 @@ public @SuppressWarnings("all") class AbnerTagger extends AbstractLanguageAnalys
 	public void execute() throws ExecutionException {
 		gateDocumentIndex = 0L;
 
-		if (!(abnerTagger.getMode() == modes.get(getAbnerMode()))) {
+		if (!(abnerTagger.getMode() == modes.get(getAbnerMode().toString()))) {
 			try {
-				if (modes.containsKey(getAbnerMode()))
-					abnerTagger = new Tagger(modes.get(getAbnerMode()));
+				if (modes.containsKey(getAbnerMode().toString()))
+					abnerTagger = new Tagger(modes.get(getAbnerMode().toString()));
 				else
 					throw new InstantiationException();
 
