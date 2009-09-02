@@ -363,8 +363,14 @@ implements ANNIEConstants{
         //convert to lower case if we are not doing a case sensitive match
         if (!caseSensitive)
           annotString = annotString.toLowerCase();
-
-        // System.out.println("Now processing the annotation: " + annotString + "|" + nameAnnot);
+        
+        if (DEBUG) {
+          if (log.isDebugEnabled()) {
+            log.debug("Now processing the annotation:  "
+                    + getStringForAnnotation(nameAnnot, document) + " Id: " + nameAnnot.getId() 
+                    + " Type: " + nameAnnot.getType() + " Offset: " + nameAnnot.getStartNode().getOffset());
+          }
+        }
 
         // get the tokens
         List tokens = new ArrayList(tokensNameAS.getContained(nameAnnot.getStartNode().getOffset(),
@@ -387,8 +393,6 @@ implements ANNIEConstants{
         tokensMap.put(nameAnnot.getId(), tokens);
         normalizedTokensMap.put(nameAnnot.getId(), new ArrayList<Annotation>(tokens));
 
-//      Out.prln("Matching annot " + nameAnnot + ": string " + annotString);
-
         //first check whether we have not matched such a string already
         //if so, just consider it matched, don't bother calling the rules
         // Exception:  AB, Spock:
@@ -396,14 +400,16 @@ implements ANNIEConstants{
         // has been matched earlier because there could be multiple people named "David", for instance,
         // on a page.
         if (processedAnnots.containsValue(annotString) &&
-                (! ((nameAnnot.getType() == personType) && (tokens.size() == 1)))) {
-          // System.out.println("Found an exact match for " + annotString);
+                (! (nameAnnot.getType().equals(personType) && (tokens.size() == 1)))) {
           Annotation returnAnnot = updateMatches(nameAnnot, annotString);
-          // System.out.println("Return value was: " + returnAnnot);
           if (returnAnnot != null) {
-            // System.out.println("We're sure this is an exact match: " + annotString);
+            if (DEBUG) {
+              if (log.isDebugEnabled()) {
+                log.debug("Exact match criteria matched " + annotString + " from (id: " + nameAnnot.getId() + ", offset: " + nameAnnot.getStartNode().getOffset() + ") to " + 
+                        "(id: " + returnAnnot.getId() + ", offset: " + returnAnnot.getStartNode().getOffset() + ")");
+              }
+            }
             processedAnnots.put(nameAnnot.getId(), annotString);
-            // System.out.println("Just put " + annotString + " on processedAnnots");
             continue;
           }
         } else if (processedAnnots.isEmpty()) {
@@ -1266,7 +1272,8 @@ implements ANNIEConstants{
     boolean mr[] = new boolean[17];
     // first apply rule for spurious matches i.e. rule0
     if (DEBUG) {
-      System.out.println("Now matching |" + shortName + "|" + longName + "|");
+      log.debug("Now matching " + longName + "(id: " + longAnnot.getId() + ") to "
+              + shortName + "(id: " + shortAnnot.getId() + ")");
     }
     if (matchRule0(longName, shortName))
       return false;
@@ -1319,9 +1326,6 @@ implements ANNIEConstants{
                                     (mr[16]= matchRule16(longName, shortName))
                             )
                             ))) {// rules for organisation annotations
-      if (DEBUG) {
-        printMatchRules(shortName, longName, mr);
-      }
       return true;
     }
 
@@ -1348,9 +1352,6 @@ implements ANNIEConstants{
               followAnnot.getFeatures().put("matchedWithLonger", true);
             }
           }
-          if (DEBUG) {
-            printMatchRules(shortName, longName, mr);
-          }
           return true;
         }
         return false;
@@ -1358,30 +1359,6 @@ implements ANNIEConstants{
     }
     return false;
   }//apply_rules
-
-  /**
-   * Print out index numbers of all rules which fired on a pair of names.
-   *
-   * @param shortName
-   * @param longName
-   * @param mr  Holds the match results.
-   */
-  private void printMatchRules(String shortName, String longName, boolean[] mr) {
-    boolean foundOne = false;
-    for (int i = 0;i < mr.length;i++) {
-      if (mr[i]) {
-        if (!foundOne) {
-          Out.prln("OrthoMatcher:  The following rules fired for: " + longName + " | "
-                  + shortName);
-          foundOne = true;
-        }
-        Out.pr(i + " ");
-      }
-    }
-    if (foundOne) {
-      Out.prln("");
-    }
-  }
 
 
   /** set the extLists flag */
@@ -1642,7 +1619,8 @@ implements ANNIEConstants{
       }
     }
     if (allTokensMatch && log.isDebugEnabled())
-      log.debug("rule4n matched " + s1 + "(id: " + longAnnot.getId() + ") to " + s2+ "(id: " + shortAnnot.getId() + ")");
+      log.debug("rule4n matched " + s1 + "(id: " + longAnnot.getId() + ", offset: " + longAnnot.getStartNode().getOffset() + ") to " + 
+                                    s2+  "(id: " + shortAnnot.getId() + ", offset: " + shortAnnot.getStartNode().getOffset() + ")");
     return allTokensMatch;
   }//matchRule4Name
 
