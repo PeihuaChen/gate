@@ -794,26 +794,19 @@ public class MainFrame extends JFrame implements ProgressListener,
               "groovy.ui.Console");
             Constructor gccons = gcClass.getConstructor();
             java.lang.reflect.Method setvar
-              = gcClass.getMethod("setVariable",
-                  new Class[]
-                  { String.class, Object.class });
+              = gcClass.getMethod("setVariable", String.class, Object.class);
             java.lang.reflect.Method run = gcClass.getMethod("run");
             Object gc = gccons.newInstance();
-            setvar.invoke(gc, new Object[]
-                   { "Gate", Gate.class });
-            setvar.invoke(gc, new Object[]
-                   { "corpora",
+            setvar.invoke(gc, "Gate", Gate.class);
+            setvar.invoke(gc, "corpora",
                      Gate.getCreoleRegister()
-                         .getLrInstances("gate.corpora.CorpusImpl") });
-            setvar.invoke(gc, new Object[]
-                   { "docs",
+                         .getLrInstances("gate.corpora.CorpusImpl"));
+            setvar.invoke(gc, "docs",
                      Gate.getCreoleRegister()
-                     .getLrInstances("gate.corpora.DocumentImpl") });
-            setvar.invoke(gc, new Object[]
-                   { "prs",
-                     Gate.getCreoleRegister().getPrInstances() });
-            setvar.invoke(gc, new Object[]
-                   { "factory", gate.Factory.class });
+                     .getLrInstances("gate.corpora.DocumentImpl"));
+            setvar.invoke(gc, "prs",
+                     Gate.getCreoleRegister().getPrInstances());
+            setvar.invoke(gc, "factory", gate.Factory.class);
 
             run.invoke(gc);
           } catch (Exception ex) {
