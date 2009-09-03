@@ -65,7 +65,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/servlet-2_3.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/orajdbc9i.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/xstream-1.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jasper-compiler-jdt.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/gate-compiler-jdt.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-logging.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/concurrent.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/icu4j.jar"/>
