@@ -19,20 +19,23 @@ package gate.util.compilers;
 import java.io.*;
 import java.util.*;
 
-import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.internal.compiler.ClassFile;
-import org.eclipse.jdt.internal.compiler.CompilationResult;
-import org.eclipse.jdt.internal.compiler.Compiler;
-import org.eclipse.jdt.internal.compiler.DefaultErrorHandlingPolicies;
-import org.eclipse.jdt.internal.compiler.ICompilerRequestor;
-import org.eclipse.jdt.internal.compiler.IErrorHandlingPolicy;
-import org.eclipse.jdt.internal.compiler.IProblemFactory;
-import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
-import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
-import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
-import org.eclipse.jdt.internal.compiler.env.NameEnvironmentAnswer;
-import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
-import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
+// note that we re-package the org.eclipse.jdt classes into an alternative
+// package using JarJar links (http://code.google.com/p/jarjar/) to avoid
+// version conflicts
+import gate.util.compilers.eclipse.jdt.core.compiler.IProblem;
+import gate.util.compilers.eclipse.jdt.internal.compiler.ClassFile;
+import gate.util.compilers.eclipse.jdt.internal.compiler.CompilationResult;
+import gate.util.compilers.eclipse.jdt.internal.compiler.Compiler;
+import gate.util.compilers.eclipse.jdt.internal.compiler.DefaultErrorHandlingPolicies;
+import gate.util.compilers.eclipse.jdt.internal.compiler.ICompilerRequestor;
+import gate.util.compilers.eclipse.jdt.internal.compiler.IErrorHandlingPolicy;
+import gate.util.compilers.eclipse.jdt.internal.compiler.IProblemFactory;
+import gate.util.compilers.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
+import gate.util.compilers.eclipse.jdt.internal.compiler.env.ICompilationUnit;
+import gate.util.compilers.eclipse.jdt.internal.compiler.env.INameEnvironment;
+import gate.util.compilers.eclipse.jdt.internal.compiler.env.NameEnvironmentAnswer;
+import gate.util.compilers.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import gate.util.compilers.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
 
 import gate.util.*;
 import gate.Gate;
@@ -205,7 +208,7 @@ public class Eclipse extends gate.util.Javac {
           System.err.println("Compilation error");
           exc.printStackTrace();
         }
-        catch (org.eclipse.jdt.internal.compiler
+        catch (gate.util.compilers.eclipse.jdt.internal.compiler
                     .classfmt.ClassFormatException exc) {
           System.err.println("Compilation error");
           exc.printStackTrace();
