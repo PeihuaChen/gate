@@ -1295,16 +1295,19 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       String line = inNlpData.readLine();
       outNlpDataLabel.append(line);
       outNlpDataLabel.newLine();
-      String[] items;
+      String[] items; 
       // For each document
       for(int iDoc = 0; iDoc < numDocs; ++iDoc) {
+        int numLabels;
+        line = inData.readLine();
+        items = line.split(ConstantParameters.ITEMSEPARATOR);
+        int num = Integer.parseInt(items[1]);
         line = inNlpData.readLine();
+        items = line.split(ConstantParameters.ITEMSEPARATOR);
+        line = items[0]+ ConstantParameters.ITEMSEPARATOR+items[1]+ ConstantParameters.ITEMSEPARATOR+
+           +num;
         outNlpDataLabel.append(line);
         outNlpDataLabel.newLine();
-        items = line.split(ConstantParameters.ITEMSEPARATOR);
-        int num = Integer.parseInt(items[2]);
-        int numLabels;
-        inData.readLine();
         // For each instance
         for(int i = 0; i < num; ++i) {
           // Read the line from data file and get the data label
@@ -1313,6 +1316,9 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
           numLabels = Integer.parseInt(items[1]);
           StringBuffer labels = new StringBuffer();
           labels.append(items[1]);
+          
+          //System.out.println("line="+line+", items[1]="+items[1]);
+          
           for(int j = 0; j < numLabels; ++j) {
             labels.append(ConstantParameters.ITEMSEPARATOR);
             labels.append(items[j + 2]);
