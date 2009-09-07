@@ -178,7 +178,7 @@ implements ProcessingResource {
    * Re-initialize the Parser resource.  In particular, reload the trained
    * data file.
    */
-  public void reinit() throws ResourceInstantiationException {
+  @Override public void reInit() throws ResourceInstantiationException {
     init();
   }  
 
