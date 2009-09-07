@@ -9,7 +9,6 @@ import gate.jape.parser.ParseCpslConstants;
 import gate.jape.parser.ParseCpslTokenManager;
 import gate.jape.parser.SimpleCharStream;
 import gate.jape.parser.Token;
-import gate.util.Files;
 import gate.util.GateRuntimeException;
 
 import java.awt.BorderLayout;
@@ -35,9 +34,15 @@ import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.JToolBar;
+import javax.swing.JTree;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeSelectionModel;
 
 /**
  * @author niraj
@@ -58,9 +63,6 @@ public class JapeViewer extends AbstractVisualResource implements
   /** Scroller used for the text diaplay */
   protected JScrollPane textScroll;
 
-  /** The toolbar displayed on the top part of the component */
-  protected JToolBar toolbar;
-
   /** Should this component behave as an editor as well as an viewer */
   private boolean editable = false;
 
@@ -75,7 +77,7 @@ public class JapeViewer extends AbstractVisualResource implements
   /** Transducer */
   private Transducer transducer;
   
-  private JComboBox cboPhases;
+  private JTree treePhases;
 
   // should probably be static
 
@@ -96,29 +98,17 @@ public class JapeViewer extends AbstractVisualResource implements
             new JScrollPane(textArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                     JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     add(textScroll, BorderLayout.CENTER);
-    
-    toolbar = new JToolBar();
-    toolbar = new JToolBar(JToolBar.HORIZONTAL);
-    toolbar.setFloatable(false);
-    
-    JButton btnReload = new JButton("Reset");
-    btnReload.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        japeFileURL = transducer.getGrammarURL();
-        readJAPEFileContents();
-      }
-    });
-    toolbar.add(btnReload);
-    
-    cboPhases = new JComboBox();
-    cboPhases.setPrototypeDisplayValue("The name of a phase");
-    cboPhases.addItemListener(new ItemListener() {
-      public void itemStateChanged(ItemEvent ie) {
+        
+    treePhases = new JTree();
+    add(treePhases,BorderLayout.WEST);
+    treePhases.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+    treePhases.addTreeSelectionListener(new TreeSelectionListener() {
+      public void valueChanged(TreeSelectionEvent e) {
         if (updating) return;
-        if (ie.getStateChange() != ItemEvent.SELECTED) return;
+        //if (e.getStateChange() != ItemEvent.SELECTED) return;
         
         try {
-          japeFileURL = new URL(transducer.getGrammarURL(),ie.getItem()+".jape");
+          japeFileURL = new URL(transducer.getGrammarURL(),e.getPath().getLastPathComponent()+".jape");
           System.out.println(japeFileURL);
           readJAPEFileContents();
         }
@@ -127,11 +117,6 @@ public class JapeViewer extends AbstractVisualResource implements
         }
       }
     });
-    toolbar.addSeparator();
-    toolbar.add(new JLabel("Phase:"));
-    toolbar.add(cboPhases);
-
-    add(toolbar, BorderLayout.NORTH);
     
     // if we want to set the jape to be monospaced then do this...
     /*
@@ -182,7 +167,7 @@ public class JapeViewer extends AbstractVisualResource implements
 
   public void setTarget(Object target) {
     if(!(target instanceof Transducer)) { throw new IllegalArgumentException(
-            "The GATE jape editor can only be used with a GATE jape transducer!\n"
+            "The GATE jape viewer can only be used with a GATE jape transducer!\n"
                     + target.getClass().toString()
                     + " is not a GATE Jape Transducer!"); }
 
@@ -192,6 +177,10 @@ public class JapeViewer extends AbstractVisualResource implements
 
     this.transducer = (Transducer)target;
     japeFileURL = transducer.getGrammarURL();
+    String japePhaseName = japeFileURL.getFile();
+    japePhaseName = japePhaseName.substring(japePhaseName.lastIndexOf("/")+1,japePhaseName.length()-5);
+    treePhases.setModel(new DefaultTreeModel(new DefaultMutableTreeNode(japePhaseName)));    
+    treePhases.setSelectionRow(0);
     // reading japeFile
     readJAPEFileContents();
     ((Transducer)target).addProgressListener(this);
@@ -222,9 +211,6 @@ public class JapeViewer extends AbstractVisualResource implements
         textArea.updateUI();
         textArea.setEditable(false);
         br.close();
-
-        cboPhases.removeAllItems();
-        cboPhases.addItem("");
         
         ParseCpslTokenManager tokenManager =
                 new ParseCpslTokenManager(new SimpleCharStream(
@@ -241,6 +227,8 @@ public class JapeViewer extends AbstractVisualResource implements
           lineOffsets.add(offset + 1);
           startFrom = offset + 1;
         }
+        
+        ((DefaultMutableTreeNode)treePhases.getSelectionPath().getLastPathComponent()).removeAllChildren();
 
         Token t;
         while((t = tokenManager.getNextToken()).kind != 0) {
@@ -269,8 +257,8 @@ public class JapeViewer extends AbstractVisualResource implements
             doc.setCharacterAttributes(start, end - start + 1, style, true);
           }
           
-          if (t.kind == ParseCpslConstants.path) {
-            cboPhases.addItem(t.toString());
+          if (t.kind == ParseCpslConstants.path) {            
+            ((DefaultMutableTreeNode)treePhases.getSelectionPath().getLastPathComponent()).add(new DefaultMutableTreeNode(t.toString()));
           }
         }
       } else {
@@ -280,12 +268,14 @@ public class JapeViewer extends AbstractVisualResource implements
     } catch(IOException ioe) {
       throw new GateRuntimeException(ioe);
     }
+    if (treePhases.getSelectionRows() != null && treePhases.getSelectionRows().length > 0)
+      treePhases.expandRow(treePhases.getSelectionRows()[0]);
+    
     updating = false;
   }
 
   public void processFinished() {
-    japeFileURL = transducer.getGrammarURL();
-    readJAPEFileContents();
+    setTarget(transducer);
   }
 
   public void progressChanged(int progress) {
