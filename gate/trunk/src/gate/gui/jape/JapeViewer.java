@@ -60,8 +60,8 @@ public class JapeViewer extends AbstractVisualResource implements
   /** The text display. */
   protected JTextPane textArea;
 
-  /** Scroller used for the text diaplay */
-  protected JScrollPane textScroll;
+  /** Scroller used for the text and tree displays */
+  protected JScrollPane textScroll, treeScroll;
 
   /** Should this component behave as an editor as well as an viewer */
   private boolean editable = false;
@@ -100,12 +100,13 @@ public class JapeViewer extends AbstractVisualResource implements
     add(textScroll, BorderLayout.CENTER);
         
     treePhases = new JTree();
-    add(treePhases,BorderLayout.WEST);
+    treeScroll = new JScrollPane(treePhases, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    add(treeScroll,BorderLayout.WEST);
     treePhases.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
     treePhases.addTreeSelectionListener(new TreeSelectionListener() {
       public void valueChanged(TreeSelectionEvent e) {
         if (updating) return;
-        //if (e.getStateChange() != ItemEvent.SELECTED) return;
+        if (e.getPath().getLastPathComponent() == null) return;
         
         try {
           japeFileURL = new URL(transducer.getGrammarURL(),e.getPath().getLastPathComponent()+".jape");
@@ -187,7 +188,9 @@ public class JapeViewer extends AbstractVisualResource implements
   }
 
   private void readJAPEFileContents() {
-    updating = true;
+    if (treePhases.getLastSelectedPathComponent() == null) return;
+    updating = true;    
+    
     try {
       if(japeFileURL != null) {
         Reader japeReader = null;
