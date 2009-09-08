@@ -138,7 +138,9 @@ public class AnnotationStackView  extends AbstractDocumentView
   class PreviousAnnotationAction extends AbstractAction {
     public PreviousAnnotationAction() {
       super("Previous annotation");
-      putValue(SHORT_DESCRIPTION, "Previous annotation boundary");
+      putValue(SHORT_DESCRIPTION, "Centre the view on the closest previous " +
+        "annotation boundary among all displayed");
+      putValue(MNEMONIC_KEY, KeyEvent.VK_LEFT);
     }
     public void actionPerformed(ActionEvent e) {
       nextAnnotationAction.setEnabled(true);
@@ -164,13 +166,16 @@ public class AnnotationStackView  extends AbstractDocumentView
         }
       }
       setEnabled(set.size() > 1);
+      textView.getTextView().requestFocusInWindow();
     }
   }
 
   class NextAnnotationAction extends AbstractAction {
     public NextAnnotationAction() {
       super("Next annotation");
-      putValue(SHORT_DESCRIPTION, "Next annotation boundary");
+      putValue(SHORT_DESCRIPTION, "Centre the view on the closest next " +
+        "annotation boundary among all displayed");
+      putValue(MNEMONIC_KEY, KeyEvent.VK_RIGHT);
     }
     public void actionPerformed(ActionEvent e) {
       previousAnnotationAction.setEnabled(true);
@@ -197,6 +202,7 @@ public class AnnotationStackView  extends AbstractDocumentView
         }
       }
       setEnabled(set.size() > 1);
+      textView.getTextView().requestFocusInWindow();
     }
   }
 
