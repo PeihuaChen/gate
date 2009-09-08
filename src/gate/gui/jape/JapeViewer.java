@@ -196,7 +196,10 @@ public class JapeViewer extends AbstractVisualResource implements
         BufferedReader br = new BufferedReader(japeReader);
         String content = br.readLine();
         StringBuilder japeFileContents = new StringBuilder();
+        java.util.List<Integer> lineOffsets = new ArrayList<Integer>();
+        
         while(content != null) {
+          lineOffsets.add(japeFileContents.length());
           japeFileContents.append(content).append("\n");
           content = br.readLine();
         }
@@ -212,18 +215,6 @@ public class JapeViewer extends AbstractVisualResource implements
                         .toString())));
 
         StyledDocument doc = textArea.getStyledDocument();
-
-        java.util.List<Integer> lineOffsets = new ArrayList<Integer>();
-
-        // TODO can we build this list when reading the original file
-        // and hence bypass the extra loop?
-        lineOffsets.add(0);
-        int startFrom = 0;
-        int offset = 0;
-        while((offset = japeFileContents.indexOf("\n", startFrom)) != -1) {
-          lineOffsets.add(offset + 1);
-          startFrom = offset + 1;
-        }
 
         ((DefaultMutableTreeNode)treePhases.getSelectionPath()
                 .getLastPathComponent()).removeAllChildren();
@@ -262,12 +253,13 @@ public class JapeViewer extends AbstractVisualResource implements
       }
       else {
         textArea
-                .setText("The JAPE Transducer Object was loaded from a serialised tranducer and the source is not available.");
+                .setText("The JAPE Transducer was loaded from a serialised tranducer and the source is not available.");
       }
     }
     catch(IOException ioe) {
       throw new GateRuntimeException(ioe);
     }
+    
     if(treePhases.getSelectionRows() != null
             && treePhases.getSelectionRows().length > 0)
       treePhases.expandRow(treePhases.getSelectionRows()[0]);
