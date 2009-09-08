@@ -71,12 +71,12 @@ public class JapeViewer extends AbstractVisualResource implements
 
   /** a field that holds the jape file contents */
   private String japeFileContents;
-  
+
   private boolean updating = false;
 
   /** Transducer */
   private Transducer transducer;
-  
+
   private JTree treePhases;
 
   // should probably be static
@@ -94,36 +94,40 @@ public class JapeViewer extends AbstractVisualResource implements
     setLayout(new BorderLayout());
     textArea = new JTextPane();
     textArea.setEditable(editable);
-    textScroll =
-            new JScrollPane(textArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    textScroll = new JScrollPane(textArea,
+            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     add(textScroll, BorderLayout.CENTER);
-        
+
     treePhases = new JTree();
-    treeScroll = new JScrollPane(treePhases, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-    add(treeScroll,BorderLayout.WEST);
-    treePhases.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+    treeScroll = new JScrollPane(treePhases,
+            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    add(treeScroll, BorderLayout.WEST);
+    treePhases.getSelectionModel().setSelectionMode(
+            TreeSelectionModel.SINGLE_TREE_SELECTION);
     treePhases.addTreeSelectionListener(new TreeSelectionListener() {
       public void valueChanged(TreeSelectionEvent e) {
-        if (updating) return;
-        if (e.getPath().getLastPathComponent() == null) return;
-        
+        if(updating) return;
+        if(e.getPath().getLastPathComponent() == null) return;
+
         try {
-          japeFileURL = new URL(transducer.getGrammarURL(),e.getPath().getLastPathComponent()+".jape");
-          System.out.println(japeFileURL);
+          japeFileURL = new URL(transducer.getGrammarURL(), e.getPath()
+                  .getLastPathComponent()
+                  + ".jape");
           readJAPEFileContents();
         }
-        catch (MalformedURLException mue) {
+        catch(MalformedURLException mue) {
           mue.printStackTrace();
         }
       }
     });
-    
+
     // if we want to set the jape to be monospaced then do this...
     /*
      * MutableAttributeSet attrs = textArea.getInputAttributes();
-     * StyleConstants.setFontFamily(attrs, "monospaced"); StyledDocument doc =
-     * textArea.getStyledDocument(); doc.setCharacterAttributes(0,
+     * StyleConstants.setFontFamily(attrs, "monospaced"); StyledDocument
+     * doc = textArea.getStyledDocument(); doc.setCharacterAttributes(0,
      * doc.getLength() + 1, attrs, false);
      */
 
@@ -167,10 +171,12 @@ public class JapeViewer extends AbstractVisualResource implements
   }
 
   public void setTarget(Object target) {
-    if(!(target instanceof Transducer)) { throw new IllegalArgumentException(
-            "The GATE jape viewer can only be used with a GATE jape transducer!\n"
-                    + target.getClass().toString()
-                    + " is not a GATE Jape Transducer!"); }
+    if(!(target instanceof Transducer)) {
+      throw new IllegalArgumentException(
+              "The GATE jape viewer can only be used with a GATE jape transducer!\n"
+                      + target.getClass().toString()
+                      + " is not a GATE Jape Transducer!");
+    }
 
     if(transducer != null) {
       transducer.removeProgressListener(this);
@@ -179,8 +185,10 @@ public class JapeViewer extends AbstractVisualResource implements
     this.transducer = (Transducer)target;
     japeFileURL = transducer.getGrammarURL();
     String japePhaseName = japeFileURL.getFile();
-    japePhaseName = japePhaseName.substring(japePhaseName.lastIndexOf("/")+1,japePhaseName.length()-5);
-    treePhases.setModel(new DefaultTreeModel(new DefaultMutableTreeNode(japePhaseName)));    
+    japePhaseName = japePhaseName.substring(japePhaseName.lastIndexOf("/") + 1,
+            japePhaseName.length() - 5);
+    treePhases.setModel(new DefaultTreeModel(new DefaultMutableTreeNode(
+            japePhaseName)));
     treePhases.setSelectionRow(0);
     // reading japeFile
     readJAPEFileContents();
@@ -188,18 +196,18 @@ public class JapeViewer extends AbstractVisualResource implements
   }
 
   private void readJAPEFileContents() {
-    if (treePhases.getLastSelectedPathComponent() == null) return;
-    updating = true;    
-    
+    if(treePhases.getLastSelectedPathComponent() == null) return;
+    updating = true;
+
     try {
       if(japeFileURL != null) {
         Reader japeReader = null;
         if(transducer.getEncoding() == null) {
           japeReader = new InputStreamReader(japeFileURL.openStream());
-        } else {
-          japeReader =
-                  new InputStreamReader(japeFileURL.openStream(), transducer
-                          .getEncoding());
+        }
+        else {
+          japeReader = new InputStreamReader(japeFileURL.openStream(),
+                  transducer.getEncoding());
         }
         BufferedReader br = new BufferedReader(japeReader);
         String content = br.readLine();
@@ -214,10 +222,9 @@ public class JapeViewer extends AbstractVisualResource implements
         textArea.updateUI();
         textArea.setEditable(false);
         br.close();
-        
-        ParseCpslTokenManager tokenManager =
-                new ParseCpslTokenManager(new SimpleCharStream(
-                        new StringReader(japeFileContents)));
+
+        ParseCpslTokenManager tokenManager = new ParseCpslTokenManager(
+                new SimpleCharStream(new StringReader(japeFileContents)));
 
         StyledDocument doc = textArea.getStyledDocument();
 
@@ -230,8 +237,9 @@ public class JapeViewer extends AbstractVisualResource implements
           lineOffsets.add(offset + 1);
           startFrom = offset + 1;
         }
-        
-        ((DefaultMutableTreeNode)treePhases.getSelectionPath().getLastPathComponent()).removeAllChildren();
+
+        ((DefaultMutableTreeNode)treePhases.getSelectionPath()
+                .getLastPathComponent()).removeAllChildren();
 
         Token t;
         while((t = tokenManager.getNextToken()).kind != 0) {
@@ -240,12 +248,10 @@ public class JapeViewer extends AbstractVisualResource implements
           while(special != null) {
             Style style = colorMap.get(special.kind);
             if(style != null) {
-              int start =
-                      lineOffsets.get(special.beginLine - 1)
-                              + special.beginColumn - 1;
-              int end =
-                      lineOffsets.get(special.endLine - 1) + special.endColumn
-                              - 1;
+              int start = lineOffsets.get(special.beginLine - 1)
+                      + special.beginColumn - 1;
+              int end = lineOffsets.get(special.endLine - 1)
+                      + special.endColumn - 1;
               doc.setCharacterAttributes(start, end - start + 1, style, true);
             }
 
@@ -259,21 +265,26 @@ public class JapeViewer extends AbstractVisualResource implements
             int end = lineOffsets.get(t.endLine - 1) + t.endColumn - 1;
             doc.setCharacterAttributes(start, end - start + 1, style, true);
           }
-          
-          if (t.kind == ParseCpslConstants.path) {            
-            ((DefaultMutableTreeNode)treePhases.getSelectionPath().getLastPathComponent()).add(new DefaultMutableTreeNode(t.toString()));
+
+          if(t.kind == ParseCpslConstants.path) {
+            ((DefaultMutableTreeNode)treePhases.getSelectionPath()
+                    .getLastPathComponent()).add(new DefaultMutableTreeNode(t
+                    .toString()));
           }
         }
-      } else {
+      }
+      else {
         textArea
                 .setText("The JAPE Transducer Object was loaded from a serialised tranducer and therefore cannot show any text!");
       }
-    } catch(IOException ioe) {
+    }
+    catch(IOException ioe) {
       throw new GateRuntimeException(ioe);
     }
-    if (treePhases.getSelectionRows() != null && treePhases.getSelectionRows().length > 0)
+    if(treePhases.getSelectionRows() != null
+            && treePhases.getSelectionRows().length > 0)
       treePhases.expandRow(treePhases.getSelectionRows()[0]);
-    
+
     updating = false;
   }
 
