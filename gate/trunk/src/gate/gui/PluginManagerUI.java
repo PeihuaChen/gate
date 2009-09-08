@@ -159,7 +159,9 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     mainTable.getSelectionModel().addListSelectionListener(
       new ListSelectionListener(){
      public void valueChanged(ListSelectionEvent e){
-       resourcesListModel.dataChanged();
+       if (!e.getValueIsAdjusting()) {
+        resourcesListModel.dataChanged();
+       }
      }
     });
 
@@ -193,15 +195,18 @@ public class PluginManagerUI extends JDialog implements GateConstants{
       private void update() {
         if (timerTask != null) { timerTask.cancel(); }
         Date timeToRun = new Date(System.currentTimeMillis() + 300);
-        timerTask = new TimerTask() { public void run() {
-          filterRows();
-        }};
+        timerTask = new TimerTask() { public void run() { filterRows(); } };
         // add a delay
         timer.schedule(timerTask, timeToRun);
       }
       private void filterRows() {
-        mainTable.clearSelection();
-        String filter = filterTextField.getText().trim().toLowerCase();
+        final String filter = filterTextField.getText().trim().toLowerCase();
+        final String previousPath = mainTable.getSelectedRow() == -1 ? "" :
+          (String) mainTable.getValueAt(mainTable.getSelectedRow(),
+            mainTable.convertColumnIndexToView(URL_COLUMN));
+        final String previousName = mainTable.getSelectedRow() == -1 ? "" :
+          (String) mainTable.getValueAt(mainTable.getSelectedRow(),
+            mainTable.convertColumnIndexToView(NAME_COLUMN));
         ArrayList<URL> previousVisibleRows = new ArrayList<URL>(visibleRows);
         if (filter.length() < 2) {
           // one character or less, don't filter rows
@@ -226,13 +231,28 @@ public class PluginManagerUI extends JDialog implements GateConstants{
         }
         if (!previousVisibleRows.equals(visibleRows)) {
           mainTableModel.fireTableDataChanged();
-          resourcesListModel.dataChanged();
         }
-        SwingUtilities.invokeLater(new Runnable() { public void run() {
-          if (mainTable.getRowCount() > 0) {
-            mainTable.addRowSelectionInterval(0, 0);
+        if (mainTable.getRowCount() > 0) {
+          SwingUtilities.invokeLater(new Runnable() { public void run() {
+          mainTable.setRowSelectionInterval(0, 0);
+          if (filter.length() < 2 && !previousPath.equals("")) {
+            // reselect the last selected row based on its name and url values
+            for (int row = 0; row < mainTable.getRowCount(); row++) {
+              String path = (String) mainTable.getValueAt(
+                row, mainTable.convertColumnIndexToView(URL_COLUMN));
+              String name = (String) mainTable.getValueAt(
+                row, mainTable.convertColumnIndexToView(NAME_COLUMN));
+              if (path.equals(previousPath)
+               && name.equals(previousName)) {
+                mainTable.setRowSelectionInterval(row, row);
+                mainTable.scrollRectToVisible(
+                  mainTable.getCellRect(row, 0, true));
+                break;
+              }
+            }
           }
-        }});
+          }});
+        }
       }
     });
 
@@ -324,6 +344,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     
     public Object getValueAt(int row, int column){
       Gate.DirectoryInfo dInfo = Gate.getDirectoryInfo(visibleRows.get(row));
+      if (dInfo == null) { return null; }
       switch (column){
         case NAME_COLUMN: return new File(dInfo.getUrl().getFile()).getName();
         case ICON_COLUMN: return
@@ -332,7 +353,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
             localIcon : remoteIcon) :
           invalidIcon;
         case URL_COLUMN: return new File(dInfo.getUrl().getFile()).getParent();
-        case LOAD_NOW_COLUMN: return  getLoadNow(dInfo.getUrl());
+        case LOAD_NOW_COLUMN: return getLoadNow(dInfo.getUrl());
         case LOAD_ALWAYS_COLUMN: return getLoadAlways(dInfo.getUrl());
         case DELETE_COLUMN: return null;
         default: return null;
@@ -347,8 +368,9 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     
     public void setValueAt(Object aValue, int rowIndex, int columnIndex){
       Boolean valueBoolean = (Boolean)aValue;
-      Gate.DirectoryInfo dInfo = Gate.getDirectoryInfo(
-        visibleRows.get(rowIndex));
+      Gate.DirectoryInfo dInfo =
+        Gate.getDirectoryInfo(visibleRows.get(rowIndex));
+      if (dInfo == null) { return; }
       switch(columnIndex){
         case LOAD_NOW_COLUMN: 
           loadNowByURL.put(dInfo.getUrl(), valueBoolean);
@@ -369,6 +391,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
   }
   
   protected class ResourcesListModel extends AbstractListModel{
+
     public Object getElementAt(int index){
       int row = mainTable.getSelectedRow();
       if(row == -1) return null;
@@ -378,17 +401,15 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     }
     
     public int getSize(){
-      
       int row = mainTable.getSelectedRow();
       if(row == -1) return 0;
       row = mainTable.rowViewToModel(row);
       Gate.DirectoryInfo dInfo = Gate.getDirectoryInfo(visibleRows.get(row));
+      if (dInfo == null) { return 0; }
       return dInfo.getResourceInfoList().size();
     }
     
     public void dataChanged(){
-//      fireIntervalRemoved(this, 0, getSize() - 1);
-//      fireIntervalAdded(this, 0, getSize() - 1);
       fireContentsChanged(this, 0, getSize() - 1);
     }
   }
@@ -431,25 +452,31 @@ public class PluginManagerUI extends JDialog implements GateConstants{
           if(currentEditor != null) {
             currentEditor.cancelCellEditing();
           }
-          row = mainTable.rowViewToModel(row);
-          URL toDelete = visibleRows.get(row);
+          int rowModel = mainTable.rowViewToModel(row);
+          URL toDelete = visibleRows.get(rowModel);
           Gate.removeKnownPlugin(toDelete);
           loadAlwaysByURL.remove(toDelete);
           loadNowByURL.remove(toDelete);
-          mainTableModel.fireTableDataChanged();
-          resourcesListModel.dataChanged();
+          // select the row before the deleted row
+          if (mainTable.getRowCount() > 0) {
+            mainTable.setRowSelectionInterval(
+              Math.max(0,row-1), Math.max(0,row-1));
+          }
+          // redisplay the table
+          filterTextField.setText(" ");
+          filterTextField.setText("");
         }
       });
-    editorDeleteButton.setMaximumSize(editorDeleteButton.getPreferredSize());
-    editorBox = new JPanel();
-    editorBox.setLayout(new GridBagLayout());
-    editorBox.setOpaque(false);
-    constraints.weightx = 1;
-    editorBox.add(Box.createGlue(), constraints);
-    constraints.weightx = 0;
-    editorBox.add(editorDeleteButton, constraints);
-    constraints.weightx = 1;
-    editorBox.add(Box.createGlue(), constraints);
+      editorDeleteButton.setMaximumSize(editorDeleteButton.getPreferredSize());
+      editorBox = new JPanel();
+      editorBox.setLayout(new GridBagLayout());
+      editorBox.setOpaque(false);
+      constraints.weightx = 1;
+      editorBox.add(Box.createGlue(), constraints);
+      constraints.weightx = 0;
+      editorBox.add(editorDeleteButton, constraints);
+      constraints.weightx = 1;
+      editorBox.add(Box.createGlue(), constraints);
     }
     
     public Component getTableCellRendererComponent(JTable table,
@@ -458,10 +485,8 @@ public class PluginManagerUI extends JDialog implements GateConstants{
             boolean hasFocus,
             int row,
             int column){
-//      editorDeleteButton.setSelected(false);
       switch(column){
         case DELETE_COLUMN:
-//          return rendererDeleteButton;
           return rendererBox;
         default: return null;
       }
@@ -578,7 +603,14 @@ public class PluginManagerUI extends JDialog implements GateConstants{
       loadNowByURL.clear();
       loadAlwaysByURL.clear();      
       mainTableModel.fireTableDataChanged();
+      if (mainTable.getRowCount() > 0) {
+        // select the first row
+        mainTable.setRowSelectionInterval(0, 0);
+        mainTable.scrollRectToVisible(
+          mainTable.getCellRect(0, 0, true));
+      }
     } else {
+      // clear the filter
       filterTextField.setText("");
     }
     super.setVisible(visible);
@@ -665,7 +697,16 @@ public class PluginManagerUI extends JDialog implements GateConstants{
         try{
           URL creoleURL = new URL(urlTextField.getText());
           Gate.addKnownPlugin(creoleURL);
-          mainTableModel.fireTableDataChanged();
+          // select the new plugin row
+          filterTextField.setText(new File(creoleURL.getFile()).getName());
+          Timer timer = new Timer("Plugin manager add plugin action", true);
+          Date timeToRun = new Date(System.currentTimeMillis() + 300);
+          TimerTask timerTask = new TimerTask() { public void run() {
+            // redisplay the table
+            filterTextField.setText("");
+          }};
+          timer.schedule(timerTask, timeToRun); // add a delay
+          mainTable.requestFocusInWindow();
         }catch(Exception ex){
           JOptionPane.showMessageDialog(
               PluginManagerUI.this,
