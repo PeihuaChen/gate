@@ -60,18 +60,6 @@ public class JapeViewer extends AbstractVisualResource implements
   /** The text display. */
   protected JTextPane textArea;
 
-  /** Scroller used for the text and tree displays */
-  protected JScrollPane textScroll, treeScroll;
-
-  /** Should this component behave as an editor as well as an viewer */
-  private boolean editable = false;
-
-  /** A field that holds the jape file name */
-  private URL japeFileURL;
-
-  /** a field that holds the jape file contents */
-  private String japeFileContents;
-
   private boolean updating = false;
 
   /** Transducer */
@@ -79,28 +67,25 @@ public class JapeViewer extends AbstractVisualResource implements
 
   private JTree treePhases;
 
-  // should probably be static
-
   Map<Integer, Style> colorMap = new HashMap<Integer, Style>();
 
   /** An Init method */
   public Resource init() {
     initGuiComponents();
-    japeFileContents = "";
     return this;
   }
 
   private void initGuiComponents() {
     setLayout(new BorderLayout());
     textArea = new JTextPane();
-    textArea.setEditable(editable);
-    textScroll = new JScrollPane(textArea,
+    textArea.setEditable(false);
+    JScrollPane textScroll = new JScrollPane(textArea,
             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     add(textScroll, BorderLayout.CENTER);
 
     treePhases = new JTree();
-    treeScroll = new JScrollPane(treePhases,
+    JScrollPane treeScroll = new JScrollPane(treePhases,
             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     add(treeScroll, BorderLayout.WEST);
@@ -112,10 +97,9 @@ public class JapeViewer extends AbstractVisualResource implements
         if(e.getPath().getLastPathComponent() == null) return;
 
         try {
-          japeFileURL = new URL(transducer.getGrammarURL(), e.getPath()
+          readJAPEFileContents(new URL(transducer.getGrammarURL(), e.getPath()
                   .getLastPathComponent()
-                  + ".jape");
-          readJAPEFileContents();
+                  + ".jape"));
         }
         catch(MalformedURLException mue) {
           mue.printStackTrace();
@@ -123,7 +107,7 @@ public class JapeViewer extends AbstractVisualResource implements
       }
     });
 
-    // if we want to set the jape to be monospaced then do this...
+    // if we want to set the jape to be monospaced (like most code editors) then do this...
     /*
      * MutableAttributeSet attrs = textArea.getInputAttributes();
      * StyleConstants.setFontFamily(attrs, "monospaced"); StyledDocument
@@ -131,7 +115,7 @@ public class JapeViewer extends AbstractVisualResource implements
      * doc.getLength() + 1, attrs, false);
      */
 
-    Style style = textArea.addStyle("Red", null);
+    Style style = textArea.addStyle("brackets", null);
     StyleConstants.setForeground(style, Color.red);
     colorMap.put(ParseCpslConstants.leftBrace, style);
     colorMap.put(ParseCpslConstants.rightBrace, style);
@@ -140,7 +124,7 @@ public class JapeViewer extends AbstractVisualResource implements
     colorMap.put(ParseCpslConstants.leftSquare, style);
     colorMap.put(ParseCpslConstants.rightSquare, style);
 
-    style = textArea.addStyle("Blue", null);
+    style = textArea.addStyle("keywords", null);
     StyleConstants.setForeground(style, Color.blue);
     colorMap.put(ParseCpslConstants.rule, style);
     colorMap.put(ParseCpslConstants.priority, style);
@@ -152,11 +136,11 @@ public class JapeViewer extends AbstractVisualResource implements
     colorMap.put(ParseCpslConstants.multiphase, style);
     colorMap.put(ParseCpslConstants.phases, style);
 
-    style = textArea.addStyle("Dark_Cyan", null);
+    style = textArea.addStyle("strings", null);
     StyleConstants.setForeground(style, new Color(0, 128, 128));
     colorMap.put(ParseCpslConstants.string, style);
 
-    style = textArea.addStyle("Green", null);
+    style = textArea.addStyle("comments", null);
     StyleConstants.setForeground(style, new Color(0, 128, 0));
     colorMap.put(ParseCpslConstants.singleLineCStyleComment, style);
     colorMap.put(ParseCpslConstants.singleLineCpslStyleComment, style);
@@ -183,7 +167,7 @@ public class JapeViewer extends AbstractVisualResource implements
     }
 
     this.transducer = (Transducer)target;
-    japeFileURL = transducer.getGrammarURL();
+    URL japeFileURL = transducer.getGrammarURL();
     String japePhaseName = japeFileURL.getFile();
     japePhaseName = japePhaseName.substring(japePhaseName.lastIndexOf("/") + 1,
             japePhaseName.length() - 5);
@@ -191,45 +175,48 @@ public class JapeViewer extends AbstractVisualResource implements
             japePhaseName)));
     treePhases.setSelectionRow(0);
     // reading japeFile
-    readJAPEFileContents();
+    readJAPEFileContents(japeFileURL);
     ((Transducer)target).addProgressListener(this);
   }
 
-  private void readJAPEFileContents() {
+  private void readJAPEFileContents(URL url) {
     if(treePhases.getLastSelectedPathComponent() == null) return;
     updating = true;
 
     try {
-      if(japeFileURL != null) {
+      if(url != null) {
         Reader japeReader = null;
         if(transducer.getEncoding() == null) {
-          japeReader = new InputStreamReader(japeFileURL.openStream());
+          japeReader = new InputStreamReader(url.openStream());
         }
         else {
-          japeReader = new InputStreamReader(japeFileURL.openStream(),
-                  transducer.getEncoding());
+          japeReader = new InputStreamReader(url.openStream(), transducer
+                  .getEncoding());
         }
         BufferedReader br = new BufferedReader(japeReader);
         String content = br.readLine();
-        japeFileContents = "";
+        StringBuilder japeFileContents = new StringBuilder();
         while(content != null) {
-          japeFileContents += content + "\n";
+          japeFileContents.append(content).append("\n");
           content = br.readLine();
         }
 
         textArea.setEditable(true);
-        textArea.setText(japeFileContents);
+        textArea.setText(japeFileContents.toString());
         textArea.updateUI();
         textArea.setEditable(false);
         br.close();
 
         ParseCpslTokenManager tokenManager = new ParseCpslTokenManager(
-                new SimpleCharStream(new StringReader(japeFileContents)));
+                new SimpleCharStream(new StringReader(japeFileContents
+                        .toString())));
 
         StyledDocument doc = textArea.getStyledDocument();
 
         java.util.List<Integer> lineOffsets = new ArrayList<Integer>();
 
+        // TODO can we build this list when reading the original file
+        // and hence bypass the extra loop?
         lineOffsets.add(0);
         int startFrom = 0;
         int offset = 0;
@@ -275,7 +262,7 @@ public class JapeViewer extends AbstractVisualResource implements
       }
       else {
         textArea
-                .setText("The JAPE Transducer Object was loaded from a serialised tranducer and therefore cannot show any text!");
+                .setText("The JAPE Transducer Object was loaded from a serialised tranducer and the source is not available.");
       }
     }
     catch(IOException ioe) {
