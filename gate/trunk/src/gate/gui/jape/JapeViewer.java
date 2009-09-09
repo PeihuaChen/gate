@@ -13,10 +13,6 @@ import gate.util.GateRuntimeException;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -28,15 +24,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
-import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
@@ -68,6 +61,7 @@ public class JapeViewer extends AbstractVisualResource implements
   private JTree treePhases;
 
   Map<Integer, Style> colorMap = new HashMap<Integer, Style>();
+  Style defaultStyle;
 
   /** An Init method */
   public Resource init() {
@@ -115,7 +109,8 @@ public class JapeViewer extends AbstractVisualResource implements
      * textArea.getStyledDocument(); doc.setCharacterAttributes(0,
      * doc.getLength() + 1, attrs, false);
      */
-
+    defaultStyle = textArea.addStyle("default", null);
+        
     Style style = textArea.addStyle("brackets", null);
     StyleConstants.setForeground(style, Color.red);
     colorMap.put(ParseCpslConstants.leftBrace, style);
@@ -182,7 +177,7 @@ public class JapeViewer extends AbstractVisualResource implements
   private void readJAPEFileContents(URL url) {
     if(treePhases.getLastSelectedPathComponent() == null) return;
     updating = true;
-
+    
     try {
       if(url != null) {
         Reader japeReader = null;
@@ -206,11 +201,9 @@ public class JapeViewer extends AbstractVisualResource implements
           japeFileContents.append(content.replaceAll("\t", "   ")).append("\n");
           content = br.readLine();
         }
-
-        textArea.setEditable(true);
+     
         textArea.setText(japeFileContents.toString());
         textArea.updateUI();
-        textArea.setEditable(false);
         br.close();
 
         ParseCpslTokenManager tokenManager =
@@ -219,6 +212,11 @@ public class JapeViewer extends AbstractVisualResource implements
 
         StyledDocument doc = textArea.getStyledDocument();
 
+        System.out.println(defaultStyle);
+        
+        doc.setCharacterAttributes(0,japeFileContents.length(),defaultStyle,true);
+        
+        
         ((DefaultMutableTreeNode)treePhases.getSelectionPath()
                 .getLastPathComponent()).removeAllChildren();
 
