@@ -79,15 +79,16 @@ public class JapeViewer extends AbstractVisualResource implements
     setLayout(new BorderLayout());
     textArea = new JTextPane();
     textArea.setEditable(false);
-    JScrollPane textScroll = new JScrollPane(textArea,
-            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    JScrollPane textScroll =
+            new JScrollPane(textArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     add(textScroll, BorderLayout.CENTER);
 
     treePhases = new JTree();
-    JScrollPane treeScroll = new JScrollPane(treePhases,
-            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    JScrollPane treeScroll =
+            new JScrollPane(treePhases,
+                    JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     add(treeScroll, BorderLayout.WEST);
     treePhases.getSelectionModel().setSelectionMode(
             TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -100,18 +101,18 @@ public class JapeViewer extends AbstractVisualResource implements
           readJAPEFileContents(new URL(transducer.getGrammarURL(), e.getPath()
                   .getLastPathComponent()
                   + ".jape"));
-        }
-        catch(MalformedURLException mue) {
+        } catch(MalformedURLException mue) {
           mue.printStackTrace();
         }
       }
     });
 
-    // if we want to set the jape to be monospaced (like most code editors) then do this...
+    // if we want to set the jape to be monospaced (like most code editors) then
+    // do this...
     /*
      * MutableAttributeSet attrs = textArea.getInputAttributes();
-     * StyleConstants.setFontFamily(attrs, "monospaced"); StyledDocument
-     * doc = textArea.getStyledDocument(); doc.setCharacterAttributes(0,
+     * StyleConstants.setFontFamily(attrs, "monospaced"); StyledDocument doc =
+     * textArea.getStyledDocument(); doc.setCharacterAttributes(0,
      * doc.getLength() + 1, attrs, false);
      */
 
@@ -155,12 +156,10 @@ public class JapeViewer extends AbstractVisualResource implements
   }
 
   public void setTarget(Object target) {
-    if(!(target instanceof Transducer)) {
-      throw new IllegalArgumentException(
-              "The GATE jape viewer can only be used with a GATE jape transducer!\n"
-                      + target.getClass().toString()
-                      + " is not a GATE Jape Transducer!");
-    }
+    if(!(target instanceof Transducer)) { throw new IllegalArgumentException(
+            "The GATE jape viewer can only be used with a GATE jape transducer!\n"
+                    + target.getClass().toString()
+                    + " is not a GATE Jape Transducer!"); }
 
     if(transducer != null) {
       transducer.removeProgressListener(this);
@@ -169,8 +168,9 @@ public class JapeViewer extends AbstractVisualResource implements
     this.transducer = (Transducer)target;
     URL japeFileURL = transducer.getGrammarURL();
     String japePhaseName = japeFileURL.getFile();
-    japePhaseName = japePhaseName.substring(japePhaseName.lastIndexOf("/") + 1,
-            japePhaseName.length() - 5);
+    japePhaseName =
+            japePhaseName.substring(japePhaseName.lastIndexOf("/") + 1,
+                    japePhaseName.length() - 5);
     treePhases.setModel(new DefaultTreeModel(new DefaultMutableTreeNode(
             japePhaseName)));
     treePhases.setSelectionRow(0);
@@ -188,19 +188,22 @@ public class JapeViewer extends AbstractVisualResource implements
         Reader japeReader = null;
         if(transducer.getEncoding() == null) {
           japeReader = new InputStreamReader(url.openStream());
-        }
-        else {
-          japeReader = new InputStreamReader(url.openStream(), transducer
-                  .getEncoding());
+        } else {
+          japeReader =
+                  new InputStreamReader(url.openStream(), transducer
+                          .getEncoding());
         }
         BufferedReader br = new BufferedReader(japeReader);
         String content = br.readLine();
         StringBuilder japeFileContents = new StringBuilder();
         java.util.List<Integer> lineOffsets = new ArrayList<Integer>();
-        
+
         while(content != null) {
           lineOffsets.add(japeFileContents.length());
-          japeFileContents.append(content).append("\n");
+          
+          //replace tabs with spaces otherwise the highlighting goes to pot
+          //TODO work out why this is needed and fix it properly
+          japeFileContents.append(content.replaceAll("\t", "   ")).append("\n");
           content = br.readLine();
         }
 
@@ -210,9 +213,9 @@ public class JapeViewer extends AbstractVisualResource implements
         textArea.setEditable(false);
         br.close();
 
-        ParseCpslTokenManager tokenManager = new ParseCpslTokenManager(
-                new SimpleCharStream(new StringReader(japeFileContents
-                        .toString())));
+        ParseCpslTokenManager tokenManager =
+                new ParseCpslTokenManager(new SimpleCharStream(
+                        new StringReader(japeFileContents.toString())));
 
         StyledDocument doc = textArea.getStyledDocument();
 
@@ -226,10 +229,12 @@ public class JapeViewer extends AbstractVisualResource implements
           while(special != null) {
             Style style = colorMap.get(special.kind);
             if(style != null) {
-              int start = lineOffsets.get(special.beginLine - 1)
-                      + special.beginColumn - 1;
-              int end = lineOffsets.get(special.endLine - 1)
-                      + special.endColumn - 1;
+              int start =
+                      lineOffsets.get(special.beginLine - 1)
+                              + special.beginColumn - 1;
+              int end =
+                      lineOffsets.get(special.endLine - 1) + special.endColumn
+                              - 1;
               doc.setCharacterAttributes(start, end - start + 1, style, true);
             }
 
@@ -250,16 +255,14 @@ public class JapeViewer extends AbstractVisualResource implements
                     .toString()));
           }
         }
-      }
-      else {
+      } else {
         textArea
                 .setText("The JAPE Transducer was loaded from a serialised tranducer and the source is not available.");
       }
-    }
-    catch(IOException ioe) {
+    } catch(IOException ioe) {
       throw new GateRuntimeException(ioe);
     }
-    
+
     if(treePhases.getSelectionRows() != null
             && treePhases.getSelectionRows().length > 0)
       treePhases.expandRow(treePhases.getSelectionRows()[0]);
