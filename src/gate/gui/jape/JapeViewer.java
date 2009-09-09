@@ -211,8 +211,6 @@ public class JapeViewer extends AbstractVisualResource implements
                         new StringReader(japeFileContents.toString())));
 
         StyledDocument doc = textArea.getStyledDocument();
-
-        System.out.println(defaultStyle);
         
         doc.setCharacterAttributes(0,japeFileContents.length(),defaultStyle,true);
         
