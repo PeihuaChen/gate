@@ -195,64 +195,11 @@ public class PluginManagerUI extends JDialog implements GateConstants{
       private void update() {
         if (timerTask != null) { timerTask.cancel(); }
         Date timeToRun = new Date(System.currentTimeMillis() + 300);
-        timerTask = new TimerTask() { public void run() { filterRows(); } };
+        timerTask = new TimerTask() { public void run() {
+          filterRows(filterTextField.getText());
+        }};
         // add a delay
         timer.schedule(timerTask, timeToRun);
-      }
-      private void filterRows() {
-        final String filter = filterTextField.getText().trim().toLowerCase();
-        final String previousPath = mainTable.getSelectedRow() == -1 ? "" :
-          (String) mainTable.getValueAt(mainTable.getSelectedRow(),
-            mainTable.convertColumnIndexToView(URL_COLUMN));
-        final String previousName = mainTable.getSelectedRow() == -1 ? "" :
-          (String) mainTable.getValueAt(mainTable.getSelectedRow(),
-            mainTable.convertColumnIndexToView(NAME_COLUMN));
-        ArrayList<URL> previousVisibleRows = new ArrayList<URL>(visibleRows);
-        if (filter.length() < 2) {
-          // one character or less, don't filter rows
-          visibleRows = new ArrayList<URL>(Gate.getKnownPlugins());
-        } else {
-          // filter rows case insensitively on each plugin URL and its resources
-          visibleRows.clear();
-          for (int i = 0; i < Gate.getKnownPlugins().size(); i++) {
-            Gate.DirectoryInfo dInfo = Gate.getDirectoryInfo(
-              Gate.getKnownPlugins().get(i));
-            String url = dInfo.getUrl().toString();
-            String resources = "";
-            for (int j = 0; j < dInfo.getResourceInfoList().size(); j++) {
-              resources += dInfo.getResourceInfoList().get(j).getResourceName()
-                + " ";
-            }
-            if (url.toLowerCase().contains(filter)
-             || resources.toLowerCase().contains(filter)) {
-              visibleRows.add(Gate.getKnownPlugins().get(i));
-            }
-          }
-        }
-        if (!previousVisibleRows.equals(visibleRows)) {
-          mainTableModel.fireTableDataChanged();
-        }
-        if (mainTable.getRowCount() > 0) {
-          SwingUtilities.invokeLater(new Runnable() { public void run() {
-          mainTable.setRowSelectionInterval(0, 0);
-          if (filter.length() < 2 && !previousPath.equals("")) {
-            // reselect the last selected row based on its name and url values
-            for (int row = 0; row < mainTable.getRowCount(); row++) {
-              String path = (String) mainTable.getValueAt(
-                row, mainTable.convertColumnIndexToView(URL_COLUMN));
-              String name = (String) mainTable.getValueAt(
-                row, mainTable.convertColumnIndexToView(NAME_COLUMN));
-              if (path.equals(previousPath)
-               && name.equals(previousName)) {
-                mainTable.setRowSelectionInterval(row, row);
-                mainTable.scrollRectToVisible(
-                  mainTable.getCellRect(row, 0, true));
-                break;
-              }
-            }
-          }
-          }});
-        }
       }
     });
 
@@ -285,7 +232,65 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     inputMap.put(KeyStroke.getKeyStroke("F1"), "Help");
     actionMap.put("Help", new HelpAction());
   }
-  
+
+  private void filterRows(String rowFilter) {
+    final String filter = rowFilter.trim().toLowerCase();
+    final String previousPath = mainTable.getSelectedRow() == -1 ? "" :
+      (String) mainTable.getValueAt(mainTable.getSelectedRow(),
+        mainTable.convertColumnIndexToView(URL_COLUMN));
+    final String previousName = mainTable.getSelectedRow() == -1 ? "" :
+      (String) mainTable.getValueAt(mainTable.getSelectedRow(),
+        mainTable.convertColumnIndexToView(NAME_COLUMN));
+    ArrayList<URL> previousVisibleRows = new ArrayList<URL>(visibleRows);
+    if (filter.length() < 2) {
+      // one character or less, don't filter rows
+      visibleRows = new ArrayList<URL>(Gate.getKnownPlugins());
+    } else {
+      // filter rows case insensitively on each plugin URL and its resources
+      visibleRows.clear();
+      for (int i = 0; i < Gate.getKnownPlugins().size(); i++) {
+        Gate.DirectoryInfo dInfo = Gate.getDirectoryInfo(
+          Gate.getKnownPlugins().get(i));
+        String url = dInfo.getUrl().toString();
+        String resources = "";
+        for (int j = 0; j < dInfo.getResourceInfoList().size(); j++) {
+          resources += dInfo.getResourceInfoList().get(j).getResourceName()
+            + " ";
+        }
+        if (url.toLowerCase().contains(filter)
+         || resources.toLowerCase().contains(filter)) {
+          visibleRows.add(Gate.getKnownPlugins().get(i));
+        }
+      }
+    }
+    if (!previousVisibleRows.equals(visibleRows)) {
+      mainTableModel.fireTableDataChanged();
+    }
+    if (mainTable.getRowCount() > 0) {
+      SwingUtilities.invokeLater(new Runnable() { public void run() {
+      mainTable.setRowSelectionInterval(0, 0);
+      if (filter.length() < 2
+       && previousPath != null
+       && !previousPath.equals("")) {
+        // reselect the last selected row based on its name and url values
+        for (int row = 0; row < mainTable.getRowCount(); row++) {
+          String path = (String) mainTable.getValueAt(
+            row, mainTable.convertColumnIndexToView(URL_COLUMN));
+          String name = (String) mainTable.getValueAt(
+            row, mainTable.convertColumnIndexToView(NAME_COLUMN));
+          if (path.equals(previousPath)
+           && name.equals(previousName)) {
+            mainTable.setRowSelectionInterval(row, row);
+            mainTable.scrollRectToVisible(
+              mainTable.getCellRect(row, 0, true));
+            break;
+          }
+        }
+      }
+      }});
+    }
+  }
+
   protected Boolean getLoadNow(URL url){
     Boolean res = loadNowByURL.get(url);
     if(res == null){
@@ -457,14 +462,8 @@ public class PluginManagerUI extends JDialog implements GateConstants{
           Gate.removeKnownPlugin(toDelete);
           loadAlwaysByURL.remove(toDelete);
           loadNowByURL.remove(toDelete);
-          // select the row before the deleted row
-          if (mainTable.getRowCount() > 0) {
-            mainTable.setRowSelectionInterval(
-              Math.max(0,row-1), Math.max(0,row-1));
-          }
           // redisplay the table
-          filterTextField.setText(" ");
-          filterTextField.setText("");
+          filterRows(filterTextField.getText());
         }
       });
       editorDeleteButton.setMaximumSize(editorDeleteButton.getPreferredSize());
@@ -695,17 +694,29 @@ public class PluginManagerUI extends JDialog implements GateConstants{
                             JOptionPane.QUESTION_MESSAGE, null, null, null);
       if(res == JOptionPane.OK_OPTION){
         try{
-          URL creoleURL = new URL(urlTextField.getText());
+          final URL creoleURL = new URL(urlTextField.getText());
           Gate.addKnownPlugin(creoleURL);
+          mainTable.clearSelection();
+          // redisplay the table
+          filterRows("");
+          // clear the filter text field
+          filterTextField.setText("");
           // select the new plugin row
-          filterTextField.setText(new File(creoleURL.getFile()).getName());
-          Timer timer = new Timer("Plugin manager add plugin action", true);
-          Date timeToRun = new Date(System.currentTimeMillis() + 300);
-          TimerTask timerTask = new TimerTask() { public void run() {
-            // redisplay the table
-            filterTextField.setText("");
-          }};
-          timer.schedule(timerTask, timeToRun); // add a delay
+          SwingUtilities.invokeLater(new Runnable() { public void run() {
+            for (int row = 0; row < mainTable.getRowCount(); row++) {
+              String path = (String) mainTable.getValueAt(
+                row, mainTable.convertColumnIndexToView(URL_COLUMN));
+              String name = (String) mainTable.getValueAt(
+                row, mainTable.convertColumnIndexToView(NAME_COLUMN));
+              if (path.equals(new File(creoleURL.getFile()).getParent())
+               && name.equals(new File(creoleURL.getFile()).getName())) {
+                mainTable.setRowSelectionInterval(row, row);
+                mainTable.scrollRectToVisible(
+                  mainTable.getCellRect(row, 0, true));
+                break;
+              }
+            }
+          }});
           mainTable.requestFocusInWindow();
         }catch(Exception ex){
           JOptionPane.showMessageDialog(
