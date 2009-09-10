@@ -63,7 +63,7 @@ public class AnnotationDiffGUI extends JFrame{
    * @param responseDocumentName name of the response document
    * @param keyAnnotationSetName key annotation set name, may be null
    * @param responseAnnotationSetName response annotation set name, may be null
-   * @param annotationType annoation type, may be null
+   * @param annotationType annotation type, may be null
    * @param featureName feature name, may be null
    */
 
@@ -502,8 +502,13 @@ public class AnnotationDiffGUI extends JFrame{
 
     addWindowListener(new WindowAdapter(){
       public void windowClosing(WindowEvent e) {
-        super.windowClosing(e);
         new CloseAction().actionPerformed(null);
+      }
+    });
+
+    addWindowFocusListener(new WindowAdapter(){
+      public void windowGainedFocus(WindowEvent e) {
+        populateGUI();
       }
     });
 
@@ -888,31 +893,6 @@ public class AnnotationDiffGUI extends JFrame{
       }
     });
 
-    // update the document lists when adding/removing documents in GATE
-    Gate.getCreoleRegister().addCreoleListener(new CreoleListener() {
-      public void resourceLoaded(CreoleEvent e) {
-        if (e.getResource() instanceof Document) {
-          populateGUI();
-        }
-      }
-      public void resourceUnloaded(CreoleEvent e) {
-        if (e.getResource() instanceof Document) {
-          populateGUI();
-        }
-      }
-      public void datastoreOpened(CreoleEvent e) {
-      }
-      public void datastoreCreated(CreoleEvent e) {
-      }
-      public void datastoreClosed(CreoleEvent e) {
-      }
-      public void resourceRenamed(Resource resource, String oldName, String newName) {
-        if (resource instanceof Document) {
-          populateGUI();
-        }
-      }
-    });
-
     bottomTabbedPane.addChangeListener(new ChangeListener(){
       public void stateChanged(ChangeEvent e) {
         if (bottomTabbedPane.getSelectedIndex() == 0) {
@@ -976,7 +956,8 @@ public class AnnotationDiffGUI extends JFrame{
   protected class DiffAction extends AbstractAction{
     public DiffAction(){
       super("Compare");
-      putValue(SHORT_DESCRIPTION, "Performs comparisons between annotations");
+      putValue(SHORT_DESCRIPTION,
+        "Compare annotations between key and response sets");
       putValue(MNEMONIC_KEY, KeyEvent.VK_ENTER);
       putValue(SMALL_ICON, MainFrame.getIcon("crystal-clear-action-run"));
     }
