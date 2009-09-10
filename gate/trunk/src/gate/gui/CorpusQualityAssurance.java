@@ -91,6 +91,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     JLabel setALabel = new JLabel("Set A");
     setALabel.setToolTipText("aka 'Key set'");
     topPanel.add(setALabel);
+    topPanel.add(Box.createHorizontalStrut(2));
     keyAnnotationSetCombo = new JComboBox();
     keyAnnotationSetCombo.setPrototypeDisplayValue("annotation set");
     topPanel.add(keyAnnotationSetCombo);
@@ -98,9 +99,14 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     JLabel setBLabel = new JLabel("Set B");
     setBLabel.setToolTipText("aka 'Response set'");
     topPanel.add(setBLabel);
+    topPanel.add(Box.createHorizontalStrut(2));
     responseAnnotationSetCombo = new JComboBox();
     responseAnnotationSetCombo.setPrototypeDisplayValue("annotation set");
     topPanel.add(responseAnnotationSetCombo);
+    topPanel.add(Box.createHorizontalStrut(5));
+    JButton button = new JButton(compareAction = new CompareAction());
+    compareAction.setEnabled(false);
+    topPanel.add(button);
     add(topPanel, BorderLayout.NORTH);
 
     Comparator<String> integerComparator = new Comparator<String>() {
@@ -202,113 +208,12 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     });
 
     // when annotation set lists selection change
-    // update annotationTypes and featuresNames
-    // update annotation and document tables
+    // enabled/disabled the 'Compare' button
     ActionListener setComboActionListener = new ActionListener(){
       public void actionPerformed(ActionEvent evt){
-        String keyAnnotationSetName =
-          (String) keyAnnotationSetCombo.getSelectedItem();
-        String responseAnnotationSetName =
-          (String) responseAnnotationSetCombo.getSelectedItem();
-        if (keyAnnotationSetName == null
-         || responseAnnotationSetName == null) {
-          return;
-        }
-        CorpusQualityAssurance.this.setCursor(
-          Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-        // update features names and annotation types lists
-        featuresNames.clear();
-        annotationTypes.clear();
-        for (Object object : corpus) {
-          Document document = (Document) object;
-          Set<Annotation> annotations = new HashSet<Annotation>();
-          if (keyAnnotationSetName.equals("[Default set]")) {
-            annotations = document.getAnnotations();
-          } else if (document.getAnnotationSetNames() != null
-          && document.getAnnotationSetNames().contains(keyAnnotationSetName)) {
-            annotations = document.getAnnotations(keyAnnotationSetName);
-          }
-          annotationTypes.addAll(((AnnotationSet)annotations).getAllTypes());
-          for (Annotation annotation : annotations) {
-            for (Object featureKey : annotation.getFeatures().keySet()) {
-              featuresNames.add((String) featureKey);
-            }
-          }
-          if (responseAnnotationSetName.equals("[Default set]")) {
-            annotations = document.getAnnotations();
-          } else if (document.getAnnotationSetNames() != null
-                  && document.getAnnotationSetNames()
-                    .contains(responseAnnotationSetName)) {
-            annotations = document.getAnnotations(responseAnnotationSetName);
-          }
-          annotationTypes.addAll(((AnnotationSet)annotations).getAllTypes());
-          for (Annotation annotation : annotations) {
-            for (Object featureKey : annotation.getFeatures().keySet()) {
-              featuresNames.add((String) featureKey);
-            }
-          }
-        }
-
-        // update cell renderers for annotation and feature columns
-        TableColumn featureColumn = annotationTable.getColumnModel()
-          .getColumn(AnnotationTableModel.COL_FEATURE);
-        JComboBox featureCombo =
-          new JComboBox(new Vector<String>(featuresNames));
-        featureCombo.setMaximumRowCount(15);
-        featureCombo.insertItemAt("None", 0);
-        featureCombo.insertItemAt("All", 1);
-        featureCombo.insertItemAt("Expand All", 2);
-        featureCombo.insertItemAt("Use As Default", 3);
-        featureCombo.insertItemAt("--------------", 4);
-        featureColumn.setCellEditor(new DefaultCellEditor(featureCombo));
-        int maxLength = "Use As Default".length();
-        for (String item : featuresNames) {
-          if (maxLength < item.length()) { maxLength = item.length(); }
-        }
-        maxLength += maxLength * 0.2;
-        String colName = annotationTableModel
-          .getColumnName(AnnotationTableModel.COL_FEATURE);
-        featureColumn.setHeaderValue(colName +
-          Strings.addPadding(" ", maxLength-colName.length()));
-        featureColumn = documentTable.getColumnModel()
-          .getColumn(DocumentTableModel.COL_FEATURE);
-        featureColumn.setCellEditor(new DefaultCellEditor(featureCombo));
-        colName = documentTableModel
-          .getColumnName(DocumentTableModel.COL_FEATURE);
-        featureColumn.setHeaderValue(colName +
-          Strings.addPadding(" ", maxLength-colName.length()));
-        TableColumn annotationColumn = documentTable.getColumnModel()
-          .getColumn(DocumentTableModel.COL_ANNOTATION);
-        JComboBox annotationCombo =
-          new JComboBox(new Vector<String>(annotationTypes));
-        annotationCombo.setMaximumRowCount(15);
-        annotationCombo.insertItemAt("All", 0);
-        annotationCombo.insertItemAt("Expand All", 1);
-        annotationCombo.insertItemAt("Use As Default", 2);
-        annotationCombo.insertItemAt("--------------", 3);
-        annotationColumn.setCellEditor(new DefaultCellEditor(annotationCombo));
-        maxLength = "Use As Default".length();
-        for (String item : annotationTypes) {
-          if (maxLength < item.length()) { maxLength = item.length(); }
-        }
-        maxLength += maxLength * 0.2;
-        colName = documentTableModel
-         .getColumnName(DocumentTableModel.COL_ANNOTATION);
-        annotationColumn.setHeaderValue(colName +
-          Strings.addPadding(" ", maxLength-colName.length()));
-        annotationTableModel.initialise();
-        documentTableModel.initialise();
-
-        // update tables
-        SwingUtilities.invokeLater(new Runnable(){ public void run(){
-          annotationTableModel.fireTableDataChanged();
-          documentTableModel.fireTableDataChanged();
-          SwingUtilities.invokeLater(new Runnable(){ public void run(){
-            CorpusQualityAssurance.this.setCursor(
-              Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-          }});
-        }});
+        compareAction.setEnabled(
+            keyAnnotationSetCombo.getSelectedItem() != null
+         && responseAnnotationSetCombo.getSelectedItem() != null);
       }
     };
     keyAnnotationSetCombo.addActionListener(setComboActionListener);
@@ -826,6 +731,127 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     private static final int COLUMN_COUNT = 10;
   }
 
+  /**
+   * Update <code>annotationTypes</code> and <code>featuresNames</code>.
+   * Update annotation and document tables.
+   */
+  protected class CompareAction extends AbstractAction{
+    public CompareAction(){
+      super("Compare");
+      putValue(SHORT_DESCRIPTION,
+        "Compare annotations between sets A and B");
+      putValue(MNEMONIC_KEY, KeyEvent.VK_ENTER);
+      putValue(SMALL_ICON, MainFrame.getIcon("crystal-clear-action-run"));
+    }
+    public void actionPerformed(ActionEvent evt){
+      String keyAnnotationSetName =
+        (String) keyAnnotationSetCombo.getSelectedItem();
+      String responseAnnotationSetName =
+        (String) responseAnnotationSetCombo.getSelectedItem();
+      if (keyAnnotationSetName == null
+       || responseAnnotationSetName == null) {
+        return;
+      }
+      CorpusQualityAssurance.this.setCursor(
+        Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+      // update features names and annotation types lists
+      featuresNames.clear();
+      annotationTypes.clear();
+      for (Object object : corpus) {
+        Document document = (Document) object;
+        Set<Annotation> annotations = new HashSet<Annotation>();
+        if (keyAnnotationSetName.equals("[Default set]")) {
+          annotations = document.getAnnotations();
+        } else if (document.getAnnotationSetNames() != null
+        && document.getAnnotationSetNames().contains(keyAnnotationSetName)) {
+          annotations = document.getAnnotations(keyAnnotationSetName);
+        }
+        annotationTypes.addAll(((AnnotationSet)annotations).getAllTypes());
+        for (Annotation annotation : annotations) {
+          for (Object featureKey : annotation.getFeatures().keySet()) {
+            featuresNames.add((String) featureKey);
+          }
+        }
+        if (responseAnnotationSetName.equals("[Default set]")) {
+          annotations = document.getAnnotations();
+        } else if (document.getAnnotationSetNames() != null
+                && document.getAnnotationSetNames()
+                  .contains(responseAnnotationSetName)) {
+          annotations = document.getAnnotations(responseAnnotationSetName);
+        }
+        annotationTypes.addAll(((AnnotationSet)annotations).getAllTypes());
+        for (Annotation annotation : annotations) {
+          for (Object featureKey : annotation.getFeatures().keySet()) {
+            featuresNames.add((String) featureKey);
+          }
+        }
+      }
+
+      // update cell renderers for annotation and feature columns
+      TableColumn featureColumn = annotationTable.getColumnModel()
+        .getColumn(AnnotationTableModel.COL_FEATURE);
+      JComboBox featureCombo =
+        new JComboBox(new Vector<String>(featuresNames));
+      featureCombo.setMaximumRowCount(15);
+      featureCombo.insertItemAt("None", 0);
+      featureCombo.insertItemAt("All", 1);
+      featureCombo.insertItemAt("Expand All", 2);
+      featureCombo.insertItemAt("Use As Default", 3);
+      featureCombo.insertItemAt("--------------", 4);
+      featureColumn.setCellEditor(new DefaultCellEditor(featureCombo));
+      int maxLength = "Use As Default".length();
+      for (String item : featuresNames) {
+        if (maxLength < item.length()) { maxLength = item.length(); }
+      }
+      maxLength += maxLength * 0.2;
+      String colName = annotationTableModel
+        .getColumnName(AnnotationTableModel.COL_FEATURE);
+      featureColumn.setHeaderValue(colName +
+        Strings.addPadding(" ", maxLength-colName.length()));
+      featureColumn = documentTable.getColumnModel()
+        .getColumn(DocumentTableModel.COL_FEATURE);
+      featureColumn.setCellEditor(new DefaultCellEditor(featureCombo));
+      colName = documentTableModel
+        .getColumnName(DocumentTableModel.COL_FEATURE);
+      featureColumn.setHeaderValue(colName +
+        Strings.addPadding(" ", maxLength-colName.length()));
+      TableColumn annotationColumn = documentTable.getColumnModel()
+        .getColumn(DocumentTableModel.COL_ANNOTATION);
+      JComboBox annotationCombo =
+        new JComboBox(new Vector<String>(annotationTypes));
+      annotationCombo.setMaximumRowCount(15);
+      annotationCombo.insertItemAt("All", 0);
+      annotationCombo.insertItemAt("Expand All", 1);
+      annotationCombo.insertItemAt("Use As Default", 2);
+      annotationCombo.insertItemAt("--------------", 3);
+      annotationColumn.setCellEditor(new DefaultCellEditor(annotationCombo));
+      maxLength = "Use As Default".length();
+      for (String item : annotationTypes) {
+        if (maxLength < item.length()) { maxLength = item.length(); }
+      }
+      maxLength += maxLength * 0.2;
+      colName = documentTableModel
+       .getColumnName(DocumentTableModel.COL_ANNOTATION);
+      annotationColumn.setHeaderValue(colName +
+        Strings.addPadding(" ", maxLength-colName.length()));
+
+      // clear internal model of tables
+      annotationTableModel.initialise();
+      documentTableModel.initialise();
+
+      // update tables
+      SwingUtilities.invokeLater(new Runnable(){ public void run(){
+        annotationTableModel.fireTableDataChanged();
+        documentTableModel.fireTableDataChanged();
+        SwingUtilities.invokeLater(new Runnable(){ public void run(){
+          CorpusQualityAssurance.this.setCursor(
+            Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        }});
+      }});
+    }
+  }
+
   class OpenDocumentAction extends AbstractAction{
     public OpenDocumentAction(){
       super("Open documents", MainFrame.getIcon("document"));
@@ -983,5 +1009,6 @@ public class CorpusQualityAssurance extends AbstractVisualResource
   protected OpenDocumentAction openDocumentAction;
   protected OpenAnnotationDiffAction openAnnotationDiffAction;
   protected ExportToHtmlAction exportToHtmlAction;
+  protected CompareAction compareAction;
   protected boolean warningAlreadyShown = false;
 }
