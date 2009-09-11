@@ -22,6 +22,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.JScrollPane;
@@ -29,7 +30,6 @@ import javax.swing.JTextPane;
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
@@ -38,33 +38,29 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeSelectionModel;
 
 /**
- * @author niraj
- * @version 1.1
+ * A JAPE viewer that allows access to all phases of the grammar and
+ * provides syntax highlighting. Future versions may allow editing and
+ * reload of JAPE files.
+ * 
+ * @author Mark A. Greenwood
  */
-
 public class JapeViewer extends AbstractVisualResource implements
                                                       ANNIEConstants,
                                                       ProgressListener {
 
-  public JapeViewer() {
-  }
-
-  // GUI components
-  /** The text display. */
-  protected JTextPane textArea;
-
-  private boolean updating = false;
-
-  /** Transducer */
-  private Transducer transducer;
+  private JTextPane textArea;
 
   private JTree treePhases;
 
-  Map<Integer, Style> colorMap = new HashMap<Integer, Style>();
-  Style defaultStyle;
+  private boolean updating = false;
 
-  /** An Init method */
-  public Resource init() {
+  private Transducer transducer;
+
+  private Map<Integer, Style> colorMap = new HashMap<Integer, Style>();
+
+  private Style defaultStyle;
+
+  @Override public Resource init() {
     initGuiComponents();
     return this;
   }
@@ -73,16 +69,15 @@ public class JapeViewer extends AbstractVisualResource implements
     setLayout(new BorderLayout());
     textArea = new JTextPane();
     textArea.setEditable(false);
-    JScrollPane textScroll =
-            new JScrollPane(textArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    JScrollPane textScroll = new JScrollPane(textArea,
+            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     add(textScroll, BorderLayout.CENTER);
 
     treePhases = new JTree();
-    JScrollPane treeScroll =
-            new JScrollPane(treePhases,
-                    JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    JScrollPane treeScroll = new JScrollPane(treePhases,
+            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     add(treeScroll, BorderLayout.WEST);
     treePhases.getSelectionModel().setSelectionMode(
             TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -95,22 +90,24 @@ public class JapeViewer extends AbstractVisualResource implements
           readJAPEFileContents(new URL(transducer.getGrammarURL(), e.getPath()
                   .getLastPathComponent()
                   + ".jape"));
-        } catch(MalformedURLException mue) {
+        }
+        catch(MalformedURLException mue) {
           mue.printStackTrace();
         }
       }
     });
 
-    // if we want to set the jape to be monospaced (like most code editors) then
+    // if we want to set the jape to be monospaced (like most code
+    // editors) then
     // do this...
     /*
      * MutableAttributeSet attrs = textArea.getInputAttributes();
-     * StyleConstants.setFontFamily(attrs, "monospaced"); StyledDocument doc =
-     * textArea.getStyledDocument(); doc.setCharacterAttributes(0,
+     * StyleConstants.setFontFamily(attrs, "monospaced"); StyledDocument
+     * doc = textArea.getStyledDocument(); doc.setCharacterAttributes(0,
      * doc.getLength() + 1, attrs, false);
      */
     defaultStyle = textArea.addStyle("default", null);
-        
+
     Style style = textArea.addStyle("brackets", null);
     StyleConstants.setForeground(style, Color.red);
     colorMap.put(ParseCpslConstants.leftBrace, style);
@@ -150,112 +147,113 @@ public class JapeViewer extends AbstractVisualResource implements
     colorMap.put(ParseCpslConstants.phasesCommentEnd, style);
   }
 
-  public void setTarget(Object target) {
-    if(!(target instanceof Transducer)) { throw new IllegalArgumentException(
-            "The GATE jape viewer can only be used with a GATE jape transducer!\n"
-                    + target.getClass().toString()
-                    + " is not a GATE Jape Transducer!"); }
+  @Override public void setTarget(Object target) {
+    if(target == null || !(target instanceof Transducer)) {
+      throw new IllegalArgumentException(
+              "The GATE jape viewer can only be used with a GATE jape transducer!\n"
+                      + target.getClass().toString()
+                      + " is not a GATE Jape Transducer!");
+    }
 
     if(transducer != null) {
       transducer.removeProgressListener(this);
     }
 
-    this.transducer = (Transducer)target;
+    transducer = (Transducer)target;
     URL japeFileURL = transducer.getGrammarURL();
+
+    if(japeFileURL == null) {
+      textArea.setText("The source for this JAPE grammar is not available!");
+      return;
+    }
+    
     String japePhaseName = japeFileURL.getFile();
-    japePhaseName =
-            japePhaseName.substring(japePhaseName.lastIndexOf("/") + 1,
-                    japePhaseName.length() - 5);
+    japePhaseName = japePhaseName.substring(japePhaseName.lastIndexOf("/") + 1,
+            japePhaseName.length() - 5);
     treePhases.setModel(new DefaultTreeModel(new DefaultMutableTreeNode(
             japePhaseName)));
     treePhases.setSelectionRow(0);
-    // reading japeFile
+
     readJAPEFileContents(japeFileURL);
-    ((Transducer)target).addProgressListener(this);
+    transducer.addProgressListener(this);
   }
 
   private void readJAPEFileContents(URL url) {
     if(treePhases.getLastSelectedPathComponent() == null) return;
     updating = true;
-    
+
     try {
-      if(url != null) {
-        Reader japeReader = null;
-        if(transducer.getEncoding() == null) {
-          japeReader = new InputStreamReader(url.openStream());
-        } else {
-          japeReader =
-                  new InputStreamReader(url.openStream(), transducer
-                          .getEncoding());
-        }
-        BufferedReader br = new BufferedReader(japeReader);
-        String content = br.readLine();
-        StringBuilder japeFileContents = new StringBuilder();
-        java.util.List<Integer> lineOffsets = new ArrayList<Integer>();
+      Reader japeReader = null;
+      if(transducer.getEncoding() == null) {
+        japeReader = new InputStreamReader(url.openStream());
+      }
+      else {
+        japeReader = new InputStreamReader(url.openStream(), transducer
+                .getEncoding());
+      }
+      BufferedReader br = new BufferedReader(japeReader);
+      String content = br.readLine();
+      StringBuilder japeFileContents = new StringBuilder();
+      List<Integer> lineOffsets = new ArrayList<Integer>();
 
-        while(content != null) {
-          lineOffsets.add(japeFileContents.length());
-          
-          //replace tabs with spaces otherwise the highlighting goes to pot
-          //TODO work out why this is needed and fix it properly
-          japeFileContents.append(content.replaceAll("\t", "   ")).append("\n");
-          content = br.readLine();
-        }
-     
-        textArea.setText(japeFileContents.toString());
-        textArea.updateUI();
-        br.close();
+      while(content != null) {
+        lineOffsets.add(japeFileContents.length());
 
-        ParseCpslTokenManager tokenManager =
-                new ParseCpslTokenManager(new SimpleCharStream(
-                        new StringReader(japeFileContents.toString())));
+        // replace tabs with spaces otherwise the highlighting fails
+        // TODO work out why this is needed and fix it properly
+        japeFileContents.append(content.replaceAll("\t", "   ")).append("\n");
+        content = br.readLine();
+      }
 
-        StyledDocument doc = textArea.getStyledDocument();
-        
-        doc.setCharacterAttributes(0,japeFileContents.length(),defaultStyle,true);
-        
-        
-        ((DefaultMutableTreeNode)treePhases.getSelectionPath()
-                .getLastPathComponent()).removeAllChildren();
+      textArea.setText(japeFileContents.toString());
+      textArea.updateUI();
+      br.close();
 
-        Token t;
-        while((t = tokenManager.getNextToken()).kind != 0) {
+      ParseCpslTokenManager tokenManager = new ParseCpslTokenManager(
+              new SimpleCharStream(
+                      new StringReader(japeFileContents.toString())));
 
-          Token special = t.specialToken;
-          while(special != null) {
-            Style style = colorMap.get(special.kind);
-            if(style != null) {
-              int start =
-                      lineOffsets.get(special.beginLine - 1)
-                              + special.beginColumn - 1;
-              int end =
-                      lineOffsets.get(special.endLine - 1) + special.endColumn
-                              - 1;
-              doc.setCharacterAttributes(start, end - start + 1, style, true);
-            }
+      StyledDocument doc = textArea.getStyledDocument();
 
-            special = special.specialToken;
-          }
+      doc.setCharacterAttributes(0, japeFileContents.length(), defaultStyle,
+              true);
 
-          Style style = colorMap.get(t.kind);
+      ((DefaultMutableTreeNode)treePhases.getSelectionPath()
+              .getLastPathComponent()).removeAllChildren();
 
+      Token t;
+      while((t = tokenManager.getNextToken()).kind != 0) {
+
+        Token special = t.specialToken;
+        while(special != null) {
+          Style style = colorMap.get(special.kind);
           if(style != null) {
-            int start = lineOffsets.get(t.beginLine - 1) + t.beginColumn - 1;
-            int end = lineOffsets.get(t.endLine - 1) + t.endColumn - 1;
+            int start = lineOffsets.get(special.beginLine - 1)
+                    + special.beginColumn - 1;
+            int end = lineOffsets.get(special.endLine - 1) + special.endColumn
+                    - 1;
             doc.setCharacterAttributes(start, end - start + 1, style, true);
           }
 
-          if(t.kind == ParseCpslConstants.path) {
-            ((DefaultMutableTreeNode)treePhases.getSelectionPath()
-                    .getLastPathComponent()).add(new DefaultMutableTreeNode(t
-                    .toString()));
-          }
+          special = special.specialToken;
         }
-      } else {
-        textArea
-                .setText("The JAPE Transducer was loaded from a serialised tranducer and the source is not available.");
+
+        Style style = colorMap.get(t.kind);
+
+        if(style != null) {
+          int start = lineOffsets.get(t.beginLine - 1) + t.beginColumn - 1;
+          int end = lineOffsets.get(t.endLine - 1) + t.endColumn - 1;
+          doc.setCharacterAttributes(start, end - start + 1, style, true);
+        }
+
+        if(t.kind == ParseCpslConstants.path) {
+          ((DefaultMutableTreeNode)treePhases.getSelectionPath()
+                  .getLastPathComponent()).add(new DefaultMutableTreeNode(t
+                  .toString()));
+        }
       }
-    } catch(IOException ioe) {
+    }
+    catch(IOException ioe) {
       throw new GateRuntimeException(ioe);
     }
 
