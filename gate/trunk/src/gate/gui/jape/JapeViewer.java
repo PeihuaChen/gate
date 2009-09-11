@@ -48,19 +48,43 @@ public class JapeViewer extends AbstractVisualResource implements
                                                       ANNIEConstants,
                                                       ProgressListener {
 
+  /**
+   * The text area where the JAPE source will be displayed
+   */
   private JTextPane textArea;
 
+  /**
+   * The tree in which the phases of the grammar will be shown
+   */
   private JTree treePhases;
 
+  /**
+   * A flag so we can know if we are currently reading a highlighting a
+   * JAPE source file
+   */
   private boolean updating = false;
 
+  /**
+   * The JAPE transducer for which we need to show the JAPE source
+   */
   private Transducer transducer;
 
+  /**
+   * A map that associates the syntactic elements of JAPE files with a
+   * colour for performing syntax highlighting
+   */
   private Map<Integer, Style> colorMap = new HashMap<Integer, Style>();
 
+  /**
+   * The default style used by the text area. This is used so that we
+   * can ensure that normal text is displayed normally. This fixes a
+   * problem where sometime the highlighting goes screwy and shows
+   * everything as a comment.
+   */
   private Style defaultStyle;
 
-  @Override public Resource init() {
+  @Override
+  public Resource init() {
     initGuiComponents();
     return this;
   }
@@ -147,7 +171,8 @@ public class JapeViewer extends AbstractVisualResource implements
     colorMap.put(ParseCpslConstants.phasesCommentEnd, style);
   }
 
-  @Override public void setTarget(Object target) {
+  @Override
+  public void setTarget(Object target) {
     if(target == null || !(target instanceof Transducer)) {
       throw new IllegalArgumentException(
               "The GATE jape viewer can only be used with a GATE jape transducer!\n"
@@ -166,7 +191,7 @@ public class JapeViewer extends AbstractVisualResource implements
       textArea.setText("The source for this JAPE grammar is not available!");
       return;
     }
-    
+
     String japePhaseName = japeFileURL.getFile();
     japePhaseName = japePhaseName.substring(japePhaseName.lastIndexOf("/") + 1,
             japePhaseName.length() - 5);
