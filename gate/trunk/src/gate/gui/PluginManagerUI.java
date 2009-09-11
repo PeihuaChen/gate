@@ -146,9 +146,9 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     hBox = Box.createHorizontalBox();
     JButton okButton = new JButton(new OkAction());
     hBox.add(okButton);
-    hBox.add(Box.createHorizontalStrut(20));
+    hBox.add(Box.createHorizontalStrut(5));
     hBox.add(new JButton(new CancelAction()));
-    hBox.add(Box.createHorizontalStrut(20));
+    hBox.add(Box.createHorizontalStrut(5));
     hBox.add(new JButton(new HelpAction()));
     constraints.insets = new Insets(2, 2, 8, 2);
     getContentPane().add(hBox, constraints);
@@ -180,7 +180,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     addComponentListener(new ComponentAdapter(){
       public void componentShown(ComponentEvent e){
         SwingUtilities.invokeLater(new Runnable() { public void run() {
-          mainSplit.setDividerLocation(0.70);
+          mainSplit.setDividerLocation(0.8);
         }});
       }
     });
@@ -235,12 +235,9 @@ public class PluginManagerUI extends JDialog implements GateConstants{
 
   private void filterRows(String rowFilter) {
     final String filter = rowFilter.trim().toLowerCase();
-    final String previousPath = mainTable.getSelectedRow() == -1 ? "" :
+    final String previousURL = mainTable.getSelectedRow() == -1 ? "" :
       (String) mainTable.getValueAt(mainTable.getSelectedRow(),
         mainTable.convertColumnIndexToView(URL_COLUMN));
-    final String previousName = mainTable.getSelectedRow() == -1 ? "" :
-      (String) mainTable.getValueAt(mainTable.getSelectedRow(),
-        mainTable.convertColumnIndexToView(NAME_COLUMN));
     ArrayList<URL> previousVisibleRows = new ArrayList<URL>(visibleRows);
     if (filter.length() < 2) {
       // one character or less, don't filter rows
@@ -270,16 +267,13 @@ public class PluginManagerUI extends JDialog implements GateConstants{
       SwingUtilities.invokeLater(new Runnable() { public void run() {
       mainTable.setRowSelectionInterval(0, 0);
       if (filter.length() < 2
-       && previousPath != null
-       && !previousPath.equals("")) {
+       && previousURL != null
+       && !previousURL.equals("")) {
         // reselect the last selected row based on its name and url values
         for (int row = 0; row < mainTable.getRowCount(); row++) {
-          String path = (String) mainTable.getValueAt(
+          String url = (String) mainTable.getValueAt(
             row, mainTable.convertColumnIndexToView(URL_COLUMN));
-          String name = (String) mainTable.getValueAt(
-            row, mainTable.convertColumnIndexToView(NAME_COLUMN));
-          if (path.equals(previousPath)
-           && name.equals(previousName)) {
+          if (url.equals(previousURL)) {
             mainTable.setRowSelectionInterval(row, row);
             mainTable.scrollRectToVisible(
               mainTable.getCellRect(row, 0, true));
@@ -357,7 +351,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
             dInfo.getUrl().getProtocol().equalsIgnoreCase("file") ? 
             localIcon : remoteIcon) :
           invalidIcon;
-        case URL_COLUMN: return new File(dInfo.getUrl().getFile()).getParent();
+        case URL_COLUMN: return dInfo.getUrl().toString();
         case LOAD_NOW_COLUMN: return getLoadNow(dInfo.getUrl());
         case LOAD_ALWAYS_COLUMN: return getLoadAlways(dInfo.getUrl());
         case DELETE_COLUMN: return null;
@@ -462,7 +456,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
           Gate.removeKnownPlugin(toDelete);
           loadAlwaysByURL.remove(toDelete);
           loadNowByURL.remove(toDelete);
-          // redisplay the table
+          // redisplay the table with the current filter
           filterRows(filterTextField.getText());
         }
       });
@@ -697,19 +691,16 @@ public class PluginManagerUI extends JDialog implements GateConstants{
           final URL creoleURL = new URL(urlTextField.getText());
           Gate.addKnownPlugin(creoleURL);
           mainTable.clearSelection();
-          // redisplay the table
+          // redisplay the table without filtering
           filterRows("");
           // clear the filter text field
           filterTextField.setText("");
           // select the new plugin row
           SwingUtilities.invokeLater(new Runnable() { public void run() {
             for (int row = 0; row < mainTable.getRowCount(); row++) {
-              String path = (String) mainTable.getValueAt(
+              String url = (String) mainTable.getValueAt(
                 row, mainTable.convertColumnIndexToView(URL_COLUMN));
-              String name = (String) mainTable.getValueAt(
-                row, mainTable.convertColumnIndexToView(NAME_COLUMN));
-              if (path.equals(new File(creoleURL.getFile()).getParent())
-               && name.equals(new File(creoleURL.getFile()).getName())) {
+              if (url.equals(creoleURL.toString())) {
                 mainTable.setRowSelectionInterval(row, row);
                 mainTable.scrollRectToVisible(
                   mainTable.getCellRect(row, 0, true));
