@@ -132,6 +132,10 @@ public class MainFrame extends JFrame implements ProgressListener,
 
   protected JToolBar toolbar;
 
+  protected JToggleButton treeSelectViewButton;
+
+  protected JToggleButton viewSelectTreeButton;
+
   static GateFileChooser fileChooser;
 
   static private MainFrame instance;
@@ -937,7 +941,42 @@ public class MainFrame extends JFrame implements ProgressListener,
     button.setText("");
     toolbar.add(button);
 
-    toolbar.add(Box.createGlue());
+    toolbar.add(Box.createHorizontalGlue());
+    treeSelectViewButton = new JToggleButton(
+      MainFrame.getIcon("right-move.png"));
+    treeSelectViewButton.setToolTipText(
+      "Selection in resources tree select the view");
+    treeSelectViewButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        // store the state into preferences
+        Preferences prefRoot = Preferences.userNodeForPackage(getClass());
+        prefRoot.put("treeSelectView",
+          Boolean.toString(treeSelectViewButton.isSelected()));
+      }
+    });
+    toolbar.add(treeSelectViewButton);
+    // restore the state from preferences
+    Preferences prefRoot = Preferences.userNodeForPackage(getClass());
+    treeSelectViewButton.setSelected(
+      Boolean.valueOf(prefRoot.get("treeSelectView", "false")));
+
+    viewSelectTreeButton = new JToggleButton(
+      MainFrame.getIcon("left-move.png"));
+    viewSelectTreeButton.setToolTipText(
+      "Selection in view select resources tree");
+    viewSelectTreeButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        // store the state into preferences
+        Preferences prefRoot = Preferences.userNodeForPackage(getClass());
+        prefRoot.put("viewSelectTree",
+          Boolean.toString(viewSelectTreeButton.isSelected()));
+      }
+    });
+    toolbar.add(viewSelectTreeButton);
+    // restore the state from preferences
+    viewSelectTreeButton.setSelected(
+      Boolean.valueOf(prefRoot.get("viewSelectTree", "false")));
+
     this.getContentPane().add(toolbar, BorderLayout.NORTH);
   }
 
@@ -1142,6 +1181,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     resourcesTree.addTreeSelectionListener(new TreeSelectionListener() {
       public void valueChanged(TreeSelectionEvent e) {
+        if (!treeSelectViewButton.isSelected()) { return; }
         // synchronise the selected tabbed pane with
         // the resource tree selection
         if (resourcesTree.getSelectionPaths() != null
@@ -1221,8 +1261,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     mainTabbedPane.getModel().addChangeListener(new ChangeListener() {
       public void stateChanged(ChangeEvent e) {
-        // synchronise the selection in the tabbed pane with
-        // the one in the resources tree
+        // find the handle in the resources tree for the main view
         JComponent largeView =
           (JComponent)mainTabbedPane.getSelectedComponent();
         Enumeration nodesEnum = resourcesTreeRoot.preorderEnumeration();
@@ -1239,9 +1278,13 @@ public class MainFrame extends JFrame implements ProgressListener,
           ((JComponent)instance.getContentPane()).getActionMap();
         if(done) {
           Handle handle = (Handle)node.getUserObject();
-          TreePath nodePath = new TreePath(node.getPath());
-          resourcesTree.setSelectionPath(nodePath);
-          resourcesTree.scrollPathToVisible(nodePath);
+          if (viewSelectTreeButton.isSelected()) {
+            // synchronise the selection in the tabbed pane with
+            // the one in the resources tree
+            TreePath nodePath = new TreePath(node.getPath());
+            resourcesTree.setSelectionPath(nodePath);
+            resourcesTree.scrollPathToVisible(nodePath);
+          }
           lowerScroll.getViewport().setView(handle.getSmallView());
 
           // redefine MainFrame actionMaps for the selected tab
