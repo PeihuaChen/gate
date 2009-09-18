@@ -1794,61 +1794,61 @@ public class MainFrame extends JFrame implements ProgressListener,
     // if the GUI is locked unlock it so we can show the new message
     unlockGUI();
 
-    // build the dialog contents
-    Object[] options = new Object[]{new JButton(new StopAction())};
-    JOptionPane pane =
-      new JOptionPane(message, JOptionPane.WARNING_MESSAGE,
-        JOptionPane.DEFAULT_OPTION, null, options, null);
-
-    // build the dialog
-    Component parentComp = (Component)((ArrayList)getGuiRoots()).get(0);
-    JDialog dialog;
-    Window parentWindow;
-    if(parentComp instanceof Window)
-      parentWindow = (Window)parentComp;
-    else parentWindow = SwingUtilities.getWindowAncestor(parentComp);
-    if(parentWindow instanceof Frame) {
-      dialog = new JDialog((Frame)parentWindow, "Please wait", true) {
-        private static final long serialVersionUID = 1L;
-        protected void processWindowEvent(WindowEvent e) {
-          if(e.getID() == WindowEvent.WINDOW_CLOSING) {
-            getToolkit().beep();
-          }
-        }
-      };
-    }
-    else if(parentWindow instanceof Dialog) {
-      dialog = new JDialog((Dialog)parentWindow, "Please wait", true) {
-        private static final long serialVersionUID = 1L;
-        protected void processWindowEvent(WindowEvent e) {
-          if(e.getID() == WindowEvent.WINDOW_CLOSING) {
-            getToolkit().beep();
-          }
-        }
-      };
-    }
-    else {
-      dialog = new JDialog(JOptionPane.getRootFrame(), "Please wait", true) {
-        private static final long serialVersionUID = 1L;
-        protected void processWindowEvent(WindowEvent e) {
-          if(e.getID() == WindowEvent.WINDOW_CLOSING) {
-            getToolkit().beep();
-          }
-        }
-      };
-    }
-    dialog.getContentPane().setLayout(new BorderLayout());
-    dialog.getContentPane().add(pane, BorderLayout.CENTER);
-    dialog.pack();
-    dialog.setLocationRelativeTo(parentComp);
-    dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-    guiLock = dialog;
-
     // this call needs to return so we'll show the dialog from a
     // different thread
     // the Swing thread sounds good for that
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
+     // build the dialog contents
+        Object[] options = new Object[]{new JButton(new StopAction())};
+        JOptionPane pane =
+          new JOptionPane(message, JOptionPane.WARNING_MESSAGE,
+            JOptionPane.DEFAULT_OPTION, null, options, null);
+
+        // build the dialog
+        Component parentComp = (Component)((ArrayList)getGuiRoots()).get(0);
+        JDialog dialog;
+        Window parentWindow;
+        if(parentComp instanceof Window)
+          parentWindow = (Window)parentComp;
+        else parentWindow = SwingUtilities.getWindowAncestor(parentComp);
+        if(parentWindow instanceof Frame) {
+          dialog = new JDialog((Frame)parentWindow, "Please wait", true) {
+            private static final long serialVersionUID = 1L;
+            protected void processWindowEvent(WindowEvent e) {
+              if(e.getID() == WindowEvent.WINDOW_CLOSING) {
+                getToolkit().beep();
+              }
+            }
+          };
+        }
+        else if(parentWindow instanceof Dialog) {
+          dialog = new JDialog((Dialog)parentWindow, "Please wait", true) {
+            private static final long serialVersionUID = 1L;
+            protected void processWindowEvent(WindowEvent e) {
+              if(e.getID() == WindowEvent.WINDOW_CLOSING) {
+                getToolkit().beep();
+              }
+            }
+          };
+        }
+        else {
+          dialog = new JDialog(JOptionPane.getRootFrame(), "Please wait", true) {
+            private static final long serialVersionUID = 1L;
+            protected void processWindowEvent(WindowEvent e) {
+              if(e.getID() == WindowEvent.WINDOW_CLOSING) {
+                getToolkit().beep();
+              }
+            }
+          };
+        }
+        dialog.getContentPane().setLayout(new BorderLayout());
+        dialog.getContentPane().add(pane, BorderLayout.CENTER);
+        dialog.pack();
+        dialog.setLocationRelativeTo(parentComp);
+        dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+        guiLock = dialog;
+        
         guiLock.setVisible(true);
       }
     });
@@ -1856,7 +1856,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     // this call should not return until the dialog is up to ensure
     // proper
     // sequentiality for lock - unlock calls
-    while(!guiLock.isShowing()) {
+    while(guiLock == null || !guiLock.isShowing()) {
       try {
         Thread.sleep(100);
       }
