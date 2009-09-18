@@ -15,6 +15,7 @@ package gate.gui.docview;
 
 import gate.Node;
 import gate.FeatureMap;
+import gate.util.Strings;
 import gate.annotation.NodeImpl;
 
 import javax.swing.*;
@@ -282,8 +283,8 @@ public class AnnotationStack extends JPanel {
         }
 
         JLabel label = new JLabel();
-        String value = (String) ann.getFeatures().get(feature);
-        if (value == null) { value = " "; }
+        Object object = ann.getFeatures().get(feature);
+        String value = (object == null) ? " " : Strings.toString(object);
         if(value.length() > maxFeatureValueLength) {
           // show the full text in the tooltip
           label.setToolTipText((value.length() > 500) ?
@@ -314,7 +315,7 @@ public class AnnotationStack extends JPanel {
           label.addMouseListener(annotationMouseListener
             .createListener(type, String.valueOf(ann.getId())));
           // show the feature values in the tooltip
-          String width = (ann.getFeatures().toString().length() > 100) ?
+          String width = (Strings.toString(ann.getFeatures()).length() > 100) ?
             "500" : "100%";
           String toolTip = "<html><table width=\"" + width
             + "\" border=\"0\" cellspacing=\"0\" cellpadding=\"4\">";
@@ -331,11 +332,11 @@ public class AnnotationStack extends JPanel {
             toolTip +="<tr align=\"left\""
               + (odd?" bgcolor=\"#"+hexColor+"\"":"")+"><td><strong>"
               + map.getKey() + "</strong></td><td>"
-              + ((((String)map.getValue()).length() > 500) ?
+              + ((Strings.toString(map.getValue()).length() > 500) ?
               "<textarea rows=\"20\" cols=\"40\" cellspacing=\"0\">"
                 + ((String)map.getValue()).replaceAll("(.{50,60})\\b", "$1\n")
                 + "</textarea>" :
-              ((String)map.getValue()).replaceAll("\n", "<br>"))
+              Strings.toString(map.getValue()).replaceAll("\n", "<br>"))
               + "</td></tr>";
             odd = !odd;
           }
@@ -343,7 +344,7 @@ public class AnnotationStack extends JPanel {
 
         } else {
           label.addMouseListener(annotationMouseListener.createListener(
-            type, feature, (String) ann.getFeatures().get(feature),
+            type, feature, Strings.toString(ann.getFeatures().get(feature)),
             String.valueOf(ann.getId())));
         }
         // find the first empty row span for this annotation

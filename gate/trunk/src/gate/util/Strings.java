@@ -1,7 +1,5 @@
 /*
- *  Strings.java
- *
- *  Copyright (c) 1998-2007, The University of Sheffield.
+ *  Copyright (c) 1998-2009, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -16,6 +14,8 @@
 package gate.util;
 
 import java.io.*;
+import java.util.Arrays;
+import java.util.Collection;
 
 /** Some utilities for use with Strings. */
 public class Strings {
@@ -153,4 +153,20 @@ public class Strings {
     return sb.toString();
   }
 
+  /**
+   * Use Arrays#deepToString to convert any array or collection.
+   * @param object object to be converted to a string
+   * @return a string representation of the object
+   */
+  public static String toString(Object object) {
+    if (object == null) {
+      return "";
+    } else if (object instanceof Object[]) {
+      return Arrays.deepToString((Object[])object);
+    } else if (object instanceof Collection) {
+      return Arrays.deepToString(((Collection)object).toArray());
+    } else {
+      return object.toString();
+    }
+  }
 } // class Strings
