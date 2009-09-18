@@ -15,19 +15,49 @@
 
 package gate;
 
-import java.awt.*;
-import java.io.*;
+import gate.gui.MainFrame;
+import gate.gui.OptionsDialog;
+import gate.gui.ShellSlacFrame;
+import gate.gui.Splash;
+import gate.gui.UserGroupEditor;
+import gate.util.CorpusBenchmarkTool;
+import gate.util.Err;
+import gate.util.Files;
+import gate.util.GateException;
+import gate.util.OptionsMap;
+import gate.util.Out;
+import gate.util.Strings;
+import gnu.getopt.Getopt;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsEnvironment;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
-import javax.swing.*;
-
-import gate.gui.*;
-import gate.util.*;
-
-import gnu.getopt.Getopt;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.RepaintManager;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
 
 /** Top-level entry point for the GATE command-line and GUI interfaces.
@@ -128,7 +158,19 @@ public class Main {
 
   /** Run the user interface. */
   private static void runGui() throws GateException {
+    try {
+      Class rmClass =
+              Gate.class
+                      .getClassLoader()
+                      .loadClass(
+                              "org.jdesktop.swinghelper.debug.CheckThreadViolationRepaintManager");
 
+      RepaintManager.setCurrentManager((RepaintManager)rmClass.getConstructor()
+              .newInstance());
+    } catch(Exception e) {
+      // the debug classes from SwingHelper are not available
+    }
+    
     Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
     //show the splash
     SwingUtilities.invokeLater(new Runnable(){
