@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 1998-2007, The University of Sheffield.
+ *  Copyright (c) 1998-2009, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -61,6 +61,12 @@ public class CorpusEditor extends AbstractVisualResource
 
   protected void initLocalData(){
     docTableModel = new DocumentTableModel();
+    try {
+      documentsLoadedCount = Gate.getCreoleRegister()
+        .getAllInstances("gate.Document").size();
+    } catch (GateException exception) {
+      exception.printStackTrace();
+    }
   }
 
   protected void initGuiComponents(){
@@ -290,11 +296,13 @@ public class CorpusEditor extends AbstractVisualResource
     Gate.getCreoleRegister().addCreoleListener(new CreoleListener() {
       public void resourceLoaded(CreoleEvent e) {
         if (e.getResource() instanceof Document) {
+          documentsLoadedCount++;
           changeMessage();
         }
       }
       public void resourceUnloaded(CreoleEvent e) {
         if (e.getResource() instanceof Document) {
+          documentsLoadedCount--;
           changeMessage();
         }
       }
@@ -309,7 +317,6 @@ public class CorpusEditor extends AbstractVisualResource
   public void cleanup(){
     super.cleanup();
     corpus = null;
-
   }
 
   public void setTarget(Object target){
@@ -647,26 +654,18 @@ public class CorpusEditor extends AbstractVisualResource
 
   protected void changeMessage() {
     SwingUtilities.invokeLater(new Runnable(){ public void run() {
-    int documentCount;
-    try {
-      documentCount = Gate.getCreoleRegister()
-        .getAllInstances("gate.Document").size();
-    } catch (GateException exception) {
-      exception.printStackTrace();
-      return;
-    }
     if (corpus != null
-    && documentCount > 0
-    && documentCount == corpus.size()) {
+    && documentsLoadedCount > 0
+    && documentsLoadedCount == corpus.size()) {
       newDocumentAction.setEnabled(false);
-      messageLabel.setText("All the documents available in the " +
+      messageLabel.setText("All the documents loaded in the " +
         "system are in this corpus.");
       messageLabel.setVisible(true);
-    } else if (documentCount == 0) {
+    } else if (documentsLoadedCount == 0) {
       newDocumentAction.setEnabled(false);
       messageLabel.setText(
-        "There are no documents available in the system. " +
-        "Please load some first. Press F1 for help.");
+        "There are no documents loaded in the system. " +
+        "Press F1 for help.");
       messageLabel.setVisible(true);
     } else if (corpus == null || corpus.size() == 0) {
       newDocumentAction.setEnabled(true);
@@ -695,4 +694,5 @@ public class CorpusEditor extends AbstractVisualResource
   protected MoveDownAction moveDownAction;
   protected OpenDocumentsAction openDocumentsAction;
   protected JLabel messageLabel;
+  protected int documentsLoadedCount;
 }
