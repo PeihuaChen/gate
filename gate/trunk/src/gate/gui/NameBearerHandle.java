@@ -1130,8 +1130,7 @@ public class NameBearerHandle implements Handle, StatusListener,
 
     public void actionPerformed(ActionEvent ae) {
       XJFileChooser fileChooser = MainFrame.getFileChooser();
-      ExtensionFileFilter filter =
-        new ExtensionFileFilter("ZIP file", "zip");
+      ExtensionFileFilter filter = new ExtensionFileFilter("ZIP file", "zip");
       fileChooser.addChoosableFileFilter(filter);
       fileChooser.setDialogTitle("Select a file where to save the application "
         + ((target instanceof CorpusController
@@ -1490,7 +1489,7 @@ public class NameBearerHandle implements Handle, StatusListener,
           corpusFiller.setExtensions(new ArrayList());
           corpusFiller.setEncoding("");
           boolean answer =
-            OkCancelDialog.showDialog(getLargeView(), corpusFiller,
+            OkCancelDialog.showDialog(window, corpusFiller,
               "Select a directory and allowed extensions");
           if(answer) {
             long startTime = System.currentTimeMillis();
@@ -1589,7 +1588,7 @@ public class NameBearerHandle implements Handle, StatusListener,
         public void run() {
           trecWebFileInputDialog.setEncoding("");
           boolean answer =
-            OkCancelDialog.showDialog(getLargeView(), trecWebFileInputDialog,
+            OkCancelDialog.showDialog(window, trecWebFileInputDialog,
               "Select a trecweb file");
           if(answer) {
             long startTime = System.currentTimeMillis();
