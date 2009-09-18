@@ -30,10 +30,9 @@ import javax.swing.table.DefaultTableCellRenderer;
 import gate.*;
 import gate.gui.docview.TextualDocumentView;
 import gate.gui.docview.AnnotationSetsView;
-import gate.event.CreoleEvent;
 import gate.swing.XJTable;
+import gate.swing.XJFileChooser;
 import gate.util.*;
-import gate.event.CreoleListener;
 
 /**
  * Compare annotations in two annotation sets in one or two documents.
@@ -1183,11 +1182,11 @@ public class AnnotationDiffGUI extends JFrame{
    * @return a new file chooser if Gate is not used as a standalone application
    * otherwise the filechooser of the standalone application.
    */
-  protected JFileChooser getFileChooser() {
+  protected XJFileChooser getFileChooser() {
     if(MainFrame.getFileChooser() != null) {
       return MainFrame.getFileChooser();
     } else {
-      return new JFileChooser();
+      return new XJFileChooser();
     }
   }
 
@@ -1199,26 +1198,28 @@ public class AnnotationDiffGUI extends JFrame{
         MainFrame.getIcon("crystal-clear-app-download-manager"));
     }
     public void actionPerformed(ActionEvent evt){
-      JFileChooser fileChooser = getFileChooser();
+      XJFileChooser fileChooser = getFileChooser();
+      fileChooser.setAcceptAllFileFilterUsed(true);
+      fileChooser.setDialogTitle("Choose a file to export the results");
+      fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+      ExtensionFileFilter filter = new ExtensionFileFilter("HTML files","html");
+      fileChooser.addChoosableFileFilter(filter);
+      fileChooser.setResourceClassName(AnnotationDiffGUI.class.getName());
+      fileChooser.setSelectedFileFromPreferences();
       File currentFile = fileChooser.getSelectedFile();
-      String nl = Strings.getNl();
-      String parent = (currentFile != null) ? currentFile.getParent() :
-        System.getProperty("user.home");
+      String parent = (currentFile != null) ?
+        currentFile.getParent() : System.getProperty("user.home");
       String fileName = (resDoc.getSourceUrl() != null) ?
-              resDoc.getSourceUrl().getFile() :
+              new File (resDoc.getSourceUrl().getFile()).getName() :
               resDoc.getName();
       fileName += "_" + annTypeCombo.getSelectedItem().toString();
       fileName += ".html";
       fileChooser.setSelectedFile(new File(parent, fileName));
-      ExtensionFileFilter fileFilter = new ExtensionFileFilter();
-      fileFilter.addExtension(".html");
-      fileChooser.setFileFilter(fileFilter);
-      fileChooser.setAcceptAllFileFilterUsed(true);
-      fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-      int res = fileChooser.showSaveDialog(AnnotationDiffGUI.this);
+      int res = fileChooser.showSaveDialog(AnnotationDiffGUI.this, null);
       if(res == JFileChooser.APPROVE_OPTION){
         File saveFile = fileChooser.getSelectedFile();
         try{
+          String nl = Strings.getNl();
           Writer fw = new BufferedWriter(new FileWriter(saveFile));
           //write the header
           fw.write(HEADER_1);
