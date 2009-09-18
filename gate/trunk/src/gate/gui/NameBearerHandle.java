@@ -23,9 +23,9 @@ import java.net.URL;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
+import java.util.prefs.Preferences;
 
 import javax.swing.*;
-import javax.swing.filechooser.FileFilter;
 
 import gate.*;
 import gate.corpora.DocumentStaxUtils;
@@ -39,6 +39,7 @@ import gate.security.*;
 import gate.security.SecurityException;
 import gate.swing.XJMenuItem;
 import gate.swing.XJPopupMenu;
+import gate.swing.XJFileChooser;
 import gate.util.*;
 import gate.util.ant.packager.PackageGappTask;
 
@@ -503,7 +504,7 @@ public class NameBearerHandle implements Handle, StatusListener,
   protected List<XJMenuItem> staticPopupItems;
 
   /**
-   * The top level GUI component this hadle belongs to.
+   * The top level GUI component this handle belongs to.
    */
   Window window;
 
@@ -592,30 +593,10 @@ public class NameBearerHandle implements Handle, StatusListener,
     public void actionPerformed(ActionEvent e) {
       Runnable runableAction = new Runnable() {
         public void run() {
-          MainFrame.GateFileChooser fileChooser = MainFrame.getFileChooser();
-          File selectedFile;
-
-          List filters = Arrays.asList(fileChooser.getChoosableFileFilters());
-          Iterator filtersIter = filters.iterator();
-          FileFilter filter = null;
-          if(filtersIter.hasNext()) {
-            filter = (FileFilter)filtersIter.next();
-            while(filtersIter.hasNext()
-              && filter.getDescription().indexOf("XML") == -1) {
-              filter = (FileFilter)filtersIter.next();
-            }
-          }
-          if(filter == null || filter.getDescription().indexOf("XML") == -1) {
-            // no suitable filter found, create a new one
-            ExtensionFileFilter xmlFilter = new ExtensionFileFilter();
-            xmlFilter.setDescription("XML files");
-            xmlFilter.addExtension("xml");
-            xmlFilter.addExtension("gml");
-            fileChooser.addChoosableFileFilter(xmlFilter);
-            filter = xmlFilter;
-          }
-          fileChooser.setFileFilter(filter);
-
+          XJFileChooser fileChooser = MainFrame.getFileChooser();
+          ExtensionFileFilter filter =
+            new ExtensionFileFilter("XML files", "xml", "gml");
+          fileChooser.addChoosableFileFilter(filter);
           fileChooser.setMultiSelectionEnabled(false);
           fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
           fileChooser.setDialogTitle("Select document to save ...");
@@ -662,9 +643,9 @@ public class NameBearerHandle implements Handle, StatusListener,
           int res = (getLargeView() != null) ?
             fileChooser.showSaveDialog(getLargeView(), null)
           : (getSmallView() != null) ? fileChooser.showSaveDialog(
-              getSmallView()) : fileChooser.showSaveDialog(null);
+              getSmallView(), null) : fileChooser.showSaveDialog(null, null);
           if(res == JFileChooser.APPROVE_OPTION) {
-            selectedFile = fileChooser.getSelectedFile();
+            File selectedFile = fileChooser.getSelectedFile();
             if(selectedFile == null) return;
             long start = System.currentTimeMillis();
             NameBearerHandle.this.statusChanged("Saving as XML to "
@@ -738,17 +719,16 @@ public class NameBearerHandle implements Handle, StatusListener,
           if(preserveFormat) System.out.println("Preserve option set!");
           try {
             // we need a directory
-            JFileChooser filer = MainFrame.getFileChooser();
-            filer
-              .setDialogTitle("Select the directory that will contain the corpus");
-            filer.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            filer.setFileFilter(filer.getAcceptAllFileFilter());
+            XJFileChooser fileChooser = MainFrame.getFileChooser();
+            fileChooser.setDialogTitle(
+              "Select the directory that will contain the corpus");
+            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
-            if(filer.showDialog(getLargeView() != null
+            if(fileChooser.showDialog(getLargeView() != null
               ? getLargeView()
               : getSmallView(), "Select") == JFileChooser.APPROVE_OPTION) {
 
-              File dir = filer.getSelectedFile();
+              File dir = fileChooser.getSelectedFile();
               // create the top directory if needed
               if(!dir.exists()) {
                 if(!dir.mkdirs()) {
@@ -1036,56 +1016,34 @@ public class NameBearerHandle implements Handle, StatusListener,
     }
 
     public void actionPerformed(ActionEvent ae) {
-      MainFrame.GateFileChooser fileChooser = MainFrame.getFileChooser();
-
-      // add a .gapp extension filter if not existing
-      List filters = Arrays.asList(fileChooser.getChoosableFileFilters());
-      Iterator filtersIter = filters.iterator();
-      FileFilter filter = null;
-      if(filtersIter.hasNext()) {
-        filter = (FileFilter)filtersIter.next();
-        while(filtersIter.hasNext()
-           && filter.getDescription().indexOf("GATE Application") == -1) {
-          filter = (FileFilter)filtersIter.next();
-        }
-      }
-      if(filter == null
-      || filter.getDescription().indexOf("GATE Application") == -1) {
-        // no suitable filter found, create a new one
-        ExtensionFileFilter gappFilter = new ExtensionFileFilter();
-        gappFilter.setDescription("GATE Application files");
-        gappFilter.addExtension("gapp");
-        fileChooser.addChoosableFileFilter(gappFilter);
-        filter = gappFilter;
-      }
-      fileChooser.setFileFilter(filter);
-
+      XJFileChooser fileChooser = MainFrame.getFileChooser();
+      ExtensionFileFilter filter = new ExtensionFileFilter(
+        "GATE Application files", "gapp");
+      fileChooser.addChoosableFileFilter(filter);
       fileChooser.setDialogTitle("Select a file where to save the application "
         + ((target instanceof CorpusController
            && ((CorpusController)target).getCorpus() != null) ?
         "WITH" : "WITHOUT") + " corpus.");
       fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 
-      if(fileChooser.showSaveDialog(largeView, "gate.ApplicationRestore." +
+      if(fileChooser.showSaveDialog(largeView, "applications." +
         target.getName())  == JFileChooser.APPROVE_OPTION) {
         final File file = fileChooser.getSelectedFile();
         Runnable runnable = new Runnable() {
           public void run() {
             try {
+              Preferences node = Preferences.userNodeForPackage(getClass())
+                .node("filechooserlocations");
               gate.util.persistence.PersistenceManager
                 .saveObjectToFile(target, file);
               // save also the location of the application as last application
-              MainFrame.setPreferenceValue(
-                "filechooserlocations/gate/ApplicationRestore",
-                "location", file.getCanonicalPath());
+              node.put("applications.lastapplication", file.getCanonicalPath());
               // add this application to the list of recent applications
-              String list = MainFrame.getPreferenceValue(
-                "filechooserlocations/gate/ApplicationRestore", "list");
+              String list = node.get("applications.list", null);
               if (list == null) { list = ""; }
               list = list.replaceFirst("\\Q"+target.getName()+"\\E;?", "");
               list = target.getName() + ";" + list;
-              MainFrame.setPreferenceValue("filechooserlocations/"
-                + "gate/ApplicationRestore", "list", list);
+              node.put("applications.list", list);
             }
             catch(Exception e) {
               JOptionPane.showMessageDialog(getLargeView(), "Error!\n"
@@ -1171,30 +1129,10 @@ public class NameBearerHandle implements Handle, StatusListener,
    }
 
     public void actionPerformed(ActionEvent ae) {
-      MainFrame.GateFileChooser fileChooser = MainFrame.getFileChooser();
-
-      // add a .zip extension filter if not existing
-      List filters = Arrays.asList(fileChooser.getChoosableFileFilters());
-      Iterator filtersIter = filters.iterator();
-      FileFilter filter = null;
-      if(filtersIter.hasNext()) {
-        filter = (FileFilter)filtersIter.next();
-        while(filtersIter.hasNext()
-           && filter.getDescription().indexOf("ZIP file") == -1) {
-          filter = (FileFilter)filtersIter.next();
-        }
-      }
-      if(filter == null
-      || filter.getDescription().indexOf("ZIP file") == -1) {
-        // no suitable filter found, create a new one
-        ExtensionFileFilter extensionFilter = new ExtensionFileFilter();
-        extensionFilter.setDescription("ZIP file");
-        extensionFilter.addExtension("zip");
-        fileChooser.addChoosableFileFilter(extensionFilter);
-        filter = extensionFilter;
-      }
-      fileChooser.setFileFilter(filter);
-
+      XJFileChooser fileChooser = MainFrame.getFileChooser();
+      ExtensionFileFilter filter =
+        new ExtensionFileFilter("ZIP file", "zip");
+      fileChooser.addChoosableFileFilter(filter);
       fileChooser.setDialogTitle("Select a file where to save the application "
         + ((target instanceof CorpusController
            && ((CorpusController)target).getCorpus() != null) ?
@@ -1202,8 +1140,9 @@ public class NameBearerHandle implements Handle, StatusListener,
       fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 
       // try to find the location of this application
-      String location = MainFrame.getPreferenceValue("filechooserlocations/" +
-        "gate/ApplicationRestore/" + target.getName(), "location");
+      Preferences node = Preferences.userNodeForPackage(getClass())
+        .node("filechooserlocations");
+      String location = node.get("applications."+target.getName(), null);
       if (location != null) {
         // replace extension with .zip
         location = location.replaceFirst("\\.[^.]{3,5}$", ".zip");
@@ -1212,7 +1151,7 @@ public class NameBearerHandle implements Handle, StatusListener,
         fileChooser.ensureFileIsVisible(file);
       }
 
-      if(fileChooser.showSaveDialog(largeView, "gate.ApplicationRestore."
+      if(fileChooser.showSaveDialog(largeView, "applications."
         + target.getName() + ".zip") == JFileChooser.APPROVE_OPTION) {
         final File targetZipFile = fileChooser.getSelectedFile();
         InputOutputAnnotationSetsDialog inOutDialog =
@@ -1555,14 +1494,14 @@ public class NameBearerHandle implements Handle, StatusListener,
               "Select a directory and allowed extensions");
           if(answer) {
             long startTime = System.currentTimeMillis();
-            URL url = null;
+            URL url;
             try {
               url = new URL(corpusFiller.getUrlString());
               java.util.List extensions = corpusFiller.getExtensions();
-              ExtensionFileFilter filter = null;
-              if(extensions == null || extensions.isEmpty())
+              ExtensionFileFilter filter;
+              if(extensions == null || extensions.isEmpty()) {
                 filter = null;
-              else {
+              } else {
                 filter = new ExtensionFileFilter();
                 Iterator extIter = corpusFiller.getExtensions().iterator();
                 while(extIter.hasNext()) {

@@ -1,7 +1,5 @@
 /*
- *  ExtensionFileFilter.java
- *
- *  Copyright (c) 1998-2007, The University of Sheffield.
+ *  Copyright (c) 1998-2009, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -18,37 +16,48 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 
 /**
- * Implementation of a file filter
+ * Implementation of a file name filter.
  * This class is used by {@link javax.swing.JFileChooser} to filter the
  * displayed files by their extension.
- *
  */
 public class ExtensionFileFilter extends javax.swing.filechooser.FileFilter
                                  implements FileFilter {
 
-  /** Debug flag
-   */
-  private static final boolean DEBUG = false;
-
   /**
-   * Builds a new ExtensionFileFilter
+   * Builds a new ExtensionFileFilter.
    */
   public ExtensionFileFilter() {
   }
 
   /**
+   * Creates a FileNameExtensionFilter with the specified description and
+   * file name extensions. The returned FileNameExtensionFilter will accept
+   * all directories and any file with a file name extension contained
+   * in extensions.
+   * @param description textual description for the filter, may be null
+   * @param extensions the accepted file name extensions
+   */
+  public ExtensionFileFilter(String description, String... extensions) {
+    setDescription(description);
+    for (String extension : extensions) {
+      addExtension(extension);
+    }
+  }
+
+  /**
    * Checks a file for compliance with the requested extensions.
    *
-   * @param f
+   * @param f file to test with this filter
    */
   public boolean accept(File f){
     String name = f.getName();
     if(f.isDirectory()) return true;
 
-    for(int i = 0; i < acceptedExtensions.size(); i++){
-      if(name.endsWith((String)acceptedExtensions.get(i))) return true;
+    for (String acceptedExtension : acceptedExtensions) {
+      if (name.endsWith(acceptedExtension)) return true;
     }
     return false;
   }
@@ -58,37 +67,45 @@ public class ExtensionFileFilter extends javax.swing.filechooser.FileFilter
    *
    */
   public String getDescription() {
-    return description;
+    return (description == null) ? toString() : description;
   }
 
   /**
    * Adds a new extension to the list of accepted extensions.
    *
-   * @param ext
+   * @param extension file extension used to filter files
    */
-  public void addExtension(String ext) {
-    acceptedExtensions.add(ext);
+  public void addExtension(String extension) {
+    acceptedExtensions.add(extension);
   }
 
   /**
    * Sets the user friendly description for the accepted files.
    *
-   * @param desc
+   * @param description description for this file filter
    */
-  public void setDescription(String desc) {
-    description = desc;
+  public void setDescription(String description) {
+    this.description = description;
   }
 
   /**
-   * The set of accepted extensions
-   *
+   * @return the set of file name extensions files are tested against
    */
-  private List acceptedExtensions = new ArrayList();
+  public String[] getExtensions() {
+    return acceptedExtensions.toArray(new String[acceptedExtensions.size()]);
+  }
 
   /**
-   * The desciption of the accepted files.
-   *
+   * @return a string representation of this file filter.
    */
+  public String toString() {
+    return "Filter for " + Arrays.toString(acceptedExtensions.toArray());
+  }
+
+  /** The list of accepted file name extensions. */
+  private List<String> acceptedExtensions = new ArrayList<String>();
+
+  /** The description of this file filter. */
   private String description;
 
 } // ExtensionFileFilter

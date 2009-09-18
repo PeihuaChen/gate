@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 1998-2007, The University of Sheffield and Ontotext.
+ *  Copyright (c) 1998-2009, The University of Sheffield and Ontotext.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -27,7 +27,6 @@ import javax.swing.*;
 import javax.swing.Timer;
 import javax.swing.border.Border;
 import javax.swing.event.*;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.table.*;
 import javax.swing.text.*;
 
@@ -42,6 +41,7 @@ import gate.gui.annedit.*;
 import gate.gui.annedit.OwnedAnnotationEditor;
 import gate.swing.ColorGenerator;
 import gate.swing.XJTable;
+import gate.swing.XJFileChooser;
 import gate.util.*;
 
 /**
@@ -1664,30 +1664,10 @@ public class AnnotationSetsView extends AbstractDocumentView
     public void actionPerformed(ActionEvent evt){
       Runnable runableAction = new Runnable(){
         public void run(){
-          MainFrame.GateFileChooser fileChooser = MainFrame.getFileChooser();
-          File selectedFile;
-
-          List filters = Arrays.asList(fileChooser.getChoosableFileFilters());
-          Iterator filtersIter = filters.iterator();
-          FileFilter filter = null;
-          if(filtersIter.hasNext()) {
-            filter = (FileFilter)filtersIter.next();
-            while(filtersIter.hasNext()
-              && filter.getDescription().indexOf("XML") == -1) {
-              filter = (FileFilter)filtersIter.next();
-            }
-          }
-          if(filter == null || filter.getDescription().indexOf("XML") == -1) {
-            // no suitable filter found, create a new one
-            ExtensionFileFilter xmlFilter = new ExtensionFileFilter();
-            xmlFilter.setDescription("XML files");
-            xmlFilter.addExtension("xml");
-            xmlFilter.addExtension("gml");
-            fileChooser.addChoosableFileFilter(xmlFilter);
-            filter = xmlFilter;
-          }
-          fileChooser.setFileFilter(filter);
-
+          XJFileChooser fileChooser = MainFrame.getFileChooser();
+          ExtensionFileFilter filter =
+            new ExtensionFileFilter("XML files", "xml", "gml");
+          fileChooser.addChoosableFileFilter(filter);
           fileChooser.setMultiSelectionEnabled(false);
           fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
           fileChooser.setDialogTitle("Select document to save ...");
@@ -1732,7 +1712,7 @@ public class AnnotationSetsView extends AbstractDocumentView
 
           int res = fileChooser.showSaveDialog(owner, null);
           if(res == JFileChooser.APPROVE_OPTION){
-            selectedFile = fileChooser.getSelectedFile();
+            File selectedFile = fileChooser.getSelectedFile();
             if(selectedFile == null) return;
             StatusListener sListener = (StatusListener)MainFrame.getListeners().
               get("gate.event.StatusListener");
