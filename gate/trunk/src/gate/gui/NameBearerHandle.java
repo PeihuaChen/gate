@@ -1484,13 +1484,12 @@ public class NameBearerHandle implements Handle, StatusListener,
     }
 
     public void actionPerformed(ActionEvent e) {
+      corpusFiller.setExtensions(new ArrayList());
+      corpusFiller.setEncoding("");
+      final boolean answer = OkCancelDialog.showDialog(window, corpusFiller,
+          "Select a directory and allowed extensions");
       Runnable runnable = new Runnable() {
         public void run() {
-          corpusFiller.setExtensions(new ArrayList());
-          corpusFiller.setEncoding("");
-          boolean answer =
-            OkCancelDialog.showDialog(window, corpusFiller,
-              "Select a directory and allowed extensions");
           if(answer) {
             long startTime = System.currentTimeMillis();
             URL url;
@@ -1564,17 +1563,14 @@ public class NameBearerHandle implements Handle, StatusListener,
           }
         }
       };
-      Thread thread =
-        new Thread(Thread.currentThread().getThreadGroup(), runnable);
+      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+        runnable,  "PopulateCorpusAction");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }
   }
 
   class PopulateCorpusWithTrecWebDataAction extends AbstractAction {
-    /**
-     * 
-     */
     private static final long serialVersionUID = 2342321851865139492L;
 
     PopulateCorpusWithTrecWebDataAction() {
@@ -1584,12 +1580,11 @@ public class NameBearerHandle implements Handle, StatusListener,
     }
 
     public void actionPerformed(ActionEvent e) {
+      trecWebFileInputDialog.setEncoding("");
+      final boolean answer = OkCancelDialog.showDialog(window,
+        trecWebFileInputDialog, "Select a trecweb file");
       Runnable runnable = new Runnable() {
         public void run() {
-          trecWebFileInputDialog.setEncoding("");
-          boolean answer =
-            OkCancelDialog.showDialog(window, trecWebFileInputDialog,
-              "Select a trecweb file");
           if(answer) {
             long startTime = System.currentTimeMillis();
             URL url = null;
@@ -1644,8 +1639,8 @@ public class NameBearerHandle implements Handle, StatusListener,
           }
         }
       };
-      Thread thread =
-        new Thread(Thread.currentThread().getThreadGroup(), runnable);
+      Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+        runnable, "PopulateCorpusWithTrecWebDataAction");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }
