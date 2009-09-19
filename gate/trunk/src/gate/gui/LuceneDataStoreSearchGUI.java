@@ -1086,7 +1086,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       return;
     }
 
-    // get informations for the selected row in the results table
+    // get information for the selected row in the results table
     Pattern result = (Pattern) results.get(resultTable.rowViewToModel(
       resultTable.getSelectionModel().getLeadSelectionIndex()));
 
@@ -1110,9 +1110,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
       String type = stackRows[row][ANNOTATION_TYPE];
       String feature = stackRows[row][FEATURE];
-
-      int row2 = findStackRow(ANNOTATION_TYPE, type, FEATURE, feature);
-      String header = (row2 >= 0) ? stackRows[row2][SHORTCUT] : "";
+      String shortcut = stackRows[row][SHORTCUT];
 
       // remove button displayed at the end of each row
       JButton removeRowButton = new ButtonBorder(
@@ -1143,7 +1141,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         crop = AnnotationStack.CROP_MIDDLE;
       }
 
-      centerPanel.addRow(type, feature, header, removeRowButton, crop);
+      centerPanel.addRow(null, type, feature, removeRowButton, shortcut, crop);
 
       // annotations for this row
       PatternAnnotation[] annotations = feature.equals("") ?
@@ -1940,11 +1938,11 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
     public MouseInputAdapter createListener(String... parameters) {
       switch(parameters.length) {
-        case 2:
-          return new AnnotationMouseListener(parameters[0]);
-        case 4:
+        case 3:
+          return new AnnotationMouseListener(parameters[1]);
+        case 5:
           return new AnnotationMouseListener(
-            parameters[0], parameters[1], parameters[2]);
+            parameters[1], parameters[2], parameters[3]);
         default:
           return null;
       }

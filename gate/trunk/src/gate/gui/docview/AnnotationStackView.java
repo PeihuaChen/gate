@@ -137,7 +137,7 @@ public class AnnotationStackView  extends AbstractDocumentView
 
   class PreviousAnnotationAction extends AbstractAction {
     public PreviousAnnotationAction() {
-      super("Previous annotation");
+      super("Previous boundary");
       putValue(SHORT_DESCRIPTION, "Centre the view on the closest previous " +
         "annotation boundary among all displayed");
       putValue(MNEMONIC_KEY, KeyEvent.VK_LEFT);
@@ -172,7 +172,7 @@ public class AnnotationStackView  extends AbstractDocumentView
 
   class NextAnnotationAction extends AbstractAction {
     public NextAnnotationAction() {
-      super("Next annotation");
+      super("Next boundary");
       putValue(SHORT_DESCRIPTION, "Centre the view on the closest next " +
         "annotation boundary among all displayed");
       putValue(MNEMONIC_KEY, KeyEvent.VK_RIGHT);
@@ -251,11 +251,9 @@ public class AnnotationStackView  extends AbstractDocumentView
     for(SetHandler setHandler : annotationSetsView.setHandlers) {
       for(TypeHandler typeHandler: setHandler.typeHandlers) {
         if (typeHandler.isSelected()) {
-          String feature = (typesFeatures.get(typeHandler.name) == null) ?
-            "" : typesFeatures.get(typeHandler.name);
-          stackPanel.addRow(typeHandler.name, feature, setHandler.set.getName()
-            + "#" + typeHandler.name + (feature.equals("")?"":".") + feature,
-            null, AnnotationStack.CROP_MIDDLE);
+          stackPanel.addRow(setHandler.set.getName(), typeHandler.name,
+            typesFeatures.get(typeHandler.name),
+            null, null, AnnotationStack.CROP_MIDDLE);
           Set<Annotation> annotations = setHandler.set.get(typeHandler.name)
             .get(Math.max(0l, caretPosition - context), Math.min(
               document.getContent().size()-1, caretPosition + context + 1));
@@ -311,10 +309,12 @@ public class AnnotationStackView  extends AbstractDocumentView
     if (selectedValue == null
      || selectedValue.equals("Cancel")
      || setsTextField.getText().trim().length() == 0) {
+      textView.getTextView().requestFocusInWindow();
       return false;
     }
     targetSetName = setsTextField.getText();
     targetSetLabel.setText("Target set: " + targetSetName);
+    textView.getTextView().requestFocusInWindow();
     return true;
   }
 
@@ -323,28 +323,21 @@ public class AnnotationStackView  extends AbstractDocumentView
     public AnnotationMouseListener() {
     }
 
-    public AnnotationMouseListener(String annotationId) {
-      Set<String> setNames = new HashSet<String>();
-      if (document.getAnnotationSetNames() != null) {
-        setNames.addAll(document.getAnnotationSetNames());
-      }
-      setNames.add(null); // default set name
-      for (String setName : setNames) {
-        AnnotationSet set = document.getAnnotations(setName);
-        annotation = set.get(Integer.valueOf(annotationId));
-        if (annotation != null) {
-          annotationData = new AnnotationDataImpl(set, annotation);
-          break;
-        }
+    public AnnotationMouseListener(String setName, String annotationId) {
+      AnnotationSet set = document.getAnnotations(setName);
+      annotation = set.get(Integer.valueOf(annotationId));
+      if (annotation != null) {
+        // the annotation has been found by its id
+        annotationData = new AnnotationDataImpl(set, annotation);
       }
     }
 
     public MouseInputAdapter createListener(String... parameters) {
       switch(parameters.length) {
-        case 2:
-          return new AnnotationMouseListener(parameters[1]);
-        case 4:
-          return new AnnotationMouseListener(parameters[3]);
+        case 3:
+          return new AnnotationMouseListener(parameters[0], parameters[2]);
+        case 5:
+          return new AnnotationMouseListener(parameters[0], parameters[4]);
         default:
           return null;
       }
@@ -354,6 +347,9 @@ public class AnnotationStackView  extends AbstractDocumentView
       processMouseEvent(me);
     }
     public void mouseReleased(MouseEvent me) {
+      processMouseEvent(me);
+    }
+    public void mouseClicked(MouseEvent me) {
       processMouseEvent(me);
     }
     public void processMouseEvent(MouseEvent me) {
@@ -373,17 +369,26 @@ public class AnnotationStackView  extends AbstractDocumentView
         }
         popup.show(me.getComponent(), me.getX(), me.getY());
 
-      } else if (me.getButton() == MouseEvent.BUTTON1
+      } else if (me.getID() == MouseEvent.MOUSE_CLICKED
+              && me.getButton() == MouseEvent.BUTTON1
               && me.getClickCount() == 2) {
         if (targetSetName == null) {
           if (!askTargetSet()) { return; }
         }
         // copy the annotation to the target annotation set
-        document.getAnnotations(targetSetName).add(annotation);
+        try {
+          document.getAnnotations(targetSetName).add(
+            annotation.getStartNode().getOffset(),
+            annotation.getEndNode().getOffset(),
+            annotation.getType(),
+            annotation.getFeatures());
+        } catch (InvalidOffsetException e) {
+          e.printStackTrace();
+        }
 
         // wait some time
         Date timeToRun = new Date(System.currentTimeMillis() + 1000);
-        Timer timer = new Timer("Annotation stack view timer", true);
+        Timer timer = new Timer("Annotation stack view select type", true);
         timer.schedule(new TimerTask() {
           public void run() {
             SwingUtilities.invokeLater(new Runnable() { public void run() {
@@ -394,6 +399,7 @@ public class AnnotationStackView  extends AbstractDocumentView
           }
         }, timeToRun);
       }
+      textView.getTextView().requestFocusInWindow();
     }
 
     public void mouseEntered(MouseEvent e) {
@@ -480,7 +486,9 @@ public class AnnotationStackView  extends AbstractDocumentView
         return;
       }
       if (e.getButton() != MouseEvent.BUTTON1
-       || e.getClickCount() != 2) { return; }
+       || e.getClickCount() != 2) {
+        return;
+      }
       // get a list of features for the current annotation type
       TreeSet<String> features = new TreeSet<String>();
       Set<String> setNames = new HashSet<String>();
@@ -517,6 +525,7 @@ public class AnnotationStackView  extends AbstractDocumentView
             popupWindow.setVisible(false);
             popupWindow.dispose();
             updateStackView();
+            textView.getTextView().requestFocusInWindow();
           }
         }
       });
@@ -573,5 +582,7 @@ public class AnnotationStackView  extends AbstractDocumentView
   Document document;
   PreviousAnnotationAction previousAnnotationAction;
   NextAnnotationAction nextAnnotationAction;
+  /** optionally map a type to a feature when the feature value
+   *  must be displayed in the rectangle annotation */
   Map<String,String> typesFeatures;
 }
