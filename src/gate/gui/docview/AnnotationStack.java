@@ -70,16 +70,18 @@ public class AnnotationStack extends JPanel {
   /**
    * Add a row to the annotation stack.
    *
+   * @param set set name for the annotation, may be null
    * @param type annotation type
-   * @param feature feature name or empty string if not to display
-   * @param header text for the first column
-   * @param lastColumnButton button at the end of the column; may be null
+   * @param feature feature name, may be null
+   * @param lastColumnButton button at the end of the column, may be null
+   * @param shortcut replace the header of the row, may be null
    * @param crop how to crop the text for the annotation if too long, one of
    *   {@link #CROP_START}, {@link #CROP_MIDDLE} or {@link #CROP_END}
    */
-  public void addRow(String type, String feature, String header,
-                     JButton lastColumnButton, int crop) {
-    stackRows.add(new StackRow(type, feature, header, lastColumnButton, crop));
+  public void addRow(String set, String type, String feature,
+                     JButton lastColumnButton, String shortcut, int crop) {
+    stackRows.add(
+      new StackRow(set, type, feature, lastColumnButton, shortcut, crop));
   }
 
   /**
@@ -195,6 +197,9 @@ public class AnnotationStack extends JPanel {
     for (StackRow stackRow : stackRows) {
       String type = stackRow.getType();
       String feature = stackRow.getFeature();
+      if (feature == null) { feature = ""; }
+      String shortcut = stackRow.getShortcut();
+      if (shortcut == null) { shortcut = ""; }
 
       gbc.gridy++;
       gbc.gridx = 0;
@@ -204,8 +209,9 @@ public class AnnotationStack extends JPanel {
       // add the header of the row
       JLabel annotationTypeAndFeature = new JLabel();
       String typeAndFeature = type + (feature.equals("") ? "" : ".") + feature;
-      annotationTypeAndFeature.setText(stackRow.getHeader().equals("") ?
-        typeAndFeature : stackRow.getHeader());
+      annotationTypeAndFeature.setText(!shortcut.equals("") ?
+        shortcut : stackRow.getSet() != null ?
+          stackRow.getSet() + "#" + typeAndFeature : typeAndFeature);
       annotationTypeAndFeature.setOpaque(true);
       annotationTypeAndFeature.setBackground(Color.WHITE);
       annotationTypeAndFeature.setBorder(new CompoundBorder(
@@ -312,8 +318,8 @@ public class AnnotationStack extends JPanel {
         label.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
         label.setOpaque(true);
         if(feature.equals("")) {
-          label.addMouseListener(annotationMouseListener
-            .createListener(type, String.valueOf(ann.getId())));
+          label.addMouseListener(annotationMouseListener.createListener(
+            stackRow.getSet(), type, String.valueOf(ann.getId())));
           // show the feature values in the tooltip
           String width = (Strings.toString(ann.getFeatures()).length() > 100) ?
             "500" : "100%";
@@ -344,8 +350,8 @@ public class AnnotationStack extends JPanel {
 
         } else {
           label.addMouseListener(annotationMouseListener.createListener(
-            type, feature, Strings.toString(ann.getFeatures().get(feature)),
-            String.valueOf(ann.getId())));
+            stackRow.getSet(), type, feature, Strings.toString(
+              ann.getFeatures().get(feature)), String.valueOf(ann.getId())));
         }
         // find the first empty row span for this annotation
         int oldGridy = gbc.gridy;
@@ -419,7 +425,7 @@ public class AnnotationStack extends JPanel {
 
   /**
    * This method uses the java.util.prefs.Preferences and get the color
-   * for particular annotationType.. This color could have been saved by
+   * for particular annotationType. This color could have been saved by
    * the AnnotationSetsView
    *
    * @param annotationType name of the annotation type
@@ -458,17 +464,20 @@ public class AnnotationStack extends JPanel {
    * Extension of a MouseInputAdapter that adds a method
    * to create new Listeners from it.<br>
    * You must overriden the createListener method.
-   * <br>
-   * There is 3 cases for the parameters of createListener:
-   * <ul>
-   * <li>first line of text -> createListener(word)
-   * <li>first column (header) -> createListener(type),
-   *   createListener(type, feature)
-   * <li>annotation -> createListener(type, annotationId),
-   *   createListener(type, feature, value, annotationId)
-   * </ul>
    */
   public static class StackMouseListener extends MouseInputAdapter {
+    /**
+     * There is 3 cases for the parameters of createListener:
+     * <ol>
+     * <li>first line of text -> createListener(word)
+     * <li>first column, header -> createListener(type),
+     *   createListener(type, feature)
+     * <li>annotation -> createListener(set, type, annotationId),
+     *   createListener(set, type, feature, value, annotationId)
+     * </ol>
+     * @param parameters see above
+     * @return a MouseInputAdapter for the text, header or annotation
+     */
     public MouseInputAdapter createListener(String... parameters) {
       return null;
     }
@@ -504,16 +513,20 @@ public class AnnotationStack extends JPanel {
    * A row of annotations in the stack.
    */
   class StackRow {
-    StackRow(String type, String feature, String header,
-             JButton lastColumnButton, int crop) {
+    StackRow(String set, String type, String feature,
+             JButton lastColumnButton, String shortcut, int crop) {
+      this.set = set;
       this.type = type;
       this.feature = feature;
       this.annotations = new HashSet<StackAnnotation>();
-      this.header = header;
       this.lastColumnButton = lastColumnButton;
+      this.shortcut = shortcut;
       this.crop = crop;
     }
 
+    public String getSet() {
+      return set;
+    }
     public String getType() {
       return type;
     }
@@ -523,11 +536,11 @@ public class AnnotationStack extends JPanel {
     public Set<StackAnnotation> getAnnotations() {
       return annotations;
     }
-    public String getHeader() {
-      return header;
-    }
     public JButton getLastColumnButton() {
       return lastColumnButton;
+    }
+    public String getShortcut() {
+      return shortcut;
     }
     public int getCrop() {
       return crop;
@@ -536,11 +549,12 @@ public class AnnotationStack extends JPanel {
       annotations.add(annotation);
     }
 
+    String set;
     String type;
     String feature;
     Set<StackAnnotation> annotations;
-    String header;
     JButton lastColumnButton;
+    String shortcut;
     int crop;
   }
 
