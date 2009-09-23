@@ -7,6 +7,8 @@
   <property name="build" location="build"/>
   <property name="dist"  location="dist"/>
   <property name="jar.location" location="hindi.jar" />
+  <property name="doc.dir" location="doc" />
+  <property name="javadoc.dir" location="${doc.dir}/javadoc" />
 
   <property name="gate.home" location="../.." />
   <property name="gate.jar" location="${gate.home}/bin/gate.jar" />
@@ -33,6 +35,25 @@
     <javac srcdir="${src}" destdir="${build}" source="1.4"
            classpathref="compile.classpath" />
   </target>
+  <!-- Build JavaDoc documentation -->
+  <target name="doc.prepare">
+    <mkdir dir="${javadoc.dir}" />
+  </target>
+
+  <target name="javadoc" depends="doc.prepare">
+    <javadoc destdir="${javadoc.dir}" packagenames="*"
+             classpathref="compile.classpath"
+             encoding="UTF-8"
+             windowtitle="${plugin.name} JavaDoc"
+             source="1.5">
+      <sourcepath>
+        <pathelement location="${src}" />
+      </sourcepath>
+      <link href="http://java.sun.com/j2se/1.5.0/docs/api/" />
+      <link href="http://gate.ac.uk/gate/doc/javadoc/" />
+    </javadoc>
+  </target>
+
 
   <target name="dist" depends="compile"
         description="generate the distribution" >
