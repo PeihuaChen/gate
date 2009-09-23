@@ -5,6 +5,8 @@
   <property name="dest" value="classes"/>
   <property name="gatehome" value="../.."/>
   <property name="src" value="src"/>
+  <property name="doc.dir" location="doc" />
+  <property name="javadoc.dir" location="${doc.dir}/javadoc" />
 
   <fileset id="gatelib.classpath" dir="${gatehome}/lib">
     <include name="*.jar"/>
@@ -32,6 +34,25 @@
     <javac classpathref="compile.classpath" debug="true" deprecation="true" destdir="${dest}" nowarn="false">
       <src path="${src}"/>
     </javac>
+  </target>
+
+  <!-- Build JavaDoc documentation -->
+  <target name="doc.prepare">
+    <mkdir dir="${javadoc.dir}" />
+  </target>
+
+  <target name="javadoc" depends="doc.prepare">
+    <javadoc destdir="${javadoc.dir}" packagenames="*"
+             classpathref="compile.classpath"
+             encoding="UTF-8"
+             windowtitle="${plugin.name} JavaDoc"
+             source="1.5">
+      <sourcepath>
+        <pathelement location="${src}" />
+      </sourcepath>
+      <link href="http://java.sun.com/j2se/1.5.0/docs/api/" />
+      <link href="http://gate.ac.uk/gate/doc/javadoc/" />
+    </javadoc>
   </target>
 
   <target name="clean.classes">
