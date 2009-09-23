@@ -4076,7 +4076,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     protected void addMenuItems() {
     final Preferences node = prefs.node("filechooserlocations");
     final String list = node.get("applications.list", null);
-    if (list == null) { return; }
+    if (list == null || list.equals("")) { return; }
     for (final String name : list.split(";")) {
       final String location = node.get("applications." + name, null);
       final XJMenuItem item = new XJMenuItem(new AbstractAction(name,
