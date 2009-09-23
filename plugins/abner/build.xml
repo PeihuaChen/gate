@@ -7,6 +7,8 @@
   <property name="src.dir" location="src" />
   <property name="classes.dir" location="classes" />
   <property name="jar.location" location="abner.jar" />
+  <property name="doc.dir" location="doc" />
+  <property name="javadoc.dir" location="${doc.dir}/javadoc" />
 
   <!-- Path to compile - includes gate.jar and GATE/lib/*.jar -->
   <path id="compile.classpath">
@@ -41,6 +43,26 @@
          update="false"
          basedir="${classes.dir}" />
   </target>
+
+  <!-- Build JavaDoc documentation -->
+  <target name="doc.prepare">
+    <mkdir dir="${javadoc.dir}" />
+  </target>
+
+  <target name="javadoc" depends="doc.prepare">
+    <javadoc destdir="${javadoc.dir}" packagenames="*"
+             classpathref="compile.classpath"
+             encoding="UTF-8"
+             windowtitle="${plugin.name} JavaDoc"
+             source="1.5">
+      <sourcepath>
+        <pathelement location="${src.dir}" />
+      </sourcepath>
+      <link href="http://java.sun.com/j2se/1.5.0/docs/api/" />
+      <link href="http://gate.ac.uk/gate/doc/javadoc/" />
+    </javadoc>
+  </target>
+
 
   <!-- remove the generated .class files -->
   <target name="clean.classes" >
