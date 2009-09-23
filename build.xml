@@ -445,6 +445,18 @@
     </for>
   </target>
 
+  <target name="plugins.javadoc" depends="jar" >
+    <for param="plugin">
+      <path>
+        <filelist refid="plugins.to.build" />
+      </path>
+      <sequential>
+        <echo>Running javadoc for plugin @{plugin}</echo>
+        <ant dir="@{plugin}" inheritAll="false" target="javadoc" />
+      </sequential>
+    </for>
+  </target>
+
   <target name="plugins.test" depends="jar" >
     <for param="plugin">
       <path>
@@ -456,7 +468,6 @@
       </sequential>
     </for>
   </target>
-
   <target name="plugins.distro.prepare">
     <for param="plugin">
       <path>
