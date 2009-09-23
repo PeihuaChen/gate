@@ -78,6 +78,8 @@ Ian Roberts (i.roberts@dcs.shef.ac.uk), March 2006
   <property name="classes.dir" location="classes"/>
   <property name="src.dir" location="src"/>
   <property name="prologimpls.dir" location="prolog-impls" />
+  <property name="doc.dir" location="doc" />
+  <property name="javadoc.dir" location="${doc.dir}/javadoc" />
 
   <!-- JAR file names -->
   <property name="supple.jar" location="SUPPLE.jar" />
@@ -163,6 +165,26 @@ Ian Roberts (i.roberts@dcs.shef.ac.uk), March 2006
            debug="true" debuglevel="lines,source"
            srcdir="${src.dir}" source="1.4"/>
   </target>
+
+  <!-- Build JavaDoc documentation -->
+  <target name="doc.prepare">
+    <mkdir dir="${javadoc.dir}" />
+  </target>
+
+  <target name="javadoc" depends="doc.prepare">
+    <javadoc destdir="${javadoc.dir}" packagenames="*"
+             classpathref="compile.classpath"
+             encoding="UTF-8"
+             windowtitle="${plugin.name} JavaDoc"
+             source="1.5">
+      <sourcepath>
+        <pathelement location="${src.dir}" />
+      </sourcepath>
+      <link href="http://java.sun.com/j2se/1.5.0/docs/api/" />
+      <link href="http://gate.ac.uk/gate/doc/javadoc/" />
+    </javadoc>
+  </target>
+
 
   <!-- Build the core SUPPLE JAR file -->
   <target name="supple.jar" depends="supple.compile">
