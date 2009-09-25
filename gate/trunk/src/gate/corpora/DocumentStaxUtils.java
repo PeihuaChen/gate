@@ -14,14 +14,19 @@
  */
 package gate.corpora;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -33,6 +38,7 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -58,6 +64,8 @@ import gate.util.Out;
  * using StAX (the Streaming API for XML).
  */
 public class DocumentStaxUtils {
+
+  private static XMLInputFactory inputFactory = null;
 
   /**
    * The char used to replace characters in text content that are
@@ -589,6 +597,201 @@ public class DocumentStaxUtils {
     }// End try
   }
 
+  // ///// Reading XCES /////
+
+  // constants
+  /**
+   * Version of XCES that this class can handle.
+   */
+  public static final String XCES_VERSION = "1.0";
+
+  /**
+   * XCES namespace URI.
+   */
+  public static final String XCES_NAMESPACE = "http://www.xces.org/schema/2003";
+
+  /**
+   * Read XML data in <a href="http://www.xces.org/">XCES</a> format
+   * from the given stream and add the corresponding annotations to the
+   * given annotation set. This method does not close the stream, this
+   * is the responsibility of the caller.
+   * 
+   * @param is the input stream to read from, which will <b>not</b> be
+   *          closed before returning.
+   * @param as the annotation set to read into.
+   */
+  public static void readXces(InputStream is, AnnotationSet as)
+          throws XMLStreamException {
+    if(inputFactory == null) {
+      inputFactory = XMLInputFactory.newInstance();
+    }
+    XMLStreamReader xsr = inputFactory.createXMLStreamReader(is);
+    try {
+      nextTagSkipDTD(xsr);
+      readXces(xsr, as);
+    }
+    finally {
+      xsr.close();
+    }
+  }
+
+  /**
+   * A copy of the nextTag algorithm from the XMLStreamReader javadocs,
+   * but which also skips over DTD events as well as whitespace,
+   * comments and PIs.
+   * 
+   * @param xsr the reader to advance
+   * @return {@link XMLStreamConstants#START_ELEMENT} or
+   *         {@link XMLStreamConstants#END_ELEMENT} for the next tag.
+   * @throws XMLStreamException
+   */
+  private static int nextTagSkipDTD(XMLStreamReader xsr)
+          throws XMLStreamException {
+    int eventType = xsr.next();
+    while((eventType == XMLStreamConstants.CHARACTERS && xsr.isWhiteSpace())
+            || (eventType == XMLStreamConstants.CDATA && xsr.isWhiteSpace())
+            || eventType == XMLStreamConstants.SPACE
+            || eventType == XMLStreamConstants.PROCESSING_INSTRUCTION
+            || eventType == XMLStreamConstants.COMMENT
+            || eventType == XMLStreamConstants.DTD) {
+      eventType = xsr.next();
+    }
+    if(eventType != XMLStreamConstants.START_ELEMENT
+            && eventType != XMLStreamConstants.END_ELEMENT) {
+      throw new XMLStreamException("expected start or end tag", xsr
+              .getLocation());
+    }
+    return eventType;
+  }
+
+  /**
+   * Read XML data in <a href="http://www.xces.org/">XCES</a> format
+   * from the given reader and add the corresponding annotations to the
+   * given annotation set. The reader must be positioned on the starting
+   * <code>cesAna</code> tag and will be left pointing to the
+   * corresponding end tag.
+   * 
+   * @param reader the XMLStreamReader to read from.
+   * @param as the annotation set to read into.
+   * @throws XMLStreamException
+   */
+  public static void readXces(XMLStreamReader xsr, AnnotationSet as)
+          throws XMLStreamException {
+    xsr.require(XMLStreamConstants.START_ELEMENT, XCES_NAMESPACE, "cesAna");
+
+    // Set of all annotation IDs in this set.
+    Set<Integer> allAnnotIds = new TreeSet<Integer>();
+    // pre-populate with the IDs of any existing annotations in the set
+    for(Annotation a : as) {
+      allAnnotIds.add(a.getId());
+    }
+
+    // lists to collect the annotations in before adding them to the
+    // set. We collect the annotations that specify and ID (via
+    // struct/@n) in one list and those that don't in another, so we can
+    // add the identified ones first, then the others will take the next
+    // available ID
+    List<AnnotationObject> collectedIdentifiedAnnots = new ArrayList<AnnotationObject>();
+    List<AnnotationObject> collectedNonIdentifiedAnnots = new ArrayList<AnnotationObject>();
+    while(xsr.nextTag() == XMLStreamConstants.START_ELEMENT) {
+      xsr.require(XMLStreamConstants.START_ELEMENT, XCES_NAMESPACE, "struct");
+      AnnotationObject annObj = new AnnotationObject();
+      annObj.setElemName(xsr.getAttributeValue(null, "type"));
+      try {
+        int from = Integer.parseInt(xsr.getAttributeValue(null, "from"));
+        annObj.setStart(new Long(from));
+      }
+      catch(NumberFormatException nfe) {
+        throw new XMLStreamException(
+                "Non-integer value found for struct/@from", xsr.getLocation());
+      }
+
+      try {
+        int to = Integer.parseInt(xsr.getAttributeValue(null, "to"));
+        annObj.setEnd(new Long(to));
+      }
+      catch(NumberFormatException nfe) {
+        throw new XMLStreamException("Non-integer value found for struct/@to",
+                xsr.getLocation());
+      }
+
+      String annotIdString = xsr.getAttributeValue(null, "n");
+      if(annotIdString != null) {
+        try {
+          Integer annotationId = Integer.valueOf(annotIdString);
+          if(allAnnotIds.contains(annotationId)) {
+            throw new XMLStreamException("Annotation IDs must be unique "
+                    + "within an annotation set. Found duplicate ID", xsr
+                    .getLocation());
+          }
+          allAnnotIds.add(annotationId);
+          annObj.setId(annotationId);
+        }
+        catch(NumberFormatException nfe) {
+          throw new XMLStreamException("Non-integer annotation ID found", xsr
+                  .getLocation());
+        }
+      }
+
+      // get the features of this annotation
+      annObj.setFM(readXcesFeatureMap(xsr));
+      // readFeatureMap leaves xsr on the </Annotation> tag
+      if(annObj.getId() != null) {
+        collectedIdentifiedAnnots.add(annObj);
+      }
+      else {
+        collectedNonIdentifiedAnnots.add(annObj);
+      }
+    }
+
+    // finished reading, add the annotations to the set
+    AnnotationObject a = null;
+    try {
+      // first the ones that specify an ID
+      Iterator<AnnotationObject> it = collectedIdentifiedAnnots.iterator();
+      while(it.hasNext()) {
+        a = it.next();
+        as.add(a.getId(), a.getStart(), a.getEnd(), a.getElemName(), a.getFM());
+      }
+      // next the ones that don't
+      it = collectedNonIdentifiedAnnots.iterator();
+      while(it.hasNext()) {
+        a = it.next();
+        as.add(a.getStart(), a.getEnd(), a.getElemName(), a.getFM());
+      }
+    }
+    catch(InvalidOffsetException ioe) {
+      throw new XMLStreamException("Invalid offset when creating annotation "
+              + a, ioe);
+    }
+  }
+
+  /**
+   * Processes a struct element to build a feature map. The element is
+   * expected to contain feat children, each with name and value
+   * attributes. The reader will be returned positioned on the closing
+   * struct tag.
+   * 
+   * @param xsr
+   * @return
+   * @throws XMLStreamException
+   */
+  public static FeatureMap readXcesFeatureMap(XMLStreamReader xsr)
+          throws XMLStreamException {
+    FeatureMap fm = Factory.newFeatureMap();
+    while(xsr.nextTag() == XMLStreamConstants.START_ELEMENT) {
+      xsr.require(XMLStreamConstants.START_ELEMENT, XCES_NAMESPACE, "feat");
+      String featureName = xsr.getAttributeValue(null, "name");
+      Object featureValue = xsr.getAttributeValue(null, "value");
+
+      fm.put(featureName, featureValue);
+      // read the (possibly virtual) closing tag of the feat element
+      xsr.nextTag();
+      xsr.require(XMLStreamConstants.END_ELEMENT, XCES_NAMESPACE, "feat");
+    }
+    return fm;
+  }
+
   // ////////// Writing methods ////////////
 
   private static XMLOutputFactory outputFactory = null;
@@ -687,10 +890,10 @@ public class DocumentStaxUtils {
    * must be filled in by the caller if required.
    * 
    * @param doc the Document to write
-   * @param annotationSets the annotations to include.  If the map
-   *         contains an entry for the key <code>null</code>, this
-   *         will be treated as the default set.  All other entries
-   *         are treated as named annotation sets.
+   * @param annotationSets the annotations to include. If the map
+   *          contains an entry for the key <code>null</code>, this
+   *          will be treated as the default set. All other entries are
+   *          treated as named annotation sets.
    * @param xsw the StAX XMLStreamWriter to use for output
    * @throws GateException if an error occurs during writing
    */
@@ -738,7 +941,8 @@ public class DocumentStaxUtils {
     Iterator<String> iter = annotationSets.keySet().iterator();
     while(iter.hasNext()) {
       String annotationSetName = iter.next();
-      // ignore the null entry, if present - we've already handled that above
+      // ignore the null entry, if present - we've already handled that
+      // above
       if(annotationSetName != null) {
         Collection<Annotation> annots = annotationSets.get(annotationSetName);
         xsw.writeComment(" Named annotation set ");
@@ -761,9 +965,9 @@ public class DocumentStaxUtils {
   /**
    * Write the specified GATE Document to an XMLStreamWriter. This
    * method writes just the GateDocument element - the XML declaration
-   * must be filled in by the caller if required.  This method writes
-   * all the annotations in all the annotation sets on the document.
-   * To write just specific annotations, use
+   * must be filled in by the caller if required. This method writes all
+   * the annotations in all the annotation sets on the document. To
+   * write just specific annotations, use
    * {@link #writeDocument(Document, Map, XMLStreamWriter, String)}.
    */
   public static void writeDocument(Document doc, XMLStreamWriter xsw,
@@ -775,7 +979,7 @@ public class DocumentStaxUtils {
     }
     writeDocument(doc, asMap, xsw, namespaceURI);
   }
-  
+
   /**
    * Writes the given annotation set to an XMLStreamWriter as GATE XML
    * format. The Name attribute of the generated AnnotationSet element
@@ -788,9 +992,10 @@ public class DocumentStaxUtils {
    */
   public static void writeAnnotationSet(AnnotationSet annotations,
           XMLStreamWriter xsw, String namespaceURI) throws XMLStreamException {
-    writeAnnotationSet((Collection)annotations, annotations.getName(), xsw, namespaceURI);
+    writeAnnotationSet((Collection)annotations, annotations.getName(), xsw,
+            namespaceURI);
   }
-  
+
   /**
    * Writes the given annotation set to an XMLStreamWriter as GATE XML
    * format. The value for the Name attribute of the generated
@@ -843,7 +1048,7 @@ public class DocumentStaxUtils {
           throws XMLStreamException {
     writeAnnotationSet((Collection)annotations, asName, xsw, namespaceURI);
   }
-  
+
   /**
    * Writes the content of the given document to an XMLStreamWriter as a
    * mixed content element called "TextWithNodes". At each point where
@@ -853,10 +1058,10 @@ public class DocumentStaxUtils {
    * 
    * @param doc the document whose content is to be written
    * @param annotationSets the annotations for which nodes are required.
-   *         This is a collection of collections.
+   *          This is a collection of collections.
    * @param xsw the {@link XMLStreamWriter} to write to.
-   * @param namespaceURI the namespace URI.  May be empty but may not
-   *         be null.
+   * @param namespaceURI the namespace URI. May be empty but may not be
+   *          null.
    * @throws XMLStreamException
    */
   public static void writeTextWithNodes(Document doc,
@@ -905,17 +1110,17 @@ public class DocumentStaxUtils {
     // and the closing TextWithNodes
     xsw.writeEndElement();
   }
-  
+
   /**
    * Write a TextWithNodes section containing nodes for all annotations
    * in the given document.
    * 
-   * @see #writeTextWithNodes(Document, Collection, XMLStreamWriter, String)
+   * @see #writeTextWithNodes(Document, Collection, XMLStreamWriter,
+   *      String)
    */
   public static void writeTextWithNodes(Document doc, XMLStreamWriter xsw,
           String namespaceURI) throws XMLStreamException {
-    Collection<Collection<Annotation>> annotationSets =
-      new ArrayList<Collection<Annotation>>();
+    Collection<Collection<Annotation>> annotationSets = new ArrayList<Collection<Annotation>>();
     annotationSets.add(doc.getAnnotations());
     if(doc.getNamedAnnotationSets() != null) {
       annotationSets.addAll(doc.getNamedAnnotationSets().values());
@@ -947,9 +1152,9 @@ public class DocumentStaxUtils {
   }
 
   /**
-   * Return a string containing the same characters as the supplied string,
-   * except that any characters that are illegal in XML will be replaced with
-   * spaces. Characters that are illegal in XML are:
+   * Return a string containing the same characters as the supplied
+   * string, except that any characters that are illegal in XML will be
+   * replaced with spaces. Characters that are illegal in XML are:
    * <ul>
    * <li>Control characters U+0000 to U+001F, <i>except</i> U+0009,
    * U+000A and U+000D, which are permitted.</li>
@@ -959,13 +1164,13 @@ public class DocumentStaxUtils {
    * order mark).</li>
    * </ul>
    * 
-   * A new string is only created if required - if the supplied string contains
-   * no illegal characters then the same object is returned.
+   * A new string is only created if required - if the supplied string
+   * contains no illegal characters then the same object is returned.
    * 
    * @param str the string to process
-   * @return <code>str</code>, unless it contains illegal characters in which
-   *         case a new string the same as str but with the illegal characters
-   *         replaced by spaces.
+   * @return <code>str</code>, unless it contains illegal characters
+   *         in which case a new string the same as str but with the
+   *         illegal characters replaced by spaces.
    */
   static String replaceXMLIllegalCharactersInString(String str) {
     StringBuilder builder = null;
@@ -994,9 +1199,10 @@ public class DocumentStaxUtils {
   /**
    * Check whether a character is illegal in XML.
    * 
-   * @param buf the character sequence in which to look (must not be null)
-   * @param i the index of the character to check (must be within the valid
-   *         range of characters in <code>buf</code>)
+   * @param buf the character sequence in which to look (must not be
+   *          null)
+   * @param i the index of the character to check (must be within the
+   *          valid range of characters in <code>buf</code>)
    */
   static final boolean isInvalidXmlChar(CharSequence buf, int i) {
     // illegal control character
@@ -1050,10 +1256,10 @@ public class DocumentStaxUtils {
    * as a sequence of "Feature" elements, each having "Name" and "Value"
    * children. Note that there is no enclosing element - the caller must
    * write the enclosing "GateDocumentFeatures" or "Annotation" element.
-   * Characters in feature values that are illegal in XML are replaced by
-   * {@link #INVALID_CHARACTER_REPLACEMENT} (a space).  Feature <i>names</i>
-   * are not modified - an illegal character in a feature name will cause the
-   * serialization to fail.
+   * Characters in feature values that are illegal in XML are replaced
+   * by {@link #INVALID_CHARACTER_REPLACEMENT} (a space). Feature
+   * <i>names</i> are not modified - an illegal character in a feature
+   * name will cause the serialization to fail.
    * 
    * @param features
    * @param xsw
@@ -1244,6 +1450,183 @@ public class DocumentStaxUtils {
     return false;
   }
 
+  // ///// Writing XCES /////
+
+  /**
+   * Comparator that compares annotations based on their offsets; when
+   * two annotations start at the same location, the longer one is
+   * considered to come first in the ordering.
+   */
+  public static final Comparator<Annotation> LONGEST_FIRST_OFFSET_COMPARATOR = new Comparator<Annotation>() {
+    public int compare(Annotation left, Annotation right) {
+      long loffset = left.getStartNode().getOffset().longValue();
+      long roffset = right.getStartNode().getOffset().longValue();
+      if(loffset == roffset) {
+        // if the start offsets are the same compare end
+        // offsets.
+        // the largest offset should come first
+        loffset = left.getEndNode().getOffset().longValue();
+        roffset = right.getEndNode().getOffset().longValue();
+        if(loffset == roffset) {
+          return left.getId() - right.getId();
+        }
+        else {
+          return (int)(roffset - loffset);
+        }
+      }
+      return (int)(loffset - roffset);
+    }
+  };
+
+  /**
+   * Save the content of a document to the given output stream. Since
+   * XCES content files are plain text (not XML), XML-illegal characters
+   * are not replaced when writing. The stream is <i>not</i> closed by
+   * this method, that is left to the caller.
+   * 
+   * @param doc the document to save
+   * @param out the stream to write to
+   * @param encoding the character encoding to use. If null, defaults to
+   *          UTF-8
+   */
+  public static void writeXcesContent(Document doc, OutputStream out,
+          String encoding) throws IOException {
+    if(encoding == null) {
+      encoding = "UTF-8";
+    }
+
+    String documentContent = doc.getContent().toString();
+
+    OutputStreamWriter osw = new OutputStreamWriter(out, encoding);
+    BufferedWriter writer = new BufferedWriter(osw);
+    writer.write(documentContent);
+    writer.flush();
+    // do not close the writer, this would close the underlying stream,
+    // which is something we want to leave to the caller
+  }
+
+  /**
+   * Save annotations to the given output stream in XCES format, with
+   * their IDs included as the "n" attribute of each <code>struct</code>.
+   * The stream is <i>not</i> closed by this method, that is left to
+   * the caller.
+   * 
+   * @param annotations the annotations to save, typically an
+   *          AnnotationSet
+   * @param os the output stream to write to
+   * @param encoding the character encoding to use.
+   */
+  public static void writeXcesAnnotations(Collection<Annotation> annotations,
+          OutputStream os, String encoding) throws XMLStreamException {
+    XMLStreamWriter xsw = null;
+    try {
+      if(encoding == null) {
+        xsw = outputFactory.createXMLStreamWriter(os);
+        xsw.writeStartDocument();
+      }
+      else {
+        xsw = outputFactory.createXMLStreamWriter(os, encoding);
+        xsw.writeStartDocument(encoding, "1.0");
+      }
+      newLine(xsw);
+      writeXcesAnnotations(annotations, xsw);
+    }
+    finally {
+      if(xsw != null) {
+        xsw.close();
+      }
+    }
+  }
+
+  /**
+   * Save annotations to the given XMLStreamWriter in XCES format, with
+   * their IDs included as the "n" attribute of each <code>struct</code>.
+   * The writer is <i>not</i> closed by this method, that is left to
+   * the caller. This method writes just the cesAna element - the XML
+   * declaration must be filled in by the caller if required.
+   * 
+   * @param annotations the annotations to save, typically an
+   *          AnnotationSet
+   * @param xsw the XMLStreamWriter to write to
+   */
+  public static void writeXcesAnnotations(Collection<Annotation> annotations,
+          XMLStreamWriter xsw) throws XMLStreamException {
+    writeXcesAnnotations(annotations, xsw, true);
+  }
+
+  /**
+   * Save annotations to the given XMLStreamWriter in XCES format. The
+   * writer is <i>not</i> closed by this method, that is left to the
+   * caller. This method writes just the cesAna element - the XML
+   * declaration must be filled in by the caller if required. Characters
+   * in feature values that are illegal in XML are replaced by
+   * {@link #INVALID_CHARACTER_REPLACEMENT} (a space). Feature <i>names</i>
+   * are not modified, nor are annotation types - an illegal character
+   * in one of these will cause the serialization to fail.
+   * 
+   * @param annotations the annotations to save, typically an
+   *          AnnotationSet
+   * @param xsw the XMLStreamWriter to write to
+   * @param includeId should we include the annotation IDs (as the "n"
+   *          attribute on each <code>struct</code>)?
+   * @throws XMLStreamException
+   */
+  public static void writeXcesAnnotations(Collection<Annotation> annotations,
+          XMLStreamWriter xsw, boolean includeId) throws XMLStreamException {
+    List<Annotation> annotsToDump = new ArrayList<Annotation>(annotations);
+    Collections.sort(annotsToDump, LONGEST_FIRST_OFFSET_COMPARATOR);
+
+    xsw.setDefaultNamespace(XCES_NAMESPACE);
+    xsw.writeStartElement(XCES_NAMESPACE, "cesAna");
+    xsw.writeDefaultNamespace(XCES_NAMESPACE);
+    xsw.writeAttribute("version", XCES_VERSION);
+    newLine(xsw);
+
+    String indent = "   ";
+    String indentMore = indent + indent;
+
+    for(Annotation a : annotsToDump) {
+      long start = a.getStartNode().getOffset().longValue();
+      long end = a.getEndNode().getOffset().longValue();
+      FeatureMap fm = a.getFeatures();
+      xsw.writeCharacters(indent);
+      if(fm == null || fm.size() == 0) {
+        xsw.writeEmptyElement(XCES_NAMESPACE, "struct");
+      }
+      else {
+        xsw.writeStartElement(XCES_NAMESPACE, "struct");
+      }
+      xsw.writeAttribute("type", a.getType());
+      xsw.writeAttribute("from", String.valueOf(start));
+      xsw.writeAttribute("to", String.valueOf(end));
+      // include the annotation ID as the "n" attribute if requested
+      if(includeId) {
+        xsw.writeAttribute("n", String.valueOf(a.getId()));
+      }
+      newLine(xsw);
+
+      if(fm != null && fm.size() != 0) {
+        for(Map.Entry att : fm.entrySet()) {
+          if(!"isEmptyAndSpan".equals(att.getKey())) {
+            xsw.writeCharacters(indentMore);
+            xsw.writeEmptyElement(XCES_NAMESPACE, "feat");
+            xsw.writeAttribute("name", String.valueOf(att.getKey()));
+            xsw.writeAttribute("value",
+                    replaceXMLIllegalCharactersInString(String.valueOf(att
+                            .getValue())));
+            newLine(xsw);
+          }
+        }
+        xsw.writeCharacters(indent);
+        xsw.writeEndElement();
+        newLine(xsw);
+      }
+    }
+
+    xsw.writeEndElement();
+    newLine(xsw);
+  }
+
   /** An inner class modeling the information contained by an annotation. */
   static class AnnotationObject {
     /** Constructor */
@@ -1318,8 +1701,9 @@ public class DocumentStaxUtils {
   } // AnnotationObject
 
   /**
-   * Thin wrapper class to use a char[] as a CharSequence.  The array is not
-   * copied - changes to the array are reflected by the CharSequence methods.
+   * Thin wrapper class to use a char[] as a CharSequence. The array is
+   * not copied - changes to the array are reflected by the CharSequence
+   * methods.
    */
   static class ArrayCharSequence implements CharSequence {
     char[] array;
