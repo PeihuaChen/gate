@@ -63,13 +63,13 @@ public class AnnotationDiffGUI extends JFrame{
    * @param keyAnnotationSetName key annotation set name, may be null
    * @param responseAnnotationSetName response annotation set name, may be null
    * @param annotationType annotation type, may be null
-   * @param featureName feature name, may be null
+   * @param featureNames feature name, may be null
    */
 
   public AnnotationDiffGUI(String title,
     final String keyDocumentName, final String responseDocumentName,
     final String keyAnnotationSetName, final String responseAnnotationSetName,
-    final String annotationType, final String featureName){
+    final String annotationType, final Set<String> featureNames){
     super(title);
     setIconImage(((ImageIcon)MainFrame.getIcon("annotation-diff")).getImage());
     MainFrame.getGuiRoots().add(this);
@@ -92,15 +92,11 @@ public class AnnotationDiffGUI extends JFrame{
       if (annotationType != null) {
         annTypeCombo.setSelectedItem(annotationType);
       }
-      if (featureName == null
-       || featureName.equals("None")) {
+      significantFeatures.clear();
+      if (featureNames == null || featureNames.isEmpty()) {
         noFeaturesBtn.setSelected(true);
-      } else if (featureName.equals("All")
-              || featureName.equals("Expand All")) {
-        allFeaturesBtn.setSelected(true);
       } else {
-        significantFeatures.clear();
-        significantFeatures.add(featureName);
+        significantFeatures.addAll(featureNames);
         someFeaturesBtn.setSelected(true);
       }
       // compute differences automatically
