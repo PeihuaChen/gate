@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 1998-2009, The University of Sheffield.
+ *  Copyright (c) 2009, Ontotext AD.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -39,15 +39,10 @@ import gate.event.CorpusListener;
 import gate.swing.XJTable;
 
 /**
- * Quality assurance corpus view
- * <ul>
- * <li>two drop down boxes for key and response annotation sets</li>
- * <li>a table with F-scores per annotation for all the corpus (corpus
- * annotation view)</li>
- * <li>a table with F-scores per document (document view)<ul>
- *  <li>including F-scores per document annotations<ul>
- *    <li>annotation diff can be displayed for each annotation</li>
- * </li></li></ul></ul></ul>
+ * Quality assurance corpus view.
+ * Compare two sets of annotations with optionally their features
+ * globally for each annotation and for each document inside a corpus
+ * with different measures notably precision, recall and F1-score.
  */
 @CreoleResource(name = "Corpus Quality Assurance", guiType = GuiType.LARGE,
     resourceDisplayed = "gate.Corpus", mainViewer = false)
@@ -68,46 +63,108 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     annotationTableModel = new AnnotationTableModel();
     annotationSetsNames = new TreeSet<String>(collator);
     annotationTypes = new TreeSet<String>(collator);
-    featuresNames = new TreeSet<String>(collator);
+    annotationFeatures = new TreeSet<String>(collator);
+    documentSetsNames = new TreeSet<String>(collator);
+    documentTypes = new TreeSet<String>(collator);
+    documentFeatures = new TreeSet<String>(collator);
     corpusChanged = false;
   }
 
   protected void initGuiComponents(){
     setLayout(new BorderLayout());
 
-    topPanel = new JPanel();
-    topPanel.setBorder(BorderFactory.createEmptyBorder());
+    JTabbedPane tabbedPane = new JTabbedPane();
+    JSplitPane annotationSplitPane =
+      new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+    annotationSplitPane.setContinuousLayout(true);
+    annotationSplitPane.setOneTouchExpandable(true);
+    annotationSplitPane.setResizeWeight(0.80);
+    JSplitPane documentSplitPane =
+      new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+    documentSplitPane.setContinuousLayout(true);
+    documentSplitPane.setOneTouchExpandable(true);
+    documentSplitPane.setResizeWeight(0.80);
+    tabbedPane.addTab("Corpus statistics", null, annotationSplitPane,
+      "Compare each annotation type for the whole corpus");
+    tabbedPane.addTab("Document statistics", null, documentSplitPane,
+      "Compare each documents in the corpus with theirs annotations");
+    add(tabbedPane);
+
+    JPanel annotationSidePanel = new JPanel(new GridBagLayout());
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.gridx = 0;
+    gbc.anchor = GridBagConstraints.NORTHWEST;
+    annotationSidePanel.add(Box.createVerticalStrut(5), gbc);
     JToolBar toolbar = new JToolBar();
-    toolbar.setBorder(BorderFactory.createEmptyBorder());
-    toolbar.setMargin(new Insets(0, 0, 0, 0));
     toolbar.setFloatable(false);
-    toolbar.add(openDocumentAction = new OpenDocumentAction());
-    openDocumentAction.setEnabled(false);
-    toolbar.add(openAnnotationDiffAction = new OpenAnnotationDiffAction());
-    openAnnotationDiffAction.setEnabled(false);
     toolbar.add(exportToHtmlAction = new ExportToHtmlAction());
-    topPanel.add(toolbar);
-    topPanel.add(Box.createHorizontalStrut(5));
-    JLabel setALabel = new JLabel("Set A");
-    setALabel.setToolTipText("aka 'Key set'");
-    topPanel.add(setALabel);
-    topPanel.add(Box.createHorizontalStrut(2));
-    keyAnnotationSetCombo = new JComboBox();
-    keyAnnotationSetCombo.setPrototypeDisplayValue("annotation set");
-    topPanel.add(keyAnnotationSetCombo);
-    topPanel.add(Box.createHorizontalStrut(5));
-    JLabel setBLabel = new JLabel("Set B");
-    setBLabel.setToolTipText("aka 'Response set'");
-    topPanel.add(setBLabel);
-    topPanel.add(Box.createHorizontalStrut(2));
-    responseAnnotationSetCombo = new JComboBox();
-    responseAnnotationSetCombo.setPrototypeDisplayValue("annotation set");
-    topPanel.add(responseAnnotationSetCombo);
-    topPanel.add(Box.createHorizontalStrut(5));
-    JButton button = new JButton(compareAction = new CompareAction());
-    compareAction.setEnabled(false);
-    topPanel.add(button);
-    add(topPanel, BorderLayout.NORTH);
+    annotationSidePanel.add(toolbar, gbc);
+    annotationSidePanel.add(Box.createVerticalStrut(5), gbc);
+    JLabel label = new JLabel("Annotation Sets A & B");
+    label.setToolTipText("aka 'Key & Response sets'");
+    gbc.anchor = GridBagConstraints.NORTH;
+    gbc.fill = GridBagConstraints.BOTH;
+    annotationSidePanel.add(label, gbc);
+    annotationSidePanel.add(Box.createVerticalStrut(2), gbc);
+    annotationSetList = new JList();
+    annotationSetList.setSelectionModel(
+      new ToggleSelectionABModel(annotationSetList));
+    annotationSetList.setPrototypeCellValue("present in every document");
+    annotationSetList.setVisibleRowCount(6);
+    annotationSidePanel.add(new JScrollPane(annotationSetList), gbc);
+    annotationSidePanel.add(Box.createVerticalStrut(2), gbc);
+    annotationSetCheck = new JCheckBox("present in every document", false);
+    annotationSetCheck.addActionListener(new AbstractAction(){
+      public void actionPerformed(ActionEvent e) {
+        updateSets(null, UPDATE_ANNOTATION_SETS);
+      }
+    });
+    annotationSidePanel.add(annotationSetCheck, gbc);
+    annotationSidePanel.add(Box.createVerticalStrut(5), gbc);
+    label = new JLabel("Annotation Features");
+    label.setToolTipText("Annotation features to compare");
+    annotationSidePanel.add(label, gbc);
+    annotationSidePanel.add(Box.createVerticalStrut(2), gbc);
+    annotationFeatureList = new JList();
+    annotationFeatureList.setSelectionModel(new ToggleSelectionModel());
+    annotationFeatureList.setPrototypeCellValue("present in every document");
+    annotationFeatureList.setVisibleRowCount(10);
+    annotationSidePanel.add(new JScrollPane(annotationFeatureList), gbc);
+//    annotationSidePanel.add(Box.createVerticalStrut(2), gbc);
+//    annotationFeatureCheck = new JCheckBox("present in every type", false);
+//    annotationSidePanel.add(annotationFeatureCheck, gbc);
+    annotationSidePanel.add(Box.createVerticalStrut(5), gbc);
+    label = new JLabel("Measures");
+    label.setToolTipText("Measures used to compare annotations");
+    annotationSidePanel.add(label, gbc);
+    annotationSidePanel.add(Box.createVerticalStrut(2), gbc);
+    annotationMeasureList = new JList();
+    annotationMeasureList.setSelectionModel(new ToggleSelectionModel());
+    annotationMeasureList.setModel(new ExtendedListModel(
+      new String[]{"F1-score strict","F1-score lenient", "F1-score average"}));
+    annotationMeasureList.setPrototypeCellValue("present in every document");
+    annotationMeasureList.setVisibleRowCount(3);
+    annotationSidePanel.add(new JScrollPane(annotationMeasureList), gbc);
+//    annotationSidePanel.add(Box.createVerticalStrut(2), gbc);
+//    annotationMicroAverageButton = new JRadioButton("Micro", true);
+//    annotationMacroAverageButton = new JRadioButton("Macro average");
+//    ButtonGroup group = new ButtonGroup();
+//    group.add(annotationMicroAverageButton);
+//    group.add(annotationMacroAverageButton);
+//    Box horizontalBox = Box.createHorizontalBox();
+//    horizontalBox.add(annotationMicroAverageButton);
+//    horizontalBox.add(annotationMacroAverageButton);
+//    annotationSidePanel.add(horizontalBox, gbc);
+    annotationSidePanel.add(Box.createVerticalStrut(5), gbc);
+    JButton button = new JButton(compareAnnotationAction =
+      new CompareAnnotationAction());
+    compareAnnotationAction.setEnabled(false);
+    annotationSidePanel.add(button, gbc);
+    annotationSidePanel.add(Box.createVerticalStrut(5), gbc);
+    annotationProgressBar = new JProgressBar();
+    annotationSidePanel.add(annotationProgressBar, gbc);
+    annotationSidePanel.add(Box.createVerticalStrut(5), gbc);
+    annotationSplitPane.setRightComponent(annotationSidePanel);
 
     Comparator<String> integerComparator = new Comparator<String>() {
       public int compare(String o1, String o2) {
@@ -123,11 +180,11 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       protected JTableHeader createDefaultTableHeader() {
         return new JTableHeader(columnModel) {
           public String getToolTipText(MouseEvent e) {
-            java.awt.Point p = e.getPoint();
+            Point p = e.getPoint();
             int index = columnModel.getColumnIndexAtX(p.x);
             if (index == -1) { return null; }
             int realIndex = columnModel.getColumn(index).getModelIndex();
-            return annotationTableModel.HEADER_TOOLTIPS[realIndex];
+            return annotationTableModel.headerTooltips.get(realIndex);
           }
         };
       }
@@ -150,17 +207,110 @@ public class CorpusQualityAssurance extends AbstractVisualResource
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     annotationScroller.getViewport().setBackground(
       annotationTable.getBackground());
+    annotationSplitPane.setLeftComponent(annotationScroller);
+
+    JPanel documentSidePanel = new JPanel(new GridBagLayout());
+    gbc = new GridBagConstraints();
+    gbc.gridx = 0;
+    gbc.anchor = GridBagConstraints.NORTHWEST;
+    documentSidePanel.add(Box.createVerticalStrut(5), gbc);
+    toolbar = new JToolBar();
+    toolbar.setFloatable(false);
+    toolbar.add(openDocumentAction = new OpenDocumentAction());
+    openDocumentAction.setEnabled(false);
+    toolbar.add(openAnnotationDiffAction = new OpenAnnotationDiffAction());
+    openAnnotationDiffAction.setEnabled(false);
+    toolbar.add(exportToHtmlAction = new ExportToHtmlAction());
+    documentSidePanel.add(toolbar, gbc);
+    documentSidePanel.add(Box.createVerticalStrut(5), gbc);
+    label = new JLabel("Annotation Sets A & B");
+    label.setToolTipText("aka 'Key & Response sets'");
+    gbc.anchor = GridBagConstraints.NORTH;
+    gbc.fill = GridBagConstraints.BOTH;
+    documentSidePanel.add(label, gbc);
+    documentSidePanel.add(Box.createVerticalStrut(2), gbc);
+    documentSetList = new JList();
+    documentSetList.setSelectionModel(
+      new ToggleSelectionABModel(documentSetList));
+    documentSetList.setPrototypeCellValue("present in every document");
+    documentSetList.setVisibleRowCount(4);
+    documentSidePanel.add(new JScrollPane(documentSetList), gbc);
+    documentSidePanel.add(Box.createVerticalStrut(2), gbc);
+    documentSetCheck = new JCheckBox("present in every document", false);
+    documentSetCheck.addActionListener(new AbstractAction(){
+      public void actionPerformed(ActionEvent e) {
+        updateSets(null, UPDATE_DOCUMENT_SETS);
+      }
+    });
+    documentSidePanel.add(documentSetCheck, gbc);
+    documentSidePanel.add(Box.createVerticalStrut(5), gbc);
+    label = new JLabel("Annotation Types");
+    label.setToolTipText("Annotation types to compare");
+    documentSidePanel.add(label, gbc);
+    documentSidePanel.add(Box.createVerticalStrut(2), gbc);
+    documentTypeList = new JList();
+    documentTypeList.setSelectionModel(new ToggleSelectionModel());
+    documentTypeList.setPrototypeCellValue("present in every document");
+    documentTypeList.setVisibleRowCount(4);
+    documentSidePanel.add(new JScrollPane(documentTypeList), gbc);
+//    documentSidePanel.add(Box.createVerticalStrut(2), gbc);
+//    documentTypeCheck = new JCheckBox("present in every set", false);
+//    documentSidePanel.add(documentTypeCheck, gbc);
+    documentSidePanel.add(Box.createVerticalStrut(5), gbc);
+    label = new JLabel("Annotation Features");
+    label.setToolTipText("Annotation features to compare");
+    documentSidePanel.add(label, gbc);
+    documentSidePanel.add(Box.createVerticalStrut(2), gbc);
+    documentFeatureList = new JList();
+    documentFeatureList.setSelectionModel(new ToggleSelectionModel());
+    documentFeatureList.setPrototypeCellValue("present in every document");
+    documentFeatureList.setVisibleRowCount(4);
+    documentSidePanel.add(new JScrollPane(documentFeatureList), gbc);
+//    documentSidePanel.add(Box.createVerticalStrut(2), gbc);
+//    documentFeatureCheck = new JCheckBox("present in every type", false);
+//    documentSidePanel.add(documentFeatureCheck, gbc);
+    documentSidePanel.add(Box.createVerticalStrut(5), gbc);
+    label = new JLabel("Measures");
+    label.setToolTipText("Measures used to compare annotations");
+    documentSidePanel.add(label, gbc);
+    documentSidePanel.add(Box.createVerticalStrut(2), gbc);
+    documentMeasureList = new JList();
+    documentMeasureList.setSelectionModel(new ToggleSelectionModel());
+    documentMeasureList.setModel(new ExtendedListModel(
+      new String[]{"F1-score strict","F1-score lenient", "F1-score average"}));
+    documentMeasureList.setPrototypeCellValue("present in every document");
+    documentMeasureList.setVisibleRowCount(3);
+    documentSidePanel.add(new JScrollPane(documentMeasureList), gbc);
+    documentSidePanel.add(Box.createVerticalStrut(2), gbc);
+    documentMicroAverageButton = new JRadioButton("Micro", true);
+    documentMacroAverageButton = new JRadioButton("Macro average");
+    ButtonGroup group = new ButtonGroup();
+    group.add(documentMicroAverageButton);
+    group.add(documentMacroAverageButton);
+    Box horizontalBox = Box.createHorizontalBox();
+    horizontalBox.add(documentMicroAverageButton);
+    horizontalBox.add(documentMacroAverageButton);
+    documentSidePanel.add(horizontalBox, gbc);
+    documentSidePanel.add(Box.createVerticalStrut(5), gbc);
+    button = new JButton(compareDocumentAction = new CompareDocumentAction());
+    compareDocumentAction.setEnabled(false);
+    documentSidePanel.add(button, gbc);
+    documentSidePanel.add(Box.createVerticalStrut(5), gbc);
+    documentProgressBar = new JProgressBar();
+    documentSidePanel.add(documentProgressBar, gbc);
+    documentSidePanel.add(Box.createVerticalStrut(5), gbc);
+    documentSplitPane.setRightComponent(documentSidePanel);
 
     documentTable = new XJTable(documentTableModel) {
       // table header tool tips.
       protected JTableHeader createDefaultTableHeader() {
         return new JTableHeader(columnModel) {
           public String getToolTipText(MouseEvent e) {
-            java.awt.Point p = e.getPoint();
+            Point p = e.getPoint();
             int index = columnModel.getColumnIndexAtX(p.x);
             if (index == -1) { return null; }
             int realIndex = columnModel.getColumn(index).getModelIndex();
-            return documentTableModel.HEADER_TOOLTIPS[realIndex];
+            return documentTableModel.headerTooltips.get(realIndex);
           }
         };
       }
@@ -178,28 +328,22 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       DocumentTableModel.COL_MISSING, integerComparator);
     documentTable.setEnableHidingColumns(true);
     documentTable.setAutoResizeMode(XJTable.AUTO_RESIZE_ALL_COLUMNS);
-    JScrollPane docScroller = new JScrollPane(documentTable);
-    docScroller.setHorizontalScrollBarPolicy(
+    JScrollPane documentScroller = new JScrollPane(documentTable);
+    documentScroller.setHorizontalScrollBarPolicy(
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-    docScroller.getViewport().setBackground(documentTable.getBackground());
-
-    JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT , true,
-      annotationScroller, docScroller);
-    splitPane.setOneTouchExpandable(true);
-    add(splitPane, BorderLayout.CENTER);
-    splitPane.setResizeWeight(0.5);
-    splitPane.setDividerLocation(0.5);
+    documentScroller.getViewport().setBackground(documentTable.getBackground());
+    documentSplitPane.setLeftComponent(documentScroller);
   }
 
   protected void initListeners(){
 
-    // when the view is shown update the tables
+    // when the view is shown update the tables if the corpus has changed
     addAncestorListener(new AncestorListener() {
       public void ancestorAdded(AncestorEvent event) {
         if (!isShowing() || !corpusChanged) { return; }
         SwingUtilities.invokeLater(new Runnable(){
           public void run(){
-            updateAnnotationSets(null);
+            updateSets(null, UPDATE_BOTH_SETS);
           }
         });
       }
@@ -207,17 +351,223 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       public void ancestorMoved(AncestorEvent event) { /* do nothing */ }
     });
 
-    // when annotation set lists selection change
-    // enabled/disabled the 'Compare' button
-    ActionListener setComboActionListener = new ActionListener(){
-      public void actionPerformed(ActionEvent evt){
-        compareAction.setEnabled(
-            keyAnnotationSetCombo.getSelectedItem() != null
-         && responseAnnotationSetCombo.getSelectedItem() != null);
+    // when annotation sets list selection change
+    annotationSetList.addListSelectionListener(new ListSelectionListener() {
+      public void valueChanged(ListSelectionEvent e) {
+        annotationFeatureList.setModel(new ExtendedListModel());
+        annotationKeySetName = ((ToggleSelectionABModel)
+          annotationSetList.getSelectionModel()).getSelectedValueA();
+        annotationResponseSetName = ((ToggleSelectionABModel)
+          annotationSetList.getSelectionModel()).getSelectedValueB();
+        if (annotationKeySetName == null
+         || annotationResponseSetName == null
+         || annotationSetList.getSelectionModel().getValueIsAdjusting()) {
+          compareAnnotationAction.setEnabled(false);
+          return;
+        }
+        annotationFeatures.clear();
+        annotationTypes.clear();
+        annotationSetList.setEnabled(false);
+        annotationSetCheck.setEnabled(false);
+        CorpusQualityAssurance.this.setCursor(
+          Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        Runnable runnable = new Runnable() { public void run() {
+        // update annotation features and annotation types lists
+        for (int i = 0; i < corpus.size(); i++) {
+          boolean documentWasLoaded = corpus.isDocumentLoaded(i);
+          Document document = (Document) corpus.get(i);
+          Set<Annotation> annotations = new HashSet<Annotation>();
+          if (annotationKeySetName.equals("[Default set]")) {
+            annotations = document.getAnnotations();
+          } else if (document.getAnnotationSetNames() != null
+          && document.getAnnotationSetNames().contains(annotationKeySetName)) {
+            annotations = document.getAnnotations(annotationKeySetName);
+          }
+          if (annotations instanceof AnnotationSet) {
+            annotationTypes.addAll(((AnnotationSet)annotations).getAllTypes());
+            for (Annotation annotation : annotations) {
+              for (Object featureKey : annotation.getFeatures().keySet()) {
+                annotationFeatures.add((String) featureKey);
+              }
+            }
+          }
+          if (annotationResponseSetName.equals("[Default set]")) {
+            annotations = document.getAnnotations();
+          } else if (document.getAnnotationSetNames() != null
+                  && document.getAnnotationSetNames()
+                    .contains(annotationResponseSetName)) {
+            annotations = document.getAnnotations(annotationResponseSetName);
+          }
+          if (annotations instanceof AnnotationSet) {
+            annotationTypes.addAll(((AnnotationSet)annotations).getAllTypes());
+            for (Annotation annotation : annotations) {
+              for (Object featureKey : annotation.getFeatures().keySet()) {
+                annotationFeatures.add((String) featureKey);
+              }
+            }
+          }
+          if (!documentWasLoaded) {
+            corpus.unloadDocument(document);
+            Factory.deleteResource(document);
+          }
+        }
+        SwingUtilities.invokeLater(new Runnable(){ public void run(){
+          annotationFeatureList.setVisibleRowCount(
+            Math.min(10, annotationFeatures.size()));
+          annotationFeatureList.setModel(
+            new ExtendedListModel(annotationFeatures.toArray()));
+          CorpusQualityAssurance.this.setCursor(
+            Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+          compareAnnotationAction.setEnabled(true);
+          annotationSetList.setEnabled(true);
+          annotationSetCheck.setEnabled(true);
+        }});
+        }};
+        Thread thread = new Thread(runnable,
+          "annotationSetList.addListSelectionListener");
+        thread.setPriority(Thread.MIN_PRIORITY);
+        thread.start();
       }
-    };
-    keyAnnotationSetCombo.addActionListener(setComboActionListener);
-    responseAnnotationSetCombo.addActionListener(setComboActionListener);
+    });
+
+    // when document sets list selection change
+    documentSetList.addListSelectionListener(new ListSelectionListener() {
+      public void valueChanged(ListSelectionEvent e) {
+        documentTypeList.setModel(new ExtendedListModel());
+        documentKeySetName = ((ToggleSelectionABModel)
+          documentSetList.getSelectionModel()).getSelectedValueA();
+        documentResponseSetName = ((ToggleSelectionABModel)
+          documentSetList.getSelectionModel()).getSelectedValueB();
+        if (documentKeySetName == null
+         || documentResponseSetName == null
+         || documentSetList.getSelectionModel().getValueIsAdjusting()) {
+          return;
+        }
+        documentFeatures.clear();
+        documentSetList.setEnabled(false);
+        documentSetCheck.setEnabled(false);
+        CorpusQualityAssurance.this.setCursor(
+          Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        Runnable runnable = new Runnable() { public void run() {
+        // update document types list
+        for (int i = 0; i < corpus.size(); i++) {
+          boolean documentWasLoaded = corpus.isDocumentLoaded(i);
+          Document document = (Document) corpus.get(i);
+          Set<Annotation> annotations = new HashSet<Annotation>();
+          if (documentKeySetName.equals("[Default set]")) {
+            annotations = document.getAnnotations();
+          } else if (document.getAnnotationSetNames() != null
+          && document.getAnnotationSetNames().contains(documentKeySetName)) {
+            annotations = document.getAnnotations(documentKeySetName);
+          }
+          if (annotations instanceof AnnotationSet) {
+            documentTypes.addAll(((AnnotationSet)annotations).getAllTypes());
+          }
+          if (documentResponseSetName.equals("[Default set]")) {
+            annotations = document.getAnnotations();
+          } else if (document.getAnnotationSetNames() != null
+                  && document.getAnnotationSetNames()
+                    .contains(documentResponseSetName)) {
+            annotations = document.getAnnotations(documentResponseSetName);
+          }
+          if (annotations instanceof AnnotationSet) {
+            documentTypes.addAll(((AnnotationSet)annotations).getAllTypes());
+          }
+          if (!documentWasLoaded) {
+            corpus.unloadDocument(document);
+            Factory.deleteResource(document);
+          }
+        }
+        SwingUtilities.invokeLater(new Runnable(){ public void run(){
+          documentTypeList.setVisibleRowCount(
+            Math.min(4, documentTypes.size()));
+          documentTypeList.setModel(
+            new ExtendedListModel(documentTypes.toArray()));
+          CorpusQualityAssurance.this.setCursor(
+            Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+          documentSetList.setEnabled(true);
+          documentSetCheck.setEnabled(true);
+        }});
+        }};
+        Thread thread = new Thread(runnable,
+          "documentSetList.addListSelectionListener");
+        thread.setPriority(Thread.MIN_PRIORITY);
+        thread.start();
+      }
+    });
+
+    // when document types list selection change
+    documentTypeList.addListSelectionListener(new ListSelectionListener() {
+      public void valueChanged(ListSelectionEvent e) {
+        // update document features list
+        documentFeatureList.setModel(new ExtendedListModel());
+        if (documentTypeList.getSelectedValues().length == 0) {
+          compareDocumentAction.setEnabled(false);
+          return;
+        }
+        final Set<String> types = new HashSet<String>();
+        for (Object type : documentTypeList.getSelectedValues()) {
+          types.add((String) type);
+        }
+        documentFeatures.clear();
+        documentTypeList.setEnabled(false);
+        CorpusQualityAssurance.this.setCursor(
+          Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        Runnable runnable = new Runnable() { public void run() {
+        for (int i = 0; i < corpus.size(); i++) {
+          boolean documentWasLoaded = corpus.isDocumentLoaded(i);
+          Document document = (Document) corpus.get(i);
+          Set<Annotation> annotations = new HashSet<Annotation>();
+          if (documentKeySetName.equals("[Default set]")) {
+            annotations = document.getAnnotations().get(types);
+          } else if (document.getAnnotationSetNames() != null
+          && document.getAnnotationSetNames().contains(documentKeySetName)) {
+            annotations = document.getAnnotations(documentKeySetName).get(types);
+          }
+          if (annotations instanceof AnnotationSet) {
+            for (Annotation annotation : annotations) {
+              for (Object featureKey : annotation.getFeatures().keySet()) {
+                documentFeatures.add((String) featureKey);
+              }
+            }
+          }
+          if (documentResponseSetName.equals("[Default set]")) {
+            annotations = document.getAnnotations().get(types);
+          } else if (document.getAnnotationSetNames() != null
+                  && document.getAnnotationSetNames()
+                    .contains(documentResponseSetName)) {
+            annotations = document.getAnnotations(
+              documentResponseSetName).get(types);
+          }
+          if (annotations instanceof AnnotationSet) {
+            for (Annotation annotation : annotations) {
+              for (Object featureKey : annotation.getFeatures().keySet()) {
+                documentFeatures.add((String) featureKey);
+              }
+            }
+          }
+          if (!documentWasLoaded) {
+            corpus.unloadDocument(document);
+            Factory.deleteResource(document);
+          }
+        }
+        SwingUtilities.invokeLater(new Runnable(){ public void run(){
+          documentFeatureList.setVisibleRowCount(
+            Math.min(4, documentFeatures.size()));
+          documentFeatureList.setModel(
+            new ExtendedListModel(documentFeatures.toArray()));
+          CorpusQualityAssurance.this.setCursor(
+            Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+          documentTypeList.setEnabled(true);
+          compareDocumentAction.setEnabled(true);
+        }});
+        }};
+        Thread thread = new Thread(runnable,
+          "documentTypeList.addListSelectionListener");
+        thread.setPriority(Thread.MIN_PRIORITY);
+        thread.start();
+      }
+    });
 
     // enable/disable toolbar icons according to the document table selection
     documentTable.getSelectionModel().addListSelectionListener(
@@ -230,6 +580,87 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         }
       }
     );
+  }
+
+  protected class ExtendedListModel extends DefaultListModel {
+    public ExtendedListModel() {
+      super();
+    }
+    public ExtendedListModel(Object[] elements) {
+      super();
+      for (Object element : elements) {
+        super.addElement(element);
+      }
+    }
+  }
+
+  protected class ToggleSelectionModel extends DefaultListSelectionModel {
+    boolean gestureStarted = false;
+    public void setSelectionInterval(int index0, int index1) {
+      if (isSelectedIndex(index0) && !gestureStarted) {
+        super.removeSelectionInterval(index0, index1);
+      } else {
+        super.addSelectionInterval(index0, index1);
+      }
+      gestureStarted = true;
+    }
+    public void setValueIsAdjusting(boolean isAdjusting) {
+      if (!isAdjusting) {
+        gestureStarted = false;
+      }
+    }
+  }
+
+  /**
+   * Add a suffix A and B for the first and second selected item.
+   * Allows only 2 items to be selected.
+   */
+  protected class ToggleSelectionABModel extends DefaultListSelectionModel {
+    public ToggleSelectionABModel(JList list) {
+      this.list = list;
+    }
+    public void setSelectionInterval(int index0, int index1) {
+      ExtendedListModel model = (ExtendedListModel) list.getModel();
+      String value = (String) model.getElementAt(index0);
+      if (value.endsWith(" (A)") || value.endsWith(" (B)")) {
+        // if ends with ' (A)' or ' (B)' then remove the suffix
+        model.removeElementAt(index0);
+        model.insertElementAt(value.substring(0,
+          value.length() - " (A)".length()), index0);
+        if (value.endsWith(" (A)")) {
+          selectedValueA = null;
+        } else {
+          selectedValueB = null;
+        }
+        removeSelectionInterval(index0, index1);
+      } else {
+        // suffix with ' (A)' or ' (B)' if not already existing
+        if (selectedValueA == null) {
+          model.removeElementAt(index0);
+          model.insertElementAt(value + " (A)", index0);
+          selectedValueA = value;
+          addSelectionInterval(index0, index1);
+        } else if (selectedValueB == null) {
+          model.removeElementAt(index0);
+          model.insertElementAt(value + " (B)", index0);
+          selectedValueB = value;
+          addSelectionInterval(index0, index1);
+        }
+      }
+    }
+    public void clearSelection() {
+      selectedValueA = null;
+      selectedValueB = null;
+      super.clearSelection();
+    }
+    public String getSelectedValueA() {
+      return selectedValueA;
+    }
+    public String getSelectedValueB() {
+      return selectedValueB;
+    }
+    JList list;
+    String selectedValueA, selectedValueB;
   }
 
   public void cleanup(){
@@ -254,7 +685,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     if (!isShowing()) { return; }
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
-        updateAnnotationSets(null);
+        updateSets(null, UPDATE_BOTH_SETS);
       }
     });
   }
@@ -264,7 +695,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     if (!isShowing()) { return; }
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
-        updateAnnotationSets(e.getDocument());
+        updateSets(null, UPDATE_BOTH_SETS);
       }
     });
   }
@@ -274,346 +705,210 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     if (!isShowing()) { return; }
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
-        updateAnnotationSets(null);
+        updateSets(null, UPDATE_BOTH_SETS);
       }
     });
   }
 
-  protected void updateAnnotationSets(Document documentAdded) {
+  protected static int UPDATE_ANNOTATION_SETS = 0;
+  protected static int UPDATE_DOCUMENT_SETS = 1;
+  protected static int UPDATE_BOTH_SETS = 2;
 
-    if (corpus.size() > 20 && !warningAlreadyShown) {
-      final JPanel warningPanel = new JPanel();
-      warningPanel.add(new JLabel(
-        "<html>This corpus contains more than 20 documents.<br>" +
-          "The comparison of all theirs annotations can be very slow.</html>"));
-      warningPanel.add(Box.createVerticalStrut(10));
-      JButton button  = new JButton("I will be patient!");
-      button.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          remove(warningPanel);
-          add(topPanel, BorderLayout.NORTH);
-          warningAlreadyShown = true;
-          topPanel.updateUI();
-        }
-      });
-      warningPanel.add(button);
-      remove(topPanel);
-      add(warningPanel, BorderLayout.NORTH);
-      warningPanel.updateUI();
-    }
-
+  /**
+   * Update set lists.
+   * @param documentAdded faster if only one document is added, may be null
+   * @param type type of the update, may be one of UPDATE_ANNOTATION_SETS,
+   *  UPDATE_DOCUMENT_SETS or UPDATE_BOTH_SETS.
+   */
+  protected void updateSets(final Document documentAdded, final int type) {
     corpusChanged = false;
+    if (type == UPDATE_ANNOTATION_SETS || type == UPDATE_BOTH_SETS) {
+      annotationSetList.clearSelection();
+    }
+    if (type == UPDATE_DOCUMENT_SETS || type == UPDATE_BOTH_SETS) {
+      documentSetList.clearSelection();
+    }
+    CorpusQualityAssurance.this.setCursor(
+      Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+    Runnable runnable = new Runnable() { public void run() {
     if (documentAdded == null) {
-      annotationSetsNames.clear();
-      for (Object resource : corpus) {
-        if (resource != null
-         && resource instanceof Document
-         && ((Document)resource).getAnnotationSetNames() != null) {
-          Document document = (Document) resource;
-          annotationSetsNames.addAll(document.getAnnotationSetNames());
+      if (type == UPDATE_ANNOTATION_SETS || type == UPDATE_BOTH_SETS) {
+        annotationSetsNames.clear();
+      }
+      if (type == UPDATE_DOCUMENT_SETS || type == UPDATE_BOTH_SETS) {
+        documentSetsNames.clear();
+      }
+      for (int i = 0; i < corpus.size(); i++) {
+        boolean documentWasLoaded = corpus.isDocumentLoaded(i);
+        Document document = (Document) corpus.get(i);
+        if (document != null && document.getAnnotationSetNames() != null) {
+          if (type == UPDATE_ANNOTATION_SETS || type == UPDATE_BOTH_SETS) {
+            if (annotationSetCheck.isSelected()
+            && !document.equals(corpus.get(0))) {
+              annotationSetsNames.retainAll(document.getAnnotationSetNames());
+            } else {
+              annotationSetsNames.addAll(document.getAnnotationSetNames());
+            }
+          }
+          if (type == UPDATE_DOCUMENT_SETS || type == UPDATE_BOTH_SETS) {
+            if (documentSetCheck.isSelected()
+            && !document.equals(corpus.get(0))) {
+              documentSetsNames.retainAll(document.getAnnotationSetNames());
+            } else {
+              documentSetsNames.addAll(document.getAnnotationSetNames());
+            }
+          }
+        }
+        if (!documentWasLoaded) {
+          corpus.unloadDocument(document);
+          Factory.deleteResource(document);
         }
       }
     } else if (documentAdded.getAnnotationSetNames() != null) {
-      annotationSetsNames.addAll(documentAdded.getAnnotationSetNames());
+      if (type == UPDATE_ANNOTATION_SETS || type == UPDATE_BOTH_SETS) {
+        if (annotationSetCheck.isSelected()) {
+          annotationSetsNames.retainAll(documentAdded.getAnnotationSetNames());
+        } else {
+          annotationSetsNames.addAll(documentAdded.getAnnotationSetNames());
+        }
+      }
+      if (type == UPDATE_DOCUMENT_SETS || type == UPDATE_BOTH_SETS) {
+        if (documentSetCheck.isSelected()) {
+          documentSetsNames.retainAll(documentAdded.getAnnotationSetNames());
+        } else {
+          documentSetsNames.addAll(documentAdded.getAnnotationSetNames());
+        }
+      }
     }
-    annotationSetsNames.add("[Default set]");
-    Object selectedItem = keyAnnotationSetCombo.getSelectedItem();
-    keyAnnotationSetCombo.setModel(
-      new DefaultComboBoxModel(annotationSetsNames.toArray()));
-    if(!annotationSetsNames.isEmpty()){
-      keyAnnotationSetCombo.setSelectedItem(selectedItem);
-    }
-    selectedItem = responseAnnotationSetCombo.getSelectedItem();
-    responseAnnotationSetCombo.setModel(
-      new DefaultComboBoxModel(annotationSetsNames.toArray()));
-    if(!annotationSetsNames.isEmpty()){
-      responseAnnotationSetCombo.setSelectedItem(selectedItem);
-    }
+    SwingUtilities.invokeLater(new Runnable(){ public void run(){
+      if (type == UPDATE_ANNOTATION_SETS || type == UPDATE_BOTH_SETS) {
+        annotationSetsNames.add("[Default set]");
+        annotationSetList.setVisibleRowCount(
+          Math.min(6, annotationSetsNames.size()));
+        annotationSetList.setModel(
+          new ExtendedListModel(annotationSetsNames.toArray()));
+      }
+      if (type == UPDATE_DOCUMENT_SETS || type == UPDATE_BOTH_SETS) {
+        documentSetsNames.add("[Default set]");
+        documentSetList.setVisibleRowCount(
+          Math.min(4, documentSetsNames.size()));
+        documentSetList.setModel(
+          new ExtendedListModel(documentSetsNames.toArray()));
+      }
+      CorpusQualityAssurance.this.setCursor(
+        Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+    }});
+    }};
+    Thread thread = new Thread(runnable, "updateSets");
+    thread.setPriority(Thread.MIN_PRIORITY);
+    thread.start();
   }
 
   protected class AnnotationTableModel extends AbstractTableModel{
-    private ArrayList<String> annotationColValues = new ArrayList<String>();
-    private ArrayList<String> featureColValues = new ArrayList<String>();
-    private AnnotationDiffer differ;
-    private ArrayList<AnnotationDiffer> annotationDifferRows =
-      new ArrayList<AnnotationDiffer>();
 
     public void initialise() {
-      annotationColValues.clear();
-      annotationColValues.addAll(annotationTypes);
-      featureColValues.clear();
-      featureColValues.addAll(Collections.nCopies(getRowCount(), "None"));
-      annotationDifferRows.clear();
+      differRows.clear();
       for (int i = 0; i < getRowCount(); i++) {
-        annotationDifferRows.add(null);
+        differRows.add(null);
       }
     }
 
-    public int getColumnCount() {
-      return COLUMN_COUNT;
-    }
-
-    public int getRowCount() {
-      return annotationColValues.size();
-    }
-
-    public Object getValueAt(int rowIndex, int columnIndex) {
-      if (annotationColValues.size() <= rowIndex) { return ""; }
-      if (annotationDifferRows.get(rowIndex) == null) {
-        String keyAnnotationSetName =
-          (String) keyAnnotationSetCombo.getSelectedItem();
-        String responseAnnotationSetName =
-          (String) responseAnnotationSetCombo.getSelectedItem();
+    public void updateRows(int rowFirst, int rowLast) {
+      annotationProgressBar.setMaximum((rowLast+1) * corpus.size());
+      for (int row = rowFirst; row <= rowLast; row++) {
         Set<Annotation> keys = new HashSet<Annotation>();
         Set<Annotation> responses = new HashSet<Annotation>();
-        for (Object resource : corpus) {
-          Document document = (Document) resource;
+        // for each document in the corpus
+        for (int i = 0; i < corpus.size(); i++) {
+          boolean documentWasLoaded = corpus.isDocumentLoaded(i);
+          Document document = (Document) corpus.get(i);
           Set<Annotation> keyAS = new HashSet<Annotation>();
           Set<Annotation> responseAS = new HashSet<Annotation>();
-          if (keyAnnotationSetName.equals("[Default set]")) {
+          // get annotations from selected annotation sets
+          if (annotationKeySetName.equals("[Default set]")) {
             keyAS = document.getAnnotations();
           } else if (document.getAnnotationSetNames() != null
-          && document.getAnnotationSetNames().contains(keyAnnotationSetName)) {
-            keyAS = document.getAnnotations(keyAnnotationSetName);
+          && document.getAnnotationSetNames().contains(annotationKeySetName)) {
+            keyAS = document.getAnnotations(annotationKeySetName);
           }
-          if (responseAnnotationSetName.equals("[Default set]")) {
+          if (annotationResponseSetName.equals("[Default set]")) {
             responseAS = document.getAnnotations();
           } else if (document.getAnnotationSetNames() != null
           && document.getAnnotationSetNames()
-            .contains(responseAnnotationSetName)) {
-            responseAS = document.getAnnotations(responseAnnotationSetName);
+            .contains(annotationResponseSetName)) {
+            responseAS = document.getAnnotations(annotationResponseSetName);
           }
-          if (annotationColValues.get(rowIndex).equals("All")
-           || annotationColValues.get(rowIndex).equals("Expand All")) {
-            keys.addAll(keyAS);
-            responses.addAll(responseAS);
-          } else {
-            if (keyAS instanceof AnnotationSet) {
-             keys.addAll(((AnnotationSet)keyAS)
-               .get(annotationColValues.get(rowIndex)));
-           }
-           if (responseAS instanceof AnnotationSet) {
-            responses.addAll(((AnnotationSet)responseAS)
-              .get(annotationColValues.get(rowIndex)));
-           }
-         }
+          // keep only annotations from the current annotation type
+          if (keyAS instanceof AnnotationSet) {
+            keys.addAll(((AnnotationSet)keyAS).get(
+              (String)annotationTypes.toArray()[row]));
+          }
+          if (responseAS instanceof AnnotationSet) {
+            responses.addAll(((AnnotationSet)responseAS).get(
+              (String)annotationTypes.toArray()[row]));
+          }
+          if (!documentWasLoaded) {
+            corpus.unloadDocument(document);
+            Factory.deleteResource(document);
+          }
+          final int rowF = row;
+          final int iF = i;
+          SwingUtilities.invokeLater(new Runnable(){ public void run(){
+            annotationProgressBar.setValue((rowF+1) * (iF+1));
+          }});
+        }
+        Set<String> featureSet = new HashSet<String>();
+        for (Object feature : annotationFeatureList.getSelectedValues()) {
+          featureSet.add((String) feature);
         }
         differ = new AnnotationDiffer();
-        if(featureColValues.get(rowIndex).equals("All")
-        || featureColValues.get(rowIndex).equals("Expand All")) {
-          differ.setSignificantFeaturesSet(null);
-        } else if (featureColValues.get(rowIndex).equals("None")) {
-          differ.setSignificantFeaturesSet(new HashSet());
-        } else {
-          differ.setSignificantFeaturesSet(
-            Collections.singleton(featureColValues.get(rowIndex)));
-        }
-        differ.calculateDiff(keys, responses);
-        annotationDifferRows.set(rowIndex, differ);
-      } else {
-        differ = annotationDifferRows.get(rowIndex);
+        differ.setSignificantFeaturesSet(featureSet);
+        differ.calculateDiff(keys, responses); // compare
+        differRows.set(row, differ);
       }
-      NumberFormat f = NumberFormat.getInstance();
-      f.setMaximumFractionDigits(2);
-      f.setMinimumFractionDigits(2);
-      switch(columnIndex) {
-        case COL_ANNOTATION:
-          return annotationColValues.get(rowIndex);
-        case COL_FEATURE:
-          return featureColValues.get(rowIndex);
-        case COL_CORRECT:
-          return Integer.toString(differ.getCorrectMatches());
-        case COL_MISSING:
-          return Integer.toString(differ.getMissing());
-        case COL_SPURIOUS:
-          return Integer.toString(differ.getSpurious());
-        case COL_PARTIAL:
-        return Integer.toString(differ.getPartiallyCorrectMatches());
-        case COL_RECALL:
-          return f.format(differ.getRecallStrict());
-        case COL_PRECISION:
-          return f.format(differ.getPrecisionStrict());
-        case COL_FMEASURE:
-          return f.format(differ.getFMeasureStrict(1.0));
-        default:
-          return "";
-      }
-    }
-
-    public Class<?> getColumnClass(int columnIndex) {
-      switch(columnIndex) {
-        case COL_FEATURE:
-          return JComboBox.class;
-        default:
-          return String.class;
-      }
-    }
-
-    public String getColumnName(int column) {
-      return COLUMN_NAMES[column];
-    }
-
-    public boolean isCellEditable(int rowIndex, int columnIndex) {
-      switch(columnIndex) {
-        case COL_FEATURE:
-          return true;
-        default:
-          return false;
-      }
-    }
-
-    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-      if (aValue.equals("--------------")) { return; }
-      final int firstRow = rowIndex;
-      if (aValue.equals("Use As Default")) {
-        String feature = featureColValues.get(rowIndex);
-        for (int row = 0; row < featureColValues.size(); row++) {
-          featureColValues.set(row, feature);
-          annotationDifferRows.set(row, null);
-        }
-        SwingUtilities.invokeLater(new Runnable(){ public void run(){
-          fireTableDataChanged();
-        }});
-        return;
-      }
-      if (aValue.equals("Expand All")) {
-        int row = rowIndex + 1;
-        for (String feature : featuresNames) {
-          annotationColValues.add(row, annotationColValues.get(rowIndex));
-          featureColValues.add(row, feature);
-          annotationDifferRows.add(row, null);
-          row++;
-        }
-        final int lastRow = row;
-        SwingUtilities.invokeLater(new Runnable(){ public void run(){
-          fireTableRowsInserted(firstRow+1, lastRow);
-        }});
-      } else if (featureColValues.get(rowIndex).equals("Expand All")) {
-        int row;
-        for (row = rowIndex + featuresNames.size(); row > rowIndex;  row--) {
-          annotationColValues.remove(row);
-          featureColValues.remove(row);
-          annotationDifferRows.remove(row);
-        }
-        SwingUtilities.invokeLater(new Runnable(){ public void run(){
-          fireTableRowsDeleted(firstRow+1, firstRow+featuresNames.size());
-        }});
-      }
-      featureColValues.set(rowIndex, (String) aValue);
-      annotationDifferRows.set(rowIndex, null);
       SwingUtilities.invokeLater(new Runnable(){ public void run(){
-        fireTableRowsUpdated(firstRow, firstRow);
+        annotationProgressBar.setValue(annotationProgressBar.getMinimum());
       }});
-    }
-
-    private final String[] COLUMN_NAMES = {"Annotation", "Feature",
-      "Match", "Only A", "Only B", "Overlap", "Rec.B/A", "Prec.B/A", "F-Score"};
-    public final String[] HEADER_TOOLTIPS = {null, null,
-      "aka 'Correct'", "aka 'Missing'", "aka 'Spurious'", "aka 'Partial'",
-      "Recall for B relative to A", "Precision for B relative to A",
-      "Combine precision and recall with the same weight for each"};
-    public static final int COL_ANNOTATION = 0;
-    public static final int COL_FEATURE = 1;
-    public static final int COL_CORRECT = 2;
-    public static final int COL_MISSING = 3;
-    public static final int COL_SPURIOUS = 4;
-    public static final int COL_PARTIAL = 5;
-    public static final int COL_RECALL = 6;
-    public static final int COL_PRECISION = 7;
-    public static final int COL_FMEASURE = 8;
-    private static final int COLUMN_COUNT = 9;
-  }
-
-  protected class DocumentTableModel extends AbstractTableModel{
-    private ArrayList<Document> documentColValues = new ArrayList<Document>();
-    private ArrayList<String> annotationColValues = new ArrayList<String>();
-    private ArrayList<String> featureColValues = new ArrayList<String>();
-    private AnnotationDiffer differ;
-    private ArrayList<AnnotationDiffer> annotationDifferRows =
-      new ArrayList<AnnotationDiffer>();
-
-    public void initialise() {
-      documentColValues.clear();
-      for (Object resource : corpus) {
-        documentColValues.add((Document) resource);
-      }
-      annotationColValues.clear();
-      annotationColValues.addAll(Collections.nCopies(getRowCount(), "All"));
-      featureColValues.clear();
-      featureColValues.addAll(Collections.nCopies(getRowCount(), "None"));
-      annotationDifferRows.clear();
-      for (int i = 0; i < getRowCount(); i++) {
-        annotationDifferRows.add(null);
+      columnNames = new ArrayList<String>(Arrays.asList(COLUMN_NAMES));
+      headerTooltips = new ArrayList<String>(Arrays.asList(HEADER_TOOLTIPS));
+      for (Object measure : annotationMeasureList.getSelectedValues()) {
+        if (measure.equals("F1-score strict")) {
+          columnNames.addAll(Arrays.asList("Rec.B/A", "Prec.B/A", "F1-strict"));
+          headerTooltips.addAll(Arrays.asList("Recall for B relative to A",
+            "Precision for B relative to A",
+            "Combine precision and recall with the same weight for each"));
+        } else if (measure.equals("F1-score lenient")) {
+          columnNames.addAll(Arrays.asList("Rec.B/A", "Prec.B/A", "F1-lenient"));
+          headerTooltips.addAll(Arrays.asList("Recall for B relative to A",
+            "Precision for B relative to A",
+            "Combine precision and recall with the same weight for each"));
+        } else if (measure.equals("F1-score average")) {
+          columnNames.addAll(Arrays.asList("Rec.B/A", "Prec.B/A", "F1-average"));
+          headerTooltips.addAll(Arrays.asList("Recall for B relative to A",
+            "Precision for B relative to A",
+            "Combine precision and recall with the same weight for each"));
+        }
       }
     }
 
     public int getColumnCount() {
-      return COLUMN_COUNT;
+      return COLUMN_COUNT
+        + (annotationMeasureList.getSelectedValues().length * 3);
     }
 
     public int getRowCount() {
-      return documentColValues.size();
+      return annotationTypes.size();
     }
 
     public Object getValueAt(int rowIndex, int columnIndex) {
-      if (documentColValues.size() <= rowIndex) { return ""; }
-      Document document = documentColValues.get(rowIndex);
-      if (annotationDifferRows.get(rowIndex) == null) {
-        String keyAnnotationSetName =
-          (String) keyAnnotationSetCombo.getSelectedItem();
-        String responseAnnotationSetName =
-          (String) responseAnnotationSetCombo.getSelectedItem();
-        Set<Annotation> keys = new HashSet<Annotation>();
-        Set<Annotation> responses = new HashSet<Annotation>();
-        if (keyAnnotationSetName.equals("[Default set]")) {
-          keys = document.getAnnotations();
-        } else if (document.getAnnotationSetNames() != null
-        && document.getAnnotationSetNames().contains(keyAnnotationSetName)) {
-          keys = document.getAnnotations(keyAnnotationSetName);
-        }
-        if (responseAnnotationSetName.equals("[Default set]")) {
-          responses = document.getAnnotations();
-        } else if (document.getAnnotationSetNames() != null
-        && document.getAnnotationSetNames()
-          .contains(responseAnnotationSetName)) {
-          responses = document.getAnnotations(responseAnnotationSetName);
-        }
-        if (!annotationColValues.get(rowIndex).equals("All")
-         && !annotationColValues.get(rowIndex).equals("Expand All")) {
-          if (keys instanceof AnnotationSet) {
-           keys = ((AnnotationSet)keys)
-             .get(annotationColValues.get(rowIndex));
-         }
-         if (responses instanceof AnnotationSet) {
-          responses = ((AnnotationSet)responses)
-            .get(annotationColValues.get(rowIndex));
-         }
-       }
-        AnnotationDiffer differ = new AnnotationDiffer();
-        if(featureColValues.get(rowIndex).equals("All")
-        || featureColValues.get(rowIndex).equals("Expand All")) {
-          differ.setSignificantFeaturesSet(null);
-        } else if (featureColValues.get(rowIndex).equals("None")) {
-          differ.setSignificantFeaturesSet(new HashSet());
-        } else {
-          differ.setSignificantFeaturesSet(
-            Collections.singleton(featureColValues.get(rowIndex)));
-        }
-        differ.calculateDiff(keys, responses);
-        annotationDifferRows.set(rowIndex, differ);
-      } else {
-        differ = annotationDifferRows.get(rowIndex);
-      }
+      if (annotationTypes.size() <= rowIndex) { return ""; }
+      differ = differRows.get(rowIndex);
       NumberFormat f = NumberFormat.getInstance();
       f.setMaximumFractionDigits(2);
       f.setMinimumFractionDigits(2);
       switch(columnIndex) {
-        case COL_DOCUMENT:
-          return document.getName();
         case COL_ANNOTATION:
-          return annotationColValues.get(rowIndex);
-        case COL_FEATURE:
-          return featureColValues.get(rowIndex);
+          return annotationTypes.toArray()[rowIndex];
         case COL_CORRECT:
           return Integer.toString(differ.getCorrectMatches());
         case COL_MISSING:
@@ -622,121 +917,313 @@ public class CorpusQualityAssurance extends AbstractVisualResource
           return Integer.toString(differ.getSpurious());
         case COL_PARTIAL:
         return Integer.toString(differ.getPartiallyCorrectMatches());
-        case COL_RECALL:
-          return f.format(differ.getRecallStrict());
-        case COL_PRECISION:
-          return f.format(differ.getPrecisionStrict());
-        case COL_FMEASURE:
-          return f.format(differ.getFMeasureStrict(1.0));
         default:
-          return "";
+          int colMeasure = (columnIndex - COLUMN_COUNT) % 3;
+          int measureIndex = (columnIndex  - COLUMN_COUNT) / 3;
+          String measure = (String)
+            annotationMeasureList.getSelectedValues()[measureIndex];
+          switch (colMeasure) {
+            case COL_RECALL:
+              if (measure.equals("F1-score strict")) {
+                return f.format(differ.getRecallStrict());
+              } else if (measure.equals("F1-score lenient")) {
+                return f.format(differ.getRecallLenient());
+              } else if (measure.equals("F1-score average")) {
+                return f.format(differ.getRecallAverage());
+              }
+            case COL_PRECISION:
+              if (measure.equals("F1-score strict")) {
+                return f.format(differ.getPrecisionStrict());
+              } else if (measure.equals("F1-score lenient")) {
+                return f.format(differ.getPrecisionLenient());
+              } else if (measure.equals("F1-score average")) {
+                return f.format(differ.getPrecisionAverage());
+              }
+            case COL_FMEASURE:
+              if (measure.equals("F1-score strict")) {
+                return f.format(differ.getFMeasureStrict(1.0));
+              } else if (measure.equals("F1-score lenient")) {
+                return f.format(differ.getFMeasureLenient(1.0));
+              } else if (measure.equals("F1-score average")) {
+                return f.format(differ.getFMeasureAverage(1.0));
+              }
+            default:
+              return "";
+          }
       }
     }
 
     public Class<?> getColumnClass(int columnIndex) {
-      switch(columnIndex) {
-        case COL_ANNOTATION:
-          return JComboBox.class;
-        case COL_FEATURE:
-          return JComboBox.class;
-        default:
-          return String.class;
-      }
+      return String.class;
     }
 
     public String getColumnName(int column) {
-      return COLUMN_NAMES[column];
+      return columnNames.get(column);
     }
 
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-      switch(columnIndex) {
-        case COL_ANNOTATION:
-          return true;
-        case COL_FEATURE:
-          return true;
-        default:
-          return false;
+      return false;
+    }
+
+    private AnnotationDiffer differ;
+    private ArrayList<AnnotationDiffer> differRows =
+      new ArrayList<AnnotationDiffer>();
+
+    private final String[] COLUMN_NAMES = {
+      "Annotation", "Match", "Only A", "Only B", "Overlap"};
+    public final String[] HEADER_TOOLTIPS = {null,
+      "aka 'Correct'", "aka 'Missing'", "aka 'Spurious'", "aka 'Partial'"};
+    private ArrayList<String> columnNames =
+      new ArrayList<String>(Arrays.asList(COLUMN_NAMES));
+    private ArrayList<String> headerTooltips =
+      new ArrayList<String>(Arrays.asList(HEADER_TOOLTIPS));
+
+    public static final int COL_ANNOTATION = 0;
+    public static final int COL_CORRECT = 1;
+    public static final int COL_MISSING = 2;
+    public static final int COL_SPURIOUS = 3;
+    public static final int COL_PARTIAL = 4;
+    private static final int COLUMN_COUNT = 5;
+    public static final int COL_RECALL = 0;
+    public static final int COL_PRECISION = 1;
+    public static final int COL_FMEASURE = 2;
+  }
+
+  protected class DocumentTableModel extends AbstractTableModel{
+
+    public void initialise() {
+      differRows.clear();
+      documentNames.clear();
+      for (int i = 0; i < getRowCount(); i++) {
+        differRows.add(null);
+        documentNames.add("");
       }
     }
 
-    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-      if (aValue.equals("--------------")) { return; }
-      final int firstRow = rowIndex;
-      ArrayList<String> list = (columnIndex == COL_ANNOTATION) ?
-        annotationColValues : featureColValues;
-      ArrayList<String> list2 = (columnIndex == COL_ANNOTATION) ?
-        featureColValues : annotationColValues;
-      Set<String> set = (columnIndex == COL_ANNOTATION) ?
-        annotationTypes : featuresNames;
-
-      if (aValue.equals("Use As Default")) {
-        String value = list.get(rowIndex);
-        for (int row = 0; row < list.size(); row++) {
-          list.set(row, value);
-          annotationDifferRows.set(row, null);
+    public void updateRows(int rowFirst, int rowLast) {
+      documentProgressBar.setMaximum(rowLast);
+      for (int row = rowFirst; row <= rowLast; row++) {
+        boolean documentWasLoaded = corpus.isDocumentLoaded(row);
+        Document document = (Document) corpus.get(row);
+        documentNames.set(row, document.getName());
+        Set<Annotation> keys = new HashSet<Annotation>();
+        Set<Annotation> responses = new HashSet<Annotation>();
+        // get annotations from selected annotation sets
+        if (documentKeySetName.equals("[Default set]")) {
+          keys = document.getAnnotations();
+        } else if (document.getAnnotationSetNames() != null
+        && document.getAnnotationSetNames().contains(documentKeySetName)) {
+          keys = document.getAnnotations(documentKeySetName);
         }
+        if (documentResponseSetName.equals("[Default set]")) {
+          responses = document.getAnnotations();
+        } else if (document.getAnnotationSetNames() != null
+        && document.getAnnotationSetNames()
+          .contains(documentResponseSetName)) {
+          responses = document.getAnnotations(documentResponseSetName);
+        }
+        // get types and features
+        Set<String> types = new HashSet<String>();
+        for (Object type : documentTypeList.getSelectedValues()) {
+          types.add((String) type);
+        }
+        Set<String> featureSet = new HashSet<String>();
+        for (Object feature : documentFeatureList.getSelectedValues()) {
+          featureSet.add((String) feature);
+        }
+        differs = new ArrayList<AnnotationDiffer>();
+        AnnotationDiffer differ = new AnnotationDiffer();
+        differ.setSignificantFeaturesSet(featureSet);
+        // keep only annotations from selected annotation types
+        if (documentMacroAverageButton.isSelected()) {
+          if (keys instanceof AnnotationSet && !types.isEmpty()) {
+            keys = ((AnnotationSet)keys).get(types);
+          }
+          if (responses instanceof AnnotationSet && !types.isEmpty()) {
+            responses = ((AnnotationSet)responses).get(types);
+          }
+          differ.calculateDiff(keys, responses); // compare
+          differs.add(differ);
+        } else {
+          Set<Annotation> keysIter = new HashSet<Annotation>();
+          Set<Annotation> responsesIter = new HashSet<Annotation>();
+          for (String type : types) {
+            if (keys instanceof AnnotationSet && !types.isEmpty()) {
+              keysIter = ((AnnotationSet)keys).get(type);
+            }
+            if (responses instanceof AnnotationSet && !types.isEmpty()) {
+              responsesIter = ((AnnotationSet)responses).get(type);
+            }
+            differ.calculateDiff(keysIter, responsesIter); // compare
+            differs.add(differ);
+          }
+        }
+        differRows.set(row, differs);
+        if (!documentWasLoaded) {
+          corpus.unloadDocument(document);
+          Factory.deleteResource(document);
+        }
+        final int rowF = row;
         SwingUtilities.invokeLater(new Runnable(){ public void run(){
-          fireTableDataChanged();
+          documentProgressBar.setValue(rowF);
         }});
-        return;
       }
-      if (aValue.equals("Expand All")) {
-        int row = rowIndex + 1;
-        for (String value : set) {
-          documentColValues.add(row, documentColValues.get(rowIndex));
-          list.add(row, value);
-          list2.add(row, list2.get(rowIndex));
-          annotationDifferRows.add(row, null);
-          row++;
-        }
-        final int lastRow = row;
-        SwingUtilities.invokeLater(new Runnable(){ public void run(){
-          fireTableRowsInserted(firstRow+1, lastRow);
-        }});
-      } else if (list.get(rowIndex).equals("Expand All")) {
-        int row;
-        for (row = rowIndex + set.size(); row > rowIndex;  row--) {
-          documentColValues.remove(row);
-          list.remove(row);
-          list2.remove(row);
-          annotationDifferRows.remove(row);
-        }
-        SwingUtilities.invokeLater(new Runnable(){ public void run(){
-          fireTableRowsDeleted(firstRow+1, firstRow+featuresNames.size());
-        }});
-      }
-      list.set(rowIndex, (String) aValue);
-      annotationDifferRows.set(rowIndex, null);
       SwingUtilities.invokeLater(new Runnable(){ public void run(){
-        fireTableRowsUpdated(firstRow, firstRow);
+        documentProgressBar.setValue(documentProgressBar.getMinimum());
       }});
+      columnNames = new ArrayList<String>(Arrays.asList(COLUMN_NAMES));
+      headerTooltips = new ArrayList<String>(Arrays.asList(HEADER_TOOLTIPS));
+      for (Object measure : documentMeasureList.getSelectedValues()) {
+        if (measure.equals("F1-score strict")) {
+          columnNames.addAll(Arrays.asList("Rec.B/A", "Prec.B/A", "F1-strict"));
+          headerTooltips.addAll(Arrays.asList("Recall for B relative to A",
+            "Precision for B relative to A",
+            "Combine precision and recall with the same weight for each"));
+        } else if (measure.equals("F1-score lenient")) {
+          columnNames.addAll(Arrays.asList("Rec.B/A", "Prec.B/A", "F1-lenient"));
+          headerTooltips.addAll(Arrays.asList("Recall for B relative to A",
+            "Precision for B relative to A",
+            "Combine precision and recall with the same weight for each"));
+        } else if (measure.equals("F1-score average")) {
+          columnNames.addAll(Arrays.asList("Rec.B/A", "Prec.B/A", "F1-average"));
+          headerTooltips.addAll(Arrays.asList("Recall for B relative to A",
+            "Precision for B relative to A",
+            "Combine precision and recall with the same weight for each"));
+        }
+      }
     }
 
-    private final String[] COLUMN_NAMES = {"Document", "Annotation", "Feature",
-      "Match", "Only A", "Only B", "Overlap", "Rec.B/A", "Prec.B/A", "F-Score"};
-    public final String[] HEADER_TOOLTIPS = {null, null, null,
-      "aka 'Correct'", "aka 'Missing'", "aka 'Spurious'", "aka 'Partial'",
-      "Recall for B relative to A", "Precision for B relative to A",
-      "Combine precision and recall with the same weight for each"};
+    public int getColumnCount() {
+      return COLUMN_COUNT
+        + (documentMeasureList.getSelectedValues().length * 3);
+    }
+
+    public int getRowCount() {
+      return corpus == null ? 0 : corpus.size();
+    }
+
+    public Object getValueAt(int rowIndex, int columnIndex) {
+      if (corpus.size() <= rowIndex) { return ""; }
+      differs = differRows.get(rowIndex);
+      NumberFormat f = NumberFormat.getInstance();
+      f.setMaximumFractionDigits(2);
+      f.setMinimumFractionDigits(2);
+      int sum = 0;
+      switch(columnIndex) {
+        case COL_DOCUMENT:
+          return documentNames.get(rowIndex);
+        case COL_CORRECT:
+          for (AnnotationDiffer differ : differs)
+          { sum += differ.getCorrectMatches(); }
+          return Integer.toString(sum);
+        case COL_MISSING:
+          for (AnnotationDiffer differ : differs)
+          { sum += differ.getMissing(); }
+          return Integer.toString(sum);
+        case COL_SPURIOUS:
+          for (AnnotationDiffer differ : differs)
+          { sum += differ.getSpurious(); }
+          return Integer.toString(sum);
+        case COL_PARTIAL:
+          for (AnnotationDiffer differ : differs)
+          { sum += differ.getPartiallyCorrectMatches(); }
+          return Integer.toString(sum);
+        default:
+          int colMeasure = (columnIndex - COLUMN_COUNT) % 3;
+          int measureIndex = (columnIndex  - COLUMN_COUNT) / 3;
+          String measure = (String)
+            documentMeasureList.getSelectedValues()[measureIndex];
+          switch (colMeasure) {
+            case COL_RECALL:
+              if (measure.equals("F1-score strict")) {
+                for (AnnotationDiffer differ : differs)
+                { sum += differ.getRecallStrict(); }
+                return f.format(sum);
+              } else if (measure.equals("F1-score lenient")) {
+                for (AnnotationDiffer differ : differs)
+                { sum += differ.getRecallLenient(); }
+                return f.format(sum);
+              } else if (measure.equals("F1-score average")) {
+                for (AnnotationDiffer differ : differs)
+                { sum += differ.getRecallAverage(); }
+                return f.format(sum);
+              }
+            case COL_PRECISION:
+              if (measure.equals("F1-score strict")) {
+                for (AnnotationDiffer differ : differs)
+                { sum += differ.getPrecisionStrict(); }
+                return f.format(sum);
+              } else if (measure.equals("F1-score lenient")) {
+                for (AnnotationDiffer differ : differs)
+                { sum += differ.getPrecisionLenient(); }
+                return f.format(sum);
+              } else if (measure.equals("F1-score average")) {
+                for (AnnotationDiffer differ : differs)
+                { sum += differ.getPrecisionAverage(); }
+                return f.format(sum);
+              }
+            case COL_FMEASURE:
+              if (measure.equals("F1-score strict")) {
+                for (AnnotationDiffer differ : differs)
+                { sum += differ.getFMeasureStrict(1.0); }
+                return f.format(sum);
+              } else if (measure.equals("F1-score lenient")) {
+                for (AnnotationDiffer differ : differs)
+                { sum += differ.getFMeasureLenient(1.0); }
+                return f.format(sum);
+              } else if (measure.equals("F1-score average")) {
+                for (AnnotationDiffer differ : differs)
+                { sum += differ.getFMeasureAverage(1.0); }
+                return f.format(sum);
+              }
+            default:
+              return "";
+          }
+      }
+    }
+
+    public Class<?> getColumnClass(int columnIndex) {
+      return String.class;
+    }
+
+    public String getColumnName(int column) {
+      return columnNames.get(column);
+    }
+
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+      return false;
+    }
+
+    private ArrayList<AnnotationDiffer> differs;
+    private ArrayList<ArrayList<AnnotationDiffer>> differRows =
+      new ArrayList<ArrayList<AnnotationDiffer>>();
+    private ArrayList<String> documentNames = new ArrayList<String>();
+
+    private final String[] COLUMN_NAMES = {
+      "Document", "Match", "Only A", "Only B", "Overlap"};
+    public final String[] HEADER_TOOLTIPS = {null,
+      "aka 'Correct'", "aka 'Missing'", "aka 'Spurious'", "aka 'Partial'"};
+    private ArrayList<String> columnNames =
+      new ArrayList<String>(Arrays.asList(COLUMN_NAMES));
+    private ArrayList<String> headerTooltips =
+      new ArrayList<String>(Arrays.asList(HEADER_TOOLTIPS));
+
     public static final int COL_DOCUMENT = 0;
-    public static final int COL_ANNOTATION = 1;
-    public static final int COL_FEATURE = 2;
-    public static final int COL_CORRECT = 3;
-    public static final int COL_MISSING = 4;
-    public static final int COL_SPURIOUS = 5;
-    public static final int COL_PARTIAL = 6;
-    public static final int COL_RECALL = 7;
-    public static final int COL_PRECISION = 8;
-    public static final int COL_FMEASURE = 9;
-    private static final int COLUMN_COUNT = 10;
+    public static final int COL_CORRECT = 1;
+    public static final int COL_MISSING = 2;
+    public static final int COL_SPURIOUS = 3;
+    public static final int COL_PARTIAL = 4;
+    private static final int COLUMN_COUNT = 5;
+    public static final int COL_RECALL = 0;
+    public static final int COL_PRECISION = 1;
+    public static final int COL_FMEASURE = 2;
   }
 
   /**
-   * Update <code>annotationTypes</code> and <code>featuresNames</code>.
-   * Update annotation and document tables.
+   * Update annotation table.
    */
-  protected class CompareAction extends AbstractAction{
-    public CompareAction(){
+  protected class CompareAnnotationAction extends AbstractAction{
+    public CompareAnnotationAction(){
       super("Compare");
       putValue(SHORT_DESCRIPTION,
         "Compare annotations between sets A and B");
@@ -744,111 +1231,56 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       putValue(SMALL_ICON, MainFrame.getIcon("crystal-clear-action-run"));
     }
     public void actionPerformed(ActionEvent evt){
-      String keyAnnotationSetName =
-        (String) keyAnnotationSetCombo.getSelectedItem();
-      String responseAnnotationSetName =
-        (String) responseAnnotationSetCombo.getSelectedItem();
-      if (keyAnnotationSetName == null
-       || responseAnnotationSetName == null) {
-        return;
-      }
+      CorpusQualityAssurance.this.setCursor(
+        Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+      Runnable runnable = new Runnable() { public void run() {
+      // update tables
+      annotationTableModel.initialise();
+      annotationTableModel.updateRows(0, annotationTableModel.getRowCount()-1);
+
+      SwingUtilities.invokeLater(new Runnable(){ public void run(){
+        // redraw tables
+        annotationTableModel.fireTableStructureChanged();
+        CorpusQualityAssurance.this.setCursor(
+          Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+      }});
+      }};
+      Thread thread = new Thread(runnable,  "CompareAnnotationAction");
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
+    }
+  }
+
+  /**
+   * Update document table.
+   */
+  protected class CompareDocumentAction extends AbstractAction{
+    public CompareDocumentAction(){
+      super("Compare");
+      putValue(SHORT_DESCRIPTION,
+        "Compare annotations between sets A and B");
+      putValue(MNEMONIC_KEY, KeyEvent.VK_ENTER);
+      putValue(SMALL_ICON, MainFrame.getIcon("crystal-clear-action-run"));
+    }
+    public void actionPerformed(ActionEvent evt){
       CorpusQualityAssurance.this.setCursor(
         Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-      // update features names and annotation types lists
-      featuresNames.clear();
-      annotationTypes.clear();
-      for (Object object : corpus) {
-        Document document = (Document) object;
-        Set<Annotation> annotations = new HashSet<Annotation>();
-        if (keyAnnotationSetName.equals("[Default set]")) {
-          annotations = document.getAnnotations();
-        } else if (document.getAnnotationSetNames() != null
-        && document.getAnnotationSetNames().contains(keyAnnotationSetName)) {
-          annotations = document.getAnnotations(keyAnnotationSetName);
-        }
-        annotationTypes.addAll(((AnnotationSet)annotations).getAllTypes());
-        for (Annotation annotation : annotations) {
-          for (Object featureKey : annotation.getFeatures().keySet()) {
-            featuresNames.add((String) featureKey);
-          }
-        }
-        if (responseAnnotationSetName.equals("[Default set]")) {
-          annotations = document.getAnnotations();
-        } else if (document.getAnnotationSetNames() != null
-                && document.getAnnotationSetNames()
-                  .contains(responseAnnotationSetName)) {
-          annotations = document.getAnnotations(responseAnnotationSetName);
-        }
-        annotationTypes.addAll(((AnnotationSet)annotations).getAllTypes());
-        for (Annotation annotation : annotations) {
-          for (Object featureKey : annotation.getFeatures().keySet()) {
-            featuresNames.add((String) featureKey);
-          }
-        }
-      }
-
-      // update cell renderers for annotation and feature columns
-      TableColumn featureColumn = annotationTable.getColumnModel()
-        .getColumn(AnnotationTableModel.COL_FEATURE);
-      JComboBox featureCombo =
-        new JComboBox(new Vector<String>(featuresNames));
-      featureCombo.setMaximumRowCount(15);
-      featureCombo.insertItemAt("None", 0);
-      featureCombo.insertItemAt("All", 1);
-      featureCombo.insertItemAt("Expand All", 2);
-      featureCombo.insertItemAt("Use As Default", 3);
-      featureCombo.insertItemAt("--------------", 4);
-      featureColumn.setCellEditor(new DefaultCellEditor(featureCombo));
-      int maxLength = "Use As Default".length();
-      for (String item : featuresNames) {
-        if (maxLength < item.length()) { maxLength = item.length(); }
-      }
-      maxLength += maxLength * 0.2;
-      String colName = annotationTableModel
-        .getColumnName(AnnotationTableModel.COL_FEATURE);
-      featureColumn.setHeaderValue(colName +
-        Strings.addPadding(" ", maxLength-colName.length()));
-      featureColumn = documentTable.getColumnModel()
-        .getColumn(DocumentTableModel.COL_FEATURE);
-      featureColumn.setCellEditor(new DefaultCellEditor(featureCombo));
-      colName = documentTableModel
-        .getColumnName(DocumentTableModel.COL_FEATURE);
-      featureColumn.setHeaderValue(colName +
-        Strings.addPadding(" ", maxLength-colName.length()));
-      TableColumn annotationColumn = documentTable.getColumnModel()
-        .getColumn(DocumentTableModel.COL_ANNOTATION);
-      JComboBox annotationCombo =
-        new JComboBox(new Vector<String>(annotationTypes));
-      annotationCombo.setMaximumRowCount(15);
-      annotationCombo.insertItemAt("All", 0);
-      annotationCombo.insertItemAt("Expand All", 1);
-      annotationCombo.insertItemAt("Use As Default", 2);
-      annotationCombo.insertItemAt("--------------", 3);
-      annotationColumn.setCellEditor(new DefaultCellEditor(annotationCombo));
-      maxLength = "Use As Default".length();
-      for (String item : annotationTypes) {
-        if (maxLength < item.length()) { maxLength = item.length(); }
-      }
-      maxLength += maxLength * 0.2;
-      colName = documentTableModel
-       .getColumnName(DocumentTableModel.COL_ANNOTATION);
-      annotationColumn.setHeaderValue(colName +
-        Strings.addPadding(" ", maxLength-colName.length()));
-
-      // clear internal model of tables
-      annotationTableModel.initialise();
-      documentTableModel.initialise();
-
+      Runnable runnable = new Runnable() { public void run() {
       // update tables
+      documentTableModel.initialise();
+      documentTableModel.updateRows(0, documentTableModel.getRowCount()-1);
+
       SwingUtilities.invokeLater(new Runnable(){ public void run(){
-        annotationTableModel.fireTableDataChanged();
-        documentTableModel.fireTableDataChanged();
-        SwingUtilities.invokeLater(new Runnable(){ public void run(){
-          CorpusQualityAssurance.this.setCursor(
-            Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-        }});
+        // redraw tables
+        documentTableModel.fireTableStructureChanged();
+        CorpusQualityAssurance.this.setCursor(
+          Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
       }});
+      }};
+      Thread thread = new Thread(runnable,  "CompareDocumentAction");
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
     }
   }
 
@@ -876,17 +1308,18 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     public void actionPerformed(ActionEvent e){
       String documentName = (String) documentTable.getValueAt(
         documentTable.getSelectedRow(), DocumentTableModel.COL_DOCUMENT);
-      String annotationType = (String) documentTable.getValueAt(
-        documentTable.getSelectedRow(), DocumentTableModel.COL_ANNOTATION);
-      String featureName = (String) documentTable.getValueAt(
-        documentTable.getSelectedRow(), DocumentTableModel.COL_FEATURE);
       String keyAnnotationSetName =
-        (String) keyAnnotationSetCombo.getSelectedItem();
+        (String) documentSetList.getSelectedValues()[0];
       String responseAnnotationSetName =
-        (String) responseAnnotationSetCombo.getSelectedItem();
+        (String) documentSetList.getSelectedValues()[1];
+      String annotationType = (String) documentTypeList.getSelectedValue();
+      Set<String> featureSet = new HashSet<String>();
+      for (Object feature : documentFeatureList.getSelectedValues()) {
+        featureSet.add((String) feature);
+      }
       AnnotationDiffGUI frame = new AnnotationDiffGUI("Annotation Difference",
         documentName, documentName, keyAnnotationSetName,
-        responseAnnotationSetName, annotationType, featureName);
+        responseAnnotationSetName, annotationType, featureSet);
       frame.pack();
       frame.setLocationRelativeTo(MainFrame.getInstance());
       frame.setVisible(true);
@@ -907,8 +1340,8 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       String parent = (currentFile != null) ? currentFile.getParent() :
         System.getProperty("user.home");
       String fileName = corpus.getName();
-      fileName += "_" + keyAnnotationSetCombo.getSelectedItem();
-      fileName += "-" + responseAnnotationSetCombo.getSelectedItem();
+      fileName += "_" + annotationKeySetName;
+      fileName += "-" + annotationResponseSetName;
       fileName += ".html";
       fileChooser.setSelectedFile(new File(parent, fileName));
       ExtensionFileFilter fileFilter = new ExtensionFileFilter();
@@ -925,15 +1358,15 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         fw.write(BEGINHTML + nl);
         fw.write(BEGINHEAD);
         fw.write(corpus.getName() + " - "
-          + keyAnnotationSetCombo.getSelectedItem() + " - "
-          + responseAnnotationSetCombo.getSelectedItem());
+          + annotationKeySetName + " - "
+          + annotationResponseSetName);
         fw.write(ENDHEAD + nl);
         fw.write("<H1>Corpus Quality Assurance</H1>" + nl);
         fw.write("<P>Corpus: " + corpus.getName() + "<BR>" + nl);
         fw.write("Key annotation set: "
-          + keyAnnotationSetCombo.getSelectedItem() + "<BR>" + nl);
+          + annotationKeySetName + "<BR>" + nl);
         fw.write("Response annotation set: " +
-          responseAnnotationSetCombo.getSelectedItem() + "</P>" + nl);
+          annotationResponseSetName + "</P>" + nl);
         // annotation table
         fw.write(BEGINTABLE + nl + "<TR>" + nl);
         int maxColIdx = annotationTable.getColumnCount() - 1;
@@ -993,22 +1426,44 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     static final String ENDTABLE = "</table>";
   }
 
-  protected JPanel topPanel;
   protected XJTable documentTable;
   protected DocumentTableModel documentTableModel;
   protected XJTable annotationTable;
   protected AnnotationTableModel annotationTableModel;
   protected Corpus corpus;
+  protected String annotationKeySetName;
+  protected String annotationResponseSetName;
+  protected String documentKeySetName;
+  protected String documentResponseSetName;
   protected TreeSet<String> annotationSetsNames;
   protected TreeSet<String> annotationTypes;
-  protected TreeSet<String> featuresNames;
-  protected JComboBox keyAnnotationSetCombo;
-  protected JComboBox responseAnnotationSetCombo;
+  protected TreeSet<String> annotationFeatures;
+  protected TreeSet<String> documentSetsNames;
+  protected TreeSet<String> documentTypes;
+  protected TreeSet<String> documentFeatures;
+  protected JList annotationSetList;
+  protected JList annotationFeatureList;
+  protected JList annotationMeasureList;
+  protected JList documentSetList;
+  protected JList documentTypeList;
+  protected JList documentFeatureList;
+  protected JList documentMeasureList;
+  protected JCheckBox annotationSetCheck;
+  protected JCheckBox annotationFeatureCheck;
+  protected JCheckBox documentSetCheck;
+  protected JCheckBox documentTypeCheck;
+  protected JCheckBox documentFeatureCheck;
+  protected JRadioButton annotationMicroAverageButton;
+  protected JRadioButton annotationMacroAverageButton;
+  protected JRadioButton documentMicroAverageButton;
+  protected JRadioButton documentMacroAverageButton;
   protected Collator collator;
   protected boolean corpusChanged;
   protected OpenDocumentAction openDocumentAction;
   protected OpenAnnotationDiffAction openAnnotationDiffAction;
   protected ExportToHtmlAction exportToHtmlAction;
-  protected CompareAction compareAction;
-  protected boolean warningAlreadyShown = false;
+  protected CompareAnnotationAction compareAnnotationAction;
+  protected CompareDocumentAction compareDocumentAction;
+  protected JProgressBar annotationProgressBar;
+  protected JProgressBar documentProgressBar;
 }
