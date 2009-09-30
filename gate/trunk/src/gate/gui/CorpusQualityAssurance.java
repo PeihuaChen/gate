@@ -814,57 +814,71 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     }
 
     public void updateRows(int rowFirst, int rowLast) {
-      annotationProgressBar.setMaximum((rowLast+1) * corpus.size());
-      for (int row = rowFirst; row <= rowLast; row++) {
-        Set<Annotation> keys = new HashSet<Annotation>();
-        Set<Annotation> responses = new HashSet<Annotation>();
-        // for each document in the corpus
-        for (int i = 0; i < corpus.size(); i++) {
-          boolean documentWasLoaded = corpus.isDocumentLoaded(i);
-          Document document = (Document) corpus.get(i);
-          Set<Annotation> keyAS = new HashSet<Annotation>();
-          Set<Annotation> responseAS = new HashSet<Annotation>();
-          // get annotations from selected annotation sets
-          if (annotationKeySetName.equals("[Default set]")) {
-            keyAS = document.getAnnotations();
-          } else if (document.getAnnotationSetNames() != null
-          && document.getAnnotationSetNames().contains(annotationKeySetName)) {
-            keyAS = document.getAnnotations(annotationKeySetName);
-          }
-          if (annotationResponseSetName.equals("[Default set]")) {
-            responseAS = document.getAnnotations();
-          } else if (document.getAnnotationSetNames() != null
-          && document.getAnnotationSetNames()
-            .contains(annotationResponseSetName)) {
-            responseAS = document.getAnnotations(annotationResponseSetName);
-          }
-          // keep only annotations from the current annotation type
-          if (keyAS instanceof AnnotationSet) {
-            keys.addAll(((AnnotationSet)keyAS).get(
-              (String)annotationTypes.toArray()[row]));
-          }
-          if (responseAS instanceof AnnotationSet) {
-            responses.addAll(((AnnotationSet)responseAS).get(
-              (String)annotationTypes.toArray()[row]));
-          }
-          if (!documentWasLoaded) {
-            corpus.unloadDocument(document);
-            Factory.deleteResource(document);
-          }
-          final int rowF = row;
-          final int iF = i;
-          SwingUtilities.invokeLater(new Runnable(){ public void run(){
-            annotationProgressBar.setValue((rowF+1) * (iF+1));
-          }});
+      final int pCoef = (corpus.getDataStore() == null) ? 0 : 1;
+      annotationProgressBar.setMaximum(pCoef*corpus.size() + rowLast + 1);
+      Set<Annotation> keys = new HashSet<Annotation>();
+      Set<Annotation> responses = new HashSet<Annotation>();
+      Set<Annotation> keysIter;
+      Set<Annotation> responsesIter;
+      // for each document in the corpus
+      for (int i = 0; i < corpus.size(); i++) {
+        boolean documentWasLoaded = corpus.isDocumentLoaded(i);
+        Document document = (Document) corpus.get(i);
+        keysIter = new HashSet<Annotation>();
+        responsesIter = new HashSet<Annotation>();
+        // get annotations from selected annotation sets
+        if (annotationKeySetName.equals("[Default set]")) {
+          keysIter = document.getAnnotations();
+        } else if (document.getAnnotationSetNames() != null
+        && document.getAnnotationSetNames().contains(annotationKeySetName)) {
+          keysIter = document.getAnnotations(annotationKeySetName);
         }
-        Set<String> featureSet = new HashSet<String>();
-        for (Object feature : annotationFeatureList.getSelectedValues()) {
-          featureSet.add((String) feature);
+        if (annotationResponseSetName.equals("[Default set]")) {
+          responsesIter = document.getAnnotations();
+        } else if (document.getAnnotationSetNames() != null
+        && document.getAnnotationSetNames()
+          .contains(annotationResponseSetName)) {
+          responsesIter = document.getAnnotations(annotationResponseSetName);
+        }
+        if (!documentWasLoaded) {
+          corpus.unloadDocument(document);
+          Factory.deleteResource(document);
+        }
+        keys.addAll(keysIter);
+        responses.addAll(responsesIter);
+        final int iF = i;
+        SwingUtilities.invokeLater(new Runnable(){ public void run(){
+          annotationProgressBar.setValue(pCoef*(iF + 1));
+        }});
+      }
+      Set<String> featureSet = new HashSet<String>();
+      for (Object feature : annotationFeatureList.getSelectedValues()) {
+        featureSet.add((String) feature);
+      }
+      // for each annotation type row
+      for (int row = rowFirst; row <= rowLast; row++) {
+        keysIter = new HashSet<Annotation>();
+        responsesIter = new HashSet<Annotation>();
+        String type = (String) annotationTypes.toArray()[row];
+        // keep only annotations from the current annotation type
+        for (Annotation annotation : keys) {
+          if (annotation.getType().equals(type)) {
+            keysIter.add(annotation);
+          }
+        }
+        for (Annotation annotation : responses) {
+          if (annotation.getType().equals(type)) {
+            responsesIter.add(annotation);
+          }
         }
         differ = new AnnotationDiffer();
         differ.setSignificantFeaturesSet(featureSet);
-        differ.calculateDiff(keys, responses); // compare
+        differ.calculateDiff(keysIter, responsesIter); // compare
         differRows.set(row, differ);
+        final int rowF = row;
+        SwingUtilities.invokeLater(new Runnable(){ public void run(){
+          annotationProgressBar.setValue(pCoef*corpus.size() + rowF + 1);
+        }});
       }
       SwingUtilities.invokeLater(new Runnable(){ public void run(){
         annotationProgressBar.setValue(annotationProgressBar.getMinimum());
@@ -1001,7 +1015,8 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     }
 
     public void updateRows(int rowFirst, int rowLast) {
-      documentProgressBar.setMaximum(rowLast);
+      documentProgressBar.setMaximum(rowLast + 1);
+      // for each document
       for (int row = rowFirst; row <= rowLast; row++) {
         boolean documentWasLoaded = corpus.isDocumentLoaded(row);
         Document document = (Document) corpus.get(row);
@@ -1022,7 +1037,10 @@ public class CorpusQualityAssurance extends AbstractVisualResource
           .contains(documentResponseSetName)) {
           responses = document.getAnnotations(documentResponseSetName);
         }
-        // get types and features
+        if (!documentWasLoaded) {
+          corpus.unloadDocument(document);
+          Factory.deleteResource(document);
+        }
         Set<String> types = new HashSet<String>();
         for (Object type : documentTypeList.getSelectedValues()) {
           types.add((String) type);
@@ -1032,8 +1050,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
           featureSet.add((String) feature);
         }
         differs = new ArrayList<AnnotationDiffer>();
-        AnnotationDiffer differ = new AnnotationDiffer();
-        differ.setSignificantFeaturesSet(featureSet);
+        AnnotationDiffer differ;
         // keep only annotations from selected annotation types
         if (documentMacroAverageButton.isSelected()) {
           if (keys instanceof AnnotationSet && !types.isEmpty()) {
@@ -1042,9 +1059,11 @@ public class CorpusQualityAssurance extends AbstractVisualResource
           if (responses instanceof AnnotationSet && !types.isEmpty()) {
             responses = ((AnnotationSet)responses).get(types);
           }
+          differ = new AnnotationDiffer();
+          differ.setSignificantFeaturesSet(featureSet);
           differ.calculateDiff(keys, responses); // compare
           differs.add(differ);
-        } else {
+        } else { // micro average
           Set<Annotation> keysIter = new HashSet<Annotation>();
           Set<Annotation> responsesIter = new HashSet<Annotation>();
           for (String type : types) {
@@ -1054,18 +1073,16 @@ public class CorpusQualityAssurance extends AbstractVisualResource
             if (responses instanceof AnnotationSet && !types.isEmpty()) {
               responsesIter = ((AnnotationSet)responses).get(type);
             }
+            differ = new AnnotationDiffer();
+            differ.setSignificantFeaturesSet(featureSet);
             differ.calculateDiff(keysIter, responsesIter); // compare
             differs.add(differ);
           }
         }
         differRows.set(row, differs);
-        if (!documentWasLoaded) {
-          corpus.unloadDocument(document);
-          Factory.deleteResource(document);
-        }
         final int rowF = row;
         SwingUtilities.invokeLater(new Runnable(){ public void run(){
-          documentProgressBar.setValue(rowF);
+          documentProgressBar.setValue(rowF + 1);
         }});
       }
       SwingUtilities.invokeLater(new Runnable(){ public void run(){
@@ -1108,27 +1125,28 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       NumberFormat f = NumberFormat.getInstance();
       f.setMaximumFractionDigits(2);
       f.setMinimumFractionDigits(2);
-      int sum = 0;
+      int sumInt = 0;
       switch(columnIndex) {
         case COL_DOCUMENT:
           return documentNames.get(rowIndex);
         case COL_CORRECT:
           for (AnnotationDiffer differ : differs)
-          { sum += differ.getCorrectMatches(); }
-          return Integer.toString(sum);
+          { sumInt += differ.getCorrectMatches(); }
+          return Integer.toString(sumInt);
         case COL_MISSING:
           for (AnnotationDiffer differ : differs)
-          { sum += differ.getMissing(); }
-          return Integer.toString(sum);
+          { sumInt += differ.getMissing(); }
+          return Integer.toString(sumInt);
         case COL_SPURIOUS:
           for (AnnotationDiffer differ : differs)
-          { sum += differ.getSpurious(); }
-          return Integer.toString(sum);
+          { sumInt += differ.getSpurious(); }
+          return Integer.toString(sumInt);
         case COL_PARTIAL:
           for (AnnotationDiffer differ : differs)
-          { sum += differ.getPartiallyCorrectMatches(); }
-          return Integer.toString(sum);
+          { sumInt += differ.getPartiallyCorrectMatches(); }
+          return Integer.toString(sumInt);
         default:
+          double sumDbl = 0;
           int colMeasure = (columnIndex - COLUMN_COUNT) % 3;
           int measureIndex = (columnIndex  - COLUMN_COUNT) / 3;
           String measure = (String)
@@ -1137,44 +1155,44 @@ public class CorpusQualityAssurance extends AbstractVisualResource
             case COL_RECALL:
               if (measure.equals("F1-score strict")) {
                 for (AnnotationDiffer differ : differs)
-                { sum += differ.getRecallStrict(); }
-                return f.format(sum);
+                { sumDbl += differ.getRecallStrict(); }
+                return f.format(sumDbl/differs.size());
               } else if (measure.equals("F1-score lenient")) {
                 for (AnnotationDiffer differ : differs)
-                { sum += differ.getRecallLenient(); }
-                return f.format(sum);
+                { sumDbl += differ.getRecallLenient(); }
+                return f.format(sumDbl/differs.size());
               } else if (measure.equals("F1-score average")) {
                 for (AnnotationDiffer differ : differs)
-                { sum += differ.getRecallAverage(); }
-                return f.format(sum);
+                { sumDbl += differ.getRecallAverage(); }
+                return f.format(sumDbl/differs.size());
               }
             case COL_PRECISION:
               if (measure.equals("F1-score strict")) {
                 for (AnnotationDiffer differ : differs)
-                { sum += differ.getPrecisionStrict(); }
-                return f.format(sum);
+                { sumDbl += differ.getPrecisionStrict(); }
+                return f.format(sumDbl/differs.size());
               } else if (measure.equals("F1-score lenient")) {
                 for (AnnotationDiffer differ : differs)
-                { sum += differ.getPrecisionLenient(); }
-                return f.format(sum);
+                { sumDbl += differ.getPrecisionLenient(); }
+                return f.format(sumDbl/differs.size());
               } else if (measure.equals("F1-score average")) {
                 for (AnnotationDiffer differ : differs)
-                { sum += differ.getPrecisionAverage(); }
-                return f.format(sum);
+                { sumDbl += differ.getPrecisionAverage(); }
+                return f.format(sumDbl/differs.size());
               }
             case COL_FMEASURE:
               if (measure.equals("F1-score strict")) {
                 for (AnnotationDiffer differ : differs)
-                { sum += differ.getFMeasureStrict(1.0); }
-                return f.format(sum);
+                { sumDbl += differ.getFMeasureStrict(1.0); }
+                return f.format(sumDbl/differs.size());
               } else if (measure.equals("F1-score lenient")) {
                 for (AnnotationDiffer differ : differs)
-                { sum += differ.getFMeasureLenient(1.0); }
-                return f.format(sum);
+                { sumDbl += differ.getFMeasureLenient(1.0); }
+                return f.format(sumDbl/differs.size());
               } else if (measure.equals("F1-score average")) {
                 for (AnnotationDiffer differ : differs)
-                { sum += differ.getFMeasureAverage(1.0); }
-                return f.format(sum);
+                { sumDbl += differ.getFMeasureAverage(1.0); }
+                return f.format(sumDbl/differs.size());
               }
             default:
               return "";
