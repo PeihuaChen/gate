@@ -208,7 +208,9 @@ public class TestCreole extends TestCase
     ResourceData xmlDocFormatRD = (ResourceData) reg.get(docFormatName);
     assertTrue(xmlDocFormatRD.getName().equals("Sheffield XML Document Format"));
     assertTrue(xmlDocFormatRD.isAutoLoading());
-    assertTrue(xmlDocFormatRD.getJarFileName().equals("ShefDocumentFormats.jar"));
+    
+    rd = reg.get("testpkg.TestPR1");
+    assertTrue(rd.getJarFileName().equals("TestResources.jar"));
   } // testDiscovery()
 
   /** Test resource metadata */

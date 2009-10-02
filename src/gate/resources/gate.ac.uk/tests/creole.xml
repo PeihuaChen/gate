@@ -62,7 +62,6 @@
 	<CREOLE>
 		<RESOURCE>
 			<NAME>Sheffield XML Document Format</NAME>
-			<JAR>ShefDocumentFormats.jar</JAR>
 			<CLASS>gate.corpora.XmlDocumentFormat</CLASS>
 			<AUTOLOAD/>
 			<AUTOINSTANCE/>
