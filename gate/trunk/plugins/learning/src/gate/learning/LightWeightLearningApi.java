@@ -251,11 +251,11 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         docFV.obtainFVsFromNLPFeatures(nlpFeatDoc, featuresList,
           featurePositionTotal, maxNegPositionTotal, featuresList.totalNumDocs,
           ngramWeight, engineSettings.datasetDefinition.valueTypeNgram);
-        if(engineSettings.datasetDefinition.isSameWinSize) {
+        /*if(engineSettings.datasetDefinition.isSameWinSize) {
           // expand the feature vector to include the context words
           docFV.expandFV(engineSettings.datasetDefinition.windowSizeLeft,
             engineSettings.datasetDefinition.windowSizeRight);
-        }
+        }*/
         if(isTraining) {
           LabelsOfFeatureVectorDoc labelsDoc = new LabelsOfFeatureVectorDoc();
           labelsDoc.obtainMultiLabelsFromNLPDocSurround(nlpFeatDoc,
