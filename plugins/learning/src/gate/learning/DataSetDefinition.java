@@ -17,6 +17,8 @@ import gate.util.GateException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import org.jdom.Content;
 import org.jdom.Element;
 
 /**
@@ -201,14 +203,28 @@ public class DataSetDefinition {
         .iterator();
       while(childrenSerieIter.hasNext()) {
         Element child = (Element)childrenSerieIter.next();
-        List<Attribute>attributelist = Attribute.parseSerie(child);
         if(isSameWinSize) {
+          anElement = child.getChild("RANGE");
+          if(anElement == null) {
+            Element rangeElement = new Element("RANGE");
+            rangeElement.setAttribute("from", new Integer(this.windowSizeLeft*(-1)).toString());
+            rangeElement.setAttribute("to", new Integer(this.windowSizeRight).toString());
+            child.addContent(rangeElement);
+          } else {
+            anElement.setAttribute("from", new Integer(this.windowSizeLeft*(-1)).toString());
+            anElement.setAttribute("to", new Integer(this.windowSizeRight).toString());
+          }
+          
+        }
+        List<Attribute>attributelist = Attribute.parseSerie(child);
+        /*if(isSameWinSize) {
           //if(attributelist.size()>0) {
             //Attribute att0 = (Attribute)attributelist.get(0);
             //att0.position=0;
             //attributes.add(att0);
             //++attrIndex;
           //}
+          
           
          for(int i=0; i<attributelist.size(); ++i) { 
            Attribute att0 = (Attribute)attributelist.get(i);
@@ -220,9 +236,11 @@ public class DataSetDefinition {
          }
          
         } else {
-          attributes.addAll(attributelist);
-          attrIndex += attributelist.size();
-        }
+          //attributes.addAll(attributelist);
+          //attrIndex += attributelist.size();
+        }*/
+        attributes.addAll(attributelist);
+        attrIndex += attributelist.size();
       }
       if(classAttribute == null)
         System.out.println("!! Warning: No class attribute defined! You CANNOT learn, but it's OK for producing the feature files.");
