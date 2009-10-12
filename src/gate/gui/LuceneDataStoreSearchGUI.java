@@ -24,10 +24,11 @@ import gate.event.DatastoreListener;
 import gate.gui.docview.*;
 import gate.persist.LuceneDataStoreImpl;
 import gate.persist.PersistenceException;
+import gate.persist.SerialDataStore;
 import gate.swing.XJTable;
 import gate.swing.BlockingGlassPane;
-import gate.util.GateRuntimeException;
-import gate.util.OptionsMap;
+import gate.swing.XJFileChooser;
+import gate.util.*;
 
 import gate.creole.annic.Constants;
 import gate.creole.annic.Hit;
@@ -45,6 +46,10 @@ import java.util.regex.*;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.net.URL;
 
 import javax.swing.table.*;
 import javax.swing.text.BadLocationException;
@@ -124,8 +129,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
   private ExecuteQueryAction executeQueryAction;
   private NextResultsAction nextResultsAction;
   private ExportResultsAction exportResultsAction;
-  /** Export results from the results table. */
-  private JButton exportToHTML;
   /** Current instance of the stack view frame. */
   private ConfigureStackViewFrame configureStackViewFrame;
   /** Names of the columns for stackRows data. */
@@ -489,8 +492,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     panel.add(Box.createHorizontalStrut(5), gbc);
     exportResultsAction = new ExportResultsAction();
     exportResultsAction.setEnabled(false);
-    exportToHTML =
-      new ButtonBorder(new Color(240,240,240), new Insets(0,0,0,3), false);
+    JButton exportToHTML = new ButtonBorder(new Color(240, 240, 240), new Insets(0, 0, 0, 3), false);
     exportToHTML.setAction(exportResultsAction);
     panel.add(exportToHTML, gbc);
     bottomLeftPanel.add(panel, gbc);
@@ -498,21 +500,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     // table of results
     resultTableModel = new ResultTableModel();
     resultTable = new XJTable(resultTableModel);
+    resultTable.setDefaultRenderer(String.class, new ResultTableCellRenderer());
     resultTable.setEnableHidingColumns(true);
-    resultTable.addMouseMotionListener(new MouseMotionListener() {
-      public void mouseMoved(MouseEvent me) {
-        int row = resultTable.rowAtPoint(me.getPoint());
-        row = resultTable.rowViewToModel(row);
-        Pattern result;
-        if(row > -1) {
-          result = (Pattern) results.get(row);
-          resultTable.setToolTipText("The query that matched this result was: "
-          +result.getQueryString()+".");
-        }
-      }
-      public void mouseDragged(MouseEvent me) {
-      }
-    });
 
     resultTable.addMouseListener(new MouseAdapter() {
       private JPopupMenu mousePopup;
@@ -600,26 +589,11 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     resultTable.getSelectionModel().addListSelectionListener(
       new javax.swing.event.ListSelectionListener() {
         public void valueChanged(javax.swing.event.ListSelectionEvent e) {
-          if (!e.getValueIsAdjusting()) { updateStackView(); }
-          switch (resultTable.getSelectedRows().length) {
-            case 0:
-              exportToHTML.setText("Export all...");
-              exportToHTML.setToolTipText("Exports all the rows in the table.");
-              break;
-            case 1:
-              exportToHTML.setText("Export selection...");
-              exportToHTML.setToolTipText("Exports selected row in the table.");
-              break;
-            default:
-              exportToHTML.setText("Export selection...");
-              exportToHTML.setToolTipText(
-                "Exports selected rows in the table.");
-              break;
+          if (!e.getValueIsAdjusting()) {
+            updateStackView();
           }
         }
       });
-    // user should be allowed to select multiple rows
-    resultTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     resultTable.setColumnSelectionAllowed(false);
     resultTable.setRowSelectionAllowed(true);
     resultTable.setSortable(true);
@@ -629,35 +603,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       ResultTableModel.RESULT_COLUMN, stringCollator);
     resultTable.setComparator(
       ResultTableModel.RIGHT_CONTEXT_COLUMN, stringCollator);
-    // right-alignment of the column
-    resultTable.getColumnModel()
-      .getColumn(ResultTableModel.LEFT_CONTEXT_COLUMN)
-      .setCellRenderer(new DefaultTableCellRenderer() {
-        public Component getTableCellRendererComponent(
-                JTable table, Object color, boolean isSelected,
-                boolean hasFocus, int row, int col) {
-          Component component = super.getTableCellRendererComponent(
-            table, color, isSelected, hasFocus, row, col);
-          if (component instanceof JLabel) {
-            ((JLabel)component).setHorizontalAlignment(SwingConstants.RIGHT);
-          }
-          return component;
-        }
-      });
-    resultTable.getColumnModel()
-      .getColumn(ResultTableModel.RESULT_COLUMN)
-      .setCellRenderer(new DefaultTableCellRenderer() {
-        public Component getTableCellRendererComponent(
-                JTable table, Object color, boolean isSelected,
-                boolean hasFocus, int row, int col) {
-          Component component = super.getTableCellRendererComponent(
-            table, color, isSelected, hasFocus, row, col);
-          if (component instanceof JLabel) {
-            ((JLabel)component).setHorizontalAlignment(SwingConstants.CENTER);
-          }
-          return component;
-        }
-      });
 
     JScrollPane tableScrollPane = new JScrollPane(resultTable,
             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -1394,224 +1339,110 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
   protected class ExportResultsAction extends AbstractAction {
 
     public ExportResultsAction() {
-      super("Export...",
-        MainFrame.getIcon("crystal-clear-app-download-manager"));
+      super("Export", MainFrame.getIcon("crystal-clear-app-download-manager"));
       super.putValue(SHORT_DESCRIPTION,
         "Export results and statistics to a HTML file.");
       super.putValue(MNEMONIC_KEY, KeyEvent.VK_E);
     }
 
     public void actionPerformed(ActionEvent ae) {
+      XJFileChooser fileChooser =  (MainFrame.getFileChooser() != null) ?
+        MainFrame.getFileChooser() : new XJFileChooser();
+      fileChooser.setAcceptAllFileFilterUsed(true);
+      fileChooser.setDialogTitle("Choose a file to export the results");
+      fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+      ExtensionFileFilter filter = new ExtensionFileFilter("HTML files","html");
+      fileChooser.addChoosableFileFilter(filter);
+      String location = (target instanceof SerialDataStore) ?
+        '-' + ((SerialDataStore)target).getStorageDir().getName() : "";
+      String fileName = "Datastore" + location + ".html";
+      fileChooser.setFileName(fileName);
+      int res = fileChooser.showSaveDialog(LuceneDataStoreSearchGUI.this,
+        LuceneDataStoreSearchGUI.class.getName());
+      if (res != JFileChooser.APPROVE_OPTION) { return; }
 
-      Map<String, Object> parameters = searcher.getParameters();
-
-      // no results
-      if(results == null || results.isEmpty()) {
-          JOptionPane.showMessageDialog(LuceneDataStoreSearchGUI.this,
-                  "No results found to export");
-          return;
-      }
-
+      File saveFile = fileChooser.getSelectedFile();
       try {
-        // ask a file location where to store results
-        JFileChooser fileDialog = new JFileChooser();
+      String nl = Strings.getNl();
+      BufferedWriter bw = new BufferedWriter(new FileWriter(saveFile));
 
-        String fileDialogTitle = "HTML";
-        fileDialog.setDialogTitle(fileDialogTitle
-                + " File to export results and statistics to...");
-        fileDialog.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        fileDialog.setSelectedFile(new java.io.File("annic.html"));
-        fileDialog.showSaveDialog(LuceneDataStoreSearchGUI.this);
-        java.io.File file = fileDialog.getSelectedFile();
+      bw.write("<!DOCTYPE html PUBLIC " +
+        "\"-//W3C//DTD HTML 4.01 Transitional//EN\"" + nl);
+      bw.write("\"http://www.w3.org/TR/html4/loose.dtd\">" + nl);
+      bw.write("<HTML><HEAD><TITLE>Annic Results and Statistics</TITLE>" + nl);
+      bw.write("<meta http-equiv=\"Content-Type\"" +
+        " content=\"text/html; charset=utf-8\">" + nl);
+      bw.write("</HEAD><BODY>" + nl + nl);
 
-        // user canceled
-        if(file == null) return;
+      bw.write("<H1 align=\"center\">Annic Results and Statistics</H1>" + nl);
+      bw.write("<H2>Parameters</H2>" + nl);
+      bw.write("<UL><LI>Corpus: <B>"
+        + corpusToSearchIn.getSelectedItem()+"</B></LI>" + nl);
+      bw.write("<LI>Annotation set: <B>"
+        + annotationSetsToSearchIn.getSelectedItem()+"</B></LI>" + nl);
+      bw.write("<LI>Query Issued: <B>" + searcher.getQuery()+"</B></LI>");
+      bw.write("<LI>Context Window: <B>" + searcher.getParameters().get(
+        Constants.CONTEXT_WINDOW) + "</B></LI>" + nl);
+      bw.write("</UL>" + nl + nl);
 
-        java.io.FileWriter fileWriter = new java.io.FileWriter(file);
-
-        ArrayList<Hit> resultsToExport = new ArrayList<Hit>();
-
-        if(resultTable.getSelectedRows().length > 0) {
-          // export selected results
-          for(int row : resultTable.getSelectedRows()) {
-            int num = resultTable.rowViewToModel(row);
-            resultsToExport.add(results.get(num));
-          }
-
+      bw.write("<H2>Results</H2>" + nl);
+      bw.write("<TABLE border=\"1\"><TBODY>" + nl);
+      bw.write("<TR>");
+      for (int col = 0; col < resultTable.getColumnCount(); col++) {
+        bw.write("<TH>"+resultTable.getColumnName(col)+"</TH>"+nl);
+      }
+      bw.write("</TR>" + nl);
+      for (int row = 0; row < resultTable.getRowCount(); row++) {
+        bw.write("<TR>");
+        for (int col = 0; col < resultTable.getColumnCount(); col++) {
+          bw.write("<TD>"+((String) resultTable.getValueAt(row, col))
+            .replaceAll("&", "&amp;").replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;").replaceAll("\"", "&quot;")+"</TD>"+nl);
         }
-        else {
-          // export all results
-          for(int i = 0; i < resultTable.getRowCount(); i++) {
-            int num = resultTable.rowViewToModel(i);
-            resultsToExport.add(results.get(num));
-          }
-        }
+        bw.write("</TR>" + nl);
+      }
+      bw.write("</TBODY></TABLE>" + nl + nl);
 
-        // Format:
-        // Issued Corpus Query
-        // Result
-        // Table
-        // 1. Document it belongs to, 2. Left context, 3. Actual
-        // Result Text, 4. Right context
-        java.io.BufferedWriter bw = new java.io.BufferedWriter(fileWriter);
-        // write header
-        bw.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"");
-        bw.newLine();
-        bw.write("\"http://www.w3.org/TR/html4/loose.dtd\">");
-        bw.newLine();
-        bw.write("<HTML><HEAD><TITLE>Annic Results and Statistics</TITLE>");
-        bw.newLine();
-        bw.write("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">");
-        bw.newLine();
-        bw.write("</HEAD><BODY>");
-        bw.newLine();
-
-        bw.write("<H1 align=\"center\">Annic Results and Statistics</H1>");
-        bw.newLine();
-
-        bw.write("<H2>Parameters</H2>");
-        bw.newLine();
-
-        bw.write("<UL><LI>Corpus: <B>"+corpusToSearchIn.getSelectedItem()+"</B></LI>");
-        bw.newLine();
-        bw.write("<LI>Annotation set: <B>"+annotationSetsToSearchIn.getSelectedItem()+"</B></LI>");
-        bw.newLine();
-        bw.write("<LI>Query Issued: <B>"+searcher.getQuery()+"</B>");
-        bw.write("<LI>Context Window: <B>"+parameters.get(Constants.CONTEXT_WINDOW)
-                +"</B></LI>");
-        bw.newLine();
-        bw.write("<LI>Queries:<UL>");
-        Collections.sort(resultsToExport, new Comparator<Hit>() {
-          public int compare(Hit a, Hit b) {
-            Pattern p1 = (Pattern) a;
-            Pattern p2 = (Pattern) b;
-            return p1.getQueryString().compareTo(p2.getQueryString());
-          }
-        });
-        String queryString = "";
-        for(Hit resultToExport : resultsToExport) {
-          if(!resultToExport.getQueryString().equals(queryString)) {
-            bw.write("<LI><a href=\"#" + resultToExport.getQueryString() + "\">"
-              + resultToExport.getQueryString() + "</a></LI>");
-            queryString = resultToExport.getQueryString();
-            bw.newLine();
-          }
-        }
-        bw.write("</UL></LI></UL>");
-
-        bw.write("<H2>Results</H2>");
-        bw.newLine();
-
-        queryString = "";
-        for(int i = 0; i < resultsToExport.size(); i++) {
-          Pattern ap = (Pattern) resultsToExport.get(i);
-          if(!ap.getQueryString().equals(queryString)) {
-            queryString = ap.getQueryString();
-
-            bw.newLine();
-            if(i != 0) {
-              bw.write("</TABLE>");
-            }
-            bw.write("<P><a name=\"" + ap.getQueryString()
-                    + "\">Query Result:</a> <B>" + ap.getQueryString()
-                    + "</B></P>");
-            bw.newLine();
-            bw.write("<TABLE border=\"1\"><TR>");
-            bw.write("<TH>No.</TH>");
-            bw.write("<TH>Document ID</TH>");
-            bw.write("<TH>Annotation Set</TH>");
-            bw.write("<TH>Left Context</TH>");
-            bw.write("<TH>Result</TH>");
-            bw.write("<TH>Right Context</TH>");
-            bw.write("</TR>");
-            bw.newLine();
-          }
-
-          bw.write("<TR><TD>" + (i + 1) + "</TD>");
-          bw.write("<TD>" + ap.getDocumentID() + "</TD>");
-          bw.write("<TD>" + ap.getAnnotationSetName() + "</TD>");
-          bw.write("<TD align=\"right\">"
-                  + ap.getPatternText(ap.getLeftContextStartOffset(),
-                    ap.getStartOffset()).replaceAll("&", "&amp;")
-                    .replaceAll("<", "&lt;").replaceAll(">", "&gt;")
-                    .replaceAll("\"", "&quot;")
-                  +"</TD>");
-          bw.write("<TD align=\"center\">"
-                  + ap.getPatternText(ap.getStartOffset(), ap.getEndOffset())
-                  .replaceAll("&", "&amp;").replaceAll("<", "&lt;")
-                  .replaceAll(">", "&gt;").replaceAll("\"", "&quot;")
-                  + "</TD>");
-          bw.write("<TD align=\"left\">"
-                  + ap.getPatternText(ap.getEndOffset(),
-                    ap.getRightContextEndOffset()).replaceAll("&", "&amp;")
-                    .replaceAll("<", "&lt;").replaceAll(">", "&gt;")
-                    .replaceAll("\"", "&quot;")
-                  + "</TD>");
-          bw.write("</TR>");
-          bw.newLine();
-        }
-        bw.write("</TABLE>");
-        bw.newLine();
-
-        bw.write("<H2>Global Statistics</H2>");
-        bw.newLine();
-
-        bw.write("<TABLE border=\"1\">");
-        bw.newLine();
+      bw.write("<H2>Global Statistics</H2>");
+      bw.write("<TABLE border=\"1\"><TBODY>" + nl);
+      bw.write("<TR>");
+      for (int col = 0; col < globalStatisticsTable.getColumnCount(); col++) {
+        bw.write("<TH>"+globalStatisticsTable.getColumnName(col)+"</TH>"+nl);
+      }
+      bw.write("</TR>" + nl);
+      for (int row = 0; row < globalStatisticsTable.getRowCount(); row++) {
         bw.write("<TR>");
         for (int col = 0; col < globalStatisticsTable.getColumnCount(); col++) {
-          bw.write("<TH>"+globalStatisticsTable.getColumnName(col)+"</TH>");
-          bw.newLine();
+          bw.write("<TD>"+globalStatisticsTable.getValueAt(row, col)+"</TD>"+nl);
         }
-        bw.write("</TR>");
-        bw.newLine();
-        for (int row = 0; row < globalStatisticsTable.getRowCount(); row++) {
-          bw.write("<TR>");
-          for (int col = 0; col < globalStatisticsTable.getColumnCount(); col++) {
-            bw.write("<TD>"+globalStatisticsTable.getValueAt(row, col)+"</TD>");
-            bw.newLine();
-          }
-          bw.write("</TR>");
-          bw.newLine();
-        }
-        bw.write("</TABLE>");
-        bw.newLine();
+        bw.write("</TR>" + nl);
+      }
+      bw.write("</TBODY></TABLE>" + nl + nl);
 
-        bw.write("<H2>One item Statistics</H2>");
-        bw.newLine();
-
-        bw.write("<TABLE border=\"1\">");
-        bw.newLine();
+      bw.write("<H2>One item Statistics</H2>" + nl);
+      bw.write("<TABLE border=\"1\"><TBODY>" + nl);
+      bw.write("<TR>");
+      for (int col = 0; col < (oneRowStatisticsTable.getColumnCount()-1); col++) {
+        bw.write("<TH>"+oneRowStatisticsTable.getColumnName(col)+"</TH>"+nl);
+      }
+      bw.write("</TR>" + nl);
+      for (int row = 0; row < oneRowStatisticsTable.getRowCount(); row++) {
         bw.write("<TR>");
         for (int col = 0; col < (oneRowStatisticsTable.getColumnCount()-1); col++) {
-          bw.write("<TH>"+oneRowStatisticsTable.getColumnName(col)+"</TH>");
-          bw.newLine();
+          bw.write("<TD>"+oneRowStatisticsTable.getValueAt(row, col)+"</TD>"+nl);
         }
-        bw.write("</TR>");
-        bw.newLine();
-        for (int row = 0; row < oneRowStatisticsTable.getRowCount(); row++) {
-          bw.write("<TR>");
-          for (int col = 0; col < (oneRowStatisticsTable.getColumnCount()-1); col++) {
-            bw.write("<TD>"+oneRowStatisticsTable.getValueAt(row, col)+"</TD>");
-            bw.newLine();
-          }
-          bw.write("</TR>");
-          bw.newLine();
-        }
-        bw.write("</TABLE>");
-        bw.newLine();
-
-        bw.write("<P><BR></P><HR>");
-        bw.newLine();
-
-        bw.write("</BODY>");
-        bw.newLine();
-        bw.write("</HTML>");
-
-        bw.flush();
-        bw.close();
+        bw.write("</TR>" + nl);
       }
-      catch(Exception e) {
+      bw.write("</TBODY></TABLE>" + nl + nl);
+
+      bw.write("<P><BR></P><HR>" + nl);
+      bw.write("</BODY>" + nl);
+      bw.write("</HTML>");
+
+      bw.flush();
+      bw.close();
+
+      } catch(Exception e) {
         e.printStackTrace();
       }
     }
@@ -2789,6 +2620,59 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     }
   }
 
+  protected class ResultTableCellRenderer extends DefaultTableCellRenderer{
+    public Component getTableCellRendererComponent(JTable table, Object value,
+    boolean isSelected, boolean hasFocus, int row, int column){
+      String text = (String) value;
+      int colModel = resultTable.convertColumnIndexToModel(column);
+      // cut text in the middle if too long
+      switch(colModel) {
+        case ResultTableModel.RESULT_COLUMN:
+        case ResultTableModel.FEATURES_COLUMN:
+          if (text.length() > ResultTableModel.MAX_COL_WIDTH) {
+            text = text.substring(0, ResultTableModel.MAX_COL_WIDTH/2) + "..."
+            + text.substring(text.length()-(ResultTableModel.MAX_COL_WIDTH/2));
+          }
+          text = text.replaceAll("(?:\r?\n)|\r", " ");
+          text = text.replaceAll("\t", " ");
+          break;
+      }
+      Component component = super.getTableCellRendererComponent(
+        table, text, isSelected, hasFocus, row, column);
+      if (!(component instanceof JLabel)) { return component; }
+      JLabel label = (JLabel) component;
+      label.setHorizontalAlignment(SwingConstants.LEFT);
+      String tip = null;
+      // add tooltips
+      switch(colModel) {
+        case ResultTableModel.LEFT_CONTEXT_COLUMN:
+          label.setHorizontalAlignment(SwingConstants.RIGHT);
+          break;
+        case ResultTableModel.RESULT_COLUMN:
+        case ResultTableModel.FEATURES_COLUMN:
+          if (((String)value).length() > ResultTableModel.MAX_COL_WIDTH) {
+            tip = (String) value;
+            if (tip.length() > 1000) {
+              tip = tip.substring(0, 1000 / 2) + "<br>...<br>"
+                + tip.substring(tip.length() - (1000 / 2));
+            }
+            tip = tip.replaceAll("\\s*\n\\s*", "<br>");
+            tip = tip.replaceAll("\\s+", " ");
+            tip = "<html><table width=\"" + (tip.length() > 150? "500": "100%")
+              + "\" border=\"0\" cellspacing=\"0\">"
+              + "<tr><td>" + tip + "</td></tr>"
+              + "</table></html>";
+          }
+          if (colModel == ResultTableModel.RESULT_COLUMN) {
+            label.setHorizontalAlignment(SwingConstants.CENTER);
+          }
+          break;
+      }
+      label.setToolTipText(tip);
+      return label;
+    }
+  }
+
   /**
    * Table model for the Result Tables.
    */
@@ -2803,36 +2687,27 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
     public String getColumnName(int columnIndex) {
       switch(columnIndex) {
-        case DOC_NAME_COLUMN:
-          return "Document";
-        case ANNOTATION_SET_NAME_COLUMN:
-          return "Annotation set";
         case LEFT_CONTEXT_COLUMN:
           return "Left context";
         case RESULT_COLUMN:
           return "Match";
         case RIGHT_CONTEXT_COLUMN:
           return "Right context";
+        case FEATURES_COLUMN:
+          return "Features";
+        case QUERY_COLUMN:
+          return "Query";
+        case DOCUMENT_COLUMN:
+          return "Document";
+        case SET_COLUMN:
+          return "Annotation set";
         default:
           return "?";
       }
     }
 
     public Class<?> getColumnClass(int columnIndex) {
-      switch(columnIndex) {
-        case DOC_NAME_COLUMN:
-          return String.class;
-        case ANNOTATION_SET_NAME_COLUMN:
-          return String.class;
-        case LEFT_CONTEXT_COLUMN:
-          return String.class;
-        case RESULT_COLUMN:
-          return String.class;
-        case RIGHT_CONTEXT_COLUMN:
-          return String.class;
-        default:
-          return Object.class;
-      }
+      return String.class;
     }
 
     public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -2842,30 +2717,47 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     public Object getValueAt(int rowIndex, int columnIndex) {
       Pattern result = (Pattern) results.get(rowIndex);
       switch(columnIndex) {
-        case DOC_NAME_COLUMN:
-          return result.getDocumentID();
-        case ANNOTATION_SET_NAME_COLUMN:
-          return result.getAnnotationSetName();
         case LEFT_CONTEXT_COLUMN:
           return result.getPatternText(result.getLeftContextStartOffset(),
-                  result.getStartOffset()).replaceAll("[\n ]+", " ");
+                   result.getStartOffset()).replaceAll("[\n ]+", " ");
         case RESULT_COLUMN:
-          return result.getPatternText(result.getStartOffset(), result
-                  .getEndOffset()).replaceAll("[\n ]+", " ");
+          return result.getPatternText(
+            result.getStartOffset(), result.getEndOffset());
         case RIGHT_CONTEXT_COLUMN:
           return result.getPatternText(result.getEndOffset(), result
                   .getRightContextEndOffset()).replaceAll("[\n ]+", " ");
+        case FEATURES_COLUMN:
+          String features = "";
+          for (PatternAnnotation annotation  : result.getPatternAnnotations(
+                 result.getStartOffset(), result.getEndOffset())) {
+            features += annotation.getType() + '='
+              + Strings.toString(annotation.getFeatures()) + ", ";
+          }
+          if (features.endsWith(", ")) {
+            features = features.substring(0, features.length()-", ".length());
+          }
+          return features;
+        case QUERY_COLUMN:
+          return result.getQueryString();
+        case DOCUMENT_COLUMN:
+          return result.getDocumentID();
+        case SET_COLUMN:
+          return result.getAnnotationSetName();
         default:
           return Object.class;
       }
     }
 
-    static private final int LEFT_CONTEXT_COLUMN = 0;
-    static private final int RESULT_COLUMN = 1;
-    static private final int RIGHT_CONTEXT_COLUMN = 2;
-    static private final int DOC_NAME_COLUMN = 3;
-    static private final int ANNOTATION_SET_NAME_COLUMN = 4;
-    static private final int COLUMN_COUNT = 5;
+    /** Maximum number of characters for the result column. */
+    static public final int MAX_COL_WIDTH = 40;
+    static public final int LEFT_CONTEXT_COLUMN = 0;
+    static public final int RESULT_COLUMN = 1;
+    static public final int RIGHT_CONTEXT_COLUMN = 2;
+    static public final int FEATURES_COLUMN = 3;
+    static public final int QUERY_COLUMN = 4;
+    static public final int DOCUMENT_COLUMN = 5;
+    static public final int SET_COLUMN = 6;
+    static public final int COLUMN_COUNT = 7;
   }
 
   /**
@@ -2997,8 +2889,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           dcbm.insertElementAt("", 0);
           featuresBox.setModel(dcbm);
           featuresBox.setSelectedItem(
-            (ts.contains((String)stackRowsJTable.getValueAt(row, col)))?
-              stackRowsJTable.getValueAt(row, col):"");
+            ts.contains((String) stackRowsJTable.getValueAt(row, col)) ?
+              stackRowsJTable.getValueAt(row, col) : "");
           return featuresBox;
         }
       }
