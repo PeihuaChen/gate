@@ -384,8 +384,8 @@ public class AnnotationDiffGUI extends JFrame{
     constraints2.gridx++;
     lbl = new JLabel("F-measure");
     lbl.setToolTipText("<html>F-measure =<br>" +
-      "   ((weight + 1) * precision * recall)<br>" +
-      " / (weight * precision + recall))</html>");
+      "   ((weight² + 1) * precision * recall)<br>" +
+      " / (weight² * precision + recall))</html>");
     statisticsPane.add(lbl, constraints2);
     fmeasureStrictLbl = new JLabel("0.00");
     statisticsPane.add(fmeasureStrictLbl, constraints2);
@@ -658,16 +658,19 @@ public class AnnotationDiffGUI extends JFrame{
                   annTypeCombo.getSelectedItem() == null) return;
           Iterator<Annotation> annIter = keySet.
               get((String)annTypeCombo.getSelectedItem()).iterator();
-          Set featureSet = new HashSet();
+          Set<String> featureSet = new HashSet<String>();
           while(annIter.hasNext()){
             Annotation ann = annIter.next();
-            Map someFeatures = ann.getFeatures();
-            if(someFeatures != null) featureSet.addAll(someFeatures.keySet());
+            Map<Object, Object> someFeatures = ann.getFeatures();
+            if (someFeatures == null) { continue; }
+            for (Object feature : someFeatures.keySet()) {
+              featureSet.add((String) feature);
+            }
           }
-          List featureLst = new ArrayList(featureSet);
-          Collections.sort(featureLst);
+          List<String> featureList = new ArrayList<String>(featureSet);
+          Collections.sort(featureList);
           featureslistModel.clear();
-          Iterator featIter = featureLst.iterator();
+          Iterator featIter = featureList.iterator();
           int index = 0;
           while(featIter.hasNext()){
             String aFeature = (String)featIter.next();
@@ -1174,18 +1177,6 @@ public class AnnotationDiffGUI extends JFrame{
     }
   }
 
-  /**
-   * @return a new file chooser if Gate is not used as a standalone application
-   * otherwise the filechooser of the standalone application.
-   */
-  protected XJFileChooser getFileChooser() {
-    if(MainFrame.getFileChooser() != null) {
-      return MainFrame.getFileChooser();
-    } else {
-      return new XJFileChooser();
-    }
-  }
-
   protected class HTMLExportAction extends AbstractAction{
     public HTMLExportAction(){
       super("Export to HTML");
@@ -1194,101 +1185,96 @@ public class AnnotationDiffGUI extends JFrame{
         MainFrame.getIcon("crystal-clear-app-download-manager"));
     }
     public void actionPerformed(ActionEvent evt){
-      XJFileChooser fileChooser = getFileChooser();
+      XJFileChooser fileChooser =  (MainFrame.getFileChooser() != null) ?
+        MainFrame.getFileChooser() : new XJFileChooser();
       fileChooser.setAcceptAllFileFilterUsed(true);
       fileChooser.setDialogTitle("Choose a file to export the results");
       fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
       ExtensionFileFilter filter = new ExtensionFileFilter("HTML files","html");
       fileChooser.addChoosableFileFilter(filter);
-      fileChooser.setResourceClassName(AnnotationDiffGUI.class.getName());
-      fileChooser.setSelectedFileFromPreferences();
-      File currentFile = fileChooser.getSelectedFile();
-      String parent = (currentFile != null) ?
-        currentFile.getParent() : System.getProperty("user.home");
       String fileName = (resDoc.getSourceUrl() != null) ?
-              new File (resDoc.getSourceUrl().getFile()).getName() :
-              resDoc.getName();
-      fileName += "_" + annTypeCombo.getSelectedItem().toString();
-      fileName += ".html";
-      fileChooser.setSelectedFile(new File(parent, fileName));
-      int res = fileChooser.showSaveDialog(AnnotationDiffGUI.this, null);
-      if(res == JFileChooser.APPROVE_OPTION){
-        File saveFile = fileChooser.getSelectedFile();
-        try{
-          String nl = Strings.getNl();
-          Writer fw = new BufferedWriter(new FileWriter(saveFile));
-          //write the header
-          fw.write(HEADER_1);
-          fw.write(resDoc.getName() + " " +
-                  annTypeCombo.getSelectedItem().toString() +
-                  " annotations");
-          fw.write(HEADER_2 + nl);
-          fw.write("<H2>Annotation Diff - comparing " +
-                  annTypeCombo.getSelectedItem().toString() +
-                  " annotations" + "</H2>");
-          fw.write("<TABLE cellpadding=\"5\" border=\"0\"");
-          fw.write(nl);
-          fw.write("<TR>" + nl);
-          fw.write("\t<TH align=\"left\">&nbsp;</TH>" + nl);
-          fw.write("\t<TH align=\"left\">Document</TH>" + nl);
-          fw.write("\t<TH align=\"left\">Annotation Set</TH>" + nl);
-          fw.write("</TR>" + nl);
+        new File (resDoc.getSourceUrl().getFile()).getName() : resDoc.getName();
+      fileName += "_" + annTypeCombo.getSelectedItem().toString() + ".html";
+      fileChooser.setFileName(fileName);
+      int res = fileChooser.showSaveDialog(AnnotationDiffGUI.this,
+        AnnotationDiffGUI.class.getName());
+      if (res != JFileChooser.APPROVE_OPTION) { return; }
 
-          fw.write("<TR>" + nl);
-          fw.write("\t<TH align=\"left\">Key</TH>" + nl);
-          fw.write("\t<TD align=\"left\">" + keyDoc.getName() + "</TD>" + nl);
-          fw.write("\t<TD align=\"left\">" + keySet.getName() + "</TD>" + nl);
-          fw.write("</TR>" + nl);
-          fw.write("<TR>" + nl);
-          fw.write("\t<TH align=\"left\">Response</TH>" + nl);
-          fw.write("\t<TD align=\"left\">" + resDoc.getName() + "</TD>" + nl);
-          fw.write("\t<TD align=\"left\">" + resSet.getName() + "</TD>" + nl);
-          fw.write("</TR>" + nl);
-          fw.write("</TABLE>" + nl);
-          fw.write("<BR><BR><BR>" + nl);
-          //write the results
-          java.text.NumberFormat format = java.text.NumberFormat.getInstance();
-          format.setMaximumFractionDigits(4);
-          fw.write("Recall: " + format.format(differ.getRecallStrict()) + "<br>" + nl);
-          fw.write("Precision: " + format.format(differ.getPrecisionStrict()) + "<br>" + nl);
-          fw.write("F-measure: " + format.format(differ.getFMeasureStrict(1)) + "<br>" + nl);
-          fw.write("<br>");
-          fw.write("Correct: " + differ.getCorrectMatches() + "<br>" + nl);
-          fw.write("Partially correct: " +
-              differ.getPartiallyCorrectMatches() + "<br>" + nl);
-          fw.write("Missing: " + differ.getMissing() + "<br>" + nl);
-          fw.write("False positives: " + differ.getSpurious() + "<br>" + nl);
-          fw.write(HEADER_3 + nl + "<TR>" + nl);
-          int maxColIdx = diffTable.getColumnCount() - 1;
-          for(int col = 0; col <= maxColIdx; col++){
-            fw.write("\t<TH align=\"left\">" + diffTable.getColumnName(col) +
-                    "</TH>" + nl);
-          }
-          fw.write("</TR>");
-          int rowCnt = diffTableModel.getRowCount();
-          for(int row = 0; row < rowCnt; row ++){
-            fw.write("<TR>");
-            for(int col = 0; col <= maxColIdx; col++){
-              Color bgCol = diffTableModel.getBackgroundAt(
-                      diffTable.rowViewToModel(row),
-                      diffTable.convertColumnIndexToModel(col));
-              fw.write("\t<TD bgcolor=\"#" +
-                      Integer.toHexString(bgCol.getRGB()).substring(2) +
-                      "\">" +
-                      diffTable.getValueAt(row, col) +
-                      "</TD>" + nl);
-            }
-            fw.write("</TR>");
-          }
-          fw.write(FOOTER);
-          fw.flush();
-          fw.close();
+      File saveFile = fileChooser.getSelectedFile();
+      try{
+      String nl = Strings.getNl();
+      Writer fw = new BufferedWriter(new FileWriter(saveFile));
+      //write the header
+      fw.write(HEADER_1);
+      fw.write(resDoc.getName() + " " +
+              annTypeCombo.getSelectedItem().toString() +
+              " annotations");
+      fw.write(HEADER_2 + nl);
+      fw.write("<H2>Annotation Diff - comparing " +
+              annTypeCombo.getSelectedItem().toString() +
+              " annotations" + "</H2>");
+      fw.write("<TABLE cellpadding=\"5\" border=\"0\"");
+      fw.write(nl);
+      fw.write("<TR>" + nl);
+      fw.write("\t<TH align=\"left\">&nbsp;</TH>" + nl);
+      fw.write("\t<TH align=\"left\">Document</TH>" + nl);
+      fw.write("\t<TH align=\"left\">Annotation Set</TH>" + nl);
+      fw.write("</TR>" + nl);
 
-        }catch(IOException ioe){
-          JOptionPane.showMessageDialog(AnnotationDiffGUI.this, ioe.toString(),
-                  "GATE", JOptionPane.ERROR_MESSAGE);
-          ioe.printStackTrace();
+      fw.write("<TR>" + nl);
+      fw.write("\t<TH align=\"left\">Key</TH>" + nl);
+      fw.write("\t<TD align=\"left\">" + keyDoc.getName() + "</TD>" + nl);
+      fw.write("\t<TD align=\"left\">" + keySet.getName() + "</TD>" + nl);
+      fw.write("</TR>" + nl);
+      fw.write("<TR>" + nl);
+      fw.write("\t<TH align=\"left\">Response</TH>" + nl);
+      fw.write("\t<TD align=\"left\">" + resDoc.getName() + "</TD>" + nl);
+      fw.write("\t<TD align=\"left\">" + resSet.getName() + "</TD>" + nl);
+      fw.write("</TR>" + nl);
+      fw.write("</TABLE>" + nl);
+      fw.write("<BR><BR><BR>" + nl);
+      //write the results
+      java.text.NumberFormat format = java.text.NumberFormat.getInstance();
+      format.setMaximumFractionDigits(4);
+      fw.write("Recall: " + format.format(differ.getRecallStrict()) + "<br>" + nl);
+      fw.write("Precision: " + format.format(differ.getPrecisionStrict()) + "<br>" + nl);
+      fw.write("F-measure: " + format.format(differ.getFMeasureStrict(1)) + "<br>" + nl);
+      fw.write("<br>");
+      fw.write("Correct: " + differ.getCorrectMatches() + "<br>" + nl);
+      fw.write("Partially correct: " +
+          differ.getPartiallyCorrectMatches() + "<br>" + nl);
+      fw.write("Missing: " + differ.getMissing() + "<br>" + nl);
+      fw.write("False positives: " + differ.getSpurious() + "<br>" + nl);
+      fw.write(HEADER_3 + nl + "<TR>" + nl);
+      int maxColIdx = diffTable.getColumnCount() - 1;
+      for(int col = 0; col <= maxColIdx; col++){
+        fw.write("\t<TH align=\"left\">" + diffTable.getColumnName(col) +
+                "</TH>" + nl);
+      }
+      fw.write("</TR>");
+      int rowCnt = diffTableModel.getRowCount();
+      for(int row = 0; row < rowCnt; row ++){
+        fw.write("<TR>");
+        for(int col = 0; col <= maxColIdx; col++){
+          Color bgCol = diffTableModel.getBackgroundAt(
+                  diffTable.rowViewToModel(row),
+                  diffTable.convertColumnIndexToModel(col));
+          fw.write("\t<TD bgcolor=\"#" +
+                  Integer.toHexString(bgCol.getRGB()).substring(2) +
+                  "\">" +
+                  diffTable.getValueAt(row, col) +
+                  "</TD>" + nl);
         }
+        fw.write("</TR>");
+      }
+      fw.write(FOOTER);
+      fw.flush();
+      fw.close();
+
+      } catch(IOException ioe){
+        JOptionPane.showMessageDialog(AnnotationDiffGUI.this, ioe.toString(),
+                "GATE", JOptionPane.ERROR_MESSAGE);
+        ioe.printStackTrace();
       }
     }
 
