@@ -1405,11 +1405,6 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
       ExtensionFileFilter filter = new ExtensionFileFilter("HTML files","html");
       fileChooser.addChoosableFileFilter(filter);
-      fileChooser.setResourceClassName(CorpusQualityAssurance.class.getName());
-      fileChooser.setSelectedFileFromPreferences();
-      File currentFile = fileChooser.getSelectedFile();
-      String parent = (currentFile != null) ?
-        currentFile.getParent() : System.getProperty("user.home");
       String title = corpus.getName();
       if (type == ANNOTATION_TABLE) {
         title += "_" + annotationKeySetName;
@@ -1418,70 +1413,72 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         title += "_" + documentKeySetName;
         title += "-" + documentResponseSetName;
       }
-      fileChooser.setSelectedFile(new File(parent, title + ".html"));
-      int res = fileChooser.showSaveDialog(CorpusQualityAssurance.this, null);
-      if(res == JFileChooser.APPROVE_OPTION){
-        File saveFile = fileChooser.getSelectedFile();
-        try{
-        Writer fw = new BufferedWriter(new FileWriter(saveFile));
-        // Header, Title
-        fw.write(BEGINHTML + nl);
-        fw.write(BEGINHEAD);
-        fw.write(title);
-        fw.write(ENDHEAD + nl);
-        fw.write("<H1>Corpus Quality Assurance</H1>" + nl);
-        fw.write("<P>Corpus: " + corpus.getName() + "<BR>" + nl);
-        if (type == ANNOTATION_TABLE) {
-          // annotation table
-          fw.write("Key set: " + annotationKeySetName + "<BR>" + nl);
-          fw.write("Response set: " + annotationResponseSetName + "</P>" + nl);
-          fw.write(BEGINTABLE + nl + "<TR>" + nl);
-          for(int col = 0; col < annotationTable.getColumnCount(); col++){
-            fw.write("<TH align=\"left\">"
-              + annotationTable.getColumnName(col) + "</TH>" + nl);
-          }
-          fw.write("</TR>" + nl);
-          for(int row = 0; row < annotationTableModel.getRowCount(); row ++){
-            fw.write("<TR>" + nl);
-            for(int col = 0; col < annotationTable.getColumnCount(); col++){
-              fw.write("<TD>"
-                + annotationTable.getValueAt(row, col) + "</TD>" + nl);
-            }
-            fw.write("</TR>" + nl);
-          }
-          fw.write(ENDTABLE + nl);
-          fw.write("<P>&nbsp;</P>" + nl);
-        } else {
-          // document table
-          fw.write("Key set: " + documentKeySetName + "<BR>" + nl);
-          fw.write("Response set: " + documentResponseSetName + "</P>" + nl);
-          fw.write(BEGINTABLE + nl + "<TR>" + nl);
-          for(int col = 0; col < documentTable.getColumnCount(); col++){
-            fw.write("<TH align=\"left\">"
-              + documentTable.getColumnName(col) + "</TH>" + nl);
-          }
-          fw.write("</TR>" + nl);
-          for(int row = 0; row < documentTable.getRowCount(); row ++){
-            fw.write("<TR>" + nl);
-            for(int col = 0; col < documentTable.getColumnCount(); col++){
-              fw.write("<TD>"
-                + documentTable.getValueAt(row, col) + "</TD>" + nl);
-            }
-            fw.write("</TR>" + nl);
-          }
-          fw.write(ENDTABLE + nl);
-        }
-        fw.write(ENDHTML + nl);
-        fw.flush();
-        fw.close();
+      fileChooser.setFileName(title + ".html");
+      int res = fileChooser.showSaveDialog(CorpusQualityAssurance.this,
+        CorpusQualityAssurance.class.getName());
+      if (res != JFileChooser.APPROVE_OPTION) { return; }
 
-        }catch(IOException ioe){
-          JOptionPane.showMessageDialog(CorpusQualityAssurance.this,
-            ioe.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
-          ioe.printStackTrace();
+      File saveFile = fileChooser.getSelectedFile();
+      try{
+      Writer fw = new BufferedWriter(new FileWriter(saveFile));
+      // Header, Title
+      fw.write(BEGINHTML + nl);
+      fw.write(BEGINHEAD);
+      fw.write(title);
+      fw.write(ENDHEAD + nl);
+      fw.write("<H1>Corpus Quality Assurance</H1>" + nl);
+      fw.write("<P>Corpus: " + corpus.getName() + "<BR>" + nl);
+      if (type == ANNOTATION_TABLE) {
+        // annotation table
+        fw.write("Key set: " + annotationKeySetName + "<BR>" + nl);
+        fw.write("Response set: " + annotationResponseSetName + "</P>" + nl);
+        fw.write(BEGINTABLE + nl + "<TR>" + nl);
+        for(int col = 0; col < annotationTable.getColumnCount(); col++){
+          fw.write("<TH align=\"left\">"
+            + annotationTable.getColumnName(col) + "</TH>" + nl);
         }
+        fw.write("</TR>" + nl);
+        for(int row = 0; row < annotationTableModel.getRowCount(); row ++){
+          fw.write("<TR>" + nl);
+          for(int col = 0; col < annotationTable.getColumnCount(); col++){
+            fw.write("<TD>"
+              + annotationTable.getValueAt(row, col) + "</TD>" + nl);
+          }
+          fw.write("</TR>" + nl);
+        }
+        fw.write(ENDTABLE + nl);
+        fw.write("<P>&nbsp;</P>" + nl);
+      } else {
+        // document table
+        fw.write("Key set: " + documentKeySetName + "<BR>" + nl);
+        fw.write("Response set: " + documentResponseSetName + "</P>" + nl);
+        fw.write(BEGINTABLE + nl + "<TR>" + nl);
+        for(int col = 0; col < documentTable.getColumnCount(); col++){
+          fw.write("<TH align=\"left\">"
+            + documentTable.getColumnName(col) + "</TH>" + nl);
+        }
+        fw.write("</TR>" + nl);
+        for(int row = 0; row < documentTable.getRowCount(); row ++){
+          fw.write("<TR>" + nl);
+          for(int col = 0; col < documentTable.getColumnCount(); col++){
+            fw.write("<TD>"
+              + documentTable.getValueAt(row, col) + "</TD>" + nl);
+          }
+          fw.write("</TR>" + nl);
+        }
+        fw.write(ENDTABLE + nl);
+      }
+      fw.write(ENDHTML + nl);
+      fw.flush();
+      fw.close();
+
+      } catch(IOException ioe){
+        JOptionPane.showMessageDialog(CorpusQualityAssurance.this,
+          ioe.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
+        ioe.printStackTrace();
       }
     }
+
     int type;
     final static int ANNOTATION_TABLE = 0;
     final static int DOCUMENT_TABLE = 1;
