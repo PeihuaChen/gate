@@ -35,6 +35,8 @@ import java.util.prefs.Preferences;
 public class XJFileChooser extends JFileChooser {
   /** key used when saving the file location to be retrieved later */
   private String resourceClassName;
+  /** file name used instead of the one saved in the preferences */
+  private String fileName;
   private Preferences node = Preferences.userNodeForPackage(MainFrame.class)
     .node("filechooserlocations");
 
@@ -78,17 +80,33 @@ public class XJFileChooser extends JFileChooser {
 
   /**
    * If possible, set the last directory/file used by the resource as
-   * the current directory/file.
+   * the current directory/file otherwise use the user home directory.
    */
   public void setSelectedFileFromPreferences() {
+    String lastUsedPath = null;
     if (resourceClassName != null) {
-      String lastUsedPath = node.get(resourceClassName, null);
-      if (lastUsedPath != null) {
-        File file = new File(lastUsedPath);
-        setSelectedFile(file);
-        ensureFileIsVisible(file);
-      }
+      lastUsedPath = node.get(resourceClassName, null);
     }
+    File file;
+    if (lastUsedPath != null && fileName != null) {
+      file = new File(lastUsedPath, fileName);
+    } else if (lastUsedPath != null) {
+      file = new File(lastUsedPath);
+    } else if (fileName != null) {
+      file = new File(System.getProperty("user.home"), fileName);
+    } else {
+      file = new File(System.getProperty("user.home"));
+    }
+    setSelectedFile(file);
+    ensureFileIsVisible(file);
+  }
+
+  /**
+   * Set the file name to be used instead of the one saved in the preferences.
+   * @param fileName file name
+   */
+  public void setFileName(String fileName) {
+    this.fileName = fileName;
   }
 
   /** overriden to first save the location of the file chooser
