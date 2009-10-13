@@ -56,8 +56,8 @@
              <JAR>lib/slf4j-api.jar</JAR>
              <JAR>lib/slf4j-log4j12.jar</JAR>
              <JAR>lib/trove.jar</JAR>		
-             <JAR>lib/owlim-3.0.beta12.jar</JAR>		
-             <JAR>lib/trree-3.0.beta12.jar</JAR>		
+             <JAR>lib/owlim-3.0-beta12.jar</JAR>		
+             <JAR>lib/trree-3.0-beta12.jar</JAR>		
 
  <CREOLE>
 

@@ -71,7 +71,7 @@ public class ParsingFrame {
 	//================================================
 	/** This class represents a single alpha-numeric lexeme (ANL) and its
 	 * non-alpha-numeric context. */
-	private class ParsingBufferElement {
+	private static class ParsingBufferElement {
 		public final int pref;
 		public final int midd;
 		public final int suff;
@@ -83,7 +83,7 @@ public class ParsingFrame {
 			this.suff = suff;  this.middTxt = middTxt; this.offset = offset;
 		}
 	}
-	private final ParsingBufferElement EMPTY_ELEMENT =
+	private final static ParsingBufferElement EMPTY_ELEMENT =
 		new ParsingBufferElement(0,0,0,"",0);
 
 	/** This is the parsing buffer that stores the results from parsing of 
@@ -336,6 +336,11 @@ public class ParsingFrame {
 		return false;
 	}
 
+	@Override
+	public int hashCode() {
+		return 1;
+	}
+	
 	@Override
 	public String toString() {
 		return this.normalizedAlias +

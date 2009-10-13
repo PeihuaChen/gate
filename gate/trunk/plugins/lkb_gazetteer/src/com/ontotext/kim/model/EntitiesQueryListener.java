@@ -2,7 +2,7 @@ package com.ontotext.kim.model;
 
 import java.io.IOException;
 
-import com.ontotext.kim.client.model.PROTONUConstants;
+import com.ontotext.kim.client.model.OWLConstants;
 import com.ontotext.kim.semanticrepository.SimpleTableListener;
 import com.ontotext.kim.util.KimLogs;
 
@@ -21,33 +21,21 @@ public abstract class EntitiesQueryListener extends SimpleTableListener {
 		this.loaded = 0;
 		this.startTime = System.currentTimeMillis();
 	}
-	
+
 	public void endTuple() throws IOException {
 		try {
 			String aliasLabel = row[0];
 			String instUri    = row[1];
 			String classUri   = row[2];
-			String ignore     = row[3];
-			//KimLogs.logNERC_GAZETTEER.info(aliasLabel + "\t" + instUri + "\t" + classUri + "\t" + ignore);        
 
-			//ad-hoc check for noise
-			// filters numbers [0..99]
-			if (aliasLabel.length() <= 2) {
-				return;
+			if (classUri == null) {
+				classUri = OWLConstants.CLASS_THING;
 			}
 
-			if (ignore == null && !classUri.equals(PROTONUConstants.CLASS_JOB_POSITION)) { // hack!!
-				addEntity(instUri, classUri, aliasLabel);
-				++loaded;
-				
-				// We log at the first, because sometimes the query runs slow and sometimes the query freezes.
-				// If we know that we have received at least one result, then the query has not frozen.
-				if (loaded == 1 || loaded % 10000 == 0) {
-					long currentTime = System.currentTimeMillis();
-					KimLogs.logSEMANTIC_REPOSITORY.info(
-							String.format("Loaded %s aliases in %s seconds." , loaded, (currentTime - startTime)/1000) );
-				}
-			}
+			addEntity(instUri, classUri, aliasLabel);
+			++loaded;
+
+			logProgress();
 		}
 		catch (Exception x) {
 			KimLogs.logNERC_GAZETTEER.error("There has been an exception in endTuple()\n" +
@@ -57,14 +45,31 @@ public abstract class EntitiesQueryListener extends SimpleTableListener {
 
 	}
 
+	private void logProgress() {
+		// We log at the first, because sometimes the query runs slow and sometimes the query freezes.
+		// If we know that we have received at least one result, then the query has not frozen.
+		if (loaded == 1) {
+			KimLogs.logSEMANTIC_REPOSITORY.info("Aliases loading started ...");
+		}
+		if (loaded % 10000 == 0) {
+			long currentTime = System.currentTimeMillis();
+			KimLogs.logSEMANTIC_REPOSITORY.info(
+					String.format("Loaded %s aliases in %s second(s)." , loaded, (currentTime - startTime)/1000) );
+		}
+	}
+
 	@Override
 	public void endTableQueryResult() throws IOException {		
 		super.endTableQueryResult();
+		if (startTime == 0) {
+			KimLogs.logSEMANTIC_REPOSITORY.info("Loaded no labels.");
+			return;
+		}
 		long currentTime = System.currentTimeMillis();
 		KimLogs.logSEMANTIC_REPOSITORY.info(
-				String.format("Loaded %s aliases in %s seconds." , loaded, (currentTime - startTime)/1000) );
+				String.format("Loading completed: %s aliases in %s second(s)." , loaded, (currentTime - startTime)/1000) );
 	}
-	
+
 	protected abstract void addEntity(String instUri, String classUri,
 			String aliasLabel);
 

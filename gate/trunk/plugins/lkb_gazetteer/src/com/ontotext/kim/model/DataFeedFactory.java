@@ -1,14 +1,11 @@
 package com.ontotext.kim.model;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
+import java.net.URL;
 import java.rmi.RemoteException;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.openrdf.query.QueryLanguage;
 
@@ -20,12 +17,24 @@ import com.ontotext.kim.client.query.KIMQueryException;
 import com.ontotext.kim.client.semanticrepository.QueryResultListener;
 import com.ontotext.kim.client.semanticrepository.SemanticRepositoryAPI;
 import com.ontotext.kim.client.semanticrepository.QueryResultListener.Feed;
+import com.ontotext.kim.gate.SettingsHashBuilder;
 import com.ontotext.kim.util.datastore.PrivateRepositoryFeed;
 
+/**
+ * 
+ * @author mnozchev
+ */
 public class DataFeedFactory {
 
 	private static Logger log = Logger.getLogger(DataFeedFactory.class);
 
+	/**
+	 * The DummyFeed allows to return a valid feed even there's no configuration for one.
+	 * That way, the dictionary can be initialized successfully if the feed is not 
+	 * required because there is a cache file already.
+	 * 
+	 * @author mnozchev
+	 */
 	private static class DummyFeed implements Feed {
 
 		private final File dictionaryPath;
@@ -47,7 +56,7 @@ public class DataFeedFactory {
 			result = createFeed(kimSvc);
 
 		if (result == null) {
-			result = createFeed(new File(dictionaryPath, "config.ttl"), new File(dictionaryPath, "query.txt"));
+			result = createSesameFeed(dictionaryPath);
 		}
 
 		if (result == null) {
@@ -56,10 +65,16 @@ public class DataFeedFactory {
 		return result;
 	}
 
-	private QueryResultListener.Feed createFeed(File configFile, File queryFile) {
-		try {
-			return new PrivateRepositoryFeed(configFile.toURI().toURL(), FileUtils.readFileToString(queryFile.getAbsoluteFile()));
-		} catch (IOException e) {
+	private QueryResultListener.Feed createSesameFeed(File dictionaryPath) {
+		File queryFile = new File(dictionaryPath, "query.txt").getAbsoluteFile();
+		try {			
+			URL configFileUrl = new File(dictionaryPath, "config.ttl").getAbsoluteFile().toURI().toURL();				
+			String queryString = FileUtils.readFileToString(queryFile);
+			log.info("Query loaded from " + queryFile);
+			int settingsHash = new SettingsHashBuilder().getHash(configFileUrl, queryString);
+			return new PrivateRepositoryFeed(configFileUrl, queryString, settingsHash);
+		} 
+		catch (IOException e) {
 			log.warn("Error while reading " + queryFile.getAbsolutePath(), e);				
 		}	
 		return null;

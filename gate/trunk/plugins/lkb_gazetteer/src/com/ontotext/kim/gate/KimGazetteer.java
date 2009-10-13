@@ -35,7 +35,7 @@ public class KimGazetteer extends AbstractLanguageAnalyser {
     private static Logger log = Logger.getLogger(KimGazetteer.class);
 	
 	private File dictionaryPath = new File(KIMConstants.KIM_CACHE_PATH);
-	private boolean forceCaseSensitive = true;
+	private boolean forceCaseSensitive = false;
 
 	private class Annotater implements EntityOccuranceHandler {
 
@@ -79,15 +79,14 @@ public class KimGazetteer extends AbstractLanguageAnalyser {
 	 * @return returns this resource
 	 */
 	public gate.Resource init() throws ResourceInstantiationException {
-		Logger rootKimLogger = Logger.getLogger("com.ontotext.kim");
-		if (rootKimLogger.getLevel() == null) {
-			rootKimLogger.setLevel(Level.INFO);
-		}
-		Logger rootSesameLogger = Logger.getLogger("org.openrdf.sesame");
-		if (rootSesameLogger.getLevel() == null) {
-			rootSesameLogger.setLevel(Level.INFO);
-		}		
-		return init(AliasCacheImpl.getInstance(dictionaryPath));
+		verifyLoggers("com.ontotext.kim");		
+		verifyLoggers("org.openrdf.sesame");
+		verifyLoggers("httpclient");
+		
+		// This doesn't match the specification exactly. Will be improved.
+		String caseSens = forceCaseSensitive ? KIMConstants.CASE_SENSITIV : KIMConstants.CASE_INSENSITIV;
+		
+		return init(AliasCacheImpl.getInstance(dictionaryPath, caseSens, getName()));
 	} // Resource init()
 
 	protected gate.Resource init(AliasLookupDictionary outerCache) {
@@ -95,6 +94,18 @@ public class KimGazetteer extends AbstractLanguageAnalyser {
 		return this;
 	} // Resource init(EntitiesCache outerCache)
 
+	@Override
+	public void cleanup() {		
+		super.cleanup();
+		AliasCacheImpl.releaseCache(dictionaryPath, getName());
+	}
+	
+	@Override
+	public void reInit() throws ResourceInstantiationException {
+		cleanup();
+		init();
+	}
+	
 	/**
 	 * This method runs the gazetteer. It parses the document and looks-up
 	 * the parsed phrases from the maps, in which the phrases vs. annotations
@@ -187,5 +198,16 @@ public class KimGazetteer extends AbstractLanguageAnalyser {
 		return forceCaseSensitive;
 	}	
 
+
+	private void verifyLoggers(String loggerName) {
+		Logger logger = Logger.getLogger(loggerName);
+		if (logger.getLevel() == null && logger.getEffectiveLevel().equals(Level.DEBUG)) {
+			logger.setLevel(Level.INFO);
+			logger.info(
+					"Logger " + loggerName + " level set to INFO, overriding the default effective level of DEBUG. " +
+					"Set the level of " + loggerName + " explictly if required.");
+		}
+
+	}	
 	
 } // class KimGazetteer

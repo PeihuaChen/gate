@@ -2,9 +2,8 @@ package com.ontotext.kim.model;
 
 import java.io.IOException;
 
+import org.apache.log4j.Logger;
 import org.openrdf.model.Value;
-
-import com.ontotext.kim.util.KimLogs;
 
 /**
  * Gathers statistics on the entries in the entity cache.
@@ -15,6 +14,8 @@ import com.ontotext.kim.util.KimLogs;
  * @author mnozchev
  */
 public class StatisticListener extends EntitiesQueryListener {
+	private static final Logger log = Logger.getLogger(StatisticListener.class);
+	
     private static final int EXAMINED_TOKENS_CNT = 20;
     private final int[] tokens4alias = new int[EXAMINED_TOKENS_CNT + 1];
     private final String t4a_StatTitle;
@@ -32,16 +33,16 @@ public class StatisticListener extends EntitiesQueryListener {
     public void endTableQueryResult() throws IOException {    
     	// We don't call super here on purpose. Calling the inner listener should take care of that.
         this.innerListener.endTableQueryResult();
-        KimLogs.logNERC.debug("Tokens-for-alias distribution chart of: " + t4a_StatTitle);
+        log.debug("Tokens-for-alias distribution chart of: " + t4a_StatTitle);
         for (int i = 0; i < (EXAMINED_TOKENS_CNT + 1); i++)
-            KimLogs.logNERC.debug(String.format("%02d: %10d", i, tokens4alias[i]));
+            log.debug(String.format("%02d: %10d", i, tokens4alias[i]));
 
-        KimLogs.logNERC.debug("MiniMax range for tokens is [" +
+        log.debug("MiniMax range for tokens is [" +
                 minOfMaxTokLen + "," + maxOfMinTokLen + "]");
-        KimLogs.logNERC.debug("Tokens-for-length distribution chart of: " + t4a_StatTitle);
+        log.debug("Tokens-for-length distribution chart of: " + t4a_StatTitle);
         for (int i = 0; i < 100; i++)
             if ( tokens4len[i] > 0 )
-                KimLogs.logNERC.debug(
+                log.debug(
                         String.format("%02d: %10d", i, tokens4len[i]));
     }
 
@@ -52,6 +53,13 @@ public class StatisticListener extends EntitiesQueryListener {
         for (int i = 0; i < 100; i++)  tokens4len[i] = 0;
     }
 
+    public void startTableQueryResult() throws IOException {
+    	// We don't call super here on purpose. Calling the inner listener should take care of that.
+        this.innerListener.startTableQueryResult();
+        for (int i = 0; i < (EXAMINED_TOKENS_CNT + 1); i++)  tokens4alias[i] = 0;
+        for (int i = 0; i < 100; i++)  tokens4len[i] = 0;
+    }
+    
     @Override
     protected void addEntity(String instUri, String classUri, String aliasLabel) {
     	// We don't call super here on purpose. Calling the inner listener should take care of that.
