@@ -185,8 +185,7 @@ public class PropertyDetailsTableCellRenderer extends DefaultTableCellRenderer {
           RDFProperty prop = (RDFProperty)obj;
           String s = "";
           if(prop instanceof DatatypeProperty) {
-            s = ((DatatypeProperty)prop).getDataType().getXmlSchemaURI()
-                    .toString();
+            s = ((DatatypeProperty)prop).getDataType().getXmlSchemaURIString();
           }
           else if(prop instanceof ObjectProperty) {
             Set<OResource> set = prop.getRange();

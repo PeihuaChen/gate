@@ -1,10 +1,15 @@
-/**
+/*
+ * MinCardinalityRestriction.java
+ *
+ * $Id$
  * 
  */
 package gate.creole.ontology;
 
 /**
- * @author niraj
+ * A MinCardinalityRestriction.
+ *
+ * @author Niraj Aswani
  *
  */
 public interface MinCardinalityRestriction extends Restriction {

@@ -2,28 +2,6 @@
 <!-- $Id$ -->
 <!-- creole.xml directory file for GATE builtins -->
 <CREOLE-DIRECTORY> 
-  <CREOLE>
-  <!-- Ontology -->	  
-
-  <RESOURCE>
-      <NAME>OWLIM Ontology LR</NAME>
-      <CLASS>gate.creole.ontology.owlim.OWLIMOntologyLR</CLASS>
-      <INTERFACE>gate.creole.ontology.Ontology</INTERFACE>
-      <COMMENT>Ontology which connects to Sesame Repository via OWLIM SAIL.</COMMENT>
-      <HELPURL>http://gate.ac.uk/userguide/sec:ontologies:lr</HELPURL>
-	 <OR>
-      <PARAMETER NAME="rdfXmlURL"
-          COMMENT="Ontology URL" RUNTIME="FALSE" OPTIONAL="TRUE">java.net.URL</PARAMETER>
-      <PARAMETER NAME="ntriplesURL"
-          COMMENT="Ontology URL" RUNTIME="FALSE" OPTIONAL="TRUE">java.net.URL</PARAMETER>
-      <PARAMETER NAME="turtleURL"
-          COMMENT="Ontology URL" RUNTIME="FALSE" OPTIONAL="TRUE">java.net.URL</PARAMETER>
-	  </OR>
-      <PARAMETER NAME="defaultNameSpace" OPTIONAL="true" COMMENT="defaultNameSpace" RUNTIME="FALSE">
-        java.lang.String</PARAMETER>
-      <ICON>ontology</ICON>
-    </RESOURCE>
-  </CREOLE>  
   
   <!-- Processing Resources -->
   <CREOLE>

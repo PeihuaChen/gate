@@ -1,10 +1,15 @@
-/**
+/*
+ * HasValueRestriction.java
+ *
+ * $Id$
  * 
  */
 package gate.creole.ontology;
 
 /**
- * @author niraj
+ *  A HasValueRestriction. 
+ *
+ * @author Niraj Aswani
  *
  */
 public interface HasValueRestriction extends Restriction {

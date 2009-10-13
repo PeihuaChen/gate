@@ -7,6 +7,7 @@
  */
 package gate.creole.ontology;
 
+
 /**
  * Each resource has a unique URI in the Ontology. Each URI has a
  * namespace and a name which all together makes a qualified URI. e.g.
@@ -15,10 +16,13 @@ package gate.creole.ontology;
  * anonymouse resource, in which case the namespace is set to an empty
  * string and a flag (isAnonymouseResource) is set to true.
  * 
- * @author niraj
+ * @author Niraj Aswani
  * 
+ * @deprecated Use OURI objects and the {@link Ontology} factory methods
+ * for creating them instead.
  */
-public class URI {
+@Deprecated
+public class URI implements OURI, ONodeID, OBNodeID {
 
   /**
    * Namespace for this URI (in current version - a value before the
@@ -115,4 +119,45 @@ public class URI {
   public boolean isAnonymousResource() {
     return this.isAnonymousResource;
   }
+
+  public int compareTo(ONodeID other) {
+    return this.toString().compareTo(other.toString());
+  }
+
+  public boolean equals(Object other) {
+    if(other instanceof URI) {
+      return uri.equals(((URI)other).uri);
+    } else {
+      return false;
+    }
+  }
+
+  public int hashCode() {
+    return uri.hashCode();
+  }
+
+  public String toTurtle() {
+    if(isAnonymousResource()) {
+      if(uri.startsWith("_:")) {
+        return uri;
+      } else {
+        return "_:"+uri;
+      }
+    } else {
+      return "<"+uri+">";
+    }
+  }
+
+  public void validate() {
+    throw new UnsupportedOperationException("Method not implemented");
+  }
+
+  public String toDisplayString() {
+    throw new UnsupportedOperationException("Method not implemented");
+  }
+
+  public String toASCIIString() {
+    throw new UnsupportedOperationException("Method not implemented");
+  }
+
 }

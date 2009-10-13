@@ -7,6 +7,7 @@
  */
 package gate.creole.ontology;
 
+import gate.util.ClosableIterator;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -15,7 +16,8 @@ import java.util.Set;
  * It provides various methods (including and not limited) to iterate
  * through its super and sub classes in the taxonomy hierarchy.
  * 
- * @author niraj
+ * @author Niraj Aswani
+ * @author Johann Petrak
  * 
  */
 public interface OClass extends OResource, OConstants {
@@ -39,7 +41,12 @@ public interface OClass extends OResource, OConstants {
    * @param closure either DIRECT_CLOSURE or TRASITIVE_CLOSURE
    * @return the set of subclasses
    */
+  @Deprecated
   public Set<OClass> getSubClasses(byte closure);
+
+  public Set<OClass> getSubClasses(Closure closure);
+
+  public ClosableIterator<OClass> getSubClassesIterator(Closure closure);
 
   /**
    * Gets the super classes according to the desired closure.
@@ -47,7 +54,10 @@ public interface OClass extends OResource, OConstants {
    * @param closure either DIRECT_CLOSURE or TRASITIVE_CLOSURE
    * @return the set of super classes
    */
+  @Deprecated
   public Set<OClass> getSuperClasses(byte closure);
+
+  public Set<OClass> getSuperClasses(Closure closure);
 
   /**
    * Checks whether the class is a super class of the given class.
@@ -60,6 +70,8 @@ public interface OClass extends OResource, OConstants {
    */
   public boolean isSuperClassOf(OClass aClass, byte closure);
 
+  public boolean isSuperClassOf(OClass aClass, OConstants.Closure closure);
+
   /**
    * Checks whether the class is a sub class of the given class.
    * 
@@ -69,7 +81,10 @@ public interface OClass extends OResource, OConstants {
    * @return true, if the class is a sub class of the given class,
    *         otherwise - false.
    */
+  @Deprecated
   public boolean isSubClassOf(OClass aClass, byte closure);
+
+  public boolean isSubClassOf(OClass aClass, OConstants.Closure closure);
 
   /**
    * Checks whether this class is a top.

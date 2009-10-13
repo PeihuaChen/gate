@@ -1,10 +1,15 @@
-/**
+/*
+ * MaxCardinalityRestriction.java
+ *
+ * $Id$
  * 
  */
 package gate.creole.ontology;
 
 /**
- * @author niraj
+ * A MaxCardinalityRestriction.
+ *
+ * @author Niraj Aswani
  *
  */
 public interface MaxCardinalityRestriction extends Restriction {

@@ -77,7 +77,7 @@ public class Utils {
     if(object instanceof Restriction) {
       Restriction res = (Restriction)object;
       toAdd.add(new KeyValuePair(res, "RESTRICTION TYPE",
-              gate.creole.ontology.owlim.Utils.getRestrictionName(res), false));
+              gate.creole.ontology.Utils.getRestrictionName(res), false));
       toAdd.add(new KeyValuePair(res.getOnPropertyValue(), "ON PROPERTY", res
               .getOnPropertyValue().getName(), false));
       String valueString = null;
@@ -86,21 +86,21 @@ public class Utils {
       if(res instanceof CardinalityRestriction) {
         valueString = ((CardinalityRestriction)res).getValue();
         datatypeString = ((CardinalityRestriction)res).getDataType()
-                .getXmlSchemaURI().toString();
+                .getXmlSchemaURIString();
         toAdd.add(new KeyValuePair(res, "DATATYPE", datatypeString, false));
         toAdd.add(new KeyValuePair(res, "VALUE", valueString, true));
       }
       else if(res instanceof MinCardinalityRestriction) {
         valueString = ((MinCardinalityRestriction)res).getValue();
         datatypeString = ((MinCardinalityRestriction)res).getDataType()
-                .getXmlSchemaURI().toString();
+                .getXmlSchemaURIString();
         toAdd.add(new KeyValuePair(res, "DATATYPE", datatypeString, false));
         toAdd.add(new KeyValuePair(res, "VALUE", valueString, true));
       }
       else if(res instanceof MaxCardinalityRestriction) {
         valueString = ((MaxCardinalityRestriction)res).getValue();
         datatypeString = ((MaxCardinalityRestriction)res).getDataType()
-                .getXmlSchemaURI().toString();
+                .getXmlSchemaURIString();
         toAdd.add(new KeyValuePair(res, "DATATYPE", datatypeString, false));
         toAdd.add(new KeyValuePair(res, "VALUE", valueString, false));
       }
@@ -108,7 +108,8 @@ public class Utils {
         Object value = ((HasValueRestriction)res).getHasValue(); 
         if(value instanceof Literal) {
           valueString = ((Literal)value).getValue();
-          datatypeString = ((DatatypeProperty)((HasValueRestriction)res).getOnPropertyValue()).getDataType().getXmlSchemaURI().toString();
+          datatypeString = ((DatatypeProperty)((HasValueRestriction)res)
+              .getOnPropertyValue()).getDataType().getXmlSchemaURIString();
           toAdd.add(new KeyValuePair(res, "DATATYPE", datatypeString, false));
           toAdd.add(new KeyValuePair(res, "VALUE", valueString, true));
         } else {
@@ -133,7 +134,7 @@ public class Utils {
       RDFProperty prop = (RDFProperty)object;
       if(prop instanceof DatatypeProperty) {
         toAdd.add(new KeyValuePair(prop, "DATATYPE", ((DatatypeProperty)prop)
-                .getDataType().getXmlSchemaURI().toString(), false));
+                .getDataType().getXmlSchemaURIString(), false));
       }
       else if(!(prop instanceof AnnotationProperty)) {
         Set<OResource> set = prop.getRange();

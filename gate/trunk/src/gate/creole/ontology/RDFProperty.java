@@ -7,6 +7,7 @@
  */
 package gate.creole.ontology;
 
+import gate.creole.ontology.OConstants.Closure;
 import java.util.Set;
 
 /**
@@ -16,7 +17,8 @@ import java.util.Set;
  * RDFProperties (and not any of their sub properties) can have any
  * OResource as its domain and range.
  * 
- * @author niraj
+ * @author Niraj Aswani
+ * @author Johann Petrak
  */
 public interface RDFProperty extends OResource {
 
@@ -56,7 +58,10 @@ public interface RDFProperty extends OResource {
    *          super-properties.
    * @return a set of {@link Property} values.
    */
+  @Deprecated
   public Set<RDFProperty> getSuperProperties(byte closure);
+
+  public Set<RDFProperty> getSuperProperties(Closure closure);
 
   /**
    * Checks whether the property is a super property of the given
@@ -68,7 +73,10 @@ public interface RDFProperty extends OResource {
    * @return true, if the property is a super property of the given
    *         property, otherwise - false.
    */
+  @Deprecated
   public boolean isSuperPropertyOf(RDFProperty theProperty, byte closure);
+
+  public boolean isSuperPropertyOf(RDFProperty theProperty, Closure closure);
 
   /**
    * Add a SuperPropertyOf relation between the given property and this.
@@ -93,7 +101,10 @@ public interface RDFProperty extends OResource {
    *          sub-properties.
    * @return a set of {@link Property} values.
    */
+  @Deprecated
   public Set<RDFProperty> getSubProperties(byte closure);
+
+  public Set<RDFProperty> getSubProperties(Closure closure);
 
   /**
    * Checks whether the property is a sub property of the given
@@ -105,7 +116,10 @@ public interface RDFProperty extends OResource {
    * @return true, if the property is a sub property of the given
    *         property, otherwise - false.
    */
+  @Deprecated
   public boolean isSubPropertyOf(RDFProperty theProperty, byte closure);
+
+  public boolean isSubPropertyOf(RDFProperty theProperty, Closure closure);
 
   /**
    * Answers whether this property is a functional property. Functional
@@ -151,7 +165,9 @@ public interface RDFProperty extends OResource {
    * @param aResource the Resource
    * @return true if this resource is compatible with the range
    *         restrictions on the property. False otherwise.
+   * @deprecated 
    */
+  @Deprecated
   public boolean isValidRange(OResource aResource);
 
   /**
@@ -161,12 +177,17 @@ public interface RDFProperty extends OResource {
    * @param aResource the Resource
    * @return true if this resource is compatible with the domain
    *         restrictions on the property. False otherwise.
+   * @deprecated 
    */
+  @Deprecated
   public boolean isValidDomain(OResource aResource);
 
   /**
    * Returns the set of domain restrictions for this property.
+   * @return
+   * @deprecated 
    */
+  @Deprecated
   public Set<OResource> getDomain();
 
   /**
@@ -174,7 +195,14 @@ public interface RDFProperty extends OResource {
    * has been set it returns an empty set.
    * 
    * @return a set of {@link OClass} or {@link Class} objects.
+   * @deprecated
    */
+  @Deprecated
   public Set<OResource> getRange();
 
+  /**
+   * Get the URI of the property.
+   * @return - an OURI object representing the URI of the property.
+   */
+  public OURI getOURI();
 }

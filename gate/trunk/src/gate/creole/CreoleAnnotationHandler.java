@@ -27,7 +27,7 @@ import gate.creole.metadata.HiddenCreoleParameter;
 import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
 import gate.util.GateException;
-import gate.util.GateRuntimeException;
+import gate.util.Err;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -35,6 +35,7 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -82,7 +83,13 @@ public class CreoleAnnotationHandler {
           throws MalformedURLException {
     if("JAR".equals(jdomElt.getName())) {
       URL url = new URL(creoleFileUrl, jdomElt.getTextTrim());
-      Gate.getClassLoader().addURL(url);
+      try {
+        java.io.InputStream s = url.openStream();
+        s.close();
+        Gate.getClassLoader().addURL(url);
+      } catch(IOException e) {
+        Err.println("Error opening URL "+url+" error: "+e);
+      }
     }
     else {
       for(Element child : (List<Element>)jdomElt.getChildren()) {

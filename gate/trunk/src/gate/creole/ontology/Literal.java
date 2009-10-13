@@ -14,7 +14,7 @@ import java.util.Locale;
  * annotation properties, or a value with datatype used for the datatype
  * properties.
  * 
- * @author niraj
+ * @author Niraj Aswani
  */
 public class Literal {
   /**
@@ -71,7 +71,7 @@ public class Literal {
     if(!dataType.isValidValue(this.value)) {
       throw new InvalidValueException("The value :\"" + this.value
               + "\" is not compatible with the dataType \""
-              + dataType.getXmlSchemaURI() + "\"");
+              + dataType.getXmlSchemaURIString() + "\"");
     }
   }
 
@@ -107,7 +107,28 @@ public class Literal {
   }
 
   public String toString() {
-    return "value : " + value + "\nlanguage :" + language + "\ndatatype :"
-            + dataType.xmlSchemaURI;
+    return value;
   }
+
+
+  public String toTurtle() {
+    // make an attempt to convert the string into turtle syntax:
+    // quote it, escape embedded special characters like quotes,
+    // if it is a string, add a language identifier if we have one,
+    // if it is not a string, add a datatype uri if we have oen.
+    // TODO: do the escaping correctly!
+    value.replace("\"", "\\\"");
+    value = "\""+value+"\"";
+    if(dataType.isStringDataType()) {
+      if(language != null) {
+        value = value+"@"+language;
+      } else {
+        value = value+"^^<" + dataType.getXmlSchemaURIString() + ">";
+      }
+    } else {
+      value = value+"^^<" + dataType.getXmlSchemaURIString() + ">";
+    }
+    return value;
+  }
+
 }

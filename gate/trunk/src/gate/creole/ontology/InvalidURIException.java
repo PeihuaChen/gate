@@ -7,13 +7,15 @@
  */
 package gate.creole.ontology;
 
+import gate.util.GateRuntimeException;
+
 /**
  * This exception is thrown when a URI is not valid.
  * 
- * @author niraj
+ * @author Niraj Aswani
  * 
  */
-public class InvalidURIException extends RuntimeException {
+public class InvalidURIException extends GateRuntimeException {
   private static final long serialVersionUID = 4121418405812712500L;
 
   /** Debug flag */

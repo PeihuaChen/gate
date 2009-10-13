@@ -11,7 +11,7 @@ package gate.creole.ontology;
  * This class represents the AnonymousClass. Anonymous class is the one
  * that doesn't have any URI or name assigned to it in the ontology.
  * 
- * @author niraj
+ * @author Niraj Aswani
  * 
  */
 public interface AnonymousClass extends OClass {

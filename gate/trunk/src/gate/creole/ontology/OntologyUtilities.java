@@ -1,9 +1,12 @@
 /*
- *  OntologyUtilities.java
+ *  Copyright (c) 1998-2009, The University of Sheffield.
  *
- *  Niraj Aswani, 09/March/07
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
  *
- *  $Id: OntologyUtilities.html,v 1.0 2007/03/09 16:13:01 niraj Exp $
+ *  $Id: UtilBooleanQuery.java 11110 2009-08-20 19:29:40Z johann_p $
  */
 package gate.creole.ontology;
 
@@ -25,9 +28,13 @@ import java.util.Locale;
  * perform some generic options. For more information see javadoc of
  * each individual static method.
  * 
- * @author niraj
+ * @author Niraj Aswani
+ * @author Johann Petrak
  * 
+ * @deprecated the use of this class and all its methods should be avoided
+ * in the future. See the individual methods for replacements.
  */
+@Deprecated
 public class OntologyUtilities {
 
   /**
@@ -41,7 +48,9 @@ public class OntologyUtilities {
    * @param url
    * @return
    * @throws ResourceInstantiationException
+   * @deprecated - this method should be avoided
    */
+  @Deprecated
   public static Ontology getOntology(URL url)
           throws ResourceInstantiationException {
     java.util.List<Resource> loadedOntologies = null;
@@ -88,13 +97,19 @@ public class OntologyUtilities {
    * 
    * @param uri
    * @return
+   * @deprecated use {@link OURI#getResourceName} instead
    */
+  @Deprecated
   public static String getResourceName(String uri) {
     int index = uri.lastIndexOf('#');
     if(index < 0) {
       index = uri.lastIndexOf('/');
-      if(index < 0) return uri;
-      if(index + 2 > uri.length()) return uri;
+      if(index < 0) {
+        return uri;
+      }
+      if(index + 2 > uri.length()) {
+        return uri;
+      }
     }
     return uri.substring(index + 1, uri.length());
   }
@@ -303,7 +318,9 @@ public class OntologyUtilities {
    * 
    * @param datatypeURI
    * @return
+   * @deprecated use {@link DataType#getDataType} instead
    */
+  @Deprecated
   public static DataType getDataType(String datatypeURI) {
     return datatypeMap.get(datatypeURI);
   }
@@ -314,7 +331,9 @@ public class OntologyUtilities {
    * 
    * @param languageCode
    * @return
+   * @deprecated use {@link DataType#getLocale} instead
    */
+  @Deprecated
   public static Locale getLocale(String languageCode) {
     if(languageCode == null) return null;
     return localsMap.get(languageCode.toLowerCase());
@@ -330,7 +349,10 @@ public class OntologyUtilities {
    * @param aResourceName
    * @param isAnonymousResource
    * @return an instance of URI
+   * @deprecated - use {@link Ontology#createOURI(String)} and related methods
+   * instead.
    */
+  @Deprecated
   public static URI createURI(Ontology ontology, String aResourceName,
           boolean isAnonymousResource) {
     if(isAnonymousResource) {

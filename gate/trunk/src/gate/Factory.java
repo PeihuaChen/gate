@@ -25,7 +25,7 @@ import java.net.*;
 import java.util.*;
 
 import gate.creole.*;
-import gate.creole.ontology.owlim.OWLIMOntologyLR;
+//import gate.creole.ontology.owlim.OWLIMOntologyLR;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
 import gate.jape.constraint.ConstraintFactory;
@@ -295,19 +295,27 @@ public abstract class Factory {
         URL sourceUrl = null;
         if(res instanceof SimpleDocument){
           sourceUrl = ((SimpleDocument)res).getSourceUrl();
-        }else if(res instanceof AnnotationSchema){
+        } else if(res instanceof AnnotationSchema){
           sourceUrl = ((AnnotationSchema)res).getXmlFileUrl();
-        }else if(res instanceof OWLIMOntologyLR){
-          sourceUrl = ((OWLIMOntologyLR)res).getRdfXmlURL();
+        } else if(res.getClass().getName().startsWith("gate.creole.ontology.owlim.")){
+          // get the name for the OWLIM2 ontology LR
+          java.lang.reflect.Method m = resClass.getMethod("getRdfXmlURL");
+          sourceUrl = (java.net.URL)m.invoke(res);
           if(sourceUrl == null){
-            sourceUrl = ((OWLIMOntologyLR)res).getN3URL();
+            m = resClass.getMethod("getN3URL");
+            sourceUrl = (java.net.URL)m.invoke(res);
           }
           if(sourceUrl == null){
-            sourceUrl = ((OWLIMOntologyLR)res).getNtriplesURL();
+            m = resClass.getMethod("getNtriplesURL");
+            sourceUrl = (java.net.URL)m.invoke(res);
           }
           if(sourceUrl == null){
-            sourceUrl = ((OWLIMOntologyLR)res).getTurtleURL();
+            m = resClass.getMethod("getTurtleURL");
+            sourceUrl = (java.net.URL)m.invoke(res);
           }
+        } else if (res.getClass().getName().startsWith("gate.creole.ontology.impl.")) {
+          java.lang.reflect.Method m = resClass.getMethod("getSourceURL");
+          sourceUrl = (java.net.URL)m.invoke(res);
         }
         if(sourceUrl != null){
           URI sourceURI = sourceUrl.toURI();

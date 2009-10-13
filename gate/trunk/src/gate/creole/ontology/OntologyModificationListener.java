@@ -17,7 +17,7 @@ import java.util.EventListener;
  * ontology.addOntologyModificationListener(OntologyModificationListener)
  * method.
  * 
- * @author niraj
+ * @author Niraj Aswani
  * 
  */
 public interface OntologyModificationListener extends EventListener {

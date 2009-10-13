@@ -46,11 +46,6 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.*;
 
-import org.openrdf.sesame.config.AccessDeniedException;
-import org.openrdf.sesame.constants.QueryLanguage;
-import org.openrdf.sesame.query.MalformedQueryException;
-import org.openrdf.sesame.query.QueryEvaluationException;
-import org.openrdf.sesame.query.QueryResultsTable;
 
 /**
  * The GUI for the Ontology Editor
@@ -217,43 +212,6 @@ public class OntologyEditor extends AbstractVisualResource
     search = new JButton(searchAction);
     search.setToolTipText("Advanced search in the ontology");
 
-    queryBtn = new JButton("Q");
-    queryBtn.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent ae) {
-
-        String serqlQuery = JOptionPane.showInputDialog("SeRQL Query :");
-
-        if(serqlQuery == null || serqlQuery.trim().length() == 0) {
-          return;
-        }
-        try {
-          long time = System.currentTimeMillis();
-          QueryResultsTable result1 = ontology.getSesameRepository()
-                  .performTableQuery(QueryLanguage.SERQL,
-                          "select " + serqlQuery);
-          for(int i = 0; i < result1.getRowCount(); i++) {
-            for(int j = 0; j < result1.getColumnCount(); j++) {
-              System.out.print(result1.getValue(i, j) + "=>");
-            }
-            System.out.println();
-          }
-          System.out.println(System.currentTimeMillis() - time);
-        }
-        catch(AccessDeniedException ade) {
-          throw new GateOntologyException(ade);
-        }
-        catch(IOException ioe) {
-          throw new GateOntologyException(ioe);
-        }
-        catch(MalformedQueryException mqe) {
-          throw new GateOntologyException(mqe);
-        }
-        catch(QueryEvaluationException qee) {
-          throw new GateOntologyException(qee);
-        }
-      }
-    });
-    //toolBar.add(queryBtn);
 
     topClassAction = new TopClassAction("", MainFrame
             .getIcon("ontology-topclass"));
@@ -569,7 +527,7 @@ public class OntologyEditor extends AbstractVisualResource
                   String value = JOptionPane.showInputDialog(null,
                           "Datatype : "
                                   + ((DatatypeProperty)p).getDataType()
-                                          .getXmlSchemaURI().toString(),
+                                          .getXmlSchemaURIString(),
                           "Enter Value for property :" + p.getName());
                   if(value != null) {
                     boolean validValue = ((DatatypeProperty)p).getDataType()
@@ -874,8 +832,8 @@ public class OntologyEditor extends AbstractVisualResource
             if(p instanceof DatatypeProperty) {
               String reply = JOptionPane.showInputDialog(MainFrame
                       .getInstance(), "Datatype : "
-                      + ((DatatypeProperty)p).getDataType().getXmlSchemaURI()
-                              .toString(), ((Literal)pv.getValue()).getValue());
+                      + ((DatatypeProperty)p).getDataType().getXmlSchemaURIString(),
+                              ((Literal)pv.getValue()).getValue());
               if(reply != null) {
                 boolean validValue = ((DatatypeProperty)p).getDataType()
                         .isValidValue(reply);

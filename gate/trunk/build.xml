@@ -427,12 +427,14 @@
   <!-- Plugins -->
   <filelist id="plugins.to.build" dir="plugins"
     files="TaggerFramework Chemistry_Tagger Jape_Compiler Kea Machine_Learning Minipar
-       Montreal_Transducer NP_Chunking Ontology_Tools TreeTagger
-       Stanford
+       Ontology Ontology_OWLIM2 Ontology_Tools  Ontology_Based_Gazetteer
+       Montreal_Transducer NP_Chunking TreeTagger
+       Stanford 
+       lkb_gazetteer
        arabic bdmComputation cebuano chinese copyAS2AnoDoc crawl google hindi alignment annotationMerging
        learning chineseSegmenter iaaPlugin rasp romanian Stemmer uima yahoo 
-       Ontology_Based_Gazetteer OpenCalais LingPipe" />
-
+       OpenCalais LingPipe" 
+   />
   <target name="plugins.build" depends="jar" >
     <for param="plugin">
       <path>
@@ -597,7 +599,7 @@
     />
   </target>
 
-  <target name="javadoc" depends="java2html.taskdef">
+  <target name="javadoc.core" depends="java2html.taskdef">
     <javadoc access="protected"
               destdir="${docDir}/javadoc"
               classpathref="run.class.path"
@@ -605,7 +607,6 @@
               Encoding="UTF-8"
               Use="yes"
               Windowtitle="GATE JavaDoc"
-              link="http://java.sun.com/j2se/1.5.0/docs/api/"
               docencoding="UTF-8"
               charset="UTF-8"
               source="1.5"
@@ -614,6 +615,11 @@
     	        linksource="yes"
               maxmemory="${runtime.max.memory}">
       <fileset dir="${srcDir}" includes="**/*.java" excludes="gate/resources/**"/>
+      <link href="../../plugins/Ontology_OWLIM2/doc/javadoc/" />
+      <link href="../../plugins/Ontology/doc/javadoc/" />
+      <link href="${gate.home}/plugins/Ontology_Tools/doc/javadoc/" />
+      <link href="${gate.home}/plugins/Ontology_Based_Gazetteer/doc/javadoc/" />
+      <link href="http://java.sun.com/j2se/1.5.0/docs/api/" />
     </javadoc>
     <!-- Now replace the ugly Java-html files with a better version -->
     <delete dir="${docDir}/javadoc/src-html"/>
@@ -670,6 +676,8 @@
                useShortFileName="true"
                overwrite="true"/>
   </target>
+
+  <target name="javadoc" depends="javadoc.core,plugins.javadoc"/>
 
   <target name="doc" depends="javadoc, internaljavadoc"/>
 
@@ -732,7 +740,7 @@
       <classpath refid="run.class.path"/>
       <sysproperty key="gate.config" value="${buildDir}/gate.xml"/>
       <sysproperty key="gate.home" value="${basedir}"/>
-      <sysproperty key="load.plugin.path" value="file:${basedir}/plugins/ANNIE;file:${basedir}/plugins/Information_Retrieval;file:${basedir}/plugins/Ontology_Tools;file:${basedir}/plugins/Tools;file:${basedir}/plugins/WordNet"/>
+      <sysproperty key="load.plugin.path" value="file:${basedir}/plugins/ANNIE;file:${basedir}/plugins/Ontology_OWLIM2;file:${basedir}/plugins/Information_Retrieval;file:${basedir}/plugins/Ontology_Tools;file:${basedir}/plugins/Tools;file:${basedir}/plugins/WordNet"/>
       <sysproperty key="java.ext.dirs" value="${extDir}"/>
       <sysproperty key="java.awt.headless" value="true"/>
       <!-- set this property to run just a single test case -->

@@ -30,7 +30,6 @@ import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.ontology.OClass;
 import gate.creole.ontology.Ontology;
-import gate.creole.ontology.owlim.OClassImpl;
 
 public class BDMCompMain extends AbstractLanguageAnalyser implements
 ProcessingResource {
@@ -130,7 +129,7 @@ ProcessingResource {
       num=1;
       for(OClass curCon:allConcepts) {
         String chainSofar = "";
-        int numS = curCon.getSuperClasses(OClassImpl.DIRECT_CLOSURE).size();
+        int numS = curCon.getSuperClasses(OClass.DIRECT_CLOSURE).size();
         //if(numS>1)
           //System.out.println("****** curCon="+curCon.getName()+"*"+", num="+numS+"*");
         String chains = obtainAChain(curCon, chainSofar);
@@ -150,7 +149,7 @@ ProcessingResource {
       HashMap<OClass,String> leafyCon2Chain = new HashMap<OClass,String>();
       num = 1;
       for(OClass curCon:allConcepts) {
-        if(curCon.getSubClasses(OClassImpl.DIRECT_CLOSURE).size()==0) {
+        if(curCon.getSubClasses(OClass.DIRECT_CLOSURE).size()==0) {
           //System.out.println(num+", leafy node="+curCon.getName()+"*");
           leafyCon2Chain.put(curCon, concept2chain.get(curCon));
           ++num;
@@ -207,7 +206,7 @@ ProcessingResource {
       float averBran = 0.0f;
       num = 0;
       for(OClass curCon:allConcepts) {
-        int len = curCon.getSubClasses(OClassImpl.DIRECT_CLOSURE).size();
+        int len = curCon.getSubClasses(OClass.DIRECT_CLOSURE).size();
         if(len>0) {
           concept2branch.put(curCon, new Integer(len));
           averBran += len;
@@ -352,7 +351,7 @@ ProcessingResource {
 	    return chainNow;
 	  } else {
 	    Set<OClass> superCons = 
-        curCon.getSuperClasses(OClassImpl.DIRECT_CLOSURE);
+        curCon.getSuperClasses(OClass.DIRECT_CLOSURE);
 	    chainSofar += ConstantParameters.separater1;
 	    //if(superCons.size()>1) {
 	     // System.out.println("****** curCon="+curCon.getName()+"*"+", num="+superCons.size());

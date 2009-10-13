@@ -17,7 +17,8 @@ import java.util.Set;
  * object instance must belongs to all the OClass (Transitive Closure)
  * specified in the range.
  * 
- * @author niraj
+ * @author Niraj Aswani
+ * @author Johann Petrak
  * 
  */
 public interface ObjectProperty extends RDFProperty {

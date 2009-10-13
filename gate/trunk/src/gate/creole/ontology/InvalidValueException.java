@@ -14,7 +14,7 @@ import gate.util.GateException;
  * compatible with the property. e.g. boolean value for the integer
  * datatype, invalid instance for an object property.
  * 
- * @author niraj
+ * @author Niraj Aswani
  * 
  */
 public class InvalidValueException extends GateException {

@@ -132,7 +132,7 @@ public class DatatypePropertyAction extends AbstractAction implements
         OClass oclass = (OClass)ontology.getOResourceFromMap(as[j]);
         hashset.add(oclass);
       }
-      DataType dt = OntologyUtilities.getDataType((String)datatypes
+      DataType dt = DataType.getDataType((String)datatypes
               .getSelectedItem());
       DatatypeProperty dp = ontology.addDatatypeProperty(new URI(nameSpace
               .getText()
