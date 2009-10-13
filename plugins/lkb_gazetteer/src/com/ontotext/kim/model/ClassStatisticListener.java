@@ -5,12 +5,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.log4j.Logger;
 import org.openrdf.model.Value;
 
-import com.ontotext.kim.util.KimLogs;
-
 public class ClassStatisticListener extends EntitiesQueryListener {
-
+	private static final Logger log = Logger.getLogger(StatisticListener.class);
+	
     private final EntitiesQueryListener innerListener;
     private final Map<String, Integer> countByClass = new HashMap<String, Integer>();
     
@@ -18,7 +18,7 @@ public class ClassStatisticListener extends EntitiesQueryListener {
         // We don't call super here on purpose. Calling the inner listener should take care of that.
         this.innerListener.endTableQueryResult();
         for (Entry<String, Integer> ent : countByClass.entrySet()) {
-            KimLogs.logSEMANTIC_REPOSITORY.debug(ent.getKey() + " : " + ent.getValue());
+            log.debug(ent.getKey() + " : " + ent.getValue());
         }
     }
 
@@ -28,6 +28,12 @@ public class ClassStatisticListener extends EntitiesQueryListener {
         countByClass.clear();
     }
 
+    public void startTableQueryResult() throws IOException {
+        // We don't call super here on purpose. Calling the inner listener should take care of that.
+        this.innerListener.startTableQueryResult();
+        countByClass.clear();
+    }
+    
     @Override
     protected void addEntity(String instUri, String classUri, String aliasLabel) {
         // We don't call super here on purpose. Calling the inner listener should take care of that.

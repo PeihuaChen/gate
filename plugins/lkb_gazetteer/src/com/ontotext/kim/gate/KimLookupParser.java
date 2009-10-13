@@ -1,6 +1,6 @@
 package com.ontotext.kim.gate;
 
-import java.util.*;
+import java.util.Collection;
 
 import org.apache.log4j.Logger;
 
@@ -72,6 +72,7 @@ public class KimLookupParser {
     }
     
     public void findLookups(String content, EntityOccuranceHandler entityHandler) {
+    	this.interrupted = false;
         ParsingFrame pfm = new ParsingFrame(content);
         
         log.debug("Time tracing begins");     
@@ -88,7 +89,7 @@ public class KimLookupParser {
             }
             if (!aliasDictionary.canPhraseGrow(pfm) || !pfm.frameCanExpand())
                 pfm.moveOne();
-        } while (pfm.frameCanMove());
+        } while (pfm.frameCanMove() && !this.interrupted);
         log.debug("Time tracing ends");       
     }
 

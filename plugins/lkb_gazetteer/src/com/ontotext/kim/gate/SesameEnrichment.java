@@ -16,6 +16,7 @@ import org.apache.log4j.Logger;
 import org.openrdf.query.Binding;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResult;
@@ -35,7 +36,7 @@ public class SesameEnrichment extends AbstractLanguageAnalyser {
 	private String inputASName;
 	private Set<String> annTypes = new HashSet<String>(Arrays.asList("Lookup"));
 	private boolean deleteOnNoRelations = true;
-	
+	private final StringBuilder outputData = new StringBuilder(2000);
 	private String query = 
 		"SELECT ?Person WHERE { " +
 		"?Person <http://dbpedia.org/ontology/birthplace> ?BirthPlace . " +
@@ -67,22 +68,13 @@ public class SesameEnrichment extends AbstractLanguageAnalyser {
 				continue;
 			String instQuery = String.format(query, instFeature);
 			try {
+				outputData.setLength(0);
 				TupleQuery tq = conn.prepareTupleQuery(QueryLanguage.SPARQL, instQuery);
-				StringBuilder outputData = new StringBuilder();
 				TupleQueryResult tqr = tq.evaluate();	
 				if (!tqr.hasNext() && deleteOnNoRelations) {
 					deathRow.add(ann);
 				}
-				try {
-					while (tqr.hasNext()) {
-						BindingSet bs = tqr.next();
-						for (Object val : bs)
-							outputData.append(((Binding)val).getValue().stringValue()).append(",");						
-					}
-				}
-				finally {
-					tqr.close();
-				}
+				populateResults(outputData, tqr);
 				if (outputData.length() > 0) {
 					ann.getFeatures().put("connections", outputData.toString());
 				}
@@ -97,6 +89,20 @@ public class SesameEnrichment extends AbstractLanguageAnalyser {
 			input.removeAll(deathRow);
 		}
 		
+	}
+
+	private void populateResults(StringBuilder outputData, TupleQueryResult tqr)
+			throws QueryEvaluationException {
+		try {
+			while (tqr.hasNext()) {
+				BindingSet bs = tqr.next();
+				for (Object val : bs)
+					outputData.append(((Binding)val).getValue().stringValue()).append(",");						
+			}
+		}
+		finally {
+			tqr.close();
+		}
 	}
 	
 	@Override
@@ -151,7 +157,7 @@ public class SesameEnrichment extends AbstractLanguageAnalyser {
 	}
 
 	public List<String> getAnnotationTypes() {
-		return new ArrayList(annTypes);
+		return new ArrayList<String>(annTypes);
 	}
 
 	public void setQuery(String query) {

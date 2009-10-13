@@ -22,8 +22,9 @@ public class AliasTextTransformer implements Transformer {
     private boolean isUc(char c) {  return Character.isUpperCase(c); }
     private char toLc(char c) {  return Character.toLowerCase(c); }
     public Object transform(Object input) {
+    	if (input == null)  return "";
     	String in = input.toString();
-        if (in == null || in.length() == 0)  return "";
+    	if (in.length() == 0) return "";
 
         //trim
         int i=0, j=in.length()-1;

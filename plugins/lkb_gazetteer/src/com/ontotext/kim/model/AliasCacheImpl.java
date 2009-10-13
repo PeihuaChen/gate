@@ -11,14 +11,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.collections.Transformer;
 import org.apache.commons.io.FileUtils;
@@ -94,33 +87,57 @@ public class AliasCacheImpl implements AliasLookupDictionary {
 	//=========================================================================
 	// Alias Cache: Instance Generation section
 	//=========================================================================
-	private static Map<File, AliasCacheImpl> aliasDictionaries = new HashMap<File, AliasCacheImpl>();
+	private static Map<File, LoadedCache> aliasDictionaries = new HashMap<File, LoadedCache>();
 	private static Object instanceLock = new Object();
 	
 	public static AliasCacheImpl getInstance() throws ResourceInstantiationException {
-		return getInstance(new File(KIMConstants.KIM_CACHE_PATH));
+		String caseSens = System.getProperty("com.ontotext.kim.KIMConstants.ENTITY_CASE_TYPE", KIMConstants.CASE_INSENSITIV);
+		return getInstance(new File(KIMConstants.KIM_CACHE_PATH), caseSens, "<unknown>");
+	}
+	
+	private static class LoadedCache {
+		public AliasCacheImpl cache;
+		public List<String> clients = new LinkedList<String>();
 	}
 	
 	/**
 	 * A static method for generation/access to the one and only instance
 	 * of the alias cache
 	 * @param dictionaryPath 
+	 * @param caseSens 
 	 * @return - the instance of the cache
 	 * @throws ResourceInstantiationException
 	 */
-	public static AliasCacheImpl getInstance(File dictionaryPath) throws ResourceInstantiationException {
+	public static AliasCacheImpl getInstance(File dictionaryPath, String caseSens, String clientId) throws ResourceInstantiationException {
 		synchronized(instanceLock) {
 			if ( !aliasDictionaries.containsKey(dictionaryPath)) {     
-				AliasCacheImpl aliasCache = createInstance(dictionaryPath);
-				aliasDictionaries.put(dictionaryPath, aliasCache);
+				LoadedCache lc = new LoadedCache();
+				lc.cache = createInstance(dictionaryPath, caseSens);
+				aliasDictionaries.put(dictionaryPath, lc);
 			}
-		}
-		return aliasDictionaries.get(dictionaryPath);
+		}		
+		LoadedCache lc = aliasDictionaries.get(dictionaryPath);
+		lc.clients.add(clientId);
+		return lc.cache;
 	}
 
-	private static AliasCacheImpl createInstance(File dictionaryPath)
+	public static void releaseCache(File dictionaryPath, String clientId) {
+		synchronized(instanceLock) {
+			LoadedCache lc = aliasDictionaries.get(dictionaryPath);
+			if (lc == null)
+				return;
+			lc.clients.remove(clientId);
+			if (lc.clients.isEmpty())
+				aliasDictionaries.remove(dictionaryPath);
+			else {
+				log.info("The cache for " + dictionaryPath + " will not be unloaded or reloaded because some clients remain: " + lc.clients);
+			}
+		}		
+	}
+	
+	public static AliasCacheImpl createInstance(File dictionaryPath, String caseSens)
 			throws ResourceInstantiationException {
-		AliasCacheImpl aliasCacheInstance = new AliasCacheImpl(KIMConstants.CASE_INSENSITIV);
+		AliasCacheImpl aliasCacheInstance = new AliasCacheImpl(caseSens);
 		Feed feed = feedFactory.createFeed(dictionaryPath);
 		Set<String> ignoreList = ListReader.fromFile(KIMConstants.KIM_GAZETEER_IGNORE_LIST_PATH,log);
 		
