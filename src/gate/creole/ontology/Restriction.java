@@ -4,8 +4,12 @@
 package gate.creole.ontology;
 
 /**
- * @author niraj This interface defines a restriction in the ontology.
+ * This interface defines a restriction in the ontology.
  *         The restriction is specified on a property.
+ *
+ * @author Niraj Aswani
+ * @author Johann Petrak
+ * 
  */
 public interface Restriction extends AnonymousClass {
 

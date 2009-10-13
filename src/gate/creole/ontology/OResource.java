@@ -14,20 +14,30 @@ import java.util.Set;
 /**
  * This is the top level interface for all ontology resources such as
  * classes, instances and properties.
+ *
+ * @author Niraj Aswani
+ * @author Johann Petrak
+ * 
  */
-public interface OResource {
+public interface OResource  {
   /**
    * Gets the URI of the resource.
    * 
    * @return the URI.
+   * @deprecated 
    */
+  @Deprecated
   public URI getURI();
+
+  public ONodeID getONodeID();
 
   /**
    * Sets the URI of the resource
    * 
    * @param uri
+   * @deprecated
    */
+  @Deprecated
   public void setURI(URI uri);
 
   /**
@@ -41,7 +51,9 @@ public interface OResource {
    * This method returns a set of comments specified on this resource.
    * 
    * @return
+   * @deprecated
    */
+  @Deprecated
   public Set<Literal> getComments();
 
   /**
@@ -50,16 +62,19 @@ public interface OResource {
    * 
    * @param language (@see OConstants for available locales)
    * @return the comment of the resource
+   * @deprecated
    */
+  @Deprecated
   public String getComment(Locale language);
 
   /**
    * Sets the comment for the resource with the specified language.
    * 
    * @param aComment the comment to be set.
-   * @param language the language of the comment (@see OConstants for
-   *          available locales)
+   * @param Locale
+   * @deprecated
    */
+  @Deprecated
   public void setComment(String aComment, Locale Locale);
 
   /**
@@ -68,7 +83,9 @@ public interface OResource {
    * 
    * @param language
    * @return the label of the resource
+   * @deprecated
    */
+  @Deprecated
   public String getLabel(Locale language);
 
   /**
@@ -99,7 +116,6 @@ public interface OResource {
    * 
    * @param theAnnotationProperty the annotation property
    * @param literal the Literal containing some value
-   * @return
    */
   public void addAnnotationPropertyValue(
           AnnotationProperty theAnnotationProperty, Literal literal);
@@ -107,7 +123,7 @@ public interface OResource {
   /**
    * Gets the list of values for a given property name.
    * 
-   * @param propertyName the name of the property
+   * @param theAnnotationProperty
    * @return a List of {@link Literal}.
    */
   public List<Literal> getAnnotationPropertyValues(
@@ -160,7 +176,6 @@ public interface OResource {
    * 
    * @param theAnnotationProperty
    * @param literal
-   * @return
    */
   public void removeAnnotationPropertyValue(
           AnnotationProperty theAnnotationProperty, Literal literal);
@@ -171,5 +186,5 @@ public interface OResource {
    * @param theProperty the property
    */
   public void removeAnnotationPropertyValues(AnnotationProperty theProperty);
-  
+
 }

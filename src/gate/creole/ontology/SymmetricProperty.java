@@ -11,7 +11,7 @@ package gate.creole.ontology;
  * Every SymmetricProperty is ObjectProperty. The only difference being
  * that the Domain and Range are identical.
  * 
- * @author niraj
+ * @author Niraj Aswani
  * 
  */
 public interface SymmetricProperty extends ObjectProperty {

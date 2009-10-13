@@ -8,7 +8,7 @@
 package gate.gui.ontology;
 
 import gate.creole.ontology.*;
-import gate.creole.ontology.owlim.Utils;
+import gate.creole.ontology.Utils;
 import gate.gui.MainFrame;
 
 import java.awt.FlowLayout;

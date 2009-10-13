@@ -16,7 +16,8 @@ import java.util.Set;
  * including and not limited to, obtain a list of classes the instance
  * belongs to, and various methods to add various property values on it.
  * 
- * @author niraj
+ * @author Niraj Aswani
+ * @author Johann Petrak
  * 
  */
 public interface OInstance extends OResource {
@@ -27,7 +28,10 @@ public interface OInstance extends OResource {
    *          OntologyConstants.TRANSITIVE_CLOSURE.
    * @return a set of {@link OClass} objects.
    */
+  @Deprecated
   public Set<OClass> getOClasses(byte closure);
+
+  public Set<OClass> getOClasses(OConstants.Closure closure);
 
   /**
    * Checks whether the instance is an instance of the provided class.
@@ -38,7 +42,10 @@ public interface OInstance extends OResource {
    * @return true, if the instance is indded an instance of the provided
    *         class, otherwise - false.
    */
+  @Deprecated
   public boolean isInstanceOf(OClass aClass, byte closure);
+
+  public boolean isInstanceOf(OClass aClass, OConstants.Closure closure);
 
   /**
    * Sets the instance being different from the provided instance.
@@ -97,7 +104,9 @@ public interface OInstance extends OResource {
    * @param value
    * @throws InvalidValueException This exception is thrown when a value
    *           is not compatible with the specified property's range.
+   * @deprecated this throws an exception in the new implementation
    */
+  @Deprecated
   public void addRDFPropertyValue(RDFProperty aProperty, OResource value)
           throws InvalidValueException;
 
@@ -107,7 +116,9 @@ public interface OInstance extends OResource {
    * @param aProperty
    * @param value
    * @return
+   * @deprecated
    */
+  @Deprecated
   public void removeRDFPropertyValue(RDFProperty aProperty, OResource value);
 
   /**
@@ -115,7 +126,9 @@ public interface OInstance extends OResource {
    * 
    * @param aProperty
    * @return a {@link List} of {@link OResource}.
+   * @deprecated 
    */
+  @Deprecated
   public List<OResource> getRDFPropertyValues(RDFProperty aProperty);
 
   /**
@@ -129,7 +142,9 @@ public interface OInstance extends OResource {
    * @param aProperty
    * @param aValue
    * @return
+   * @deprecated
    */
+  @Deprecated
   public boolean hasRDFPropertyWithValue(RDFProperty aProperty, OResource aResource);
 
   
@@ -137,7 +152,9 @@ public interface OInstance extends OResource {
    * Removes all property values set for the current property.
    * 
    * @param aProperty
+   * @deprecated 
    */
+  @Deprecated
   public void removeRDFPropertyValues(RDFProperty aProperty);
 
   // ******************
@@ -254,5 +271,6 @@ public interface OInstance extends OResource {
    * @return
    */
   public boolean hasObjectPropertyWithValue(ObjectProperty aProperty, OInstance aValue);
-  
+
+  public OURI getOURI();
 }

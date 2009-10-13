@@ -13,6 +13,9 @@ import java.util.Set;
  * Interface for datatype properties. Datatype properties have as range values
  * datatype values (different from object properties which have instances as
  * values). Values are Java objects.
+ *
+ * @author Niraj Aswani
+ * 
  */
 public interface DatatypeProperty extends RDFProperty {
 

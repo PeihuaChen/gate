@@ -8,10 +8,13 @@
 package gate.creole.ontology;
 
 /**
- * Annotation properties can be set on {@link OResource} and can have a String
- * with language, a URI or an Instance as a value.
+ * An Annotation property.
+ * Annotation properties can be set on any {@link OResource} and can have a String
+ * with language, an URI or an Instance as a value.
  * 
- * @author niraj
+ * @author Niraj Aswani
+ * @author Johann Petrak
+ * 
  */
 public interface AnnotationProperty extends RDFProperty {
 }

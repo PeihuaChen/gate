@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pmd version="4.2.2" timestamp="2009-09-11T16:03:12.532">
+<file name="D:\maven-projects\kim-gazetteer\src\main\java\com\ontotext\kim\model\DataFeedFactory.java">
+<violation beginline="4" endline="4" begincolumn="1" endcolumn="37" rule="UnusedImports" ruleset="Import Statement Rules" package="com.ontotext.kim.model" externalInfoUrl="http://pmd.sourceforge.net/rules/imports.html#UnusedImports" priority="4">
+Avoid unused imports such as 'java.io.FileNotFoundException'
+</violation>
+<violation beginline="5" endline="5" begincolumn="1" endcolumn="26" rule="UnusedImports" ruleset="Import Statement Rules" package="com.ontotext.kim.model" externalInfoUrl="http://pmd.sourceforge.net/rules/imports.html#UnusedImports" priority="4">
+Avoid unused imports such as 'java.io.FileReader'
+</violation>
+<violation beginline="7" endline="7" begincolumn="1" endcolumn="22" rule="UnusedImports" ruleset="Import Statement Rules" package="com.ontotext.kim.model" externalInfoUrl="http://pmd.sourceforge.net/rules/imports.html#UnusedImports" priority="4">
+Avoid unused imports such as 'java.io.Reader'
+</violation>
+<violation beginline="11" endline="11" begincolumn="1" endcolumn="37" rule="UnusedImports" ruleset="Import Statement Rules" package="com.ontotext.kim.model" externalInfoUrl="http://pmd.sourceforge.net/rules/imports.html#UnusedImports" priority="4">
+Avoid unused imports such as 'org.apache.commons.io.IOUtils'
+</violation>
+</file>
+<file name="D:\maven-projects\kim-gazetteer\src\main\java\com\ontotext\kim\model\EntityPriority.java">
+<violation beginline="10" endline="10" begincolumn="1" endcolumn="44" rule="UnusedImports" ruleset="Import Statement Rules" package="com.ontotext.kim.model" externalInfoUrl="http://pmd.sourceforge.net/rules/imports.html#UnusedImports" priority="4">
+Avoid unused imports such as 'com.ontotext.kim.client.KIMException'
+</violation>
+</file>
+<file name="D:\maven-projects\kim-gazetteer\src\main\java\com\ontotext\kim\model\HashRegister.java">
+<violation beginline="371" endline="374" begincolumn="62" endcolumn="33" rule="EmptyIfStmt" ruleset="Basic Rules" package="com.ontotext.kim.model" class="HashRegister" method="resizeMainReg" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#EmptyIfStmt" priority="3">
+Avoid empty if statements
+</violation>
+<violation beginline="400" endline="401" begincolumn="54" endcolumn="41" rule="EmptyIfStmt" ruleset="Basic Rules" package="com.ontotext.kim.model" class="HashRegister" method="resizeMainReg" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#EmptyIfStmt" priority="3">
+Avoid empty if statements
+</violation>
+<violation beginline="417" endline="418" begincolumn="54" endcolumn="41" rule="EmptyIfStmt" ruleset="Basic Rules" package="com.ontotext.kim.model" class="HashRegister" method="resizeMainReg" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#EmptyIfStmt" priority="3">
+Avoid empty if statements
+</violation>
+<violation beginline="616" endline="616" begincolumn="33" endcolumn="33" rule="EmptyStatementNotInLoop" ruleset="Basic Rules" package="com.ontotext.kim.model" class="HashRegister" method="printContent" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#EmptyStatementNotInLoop" priority="3">
+An empty statement (semicolon) not part of a loop
+</violation>
+<violation beginline="616" endline="616" begincolumn="33" endcolumn="33" rule="EmptyIfStmt" ruleset="Basic Rules" package="com.ontotext.kim.model" class="HashRegister" method="printContent" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#EmptyIfStmt" priority="3">
+Avoid empty if statements
+</violation>
+</file>
+<file name="D:\maven-projects\kim-gazetteer\src\main\java\com\ontotext\kim\model\ParsingFrame.java">
+<violation beginline="328" endline="328" begincolumn="24" endcolumn="39" rule="OverrideBothEqualsAndHashcode" ruleset="Basic Rules" package="com.ontotext.kim.model" class="ParsingFrame" method="equals" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#OverrideBothEqualsAndHashcode" priority="3">
+Ensure you override both equals() and hashCode()
+</violation>
+</file>
+<file name="D:\maven-projects\kim-gazetteer\src\main\java\com\ontotext\kim\util\datastore\PrivateRepositoryFeed.java">
+<violation beginline="4" endline="4" begincolumn="1" endcolumn="22" rule="UnusedImports" ruleset="Import Statement Rules" package="com.ontotext.kim.util.datastore" externalInfoUrl="http://pmd.sourceforge.net/rules/imports.html#UnusedImports" priority="4">
+Avoid unused imports such as 'java.io.Reader'
+</violation>
+</file>
+</pmd>

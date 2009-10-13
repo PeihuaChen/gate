@@ -8,7 +8,6 @@
 package gate.gui.ontology;
 
 import gate.creole.ontology.*;
-import gate.creole.ontology.owlim.Utils;
 import gate.gui.MainFrame;
 
 import java.awt.FlowLayout;
@@ -54,7 +53,7 @@ public class InstanceAction extends AbstractAction implements
     }
     OResource selectedNode = ((OResourceNode)selectedNodes.get(0).getUserObject()).getResource();
     String ns = selectedNode.getURI().getNameSpace();
-    if(Utils.hasSystemNameSpace(selectedNode.getURI().toString())) {
+    if(gate.creole.ontology.Utils.hasSystemNameSpace(selectedNode.getURI().toString())) {
       ns = ontology.getDefaultNameSpace();
     }
     nameSpace.setText(ns);

@@ -221,8 +221,11 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
 //      }
     }
 
+    // TODO: this used getXmlSchemaURI originally -- test if this breaks
+    // anything!
     if(property instanceof DatatypeProperty) {
-      range.getValues().add(new KeyValuePair(property, "DATATYPE", ((DatatypeProperty)property).getDataType().getXmlSchemaURI(), false));
+      range.getValues().add(new KeyValuePair(property, "DATATYPE", 
+          ((DatatypeProperty)property).getDataType().getXmlSchemaURIString(), false));
       fireTableDataChanged();
       return;
     }

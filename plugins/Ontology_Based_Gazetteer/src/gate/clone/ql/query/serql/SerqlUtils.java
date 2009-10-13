@@ -17,17 +17,16 @@ import java.util.Set;
 
 import gate.clone.ql.CATConstants;
 import gate.creole.ontology.GateOntologyException;
+import gate.creole.ontology.OConstants.QueryLanguage;
 import gate.creole.ontology.Ontology;
+import gate.creole.ontology.OntologyTupleQuery;
+import gate.creole.ontology.OConstants.RDF;
+import gate.creole.ontology.OConstants.RDFS;
+import gate.creole.ontology.OConstants.OWL;
+//import org.openrdf.model.vocabulary.OWL;
+//import org.openrdf.model.vocabulary.RDF;
+//import org.openrdf.model.vocabulary.RDFS;
 
-import org.openrdf.sesame.config.AccessDeniedException;
-import org.openrdf.sesame.constants.QueryLanguage;
-import org.openrdf.sesame.query.MalformedQueryException;
-import org.openrdf.sesame.query.QueryEvaluationException;
-import org.openrdf.sesame.query.QueryResultsTable;
-import org.openrdf.sesame.repository.SesameRepository;
-import org.openrdf.vocabulary.OWL;
-import org.openrdf.vocabulary.RDF;
-import org.openrdf.vocabulary.RDFS;
 
 /**
  * This class executes queries against the ontology with which it is initialized
@@ -354,5 +353,6 @@ public class SerqlUtils {
         + " select distinct B FROM {B} owl:equivalentProperty {SUB}";
     return ontology.executeQuery(query);
   }
+
 
 }

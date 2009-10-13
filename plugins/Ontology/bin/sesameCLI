@@ -1,0 +1,22 @@
+#!/bin/bash
+
+V=12
+
+PRG="$0"
+# need this for relative symlinks
+while [ -h "$PRG" ] ; do
+  ls=`ls -ld "$PRG"`
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '/.*' > /dev/null; then
+    PRG="$link"
+  else
+    PRG=`dirname "$PRG"`"/$link"
+  fi
+done
+s=`dirname "$PRG"` 
+h=$s/..
+
+export cp="$h/Ontology.jar:$h/lib/jewelcli-0.54.jar:$h/lib/trree-3.0.beta$V.jar:$h/lib/owlim-3.0.beta$V.jar:$h/lib/openrdf-sesame-2.3-pr1-onejar.jar:$h/lib/commons-codec-1.3.jar:$h/lib/commons-httpclient-3.1.jar:$h/lib/commons-logging-1.1.1.jar:$h/../../lib/log4j-over-slf4j-1.5.3.jar:$h/lib/slf4j-api-1.5.6.jar:$h/lib/slf4j-jdk14-1.5.6.jar:$h/lib/slf4j-simple-1.5.3.jar:$h/lib/log4j-1.2.15.jar:$h/../../bin/gate.jar" 
+
+#echo $cp
+java -Xmx2248M -cp $cp gate.creole.ontology.impl.sesame.SesameCLI "$@"

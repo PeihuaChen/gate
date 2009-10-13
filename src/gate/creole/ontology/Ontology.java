@@ -8,111 +8,328 @@
 package gate.creole.ontology;
 
 import gate.LanguageResource;
+import gate.creole.ontology.OConstants.OntologyFormat;
+import gate.creole.ontology.OConstants.QueryLanguage;
 
+import gate.util.ClosableIterator;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.io.Writer;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import org.openrdf.sesame.repository.SesameRepository;
 
 /**
- * This is the base interface for all concrete implementations of
- * ontologies.
+ * Interface for ontology language resources.
+ * A client program may only use the methods defined in this interface
+ * to manipulate ontologies and must never use any methods from the
+ * implementing package.
+ * <p>
+ * All ontology language resources must be created using the
+ * {@link gate.Factory#createResource(String, gate.FeatureMap) Factory.createResource} method.
+ * See the documentation for the implementing plugins for details on
+ * how to create ontology language resources programmatically.
+ * <p>
+ * Unless stated otherwise, this documentation describes the intended
+ * behavior of the methods or the behavior as implemented in the
+ * maingined ontology API implementation plugin,
+ * <a href="../../../../../plugins/Ontology/doc/javadoc/index.html" target="_parent">Ontology</a>
+ * 
+ * @author Niraj Aswani
+ * @author Johann Petrak
+ * 
  */
 public interface Ontology extends LanguageResource {
-  // *****************************
-  // Ontology related methods and not specific to its members (e.g.
-  // classes,
-  // properties and so on)
-  // *****************************
+
   /**
    * This method removes the entire data from the ontology and emptys
-   * it.
+   * it. This will also re-initialize the ontology to the state it would have
+   * after creation and perform the import of system data into the ontology
+   * store (OWL and RDFS assertions).
    */
   public void cleanOntology();
 
   /**
-   * The data from ontology repository is retrieved in the specified
-   * format. (@see OntologyConstants)
+   * Retrieves the ontology data and returns a string with the serialization
+   * of the data in the specified format.
    * 
-   * @param format
-   * @return
+   * @param format the format to be used for serialization <@see OConstants>
+   * @return a string containing the serialization of the ontology
+   * @deprecated not supported any more - throws UnsupportedOperationException
    */
+  @Deprecated
   public String getOntologyData(byte format);
 
   /**
    * Exports the ontology data into the provided format to the provided
    * output stream.
    * 
-   * @param out
-   * @param format <@see OConstants>
+   * @param out OutputStream the serialized ontology data is written to
+   * @param format the serialization format, see {@link OConstants}
+   * @deprecated not supported any more - throws UnsupportedOperationException
    */
+  @Deprecated
   public void writeOntologyData(OutputStream out, byte format);
+
+  /**
+   * Write the ontology data to the provided output stream in the specified
+   * serialization format. The output stream has to be closed by the caller.
+   *
+   * @since 5.1
+   * @param out an open OutpuStream for writing the data.
+   * @param format the serialization format
+   * @param includeExports if false, do not write any data that was loaded
+   *   as an ontology import.
+   */
+  public void writeOntologyData(OutputStream out, 
+    OntologyFormat format, boolean includeExports);
 
   /**
    * Exports the ontology data into the provided format using the
    * provided writer.
    * 
-   * @param out
-   * @param format
+   * @param out an open Writer for writing the data
+   * @param format the ontology serialization format , see {@link OConstants}
+   * @deprecated  not supported any more and will throw and exception
+   * in the new implementation plugin
    */
+  @Deprecated
   public void writeOntologyData(Writer out, byte format);
 
   /**
-   * Gets the url of this ontology
+   * Write the ontology data to the provided writer in the specified 
+   * serialization format. The writer object has to be closed by the caller.
    * 
-   * @return the url of this ontology
+   * @param out an open Writer for writing the data
+   * @param format the ontology serialization format , see
+   * {@link OConstants.OntologyFormat}
+   * @param includeExports if false, do not write any data that was loaded as
+   * and ontology import.
+   */
+  public void writeOntologyData(Writer out, 
+      OntologyFormat format, boolean includeExports);
+
+
+  /**
+   * Read ontology data from the specified stream in the specified format
+   * and load it into the ontology. The input stream has to be closed by
+   * the caller.
+   *
+   * @param in an InputStream object for reading the ontology data
+   * @param baseURI the URI to use for resolving URI references
+   * @param format the serialization format of the ontology, see
+   * {@link OConstants.OntologyFormat}
+   * @param asImport if true, load the data as an ontology import which means
+   *   that it will not be written as part of the user data, unless explicitly
+   *   requested.
+   */
+  public void readOntologyData(InputStream in, String baseURI,
+      OntologyFormat format, boolean asImport);
+
+
+
+    /**
+   * Read ontology data from the specified reader in the specified format
+   * and load it into the ontology.
+   * @param in
+     * @param baseURI 
+     * @param format
+   * @param asImport asImport if true, load the data as an ontology import which means
+   *   that it will not be written as part of the user data, unless explicitly
+   *   requested.
+   */
+  public void readOntologyData(Reader in, String baseURI,
+      OntologyFormat format, boolean asImport);
+
+
+  // TODO: do not include this method yet
+  ///**
+  // * Get a list of the ontology URIs in the order the ontology data was loaded.
+  // * When an ontology is loaded, the implementation tries to determine
+  // * the ontology URI (this is different from the URL where the ontology data
+  // * is actually loaded from) and adds that URI to the list.
+  // * No ontology import URI will be automatically loaded as part of
+  // * {@link #resolveImports} when it has been found to be an ontology URI.
+  // *
+  // * @return a list of URIs corresponding to the ontologies loaded (usually
+  // * just one URI)
+  // */
+  //public List<OURI> getOntologyURIs();
+
+
+  /**
+   * Get the URI of this ontology. If no ontology URI is found, null is
+   * returned. If more than one ontology URI is found, an exception is
+   * thrown.
+   * 
+   * @return the OURI of the current ontology or null
+   */
+  public OURI getOntologyURI();
+
+  /**
+   * Set the ontology URI of the current ontology. If the ontology
+   * URI is already set to a different value, this method throws an exception.
+   * <p>
+   * NOTE: this method does not set the default namespace!
+   * <p>
+   * NOTE: at the moment, this method allows to set the ontology URI as long as no
+   * URI is set yet. Once an ontology URI is set, it cannot be changed
+   * since it would not be clear what to do with assertions that alreadt reference
+   * that ontology URI (e.g. ontology annotations or import specifications).
+   *
+   * @param theURI
+   */
+  public void setOntologyURI(OURI theURI);
+
+
+  /**
+   * Loads all imported ontologies. This method finds all ontology import
+   * URIs in the current ontology and loads as imports the ontologies
+   * referenced by these URIs. If an URI is found in <code>importMappings<code>,
+   * and maps to an empty String, the import will be ignored. If an URI
+   * is found and maps to a non-empty string, the string will be interpreted
+   * as an URL from which to load the imported ontology. If no entry is found
+   * for the URI, the URI will be interpreted as an URL from which to load
+   * the ontology. All import URIs of ontologies loaded during this process
+   * will be recursively processed in the same way.
+   * <p>
+   * A GateOntologyException is thrown if any import that should be loaded
+   * cannot be loaded and the import loading process is aborted before
+   * potential additional imports are processed.
+   * 
+   * @param importMappings
+   */
+  public void resolveImports(Map<String,String> importMappings);
+
+  /**
+   * Gets the URL of this ontology. This usually is the URL the ontology was
+   * loaded  from. If several files were loaded, the URL of the first file
+   * is returned. Files loaded as imports are not considered for this.
+   * If and how this is set automatically when an ontology LR
+   * is created depends on the implementation.
+   * 
+   * @return the URL of this ontology if set, or null otherwise
    */
   public URL getURL();
 
   /**
-   * Set the url of this ontology
+   * Set the URL of this ontology.
+   * This URL set by this method will be returned by the {@link #getURL()}
+   * method. The ontology store is not modified by this.
    * 
    * @param aUrl the url to be set
    */
   public void setURL(URL aUrl);
 
+
+// TODO: not implemented yet. We need to first figure out how to correctly
+// deal with the issues related to loading several ontologies.
+//  /**
+//   * Get the list of URLs of data that was loaded into the ontology.
+//   * This method returns a list of URLs of ontology data that was loaded
+//   * into the current ontology, in the order the data was loaded. If
+//   * <code>includeImports</code> is <code>true</code>, all data that was
+//   * loaded as an ontology import is included in the list, including the
+//   * URLs that were loaded by the {@link #resolveImports(java.util.Map)}
+//   * method.
+//   * <p>
+//   * Note that this list only contains URLs for data that was actually
+//   * loaded since the ontology object was created. If the ontology object
+//   * is created by connecting to a repository that already contains ontology
+//   * data, the URLs for that data cannot be determined.
+//   *
+//   * @param includeImports if true, include URLs for data loaded as ontology import
+//   * @return a list of URLs of data loaded, sorted by the order of loading
+//   */
+//  public List<URL> getURLs(boolean includeImports);
+
   /**
-   * Saves the ontology in the provided File
+   * Saves the ontology in the specified File
+   *
+   * @param newOntology  a File object describing the file where to save to
+   * @throws IOException 
+   * @deprecated not implemented any more, throws UnsupportedOperationException
    */
+  @Deprecated
   public void store(File newOntology) throws IOException;
 
   /**
-   * Sets the default name space, which is (by default) used for the
-   * newly created resources.
+   * Sets the default name space/base URI for the ontology.
+   * This URI must end in "#" or "/". This URI is used when a new OURI
+   * is created using the {@link #createOURIForName(String)} method.
+   * Setting the default name space with this method does not change the
+   * ontology store and does not add a default namespace declaration to the
+   * store or when the ontology is saved.
    * 
-   * @param theURI the URI to be set
+   * @param aNameSpace a String that can be used as a base URI
    */
   public void setDefaultNameSpace(String aNameSpace);
 
   /**
-   * Gets the default name space for this ontology. The defaultNameSpace
-   * is (by default) used for the newly created resources.
+   * Gets the default name space for this ontology.
+   * This is used as the base URI for the ontology.
+   * This returns the last value set with the method setDefaultNameSpace.
+   * If the default name space was not set with this method, it is set
+   * to a default value when an ontology is loaded in the following way:
+   * If a base URI is specified for the loading, that base URI is used,
+   * otherwise, if there was no ontology URI already set from a previous
+   * load and this load determined exactly one ontology URI, that URI
+   * will be used to set the default name space.
    * 
    * @return a String value.
    */
   public String getDefaultNameSpace();
 
   /**
-   * Sets version to this ontology.
+   * Sets the version information for the ontology. 
    * 
    * @param theVersion the version to be set
+   * @deprecated use method setOntologyAnnotation instead
    */
+  @Deprecated
   public void setVersion(String theVersion);
 
   /**
    * Gets the version of this ontology.
    * 
    * @return the version of this ontology
+   * @deprecated use method getOntologyAnnotationValues instead
    */
+  @Deprecated
   public String getVersion();
 
-  // *****************************
-  // OClass methods
-  // *****************************
+  /**
+   * Set an annotation property for the ontology to the specified literal
+   * value.
+   * The annotation property can be one of the predefined system annotation
+   * properties that can be generated with
+   * {@link #getSystemAnnotationProperty(OConstants.SystemAnnotationProperty)} or
+   * a user-defined annotation property.
+   *
+   * @param ann the annotation property object
+   * @param value a Literal object describing the value. This usually should be
+   * a String literal.
+   * 
+   */
+  public void setOntologyAnnotation(AnnotationProperty ann, Literal value);
+
+  /**
+   * Get the values of an ontology annotation property.
+   * The annotation property can be one of the predefined system annotation
+   * properties that can be generated with
+   * {@link #getSystemAnnotationProperty(OConstants.SystemAnnotationProperty)} or
+   * a user-defined annotation property.
+   *
+   * @param ann the annotation property object
+   * @return a a list of literals describing the values for the property
+   */
+  public List<Literal> getOntologyAnnotationValues(AnnotationProperty ann);
+
+
   /**
    * Creates a new OClass and adds it the ontology.
    * 
@@ -122,61 +339,94 @@ public interface Ontology extends LanguageResource {
    *          OConstants.OCLASS_TYPE_OWL_RESTRICTION;
    * @return the newly created class or an existing class if available
    *         with the same URI.
+   * @deprecated - use one of the dedicated methods to add a named class
+   *   or a restriction instead
    */
-  public OClass addOClass(URI aURI, byte classType);
+  @Deprecated
+  public OClass addOClass(OURI aURI, byte classType);
 
   /**
-   * Creates a new OWL_Class and adds it the ontology.
+   * Creates a new OWL Class and adds it the ontology.
+   * If a class with that URI already exists, that class is returned.
    * 
    * @param aURI URI of this class
    * @return the newly created class or an existing class if available
    *         with the same URI.
    */
-  public OClass addOClass(URI aURI);
+  public OClass addOClass(OURI aURI);
   
   
+//  /**
+//   * Retrieves a named class by its URI.
+//   *
+//   * @param theClassURI the URI of the class
+//   * @return the class with that URI or null if no such class exists
+//   */
+//  public OClass getOClass(OURI theClassURI);
+
   /**
-   * Retrieves a class by its URI.
-   * 
-   * @param theClassURI the URI of the class
-   * @return the class matching the name or null if no matches.
+   * Retrieves a both named classes and anonymous classes and retrictions that
+   * match either the URI or the blank node identifier represented by ONodeID
+   * @param theClassID
+   * @returnthe class matching the URI or blank node ID or null if no matches.
    */
-  public OClass getOClass(URI theClassURI);
+  public OClass getOClass(ONodeID theClassID);
 
   /**
    * Removes a class from this ontology.
    * 
    * @param theClass the class to be removed
-   * @return
    */
   public void removeOClass(OClass theClass);
 
   /**
-   * Checks whether the provided URI is a type of RDFS.CLASS or
-   * OWL.CLASS and that the ontology contains this class.
+   * Checks whether a class with the specified URI or blank node ID
+   * exists in the ontology.
    * 
-   * @param theURI
-   * @return true, if the class exists and is a type of RDFS.CLASS or
-   *         OWL.CLASS, otherwise - false.
+   * @param theURI a ONodeID, usually an OURI specifying the ID of the
+   * ontology class
+   * @return true, if the class exists 
    */
-  public boolean containsOClass(URI theURI);
+  public boolean containsOClass(ONodeID theURI);
 
   /**
-   * Checks whether the ontology contains this class or not.
+   * Checks whether the ontology contains this class.
    * 
-   * @param theClass
+   * @param theClass a ontology class object
    * @return true, if the class exists, otherwise - false.
    */
   public boolean containsOClass(OClass theClass);
 
   /**
-   * Retrieves all classes as a set.
+   * Retrieves all ontology classes in a set.
+   * This method returns a set of either all classes in the ontology or
+   * just the "top" classes. A "top" class is a class that is not a subclass
+   * of any other class that is not a predefined system class like owl:Thing
+   * or rdfs:Resource or a trivial subclass (of itself or of a class that
+   * is defined to be equivalent to itself).
+   * <p>
+   * NOTE: for large ontologies with a large number of classes it may be
+   * preferable to use method {@link #getOClassesIterator(boolean)} instead.
    * 
    * @param top If set to true, only returns those classes with no super
    *          classes, otherwise - a set of all classes.
    * @return set of all the classes in this ontology
    */
   public Set<OClass> getOClasses(boolean top);
+
+
+  /**
+   * Return an iterator to retrieve all ontology classes in the ontology.
+   * The iterator should be closed() as soon as it is not needed anymore
+   * but will auto-close when it is exhausted and the hasNext() method
+   * returned false.
+   * 
+   * @param top If set to true, only returns those classes with no
+   *     super classes, otherwise all classes
+   * @return a ClosableIterator for accessing the returned ontology classes
+   */
+  public ClosableIterator<OClass> getOClassesIterator(boolean top);
+   
 
   /**
    * Gets the taxonomic distance between 2 classes.
@@ -193,11 +443,11 @@ public interface Ontology extends LanguageResource {
   /**
    * Creates a new OInstance and returns it.
    * 
-   * @param theURI the URI for the new instance.
+   * @param theInstanceURI
    * @param theClass the class to which the instance belongs.
    * @return the OInstance that has been added to the ontology.
    */
-  public OInstance addOInstance(URI theInstanceURI, OClass theClass);
+  public OInstance addOInstance(OURI theInstanceURI, OClass theClass);
 
   /**
    * Removes the instance from the ontology.
@@ -210,13 +460,18 @@ public interface Ontology extends LanguageResource {
    * Gets all instances in the ontology.
    * 
    * @return a {@link Set} of OInstance objects
+   * {@link #getOInstanceIterator()} instead
    */
   public Set<OInstance> getOInstances();
 
+  /*
+   * Return an iterator for accessing all instances in the ontology.
+   * @return
+   */
+  public ClosableIterator<OInstance> getOInstancesIterator();
+
   /**
-   * Gets instances in the ontology, which belong to this class. If only
-   * the instances of the given class are needed, then the value of
-   * direct should be set to true.
+   * Gets instances in the ontology, which belong to this class. 
    * 
    * @param theClass the class of the instances
    * @param closure either DIRECT_CLOSURE or TRANSITIVE_CLOSURE of
@@ -224,7 +479,26 @@ public interface Ontology extends LanguageResource {
    * 
    * @return {@link Set} of OInstance objects
    */
+  @Deprecated
   public Set<OInstance> getOInstances(OClass theClass, byte closure);
+
+  /**
+   * Gets instances in the ontology, which belong to this class.
+   * The second parameter specifies if the the given class needs to be
+   * a direct class of the instance (direct closure)
+   * or a class to which the instance belongs
+   * indirectly (transitive closure)
+   *
+   * @param theClass the class of the instances
+   * @param closure either {@link OConstants.Closure.DIRECT_CLOSURE} or
+   * {@link OConstants.Closure.TRANSITIVE_CLOSURE}
+   *
+   * @return {@link Set} of OInstance objects
+   */
+  public Set<OInstance> getOInstances(OClass theClass, OConstants.Closure closure);
+
+  public ClosableIterator<OInstance>
+      getOInstancesIterator(OClass theClass, OConstants.Closure closure);
 
   /**
    * Gets the instance with the given URI.
@@ -233,7 +507,7 @@ public interface Ontology extends LanguageResource {
    * @return the OInstance object with this URI. If there is no such
    *         instance then null.
    */
-  public OInstance getOInstance(URI theInstanceURI);
+  public OInstance getOInstance(OURI theInstanceURI);
 
   /**
    * Checks whether the provided Instance exists in the ontology.
@@ -252,7 +526,7 @@ public interface Ontology extends LanguageResource {
    * @return true, if the URI exists in ontology and refers to an
    *         Instance, otherwise - false.
    */
-  public boolean containsOInstance(URI theInstanceURI);
+  public boolean containsOInstance(OURI theInstanceURI);
 
   // *****************************
   // Property definitions methods
@@ -266,8 +540,11 @@ public interface Ontology extends LanguageResource {
    *          etc.).
    * @param range a set of {@link OResource} (e.g. a Class, a Property
    *          etc.).
+   * @return
+   * @deprecated
    */
-  public RDFProperty addRDFProperty(URI aPropertyURI, Set<OResource> domain,
+  @Deprecated
+  public RDFProperty addRDFProperty(OURI aPropertyURI, Set<OResource> domain,
           Set<OResource> range);
 
   /**
@@ -286,15 +563,16 @@ public interface Ontology extends LanguageResource {
    * @return true, only if there exists the above statement, otherwise -
    *         false.
    */
-  public boolean isRDFProperty(URI thePropertyURI);
+  public boolean isRDFProperty(OURI thePropertyURI);
 
   /**
    * Creates a new AnnotationProperty.
    * 
    * @param aPropertyURI URI of the property to be added into the
    *          ontology.
+   * @return
    */
-  public AnnotationProperty addAnnotationProperty(URI aPropertyURI);
+  public AnnotationProperty addAnnotationProperty(OURI aPropertyURI);
 
   /**
    * Gets the set of Annotation Properties in the ontology where for a
@@ -313,7 +591,7 @@ public interface Ontology extends LanguageResource {
    * @return true, only if there exists the above statement, otherwise -
    *         false.
    */
-  public boolean isAnnotationProperty(URI thePropertyURI);
+  public boolean isAnnotationProperty(OURI thePropertyURI);
 
   /**
    * Create a DatatypeProperty with the given domain and range.
@@ -324,11 +602,10 @@ public interface Ontology extends LanguageResource {
    *          The property only applies to instances that belong to
    *          <b>all</b> classes included in its domain. An empty set
    *          means that the property applies to instances of any class.
-   * @param range the range specifying the {@link DataType} of a value
-   *          that this property can have.
+   * @param aDatatype
    * @return the newly created property.
    */
-  public DatatypeProperty addDatatypeProperty(URI aPropertyURI,
+  public DatatypeProperty addDatatypeProperty(OURI aPropertyURI,
           Set<OClass> domain, DataType aDatatype);
 
   /**
@@ -346,7 +623,7 @@ public interface Ontology extends LanguageResource {
    * @return true, only if there exists the above statement, otherwise -
    *         false.
    */
-  public boolean isDatatypeProperty(URI thePropertyURI);
+  public boolean isDatatypeProperty(OURI thePropertyURI);
 
   /**
    * Creates a new object property (a property that takes instances as
@@ -354,15 +631,19 @@ public interface Ontology extends LanguageResource {
    * 
    * @param aPropertyURI the URI for the new property.
    * @param domain the set of ontology classes (i.e. {@link OClass}
-   *          objects} that constitutes the range for the new property.
-   *          The property only applies to instances that belong to
-   *          <b>all</b> classes included in its domain. An empty set
-   *          means that the property applies to instances of any class.
+   * objects} that constitutes the domain of the property.
+   * An instance must belong to the intersection of all classes
+   * in the set to be a valid member of the domain of the property.
+   * If an empty set or null is passed, the instance can belong to any
+   * class.
    * @param range the set of ontology classes (i.e. {@link OClass}
-   *          objects} that constitutes the range for the new property.
+   * objects} that constitutes the range for the new property. The instance
+   * that is the value of a property must belong to the intersection of
+   * all classes in this set to be valid. If an empty set or null is passed
+   * on, the instance can belong to any class.
    * @return the newly created property.
    */
-  public ObjectProperty addObjectProperty(URI aPropertyURI, Set<OClass> domain,
+  public ObjectProperty addObjectProperty(OURI aPropertyURI, Set<OClass> domain,
           Set<OClass> range);
 
   /**
@@ -373,14 +654,13 @@ public interface Ontology extends LanguageResource {
   public Set<ObjectProperty> getObjectProperties();
 
   /**
-   * Checkes whether there exists a statement <thePropertyURI, RDF:Type,
-   * OWL:ObjectProperty> in the ontology or not.
+   * Checks if there exists an object property with the given URI
    * 
    * @param thePropertyURI
-   * @return true, only if there exists the above statement, otherwise -
-   *         false.
+   * @return true, only if there exists an object property with the
+   * given URI.
    */
-  public boolean isObjectProperty(URI thePropertyURI);
+  public boolean isObjectProperty(OURI thePropertyURI);
 
   /**
    * Creates a new symmetric property (an object property that is
@@ -395,7 +675,7 @@ public interface Ontology extends LanguageResource {
    *          applies to instances of any class.
    * @return the newly created property.
    */
-  public SymmetricProperty addSymmetricProperty(URI aPropertyURI,
+  public SymmetricProperty addSymmetricProperty(OURI aPropertyURI,
           Set<OClass> domainAndRange);
 
   /**
@@ -413,7 +693,7 @@ public interface Ontology extends LanguageResource {
    * @return true, only if there exists the above statement, otherwise -
    *         false.
    */
-  public boolean isSymmetricProperty(URI thePropertyURI);
+  public boolean isSymmetricProperty(OURI thePropertyURI);
 
   /**
    * Creates a new transitive property (an object property that is
@@ -429,7 +709,7 @@ public interface Ontology extends LanguageResource {
    *          objects} that constitutes the range for the new property.
    * @return the newly created property.
    */
-  public TransitiveProperty addTransitiveProperty(URI aPropertyURI,
+  public TransitiveProperty addTransitiveProperty(OURI aPropertyURI,
           Set<OClass> domain, Set<OClass> range);
 
   /**
@@ -447,7 +727,7 @@ public interface Ontology extends LanguageResource {
    * @return true, only if there exists the above statement, otherwise -
    *         false.
    */
-  public boolean isTransitiveProperty(URI thePropertyURI);
+  public boolean isTransitiveProperty(OURI thePropertyURI);
 
   /**
    * Gets the set of RDF, Object, Datatype, Symmetric and Transitive
@@ -462,13 +742,41 @@ public interface Ontology extends LanguageResource {
   public Set<RDFProperty> getPropertyDefinitions();
 
   /**
-   * Returns the property definition for a given property. This does not
-   * include Annotation properties.
+   * Returns the property for a given URI or null if there is no property
+   * with that URI.
    * 
-   * @param thePropertyURI the URI for which the definition is sought.
-   * @return a {@link Property} object.
+   * @param thePropertyURI the URI of the property
+   * @return the RDFProperty object or null if no property with that URI is found
    */
-  public RDFProperty getProperty(URI thePropertyURI);
+  public RDFProperty getProperty(OURI thePropertyURI);
+
+  /**
+   * Returns the annotation property for the given URI or null if there is
+   * no annotation property with that URI.
+   *
+   * @param theURI the URI of the property
+   * @return the AnnotationProperty obejct
+   */
+  public AnnotationProperty getAnnotationProperty(OURI theURI);
+
+  /**
+   * Returns the datatype property for the given URI or null if there is
+   * no datatype property with that URI.
+   *
+   * @param theURI the URI of the property
+   * @return the DatatypeProperty obejct
+   */
+  public DatatypeProperty getDatatypeProperty(OURI theURI);
+
+  /**
+   * Returns the object property for the given URI or null if there is
+   * no object property with that URI.
+   *
+   * @param theURI the URI of the property
+   * @return the AnnotationProperty obejct
+   */
+  public ObjectProperty getObjectProperty(OURI theURI);
+
 
   /**
    * A method to remove the existing propertyDefinition (exclusive of
@@ -502,7 +810,7 @@ public interface Ontology extends LanguageResource {
    * denote the restriction. The default datatype is set to NonNegativeIntegerNumber
    * 
    * @param onProperty - Specifies the property for which the restriction is being set.
-   * @param minCardinalityValue - generally a numeric number.
+   * @param maxCardinalityValue - generally a numeric number.
    * @return
    * @throws InvalidValueException - if a value is not compatible with the nonNegativeIntegerNumber datatype.
    */
@@ -516,7 +824,7 @@ public interface Ontology extends LanguageResource {
    * denote the restriction. The default datatype is set to NonNegativeIntegerNumber
    * 
    * @param onProperty - Specifies the property for which the restriction is being set.
-   * @param minCardinalityValue - generally a numeric number.
+   * @param cardinalityValue - generally a numeric number.
    * @return
    * @throws InvalidValueException - if a value is not compatible with the nonNegativeIntegerNumber datatype.
    */
@@ -537,16 +845,22 @@ public interface Ontology extends LanguageResource {
           RDFProperty onProperty, OResource hasValue);
 
   /**
-   * Adds a new AllValuesFrom Restriction to the ontology. It
-   * automatically creates a randon anonymous class, which it uses to
-   * denote the restriction.
-   * 
+   * Adds a new AllValuesFrom Restriction to the ontology.
+   *
    * @param onProperty - Specifies the property for which the restriction is being set.
    * @param hasValue - a resource used as a value for hasValue element of the restriction.
    * @return
+   * @deprecated - this method is deprecated and kept for backwards compatibility
+   * as long as the OntologyOWLIM2 plugin is kept. Use the method
+   * {@link addAllValuesFromRestriction(ObjectProperty, OClass)} instead.
    */
+  @Deprecated
   public AllValuesFromRestriction addAllValuesFromRestriction(
           RDFProperty onProperty, OResource hasValue);
+
+  public AllValuesFromRestriction addAllValuesFromRestriction(
+      ObjectProperty onProperty, OClass theClass);
+
 
   /**
    * Adds a new AllValuesFrom Restriction to the ontology. It
@@ -559,7 +873,13 @@ public interface Ontology extends LanguageResource {
    */
   public SomeValuesFromRestriction addSomeValuesFromRestriction(
           RDFProperty onProperty, OResource hasValue);
-  
+
+
+  /**
+   *
+   * @return
+   */
+  public AnonymousClass addAnonymousClass();
   
   // *****************************
   // Ontology Modification Events
@@ -598,6 +918,8 @@ public interface Ontology extends LanguageResource {
    * A method to invoke when a resource's property value is changed
    * 
    * @param resource
+   * @param property
+   * @param value
    * @param eventType
    */
   public void fireResourcePropertyValueChanged(OResource resource, RDFProperty property, Object value, int eventType);
@@ -605,7 +927,8 @@ public interface Ontology extends LanguageResource {
   /**
    * A method to invoke when a resource's property value is changed
    * 
-   * @param resource
+   * @param resource1
+   * @param resource2
    * @param eventType
    */
   public void fireResourceRelationChanged(OResource resource1, OResource resource2,int eventType);
@@ -620,7 +943,7 @@ public interface Ontology extends LanguageResource {
   /**
    * A Method to invoke an event for a removed ontology resource
    * 
-   * @param resource
+   * @param resources 
    */
   public void fireOntologyResourcesRemoved(String[] resources);
 
@@ -636,43 +959,56 @@ public interface Ontology extends LanguageResource {
   /**
    * Start the transaction before additing statements.
    */
-  public void startTransaction();
 
   /**
-   * Commits all the transaction (so far included after the call to
+   * Commit all changes to the ontology.
+   * This will commit all changesall the transaction (so far included after the call to
    * start transaction) into the repository.
+   *
+   * @deprecated
    */
+  @Deprecated
   public void commitTransaction();
 
   /**
    * Checks whether the transation is already started.
    * 
    * @return
+   * @deprecated 
    */
+  @Deprecated
   public boolean transationStarted();
 
   /**
    * Returns the repository created for this particular instance of the
    * ontology.
-   * 
+   *
    * @return
+   * @deprecated
    */
-  public SesameRepository getSesameRepository();
+  @Deprecated
+  public Object getSesameRepository();
 
   /**
    * Returns the ID of a Sesame Repository created for this particular
    * instance of the ontology.
-   * 
+   *
    * @return
+   * @deprecated
    */
+  @Deprecated
   public String getSesameRepositoryID();
+
+
 
   /**
    * Given a URI object, this method returns its equivalent object
    * 
    * @param uri
    * @return
+   * @deprecated
    */
+  @Deprecated
   public OResource getOResourceFromMap(String uri);
 
   /**
@@ -680,14 +1016,18 @@ public interface Ontology extends LanguageResource {
    * 
    * @param uri
    * @param resource
+   * @deprecated
    */
+  @Deprecated
   public void addOResourceToMap(String uri, OResource resource);
 
   /**
    * Removes the resource from the central map
    * 
    * @param uri
+   * @deprecated 
    */
+  @Deprecated
   public void removeOResourceFromMap(String uri);
 
   /**
@@ -700,7 +1040,9 @@ public interface Ontology extends LanguageResource {
    * 
    * @param resourceName
    * @return
+   * @deprecated
    */
+  @Deprecated
   public OResource getOResourceByName(String resourceName);
 
   /**
@@ -714,6 +1056,7 @@ public interface Ontology extends LanguageResource {
    * 
    * @param resourceName
    * @return
+   * @deprecated
    */
   public List<OResource> getOResourcesByName(String resourceName);
 
@@ -725,7 +1068,9 @@ public interface Ontology extends LanguageResource {
    * interface to delete such resources.
    * 
    * @return
+   * @deprecated
    */
+  @Deprecated
   public List<OResource> getAllResources();
 
   /**
@@ -756,6 +1101,91 @@ public interface Ontology extends LanguageResource {
    * result of the QueryResultTable.
    * @param serqlQuery
    * @return
+   *
+   * @deprecated  As of release 1.3, replaced by {@link #createQuery()}
    */
+  @Deprecated
   public String executeQuery(String serqlQuery);
+
+  /**
+   * This method creates a OntologyTupleQuery object and passes on
+   * the specified query string in the specified query language.
+   *
+   * @param theQuery a String representing the tuple query.
+   * @param queryLanguage the query language, either SERQL or SPARQL
+   * @return the OntologyTurpleQuery object that can be used to retrieve
+   * the matching tuples in several formats. The query object can be re-used
+   * with different variable bindings.
+   */
+  public OntologyTupleQuery createTupleQuery(String theQuery, QueryLanguage queryLanguage);
+
+  /**
+   * This method creates a OntologyBooleanQuery object and passes on the
+   * specified query string and the specified query language.
+   *
+   * @param theQuery a String representing the tuple query.
+   * @param queryLanguage the query language, either SERQL or SPARQL
+   * @return the OntologyBooleanQuery object that can be used to retrieve
+   * the boolean answer for the query. The query object can be re-used
+   * with different variable bindings.
+   */
+  public OntologyBooleanQuery createBooleanQuery(String theQuery, QueryLanguage queryLanguage);
+
+  /**
+   * Create an ORUI object from the given URI string.
+   *
+   * @param theURI an URI or IRI string
+   * @return the OURI object representing the URI/IRI
+   */
+  public OURI createOURI(String theURI);
+
+  /**
+   * Create an OURI from the given resource name, using the ontology base URI
+   * (default name space). This method will throw an exception if no
+   * default name space is set (i.e. if the method getDefaultNameSpace would
+   * return null).
+   *
+   * @param resourceName the resource name i.e. the part of the final URI/IRI
+   * that is attached to the base URI (aftaer a trailing "#" or "/").
+   * @return the OURI 
+   */
+  public OURI createOURIForName(String resourceName);
+
+
+  /** Generate a new unique OURI for this ontology.
+   * This generates a new OURI that is guaranteed to be unique in the
+   * ontology, using the specified resource name string as a prefix for the
+   * URI's fragement identifier and the current defaultNameSpace of the
+   * ontology as a base URI.
+   * The resource name can be null or the empty string if no prefix is
+   * wanted.
+   * <p>
+   * The URI fragment part that is appended to the given resourceName (if any)
+   * consists of 7 ASCII characters representing the system time  in radix 36
+   * followed by 3 ASCII characters representing a random number.
+   * <p>
+   * Note that this method will return an OURI that is guaranteed not
+   * to be contained in the ontology, but if called repeatedly without
+   * actually adding a resource with the newly generated OURI to the ontology,
+   * the method might, although extremely unlikely,
+   * still return the same OURI more than once. Generated OURIs should hence
+   * been used for adding resources before more OURIs are generated.
+   * 
+   * @param resourceNamePrefix the prefix to use for the generated resource
+   * name
+   * @return a OURI object for an URI that is new and unique in the ontology
+   */
+  public OURI generateOURI(String resourceNamePrefix);
+
+  /** Generate a new unique OURI for this ontology.
+   * This works in the same way as {@link #generateOURI(java.lang.String) }
+   * but also allows the specification of the base URI part of the final
+   * URI.
+   *
+   * @param resourceNamePrefix the prefix to use for the generated resource name
+   * @param baseURI the base URI to use for the final URI
+   * @return a OURI object for an URI that is new and unique in the ontology
+   */
+  public OURI generateOURI(String resourceNamePrefix, String baseURI);
+
 }

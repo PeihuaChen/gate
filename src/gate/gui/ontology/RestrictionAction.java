@@ -19,8 +19,6 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 
-import org.openrdf.vocabulary.XmlSchema;
-
 /**
  * Action to create a new ObjectProperty in the ontology
  * 
@@ -131,7 +129,7 @@ public class RestrictionAction extends AbstractAction {
       else {
         // first check if the provided string is a valid datatype
         String number = value.getText();
-        if(!OntologyUtilities.getDataType(XmlSchema.NON_NEGATIVE_INTEGER)
+        if(!DataType.getDataType("http://www.w3.org/2001/XMLSchema#nonNegativeInteger")
                 .isValidValue(number)) {
           JOptionPane.showMessageDialog(MainFrame.getInstance(),
                   "Invalid value " + number);
