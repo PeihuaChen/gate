@@ -116,7 +116,7 @@ public @SuppressWarnings("all") class OpenNlpChunker extends AbstractLanguageAna
 				Annotation token = (Annotation) iterator3.next();
 
 				tokens[i] = token.getFeatures().get("string").toString();
-				postags[i] = token.getFeatures().get("pos").toString();
+				postags[i] = token.getFeatures().get("category").toString();
 
 				i++;
 			}
