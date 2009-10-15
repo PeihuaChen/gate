@@ -1,13 +1,6 @@
 package com.ontotext.kim.util.datastore;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Reader;
-import java.io.StringReader;
+import java.io.*;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -60,6 +53,8 @@ public class PrivateRepositoryFeed implements QueryResultListener.Feed {
 	public void feedTo(QueryResultListener listener) throws KIMQueryException {
 		UnmanagedRepositoryFactory factory = new UnmanagedRepositoryFactory();
 		TimedListener timedListener = new TimedListener(true, listener, -1);
+		
+		FileUtils.deleteQuietly(new File("owlim-storage"));
 		Reader configReader = null;
 		try {
 			configReader = getConfigReader();
@@ -122,6 +117,7 @@ public class PrivateRepositoryFeed implements QueryResultListener.Feed {
 	}
 
 	private boolean verifyHash(File dictionaryPath, int settingsHash) {
+		log.info("Looking for changed in configuration ...");
 		Properties props = new Properties();
 		File propsFile = new File(dictionaryPath, PrivateRepositoryFeed.SNAPSHOT_PROPERTIES_FILENAME);
 		propsFile = propsFile.getAbsoluteFile();
@@ -133,7 +129,7 @@ public class PrivateRepositoryFeed implements QueryResultListener.Feed {
 		try {			
 			inStream = new FileInputStream(propsFile);
 			props.load(inStream);
-			String oldHash = (String) props.get(PrivateRepositoryFeed.SETTINGS_HASH_PROPERTY);
+			String oldHash = (String) props.get(PrivateRepositoryFeed.SETTINGS_HASH_PROPERTY);			
 			return settingsHash == NumberUtils.toInt(oldHash, settingsHash);
 		} 
 		catch (IOException e) {

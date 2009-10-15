@@ -3,11 +3,12 @@ SELECT ?la ?entity ?cl
 WHERE {
    ?entity rdfs:label ?la .
    ?entity a ?cl .
+   ?cl rdfs:subClassOf rdfs:Class .
    OPTIONAL
    {
        ?sc rdfs:subClassOf ?cl.
        ?entity a ?sc .
        filter(?cl != ?sc)      
-   }
+   }   
    filter (!bound(?sc) && isURI(?cl))
 }
