@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 1998-2007, The University of Sheffield.
+ *  Copyright (c) 1998-2009, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -172,9 +172,9 @@ public class OptionsDialog extends JDialog {
       addSpaceOnMarkupUnpackChk.setSelected(false);
 
     ButtonGroup bGroup = new ButtonGroup();
-    doceditInsertAppendChk = new JCheckBox("Append");
+    doceditInsertAppendChk = new JRadioButton("Append");
     bGroup.add(doceditInsertAppendChk);
-    doceditInsertPrependChk = new JCheckBox("Prepend");
+    doceditInsertPrependChk = new JRadioButton("Prepend");
     bGroup.add(doceditInsertPrependChk);
     doceditInsertPrependChk.setSelected(Gate.getUserConfig().
       getBoolean(GateConstants.DOCEDIT_INSERT_PREPEND));
@@ -257,6 +257,7 @@ public class OptionsDialog extends JDialog {
       hBox2.add(doceditInsertAppendChk);
       hBox2.add(Box.createVerticalStrut(5));
       hBox2.add(doceditInsertPrependChk);
+      hBox2.add(Box.createHorizontalGlue());
     hBox.add(hBox2);
       hBox2 = Box.createHorizontalBox();
       hBox2.add(Box.createVerticalStrut(5));
@@ -642,11 +643,11 @@ public class OptionsDialog extends JDialog {
    */
   protected JCheckBox addSpaceOnMarkupUnpackChk;
 
-  /** The Docedit append checkbox */
-  protected JCheckBox doceditInsertAppendChk;
+  /** Document insertion append */
+  protected JRadioButton doceditInsertAppendChk;
 
-  /** The Docedit prepend checkbox */
-  protected JCheckBox doceditInsertPrependChk;
+  /** Document insertion prepend */
+  protected JRadioButton doceditInsertPrependChk;
 
   /** The Document read-only checkbox */
   protected JCheckBox docReadOnlyChk;

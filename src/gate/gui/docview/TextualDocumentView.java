@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 1998-2007, The University of Sheffield.
+ *  Copyright (c) 1998-2009, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -14,7 +14,6 @@ package gate.gui.docview;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
@@ -26,13 +25,10 @@ import javax.swing.text.*;
 import gate.Annotation;
 import gate.AnnotationSet;
 import gate.Document;
-import gate.Gate;
-import gate.GateConstants;
 import gate.corpora.DocumentContentImpl;
 import gate.event.DocumentEvent;
 import gate.event.DocumentListener;
 import gate.gui.annedit.AnnotationData;
-import gate.gui.MainFrame;
 import gate.util.*;
 
 
@@ -231,39 +227,7 @@ public class TextualDocumentView extends AbstractDocumentView {
 //    textView.setContentType("text/plain");
 //    textView.setEditorKit(new RawEditorKit());
 
-    // when in read-only mode allows only movement keys
-    textView = new JTextArea() {
-      protected void processKeyEvent(KeyEvent e) {
-        int code = e.getKeyCode();
-        if (!Gate.getUserConfig().getBoolean(GateConstants.DOCEDIT_READ_ONLY)) {
-          super.processKeyEvent(e);
-
-        } else if (!(code == KeyEvent.VK_H && e.isControlDown()) // backspace
-         && !(code == KeyEvent.VK_X && e.isControlDown()) // cut
-         && !(code == KeyEvent.VK_V && e.isControlDown()) // paste
-         && (e.isActionKey() || e.isAltDown() || e.isAltGraphDown()
-          || e.isControlDown() || e.isMetaDown() || e.isShiftDown()
-          || code == KeyEvent.VK_ESCAPE
-          || code == KeyEvent.VK_UP || code == KeyEvent.VK_DOWN
-          || code == KeyEvent.VK_RIGHT || code == KeyEvent.VK_LEFT
-          || code == KeyEvent.VK_KP_UP || code == KeyEvent.VK_KP_DOWN
-          || code == KeyEvent.VK_KP_RIGHT || code == KeyEvent.VK_KP_LEFT
-          || code == KeyEvent.VK_HOME || code == KeyEvent.VK_END
-          || code == KeyEvent.VK_PAGE_UP || code == KeyEvent.VK_PAGE_DOWN)) {
-          super.processKeyEvent(e);
-
-        } else if (e.getID() == KeyEvent.KEY_PRESSED) {
-          int choice = JOptionPane.showConfirmDialog(MainFrame.getInstance(),
-            "Gate documents are in read-only mode.\n" +
-            "(Menu Options->Configuration->Advanced)\n\n" +
-            "Do you want to change to edit mode?\n",
-            "Document Editor", JOptionPane.YES_NO_OPTION);
-          if (choice == JOptionPane.YES_OPTION) {
-            Gate.getUserConfig().put(GateConstants.DOCEDIT_READ_ONLY, false);
-          }
-        }
-      }
-    };
+    textView = new JTextArea();
     textView.setAutoscrolls(false);
     textView.setLineWrap(true);
     textView.setWrapStyleWord(true);
@@ -335,14 +299,22 @@ public class TextualDocumentView extends AbstractDocumentView {
 //        }
 //      }      
 //    });
+
+    // stop control+H from deleting text and transfers the key to the parent
+    textView.addKeyListener(new KeyAdapter() {
+      public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_H
+         && e.isControlDown()) {
+          getGUI().dispatchEvent(e);
+          e.consume();
+        }
+      }
+    });
   }
-  
-  
 
   protected void unregisterHooks(){}
   protected void registerHooks(){}
-  
-  
+
   /**
    * Blinks the blinking highlights if any.
    */
@@ -550,15 +522,18 @@ public class TextualDocumentView extends AbstractDocumentView {
   // the selection, it just stops painting it so we need to force
   // the painting
   public class PermanentSelectionCaret extends DefaultCaret {
-    
     private boolean isFocused;
-
     public void setSelectionVisible(boolean hasFocus) {
       if (hasFocus != isFocused) {
         isFocused = hasFocus;
         super.setSelectionVisible(false);
         super.setSelectionVisible(true);
       }
+    }
+    public void focusGained(FocusEvent e) {
+      super.focusGained(e);
+      // force displaying the caret even if the document is not editable
+      super.setVisible(true);
     }
   }
 

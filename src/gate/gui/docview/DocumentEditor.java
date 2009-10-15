@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 1998-2007, The University of Sheffield.
+ *  Copyright (c) 1998-2009, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -17,14 +17,19 @@ import java.awt.event.*;
 import java.util.*;
 import java.util.List;
 import java.util.Timer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
+import java.util.regex.*;
 
 import javax.swing.*;
+import javax.swing.text.JTextComponent;
 
-import gate.*;
-import gate.creole.*;
+import gate.Document;
+import gate.Factory;
+import gate.Gate;
+import gate.GateConstants;
+import gate.Resource;
+import gate.creole.AbstractVisualResource;
+import gate.creole.ResourceData;
+import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.GuiType;
 import gate.gui.ActionsPublisher;
@@ -204,18 +209,22 @@ public class DocumentEditor extends AbstractVisualResource
     remove(progressBar);
     add(horizontalSplit, BorderLayout.CENTER);
     topBar.addSeparator();
-    Action searchAction = new SearchAction();
+    searchAction = new SearchAction();
     searchAction.putValue(Action.SHORT_DESCRIPTION,
       "<html>"+searchAction.getValue(Action.SHORT_DESCRIPTION)
       +"&nbsp;&nbsp;<font color=#667799><small>Ctrl-F"
       +"&nbsp;&nbsp;</small></font></html>");
-    topBar.add(searchAction);
+    JButton searchButton = new JButton(searchAction);
+    searchButton.setText("");
+    topBar.add(searchButton);
+    setEditable(!Gate.getUserConfig()
+      .getBoolean(GateConstants.DOCEDIT_READ_ONLY));
+
     // add a key binding for the search function
     getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(
       KeyStroke.getKeyStroke("control F"), "Search in text");
     getActionMap().put("Search in text", searchAction);
-    
-    
+
     validate();
   }
   
@@ -266,42 +275,43 @@ public class DocumentEditor extends AbstractVisualResource
 
     // binds a F-key to each view toggle button
     // avoid the F-Key F1,2,6,8,10 because already used
-    if ((numberOfTheFKeyforLastView == 5)
-     || (numberOfTheFKeyforLastView == 7)
-     || (numberOfTheFKeyforLastView == 9)) {
-      numberOfTheFKeyforLastView++;
+    if ((functionKeyNumber == 5)
+     || (functionKeyNumber == 7)
+     || (functionKeyNumber == 9)) {
+      functionKeyNumber++;
     }
     getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-      .put(KeyStroke.getKeyStroke("F"+(numberOfTheFKeyforLastView+1)),
-      "Shows view "+numberOfTheFKeyforLastView+1);
-    getActionMap().put("Shows view "+numberOfTheFKeyforLastView+1,
+      .put(KeyStroke.getKeyStroke("F"+(functionKeyNumber +1)),
+      "Shows view "+ functionKeyNumber +1);
+    getActionMap().put("Shows view "+ functionKeyNumber +1,
         new AbstractAction() {
             public void actionPerformed(ActionEvent evt) {
               viewButton.doClick();
             }
         }
     );
+    // add a tooltip with the key shortcut
     if (view instanceof AnnotationSetsView) {
       getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-        .put(KeyStroke.getKeyStroke("shift F"+(numberOfTheFKeyforLastView+1)),
-        "Shows view "+numberOfTheFKeyforLastView+1);
+        .put(KeyStroke.getKeyStroke("shift F"+(functionKeyNumber +1)),
+        "Shows view "+ functionKeyNumber +1);
 
       viewButton.setToolTipText("<html>Toggle the view of "+name
         +"&nbsp;&nbsp;<font color=#667799><small>F"
-        +(numberOfTheFKeyforLastView+1)
+        +(functionKeyNumber +1)
         +"&nbsp;&nbsp;</small></font>"
         +"<br>Set last selected annotations "
         +"&nbsp;&nbsp;<font color=#667799><small>Shift+F"
-        +(numberOfTheFKeyforLastView+1)
+        +(functionKeyNumber +1)
         +"&nbsp;&nbsp;</small></font></html>");
 
     } else {
       viewButton.setToolTipText("<html>Toggle the view of "+name
         +"&nbsp;&nbsp;<font color=#667799><small>F"
-        +(numberOfTheFKeyforLastView+1)
+        +(functionKeyNumber +1)
         +"&nbsp;&nbsp;</small></font></html>");
     }
-    numberOfTheFKeyforLastView++;
+    functionKeyNumber++;
   }
 
   /**
@@ -571,6 +581,23 @@ public class DocumentEditor extends AbstractVisualResource
   }
 
   /**
+   * @return the text component associated with this document editor.
+   */
+  protected JTextComponent getTextComponent() {
+    return (JTextComponent) (((JScrollPane)getCentralView()
+      .getGUI()).getViewport()).getView();
+  }
+
+  /**
+   * Set the document as editable or readonly.
+   * Documents are editable by default.
+   * @param editable true if editable, false if readonly
+   */
+  public void setEditable(boolean editable) {
+    getTextComponent().setEditable(editable);
+  }
+
+  /**
    * Dialog to search an expression in the document.
    * Select the current match in the document.
    * Options: incremental search, case insensitive, whole word,
@@ -595,11 +622,7 @@ public class DocumentEditor extends AbstractVisualResource
         MainFrame.getGuiRoots().add(searchDialog);
       }
 
-      // FIXME: that's ugly !!
-      javax.swing.text.JTextComponent textPane =
-        (javax.swing.text.JTextComponent)
-          (((JScrollPane)getCentralView().getGUI())
-            .getViewport()).getView();
+      JTextComponent textPane = getTextComponent();
 
       // if the user never gives the focus to the textPane then
       // there will never be any selection in it so we force it
@@ -931,12 +954,7 @@ public class DocumentEditor extends AbstractVisualResource
       }
     }
 
-    // FIXME: that's ugly !!
-    javax.swing.text.JTextComponent textPane =
-      (javax.swing.text.JTextComponent)
-        (((JScrollPane)getCentralView().getGUI())
-          .getViewport()).getView();
-
+    JTextComponent textPane = getTextComponent();
     JTextField patternTextField;
     JCheckBox ignoreCaseChk;
     JCheckBox wholeWordsChk;
@@ -1036,6 +1054,10 @@ public class DocumentEditor extends AbstractVisualResource
                 break;
             }
           }
+          if (view instanceof TextualDocumentView) {
+            // enable/disable according to text visibility
+            searchAction.setEnabled(isSelected());
+          }
         }
       });
     }
@@ -1068,6 +1090,7 @@ public class DocumentEditor extends AbstractVisualResource
   /** The dialog used for text search */
   private SearchDialog searchDialog;
 
+  protected Action searchAction;
   /**
    * Cahced value for the selected annotations.
    */
@@ -1127,5 +1150,5 @@ public class DocumentEditor extends AbstractVisualResource
   /**
    * Used to know the last F-key used when adding a new view.
    */
-  protected int numberOfTheFKeyforLastView = 2;
+  protected int functionKeyNumber = 2;
 }
