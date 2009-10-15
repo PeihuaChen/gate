@@ -88,7 +88,7 @@ public class CreoleAnnotationHandler {
         s.close();
         Gate.getClassLoader().addURL(url);
       } catch(IOException e) {
-        Err.println("Error opening URL "+url+" error: "+e);
+        Err.println("Error opening JAR "+url+" specified in creole file "+ creoleFileUrl +": "+e);
       }
     }
     else {
