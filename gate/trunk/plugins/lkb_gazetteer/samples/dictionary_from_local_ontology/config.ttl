@@ -30,7 +30,7 @@
 				 %relpath%/kb/owl/protons.owl;
 				 %relpath%/kb/owl/protont.owl;
 				 %relpath%/kb/owl/protonu.owl;
-				 %relpath%/kb/wkbx.nt;" ;
+				 %relpath%/kb/univ-bench.owl;" ;
 
 		 owlim:defaultNS 
                "http://www.w3.org/2002/07/owl#;

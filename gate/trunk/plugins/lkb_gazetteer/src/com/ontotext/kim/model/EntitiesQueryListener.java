@@ -35,7 +35,7 @@ public abstract class EntitiesQueryListener extends SimpleTableListener {
 			addEntity(instUri, classUri, aliasLabel);
 			++loaded;
 
-			logProgress();
+			logProgress(instUri, classUri, aliasLabel);
 		}
 		catch (Exception x) {
 			KimLogs.logNERC_GAZETTEER.error("There has been an exception in endTuple()\n" +
@@ -45,11 +45,13 @@ public abstract class EntitiesQueryListener extends SimpleTableListener {
 
 	}
 
-	private void logProgress() {
+	private void logProgress(String instUri, String classUri, String aliasLabel) {
 		// We log at the first, because sometimes the query runs slow and sometimes the query freezes.
 		// If we know that we have received at least one result, then the query has not frozen.
 		if (loaded == 1) {
-			KimLogs.logSEMANTIC_REPOSITORY.info("Aliases loading started ...");
+			KimLogs.logSEMANTIC_REPOSITORY.info(
+					String.format("Aliases loading started ... First one is: %s %s %s", 
+							aliasLabel, instUri, classUri));
 		}
 		if (loaded % 10000 == 0) {
 			long currentTime = System.currentTimeMillis();
@@ -70,7 +72,6 @@ public abstract class EntitiesQueryListener extends SimpleTableListener {
 				String.format("Loading completed: %s aliases in %s second(s)." , loaded, (currentTime - startTime)/1000) );
 	}
 
-	protected abstract void addEntity(String instUri, String classUri,
-			String aliasLabel);
+	protected abstract void addEntity(String instUri, String classUri, String aliasLabel);
 
 }
