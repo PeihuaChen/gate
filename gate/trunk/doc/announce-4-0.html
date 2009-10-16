@@ -4,6 +4,7 @@
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
+<meta name="generator" content="cow"/>
 <title>GATE Version 4.0 release (July 2007)</title>
 <style type="text/css">
 /*<![CDATA[*/
@@ -42,67 +43,67 @@ div.banner a:hover {
 </style>
 </head>
 <body bgcolor="#FFFFFF" text="#000000">
-<h1>GATE Version 4.0 release (July 2007)</h1>
-<a name="section-1."/><h1>1. Major new features</h1>
-<a name="section-1.1."/><h2>1.1. ANNIC</h2>
+<h1 class="cow-title-heading">GATE Version 4.0 release (July 2007)</h1>
+<a class="cow-section-anchor" name="section-1."/><h1 class="cow-heading"><span class="cow-sec-number">1. </span>Major new features</h1>
+<a class="cow-section-anchor" name="section-1.1."/><h2 class="cow-heading"><span class="cow-sec-number">1.1. </span>ANNIC</h2>
 
 <p>ANNotations In Context: a full-featured annotation indexing and retrieval
 system designed to support corpus querying and JAPE rule authoring.  It is
 provided as part of an extention of the Serial Datastores, called Searchable
 Serial Datastore (SSD)
-(<a href="http://gate.ac.uk/sale/tao/#sec:misc-creole:annic">details</a>).</p>
-<a name="section-1.2."/><h2>1.2. New machine learning API</h2>
+(<a class="cow-url" href="http://gate.ac.uk/sale/tao/#sec:misc-creole:annic">details</a>).</p>
+<a class="cow-section-anchor" name="section-1.2."/><h2 class="cow-heading"><span class="cow-sec-number">1.2. </span>New machine learning API</h2>
 
 <p>A brand new machine learning layer specifically targetted at NLP tasks
 including text classification, chunk learning (e.g. for named entity
 recognition) and relation learning
-(<a href="http://gate.ac.uk/sale/tao/#chapt:mlapi">details</a>).</p>
-<a name="section-1.3."/><h2>1.3. Ontology API</h2>
+(<a class="cow-url" href="http://gate.ac.uk/sale/tao/#chapt:mlapi">details</a>).</p>
+<a class="cow-section-anchor" name="section-1.3."/><h2 class="cow-heading"><span class="cow-sec-number">1.3. </span>Ontology API</h2>
 
-<p>A new ontology API, based on <a href="http://www.ontotext.com/owlim/">OWL In Memory</a>
+<p>A new ontology API, based on <a class="cow-url" href="http://www.ontotext.com/owlim/">OWL In Memory</a>
 (OWLIM), which offers a better API, revised ontology event model and
 an improved ontology editor to name but few
-(<a href="http://gate.ac.uk/sale/tao/#chapt:ontologies">details</a>).</p>
-<a name="section-1.4."/><h2>1.4. OCAT</h2>
+(<a class="cow-url" href="http://gate.ac.uk/sale/tao/#chapt:ontologies">details</a>).</p>
+<a class="cow-section-anchor" name="section-1.4."/><h2 class="cow-heading"><span class="cow-sec-number">1.4. </span>OCAT</h2>
 
 <p>Ontology-based Corpus Annotation Tool to help annotators to manually annotate
 documents using ontologies
-(<a href="http://gate.ac.uk/sale/tao/#sec:ontologies:ocat">details</a>).</p>
-<a name="section-1.5."/><h2>1.5. Alignment Tools</h2>
+(<a class="cow-url" href="http://gate.ac.uk/sale/tao/#sec:ontologies:ocat">details</a>).</p>
+<a class="cow-section-anchor" name="section-1.5."/><h2 class="cow-heading"><span class="cow-sec-number">1.5. </span>Alignment Tools</h2>
 
 <p>A new set of components (e.g. CompoundDocument, AlignmentEditor etc.) that help
 in building alignment tools and in carrying out cross-document processing
-(<a href="http://gate.ac.uk/sale/tao/#chapt:alignment">details</a>).</p>
-<a name="section-1.6."/><h2>1.6. New HTML Parser</h2>
+(<a class="cow-url" href="http://gate.ac.uk/sale/tao/#chapt:alignment">details</a>).</p>
+<a class="cow-section-anchor" name="section-1.6."/><h2 class="cow-heading"><span class="cow-sec-number">1.6. </span>New HTML Parser</h2>
 
 <p>A new HTML document format parser, based on Andy Clark's
-<a href="http://people.apache.org/~andyc/neko/doc/html/">NekoHTML</a>.  This parser
+<a class="cow-url" href="http://people.apache.org/~andyc/neko/doc/html/">NekoHTML</a>.  This parser
 is much better than the old one at handling modern HTML and XHTML constructs,
 JavaScript blocks, etc., though the old parser is still available for existing
 applications that depend on its behaviour.</p>
-<a name="section-1.7."/><h2>1.7. Java 5.0 support</h2>
+<a class="cow-section-anchor" name="section-1.7."/><h2 class="cow-heading"><span class="cow-sec-number">1.7. </span>Java 5.0 support</h2>
 
 <p>GATE now requires Java 5.0 or later to compile and run.  This brings a number
 of benefits:</p>
 <ul>
 <li>Java 5.0 syntax is now available on the right hand side of JAPE rules
   with the default Eclipse compiler
-  (<a href="http://gate.ac.uk/sale/tao/#sec:japeimpl:javacompiler">details</a>).</li>
+  (<a class="cow-url" href="http://gate.ac.uk/sale/tao/#sec:japeimpl:javacompiler">details</a>).</li>
 <li><tt>enum</tt> types are now supported for resource parameters.  see
-  <a href="http://gate.ac.uk/sale/tao/#sec:howto:creoleconfig">here</a> for details on
+  <a class="cow-url" href="http://gate.ac.uk/sale/tao/#sec:howto:creoleconfig">here</a> for details on
   defining the parameters of a resource.</li>
 <li><tt>AnnotationSet</tt> and the <tt>CreoleRegister</tt> take advantage of
   generic types.  The <tt>AnnotationSet</tt> interface is now an extension of
-  <tt>Set&lt;Annotation></tt> rather than just <tt>Set</tt>, which should make for
+  <tt>Set&lt;Annotation&gt;</tt> rather than just <tt>Set</tt>, which should make for
   cleaner and more type-safe code when programming to the API, and the
   <tt>CreoleRegister</tt> now uses parameterized types, which are
   backwards-compatible but provide better type-safety for new code.</li>
 </ul>
-<a name="section-2."/><h1>2. Other new features and improvements</h1>
+<a class="cow-section-anchor" name="section-2."/><h1 class="cow-heading"><span class="cow-sec-number">2. </span>Other new features and improvements</h1>
 
 <ul>
 <li>Hiding the view for a particular resource (by right clicking on its tab 
-  and selecting "Hide this view") will now completely close the associated 
+  and selecting &quot;Hide this view&quot;) will now completely close the associated 
   viewers and dispose them. Re-selecting the same resource at a later time will 
   lead to re-creating the necessary viewers and displaying them. This has two 
   advantages: firstly it offers a mechanism for disposing views that are not 
@@ -126,39 +127,39 @@ of benefits:</p>
 <li>Support has been added for resource parameters of type
   <tt>gate.FeatureMap</tt>, and it is also possible to specify a default value
   for parameters whose type is <tt>Collection</tt>, <tt>List</tt> or
-  <tt>Set</tt> (<a href="http://gate.ac.uk/sale/tao/#sec:howto:creoleconfig">details</a>).</li>
+  <tt>Set</tt> (<a class="cow-url" href="http://gate.ac.uk/sale/tao/#sec:howto:creoleconfig">details</a>).</li>
 </ul>
 
 <ul>
 <li>(Feature Request
-  <a href="https://sourceforge.net/support/tracker.php?aid=1446642">1446642</a>)
+  <a class="cow-url" href="https://sourceforge.net/support/tracker.php?aid=1446642">1446642</a>)
   After several requests, a mechanism has been added to allow overriding of
   GATE's document format detection routine.  A new creation-time parameter
   <tt>mimeType</tt> has been added to the standard document implementation, which
   forces a document to be interpreted as a specific MIME type and prevents the
   usual detection based on file name extension and other information
-  (<a href="http://gate.ac.uk/sale/tao/#subsect:DetectingTheReader">details</a>).</li>
+  (<a class="cow-url" href="http://gate.ac.uk/sale/tao/#subsect:DetectingTheReader">details</a>).</li>
 </ul>
 
 <ul>
 <li>A capability has been added to specify arbitrary sets of additional
   features on individual gazetteer entries.  These features are passed forward
   into the Lookup annotations generated by the gazetteer
-  (<a href="http://gate.ac.uk/sale/tao/#sec:gazetteer">details</a>).</li>
+  (<a class="cow-url" href="http://gate.ac.uk/sale/tao/#sec:gazetteer">details</a>).</li>
 </ul>
 
 <ul>
 <li>As an alternative to the Google plugin, a new plugin called <em>yahoo</em> has been
   added to GATE to allow users to submit their query to the Yahoo search engine
   and to load the found pages as GATE documents
-  (<a href="http://gate.ac.uk/sale/tao/#sec:misc-creole:yahoo">details</a>).</li>
+  (<a class="cow-url" href="http://gate.ac.uk/sale/tao/#sec:misc-creole:yahoo">details</a>).</li>
 </ul>
 
 <ul>
 <li>It is now easier to run a corpus pipeline over a single document in the
   GATE GUI -- documents now provide a right-click menu item to create a
   singleton corpus containing just this document
-  (<a href="http://gate.ac.uk/sale/tao/#sec:howto:loadlr">details</a>).</li>
+  (<a class="cow-url" href="http://gate.ac.uk/sale/tao/#sec:howto:loadlr">details</a>).</li>
 </ul>
 
 <ul>
@@ -166,7 +167,7 @@ of benefits:</p>
   start and end of execution of their containing controller.  This is useful
   for PRs that need to do cleanup or other processing after a whole corpus has
   been processed
-  (<a href="http://gate.ac.uk/sale/tao/#sec:applications">details</a>).</li>
+  (<a class="cow-url" href="http://gate.ac.uk/sale/tao/#sec:applications">details</a>).</li>
 </ul>
 
 <ul>
@@ -193,8 +194,8 @@ of benefits:</p>
 
 <ul>
 <li>A couple of helper classes have been added to assist in using GATE within
-  a <a href="http://www.springframework.org">Spring</a> application
-  (<a href="http://gate.ac.uk/sale/tao/#sec:howto:spring">details</a>).</li>
+  a <a class="cow-url" href="http://www.springframework.org">Spring</a> application
+  (<a class="cow-url" href="http://gate.ac.uk/sale/tao/#sec:howto:spring">details</a>).</li>
 </ul>
 
 <ul>
@@ -203,25 +204,25 @@ of benefits:</p>
   multiple threads (though it is not safe to use the same resource instance in
   more than one thread).  This is a big advantage when using GATE in a
   multithreaded environment, such as a web application
-  (<a href="http://gate.ac.uk/sale/tao/#sec:howto:multithread">details</a>).</li>
+  (<a class="cow-url" href="http://gate.ac.uk/sale/tao/#sec:howto:multithread">details</a>).</li>
 </ul>
 
 <ul>
 <li>Plugins can now provide custom icons for their PRs and LRs in the plugin
-  JAR file (<a href="http://gate.ac.uk/sale/tao/#sec:howto:creoleconfig">details</a>).</li>
+  JAR file (<a class="cow-url" href="http://gate.ac.uk/sale/tao/#sec:howto:creoleconfig">details</a>).</li>
 </ul>
 
 <ul>
 <li>It is now possible to override the default location for the saved session
   file using a system property
-  (<a href="http://gate.ac.uk/sale/tao/#sec:howto:sysprop">details</a>).</li>
+  (<a class="cow-url" href="http://gate.ac.uk/sale/tao/#sec:howto:sysprop">details</a>).</li>
 </ul>
 
 <ul>
 <li>The TreeTagger plugin supports a system property to specify the location
   of the shell interpreter used for the tagger shell script.  In combination
   with Cygwin this makes it much easier to use the tagger on Windows
-  (<a href="http://gate.ac.uk/sale/tao/#sec:misc-creole:treetagger">details</a>).</li>
+  (<a class="cow-url" href="http://gate.ac.uk/sale/tao/#sec:misc-creole:treetagger">details</a>).</li>
 </ul>
 
 <ul>
@@ -238,7 +239,7 @@ of benefits:</p>
 
 <ul>
 <li>The GATE source code has moved from CVS into Subversion.  See
-  <a href="http://gate.ac.uk/sale/tao/#sec:howto:svn">here</a> for details of how to check
+  <a class="cow-url" href="http://gate.ac.uk/sale/tao/#sec:howto:svn">here</a> for details of how to check
   out the code from the new repository.</li>
 </ul>
 
@@ -246,18 +247,18 @@ of benefits:</p>
 <li>An optional parameter, keepOriginalMarkupsAS, has been added to the
   DocumentReset PR which allows users to decide whether to keep the Original
   Markups AS or not while reseting the document
-  (<a href="http://gate.ac.uk/sale/tao/#sec:misc-creole:reset">details</a>).</li>
+  (<a class="cow-url" href="http://gate.ac.uk/sale/tao/#sec:misc-creole:reset">details</a>).</li>
 </ul>
-<a name="section-3."/><h1>3. Bug fixes and optimizations</h1>
+<a class="cow-section-anchor" name="section-3."/><h1 class="cow-heading"><span class="cow-sec-number">3. </span>Bug fixes and optimizations</h1>
 
 <ul>
 <li>The Morphological Analyser has been optimized.  A new FSM based, although
   with minor alteration to the basic FSM algorithm, has been implemented to
   optimize the GATE Morphological Analyser. The previous profiling figures show
   that the morpher when integrated with ANNIE application used to take upto
-  60% of the overall processing time.  The optimized version only takes 7.6%
+  60<span class="cow-escape">%</span> of the overall processing time.  The optimized version only takes 7.6<span class="cow-escape">%</span>
   of the total processing time. 
-  (<a href="http://gate.ac.uk/sale/tao/#sec:misc-creole:morpher">details</a>).</li>
+  (<a class="cow-url" href="http://gate.ac.uk/sale/tao/#sec:misc-creole:morpher">details</a>).</li>
 </ul>
 
 <ul>
@@ -273,7 +274,7 @@ of benefits:</p>
 
 <ul>
 <li>The implementation of <tt>AnnotationSets</tt> has been improved. GATE now
-  requires up to 40% less memory to run and is also 20% faster on average.
+  requires up to 40<span class="cow-escape">%</span> less memory to run and is also 20<span class="cow-escape">%</span> faster on average.
   The <tt>get</tt> methods of <tt>AnnotationSet</tt> return instances of
   <tt>ImmutableAnnotationSet</tt>. Any attempt at modifying the content of
   these objects will trigger an <tt>Exception</tt>. An empty
@@ -283,7 +284,7 @@ of benefits:</p>
 <ul>
 <li>The Chemistry tagger has been updated with a number of bugfixes and
   improvements
-  (<a href="http://gate.ac.uk/sale/tao/#sec:misc-creole:chemistrytagger">details</a>).</li>
+  (<a class="cow-url" href="http://gate.ac.uk/sale/tao/#sec:misc-creole:chemistrytagger">details</a>).</li>
 </ul>
 
 <ul>
