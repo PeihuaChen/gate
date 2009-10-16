@@ -1,0 +1,64 @@
+GATE Developer/Embedded Backlog
+
+5.1 release task list:
+
+- feature freeze end of next week *23rd oct*
+  - new features that must be complete or checkpointed and branched ASAP
+    (other
+    - plugin renaming [NA]
+    - moving all config into gate.xml (ditch prefs API) and allow non-existent
+      gate.xml (create it if it doesn't exist)
+    - lkb plugin
+      - manual: changelog, main docs [GG]
+      - finalisation of the name [GG]
+      - MN: describe or remove SemanticEnrichmentPR [HC - HC contact]
+    - benchmarking: [TH - HC contact]
+    - remove the menu item for the JAPE debugger [MG]
+    - compile-time JAPE errors: dump the source in the error message [MG]
+    - copy CBT messages from the mailing list into the perf an chapter [AR/GG]
+- documentation
+  - deadline for everything to have at least a placeholder in the manual and
+    an entry in the changelog: *23rd oct*
+  - remove JAPE debugger material, and put a note saying this is no longer
+    supported [GG]
+  - remove oracle/postgresql docs and leave a note [GG]
+  - update script to map old TAO sections to new manual sections [IR]
+  - move the sale/tao trunk to tao-old and the manual branch to sale/tao and
+    announce on gate-users (put a link to the old one? perhaps we move the
+    current tao to tao-old under sale? [GG/VT]
+  - plugins.html script: add a link to the javadocs when they exist [IR]
+  - talk to DM/WP about the performance an chap and the IAA appendix
+    [GG,DM,WP]
+  - proof-reading [all]
+- Developer/Embedded testing *week of the 23rd* [HC schedule]
+- final release: *week of 30th nov* [all]
+
+TAO proof-reading responsibilities by chapter/appendix number
+-  1 HC
+-  2 DD
+-  3 VT
+-  4 IR
+-  5 AF
+-  6 MA
+-  7 VT
+-  8 MG
+-  9 NA
+- 10 GG/DM/WP
+- 11 IR
+- 12 JP
+- 13 DD
+- 14 AR
+- 15 NA
+- 16 AF
+- 17 IR
+- 18 AR
+-  A HC
+-  B -
+-  C VT
+-  D -
+-  E MA
+-  F AR
+-  G -
+-  H GG/DM/WP
+-  I MG
+-  J -
