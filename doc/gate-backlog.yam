@@ -7,7 +7,7 @@ GATE Developer/Embedded Backlog
     (other
     - plugin renaming [NA]
     - moving all config into gate.xml (ditch prefs API) and allow non-existent
-      gate.xml (create it if it doesn't exist)
+      gate.xml (create it if it doesn't exist) [TH]
     - lkb plugin
       - manual: changelog, main docs [GG]
       - finalisation of the name [GG]
