@@ -8,6 +8,11 @@ import java.util.Map.Entry;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Value;
 
+/**
+ * Gathers statistics on the classes of the entities loaded from the vocabulary.
+ * 
+ * @author mnozchev
+ */
 public class ClassStatisticListener extends EntitiesQueryListener {
 	private static final Logger log = Logger.getLogger(StatisticListener.class);
 	

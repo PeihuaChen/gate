@@ -638,15 +638,15 @@ public class AliasCacheImpl implements AliasLookupDictionary {
 		}
 		return ns + shortURI.substring(i+1);
 	}
-	private short packClass(String classURI) {
+	private int packClass(String classURI) {
 		int i = classCache.indexOf(classURI);
 		if (i < 0) {
 			classCache.add(classURI);
 			i = classCache.size() - 1;
 		}
-		return (short) i;
+		return i;
 	}
-	private String unpackClass(short clasID) {
+	private String unpackClass(int clasID) {
 		return classCache.get(clasID);
 	}
 

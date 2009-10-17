@@ -50,7 +50,7 @@ public abstract class EntitiesQueryListener extends SimpleTableListener {
 		// If we know that we have received at least one result, then the query has not frozen.
 		if (loaded == 1) {
 			KimLogs.logSEMANTIC_REPOSITORY.info(
-					String.format("Aliases loading started ... First one is: %s %s %s", 
+					String.format("Aliases loading started ... First one is:\nlabel - %s\nURI - %s\nClass URI - %s", 
 							aliasLabel, instUri, classUri));
 		}
 		if (loaded % 10000 == 0) {

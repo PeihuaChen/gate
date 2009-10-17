@@ -25,6 +25,20 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.http.HTTPRepository;
 
+/**
+ * The Semantic Enrichment PR allows adding new data to semantic annotations 
+ * by querying external RDF (Linked Data) repositories.
+ *	
+ * <p>
+ * Here a semantic annotation is an annotation that is linked to an RDF entity by having 
+ * the URI of the entity in the "inst" feature of the annotation. For all such annotation 
+ * of a given type, this PR runs a SPARQL query against the defined repository and puts 
+ * a comma-separated list of the values mentioned in the query output in the 
+ * "connections" feature of the same annotation.
+ * 
+ * @author mnozchev
+ *
+ */
 public class SesameEnrichment extends AbstractLanguageAnalyser {
 
 	private static final long serialVersionUID = 3650L;
@@ -124,7 +138,7 @@ public class SesameEnrichment extends AbstractLanguageAnalyser {
 			}
 		}
 		catch (RepositoryException e) {
-			e.printStackTrace();
+			log.error("Could not close connection.", e);
 		}
 	}
 	
