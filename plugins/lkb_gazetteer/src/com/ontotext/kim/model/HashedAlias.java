@@ -40,7 +40,7 @@ import java.io.Serializable;
  *
  */
 public class HashedAlias implements Serializable, Comparable<HashedAlias> {
-    private static final long serialVersionUID = 2442L;
+    private static final long serialVersionUID = 4500L;
 
     //===========================
     // Hashed alias - data fields 
@@ -55,7 +55,7 @@ public class HashedAlias implements Serializable, Comparable<HashedAlias> {
     
     // Properties of the related Entity
     /** The internal class identifier of the Entity */
-    public final short classID;
+    public final int classID;
     /** The compressed instance URI of the Entity*/
     public final String shortInstURI;
     
@@ -69,7 +69,7 @@ public class HashedAlias implements Serializable, Comparable<HashedAlias> {
      * @param classID - the encoded semantic class identifier
      */
     public HashedAlias(int aliasHash2, int prefLen, int suffLen,
-            String shortInstURI, short classID) {
+            String shortInstURI, int classID) {
         if (prefLen > 127 || suffLen > 127 )
             throw new RuntimeException("Cannot create HashedAlias with" +
             		"symbolic prefix/suffix longer than 127!");

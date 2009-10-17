@@ -117,7 +117,7 @@ public class PrivateRepositoryFeed implements QueryResultListener.Feed {
 	}
 
 	private boolean verifyHash(File dictionaryPath, int settingsHash) {
-		log.info("Looking for changed in configuration ...");
+		log.info("Looking for changes in configuration ...");
 		Properties props = new Properties();
 		File propsFile = new File(dictionaryPath, PrivateRepositoryFeed.SNAPSHOT_PROPERTIES_FILENAME);
 		propsFile = propsFile.getAbsoluteFile();
@@ -129,8 +129,12 @@ public class PrivateRepositoryFeed implements QueryResultListener.Feed {
 		try {			
 			inStream = new FileInputStream(propsFile);
 			props.load(inStream);
-			String oldHash = (String) props.get(PrivateRepositoryFeed.SETTINGS_HASH_PROPERTY);			
-			return settingsHash == NumberUtils.toInt(oldHash, settingsHash);
+			String oldHash = (String) props.get(PrivateRepositoryFeed.SETTINGS_HASH_PROPERTY);
+			if (oldHash == null || oldHash.trim().length() == 0) {
+				log.info("Snaphot metadata present, but configuration checksum is missing.");
+				return true;
+			}
+			return settingsHash == NumberUtils.toInt(oldHash.trim(), settingsHash);
 		} 
 		catch (IOException e) {
 			log.info("Could not read " + propsFile, e);
