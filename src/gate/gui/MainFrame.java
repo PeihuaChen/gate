@@ -777,7 +777,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         new AbstractAction("Groovy console", getIcon("groovyConsole")) {
         { putValue(SHORT_DESCRIPTION, "Console for Groovy scripting"); }
         private static final long serialVersionUID = 1L;
-        public void actionPerformed(ActionEvent evt) {
+          public void actionPerformed(ActionEvent evt) {
           try {
             Class gcClass = Gate.class.getClassLoader().loadClass(
               "groovy.ui.Console");
@@ -814,20 +814,20 @@ public class MainFrame extends JFrame implements ProgressListener,
     helpMenu.add(new XJMenuItem(new AbstractAction("Keyboard shortcuts") {
       { this.putValue(Action.SHORT_DESCRIPTION, "Keyboard shortcuts"); }
       public void actionPerformed(ActionEvent e) {
-        showHelpFrame("chap:shortcuts", null);
+        showHelpFrame("chap:shortcuts", "shortcuts");
       }
     }, this));
     helpMenu.addSeparator();
     helpMenu.add(new XJMenuItem(new AbstractAction("Howtos") {
       { this.putValue(Action.SHORT_DESCRIPTION, "Howtos for newcomers"); }
       public void actionPerformed(ActionEvent e) {
-        showHelpFrame("chap:howto", null);
+        showHelpFrame("chap:howto", "how to");
       }
     }, this));
     helpMenu.add(new XJMenuItem(new AbstractAction("Demo movies") {
       { this.putValue(Action.SHORT_DESCRIPTION, "Movie tutorials"); }
       public void actionPerformed(ActionEvent e) {
-        showHelpFrame("http://gate.ac.uk/demos/movies.html", null);
+        showHelpFrame("http://gate.ac.uk/demos/movies.html", "movies");
       }
     }, this));
     helpMenu.add(new XJMenuItem(new HelpMailingListAction(), this));
@@ -840,7 +840,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       { this.putValue(Action.SHORT_DESCRIPTION,
           "List new features and important changes"); }
       public void actionPerformed(ActionEvent e) {
-        showHelpFrame("chap:changes", null);
+        showHelpFrame("chap:changes", "changes");
       }
     }, this));
     if(!Gate.runningOnMac()) {
@@ -878,7 +878,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     button.setText("");
     toolbar.add(button);
     toolbar.addSeparator();
-    
+
     JPopupMenu annieMenu = new JPopupMenu();
     annieMenu.add(new LoadANNIEWithDefaultsAction());
     annieMenu.add(new LoadANNIEWithoutDefaultsAction());
@@ -887,13 +887,13 @@ public class MainFrame extends JFrame implements ProgressListener,
     menuButton.setToolTipText("Load ANNIE system");
     toolbar.add(menuButton);
     toolbar.addSeparator();
-    
+
     LiveMenu tbNewLRMenu = new LiveMenu(LiveMenu.LR);
     menuButton = new JMenuButton(tbNewLRMenu);
     menuButton.setToolTipText("New Language Resource");
     menuButton.setIcon(getIcon("lrs"));
     toolbar.add(menuButton);
-    
+
     LiveMenu tbNewPRMenu = new LiveMenu(LiveMenu.PR);
     menuButton = new JMenuButton(tbNewPRMenu);
     menuButton.setToolTipText("New Processing Resource");
@@ -906,7 +906,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     menuButton.setIcon(getIcon("applications"));
     toolbar.add(menuButton);
     toolbar.addSeparator();
-    
+
     JPopupMenu tbDsMenu = new JPopupMenu();
     tbDsMenu.add(new NewDSAction());
     tbDsMenu.add(new OpenDSAction());
@@ -914,7 +914,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     menuButton.setToolTipText("Datastores");
     menuButton.setIcon(getIcon("datastores"));
     toolbar.add(menuButton);
-    
+
     toolbar.addSeparator();
     button = new JButton(new ManagePluginsAction());
     button.setToolTipText(button.getText());
@@ -1118,7 +1118,7 @@ public class MainFrame extends JFrame implements ProgressListener,
                 popup.insert(new XJMenuItem(((NameBearerHandle)handle)
                         .getCloseAction(), MainFrame.this), 0);
               }
-              
+
               // if application then add a close recursively action
               if(handle instanceof NameBearerHandle
               && handle.getTarget() instanceof Controller) {
@@ -1137,7 +1137,7 @@ public class MainFrame extends JFrame implements ProgressListener,
                 popup.insert(new XJMenuItem(new ShowResourceAction(handle),
                   MainFrame.this), 2);
               }
-              
+
               // add a rename action
               popup.insert(new XJMenuItem(new RenameResourceAction(path),
                 MainFrame.this), 3);
@@ -1288,7 +1288,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           actionMap.put("Close resource", null);
           actionMap.put("Close recursively", null);
           actionMap.put("Hide", null);
-          actionMap.put("Hide all", null); 
+          actionMap.put("Hide all", null);
           actionMap.put("Save As XML", null);
         }
       }
@@ -1424,7 +1424,7 @@ public class MainFrame extends JFrame implements ProgressListener,
    */
   protected void initMacListeners() {
     // What this method effectively does is:
-    // 
+    //
     // com.apple.eawt.Application app = Application.getApplication();
     // app.addApplicationListener(new ApplicationAdapter() {
     // public void handleAbout(ApplicationEvent e) {
@@ -1441,7 +1441,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     // optionsDialog.dispose();
     // }
     // });
-    // 
+    //
     // app.setEnabledPreferencesMenu(true);
     //
     // except that it does it all by reflection so as not to
@@ -1541,7 +1541,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
   /**
    * Called when the process is finished.
-   * 
+   *
    */
   public void processFinished() {
     // progressBar.setStringPainted(false);
@@ -1625,7 +1625,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
         else if(res instanceof LanguageResource) {
           parent = languageResourcesRoot;
-        } 
+        }
         if(parent != null) {
           Enumeration children = parent.children();
           while(children.hasMoreElements()) {
@@ -1767,7 +1767,7 @@ public class MainFrame extends JFrame implements ProgressListener,
    * be ignored. A call to this method while the GUI is locked will
    * cause the GUI to be unlocked and then locked again with the new
    * message. If a message is provided it will show in the dialog.
-   * 
+   *
    * @param message the message to be displayed while the GUI is locked
    */
   public synchronized static void lockGUI(final String message) {
@@ -1830,7 +1830,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         dialog.setLocationRelativeTo(parentComp);
         dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
         guiLock = dialog;
-        
+
         guiLock.setVisible(true);
       }
     });
@@ -1975,7 +1975,7 @@ public class MainFrame extends JFrame implements ProgressListener,
    * waitDialog.getHeight() - southBox.getHeight() - 10);
    * waitDialog.setLocation(location); waitDialog.showDialog(new
    * Component[]{}); }
-   * 
+   *
    * synchronized void hideWaitDialog() { waitDialog.goAway(); }
    */
 
@@ -2001,7 +2001,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
   /**
    * Searches for groovy on the class path.
-   * 
+   *
    * @return true if groovy is on the classpath
    */
   private static boolean groovyPresent() {
@@ -2337,9 +2337,9 @@ public class MainFrame extends JFrame implements ProgressListener,
    * for human annotated texts"); putValue(SHORT_DESCRIPTION,"Use a
    * datastore for the human annotated texts"); }//
    * DatastoreModeCorpusEvalToolAction
-   * 
+   *
    * public boolean isDatastoreMode() {return datastoreMode;}
-   * 
+   *
    * public void actionPerformed(ActionEvent e) { if (! (e.getSource()
    * instanceof JCheckBoxMenuItem)) return; datastoreMode =
    * ((JCheckBoxMenuItem)e.getSource()).getState(); }//
@@ -2487,7 +2487,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     private static final String PLUGIN_DIR = "LingPipe";
     private static final String RESOURCE_DIR = "resources";
     private static final String APPLICATION_FILE = "lingpipe.gapp";
-    
+
     public LoadLingPipeWithDefaultsAction() {
       super("Load LingPipe system");
       putValue(SHORT_DESCRIPTION, "Load LingPipe with default parameters");
@@ -2503,7 +2503,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
             // load LingPipe as an application from a gapp file
             PersistenceManager.loadObjectFromFile(new File(new File(new File(
-              Gate.getPluginsHome(), PLUGIN_DIR), RESOURCE_DIR), 
+              Gate.getPluginsHome(), PLUGIN_DIR), RESOURCE_DIR),
               APPLICATION_FILE));
 
 
@@ -3285,7 +3285,7 @@ public class MainFrame extends JFrame implements ProgressListener,
                 list = res.getName() + ";" + list;
                 node.put("applications.list", list);
               }
-              
+
             }
             catch(MalformedURLException e) {
               log.error("Error when saving the resource URL.", e);
@@ -3518,7 +3518,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("Enter"));
       this.handle = handle;
     }
-    
+
     public void actionPerformed(ActionEvent e) {
       SwingUtilities.invokeLater(new Runnable() {
         public void run() { select(handle); }
@@ -3618,7 +3618,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           // trying to release all resources occupied by all
           try {
             //make a list of lists of resources of various kinds
-            List<List<Resource>> listOfListOfResources = 
+            List<List<Resource>> listOfListOfResources =
               new ArrayList<List<Resource>>();
 //            listOfListOfResoruces.add(Gate.getCreoleRegister().getAllInstances(
 //                    gate.VisualResource.class.getName()));
@@ -3628,7 +3628,7 @@ public class MainFrame extends JFrame implements ProgressListener,
                     gate.ProcessingResource.class.getName()));
             listOfListOfResources.add(Gate.getCreoleRegister().getAllInstances(
                     gate.Controller.class.getName()));
-            
+
             for(List<Resource> resources :listOfListOfResources){
               // we need to call the clean up method for each of these resources
               for(Resource aResource : resources) {
@@ -3642,7 +3642,7 @@ public class MainFrame extends JFrame implements ProgressListener,
                 }
               }
             }
-            
+
             // close all the opened datastores
             if(Gate.getDataStoreRegister() != null) {
               Set dataStores = new HashSet(Gate.getDataStoreRegister());
@@ -3927,7 +3927,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     protected void init() {
       getPopupMenu().addPopupMenuListener(new PopupMenuListener(){
 
-        public void popupMenuCanceled(PopupMenuEvent e) {         
+        public void popupMenuCanceled(PopupMenuEvent e) {
         }
         public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
         }
@@ -3943,7 +3943,7 @@ public class MainFrame extends JFrame implements ProgressListener,
               break;
             case PR:
               resTypes = new ArrayList<String>( reg.getPublicPrTypes() );
-              //GATE default controllers are now also PRs, but we don't want 
+              //GATE default controllers are now also PRs, but we don't want
               //them here
               resTypes.removeAll(reg.getPublicControllerTypes());
               break;
@@ -3988,9 +3988,9 @@ public class MainFrame extends JFrame implements ProgressListener,
             }
           }
         }
-        
+
       });
-      
+
       addMenuListener(new MenuListener() {
         public void menuCanceled(MenuEvent e) {
           // do nothing
@@ -4122,7 +4122,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     /**
      * Overrides <code>JTree</code>'s <code>getToolTipText</code>
      * method in order to allow custom tips to be used.
-     * 
+     *
      * @param event the <code>MouseEvent</code> that initiated the
      *          <code>ToolTip</code> display
      * @return a string containing the tooltip or <code>null</code> if
@@ -4156,7 +4156,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   /**
    * Implementation of a custom tool tip to be used for showing extended
    * information about CREOLE resources.
-   * 
+   *
    */
   class ResourceToolTip extends JToolTip {
     private static final long serialVersionUID = 1L;
@@ -4202,7 +4202,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     /**
      * Sets the value to be displayed
-     * 
+     *
      * @param value to be displayed as tooltip
      */
     public void setValue(Object value) {
@@ -4289,7 +4289,7 @@ public class MainFrame extends JFrame implements ProgressListener,
        "group_id=143829&form_submit=Search&search_subject=1&search_body=1" +
        "&type_of_search=mlists&ml_name=gate-users&limit=50&all_words=" +
        java.net.URLEncoder.encode(keywords, "UTF-8") +
-       "#content", null);
+       "#content", "mailing list");
 
       } catch (UnsupportedEncodingException error) {
         String message = "The Character Encoding is not supported.";
@@ -4299,7 +4299,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       }
     }
   }
-  
+
   class HelpUserGuideAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public HelpUserGuideAction() {
@@ -4308,46 +4308,50 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
 
     public void actionPerformed(ActionEvent e) {
-      showHelpFrame("", null);
+      showHelpFrame("", "help contents");
     }
   }
 
   public void showHelpFrame(String urlString, String resourceName) {
     final URL url;
-    if (urlString != null && !urlString.startsWith("http://")) {
+    if (resourceName == null) { resourceName = "unknown"; }
+    if (urlString != null
+    && !urlString.startsWith("http://")
+    && !urlString.startsWith("file://")) {
       urlString = "http://gate.ac.uk/userguide/" + urlString;
     }
     try {
       url = new URL(urlString);
     } catch (MalformedURLException e) {
       JOptionPane.showMessageDialog(MainFrame.this,
-        (urlString == null)?
+        (urlString == null) ?
         "There is no help page for this resource !\n\n" +
         "Find the developper of the resource:\n" +
-        resourceName + "\n" +
-        "and force him/her to put one."
+        resourceName + "\n" + "and force him/her to put one."
         :
-        "The URL of the help page is invalid.\n" + urlString,
+        "The URL of the page for " + resourceName + " is invalid.\n"
+        + urlString,
         "GATE", JOptionPane.INFORMATION_MESSAGE);
       return;
     }
     Runnable runnable = new Runnable() {
       public void run() {
-
-        // add gateVersion=... to the end of the URL
         StringBuilder actualURL = new StringBuilder(url.toString());
-        int insertPoint = actualURL.length();
-        if(url.getRef() != null) {
-          // adjust for a #something on the end
-          insertPoint -= url.getRef().length() + 1;
+        if (url.toString().startsWith("http://gate.ac.uk/userguide/")) {
+          // add gateVersion=... to the end of the URL
+          int insertPoint = actualURL.length();
+          if(url.getRef() != null) {
+            // adjust for a #something on the end
+            insertPoint -= url.getRef().length() + 1;
+          }
+          if(url.getQuery() == null) {
+            actualURL.insert(insertPoint, '?');
+          }
+          else {
+            actualURL.insert(insertPoint, "&");
+          }
+          actualURL.insert(insertPoint + 1, "gateVersion=" + gate.Main.version);
         }
-        if(url.getQuery() == null) {
-          actualURL.insert(insertPoint, '?');
-        }
-        else {
-          actualURL.insert(insertPoint, "&");
-        }
-        actualURL.insert(insertPoint + 1, "gateVersion=" + gate.Main.version);
 
         Action[] actions = {
           new AbstractAction("Show configuration") {
@@ -4481,7 +4485,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           .actionPerformed(null);
       } else if (mainTabbedPane.getTitleAt(mainTabbedPane
                   .getSelectedIndex()).equals("Messages")) {
-        showHelpFrame("sec:howto:guistart", null);
+        showHelpFrame("sec:howto:guistart", "messages pane");
       } else {
         showHelpFrame(null, node.getUserObject().getClass().getName());
       }
