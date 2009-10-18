@@ -770,18 +770,6 @@ public class MainFrame extends JFrame implements ProgressListener,
       }
     }, this));
 
-    toolsMenu.add(new XJMenuItem(
-        new AbstractAction("JAPE Debugger", getIcon("application")) {
-        { putValue(SHORT_DESCRIPTION, "Debugger for JAPE grammars"); }
-        private static final long serialVersionUID = 1L;
-        public void actionPerformed(ActionEvent evt) {
-          System.out.println("Creating Jape Debugger");
-          new debugger.JapeDebugger();
-        }
-      }, this));
-
-
-
     // Groovy console menu: launches a groovy console, only visible if groovy
     // is present. Move out to a groovy class at some point?
     if(groovyPresent()) {
