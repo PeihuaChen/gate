@@ -1261,6 +1261,9 @@ AnnotationAccessor accessor = null;
 
   void appendSpecials(Token tok, StringBuffer block) throws ParseException {
   if(tok != null) {
+    // each specialToken points to its *preceding* one, so we must recursively
+    // append the previous special (which will recursively append its
+    // predecessor, etc.) before appending the current one.
     appendSpecials(tok.specialToken, block);
     block.append(tok.image);
   }
