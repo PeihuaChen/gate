@@ -1,7 +1,7 @@
 /*
  *  RightHandSide.java - transducer class
  *
- *  Copyright (c) 1998-2007, The University of Sheffield.
+ *  Copyright (c) 1998-2009, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -16,14 +16,24 @@
 
 package gate.jape;
 
-import java.io.*;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import gate.*;
+import gate.AnnotationSet;
+import gate.Document;
+import gate.Gate;
 import gate.creole.ontology.Ontology;
+import gate.util.Err;
 import gate.util.GateRuntimeException;
 import gate.util.Strings;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
@@ -119,7 +129,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
       "  public void doit(Document doc, java.util.Map bindings, " + nl +
       "                   AnnotationSet annotations, " + nl +
       "                   AnnotationSet inputAS, AnnotationSet outputAS, " + nl +
-      "                   Ontology ontology) {" + nl
+      "                   Ontology ontology) throws JapeException {" + nl
     );
 
     // initialise various names
@@ -258,15 +268,32 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     try {
       ((RhsAction) theActionObject).doit(doc, bindings, outputAS,
                                          inputAS, outputAS, ontology);
+    } catch (NonFatalJapeException e) {
+      // if the action class throws a non-fatal exception then respond by
+      // dumping a whole bunch of useful debug information but then allow
+      // processing to continue on as if nothing happened.
+      Throwable t = e.getCause();
+      Err.println("A non-fatal JAPE exception occurred while processing document '"+doc.getName()+"'.");
+      Err.println("The issue occurred during execution of rule '"+getRuleName()+"' in phase '"+getPhaseName()+"':");
+      if (t != null) {
+        Err.println(t.getClass().getName());
+        for (StackTraceElement ste : t.getStackTrace()) {
+         Err.println("\tat "+ste);
+         if (ste.getClassName().equals(actionClassQualifiedName)) break;
+        }
+        Err.println(Strings.getNl()+Strings.addLineNumbers(actionClassString.toString()));        
+      } else {
+        Err.println("Line number and exception details are not available.");
+      }
 
-    // if the action class throws an exception, re-throw it with a
-    // full description of the problem, inc. stack trace and the RHS
-    // action class code
     } catch (Exception e) {
+      // if the action class throws an exception, re-throw it with a
+      // full description of the problem, inc. stack trace and the RHS
+      // action class code
       StringWriter stackTraceWriter = new StringWriter();
       e.printStackTrace(new PrintWriter(stackTraceWriter));
       throw new JapeException(
-        "Couldn't run RHS action: " + Strings.getNl() +
+        "Couldn't run RHS action over document '"+doc.getName()+"': " + Strings.getNl() +
         stackTraceWriter.getBuffer().toString() +
         Strings.addLineNumbers(actionClassString.toString())
       );
