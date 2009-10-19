@@ -55,13 +55,17 @@ public class Strings {
 
   /** Helper method to add line numbers to a string */
   public static String addLineNumbers(String text) {
+    return addLineNumbers(text, 1);
+  }
+  
+  public static String addLineNumbers(String text, int startLine) {
     // construct a line reader for the text
     BufferedReader reader = new BufferedReader(new StringReader(text));
     String line = null;
     StringBuffer result = new StringBuffer();
 
     try {
-      for(int lineNum = 1; ( line = reader.readLine() ) != null; lineNum++) {
+      for(int lineNum = startLine; ( line = reader.readLine() ) != null; lineNum++) {
         String pad;
         if(lineNum < 10) pad = " ";
         else pad = "";
