@@ -1259,6 +1259,13 @@ AnnotationAccessor accessor = null;
     throw new Error("Missing return statement in function");
   }
 
+  void appendSpecials(Token tok, StringBuffer block) throws ParseException {
+  if(tok != null) {
+    appendSpecials(tok.specialToken, block);
+    block.append(tok.image);
+  }
+  }
+
   String ConsumeBlock() throws ParseException {
   StringBuffer block = new StringBuffer(); // to collect the block in
   int nesting = 1; // the first "{" was consumed before we were called
@@ -1268,17 +1275,7 @@ AnnotationAccessor accessor = null;
     Token nextTok = getNextToken();
 
     // add in any preceding spaces and comments
-    // for some bizzare reason, this misses the comments...
-    if(nextTok.specialToken != null) {
-      Token special = nextTok.specialToken;
-      while(special != null) {
-        /*Debug.pr(
-          this, "ParseCpsl.ConsumeBlock: special.image = " + special.image
-        );*/
-        block.append(special.image);
-        special = special.next;
-      }
-    }
+    appendSpecials(nextTok.specialToken, block);
 
     // adjust nesting
     if(nextTok.image.equals("{")) {

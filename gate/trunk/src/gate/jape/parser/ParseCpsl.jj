@@ -1269,6 +1269,15 @@ String[] AssignmentExpression() :
 
 
 JAVACODE
+void appendSpecials(Token tok, StringBuffer block) {
+  if(tok != null) {
+    appendSpecials(tok.specialToken, block);
+    block.append(tok.image);
+  }
+} // appendSpecials
+
+
+JAVACODE
 String ConsumeBlock() {
   StringBuffer block = new StringBuffer(); // to collect the block in
   int nesting = 1; // the first "{" was consumed before we were called
@@ -1278,17 +1287,7 @@ String ConsumeBlock() {
     Token nextTok = getNextToken();
 
     // add in any preceding spaces and comments
-    // for some bizzare reason, this misses the comments...
-    if(nextTok.specialToken != null) {
-      Token special = nextTok.specialToken;
-      while(special != null) {
-        /*Debug.pr(
-          this, "ParseCpsl.ConsumeBlock: special.image = " + special.image
-        );*/
-        block.append(special.image);
-        special = special.next;
-      }
-    }
+    appendSpecials(nextTok.specialToken, block);
 
     // adjust nesting
     if(nextTok.image.equals("{")) {
