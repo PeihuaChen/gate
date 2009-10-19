@@ -44,8 +44,7 @@ div.banner a:hover {
 </head>
 <body bgcolor="#FFFFFF" text="#000000">
 <h1 class="cow-title-heading">GATE Developer/Embedded Backlog</h1>
-
-<p>5.1 release task list:</p>
+<a class="cow-section-anchor" name="section-1."/><h1 class="cow-heading"><span class="cow-sec-number">1. </span>5.1 release task list:</h1>
 
 <ul>
 <li>feature freeze end of next week <b>23rd oct</b>
@@ -117,5 +116,24 @@ div.banner a:hover {
 <li>H GG/DM/WP</li>
 <li>I MG</li>
 <li>J -</li>
+</ul>
+<a class="cow-section-anchor" name="section-2."/><h1 class="cow-heading"><span class="cow-sec-number">2. </span>Post-5.1 tasks</h1>
+
+<ul>
+<li>Mapping Java RHS exception stack traces back to the original JAPE file line
+  numbers.
+  <ul>
+  <li><tt>ParseCpsl.ConsumeBlock</tt>: prefix the block with a comment
+    <tt>//MAP:&lt;filename&gt;:&lt;line&gt;</tt> (where <tt>line</tt> is the number of the line before
+    the first token or special in the block)</li>
+  <li><tt>RightHandSide</tt>: search for these comments when building the Java source and
+    add the line number map as a static on the action class</li>
+  <li>Add a static utility method somewhere that takes a Throwable and processes
+    it (and its causes, recursively) to find all StackTraceElements that refer
+    to a RhsAction and remap their file name and line number using the line
+    number map for that action class.</li>
+  <li>Whenever an exception is thrown during JAPE transduction, pass it through
+    this method before rethrowing.</li>
+  </ul></li>
 </ul>
 </body></html>
