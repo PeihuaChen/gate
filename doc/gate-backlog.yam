@@ -13,8 +13,8 @@ GATE Developer/Embedded Backlog
       - finalisation of the name [GG]
       - MN: describe or remove SemanticEnrichmentPR [HC - HC contact]
     - benchmarking: [TH - HC contact]
-    - remove the menu item for the JAPE debugger [MG]
-    - compile-time JAPE errors: dump the source in the error message [MG]
+    - remove the menu item for the JAPE debugger [MG] *[DONE]*
+    - run-time JAPE errors: dump the source in the error message [MG] *[DONE]*
     - copy CBT messages from the mailing list into the perf an chapter [AR/GG]
 - documentation
   - deadline for everything to have at least a placeholder in the manual and
