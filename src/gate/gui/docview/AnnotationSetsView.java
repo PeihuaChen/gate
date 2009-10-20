@@ -20,8 +20,6 @@ import java.io.*;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.List;
-import java.util.prefs.Preferences;
-import java.util.prefs.BackingStoreException;
 
 import javax.swing.*;
 import javax.swing.Timer;
@@ -30,7 +28,12 @@ import javax.swing.event.*;
 import javax.swing.table.*;
 import javax.swing.text.*;
 
-import gate.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Factory;
+import gate.Gate;
+import gate.GateConstants;
+import gate.TextualDocument;
 import gate.creole.ResourceData;
 import gate.creole.ResourceInstantiationException;
 import gate.event.*;
@@ -119,7 +122,6 @@ public class AnnotationSetsView extends AbstractDocumentView
     setHandlers = new ArrayList<SetHandler>();
     tableRows = new ArrayList();
     visibleAnnotationTypes = new ArrayList<TypeSpec>();
-    colourGenerator = new ColorGenerator();
     actions = new ArrayList();
     actions.add(new SavePreserveFormatAction());
     pendingEvents = new LinkedList<GateEvent>();
@@ -298,45 +300,41 @@ public class AnnotationSetsView extends AbstractDocumentView
     return mainPanel;
   }
 
-  protected Color getColor(String annotationType){
-    // chop off the annotation type at the max preferences key length if
-    // necessary.
-    if(annotationType != null
-        && annotationType.length() > Preferences.MAX_KEY_LENGTH) {
-      annotationType = annotationType.substring(0, Preferences.MAX_KEY_LENGTH);
-    }
-    Preferences prefRoot = Preferences.userNodeForPackage(getClass());
-    int rgba = prefRoot.getInt(annotationType, -1);
+  /**
+   * Get the saved colour for this annotation type or create a new one
+   * and save it. The colours are saved in the user configuration file.
+   * @param annotationType type to get a colour for
+   * @return a colour
+   */
+  public static Color getColor(String annotationType) {
+    Map<String, String> colourMap = Gate.getUserConfig()
+      .getMap(AnnotationSetsView.class.getName()+".colours");
+    String colourValue = colourMap.get(annotationType);
     Color colour;
-    if(rgba == -1){
-      //initialise and save
+    if (colourValue == null) {
       float components[] = colourGenerator.getNextColor().getComponents(null);
-      colour = new Color(components[0],
-                         components[1],
-                         components[2],
-                         0.5f);
+      colour = new Color(components[0], components[1], components[2], 0.5f);
       int rgb = colour.getRGB();
       int alpha = colour.getAlpha();
-      rgba = rgb | (alpha << 24);
-      prefRoot.putInt(annotationType, rgba);
-    }else{
-      colour = new Color(rgba, true);
+      int rgba = rgb | (alpha << 24);
+      colourMap.put(annotationType, String.valueOf(rgba));
+      Gate.getUserConfig().put(
+        AnnotationSetsView.class.getName()+".colours", colourMap);
+    } else {
+      colour = new Color(Integer.valueOf(colourValue), true);
     }
     return colour;
   }
   
   protected void saveColor(String annotationType, Color colour){
-    // chop off the annotation type at the max preferences key length if
-    // necessary.
-    if(annotationType != null
-        && annotationType.length() > Preferences.MAX_KEY_LENGTH) {
-      annotationType = annotationType.substring(0, Preferences.MAX_KEY_LENGTH);
-    }
-    Preferences prefRoot = Preferences.userNodeForPackage(getClass());
+    Map<String, String> colourMap = Gate.getUserConfig()
+      .getMap(AnnotationSetsView.class.getName()+".colours");
     int rgb = colour.getRGB();
     int alpha = colour.getAlpha();
     int rgba = rgb | (alpha << 24);
-    prefRoot.putInt(annotationType, rgba);
+    colourMap.put(annotationType, String.valueOf(rgba));
+    Gate.getUserConfig().put(
+      AnnotationSetsView.class.getName()+".colours", colourMap);
   }
 
   /**
@@ -345,43 +343,31 @@ public class AnnotationSetsView extends AbstractDocumentView
    * @param typeName type name to save/remove
    * @param selected state of the selection
    */
-  public void saveType(String setName,
-                       String typeName,
-                       boolean selected) {
-    String set = (setName == null) ? "" :
-      (setName.length() > Preferences.MAX_KEY_LENGTH) ?
-      setName.substring(0, Preferences.MAX_KEY_LENGTH) : setName;
-    String path = set.equals("") ?
-      "selectedtypes" : "selectedtypes/" + set;
-    Preferences prefRoot = Preferences.userNodeForPackage(getClass());
-    Preferences node = prefRoot.node(path);
-    String type = (typeName.length() > Preferences.MAX_KEY_LENGTH) ?
-      typeName.substring(0, Preferences.MAX_KEY_LENGTH) : typeName;
+  public void saveType(String setName, String typeName, boolean selected) {
+    List<String> typeList = Gate.getUserConfig().getList(
+      AnnotationSetsView.class.getName() + ".types");
+    String prefix = (setName == null) ? "." : setName + ".";
     if (selected) {
-      node.put(type, "");
+      typeList.add(prefix+typeName);
     } else {
-      node.remove(type);
+      typeList.remove(prefix+typeName);
     }
+    Gate.getUserConfig().put(
+      AnnotationSetsView.class.getName()+".types", typeList);
   }
 
   /**
    * Restore previously selected types from the preferences.
    */
   public void restoreSavedSelectedTypes() {
-    Preferences prefRoot = Preferences.userNodeForPackage(getClass());
-    for(SetHandler sHandler : setHandlers){
-      String path = sHandler.set.getName() == null ?
-        "selectedtypes" : "selectedtypes/" + sHandler.set.getName();
-      for(TypeHandler tHandler : sHandler.typeHandlers){
-        try {
-          if (prefRoot.nodeExists(path)) {
-            Preferences node = prefRoot.node(path);
-            if (node.get(tHandler.name, null) != null) {
-              tHandler.setSelected(true);
-            }
-          }
-        } catch (BackingStoreException e) {
-          e.printStackTrace();
+    List<String> typeList = Gate.getUserConfig().getList(
+      AnnotationSetsView.class.getName() + ".types");
+    for (SetHandler sHandler : setHandlers){
+      String prefix = (sHandler.set.getName() == null) ?
+        "." : sHandler.set.getName() + ".";
+      for (TypeHandler tHandler : sHandler.typeHandlers) {
+        if (typeList.contains(prefix + tHandler.name)) {
+          tHandler.setSelected(true);
         }
       }
     }
@@ -1710,8 +1696,7 @@ public class AnnotationSetsView extends AbstractDocumentView
             fileChooser.setSelectedFile(file);
           }
 
-          int res = fileChooser.showSaveDialog(owner, null);
-          if(res == JFileChooser.APPROVE_OPTION){
+          if(fileChooser.showSaveDialog(owner) == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
             if(selectedFile == null) return;
             StatusListener sListener = (StatusListener)MainFrame.getListeners().
@@ -1720,7 +1705,7 @@ public class AnnotationSetsView extends AbstractDocumentView
               sListener.statusChanged("Please wait while dumping annotations"+
               "in the original format to " + selectedFile.toString() + " ...");
             // This method construct a set with all annotations that need to be
-            // dupmped as Xml. If the set is null then only the original markups
+            // dumped as Xml. If the set is null then only the original markups
             // are dumped.
             Set annotationsToDump = new HashSet();
             Iterator setIter = setHandlers.iterator();
@@ -2236,7 +2221,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   
   protected List actions;
   
-  protected ColorGenerator colourGenerator;
+  protected final static ColorGenerator colourGenerator = new ColorGenerator();
   private static final int NAME_COL = 1;
   private static final int SELECTED_COL = 0;
   

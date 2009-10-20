@@ -1,7 +1,7 @@
 /*
  *  GateConstants.java
  *
- *  Copyright (c) 1998-2007, The University of Sheffield.
+ *  Copyright (c) 1998-2009, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -187,15 +187,4 @@ public interface GateConstants {
    * Key used in resource features for hiding the resource fromthe GUI.
    */
   public static final String HIDDEN_FEATURE_KEY = "gate.HIDDEN"; 
-  
-  /**
-   * List of annotation rows to display in the central view of ANNIC GUI.
-   */
-  public static final String ANNIC_ANNOTATION_ROWS = "ANNIC_annotation_rows";
-
-  public static final String HELP_BROWSER_COMMAND_LINE =
-    "Help_browser_command_line";
-
-  public static final String ANNIC_DISABLE_AUTOCOMPLETION =
-    "Annic_disable_autocompletion";
 } // GateConstants

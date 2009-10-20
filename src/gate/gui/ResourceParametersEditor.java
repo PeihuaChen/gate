@@ -30,6 +30,7 @@ import gate.creole.*;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
 import gate.swing.XJTable;
+import gate.swing.XJFileChooser;
 import gate.util.*;
 
 /**
@@ -74,6 +75,10 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       parameterDisjunctions = null;
     }
     tableModel.fireTableDataChanged();
+    fileChooser = MainFrame.getFileChooser();
+    // must be saved now as it will be reset when the file chooser is hidden
+    fileChooserResource = (resource != null) ?
+      resource.getClass().getName() : fileChooser.getResource();
   }
 
   protected void initLocalData() {
@@ -224,6 +229,13 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
   ParametersTableModel tableModel;
 
   Resource resource;
+
+  /**
+   * A pointer to the filechooser from MainFrame.
+   */
+  static XJFileChooser fileChooser;
+
+  String fileChooserResource;
 
   /**
    * A list of {@link ParameterDisjunction}
@@ -610,13 +622,13 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
 
       textField = new JTextField();
 
-      fileChooser = MainFrame.getFileChooser();
       fileButton = new JButton(MainFrame.getIcon("open-file"));
       fileButton.setToolTipText("Browse the file system");
       fileButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
           fileChooser.setDialogTitle("Select a file");
+          fileChooser.setResource(fileChooserResource);
           int res = fileChooser.showOpenDialog(ResourceParametersEditor.this);
           if(res == JFileChooser.APPROVE_OPTION) {
             try {
@@ -892,11 +904,6 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
      * Editor used for boolean values.
      */
     JTextField textFieldBoolean;
-
-    /**
-     * A pointer to the filechooser from MainFrame;
-     */
-    JFileChooser fileChooser;
 
     ListEditorDialog listEditor = null;
 

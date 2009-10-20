@@ -16,54 +16,53 @@
 package gate.swing;
 
 import gate.gui.MainFrame;
+import gate.Gate;
 
-import javax.swing.*;
+import javax.swing.JFileChooser;
+import javax.swing.event.AncestorListener;
+import javax.swing.event.AncestorEvent;
 import javax.swing.filechooser.FileFilter;
-import java.awt.*;
+import java.awt.Component;
+import java.awt.HeadlessException;
 import java.io.File;
 import java.io.IOException;
-import java.util.prefs.Preferences;
+import java.util.Map;
 
 /**
  * Extends {@link javax.swing.JFileChooser} to make sure the shared
- * {@link MainFrame} instance is used as a parent.
- *
- * Remember the last path used for the resource when loading/saving.
- * The class of the resource must be given in the variable
- * <code>resourceClassName</code>.
+ * {@link MainFrame} instance is used as a parent when no parent is specified.
+ * <br><br>
+ * Remember the last path used for each resource type.
+ * The path is saved when the user confirm the dialog.
+ * The resource name must be set with the method {@link #setResource(String)}.
+ * Use {@link #setSelectedFile(java.io.File)} to preselect a different file
+ * or use {@link #setFileName(String)} to use a different file name but the
+ * saved directory.
+ * <br><br>
+ * Resource paths are saved in the user config file.
  */
 public class XJFileChooser extends JFileChooser {
   /** key used when saving the file location to be retrieved later */
-  private String resourceClassName;
+  private String resource;
   /** file name used instead of the one saved in the preferences */
   private String fileName;
-  private Preferences node = Preferences.userNodeForPackage(MainFrame.class)
-    .node("filechooserlocations");
+  /** set to true when setSelectedFile has been used */
+  private boolean isFileSelected = false;
+  /** map for (resource name -> path) saved in the user config file */
+  private Map<String, String> locations;
 
-  /**
-   * Use this to set directly resourceClassName.
-   * @param parent see {@link JFileChooser#showOpenDialog}
-   * @param resourceClassName class name of the resource to load
-   * @return see {@link JFileChooser#showOpenDialog}
-   * @throws HeadlessException see {@link JFileChooser#showOpenDialog}
-   */
-  public int showOpenDialog(Component parent, String resourceClassName)
-    throws HeadlessException {
-    setResourceClassName(resourceClassName);
-    return showOpenDialog(parent);
-  }
-
-  /**
-   * Use this to set directly resourceClassName.
-   * @param parent see {@link JFileChooser#showOpenDialog}
-   * @param resourceClassName class name of the resource to save
-   * @return see {@link JFileChooser#showOpenDialog}
-   * @throws HeadlessException see {@link JFileChooser#showOpenDialog}
-   */
-  public int showSaveDialog(Component parent, String resourceClassName)
-    throws HeadlessException {
-    setResourceClassName(resourceClassName);
-    return showSaveDialog(parent);
+  public XJFileChooser() {
+    addAncestorListener(new AncestorListener() {
+      public void ancestorAdded(AncestorEvent event) { /* do nothing */ }
+      public void ancestorRemoved(AncestorEvent event) {
+        // reinitialise fields when the file chooser is hidden
+        resource = null;
+        fileName = null;
+        isFileSelected = false;
+        resetChoosableFileFilters();
+      }
+      public void ancestorMoved(AncestorEvent event) { /* do nothing */ }
+    });
   }
 
   /**
@@ -79,26 +78,61 @@ public class XJFileChooser extends JFileChooser {
   }
 
   /**
-   * If possible, set the last directory/file used by the resource as
-   * the current directory/file otherwise use the user home directory.
+   * If possible, select the last directory/file used for the resource
+   * otherwise use the last file chooser selection directory or if null
+   * use the user home directory.
    */
   public void setSelectedFileFromPreferences() {
-    String lastUsedPath = null;
-    if (resourceClassName != null) {
-      lastUsedPath = node.get(resourceClassName, null);
-    }
+    String lastUsedPath = getLocationForResource(resource);
     File file;
-    if (lastUsedPath != null && fileName != null) {
-      file = new File(lastUsedPath, fileName);
+    if (isFileSelected) {
+      // a file has already been selected so do not use the saved one
+      return; 
+    } else if (lastUsedPath != null && fileName != null) {
+      file = new File(lastUsedPath);
+      if (!file.isDirectory()) {
+        file = file.getParentFile();
+      }
+      file = new File(file, fileName);
     } else if (lastUsedPath != null) {
       file = new File(lastUsedPath);
     } else if (fileName != null) {
       file = new File(System.getProperty("user.home"), fileName);
     } else {
-      file = new File(System.getProperty("user.home"));
+      // nothing has been set so use the last selected directory
+      // if null use the user home directory
+      file = getSelectedFile();
+      if (file == null) {
+        file = new File(System.getProperty("user.home"));
+      } else if (!file.isDirectory()) {
+        file = file.getParentFile();
+      }
     }
     setSelectedFile(file);
     ensureFileIsVisible(file);
+  }
+
+  public String getLocationForResource(String resource) {
+    locations = getLocations();
+    return (resource == null) ? null : locations.get(resource);
+  }
+
+  /**
+   * Useful to modify the locations used by this file chooser.
+   * @return a map of resource (name * file location)
+   * @see #setLocations(java.util.Map)
+   */
+  public Map<String, String> getLocations() {
+    return Gate.getUserConfig().getMap(XJFileChooser.class.getName());
+  }
+
+  /**
+   * Useful to modify the locations used by this file chooser.
+   * @param locations a map of (resource name * file location)
+   * @see #getLocations()
+   */
+  public void setLocations(Map<String, String> locations) {
+    Gate.getUserConfig().put(XJFileChooser.class.getName(), locations);
   }
 
   /**
@@ -112,27 +146,33 @@ public class XJFileChooser extends JFileChooser {
   /** overriden to first save the location of the file chooser
    *  for the current resource. */
   public void approveSelection() {
-    if (resourceClassName != null && getSelectedFile() != null) {
+    if (resource != null && getSelectedFile() != null) {
       try {
         String filePath = getSelectedFile().getCanonicalPath();
-        node.put(resourceClassName, filePath);
+        locations.put(resource, filePath);
+        setLocations(locations);
       } catch (IOException e) {
         e.printStackTrace();
       }
     }
     super.approveSelection();
-    resetChoosableFileFilters();
   }
 
   /**
-   * Set the resource to search for the last path used before to call
+   * Set the resource to remember the path. Must be set before to call
    * {@link #showDialog}.
-   * @param name resource to be selected in the dialog.
+   * @param resource name of the resource
    */
-  public void setResourceClassName(String name) {
-    resourceClassName = (name == null) ? null :
-      (name.length() <= Preferences.MAX_KEY_LENGTH) ? name :
-        name.substring(name.length()-Preferences.MAX_KEY_LENGTH);
+  public void setResource(String resource) {
+    this.resource = resource;
+  }
+
+  /**
+   * Get the resource associated to this file chooser.
+   * @return name of the resource
+   */
+  public String getResource() {
+    return resource;
   }
 
   /** Overriden to test first if the file exists */
@@ -147,6 +187,7 @@ public class XJFileChooser extends JFileChooser {
          (file.getParentFile() != null && file.getParentFile().exists())){
         super.setSelectedFile(file);
       }
+      isFileSelected = true;
     }
   }
 

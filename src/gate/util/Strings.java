@@ -14,8 +14,12 @@
 package gate.util;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /** Some utilities for use with Strings. */
 public class Strings {
@@ -75,25 +79,25 @@ public class Strings {
 
     return result.toString();
   } // addLineNumbers
-  
+
   /**
    * A method to unescape Java strings, returning a string containing escape
    * sequences into the respective character. i.e. "\" followed by "t" is turned
    * into the tab character.
-   * 
+   *
    * @param str the string to unescape
    * @return a new unescaped string of the one passed in
    */
   public static String unescape(String str) {
     if (str == null) return str;
-    
+
     StringBuilder sb = new StringBuilder(); // string to build
-    
+
     StringBuilder unicodeStr = new StringBuilder(4); // store unicode sequences
-    
+
     boolean inUnicode = false;
     boolean hadSlash = false;
-    
+
     for (char ch: str.toCharArray()) {
       if (inUnicode) {
         unicodeStr.append(ch);
@@ -158,9 +162,11 @@ public class Strings {
   }
 
   /**
-   * Use Arrays#deepToString to convert any array or collection.
+   * Convert about any object to a human readable string.<br>
+   * Use {@link Arrays#deepToString(Object[])} to convert an array or
+   * a collection.
    * @param object object to be converted to a string
-   * @return a string representation of the object
+   * @return a string representation of the object, the empty string if null.
    */
   public static String toString(Object object) {
     if (object == null) {
@@ -173,4 +179,73 @@ public class Strings {
       return object.toString();
     }
   }
+
+  /**
+   * If the string has the format [value, value] like with
+   * {@link Arrays#deepToString(Object[])} then returns a List of String.
+   *
+   * @param string String to convert to a List
+   * @return a List
+   */
+  public static List<String> toList(String string) {
+    if (string == null
+     || string.length() < 3) {
+      return new ArrayList<String>();
+    }
+    return new ArrayList<String>(Arrays.asList(
+      string.substring(1, string.length()-1) // remove brackets []
+        .split(", "))); // split on list separator
+  }
+
+  /**
+   * If the string has the format [[value, value], [value, value]]
+   * like with {@link Arrays#deepToString(Object[])}
+   * then returns a List of List of String.
+   *
+   * @param string String to convert to a List of List
+   * @return a List of List
+   */
+  public static List<List<String>> toListOfList(String string) {
+    List<List<String>> listOfList = new ArrayList<List<String>>();
+    if (string == null
+     || string.length() < 5) {
+      listOfList.add(new ArrayList<String>());
+      return listOfList;
+    }
+    string = string.substring(2, string.length()-2); // remove brackets [[]]
+    String[] lists = string.split("\\], \\[");
+    for (String list : lists) {
+      // split on list separator
+      listOfList.add(new ArrayList<String>(Arrays.asList(list.split(", "))));
+    }
+    return listOfList;
+  }
+
+  /**
+   * If the string has the format {key=value, key=value} like with
+   * {@link Arrays#deepToString(Object[])} then returns a Map of String*String.
+   *
+   * @param string String to convert to a Map
+   * @return a Map
+   */
+  public static Map<String, String> toMap(String string) {
+    Map<String, String> map = new HashMap<String, String>();
+    if (string == null
+     || string.length() < 3) {
+      return map;
+    }
+    try {
+      String[] entries = string.substring(1, string.length()-1).split(", "); 
+      for (String entry : entries) {
+        String[] keyValue = entry.split("=", 2);
+        map.put(keyValue[0], keyValue[1]);
+      }
+    } catch(ArrayIndexOutOfBoundsException e) {
+      Err.println("The string has not the format: {key=value, key=value}");
+      Err.println(string);
+      throw e;
+    }
+    return map;
+  }
+
 } // class Strings

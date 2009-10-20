@@ -33,7 +33,6 @@ import java.lang.reflect.Proxy;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationHandler;
 import java.lang.SecurityException;
-import java.util.prefs.*;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -131,10 +130,6 @@ public class MainFrame extends JFrame implements ProgressListener,
 
   protected JToolBar toolbar;
 
-  protected JToggleButton treeSelectViewButton;
-
-  protected JToggleButton viewSelectTreeButton;
-
   static XJFileChooser fileChooser;
 
   static private MainFrame instance;
@@ -182,10 +177,6 @@ public class MainFrame extends JFrame implements ProgressListener,
 
   private static JDialog guiLock = null;
 
-  /** Preferences node for this package. */
-  static private Preferences prefs =
-    Preferences.userNodeForPackage(MainFrame.class);
-  
   static public Icon getIcon(String baseName) {
     Icon result = iconByName.get(baseName);
     for(int i = 0; i < ICON_EXTENSIONS.length && result == null; i++) {
@@ -925,39 +916,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     button.setToolTipText(button.getText());
     button.setText("");
     toolbar.add(button);
-
     toolbar.add(Box.createHorizontalGlue());
-    treeSelectViewButton = new JToggleButton(
-      MainFrame.getIcon("right-move.png"));
-    treeSelectViewButton.setToolTipText(
-      "Selection in resources tree select the view");
-    treeSelectViewButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        // store the state into preferences
-        prefs.put("treeSelectView",
-          Boolean.toString(treeSelectViewButton.isSelected()));
-      }
-    });
-    toolbar.add(treeSelectViewButton);
-    // restore the state from preferences
-    treeSelectViewButton.setSelected(
-      Boolean.valueOf(prefs.get("treeSelectView", "false")));
-
-    viewSelectTreeButton = new JToggleButton(
-      MainFrame.getIcon("left-move.png"));
-    viewSelectTreeButton.setToolTipText(
-      "Selection in view select resources tree");
-    viewSelectTreeButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        // store the state into preferences
-        prefs.put("viewSelectTree",
-          Boolean.toString(viewSelectTreeButton.isSelected()));
-      }
-    });
-    toolbar.add(viewSelectTreeButton);
-    // restore the state from preferences
-    viewSelectTreeButton.setSelected(
-      Boolean.valueOf(prefs.get("viewSelectTree", "false")));
 
     this.getContentPane().add(toolbar, BorderLayout.NORTH);
   }
@@ -1044,8 +1003,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             value = ((DefaultMutableTreeNode)value).getUserObject();
             if(value instanceof Handle) {
               handle = (Handle)value;
-              fileChooser.setResourceClassName(
-                handle.getTarget().getClass().getName());
+              fileChooser.setResource(handle.getTarget().getClass().getName());
               if(e.isPopupTrigger()) { popup = handle.getPopup(); }
             }
           }
@@ -1163,7 +1121,10 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     resourcesTree.addTreeSelectionListener(new TreeSelectionListener() {
       public void valueChanged(TreeSelectionEvent e) {
-        if (!treeSelectViewButton.isSelected()) { return; }
+        if (!Gate.getUserConfig().getBoolean(
+          MainFrame.class.getName()+".treeselectview")) {
+          return;
+        }
         // synchronise the selected tabbed pane with
         // the resource tree selection
         if (resourcesTree.getSelectionPaths() != null
@@ -1260,7 +1221,8 @@ public class MainFrame extends JFrame implements ProgressListener,
           ((JComponent)instance.getContentPane()).getActionMap();
         if(done) {
           Handle handle = (Handle)node.getUserObject();
-          if (viewSelectTreeButton.isSelected()) {
+          if (Gate.getUserConfig().getBoolean(
+            MainFrame.class.getName()+".viewselecttree")) {
             // synchronise the selection in the tabbed pane with
             // the one in the resources tree
             TreePath nodePath = new TreePath(node.getPath());
@@ -1888,8 +1850,9 @@ public class MainFrame extends JFrame implements ProgressListener,
     fileChooser.setDialogTitle("Please create a new empty directory");
     fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
     fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
-    if(fileChooser.showOpenDialog(MainFrame.this,
-      "gate.persist.SerialDataStore") == JFileChooser.APPROVE_OPTION) {
+    fileChooser.setResource("gate.persist.SerialDataStore");
+    if(fileChooser.showOpenDialog(MainFrame.this)
+      == JFileChooser.APPROVE_OPTION) {
       try {
         URL dsURL = fileChooser.getSelectedFile().toURI().toURL();
         ds =
@@ -1922,8 +1885,9 @@ public class MainFrame extends JFrame implements ProgressListener,
     fileChooser.setDialogTitle("Select the datastore directory");
     fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
     fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
-    if(fileChooser.showOpenDialog(MainFrame.this,
-      "gate.persist.SerialDataStore") == JFileChooser.APPROVE_OPTION) {
+    fileChooser.setResource("gate.persist.SerialDataStore");
+    if(fileChooser.showOpenDialog(MainFrame.this)
+      == JFileChooser.APPROVE_OPTION) {
       try {
         URL dsURL = fileChooser.getSelectedFile().toURI().toURL();
         ds =
@@ -2084,16 +2048,17 @@ public class MainFrame extends JFrame implements ProgressListener,
             + "the documents to be evaluated");
           fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
           fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
-          int state = fileChooser.showOpenDialog(MainFrame.this,
-            CorpusBenchmarkTool.class.getName());
+          fileChooser.setResource(CorpusBenchmarkTool.class.getName());
+          int state = fileChooser.showOpenDialog(MainFrame.this);
           File startDir = fileChooser.getSelectedFile();
           if(state == JFileChooser.CANCEL_OPTION || startDir == null) return;
 
           fileChooser.setDialogTitle(
             "Please select the application that you want to run");
           fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-          state = fileChooser.showOpenDialog(MainFrame.this,
-            CorpusBenchmarkTool.class.getName()+".application");
+          fileChooser.setResource(
+            CorpusBenchmarkTool.class.getName() + ".application");
+          state = fileChooser.showOpenDialog(MainFrame.this);
           File testApp = fileChooser.getSelectedFile();
           if(state == JFileChooser.CANCEL_OPTION || testApp == null) return;
 
@@ -2147,8 +2112,8 @@ public class MainFrame extends JFrame implements ProgressListener,
             + "the documents to be evaluated");
           fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
           fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
-          int state = fileChooser.showOpenDialog(MainFrame.this,
-            CorpusBenchmarkTool.class.getName());
+          fileChooser.setResource(CorpusBenchmarkTool.class.getName());
+          int state = fileChooser.showOpenDialog(MainFrame.this);
           File startDir = fileChooser.getSelectedFile();
           if(state == JFileChooser.CANCEL_OPTION || startDir == null) return;
 
@@ -2205,16 +2170,17 @@ public class MainFrame extends JFrame implements ProgressListener,
             + "the documents to be evaluated");
           fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
           fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
-          int state = fileChooser.showOpenDialog(MainFrame.this,
-            CorpusBenchmarkTool.class.getName());
+          fileChooser.setResource(CorpusBenchmarkTool.class.getName());
+          int state = fileChooser.showOpenDialog(MainFrame.this);
           File startDir = fileChooser.getSelectedFile();
           if(state == JFileChooser.CANCEL_OPTION || startDir == null) return;
 
           fileChooser.setDialogTitle(
             "Please select the application that you want to run");
           fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-          state = fileChooser.showOpenDialog(MainFrame.this,
-            CorpusBenchmarkTool.class.getName()+".application");
+          fileChooser.setResource(
+            CorpusBenchmarkTool.class.getName() + ".application");
+          state = fileChooser.showOpenDialog(MainFrame.this);
           File testApp = fileChooser.getSelectedFile();
           if(state == JFileChooser.CANCEL_OPTION || testApp == null) return;
 
@@ -2268,16 +2234,17 @@ public class MainFrame extends JFrame implements ProgressListener,
             + "the documents to be evaluated");
           fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
           fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
-          int state = fileChooser.showOpenDialog(MainFrame.this,
-            CorpusBenchmarkTool.class.getName());
+          fileChooser.setResource(CorpusBenchmarkTool.class.getName());
+          int state = fileChooser.showOpenDialog(MainFrame.this);
           File startDir = fileChooser.getSelectedFile();
           if(state == JFileChooser.CANCEL_OPTION || startDir == null) return;
 
           fileChooser.setDialogTitle(
             "Please select the application that you want to run");
           fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-          state = fileChooser.showOpenDialog(MainFrame.this,
-            CorpusBenchmarkTool.class.getName()+".application");
+          fileChooser.setResource(
+            CorpusBenchmarkTool.class.getName() + ".application");
+          state = fileChooser.showOpenDialog(MainFrame.this);
           File testApp = fileChooser.getSelectedFile();
           if(state == JFileChooser.CANCEL_OPTION || testApp == null) return;
 
@@ -2452,7 +2419,7 @@ public class MainFrame extends JFrame implements ProgressListener,
                     throw new ResourceInstantiationException(
                       pr.getName() + " was not possible to load.");
                   }
-                  fileChooser.setResourceClassName(resData.getClassName());
+                  fileChooser.setResource(resData.getClassName());
                   if(newResourceDialog.show(resData, "Parameters for the new "
                     + resData.getName())) {
                     // add the PR with user parameters
@@ -2576,7 +2543,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         int y = (screenSize.height - height) / 2;
         pluginManager.setLocation(x, y);
       }
-      fileChooser.setResourceClassName(PluginManagerUI.class.getName());
+      fileChooser.setResource(PluginManagerUI.class.getName());
       pluginManager.setVisible(true);
       // free resources after the dialog is hidden
       pluginManager.dispose();
@@ -2613,8 +2580,8 @@ public class MainFrame extends JFrame implements ProgressListener,
         public void actionPerformed(ActionEvent e) {
           fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
           fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
-          int result = fileChooser.showOpenDialog(MainFrame.this,
-            "gate.CreoleRegister");
+          fileChooser.setResource("gate.CreoleRegister");
+          int result = fileChooser.showOpenDialog(MainFrame.this);
           if(result == JFileChooser.APPROVE_OPTION) {
             try {
               textField.setText(fileChooser.getSelectedFile().toURI().toURL()
@@ -2678,7 +2645,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         public void run() {
           newResourceDialog.setTitle("Parameters for the new "
             + rData.getName());
-          fileChooser.setResourceClassName(rData.getClassName());
+          fileChooser.setResource(rData.getClassName());
           newResourceDialog.show(rData);
         }
       };
@@ -2807,11 +2774,12 @@ public class MainFrame extends JFrame implements ProgressListener,
       dsBrowse.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent ae) {
           // first we need to ask for a new empty directory
-          fileChooser
-            .setDialogTitle("Please create a new empty directory for datastore");
+          fileChooser.setDialogTitle(
+            "Please create a new empty directory for datastore");
           fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-          if(fileChooser.showOpenDialog(MainFrame.this,
-            "gate.DataStore.data") == JFileChooser.APPROVE_OPTION) {
+          fileChooser.setResource("gate.DataStore.data");
+          if(fileChooser.showOpenDialog(MainFrame.this)
+            == JFileChooser.APPROVE_OPTION) {
             try {
               dsLocation.setText(fileChooser.getSelectedFile().toURI().toURL()
                 .toExternalForm());
@@ -2826,11 +2794,12 @@ public class MainFrame extends JFrame implements ProgressListener,
       indexBrowse.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent ae) {
           // first we need to ask for a new empty directory
-          fileChooser
-            .setDialogTitle("Please create a new empty directory for datastore");
+          fileChooser.setDialogTitle(
+            "Please create a new empty directory for datastore");
           fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-          if(fileChooser.showOpenDialog(MainFrame.this,
-            "gate.DataStore.index") == JFileChooser.APPROVE_OPTION) {
+          fileChooser.setResource("gate.DataStore.index");
+          if(fileChooser.showOpenDialog(MainFrame.this)
+            == JFileChooser.APPROVE_OPTION) {
             try {
               indexLocation.setText(fileChooser.getSelectedFile().toURI()
                 .toURL().toExternalForm());
@@ -3130,8 +3099,9 @@ public class MainFrame extends JFrame implements ProgressListener,
     // get the URL (a file in this case)
     fileChooser.setDialogTitle("Select the datastore directory");
     fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-    if(fileChooser.showOpenDialog(MainFrame.this,
-      "gate.DataStore.data") == JFileChooser.APPROVE_OPTION) {
+    fileChooser.setResource("gate.DataStore.data");
+    if(fileChooser.showOpenDialog(MainFrame.this)
+      == JFileChooser.APPROVE_OPTION) {
       try {
         URL dsURL = fileChooser.getSelectedFile().toURI().toURL();
         ds =
@@ -3171,7 +3141,8 @@ public class MainFrame extends JFrame implements ProgressListener,
       if(!dsTypeByName.isEmpty()) {
         JLabel label = new JLabel("Select a type of Datastore:");
         final JList list = new JList(dsTypeByName.keySet().toArray());
-        String initialSelection = prefs.get("datastorelist", null);
+        String initialSelection = Gate.getUserConfig().getString(
+          MainFrame.class.getName()+".datastoretype");
         if (dsTypeByName.containsKey(initialSelection)) {
           list.setSelectedValue(initialSelection, true);
         } else {
@@ -3220,7 +3191,8 @@ public class MainFrame extends JFrame implements ProgressListener,
         if(answer == null) { return; }
         String className = dsTypeByName.get(list.getSelectedValue());
         if(answer.equals("OK") && !list.isSelectionEmpty()) {
-          prefs.put("datastorelist", (String) list.getSelectedValue());
+          Gate.getUserConfig().put(MainFrame.class.getName()+".datastoretype",
+            list.getSelectedValue());
           if(className.equals("gate.persist.SerialDataStore")) {
             createSerialDataStore();
           }
@@ -3260,49 +3232,50 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
 
     public void actionPerformed(ActionEvent e) {
-      Runnable runnable = new Runnable() {
-        public void run() {
-          ExtensionFileFilter filter = new ExtensionFileFilter(
-            "GATE Application files", "gapp");
-          fileChooser.addChoosableFileFilter(filter);
-          fileChooser.setDialogTitle("Select a file for this resource");
-          fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+      ExtensionFileFilter filter = new ExtensionFileFilter(
+        "GATE Application files", "gapp");
+      fileChooser.addChoosableFileFilter(filter);
+      fileChooser.setDialogTitle("Select a file for this resource");
+      fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+      fileChooser.setResource("lastapplication");
 
-          if(fileChooser.showOpenDialog(MainFrame.this,
-            "applications.lastapplication") == JFileChooser.APPROVE_OPTION) {
-            File file = fileChooser.getSelectedFile();
-            try {
-              Object resource = PersistenceManager.loadObjectFromFile(file);
-              if(resource instanceof Resource) {
-                Preferences node = prefs.node("filechooserlocations");
-                Resource res = (Resource) resource;
-                // save also the location of the application with its name
-                node.put("applications."+res.getName(),file.getCanonicalPath());
-                // add this application to the list of recent applications
-                String list = node.get("applications.list", null);
-                if (list == null) { list = ""; }
-                list = list.replaceFirst("\\Q"+res.getName()+"\\E;?", "");
-                list = res.getName() + ";" + list;
-                node.put("applications.list", list);
-              }
-
-            }
-            catch(MalformedURLException e) {
-              log.error("Error when saving the resource URL.", e);
-            }
-            catch (Exception error) {
-              String message = error.getMessage();
-              alertButton.setAction(new AlertAction(error, message, null));
-            }
-            finally {
-              processFinished();
-            }
+      if (fileChooser.showOpenDialog(MainFrame.this)
+        == JFileChooser.APPROVE_OPTION) {
+        final File file = fileChooser.getSelectedFile();
+        Runnable runnable = new Runnable() { public void run() {
+        try {
+          Object resource = PersistenceManager.loadObjectFromFile(file);
+          if(resource instanceof Resource) {
+            Map<String, String> locations = fileChooser.getLocations();
+            Resource res = (Resource) resource;
+            // save also the location of the application with its name
+            locations.put("application."+res.getName(),file.getCanonicalPath());
+            locations.put("application.zip."+res.getName(),
+              file.getCanonicalPath().replaceFirst("\\.[^.]{3,5}$", ".zip"));
+            // add this application to the list of recent applications
+            String list = locations.get("applications");
+            if (list == null) { list = ""; }
+            list = list.replaceFirst("\\Q"+res.getName()+"\\E;?", "");
+            list = res.getName() + ";" + list;
+            locations.put("applications", list);
+            fileChooser.setLocations(locations);
           }
         }
-      };
-      Thread thread = new Thread(runnable, "LoadResourceFromFileAction");
-      thread.setPriority(Thread.MIN_PRIORITY);
-      thread.start();
+        catch(MalformedURLException e) {
+          log.error("Error when saving the resource URL.", e);
+        }
+        catch (Exception error) {
+          String message = error.getMessage();
+          alertButton.setAction(new AlertAction(error, message, null));
+        }
+        finally {
+          processFinished();
+        }
+        }};
+        Thread thread = new Thread(runnable, "LoadResourceFromFileAction");
+        thread.setPriority(Thread.MIN_PRIORITY);
+        thread.start();
+      }
     }
   }
 
@@ -3693,7 +3666,8 @@ public class MainFrame extends JFrame implements ProgressListener,
       if(!dsTypeByName.isEmpty()) {
         JLabel label = new JLabel("Select a type of Datastore:");
         final JList list = new JList(dsTypeByName.keySet().toArray());
-        String initialSelection = prefs.get("datastorelist", null);
+        String initialSelection = Gate.getUserConfig().getString(
+          MainFrame.class.getName()+".datastoretype");
         if (dsTypeByName.containsKey(initialSelection)) {
           list.setSelectedValue(initialSelection, true);
         } else {
@@ -3742,7 +3716,8 @@ public class MainFrame extends JFrame implements ProgressListener,
         if(answer == null) { return; }
         String className = dsTypeByName.get(list.getSelectedValue());
         if(answer.equals("OK") && !list.isSelectionEmpty()) {
-          prefs.put("datastorelist", (String) list.getSelectedValue());
+          Gate.getUserConfig().put(MainFrame.class.getName()
+            + ".datastoretype", list.getSelectedValue());
           if(className.indexOf("SerialDataStore") != -1) {
             openSerialDataStore();
           }
@@ -4062,11 +4037,11 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
 
     protected void addMenuItems() {
-    final Preferences node = prefs.node("filechooserlocations");
-    final String list = node.get("applications.list", null);
+    final Map<String, String> locations = fileChooser.getLocations();
+    final String list = locations.get("applications");
     if (list == null || list.equals("")) { return; }
     for (final String name : list.split(";")) {
-      final String location = node.get("applications." + name, null);
+      final String location = locations.get("application." + name);
       final XJMenuItem item = new XJMenuItem(new AbstractAction(name,
         MainFrame.getIcon("open-application")) {
         { this.putValue(Action.SHORT_DESCRIPTION, location); }
@@ -4079,7 +4054,8 @@ public class MainFrame extends JFrame implements ProgressListener,
             alertButton.setAction(new AlertAction(e, message, null));
             if (e instanceof IOException) {
               // remove selected element from the applications list
-              node.put("applications.list", list.replaceFirst(name + ";?", ""));
+              locations.put("applications", list.replaceFirst(name + ";?", ""));
+              fileChooser.setLocations(locations);
             }
           } finally { processFinished(); }}};
           Thread thread = new Thread(runnable ,"Reload application");
@@ -4091,7 +4067,8 @@ public class MainFrame extends JFrame implements ProgressListener,
         public void menuKeyPressed(MenuKeyEvent e) {
           if (e.getKeyCode() == KeyEvent.VK_DELETE) {
             // remove selected element from the applications list
-            node.put("applications.list", list.replaceFirst(name + ";?", ""));
+            locations.put("applications", list.replaceFirst(name + ";?", ""));
+            fileChooser.setLocations(locations);
             // TODO: update the menu
 //            item.setVisible(false);
 //            item.revalidate();
@@ -4104,7 +4081,8 @@ public class MainFrame extends JFrame implements ProgressListener,
     add(new XJMenuItem(new AbstractAction("Remove last element") {
       public void actionPerformed(ActionEvent e) {
         // remove the last element from the applications list
-        node.put("applications.list", list.replaceFirst("[^;]+;?$", ""));
+        locations.put("applications", list.replaceFirst("[^;]+;?$", ""));
+        fileChooser.setLocations(locations);
     }}, MainFrame.this));
     }
   }
@@ -4361,7 +4339,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         }}};
 
         String commandLine = Gate.getUserConfig().getString(
-          GateConstants.HELP_BROWSER_COMMAND_LINE);
+          MainFrame.class.getName()+".browsercommandline");
 
         if(commandLine == null
         || commandLine.equals("Set dynamically when you display help.")) {
