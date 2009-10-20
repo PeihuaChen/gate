@@ -43,7 +43,7 @@ public class TestAnnotationMergingPlugin extends TestCase {
     if(!initialized) {
       Gate.init();
       learningHome = new File(new File(Gate.getGateHome(), "plugins"),
-        "annotationMerging");
+        "Annotation_Merging");
       Gate.getCreoleRegister().addDirectory(learningHome.toURL());
       initialized = true;
     }

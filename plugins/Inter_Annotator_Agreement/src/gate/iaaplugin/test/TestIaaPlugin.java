@@ -43,7 +43,7 @@ public class TestIaaPlugin extends TestCase {
     if(!initialized) {
       Gate.init();
       iaaPluginHome = new File(new File(Gate.getGateHome(), "plugins"),
-        "iaaPlugin");
+        "Inter_Annotator_Agreement");
       Gate.getCreoleRegister().addDirectory(iaaPluginHome.toURL());
       initialized = true;
     }

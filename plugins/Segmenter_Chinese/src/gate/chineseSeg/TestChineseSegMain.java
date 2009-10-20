@@ -48,7 +48,7 @@ public class TestChineseSegMain extends TestCase {
       Gate.init();
 
       bdmPluginHome = new File(new File(Gate.getGateHome(), "plugins"),
-        "chineseSegmenter");
+        "Segmenter_Chinese");
       Gate.getCreoleRegister().addDirectory(bdmPluginHome.toURI().toURL());
       initialized = true;
     }
