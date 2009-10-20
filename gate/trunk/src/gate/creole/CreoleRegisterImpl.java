@@ -71,21 +71,21 @@ import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLFilterImpl;
 
-
-/** This class implements the CREOLE register interface. DO NOT
-  * construct objects of this class unless your name is gate.Gate
-  * (in which case please go back to the source code repository and stop
-  * looking at other class's code).
-  * <P>
-  * The CREOLE register records the set of resources that are currently
-  * known to the system. Each member of the register is a
-  * {@link gate.creole.ResourceData} object, indexed by
-  * the class name of the resource.
-  * @see gate.CreoleRegister
-  */
+/**
+ * This class implements the CREOLE register interface. DO NOT construct objects
+ * of this class unless your name is gate.Gate (in which case please go back to
+ * the source code repository and stop looking at other class's code).
+ * <P>
+ * The CREOLE register records the set of resources that are currently known to
+ * the system. Each member of the register is a {@link gate.creole.ResourceData}
+ * object, indexed by the class name of the resource.
+ * 
+ * @see gate.CreoleRegister
+ */
 public class CreoleRegisterImpl extends HashMap<String, ResourceData>
-          implements CreoleRegister, CreoleListener
-{
+                                                                     implements
+                                                                     CreoleRegister,
+                                                                     CreoleListener {
   /** Debug flag */
   protected static final boolean DEBUG = false;
 
@@ -96,8 +96,18 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   protected transient SAXBuilder jdomBuilder = null;
 
   /**
-   * Default constructor. Sets up directory files parser. <B>NOTE:</B>
-   * only Factory should call this method.
+   * Name of the plugin-mappings file
+   */
+  public static final String PLUGIN_NAMES_MAPPING_FILE = "plugin-mappings.xml";
+
+  /**
+   * maps previous plugin names to new plugin names
+   */
+  protected Map<String, String> pluginNamesMappings = null;
+
+  /**
+   * Default constructor. Sets up directory files parser. <B>NOTE:</B> only
+   * Factory should call this method.
    */
   public CreoleRegisterImpl() throws GateException {
 
@@ -111,18 +121,65 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
     // construct a SAX parser for parsing the CREOLE directory files
     jdomBuilder = new SAXBuilder(false);
     jdomBuilder.setXMLFilter(new CreoleXmlUpperCaseFilter());
+
+    // read plugin name mappings file
+    readPluginNamesMappings();
+    
   } // default constructor
 
-  /** Add a CREOLE directory URL to the register and to the GATE classloader.
-    * The directory will be automatically registered.
-    * This method is equivalent with #registerDirectories(URL) which it actually
-    * calls and it's only kept here for backwards compatibility reasons.
-    * @deprecated
-    */
+  /**
+   * reads plugins-mapping.xml file which is used for mapping old plugin
+   * names to new plugin names
+   */
+  private void readPluginNamesMappings() {
+    // should load it only once
+    if(pluginNamesMappings != null) return;
+
+    pluginNamesMappings = new HashMap<String, String>();
+
+    // use jdom
+    SAXBuilder builder = new SAXBuilder();
+
+    // command line should offer URIs or file names
+    try {
+      URL creoleDirURL = Gate.getBuiltinCreoleDir();
+      URL pluginMappingsFileURL =
+        new URL(creoleDirURL, PLUGIN_NAMES_MAPPING_FILE);
+      Document document = builder.build(pluginMappingsFileURL);
+      List<Element> plugins = document.getRootElement().getChildren("Plugin");
+      if(plugins != null) {
+        for(Element aPlugin : plugins) {
+          String oldName = aPlugin.getChildText("OldName");
+          String newName = aPlugin.getChildText("NewName");
+          pluginNamesMappings.put(oldName, newName);
+        }
+      }
+    }
+    // indicates a well-formedness error
+    catch(JDOMException e) {
+      System.out.println(PLUGIN_NAMES_MAPPING_FILE + " is not well-formed.");
+      System.out.println(e.getMessage());
+    }
+    catch(IOException e) {
+      System.out.println("Could not check " + PLUGIN_NAMES_MAPPING_FILE);
+      System.out.println(" because " + e.getMessage());
+    }
+
+  }
+
+  /**
+   * Add a CREOLE directory URL to the register and to the GATE classloader. The
+   * directory will be automatically registered. This method is equivalent with
+   * #registerDirectories(URL) which it actually calls and it's only kept here
+   * for backwards compatibility reasons.
+   * 
+   * @deprecated
+   */
   public void addDirectory(URL directoryUrl) {
-    try{
+    try {
       registerDirectories(directoryUrl);
-    }catch(GateException ge){
+    }
+    catch(GateException ge) {
       throw new GateRuntimeException(ge);
     }
   } // addDirectory
@@ -131,45 +188,44 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   public Set getDirectories() {
     return Collections.unmodifiableSet(directories);
   } // getDirectories
-  
-  /** 
+
+  /**
    * All CREOLE directories are now automatically registered when they are added
-   * so this method does nothing now. It is only kept here for backwards 
+   * so this method does nothing now. It is only kept here for backwards
    * compatibility reasons.
+   * 
    * @deprecated
-    */
+   */
   public void registerDirectories() throws GateException {
-//    Iterator iter = directories.iterator();
-//
-//    while(iter.hasNext()) {
-//      URL directoryUrl = (URL) iter.next();
-//      registerDirectories(directoryUrl);
-//    }
+    // Iterator iter = directories.iterator();
+    //
+    // while(iter.hasNext()) {
+    // URL directoryUrl = (URL) iter.next();
+    // registerDirectories(directoryUrl);
+    // }
   } // registerDirectories
 
-  /** Register a single CREOLE directory. The <CODE>creole.xml</CODE>
-    * file at the URL is parsed, and <CODE>CreoleData</CODE> objects added
-    * to the register. If the directory URL has not yet been added it
-    * is now added.
-    * URLs for resource JAR files are added to the GATE class loader.
-    */
+  /**
+   * Register a single CREOLE directory. The <CODE>creole.xml</CODE> file at the
+   * URL is parsed, and <CODE>CreoleData</CODE> objects added to the register.
+   * If the directory URL has not yet been added it is now added. URLs for
+   * resource JAR files are added to the GATE class loader.
+   */
   public void registerDirectories(URL directoryUrl) throws GateException {
 
     // directory URLs shouldn't include "creole.xml"
     String urlName = directoryUrl.toExternalForm();
-    if(urlName.toLowerCase().endsWith("creole.xml")) {
-      throw new GateException(
-        "CREOLE directory URLs should point to the parent location of " +
-        "the creole.xml file, not the file itself; bad URL was: " + urlName
-      );
-    }
-    //CREOLE URLs are directory URLs so they should end with "/"
+    if(urlName.toLowerCase().endsWith("creole.xml")) { throw new GateException(
+      "CREOLE directory URLs should point to the parent location of "
+        + "the creole.xml file, not the file itself; bad URL was: " + urlName); }
+    // CREOLE URLs are directory URLs so they should end with "/"
     String separator = "/";
-    if(!urlName.endsWith(separator)){
+    if(!urlName.endsWith(separator)) {
       urlName += separator;
-      try{
+      try {
         directoryUrl = new URL(urlName);
-      }catch(MalformedURLException mue){
+      }
+      catch(MalformedURLException mue) {
         throw new GateRuntimeException(mue);
       }
     }
@@ -177,44 +233,85 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
     URL directoryXmlFileUrl = directoryUrl;
     try {
       directoryXmlFileUrl = new URL(urlName + "creole.xml");
-    } catch(MalformedURLException e) {
-      throw(new GateException("bad creole.xml URL, based on " + urlName));
+    }
+    catch(MalformedURLException e) {
+      throw (new GateException("bad creole.xml URL, based on " + urlName));
+    }
+
+    // creole stream
+    InputStream creoleStream = null;
+
+    // lets check if it is an old plugin name
+    try {
+      creoleStream = directoryXmlFileUrl.openStream();
+    }
+    catch(IOException ioe) {
+
+      // if this happens
+      // locating last separator
+      int indexOfSeparator = urlName.lastIndexOf('/', urlName.length() - 2);
+
+      // plugin name
+      String pluginName =
+        urlName.substring(indexOfSeparator + 1, urlName.length() - 1);
+
+      if(pluginNamesMappings != null && pluginNamesMappings.containsKey(pluginName)) {
+        String newPluginName = pluginNamesMappings.get(pluginName);
+
+        urlName =
+          urlName.substring(0, indexOfSeparator + 1) + newPluginName + "/";
+
+        try {
+          System.err.println("Trying to use new plugin name for " + pluginName);
+          directoryXmlFileUrl = new URL(urlName + "creole.xml");
+          creoleStream = directoryXmlFileUrl.openStream();
+          System.err.println("Please note that plugin names have changed. "
+            + "Please correct your application to rename " + pluginName
+            + " to " + newPluginName);
+        }
+        catch(IOException e) {
+          throw new GateException("couldn't open creole.xml: " + e.toString());
+        }
+      } else {
+        throw new GateException("couldn't find:" + directoryUrl);
+      }
     }
 
     // add the URL
-    //if already present do nothing
-    if(directories.add(directoryUrl)){
-      //add it to the list of known directories
+    // if already present do nothing
+    if(directories.add(directoryUrl)) {
+      // add it to the list of known directories
       Gate.addKnownPlugin(directoryUrl);
       // parse the directory file
       try {
-        parseDirectory(directoryXmlFileUrl.openStream(), directoryUrl, 
-                directoryXmlFileUrl);
-        System.out.println("CREOLE plugin loaded: " + directoryUrl);
-      } catch(IOException e) {
-        //it failed: remove it
+        parseDirectory(creoleStream, directoryUrl,
+          directoryXmlFileUrl);
+        System.out.println("CREOLE plugin loaded: " + urlName);
+      }
+      catch(GateException e) {
+        // it failed: remove it
         directories.remove(directoryUrl);
         Gate.removeKnownPlugin(directoryUrl);
-        throw(new GateException("couldn't open creole.xml: " + e.toString()));
+        throw (new GateException("couldn't open creole.xml: " + e.toString()));
       }
     }
   } // registerDirectories(URL)
 
-  /** Parse a directory file (represented as an open stream), adding
-    * resource data objects to the CREOLE register as they occur.
-    * If the resource is from a URL then that location is passed (otherwise
-    * null).
-    */
+  /**
+   * Parse a directory file (represented as an open stream), adding resource
+   * data objects to the CREOLE register as they occur. If the resource is from
+   * a URL then that location is passed (otherwise null).
+   */
   protected void parseDirectory(InputStream directoryStream, URL directoryUrl,
-          URL creoleFileUrl)
-  throws GateException
-  {
+    URL creoleFileUrl) throws GateException {
     // create a handler for the directory file and parse it;
     // this will create ResourceData entries in the register
     try {
-      Document jdomDoc = jdomBuilder.build(directoryStream, creoleFileUrl.toExternalForm());
-      CreoleAnnotationHandler annotationHandler = new CreoleAnnotationHandler(creoleFileUrl);
-      
+      Document jdomDoc =
+        jdomBuilder.build(directoryStream, creoleFileUrl.toExternalForm());
+      CreoleAnnotationHandler annotationHandler =
+        new CreoleAnnotationHandler(creoleFileUrl);
+
       // Add any JARs from the creole.xml to the GATE ClassLoader
       annotationHandler.addJarsToClassLoader(jdomDoc);
 
@@ -231,56 +328,57 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
         XMLOutputter xmlOut = new XMLOutputter(Format.getPrettyFormat());
         xmlOut.output(jdomDoc, System.out);
       }
-      
+
       // finally, parse the augmented definition with the normal parser
-      DefaultHandler handler = new CreoleXmlHandler(this, directoryUrl, 
-              creoleFileUrl);
-      SAXOutputter outputter = new SAXOutputter(handler, handler, handler, handler);
+      DefaultHandler handler =
+        new CreoleXmlHandler(this, directoryUrl, creoleFileUrl);
+      SAXOutputter outputter =
+        new SAXOutputter(handler, handler, handler, handler);
       outputter.output(jdomDoc);
       if(DEBUG) {
-        Out.prln(
-          "done parsing " +
-          ((directoryUrl == null) ? "null" : directoryUrl.toString())
-        );
+        Out.prln("done parsing "
+          + ((directoryUrl == null) ? "null" : directoryUrl.toString()));
       }
-    } catch (IOException e) {
-      throw(new GateException(e));
-    } catch (JDOMException je) {
+    }
+    catch(IOException e) {
+      throw (new GateException(e));
+    }
+    catch(JDOMException je) {
       if(DEBUG) je.printStackTrace(Err.getPrintWriter());
-      throw(new GateException(je));
+      throw (new GateException(je));
     }
 
   } // parseDirectory
 
-  /** Register resources that are built in to the GATE distribution.
-    * These resources are described by the <TT>creole.xml</TT> file in
-    * <TT>resources/creole</TT>.
-    */
+  /**
+   * Register resources that are built in to the GATE distribution. These
+   * resources are described by the <TT>creole.xml</TT> file in
+   * <TT>resources/creole</TT>.
+   */
   public void registerBuiltins() throws GateException {
 
     try {
       URL creoleDirURL = Gate.getBuiltinCreoleDir();
       URL creoleFileURL = new URL(creoleDirURL, "creole.xml");
-      //URL creoleFileURL = Files.getGateResource("/creole/creole.xml");
-      parseDirectory(creoleFileURL.openStream(), 
-              creoleDirURL,
-              creoleFileURL);
-    } catch(IOException e) {
-      if (DEBUG) Out.println(e);
-      throw(new GateException(e));
+      // URL creoleFileURL = Files.getGateResource("/creole/creole.xml");
+      parseDirectory(creoleFileURL.openStream(), creoleDirURL, creoleFileURL);
+    }
+    catch(IOException e) {
+      if(DEBUG) Out.println(e);
+      throw (new GateException(e));
     }
   } // registerBuiltins()
 
-  /** This is a utility method for creating CREOLE directory files
-    * (typically called <CODE>creole.xml</CODE>) from a list of Jar
-    * files that contain resources. The method concatenates the
-    * <CODE>resource.xml</CODE> files that the Jars contain.
-    * <P>
-    * If Java allowed class methods in interfaces this would be static.
-    */
-  public File createCreoleDirectoryFile(File directoryFile, Set jarFileNames)
-  {
-    ////////////////////
+  /**
+   * This is a utility method for creating CREOLE directory files (typically
+   * called <CODE>creole.xml</CODE>) from a list of Jar files that contain
+   * resources. The method concatenates the <CODE>resource.xml</CODE> files that
+   * the Jars contain.
+   * <P>
+   * If Java allowed class methods in interfaces this would be static.
+   */
+  public File createCreoleDirectoryFile(File directoryFile, Set jarFileNames) {
+    // //////////////////
     // dump xml header and comment header and <CREOLE-DIRECTORY> into dirfile
     // for each jar file pick out resource.xml
     // strip xml header
@@ -289,52 +387,58 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
     throw new LazyProgrammerException();
   } // createCreoleDirectoryFile
 
-  /** Overide HashMap's put method to maintain a list of all the
-    * types of LR in the register, and a list of tool types. The key is
-    * the resource type, the value its data.
-    */
+  /**
+   * Overide HashMap's put method to maintain a list of all the types of LR in
+   * the register, and a list of tool types. The key is the resource type, the
+   * value its data.
+   */
   public ResourceData put(String key, ResourceData rd) {
 
     // get the resource implementation class
     Class<? extends Resource> resClass = null;
     try {
       resClass = rd.getResourceClass();
-    } catch(ClassNotFoundException e) {
+    }
+    catch(ClassNotFoundException e) {
       throw new GateRuntimeException(
-        "Couldn't get resource class from the resource data:" + e
-      );
+        "Couldn't get resource class from the resource data:" + e);
     }
 
     // add class names to the type lists
     if(LanguageResource.class.isAssignableFrom(resClass)) {
       if(DEBUG) Out.prln("LR: " + resClass);
-      if(lrTypes == null) lrTypes = new HashSet<String>(); // for deserialisation
+      if(lrTypes == null) lrTypes = new HashSet<String>(); // for
+      // deserialisation
       lrTypes.add(rd.getClassName());
     }
     if(ProcessingResource.class.isAssignableFrom(resClass)) {
       if(DEBUG) {
         Out.prln("PR: " + resClass);
-        //Out.prln("prTypes: " + prTypes);
-        //Out.prln("rd.getClassName(): " + rd.getClassName());
+        // Out.prln("prTypes: " + prTypes);
+        // Out.prln("rd.getClassName(): " + rd.getClassName());
       }
-      if(prTypes == null) prTypes = new HashSet<String>(); // for deserialisation
+      if(prTypes == null) prTypes = new HashSet<String>(); // for
+      // deserialisation
       prTypes.add(rd.getClassName());
     }
     if(VisualResource.class.isAssignableFrom(resClass)) {
       if(DEBUG) Out.prln("VR: " + resClass);
-      if(vrTypes == null) vrTypes = new LinkedList<String>(); // for deserialisation
-      //we have to simulate Set behaviour as this is a list
+      if(vrTypes == null) vrTypes = new LinkedList<String>(); // for
+      // deserialisation
+      // we have to simulate Set behaviour as this is a list
       if(!vrTypes.contains(rd.getClassName())) vrTypes.add(rd.getClassName());
     }
     if(Controller.class.isAssignableFrom(resClass)) {
       if(DEBUG) Out.prln("Controller: " + resClass);
-      if(controllerTypes == null) controllerTypes = new HashSet<String>(); // for deserialisation
+      if(controllerTypes == null) controllerTypes = new HashSet<String>(); // for
+      // deserialisation
       controllerTypes.add(rd.getClassName());
     }
 
     // maintain tool types list
     if(rd.isTool()) {
-      if(toolTypes == null) toolTypes = new HashSet<String>(); // for deserialisation
+      if(toolTypes == null) toolTypes = new HashSet<String>(); // for
+      // deserialisation
       toolTypes.add(rd.getClassName());
     }
 
@@ -343,23 +447,25 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
 
   /**
    * Removes a CREOLE directory from the set of loaded directories.
+   * 
    * @param directory
    */
-  public void removeDirectory(URL directory){
-    if(directories.remove(directory)){
+  public void removeDirectory(URL directory) {
+    if(directories.remove(directory)) {
       DirectoryInfo dInfo = (DirectoryInfo)Gate.getDirectoryInfo(directory);
-      if(dInfo != null){
-        for(ResourceInfo rInfo : dInfo.getResourceInfoList()){
+      if(dInfo != null) {
+        for(ResourceInfo rInfo : dInfo.getResourceInfoList()) {
           remove(rInfo.getResourceClassName());
         }
       }
       System.out.println("CREOLE plugin unloaded: " + directory);
     }
   }
-  
-  /** Overide HashMap's delete method to update the lists of types
-    * in the register.
-    */
+
+  /**
+   * Overide HashMap's delete method to update the lists of types in the
+   * register.
+   */
   public ResourceData remove(Object key) {
     ResourceData rd = get(key);
     if(rd == null) return null;
@@ -368,29 +474,33 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
       Out.prln(rd);
     }
     try {
-      if(LanguageResource.class.isAssignableFrom(rd.getResourceClass())){
+      if(LanguageResource.class.isAssignableFrom(rd.getResourceClass())) {
         lrTypes.remove(rd.getClassName());
-      }else if(ProcessingResource.class.isAssignableFrom(rd.getResourceClass())){
+      }
+      else if(ProcessingResource.class.isAssignableFrom(rd.getResourceClass())) {
         prTypes.remove(rd.getClassName());
-      }else if(VisualResource.class.isAssignableFrom(rd.getResourceClass())){
+      }
+      else if(VisualResource.class.isAssignableFrom(rd.getResourceClass())) {
         vrTypes.remove(rd.getClassName());
-      }else if(Controller.class.isAssignableFrom(rd.getResourceClass())){
+      }
+      else if(Controller.class.isAssignableFrom(rd.getResourceClass())) {
         controllerTypes.remove(rd.getClassName());
       }
     }
     catch(ClassNotFoundException cnfe) {
       throw new GateRuntimeException(
-              "Could not load class specified in CREOLE data.", cnfe);
+        "Could not load class specified in CREOLE data.", cnfe);
     }
     // maintain tool types list
     if(rd.isTool()) toolTypes.remove(rd.getClassName());
-    
+
     return super.remove(key);
   } // remove(Object)
 
-  /** Overide HashMap's clear to update the list of LR types in the register,
-    * and remove all resources and forgets all directories.
-    */
+  /**
+   * Overide HashMap's clear to update the list of LR types in the register, and
+   * remove all resources and forgets all directories.
+   */
   public void clear() {
     lrTypes.clear();
     prTypes.clear();
@@ -401,13 +511,19 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   } // clear()
 
   /** Get the list of types of LR in the register. */
-  public Set<String> getLrTypes() { return Collections.unmodifiableSet(lrTypes);}
+  public Set<String> getLrTypes() {
+    return Collections.unmodifiableSet(lrTypes);
+  }
 
   /** Get the list of types of PR in the register. */
-  public Set<String> getPrTypes() { return Collections.unmodifiableSet(prTypes);}
+  public Set<String> getPrTypes() {
+    return Collections.unmodifiableSet(prTypes);
+  }
 
   /** Get the list of types of VR in the register. */
-  public Set<String> getVrTypes() { return Collections.unmodifiableSet(new HashSet<String>(vrTypes));}
+  public Set<String> getVrTypes() {
+    return Collections.unmodifiableSet(new HashSet<String>(vrTypes));
+  }
 
   /** Get the list of types of Controller in the register. */
   public Set<String> getControllerTypes() {
@@ -415,7 +531,9 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   }
 
   /** Get the list of types of TOOL resources in the register. */
-  public Set<String> getToolTypes() { return Collections.unmodifiableSet(toolTypes);}
+  public Set<String> getToolTypes() {
+    return Collections.unmodifiableSet(toolTypes);
+  }
 
   /** Get a list of all instantiations of LR in the register. */
   public List<LanguageResource> getLrInstances() {
@@ -461,31 +579,28 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   /** Get a list of instantiations of a type of LR in the register. */
   public List<LanguageResource> getLrInstances(String resourceTypeName) {
     ResourceData resData = get(resourceTypeName);
-    if(resData == null)
-      return Collections.emptyList();
+    if(resData == null) return Collections.emptyList();
 
     return new TypedResourceList<LanguageResource>(resData.getInstantiations(),
-            LanguageResource.class);
+      LanguageResource.class);
   } // getLrInstances
 
   /** Get a list of instantiations of a type of PR in the register. */
   public List<ProcessingResource> getPrInstances(String resourceTypeName) {
     ResourceData resData = get(resourceTypeName);
-    if(resData == null)
-      return Collections.emptyList();
+    if(resData == null) return Collections.emptyList();
 
-    return new TypedResourceList<ProcessingResource>(resData.getInstantiations(),
-            ProcessingResource.class);
+    return new TypedResourceList<ProcessingResource>(resData
+      .getInstantiations(), ProcessingResource.class);
   } // getPrInstances
 
   /** Get a list of instantiations of a type of VR in the register. */
   public List<VisualResource> getVrInstances(String resourceTypeName) {
     ResourceData resData = get(resourceTypeName);
-    if(resData == null)
-      return Collections.emptyList();
+    if(resData == null) return Collections.emptyList();
 
     return new TypedResourceList<VisualResource>(resData.getInstantiations(),
-            VisualResource.class);
+      VisualResource.class);
   } // getVrInstances
 
   /** Get a list of all non-private instantiations of LR in the register. */
@@ -501,151 +616,163 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   /** Get a list of all non-private instantiations of VR in the register. */
   public List<VisualResource> getPublicVrInstances() {
     return Collections.unmodifiableList(getPublics(getVrInstances()));
-  }//getPublicVrInstances()
+  }// getPublicVrInstances()
 
   /** Get a list of all non-private types of LR in the register. */
   public List<String> getPublicLrTypes() {
     return Collections.unmodifiableList(getPublicTypes(getLrTypes()));
-  }//getPublicLrTypes()
+  }// getPublicLrTypes()
 
   /** Get a list of all non-private types of PR in the register. */
   public List<String> getPublicPrTypes() {
     return Collections.unmodifiableList(getPublicTypes(getPrTypes()));
-  }//getPublicPrTypes()
+  }// getPublicPrTypes()
 
   /** Get a list of all non-private types of VR in the register. */
   public List<String> getPublicVrTypes() {
     return Collections.unmodifiableList(getPublicTypes(vrTypes));
-  }//getPublicVrTypes()
+  }// getPublicVrTypes()
 
   /** Get a list of all non-private types of controller in the register. */
   public List<String> getPublicControllerTypes() {
     return Collections.unmodifiableList(getPublicTypes(getControllerTypes()));
-  }//getPublicPrTypes()
-
+  }// getPublicPrTypes()
 
   /**
-   * Gets all the instantiations of a given type and all its derivate types;
-   * It doesn't return instances that have the hidden attribute set to "true"
+   * Gets all the instantiations of a given type and all its derivate types; It
+   * doesn't return instances that have the hidden attribute set to "true"
    */
-  public List<Resource> getAllInstances(String type) throws GateException{
+  public List<Resource> getAllInstances(String type) throws GateException {
     Iterator<String> typesIter = keySet().iterator();
     List<Resource> res = new ArrayList<Resource>();
     Class<? extends Resource> targetClass;
-    try{
-      targetClass = Gate.getClassLoader().loadClass(type)
-        .asSubclass(Resource.class);
-    }catch(ClassNotFoundException cnfe){
+    try {
+      targetClass =
+        Gate.getClassLoader().loadClass(type).asSubclass(Resource.class);
+    }
+    catch(ClassNotFoundException cnfe) {
       throw new GateException("Invalid type " + type);
     }
-    while(typesIter.hasNext()){
+    while(typesIter.hasNext()) {
       String aType = typesIter.next();
       Class<?> aClass;
-      try{
+      try {
         aClass = Gate.getClassLoader().loadClass(aType);
-        if(targetClass.isAssignableFrom(aClass)){
-          //filter out hidden instances
-          Iterator<? extends Resource> newInstancesIter = get(aType).getInstantiations().iterator();
-          while(newInstancesIter.hasNext()){
+        if(targetClass.isAssignableFrom(aClass)) {
+          // filter out hidden instances
+          Iterator<? extends Resource> newInstancesIter =
+            get(aType).getInstantiations().iterator();
+          while(newInstancesIter.hasNext()) {
             Resource instance = newInstancesIter.next();
-            if(!Gate.getHiddenAttribute(instance.getFeatures())){
+            if(!Gate.getHiddenAttribute(instance.getFeatures())) {
               res.add(instance);
             }
           }
         }
-      }catch(ClassNotFoundException cnfe){
+      }
+      catch(ClassNotFoundException cnfe) {
         throw new LuckyException(
           "A type registered in the creole register does not exist in the VM!");
       }
 
-    }//while(typesIter.hasNext())
+    }// while(typesIter.hasNext())
 
     return res;
   }
 
   /**
-   * Returns a list of strings representing class names for large VRs valid
-   * for a given type of language/processing resource.
-   * The default VR will be the first in the returned list.
-   * @param resourceClassName the name of the resource that has large viewers. If
-   * resourceClassName is <b>null</b> then an empty list will be returned.
+   * Returns a list of strings representing class names for large VRs valid for
+   * a given type of language/processing resource. The default VR will be the
+   * first in the returned list.
+   * 
+   * @param resourceClassName
+   *          the name of the resource that has large viewers. If
+   *          resourceClassName is <b>null</b> then an empty list will be
+   *          returned.
    * @return a list with Strings representing the large VRs for the
-   * resourceClassName
+   *         resourceClassName
    */
-  public List<String> getLargeVRsForResource(String resourceClassName){
+  public List<String> getLargeVRsForResource(String resourceClassName) {
     return getVRsForResource(resourceClassName, ResourceData.LARGE_GUI);
   }// getLargeVRsForResource()
 
   /**
-   * Returns a list of strings representing class names for small VRs valid
-   * for a given type of language/processing resource
-   * The default VR will be the first in the returned list.
-   * @param resourceClassName the name of the resource that has large viewers. If
-   * resourceClassName is <b>null</b> then an empty list will be returned.
+   * Returns a list of strings representing class names for small VRs valid for
+   * a given type of language/processing resource The default VR will be the
+   * first in the returned list.
+   * 
+   * @param resourceClassName
+   *          the name of the resource that has large viewers. If
+   *          resourceClassName is <b>null</b> then an empty list will be
+   *          returned.
    * @return a list with Strings representing the large VRs for the
-   * resourceClassName
+   *         resourceClassName
    */
-  public List<String> getSmallVRsForResource(String resourceClassName){
+  public List<String> getSmallVRsForResource(String resourceClassName) {
     return getVRsForResource(resourceClassName, ResourceData.SMALL_GUI);
   }// getSmallVRsForResource
 
   /**
    * Returns a list of strings representing class names for guiType VRs valid
-   * for a given type of language/processing resource
-   * The default VR will be the first in the returned list.
-   * @param resourceClassName the name of the resource that has large viewers. If
-   * resourceClassName is <b>null</b> then an empty list will be returned.
-   * @param guiType can be ResourceData's LARGE_GUI or SMALL_GUI
+   * for a given type of language/processing resource The default VR will be the
+   * first in the returned list.
+   * 
+   * @param resourceClassName
+   *          the name of the resource that has large viewers. If
+   *          resourceClassName is <b>null</b> then an empty list will be
+   *          returned.
+   * @param guiType
+   *          can be ResourceData's LARGE_GUI or SMALL_GUI
    * @return a list with Strings representing the large VRs for the
-   * resourceClassName
+   *         resourceClassName
    */
-  private List<String> getVRsForResource(String resourceClassName, int guiType){
+  private List<String> getVRsForResource(String resourceClassName, int guiType) {
     // If resurceClassName is null return a simply list
-    if (resourceClassName == null)
+    if(resourceClassName == null)
       return Collections.unmodifiableList(new ArrayList<String>());
     // create a Class object for the resource
     Class<?> resourceClass = null;
     GateClassLoader classLoader = Gate.getClassLoader();
-    try{
+    try {
       resourceClass = classLoader.loadClass(resourceClassName);
-    } catch (ClassNotFoundException ex){
+    }
+    catch(ClassNotFoundException ex) {
       throw new GateRuntimeException(
-        "Couldn't get resource class from the resource name:" + ex
-      );
+        "Couldn't get resource class from the resource name:" + ex);
     }// End try
     LinkedList<String> responseList = new LinkedList<String>();
     String defaultVR = null;
     // Take all VRs and for each large one, test if
     // resourceClassName is asignable form VR's RESOURCE_DISPLAYED
     Iterator<String> vrIterator = vrTypes.iterator();
-    while (vrIterator.hasNext()){
+    while(vrIterator.hasNext()) {
       String vrClassName = vrIterator.next();
       ResourceData vrResourceData = this.get(vrClassName);
-      if (vrResourceData == null)
+      if(vrResourceData == null)
         throw new GateRuntimeException(
-          "Couldn't get resource data for VR called " + vrClassName
-        );
-      if (vrResourceData.getGuiType() == guiType){
+          "Couldn't get resource data for VR called " + vrClassName);
+      if(vrResourceData.getGuiType() == guiType) {
         String resourceDisplayed = vrResourceData.getResourceDisplayed();
-        if (resourceDisplayed != null){
+        if(resourceDisplayed != null) {
           Class<?> resourceDisplayedClass = null;
-          try{
+          try {
             resourceDisplayedClass = classLoader.loadClass(resourceDisplayed);
-          } catch (ClassNotFoundException ex){
-              throw new GateRuntimeException(
-                "Couldn't get resource class from the resource name :" +
-                resourceDisplayed + " " +ex );
+          }
+          catch(ClassNotFoundException ex) {
+            throw new GateRuntimeException(
+              "Couldn't get resource class from the resource name :"
+                + resourceDisplayed + " " + ex);
           }// End try
-          if (resourceDisplayedClass.isAssignableFrom(resourceClass)){
+          if(resourceDisplayedClass.isAssignableFrom(resourceClass)) {
             responseList.add(vrClassName);
-            if (vrResourceData.isMainView()){
+            if(vrResourceData.isMainView()) {
               defaultVR = vrClassName;
             }// End if
           }// End if
         }// End if
       }// End if
     }// End while
-    if (defaultVR != null){
+    if(defaultVR != null) {
       responseList.remove(defaultVR);
       responseList.addFirst(defaultVR);
     }// End if
@@ -653,43 +780,42 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   }// getVRsForResource()
 
   /**
-   * Returns a list of strings representing class names for annotation VRs
-   * that are able to display/edit all types of annotations.
-   * The default VR will be the first in the returned list.
+   * Returns a list of strings representing class names for annotation VRs that
+   * are able to display/edit all types of annotations. The default VR will be
+   * the first in the returned list.
+   * 
    * @return a list with all VRs that can display all annotation types
    */
-  public List<String> getAnnotationVRs(){
+  public List<String> getAnnotationVRs() {
     LinkedList<String> responseList = new LinkedList<String>();
     String defaultVR = null;
     Iterator<String> vrIterator = vrTypes.iterator();
-    while (vrIterator.hasNext()){
+    while(vrIterator.hasNext()) {
       String vrClassName = vrIterator.next();
       ResourceData vrResourceData = this.get(vrClassName);
-      if (vrResourceData == null)
+      if(vrResourceData == null)
         throw new GateRuntimeException(
-          "Couldn't get resource data for VR called " + vrClassName
-        );
+          "Couldn't get resource data for VR called " + vrClassName);
       Class<?> vrResourceClass = null;
-      try{
+      try {
         vrResourceClass = vrResourceData.getResourceClass();
-      } catch(ClassNotFoundException ex){
+      }
+      catch(ClassNotFoundException ex) {
         throw new GateRuntimeException(
-          "Couldn't create a class object for VR called " + vrClassName
-        );
+          "Couldn't create a class object for VR called " + vrClassName);
       }// End try
       // Test if VR can display all types of annotations
-      if ( vrResourceData.getGuiType() == ResourceData.NULL_GUI &&
-           vrResourceData.getAnnotationTypeDisplayed() == null &&
-           vrResourceData.getResourceDisplayed() == null &&
-           gate.creole.AnnotationVisualResource.class.
-                                          isAssignableFrom(vrResourceClass)){
+      if(vrResourceData.getGuiType() == ResourceData.NULL_GUI
+        && vrResourceData.getAnnotationTypeDisplayed() == null
+        && vrResourceData.getResourceDisplayed() == null
+        && gate.creole.AnnotationVisualResource.class
+          .isAssignableFrom(vrResourceClass)) {
 
-          responseList.add(vrClassName);
-          if (vrResourceData.isMainView())
-              defaultVR = vrClassName;
+        responseList.add(vrClassName);
+        if(vrResourceData.isMainView()) defaultVR = vrClassName;
       }// End if
     }// End while
-    if (defaultVR != null){
+    if(defaultVR != null) {
       responseList.remove(defaultVR);
       responseList.addFirst(defaultVR);
     }// End if
@@ -697,90 +823,84 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   }// getAnnotationVRs()
 
   /**
-   * Returns a list of strings representing class names for annotation VRs
-   * that are able to display/edit a given annotation type
-   * The default VR will be the first in the returned list.
+   * Returns a list of strings representing class names for annotation VRs that
+   * are able to display/edit a given annotation type The default VR will be the
+   * first in the returned list.
    */
-  public List<String> getAnnotationVRs(String annotationType){
-    if (annotationType == null)
+  public List<String> getAnnotationVRs(String annotationType) {
+    if(annotationType == null)
       return Collections.unmodifiableList(new ArrayList<String>());
     LinkedList<String> responseList = new LinkedList<String>();
     String defaultVR = null;
     Iterator<String> vrIterator = vrTypes.iterator();
-    while (vrIterator.hasNext()){
+    while(vrIterator.hasNext()) {
       String vrClassName = vrIterator.next();
       ResourceData vrResourceData = this.get(vrClassName);
-      if (vrResourceData == null)
+      if(vrResourceData == null)
         throw new GateRuntimeException(
-          "Couldn't get resource data for VR called " + vrClassName
-        );
+          "Couldn't get resource data for VR called " + vrClassName);
       Class<?> vrResourceClass = null;
-      try{
+      try {
         vrResourceClass = vrResourceData.getResourceClass();
-      } catch(ClassNotFoundException ex){
+      }
+      catch(ClassNotFoundException ex) {
         throw new GateRuntimeException(
-          "Couldn't create a class object for VR called " + vrClassName
-        );
+          "Couldn't create a class object for VR called " + vrClassName);
       }// End try
       // Test if VR can display all types of annotations
-      if ( vrResourceData.getGuiType() == ResourceData.NULL_GUI &&
-           vrResourceData.getAnnotationTypeDisplayed() != null &&
-           gate.creole.AnnotationVisualResource.class.
-                                          isAssignableFrom(vrResourceClass)){
+      if(vrResourceData.getGuiType() == ResourceData.NULL_GUI
+        && vrResourceData.getAnnotationTypeDisplayed() != null
+        && gate.creole.AnnotationVisualResource.class
+          .isAssignableFrom(vrResourceClass)) {
 
-          String annotationTypeDisplayed =
-                                  vrResourceData.getAnnotationTypeDisplayed();
-          if (annotationTypeDisplayed.equals(annotationType)){
-            responseList.add(vrClassName);
-            if (vrResourceData.isMainView())
-              defaultVR = vrClassName;
-          }// End if
+        String annotationTypeDisplayed =
+          vrResourceData.getAnnotationTypeDisplayed();
+        if(annotationTypeDisplayed.equals(annotationType)) {
+          responseList.add(vrClassName);
+          if(vrResourceData.isMainView()) defaultVR = vrClassName;
+        }// End if
       }// End if
     }// End while
-    if (defaultVR != null){
+    if(defaultVR != null) {
       responseList.remove(defaultVR);
       responseList.addFirst(defaultVR);
     }// End if
     return Collections.unmodifiableList(responseList);
-  }//getAnnotationVRs()
+  }// getAnnotationVRs()
 
-   /**
-    * Renames an existing resource.
-    */
-   public void setResourceName(Resource res, String newName){
+  /**
+   * Renames an existing resource.
+   */
+  public void setResourceName(Resource res, String newName) {
     String oldName = res.getName();
     res.setName(newName);
     fireResourceRenamed(res, oldName, newName);
-   }
-
+  }
 
   /**
-   * Returns a list of strings representing annotations types for which
-   * there are custom viewers/editor registered.
+   * Returns a list of strings representing annotations types for which there
+   * are custom viewers/editor registered.
    */
-  public List<String> getVREnabledAnnotationTypes(){
+  public List<String> getVREnabledAnnotationTypes() {
     LinkedList<String> responseList = new LinkedList<String>();
     Iterator<String> vrIterator = vrTypes.iterator();
-    while (vrIterator.hasNext()){
+    while(vrIterator.hasNext()) {
       String vrClassName = vrIterator.next();
       ResourceData vrResourceData = this.get(vrClassName);
-      if (vrResourceData == null)
+      if(vrResourceData == null)
         throw new GateRuntimeException(
-          "Couldn't get resource data for VR called " + vrClassName
-        );
+          "Couldn't get resource data for VR called " + vrClassName);
       // Test if VR can display all types of annotations
-      if ( vrResourceData.getGuiType() == ResourceData.NULL_GUI &&
-           vrResourceData.getAnnotationTypeDisplayed() != null ){
+      if(vrResourceData.getGuiType() == ResourceData.NULL_GUI
+        && vrResourceData.getAnnotationTypeDisplayed() != null) {
 
-          String annotationTypeDisplayed =
-                                  vrResourceData.getAnnotationTypeDisplayed();
-          responseList.add(annotationTypeDisplayed);
+        String annotationTypeDisplayed =
+          vrResourceData.getAnnotationTypeDisplayed();
+        responseList.add(annotationTypeDisplayed);
       }// End if
     }// End while
     return Collections.unmodifiableList(responseList);
   }// getVREnabledAnnotationTypes()
-
-
 
   /** Get a list of all non-private instantiations. */
   protected <T> List<T> getPublics(List<T> instances) {
@@ -792,35 +912,36 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
     while(iter.hasNext()) {
       T res = iter.next();
       ResourceData rd = get(res.getClass().getName());
-      if(! rd.isPrivate()) publics.add(res);
+      if(!rd.isPrivate()) publics.add(res);
     }
 
     return Collections.unmodifiableList(publics);
   } // getPublics
 
-  /** Gets a list of all non private types from alist of types*/
-  protected List<String> getPublicTypes(Collection<String> types){
+  /** Gets a list of all non private types from alist of types */
+  protected List<String> getPublicTypes(Collection<String> types) {
     Iterator<String> iter = types.iterator();
     List<String> publics = new ArrayList<String>();
-    while(iter.hasNext()){
+    while(iter.hasNext()) {
       String oneType = iter.next();
       ResourceData rData = get(oneType);
       if(rData != null && !rData.isPrivate()) publics.add(oneType);
     }
     return Collections.unmodifiableList(publics);
-  }//getPublicTypes
+  }// getPublicTypes
 
   public synchronized void removeCreoleListener(CreoleListener l) {
-    if (creoleListeners != null && creoleListeners.contains(l)) {
-      Vector v = (Vector) creoleListeners.clone();
+    if(creoleListeners != null && creoleListeners.contains(l)) {
+      Vector v = (Vector)creoleListeners.clone();
       v.removeElement(l);
       creoleListeners = v;
     }
   }
 
   public synchronized void addCreoleListener(CreoleListener l) {
-    Vector v = creoleListeners == null ? new Vector(2) : (Vector) creoleListeners.clone();
-    if (!v.contains(l)) {
+    Vector v =
+      creoleListeners == null ? new Vector(2) : (Vector)creoleListeners.clone();
+    if(!v.contains(l)) {
       v.addElement(l);
       creoleListeners = v;
     }
@@ -832,22 +953,21 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
    */
 
   /**
-   * Registers a {@link gate.event.CreoleListener}with this CreoleRegister.
-   * The register will fire events every time a resource is added to or removed
-   * from the system.
-   */// addCreoleListener
-
+   * Registers a {@link gate.event.CreoleListener}with this CreoleRegister. The
+   * register will fire events every time a resource is added to or removed from
+   * the system.
+   */
+  // addCreoleListener
   /**
    * Notifies all listeners that a new {@link gate.Resource} has been loaded
    * into the system
-   */// fireResourceLoaded
-
+   */
+  // fireResourceLoaded
   /**
-   * Notifies all listeners that a {@link gate.Resource} has been unloaded
-   * from the system
-   */// fireResourceUnloaded
-  
-
+   * Notifies all listeners that a {@link gate.Resource} has been unloaded from
+   * the system
+   */
+  // fireResourceUnloaded
   /** A list of the types of LR in the register. */
   protected Set<String> lrTypes;
 
@@ -864,64 +984,65 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   protected Set<String> toolTypes;
 
   private transient Vector creoleListeners;
+
   protected void fireResourceLoaded(CreoleEvent e) {
-    if (creoleListeners != null) {
+    if(creoleListeners != null) {
       Vector listeners = creoleListeners;
       int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((CreoleListener) listeners.elementAt(i)).resourceLoaded(e);
+      for(int i = 0; i < count; i++) {
+        ((CreoleListener)listeners.elementAt(i)).resourceLoaded(e);
       }
     }
   }
 
   protected void fireResourceUnloaded(CreoleEvent e) {
-    if (creoleListeners != null) {
+    if(creoleListeners != null) {
       Vector listeners = creoleListeners;
       int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((CreoleListener) listeners.elementAt(i)).resourceUnloaded(e);
+      for(int i = 0; i < count; i++) {
+        ((CreoleListener)listeners.elementAt(i)).resourceUnloaded(e);
       }
     }
   }
 
   protected void fireResourceRenamed(Resource res, String oldName,
-                                     String newName) {
-    if (creoleListeners != null) {
+    String newName) {
+    if(creoleListeners != null) {
       Vector listeners = creoleListeners;
       int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((CreoleListener) listeners.elementAt(i)).resourceRenamed(res,
-                                                                  oldName,
-                                                                  newName);
+      for(int i = 0; i < count; i++) {
+        ((CreoleListener)listeners.elementAt(i)).resourceRenamed(res, oldName,
+          newName);
       }
     }
   }
 
   protected void fireDatastoreOpened(CreoleEvent e) {
-    if (creoleListeners != null) {
+    if(creoleListeners != null) {
       Vector listeners = creoleListeners;
       int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((CreoleListener) listeners.elementAt(i)).datastoreOpened(e);
+      for(int i = 0; i < count; i++) {
+        ((CreoleListener)listeners.elementAt(i)).datastoreOpened(e);
       }
     }
   }
+
   protected void fireDatastoreCreated(CreoleEvent e) {
-    if (creoleListeners != null) {
+    if(creoleListeners != null) {
       Vector listeners = creoleListeners;
       int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((CreoleListener) listeners.elementAt(i)).datastoreCreated(e);
+      for(int i = 0; i < count; i++) {
+        ((CreoleListener)listeners.elementAt(i)).datastoreCreated(e);
       }
     }
   }
 
   protected void fireDatastoreClosed(CreoleEvent e) {
-    if (creoleListeners != null) {
+    if(creoleListeners != null) {
       Vector listeners = creoleListeners;
       int count = listeners.size();
-      for (int i = 0; i < count; i++) {
-        ((CreoleListener) listeners.elementAt(i)).datastoreClosed(e);
+      for(int i = 0; i < count; i++) {
+        ((CreoleListener)listeners.elementAt(i)).datastoreClosed(e);
       }
     }
   }
@@ -934,8 +1055,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
     fireResourceUnloaded(e);
   }
 
-  public void resourceRenamed(Resource resource, String oldName,
-                              String newName){
+  public void resourceRenamed(Resource resource, String oldName, String newName) {
     fireResourceRenamed(resource, oldName, newName);
   }
 
@@ -951,25 +1071,27 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
     fireDatastoreClosed(e);
   }
 
-  /**The lists of listeners registered with this CreoleRegister*/
-  
+  /** The lists of listeners registered with this CreoleRegister */
+
   /**
    * Type-safe read-only list used by getLrInstances, getPrInstances, etc.
    */
-  private static class TypedResourceList<T extends Resource> extends AbstractList<T> {
+  private static class TypedResourceList<T extends Resource>
+                                                             extends
+                                                               AbstractList<T> {
     private List<Resource> backingList;
-    
+
     private Class<T> realType;
-    
+
     TypedResourceList(List<Resource> backingList, Class<T> realType) {
       this.backingList = backingList;
       this.realType = realType;
     }
-    
+
     public T get(int i) {
-      return realType.cast(backingList.get(i)); 
+      return realType.cast(backingList.get(i));
     }
-    
+
     public int size() {
       return backingList.size();
     }
