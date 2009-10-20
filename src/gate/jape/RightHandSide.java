@@ -211,9 +211,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
   /**
    * Enhances a Throwable by replacing mentions of Java code inside a
    * Jape RhsAction with a reference to the original Jape source where
-   * available. Note that it also trims the stack trace once it finds
-   * code within an RhsAction class as nothing higher up the stack will
-   * help in debugging the problem.
+   * available.
    * 
    * @param t the Throwable to enhance with Jape source information
    */
@@ -369,15 +367,14 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
       }
       if(e instanceof JapeException) {
         throw (JapeException)e;
-      }
-      else if(e instanceof RuntimeException) {
+      }      
+      if(e instanceof RuntimeException) {
         throw (RuntimeException)e;
       }
-      else {
-        // shouldn't happen...
+      
+      // shouldn't happen...
         throw new JapeException(
           "Couldn't run RHS action", e);
-      }
     }
   } // transduce
 
