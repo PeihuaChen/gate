@@ -64,16 +64,4 @@ TAO proof-reading responsibilities by chapter/appendix number
 
 %1 Post-5.1 tasks
 
-- Mapping Java RHS exception stack traces back to the original JAPE file line
-  numbers.
-  - ^ParseCpsl.ConsumeBlock^: prefix the block with a comment
-    ^//MAP:<filename>:<line>^ (where ^line^ is the number of the line before
-    the first token or special in the block)
-  - ^RightHandSide^: search for these comments when building the Java source and
-    add the line number map as a static on the action class
-  - Add a static utility method somewhere that takes a Throwable and processes
-    it (and its causes, recursively) to find all StackTraceElements that refer
-    to a RhsAction and remap their file name and line number using the line
-    number map for that action class.
-  - Whenever an exception is thrown during JAPE transduction, pass it through
-    this method before rethrowing.
+- remove all the JAPE debuger code to help with JAPE performance
