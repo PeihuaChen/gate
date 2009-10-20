@@ -1414,8 +1414,8 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         title += "-" + documentResponseSetName;
       }
       fileChooser.setFileName(title + ".html");
-      int res = fileChooser.showSaveDialog(CorpusQualityAssurance.this,
-        CorpusQualityAssurance.class.getName());
+      fileChooser.setResource(CorpusQualityAssurance.class.getName());
+      int res = fileChooser.showSaveDialog(CorpusQualityAssurance.this);
       if (res != JFileChooser.APPROVE_OPTION) { return; }
 
       File saveFile = fileChooser.getSelectedFile();

@@ -20,7 +20,6 @@ import javax.swing.*;
 import javax.swing.tree.*;
 import javax.swing.event.*;
 import java.util.*;
-import java.util.prefs.Preferences;
 import gate.*;
 import gate.creole.*;
 import java.io.*;
@@ -840,7 +839,7 @@ public class CorefEditor
         return;
       }
 
-      Color color = getColor(type);
+      Color color = AnnotationSetsView.getColor(type);
       if (type != null) {
         AnnotationSet typeSet = set.get(type);
         Iterator<Annotation> iter = typeSet.iterator();
@@ -1993,49 +1992,6 @@ public class CorefEditor
 
       }
     }
-  }
-
-  /**
-   * This method uses the java.util.prefs.Preferences and get the color
-   * for particular annotationType.. This color could have been saved
-   * by the AnnotationSetsView
-   * @param annotationType
-   * @return
-   */
-  private Color getColor(String annotationType) {
-    // chop off the annotation type at the max preferences key length if
-    // necessary.
-    if(annotationType != null
-        && annotationType.length() > Preferences.MAX_KEY_LENGTH) {
-      annotationType = annotationType.substring(0, Preferences.MAX_KEY_LENGTH);
-    }
-    Preferences prefRoot = null;
-    try {
-      prefRoot = Preferences.userNodeForPackage(Class.forName(
-          "gate.gui.docview.AnnotationSetsView"));
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-    }
-    int rgba = prefRoot.getInt(annotationType, -1);
-    Color colour;
-    if (rgba == -1) {
-      //initialise and save
-      float components[] = colorGenerator.getNextColor().getComponents(null);
-      colour = new Color(components[0],
-                         components[1],
-                         components[2],
-                         0.5f);
-      int rgb = colour.getRGB();
-      int alpha = colour.getAlpha();
-      rgba = rgb | (alpha << 24);
-      prefRoot.putInt(annotationType, rgba);
-
-    }
-    else {
-      colour = new Color(rgba, true);
-    }
-    return colour;
   }
 
   /**

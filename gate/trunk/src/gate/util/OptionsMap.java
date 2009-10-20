@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 1998-2007, The University of Sheffield.
+ *  Copyright (c) 1998-2009, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -15,16 +15,23 @@ package gate.util;
 import java.awt.Font;
 import java.awt.font.TextAttribute;
 import java.util.*;
+import java.io.Serializable;
+
 /**
  * A map that stores values as strings and provides support for converting some
- * frequently used types to and from string
+ * frequently used types to and from string.<br>
+ * Not very efficient as there is a lot of conversions from/to String.
+ * The conversion could happend only when loading/saving from/to a file.
  */
-public class OptionsMap extends HashMap {
+public class OptionsMap extends TreeMap<Object, Object> {
 
   /**
-   * Converts the value to string using its toString() method and then stores it
+   * Converts the value to string using {@link Strings#toString(Object)}
+   * method and then stores it.
+   * There is get methods for values that are a String, an Integer, a Boolean,
+   * a Font, a List of String and a Map of String*String.
    */
-  public Object put(Object key, Object value){
+  public Object put(Object key, Object value) {
     if(value instanceof Font){
       Font font = (Font)value;
       String family = font.getFamily();
@@ -33,76 +40,111 @@ public class OptionsMap extends HashMap {
       boolean bold = font.isBold();
       value = family + "#" + size + "#" + italic + "#" + bold;
     }
-
-    Object res = super.put(key, value.toString());
-    return res;
+    return super.put(key, Strings.toString(value));
   }
 
   /**
    * If the object stored under key is an Integer then returns its value
-   * otherwise returns null;
+   * otherwise returns null.
+   * @param key key associated to the value to retrieve
+   * @return the associated integer
    */
-  public Integer getInt(Object key){
-    String stringValue = getString(key);
-    Integer value = null;
-    try{
-      value = Integer.decode(stringValue);
-    }catch(Exception e){};
-    return value;
+  public Integer getInt(Object key) {
+    try {
+      return Integer.decode((String) get(key));
+    } catch (Exception e) {
+      return null;
+    }
   }
 
   /**
    * If the object stored under key is a Boolean then returns its value
-   * otherwise returns null;
+   * otherwise returns false.
+   * @param key key associated to the value to retrieve
+   * @return the associated boolean
    */
-  public Boolean getBoolean(Object key){
-    String stringValue = getString(key);
-    Boolean value = null;
-    try{
-      value = Boolean.valueOf(stringValue);
-    }catch(Exception e){};
-    return value;
+  public Boolean getBoolean(Object key) {
+    try {
+      return Boolean.valueOf((String) get(key));
+    } catch (Exception e) {
+      return false;
+    }
   }
 
   /**
    * If the object stored under key is a String then returns its value
-   * otherwise returns null;
+   * otherwise returns null.
+   * @param key key associated to the value to retrieve
+   * @return the associated string
    */
-  public String getString(Object key){
-    String stringValue = null;
-    try{
-      stringValue = (String)get(key);
-    }catch(Exception e){};
-    return stringValue;
+  public String getString(Object key) {
+    try {
+      return (String) get(key);
+    } catch (Exception e) {
+      return null;
+    }
   }
 
   /**
-   * If the object stored under key is a String then returns its value
-   * otherwise returns null;
+   * If the object stored under key is a Font then returns its value
+   * otherwise returns null.
+   * @param key key associated to the value to retrieve
+   * @return the associated font
    */
-  public Font getFont(Object key){
-    String stringValue = null;
-    try{
-      stringValue = (String)get(key);
-    }catch(Exception e){};
-    if(stringValue == null) return null;
-    StringTokenizer strTok = new StringTokenizer(stringValue, "#", false);
-    String family = strTok.nextToken();
-    int size = Integer.parseInt(strTok.nextToken());
-    boolean italic = Boolean.valueOf(strTok.nextToken()).booleanValue();
-    boolean bold = Boolean.valueOf(strTok.nextToken()).booleanValue();
-
-    Map fontAttrs = new HashMap();
-    fontAttrs.put(TextAttribute.FAMILY, family);
-    fontAttrs.put(TextAttribute.SIZE, new Float(size));
-    if(bold) fontAttrs.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD);
-    else fontAttrs.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_REGULAR);
-    if(italic) fontAttrs.put(TextAttribute.POSTURE, TextAttribute.POSTURE_OBLIQUE);
-    else fontAttrs.put(TextAttribute.POSTURE, TextAttribute.POSTURE_REGULAR);
-
-    return new Font(fontAttrs);
+  public Font getFont(Object key) {
+    try {
+      String stringValue = (String) get(key);
+      if (stringValue == null) { return null; }
+      StringTokenizer strTok = new StringTokenizer(stringValue, "#", false);
+      String family = strTok.nextToken();
+      int size = Integer.parseInt(strTok.nextToken());
+      boolean italic = Boolean.valueOf(strTok.nextToken());
+      boolean bold = Boolean.valueOf(strTok.nextToken());
+      HashMap<TextAttribute, Serializable> fontAttrs =
+        new HashMap<TextAttribute, Serializable>();
+      fontAttrs.put(TextAttribute.FAMILY, family);
+      fontAttrs.put(TextAttribute.SIZE, (float) size);
+      if(bold) fontAttrs.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD);
+      else fontAttrs.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_REGULAR);
+      if(italic) fontAttrs.put(
+        TextAttribute.POSTURE, TextAttribute.POSTURE_OBLIQUE);
+      else fontAttrs.put(TextAttribute.POSTURE, TextAttribute.POSTURE_REGULAR);
+      return new Font(fontAttrs);
+    } catch (Exception e) {
+      return null;
+    }
   }
 
+  /**
+   * If the object stored under key is a list then returns its value
+   * otherwise returns an empty list.
+   *
+   * @param key key associated to the value to retrieve
+   * @return the associated list
+   */
+  public List<String> getList(Object key) {
+    return Strings.toList((String) get(key));
+  }
 
+  /**
+   * If the object stored under key is a list of list
+   * then returns its value otherwise returns an empty list of empty list.
+   *
+   * @param key key associated to the value to retrieve
+   * @return the associated list of list
+   */
+  public List<List<String>> getListOfList(Object key) {
+      return Strings.toListOfList((String) get(key));
+  }
 
+  /**
+   * If the object stored under key is a map then returns its value
+   * otherwise returns an empty map.
+   *
+   * @param key key associated to the value to retrieve
+   * @return the associated map
+   */
+  public Map<String, String> getMap(Object key) {
+      return Strings.toMap((String) get(key));
+  }
 }

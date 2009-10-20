@@ -314,7 +314,7 @@ public class AnnotationStack extends JPanel {
           }
         }
         label.setText(value);
-        label.setBackground(getAnnotationTypeColor(ann.getType()));
+        label.setBackground(AnnotationSetsView.getColor(ann.getType()));
         label.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
         label.setOpaque(true);
         if(feature.equals("")) {
@@ -421,43 +421,6 @@ public class AnnotationStack extends JPanel {
 
     validate();
     updateUI();
-  }
-
-  /**
-   * This method uses the java.util.prefs.Preferences and get the color
-   * for particular annotationType. This color could have been saved by
-   * the AnnotationSetsView
-   *
-   * @param annotationType name of the annotation type
-   * @return the color saved in the GATE preferences
-   */
-  Color getAnnotationTypeColor(String annotationType) {
-    java.util.prefs.Preferences prefRoot = null;
-    try {
-      prefRoot = java.util.prefs.Preferences.userNodeForPackage(Class
-              .forName("gate.gui.docview.AnnotationSetsView"));
-    }
-    catch(Exception e) {
-      e.printStackTrace();
-    }
-    int rgba = (annotationType != null)?prefRoot.getInt(annotationType, -1):-1;
-    Color colour;
-    if(rgba == -1) {
-      // initialise and save
-      gate.swing.ColorGenerator colorGenerator = new gate.swing.ColorGenerator();
-      float components[] = colorGenerator.getNextColor().getComponents(null);
-      colour = new Color(components[0], components[1], components[2], 0.5f);
-      int rgb = colour.getRGB();
-      int alpha = colour.getAlpha();
-      rgba = rgb | (alpha << 24);
-      if (annotationType != null) {
-        prefRoot.putInt(annotationType, rgba);
-      }
-    }
-    else {
-      colour = new Color(rgba, true);
-    }
-    return colour;
   }
 
   /**

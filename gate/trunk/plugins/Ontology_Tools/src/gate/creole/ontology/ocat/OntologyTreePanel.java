@@ -510,53 +510,13 @@ public class OntologyTreePanel extends JPanel {
    */
   public void setColorScheme(IFolder root, HashMap<String, Color> colorScheme) {
     if(!colorScheme.containsKey(root.toString())) {
-      colorScheme.put(root.toString(), getColor(root.toString()));
+      colorScheme.put(root.toString(),
+        AnnotationSetsView.getColor(root.toString()));
       Iterator children = root.getChildren();
       while(children.hasNext()) {
         setColorScheme((IFolder)children.next(), colorScheme);
       }
     }
-  }
-
-  /**
-   * This method uses the java.util.prefs.Preferences and get the color for
-   * particular selectedAnnotationType.. This color could have been saved by the
-   * AnnotationSetsView
-   * 
-   * @param selectedAnnotationType
-   * @return
-   */
-  public Color getColor(String className) {
-    java.util.prefs.Preferences prefRoot = null;
-    try {
-      prefRoot =
-        java.util.prefs.Preferences.userNodeForPackage(Class
-          .forName("gate.creole.ontology.ocat.OntologyTreePanel"));
-    }
-    catch(Exception e) {
-      e.printStackTrace();
-    }
-    // chop off the class name at the max key length to avoid Preferences
-    // exception
-    if(className.length() > java.util.prefs.Preferences.MAX_KEY_LENGTH) {
-      className =
-        className.substring(0, java.util.prefs.Preferences.MAX_KEY_LENGTH);
-    }
-    int rgba = prefRoot.getInt(className, -1);
-    Color colour;
-    if(rgba == -1) {
-      // initialise and save
-      float components[] = colorGenerator.getNextColor().getComponents(null);
-      colour = new Color(components[0], components[1], components[2], 0.5f);
-      int rgb = colour.getRGB();
-      int alpha = colour.getAlpha();
-      rgba = rgb | (alpha << 24);
-      prefRoot.putInt(className, rgba);
-    }
-    else {
-      colour = new Color(rgba, true);
-    }
-    return colour;
   }
 
   /**

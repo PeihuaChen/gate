@@ -40,17 +40,10 @@ public class OptionsDialog extends JDialog {
   }
 
   protected void initLocalData(){
-    lookAndFeelClassName = Gate.getUserConfig().
-                           getString(GateConstants.LOOK_AND_FEEL);
-
-    textComponentsFont = Gate.getUserConfig().
-                         getFont(GateConstants.TEXT_COMPONENTS_FONT);
-
-    menusFont = Gate.getUserConfig().
-                getFont(GateConstants.MENUS_FONT);
-
-    componentsFont = Gate.getUserConfig().
-                     getFont(GateConstants.OTHER_COMPONENTS_FONT);
+    lookAndFeelClassName = userConfig.getString(GateConstants.LOOK_AND_FEEL);
+    textComponentsFont = userConfig.getFont(GateConstants.TEXT_COMPONENTS_FONT);
+    menusFont = userConfig.getFont(GateConstants.MENUS_FONT);
+    componentsFont = userConfig.getFont(GateConstants.OTHER_COMPONENTS_FONT);
     dirtyGUI = false;
   }
 
@@ -150,25 +143,22 @@ public class OptionsDialog extends JDialog {
      *****************/
 
     saveOptionsChk = new JCheckBox("Save options on exit",
-      Gate.getUserConfig().getBoolean(GateConstants.SAVE_OPTIONS_ON_EXIT));
+      userConfig.getBoolean(GateConstants.SAVE_OPTIONS_ON_EXIT));
 
     saveSessionChk = new JCheckBox("Save session on exit",
-      Gate.getUserConfig().getBoolean(GateConstants.SAVE_SESSION_ON_EXIT));
+      userConfig.getBoolean(GateConstants.SAVE_SESSION_ON_EXIT));
 
     includeFeaturesOnPreserveFormatChk = new JCheckBox(
       "Include annotation features for \"Save preserving format\"",
-      Gate.getUserConfig()
-        .getBoolean(GateConstants.SAVE_FEATURES_WHEN_PRESERVING_FORMAT));
+      userConfig.getBoolean(
+        GateConstants.SAVE_FEATURES_WHEN_PRESERVING_FORMAT));
 
     addSpaceOnMarkupUnpackChk = new JCheckBox(
       "Add space on markup unpack if needed", true);
-
-    if ( (Gate.getUserConfig().
-       get(GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME) != null)
-      &&
-      !Gate.getUserConfig().
-        getBoolean(GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME)
-      )
+    if ( (userConfig.get(GateConstants
+      .DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME) != null)
+      && !userConfig.getBoolean(GateConstants
+      .DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME) )
       addSpaceOnMarkupUnpackChk.setSelected(false);
 
     ButtonGroup bGroup = new ButtonGroup();
@@ -176,24 +166,25 @@ public class OptionsDialog extends JDialog {
     bGroup.add(doceditInsertAppendChk);
     doceditInsertPrependChk = new JRadioButton("Prepend");
     bGroup.add(doceditInsertPrependChk);
-    doceditInsertPrependChk.setSelected(Gate.getUserConfig().
-      getBoolean(GateConstants.DOCEDIT_INSERT_PREPEND));
-    doceditInsertAppendChk.setSelected(Gate.getUserConfig().
-      getBoolean(GateConstants.DOCEDIT_INSERT_APPEND));
+    doceditInsertPrependChk.setSelected(
+      userConfig.getBoolean(GateConstants.DOCEDIT_INSERT_PREPEND));
+    doceditInsertAppendChk.setSelected(
+      userConfig.getBoolean(GateConstants.DOCEDIT_INSERT_APPEND));
     //if none set then set the default one
     if(!(doceditInsertAppendChk.isSelected()||
          doceditInsertPrependChk.isSelected()))
       doceditInsertAppendChk.setSelected(true);
+
     docReadOnlyChk = new JCheckBox("Read-only");
-    docReadOnlyChk.setSelected(Gate.getUserConfig().
-      getBoolean(GateConstants.DOCEDIT_READ_ONLY));
+    docReadOnlyChk.setSelected(
+      userConfig.getBoolean(GateConstants.DOCEDIT_READ_ONLY));
 
     browserComboBox = new JComboBox(new String[] {
       "Default browser", "Java", "Custom"});
     browserComboBox.setPrototypeDisplayValue("Default browser");
     browserCommandLineTextField = new JTextField(15);
     String commandLine =
-      Gate.getUserConfig().getString(GateConstants.HELP_BROWSER_COMMAND_LINE);
+      userConfig.getString(MainFrame.class.getName()+".browsercommandline");
     if(commandLine == null || commandLine.trim().length() == 0
     || commandLine.equals("Set dynamically when you display help.")) {
       // option not configured or empty or default browser
@@ -209,9 +200,19 @@ public class OptionsDialog extends JDialog {
     }
     browserCommandLineTextField.setText((commandLine == null)?"":commandLine);
 
+    treeSelectViewChk = new JCheckBox("Tree select view",
+      userConfig.getBoolean(MainFrame.class.getName()+".treeselectview"));
+    treeSelectViewChk.setToolTipText(
+      "Selection in left resources tree select the main view");
+
+    viewSelectTreeChk = new JCheckBox("View select in tree",
+      userConfig.getBoolean(MainFrame.class.getName()+".viewselecttree"));
+    viewSelectTreeChk.setToolTipText(
+      "Selection of the main view select item in left resources tree");
+
     annicDisableAutocompletionChk = new JCheckBox("Disable autocompletion",
-      Gate.getUserConfig()
-        .getBoolean(GateConstants.ANNIC_DISABLE_AUTOCOMPLETION));
+      userConfig.getBoolean(LuceneDataStoreSearchGUI.class.getName()
+        + ".disableautocompletion"));
 
     JPanel advancedBox =  new JPanel();
     advancedBox.setLayout(new BoxLayout(advancedBox, BoxLayout.Y_AXIS));
@@ -283,7 +284,24 @@ public class OptionsDialog extends JDialog {
     advancedBox.add(hBox);
 
     hBox = Box.createHorizontalBox();
-    hBox.setBorder(BorderFactory.createTitledBorder(" Annic (Lucene datastore) "));
+    hBox.setBorder(BorderFactory.createTitledBorder(
+      " Link resources tree selection and the main view "));
+    hBox.add(Box.createHorizontalStrut(5));
+      hBox2 = Box.createHorizontalBox();
+      hBox2.add(treeSelectViewChk);
+      hBox2.add(Box.createVerticalStrut(5));
+      hBox2.add(viewSelectTreeChk);
+      hBox2.add(Box.createVerticalStrut(5));
+    hBox.add(hBox2);
+    hBox.add(Box.createHorizontalStrut(5));
+    hBox.add(Box.createHorizontalGlue());
+    advancedBox.add(hBox);
+
+    advancedBox.add(Box.createVerticalStrut(5));
+
+    hBox = Box.createHorizontalBox();
+    hBox.setBorder(BorderFactory.createTitledBorder(
+      " Annic (Lucene datastore) "));
     hBox.add(Box.createHorizontalStrut(5));
       vBox = Box.createVerticalBox();
       vBox.add(annicDisableAutocompletionChk);
@@ -450,7 +468,7 @@ public class OptionsDialog extends JDialog {
    */
   public static void setTextComponentsFont(Font font){
     setUIDefaults(textComponentsKeys, new FontUIResource(font));
-    Gate.getUserConfig().put(GateConstants.TEXT_COMPONENTS_FONT, font);
+    userConfig.put(GateConstants.TEXT_COMPONENTS_FONT, font);
   }
 
   /**
@@ -459,7 +477,7 @@ public class OptionsDialog extends JDialog {
    */
   public static void setMenuComponentsFont(Font font){
     setUIDefaults(menuKeys, new FontUIResource(font));
-    Gate.getUserConfig().put(GateConstants.MENUS_FONT, font);
+    userConfig.put(GateConstants.MENUS_FONT, font);
   }
 
   /**
@@ -468,7 +486,7 @@ public class OptionsDialog extends JDialog {
    */
   public static void setComponentsFont(Font font){
     setUIDefaults(componentsKeys, new FontUIResource(font));
-    Gate.getUserConfig().put(GateConstants.OTHER_COMPONENTS_FONT, font);
+    userConfig.put(GateConstants.OTHER_COMPONENTS_FONT, font);
   }
 
   class OKAction extends AbstractAction{
@@ -477,7 +495,6 @@ public class OptionsDialog extends JDialog {
     }
 
     public void actionPerformed(ActionEvent evt) {
-      OptionsMap userConfig = Gate.getUserConfig();
       if(dirtyGUI){
         setMenuComponentsFont(menusFont);
         setComponentsFont(componentsFont);
@@ -514,10 +531,14 @@ public class OptionsDialog extends JDialog {
         doceditInsertPrependChk.isSelected());
       userConfig.put(GateConstants.DOCEDIT_READ_ONLY,
         docReadOnlyChk.isSelected());
-      userConfig.put(GateConstants.HELP_BROWSER_COMMAND_LINE,
+      userConfig.put(MainFrame.class.getName()+".browsercommandline",
         browserCommandLineTextField.getText());
-      userConfig.put(GateConstants.ANNIC_DISABLE_AUTOCOMPLETION,
-        annicDisableAutocompletionChk.isSelected());
+      userConfig.put(MainFrame.class.getName()+".treeselectview",
+        treeSelectViewChk.isSelected());
+      userConfig.put(MainFrame.class.getName()+".viewselecttree",
+        viewSelectTreeChk.isSelected());
+      userConfig.put(LuceneDataStoreSearchGUI.class.getName()
+        + ".disableautocompletion", annicDisableAutocompletionChk.isSelected());
       setVisible(false);
     }// void actionPerformed(ActionEvent evt)
   }
@@ -697,4 +718,9 @@ public class OptionsDialog extends JDialog {
 
   protected JCheckBox annicDisableAutocompletionChk;
 
+  protected JCheckBox treeSelectViewChk;
+
+  protected JCheckBox viewSelectTreeChk;
+
+  protected static OptionsMap userConfig = Gate.getUserConfig();
 }

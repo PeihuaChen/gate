@@ -23,7 +23,6 @@ import java.net.URL;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
-import java.util.prefs.Preferences;
 
 import javax.swing.*;
 
@@ -641,9 +640,10 @@ public class NameBearerHandle implements Handle, StatusListener,
           }
 
           int res = (getLargeView() != null) ?
-            fileChooser.showSaveDialog(getLargeView(), null)
-          : (getSmallView() != null) ? fileChooser.showSaveDialog(
-              getSmallView(), null) : fileChooser.showSaveDialog(null, null);
+              fileChooser.showSaveDialog(getLargeView())
+            : (getSmallView() != null) ?
+                fileChooser.showSaveDialog(getSmallView())
+              : fileChooser.showSaveDialog(null);
           if(res == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
             if(selectedFile == null) return;
@@ -1016,7 +1016,7 @@ public class NameBearerHandle implements Handle, StatusListener,
     }
 
     public void actionPerformed(ActionEvent ae) {
-      XJFileChooser fileChooser = MainFrame.getFileChooser();
+      final XJFileChooser fileChooser = MainFrame.getFileChooser();
       ExtensionFileFilter filter = new ExtensionFileFilter(
         "GATE Application files", "gapp");
       fileChooser.addChoosableFileFilter(filter);
@@ -1025,25 +1025,25 @@ public class NameBearerHandle implements Handle, StatusListener,
            && ((CorpusController)target).getCorpus() != null) ?
         "WITH" : "WITHOUT") + " corpus.");
       fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+      fileChooser.setResource("application." + target.getName());
 
-      if(fileChooser.showSaveDialog(largeView, "applications." +
-        target.getName())  == JFileChooser.APPROVE_OPTION) {
+      if(fileChooser.showSaveDialog(largeView) == JFileChooser.APPROVE_OPTION) {
         final File file = fileChooser.getSelectedFile();
         Runnable runnable = new Runnable() {
           public void run() {
             try {
-              Preferences node = Preferences.userNodeForPackage(getClass())
-                .node("filechooserlocations");
+              Map<String, String> locations = fileChooser.getLocations();
               gate.util.persistence.PersistenceManager
                 .saveObjectToFile(target, file);
               // save also the location of the application as last application
-              node.put("applications.lastapplication", file.getCanonicalPath());
+              locations.put("lastapplication", file.getCanonicalPath());
               // add this application to the list of recent applications
-              String list = node.get("applications.list", null);
+              String list = locations.get("applications");
               if (list == null) { list = ""; }
               list = list.replaceFirst("\\Q"+target.getName()+"\\E;?", "");
               list = target.getName() + ";" + list;
-              node.put("applications.list", list);
+              locations.put("applications", list);
+              fileChooser.setLocations(locations);
             }
             catch(Exception e) {
               JOptionPane.showMessageDialog(getLargeView(), "Error!\n"
@@ -1137,21 +1137,10 @@ public class NameBearerHandle implements Handle, StatusListener,
            && ((CorpusController)target).getCorpus() != null) ?
         "WITH" : "WITHOUT") + " corpus.");
       fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+      fileChooser.setResource("application.zip." + target.getName());
 
-      // try to find the location of this application
-      Preferences node = Preferences.userNodeForPackage(getClass())
-        .node("filechooserlocations");
-      String location = node.get("applications."+target.getName(), null);
-      if (location != null) {
-        // replace extension with .zip
-        location = location.replaceFirst("\\.[^.]{3,5}$", ".zip");
-        File file = new File(location);
-        fileChooser.setSelectedFile(file);
-        fileChooser.ensureFileIsVisible(file);
-      }
-
-      if(fileChooser.showSaveDialog(largeView, "applications."
-        + target.getName() + ".zip") == JFileChooser.APPROVE_OPTION) {
+      if (fileChooser.showSaveDialog(largeView)
+        == JFileChooser.APPROVE_OPTION) {
         final File targetZipFile = fileChooser.getSelectedFile();
         InputOutputAnnotationSetsDialog inOutDialog =
           new InputOutputAnnotationSetsDialog((Controller)target);

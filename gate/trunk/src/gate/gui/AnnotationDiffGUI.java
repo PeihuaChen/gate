@@ -1196,8 +1196,8 @@ public class AnnotationDiffGUI extends JFrame{
         new File (resDoc.getSourceUrl().getFile()).getName() : resDoc.getName();
       fileName += "_" + annTypeCombo.getSelectedItem().toString() + ".html";
       fileChooser.setFileName(fileName);
-      int res = fileChooser.showSaveDialog(AnnotationDiffGUI.this,
-        AnnotationDiffGUI.class.getName());
+      fileChooser.setResource(AnnotationDiffGUI.class.getName());
+      int res = fileChooser.showSaveDialog(AnnotationDiffGUI.this);
       if (res != JFileChooser.APPROVE_OPTION) { return; }
 
       File saveFile = fileChooser.getSelectedFile();
