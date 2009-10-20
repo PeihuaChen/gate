@@ -428,7 +428,7 @@
   <filelist id="plugins.to.build" dir="plugins"
     files="TaggerFramework Chemistry_Tagger Jape_Compiler Kea Machine_Learning Minipar
        Ontology Ontology_OWLIM2 Ontology_Tools  Ontology_Based_Gazetteer
-       Montreal_Transducer NP_Chunking TreeTagger
+       NP_Chunking TreeTagger
        Stanford 
        lkb_gazetteer
        arabic bdmComputation cebuano chinese copyAS2AnoDoc crawl google hindi alignment annotationMerging
