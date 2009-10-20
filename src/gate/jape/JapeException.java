@@ -30,9 +30,31 @@ public class JapeException extends GateException {
   public JapeException(String message) {
     super(message);
   }
+  
+  public JapeException(String message, Throwable cause) {
+    super(message, cause);
+  }
 
   public JapeException() {
     super();
+  }
+  
+  /**
+   * The location of the error.
+   */
+  String location = null;
+  
+  void setLocation(String location) {
+    this.location = location;
+  }
+  
+  public String getMessage() {
+    if(location != null) {
+      return super.getMessage() + " (at " + location + ")";
+    }
+    else {
+      return super.getMessage();
+    }
   }
 
 } // class JapeException

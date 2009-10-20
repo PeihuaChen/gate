@@ -183,11 +183,9 @@ implements JapeConstants, java.io.Serializable
         }
         fireStatusChanged("");
       } catch(JapeException e) {
-        String errorMessage = new String(
-          "Error transducing document " + doc.getName() +
-          ", phase " + t.getName() + Strings.getNl() + e.getMessage()
-        );
-        throw(new JapeException(errorMessage));
+        String location = "phase " + t.getName() + ", document " + doc.getName();
+        e.setLocation(location);
+        throw e;
       }
     }
 
