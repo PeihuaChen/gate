@@ -258,11 +258,8 @@ public class Gate implements GateConstants {
     if(userConfigFile == null) {
       String userConfigStr = System.getProperty(USER_CONFIG_PROPERTY_NAME);
       if(userConfigStr != null && userConfigStr.length() > 0) {
-        File configFile = new File(userConfigStr);
-        if(configFile.exists()) userConfigFile = configFile;
-      }
-      // if still not set, use the user's home as a base directory
-      if(userConfigFile == null) {
+        userConfigFile = new File(userConfigStr);
+      } else {
         userConfigFile = new File(getDefaultUserConfigFileName());
       }
     }
