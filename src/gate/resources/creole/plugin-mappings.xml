@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!-- This file is used for mapping old plugin names to their new names -->
+<Mappings>
+  <!-- Example entry below
+  <Plugin>
+    <OldName>alignment</OldName>
+    <NewName>Alignment</NewName>
+  </Plugin>
+  -->
+</Mappings>
