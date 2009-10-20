@@ -1285,10 +1285,25 @@ String ConsumeBlock() {
   StringBuffer block = new StringBuffer(); // to collect the block in
   int nesting = 1; // the first "{" was consumed before we were called
 
+  // this is the first 'proper' token in the block
+  Token nextTok = getNextToken();
+
+  // for line numbers in the original Jape we want the first
+  // token, normal or special (i.e. comments) so look back from
+  // the first 'proper' token until we get back to the token
+  // after the opening brace 
+  Token blockStart = nextTok;
+  while (blockStart.specialToken != null) {
+    blockStart = blockStart.specialToken;
+  }
+  
+  // append the info about the source Jape to the beginning
+  // of the loaded source Java block
+  block.append("  // JAPE Source: " + baseURL+":" + blockStart.beginLine + "\n");
+
   // step through the code until the final brace
   while(nesting != 0) {
-    Token nextTok = getNextToken();
-
+    
     // add in any preceding spaces and comments
     appendSpecials(nextTok.specialToken, block);
 
@@ -1314,10 +1329,15 @@ String ConsumeBlock() {
     }
     /*Debug.pr(this, "ParseCpsl.ConsumeBlock: nextTok.image = ^" +
              nextTok.image + "^");*/
+             
+	// if we haven't worked all the way out of the nesting
+	// then get the next token
+	if (nesting != 0) nextTok = getNextToken();
 
   } // while
 
   /*Debug.pr(this, "ParseCpsl.ConsumeBlock: block = " + block.toString());*/
+  
   return block.toString();
 } // ConsumeBlock
 
