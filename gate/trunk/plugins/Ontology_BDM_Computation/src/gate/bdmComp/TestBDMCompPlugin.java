@@ -35,7 +35,7 @@ public class TestBDMCompPlugin extends TestCase {
         "Ontology_OWLIM2");
       Gate.getCreoleRegister().addDirectory(owlimPluginHome.toURI().toURL());
       bdmPluginHome = new File(new File(Gate.getGateHome(), "plugins"),
-        "bdmComputation");
+        "Ontology_BDM_Computation");
       Gate.getCreoleRegister().addDirectory(bdmPluginHome.toURI().toURL());
       initialized = true;
     }
