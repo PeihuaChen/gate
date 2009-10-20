@@ -431,7 +431,7 @@
        NP_Chunking TreeTagger
        Stanford 
        lkb_gazetteer
-       arabic bdmComputation cebuano chinese copyAS2AnoDoc crawl google hindi alignment annotationMerging
+       arabic bdmComputation cebuano chinese copyAS2AnoDoc crawl google hindi Alignment annotationMerging
        learning chineseSegmenter iaaPlugin rasp romanian Stemmer uima yahoo 
        OpenCalais LingPipe" 
    />
