@@ -79,7 +79,16 @@ public interface OntologyTupleQuery
    * @param varName the name of the variable
    * @param value the value to assign to the variable
    */
-  public void setBinding(String varName, LiteralOrONodeID value);
+  public void setBinding(String varName, Literal value);
+  /**
+   * Set the binding of a query variable to a new value. This can be used
+   * to re-use a query with different variable bindings without recompiling
+   * it.
+   *
+   * @param varName the name of the variable
+   * @param value the value to assign to the variable
+   */
+  public void setBinding(String varName, ONodeID value);
   /**
    * Evaluate the tuple query (again). This method is optional but can
    * be used to explicitly re-evaluate the query after variable bindings
