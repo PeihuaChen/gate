@@ -177,7 +177,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
     actionClassString.append(
       "    if(" + name + "Annots != null && " + name +
-      "Annots.size() != 0) { " + nl + "      ");
+      "Annots.size() != 0) { " + nl);
       
     actionClassString.append(storeSourceInfo(namedBlock));
       
@@ -196,12 +196,12 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     int lineNumber = Integer
             .parseInt(info.substring(info.lastIndexOf(":") + 1));
 
-    int startLine = actionClassString.toString().split("\n").length;
+    int startLine = actionClassString.toString().split("\n").length + 1;
     int endLine = startLine + code.split("\n").length;
 
     int startOffset = actionClassString.length();
     int endOfset = actionClassString.length() + code.length();
-
+    
     sourceInfo.add(new SourceInfo(japeURL, lineNumber, startLine, endLine,
             startOffset, endOfset));
 
