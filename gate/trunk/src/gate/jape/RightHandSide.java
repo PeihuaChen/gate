@@ -245,8 +245,6 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
         }
 
         stack.add(japeSTE != null ? japeSTE : ste);
-
-        break;
       }
       else {
         stack.add(ste);
@@ -357,22 +355,29 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
       Err.println("The issue occurred during execution of rule '"+getRuleName()+"' in phase '"+getPhaseName()+"':");
       if (t != null) {
         enhanceTheThrowable(t);
-        StringWriter stackTraceWriter = new StringWriter();
-        t.printStackTrace(new PrintWriter(stackTraceWriter));
-        Err.println(stackTraceWriter.getBuffer());        
+        t.printStackTrace(Err.getPrintWriter());
       } else {
         Err.println("Line number and exception details are not available!");
       }
-    } catch (Exception e) {
+    } catch (Throwable e) {
       // if the action class throws an exception, re-throw it with a
       // full description of the problem, inc. stack trace and the RHS
       // action class code
       enhanceTheThrowable(e);
-      StringWriter stackTraceWriter = new StringWriter();
-      e.printStackTrace(new PrintWriter(stackTraceWriter));
-      throw new JapeException(
-        "Couldn't run RHS action over document '"+doc.getName()+"': " + Strings.getNl() +
-        stackTraceWriter.getBuffer().toString());
+      if(e instanceof Error) {
+        throw (Error)e;
+      }
+      if(e instanceof JapeException) {
+        throw (JapeException)e;
+      }
+      else if(e instanceof RuntimeException) {
+        throw (RuntimeException)e;
+      }
+      else {
+        // shouldn't happen...
+        throw new JapeException(
+          "Couldn't run RHS action", e);
+      }
     }
   } // transduce
 
