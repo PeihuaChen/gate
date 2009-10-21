@@ -425,7 +425,7 @@
        Gazetteer_LKB Lang_Arabic Ontology_BDM_Computation Lang_Cebuano 
        Lang_Chinese Copy_Annots_Between_Docs Web_Crawler_Websphinx 
        Web_Search_Google Lang_Hindi Alignment Annotation_Merging
-       Segmenter_Chinese Inter_Annotator_Agreement Parser_RASP Lang_Romanian 
+       learning Segmenter_Chinese Inter_Annotator_Agreement Parser_RASP Lang_Romanian 
        Stemmer_Snowball UIMA Web_Search_Yahoo Tagger_OpenCalais LingPipe
        Tagger_Abner" 
    />
