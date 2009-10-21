@@ -790,6 +790,9 @@ public class PersistenceManager {
 
       registerPersitentEquivalent(ConditionalController.class,
               ConditionalControllerPersistence.class);
+      
+      registerPersitentEquivalent(ConditionalSerialAnalyserController.class,
+              ConditionalSerialAnalyserControllerPersistence.class);
 
       registerPersitentEquivalent(LanguageAnalyser.class,
               LanguageAnalyserPersistence.class);
@@ -799,6 +802,7 @@ public class PersistenceManager {
 
       registerPersitentEquivalent(gate.persist.JDBCDataStore.class,
               JDBCDSPersistence.class);
+      
       registerPersitentEquivalent(gate.creole.AnalyserRunningStrategy.class,
               AnalyserRunningStrategyPersistence.class);
     }
