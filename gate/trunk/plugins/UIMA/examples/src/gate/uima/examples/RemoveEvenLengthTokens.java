@@ -11,13 +11,13 @@
  */
 package gate.uima.examples;
 
-import com.ibm.uima.analysis_engine.annotator.JTextAnnotator_ImplBase;
-import com.ibm.uima.analysis_engine.annotator.AnnotatorProcessException;
-import com.ibm.uima.analysis_engine.ResultSpecification;
-import com.ibm.uima.jcas.impl.JCas;
-import com.ibm.uima.jcas.JFSIndexRepository;
-import com.ibm.uima.cas.FSIndex;
-import com.ibm.uima.cas.FSIndexRepository;
+import org.apache.uima.analysis_engine.annotator.JTextAnnotator_ImplBase;
+import org.apache.uima.analysis_engine.annotator.AnnotatorProcessException;
+import org.apache.uima.analysis_engine.ResultSpecification;
+import org.apache.uima.jcas.JCas;
+import org.apache.uima.jcas.JFSIndexRepository;
+import org.apache.uima.cas.FSIndex;
+import org.apache.uima.cas.FSIndexRepository;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;

@@ -11,12 +11,12 @@
  */
 package gate.uima.mapping;
 
-import com.ibm.uima.cas.TypeSystem;
-import com.ibm.uima.cas.text.TCAS;
+import org.apache.uima.cas.TypeSystem;
+import org.apache.uima.cas.CAS;
 import gate.Document;
 import gate.Annotation;
 import gate.AnnotationSet;
-import com.ibm.uima.cas.FeatureStructure;
+import org.apache.uima.cas.FeatureStructure;
 import org.jdom.Element;
 
 /**
@@ -40,7 +40,7 @@ public class StringBuilder implements ObjectBuilder {
   /**
    * Returns the specified String value.
    */
-  public Object buildObject(TCAS cas, Document doc, AnnotationSet annSet,
+  public Object buildObject(CAS cas, Document doc, AnnotationSet annSet,
       Annotation currentAnn, FeatureStructure currentFS) {
     return stringValue;
   }

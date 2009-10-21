@@ -14,8 +14,8 @@
 <!-- Descriptor for the type system used by AnalysisEnginePR for the index that
 relates UIMA annotations to the GATE annotations they were created from.  This
 will be merged with the type system from the chosen analysis engine to produce
-a TCAS for use by the AnalysisEnginePR -->
-<analysisEngineMetaData xmlns="http://uima.watson.ibm.com/resourceSpecifier">
+a CAS for use by the AnalysisEnginePR -->
+<analysisEngineMetaData xmlns="http://uima.apache.org/resourceSpecifier">
   <name>GATE/UIMA mapping index</name>
   <version>1.0</version>
   <vendor>GATE</vendor>

@@ -15,7 +15,7 @@ import java.util.*;
 import java.io.InputStream;
 import java.io.IOException;
 
-import com.ibm.uima.cas.TypeSystem;
+import org.apache.uima.cas.TypeSystem;
 import org.jdom.Element;
 
 public class ObjectManager {

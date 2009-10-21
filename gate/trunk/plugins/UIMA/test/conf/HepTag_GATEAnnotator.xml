@@ -13,8 +13,8 @@
 
 <!-- GATE application that adds part-of-speech tags to UIMA tokens -->
 
-<taeDescription xmlns="http://uima.watson.ibm.com/resourceSpecifier">
-<frameworkImplementation>com.ibm.uima.java</frameworkImplementation>
+<taeDescription xmlns="http://uima.apache.org/resourceSpecifier">
+<frameworkImplementation>org.apache.uima.java</frameworkImplementation>
 <primitive>true</primitive>
 <annotatorImplementationName>gate.uima.GATEApplicationAnnotator</annotatorImplementationName>
  
@@ -32,7 +32,7 @@ those the annotation mapping expects, or the behavious is not defined. -->
   <typeSystemDescription>
     <types>
       <typeDescription>
-        <name>com.ibm.uima.examples.tokenizer.Token</name>
+        <name>org.apache.uima.examples.tokenizer.Token</name>
         <description></description>
         <supertypeName>uima.tcas.Annotation</supertypeName>
         <features>
@@ -44,7 +44,7 @@ those the annotation mapping expects, or the behavious is not defined. -->
         </features>
       </typeDescription>
       <typeDescription>
-        <name>com.ibm.uima.examples.tokenizer.Sentence</name>
+        <name>org.apache.uima.examples.tokenizer.Sentence</name>
         <description></description>
         <supertypeName>uima.tcas.Annotation</supertypeName>
       </typeDescription>
@@ -57,11 +57,11 @@ match what the particular GATE application will produce, or an error may occur
   <capabilities>
     <capability>
       <inputs>
-        <type>com.ibm.uima.examples.tokenizer.Sentence</type>
-        <type>com.ibm.uima.examples.tokenizer.Token</type>
+        <type>org.apache.uima.examples.tokenizer.Sentence</type>
+        <type>org.apache.uima.examples.tokenizer.Token</type>
       </inputs>
       <outputs>
-        <feature>com.ibm.uima.examples.tokenizer.Token:POS</feature>
+        <feature>org.apache.uima.examples.tokenizer.Token:POS</feature>
       </outputs>
       <languagesSupported>
         <language>en</language>

@@ -31,34 +31,33 @@ import java.util.HashMap;
 import java.util.Arrays;
 
 // UIMA imports
-import com.ibm.uima.UIMAFramework;
-import com.ibm.uima.util.XMLParser;
-import com.ibm.uima.util.XMLInputSource;
-import com.ibm.uima.util.InvalidXMLException;
-import com.ibm.uima.util.ProcessTrace;
-import com.ibm.uima.util.CasCreationUtils;
-import com.ibm.uima.analysis_engine.TextAnalysisEngine;
-import com.ibm.uima.analysis_engine.AnalysisEngineProcessException;
-import com.ibm.uima.resource.ResourceInitializationException;
-import com.ibm.uima.resource.ResourceSpecifier;
-import com.ibm.uima.resource.metadata.ResourceMetaData;
-import com.ibm.uima.cas.CASRuntimeException;
-import com.ibm.uima.cas.FeatureStructure;
-import com.ibm.uima.cas.Type;
-import com.ibm.uima.cas.Feature;
-import com.ibm.uima.cas.TypeSystem;
-import com.ibm.uima.cas.FSIndexRepository;
-import com.ibm.uima.cas.FSIndex;
-import com.ibm.uima.cas.FSIterator;
-import com.ibm.uima.cas.ConstraintFactory;
-import com.ibm.uima.cas.FSMatchConstraint;
-import com.ibm.uima.cas.FSStringConstraint;
-import com.ibm.uima.cas.FeaturePath;
-import com.ibm.uima.cas.text.TCAS;
-import com.ibm.uima.cas.text.AnnotationFS;
-import com.ibm.uima.cas.text.TCASRuntimeException;
+import org.apache.uima.UIMAFramework;
+import org.apache.uima.util.XMLParser;
+import org.apache.uima.util.XMLInputSource;
+import org.apache.uima.util.InvalidXMLException;
+import org.apache.uima.util.ProcessTrace;
+import org.apache.uima.util.CasCreationUtils;
+import org.apache.uima.analysis_engine.AnalysisEngine;
+import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
+import org.apache.uima.resource.ResourceInitializationException;
+import org.apache.uima.resource.ResourceSpecifier;
+import org.apache.uima.resource.metadata.ResourceMetaData;
+import org.apache.uima.cas.CASRuntimeException;
+import org.apache.uima.cas.FeatureStructure;
+import org.apache.uima.cas.Type;
+import org.apache.uima.cas.Feature;
+import org.apache.uima.cas.TypeSystem;
+import org.apache.uima.cas.FSIndexRepository;
+import org.apache.uima.cas.FSIndex;
+import org.apache.uima.cas.FSIterator;
+import org.apache.uima.cas.ConstraintFactory;
+import org.apache.uima.cas.FSMatchConstraint;
+import org.apache.uima.cas.FSStringConstraint;
+import org.apache.uima.cas.FeaturePath;
+import org.apache.uima.cas.CAS;
+import org.apache.uima.cas.text.AnnotationFS;
 
-import com.ibm.uima.cas.impl.XCASSerializer;
+import org.apache.uima.cas.impl.XCASSerializer;
 
 // JDOM imports
 import org.jdom.Document;
@@ -145,12 +144,12 @@ public class AnalysisEnginePR extends AbstractLanguageAnalyser {
   /**
    * The UIMA analysis engine that actually does the work.
    */
-  private TextAnalysisEngine analysisEngine;
+  private AnalysisEngine analysisEngine;
 
   /**
    * The CAS used to pass annotations into and out of the TAE.
    */
-  private TCAS tcas;
+  private CAS cas;
 
   /**
    * A List of ObjectBuilders defining the input mappings of GATE annotations
@@ -249,7 +248,7 @@ public class AnalysisEnginePR extends AbstractLanguageAnalyser {
       ResourceSpecifier taeDescription =
         uimaXMLParser.parseResourceSpecifier(aeDescriptorSource);
 
-      analysisEngine = UIMAFramework.produceTAE(taeDescription);
+      analysisEngine = UIMAFramework.produceAnalysisEngine(taeDescription);
 
       // load our GATE-specific type system and index information
       XMLInputSource gateIndexSource = new XMLInputSource(
@@ -266,7 +265,7 @@ public class AnalysisEnginePR extends AbstractLanguageAnalyser {
            gateIndexDescription});
 
       //tcas = analysisEngine.newTCAS();
-      tcas = CasCreationUtils.createTCas(casSpecs);
+      cas = CasCreationUtils.createCas(casSpecs);
     }
     catch(IOException ioe) {
       throw new ResourceInstantiationException(ioe);
@@ -313,9 +312,9 @@ public class AnalysisEnginePR extends AbstractLanguageAnalyser {
         .initCause(ioe);
     }
 
-    processMappingDescriptor(configDoc, tcas.getTypeSystem());
+    processMappingDescriptor(configDoc, cas.getTypeSystem());
 
-    initUimaGateIndex(tcas.getTypeSystem());
+    initUimaGateIndex(cas.getTypeSystem());
 
     return this;
   }
@@ -331,14 +330,14 @@ public class AnalysisEnginePR extends AbstractLanguageAnalyser {
     try {
       // populate the CAS with the text and input annotations according to
       // mapping
-      tcas.setDocumentText(document.getContent().toString());
+      cas.setDocumentText(document.getContent().toString());
       mapInputAnnotations();
 
       if(DEBUG) {
         File logfile = new File("casBefore.xml");
         try {
           FileOutputStream fos = new FileOutputStream(logfile);
-          XCASSerializer.serialize(tcas, fos);
+          XCASSerializer.serialize(cas, fos);
           fos.close();
         }
         catch(Exception ex) {
@@ -347,7 +346,7 @@ public class AnalysisEnginePR extends AbstractLanguageAnalyser {
       }
       
       // run the AE
-      ProcessTrace trace = analysisEngine.process(tcas);
+      ProcessTrace trace = analysisEngine.process(cas);
 
       if(DEBUG) {
       /*  FSIndex annIndex = tcas.getAnnotationIndex();
@@ -365,7 +364,7 @@ public class AnalysisEnginePR extends AbstractLanguageAnalyser {
         File logfile = new File("casAfter.xml");
         try {
           FileOutputStream fos = new FileOutputStream(logfile);
-          XCASSerializer.serialize(tcas, fos);
+          XCASSerializer.serialize(cas, fos);
           fos.close();
         }
         catch(Exception ex) {
@@ -381,13 +380,13 @@ public class AnalysisEnginePR extends AbstractLanguageAnalyser {
     catch(AnalysisEngineProcessException aepe) {
       throw new ExecutionException(aepe);
     }
-    catch(TCASRuntimeException tre) {
+    catch(CASRuntimeException tre) {
       throw new ExecutionException(tre);
     }
     finally {
       try {
         // clear out the CAS ready for the next document
-        tcas.reset();
+        cas.reset();
         clearIndexes();
       }
       catch(CASRuntimeException cre) {
@@ -411,7 +410,7 @@ public class AnalysisEnginePR extends AbstractLanguageAnalyser {
 
     // get the UIMA index repository, to which generated feature structures
     // will be added
-    FSIndexRepository uimaIndexes = tcas.getIndexRepository();
+    FSIndexRepository uimaIndexes = cas.getIndexRepository();
     if(uimaIndexes == null) {
       throw new ExecutionException("No index repository found for CAS - "
           + "there should be at least the AnnotationIndex");
@@ -447,7 +446,7 @@ public class AnalysisEnginePR extends AbstractLanguageAnalyser {
             gate.Annotation gateAnnot = (gate.Annotation)annotsToMapIt.next();
             try {
               AnnotationFS uimaAnnot =
-                (AnnotationFS)annotBuilder.buildObject(tcas, document,
+                (AnnotationFS)annotBuilder.buildObject(cas, document,
                                                        sourceSet, gateAnnot,
                                                        null);
               // add to UIMA index repository - this is important
@@ -470,7 +469,7 @@ public class AnalysisEnginePR extends AbstractLanguageAnalyser {
         // result to the CAS
         try {
           FeatureStructure fs =
-            (FeatureStructure)fsBuilder.buildObject(tcas, document, sourceSet,
+            (FeatureStructure)fsBuilder.buildObject(cas, document, sourceSet,
                                                     null, null);
           
           uimaIndexes.addFS(fs);
@@ -489,7 +488,7 @@ public class AnalysisEnginePR extends AbstractLanguageAnalyser {
    * GATE.
    */
   private void mapOutputs() throws ExecutionException {
-    FSIndexRepository uimaIndexes = tcas.getIndexRepository();
+    FSIndexRepository uimaIndexes = cas.getIndexRepository();
     if(uimaIndexes == null) {
       throw new ExecutionException("No index repository found for CAS - "
           + "there should be at least the AnnotationIndex");
@@ -514,12 +513,12 @@ public class AnalysisEnginePR extends AbstractLanguageAnalyser {
         // iterate over all the UIMA annotations of the appropriate type and
         // create GATE annotations to correspond
         Type uimaAnnotationType = outputBuilder.getUimaType();
-        FSIndex uimaIndex = tcas.getAnnotationIndex(uimaAnnotationType);
+        FSIndex uimaIndex = cas.getAnnotationIndex(uimaAnnotationType);
         Iterator uimaIndexIt = uimaIndex.iterator();
         while(uimaIndexIt.hasNext()) {
           FeatureStructure uimaAnn = (FeatureStructure)uimaIndexIt.next();
           try {
-            outputBuilder.buildObject(tcas, document, annSet, null, uimaAnn);
+            outputBuilder.buildObject(cas, document, annSet, null, uimaAnn);
           }
           catch(MappingException mx) {
             throw (ExecutionException)
@@ -551,7 +550,7 @@ public class AnalysisEnginePR extends AbstractLanguageAnalyser {
           FeatureStructure uimaAnnot = getUIMAAnnotationFromIndex(indexEntry);
           Annotation gateAnnot = getGATEAnnotationFromIndex(indexEntry, annSet);
           try {
-            outputBuilder.updateFeatures(tcas, document, annSet, gateAnnot,
+            outputBuilder.updateFeatures(cas, document, annSet, gateAnnot,
                 uimaAnnot);
           }
           catch(MappingException mx) {
@@ -565,7 +564,7 @@ public class AnalysisEnginePR extends AbstractLanguageAnalyser {
 
     // removed annotations
     if(!outputsRemoved.isEmpty()) {
-      FSIndex allAnnotationsIndex = tcas.getAnnotationIndex();
+      FSIndex allAnnotationsIndex = cas.getAnnotationIndex();
       Iterator outputsRemovedIt = outputsRemoved.iterator();
       while(outputsRemovedIt.hasNext()) {
         GateAnnotationBuilder outputBuilder =
@@ -661,14 +660,14 @@ public class AnalysisEnginePR extends AbstractLanguageAnalyser {
           + " in type system");
     }
 
-    FSIndexRepository uimaIndexes = tcas.getIndexRepository();
+    FSIndexRepository uimaIndexes = cas.getIndexRepository();
     gateFSIndex = uimaIndexes.getIndex(GATE_INDEX_LABEL);
     if(gateFSIndex == null) {
       throw new ResourceInstantiationException("Couldn't find GATE index "
           + "in UIMA index repository");
     }
 
-    gateAnnotationTypePath = tcas.createFeaturePath();
+    gateAnnotationTypePath = cas.createFeaturePath();
     gateAnnotationTypePath.addFeature(
         annotationSource_GATEAnnotationTypeFeature);
   }
@@ -687,14 +686,14 @@ public class AnalysisEnginePR extends AbstractLanguageAnalyser {
   private void addToUimaGateIndex(AnnotationFS uimaAnnot,
                                   gate.Annotation gateAnnot) {
     //uimaGateIndex.put(uimaAnnot, gateAnnot.getId());
-    FeatureStructure indexEntry = tcas.createFS(annotationSourceType);
+    FeatureStructure indexEntry = cas.createFS(annotationSourceType);
     indexEntry.setFeatureValue(annotationSource_UIMAAnnotationFeature,
         uimaAnnot);
     indexEntry.setIntValue(annotationSource_GATEAnnotationIDFeature,
         gateAnnot.getId().intValue());
     indexEntry.setStringValue(annotationSource_GATEAnnotationTypeFeature,
         gateAnnot.getType());
-    tcas.getIndexRepository().addFS(indexEntry);
+    cas.getIndexRepository().addFS(indexEntry);
     
     if(DEBUG) {
       System.out.println("Put annotation " + gateAnnot + " into index.");
@@ -706,7 +705,7 @@ public class AnalysisEnginePR extends AbstractLanguageAnalyser {
    * refer to the specified type of GATE annotation.
    */
   private FSIterator getIndexIterator(String gateAnnotType) {
-    ConstraintFactory cf = tcas.getConstraintFactory();
+    ConstraintFactory cf = cas.getConstraintFactory();
     // construct a matching constraint to allow us to iterate over only
     // those index entries that refer to the right kind of GATE annotation
     FSStringConstraint annotTypeConstraint = cf.createStringConstraint();
@@ -716,7 +715,7 @@ public class AnalysisEnginePR extends AbstractLanguageAnalyser {
       cf.embedConstraint(gateAnnotationTypePath, annotTypeConstraint);
 
     FSIterator allIndexEntriesIt = gateFSIndex.iterator();
-    FSIterator indexIt = tcas.createFilteredIterator(
+    FSIterator indexIt = cas.createFilteredIterator(
         allIndexEntriesIt, matchConstraint);
 
     return indexIt;

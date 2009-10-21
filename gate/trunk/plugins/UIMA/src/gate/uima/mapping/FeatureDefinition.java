@@ -11,7 +11,7 @@
  */
 package gate.uima.mapping;
 
-import com.ibm.uima.cas.Feature;
+import org.apache.uima.cas.Feature;
 
 /**
  * Represents a single feature definition (GATE or UIMA) in a mapping.

@@ -36,14 +36,14 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import com.ibm.uima.analysis_engine.annotator.*;
-import com.ibm.uima.analysis_engine.ResultSpecification;
-import com.ibm.uima.cas.TypeSystem;
-import com.ibm.uima.cas.Type;
-import com.ibm.uima.cas.FeatureStructure;
-import com.ibm.uima.cas.FSIterator;
-import com.ibm.uima.cas.FSIndexRepository;
-import com.ibm.uima.cas.text.TCAS;
+import org.apache.uima.analysis_engine.annotator.*;
+import org.apache.uima.analysis_engine.ResultSpecification;
+import org.apache.uima.cas.TypeSystem;
+import org.apache.uima.cas.Type;
+import org.apache.uima.cas.FeatureStructure;
+import org.apache.uima.cas.FSIterator;
+import org.apache.uima.cas.FSIndexRepository;
+import org.apache.uima.cas.CAS;
 
 /**
  * UIMA annotator that encapsulates a GATE processing pipeline.
@@ -71,11 +71,9 @@ public class GATEApplicationAnnotator extends Annotator_ImplBase
   public static final String SITE_CONFIG_PROPERTY = "uima.gate.siteconfig";
   public static final String USER_CONFIG_PROPERTY = "uima.gate.userconfig";
 
-  private static boolean gateInited = false;
-
   private static synchronized void initGate()
                   throws AnnotatorInitializationException {
-    if(!gateInited) {
+    if(!Gate.isInitialised()) {
       try {
         File gateConfigDir = null;
         String gateConfigDirPath = System.getProperty(CONFIG_DIR_PROPERTY);
@@ -150,7 +148,6 @@ public class GATEApplicationAnnotator extends Annotator_ImplBase
         throw new AnnotatorInitializationException(
             MESSAGE_DIGEST, "gate_init_exception", new Object[0], gx);
       }
-      gateInited = true;
     }
   }
 
@@ -393,9 +390,9 @@ public class GATEApplicationAnnotator extends Annotator_ImplBase
   }
 
  
-  public void process(TCAS tcas, ResultSpecification resultSpec)
+  public void process(CAS cas, ResultSpecification resultSpec)
                   throws AnnotatorProcessException {
-    String docText = tcas.getDocumentText();
+    String docText = cas.getDocumentText();
     gate.Document gateDoc = null;
     try {
       gateDoc = Factory.newDocument(docText);
@@ -406,13 +403,13 @@ public class GATEApplicationAnnotator extends Annotator_ImplBase
     }
 
     try {
-      mapInputAnnotations(tcas, gateDoc);
+      mapInputAnnotations(cas, gateDoc);
 
       gateCorpus.add(gateDoc);
       
       gateApplication.execute();
 
-      mapOutputs(tcas, gateDoc);
+      mapOutputs(cas, gateDoc);
     }
     catch(ExecutionException ex) {
       throw new AnnotatorProcessException(MESSAGE_DIGEST,
@@ -430,7 +427,7 @@ public class GATEApplicationAnnotator extends Annotator_ImplBase
     }
   }
 
-  private void mapInputAnnotations(TCAS tcas, gate.Document gateDoc)
+  private void mapInputAnnotations(CAS cas, gate.Document gateDoc)
                           throws MappingException, AnnotatorProcessException {
     // nothing to do if there are no input mappings
     if(inputMappings == null || inputMappings.isEmpty()) {
@@ -458,13 +455,13 @@ public class GATEApplicationAnnotator extends Annotator_ImplBase
 
         Type uimaType = gab.getUimaType();
         String gateType = gab.getGateType();
-        FSIterator annotsToMap = tcas.getAnnotationIndex(uimaType).iterator();
+        FSIterator annotsToMap = cas.getAnnotationIndex(uimaType).iterator();
         while(annotsToMap.hasNext()) {
           FeatureStructure uimaAnnot = (FeatureStructure)annotsToMap.next();
 
           // create the annotation in the given annotation set
           Integer id = (Integer)
-            gab.buildObject(tcas, gateDoc, annSet, null, uimaAnnot);
+            gab.buildObject(cas, gateDoc, annSet, null, uimaAnnot);
           // add to index
           addToUimaGateIndex(uimaAnnot, (String)mappingSet.getKey(),
                              gateType, id);
@@ -473,9 +470,9 @@ public class GATEApplicationAnnotator extends Annotator_ImplBase
     }
   }
 
-  private void mapOutputs(TCAS tcas, gate.Document gateDoc)
+  private void mapOutputs(CAS cas, gate.Document gateDoc)
                           throws MappingException, AnnotatorProcessException {
-    FSIndexRepository uimaIndexes = tcas.getIndexRepository();
+    FSIndexRepository uimaIndexes = cas.getIndexRepository();
     // added
     if(!outputsAdded.isEmpty()) {
       Iterator outputsAddedIt = outputsAdded.iterator();
@@ -504,7 +501,7 @@ public class GATEApplicationAnnotator extends Annotator_ImplBase
             while(annotsIt.hasNext()) {
               gate.Annotation ann = (gate.Annotation)annotsIt.next();
               FeatureStructure uimaAnn = (FeatureStructure)
-                annotBuilder.buildObject(tcas, gateDoc, annSet, ann, null);
+                annotBuilder.buildObject(cas, gateDoc, annSet, ann, null);
               uimaIndexes.addFS(uimaAnn);
             }
           }
@@ -512,7 +509,7 @@ public class GATEApplicationAnnotator extends Annotator_ImplBase
         else {
           // non-Annotation FS, so just build one object and add it
           FeatureStructure fs = (FeatureStructure)
-            fsBuilder.buildObject(tcas, gateDoc, null, null, null);
+            fsBuilder.buildObject(cas, gateDoc, null, null, null);
           uimaIndexes.addFS(fs);
         }
       }
@@ -552,7 +549,7 @@ public class GATEApplicationAnnotator extends Annotator_ImplBase
                 // remove from indexes during update, in case we change the
                 // value of any features which are keys in an index.
                 uimaIndexes.removeFS(uimaAnn);
-                annotBuilder.populateFeatures(uimaAnn, tcas, gateDoc,
+                annotBuilder.populateFeatures(uimaAnn, cas, gateDoc,
                     annSet, ann, null);
                 uimaIndexes.addFS(uimaAnn);
               }

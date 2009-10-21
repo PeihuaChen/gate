@@ -13,7 +13,7 @@
 <deployment name="Vinci Token Handler Service">
   <service name="gate.uima.TokenHandlerService" provider="vinci">
     <parameter name="serializerClassName"
-               value="com.ibm.uima.reference_impl.analysis_engine.service.vinci.VinciXCASSerializer_NoDocText"/>
+               value="org.apache.uima.adapter.vinci.VinciXCASSerializer_NoDocText"/>
 
     <parameter name="resourceSpecifierPath" value="uima_descriptors/TokenHandlerAggregate.xml"/>
 

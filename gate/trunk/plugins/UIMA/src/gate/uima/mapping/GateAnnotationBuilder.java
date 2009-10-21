@@ -11,17 +11,17 @@
  */
 package gate.uima.mapping;
 
-import com.ibm.uima.cas.TypeSystem;
-import com.ibm.uima.cas.Type;
-import com.ibm.uima.cas.Feature;
-import com.ibm.uima.cas.text.TCAS;
+import org.apache.uima.cas.TypeSystem;
+import org.apache.uima.cas.Type;
+import org.apache.uima.cas.Feature;
+import org.apache.uima.cas.CAS;
 import gate.Document;
 import gate.Annotation;
 import gate.AnnotationSet;
 import gate.FeatureMap;
 import gate.Factory;
 import gate.util.InvalidOffsetException;
-import com.ibm.uima.cas.FeatureStructure;
+import org.apache.uima.cas.FeatureStructure;
 import org.jdom.Element;
 import java.util.List;
 import java.util.ArrayList;
@@ -102,24 +102,24 @@ public class GateAnnotationBuilder implements ObjectBuilder {
           + " not found in UIMA type system");
     }
 
-    if(!typeSystem.subsumes(typeSystem.getType(TCAS.TYPE_NAME_ANNOTATION),
+    if(!typeSystem.subsumes(typeSystem.getType(CAS.TYPE_NAME_ANNOTATION),
                             uimaType)) {
       throw new MappingException("Type " + uimaTypeString
           + " is not an annotation type");
     }
 
     uimaAnnotationBeginFeature = typeSystem.getFeatureByFullName(
-         TCAS.FEATURE_FULL_NAME_BEGIN);
+         CAS.FEATURE_FULL_NAME_BEGIN);
     if(uimaAnnotationBeginFeature == null) {
-      throw new MappingException(TCAS.FEATURE_FULL_NAME_BEGIN + " feature not "
-          + "found in type system - are you sure CAS is a TCAS?");
+      throw new MappingException(CAS.FEATURE_FULL_NAME_BEGIN + " feature not "
+          + "found in type system - are you sure CAS is a CAS?");
     }
 
     uimaAnnotationEndFeature = typeSystem.getFeatureByFullName(
-         TCAS.FEATURE_FULL_NAME_END);
+         CAS.FEATURE_FULL_NAME_END);
     if(uimaAnnotationEndFeature == null) {
-      throw new MappingException(TCAS.FEATURE_FULL_NAME_END + " feature not "
-          + "found in type system - are you sure CAS is a TCAS?");
+      throw new MappingException(CAS.FEATURE_FULL_NAME_END + " feature not "
+          + "found in type system - are you sure CAS is a CAS?");
     }
 
     String indexedString = elt.getAttributeValue("indexed");
@@ -156,7 +156,7 @@ public class GateAnnotationBuilder implements ObjectBuilder {
   /**
    * Create a GATE annotation in the given annotation set and return its ID.
    */
-  public Object buildObject(TCAS cas, Document doc, AnnotationSet annSet,
+  public Object buildObject(CAS cas, Document doc, AnnotationSet annSet,
       Annotation currentAnn, FeatureStructure currentFS)
           throws MappingException {
     //if(!(currentFS instanceof AnnotationFS)) {
@@ -186,7 +186,7 @@ public class GateAnnotationBuilder implements ObjectBuilder {
    * Updates the features of an existing annotation based on this builder's
    * list of feature definitions.
    */
-  public void updateFeatures(TCAS cas, Document doc, AnnotationSet annSet,
+  public void updateFeatures(CAS cas, Document doc, AnnotationSet annSet,
       Annotation currentAnn, FeatureStructure currentFS)
           throws MappingException {
     //if(!(currentFS instanceof AnnotationFS)) {
@@ -203,7 +203,7 @@ public class GateAnnotationBuilder implements ObjectBuilder {
   /**
    * Removes the current annotation from the annotation set.
    */
-  public void removeAnnotation(TCAS cas, Document doc, AnnotationSet annSet,
+  public void removeAnnotation(CAS cas, Document doc, AnnotationSet annSet,
       Annotation currentAnn, FeatureStructure currentFS)
           throws MappingException {
     annSet.remove(currentAnn);
@@ -215,7 +215,7 @@ public class GateAnnotationBuilder implements ObjectBuilder {
    * <code>null</code> the corresponding feature will be removed from the map
    * if it is present.
    */
-  protected void applyFeatureDefs(FeatureMap features, TCAS cas, Document doc,
+  protected void applyFeatureDefs(FeatureMap features, CAS cas, Document doc,
       AnnotationSet annSet, Annotation currentGateAnn,
       FeatureStructure currentUimaAnn) throws MappingException {
     Iterator featuresIt = featureDefs.iterator();

@@ -15,8 +15,8 @@
 to facilitate JCasGen generation of a single set of Token JCas classes that
 will work for them all -->
 
-<taeDescription xmlns="http://uima.watson.ibm.com/resourceSpecifier">
-<frameworkImplementation>com.ibm.uima.java</frameworkImplementation>
+<taeDescription xmlns="http://uima.apache.org/resourceSpecifier">
+<frameworkImplementation>org.apache.uima.java</frameworkImplementation>
 <primitive>false</primitive>
 <delegateAnalysisEngineSpecifiers>
   <delegateAnalysisEngine key="printer">
