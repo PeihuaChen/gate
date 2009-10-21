@@ -53,7 +53,7 @@
 
 	<property name="gate.jar" location="${gate.home}/bin/gate.jar" />
 	<property name="gate.lib.dir" location="${gate.home}/lib" />
-        <property name="gate.learning.jar" location="${gate.home}/plugins/learning/learningapi.jar" />
+        <property name="gate.learning.jar" location="${gate.home}/plugins/Learning/learningapi.jar" />
 
 	<fileset id="gate.libs" dir="${gate.lib.dir}">
 		<include name="*.jar" />
