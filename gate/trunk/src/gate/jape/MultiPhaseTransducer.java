@@ -40,6 +40,8 @@ import gate.util.Strings;
 public class MultiPhaseTransducer extends Transducer
 implements JapeConstants, java.io.Serializable
 {
+  private static final long serialVersionUID = -1817675404943909246L;
+
   /** Debug flag */
   private static final boolean DEBUG = false;
 

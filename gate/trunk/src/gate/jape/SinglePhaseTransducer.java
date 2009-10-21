@@ -29,14 +29,6 @@ import gate.event.ProgressListener;
 import gate.fsm.*;
 import gate.util.*;
 
-// by Shafirin Andrey start
-import debugger.resources.pr.TraceContainer;
-import debugger.resources.pr.RuleTrace;
-import debugger.resources.SPTLock;
-import debugger.resources.PhaseController;
-
-// by Shafirin Andrey end
-
 /**
  * Represents a complete CPSL grammar, with a phase name, options and
  * rule set (accessible by name and by sequence). Implements a transduce
@@ -44,6 +36,9 @@ import debugger.resources.PhaseController;
  */
 public class SinglePhaseTransducer extends Transducer implements JapeConstants,
                                                      java.io.Serializable {
+
+  private static final long serialVersionUID = -2749474684496896114L;
+
   protected static final Logger log = Logger
           .getLogger(SinglePhaseTransducer.class);
 
@@ -125,22 +120,6 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     Document document;
     AnnotationSet inputAS;
   }
-  // by Shafirin Andrey start
-  PhaseController phaseController = null;
-
-  TraceContainer rulesTrace = null;
-
-  RuleTrace currRuleTrace = null;
-
-  public PhaseController getPhaseController() {
-    return phaseController;
-  }
-
-  public void setPhaseController(PhaseController phaseController) {
-    this.phaseController = phaseController;
-  }
-
-  // by Shafirin Andrey end
 
   /** Construction from name. */
   public SinglePhaseTransducer(String name) {
@@ -323,14 +302,6 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 
     // The structure that fireRule() will update
     SearchState state = new SearchState(startNode, startNodeOff, 0);
-
-    // by Shafirin Andrey start (according to Vladimir Karasev)
-    // by Shafirin Andrey --> if (null != phaseController) {
-    if(null != phaseController) {
-      rulesTrace = new TraceContainer();
-      rulesTrace.putPhaseCut(this, inputAS);
-    }
-    // by Shafirin Andrey end
 
     // A list storing the active tasks and used to obtain the results
     // from them
@@ -661,40 +632,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
           }
           newFSMI.setAGPosition(matchingAnnot.getEndNode());
           newFSMI.setFSMPosition(currentTransition.getTarget());
-  
-          // by Shafirin Andrey start (according to Vladimir Karasev)
-          if(null != phaseController) {
-            // figure out which constraint this came from so can include
-            // it in
-            // debug trace
-            Constraint matchingConstraint = null;
-            for(int i = 0; i < matchesByConstraint.length; i++) {
-              // for(Map.Entry<Constraint,Collection<Annotation>> entry
-              // : matchingMap.entrySet()) {
-              if(matchesByConstraint[i] != null
-                      && matchesByConstraint[i].contains(matchingAnnot)) {
-                // if (entry.getValue().contains(matchingAnnot)) {
-                matchingConstraint = currentConstraints[i];
-                // matchingConstraint = entry.getKey();
-                break;
-              }
-            }
-            currRuleTrace = rulesTrace.getStateContainer(currentClone
-                    .getFSMPosition());
-            if(currRuleTrace == null) {
-              currRuleTrace = new RuleTrace(newFSMI.getFSMPosition(), document);
-              currRuleTrace.addAnnotation(matchingAnnot);
-              currRuleTrace.putPattern(matchingAnnot, matchingConstraint);
-              rulesTrace.add(currRuleTrace);
-            }
-            else {
-              currRuleTrace.addState(newFSMI.getFSMPosition());
-              currRuleTrace.addAnnotation(matchingAnnot);
-              currRuleTrace.putPattern(matchingAnnot, matchingConstraint);
-            }
-          }
-          // by Shafirin Andrey end
-  
+    
           // bindings
           java.util.Map binds = newFSMI.getBindings();
           java.util.Iterator labelsIter = currentTransition.getBindings()
@@ -826,28 +764,9 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
         currentAcceptor = accFSMIter.next();
         currentRHS = currentAcceptor.getFSMPosition().getAction();
 
-        // by Shafirin Andrey start
-        // debugger callback
-        if(null != phaseController) {
-          SPTLock lock = new SPTLock();
-          phaseController.TraceTransit(rulesTrace);
-          rulesTrace = new TraceContainer();
-          phaseController.RuleMatched(lock, this, currentRHS, doc,
-                  currentAcceptor.getBindings(), inputAS, outputAS);
-        }
-        // by Shafirin Andrey end
-
         currentRHS.transduce(doc, currentAcceptor.getBindings(), inputAS,
                 outputAS, ontology);
 
-        // by Shafirin Andrey start
-        // debugger callback
-        if(null != phaseController) {
-          SPTLock lock = new SPTLock();
-          phaseController.RuleFinished(lock, this, currentRHS, doc,
-                  currentAcceptor.getBindings(), inputAS, outputAS);
-        }
-        // by Shafirin Andrey end
         if(ruleApplicationStyle == BRILL_STYLE) {
           // find the maximal next position
           long currentAGPosition = currentAcceptor.getAGPosition().getOffset()
@@ -898,29 +817,8 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       }
       RightHandSide currentRHS = currentAcceptor.getFSMPosition().getAction();
 
-      // by Shafirin Andrey start
-      // debugger callback
-      if(null != phaseController) {
-        SPTLock lock = new SPTLock();
-        rulesTrace.leaveLast(currentRHS);
-        phaseController.TraceTransit(rulesTrace);
-        rulesTrace = new TraceContainer();
-        phaseController.RuleMatched(lock, this, currentRHS, doc,
-                currentAcceptor.getBindings(), inputAS, outputAS);
-      }
-      // by Shafirin Andrey end
-
       currentRHS.transduce(doc, currentAcceptor.getBindings(), inputAS,
               outputAS, ontology);
-
-      // by Shafirin Andrey start
-      // debugger callback
-      if(null != phaseController) {
-        SPTLock lock = new SPTLock();
-        phaseController.RuleFinished(lock, this, currentRHS, doc,
-                currentAcceptor.getBindings(), inputAS, outputAS);
-      }
-      // by Shafirin Andrey end
 
       // if in matchGroup mode check other possible patterns in this
       // span
@@ -958,29 +856,9 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
               }// DEBUG
               currentRHS = rivalAcceptor.getFSMPosition().getAction();
 
-              // by Shafirin Andrey start
-              // debugger callback
-              if(null != phaseController) {
-                SPTLock lock = new SPTLock();
-                rulesTrace.leaveLast(currentRHS);
-                phaseController.TraceTransit(rulesTrace);
-                rulesTrace = new TraceContainer();
-                phaseController.RuleMatched(lock, this, currentRHS, doc,
-                        rivalAcceptor.getBindings(), inputAS, outputAS);
-              }
-              // by Shafirin Andrey end
-
               currentRHS.transduce(doc, rivalAcceptor.getBindings(), inputAS,
                       outputAS, ontology);
 
-              // by Shafirin Andrey start
-              // debugger callback
-              if(null != phaseController) {
-                SPTLock lock = new SPTLock();
-                phaseController.RuleFinished(lock, this, currentRHS, doc,
-                        rivalAcceptor.getBindings(), inputAS, outputAS);
-              }
-              // by Shafirin Andrey end
             } // equal rival
           }
           else {
