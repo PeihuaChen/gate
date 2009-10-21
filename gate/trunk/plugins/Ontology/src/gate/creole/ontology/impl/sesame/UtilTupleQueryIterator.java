@@ -14,15 +14,15 @@ package gate.creole.ontology.impl.sesame;
 
 import gate.creole.ontology.GateOntologyException;
 import gate.creole.ontology.LiteralOrONodeID;
+import gate.creole.ontology.Literal;
+import gate.creole.ontology.ONodeID;
 import gate.creole.ontology.OConstants;
 import gate.creole.ontology.OntologyTupleQuery;
 import gate.creole.ontology.impl.LiteralOrONodeIDImpl;
-import gate.util.ClosableIterator;
 import java.util.List;
 import java.util.Vector;
 import org.apache.log4j.Logger;
 import org.openrdf.model.BNode;
-import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.query.BindingSet;
@@ -107,6 +107,12 @@ import org.openrdf.repository.RepositoryConnection;
     public void setBinding(String name, LiteralOrONodeID value) {
       mTupleQuery.setBinding(name, UtilConvert.toSesameValue(value));
     }
+    public void setBinding(String name, Literal value) {
+      mTupleQuery.setBinding(name, UtilConvert.toSesameLiteral(value));
+    }
+    public void setBinding(String name, ONodeID value) {
+      mTupleQuery.setBinding(name, UtilConvert.toSesameValue(value));
+    }
 
     /**
      * 
@@ -155,8 +161,9 @@ import org.openrdf.repository.RepositoryConnection;
       Value v = nextFirstAsValue();
       if(v instanceof BNode) {
         return new LiteralOrONodeIDImpl(new OBNodeIDImpl(v.stringValue()));
-      } else if(v instanceof Literal) {
-        return new LiteralOrONodeIDImpl(UtilConvert.toGateLiteral((Literal)v));
+      } else if(v instanceof org.openrdf.model.Literal) {
+        return new LiteralOrONodeIDImpl(
+            UtilConvert.toGateLiteral((org.openrdf.model.Literal)v));
       } else if(v instanceof org.openrdf.model.URI) {
         URI u = (URI)v;
         // TODO: check if we want toString or stringValue() here
@@ -231,8 +238,9 @@ import org.openrdf.repository.RepositoryConnection;
           Value value = bindingSet.getValue(bindingName);
           if(value instanceof BNode) {
             result.add(new LiteralOrONodeIDImpl(new OBNodeIDImpl(value.stringValue())));
-          } else if(value instanceof Literal) {
-             result.add(new LiteralOrONodeIDImpl(UtilConvert.toGateLiteral((Literal)value)));
+          } else if(value instanceof org.openrdf.model.Literal) {
+             result.add(new LiteralOrONodeIDImpl(
+                 UtilConvert.toGateLiteral((org.openrdf.model.Literal)value)));
           } else if(value instanceof org.openrdf.model.URI) {
              URI u = (URI)value;
              result.add(new LiteralOrONodeIDImpl(new OURIImpl(u.stringValue())));
