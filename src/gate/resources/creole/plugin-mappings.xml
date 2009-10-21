@@ -80,6 +80,10 @@
     <NewName>Keyphrase_Extraction_Algorithm</NewName>
   </Plugin>
   <Plugin>
+    <OldName>learning</OldName>
+    <NewName>Learning</NewName>
+  </Plugin>  
+  <Plugin>
     <OldName>lkb_gazetteer</OldName>
     <NewName>Gazetteer_LKB</NewName>
   </Plugin>  

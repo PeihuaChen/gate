@@ -26,7 +26,7 @@
 	<classpathentry kind="src" output="plugins/Tagger_TreeTagger/classes" path="plugins/Tagger_TreeTagger/src"/>
 	<classpathentry kind="src" output="plugins/Lang_Cebuano/build" path="plugins/Lang_Cebuano/src"/>
 	<classpathentry kind="src" output="plugins/Alignment/classes" path="plugins/Alignment/src"/>
-	<classpathentry kind="src" output="plugins/learning/build" path="plugins/learning/src"/>
+	<classpathentry kind="src" output="plugins/Learning/build" path="plugins/Learning/src"/>
 	<classpathentry kind="src" output="plugins/Stemmer_Snowball/classes" path="plugins/Stemmer_Snowball/src"/>
 	<classpathentry exported="true" kind="lib" path="lib/Bib2HTML.jar"/>
 	<classpathentry kind="lib" path="lib/ext/nl.mpi.lookup.jar"/>
@@ -78,7 +78,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/xml-apis.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/PDFBox-0.7.2.jar"/>
 	<classpathentry kind="lib" path="lib/xmlunit-1.2.jar"/>
-	<classpathentry kind="lib" path="plugins/learning/lib/weka.jar"/>
+	<classpathentry kind="lib" path="plugins/Learning/lib/weka.jar"/>
 	<classpathentry kind="lib" path="plugins/Web_Crawler_Websphinx/lib/websphinx.jar"/>
 	<classpathentry kind="lib" path="plugins/Web_Search_Google/lib/googleapi.jar"/>
 	<classpathentry kind="lib" path="plugins/Keyphrase_Extraction_Algorithm/lib/weka-3.4.6.jar"/>

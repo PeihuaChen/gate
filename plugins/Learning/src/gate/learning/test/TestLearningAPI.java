@@ -44,7 +44,7 @@ public class TestLearningAPI extends TestCase {
     if(!initialized) {
       Gate.init();
       learningHome = new File(new File(Gate.getGateHome(), "plugins"),
-        "learning");
+        "Learning");
       Gate.getCreoleRegister().addDirectory(learningHome.toURL());
       initialized = true;
     }
