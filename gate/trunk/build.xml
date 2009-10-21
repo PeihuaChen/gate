@@ -427,7 +427,7 @@
        Web_Search_Google Lang_Hindi Alignment Annotation_Merging
        learning Segmenter_Chinese Inter_Annotator_Agreement Parser_RASP Lang_Romanian 
        Stemmer_Snowball UIMA Web_Search_Yahoo Tagger_OpenCalais LingPipe
-       Tagger_Abner" 
+       Tagger_Abner OpenNLP" 
    />
   <target name="plugins.build" depends="jar" >
     <for param="plugin">
