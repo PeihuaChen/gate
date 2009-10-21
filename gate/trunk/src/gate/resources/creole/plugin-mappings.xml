@@ -132,10 +132,6 @@
     <NewName>UIMA</NewName>
   </Plugin>
   <Plugin>
-    <OldName>WordNet</OldName>
-    <NewName>Wordnet</NewName>
-  </Plugin>
-  <Plugin>
     <OldName>yahoo</OldName>
     <NewName>Web_Search_Yahoo</NewName>
   </Plugin>
