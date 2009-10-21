@@ -3,31 +3,31 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="plugins/Ontology_OWLIM2/src"/>
 	<classpathentry kind="src" path="plugins/openNLP/src"/>
-	<classpathentry kind="src" path="plugins/TaggerFramework/src"/>
+	<classpathentry kind="src" path="plugins/Tagger_Framework/src"/>
 	<classpathentry kind="src" path="plugins/Ontology/src"/>
-	<classpathentry kind="src" path="plugins/Ontology_Based_Gazetteer/src"/>
-	<classpathentry kind="src" output="plugins/Stanford/classes" path="plugins/Stanford/src"/>
-	<classpathentry kind="src" output="plugins/chinese/build" path="plugins/chinese/src"/>
-	<classpathentry kind="src" output="plugins/google/build" path="plugins/google/src"/>
-	<classpathentry kind="src" output="plugins/uima/classes" path="plugins/uima/src"/>
-	<classpathentry kind="src" output="plugins/Chemistry_Tagger/classes" path="plugins/Chemistry_Tagger/src"/>
-	<classpathentry kind="src" output="plugins/Minipar/classes" path="plugins/Minipar/src"/>
-	<classpathentry kind="src" output="plugins/romanian/build" path="plugins/romanian/src"/>
-	<classpathentry kind="src" output="plugins/hindi/build" path="plugins/hindi/src"/>
-	<classpathentry kind="src" output="plugins/Kea/build" path="plugins/Kea/src"/>
-	<classpathentry kind="src" output="plugins/yahoo/classes" path="plugins/yahoo/src"/>
-	<classpathentry kind="src" output="plugins/crawl/build" path="plugins/crawl/src"/>
-	<classpathentry kind="src" output="plugins/rasp/classes" path="plugins/rasp/src"/>
+	<classpathentry kind="src" path="plugins/Gazetteer_Ontology_Based/src"/>
+	<classpathentry kind="src" output="plugins/Parser_Stanford/classes" path="plugins/Parser_Stanford/src"/>
+	<classpathentry kind="src" output="plugins/Lang_Chinese/build" path="plugins/Lang_Chinese/src"/>
+	<classpathentry kind="src" output="plugins/Web_Search_Google/build" path="plugins/Web_Search_Google/src"/>
+	<classpathentry kind="src" output="plugins/UIMA/classes" path="plugins/UIMA/src"/>
+	<classpathentry kind="src" output="plugins/Tagger_Chemistry/classes" path="plugins/Tagger_Chemistry/src"/>
+	<classpathentry kind="src" output="plugins/Parser_Minipar/classes" path="plugins/Parser_Minipar/src"/>
+	<classpathentry kind="src" output="plugins/Lang_Romanian/build" path="plugins/Lang_Romanian/src"/>
+	<classpathentry kind="src" output="plugins/Lang_Hindi/build" path="plugins/Lang_Hindi/src"/>
+	<classpathentry kind="src" output="plugins/Keyphrase_Extraction_Algorithm/build" path="plugins/Keyphrase_Extraction_Algorithm/src"/>
+	<classpathentry kind="src" output="plugins/Web_Search_Yahoo/classes" path="plugins/Web_Search_Yahoo/src"/>
+	<classpathentry kind="src" output="plugins/Web_Crawler_Websphinx/build" path="plugins/Web_Crawler_Websphinx/src"/>
+	<classpathentry kind="src" output="plugins/Parser_RASP/classes" path="plugins/Parser_RASP/src"/>
 	<classpathentry kind="src" output="plugins/Jape_Compiler/build" path="plugins/Jape_Compiler/src"/>
 	<classpathentry kind="src" output="plugins/Ontology_Tools/build" path="plugins/Ontology_Tools/src"/>
-	<classpathentry kind="src" output="plugins/NP_Chunking/classes" path="plugins/NP_Chunking/src"/>
+	<classpathentry kind="src" output="plugins/Parser_NP_Chunking/classes" path="plugins/Parser_NP_Chunking/src"/>
 	<classpathentry kind="src" output="plugins/Montreal_Transducer/build" path="plugins/Montreal_Transducer/src"/>
-	<classpathentry kind="src" output="plugins/arabic/build" path="plugins/arabic/src"/>
-	<classpathentry kind="src" output="plugins/TreeTagger/classes" path="plugins/TreeTagger/src"/>
-	<classpathentry kind="src" output="plugins/cebuano/build" path="plugins/cebuano/src"/>
-	<classpathentry kind="src" output="plugins/alignment/classes" path="plugins/alignment/src"/>
+	<classpathentry kind="src" output="plugins/Lang_Arabic/build" path="plugins/Lang_Arabic/src"/>
+	<classpathentry kind="src" output="plugins/Tagger_TreeTagger/classes" path="plugins/Tagger_TreeTagger/src"/>
+	<classpathentry kind="src" output="plugins/Lang_Cebuano/build" path="plugins/Lang_Cebuano/src"/>
+	<classpathentry kind="src" output="plugins/Alignment/classes" path="plugins/Alignment/src"/>
 	<classpathentry kind="src" output="plugins/learning/build" path="plugins/learning/src"/>
-	<classpathentry kind="src" output="plugins/Stemmer/classes" path="plugins/Stemmer/src"/>
+	<classpathentry kind="src" output="plugins/Stemmer_Snowball/classes" path="plugins/Stemmer_Snowball/src"/>
 	<classpathentry exported="true" kind="lib" path="lib/Bib2HTML.jar"/>
 	<classpathentry kind="lib" path="lib/ext/nl.mpi.lookup.jar"/>
 	<classpathentry kind="lib" path="lib/plugins/rdf_backend.jar"/>
@@ -79,36 +79,36 @@
 	<classpathentry exported="true" kind="lib" path="lib/PDFBox-0.7.2.jar"/>
 	<classpathentry kind="lib" path="lib/xmlunit-1.2.jar"/>
 	<classpathentry kind="lib" path="plugins/learning/lib/weka.jar"/>
-	<classpathentry kind="lib" path="plugins/crawl/lib/websphinx.jar"/>
-	<classpathentry kind="lib" path="plugins/google/lib/googleapi.jar"/>
-	<classpathentry kind="lib" path="plugins/Kea/lib/weka-3.4.6.jar"/>
+	<classpathentry kind="lib" path="plugins/Web_Crawler_Websphinx/lib/websphinx.jar"/>
+	<classpathentry kind="lib" path="plugins/Web_Search_Google/lib/googleapi.jar"/>
+	<classpathentry kind="lib" path="plugins/Keyphrase_Extraction_Algorithm/lib/weka-3.4.6.jar"/>
 	<classpathentry kind="lib" path="plugins/Machine_Learning/lib/troveForMaxent.jar"/>
-	<classpathentry kind="lib" path="plugins/SUPPLE/lib/compiler.jar"/>
-	<classpathentry kind="lib" path="plugins/SUPPLE/lib/jpl.jar"/>
-	<classpathentry kind="lib" path="plugins/SUPPLE/lib/plcafe.jar"/>
-	<classpathentry kind="lib" path="plugins/uima/lib/activation.jar"/>
-	<classpathentry kind="lib" path="plugins/uima/lib/axis.jar"/>
-	<classpathentry kind="lib" path="plugins/uima/lib/commons-discovery-0.2.jar"/>
-	<classpathentry kind="lib" path="plugins/uima/lib/commons-logging-1.0.4.jar"/>
-	<classpathentry kind="lib" path="plugins/uima/lib/jaxrpc.jar"/>
-	<classpathentry kind="lib" path="plugins/uima/lib/jVinci_vns.jar"/>
-	<classpathentry kind="lib" path="plugins/uima/lib/jVinci.jar"/>
-	<classpathentry kind="lib" path="plugins/uima/lib/mail.jar"/>
-	<classpathentry kind="lib" path="plugins/uima/lib/saaj.jar"/>
-	<classpathentry kind="lib" path="plugins/uima/lib/uima_adapter_soap.jar"/>
-	<classpathentry kind="lib" path="plugins/uima/lib/uima_adapter_vinci.jar"/>
-	<classpathentry kind="lib" path="plugins/uima/lib/uima_core.jar"/>
-	<classpathentry kind="lib" path="plugins/uima/lib/uima_cpe.jar"/>
-	<classpathentry kind="lib" path="plugins/uima/lib/uima_examples.jar"/>
-	<classpathentry kind="lib" path="plugins/uima/lib/uima_jcas_builtin_types.jar"/>
-	<classpathentry kind="lib" path="plugins/uima/lib/uima_jcasgen_gen.jar"/>
-	<classpathentry kind="lib" path="plugins/uima/lib/uima_tools.jar"/>
-	<classpathentry kind="lib" path="plugins/uima/lib/xml.jar"/>
-	<classpathentry kind="lib" path="plugins/uima/lib/xsdbeans.jar"/>
-	<classpathentry kind="lib" path="plugins/yahoo/lib/yahoo_search-1.1.0.jar"/>
+	<classpathentry kind="lib" path="plugins/Parser_SUPPLE/lib/compiler.jar"/>
+	<classpathentry kind="lib" path="plugins/Parser_SUPPLE/lib/jpl.jar"/>
+	<classpathentry kind="lib" path="plugins/Parser_SUPPLE/lib/plcafe.jar"/>
+	<classpathentry kind="lib" path="plugins/UIMA/lib/activation.jar"/>
+	<classpathentry kind="lib" path="plugins/UIMA/lib/axis.jar"/>
+	<classpathentry kind="lib" path="plugins/UIMA/lib/commons-discovery-0.2.jar"/>
+	<classpathentry kind="lib" path="plugins/UIMA/lib/commons-logging-1.0.4.jar"/>
+	<classpathentry kind="lib" path="plugins/UIMA/lib/jaxrpc.jar"/>
+	<classpathentry kind="lib" path="plugins/UIMA/lib/jVinci_vns.jar"/>
+	<classpathentry kind="lib" path="plugins/UIMA/lib/jVinci.jar"/>
+	<classpathentry kind="lib" path="plugins/UIMA/lib/mail.jar"/>
+	<classpathentry kind="lib" path="plugins/UIMA/lib/saaj.jar"/>
+	<classpathentry kind="lib" path="plugins/UIMA/lib/uima_adapter_soap.jar"/>
+	<classpathentry kind="lib" path="plugins/UIMA/lib/uima_adapter_vinci.jar"/>
+	<classpathentry kind="lib" path="plugins/UIMA/lib/uima_core.jar"/>
+	<classpathentry kind="lib" path="plugins/UIMA/lib/uima_cpe.jar"/>
+	<classpathentry kind="lib" path="plugins/UIMA/lib/uima_examples.jar"/>
+	<classpathentry kind="lib" path="plugins/UIMA/lib/uima_jcas_builtin_types.jar"/>
+	<classpathentry kind="lib" path="plugins/UIMA/lib/uima_jcasgen_gen.jar"/>
+	<classpathentry kind="lib" path="plugins/UIMA/lib/uima_tools.jar"/>
+	<classpathentry kind="lib" path="plugins/UIMA/lib/xml.jar"/>
+	<classpathentry kind="lib" path="plugins/UIMA/lib/xsdbeans.jar"/>
+	<classpathentry kind="lib" path="plugins/Web_Search_Yahoo/lib/yahoo_search-1.1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/lucene-core-2.2.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/tools.jar"/>
-	<classpathentry kind="lib" path="plugins/Stanford/lib/stanford-parser.jar"/>
+	<classpathentry kind="lib" path="plugins/Parser_Stanford/lib/stanford-parser.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/nekohtml-1.9.8+2039483.jar"/>
 	<classpathentry kind="lib" path="lib/gate-asm.jar"/>
 	<classpathentry kind="lib" path="lib/commons-lang-2.4.jar"/>
