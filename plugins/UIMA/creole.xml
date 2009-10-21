@@ -7,14 +7,11 @@
     <HELPURL>http://gate.ac.uk/userguide/chap:uima</HELPURL>
     <CLASS>gate.uima.AnalysisEnginePR</CLASS>
     <JAR>uima-gate.jar</JAR>
-    <JAR>lib/uima_core.jar</JAR>
-    <JAR>lib/uima_jcas_builtin_types.jar</JAR>
-    <JAR>lib/xml.jar</JAR>
-    <JAR>lib/xsdbeans.jar</JAR>
+    <JAR>lib/uima-core.jar</JAR>
+    <JAR>lib/uima-document-annotation.jar</JAR>
     <JAR>lib/jVinci.jar</JAR>
-    <JAR>lib/jVinci_vns.jar</JAR>
-    <JAR>lib/uima_adapter_vinci.jar</JAR>
-    <JAR>lib/uima_adapter_soap.jar</JAR>
+    <JAR>lib/uima-adapter-vinci.jar</JAR>
+    <JAR>lib/uima-adapter-soap.jar</JAR>
     <JAR>lib/activation.jar</JAR>
     <JAR>lib/axis.jar</JAR>
     <JAR>lib/commons-discovery-0.2.jar</JAR>

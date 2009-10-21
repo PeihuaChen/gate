@@ -11,15 +11,15 @@
  */
 package gate.uima.mapping;
 
-import com.ibm.uima.cas.TypeSystem;
-import com.ibm.uima.cas.Type;
-import com.ibm.uima.cas.Feature;
-import com.ibm.uima.cas.text.TCAS;
+import org.apache.uima.cas.TypeSystem;
+import org.apache.uima.cas.Type;
+import org.apache.uima.cas.Feature;
+import org.apache.uima.cas.CAS;
 import gate.Document;
 import gate.Annotation;
 import gate.AnnotationSet;
-import com.ibm.uima.cas.FeatureStructure;
-import com.ibm.uima.cas.CASRuntimeException;
+import org.apache.uima.cas.FeatureStructure;
+import org.apache.uima.cas.CASRuntimeException;
 import org.jdom.Element;
 import java.util.List;
 import java.util.ArrayList;
@@ -101,7 +101,7 @@ public class UIMAFeatureStructureBuilder implements ObjectBuilder {
   /**
    * Constructs and returns the FeatureStructure.
    */
-  public Object buildObject(TCAS cas, Document doc, AnnotationSet annSet,
+  public Object buildObject(CAS cas, Document doc, AnnotationSet annSet,
       Annotation currentAnn, FeatureStructure currentFS)
           throws MappingException {
     FeatureStructure newFS = createFS(cas, doc, currentAnn, fsType);
@@ -115,7 +115,7 @@ public class UIMAFeatureStructureBuilder implements ObjectBuilder {
    * Create the feature structure object.  This method may be overridden by
    * subclasses that create more specific types of FS (e.g. annotations).
    */
-  protected FeatureStructure createFS(TCAS cas, Document doc,
+  protected FeatureStructure createFS(CAS cas, Document doc,
       Annotation currentAnn, Type fsType) {
     return cas.createFS(fsType);
   }
@@ -125,7 +125,7 @@ public class UIMAFeatureStructureBuilder implements ObjectBuilder {
    * Uses the set of feature definitions to populate the features of the given
    * feature structure.
    */
-  public void populateFeatures(FeatureStructure newFS, TCAS cas,
+  public void populateFeatures(FeatureStructure newFS, CAS cas,
             Document doc, AnnotationSet annSet, Annotation currentAnn,
             FeatureStructure currentFS) throws MappingException {
     Iterator featuresIt = featureDefs.iterator();

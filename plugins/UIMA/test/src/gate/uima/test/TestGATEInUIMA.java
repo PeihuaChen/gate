@@ -15,18 +15,18 @@ import junit.framework.*;
 
 import java.io.File;
 
-import com.ibm.uima.UIMAFramework;
-import com.ibm.uima.util.XMLParser;
-import com.ibm.uima.util.XMLInputSource;
-import com.ibm.uima.util.InvalidXMLException;
-import com.ibm.uima.resource.ResourceSpecifier;
-import com.ibm.uima.analysis_engine.TextAnalysisEngine;
-import com.ibm.uima.cas.Type;
-import com.ibm.uima.cas.Feature;
-import com.ibm.uima.cas.FSIndex;
-import com.ibm.uima.cas.FSIterator;
-import com.ibm.uima.cas.FeatureStructure;
-import com.ibm.uima.cas.text.TCAS;
+import org.apache.uima.UIMAFramework;
+import org.apache.uima.util.XMLParser;
+import org.apache.uima.util.XMLInputSource;
+import org.apache.uima.util.InvalidXMLException;
+import org.apache.uima.resource.ResourceSpecifier;
+import org.apache.uima.analysis_engine.AnalysisEngine;
+import org.apache.uima.cas.Type;
+import org.apache.uima.cas.Feature;
+import org.apache.uima.cas.FSIndex;
+import org.apache.uima.cas.FSIterator;
+import org.apache.uima.cas.FeatureStructure;
+import org.apache.uima.cas.CAS;
 
 /**
  * Test case for GATE in UIMA (i.e. GATEApplicationAnnotator).
@@ -92,13 +92,13 @@ public class TestGATEInUIMA extends TestCase {
     ResourceSpecifier tokAndPOSTaggerDescriptor =
       uimaXMLParser.parseResourceSpecifier(inputSource);
 
-    TextAnalysisEngine tokAndPOSTagger =
-      UIMAFramework.produceTAE(tokAndPOSTaggerDescriptor);
+    AnalysisEngine tokAndPOSTagger =
+      UIMAFramework.produceAnalysisEngine(tokAndPOSTaggerDescriptor);
 
     // create CAS and populate it with initial text.
-    TCAS tcas = tokAndPOSTagger.newTCAS();
+    CAS cas = tokAndPOSTagger.newCAS();
 
-    tcas.setDocumentText(
+    cas.setDocumentText(
         "This is a test document. This is the second sentence.");
     // what POS tags do we expect to get back?
     String[] expectedPOSTags = new String[] {
@@ -117,17 +117,17 @@ public class TestGATEInUIMA extends TestCase {
     };
 
     // run the beast
-    tokAndPOSTagger.process(tcas);
+    tokAndPOSTagger.process(cas);
 
     // check the results have the right POS tags
-    Type tokenType = tcas.getTypeSystem().getType(
-        "com.ibm.uima.examples.tokenizer.Token");
+    Type tokenType = cas.getTypeSystem().getType(
+        "org.apache.uima.examples.tokenizer.Token");
     assertNotNull("Token type not found in type system", tokenType);
 
     Feature posFeature = tokenType.getFeatureByBaseName("POS");
     assertNotNull("Token POS feature not found", posFeature);
     
-    FSIndex tokensIndex = tcas.getAnnotationIndex(tokenType);
+    FSIndex tokensIndex = cas.getAnnotationIndex(tokenType);
     FSIterator tokensIt = tokensIndex.iterator();
     int tokenNo = 0;
     while(tokensIt.isValid()) {

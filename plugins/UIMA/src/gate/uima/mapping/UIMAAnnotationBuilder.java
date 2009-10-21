@@ -11,13 +11,13 @@
  */
 package gate.uima.mapping;
 
-import com.ibm.uima.cas.TypeSystem;
-import com.ibm.uima.cas.Type;
-import com.ibm.uima.cas.Feature;
-import com.ibm.uima.cas.text.TCAS;
+import org.apache.uima.cas.TypeSystem;
+import org.apache.uima.cas.Type;
+import org.apache.uima.cas.Feature;
+import org.apache.uima.cas.CAS;
 import gate.Document;
 import gate.Annotation;
-import com.ibm.uima.cas.FeatureStructure;
+import org.apache.uima.cas.FeatureStructure;
 import org.jdom.Element;
 
 /**
@@ -70,7 +70,7 @@ public class UIMAAnnotationBuilder extends UIMAFeatureStructureBuilder {
     indexed = Boolean.valueOf(indexedString).booleanValue();
   }
 
-  protected FeatureStructure createFS(TCAS cas, Document doc,
+  protected FeatureStructure createFS(CAS cas, Document doc,
       Annotation currentAnn, Type fsType) {
 
     // UIMA offsets are int, not long, so possible overflow here - you have

@@ -91,20 +91,16 @@
 	<classpathentry kind="lib" path="plugins/UIMA/lib/commons-discovery-0.2.jar"/>
 	<classpathentry kind="lib" path="plugins/UIMA/lib/commons-logging-1.0.4.jar"/>
 	<classpathentry kind="lib" path="plugins/UIMA/lib/jaxrpc.jar"/>
-	<classpathentry kind="lib" path="plugins/UIMA/lib/jVinci_vns.jar"/>
 	<classpathentry kind="lib" path="plugins/UIMA/lib/jVinci.jar"/>
 	<classpathentry kind="lib" path="plugins/UIMA/lib/mail.jar"/>
 	<classpathentry kind="lib" path="plugins/UIMA/lib/saaj.jar"/>
-	<classpathentry kind="lib" path="plugins/UIMA/lib/uima_adapter_soap.jar"/>
-	<classpathentry kind="lib" path="plugins/UIMA/lib/uima_adapter_vinci.jar"/>
-	<classpathentry kind="lib" path="plugins/UIMA/lib/uima_core.jar"/>
-	<classpathentry kind="lib" path="plugins/UIMA/lib/uima_cpe.jar"/>
-	<classpathentry kind="lib" path="plugins/UIMA/lib/uima_examples.jar"/>
-	<classpathentry kind="lib" path="plugins/UIMA/lib/uima_jcas_builtin_types.jar"/>
-	<classpathentry kind="lib" path="plugins/UIMA/lib/uima_jcasgen_gen.jar"/>
-	<classpathentry kind="lib" path="plugins/UIMA/lib/uima_tools.jar"/>
-	<classpathentry kind="lib" path="plugins/UIMA/lib/xml.jar"/>
-	<classpathentry kind="lib" path="plugins/UIMA/lib/xsdbeans.jar"/>
+	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-adapter-soap.jar"/>
+	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-adapter-vinci.jar"/>
+	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-core.jar"/>
+	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-cpe.jar"/>
+	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-examples.jar"/>
+	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-document-annotation.jar"/>
+	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-tools.jar"/>
 	<classpathentry kind="lib" path="plugins/Web_Search_Yahoo/lib/yahoo_search-1.1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/lucene-core-2.2.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/tools.jar"/>

@@ -51,11 +51,10 @@
     <mkdir dir="${vns.tmpdir}" />
     <echo>Starting the Vinci Name Service on port ${vns.port}</echo>
     <echo>Temporary files will be written to ${vns.tmpdir}</echo>
-    <java classname="com.ibm.vinci.transport.vns.service.VNS"
+    <java classname="org.apache.vinci.transport.vns.service.VNS"
           fork="true" dir="${vns.tmpdir}">
       <classpath>
-        <pathelement location="${lib.dir}/xml.jar" />
-        <pathelement location="${lib.dir}/jVinci_vns.jar" />
+        <pathelement location="${lib.dir}/jVinci.jar" />
       </classpath>
       <arg value="-p" />
       <arg value="${vns.port}" />
@@ -154,13 +153,11 @@
   <target name="jcasgen" depends="examples.prepare, jcasgen.checkdepends"
           unless="jcas.uptodate">
     <echo level="info">Generating JCas classes for Token examples</echo>
-    <property name="jcasgen.xml-jar" location="${lib.dir}/xml.jar" />
-    <java classname="com.ibm.uima.jcas.jcasgen_gen.Jg"
+    <java classname="org.apache.uima.tools.jcasgen.Jg"
           fork="true">
       <classpath>
         <fileset refid="uima.libs" />
       </classpath>
-      <jvmarg value="-Xbootclasspath/p:${jcasgen.xml-jar}" />
       <sysproperty key="java.util.logging.config.file"
                    value="JCasGenFileConsoleLogger" />
       <arg value="-jcasgeninput"/>
@@ -214,7 +211,7 @@
   already be running for this to work. -->
   <target name="vinciservice">
     <echo>Starting Token Handler Vinci service</echo>
-    <java classname="com.ibm.uima.reference_impl.collection.service.vinci.VinciCasObjectProcessorService_impl"
+    <java classname="org.apache.uima.adapter.vinci.VinciAnalysisEngineService_impl"
           fork="true"
           dir="${examples.conf.dir}">
       <classpath>
@@ -240,9 +237,6 @@
   <!-- for running UIMAinGATE tests, include the compiled test JAR but EXCLUDE
   UIMA libraries and uima-gate.jar, as they will be loaded by creole.xml -->
   <path id="test.uimaingate.classpath">
-    <!-- we must include xml.jar on the classpath (rather than the GATE
-    classloader) otherwise the tests will fail when run on Java 1.5 -->
-    <pathelement location="${lib.dir}/xml.jar" />
     <pathelement location="${test.jar.location}" />
     <pathelement location="${gate.jar}" />
     <fileset refid="gate.libs"/>
@@ -317,7 +311,7 @@
           <formatter type="xml" />
           <test name="gate.uima.test.TestUIMAInGATE" />
         </junit>
-        <java fork="true" classname="com.ibm.uima.reference_impl.analysis_engine.service.vinci.util.Shutdown">
+        <java fork="true" classname="org.apache.uima.adapter.vinci.util.Shutdown">
           <classpath>
             <path refid="test.uimaingate.classpath"/>
             <fileset refid="uima.libs" />
@@ -354,7 +348,7 @@
        GATEApplicationAnnotator. -->
   <target name="documentanalyser">
     <echo>Starting UIMA document analyser</echo>
-    <java classname="com.ibm.uima.reference_impl.application.docanalyzer.DocumentAnalyzer"
+    <java classname="org.apache.uima.tools.docanalyzer.DocumentAnalyzer"
           fork="true">
       <classpath>
         <path refid="gate.and.uima.path" />

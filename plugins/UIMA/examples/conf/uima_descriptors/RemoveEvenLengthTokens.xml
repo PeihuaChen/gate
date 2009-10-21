@@ -14,8 +14,8 @@
 <!-- Descriptor for the example annotator that removes tokens whose length is
 an even number. -->
 
-<taeDescription xmlns="http://uima.watson.ibm.com/resourceSpecifier">
-<frameworkImplementation>com.ibm.uima.java</frameworkImplementation>
+<taeDescription xmlns="http://uima.apache.org/resourceSpecifier">
+<frameworkImplementation>org.apache.uima.java</frameworkImplementation>
 <primitive>true</primitive>
 <annotatorImplementationName>gate.uima.examples.RemoveEvenLengthTokens</annotatorImplementationName>
  

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<taeDescription xmlns="http://uima.watson.ibm.com/resourceSpecifier">
-  <frameworkImplementation>com.ibm.uima.java</frameworkImplementation>
+<taeDescription xmlns="http://uima.apache.org/resourceSpecifier">
+  <frameworkImplementation>org.apache.uima.java</frameworkImplementation>
   <primitive>true</primitive>
-  <annotatorImplementationName>com.ibm.uima.examples.tokenizer.SimpleTokenAndSentenceAnnotator</annotatorImplementationName>
+  <annotatorImplementationName>org.apache.uima.examples.tokenizer.SimpleTokenAndSentenceAnnotator</annotatorImplementationName>
   <analysisEngineMetaData>
     <name>Simple Token and Sentence Annotator</name>
     <description>Annotates tokens and sentences.</description>
@@ -13,12 +13,12 @@
     <typeSystemDescription>
       <types>
         <typeDescription>
-          <name>com.ibm.uima.examples.tokenizer.Token</name>
+          <name>org.apache.uima.examples.tokenizer.Token</name>
           <description></description>
           <supertypeName>uima.tcas.Annotation</supertypeName>
         </typeDescription>
         <typeDescription>
-          <name>com.ibm.uima.examples.tokenizer.Sentence</name>
+          <name>org.apache.uima.examples.tokenizer.Sentence</name>
           <description></description>
           <supertypeName>uima.tcas.Annotation</supertypeName>
         </typeDescription>
@@ -28,8 +28,8 @@
       <capability>
         <inputs/>
         <outputs>
-          <type allAnnotatorFeatures="true">com.ibm.uima.examples.tokenizer.Sentence</type>
-          <type allAnnotatorFeatures="true">com.ibm.uima.examples.tokenizer.Token</type>
+          <type allAnnotatorFeatures="true">org.apache.uima.examples.tokenizer.Sentence</type>
+          <type allAnnotatorFeatures="true">org.apache.uima.examples.tokenizer.Token</type>
         </outputs>
         <languagesSupported>
           <language>en</language>
