@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="plugins/Ontology_OWLIM2/src"/>
-	<classpathentry kind="src" path="plugins/openNLP/src"/>
+	<classpathentry kind="src" path="plugins/OpenNLP/src"/>
 	<classpathentry kind="src" path="plugins/Tagger_Framework/src"/>
 	<classpathentry kind="src" path="plugins/Ontology/src"/>
 	<classpathentry kind="src" path="plugins/Gazetteer_Ontology_Based/src"/>

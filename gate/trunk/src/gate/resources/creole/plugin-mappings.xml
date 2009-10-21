@@ -100,6 +100,10 @@
     <NewName>Tagger_OpenCalais</NewName>
   </Plugin>
   <Plugin>
+    <OldName>openNLP</OldName>
+    <NewName>OpenNLP</NewName>
+  </Plugin>
+  <Plugin>
     <OldName>rasp</OldName>
     <NewName>Parser_RASP</NewName>
   </Plugin>
