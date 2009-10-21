@@ -169,20 +169,20 @@ public @SuppressWarnings("all") class OpenNLPNameFin extends AbstractLanguageAna
 	public Resource init() throws ResourceInstantiationException {
 		String dir = null;
 		if (model == null)
-			 dir = "plugins/openNLP/models/english/namefind/";
+			 dir = "plugins/openNLP/models/english/namefind";
 		else
 			dir = model.getFile();
 //		
 //		logger.info("current path is: " + System.getProperty("user.dir"));
 //		logger.info("current path is: " + System.getProperty("user.home"));
 		List<String> models = new LinkedList<String>();
-		models.add("person.bin.gz");
-		models.add("money.bin.gz");
-		models.add("time.bin.gz");
-		models.add("percentage.bin.gz");
-		models.add("location.bin.gz");
-		models.add("date.bin.gz");
-		models.add("organization.bin.gz");
+		models.add("/person.bin.gz");
+		models.add("/money.bin.gz");
+		models.add("/time.bin.gz");
+		models.add("/percentage.bin.gz");
+		models.add("/location.bin.gz");
+		models.add("/date.bin.gz");
+		models.add("/organization.bin.gz");
 
 		finder = new LinkedList<NameFinder>();
 		for (Iterator iterator = models.iterator(); iterator.hasNext();) {
@@ -226,7 +226,11 @@ public @SuppressWarnings("all") class OpenNLPNameFin extends AbstractLanguageAna
 		NameFinderME model;
 
 		public NameFinder(String path) {
-			name = path.substring(path.lastIndexOf("/") + 1, path.indexOf("."));
+			try{
+			name = path.substring(path.lastIndexOf("/") + 1, path.indexOf(".", path.lastIndexOf("/") + 1));
+			}catch (Exception e){
+				name = path;
+			}
 			model = new NameFinderME(OpenNLPNameFin.getModel(new File(path)));
 		}
 
