@@ -5,7 +5,7 @@ GATE Developer/Embedded Backlog
 - feature freeze end of next week *23rd oct*
   - new features that must be complete or checkpointed and branched ASAP
     (other
-    - plugin renaming [NA]
+    - plugin renaming [NA] [*DONE*]
     - moving all config into gate.xml (ditch prefs API) and allow non-existent
       gate.xml (create it if it doesn't exist) [TH]
     - lkb plugin
