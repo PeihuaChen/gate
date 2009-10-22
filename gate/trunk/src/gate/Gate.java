@@ -80,7 +80,7 @@ public class Gate implements GateConstants {
   public static final String URI = "http://www.gate.ac.uk";
 
   /** Minimum version of JDK we support */
-  protected static final String MIN_JDK_VERSION = "1.4.1";
+  protected static final String MIN_JDK_VERSION = "1.5";
 
   /**
    * Feature name that should be used to set if the benchmarking logging should
