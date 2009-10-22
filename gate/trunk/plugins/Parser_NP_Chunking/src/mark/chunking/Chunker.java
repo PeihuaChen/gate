@@ -1,5 +1,5 @@
 /************************************************************************
- *         Copyright (C) 2004 The University of Sheffield               *
+ *         Copyright (C) 2004-2009 The University of Sheffield          *
  *       Developed by Mark Greenwood <m.greenwood@dcs.shef.ac.uk>       *
  *                                                                      *
  * This program is free software; you can redistribute it and/or modify *
@@ -19,13 +19,21 @@
 
 package mark.chunking;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 public class Chunker
 {
-	private List rules = new ArrayList();
+	private List<Rule> rules = new ArrayList<Rule>();
 
 	public static void main(String args[]) throws Exception
 	{
@@ -35,7 +43,7 @@ public class Chunker
 
 		String line = in.readLine();
 
-		Map chunkTags = new HashMap();
+		Map<String,String> chunkTags = new HashMap<String,String>();
 
 		while (line != null)
 		{
@@ -58,9 +66,9 @@ public class Chunker
 		{
 			String[] tokens = line.split(" ");
 
-			List wl = new ArrayList();
-			List tl = new ArrayList();
-			List pl = new ArrayList();
+			List<String> wl = new ArrayList<String>();
+			List<String> tl = new ArrayList<String>();
+			List<String> pl = new ArrayList<String>();
 
 			for (int i = 0 ; i < tokens.length ; ++i)
 			{
@@ -69,7 +77,7 @@ public class Chunker
 				wl.add(data[0]);
 				pl.add(data[1]);
 
-				String ct = (String)chunkTags.get(data[1]);
+				String ct = chunkTags.get(data[1]);
 
 				if (ct == null) ct = "I";
 
@@ -83,7 +91,7 @@ public class Chunker
 
 			for (int i = 0 ; i < wl.size() ; ++i)
 			{
-				String ct = (String)tl.get(i);
+				String ct = tl.get(i);
 
 				if (inBaseNP)
 				{
@@ -158,7 +166,7 @@ public class Chunker
 	 * @param pos an ordered List of the POS tags within the sentence.
 	 * @return an ordered List of the updated chunk tags for the sentence.
 	 **/
-	public List chunkSentence(List words, List tags, List pos)
+	public List<String> chunkSentence(List<String> words, List<String> tags, List<String> pos)
 	{
 		//add the word/pos/tag that represents the end of
 		//the sentence, cos some of the rules match against
@@ -169,15 +177,15 @@ public class Chunker
 
 		//Get an iterator over the rules and loop
 		//through them...
-		Iterator it = rules.iterator();
+		Iterator<Rule> it = rules.iterator();
 		while (it.hasNext())
 		{
 			//create an empty list to hold the new
 			//chunk tags for this iterations
-			List newTags = new ArrayList();
+			List<String> newTags = new ArrayList<String>();
 
 			//get the next rule we are going to apply
-			Rule r = (Rule)it.next();
+			Rule r = it.next();
 
 			//loop over all the words in the sentence
 			for (int i = 0 ; i < words.size() ; ++i)
