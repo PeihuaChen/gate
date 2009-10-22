@@ -1,5 +1,5 @@
 /************************************************************************
- *         Copyright (C) 2004 The University of Sheffield               *
+ *         Copyright (C) 2004-2009 The University of Sheffield          *
  *       Developed by Mark Greenwood <m.greenwood@dcs.shef.ac.uk>       *
  *                                                                      *
  * This program is free software; you can redistribute it and/or modify *
@@ -19,8 +19,10 @@
 
 package mark.chunking;
 
-import java.util.regex.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class encapulates chunking rules, providing methods to
@@ -55,19 +57,19 @@ public class Rule
 	 * A List to hold the types (T, W or P)
 	 * of the parts of the rule.
 	 **/
-	private List types = new ArrayList();
+	private List<String> types = new ArrayList<String>();
 
 	/**
 	 * A List to hold the offsets for the
 	 * parts of the rule.
 	 **/
-	private List offsets = new ArrayList();
+	private List<List<Integer>> offsets = new ArrayList<List<Integer>>();
 
 	/**
 	 * A List to hold the values for the
 	 * parts of the rule.
 	 **/
-	private List values = new ArrayList();
+	private List<String> values = new ArrayList<String>();
 
 	/**
 	 * The smallest offset used within this rule.
@@ -109,7 +111,7 @@ public class Rule
 
 			//create a new list to hold the offsets
 			//for this part
-			List ofs = new ArrayList();
+			List<Integer> ofs = new ArrayList<Integer>();
 
 			//split the offsets into separate parts
 			Matcher mo = po.matcher(to.substring(1));
@@ -153,7 +155,7 @@ public class Rule
 	 * @param pos an ordered List of the POS tags within the sentence.
 	 * @return true if the rule matches the input sentence, false otherwise.
 	 **/
-	public boolean match(int currentToken, List words, List tags, List pos)
+	public boolean match(int currentToken, List<String> words, List<String> tags, List<String> pos)
 	{
 		//if the rule doesn't fit within the sentence then it can never
 		//match so simply return false
@@ -166,16 +168,16 @@ public class Rule
 		for (int i = 0 ; i < types.size() ; ++i)
 		{
 			//get the current type
-			String type = (String)types.get(i);
+			String type = types.get(i);
 
 			//get the list of offsets for the part
-			List ofs = (List)offsets.get(i);
+			List<Integer> ofs = offsets.get(i);
 
 			//get the value for this part
-			String value = (String)values.get(i);
+			String value = values.get(i);
 
 			//A placeholder for the right list
-			List working = null;
+			List<String> working = null;
 
 			if (type.equals("T"))
 			{
@@ -197,21 +199,21 @@ public class Rule
 			}
 
 			//get the first (maybe the only) offset for this part
-			int offset = ((Integer)ofs.get(0)).intValue();
+			int offset = ofs.get(0).intValue();
 
 			//does the value of this offset match the value given in the rule
-			boolean matchOffset = ((String)working.get(currentToken+offset)).equals(value);
+			boolean matchOffset = working.get(currentToken+offset).equals(value);
 
 			for (int j = 1 ; j < ofs.size() ; ++j)
 			{
 				//if there is more than one offset then...
 
 				//get the next offset
-				offset = ((Integer)ofs.get(j)).intValue();
+				offset = ofs.get(j).intValue();
 
 				//or the truth of matching the value in the rule against
 				//the value of the offset
-				matchOffset = matchOffset || ((String)working.get(currentToken+offset)).equals(value);
+				matchOffset = matchOffset || working.get(currentToken+offset).equals(value);
 			}
 
 			//combine the success/failure of matching this part with that
@@ -257,7 +259,7 @@ public class Rule
 		return within;
 	}
 
-	public String toString()
+	@Override public String toString()
 	{
 		//simply return the line of the rules file
 		return rule;

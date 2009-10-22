@@ -1,5 +1,5 @@
 /************************************************************************
- *         Copyright (C) 2004 The University of Sheffield               *
+ *         Copyright (C) 2004-2009 The University of Sheffield          *
  *       Developed by Mark Greenwood <m.greenwood@dcs.shef.ac.uk>       *
  *                                                                      *
  * This program is free software; you can redistribute it and/or modify *
@@ -48,7 +48,7 @@ public class GATEWrapper extends AbstractLanguageAnalyser implements
                                                          Serializable {
   private Chunker c = null;
 
-  private Map chunkTags = null;
+  private Map<String,String> chunkTags = null;
 
   private OffsetComparator offsetComparator = new OffsetComparator();
 
@@ -146,7 +146,7 @@ public class GATEWrapper extends AbstractLanguageAnalyser implements
       String line = in.readLine();
 
       // create a new empty map to hold the pos and chunk tags
-      chunkTags = new HashMap();
+      chunkTags = new HashMap<String,String>();
 
       while(line != null) {
         // while there is still data in the file...
@@ -215,32 +215,32 @@ public class GATEWrapper extends AbstractLanguageAnalyser implements
       int i = 0;
 
       // Loop through all the sentences
-      Iterator sit = sentences.iterator();
+      Iterator<Annotation> sit = sentences.iterator();
       while(sit.hasNext()) {
         // get the current sentence to process
-        Annotation sentence = (Annotation)sit.next();
+        Annotation sentence = sit.next();
 
         // Get a sorted list of the tokens within the current sentence
-        List tokens = new ArrayList();
+        List<Annotation> tokens = new ArrayList<Annotation>();
         tokens.addAll(tokenas.getContained(sentence.getStartNode().getOffset(),
                 sentence.getEndNode().getOffset()));
         Collections.sort(tokens, offsetComparator);
 
         // Create three empty lists to hold the words, pos and chunk
         // tags of the tokens in the current sentence
-        List wl = new ArrayList();
-        List tl = new ArrayList();
-        List pl = new ArrayList();
+        List<String> wl = new ArrayList<String>();
+        List<String> tl = new ArrayList<String>();
+        List<String> pl = new ArrayList<String>();
 
         // Loop through all the tokens in the current sentence
-        Iterator tit = tokens.iterator();
+        Iterator<Annotation> tit = tokens.iterator();
         while(tit.hasNext()) {
           // get the current token to process
-          Annotation token = (Annotation)tit.next();
+          Annotation token = tit.next();
 
           // add the string spanned by the current token to the list of
           // words
-          wl.add(token.getFeatures().get("string"));
+          wl.add((String)token.getFeatures().get("string"));
 
           // get the POS tag for the current token
           String pos = (String)token.getFeatures().get(posFeature);
@@ -249,7 +249,7 @@ public class GATEWrapper extends AbstractLanguageAnalyser implements
           pl.add(pos);
 
           // get the initial chunk tag for this POS tag
-          String chunkTag = (String)chunkTags.get(pos);
+          String chunkTag = chunkTags.get(pos);
 
           // if the chunk tag is null then use the unknown chunk tag
           if(chunkTag == null) chunkTag = unknownTag;
@@ -273,7 +273,7 @@ public class GATEWrapper extends AbstractLanguageAnalyser implements
         // so we can find the noun chunks
         for(int tIndex = 0; tIndex < tl.size(); ++tIndex) {
           // get the current chunk tag
-          String ct = (String)tl.get(tIndex);
+          String ct = tl.get(tIndex);
 
           if(inBaseNP) {
             // if we are currently inside a noun chunk then...
@@ -342,7 +342,7 @@ public class GATEWrapper extends AbstractLanguageAnalyser implements
     }
   }
 
-  private void addAnnotation(AnnotationSet outputAS, List tokens, int start,
+  private void addAnnotation(AnnotationSet outputAS, List<Annotation> tokens, int start,
           int end) {
     // Create a new FeatureMap to act as the features for the new
     // annotation
@@ -351,10 +351,10 @@ public class GATEWrapper extends AbstractLanguageAnalyser implements
     FeatureMap params = Factory.newFeatureMap();
 
     // Get the token annotation from the beginning of the chunk
-    Annotation aStart = (Annotation)tokens.get(start);
+    Annotation aStart = tokens.get(start);
 
     // Get the token annotation from the end of the chunk
-    Annotation aEnd = (Annotation)tokens.get(end);
+    Annotation aEnd = tokens.get(end);
 
     // This spots errors where the start is after the end. What
     // we should do is figure out why this occurs in the first place
