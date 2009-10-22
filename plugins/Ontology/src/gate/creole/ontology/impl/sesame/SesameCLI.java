@@ -17,13 +17,19 @@
 package gate.creole.ontology.impl.sesame;
 
 import gate.creole.ontology.OntologyTupleQuery;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.Vector;
-import java.util.HashMap;
 
-
-import java.io.*;
-import uk.co.flamingpenguin.jewel.cli.*;
+import uk.co.flamingpenguin.jewel.cli.ArgumentValidationException;
+import uk.co.flamingpenguin.jewel.cli.CliFactory;
 
 /**
  *

@@ -4,7 +4,6 @@
 	<classpathentry kind="src" path="plugins/Ontology_OWLIM2/src"/>
 	<classpathentry kind="src" path="plugins/OpenNLP/src"/>
 	<classpathentry kind="src" path="plugins/Tagger_Framework/src"/>
-	<classpathentry kind="src" path="plugins/Ontology/src"/>
 	<classpathentry kind="src" path="plugins/Gazetteer_Ontology_Based/src"/>
 	<classpathentry kind="src" output="plugins/Parser_Stanford/classes" path="plugins/Parser_Stanford/src"/>
 	<classpathentry kind="src" output="plugins/Lang_Chinese/build" path="plugins/Lang_Chinese/src"/>
@@ -21,7 +20,6 @@
 	<classpathentry kind="src" output="plugins/Jape_Compiler/build" path="plugins/Jape_Compiler/src"/>
 	<classpathentry kind="src" output="plugins/Ontology_Tools/build" path="plugins/Ontology_Tools/src"/>
 	<classpathentry kind="src" output="plugins/Parser_NP_Chunking/classes" path="plugins/Parser_NP_Chunking/src"/>
-	<classpathentry kind="src" output="plugins/Montreal_Transducer/build" path="plugins/Montreal_Transducer/src"/>
 	<classpathentry kind="src" output="plugins/Lang_Arabic/build" path="plugins/Lang_Arabic/src"/>
 	<classpathentry kind="src" output="plugins/Tagger_TreeTagger/classes" path="plugins/Tagger_TreeTagger/src"/>
 	<classpathentry kind="src" output="plugins/Lang_Cebuano/build" path="plugins/Lang_Cebuano/src"/>
@@ -61,6 +59,13 @@
 	<classpathentry exported="true" kind="lib" path="lib/spring-beans-2.0.8.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/spring-core-2.0.8.jar"/>
 	<classpathentry kind="lib" path="lib/jaxen-1.1.jar"/>
+	<classpathentry kind="lib" path="plugins/OpenNLP/lib/maxent-2.5.2.jar"/>
+	<classpathentry kind="lib" path="plugins/OpenNLP/lib/opennlp-tools-1.1.0.jar"/>
+	<classpathentry kind="lib" path="plugins/Ontology_OWLIM2/lib/sesame.jar"/>
+	<classpathentry kind="lib" path="plugins/Ontology_OWLIM2/lib/openrdf-model.jar"/>
+	<classpathentry kind="lib" path="plugins/Ontology_OWLIM2/lib/rio.jar"/>
+	<classpathentry kind="lib" path="plugins/Ontology_OWLIM2/lib/owlim-2.8.4.jar"/>
+	<classpathentry kind="lib" path="plugins/Ontology_OWLIM2/lib/commons-io-1.4.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="lib" path="lib/javacc.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/servlet-2_3.zip"/>
