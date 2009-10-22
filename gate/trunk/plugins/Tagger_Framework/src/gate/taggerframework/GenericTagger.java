@@ -271,10 +271,10 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
 
     if(debug) {
       // if we are doing debug work then echo the command line
-      String sanityCheck = "";
+      StringBuilder sanityCheck = new StringBuilder();
       for(String s : taggerCmd)
-        sanityCheck += " " + s;
-      System.out.println(sanityCheck);
+        sanityCheck.append(" ").append(s);
+      System.out.println(sanityCheck.toString());
     }
 
     // return the fully constructed command line
