@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.JTree;
@@ -57,6 +58,8 @@ public class JapeViewer extends AbstractVisualResource implements
    * The tree in which the phases of the grammar will be shown
    */
   private JTree treePhases;
+  
+  private JScrollPane treeScroll;
 
   /**
    * A flag so we can know if we are currently reading a highlighting a
@@ -99,7 +102,7 @@ public class JapeViewer extends AbstractVisualResource implements
     add(textScroll, BorderLayout.CENTER);
 
     treePhases = new JTree();
-    JScrollPane treeScroll = new JScrollPane(treePhases,
+    treeScroll = new JScrollPane(treePhases,
             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     add(treeScroll, BorderLayout.WEST);
@@ -189,6 +192,7 @@ public class JapeViewer extends AbstractVisualResource implements
 
     if(japeFileURL == null) {
       textArea.setText("The source for this JAPE grammar is not available!");
+      remove(treeScroll);
       return;
     }
 
