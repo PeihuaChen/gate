@@ -393,7 +393,7 @@ public class OResourceImpl implements OResource {
   /**
    * HashCode for this resource.
    */
-  public int hashcode() {
+  public int hashCode() {
     return this.getURI().toString().hashCode();
   }
 
