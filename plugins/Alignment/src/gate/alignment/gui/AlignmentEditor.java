@@ -7,7 +7,7 @@ import java.util.Timer;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.MouseInputAdapter;
-import javax.swing.table.AbstractTableModel;
+//import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 
 import java.awt.*;
@@ -110,11 +110,6 @@ public class AlignmentEditor extends AbstractVisualResource implements
    * aligning
    */
   private JPanel propertiesPanel;
-
-  /**
-   * Table Tabbed Pane that contains stats published by actions
-   */
-  private JPanel tableTabbedPanel;
 
   /**
    * holds tabbed panes
@@ -591,16 +586,17 @@ public class AlignmentEditor extends AbstractVisualResource implements
     waScrollPane = new JScrollPane(waPanel);
     waScrollPane.setPreferredSize(new Dimension(800, 200));
 
-    JSplitPane verticalPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+    //JSplitPane verticalPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
     waParentPanel.add(waScrollPane, BorderLayout.CENTER);
     splitPane.add(waParentPanel);
-    splitPane.add(verticalPane);
+    //splitPane.add(verticalPane);
+    splitPane.add(propertiesPane);
     mainPanel.add(splitPane/* , BorderLayout.CENTER */);
 
-    verticalPane.add(propertiesPane);
-    tableTabbedPane = new JTabbedPane();
-    JScrollPane tableTabbedScroller = new JScrollPane(tableTabbedPane);
-    verticalPane.add(tableTabbedScroller);
+//    verticalPane.add(propertiesPane);
+//    tableTabbedPane = new JTabbedPane();
+//    JScrollPane tableTabbedScroller = new JScrollPane(tableTabbedPane);
+//    verticalPane.add(tableTabbedScroller);
 
     this.setLayout(new BorderLayout());
     this.add(mainPanel, BorderLayout.CENTER);
@@ -608,9 +604,9 @@ public class AlignmentEditor extends AbstractVisualResource implements
     splitPane.setDividerLocation(0.8);
     splitPane.revalidate();
     splitPane.updateUI();
-    verticalPane.setDividerLocation(0.5);
-    verticalPane.revalidate();
-    verticalPane.updateUI();
+//    verticalPane.setDividerLocation(0.5);
+//    verticalPane.revalidate();
+//    verticalPane.updateUI();
     waPanel.setVisible(false);
   }
 
