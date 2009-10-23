@@ -1,6 +1,7 @@
 #!/bin/sh
 # adapted from ant starting script
 PRG="$0"
+export CURDIR=`pwd`
 # need this for relative symlinks
 while [ -h "$PRG" ] ; do
   ls=`ls -ld "$PRG"`
@@ -19,6 +20,48 @@ GATE_HOME=`dirname "$PRG"`/..
 cd "$GATE_HOME"
 export GATE_HOME=`pwd`
 export ANT_HOME=$GATE_HOME
-cd $GATE_HOME
+cd "$CURDIR"
 
-exec bin/ant run "$@"
+## Process arguments: known arguments must come first, as soon as an 
+## unknown argument is detected, processing ends and the rest of the
+## arguments are passed on to ant run
+
+config=
+session=
+while test "$1" != "";
+do
+  case "$1" in
+  -h)
+    cat <<EOF
+Run GATE Developer
+The following options can be passed immediately after the command name:
+  -ld      ... create or use the GATE default configuration and session files 
+               in the current directory
+  -ln name ... create or use a config file name.xml and session file name.session 
+               in the current directory
+  -h       ... show this help
+All other options will be passed on to the "ant run" command
+EOF
+    #exec bin/ant -h
+    exit 0
+    ;;
+  -ld)
+    config="-Drun.gate.user.config=$CURDIR/.gate.xml"
+    session="-Drun.gate.user.session=$CURDIR/.gate.session"
+    shift
+    ;;
+  -ln)
+    shift
+    base=$1
+    shift
+    config="-Drun.gate.user.config=$CURDIR/$base.xml"
+    session="-Drun.gate.user.session=$CURDIR/$base.session"
+    ;;
+  *)
+    break
+    ;;
+  esac
+done
+
+#echo running: $GATE_HOME/bin/ant run $config $session "$@"
+exec "$GATE_HOME/bin/ant" run -f "$GATE_HOME/build.xml" $config $session "$@"
