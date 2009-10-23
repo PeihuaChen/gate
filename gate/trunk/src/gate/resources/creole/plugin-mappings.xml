@@ -93,7 +93,7 @@
   </Plugin>
   <Plugin>
     <OldName>NP_Chunking</OldName>
-    <NewName>Parser_NP_Chunking</NewName>
+    <NewName>Tagger_NP_Chunking</NewName>
   </Plugin>
   <Plugin>
     <OldName>Ontology_Based_Gazetteer</OldName>
