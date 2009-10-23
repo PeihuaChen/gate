@@ -54,15 +54,16 @@ import gate.security.*;
 import gate.swing.*;
 import gate.util.*;
 import gate.util.persistence.PersistenceManager;
+import gate.util.reporting.*;
+import gate.util.reporting.exceptions.BenchmarkReportException;
 
 /**
  * The main Gate GUI frame.
  */
 public class MainFrame extends JFrame implements ProgressListener,
                                      StatusListener, CreoleListener {
-  private static final long serialVersionUID = 1L;
 
-  private static final Logger log = Logger.getLogger(MainFrame.class);
+  protected static final Logger log = Logger.getLogger(MainFrame.class);
 
   protected JMenuBar menuBar;
 
@@ -130,7 +131,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
   protected JToolBar toolbar;
 
-  static XJFileChooser fileChooser;
+  protected static XJFileChooser fileChooser;
 
   static private MainFrame instance;
 
@@ -146,8 +147,6 @@ public class MainFrame extends JFrame implements ProgressListener,
 
   protected HelpFrame helpFrame;
   
-  protected JCheckBoxMenuItem toggleToolTipsCheckBoxMenuItem;
-
   /**
    * Holds all the icons used in the Gate GUI indexed by filename. This
    * is needed so we do not need to decode the icon everytime we need it
@@ -735,6 +734,165 @@ public class MainFrame extends JFrame implements ProgressListener,
     JMenu toolsMenu = new XJMenu("Tools", null, this);
     toolsMenu.setMnemonic(KeyEvent.VK_T);
     toolsMenu.add(new XJMenuItem(new NewAnnotDiffAction(), this));
+
+    JMenu reportMenu = new XJMenu("Profiling reports",
+      "Generates profiling reports from processing resources", this);
+    reportMenu.setIcon(getIcon("gazetteer"));
+    reportMenu.add(new XJMenuItem( new AbstractAction(
+      (Benchmark.isBenchmarkingEnabled()?"Stop":"Start")+" recording") {
+      { putValue(SHORT_DESCRIPTION,
+        "Toggles the recording of processing resources"); }
+      public void actionPerformed(ActionEvent evt) {
+        if (getValue(NAME).equals("Start recording")) {
+          Benchmark.setBenchmarkingEnabled(true);
+          putValue(NAME, "Stop recording");
+        } else {
+          Benchmark.setBenchmarkingEnabled(false);
+          putValue(NAME, "Start recording");
+        }
+      }
+    }, this));
+    reportMenu.add(new XJMenuItem( new AbstractAction("Clear record log") {
+      { putValue(SHORT_DESCRIPTION,
+        "Empties the record log file otherwise the report is cumulative."); }
+      public void actionPerformed(ActionEvent evt) {
+        // delete the benchmark.txt file
+        File benchmarkFile = new File(Gate.getGateHome(), "benchmark.txt");
+        // TODO: find a way to get the benchmark file path
+        // Benchmark.logger.getAppender("benchmarklog").fileName is not public
+        if (!benchmarkFile.delete()) {
+          String message = "Error when deleting the benchmark log.\n" +
+            benchmarkFile.getAbsolutePath();
+          alertButton.setAction(new AlertAction(null, message, null));
+        } else try {
+          if (!benchmarkFile.createNewFile()) {
+            String message = "Error when creating an empty benchmark log.\n"
+              + benchmarkFile.getAbsolutePath();
+            alertButton.setAction(new AlertAction(null, message, null));
+          }
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+    }, this));
+    reportMenu.addSeparator();
+
+    final JCheckBoxMenuItem reportZeroTimesCheckBox = new JCheckBoxMenuItem();
+    reportZeroTimesCheckBox.setAction(
+      new AbstractAction("Report zero time entries") {
+      public void actionPerformed(ActionEvent evt) {
+        Gate.getUserConfig().put(MainFrame.class.getName()+".reportzerotime",
+          reportZeroTimesCheckBox.isSelected());
+      }
+    });
+    reportZeroTimesCheckBox.setSelected(Gate.getUserConfig().getBoolean(
+        MainFrame.class.getName()+".reportzerotimes"));
+    ButtonGroup group = new ButtonGroup();
+    final JRadioButtonMenuItem reportSortExecution = new JRadioButtonMenuItem();
+    reportSortExecution.setAction(new AbstractAction("Sort by execution") {
+      public void actionPerformed(ActionEvent evt) {
+        Gate.getUserConfig().put(
+          MainFrame.class.getName()+".reportsorttime", false);
+      }
+    });
+    reportSortExecution.setSelected(!Gate.getUserConfig().getBoolean(
+      MainFrame.class.getName()+".reportsorttime"));
+    group.add(reportSortExecution);
+    final JRadioButtonMenuItem reportSortTime = new JRadioButtonMenuItem();
+    reportSortTime.setAction(new AbstractAction("Sort by time") {
+      public void actionPerformed(ActionEvent evt) {
+        Gate.getUserConfig().put(
+          MainFrame.class.getName()+".reportsorttime", true);
+      }
+    });
+    reportSortTime.setSelected(Gate.getUserConfig().getBoolean(
+      MainFrame.class.getName()+".reportsorttime"));
+    group.add(reportSortTime);
+    reportMenu.add(new XJMenuItem(
+      new AbstractAction("Report on processing resources") {
+      { putValue(SHORT_DESCRIPTION,
+        "Report time taken by each processing resource"); }
+      public void actionPerformed(ActionEvent evt) {
+        PRTimeReporter report = new PRTimeReporter();
+        report.setSupressZeroTimeEntries(!reportZeroTimesCheckBox.isSelected());
+        report.setSortOrder(reportSortTime.isSelected() ?
+          PRTimeReporter.SORT_TIME_TAKEN : PRTimeReporter.SORT_EXEC_ORDER);
+        try {
+          report.executeReport();
+        } catch (BenchmarkReportException e) {
+          e.printStackTrace();
+          return;
+        }
+        showHelpFrame("file://" + report.getReportFile(),
+          "processing times report");
+      }
+    }, this));
+    reportMenu.add(reportZeroTimesCheckBox);
+    reportMenu.add(reportSortTime);
+    reportMenu.add(reportSortExecution);
+    reportMenu.addSeparator();
+
+    reportMenu.add(new XJMenuItem(
+      new AbstractAction("Report on document processed") {
+        { putValue(SHORT_DESCRIPTION, "Report most time consuming documents"); }
+        public void actionPerformed(ActionEvent evt) {
+          DocTimeReporter report = new DocTimeReporter();
+          String maxDocs = Gate.getUserConfig().getString(
+            MainFrame.class.getName()+".reportmaxdocs");
+          if (maxDocs != null) {
+            report.setMaxDocumentInReport((maxDocs.equals("All")) ?
+              DocTimeReporter.ALL_DOCS : Integer.valueOf(maxDocs));
+          }
+          String prRegex = Gate.getUserConfig().getString(
+            MainFrame.class.getName()+".reportprregex");
+          if (prRegex != null) {
+            report.setPRMatchingRegex(prRegex);
+          }
+          try {
+            report.executeReport();
+          } catch (BenchmarkReportException e) {
+            e.printStackTrace();
+            return;
+          }
+          showHelpFrame("file://" + report.getReportFile(),
+            "documents time report");
+        }
+      }, this));
+    String maxDocs = Gate.getUserConfig().getString(
+      MainFrame.class.getName()+".reportmaxdocs");
+    if (maxDocs == null) { maxDocs = "10"; }
+    reportMenu.add(new XJMenuItem(
+      new AbstractAction("Set max documents (" + maxDocs + ")") {
+        public void actionPerformed(ActionEvent evt) {
+          Object response = JOptionPane.showInputDialog(instance,
+              "Set the maximum of documents to report", "Report options",
+              JOptionPane.QUESTION_MESSAGE, null,
+              new Object[]{"All", "10", "20", "30", "40", "50", "100"}, "10");
+          if (response != null) {
+            Gate.getUserConfig().put(
+              MainFrame.class.getName()+".reportmaxdocs",response);
+            putValue(NAME, "Set max documents (" + response + ")");
+          }
+        }
+      }, this));
+    String prRegex = Gate.getUserConfig().getString(
+      MainFrame.class.getName()+".reportprregex");
+    if (prRegex == null) { prRegex = "All"; }
+    reportMenu.add(new XJMenuItem(
+      new AbstractAction("Set PR matching regex (" + prRegex + ")") {
+        public void actionPerformed(ActionEvent evt) {
+          Object response = JOptionPane.showInputDialog(instance,
+              "Set the processing resource regex filter", "Report options",
+              JOptionPane.QUESTION_MESSAGE);
+          if (response != null) {
+            Gate.getUserConfig().put(
+              MainFrame.class.getName()+".reportprregex",response);
+            putValue(NAME, "Set PR matching regex (" + response + ")");
+          }
+        }
+      }, this));
+    toolsMenu.add(reportMenu);
+
     toolsMenu.add(new XJMenuItem(new NewBootStrapAction(), this));
     final JMenu corpusEvalMenu = new XJMenu("Corpus Benchmark",
       "Compares processed and human-annotated annotations", this);
@@ -823,9 +981,18 @@ public class MainFrame extends JFrame implements ProgressListener,
     }, this));
     helpMenu.add(new XJMenuItem(new HelpMailingListAction(), this));
     helpMenu.addSeparator();
-    toggleToolTipsCheckBoxMenuItem =
+    JCheckBoxMenuItem toggleToolTipsCheckBoxMenuItem =
       new JCheckBoxMenuItem(new ToggleToolTipsAction());
-    toggleToolTipsCheckBoxMenuItem.setSelected(true);
+    javax.swing.ToolTipManager toolTipManager =
+      ToolTipManager.sharedInstance();
+    if (Gate.getUserConfig().getBoolean(
+        MainFrame.class.getName()+".hidetooltips")) {
+      toolTipManager.setEnabled(false);
+      toggleToolTipsCheckBoxMenuItem.setSelected(false);
+    } else {
+      toolTipManager.setEnabled(true);
+      toggleToolTipsCheckBoxMenuItem.setSelected(true);
+    }
     helpMenu.add(toggleToolTipsCheckBoxMenuItem);
     helpMenu.add(new XJMenuItem(new AbstractAction("What's new") {
       { this.putValue(Action.SHORT_DESCRIPTION,
@@ -4507,21 +4674,23 @@ public class MainFrame extends JFrame implements ProgressListener,
   }
 
   class ToggleToolTipsAction extends AbstractAction {
-    private static final long serialVersionUID = 1L;
     public ToggleToolTipsAction() {
       super("Show tooltips");
       putValue(SHORT_DESCRIPTION, "Toggle the help balloon under the cursor");
     }
-
     public void actionPerformed(ActionEvent e) {
       Runnable runnable = new Runnable() {
         public void run() {
-          javax.swing.ToolTipManager toolTipManager;
-          toolTipManager = ToolTipManager.sharedInstance();
-          if (toggleToolTipsCheckBoxMenuItem.isSelected()) {
-            toolTipManager.setEnabled(true);
-          } else {
+          javax.swing.ToolTipManager toolTipManager =
+            ToolTipManager.sharedInstance();
+          if (toolTipManager.isEnabled()) {
             toolTipManager.setEnabled(false);
+            Gate.getUserConfig().put(
+              MainFrame.class.getName()+".hidetooltips", false);
+          } else {
+            toolTipManager.setEnabled(true);
+            Gate.getUserConfig().put(
+              MainFrame.class.getName()+".hidetooltips", true);
           }
         }
       };
@@ -4857,16 +5026,18 @@ public class MainFrame extends JFrame implements ProgressListener,
     }// actionPerformed();
   }// class NewOntologyEditorAction
 
-  /**
-   * Action for the alert button that shows a message in a popup.
-   * A detailed dialog can be shown when the button or popup are clicked.
-   * <code>error</code> can be null in case of info message.
-   * Log the message and error as soon as the action is created.
-   */
   class AlertAction extends AbstractAction {
     private Timer timer =
       new java.util.Timer("MainFrame alert tooltip hide timer", true);
     
+    /**
+     * Action for the alert button that shows a message in a popup.
+     * A detailed dialog can be shown when the button or popup are clicked.
+     * Log the message and error as soon as the action is created.
+     * @param error can be null in case of info message.
+     * @param message text to be displayed in a popup and dialogue
+     * @param actions actions the user can choose in the dialogue
+     */
     public AlertAction(Throwable error, String message, Action[] actions) {
       if (error == null) {
         log.info(message);
