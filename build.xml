@@ -421,7 +421,7 @@
     files="Tagger_TreeTagger Tagger_Chemistry Jape_Compiler 
        Keyphrase_Extraction_Algorithm Machine_Learning Parser_Minipar
        Ontology Ontology_OWLIM2 Ontology_Tools Gazetteer_Ontology_Based
-       Parser_NP_Chunking Tagger_TreeTagger Parser_Stanford 
+       Tagger_NP_Chunking Tagger_TreeTagger Parser_Stanford 
        Gazetteer_LKB Lang_Arabic Ontology_BDM_Computation Lang_Cebuano 
        Lang_Chinese Copy_Annots_Between_Docs Web_Crawler_Websphinx 
        Web_Search_Google Lang_Hindi Alignment Annotation_Merging
