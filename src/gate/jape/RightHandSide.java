@@ -26,8 +26,6 @@ import gate.util.Strings;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,6 +41,8 @@ import java.util.concurrent.atomic.AtomicInteger;
   */
 public class RightHandSide implements JapeConstants, java.io.Serializable
 {
+  private static final long serialVersionUID = -4359589687308736378L;
+  
   /** Debug flag */
   private static final boolean DEBUG = false;
 
@@ -73,7 +73,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
   private String actionClassClassFileName;
   
   /** A list of source info object for mapping between Java and Jape. */
-  private List<SourceInfo> sourceInfo;
+  private transient List<SourceInfo> sourceInfo;
 
   /** Cardinality of the action class set. Used for ensuring class name
     * uniqueness.
@@ -227,7 +227,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
         StackTraceElement japeSTE = null;
 
-        if(ste.getLineNumber() >= 0) {
+        if(ste.getLineNumber() >= 0 && sourceInfo != null) {
           for(SourceInfo info : sourceInfo) {
             japeSTE = info.getStackTraceElement(ste.getLineNumber());
 
