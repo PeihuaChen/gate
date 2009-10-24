@@ -1655,7 +1655,7 @@ public abstract class AbstractOntologyImpl
    * @see gate.creole.ontology.Ontology#getOResourceFromMap(java.lang.String)
    */
   public OResource getOResourceFromMap(String uri) {
-    Utils.warnDeprecation("getOResourceFromMap");
+    //Utils.warnDeprecation("getOResourceFromMap");
     // TODO: this tries to provide a replacement without the map for
     // backwards compatibility but this should really be dropped entirely!
     OURI ouri = this.createOURI(uri);
@@ -1742,7 +1742,7 @@ public abstract class AbstractOntologyImpl
    */
   // TODO: replace by actual lookup!
   public List<OResource> getOResourcesByName(String resourceName) {
-    Utils.warnDeprecation("getOResourcesByName");
+    //Utils.warnDeprecation("getOResourcesByName");
     //System.err.println("getOResourcesByName called");
     //new GateOntologyException("NO USE").printStackTrace();
     List<OResource> toReturn = new ArrayList<OResource>();
@@ -1791,7 +1791,7 @@ public abstract class AbstractOntologyImpl
    * @return
    */
   public List<OResource> getAllResources() {
-    Utils.warnDeprecation("getAllResources");
+    //Utils.warnDeprecation("getAllResources");
     // TODO: would love to make this Unsupported but at the moment
     // it is still used by the ontology editor.
     Set<OClass> cs = getOClasses(false);
