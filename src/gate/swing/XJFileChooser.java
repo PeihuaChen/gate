@@ -99,14 +99,8 @@ public class XJFileChooser extends JFileChooser {
     } else if (fileName != null) {
       file = new File(System.getProperty("user.home"), fileName);
     } else {
-      // nothing has been set so use the last selected directory
-      // if null use the user home directory
-      file = getSelectedFile();
-      if (file == null) {
-        file = new File(System.getProperty("user.home"));
-      } else if (!file.isDirectory()) {
-        file = file.getParentFile();
-      }
+      // nothing has been set so use the file chooser default behaviour
+      return;
     }
     setSelectedFile(file);
     ensureFileIsVisible(file);
