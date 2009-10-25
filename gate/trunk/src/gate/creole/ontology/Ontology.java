@@ -31,13 +31,25 @@ import java.util.Set;
  * <p>
  * All ontology language resources must be created using the
  * {@link gate.Factory#createResource(String, gate.FeatureMap) Factory.createResource} method.
+ * <p>
  * See the documentation for the implementing plugins for details on
  * how to create ontology language resources programmatically.
  * <p>
- * Unless stated otherwise, this documentation describes the intended
- * behavior of the methods or the behavior as implemented in the
- * maingined ontology API implementation plugin,
+ * Unless stated otherwise, this documentation describes 
+ * the behavior of the methods as implemented in the
+ * ontology API implementation plugin,
  * <a href="../../../../../plugins/Ontology/doc/javadoc/index.html" target="_parent">Ontology</a>
+ * <p>
+ * The backwards-compatibility plugin
+ * a href="../../../../../plugins/Ontology/doc/javadoc/index.html" target="_parent">Ontology_OWLIM2</a>
+ * implements all of the deprecated methods and classes but none of the
+ * new methods that were added to the API in version 5.1.  Some but not all depracated
+ * methods are also implemented in the new plugin <code>Ontology</code>
+ * <p>
+ * The use of deprecated methods should be avoided and replaced by
+ * other methods as soon as possible as the backwards-compatibility
+ * plugin may get removed in the future and deprecated methods may
+ * get removed from the API.
  * 
  * @author Niraj Aswani
  * @author Johann Petrak
