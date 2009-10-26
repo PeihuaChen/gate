@@ -1,6 +1,6 @@
 /* **********************************************************************
  *           Chemistry Tagger - A GATE Processing Resource              *
- *         Copyright (C) 2004-2006 The University of Sheffield          *
+ *         Copyright (C) 2004-2009 The University of Sheffield          *
  *       Developed by Mark Greenwood <m.greenwood@dcs.shef.ac.uk>       *
  *       Modifications by Ian Roberts <i.roberts@dcs.shef.ac.uk>        *
  *                                                                      *
@@ -115,13 +115,13 @@ public class Tagger extends AbstractLanguageAnalyser implements
     return elementMapURL;
   }
 
-  private List elementSymbol, elementName;
+  private List<String> elementSymbol, elementName;
 
   /**
    * Create the tagger by creating the various gazetteers and JAPE transducers
    * it uses.
    */
-  public Resource init() throws ResourceInstantiationException {
+  @Override public Resource init() throws ResourceInstantiationException {
     // sanity check parameters
     if(compoundListsURL == null) { throw new ResourceInstantiationException(
             "Compound lists URL must be specified"); }
@@ -129,8 +129,8 @@ public class Tagger extends AbstractLanguageAnalyser implements
             "Element lists URL must be specified"); }
     if(transducerGrammarURL == null) { throw new ResourceInstantiationException(
             "Transducer grammar URL must be specified"); }
-    elementSymbol = new ArrayList();
-    elementName = new ArrayList();
+    elementSymbol = new ArrayList<String>();
+    elementName = new ArrayList<String>();
     try {
       BufferedReader in = new BufferedReader(new InputStreamReader(
               elementMapURL.openStream()));
@@ -163,7 +163,7 @@ public class Tagger extends AbstractLanguageAnalyser implements
     return this;
   }
 
-  public void execute() throws ExecutionException {
+  @Override public void execute() throws ExecutionException {
     Document doc = getDocument();
     gazc.setDocument(doc);
     gazo.setDocument(doc);
@@ -189,9 +189,9 @@ public class Tagger extends AbstractLanguageAnalyser implements
         AnnotationSet compounds = doc.getAnnotations().get("ChemicalCompound",
                 params);
         if(compounds != null) {
-          Iterator cit = compounds.iterator();
+          Iterator<Annotation> cit = compounds.iterator();
           while(cit.hasNext()) {
-            Annotation compound = (Annotation)cit.next();
+            Annotation compound = cit.next();
             AnnotationSet elements = doc.getAnnotations().get(
                     "ChemicalElement", compound.getStartNode().getOffset(),
                     compound.getEndNode().getOffset());
@@ -205,9 +205,9 @@ public class Tagger extends AbstractLanguageAnalyser implements
       AnnotationSet elements = doc.getAnnotations().get("ChemicalElement",
               params);
       if(elements != null) {
-        Iterator eit = elements.iterator();
+        Iterator<Annotation> eit = elements.iterator();
         while(eit.hasNext()) {
-          Annotation element = (Annotation)eit.next();
+          Annotation element = eit.next();
           try {
             String span = doc.getContent().getContent(
                     element.getStartNode().getOffset(),
@@ -227,7 +227,7 @@ public class Tagger extends AbstractLanguageAnalyser implements
               feats.put("name", span);
               int index = elementName.indexOf(span.toLowerCase());
               if(index != -1) {
-                String symbol = (String)elementSymbol.get(index);
+                String symbol = elementSymbol.get(index);
                 feats.put("symbol", symbol);
                 feats.put("uri",
                         "http://www.daml.org/2003/01/periodictable/PeriodicTable.owl#"
