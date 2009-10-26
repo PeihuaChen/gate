@@ -14,7 +14,10 @@ General Public License (LGPL) Version 2.1, a copy of which can be
 found in the file LICENSE.
 
 By default, the wrappers uses models for English which can be found in
-models/english directory.
+models/english directory.  These models have been redistributed from
+the "models" module in the OpenNLP CVS repository at
+http://opennlp.cvs.sourceforge.net
+
 
 Thanks are due to Georgi D. Georgiev of Ontotext for wrapping the
 OpenNLP tools for GATE, and to the OpenNLP project.
