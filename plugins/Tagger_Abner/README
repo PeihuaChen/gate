@@ -17,6 +17,8 @@ representations or warranties of any kind.
 
 ABNER can be obtained from: http://pages.cs.wisc.edu/~bsettles/abner/
 
+ABNER is described in:
+
 B. Settles. ABNER: An open source tool for automatically tagging
 genes, proteins, and other entity names in text. Bioinformatics,
 21(14):3191-3192. 2005.
