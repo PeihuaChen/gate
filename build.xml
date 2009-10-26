@@ -39,7 +39,7 @@
   -->
 
   <!-- RUNTIME MEMORY -->
-  <property name="runtime.max.memory" value="2000M"/>
+  <property name="runtime.max.memory" value="900M"/>
   <property name="runtime.start.memory" value="200M"/>
 
   <!-- Should Ant exit as soon as it has started the GUI? -->
