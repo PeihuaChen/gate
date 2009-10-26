@@ -38,7 +38,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.tree.*;
 
-import org.apache.log4j.Logger;
+import org.apache.log4j.*;
 
 import junit.framework.Assert;
 
@@ -735,46 +735,54 @@ public class MainFrame extends JFrame implements ProgressListener,
     toolsMenu.setMnemonic(KeyEvent.VK_T);
     toolsMenu.add(new XJMenuItem(new NewAnnotDiffAction(), this));
 
+    final JMenuItem reportClearMenuItem = new XJMenuItem(
+      new AbstractAction("Clear record log") {
+      { putValue(SHORT_DESCRIPTION,
+        "Empties the record log file otherwise the report is cumulative."); }
+      public void actionPerformed(ActionEvent evt) {
+        // create a new log file
+        File logFile = new File(System.getProperty("java.io.tmpdir"),
+          "gate-benchmark-log.txt");
+        if (logFile.exists() && !logFile.delete()) {
+          log.info("Error when deleting the file:\n" +
+            logFile.getAbsolutePath());
+        }
+      }
+    }, this);
     JMenu reportMenu = new XJMenu("Profiling reports",
       "Generates profiling reports from processing resources", this);
     reportMenu.setIcon(getIcon("gazetteer"));
-    reportMenu.add(new XJMenuItem( new AbstractAction(
-      (Benchmark.isBenchmarkingEnabled()?"Stop":"Start")+" recording") {
+    reportMenu.add(new XJMenuItem( new AbstractAction("Start recording") {
       { putValue(SHORT_DESCRIPTION,
         "Toggles the recording of processing resources"); }
       public void actionPerformed(ActionEvent evt) {
         if (getValue(NAME).equals("Start recording")) {
-          Benchmark.setBenchmarkingEnabled(true);
+          reportClearMenuItem.setEnabled(false);
+          if (!Benchmark.isBenchmarkingEnabled()) {
+            Benchmark.setBenchmarkingEnabled(true);
+          }
+          Layout layout = new PatternLayout("%m%n");
+          File logFile = new File(System.getProperty("java.io.tmpdir"),
+            "gate-benchmark-log.txt");
+          Appender appender;
+          try {
+            appender =
+              new FileAppender(layout, logFile.getAbsolutePath(), true);
+          } catch (IOException e) {
+            e.printStackTrace();
+            return;
+          }
+          appender.setName("gate-benchmark");
+          Benchmark.logger.addAppender(appender);
           putValue(NAME, "Stop recording");
         } else {
-          Benchmark.setBenchmarkingEnabled(false);
+          Benchmark.logger.removeAppender("gate-benchmark");
           putValue(NAME, "Start recording");
+          reportClearMenuItem.setEnabled(true);
         }
       }
     }, this));
-    reportMenu.add(new XJMenuItem( new AbstractAction("Clear record log") {
-      { putValue(SHORT_DESCRIPTION,
-        "Empties the record log file otherwise the report is cumulative."); }
-      public void actionPerformed(ActionEvent evt) {
-        // delete the benchmark.txt file
-        File benchmarkFile = new File(Gate.getGateHome(), "benchmark.txt");
-        // TODO: find a way to get the benchmark file path
-        // Benchmark.logger.getAppender("benchmarklog").fileName is not public
-        if (!benchmarkFile.delete()) {
-          String message = "Error when deleting the benchmark log.\n" +
-            benchmarkFile.getAbsolutePath();
-          alertButton.setAction(new AlertAction(null, message, null));
-        } else try {
-          if (!benchmarkFile.createNewFile()) {
-            String message = "Error when creating an empty benchmark log.\n"
-              + benchmarkFile.getAbsolutePath();
-            alertButton.setAction(new AlertAction(null, message, null));
-          }
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-      }
-    }, this));
+    reportMenu.add(reportClearMenuItem);
     reportMenu.addSeparator();
 
     final JCheckBoxMenuItem reportZeroTimesCheckBox = new JCheckBoxMenuItem();
@@ -814,6 +822,8 @@ public class MainFrame extends JFrame implements ProgressListener,
         "Report time taken by each processing resource"); }
       public void actionPerformed(ActionEvent evt) {
         PRTimeReporter report = new PRTimeReporter();
+        report.setBenchmarkFile(new File(System.getProperty("java.io.tmpdir"),
+          "gate-benchmark-log.txt"));
         report.setSupressZeroTimeEntries(!reportZeroTimesCheckBox.isSelected());
         report.setSortOrder(reportSortTime.isSelected() ?
           PRTimeReporter.SORT_TIME_TAKEN : PRTimeReporter.SORT_EXEC_ORDER);
@@ -837,6 +847,8 @@ public class MainFrame extends JFrame implements ProgressListener,
         { putValue(SHORT_DESCRIPTION, "Report most time consuming documents"); }
         public void actionPerformed(ActionEvent evt) {
           DocTimeReporter report = new DocTimeReporter();
+          report.setBenchmarkFile(new File(System.getProperty("java.io.tmpdir"),
+            "gate-benchmark-log.txt"));
           String maxDocs = Gate.getUserConfig().getString(
             MainFrame.class.getName()+".reportmaxdocs");
           if (maxDocs != null) {
