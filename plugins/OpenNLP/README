@@ -14,7 +14,7 @@ All of the above libraries are redistributed here under the GNU Lesser
 General Public License (LGPL) Version 2.1, a copy of which can be
 found in the file LICENSE.
 
-By default, the wrappers uses models for English which can be found in
+By default, the wrappers use models for English which can be found in
 models/english directory.  These models have been redistributed from
 the "models" module in the OpenNLP CVS repository at
 http://opennlp.cvs.sourceforge.net
