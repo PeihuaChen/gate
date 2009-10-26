@@ -1,1 +1,20 @@
-opennlp.jar hosts a variety of java-based NLP tools which perform sentence detection, tokenization, pos-tagging, chunking and parsing, named-entity detection, and coreference using the OpenNLP (http://opennlp.sourceforge.net/) Maxent machine learning package. The plugin by default uses the models for English which are in models/english directory.
+This directory contains wrappers for the OpenNLP java-based tools for
+sentence detection, tokenization, pos-tagging, chunking and parsing,
+named-entity detection, and coreference. The tools use the Maxent
+machine learning package.
+
+The wrappers use the following libraries:
+
+OpenNLP Java API from http://opennlp.sourceforge.net/
+OpenNLP Tools from http://opennlp.sourceforge.net/
+OpenNLP Maxent from http://maxent.sourceforge.net/
+
+All of the above libraries are redistributed here under the GNU Lesser
+General Public License (LGPL) Version 2.1, a copy of which can be
+found in the file LICENSE.
+
+By default, the wrappers uses models for English which can be found in
+models/english directory.
+
+Thanks are due to Georgi D. Georgiev of Ontotext for wrapping the
+OpenNLP tools for GATE, and to the OpenNLP project.
