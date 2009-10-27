@@ -50,12 +50,9 @@ public class DocTimeReporter implements BenchmarkReportable {
   private File benchmarkFile = new File("benchmark.txt");
   /** Report media. */
   private String printMedia = MEDIA_HTML;
-  /**
-   * No of documents to be displayed against matching PRs, default: -1 means
-   * show all documents.
-   */
+  /** No of documents to be displayed against matching PRs. */
   private int maxDocumentInReport = 10;
-  /** Search string, could be a PR name. Default:All PRs means display All PRs. */
+  /** Search string, could be a PR name. */
   private String PRMatchingRegex = MATCH_ALL_PR_REGEX;
   /** A marker indicating the start of current logical run. */
   private String logicalStart = null;
@@ -117,7 +114,7 @@ public class DocTimeReporter implements BenchmarkReportable {
   /**
    * The default value for search string matching PRs for given run.
    */
-  public static final String MATCH_ALL_PR_REGEX = "All PRs";
+  public static final String MATCH_ALL_PR_REGEX = "all_prs";
 
   /**
    * No argument constructor.
@@ -383,7 +380,6 @@ public class DocTimeReporter implements BenchmarkReportable {
       in = new BufferedReader(new FileReader(inputFile));
       String str;
       String docName = null;
-      ArrayList<String> startTokens = new ArrayList<String>();
       String matchedPR = null;
       String startToken = null;
       // Reading the benchmark.txt one line at a time
@@ -399,7 +395,6 @@ public class DocTimeReporter implements BenchmarkReportable {
             throw new BenchmarkReportInputFileFormatException(
                 getBenchmarkFile() + " is invalid.");
           }
-          startTokens.add(startToken);
         }
         Matcher matcher = pattern.matcher(str);
         Matcher matcherDocName = patternDocName.matcher(str);
@@ -903,7 +898,6 @@ public class DocTimeReporter implements BenchmarkReportable {
             out = new BufferedWriter(new FileWriter(benchmarkFileName));
             out.write(logEntry);
             out.newLine();
-            out.close();
           }
         }
         // if a valid benchmark entry then write it to the pipeline specific
@@ -1031,26 +1025,16 @@ public class DocTimeReporter implements BenchmarkReportable {
    * Display a usage message
    */
   public static void usage() {
-    System.out
-        .println("Usage: java gate.util.reporting.DocTimeReporter [OPTIONS] "
-            + NL
-            + "\tOPTIONS: "
-            + NL
-            + "\t -i input benchmark file (benchmark.txt) path (Mandatory) "
-            + NL
-            + "\t -m print media - html/text (Optional, Default:html) "
-            + NL
-            + "\t -d No. of docs (Optional, Default:10 docs, -1: All docs) "
-            + NL
-            + "\t -p PR Name to be matched (Optional, Default:All PRs) "
-            + NL
-            + "\t -o output report file path (Mandatory) "
-            + NL
-            + "\t -l logical start (Optional) "
-            + NL
-            + "\t -h show help (Optional) "
-            + NL
-            + "");
+    System.out.println(
+    "Usage: java gate.util.reporting.DocTimeReporter [Options]" + NL
+  + "\t Options:" + NL
+  + "\t -i input file path (default: benchmark.txt in the execution directory)" + NL
+  + "\t -m print media - html/text (default: html)" + NL
+  + "\t -d number of docs, use -1 for all docs (default: 10 docs)" + NL
+  + "\t -p processing resource name to be matched (default: all_prs)" + NL
+  + "\t -o output file path (default: report.html/txt in the system temporary directory)" + NL
+  + "\t -l logical start (not set by default)" + NL
+  + "\t -h show help" + NL);
   } // usage()
 
   /**
