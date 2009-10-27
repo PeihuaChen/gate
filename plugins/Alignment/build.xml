@@ -65,7 +65,7 @@
     <delete file="aligntools.jar"/>
   </target>
 
-  <target name="init" depends="clean">
+  <target name="init">
     <mkdir dir="${dest}"/>
   </target>
 
