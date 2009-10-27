@@ -7,12 +7,12 @@ GATE Developer/Embedded Backlog
     (other
     - plugin renaming [NA] [*DONE*]
     - moving all config into gate.xml (ditch prefs API) and allow non-existent
-      gate.xml (create it if it doesn't exist) [TH]
+      gate.xml (create it if it doesn't exist) [TH] [*DONE*]
     - lkb plugin
       - manual: changelog, main docs [GG]
       - finalisation of the name [GG]
       - MN: describe or remove SemanticEnrichmentPR [HC - HC contact]
-    - benchmarking: [TH - HC contact]
+    - benchmarking: [TH - HC contact] [*DONE*]
     - remove the menu item for the JAPE debugger [MG] *[DONE]*
     - run-time JAPE errors: dump the source in the error message [MG] *[DONE]*
     - copy CBT messages from the mailing list into the perf an chapter [AR/GG]
