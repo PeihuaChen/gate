@@ -59,13 +59,13 @@ public class PRTimeReporter implements BenchmarkReportable {
    * This string constant when set as sort order indicates that the processing
    * elements are sorted in the order of their execution.
    */
-  public static final String SORT_EXEC_ORDER = "EXEC_ORDER";
+  public static final String SORT_EXEC_ORDER = "exec_order";
   /**
    * This string constant when set as sort order indicates that the processing
    * elements are sorted in the descending order of processing time taken by a
    * particular element.
    */
-  public static final String SORT_TIME_TAKEN = "TIME_TAKEN";
+  public static final String SORT_TIME_TAKEN = "time_taken";
   /** A Hashtable storing the time taken by each pipeline. */
   private Hashtable<String, String> globalTotal = new Hashtable<String, String>();
   /** An ArrayList containing the lines to be printed in the final text report. */
@@ -787,13 +787,11 @@ public class PRTimeReporter implements BenchmarkReportable {
    *          A part of a file being read upside down.
    * @param lastNlines
    *          A vector containing the lines extracted from file part.
-   * @param fromPos
-   *          A long value indicating the start of a file part.
    * @return true if marker indicating the logical start of run is found; false
    *         otherwise.
    */
   private boolean parseLinesFromLast(byte[] bytearray,
-                                     Vector<String> lastNlines, long fromPos) {
+                                     Vector<String> lastNlines) {
       String lastNChars = new String(bytearray);
       StringBuffer sb = new StringBuffer(lastNChars);
       lastNChars = sb.reverse().toString();
@@ -836,7 +834,7 @@ public class PRTimeReporter implements BenchmarkReportable {
           raf.seek(0);
           bytearray = new byte[(int) curPos];
           raf.readFully(bytearray);
-          if (parseLinesFromLast(bytearray, lastNlines, fromPos)) {
+          if (parseLinesFromLast(bytearray, lastNlines)) {
             if (fromPos < 0)
               fromPos = 0;
           }
@@ -845,7 +843,7 @@ public class PRTimeReporter implements BenchmarkReportable {
           raf.seek(fromPos);
           bytearray = new byte[chunkSize];
           raf.readFully(bytearray);
-          if (parseLinesFromLast(bytearray, lastNlines, fromPos)) {
+          if (parseLinesFromLast(bytearray, lastNlines)) {
             break;
           }
           delta = (lastNlines.get(lastNlines.size() - 1)).length();
@@ -996,23 +994,16 @@ public class PRTimeReporter implements BenchmarkReportable {
    * Display a usage message
    */
   public static void usage() {
-    System.out
-        .println("Usage: java gate.util.reporting.PRTimeReporter [OPTIONS] "
-            + NL
-            + "\tOPTIONS: "
-            + NL
-            + "\t -i input benchmark file (benchmark.txt) path (Mandatory) "
-            + NL
-            + "\t -m print media - html/text (Optional, Default:html) "
-            + NL
-            + "\t -z supressZeroTimeEntries - true/false (Optional, Default:true) "
-            + NL
-            + "\t -s sort order - EXEC_ORDER/TIME_TAKEN (Optional, Default:EXEC_ORDER) "
-            + NL
-            + "\t -o output report file path (Mandatory) "
-            + NL + "\t -l logical start (Optional) "
-            + NL + "\t -h show help (Optional) " + NL
-            + "");
+    System.out.println(
+    "Usage: java gate.util.reporting.PRTimeReporter [Options]" + NL
+  + "\t Options:" + NL
+  + "\t -i input file path (default: benchmark.txt in the execution directory)" + NL
+  + "\t -m print media - html/text (default: html)" + NL
+  + "\t -z supressZeroTimeEntries - true/false (default: true)" + NL
+  + "\t -s sorting order - exec_order/time_taken (default: exec_order)" + NL
+  + "\t -o output file path (default: report.html/txt in the system temporary directory)" + NL
+  + "\t -l logical start (not set by default)" + NL
+  + "\t -h show help" + NL);
   } // usage()
 
   /**
