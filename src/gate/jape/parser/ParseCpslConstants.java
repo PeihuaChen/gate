@@ -23,41 +23,42 @@ public interface ParseCpslConstants {
   int phasesCommentChars = 17;
   int phasesCommentEnd = 18;
   int phase = 19;
-  int input = 20;
-  int option = 21;
-  int rule = 22;
-  int macro = 23;
-  int priority = 24;
-  int pling = 25;
-  int kleeneOp = 26;
-  int attrOp = 27;
-  int metaPropOp = 28;
-  int integer = 29;
-  int string = 41;
-  int bool = 42;
-  int ident = 43;
-  int floatingPoint = 44;
-  int exponent = 45;
-  int colon = 46;
-  int semicolon = 47;
-  int period = 48;
-  int bar = 49;
-  int comma = 50;
-  int leftBrace = 51;
-  int rightBrace = 52;
-  int leftBracket = 53;
-  int rightBracket = 54;
-  int leftSquare = 55;
-  int rightSquare = 56;
-  int assign = 57;
-  int colonplus = 58;
-  int whiteSpace = 59;
-  int singleLineCStyleComment = 60;
-  int singleLineCpslStyleComment = 61;
-  int commentStart = 62;
-  int commentChars = 63;
-  int commentEnd = 64;
-  int other = 65;
+  int javaimport = 20;
+  int input = 21;
+  int option = 22;
+  int rule = 23;
+  int macro = 24;
+  int priority = 25;
+  int pling = 26;
+  int kleeneOp = 27;
+  int attrOp = 28;
+  int metaPropOp = 29;
+  int integer = 30;
+  int string = 42;
+  int bool = 43;
+  int ident = 44;
+  int floatingPoint = 45;
+  int exponent = 46;
+  int colon = 47;
+  int semicolon = 48;
+  int period = 49;
+  int bar = 50;
+  int comma = 51;
+  int leftBrace = 52;
+  int rightBrace = 53;
+  int leftBracket = 54;
+  int rightBracket = 55;
+  int leftSquare = 56;
+  int rightSquare = 57;
+  int assign = 58;
+  int colonplus = 59;
+  int whiteSpace = 60;
+  int singleLineCStyleComment = 61;
+  int singleLineCpslStyleComment = 62;
+  int commentStart = 63;
+  int commentChars = 64;
+  int commentEnd = 65;
+  int other = 66;
 
   int DEFAULT = 0;
   int IN_PHASES = 1;
@@ -86,6 +87,7 @@ public interface ParseCpslConstants {
     "<phasesCommentChars>",
     "<phasesCommentEnd>",
     "\"Phase:\"",
+    "\"Imports:\"",
     "\"Input:\"",
     "\"Options:\"",
     "\"Rule:\"",
@@ -105,8 +107,8 @@ public interface ParseCpslConstants {
     "\"\\\\\\\"\"",
     "\"\\\\\\\'\"",
     "\"\\\\\\\\\"",
-    "<token of kind 39>",
     "<token of kind 40>",
+    "<token of kind 41>",
     "\"\\\"\"",
     "<bool>",
     "<ident>",

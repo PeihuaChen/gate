@@ -179,7 +179,7 @@ public class ParseCpsl implements JapeConstants {
       blockBuffer.append(", features" + nl);
       blockBuffer.append("          );" + nl);
       blockBuffer.append("        }" + nl);
-      blockBuffer.append("        catch(InvalidOffsetException ioe) {" + nl);
+      blockBuffer.append("        catch(gate.util.InvalidOffsetException ioe) {" + nl);
       blockBuffer.append("          throw new LuckyException(\"Invalid offset exception generated \" +" + nl);
       blockBuffer.append("               \"from offsets taken from same document!\");" + nl);
       blockBuffer.append("        }" + nl);
@@ -274,11 +274,12 @@ PARSER_END(ParseCpsl)
   <phasesCommentEnd: ("*/" | "|#")> : IN_PHASES
 }
 
+<DEFAULT> TOKEN [IGNORE_CASE]: { <javaimport:   "Imports:"> }
 <DEFAULT> TOKEN [IGNORE_CASE]: { <phase:        "Phase:"> }
 <DEFAULT> TOKEN [IGNORE_CASE]: { <input:        "Input:"> }
 <DEFAULT> TOKEN [IGNORE_CASE]: { <option:       "Options:"> }
 <DEFAULT> TOKEN [IGNORE_CASE]: { <rule:         "Rule:"> }
-<DEFAULT> TOKEN [IGNORE_CASE]: { <macro:         "Macro:"> }
+<DEFAULT> TOKEN [IGNORE_CASE]: { <macro:        "Macro:"> }
 <DEFAULT> TOKEN [IGNORE_CASE]: { <priority:     "Priority:"> }
 <DEFAULT> TOKEN: { <pling: "!"> }
 <DEFAULT> TOKEN: { <kleeneOp: "*" | "+" | "?"> }
@@ -396,6 +397,7 @@ MultiPhaseTransducer MultiPhaseTransducer() :
   m.setBaseURL(baseURL);
   Token mptNameTok = null;
   Token phaseNameTok = null;
+  String javaimportblock = null;
 }
 {
   // transducer name
@@ -408,8 +410,11 @@ MultiPhaseTransducer MultiPhaseTransducer() :
   (
     // sptrannies in this file
     (
+      (javaimportblock=JavaImportBlock())
+      (
+        
         try {
-            s=SinglePhaseTransducer() {
+            s=SinglePhaseTransducer(javaimportblock) {
                 m.addPhase(s.getName(), s);
                 s.setBaseURL(baseURL);
             }
@@ -417,11 +422,12 @@ MultiPhaseTransducer MultiPhaseTransducer() :
             // try to wrap the exception with info about what file/resource
             // it occurred in.
             throw(
-              new ParseException("Cannot parse phase " +
+              new ParseException("Cannot parse a phase in " +
                   baseURL + ": " + e.getMessage()
               ));
           }
-    )+
+      )+
+    )
     |
     // sptrannies in external files
     (
@@ -458,7 +464,7 @@ MultiPhaseTransducer MultiPhaseTransducer() :
                   "Cannot open URL " + sptURL.toExternalForm()
                 )
               );
-            }
+            } 
 
           // adding the resultant spt to m
           if(parser != null) {
@@ -491,7 +497,7 @@ MultiPhaseTransducer MultiPhaseTransducer() :
 } // MultiPhaseTransducer
 
 
-SinglePhaseTransducer SinglePhaseTransducer() :
+SinglePhaseTransducer SinglePhaseTransducer(String javaimportblock) :
 {
   ruleNumber = 0;
   Token phaseNameTok = null;
@@ -503,6 +509,7 @@ SinglePhaseTransducer SinglePhaseTransducer() :
   Token optionValueTok = null;
 }
 {
+  
   <phase> phaseNameTok=<ident>
   { t = createSinglePhaseTransducer(phaseNameTok.image); curSPT = t; }
 
@@ -556,7 +563,7 @@ SinglePhaseTransducer SinglePhaseTransducer() :
   )?
 
   (
-    ( newRule=Rule(phaseNameTok.image) { t.addRule(newRule); } )
+    ( newRule=Rule(phaseNameTok.image,javaimportblock) { t.addRule(newRule); } )
     |
     MacroDef()
   )*
@@ -567,8 +574,34 @@ SinglePhaseTransducer SinglePhaseTransducer() :
 
 } // SinglePhaseTransducer
 
+// if there is a block, set the javaimports to the java block specified,
+// otherwise set it to the default block
+String JavaImportBlock() :
+{
+  // default java imports
+  String defaultimportblock =
+      "import java.io.*;\n" +
+      "import java.util.*;\n" +
+      "import gate.*;\n" +
+      "import gate.jape.*;\n" +
+      "import gate.creole.ontology.*;\n" +
+      "import gate.annotation.*;\n" +
+      "import gate.util.*;\n";
+  String importblock = null;
+}
+{
+  ( <javaimport> <leftBrace> importblock=ConsumeBlock()
+  )?
+  {
+    if(importblock != null) {
+      return defaultimportblock+importblock;
+    } else  {
+      return defaultimportblock;
+    }
+  }
+}
 
-Rule Rule(String phaseName) :
+Rule Rule(String phaseName, String currentImports) :
 {
   Token ruleNameTok = null;
   String ruleName = null;
@@ -593,7 +626,7 @@ Rule Rule(String phaseName) :
     }
   )?
 
-  lhs=LeftHandSide() "-->" rhs=RightHandSide(phaseName, ruleName, lhs)
+  lhs=LeftHandSide() "-->" rhs=RightHandSide(phaseName, ruleName, lhs, currentImports)
   {
     try {
       rhs.createActionClass();
@@ -982,11 +1015,11 @@ Pair AttrVal() :
 
 
 RightHandSide RightHandSide(
-  String phaseName, String ruleName, LeftHandSide lhs
+  String phaseName, String ruleName, LeftHandSide lhs, String imports
 ) :
 {
   String[] block = new String[2];
-  RightHandSide rhs = new RightHandSide(phaseName, ruleName, lhs);
+  RightHandSide rhs = new RightHandSide(phaseName, ruleName, lhs, imports);
 }
 {
   block=Action() {
@@ -1211,8 +1244,8 @@ String[] AssignmentExpression() :
 
           blockBuffer.append(
             "      { // need a block for the existing annot set" + nl +
-            "        AnnotationSet " + existingAnnotSetName +
-            " = (AnnotationSet)bindings.get(");
+            "        gate.AnnotationSet " + existingAnnotSetName +
+            " = (gate.AnnotationSet)bindings.get(");
           appendJavaStringLiteral(blockBuffer, nameTok.image);
           blockBuffer.append("); " + nl);
         }
@@ -1225,14 +1258,14 @@ String[] AssignmentExpression() :
         {
           blockBuffer.append(
 "        if (" + existingAnnotSetName + " != null) {" + nl +
-"          AnnotationSet existingAnnots = " + nl +
+"          gate.AnnotationSet existingAnnots = " + nl +
 "          " + existingAnnotSetName + ".get(");
           appendJavaStringLiteral(blockBuffer, existingAnnotType);
           blockBuffer.append(");" + nl +
 "          if (existingAnnots != null) {" + nl +
-"            Iterator iter = existingAnnots.iterator();" + nl +
+"            java.util.Iterator iter = existingAnnots.iterator();" + nl +
 "            while(iter.hasNext()) {" + nl +
-"              Annotation existingA = (Annotation) iter.next();" + nl +
+"              gate.Annotation existingA = (gate.Annotation) iter.next();" + nl +
 "              Object existingFeatureValue = existingA.getFeatures().get(");
           appendJavaStringLiteral(blockBuffer, existingAttrName);
           blockBuffer.append(");" + nl +
