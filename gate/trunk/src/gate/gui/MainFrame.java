@@ -3443,9 +3443,13 @@ public class MainFrame extends JFrame implements ProgressListener,
         catch(MalformedURLException e) {
           log.error("Error when saving the resource URL.", e);
         }
-        catch (Exception error) {
-          String message = error.getMessage();
-          alertButton.setAction(new AlertAction(error, message, null));
+        catch (final Exception error) {
+          SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+              String message = error.getMessage();
+              alertButton.setAction(new AlertAction(error, message, null));
+            }
+          });          
         }
         finally {
           processFinished();
@@ -5063,7 +5067,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       final int lines = description.split("<br>").length;
       putValue(Action.SMALL_ICON, MainFrame.getIcon("crystal-clear-app-error"));
       putValue(Action.SHORT_DESCRIPTION, description);
-      alertButton.setEnabled(true);
+      
       this.error = error;
       this.message = message;
       if (actions == null) {
@@ -5077,6 +5081,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       // show for a few seconds a popup with the error message
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
+          alertButton.setEnabled(true);
           JToolTip toolTip = alertButton.createToolTip();
           toolTip.setTipText(alertButton.getToolTipText());
           PopupFactory popupFactory = PopupFactory.getSharedInstance();
@@ -5093,7 +5098,11 @@ public class MainFrame extends JFrame implements ProgressListener,
           Date timeToRun = new Date(System.currentTimeMillis() + 4000);
           timer.schedule(new TimerTask() {
             public void run() {
-              popup.hide(); // hide the tooltip after some time
+              SwingUtilities.invokeLater(new Runnable(){
+                public void run() {
+                  popup.hide(); // hide the tooltip after some time
+                }
+              });
             }
           }, timeToRun);
         }
