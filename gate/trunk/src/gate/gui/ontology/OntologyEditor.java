@@ -216,6 +216,15 @@ public class OntologyEditor extends AbstractVisualResource
     topClass = new JButton(topClassAction);
     topClass.setToolTipText("Add New Top Class");
 
+    refreshOntologyBtn = 
+      new JButton(MainFrame.getIcon("crystal-clear-action-reload-small"));
+    refreshOntologyBtn.setToolTipText("Rebuilds the ontology tree");
+    refreshOntologyBtn.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent ae) {
+        rebuildModel();
+      }
+    });
+    
     subClassAction = new SubClassAction("", MainFrame
             .getIcon("ontology-subclass"));
     addTreeNodeSelectionListener(subClassAction);
@@ -291,6 +300,7 @@ public class OntologyEditor extends AbstractVisualResource
     toolBar.add(transitiveProperty);
     toolBar.add(delete);
     toolBar.add(search);
+    toolBar.add(refreshOntologyBtn);
     this.add(toolBar, BorderLayout.NORTH);
   }
 
@@ -2262,6 +2272,8 @@ public class OntologyEditor extends AbstractVisualResource
 
   protected JButton queryBtn;
 
+  protected JButton refreshOntologyBtn;
+  
   protected JButton topClass;
 
   protected JButton subClass;
