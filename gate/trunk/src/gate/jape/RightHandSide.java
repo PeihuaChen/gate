@@ -106,7 +106,10 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
   /** Construction from the transducer name, rule name and the LHS. */
   public RightHandSide(
-    String transducerName, String ruleName, LeftHandSide lhs
+    String transducerName,
+    String ruleName,
+    LeftHandSide lhs,
+    String importblock
   ) {
     // debug = true;
     this.lhs = lhs;
@@ -118,23 +121,16 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     blockNames = new HashSet();
     sourceInfo = new ArrayList<SourceInfo>();
 
-    // initialise the class action string
     actionClassString = new StringBuffer(
       "// " + actionClassName + nl +
       "package " + actionsDirName + "; " + nl +
-      "import java.io.*;" + nl +
-      "import java.util.*;" + nl +
-      "import gate.*;" + nl +
-      "import gate.jape.*;" + nl +
-      "import gate.creole.ontology.Ontology;" + nl +
-      "import gate.annotation.*;" + nl +
-      "import gate.util.*;" + nl + nl +
+      importblock + nl +
       "public class " + actionClassName + nl +
       "implements java.io.Serializable, RhsAction { " + nl +
-      "  public void doit(Document doc, java.util.Map bindings, " + nl +
-      "                   AnnotationSet annotations, " + nl +
-      "                   AnnotationSet inputAS, AnnotationSet outputAS, " + nl +
-      "                   Ontology ontology) throws JapeException {" + nl
+      "  public void doit(gate.Document doc, java.util.Map bindings, " + nl +
+      "                   gate.AnnotationSet annotations, " + nl +
+      "                   gate.AnnotationSet inputAS, gate.AnnotationSet outputAS, " + nl +
+      "                   gate.creole.ontology.Ontology ontology) throws gate.jape.JapeException {" + nl
     );
 
     // initialise various names
@@ -171,7 +167,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
     if(blockNames.add(name)) // it wasn't already a member
       actionClassString.append(
-        "    AnnotationSet " + name + "Annots = (AnnotationSet)bindings.get(\""
+        "    gate.AnnotationSet " + name + "Annots = (gate.AnnotationSet)bindings.get(\""
         + name + "\"); " + nl
       );
 
