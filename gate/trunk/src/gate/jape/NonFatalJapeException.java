@@ -19,4 +19,7 @@ public class NonFatalJapeException extends JapeException {
     super(cause);
   }
   
+  public NonFatalJapeException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }
