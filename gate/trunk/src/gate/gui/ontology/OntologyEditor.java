@@ -37,7 +37,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
@@ -72,7 +71,6 @@ public class OntologyEditor extends AbstractVisualResource
     topClassAction.setOntology(ontology);
     subClassAction.setOntology(ontology);
     instanceAction.setOntology(ontology);
-    rdfPropertyAction.setOntology(ontology);
     annotationPropertyAction.setOntology(ontology);
     datatypePropertyAction.setOntology(ontology);
     objectPropertyAction.setOntology(ontology);
@@ -223,48 +221,49 @@ public class OntologyEditor extends AbstractVisualResource
     addTreeNodeSelectionListener(subClassAction);
     subClass = new JButton(subClassAction);
     subClass.setToolTipText("Add New Sub Class");
+    subClass.setEnabled(false);
 
     instanceAction = new InstanceAction("", MainFrame
             .getIcon("ontology-instance"));
     addTreeNodeSelectionListener(instanceAction);
     instance = new JButton(instanceAction);
     instance.setToolTipText("Add New Instance");
-
-    rdfPropertyAction = new RDFPropertyAction("", MainFrame
-            .getIcon("ontology-rdf-property"));
-    addTreeNodeSelectionListener(rdfPropertyAction);
-    rdfProperty = new JButton(rdfPropertyAction);
-    rdfProperty.setToolTipText("Add New RDF Property");
+    instance.setEnabled(false);
 
     annotationPropertyAction = new AnnotationPropertyAction("", MainFrame
             .getIcon("ontology-annotation-property"));
     addTreeNodeSelectionListener(annotationPropertyAction);
     annotationProperty = new JButton(annotationPropertyAction);
     annotationProperty.setToolTipText("Add New Annotation Property");
+    annotationProperty.setEnabled(false);
 
     datatypePropertyAction = new DatatypePropertyAction("", MainFrame
             .getIcon("ontology-datatype-property"));
     addTreeNodeSelectionListener(datatypePropertyAction);
     datatypeProperty = new JButton(datatypePropertyAction);
     datatypeProperty.setToolTipText("Add New Datatype Property");
+    datatypeProperty.setEnabled(false);
 
     objectPropertyAction = new ObjectPropertyAction("", MainFrame
             .getIcon("ontology-object-property"));
     addTreeNodeSelectionListener(objectPropertyAction);
     objectProperty = new JButton(objectPropertyAction);
     objectProperty.setToolTipText("Add New Object Property");
+    objectProperty.setEnabled(false);
 
     symmetricPropertyAction = new SymmetricPropertyAction("", MainFrame
             .getIcon("ontology-symmetric-property"));
     addTreeNodeSelectionListener(symmetricPropertyAction);
     symmetricProperty = new JButton(symmetricPropertyAction);
     symmetricProperty.setToolTipText("Add New Symmetric Property");
+    symmetricProperty.setEnabled(false);
 
     transitivePropertyAction = new TransitivePropertyAction("", MainFrame
             .getIcon("ontology-transitive-property"));
     addTreeNodeSelectionListener(transitivePropertyAction);
     transitiveProperty = new JButton(transitivePropertyAction);
     transitiveProperty.setToolTipText("Add New Transitive Property");
+    transitiveProperty.setEnabled(false);
 
     deleteOntoResourceAction = new DeleteOntologyResourceAction("", MainFrame
             .getIcon("ontology-delete"));
@@ -274,16 +273,17 @@ public class OntologyEditor extends AbstractVisualResource
     addTreeNodeSelectionListener(deleteOntoResourceAction);
     delete = new JButton(deleteOntoResourceAction);
     delete.setToolTipText("Delete the selected nodes");
+    delete.setEnabled(false);
 
     restriction = new JButton(restrictionAction);
     restriction.setToolTipText("Add New Restriction");
-
+    restriction.setEnabled(false);
+    
     toolBar.setFloatable(false);
     toolBar.add(topClass);
     toolBar.add(subClass);
     toolBar.add(restriction);
     toolBar.add(instance);
-    toolBar.add(rdfProperty);
     toolBar.add(annotationProperty);
     toolBar.add(datatypeProperty);
     toolBar.add(objectProperty);
@@ -359,7 +359,7 @@ public class OntologyEditor extends AbstractVisualResource
     tree.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent me) {
         if(SwingUtilities.isRightMouseButton(me)) {
-          if(selectedNodes.size() > 1) return;
+          if(selectedNodes == null || selectedNodes.size() != 1) return;
           final JPopupMenu menu = new JPopupMenu();
           final JMenu addProperty = new JMenu("Properties");
           final OResource candidate = (OResource)((OResourceNode)((DefaultMutableTreeNode)selectedNodes
@@ -615,7 +615,7 @@ public class OntologyEditor extends AbstractVisualResource
     propertyTree.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent me) {
         if(SwingUtilities.isRightMouseButton(me)) {
-          if(selectedNodes.size() > 1) return;
+          if(selectedNodes == null || selectedNodes.size() != 1) return;
           final JPopupMenu menu = new JPopupMenu();
           final OResource candidate = ((OResourceNode)((DefaultMutableTreeNode)selectedNodes
                   .get(0)).getUserObject()).getResource();
@@ -1115,49 +1115,49 @@ public class OntologyEditor extends AbstractVisualResource
       topClass.setEnabled(true);
       subClass.setEnabled(true);
       instance.setEnabled(true);
-      rdfProperty.setEnabled(true);
       annotationProperty.setEnabled(true);
       datatypeProperty.setEnabled(true);
       objectProperty.setEnabled(true);
       symmetricProperty.setEnabled(true);
       transitiveProperty.setEnabled(true);
       delete.setEnabled(true);
+      restriction.setEnabled(true);
     }
     else if(allInstances) {
       topClass.setEnabled(true);
       subClass.setEnabled(false);
       instance.setEnabled(false);
-      rdfProperty.setEnabled(true);
       annotationProperty.setEnabled(true);
       datatypeProperty.setEnabled(false);
       objectProperty.setEnabled(false);
       symmetricProperty.setEnabled(false);
       transitiveProperty.setEnabled(false);
       delete.setEnabled(true);
+      restriction.setEnabled(false);
     }
     else if(allProperties) {
       topClass.setEnabled(false);
       subClass.setEnabled(false);
       instance.setEnabled(false);
-      rdfProperty.setEnabled(true);
       annotationProperty.setEnabled(true);
       datatypeProperty.setEnabled(true);
       objectProperty.setEnabled(true);
       symmetricProperty.setEnabled(true);
       transitiveProperty.setEnabled(true);
       delete.setEnabled(true);
+      restriction.setEnabled(true);      
     }
     else {
       topClass.setEnabled(false);
       subClass.setEnabled(false);
       instance.setEnabled(false);
-      rdfProperty.setEnabled(true);
       annotationProperty.setEnabled(true);
       datatypeProperty.setEnabled(false);
       objectProperty.setEnabled(false);
       symmetricProperty.setEnabled(false);
       transitiveProperty.setEnabled(false);
       delete.setEnabled(true);
+      restriction.setEnabled(false);
     }
   }
 
@@ -1195,7 +1195,6 @@ public class OntologyEditor extends AbstractVisualResource
     }
     Collections.sort(subList, itemComparator);
     addPropertyChidrenRec(propertyRootNode, subList, itemComparator);
-    rdfPropertyAction.setResoucesList(ontology.getAllResources());
     datatypePropertyAction.setOntologyClassesURIs(ontologyClassesURIs);
     objectPropertyAction.setOntologyClassesURIs(ontologyClassesURIs);
     symmetricPropertyAction.setOntologyClassesURIs(ontologyClassesURIs);
@@ -1886,7 +1885,6 @@ public class OntologyEditor extends AbstractVisualResource
       instanceIsAdded((OInstance)resource);
       expandNode(tree);
     }
-    rdfPropertyAction.setResoucesList(ontology.getAllResources());
     datatypePropertyAction.setOntologyClassesURIs(ontologyClassesURIs);
     objectPropertyAction.setOntologyClassesURIs(ontologyClassesURIs);
     symmetricPropertyAction.setOntologyClassesURIs(ontologyClassesURIs);
@@ -1954,7 +1952,6 @@ public class OntologyEditor extends AbstractVisualResource
         expandNode(tree);
         break;
     }
-    rdfPropertyAction.setResoucesList(ontology.getAllResources());
     datatypePropertyAction.setOntologyClassesURIs(ontologyClassesURIs);
     objectPropertyAction.setOntologyClassesURIs(ontologyClassesURIs);
     symmetricPropertyAction.setOntologyClassesURIs(ontologyClassesURIs);
@@ -2273,8 +2270,6 @@ public class OntologyEditor extends AbstractVisualResource
 
   protected JButton instance;
 
-  protected JButton rdfProperty;
-
   protected JButton annotationProperty;
 
   protected JButton datatypeProperty;
@@ -2300,8 +2295,6 @@ public class OntologyEditor extends AbstractVisualResource
   protected SubClassAction subClassAction;
 
   protected InstanceAction instanceAction;
-
-  protected RDFPropertyAction rdfPropertyAction;
 
   protected AnnotationPropertyAction annotationPropertyAction;
 
