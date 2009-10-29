@@ -43,7 +43,7 @@ import org.apache.log4j.Logger;
     interfaceName = "gate.creole.ontology.Ontology",
     comment = "Connect to a repository containing and ontology",
     icon = "ontology",
-    helpURL = "http://gate.ac.uk/userguide/sec:ontologies:ontoplugin:connect]")
+    helpURL = "http://gate.ac.uk/userguide/sec:ontologies:ontoplugin:connect")
 public class ConnectSesameOntology  extends OntologyLR
 {
   private static final long serialVersionUID = 1L;
