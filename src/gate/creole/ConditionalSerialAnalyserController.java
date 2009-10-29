@@ -34,7 +34,7 @@ import gate.util.*;
 @CreoleResource(name = "Conditional Corpus Pipeline",
     comment = "A serial controller for conditionally run PR pipelines "
         + "over corpora.",
-    helpURL = "http://gate.ac.uk/userguide/sec:howto:cond")
+    helpURL = "http://gate.ac.uk/userguide/sec:developer:cond")
 public class ConditionalSerialAnalyserController
        extends ConditionalSerialController implements CorpusController {
 

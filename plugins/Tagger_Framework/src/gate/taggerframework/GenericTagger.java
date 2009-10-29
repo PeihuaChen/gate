@@ -51,7 +51,7 @@ import java.util.regex.Pattern;
  * @author Rene Witte
  */
 @CreoleResource(comment = "The Generic Tagger is Generic!", 
-        helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:taggerframework")
+        helpURL = "http://gate.ac.uk/userguide/sec:parsers:taggerframework")
 public class GenericTagger extends AbstractLanguageAnalyser implements
                                                            ProcessingResource {
 
