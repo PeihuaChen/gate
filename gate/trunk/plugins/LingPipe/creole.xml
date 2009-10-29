@@ -14,7 +14,7 @@
     </RESOURCE>
 
     <RESOURCE>
-      <JAR>lingpipe.jar.jar</JAR>
+      <JAR>lingpipe.jar</JAR>
       <JAR>lib/lingpipe-3.8.1.jar</JAR>
       <NAME>LingPipe NER PR</NAME>
       <CLASS>gate.lingpipe.NamedEntityRecognizerPR</CLASS>
@@ -26,7 +26,7 @@
     </RESOURCE>
 
     <RESOURCE>
-      <JAR>lingpipe.jar.jar</JAR>
+      <JAR>lingpipe.jar</JAR>
       <JAR>lib/lingpipe-3.8.1.jar</JAR>
       <NAME>LingPipe Language Identifier PR</NAME>
       <CLASS>gate.lingpipe.LanguageIdentifierPR</CLASS>
