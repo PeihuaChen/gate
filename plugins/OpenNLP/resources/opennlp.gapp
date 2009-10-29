@@ -2,7 +2,7 @@
   <urlList class="gate.util.persistence.CollectionPersistence">
     <localList>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../../LingPipe</urlString>
+        <urlString>$relpath$../../OpenNLP</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
     </localList>
     <collectionType>java.util.ArrayList</collectionType>
@@ -10,115 +10,29 @@
   <application class="gate.util.persistence.SerialAnalyserControllerPersistence">
     <prList class="gate.util.persistence.CollectionPersistence">
       <localList>
-        <gate.util.persistence.PRPersistence>
+        <gate.util.persistence.LanguageAnalyserPersistence>
           <runtimeParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap>
-              <entry>
-                <string>document</string>
-                <null/>
-              </entry>
-              <entry>
-                <string>languageIdFeatureName</string>
-                <null/>
-              </entry>
-            </localMap>
-          </runtimeParams>
-          <resourceType>gate.lingpipe.LanguageIdentifierPR</resourceType>
-          <resourceName>LingPipe Language Identifier PR_00009</resourceName>
-          <initParams class="gate.util.persistence.MapPersistence">
-            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-            <localMap>
-              <entry>
-                <string>modelFileUrl</string>
-                <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$relpath$models/langid-leipzig.classifier</urlString>
-                </gate.util.persistence.PersistenceManager-URLHolder>
-              </entry>
-            </localMap>
-          </initParams>
-          <features class="gate.util.persistence.MapPersistence">
-            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-            <localMap/>
-          </features>
-        </gate.util.persistence.PRPersistence>
-        <gate.util.persistence.PRPersistence>
-          <runtimeParams class="gate.util.persistence.MapPersistence">
-            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-            <localMap>
-              <entry>
-                <string>outputASName</string>
-                <null/>
-              </entry>
-              <entry>
-                <string>document</string>
-                <null/>
-              </entry>
-            </localMap>
-          </runtimeParams>
-          <resourceType>gate.lingpipe.TokenizerPR</resourceType>
-          <resourceName>LingPipe Tokenizer PR_0000C</resourceName>
-          <initParams class="gate.util.persistence.MapPersistence">
-            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-            <localMap/>
-          </initParams>
-          <features class="gate.util.persistence.MapPersistence">
-            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-            <localMap/>
-          </features>
-        </gate.util.persistence.PRPersistence>
-        <gate.util.persistence.PRPersistence>
-          <runtimeParams class="gate.util.persistence.MapPersistence">
-            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-            <localMap>
-              <entry>
-                <string>outputASName</string>
-                <null/>
-              </entry>
-              <entry>
-                <string>document</string>
-                <null/>
-              </entry>
-            </localMap>
-          </runtimeParams>
-          <resourceType>gate.lingpipe.SentenceSplitterPR</resourceType>
-          <resourceName>LingPipe Sentence Splitter PR_0000B</resourceName>
-          <initParams class="gate.util.persistence.MapPersistence">
-            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-            <localMap/>
-          </initParams>
-          <features class="gate.util.persistence.MapPersistence">
-            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-            <localMap/>
-          </features>
-        </gate.util.persistence.PRPersistence>
-        <gate.util.persistence.PRPersistence>
-          <runtimeParams class="gate.util.persistence.MapPersistence">
-            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-            <localMap>
-              <entry>
-                <string>applicationMode</string>
-                <gate.lingpipe.POSApplicationMode>FIRSTBEST</gate.lingpipe.POSApplicationMode>
-              </entry>
               <entry>
                 <string>document</string>
                 <null/>
               </entry>
               <entry>
                 <string>inputASName</string>
-                <null/>
+                <string></string>
               </entry>
             </localMap>
           </runtimeParams>
-          <resourceType>gate.lingpipe.POSTaggerPR</resourceType>
-          <resourceName>LingPipe POS Tagger PR_00008</resourceName>
+          <resourceType>gate.opennlp.OpenNlpTokenizer</resourceType>
+          <resourceName>OpenNlpTokenizer_0001C</resourceName>
           <initParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap>
               <entry>
-                <string>modelFileUrl</string>
+                <string>model</string>
                 <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$relpath$models/pos-en-general-brown.HiddenMarkovModel</urlString>
+                  <urlString>$relpath$../models/english/tokenize/EnglishTok.bin.gz</urlString>
                 </gate.util.persistence.PersistenceManager-URLHolder>
               </entry>
             </localMap>
@@ -127,30 +41,30 @@
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap/>
           </features>
-        </gate.util.persistence.PRPersistence>
-        <gate.util.persistence.PRPersistence>
+        </gate.util.persistence.LanguageAnalyserPersistence>
+        <gate.util.persistence.LanguageAnalyserPersistence>
           <runtimeParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap>
               <entry>
-                <string>outputASName</string>
-                <null/>
-              </entry>
-              <entry>
                 <string>document</string>
                 <null/>
               </entry>
+              <entry>
+                <string>inputASName</string>
+                <string></string>
+              </entry>
             </localMap>
           </runtimeParams>
-          <resourceType>gate.lingpipe.NamedEntityRecognizerPR</resourceType>
-          <resourceName>LingPipe NER PR_0000A</resourceName>
+          <resourceType>gate.opennlp.OpenNlpSentenceSplit</resourceType>
+          <resourceName>OpenNlpSentenceSplit_0001D</resourceName>
           <initParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap>
               <entry>
-                <string>modelFileUrl</string>
+                <string>model</string>
                 <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$relpath$models/ne-en-news-muc6.AbstractCharLmRescoringChunker</urlString>
+                  <urlString>$relpath$../models/english/sentdetect/EnglishSD.bin.gz</urlString>
                 </gate.util.persistence.PersistenceManager-URLHolder>
               </entry>
             </localMap>
@@ -159,12 +73,114 @@
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap/>
           </features>
-        </gate.util.persistence.PRPersistence>
+        </gate.util.persistence.LanguageAnalyserPersistence>
+        <gate.util.persistence.LanguageAnalyserPersistence>
+          <runtimeParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap>
+              <entry>
+                <string>document</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>inputASName</string>
+                <string></string>
+              </entry>
+            </localMap>
+          </runtimeParams>
+          <resourceType>gate.opennlp.OpenNlpPOS</resourceType>
+          <resourceName>OpenNlpPOS_0001E</resourceName>
+          <initParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap>
+              <entry>
+                <string>model</string>
+                <gate.util.persistence.PersistenceManager-URLHolder>
+                  <urlString>$relpath$../models/english/postag/EnglishPOS.bin.gz</urlString>
+                </gate.util.persistence.PersistenceManager-URLHolder>
+              </entry>
+              <entry>
+                <string>dictionary</string>
+                <gate.util.persistence.PersistenceManager-URLHolder>
+                  <urlString>$relpath$../models/english/postag/tagdict</urlString>
+                </gate.util.persistence.PersistenceManager-URLHolder>
+              </entry>
+            </localMap>
+          </initParams>
+          <features class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap/>
+          </features>
+        </gate.util.persistence.LanguageAnalyserPersistence>
+        <gate.util.persistence.LanguageAnalyserPersistence>
+          <runtimeParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap>
+              <entry>
+                <string>document</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>inputASName</string>
+                <string></string>
+              </entry>
+            </localMap>
+          </runtimeParams>
+          <resourceType>gate.opennlp.OpenNLPNameFin</resourceType>
+          <resourceName>OpenNlpNameFinder_0001F</resourceName>
+          <initParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap>
+              <entry>
+                <string>model</string>
+                <gate.util.persistence.PersistenceManager-URLHolder>
+                  <urlString>$relpath$../models/english/namefind</urlString>
+                </gate.util.persistence.PersistenceManager-URLHolder>
+              </entry>
+            </localMap>
+          </initParams>
+          <features class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap/>
+          </features>
+        </gate.util.persistence.LanguageAnalyserPersistence>
+        <gate.util.persistence.LanguageAnalyserPersistence>
+          <runtimeParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap>
+              <entry>
+                <string>document</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>inputASName</string>
+                <string></string>
+              </entry>
+            </localMap>
+          </runtimeParams>
+          <resourceType>gate.opennlp.OpenNlpChunker</resourceType>
+          <resourceName>OpenNlpChunker_00020</resourceName>
+          <initParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap>
+              <entry>
+                <string>model</string>
+                <gate.util.persistence.PersistenceManager-URLHolder>
+                  <urlString>$relpath$../models/english/chunker/EnglishChunk.bin.gz</urlString>
+                </gate.util.persistence.PersistenceManager-URLHolder>
+              </entry>
+            </localMap>
+          </initParams>
+          <features class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap/>
+          </features>
+        </gate.util.persistence.LanguageAnalyserPersistence>
       </localList>
       <collectionType>java.util.ArrayList</collectionType>
     </prList>
     <resourceType>gate.creole.SerialAnalyserController</resourceType>
-    <resourceName>LingPipe Application</resourceName>
+    <resourceName>OpenNLP Application</resourceName>
     <initParams class="gate.util.persistence.MapPersistence">
       <mapType>gate.util.SimpleFeatureMapImpl</mapType>
       <localMap/>
