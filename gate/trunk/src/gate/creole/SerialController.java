@@ -31,7 +31,7 @@ import gate.util.Out;
  */
 @CreoleResource(name = "Pipeline",
     comment = "A simple serial controller for PR pipelines.",
-    helpURL = "http://gate.ac.uk/userguide/sec:howto:apps")
+    helpURL = "http://gate.ac.uk/userguide/sec:developer:apps")
 public class SerialController extends AbstractController implements
                                                         CreoleListener {
 
