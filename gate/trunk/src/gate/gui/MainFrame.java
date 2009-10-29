@@ -1000,14 +1000,14 @@ public class MainFrame extends JFrame implements ProgressListener,
     helpMenu.add(new XJMenuItem(new AbstractAction("Keyboard shortcuts") {
       { this.putValue(Action.SHORT_DESCRIPTION, "Keyboard shortcuts"); }
       public void actionPerformed(ActionEvent e) {
-        showHelpFrame("chap:shortcuts", "shortcuts");
+        showHelpFrame("sec:developer:keyboard", "shortcuts");
       }
     }, this));
     helpMenu.addSeparator();
-    helpMenu.add(new XJMenuItem(new AbstractAction("Howtos") {
-      { this.putValue(Action.SHORT_DESCRIPTION, "Howtos for newcomers"); }
+    helpMenu.add(new XJMenuItem(new AbstractAction("Using GATE Developer") {
+      { this.putValue(Action.SHORT_DESCRIPTION, "To read first"); }
       public void actionPerformed(ActionEvent e) {
-        showHelpFrame("chap:howto", "how to");
+        showHelpFrame("chap:developer", "Using GATE Developer");
       }
     }, this));
     helpMenu.add(new XJMenuItem(new AbstractAction("Demo movies") {
@@ -2757,6 +2757,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
   }
 
+  // TODO: delete this method as it has moved to PluginManagerUI?
   class LoadCreoleRepositoryAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public LoadCreoleRepositoryAction() {
@@ -4674,7 +4675,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           .actionPerformed(null);
       } else if (mainTabbedPane.getTitleAt(mainTabbedPane
                   .getSelectedIndex()).equals("Messages")) {
-        showHelpFrame("sec:howto:guistart", "messages pane");
+        showHelpFrame("sec:developer:gui", "messages pane");
       } else {
         showHelpFrame(null, node.getUserObject().getClass().getName());
       }
