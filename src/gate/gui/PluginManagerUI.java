@@ -35,6 +35,7 @@ import javax.swing.table.*;
 import gate.Gate;
 import gate.GateConstants;
 import gate.swing.XJTable;
+import gate.swing.XJFileChooser;
 import gate.util.*;
 
 /**
@@ -658,10 +659,11 @@ public class PluginManagerUI extends JDialog implements GateConstants{
         }
 
         public void actionPerformed(ActionEvent e){
-          JFileChooser fileChooser = MainFrame.getFileChooser(); 
+          XJFileChooser fileChooser = MainFrame.getFileChooser();
           fileChooser.setMultiSelectionEnabled(false);
           fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
           fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
+          fileChooser.setResource("gate.CreoleRegister");
           int result = fileChooser.showOpenDialog(PluginManagerUI.this);
           if(result == JFileChooser.APPROVE_OPTION){
             try{
@@ -681,11 +683,9 @@ public class PluginManagerUI extends JDialog implements GateConstants{
       rightBox.add(fileBtn);
       messageBox.add(rightBox);
 
-      int res = JOptionPane.showOptionDialog(
-                            PluginManagerUI.this, messageBox,
-                            "Enter an URL to the directory containing the " +
-                            "\"creole.xml\" file", JOptionPane.OK_CANCEL_OPTION,
-                            JOptionPane.QUESTION_MESSAGE, null, null, null);
+      int res = JOptionPane.showOptionDialog(PluginManagerUI.this, messageBox,
+        "Enter an URL to the directory containing the \"creole.xml\" file",
+        JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
       if(res == JOptionPane.OK_OPTION){
         try{
           final URL creoleURL = new URL(urlTextField.getText());
