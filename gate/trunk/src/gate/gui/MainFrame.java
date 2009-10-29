@@ -644,7 +644,14 @@ public class MainFrame extends JFrame implements ProgressListener,
     // this));
 
     // LingPipe action
-    fileMenu.add(new XJMenuItem(new LoadLingPipeWithDefaultsAction(), this));
+    fileMenu.add(new XJMenuItem(new LoadApplicationAction(
+            "Load LingPipe system", "LingPipe", "resources/lingpipe.gapp"),
+            this));
+
+    // OpenNLP action
+    fileMenu.add(new XJMenuItem(new LoadApplicationAction(
+            "Load OpenNLP system", "OpenNLP", "resources/opennlp.gapp"), this));
+
     fileMenu.add(new XJMenuItem(new ManagePluginsAction(), this));
     
     if(!Gate.runningOnMac()) {
@@ -2644,53 +2651,56 @@ public class MainFrame extends JFrame implements ProgressListener,
   }// class LoadANNIEWithoutDefaultsAction
 
   /**
-   * Loads LingPipe with default parameters.
+   * Loads the application.
    */
-  class LoadLingPipeWithDefaultsAction extends AbstractAction {
+  class LoadApplicationAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
-    private static final String PLUGIN_DIR = "LingPipe";
-    private static final String RESOURCE_DIR = "resources";
-    private static final String APPLICATION_FILE = "lingpipe.gapp";
 
-    public LoadLingPipeWithDefaultsAction() {
-      super("Load LingPipe system");
-      putValue(SHORT_DESCRIPTION, "Load LingPipe with default parameters");
+    private String pluginDir = null;
+
+    private String applicationFile = null;
+
+    public LoadApplicationAction(String caption, String pluginDir,
+            String applicationFile) {
+      super("Load " + pluginDir + " system");
+      this.pluginDir = pluginDir;
+      this.applicationFile = applicationFile;
+      putValue(SHORT_DESCRIPTION, "Load " + pluginDir
+              + "with default parameters");
       putValue(SMALL_ICON, getIcon("open-application"));
     }
 
     public void actionPerformed(ActionEvent e) {
       Runnable runnable = new Runnable() {
         public void run() {
-          lockGUI("LingPipe is being loaded...");
+          lockGUI(pluginDir + " is being loaded...");
           try {
             long startTime = System.currentTimeMillis();
 
             // load LingPipe as an application from a gapp file
-            PersistenceManager.loadObjectFromFile(new File(new File(new File(
-              Gate.getPluginsHome(), PLUGIN_DIR), RESOURCE_DIR),
-              APPLICATION_FILE));
-
+            PersistenceManager.loadObjectFromFile(new File(new File(Gate
+                    .getPluginsHome(), pluginDir), applicationFile));
 
             long endTime = System.currentTimeMillis();
-            statusChanged("LingPipe loaded in "
-              + NumberFormat.getInstance().format(
-                (double)(endTime - startTime) / 1000) + " seconds");
-          }
-          catch(Exception error) {
+            statusChanged(pluginDir
+                    + " loaded in "
+                    + NumberFormat.getInstance().format(
+                            (double)(endTime - startTime) / 1000) + " seconds");
+          } catch(Exception error) {
             String message =
-              "There was an error when loading the LingPipe application.";
+                    "There was an error when loading the " + pluginDir
+                            + " application.";
             alertButton.setAction(new AlertAction(error, message, null));
-          }
-          finally {
+          } finally {
             unlockGUI();
           }
         }
       };
-      Thread thread = new Thread(runnable, "LoadLingPipeWithDefaultsAction");
+      Thread thread = new Thread(runnable, "LoadApplicationAction");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }
-  }// class LoadLingPipeWithDefaultsAction
+  }// class LoadApplicationAction
 
   class NewBootStrapAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
