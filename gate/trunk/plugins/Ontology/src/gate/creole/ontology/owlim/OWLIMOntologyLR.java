@@ -43,7 +43,7 @@ import org.apache.log4j.Logger;
     interfaceName = "gate.creole.ontology.Ontology",
     comment = "Ontology created as a temporary OWLIM3 in-memory repository, for backwards compatibility only",
     icon = "ontology",
-    helpURL = "http://gate.ac.uk/userguide/sec:ontologies:owlim2compat")
+    helpURL = "http://gate.ac.uk/userguide/sec:ontologies:ontoplugin:owlim2compat")
 public class OWLIMOntologyLR 
     extends OWLIMOntology
   {
