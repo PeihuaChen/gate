@@ -10,7 +10,7 @@
 			<JAR>lib/abner1.0.0.jar</JAR>
 			<JAR>lib/mallet.jar</JAR>
 			<COMMENT>Gate wrapper over Abner.</COMMENT>
-			<HELPURL>http://pages.cs.wisc.edu/~bsettles/abner/</HELPURL>
+			<HELPURL>http://gate.ac.uk/userguide/sec:parsers:abner</HELPURL>
 			<CLASS>gate.abner.AbnerTagger</CLASS>
 			<PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
 			<PARAMETER NAME="outputASName" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
