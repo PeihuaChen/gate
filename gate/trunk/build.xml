@@ -418,17 +418,17 @@
 
   <!-- Plugins -->
   <filelist id="plugins.to.build" dir="plugins"
-    files="Tagger_TreeTagger Tagger_Chemistry Jape_Compiler 
-       Keyphrase_Extraction_Algorithm Machine_Learning Parser_Minipar
-       Ontology Ontology_OWLIM2 Ontology_Tools Gazetteer_Ontology_Based
-       Tagger_NP_Chunking Tagger_TreeTagger Parser_Stanford 
-       Gazetteer_LKB Lang_Arabic Ontology_BDM_Computation Lang_Cebuano 
-       Lang_Chinese Copy_Annots_Between_Docs Web_Crawler_Websphinx 
-       Web_Search_Google Lang_Hindi Alignment Annotation_Merging
-       Learning Segmenter_Chinese Inter_Annotator_Agreement Parser_RASP Lang_Romanian 
-       Stemmer_Snowball UIMA Web_Search_Yahoo Tagger_OpenCalais LingPipe
-       Tagger_Abner OpenNLP" 
-   />
+    files="
+      Alignment Annotation_Merging Copy_Annots_Between_Docs Gazetteer_LKB
+      Gazetteer_Ontology_Based Inter_Annotator_Agreement Jape_Compiler
+      Keyphrase_Extraction_Algorithm Lang_Arabic Lang_Cebuano Lang_Chinese
+      Lang_Hindi Lang_Romanian Learning LingPipe Machine_Learning Ontology
+      Ontology_BDM_Computation Ontology_OWLIM2 Ontology_Tools OpenNLP
+      Parser_Minipar Parser_RASP Parser_Stanford Segmenter_Chinese
+      Stemmer_Snowball Tagger_Abner Tagger_Chemistry Tagger_Framework
+      Tagger_NP_Chunking Tagger_OpenCalais Tagger_TreeTagger UIMA
+      Web_Crawler_Websphinx Web_Search_Google Web_Search_Yahoo
+    " />
   <target name="plugins.build" depends="jar" >
     <for param="plugin">
       <path>
