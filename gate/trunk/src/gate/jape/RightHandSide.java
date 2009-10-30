@@ -26,12 +26,16 @@ import gate.util.Strings;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -103,6 +107,8 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
   static final boolean debug = false;
   private String phaseName;
   private String ruleName;
+  
+  private static Set<StackTraceElement> warnings = new HashSet<StackTraceElement>();
 
   /** Construction from the transducer name, rule name and the LHS. */
   public RightHandSide(
@@ -231,9 +237,9 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
           }
         }
         else {
-          // I doubt it is possible to get to here as the Jape java
-          // source is compiled so that line numbers are included but
-          // just to be on the safe side
+          // this will happen if we are running from a
+          // serialised jape grammar as we don't keep the
+          // source info
           japeSTE = new StackTraceElement(getPhaseName(), getRuleName(), null,
                   -1);
         }
@@ -329,16 +335,81 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
   
   /** Makes changes to the document, using LHS bindings. */
   public void transduce(Document doc, java.util.Map bindings,
-                        AnnotationSet inputAS, AnnotationSet outputAS,
+                        AnnotationSet inputAS, final AnnotationSet outputAS,
                         Ontology ontology)
                         throws JapeException {
     if(theActionObject == null) {
       instantiateActionClass();
     }
 
+    // the 'annotations' parameter of the RhSAction.doIt method has been
+    // deprecated. As there is no way in Java to deprecate a parameter
+    // we will have to be a little clever/sneaky! We will create a proxy
+    // around the outputAS and pass the proxy to the Jape RHS. If the RHS
+    // code calls any method on the annotations proxy the following
+    // handler will be called instead so we can warn about the
+    // deprecation and then forward the method onwards to the outputAS
+    // so that the JAPE code will still work.
+    AnnotationSet annotations = (AnnotationSet)Proxy.newProxyInstance(
+            getClass().getClassLoader(), new Class[] {AnnotationSet.class},
+            new InvocationHandler() {
+
+              public Object invoke(Object proxy, Method method, Object[] args)
+                      throws Throwable {
+
+                StackTraceElement japeSTE = null;
+                SourceInfo source = null;
+
+                // find the stack trace element corresponding to the
+                // call on the annotations proxy. This should always be
+                // the third element but just to be on the safe side we
+                // will find it by looping
+                for(StackTraceElement ste : (new Throwable()).getStackTrace()) {
+                  if(ste.getClassName().equals(actionClassQualifiedName)) {
+
+                    if(ste.getLineNumber() >= 0 && sourceInfo != null) {
+                      for(SourceInfo info : sourceInfo) {
+                        japeSTE = info
+                                .getStackTraceElement(ste.getLineNumber());
+
+                        if(japeSTE != null) {
+                          source = info;
+                          break;
+                        }
+                      }
+                    }
+                    else {
+                      // this will happen if we are running from a
+                      // serialised jape grammar as we don't keep the
+                      // source info
+                      japeSTE = new StackTraceElement(getPhaseName(),
+                              getRuleName(), null, -1);
+                    }
+
+                    break;
+                  }
+                }
+
+                if(!warnings.contains(japeSTE)) {
+                  // we only want to warn about each use once per
+                  // invocation of GATE so we keep a cache of the stack
+                  // trace elements we have already warned about
+                  Err.println(nl + "WARNING: the JAPE 'annotations' parameter has been deprecated. Please use 'inputAS' or 'outputAS' instead.");
+                  Err.println(japeSTE);
+                  if(japeSTE.getLineNumber() >= 0)
+                    Err.println("\t" + source.getSource(japeSTE.getLineNumber()).trim());
+
+                  warnings.add(japeSTE);
+                }
+
+                //pass the method on so that the JAPE code still works
+                return method.invoke(outputAS, args);
+              }
+            });
+    
     // run the action class
     try {
-      ((RhsAction) theActionObject).doit(doc, bindings, outputAS,
+      ((RhsAction) theActionObject).doit(doc, bindings, annotations,
                                          inputAS, outputAS, ontology);
     } catch (NonFatalJapeException e) {
       // if the action class throws a non-fatal exception then respond by
@@ -447,11 +518,15 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     }
 
     public String getNumberedSource() {
-      String source = actionClassString.substring(startOffset, endOffset);
-
-      return Strings.addLineNumbers(source, japeLine);
+      return Strings.addLineNumbers(getSource(), japeLine);
     }
 
+    public String getSource(int line) {      
+      String[] lines = getSource().split(nl);
+      
+      return lines[line-japeLine];
+    }
+    
     public int getJapeLineNumber(int javaLineNumber) {
       if(!contains(javaLineNumber)) return -1;
 
@@ -466,8 +541,11 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
       return new StackTraceElement(RightHandSide.this.getPhaseName(),
               RightHandSide.this.getRuleName(), japeURL, japeLineNumber);
     }
+    
+    public String getSource() {
+      return actionClassString.substring(startOffset, endOffset);
+    }
   }
-
 } // class RightHandSide
 
 
