@@ -13,7 +13,6 @@
       A module for executing augmented Jape grammars.  Many of its features
       have now been subsumed into the standard JAPE implementation.
     </COMMENT>
-    <HELPURL>http://gate.ac.uk/userguide/sec:misc-creole:montrealtransducer</HELPURL>
     <PARAMETER NAME="document" RUNTIME="true"
       COMMENT="The document to be processed">gate.Document</PARAMETER>
     <PARAMETER NAME="inputASName" RUNTIME="true"
