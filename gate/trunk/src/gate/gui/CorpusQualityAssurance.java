@@ -71,6 +71,10 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       public int compare(String s1, String s2) {
         if (s1 == null || s2 == null) {
           return 0;
+        } else if (s1.equals("")) {
+          return 1;
+        } else if (s2.equals("")) {
+          return -1;
         } else {
           return Double.valueOf(s1).compareTo(Double.valueOf(s2));
         }
@@ -379,9 +383,12 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       new ListSelectionListener() {
         public void valueChanged(ListSelectionEvent e) {
           if (e.getValueIsAdjusting()) { return; }
-          openDocumentAction.setEnabled(documentTable.getSelectedRow() != -1);
-          openAnnotationDiffAction.setEnabled(
-            documentTable.getSelectedRow() != -1);
+          boolean enabled = documentTable.getSelectedRow() != -1
+            && !((String)documentTable.getValueAt(
+              documentTable.getSelectedRow(),
+              DocumentTableModel.COL_DOCUMENT)).endsWith("summary");
+          openDocumentAction.setEnabled(enabled);
+          openAnnotationDiffAction.setEnabled(enabled);
         }
       }
     );
