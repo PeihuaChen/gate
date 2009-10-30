@@ -36,6 +36,36 @@ import gate.Annotation;
  */
 public class AnnotationDiffer {
 
+  /**
+   * Constructor to be used when you have a collection of AnnotationDiffer
+   * and want to consider it as only one AnnotationDiffer.
+   * It simply set the correct, partial, spurious and missing values to be
+   * the sum of those in the collection.
+   * Then you can only use the methods getPrecision/Recall/FMeasure...().
+   * @param differs collection to be regrouped in one AnnotationDiffer
+   */
+  public AnnotationDiffer(Collection<AnnotationDiffer> differs) {
+    correctMatches = 0;
+    partiallyCorrectMatches = 0;
+    missing = 0;
+    spurious = 0;
+    int keyCount = 0;
+    int responseCount = 0;
+    for (AnnotationDiffer differ : differs) {
+      correctMatches += differ.getCorrectMatches();
+      partiallyCorrectMatches += differ.getPartiallyCorrectMatches();
+      missing += differ.getMissing();
+      spurious += differ.getSpurious();
+      keyCount += differ.getKeysCount();
+      responseCount += differ.getResponsesCount();
+    }
+    keyList = new ArrayList(Collections.nCopies(keyCount, null));
+    responseList = new ArrayList(Collections.nCopies(responseCount, null));
+  }
+
+  public AnnotationDiffer() {
+    // empty constructor
+  }
 
   /**
    * Interface representing a pairing between a key annotation and a response 
@@ -57,8 +87,8 @@ public class AnnotationDiffer {
     public Annotation getResponse();
     
     /**
-     * Gets the type of the pairing, one of {@link #CORRECT_TYPE}, 
-     * {@link #PARTIALLY_CORRECT_TYPE}, {@link #SPURIOUS_TYPE} or 
+     * Gets the type of the pairing, one of {@link #CORRECT_TYPE},
+     * {@link #PARTIALLY_CORRECT_TYPE}, {@link #SPURIOUS_TYPE} or
      * {@link #MISSING_TYPE},
      * @return an <tt>int</tt> value.
      */
