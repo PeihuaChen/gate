@@ -546,6 +546,10 @@
   <target name="run-mac" if="running.on.mac">
     <property name="gate.icon.location"
               location="GATE.app/Contents/Resources/gate-icon.icns" />
+    <condition property="runtime.arch" value="64" else="32">
+      <os arch="x86_64" />
+    </condition>
+    <echo>Running GATE with -d${runtime.arch}</echo>
     <java classname="gate.Main"
           classpathref="run.class.path"
           fork="true"
@@ -559,6 +563,7 @@
        <sysproperty key="apple.laf.useScreenMenuBar" value="true"/>
        <sysproperty key="com.apple.mrj.application.growbox.intrudes" value="false"/>
        <sysproperty key="com.apple.mrj.application.live-resize" value="true"/>
+       <jvmarg value="-d${runtime.arch}" />
        <jvmarg value="-Xdock:name=GATE ${gate.version}"/>
        <jvmarg value="-Xdock:icon=${gate.icon.location}"/>
        <syspropertyset refid="run.properties" />
