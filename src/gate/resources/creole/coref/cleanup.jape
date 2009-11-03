@@ -25,6 +25,6 @@ Rule:CleanTempAnnotations
 -->
 {
    gate.AnnotationSet tmp = (gate.AnnotationSet)bindings.get("temp");
-   annotations.removeAll(tmp);
+   outputAS.removeAll(tmp);
 }
 

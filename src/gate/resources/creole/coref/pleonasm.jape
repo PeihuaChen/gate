@@ -353,7 +353,7 @@ Priority: 99
 
 	gate.FeatureMap features = Factory.newFeatureMap();
 	features.put("firedBy","ruleA+B");
-	annotations.add(found_pleonasm.firstNode(), found_pleonasm.lastNode(), "PleonasticIt", features);
+	outputAS.add(found_pleonasm.firstNode(), found_pleonasm.lastNode(), "PleonasticIt", features);
 
     //try to get doc feature
     Integer cnt = (Integer)doc.getFeatures().get("PLEONASM");
@@ -395,7 +395,7 @@ Priority: 77
 
 	gate.FeatureMap features = Factory.newFeatureMap();
 	features.put("firedBy","ruleC");
-	annotations.add(found_pleonasm.firstNode(), found_pleonasm.lastNode(), "PleonasticIt", features);
+	outputAS.add(found_pleonasm.firstNode(), found_pleonasm.lastNode(), "PleonasticIt", features);
 
     //try to get doc feature
     Integer cnt = (Integer)doc.getFeatures().get("PLEONASM");
@@ -435,7 +435,7 @@ Priority: 66
 
 	gate.FeatureMap features = Factory.newFeatureMap();
 	features.put("firedBy","ruleD");
-	annotations.add(found_pleonasm.firstNode(), found_pleonasm.lastNode(), "PleonasticIt", features);
+	outputAS.add(found_pleonasm.firstNode(), found_pleonasm.lastNode(), "PleonasticIt", features);
 
     //try to get doc feature
     Integer cnt = (Integer)doc.getFeatures().get("PLEONASM");
@@ -469,7 +469,7 @@ Priority: 55
 
 	gate.FeatureMap features = Factory.newFeatureMap();
 	features.put("firedBy","ruleE");
-	annotations.add(found_pleonasm.firstNode(), found_pleonasm.lastNode(), "PleonasticIt", features);
+	outputAS.add(found_pleonasm.firstNode(), found_pleonasm.lastNode(), "PleonasticIt", features);
 
     //try to get doc feature
     Integer cnt = (Integer)doc.getFeatures().get("PLEONASM");
@@ -509,7 +509,7 @@ Priority: 55
 
 	gate.FeatureMap features = Factory.newFeatureMap();
 	features.put("firedBy","ruleD");
-	annotations.add(found_pleonasm.firstNode(), found_pleonasm.lastNode(), "PleonasticIt", features);
+	outputAS.add(found_pleonasm.firstNode(), found_pleonasm.lastNode(), "PleonasticIt", features);
 
     //try to get doc feature
     Integer cnt = (Integer)doc.getFeatures().get("PLEONASM");
