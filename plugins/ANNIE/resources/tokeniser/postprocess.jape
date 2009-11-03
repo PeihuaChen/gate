@@ -36,7 +36,7 @@ Rule: simpleJoin
 -->
 {
   gate.AnnotationSet toRemove = (gate.AnnotationSet)bindings.get("left");
-  annotations.removeAll(toRemove);
+  outputAS.removeAll(toRemove);
   //get the tokens
   java.util.ArrayList tokens = new java.util.ArrayList(toRemove);
   //define a comparator for annotations by start offset
@@ -51,7 +51,7 @@ Rule: simpleJoin
   features.put("string", text);
   features.put("length", Integer.toString(text.length()));
   features.put("orth", "apostrophe");
-  annotations.add(toRemove.firstNode(), toRemove.lastNode(), "Token", features);
+  outputAS.add(toRemove.firstNode(), toRemove.lastNode(), "Token", features);
 }
 
 
@@ -103,8 +103,8 @@ Rule: VBneg
   String firstTokenText = (String)firstToken.getFeatures().get("string");
   if(firstTokenText.endsWith("n")){
     //remove the old tokens
-    annotations.removeAll((gate.AnnotationSet)bindings.get("one"));
-    annotations.removeAll((gate.AnnotationSet)bindings.get("two"));
+    outputAS.removeAll((gate.AnnotationSet)bindings.get("one"));
+    outputAS.removeAll((gate.AnnotationSet)bindings.get("two"));
     //create the new tokens
     Long ofs0 = firstToken.getStartNode().getOffset();
     Long ofs1 = new Long(firstToken.getEndNode().getOffset().longValue() - 1);
@@ -118,7 +118,7 @@ Rule: VBneg
         features.put("string", text);
         features.put("length", Integer.toString(text.length()));
         features.put("orth", firstToken.getFeatures().get("orth"));
-        annotations.add(ofs0, ofs1, "Token", features);
+        outputAS.add(ofs0, ofs1, "Token", features);
       }
 
       features = Factory.newFeatureMap();
@@ -126,7 +126,7 @@ Rule: VBneg
       features.put("string", "n't");
       features.put("length", "3");
       features.put("orth", "lowercase");
-      annotations.add(ofs1, ofs2, "Token", features);
+      outputAS.add(ofs1, ofs2, "Token", features);
     }catch(Exception e){
       e.printStackTrace();
     }
@@ -144,7 +144,7 @@ Rule: NewLine
 -->
 {
   gate.AnnotationSet toRemove = (gate.AnnotationSet)bindings.get("left");
-  annotations.removeAll(toRemove);
+  outputAS.removeAll(toRemove);
   //get the tokens
   java.util.ArrayList tokens = new java.util.ArrayList(toRemove);
   //define a comparator for annotations by start offset
@@ -158,6 +158,6 @@ Rule: NewLine
   features.put("kind", "control");
   features.put("string", text);
   features.put("length", Integer.toString(text.length()));
-  annotations.add(toRemove.firstNode(), toRemove.lastNode(), "SpaceToken", features);
+  outputAS.add(toRemove.firstNode(), toRemove.lastNode(), "SpaceToken", features);
 }
 
