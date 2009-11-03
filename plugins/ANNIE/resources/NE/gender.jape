@@ -25,7 +25,7 @@ Rule: isFemale
 	gate.FeatureMap features = Factory.newFeatureMap();
 	features.put("gender", "female");
 	features.put("rule", "isFemale");
-	annotations.add(person.firstNode(), person.lastNode(), "isFemale",
+	outputAS.add(person.firstNode(), person.lastNode(), "isFemale",
 	features);
 }
 
@@ -45,6 +45,6 @@ Rule: isMale
 	gate.FeatureMap features = Factory.newFeatureMap();
 	features.put("gender", "male");
 	features.put("rule", "isMale");
-	annotations.add(person.firstNode(), person.lastNode(), "isMale",
+	outputAS.add(person.firstNode(), person.lastNode(), "isMale",
 	features);
 }

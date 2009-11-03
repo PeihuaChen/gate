@@ -45,7 +45,7 @@ while(!ambig && lookupsIter.hasNext()){
 if(!ambig) features.put("gender", gender);
 
 features.put("rule", "FirstName");
-annotations.add(person.firstNode(), person.lastNode(), "FirstPerson",
+outputAS.add(person.firstNode(), person.lastNode(), "FirstPerson",
 features);
 }
 
@@ -64,7 +64,7 @@ gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("gender", personAnn.getFeatures().get("minorType"));
 features.put("rule", "TitleGender");
-annotations.add(person.firstNode(), person.lastNode(), "Title",
+outputAS.add(person.firstNode(), person.lastNode(), "Title",
 features);
 }
 
