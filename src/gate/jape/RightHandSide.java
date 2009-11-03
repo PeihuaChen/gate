@@ -522,7 +522,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     }
 
     public String getSource(int line) {      
-      String[] lines = getSource().split(nl);
+      String[] lines = getSource().split("\n");
       
       return lines[line-japeLine];
     }
