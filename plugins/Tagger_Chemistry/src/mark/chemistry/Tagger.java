@@ -52,6 +52,8 @@ public class Tagger extends AbstractLanguageAnalyser implements
   private LanguageAnalyser gazo = null;
 
   private LanguageAnalyser net = null;
+  
+  private String annotationSetName = null;
 
   // // Init parameters ////
   /**
@@ -66,6 +68,14 @@ public class Tagger extends AbstractLanguageAnalyser implements
 
   public URL getCompoundListsURL() {
     return compoundListsURL;
+  }
+  
+  public void setAnnotationSetName(String name) {
+    annotationSetName = name;
+  }
+  
+  public String getAnnotationSetName() {
+    return annotationSetName;
   }
 
   /**
@@ -164,45 +174,63 @@ public class Tagger extends AbstractLanguageAnalyser implements
   }
 
   @Override public void execute() throws ExecutionException {
+      
     Document doc = getDocument();
-    gazc.setDocument(doc);
-    gazo.setDocument(doc);
-    net.setDocument(doc);
+    
     try {
+      gazc.setDocument(doc);
+      gazc.setParameterValue("annotationSetName", annotationSetName);
+
+      gazo.setDocument(doc);
+      gazo.setParameterValue("annotationSetName", annotationSetName);
+      
+      net.setDocument(doc);
+      net.setParameterValue("inputASName", annotationSetName);
+      net.setParameterValue("outputASName", annotationSetName);
+    }
+    catch(ResourceInstantiationException rie) {
+      throw new ExecutionException(rie);
+    }
+    
+    try
+    {
       gazc.execute();
       gazo.execute();
       net.execute();
       // This lot used to be in the clean.jape file but it was slowing
       // things down a lot as what I really wanted would have required
       // the brill style to do what it is meant to do.
+      
+      AnnotationSet docAS = doc.getAnnotations(annotationSetName);
+      
       FeatureMap params = Factory.newFeatureMap();
-      AnnotationSet temp = doc.getAnnotations().get("NotACompound", params);
-      if(temp != null) doc.getAnnotations().removeAll(temp);
+      AnnotationSet temp = docAS.get("NotACompound", params);
+      if(temp != null) docAS.removeAll(temp);
       params.put("majorType", "CTelement");
-      temp = doc.getAnnotations().get("Lookup", params);
-      if(temp != null) doc.getAnnotations().removeAll(temp);
+      temp = docAS.get("Lookup", params);
+      if(temp != null) docAS.removeAll(temp);
       params.put("majorType", "chemTaggerSymbols");
-      temp = doc.getAnnotations().get("Lookup", params);
-      if(temp != null) doc.getAnnotations().removeAll(temp);
+      temp = docAS.get("Lookup", params);
+      if(temp != null) docAS.removeAll(temp);
       if(removeElements.booleanValue()) {
         params = Factory.newFeatureMap();
-        AnnotationSet compounds = doc.getAnnotations().get("ChemicalCompound",
+        AnnotationSet compounds = docAS.get("ChemicalCompound",
                 params);
         if(compounds != null) {
           Iterator<Annotation> cit = compounds.iterator();
           while(cit.hasNext()) {
             Annotation compound = cit.next();
-            AnnotationSet elements = doc.getAnnotations().get(
+            AnnotationSet elements = docAS.get(
                     "ChemicalElement", compound.getStartNode().getOffset(),
                     compound.getEndNode().getOffset());
             if(elements != null) {
-              doc.getAnnotations().removeAll(elements);
+              docAS.removeAll(elements);
             }
           }
         }
       }
       params = Factory.newFeatureMap();
-      AnnotationSet elements = doc.getAnnotations().get("ChemicalElement",
+      AnnotationSet elements = docAS.get("ChemicalElement",
               params);
       if(elements != null) {
         Iterator<Annotation> eit = elements.iterator();

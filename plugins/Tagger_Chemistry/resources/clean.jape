@@ -1,6 +1,6 @@
 /************************************************************************
  *            Chemistry Tagger - A GATE Processing Resource             *
- *         Copyright (C) 2004-2006 The University of Sheffield          *
+ *         Copyright (C) 2004-2009 The University of Sheffield          *
  *       Developed by Mark Greenwood <m.greenwood@dcs.shef.ac.uk>       *
  *                                                                      *
  * This program is free software; you can redistribute it and/or modify *
@@ -33,11 +33,11 @@ Rule:InitialNotElement
 	gate.AnnotationSet dotSet = (gate.AnnotationSet)bindings.get("dot");
 	
 	
-	gate.AnnotationSet splits = annotations.get("Split",dotSet.firstNode().getOffset(),dotSet.lastNode().getOffset());
+	gate.AnnotationSet splits = outputAS.get("Split",dotSet.firstNode().getOffset(),dotSet.lastNode().getOffset());
 	
 	if (splits != null || splits.size() > 0)
 	{
-		annotations.removeAll(elSet);
+		outputAS.removeAll(elSet);
 	}
 }
 
@@ -48,16 +48,16 @@ Rule:SentenceElement
 {
 	gate.AnnotationSet elSet = (gate.AnnotationSet)bindings.get("element");
 	
-	gate.AnnotationSet compounds = annotations.get("ChemicalCompound",elSet.firstNode().getOffset(),elSet.lastNode().getOffset());
+	gate.AnnotationSet compounds = outputAS.get("ChemicalCompound",elSet.firstNode().getOffset(),elSet.lastNode().getOffset());
 
 	if (compounds == null || compounds.size() == 0)
 	{
 
-		gate.AnnotationSet sentences = annotations.get("Sentence",elSet.firstNode().getOffset(),elSet.lastNode().getOffset());
+		gate.AnnotationSet sentences = outputAS.get("Sentence",elSet.firstNode().getOffset(),elSet.lastNode().getOffset());
 
 		if (sentences.firstNode().equals(elSet.firstNode()))
 		{
-			annotations.removeAll(elSet);
+			outputAS.removeAll(elSet);
 		}
 	}
 }

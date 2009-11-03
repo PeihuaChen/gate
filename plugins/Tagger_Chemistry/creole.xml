@@ -7,8 +7,12 @@
       <HELPURL>http://gate.ac.uk/userguide/sec:parsers:chemistrytagger</HELPURL>
       <JAR>ChemTagger.jar</JAR>
       <CLASS>mark.chemistry.Tagger</CLASS>
+      <PARAMETER NAME="annotationSetName"
+        COMMENT="The annotation set to use"
+        RUNTIME="true"
+        OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="document"
-        COMMENT="The document to be analysed."
+        COMMENT="The document to be analysed"
         RUNTIME="true">gate.corpora.DocumentImpl</PARAMETER>
       <PARAMETER NAME="compoundListsURL"
         COMMENT="The gazetteer lists definition for spotting element symbols as part of compounds"
