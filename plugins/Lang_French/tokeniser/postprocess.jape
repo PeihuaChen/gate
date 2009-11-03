@@ -22,7 +22,7 @@ TreeTagger output, e.g. d' should be one Token not two */
 -->
 {
   gate.AnnotationSet toRemove = (gate.AnnotationSet)bindings.get("left");
-  annotations.removeAll(toRemove);
+  outputAS.removeAll(toRemove);
   //get the tokens
   java.util.ArrayList tokens = new java.util.ArrayList(toRemove);
   //define a comparator for annotations by start offset
@@ -37,5 +37,5 @@ TreeTagger output, e.g. d' should be one Token not two */
   features.put("string", text);
   features.put("length", Integer.toString(text.length()));
   features.put("orth", "artapos");
-  annotations.add(toRemove.firstNode(), toRemove.lastNode(), "Token", features);
+  outputAS.add(toRemove.firstNode(), toRemove.lastNode(), "Token", features);
 }

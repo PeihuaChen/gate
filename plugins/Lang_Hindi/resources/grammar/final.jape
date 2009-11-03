@@ -32,9 +32,9 @@ gate.FeatureMap features = Factory.newFeatureMap();
 features.put("locType",locAnn.getFeatures().get("locType"));
 features.put("rule1", locAnn.getFeatures().get("rule"));
 features.put("rule2", "LocFinal");
-annotations.add(loc.firstNode(), loc.lastNode(), "LOC",
+outputAS.add(loc.firstNode(), loc.lastNode(), "LOC",
 features);
-annotations.removeAll(loc);
+outputAS.removeAll(loc);
 }
 
 Rule: PersonFinal
@@ -51,9 +51,9 @@ gate.FeatureMap features = Factory.newFeatureMap();
 features.put("perType",perAnn.getFeatures().get("gender"));
 features.put("rule1", perAnn.getFeatures().get("rule"));
 features.put("rule2", "PersonFinal");
-annotations.add(per.firstNode(), per.lastNode(), "PER",
+outputAS.add(per.firstNode(), per.lastNode(), "PER",
 features);
-annotations.removeAll(per);
+outputAS.removeAll(per);
 }
 
 

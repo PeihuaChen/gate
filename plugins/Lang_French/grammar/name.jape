@@ -124,7 +124,7 @@ gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("kind", "personName");
 features.put("rule", "GazPerson");
-annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+outputAS.add(person.firstNode(), person.lastNode(), "TempPerson",
 features);
 }
 
@@ -150,9 +150,9 @@ gate.FeatureMap features = Factory.newFeatureMap();
 features.put("gender", personAnn.getFeatures().get("gender"));
 features.put("kind", "personName");
 features.put("rule", "GazPersonFirst");
-annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+outputAS.add(person.firstNode(), person.lastNode(), "TempPerson",
 features);
-//annotations.removeAll(person);
+//outputAS.removeAll(person);
 }
 
 
@@ -173,9 +173,9 @@ gate.FeatureMap features = Factory.newFeatureMap();
 features.put("gender", personAnn.getFeatures().get("gender"));
 features.put("kind", "personName");
 features.put("rule", "GazPersonFirst");
-annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+outputAS.add(person.firstNode(), person.lastNode(), "TempPerson",
 features);
-//annotations.removeAll(person);
+//outputAS.removeAll(person);
 }
 
 
@@ -207,14 +207,14 @@ if (firstPerson != null && firstPerson.size()>0)
 }
   features1.put("kind", "personName");
   features1.put("rule", "PersonFirstContext");
-annotations.add(person1Set.firstNode(), person1Set.lastNode(), "TempPerson",
+outputAS.add(person1Set.firstNode(), person1Set.lastNode(), "TempPerson",
 features1);
 //now deal with person2
 gate.FeatureMap features2 = Factory.newFeatureMap();
 gate.AnnotationSet person2Set = (gate.AnnotationSet)bindings.get("person2");
   features2.put("kind", "personName");
   features2.put("rule", "PersonFirstContext");
-annotations.add(person2Set.firstNode(), person2Set.lastNode(), "TempPerson",
+outputAS.add(person2Set.firstNode(), person2Set.lastNode(), "TempPerson",
 features2);
 }
 
@@ -242,7 +242,7 @@ if (firstPerson != null && firstPerson.size()>0)
 }
   features.put("kind", "personName");
   features.put("rule", "PersonFirstContext2");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -300,7 +300,7 @@ else
 }
   features.put("kind", "personName");
   features.put("rule", "PersonTitle");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -327,7 +327,7 @@ if (title != null && title.size()>0)
 }
   features.put("kind", "personName");
   features.put("rule", "PersonFirstTitleGender");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -362,7 +362,7 @@ if (title != null && title.size()>0)
   features.put("kind", "personName");
   features.put("rule", "PersonTitleGender");
 // create a TempPerson annotation and add the features we've created
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -426,7 +426,7 @@ gate.FeatureMap features = Factory.newFeatureMap();
 features.put("gender", personAnn.getFeatures().get("gender"));
 features.put("kind", "personName");
 features.put("rule", "GazPersonFirst");
-annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+outputAS.add(person.firstNode(), person.lastNode(), "TempPerson",
 features);
 }
 
@@ -499,7 +499,7 @@ gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
 }
   features.put("kind", "personName");
   features.put("rule", "PersonFull");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -556,7 +556,7 @@ if (firstPerson != null && firstPerson.size()>0)
 }
   features.put("kind", "personName");
   features.put("rule", "PersonFullReverse");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -581,7 +581,7 @@ if (firstPerson != null && firstPerson.size()>0)
 }
   features.put("kind", "personName");
   features.put("rule", "PersonSaint");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -611,7 +611,7 @@ if (firstPerson != null && firstPerson.size()>0)
 }
   features.put("kind", "personName");
   features.put("rule", "PersonLocAmbig");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -668,7 +668,7 @@ if (org != null && org.size()>0)
 // create some new features
   features.put("rule", "GazOrganization");
 // create a TempOrg annotation and add the features we've created
-annotations.add(orgSet.firstNode(), orgSet.lastNode(), "TempOrganization",
+outputAS.add(orgSet.firstNode(), orgSet.lastNode(), "TempOrganization",
 features);
 }
 
@@ -696,7 +696,7 @@ if (org != null && org.size()>0)
 // create some new features
   features.put("rule", "GazOrganization");
 // create a TempOrg annotation and add the features we've created
-annotations.add(orgSet.firstNode(), orgSet.lastNode(), "TempOrganization",
+outputAS.add(orgSet.firstNode(), orgSet.lastNode(), "TempOrganization",
 features);
 }
 
@@ -1156,7 +1156,7 @@ if (loc != null && loc.size()>0)
 // create some new features
   features.put("rule", "Location1");
 // create a TempLoc annotation and add the features we've created
-annotations.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
+outputAS.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
 features);
 }
 
@@ -1187,7 +1187,7 @@ if (loc != null && loc.size()>0)
 // create some new features
   features.put("rule", "GazLocation");
 // create a TempLoc annotation and add the features we've created
-annotations.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
+outputAS.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
 features);
 }
 

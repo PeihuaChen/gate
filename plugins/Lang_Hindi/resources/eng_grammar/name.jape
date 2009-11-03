@@ -88,11 +88,11 @@ if (org != null && org.size()>0)
 // create some new features
   features.put("rule", "GazOrganization");
 // create a TempOrg annotation and add the features we've created
-annotations.add(orgSet.firstNode(), orgSet.lastNode(), "TempOrganization",
+outputAS.add(orgSet.firstNode(), orgSet.lastNode(), "TempOrganization",
 features);
 // get spurious bit
 //gate.AnnotationSet spurSet = (gate.AnnotationSet)bindings.get("orgSpur");
-//annotations.removeAll(spurSet);
+//outputAS.removeAll(spurSet);
 }
 
 Rule: GazOrgJobTitle
@@ -126,7 +126,7 @@ if (org != null && org.size()>0)
 // create some new features
   features.put("rule", "GazOrgJobTitle");
 // create a TempOrg annotation and add the features we've created
-annotations.add(orgSet.firstNode(), orgSet.lastNode(), "TempOrganization",
+outputAS.add(orgSet.firstNode(), orgSet.lastNode(), "TempOrganization",
 features);
 }
 
@@ -174,9 +174,9 @@ Priority: 60
 gate.AnnotationSet orgSet = (gate.AnnotationSet)bindings.get("orgName");
 features.put("orgType", "team");
 features.put("rule", "SportsteamPost");
-annotations.add(orgSet.firstNode(), orgSet.lastNode(), "TempOrganization",
+outputAS.add(orgSet.firstNode(), orgSet.lastNode(), "TempOrganization",
 features);
-annotations.removeAll(orgSet);
+outputAS.removeAll(orgSet);
 }
 
 
@@ -195,7 +195,7 @@ Priority: 50
  gate.FeatureMap features = Factory.newFeatureMap();
 // create an annotation set consisting of all the annotations for orgName 
   gate.AnnotationSet orgSet = (gate.AnnotationSet)bindings.get("orgName");
- annotations.removeAll(orgSet);
+ outputAS.removeAll(orgSet);
 }
 
 Rule:	TheOrgXandY
@@ -264,9 +264,9 @@ Priority: 250
 gate.AnnotationSet orgSet = (gate.AnnotationSet)bindings.get("orgName");
 features.put("orgType", "Unknown");
 features.put("rule", "LocUni");
-annotations.add(orgSet.firstNode(), orgSet.lastNode(), "TempOrganization",
+outputAS.add(orgSet.firstNode(), orgSet.lastNode(), "TempOrganization",
 features);
-annotations.removeAll(orgSet);
+outputAS.removeAll(orgSet);
 }
 
 
@@ -705,7 +705,7 @@ if (loc != null && loc.size()>0)
   gate.Annotation locAnn = (gate.Annotation)loc.iterator().next();
 //propagate minorType feature (and value) from Lookup
   features.put("locType", locAnn.getFeatures().get("minorType"));
-  annotations.removeAll(loc);
+  outputAS.removeAll(loc);
 }
 else
 { 
@@ -713,12 +713,12 @@ else
   gate.AnnotationSet gpe = (gate.AnnotationSet)locSet.get("GazLocation");
   gate.Annotation gpeAnn = (gate.Annotation) gpe.iterator().next();
   features.put("locType", gpeAnn.getFeatures().get("locType"));
-annotations.removeAll(gpe);
+outputAS.removeAll(gpe);
 }
 // create some new features
   features.put("rule", "Location1");
 // create a TempLoc annotation and add the features we've created
-annotations.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
+outputAS.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
 features);
 }
 
@@ -748,9 +748,9 @@ gate.AnnotationSet locSet = (gate.AnnotationSet)bindings.get("locName");
   features.put("rule", "Location2");
   features.put("locType", "Unknown");
   // create a TempLoc annotation and add the features we've created
-annotations.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
+outputAS.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
 features);
-annotations.removeAll(locSet);
+outputAS.removeAll(locSet);
 }
 
 
@@ -786,7 +786,7 @@ if (loc != null && loc.size()>0)
 // create some new features
   features.put("rule", "LocationPre");
 // create a TempLoc annotation and add the features we've created
-annotations.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
+outputAS.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
 features);
 }
 
@@ -823,9 +823,9 @@ else
 // create some new features
   features.put("rule", "LocationPreLower");
 // create a TempLoc annotation and add the features we've created
-annotations.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
+outputAS.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
 features);
-annotations.removeAll(locSet);
+outputAS.removeAll(locSet);
 }
 
 //note this isn't implemented because it depends whether the 
@@ -847,7 +847,7 @@ annotations.removeAll(locSet);
 //{
 // gate.FeatureMap features = Factory.newFeatureMap();
 // gate.AnnotationSet fooSet = (gate.AnnotationSet)bindings.get("foo");
-// annotations.removeAll(fooSet);
+// outputAS.removeAll(fooSet);
 //}
 
 Rule:	GazLocation
@@ -878,9 +878,9 @@ if (loc != null && loc.size()>0)
 // create some new features
   features.put("rule", "GazLocation");
 // create a TempLoc annotation and add the features we've created
-annotations.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
+outputAS.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
 features);
-annotations.removeAll(locSet);
+outputAS.removeAll(locSet);
 }
 
 Rule: GPEPost
@@ -994,9 +994,9 @@ gate.AnnotationSet facSet = (gate.AnnotationSet)bindings.get("facName");
 // create some new features
 features.put("rule", "GazFacility");
 // create a TempFac annotation and add the features we've created
-annotations.add(facSet.firstNode(), facSet.lastNode(), "TempFacility",
+outputAS.add(facSet.firstNode(), facSet.lastNode(), "TempFacility",
 features);
-annotations.removeAll(facSet);
+outputAS.removeAll(facSet);
 }
 
 
@@ -1023,9 +1023,9 @@ gate.AnnotationSet facSet = (gate.AnnotationSet)bindings.get("facName");
 // create some new features
 features.put("rule", "LocFacility");
 // create a TempFac annotation and add the features we've created
-annotations.add(facSet.firstNode(), facSet.lastNode(), "TempFacility",
+outputAS.add(facSet.firstNode(), facSet.lastNode(), "TempFacility",
 features);
-annotations.removeAll(facSet);
+outputAS.removeAll(facSet);
 }
 
 Rule: Facility1
@@ -1051,9 +1051,9 @@ gate.AnnotationSet facSet = (gate.AnnotationSet)bindings.get("facName");
 // create some new features
 features.put("rule", "Facility1");
 // create a TempFac annotation and add the features we've created
-annotations.add(facSet.firstNode(), facSet.lastNode(), "TempFacility",
+outputAS.add(facSet.firstNode(), facSet.lastNode(), "TempFacility",
 features);
-annotations.removeAll(facSet);
+outputAS.removeAll(facSet);
 }
 
 Rule: Facility2
@@ -1074,9 +1074,9 @@ gate.AnnotationSet facSet = (gate.AnnotationSet)bindings.get("facName");
 // create some new features
 features.put("rule", "Facility2");
 // create a TempFac annotation and add the features we've created
-annotations.add(facSet.firstNode(), facSet.lastNode(), "TempFacility",
+outputAS.add(facSet.firstNode(), facSet.lastNode(), "TempFacility",
 features);
-annotations.removeAll(facSet);
+outputAS.removeAll(facSet);
 }
 
 
@@ -1103,9 +1103,9 @@ gate.AnnotationSet facSet = (gate.AnnotationSet)bindings.get("facName");
   // create some new features
 features.put("rule", "FacilityExt");
   // create a TempFac annotation and add the features we've created
-annotations.add(facSet.firstNode(), facSet.lastNode(), "TempFacility",
+outputAS.add(facSet.firstNode(), facSet.lastNode(), "TempFacility",
 features);
-annotations.removeAll(facSet);
+outputAS.removeAll(facSet);
 }
 
 Rule: FacilityExt2
@@ -1129,9 +1129,9 @@ gate.AnnotationSet facSet = (gate.AnnotationSet)bindings.get("facName");
   // create some new features
 features.put("rule", "FacilityExt2");
   // create a TempFac annotation and add the features we've created
-annotations.add(facSet.firstNode(), facSet.lastNode(), "TempFacility",
+outputAS.add(facSet.firstNode(), facSet.lastNode(), "TempFacility",
 features);
-annotations.removeAll(facSet);
+outputAS.removeAll(facSet);
 }
 
 Rule: FacilityStreet
@@ -1164,7 +1164,7 @@ gate.FeatureMap features = Factory.newFeatureMap();
 features.put("kind", "personName");
 features.put("rule", "CountryPerson");
 features.put("GENERIC", "TRUE");
-annotations.add(person.firstNode(), person.lastNode(), "GPE",
+outputAS.add(person.firstNode(), person.lastNode(), "GPE",
 features);
 }
 
@@ -1187,7 +1187,7 @@ gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("kind", "personName");
 features.put("rule", "CountryPerson");
-annotations.add(person.firstNode(), person.lastNode(), "GPE",
+outputAS.add(person.firstNode(), person.lastNode(), "GPE",
 features);
 }
 
@@ -1232,16 +1232,16 @@ if (loc != null && loc.size()>0)
   features.put("locType", locAnn.getFeatures().get("locType"));
  features.put("rule", "LocOrgXBase");
 }
-  annotations.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
+  outputAS.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
 features);
-annotations.removeAll(loc);
+outputAS.removeAll(loc);
 // now process Organization
 gate.AnnotationSet orgSet = (gate.AnnotationSet)bindings.get("orgName");
 features.put("orgType", "Unknown");
 features.put("rule", "LocOrgXBase");
-annotations.add(orgSet.firstNode(), orgSet.lastNode(), "TempOrganization",
+outputAS.add(orgSet.firstNode(), orgSet.lastNode(), "TempOrganization",
 features);
-annotations.removeAll(orgSet);
+outputAS.removeAll(orgSet);
 }
 
 

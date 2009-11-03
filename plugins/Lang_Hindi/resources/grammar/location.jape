@@ -50,7 +50,7 @@ if (loc != null && loc.size()>0)
   gate.Annotation locAnn = (gate.Annotation)loc.iterator().next();
 //propagate minorType feature (and value) from Lookup
   features.put("locType", locAnn.getFeatures().get("minorType"));
-  annotations.removeAll(loc);
+  outputAS.removeAll(loc);
 }
 else
 { 
@@ -58,12 +58,12 @@ else
   gate.AnnotationSet gpe = (gate.AnnotationSet)locSet.get("GazLocation");
   gate.Annotation gpeAnn = (gate.Annotation) gpe.iterator().next();
   features.put("locType", gpeAnn.getFeatures().get("locType"));
-annotations.removeAll(gpe);
+outputAS.removeAll(gpe);
 }
 // create some new features
   features.put("rule", "Location1");
 // create a TempLoc annotation and add the features we've created
-annotations.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
+outputAS.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
 features);
 }
 
@@ -90,9 +90,9 @@ gate.AnnotationSet locSet = (gate.AnnotationSet)bindings.get("locName");
   features.put("rule", "Location2");
   features.put("locType", "Unknown");
   // create a TempLoc annotation and add the features we've created
-annotations.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
+outputAS.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
 features);
-annotations.removeAll(locSet);
+outputAS.removeAll(locSet);
 }
 
 
@@ -125,7 +125,7 @@ if (loc != null && loc.size()>0)
 // create some new features
   features.put("rule", "LocationPre");
 // create a TempLoc annotation and add the features we've created
-annotations.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
+outputAS.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
 features);
 }
 
@@ -157,9 +157,9 @@ if (loc != null && loc.size()>0)
 // create some new features
   features.put("rule", "GazLocation");
 // create a TempLoc annotation and add the features we've created
-annotations.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
+outputAS.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
 features);
-annotations.removeAll(locSet);
+outputAS.removeAll(locSet);
 }
 
 Rule: GPEPost
