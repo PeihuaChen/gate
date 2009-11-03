@@ -4,6 +4,9 @@
 
 SELECT DISTINCT X FROM {X} rdf:type {yyy1} rdf:type {owl:Class}
   WHERE  ISURI(X) 
+UNION
+SELECT DISTINCT X FROM {X} rdf:type {yyy1} rdf:type {rdfs:Class}
+  WHERE  ISURI(X) 
 
 USING NAMESPACE
 xsd = <http://www.w3.org/2001/XMLSchema#>,
