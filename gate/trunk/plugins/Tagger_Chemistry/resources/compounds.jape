@@ -1,6 +1,6 @@
 /************************************************************************
  *            Chemistry Tagger - A GATE Processing Resource             *
- *         Copyright (C) 2004-2006 The University of Sheffield          *
+ *         Copyright (C) 2004-2009 The University of Sheffield          *
  *       Developed by Mark Greenwood <m.greenwood@dcs.shef.ac.uk>       *
  *                                                                      *
  * This program is free software; you can redistribute it and/or modify *
@@ -41,7 +41,7 @@ Rule:Compound
 	
 	if (compSet.size() > 1)
 	{
-		gate.AnnotationSet toks = (gate.AnnotationSet)annotations.get("Token",compSet.firstNode().getOffset(),compSet.lastNode().getOffset());
+		gate.AnnotationSet toks = (gate.AnnotationSet)outputAS.get("Token",compSet.firstNode().getOffset(),compSet.lastNode().getOffset());
 		gate.AnnotationSet lookups = compSet.get("Lookup",compSet.firstNode().getOffset(),compSet.lastNode().getOffset());
 
 		try
@@ -66,7 +66,7 @@ Rule:Compound
 			
 			if (!ok || !compSet.firstNode().getOffset().equals(toks.firstNode().getOffset()) || !compSet.lastNode().getOffset().equals(toks.lastNode().getOffset()))
 			{
-				annotations.add(compSet.firstNode().getOffset(),compSet.lastNode().getOffset(),"NotACompound",params);
+				outputAS.add(compSet.firstNode().getOffset(),compSet.lastNode().getOffset(),"NotACompound",params);
 			}
 			else
 			{
@@ -111,7 +111,7 @@ Rule:Compound
 
 					if (ok)
 					{
-						annotations.add(new Long(start.longValue() + m.start()),new Long(start.longValue() + m.end()),"ChemicalCompound",params);
+						outputAS.add(new Long(start.longValue() + m.start()),new Long(start.longValue() + m.end()),"ChemicalCompound",params);
 
 						FeatureMap epl = Factory.newFeatureMap();
 						epl.put("majorType","chemTaggerSymbols");
@@ -124,7 +124,7 @@ Rule:Compound
 						kep.put("majorType","CTelement");
 						kep.put("minorType","symbol");
 
-						gate.AnnotationSet known = annotations.get("Lookup",kep);
+						gate.AnnotationSet known = outputAS.get("Lookup",kep);
 
 						Iterator eit = elements.iterator();
 						while(eit.hasNext())
@@ -144,12 +144,12 @@ Rule:Compound
 								add = (overlap == null || overlap.size() == 0);
 							}
 
-							if (add) annotations.add(e.getStartNode().getOffset(),e.getEndNode().getOffset(),"ChemicalElement",ep);
+							if (add) outputAS.add(e.getStartNode().getOffset(),e.getEndNode().getOffset(),"ChemicalElement",ep);
 						}
 					}
 					else
 					{
-						annotations.add(new Long(start.longValue() + m.start()),new Long(start.longValue() + m.end()),"NotACompound",params);
+						outputAS.add(new Long(start.longValue() + m.start()),new Long(start.longValue() + m.end()),"NotACompound",params);
 					}
 				
 				}

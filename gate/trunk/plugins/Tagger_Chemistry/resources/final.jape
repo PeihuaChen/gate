@@ -1,6 +1,6 @@
 /************************************************************************
  *            Chemistry Tagger - A GATE Processing Resource             *
- *         Copyright (C) 2004-2006 The University of Sheffield          *
+ *         Copyright (C) 2004-2009 The University of Sheffield          *
  *       Developed by Mark Greenwood <m.greenwood@dcs.shef.ac.uk>       *
  *                                                                      *
  * This program is free software; you can redistribute it and/or modify *
@@ -29,11 +29,11 @@ Rule:CleanIons
 {
 	gate.AnnotationSet annots = (gate.AnnotationSet)bindings.get("elemSet");
 	
-	gate.AnnotationSet overlap = (gate.AnnotationSet)annotations.get("ChemicalCompound",annots.firstNode().getOffset(),annots.lastNode().getOffset());
-	if (overlap != null) annotations.removeAll(overlap);
+	gate.AnnotationSet overlap = (gate.AnnotationSet)outputAS.get("ChemicalCompound",annots.firstNode().getOffset(),annots.lastNode().getOffset());
+	if (overlap != null) outputAS.removeAll(overlap);
 	
-	overlap = (gate.AnnotationSet)annotations.get("NotACompound",annots.firstNode().getOffset(),annots.lastNode().getOffset());
-	if (overlap != null) annotations.removeAll(overlap);
+	overlap = (gate.AnnotationSet)outputAS.get("NotACompound",annots.firstNode().getOffset(),annots.lastNode().getOffset());
+	if (overlap != null) outputAS.removeAll(overlap);
 }
 
 Rule:CleanNotCompounds
@@ -43,8 +43,8 @@ Rule:CleanNotCompounds
 {
 	gate.AnnotationSet annots = (gate.AnnotationSet)bindings.get("compSet");
 	
-	gate.AnnotationSet overlap = (gate.AnnotationSet)annotations.get("ChemicalElement",annots.firstNode().getOffset(),annots.lastNode().getOffset());
-	if (overlap != null) annotations.removeAll(overlap);
+	gate.AnnotationSet overlap = (gate.AnnotationSet)outputAS.get("ChemicalElement",annots.firstNode().getOffset(),annots.lastNode().getOffset());
+	if (overlap != null) outputAS.removeAll(overlap);
 }
 
 Rule:CompoundName
@@ -64,7 +64,7 @@ Rule:ActuallyAnIon
 {
 	gate.AnnotationSet elSet = (gate.AnnotationSet)bindings.get("element");
 	
-	gate.AnnotationSet tokens = annotations.get("Token",elSet.firstNode().getOffset(),elSet.lastNode().getOffset());
+	gate.AnnotationSet tokens = outputAS.get("Token",elSet.firstNode().getOffset(),elSet.lastNode().getOffset());
 		
 	gate.Annotation token = (gate.Annotation)tokens.iterator().next();
 	String string = (String)token.getFeatures().get("string");
@@ -74,6 +74,6 @@ Rule:ActuallyAnIon
 		FeatureMap params = Factory.newFeatureMap();
 		params.put("rule","ActuallyAnIon");
 
-		annotations.add(token.getStartNode(),token.getEndNode(),"ChemicalIon",params);
+		outputAS.add(token.getStartNode(),token.getEndNode(),"ChemicalIon",params);
 	}
 }
