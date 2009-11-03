@@ -33,9 +33,9 @@ Priority: 50
 gate.AnnotationSet person = (gate.AnnotationSet) bindings.get("person");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule", "JobTitle1");
-annotations.add(person.firstNode(), person.lastNode(), "Person",
+outputAS.add(person.firstNode(), person.lastNode(), "Person",
 features);
-annotations.removeAll(person);
+outputAS.removeAll(person);
 }
 
 
@@ -51,9 +51,9 @@ Priority: 40
 gate.AnnotationSet person = (gate.AnnotationSet) bindings.get("person");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule", "PersonTitle1");
-annotations.add(person.firstNode(), person.lastNode(), "Person",
+outputAS.add(person.firstNode(), person.lastNode(), "Person",
 features);
-annotations.removeAll(person);
+outputAS.removeAll(person);
 }
 
 
