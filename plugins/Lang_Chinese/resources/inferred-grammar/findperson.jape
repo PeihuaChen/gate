@@ -44,10 +44,10 @@ Priority: 100
 gate.AnnotationSet tagSet = (gate.AnnotationSet)bindings.get("tag");
 features.put("rule", "NounPerson");
 features.put("kind", "inferred");
-annotations.add(tagSet.firstNode(), tagSet.lastNode(), "Person",
+outputAS.add(tagSet.firstNode(), tagSet.lastNode(), "Person",
 features);
 Out.prln("NounPersons found: " +  tagSet);
-annotations.removeAll(tagSet);
+outputAS.removeAll(tagSet);
 }
 
 

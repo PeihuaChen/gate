@@ -41,9 +41,9 @@ if (loc != null && loc.size()>0)
 // create some new features
    features.put("rule", "Location");
 // create a GazLoc annotation and add the features we've created
-annotations.add(locSet.firstNode(), locSet.lastNode(), "Location",
+outputAS.add(locSet.firstNode(), locSet.lastNode(), "Location",
 features);
-annotations.removeAll(loc);
+outputAS.removeAll(loc);
 }
 
 //Token.String includes an item in loc_key.lst (at the end of the Token)

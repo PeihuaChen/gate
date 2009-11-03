@@ -140,7 +140,7 @@ gate.Annotation personAnn = (gate.Annotation)person.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("kind", "personName");
 features.put("rule", "GazPerson");
-annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+outputAS.add(person.firstNode(), person.lastNode(), "TempPerson",
 features);
 }
 
@@ -168,9 +168,9 @@ gate.FeatureMap features = Factory.newFeatureMap();
 features.put("gender", personAnn.getFeatures().get("gender"));
 features.put("kind", "personName");
 features.put("rule", "GazPersonFirst");
-annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+outputAS.add(person.firstNode(), person.lastNode(), "TempPerson",
 features);
-//annotations.removeAll(person);
+//outputAS.removeAll(person);
 }
 
 
@@ -198,7 +198,7 @@ if (firstPerson != null && firstPerson.size()>0)
 }
   features.put("kind", "personName");
   features.put("rule", "PersonFirstContext2");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -285,7 +285,7 @@ else
 }
   features.put("kind", "personName");
   features.put("rule", "PersonTitle");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -312,7 +312,7 @@ if (title != null && title.size()>0)
 }
   features.put("kind", "personName");
   features.put("rule", "PersonFirstTitleGender");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -347,7 +347,7 @@ if (title != null && title.size()>0)
   features.put("kind", "personName");
   features.put("rule", "PersonTitleGender");
 // create a TempPerson annotation and add the features we've created
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -400,7 +400,7 @@ if (firstPerson != null && firstPerson.size()>0)
   Double num = new Double((double)20);
   features.put("confidence", num);
   features.put("rule", "FirstPersonStop");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -478,7 +478,7 @@ gate.FeatureMap features = Factory.newFeatureMap();
 features.put("gender", personAnn.getFeatures().get("gender"));
 features.put("kind", "personName");
 features.put("rule", "GazPersonFirst");
-annotations.add(person.firstNode(), person.lastNode(), "TempPerson",
+outputAS.add(person.firstNode(), person.lastNode(), "TempPerson",
 features);
 }
 
@@ -528,7 +528,7 @@ gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
 }
   features.put("kind", "personName");
   features.put("rule", "PersonFull");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -585,7 +585,7 @@ if (firstPerson != null && firstPerson.size()>0)
 }
   features.put("kind", "personName");
   features.put("rule", "PersonFullReverse");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -610,7 +610,7 @@ if (firstPerson != null && firstPerson.size()>0)
 }
   features.put("kind", "personName");
   features.put("rule", "PersonSaint");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -640,7 +640,7 @@ if (firstPerson != null && firstPerson.size()>0)
 }
   features.put("kind", "personName");
   features.put("rule", "PersonLocAmbig");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -681,7 +681,7 @@ gate.AnnotationSet personSet = (gate.AnnotationSet)bindings.get("person");
 }
   features.put("kind", "personName");
   features.put("rule", "OrgTitlePerson");
-annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
+outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
@@ -773,7 +773,7 @@ Priority: 10
   }
   features.put("kind", "personName");
   features.put("rule", "PersonAlias");
-  annotations.add(personSet.firstNode(), personSet.lastNode(), "TempPerson", features);
+  outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson", features);
 }
 
 
@@ -847,7 +847,7 @@ if (org != null && org.size()>0)
 // create some new features
   features.put("rule", "GazOrganization");
 // create a TempOrg annotation and add the features we've created
-annotations.add(orgSet.firstNode(), orgSet.lastNode(), "TempOrganization",
+outputAS.add(orgSet.firstNode(), orgSet.lastNode(), "TempOrganization",
 features);
 }
 
@@ -1199,7 +1199,7 @@ if (loc != null && loc.size()>0)
 // create some new features
   features.put("rule", "Location1");
 // create a TempLoc annotation and add the features we've created
-annotations.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
+outputAS.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
 features);
 }
 
@@ -1230,7 +1230,7 @@ if (loc != null && loc.size()>0)
 // create some new features
   features.put("rule", "GazLocation");
 // create a TempLoc annotation and add the features we've created
-annotations.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
+outputAS.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
 features);
 }
 
@@ -1392,9 +1392,9 @@ gate.AnnotationSet facSet = (gate.AnnotationSet)bindings.get("facName");
 // create some new features
 features.put("rule", "GazFacility");
 // create a TempFac annotation and add the features we've created
-annotations.add(facSet.firstNode(), facSet.lastNode(), "TempFacility",
+outputAS.add(facSet.firstNode(), facSet.lastNode(), "TempFacility",
 features);
-annotations.removeAll(facSet);
+outputAS.removeAll(facSet);
 }
 
 
@@ -1420,9 +1420,9 @@ gate.AnnotationSet facSet = (gate.AnnotationSet)bindings.get("facName");
 // create some new features
 features.put("rule", "LocFacility");
 // create a TempFac annotation and add the features we've created
-annotations.add(facSet.firstNode(), facSet.lastNode(), "TempFacility",
+outputAS.add(facSet.firstNode(), facSet.lastNode(), "TempFacility",
 features);
-annotations.removeAll(facSet);
+outputAS.removeAll(facSet);
 }
 
 Rule: Facility1
@@ -1448,9 +1448,9 @@ gate.AnnotationSet facSet = (gate.AnnotationSet)bindings.get("facName");
 // create some new features
 features.put("rule", "Facility1");
 // create a TempFac annotation and add the features we've created
-annotations.add(facSet.firstNode(), facSet.lastNode(), "TempFacility",
+outputAS.add(facSet.firstNode(), facSet.lastNode(), "TempFacility",
 features);
-annotations.removeAll(facSet);
+outputAS.removeAll(facSet);
 }
 
 Rule: FacilityExt
@@ -1476,9 +1476,9 @@ gate.AnnotationSet facSet = (gate.AnnotationSet)bindings.get("facName");
   // create some new features
 features.put("rule", "FacilityExt");
   // create a TempFac annotation and add the features we've created
-annotations.add(facSet.firstNode(), facSet.lastNode(), "TempFacility",
+outputAS.add(facSet.firstNode(), facSet.lastNode(), "TempFacility",
 features);
-annotations.removeAll(facSet);
+outputAS.removeAll(facSet);
 }
 
 Rule: FacilityExt2
@@ -1502,9 +1502,9 @@ gate.AnnotationSet facSet = (gate.AnnotationSet)bindings.get("facName");
   // create some new features
 features.put("rule", "FacilityExt2");
   // create a TempFac annotation and add the features we've created
-annotations.add(facSet.firstNode(), facSet.lastNode(), "TempFacility",
+outputAS.add(facSet.firstNode(), facSet.lastNode(), "TempFacility",
 features);
-annotations.removeAll(facSet);
+outputAS.removeAll(facSet);
 }
 
 Rule: FacilityStreet
