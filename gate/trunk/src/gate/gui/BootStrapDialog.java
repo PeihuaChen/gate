@@ -71,6 +71,7 @@ public class BootStrapDialog extends JDialog{
     mainFrame = aMainFrame;
     thisBootStrapDialog = this;
     this.setTitle("BootStrap Wizard");
+    this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     initLocalData();
     initGuiComponents();
     initListeners();
@@ -374,6 +375,7 @@ public class BootStrapDialog extends JDialog{
    cancelButton.addActionListener(new java.awt.event.ActionListener(){
       public void actionPerformed(ActionEvent e){
         thisBootStrapDialog.setVisible(false);
+        BootStrapDialog.this.dispose();
       }//actionPerformed
    });
 
@@ -446,6 +448,7 @@ public class BootStrapDialog extends JDialog{
                                        resourceInterfaces,
                                        pathNewProject);
         thisBootStrapDialog.setVisible(false);
+        thisBootStrapDialog.dispose();
         JOptionPane.showMessageDialog(mainFrame,
                                       resourceName + " creation succeeded !\n" +
                                       "Look for it in " + pathNewProject,
@@ -459,7 +462,7 @@ public class BootStrapDialog extends JDialog{
                      "BootStrap error !",
                      JOptionPane.ERROR_MESSAGE);
         thisBootStrapDialog.setModal(true);
-      }// End try
+      } //End try
     }// run();
   }//CreateResourceRunner
 
