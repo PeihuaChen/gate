@@ -743,9 +743,9 @@ public class MainFrame extends JFrame implements ProgressListener,
     toolsMenu.add(new XJMenuItem(new NewAnnotDiffAction(), this));
 
     final JMenuItem reportClearMenuItem = new XJMenuItem(
-      new AbstractAction("Clear record log") {
+      new AbstractAction("Clear profiling history") {
       { putValue(SHORT_DESCRIPTION,
-        "Empties the record log file otherwise the report is cumulative."); }
+        "Clear profiling history otherwise the report is cumulative."); }
       public void actionPerformed(ActionEvent evt) {
         // create a new log file
         File logFile = new File(System.getProperty("java.io.tmpdir"),
@@ -759,11 +759,12 @@ public class MainFrame extends JFrame implements ProgressListener,
     JMenu reportMenu = new XJMenu("Profiling reports",
       "Generates profiling reports from processing resources", this);
     reportMenu.setIcon(getIcon("gazetteer"));
-    reportMenu.add(new XJMenuItem( new AbstractAction("Start recording") {
+    reportMenu.add(new XJMenuItem(
+      new AbstractAction("Start profiling applications") {
       { putValue(SHORT_DESCRIPTION,
-        "Toggles the recording of processing resources"); }
+        "Toggles the profiling of processing resources"); }
       public void actionPerformed(ActionEvent evt) {
-        if (getValue(NAME).equals("Start recording")) {
+        if (getValue(NAME).equals("Start profiling applications")) {
           reportClearMenuItem.setEnabled(false);
           if (!Benchmark.isBenchmarkingEnabled()) {
             Benchmark.setBenchmarkingEnabled(true);
@@ -781,10 +782,10 @@ public class MainFrame extends JFrame implements ProgressListener,
           }
           appender.setName("gate-benchmark");
           Benchmark.logger.addAppender(appender);
-          putValue(NAME, "Stop recording");
+          putValue(NAME, "Stop profiling applications");
         } else {
           Benchmark.logger.removeAppender("gate-benchmark");
-          putValue(NAME, "Start recording");
+          putValue(NAME, "Start profiling applications");
           reportClearMenuItem.setEnabled(true);
         }
       }
@@ -831,7 +832,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         PRTimeReporter report = new PRTimeReporter();
         report.setBenchmarkFile(new File(System.getProperty("java.io.tmpdir"),
           "gate-benchmark-log.txt"));
-        report.setSupressZeroTimeEntries(!reportZeroTimesCheckBox.isSelected());
+        report.setSuppressZeroTimeEntries(!reportZeroTimesCheckBox.isSelected());
         report.setSortOrder(reportSortTime.isSelected() ?
           PRTimeReporter.SORT_TIME_TAKEN : PRTimeReporter.SORT_EXEC_ORDER);
         try {
@@ -850,7 +851,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     reportMenu.addSeparator();
 
     reportMenu.add(new XJMenuItem(
-      new AbstractAction("Report on document processed") {
+      new AbstractAction("Report on documents processed") {
         { putValue(SHORT_DESCRIPTION, "Report most time consuming documents"); }
         public void actionPerformed(ActionEvent evt) {
           DocTimeReporter report = new DocTimeReporter();
@@ -865,7 +866,8 @@ public class MainFrame extends JFrame implements ProgressListener,
           String prRegex = Gate.getUserConfig().getString(
             MainFrame.class.getName()+".reportprregex");
           if (prRegex != null) {
-            report.setPRMatchingRegex(prRegex);
+            report.setPRMatchingRegex((prRegex.equals("")) ?
+              DocTimeReporter.MATCH_ALL_PR_REGEX : prRegex);
           }
           try {
             report.executeReport();
@@ -896,16 +898,18 @@ public class MainFrame extends JFrame implements ProgressListener,
       }, this));
     String prRegex = Gate.getUserConfig().getString(
       MainFrame.class.getName()+".reportprregex");
-    if (prRegex == null) { prRegex = "All"; }
+    if (prRegex == null || prRegex.equals("")) { prRegex = "All"; }
     reportMenu.add(new XJMenuItem(
       new AbstractAction("Set PR matching regex (" + prRegex + ")") {
         public void actionPerformed(ActionEvent evt) {
           Object response = JOptionPane.showInputDialog(instance,
-              "Set the processing resource regex filter", "Report options",
+            "Set the processing resource regex filter\n" +
+            "Leave empty to not filter", "Report options",
               JOptionPane.QUESTION_MESSAGE);
           if (response != null) {
             Gate.getUserConfig().put(
               MainFrame.class.getName()+".reportprregex",response);
+            if (response.equals("")) { response = "All"; }
             putValue(NAME, "Set PR matching regex (" + response + ")");
           }
         }

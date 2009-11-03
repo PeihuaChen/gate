@@ -118,7 +118,7 @@ public class PRTimeReporter implements BenchmarkReportable {
   /** A handle to the input benchmark file (benchmark.txt). */
   private File benchmarkFile = new File("benchmark.txt");
   /** Indicate whether or not to show 0 millisecond entries. */
-  private boolean supressZeroTimeEntries = true;
+  private boolean suppressZeroTimeEntries = true;
   /** Report media. */
   private String printMedia = MEDIA_HTML;
   /**
@@ -482,10 +482,10 @@ public class PRTimeReporter implements BenchmarkReportable {
    */
   public void printReport(Object reportSource, File outputFile) {
     if (printMedia.equalsIgnoreCase(MEDIA_TEXT)) {
-      printToText(reportSource, outputFile, supressZeroTimeEntries);
+      printToText(reportSource, outputFile, suppressZeroTimeEntries);
     } else if (printMedia.equalsIgnoreCase(MEDIA_HTML)) {
       printToHTML((LinkedHashMap<String, Object>) reportSource,
-        outputFile, supressZeroTimeEntries);
+        outputFile, suppressZeroTimeEntries);
     }
   }
 
@@ -498,14 +498,14 @@ public class PRTimeReporter implements BenchmarkReportable {
    *          structure.
    * @param outputFile
    *          An object of type File representing the output report file.
-   * @param supressZeroTimeEntries
+   * @param suppressZeroTimeEntries
    *          Indicate whether or not to show 0 millisecond entries.
    */
   private void printToText(Object reportContainer, File outputFile,
-                           boolean supressZeroTimeEntries) {
+                           boolean suppressZeroTimeEntries) {
     LinkedHashMap<String, Object> globalStore =
       (LinkedHashMap<String, Object>) reportContainer;
-    prettyPrint(globalStore, "\t", supressZeroTimeEntries);
+    prettyPrint(globalStore, "\t", suppressZeroTimeEntries);
     BufferedWriter out = null;
     try {
       out = new BufferedWriter(new FileWriter(outputFile));
@@ -535,11 +535,11 @@ public class PRTimeReporter implements BenchmarkReportable {
    * @param separator
    *          A String separator to indent the processing elements in tree like
    *          structure.
-   * @param supressZeroTimeEntries
+   * @param suppressZeroTimeEntries
    *          Indicate whether or not to show 0 millisecond entries.
    */
   private void prettyPrint(LinkedHashMap<String, Object> gStore,
-                           String separator, boolean supressZeroTimeEntries) {
+                           String separator, boolean suppressZeroTimeEntries) {
 
     Iterator<String> i = gStore.keySet().iterator();
     while (i.hasNext()) {
@@ -554,7 +554,7 @@ public class PRTimeReporter implements BenchmarkReportable {
               .parseInt((String) ((LinkedHashMap<String, Object>) (gStore
                   .get(key))).get("systotal"));
         }
-        if (supressZeroTimeEntries) {
+        if (suppressZeroTimeEntries) {
           if (systotal > 0)
             printLines.add(separator + key + " (" + systotal / 1000.0 + ") ["
                 + Math.round(((systotal / globalValue) * 100) * 10) / 10.0
@@ -567,10 +567,10 @@ public class PRTimeReporter implements BenchmarkReportable {
         }
 
         prettyPrint((LinkedHashMap<String, Object>) (gStore.get(key)),
-            separator + "\t", supressZeroTimeEntries);
+            separator + "\t", suppressZeroTimeEntries);
       } else {
         if (!(key.equals("total") || key.equals("systotal"))) {
-          if (supressZeroTimeEntries) {
+          if (suppressZeroTimeEntries) {
             if (Integer.parseInt((String) (gStore.get(key))) != 0) {
               printLines
                   .add(separator
@@ -611,11 +611,11 @@ public class PRTimeReporter implements BenchmarkReportable {
    * @param outputFile
    *          An object of type File representing the output report file to
    *          which the HTML report is to be written.
-   * @param supressZeroTimeEntries
+   * @param suppressZeroTimeEntries
    *          Indicate whether or not to show 0 millisecond entries.
    */
   private void printToHTML(LinkedHashMap<String, Object> gStore,
-                           File outputFile, boolean supressZeroTimeEntries) {
+                           File outputFile, boolean suppressZeroTimeEntries) {
     String htmlPipelineNames = "<ul>";
     for (String pipeline : pipelineNames) {
       htmlPipelineNames += "<li><b>" + pipeline + "</b></li>" + NL;
@@ -669,7 +669,7 @@ public class PRTimeReporter implements BenchmarkReportable {
       htmlPipelineNames + NL + "</td>" + NL +
       "<td><b>Time in seconds</b></td>" + NL +
       "<td><b>% time taken</b></td></tr><tr>";
-    generateCollapsibleHTMLTree(gStore, supressZeroTimeEntries);
+    generateCollapsibleHTMLTree(gStore, suppressZeroTimeEntries);
     htmlElementTree += "</ul></div></td>" + NL;
     htmlTimeTree += "</div></div></td>" + NL;
     htmlTimeInPercentTree += "</div></div></td>" + NL;
@@ -701,11 +701,11 @@ public class PRTimeReporter implements BenchmarkReportable {
    *          An Object of type LinkedHashMap<String, Object> containing the
    *          processing elements (with time in milliseconds) in hierarchical
    *          structure.
-   * @param supressZeroTimeEntries
+   * @param suppressZeroTimeEntries
    *          Indicate whether or not to show 0 millisecond entries.
    */
   private void generateCollapsibleHTMLTree(LinkedHashMap<String, Object> gStore,
-                                           boolean supressZeroTimeEntries) {
+                                           boolean suppressZeroTimeEntries) {
     Iterator<String> i = gStore.keySet().iterator();
     while (i.hasNext()) {
       Object key = i.next();
@@ -721,7 +721,7 @@ public class PRTimeReporter implements BenchmarkReportable {
                   .get(key))).get("systotal"));
         }
 
-        if (supressZeroTimeEntries) {
+        if (suppressZeroTimeEntries) {
           if (systotal > 0) {
             htmlElementTree += "<li id=\"level" + level + "\">" +
               "<a href=\"#\"  onclick=\"expandCollapseTree(this)\">[+]</a>" +
@@ -733,7 +733,7 @@ public class PRTimeReporter implements BenchmarkReportable {
                 + "<div style=\"display:none\">" + NL;
             level++;
             generateCollapsibleHTMLTree((LinkedHashMap<String, Object>) (gStore
-                .get(key)), supressZeroTimeEntries);
+                .get(key)), suppressZeroTimeEntries);
             htmlElementTree += "</ul></li>" + NL;
             htmlTimeTree += "</div></div>" + NL;
             htmlTimeInPercentTree += "</div></div>" + NL;
@@ -749,14 +749,14 @@ public class PRTimeReporter implements BenchmarkReportable {
               + "<div style=\"display:none\">" + NL;
           level++;
           generateCollapsibleHTMLTree((LinkedHashMap<String, Object>) (gStore
-              .get(key)), supressZeroTimeEntries);
+              .get(key)), suppressZeroTimeEntries);
           htmlElementTree += "</ul></li>" + NL;
           htmlTimeTree += "</div></div>" + NL;
           htmlTimeInPercentTree += "</div></div>" + NL;
         }
       } else {
         if (!(key.equals("total") || key.equals("systotal"))) {
-          if (supressZeroTimeEntries) {
+          if (suppressZeroTimeEntries) {
             if (Integer.parseInt((String) (gStore.get(key))) != 0) {
               htmlElementTree += "<li>&nbsp;&nbsp;&nbsp;" + key + "</li>" + NL;
               htmlTimeTree += "<div>" + NL
@@ -913,7 +913,7 @@ public class PRTimeReporter implements BenchmarkReportable {
     Getopt g = new Getopt("gate.util.reporting.PRTimeReporter", args,
         "i:m:z:s:o:l:h");
     int choice;
-    String argSupressZeroTimeEntries = null;
+    String argSuppressZeroTimeEntries = null;
     while ((choice = g.getopt()) != -1) {
       switch (choice) {
       // -i inputFile
@@ -932,11 +932,11 @@ public class PRTimeReporter implements BenchmarkReportable {
           setPrintMedia(printMedia);
         }
         break;
-      // -z supressZeroTimeEntries
+      // -z suppressZeroTimeEntries
       case 'z':
-        argSupressZeroTimeEntries = g.getOptarg();
-        if (argSupressZeroTimeEntries == null) {
-          setSupressZeroTimeEntries(supressZeroTimeEntries);
+        argSuppressZeroTimeEntries = g.getOptarg();
+        if (argSuppressZeroTimeEntries == null) {
+          setSuppressZeroTimeEntries(suppressZeroTimeEntries);
         }
         break;
       // -s sortOrder
@@ -976,13 +976,13 @@ public class PRTimeReporter implements BenchmarkReportable {
         break;
       } // getopt switch
     }
-    if (argSupressZeroTimeEntries != null) {
-      if (argSupressZeroTimeEntries.trim().equalsIgnoreCase("true")) {
-        setSupressZeroTimeEntries(true);
-      } else if (argSupressZeroTimeEntries.trim().equalsIgnoreCase("false")) {
-        setSupressZeroTimeEntries(false);
+    if (argSuppressZeroTimeEntries != null) {
+      if (argSuppressZeroTimeEntries.trim().equalsIgnoreCase("true")) {
+        setSuppressZeroTimeEntries(true);
+      } else if (argSuppressZeroTimeEntries.trim().equalsIgnoreCase("false")) {
+        setSuppressZeroTimeEntries(false);
       } else {
-        System.err.println("Supress Zero Time Entries: parameter value" + NL +
+        System.err.println("Suppress Zero Time Entries: parameter value" + NL +
           " passed is invalid. Please provide true or false as value.");
         usage();
         System.exit(STATUS_ERROR);
@@ -999,7 +999,7 @@ public class PRTimeReporter implements BenchmarkReportable {
   + "\t Options:" + NL
   + "\t -i input file path (default: benchmark.txt in the execution directory)" + NL
   + "\t -m print media - html/text (default: html)" + NL
-  + "\t -z supressZeroTimeEntries - true/false (default: true)" + NL
+  + "\t -z suppressZeroTimeEntries - true/false (default: true)" + NL
   + "\t -s sorting order - exec_order/time_taken (default: exec_order)" + NL
   + "\t -o output file path (default: report.html/txt in the system temporary directory)" + NL
   + "\t -l logical start (not set by default)" + NL
@@ -1066,23 +1066,23 @@ public class PRTimeReporter implements BenchmarkReportable {
    * Returns the flag indicating whether or not to suppress the processing
    * elements from the report which took 0 milliseconds.
    *
-   * @return supressZeroTimeEntries A boolean indicating whether or not to
+   * @return suppressZeroTimeEntries A boolean indicating whether or not to
    *         suppress zero time entries.
    */
-  public boolean isSupressZeroTimeEntries() {
-    return supressZeroTimeEntries;
+  public boolean isSuppressZeroTimeEntries() {
+    return suppressZeroTimeEntries;
   }
 
   /**
    * Allow to suppress the processing elements from the report which
    * took 0 milliseconds.
    *
-   * @param supressZeroTimeEntries if true suppress zero time entries.
+   * @param suppressZeroTimeEntries if true suppress zero time entries.
    * This Parameter is ignored if SortOrder specified is
    * <code>SORT_TIME_TAKEN</code>. True by default.
    */
-  public void setSupressZeroTimeEntries(boolean supressZeroTimeEntries) {
-    this.supressZeroTimeEntries = supressZeroTimeEntries;
+  public void setSuppressZeroTimeEntries(boolean suppressZeroTimeEntries) {
+    this.suppressZeroTimeEntries = suppressZeroTimeEntries;
   }
 
   /**
