@@ -1417,7 +1417,8 @@ public class SerialControllerEditor extends AbstractVisualResource
           fireProgressChanged(0);
 
           try {
-            Benchmark.executeWithBenchmarking(controller, controller.getName(),
+            Benchmark.executeWithBenchmarking(controller,
+                    Benchmark.createBenchmarkId(controller.getName(), null),
                     RunAction.this, null);
           }catch(ExecutionInterruptedException eie){
             MainFrame.unlockGUI();
