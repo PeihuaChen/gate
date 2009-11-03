@@ -33,7 +33,9 @@ public interface Benchmarkable {
    * This method sets the benchmarkID for this resource. The resource
    * must use this as the prefix for any sub-events it logs.
    * 
-   * @param benchmarkID
+   * @param benchmarkId the benchmark ID, which must not contain spaces
+   *  as it is already used as a separator in the log, you can use
+   * {@link Benchmark#createBenchmarkId(String, String)} for it. 
    */
   public void setBenchmarkId(String benchmarkId);
 

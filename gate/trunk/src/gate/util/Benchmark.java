@@ -281,7 +281,9 @@ public class Benchmark {
    * is itself {@link Benchmarkable}).
    * 
    * @param executable the object to execute
-   * @param benchmarkID the benchmark ID
+   * @param benchmarkID the benchmark ID, which must not contain spaces
+   *  as it is already used as a separator in the log, you can use
+   * {@link #createBenchmarkId(String, String)} for it. 
    * @param objectInvokingThisCheckPoint the object invoking this method
    *          (typically the caller would pass <code>this</code> here)
    * @param benchmarkingFeatures features to include in the check point
