@@ -236,9 +236,9 @@ gate.AnnotationSet key = (gate.AnnotationSet)bindings.get("key");
 gate.Annotation keyAnn = (gate.Annotation)key.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule", "OrgLoc");
-annotations.add(key.firstNode(), key.lastNode(), "ORG",
+outputAS.add(key.firstNode(), key.lastNode(), "ORG",
 features);
-annotations.removeAll(key);
+outputAS.removeAll(key);
 }
  
  
