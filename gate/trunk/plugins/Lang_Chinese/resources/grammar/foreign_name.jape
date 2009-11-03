@@ -41,7 +41,7 @@ gate.FeatureMap features = Factory.newFeatureMap();
 features.put("gender", personAnn.getFeatures().get("minorType"));
 features.put("kind", "foreign");
 features.put("rule", "FullName");
-annotations.add(person.firstNode(), person.lastNode(), "Person",
+outputAS.add(person.firstNode(), person.lastNode(), "Person",
 features);
 }
 

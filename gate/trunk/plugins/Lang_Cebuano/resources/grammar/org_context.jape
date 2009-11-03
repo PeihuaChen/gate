@@ -56,9 +56,9 @@ Priority: 1
 gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule ", "OrgContext1");
-annotations.add(org.firstNode(), org.lastNode(), "Organization",
+outputAS.add(org.firstNode(), org.lastNode(), "Organization",
 features);
-annotations.removeAll(org);
+outputAS.removeAll(org);
 }
 
 Rule: OrgContext2
@@ -82,9 +82,9 @@ Priority: 5
 gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule ", "OrgContext2");
-annotations.add(org.firstNode(), org.lastNode(), "Organization",
+outputAS.add(org.firstNode(), org.lastNode(), "Organization",
 features);
-annotations.removeAll(org);
+outputAS.removeAll(org);
 }
 
 Rule:OrgContext3
@@ -102,9 +102,9 @@ Priority: 5
 gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule ", "OrgContext3");
-annotations.add(org.firstNode(), org.lastNode(), "Organization",
+outputAS.add(org.firstNode(), org.lastNode(), "Organization",
 features);
-annotations.removeAll(org);
+outputAS.removeAll(org);
 }
 
 Rule:OrgContext4
@@ -124,9 +124,9 @@ Priority: 10
 gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule ", "OrgContext4");
-annotations.add(org.firstNode(), org.lastNode(), "Organization",
+outputAS.add(org.firstNode(), org.lastNode(), "Organization",
 features);
-annotations.removeAll(org);
+outputAS.removeAll(org);
 }
 
 
@@ -147,9 +147,9 @@ Priority: 10
 gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule ", "OrgContext5");
-annotations.add(org.firstNode(), org.lastNode(), "Organization",
+outputAS.add(org.firstNode(), org.lastNode(), "Organization",
 features);
-annotations.removeAll(org);
+outputAS.removeAll(org);
 }
 
 
@@ -175,9 +175,9 @@ Priority: 50
 gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule ", "JoinOrg");
-annotations.add(org.firstNode(), org.lastNode(), "Organization",
+outputAS.add(org.firstNode(), org.lastNode(), "Organization",
 features);
-annotations.removeAll(org);
+outputAS.removeAll(org);
 }
 
 
@@ -203,11 +203,11 @@ gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
 //create the new annotation
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule ", "OrgPerson");
-annotations.add(org.firstNode(), org.lastNode(), "Organization",
+outputAS.add(org.firstNode(), org.lastNode(), "Organization",
 features);
 
 //delete the old annotation(s)
-annotations.removeAll(org);
+outputAS.removeAll(org);
 }
 
 
@@ -228,9 +228,9 @@ Priority: 10
 gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule ", "OrgConjOrg1");
-annotations.add(org.firstNode(), org.lastNode(), "Organization",
+outputAS.add(org.firstNode(), org.lastNode(), "Organization",
 features);
-annotations.removeAll(org);
+outputAS.removeAll(org);
 }
 
 
@@ -251,9 +251,9 @@ Priority: 10
 gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule ", "OrgConjOrg2");
-annotations.add(org.firstNode(), org.lastNode(), "Organization",
+outputAS.add(org.firstNode(), org.lastNode(), "Organization",
 features);
-annotations.removeAll(org);
+outputAS.removeAll(org);
 }
 
 
@@ -272,9 +272,9 @@ Priority: 30
 gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule ", "OrgJobTitle");
-annotations.add(org.firstNode(), org.lastNode(), "Organization",
+outputAS.add(org.firstNode(), org.lastNode(), "Organization",
 features);
-annotations.removeAll(org);
+outputAS.removeAll(org);
 }
 
 Rule: LocXandOrg
@@ -293,9 +293,9 @@ Priority: 25
 gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule", "LocXandOrg");
-annotations.add(org.firstNode(), org.lastNode(), "Organization",
+outputAS.add(org.firstNode(), org.lastNode(), "Organization",
 features);
-annotations.removeAll(org);
+outputAS.removeAll(org);
 }
 
 
@@ -313,9 +313,9 @@ Priority: 20
 gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule", "LocOrg");
-annotations.add(org.firstNode(), org.lastNode(), "Organization",
+outputAS.add(org.firstNode(), org.lastNode(), "Organization",
 features);
-annotations.removeAll(org);
+outputAS.removeAll(org);
 }
 
 Rule:OrgPublishers
@@ -333,9 +333,9 @@ Priority: 20
 gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule", "OrgPublishers");
-annotations.add(org.firstNode(), org.lastNode(), "Organization",
+outputAS.add(org.firstNode(), org.lastNode(), "Organization",
 features);
-annotations.removeAll(org);
+outputAS.removeAll(org);
 }
 
 Rule: OrgGroup
@@ -351,9 +351,9 @@ Priority: 50
 gate.AnnotationSet org = (gate.AnnotationSet) bindings.get("org");
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule", "OrgGroup");
-annotations.add(org.firstNode(), org.lastNode(), "Organization",
+outputAS.add(org.firstNode(), org.lastNode(), "Organization",
 features);
-annotations.removeAll(org);
+outputAS.removeAll(org);
 }
 
 Rule: Spur
@@ -397,8 +397,8 @@ Rule: OrgInitials
   {
    gate.FeatureMap features = Factory.newFeatureMap();
    features.put("rule", "OrgInitials");
-   annotations.add(orgSet.firstNode(), orgSet.lastNode(),
+   outputAS.add(orgSet.firstNode(), orgSet.lastNode(),
  "Organization", features);
 }
-annotations.removeAll(orgSet);
+outputAS.removeAll(orgSet);
 }

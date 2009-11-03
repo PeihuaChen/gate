@@ -32,7 +32,7 @@ gate.Annotation dateAnn = (gate.Annotation)date.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule1", dateAnn.getFeatures().get("rule"));
 features.put("rule2", "DatetoDate");
-annotations.add(date.firstNode(), date.lastNode(), "Date",
+outputAS.add(date.firstNode(), date.lastNode(), "Date",
 features);
-annotations.removeAll(date);
+outputAS.removeAll(date);
 }
