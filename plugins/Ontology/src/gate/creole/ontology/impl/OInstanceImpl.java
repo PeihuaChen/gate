@@ -230,27 +230,33 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * @see gate.creole.ontology.OInstance#getRDFPropertyValues(gate.creole.ontology.RDFProperty)
    */
   // TODO: this must be deprecated and/or done differently!
+
   // It is highly inefficient as it retrieves all individuals in here to
   // check, we should do this in the query, if posible!
+  // DONE: we have replaced this with hasInstance
+
+  // TODO: why does this not check for property values that coul be
+  // literals?
   public List<OResource> getRDFPropertyValues(RDFProperty aProperty) {
     //System.out.println(aProperty.getOURI().toString());
-    Utils.warnDeprecation("getREDFPropertyValues");
+    //Utils.warnDeprecation("getREDFPropertyValues");
     ResourceInfo[] list = ontologyService.getRDFPropertyValues(nodeId
               .toString(), aProperty.getOURI().toString());
       List<OResource> values = new ArrayList<OResource>();
       //List<String> individuals = Arrays.asList(ontologyService
       //        .getIndividuals());
-      ClosableIterator<OInstance> ii = ontologyService.getInstancesIterator(null,null);
-      List<String> individuals = new ArrayList<String>();
-      while(ii.hasNext()) {
-        individuals.add(ii.next().getOURI().toString());
-      }
+      //ClosableIterator<OInstance> ii = ontologyService.getInstancesIterator(null,null);
+      //List<String> individuals = new ArrayList<String>();
+      //while(ii.hasNext()) {
+      //  individuals.add(ii.next().getOURI().toString());
+      //}
       // these resources can be anything - an instance, a property, or a
       // class
       // TODO: do something about the use of the map here!!!!
       for(int i = 0; i < list.length; i++) {
         // is it an individual
-        if(individuals.contains(list[i].toString())) {
+        if(ontologyService.hasInstance(ontology.createOURI(list[i].getUri()),null,null)) {
+        //if(individuals.contains(list[i].toString())) {
           values.add(Utils.createOInstance(this.ontology,
                   this.ontologyService, list[i].getUri()));
           continue;
@@ -262,10 +268,22 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
           continue;
         }
 
+        // TODO: if we get something here that is not defined in the ontology,
+        // we assume it is a property but that could be wrong if it is
+        // the URI of a class or instance that is not defined as class or
+        // instance in the ontology.
+        // We probably should warn about this at some point but will
+        // ignore it for now ...
+
         Property prop = ontologyService.getPropertyFromOntology(
                 list[i].getUri());
+        if(prop == null) {
+          // System.err.println("Property is null for "+list[i]+"/"+list[i].getUri());
+          continue;
+        } else {
         values.add(Utils.createOProperty(this.ontology,
                 this.ontologyService, prop.getUri(), prop.getType()));
+        }
       }
       return values;
   }
