@@ -5114,6 +5114,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       // show for a few seconds a popup with the error message
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
+          if (!instance.isShowing()) { return; }
           alertButton.setEnabled(true);
           JToolTip toolTip = alertButton.createToolTip();
           toolTip.setTipText(alertButton.getToolTipText());
