@@ -645,8 +645,6 @@ public class PersistenceManager {
         sListener.statusChanged("Loading completed in "
                 + NumberFormat.getInstance().format(
                         (double)(endTime - startTime) / 1000) + " seconds");
-      if(pListener != null) pListener.processFinished();
-
       return res;
     }
     catch(ResourceInstantiationException rie) {
