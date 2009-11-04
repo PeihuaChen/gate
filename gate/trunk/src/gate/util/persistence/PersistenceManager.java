@@ -568,6 +568,8 @@ public class PersistenceManager {
     StatusListener sListener = (gate.event.StatusListener)MainFrame
             .getListeners().get("gate.event.StatusListener");
     if(pListener != null) pListener.progressChanged(0);
+
+    try {
     long startTime = System.currentTimeMillis();
     persistenceURL = url;
     // Determine whether the file contains an application serialized in
@@ -650,22 +652,24 @@ public class PersistenceManager {
     catch(ResourceInstantiationException rie) {
       if(sListener != null) sListener.statusChanged(
         "Failure during instantiation of resources.");
-      if(pListener != null) pListener.processFinished();
       throw rie;
     }
     catch(PersistenceException pe) {
       if(sListener != null) sListener.statusChanged(
         "Failure during persistence operations.");
-      if(pListener != null) pListener.processFinished();
       throw pe;
     }
     catch(Exception ex) {
       if(sListener != null) sListener.statusChanged("Loading failed!");
-      if(pListener != null) pListener.processFinished();
       throw new PersistenceException(ex);
     }
     finally {
       persistenceURL = null;
+    }
+
+    }
+    finally {
+      if(pListener != null) pListener.processFinished();
     }
   }
 
