@@ -301,11 +301,9 @@ public class DumpingPR extends AbstractLanguageAnalyser
   }
 
   protected String getNewFileName(URL dir, String file) {
-    String newFile = dir.getFile();
-    if(newFile.endsWith("\\") || newFile.endsWith("/"))
-      return newFile+file;
-    else
-      return newFile+"/"+file;
+    return new File((dir == null) ?
+      new File(System.getProperty("java.io.tmpdir")) : Files.fileFromURL(dir),
+      file).getAbsolutePath();
   }
 
   protected AnnotationSet renameAnnotations(AnnotationSet annots2Export,
