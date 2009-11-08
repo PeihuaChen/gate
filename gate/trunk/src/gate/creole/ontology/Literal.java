@@ -112,12 +112,9 @@ public class Literal {
 
 
   public String toTurtle() {
-    // make an attempt to convert the string into turtle syntax:
-    // quote it, escape embedded special characters like quotes,
-    // if it is a string, add a language identifier if we have one,
-    // if it is not a string, add a datatype uri if we have oen.
     // TODO: do the escaping correctly!
-    value.replace("\"", "\\\"");
+    String value = this.value;
+    value = value.replace("\"", "\\\"");
     value = "\""+value+"\"";
     if(dataType.isStringDataType()) {
       if(language != null) {
@@ -129,6 +126,33 @@ public class Literal {
       value = value+"^^<" + dataType.getXmlSchemaURIString() + ">";
     }
     return value;
+  }
+
+  @Override
+  public int hashCode() {
+    return value.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final Literal other = (Literal) obj;
+    // if both are Literals, they are only equal if the dataTypes are the same
+    // and if the languages are the same and if the values are the same
+    if ((this.value == null) && (other.value == null)) {
+      return true;
+    }
+    if(!this.dataType.equals(other.dataType) ||
+       !this.language.equals(other.language) ||
+       !this.value.equals(other.value)) {
+      return false;
+    }
+    return true;
   }
 
 }
