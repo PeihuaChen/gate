@@ -24,6 +24,7 @@ import java.util.List;
 import javax.swing.AbstractAction;
 
 import org.apache.log4j.Logger;
+import org.openrdf.repository.RepositoryConnection;
 
 /**
  * The common abstract base class for all ontology LRs in this implementation.
@@ -117,6 +118,10 @@ public abstract class OntologyLR
   // just for testing
   public OntologyServiceImplSesame getService() {
     return (OntologyServiceImplSesame)ontologyService;
+  }
+
+  public RepositoryConnection getSesameRepositoryConnection() {
+    return ((OntologyServiceImplSesame)ontologyService).getRepositoryConnection();
   }
 
 }
