@@ -96,6 +96,7 @@ public class LiteralOrONodeIDImpl implements LiteralOrONodeID  {
     }
   }
 
+  @Override
   public int hashCode() {
     if(isLiteral) {
       return ((Literal)theObject).hashCode();
