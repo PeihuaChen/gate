@@ -9,12 +9,14 @@ package gate.creole.ontology.impl;
 
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import gate.creole.ontology.DataType;
+import gate.creole.ontology.OValue;
+import gate.creole.ontology.ONodeID;
+import gate.creole.ontology.LiteralOrONodeID;
 import gate.creole.ontology.DatatypeProperty;
 import gate.creole.ontology.GateOntologyException;
 import gate.creole.ontology.InvalidValueException;
@@ -28,7 +30,6 @@ import gate.creole.ontology.OURI;
 import gate.creole.ontology.ObjectProperty;
 import gate.creole.ontology.Ontology;
 import gate.creole.ontology.RDFProperty;
-import gate.util.ClosableIterator;
 
 /**
  * Implementation of the OInstance
@@ -237,6 +238,7 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
 
   // TODO: why does this not check for property values that coul be
   // literals?
+  @Deprecated
   public List<OResource> getRDFPropertyValues(RDFProperty aProperty) {
     //System.out.println(aProperty.getOURI().toString());
     //Utils.warnDeprecation("getREDFPropertyValues");
@@ -287,6 +289,48 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
       }
       return values;
   }
+
+
+  public List<OValue> getRDFPropertyOValues(RDFProperty aProperty) {
+    List<LiteralOrONodeID> list =
+        ontologyService.getRDFPropertyLiteralOrONodeIDs(
+          this.nodeId, aProperty.getOURI());
+    List<OValue> values = new ArrayList<OValue>();
+
+    for(LiteralOrONodeID val : list) {
+      if(val.isLiteral()) {
+        values.add(new OValueImpl(val.getLiteral()));
+      } else {
+        ONodeID node = val.getONodeID();
+        if(node instanceof OURI && ontologyService.hasInstance((OURI)node,null,null)) {
+          values.add(new OValueImpl(Utils.createOInstance(
+              this.ontology,
+              this.ontologyService, 
+              node.toString())));
+          continue;
+        }
+        // is it a class ..
+        if(ontologyService.hasClass(node.toString())) {
+          values.add(new OValueImpl(Utils.createOClass(this.ontology,
+                  this.ontologyService, node.toString(),
+                  ontologyService.getClassType(node.toString()))));
+          continue;
+        }
+        Property prop = ontologyService.getPropertyFromOntology(
+                node.toString());
+        if(prop == null) {
+          System.err.println("Strange property value for instance "+
+              this.nodeId+" property "+aProperty+": "+node);
+          continue;
+        } else {
+          values.add(new OValueImpl(Utils.createOProperty(this.ontology,
+                this.ontologyService, prop.getUri(), prop.getType())));
+        }
+      } // if literal
+    } // for  list
+    return values;
+  }
+
 
   /**
    * This method returns the RDF properties set on this resource.
