@@ -20,8 +20,10 @@ import gate.creole.ontology.OConstants.Closure;
 import gate.creole.ontology.OInstance;
 import gate.creole.ontology.ONodeID;
 import gate.creole.ontology.OURI;
+import gate.creole.ontology.LiteralOrONodeID;
 import gate.creole.ontology.RDFProperty;
 import gate.util.ClosableIterator;
+import java.util.List;
 import java.util.Set;
 
 public interface OntologyService {
@@ -467,11 +469,16 @@ public interface OntologyService {
    * @param anInstanceURI
    * @param anRDFPropertyURI
    * @return resource URIs
+   * @deprecated
    */
+      @Deprecated
         public ResourceInfo[] getRDFPropertyValues(
                    String anInstanceURI,
-          String anRDFPropertyURI)
-          throws GateOntologyException;
+          String anRDFPropertyURI);
+
+        public List<LiteralOrONodeID> getRDFPropertyLiteralOrONodeIDs(
+                   ONodeID anInstanceURI,
+          OURI anRDFPropertyURI);
 
   /**
    * Removes all the RDF Property values from the given instance.
