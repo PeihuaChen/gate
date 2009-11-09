@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Set;
 
 import gate.creole.ontology.DataType;
+import gate.creole.ontology.OValue;
 import gate.creole.ontology.DatatypeProperty;
 import gate.creole.ontology.GateOntologyException;
 import gate.creole.ontology.InvalidValueException;
@@ -218,7 +219,6 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * @see gate.creole.ontology.OInstance#getRDFPropertyValues(gate.creole.ontology.RDFProperty)
    */
   public List<OResource> getRDFPropertyValues(RDFProperty aProperty) {
-    System.out.println(aProperty.getURI().toString());  
     ResourceInfo[] list = owlim.getRDFPropertyValues(this.repositoryID, uri
               .toString(), aProperty.getURI().toString());
       List<OResource> values = new ArrayList<OResource>();
@@ -250,6 +250,45 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
                 list[i].getUri());
         values.add(Utils.createOProperty(this.repositoryID, this.ontology,
                 this.owlim, prop.getUri(), prop.getType()));
+      }
+      return values;
+  }
+
+  // this is just a copy of the original getRDFPropertyValues method and
+  // does for now not add any new functionality (the new functionality
+  // is only provided in Ontology plugin)
+  public List<OValue> getRDFPropertyOValues(RDFProperty aProperty) {
+    ResourceInfo[] list = owlim.getRDFPropertyValues(this.repositoryID, uri
+              .toString(), aProperty.getURI().toString());
+      List<OValue> values = new ArrayList<OValue>();
+      List<String> individuals = Arrays.asList(owlim
+              .getIndividuals(this.repositoryID));
+      // these resources can be anything - an instance, a property, or a
+      // class
+      for(int i = 0; i < list.length; i++) {
+        // lets first search if it is available in ontology cache
+        OResource resource = ontology.getOResourceFromMap(list[i].getUri());
+        if(resource != null) {
+          values.add(new OValueImpl(resource));
+          continue;
+        }
+        // is it an individual
+        if(individuals.contains(list[i])) {
+          values.add(new OValueImpl(Utils.createOInstance(this.repositoryID, this.ontology,
+                  this.owlim, list[i].getUri())));
+          continue;
+        }
+        // is it a class
+        if(owlim.hasClass(this.repositoryID, list[i].getUri())) {
+          values.add(new OValueImpl(Utils.createOClass(this.repositoryID, this.ontology,
+                  this.owlim, list[i].getUri(), list[i].getClassType())));
+          continue;
+        }
+
+        Property prop = owlim.getPropertyFromOntology(this.repositoryID,
+                list[i].getUri());
+        values.add(new OValueImpl(Utils.createOProperty(this.repositoryID, this.ontology,
+                this.owlim, prop.getUri(), prop.getType())));
       }
       return values;
   }
