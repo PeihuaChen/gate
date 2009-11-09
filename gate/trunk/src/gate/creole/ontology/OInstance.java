@@ -131,6 +131,8 @@ public interface OInstance extends OResource {
   @Deprecated
   public List<OResource> getRDFPropertyValues(RDFProperty aProperty);
 
+  public List<OValue> getRDFPropertyOValues(RDFProperty aProperty);
+
   /**
    * This method returns the RDF properties set on this resource.
    * @return
