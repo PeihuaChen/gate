@@ -65,4 +65,11 @@ public interface LiteralOrONodeID  {
    * Turtle syntax.
    */
   public String toTurtle();
+
+  @Override
+  public int hashCode();
+
+  @Override
+  public boolean equals(Object other);
+
 }
