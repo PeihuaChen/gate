@@ -85,6 +85,7 @@ public class OptionsDialog extends JDialog {
     }
     lnfCombo = new JComboBox(supportedLNFs.toArray());
     lnfCombo.setSelectedItem(currentLNF);
+    lnfCombo.setToolTipText("Be aware that only 'Metal' is fully tested.");
 
     fontBG = new ButtonGroup();
     textBtn = new JRadioButton("Text components font");
@@ -144,9 +145,13 @@ public class OptionsDialog extends JDialog {
 
     saveOptionsChk = new JCheckBox("Save options on exit",
       userConfig.getBoolean(GateConstants.SAVE_OPTIONS_ON_EXIT));
+    saveOptionsChk.setToolTipText(
+      "Remembers the options set in this dialogue.");
 
     saveSessionChk = new JCheckBox("Save session on exit",
       userConfig.getBoolean(GateConstants.SAVE_SESSION_ON_EXIT));
+    saveSessionChk.setToolTipText(
+      "Reloads the same resources in the tree on next start.");
 
     includeFeaturesOnPreserveFormatChk = new JCheckBox(
       "Include annotation features for \"Save preserving format\"",
@@ -155,6 +160,8 @@ public class OptionsDialog extends JDialog {
 
     addSpaceOnMarkupUnpackChk = new JCheckBox(
       "Add space on markup unpack if needed", true);
+    addSpaceOnMarkupUnpackChk.setToolTipText(
+      "Adds a space instead of concatenate words separated by a XML tag");
     if ( (userConfig.get(GateConstants
       .DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME) != null)
       && !userConfig.getBoolean(GateConstants
@@ -163,8 +170,12 @@ public class OptionsDialog extends JDialog {
 
     ButtonGroup bGroup = new ButtonGroup();
     doceditInsertAppendChk = new JRadioButton("Append");
+    doceditInsertAppendChk.setToolTipText(
+      "Inserts a character after the caret.");
     bGroup.add(doceditInsertAppendChk);
     doceditInsertPrependChk = new JRadioButton("Prepend");
+    doceditInsertPrependChk.setToolTipText(
+      "Inserts a character before the caret.");
     bGroup.add(doceditInsertPrependChk);
     doceditInsertPrependChk.setSelected(
       userConfig.getBoolean(GateConstants.DOCEDIT_INSERT_PREPEND));
@@ -178,10 +189,14 @@ public class OptionsDialog extends JDialog {
     docReadOnlyChk = new JCheckBox("Read-only");
     docReadOnlyChk.setSelected(
       userConfig.getBoolean(GateConstants.DOCEDIT_READ_ONLY));
+    docReadOnlyChk.setToolTipText(
+      "Prevents text editing but not annotation editing.");
 
     browserComboBox = new JComboBox(new String[] {
       "Default browser", "Java", "Custom"});
     browserComboBox.setPrototypeDisplayValue("Default browser");
+    browserComboBox.setToolTipText(
+      "Use Java or Custom only if Default doesn't work.");
     browserCommandLineTextField = new JTextField(15);
     String commandLine =
       userConfig.getString(MainFrame.class.getName()+".browsercommandline");
@@ -213,6 +228,8 @@ public class OptionsDialog extends JDialog {
     annicDisableAutocompletionChk = new JCheckBox("Disable autocompletion",
       userConfig.getBoolean(LuceneDataStoreSearchGUI.class.getName()
         + ".disableautocompletion"));
+    annicDisableAutocompletionChk.setToolTipText(
+      "Temporary option in case the autocompletion doesn't work.");
 
     JPanel advancedBox =  new JPanel();
     advancedBox.setLayout(new BoxLayout(advancedBox, BoxLayout.Y_AXIS));
@@ -317,13 +334,16 @@ public class OptionsDialog extends JDialog {
      ******************/
 
     Box buttonsBox = Box.createHorizontalBox();
-    buttonsBox.add(okButton = new JButton(new OKAction()));
+    JButton okButton = new JButton(new OKAction());
+    buttonsBox.add(okButton);
     buttonsBox.add(Box.createHorizontalStrut(10));
-    buttonsBox.add(cancelButton = new JButton("Cancel"));
+    buttonsBox.add(new JButton(new CancelAction()));
 
     getContentPane().add(Box.createVerticalStrut(10));
     getContentPane().add(buttonsBox);
     getContentPane().add(Box.createVerticalStrut(10));
+
+    getRootPane().setDefaultButton(okButton);
   }
 
   protected void initListeners(){
@@ -381,11 +401,6 @@ public class OptionsDialog extends JDialog {
       }
     });
 
-    cancelButton.setAction(new AbstractAction("Cancel"){
-      public void actionPerformed(ActionEvent evt){
-        setVisible(false);
-      }
-    });
     textBtn.setSelected(true);
 
     browserComboBox.addActionListener(new ActionListener() {
@@ -407,6 +422,15 @@ public class OptionsDialog extends JDialog {
         }
       }
     });
+
+    // define keystrokes action bindings at the level of the main window
+    InputMap inputMap = ((JComponent)this.getContentPane())
+      .getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+    ActionMap actionMap = ((JComponent)this.getContentPane()).getActionMap();
+    inputMap.put(KeyStroke.getKeyStroke("ENTER"), "Apply");
+    actionMap.put("Apply", new OKAction());
+    inputMap.put(KeyStroke.getKeyStroke("ESCAPE"), "Cancel");
+    actionMap.put("Cancel", new CancelAction());
   }
 
   protected void selectedFontChanged(){
@@ -543,6 +567,15 @@ public class OptionsDialog extends JDialog {
     }// void actionPerformed(ActionEvent evt)
   }
 
+  protected class CancelAction extends AbstractAction {
+    public CancelAction(){
+      super("Cancel");
+    }
+    public void actionPerformed(ActionEvent evt){
+      setVisible(false);
+    }
+  }
+
   protected static class LNFData{
     public LNFData(String className, String name){
       this.className = className;
@@ -603,16 +636,6 @@ public class OptionsDialog extends JDialog {
    * The main tabbed pane
    */
   protected JTabbedPane mainTabbedPane;
-
-  /**
-   * The OK button. The action for this button is an {@link OKAction}
-   */
-  protected JButton okButton;
-
-  /**
-   * The Cancel button: hides the dialog without doing anything
-   */
-  protected JButton cancelButton;
 
   /**
    * Radio button used to set the font for text components
