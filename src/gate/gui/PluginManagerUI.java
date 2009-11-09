@@ -170,6 +170,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     mainTable.addKeyListener(new KeyAdapter() {
       public void keyTyped(KeyEvent e) {
         if (e.getKeyChar() != KeyEvent.VK_TAB
+         && e.getKeyChar() != KeyEvent.VK_SPACE
          && e.getKeyChar() != KeyEvent.VK_BACK_SPACE
          && e.getKeyChar() != KeyEvent.VK_DELETE) {
           filterTextField.requestFocusInWindow();
@@ -627,8 +628,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
     }
     public void actionPerformed(ActionEvent evt) {
       MainFrame.getInstance().showHelpFrame(
-        "http://gate.ac.uk/userguide/sec:howto:plugins",
-        "gate.gui.PluginManagerUI");
+        "sec:howto:plugins", "gate.gui.PluginManagerUI");
     }
   }
 
