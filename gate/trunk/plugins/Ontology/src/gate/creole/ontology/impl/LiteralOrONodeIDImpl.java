@@ -76,4 +76,32 @@ public class LiteralOrONodeIDImpl implements LiteralOrONodeID  {
       return ((ONodeID)theObject).toTurtle();
     }
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final LiteralOrONodeIDImpl other = (LiteralOrONodeIDImpl) obj;
+    if (this.isLiteral != other.isLiteral) {
+      return false;
+    }
+    if(this.isLiteral) {
+      return ((Literal)this.theObject).equals((Literal)other.theObject);
+    } else {
+      return ((ONodeID)this.theObject).equals((ONodeID)other.theObject);
+    }
+  }
+
+  public int hashCode() {
+    if(isLiteral) {
+      return ((Literal)theObject).hashCode();
+    } else {
+      return ((ONodeID)theObject).hashCode();
+    }
+  }
+
 }
