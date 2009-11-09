@@ -63,11 +63,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 
-import java.util.logging.Level;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -612,7 +612,7 @@ public class OntologyServiceImplSesame implements OntologyService {
   {
     //System.out.println("Checking for class: "+classURI);
     try {
-      // TODO: make two versions: one taking ONodeID and one String
+      // TODO: !!!!make two versions: one taking ONodeID and one String
       boolean hasOWLClass = 
           repositoryConnection.hasStatement(string2SesameResource(classURI),
           RDF.TYPE, OWL.CLASS, true);
@@ -1841,6 +1841,27 @@ public class OntologyServiceImplSesame implements OntologyService {
     addSerqlQueryResultToCollection(query, list);
     return listToResourceInfoArray(list);
   }
+
+  public List<LiteralOrONodeID> getRDFPropertyLiteralOrONodeIDs(
+      ONodeID anInstanceURI, OURI anRDFPropertyURI)
+  {
+
+    List<LiteralOrONodeID> list = new LinkedList<LiteralOrONodeID>();
+    String query =
+        "Select DISTINCT Y from {" + anInstanceURI.toTurtle() +
+        "} " + anRDFPropertyURI.toTurtle() +
+        " {Y}";
+
+    UtilTupleQueryIterator qit =
+        new UtilTupleQueryIterator(
+          repositoryConnection, query, OConstants.QueryLanguage.SERQL);
+    while(qit.hasNext()) {
+      list.add(qit.nextFirst());
+    }
+    return list;
+  }
+
+
 
   /**
    * Removes all the RDF Property values from the given instance.
