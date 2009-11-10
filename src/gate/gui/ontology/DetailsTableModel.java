@@ -274,7 +274,7 @@ public class DetailsTableModel extends AbstractTableModel {
       }
 
       for(RDFProperty rd : rdfProp) {
-        List<OResource> oinstances = oinstance.getRDFPropertyValues(rd);
+        List<OValue> oinstances = oinstance.getRDFPropertyOValues(rd);
         for(int i = 0; i < oinstances.size(); i++) {
           PropertyValue pv = new PropertyValue(rd, oinstances.get(i));
           propertyValues.getValues().add(pv);
