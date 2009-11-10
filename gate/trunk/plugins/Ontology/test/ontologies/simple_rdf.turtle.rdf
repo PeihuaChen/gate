@@ -34,6 +34,19 @@
 :London :hasName "London" .
 :London :locatedIn :UK .
 
+:Vienna a :City .
+:Vienna :hasName "Wien" .
+:Vienna :hasName "Vienna" .
+
 :UK a :Location .
 :UK :hasName "London" .
 :UK rdfs:label "London" .
+
+:C01 a rdfs:Class .
+:C02 a rdfs:Class .
+:C01 a :C02 . 
+:C01 :hasName "Weird class and instance" .
+:p01 a rdf:Property .
+:p02 a rdf:Property .
+:C01 :p01 :p02 .
+:C01 :p02 :C02 .
