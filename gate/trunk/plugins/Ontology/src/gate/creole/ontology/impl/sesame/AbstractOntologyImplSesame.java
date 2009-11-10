@@ -189,6 +189,12 @@ public abstract class AbstractOntologyImplSesame extends AbstractOntologyImpl {
    * loaded yet.
    */
   public void loadSystemImports() {
+    // according to a discussion with Ivan Peikov from OntoText, these
+    // imports are not necessary any more. For now this method is left
+    // here for reference and the code of the LRs is not chenged, but
+    // if no "system" imports are needed anywhere in the future, all the
+    // relevant code can be removed.
+    /*
     File pluginDir = getPluginDir();
     File owlFile = new File(new File(pluginDir, "config"), "owl.rdfs");
     ((OntologyServiceImplSesame) ontologyService).loadSystemImport(owlFile,
@@ -196,6 +202,7 @@ public abstract class AbstractOntologyImplSesame extends AbstractOntologyImpl {
     File rdfsFile = new File(new File(pluginDir, "config"), "rdf-schema.rdf");
     ((OntologyServiceImplSesame) ontologyService).loadSystemImport(rdfsFile,
         "http://www.w3.org/2000/01/rdf-schema#", OConstants.OntologyFormat.RDFXML);
+    */
   }
 
   @Override

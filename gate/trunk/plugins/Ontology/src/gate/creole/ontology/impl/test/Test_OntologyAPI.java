@@ -170,7 +170,7 @@ public class Test_OntologyAPI extends TestCase {
 
     rdfps = ont.getRDFProperties();
     System.out.println("getRDFProperties: "+rdfps);
-    assertEquals(2,rdfps.size());
+    assertEquals(1,rdfps.size());
 
     rdfps = ont.getPropertyDefinitions();
     System.out.println("getPropertyDefintiions: "+rdfps);
