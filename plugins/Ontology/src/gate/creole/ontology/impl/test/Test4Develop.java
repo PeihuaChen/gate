@@ -24,6 +24,7 @@ import gate.creole.ontology.impl.sesame.UtilTupleQueryIterator;
 import gate.util.ClosableIterator;
 import java.io.FileInputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -69,6 +70,7 @@ public class Test4Develop extends TestCase {
     ps.close();
     System.setProperties(props);
      * */
+
     testingDir = new File(pluginHome,"test");
     assertTrue(testingDir.exists());
     configDir = new File(pluginHome,"config");
@@ -122,9 +124,45 @@ public class Test4Develop extends TestCase {
     OWLIMOntology ontology = (OWLIMOntology)Factory.createResource(
             "gate.creole.ontology.impl.sesame.OWLIMOntology", fm);
 
+
+    Set<Literal> literals = new HashSet<Literal>();
+    Set<LiteralOrONodeID> lonodes = new HashSet<LiteralOrONodeID>();
+
+
+    Literal l1 = new Literal("string1");
+    System.out.println("Literal l1 hash: "+l1.hashCode());
+    literals.add(l1);
+    Literal l2 = new Literal("string"+1);
+    System.out.println("Literal l2 hash: "+l2.hashCode());
+    literals.add(l2);
+    Literal l3 = new Literal("string1");
+    System.out.println("Literal l3 hash: "+l3.hashCode());
+    literals.add(l3);
+
+    assertEquals(l1,l2);
+    assertEquals(l1,l3);
+    assertEquals(l2,l3);
+
+    assertTrue(literals.contains(l1));
+    assertTrue(literals.contains(l2));
+    assertTrue(literals.contains(l3));
+
+    for (Literal l : literals) {
+      System.out.println("From set: "+l);
+    }
+
+    assertEquals(1, literals.size());
+
+    lonodes.add(new gate.creole.ontology.impl.LiteralOrONodeIDImpl(new Literal("string1")));
+    lonodes.add(new gate.creole.ontology.impl.LiteralOrONodeIDImpl(new Literal("string"+1)));
+    lonodes.add(new gate.creole.ontology.impl.LiteralOrONodeIDImpl(new Literal("strin"+"g1")));
+
+    assertEquals(1, lonodes.size());
+
+
     //checkWineStuff(ontology);
     //checkWineStuff2(ontology);
-    checkWineStuff3(ontology);
+    //checkWineStuff3(ontology);
     //checkBNodes(ontology);
     //checkOInstances1(ontology);
     //checkQuery01(ontology);
