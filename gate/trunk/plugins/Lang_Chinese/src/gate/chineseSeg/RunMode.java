@@ -3,7 +3,7 @@
  * 
  *  Yaoyong Li 23/04/2009
  *
- *  $Id: RunMode.java, v 1.0 2009-04-23 12:58:16 +0000 yaoyong $
+ *  $Id$
  */
 
 package gate.chineseSeg;
