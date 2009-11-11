@@ -41,7 +41,11 @@
   </Plugin>
   <Plugin>
     <OldName>chineseSegmenter</OldName>
-    <NewName>Segmenter_Chinese</NewName>
+    <NewName>Lang_Chinese</NewName>
+  </Plugin>
+  <Plugin>
+    <OldName>Segmenter_Chinese</OldName>
+    <NewName>Lang_Chinese</NewName>
   </Plugin>
   <Plugin>
     <OldName>copyAS2AnoDoc</OldName>
