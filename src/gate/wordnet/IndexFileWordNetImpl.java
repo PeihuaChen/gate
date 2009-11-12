@@ -173,7 +173,7 @@ public class IndexFileWordNetImpl extends AbstractLanguageResource
 
   /** Get the data store that this LR lives in. Null for transient LRs. */
   public DataStore getDataStore(){
-    throw new UnsupportedOperationException();
+    return null;
   }
 
    /** Set the data store that this LR lives in. */
