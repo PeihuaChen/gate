@@ -308,7 +308,7 @@
            encoding="UTF-8"
            debug="true"
     			 deprecation="true"
-           debuglevel="lines,source"
+           debuglevel="lines,source,vars"
            includes="gate/**,com/**,hepple/**"
 					 classpathref="build.class.path"/>
   </target>
@@ -324,6 +324,7 @@
            source="1.5"
            target="1.5"
            debug="true"
+           debuglevel="lines,source,vars"
            deprecation="true"
            includes="gate/**,com/**,hepple/**"
 					 classpathref="build.class.path"/>
@@ -534,6 +535,8 @@
           maxmemory="${runtime.max.memory}">
 <!--	     <jvmarg value="-Xms${runtime.start.memory}"/> -->
       <jvmarg value="${server.or.client}"/>
+      <jvmarg value="-Xdebug"/>
+      <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"/>
     	<sysproperty key="gate.home" value="${basedir}"/>
        <sysproperty key="java.ext.dirs" value="${extDir}"/>
  <!--<sysproperty key="awt.toolkit" value="sun.awt.motif.MToolkit"/>-->
