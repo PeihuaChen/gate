@@ -362,7 +362,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     } // if
     processingResourcesRoot =
       new DefaultMutableTreeNode("Processing Resources", true);
-    datastoresRoot = new DefaultMutableTreeNode("Data stores", true);
+    datastoresRoot = new DefaultMutableTreeNode("Datastores", true);
     resourcesTreeRoot.add(applicationsRoot);
     resourcesTreeRoot.add(languageResourcesRoot);
     resourcesTreeRoot.add(processingResourcesRoot);
@@ -603,17 +603,17 @@ public class MainFrame extends JFrame implements ProgressListener,
     fileMenu.setMnemonic(KeyEvent.VK_F);
 
     LiveMenu newAPPMenu = new LiveMenu(LiveMenu.APP);
-    newAPPMenu.setText("New application");
+    newAPPMenu.setText("New Application");
     newAPPMenu.setIcon(getIcon("applications"));
     fileMenu.add(newAPPMenu);
 
     LiveMenu newLRMenu = new LiveMenu(LiveMenu.LR);
-    newLRMenu.setText("New language resource");
+    newLRMenu.setText("New Language Resource");
     newLRMenu.setIcon(getIcon("lrs"));
     fileMenu.add(newLRMenu);
 
     LiveMenu newPRMenu = new LiveMenu(LiveMenu.PR);
-    newPRMenu.setText("New processing resource");
+    newPRMenu.setText("New Processing Resource");
     newPRMenu.setIcon(getIcon("prs"));
     fileMenu.add(newPRMenu);
 
@@ -628,11 +628,11 @@ public class MainFrame extends JFrame implements ProgressListener,
     fileMenu.add(new XJMenuItem(new LoadResourceFromFileAction(), this));
 
     RecentAppsMenu recentAppsMenu = new RecentAppsMenu();
-    recentAppsMenu.setText("Recent applications");
+    recentAppsMenu.setText("Recent Applications");
     recentAppsMenu.setIcon(getIcon("open-application"));
     fileMenu.add(recentAppsMenu);
 
-    final JMenu loadANNIEMenu = new XJMenu("Load ANNIE system",
+    final JMenu loadANNIEMenu = new XJMenu("Load ANNIE System",
       "Application that adds morphosyntaxic and semantic annotations", this);
     loadANNIEMenu.setIcon(getIcon("annie-application"));
     loadANNIEMenu.add(new XJMenuItem(new LoadANNIEWithDefaultsAction(), this));
@@ -645,12 +645,12 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     // LingPipe action
     fileMenu.add(new XJMenuItem(new LoadApplicationAction(
-            "Load LingPipe system", "LingPipe", "resources/lingpipe.gapp"),
+            "Load LingPipe System", "LingPipe", "resources/lingpipe.gapp"),
             this));
 
     // OpenNLP action
     fileMenu.add(new XJMenuItem(new LoadApplicationAction(
-            "Load OpenNLP system", "OpenNLP", "resources/opennlp.gapp"), this));
+            "Load OpenNLP System", "OpenNLP", "resources/opennlp.gapp"), this));
 
     fileMenu.add(new XJMenuItem(new ManagePluginsAction(), this));
     
@@ -716,7 +716,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     });
     JMenuItem item;
     if(!installedLocales.isEmpty()) {
-      imMenu = new XJMenu("Input methods");
+      imMenu = new XJMenu("Input Methods");
       ButtonGroup bg = new ButtonGroup();
       item = new LocaleSelectorMenuItem();
       imMenu.add(item);
@@ -743,7 +743,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     toolsMenu.add(new XJMenuItem(new NewAnnotDiffAction(), this));
 
     final JMenuItem reportClearMenuItem = new XJMenuItem(
-      new AbstractAction("Clear profiling history") {
+      new AbstractAction("Clear Profiling History") {
       { putValue(SHORT_DESCRIPTION,
         "Clear profiling history otherwise the report is cumulative."); }
       public void actionPerformed(ActionEvent evt) {
@@ -756,15 +756,15 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
       }
     }, this);
-    JMenu reportMenu = new XJMenu("Profiling reports",
+    JMenu reportMenu = new XJMenu("Profiling Reports",
       "Generates profiling reports from processing resources", this);
     reportMenu.setIcon(getIcon("gazetteer"));
     reportMenu.add(new XJMenuItem(
-      new AbstractAction("Start profiling applications") {
+      new AbstractAction("Start Profiling Applications") {
       { putValue(SHORT_DESCRIPTION,
         "Toggles the profiling of processing resources"); }
       public void actionPerformed(ActionEvent evt) {
-        if (getValue(NAME).equals("Start profiling applications")) {
+        if (getValue(NAME).equals("Start Profiling Applications")) {
           reportClearMenuItem.setEnabled(false);
           if (!Benchmark.isBenchmarkingEnabled()) {
             Benchmark.setBenchmarkingEnabled(true);
@@ -782,10 +782,10 @@ public class MainFrame extends JFrame implements ProgressListener,
           }
           appender.setName("gate-benchmark");
           Benchmark.logger.addAppender(appender);
-          putValue(NAME, "Stop profiling applications");
+          putValue(NAME, "Stop Profiling Applications");
         } else {
           Benchmark.logger.removeAppender("gate-benchmark");
-          putValue(NAME, "Start profiling applications");
+          putValue(NAME, "Start Profiling Applications");
           reportClearMenuItem.setEnabled(true);
         }
       }
@@ -795,7 +795,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     final JCheckBoxMenuItem reportZeroTimesCheckBox = new JCheckBoxMenuItem();
     reportZeroTimesCheckBox.setAction(
-      new AbstractAction("Report zero time entries") {
+      new AbstractAction("Report Zero Time Entries") {
       public void actionPerformed(ActionEvent evt) {
         Gate.getUserConfig().put(MainFrame.class.getName()+".reportzerotime",
           reportZeroTimesCheckBox.isSelected());
@@ -805,7 +805,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         MainFrame.class.getName()+".reportzerotimes"));
     ButtonGroup group = new ButtonGroup();
     final JRadioButtonMenuItem reportSortExecution = new JRadioButtonMenuItem();
-    reportSortExecution.setAction(new AbstractAction("Sort by execution") {
+    reportSortExecution.setAction(new AbstractAction("Sort by Execution") {
       public void actionPerformed(ActionEvent evt) {
         Gate.getUserConfig().put(
           MainFrame.class.getName()+".reportsorttime", false);
@@ -815,7 +815,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       MainFrame.class.getName()+".reportsorttime"));
     group.add(reportSortExecution);
     final JRadioButtonMenuItem reportSortTime = new JRadioButtonMenuItem();
-    reportSortTime.setAction(new AbstractAction("Sort by time") {
+    reportSortTime.setAction(new AbstractAction("Sort by Time") {
       public void actionPerformed(ActionEvent evt) {
         Gate.getUserConfig().put(
           MainFrame.class.getName()+".reportsorttime", true);
@@ -825,7 +825,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       MainFrame.class.getName()+".reportsorttime"));
     group.add(reportSortTime);
     reportMenu.add(new XJMenuItem(
-      new AbstractAction("Report on processing resources") {
+      new AbstractAction("Report on Processing Resources") {
       { putValue(SHORT_DESCRIPTION,
         "Report time taken by each processing resource"); }
       public void actionPerformed(ActionEvent evt) {
@@ -851,7 +851,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     reportMenu.addSeparator();
 
     reportMenu.add(new XJMenuItem(
-      new AbstractAction("Report on documents processed") {
+      new AbstractAction("Report on Documents Processed") {
         { putValue(SHORT_DESCRIPTION, "Report most time consuming documents"); }
         public void actionPerformed(ActionEvent evt) {
           DocTimeReporter report = new DocTimeReporter();
@@ -883,7 +883,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       MainFrame.class.getName()+".reportmaxdocs");
     if (maxDocs == null) { maxDocs = "10"; }
     reportMenu.add(new XJMenuItem(
-      new AbstractAction("Set max documents (" + maxDocs + ")") {
+      new AbstractAction("Set Max Documents (" + maxDocs + ")") {
         public void actionPerformed(ActionEvent evt) {
           Object response = JOptionPane.showInputDialog(instance,
               "Set the maximum of documents to report", "Report options",
@@ -892,7 +892,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           if (response != null) {
             Gate.getUserConfig().put(
               MainFrame.class.getName()+".reportmaxdocs",response);
-            putValue(NAME, "Set max documents (" + response + ")");
+            putValue(NAME, "Set Max Documents (" + response + ")");
           }
         }
       }, this));
@@ -900,7 +900,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       MainFrame.class.getName()+".reportprregex");
     if (prRegex == null || prRegex.equals("")) { prRegex = "All"; }
     reportMenu.add(new XJMenuItem(
-      new AbstractAction("Set PR matching regex (" + prRegex + ")") {
+      new AbstractAction("Set PR Matching Regex (" + prRegex + ")") {
         public void actionPerformed(ActionEvent evt) {
           Object response = JOptionPane.showInputDialog(instance,
             "Set the processing resource regex filter\n" +
@@ -910,7 +910,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             Gate.getUserConfig().put(
               MainFrame.class.getName()+".reportprregex",response);
             if (response.equals("")) { response = "All"; }
-            putValue(NAME, "Set PR matching regex (" + response + ")");
+            putValue(NAME, "Set PR Matching Regex (" + response + ")");
           }
         }
       }, this));
@@ -934,7 +934,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       new JCheckBoxMenuItem(new VerboseModeCorpusEvalToolAction());
     corpusEvalMenu.add(verboseModeItem);
     toolsMenu.add(new XJMenuItem(
-      new AbstractAction("Unicode editor", getIcon("unicode")) {
+      new AbstractAction("Unicode Editor", getIcon("unicode")) {
       { putValue(SHORT_DESCRIPTION, "Editor for testing character encoding"); }
       private static final long serialVersionUID = 1L;
       public void actionPerformed(ActionEvent evt) {
@@ -964,7 +964,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     // is present. Move out to a groovy class at some point?
     if(groovyPresent()) {
       toolsMenu.add(new XJMenuItem(
-        new AbstractAction("Groovy console", getIcon("groovyConsole")) {
+        new AbstractAction("Groovy Console", getIcon("groovyConsole")) {
         { putValue(SHORT_DESCRIPTION, "Console for Groovy scripting"); }
         private static final long serialVersionUID = 1L;
           public void actionPerformed(ActionEvent evt) {
@@ -1001,8 +1001,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     helpMenu.setMnemonic(KeyEvent.VK_H);
     helpMenu.add(new XJMenuItem(new HelpUserGuideAction(), this));
     helpMenu.add(new XJMenuItem(new HelpUserGuideInContextAction(), this));
-    helpMenu.add(new XJMenuItem(new AbstractAction("Keyboard shortcuts") {
-      { this.putValue(Action.SHORT_DESCRIPTION, "Keyboard shortcuts"); }
+    helpMenu.add(new XJMenuItem(new AbstractAction("Keyboard Shortcuts") {
       public void actionPerformed(ActionEvent e) {
         showHelpFrame("sec:developer:keyboard", "shortcuts");
       }
@@ -1014,7 +1013,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         showHelpFrame("chap:developer", "Using GATE Developer");
       }
     }, this));
-    helpMenu.add(new XJMenuItem(new AbstractAction("Demo movies") {
+    helpMenu.add(new XJMenuItem(new AbstractAction("Demo Movies") {
       { this.putValue(Action.SHORT_DESCRIPTION, "Movie tutorials"); }
       public void actionPerformed(ActionEvent e) {
         showHelpFrame("http://gate.ac.uk/demos/movies.html", "movies");
@@ -1035,7 +1034,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       toggleToolTipsCheckBoxMenuItem.setSelected(true);
     }
     helpMenu.add(toggleToolTipsCheckBoxMenuItem);
-    helpMenu.add(new XJMenuItem(new AbstractAction("What's new") {
+    helpMenu.add(new XJMenuItem(new AbstractAction("What's New") {
       { this.putValue(Action.SHORT_DESCRIPTION,
           "List new features and important changes"); }
       public void actionPerformed(ActionEvent e) {
@@ -1083,7 +1082,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     annieMenu.add(new LoadANNIEWithoutDefaultsAction());
     JMenuButton menuButton = new JMenuButton(annieMenu);
     menuButton.setIcon(getIcon("annie-application"));
-    menuButton.setToolTipText("Load ANNIE system");
+    menuButton.setToolTipText("Load ANNIE System");
     toolbar.add(menuButton);
     toolbar.addSeparator();
 
@@ -1190,7 +1189,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             Component[] components = new RecentAppsMenu().getMenuComponents();
             if (components.length > 0) {
               appsPopup.addSeparator();
-              appsPopup.add("Recent applications:");
+              appsPopup.add("Recent Applications:");
             }
             for (Component menuItem : components) {
                 // add each menu item from the application recent menu
@@ -2243,7 +2242,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   class NewCorpusEvalAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public NewCorpusEvalAction() {
-      super("Default mode");
+      super("Default Mode");
       putValue(SHORT_DESCRIPTION, "Compares stored processed set with current" +
         " processed set and human-annotated set");
       putValue(SMALL_ICON, getIcon("corpus-benchmark"));
@@ -2307,7 +2306,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   class StoredMarkedCorpusEvalAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public StoredMarkedCorpusEvalAction() {
-      super("Human marked against stored processing results");
+      super("Human Marked Against Stored Processing Results");
       putValue(SHORT_DESCRIPTION,
         "Compares stored processed set with human-annotated set");
       putValue(SMALL_ICON, getIcon("corpus-benchmark"));
@@ -2365,7 +2364,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   class CleanMarkedCorpusEvalAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public CleanMarkedCorpusEvalAction() {
-      super("Human marked against current processing results");
+      super("Human Marked Against Current Processing Results");
       putValue(SHORT_DESCRIPTION,
         "Compares current processed set with human-annotated set");
       putValue(SMALL_ICON, getIcon("corpus-benchmark"));
@@ -2430,7 +2429,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   class GenerateStoredCorpusEvalAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public GenerateStoredCorpusEvalAction() {
-      super("Store corpus for future evaluation");
+      super("Store Corpus for Future Evaluation");
       putValue(SHORT_DESCRIPTION, "Store corpus for future evaluation");
       putValue(SMALL_ICON, getIcon("corpus-benchmark"));
     }// newCorpusEvalAction
@@ -2486,8 +2485,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   class VerboseModeCorpusEvalToolAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public VerboseModeCorpusEvalToolAction() {
-      super("Verbose mode");
-      putValue(SHORT_DESCRIPTION, "Set the Benchmark Tool in verbose mode");
+      super("Verbose Mode");
     }// VerboseModeCorpusEvalToolAction
 
     public boolean isVerboseMode() {
@@ -2530,7 +2528,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     private static final long serialVersionUID = 1L;
 
     public LoadANNIEWithDefaultsAction() {
-      super("With defaults");
+      super("with Defaults");
       putValue(SHORT_DESCRIPTION, "Load ANNIE with default parameters");
       putValue(SMALL_ICON, getIcon("annie-application"));
     }
@@ -2576,7 +2574,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     private static final long serialVersionUID = 1L;
 
     public LoadANNIEWithoutDefaultsAction() {
-      super("Without defaults");
+      super("without Defaults");
       putValue(SHORT_DESCRIPTION, "Load ANNIE without default parameters");
       putValue(SMALL_ICON, getIcon("annie-application"));
     }
@@ -2666,11 +2664,11 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     public LoadApplicationAction(String caption, String pluginDir,
             String applicationFile) {
-      super("Load " + pluginDir + " system");
+      super("Load " + pluginDir + " System");
       this.pluginDir = pluginDir;
       this.applicationFile = applicationFile;
       putValue(SHORT_DESCRIPTION, "Load " + pluginDir
-              + "with default parameters");
+              + " with default parameters");
       putValue(SMALL_ICON, getIcon("open-application"));
     }
 
@@ -2722,7 +2720,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   class ManagePluginsAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public ManagePluginsAction() {
-      super("Manage CREOLE plugins");
+      super("Manage CREOLE Plugins");
       putValue(SHORT_DESCRIPTION,
         "Load, unload, add and remove CREOLE plugins");
       putValue(SMALL_ICON, getIcon("creole-plugins"));
@@ -2765,8 +2763,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   class LoadCreoleRepositoryAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public LoadCreoleRepositoryAction() {
-      super("Load a CREOLE repository");
-      putValue(SHORT_DESCRIPTION, "Load a CREOLE repository");
+      super("Load a CREOLE Repository");
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -3338,8 +3335,8 @@ public class MainFrame extends JFrame implements ProgressListener,
   class NewDSAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public NewDSAction() {
-      super("Create datastore");
-      putValue(SHORT_DESCRIPTION, "Create a new Datastore");
+      super("Create Datastore");
+      putValue(SHORT_DESCRIPTION, "Create a new datastore");
       putValue(SMALL_ICON, getIcon("datastore"));
     }
 
@@ -3437,7 +3434,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   class LoadResourceFromFileAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public LoadResourceFromFileAction() {
-      super("Restore application from file");
+      super("Restore Application from File");
       putValue(SHORT_DESCRIPTION,
         "Restores a previously saved application from a file");
       putValue(SMALL_ICON, getIcon("open-application"));
@@ -3597,7 +3594,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   class CloseRecursivelySelectedResourcesAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public CloseRecursivelySelectedResourcesAction() {
-      super("Close recursively all");
+      super("Close Recursively all");
       putValue(SHORT_DESCRIPTION, "Close recursively the selected resources");
     }
 
@@ -3867,7 +3864,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   class OpenDSAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public OpenDSAction() {
-      super("Open datastore");
+      super("Open Datastore");
       putValue(SHORT_DESCRIPTION, "Open a datastore");
       putValue(SMALL_ICON, getIcon("datastore"));
     }
@@ -4164,7 +4161,7 @@ public class MainFrame extends JFrame implements ProgressListener,
               }
             } else if (type == PR) {
               // empty PR menu -> add an action to load ANNIE plugin
-              add(new AbstractAction("Add ANNIE resources to this menu") {
+              add(new AbstractAction("Add ANNIE Resources to this Menu") {
                 { putValue(SHORT_DESCRIPTION, "Load the ANNIE plugin."); }
                 public void actionPerformed(ActionEvent e) {
                 try {
@@ -4246,7 +4243,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           removeAll();
           addMenuItems();
           if (getMenuComponentCount() == 0) {
-            add("No recent applications");
+            add("No Recent Applications");
           }
         }
       });
@@ -4294,7 +4291,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       });
       add(item);
     }
-    add(new XJMenuItem(new AbstractAction("Remove last element") {
+    add(new XJMenuItem(new AbstractAction("Remove Last Element") {
       public void actionPerformed(ActionEvent e) {
         // remove the last element from the applications list
         locations.put("applications", list.replaceFirst("[^;]+;?$", ""));
@@ -4416,7 +4413,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             textLabel.setText(
               "Processing Resources: processes that annotate data ");
             iconLabel.setIcon(getIcon("prs"));
-          } else if (text.equals("Data stores")) {
+          } else if (text.equals("Datastores")) {
             textLabel.setText("Datastores: repositories for large data ");
             iconLabel.setIcon(getIcon("datastores"));
           } else {
@@ -4461,13 +4458,13 @@ public class MainFrame extends JFrame implements ProgressListener,
     private static final long serialVersionUID = 1L;
     String keywords;
     public HelpMailingListAction() {
-      super("Search in mailing list");
+      super("Search in Mailing List");
       putValue(SHORT_DESCRIPTION,
         "Search keywords in GATE users mailing list");
       this.keywords = null;
     }
     public HelpMailingListAction(String keywords) {
-      super("Search in mailing list");
+      super("Search in Mailing List");
       this.keywords = keywords;
     }
     public void actionPerformed(ActionEvent e) {
@@ -4655,7 +4652,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     private static final long serialVersionUID = 1L;
     public HelpUserGuideInContextAction() {
       super("Contextual User Guide");
-      putValue(SHORT_DESCRIPTION, "Online help for the selected view");
+      putValue(SHORT_DESCRIPTION, "Online help for the selected component");
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("F1"));
     }
 
@@ -4724,8 +4721,9 @@ public class MainFrame extends JFrame implements ProgressListener,
 
   class ToggleToolTipsAction extends AbstractAction {
     public ToggleToolTipsAction() {
-      super("Show tooltips");
-      putValue(SHORT_DESCRIPTION, "Toggle the help balloon under the cursor");
+      super("Show Tooltips");
+      putValue(SHORT_DESCRIPTION,
+        "Tooltips appear in help balloon like this one");
     }
     public void actionPerformed(ActionEvent e) {
       Runnable runnable = new Runnable() {
@@ -5009,7 +5007,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
 
     public LocaleSelectorMenuItem() {
-      super("System default  >>" + Locale.getDefault().getDisplayName() + "<<");
+      super("System Default  >>" + Locale.getDefault().getDisplayName() + "<<");
       me = this;
       myLocale = Locale.getDefault();
       this.addActionListener(new ActionListener() {

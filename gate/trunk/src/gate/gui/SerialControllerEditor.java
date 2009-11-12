@@ -1323,7 +1323,7 @@ public class SerialControllerEditor extends AbstractVisualResource
   /** Runs the Application*/
   class RunAction extends AbstractAction {
     RunAction(){
-      super("Run this application");
+      super("Run this Application");
       super.putValue(SHORT_DESCRIPTION, "<html>Run this application"
       +"&nbsp;&nbsp;<font color=#667799><small>F3"
       +"&nbsp;&nbsp;</small></font></html>");

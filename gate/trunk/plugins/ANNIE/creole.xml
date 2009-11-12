@@ -6,7 +6,7 @@
 	<CREOLE>
 		<!-- Annotation schema -->
 		<RESOURCE>
-			<NAME>Annotation schema</NAME>
+			<NAME>Annotation Schema</NAME>
 			<CLASS>gate.creole.AnnotationSchema</CLASS>
 			<COMMENT>An annotation type and its features.</COMMENT>
 			<HELPURL>http://gate.ac.uk/userguide/sec:corpora:schemas</HELPURL>
