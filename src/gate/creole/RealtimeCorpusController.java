@@ -29,7 +29,7 @@ import gate.util.Out;
  * @author Valentin Tablan
  *
  */
-@CreoleResource(name = "Real-time Corpus Pipeline",
+@CreoleResource(name = "Real-Time Corpus Pipeline",
     comment = "A serial controller for PR pipelines over corpora which "
         + "limits the run time of each PR.",
     icon = "application-realtime",

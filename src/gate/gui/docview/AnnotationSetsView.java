@@ -1644,7 +1644,9 @@ public class AnnotationSetsView extends AbstractDocumentView
    */
   protected class SavePreserveFormatAction extends AbstractAction{
     public SavePreserveFormatAction(){
-      super("Save preserving document format");
+      super("Save Preserving Format");
+      putValue(SHORT_DESCRIPTION,
+        "Saves original markups and highlighted annotations");
     }
     
     public void actionPerformed(ActionEvent evt){

@@ -564,7 +564,7 @@ public class NameBearerHandle implements Handle, StatusListener,
 
   class CloseRecursivelyAction extends AbstractAction {
     public CloseRecursivelyAction() {
-      super("Close recursively");
+      super("Close Recursively");
       putValue(SHORT_DESCRIPTION,
         "Close this application and recursively all contained resources");
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("shift F4"));
@@ -584,8 +584,8 @@ public class NameBearerHandle implements Handle, StatusListener,
   class SaveAsXmlAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public SaveAsXmlAction() {
-      super("Save As Xml...");
-      putValue(SHORT_DESCRIPTION, "Saves this resource in XML");
+      super("Save as XML...");
+      putValue(SHORT_DESCRIPTION, "Saves this resource in GATE XML format");
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control S"));
     }// SaveAsXmlAction()
 
@@ -703,13 +703,14 @@ public class NameBearerHandle implements Handle, StatusListener,
     private boolean preserveFormat;
 
     public SaveCorpusAsXmlAction(boolean preserveFormat) {
-      super("Save As Xml...");
-      putValue(SHORT_DESCRIPTION, "Saves this corpus in XML");
+      super("Save as XML...");
+      putValue(SHORT_DESCRIPTION, "Saves each document in GATE XML format");
       this.preserveFormat = preserveFormat;
 
       if(preserveFormat) {
-        putValue(NAME, "Save As Xml preserve format...");
-        putValue(SHORT_DESCRIPTION, "Saves this corpus in XML preserve format");
+        putValue(NAME, "Save Preserving Format...");
+        putValue(SHORT_DESCRIPTION,
+          "Saves each document preserving its format");
       } // if
     }// SaveAsXmlAction()
 
@@ -919,9 +920,9 @@ public class NameBearerHandle implements Handle, StatusListener,
   class ReloadClassAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public ReloadClassAction() {
-      super("Reload resource class");
+      super("Reload Resource Class");
       putValue(SHORT_DESCRIPTION, "Reloads the java class for this resource");
-    }// SaveAsXmlAction()
+    }
 
     public void actionPerformed(ActionEvent e) {
       int answer =
@@ -952,7 +953,7 @@ public class NameBearerHandle implements Handle, StatusListener,
   class SaveAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public SaveAction() {
-      super("Save to its datastore");
+      super("Save to its Datastore");
       putValue(SHORT_DESCRIPTION, "Save back to its datastore");
     }
 
@@ -997,7 +998,7 @@ public class NameBearerHandle implements Handle, StatusListener,
           else {
             JOptionPane.showMessageDialog(getLargeView(),
               "This resource has not been loaded from a datastore.\n"
-                + "Please use the \"Save to datastore...\" option.\n", "GATE",
+                + "Please use the \"Save to Datastore...\" option.\n", "GATE",
               JOptionPane.ERROR_MESSAGE);
 
           }
@@ -1010,7 +1011,7 @@ public class NameBearerHandle implements Handle, StatusListener,
   class DumpToFileAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public DumpToFileAction() {
-      super("Save application state");
+      super("Save Application State");
       putValue(SHORT_DESCRIPTION,
         "Saves the data needed to recreate this application");
     }
@@ -1229,7 +1230,7 @@ public class NameBearerHandle implements Handle, StatusListener,
   class SaveToAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public SaveToAction() {
-      super("Save to datastore...");
+      super("Save to Datastore...");
       putValue(SHORT_DESCRIPTION, "Save this resource to a datastore");
     }
 
@@ -1563,7 +1564,7 @@ public class NameBearerHandle implements Handle, StatusListener,
     private static final long serialVersionUID = 2342321851865139492L;
 
     PopulateCorpusWithTrecWebDataAction() {
-      super("Populate With TrecWebData");
+      super("Populate with TrecWebData");
       putValue(SHORT_DESCRIPTION,
         "Fills this corpus by extracting documents from a big trecweb file");
     }
@@ -1659,7 +1660,7 @@ public class NameBearerHandle implements Handle, StatusListener,
     private static final long serialVersionUID = -292879296310753260L;
 
     CreateIndexAction() {
-      super("Index corpus");
+      super("Index Corpus");
       putValue(SHORT_DESCRIPTION, "Create index with documents from the corpus");
       createIndexGui = new CreateIndexGUI();
     }
@@ -1818,7 +1819,7 @@ public class NameBearerHandle implements Handle, StatusListener,
     private static final long serialVersionUID = -3698451324578510407L;
 
     public CreateCorpusForDocAction() {
-      super("New corpus with this document");
+      super("New Corpus with this Document");
     }
 
     public void actionPerformed(ActionEvent e) {
