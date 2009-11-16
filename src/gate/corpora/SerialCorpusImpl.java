@@ -38,7 +38,8 @@ import gate.util.*;
 // always restore the doc, because it has its persistence ID.
 
 @CreoleResource(name = "GATE Serial Corpus", isPrivate = true,
-    comment = "GATE persistent corpus (serialisation)", icon = "corpus")
+    comment = "GATE persistent corpus (serialisation)", icon = "corpus",
+    helpURL = "http://gate.ac.uk/userguide/sec:developer:datastores")
 public class SerialCorpusImpl extends AbstractLanguageResource
                                                               implements
                                                               Corpus,
