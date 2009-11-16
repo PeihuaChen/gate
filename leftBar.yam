@@ -1,7 +1,6 @@
 
 
-
-- *%(index.html, GATE Developer)
+- *%(index.html, GATE Developer)*
   - %(doc/index.html, Documentation)
   - %(doc/javadoc/index.html, API Javadocs)
   - %(doc/papers.html, Papers/theory)
