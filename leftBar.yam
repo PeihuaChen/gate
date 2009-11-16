@@ -1,4 +1,5 @@
 
+
 - *%(/gate/index.html, GATE Developer)*
   - %(/gate/doc/index.html, Documentation)
   - %(/gate/doc/javadoc/index.html, API Javadocs)
@@ -6,6 +7,6 @@
   - %(/gate/doc/plugins.html, Core plugins)
   - %(/gate/doc/external-plugins.html, External plugins)
   - %(/gate/doc/releases.html, Release notes)
-  - *%(/gate/biz/licencing.html, Licencing)*
+  - *%(/biz/licencing.html, Licencing)*
     - %(/gate/licence.html, LGPL)
     - %(/gate/lib/index.html, Libraries)
