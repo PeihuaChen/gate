@@ -430,7 +430,12 @@ public class IaaMain extends AbstractLanguageAnalyser implements
     numDoc -= numDocNotCounted;
     if(numDoc<1) ++numDoc;
     int numTypes = annsTypes.keySet().size();
-    if(verbo>0) System.out.println("\nMacro averaged over "+numDoc+" documents:");
+    
+    
+    //Code presenting the macro average. This is commented out due to dispute over
+    //how to handle documents that are missing an annotation type altogether.
+    
+    /*if(verbo>0) System.out.println("\nMacro averaged over "+numDoc+" documents:");
     if(verbo>0) System.out.println("\nFor each pair of annotators, each type and each label:");
     //if(verbo>0) System.out.println("for each type:");
     for(int i=0; i<numTypes; ++i) {
@@ -471,9 +476,11 @@ public class IaaMain extends AbstractLanguageAnalyser implements
       fMeasureOverallTypes.add(fMeasureOverall[i]);
     }
     fMeasureOverallTypes.macroAverage(numTypes);
-    if(verbo>0) System.out.println("Overall pairs and types: "+  fMeasureOverallTypes.printResults());
+    if(verbo>0) System.out.println("Overall pairs and types: "+  fMeasureOverallTypes.printResults());*/
     
-    /*if(verbo>0) System.out.println("\nMicro averaged over "+numDoc+" documents:");
+    //Code presenting the micro average.
+    
+    if(verbo>0) System.out.println("\nMicro averaged over "+numDoc+" documents:");
     if(verbo>0) System.out.println("For each pair of annotators");
     for(int i=0; i<numTypes; ++i) {
       String typeN = typeNames.get(i);
@@ -513,7 +520,7 @@ public class IaaMain extends AbstractLanguageAnalyser implements
     }
     fMeasureOverallTypes.computeFmeasure();
     fMeasureOverallTypes.computeFmeasureLenient();
-    if(verbo>0) System.out.println("Overall pairs and types: "+  fMeasureOverallTypes.printResults());*/
+    if(verbo>0) System.out.println("Overall pairs and types: "+  fMeasureOverallTypes.printResults());
     
   }
   
