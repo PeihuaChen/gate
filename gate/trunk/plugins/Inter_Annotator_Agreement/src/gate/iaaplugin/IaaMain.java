@@ -184,7 +184,7 @@ public class IaaMain extends AbstractLanguageAnalyser implements
 		}
 		int numAnns = annsArray.length;
     
-    if(verbo>1 && positionDoc == 0) System.out.println("annotation sets:");
+    if(verbo>1 && positionDoc == 0) System.out.println("Annotation sets:");
 		for (int i = 0; i < numAnns; ++i) {
 			annsArray[i] = annsArray[i].trim();
       if(verbo>1 && positionDoc == 0) System.out.println("*"+annsArray[i]+"*");
@@ -245,7 +245,7 @@ public class IaaMain extends AbstractLanguageAnalyser implements
     if(!isAvailabelAllAnnSets) {
       ++numDocNotCounted;
       System.out.println("\nThe document "+document.getName() + 
-        " doesn't have all the annotation set required!");
+        " doesn't have all the annotation sets required!");
     } else {
       //Put the types and features into the map for all documents
       for(String t:annsTypes.keySet()) {
@@ -610,22 +610,22 @@ public class IaaMain extends AbstractLanguageAnalyser implements
     }
     catch(UnsupportedEncodingException e) {
       this.isUsingBDM = false;
-      System.out.println("There is something wrong with BDM file. So the BDM score cannot be used!");
+      System.out.println("There is something wrong with the BDM file. The BDM score cannot be used!");
       e.printStackTrace();
     }
     catch(FileNotFoundException e) {
       this.isUsingBDM = false;
-      System.out.println("There is something wrong with BDM file. So the BDM score cannot be used!");
+      System.out.println("There is something wrong with the BDM file. The BDM score cannot be used!");
       e.printStackTrace();
     }
     catch(URISyntaxException e) {
       this.isUsingBDM = false;
-      System.out.println("There is something wrong with BDM file. So the BDM score cannot be used!");
+      System.out.println("There is something wrong with the BDM file. The BDM score cannot be used!");
       e.printStackTrace();
     }
     catch(IOException e) {
       this.isUsingBDM = false;
-      System.out.println("There is something wrong with BDM file. So the BDM score cannot be used!");
+      System.out.println("There is something wrong with the BDM file. The BDM score cannot be used!");
       e.printStackTrace();
     }
   }
@@ -857,8 +857,8 @@ public class IaaMain extends AbstractLanguageAnalyser implements
     FMeasure fMeasureOverall, FMeasure[][] fMeasuresPairwiseLabel, FMeasure[] fMeasuresPairwise) {
 //  Print out the FMeasures for pairwise comparison
     int num1 = iaaC.numAnnotators * (iaaC.numAnnotators - 1) / 2;
-    System.out.println("\n ********  The Fmeasures based on the BDM scores specified in the following: ");
-      System.out.println("Fmeasures averaged over " + num1
+    System.out.println("\n ********  The F-measures based on the BDM scores specified in the following: ");
+      System.out.println("F-measures averaged over " + num1
         + " pairs of annotators.");
       System.out.println(fMeasureOverall.printResults());
       System.out.println("For each pair of annotators:");

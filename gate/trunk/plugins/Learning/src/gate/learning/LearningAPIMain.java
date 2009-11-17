@@ -522,7 +522,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
             }
             else {
               System.out
-                .println("!! Warning: cannot produce N-gram data because there is no Ngram "
+                .println("!! Warning: cannot produce N-gram data because there is no N-gram "
                   + "defintion in the configuration file!");
             }
 
@@ -667,7 +667,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
                 + ConstantParameters.FILENAMEOFModels;
             if(!new File(modelFileName).exists()) {
               System.out
-                .println("Warning: the model is not available at the moment!!");
+                .println("Warning: the model is not available at the moment!");
               return;
             }
             if(endDocIdApp > startDocIdApp) {
@@ -878,7 +878,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
       }
 
       if(LogService.minVerbosityLevel > 0)
-        System.out.println("This learning session finished!.");
+        System.out.println("This learning session finished!");
     } // end of learning (position=corpus.size()-1)
   }
 
