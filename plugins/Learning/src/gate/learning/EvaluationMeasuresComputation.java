@@ -118,7 +118,7 @@ public class EvaluationMeasuresComputation {
       this.f1Lenient /= k;
     } else {
       System.out
-        .println("!! The macro averaged F measure cannot be done because the number is less than 1 !!");
+        .println("!! The macro averaged F measure cannot be done because the number is less than 1!");
     }
     return;
   }
@@ -126,7 +126,7 @@ public class EvaluationMeasuresComputation {
   /** Print out the results. */
   public String printResults() {
     StringBuffer logMessage = new StringBuffer();
-    logMessage.append("  (correct, paritalCorrect, spurious, missing)= ("
+    logMessage.append("  (correct, partialCorrect, spurious, missing)= ("
       + correct + ", " + partialCor + ", "
       + spurious + ", " + missing + ");  ");
     logMessage.append("(precision, recall, F1)= (" + precision

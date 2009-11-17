@@ -81,7 +81,7 @@ public class IaaCalculation {
     this.verbosity = verbsy;
     if(this.numAnnotators < 2) {
       if(this.verbosity>0) System.out
-        .println("Warning: the IAA calculation needs at least two annotation sets. ");
+        .println("Warning: The IAA calculation needs at least two annotation sets. ");
     }
     checkIsAnnsMissing();
   }
@@ -110,7 +110,7 @@ public class IaaCalculation {
     for(int i = 0; i < numDocs; ++i)
       for(int j = 0; j < numAnnotators; ++j)
         if(annsArrArr[i][j] == null) {
-          if(verbosity>0) System.out.println("Warning: The AnnotationSet of the "
+          if(verbosity>0) System.out.println("Warning: The annotation set of the "
             + "Annotator " + j + " on the document " + i + " is missed!");
           isMissing = true;
         }
@@ -161,10 +161,10 @@ public class IaaCalculation {
     if(verbosity >= 1) {
       int num1 = numAnnotators * (numAnnotators - 1) / 2; // Number of pairs of
       // annotators
-      System.out.println("Overall resutls macro-averaged over " + num1
+      System.out.println("Overall results macro-averaged over " + num1
         + " pairs:");
       System.out.println(contingencyOverall.printResultsPairwise());
-      System.out.println("Results for each pair of annotator:");
+      System.out.println("Results for each pair of annotators:");
       int num11 = 0;
       for(int i = 0; i < numAnnotators; ++i)
         for(int j = i + 1; j < numAnnotators; ++j) {
@@ -292,7 +292,7 @@ public class IaaCalculation {
   public void printAllwayIaa() {
     // Print out the results
     if(verbosity >= 1) {
-      System.out.println("Overall resutls (allWay) over " + numAnnotators
+      System.out.println("Overall results (allWay) over " + numAnnotators
         + " annotators:");
       System.out.println(contingencyOverall.printResultsAllway());
     }
@@ -353,7 +353,7 @@ public class IaaCalculation {
     //  Print out the FMeasures for pairwise comparison
     if(verbosity >= 1) {
       int num1 = numAnnotators * (numAnnotators - 1) / 2;
-      System.out.println("Fmeasures averaged over " + num1
+      System.out.println("F-measures averaged over " + num1
         + " pairs of annotators.");
       System.out.println(this.fMeasureOverall.printResults());
       System.out.println("For each pair of annotators:");

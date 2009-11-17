@@ -121,7 +121,7 @@ public class FMeasure {
     }
     else {
       System.out
-        .println("Waining: the macro averaged F measure cannot be done because the number of pair is less than 1.");
+        .println("Warning: the macro averaged F measure cannot be done because the number of pairs is less than 1.");
     }
     return;
   }
@@ -130,7 +130,7 @@ public class FMeasure {
   public String printResults() {
     StringBuffer logMessage = new StringBuffer();
     logMessage
-      .append("  (correct, paritalCorrect, spurious, missing)= (" + correct
+      .append("  (correct, partial, spurious, missing)= (" + correct
         + ", " + partialCor + ", " + spurious + ", " + missing + ");  ");
     logMessage.append("(precision, recall, F1)= (" + precision + ", " + recall
       + ", " + f1 + ");  ");
