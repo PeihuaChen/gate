@@ -432,26 +432,27 @@ public class IaaMain extends AbstractLanguageAnalyser implements
     int numTypes = annsTypes.keySet().size();
     
     
-    //Code presenting the macro average. This is commented out due to dispute over
+    //Code presenting the macro average. Printouts are commented out due to dispute over
     //how to handle documents that are missing an annotation type altogether.
     
-    /*if(verbo>0) System.out.println("\nMacro averaged over "+numDoc+" documents:");
-    if(verbo>0) System.out.println("\nFor each pair of annotators, each type and each label:");
+    //if(verbo>0) System.out.println("\nMacro averaged over "+numDoc+" documents:");
+    //if(verbo>0) System.out.println("\nFor each pair of annotators, each type and each label:");
     //if(verbo>0) System.out.println("for each type:");
+    
     for(int i=0; i<numTypes; ++i) {
       String typeN = typeNames.get(i);
-      if(verbo>0) System.out.println("Annotation type *"+ typeN+"*");
+      //if(verbo>0) System.out.println("Annotation type *"+ typeN+"*");
       fMeasureOverall[i].macroAverage(numDoc); 
       for(int j=0; j<fMeasuresPairwise[0].length; ++j)
         fMeasuresPairwise[i][j].macroAverage(numDoc);
-      if(verbo>0) System.out.println("For each pair of annotators");
-      int num11=0;
+      //if(verbo>0) System.out.println("For each pair of annotators");
+      /*int num11=0;
       for(int i1=0; i1<annsArray.length; ++i1)
         for(int j=i1+1; j<annsArray.length; ++j) {
           if(verbo>0) System.out.println("For pair ("+annsArray[i1]+","+annsArray[j]+"): "+
             fMeasuresPairwise[i][num11].printResults());
           ++num11;
-        }
+        }*/
       if(verbo>1) {
         isUsingLabel = false;
         if(annsTypes.get(typeN) != null && annsTypes.get(typeN) != "")
@@ -463,20 +464,20 @@ public class IaaMain extends AbstractLanguageAnalyser implements
             String key = keyList.get(i1);
             if(key.contains("):"+typeN+"->")) {
               fMeasuresPairwiseLabel.get(key).macroAverage(numDoc);
-              String pairAnns = key.substring(0,key.indexOf("):")+1);
-              String typeAnn = key.substring(key.indexOf("):")+2, key.indexOf("->"));
-              String labelAnn = key.substring(key.indexOf("->")+2);
-              System.out.println("pairAnns="+pairAnns+", type="+typeAnn+", label="+labelAnn+": "
-              +fMeasuresPairwiseLabel.get(key).printResults());
+              //String pairAnns = key.substring(0,key.indexOf("):")+1);
+              //String typeAnn = key.substring(key.indexOf("):")+2, key.indexOf("->"));
+              //String labelAnn = key.substring(key.indexOf("->")+2);
+              //System.out.println("pairAnns="+pairAnns+", type="+typeAnn+", label="+labelAnn+": "
+              //+fMeasuresPairwiseLabel.get(key).printResults());
             }
           }
         }
       }
-      if(verbo>0) System.out.println("Overall pairs: "+fMeasureOverall[i].printResults());
+      //if(verbo>0) System.out.println("Overall pairs: "+fMeasureOverall[i].printResults());
       fMeasureOverallTypes.add(fMeasureOverall[i]);
     }
     fMeasureOverallTypes.macroAverage(numTypes);
-    if(verbo>0) System.out.println("Overall pairs and types: "+  fMeasureOverallTypes.printResults());*/
+    //if(verbo>0) System.out.println("Overall pairs and types: "+  fMeasureOverallTypes.printResults());
     
     //Code presenting the micro average.
     
