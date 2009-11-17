@@ -22,6 +22,7 @@ import java.text.Collator;
 import java.io.*;
 
 import javax.swing.*;
+import javax.swing.text.Position;
 import javax.swing.event.AncestorListener;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.ListSelectionListener;
@@ -47,7 +48,8 @@ import gate.swing.XJFileChooser;
  * with different measures notably precision, recall and F1-score.
  */
 @CreoleResource(name = "Corpus Quality Assurance", guiType = GuiType.LARGE,
-    resourceDisplayed = "gate.Corpus", mainViewer = false)
+    resourceDisplayed = "gate.Corpus", mainViewer = false,
+    helpURL = "http://gate.ac.uk/userguide/sec:eval:corpusqualityassurance")
 public class CorpusQualityAssurance extends AbstractVisualResource
   implements CorpusListener {
 
@@ -64,8 +66,6 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     documentTableModel = new DocumentTableModel();
     annotationTableModel = new AnnotationTableModel();
     types = new TreeSet<String>(collator);
-    docsSetsTypesFeatures = new LinkedHashMap<String, TreeMap<String,
-      TreeMap<String, TreeSet<String>>>>();
     corpusChanged = false;
     doubleComparator = new Comparator<String>() {
       public int compare(String s1, String s2) {
@@ -132,7 +132,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     setCheck = new JCheckBox("present in every document", false);
     setCheck.addActionListener(new AbstractAction(){
       public void actionPerformed(ActionEvent e) {
-        updateSets();
+        updateSetList();
       }
     });
     sidePanel.add(setCheck, gbc);
@@ -144,7 +144,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     typeList = new JList();
     typeList.setSelectionModel(new ToggleSelectionModel());
     typeList.setPrototypeCellValue("present in every document");
-    typeList.setVisibleRowCount(4);
+    typeList.setVisibleRowCount(5);
     sidePanel.add(new JScrollPane(typeList), gbc);
     sidePanel.add(Box.createVerticalStrut(2), gbc);
     typeCheck = new JCheckBox("present in every selected set", false);
@@ -267,7 +267,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         if (timerTask != null) { timerTask.cancel(); }
         Date timeToRun = new Date(System.currentTimeMillis() + 1000);
         timerTask = new TimerTask() { public void run() {
-          updateSets();
+          readSetsTypesFeatures(0);
         }};
         timer.schedule(timerTask, timeToRun); // add a delay before updating
       }
@@ -278,6 +278,9 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     // when set list selection change
     setList.addListSelectionListener(new ListSelectionListener() {
       public void valueChanged(ListSelectionEvent e) {
+        if (typesSelected == null) {
+          typesSelected = typeList.getSelectedValues();
+        }
         typeList.setModel(new ExtendedListModel());
         keySetName = ((ToggleSelectionABModel)
           setList.getSelectionModel()).getSelectedValueA();
@@ -295,30 +298,42 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         TreeSet<String> someTypes = new TreeSet<String>();
         TreeMap<String, TreeSet<String>> typesFeatures;
         boolean firstLoop = true; // needed for retainAll to work
-        for (TreeMap<String, TreeMap<String, TreeSet<String>>>
-            setsTypesFeatures : docsSetsTypesFeatures.values()) {
-          typesFeatures = setsTypesFeatures.get(
-            keySetName.equals("[Default set]") ? "" : keySetName);
-          if (typesFeatures != null) {
-            if (typeCheck.isSelected() && !firstLoop) {
-              someTypes.retainAll(typesFeatures.keySet());
-            } else {
-              someTypes.addAll(typesFeatures.keySet());
+        synchronized(docsSetsTypesFeatures) {
+          for (TreeMap<String, TreeMap<String, TreeSet<String>>>
+              setsTypesFeatures : docsSetsTypesFeatures.values()) {
+            typesFeatures = setsTypesFeatures.get(
+              keySetName.equals("[Default set]") ? "" : keySetName);
+            if (typesFeatures != null) {
+              if (typeCheck.isSelected() && !firstLoop) {
+                someTypes.retainAll(typesFeatures.keySet());
+              } else {
+                someTypes.addAll(typesFeatures.keySet());
+              }
             }
-          }
-          typesFeatures = setsTypesFeatures.get(
-            responseSetName.equals("[Default set]") ? "" : responseSetName);
-          if (typesFeatures != null) {
-            if (typeCheck.isSelected() && !firstLoop) {
-              someTypes.retainAll(typesFeatures.keySet());
-            } else {
-              someTypes.addAll(typesFeatures.keySet());
+            typesFeatures = setsTypesFeatures.get(
+              responseSetName.equals("[Default set]") ? "" : responseSetName);
+            if (typesFeatures != null) {
+              if (typeCheck.isSelected() && !firstLoop) {
+                someTypes.retainAll(typesFeatures.keySet());
+              } else {
+                someTypes.addAll(typesFeatures.keySet());
+              }
             }
+            firstLoop = false;
           }
-          firstLoop = false;
         }
-        typeList.setVisibleRowCount(Math.min(4, someTypes.size()));
         typeList.setModel(new ExtendedListModel(someTypes.toArray()));
+        if (someTypes.size() > 0) {
+          for (Object value : typesSelected) {
+            // put back the selection if possible
+            int index = typeList.getNextMatch(
+              (String) value, 0, Position.Bias.Forward);
+            if (index != -1) {
+              typeList.setSelectedIndex(index);
+            }
+          }
+        }
+        typesSelected = null;
         setList.setEnabled(true);
         setCheck.setEnabled(true);
         compareAction.setEnabled(true);
@@ -329,6 +344,9 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     typeList.addListSelectionListener(new ListSelectionListener() {
       public void valueChanged(ListSelectionEvent e) {
         // update feature UI list
+        if (featuresSelected == null) {
+          featuresSelected = featureList.getSelectedValues();
+        }
         featureList.setModel(new ExtendedListModel());
         if (typeList.getSelectedValues().length == 0
          || typeList.getSelectionModel().getValueIsAdjusting()) {
@@ -339,42 +357,56 @@ public class CorpusQualityAssurance extends AbstractVisualResource
           typeNames.add((String) type);
         }
         typeList.setEnabled(false);
+        typeCheck.setEnabled(false);
         TreeSet<String> features = new TreeSet<String>(collator);
         TreeMap<String, TreeSet<String>> typesFeatures;
         boolean firstLoop = true; // needed for retainAll to work
-        for (TreeMap<String, TreeMap<String, TreeSet<String>>> sets :
-             docsSetsTypesFeatures.values()) {
-          typesFeatures = sets.get(keySetName.equals("[Default set]") ?
-            "" : keySetName);
-          if (typesFeatures != null) {
-            for (String typeName : typesFeatures.keySet()) {
-              if (typeNames.contains(typeName)) {
-                if (featureCheck.isSelected() && !firstLoop) {
-                  features.retainAll(typesFeatures.get(typeName));
-                } else {
-                  features.addAll(typesFeatures.get(typeName));
+        synchronized(docsSetsTypesFeatures) {
+          for (TreeMap<String, TreeMap<String, TreeSet<String>>> sets :
+               docsSetsTypesFeatures.values()) {
+            typesFeatures = sets.get(keySetName.equals("[Default set]") ?
+              "" : keySetName);
+            if (typesFeatures != null) {
+              for (String typeName : typesFeatures.keySet()) {
+                if (typeNames.contains(typeName)) {
+                  if (featureCheck.isSelected() && !firstLoop) {
+                    features.retainAll(typesFeatures.get(typeName));
+                  } else {
+                    features.addAll(typesFeatures.get(typeName));
+                  }
                 }
               }
             }
-          }
-          typesFeatures = sets.get(responseSetName.equals("[Default set]") ?
-            "" : responseSetName);
-          if (typesFeatures != null) {
-            for (String typeName : typesFeatures.keySet()) {
-              if (typeNames.contains(typeName)) {
-                if (featureCheck.isSelected() && !firstLoop) {
-                  features.retainAll(typesFeatures.get(typeName));
-                } else {
-                  features.addAll(typesFeatures.get(typeName));
+            typesFeatures = sets.get(responseSetName.equals("[Default set]") ?
+              "" : responseSetName);
+            if (typesFeatures != null) {
+              for (String typeName : typesFeatures.keySet()) {
+                if (typeNames.contains(typeName)) {
+                  if (featureCheck.isSelected() && !firstLoop) {
+                    features.retainAll(typesFeatures.get(typeName));
+                  } else {
+                    features.addAll(typesFeatures.get(typeName));
+                  }
                 }
               }
             }
+            firstLoop = false;
           }
-          firstLoop = false;
         }
-        featureList.setVisibleRowCount(Math.min(4, features.size()));
         featureList.setModel(new ExtendedListModel(features.toArray()));
+        if (features.size() > 0) {
+          for (Object value : featuresSelected) {
+            // put back the selection if possible
+            int index = featureList.getNextMatch(
+              (String) value, 0, Position.Bias.Forward);
+            if (index != -1) {
+              featureList.setSelectedIndex(index);
+            }
+          }
+        }
+        featuresSelected = null;
         typeList.setEnabled(true);
+        typeCheck.setEnabled(true);
       }
     });
 
@@ -394,7 +426,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     );
   }
 
-  protected class ExtendedListModel extends DefaultListModel {
+  protected static class ExtendedListModel extends DefaultListModel {
     public ExtendedListModel() {
       super();
     }
@@ -406,7 +438,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     }
   }
 
-  protected class ToggleSelectionModel extends DefaultListSelectionModel {
+  protected static class ToggleSelectionModel extends DefaultListSelectionModel {
     boolean gestureStarted = false;
     public void setSelectionInterval(int index0, int index1) {
       if (isSelectedIndex(index0) && !gestureStarted) {
@@ -427,7 +459,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
    * Add a suffix A and B for the first and second selected item.
    * Allows only 2 items to be selected.
    */
-  protected class ToggleSelectionABModel extends DefaultListSelectionModel {
+  protected static class ToggleSelectionABModel extends DefaultListSelectionModel {
     public ToggleSelectionABModel(JList list) {
       this.list = list;
     }
@@ -498,7 +530,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     if (timerTask != null) { timerTask.cancel(); }
     Date timeToRun = new Date(System.currentTimeMillis() + 2000);
     timerTask = new TimerTask() { public void run() {
-      updateSets();
+      readSetsTypesFeatures(0);
     }};
     timer.schedule(timerTask, timeToRun); // add a delay before updating
   }
@@ -509,7 +541,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     if (timerTask != null) { timerTask.cancel(); }
     Date timeToRun = new Date(System.currentTimeMillis() + 2000);
     timerTask = new TimerTask() { public void run() {
-      updateSets();
+      readSetsTypesFeatures(0);
     }};
     timer.schedule(timerTask, timeToRun); // add a delay before updating
   }
@@ -520,20 +552,20 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     if (timerTask != null) { timerTask.cancel(); }
     Date timeToRun = new Date(System.currentTimeMillis() + 2000);
     timerTask = new TimerTask() { public void run() {
-      updateSets();
+      readSetsTypesFeatures(0);
     }};
     timer.schedule(timerTask, timeToRun); // add a delay before updating
   }
 
   /**
    * Update set lists.
+   * @param documentStart first document to read in the corpus,
+   * the first document of the corpus is 0.
    */
-  protected void updateSets() {
+  protected void readSetsTypesFeatures(final int documentStart) {
     if (!isShowing()) { return; }
     corpusChanged = false;
     SwingUtilities.invokeLater(new Runnable(){ public void run() {
-      setList.clearSelection();
-      compareAction.setEnabled(false);
       progressBar.setMaximum(corpus.size() - 1);
       progressBar.setString("Read sets, types, features");
       reloadCacheAction.setEnabled(false);
@@ -543,69 +575,53 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     Runnable runnable = new Runnable() { public void run() {
     if (docsSetsTypesFeatures.size() != corpus.getDocumentNames().size()
     || !docsSetsTypesFeatures.keySet().containsAll(corpus.getDocumentNames())) {
-    docsSetsTypesFeatures.clear();
-    TreeMap<String, TreeMap<String, TreeSet<String>>> setsTypesFeatures;
-    TreeMap<String, TreeSet<String>> typesFeatures;
-    TreeSet<String> features;
-    for (int i = 0; i < corpus.size(); i++) {
-      // fill in the lists of document, set, type and feature names
-      boolean documentWasLoaded = corpus.isDocumentLoaded(i);
-      Document document = (Document) corpus.get(i);
-      if (document != null && document.getAnnotationSetNames() != null) {
-        setsTypesFeatures =
-          new TreeMap<String, TreeMap<String, TreeSet<String>>>(collator);
-        HashSet<String> setNames =
-          new HashSet<String>(document.getAnnotationSetNames());
-        setNames.add("");
-        for (String set : setNames) {
-          typesFeatures = new TreeMap<String, TreeSet<String>>(collator);
-          AnnotationSet annotations = document.getAnnotations(set);
-          for (String type : annotations.getAllTypes()) {
-            features = new TreeSet<String>(collator);
-            for (Annotation annotation : annotations.get(type)) {
-              for (Object featureKey : annotation.getFeatures().keySet()) {
-                features.add((String) featureKey);
+      if (documentStart == 0) { docsSetsTypesFeatures.clear(); }
+      TreeMap<String, TreeMap<String, TreeSet<String>>> setsTypesFeatures;
+      TreeMap<String, TreeSet<String>> typesFeatures;
+      TreeSet<String> features;
+      for (int i = documentStart; i < corpus.size(); i++) {
+        // fill in the lists of document, set, type and feature names
+        boolean documentWasLoaded = corpus.isDocumentLoaded(i);
+        Document document = (Document) corpus.get(i);
+        if (document != null && document.getAnnotationSetNames() != null) {
+          setsTypesFeatures =
+            new TreeMap<String, TreeMap<String, TreeSet<String>>>(collator);
+          HashSet<String> setNames =
+            new HashSet<String>(document.getAnnotationSetNames());
+          setNames.add("");
+          for (String set : setNames) {
+            typesFeatures = new TreeMap<String, TreeSet<String>>(collator);
+            AnnotationSet annotations = document.getAnnotations(set);
+            for (String type : annotations.getAllTypes()) {
+              features = new TreeSet<String>(collator);
+              for (Annotation annotation : annotations.get(type)) {
+                for (Object featureKey : annotation.getFeatures().keySet()) {
+                  features.add((String) featureKey);
+                }
               }
+              typesFeatures.put(type, features);
             }
-            typesFeatures.put(type, features);
+            setsTypesFeatures.put(set, typesFeatures);
           }
-          setsTypesFeatures.put(set, typesFeatures);
+          docsSetsTypesFeatures.put(document.getName(), setsTypesFeatures);
         }
-        docsSetsTypesFeatures.put(document.getName(), setsTypesFeatures);
-      }
-      if (!documentWasLoaded) {
-        corpus.unloadDocument(document);
-        Factory.deleteResource(document);
-      }
-      final int progressValue = i + 1;
-      SwingUtilities.invokeLater(new Runnable(){ public void run() {
-        if (progressBar.isShowing()) {
+        if (!documentWasLoaded) {
+          corpus.unloadDocument(document);
+          Factory.deleteResource(document);
+        }
+        final int progressValue = i + 1;
+        SwingUtilities.invokeLater(new Runnable(){ public void run() {
           progressBar.setValue(progressValue);
-        }
-      }});
-    }
-    }
-    final TreeSet<String> setsNames = new TreeSet<String>(collator);
-    Set<String> sets;
-    boolean firstLoop = true; // needed for retainAll to work
-    for (String document : docsSetsTypesFeatures.keySet()) {
-      // get the list of set names
-      sets = docsSetsTypesFeatures.get(document).keySet();
-      if (setCheck.isSelected() && !firstLoop) {
-        setsNames.retainAll(sets);
-      } else {
-        setsNames.addAll(sets);
+          if ((progressValue+1) % 5 == 0) {
+            // update the set list every 5 documents read
+            updateSetList();
+          }
+        }});
+        if (Thread.interrupted()) { return; }
       }
-      firstLoop = false;
     }
+    updateSetList();
     SwingUtilities.invokeLater(new Runnable(){ public void run(){
-      // update the UI lists of sets
-      setsNames.remove("");
-      setsNames.add("[Default set]");
-      setList.setVisibleRowCount(
-        Math.min(4, setsNames.size()));
-      setList.setModel(
-        new ExtendedListModel(setsNames.toArray()));
       progressBar.setValue(progressBar.getMinimum());
       progressBar.setString("");
       CorpusQualityAssurance.this.setCursor(
@@ -613,15 +629,74 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       reloadCacheAction.setEnabled(true);
     }});
     }};
-    Thread thread = new Thread(runnable, "updateSets");
-    thread.setPriority(Thread.MIN_PRIORITY);
-    thread.start();
+    readSetsTypesFeaturesThread = new Thread(runnable, "readSetsTypesFeatures");
+    readSetsTypesFeaturesThread.setPriority(Thread.MIN_PRIORITY);
+    readSetsTypesFeaturesThread.start();
+  }
+
+  protected void updateSetList() {
+    final TreeSet<String> setsNames = new TreeSet<String>(collator);
+    Set<String> sets;
+    boolean firstLoop = true; // needed for retainAll to work
+    synchronized(docsSetsTypesFeatures) {
+      for (String document : docsSetsTypesFeatures.keySet()) {
+        // get the list of set names
+        sets = docsSetsTypesFeatures.get(document).keySet();
+        if (setCheck.isSelected() && !firstLoop) {
+          setsNames.retainAll(sets);
+        } else {
+          setsNames.addAll(sets);
+        }
+        firstLoop = false;
+      }
+    }
+    SwingUtilities.invokeLater(new Runnable(){ public void run() {
+      // update the UI lists of sets
+      setsNames.remove("");
+      setsNames.add("[Default set]");
+      String keySetNamePrevious = keySetName;
+      String responseSetNamePrevious = responseSetName;
+      setList.setModel(new ExtendedListModel(setsNames.toArray()));
+      if (setsNames.size() > 0) {
+        if (keySetNamePrevious != null) {
+          // put back the selection if possible
+          int index = setList.getNextMatch(
+            keySetNamePrevious, 0, Position.Bias.Forward);
+          if (index != -1) {
+            setList.setSelectedIndex(index);
+          }
+        }
+        if (responseSetNamePrevious != null) {
+          // put back the selection if possible
+          int index = setList.getNextMatch(
+            responseSetNamePrevious, 0, Position.Bias.Forward);
+          if (index != -1) {
+            setList.setSelectedIndex(index);
+          }
+        }
+      }
+    }});
   }
 
   protected void compareAnnotation() {
+    int progressValuePrevious = -1;
+    if (readSetsTypesFeaturesThread != null
+     && readSetsTypesFeaturesThread.isAlive()) {
+      // stop the thread that reads the sets, types and features
+      progressValuePrevious = progressBar.getValue();
+      readSetsTypesFeaturesThread.interrupt();
+    }
     SwingUtilities.invokeLater(new Runnable(){ public void run(){
       progressBar.setMaximum(corpus.size() - 1);
       progressBar.setString("Compare annotations");
+      setList.setEnabled(false);
+      setCheck.setEnabled(false);
+      typeList.setEnabled(false);
+      typeCheck.setEnabled(false);
+      featureList.setEnabled(false);
+      featureCheck.setEnabled(false);
+      measureList.setEnabled(false);
+      reloadCacheAction.setEnabled(false);
     }});
     differsByDocThenType.clear();
     documentNames.clear();
@@ -689,7 +764,19 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     SwingUtilities.invokeLater(new Runnable(){ public void run(){
       progressBar.setValue(progressBar.getMinimum());
       progressBar.setString("");
+      setList.setEnabled(true);
+      setCheck.setEnabled(true);
+      typeList.setEnabled(true);
+      typeCheck.setEnabled(true);
+      featureList.setEnabled(true);
+      featureCheck.setEnabled(true);
+      measureList.setEnabled(true);
+      reloadCacheAction.setEnabled(true);
     }});
+    if (progressValuePrevious > -1) {
+      // restart the thread where it was interrupted
+      readSetsTypesFeatures(progressValuePrevious);
+    }
   }
 
   protected double getMeasureValue(int column, AnnotationDiffer differ,
@@ -1204,7 +1291,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     }
     public void actionPerformed(ActionEvent e){
       docsSetsTypesFeatures.clear();
-      updateSets();
+      readSetsTypesFeatures(0);
     }
   }
 
@@ -1215,15 +1302,18 @@ public class CorpusQualityAssurance extends AbstractVisualResource
   protected Corpus corpus;
   protected TreeSet<String> types;
   /** cache for document*set*type*feature names */
-  protected LinkedHashMap<String, TreeMap<String, TreeMap<String,
-    TreeSet<String>>>> docsSetsTypesFeatures;
+  final protected Map<String, TreeMap<String, TreeMap<String, TreeSet<String>>>>
+    docsSetsTypesFeatures = Collections.synchronizedMap(new LinkedHashMap
+      <String, TreeMap<String, TreeMap<String, TreeSet<String>>>>());
   /** ordered by document as in the <code>corpus</code>
    *  then contains (annotation type * AnnotationDiffer) */
-  private ArrayList<HashMap<String, AnnotationDiffer>> differsByDocThenType =
+  protected ArrayList<HashMap<String, AnnotationDiffer>> differsByDocThenType =
     new ArrayList<HashMap<String, AnnotationDiffer>>();
-  private ArrayList<String> documentNames = new ArrayList<String>();
+  protected ArrayList<String> documentNames = new ArrayList<String>();
   protected String keySetName;
   protected String responseSetName;
+  protected Object[] typesSelected;
+  protected Object[] featuresSelected;
   protected JList setList;
   protected JList typeList;
   protected JList featureList;
@@ -1242,4 +1332,5 @@ public class CorpusQualityAssurance extends AbstractVisualResource
   protected JProgressBar progressBar;
   protected Timer timer = new Timer("CorpusQualityAssurance", true);
   protected TimerTask timerTask;
+  protected Thread readSetsTypesFeaturesThread;
 }
