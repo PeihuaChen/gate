@@ -353,7 +353,9 @@ public class NameBearerHandle implements Handle, StatusListener,
         // this item can be used only if the resource belongs to a datastore
         staticPopupItems.add(new XJMenuItem(new SaveAction(), sListenerProxy));
       }
-      staticPopupItems.add(new XJMenuItem(new SaveToAction(), sListenerProxy));
+      if (!(target instanceof AnnotationSchema)) {
+        staticPopupItems.add(new XJMenuItem(new SaveToAction(), sListenerProxy));
+      }
     }
 
     if(target instanceof Controller) {
