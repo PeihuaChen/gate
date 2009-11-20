@@ -45,6 +45,9 @@
   <!-- Should Ant exit as soon as it has started the GUI? -->
   <property name="runtime.spawn" value="true" />
 
+  <!-- if deprecation warnings should be shown -->
+  <property name="deprecation" value="true"/>
+
   <!-- OS specific properties
        To set a system property for GATE running on a specific platform, define
        it here:
@@ -307,10 +310,10 @@
            target="1.5"
            encoding="UTF-8"
            debug="true"
-    			 deprecation="true"
+    	   deprecation="${deprecation}"
            debuglevel="lines,source"
            includes="gate/**,com/**,hepple/**"
-					 classpathref="build.class.path"/>
+           classpathref="build.class.path"/>
   </target>
 
 	<!-- This target compiles all the classes including debug information -->
@@ -319,14 +322,14 @@
           description="compile the source " >
     <!-- Compile the java code from ${srcDir} into ${buildDir} -->
     <javac srcdir="${srcDir}"
-		       destdir="${outputDir}"
+           destdir="${outputDir}"
            encoding="UTF-8"
            source="1.5"
            target="1.5"
            debug="true"
-           deprecation="true"
+           deprecation="${deprecation}"
            includes="gate/**,com/**,hepple/**"
-					 classpathref="build.class.path"/>
+           classpathref="build.class.path"/>
   </target>
 
 
