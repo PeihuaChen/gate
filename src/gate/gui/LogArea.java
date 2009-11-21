@@ -43,6 +43,11 @@ public class LogArea extends XJTextPane {
   /** The popup menu with various actions*/
   protected JPopupMenu popup = null;
 
+  /** Start position from the document. */
+  protected Position startPos;
+  /** End position from the document. */
+  protected Position endPos;
+
   /** The original printstream on System.out */
   protected PrintStream originalOut;
 
@@ -99,6 +104,10 @@ public class LogArea extends XJTextPane {
     selectAllAction = new SelectAllAction();
     copyAction = new CopyAction();
     clearAllAction = new ClearAllAction();
+    startPos = getDocument().getStartPosition();
+    endPos = getDocument().getEndPosition();
+
+    System.out.println("Start pos: " + startPos + ", end pos: " + endPos + ", length: " + getDocument().getLength());
 
     popup.add(selectAllAction);
     popup.add(copyAction);
@@ -106,6 +115,20 @@ public class LogArea extends XJTextPane {
     popup.add(clearAllAction);
     initListeners();
   }// LogArea
+
+  /**
+   * Overriddent to fetch new start and end Positions when the document is
+   * changed.
+   */
+  public void setDocument(Document d) {
+    super.setDocument(d);
+    startPos = d.getStartPosition();
+    endPos = d.getEndPosition();
+  }
+
+  public void setStyledDocument(StyledDocument d) {
+    this.setDocument(d);
+  }
 
   /** Init all listeners for this object*/
   public void initListeners(){
@@ -161,11 +184,13 @@ public class LogArea extends XJTextPane {
 
     public void run(){
       try{
-        if(getDocument().getLength() > 0){
-          Rectangle place = modelToView(getDocument().getLength() - 1);
+        if(endPos.getOffset() > 0){
+          Rectangle place = modelToView(endPos.getOffset() - 1);
           if(place != null) scrollRectToVisible(place);
         }
-        getDocument().insertString(getDocument().getLength(), text, style);
+        // endPos is always one past the real end position because of the
+        // implicit newline character at the end of any Document
+        getDocument().insertString(endPos.getOffset() - 1, text, style);
       } catch(BadLocationException e){
           e.printStackTrace(System.err);
       }// End try
@@ -235,7 +260,7 @@ public class LogArea extends XJTextPane {
     }// ClearAllAction
     public void actionPerformed(ActionEvent e){
       try{
-        thisLogArea.getDocument().remove(0,thisLogArea.getDocument().getLength());
+        thisLogArea.getDocument().remove(startPos.getOffset(),endPos.getOffset() - startPos.getOffset() - 1);
       } catch (BadLocationException e1){
         e1.printStackTrace(Err.getPrintWriter());
       }// End try
