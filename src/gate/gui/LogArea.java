@@ -98,7 +98,7 @@ public class LogArea extends XJTextPane {
     try{
       System.setErr(new UTF8PrintStream(err, true));
     }catch(UnsupportedEncodingException uee){
-      uee.printStackTrace();
+      uee.printStackTrace(originalErr);
     }
     popup = new JPopupMenu();
     selectAllAction = new SelectAllAction();
@@ -106,8 +106,6 @@ public class LogArea extends XJTextPane {
     clearAllAction = new ClearAllAction();
     startPos = getDocument().getStartPosition();
     endPos = getDocument().getEndPosition();
-
-    System.out.println("Start pos: " + startPos + ", end pos: " + endPos + ", length: " + getDocument().getLength());
 
     popup.add(selectAllAction);
     popup.add(copyAction);
@@ -184,19 +182,56 @@ public class LogArea extends XJTextPane {
 
     public void run(){
       try{
-        if(endPos.getOffset() > 0){
+        if(endPos.getOffset() > 1){
           Rectangle place = modelToView(endPos.getOffset() - 1);
           if(place != null) scrollRectToVisible(place);
         }
+      } catch(BadLocationException e) {
+        // ignore a BLE at this point, just don't bother scrolling
+        originalErr.println("Exception encountered when trying to scroll to "
+            + "end of messages pane: " + e);
+      }
+
+      try {
         // endPos is always one past the real end position because of the
         // implicit newline character at the end of any Document
         getDocument().insertString(endPos.getOffset() - 1, text, style);
       } catch(BadLocationException e){
-          e.printStackTrace(System.err);
+        // a BLE here is a real problem
+        handleBadLocationException(e, text, style);
       }// End try
     }
     String text;
     Style style;
+  }
+
+  /**
+   * Try and recover from a BadLocationException thrown when inserting a string
+   * into the log area.  This method must only be called on the AWT event
+   * handling thread.
+   */
+  private void handleBadLocationException(BadLocationException e,
+      String textToInsert, Style style) {
+    originalErr.println("BadLocationException encountered when writing to "
+        + "the log area: " + e);
+    originalErr.println("trying to recover...");
+
+    Document newDocument = new DefaultStyledDocument();
+    try {
+      StringBuilder sb = new StringBuilder();
+      sb.append("An error occurred when trying to write a message to the log area.  The log\n");
+      sb.append("has been cleared to try and recover from this problem.\n\n");
+      sb.append(textToInsert);
+
+      newDocument.insertString(0, sb.toString(), style);
+    }
+    catch(BadLocationException e2) {
+      // oh dear, all bets are off now...
+      e2.printStackTrace(originalErr);
+      return;
+    }
+    // replace the log area's document with the new one
+    setDocument(newDocument);
   }
 
   /**
@@ -262,6 +297,7 @@ public class LogArea extends XJTextPane {
       try{
         thisLogArea.getDocument().remove(startPos.getOffset(),endPos.getOffset() - startPos.getOffset() - 1);
       } catch (BadLocationException e1){
+        // it's OK to print this exception to the current log area
         e1.printStackTrace(Err.getPrintWriter());
       }// End try
     }// actionPerformed();
@@ -310,7 +346,8 @@ public class LogArea extends XJTextPane {
                                                               length, "UTF-8"),
                                                    style));
       }catch(UnsupportedEncodingException uee){
-        uee.printStackTrace();
+        // should never happen - all JREs are required to support UTF-8
+        uee.printStackTrace(originalErr);
       }
     }// write(byte[] data, int offset, int length)
   }////End class LogAreaOutputStream
