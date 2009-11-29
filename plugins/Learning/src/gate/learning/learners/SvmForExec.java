@@ -258,7 +258,7 @@ public class SvmForExec extends SupervisedLearner{
         modelFile.append(numSV+"\n");
         for(int i=0; i<numSV; ++i) {
           line = svmModelBuff.readLine();
-          modelFile.append(line);
+          modelFile.append(line+"\n");
         }
       }
     } catch(FileNotFoundException e) {
