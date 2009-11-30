@@ -1,48 +1,140 @@
-<html>
-    <head>
-        <!-- index.html $Id$ -->
-        <title>GATE Developer Page</title>
-        <link href="gate.css" type="text/css" rel="stylesheet" />
-    </head>
-    <body spellcheck="false">
-        <!-- header gif ****************************************************** -->
-        <p align="center"><a href="http://gate.ac.uk/"> <img width="356" height="76" border="0" alt="GATE" src="gateHeader.gif" /></a></p>
-        <!-- top banner ****************************************************** -->
-        <div class="banner">
-        <p>Developers:   <br />
-        | <a href="#docs">docs</a> |     <a href="#licence">licencing</a> |     <a href="#contribute">contributing</a> |   <br />
-        | <a href="usecases.html">requirements</a> |     <a href="kiss.html">philosophy</a> |</p>
-        </div>
-        <!-- documentation ************************************************** -->
-        <p><a name="docs"></a></p>
-        <h2>Developer Documentation</h2>
-        <ul>
-            <li>The <a href="http://gate.ac.uk/userguide">User Guide</a> includes developer documentation - that's the first place to look.</li>
-            <li>A partial list of <a href="plugins.html">plugins for GATE</a>.</li>
-            <li>The last beta release (version 5.1-beta2 build 3402 - November 4<sup>th</sup> 2009): <a href="http://www.gate.ac.uk/releases/gate-5.1-beta2-build3402-ALL/doc/javadoc/index.html">JavaDoc</a> (class names link to the HTML of the source code).</li>
-            <li>The last stable release (version 5.0 build 3244 - May 29<sup>th</sup> 2009): <a href="http://www.gate.ac.uk/releases/gate-5.0-build3244-ALL/doc/javadoc/index.html">JavaDoc</a> (class names link to the HTML of the source code).</li>
-            <li>Last night's build <a href="javadoc/index.html">JavaDoc</a> (class names link to the HTML of the source code).</li>
-            <li>How to <a href="http://gate.ac.uk/sale/tao/index.html#install">install GATE</a>.</li>
-            <li>How to <a href="http://gate.ac.uk/gate/doc/persistence.pdf">configure RDBMS persistence</a> for GATE.</li>
-            <li><a href="bugs.html">Creepy-crawlies (bugs)</a>.</li>
-            <li><a href="codestyle.html">Code style</a> (<strong>mandatory</strong> for changes to GATE itself).</li>
-            <li>Details of nightly <a href="http://gate.ac.uk/testresults/">build and test results</a>.</li>
-            <li><a href="releases.html">Release notes</a>.</li>
-            <li>What <a href="../build/version.txt">version of GATE</a> this documentation set is for.</li>
-        </ul>
-        <!-- licence ******************************************************** -->
-        <p><a name="licence"></a></p>
-        <h2>Embedding GATE in other software systems</h2>
-        <p>GATE is licenced under the  <a href="../licence.html">GNU Library General Public License</a>, version 2 of June 1991 (referred to as &quot;The GNU License&quot; below). (We also use lots of 3rd-party tools which are licenced separately - see <a href="../lib/index.html">the library licences list</a>.)</p>
-        <p>Under the terms of the GNU License, the source code of a system that uses GATE as a library consitutes &quot;a work that uses the library&quot; and is therefore exempt from the terms of the license. Executables of embedding systems (that are linked with GATE) constitute &quot;an executable that is derivative of the library&quot; and are subject to the terms of clause 6 of the GNU License. This clause requires that if these executables are redistributed they must include a copy of GATE (both binary and source), a copy of the GNU License attached to that copy, and give notice that GATE used within it, including this information in any display of copyright notices given by the embedding system.</p>
-        <p>If you modify GATE, you must: clearly mark what modifications you made (e.g. in the headers of the files you changed), and you must make those modifications available free to anyone who wants them. This <strong>does not apply</strong> to work that is identifiably not part of the library, such as components you may write that are loaded with GATE at runtime. The license does not affect your rights to this work, only to modifications to the core GATE system itself.</p>
-        <p>Basically, you can use GATE in another system as you like. The only restriction is that if you distribute binaries that incorporate GATE, you must also include copies of GATE, and you must acknowledge your  use of our system.   <!-- contribute ******************************************************* --> <a name="contribute"></a></p>
-        <h2>Contributing</h2>
-        <p>We welcome input to the development process of GATE. The code is  <a href="http://sourceforge.net/projects/gate">hosted on SourceForge</a>, providing <a href="http://gate.ac.uk/sale/tao/index.html#sec:howto:svn">anonymous Subversion access</a>. We're happy to give committer privileges to anyone contributing good code to the project. We also make the current version available nightly on the ftp site.  <!-- footer ********************************************************** --></p>
-        <p>&nbsp;</p>
-        <div class="banner">| <a href="http://gate.ac.uk/">gate home</a> |</div>
-        <p align="center"><img width="164" height="60" border="0" align="left" alt="NLP group" name="revNlpLogo" src="revNlpLogo.jpg" /> <br />
-        <img width="250" height="18" border="0" align="center" src="nlpTitle.gif" alt="" /> <br />
-        <img width="500" height="17" border="0" align="right" src="redline.jpg" alt="" /> <!-- ***************************************************************** -->  <!-- the end ********************************************************* --></p>
-    </body>
-</html>
+<!-- index.html $Id$ -->
+<HTML>
+  <META http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+  <META name="keywords"
+    content="GATE, General Architecture for Text Engineering"/>
+  <META name="description"
+    content="GATE Developer Page"/>
+  <TITLE>GATE Developer Page</TITLE>
+  <LINK rel="stylesheet" type="text/css" href="gate.css"></LINK>
+</HEAD>
+
+<!-- body ************************************************************ -->
+<BODY>
+
+<!-- header gif ****************************************************** -->
+<P ALIGN="center">
+<A HREF="http://gate.ac.uk/">
+<IMG SRC="gateHeader.gif" ALT="GATE" HEIGHT=76 WIDTH=356 BORDER="0"></A>
+</P>
+
+<!-- top banner ****************************************************** -->
+<DIV CLASS="banner">
+  <P>
+  Developers:
+  <BR>
+  | <A HREF=#docs>docs</A> |
+    <A HREF=#licence>licencing</A> |
+    <A HREF=#contribute>contributing</A> |
+  <BR>
+  | <A HREF=usecases.html>requirements</A> |
+    <A HREF=kiss.html>philosophy</A> |
+  </P>
+</DIV>
+
+<!-- documentation ************************************************** -->
+<A NAME="docs"></A><H2>Developer Documentation</H2>
+
+<UL>
+<LI>
+The <A HREF="http://gate.ac.uk/userguide">User Guide</A> includes
+developer documentation - that's the first place to look.
+<LI>
+A partial list of <A HREF="plugins.html">plugins for GATE</A>.
+<LI>
+The last beta release (version 5.1-beta2 build 3402 - November 4<sup>th</sup> 2009):
+<A HREF=http://www.gate.ac.uk/releases/gate-5.1-beta2-build3402-ALL/doc/javadoc/index.html>JavaDoc</A>
+(class names link to the HTML of the source code).
+<LI>
+The last stable release (version 5.0 build 3244 - May 29<sup>th</sup> 2009):
+<A HREF=http://www.gate.ac.uk/releases/gate-5.0-build3244-ALL/doc/javadoc/index.html>JavaDoc</A>
+(class names link to the HTML of the source code).
+<LI>
+Last night's build <A HREF=javadoc/index.html>JavaDoc</A> (class names link to the HTML of the source code).
+<LI>
+How to <A HREF="http://gate.ac.uk/sale/tao/index.html#install">install GATE</A>.
+<LI>
+How to <A HREF="http://gate.ac.uk/gate/doc/persistence.pdf">configure RDBMS persistence</A> for GATE.
+<LI>
+<A HREF="bugs.html">How to report creepy-crawlies (bugs)</A>.
+<LI>
+<A HREF="codestyle.html">Code style</A> (<B>mandatory</B> for changes to GATE
+itself).
+<LI>
+Details of nightly <A HREF="http://gate.ac.uk/testresults/">build and test results</A>.
+<LI>
+<A HREF="releases.html">Release notes</A>.
+<LI>
+What <A HREF="../build/version.txt">version of GATE</A> this documentation set is for.
+</UL>
+
+<!-- licence ******************************************************** -->
+<A NAME="licence"></A><H2>Embedding GATE in other software systems</H2>
+
+<P>
+GATE is licenced under the 
+<A HREF=../licence.html>GNU Library General Public License</A>,
+version 2 of June 1991 (referred to as "The GNU License" below).
+(We also use lots of 3rd-party tools which are licenced separately - see <A
+HREF=../lib/index.html>the library licences list</A>.)
+
+<P>
+Under the terms of the GNU License, the source code of a system that
+uses GATE as a library
+consitutes "a work that uses the library" and
+is therefore exempt from the terms of the license. Executables
+of embedding systems (that are linked with GATE)
+constitute "an executable that is derivative of the library" and
+are subject to the terms of clause 6 of the GNU License. This
+clause requires that if these executables are
+redistributed they must include a copy of GATE (both binary and source),
+a copy of the GNU License attached to that copy, and give notice
+that GATE
+used within it, including this information in any display of copyright
+notices given by the embedding system.
+
+<P>
+If you modify GATE, you must: clearly mark what modifications you made (e.g.
+in the headers of the files you changed), and you must make those
+modifications available free to anyone who wants them. This <B>does not
+apply</B> to work that is identifiably not part of the library, such as
+components you may write that are loaded with GATE at runtime. The license
+does not affect your rights to this work, only to modifications to the core
+GATE system itself.
+
+<P>
+Basically, you can use GATE in another system as you like. The only
+restriction is that if you distribute binaries that incorporate GATE,
+you must also include copies of GATE, and you must acknowledge your 
+use of our system.
+
+
+<!-- contribute ******************************************************* -->
+<A NAME="contribute"></A><H2>Contributing</H2>
+
+<P>
+We welcome input to the development process of GATE.
+The code is 
+<a href=http://sourceforge.net/projects/gate>hosted on SourceForge</a>,
+providing
+<a href=http://gate.ac.uk/sale/tao/index.html#sec:howto:svn>anonymous
+Subversion access</a>.
+We're happy to give committer privileges to anyone contributing good code to
+the project.
+We also make the current version available nightly on the ftp site.
+
+<!-- footer ********************************************************** -->
+<P><DIV CLASS="banner">| <A HREF="http://gate.ac.uk/">gate home</A> |</DIV>
+<P ALIGN="center">
+<A HREF=http://nlp.shef.ac.uk/>
+<IMG WIDTH=164 HEIGHT=60 SRC="revNlpLogo.jpg" ALIGN="left" BORDER="0"
+  name="revNlpLogo" alt="NLP group">
+</A><BR>
+<IMG WIDTH=250 HEIGHT=18 SRC="nlpTitle.gif" BORDER="0" ALIGN="center">
+<BR><IMG WIDTH=500 HEIGHT=17 SRC="redline.jpg" BORDER="0" ALIGN="right">
+<!-- ***************************************************************** -->
+
+<!-- the end ********************************************************* -->
+</BODY>
+</HTML>
+<!-- ***************************************************************** -->
