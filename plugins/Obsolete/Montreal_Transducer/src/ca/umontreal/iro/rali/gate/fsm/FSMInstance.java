@@ -1,7 +1,8 @@
 /*
  *  FSMInstance.java
  *
- *  Copyright (c) 1998-2001, The University of Sheffield.
+ *  Copyright (c) 1995-2010, The University of Sheffield. See the file
+ *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -10,7 +11,7 @@
  *
  *  Valentin Tablan, 05/May/2000
  *
- *  Minor modifications made by Luc Plamondon, Université de Montréal, 27/11/03:
+ *  Minor modifications made by Luc Plamondon, UniversitÃ© de MontrÃ©al, 27/11/03:
  *  - migrated original file from gate.fsm to 
  *    ca.umontreal.iro.rali.gate.fsm package.
  *
