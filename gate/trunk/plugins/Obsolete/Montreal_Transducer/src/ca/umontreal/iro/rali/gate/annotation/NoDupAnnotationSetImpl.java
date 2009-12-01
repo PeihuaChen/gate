@@ -1,7 +1,7 @@
 /*
  *  NoDupAnnotationSetImpl.java
  *
- *  Copyright (c) 2004, Université de Montréal.
+ *  Copyright (c) 2004, UniversitÃ© de MontrÃ©al.
  *
  *  This file uses GATE libraries (see http://gate.ac.uk), and is free
  *  software, licenced under the GNU Library General Public License,

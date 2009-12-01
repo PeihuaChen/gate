@@ -1,7 +1,8 @@
 /*
  *  Constraint.java - transducer class
  *
- *  Copyright (c) 1998-2001, The University of Sheffield.
+ *  Copyright (c) 1995-2010, The University of Sheffield. See the file
+ *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -10,7 +11,7 @@
  *
  *  Hamish Cunningham, 24/07/98
  *
- *  Modifications by Luc Plamondon, Universit� de Montr�al, 20/11/03:
+ *  Modifications by Luc Plamondon, Université de Montréal, 20/11/03:
  *  - Migrated original file to the ca.umontreal.iro.rali.gate.jape package
  *  - The attributes/values are stored in a list of JdmAttribute objects,
  *    instead of a FeatureMap.  This allows us to store a comparison operator
