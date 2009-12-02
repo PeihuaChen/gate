@@ -240,6 +240,7 @@ public class OWLIMOntology
       
 
       // determine where to store the repository data
+      URL actualDataDirectoryURL = null;
       if(dataDirectoryURL == null) {
         // use the system tmp
         String tmplocation = System.getProperty("run.java.io.tmpdir");
@@ -249,22 +250,24 @@ public class OWLIMOntology
           logger.debug("java.io.tmpdir is "+tmplocation);
         }
         if(tmplocation != null) {
-            dataDirectoryURL = new File(tmplocation).toURI().toURL();
+            actualDataDirectoryURL = new File(tmplocation).toURI().toURL();
          }
+      } else {
+          actualDataDirectoryURL = dataDirectoryURL;
       }
-      if(dataDirectoryURL == null) {
+      if(actualDataDirectoryURL == null) {
         throw new ResourceInstantiationException(
             "Could not determine location for the data directory");
       }
-      logger.debug("dataDirectoryURL is now "+dataDirectoryURL);
-      if(!dataDirectoryURL.getProtocol().equals("file")) {
+      logger.debug("dataDirectoryURL is now "+actualDataDirectoryURL);
+      if(!actualDataDirectoryURL.getProtocol().equals("file")) {
         throw new ResourceInstantiationException("dataDirectoryURL must be a local file");
       }
-      dataDirectory = new File(dataDirectoryURL.toURI());
+      dataDirectory = new File(actualDataDirectoryURL.toURI());
       if(!dataDirectory.exists()) {
         if(!dataDirectory.mkdir()) {
           throw new ResourceInstantiationException(
-              "Could not create data directory "+dataDirectoryURL);
+              "Could not create data directory "+actualDataDirectoryURL);
         }
       } else {
         if(!dataDirectory.isDirectory()) {
