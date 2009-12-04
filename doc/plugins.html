@@ -54,6 +54,7 @@ list</a>.</p>
 <li><a href='#Keyphrase_Extraction_Algorithm'>Keyphrase_Extraction_Algorithm</a></li>
 <li><a href='#Lang_Arabic'>Lang_Arabic</a></li>
 <li><a href='#Lang_Cebuano'>Lang_Cebuano</a></li>
+<li><a href='#Lang_Chinese'>Lang_Chinese</a></li>
 <li><a href='#Lang_Hindi'>Lang_Hindi</a></li>
 <li><a href='#Lang_Romanian'>Lang_Romanian</a></li>
 <li><a href='#Learning'>Learning</a></li>
@@ -74,7 +75,6 @@ list</a>.</p>
 <li><a href='#Parser_Stanford'>Parser_Stanford</a></li>
 <li><a href='#Parser_SUPPLE'>Parser_SUPPLE</a></li>
 <li><a href='#Schema_Annotation_Editor'>Schema_Annotation_Editor</a></li>
-<li><a href='#Segmenter_Chinese'>Segmenter_Chinese</a></li>
 <li><a href='#Stemmer_Snowball'>Stemmer_Snowball</a></li>
 <li><a href='#Tagger_Abner'>Tagger_Abner</a></li>
 <li><a href='#Tagger_Chemistry'>Tagger_Chemistry</a></li>
@@ -142,7 +142,7 @@ list</a>.</p>
 		<th colspan='3'><a name='ANNIE'>ANNIE</a></th>
 	</tr>
 	<tr>
-		<td>Annotation schema&nbsp;</td>
+		<td>Annotation Schema&nbsp;</td>
 		<td>An annotation type and its features. (<a href="http://gate.ac.uk/userguide/sec:corpora:schemas">docs</a>)&nbsp;</td>
 		<td>gate.creole.AnnotationSchema</td>
 	</tr>
@@ -383,6 +383,14 @@ list</a>.</p>
 		<td>Cebuano POS Tagger&nbsp;</td>
 		<td>Mark Hepple's Brill-style POS tagger, adapted for languages where entries are multiword&nbsp;</td>
 		<td>cebtag.postag.CebuanoPOSTagger</td>
+	</tr>
+	<tr>
+		<th colspan='3'><a name='Lang_Chinese'>Lang_Chinese</a></th>
+	</tr>
+	<tr>
+		<td>Chinese Segmenter PR&nbsp;</td>
+		<td>Segment the Chinese text into words, based on the PAUM learning algorithm. (<a href="http://gate.ac.uk/userguide/sec:misc-creole:chineseSeg">docs</a>)&nbsp;</td>
+		<td>gate.chineseSeg.ChineseSegMain</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='Lang_Hindi'>Lang_Hindi</a></th>
@@ -703,14 +711,6 @@ list</a>.</p>
 		<td>Schema Annotations Editor&nbsp;</td>
 		<td>An annotation editor restricted by schemas. (<a href="http://gate.ac.uk/userguide/sec:corpora:schemas">docs</a>)&nbsp;</td>
 		<td>gate.gui.annedit.SchemaAnnotationEditor</td>
-	</tr>
-	<tr>
-		<th colspan='3'><a name='Segmenter_Chinese'>Segmenter_Chinese</a></th>
-	</tr>
-	<tr>
-		<td>Chinese Segmenter PR&nbsp;</td>
-		<td>Segment the Chinese text into words, based on the PAUM learning algorithm. (<a href="http://gate.ac.uk/userguide/sec:misc-creole:chineseSeg">docs</a>)&nbsp;</td>
-		<td>gate.chineseSeg.ChineseSegMain</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='Stemmer_Snowball'>Stemmer_Snowball</a></th>
