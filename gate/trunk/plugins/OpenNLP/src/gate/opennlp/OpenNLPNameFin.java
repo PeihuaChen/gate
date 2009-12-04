@@ -110,7 +110,7 @@ public @SuppressWarnings("all") class OpenNLPNameFin extends AbstractLanguageAna
 						
 						//iterate until got the final span
 						int start = i;
-						while(off[i+1].equals("cont")){
+						while(i + 1 < off.length && off[i+1].equals("cont")){
 							//while(off[++i].equals("cont"))
 							i++;
 						}
