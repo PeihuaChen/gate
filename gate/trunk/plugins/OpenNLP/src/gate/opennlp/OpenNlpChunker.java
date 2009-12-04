@@ -9,9 +9,8 @@ import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
 
 import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -26,7 +25,7 @@ import opennlp.tools.chunker.ChunkerME;
 
 /**
  * Wrapper for the opennlp chuncker
- * @author <A HREF="mailto:georgiev@ontotext.com>georgi.georgiev@ontotext.com</A>
+ * @author <A HREF="mailto:georgiev@ontotext.com">georgi.georgiev@ontotext.com</A>
  * Created: Thu Dec 11 16:25:59 EET 2008
  */
 
@@ -43,28 +42,28 @@ public @SuppressWarnings("all") class OpenNlpChunker extends AbstractLanguageAna
 	 * @param String
 	 *            path to MaxentModel
 	 */
-	public static MaxentModel getModel(File name) {
+	public static MaxentModel getModel(URL name) {
 		try {
 			return new BinaryGISModelReader(new DataInputStream(
-					new GZIPInputStream(new FileInputStream(name)))).getModel();
+					new GZIPInputStream(name.openStream()))).getModel();
 		} catch (IOException E) {
 			E.printStackTrace();
 			return null;
 		}
 	}
 	// private members
-	private String inputASName = null;
+	private String annotationSetName = null;
 	ChunkerME chunker = null;
 
-	private java.net.URL model;
+	private URL model;
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public void execute() throws ExecutionException {
 		// text doc annotations
 		AnnotationSet annotations;
-		if (inputASName != null && inputASName.length() > 0) {
-			annotations = document.getAnnotations(inputASName);
+		if (annotationSetName != null && annotationSetName.length() > 0) {
+			annotations = document.getAnnotations(annotationSetName);
 		} else {
 			annotations = document.getAnnotations();
 		}
@@ -158,11 +157,11 @@ public @SuppressWarnings("all") class OpenNlpChunker extends AbstractLanguageAna
 		}
 	}
 
-	public String getInputASName() {
-		return inputASName;
-	}/* getters and setters for the PR */
+	public String getAnnotationSetName() {
+		return annotationSetName;
+	}
 
-	public java.net.URL getModel() {
+	public URL getModel() {
 		return model;
 	}
 
@@ -174,18 +173,12 @@ public @SuppressWarnings("all") class OpenNlpChunker extends AbstractLanguageAna
 	public Resource init() throws ResourceInstantiationException {
 //		logger.error("Chunker url is: " + model.getFile());
 		try {
-			String file = null;
-			if (model == null)
-				file = "plugins/openNLP/models/english/chunker/EnglishChunk.bin.gz";
-			else
-				file = model.getFile();
-			
-		chunker = new ChunkerME(getModel(new File(file)));
+		chunker = new ChunkerME(getModel(model));
 				//"/home/joro/work/m_learning/models/Chunker_Genia.bin.gz"));
 		}catch (Exception e){
 			e.printStackTrace();
 			logger.error("Chunker can not be initialized!");
-			throw new RuntimeException("Sentence Splitter cannot be initialized!", e);
+			throw new RuntimeException("Chunker cannot be initialized!", e);
 		}
 
 		return this;
@@ -197,11 +190,11 @@ public @SuppressWarnings("all") class OpenNlpChunker extends AbstractLanguageAna
 		init();
 	}
 
-	public void setInputASName(String a) {
-		inputASName = a;
+	public void setAnnotationSetName(String a) {
+		annotationSetName = a;
 	}
 
-	public void setModel(java.net.URL model) {
+	public void setModel(URL model) {
 		this.model = model;
 	}
 

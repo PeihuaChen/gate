@@ -1,8 +1,8 @@
 package gate.opennlp;
 
+import java.io.BufferedReader;
 import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -34,7 +34,7 @@ import gate.util.InvalidOffsetException;
 
 /**
  * Wrapper for the open nlp pos tagger
- * @author <A HREF="mailto:georgiev@ontotext.com>georgi.georgiev@ontotext.com</A>
+ * @author <A HREF="mailto:georgiev@ontotext.com">georgi.georgiev@ontotext.com</A>
  * Created: Thu Dec 11 16:25:59 EET 2008
  */
 
@@ -45,18 +45,19 @@ public @SuppressWarnings("all") class OpenNlpPOS extends AbstractLanguageAnalyse
 	private static final Logger logger = Logger.getLogger(OpenNlpPOS.class);
 
 	// private members
-	private String inputASName = null;
+	private String annotationSetName = null;
 	POSTaggerME pos = null;
 	URL model;
 	URL dictionary;
+	private String dictionaryEncoding = "UTF-8";
 	
 	
 	@Override
 	public void execute() throws ExecutionException {
 		// text doc annotations
 		AnnotationSet annotations;
-		if (inputASName != null && inputASName.length() > 0)
-			annotations = document.getAnnotations(inputASName);
+		if (annotationSetName != null && annotationSetName.length() > 0)
+			annotations = document.getAnnotations(annotationSetName);
 		else
 			annotations = document.getAnnotations();
 
@@ -64,7 +65,7 @@ public @SuppressWarnings("all") class OpenNlpPOS extends AbstractLanguageAnalyse
 		String text = document.getContent().toString();
 		
 		// get sentence annotations
-		 AnnotationSet sentences = document.getAnnotations().get("Sentence");
+		 AnnotationSet sentences = annotations.get("Sentence");
 		 
 			
 		//order sentences
@@ -82,7 +83,7 @@ public @SuppressWarnings("all") class OpenNlpPOS extends AbstractLanguageAnalyse
 		 for (Iterator iterator = sentList.iterator(); iterator.hasNext();) {
 			Annotation annotation = (Annotation) iterator.next();
 			
-			AnnotationSet sentenceTokens = document.getAnnotations().get("Token", 
+			AnnotationSet sentenceTokens = annotations.get("Token", 
 					annotation.getStartNode().getOffset(), annotation.getEndNode().getOffset());
 			
 			//create a list
@@ -155,20 +156,12 @@ public @SuppressWarnings("all") class OpenNlpPOS extends AbstractLanguageAnalyse
 //		logger.warn("OpenNLP POS initializing strings are: model - " + model.getFile() + 
 //				" dictionary: "+dictionary.getFile());
 		try {
-			
-			String file = null;
-			String lexicon = null;
-			if (model == null||dictionary==null){
-				file = "plugins/openNLP/models/english/postag/EnglishPOS.bin.gz";
-				lexicon = "plugins/openNLP/models/english/postag/tagdict";
-			}
-			else{
-				file = model.getFile();
-				lexicon = dictionary.getFile();
-			}
-			
-			pos = new POSTaggerME(getModel(new File(file)), new POSDictionary(
-					lexicon));
+			BufferedReader dictionaryReader = new BufferedReader(
+					new InputStreamReader(
+						dictionary.openStream(),
+						dictionaryEncoding));
+			pos = new POSTaggerME(getModel(model), new POSDictionary(
+					dictionaryReader, true));
 		} catch (IOException e) {
 			e.printStackTrace();
 			logger.error("OpenNLP POS can not be initialized!");
@@ -190,10 +183,10 @@ public @SuppressWarnings("all") class OpenNlpPOS extends AbstractLanguageAnalyse
 	 * @param String
 	 *            path to MaxentModel
 	 */
-	public static MaxentModel getModel(File name) {
+	public static MaxentModel getModel(URL name) {
 		try {
 			return new BinaryGISModelReader(new DataInputStream(
-					new GZIPInputStream(new FileInputStream(name)))).getModel();
+					new GZIPInputStream(name.openStream()))).getModel();
 		} catch (IOException E) {
 			E.printStackTrace();
 			return null;
@@ -205,13 +198,13 @@ public @SuppressWarnings("all") class OpenNlpPOS extends AbstractLanguageAnalyse
 	
 	
 	
-	public void setInputASName(String a) {
-		inputASName = a;
+	public void setAnnotationSetName(String a) {
+		annotationSetName = a;
 	}
 
-	public String getInputASName() {
-		return inputASName;
-	}/* getters and setters for the PR */
+	public String getAnnotationSetName() {
+		return annotationSetName;
+	}
 
 	public URL getModel() {
 		return model;
@@ -227,6 +220,14 @@ public @SuppressWarnings("all") class OpenNlpPOS extends AbstractLanguageAnalyse
 
 	public void setDictionary(URL dictionary) {
 		this.dictionary = dictionary;
+	}
+
+	public void setDictionaryEncoding(String a) {
+		dictionaryEncoding = a;
+	}
+
+	public String getDictionaryEncoding() {
+		return dictionaryEncoding;
 	}
 
 }

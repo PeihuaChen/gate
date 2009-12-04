@@ -1,8 +1,6 @@
 package gate.opennlp;
 
 import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -44,6 +42,7 @@ public @SuppressWarnings("all") class OpenNLPNameFin extends AbstractLanguageAna
 
 	// private members
 	private String inputASName = null;
+	private String outputASName = null;
 	NameFinderME namefin = null;
 	URL model;
 	private List<NameFinder> finder;
@@ -56,6 +55,12 @@ public @SuppressWarnings("all") class OpenNLPNameFin extends AbstractLanguageAna
 			annotations = document.getAnnotations(inputASName);
 		else
 			annotations = document.getAnnotations();
+
+		AnnotationSet outputAnnots;
+		if (outputASName != null && outputASName.length() > 0)
+			outputAnnots = document.getAnnotations(outputASName);
+		else
+			outputAnnots = document.getAnnotations();
 
 		// get sentence annotations
 		//AnnotationSet sentences = document.getAnnotations("Sentence");
@@ -119,7 +124,7 @@ public @SuppressWarnings("all") class OpenNLPNameFin extends AbstractLanguageAna
 //							annotations.add(Long.valueOf(tokens[start].get()), Long
 //									.valueOf(spans[i].getEnd()), "Name", fm);
 							
-							annotations.add(tokenslist.get(start).getStartNode().getOffset(), 
+							outputAnnots.add(tokenslist.get(start).getStartNode().getOffset(), 
 									tokenslist.get(i).getEndNode().getOffset(), "Name", fm);
 
 						} catch (InvalidOffsetException e) {
@@ -167,35 +172,39 @@ public @SuppressWarnings("all") class OpenNLPNameFin extends AbstractLanguageAna
 
 	@Override
 	public Resource init() throws ResourceInstantiationException {
-		String dir = null;
-		if (model == null)
-			 dir = "plugins/openNLP/models/english/namefind";
-		else
-			dir = model.getFile();
 //		
 //		logger.info("current path is: " + System.getProperty("user.dir"));
 //		logger.info("current path is: " + System.getProperty("user.home"));
-		List<String> models = new LinkedList<String>();
-		models.add("/person.bin.gz");
-		models.add("/money.bin.gz");
-		models.add("/time.bin.gz");
-		models.add("/percentage.bin.gz");
-		models.add("/location.bin.gz");
-		models.add("/date.bin.gz");
-		models.add("/organization.bin.gz");
+		// add a trailing slash to the model dir if necessary
+		try {
+			URL modelDir = model;
+			if(modelDir.toExternalForm().endsWith("/"))
+				modelDir = new URL(modelDir.toExternalForm() + "/");
+			List<String> models = new LinkedList<String>();
+			models.add("person.bin.gz");
+			models.add("money.bin.gz");
+			models.add("time.bin.gz");
+			models.add("percentage.bin.gz");
+			models.add("location.bin.gz");
+			models.add("date.bin.gz");
+			models.add("organization.bin.gz");
 
-		finder = new LinkedList<NameFinder>();
-		for (Iterator iterator = models.iterator(); iterator.hasNext();) {
-			String string = (String) iterator.next();
-			logger.info("Initialized: "+ string);
-			finder.add(new NameFinder(dir + string));
+			finder = new LinkedList<NameFinder>();
+			for (Iterator iterator = models.iterator(); iterator.hasNext();) {
+				String string = (String) iterator.next();
+				logger.info("Initialized: "+ string);
+				finder.add(new NameFinder(new URL(modelDir, string)));
+			}
+			
+			logger.warn("OpenNLP Name Finder initialized!");
+			
+			return this;
 		}
-//		namefin = new NameFinderME(
-//				getModel(new File(model.getFile())));
-		
-		logger.warn("OpenNLP Name Finder initialized!");
-		
-		return this;
+		catch(MalformedURLException e) {
+			throw new ResourceInstantiationException(
+				"OpenNLP Name Finder could not be initialized",
+				e);
+		}
 
 	}
 
@@ -210,10 +219,10 @@ public @SuppressWarnings("all") class OpenNLPNameFin extends AbstractLanguageAna
 	 * @param String
 	 *            path to MaxentModel
 	 */
-	public static MaxentModel getModel(File name) {
+	public static MaxentModel getModel(URL name) {
 		try {
 			return new BinaryGISModelReader(new DataInputStream(
-					new GZIPInputStream(new FileInputStream(name)))).getModel();
+					new GZIPInputStream(name.openStream()))).getModel();
 		} catch (IOException E) {
 			E.printStackTrace();
 			logger.error("OpenNLP NameFinder can not be initialized!");
@@ -225,13 +234,14 @@ public @SuppressWarnings("all") class OpenNLPNameFin extends AbstractLanguageAna
 		String name;
 		NameFinderME model;
 
-		public NameFinder(String path) {
+		public NameFinder(URL url) {
+			String path = url.toExternalForm();
 			try{
 			name = path.substring(path.lastIndexOf("/") + 1, path.indexOf(".", path.lastIndexOf("/") + 1));
 			}catch (Exception e){
 				name = path;
 			}
-			model = new NameFinderME(OpenNLPNameFin.getModel(new File(path)));
+			model = new NameFinderME(OpenNLPNameFin.getModel(url));
 		}
 
 	}
@@ -244,6 +254,14 @@ public @SuppressWarnings("all") class OpenNLPNameFin extends AbstractLanguageAna
 
 	public String getInputASName() {
 		return inputASName;
+	}
+
+	public void setOutputASName(String a) {
+		outputASName = a;
+	}
+
+	public String getOutputASName() {
+		return outputASName;
 	}
 
 	public URL getModel() {

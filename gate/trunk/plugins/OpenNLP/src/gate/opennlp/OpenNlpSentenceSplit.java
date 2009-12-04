@@ -7,11 +7,10 @@ import gate.Resource;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
+import gate.util.Files;
 import gate.util.InvalidOffsetException;
 
 import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.zip.GZIPInputStream;
@@ -39,7 +38,7 @@ class OpenNlpSentenceSplit extends AbstractLanguageAnalyser {
 			.getLogger(OpenNlpSentenceSplit.class);
 
 	// private members
-	private String inputASName = null;
+	private String annotationSetName = null;
 	SentenceDetectorME splitter = null;
 	URL model;
 
@@ -47,8 +46,8 @@ class OpenNlpSentenceSplit extends AbstractLanguageAnalyser {
 	public void execute() throws ExecutionException {
 		// text doc annotations
 		AnnotationSet annotations;
-		if (inputASName != null && inputASName.length() > 0)
-			annotations = document.getAnnotations(inputASName);
+		if (annotationSetName != null && annotationSetName.length() > 0)
+			annotations = document.getAnnotations(annotationSetName);
 		else
 			annotations = document.getAnnotations();
 		// getdoc.get text
@@ -105,14 +104,8 @@ class OpenNlpSentenceSplit extends AbstractLanguageAnalyser {
 	public Resource init() throws ResourceInstantiationException {
 		//logger.info("Sentence split url is: " + model.getFile());
 		try {
-			String file = null;
-			if (model == null)
-				file = "plugins/openNLP/models/english/sentdetect/EnglishSD.bin.gz";
-			else
-				file = model.getFile();
-
 			splitter = new SentenceDetectorME(
-					getModel(new File(file)));
+					getModel(model));
 		} catch (Exception e) {
 			logger.error("Sentence Splitter can not be initialized!");
 			throw new RuntimeException(
@@ -136,10 +129,10 @@ class OpenNlpSentenceSplit extends AbstractLanguageAnalyser {
 	 * @param String
 	 *            path to MaxentModel
 	 */
-	public static MaxentModel getModel(File name) {
+	public static MaxentModel getModel(URL name) {
 		try {
 			return new BinaryGISModelReader(new DataInputStream(
-					new GZIPInputStream(new FileInputStream(name)))).getModel();
+					new GZIPInputStream(name.openStream()))).getModel();
 		} catch (IOException E) {
 			E.printStackTrace();
 			return null;
@@ -149,12 +142,12 @@ class OpenNlpSentenceSplit extends AbstractLanguageAnalyser {
 	/* getters and setters for the PR */
 	/* public members */
 
-	public void setInputASName(String a) {
-		inputASName = a;
+	public void setAnnotationSetName(String a) {
+		annotationSetName = a;
 	}
 
-	public String getInputASName() {
-		return inputASName;
+	public String getAnnotationSetName() {
+		return annotationSetName;
 	}/* getters and setters for the PR */
 
 	public URL getModel() {
