@@ -72,21 +72,25 @@ public @SuppressWarnings("all") class OpenNlpChunker extends AbstractLanguageAna
 		// getdoc.get text
 		//String text = document.getContent().toString();
 
-		// get sentence annotations
+		// get token and sentence annotations
 		AnnotationSet sentences = annotations.get("Sentence");
+                AnnotationSet tokensAS = annotations.get("Token");
 
-		//order them
-		List<Annotation> sentList = new LinkedList<Annotation>();
+                if(sentences != null && sentences.size() > 0
+                   && tokensAS != null && tokensAS.size() > 0){
 
-		for (Iterator iterator = sentences.iterator(); iterator.hasNext();) {
-			sentList.add( (Annotation) iterator.next());
+    		  //order them
+		  List<Annotation> sentList = new LinkedList<Annotation>();
 
-		}
+		  for (Iterator iterator = sentences.iterator(); iterator.hasNext();) {
+			  sentList.add( (Annotation) iterator.next());
 
-		java.util.Collections.sort(sentList, new gate.util.OffsetComparator());
+		  }
 
-		// for each sentence get token annotations
-		for (Iterator iterator = sentList.iterator(); iterator.hasNext();) {
+		  java.util.Collections.sort(sentList, new gate.util.OffsetComparator());
+
+		  // for each sentence get token annotations
+		  for (Iterator iterator = sentList.iterator(); iterator.hasNext();) {
 			Annotation annotation = (Annotation) iterator.next();
 
 			AnnotationSet sentenceTokens = annotations.get(
@@ -116,7 +120,12 @@ public @SuppressWarnings("all") class OpenNlpChunker extends AbstractLanguageAna
 				Annotation token = (Annotation) iterator3.next();
 
 				tokens[i] = token.getFeatures().get("string").toString();
-				postags[i] = token.getFeatures().get("category").toString();
+                                Object posObj = token.getFeatures().get("category");
+                                if( posObj == null) {
+                                  throw new ExecutionException("Token found with no POS tag category!\n" +
+                                                      "Did you run a POS tagger before the OpenNLPChunker?");
+                                }
+				postags[i] = posObj.toString();
 
 				i++;
 			}
@@ -140,6 +149,12 @@ public @SuppressWarnings("all") class OpenNlpChunker extends AbstractLanguageAna
 				j++;
 
 			}
+		  }
+                } else {
+                  throw new ExecutionException("No sentences or tokens t process!\n" +
+                                               "Please run a sentence splitter "+
+                                               "and tokeniser first!");
+
 		}
 	}
 
