@@ -22,7 +22,7 @@ GATE Developer/Embedded Backlog
   - remove JAPE debugger material, and put a note saying this is no longer
     supported [GG]
   - remove oracle/postgresql docs and leave a note [GG]
-  - update script to map old TAO sections to new manual sections [IR]
+  - update script to map old TAO sections to new manual sections [IR] *[DONE]*
   - move the sale/tao trunk to tao-old and the manual branch to sale/tao and
     announce on gate-users [GG/VT]
   - plugins.html script: add a link to the javadocs when they exist [IR]
