@@ -9,7 +9,7 @@
       <COMMENT>Segment the Chinese text into words, based on the PAUM learning algorithm.</COMMENT>
       <HELPURL>http://gate.ac.uk/userguide/sec:misc-creole:chineseSeg</HELPURL>
       <CLASS>gate.chineseSeg.ChineseSegMain</CLASS>
-      <JAR>ChineseSegMain.jar</JAR>
+      <JAR>chinese.jar</JAR>
       <JAR>../Learning/learningapi.jar</JAR>
       <PARAMETER NAME="modelURL"
         COMMENT="The URL referring to one directory containing the model files" RUNTIME="true"
