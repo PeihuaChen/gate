@@ -15,7 +15,7 @@
 			<HELPURL>http://opennlp.sourceforge.net/</HELPURL>
 			<CLASS>gate.opennlp.OpenNlpSentenceSplit</CLASS>
 			<PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
-			<PARAMETER NAME="inputASName" DEFAULT="" RUNTIME="true" OPTIONAL="false">java.lang.String</PARAMETER>
+			<PARAMETER NAME="annotationSetName" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
 			<PARAMETER NAME="model" RUNTIME="false" OPTIONAL="false" COMMENT="This URL must point to the model file." DEFAULT="models/english/sentdetect/EnglishSD.bin.gz">java.net.URL</PARAMETER>
 		</RESOURCE>
 	</CREOLE>
@@ -32,7 +32,7 @@
 			<HELPURL>http://opennlp.sourceforge.net/</HELPURL>
 			<CLASS>gate.opennlp.OpenNlpTokenizer</CLASS>
 			<PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
-			<PARAMETER NAME="inputASName" DEFAULT="" RUNTIME="true" OPTIONAL="false">java.lang.String</PARAMETER> 
+			<PARAMETER NAME="annotationSetName" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER> 
 			<PARAMETER NAME="model" RUNTIME="false" OPTIONAL="false" COMMENT="This URL must point to the model file." DEFAULT="models/english/tokenize/EnglishTok.bin.gz">java.net.URL</PARAMETER>
 			<!--<JAR></JAR>-->
 		</RESOURCE>
@@ -50,9 +50,10 @@
 			<HELPURL>http://opennlp.sourceforge.net/</HELPURL>
 			<CLASS>gate.opennlp.OpenNlpPOS</CLASS>
 			<PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
-			<PARAMETER NAME="inputASName" DEFAULT="" RUNTIME="true" OPTIONAL="false">java.lang.String</PARAMETER>
+			<PARAMETER NAME="annotationSetName" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
 			<PARAMETER NAME="model" RUNTIME="false" OPTIONAL="false" COMMENT="This URL must point to the model file." DEFAULT="models/english/postag/EnglishPOS.bin.gz">java.net.URL</PARAMETER>
 			<PARAMETER NAME="dictionary" RUNTIME="false" OPTIONAL="false" COMMENT="This URL must point to the dictionary POS file." DEFAULT="models/english/postag/tagdict">java.net.URL</PARAMETER>
+			<PARAMETER NAME="dictionaryEncoding" RUNTIME="false" OPTIONAL="false" COMMENT="The character encoding of the dictionary POS file." DEFAULT="UTF-8">java.lang.String</PARAMETER>
 			<!--<JAR></JAR>-->
 		</RESOURCE>
 	</CREOLE>
@@ -69,7 +70,7 @@
 			<HELPURL>http://opennlp.sourceforge.net/</HELPURL>
 			<CLASS>gate.opennlp.OpenNlpChunker</CLASS>
 			<PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
-			<PARAMETER NAME="inputASName" DEFAULT="" RUNTIME="true" OPTIONAL="false">java.lang.String</PARAMETER>
+			<PARAMETER NAME="annotationSetName" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
 			<PARAMETER NAME="model" RUNTIME="false" OPTIONAL="false" COMMENT="This URL must point to the model file." DEFAULT="models/english/chunker/EnglishChunk.bin.gz">java.net.URL</PARAMETER>
 		</RESOURCE>
 	</CREOLE>
@@ -86,8 +87,9 @@
 			<HELPURL>http://opennlp.sourceforge.net/</HELPURL>
 			<CLASS>gate.opennlp.OpenNLPNameFin</CLASS>
 			<PARAMETER NAME="document" RUNTIME="true">gate.Document</PARAMETER>
-			<PARAMETER NAME="inputASName" DEFAULT="" RUNTIME="true" OPTIONAL="false">java.lang.String</PARAMETER>
-			<PARAMETER NAME="model" RUNTIME="false" OPTIONAL="false" COMMENT="This URL must point to the model directory." DEFAULT="models/english/namefind">java.net.URL</PARAMETER>
+			<PARAMETER NAME="inputASName" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
+			<PARAMETER NAME="outputASName" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
+			<PARAMETER NAME="model" RUNTIME="false" OPTIONAL="false" COMMENT="This URL must point to the model directory, and should end with a slash." DEFAULT="models/english/namefind/">java.net.URL</PARAMETER>
 		</RESOURCE>
 	</CREOLE>
 	<!-- Opennlp parser wrapper-->

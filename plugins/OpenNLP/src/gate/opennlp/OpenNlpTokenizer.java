@@ -1,8 +1,6 @@
 package gate.opennlp;
 
 import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -39,7 +37,7 @@ public @SuppressWarnings("all") class OpenNlpTokenizer extends AbstractLanguageA
 	private static final Logger logger = Logger.getLogger(OpenNlpTokenizer.class);
 
 	// private members
-	private String inputASName = null;
+	private String annotationSetName = null;
 	TokenizerME tokenizer = null;
 	URL model;
 
@@ -47,8 +45,8 @@ public @SuppressWarnings("all") class OpenNlpTokenizer extends AbstractLanguageA
 	public void execute() throws ExecutionException {
 		// text doc annotations
 		AnnotationSet annotations;
-		if (inputASName != null && inputASName.length() > 0)
-			annotations = document.getAnnotations(inputASName);
+		if (annotationSetName != null && annotationSetName.length() > 0)
+			annotations = document.getAnnotations(annotationSetName);
 		else
 			annotations = document.getAnnotations();
 
@@ -108,15 +106,8 @@ public @SuppressWarnings("all") class OpenNlpTokenizer extends AbstractLanguageA
 	@Override
 	public Resource init() throws ResourceInstantiationException {
 		//logger.info("The string of Tokenizer file is: "+model);
-		
-		String file = null;
-		if (model == null)
-			 file = "plugins/openNLP/models/english/tokenize/EnglishTok.bin.gz";
-		else
-			file = model.getFile();
-		
 		tokenizer = new TokenizerME(
-				getModel(new File(file)));
+				getModel(model));
 		
 		logger.warn("OpenNLP Tokenizer initialized!");//System.out.println("OpenNLP Tokenizer initialized!");
 		
@@ -135,10 +126,10 @@ public @SuppressWarnings("all") class OpenNlpTokenizer extends AbstractLanguageA
 	 * @param String
 	 *            path to MaxentModel
 	 */
-	public static MaxentModel getModel(File name) {
+	public static MaxentModel getModel(URL name) {
 		try {
 			return new BinaryGISModelReader(new DataInputStream(
-					new GZIPInputStream(new FileInputStream(name)))).getModel();
+					new GZIPInputStream(name.openStream()))).getModel();
 		} catch (IOException E) {
 			E.printStackTrace();
 			logger.error("OpenNLP Tokenizer can not be initialized!");
@@ -148,12 +139,12 @@ public @SuppressWarnings("all") class OpenNlpTokenizer extends AbstractLanguageA
 
 	/* getters and setters for the PR */
 	/* public members */
-	public void setInputASName(String a) {
-		inputASName = a;
+	public void setAnnotationSetName(String a) {
+		annotationSetName = a;
 	}
 
-	public String getInputASName() {
-		return inputASName;
+	public String getAnnotationSetName() {
+		return annotationSetName;
 	}
 
 	public URL getModel() {
