@@ -69,7 +69,6 @@
 		</RESOURCE>
 		<RESOURCE>
 			<NAME>Sheffield Email Document Format</NAME>
-			<JAR>ShefDocumentFormats.jar</JAR>
 			<CLASS>gate.corpora.EmailDocumentFormat</CLASS>
 			<AUTOLOAD/>
 			<AUTOINSTANCE/>
