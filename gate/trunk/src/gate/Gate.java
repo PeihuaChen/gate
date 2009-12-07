@@ -687,7 +687,7 @@ public class Gate implements GateConstants {
    * e.g. when setting up a base URL. Has to be called <B>before</B>
    * {@link #init()}.
    */
-  private static boolean localWebServer = true;
+  private static boolean localWebServer = false;
 
   /** Should we assume there's a local web server? */
   public static boolean isLocalWebServer() {
