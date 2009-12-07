@@ -201,7 +201,15 @@
 		<fileset refid="libs"/>
   </path>
 
-  <tstamp>
+  <!-- The test CLASSPATH -->
+  <path id="test.class.path">
+    <pathelement location="${binDir}" />
+    <pathelement location="${outputDir}"/>
+    <path refid="tools.jar.path"/>
+    <fileset refid="libs"/>
+  </path>
+
+	<tstamp>
     <format property="TODAY_UK" pattern="d-MMMM-yyyy" locale="en"/>
     <format property="TSTAMP_UK" pattern="hh:mm" locale="en"/>
   </tstamp>
@@ -740,7 +748,7 @@
            showoutput="true"
            printsummary="yes"
            maxmemory="512m">
-      <classpath refid="run.class.path"/>
+      <classpath refid="test.class.path"/>
       <sysproperty key="gate.config" value="${buildDir}/gate.xml"/>
       <sysproperty key="gate.home" value="${basedir}"/>
       <sysproperty key="load.plugin.path" value="file:${basedir}/plugins/ANNIE;file:${basedir}/plugins/Ontology_OWLIM2;file:${basedir}/plugins/Information_Retrieval;file:${basedir}/plugins/Ontology_Tools;file:${basedir}/plugins/Tools;file:${basedir}/plugins/WordNet"/>
