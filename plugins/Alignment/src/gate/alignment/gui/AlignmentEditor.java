@@ -307,8 +307,21 @@ public class AlignmentEditor extends AbstractVisualResource implements
    */
   private List<FinishedAlignmentAction> finishedAlignmentActions = null;
 
+  /**
+   * actions to store data publishers' instances
+   */
   private List<DataPublisherAction> dataPublisherActions = null;
 
+  /**
+   * id of selected source document
+   */
+  private String selectedSourceID;
+  
+  /**
+   * id of the selected target document
+   */
+  private String selectedTargetID;
+  
   /*
    * (non-Javadoc)
    * 
@@ -373,15 +386,17 @@ public class AlignmentEditor extends AbstractVisualResource implements
     targetDocumentId = new JComboBox(new DefaultComboBoxModel());
     targetDocumentId.setEditable(false);
 
-    sourceDocumentId.addItemListener(new ItemListener() {
-      public void itemStateChanged(ItemEvent ie) {
-        populateAS((String)sourceDocumentId.getSelectedItem(), sourceASName);
+    sourceDocumentId.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent ae) {
+        selectedSourceID = (String) sourceDocumentId.getSelectedItem();
+        populateAS(selectedSourceID, sourceASName);
       }
     });
 
-    targetDocumentId.addItemListener(new ItemListener() {
-      public void itemStateChanged(ItemEvent ie) {
-        populateAS((String)targetDocumentId.getSelectedItem(), targetASName);
+    targetDocumentId.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent ae) {
+        selectedTargetID = (String) targetDocumentId.getSelectedItem();
+        populateAS(selectedTargetID, targetASName);
       }
     });
 
@@ -389,8 +404,8 @@ public class AlignmentEditor extends AbstractVisualResource implements
     sourceASName.setPrototypeDisplayValue("AnnotationSetName");
     sourceASName.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
-        populateParentOfUnitOfAlignment((String)sourceDocumentId
-                .getSelectedItem(), sourceParentOfUnitOfAlignment);
+
+        populateParentOfUnitOfAlignment(selectedSourceID, sourceParentOfUnitOfAlignment);
       }
     });
 
@@ -398,8 +413,7 @@ public class AlignmentEditor extends AbstractVisualResource implements
     targetASName.setPrototypeDisplayValue("AnnotationSetName");
     targetASName.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
-        populateParentOfUnitOfAlignment((String)targetDocumentId
-                .getSelectedItem(), targetParentOfUnitOfAlignment);
+        populateParentOfUnitOfAlignment(selectedTargetID, targetParentOfUnitOfAlignment);
       }
     });
 
@@ -408,7 +422,7 @@ public class AlignmentEditor extends AbstractVisualResource implements
     sourceParentOfUnitOfAlignment.setEditable(false);
     sourceParentOfUnitOfAlignment.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
-        populateUnitOfAlignment((String)sourceDocumentId.getSelectedItem(),
+        populateUnitOfAlignment(selectedSourceID,
                 sourceUnitOfAlignment);
       }
     });
@@ -418,7 +432,7 @@ public class AlignmentEditor extends AbstractVisualResource implements
     targetParentOfUnitOfAlignment.setEditable(false);
     targetParentOfUnitOfAlignment.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
-        populateUnitOfAlignment((String)targetDocumentId.getSelectedItem(),
+        populateUnitOfAlignment(selectedTargetID,
                 targetUnitOfAlignment);
       }
     });
@@ -818,10 +832,8 @@ public class AlignmentEditor extends AbstractVisualResource implements
   protected void executeAction(AlignmentAction aa) {
 
     // obtaining source and target documents
-    Document srcDocument = document.getDocument(sourceDocumentId
-            .getSelectedItem().toString());
-    Document tgtDocument = document.getDocument(targetDocumentId
-            .getSelectedItem().toString());
+    Document srcDocument = document.getDocument(selectedSourceID);
+    Document tgtDocument = document.getDocument(selectedTargetID);
 
     // obtaining selected annotations
     Set<Annotation> srcSelectedAnnots = new HashSet<Annotation>(
@@ -937,9 +949,7 @@ public class AlignmentEditor extends AbstractVisualResource implements
         if(sourceParentOfUnitOfAlignment.getSelectedItem() == null) return;
         if(targetParentOfUnitOfAlignment.getSelectedItem() == null) return;
 
-        AlignmentFactory af = new AlignmentFactory(document, sourceDocumentId
-                .getSelectedItem().toString(), targetDocumentId
-                .getSelectedItem().toString(), sourceASName.getSelectedItem()
+        AlignmentFactory af = new AlignmentFactory(document, selectedSourceID, selectedTargetID, sourceASName.getSelectedItem()
                 .toString(), targetASName.getSelectedItem().toString(),
                 sourceUnitOfAlignment.getSelectedItem().toString(),
                 targetUnitOfAlignment.getSelectedItem().toString(),
@@ -947,10 +957,8 @@ public class AlignmentEditor extends AbstractVisualResource implements
                 targetParentOfUnitOfAlignment.getSelectedItem().toString(),
                 iteratingMethodTF.getText().trim());
 
-        sourcePanel.setBorder(BorderFactory.createTitledBorder(sourceDocumentId
-                .getSelectedItem().toString()));
-        targetPanel.setBorder(BorderFactory.createTitledBorder(targetDocumentId
-                .getSelectedItem().toString()));
+        sourcePanel.setBorder(BorderFactory.createTitledBorder(selectedSourceID));
+        targetPanel.setBorder(BorderFactory.createTitledBorder(selectedTargetID));
 
         // if there were no errors
         alignFactory = af;
@@ -1179,11 +1187,11 @@ public class AlignmentEditor extends AbstractVisualResource implements
       JPanel pane = null;
       boolean isSrcDocument = false;
 
-      if(docId.equals(sourceDocumentId.getSelectedItem().toString())) {
+      if(docId.equals(selectedSourceID)) {
         pane = sourcePanel;
         isSrcDocument = true;
       }
-      else if(docId.equals(sourceDocumentId.getSelectedItem().toString())) {
+      else if(docId.equals(selectedTargetID)) {
         pane = targetPanel;
         isSrcDocument = false;
       }
@@ -1607,11 +1615,9 @@ public class AlignmentEditor extends AbstractVisualResource implements
       return;
     }
 
-    if(!srcDocument.getName().equals(
-            sourceDocumentId.getSelectedItem().toString())) return;
+    if(!srcDocument.getName().equals(selectedSourceID)) return;
 
-    if(!tgtDocument.getName().equals(
-            targetDocumentId.getSelectedItem().toString())) return;
+    if(!tgtDocument.getName().equals(selectedTargetID)) return;
 
     AnnotationHighlight srcAH = sourceHighlights.get(srcAnnotation);
     AnnotationHighlight tgtAH = targetHighlights.get(tgtAnnotation);
@@ -2059,10 +2065,12 @@ public class AlignmentEditor extends AbstractVisualResource implements
   // setter methods
   public void setSourceDocumentId(String docId) {
     sourceDocumentId.setSelectedItem(docId);
+    selectedSourceID = docId;
   }
 
   public void setTargetDocumentId(String docId) {
     targetDocumentId.setSelectedItem(docId);
+    selectedTargetID = docId;
   }
 
   public void setSourceAnnotationSetName(String annotSet) {
@@ -2183,11 +2191,11 @@ public class AlignmentEditor extends AbstractVisualResource implements
   }
 
   public String getSourceDocumentId() {
-    return sourceDocumentId.getSelectedItem().toString();
+    return selectedSourceID;
   }
 
   public String getTargetDocumentId() {
-    return targetDocumentId.getSelectedItem().toString();
+    return selectedTargetID;
   }
 
   public String getSourceAnnotationSetName() {
