@@ -604,7 +604,7 @@ public class Gate implements GateConstants {
    * Flag controlling whether we should try to access the net, e.g. when setting
    * up a base URL.
    */
-  private static boolean netConnected = true;
+  private static boolean netConnected = false;
 
   private static int lastSym;
 
