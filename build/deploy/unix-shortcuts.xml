@@ -6,12 +6,13 @@
 
    <shortcut
      name="GATE $APP_VER GUI"
-     programGroup="yes"
      target="$INSTALL_PATH/bin/gate.sh"
+     programGroup="yes"
+     desktop="yes"     
      workingDirectory="$INSTALL_PATH"
      description="Starts the GATE $APP_VER GUI"
      initialState="normal"
-     desktop="yes"
+     iconFile="$INSTALL_PATH/icons/gate-icon.png"
      type="Application"
      Categories="Development;GATE;"
      encoding="UTF-8">
@@ -20,10 +21,16 @@
 
    <shortcut
      name="GATE User Guide"
+     target="xdg-open"
      programGroup="yes"
-     target="$INSTALL_PATH/tao.pdf"
+     desktop="yes"
+     workingDirectory="$INSTALL_PATH"
+     url="$INSTALL_PATH/tao.pdf"
+     commandLine="$INSTALL_PATH/tao.pdf"
      description="The GATE User Guide"
-     type="Link">
+     iconFile="$INSTALL_PATH/icons/mime-application-pdf.png"
+     type="Application"
+     encoding="UTF-8">
      <createForPack name="User guide"/>
    </shortcut>
 </shortcuts>
