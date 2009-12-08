@@ -319,6 +319,11 @@ public class AlignmentEditor extends AbstractVisualResource implements
    */
   private String selectedTargetID;
   
+  /**
+   * properties Pane to hold properties panel
+   */
+  private JScrollPane propertiesPane;
+  
   /*
    * (non-Javadoc)
    * 
@@ -574,10 +579,10 @@ public class AlignmentEditor extends AbstractVisualResource implements
 
     propertiesPanel = new JPanel();
     propertiesPanel.setLayout(new BoxLayout(propertiesPanel, BoxLayout.Y_AXIS));
-    JScrollPane propertiesPane = new JScrollPane(propertiesPanel);
+    propertiesPane = new JScrollPane(propertiesPanel);
     propertiesPanel.add(new JLabel("Actions"));
     propertiesPanel.add(Box.createGlue());
-    propertiesPanel.setVisible(false);
+    propertiesPane.setVisible(false);
 
     waPanel.add(sourcePanel, BorderLayout.NORTH);
     waPanel.add(targetPanel, BorderLayout.SOUTH);
@@ -1808,9 +1813,9 @@ public class AlignmentEditor extends AbstractVisualResource implements
       actionsCBMap.put(aa, pab);
       int count = propertiesPanel.getComponentCount();
       propertiesPanel.add(pab, count - 1);
-      propertiesPanel.setVisible(true);
-      propertiesPanel.validate();
-      propertiesPanel.updateUI();
+      propertiesPane.setVisible(true);
+      propertiesPane.validate();
+      propertiesPane.updateUI();
       waPanel.validate();
       waPanel.updateUI();
     }
