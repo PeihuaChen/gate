@@ -4555,7 +4555,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         String commandLine = Gate.getUserConfig().getString(
           MainFrame.class.getName()+".browsercommandline");
 
-        if(commandLine == null
+        if(commandLine == null || commandLine.equals("")
         || commandLine.equals("Set dynamically when you display help.")) {
           // try to find the default browser
           Process process = null;
