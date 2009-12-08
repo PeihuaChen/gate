@@ -7,14 +7,11 @@ import java.util.Timer;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.MouseInputAdapter;
-//import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.io.BufferedReader;
@@ -341,31 +338,6 @@ public class AlignmentEditor extends AbstractVisualResource implements
     finishedAlignmentActions = new ArrayList<FinishedAlignmentAction>();
     dataPublisherActions = new ArrayList<DataPublisherAction>();
 
-    ResourceData myResourceData = (ResourceData)Gate.getCreoleRegister().get(
-            this.getClass().getName());
-    URL creoleXml = myResourceData.getXmlFileUrl();
-    URL alignmentHomeURL = null;
-    File actionsConfFile = null;
-    try {
-      alignmentHomeURL = new URL(creoleXml, ".");
-
-      // loading the default actions config file.
-      actionsConfFile = new File(new File(new File(alignmentHomeURL.toURI()),
-              "resources"), ACTIONS_CONFIG_FILE);
-    }
-    catch(MalformedURLException mue) {
-      throw new GateRuntimeException(mue);
-    }
-    catch(URISyntaxException use) {
-      throw new GateRuntimeException(use);
-    }
-
-    readAction(new ResetAction());
-    alignAction = new AlignAction();
-    readAction(alignAction);
-    removeAlignmentAction = new RemoveAlignmentAction();
-    readAction(removeAlignmentAction);
-    readActions(actionsConfFile);
     thisInstance = this;
     return this;
   }
@@ -446,6 +418,7 @@ public class AlignmentEditor extends AbstractVisualResource implements
     targetUnitOfAlignment.setEditable(false);
 
     alignmentFeatureNames = new JComboBox(new DefaultComboBoxModel());
+    alignmentFeatureNames.setEditable(true);
     ((DefaultComboBoxModel)alignmentFeatureNames.getModel())
             .addElement(AlignmentFactory.ALIGNMENT_FEATURE_NAME);
     alignmentFeatureNames.setPrototypeDisplayValue("AnnotationSetName");
@@ -495,7 +468,7 @@ public class AlignmentEditor extends AbstractVisualResource implements
     next = new JButton("Next >");
     next.addActionListener(this);
 
-    showLinks = new JToggleButton("Show Links");
+    showLinks = new JToggleButton("Horizontal View");
     showLinks.setSelected(true);
     showLinks.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
@@ -507,6 +480,8 @@ public class AlignmentEditor extends AbstractVisualResource implements
           waPanel.setLayout(new GridLayout(1, 2));
           waPanel.add(sourcePanel);
           waPanel.add(targetPanel);
+//          sourcePanel.setPreferredSize(new Dimension(230, 500));
+//          targetPanel.setPreferredSize(new Dimension(230, 500));
         }
         else {
           sourcePanel.setLayout(new BoxLayout(sourcePanel, BoxLayout.X_AXIS));
@@ -516,7 +491,8 @@ public class AlignmentEditor extends AbstractVisualResource implements
           waPanel.setLayout(new BorderLayout());
           waPanel.add(sourcePanel, BorderLayout.NORTH);
           waPanel.add(targetPanel, BorderLayout.SOUTH);
-
+//          sourcePanel.setPreferredSize(new Dimension(500, 20));
+//          targetPanel.setPreferredSize(new Dimension(230, 20));
         }
 
         if(linesCanvas != null) {
@@ -529,6 +505,7 @@ public class AlignmentEditor extends AbstractVisualResource implements
           waPanel.revalidate();
           waPanel.updateUI();
         }
+        refresh();
       }
     });
 
@@ -536,9 +513,14 @@ public class AlignmentEditor extends AbstractVisualResource implements
     loadActions = new JButton("Load Actions");
     loadActions.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
+        int mode = 0;
+        JFileChooser fileChooser = null;
         try {
-          JFileChooser fileChooser = Main.getMainFrame().getFileChooser();
+          fileChooser = Main.getMainFrame().getFileChooser();
+          mode = fileChooser.getFileSelectionMode();
+          fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
           int answer = fileChooser.showOpenDialog(MainFrame.getInstance());
+          
           if(answer == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
             if(selectedFile == null) {
@@ -551,6 +533,9 @@ public class AlignmentEditor extends AbstractVisualResource implements
         }
         catch(GateException ge) {
           throw new GateRuntimeException(ge);
+        } finally {
+          if(fileChooser != null)
+            fileChooser.setFileSelectionMode(mode);
         }
       }
     });
@@ -575,53 +560,71 @@ public class AlignmentEditor extends AbstractVisualResource implements
     sourcePanel = new JPanel();
     sourcePanel.setLayout(new BoxLayout(sourcePanel, BoxLayout.X_AXIS));
     sourcePanel.setBackground(Color.WHITE);
+    
 
     targetPanel = new JPanel();
     targetPanel.setLayout(new BoxLayout(targetPanel, BoxLayout.X_AXIS));
     targetPanel.setBackground(Color.WHITE);
-
+    
     linesCanvas = new MappingsPanel();
     linesCanvas.setBackground(Color.WHITE);
     linesCanvas.setLayout(null);
-    linesCanvas.setPreferredSize(new Dimension(200, 50));
+    linesCanvas.setPreferredSize(new Dimension(800, 50));
     linesCanvas.setOpaque(true);
 
     propertiesPanel = new JPanel();
     propertiesPanel.setLayout(new BoxLayout(propertiesPanel, BoxLayout.Y_AXIS));
     JScrollPane propertiesPane = new JScrollPane(propertiesPanel);
-    propertiesPanel.add(new JLabel("Options"));
+    propertiesPanel.add(new JLabel("Actions"));
     propertiesPanel.add(Box.createGlue());
+    propertiesPanel.setVisible(false);
 
     waPanel.add(sourcePanel, BorderLayout.NORTH);
     waPanel.add(targetPanel, BorderLayout.SOUTH);
     waPanel.add(linesCanvas, BorderLayout.CENTER);
-    JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+    JPanel splitPane = new JPanel(new BorderLayout());
     JPanel waParentPanel = new JPanel(new BorderLayout());
     waScrollPane = new JScrollPane(waPanel);
-    waScrollPane.setPreferredSize(new Dimension(800, 200));
+    //waScrollPane.setPreferredSize(new Dimension(800, 200));
 
-    //JSplitPane verticalPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
     waParentPanel.add(waScrollPane, BorderLayout.CENTER);
-    splitPane.add(waParentPanel);
-    //splitPane.add(verticalPane);
-    splitPane.add(propertiesPane);
-    mainPanel.add(splitPane/* , BorderLayout.CENTER */);
-
-//    verticalPane.add(propertiesPane);
-//    tableTabbedPane = new JTabbedPane();
-//    JScrollPane tableTabbedScroller = new JScrollPane(tableTabbedPane);
-//    verticalPane.add(tableTabbedScroller);
+    splitPane.add(waParentPanel, BorderLayout.CENTER);
+    splitPane.add(propertiesPane, BorderLayout.EAST);
+    mainPanel.add(splitPane);
 
     this.setLayout(new BorderLayout());
     this.add(mainPanel, BorderLayout.CENTER);
     color = getColor(null);
-    splitPane.setDividerLocation(0.8);
     splitPane.revalidate();
     splitPane.updateUI();
-//    verticalPane.setDividerLocation(0.5);
-//    verticalPane.revalidate();
-//    verticalPane.updateUI();
     waPanel.setVisible(false);
+
+    ResourceData myResourceData = (ResourceData)Gate.getCreoleRegister().get(
+            this.getClass().getName());
+    URL creoleXml = myResourceData.getXmlFileUrl();
+    URL alignmentHomeURL = null;
+    File actionsConfFile = null;
+    try {
+      alignmentHomeURL = new URL(creoleXml, ".");
+
+      // loading the default actions config file.
+      actionsConfFile = new File(new File(new File(alignmentHomeURL.toURI()),
+              "resources"), ACTIONS_CONFIG_FILE);
+    }
+    catch(MalformedURLException mue) {
+      throw new GateRuntimeException(mue);
+    }
+    catch(URISyntaxException use) {
+      throw new GateRuntimeException(use);
+    }
+
+    readAction(new ResetAction());
+    alignAction = new AlignAction();
+    readAction(alignAction);
+    removeAlignmentAction = new RemoveAlignmentAction();
+    readAction(removeAlignmentAction);
+    readActions(actionsConfFile);
+  
   }
 
   /**
@@ -1148,7 +1151,11 @@ public class AlignmentEditor extends AbstractVisualResource implements
                 underlyingUnitAnnotation, isSourceDocument);
         annotationHighlightsMap.put(underlyingUnitAnnotation, ah);
         panelToUse.add(ah);
-        panelToUse.add(Box.createRigidArea(new Dimension(5, 0)));
+        if(showLinks.isSelected()) {
+          panelToUse.add(Box.createRigidArea(new Dimension(5, 0)));
+        } else {
+          panelToUse.add(Box.createRigidArea(new Dimension(0, 10)));
+        }
       }
 
       if(isSourceDocument) {
@@ -1353,7 +1360,7 @@ public class AlignmentEditor extends AbstractVisualResource implements
      */
     public AnnotationHighlight(String text, Color color, Annotation annot,
             boolean sourceDocument) {
-      super(text);
+      super((showLinks.isSelected() ? "" : "<html>")+text+(showLinks.isSelected() ? "" : "</html>"));
       this.setOpaque(true);
       this.annotation = annot;
       this.sourceDocument = sourceDocument;
@@ -1390,6 +1397,15 @@ public class AlignmentEditor extends AbstractVisualResource implements
       return this.colorToUse;
     }
 
+    public Dimension getPreferredSize() {
+      Dimension superPreferred = super.getPreferredSize();
+      if(!showLinks.isSelected())
+        return new Dimension((int)Math.min(230, superPreferred.getWidth()),
+                (int)superPreferred.getHeight());
+      else
+        return superPreferred;
+    }
+    
     /**
      * Implements various mouse events. E.g. what should happen when
      * someone clicks on an unhighlighted annotation etc.
@@ -1702,7 +1718,8 @@ public class AlignmentEditor extends AbstractVisualResource implements
    * @param actionsConfFile
    */
   private void readActions(File actionsConfFile) {
-
+    System.out.println("Actions configuration file: "+actionsConfFile.getAbsolutePath());
+    
     if(actionsConfFile != null && actionsConfFile.exists()) {
       try {
         BufferedReader br = new BufferedReader(new FileReader(actionsConfFile));
@@ -1712,7 +1729,6 @@ public class AlignmentEditor extends AbstractVisualResource implements
           // each line will have a class name
           try {
             if(line.trim().startsWith("#") || line.trim().length() == 0) {
-              line = br.readLine();
               continue;
             }
 
@@ -1725,6 +1741,15 @@ public class AlignmentEditor extends AbstractVisualResource implements
 
             Object action = actionClass.newInstance();
             String[] args = line.split("[,]");
+            String parentPath = actionsConfFile.getParentFile().getAbsolutePath();
+            if(!parentPath.endsWith("/")) {
+              parentPath += "/";
+            }
+            
+            for(int i=0;i<args.length;i++) {
+              args[i] = args[i].replaceAll("(\\$relpath\\$)", parentPath);
+            }
+            
             if(action instanceof AlignmentAction) {
               loadAlignmentAction((AlignmentAction)action, args);
             }
@@ -1783,8 +1808,11 @@ public class AlignmentEditor extends AbstractVisualResource implements
       actionsCBMap.put(aa, pab);
       int count = propertiesPanel.getComponentCount();
       propertiesPanel.add(pab, count - 1);
+      propertiesPanel.setVisible(true);
       propertiesPanel.validate();
       propertiesPanel.updateUI();
+      waPanel.validate();
+      waPanel.updateUI();
     }
   }
 
