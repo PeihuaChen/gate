@@ -158,21 +158,6 @@ public interface Ontology extends LanguageResource {
       OntologyFormat format, boolean asImport);
 
 
-  // TODO: do not include this method yet
-  ///**
-  // * Get a list of the ontology URIs in the order the ontology data was loaded.
-  // * When an ontology is loaded, the implementation tries to determine
-  // * the ontology URI (this is different from the URL where the ontology data
-  // * is actually loaded from) and adds that URI to the list.
-  // * No ontology import URI will be automatically loaded as part of
-  // * {@link #resolveImports} when it has been found to be an ontology URI.
-  // *
-  // * @return a list of URIs corresponding to the ontologies loaded (usually
-  // * just one URI)
-  // */
-  //public List<OURI> getOntologyURIs();
-
-
   /**
    * Get the URI of this ontology. If no ontology URI is found, null is
    * returned. If more than one ontology URI is found, an exception is
@@ -237,27 +222,6 @@ public interface Ontology extends LanguageResource {
    */
   public void setURL(URL aUrl);
 
-
-// TODO: not implemented yet. We need to first figure out how to correctly
-// deal with the issues related to loading several ontologies.
-//  /**
-//   * Get the list of URLs of data that was loaded into the ontology.
-//   * This method returns a list of URLs of ontology data that was loaded
-//   * into the current ontology, in the order the data was loaded. If
-//   * <code>includeImports</code> is <code>true</code>, all data that was
-//   * loaded as an ontology import is included in the list, including the
-//   * URLs that were loaded by the {@link #resolveImports(java.util.Map)}
-//   * method.
-//   * <p>
-//   * Note that this list only contains URLs for data that was actually
-//   * loaded since the ontology object was created. If the ontology object
-//   * is created by connecting to a repository that already contains ontology
-//   * data, the URLs for that data cannot be determined.
-//   *
-//   * @param includeImports if true, include URLs for data loaded as ontology import
-//   * @return a list of URLs of data loaded, sorted by the order of loading
-//   */
-//  public List<URL> getURLs(boolean includeImports);
 
   /**
    * Saves the ontology in the specified File
@@ -607,14 +571,18 @@ public interface Ontology extends LanguageResource {
 
   /**
    * Create a DatatypeProperty with the given domain and range.
+   *
+   * The domain must be specified as a set of OClass objects, the resulting
+   * domain is the intersection of all specified classes.
+   * <p>
+   * If this method is called with an OURI of a datatype property that
+   * already exists, any specified domain class is added to the intersection
+   * of classes already defined for the domain.
    * 
    * @param aPropertyURI the URI for the new property.
-   * @param domain the set of ontology classes (i.e. {@link OClass}
-   *          objects} that constitutes the range for the new property.
-   *          The property only applies to instances that belong to
-   *          <b>all</b> classes included in its domain. An empty set
-   *          means that the property applies to instances of any class.
-   * @param aDatatype
+   * @param domain the set of ontology classes
+   * that constitutes the domain for the new property.
+   * @param aDatatype a DataType object describing the datatype of the range.
    * @return the newly created property.
    */
   public DatatypeProperty addDatatypeProperty(OURI aPropertyURI,
@@ -628,18 +596,22 @@ public interface Ontology extends LanguageResource {
   public Set<DatatypeProperty> getDatatypeProperties();
 
   /**
-   * Checkes whether there exists a statement <thePropertyURI, RDF:Type,
-   * OWL:DatatypeProperty> in the ontology or not.
+   * Checkes whether the ontology contains a datatype property with the
+   * given URI.
    * 
    * @param thePropertyURI
-   * @return true, only if there exists the above statement, otherwise -
-   *         false.
+   * @return true if there is an instance of owl:DatatypeProperty with the
+   * given URI in the ontology.
    */
   public boolean isDatatypeProperty(OURI thePropertyURI);
 
   /**
    * Creates a new object property (a property that takes instances as
    * values).
+   * <p>
+   * If this method is called with an OURI of an object property that
+   * already exists, any specified domain or range class is added to
+   * the intersection of classes already defined for the domain or range.
    * 
    * @param aPropertyURI the URI for the new property.
    * @param domain the set of ontology classes (i.e. {@link OClass}
@@ -677,12 +649,17 @@ public interface Ontology extends LanguageResource {
   /**
    * Creates a new symmetric property (an object property that is
    * symmetric).
+   * <p>
+   * If this method is called with an OURI of a datatype property that
+   * already exists, any specified domainAndRange class is added to the
+   * intersection of classes already defined for the domain and range.
    * 
    * @param aPropertyURI the URI for the new property.
    * @param domainAndRange the set of ontology classes (i.e.
    *          {@link OClass} objects} that constitutes the domain and
    *          the range for the new property. The property only applies
-   *          to instances that belong to <b>all</b> classes included
+   *          to instances that belong to <b>the intersection of all</b>
+   * classes included
    *          in its domain. An empty set means that the property
    *          applies to instances of any class.
    * @return the newly created property.
@@ -710,12 +687,17 @@ public interface Ontology extends LanguageResource {
   /**
    * Creates a new transitive property (an object property that is
    * transitive).
-   * 
+   * <p>
+   * If this method is called with an OURI of a transitive property that
+   * already exists, any specified domain or range class is added to the intersection
+   * of classes already defined for the domain or range.
+   *
    * @param aPropertyURI the URI for the new property.
    * @param domain the set of ontology classes (i.e. {@link OClass}
    *          objects} that constitutes the range for the new property.
    *          The property only applies to instances that belong to
-   *          <b>all</b> classes included in its domain. An empty set
+   *          <b>the intersection of all</b> classes included in its domain.
+   * An empty set
    *          means that the property applies to instances of any class.
    * @param range the set of ontology classes (i.e. {@link OClass}
    *          objects} that constitutes the range for the new property.
