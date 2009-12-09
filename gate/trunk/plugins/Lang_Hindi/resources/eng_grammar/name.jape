@@ -15,7 +15,7 @@
 
 
 Phase:	Name
-Input: Token Lookup TempPerson TempDate GazLocation Upper Initials Control
+Input: Token Lookup TempPerson TempDate GazLocation Upper Initials Control JobTitle FirstPerson
 Options: control = appelt debug = false
 
 ///////////////////////////////////////////////////////////////////

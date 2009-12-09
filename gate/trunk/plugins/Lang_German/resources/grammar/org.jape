@@ -91,7 +91,7 @@ Priority: 20
 	{TreeTaggerToken.category == NE}
 	)
 	(
-	({Token.string == "\-"})?
+	({Token.string == "-"})?
 	(
 	{TreeTaggerToken.category == NN}|
 	{TreeTaggerToken.category == NE}
@@ -211,7 +211,7 @@ Rule: Organization_key1
 
 (
 	{Lookup.minorType == "organization_key"}
-	({Token.string == "\-"})?
+	({Token.string == "-"})?
 		(
 		{TreeTaggerToken.category == NN}|
 	        {TreeTaggerToken.category == NE}

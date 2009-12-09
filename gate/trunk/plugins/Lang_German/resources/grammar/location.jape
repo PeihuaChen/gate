@@ -199,7 +199,7 @@ Rule: City_by_stadt
 	 {TreeTaggerToken.category == NE}
 	)
 	(
-	({Token.string == "\-"})?
+	({Token.string == "-"})?
 	({TreeTaggerToken.category == NN}|
 	 {TreeTaggerToken.category == NE}
 	)
@@ -216,14 +216,14 @@ Rule: Location_key1
 	(
 	
 		(
-		{Token.string == "\-"}
+		{Token.string == "-"}
 		)?
 		({TreeTaggerToken.category == NN}|
 	         {TreeTaggerToken.category == NE} 
 		)
 	)*
 	(
-	({Token.string == "\-"})?
+	({Token.string == "-"})?
 	{Lookup.minorType == "location_key"}
 	)
 	(
@@ -231,7 +231,7 @@ Rule: Location_key1
 	 {TreeTaggerToken.category == NE}
 	)
 		(
-		({Token.string == "\-"})?
+		({Token.string == "-"})?
 		({TreeTaggerToken.category == NN}|
 	        {TreeTaggerToken.category == NE}
 		)
@@ -252,20 +252,16 @@ Priority: 20
 	(
 	
 		(
-		{Token.string == "\-"}
+		{Token.string == "-"}
 		)?
 		({TreeTaggerToken.category == NN}|
 	         {TreeTaggerToken.category == NE} 
 		)
 	)*
 	(
-	({Token.string == "\-"})?
+	({Token.string == "-"})?
 	{Lookup.minorType == "location_key"}
 	)
 ):key
 -->
 :key.Exception = {rule = "Location_key1_exception"}
-
-
-
-
