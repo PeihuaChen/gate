@@ -565,10 +565,19 @@
   <target name="run-mac" if="running.on.mac">
     <property name="gate.icon.location"
               location="GATE.app/Contents/Resources/gate-icon.icns" />
-    <condition property="runtime.arch" value="64" else="32">
+    <!-- Don't pass a -d32 or -d64 on Tiger (10.4.x) -->
+    <condition property="runtime.arch" value="">
+      <matches pattern="10\.4(?:\..*)?" string="${os.version}" />
+    </condition>
+    <condition property="runtime.arch" value="-d64" else="-d32">
       <os arch="x86_64" />
     </condition>
-    <echo>Running GATE with -d${runtime.arch}</echo>
+    <if>
+      <length string="${runtime.arch}" when="greater" length="0" />
+      <then>
+        <echo>Running GATE with ${runtime.arch}</echo>
+      </then>
+    </if>
     <java classname="gate.Main"
           classpathref="run.class.path"
           fork="true"
@@ -582,7 +591,8 @@
        <sysproperty key="apple.laf.useScreenMenuBar" value="true"/>
        <sysproperty key="com.apple.mrj.application.growbox.intrudes" value="false"/>
        <sysproperty key="com.apple.mrj.application.live-resize" value="true"/>
-       <jvmarg value="-d${runtime.arch}" />
+       <!-- use "line" rather than "value" as runtime.arch may be empty -->
+       <jvmarg line="${runtime.arch}" />
        <jvmarg value="-Xdock:name=GATE ${gate.version}"/>
        <jvmarg value="-Xdock:icon=${gate.icon.location}"/>
        <syspropertyset refid="run.properties" />
