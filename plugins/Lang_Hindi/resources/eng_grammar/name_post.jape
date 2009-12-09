@@ -14,7 +14,7 @@
 */
 
 Phase:	NamePost
-Input: Token Lookup FirstPerson Control
+Input: Token Lookup FirstPerson Control Initials
 Options: control = appelt
 
 // this runs after name.jape to fix some problems that may have been caused

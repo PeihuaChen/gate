@@ -30,7 +30,7 @@ Rule: Location_key2
 	|
 	{Token.orth == "upperInitial"}
 	)
-	({Token.string == "\-"})
+	({Token.string == "-"})
 	)*
 	{Lookup.minorType == "location_key"}
 ):tag
@@ -178,7 +178,7 @@ Rule: Organization_key2
 	|
 	{Token.orth == "upperInitial"}
 	)?
-	({Token.string == "\-"})
+	({Token.string == "-"})
 	)*
 	{Lookup.minorType == "organization_key"}
 ):tag

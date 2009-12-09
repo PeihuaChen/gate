@@ -5,10 +5,7 @@
         <urlString>$relpath$../ANNIE</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../Tools</urlString>
-      </gate.util.persistence.PersistenceManager-URLHolder>
-      <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../TreeTagger</urlString>
+        <urlString>$relpath$../Tagger_TreeTagger</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
     </localList>
     <collectionType>java.util.ArrayList</collectionType>
@@ -181,7 +178,7 @@
                 <entry>
                   <string>treeTaggerBinary</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>$relpath$../TreeTagger/resources/tree-tagger-french-gate</urlString>
+                    <urlString>$relpath$../Tagger_TreeTagger/resources/tree-tagger-french-gate</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
               </localMap>

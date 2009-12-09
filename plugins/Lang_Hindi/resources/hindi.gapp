@@ -2,10 +2,10 @@
   <urlList class="gate.util.persistence.CollectionPersistence">
     <localList>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../../cebuano</urlString>
+        <urlString>$relpath$../../Lang_Cebuano</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../../hindi</urlString>
+        <urlString>$relpath$../../Lang_Hindi</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
         <urlString>$relpath$../../ANNIE</urlString>

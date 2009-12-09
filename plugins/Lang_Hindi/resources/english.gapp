@@ -116,13 +116,13 @@
                 <entry>
                   <string>tokeniserRulesURL</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>gate:/creole/tokeniser/DefaultTokeniser.rules</urlString>
+                    <urlString>$relpath$../../ANNIE/resources/tokeniser/DefaultTokeniser.rules</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
                 <entry>
                   <string>transducerGrammarURL</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>gate:/creole/tokeniser/postprocess.jape</urlString>
+                    <urlString>$relpath$../../ANNIE/resources/tokeniser/postprocess.jape</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
               </localMap>
@@ -205,13 +205,13 @@
                 <entry>
                   <string>transducerURL</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>gate:/creole/splitter/grammar/main.jape</urlString>
+                    <urlString>$relpath$../../ANNIE/resources/sentenceSplitter/grammar/main.jape</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
                 <entry>
                   <string>gazetteerListsURL</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>gate:/creole/splitter/gazetteer/lists.def</urlString>
+                    <urlString>$relpath$../../ANNIE/resources/sentenceSplitter/gazetteer/lists.def</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
                 <entry>
@@ -250,13 +250,13 @@
                 <entry>
                   <string>rulesURL</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>gate:/creole/heptag/ruleset</urlString>
+                    <urlString>$relpath$../../ANNIE/resources/heptag/ruleset</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
                 <entry>
                   <string>lexiconURL</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>gate:/creole/heptag/lexicon</urlString>
+                    <urlString>$relpath$../../ANNIE/resources/heptag/lexicon</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
               </localMap>
@@ -354,7 +354,7 @@
                 <entry>
                   <string>definitionFileURL</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>gate:/creole/namematcher/listsNM.def</urlString>
+                    <urlString>$relpath$../../ANNIE/resources/othomatcher/listsNM.def</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
                 <entry>
