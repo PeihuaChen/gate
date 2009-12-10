@@ -1566,9 +1566,9 @@ public abstract class AbstractOntologyImpl
           .print("Warning : there are more than one resources matching with the name "
             + resourceName);
       }
-      if(resources.size() == 1) {
+      //if(resources.size() == 1) {
         return resources.get(0);
-      }
+      //}
     }
     return null;
   }
