@@ -1,5 +1,5 @@
 /*
- *  CorpusControllerDocumentProcessor.java
+ *  LanguageAnalyserDocumentProcessor.java
  *  Copyright (c) 1995-2010, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
@@ -16,35 +16,35 @@
 package gate.util;
 
 import gate.Corpus;
-import gate.CorpusController;
+import gate.LanguageAnalyser;
 import gate.Document;
 import gate.Factory;
 import gate.creole.ExecutionException;
 
 /**
  * {@link DocumentProcessor} that processes documents using a
- * {@link CorpusController}.
+ * {@link LanguageAnalyser}.
  */
-public class CorpusControllerDocumentProcessor implements DocumentProcessor {
+public class LanguageAnalyserDocumentProcessor implements DocumentProcessor {
 
   /**
-   * The controller used to process documents.
+   * The analyser used to process documents.
    */
-  private CorpusController controller;
+  private LanguageAnalyser analyser;
 
   /**
    * Corpus used to contain the document being processed.
    */
   private Corpus corpus;
 
-  public CorpusControllerDocumentProcessor() {
+  public LanguageAnalyserDocumentProcessor() {
   }
 
   /**
    * Set the controller used to process documents.
    */
-  public void setController(CorpusController c) {
-    this.controller = c;
+  public void setAnalyser(LanguageAnalyser a) {
+    this.analyser = a;
   }
 
   public synchronized void processDocument(Document doc) throws GateException {
@@ -53,11 +53,13 @@ public class CorpusControllerDocumentProcessor implements DocumentProcessor {
     }
     try {
       corpus.add(doc);
-      controller.setCorpus(corpus);
-      controller.execute();
+      analyser.setCorpus(corpus);
+      analyser.setDocument(doc);
+      analyser.execute();
     }
     finally {
-      controller.setCorpus(null);
+      analyser.setCorpus(null);
+      analyser.setDocument(null);
       corpus.clear();
     }
   }
@@ -67,7 +69,7 @@ public class CorpusControllerDocumentProcessor implements DocumentProcessor {
    * required.
    */
   public synchronized void cleanup() {
-    Factory.deleteResource(controller);
+    Factory.deleteResource(analyser);
     Factory.deleteResource(corpus);
   }
 }
