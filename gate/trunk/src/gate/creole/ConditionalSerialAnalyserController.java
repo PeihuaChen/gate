@@ -37,7 +37,8 @@ import gate.util.*;
         + "over corpora.",
     helpURL = "http://gate.ac.uk/userguide/sec:developer:cond")
 public class ConditionalSerialAnalyserController
-       extends ConditionalSerialController implements CorpusController {
+       extends ConditionalSerialController
+       implements CorpusController, LanguageAnalyser {
 
   /** Debug flag */
   private static final boolean DEBUG = false;
