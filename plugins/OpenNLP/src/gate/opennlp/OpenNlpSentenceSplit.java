@@ -53,6 +53,7 @@ class OpenNlpSentenceSplit extends AbstractLanguageAnalyser {
 
 	@Override
 	public void execute() throws ExecutionException {
+		boolean isSentenceSplitted = false;
 		// text doc annotations
 		AnnotationSet annotations;
 		if (annotationSetName != null && annotationSetName.length() > 0)
@@ -100,6 +101,8 @@ class OpenNlpSentenceSplit extends AbstractLanguageAnalyser {
 
 				annotations.add(Long.valueOf(start), Long.valueOf(end),
 						"Sentence", fm);
+				if(!isSentenceSplitted)
+					isSentenceSplitted = true;
 
 			} catch (InvalidOffsetException e) {
 				e.printStackTrace();
@@ -107,6 +110,18 @@ class OpenNlpSentenceSplit extends AbstractLanguageAnalyser {
 			}
 
 			prevSpan = spans[i];
+		}
+		if(!isSentenceSplitted){
+			FeatureMap fm = Factory.newFeatureMap();
+			// type
+			fm.put("source", "openNLP");
+			try {
+				annotations.add(new Long(0), new Long(text.length()),
+						"Sentence", fm);
+			} catch (InvalidOffsetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
