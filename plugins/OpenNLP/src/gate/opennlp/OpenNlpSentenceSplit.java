@@ -7,7 +7,6 @@ import gate.Resource;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
-import gate.util.Files;
 import gate.util.InvalidOffsetException;
 
 import java.io.DataInputStream;
@@ -15,11 +14,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.zip.GZIPInputStream;
 
-import org.apache.log4j.Logger;
-
 import opennlp.maxent.MaxentModel;
 import opennlp.maxent.io.BinaryGISModelReader;
 import opennlp.tools.sentdetect.SentenceDetectorME;
+
+import org.apache.log4j.Logger;
 
 /**
  * Wrapper for the open nlp sentence splitter
@@ -33,6 +32,16 @@ public @SuppressWarnings("all")
 class OpenNlpSentenceSplit extends AbstractLanguageAnalyser {
 
 	public static final long serialVersionUID = 1L;
+
+	String inputASName;
+
+	public String getInputASName() {
+		return inputASName;
+	}
+
+	public void setInputASName(String inputASName) {
+		this.inputASName = inputASName;
+	}
 
 	private static final Logger logger = Logger
 			.getLogger(OpenNlpSentenceSplit.class);
@@ -63,15 +72,35 @@ class OpenNlpSentenceSplit extends AbstractLanguageAnalyser {
 			// type
 			fm.put("source", "openNLP");
 			// source
-//			fm.put("type", "urn:lsid:ontotext.com:kim:iextraction:Sentence");
+			// fm.put("type", "urn:lsid:ontotext.com:kim:iextraction:Sentence");
 
 			try {
 				// annotations.add(Long.valueOf(spans[i].getStart()),
 				// Long.valueOf(spans[i].getEnd()), "Sentence", fm);
-				annotations.add(i == 0 ? Long.valueOf(prevSpan) : Long
-						.valueOf(prevSpan + countSpaces(prevSpan - 1)),
-						i == (spans.length - 1) ? Long.valueOf(spans[i]) : Long
-								.valueOf(spans[i] - 1), "Sentence", fm);
+				// annotations.add(i == 0 ? Long.valueOf(prevSpan) : Long
+				// .valueOf(prevSpan + countSpaces(prevSpan - 1)),
+				// i == (spans.length - 1) ? Long.valueOf(spans[i]) : Long
+				// .valueOf(spans[i] - 1), "Sentence", fm);
+				int start = prevSpan;
+				int end = spans[i];
+
+				// remove leading spaces of a sentence
+				for (int j = start; j < end
+						&& Character.isWhitespace(text.charAt(j)); j++) {
+					start = j + 1;
+				}
+
+				// remove trailing spaces of a sentence
+				if (end > 1) {
+					for (int j = end; j > start
+							&& Character.isWhitespace(text.charAt(j - 1)); j--) {
+						end = j - 1;
+					}
+				}
+
+				annotations.add(Long.valueOf(start), Long.valueOf(end),
+						"Sentence", fm);
+
 			} catch (InvalidOffsetException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e);
@@ -102,10 +131,9 @@ class OpenNlpSentenceSplit extends AbstractLanguageAnalyser {
 
 	@Override
 	public Resource init() throws ResourceInstantiationException {
-		//logger.info("Sentence split url is: " + model.getFile());
+		// logger.info("Sentence split url is: " + model.getFile());
 		try {
-			splitter = new SentenceDetectorME(
-					getModel(model));
+			splitter = new SentenceDetectorME(getModel(model));
 		} catch (Exception e) {
 			logger.error("Sentence Splitter can not be initialized!");
 			throw new RuntimeException(
