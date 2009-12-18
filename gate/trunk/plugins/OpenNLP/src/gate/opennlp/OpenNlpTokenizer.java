@@ -35,6 +35,16 @@ public @SuppressWarnings("all") class OpenNlpTokenizer extends AbstractLanguageA
 	public static final long serialVersionUID = 1L;
 	
 	private static final Logger logger = Logger.getLogger(OpenNlpTokenizer.class);
+	
+	String inputASName;
+
+	public String getInputASName() {
+		return inputASName;
+	}
+
+	public void setInputASName(String inputASName) {
+		this.inputASName = inputASName;
+	}
 
 	// private members
 	private String annotationSetName = null;
