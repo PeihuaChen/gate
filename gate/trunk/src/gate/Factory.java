@@ -65,7 +65,12 @@ public abstract class Factory {
     ResourceData resData = (ResourceData) reg.get(resourceClassName);
     if(resData == null)
       throw new ResourceInstantiationException(
-        "Couldn't get resource data for " + resourceClassName
+        "Couldn't get resource data for " + resourceClassName + ".\n\n" +
+        "You may need first to load the plugin that contains your resource.\n" +
+        "For example, to create a gate.creole.tokeniser.DefaultTokeniser\n" +
+        "you need first to load the ANNIE plugin.\n\n" +
+        "Go to the menu File->Manage CREOLE plugins or use the method\n" +
+        "Gate.getCreoleRegister().registerDirectories(pluginDirectoryURL)."
       );
 
     // get the parameter list and default values
