@@ -1,5 +1,4 @@
 /**
- *
  *  Copyright (c) 1995-2010, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
@@ -14,22 +13,12 @@
 package gate.util;
 
 import gate.AnnotationSet;
-import gate.FeatureMap;
-import gate.Factory;
-import gate.Document;
 import gate.Annotation;
-import gate.Gate;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
 import java.util.TreeSet;
 
 /**
@@ -62,15 +51,14 @@ public class ContingencyTable {
   /** Number of annotators. */
   public int numJudges;
   
-  /** Confusion matrix. */
+  /** Array of dimensions category * judge. */
   public float[][] confusionMatrix;
   
+  final static int NOT_CALCULATED = -1;
+
   /** The observed agreement. */
-  public float observedAgreement = 0;
-  
-  /** Indicate if the agreement is available or not. */
-  public boolean isAgreementAvailable = false;
-  
+  public float observedAgreement = NOT_CALCULATED;
+
   /** Cohen's kappa. */
   public float kappaCohen = 0;
   
@@ -92,243 +80,242 @@ public class ContingencyTable {
   /** List of feature values that are the labels of the confusion matrix */
   private TreeSet<String> featureValues;
     
-  /** Constructor for pairwise case. 
+  /**
+   * Pairwise case.
    * Used in IAA plugin because the calling code knows the number of categories.
    * We are moving away from having to know that in advance.
    * @deprecated
    */
-  public ContingencyTable(int numC)
+  public ContingencyTable(int numCats)
   {
-    this.numCats = numC;
-    this.confusionMatrix = new float[numC][numC];
-    isAgreementAvailable = false;
+    this.numCats = numCats;
+    confusionMatrix = new float[numCats][numCats];
   }
 
-  /** Constructor for more than two annotators?
+  /**
+   * More than two annotators?
    * @deprecated
    */
-  public ContingencyTable(int numC, int numJ)
+  public ContingencyTable(int numCats, int numJ)
   {
-    this.numCats = numC;
+    this.numCats = numCats;
     this.numJudges = numJ;
-    this.assignmentMatrix = new float[numC][numJ];
-    isAgreementAvailable = false;
+    assignmentMatrix = new float[numCats][numJ];
   }
 
-  /** Constructor that takes 2 annotation sets,
-   * one type and one feature. Compiles list of categories
-   * on the fly. Creates the contingency table. 
+  /**
+   * See {@link #createConfusionMatrix(gate.AnnotationSet, gate.AnnotationSet,
+   *  String, String)}.
    */
-  public ContingencyTable(AnnotationSet aS1, AnnotationSet aS2, String type, String feature)
+  public ContingencyTable(AnnotationSet aS1, AnnotationSet aS2, String type,
+                          String feature)
   {
-    this.init(aS1, aS2, type, feature);
+    createConfusionMatrix(aS1, aS2, type, feature);
   }
   
-  /** Constructor that takes a list of existing contingency tables
-   * and makes a megatable.
-   * @param tables
+  /**
+   * See {@link #combineConfusionMatrixes(java.util.ArrayList)}.
    */
   public ContingencyTable(ArrayList<ContingencyTable> tables)
   {
-    this.init(tables);
+    combineConfusionMatrixes(tables);
   }
   
   /**
-   * Get the observed agreement.
-   * The global variable is remaining public for now but it is safer to use this method.
-   * @return
+   * Portion of the instances on which the annotators agree.
+   * @return a number between 0 and 1. 1 means perfect agreements.
    */
   public float getObservedAgreement()
   {
-    this.computeObservedAgreement();
-    return this.observedAgreement;
+    computeObservedAgreement();
+    return observedAgreement;
   }
 
   /**
-   * Get Cohen's Kappa.
-   * The global variable is remaining public for now but it is safer to use this method.
-   * @return
+   * Kappa is defined as the observed agreements minus the agreement
+   * expected by chance.
+   * The Cohen’s Kappa is based on the individual distribution of each
+   * annotator.
+   * @return a number between -1 and 1. 1 means perfect agreements.
    */
   public float getKappaCohen()
   {
-    this.computeKappaPairwise();
-    return this.kappaCohen;
+    computeKappaPairwise();
+    return kappaCohen;
   }
 
   /**
-   * Get Scott's Pi.
-   * The global variable is remaining public for now but it is safer to use this method.
-   * @return
+   * Kappa is defined as the observed agreements minus the agreement
+   * expected by chance.
+   * The Siegel & Castellan’s Kappa is based on the assumption that all the
+   * annotators have the same distribution.
+   * @return a number between -1 and 1. 1 means perfect agreements.
    */
   public float getKappaPi()
   {
-    this.computeKappaPairwise();
-    return this.kappaPi;
+    computeKappaPairwise();
+    return kappaPi;
   }
     
   /**
-   * Given 2 annotation sets, a type and a feature, this will create a confusion matrix
-   * in which annotations of identical span bearing the specified feature are
-   * compared in terms of feature value.
-   * @param aS1
-   * @param aS2
-   * @param type
-   * @param feature
-   * @return
+   * Create a confusion matrix in which annotations of identical span
+   * bearing the specified feature name are compared in terms of feature value.
+   * Compiles list of classes (feature values) on the fly.
+   *
+   * @param aS1 annotation set to compare to the second
+   * @param aS2 annotation set to compare to the first
+   * @param type annotation type containing the features to compare
+   * @param feature feature name whose values will be compared
    */
-  public void init(AnnotationSet aS1, AnnotationSet aS2, String type, String feature)
+  public void createConfusionMatrix(AnnotationSet aS1, AnnotationSet aS2,
+                                    String type, String feature)
   {   
-    /* We'll accumulate a list of the feature values (a.k.a. class labels) */
-    this.featureValues = new TreeSet<String>();
+    // We'll accumulate a list of the feature values (a.k.a. class labels)
+    featureValues = new TreeSet<String>();
     
-    /* Make a hash of hashes for the counts. */
-    HashMap<String, HashMap<String, Float>> countMap = new HashMap<String, HashMap<String, Float>>();
+    // Make a hash of hashes for the counts.
+    HashMap<String, HashMap<String, Float>> countMap =
+      new HashMap<String, HashMap<String, Float>>();
     
-    /* Get all the annotations of the correct type containing the correct feature */
+    // Get all the annotations of the correct type containing
+    // the correct feature
     HashSet<String> featureSet = new HashSet<String>();
     featureSet.add(feature);
     AnnotationSet relevantAnns1 = aS1.get(type, featureSet);
     AnnotationSet relevantAnns2 = aS2.get(type, featureSet);
     
-    /* For each annotation in aS1, find the match in aS2 */
-    Iterator<Annotation> as1it = relevantAnns1.iterator();
-    while (as1it.hasNext()){
-      Annotation thisAnn = as1it.next();
-      
-      /*First we need to check that this annotation is not identical in span
-       * to anything else in the same set. Duplicates should be excluded. */
-      Iterator<Annotation> dupeIterator = relevantAnns1.iterator();
+    // For each annotation in aS1, find the match in aS2
+    for (Annotation relevantAnn1 : relevantAnns1) {
+
+      // First we need to check that this annotation is not identical in span
+      // to anything else in the same set. Duplicates should be excluded.
       int dupecount = 0;
-      while (dupeIterator.hasNext()){
-        Annotation dupeCheckAnn = dupeIterator.next();
-        if(dupeCheckAnn.getStartNode().getOffset()==thisAnn.getStartNode().getOffset()
-                && dupeCheckAnn.getEndNode().getOffset()==thisAnn.getEndNode().getOffset()){
+      for (Annotation aRelevantAnns1 : relevantAnns1) {
+        if (aRelevantAnns1.getStartNode().getOffset().equals(
+          relevantAnn1.getStartNode().getOffset())
+          && aRelevantAnns1.getEndNode().getOffset().equals(
+          relevantAnn1.getEndNode().getOffset())) {
           dupecount++;
         }
       }
-      
-      if(dupecount>1){
-        System.out.println("ContingencyTable: Same span annotations detected! Ignoring.");
+
+      if (dupecount > 1) {
+        Out.prln("ContingencyTable: Same span annotations detected! Ignoring.");
       } else {
-        /* Find the match in as2 */
-        Iterator<Annotation> as2it = relevantAnns2.iterator();
+        // Find the match in as2
         int howManyCoextensiveAnnotations = 0;
         Annotation doc2Match = null;
-        while(as2it.hasNext()){
-          Annotation doc2MatchCandidate = as2it.next();          
-          if(doc2MatchCandidate.getStartNode().getOffset().equals(thisAnn.getStartNode().getOffset())
-                  && doc2MatchCandidate.getEndNode().getOffset().equals(thisAnn.getEndNode().getOffset())){
+        for (Annotation relevantAnn2 : relevantAnns2) {
+          if (relevantAnn2.getStartNode().getOffset().equals(
+            relevantAnn1.getStartNode().getOffset())
+            && relevantAnn2.getEndNode().getOffset().equals(
+            relevantAnn1.getEndNode().getOffset())) {
             howManyCoextensiveAnnotations++;
-            doc2Match = doc2MatchCandidate;
+            doc2Match = relevantAnn2;
           }
         }
-          
-        if(howManyCoextensiveAnnotations==0){
-          System.out.println("ContingencyTable: Annotation with no counterpart detected!");
-        } else if(howManyCoextensiveAnnotations==1){
-          
-          /* What are our feature values? */
-          String featVal1 = (String)thisAnn.getFeatures().get(feature);
-          String featVal2 = (String)doc2Match.getFeatures().get(feature);
-          
-          /* Make sure both are present in our feature value list */
+
+        if (howManyCoextensiveAnnotations == 0) {
+          Out.prln("ContingencyTable: Annotation with no counterpart" +
+            " detected!");
+        } else if (howManyCoextensiveAnnotations == 1) {
+
+          // What are our feature values?
+          String featVal1 = (String) relevantAnn1.getFeatures().get(feature);
+          String featVal2 = (String) doc2Match.getFeatures().get(feature);
+
+          // Make sure both are present in our feature value list
           featureValues.add(featVal1);
           featureValues.add(featVal2);
-          
-          /* Update the matrix hash of hashes*/
-          /* Get the right hashmap for the as1 feature value */
+
+          // Update the matrix hash of hashes
+          // Get the right hashmap for the as1 feature value
           HashMap<String, Float> subHash = countMap.get(featVal1);
-          if(subHash==null){
-            /* This is a new as1 feature value, since it has no subhash yet */
-            HashMap<String, Float> subHashForNewAS1FeatVal = new HashMap<String, Float>();
-              
-            /* Since it is a new as1 feature value, there can be no existing
-             *  as2 feature values paired with it. So we make a new one for this
-             *  as2 feature value */
-            subHashForNewAS1FeatVal.put(featVal2, new Float(1));
-              
+          if (subHash == null) {
+            // This is a new as1 feature value, since it has no subhash yet
+            HashMap<String, Float> subHashForNewAS1FeatVal =
+              new HashMap<String, Float>();
+
+            // Since it is a new as1 feature value, there can be no existing
+            // as2 feature values paired with it. So we make a new one for this
+            // as2 feature value
+            subHashForNewAS1FeatVal.put(featVal2, (float) 1);
+
             countMap.put(featVal1, subHashForNewAS1FeatVal);
           } else {
-            /* Increment the count */
+            // Increment the count
             Float count = subHash.get(featVal2);
-            if(count==null){
-              subHash.put(featVal2, new Float(1));
+            if (count == null) {
+              subHash.put(featVal2, (float) 1);
             } else {
-              subHash.put(featVal2, new Float(count.intValue() + 1));
+              subHash.put(featVal2, (float) count.intValue() + 1);
             }
-            
+
           }
-        } else if(howManyCoextensiveAnnotations>1){
-          System.out.println("ContingencyTable: Same span annotations detected! Ignoring.");
+        } else if (howManyCoextensiveAnnotations > 1) {
+          Out.prln("ContingencyTable: Same span annotations detected!" +
+            " Ignoring.");
         }
       }
     }
     
-    /* Now we have this hash of hashes, but the calculation implementations
-     * require an array of floats. So for now we can just translate it.
-     */
-    this.confusionMatrix = this.convert2DHashTo2DFloatArray(countMap, featureValues);
+    // Now we have this hash of hashes, but the calculation implementations
+    // require an array of floats. So for now we can just translate it.
+    confusionMatrix = convert2DHashTo2DFloatArray(countMap, featureValues);
         
-    /* Set numcats global so calculation methods will work */
-    this.numCats = this.featureValues.size();
+    // Set numcats global so calculation methods will work
+    numCats = featureValues.size();
   }
   
   /**
    * Given a list of ContingencyTables, this will combine to make
    * a megatable. Then you can use kappa getters to get micro average
    * figures for the entire set.
-   * @param tables
+   * @param tables tables to combine
    */
-  private void init(ArrayList<ContingencyTable> tables)
+  private void combineConfusionMatrixes(ArrayList<ContingencyTable> tables)
   {
     /* A hash of hashes for the actual values.
      * This will later be converted to a 2D float array for
      * compatibility with the existing code. */
-    HashMap<String, HashMap<String, Float>> countMap = new HashMap<String, HashMap<String, Float>>();
+    HashMap<String, HashMap<String, Float>> countMap =
+      new HashMap<String, HashMap<String, Float>>();
     
     /* Make a new feature values set which is a superset of all the others */
     TreeSet<String> featureValues = new TreeSet<String>();
     
-    
     /* Now we are going to add each new contingency table in turn */
-    
-    Iterator<ContingencyTable> tableIterator = tables.iterator();
-    
-    while(tableIterator.hasNext()){
-      ContingencyTable thisTable = tableIterator.next();
-        
-      Iterator<String> it1 = thisTable.featureValues.iterator();
+
+    for (ContingencyTable table : tables) {
       int it1index = 0;
-      while(it1.hasNext()){
-        String featVal1 = it1.next();
-        featureValues.add(featVal1);
-        Iterator<String> it2 = thisTable.featureValues.iterator();
+      for (String featureValue1 : table.featureValues) {
+        featureValues.add(featureValue1);
         int it2index = 0;
-        while(it2.hasNext()){
-          String featVal2 = it2.next();
-          
+        for (String featureValue2 : table.featureValues) {
+
           /* So we have the labels of the count we want to add */
           /* What is the value we want to add? */
-          Float valtoadd = new Float((thisTable.confusionMatrix[it1index][it2index]));
-          
-          HashMap<String, Float> subHash = countMap.get(featVal1);
-          if(subHash==null){
+          Float valtoadd = table.confusionMatrix[it1index][it2index];
+
+          HashMap<String, Float> subHash = countMap.get(featureValue1);
+          if (subHash == null) {
             /* This is a new as1 feature value, since it has no subhash yet */
-            HashMap<String, Float> subHashForNewAS1FeatVal = new HashMap<String, Float>();
-            
+            HashMap<String, Float> subHashForNewAS1FeatVal =
+              new HashMap<String, Float>();
+
             /* Since it is a new as1 feature value, there can be no existing
              *  as2 feature values paired with it. So we make a new one for this
              *  as2 feature value */
-            subHashForNewAS1FeatVal.put(featVal2, valtoadd);
-              
-            countMap.put(featVal1, subHashForNewAS1FeatVal);
+            subHashForNewAS1FeatVal.put(featureValue2, valtoadd);
+
+            countMap.put(featureValue1, subHashForNewAS1FeatVal);
           } else {
             /* Increment the count */
-            Float count = subHash.get(featVal2);
-            if(count==null){
-              subHash.put(featVal2, new Float(valtoadd));
+            Float count = subHash.get(featureValue2);
+            if (count == null) {
+              subHash.put(featureValue2, valtoadd);
             } else {
-              subHash.put(featVal2, new Float(count.intValue() + valtoadd));
+              subHash.put(featureValue2, count.intValue() + valtoadd);
             }
           }
           it2index++;
@@ -337,11 +324,10 @@ public class ContingencyTable {
       }
     }
     
-    this.confusionMatrix = this.convert2DHashTo2DFloatArray(countMap, featureValues);
-    this.featureValues = featureValues;
-    
+    confusionMatrix = convert2DHashTo2DFloatArray(countMap, featureValues);
+
     /* Set numcats global so calculation methods will work */
-    this.numCats = this.featureValues.size();  
+    numCats = featureValues.size();
   }
   
   
@@ -352,7 +338,7 @@ public class ContingencyTable {
   public void computeKappaPairwise()
   {
     // Compute the agreement
-    if(!isAgreementAvailable) computeObservedAgreement();
+    if(observedAgreement == NOT_CALCULATED) computeObservedAgreement();
     // compute the agreement by chance
     // Get the marginal sum for each annotator
     float[] marginalArrayC = new float[numCats];
@@ -408,9 +394,9 @@ public class ContingencyTable {
   }
 
   /** Compute the observed agreement. 
-   * It's a simple ratio of right to wrong. You should use getObservedAgreement() rather
-   * than using this method directly. This will be made private later. It is left
-   * public for the sake of the IAA plugin.
+   * It's a simple ratio of right to wrong. This will be made private later.
+   * It is left public for the sake of the IAA plugin.
+   * @deprecated you should use {@link #getObservedAgreement()} instead.
    */
   public void computeObservedAgreement()
   {
@@ -424,13 +410,11 @@ public class ContingencyTable {
     if(sumTotal > 0.0)
       observedAgreement = sumAgreed / sumTotal;
     else observedAgreement = 0;
-    isAgreementAvailable = true;
   }
 
   /** Compute the all way kappa. 
    * This will calculate DF and SC kappas for more than two annotators.
-   * However it may not be supported in the future.
-   * @deprecated
+   * @deprecated it may not be supported in the future.
    */
   public void computeAllwayKappa(long ySum, long numInstances,
     long numAgreements, long[] numJudgesCat, boolean isUsingNonlabel)
@@ -489,20 +473,17 @@ public class ContingencyTable {
    */
   public String printResultsPairwise()
   {
-    StringBuffer logMessage = new StringBuffer();
-    logMessage.append("Observed agreement: " + observedAgreement + ";  ");
-    logMessage.append("Cohen's kappa: " + kappaCohen + "; ");
-    logMessage.append("Scott's pi: " + kappaPi + "\n");
-    return logMessage.toString();
+    return "Observed agreement: " + observedAgreement + "; " +
+                "Cohen's kappa: " + kappaCohen + "; " +
+                   "Scott's pi: " + kappaPi + "\n";
   }
 
-  /** Print out the confusion matrix.
-   * This method requires a String array of labels. If you
-   * populated your ContingencyTable using the new constructors, then you
-   * won't need to provide labels, and should use printConfusionMatrix().
-   * @deprecated
-   * @param labelsArr
-   * @return
+  /**
+   * @deprecated If you populated your ContingencyTable using the new
+   * constructors, then you won't need to provide labels, and should use
+   * {@link #printConfusionMatrix()}.
+   * @param labelsArr String array of labels
+   * @return the confusion matrix as a String
    */
   public String printConfusionMatrix(String[] labelsArr)
   {
@@ -511,25 +492,30 @@ public class ContingencyTable {
     logMessage.append("\t\t|");
     int numL = labelsArr.length;
     for(int i = 0; i < numL; ++i) {
-      logMessage.append("\t" + labelsArr[i] + "\t|");
+      logMessage.append("\t").append(labelsArr[i]).append("\t|");
     }
-    logMessage.append("\t " + IaaCalculation.NONCAT + " \t|\n");
+    logMessage.append("\t ").append(IaaCalculation.NONCAT).append(" \t|\n");
     // logMessage.append("----------------------------------------------\n");
     for(int i = 0; i < numL; ++i) {
-      logMessage.append("\t" + labelsArr[i] + "\t|");
+      logMessage.append("\t").append(labelsArr[i]).append("\t|");
       for(int j = 0; j < numL; ++j)
-        logMessage.append("\t" + this.confusionMatrix[i][j] + "\t|");
-      logMessage.append("\t" + this.confusionMatrix[i][numL] + "\t|\n");
+        logMessage.append("\t").append(this.confusionMatrix[i][j])
+          .append("\t|");
+      logMessage.append("\t").append(this.confusionMatrix[i][numL])
+        .append("\t|\n");
     }
-    logMessage.append("\t" + IaaCalculation.NONCAT + "\t|");
+    logMessage.append("\t").append(IaaCalculation.NONCAT).append("\t|");
     for(int j = 0; j < numL; ++j)
-      logMessage.append("\t" + this.confusionMatrix[numL][j] + "\t|");
-    logMessage.append("\t" + this.confusionMatrix[numL][numL] + "\t|\n");
+      logMessage.append("\t").append(this.confusionMatrix[numL][j])
+        .append("\t|");
+    logMessage.append("\t").append(this.confusionMatrix[numL][numL])
+      .append("\t|\n");
     // logMessage.append("----------------------------------------------\n");
     return logMessage.toString();
   }
 
-  /** Print out the confusion matrix. 
+  /**
+   * Print out the confusion matrix on the standard out stream.
    */
   public void printConfusionMatrix()
   {
@@ -539,23 +525,24 @@ public class ContingencyTable {
     Iterator it = this.featureValues.iterator();
     int x = 0;
     while(it.hasNext()){
-      System.out.println(x + ": " + it.next());
+      Out.prln(x + ": " + it.next());
       x++;
     }
     
     logMessage.append("\t|");
     for(int i = 0; i < numL; i++) {
-      logMessage.append("\t" + i + "\t|");
+      logMessage.append("\t").append(i).append("\t|");
     }
     logMessage.append("\n");
     for(int i = 0; i < numL; i++) {
-      logMessage.append(i + "\t|");
+      logMessage.append(i).append("\t|");
       for(int j = 0; j < numL; j++){
-        logMessage.append("\t" + this.confusionMatrix[i][j] + "\t|");
+        logMessage.append("\t").append(this.confusionMatrix[i][j])
+          .append("\t|");
       }
       logMessage.append("\n");
     }
-    System.out.print(logMessage);
+    Out.pr(logMessage);
   }
 
   /** Print out the results for more than two annotators.
@@ -580,45 +567,42 @@ public class ContingencyTable {
    */
   public void add(ContingencyTable another)
   {
-    this.kappaCohen += another.kappaCohen;
-    this.kappaDF += another.kappaDF;
-    this.kappaPi += another.kappaPi;
-    this.kappaSC += another.kappaSC;
-    this.observedAgreement += another.observedAgreement;
+    kappaCohen += another.kappaCohen;
+    kappaDF += another.kappaDF;
+    kappaPi += another.kappaPi;
+    kappaSC += another.kappaSC;
+    observedAgreement += another.observedAgreement;
   }
 
   
-  /** Private method to convert between two formats of confusion matrix.
-   * A hashmap of hashmaps is easier to populate but older methods require
-   * a 2D float array. So this method is used to convert. It requires a 
-   * sorted set of labels, that will define the dimensions.
-   * @param countMap
-   * @param featureValues
-   * @return
+  /**
+   * Convert between two formats of confusion matrix.
+   * A hashmap of hashmaps is easier to populate but an array is better for
+   * matrix computation.
+   * @param countMap count for each label as in confusion matrix
+   * @param featureValues sorted set of labels that will define the dimensions
+   * @return converted confusion matrix as an 2D array
    */
-  private float[][] convert2DHashTo2DFloatArray(HashMap<String, HashMap<String, Float>> countMap, 
-          TreeSet<String> featureValues)
+  private float[][] convert2DHashTo2DFloatArray(
+    HashMap<String, HashMap<String, Float>> countMap,
+    TreeSet<String> featureValues)
   {
-
     int dimensionOfContingencyTable = featureValues.size();
-    
-    float[][] confusionMatrix = new float[dimensionOfContingencyTable][dimensionOfContingencyTable];
+    float[][] confusionMatrix =
+      new float[dimensionOfContingencyTable][dimensionOfContingencyTable];
     int i=0;
     int j=0;
-    Iterator<String> it1 = featureValues.iterator();
-    while(it1.hasNext()){
-      String featval1 = it1.next();
-      HashMap<String, Float> hashForThisAS1FeatVal = countMap.get(featval1);      
-      Iterator<String> it2 = featureValues.iterator();
+    for (String featureValue1 : featureValues) {
+      HashMap<String, Float> hashForThisAS1FeatVal =
+        countMap.get(featureValue1);
       j = 0;
-      while(it2.hasNext()){
-        String featval2 = it2.next();
+      for (String featureValue2 : featureValues) {
         Float count = null;
-        if(hashForThisAS1FeatVal!=null){
-          count = hashForThisAS1FeatVal.get(featval2);
+        if (hashForThisAS1FeatVal != null) {
+          count = hashForThisAS1FeatVal.get(featureValue2);
         }
-        if(count != null){
-          confusionMatrix[i][j] = count.floatValue();
+        if (count != null) {
+          confusionMatrix[i][j] = count;
         } else {
           confusionMatrix[i][j] = 0;
         }
@@ -631,17 +615,18 @@ public class ContingencyTable {
   
   /** Compute the macro averaged results. 
    * This method assumes you have added all the kappa figures up using add(). 
-   * It expects you to provide the divisor yourself. You should preferably 
-   * calculate your own macro average and not use this method.
-   * @deprecated
+   * It expects you to provide the divisor yourself.
+   * @param num number of categories?
+   * @deprecated You should preferably calculate your own macro average and
+   * not use this method.
    */
   public void macroAveraged(int num)
   {
-    this.kappaCohen /= num;
-    this.kappaDF /= num;
-    this.kappaPi /= num;
-    this.kappaSC /= num;
-    this.observedAgreement /= num;
+    kappaCohen /= num;
+    kappaDF /= num;
+    kappaPi /= num;
+    kappaSC /= num;
+    observedAgreement /= num;
   }
   
 /*
