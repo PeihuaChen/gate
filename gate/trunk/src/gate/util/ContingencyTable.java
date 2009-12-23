@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+
 /**
  * ContingencyTable, given two annotation sets, a type and a feature,
  * compares the feature values. It finds matching annotations and treats
@@ -51,7 +52,7 @@ public class ContingencyTable {
   /** Number of annotators. */
   public int numJudges;
   
-  /** Array of dimensions category * judge. */
+  /** Array of dimensions categories * categories. */
   public float[][] confusionMatrix;
   
   final static int NOT_CALCULATED = -1;
@@ -118,7 +119,7 @@ public class ContingencyTable {
    */
   public ContingencyTable(ArrayList<ContingencyTable> tables)
   {
-    combineConfusionMatrixes(tables);
+    combineConfusionMatrices(tables);
   }
   
   /**
@@ -156,7 +157,7 @@ public class ContingencyTable {
     computeKappaPairwise();
     return kappaPi;
   }
-    
+  
   /**
    * Create a confusion matrix in which annotations of identical span
    * bearing the specified feature name are compared in terms of feature value.
@@ -273,7 +274,7 @@ public class ContingencyTable {
    * figures for the entire set.
    * @param tables tables to combine
    */
-  private void combineConfusionMatrixes(ArrayList<ContingencyTable> tables)
+  private void combineConfusionMatrices(ArrayList<ContingencyTable> tables)
   {
     /* A hash of hashes for the actual values.
      * This will later be converted to a 2D float array for
@@ -325,6 +326,7 @@ public class ContingencyTable {
     }
     
     confusionMatrix = convert2DHashTo2DFloatArray(countMap, featureValues);
+    this.featureValues = featureValues;
 
     /* Set numcats global so calculation methods will work */
     numCats = featureValues.size();
@@ -616,7 +618,7 @@ public class ContingencyTable {
   /** Compute the macro averaged results. 
    * This method assumes you have added all the kappa figures up using add(). 
    * It expects you to provide the divisor yourself.
-   * @param num number of categories?
+   * @param num number of documents or other items to average across
    * @deprecated You should preferably calculate your own macro average and
    * not use this method.
    */
@@ -629,72 +631,4 @@ public class ContingencyTable {
     observedAgreement /= num;
   }
   
-/*
-  public static void main(String [] args)
-  {
-    //Testing
-    String type = "Type1";
-    String feature = "Feat1";
-      
-    Document doc1 = null;
-    Document doc2 = null;
-    Document doc3 = null;
-      
-    try {
-      Gate.init();
-        
-      URI uri1 = new URI("file:////home/genevieve/Desktop/doc1.xml");
-      URI uri2 = new URI("file:////home/genevieve/Desktop/doc2.xml");
-      URI uri3 = new URI("file:////home/genevieve/Desktop/doc3.xml");
-        
-      doc1 = Factory.newDocument(uri1.toURL());
-      doc2 = Factory.newDocument(uri2.toURL());
-      doc3 = Factory.newDocument(uri3.toURL());
-        
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-     if(doc1!=null && doc2!=null && doc3!=null){
-       AnnotationSet as1 = doc1.getAnnotations();
-       AnnotationSet as2 = doc2.getAnnotations();
-       AnnotationSet as3 = doc3.getAnnotations();
-       
-       System.out.println("Docs 1 and 2\n");
-       ContingencyTable myContingencyTable1 = new ContingencyTable(as1, as2, type, feature);
-       myContingencyTable1.printConfusionMatrix();
-       System.out.println("Observed agreement: " + myContingencyTable1.getObservedAgreement());
-       System.out.println("Kappa Cohen: " + myContingencyTable1.getKappaCohen());
-       System.out.println("Kappa Pi: " + myContingencyTable1.getKappaPi() + "\n");
-
-       System.out.println("Docs 1 and 3\n");
-       ContingencyTable myContingencyTable2 = new ContingencyTable(as1, as3, type, feature);
-       myContingencyTable2.printConfusionMatrix();
-       System.out.println("Observed agreement: " + myContingencyTable2.getObservedAgreement());
-       System.out.println("Kappa Cohen: " + myContingencyTable2.getKappaCohen());
-       System.out.println("Kappa Pi: " + myContingencyTable2.getKappaPi() + "\n");
-
-       System.out.println("Docs 2 and 3\n");
-       ContingencyTable myContingencyTable3 = new ContingencyTable(as2, as3, type, feature);
-       myContingencyTable3.printConfusionMatrix();
-       System.out.println("Observed agreement: " + myContingencyTable3.getObservedAgreement());
-       System.out.println("Kappa Cohen: " + myContingencyTable3.getKappaCohen());
-       System.out.println("Kappa Pi: " + myContingencyTable3.getKappaPi() + "\n");
-       
-       ArrayList<ContingencyTable> tablesList = new ArrayList<ContingencyTable>();
-       tablesList.add(myContingencyTable1);
-       tablesList.add(myContingencyTable2);    
-       tablesList.add(myContingencyTable3);       
-       ContingencyTable myNewContingencyTable = new ContingencyTable(tablesList);
-
-       System.out.println("All 3 added\n");
-       myNewContingencyTable.printConfusionMatrix();
-       System.out.println("Observed agreement: " + myNewContingencyTable.getObservedAgreement());
-       System.out.println("Kappa Cohen: " + myNewContingencyTable.getKappaCohen());
-       System.out.println("Kappa Pi: " + myNewContingencyTable.getKappaPi());
-       
-     } else {
-       System.out.println("Failed to create docs from URLs.");
-     }
-  }
-  */
 }
