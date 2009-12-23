@@ -286,14 +286,14 @@ public class ContingencyTable {
       new HashMap<String, HashMap<String, Float>>();
     
     /* Make a new feature values set which is a superset of all the others */
-    TreeSet<String> featureValues = new TreeSet<String>();
+    TreeSet<String> newFeatureValues = new TreeSet<String>();
     
     /* Now we are going to add each new contingency table in turn */
 
     for (ContingencyTable table : tables) {
       int it1index = 0;
       for (String featureValue1 : table.featureValues) {
-        featureValues.add(featureValue1);
+        newFeatureValues.add(featureValue1);
         int it2index = 0;
         for (String featureValue2 : table.featureValues) {
 
@@ -328,11 +328,11 @@ public class ContingencyTable {
       }
     }
     
-    confusionMatrix = convert2DHashTo2DFloatArray(countMap, featureValues);
-    this.featureValues = featureValues;
+    confusionMatrix = convert2DHashTo2DFloatArray(countMap, newFeatureValues);
+    featureValues = newFeatureValues;
 
     /* Set numcats global so calculation methods will work */
-    numCats = featureValues.size();
+    numCats = newFeatureValues.size();
   }
   
   
