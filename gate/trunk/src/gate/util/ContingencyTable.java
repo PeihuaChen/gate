@@ -55,11 +55,12 @@ public class ContingencyTable {
   /** Array of dimensions categories * categories. */
   public float[][] confusionMatrix;
   
-  final static int NOT_CALCULATED = -1;
-
   /** The observed agreement. */
-  public float observedAgreement = NOT_CALCULATED;
+  public float observedAgreement = 0;
 
+  /** Indicate if the agreement is available or not. */
+  public boolean isAgreementAvailable = false;
+  
   /** Cohen's kappa. */
   public float kappaCohen = 0;
   
@@ -91,6 +92,7 @@ public class ContingencyTable {
   {
     this.numCats = numCats;
     confusionMatrix = new float[numCats][numCats];
+    isAgreementAvailable = false;
   }
 
   /**
@@ -102,6 +104,7 @@ public class ContingencyTable {
     this.numCats = numCats;
     this.numJudges = numJ;
     assignmentMatrix = new float[numCats][numJ];
+    isAgreementAvailable = false;
   }
 
   /**
@@ -115,7 +118,7 @@ public class ContingencyTable {
   }
   
   /**
-   * See {@link #combineConfusionMatrixes(java.util.ArrayList)}.
+   * See {@link #combineConfusionMatrices(java.util.ArrayList)}.
    */
   public ContingencyTable(ArrayList<ContingencyTable> tables)
   {
@@ -340,7 +343,7 @@ public class ContingencyTable {
   public void computeKappaPairwise()
   {
     // Compute the agreement
-    if(observedAgreement == NOT_CALCULATED) computeObservedAgreement();
+    if(!isAgreementAvailable) computeObservedAgreement();
     // compute the agreement by chance
     // Get the marginal sum for each annotator
     float[] marginalArrayC = new float[numCats];
@@ -412,6 +415,7 @@ public class ContingencyTable {
     if(sumTotal > 0.0)
       observedAgreement = sumAgreed / sumTotal;
     else observedAgreement = 0;
+    isAgreementAvailable = true;
   }
 
   /** Compute the all way kappa. 
