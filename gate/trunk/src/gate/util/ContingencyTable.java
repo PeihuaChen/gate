@@ -131,8 +131,13 @@ public class ContingencyTable {
    */
   public float getObservedAgreement()
   {
-    computeObservedAgreement();
-    return observedAgreement;
+    float agreed = this.getAgreedTrials();
+    float total = this.getTotalTrials();
+    if(total>0){
+      return agreed/total;
+    } else {
+      return 0;
+    }
   }
 
   /**
@@ -159,6 +164,14 @@ public class ContingencyTable {
   {
     computeKappaPairwise();
     return kappaPi;
+  }
+  
+  public TreeSet getFeatureValues(){
+    return featureValues;
+  }
+  
+  public float[][] getConfusionMatrix(){
+    return confusionMatrix;
   }
   
   /**
@@ -397,11 +410,29 @@ public class ContingencyTable {
       else sAgreements[i][1] = 0.0f;
     }
   }
-
+  
+  public float getAgreedTrials(){
+    float sumAgreed = 0;
+    for(int i = 0; i < numCats; ++i) {
+      sumAgreed += confusionMatrix[i][i];
+    }
+    return sumAgreed;
+  }
+  
+  public float getTotalTrials(){
+    float sumTotal = 0;
+    for(int i = 0; i < numCats; ++i) {
+      for(int j = 0; j < numCats; ++j) {
+        sumTotal += confusionMatrix[i][j];
+      }
+    }
+    return sumTotal;
+  }
+  
   /** Compute the observed agreement. 
    * It's a simple ratio of right to wrong. This will be made private later.
    * It is left public for the sake of the IAA plugin.
-   * @deprecated you should use {@link #getObservedAgreement()} instead.
+   * @deprecated You should use {@link #getObservedAgreement()} instead.
    */
   public void computeObservedAgreement()
   {
