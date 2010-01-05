@@ -13,11 +13,11 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-public class TestContingencyTable extends TestCase{
+public class TestClassificationMeasures extends TestCase{
 
   /** Test suite routine for the test runner */
   public static Test suite() {
-    return new TestSuite(TestContingencyTable.class);
+    return new TestSuite(TestClassificationMeasures.class);
   } // suite
 
   
@@ -63,26 +63,26 @@ public class TestContingencyTable extends TestCase{
       AnnotationSet as1 = doc1.getAnnotations("ann1");
       AnnotationSet as2 = doc2.getAnnotations("ann2");
 
-      ContingencyTable myContingencyTable1 = new ContingencyTable(as1, as2, type, feature);
-      assertEquals(myContingencyTable1.getObservedAgreement(), new Float(0.7777778).floatValue());
-      assertEquals(myContingencyTable1.getKappaCohen(), new Float(0.6086957).floatValue());
-      assertEquals(myContingencyTable1.getKappaPi(), new Float(0.59550565).floatValue());
+      ClassificationMeasures myClassificationMeasures1 = new ClassificationMeasures(as1, as2, type, feature);
+      assertEquals(myClassificationMeasures1.getObservedAgreement(), new Float(0.7777778).floatValue());
+      assertEquals(myClassificationMeasures1.getKappaCohen(), new Float(0.6086957).floatValue());
+      assertEquals(myClassificationMeasures1.getKappaPi(), new Float(0.59550565).floatValue());
       
       AnnotationSet as3 = doc3.getAnnotations("ann1");
       AnnotationSet as4 = doc4.getAnnotations("ann2");
        
-      ContingencyTable myContingencyTable2 = new ContingencyTable(as3, as4, type, feature);
-      assertEquals(myContingencyTable2.getObservedAgreement(), new Float(0.96875).floatValue());
-      assertEquals(myContingencyTable2.getKappaCohen(), new Float(0.3263158).floatValue());
-      assertEquals(myContingencyTable2.getKappaPi(), new Float(0.3227513).floatValue());
+      ClassificationMeasures myClassificationMeasures2 = new ClassificationMeasures(as3, as4, type, feature);
+      assertEquals(myClassificationMeasures2.getObservedAgreement(), new Float(0.96875).floatValue());
+      assertEquals(myClassificationMeasures2.getKappaCohen(), new Float(0.3263158).floatValue());
+      assertEquals(myClassificationMeasures2.getKappaPi(), new Float(0.3227513).floatValue());
        
-      ArrayList<ContingencyTable> tablesList = new ArrayList<ContingencyTable>();
-      tablesList.add(myContingencyTable1);
-      tablesList.add(myContingencyTable2);
-      ContingencyTable myNewContingencyTable = new ContingencyTable(tablesList);
-      assertEquals(myNewContingencyTable.getObservedAgreement(), new Float(0.94520545).floatValue());
-      assertEquals(myNewContingencyTable.getKappaCohen(), new Float(0.7784521).floatValue());
-      assertEquals(myNewContingencyTable.getKappaPi(), new Float(0.7778622).floatValue());
+      ArrayList<ClassificationMeasures> tablesList = new ArrayList<ClassificationMeasures>();
+      tablesList.add(myClassificationMeasures1);
+      tablesList.add(myClassificationMeasures2);
+      ClassificationMeasures myNewClassificationMeasures = new ClassificationMeasures(tablesList);
+      assertEquals(myNewClassificationMeasures.getObservedAgreement(), new Float(0.94520545).floatValue());
+      assertEquals(myNewClassificationMeasures.getKappaCohen(), new Float(0.7784521).floatValue());
+      assertEquals(myNewClassificationMeasures.getKappaPi(), new Float(0.7778622).floatValue());
        
     } else {
       System.out.println("Failed to create docs from URLs.");
