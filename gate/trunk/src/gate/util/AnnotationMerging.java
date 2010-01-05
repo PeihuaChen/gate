@@ -300,4 +300,32 @@ public class AnnotationMerging {
     }
   } 
   
+
+  /**
+   * Check if the annotation sets contain the same annotations.
+   */
+  public static boolean isSameInstancesForAnnotators(AnnotationSet[] annsA, int vsy) {
+    int numAnnotators = annsA.length;
+    if(annsA[0] == null) return false;
+    for(Annotation ann : annsA[0]) {
+      for(int iJud = 1; iJud < numAnnotators; ++iJud) {
+        if(annsA[iJud] == null) return false;
+        boolean isContained = false;
+        for(Annotation ann1 : annsA[iJud]) {
+          // If the ann is not the same
+          if(ann.coextensive(ann1)) {
+            isContained = true;
+            break;
+          }
+        }
+        if(!isContained) {
+          if(vsy>0)
+          System.out.println("The " + iJud + " annotator cause different");
+          return false;
+        }
+      }// end of the loop for annotators
+    }// end of loop for each annotation in one document
+    // If the annotated instances are the same for every annotators.
+    return true;
+  }
 }

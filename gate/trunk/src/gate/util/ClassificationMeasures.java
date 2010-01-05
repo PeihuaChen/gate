@@ -515,41 +515,6 @@ public class ClassificationMeasures {
                    "Scott's pi: " + kappaPi + "\n";
   }
 
-  /**
-   * @deprecated If you populated your ContingencyTable using the new
-   * constructors, then you won't need to provide labels, and should use
-   * {@link #printConfusionMatrix()}.
-   * @param labelsArr String array of labels
-   * @return the confusion matrix as a String
-   */
-  public String printConfusionMatrix(String[] labelsArr)
-  {
-    StringBuffer logMessage = new StringBuffer();
-    // logMessage.append("----------------------------------------------\n");
-    logMessage.append("\t\t|");
-    int numL = labelsArr.length;
-    for(int i = 0; i < numL; ++i) {
-      logMessage.append("\t").append(labelsArr[i]).append("\t|");
-    }
-    logMessage.append("\t ").append(IaaCalculation.NONCAT).append(" \t|\n");
-    // logMessage.append("----------------------------------------------\n");
-    for(int i = 0; i < numL; ++i) {
-      logMessage.append("\t").append(labelsArr[i]).append("\t|");
-      for(int j = 0; j < numL; ++j)
-        logMessage.append("\t").append(this.confusionMatrix[i][j])
-          .append("\t|");
-      logMessage.append("\t").append(this.confusionMatrix[i][numL])
-        .append("\t|\n");
-    }
-    logMessage.append("\t").append(IaaCalculation.NONCAT).append("\t|");
-    for(int j = 0; j < numL; ++j)
-      logMessage.append("\t").append(this.confusionMatrix[numL][j])
-        .append("\t|");
-    logMessage.append("\t").append(this.confusionMatrix[numL][numL])
-      .append("\t|\n");
-    // logMessage.append("----------------------------------------------\n");
-    return logMessage.toString();
-  }
 
   /**
    * Print out the confusion matrix on the standard out stream.
