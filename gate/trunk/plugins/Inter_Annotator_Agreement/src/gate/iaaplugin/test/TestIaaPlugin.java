@@ -19,12 +19,12 @@ import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
 import gate.GateConstants;
-import gate.iaaplugin.IaaMain;
 import gate.util.ExtensionFileFilter;
 import gate.util.GateException;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import gate.iaaplugin.IaaMain;
 import gate.iaaplugin.MeasureType;
 /**
  * Test the IAA computation by using the test

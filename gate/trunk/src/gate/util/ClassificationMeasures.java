@@ -18,95 +18,32 @@ import gate.Annotation;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.TreeSet;
 
 
 /**
- * ContingencyTable, given two annotation sets, a type and a feature,
+ * Given two annotation sets, a type and a feature,
  * compares the feature values. It finds matching annotations and treats
  * the feature values as classifications. Its purpose is to calculate the
  * extent of agreement between the feature values in the two annotation
- * sets.
- * 
- * ContingencyTable computes observed agreement and Kappa 
- * measures. This class contains some
- * code to handle more than two annotators; i.e. to calculate Scott's Pi
- * and Davies and Fleiss's extensions for more than two annotators.
- * However, the supporting methods required to make these implementations
- * readily usable were not present, and have not been added at this time.
- * Therefore, for simplicity, calculations for more than two annotators have
- * been deprecated, since as it stands they are not complete. Macro average
- * methods are also deprecated: calculating a macro average is more 
- * appropriately done in the calling class, since it requires a set of
- * contingency tables. This class is just a single contingency table.
+ * sets. It computes observed agreement and Kappa measures.
  */
 public class ClassificationMeasures {
   
-  /* The public variables below are remaining public for the 
-   * sake of the IAA plugin. They should not be used in general.*/
-  
-  /** Number of categories. */
-  public int numCats;
-  
-  /** Number of annotators. */
-  public int numJudges;
-  
   /** Array of dimensions categories * categories. */
-  public float[][] confusionMatrix;
-  
-  /** The observed agreement. */
-  public float observedAgreement = 0;
-
-  /** Indicate if the agreement is available or not. */
-  public boolean isAgreementAvailable = false;
+  private float[][] confusionMatrix;
   
   /** Cohen's kappa. */
-  public float kappaCohen = 0;
+  private float kappaCohen = 0;
   
   /** Scott's pi or Siegel & Castellan's kappa */
-  public float kappaPi = 0;
+  private float kappaPi = 0;
   
-  /** Assignment matrix for computing the all way kappa. */
-  float[][] assignmentMatrix;
-  
-  /** Davies and Fleiss's extension of Cohen's kappa. */
-  public float kappaDF = 0;
-  
-  /** Extension of Scott's pi for more than two judges. */
-  public float kappaSC = 0;
-  
-  /** Positive and negative specific agreement for each category. */
-  public float[][] sAgreements;
+  private boolean isCalculatedKappas = false;
   
   /** List of feature values that are the labels of the confusion matrix */
   private TreeSet<String> featureValues;
     
-  /**
-   * Pairwise case.
-   * Used in IAA plugin because the calling code knows the number of categories.
-   * We are moving away from having to know that in advance.
-   * @deprecated
-   */
-  public ClassificationMeasures(int numCats)
-  {
-    this.numCats = numCats;
-    confusionMatrix = new float[numCats][numCats];
-    isAgreementAvailable = false;
-  }
-
-  /**
-   * More than two annotators?
-   * @deprecated
-   */
-  public ClassificationMeasures(int numCats, int numJ)
-  {
-    this.numCats = numCats;
-    this.numJudges = numJ;
-    assignmentMatrix = new float[numCats][numJ];
-    isAgreementAvailable = false;
-  }
-
   /**
    * See {@link #createConfusionMatrix(gate.AnnotationSet, gate.AnnotationSet,
    *  String, String)}.
@@ -149,7 +86,10 @@ public class ClassificationMeasures {
    */
   public float getKappaCohen()
   {
-    computeKappaPairwise();
+    if(!isCalculatedKappas){
+      computeKappaPairwise();
+      isCalculatedKappas = true;
+    }
     return kappaCohen;
   }
 
@@ -162,16 +102,34 @@ public class ClassificationMeasures {
    */
   public float getKappaPi()
   {
-    computeKappaPairwise();
+    if(!isCalculatedKappas){
+      computeKappaPairwise();
+      isCalculatedKappas = true;
+    }
     return kappaPi;
   }
   
-  public TreeSet getFeatureValues(){
-    return featureValues;
-  }
-  
+  /**
+   * Return the confusion matrix describing how annotations in one
+   * set are classified in the other and vice versa. To understand
+   * exactly which types are being confused with which other types
+   * you will need to view this array in conjunction with featureValues,
+   * which gives the class labels (annotation types) in the correct
+   * order.
+   * @return
+   */
   public float[][] getConfusionMatrix(){
     return confusionMatrix;
+  }
+  
+  /**
+   * Return the list of annotation types (class labels) in the
+   * order in which they appear in the confusion matrix. This is
+   * necessary to make sense of the confusion matrix.
+   * @return
+   */
+  public TreeSet getFeatureValues(){
+    return featureValues;
   }
   
   /**
@@ -217,7 +175,7 @@ public class ClassificationMeasures {
       }
 
       if (dupecount > 1) {
-        Out.prln("ContingencyTable: Same span annotations detected! Ignoring.");
+        Out.prln("ClassificationMeasures: Same span annotations detected! Ignoring.");
       } else {
         // Find the match in as2
         int howManyCoextensiveAnnotations = 0;
@@ -279,9 +237,6 @@ public class ClassificationMeasures {
     // Now we have this hash of hashes, but the calculation implementations
     // require an array of floats. So for now we can just translate it.
     confusionMatrix = convert2DHashTo2DFloatArray(countMap, featureValues);
-        
-    // Set numcats global so calculation methods will work
-    numCats = featureValues.size();
   }
   
   /**
@@ -343,20 +298,17 @@ public class ClassificationMeasures {
     
     confusionMatrix = convert2DHashTo2DFloatArray(countMap, newFeatureValues);
     featureValues = newFeatureValues;
-
-    /* Set numcats global so calculation methods will work */
-    numCats = newFeatureValues.size();
+    isCalculatedKappas = false;
   }
   
   
-  /** Compute Cohen's and Pi kappas for two annotators. 
-   * Currently the kappa getters recalculate both kappas, which might
-   * be slow. This is a candidate for later improvement.
+  /** Compute Cohen's and Pi kappas for two annotators.
    */
   public void computeKappaPairwise()
   {
     // Compute the agreement
-    if(!isAgreementAvailable) computeObservedAgreement();
+    float observedAgreement = getObservedAgreement();
+    int numCats = featureValues.size();
     // compute the agreement by chance
     // Get the marginal sum for each annotator
     float[] marginalArrayC = new float[numCats];
@@ -397,7 +349,7 @@ public class ClassificationMeasures {
       kappaPi = (observedAgreement - pE) / (1 - pE);
     else kappaPi = 0;
     // Compute the specific agreement for each label using marginal sums
-    sAgreements = new float[numCats][2];
+    float[][] sAgreements = new float[numCats][2];
     for(int i = 0; i < numCats; ++i) {
       if(marginalArrayC[i] + marginalArrayR[i]>0) 
         sAgreements[i][0] = (2 * confusionMatrix[i][i])
@@ -411,111 +363,33 @@ public class ClassificationMeasures {
     }
   }
   
+  /** Gets the number of annotations for which the two annotation sets
+   * are in agreement with regards to the annotation type.
+   * @return Number of agreed trials
+   */
   public float getAgreedTrials(){
     float sumAgreed = 0;
-    for(int i = 0; i < numCats; ++i) {
+    for(int i = 0; i < featureValues.size(); ++i) {
       sumAgreed += confusionMatrix[i][i];
     }
     return sumAgreed;
   }
   
+  /** Gets the total number of annotations in the two sets.
+   * Note that only matched annotations (identical span) are
+   * considered.
+   * @return Number of trials
+   */
   public float getTotalTrials(){
     float sumTotal = 0;
-    for(int i = 0; i < numCats; ++i) {
-      for(int j = 0; j < numCats; ++j) {
+    for(int i = 0; i < featureValues.size(); ++i) {
+      for(int j = 0; j < featureValues.size(); ++j) {
         sumTotal += confusionMatrix[i][j];
       }
     }
     return sumTotal;
   }
   
-  /** Compute the observed agreement. 
-   * It's a simple ratio of right to wrong. This will be made private later.
-   * It is left public for the sake of the IAA plugin.
-   * @deprecated You should use {@link #getObservedAgreement()} instead.
-   */
-  public void computeObservedAgreement()
-  {
-    float sumAgreed = 0;
-    float sumTotal = 0;
-    for(int i = 0; i < numCats; ++i) {
-      sumAgreed += confusionMatrix[i][i];
-      for(int j = 0; j < numCats; ++j)
-        sumTotal += confusionMatrix[i][j];
-    }
-    if(sumTotal > 0.0)
-      observedAgreement = sumAgreed / sumTotal;
-    else observedAgreement = 0;
-    isAgreementAvailable = true;
-  }
-
-  /** Compute the all way kappa. 
-   * This will calculate DF and SC kappas for more than two annotators.
-   * @deprecated it may not be supported in the future.
-   */
-  public void computeAllwayKappa(long ySum, long numInstances,
-    long numAgreements, long[] numJudgesCat, boolean isUsingNonlabel)
-  {
-    // Compute cohen's kappa using the extended formula.
-    float[] pc = new float[numCats];
-    for(int j = 0; j < numJudges; ++j) {
-      for(int i = 0; i < numCats; ++i)
-        pc[i] += assignmentMatrix[i][j];
-      float sum = 0;
-      for(int i = 0; i < numCats; ++i)
-        sum += assignmentMatrix[i][j];
-      if(sum > 0) for(int i = 0; i < numCats; ++i)
-        assignmentMatrix[i][j] /= sum;
-    }
-    float sum = 0;
-    for(int i = 0; i < numCats; ++i)
-      sum += pc[i];
-    if(sum > 0) for(int i = 0; i < numCats; ++i)
-      pc[i] /= sum;
-    float term1, term2;
-    term1 = 0;
-    for(int i = 0; i < numCats; ++i)
-      term1 += pc[i] * (1 - pc[i]);
-    term2 = 0;
-    for(int i = 0; i < numCats; ++i)
-      for(int j = 0; j < numJudges; ++j)
-        term2 += (assignmentMatrix[i][j] - pc[i])
-          * (assignmentMatrix[i][j] - pc[i]);
-    if(numInstances > 0 && numJudges > 1 && (term1 > 0 || term2 > 0))
-      kappaDF = 1 - (float)(numInstances * numJudges * numJudges - ySum)
-        / (numInstances * (numJudges * (numJudges - 1) * term1 + term2));
-    else kappaDF = 0;
-    // Compute the observed agreement and the S&C kappa
-    if(numInstances == 0 || numJudges == 0) {
-      observedAgreement = 0;
-      kappaSC = 0;
-    }
-    else {
-      observedAgreement = (float)numAgreements / numInstances;
-      // Compute the kappa of S&C
-      float pE = 0;
-      float dNum = numInstances * numJudges;
-      for(int i = 0; i < numCats; ++i) {
-        float s = numJudgesCat[i] / dNum;
-        float sR = s;
-        for(int j = 1; j < numJudges; ++j)
-          sR *= s;
-        pE += sR;
-      }
-      kappaSC = (observedAgreement - pE) / (1 - pE);
-    }
-  }
-
-  /** Print out the results for two annotators.
-   */
-  public String printResultsPairwise()
-  {
-    return "Observed agreement: " + observedAgreement + "; " +
-                "Cohen's kappa: " + kappaCohen + "; " +
-                   "Scott's pi: " + kappaPi + "\n";
-  }
-
-
   /**
    * Print out the confusion matrix on the standard out stream.
    */
@@ -524,10 +398,9 @@ public class ClassificationMeasures {
     StringBuffer logMessage = new StringBuffer();
 
     int numL = this.featureValues.size();
-    Iterator it = this.featureValues.iterator();
     int x = 0;
-    while(it.hasNext()){
-      Out.prln(x + ": " + it.next());
+    for(String featureValue : featureValues){
+      Out.prln(x + ": " + featureValue);
       x++;
     }
     
@@ -546,36 +419,6 @@ public class ClassificationMeasures {
     }
     Out.pr(logMessage);
   }
-
-  /** Print out the results for more than two annotators.
-   * @deprecated
-   */
-  public String printResultsAllway()
-  {
-    StringBuffer logMessage = new StringBuffer();
-    logMessage.append("Observed agreement: " + observedAgreement + "; ");
-    logMessage.append("Cohen's kappa extended for  " + numJudges
-      + " annotators: " + kappaDF + "; ");
-    logMessage.append("S&C kappa for " + numJudges + " annotators: " + kappaSC
-      + "\n");
-    return logMessage.toString();
-  }
-
-  /** Add the results. This can be used to calculate macro averages,
-   * by adding the results of calculations then using macroAveraged()
-   * method. However, this is not very safe. You are recommended to
-   * implement your own macro average.
-   * @deprecated
-   */
-  public void add(ClassificationMeasures another)
-  {
-    kappaCohen += another.kappaCohen;
-    kappaDF += another.kappaDF;
-    kappaPi += another.kappaPi;
-    kappaSC += another.kappaSC;
-    observedAgreement += another.observedAgreement;
-  }
-
   
   /**
    * Convert between two formats of confusion matrix.
@@ -613,22 +456,6 @@ public class ClassificationMeasures {
       i++;
     }    
     return confusionMatrix;
-  }
-  
-  /** Compute the macro averaged results. 
-   * This method assumes you have added all the kappa figures up using add(). 
-   * It expects you to provide the divisor yourself.
-   * @param num number of documents or other items to average across
-   * @deprecated You should preferably calculate your own macro average and
-   * not use this method.
-   */
-  public void macroAveraged(int num)
-  {
-    kappaCohen /= num;
-    kappaDF /= num;
-    kappaPi /= num;
-    kappaSC /= num;
-    observedAgreement /= num;
   }
   
 }
