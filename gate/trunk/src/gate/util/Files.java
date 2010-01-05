@@ -14,6 +14,7 @@
 
 package gate.util;
 import gate.Gate;
+import gate.corpora.DocumentXmlUtils;
 
 import java.io.*;
 import java.util.*;
@@ -538,9 +539,10 @@ public class Files {
       String key =   (String) entry.getKey();
       String value = (String) entry.getValue();
 
-      newElement.append(" ");newElement.append(key);
+      newElement.append(" ");
+      newElement.append(DocumentXmlUtils.combinedNormalisation(key));
       newElement.append("=\"");
-      newElement.append(value);
+      newElement.append(DocumentXmlUtils.combinedNormalisation(value));
       newElement.append("\"" + nl);
     }
 
