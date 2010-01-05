@@ -276,6 +276,7 @@ public class TestGate {
         suite.addTest(TestDiffer.suite());
         //suite.addTest(TestIaa.suite()); Moved this to the IAA plugin
         suite.addTest(TestAnnotationMerging.suite());
+        suite.addTest(TestClassificationMeasures.suite());
 //no longer needed as replaced by testPR
 //        suite.addTest(TestTokeniser.suite());
         suite.addTest(TestGazetteer.suite());
