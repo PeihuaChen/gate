@@ -33,8 +33,8 @@ import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
 import gate.util.AnnotationDiffer;
-import gate.util.FMeasure;
-import gate.util.IaaCalculation;
+//import gate.util.FMeasure;
+//import gate.util.IaaCalculation;
 
 /**
  * 
