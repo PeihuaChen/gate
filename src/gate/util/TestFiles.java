@@ -192,6 +192,7 @@ public class TestFiles extends TestCase
     newAttrs.put("a", "1");
     newAttrs.put("b", "2");
     newAttrs.put("c", "3");
+    newAttrs.put("d", "needs&escaping");
 
     // test the files method
     String newXml = Files.updateXmlElement(
@@ -202,7 +203,9 @@ public class TestFiles extends TestCase
     assertTrue(
       "newXml doesn't match (1): " + newXml.toString(),
       newXml.toString().startsWith(exampleXmlStart) &&
-        newXml.toString().endsWith(exampleXmlEnd)
+        newXml.toString().endsWith(exampleXmlEnd) &&
+        newXml.toString().contains("a=\"1\"") &&
+        newXml.toString().contains("d=\"needs&amp;escaping\"")
     );
     if(DEBUG) Out.prln(newXml);
 
@@ -212,7 +215,9 @@ public class TestFiles extends TestCase
     assertTrue(
       "newXml doesn't match (2): " + newXml.toString(),
       newXml.toString().startsWith(exampleXmlStart) &&
-        newXml.toString().endsWith(exampleXmlEnd)
+        newXml.toString().endsWith(exampleXmlEnd) &&
+        newXml.toString().contains("a=\"1\"") &&
+        newXml.toString().contains("d=\"needs&amp;escaping\"")
     );
     if(DEBUG) Out.prln(newXml);
 
@@ -221,7 +226,9 @@ public class TestFiles extends TestCase
     assertTrue(
       "newXml doesn't match (3): " + newXml.toString(),
       newXml.toString().startsWith(exampleXmlStart) &&
-        newXml.toString().endsWith(exampleXmlEnd)
+        newXml.toString().endsWith(exampleXmlEnd) &&
+        newXml.toString().contains("a=\"1\"") &&
+        newXml.toString().contains("d=\"needs&amp;escaping\"")
     );
     if(DEBUG) Out.prln(newXml);
 
