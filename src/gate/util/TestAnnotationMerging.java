@@ -119,7 +119,7 @@ public class TestAnnotationMerging extends TestCase {
     //Annotation merging
     boolean isTheSameInstances = true;
     for(int i=0; i<annArr2.length; ++i)
-      if(!IaaCalculation.isSameInstancesForAnnotators(annArr2[i], 1)) {
+      if(!AnnotationMerging.isSameInstancesForAnnotators(annArr2[i], 1)) {
         isTheSameInstances = false;
         break;
       }
