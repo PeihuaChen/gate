@@ -16,8 +16,10 @@ import gate.AnnotationSet;
 import gate.Annotation;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 
@@ -43,7 +45,11 @@ public class ClassificationMeasures {
   
   /** List of feature values that are the labels of the confusion matrix */
   private TreeSet<String> featureValues;
-    
+
+  public ClassificationMeasures() {
+    // empty constructor
+  }
+
   /**
    * See {@link #createConfusionMatrix(gate.AnnotationSet, gate.AnnotationSet,
    *  String, String)}.
@@ -119,7 +125,7 @@ public class ClassificationMeasures {
    * @return
    */
   public float[][] getConfusionMatrix(){
-    return confusionMatrix;
+      return confusionMatrix.clone();
   }
   
   /**
@@ -128,8 +134,8 @@ public class ClassificationMeasures {
    * necessary to make sense of the confusion matrix.
    * @return
    */
-  public TreeSet getFeatureValues(){
-    return featureValues;
+  public SortedSet<String> getFeatureValues(){
+    return Collections.unmodifiableSortedSet(featureValues);
   }
   
   /**
@@ -433,7 +439,7 @@ public class ClassificationMeasures {
     TreeSet<String> featureValues)
   {
     int dimensionOfContingencyTable = featureValues.size();
-    float[][] confusionMatrix =
+    float[][] matrix =
       new float[dimensionOfContingencyTable][dimensionOfContingencyTable];
     int i=0;
     int j=0;
@@ -447,15 +453,15 @@ public class ClassificationMeasures {
           count = hashForThisAS1FeatVal.get(featureValue2);
         }
         if (count != null) {
-          confusionMatrix[i][j] = count;
+          matrix[i][j] = count;
         } else {
-          confusionMatrix[i][j] = 0;
+          matrix[i][j] = 0;
         }
         j++;
       }
       i++;
     }    
-    return confusionMatrix;
+    return matrix;
   }
   
 }
