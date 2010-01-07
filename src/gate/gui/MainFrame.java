@@ -986,6 +986,9 @@ public class MainFrame extends JFrame implements ProgressListener,
                      .getLrInstances("gate.corpora.DocumentImpl"));
             setvar.invoke(gc, "prs",
                      Gate.getCreoleRegister().getPrInstances());
+            setvar.invoke(gc, "apps",
+                     Gate.getCreoleRegister().getAllInstances(
+                       "gate.creole.AbstractController"));
             setvar.invoke(gc, "factory", gate.Factory.class);
 
             run.invoke(gc);
