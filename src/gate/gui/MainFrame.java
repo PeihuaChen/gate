@@ -596,6 +596,23 @@ public class MainFrame extends JFrame implements ProgressListener,
     okBtn.setBackground(Color.white);
     splashBox.add(okBtn, constraints);
     splash = new Splash(this, splashBox);
+    // make Enter and Escape keys closing the splash window
+    splash.getRootPane().setDefaultButton(okBtn);
+    InputMap inputMap = ((JComponent)splash.getContentPane())
+      .getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+    ActionMap actionMap = ((JComponent)splash.getContentPane()).getActionMap();
+    inputMap.put(KeyStroke.getKeyStroke("ENTER"), "Apply");
+    actionMap.put("Apply", new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        splash.setVisible(false);
+      }
+    });
+    inputMap.put(KeyStroke.getKeyStroke("ESCAPE"), "Cancel");
+    actionMap.put("Cancel", new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        splash.setVisible(false);
+      }
+    });
 
     // MENUS
     menuBar = new JMenuBar();
