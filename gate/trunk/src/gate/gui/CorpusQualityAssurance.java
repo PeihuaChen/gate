@@ -276,8 +276,10 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     // when the measure tab selection change
     measureTabbedPane.addChangeListener(new ChangeListener() {
       public void stateChanged(ChangeEvent e) {
+        JTabbedPane tabbedPane = (JTabbedPane) e.getSource();
+        int selectedTab = tabbedPane.getSelectedIndex();
         tableTabbedPane.removeAll();
-        if (measure2List.isShowing()) {
+        if (tabbedPane.getTitleAt(selectedTab).equals("F-Score")) {
           tableTabbedPane.addTab("Corpus statistics", null,
             new JScrollPane(annotationTable),
             "Compare each annotation type for the whole corpus");
@@ -792,10 +794,10 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         Set<Annotation> keysIter = new HashSet<Annotation>();
         Set<Annotation> responsesIter = new HashSet<Annotation>();
         for (String type : types) {
-          if (keys instanceof AnnotationSet && !types.isEmpty()) {
+          if (!keys.isEmpty() && !types.isEmpty()) {
             keysIter = ((AnnotationSet)keys).get(type);
           }
-          if (responses instanceof AnnotationSet && !types.isEmpty()) {
+          if (!responses.isEmpty() && !types.isEmpty()) {
             responsesIter = ((AnnotationSet)responses).get(type);
           }
           differ = new AnnotationDiffer();
@@ -804,7 +806,8 @@ public class CorpusQualityAssurance extends AbstractVisualResource
           differsByType.put(type, differ);
         }
         differsByDocThenType.add(differsByType);
-      } else { // the second set of measures is selected
+      } else if (!keys.isEmpty() && !responses.isEmpty()) {
+        // the second set of measures is selected
         ClassificationMeasures classificationMeasures =
           new ClassificationMeasures();
         classificationMeasures.createConfusionMatrix(
@@ -828,8 +831,8 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         SortedSet<String> features = new TreeSet<String>(
           classificationMeasures.getFeatureValues());
         for (int i = confusionTableModel.getColumnCount();
-             i < features.size(); i++) {     // if necessary
-          confusionTableModel.addColumn(""); // increase columns count
+             i < (features.size() + 1); i++) { // if necessary
+          confusionTableModel.addColumn("");   // increase columns count
         }
         confusionTableModel.addRow(new Object[]{" "}); // empty row spacer
         confusionTableModel.addRow(new Object[]{ // document name
