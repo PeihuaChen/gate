@@ -197,7 +197,7 @@ public class ClassificationMeasures {
         }
 
         if (howManyCoextensiveAnnotations == 0) {
-          Out.prln("ContingencyTable: Annotation with no counterpart" +
+          Out.prln("ClassificationMeasures: Annotation with no counterpart" +
             " detected!");
         } else if (howManyCoextensiveAnnotations == 1) {
 
@@ -234,7 +234,7 @@ public class ClassificationMeasures {
 
           }
         } else if (howManyCoextensiveAnnotations > 1) {
-          Out.prln("ContingencyTable: Same span annotations detected!" +
+          Out.prln("ClassificationMeasures: Same span annotations detected!" +
             " Ignoring.");
         }
       }
@@ -246,12 +246,12 @@ public class ClassificationMeasures {
   }
   
   /**
-   * Given a list of ContingencyTables, this will combine to make
+   * Given a list of ClassificationMeasures, this will combine to make
    * a megatable. Then you can use kappa getters to get micro average
    * figures for the entire set.
    * @param tables tables to combine
    */
-  private void combineConfusionMatrices(ArrayList<ClassificationMeasures> tables)
+  public void combineConfusionMatrices(ArrayList<ClassificationMeasures> tables)
   {
     /* A hash of hashes for the actual values.
      * This will later be converted to a 2D float array for

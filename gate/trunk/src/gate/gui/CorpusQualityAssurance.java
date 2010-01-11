@@ -290,7 +290,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
           tableTabbedPane.addTab("Document statistics", null,
             new JScrollPane(document2Table),
             "Compare each documents in the corpus with theirs annotations");
-          tableTabbedPane.addTab("Confusion Matrix", null,
+          tableTabbedPane.addTab("Confusion Matrices", null,
             new JScrollPane(confusionTable), "Describe how annotations in" +
               " one set are classified in the other and vice versa.");
         }
@@ -749,6 +749,8 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     }});
     differsByDocThenType.clear();
     documentNames.clear();
+    ArrayList<ClassificationMeasures> classificationMeasuresList =
+      new ArrayList<ClassificationMeasures>();
     // for each document
     for (int row = 0; row < corpus.size(); row++) {
       boolean documentWasLoaded = corpus.isDocumentLoaded(row);
@@ -806,6 +808,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
           differsByType.put(type, differ);
         }
         differsByDocThenType.add(differsByType);
+
       } else if (!keys.isEmpty() && !responses.isEmpty()) {
         // the second set of measures is selected
         ClassificationMeasures classificationMeasures =
@@ -814,7 +817,9 @@ public class CorpusQualityAssurance extends AbstractVisualResource
           (AnnotationSet) keys, (AnnotationSet) responses,
           (String) typeList.getSelectedValue(),
           (String) featureList.getSelectedValue());
+        classificationMeasuresList.add(classificationMeasures);
         ArrayList<Object> values = new ArrayList<Object>();
+        // fill the document table
         values.add(documentNames.get(documentNames.size()-1));
         List<Object> selectedMeasures =
           Arrays.asList(measure2List.getSelectedValues());
@@ -828,6 +833,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
           values.add(f.format(classificationMeasures.getKappaPi()));
         }
         document2TableModel.addRow(values.toArray());
+        // fill the confusion matrices table
         SortedSet<String> features = new TreeSet<String>(
           classificationMeasures.getFeatureValues());
         for (int i = confusionTableModel.getColumnCount();
@@ -847,7 +853,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
           values.add(features.first()); // row header
           features.remove(features.first());
           for (float confusionValue : confusionValues) { // confusion values
-            values.add(f.format(confusionValue));
+            values.add(String.valueOf((int) confusionValue));
           }
           confusionTableModel.addRow(values.toArray());
         }
@@ -856,6 +862,39 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       SwingUtilities.invokeLater(new Runnable(){ public void run(){
         progressBar.setValue(progressValue);
       }});
+    }
+    if (!classificationMeasuresList.isEmpty()) {
+      // add summary rows to the document table
+      List<Object> selectedMeasures =
+        Arrays.asList(measure2List.getSelectedValues());
+      ArrayList<Object> values = new ArrayList<Object>();
+      values.add("Macro summary");
+      float sum;
+      for (int col = 1; col < document2TableModel.getColumnCount(); col++) {
+        sum = 0;
+        for (int row = 0; row < document2TableModel.getRowCount(); row++) {
+          sum += Float.parseFloat((String)
+            document2TableModel.getValueAt(row, col));
+        }
+        values.add(f.format(sum / document2TableModel.getRowCount()));
+      }
+      document2TableModel.addRow(values.toArray());
+      values.clear();
+      ClassificationMeasures classificationMeasures =
+        new ClassificationMeasures();
+      classificationMeasures.combineConfusionMatrices(
+        classificationMeasuresList);
+      values.add("Micro summary");
+      if (selectedMeasures.contains("Observed agreement")) {
+        values.add(f.format(classificationMeasures.getObservedAgreement()));
+      }
+      if (selectedMeasures.contains("Cohen's Kappa")) {
+        values.add(f.format(classificationMeasures.getKappaCohen()));
+      }
+      if (selectedMeasures.contains("Pi's Kappa")) {
+        values.add(f.format(classificationMeasures.getKappaPi()));
+      }
+      document2TableModel.addRow(values.toArray());
     }
     SwingUtilities.invokeLater(new Runnable(){ public void run(){
       progressBar.setValue(progressBar.getMinimum());
@@ -964,7 +1003,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
             return f.format(getMeasureValue(columnIndex, differ, COLUMN_COUNT));
         }
       } else if (rowIndex == types.size()) {
-        // get the sum counts and average measures by type
+        // average measures by document
         switch(columnIndex) {
           case COL_ANNOTATION:
             return "Macro summary";
@@ -982,7 +1021,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
             return f.format(sumDbl / types.size());
         }
       } else if (rowIndex == types.size() + 1) {
-        // get the sum counts and average measures by corpus
+        // sum counts and recalculate measures like the corpus is one document
         switch(columnIndex) {
           case COL_ANNOTATION:
             return "Micro summary";
@@ -1088,7 +1127,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
             return f.format(getMeasureValue(columnIndex, differ, COLUMN_COUNT));
         }
       } else if (rowIndex == differsByDocThenType.size()) {
-        // get the sum counts and average measures by document
+        // average measures by document
         switch(columnIndex) {
           case COL_DOCUMENT:
             return "Macro summary";
@@ -1105,7 +1144,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
             return f.format(sumDbl / differsByDocThenType.size());
         }
       } else if (rowIndex == differsByDocThenType.size() + 1) {
-        // get the sum counts and average measures by corpus
+        // sum counts and recalculate measures like the corpus is one document
         switch(columnIndex) {
           case COL_DOCUMENT:
             return "Micro summary";
