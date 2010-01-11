@@ -65,6 +65,7 @@ public class BootStrapDialog extends JDialog{
 
   JButton    createResourceButton = null;
   JButton    cancelButton = null;
+  JButton    helpButton = null;
 
   JFileChooser fileChooser = null;
 
@@ -255,11 +256,13 @@ public class BootStrapDialog extends JDialog{
 
     // init createresource
     createResourceButton = new JButton("Finish");
+    getRootPane().setDefaultButton(createResourceButton);
     // init cancel
     cancelButton = new JButton("Cancel");
+    helpButton = new JButton("Help");
     fileChooser = new JFileChooser();
 
-    // ARANGE the components
+    // Arrange the components
     // Put all those components at their place
     Box mainBox = new Box(BoxLayout.Y_AXIS);
 
@@ -323,6 +326,8 @@ public class BootStrapDialog extends JDialog{
     tmpBox.add(createResourceButton);
     tmpBox.add(Box.createRigidArea(new Dimension(25,0)));
     tmpBox.add(cancelButton);
+    tmpBox.add(Box.createRigidArea(new Dimension(25,0)));
+    tmpBox.add(helpButton);
     tmpBox.add(Box.createHorizontalGlue());
     mainBox.add(tmpBox);
 
@@ -370,14 +375,22 @@ public class BootStrapDialog extends JDialog{
    createResourceButton.addActionListener(new java.awt.event.ActionListener(){
       public void actionPerformed(ActionEvent e){
         doCreateResource();
-      }//actionPerformed
+      }
    });
 
    cancelButton.addActionListener(new java.awt.event.ActionListener(){
       public void actionPerformed(ActionEvent e){
         thisBootStrapDialog.setVisible(false);
         BootStrapDialog.this.dispose();
-      }//actionPerformed
+      }
+   });
+
+   helpButton.addActionListener(new java.awt.event.ActionListener(){
+      public void actionPerformed(ActionEvent e){
+        MainFrame.getInstance().showHelpFrame(
+          "http://gate.ac.uk/userguide/sec:api:bootstrap",
+          "gate.gui.BootStrapDialog");
+      }
    });
 
    resourceTypesComboBox.addActionListener(new ActionListener(){
@@ -385,7 +398,7 @@ public class BootStrapDialog extends JDialog{
         String selectedItem =(String) resourceTypesComboBox.getSelectedItem();
         possibleInterfaces = (String)resourceTypes.get(selectedItem);
         interfacesTextField.setText(possibleInterfaces);
-      }// actionPerformed();
+      }
    });
 
    chooseFolderButton.addActionListener(new java.awt.event.ActionListener(){
@@ -402,16 +415,26 @@ public class BootStrapDialog extends JDialog{
       }//actionPerformed
    });
 
-    // add F1 help keystroke
+    // define keystrokes action bindings at the level of the main window
     InputMap inputMap = ((JComponent)this.getContentPane()).
       getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
     ActionMap actionMap = ((JComponent)this.getContentPane()).getActionMap();
+    inputMap.put(KeyStroke.getKeyStroke("ENTER"), "Apply");
+    actionMap.put("Apply", new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        createResourceButton.doClick();
+      }
+    });
+    inputMap.put(KeyStroke.getKeyStroke("ESCAPE"), "Cancel");
+    actionMap.put("Cancel", new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        cancelButton.doClick();
+      }
+    });
     inputMap.put(KeyStroke.getKeyStroke("F1"), "Help");
     actionMap.put("Help", new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
-        MainFrame.getInstance().showHelpFrame(
-          "http://gate.ac.uk/userguide/sec:howto:bootstrap",
-          "gate.gui.BootStrapDialog");
+        helpButton.doClick();
       }
     });
   }//initListeners
