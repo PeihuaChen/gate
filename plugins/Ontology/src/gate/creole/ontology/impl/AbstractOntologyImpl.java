@@ -618,7 +618,7 @@ public abstract class AbstractOntologyImpl
      * */
     RDFProperty exists = getProperty(aPropertyURI);
     if(exists != null) {
-      if(exists instanceof DatatypeProperty) {
+      if(exists instanceof AnnotationProperty) {
         Utils.warning(aPropertyURI.toString() + " already exists");
         return (AnnotationProperty)exists;
       }
