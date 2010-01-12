@@ -546,21 +546,15 @@ public class MainFrame extends JFrame implements ProgressListener,
     splashBox.setLayout(new GridBagLayout());
     GridBagConstraints constraints = new GridBagConstraints();
     constraints.weightx = 1;
-    constraints.weighty = 0;
     constraints.insets = new Insets(2, 2, 2, 2);
     constraints.gridy = 0;
     constraints.fill = GridBagConstraints.BOTH;
-    // constraints.gridx = GridBagConstraints.RELATIVE;
-    constraints.anchor = GridBagConstraints.CENTER;
-    constraints.gridwidth = 1;
-    constraints.gridheight = 1;
 
     JLabel gifLbl = new JLabel(getIcon("splash"));
     splashBox.add(gifLbl, constraints);
 
     constraints.gridy = 2;
     constraints.gridwidth = 2;
-    constraints.anchor = GridBagConstraints.CENTER;
     constraints.fill = GridBagConstraints.HORIZONTAL;
     String splashHtml;
     try {
@@ -587,30 +581,30 @@ public class MainFrame extends JFrame implements ProgressListener,
     constraints.gridy = 4;
     constraints.gridwidth = 2;
     constraints.fill = GridBagConstraints.NONE;
-    JButton okBtn = new JButton("OK");
-    okBtn.addActionListener(new ActionListener() {
+    final JButton okButton = new JButton("OK");
+    okButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         splash.setVisible(false);
       }
     });
-    okBtn.setBackground(Color.white);
-    splashBox.add(okBtn, constraints);
+    okButton.setBackground(Color.white);
+    splashBox.add(okButton, constraints);
     splash = new Splash(this, splashBox);
     // make Enter and Escape keys closing the splash window
-    splash.getRootPane().setDefaultButton(okBtn);
+    splash.getRootPane().setDefaultButton(okButton);
     InputMap inputMap = ((JComponent)splash.getContentPane())
       .getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
     ActionMap actionMap = ((JComponent)splash.getContentPane()).getActionMap();
     inputMap.put(KeyStroke.getKeyStroke("ENTER"), "Apply");
     actionMap.put("Apply", new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
-        splash.setVisible(false);
+        okButton.doClick();
       }
     });
     inputMap.put(KeyStroke.getKeyStroke("ESCAPE"), "Cancel");
     actionMap.put("Cancel", new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
-        splash.setVisible(false);
+        okButton.doClick();
       }
     });
 
