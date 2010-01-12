@@ -15,6 +15,8 @@
 package gate.gui;
 
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
@@ -25,38 +27,45 @@ import javax.swing.border.EtchedBorder;
  * initialises. The implementation uses a {@link java.awt.Window} (a Frame with
  * no decorations such as bar or buttons) and can either display a JComponent
  * as content or an image.
+ * When clicked it is hidden.
  */
 public class Splash extends JWindow {
 
   /**
    * Constructor from owner, GraphicsConfiguration and content.
    */
-  public Splash(Window owner, GraphicsConfiguration gc, JComponent content) {
+  public Splash(Window owner, GraphicsConfiguration gc, final JComponent content) {
     super(owner, gc);
     getContentPane().setLayout(new BorderLayout());
     content.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
     getContentPane().add(content, BorderLayout.CENTER);
+    content.addMouseListener(new MouseAdapter() {
+      public void mouseClicked(MouseEvent e) {
+        // when the content pane is clicked, hide it
+        setVisible(false);
+      }
+    });
     validate();
     pack();
-  }// public Splash(Window owner, JComponent content)
+  }
 
   public Splash(Window owner,  JComponent content) {
     this(owner, null, content);
   }
   
   /**
-   * Contructor from image.
+   * Constructor from image.
    */
   public Splash(String imageResourcePath) {
     this(null, imageResourcePath);
-  }// public Splash(String imageResourcePath)
+  }
 
   /**
    * Constructor from content.
    */
   public Splash(JComponent content) {
     this(null, content);
-  }// public Splash(JComponent content)
+  }
 
   /**
    * Constructor from owner and image.
@@ -64,7 +73,7 @@ public class Splash extends JWindow {
   public Splash(Window owner, String imageResourcePath) {
     this(owner,
         new JLabel(new ImageIcon(Splash.class.getResource(imageResourcePath))));
-  }// public Splash(Window owner, String imageResourcePath)
+  }
 
   /**
    * Displays the splash screen centered in the owner's space or centered on
@@ -96,6 +105,5 @@ public class Splash extends JWindow {
     setLocation(ownerLocation.x + (ownerSize.width - frameSize.width) / 2,
                 ownerLocation.y + (ownerSize.height - frameSize.height) / 2);
     super.setVisible(true);
-  }// public void show()
-
-}// class Splash
+  }
+}
