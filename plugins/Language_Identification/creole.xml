@@ -10,7 +10,7 @@
 			<PARAMETER NAME="document" RUNTIME="true" COMMENT="The document to be processed.">gate.Document</PARAMETER>
 			<PARAMETER NAME="languageFeatureName" RUNTIME="true"
 				COMMENT="The name of the document language feature."
-				OPTIONAL="true" DEFAULT="language">java.lang.String</PARAMETER>
+				OPTIONAL="true" DEFAULT="LANGUAGE">java.lang.String</PARAMETER>
 		</RESOURCE>
 	</CREOLE>
 </CREOLE-DIRECTORY>
