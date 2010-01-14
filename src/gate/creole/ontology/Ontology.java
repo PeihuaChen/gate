@@ -208,6 +208,8 @@ public interface Ontology extends LanguageResource {
    * is returned. Files loaded as imports are not considered for this.
    * If and how this is set automatically when an ontology LR
    * is created depends on the implementation.
+   * For an ontology LR that connects to an existing ontology repository,
+   * an URL derived from the ontology repository location may be returned.
    * 
    * @return the URL of this ontology if set, or null otherwise
    */
