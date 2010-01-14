@@ -244,7 +244,7 @@ public class XmlDocumentFormat extends TextualDocumentFormat {
 
     XmlDocumentHandler xmlDocHandler = null;
     try {
-      // use Excerces XML parser with JAXP
+      // use Xerces XML parser with JAXP
       // System.setProperty("javax.xml.parsers.SAXParserFactory",
       // "org.apache.xerces.jaxp.SAXParserFactoryImpl");
       // Get a parser factory.
@@ -282,27 +282,32 @@ public class XmlDocumentFormat extends TextualDocumentFormat {
       newxmlParser.setDTDHandler(xmlDocHandler);
       newxmlParser.setEntityResolver(xmlDocHandler);
       // Parse the XML Document with the appropriate encoding
-      InputSource is;
-
-      if(docHasContentButNoValidURL) {
-        // no URL, so parse from string
-        is = new InputSource(new StringReader(doc.getContent().toString()));
+      Reader docReader = null;
+      try{
+        InputSource is;
+        if(docHasContentButNoValidURL) {
+          // no URL, so parse from string
+          is = new InputSource(new StringReader(doc.getContent().toString()));
+        }
+        else if(doc instanceof TextualDocument) {
+          // textual document - load with user specified encoding
+          String docEncoding = ((TextualDocument)doc).getEncoding();
+          docReader = new InputStreamReader(doc.getSourceUrl()
+                  .openStream(), docEncoding);
+          is = new InputSource(docReader);
+          // must set system ID to allow relative URLs (e.g. to a DTD) to
+          // work
+          is.setSystemId(doc.getSourceUrl().toString());
+        }
+        else {
+          // let the parser decide the encoding
+          is = new InputSource(doc.getSourceUrl().toString());
+        }
+        newxmlParser.parse(is);
+      }finally{
+        //make sure the open streams are closed
+        if(docReader != null) docReader.close();
       }
-      else if(doc instanceof TextualDocument) {
-        // textual document - load with user specified encoding
-        String docEncoding = ((TextualDocument)doc).getEncoding();
-        Reader docReader = new InputStreamReader(doc.getSourceUrl()
-                .openStream(), docEncoding);
-        is = new InputSource(docReader);
-        // must set system ID to allow relative URLs (e.g. to a DTD) to
-        // work
-        is.setSystemId(doc.getSourceUrl().toString());
-      }
-      else {
-        // let the parser decide the encoding
-        is = new InputSource(doc.getSourceUrl().toString());
-      }
-      newxmlParser.parse(is);
       // Angel - end
       ((DocumentImpl)doc).setNextAnnotationId(xmlDocHandler
               .getCustomObjectsId());
