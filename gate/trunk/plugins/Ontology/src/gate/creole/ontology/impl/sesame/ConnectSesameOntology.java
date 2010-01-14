@@ -125,13 +125,15 @@ public class ConnectSesameOntology  extends OntologyLR
     } else if(ouris.size() == 0) {
       System.err.println("Error: several ontology URIs found, could not set default name space");
     }
+
+    this.setURL(getSourceURL());
     logger.debug("Initializing complete");
   }
 
 
   public java.net.URL getSourceURL() {
     try {
-      return new java.net.URL(getRepositoryLocation() + "/" + getRepositoryID());
+      return new java.net.URL(getRepositoryLocation() + "/repositories/" + getRepositoryID());
     } catch (MalformedURLException ex) {
       return null;
     }
