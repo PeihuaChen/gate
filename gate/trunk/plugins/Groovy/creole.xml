@@ -4,7 +4,7 @@
     <!-- creole.xml for Groovy resources -->
     <RESOURCE>
       <JAR>groovy.jar</JAR>
-      <JAR>lib/groovy-all-1.7.0.jar</JAR>
+      <JAR>lib/groovy-all-1.6.3.jar</JAR>
       <NAME>Groovy scripting PR</NAME>
       <CLASS>gate.groovy.ScriptPR</CLASS>
       <COMMENT>Provides a Groovy scripting PR.</COMMENT>
