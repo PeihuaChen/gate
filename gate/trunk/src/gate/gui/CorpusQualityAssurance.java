@@ -74,6 +74,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     confusionTableModel = new DefaultTableModel();
     types = new TreeSet<String>(collator);
     corpusChanged = false;
+    selectedMeasures = FSCORE_MEASURES;
     doubleComparator = new Comparator<String>() {
       public int compare(String s1, String s2) {
         if (s1 == null || s2 == null) {
@@ -196,7 +197,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       new String[]{"Observed agreement", "Cohen's Kappa" , "Pi's Kappa"}));
     measure2List.setPrototypeCellValue("present in every document");
     measure2List.setVisibleRowCount(3);
-    JTabbedPane measureTabbedPane = new JTabbedPane();
+    measureTabbedPane = new JTabbedPane();
     measureTabbedPane.addTab("F-Score", null,
       new JScrollPane(measureList), "Inter-annotator agreement");
     measureTabbedPane.addTab("Classification", null,
@@ -273,30 +274,6 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       new JScrollPane(documentTable),
       "Compare each documents in the corpus with theirs annotations");
 
-    // when the measure tab selection change
-    measureTabbedPane.addChangeListener(new ChangeListener() {
-      public void stateChanged(ChangeEvent e) {
-        JTabbedPane tabbedPane = (JTabbedPane) e.getSource();
-        int selectedTab = tabbedPane.getSelectedIndex();
-        tableTabbedPane.removeAll();
-        if (tabbedPane.getTitleAt(selectedTab).equals("F-Score")) {
-          tableTabbedPane.addTab("Corpus statistics", null,
-            new JScrollPane(annotationTable),
-            "Compare each annotation type for the whole corpus");
-          tableTabbedPane.addTab("Document statistics", null,
-            new JScrollPane(documentTable),
-            "Compare each documents in the corpus with theirs annotations");
-        } else {
-          tableTabbedPane.addTab("Document statistics", null,
-            new JScrollPane(document2Table),
-            "Compare each documents in the corpus with theirs annotations");
-          tableTabbedPane.addTab("Confusion Matrices", null,
-            new JScrollPane(confusionTable), "Describe how annotations in" +
-              " one set are classified in the other and vice versa.");
-        }
-      }
-    });
-
     JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
     splitPane.setContinuousLayout(true);
     splitPane.setOneTouchExpandable(true);
@@ -307,7 +284,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     add(splitPane);
   }
 
-  protected void initListeners(){
+  protected void initListeners() {
 
     // when the view is shown update the tables if the corpus has changed
     addAncestorListener(new AncestorListener() {
@@ -459,15 +436,58 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       }
     });
 
+    // when the measure tab selection change
+    measureTabbedPane.addChangeListener(new ChangeListener() {
+      public void stateChanged(ChangeEvent e) {
+        JTabbedPane tabbedPane = (JTabbedPane) e.getSource();
+        int selectedTab = tabbedPane.getSelectedIndex();
+        tableTabbedPane.removeAll();
+        openDocumentAction.setEnabled(false);
+        openAnnotationDiffAction.setEnabled(false);
+        if (tabbedPane.getTitleAt(selectedTab).equals("F-Score")) {
+          selectedMeasures = FSCORE_MEASURES;
+          tableTabbedPane.addTab("Corpus statistics", null,
+            new JScrollPane(annotationTable),
+            "Compare each annotation type for the whole corpus");
+          tableTabbedPane.addTab("Document statistics", null,
+            new JScrollPane(documentTable),
+            "Compare each documents in the corpus with theirs annotations");
+        } else {
+          selectedMeasures = CLASSIFICATION_MEASURES;
+          tableTabbedPane.addTab("Document statistics", null,
+            new JScrollPane(document2Table),
+            "Compare each documents in the corpus with theirs annotations");
+          tableTabbedPane.addTab("Confusion Matrices", null,
+            new JScrollPane(confusionTable), "Describe how annotations in" +
+              " one set are classified in the other and vice versa.");
+        }
+      }
+    });
+
     // enable/disable toolbar icons according to the document table selection
     documentTable.getSelectionModel().addListSelectionListener(
       new ListSelectionListener() {
         public void valueChanged(ListSelectionEvent e) {
           if (e.getValueIsAdjusting()) { return; }
           boolean enabled = documentTable.getSelectedRow() != -1
-            && !((String)documentTable.getValueAt(
+            && !((String)documentTableModel.getValueAt(
               documentTable.getSelectedRow(),
               DocumentTableModel.COL_DOCUMENT)).endsWith("summary");
+          openDocumentAction.setEnabled(enabled);
+          openAnnotationDiffAction.setEnabled(enabled);
+        }
+      }
+    );
+
+    // enable/disable toolbar icons according to the document 2 table selection
+    document2Table.getSelectionModel().addListSelectionListener(
+      new ListSelectionListener() {
+        public void valueChanged(ListSelectionEvent e) {
+          if (e.getValueIsAdjusting()) { return; }
+          boolean enabled = document2Table.getSelectedRow() != -1
+            && !((String)document2TableModel.getValueAt(
+              document2Table.getSelectedRow(),
+              0)).endsWith("summary");
           openDocumentAction.setEnabled(enabled);
           openAnnotationDiffAction.setEnabled(enabled);
         }
@@ -776,7 +796,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         corpus.unloadDocument(document);
         Factory.deleteResource(document);
       }
-      if (measureList.isShowing()) { // the first set of measures is selected
+      if (selectedMeasures == FSCORE_MEASURES) {
         types.clear();
         for (Object type : typeList.getSelectedValues()) {
           types.add((String) type);
@@ -809,8 +829,8 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         }
         differsByDocThenType.add(differsByType);
 
-      } else if (!keys.isEmpty() && !responses.isEmpty()) {
-        // the second set of measures is selected
+      } else if (selectedMeasures == CLASSIFICATION_MEASURES
+             && !keys.isEmpty() && !responses.isEmpty()) {
         ClassificationMeasures classificationMeasures =
           new ClassificationMeasures();
         classificationMeasures.createConfusionMatrix(
@@ -834,29 +854,9 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         }
         document2TableModel.addRow(values.toArray());
         // fill the confusion matrices table
-        SortedSet<String> features = new TreeSet<String>(
-          classificationMeasures.getFeatureValues());
-        for (int i = confusionTableModel.getColumnCount();
-             i < (features.size() + 1); i++) { // if necessary
-          confusionTableModel.addColumn("");   // increase columns count
-        }
-        confusionTableModel.addRow(new Object[]{" "}); // empty row spacer
-        confusionTableModel.addRow(new Object[]{ // document name
-          documentNames.get(documentNames.size()-1)});
-        values.clear();
-        values.add("");
-        values.addAll(features);
-        confusionTableModel.addRow(values.toArray()); // first row headers
-        for (float[] confusionValues :
-            classificationMeasures.getConfusionMatrix()) {
-          values.clear();
-          values.add(features.first()); // row header
-          features.remove(features.first());
-          for (float confusionValue : confusionValues) { // confusion values
-            values.add(String.valueOf((int) confusionValue));
-          }
-          confusionTableModel.addRow(values.toArray());
-        }
+        printConfusionMatrices(classificationMeasures, confusionTableModel,
+          confusionTableModel.getRowCount()-1,
+          documentNames.get(documentNames.size()-1));
       }
       final int progressValue = row + 1;
       SwingUtilities.invokeLater(new Runnable(){ public void run(){
@@ -895,6 +895,9 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         values.add(f.format(classificationMeasures.getKappaPi()));
       }
       document2TableModel.addRow(values.toArray());
+      // fill the confusion matrices table
+      printConfusionMatrices(classificationMeasures, confusionTableModel,
+        0, "Whole corpus");
     }
     SwingUtilities.invokeLater(new Runnable(){ public void run(){
       progressBar.setValue(progressBar.getMinimum());
@@ -911,6 +914,42 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     if (progressValuePrevious > -1) {
       // restart the thread where it was interrupted
       readSetsTypesFeatures(progressValuePrevious);
+    }
+  }
+
+  /**
+   * Print the confusion matrix from classificationMeasures in the
+   * tableModel at the insertionRow row.
+   * @param classificationMeasures contain the data
+   * @param tableModel table where to print
+   * @param insertionRow row where to start printing
+   * @param title matrix title
+   */
+  protected void printConfusionMatrices(
+      ClassificationMeasures classificationMeasures,
+      DefaultTableModel tableModel, int insertionRow, String title) {
+    SortedSet<String> features = new TreeSet<String>(
+      classificationMeasures.getFeatureValues());
+    for (int i = tableModel.getColumnCount();
+         i < (features.size() + 1); i++) { // if necessary
+      tableModel.addColumn("");   // increase columns count
+    }
+    if (insertionRow < 0) { insertionRow = 0; }
+    tableModel.insertRow(insertionRow++, new Object[]{" "}); // spacer
+    tableModel.insertRow(insertionRow++, new Object[]{title});// title
+    ArrayList<Object> values = new ArrayList<Object>();
+    values.add("");
+    values.addAll(features);
+    tableModel.insertRow(insertionRow++, values.toArray()); // headers
+    for (float[] confusionValues :
+      classificationMeasures.getConfusionMatrix()) {
+      values.clear();
+      values.add(features.first()); // header
+      features.remove(features.first());
+      for (float confusionValue : confusionValues) { // confusion values
+        values.add(String.valueOf((int) confusionValue));
+      }
+      tableModel.insertRow(insertionRow++, values.toArray());
     }
   }
 
@@ -1218,7 +1257,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       setEnabled(false);
 
       Runnable runnable = new Runnable() { public void run() {
-      if (measureList.isShowing()) { // the first set of measures is selected
+      if (selectedMeasures == FSCORE_MEASURES) {
         compareAnnotation(); // do all the computation
         // update data
         documentTableModel.updateColumns();
@@ -1250,7 +1289,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
           setEnabled(true);
         }});
 
-      } else { // the second set of measures is selected
+      } else if (selectedMeasures == CLASSIFICATION_MEASURES) {
         document2TableModel = new DefaultTableModel();
         document2TableModel.addColumn("Document");
         for (Object measure : measure2List.getSelectedValues()) {
@@ -1286,9 +1325,13 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       putValue(MNEMONIC_KEY, KeyEvent.VK_UP);
     }
     public void actionPerformed(ActionEvent e){
-      Document doc = (Document) corpus.get(
-        documentTable.rowViewToModel(documentTable.getSelectedRow()));
-      MainFrame.getInstance().select(doc);
+      final Document document = (Document)
+        corpus.get(selectedMeasures == FSCORE_MEASURES ?
+          documentTable.rowViewToModel(documentTable.getSelectedRow())
+        : document2Table.rowViewToModel(document2Table.getSelectedRow()));
+      SwingUtilities.invokeLater( new Runnable() { public void run() {
+        MainFrame.getInstance().select(document);
+      }});
     }
   }
 
@@ -1300,8 +1343,11 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       putValue(MNEMONIC_KEY, KeyEvent.VK_RIGHT);
     }
     public void actionPerformed(ActionEvent e){
-      String documentName = (String) documentTable.getValueAt(
-        documentTable.getSelectedRow(), DocumentTableModel.COL_DOCUMENT);
+      Document document = (Document)
+        corpus.get(selectedMeasures == FSCORE_MEASURES ?
+          documentTable.rowViewToModel(documentTable.getSelectedRow())
+        : document2Table.rowViewToModel(document2Table.getSelectedRow()));
+      String documentName = document.getName();
       String annotationType = (String) typeList.getSelectedValue();
       Set<String> featureSet = new HashSet<String>();
       for (Object feature : featureList.getSelectedValues()) {
@@ -1461,6 +1507,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
   protected JList setList;
   protected JList typeList;
   protected JList featureList;
+  protected JTabbedPane measureTabbedPane;
   protected JList measureList;
   protected JList measure2List;
   protected JCheckBox setCheck;
@@ -1482,4 +1529,8 @@ public class CorpusQualityAssurance extends AbstractVisualResource
   protected static final int COL_RECALL = 0;
   protected static final int COL_PRECISION = 1;
   protected static final int COL_FMEASURE = 2;
+  /** FSCORE_MEASURES or CLASSIFICATION_MEASURES */
+  protected int selectedMeasures;
+  protected static final int FSCORE_MEASURES = 0;
+  protected static final int CLASSIFICATION_MEASURES = 1;
 }
