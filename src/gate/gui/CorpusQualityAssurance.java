@@ -70,7 +70,8 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     annotationTableModel = new AnnotationTableModel();
     document2TableModel = new DefaultTableModel();
     document2TableModel.addColumn("Document");
-    document2TableModel.addColumn("Measure");
+    document2TableModel.addColumn("Agreed");
+    document2TableModel.addColumn("Total");
     confusionTableModel = new DefaultTableModel();
     types = new TreeSet<String>(collator);
     corpusChanged = false;
@@ -362,7 +363,9 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         typesSelected = null;
         setList.setEnabled(true);
         setCheck.setEnabled(true);
-        compareAction.setEnabled(true);
+        if (selectedMeasures == FSCORE_MEASURES) {
+          compareAction.setEnabled(true);
+        }
       }
     });
 
@@ -436,6 +439,15 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       }
     });
 
+    // when type list selection change
+    featureList.addListSelectionListener(new ListSelectionListener() {
+      public void valueChanged(ListSelectionEvent e) {
+        if (selectedMeasures == CLASSIFICATION_MEASURES) {
+          compareAction.setEnabled(featureList.getSelectedIndex() != -1);
+        }
+      }
+    });
+
     // when the measure tab selection change
     measureTabbedPane.addChangeListener(new ChangeListener() {
       public void stateChanged(ChangeEvent e) {
@@ -445,6 +457,8 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         openDocumentAction.setEnabled(false);
         openAnnotationDiffAction.setEnabled(false);
         if (tabbedPane.getTitleAt(selectedTab).equals("F-Score")) {
+          compareAction.setEnabled(keySetName != null
+                           && responseSetName != null);
           selectedMeasures = FSCORE_MEASURES;
           tableTabbedPane.addTab("Corpus statistics", null,
             new JScrollPane(annotationTable),
@@ -453,6 +467,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
             new JScrollPane(documentTable),
             "Compare each documents in the corpus with theirs annotations");
         } else {
+          compareAction.setEnabled(featureList.getSelectedIndex() != -1);
           selectedMeasures = CLASSIFICATION_MEASURES;
           tableTabbedPane.addTab("Document statistics", null,
             new JScrollPane(document2Table),
@@ -841,6 +856,10 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         ArrayList<Object> values = new ArrayList<Object>();
         // fill the document table
         values.add(documentNames.get(documentNames.size()-1));
+        values.add(String.valueOf((int)
+          classificationMeasures.getAgreedTrials()));
+        values.add(String.valueOf((int)
+          classificationMeasures.getTotalTrials()));
         List<Object> selectedMeasures =
           Arrays.asList(measure2List.getSelectedValues());
         if (selectedMeasures.contains("Observed agreement")) {
@@ -1292,6 +1311,8 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       } else if (selectedMeasures == CLASSIFICATION_MEASURES) {
         document2TableModel = new DefaultTableModel();
         document2TableModel.addColumn("Document");
+        document2TableModel.addColumn("Agreed");
+        document2TableModel.addColumn("Total");
         for (Object measure : measure2List.getSelectedValues()) {
           document2TableModel.addColumn(measure);
         }
@@ -1397,44 +1418,40 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         fw.write("<H1>Corpus Quality Assurance</H1>" + nl);
         fw.write("<P>Corpus: " + corpus.getName() + "<BR>" + nl);
         fw.write("Key set: " + keySetName + "<BR>" + nl);
-        fw.write("Response set: " + responseSetName + "</P>" + nl);
+        fw.write("Response set: " + responseSetName + "<BR>" + nl);
+        fw.write("Types: "
+          + Strings.toString(typeList.getSelectedValues()) + "<BR>" + nl);
+        fw.write("Features: "
+          + Strings.toString(featureList.getSelectedValues()) + "</P>" + nl);
         fw.write("<P>&nbsp;</P>" + nl);
 
-        // annotation table
-        fw.write(BEGINTABLE + nl + "<TR>" + nl);
-        for(int col = 0; col < annotationTable.getColumnCount(); col++){
-          fw.write("<TH align=\"left\">"
-            + annotationTable.getColumnName(col) + "</TH>" + nl);
+        ArrayList<JTable> tablesToExport = new ArrayList<JTable>();
+        if (selectedMeasures == FSCORE_MEASURES) {
+          tablesToExport.add(annotationTable);
+          tablesToExport.add(documentTable);
+        } else if (selectedMeasures == CLASSIFICATION_MEASURES) {
+          tablesToExport.add(document2Table);
+          tablesToExport.add(confusionTable);
         }
-        fw.write("</TR>" + nl);
-        for(int row = 0; row < annotationTableModel.getRowCount(); row ++){
-          fw.write("<TR>" + nl);
-          for(int col = 0; col < annotationTable.getColumnCount(); col++){
-            fw.write("<TD>"
-              + annotationTable.getValueAt(row, col) + "</TD>" + nl);
+        for (JTable table : tablesToExport) {
+          fw.write(BEGINTABLE + nl + "<TR>" + nl);
+          for(int col = 0; col < table.getColumnCount(); col++){
+            fw.write("<TH align=\"left\">"
+              + table.getColumnName(col) + "</TH>" + nl);
           }
           fw.write("</TR>" + nl);
-        }
-        fw.write(ENDTABLE + nl);
-
-        fw.write("<P>&nbsp;</P>" + nl);
-
-        // document table
-        fw.write(BEGINTABLE + nl + "<TR>" + nl);
-        for(int col = 0; col < documentTable.getColumnCount(); col++){
-          fw.write("<TH align=\"left\">"
-            + documentTable.getColumnName(col) + "</TH>" + nl);
-        }
-        fw.write("</TR>" + nl);
-        for(int row = 0; row < documentTable.getRowCount(); row ++){
-          fw.write("<TR>" + nl);
-          for(int col = 0; col < documentTable.getColumnCount(); col++){
-            fw.write("<TD>"
-              + documentTable.getValueAt(row, col) + "</TD>" + nl);
+          for(int row = 0; row < table.getRowCount(); row ++){
+            fw.write("<TR>" + nl);
+            for(int col = 0; col < table.getColumnCount(); col++){
+              String value = (String) table.getValueAt(row, col);
+              if (value == null) { value = ""; }
+              fw.write("<TD>" + value  + "</TD>" + nl);
+            }
+            fw.write("</TR>" + nl);
           }
-          fw.write("</TR>" + nl);
+          fw.write(ENDTABLE + nl);
+          fw.write("<P>&nbsp;</P>" + nl);
         }
-        fw.write(ENDTABLE + nl);
 
         fw.write(ENDHTML + nl);
         fw.flush();
