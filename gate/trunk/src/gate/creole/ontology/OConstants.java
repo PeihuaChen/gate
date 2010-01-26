@@ -424,10 +424,20 @@ public interface OConstants {
   /// ***********************************
   /// Closure types 
   /// ***********************************
-  /** denotes a direct closure(no transitivity) */
+
+  /**
+   * The set of entities directly connected.
+   * 
+   * @deprecated use {@link Closure} instead.
+   */
   @Deprecated
   public static final byte DIRECT_CLOSURE = 0;
-  /** denotes atransitive closure */
+
+  /**
+   * The set of entities directly or indirectly connected.
+   *
+   * @deprecated use {@link Closure} instead.
+   */
   @Deprecated
   public static final byte TRANSITIVE_CLOSURE = 1;
 
@@ -435,8 +445,8 @@ public interface OConstants {
    * Closure constants. 
    */
   public static enum Closure {
-
-    DIRECT_CLOSURE, TRANSITIVE_CLOSURE
+    DIRECT_CLOSURE,
+    TRANSITIVE_CLOSURE
   }
   /// Default base URI
   public static final String ONTOLOGY_DEFAULT_BASE_URI = "http://gate.ac.uk/owlim#";
