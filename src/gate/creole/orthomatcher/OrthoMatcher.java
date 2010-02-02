@@ -109,14 +109,12 @@ implements ANNIEConstants{
    *  This is needed, because organizations can share
    *  first/last tokens like News and be different
    */
-  private   boolean allMatchingNeeded = false;
+  protected boolean allMatchingNeeded = false;
 
   //** Orthomatching is not case-sensitive by default*/
   protected boolean caseSensitive = false;
 
   protected FeatureMap queryFM = Factory.newFeatureMap();
-
-//protected ExecutionException executionException;
 
   // name lookup tables (used for namematch)
   //gave them bigger default size, coz rehash is expensive
@@ -136,9 +134,12 @@ implements ANNIEConstants{
   protected HashMap tokensMap = new HashMap(150);
   protected HashMap normalizedTokensMap = new HashMap(150);
 
-  protected Annotation shortAnnot, longAnnot;
+  protected Annotation shortAnnot;
+  protected Annotation longAnnot;
 
-  protected ArrayList<Annotation> tokensLongAnnot, tokensShortAnnot;
+  protected ArrayList<Annotation> tokensLongAnnot;
+  protected ArrayList<Annotation> tokensShortAnnot;
+  
   protected ArrayList<Annotation> normalizedTokensLongAnnot, normalizedTokensShortAnnot;
 
   /** a feature map to be used when retrieving annotations
@@ -160,7 +161,9 @@ implements ANNIEConstants{
   /** The encoding used for the definition file and associated lists.*/
   private String encoding;
 
-  private Map<String,HashSet<String>> nicknameMap;
+  protected Map<String,HashSet<String>> nicknameMap;
+  
+  private Map<Integer,OrthoMatcherRule> rules=new HashMap();
 
   /** @link dependency */
   /*#OrthoMatcher lnkOrthoMatcher;*/
@@ -172,6 +175,35 @@ implements ANNIEConstants{
     annotationTypes.add("Date");
   }
 
+  /** Initialise the rules. The orthomatcher loads its build-in rules. */
+  private void initRules(){
+	  //this line should be executed after spur_match is loaded
+	  rules.put(0,  new MatchRule0(this));
+	  rules.put(1,  new MatchRule1(this));
+	  rules.put(2,  new MatchRule2(this));
+	  rules.put(3,  new MatchRule3(this));
+	  rules.put(4,  new MatchRule4(this));
+	  rules.put(5,  new MatchRule5(this));
+	  rules.put(6,  new MatchRule6(this));
+	  rules.put(7,  new MatchRule7(this));
+	  rules.put(8,  new MatchRule8(this));
+	  rules.put(9,  new MatchRule9(this));
+	  rules.put(10, new MatchRule10(this));
+	  rules.put(11, new MatchRule11(this));
+	  rules.put(12, new MatchRule12(this));
+	  rules.put(13, new MatchRule13(this));
+	  rules.put(14, new MatchRule14(this));
+	  rules.put(15, new MatchRule15(this));
+	  rules.put(16, new MatchRule16(this));
+	  rules.put(17, new MatchRule17(this));
+
+  }
+  
+  /** Override this method to add, replace, remove rules */
+  protected void modifyRules(Map<Integer,OrthoMatcherRule> rules) {
+	  
+  }
+  
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
     //initialise the list of annotations which we will match
@@ -210,6 +242,9 @@ implements ANNIEConstants{
         System.err.println("WARNING: "+
                 "No entry for nickname provided in definition file!");
       }
+      
+      initRules();
+      modifyRules(rules);
 
     }catch(IOException ioe){
       throw new ResourceInstantiationException(ioe);
@@ -359,7 +394,7 @@ implements ANNIEConstants{
         Integer id = nameAnnot.getId();
 
         // get string and value
-        String annotString = getStringForAnnotation(nameAnnot, document);
+        String annotString = OrthoMatcherHelper.getStringForAnnotation(nameAnnot, document);
 
         //convert to lower case if we are not doing a case sensitive match
         if (!caseSensitive)
@@ -368,7 +403,7 @@ implements ANNIEConstants{
         if (DEBUG) {
           if (log.isDebugEnabled()) {
             log.debug("Now processing the annotation:  "
-                    + getStringForAnnotation(nameAnnot, document) + " Id: " + nameAnnot.getId() 
+                    + OrthoMatcherHelper.getStringForAnnotation(nameAnnot, document) + " Id: " + nameAnnot.getId() 
                     + " Type: " + nameAnnot.getType() + " Offset: " + nameAnnot.getStartNode().getOffset());
           }
         }
@@ -381,7 +416,7 @@ implements ANNIEConstants{
         if (tokens.isEmpty()) {
           if (log.isDebugEnabled()) {
             log.debug("Didn't find any tokens for the following annotation.  We will be unable to perform coref on this annotation.  \n String:  "
-                    + getStringForAnnotation(nameAnnot, document) + " Id: " + nameAnnot.getId() + " Type: " + nameAnnot.getType());
+                    + OrthoMatcherHelper.getStringForAnnotation(nameAnnot, document) + " Id: " + nameAnnot.getId() + " Type: " + nameAnnot.getType());
           }
           continue;
         }
@@ -463,7 +498,7 @@ implements ANNIEConstants{
       Annotation unknown = iter.next();
 
       // get string and value
-      String unknownString = getStringForAnnotation(unknown, document);
+      String unknownString = OrthoMatcherHelper.getStringForAnnotation(unknown, document);
       //convert to lower case if we are not doing a case sensitive match
       if (!caseSensitive)
         unknownString = unknownString.toLowerCase();
@@ -488,7 +523,7 @@ implements ANNIEConstants{
         Annotation matchedAnnot = updateMatches(unknown, unknownString);
         if (matchedAnnot == null) {
           log.info("Unable to find the annotation: " +
-                  getStringForAnnotation(unknown, document) +
+        		  OrthoMatcherHelper.getStringForAnnotation(unknown, document) +
           " in matchUnknown");
         }
         else {
@@ -690,11 +725,11 @@ implements ANNIEConstants{
         return;
       }
       else {
-        String updateAnnotString = getStringForAnnotation(updateAnnot, document).toLowerCase();
+        String updateAnnotString = OrthoMatcherHelper.getStringForAnnotation(updateAnnot, document).toLowerCase();
         for (Integer nextId : matchesList) {
           Annotation a = nameAllAnnots.get(nextId);
 
-          if (fuzzyMatch(getStringForAnnotation(a, document),updateAnnotString)) {
+          if (OrthoMatcherHelper.fuzzyMatch(nicknameMap,OrthoMatcherHelper.getStringForAnnotation(a, document),updateAnnotString)) {
             if (DEBUG) {
               log.debug("propogateProperty: " + featureName + " " + value + " from: " + updateAnnot.getId() + " to: " + a.getId());
             }
@@ -705,24 +740,6 @@ implements ANNIEConstants{
     }
     catch (Exception e) {
       log.error("Error in propogatePropertyToExactMatchingMatches", e);
-    }
-  }
-
-  static private String getStringForAnnotation(Annotation a, gate.Document d) throws ExecutionException {
-    String annotString = getStringForSpan(a.getStartNode().getOffset(),a.getEndNode().getOffset(), d);
-    // now do the reg. exp. substitutions
-    annotString = annotString.replaceAll("\\s+", " ");
-
-    return annotString;
-  }
-
-  static private String getStringForSpan(Long start, Long end,gate.Document d) throws ExecutionException {
-    try {
-      return d.getContent().getContent(start, end).toString();
-    }
-    catch (InvalidOffsetException e) {
-      log.error("Weird offset exception in getStringForSpan", e);
-      throw new ExecutionException(e);
     }
   }
 
@@ -1218,16 +1235,16 @@ implements ANNIEConstants{
       longName = name2;
       shortName = name1;
     }
-    if (matchRule0(longName,shortName)) {
+    if (rules.get(0).value(longName,shortName)) {//matchRule0(longName,shortName)
       return false;
     }
     else {
-      if (longName.equals(shortName) || matchRule2(longName, shortName) ||
-              matchRule3(longName, shortName)) {
+      if (longName.equals(shortName) || rules.get(2).value(longName, shortName) ||
+              rules.get(3).value(longName, shortName)) {
         return true;
       }
       else {
-        return (matchRule1Name(longName, shortName,true, true));
+        return (rules.get(0).value(longName, shortName));
         // boolean throwAway[] = new boolean[17];
         // return basic_person_match_criteria(shortName,longName,throwAway);
         // The above doesn't work because basic_person_match_criteria is reliant on the global
@@ -1247,18 +1264,11 @@ implements ANNIEConstants{
    */
   private boolean basic_person_match_criteria(String shortName,
           String longName, boolean mr[]) {
-    if (  (mr[1] = matchRule1Name(longName, shortName,true, true))
-            ||   // For 4, 5, 14, and 15, need to mark shorter annot
-            (mr[4] = matchRule4Name(longName, shortName))
-            ||
-            (mr[5] = matchRule5(longName, shortName))
-            ||
-            (mr[12] = matchRule12Name(longName, shortName))
-            ||
-            (mr[14] = matchRule14(longName, shortName))
-            || //kalina: added this, so it matches names when contain more
-            //than one first and one last name
-            (mr[15] = matchRule15(longName, shortName))) {
+    
+    if ( // For 4, 5, 14, and 15, need to mark shorter annot
+         //kalina: added 16, so it matches names when contain more than one first and one last name
+          OrthoMatcherHelper.ExecuteDisjunction(rules, new int[] {1,5,6,13,15,16},longName,shortName,mr)
+       ) {
       return true;
     }
     return false;
@@ -1270,63 +1280,37 @@ implements ANNIEConstants{
           String longName,Annotation prevAnnot,
           Annotation followAnnot,
           boolean longerPrevious) {
-    boolean mr[] = new boolean[17];
+    boolean mr[] = new boolean[rules.size()];
     // first apply rule for spurious matches i.e. rule0
     if (DEBUG) {
       log.debug("Now matching " + longName + "(id: " + longAnnot.getId() + ") to "
               + shortName + "(id: " + shortAnnot.getId() + ")");
     }
-    if (matchRule0(longName, shortName))
+    
+    if (rules.get(0).value(longName,shortName))
       return false;
     if (
             (// rules for all annotations
-                    //no longer use rule1, coz I do the check for same string via the
-                    //hash table
-                    (mr[2] = matchRule2(longName, shortName))
-                    ||
-                    (mr[3] = matchRule3(longName, shortName))
+                    //no longer use rule1, coz I do the check for same string via the hash table
+                    OrthoMatcherHelper.ExecuteDisjunction(rules, new int[] {2,3},longName,shortName,mr)
+
             ) // rules for all annotations
             ||
             (// rules for organisation annotations
-                    ( annotationType.equals(organizationType)
-                            //ACE addition
-                            || annotationType.equals("Facility"))
-                            &&
-                            // Should basically only match when you have a match of all tokens other than
-                            // CDG's and function words
-                            ((  !highPrecisionOrgs &&  (
-                                    (mr[4] = matchRule4(longName, shortName))
-                                    ||
-                                    (mr[5]=   matchRule5(longName, shortName))
-                                    ||
-                                    (mr[6] =matchRule6(longName, shortName))
-                                    ||
-                                    (mr[7] = matchRule7(longName, shortName))
-                                    ||
-//                                  matchRule8(longName, shortName)
-//                                  ||
-                                    (mr[9] = matchRule9(longName, shortName))
-                                    ||
-                                    (mr[10] = matchRule10(longName, shortName))
-                                    ||
-                                    (mr[11]= matchRule11(longName, shortName))
-                                    ||
-                                    (mr[12]= matchRule12(longName, shortName))
-                                    ||
-                                    (mr[13] = matchRule13(shortName, longName)))
-                            ) ||
-                            (highPrecisionOrgs &&
-                                    (mr[6] =matchRule6(longName, shortName))
-                                    ||
-                                    (mr[7] = matchRule7(longName, shortName))
-                                    ||
-                                    (mr[10] = matchRule10(longName, shortName))
-                                    ||
-                                    (mr[11]= matchRule11(longName, shortName))
-                                    ||
-                                    (mr[16]= matchRule16(longName, shortName))
-                            )
-                            ))) {// rules for organisation annotations
+               (annotationType.equals(organizationType)
+                    //ACE addition
+                    || annotationType.equals("Facility")
+               )
+               &&
+               // Should basically only match when you have a match of all tokens other than
+               // CDG's and function words
+               (
+                 (!highPrecisionOrgs && OrthoMatcherHelper.ExecuteDisjunction(rules,new int[] {4,6,7,8,9,10,11,12,14},longName,shortName,mr)) 
+                 ||
+                 (highPrecisionOrgs && OrthoMatcherHelper.ExecuteDisjunction(rules,new int[] {7,8,10,11,17},longName,shortName,mr))
+                )
+            )
+       ) {// rules for organisation annotations
       return true;
     }
 
@@ -1436,772 +1420,6 @@ implements ANNIEConstants{
 
   } //isUnknownGender
 
-  /** RULE #0: If the two names are listed in table of
-   * spurius matches then they do NOT match
-   * Condition(s): -
-   * Applied to: all name annotations
-   */
-  public boolean matchRule0(String s1,
-          String s2) {
-    if (spur_match.containsKey(s1)
-            && spur_match.containsKey(s2) )
-      return
-      spur_match.get(s1).toString().equals(spur_match.get(s2).toString());
-
-    return false;
-  }//matchRule0
-
-  /** RULE #1: If the two names are identical then they are the same
-   * no longer used, because I do the check for same string via the
-   * hash table of previous annotations
-   * Condition(s): depend on case
-   * Applied to: annotations other than names
-   */
-  public boolean matchRule1(String s1,
-          String s2,
-          boolean matchCase) {
-//  Out.prln("Rule1: Matching " + s1 + "and " + s2);
-
-    boolean matched = false;
-    if (!matchCase)
-      matched = s1.equalsIgnoreCase(s2);
-    else matched =  s1.equals(s2) ;
-//  kalina: do not remove, nice for debug
-//  if (matched && (s2.startsWith("Kenneth") || s1.startsWith("Kenneth")))
-//  Out.prln("Rule1: Matched " + s1 + "and " + s2);
-    return matched;
-  }//matchRule1
-
-  public boolean matchRule1Name(String s1,
-          String s2,
-          boolean matchCase, boolean logResult) {
-    boolean retVal = matchRule1(s1, s2, matchCase);
-    //if straight compare didn't work, try a little extra logic
-    if (!retVal)
-      retVal = fuzzyMatch(s1, s2);
-
-    if (logResult && retVal && log.isDebugEnabled()) {
-      log.debug("rule1Name matched " + s1 + "(id: " + longAnnot.getId() + ") to "
-              + s2+ "(id: " + shortAnnot.getId() + ")");
-    }
-    return retVal;
-  }//matchRule1Name
-
-
-  /**
-   * RULE #2: if the two names are listed as equivalent in the
-   * lookup table (alias) then they match
-   * Condition(s): -
-   * Applied to: all name annotations
-   */
-  public boolean matchRule2(String s1,
-          String s2) {
-
-    if (alias.containsKey(s1) && alias.containsKey(s2)) {
-      if (alias.get(s1).toString().equals(alias.get(s2).toString())) {
-        if (log.isDebugEnabled())
-          log.debug("rule2 matched " + s1 + " to " + s2);
-        return true;
-      }
-    }
-
-    return false;
-  }//matchRule2
-
-  /**
-   * RULE #3: adding a possessive at the end
-   * of one name causes a match
-   * e.g. "Standard and Poor" == "Standard and Poor's"
-   * and also "Standard and Poor" == "Standard's"
-   * Condition(s): case-insensitive match
-   * Applied to: all name annotations
-   */
-  public boolean matchRule3(String s1, //long string
-          String s2) { //short string
-
-    if (s2.endsWith("'s") || s2.endsWith("'")
-            ||(s1.endsWith("'s")|| s1.endsWith("'"))) {
-
-
-      String s2_poss = null;
-
-      if (!s2.endsWith("'s")) s2_poss = s2.concat("'s");
-      else s2_poss = s2.concat("'");
-
-      if (s2_poss != null && matchRule1(s1, s2_poss,caseSensitive)) {
-        if (log.isDebugEnabled())
-          log.debug("rule3 matched " + s1 + " to " + s2);
-        return true;
-      }
-
-      // now check the second case i.e. "Standard and Poor" == "Standard's"
-      String token = (String)
-      ((Annotation) tokensLongAnnot.get(0)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-
-      if (!token.endsWith("'s")) s2_poss = token.concat("'s");
-      else s2_poss = token.concat("'");
-
-      if (s2_poss != null && matchRule1(s2_poss,s2,caseSensitive)) {
-        if (log.isDebugEnabled())
-          log.debug("rule3 matched " + s1 + " to " + s2);
-        return true;
-      }
-
-    } // if (s2.endsWith("'s")
-    return false;
-  }//matchRule3
-
-  /**
-   * RULE #4: Does the first non-punctuation token from the long string match
-   * the first token from the short string?
-   * e.g. "fred jones" == "fred"
-   * Condition(s): case-insensitive match
-   * Applied to: person annotations
-   *
-   * Modified by Andrew Borthwick, Spock Networks:  Disallow stop words
-   */
-  public boolean matchRule4(String s1,
-          String s2) {
-
-    boolean allTokensMatch = true;
-    // Out.prln("MR4:  Matching" + s1 + " with " + s2);
-
-    Iterator tokensLongAnnotIter = tokensLongAnnot.iterator();
-    Iterator tokensShortAnnotIter = tokensShortAnnot.iterator();
-    while (tokensLongAnnotIter.hasNext() && tokensShortAnnotIter.hasNext()) {
-      Annotation token = (Annotation) tokensLongAnnotIter.next();
-      if (((String)token.getFeatures().get(TOKEN_KIND_FEATURE_NAME)).equals(PUNCTUATION_VALUE) ||
-              token.getFeatures().containsKey("ortho_stop"))
-        continue;
-      if (! ((String)(((Annotation) tokensShortAnnotIter.next()).
-              getFeatures().get(TOKEN_STRING_FEATURE_NAME))).equals(
-                      (String) token.getFeatures().get(TOKEN_STRING_FEATURE_NAME))) {
-        allTokensMatch = false;
-        break;
-      } // if (!tokensLongAnnot.nextToken()
-    } // while
-//  if (allTokensMatch)
-//  Out.prln("rule4 fired. result is: " + allTokensMatch);
-    if (allTokensMatch && log.isDebugEnabled())
-      log.debug("rule4 matched " + s1 + "(id: " + longAnnot.getId() + ") to " + s2+ "(id: " + shortAnnot.getId() + ")");
-    return allTokensMatch;
-  }//matchRule4
-
-  /**
-   * RULE #4Name: Does all the non-punctuation tokens from the long string match the corresponding tokens 
-   * in the short string?  
-   * This basically identifies cases where the two strings match token for token, excluding punctuation
-   * Applied to: person annotations
-   *
-   * Modified by Andrew Borthwick, Spock Networks:  Allowed for nickname match
-   */
-  public boolean matchRule4Name(String s1,
-          String s2) {
-    boolean allTokensMatch = true;
-//    if (s1.equals("wilson")) {
-//      log.debug("MR4 Name: Matching" + tokensLongAnnot + " with " + tokensShortAnnot);
-//      log.debug("MR4 Name: Matching " + s1 + " with " + s2);
-//    }  
-    if (tokensLongAnnot.size() == 0 || tokensShortAnnot.size() == 0) {
-      log.debug("Rule4n rejecting " + s1 + " and " + s2 + " because one doesn't have any tokens");
-      return false;
-    }
-    Iterator tokensLongAnnotIter = tokensLongAnnot.iterator();
-    Iterator tokensShortAnnotIter = tokensShortAnnot.iterator();
-    while (tokensLongAnnotIter.hasNext() && tokensShortAnnotIter.hasNext()) {
-      Annotation token = (Annotation) tokensLongAnnotIter.next();
-      if (((String)token.getFeatures().get(TOKEN_KIND_FEATURE_NAME)).equals(PUNCTUATION_VALUE))
-        continue;
-      if (! fuzzyMatch((String)(((Annotation) tokensShortAnnotIter.next()).
-              getFeatures().get(TOKEN_STRING_FEATURE_NAME)),
-              (String) token.getFeatures().get(TOKEN_STRING_FEATURE_NAME))) {
-        allTokensMatch = false;
-        break;
-      }
-    }
-    if (allTokensMatch && log.isDebugEnabled())
-      log.debug("rule4n matched " + s1 + "(id: " + longAnnot.getId() + ", offset: " + longAnnot.getStartNode().getOffset() + ") to " + 
-                                    s2+  "(id: " + shortAnnot.getId() + ", offset: " + shortAnnot.getStartNode().getOffset() + ")");
-    return allTokensMatch;
-  }//matchRule4Name
-
-  /**
-   * RULE #5: if the 1st token of one name
-   * matches the second name
-   * e.g. "Pepsi Cola" == "Pepsi"
-   * Condition(s): case-insensitive match
-   * Applied to: all name annotations
-   *
-   * Note that we don't want to use nicknames here because you don't use nicknames for last names
-   */
-  public boolean matchRule5(String s1,
-          String s2) {
-
-    //do not match numbers by this rule
-    if (tokensLongAnnot.size()> 1 &&
-            ((Annotation) tokensLongAnnot.get(0)).getFeatures().get("kind").equals("number"))
-      return false;
-
-//  if (s1.startsWith("Patrick") || s2.startsWith("Patrick")) {
-//  Out.prln("Rule 5: " + s1 + "and " + s2);
-//  }
-
-    //require that when matching person names, the shorter one to be of length 1
-    //for the rule to apply. In other words, avoid matching Peter Smith and
-    //Peter Kline, because they share a Peter token.
-    if ( (shortAnnot.getType().equals(personType)
-            || longAnnot.getType().equals(personType)
-    )
-    &&
-    tokensShortAnnot.size()>1
-    )
-      return false;
-
-    if (tokensLongAnnot.size()<=1)
-      return false;
-    if (((Annotation) tokensShortAnnot.get(0)).getFeatures().containsKey("ortho_stop")) {
-      return false;
-    }
-    boolean result = matchRule1((String)
-            ((Annotation) tokensLongAnnot.get(0)
-            ).getFeatures().get(TOKEN_STRING_FEATURE_NAME),
-            s2,
-            caseSensitive);
-    if (result && log.isDebugEnabled())
-      log.debug("rule5 matched " + s1 + " to " + s2);
-    return result;
-
-  }//matchRule5
-
-  /**
-   * RULE #6: if one name is the acronym of the other
-   * e.g. "Imperial Chemical Industries" == "ICI"
-   * Applied to: organisation annotations only
-   */
-  public boolean matchRule6(String s1,
-          String s2) {
-
-    int i = 0;
-
-    //check and if the shorted string has a space in it, then it's not
-    //an acronym
-    if (s2.indexOf(" ") > 0)
-      return false;
-
-    // Abbreviations of one-word names are very rare and can lead to weird errors
-    if (tokensLongAnnot.size() <= 1) {
-      return false;
-    }
-
-    //Out.prln("Acronym: Matching " + s1 + "and " + s2);
-    StringBuffer acronym_s1 = new StringBuffer("");
-    StringBuffer acronymDot_s1 = new StringBuffer("");
-
-    for ( ;i < tokensLongAnnot.size(); i++ ) {
-      String toAppend = ( (String) ((Annotation) tokensLongAnnot.get(i)
-      ).getFeatures().get(TOKEN_STRING_FEATURE_NAME)).substring(0,1);
-      acronym_s1.append(toAppend);
-      acronymDot_s1.append(toAppend);
-      acronymDot_s1.append(".");
-    }
-
-    //Out.prln("Acronym dot: To Match " + acronymDot_s1 + "and " + s2);
-    //Out.prln("Result: " + matchRule1(acronymDot_s1.toString(),s2,caseSensitive));
-
-    if (matchRule1(acronym_s1.toString(),s2,caseSensitive) ||
-            matchRule1(acronymDot_s1.toString(),s2,caseSensitive) )
-      return true;
-
-    return false;
-  }//matchRule6
-
-  /**
-   * RULE #7: if one of the tokens in one of the
-   * names is in the list of separators eg. "&"
-   * then check if the token before the separator
-   * matches the other name
-   * e.g. "R.H. Macy & Co." == "Macy"
-   * Condition(s): case-sensitive match
-   * Applied to: organisation annotations only
-   */
-  public boolean matchRule7(String s1,
-          String s2) {
-
-    //don't try it unless the second string is just one token
-    if (tokensShortAnnot.size() != 1)
-      return false;
-
-    String previous_token = null;
-
-    for (int i = 0;  i < tokensLongAnnot.size(); i++ ) {
-      if (connector.containsKey( ((Annotation) tokensLongAnnot.get(i)
-      ).getFeatures().get(TOKEN_STRING_FEATURE_NAME) )) {
-        previous_token = (String) ((Annotation) tokensLongAnnot.get(i-1)
-        ).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-
-        break;
-      }
-    }
-
-    //now match previous_token with other name
-    if (previous_token != null) {
-//    if (s1.equalsIgnoreCase("chin") || s2.equalsIgnoreCase("chin"))
-//    Out.prln("Rule7");
-      return matchRule1(previous_token,s2,caseSensitive);
-
-    }
-    return false;
-  }//matchRule7
-
-  /**
-   * This rule is now obsolete, as The and the trailing CDG
-   * are stripped before matching.
-   * DO NOT CALL!!!
-   *
-   * RULE #8: if the names match, ignoring The and
-   * and trailing company designator (which have already been stripped)
-   * e.g. "The Magic Tricks Co." == "Magic Tricks"
-   * Condition(s): case-sensitive match
-   * Applied to: organisation annotations only
-   */
-  public boolean matchRule8(String s1,
-          String s2) {
-    Out.prln("OrthoMatcher warning: This rule has been discontinued!");
-    /*
-    if (s1.startsWith("The ")) s1 = s1.substring(4);
-    if (s2.startsWith("The ")) s2 = s2.substring(4);
-
-    // check that cdg is not empty
-    if (!cdg.isEmpty()) {
-      String stringToTokenize1 = s1;
-      StringTokenizer tokensLongAnnot = new StringTokenizer(stringToTokenize1," ");
-
-      String stringToTokenize2 = s2;
-      StringTokenizer tokensShortAnnot = new StringTokenizer(stringToTokenize2," ");
-      String token = null;
-      String cdg1 = null;
-      String cdg2 = null;
-
-      s1 = "";
-      s2 = "";
-
-      //check last token of s1
-      while (tokensLongAnnot.hasMoreTokens()) {
-        token = tokensLongAnnot.nextToken();
-        if (!tokensLongAnnot.hasMoreTokens()
-            && cdg.contains(token)) cdg1=token;
-        else s1 = s1+token;
-      }
-
-      // do the same for s2
-      while (tokensShortAnnot.hasMoreTokens()) {
-        token = tokensShortAnnot.nextToken();
-        if (!tokensShortAnnot.hasMoreTokens()
-          && cdg.contains(token)) cdg2=token;
-        else s2 = s2+token;
-      }
-
-      // if the company designators are different
-      // then they are NOT the same organisations
-      if ((cdg1!=null && cdg2!=null)
-    && !cdg1.equalsIgnoreCase(cdg2)) return false;
-    }
-    if (!s1.equals("") && !s2.equals("")) return matchRule1(s1,s2,caseSensitive);
-     */
-    return false;
-
-  }//matchRule8
-
-  /**
-   * RULE #9: does one of the names match the token
-   * just before a trailing company designator
-   * in the other name?
-   * The company designator has already been chopped off,
-   * so the token before it, is in fact the last token
-   * e.g. "R.H. Macy Co." == "Macy"
-   * Applied to: organisation annotations only
-   */
-  public boolean matchRule9(String s1,
-          String s2) {
-
-//  if (s1.equalsIgnoreCase("news") || s2.equalsIgnoreCase("news"))
-//  Out.prln("Rule 9 " + s1 + " and " + s2);
-    String s1_short = (String)
-    ((Annotation) tokensLongAnnot.get(
-            tokensLongAnnot.size()-1)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-//  Out.prln("Converted to " + s1_short);
-    if (tokensLongAnnot.size()>1) {
-      boolean matched = matchRule1(s1_short, s2, caseSensitive);
-      //we need to make sure all names match, instead of assuming transitivity,
-      //to avoid matching BBC News with News then News with ITV News, which
-      //by transitivity leads to BBC News matching ITV News which is not what
-      //we want
-      if (matched)
-        allMatchingNeeded = true;
-      return matched;
-    } //if
-
-    return false;
-  }//matchRule9
-
-  /**
-   * RULE #10: is one name the reverse of the other
-   * reversing around prepositions only?
-   * e.g. "Department of Defence" == "Defence Department"
-   * Condition(s): case-sensitive match
-   * Applied to: organisation annotations only
-   */
-  public boolean matchRule10(String s1,
-          String s2) {
-
-    String token = null;
-    String previous_token = null;
-    String next_token = null;
-    boolean invoke_rule=false;
-
-    if (tokensLongAnnot.size() >= 3
-            && tokensShortAnnot.size() >= 2) {
-
-      // first get the tokens before and after the preposition
-      int i = 0;
-      for (; i< tokensLongAnnot.size(); i++) {
-        token = (String)
-        ((Annotation) tokensLongAnnot.get(i)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-        if (prepos.containsKey(token)) {
-          invoke_rule=true;
-          break;
-        }//if
-        previous_token = token;
-      }//while
-
-      if (! invoke_rule)
-        return false;
-
-      if (i < tokensLongAnnot.size()
-              && previous_token != null)
-        next_token= (String)
-        ((Annotation) tokensLongAnnot.get(i++)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-      else return false;
-
-      String s21 = (String)
-      ((Annotation) tokensShortAnnot.get(0)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-      String s22 = (String)
-      ((Annotation) tokensShortAnnot.get(1)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-      // then compare (in reverse) with the first two tokens of s2
-      if (matchRule1(next_token,(String) s21,caseSensitive)
-              && matchRule1(previous_token, s22,caseSensitive))
-        return true ;
-    }//if (tokensLongAnnot.countTokens() >= 3
-    return false;
-  }//matchRule10
-
-  /**
-   * RULE #11: does one name consist of contractions
-   * of the first two tokens of the other name?
-   * e.g. "Communications Satellite" == "ComSat"
-   * and "Pan American" == "Pan Am"
-   * Condition(s): case-sensitive match
-   * Applied to: organisation annotations only
-   */
-  public boolean matchRule11(String s1,
-          String s2) {
-
-
-    // first do the easy case e.g. "Pan American" == "Pan Am"
-
-    String token11 = null;
-    String token12 = null;
-    String token21 = null;
-    String token22 = null;
-
-    if (tokensLongAnnot.size() < 2)
-      return false;
-
-    // 1st get the first two tokens of s1
-    token11 = (String)
-    ((Annotation) tokensLongAnnot.get(0)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-    token12 = (String)
-    ((Annotation) tokensLongAnnot.get(1)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-
-    // now check for the first case i.e. "Pan American" == "Pan Am"
-    if (tokensShortAnnot.size() == 2)  {
-
-      token21 = (String)
-      ((Annotation) tokensShortAnnot.get(0)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-      token22 = (String)
-      ((Annotation) tokensShortAnnot.get(0)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-
-      if (token11.startsWith(token21)
-              && token12.startsWith(token22))
-        return true;
-
-    } // if (tokensShortAnnot.countTokens() == 2)
-
-    // now the second case e.g.  "Communications Satellite" == "ComSat"
-    else if (tokensShortAnnot.size()==1 && s2.length()>=3) {
-
-      // split the token into possible contractions
-      // ignore case for matching
-      for (int i=2;i<s2.length();i++) {
-        token21=s2.substring(0,i+1);
-        token22=s2.substring(i+1);
-
-        if (token11.startsWith(token21)
-                && token12.startsWith(token22))
-          return true;
-      }// for
-    } // else if
-
-    return false;
-  }//matchRule11
-
-  /**
-   * RULE #12: do the first and last tokens of one name
-   * match the first and last tokens of the other?
-   * Condition(s): case-sensitive match
-   * Applied to: organisation annotations only
-   */
-  public boolean matchRule12(String s1,
-          String s2) {
-
-    // first do the easy case e.g. "Pan American" == "Pan Am"
-
-    if (tokensLongAnnot.size()>1 && tokensShortAnnot.size()>1) {
-//    Out.prln("Rule 12");
-
-      // get first and last tokens of s1 & s2
-      String s1_first = (String)
-      ((Annotation) tokensLongAnnot.get(0)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-      String s2_first = (String)
-      ((Annotation) tokensShortAnnot.get(0)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-
-      if (!matchRule1(s1_first,s2_first,caseSensitive))
-        return false;
-
-      String s1_last = (String)
-      ((Annotation) tokensLongAnnot.get(tokensLongAnnot.size()-1)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-      String s2_last = (String)
-      ((Annotation) tokensShortAnnot.get(tokensShortAnnot.size()-1)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-
-      boolean retVal =  matchRule1(s1_last,s2_last,caseSensitive);
-      if (retVal && log.isDebugEnabled()) {
-        log.debug("rule12 matched " + s1 + "(id: " + longAnnot.getId() + ") to "
-                + s2+ "(id: " + shortAnnot.getId() + ")");
-      }
-      return retVal;
-      
-    } // if (tokensLongAnnot.countTokens()>1
-    return false;
-  }//matchRule12
-
-  /**
-   * RULE #12: do the first and last tokens of one name
-   * match the first and last tokens of the other?
-   * Condition(s): case-sensitive match
-   * Applied to: person annotations only
-   */
-  public boolean matchRule12Name(String s1,
-          String s2) {
-
-    // first do the easy case e.g. "Pan American" == "Pan Am"
-
-    if (tokensLongAnnot.size()>1 && tokensShortAnnot.size()>1) {
-//    Out.prln("Rule 12");
-
-      // get first and last tokens of s1 & s2
-      String s1_first = (String)
-      ((Annotation) tokensLongAnnot.get(0)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-      String s2_first = (String)
-      ((Annotation) tokensShortAnnot.get(0)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-
-      if (!(matchRule1Name(s1_first,s2_first,caseSensitive, false) || initialMatch(s1_first,s2_first)))
-        return false;
-
-      String s1_last = (String)
-      ((Annotation) tokensLongAnnot.get(tokensLongAnnot.size()-1)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-      String s2_last = (String)
-      ((Annotation) tokensShortAnnot.get(tokensShortAnnot.size()-1)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-
-      boolean retVal =  matchRule1(s1_last,s2_last,caseSensitive);
-      if (retVal && log.isDebugEnabled()) {
-        log.debug("rule12Name matched " + s1 + "(id: " + longAnnot.getId() + ") to "
-                + s2+ "(id: " + shortAnnot.getId() + ")");
-      }
-      return retVal;
-    } // if (tokensLongAnnot.countTokens()>1
-    return false;
-  }//matchRule12
-
-  /**
-   * RULE #13: do multi-word names match except for
-   * one token e.g.
-   * "Second Force Recon Company" == "Force Recon Company"
-   * Note that this rule has NOT been used in LaSIE's 1.5
-   * namematcher
-   * Restrictions: - remove cdg first
-   *               - shortest name should be 2 words or more
-   *               - if N is the number of tokens of the longest
-   *                 name, then N-1 tokens should be matched
-   * Condition(s): case-sensitive match
-   * Applied to: organisation or person annotations only
-   */
-  public boolean matchRule13(String s1,
-          String s2) {
-
-
-    String token1 = null;
-    String token2 = null;
-
-    int matched_tokens = 0, mismatches = 0;;
-
-    // if names < 2 words then rule is invalid
-    if (tokensLongAnnot.size() < 3 || tokensShortAnnot.size() < 2) return false;
-
-//  if (s1.equalsIgnoreCase("chin") || s2.equalsIgnoreCase("chin")) {
-//  Out.prln("Rule 13: Matching tokens" + tokensLongAnnot);
-//  Out.prln("with tokens " + tokensShortAnnot);
-//  }
-
-    // now do the matching
-    for (int i=0,j= 0; i < tokensShortAnnot.size() && mismatches < 2; i++) {
-
-//    Out.prln("i = " + i);
-//    Out.prln("j = " + j);
-      if ( ((Annotation) tokensLongAnnot.get(j)).getFeatures().get(TOKEN_STRING_FEATURE_NAME).equals(
-              ((Annotation) tokensShortAnnot.get(i)).getFeatures().get(TOKEN_STRING_FEATURE_NAME)) ) {
-        matched_tokens++;
-        j++;
-      } else
-        mismatches++;
-    } // for
-
-    if (matched_tokens >= tokensLongAnnot.size()-1)
-      return true;
-
-    return false;
-  }//matchRule13
-
-  /**
-   * RULE #14: if the last token of one name
-   * matches the second name
-   * e.g. "Hamish Cunningham" == "Cunningham"
-   * Condition(s): case-insensitive match
-   * Applied to: all person annotations
-   *
-   * Don't need to nicknames here
-   */
-  public boolean matchRule14(String s1,
-          String s2) {
-
-//  if (s1.equalsIgnoreCase("chin") || s2.equalsIgnoreCase("chin"))
-//  Out.prln("Rule 14 " + s1 + " and " + s2);
-    String s1_short = (String)
-    ((Annotation) tokensLongAnnot.get(
-            tokensLongAnnot.size()-1)).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-//  Out.prln("Converted to " + s1_short);
-    if (tokensLongAnnot.size()>1 && matchRule1(s1_short, s2, caseSensitive)) {
-      if (log.isDebugEnabled())
-        log.debug("rule14 matched " + s1 + "(id: " + longAnnot.getId() + ") to "  + s2 
-                + "(id: " + shortAnnot.getId() + ")");
-      return true;
-    }
-
-    return false;
-
-  }//matchRule14
-
-  /**
-   * RULE #15: Does every token in the shorter name appear in the longer name?
-   */
-  public boolean matchRule15(String s1,
-          String s2) {
-
-    //do a token-by-token test
-    Annotation token1, token2;
-    // catch (ExecutionException e) {}
-    for (int i=0; i < tokensShortAnnot.size(); i++) {
-      token1 = (Annotation) tokensShortAnnot.get(i);
-      //first check if not punctuation, because we need to skip it
-      if (token1.getFeatures().get(TOKEN_KIND_FEATURE_NAME).equals(PUNCTUATION_VALUE))
-        continue;
-
-      String ts1 = (String)token1.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-      boolean foundMatch = false;
-      for (int j=0; j<tokensLongAnnot.size(); j++) {
-        // Out.prln("i = " + i);
-        token2 = (Annotation) tokensLongAnnot.get(j);
-        if (token2.getFeatures().get(TOKEN_KIND_FEATURE_NAME).equals(PUNCTUATION_VALUE))
-          continue;
-
-        String ts2 = (String)token2.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-
-        if (i == 0 && j == 0) {
-          foundMatch = fuzzyMatch(ts1, ts2);
-        }
-        else {
-          if (caseSensitive) {
-            if (ts2.equals(ts1)) {
-              foundMatch = true;
-              break;
-            }
-          }
-          else {
-            if (ts2.equalsIgnoreCase(ts1)) {
-              foundMatch = true;
-              break;
-            }
-          }
-        }
-      }//for
-      //if no match for the current tokenShortAnnot, then it is not a coref of the
-      //longer annot
-      if (!foundMatch)
-        return false;
-    } // for
-
-    //only get to here if all word tokens in the short annot were found in
-    //the long annot, so there is a coref relation
-    if (log.isDebugEnabled())
-      log.debug("rule15 matched " + s1 + " to " + s2);
-    return true;
-  }//matchRule15
-
-  /**
-   * RULE #16: Conservative match rule
-   * Require every token in one name to match the other except for tokens that are on a stop word list
-   */
-  public boolean matchRule16(String s1,
-          String s2) {
-    if (allNonStopTokensInOtherAnnot(tokensLongAnnot,tokensShortAnnot)) {
-      return allNonStopTokensInOtherAnnot(tokensShortAnnot, tokensLongAnnot);
-    }
-    else {
-      return false;
-    }
-  }
-
-  /**
-   * @return true if all of the tokens in firstName are either found in second name or are stop words
-   */
-  private boolean allNonStopTokensInOtherAnnot(ArrayList<Annotation> firstName,ArrayList<Annotation> secondName) {
-    for (Annotation a : firstName) {
-      if (!a.getFeatures().containsKey("ortho_stop")) {
-        String aString = (String) a.getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-        boolean foundAMatchInSecond = false;
-        for (Annotation b: secondName) {
-          if (matchRule1(aString,(String) b.getFeatures().get(TOKEN_STRING_FEATURE_NAME),caseSensitive)) {
-            foundAMatchInSecond = true;
-            break;
-          }
-        }
-        if (!foundAMatchInSecond) {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-
   /**
   No Match Rule 1:
   Avoids the problem of matching
@@ -2271,8 +1489,8 @@ implements ANNIEConstants{
           getFeatures().get(TOKEN_STRING_FEATURE_NAME);
         String lastNameShort = (String) normalizedTokensShortAnnot.get(normalizedTokensShortAnnot.size() - 1).
           getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-        if (matchRule1Name(firstNameLong,firstNameShort,caseSensitive,false) && 
-                (matchRule1Name(lastNameLong,lastNameShort,caseSensitive,false))) {
+        if (rules.get(1).value(firstNameLong,firstNameShort) && 
+                (rules.get(1).value(lastNameLong,lastNameShort))) {
           // Must have a match on first and last name for this non-match rule to take effect when the number of tokens differs
           if (detectBadMiddleTokens(tokensLongAnnot) || detectBadMiddleTokens(tokensShortAnnot)) {
             // Exclude the William (Bill) H. Gates vs. William H. Gates case and the 
@@ -2298,8 +1516,8 @@ implements ANNIEConstants{
             s2_middle = s2_middle.toLowerCase();
           }
 //          log.debug("noMatchRule2 comparing substring " + s1_middle + " to " + s2_middle);
-          if (!(matchRule1Name(s1_middle,s2_middle,caseSensitive, false) ||
-                  initialMatch(s1_middle, s2_middle))) {
+          if (!(rules.get(1).value(s1_middle,s2_middle) ||
+        		  OrthoMatcherHelper.initialMatch(s1_middle, s2_middle))) {
             // We found a mismatching middle name
             retval = true;
             break;
@@ -2314,19 +1532,6 @@ implements ANNIEConstants{
     } // if (normalizedTokensLongAnnot.size()>2 && normalizedTokensShortAnnot.size()>2)
     return false; 
   }//noMatchRule2
-
-  /**
-   * Returns true if only one of s1 and s2 is a single character and the two strings match on that
-   * initial
-   * 
-   * @param s1  
-   * @param s2
-   * @return
-   */
-  private boolean initialMatch(String s1, String s2) {
-    return (((s1.length() == 1) ^ (s2.length() == 1) ) && (s1.charAt(0) == s2.charAt(0)));
-  }
-
 
   /** Tables for namematch info
    * (used by the namematch rules)
@@ -2368,27 +1573,7 @@ implements ANNIEConstants{
     }//if
   }//buildTables
 
-  public boolean fuzzyMatch (String s1, String s2) {
-    String s1Lower = s1.toLowerCase();
-    String s2Lower = s2.toLowerCase();
-    if (s1Lower.equals(s2Lower)) {
-      return true;
-    }
-    // System.out.println("Now comparing " + s1 + " | " + s2) ;
-    Set<String> formalNameSet = nicknameMap.get(s1Lower);
-    if (formalNameSet != null) {
-      if (formalNameSet.contains(s2Lower)) {
-        return true;
-      }
-    }
-    formalNameSet = nicknameMap.get(s2Lower);
-    if (formalNameSet != null) {
-      if (formalNameSet.contains(s1Lower)) {
-        return true;
-      }
-    }
-    return false;
-  }
+  
 
 
   public void setDefinitionFileURL(java.net.URL definitionFileURL) {
@@ -2431,8 +1616,4 @@ implements ANNIEConstants{
   static Pattern punctPat = Pattern.compile("[\\p{Punct}]+");
   // The UTF characters are right and left double and single curly quotes
   static Pattern badMiddleTokens = Pattern.compile("[\u201c\u201d\u2018\u2019\'\\(\\)\"]+|^de$|^von$");
-
-
-
 }
-
