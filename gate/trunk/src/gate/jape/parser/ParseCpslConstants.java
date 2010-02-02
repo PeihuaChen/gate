@@ -22,8 +22,8 @@ public interface ParseCpslConstants {
   int phasesCommentStart = 16;
   int phasesCommentChars = 17;
   int phasesCommentEnd = 18;
-  int phase = 19;
-  int javaimport = 20;
+  int javaimport = 19;
+  int phase = 20;
   int input = 21;
   int option = 22;
   int rule = 23;
@@ -86,8 +86,8 @@ public interface ParseCpslConstants {
     "<phasesCommentStart>",
     "<phasesCommentChars>",
     "<phasesCommentEnd>",
-    "\"Phase:\"",
     "\"Imports:\"",
+    "\"Phase:\"",
     "\"Input:\"",
     "\"Options:\"",
     "\"Rule:\"",

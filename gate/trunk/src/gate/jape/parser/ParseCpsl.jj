@@ -359,6 +359,8 @@ PARSER_END(ParseCpsl)
 <DEFAULT> TOKEN: { <rightSquare: "]"> }
 <DEFAULT> TOKEN: { <assign: "="> }
 <DEFAULT> TOKEN: { <colonplus: ":+"> }
+// <DEFAULT> TOKEN: { <periodOrMetaPropOp: <metaPropOp> | <period>  > }
+//<DEFAULT> TOKEN: { <periodOrMeta: "^"  > }
 /*<DEFAULT> SPECIAL_TOKEN: { // catch all for Java block processing
   <other: (~[])>
 }*/
@@ -1125,6 +1127,7 @@ String[] AssignmentExpression() :
   String[] block = new String[2];
   StringBuffer blockBuffer = new StringBuffer();
   Token nameTok = null;
+  Token opTok = null;
   String newAnnotType = null;
   String newAttrName = null;
   String nl = Strings.getNl();
@@ -1133,6 +1136,7 @@ String[] AssignmentExpression() :
   String existingAnnotSetName = null;
   String existingAnnotType = null;
   String existingAttrName = null;
+  String opName = null;
 
   blockBuffer.append("// RHS assignment block" + nl);
   blockBuffer.append(
@@ -1249,8 +1253,10 @@ String[] AssignmentExpression() :
           appendJavaStringLiteral(blockBuffer, nameTok.image);
           blockBuffer.append("); " + nl);
         }
+        // WORKING
         <period> nameTok=<ident> { existingAnnotType = nameTok.image; }
-        <period> nameTok=<ident> { existingAttrName = nameTok.image; }
+        (opTok=<period> | opTok=<metaPropOp>) nameTok=<ident>
+          { opName = opTok.image; existingAttrName = nameTok.image; }
 
         // for each existingAnnotType annotation in existingAnnotSetAnnots
         //   if there is an attribute with existingAttrName
@@ -1266,9 +1272,21 @@ String[] AssignmentExpression() :
 "            java.util.Iterator iter = existingAnnots.iterator();" + nl +
 "            while(iter.hasNext()) {" + nl +
 "              gate.Annotation existingA = (gate.Annotation) iter.next();" + nl +
-"              Object existingFeatureValue = existingA.getFeatures().get(");
-          appendJavaStringLiteral(blockBuffer, existingAttrName);
-          blockBuffer.append(");" + nl +
+"              Object existingFeatureValue;" + nl );
+
+          if(opName.equals("@") && existingAttrName.equals("string")) {
+            blockBuffer.append(
+"              int from = existingA.getStartNode().getOffset().intValue();" + nl +
+"              int to   = existingA.getEndNode().getOffset().intValue();" + nl +
+"              existingFeatureValue = doc.getContent().toString().substring(from,to);" + nl
+            );
+          } else {
+            blockBuffer.append("existingFeatureValue = existingA.getFeatures().get(");
+            appendJavaStringLiteral(blockBuffer, existingAttrName);
+            blockBuffer.append(");" + nl);
+          }
+
+          blockBuffer.append(
 "              if(existingFeatureValue != null) {" + nl +
 "                features.put(");
           appendJavaStringLiteral(blockBuffer, newAttrName);
