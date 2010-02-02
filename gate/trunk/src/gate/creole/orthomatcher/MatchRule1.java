@@ -11,23 +11,24 @@ import java.util.Map;
  */
 public class MatchRule1 implements OrthoMatcherRule{
 
-	OrthoMatcher orthmatcher;
+	OrthoMatcher orthomatcher;
 	
 	public MatchRule1(OrthoMatcher orthmatcher){
-		this.orthmatcher=orthmatcher;
+		this.orthomatcher=orthmatcher;
 	}
 	
 	public boolean value(String s1,
 	          String s2) {
 		
-	    boolean retVal = OrthoMatcherHelper.straightCompare(s1, s2, orthmatcher.caseSensitive);
+	    boolean retVal = OrthoMatcherHelper.straightCompare(s1, s2, orthomatcher.caseSensitive);
 	    //if straight compare didn't work, try a little extra logic
 	    if (!retVal)
-	      retVal = OrthoMatcherHelper.fuzzyMatch(orthmatcher.nicknameMap,s1, s2);
+	      retVal = OrthoMatcherHelper.fuzzyMatch(orthomatcher.nicknameMap,s1, s2);
 
-	    /*if (logResult && retVal && log.isDebugEnabled()) {
-	      log.debug("rule1Name matched " + s1 + "(id: " + longAnnot.getId() + ") to "
-	              + s2+ "(id: " + shortAnnot.getId() + ")");*/
+	    if (retVal && orthomatcher.log.isDebugEnabled()) {
+	      orthomatcher.log.debug("rule 1 matched " + s1 + "(id: " + orthomatcher.longAnnot.getId() + ") to "
+	              + s2+ "(id: " + orthomatcher.shortAnnot.getId() + ")");
+	    }
 	  
 	    return retVal;
 	}

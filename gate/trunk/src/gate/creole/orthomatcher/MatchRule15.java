@@ -13,10 +13,10 @@ import gate.Annotation;
  */
 public class MatchRule15 implements OrthoMatcherRule {
 
-  OrthoMatcher orthmatcher;
+  OrthoMatcher orthomatcher;
 	
 	public MatchRule15(OrthoMatcher orthmatcher){
-			this.orthmatcher=orthmatcher;
+			this.orthomatcher=orthmatcher;
 	}
 	
 	public boolean value(String s1, String s2) {
@@ -24,13 +24,14 @@ public class MatchRule15 implements OrthoMatcherRule {
 	//  if (s1.equalsIgnoreCase("chin") || s2.equalsIgnoreCase("chin"))
 	//  Out.prln("Rule 14 " + s1 + " and " + s2);
 	    String s1_short = (String)
-	    ((Annotation) orthmatcher.tokensLongAnnot.get(
-	    		orthmatcher.tokensLongAnnot.size()-1)).getFeatures().get(orthmatcher.TOKEN_STRING_FEATURE_NAME);
+	    ((Annotation) orthomatcher.tokensLongAnnot.get(
+	    		orthomatcher.tokensLongAnnot.size()-1)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME);
 	//  Out.prln("Converted to " + s1_short);
-	    if (orthmatcher.tokensLongAnnot.size()>1 && OrthoMatcherHelper.straightCompare(s1_short, s2,orthmatcher.caseSensitive)) {
-	     /* if (log.isDebugEnabled())
-	        log.debug("rule14 matched " + s1 + "(id: " + longAnnot.getId() + ") to "  + s2 
-	                + "(id: " + shortAnnot.getId() + ")");*/
+	    if (orthomatcher.tokensLongAnnot.size()>1 && OrthoMatcherHelper.straightCompare(s1_short, s2,orthomatcher.caseSensitive)) {
+	     if (orthomatcher.log.isDebugEnabled()) {
+	       orthomatcher.log.debug("rule 15 matched " + s1 + "(id: " + orthomatcher.longAnnot.getId() + ") to "  + s2 
+	                + "(id: " + orthomatcher.shortAnnot.getId() + ")");
+	     }
 	      return true;
 	    }
 

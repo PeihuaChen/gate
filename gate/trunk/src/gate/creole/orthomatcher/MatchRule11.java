@@ -12,10 +12,10 @@ import gate.Annotation;
  */
 public class MatchRule11 implements OrthoMatcherRule {
 
-	OrthoMatcher orthmatcher;
+	OrthoMatcher orthomatcher;
 	
 	public MatchRule11(OrthoMatcher orthmatcher){
-			this.orthmatcher=orthmatcher;
+			this.orthomatcher=orthmatcher;
 	}
 	
 	public boolean value(String s1, String s2) {
@@ -26,22 +26,22 @@ public class MatchRule11 implements OrthoMatcherRule {
 	    String token21 = null;
 	    String token22 = null;
 
-	    if (orthmatcher.tokensLongAnnot.size() < 2)
+	    if (orthomatcher.tokensLongAnnot.size() < 2)
 	      return false;
 
 	    // 1st get the first two tokens of s1
 	    token11 = (String)
-	    ((Annotation) orthmatcher.tokensLongAnnot.get(0)).getFeatures().get(orthmatcher.TOKEN_STRING_FEATURE_NAME);
+	    ((Annotation) orthomatcher.tokensLongAnnot.get(0)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME);
 	    token12 = (String)
-	    ((Annotation) orthmatcher.tokensLongAnnot.get(1)).getFeatures().get(orthmatcher.TOKEN_STRING_FEATURE_NAME);
+	    ((Annotation) orthomatcher.tokensLongAnnot.get(1)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME);
 
 	    // now check for the first case i.e. "Pan American" == "Pan Am"
-	    if (orthmatcher.tokensShortAnnot.size() == 2)  {
+	    if (orthomatcher.tokensShortAnnot.size() == 2)  {
 
 	      token21 = (String)
-	      ((Annotation) orthmatcher.tokensShortAnnot.get(0)).getFeatures().get(orthmatcher.TOKEN_STRING_FEATURE_NAME);
+	      ((Annotation) orthomatcher.tokensShortAnnot.get(0)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME);
 	      token22 = (String)
-	      ((Annotation) orthmatcher.tokensShortAnnot.get(0)).getFeatures().get(orthmatcher.TOKEN_STRING_FEATURE_NAME);
+	      ((Annotation) orthomatcher.tokensShortAnnot.get(0)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME);
 
 	      if (token11.startsWith(token21)
 	              && token12.startsWith(token22))
@@ -50,7 +50,7 @@ public class MatchRule11 implements OrthoMatcherRule {
 	    } // if (tokensShortAnnot.countTokens() == 2)
 
 	    // now the second case e.g.  "Communications Satellite" == "ComSat"
-	    else if (orthmatcher.tokensShortAnnot.size()==1 && s2.length()>=3) {
+	    else if (orthomatcher.tokensShortAnnot.size()==1 && s2.length()>=3) {
 
 	      // split the token into possible contractions
 	      // ignore case for matching

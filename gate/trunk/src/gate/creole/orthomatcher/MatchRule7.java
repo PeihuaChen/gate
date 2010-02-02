@@ -10,10 +10,10 @@ import gate.Annotation;
 
 public class MatchRule7 implements OrthoMatcherRule {
 
-    OrthoMatcher orthmatcher;
+    OrthoMatcher orthomatcher;
 	
 	public MatchRule7(OrthoMatcher orthmatcher){
-		this.orthmatcher=orthmatcher;
+		this.orthomatcher=orthmatcher;
 	}
 	
 	public boolean value(String s1, String s2) {
@@ -25,7 +25,7 @@ public class MatchRule7 implements OrthoMatcherRule {
 		      return false;
 
 		    // Abbreviations of one-word names are very rare and can lead to weird errors
-		    if (orthmatcher.tokensLongAnnot.size() <= 1) {
+		    if (orthomatcher.tokensLongAnnot.size() <= 1) {
 		      return false;
 		    }
 
@@ -33,8 +33,8 @@ public class MatchRule7 implements OrthoMatcherRule {
 		    StringBuffer acronym_s1 = new StringBuffer("");
 		    StringBuffer acronymDot_s1 = new StringBuffer("");
 
-		    for ( ;i < orthmatcher.tokensLongAnnot.size(); i++ ) {
-		      String toAppend = ( (String) ((Annotation) orthmatcher.tokensLongAnnot.get(i)
+		    for ( ;i < orthomatcher.tokensLongAnnot.size(); i++ ) {
+		      String toAppend = ( (String) ((Annotation) orthomatcher.tokensLongAnnot.get(i)
 		      ).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME)).substring(0,1);
 		      acronym_s1.append(toAppend);
 		      acronymDot_s1.append(toAppend);
@@ -44,8 +44,8 @@ public class MatchRule7 implements OrthoMatcherRule {
 		    //Out.prln("Acronym dot: To Match " + acronymDot_s1 + "and " + s2);
 		    //Out.prln("Result: " + matchRule1(acronymDot_s1.toString(),s2,caseSensitive));
 
-		    if (OrthoMatcherHelper.straightCompare(acronym_s1.toString(),s2,orthmatcher.caseSensitive) ||
-		    		OrthoMatcherHelper.straightCompare(acronymDot_s1.toString(),s2,orthmatcher.caseSensitive) )
+		    if (OrthoMatcherHelper.straightCompare(acronym_s1.toString(),s2,orthomatcher.caseSensitive) ||
+		    		OrthoMatcherHelper.straightCompare(acronymDot_s1.toString(),s2,orthomatcher.caseSensitive) )
 		      return true;
 
 		    return false;

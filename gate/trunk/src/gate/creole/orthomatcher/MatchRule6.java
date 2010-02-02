@@ -14,15 +14,15 @@ import gate.Annotation;
  */
 public class MatchRule6 implements OrthoMatcherRule {
 
-  OrthoMatcher orthmatcher;
+  OrthoMatcher orthomatcher;
 	
 	public MatchRule6(OrthoMatcher orthmatcher){
-		this.orthmatcher=orthmatcher;
+		this.orthomatcher=orthmatcher;
 	}
 	
 	public boolean value(String s1, String s2) {
-		if (orthmatcher.tokensLongAnnot.size()> 1 &&
-	            ((Annotation) orthmatcher.tokensLongAnnot.get(0)).getFeatures().get("kind").equals("number"))
+		if (orthomatcher.tokensLongAnnot.size()> 1 &&
+	            ((Annotation) orthomatcher.tokensLongAnnot.get(0)).getFeatures().get("kind").equals("number"))
 	      return false;
 
 	    //  if (s1.startsWith("Patrick") || s2.startsWith("Patrick")) {
@@ -32,26 +32,27 @@ public class MatchRule6 implements OrthoMatcherRule {
 	    //require that when matching person names, the shorter one to be of length 1
 	    //for the rule to apply. In other words, avoid matching Peter Smith and
 	    //Peter Kline, because they share a Peter token.
-	    if ( (orthmatcher.shortAnnot.getType().equals(orthmatcher.personType)
-	            || orthmatcher.longAnnot.getType().equals(orthmatcher.personType)
+	    if ( (orthomatcher.shortAnnot.getType().equals(orthomatcher.personType)
+	            || orthomatcher.longAnnot.getType().equals(orthomatcher.personType)
 	    )
 	    &&
-	    orthmatcher.tokensShortAnnot.size()>1
+	    orthomatcher.tokensShortAnnot.size()>1
 	    )
 	      return false;
 
-	    if (orthmatcher.tokensLongAnnot.size()<=1)
+	    if (orthomatcher.tokensLongAnnot.size()<=1)
 	      return false;
-	    if (((Annotation) orthmatcher.tokensShortAnnot.get(0)).getFeatures().containsKey("ortho_stop")) {
+	    if (((Annotation) orthomatcher.tokensShortAnnot.get(0)).getFeatures().containsKey("ortho_stop")) {
 	      return false;
 	    }
 	    boolean result = OrthoMatcherHelper.straightCompare((String)
-	            ((Annotation) orthmatcher.tokensLongAnnot.get(0)
-	            ).getFeatures().get(orthmatcher.TOKEN_STRING_FEATURE_NAME),
+	            ((Annotation) orthomatcher.tokensLongAnnot.get(0)
+	            ).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME),
 	            s2,
-	            orthmatcher.caseSensitive);
-	    /*if (result && log.isDebugEnabled())
-	      log.debug("rule5 matched " + s1 + " to " + s2);*/
+	            orthomatcher.caseSensitive);
+	    if (result && orthomatcher.log.isDebugEnabled()) {
+	      orthomatcher.log.debug("rule 6 matched " + s1 + " to " + s2);
+	    }
 	    return result;
 	}
 	
