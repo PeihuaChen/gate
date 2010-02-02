@@ -10,18 +10,18 @@ import java.util.HashMap;
  */
 public class MatchRule0 implements OrthoMatcherRule {
  
-    OrthoMatcher orthmatcher;
+    OrthoMatcher orthomatcher;
 	
 	  public MatchRule0(OrthoMatcher orthmatcher){
-		   this.orthmatcher=orthmatcher;
+		   this.orthomatcher=orthmatcher;
 	  }
 	 
 	  public boolean value(String _string1,String _string2){
 		 
-	      if (orthmatcher.spur_match.containsKey(_string1)
-	            && orthmatcher.spur_match.containsKey(_string2) )
+	      if (orthomatcher.spur_match.containsKey(_string1)
+	            && orthomatcher.spur_match.containsKey(_string2) )
 	      return
-	      orthmatcher.spur_match.get(_string1).toString().equals(orthmatcher.spur_match.get(_string2).toString());
+	      orthomatcher.spur_match.get(_string1).toString().equals(orthomatcher.spur_match.get(_string2).toString());
 
 	    return false;
 	  }

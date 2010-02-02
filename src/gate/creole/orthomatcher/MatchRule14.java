@@ -17,17 +17,17 @@ import gate.Annotation;
  */
 public class MatchRule14 implements OrthoMatcherRule {
 
-  OrthoMatcher orthmatcher;
+  OrthoMatcher orthomatcher;
 	
 	public MatchRule14(OrthoMatcher orthmatcher){
-			this.orthmatcher=orthmatcher;
+			this.orthomatcher=orthmatcher;
 	}
 	
 	public boolean value(String s1, String s2) {
 	    int matched_tokens = 0, mismatches = 0;;
 
 	    // if names < 2 words then rule is invalid
-	    if (orthmatcher.tokensLongAnnot.size() < 3 || orthmatcher.tokensShortAnnot.size() < 2) return false;
+	    if (orthomatcher.tokensLongAnnot.size() < 3 || orthomatcher.tokensShortAnnot.size() < 2) return false;
 
 	//  if (s1.equalsIgnoreCase("chin") || s2.equalsIgnoreCase("chin")) {
 	//  Out.prln("Rule 13: Matching tokens" + tokensLongAnnot);
@@ -35,19 +35,19 @@ public class MatchRule14 implements OrthoMatcherRule {
 	//  }
 
 	    // now do the matching
-	    for (int i=0,j= 0; i < orthmatcher.tokensShortAnnot.size() && mismatches < 2; i++) {
+	    for (int i=0,j= 0; i < orthomatcher.tokensShortAnnot.size() && mismatches < 2; i++) {
 
 //	    Out.prln("i = " + i);
 //	    Out.prln("j = " + j);
-	      if ( ((Annotation) orthmatcher.tokensLongAnnot.get(j)).getFeatures().get(orthmatcher.TOKEN_STRING_FEATURE_NAME).equals(
-	              ((Annotation) orthmatcher.tokensShortAnnot.get(i)).getFeatures().get(orthmatcher.TOKEN_STRING_FEATURE_NAME)) ) {
+	      if ( ((Annotation) orthomatcher.tokensLongAnnot.get(j)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME).equals(
+	              ((Annotation) orthomatcher.tokensShortAnnot.get(i)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME)) ) {
 	        matched_tokens++;
 	        j++;
 	      } else
 	        mismatches++;
 	    } // for
 
-	    if (matched_tokens >= orthmatcher.tokensLongAnnot.size()-1)
+	    if (matched_tokens >= orthomatcher.tokensLongAnnot.size()-1)
 	      return true;
 
 	    return false;

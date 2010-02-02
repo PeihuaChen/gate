@@ -15,10 +15,10 @@ import gate.Annotation;
 
 public class MatchRule10 implements OrthoMatcherRule {
 
-	OrthoMatcher orthmatcher;
+	OrthoMatcher orthomatcher;
 		
 	public MatchRule10(OrthoMatcher orthmatcher){
-			this.orthmatcher=orthmatcher;
+			this.orthomatcher=orthmatcher;
 	}
 	
 	public boolean value(String s1, String s2) {
@@ -28,15 +28,15 @@ public class MatchRule10 implements OrthoMatcherRule {
 	    String next_token = null;
 	    boolean invoke_rule=false;
 
-	    if (orthmatcher.tokensLongAnnot.size() >= 3
-	            && orthmatcher.tokensShortAnnot.size() >= 2) {
+	    if (orthomatcher.tokensLongAnnot.size() >= 3
+	            && orthomatcher.tokensShortAnnot.size() >= 2) {
 
 	      // first get the tokens before and after the preposition
 	      int i = 0;
-	      for (; i< orthmatcher.tokensLongAnnot.size(); i++) {
+	      for (; i< orthomatcher.tokensLongAnnot.size(); i++) {
 	        token = (String)
-	        ((Annotation) orthmatcher.tokensLongAnnot.get(i)).getFeatures().get(orthmatcher.TOKEN_STRING_FEATURE_NAME);
-	        if (orthmatcher.prepos.containsKey(token)) {
+	        ((Annotation) orthomatcher.tokensLongAnnot.get(i)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME);
+	        if (orthomatcher.prepos.containsKey(token)) {
 	          invoke_rule=true;
 	          break;
 	        }//if
@@ -46,19 +46,19 @@ public class MatchRule10 implements OrthoMatcherRule {
 	      if (! invoke_rule)
 	        return false;
 
-	      if (i < orthmatcher.tokensLongAnnot.size()
+	      if (i < orthomatcher.tokensLongAnnot.size()
 	              && previous_token != null)
 	        next_token= (String)
-	        ((Annotation) orthmatcher.tokensLongAnnot.get(i++)).getFeatures().get(orthmatcher.TOKEN_STRING_FEATURE_NAME);
+	        ((Annotation) orthomatcher.tokensLongAnnot.get(i++)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME);
 	      else return false;
 
 	      String s21 = (String)
-	      ((Annotation) orthmatcher.tokensShortAnnot.get(0)).getFeatures().get(orthmatcher.TOKEN_STRING_FEATURE_NAME);
+	      ((Annotation) orthomatcher.tokensShortAnnot.get(0)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME);
 	      String s22 = (String)
-	      ((Annotation) orthmatcher.tokensShortAnnot.get(1)).getFeatures().get(orthmatcher.TOKEN_STRING_FEATURE_NAME);
+	      ((Annotation) orthomatcher.tokensShortAnnot.get(1)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME);
 	      // then compare (in reverse) with the first two tokens of s2
-	      if (OrthoMatcherHelper.straightCompare(next_token,(String) s21,orthmatcher.caseSensitive)
-	              && OrthoMatcherHelper.straightCompare(previous_token, s22,orthmatcher.caseSensitive))
+	      if (OrthoMatcherHelper.straightCompare(next_token,(String) s21,orthomatcher.caseSensitive)
+	              && OrthoMatcherHelper.straightCompare(previous_token, s22,orthomatcher.caseSensitive))
 	        return true ;
 	    }//if (tokensLongAnnot.countTokens() >= 3
 	    return false;

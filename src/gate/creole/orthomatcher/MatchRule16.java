@@ -12,8 +12,8 @@ public class MatchRule16 implements OrthoMatcherRule {
 
     OrthoMatcher orthmatcher;
 	
-	public MatchRule16(OrthoMatcher orthmatcher){
-			this.orthmatcher=orthmatcher;
+	public MatchRule16(OrthoMatcher orthomatcher){
+			this.orthmatcher=orthomatcher;
 	}
 	
 	public boolean value(String s1, String s2) {
@@ -63,8 +63,8 @@ public class MatchRule16 implements OrthoMatcherRule {
 
 	    //only get to here if all word tokens in the short annot were found in
 	    //the long annot, so there is a coref relation
-	    /*if (log.isDebugEnabled())
-	      log.debug("rule15 matched " + s1 + " to " + s2);*/
+	    if (orthmatcher.log.isDebugEnabled())
+	      orthmatcher.log.debug("rule 16 matched " + s1 + " to " + s2);
 	    return true;
 	}
 	

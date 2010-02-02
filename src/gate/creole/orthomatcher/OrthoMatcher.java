@@ -1255,8 +1255,7 @@ implements ANNIEConstants{
 
   /**
    * basic_person_match_criteria
-   * Note that this function relies on various global variables in matchRule4, matchRule5, matchRule14,
-   * and matchRule15
+   * Note that this function relies on various global variables in some other match rules.
    * @param shortName
    * @param longName
    * @param mr
@@ -1291,8 +1290,8 @@ implements ANNIEConstants{
       return false;
     if (
             (// rules for all annotations
-                    //no longer use rule1, coz I do the check for same string via the hash table
-                    OrthoMatcherHelper.ExecuteDisjunction(rules, new int[] {2,3},longName,shortName,mr)
+             //no longer use rule1, coz I do the check for same string via the hash table
+              OrthoMatcherHelper.ExecuteDisjunction(rules, new int[] {2,3},longName,shortName,mr)
 
             ) // rules for all annotations
             ||

@@ -17,24 +17,24 @@ import gate.Annotation;
  */
 public class MatchRule8 implements OrthoMatcherRule {
 
-  OrthoMatcher orthmatcher;
+  OrthoMatcher orthomatcher;
 	
 	public MatchRule8(OrthoMatcher orthmatcher){
-		this.orthmatcher=orthmatcher;
+		this.orthomatcher=orthmatcher;
 	}
 	
 	public boolean value(String s1, String s2) {
 		
 		//don't try it unless the second string is just one token
-	    if (orthmatcher.tokensShortAnnot.size() != 1)
+	    if (orthomatcher.tokensShortAnnot.size() != 1)
 	      return false;
 
 	    String previous_token = null;
 
-	    for (int i = 0;  i < orthmatcher.tokensLongAnnot.size(); i++ ) {
-	      if (orthmatcher.connector.containsKey( ((Annotation) orthmatcher.tokensLongAnnot.get(i)
+	    for (int i = 0;  i < orthomatcher.tokensLongAnnot.size(); i++ ) {
+	      if (orthomatcher.connector.containsKey( ((Annotation) orthomatcher.tokensLongAnnot.get(i)
 	      ).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME) )) {
-	        previous_token = (String) ((Annotation) orthmatcher.tokensLongAnnot.get(i-1)
+	        previous_token = (String) ((Annotation) orthomatcher.tokensLongAnnot.get(i-1)
 	        ).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
 
 	        break;
@@ -45,7 +45,7 @@ public class MatchRule8 implements OrthoMatcherRule {
 	    if (previous_token != null) {
 //	    if (s1.equalsIgnoreCase("chin") || s2.equalsIgnoreCase("chin"))
 //	    Out.prln("Rule7");
-	      return OrthoMatcherHelper.straightCompare(previous_token,s2,orthmatcher.caseSensitive);
+	      return OrthoMatcherHelper.straightCompare(previous_token,s2,orthomatcher.caseSensitive);
 
 	    }
 	    return false;

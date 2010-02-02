@@ -16,27 +16,27 @@ import gate.Annotation;
  */
 public class MatchRule9 implements OrthoMatcherRule {
 
-  OrthoMatcher orthmatcher;
+  OrthoMatcher orthomatcher;
 	
 	public MatchRule9(OrthoMatcher orthmatcher){
-		this.orthmatcher=orthmatcher;
+		this.orthomatcher=orthmatcher;
 	}
 	
 	public boolean value(String s1, String s2) {
 		// if (s1.equalsIgnoreCase("news") || s2.equalsIgnoreCase("news"))
 		//  Out.prln("Rule 9 " + s1 + " and " + s2);
 		    String s1_short = (String)
-		    ((Annotation) orthmatcher.tokensLongAnnot.get(
-		    		orthmatcher.tokensLongAnnot.size()-1)).getFeatures().get(orthmatcher.TOKEN_STRING_FEATURE_NAME);
+		    ((Annotation) orthomatcher.tokensLongAnnot.get(
+		    		orthomatcher.tokensLongAnnot.size()-1)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME);
 		//  Out.prln("Converted to " + s1_short);
-		    if (orthmatcher.tokensLongAnnot.size()>1) {
-		      boolean matched = OrthoMatcherHelper.straightCompare(s1_short, s2, orthmatcher.caseSensitive);
+		    if (orthomatcher.tokensLongAnnot.size()>1) {
+		      boolean matched = OrthoMatcherHelper.straightCompare(s1_short, s2, orthomatcher.caseSensitive);
 		      //we need to make sure all names match, instead of assuming transitivity,
 		      //to avoid matching BBC News with News then News with ITV News, which
 		      //by transitivity leads to BBC News matching ITV News which is not what
 		      //we want
 		      if (matched)
-		    	  orthmatcher.allMatchingNeeded = true;
+		    	  orthomatcher.allMatchingNeeded = true;
 		      return matched;
 		    } //if
 

@@ -14,10 +14,10 @@ import gate.Annotation;
  */
 public class MatchRule3 implements OrthoMatcherRule {
 
-	  OrthoMatcher orthmatcher;
+	  OrthoMatcher orthomatcher;
 		
 		public MatchRule3(OrthoMatcher orthmatcher){
-			this.orthmatcher=orthmatcher;
+			this.orthomatcher=orthmatcher;
 		}
 	
 	public boolean value(String s1,  String s2) { //short string
@@ -30,22 +30,24 @@ public class MatchRule3 implements OrthoMatcherRule {
 	      if (!s2.endsWith("'s")) s2_poss = s2.concat("'s");
 	      else s2_poss = s2.concat("'");
 
-	      if (s2_poss != null && OrthoMatcherHelper.straightCompare(s1, s2_poss,orthmatcher.caseSensitive)) {
-	        /*if (log.isDebugEnabled())
-	          log.debug("rule3 matched " + s1 + " to " + s2);*/
+	      if (s2_poss != null && OrthoMatcherHelper.straightCompare(s1, s2_poss,orthomatcher.caseSensitive)) {
+	        if (orthomatcher.log.isDebugEnabled()) {
+	          orthomatcher.log.debug("rule 3 matched " + s1 + " to " + s2);
+	        }
 	        return true;
 	      }
 
 	      // now check the second case i.e. "Standard and Poor" == "Standard's"
 	      String token = (String)
-	      ((Annotation) orthmatcher.tokensLongAnnot.get(0)).getFeatures().get(orthmatcher.TOKEN_STRING_FEATURE_NAME);
+	      ((Annotation) orthomatcher.tokensLongAnnot.get(0)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME);
 
 	      if (!token.endsWith("'s")) s2_poss = token.concat("'s");
 	      else s2_poss = token.concat("'");
 
-	      if (s2_poss != null && OrthoMatcherHelper.straightCompare(s2_poss,s2,orthmatcher.caseSensitive)) {
-	        /*if (log.isDebugEnabled())
-	          log.debug("rule3 matched " + s1 + " to " + s2);*/
+	      if (s2_poss != null && OrthoMatcherHelper.straightCompare(s2_poss,s2,orthomatcher.caseSensitive)) {
+	        if (orthomatcher.log.isDebugEnabled()){
+	          orthomatcher.log.debug("rule 3 matched " + s1 + " to " + s2);
+	        }
 	        return true;
 	      }
 

@@ -6,16 +6,16 @@ package gate.creole.orthomatcher;
  */
 public class MatchRule17 implements OrthoMatcherRule {
 
-    OrthoMatcher orthmatcher;
+    OrthoMatcher orthomatcher;
 	
 	public MatchRule17(OrthoMatcher orthmatcher){
-			this.orthmatcher=orthmatcher;
+			this.orthomatcher=orthmatcher;
 	}
 	
 	public boolean value(String s1, String s2) {
 		//reversed execution of allNonStopTokensInOtherAnnot
-		if (OrthoMatcherHelper.allNonStopTokensInOtherAnnot(orthmatcher.tokensLongAnnot, orthmatcher.tokensShortAnnot,orthmatcher.TOKEN_STRING_FEATURE_NAME,orthmatcher.caseSensitive)) {
-		      return OrthoMatcherHelper.allNonStopTokensInOtherAnnot(orthmatcher.tokensShortAnnot, orthmatcher.tokensLongAnnot,orthmatcher.TOKEN_STRING_FEATURE_NAME,orthmatcher.caseSensitive);
+		if (OrthoMatcherHelper.allNonStopTokensInOtherAnnot(orthomatcher.tokensLongAnnot, orthomatcher.tokensShortAnnot,orthomatcher.TOKEN_STRING_FEATURE_NAME,orthomatcher.caseSensitive)) {
+		      return OrthoMatcherHelper.allNonStopTokensInOtherAnnot(orthomatcher.tokensShortAnnot, orthomatcher.tokensLongAnnot,orthomatcher.TOKEN_STRING_FEATURE_NAME,orthomatcher.caseSensitive);
 		    }
 		  else 
 		  {
