@@ -1,5 +1,11 @@
 /*
- *  DatatypePropertyAction.java
+ *  Copyright (c) 1995-2010, The University of Sheffield. See the file
+ *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
  *
  *  Niraj Aswani, 09/March/07
  *
@@ -8,8 +14,9 @@
 package gate.gui.ontology;
 
 import gate.creole.ontology.*;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
+import gate.gui.MainFrame;
+
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
@@ -18,9 +25,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
  * Action to create a new datatype property.
- * 
- * @author niraj
- * 
  */
 public class DatatypePropertyAction extends AbstractAction implements
                                                           TreeNodeSelectionListener {
@@ -28,14 +32,26 @@ public class DatatypePropertyAction extends AbstractAction implements
 
   public DatatypePropertyAction(String s, Icon icon) {
     super(s, icon);
-    nameSpace = new JTextField(20);
-    nsPanel = new JPanel(new FlowLayout(0));
-    nsPanel.add(new JLabel("Name Space:"));
-    nsPanel.add(nameSpace);
-    propertyName = new JTextField(20);
-    domainB = new JButton("Domain");
-    domainAction = new ValuesSelectionAction();
-    datatypes = new JComboBox(new DefaultComboBoxModel(new String[] {
+
+    mainPanel = new JPanel(new GridBagLayout());
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.insets = new Insets(3, 3, 3, 3);
+    gbc.anchor = GridBagConstraints.WEST;
+
+    mainPanel.add(new JLabel("Name Space:"), gbc);
+    mainPanel.add(nameSpace = new JTextField(30), gbc);
+
+    gbc.gridy = 1;
+    mainPanel.add(new JLabel("Data Type:"), gbc);
+    mainPanel.add(datatypesComboBox = new JComboBox(), gbc);
+    mainPanel.add(datatypesComboBox, gbc);
+
+    gbc.gridy = 2;
+    mainPanel.add(new JLabel("Property Name:"), gbc);
+    mainPanel.add(propertyName = new JTextField(30), gbc);
+    mainPanel.add(domainButton = new JButton("Domain"), gbc);
+
+    datatypesComboBox.setModel(new DefaultComboBoxModel(new String[] {
         "http://www.w3.org/2001/XMLSchema#boolean",
         "http://www.w3.org/2001/XMLSchema#byte",
         "http://www.w3.org/2001/XMLSchema#date",
@@ -57,86 +73,73 @@ public class DatatypePropertyAction extends AbstractAction implements
         "http://www.w3.org/2001/XMLSchema#unsignedInt",
         "http://www.w3.org/2001/XMLSchema#unsignedLong",
         "http://www.w3.org/2001/XMLSchema#unsignedShort"}));
-    domainB.addActionListener(new ActionListener() {
+    domainAction = new ValuesSelectionAction();
+    domainButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent actionevent) {
         String as[] = new String[ontologyClassesURIs.size()];
         for(int i = 0; i < as.length; i++)
-          as[i] = ((String)ontologyClassesURIs.get(i));
+          as[i] = ontologyClassesURIs.get(i);
         ArrayList<String> arraylist = new ArrayList<String>();
         for(int j = 0; j < selectedNodes.size(); j++) {
-          DefaultMutableTreeNode node = (DefaultMutableTreeNode)selectedNodes
-                  .get(j);
+          DefaultMutableTreeNode node = selectedNodes.get(j);
           OResource res = ((OResourceNode)node.getUserObject()).getResource();
-          if(res instanceof OClass)
-            arraylist.add(((OClass)res).getURI().toString());
+          if(res instanceof OClass) {
+            arraylist.add(res.getURI().toString());
+          }
         }
         String as1[] = new String[arraylist.size()];
-        for(int k = 0; k < as1.length; k++)
+        for(int k = 0; k < as1.length; k++) {
           as1[k] = arraylist.get(k);
-        domainAction.showGUI("Domain", as, as1, false);
-      }
-
-      final DatatypePropertyAction this$0;
-      {
-        this$0 = DatatypePropertyAction.this;
+        }
+        domainAction.showGUI("Domain", as, as1, false,
+          MainFrame.getIcon("ontology-datatype-property"));
       }
     });
-    propertyPanel = new JPanel(new FlowLayout(0));
-    propertyPanel.add(new JLabel("Property Name:"));
-    propertyPanel.add(propertyName);
-    propertyPanel.add(domainB);
-    dtPanel = new JPanel(new FlowLayout(0));
-    dtPanel.add(new JLabel("Data Type :"));
-    dtPanel.add(datatypes);
-    panel = new JPanel(new GridLayout(3, 1));
-    ((GridLayout)panel.getLayout()).setVgap(0);
-    panel.add(propertyPanel);
-    panel.add(nsPanel);
-    panel.add(dtPanel);
-    subPropPanel = new JPanel(new FlowLayout(0));
-    subPropertyCB = new JCheckBox("sub property of the selected nodes?");
-    subPropPanel.add(subPropertyCB);
-    // panel.add(subPropPanel);
   }
 
   public void actionPerformed(ActionEvent actionevent) {
-    ArrayList<DefaultMutableTreeNode> selectedNodes = new ArrayList<DefaultMutableTreeNode>(
-            this.selectedNodes);
-    nameSpace.setText(ontology.getDefaultNameSpace());
-    int i = JOptionPane.showOptionDialog(null, panel, "New Datatype Property",
-            2, 3, null, new String[] {"OK", "Cancel"}, "OK");
-    if(i == 0) {
+    nameSpace.setText(ontology.getDefaultNameSpace() == null ?
+      "http://gate.ac.uk/example#" : ontology.getDefaultNameSpace());
+    JOptionPane pane = new JOptionPane(mainPanel, JOptionPane.QUESTION_MESSAGE,
+      JOptionPane.OK_CANCEL_OPTION,
+      MainFrame.getIcon("ontology-datatype-property")) {
+      public void selectInitialValue() {
+        propertyName.requestFocusInWindow();
+        propertyName.selectAll();
+      }
+    };
+    pane.createDialog(MainFrame.getInstance(),
+      "New Datatype Property").setVisible(true);
+    Object selectedValue = pane.getValue();
+    if (selectedValue != null
+    && selectedValue instanceof Integer
+    && (Integer) selectedValue == JOptionPane.OK_OPTION) {
       String s = nameSpace.getText();
-      if(!gate.gui.ontology.Utils.isValidNameSpace(s)) {
-        JOptionPane.showMessageDialog(null, (new StringBuilder()).append(
-                "Invalid NameSpace:").append(s).append(
-                "\n example: http://gate.ac.uk/example#").toString());
+      if(!Utils.isValidNameSpace(s)) {
+        JOptionPane.showMessageDialog(MainFrame.getInstance(),
+          "Invalid Name Space: " + s + "\nExample: http://gate.ac.uk/example#");
         return;
       }
-      if(!gate.gui.ontology.Utils.isValidOntologyResourceName(propertyName
-              .getText())) {
-        JOptionPane.showMessageDialog(null, "Invalid Property Name");
+      if(!Utils.isValidOntologyResourceName(propertyName.getText())) {
+        JOptionPane.showMessageDialog(MainFrame.getInstance(),
+          "Invalid Property Name: " + propertyName.getText());
         return;
       }
-      if(ontology.getOResourceFromMap(nameSpace.getText()
-              + propertyName.getText()) != null) {
-        JOptionPane.showMessageDialog(null, (new StringBuilder()).append(
-                "A Resource with name \"").append(
-                nameSpace.getText() + propertyName.getText()).append(
-                "\" already exists").toString());
+      if(ontology.getOResourceFromMap(s + propertyName.getText()) != null) {
+        JOptionPane.showMessageDialog(MainFrame.getInstance(),"<html>" +
+          "Resource <b>" + s+propertyName.getText() + "</b> already exists.");
         return;
       }
       String as[] = domainAction.getSelectedValues();
       HashSet<OClass> hashset = new HashSet<OClass>();
-      for(int j = 0; j < as.length; j++) {
-        OClass oclass = (OClass)ontology.getOResourceFromMap(as[j]);
+      for (String a : as) {
+        OClass oclass = (OClass) ontology.getOResourceFromMap(a);
         hashset.add(oclass);
       }
-      DataType dt = DataType.getDataType((String)datatypes
-              .getSelectedItem());
-      DatatypeProperty dp = ontology.addDatatypeProperty(new URI(nameSpace
-              .getText()
-              + propertyName.getText(), false), hashset, dt);
+      DataType dt = DataType.getDataType((String)
+        datatypesComboBox.getSelectedItem());
+      ontology.addDatatypeProperty(new URI(nameSpace.getText()
+        + propertyName.getText(), false), hashset, dt);
     }
   }
 
@@ -144,8 +147,8 @@ public class DatatypePropertyAction extends AbstractAction implements
     return ontology;
   }
 
-  public void setOntology(Ontology ontology1) {
-    ontology = ontology1;
+  public void setOntology(Ontology ontology) {
+    this.ontology = ontology;
   }
 
   public void selectionChanged(ArrayList<DefaultMutableTreeNode> arraylist) {
@@ -160,31 +163,13 @@ public class DatatypePropertyAction extends AbstractAction implements
     ontologyClassesURIs = arraylist;
   }
 
-  protected JPanel nsPanel;
-
-  protected JPanel propertyPanel;
-
-  protected JPanel panel;
-
-  protected JPanel dtPanel;
-
-  protected JPanel subPropPanel;
-
-  protected JCheckBox subPropertyCB;
-
-  protected JComboBox datatypes;
-
+  protected JPanel mainPanel;
   protected JTextField nameSpace;
-
+  protected JComboBox datatypesComboBox;
+  protected JButton domainButton;
   protected JTextField propertyName;
-
-  protected JButton domainB;
-
   protected ValuesSelectionAction domainAction;
-
   protected ArrayList<String> ontologyClassesURIs;
-
   protected ArrayList<DefaultMutableTreeNode> selectedNodes;
-
   protected Ontology ontology;
 }

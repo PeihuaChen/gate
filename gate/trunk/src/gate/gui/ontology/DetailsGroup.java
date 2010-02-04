@@ -46,8 +46,8 @@ public class DetailsGroup {
     return values.size();
   }
 
-  public Object getValueAt(int i) {
-    return values.get(i);
+  public Object getValueAt(int index) {
+    return values.get(index);
   }
 
   public List getValues() {
@@ -56,6 +56,12 @@ public class DetailsGroup {
 
   public void setValues(List list) {
     values = list;
+  }
+
+  /** Set one of the value in the list.
+   *  Same behaviour as {@link List#set(int, Object)}. */
+  public Object setValueAt(int index, Object value) {
+    return values.set(index, value);
   }
 
   boolean expanded;

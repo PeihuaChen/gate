@@ -1,5 +1,11 @@
 /*
- *  InstanceAction.java
+ *  Copyright (c) 1995-2010, The University of Sheffield. See the file
+ *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
  *
  *  Niraj Aswani, 09/March/07
  *
@@ -10,8 +16,7 @@ package gate.gui.ontology;
 import gate.creole.ontology.*;
 import gate.gui.MainFrame;
 
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.*;
 import javax.swing.*;
@@ -19,9 +24,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
  * Action to create a new Instance in the ontology
- * 
- * @author niraj
- * 
  */
 public class InstanceAction extends AbstractAction implements
                                                   TreeNodeSelectionListener {
@@ -29,67 +31,66 @@ public class InstanceAction extends AbstractAction implements
 
   public InstanceAction(String caption, Icon icon) {
     super(caption, icon);
-    nameSpace = new JTextField(20);
-    instanceName = new JTextField(20);
-    labelPanel = new JPanel(new GridLayout(2, 1));
-    textFieldsPanel = new JPanel(new GridLayout(2, 1));
-    panel = new JPanel(new FlowLayout(0));
-    panel.add(labelPanel);
-    panel.add(textFieldsPanel);
-    labelPanel.add(new JLabel("Name Space :"));
-    textFieldsPanel.add(nameSpace);
-    labelPanel.add(new JLabel("Instance Name :"));
-    textFieldsPanel.add(instanceName);
+    mainPanel = new JPanel(new GridBagLayout());
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.insets = new Insets(3, 3, 3, 3);
+    gbc.anchor = GridBagConstraints.WEST;
+
+    mainPanel.add(new JLabel("Name Space:"), gbc);
+    mainPanel.add(nameSpace = new JTextField(30), gbc);
+
+    gbc.gridy = 1;
+    mainPanel.add(new JLabel("Instance Name:"), gbc);
+    mainPanel.add(instanceName = new JTextField(30), gbc);
   }
 
   public void actionPerformed(ActionEvent actionevent) {
-    ArrayList<DefaultMutableTreeNode> selectedNodes = new ArrayList<DefaultMutableTreeNode>(
-            this.selectedNodes);
-    if(selectedNodes.size() == 0) {
-      JOptionPane
-              .showMessageDialog(MainFrame.getInstance(),
-                      "Please select a class for which you want to create a new instance");
-      return;
-    }
-    OResource selectedNode = ((OResourceNode)selectedNodes.get(0).getUserObject()).getResource();
+    OResource selectedNode = ((OResourceNode)selectedNodes.get(0)
+      .getUserObject()).getResource();
     String ns = selectedNode.getURI().getNameSpace();
-    if(gate.creole.ontology.Utils.hasSystemNameSpace(selectedNode.getURI().toString())) {
+    if(gate.creole.ontology.Utils.hasSystemNameSpace(
+      selectedNode.getURI().toString())) {
       ns = ontology.getDefaultNameSpace();
     }
     nameSpace.setText(ns);
 
-    int j = JOptionPane.showOptionDialog(MainFrame.getInstance(), panel,
-            "New Instance: ", 2, 3, null, new String[] {"OK", "Cancel"}, "OK");
-    if(j == 0) {
+    nameSpace.setText(ontology.getDefaultNameSpace() == null ?
+      "http://gate.ac.uk/example#" : ontology.getDefaultNameSpace());
+    JOptionPane pane = new JOptionPane(mainPanel, JOptionPane.QUESTION_MESSAGE,
+      JOptionPane.OK_CANCEL_OPTION, MainFrame.getIcon("ontology-instance")) {
+      public void selectInitialValue() {
+        instanceName.requestFocusInWindow();
+        instanceName.selectAll();
+      }
+    };
+    pane.createDialog(MainFrame.getInstance(),"New Instance").setVisible(true);
+    Object selectedValue = pane.getValue();
+    if (selectedValue != null
+    && selectedValue instanceof Integer
+    && (Integer) selectedValue == JOptionPane.OK_OPTION) {
       String s = nameSpace.getText();
-      if(!gate.gui.ontology.Utils.isValidNameSpace(s)) {
+      if (!Utils.isValidNameSpace(s)) {
         JOptionPane.showMessageDialog(MainFrame.getInstance(),
-                (new StringBuilder()).append("Invalid NameSpace:").append(s)
-                        .append("\n example: http://gate.ac.uk/example#")
-                        .toString());
+          "Invalid Name Space: " + s + "\nExample: http://gate.ac.uk/example#");
         return;
       }
-      if(!gate.gui.ontology.Utils.isValidOntologyResourceName(instanceName.getText())) {
+      if(!Utils.isValidOntologyResourceName(instanceName.getText())) {
         JOptionPane.showMessageDialog(MainFrame.getInstance(),
-                "Invalid Instance Name");
+          "Invalid Instance: " + instanceName.getText());
         return;
       }
-
-      if(ontology.getOResourceFromMap(nameSpace.getText()
-              + instanceName.getText()) != null) {
-        JOptionPane.showMessageDialog(MainFrame.getInstance(),
-                (new StringBuilder()).append("An instance with name \"")
-                        .append(nameSpace.getText() + instanceName.getText())
-                        .append("\" already exists").toString());
+      if(ontology.getOResourceFromMap(s + instanceName.getText()) != null) {
+        JOptionPane.showMessageDialog(MainFrame.getInstance(),"<html>" +
+          "Resource <b>" + s+instanceName.getText() + "</b> already exists.");
         return;
       }
 
       for(int i = 0; i < selectedNodes.size(); i++) {
-        Object obj = ((OResourceNode)selectedNodes.get(i).getUserObject()).getResource();
+        Object obj = ((OResourceNode)selectedNodes.get(i)
+          .getUserObject()).getResource();
         if(obj instanceof OClass) {
-          OInstance instance = ontology.addOInstance(new URI(nameSpace
-                  .getText()
-                  + instanceName.getText(), false), (OClass)obj);
+          ontology.addOInstance(new URI(nameSpace.getText()
+            + instanceName.getText(), false), (OClass)obj);
         }
       }
     }
@@ -99,8 +100,8 @@ public class InstanceAction extends AbstractAction implements
     return ontology;
   }
 
-  public void setOntology(Ontology ontology1) {
-    ontology = ontology1;
+  public void setOntology(Ontology ontology) {
+    this.ontology = ontology;
   }
 
   public void selectionChanged(ArrayList<DefaultMutableTreeNode> arraylist) {
@@ -108,16 +109,8 @@ public class InstanceAction extends AbstractAction implements
   }
 
   JTextField nameSpace;
-
   JTextField instanceName;
-
-  JPanel labelPanel;
-
-  JPanel textFieldsPanel;
-
-  JPanel panel;
-
+  JPanel mainPanel;
   Ontology ontology;
-
   ArrayList<DefaultMutableTreeNode> selectedNodes;
 }

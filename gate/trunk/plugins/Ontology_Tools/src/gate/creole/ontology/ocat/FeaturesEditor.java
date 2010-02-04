@@ -106,7 +106,7 @@ public class FeaturesEditor extends JPanel {
   protected void populate() {
     featureList.clear();
 
-    // get all the exisitng features
+    // get all the existing features
     Set features = new HashSet();
 
     if(targetFeatures != null) {
@@ -318,7 +318,8 @@ public class FeaturesEditor extends JPanel {
             // otherwise he is restricted to use one of the values from the
             // availableValues
             vsa.showGUI("Values for the \"" + feature.name + "\" feature",
-              availableValues, selectedValues, availableValues.length == 0);
+              availableValues, selectedValues, availableValues.length == 0,
+              null);
             selectedValues = vsa.getSelectedValues();
             ArrayList list = new ArrayList();
             for(int i = 0; i < selectedValues.length; i++) {

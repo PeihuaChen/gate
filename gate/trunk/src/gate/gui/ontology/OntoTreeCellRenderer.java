@@ -25,10 +25,6 @@ import javax.swing.tree.DefaultTreeCellRenderer;
  */
 public class OntoTreeCellRenderer extends DefaultTreeCellRenderer {
   private static final long serialVersionUID = 3256445798102610225L;
-
-  public OntoTreeCellRenderer() {
-  }
-
   public Component getTreeCellRendererComponent(JTree jtree, Object obj,
           boolean flag, boolean flag1, boolean flag2, int i, boolean flag3) {
     if(obj != null && (obj instanceof DefaultMutableTreeNode)) {
