@@ -34,6 +34,17 @@ public interface OInstance extends OResource {
   public Set<OClass> getOClasses(OConstants.Closure closure);
 
   /**
+   * Make this individual an instance of another class. This does nothing
+   * if the individual is already an instance of the given class. Note
+   * that this cann lead to inconsistencies, e.g. if this class is disjunct
+   * with a class of which the individual is already an instance.
+   *
+   * @param theClass - the OClass object for the class of which the individual
+   * should be an instance.
+   */
+  public void addOClass(OClass theClass);
+
+  /**
    * Checks whether the instance is an instance of the provided class.
    * 
    * @param aClass
