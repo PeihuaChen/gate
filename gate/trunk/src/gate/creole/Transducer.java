@@ -158,22 +158,25 @@ public class Transducer extends AbstractLanguageAnalyser
     //Load operators
     if (operators != null) {
       for(String opName : operators) {
-        Class<ConstraintPredicate> clazz = null;
+        Class<? extends ConstraintPredicate> clazz = null;
         try {
-          clazz = (Class<ConstraintPredicate>)Class.forName(opName);
+          clazz = Class.forName(opName, true, Gate.getClassLoader())
+                        .asSubclass(ConstraintPredicate.class);
         }
         catch(ClassNotFoundException e) {
           //if couldn't find it that way, try with current thread class loader
           try {
-            clazz = (Class<ConstraintPredicate>)Class.forName(opName, true, Thread.currentThread().getContextClassLoader());
+            clazz = Class.forName(opName, true,
+                Thread.currentThread().getContextClassLoader())
+                  .asSubclass(ConstraintPredicate.class);
           }
           catch(ClassNotFoundException e1) {
             throw new ResourceInstantiationException("Cannot load class for operator: " + opName, e1);
           }
         }
-        //check that the class instantiates ConstraintPredicate
-        if (!ConstraintPredicate.class.isAssignableFrom(clazz))
+        catch(ClassCastException cce) {
           throw new ResourceInstantiationException("Operator class '" + opName + "' must implement ConstraintPredicate");
+        }
 
         //instantiate an instance of the class so can get the operator string
         try {
@@ -191,22 +194,25 @@ public class Transducer extends AbstractLanguageAnalyser
     //Load annotationAccessors
     if (annotationAccessors != null) {
       for(String accessorName : annotationAccessors) {
-        Class<AnnotationAccessor> clazz = null;
+        Class<? extends AnnotationAccessor> clazz = null;
         try {
-          clazz = (Class<AnnotationAccessor>)Class.forName(accessorName);
+          clazz = Class.forName(accessorName, true, Gate.getClassLoader())
+                     .asSubclass(AnnotationAccessor.class);
         }
         catch(ClassNotFoundException e) {
           //if couldn't find it that way, try with current thread class loader
           try {
-            clazz = (Class<AnnotationAccessor>)Class.forName(accessorName, true, Thread.currentThread().getContextClassLoader());
+            clazz = Class.forName(accessorName, true,
+                Thread.currentThread().getContextClassLoader())
+                   .asSubclass(AnnotationAccessor.class);
           }
           catch(ClassNotFoundException e1) {
             throw new ResourceInstantiationException("Cannot load class for accessor: " + accessorName, e1);
           }
         }
-        //check that the class instantiates ConstraintPredicate
-        if (!AnnotationAccessor.class.isAssignableFrom(clazz))
+        catch(ClassCastException cce) {
           throw new ResourceInstantiationException("Operator class '" + accessorName + "' must implement AnnotationAccessor");
+        }
 
         //instantiate an instance of the class so can get the meta-property name string
         try {
