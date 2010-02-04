@@ -70,6 +70,10 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
     throw new UnsupportedOperationException("Not supported in this implementation");
   }
 
+  public void addOClass(OClass theClass) {
+    throw new UnsupportedOperationException("Not supported in this implementation, use Ontology.addOInstance instead");
+  }
+
   /*
    * (non-Javadoc)
    * 
