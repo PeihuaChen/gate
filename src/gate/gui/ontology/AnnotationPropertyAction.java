@@ -1,5 +1,11 @@
 /*
- *  AnnotationPropertyAction.java
+ *  Copyright (c) 1995-2010, The University of Sheffield. See the file
+ *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
  *
  *  Niraj Aswani, 09/March/07
  *
@@ -8,21 +14,16 @@
 package gate.gui.ontology;
 
 import gate.creole.ontology.*;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
+import gate.gui.MainFrame;
+
+import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.*;
 import javax.swing.*;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
  * Action to create a new annotation property.
- * 
- * @author niraj
- * 
  */
-public class AnnotationPropertyAction extends AbstractAction implements
-                                                            TreeNodeSelectionListener {
+public class AnnotationPropertyAction extends AbstractAction {
   private static final long serialVersionUID = 3546358452780544048L;
 
   /**
@@ -33,48 +34,50 @@ public class AnnotationPropertyAction extends AbstractAction implements
    */
   public AnnotationPropertyAction(String s, Icon icon) {
     super(s, icon);
-    nameSpace = new JTextField(20);
-    nsPanel = new JPanel(new FlowLayout(0));
-    nsPanel.add(new JLabel("Name Space:"));
-    nsPanel.add(nameSpace);
-    propertyName = new JTextField(20);
-    propertyPanel = new JPanel(new FlowLayout(0));
-    propertyPanel.add(new JLabel("Property Name:"));
-    propertyPanel.add(propertyName);
-    panel = new JPanel(new GridLayout(2, 1));
-    ((GridLayout)panel.getLayout()).setVgap(0);
-    panel.add(propertyPanel);
-    panel.add(nsPanel);
+    mainPanel = new JPanel(new GridBagLayout());
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.insets = new Insets(3, 3, 3, 3);
+    gbc.anchor = GridBagConstraints.WEST;
+
+    mainPanel.add(new JLabel("Name Space:"), gbc);
+    mainPanel.add(nameSpace = new JTextField(30), gbc);
+
+    gbc.gridy = 1;
+    mainPanel.add(new JLabel("Property Name:"), gbc);
+    mainPanel.add(propertyName = new JTextField(30), gbc);
   }
 
-  /**
-   * This is invovked whenever user click on the button
-   */
   public void actionPerformed(ActionEvent actionevent) {
-    ArrayList<DefaultMutableTreeNode> selectedNodes = new ArrayList<DefaultMutableTreeNode>(
-            this.selectedNodes);
-    nameSpace.setText(ontology.getDefaultNameSpace());
-    int i = JOptionPane.showOptionDialog(null, panel,
-            "New Annotation Property", 2, 3, null,
-            new String[] {"OK", "Cancel"}, "OK");
-    if(i == 0) {
+    nameSpace.setText(ontology.getDefaultNameSpace() == null ?
+      "http://gate.ac.uk/example#" : ontology.getDefaultNameSpace());
+    JOptionPane pane = new JOptionPane(mainPanel, JOptionPane.QUESTION_MESSAGE,
+      JOptionPane.OK_CANCEL_OPTION,
+      MainFrame.getIcon("ontology-annotation-property")) {
+      public void selectInitialValue() {
+        propertyName.requestFocusInWindow();
+        propertyName.selectAll();
+      }
+    };
+    pane.createDialog(MainFrame.getInstance(),
+      "New Annotation Property").setVisible(true);
+    Object selectedValue = pane.getValue();
+    if (selectedValue != null
+    && selectedValue instanceof Integer
+    && (Integer) selectedValue == JOptionPane.OK_OPTION) {
       String s = nameSpace.getText();
       if(!Utils.isValidNameSpace(s)) {
-        JOptionPane.showMessageDialog(null, (new StringBuilder()).append(
-                "Invalid NameSpace:").append(s).append(
-                "\n example: http://gate.ac.uk/example#").toString());
+        JOptionPane.showMessageDialog(MainFrame.getInstance(),
+          "Invalid Name Space: " + s + "\nExample: http://gate.ac.uk/example#");
         return;
       }
       if(!Utils.isValidOntologyResourceName(propertyName.getText())) {
-        JOptionPane.showMessageDialog(null, "Invalid Annotation Property Name");
+        JOptionPane.showMessageDialog(MainFrame.getInstance(),
+          "Invalid Property Name: " + propertyName.getText());
         return;
       }
-      if(ontology.getOResourceFromMap(nameSpace.getText()
-              + propertyName.getText()) != null) {
-        JOptionPane.showMessageDialog(null, (new StringBuilder()).append(
-                "A Resource with name \"").append(
-                nameSpace.getText() + propertyName.getText()).append(
-                "\" already exists").toString());
+      if(ontology.getOResourceFromMap(s + propertyName.getText()) != null) {
+        JOptionPane.showMessageDialog(MainFrame.getInstance(),"<html>" +
+          "Resource <b>" + s+propertyName.getText() + "</b> already exists.");
         return;
       }
       ontology.addAnnotationProperty(new URI(nameSpace.getText()
@@ -83,9 +86,7 @@ public class AnnotationPropertyAction extends AbstractAction implements
   }
 
   /**
-   * Returns the associated ontology
-   * 
-   * @return
+   * @return the associated ontology
    */
   public Ontology getOntology() {
     return ontology;
@@ -94,38 +95,13 @@ public class AnnotationPropertyAction extends AbstractAction implements
   /**
    * Specifies the ontology that should be used to add/remove resource
    * to/from.
-   * 
-   * @param ontology1
    */
-  public void setOntology(Ontology ontology1) {
-    ontology = ontology1;
+  public void setOntology(Ontology ontology) {
+    this.ontology = ontology;
   }
 
-  /**
-   * This method is invoked by the ontology editor whenever the
-   * selection in ontology tree changes to reset the selected nodes.
-   */
-  public void selectionChanged(ArrayList<DefaultMutableTreeNode> arraylist) {
-    selectedNodes = arraylist;
-  }
-
-  protected JPanel nsPanel;
-
-  protected JPanel propertyPanel;
-
-  protected JPanel propPanel;
-
-  protected JPanel symTransPanel;
-
-  protected JPanel commentPanel;
-
-  protected JPanel panel;
-
+  protected JPanel mainPanel;
   protected JTextField nameSpace;
-
   protected JTextField propertyName;
-
-  protected ArrayList<DefaultMutableTreeNode> selectedNodes;
-
   protected Ontology ontology;
 }

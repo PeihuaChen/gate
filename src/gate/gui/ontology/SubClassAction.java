@@ -1,5 +1,11 @@
 /*
- *  SubClassAction.java
+ *  Copyright (c) 1995-2010, The University of Sheffield. See the file
+ *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
  *
  *  Niraj Aswani, 09/March/07
  *
@@ -8,11 +14,9 @@
 package gate.gui.ontology;
 
 import gate.creole.ontology.*;
-import gate.creole.ontology.Utils;
 import gate.gui.MainFrame;
 
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.*;
 import javax.swing.*;
@@ -20,9 +24,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
  * Action to create a new subclass.
- * 
- * @author niraj
- * 
  */
 public class SubClassAction extends AbstractAction implements
                                                   TreeNodeSelectionListener {
@@ -30,69 +31,70 @@ public class SubClassAction extends AbstractAction implements
 
   public SubClassAction(String s, Icon icon) {
     super(s, icon);
-    nameSpace = new JTextField(20);
-    className = new JTextField(20);
-    labelPanel = new JPanel(new GridLayout(2, 1));
-    textFieldsPanel = new JPanel(new GridLayout(2, 1));
-    panel = new JPanel(new FlowLayout(0));
-    panel.add(labelPanel);
-    panel.add(textFieldsPanel);
-    labelPanel.add(new JLabel("Name Space :"));
-    textFieldsPanel.add(nameSpace);
-    labelPanel.add(new JLabel("Sub Class Name :"));
-    textFieldsPanel.add(className);
+    mainPanel = new JPanel(new GridBagLayout());
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.insets = new Insets(3, 3, 3, 3);
+    gbc.anchor = GridBagConstraints.WEST;
+
+    mainPanel.add(new JLabel("Name Space:"), gbc);
+    mainPanel.add(nameSpace = new JTextField(30), gbc);
+
+    gbc.gridy = 1;
+    mainPanel.add(new JLabel("Class Name:"), gbc);
+    mainPanel.add(className = new JTextField(30), gbc);
   }
 
   public void actionPerformed(ActionEvent actionevent) {
-    ArrayList<DefaultMutableTreeNode> selectedNodes = new ArrayList<DefaultMutableTreeNode>(
-            this.selectedNodes);
-    if(selectedNodes.size() == 0) {
-      JOptionPane
-              .showMessageDialog(MainFrame.getInstance(),
-                      "Please select a class for which you want to create a new subclass");
-      return;
-    }
-    OResource selectedNode = ((OResourceNode)selectedNodes.get(0).getUserObject()).getResource();
+    OResource selectedNode = ((OResourceNode)selectedNodes.get(0)
+      .getUserObject()).getResource();
     String ns = selectedNode.getURI().getNameSpace();
-    if(Utils.hasSystemNameSpace(selectedNode.getURI().toString())) {
+    if(gate.creole.ontology.Utils.hasSystemNameSpace(
+      selectedNode.getURI().toString())) {
       ns = ontology.getDefaultNameSpace();
     }
     nameSpace.setText(ns);
     ArrayList<OClass> arraylist = new ArrayList<OClass>();
     for(int i = 0; i < selectedNodes.size(); i++) {
-      Object obj = ((OResourceNode)((DefaultMutableTreeNode)selectedNodes.get(i)).getUserObject()).getResource();
+      Object obj = ((OResourceNode)((DefaultMutableTreeNode)
+        selectedNodes.get(i)).getUserObject()).getResource();
       if(obj instanceof OClass) arraylist.add((OClass)obj);
     }
 
-    int j = JOptionPane.showOptionDialog(MainFrame.getInstance(), panel,
-            "New Sub Class:", 2, 3, null, new String[] {"OK", "Cancel"}, "OK");
-    if(j == 0) {
+    nameSpace.setText(ontology.getDefaultNameSpace() == null ?
+      "http://gate.ac.uk/example#" : ontology.getDefaultNameSpace());
+    JOptionPane pane = new JOptionPane(mainPanel, JOptionPane.QUESTION_MESSAGE,
+      JOptionPane.OK_CANCEL_OPTION, MainFrame.getIcon("ontology-subclass")) {
+      public void selectInitialValue() {
+        className.requestFocusInWindow();
+        className.selectAll();
+      }
+    };
+    pane.createDialog(MainFrame.getInstance(),"New Sub Class").setVisible(true);
+    Object selectedValue = pane.getValue();
+    if (selectedValue != null
+    && selectedValue instanceof Integer
+    && (Integer) selectedValue == JOptionPane.OK_OPTION) {
       String s = nameSpace.getText();
-      if(!gate.gui.ontology.Utils.isValidNameSpace(s)) {
+      if (!Utils.isValidNameSpace(s)) {
         JOptionPane.showMessageDialog(MainFrame.getInstance(),
-                (new StringBuilder()).append("Invalid NameSpace:").append(s)
-                        .append("\n example: http://gate.ac.uk/example#")
-                        .toString());
+          "Invalid Name Space: " + s + "\nExample: http://gate.ac.uk/example#");
         return;
       }
-      if(!gate.gui.ontology.Utils.isValidOntologyResourceName(className.getText())) {
+      if(!Utils.isValidOntologyResourceName(className.getText())) {
         JOptionPane.showMessageDialog(MainFrame.getInstance(),
-                "Invalid Classname");
+          "Invalid Class Name: " + className.getText());
         return;
       }
-
       if(ontology.getOResourceFromMap(s + className.getText()) != null) {
-        JOptionPane.showMessageDialog(MainFrame.getInstance(),
-                (new StringBuilder()).append("Class :").append(
-                        className.getText()).append(" already exists")
-                        .toString());
+        JOptionPane.showMessageDialog(MainFrame.getInstance(),"<html>" +
+          "Resource <b>" + s+className.getText() + "</b> already exists.");
         return;
       }
 
       OClass oclassimpl = ontology.addOClass(new URI(s + className.getText(),
               false), OConstants.OWL_CLASS);
       for(int k = 0; k < arraylist.size(); k++) {
-        ((OClass)arraylist.get(k)).addSubClass(oclassimpl);
+        (arraylist.get(k)).addSubClass(oclassimpl);
       }
     }
   }
@@ -101,8 +103,8 @@ public class SubClassAction extends AbstractAction implements
     return ontology;
   }
 
-  public void setOntology(Ontology ontology1) {
-    ontology = ontology1;
+  public void setOntology(Ontology ontology) {
+    this.ontology = ontology;
   }
 
   public void selectionChanged(ArrayList<DefaultMutableTreeNode> arraylist) {
@@ -110,16 +112,8 @@ public class SubClassAction extends AbstractAction implements
   }
 
   protected JTextField nameSpace;
-
   protected JTextField className;
-
-  protected JPanel labelPanel;
-
-  protected JPanel textFieldsPanel;
-
-  protected JPanel panel;
-
+  protected JPanel mainPanel;
   protected ArrayList<DefaultMutableTreeNode> selectedNodes;
-
   protected Ontology ontology;
 }

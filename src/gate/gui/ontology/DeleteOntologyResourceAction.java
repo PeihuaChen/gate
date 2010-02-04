@@ -1,5 +1,11 @@
 /*
- *  DeleteOntologyResourceAction.java
+ *  Copyright (c) 1995-2010, The University of Sheffield. See the file
+ *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
  *
  *  Niraj Aswani, 09/March/07
  *
@@ -17,9 +23,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
  * Action to delete a resource from ontology.
- * 
- * @author niraj
- * 
  */
 public class DeleteOntologyResourceAction extends AbstractAction implements
                                                                 TreeNodeSelectionListener {
@@ -27,40 +30,44 @@ public class DeleteOntologyResourceAction extends AbstractAction implements
 
   public DeleteOntologyResourceAction(String caption, Icon icon) {
     super(caption, icon);
-    selectedNodes = new ArrayList<DefaultMutableTreeNode>();
   }
 
   public void actionPerformed(ActionEvent actionevent) {
-    ArrayList<DefaultMutableTreeNode> selectedNodes = new ArrayList<DefaultMutableTreeNode>(
-            this.selectedNodes);
-
-    int i = JOptionPane.showConfirmDialog(MainFrame.getInstance(),
-            "Are you sure?", "Resource deleting action",
-            JOptionPane.YES_NO_OPTION);
-    if(i != 0) return;
-    for(int j = 0; j < selectedNodes.size(); j++) {
-      DefaultMutableTreeNode defaultmutabletreenode = (DefaultMutableTreeNode)selectedNodes
-              .get(j);
-      Object obj = ((OResourceNode)defaultmutabletreenode.getUserObject())
-              .getResource();
+    String[] resourcesToDelete = new String[selectedNodes.size()];
+    int i = 0;
+    for (DefaultMutableTreeNode node : selectedNodes) {
+      Object object = ((OResourceNode) node.getUserObject()).getResource();
+      resourcesToDelete[i++] = ((OResource) object).getONodeID().toString();
+    }
+    JList list = new JList(resourcesToDelete);
+    int choice = JOptionPane.showOptionDialog(MainFrame.getInstance(),
+      new Object[]{"Are you sure you want to delete the following resources?",
+      "\n\n", new JScrollPane(list), '\n'}, "Delete resources",
+      JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null,
+      new String[]{"Delete resources", "Cancel"}, "Cancel");
+    if (choice == JOptionPane.CLOSED_OPTION || choice == 1)  { return; }
+    for (DefaultMutableTreeNode node : selectedNodes) {
+      Object object = ((OResourceNode) node.getUserObject()).getResource();
       try {
-        if(obj instanceof OClass) {
-          if(ontology.containsOClass(((OClass)obj).getURI()))
-            ontology.removeOClass((OClass)obj);
+        if (object instanceof OClass) {
+          if (ontology.containsOClass(((OClass) object).getURI()))
+            ontology.removeOClass((OClass) object);
           continue;
         }
-        if(obj instanceof OInstance) {
-          if(ontology.getOInstance(((OInstance)obj).getURI()) != null)
-            ontology.removeOInstance((OInstance)obj);
+        if (object instanceof OInstance) {
+          if (ontology.getOInstance(((OInstance) object).getURI()) != null)
+            ontology.removeOInstance((OInstance) object);
           continue;
         }
-        if((obj instanceof RDFProperty)
-                && ontology.getOResourceFromMap(((RDFProperty)obj).getURI().toString()) != null)
-          ontology.removeProperty((RDFProperty)obj);
+        if ((object instanceof RDFProperty)
+          && ontology.getOResourceFromMap(
+            ((RDFProperty) object).getURI().toString()) != null)
+          ontology.removeProperty((RDFProperty) object);
       }
-      catch(Exception re) {
+      catch (Exception re) {
         re.printStackTrace();
-        JOptionPane.showMessageDialog(MainFrame.getInstance(), re.getMessage() + "\nPlease see tab messages for more information!");
+        JOptionPane.showMessageDialog(MainFrame.getInstance(), re.getMessage() +
+          "\nPlease see tab messages for more information!");
       }
     }
   }
@@ -69,8 +76,8 @@ public class DeleteOntologyResourceAction extends AbstractAction implements
     return ontology;
   }
 
-  public void setOntology(Ontology ontology1) {
-    ontology = ontology1;
+  public void setOntology(Ontology ontology) {
+    this.ontology = ontology;
   }
 
   public void selectionChanged(ArrayList<DefaultMutableTreeNode> arraylist) {
@@ -78,6 +85,5 @@ public class DeleteOntologyResourceAction extends AbstractAction implements
   }
 
   protected Ontology ontology;
-
   protected ArrayList<DefaultMutableTreeNode> selectedNodes;
 }

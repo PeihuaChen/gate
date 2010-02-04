@@ -1,5 +1,11 @@
 /*
- *  TopClassAction.java
+ *  Copyright (c) 1995-2010, The University of Sheffield. See the file
+ *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
  *
  *  Niraj Aswani, 09/March/07
  *
@@ -10,55 +16,64 @@ package gate.gui.ontology;
 import gate.creole.ontology.*;
 import gate.gui.MainFrame;
 
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import javax.swing.*;
 
 /**
- * Action to create a new Top Class
- * 
- * @author niraj
- * 
+ * Action to create a new Top Class.
  */
 public class TopClassAction extends AbstractAction {
   private static final long serialVersionUID = 3258409543049359926L;
 
   public TopClassAction(String s, Icon icon) {
     super(s, icon);
-    nameSpace = new JTextField(20);
-    className = new JTextField(20);
-    labelPanel = new JPanel(new GridLayout(2, 1));
-    textFieldsPanel = new JPanel(new GridLayout(2, 1));
-    panel = new JPanel(new FlowLayout(0));
-    panel.add(labelPanel);
-    panel.add(textFieldsPanel);
-    labelPanel.add(new JLabel("Name Space :"));
-    textFieldsPanel.add(nameSpace);
-    labelPanel.add(new JLabel("Top Class Name :"));
-    textFieldsPanel.add(className);
+    mainPanel = new JPanel(new GridBagLayout());
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.insets = new Insets(3, 3, 3, 3);
+    gbc.anchor = GridBagConstraints.WEST;
+
+    mainPanel.add(new JLabel("Name Space:"), gbc);
+    mainPanel.add(nameSpace = new JTextField(30), gbc);
+
+    gbc.gridy = 1;
+    mainPanel.add(new JLabel("Class Name:"), gbc);
+    mainPanel.add(className = new JTextField(30), gbc);
   }
 
   public void actionPerformed(ActionEvent actionevent) {
-    nameSpace.setText(ontology.getDefaultNameSpace());
-    int i = JOptionPane.showOptionDialog(MainFrame.getInstance(), panel,
-            "New Top Class", 2, 3, null, new String[] {"OK", "Cancel"}, "OK");
-    if(i == 0) {
+    nameSpace.setText(ontology.getDefaultNameSpace() == null ?
+      "http://gate.ac.uk/example#" : ontology.getDefaultNameSpace());
+    JOptionPane pane = new JOptionPane(mainPanel, JOptionPane.QUESTION_MESSAGE,
+      JOptionPane.OK_CANCEL_OPTION, MainFrame.getIcon("ontology-topclass")) {
+      public void selectInitialValue() {
+        className.requestFocusInWindow();
+        className.selectAll();
+      }
+    };
+    pane.createDialog(MainFrame.getInstance(),"New Top Class").setVisible(true);
+    Object selectedValue = pane.getValue();
+    if (selectedValue != null
+    && selectedValue instanceof Integer
+    && (Integer) selectedValue == JOptionPane.OK_OPTION) {
       String s = nameSpace.getText();
-      if(!Utils.isValidNameSpace(s)) {
+      if (!Utils.isValidNameSpace(s)) {
         JOptionPane.showMessageDialog(MainFrame.getInstance(),
-                (new StringBuilder()).append("Invalid NameSpace:").append(s)
-                        .append("\n example: http://gate.ac.uk/example#")
-                        .toString());
+          "Invalid Name Space: " + s + "\nExample: http://gate.ac.uk/example#");
         return;
       }
       if(!Utils.isValidOntologyResourceName(className.getText())) {
         JOptionPane.showMessageDialog(MainFrame.getInstance(),
-                "Invalid Classname");
+          "Invalid Class Name: " + className.getText());
         return;
       }
-      OClass oclassimpl = ontology.addOClass(new URI(nameSpace.getText()
-              + className.getText(), false), OConstants.OWL_CLASS);
+      if(ontology.getOResourceFromMap(s + className.getText()) != null) {
+        JOptionPane.showMessageDialog(MainFrame.getInstance(),"<html>" +
+          "Resource <b>" + s+className.getText() + "</b> already exists.");
+        return;
+      }
+      ontology.addOClass(new URI(nameSpace.getText() + className.getText(),
+        false), OConstants.OWL_CLASS);
     }
   }
 
@@ -66,19 +81,12 @@ public class TopClassAction extends AbstractAction {
     return ontology;
   }
 
-  public void setOntology(Ontology ontology1) {
-    ontology = ontology1;
+  public void setOntology(Ontology ontology) {
+    this.ontology = ontology;
   }
 
   protected JTextField nameSpace;
-
   protected JTextField className;
-
-  protected JPanel labelPanel;
-
-  protected JPanel textFieldsPanel;
-
-  protected JPanel panel;
-
+  protected JPanel mainPanel;
   protected Ontology ontology;
 }

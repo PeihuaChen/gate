@@ -1,5 +1,11 @@
 /*
- *  DetailsTableModel.java
+ *  Copyright (c) 1995-2010, The University of Sheffield. See the file
+ *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
  *
  *  Niraj Aswani, 09/March/07
  *
@@ -8,9 +14,11 @@
 package gate.gui.ontology;
 
 import gate.creole.ontology.*;
+import gate.gui.MainFrame;
 
 import java.util.*;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.*;
 
 /**
  * A DataModel that is created when a node is selected in the ontology
@@ -48,16 +56,16 @@ public class DetailsTableModel extends AbstractTableModel {
   }
 
   public int getRowCount() {
-    int i = detailGroups.length;
+    int count = detailGroups.length;
     for(int j = 0; j < detailGroups.length; j++)
       if(detailGroups[j].isExpanded()) {
-        i += detailGroups[j].getSize();
+        count += detailGroups[j].getSize();
       }
-    return i;
+    return count;
   }
 
-  public String getColumnName(int i) {
-    switch(i) {
+  public String getColumnName(int column) {
+    switch(column) {
       case EXPANDED_COLUMN:
         return "";
       case LABEL_COLUMN:
@@ -70,14 +78,14 @@ public class DetailsTableModel extends AbstractTableModel {
     return "";
   }
 
-  public Class getColumnClass(int i) {
-    switch(i) {
+  public Class getColumnClass(int columnIndex) {
+    switch(columnIndex) {
       case EXPANDED_COLUMN:
-        return Boolean.class;
+        return String.class;
       case LABEL_COLUMN:
         return Object.class;
       case VALUE_COLUMN:
-        return Object.class;
+        return String.class;
       case DELETE_COLUMN:
         return Object.class;
       
@@ -85,54 +93,168 @@ public class DetailsTableModel extends AbstractTableModel {
     return Object.class;
   }
 
-  public boolean isCellEditable(int i, int j) {
-    Object obj = getItemForRow(i);
-    //if(obj instanceof PropertyValue && j==2) return true;
-    return false;
+  public boolean isCellEditable(int rowIndex, int columnIndex) {
+    if (columnIndex != VALUE_COLUMN) { return false; }
+    Object object = getItemForRow(rowIndex);
+    if (!(object instanceof PropertyValue)) { return false; }
+    RDFProperty property = ((PropertyValue) object).getProperty();
+    return property instanceof AnnotationProperty
+        || property instanceof DatatypeProperty;
   }
 
-  public void setValueAt(Object obj, int i, int j) {
-    Object obj1 = getItemForRow(i);
-    if(j == 0 && (obj1 instanceof DetailsGroup)) {
-      DetailsGroup detailsgroup = (DetailsGroup)obj1;
-      detailsgroup.setExpanded(((Boolean)obj).booleanValue());
+  public void setValueAt(Object value, int row, int col) {
+    Object object = getItemForRow(row);
+    switch (col) {
+      case EXPANDED_COLUMN:
+        if (object instanceof DetailsGroup) {
+          DetailsGroup detailsgroup = (DetailsGroup) object;
+          detailsgroup.setExpanded((Boolean) value);
+        }
+        break;
+      case VALUE_COLUMN:
+        if (object instanceof PropertyValue) {
+          PropertyValue propertyValue = (PropertyValue) object;
+          RDFProperty property = propertyValue.getProperty();
+          if (property instanceof AnnotationProperty) {
+            // update the ontology
+            oResource.removeAnnotationPropertyValue((AnnotationProperty)
+              property, (Literal) propertyValue.getValue());
+            oResource.addAnnotationPropertyValue((AnnotationProperty)
+              property, new Literal((String) value));
+            // update the data structure for this table
+            setItemForRow(row, new PropertyValue(
+              property, new Literal((String) value)));
+          } else if (property instanceof DatatypeProperty) {
+            boolean isValidValue = ((DatatypeProperty)property)
+              .getDataType().isValidValue((String) value);
+            if (!isValidValue) {
+              JOptionPane.showMessageDialog(MainFrame.getInstance(),
+                "Incompatible value: " + value +
+                "\nUse a value of type " + ((DatatypeProperty)property)
+                .getDataType().getXmlSchemaURIString()
+                  .replaceFirst("http://www.w3.org/2001/XMLSchema#", ""));
+              return;
+            }
+            try {
+              ((OInstance)oResource).removeDatatypePropertyValue(
+                (DatatypeProperty)property, (Literal)propertyValue.getValue());
+              ((OInstance)oResource).addDatatypePropertyValue(
+                (DatatypeProperty)property, new Literal((String) value,
+                  ((DatatypeProperty)property).getDataType()));
+              setItemForRow(row, new PropertyValue(
+                property, new Literal((String) value)));
+            } catch(InvalidValueException e) {
+              JOptionPane.showMessageDialog(MainFrame.getInstance(),
+                      "Incompatible value");
+              e.printStackTrace();
+              return;
+            }
+          }
+        }
+        break;
     }
+    // redraw the table
     fireTableDataChanged();
   }
 
-  protected Object getItemForRow(int i) {
-    int j = 0;
-    for(int k = 0; j <= i; k++) {
-      if(j == i) return detailGroups[k];
-      int l = 1 + (detailGroups[k].isExpanded() ? detailGroups[k].getSize() : 0);
-      if(j + l > i) return detailGroups[k].getValueAt(i - j - 1);
-      j += l;
+  protected Object getItemForRow(int row) {
+    int groupRow = 0;
+    for (int groupIndex = 0; groupRow <= row; groupIndex++) {
+      if (groupRow == row) {
+        return detailGroups[groupIndex];
+      }
+      int groupSize = 1 + (detailGroups[groupIndex].isExpanded() ?
+        detailGroups[groupIndex].getSize() : 0);
+      if (groupRow + groupSize > row) {
+        return detailGroups[groupIndex].getValueAt(row - groupRow - 1);
+      }
+      groupRow += groupSize;
     }
     return null;
   }
 
-  public Object getValueAt(int i, int j) {
-    Object obj = getItemForRow(i);
-    switch(j) {
+  protected void setItemForRow(int row, Object value) {
+    int groupRow = 0;
+    for (int groupIndex = 0; groupRow <= row; groupIndex++) {
+      if (groupRow == row) {
+        detailGroups[groupIndex].setExpanded((Boolean) value);
+        return;
+      }
+      int groupSize = 1 + (detailGroups[groupIndex].isExpanded() ?
+        detailGroups[groupIndex].getSize() : 0);
+      if (groupRow + groupSize > row) {
+        detailGroups[groupIndex].setValueAt(row - groupRow - 1, value);
+        return;
+      }
+      groupRow += groupSize;
+    }
+  }
+
+  public Object getValueAt(int row, int col) {
+    Object object = getItemForRow(row);
+    switch(col) {
       case EXPANDED_COLUMN:
-        return (obj instanceof DetailsGroup) ? new Boolean(((DetailsGroup)obj)
-                .isExpanded()) : null;
+        return (object instanceof DetailsGroup) ?
+                 ((DetailsGroup) object).getSize() > 0 ?
+                   ((DetailsGroup) object).isExpanded() ?
+                     "expanded" : "closed" : "empty" : null;
       case LABEL_COLUMN:
-        return obj;
+        return object;
       case VALUE_COLUMN:
-        return obj;
+        if (object instanceof DetailsGroup) {
+          return "";
+        } else if (object instanceof PropertyValue) {
+          PropertyValue property = (PropertyValue) object;
+          if(property.getValue() instanceof Literal) {
+            return ((Literal)property.getValue()).getValue();
+          } else {
+            return property.getValue().toString();
+          }
+        } else if (object instanceof KeyValuePair) {
+            KeyValuePair keyValuePair = (KeyValuePair) object;
+            return keyValuePair.getValue().toString();
+        } else if (object instanceof RDFProperty) {
+          RDFProperty property = (RDFProperty) object;
+          if (property instanceof DatatypeProperty) {
+            return ((DatatypeProperty)property).getDataType()
+              .getXmlSchemaURIString();
+          } else if (!(property instanceof AnnotationProperty)) {
+            Set<OResource> set = property.getRange();
+            if (set == null || set.isEmpty()) {
+              return "[ALL CLASSES]";
+            } else {
+              String s = "[";
+              boolean firstTime = true;
+              for(OResource res : set) {
+                if (!firstTime) {
+                  s += ",";
+                } else {
+                  firstTime = false;
+                }
+                s += res.getName();
+              }
+              s += "]";
+              return s;
+            }
+          } else {
+            return "[ALL RESOURCES]";
+          }
+        } else {
+          return object.toString();
+        }
       case DELETE_COLUMN:
-        return obj;
+        return object;
     }
     return null;
   }
 
-  public void setItem(Object obj) {
-    if(obj instanceof OClass) {
+  public void setItem(OResource oResource) {
+    this.oResource = oResource;
+    if(oResource instanceof OClass) {
       detailGroups = new DetailsGroup[] {resourceInfo, directSuperClasses, allSuperClasses,
           directSubClasses, allSubClasses, equivalentClasses, propertyTypes,
           propertyValues, instances};
-      OClass tclass = (OClass)obj;
+      OClass tclass = (OClass)oResource;
       resourceInfo.getValues().clear();
       if(tclass instanceof Restriction) {
           resourceInfo.getValues().addAll(Utils.getDetailsToAdd(tclass));
@@ -204,8 +326,8 @@ public class DetailsTableModel extends AbstractTableModel {
         Collections.sort(instances.getValues(), itemComparator);
       }
     }
-    else if(obj instanceof OInstance) {
-      OInstance oinstance = (OInstance)obj;
+    else if(oResource instanceof OInstance) {
+      OInstance oinstance = (OInstance)oResource;
       detailGroups = (new DetailsGroup[] {resourceInfo, directTypes, allTypes,
           sameAsInstances, propertyTypes, propertyValues});
 
@@ -284,54 +406,38 @@ public class DetailsTableModel extends AbstractTableModel {
     fireTableDataChanged();
   }
 
+  public OResource getItem() {
+    return oResource;
+  }
+
   public Ontology getOntology() {
     return ontology;
   }
 
-  public void setOntology(Ontology ontology1) {
-    ontology = ontology1;
+  public void setOntology(Ontology ontology) {
+    this.ontology = ontology;
   }
 
   protected DetailsGroup resourceInfo;
-  
   protected DetailsGroup directSuperClasses;
-  
-  
   protected DetailsGroup allSuperClasses;
-
   protected DetailsGroup directSubClasses;
-
   protected DetailsGroup allSubClasses;
-
   protected DetailsGroup equivalentClasses;
-
   protected DetailsGroup sameAsInstances;
-
   protected DetailsGroup instances;
-
   protected DetailsGroup propertyTypes;
-
   protected DetailsGroup propertyValues;
-
   protected DetailsGroup directTypes;
-
   protected DetailsGroup allTypes;
-
   protected DetailsGroup detailGroups[];
-
   protected Ontology ontology;
-
+  protected OResource oResource;
   protected boolean ontologyMode;
-
   public static final int COLUMN_COUNT = 4;
-
   public static final int EXPANDED_COLUMN = 0;
-
   public static final int LABEL_COLUMN = 1;
-
   public static final int VALUE_COLUMN = 2;
-  
   public static final int DELETE_COLUMN = 3;
-
   protected OntologyItemComparator itemComparator;
 }

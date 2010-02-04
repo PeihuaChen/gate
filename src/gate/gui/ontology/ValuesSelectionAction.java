@@ -1,3 +1,18 @@
+/*
+ *  Copyright (c) 1995-2010, The University of Sheffield. See the file
+ *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Niraj Aswani, 2007
+ *
+ *  $Id$
+ *
+ */
+
 package gate.gui.ontology;
 
 import gate.gui.MainFrame;
@@ -18,12 +33,12 @@ public class ValuesSelectionAction {
     list = null;
     domainBox = new JComboBox();
     domainBox.setEditable(true);
-    list = new JList(new DefaultListModel());
+    list = new JList(new DefaultComboBoxModel());
     list.setVisibleRowCount(7);
     add = new JButton("Add");
     remove = new JButton("Remove");
     panel = new JPanel();
-    BoxLayout boxlayout = new BoxLayout(panel, 1);
+    BoxLayout boxlayout = new BoxLayout(panel, BoxLayout.Y_AXIS);
     panel.setLayout(boxlayout);
     panel.add(domainBox);
     domainBox.setEditable(true);
@@ -41,22 +56,17 @@ public class ValuesSelectionAction {
               }
             }
             Collections.sort(arraylist);
-            DefaultComboBoxModel defaultcomboboxmodel = new DefaultComboBoxModel(
-                    arraylist.toArray());
-            domainBox.setModel(defaultcomboboxmodel);
-
-            try {
-              if(!arraylist.isEmpty()) domainBox.showPopup();
-            }
-            catch(Exception exception) {
-            }
+            DefaultComboBoxModel model =
+              new DefaultComboBoxModel(arraylist.toArray());
+            domainBox.setModel(model);
+            if(!arraylist.isEmpty()) domainBox.showPopup();
           }
           ((JTextComponent)domainBox.getEditor().getEditorComponent())
                   .setText(s);
         }
       }
     });
-    JPanel jpanel = new JPanel(new FlowLayout(1));
+    JPanel jpanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
     jpanel.add(add);
     jpanel.add(remove);
     panel.add(jpanel);
@@ -71,21 +81,13 @@ public class ValuesSelectionAction {
             return;
           }
         }
-
-        if(((DefaultListModel)list.getModel()).contains(s)) {
+        if(((DefaultComboBoxModel)list.getModel()).getIndexOf(s) != -1) {
           JOptionPane.showMessageDialog(MainFrame.getInstance(),
-                  "Already added!");
-          return;
+            "Already added!");
         }
         else {
-          ((DefaultListModel)list.getModel()).addElement(s);
-          return;
+          ((DefaultComboBoxModel)list.getModel()).addElement(s);
         }
-      }
-
-      final ValuesSelectionAction this$0;
-      {
-        this$0 = ValuesSelectionAction.this;
       }
     });
     remove.addActionListener(new ActionListener() {
@@ -93,51 +95,55 @@ public class ValuesSelectionAction {
         Object aobj[] = list.getSelectedValues();
         if(aobj != null && aobj.length > 0) {
           for(int i = 0; i < aobj.length; i++)
-            ((DefaultListModel)list.getModel()).removeElement(aobj[i]);
+            ((DefaultComboBoxModel)list.getModel()).removeElement(aobj[i]);
         }
-      }
-
-      final ValuesSelectionAction this$0;
-      {
-        this$0 = ValuesSelectionAction.this;
       }
     });
   }
 
-  public void showGUI(String windowTitle, String inDropDownList[],
-          String alreadySelected[], boolean allowValueOutsideDropDownList) {
+  /**
+   * Dialogue that list possible choices to choose from.
+   * @param windowTitle title of the window
+   * @param inDropDownList list of choices
+   * @param alreadySelected initial selection
+   * @param allowValueOutsideDropDownList true if allowed
+   * @param icon message dialogue icon
+   * @return {@link JOptionPane#CLOSED_OPTION},
+   *  {@link JOptionPane#UNINITIALIZED_VALUE}, {@link JOptionPane#OK_OPTION},
+   *  {@link JOptionPane#CANCEL_OPTION}.
+   */
+  public int showGUI(String windowTitle, String[] inDropDownList,
+          String[] alreadySelected, boolean allowValueOutsideDropDownList,
+          Icon icon) {
     this.ontologyClasses = inDropDownList;
     this.allowValueOutsideDropDownList = allowValueOutsideDropDownList;
-    DefaultComboBoxModel defaultcomboboxmodel = new DefaultComboBoxModel(
-            inDropDownList);
-    domainBox.setModel(defaultcomboboxmodel);
-    DefaultListModel defaultlistmodel = new DefaultListModel();
-    for(int i = 0; i < alreadySelected.length; i++)
-      defaultlistmodel.addElement(alreadySelected[i]);
-    list.setModel(defaultlistmodel);
-    JOptionPane.showOptionDialog(MainFrame.getInstance(), panel, windowTitle,
-            0, 3, null, new String[] {"OK"}, "OK");
+    domainBox.setModel(new DefaultComboBoxModel(inDropDownList));
+    list.setModel(new DefaultComboBoxModel(alreadySelected));
+    JOptionPane pane = new JOptionPane(panel, JOptionPane.QUESTION_MESSAGE,
+     JOptionPane.OK_CANCEL_OPTION, icon) {
+      public void selectInitialValue() {
+        domainBox.requestFocusInWindow();
+        domainBox.getEditor().selectAll();
+      }
+    };
+    pane.createDialog(MainFrame.getInstance(), windowTitle).setVisible(true);
+    return pane.getValue() == null ?
+      JOptionPane.CLOSED_OPTION : (Integer) pane.getValue();
   }
 
   public String[] getSelectedValues() {
-    DefaultListModel defaultlistmodel = (DefaultListModel)list.getModel();
-    String as[] = new String[defaultlistmodel.getSize()];
+    DefaultComboBoxModel model = (DefaultComboBoxModel) list.getModel();
+    String as[] = new String[model.getSize()];
     for(int i = 0; i < as.length; i++)
-      as[i] = (String)defaultlistmodel.getElementAt(i);
+      as[i] = (String) model.getElementAt(i);
     return as;
   }
 
-  final protected JComboBox domainBox;
-
+  protected JComboBox domainBox;
   protected JList list;
-
   protected JButton add;
-
   protected JButton remove;
-
   protected JPanel panel;
-
   protected String[] ontologyClasses;
-
   protected boolean allowValueOutsideDropDownList = true;
 }

@@ -1,5 +1,11 @@
 /*
- *  ObjectPropertyAction.java
+ *  Copyright (c) 1995-2010, The University of Sheffield. See the file
+ *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
  *
  *  Niraj Aswani, 09/March/07
  *
@@ -8,8 +14,9 @@
 package gate.gui.ontology;
 
 import gate.creole.ontology.*;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
+import gate.gui.MainFrame;
+
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
@@ -18,9 +25,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
  * Action to create a new ObjectProperty in the ontology
- * 
- * @author niraj
- * 
  */
 public class ObjectPropertyAction extends AbstractAction implements
                                                         TreeNodeSelectionListener {
@@ -28,110 +32,103 @@ public class ObjectPropertyAction extends AbstractAction implements
 
   public ObjectPropertyAction(String s, Icon icon) {
     super(s, icon);
-    nameSpace = new JTextField(20);
-    nsPanel = new JPanel(new FlowLayout(0));
-    nsPanel.add(new JLabel("Name Space:"));
-    nsPanel.add(nameSpace);
-    propertyName = new JTextField(20);
-    domainB = new JButton("Domain");
-    rangeB = new JButton("Range");
+
+    mainPanel = new JPanel(new GridBagLayout());
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.insets = new Insets(3, 3, 3, 3);
+    gbc.anchor = GridBagConstraints.WEST;
+
+    mainPanel.add(new JLabel("Name Space:"), gbc);
+    mainPanel.add(nameSpace = new JTextField(30), gbc);
+
+    gbc.gridy = 1;
+    mainPanel.add(new JLabel("Property Name:"), gbc);
+    mainPanel.add(propertyName = new JTextField(30), gbc);
+    mainPanel.add(domainButton = new JButton("Domain"), gbc);
+    mainPanel.add(rangeButton = new JButton("Range"), gbc);
+
     domainAction = new ValuesSelectionAction();
-    rangeAction = new ValuesSelectionAction();
-    domainB.addActionListener(new ActionListener() {
+    domainButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent actionevent) {
         String as[] = new String[ontologyClassesURIs.size()];
         for(int i = 0; i < as.length; i++)
-          as[i] = ((String)ontologyClassesURIs.get(i));
+          as[i] = ontologyClassesURIs.get(i);
         ArrayList<String> arraylist = new ArrayList<String>();
         for(int j = 0; j < selectedNodes.size(); j++) {
           DefaultMutableTreeNode defaultmutabletreenode = selectedNodes.get(j);
           if(((OResourceNode)defaultmutabletreenode.getUserObject())
                   .getResource() instanceof OClass)
-            arraylist.add(((OClass)((OResourceNode)defaultmutabletreenode
+            arraylist.add((((OResourceNode)defaultmutabletreenode
                     .getUserObject()).getResource()).getURI().toString());
         }
         String as1[] = new String[arraylist.size()];
         for(int k = 0; k < as1.length; k++)
           as1[k] = arraylist.get(k);
-        domainAction.showGUI("Domain", as, as1, false);
-      }
-
-      final ObjectPropertyAction this$0;
-      {
-        this$0 = ObjectPropertyAction.this;
+        domainAction.showGUI("Domain", as, as1, false,
+          MainFrame.getIcon("ontology-object-property"));
       }
     });
-    rangeB.addActionListener(new ActionListener() {
+    rangeAction = new ValuesSelectionAction();
+    rangeButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent actionevent) {
         String as[] = new String[ontologyClassesURIs.size()];
         for(int i = 0; i < as.length; i++)
-          as[i] = ((String)ontologyClassesURIs.get(i));
-        rangeAction.showGUI("Range", as, new String[0], false);
-      }
-
-      final ObjectPropertyAction this$0;
-      {
-        this$0 = ObjectPropertyAction.this;
+          as[i] = ontologyClassesURIs.get(i);
+        rangeAction.showGUI("Range", as, new String[0], false,
+          MainFrame.getIcon("ontology-object-property"));
       }
     });
-    propertyPanel = new JPanel(new FlowLayout(0));
-    propertyPanel.add(new JLabel("Property Name:"));
-    propertyPanel.add(propertyName);
-    propertyPanel.add(domainB);
-    propertyPanel.add(rangeB);
-    panel = new JPanel(new GridLayout(2, 1));
-    ((GridLayout)panel.getLayout()).setVgap(0);
-    panel.add(propertyPanel);
-    panel.add(nsPanel);
-    subPropPanel = new JPanel(new FlowLayout(0));
-    subPropertyCB = new JCheckBox("sub property of the selected nodes?");
-    subPropPanel.add(subPropertyCB);
-    // panel.add(subPropPanel);
   }
 
   public void actionPerformed(ActionEvent actionevent) {
-    ArrayList<DefaultMutableTreeNode> selectedNodes = new ArrayList<DefaultMutableTreeNode>(
-            this.selectedNodes);
-    nameSpace.setText(ontology.getDefaultNameSpace());
-    int i = JOptionPane.showOptionDialog(null, panel, "New Property", 2, 3,
-            null, new String[] {"OK", "Cancel"}, "OK");
-    if(i == 0) {
+    nameSpace.setText(ontology.getDefaultNameSpace() == null ?
+      "http://gate.ac.uk/example#" : ontology.getDefaultNameSpace());
+    JOptionPane pane = new JOptionPane(mainPanel, JOptionPane.QUESTION_MESSAGE,
+      JOptionPane.OK_CANCEL_OPTION,
+      MainFrame.getIcon("ontology-object-property")) {
+      public void selectInitialValue() {
+        propertyName.requestFocusInWindow();
+        propertyName.selectAll();
+      }
+    };
+    pane.createDialog(MainFrame.getInstance(),
+      "New Object Property").setVisible(true);
+    Object selectedValue = pane.getValue();
+    if (selectedValue != null
+    && selectedValue instanceof Integer
+    && (Integer) selectedValue == JOptionPane.OK_OPTION) {
       String s = nameSpace.getText();
       if(!Utils.isValidNameSpace(s)) {
-        JOptionPane.showMessageDialog(null, (new StringBuilder()).append(
-                "Invalid NameSpace:").append(s).append(
-                "\n example: http://gate.ac.uk/example#").toString());
+        JOptionPane.showMessageDialog(MainFrame.getInstance(),
+          "Invalid Name Space: " + s + "\nExample: http://gate.ac.uk/example#");
         return;
       }
       if(!Utils.isValidOntologyResourceName(propertyName.getText())) {
-        JOptionPane.showMessageDialog(null, "Invalid Property Name");
+        JOptionPane.showMessageDialog(MainFrame.getInstance(),
+          "Invalid Property Name: " + propertyName.getText());
         return;
       }
-      if(ontology.getOResourceFromMap(nameSpace.getText()
-              + propertyName.getText()) != null) {
-        JOptionPane.showMessageDialog(null, (new StringBuilder()).append(
-                "A Resource with name \"").append(
-                nameSpace.getText() + propertyName.getText()).append(
-                "\" already exists").toString());
+      if(ontology.getOResourceFromMap(s + propertyName.getText()) != null) {
+        JOptionPane.showMessageDialog(MainFrame.getInstance(),"<html>" +
+          "Resource <b>" + s+propertyName.getText() + "</b> already exists.");
         return;
       }
       String domainSelectedValues[] = domainAction.getSelectedValues();
       HashSet<OClass> domainSet = new HashSet<OClass>();
-      for(int j = 0; j < domainSelectedValues.length; j++) {
-        OClass oclass = (OClass)ontology
-                .getOResourceFromMap(domainSelectedValues[j]);
+      for (String domainSelectedValue : domainSelectedValues) {
+        OClass oclass = (OClass)
+          ontology.getOResourceFromMap(domainSelectedValue);
         domainSet.add(oclass);
       }
       String rangeSelectedValues[] = rangeAction.getSelectedValues();
       HashSet<OClass> rangeSet = new HashSet<OClass>();
-      for(int j = 0; j < rangeSelectedValues.length; j++) {
-        OClass oclass = (OClass)ontology
-                .getOResourceFromMap(rangeSelectedValues[j]);
+      for (String rangeSelectedValue : rangeSelectedValues) {
+        OClass oclass = (OClass)
+          ontology.getOResourceFromMap(rangeSelectedValue);
         rangeSet.add(oclass);
       }
-      ObjectProperty dp = ontology.addObjectProperty(new URI(nameSpace
-              .getText()
-              + propertyName.getText(), false), domainSet, rangeSet);
+      ontology.addObjectProperty(new URI(nameSpace.getText()
+        + propertyName.getText(), false), domainSet, rangeSet);
     }
   }
 
@@ -139,8 +136,8 @@ public class ObjectPropertyAction extends AbstractAction implements
     return ontology;
   }
 
-  public void setOntology(Ontology ontology1) {
-    ontology = ontology1;
+  public void setOntology(Ontology ontology) {
+    this.ontology = ontology;
   }
 
   public void selectionChanged(ArrayList<DefaultMutableTreeNode> arraylist) {
@@ -155,31 +152,14 @@ public class ObjectPropertyAction extends AbstractAction implements
     ontologyClassesURIs = arraylist;
   }
 
-  protected JPanel nsPanel;
-
-  protected JPanel propertyPanel;
-
-  protected JPanel panel;
-
+  protected JPanel mainPanel;
   protected JTextField nameSpace;
-
+  protected JButton domainButton;
+  protected JButton rangeButton;
   protected JTextField propertyName;
-
-  protected JButton domainB;
-
-  protected JButton rangeB;
-
   protected ValuesSelectionAction domainAction;
-
   protected ValuesSelectionAction rangeAction;
-
   protected ArrayList<String> ontologyClassesURIs;
-
   protected ArrayList<DefaultMutableTreeNode> selectedNodes;
-
   protected Ontology ontology;
-
-  protected JPanel subPropPanel;
-
-  protected JCheckBox subPropertyCB;
 }
