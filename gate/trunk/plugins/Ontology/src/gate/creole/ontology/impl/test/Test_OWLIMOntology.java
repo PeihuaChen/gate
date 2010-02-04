@@ -332,9 +332,25 @@ public class Test_OWLIMOntology extends TestCase {
 
     OInstance i1 = ontology.addOInstance(getURI4Name(ontology,"Ic02a01"), c02a);
     assertNotNull(i1);
+    Set<OClass> iclasses = i1.getOClasses(DIRECT_CLOSURE);
+    System.out.println("Direct classes for Ic02a01: "+iclasses);
+    assertEquals(iclasses.size(), 2);
+    iclasses = i1.getOClasses(TRANSITIVE_CLOSURE);
+    System.out.println("All classes for Ic02a01: "+iclasses);
+    assertEquals(iclasses.size(), 2);
 
     OClass c02b = ontology.getOClass(getURI4Name(ontology,"Class02b"));
     assertNotNull(c02b);
+
+    OClass newClass = ontology.addOClass(getURI4Name(ontology,"newClass01"));
+    i1.addOClass(newClass);
+    iclasses = i1.getOClasses(DIRECT_CLOSURE);
+    System.out.println("Direct classes for Ic02a01 after addOClass: "+iclasses);
+    assertEquals(iclasses.size(), 3);
+    iclasses = i1.getOClasses(TRANSITIVE_CLOSURE);
+    System.out.println("All classes for Ic02a01 after addOClass: "+iclasses);
+    assertEquals(iclasses.size(), 3);
+
 
     // Class02b is asserted to be an equivalent class of Class02a so the
     // newly added instance should also be an instance of c02b
@@ -353,7 +369,7 @@ public class Test_OWLIMOntology extends TestCase {
 
     OInstance i2 = ontology.getOInstance(ontology.createOURIForName("IClass01_10"));
     assertNotNull(i2);
-    Set<OClass> iclasses = i2.getOClasses(DIRECT_CLOSURE);
+    iclasses = i2.getOClasses(DIRECT_CLOSURE);
     System.out.println("Direct classes for IClass01_10: "+iclasses);
     assertEquals(2,iclasses.size());
     iclasses = i2.getOClasses(TRANSITIVE_CLOSURE);
