@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -115,9 +116,11 @@ public class PackageGappTask extends Task {
   private List<MappingHint> hintTasks = new ArrayList<MappingHint>();
 
   /**
-   * Map of mapping hints.
+   * Map of mapping hints.  This is an insertion-ordered LinkedHashMap, so
+   * where two hints could apply to the same path, the one specified first in
+   * the configuration wins.
    */
-  private Map<URL, String> mappingHints = new HashMap<URL, String>();
+  private Map<URL, String> mappingHints = new LinkedHashMap<URL, String>();
 
   /**
    * Get the destination file to which the modified gapp will be
