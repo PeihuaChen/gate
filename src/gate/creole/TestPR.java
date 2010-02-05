@@ -467,6 +467,20 @@ public class TestPR extends TestCase
     assertEquals("Wrong number of matches for second Sarah in document", 2, 
             ((java.util.ArrayList) sarahAnnot.getFeatures().get("matches")).size());
     
+    Annotation robertQJones = personAnnots.get(new Long(300), new Long(315)).iterator().next();
+    assertEquals("Wrong number of matches for Robert Q Jones in document", 3, 
+            ((java.util.ArrayList) robertQJones.getFeatures().get("matches")).size());  
+    
+    Annotation robertCJones = personAnnots.get(new Long(0), new Long(15)).iterator().next();
+    assertEquals("Wrong number of matches for Robert C Jones in document", 3, 
+            ((java.util.ArrayList) robertCJones.getFeatures().get("matches")).size()); 
+    
+    Annotation robertAnderson = personAnnots.get(new Long(1188), new Long(1203)).iterator().next();
+    assertEquals("Found a match for Robert Anderson, but he should not have been matched.", false,
+            robertAnderson.getFeatures().containsKey("matches")); 
+    
+    
+    
   }//testOrthomatcher
 
   /** A test for comparing the annotation sets*/
