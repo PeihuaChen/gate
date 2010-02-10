@@ -164,7 +164,7 @@ public class Test_OWLIMOntology extends TestCase {
     System.out.println("List  ann props: "+anns);
     System.out.println("##### ann props: "+anns.size());
     System.out.println("@@@@@ ann props: "+elapsed1);
-    assertEquals(1, anns.size());
+    assertEquals(6, anns.size());
 
     beginTime = System.nanoTime();
     Set<DatatypeProperty> dats = ontology.getDatatypeProperties();

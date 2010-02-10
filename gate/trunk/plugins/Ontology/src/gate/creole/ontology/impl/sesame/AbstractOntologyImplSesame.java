@@ -195,15 +195,19 @@ public abstract class AbstractOntologyImplSesame extends AbstractOntologyImpl {
     // here for reference and the code of the LRs is not chenged, but
     // if no "system" imports are needed anywhere in the future, all the
     // relevant code can be removed.
-    /*
-    File pluginDir = getPluginDir();
+    // UPDATE 2010-02-10: as it turns out, the owl.rdfs import is needed
+    // to correctly define the predefined owl:AnnotationProperty properties
+    // like rdfs:label
+    
+    pluginDir = getPluginDir();
     File owlFile = new File(new File(pluginDir, "config"), "owl.rdfs");
     ((OntologyServiceImplSesame) ontologyService).loadSystemImport(owlFile,
         "http://www.w3.org/2002/07/owl#", OConstants.OntologyFormat.RDFXML);
-    File rdfsFile = new File(new File(pluginDir, "config"), "rdf-schema.rdf");
-    ((OntologyServiceImplSesame) ontologyService).loadSystemImport(rdfsFile,
-        "http://www.w3.org/2000/01/rdf-schema#", OConstants.OntologyFormat.RDFXML);
-    */
+
+    //File rdfsFile = new File(new File(pluginDir, "config"), "rdf-schema.rdf");
+    //((OntologyServiceImplSesame) ontologyService).loadSystemImport(rdfsFile,
+    //    "http://www.w3.org/2000/01/rdf-schema#", OConstants.OntologyFormat.RDFXML);
+    
   }
 
   @Override
