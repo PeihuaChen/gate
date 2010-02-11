@@ -1598,8 +1598,8 @@ public class AnnotationSetsView extends AbstractDocumentView
   protected class NewAnnotationAction extends AbstractAction{
     public NewAnnotationAction(String selection){
       super("Create new annotation");
-      putValue(SHORT_DESCRIPTION,
-        "Creates a new annotation from the selection: [" + selection + "]");
+      putValue(SHORT_DESCRIPTION, "Creates a new annotation from the" +
+        " selection: [" + Strings.crop(selection, 30) + "]");
     }
     public void actionPerformed(ActionEvent evt){
       if(annotationEditor == null) return;
