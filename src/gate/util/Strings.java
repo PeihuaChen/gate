@@ -249,4 +249,18 @@ public class Strings {
     return map;
   }
 
+  /**
+   * Crop the text in the middle if too long.
+   * @param text text to crop
+   * @param maxLength maximum length of the text
+   * @return cropped text if needed otherwise the same text
+   */
+  public static String crop(String text, int maxLength) {
+    if (text.length() > maxLength) {
+      text = text.substring(0, (maxLength/2)-2) + "..."
+        + text.substring(text.length() - (maxLength/2));
+    }
+    return text;
+  }
+
 } // class Strings
