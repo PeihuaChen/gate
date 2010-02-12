@@ -108,22 +108,48 @@ public class XJTable extends JTable{
       if(headerRenderer != null){
         Component c = headerRenderer.getTableCellRendererComponent(
                 XJTable.this, tCol.getHeaderValue(), false, false, 0, 0);
-        tCol.setMinWidth(c.getMinimumSize().width);
-        tCol.setPreferredWidth(c.getPreferredSize().width);
+        int width = c.getMinimumSize().width;
+        if(tCol.getMinWidth() != width) tCol.setMinWidth(width);
+        width = c.getPreferredSize().width;
+        if(tCol.getPreferredWidth() != width) tCol.setPreferredWidth(width);
       }else{
         tCol.setMinWidth(1);
         tCol.setPreferredWidth(1);          
       }
     }
-    //start with all rows of size 1
-    for(int row = 0; row < getRowCount(); row++)
-      setRowHeight(row, 1);
-    for(int row = 0; row < getRowCount(); row++)
+    
+    //now fix the row height and column width
+    Dimension spacing = getIntercellSpacing();
+    for(int row = 0; row < getRowCount(); row++){
+      //start with all rows of size 1      
+      int newRowHeight = 1;
+      Dimension dim;
       for(int column = 0; column < getColumnCount(); column ++){
-        prepareRenderer(getCellRenderer(row, column), row, column);
+        Component cellComponent = prepareRenderer(getCellRenderer(row, column), 
+                row, column);
+        TableColumn tColumn = getColumnModel().getColumn(column);
+        dim = cellComponent.getMinimumSize();
+        
+        int width = dim.width + spacing.width;
+        if(tColumn.getMinWidth() < width) tColumn.setMinWidth(width);
+        //now fix the preferred size
+        dim = cellComponent.getPreferredSize();
+        width = dim.width + spacing.width;
+        if(tColumn.getPreferredWidth() < width) tColumn.setPreferredWidth(width);
+        
+        //now fix the row height
+        if(newRowHeight < (dim.height + spacing.height)) 
+          newRowHeight = dim.height + spacing.height;
       }
+      setRowHeight(row, newRowHeight);
+      //JTable seems to revert to using the default (and single) rowHeight value
+      //after editing
+      //turns out this actually deletes the row model in JTable
+//      if(getRowHeight() < newRowHeight) setRowHeight(newRowHeight);
+    }
     componentSizedProperly = true;
   }
+  
   @Override
   /**
    * Overridden so that the preferred size can be calculated properly
@@ -178,31 +204,6 @@ public class XJTable extends JTable{
   private boolean componentSizedProperly = false;
   
   private Dimension preferredSize;
-  
-  @Override
-  /**
-   * Overridden to capture the preferred size while painting the cells
-   */  
-  public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
-    Component cellComponent =  super.prepareRenderer(renderer, row, column);
-    TableColumn tColumn = getColumnModel().getColumn(column);
-    Dimension spacing = getIntercellSpacing();
-    
-      //fix the minimum size
-      Dimension dim = cellComponent.getMinimumSize();
-      if(tColumn.getMinWidth() < (dim.width + spacing.width))
-              tColumn.setMinWidth(dim.width + spacing.width);
-      //now fix the preferred size
-      dim = cellComponent.getPreferredSize();
-      if(tColumn.getPreferredWidth() < (dim.width + spacing.width))
-        tColumn.setPreferredWidth(dim.width + spacing.width);
-    //now fix the row height
-    dim = cellComponent.getPreferredSize();
-    if(getRowHeight(row) < (dim.height + spacing.height)) 
-            setRowHeight(row, dim.height + spacing.height);
-    return cellComponent;
-  }
-
   
   /**
    * Converts a row number from the model co-ordinates system to the view's. 
@@ -521,7 +522,11 @@ public class XJTable extends JTable{
             //all data changed (including the number of rows)
             init(sourceModel);
             if(isSortable()) sort();
-            else fireTableDataChanged();
+            else {
+              //this will re-create all rows (which deletes the rowModel in JTable)
+              componentSizedProperly = false;
+              fireTableDataChanged();
+            }
           }else{
             //the rows should have normal values
             //if the sortedColumn is not affected we don't care
@@ -550,14 +555,22 @@ public class XJTable extends JTable{
           }else{
             //the real rows are not in sequence
             if(isSortable()) sort();
-            else fireTableDataChanged();
+            else {
+              //this will re-create all rows (which deletes the rowModel in JTable)
+              componentSizedProperly = false;
+              fireTableDataChanged();
+            }
           }
           break;
         case TableModelEvent.DELETE:
           //rows were deleted -> we need to rebuild
           init(sourceModel);
           if(isSortable()) sort();
-          else fireTableDataChanged();
+          else {
+            //this will re-create all rows (which deletes the rowModel in JTable)
+            componentSizedProperly = false;
+            fireTableDataChanged();
+          }
       }
     }
     
@@ -656,6 +669,8 @@ public class XJTable extends JTable{
             targetToSource[targetIndex] = sourceIndex;
           }
           sourceData.clear();
+          //this will re-create all rows (which deletes the rowModel in JTable)
+          componentSizedProperly = false;
           fireTableDataChanged();
           //restore selection
           //convert to model co-ordinates
@@ -791,7 +806,7 @@ public class XJTable extends JTable{
     super.changeSelection(rowIndex, columnIndex, toggle, extend);
     if (!toggle && !extend && editCellAsSoonAsFocus) {
       // start cell editing as soon as a cell is selected
-      this.editCellAt(rowIndex, columnIndex);
+      if(!isEditing()) this.editCellAt(rowIndex, columnIndex);
     }
   }
 
