@@ -91,18 +91,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
     setModel(tableModel = new ParametersTableModel());
     getColumnModel().getColumn(0).setCellRenderer(
             new ParameterDisjunctionRenderer());
-    getColumnModel().getColumn(1).setCellRenderer(
-      new DefaultTableCellRenderer() {
-      public Component getTableCellRendererComponent(JTable table, Object value,
-        boolean isSelected, boolean hasFocus, int row, int column) {
-          // remove the package prefix for the value of the type column
-          String text = (String) value;
-          int index = text.lastIndexOf('.');
-          setText(text.substring(index+1));
-          setToolTipText((String)value);
-          return this;
-        }
-      });
+    getColumnModel().getColumn(2).setCellRenderer(new DefaultTableCellRenderer());
     getColumnModel().getColumn(2).setCellRenderer(new BooleanRenderer());
     getColumnModel().getColumn(3).setCellRenderer(new ParameterValueRenderer());
     getColumnModel().getColumn(0).setCellEditor(
@@ -307,7 +296,8 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
         case 0:
           return pDisj;
         case 1:
-          return pDisj.getType();
+          String paramType = pDisj.getType();
+          return paramType.substring(paramType.lastIndexOf('.') + 1); 
         case 2:
           return pDisj.isRequired();
         case 3:
@@ -321,8 +311,11 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       ParameterDisjunction pDisj = parameterDisjunctions.get(rowIndex);
       switch(columnIndex) {
         case 0: {
-          pDisj.setSelectedIndex((Integer) aValue);
-          tableModel.fireTableRowsUpdated(rowIndex, rowIndex);
+          if(aValue instanceof ParameterDisjunction){
+            //do nothing
+          } else if (aValue instanceof Integer){
+            pDisj.setSelectedIndex((Integer) aValue);
+          }
           break;
         }
         case 1: {
@@ -338,6 +331,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
         default: {
         }
       }
+      tableModel.fireTableRowsUpdated(rowIndex, rowIndex);
     }// public void setValueAt
   }// /class FeaturesTableModel extends DefaultTableModel
 
@@ -588,6 +582,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       combo.setRenderer(new CustomRenderer());
       combo.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
+          pDisj.setSelectedIndex(combo.getSelectedIndex());
           stopCellEditing();
         }
       });
@@ -597,14 +592,15 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
             boolean isSelected, int row, int column) {
       pDisj = (ParameterDisjunction)value;
       DefaultComboBoxModel comboModel = new DefaultComboBoxModel(pDisj.getNames());
-      comboModel.setSelectedItem(pDisj.getParameter().getName());
       combo.setModel(comboModel);
-      
+      combo.setSelectedIndex(pDisj.getSelectedIndex());
       return combo;
     }// public Component getTableCellEditorComponent
 
     public Object getCellEditorValue() {
-      return combo.getSelectedIndex();
+      pDisj.setSelectedIndex(combo.getSelectedIndex());
+//      return combo.getSelectedIndex();
+      return pDisj;
     }
 
     public boolean stopCellEditing() {
@@ -624,7 +620,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       combo.setRenderer(new ResourceRenderer());
       combo.setEditable(false);
 
-      textField = new JTextField();
+      textField = new JTextField(20);
 
       fileButton = new JButton(MainFrame.getIcon("open-file"));
       fileButton.setToolTipText("Browse the file system");
