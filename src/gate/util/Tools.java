@@ -17,6 +17,7 @@
 package gate.util;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.net.JarURLConnection;
 import java.net.URL;
@@ -235,5 +236,16 @@ public class Tools {
               + mostSpecificConstructor);
     }
     return mostSpecificConstructor;
+  }
+  
+  /**
+   * Prints the stack trace of the current thread to the specified print stream.
+   * @param pStream
+   */
+  public static final void printStackTrace(PrintStream pStream){
+    StackTraceElement stackTraceElems[] = Thread.currentThread().getStackTrace();
+    for(StackTraceElement ste : stackTraceElems){
+      pStream.println(ste.toString());
+    }
   }
 } // class Tools
