@@ -85,6 +85,14 @@ public class ParameterDisjunction implements CreoleListener {
     selectedIndex = index;
   }
 
+  
+  /**
+   * Gets the currently selected parameter for this disjunction.
+   */
+  public int getSelectedIndex() {
+    return selectedIndex;
+  }
+
   /**
    * gets the number of parameters in this disjunction.
    */
