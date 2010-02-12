@@ -596,7 +596,10 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
     public Component getTableCellEditorComponent(JTable table, Object value,
             boolean isSelected, int row, int column) {
       pDisj = (ParameterDisjunction)value;
-      combo.setModel(new DefaultComboBoxModel(pDisj.getNames()));
+      DefaultComboBoxModel comboModel = new DefaultComboBoxModel(pDisj.getNames());
+      comboModel.setSelectedItem(pDisj.getParameter().getName());
+      combo.setModel(comboModel);
+      
       return combo;
     }// public Component getTableCellEditorComponent
 
