@@ -4128,14 +4128,15 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
 
     protected void init() {
-      getPopupMenu().addPopupMenuListener(new PopupMenuListener(){
-
-        public void popupMenuCanceled(PopupMenuEvent e) {
+      addMenuListener(new MenuListener() {
+        public void menuCanceled(MenuEvent e) {
+          // do nothing
         }
-        public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+        public void menuDeselected(MenuEvent e) {
+          // clear the status
+          statusChanged("");
         }
-
-        public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+        public void menuSelected(MenuEvent e) {
           removeAll();
           // find out the available types of LRs and repopulate the menu
           CreoleRegister reg = Gate.getCreoleRegister();
@@ -4183,26 +4184,15 @@ public class MainFrame extends JFrame implements ProgressListener,
                   URL pluginUrl = new File(Gate.getPluginsHome(),
                     ANNIEConstants.PLUGIN_DIR).toURI().toURL();
                   Gate.getCreoleRegister().registerDirectories(pluginUrl);
-	                Gate.addAutoloadPlugin(pluginUrl);
+                  Gate.addAutoloadPlugin(pluginUrl);
                 } catch(Exception ex) {
                   log.error("Unable to load ANNIE plugin.", ex);
                 }
               }});
             }
           }
-        }
 
-      });
-
-      addMenuListener(new MenuListener() {
-        public void menuCanceled(MenuEvent e) {
-          // do nothing
-        }
-        public void menuDeselected(MenuEvent e) {
-          // clear the status
-          statusChanged("");
-        }
-        public void menuSelected(MenuEvent e) {
+          // fire the status listener events
           switch(type){
             case LR:
               statusChanged("Data used for annotating");
@@ -4249,12 +4239,15 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
 
     protected void init() {
-      getPopupMenu().addPopupMenuListener(new PopupMenuListener(){
-        public void popupMenuCanceled(PopupMenuEvent e) { /* do nothing */ }
-        public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+      addMenuListener(new MenuListener() {
+        public void menuCanceled(MenuEvent e) {
           // do nothing
         }
-        public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+        public void menuDeselected(MenuEvent e) {
+          // clear the status
+          statusChanged("");
+        }
+        public void menuSelected(MenuEvent e) {
           removeAll();
           addMenuItems();
           if (getMenuComponentCount() == 0) {
