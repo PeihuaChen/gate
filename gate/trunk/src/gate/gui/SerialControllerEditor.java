@@ -15,8 +15,12 @@
 
 package gate.gui;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.DataFlavor;
@@ -99,12 +103,12 @@ public class SerialControllerEditor extends AbstractVisualResource
   }
 
   protected void initGuiComponents() {
-    setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-
-
-    JPanel topBox = new JPanel();
-    topBox.setLayout(new BoxLayout(topBox, BoxLayout.X_AXIS));
-    topBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+//    setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+    setLayout(new GridBagLayout());
+    GridBagConstraints constraints = new GridBagConstraints();
+    constraints.fill = GridBagConstraints.BOTH;
+    constraints.gridy = 0;
+    
 
     loadedPRsTableModel = new LoadedPRsTableModel();
     loadedPRsTable = new XJTable();
@@ -170,9 +174,13 @@ public class SerialControllerEditor extends AbstractVisualResource
                        createTitledBorder(BorderFactory.createEtchedBorder(),
                                           " Loaded Processing resources "));
 
-    topBox.add(scroller);
-    topBox.add(Box.createHorizontalGlue());
+    //adding a scrollable table
+    constraints.weightx = 1;
+    constraints.weighty = 1;
+    constraints.insets = new Insets(0,0,0,5);
+    add(scroller, constraints);
 
+    
     addButton = new JButton(addPRAction);
     addButton.setText("");
     addButton.setEnabled(false);
@@ -187,8 +195,10 @@ public class SerialControllerEditor extends AbstractVisualResource
     buttonsBox.add(removeButton);
     buttonsBox.add(Box.createVerticalGlue());
 
-    topBox.add(buttonsBox);
-    topBox.add(Box.createHorizontalGlue());
+    constraints.weightx = 0;
+    constraints.weighty = 0;
+    constraints.insets = new Insets(0,0,0,5);
+    add(buttonsBox, constraints);
 
     memberPRsTableModel = new MemberPRsTableModel();
     memberPRsTable = new XJTable();
@@ -292,9 +302,13 @@ public class SerialControllerEditor extends AbstractVisualResource
                        createTitledBorder(BorderFactory.createEtchedBorder(),
                                           " Selected Processing resources "));
 
+    //adding a scrollable table
+    constraints.weightx = 1;
+    constraints.weighty = 1;
+    constraints.insets = new Insets(0,0,0,5);
+    add(scroller, constraints);
 
-    topBox.add(scroller);
-
+    
     moveUpButton = new JButton(MainFrame.getIcon("up"));
     moveUpButton.setMnemonic(KeyEvent.VK_UP);
     moveUpButton.setToolTipText("Move the selected resources up.");
@@ -311,10 +325,17 @@ public class SerialControllerEditor extends AbstractVisualResource
     buttonsBox.add(moveDownButton);
     buttonsBox.add(Box.createVerticalGlue());
 
-    topBox.add(buttonsBox);
-    topBox.add(Box.createHorizontalGlue());
+    //adding a scrollable table
+    constraints.weightx = 0;
+    constraints.weighty = 0;
+    constraints.insets = new Insets(0,0,0,0);
+    add(buttonsBox, constraints);
 
-    add(topBox);
+    //next row
+    constraints.gridy++;
+    //all the following rows have one element only
+    constraints.gridwidth = 4;
+    
 
     if(conditionalMode){
       strategyPanel = new JPanel();
@@ -365,7 +386,12 @@ public class SerialControllerEditor extends AbstractVisualResource
           " No processing resource selected... ");
       strategyPanel.setBorder(strategyBorder);
 
-      add(strategyPanel);
+
+      constraints.weightx = 1;
+      constraints.weighty = 0;
+      constraints.insets = new Insets(0,0,0,0);
+      add(strategyPanel, constraints);
+      constraints.gridy++;
     }//if conditional mode
     if(analyserMode){
       //we need to add the corpus combo
@@ -398,15 +424,29 @@ public class SerialControllerEditor extends AbstractVisualResource
       horBox.add(Box.createHorizontalStrut(5));
       horBox.add(corpusCombo);
       horBox.add(Box.createHorizontalStrut(5));
-      horBox.add(Box.createHorizontalGlue());
-      add(horBox);
+
+      constraints.weightx = 1;
+      constraints.anchor = GridBagConstraints.WEST;
+      constraints.fill = GridBagConstraints.BOTH;
+      constraints.weighty = 0;
+      constraints.insets = new Insets(0,0,0,0);
+      add(horBox, constraints);
+      constraints.gridy++;
+      
       JLabel warningLbl = new JLabel(
         "<HTML>The <b>corpus</b> and <b>document</b> parameters are not " +
         "available as they are automatically set by the controller!</HTML>");
       warningLbl.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
-      add(warningLbl);
+      constraints.weightx = 1;
+      constraints.anchor = GridBagConstraints.WEST;
+      constraints.fill = GridBagConstraints.BOTH;
+      constraints.weighty = 0;
+      constraints.insets = new Insets(0,0,0,0);
+      add(warningLbl, constraints);
+      constraints.gridy++;
     }
 
+    
     parametersPanel = new JPanel();
     parametersPanel.setLayout(new BoxLayout(parametersPanel, BoxLayout.Y_AXIS));
     parametersPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -417,22 +457,21 @@ public class SerialControllerEditor extends AbstractVisualResource
     parametersEditor = new ResourceParametersEditor();
     parametersEditor.init(null, null);
     parametersPanel.add(new JScrollPane(parametersEditor));
-    add(Box.createVerticalStrut(5));
-    add(parametersPanel);
+//    parametersPanel.add(parametersEditor, constraints);
+    
+    constraints.weighty = 1;
+    constraints.weightx = 1;
+    constraints.anchor = GridBagConstraints.CENTER;
+    constraints.fill = GridBagConstraints.BOTH;
+    constraints.insets = new Insets(0,0,0,0);
+    add(parametersPanel, constraints);
+    constraints.gridy++;
 
-
-    add(Box.createVerticalStrut(5));
-    add(Box.createVerticalGlue());
-    JPanel horBox = new JPanel();
-    horBox.setLayout(new BoxLayout(horBox, BoxLayout.X_AXIS));
-    horBox.setAlignmentX(Component.LEFT_ALIGNMENT);
-    horBox.add(Box.createHorizontalGlue());
-    horBox.add(new JButton(runAction));
-    horBox.add(Box.createHorizontalGlue());
-    add(horBox);
-    add(Box.createVerticalGlue());
-    add(Box.createVerticalStrut(5));
-
+    constraints.weightx = 0;
+    constraints.weighty = 0;
+    constraints.fill = GridBagConstraints.NONE;
+    constraints.anchor = GridBagConstraints.CENTER;
+    add(new JButton(runAction), constraints);
   }// initGuiComponents()
 
   protected void initListeners() {
@@ -559,10 +598,6 @@ public class SerialControllerEditor extends AbstractVisualResource
           if (e.getClickCount() == 2) {
             //add selected modules on double click
             addPRAction.actionPerformed(null);
-
-          } else if(e.getClickCount() == 1) {
-            //edit parameters on one click
-            showParamsEditor(pr);
           }
         }
       }
@@ -599,10 +634,6 @@ public class SerialControllerEditor extends AbstractVisualResource
           if (e.getClickCount() == 2) {
             //remove selected modules on double click
             removePRAction.actionPerformed(null);
-
-          } else if(e.getClickCount() == 1) {
-            //edit parameters on one click
-            selectPR(row);
           }
         }
       }
@@ -625,27 +656,15 @@ public class SerialControllerEditor extends AbstractVisualResource
             && !memberPRsTable.isRowSelected(0));
           moveDownButton.setEnabled(memberPRsTable.getSelectedRowCount() > 0
             && !memberPRsTable.isRowSelected(memberPRsTable.getRowCount() - 1));
+          //if multiple selection, no editing of parameters
+          if(memberPRsTable.getSelectedRowCount() == 1){
+            //only one selection
+            selectPR(memberPRsTable.getSelectedRow());
+          }else{
+            showParamsEditor(null);
+          }
         }
       });
-
-     loadedPRsTable.addKeyListener(new KeyAdapter() {
-       public void keyPressed(KeyEvent e) {
-         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-           ProcessingResource pr = (ProcessingResource) loadedPRsTable
-             .getValueAt(loadedPRsTable.getSelectedRow(),
-               loadedPRsTable.convertColumnIndexToView(0));
-           showParamsEditor(pr);
-         }
-       }
-     });
-
-    memberPRsTable.addKeyListener(new KeyAdapter() {
-      public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-          selectPR(memberPRsTable.getSelectedRow());
-        }
-      }
-    });
 
     if(conditionalMode){
       final ActionListener executionModeActionListener = new ActionListener() {
