@@ -132,8 +132,9 @@ public class XJTable extends JTable{
     //the first time the component is sized, calculate the actual preferred size
     if(!componentSizedProperly){
       calculatePreferredSize();
+      preferredSize = super.getPreferredSize();
     }
-    return super.getPreferredSize();
+    return preferredSize;
   }
 
   /**
@@ -163,20 +164,21 @@ public class XJTable extends JTable{
   }
 
   /**
-   * From Java 1.6. Allows an empty table to use all the height instead of
-   * being invisible. Needed to drop an object on an empty table.
+   * Track parent viewport's size if it's larger than the current preferred 
+   * height of the table (causes empty tables to fill in the whole area of
+   * a JScrollPane). 
    * @return true if the preferred height of the table is smaller than the
-   *   viewport and getdragEnabled(), false otherwise.
+   *   viewport.
    */
   public boolean getScrollableTracksViewportHeight() {
-    return getDragEnabled() ?
-      getParent() instanceof JViewport
-   && getParent().getHeight() > getPreferredSize().height
-    :
-      super.getScrollableTracksViewportHeight();
+    return  (getParent() instanceof JViewport && 
+             getParent().getHeight() > getPreferredSize().height);
   }
 
   private boolean componentSizedProperly = false;
+  
+  private Dimension preferredSize;
+  
   @Override
   /**
    * Overridden to capture the preferred size while painting the cells
