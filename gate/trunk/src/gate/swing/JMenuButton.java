@@ -30,6 +30,7 @@ import javax.swing.event.PopupMenuListener;
 public class JMenuButton extends JToggleButton {
   public JMenuButton(JMenu menu) {
     this(menu.getPopupMenu());
+    this.menu = menu;
   }
   
   public JMenuButton(JPopupMenu popup) {
@@ -39,9 +40,11 @@ public class JMenuButton extends JToggleButton {
   }
 
   protected void initListeners() {
+    
     addActionListener(new ActionListener() {
 
       public void actionPerformed(ActionEvent e) {
+        if(menu != null) menu.setSelected(isSelected());
         if(isSelected()) {
           // show the popup
           Point p = getPopupMenuOrigin();
@@ -159,4 +162,5 @@ public class JMenuButton extends JToggleButton {
   }
 
   protected JPopupMenu popup;
+  protected JMenu menu;
 }
