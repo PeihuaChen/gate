@@ -22,6 +22,7 @@ import java.awt.Dimension;
 import java.awt.event.*;
 import java.util.*;
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.*;
@@ -808,6 +809,18 @@ public class XJTable extends JTable{
       // start cell editing as soon as a cell is selected
       if(!isEditing()) this.editCellAt(rowIndex, columnIndex);
     }
+  }
+
+  /**
+   * Workaround for lost of content when a cell lost its focus.
+   * It happens notably when resizing a table when editing a cell.
+   * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4330950
+   */
+  public void columnMarginChanged(ChangeEvent e)	{
+    if (getEditingColumn() != -1 || getEditingRow() != -1) {
+      editCellAt(0, 0);
+    }
+    super.columnMarginChanged(e);
   }
 
   protected SortingModel sortingModel;
