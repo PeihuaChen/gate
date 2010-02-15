@@ -496,7 +496,7 @@ public class SerialControllerEditor extends AbstractVisualResource
         // directly.
         SwingUtilities.invokeLater(new Runnable(){
           public void run(){
-            splitPane.setDividerLocation(0.3);    
+            splitPane.setDividerLocation(0.5);    
           }
         });
         splitPane.removeAncestorListener(this);
