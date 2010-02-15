@@ -57,9 +57,9 @@ public class XJTable extends JTable{
     // this is a partial fix for 
     // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4330950:
     // causes the current edit to be committed when focus moves to another
-    // component. The other half of this bug (edits bring lost when the table 
+    // component. The other half of this bug (edits lost when the table 
     // header is clicked) is being addressed by overriding 
-    // columnMarginChanged(ChangeEvent) and columnMarginChanged(ChangeEvent)
+    // columnMarginChanged(ChangeEvent) and columnMoved(TableColumnModelEvent)
     putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
   }
   
