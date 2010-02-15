@@ -1535,7 +1535,7 @@ implements ANNIEConstants{
   /** Tables for namematch info
    * (used by the namematch rules)
    */
-  private void buildTables(AnnotationSet nameAllAnnots) {
+  protected void buildTables(AnnotationSet nameAllAnnots) {
 
     //reset the tables first
     cdg.clear();

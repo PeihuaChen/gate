@@ -89,7 +89,7 @@ public class OrthoMatcherHelper {
 		    return annotString;
 		  }
 
-		static private String getStringForSpan(Long start, Long end,gate.Document d) throws ExecutionException {
+		public static String getStringForSpan(Long start, Long end,gate.Document d) throws ExecutionException {
 		    try {
 		      return d.getContent().getContent(start, end).toString();
 		    }
