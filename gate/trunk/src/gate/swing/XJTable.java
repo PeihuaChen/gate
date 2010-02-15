@@ -23,6 +23,7 @@ import java.awt.event.*;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.*;
@@ -53,6 +54,13 @@ public class XJTable extends JTable{
   public XJTable(TableModel model){
     super();
     if(model != null) setModel(model);
+    // this is a partial fix for 
+    // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4330950:
+    // causes the current edit to be committed when focus moves to another
+    // component. The other half of this bug (edits bring lost when the table 
+    // header is clicked) is being addressed by overriding 
+    // columnMarginChanged(ChangeEvent) and columnMarginChanged(ChangeEvent)
+    putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
   }
   
   public void setModel(TableModel dataModel) {
@@ -812,15 +820,25 @@ public class XJTable extends JTable{
   }
 
   /**
-   * Workaround for lost of content when a cell lost its focus.
-   * It happens notably when resizing a table when editing a cell.
-   * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4330950
-   */
-  public void columnMarginChanged(ChangeEvent e)	{
-    if (getEditingColumn() != -1 || getEditingRow() != -1) {
-      editCellAt(0, 0);
+   * Overridden to fix 
+   * //http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4330950:
+   */ 
+  public void columnMoved(TableColumnModelEvent e) {
+    if (isEditing()) {
+        cellEditor.stopCellEditing();
     }
-    super.columnMarginChanged(e);
+    super.columnMoved(e);
+  }
+
+  /**
+   * Overridden to fix 
+   * //http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4330950:
+   */   
+  public void columnMarginChanged(ChangeEvent e) {
+      if (isEditing()) {
+          cellEditor.stopCellEditing();
+      }
+      super.columnMarginChanged(e);
   }
 
   protected SortingModel sortingModel;
