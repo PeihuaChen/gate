@@ -121,42 +121,6 @@ public class SerialControllerEditor extends AbstractVisualResource
     loadedPRsTable.setSortable(false);
     loadedPRsTable.setModel(loadedPRsTableModel);
     loadedPRsTable.setDragEnabled(true);
-    loadedPRsTable.setTransferHandler(new TransferHandler() {
-      // minimal drag and drop that only call the removePRAction when importing
-      String source = "";
-      public int getSourceActions(JComponent c) {
-        return MOVE;
-      }
-      protected Transferable createTransferable(JComponent c) {
-        return new StringSelection("loadedPRsTable");
-      }
-      protected void exportDone(JComponent c, Transferable data, int action) {
-      }
-      public boolean canImport(JComponent c, DataFlavor[] flavors) {
-        for(DataFlavor flavor : flavors) {
-          if(DataFlavor.stringFlavor.equals(flavor)) {
-            return true;
-          }
-        }
-        return false;
-      }
-      public boolean importData(JComponent c, Transferable t) {
-        if (canImport(c, t.getTransferDataFlavors())) {
-          try {
-              source = (String)t.getTransferData(DataFlavor.stringFlavor);
-              if (source.startsWith("memberPRsTable")) {
-                removePRAction.actionPerformed(null);
-                return true;
-              } else {
-                return false;
-              }
-          } catch (UnsupportedFlavorException ufe) { // just return false later
-          } catch (IOException ioe) { // just return false later
-          }
-        }
-        return false;
-      }
-    });
     loadedPRsTable.setDefaultRenderer(ProcessingResource.class,
                                       new ResourceRenderer());
 
@@ -214,79 +178,6 @@ public class SerialControllerEditor extends AbstractVisualResource
                                       new ResourceRenderer());
     memberPRsTable.setDefaultRenderer(JLabel.class, new LabelRenderer());
     memberPRsTable.setDragEnabled(true);
-    memberPRsTable.setTransferHandler(new TransferHandler() {
-      // minimal drag and drop that only call the addPRAction when importing
-      String source = "";
-      public int getSourceActions(JComponent c) {
-        return MOVE;
-      }
-      protected Transferable createTransferable(JComponent c) {
-        int selectedRows[] = memberPRsTable.getSelectedRows();
-        Arrays.sort(selectedRows);
-        return new StringSelection("memberPRsTable"
-          + Arrays.toString(selectedRows));
-      }
-      protected void exportDone(JComponent c, Transferable data, int action) {
-      }
-      public boolean canImport(JComponent c, DataFlavor[] flavors) {
-        for(DataFlavor flavor : flavors) {
-          if(DataFlavor.stringFlavor.equals(flavor)) {
-            return true;
-          }
-        }
-        return false;
-      }
-      public boolean importData(JComponent c, Transferable t) {
-        if (!canImport(c, t.getTransferDataFlavors())) {
-          return false;
-        }
-        try {
-          source = (String)t.getTransferData(DataFlavor.stringFlavor);
-          if (source.startsWith("memberPRsTable")) {
-            int insertion = memberPRsTable.getSelectedRow();
-            int initialInsertion = insertion;
-            List<ProcessingResource> prs = new ArrayList<ProcessingResource>();
-            source = source.replaceFirst("^memberPRsTable\\[", "");
-            source = source.replaceFirst("\\]$", "");
-            String selectedRows[] = source.split(", ");
-            if (Integer.valueOf(selectedRows[0]) < insertion) { insertion++; }
-            // get the list of PRs selected when dragging started
-            for(String row : selectedRows) {
-              if (Integer.valueOf(row) == initialInsertion) {
-                // the user draged the selected rows on themselves, do nothing
-                return false;
-              }
-              prs.add((ProcessingResource) memberPRsTable.getValueAt(
-                Integer.valueOf(row),
-                memberPRsTable.convertColumnIndexToView(1)));
-              if (Integer.valueOf(row) < initialInsertion) { insertion--; }
-            }
-            // remove the PRs selected when dragging started
-            for (ProcessingResource pr : prs) {
-              controller.remove(pr);
-            }
-            // add the PRs at the insertion point
-            for (ProcessingResource pr : prs) {
-              controller.add(insertion, pr);
-              insertion++;
-            }
-            // select the moved PRs
-            memberPRsTable.addRowSelectionInterval(
-              insertion - selectedRows.length, insertion - 1);
-            return true;
-          } else if (source.equals("loadedPRsTable")) {
-            addPRAction.actionPerformed(null);
-            return true;
-          } else {
-            return false;
-          }
-        } catch (UnsupportedFlavorException ufe) {
-          return false;
-        } catch (IOException ioe) {
-          return false;
-        }
-      }
-    });
 
     final int width2 = new JLabel("Selected Processing resources").
                            getPreferredSize().width + 30;
@@ -562,7 +453,6 @@ public class SerialControllerEditor extends AbstractVisualResource
       }
     });
 
-
     moveDownButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         int rows[] = memberPRsTable.getSelectedRows();
@@ -635,6 +525,44 @@ public class SerialControllerEditor extends AbstractVisualResource
       }
     });
 
+    // drag and drop support
+    loadedPRsTable.setTransferHandler(new TransferHandler() {
+      // minimal drag and drop that only call the removePRAction when importing
+      String source = "";
+      public int getSourceActions(JComponent c) {
+        return MOVE;
+      }
+      protected Transferable createTransferable(JComponent c) {
+        return new StringSelection("loadedPRsTable");
+      }
+      protected void exportDone(JComponent c, Transferable data, int action) {
+      }
+      public boolean canImport(JComponent c, DataFlavor[] flavors) {
+        for(DataFlavor flavor : flavors) {
+          if(DataFlavor.stringFlavor.equals(flavor)) {
+            return true;
+          }
+        }
+        return false;
+      }
+      public boolean importData(JComponent c, Transferable t) {
+        if (canImport(c, t.getTransferDataFlavors())) {
+          try {
+              source = (String)t.getTransferData(DataFlavor.stringFlavor);
+              if (source.startsWith("memberPRsTable")) {
+                removePRAction.actionPerformed(null);
+                return true;
+              } else {
+                return false;
+              }
+          } catch (UnsupportedFlavorException ufe) { // just return false later
+          } catch (IOException ioe) { // just return false later
+          }
+        }
+        return false;
+      }
+    });
+    
     // mouse click edit the resource
     // mouse double click or context menu remove the resource from the
     // application
@@ -671,6 +599,81 @@ public class SerialControllerEditor extends AbstractVisualResource
       }
     });
 
+    // Drag and drop support
+    memberPRsTable.setTransferHandler(new TransferHandler() {
+      // minimal drag and drop that only call the addPRAction when importing
+      String source = "";
+      public int getSourceActions(JComponent c) {
+        return MOVE;
+      }
+      protected Transferable createTransferable(JComponent c) {
+        int selectedRows[] = memberPRsTable.getSelectedRows();
+        Arrays.sort(selectedRows);
+        return new StringSelection("memberPRsTable"
+          + Arrays.toString(selectedRows));
+      }
+      protected void exportDone(JComponent c, Transferable data, int action) {
+      }
+      public boolean canImport(JComponent c, DataFlavor[] flavors) {
+        for(DataFlavor flavor : flavors) {
+          if(DataFlavor.stringFlavor.equals(flavor)) {
+            return true;
+          }
+        }
+        return false;
+      }
+      public boolean importData(JComponent c, Transferable t) {
+        if (!canImport(c, t.getTransferDataFlavors())) {
+          return false;
+        }
+        try {
+          source = (String)t.getTransferData(DataFlavor.stringFlavor);
+          if (source.startsWith("memberPRsTable")) {
+            int insertion = memberPRsTable.getSelectedRow();
+            int initialInsertion = insertion;
+            List<ProcessingResource> prs = new ArrayList<ProcessingResource>();
+            source = source.replaceFirst("^memberPRsTable\\[", "");
+            source = source.replaceFirst("\\]$", "");
+            String selectedRows[] = source.split(", ");
+            if (Integer.valueOf(selectedRows[0]) < insertion) { insertion++; }
+            // get the list of PRs selected when dragging started
+            for(String row : selectedRows) {
+              if (Integer.valueOf(row) == initialInsertion) {
+                // the user draged the selected rows on themselves, do nothing
+                return false;
+              }
+              prs.add((ProcessingResource) memberPRsTable.getValueAt(
+                Integer.valueOf(row),
+                memberPRsTable.convertColumnIndexToView(1)));
+              if (Integer.valueOf(row) < initialInsertion) { insertion--; }
+            }
+            // remove the PRs selected when dragging started
+            for (ProcessingResource pr : prs) {
+              controller.remove(pr);
+            }
+            // add the PRs at the insertion point
+            for (ProcessingResource pr : prs) {
+              controller.add(insertion, pr);
+              insertion++;
+            }
+            // select the moved PRs
+            memberPRsTable.addRowSelectionInterval(
+              insertion - selectedRows.length, insertion - 1);
+            return true;
+          } else if (source.equals("loadedPRsTable")) {
+            addPRAction.actionPerformed(null);
+            return true;
+          } else {
+            return false;
+          }
+        } catch (UnsupportedFlavorException ufe) {
+          return false;
+        } catch (IOException ioe) {
+          return false;
+        }
+      }
+    });
+    
     loadedPRsTable.getSelectionModel().addListSelectionListener(
       new ListSelectionListener() {
         public void valueChanged(ListSelectionEvent e) {
