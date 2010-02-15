@@ -23,6 +23,7 @@ import java.util.List;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 
 import gate.Factory;
 import gate.FeatureMap;
@@ -47,8 +48,8 @@ public class FeaturesEditor extends AbstractVisualResource{
     tableModel = new FeaturesTableModel();
     table = new XJTable(tableModel);
 //    table.setIntercellSpacing(new Dimension(5,5));
-    table.setDefaultRenderer(String.class, new ObjectRenderer());
-    table.setDefaultRenderer(Object.class, new ObjectRenderer());
+    table.setDefaultRenderer(String.class, new DefaultTableCellRenderer());
+    table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer());
     table.setAutoResizeMode(XJTable.AUTO_RESIZE_OFF);
     DefaultCellEditor editor = new DefaultCellEditor(new JTextField());
     editor.setClickCountToStart(0);
