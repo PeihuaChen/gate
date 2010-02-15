@@ -23,6 +23,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
 
+import sun.swing.DefaultLookup;
+
 import gate.*;
 import gate.creole.ResourceData;
 
@@ -86,7 +88,6 @@ public class ResourceRenderer extends JLabel
       }
     }else{
       if(ownerComponent instanceof JTable){
-        JTable table = (JTable)ownerComponent;
         setForeground(ownerComponent.getForeground());
         setBackground(ownerComponent.getBackground());
       }else{
@@ -96,13 +97,14 @@ public class ResourceRenderer extends JLabel
     }
 
     setFont(ownerComponent.getFont());
-
-    if (hasFocus) {
-      setBorder( UIManager.getBorder("Table.focusCellHighlightBorder") );
-    }else{
-      setBorder(noFocusBorder);
+    if(ownerComponent instanceof JTable){
+      if (hasFocus) {
+        setBorder( UIManager.getBorder("Table.focusCellHighlightBorder") );
+      }else{
+        setBorder( UIManager.getBorder("Table.cellNoFocusBorder") );
+      }
     }
-
+    
     String text;
     String toolTipText;
     Icon icon;
@@ -135,6 +137,4 @@ public class ResourceRenderer extends JLabel
     setIcon(icon);
     setToolTipText(toolTipText);
   }
-
-  protected static Border noFocusBorder = new EmptyBorder(1, 1, 1, 1);
 }
