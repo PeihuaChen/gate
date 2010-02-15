@@ -15,6 +15,7 @@
 
 package gate.gui;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -103,8 +104,12 @@ public class SerialControllerEditor extends AbstractVisualResource
   }
 
   protected void initGuiComponents() {
-//    setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-    setLayout(new GridBagLayout());
+    //we use a JSplitPane for most of the content, and add the Run button to 
+    //the South area
+    setLayout(new BorderLayout());
+
+    JPanel topSplit = new JPanel();
+    topSplit.setLayout(new GridBagLayout());
     GridBagConstraints constraints = new GridBagConstraints();
     constraints.fill = GridBagConstraints.BOTH;
     constraints.gridy = 0;
@@ -112,7 +117,7 @@ public class SerialControllerEditor extends AbstractVisualResource
 
     loadedPRsTableModel = new LoadedPRsTableModel();
     loadedPRsTable = new XJTable();
-    loadedPRsTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+    loadedPRsTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
     loadedPRsTable.setSortable(false);
     loadedPRsTable.setModel(loadedPRsTableModel);
     loadedPRsTable.setDragEnabled(true);
@@ -178,7 +183,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     constraints.weightx = 1;
     constraints.weighty = 1;
     constraints.insets = new Insets(0,0,0,5);
-    add(scroller, constraints);
+    topSplit.add(scroller, constraints);
 
     
     addButton = new JButton(addPRAction);
@@ -198,13 +203,13 @@ public class SerialControllerEditor extends AbstractVisualResource
     constraints.weightx = 0;
     constraints.weighty = 0;
     constraints.insets = new Insets(0,0,0,5);
-    add(buttonsBox, constraints);
+    topSplit.add(buttonsBox, constraints);
 
     memberPRsTableModel = new MemberPRsTableModel();
     memberPRsTable = new XJTable();
     memberPRsTable.setSortable(false);
     memberPRsTable.setModel(memberPRsTableModel);
-    memberPRsTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+    memberPRsTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
     memberPRsTable.setDefaultRenderer(ProcessingResource.class,
                                       new ResourceRenderer());
     memberPRsTable.setDefaultRenderer(JLabel.class, new LabelRenderer());
@@ -306,7 +311,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     constraints.weightx = 1;
     constraints.weighty = 1;
     constraints.insets = new Insets(0,0,0,5);
-    add(scroller, constraints);
+    topSplit.add(scroller, constraints);
 
     
     moveUpButton = new JButton(MainFrame.getIcon("up"));
@@ -329,14 +334,15 @@ public class SerialControllerEditor extends AbstractVisualResource
     constraints.weightx = 0;
     constraints.weighty = 0;
     constraints.insets = new Insets(0,0,0,0);
-    add(buttonsBox, constraints);
-
-    //next row
-    constraints.gridy++;
-    //all the following rows have one element only
-    constraints.gridwidth = 4;
+    topSplit.add(buttonsBox, constraints);
     
-
+    // =========== BOTTOM Half ===========
+    JPanel bottomSplit = new JPanel();
+    bottomSplit.setLayout(new GridBagLayout());
+    
+    //first row
+    constraints.gridy = 0;
+    
     if(conditionalMode){
       strategyPanel = new JPanel();
       strategyPanel.setLayout(new BoxLayout(strategyPanel, BoxLayout.X_AXIS));
@@ -357,12 +363,13 @@ public class SerialControllerEditor extends AbstractVisualResource
                            new Dimension(Integer.MAX_VALUE,
                                          featureNameTextField.getPreferredSize().
                                          height));
+      
       featureValueTextField = new JTextField("", 25);
       featureValueTextField.setMaximumSize(
                            new Dimension(Integer.MAX_VALUE,
                                          featureValueTextField.getPreferredSize().
                                          height));
-
+      
       strategyPanel.add(new JLabel(MainFrame.getIcon("greenBall")));
       strategyPanel.add(yes_RunRBtn);
       strategyPanel.add(Box.createHorizontalStrut(5));
@@ -390,9 +397,10 @@ public class SerialControllerEditor extends AbstractVisualResource
       constraints.weightx = 1;
       constraints.weighty = 0;
       constraints.insets = new Insets(0,0,0,0);
-      add(strategyPanel, constraints);
+      bottomSplit.add(strategyPanel, constraints);
       constraints.gridy++;
-    }//if conditional mode
+    }//if conditional mode    
+    
     if(analyserMode){
       //we need to add the corpus combo
       corpusCombo = new JComboBox(corpusComboModel = new CorporaComboModel());
@@ -430,7 +438,7 @@ public class SerialControllerEditor extends AbstractVisualResource
       constraints.fill = GridBagConstraints.BOTH;
       constraints.weighty = 0;
       constraints.insets = new Insets(0,0,0,0);
-      add(horBox, constraints);
+      bottomSplit.add(horBox, constraints);
       constraints.gridy++;
       
       JLabel warningLbl = new JLabel(
@@ -442,10 +450,11 @@ public class SerialControllerEditor extends AbstractVisualResource
       constraints.fill = GridBagConstraints.BOTH;
       constraints.weighty = 0;
       constraints.insets = new Insets(0,0,0,0);
-      add(warningLbl, constraints);
+      bottomSplit.add(warningLbl, constraints);
+      //all the following rows have one element only
+      constraints.gridwidth = 1;
       constraints.gridy++;
-    }
-
+    }//if(analyserMode)    
     
     parametersPanel = new JPanel();
     parametersPanel.setLayout(new BoxLayout(parametersPanel, BoxLayout.Y_AXIS));
@@ -464,14 +473,37 @@ public class SerialControllerEditor extends AbstractVisualResource
     constraints.anchor = GridBagConstraints.CENTER;
     constraints.fill = GridBagConstraints.BOTH;
     constraints.insets = new Insets(0,0,0,0);
-    add(parametersPanel, constraints);
+    bottomSplit.add(parametersPanel, constraints);
     constraints.gridy++;
 
     constraints.weightx = 0;
     constraints.weighty = 0;
     constraints.fill = GridBagConstraints.NONE;
     constraints.anchor = GridBagConstraints.CENTER;
-    add(new JButton(runAction), constraints);
+    bottomSplit.add(new JButton(runAction), constraints);
+
+    final JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, 
+            topSplit, bottomSplit);
+    splitPane.addAncestorListener(new AncestorListener() {
+      public void ancestorRemoved(AncestorEvent event) {}
+      public void ancestorMoved(AncestorEvent event) {}
+      /**
+       * One-shot ancestor listener that places the divider location on first
+       * show, and then de-registers self. 
+       */
+      public void ancestorAdded(AncestorEvent event) {
+        // This seems to work more reliably if queued rather than executed
+        // directly.
+        SwingUtilities.invokeLater(new Runnable(){
+          public void run(){
+            splitPane.setDividerLocation(0.3);    
+          }
+        });
+        splitPane.removeAncestorListener(this);
+      }
+    });
+    
+    add(splitPane, BorderLayout.CENTER);
   }// initGuiComponents()
 
   protected void initListeners() {
@@ -656,54 +688,48 @@ public class SerialControllerEditor extends AbstractVisualResource
             && !memberPRsTable.isRowSelected(0));
           moveDownButton.setEnabled(memberPRsTable.getSelectedRowCount() > 0
             && !memberPRsTable.isRowSelected(memberPRsTable.getRowCount() - 1));
-          //if multiple selection, no editing of parameters
+          //update the parameters & strategy editors
           if(memberPRsTable.getSelectedRowCount() == 1){
             //only one selection
             selectPR(memberPRsTable.getSelectedRow());
           }else{
-            showParamsEditor(null);
+            //clean up UI
+            selectPR(-1);
           }
         }
       });
 
     if(conditionalMode){
-      final ActionListener executionModeActionListener = new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
+      /**
+       * A listener called when the selection state changes for any of the
+       * execution mode radio buttons. We use selection changes rather than 
+       * action listeners, as the change of state may not be as results of an 
+       * action (e.g. editing one of the text fields, changes the selection). 
+       */
+      ItemListener strategyModeListener = new ItemListener() {
+        public void itemStateChanged(ItemEvent e) {
           if(selectedPRRunStrategy != null &&
-             selectedPRRunStrategy instanceof AnalyserRunningStrategy){
-            AnalyserRunningStrategy strategy =
-              (AnalyserRunningStrategy)selectedPRRunStrategy;
-            if(yes_RunRBtn.isSelected()){
-              strategy.setRunMode(RunningStrategy.RUN_ALWAYS);
-              featureNameTextField.setEditable(false);
-              featureValueTextField.setEditable(false);
-            }else if(no_RunRBtn.isSelected()){
-              strategy.setRunMode(RunningStrategy.RUN_NEVER);
-              featureNameTextField.setEditable(false);
-              featureValueTextField.setEditable(false);
-            }else if(conditional_RunRBtn.isSelected()){
-              strategy.setRunMode(RunningStrategy.RUN_CONDITIONAL);
-              featureNameTextField.setEditable(true);
-              featureValueTextField.setEditable(true);
-
-              String str = featureNameTextField.getText();
-              strategy.setFeatureName(str == null || str.length()==0 ?
-                                      null : str);
-              str = featureValueTextField.getText();
-              strategy.setFeatureValue(str == null || str.length()==0 ?
-                                      null : str);
-            }
-          }
+                  selectedPRRunStrategy instanceof AnalyserRunningStrategy){
+             AnalyserRunningStrategy strategy =
+               (AnalyserRunningStrategy)selectedPRRunStrategy;
+             if(yes_RunRBtn.isSelected()){
+               strategy.setRunMode(RunningStrategy.RUN_ALWAYS);
+             }else if(no_RunRBtn.isSelected()){
+               strategy.setRunMode(RunningStrategy.RUN_NEVER);
+             }else if(conditional_RunRBtn.isSelected()){
+               strategy.setRunMode(RunningStrategy.RUN_CONDITIONAL);
+             }
+           }
+          //some icons may have changed!
           memberPRsTable.repaint();
         }
       };
-
-      yes_RunRBtn.addActionListener(executionModeActionListener);
-
-      no_RunRBtn.addActionListener(executionModeActionListener);
-
-      conditional_RunRBtn.addActionListener(executionModeActionListener);
-
+      
+      yes_RunRBtn.addItemListener(strategyModeListener);
+      no_RunRBtn.addItemListener(strategyModeListener);
+      conditional_RunRBtn.addItemListener(strategyModeListener);
+      
+      
       featureNameTextField.getDocument().addDocumentListener(
       new javax.swing.event.DocumentListener() {
         public void insertUpdate(javax.swing.event.DocumentEvent e) {
@@ -725,6 +751,8 @@ public class SerialControllerEditor extends AbstractVisualResource
               (AnalyserRunningStrategy)selectedPRRunStrategy;
             strategy.setFeatureName(featureNameTextField.getText());
           }
+          //editing the textfield changes the running strategy to conditional
+          conditional_RunRBtn.setSelected(true);
         }
       });
 
@@ -749,21 +777,24 @@ public class SerialControllerEditor extends AbstractVisualResource
               (AnalyserRunningStrategy)selectedPRRunStrategy;
             strategy.setFeatureValue(featureValueTextField.getText());
           }
+          //editing the textfield changes the running strategy to conditional
+          conditional_RunRBtn.setSelected(true);
         }
       });
     }//if conditional
+    
     if(analyserMode){
       corpusCombo.addPopupMenuListener(new PopupMenuListener() {
-                    public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
-                      corpusComboModel.fireDataChanged();
-                    }
+        public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+          corpusComboModel.fireDataChanged();
+        }
 
-                    public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-                    }
+        public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+        }
 
-                    public void popupMenuCanceled(PopupMenuEvent e) {
-                    }
-                  });
+        public void popupMenuCanceled(PopupMenuEvent e) {
+        }
+      });
     }
 
     addAncestorListener(new AncestorListener() {
@@ -805,100 +836,56 @@ public class SerialControllerEditor extends AbstractVisualResource
 
   /**
    * Called when a PR has been selected in the member PRs table;
-   * @param index row index in {@link #memberPRsTable}
+   * @param index row index in {@link #memberPRsTable} (or -1 if no PR is
+   * currently selected)
    */
   protected void selectPR(int index){
-    ProcessingResource pr = (ProcessingResource)
-                            ((java.util.List)controller.getPRs()).get(index);
-    showParamsEditor(pr);
-    selectedPR = pr;
-    if(conditionalMode){
-      strategyBorder.setTitle(" Run \"" + pr.getName() + "\"? ");
-      //update the state of the run strategy buttons
-      selectedPRRunStrategy = (RunningStrategy)
-                                 ((List)((ConditionalController)controller).
-                                          getRunningStrategies()).get(index);
-      int runMode = selectedPRRunStrategy.getRunMode();
-
-      if(selectedPRRunStrategy instanceof AnalyserRunningStrategy){
-        yes_RunRBtn.setEnabled(true);
-        no_RunRBtn.setEnabled(true);
-        conditional_RunRBtn.setEnabled(true);
-
-        featureNameTextField.setText(
-              ((AnalyserRunningStrategy)selectedPRRunStrategy).
-              getFeatureName());
-        featureValueTextField.setText(
-              ((AnalyserRunningStrategy)selectedPRRunStrategy).
-              getFeatureValue());
-      }else{
-        yes_RunRBtn.setEnabled(false);
-        no_RunRBtn.setEnabled(false);
-        conditional_RunRBtn.setEnabled(false);
-
-        featureNameTextField.setText("");
-        featureValueTextField.setText("");
+    //stop current editing of parameters
+    if(parametersEditor.getResource() != null){
+      try{
+        parametersEditor.setParameters();
+      }catch(ResourceInstantiationException rie){
+        JOptionPane.showMessageDialog(
+            SerialControllerEditor.this,
+            "Failed to set parameters for \"" + 
+            parametersEditor.getResource().getName() +"\"!\n" ,
+            "GATE", JOptionPane.ERROR_MESSAGE);
+        rie.printStackTrace(Err.getPrintWriter());
       }
-
-      featureNameTextField.setEditable(false);
-      featureValueTextField.setEditable(false);
-
-      switch(selectedPRRunStrategy.getRunMode()){
-        case RunningStrategy.RUN_ALWAYS:{
-          yes_RunRBtn.setSelected(true);
-          break;
+      
+      if(conditionalMode){
+        if(selectedPRRunStrategy != null &&
+                selectedPRRunStrategy instanceof AnalyserRunningStrategy){
+               AnalyserRunningStrategy strategy =
+                 (AnalyserRunningStrategy)selectedPRRunStrategy;
+               strategy.setFeatureName(featureNameTextField.getText());
+               strategy.setFeatureValue(featureValueTextField.getText());
         }
-
-        case RunningStrategy.RUN_NEVER:{
-          no_RunRBtn.setSelected(true);
-          break;
-        }
-
-        case RunningStrategy.RUN_CONDITIONAL:{
-          conditional_RunRBtn.setSelected(true);
-          if(selectedPRRunStrategy instanceof AnalyserRunningStrategy){
-            featureNameTextField.setEditable(true);
-            featureValueTextField.setEditable(true);
-          }
-          break;
-        }
-      }//switch
+        selectedPRRunStrategy = null;
+      }
     }
-  }
-
-  /**
-   * Stops the current edits for parameters; sets the parameters for the
-   * resource currently being edited and displays the editor for the new
-   * resource
-   * @param pr the new resource
-   */
-  protected void showParamsEditor(ProcessingResource pr){
-    try{
-      if(parametersEditor.getResource() != null) parametersEditor.setParameters();
-    }catch(ResourceInstantiationException rie){
-      JOptionPane.showMessageDialog(
-          SerialControllerEditor.this,
-          "Failed to set parameters for \"" + pr.getName() +"\"!\n" ,
-          "GATE", JOptionPane.ERROR_MESSAGE);
-      rie.printStackTrace(Err.getPrintWriter());
+    //find the new PR 
+    ProcessingResource pr = null;
+    if(index >= 0 && index < controller.getPRs().size()){
+      pr = (ProcessingResource)((java.util.List)controller.getPRs()).get(index);
     }
-
     if(pr != null){
+      //update the GUI for the new PR
       ResourceData rData = (ResourceData)Gate.getCreoleRegister().
                                          get(pr.getClass().getName());
-
+      //update the border name
       parametersBorder.setTitle(" Parameters for the \"" + pr.getName() +
                                 "\" " + rData.getName() + " ");
-
+      //update the params editor
       //this is a list of lists
-      List<List<Parameter>> parameters =
-        rData.getParameterList().getRuntimeParameters();
-
+      List<List<Parameter>> parameters = 
+          rData.getParameterList().getRuntimeParameters();
       if(analyserMode){
         //remove corpus and document
         //create a new list so we don't change the one from CreoleReg.
-        List<List<Parameter>> newParameters = new ArrayList<List<Parameter>>();
-        for(List<Parameter> aDisjunction : parameters) {
+        List<List<Parameter>> oldParameters = parameters;
+        parameters = new ArrayList<List<Parameter>>();
+        for(List<Parameter> aDisjunction : oldParameters) {
           List<Parameter> newDisjunction = new ArrayList<Parameter>();
           for(Parameter parameter : aDisjunction) {
             if(!parameter.getName().equals("corpus")
@@ -906,19 +893,71 @@ public class SerialControllerEditor extends AbstractVisualResource
               newDisjunction.add(parameter);
             }
           }
-          if(!newDisjunction.isEmpty()) newParameters.add(newDisjunction);
+          if(!newDisjunction.isEmpty()) parameters.add(newDisjunction);
         }
-        parametersEditor.init(pr, newParameters);
-      }else{
-        parametersEditor.init(pr, parameters);
+      }
+      parametersEditor.init(pr, parameters);
+      
+      if(conditionalMode){
+        strategyBorder.setTitle(" Run \"" + pr.getName() + "\"? ");
+        //update the state of the run strategy buttons
+        yes_RunRBtn.setEnabled(true);
+        no_RunRBtn.setEnabled(true);
+        conditional_RunRBtn.setEnabled(true);
+        
+        //editing the strategy panel causes the edits to be sent to the current
+        //strategy object, which can lead to a race condition. 
+        //So we used a cached value instead.
+        selectedPRRunStrategy = null;
+        RunningStrategy newStrategy = (RunningStrategy)
+                                   ((List)((ConditionalController)controller).
+                                            getRunningStrategies()).get(index);
+        if(newStrategy instanceof AnalyserRunningStrategy){
+          featureNameTextField.setEnabled(true);
+          featureValueTextField.setEnabled(true);
+          featureNameTextField.setText(
+                ((AnalyserRunningStrategy)newStrategy).
+                getFeatureName());
+          featureValueTextField.setText(
+                ((AnalyserRunningStrategy)newStrategy).
+                getFeatureValue());
+        }
+        switch(newStrategy.getRunMode()){
+          case RunningStrategy.RUN_ALWAYS:{
+            yes_RunRBtn.setSelected(true);
+            break;
+          }
+          case RunningStrategy.RUN_NEVER:{
+            no_RunRBtn.setSelected(true);
+            break;
+          }
+          case RunningStrategy.RUN_CONDITIONAL:{
+            conditional_RunRBtn.setSelected(true);
+            break;
+          }
+        }//switch
+        //now that the UI is updated, we can safely link to the new strategy
+        selectedPRRunStrategy = newStrategy;
       }
     }else{
-      parametersBorder.setTitle("No selected processing resource");
+      //selected PR == null -> clean all mentions of the old PR from the GUI
+      parametersBorder.setTitle(" No processing resource selected... ");
       parametersEditor.init(null, null);
+      if(conditionalMode){
+        strategyBorder.setTitle(" No processing resource selected... ");
+        yes_RunRBtn.setEnabled(false);
+        no_RunRBtn.setEnabled(false);
+        conditional_RunRBtn.setEnabled(false);
+        featureNameTextField.setText("");
+        featureNameTextField.setEnabled(false);
+        featureValueTextField.setText("");
+        featureValueTextField.setEnabled(false);
+      }
     }
-    SerialControllerEditor.this.validate();
+    //this seems to be needed to show the changes
     SerialControllerEditor.this.repaint(100);
   }
+
 
   //CreoleListener implementation
   public void resourceLoaded(CreoleEvent e) {
