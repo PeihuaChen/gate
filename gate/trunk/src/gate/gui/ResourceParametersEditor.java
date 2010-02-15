@@ -97,7 +97,6 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
     getColumnModel().getColumn(0).setCellEditor(
             new ParameterDisjunctionEditor());
     getColumnModel().getColumn(3).setCellEditor(new ParameterValueEditor());
-    setIntercellSpacing(new Dimension(5, 5));
     setAutoResizeMode(AUTO_RESIZE_LAST_COLUMN);
 
     setSurrendersFocusOnKeystroke(true);
@@ -331,7 +330,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
         default: {
         }
       }
-      tableModel.fireTableRowsUpdated(rowIndex, rowIndex);
+      tableModel.fireTableCellUpdated(rowIndex, columnIndex);
     }// public void setValueAt
   }// /class FeaturesTableModel extends DefaultTableModel
 
@@ -383,8 +382,8 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
    * A renderer that displays a File Open button next to a text field.
    * Used for setting URLs from files.
    */
-  class ParameterValueRenderer extends ObjectRenderer {
-    ParameterValueRenderer() {
+  class ParameterValueRenderer extends DefaultTableCellRenderer {
+    public ParameterValueRenderer() {
       fileButton = new JButton(MainFrame.getIcon("open-file"));
       fileButton.setToolTipText("Browse the file system");
       listButton = new JButton(MainFrame.getIcon("edit-list"));
