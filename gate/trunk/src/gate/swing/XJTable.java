@@ -65,6 +65,7 @@ public class XJTable extends JTable{
   
   public void setModel(TableModel dataModel) {
     sortingModel = new SortingModel(dataModel);
+    componentSizedProperly = false;
     super.setModel(sortingModel);
     newColumns();
   }
@@ -545,6 +546,7 @@ public class XJTable extends JTable{
                 //re-sorting will also fire the event upwards
                 sort();
             }else{
+              componentSizedProperly = false;
               fireTableChanged(new TableModelEvent(this,  
                       sourceToTarget(firstRow), 
                       sourceToTarget(lastRow), column, type));
@@ -558,9 +560,12 @@ public class XJTable extends JTable{
           if(firstRow != TableModelEvent.HEADER_ROW && firstRow == lastRow){
             //single row insertion
             if(isSortable()) sort();
-            else fireTableChanged(new TableModelEvent(this,  
+            else{
+              componentSizedProperly = false;
+              fireTableChanged(new TableModelEvent(this,  
                     sourceToTarget(firstRow), 
                     sourceToTarget(lastRow), column, type));
+            }
           }else{
             //the real rows are not in sequence
             if(isSortable()) sort();
@@ -651,42 +656,30 @@ public class XJTable extends JTable{
           comparator = defaultComparator;
         }
         compWrapper.setComparator(comparator);
-//          for(int i = 0; i < sourceData.size() - 1; i++){
-//            for(int j = i + 1; j < sourceData.size(); j++){
-//              Object o1 = sourceData.get(targetToSource(i));
-//              Object o2 = sourceData.get(targetToSource(j));
-//              boolean swap = ascending ?
-//                      (comparator.compare(o1, o2) > 0) :
-//                      (comparator.compare(o1, o2) < 0);
-//              if(swap){
-//                int aux = targetToSource[i];
-//                targetToSource[i] = targetToSource[j];
-//                targetToSource[j] = aux;
-//                
-//                sourceToTarget[targetToSource[i]] = i;
-//                sourceToTarget[targetToSource[j]] = j;
-//              }
-//            }
-//          }
-          //perform the actual sorting
-          Collections.sort(sourceData, compWrapper);
-          //extract the new order
-          for(int i = 0; i < sourceData.size(); i++){
-            int targetIndex = i;
-            int sourceIndex = sourceData.get(i).index;
-            sourceToTarget[sourceIndex] = targetIndex;
-            targetToSource[targetIndex] = sourceIndex;
-          }
-          sourceData.clear();
-          //this will re-create all rows (which deletes the rowModel in JTable)
-          componentSizedProperly = false;
-          fireTableDataChanged();
-          //restore selection
-          //convert to model co-ordinates
-          for(int i = 0; i < rows.length; i++){
-            rows[i] = rowModelToView(rows[i]);
-            getSelectionModel().addSelectionInterval(rows[i], rows[i]);
-          }
+        //perform the actual sorting
+        Collections.sort(sourceData, compWrapper);
+        //extract the new order
+        for(int i = 0; i < sourceData.size(); i++){
+          int targetIndex = i;
+          int sourceIndex = sourceData.get(i).index;
+          sourceToTarget[sourceIndex] = targetIndex;
+          targetToSource[targetIndex] = sourceIndex;
+        }
+        sourceData.clear();
+        //the rows may have moved about so we need to recalculate the heights
+        componentSizedProperly = false;
+        //calling whole data changed causes the super JTable to drop its
+        //rows model, so we need to be more specific.
+        fireTableRowsUpdated(0, getRowCount());
+        resizeAndRepaint();
+        //fireTableDataChanged();
+          
+        //restore selection
+        //convert to model co-ordinates
+        for(int i = 0; i < rows.length; i++){
+          rows[i] = rowModelToView(rows[i]);
+          getSelectionModel().addSelectionInterval(rows[i], rows[i]);
+        }
       }catch(ArrayIndexOutOfBoundsException aioob) {
         //this can happen when update events get behind
         //just ignore - we'll get another event later to cause the sorting
