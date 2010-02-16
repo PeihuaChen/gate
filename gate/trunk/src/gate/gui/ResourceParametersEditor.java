@@ -390,7 +390,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       listButton.setToolTipText("Edit the list");
       fmButton = new JButton(MainFrame.getIcon("edit-list"));
       fmButton.setToolTipText("Edit the feature map");
-      textField = new JTextField();
+      textField = new JTextField(25);
       textButtonBox = new JPanel();
       textButtonBox.setLayout(new BoxLayout(textButtonBox, BoxLayout.X_AXIS));
       textButtonBox.setOpaque(false);
@@ -439,7 +439,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
         }
         // non Gate type -> we'll use the text field
         String text = (value == null)
-                ? "                    "
+                ? ""
                 : value.toString();
         // prepare the renderer
         textField.setText(text);
