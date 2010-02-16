@@ -439,8 +439,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
         }
         // non Gate type -> we'll use the text field
         String text = (value == null)
-                ? "                                        "
-                        + "                                        "
+                ? "                    "
                 : value.toString();
         // prepare the renderer
         textField.setText(text);
