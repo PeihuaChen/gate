@@ -19,6 +19,7 @@ package gate.swing;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.event.*;
 import java.util.*;
 import javax.swing.*;
@@ -812,6 +813,64 @@ public class XJTable extends JTable{
     }
   }
 
+  /**
+   * Overridden for efficiency reasons (provides a better calculation of the 
+   * dirty region). See 
+   * <a href="http://www.objectdefinitions.com/odblog/2009/jtable-setrowheight-causes-slow-repainting/">this page</a>
+   * for a more complete discussion. 
+   */
+  public void tableChanged(TableModelEvent e) {
+    //if just an update, and not a data or structure changed event or an insert or delete, use the fixed row update handling
+    //otherwise call super.tableChanged to let the standard JTable update handling manage it
+    if ( e != null &&
+        e.getType() == TableModelEvent.UPDATE &&
+        e.getFirstRow() != TableModelEvent.HEADER_ROW &&
+        e.getLastRow() != Integer.MAX_VALUE) {
+        handleRowUpdate(e);
+    } else {
+        super.tableChanged(e);
+    }
+  }
+
+  /**
+   * This borrows most of the logic from the superclass handling of update 
+   * events, but changes the calculation of the height for the dirty region to 
+   * provide proper handling for repainting custom height rows.
+   * Copied from <a href="http://www.objectdefinitions.com/odblog/2009/jtable-setrowheight-causes-slow-repainting/">this page</a>.
+   */
+  private void handleRowUpdate(TableModelEvent e) {
+    int modelColumn = e.getColumn();
+    int start = e.getFirstRow();
+    int end = e.getLastRow();
+
+    Rectangle dirtyRegion;
+    if (modelColumn == TableModelEvent.ALL_COLUMNS) {
+        // 1 or more rows changed
+      int rowStart = 0;
+      for ( int row=0; row < start; row++ ) rowStart += getRowHeight(row);
+      dirtyRegion = new Rectangle(0, rowStart, 
+              getColumnModel().getTotalColumnWidth(), 0);
+      
+    } else {
+      // A cell or column of cells has changed.
+      // Unlike the rest of the methods in the JTable, the TableModelEvent
+      // uses the coordinate system of the model instead of the view.
+      // This is the only place in the JTable where this "reverse mapping"
+      // is used.
+      int column = convertColumnIndexToView(modelColumn);
+      dirtyRegion = getCellRect(start, column, true);
+    }
+
+    // Now adjust the height of the dirty region
+    dirtyRegion.height = 0;
+    for (int row = start; row <= end; row ++ ) {
+      //THIS IS CHANGED TO CALCULATE THE DIRTY REGION HEIGHT CORRECTLY
+      dirtyRegion.height += getRowHeight(row);
+    }
+    repaint(dirtyRegion.x, dirtyRegion.y, dirtyRegion.width, dirtyRegion.height);
+  }
+  
+  
   /**
    * Overridden to fix 
    * //http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4330950:
