@@ -37,6 +37,7 @@ import gate.gui.ActionsPublisher;
 import gate.gui.MainFrame;
 import gate.gui.annedit.AnnotationData;
 import gate.gui.annedit.SearchExpressionsAction;
+import gate.swing.JMenuButton;
 import gate.util.GateRuntimeException;
 
 /**
@@ -50,29 +51,79 @@ import gate.util.GateRuntimeException;
 public class DocumentEditor extends AbstractVisualResource
                             implements ActionsPublisher {
 
+  private static final long serialVersionUID = 1L;
+
+  /**
+   * Save and restore the layout of the views and selected annotations.
+   */
+  static class Settings {
+    int rightViewIdx = 0;
+    int bottomViewIdx = 0;
+    List<String[]> annotationSetsTypes = new ArrayList<String[]>();
+    
+    public void saveSettings(DocumentEditor de) {
+      rightViewIdx = de.rightViewIdx;
+      bottomViewIdx = de.bottomViewIdx;
+      annotationSetsTypes.clear();
+      DocumentView dv = de.getRightView();
+      if (dv instanceof AnnotationSetsView) {
+        AnnotationSetsView av = (AnnotationSetsView)dv;
+        for (AnnotationSetsView.SetHandler sh : av.setHandlers) {
+          for (AnnotationSetsView.TypeHandler th : sh.typeHandlers) {
+            if (th.isSelected()) {
+              annotationSetsTypes.add(new String[] {sh.set.getName(), th.name});
+            }
+          }
+        }
+      }
+    }
+
+    public void restoreSettings(DocumentEditor de) {
+      if (de.rightViewIdx != rightViewIdx) de.setRightView(rightViewIdx);
+      if (de.bottomViewIdx != bottomViewIdx) de.setBottomView(bottomViewIdx);
+      DocumentView dv = de.getRightView();
+      if (dv instanceof AnnotationSetsView) {
+        AnnotationSetsView av = (AnnotationSetsView) dv;
+        for (AnnotationSetsView.SetHandler sh : av.setHandlers) {
+          for (AnnotationSetsView.TypeHandler th : sh.typeHandlers) {
+            th.setSelected(false);
+            for (String[] annotationSetType : annotationSetsTypes) {
+              String setName = annotationSetType[0];
+              String typeName = annotationSetType[1];
+              if (av.getSetHandler(setName) != null
+               && av.getSetHandler(setName).getTypeHandler(typeName) != null) {
+                av.setTypeSelected(setName, typeName, true);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  static Settings settings = new Settings();   
   /**
    * The document view is just an empty shell. This method publishes the actions
    * from the contained views. 
    */
   public List getActions() {
     List actions = new ArrayList();
-    Iterator viewIter;
+    Iterator<DocumentView> viewIter;
     if(getCentralViews() != null){
       viewIter = getCentralViews().iterator();
       while(viewIter.hasNext()){
-        actions.addAll(((DocumentView)viewIter.next()).getActions());
+        actions.addAll(viewIter.next().getActions());
       }
     }
     if(getHorizontalViews() != null){
       viewIter = getHorizontalViews().iterator();
       while(viewIter.hasNext()){
-        actions.addAll(((DocumentView)viewIter.next()).getActions());
+        actions.addAll(viewIter.next().getActions());
       }
     }
     if(getVerticalViews() != null){
       viewIter = getVerticalViews().iterator();
       while(viewIter.hasNext()){
-        actions.addAll(((DocumentView)viewIter.next()).getActions());
+        actions.addAll(viewIter.next().getActions());
       }
     }
     return actions;
@@ -101,20 +152,20 @@ public class DocumentEditor extends AbstractVisualResource
   }
   
   public void cleanup(){
-    Iterator viewsIter;
+    Iterator<DocumentView> viewsIter;
     if(centralViews != null){ 
       viewsIter= centralViews.iterator();
-      while(viewsIter.hasNext()) ((Resource)viewsIter.next()).cleanup();
+      while(viewsIter.hasNext()) viewsIter.next().cleanup();
       centralViews.clear();
     }
     if(horizontalViews != null){
       viewsIter = horizontalViews.iterator();
-      while(viewsIter.hasNext()) ((Resource)viewsIter.next()).cleanup();
+      while(viewsIter.hasNext()) viewsIter.next().cleanup();
       horizontalViews.clear();
     }
     if(verticalViews != null){
       viewsIter = verticalViews.iterator();
-      while(viewsIter.hasNext()) ((Resource)viewsIter.next()).cleanup();
+      while(viewsIter.hasNext()) viewsIter.next().cleanup();
       verticalViews.clear();
     }
   }
@@ -150,21 +201,8 @@ public class DocumentEditor extends AbstractVisualResource
     topBar.setFloatable(false);
     add(topBar, BorderLayout.NORTH);
 
-//    bottomBar = new JToolBar(JToolBar.HORIZONTAL);
-//    bottomBar.setFloatable(false);
-//    add(bottomBar, BorderLayout.SOUTH);
-
-//    leftBar = new JToolBar(JToolBar.VERTICAL);
-//    leftBar.setFloatable(false);
-//    add(leftBar, BorderLayout.WEST);
-
-//    rightBar = new JToolBar(JToolBar.VERTICAL);
-//    rightBar.setFloatable(false);
-//    add(rightBar, BorderLayout.EAST);
-
     progressBar.setValue(40);
 
-    
     centralViews = new ArrayList<DocumentView>();
     verticalViews = new ArrayList<DocumentView>();
     horizontalViews = new ArrayList<DocumentView>();
@@ -209,7 +247,6 @@ public class DocumentEditor extends AbstractVisualResource
     //populate the main VIEW
     remove(progressBar);
     add(horizontalSplit, BorderLayout.CENTER);
-    topBar.addSeparator();
     searchAction = new SearchAction();
     searchAction.putValue(Action.SHORT_DESCRIPTION,
       "<html>"+searchAction.getValue(Action.SHORT_DESCRIPTION)
@@ -217,6 +254,8 @@ public class DocumentEditor extends AbstractVisualResource
       +"&nbsp;&nbsp;</small></font></html>");
     JButton searchButton = new JButton(searchAction);
     searchButton.setText("");
+    searchButton.setMargin(new Insets(0, 0, 0, 0));
+    topBar.add(Box.createHorizontalStrut(5));
     topBar.add(searchButton);
     setEditable(!Gate.getUserConfig()
       .getBoolean(GateConstants.DOCEDIT_READ_ONLY));
@@ -226,20 +265,61 @@ public class DocumentEditor extends AbstractVisualResource
       KeyStroke.getKeyStroke("control F"), "Search in text");
     getActionMap().put("Search in text", searchAction);
 
+    // create menu that contains a checkbox item for restoring automatically
+    // the layout and an action item for saving the current layout
+    final JPopupMenu optionsMenu = new JPopupMenu("Options menu");
+    final JMenuItem saveCurrentLayoutMenuItem = new JMenuItem(
+      new AbstractAction("Save Current Layout") {
+      public void actionPerformed(ActionEvent evt) {
+        settings.saveSettings(DocumentEditor.this);
+      }
+    });
+    optionsMenu.add(saveCurrentLayoutMenuItem);
+    final JCheckBoxMenuItem restoreLayoutAutomaticallyMenuItem =
+      new JCheckBoxMenuItem("Restore Layout Automatically");
+    restoreLayoutAutomaticallyMenuItem.setSelected(Gate.getUserConfig()
+     .getBoolean(DocumentEditor.class.getName()+".restoreLayoutAutomatically"));
+    restoreLayoutAutomaticallyMenuItem.addItemListener(new ItemListener() {
+      public void itemStateChanged(ItemEvent e) {
+        // whenever the user checks/unchecks, update the config
+        Gate.getUserConfig().put(
+          DocumentEditor.class.getName()+".restoreLayoutAutomatically",
+        restoreLayoutAutomaticallyMenuItem.isSelected());
+      }
+    });
+    optionsMenu.add(restoreLayoutAutomaticallyMenuItem);
+    JMenuButton menuButton = new JMenuButton(optionsMenu);
+    menuButton.setIcon(MainFrame.getIcon("expanded"));
+    menuButton.setToolTipText("Options for the document editor");
+    menuButton.setMargin(new Insets(0, 0, 0, 1)); // icon is not centred
+    topBar.add(Box.createHorizontalGlue());
+    topBar.add(menuButton);
+
+    // when the editor is shown restore views if layout saving is enable
+    addFocusListener(new FocusAdapter () {
+      public void focusGained(FocusEvent e) {
+        super.focusGained(e);
+        if(Gate.getUserConfig().getBoolean(
+          DocumentEditor.class.getName()+".restoreLayoutAutomatically")) {
+          settings.restoreSettings(DocumentEditor.this);
+        }
+      }
+    });
+    
     validate();
   }
   
-  public List getCentralViews(){
+  public List<DocumentView> getCentralViews(){
   	return centralViews == null ? null : 
       Collections.unmodifiableList(centralViews);
   }
   
-  public List getHorizontalViews(){
+  public List<DocumentView> getHorizontalViews(){
     return horizontalViews == null ? null : 
       Collections.unmodifiableList(horizontalViews);
   }
   
-  public List getVerticalViews(){
+  public List<DocumentView> getVerticalViews(){
     return verticalViews == null ? null : 
       Collections.unmodifiableList(verticalViews);
   }
