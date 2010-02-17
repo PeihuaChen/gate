@@ -6,7 +6,7 @@
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
- *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  Version 2, June 1991 (in the distribution annotationSet file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
  *
  *  Johann Petrak, 2010-02-05
@@ -16,7 +16,9 @@
 
 package gate;
 
+import gate.annotation.AnnotationSetImpl;
 import gate.util.GateRuntimeException;
+import java.util.Iterator;
 
 /**
  * Various utility methods to make often-needed tasks more easy and
@@ -25,7 +27,7 @@ import gate.util.GateRuntimeException;
  */
 public class Utils {
   /**
-   * Return the length of the document content covered by an Annotation as an
+   * Return the length of the document content covered by an Annotation annotationSet an
    * int -- if the content is too long for an int, the method will throw
    * a GateRuntimeException. Use getLengthLong(SimpleAnnotation ann) if
    * this situation could occur.
@@ -43,7 +45,7 @@ public class Utils {
   }
 
   /**
-   * Return the length of the document content covered by an Annotation as a
+   * Return the length of the document content covered by an Annotation annotationSet a
    * long.
    * @param ann the annotation for which to determine the length
    * @return the length of the document content covered by this annotation.
@@ -54,7 +56,7 @@ public class Utils {
   }
 
   /**
-   * Return the length of the document as an
+   * Return the length of the document annotationSet an
    * int -- if the content is too long for an int, the method will throw a
    * GateRuntimeException. Use getLengthLong(Document doc) if
    * this situation could occur.
@@ -72,7 +74,7 @@ public class Utils {
   }
 
   /**
-   * Return the length of the document as a long.
+   * Return the length of the document annotationSet a long.
    * @param doc the document for which to determine the length
    * @return the length of the document content.
    */
@@ -102,7 +104,7 @@ public class Utils {
   }
 
   /**
-   * Return the document text as a String corresponding to the annotation.
+   * Return the document text annotationSet a String corresponding to the annotation.
    * @param doc the document from which to extract the document text
    * @param ann the annotation for which to return the text.
    * @return a String representing the text content spanned by the annotation.
@@ -117,5 +119,31 @@ public class Utils {
       throw new GateRuntimeException(ex.getMessage());
     }
   }
+
+  /**
+   * Return a the subset of annotations from the given annotation set
+   * that start exactly at the given offset.
+   *
+   * @param annotationSet the set of annotations from which to select
+   * @param atOffset the offset where the annoation to be returned should start
+   * @return an annotation set containing all the annotations from the original
+   * set that start at the given offset
+   */
+  public static AnnotationSet getAnnotationsAtOffset(
+          AnnotationSet annotationSet, Long atOffset) {
+    // this returns all annotations that start at this atOffset OR AFTER!
+    AnnotationSet tmp = annotationSet.get(atOffset);
+    // so lets filter ...
+    AnnotationSet ret = new AnnotationSetImpl(annotationSet.getDocument());
+    Iterator<Annotation> it = tmp.iterator();
+    while(it.hasNext()) {
+      Annotation ann = it.next();
+      if(ann.getStartNode().getOffset().equals(atOffset)) {
+        ret.add(ann);
+      }
+    }
+    return ret;
+  }
+
 
 }
