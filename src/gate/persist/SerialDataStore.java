@@ -122,7 +122,7 @@ extends AbstractFeatureBearer implements DataStore {
         throw new
           PersistenceException("cannot create directory " + storageDir);
     } else { // must be empty
-      String[] existingFiles = storageDir.list();
+      String[] existingFiles = filterIgnoredFileNames(storageDir.list());
       if(! (existingFiles == null || existingFiles.length == 0) )
         throw new PersistenceException(
           "directory "+ storageDir +" is not empty: cannot use for data store"
@@ -220,7 +220,7 @@ extends AbstractFeatureBearer implements DataStore {
       throw new PersistenceException("Can't delete file " + resourceFile);
 
     // if there are no more resources of this type, delete the dir too
-    if(resourceTypeDirectory.list().length == 0)
+    if(filterIgnoredFileNames(resourceTypeDirectory.list()).length == 0)
       if(! resourceTypeDirectory.delete())
         throw new PersistenceException("Can't delete " + resourceTypeDirectory);
 
@@ -501,7 +501,7 @@ extends AbstractFeatureBearer implements DataStore {
       throw new PersistenceException("Can't read storage directory");
 
     // filter out the version file
-    String[] fileArray = storageDir.list();
+    String[] fileArray = filterIgnoredFileNames(storageDir.list());
     List lrTypes = new ArrayList();
     for(int i=0; i<fileArray.length; i++)
       if(! fileArray[i].equals(versionFileName))
@@ -517,7 +517,7 @@ extends AbstractFeatureBearer implements DataStore {
     if(! resourceTypeDir.exists())
       return Arrays.asList(new String[0]);
 
-    return Arrays.asList(resourceTypeDir.list());
+    return Arrays.asList(filterIgnoredFileNames(resourceTypeDir.list()));
   } // getLrIds(lrType)
 
   /** Get a list of the names of LRs of a particular type that are present. */
@@ -757,5 +757,27 @@ extends AbstractFeatureBearer implements DataStore {
     throw new UnsupportedOperationException(
                               "Serial DataStore does not support document retrieval.");
   }
+
+  /**
+   * This removes the names of all files from a list of file names for which
+   * we know that we want to ignore them.
+   * Currently, all names starting with a dot are ignored.
+   * 
+   * @param fileNames
+   * @return the list of file names with the ignored names removed
+   */
+  protected String[] filterIgnoredFileNames(String[] fileNames) {
+    if(fileNames == null || fileNames.length == 0) {
+      return fileNames;
+    }
+    Vector<String> filteredNames = new Vector<String>(fileNames.length);
+    for(String filname : fileNames) {
+      if(!filname.startsWith(".")) {
+        filteredNames.add(filname);
+      }
+    }
+    return filteredNames.toArray(new String[0]);
+  }
+
 
 } // class SerialDataStore
