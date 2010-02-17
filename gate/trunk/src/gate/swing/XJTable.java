@@ -19,17 +19,22 @@ package gate.swing;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.*;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.*;
 
+import gate.gui.MainFrame;
 import gate.util.ObjectComparator;
+import gate.util.Tools;
 
 /**
  * A &quot;smarter&quot; JTable. Features include:
@@ -62,6 +67,11 @@ public class XJTable extends JTable{
     // header is clicked) is being addressed by overriding 
     // columnMarginChanged(ChangeEvent) and columnMoved(TableColumnModelEvent)
     putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
+    // JTable deletes its row model frequently. It's also so ashamed of such 
+    // behaviour that it makes impossible to know when that happened.
+    // We set the row height value to something ludicrous, and use that value
+    // to find out if the row model has been deleted (again!).
+    setRowHeight(FAKE_ROW_HEIGHT);
   }
   
   public void setModel(TableModel dataModel) {
@@ -121,11 +131,8 @@ public class XJTable extends JTable{
                 XJTable.this, tCol.getHeaderValue(), false, false, 0, 0);
         int width = c.getMinimumSize().width;
         if(tCol.getMinWidth() != width) tCol.setMinWidth(width);
-        width = c.getPreferredSize().width;
-        if(tCol.getPreferredWidth() != width) tCol.setPreferredWidth(width);
       }else{
         tCol.setMinWidth(1);
-        tCol.setPreferredWidth(1);          
       }
     }
     
@@ -143,12 +150,8 @@ public class XJTable extends JTable{
         
         int width = dim.width + spacing.width;
         if(tColumn.getMinWidth() < width) tColumn.setMinWidth(width);
-        //now fix the preferred size
-        dim = cellComponent.getPreferredSize();
-        width = dim.width + spacing.width;
-        if(tColumn.getPreferredWidth() < width) tColumn.setPreferredWidth(width);
-        
         //now fix the row height
+        dim = cellComponent.getPreferredSize();
         if(newRowHeight < (dim.height + spacing.height)) 
           newRowHeight = dim.height + spacing.height;
       }
@@ -167,7 +170,7 @@ public class XJTable extends JTable{
    */
   public Dimension getPreferredSize() {
     //the first time the component is sized, calculate the actual preferred size
-    if(!componentSizedProperly){
+    if(preferredSize == null || !componentSizedProperly){
       calculatePreferredSize();
       preferredSize = super.getPreferredSize();
     }
@@ -186,7 +189,7 @@ public class XJTable extends JTable{
   public boolean getScrollableTracksViewportWidth() {
     if(super.getScrollableTracksViewportWidth()) {
       Container parent = this.getParent();
-      if(parent instanceof JViewport) {
+      if(parent != null && parent instanceof JViewport) {
         // only track the viewport width if it is big enough.
         return ((JViewport)parent).getExtentSize().width
                     >= this.getMinimumSize().width;
@@ -208,11 +211,26 @@ public class XJTable extends JTable{
    *   viewport.
    */
   public boolean getScrollableTracksViewportHeight() {
-    return  (getParent() instanceof JViewport && 
-             getParent().getHeight() > getPreferredSize().height);
+    Container parent = getParent();
+    Dimension dim = getPreferredSize();
+    return  (parent != null && dim!= null &&
+             parent instanceof JViewport && 
+             parent.getHeight() > getPreferredSize().height);
   }
 
   private boolean componentSizedProperly = false;
+
+  
+  /**
+   * JTable deletes its row model frequently. It's also so ashamed of such
+   * behaviour that it makes impossible to know when that happened.
+   * We set the row height value to something ludicrous, and use that value 
+   * to find out if the row model has been deleted (again!).
+   * 
+   * If {@link JTable#getRowHeight()} ever returns this value, then the row 
+   * model has been deleted.
+   */
+  protected static final int FAKE_ROW_HEIGHT = 1;
   
   private Dimension preferredSize;
   
@@ -532,8 +550,9 @@ public class XJTable extends JTable{
           }else if(lastRow == Integer.MAX_VALUE){
             //all data changed (including the number of rows)
             init(sourceModel);
-            if(isSortable()) sort();
-            else {
+            if(isSortable()){
+              sort();
+            } else {
               //this will re-create all rows (which deletes the rowModel in JTable)
               componentSizedProperly = false;
               fireTableDataChanged();
@@ -633,12 +652,9 @@ public class XJTable extends JTable{
     public void sort(){
       try {
         //save the selection
-        final int[] rows = getSelectedRows();
+        int[] rows = getSelectedRows();
         //convert to model co-ordinates
-        for(int i = 0; i < rows.length; i++) {
-          rows[i] = rowViewToModel(rows[i]);
-        }
-        clearSelection();
+        for(int i = 0; i < rows.length; i++)  rows[i] = rowViewToModel(rows[i]);
         //create a list of ValueHolder objects for the source data that needs
         //sorting
         List<ValueHolder> sourceData = 
@@ -669,17 +685,16 @@ public class XJTable extends JTable{
         sourceData.clear();
         //the rows may have moved about so we need to recalculate the heights
         componentSizedProperly = false;
-        //calling whole data changed causes the super JTable to drop its
-        //rows model, so we need to be more specific.
-        fireTableRowsUpdated(0, getRowCount());
+        //this deletes the JTable row model 
+        fireTableDataChanged();
+        //we need to recreate the row model, and only then restore selection
         resizeAndRepaint();
-        //fireTableDataChanged();
-          
-        //restore selection
-        //convert to model co-ordinates
+        //restore the selection
+        clearSelection();
         for(int i = 0; i < rows.length; i++){
-          rows[i] = rowModelToView(rows[i]);
-          getSelectionModel().addSelectionInterval(rows[i], rows[i]);
+            rows[i] = rowModelToView(rows[i]);
+            if(rows[i] > 0 && rows[i] < getRowCount())
+              addRowSelectionInterval(rows[i], rows[i]);
         }
       }catch(ArrayIndexOutOfBoundsException aioob) {
         //this can happen when update events get behind
@@ -809,8 +824,18 @@ public class XJTable extends JTable{
     super.changeSelection(rowIndex, columnIndex, toggle, extend);
     if (!toggle && !extend && editCellAsSoonAsFocus) {
       // start cell editing as soon as a cell is selected
-      if(!isEditing()) this.editCellAt(rowIndex, columnIndex);
+      if(!isEditing() && isCellEditable(rowIndex, columnIndex)) this.editCellAt(rowIndex, columnIndex);
     }
+  }
+
+  @Override
+  public int rowAtPoint(Point point) {
+    //The Swing implementation is very keen to drop the rowModel. We KNOW we
+    //should always have a row model, so if null, create it!
+    if(getRowHeight() == FAKE_ROW_HEIGHT){
+      calculatePreferredSize();
+    }
+    return super.rowAtPoint(point);
   }
 
   /**
@@ -887,10 +912,8 @@ public class XJTable extends JTable{
    * //http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4330950:
    */   
   public void columnMarginChanged(ChangeEvent e) {
-      if (isEditing()) {
-          cellEditor.stopCellEditing();
-      }
-      super.columnMarginChanged(e);
+    if (isEditing()) cellEditor.stopCellEditing();
+    super.columnMarginChanged(e);
   }
 
   protected SortingModel sortingModel;
