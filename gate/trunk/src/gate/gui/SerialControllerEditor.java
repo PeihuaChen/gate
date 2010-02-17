@@ -35,6 +35,7 @@ import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.*;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
 import gate.*;
@@ -176,7 +177,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     memberPRsTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
     memberPRsTable.setDefaultRenderer(ProcessingResource.class,
                                       new ResourceRenderer());
-    memberPRsTable.setDefaultRenderer(JLabel.class, new LabelRenderer());
+    memberPRsTable.setDefaultRenderer(Icon.class, new IconRenderer());
     memberPRsTable.setDragEnabled(true);
 
     final int width2 = new JLabel("Selected Processing resources").
@@ -1219,14 +1220,17 @@ public class SerialControllerEditor extends AbstractVisualResource
   /**
    *  Renders JLabel by simply displaying them
    */
-  class LabelRenderer implements TableCellRenderer{
+  class IconRenderer extends DefaultTableCellRenderer{
     public Component getTableCellRendererComponent(JTable table,
                                                    Object value,
                                                    boolean isSelected,
                                                    boolean hasFocus,
                                                    int row,
                                                    int column){
-      return (JLabel) value;
+      super.getTableCellRendererComponent(table, "", isSelected, hasFocus, 
+              row, column);
+      setIcon((Icon)value);
+      return this;
     }
   }
 
@@ -1234,11 +1238,12 @@ public class SerialControllerEditor extends AbstractVisualResource
    * Table model for all the processing resources in the controller.
    */
   class MemberPRsTableModel extends AbstractTableModel{
-    MemberPRsTableModel(){
-      green = new JLabel(MainFrame.getIcon("greenBall"));
-      red = new JLabel(MainFrame.getIcon("redBall"));
-      yellow = new JLabel(MainFrame.getIcon("yellowBall"));
+    public MemberPRsTableModel(){
+      green = MainFrame.getIcon("greenBall");
+      red = MainFrame.getIcon("redBall");
+      yellow = MainFrame.getIcon("yellowBall");
     }
+    
     public int getRowCount(){
       return controller == null ? 0 : controller.getPRs().size();
     }
@@ -1287,7 +1292,7 @@ public class SerialControllerEditor extends AbstractVisualResource
 
     public Class getColumnClass(int columnIndex){
       switch(columnIndex){
-        case 0 : return JLabel.class;
+        case 0 : return Icon.class;
         case 1 : return ProcessingResource.class;
 //        case 1 : return Boolean.class;
         case 2 : return String.class;
@@ -1302,7 +1307,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     public void setValueAt(Object aValue, int rowIndex, int columnIndex){
     }
 
-    protected JLabel green, red, yellow;
+    protected Icon green, red, yellow;
   }//protected class MemberPRsTableModel extends AbstractTableModel
 
   /** Adds a PR to the controller*/
