@@ -16,13 +16,22 @@ package gate.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
+import javax.swing.AbstractAction;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 
 import gate.Gate;
 import gate.Resource;
 import gate.creole.AbstractVisualResource;
 import gate.creole.ResourceData;
+import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.GuiType;
 import gate.swing.XJTable;
@@ -33,10 +42,17 @@ import gate.util.GateRuntimeException;
 public class PRViewer extends AbstractVisualResource {
 
   public PRViewer() {
+  }
+
+  
+  @Override
+  public Resource init() throws ResourceInstantiationException {
     initLocalData();
     initGuiComponents();
     initListeners();
+    return this;
   }
+
 
   protected void initLocalData(){
   }
@@ -53,6 +69,32 @@ public class PRViewer extends AbstractVisualResource {
   }
 
   protected void initListeners(){
+    editor.addMouseListener(new MouseAdapter() {
+      private void handleMouseEvent(MouseEvent e){
+        if(e.isPopupTrigger()){
+          int row = editor.rowAtPoint(e.getPoint());
+          int col = editor.columnAtPoint(e.getPoint());
+          JPopupMenu popup =new JPopupMenu();
+          popup.add(new CopyValueAction(row, col));
+          popup.show(editor,e.getX(), e.getY());
+        }
+      }
+      
+      @Override
+      public void mousePressed(MouseEvent e) {
+        handleMouseEvent(e);
+      }
+
+      @Override
+      public void mouseReleased(MouseEvent e) {
+        handleMouseEvent(e);
+      }
+
+      @Override
+      public void mouseClicked(MouseEvent e) {
+        handleMouseEvent(e);
+      }
+    });
   }
 
   public void cleanup(){
@@ -85,5 +127,32 @@ public class PRViewer extends AbstractVisualResource {
     editor.removeCreoleListenerLink();
   }
 
-  ResourceParametersEditor editor;
+  protected ResourceParametersEditor editor;
+  
+  protected class CopyValueAction extends AbstractAction{
+    private int row, column;
+    
+    public CopyValueAction (int row, int column){
+      super("Copy value");
+      putValue(SHORT_DESCRIPTION, 
+              "Copies the value of the cell to the clipboard.");
+      this.row = row;
+      this.column = column;
+    }
+    
+    public void actionPerformed(ActionEvent e) {
+      Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+      Object value = editor.getValueAt(row, column);
+      String valStr;
+      if(value instanceof ParameterDisjunction){
+        valStr = ((ParameterDisjunction)value).getName();
+      }else if(value instanceof Boolean){
+        valStr = ((Boolean)value) ? "Required parameter" : "Optional parameter";
+      }else{
+        valStr = value.toString();
+      }
+      StringSelection data = new StringSelection(valStr);
+      clipboard.setContents(data, data);
+    }
+  }
 }
