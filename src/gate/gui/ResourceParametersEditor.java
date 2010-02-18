@@ -390,7 +390,14 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       listButton.setToolTipText("Edit the list");
       fmButton = new JButton(MainFrame.getIcon("edit-list"));
       fmButton.setToolTipText("Edit the feature map");
-      textField = new JTextField(25);
+      textField = new JTextField(25){
+        @Override
+        public Dimension getMinimumSize() {
+          //we don't want to be squashed!
+          return getPreferredSize();
+        }
+        
+      };
       textButtonBox = new JPanel();
       textButtonBox.setLayout(new BoxLayout(textButtonBox, BoxLayout.X_AXIS));
       textButtonBox.setOpaque(false);
