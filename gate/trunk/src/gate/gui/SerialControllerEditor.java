@@ -124,6 +124,25 @@ public class SerialControllerEditor extends AbstractVisualResource
     loadedPRsTable.setDragEnabled(true);
     loadedPRsTable.setDefaultRenderer(ProcessingResource.class,
                                       new ResourceRenderer());
+    //create a renderer that doesn't mind being extended horizontally.
+    loadedPRsTable.setDefaultRenderer(String.class, 
+            new DefaultTableCellRenderer(){
+      @Override
+      public Dimension getMaximumSize() {
+        //we don't mind being extended horizontally
+        Dimension dim = super.getMaximumSize();
+        if(dim != null){
+          dim.width = Integer.MAX_VALUE;
+          setMaximumSize(dim);
+        }
+        return dim;
+      }
+      @Override
+      public Dimension getMinimumSize() {
+        //we don't like being squashed!
+        return getPreferredSize();
+      }
+    });
 
     final int width1 = new JLabel("Loaded Processing resources").
                 getPreferredSize().width + 30;
@@ -177,6 +196,24 @@ public class SerialControllerEditor extends AbstractVisualResource
     memberPRsTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
     memberPRsTable.setDefaultRenderer(ProcessingResource.class,
                                       new ResourceRenderer());
+    memberPRsTable.setDefaultRenderer(String.class, 
+            new DefaultTableCellRenderer(){
+      @Override
+      public Dimension getMaximumSize() {
+        //we don't mind being extended horizontally
+        Dimension dim = super.getMaximumSize();
+        if(dim != null){
+          dim.width = Integer.MAX_VALUE;
+          setMaximumSize(dim);
+        }
+        return dim;
+      }
+      @Override
+      public Dimension getMinimumSize() {
+        //we don't like being squashed!
+        return getPreferredSize();
+      }
+    });
     memberPRsTable.setDefaultRenderer(Icon.class, new IconRenderer());
     memberPRsTable.setDragEnabled(true);
 
@@ -331,18 +368,7 @@ public class SerialControllerEditor extends AbstractVisualResource
       constraints.weighty = 0;
       constraints.insets = new Insets(0,0,0,0);
       bottomSplit.add(horBox, constraints);
-      constraints.gridy++;
-      
-      JLabel warningLbl = new JLabel(
-        "<HTML>The <b>corpus</b> and <b>document</b> parameters are not " +
-        "available as they are automatically set by the controller!</HTML>");
-      warningLbl.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
-      constraints.weightx = 1;
-      constraints.anchor = GridBagConstraints.WEST;
-      constraints.fill = GridBagConstraints.BOTH;
-      constraints.weighty = 0;
-      constraints.insets = new Insets(0,0,0,0);
-      bottomSplit.add(warningLbl, constraints);
+
       //all the following rows have one element only
       constraints.gridwidth = 1;
       constraints.gridy++;
@@ -878,8 +904,8 @@ public class SerialControllerEditor extends AbstractVisualResource
       ResourceData rData = (ResourceData)Gate.getCreoleRegister().
                                          get(pr.getClass().getName());
       //update the border name
-      parametersBorder.setTitle(" Parameters for the \"" + pr.getName() +
-                                "\" " + rData.getName() + " ");
+      parametersBorder.setTitle(" Runtime Parameters for the \"" + pr.getName() +
+                                "\" " + rData.getName() + ": ");
       //update the params editor
       //this is a list of lists
       List<List<Parameter>> parameters = 
@@ -1221,6 +1247,7 @@ public class SerialControllerEditor extends AbstractVisualResource
    *  Renders JLabel by simply displaying them
    */
   class IconRenderer extends DefaultTableCellRenderer{
+    
     public Component getTableCellRendererComponent(JTable table,
                                                    Object value,
                                                    boolean isSelected,
@@ -1232,6 +1259,17 @@ public class SerialControllerEditor extends AbstractVisualResource
       setIcon((Icon)value);
       return this;
     }
+
+    @Override
+    public Dimension getMaximumSize() {
+      return getPreferredSize();
+    }
+
+    @Override
+    public Dimension getMinimumSize() {
+      return getPreferredSize();
+    }
+    
   }
 
   /**
