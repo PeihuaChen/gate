@@ -107,56 +107,79 @@ public class XJTable extends JTable{
   }
   
   protected void calculatePreferredSize(){
-    //start with all columns at default size
-    int colCount = getColumnModel().getColumnCount();
-    for(int col = 0; col < colCount; col++){
-      TableColumn tCol = getColumnModel().getColumn(col);
-      TableCellRenderer headerRenderer = tCol.getHeaderRenderer();
-      if(headerRenderer == null){
-        //no header renderer provided -> use default implementation
-        JTableHeader tHeader = getTableHeader();
-        if(tHeader == null){
-          tHeader = new JTableHeader();
+    if(sizingInProgress){
+      return;
+    }else{
+      sizingInProgress = true;
+    }
+    try{
+      Dimension spacing = getIntercellSpacing();
+      //start with all columns at header size
+      int colCount = getColumnModel().getColumnCount();
+      for(int col = 0; col < colCount; col++){
+        TableColumn tColumn = getColumnModel().getColumn(col);
+        TableCellRenderer headerRenderer = tColumn.getHeaderRenderer();
+        if(headerRenderer == null){
+          //no header renderer provided -> use default implementation
+          JTableHeader tHeader = getTableHeader();
+          if(tHeader == null){
+            tHeader = new JTableHeader();
+          }
+          headerRenderer = tHeader.getDefaultRenderer();
+          tColumn.setHeaderRenderer(headerRenderer);
         }
-        headerRenderer = tHeader.getDefaultRenderer();
-        tCol.setHeaderRenderer(headerRenderer);
+        if(headerRenderer != null){
+          Component c = headerRenderer.getTableCellRendererComponent(
+                  XJTable.this, tColumn.getHeaderValue(), false, false, 0, 0);
+          int width = c.getMinimumSize().width  + spacing.width;
+          if(tColumn.getMinWidth() != width) tColumn.setMinWidth(width);
+        }else{
+          tColumn.setMinWidth(1);
+        }
       }
-      if(headerRenderer != null){
-        Component c = headerRenderer.getTableCellRendererComponent(
-                XJTable.this, tCol.getHeaderValue(), false, false, 0, 0);
-        int width = c.getMinimumSize().width;
-        if(tCol.getMinWidth() != width) tCol.setMinWidth(width);
-      }else{
-        tCol.setMinWidth(1);
+      
+      //now fix the row height and column min/max widths
+      for(int row = 0; row < getRowCount(); row++){
+        //start with all rows of size 1      
+        int newRowHeight = 1;
+        for(int column = 0; column < getColumnCount(); column ++){
+          Component cellComponent = prepareRenderer(getCellRenderer(row, column), 
+                  row, column);
+          TableColumn tColumn = getColumnModel().getColumn(column);
+          int minWidth = cellComponent.getMinimumSize().width + spacing.width;
+          //minimum width can only grow
+          //if needed, increase the max width
+          if(tColumn.getMaxWidth() < minWidth) tColumn.setMaxWidth(minWidth);
+          if(tColumn.getMinWidth() < minWidth) tColumn.setMinWidth(minWidth);
+          
+          
+          int maxWidth = cellComponent.getMaximumSize().width;
+          //only components that have a real max width are considered
+          if(maxWidth < Integer.MAX_VALUE){
+            maxWidth += spacing.width;
+            //max width can only decrease (it will never go larger than 
+            //min width due to Swing implementation)
+            if(tColumn.getMaxWidth() > maxWidth) tColumn.setMaxWidth(maxWidth);  
+          }
+                    
+//          if(tColumn.getMaxWidth() > width ){
+//            tColumn.setMaxWidth(width);
+//          }
+          //now fix the row height
+          int height = cellComponent.getPreferredSize().height;
+          if(newRowHeight < (height + spacing.height)) 
+            newRowHeight = height + spacing.height;
+        }
+        setRowHeight(row, newRowHeight);
+        //JTable seems to revert to using the default (and single) rowHeight value
+        //after editing
+        //turns out this actually deletes the row model in JTable
+  //      if(getRowHeight() < newRowHeight) setRowHeight(newRowHeight);
       }
+    }finally{
+      componentSizedProperly = true;
+      sizingInProgress = false;
     }
-    
-    //now fix the row height and column width
-    Dimension spacing = getIntercellSpacing();
-    for(int row = 0; row < getRowCount(); row++){
-      //start with all rows of size 1      
-      int newRowHeight = 1;
-      Dimension dim;
-      for(int column = 0; column < getColumnCount(); column ++){
-        Component cellComponent = prepareRenderer(getCellRenderer(row, column), 
-                row, column);
-        TableColumn tColumn = getColumnModel().getColumn(column);
-        dim = cellComponent.getMinimumSize();
-        
-        int width = dim.width + spacing.width;
-        if(tColumn.getMinWidth() < width) tColumn.setMinWidth(width);
-        //now fix the row height
-        dim = cellComponent.getPreferredSize();
-        if(newRowHeight < (dim.height + spacing.height)) 
-          newRowHeight = dim.height + spacing.height;
-      }
-      setRowHeight(row, newRowHeight);
-      //JTable seems to revert to using the default (and single) rowHeight value
-      //after editing
-      //turns out this actually deletes the row model in JTable
-//      if(getRowHeight() < newRowHeight) setRowHeight(newRowHeight);
-    }
-    componentSizedProperly = true;
   }
   
   @Override
@@ -187,9 +210,8 @@ public class XJTable extends JTable{
       if(parent != null && parent instanceof JViewport) {
         // only track the viewport width if it is big enough.
         return ((JViewport)parent).getExtentSize().width
-                    >= this.getMinimumSize().width;
-      }
-      else {
+                    > this.getMinimumSize().width;
+      } else {
         return true;
       }
     }
@@ -213,8 +235,9 @@ public class XJTable extends JTable{
              parent.getHeight() > getPreferredSize().height);
   }
 
-  private boolean componentSizedProperly = false;
+  private boolean  componentSizedProperly = false;
 
+  private boolean sizingInProgress = false;
   
   private Dimension preferredSize;
   
