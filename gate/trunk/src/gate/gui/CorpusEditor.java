@@ -16,6 +16,7 @@ package gate.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.DataFlavor;
@@ -77,7 +78,7 @@ public class CorpusEditor extends AbstractVisualResource
     docTable = new XJTable(docTableModel);
     docTable.setSortable(true);
     docTable.setSortedColumn(DocumentTableModel.COL_INDEX);
-    docTable.setAutoResizeMode(XJTable.AUTO_RESIZE_OFF);
+    docTable.setAutoResizeMode(XJTable.AUTO_RESIZE_LAST_COLUMN);
     docTable.getColumnModel().getColumn(DocumentTableModel.COL_NAME).
         setCellRenderer(renderer);
     docTable.setDragEnabled(true);
@@ -445,6 +446,25 @@ public class CorpusEditor extends AbstractVisualResource
       return getTableCellRendererComponent(docTable, value, isSelected, 
               cellHasFocus, index, DocumentTableModel.COL_NAME);
     }
+
+    @Override
+    public Dimension getMaximumSize() {
+      //we don't mind being extended horizontally
+      Dimension dim = super.getMaximumSize();
+      if(dim != null){
+        dim.width = Integer.MAX_VALUE;
+        setMaximumSize(dim);
+      }
+      return dim;
+    }
+
+    @Override
+    public Dimension getMinimumSize() {
+      //we don't like being squashed!
+      return getPreferredSize();
+    }
+    
+    
   }
   
   class MoveUpAction extends AbstractAction{
