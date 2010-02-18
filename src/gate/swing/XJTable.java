@@ -67,11 +67,6 @@ public class XJTable extends JTable{
     // header is clicked) is being addressed by overriding 
     // columnMarginChanged(ChangeEvent) and columnMoved(TableColumnModelEvent)
     putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
-    // JTable deletes its row model frequently. It's also so ashamed of such 
-    // behaviour that it makes impossible to know when that happened.
-    // We set the row height value to something ludicrous, and use that value
-    // to find out if the row model has been deleted (again!).
-    setRowHeight(FAKE_ROW_HEIGHT);
   }
   
   public void setModel(TableModel dataModel) {
@@ -220,17 +215,6 @@ public class XJTable extends JTable{
 
   private boolean componentSizedProperly = false;
 
-  
-  /**
-   * JTable deletes its row model frequently. It's also so ashamed of such
-   * behaviour that it makes impossible to know when that happened.
-   * We set the row height value to something ludicrous, and use that value 
-   * to find out if the row model has been deleted (again!).
-   * 
-   * If {@link JTable#getRowHeight()} ever returns this value, then the row 
-   * model has been deleted.
-   */
-  protected static final int FAKE_ROW_HEIGHT = 1;
   
   private Dimension preferredSize;
   
@@ -832,7 +816,7 @@ public class XJTable extends JTable{
   public int rowAtPoint(Point point) {
     //The Swing implementation is very keen to drop the rowModel. We KNOW we
     //should always have a row model, so if null, create it!
-    if(getRowHeight() == FAKE_ROW_HEIGHT){
+    if(!componentSizedProperly){
       calculatePreferredSize();
     }
     return super.rowAtPoint(point);
