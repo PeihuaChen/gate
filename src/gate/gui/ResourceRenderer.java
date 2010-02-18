@@ -25,8 +25,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
 
-import sun.swing.DefaultLookup;
-
 import gate.*;
 import gate.creole.ResourceData;
 
@@ -72,8 +70,10 @@ public class ResourceRenderer extends JLabel implements ListCellRenderer,
       Color background = table.getBackground();
       if(background == null
               || background instanceof javax.swing.plaf.UIResource) {
-        Color alternateColor = DefaultLookup.getColor(this, ui,
-                "Table.alternateRowColor");
+//        Color alternateColor = DefaultLookup.getColor(this, ui,
+//                "Table.alternateRowColor");
+        Color alternateColor = UIManager.getColor("Table.alternateRowColor");
+        
         if(alternateColor != null && row % 2 == 0) background = alternateColor;
       }
       super.setForeground(table.getForeground());
@@ -83,12 +83,10 @@ public class ResourceRenderer extends JLabel implements ListCellRenderer,
     if(hasFocus) {
       Border border = null;
       if(isSelected) {
-        border = DefaultLookup.getBorder(this, ui,
-                "Table.focusSelectedCellHighlightBorder");
+        border = UIManager.getBorder("Table.focusSelectedCellHighlightBorder");
       }
       if(border == null) {
-        border = DefaultLookup.getBorder(this, ui,
-                "Table.focusCellHighlightBorder");
+        border = UIManager.getBorder("Table.focusCellHighlightBorder");
       }
       setBorder(border);
     }
