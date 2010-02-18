@@ -187,12 +187,14 @@ public class XJTable extends JTable{
    * Overridden so that the preferred size can be calculated properly
    */
   public Dimension getPreferredSize() {
+    //if hard-coded, we return the given value.
+    if(isPreferredSizeSet()) return super.getPreferredSize();
+    
     //the first time the component is sized, calculate the actual preferred size
-    if(preferredSize == null || !componentSizedProperly){
+    if(!componentSizedProperly){
       calculatePreferredSize();
-      preferredSize = super.getPreferredSize();
     }
-    return preferredSize;
+    return super.getPreferredSize();
   }
 
   /**
@@ -235,11 +237,10 @@ public class XJTable extends JTable{
              parent.getHeight() > getPreferredSize().height);
   }
 
-  private boolean  componentSizedProperly = false;
+  private volatile boolean componentSizedProperly = false;
 
-  private boolean sizingInProgress = false;
+  private volatile boolean sizingInProgress = false;
   
-  private Dimension preferredSize;
   
   /**
    * Converts a row number from the model co-ordinates system to the view's. 
