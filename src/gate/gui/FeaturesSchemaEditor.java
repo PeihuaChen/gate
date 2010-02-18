@@ -17,6 +17,8 @@ package gate.gui;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.BeanInfo;
+import java.beans.Introspector;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
@@ -33,7 +35,7 @@ import gate.util.*;
  */
 @CreoleResource(name = "Features", guiType = GuiType.SMALL,
     resourceDisplayed = "gate.util.FeatureBearer")
-public class FeaturesSchemaEditor extends AbstractVisualResource
+public class FeaturesSchemaEditor extends XJTable
         implements ResizableVisualResource, FeatureMapListener{
   public FeaturesSchemaEditor(){
 //    setBackground(UIManager.getDefaults().getColor("Table.background"));
@@ -48,9 +50,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
   }
   
   
-  @Override
   public void cleanup() {
-    super.cleanup();
     if(targetFeatures != null){
       targetFeatures.removeFeatureMapListener(this);
       targetFeatures = null;
@@ -72,10 +72,6 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
     featuresModel.fireTableRowsUpdated(0, featureList.size() - 1);
   }
     
-  public XJTable getTable(){
-    return mainTable;
-  }
-
   /* (non-Javadoc)
    * @see gate.event.FeatureMapListener#featureMapUpdated()
    * Called each time targetFeatures is changed.
@@ -100,72 +96,65 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
   
   protected void initGUI(){
     featuresModel = new FeaturesTableModel();
-    mainTable = new XJTable();
-    mainTable.setModel(featuresModel);
-    mainTable.setTableHeader(null);
-    mainTable.setSortable(false);
-    mainTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-    mainTable.setShowGrid(false);
-    mainTable.setBackground(getBackground());
-    mainTable.setIntercellSpacing(new Dimension(2,2));
-    mainTable.setTabSkipUneditableCell(true);
-    mainTable.setEditCellAsSoonAsFocus(true);
+    setModel(featuresModel);
+    setTableHeader(null);
+    setSortable(false);
+    setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+    setShowGrid(false);
+    setBackground(getBackground());
+    setIntercellSpacing(new Dimension(2,2));
+    setTabSkipUneditableCell(true);
+    setEditCellAsSoonAsFocus(true);
     featureEditorRenderer = new FeatureEditorRenderer();
-    mainTable.getColumnModel().getColumn(ICON_COL).
+    getColumnModel().getColumn(ICON_COL).
         setCellRenderer(featureEditorRenderer);
-    mainTable.getColumnModel().getColumn(NAME_COL).
+    getColumnModel().getColumn(NAME_COL).
         setCellRenderer(featureEditorRenderer);
-    mainTable.getColumnModel().getColumn(NAME_COL).
+    getColumnModel().getColumn(NAME_COL).
         setCellEditor(featureEditorRenderer);
-    mainTable.getColumnModel().getColumn(VALUE_COL).
+    getColumnModel().getColumn(VALUE_COL).
         setCellRenderer(featureEditorRenderer);
-    mainTable.getColumnModel().getColumn(VALUE_COL).
+    getColumnModel().getColumn(VALUE_COL).
         setCellEditor(featureEditorRenderer);
-    mainTable.getColumnModel().getColumn(DELETE_COL).
+    getColumnModel().getColumn(DELETE_COL).
         setCellRenderer(featureEditorRenderer);
-    mainTable.getColumnModel().getColumn(DELETE_COL).
+    getColumnModel().getColumn(DELETE_COL).
       setCellEditor(featureEditorRenderer);
     
     //the background colour seems to change somewhere when using the GTK+ 
     //look and feel on Linux, so we copy the value now and set it 
-    Color tableBG = mainTable.getBackground();
+    Color tableBG = getBackground();
     //make a copy of the value (as the reference gets changed somewhere)
     tableBG = new Color(tableBG.getRGB());
-    mainTable.setBackground(tableBG);
+    setBackground(tableBG);
 
     // allow Tab key to select the next cell in the table
-    mainTable.setSurrendersFocusOnKeystroke(true);
-    mainTable.setFocusCycleRoot(true);
+    setSurrendersFocusOnKeystroke(true);
+    setFocusCycleRoot(true);
 
     // remove (shift) control tab as traversal keys
     Set<AWTKeyStroke> keySet = new HashSet<AWTKeyStroke>(
-      mainTable.getFocusTraversalKeys(
+      getFocusTraversalKeys(
       KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS));
     keySet.remove(KeyStroke.getKeyStroke("control TAB"));
-    mainTable.setFocusTraversalKeys(
+    setFocusTraversalKeys(
       KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, keySet);
     keySet = new HashSet<AWTKeyStroke>(
-      mainTable.getFocusTraversalKeys(
+      getFocusTraversalKeys(
       KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS));
     keySet.remove(KeyStroke.getKeyStroke("shift control TAB"));
-    mainTable.setFocusTraversalKeys(
+    setFocusTraversalKeys(
       KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, keySet);
 
     // add (shift) control tab to go the container of this component
     keySet.clear();
     keySet.add(KeyStroke.getKeyStroke("control TAB"));
-    mainTable.setFocusTraversalKeys(
+    setFocusTraversalKeys(
       KeyboardFocusManager.UP_CYCLE_TRAVERSAL_KEYS, keySet);
     keySet.clear();
     keySet.add(KeyStroke.getKeyStroke("shift control TAB"));
-    mainTable.setFocusTraversalKeys(
+    setFocusTraversalKeys(
       KeyboardFocusManager.DOWN_CYCLE_TRAVERSAL_KEYS, keySet);
-
-    scroller = new JScrollPane(mainTable);
-    scroller.getViewport().setOpaque(true);
-    scroller.getViewport().setBackground(tableBG);
-    setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-    add(scroller);
   }
   
   /**
@@ -201,7 +190,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
       featureList.add(emptyFeature);
     }
     featuresModel.fireTableDataChanged();
-    mainTable.setSize(mainTable.getPreferredScrollableViewportSize());
+//    mainTable.setSize(mainTable.getPreferredScrollableViewportSize());
   }
 
   FeatureMap targetFeatures;
@@ -211,8 +200,6 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
   FeaturesTableModel featuresModel;
   List<Feature> featureList;
   FeatureEditorRenderer featureEditorRenderer;
-  XJTable mainTable;
-  JScrollPane scroller;
   FeaturesSchemaEditor instance;
   
   private static final int COLUMNS = 4;
@@ -300,7 +287,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
             SwingUtilities.invokeLater(new Runnable() {
               public void run() {
                 // edit the last row that is empty
-                mainTable.editCellAt(mainTable.getRowCount() - 1, NAME_COL);
+                FeaturesSchemaEditor.this.editCellAt(FeaturesSchemaEditor.this.getRowCount() - 1, NAME_COL);
               }
             });
           }
@@ -315,8 +302,8 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
           if(feature == emptyFeature) emptyFeature = new Feature("", null);
           populate();
           int newRow;
-          for (newRow = 0; newRow < mainTable.getRowCount(); newRow++) {
-            if (mainTable.getValueAt(newRow, NAME_COL).equals(feature.name)) {
+          for (newRow = 0; newRow < FeaturesSchemaEditor.this.getRowCount(); newRow++) {
+            if (FeaturesSchemaEditor.this.getValueAt(newRow, NAME_COL).equals(feature.name)) {
               break; // find the previously selected row in the new table
             }
           }
@@ -324,7 +311,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
           SwingUtilities.invokeLater(new Runnable() {
             public void run() {
               // edit the cell containing the value associated with this name
-              mainTable.editCellAt(newRowF, VALUE_COL);
+              FeaturesSchemaEditor.this.editCellAt(newRowF, VALUE_COL);
             }
           });
           break;
@@ -359,7 +346,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
       defaultComparator = new ObjectComparator();
       editorCombo = (JComboBox)editorComponent;
       editorCombo.setModel(new DefaultComboBoxModel());
-      editorCombo.setBackground(mainTable.getBackground());
+      editorCombo.setBackground(FeaturesSchemaEditor.this.getBackground());
       editorCombo.setEditable(true);
       editorCombo.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent evt){
@@ -367,9 +354,18 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
         }
       });
       
-      rendererCombo = new JComboBox();
+      rendererCombo = new JComboBox(){
+        @Override
+        public Dimension getMaximumSize() {
+          return getPreferredSize();
+        }
+        @Override
+        public Dimension getMinimumSize() {
+          return getPreferredSize();
+        }
+      };
       rendererCombo.setModel(new DefaultComboBoxModel());
-      rendererCombo.setBackground(mainTable.getBackground());
+      rendererCombo.setBackground(FeaturesSchemaEditor.this.getBackground());
       rendererCombo.setEditable(true);
       rendererCombo.setOpaque(false);
 
@@ -382,7 +378,14 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
         protected void firePropertyChange(String propertyName,
                 													Object oldValue,
                 													Object newValue){}
-        
+        @Override
+        public Dimension getMaximumSize() {
+          return getPreferredSize();
+        }
+        @Override
+        public Dimension getMinimumSize() {
+          return getPreferredSize();
+        }        
       };
       requiredIconLabel.setIcon(MainFrame.getIcon("r"));
       requiredIconLabel.setOpaque(false);
@@ -396,7 +399,14 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
         protected void firePropertyChange(String propertyName,
                                           Object oldValue,
                                           Object newValue){}
-        
+        @Override
+        public Dimension getMaximumSize() {
+          return getPreferredSize();
+        }
+        @Override
+        public Dimension getMinimumSize() {
+          return getPreferredSize();
+        }
       };
       optionalIconLabel.setIcon(MainFrame.getIcon("o"));
       optionalIconLabel.setOpaque(false);
@@ -410,7 +420,14 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
         protected void firePropertyChange(String propertyName,
                 													Object oldValue,
                 													Object newValue){}
-        
+        @Override
+        public Dimension getMaximumSize() {
+          return getPreferredSize();
+        }
+        @Override
+        public Dimension getMinimumSize() {
+          return getPreferredSize();
+        }
       };
       nonSchemaIconLabel.setToolTipText("Custom feature");
       nonSchemaIconLabel.setOpaque(false);
@@ -423,7 +440,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
       deleteButton.setToolTipText("Delete");
       deleteButton.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent evt){
-          int row = mainTable.getEditingRow();
+          int row = FeaturesSchemaEditor.this.getEditingRow();
           if(row < 0) return;
           Feature feature = featureList.get(row);
           if(feature == emptyFeature){
@@ -432,7 +449,7 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
             featureList.remove(row);
             targetFeatures.remove(feature.name);
             featuresModel.fireTableRowsDeleted(row, row);
-            mainTable.setSize(mainTable.getPreferredScrollableViewportSize());
+//            mainTable.setSize(mainTable.getPreferredScrollableViewportSize());
           }
         }
       });
@@ -449,8 +466,9 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
                          optionalIconLabel) :
                          nonSchemaIconLabel;  
         case NAME_COL:
-          rendererCombo.setPreferredSize(null);
+          
           prepareCombo(rendererCombo, row, column);
+          rendererCombo.getPreferredSize();
 //          Dimension dim = rendererCombo.getPreferredSize();
 //          rendererCombo.setPreferredSize(new Dimension(dim.width + 5, dim.height));
           return rendererCombo;
@@ -527,4 +545,79 @@ public class FeaturesSchemaEditor extends AbstractVisualResource
     JButton deleteButton;
     ObjectComparator defaultComparator;
   }
+  
+  /* 
+   * Resource implementation 
+   */
+  /** Accessor for features. */
+  public FeatureMap getFeatures(){
+    return features;
+  }//getFeatures()
+
+  /** Mutator for features*/
+  public void setFeatures(FeatureMap features){
+    this.features = features;
+  }// setFeatures()
+
+
+  /**
+   * Used by the main GUI to tell this VR what handle created it. The VRs can
+   * use this information e.g. to add items to the popup for the resource.
+   */
+  public void setHandle(Handle handle){
+    this.handle = handle;
+  }
+
+  //Parameters utility methods
+  /**
+   * Gets the value of a parameter of this resource.
+   * @param paramaterName the name of the parameter
+   * @return the current value of the parameter
+   */
+  public Object getParameterValue(String paramaterName)
+                throws ResourceInstantiationException{
+    return AbstractResource.getParameterValue(this, paramaterName);
+  }
+
+  /**
+   * Sets the value for a specified parameter.
+   *
+   * @param paramaterName the name for the parameteer
+   * @param parameterValue the value the parameter will receive
+   */
+  public void setParameterValue(String paramaterName, Object parameterValue)
+              throws ResourceInstantiationException{
+    // get the beaninfo for the resource bean, excluding data about Object
+    BeanInfo resBeanInf = null;
+    try {
+      resBeanInf = Introspector.getBeanInfo(this.getClass(), Object.class);
+    } catch(Exception e) {
+      throw new ResourceInstantiationException(
+        "Couldn't get bean info for resource " + this.getClass().getName()
+        + Strings.getNl() + "Introspector exception was: " + e
+      );
+    }
+    AbstractResource.setParameterValue(this, resBeanInf, paramaterName, parameterValue);
+  }
+
+  /**
+   * Sets the values for more parameters in one step.
+   *
+   * @param parameters a feature map that has paramete names as keys and
+   * parameter values as values.
+   */
+  public void setParameterValues(FeatureMap parameters)
+              throws ResourceInstantiationException{
+    AbstractResource.setParameterValues(this, parameters);
+  }
+
+  // Properties for the resource
+  protected FeatureMap features;
+  
+  /**
+   * The handle for this visual resource
+   */
+  protected Handle handle;
+  
+  
 }

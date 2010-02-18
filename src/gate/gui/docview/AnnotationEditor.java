@@ -117,15 +117,22 @@ public class AnnotationEditor extends AbstractVisualResource
       public void pack() {
         // increase the feature table size only if not bigger
         // than the main frame
-        if (featuresEditor.getHeight()
-            > MainFrame.getInstance().getHeight()) {
-          featuresEditor.setPreferredSize(
-            new Dimension(featuresEditor.getPreferredSize().width,
-                          MainFrame.getInstance().getHeight()));
+        if(isVisible()){
+          int maxHeight = MainFrame.getInstance().getHeight();
+          int otherHeight = getHeight() - featuresScroller.getHeight();
+          maxHeight -= otherHeight;
+          if(featuresScroller.getPreferredSize().height > maxHeight){
+            featuresScroller.setMaximumSize(new Dimension(
+                    featuresScroller.getMaximumSize().width, maxHeight));
+            featuresScroller.setPreferredSize(new Dimension(
+                    featuresScroller.getPreferredSize().width, maxHeight));
+          }
+          
         }
         super.pack();
       }
     };
+    
     JPanel pane = new JPanel();
     pane.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
     pane.setLayout(new GridBagLayout());
@@ -214,19 +221,12 @@ public class AnnotationEditor extends AbstractVisualResource
     }catch(ResourceInstantiationException rie){
       throw new GateRuntimeException(rie);
     }
-    // resize the annotation editor window when some data
-    // are modified in the features table
-    featuresEditor.getTable().getModel().addTableModelListener(
-      new TableModelListener() {
-        public void tableChanged(TableModelEvent e) {
-          popupWindow.pack();
-        }
-      });
 
     constraints.gridy = 2;
     constraints.weighty = 1;
     constraints.fill = GridBagConstraints.BOTH;
-    pane.add(featuresEditor, constraints);
+    featuresScroller = new JScrollPane(featuresEditor); 
+    pane.add(featuresScroller, constraints);
 
     // add the search and annotate GUI at the bottom of the annotator editor
     SearchAndAnnotatePanel searchPanel =
@@ -247,7 +247,16 @@ public class AnnotationEditor extends AbstractVisualResource
 
 
   protected void initListeners(){
+    //resize the window when the table cahnges. 
+    featuresEditor.addComponentListener(new ComponentAdapter() {
+      @Override
+      public void componentResized(ComponentEvent e) {
+        //the table has changed size -> resize the window too! 
+        popupWindow.pack();
+      }
+    });
 
+    
     MouseListener windowMouseListener = new MouseAdapter() {
       public void mouseEntered(MouseEvent evt) {
         hideTimer.stop();
@@ -778,6 +787,9 @@ public class AnnotationEditor extends AbstractVisualResource
    */
   protected FeaturesSchemaEditor featuresEditor;
   
+  protected JScrollPane featuresScroller;
+  
+  
   protected JButton solButton;
   protected JButton sorButton;
   protected JButton delButton;
@@ -875,13 +887,13 @@ public class AnnotationEditor extends AbstractVisualResource
     eorButton.setEnabled(isEditingEnabled);
     typeCombo.setEnabled(isEditingEnabled);
     // cancel editing, if any
-    if (featuresEditor.getTable().isEditing()) {
-      featuresEditor.getTable().getColumnModel()
-        .getColumn(featuresEditor.getTable().getEditingColumn())
+    if (featuresEditor.isEditing()) {
+      featuresEditor.getColumnModel()
+        .getColumn(featuresEditor.getEditingColumn())
         .getCellEditor().cancelCellEditing();
     }
    // en/disable the featuresEditor table, no easy way unfortunately : |
-    featuresEditor.getTable().setEnabled(isEditingEnabled);
+    featuresEditor.setEnabled(isEditingEnabled);
     if (isEditingEnabled) {
       // avoid the background to be incorrectly reset to the default color
       Color tableBG = featuresEditor.getBackground();
@@ -890,8 +902,8 @@ public class AnnotationEditor extends AbstractVisualResource
     }
     final boolean isEditingEnabledF = isEditingEnabled;
     for (int col = 0;
-         col < featuresEditor.getTable().getColumnCount(); col++) {
-      final TableCellRenderer previousTcr = featuresEditor.getTable()
+         col < featuresEditor.getColumnCount(); col++) {
+      final TableCellRenderer previousTcr = featuresEditor
         .getColumnModel().getColumn(col).getCellRenderer();
       TableCellRenderer tcr = new TableCellRenderer() {
       public Component getTableCellRendererComponent(JTable table,
@@ -903,8 +915,7 @@ public class AnnotationEditor extends AbstractVisualResource
         return c;
       }
     };
-    featuresEditor.getTable().getColumnModel().getColumn(col)
-      .setCellRenderer(tcr);
+    featuresEditor.getColumnModel().getColumn(col).setCellRenderer(tcr);
     }
     // enable/disable the key binding actions
     if (isEditingEnabled) {
