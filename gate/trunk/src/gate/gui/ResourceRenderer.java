@@ -16,6 +16,8 @@ package gate.gui;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -29,106 +31,132 @@ import gate.*;
 import gate.creole.ResourceData;
 
 /**
- * Renders a {@link Resource} for tables, trees and lists.
- * It will use the icon info from the creole register, the name of the resource
- * as the rendered string and the type of the resource as the tooltip.
+ * Renders a {@link Resource} for tables, trees and lists. It will use
+ * the icon info from the creole register, the name of the resource as
+ * the rendered string and the type of the resource as the tooltip.
  */
-public class ResourceRenderer extends JLabel
-                              implements ListCellRenderer, TableCellRenderer,
-                                         TreeCellRenderer {
+public class ResourceRenderer extends JLabel implements ListCellRenderer,
+                                            TableCellRenderer, TreeCellRenderer {
 
-  public ResourceRenderer(){
+  public ResourceRenderer() {
     setOpaque(true);
   }
 
-  public Component getListCellRendererComponent(JList list,
-                                                Object value,
-                                                int index,
-                                                boolean isSelected,
-                                                boolean cellHasFocus){
-    prepareRenderer(list, value, isSelected, hasFocus());
+  public Component getListCellRendererComponent(JList list, Object value,
+          int index, boolean isSelected, boolean cellHasFocus) {
+    prepareRendererList(list, value, isSelected, hasFocus());
     return this;
   }
 
-
-  public Component getTableCellRendererComponent(JTable table,
-                                                 Object value,
-                                                 boolean isSelected,
-                                                 boolean hasFocus,
-                                                 int row,
-                                                 int column){
-    prepareRenderer(table, value, isSelected, hasFocus);
+  public Component getTableCellRendererComponent(JTable table, Object value,
+          boolean isSelected, boolean hasFocus, int row, int column) {
+    prepareRendererTable(table, value, isSelected, hasFocus, row, column);
     return this;
   }
 
-  public Component getTreeCellRendererComponent(JTree tree,
-                                                Object value,
-                                                boolean selected,
-                                                boolean expanded,
-                                                boolean leaf,
-                                                int row,
-                                                boolean hasFocus){
-    prepareRenderer(tree, value, selected, hasFocus);
+  public Component getTreeCellRendererComponent(JTree tree, Object value,
+          boolean selected, boolean expanded, boolean leaf, int row,
+          boolean hasFocus) {
+    prepareRendererTree(tree, value, selected, hasFocus);
     return this;
   }
 
-  private void prepareRenderer(JComponent ownerComponent, Object value,
-                               boolean isSelected, boolean hasFocus){
-
-    if (isSelected) {
-      if(ownerComponent instanceof JTable){
-        setForeground(((JTable)ownerComponent).getSelectionForeground());
-        setBackground(((JTable)ownerComponent).getSelectionBackground());
-      }else if(ownerComponent instanceof JTree){
-        setForeground(UIManager.getColor("Tree.selectionForeground"));
-        setBackground(UIManager.getColor("Tree.selectionBackground"));
-      }else if(ownerComponent instanceof JList){
-        setForeground(((JList)ownerComponent).getSelectionForeground());
-        setBackground(((JList)ownerComponent).getSelectionBackground());
-      }
-    }else{
-      if(ownerComponent instanceof JTable){
-        setForeground(ownerComponent.getForeground());
-        setBackground(ownerComponent.getBackground());
-      }else{
-        setForeground(ownerComponent.getForeground());
-        setBackground(ownerComponent.getBackground());
-      }
+  private void prepareRendererTable(JTable table, Object value,
+          boolean isSelected, boolean hasFocus, int row, int column) {
+    setName("Table.cellRenderer");
+    if(isSelected) {
+      super.setForeground(table.getSelectionForeground());
+      super.setBackground(table.getSelectionBackground());
     }
+    else {
+      Color background = table.getBackground();
+      if(background == null
+              || background instanceof javax.swing.plaf.UIResource) {
+        Color alternateColor = DefaultLookup.getColor(this, ui,
+                "Table.alternateRowColor");
+        if(alternateColor != null && row % 2 == 0) background = alternateColor;
+      }
+      super.setForeground(table.getForeground());
+      super.setBackground(background);
+    }
+
+    if(hasFocus) {
+      Border border = null;
+      if(isSelected) {
+        border = DefaultLookup.getBorder(this, ui,
+                "Table.focusSelectedCellHighlightBorder");
+      }
+      if(border == null) {
+        border = DefaultLookup.getBorder(this, ui,
+                "Table.focusCellHighlightBorder");
+      }
+      setBorder(border);
+    }
+    else {
+      setBorder(UIManager.getBorder("Table.cellNoFocusBorder"));
+    }
+
+    prepareRendererCommon(table, value, isSelected, hasFocus);
+  }
+
+  private void prepareRendererList(JList list, Object value,
+          boolean isSelected, boolean hasFocus) {
+    if(isSelected) {
+      setForeground(list.getSelectionForeground());
+      setBackground(list.getSelectionBackground());
+    }
+    else {
+      setForeground(list.getForeground());
+      setBackground(list.getBackground());
+    }
+    prepareRendererCommon(list, value, isSelected, hasFocus);
+  }
+
+  private void prepareRendererTree(JTree tree, Object value,
+          boolean isSelected, boolean hasFocus) {
+    if(isSelected) {
+      setForeground(UIManager.getColor("Tree.selectionForeground"));
+      setBackground(UIManager.getColor("Tree.selectionBackground"));
+    }
+    else {
+      setForeground(tree.getForeground());
+      setBackground(tree.getBackground());
+    }
+    prepareRendererCommon(tree, value, isSelected, hasFocus);
+  }
+
+  private void prepareRendererCommon(JComponent ownerComponent, Object value,
+          boolean isSelected, boolean hasFocus) {
 
     setFont(ownerComponent.getFont());
-    if(ownerComponent instanceof JTable){
-      if (hasFocus) {
-        setBorder( UIManager.getBorder("Table.focusCellHighlightBorder") );
-      }else{
-        setBorder( UIManager.getBorder("Table.cellNoFocusBorder") );
-      }
-    }
-    
+
     String text;
     String toolTipText;
     Icon icon;
     ResourceData rData = null;
-    if(value instanceof Resource){
+    if(value instanceof Resource) {
       text = ((Resource)value).getName();
 
-      rData = (ResourceData)Gate.getCreoleRegister().
-                                 get(value.getClass().getName());
-    }else{
-      text = (value == null) ? "<null>" : value.toString();
-      if(value == null)
-        setForeground(Color.red);
+      rData = (ResourceData)Gate.getCreoleRegister().get(
+              value.getClass().getName());
     }
-    if(rData != null){
+    else {
+      text = (value == null) ? "<null>" : value.toString();
+      if(value == null) setForeground(Color.red);
+    }
+    if(rData != null) {
       toolTipText = "<HTML>Type: <b>" + rData.getName() + "</b></HTML>";
       String iconName = rData.getIcon();
-      if(iconName == null){
-        if(value instanceof LanguageResource) iconName = "lr";
-        else if(value instanceof ProcessingResource) iconName = "pr";
+      if(iconName == null) {
+        if(value instanceof LanguageResource)
+          iconName = "lr";
+        else if(value instanceof ProcessingResource)
+          iconName = "pr";
         else if(value instanceof Controller) iconName = "application";
       }
       icon = (iconName == null) ? null : MainFrame.getIcon(iconName);
-    }else{
+    }
+    else {
       icon = null;
       toolTipText = null;
     }
@@ -137,4 +165,82 @@ public class ResourceRenderer extends JLabel
     setIcon(icon);
     setToolTipText(toolTipText);
   }
+
+  
+  @Override
+  public Dimension getMaximumSize() {
+    //we don't mind being extended horizontally
+    Dimension dim = super.getMaximumSize();
+    if(dim != null){
+      dim.width = Integer.MAX_VALUE;
+      setMaximumSize(dim);
+    }
+    return dim;
+  }
+
+  @Override
+  public Dimension getMinimumSize() {
+    //we don't like being squashed!
+    return getPreferredSize();
+  }
+  /*
+   * The following methods are overridden as a performance measure to to
+   * prune code-paths are often called in the case of renders but which
+   * we know are unnecessary. Great care should be taken when writing
+   * your own renderer to weigh the benefits and drawbacks of overriding
+   * methods like these.
+   */
+
+  /**
+   * Overridden for performance reasons.
+   */
+  public boolean isOpaque() {
+    Color back = getBackground();
+    Component p = getParent();
+    if(p != null) {
+      p = p.getParent();
+    }
+
+    // p should now be the JTable.
+    boolean colorMatch = (back != null) && (p != null)
+            && back.equals(p.getBackground()) && p.isOpaque();
+    return !colorMatch && super.isOpaque();
+  }
+
+  /**
+   * Overridden for performance reasons.
+   */
+  public void invalidate() {
+  }
+
+  /**
+   * Overridden for performance reasons.
+   */
+  public void validate() {
+  }
+
+  /**
+   * Overridden for performance reasons.
+   */
+  public void revalidate() {
+  }
+
+  /**
+   * Overridden for performance reasons.
+   */
+  public void repaint(long tm, int x, int y, int width, int height) {
+  }
+
+  /**
+   * Overridden for performance reasons.
+   */
+  public void repaint(Rectangle r) {
+  }
+
+  /**
+   * Overridden for performance reasons.
+   */
+  public void repaint() {
+  }
+
 }
