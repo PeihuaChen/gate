@@ -567,9 +567,7 @@ public class NameBearerHandle implements Handle, StatusListener,
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("shift F4"));
     }
     public void actionPerformed(ActionEvent e) {
-      if(target instanceof Controller) {
-        Factory.deleteResource((Resource)target);
-      }
+      Factory.deleteResource((Resource)target);
       statusListeners.clear();
       progressListeners.clear();
     }
