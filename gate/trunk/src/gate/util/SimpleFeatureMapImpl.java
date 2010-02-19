@@ -17,16 +17,14 @@
 
 package gate.util;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Set;
-import java.util.Vector;
 import gate.FeatureMap;
 import gate.creole.ontology.OClass;
 import gate.creole.ontology.OConstants;
 import gate.creole.ontology.Ontology;
-import gate.creole.ontology.OntologyUtilities;
 import gate.event.FeatureMapListener;
+
+import java.util.Set;
+import java.util.Vector;
 
 /** Simple case of features. */
 public class SimpleFeatureMapImpl

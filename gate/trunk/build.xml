@@ -321,7 +321,10 @@
     	   deprecation="${deprecation}"
            debuglevel="lines,source"
            includes="gate/**,com/**,hepple/**"
-           classpathref="build.class.path"/>
+           classpathref="build.class.path">
+      <compilerarg value="-Xmaxwarns"/>
+      <compilerarg value="10000"/>
+    </javac>
   </target>
 
 	<!-- This target compiles all the classes including debug information -->
