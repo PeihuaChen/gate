@@ -100,10 +100,10 @@ public final class FastCharStream implements CharStream {
     }
   }
 
-  public final int getColumn() {
+  @Deprecated public final int getColumn() {
     return bufferStart + bufferPosition;
-  }
-  public final int getLine() {
+  }  
+  @Deprecated public final int getLine() {
     return 1;
   }
   public final int getEndColumn() {
