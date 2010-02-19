@@ -81,12 +81,12 @@ public abstract class ComparablePredicate extends AbstractConstraintPredicate {
       try {
         // try to compare as Longs
         if(comparableValue instanceof Long) {
-          return comparableValue.compareTo(Long.valueOf((String)passedValue));
+          return comparableValue.compareTo(Long.valueOf(passedValue.toString()));
         }
 
         // try to compare as Double
         if(comparableValue instanceof Double) {
-          return comparableValue.compareTo(Double.valueOf((String)passedValue));
+          return comparableValue.compareTo(Double.valueOf(passedValue.toString()));
         }
 
         // can't compare
