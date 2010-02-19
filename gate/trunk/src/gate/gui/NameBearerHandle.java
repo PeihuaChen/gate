@@ -298,7 +298,9 @@ public class NameBearerHandle implements Handle, StatusListener,
     // build the static part of the popup
     staticPopupItems = new ArrayList<XJMenuItem>();
 
-    if(target instanceof ProcessingResource) {
+    if(target instanceof ProcessingResource && 
+       !(target instanceof Controller)) {
+      //actions for PRs (but not Controllers)
       staticPopupItems.add(null);
       staticPopupItems.add(new XJMenuItem(new ReloadAction(), sListenerProxy));
       if(target instanceof com.ontotext.gate.hmm.agent.AlternativeHMMAgent) {
@@ -1394,6 +1396,7 @@ public class NameBearerHandle implements Handle, StatusListener,
       Runnable runnable = new Runnable() {
         public void run() {
           if(!(target instanceof ProcessingResource)) return;
+          if(target instanceof Controller) return;
           try {
             long startTime = System.currentTimeMillis();
             fireStatusChanged("Reinitialising " + target.getName());
