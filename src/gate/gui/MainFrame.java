@@ -1836,8 +1836,41 @@ public class MainFrame extends JFrame implements ProgressListener,
   /** Called when a {@link gate.DataStore} has been opened */
   public void datastoreOpened(CreoleEvent e) {
     DataStore ds = e.getDatastore();
-
-    ds.setName(ds.getStorageUrl());
+    if(ds.getName() == null || ds.getName().length() == 0){
+      String name = ds.getStorageUrl(); 
+      StringBuilder nameBuilder = new StringBuilder();
+      //quick and dirty FSA 
+      int state = 0;
+      for(int i = name.length() -1; i >= 0 && state != 2 ; i--){
+        char currentChar = name.charAt(i); 
+        switch (state) {
+          case 0:
+            //consuming slashes at the end
+            if(currentChar == '/'){
+              //consume
+            }else{
+              //we got the first non-slash char
+              state = 1;
+              nameBuilder.insert(0, currentChar);
+            }
+            break;
+          case 1:
+            //eating up name chars
+            if(currentChar == '/'){
+              //we're done!
+              state = 2;
+            }else{
+              //we got a non-slash char
+              nameBuilder.insert(0, currentChar);
+            }
+            break;
+          default:
+            throw new LuckyException("A phanthom state of things!");
+        }
+      }
+      if(nameBuilder.length() > 0) name = nameBuilder.toString();
+      ds.setName(name);  
+    }
 
     NameBearerHandle handle = new NameBearerHandle(ds, MainFrame.this);
     DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);
@@ -4847,13 +4880,25 @@ public class MainFrame extends JFrame implements ProgressListener,
         (DefaultMutableTreeNode)path.getLastPathComponent();
       Object userObject = aNode.getUserObject();
       if(userObject instanceof Handle) {
-        Object target = ((Handle)userObject).getTarget();
+        Handle handle = (Handle)userObject;
+        Object target = handle.getTarget();
         if(target instanceof Resource) {
           Gate.getCreoleRegister().setResourceName((Resource)target,
             (String)newValue);
+        } else if(target instanceof NameBearer){
+          //not a resource, we need to do it manually
+          ((NameBearer)target).setName((String)newValue);
+          //next see if there is a tab for this resource and rename it
+          for(int i = 0; i < mainTabbedPane.getTabCount(); i++) {
+            if(mainTabbedPane.getComponentAt(i) == handle.getLargeView()) {
+              mainTabbedPane.setTitleAt(i, (String)newValue);
+              break;
+            }
+          }
         }
       }
       nodeChanged(aNode);
+      
     }
   }
 

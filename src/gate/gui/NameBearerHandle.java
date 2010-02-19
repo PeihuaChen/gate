@@ -91,7 +91,6 @@ public class NameBearerHandle implements Handle, StatusListener,
       tooltipText = ((DataStore)target).getComment();
     }
 
-    title = target.getName();
     this.icon = MainFrame.getIcon(iconName);
 
     Gate.getCreoleRegister().addCreoleListener(this);
@@ -113,11 +112,7 @@ public class NameBearerHandle implements Handle, StatusListener,
   }
 
   public String getTitle() {
-    return title;
-  }
-
-  public void setTitle(String newTitle) {
-    this.title = newTitle;
+    return target == null ? null : target.getName();
   }
 
   /**
@@ -461,7 +456,7 @@ public class NameBearerHandle implements Handle, StatusListener,
   }// protected void buildViews
 
   public String toString() {
-    return title;
+    return getTitle();
   }
 
   @SuppressWarnings("unchecked")
@@ -487,7 +482,6 @@ public class NameBearerHandle implements Handle, StatusListener,
     }
   }// public synchronized void addProgressListener(ProgressListener l)
 
-  String title;
 
   String tooltipText;
 
@@ -1972,7 +1966,6 @@ public class NameBearerHandle implements Handle, StatusListener,
   }
 
   public void resourceRenamed(Resource resource, String oldName, String newName) {
-    if(target == resource) title = target.getName();
   }
 
   public void datastoreOpened(CreoleEvent e) {
