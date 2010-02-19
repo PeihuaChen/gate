@@ -157,15 +157,15 @@ public class AnnotationListView extends AbstractDocumentView
           addListSelectionListener(new ListSelectionListener(){
             public void valueChanged(ListSelectionEvent e){
               if(!isActive())return;
+              if(e.getValueIsAdjusting()) return;
               statusLabel.setText(
                       Integer.toString(tableModel.getRowCount()) +
                       " Annotations (" +
                       Integer.toString(table.getSelectedRowCount()) +
                       " selected)");
+              //if the new selection is already known about, no more work to do 
+              if(localSelectionUpdating) return;
               //update the list of selected annotations globally
-              synchronized(this) {
-                if(localSelectionUpdating) return;
-              }
               int[] viewRows = table.getSelectedRows();
               List<AnnotationData> selAnns = new ArrayList<AnnotationData>();
               for(int i = 0; i < viewRows.length; i++){
@@ -175,17 +175,19 @@ public class AnnotationListView extends AbstractDocumentView
                 }
               }
               owner.setSelectedAnnotations(selAnns);
-              //blink the selected annotations
-    //          textView.removeAllBlinkingHighlights();
-    //          showHighlights();
-
+              
               if(table.getSelectedRowCount() >= 1){
-                int modelRow = table.rowViewToModel(
-                  table.getSelectionModel().getLeadSelectionIndex());
-                AnnotationData aHandler = annDataList.get(modelRow);
-                //scroll to show the last highlight
-                if(aHandler != null && aHandler.getAnnotation() != null)
-                  textView.scrollAnnotationToVisible(aHandler.getAnnotation());
+                int viewRow = table.getSelectionModel().getLeadSelectionIndex();
+                if(table.getSelectionModel().isSelectedIndex(viewRow)){
+                  int modelRow = table.rowViewToModel(viewRow);
+                  AnnotationData aHandler = annDataList.get(modelRow);
+                  //scroll to show the last highlight
+                  if(aHandler != null && aHandler.getAnnotation() != null)
+                    textView.scrollAnnotationToVisible(aHandler.getAnnotation());
+                }else{
+                  //last operation was a remove selection
+                  //do nothing
+                }
               }
             }
         });
@@ -284,7 +286,7 @@ public class AnnotationListView extends AbstractDocumentView
           return;
         }
         // block upward events
-        synchronized(this) { localSelectionUpdating = true; }
+        localSelectionUpdating = true;
         for (int row = 0; row < table.getRowCount(); row++) {
           for (int col = 0; col < table.getColumnCount(); col++) {
             if (table.getValueAt(row, col) != null
@@ -295,7 +297,7 @@ public class AnnotationListView extends AbstractDocumentView
             }
           }
         }
-        synchronized(this) { localSelectionUpdating = false; }
+        localSelectionUpdating = false;
         // update the highlights in the document
         if (table.isCellSelected(0,0)) {
           table.addRowSelectionInterval(0, 0);
@@ -442,7 +444,13 @@ public class AnnotationListView extends AbstractDocumentView
      AnnotationDataImpl aData = new AnnotationDataImpl(set, ann);
      annDataList.add(aData);
      int row = annDataList.size() -1;
-     if(tableModel != null) tableModel.fireTableRowsInserted(row, row);
+     try{
+       localSelectionUpdating = true;
+       if(tableModel != null) tableModel.fireTableRowsInserted(row, row);  
+     }finally{
+       localSelectionUpdating = false;
+     }
+     
      //listen for the new annotation's events
      aData.getAnnotation().addAnnotationListener(AnnotationListView.this);
      return aData;
@@ -457,17 +465,16 @@ public class AnnotationListView extends AbstractDocumentView
        if(selAnns.remove(tag)){
          owner.setSelectedAnnotations(selAnns);
        }
- //      if(table != null){
- //        int viewRow = table.rowModelToView(row);
- //        if(table.isRowSelected(viewRow)){
- //          table.getSelectionModel().removeIndexInterval(viewRow, viewRow);
- //          //remove the blinking highlight
- //          textView.removeBlinkingHighlight(aHandler.getAnnotation());
- //        }
- //      }
-       aHandler.getAnnotation().removeAnnotationListener(AnnotationListView.this);
+       aHandler.getAnnotation().removeAnnotationListener(
+               AnnotationListView.this);
        annDataList.remove(row);
-       if(tableModel != null) tableModel.fireTableRowsDeleted(row, row);
+       //owner was already notified
+       try{
+         localSelectionUpdating = true;
+         if(tableModel != null) tableModel.fireTableRowsDeleted(row, row);
+       }finally{
+         localSelectionUpdating = false;
+       }
      }
    }
 
@@ -519,7 +526,15 @@ public class AnnotationListView extends AbstractDocumentView
        annDataList.add(aTag);
        ann.addAnnotationListener(AnnotationListView.this);
      }
-     if(tableModel != null) tableModel.fireTableDataChanged();
+     try{
+       //this will cause the selection to change (the actual selection contents
+       //stay the same, but the row numbers may change)
+       //we want to avoid circular notifications.
+       localSelectionUpdating  = true;
+       if(tableModel != null) tableModel.fireTableDataChanged();
+     }finally{
+       localSelectionUpdating = false;
+     }
      return tags;
    }
 
@@ -549,8 +564,7 @@ public class AnnotationListView extends AbstractDocumentView
      table.clearSelection();
      if(selection != null){
        for(int i = 0; i < selection.length; i++){
-         table.getSelectionModel().addSelectionInterval(selection[i],
-                 selection[i]);
+         table.addRowSelectionInterval(selection[i], selection[i]);
        }
      }
    }
@@ -560,7 +574,7 @@ public class AnnotationListView extends AbstractDocumentView
     * @see gate.gui.docview.AbstractDocumentView#setSelectedAnnotations(java.util.List)
     */
    @Override
-   public void setSelectedAnnotations(List<AnnotationData> selectedAnnots) {
+   public void setSelectedAnnotations(final List<AnnotationData> selectedAnnots) {
      //if the list of selected annotations differs from the current selection,
      //update the selection.
      //otherwise do nothing (to break infinite looping)
@@ -585,27 +599,32 @@ public class AnnotationListView extends AbstractDocumentView
        }
      }
      //if we got this far, the selection lists were different
-     try{
-       //block upward events
-       synchronized(this) {
-         localSelectionUpdating = true;
-       }
-       //update the local selection
-       table.getSelectionModel().clearSelection();
-       for(AnnotationData aData : selectedAnnots){
-         int modelRow = annDataList.indexOf(aData);
-         if(modelRow != -1){
-           int viewRow = table.rowModelToView(modelRow);
-           table.getSelectionModel().addSelectionInterval(viewRow, viewRow);
-           table.scrollRectToVisible(table.getCellRect(viewRow, 0, true));
+     //we need to change the selection from the UI thread.
+     SwingUtilities.invokeLater(new Runnable(){
+       public void run(){
+         try{
+           //block upward events
+           localSelectionUpdating = true;
+           //update the local selection
+           table.getSelectionModel().clearSelection();
+           int rowToScrollTo = -1;
+           for(AnnotationData aData : selectedAnnots){
+             int modelRow = annDataList.indexOf(aData);
+             if(modelRow != -1){
+               int viewRow = table.rowModelToView(modelRow);
+               table.getSelectionModel().addSelectionInterval(viewRow, viewRow);
+               rowToScrollTo = viewRow;
+             }
+           }
+           if(rowToScrollTo >= 0){
+             table.scrollRectToVisible(table.getCellRect(rowToScrollTo, 0, true));
+           }
+         }finally{
+           //re-enable upward events
+           localSelectionUpdating = false;
          }
        }
-     }finally{
-       //re-enable upward events
-       synchronized(this) {
-         localSelectionUpdating = false;
-       }
-     }
+     });
    }
 
 
@@ -829,7 +848,7 @@ public class AnnotationListView extends AbstractDocumentView
       * This is used to block update events being sent to the owner, while the
       * current selection is adjusted.
       */
-     protected boolean localSelectionUpdating = false;
+     protected volatile boolean localSelectionUpdating = false;
 
      protected JPanel mainPanel;
      protected JLabel statusLabel;

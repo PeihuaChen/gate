@@ -20,6 +20,8 @@ import java.io.*;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.swing.*;
 import javax.swing.Timer;
@@ -41,7 +43,6 @@ import gate.event.DocumentEvent;
 import gate.event.DocumentListener;
 import gate.gui.*;
 import gate.gui.annedit.*;
-import gate.gui.annedit.OwnedAnnotationEditor;
 import gate.swing.ColorGenerator;
 import gate.swing.XJTable;
 import gate.swing.XJFileChooser;
@@ -77,9 +78,8 @@ public class AnnotationSetsView extends AbstractDocumentView
   public void selectAnnotation(final AnnotationData aData) {
     Runnable action = new Runnable(){
       public void run(){
-        List<AnnotationData> selAnns = new LinkedList<AnnotationData>();
-        selAnns.add(aData);
-        owner.setSelectedAnnotations(selAnns);        
+        List<AnnotationData> selAnns = Collections.singletonList(aData);
+        owner.setSelectedAnnotations(selAnns);
       }
     };
     pendingEvents.offer(new PerformActionEvent(action));
@@ -121,10 +121,10 @@ public class AnnotationSetsView extends AbstractDocumentView
   public AnnotationSetsView(){
     setHandlers = new ArrayList<SetHandler>();
     tableRows = new ArrayList();
-    visibleAnnotationTypes = new ArrayList<TypeSpec>();
+    visibleAnnotationTypes = new LinkedBlockingQueue<TypeSpec>();
     actions = new ArrayList();
     actions.add(new SavePreserveFormatAction());
-    pendingEvents = new LinkedList<GateEvent>();
+    pendingEvents = new LinkedBlockingQueue<GateEvent>();
     eventMinder = new Timer(EVENTS_HANDLE_DELAY, 
             new HandleDocumentEventsAction());
     eventMinder.setRepeats(true);
@@ -415,15 +415,13 @@ public class AnnotationSetsView extends AbstractDocumentView
    *
    */
   protected void storeSelectedTypes(){
-    synchronized(AnnotationSetsView.this) {
-      visibleAnnotationTypes.clear(); // for security
-      for(SetHandler sHandler:setHandlers){
-        for(TypeHandler tHandler: sHandler.typeHandlers){
-          if(tHandler.isSelected()){
-            visibleAnnotationTypes.add(new TypeSpec(sHandler.set.getName(),
-              tHandler.name));
-            tHandler.setSelected(false);
-          }
+    visibleAnnotationTypes.clear(); // for security
+    for(SetHandler sHandler:setHandlers){
+      for(TypeHandler tHandler: sHandler.typeHandlers){
+        if(tHandler.isSelected()){
+          visibleAnnotationTypes.add(new TypeSpec(sHandler.set.getName(),
+            tHandler.name));
+          tHandler.setSelected(false);
         }
       }
     }
@@ -434,15 +432,13 @@ public class AnnotationSetsView extends AbstractDocumentView
    * {@link #visibleAnnotationTypes} data structure.
    */
   protected void restoreSelectedTypes(){
-    synchronized(AnnotationSetsView.this) {
-      for(TypeSpec typeSpec: visibleAnnotationTypes){
-        TypeHandler typeHandler =
-          getTypeHandler(typeSpec.setName, typeSpec.type);
-        if (typeHandler != null) { // may have been deleted since
-          typeHandler.setSelected(true);
-        }
+    TypeSpec typeSpec;
+    while((typeSpec = visibleAnnotationTypes.poll()) != null){
+      TypeHandler typeHandler =
+        getTypeHandler(typeSpec.setName, typeSpec.type);
+      if (typeHandler != null) { // may have been deleted since
+        typeHandler.setSelected(true);
       }
-      visibleAnnotationTypes.clear();
     }
   }
 
@@ -627,87 +623,19 @@ public class AnnotationSetsView extends AbstractDocumentView
       sHandler.set.removeAnnotationSetListener(AnnotationSetsView.this);
     }    
     eventMinder.stop();
-    synchronized(this) {
-      pendingEvents.clear();  
-    }
+    pendingEvents.clear();  
     super.cleanup();
     document = null;
   }
   
   public void annotationSetAdded(final DocumentEvent e) {
-    synchronized(AnnotationSetsView.this) {
-      pendingEvents.offer(e);
-      eventMinder.restart();
-    }
-    
-//    Runnable runner = new Runnable(){
-//      public void run(){
-//        String newSetName = e.getAnnotationSetName();
-//        SetHandler sHandler = new SetHandler(document.getAnnotations(newSetName));
-//        //find the right location for the new set
-//        //this is a named set and the first one is always the default one
-//        int i = 1;
-//        for(;
-//            i < setHandlers.size() && 
-//            ((SetHandler)setHandlers.get(i)).set.
-//            	getName().compareTo(newSetName) <= 0;
-//            i++);
-//        setHandlers.add(i, sHandler);
-//        //update the tableRows list
-//        SetHandler previousHandler = (SetHandler)setHandlers.get(i -1);
-//        //find the index for the previous handler - which is guaranteed to exist
-//        int j = 0;
-//        for(;
-//        	tableRows.get(j) != previousHandler;
-//          j++);
-//        if(previousHandler.isExpanded()){
-//          j += previousHandler.typeHandlers.size();
-//        }
-//        j++;
-//        tableRows.add(j, sHandler);
-//        //update the table view
-//        tableModel.fireTableRowsInserted(j, j);
-//      }
-//    };
-//    SwingUtilities.invokeLater(runner);
+    pendingEvents.offer(e);
+    eventMinder.restart();
   }//public void annotationSetAdded(DocumentEvent e) 
   
   public void annotationSetRemoved(final DocumentEvent e) {
-    synchronized(AnnotationSetsView.this) {
-      pendingEvents.offer(e);
-      eventMinder.restart();
-    }
-    
-//    Runnable runner = new Runnable(){
-//      public void run(){
-//        String setName = e.getAnnotationSetName();
-//        //find the handler and remove it from the list of handlers
-//    //    Iterator shIter = setHandlers.iterator();
-//        SetHandler sHandler = getSetHandler(setName);
-//        if(sHandler != null){
-//          //remove highlights if any
-//          Iterator typeIter = sHandler.typeHandlers.iterator();
-//          while(typeIter.hasNext()){
-//            TypeHandler tHandler = (TypeHandler)typeIter.next();
-//            tHandler.setSelected(false);
-//          }
-//          setHandlers.remove(sHandler);
-//          //remove the set from the table
-//          int row = tableRows.indexOf(sHandler);
-//          tableRows.remove(row);
-//          int removed = 1;
-//          //remove the type rows as well
-//          if(sHandler.isExpanded())
-//            for(int i = 0; i < sHandler.typeHandlers.size(); i++){ 
-//              tableRows.remove(row);
-//              removed++;
-//            }
-//          tableModel.fireTableRowsDeleted(row, row + removed -1);
-//          sHandler.cleanup();
-//        }
-//      }
-//    };
-//    SwingUtilities.invokeLater(runner);
+    pendingEvents.offer(e);
+    eventMinder.restart();
   }//public void annotationSetRemoved(DocumentEvent e) 
   
   /**Called when the content of the document has changed through an edit 
@@ -730,17 +658,13 @@ public class AnnotationSetsView extends AbstractDocumentView
   
   
   public void annotationAdded(final AnnotationSetEvent e) {
-    synchronized(AnnotationSetsView.this) {
-      pendingEvents.offer(e);
-      eventMinder.restart();
-    }
+    pendingEvents.offer(e);
+    eventMinder.restart();
   }
   
   public void annotationRemoved(final AnnotationSetEvent e) {
-    synchronized(AnnotationSetsView.this) {
-      pendingEvents.offer(e);
-      eventMinder.restart();
-    }
+    pendingEvents.offer(e);
+    eventMinder.restart();
   }
   
   /**
@@ -796,9 +720,7 @@ public class AnnotationSetsView extends AbstractDocumentView
           mainTable.getSelectionModel().setSelectionInterval(row, row);
         }else{
           //type handler not created yet
-          synchronized(AnnotationSetsView.this) {
-            visibleAnnotationTypes.add(new TypeSpec(setName, typeName));  
-          }
+          visibleAnnotationTypes.add(new TypeSpec(setName, typeName));  
         }
       }
     });
@@ -830,10 +752,8 @@ public class AnnotationSetsView extends AbstractDocumentView
           }
         }
       });
-      synchronized(AnnotationSetsView.this) {
-        pendingEvents.offer(actionEvent);
-        eventMinder.restart();
-      }
+      pendingEvents.offer(actionEvent);
+      eventMinder.restart();
     }
   }
 
@@ -1159,7 +1079,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     }
     
     /**
-     * Notifies this set handler that anew type of annotations has been created
+     * Notifies this set handler that a new type of annotations has been created
      * @param type the new type of annotations
      * @return the new TypeHandler created as a result
      */
@@ -1188,10 +1108,8 @@ public class AnnotationSetsView extends AbstractDocumentView
       if(row != -1) mainTable.getSelectionModel().setSelectionInterval(row, row);
       //select the newly created type if previously requested
       TypeSpec typeSpec = new TypeSpec(set.getName(), type);
-      synchronized(AnnotationSetsView.this) {
-        if(visibleAnnotationTypes.remove(typeSpec)){
-          tHandler.setSelected(true);
-        }
+      if(visibleAnnotationTypes.remove(typeSpec)){
+        tHandler.setSelected(true);
       }
       return tHandler;
     }
@@ -1629,8 +1547,8 @@ public class AnnotationSetsView extends AbstractDocumentView
 	        //make sure new annotation is visible
 	        setTypeSelected(set.getName(), ann.getType(), true);
 	        //edit the new annotation
-	        new EditAnnotationAction(new AnnotationDataImpl(set, ann)).
-	          actionPerformed(null);
+	        pendingEvents.offer(new PerformActionEvent(
+	                new EditAnnotationAction(new AnnotationDataImpl(set, ann))));
         }catch(InvalidOffsetException ioe){
           //this should never happen
           throw new GateRuntimeException(ioe);
@@ -1766,16 +1684,29 @@ public class AnnotationSetsView extends AbstractDocumentView
     public PerformActionEvent(Runnable runnable){
       super(AnnotationSetsView.this, 0);
       this.runnable = runnable;
+      this.action = null;
+    }
+
+    public PerformActionEvent(Action action){
+      super(AnnotationSetsView.this, 0);
+      this.runnable = null;
+      this.action = action;
     }
     
-    private Runnable runnable;
-
     /**
-     * @return the runnable
+     * Runs the action (or runnable) enclosed by this event. 
      */
-    public Runnable getRunnable() {
-      return runnable;
+    public void run(){
+      if(runnable != null){
+        runnable.run();
+      }else if(action != null){
+        action.actionPerformed(null);
+      }
     }
+    
+    private Action action;
+    
+    private Runnable runnable;
   }
   
   protected class HandleDocumentEventsAction extends AbstractAction{
@@ -1787,98 +1718,96 @@ public class AnnotationSetsView extends AbstractDocumentView
         rebuildDisplay();
         return;
       }
+      //if too many individual events, then rebuild UI from scratch as it's 
+      //faster.
+      if(pendingEvents.size() > MAX_EVENTS){
+        rebuildDisplay();
+        return;
+      }
       //process the individual events
-      synchronized(AnnotationSetsView.this) {
-        //if too many individual events, then rebuild UI from scratch as it's 
-        //faster.
-        if(pendingEvents.size() > MAX_EVENTS){
-          rebuildDisplay();
-          return;
-        }
-        while(!pendingEvents.isEmpty()){
-          GateEvent event = pendingEvents.remove();
-          if(event instanceof DocumentEvent){
-            DocumentEvent e = (DocumentEvent)event;
-            if(event.getType() == DocumentEvent.ANNOTATION_SET_ADDED){
-                String newSetName = e.getAnnotationSetName();
-                SetHandler sHandler = new SetHandler(document.getAnnotations(newSetName));
-                //find the right location for the new set
-                //this is a named set and the first one is always the default one
-                int i = 0;
-                if(newSetName != null){
-                  for(i = 1;
-                      i < setHandlers.size() && 
-                      ((SetHandler)setHandlers.get(i)).set.
-                      getName().compareTo(newSetName) <= 0;
-                      i++);
-                }
-                setHandlers.add(i, sHandler);
-                //update the tableRows list
-                int j = 0;
-                if(i > 0){
-                  SetHandler previousHandler = (SetHandler)setHandlers.get(i -1);
-                  //find the index for the previous handler - which is guaranteed to exist
-                  for(; tableRows.get(j) != previousHandler; j++);
-                  if(previousHandler.isExpanded()){
-                    j += previousHandler.typeHandlers.size();
-                  }
-                  j++;
-                }
-                tableRows.add(j, sHandler);
-                //update the table view
-                tableModel.fireTableRowsInserted(j, j);
-            }else if(event.getType() == DocumentEvent.ANNOTATION_SET_REMOVED){
-              String setName = e.getAnnotationSetName();
-              //find the handler and remove it from the list of handlers
-              SetHandler sHandler = getSetHandler(setName);
-              if(sHandler != null){
-                sHandler.set.removeAnnotationSetListener(AnnotationSetsView.this);
-                //remove highlights if any
-                Iterator typeIter = sHandler.typeHandlers.iterator();
-                while(typeIter.hasNext()){
-                  TypeHandler tHandler = (TypeHandler)typeIter.next();
-                  tHandler.setSelected(false);
-                }
-                setHandlers.remove(sHandler);
-                //remove the set from the table
-                int row = tableRows.indexOf(sHandler);
-                tableRows.remove(row);
-                int removed = 1;
-                //remove the type rows as well
-                if(sHandler.isExpanded())
-                  for(int i = 0; i < sHandler.typeHandlers.size(); i++){ 
-                    tableRows.remove(row);
-                    removed++;
-                  }
-                tableModel.fireTableRowsDeleted(row, row + removed -1);
-                sHandler.cleanup();
+      while(!pendingEvents.isEmpty()){
+        GateEvent event = pendingEvents.remove();
+        if(event instanceof DocumentEvent){
+          DocumentEvent e = (DocumentEvent)event;
+          if(event.getType() == DocumentEvent.ANNOTATION_SET_ADDED){
+              String newSetName = e.getAnnotationSetName();
+              SetHandler sHandler = new SetHandler(document.getAnnotations(newSetName));
+              //find the right location for the new set
+              //this is a named set and the first one is always the default one
+              int i = 0;
+              if(newSetName != null){
+                for(i = 1;
+                    i < setHandlers.size() && 
+                    ((SetHandler)setHandlers.get(i)).set.
+                    getName().compareTo(newSetName) <= 0;
+                    i++);
               }
-            }else{
-              //some other kind of event we don't care about
-            }
-          }else if(event instanceof AnnotationSetEvent){
-            AnnotationSetEvent e = (AnnotationSetEvent)event;
-            AnnotationSet set = (AnnotationSet)e.getSource();
-            Annotation ann = e.getAnnotation();
-            if(event.getType() == AnnotationSetEvent.ANNOTATION_ADDED){
-              TypeHandler tHandler = getTypeHandler(set.getName(), ann.getType());
-              if(tHandler == null){
-                //new type for this set
-                SetHandler sHandler = getSetHandler(set.getName());
-                tHandler = sHandler.newType(ann.getType());
+              setHandlers.add(i, sHandler);
+              //update the tableRows list
+              int j = 0;
+              if(i > 0){
+                SetHandler previousHandler = (SetHandler)setHandlers.get(i -1);
+                //find the index for the previous handler - which is guaranteed to exist
+                for(; tableRows.get(j) != previousHandler; j++);
+                if(previousHandler.isExpanded()){
+                  j += previousHandler.typeHandlers.size();
+                }
+                j++;
               }
-              tHandler.annotationAdded(ann);        
-            }else if(event.getType() == AnnotationSetEvent.ANNOTATION_REMOVED){
-              TypeHandler tHandler = getTypeHandler(set.getName(), ann.getType());
-              if(tHandler != null) tHandler.annotationRemoved(ann);
-            }else{
-              //some other kind of event we don't care about
+              tableRows.add(j, sHandler);
+              //update the table view
+              tableModel.fireTableRowsInserted(j, j);
+          }else if(event.getType() == DocumentEvent.ANNOTATION_SET_REMOVED){
+            String setName = e.getAnnotationSetName();
+            //find the handler and remove it from the list of handlers
+            SetHandler sHandler = getSetHandler(setName);
+            if(sHandler != null){
+              sHandler.set.removeAnnotationSetListener(AnnotationSetsView.this);
+              //remove highlights if any
+              Iterator typeIter = sHandler.typeHandlers.iterator();
+              while(typeIter.hasNext()){
+                TypeHandler tHandler = (TypeHandler)typeIter.next();
+                tHandler.setSelected(false);
+              }
+              setHandlers.remove(sHandler);
+              //remove the set from the table
+              int row = tableRows.indexOf(sHandler);
+              tableRows.remove(row);
+              int removed = 1;
+              //remove the type rows as well
+              if(sHandler.isExpanded())
+                for(int i = 0; i < sHandler.typeHandlers.size(); i++){ 
+                  tableRows.remove(row);
+                  removed++;
+                }
+              tableModel.fireTableRowsDeleted(row, row + removed -1);
+              sHandler.cleanup();
             }
-          }else if(event instanceof PerformActionEvent){
-            ((PerformActionEvent)event).getRunnable().run();
           }else{
-            //unknown type of event -> ignore
+            //some other kind of event we don't care about
           }
+        }else if(event instanceof AnnotationSetEvent){
+          AnnotationSetEvent e = (AnnotationSetEvent)event;
+          AnnotationSet set = (AnnotationSet)e.getSource();
+          Annotation ann = e.getAnnotation();
+          if(event.getType() == AnnotationSetEvent.ANNOTATION_ADDED){
+            TypeHandler tHandler = getTypeHandler(set.getName(), ann.getType());
+            if(tHandler == null){
+              //new type for this set
+              SetHandler sHandler = getSetHandler(set.getName());
+              tHandler = sHandler.newType(ann.getType());
+            }
+            tHandler.annotationAdded(ann);    
+          }else if(event.getType() == AnnotationSetEvent.ANNOTATION_REMOVED){
+            TypeHandler tHandler = getTypeHandler(set.getName(), ann.getType());
+            if(tHandler != null) tHandler.annotationRemoved(ann);
+          }else{
+            //some other kind of event we don't care about
+          }
+        }else if(event instanceof PerformActionEvent){
+          ((PerformActionEvent)event).run();
+        }else{
+          //unknown type of event -> ignore
         }
       }
     }
@@ -1895,9 +1824,19 @@ public class AnnotationSetsView extends AbstractDocumentView
       //is necessary
       uiDirty = false;
       try{
-        synchronized(AnnotationSetsView.this) {
-          //ignore all pending events, as we're rebuilding from scratch
-          pendingEvents.clear();
+        //Ignore all pending events, as we're rebuilding from scratch.
+        //Rotate once through the whole queue, filtering out events we want
+        //to ignore.
+        GateEvent event;
+        pendingEvents.offer(END_OF_LIST);
+        while((event = pendingEvents.poll()) != END_OF_LIST){
+          if(event instanceof DocumentEvent || 
+             event instanceof AnnotationSetEvent){
+            //ignore event
+          }else{
+            //event of unknown type -> we re-queue it!
+            pendingEvents.offer(event);
+          }
         }
         //store selection state
         storeSelectedTypes();
@@ -2206,7 +2145,7 @@ public class AnnotationSetsView extends AbstractDocumentView
    * so that the selection can be restored when the view is made active again.
    * The values are String[2] pairs of form <set name, type>.
    */
-  protected List<TypeSpec> visibleAnnotationTypes;
+  protected BlockingQueue<TypeSpec> visibleAnnotationTypes;
   
   protected Timer mouseMovementTimer;
   /**
@@ -2214,7 +2153,7 @@ public class AnnotationSetsView extends AbstractDocumentView
    */
   protected Timer eventMinder;
   
-  protected Queue<GateEvent> pendingEvents;
+  protected BlockingQueue<GateEvent> pendingEvents;
   
   private static final int MOUSE_MOVEMENT_TIMER_DELAY = 500;
   protected MouseStoppedMovingAction mouseStoppedMovingAction;
@@ -2226,6 +2165,13 @@ public class AnnotationSetsView extends AbstractDocumentView
   protected final static ColorGenerator colourGenerator = new ColorGenerator();
   private static final int NAME_COL = 1;
   private static final int SELECTED_COL = 0;
+  
+  /**
+   * A special GateEvent used as a flag.
+   */
+  private static final GateEvent END_OF_LIST = new GateEvent(
+          AnnotationSetsView.class, 
+          Integer.MAX_VALUE);
   
   private static final int EVENTS_HANDLE_DELAY = 300;
   
