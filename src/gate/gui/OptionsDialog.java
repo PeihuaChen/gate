@@ -335,10 +335,10 @@ public class OptionsDialog extends JDialog {
      ******************/
 
     Box buttonsBox = Box.createHorizontalBox();
-    JButton okButton = new JButton(new OKAction());
+    okButton = new JButton(new OKAction());
     buttonsBox.add(okButton);
     buttonsBox.add(Box.createHorizontalStrut(10));
-    buttonsBox.add(new JButton(new CancelAction()));
+    buttonsBox.add(cancelButton = new JButton(new CancelAction()));
 
     getContentPane().add(Box.createVerticalStrut(10));
     getContentPane().add(buttonsBox);
@@ -642,6 +642,18 @@ public class OptionsDialog extends JDialog {
    * Radio button used to set the font for text components
    */
   protected JRadioButton textBtn;
+  
+  /**
+   * The OK button for the dialog. It's set as protected so it can be accessed
+   * by subclasses in other projects.
+   */
+  protected JButton okButton;
+  
+  /**
+   * The Cancel button for the dialog. It's set as protected so it can be 
+   * accessed by subclasses in other projects.
+   */
+  protected JButton cancelButton;
 
   /**
    * which text is currently being edited; values are: "text", "menu", "other"
