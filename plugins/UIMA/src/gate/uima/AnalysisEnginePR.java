@@ -400,6 +400,17 @@ public class AnalysisEnginePR extends AbstractLanguageAnalyser {
   }
 
   /**
+   * Clean up the AnalysisEngine and CAS.
+   */
+  public void cleanup() {
+    super.cleanup();
+    // release the CAS
+    cas.release();
+    // clean up the analysis engine
+    analysisEngine.destroy();
+  }
+
+  /**
    * Use the defined input mappings to populate the initial CAS.
    */
   private void mapInputAnnotations() throws ExecutionException {
