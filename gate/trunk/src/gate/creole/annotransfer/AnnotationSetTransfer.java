@@ -1,176 +1,186 @@
 /*
- *  AnnotationSetTransfer.java
- *
- *  Copyright (c) 1995-2010, The University of Sheffield. See the file
- *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
- *
- *  This file is part of GATE (see http://gate.ac.uk/), and is free
- *  software, licenced under the GNU Library General Public License,
- *  Version 2, June 1991 (in the distribution as file licence.html,
- *  and also available at http://gate.ac.uk/gate/licence.html).
- *
- *  Kalina Bontcheva, 6/8/2001
- *
- *  $Id$
+ * AnnotationSetTransfer.java
+ * 
+ * Copyright (c) 2009, The University of Sheffield.
+ * 
+ * This file is part of GATE (see http://gate.ac.uk/), and is free software,
+ * licenced under the GNU Library General Public License, Version 2, June 1991
+ * (in the distribution as file licence.html, and also available at
+ * http://gate.ac.uk/gate/licence.html).
+ * 
+ * Mark A. Greenwood, 7/10/2009
  */
-
 package gate.creole.annotransfer;
 
-import java.util.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.GateConstants;
+import gate.ProcessingResource;
+import gate.Resource;
+import gate.creole.AbstractLanguageAnalyser;
+import gate.creole.ExecutionException;
+import gate.creole.ResourceInstantiationException;
+import gate.util.InvalidOffsetException;
 
-import gate.*;
-import gate.creole.*;
-import gate.util.GateRuntimeException;
-import gate.util.Out;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Serializable;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
- * This class is the implementation of the resource ACEPROCESSOR.
+ * This plugin allows the names of annotations and features to be changed as
+ * well as transfered from one annotation set to another. Think of it as an
+ * extended version of the old AnnotationSet Transfer plugin.
+ * 
+ * @author Mark A. Greenwood
  */
 public class AnnotationSetTransfer extends AbstractLanguageAnalyser
-  implements ProcessingResource {
+                                                                     implements
+                                                                     ProcessingResource,
+                                                                     Serializable {
+  
+  private String tagASName = GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME;
 
-  /** DEBUG flag */
-  private static final boolean DEBUG = false;
+  private String outputASName, inputASName, textTagName;
+  
+  private URL configURL;
 
-  public static final String
-    AST_DOCUMENT_PARAMETER_NAME = "document";
+  private Boolean copyAnnotations, transferAllUnlessFound;
 
-  public static final String
-    AST_INPUT_AS_PARAMETER_NAME = "inputASName";
+  private gate.AnnotationSet bodyAnnotations = null;
 
-  public static final String
-    AST_OUTPUT_AS_PARAMETER_NAME = "outputASName";
+  private List<String> annotationTypes = null;
+  
+  Map<String, Mapping> mappings = new HashMap<String, Mapping>();
 
-  public static final String
-    AST_TAG_AS_PARAMETER_NAME = "tagASName";
+  @Override
+  public Resource init() throws ResourceInstantiationException {
+    return this;
+  }
 
-  public static final String
-    AST_TEXT_TAG_PARAMETER_NAME = "textTagName";
-
-  public static final String DEFAULT_OUTPUT_SET_NAME = "Filtered";
-  public static final String DEFAULT_TEXT_TAG_NAME = "BODY";
-
-  protected String   tagASName =  GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME;
-  protected String                outputASName = DEFAULT_OUTPUT_SET_NAME;
-  protected String                inputASName = null;
-  protected String                textTagName = DEFAULT_TEXT_TAG_NAME;
-  protected gate.AnnotationSet    bodyAnnotations = null;
-  protected List annotationTypes;
-  protected Boolean copyAnnotations = false;
-  protected Boolean transferAllUnlessFound = true;
-
-  /** Initialise this resource, and return it. */
-  public Resource init() throws ResourceInstantiationException
-  {
-    return super.init();
-  } // init()
-
-  /**
-  * Reinitialises the processing resource. After calling this method the
-  * resource should be in the state it is after calling init.
-  * If the resource depends on external resources (such as rules files) then
-  * the resource will re-read those resources. If the data used to create
-  * the resource has changed since the resource has been created then the
-  * resource will change too after calling reInit().
-  */
-  public void reInit() throws ResourceInstantiationException
-  {
-    init();
-  } // reInit()
-
-  /** Run the resource. */
+  @Override
   public void execute() throws ExecutionException {
-
-    if(document == null)
-      throw new GateRuntimeException("No document to process!");
-
-    if(inputASName != null && inputASName.equals(""))
-      inputASName = null;
-    if(outputASName != null && outputASName.equals(""))
-      outputASName = null;
-
-    //get the input annotation set and the output one
-    AnnotationSet inputAS = (inputASName == null) ?
-                            document.getAnnotations() :
-                            document.getAnnotations(inputASName);
-    AnnotationSet outputAS = (outputASName == null) ?
-                             document.getAnnotations() :
-                             document.getAnnotations(outputASName);
-    AnnotationSet tagAS = (tagASName == null) ?
-                            document.getAnnotations() :
-                            document.getAnnotations(tagASName);
-
-    //if we want to transfer only some types, then select only annotations
-    //from these types
-
+    AnnotationSet inputAS = document.getAnnotations(inputASName);
+    AnnotationSet outputAS = document.getAnnotations(outputASName);
+    AnnotationSet tagAS = document.getAnnotations(tagASName);
     AnnotationSet annotsToTransfer = null;
-    if (annotationTypes != null && annotationTypes.size() > 0) {
-      //inputAS = inputAS.get(new HashSet(annotationTypes));
-      annotsToTransfer = inputAS.get(new HashSet(annotationTypes));
+
+    mappings.clear();
+    
+    //TODO clean this up so we don't have to repeat ourselves
+    if (configURL != null) {
+      
+      try {
+        BufferedReader in = new BufferedReader(new InputStreamReader(configURL.openStream()));
+        
+        String line = in.readLine();
+        while (line != null) {
+          if (!line.trim().equals("")) {
+            String[] data = line.split("=",2);
+            String oldName = data[0].trim();
+            String newName = data.length == 2 ? data[1].trim() : null;
+            mappings.put(oldName, new Mapping(oldName, newName));
+          }
+          line = in.readLine();
+        }
+      }
+      catch (IOException ioe) {
+        ioe.printStackTrace();
+      }    
+    }
+    else if (annotationTypes != null) {
+      for(String type : annotationTypes) {
+        String[] data = type.split("=", 2);
+        String oldName = data[0].trim();
+        String newName = data.length == 2 ? data[1].trim() : null;
+        
+        System.out.println(oldName +" --> "+newName);
+        
+        mappings.put(oldName, new Mapping(oldName, newName));
+      }
+    }
+    else
+      throw new ExecutionException("The annotation list and URL cannot both be null");
+    
+    if(mappings.size() > 0) {
+      annotsToTransfer = inputAS.get(mappings.keySet());
     } else {
       // transfer everything
       annotsToTransfer = inputAS.get();
     }
-
     // in case of no one annotation from some of annotationTypes
-    //if(inputAS == null) return;
     if(annotsToTransfer == null || annotsToTransfer.size() == 0) return;
-
-    //check if we have a BODY annotation
-    //if not, just copy all
-    if (textTagName == null || textTagName.equals("")) {
-      //outputAS.addAll(inputAS);
-      outputAS.addAll(annotsToTransfer);
+    // check if we have a BODY annotation
+    // if not, just copy all
+    if(textTagName == null || textTagName.equals("")) {
+      // outputAS.addAll(inputAS);
+      transferAnnotations(new ArrayList<Annotation>(annotsToTransfer),
+              outputAS);
       // remove from input set unless we copy only
-      if(!copyAnnotations)
-        inputAS.removeAll(annotsToTransfer);
+      if(!copyAnnotations) inputAS.removeAll(annotsToTransfer);
       return;
     }
-
-    //get the BODY annotation
+    // get the BODY annotation
     bodyAnnotations = tagAS.get(textTagName);
-    if (bodyAnnotations == null || bodyAnnotations.isEmpty()) {
-      if(DEBUG) {
-        Out.prln("AST Warning: No text annotations of type '" + textTagName
-                 + "' in document '" + document.getName()
-                 + "' found, so transferring all annotations to the target set");
-      }
-      //outputAS.addAll(inputAS);
+    if(bodyAnnotations == null || bodyAnnotations.isEmpty()) {
+      // outputAS.addAll(inputAS);
       if(transferAllUnlessFound) {
-        outputAS.addAll(annotsToTransfer);
+        // outputAS.addAll(annotsToTransfer);
+        transferAnnotations(new ArrayList<Annotation>(annotsToTransfer),
+                outputAS);
         // remove from input set unless we copy only
-        if(!copyAnnotations)
-          inputAS.removeAll(annotsToTransfer);
+        if(!copyAnnotations) inputAS.removeAll(annotsToTransfer);
       }
       return;
     }
-
-    List annots2Move = new ArrayList();
+    List<Annotation> annots2Move = new ArrayList<Annotation>();
     Iterator<Annotation> bodyIter = bodyAnnotations.iterator();
-    while (bodyIter.hasNext()) {
+    while(bodyIter.hasNext()) {
       Annotation bodyAnn = bodyIter.next();
       Long start = bodyAnn.getStartNode().getOffset();
       Long end = bodyAnn.getEndNode().getOffset();
-
-      //get all annotations we want transferred
-      //AnnotationSet annots2Copy = inputAS.getContained(start, end);
+      // get all annotations we want transferred
+      // AnnotationSet annots2Copy = inputAS.getContained(start, end);
       AnnotationSet annots2Copy = annotsToTransfer.getContained(start, end);
-      //copy them to the new set and delete them from the old one
+      // copy them to the new set and delete them from the old one
       annots2Move.addAll(annots2Copy);
     }
-    outputAS.addAll(annots2Move);
-    if(!copyAnnotations)
-      inputAS.removeAll(annots2Move);
+    // outputAS.addAll(annots2Move);
+    transferAnnotations(annots2Move, outputAS);
+    if(!copyAnnotations) inputAS.removeAll(annots2Move);
+  }
 
-
-  } // execute()
+  private void transferAnnotations(List<Annotation> toTransfer, AnnotationSet to)
+          throws ExecutionException {
+    System.out.println("transferAnnotations");
+    for(Annotation annot : toTransfer) {
+      Mapping m = mappings.get(annot.getType());
+      System.out.println("Mapping: "+m);
+      if(m == null || m.newName == null) {
+        to.add(annot);
+      } else {
+        // 
+        try {
+          to.add(annot.getStartNode().getOffset(), annot.getEndNode()
+                  .getOffset(), m.newName, annot.getFeatures());
+        } catch(InvalidOffsetException e) {
+          throw new ExecutionException(e);
+        }
+      }
+    }
+  }
 
   public void setTagASName(String newTagASName) {
-    //if given an empty string, set to the default set
-    if ("".equals(newTagASName))
+    // if given an empty string, set to the default set
+    if("".equals(newTagASName))
       tagASName = null;
-    else
-      tagASName = newTagASName;
+    else tagASName = newTagASName;
   }
 
   public String getTagASName() {
@@ -201,12 +211,20 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
     return textTagName;
   }
 
-  public List getAnnotationTypes() {
-    return this.annotationTypes;
+  public List<String> getAnnotationTypes() {
+    return annotationTypes;
   }
 
-  public void setAnnotationTypes(List newTypes) {
+  public void setAnnotationTypes(List<String> newTypes) {
     annotationTypes = newTypes;
+  }
+  
+  public void setConfigURL(URL url) {
+    configURL = url;
+  }
+  
+  public URL getConfigURL() {
+    return configURL;
   }
 
   public Boolean getCopyAnnotations() {
@@ -220,8 +238,29 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
   public Boolean getTransferAllUnlessFound() {
     return this.transferAllUnlessFound;
   }
-  
+
   public void setTransferAllUnlessFound(Boolean value) {
     this.transferAllUnlessFound = value;
   }
-} // class AnnotationSetTransfer
+
+  class Mapping {
+    String oldName, newName;
+
+    //TODO implement the renaming of features as well as annotations
+    //Map<String, String> features = new HashMap<String, String>();
+
+    public Mapping(String oldName, String newName) {
+      this.oldName = oldName;
+      this.newName = newName;
+    }
+
+    @Override public String toString() {
+      StringBuilder result = new StringBuilder();
+      result.append(oldName);
+      if(newName != null) {
+        result.append("=").append(newName);
+      }
+      return result.toString();
+    }
+  }
+}
