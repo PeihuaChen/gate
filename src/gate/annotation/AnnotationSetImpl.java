@@ -589,8 +589,10 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   } // get(type, constraints, offset)
 
   /**
-   * Select annotations by offset that start at a position between the start and
-   * end before the end offset
+   * Select annotations contained within an interval, i.e.
+   * those annotations whose start position is
+   * >= <code>startOffset</code> and &lt; <code>endOffset</code>
+   * and whose end position is &lt= <code>endOffset</code>.
    */
   public AnnotationSet getContained(Long startOffset, Long endOffset) {
     // the result will include all the annotations that either:
