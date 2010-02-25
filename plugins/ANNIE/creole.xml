@@ -183,6 +183,42 @@
 			<ICON>gazetteer</ICON>
 		</RESOURCE>
 
+        <!-- creole.xml for a SharedDefaultGazetteer instance -->
+        <RESOURCE>
+            <NAME>Sharable Gazetteer</NAME>
+            <CLASS>gate.creole.gazetteer.SharedDefaultGazetteer</CLASS>
+            <COMMENT>A sharable list lookup component.</COMMENT>
+            <HELPURL>http://gate.ac.uk/userguide/sec:annie:gazetteer</HELPURL>
+            <PRIVATE />
+            <PARAMETER NAME="document" RUNTIME="true"
+                       COMMENT="The document to be processed">
+                gate.Document
+            </PARAMETER>
+            <PARAMETER NAME="annotationSetName" RUNTIME="true"
+                       COMMENT="The annotation set to be used for the generated annotations"
+                       OPTIONAL="true">
+                java.lang.String
+            </PARAMETER>
+            <PARAMETER NAME="longestMatchOnly"
+                       DEFAULT="true"
+                       COMMENT="Should this gazetteer only match the longest string starting from any offset?"
+                       RUNTIME="true">
+                java.lang.Boolean
+            </PARAMETER>
+            <PARAMETER NAME="wholeWordsOnly"
+                       DEFAULT="true"
+                       COMMENT="Should this gazetteer only match whole words?"
+                       RUNTIME="true">
+                java.lang.Boolean
+            </PARAMETER>
+            <PARAMETER NAME="bootstrapGazetteer"
+                       OPTIONAL="false"
+                       COMMENT="The DefaultGazetteer that is to be used to bootstrap this shared instance">
+                gate.creole.gazetteer.DefaultGazetteer
+            </PARAMETER>
+            <ICON>gazetteer</ICON>
+        </RESOURCE>
+
 		<!-- creole.xml for Hash Gazetteer (ex Natural)-->
 		<RESOURCE>
 			<NAME>Hash Gazetteer</NAME>
