@@ -61,10 +61,12 @@ public class JMenuButton extends JToggleButton {
 
       public void popupMenuCanceled(PopupMenuEvent e) {
         setSelected(false);
+        if(menu != null) menu.setSelected(false);
       }
 
       public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
         setSelected(false);
+        if(menu != null) menu.setSelected(false);
       }
 
       public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
