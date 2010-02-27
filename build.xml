@@ -246,6 +246,53 @@
     </echo>
   </target>
 
+  <target name="check.info.plist">
+    <!-- we need to rebuild Info.plist if (a) this is a release build or (b)
+    the current Info.plist is older than version.txt or build.txt. -->
+    <condition property="info.plist.build.required">
+      <or>
+        <isset property="release.build" />
+        <and>
+          <!-- Check that GATE.app exists (it won't if this is a copy of GATE
+          installed from the installer on Windows) -->
+          <available file="GATE.app/Contents" />
+          <not>
+            <uptodate targetfile="GATE.app/Contents/Info.plist">
+              <srcfiles dir="${buildDir}" includes="version.txt, build.txt" />
+            </uptodate>
+          </not>
+        </and>
+      </or>
+    </condition>
+  </target>
+
+  <!-- Generate the Mac launcher Info.plist file from the template, filling in
+  the correct version string. -->
+  <target name="build.info.plist" if="info.plist.build.required">
+    <!-- include the build number in the Info.plist version string unless
+         it's a release build -->
+    <condition property="info.plist.version"
+               value="${gate.version}"
+               else="${gate.version} (build ${gate.build})">
+      <isset property="release.build" />
+    </condition>
+    <copy file="${buildDir}/Info.plist.template"
+          tofile="GATE.app/Contents/Info.plist"
+          overwrite="yes" encoding="UTF-8">
+      <filterset>
+        <filter token="version" value="${info.plist.version}" />
+      </filterset>
+    </copy>
+    <!-- Touch GATE.app so Finder notices the .plist change -->
+    <touch>
+      <dirset dir="${basedir}" includes="GATE.app" />
+    </touch>
+  </target>
+
+  <target name="prepare" depends="check.info.plist, build.info.plist">
+    <mkdir dir="${outputDir}"/>
+  </target>
+
   <!-- Copies resources to the output directory -->
   <target name="resources">
     <copy todir="${outputDir}/gate/resources"
@@ -278,8 +325,7 @@
 
   <!-- This target compiles the GUK classes which are required by the main
        GATE compile task -->
-  <target name="guk" depends="depend">
-    <mkdir dir="${outputDir}"/>
+  <target name="guk" depends="prepare, depend">
     <javac classpathref="build.class.path"
            destdir="${outputDir}"
            includes="guk/**"
@@ -309,7 +355,7 @@
 
 	<!-- This target compiles all the classes -->
   <target name="compile"
-          depends="depend, guk"
+          depends="prepare, depend, guk"
           description="compile the source " >
     <!-- Compile the java code from ${srcDir} into ${buildDir} -->
     <javac srcdir="${srcDir}"
@@ -329,7 +375,7 @@
 
 	<!-- This target compiles all the classes including debug information -->
   <target name="compile_debug"
-          depends="depend, guk"
+          depends="prepare, depend, guk"
           description="compile the source " >
     <!-- Compile the java code from ${srcDir} into ${buildDir} -->
     <javac srcdir="${srcDir}"
@@ -828,13 +874,13 @@
 
   <!-- Make the archives for the GATE Distribution -->
   <target name="distro-zips"
-          depends="compile, jar, doc, plugins.build, plugins.distro.prepare">
+          depends="prepare, compile, jar, doc, plugins.build, plugins.distro.prepare">
     <ant antfile="build/deploy/build.xml" target="make-zips" />
   </target>
 
   <!-- build the installer .jar -->
   <target name="installer"
-          depends="compile, jar, doc, plugins.build, plugins.distro.prepare">
+          depends="prepare, compile, jar, doc, plugins.build, plugins.distro.prepare">
     <ant antfile="build/deploy/build.xml" target="build-installer" />
   </target>
 
