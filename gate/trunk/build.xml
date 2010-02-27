@@ -246,20 +246,20 @@
     </echo>
   </target>
 
-	<!-- Copies resources to the output directory -->
+  <!-- Copies resources to the output directory -->
   <target name="resources">
-		<copy todir="${outputDir}/gate/resources"
-		      includeEmptyDirs="true" >
-			<fileset dir="${srcDir}/gate/resources"
-							 excludes="**/CVS,**/CVS/**,**/.cvsignore" />
-		</copy>
-		<copy file="${buildDir}/build.txt" todir="${outputDir}/gate/resources"/>
-		<copy file="${buildDir}/version.txt" todir="${outputDir}/gate/resources"/>
-		<copy todir="${outputDir}/gate/util"
-		      includeEmptyDirs="true">
-			<fileset dir="${srcDir}/gate/util"
+    <copy todir="${outputDir}/gate/resources"
+          includeEmptyDirs="true" >
+      <fileset dir="${srcDir}/gate/resources"
+               excludes="**/CVS,**/CVS/**,**/.cvsignore" />
+    </copy>
+    <copy file="${buildDir}/build.txt" todir="${outputDir}/gate/resources"/>
+    <copy file="${buildDir}/version.txt" todir="${outputDir}/gate/resources"/>
+    <copy todir="${outputDir}/gate/util"
+          includeEmptyDirs="true">
+      <fileset dir="${srcDir}/gate/util"
                includes="*.tcl"/>
-		</copy>
+    </copy>
     <!-- This is for the Spring support -->
     <copy todir="${outputDir}/META-INF" includeEmptyDirs="true">
       <fileset dir="${srcDir}/META-INF" />
@@ -273,10 +273,10 @@
     <copy todir="${outputDir}/gate/util/ant" includeEmptyDirs="true">
       <fileset dir="${srcDir}/gate/util/ant" includes="antlib.xml" />
     </copy>
-	</target>
+  </target>
 
 
-	<!-- This target compiles the GUK classes which are required by the main
+  <!-- This target compiles the GUK classes which are required by the main
        GATE compile task -->
   <target name="guk" depends="depend">
     <mkdir dir="${outputDir}"/>
@@ -345,21 +345,21 @@
 
 
   <!-- Make gate.jar archive -->
-	<target name="jar" depends="compile,resources">
-		<jar destfile="${binDir}/gate.jar"
+  <target name="jar" depends="compile,resources">
+    <jar destfile="${binDir}/gate.jar"
          update="false"
          index="true">
       <fileset dir="${outputDir}/"
                includes="META-INF/**,gate/**,com/**,hepple/**"/>
 <!--    <zipgroupfileset refid="libs"/> -->
     </jar>
-	</target>
+  </target>
 
     <!-- Optional target useful for creating jars for embedded apps.  It splits
     the contents that would go into gate.jar into subjars for easier updating,
     omitting classes and test files not required for normal execution. -->
-  	<target name="split_jars" depends="compile,resources">
-  	  <jar destfile="${binDir}/gate-core.jar"
+    <target name="split_jars" depends="compile,resources">
+      <jar destfile="${binDir}/gate-core.jar"
            update="false"
            index="true">
         <fileset dir="${outputDir}/">
@@ -374,60 +374,60 @@
             <exclude name="gate/swing/**"/>
         </fileset>
       </jar>
-	  <jar destfile="${binDir}/gate-gui.jar"
-         update="false"
-         index="true">
+      <jar destfile="${binDir}/gate-gui.jar"
+           update="false"
+           index="true">
         <fileset dir="${outputDir}/">
-            <include name="gate/**/gui/**/*.class"/>
-            <include name="gate/swing/**/*.class"/>
-	        <exclude name="**/*Test*.class"/>
-	    </fileset>
+          <include name="gate/**/gui/**/*.class"/>
+          <include name="gate/swing/**/*.class"/>
+          <exclude name="**/*Test*.class"/>
+        </fileset>
       </jar>
-	  <jar destfile="${binDir}/gate-annic.jar"
-         update="false"
-         index="true">
+      <jar destfile="${binDir}/gate-annic.jar"
+           update="false"
+           index="true">
         <fileset dir="${outputDir}/">
-            <include name="gate/creole/annic/**/*.class"/>
-	        <exclude name="**/*Test*.class"/>
-	    </fileset>
+          <include name="gate/creole/annic/**/*.class"/>
+          <exclude name="**/*Test*.class"/>
+        </fileset>
       </jar>
-	  <jar destfile="${binDir}/gate-resources.jar"
-         update="false"
-         index="true">
-         <fileset dir="${outputDir}/">
-            <include name="**/img/**"/>
-            <include name="**/icons/**"/>
-            <include name="gate/resources/splash.html"/>
-            <include name="gate/resources/**/bootstrap/**"/>
-            <exclude name="**/img/splash_large.png"/>
-	    </fileset>
+      <jar destfile="${binDir}/gate-resources.jar"
+           update="false"
+           index="true">
+        <fileset dir="${outputDir}/">
+          <include name="**/img/**"/>
+          <include name="**/icons/**"/>
+          <include name="gate/resources/splash.html"/>
+          <include name="gate/resources/**/bootstrap/**"/>
+          <exclude name="**/img/splash_large.png"/>
+        </fileset>
       </jar>
       <!-- I don't think any of these files are needed for running the UI.
       Uncomment if this turns out to be incorrect-->
       <!--
-	  <jar destfile="${binDir}/gate-resources-ext.jar"
-         update="false"
-         index="true">
-         <fileset dir="${outputDir}/"
-                  includes="META-INF/**,gate/**,com/**,hepple/**">
-            <exclude name="**/test/**"/>
-	        <exclude name="**/*.class"/>
-            <exclude name="**/img/**"/>
-	    </fileset>
+      <jar destfile="${binDir}/gate-resources-ext.jar"
+           update="false"
+           index="true">
+        <fileset dir="${outputDir}/"
+                 includes="META-INF/**,gate/**,com/**,hepple/**">
+          <exclude name="**/test/**"/>
+          <exclude name="**/*.class"/>
+          <exclude name="**/img/**"/>
+        </fileset>
       </jar>
       -->
-  	</target>
+    </target>
 
   <!-- Make gate.jar archive -->
-	<target name="bigjar" depends="compile,resources">
-		<jar destfile="${binDir}/gate.jar"
+  <target name="bigjar" depends="compile,resources">
+    <jar destfile="${binDir}/gate.jar"
          update="false"
          index="true">
       <fileset dir="${outputDir}/"
                includes="gate/**,com/**,hepple/**"/>
       <zipgroupfileset refid="libs"/>
     </jar>
-	</target>
+  </target>
 
 
   <!-- Plugins -->
