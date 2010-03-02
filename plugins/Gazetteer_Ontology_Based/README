@@ -42,8 +42,9 @@ step instructions are given below.
 
 Click on 'Manage CREOLE plugins' and check the following:
    - Tools
-   - Ontology_Tools
+   - Ontology
    - Ontology_Based_Gazetteer
+   - Ontology_Tools (optional)
 ANNIE plugin is checked by default.
 
 Make sure that these plugins are loaded from GATE/plugins/[plugin_name] folder.
