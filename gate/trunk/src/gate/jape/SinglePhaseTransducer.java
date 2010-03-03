@@ -317,12 +317,10 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       // create initial active FSM instance starting parsing from new
       // startNode
       // currentFSM = FSMInstance.getNewInstance(
-      FSMInstance firstCurrentFSM = new FSMInstance(fsm, fsm.getInitialState(),// fresh
-              // start
-              state.startNode,// the matching starts form the current
-              // startNode
-              state.startNode,// current position in AG is the start
-              // position
+      FSMInstance firstCurrentFSM = new FSMInstance(fsm, 
+              fsm.getInitialState(),// fresh start
+              state.startNode,// the matching starts form the current startNode
+              state.startNode,// current position in AG is the start position
               new java.util.HashMap(),// no bindings yet!
               doc);
 
@@ -377,7 +375,8 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
                       if(result.acceptingFSMInstances != null && 
                               !result.acceptingFSMInstances.isEmpty()) {
                         acceptingFSMInstances.addAll(result.acceptingFSMInstances);
-                        if(ruleApplicationStyle == FIRST_STYLE) break activeFSMWhile;
+                        if(ruleApplicationStyle == FIRST_STYLE ||
+                           ruleApplicationStyle == ONCE_STYLE) break activeFSMWhile;
                       }
                       
                       if(result.activeFSMInstances != null && 
@@ -411,7 +410,8 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
             if(result.acceptingFSMInstances != null && 
                     !result.acceptingFSMInstances.isEmpty()) {
               acceptingFSMInstances.addAll(result.acceptingFSMInstances);
-              if(ruleApplicationStyle == FIRST_STYLE) break activeFSMWhile;
+              if(ruleApplicationStyle == FIRST_STYLE ||
+                 ruleApplicationStyle == ONCE_STYLE) break activeFSMWhile;
             }
             
             if(result.activeFSMInstances != null && 
@@ -475,7 +475,8 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 //        newAcceptingInstances.add((FSMInstance)currentInstance.clone());
         newAcceptingInstances.add((FSMInstance)currentClone);
         // if we're only looking for the shortest stop here
-        if(ruleApplicationStyle == FIRST_STYLE) break;
+        if(ruleApplicationStyle == FIRST_STYLE ||
+           ruleApplicationStyle == ONCE_STYLE ) break;
       }
 
       currentInstanceBlocked = true;
