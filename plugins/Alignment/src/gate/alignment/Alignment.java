@@ -53,7 +53,7 @@ public class Alignment implements Serializable {
   /**
    * the document this alignment object belongs to.
    */
-  protected transient CompoundDocument compoundDocument;
+  protected CompoundDocument compoundDocument;
 
   /**
    * A feature that PRs can use to specify which method was used to align that particular annotation.
