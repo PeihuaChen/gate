@@ -30,6 +30,11 @@ public class SphinxWrapper extends Crawler{
 							     DocumentImpl.class.getName(), params, null, docName
 							     );
             corpus.add(doc);
+            if (corpus.getLRPersistenceId() != null) {
+              corpus.unloadDocument(doc);
+              Factory.deleteResource(doc);
+            }
+            
 	    System.out.println(count+" ["+p.getDepth()+"] "+p.toURL());
 	    count++;
 	}
