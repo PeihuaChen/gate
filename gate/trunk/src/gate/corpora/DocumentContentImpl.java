@@ -110,7 +110,8 @@ public class DocumentContentImpl implements DocumentContent
     throws InvalidOffsetException
   {
     if(! isValidOffsetRange(start, end))
-      throw new InvalidOffsetException();
+      throw new InvalidOffsetException("Invalid offset range "+start+" to "+end+
+              " for document content of length "+this.size());
 
     return new DocumentContentImpl(
       content.substring(start.intValue(), end.intValue())
