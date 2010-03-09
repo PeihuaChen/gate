@@ -229,7 +229,7 @@ public class AnnotationStackView  extends AbstractDocumentView
     try {
       text = document.getContent().getContent(
         Math.max(0l, caretPosition - context),
-        Math.min(document.getContent().size()-1, caretPosition + 1 + context))
+        Math.min(Math.max(document.getContent().size()-1,0l), caretPosition + 1 + context))
         .toString();
     } catch (InvalidOffsetException e) {
       e.printStackTrace();
