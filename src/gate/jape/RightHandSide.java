@@ -154,13 +154,13 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
   /** Add an anonymous block to the action class */
   public void addBlock(String anonymousBlock) {
-    actionClassString.append(nl);
-    actionClassString.append("{");
+    //actionClassString.append(nl);
+    //actionClassString.append("L:{");
     actionClassString.append(nl);
     actionClassString.append(storeSourceInfo(anonymousBlock));
     actionClassString.append(nl);
-    actionClassString.append("}");
-    actionClassString.append(nl);
+    //actionClassString.append("}");
+    //actionClassString.append(nl);
   } // addBlock(anon)
 
   /** Add a named block to the action class */
