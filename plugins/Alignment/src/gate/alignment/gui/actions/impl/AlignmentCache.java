@@ -112,7 +112,9 @@ public class AlignmentCache extends AbstractAlignmentAction implements
                   public int compare(String s1, String s2) {
                     String[] s1Array = s1.split("[ ]+");
                     String[] s2Array = s2.split("[ ]+");
-                    return s2Array.length - s1Array.length;
+                    int diff = s2Array.length - s1Array.length;
+                    if(diff == 0) return s2.compareTo(s1);
+                    else return diff;
                   }
                 });
                 _cache.put(words[0], tgtEntries);
@@ -384,7 +386,6 @@ public class AlignmentCache extends AbstractAlignmentAction implements
           Set<Annotation> srcAlignedAnnotations, Document tgtDocument,
           String tgtAS, Set<Annotation> tgtAlignedAnnotations,
           Annotation clickedAnnotation) throws AlignmentException {
-
     if(srcAlignedAnnotations == null || srcAlignedAnnotations.isEmpty())
       return;
     if(tgtAlignedAnnotations == null || tgtAlignedAnnotations.isEmpty())
@@ -405,7 +406,9 @@ public class AlignmentCache extends AbstractAlignmentAction implements
     }
 
     if(_cache.containsKey(sourceText)) {
-      if(_cache.get(sourceText).contains(targetText)) { return; }
+      if(_cache.get(sourceText).contains(targetText)) {
+        return; 
+      }
     }
 
     SortedSet<String> sourceTexts = _cache.get(sourceText);
@@ -414,17 +417,21 @@ public class AlignmentCache extends AbstractAlignmentAction implements
         public int compare(String s1, String s2) {
           String[] s1Array = s1.split("[ ]+");
           String[] s2Array = s2.split("[ ]+");
-          return s2Array.length - s1Array.length;
+          int diff = s2Array.length - s1Array.length;
+          if(diff == 0) return s2.compareTo(s1);
+          else return diff;
         }
       });
       _cache.put(sourceText, sourceTexts);
     }
+    
     if(!sourceTexts.contains(targetText)) {
       sourceTexts.add(targetText);  
       try {
         if(bw == null) {
           init(suppliedArgs);
         }
+        
         bw.write(sourceText + "\t" + targetText + "\t" + srcLen + "\t" + tgtLen);
         bw.newLine();
         bw.flush();
@@ -435,5 +442,4 @@ public class AlignmentCache extends AbstractAlignmentAction implements
       }
     }
   }
-
 }
