@@ -269,7 +269,7 @@ public class OntologyClassView extends AbstractDocumentView
           .createOURI((String)annotation.getFeatures().get("class")));
         if (oClass != null) {
           classColorMap.put(oClass,
-            AnnotationSetsView.getColor(oClass.getName()));
+            AnnotationSetsView.getColor(setName,oClass.getName()));
           returnValue = true;
         }
       }
@@ -444,7 +444,7 @@ public class OntologyClassView extends AbstractDocumentView
         if (classColorMap.containsKey(oClass)) {
           color = classColorMap.get(oClass);
         } else {
-          color = AnnotationSetsView.getColor(oClass.getName());
+          color = AnnotationSetsView.getColor(selectedSet,oClass.getName());
           classColorMap.put(oClass, color);
         }
         SwingUtilities.invokeLater(new Runnable() { public void run() {
@@ -480,7 +480,7 @@ public class OntologyClassView extends AbstractDocumentView
     if (classColorMap.containsKey(oClass)) {
       color = classColorMap.get(oClass);
     } else {
-      color = AnnotationSetsView.getColor(oClass.getName());
+      color = AnnotationSetsView.getColor(set.getName(),oClass.getName());
       classColorMap.put(oClass, color);
     }
     SwingUtilities.invokeLater(new Runnable() { public void run() {

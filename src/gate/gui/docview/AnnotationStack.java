@@ -314,7 +314,7 @@ public class AnnotationStack extends JPanel {
           }
         }
         label.setText(value);
-        label.setBackground(AnnotationSetsView.getColor(ann.getType()));
+        label.setBackground(AnnotationSetsView.getColor(stackRow.getSet(),ann.getType()));
         label.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
         label.setOpaque(true);
         if(feature.equals("")) {

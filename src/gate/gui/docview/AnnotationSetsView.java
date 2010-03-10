@@ -306,10 +306,12 @@ public class AnnotationSetsView extends AbstractDocumentView
    * @param annotationType type to get a colour for
    * @return a colour
    */
-  public static Color getColor(String annotationType) {
+  public static Color getColor(String annotationSet, String annotationType) {
     Map<String, String> colourMap = Gate.getUserConfig()
       .getMap(AnnotationSetsView.class.getName()+".colours");
-    String colourValue = colourMap.get(annotationType);
+    String colourValue = colourMap.get(annotationSet+"."+annotationType);
+    if (colourValue == null) colourValue = colourMap.get(annotationType);
+
     Color colour;
     if (colourValue == null) {
       float components[] = colourGenerator.getNextColor().getComponents(null);
@@ -323,16 +325,27 @@ public class AnnotationSetsView extends AbstractDocumentView
     } else {
       colour = new Color(Integer.valueOf(colourValue), true);
     }
+    
     return colour;
   }
   
-  protected void saveColor(String annotationType, Color colour){
+  protected void saveColor(String annotationSet, String annotationType, Color colour){
     Map<String, String> colourMap = Gate.getUserConfig()
       .getMap(AnnotationSetsView.class.getName()+".colours");
     int rgb = colour.getRGB();
     int alpha = colour.getAlpha();
     int rgba = rgb | (alpha << 24);
-    colourMap.put(annotationType, String.valueOf(rgba));
+    
+    String defaultValue = colourMap.get(annotationType);
+    String newValue = String.valueOf(rgba);
+    
+    if (newValue.equals(defaultValue)) {
+      colourMap.remove(annotationSet+"."+annotationType);
+    }
+    else {
+      colourMap.put(annotationSet+"."+annotationType, newValue);
+    }
+    
     Gate.getUserConfig().put(
       AnnotationSetsView.class.getName()+".colours", colourMap);
   }
@@ -1184,7 +1197,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     TypeHandler (SetHandler setHandler, String name){
       this.setHandler = setHandler;
       this.name = name;
-      colour = getColor(name);
+      colour = getColor(setHandler.set.getName(),name);
       hghltTagsForAnnId = new HashMap<Integer, Object>();
       annListTagsForAnn = new HashMap();
       changeColourAction = new ChangeColourAction();
@@ -1201,7 +1214,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     public void setColour(Color colour){
       if(this.colour.equals(colour)) return;
       this.colour = colour;
-      saveColor(name, colour);
+      saveColor(setHandler.set.getName(),name, colour);
       if(isSelected()){
         //redraw the highlights
         //hide highlights
@@ -1222,6 +1235,8 @@ public class AnnotationSetsView extends AbstractDocumentView
       //update the table display
       int row = tableRows.indexOf(this);
       if(row >= 0) tableModel.fireTableRowsUpdated(row, row);
+      
+      if (stackView.isActive()) stackView.updateStackView();
     }
     
     public void setSelected(boolean selected){
