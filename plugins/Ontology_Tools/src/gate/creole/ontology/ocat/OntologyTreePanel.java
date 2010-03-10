@@ -511,7 +511,7 @@ public class OntologyTreePanel extends JPanel {
   public void setColorScheme(IFolder root, HashMap<String, Color> colorScheme) {
     if(!colorScheme.containsKey(root.toString())) {
       colorScheme.put(root.toString(),
-        AnnotationSetsView.getColor(root.toString()));
+        AnnotationSetsView.getColor("OntologyColours",root.toString()));
       Iterator children = root.getChildren();
       while(children.hasNext()) {
         setColorScheme((IFolder)children.next(), colorScheme);
