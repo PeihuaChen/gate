@@ -100,8 +100,6 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
         String oldName = data[0].trim();
         String newName = data.length == 2 ? data[1].trim() : null;
         
-        System.out.println(oldName +" --> "+newName);
-        
         mappings.put(oldName, new Mapping(oldName, newName));
       }
     }
@@ -158,10 +156,9 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
 
   private void transferAnnotations(List<Annotation> toTransfer, AnnotationSet to)
           throws ExecutionException {
-    System.out.println("transferAnnotations");
     for(Annotation annot : toTransfer) {
       Mapping m = mappings.get(annot.getType());
-      System.out.println("Mapping: "+m);
+      
       if(m == null || m.newName == null) {
         to.add(annot);
       } else {
