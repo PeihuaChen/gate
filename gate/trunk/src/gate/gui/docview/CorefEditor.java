@@ -840,7 +840,7 @@ public class CorefEditor
         return;
       }
 
-      Color color = AnnotationSetsView.getColor(type);
+      Color color = AnnotationSetsView.getColor(getAnnotationSet((String)annotSets.getSelectedItem()).getName(),type);
       if (type != null) {
         AnnotationSet typeSet = set.get(type);
         Iterator<Annotation> iter = typeSet.iterator();
