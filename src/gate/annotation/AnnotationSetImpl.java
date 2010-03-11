@@ -672,7 +672,11 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   }
 
   /**
-   * Create and add an annotation with pre-existing nodes, and return its id
+   * Create and add an annotation with pre-existing nodes, and return its id.
+   * <B>Note that only Nodes retrieved from the same annotation set should be used
+   * to create a new annotation using this method. Using Nodes from other annotation
+   * sets may lead to undefined behaviour. If in any doubt use the Long based add
+   * method instead of this one.</B>
    */
   public Integer add(Node start, Node end, String type, FeatureMap features) {
     // the id of the new annotation
