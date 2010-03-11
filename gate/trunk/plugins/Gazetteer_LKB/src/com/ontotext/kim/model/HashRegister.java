@@ -36,7 +36,7 @@ public class HashRegister implements Serializable {
      * 1 - replace the old object and put the new one;<br>
      * 2 - keep the old one and ignore the new one;<br>
      */
-    protected static int todoIfExists = 1;
+    protected static int todoIfExists = 0;
     /**
      * Determines the step for extension of the array field
      * <code>HashElement.elementHolder</code>
