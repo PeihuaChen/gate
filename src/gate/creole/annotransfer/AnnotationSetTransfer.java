@@ -103,8 +103,8 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
         mappings.put(oldName, new Mapping(oldName, newName));
       }
     }
-    else
-      throw new ExecutionException("The annotation list and URL cannot both be null");
+    //else
+    //  throw new ExecutionException("The annotation list and URL cannot both be null");
     
     if(mappings.size() > 0) {
       annotsToTransfer = inputAS.get(mappings.keySet());
