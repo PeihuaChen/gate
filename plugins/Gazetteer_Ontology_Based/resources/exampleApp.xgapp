@@ -10,8 +10,11 @@
       <gate.util.persistence.PersistenceManager-URLHolder>
         <urlString>$relpath$../../Ontology_Tools</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
+     <gate.util.persistence.PersistenceManager-URLHolder>
+        <urlString>$relpath$../../Ontology</urlString>
+      </gate.util.persistence.PersistenceManager-URLHolder>      
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../../Ontology_Based_Gazetteer</urlString>
+        <urlString>$relpath$../../Gazetteer_Ontology_Based</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
     </localList>
     <collectionType>java.util.ArrayList</collectionType>
