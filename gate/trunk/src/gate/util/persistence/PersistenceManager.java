@@ -120,8 +120,35 @@ public class PersistenceManager {
         URL url = (URL)source;
         if(url.getProtocol().equals("file")) {
           try {
-            urlString = relativePathMarker
-                    + getRelativePath(persistenceFile.toURI().toURL(), url);
+            
+            String pathMarker = relativePathMarker;
+            File gateCanonicalHome = null;
+            // if the persistence file does NOT reside in the GATE home
+            // tree and if the URL references something in the GATE home
+            // tree, use $gatehome$ instead of $relpath$
+            try {
+              String persistenceFilePathName = persistenceFile.getCanonicalPath();
+              String gateHomePathName = Gate.getGateHome().getCanonicalPath();
+              gateCanonicalHome = Gate.getGateHome().getCanonicalFile();
+              String urlPathName = Files.fileFromURL(url).getCanonicalPath();
+              //System.out.println("persistenceFilePathName "+persistenceFilePathName);
+              //System.out.println("gateHomePathName        "+gateHomePathName);
+              //System.out.println("urlPathName             "+urlPathName);
+              if(!persistenceFilePathName.startsWith(gateHomePathName) &&
+                 urlPathName.startsWith(gateHomePathName)) {
+                //System.out.println("Setting path marker to "+gatehomePathMarker);
+                pathMarker = gatehomePathMarker;
+              }
+            } catch(IOException ex) {
+              // simply do nothing and proceed with using the relativePathMarker
+            }
+            if(pathMarker.equals(relativePathMarker)) {
+              urlString = pathMarker
+                 + getRelativePath(persistenceFile.toURI().toURL(), url);
+            } else {
+              urlString = pathMarker
+                 + getRelativePath(gateCanonicalHome.toURI().toURL(), url);             
+            }
           }
           catch(MalformedURLException mue) {
             urlString = ((URL)source).toExternalForm();
