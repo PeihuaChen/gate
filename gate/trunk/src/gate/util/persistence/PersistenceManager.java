@@ -121,7 +121,7 @@ public class PersistenceManager {
         if(url.getProtocol().equals("file")) {
           try {
             urlString = relativePathMarker
-                    + getRelativePath(persistenceFile.toURI().toURL(), url);
+                    + getRelativePath(currentPersistenceFile().toURI().toURL(), url);
           }
           catch(MalformedURLException mue) {
             urlString = ((URL)source).toExternalForm();
@@ -144,7 +144,7 @@ public class PersistenceManager {
     public Object createObject() throws PersistenceException {
       try {
         if(urlString.startsWith(relativePathMarker)) {
-          URL context = persistenceURL;
+          URL context = currentPersistenceURL();
           return new URL(context, urlString.substring(relativePathMarker
                   .length()));
         } else if(urlString.startsWith(gatehomePathMarker)) {
@@ -245,7 +245,7 @@ public class PersistenceManager {
     if(target == null) return null;
     // first check we don't have it already
     Persistence res = (Persistence)existingPersitentReplacements
-            .get(new ObjectHolder(target));
+            .get().getFirst().get(new ObjectHolder(target));
     if(res != null) return res;
 
     Class type = target.getClass();
@@ -273,7 +273,7 @@ public class PersistenceManager {
       }
     }
     res.extractDataFromSource(target);
-    existingPersitentReplacements.put(new ObjectHolder(target), res);
+    existingPersitentReplacements.get().getFirst().put(new ObjectHolder(target), res);
     return res;
   }
 
@@ -284,12 +284,12 @@ public class PersistenceManager {
     if(target instanceof Persistence) {
       Object resultKey = new ObjectHolder(target);
       // check the cached values; maybe we have the result already
-      Object result = existingTransientValues.get(resultKey);
+      Object result = existingTransientValues.get().getFirst().get(resultKey);
       if(result != null) return result;
 
       // we didn't find the value: create it
       result = ((Persistence)target).createObject();
-      existingTransientValues.put(resultKey, result);
+      existingTransientValues.get().getFirst().put(resultKey, result);
       return result;
     }
     else return target;
@@ -488,12 +488,8 @@ public class PersistenceManager {
     ObjectOutputStream oos = null;
     com.thoughtworks.xstream.XStream xstream = null;
     HierarchicalStreamWriter writer = null;
-    persistenceFile = file;
+    startPersistingTo(file);
     try {
-      // insure a clean start
-      existingPersitentReplacements.clear();
-      existingPersitentReplacements.clear();
-
       if(Gate.getUseXMLSerialization()) {
         // Just create the xstream and the filewriter that will later be
         // used to serialize objects.
@@ -536,7 +532,7 @@ public class PersistenceManager {
 
     }
     finally {
-      persistenceFile = null;
+      finishedPersisting();
       if(oos != null) {
         oos.flush();
         oos.close();
@@ -556,13 +552,42 @@ public class PersistenceManager {
     }
   }
 
+  /**
+   * Set up the thread-local state for a new persistence run.
+   */
+  private static void startPersistingTo(File file) {
+    persistenceFile.get().addFirst(file);
+    existingPersitentReplacements.get().addFirst(new HashMap());
+  }
+
+  /**
+   * Get the file currently being saved by this thread.
+   */
+  private static File currentPersistenceFile() {
+    return persistenceFile.get().getFirst();
+  }
+
+  /**
+   * Clean up the thread-local state for the current persistence run.
+   */
+  private static void finishedPersisting() {
+    persistenceFile.get().removeFirst();
+    if(persistenceFile.get().isEmpty()) {
+      persistenceFile.remove();
+    }
+    existingPersitentReplacements.get().removeFirst();
+    if(existingPersitentReplacements.get().isEmpty()) {
+      existingPersitentReplacements.remove();
+    }
+  }
+
   public static Object loadObjectFromFile(File file)
           throws PersistenceException, IOException,
           ResourceInstantiationException {
     return loadObjectFromUrl(file.toURI().toURL());
   }
 
-  public synchronized static Object loadObjectFromUrl(URL url) throws PersistenceException,
+  public static Object loadObjectFromUrl(URL url) throws PersistenceException,
           IOException, ResourceInstantiationException {
     ProgressListener pListener = (ProgressListener)MainFrame.getListeners()
             .get("gate.event.ProgressListener");
@@ -570,105 +595,138 @@ public class PersistenceManager {
             .getListeners().get("gate.event.StatusListener");
     if(pListener != null) pListener.progressChanged(0);
 
+    startLoadingFrom(url);
     try {
-    long startTime = System.currentTimeMillis();
-    persistenceURL = url;
-    // Determine whether the file contains an application serialized in
-    // xml
-    // format. Otherwise we will assume that it contains native
-    // serializations.
-    boolean xmlStream = isXmlApplicationFile(url);
-    ObjectInputStream ois = null;
-    HierarchicalStreamReader reader = null;
-    XStream xstream = null;
-    // Make the appropriate kind of streams that will be used, depending
-    // on
-    // whether serialization is native or xml.
-    if(xmlStream) {
-      Reader inputReader = new java.io.InputStreamReader(url.openStream());
-      try {
-        XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-        XMLStreamReader xsr = inputFactory.createXMLStreamReader(
-            url.toExternalForm(), inputReader);
-        reader = new StaxReader(new QNameMap(), xsr);
-      }
-      catch(XMLStreamException xse) {
-        throw new PersistenceException("Error creating reader", xse);
-      }
-      
-      xstream = new XStream(new StaxDriver(new XStream11XmlFriendlyReplacer())) {
-        protected boolean useXStream11XmlFriendlyMapper() {
-          return true;
-        }
-      };
-      // make XStream load classes through the GATE ClassLoader
-      xstream.setClassLoader(Gate.getClassLoader());
-      // make the XML stream appear as a normal ObjectInputStream
-      ois = xstream.createObjectInputStream(reader);
-    }
-    else {
-      // use GateAwareObjectInputStream to load classes through the
-      // GATE ClassLoader if they can't be loaded through the one
-      // ObjectInputStream would normally use
-      ois = new GateAwareObjectInputStream(url.openStream());
-      
-    }
-    Object res = null;
-    try {
-      // first read the list of creole URLs.
-      Iterator urlIter = 
-        ((Collection)getTransientRepresentation(ois.readObject()))
-        .iterator();
-      
-      // and re-register them
-      while(urlIter.hasNext()) {
-        URL anUrl = (URL)urlIter.next();
+      long startTime = System.currentTimeMillis();
+      // Determine whether the file contains an application serialized in
+      // xml
+      // format. Otherwise we will assume that it contains native
+      // serializations.
+      boolean xmlStream = isXmlApplicationFile(url);
+      ObjectInputStream ois = null;
+      HierarchicalStreamReader reader = null;
+      XStream xstream = null;
+      // Make the appropriate kind of streams that will be used, depending
+      // on
+      // whether serialization is native or xml.
+      if(xmlStream) {
+        Reader inputReader = new java.io.InputStreamReader(url.openStream());
         try {
-          Gate.getCreoleRegister().registerDirectories(anUrl);
+          XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+          XMLStreamReader xsr = inputFactory.createXMLStreamReader(
+              url.toExternalForm(), inputReader);
+          reader = new StaxReader(new QNameMap(), xsr);
         }
-        catch(GateException ge) {
-          Err.prln("Could not reload creole directory "
-                  + anUrl.toExternalForm());
+        catch(XMLStreamException xse) {
+          throw new PersistenceException("Error creating reader", xse);
         }
+        
+        xstream = new XStream(new StaxDriver(new XStream11XmlFriendlyReplacer())) {
+          protected boolean useXStream11XmlFriendlyMapper() {
+            return true;
+          }
+        };
+        // make XStream load classes through the GATE ClassLoader
+        xstream.setClassLoader(Gate.getClassLoader());
+        // make the XML stream appear as a normal ObjectInputStream
+        ois = xstream.createObjectInputStream(reader);
       }
-      
-      // now we can read the saved object in the presence of all
-      // the right plugins
-      res = ois.readObject();
-      ois.close();
-
-      // ensure a fresh start
-      existingTransientValues.clear();
-      res = getTransientRepresentation(res);
-      existingTransientValues.clear();
-      long endTime = System.currentTimeMillis();
-      if(sListener != null)
-        sListener.statusChanged("Loading completed in "
-                + NumberFormat.getInstance().format(
-                        (double)(endTime - startTime) / 1000) + " seconds");
-      return res;
-    }
-    catch(ResourceInstantiationException rie) {
-      if(sListener != null) sListener.statusChanged(
-        "Failure during instantiation of resources.");
-      throw rie;
-    }
-    catch(PersistenceException pe) {
-      if(sListener != null) sListener.statusChanged(
-        "Failure during persistence operations.");
-      throw pe;
-    }
-    catch(Exception ex) {
-      if(sListener != null) sListener.statusChanged("Loading failed!");
-      throw new PersistenceException(ex);
+      else {
+        // use GateAwareObjectInputStream to load classes through the
+        // GATE ClassLoader if they can't be loaded through the one
+        // ObjectInputStream would normally use
+        ois = new GateAwareObjectInputStream(url.openStream());
+        
+      }
+      Object res = null;
+      try {
+        // first read the list of creole URLs.
+        Iterator urlIter = 
+          ((Collection)getTransientRepresentation(ois.readObject()))
+          .iterator();
+        
+        // and re-register them
+        while(urlIter.hasNext()) {
+          URL anUrl = (URL)urlIter.next();
+          try {
+            Gate.getCreoleRegister().registerDirectories(anUrl);
+          }
+          catch(GateException ge) {
+            Err.prln("Could not reload creole directory "
+                    + anUrl.toExternalForm());
+          }
+        }
+        
+        // now we can read the saved object in the presence of all
+        // the right plugins
+        res = ois.readObject();
+        ois.close();
+  
+        // ensure a fresh start
+        clearCurrentTransients();
+        res = getTransientRepresentation(res);
+        long endTime = System.currentTimeMillis();
+        if(sListener != null)
+          sListener.statusChanged("Loading completed in "
+                  + NumberFormat.getInstance().format(
+                          (double)(endTime - startTime) / 1000) + " seconds");
+        return res;
+      }
+      catch(ResourceInstantiationException rie) {
+        if(sListener != null) sListener.statusChanged(
+          "Failure during instantiation of resources.");
+        throw rie;
+      }
+      catch(PersistenceException pe) {
+        if(sListener != null) sListener.statusChanged(
+          "Failure during persistence operations.");
+        throw pe;
+      }
+      catch(Exception ex) {
+        if(sListener != null) sListener.statusChanged("Loading failed!");
+        throw new PersistenceException(ex);
+      }
     }
     finally {
-      persistenceURL = null;
-    }
-
-    }
-    finally {
+      finishedLoading();
       if(pListener != null) pListener.processFinished();
+    }
+  }
+
+  /**
+   * Set up the thread-local state for the current loading run.
+   */
+  private static void startLoadingFrom(URL url) {
+    persistenceURL.get().addFirst(url);
+    existingTransientValues.get().addFirst(new HashMap());
+  }
+
+  /**
+   * Clear the current list of transient replacements without
+   * popping them off the stack.
+   */
+  private static void clearCurrentTransients() {
+    existingTransientValues.get().getFirst().clear();
+  }
+
+  /**
+   * Get the URL currently being loaded by this thread.
+   */
+  private static URL currentPersistenceURL() {
+    return persistenceURL.get().getFirst();
+  }
+
+  /**
+   * Clean up the thread-local state at the end of a loading run.
+   */
+  private static void finishedLoading() {
+    persistenceURL.get().removeFirst();
+    if(persistenceURL.get().isEmpty()) {
+      persistenceURL.remove();
+    }
+    existingTransientValues.get().removeFirst();
+    if(existingTransientValues.get().isEmpty()) {
+      existingTransientValues.remove();
     }
   }
 
@@ -743,7 +801,7 @@ public class PersistenceManager {
    * same object. The keys used are {@link ObjectHolder}s that contain
    * the transient values being converted to persistent equivalents.
    */
-  private static Map existingPersitentReplacements;
+  private static ThreadLocal<LinkedList<Map>> existingPersitentReplacements;
 
   /**
    * Stores the transient values obtained from persistent replacements
@@ -753,7 +811,7 @@ public class PersistenceManager {
    * values are the transient values created by the persisten
    * equivalents.
    */
-  private static Map existingTransientValues;
+  private static ThreadLocal<LinkedList<Map>> existingTransientValues;
 
   private static ClassComparator classComparator = new ClassComparator();
 
@@ -761,14 +819,14 @@ public class PersistenceManager {
    * The file currently used to write the persisten representation. Will
    * only have a non-null value during storing operations.
    */
-  static File persistenceFile;
+  static ThreadLocal<LinkedList<File>> persistenceFile;
 
   /**
    * The URL currently used to read the persistent representation when
    * reading from a URL. Will only be non-null during restoring
    * operations.
    */
-  static URL persistenceURL;
+  static ThreadLocal<LinkedList<URL>> persistenceURL;
 
   static {
     persistentReplacementTypes = new HashMap();
@@ -813,7 +871,21 @@ public class PersistenceManager {
       // builtins shouldn't raise this
       pe.printStackTrace();
     }
-    existingPersitentReplacements = new HashMap();
-    existingTransientValues = new HashMap();
+    
+    /**
+     * Thread-local stack.
+     */
+    class ThreadLocalStack<T> extends ThreadLocal<LinkedList<T>> {
+      @Override
+      protected LinkedList<T> initialValue() {
+        // TODO Auto-generated method stub
+        return new LinkedList<T>();
+      }
+    
+    }
+    existingPersitentReplacements = new ThreadLocalStack<Map>();
+    existingTransientValues = new ThreadLocalStack<Map>();
+    persistenceFile = new ThreadLocalStack<File>();
+    persistenceURL = new ThreadLocalStack<URL>();
   }
 }
