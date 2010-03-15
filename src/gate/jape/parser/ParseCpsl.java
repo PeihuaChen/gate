@@ -329,95 +329,103 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     jj_consume_token(phase);
     phaseNameTok = jj_consume_token(ident);
     t = createSinglePhaseTransducer(phaseNameTok.image); curSPT = t;
-    switch (jj_nt.kind) {
-    case input:
-      jj_consume_token(input);
-      label_3:
-      while (true) {
-        switch (jj_nt.kind) {
-        case ident:
-          ;
-          break;
-        default:
-          jj_la1[4] = jj_gen;
-          break label_3;
-        }
-        inputTok = jj_consume_token(ident);
-                         t.addInput(inputTok.image);
+    label_3:
+    while (true) {
+      switch (jj_nt.kind) {
+      case input:
+      case option:
+        ;
+        break;
+      default:
+        jj_la1[4] = jj_gen;
+        break label_3;
       }
-      break;
-    default:
-      jj_la1[5] = jj_gen;
-      ;
-    }
-    switch (jj_nt.kind) {
-    case option:
-      jj_consume_token(option);
-      label_4:
-      while (true) {
-        switch (jj_nt.kind) {
-        case ident:
-          ;
-          break;
-        default:
-          jj_la1[6] = jj_gen;
-          break label_4;
+      switch (jj_nt.kind) {
+      case input:
+        jj_consume_token(input);
+        label_4:
+        while (true) {
+          switch (jj_nt.kind) {
+          case ident:
+            ;
+            break;
+          default:
+            jj_la1[5] = jj_gen;
+            break label_4;
+          }
+          inputTok = jj_consume_token(ident);
+                           t.addInput(inputTok.image);
         }
-        optionNameTok = jj_consume_token(ident);
-        jj_consume_token(assign);
-        switch (jj_nt.kind) {
-        case ident:
-          optionValueTok = jj_consume_token(ident);
-          break;
-        case bool:
-          optionValueTok = jj_consume_token(bool);
-          break;
-        default:
-          jj_la1[7] = jj_gen;
-          jj_consume_token(-1);
-          throw new ParseException();
-        }
-        t.setOption(optionNameTok.image, optionValueTok.image);
+        break;
+      case option:
+        jj_consume_token(option);
+        label_5:
+        while (true) {
+          switch (jj_nt.kind) {
+          case ident:
+            ;
+            break;
+          default:
+            jj_la1[6] = jj_gen;
+            break label_5;
+          }
+          optionNameTok = jj_consume_token(ident);
+          jj_consume_token(assign);
+          switch (jj_nt.kind) {
+          case ident:
+            optionValueTok = jj_consume_token(ident);
+            break;
+          case bool:
+            optionValueTok = jj_consume_token(bool);
+            break;
+          default:
+            jj_la1[7] = jj_gen;
+            jj_consume_token(-1);
+            throw new ParseException();
+          }
+          t.setOption(optionNameTok.image, optionValueTok.image);
 
-        // control
-        if(optionNameTok.image.equalsIgnoreCase("control")) {
-          if(optionValueTok.image.equalsIgnoreCase("appelt"))
-            t.setRuleApplicationStyle(APPELT_STYLE);
-          else if(optionValueTok.image.equalsIgnoreCase("first"))
-            t.setRuleApplicationStyle(FIRST_STYLE);
-          else if(optionValueTok.image.equalsIgnoreCase("brill"))
-            t.setRuleApplicationStyle(BRILL_STYLE);
-          else if(optionValueTok.image.equalsIgnoreCase("once"))
-            t.setRuleApplicationStyle(ONCE_STYLE);
-          else if(optionValueTok.image.equalsIgnoreCase("all"))
-            t.setRuleApplicationStyle(ALL_STYLE);
-          else
-            System.err.println(errorMsgPrefix(optionValueTok)+
-              "ignoring unknown control strategy " + option +
-              " (should be brill, appelt, first, once or all)"
-            );
-        } // control
-        else if(optionNameTok.image.equalsIgnoreCase("debug")) {
-          if(optionValueTok.image.equalsIgnoreCase("true") ||
-             optionValueTok.image.equalsIgnoreCase("yes") ||
-             optionValueTok.image.equalsIgnoreCase("y"))
-            t.setDebugMode(true);
-          else t.setDebugMode(false);
+          // control
+          if(optionNameTok.image.equalsIgnoreCase("control")) {
+            if(optionValueTok.image.equalsIgnoreCase("appelt"))
+              t.setRuleApplicationStyle(APPELT_STYLE);
+            else if(optionValueTok.image.equalsIgnoreCase("first"))
+              t.setRuleApplicationStyle(FIRST_STYLE);
+            else if(optionValueTok.image.equalsIgnoreCase("brill"))
+              t.setRuleApplicationStyle(BRILL_STYLE);
+            else if(optionValueTok.image.equalsIgnoreCase("once"))
+              t.setRuleApplicationStyle(ONCE_STYLE);
+            else if(optionValueTok.image.equalsIgnoreCase("all"))
+              t.setRuleApplicationStyle(ALL_STYLE);
+            else
+              System.err.println(errorMsgPrefix(optionValueTok)+
+                "ignoring unknown control strategy " + option +
+                " (should be brill, appelt, first, once or all)"
+              );
+          } // control
+          else if(optionNameTok.image.equalsIgnoreCase("debug")) {
+            if(optionValueTok.image.equalsIgnoreCase("true") ||
+               optionValueTok.image.equalsIgnoreCase("yes") ||
+               optionValueTok.image.equalsIgnoreCase("y"))
+              t.setDebugMode(true);
+            else t.setDebugMode(false);
+          }
+          else if(optionNameTok.image.equalsIgnoreCase("matchGroup")) {
+            if(optionValueTok.image.equalsIgnoreCase("true") ||
+               optionValueTok.image.equalsIgnoreCase("yes") ||
+               optionValueTok.image.equalsIgnoreCase("y"))
+              t.setMatchGroupMode(true);
+            else t.setMatchGroupMode(false);
+          }
         }
-        else if(optionNameTok.image.equalsIgnoreCase("matchGroup")) {
-          if(optionValueTok.image.equalsIgnoreCase("true") ||
-             optionValueTok.image.equalsIgnoreCase("yes") ||
-             optionValueTok.image.equalsIgnoreCase("y"))
-            t.setMatchGroupMode(true);
-          else t.setMatchGroupMode(false);
-        }
+        break;
+      default:
+        jj_la1[8] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
       }
-      break;
-    default:
-      jj_la1[8] = jj_gen;
-      ;
     }
-    label_5:
+    label_6:
     while (true) {
       switch (jj_nt.kind) {
       case rule:
@@ -426,7 +434,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         break;
       default:
         jj_la1[9] = jj_gen;
-        break label_5;
+        break label_6;
       }
       switch (jj_nt.kind) {
       case rule:
@@ -582,7 +590,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
 // so we can add PEs and create disjunctions here
   final public void ConstraintGroup(LeftHandSide lhs, ConstraintGroup cg) throws ParseException {
   PatternElement pat = null;
-    label_6:
+    label_7:
     while (true) {
       pat = PatternElement(lhs);
                               cg.addPatternElement(pat);
@@ -595,10 +603,10 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         break;
       default:
         jj_la1[14] = jj_gen;
-        break label_6;
+        break label_7;
       }
     }
-    label_7:
+    label_8:
     while (true) {
       switch (jj_nt.kind) {
       case bar:
@@ -606,11 +614,11 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         break;
       default:
         jj_la1[15] = jj_gen;
-        break label_7;
+        break label_8;
       }
       jj_consume_token(bar);
             cg.createDisjunction();
-      label_8:
+      label_9:
       while (true) {
         pat = PatternElement(lhs);
                                 cg.addPatternElement(pat);
@@ -623,7 +631,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
           break;
         default:
           jj_la1[16] = jj_gen;
-          break label_8;
+          break label_9;
         }
       }
     }
@@ -707,7 +715,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       jj_consume_token(leftBrace);
       c = Constraint();
                                    bpe.addConstraint(c);
-      label_9:
+      label_10:
       while (true) {
         switch (jj_nt.kind) {
         case comma:
@@ -715,7 +723,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
           break;
         default:
           jj_la1[18] = jj_gen;
-          break label_9;
+          break label_10;
         }
         jj_consume_token(comma);
         c = Constraint();
@@ -1013,7 +1021,7 @@ AnnotationAccessor accessor = null;
           "unknown label in RHS action: " + block[0]));}
       }
     rhs.addBlock(block[0], block[1]);
-    label_10:
+    label_11:
     while (true) {
       switch (jj_nt.kind) {
       case comma:
@@ -1021,7 +1029,7 @@ AnnotationAccessor accessor = null;
         break;
       default:
         jj_la1[30] = jj_gen;
-        break label_10;
+        break label_11;
       }
       jj_consume_token(comma);
       block = Action();
@@ -1159,7 +1167,7 @@ AnnotationAccessor accessor = null;
     blockBuffer.append("      Object val = null;" + nl);
     jj_consume_token(assign);
     jj_consume_token(leftBrace);
-    label_11:
+    label_12:
     while (true) {
       switch (jj_nt.kind) {
       case ident:
@@ -1167,7 +1175,7 @@ AnnotationAccessor accessor = null;
         break;
       default:
         jj_la1[33] = jj_gen;
-        break label_11;
+        break label_12;
       }
       // the name of the attribute, and equals sign
           nameTok = jj_consume_token(ident);
@@ -1403,32 +1411,47 @@ AnnotationAccessor accessor = null;
     finally { jj_save(1, xla); }
   }
 
-  final private boolean jj_3R_24() {
+  final private boolean jj_3R_25() {
     if (jj_scan_token(pling)) return true;
     return false;
   }
 
-  final private boolean jj_3R_20() {
+  final private boolean jj_3R_21() {
     if (jj_scan_token(string)) return true;
     return false;
   }
 
-  final private boolean jj_3R_18() {
+  final private boolean jj_3R_19() {
     if (jj_scan_token(leftBracket)) return true;
-    if (jj_3R_21()) return true;
+    if (jj_3R_22()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_24() {
+    if (jj_3R_13()) return true;
     return false;
   }
 
   final private boolean jj_3R_23() {
-    if (jj_3R_12()) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_25()) jj_scanpos = xsp;
+    if (jj_scan_token(ident)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_17() {
+    if (jj_3R_19()) return true;
     return false;
   }
 
   final private boolean jj_3R_22() {
     Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_24()) jj_scanpos = xsp;
-    if (jj_scan_token(ident)) return true;
+    if (jj_3R_24()) return true;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_24()) { jj_scanpos = xsp; break; }
+    }
     return false;
   }
 
@@ -1437,66 +1460,51 @@ AnnotationAccessor accessor = null;
     return false;
   }
 
-  final private boolean jj_3R_21() {
-    Token xsp;
-    if (jj_3R_23()) return true;
-    while (true) {
-      xsp = jj_scanpos;
-      if (jj_3R_23()) { jj_scanpos = xsp; break; }
-    }
-    return false;
-  }
-
   final private boolean jj_3R_15() {
-    if (jj_3R_17()) return true;
-    return false;
-  }
-
-  final private boolean jj_3_2() {
-    if (jj_3R_13()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_14() {
     if (jj_scan_token(ident)) return true;
     return false;
   }
 
-  final private boolean jj_3R_19() {
+  final private boolean jj_3_2() {
+    if (jj_3R_14()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_20() {
     if (jj_scan_token(leftBrace)) return true;
-    if (jj_3R_22()) return true;
+    if (jj_3R_23()) return true;
     return false;
   }
 
   final private boolean jj_3_1() {
-    if (jj_3R_12()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_12() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_14()) {
-    jj_scanpos = xsp;
-    if (jj_3R_15()) {
-    jj_scanpos = xsp;
-    if (jj_3R_16()) return true;
-    }
-    }
-    return false;
-  }
-
-  final private boolean jj_3R_17() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_19()) {
-    jj_scanpos = xsp;
-    if (jj_3R_20()) return true;
-    }
+    if (jj_3R_13()) return true;
     return false;
   }
 
   final private boolean jj_3R_13() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_15()) {
+    jj_scanpos = xsp;
+    if (jj_3R_16()) {
+    jj_scanpos = xsp;
+    if (jj_3R_17()) return true;
+    }
+    }
+    return false;
+  }
+
+  final private boolean jj_3R_18() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_20()) {
+    jj_scanpos = xsp;
+    if (jj_3R_21()) return true;
+    }
+    return false;
+  }
+
+  final private boolean jj_3R_14() {
     if (jj_scan_token(colon)) return true;
     if (jj_scan_token(ident)) return true;
     if (jj_scan_token(leftBrace)) return true;
@@ -1521,10 +1529,10 @@ AnnotationAccessor accessor = null;
       jj_la1_2();
    }
    private static void jj_la1_0() {
-      jj_la1_0 = new int[] {0x400,0x100000,0x1000,0x180800,0x0,0x200000,0x0,0x0,0x400000,0x1800000,0x1800000,0x80000,0x2000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x8000000,0x40000000,0x0,0x0,0x8000000,0x4000000,0x4000000,0x20000000,0x20000000,0x40000000,0x0,0x0,0x0,0x0,0x20000000,0x40000000,0x0,};
+      jj_la1_0 = new int[] {0x400,0x100000,0x1000,0x180800,0x600000,0x0,0x0,0x0,0x600000,0x1800000,0x1800000,0x80000,0x2000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x8000000,0x40000000,0x0,0x0,0x8000000,0x4000000,0x4000000,0x20000000,0x20000000,0x40000000,0x0,0x0,0x0,0x0,0x20000000,0x40000000,0x0,};
    }
    private static void jj_la1_1() {
-      jj_la1_1 = new int[] {0x0,0x0,0x0,0x0,0x1000,0x0,0x1000,0x1800,0x0,0x0,0x0,0x0,0x0,0x8109000,0x501400,0x40000,0x501400,0x501400,0x80000,0x100400,0x1000000,0x1000,0x8000,0x80000,0x1000000,0x0,0x101000,0x21000,0x21000,0x3c00,0x80000,0x8109000,0x8008000,0x1000,0x20000,0xbc00,0x80000,};
+      jj_la1_1 = new int[] {0x0,0x0,0x0,0x0,0x0,0x1000,0x1000,0x1800,0x0,0x0,0x0,0x0,0x0,0x8109000,0x501400,0x40000,0x501400,0x501400,0x80000,0x100400,0x1000000,0x1000,0x8000,0x80000,0x1000000,0x0,0x101000,0x21000,0x21000,0x3c00,0x80000,0x8109000,0x8008000,0x1000,0x20000,0xbc00,0x80000,};
    }
    private static void jj_la1_2() {
       jj_la1_2 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};

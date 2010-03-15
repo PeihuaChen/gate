@@ -516,53 +516,55 @@ SinglePhaseTransducer SinglePhaseTransducer(String javaimportblock) :
   { t = createSinglePhaseTransducer(phaseNameTok.image); curSPT = t; }
 
   (
-    <input>
-    (inputTok = <ident> {t.addInput(inputTok.image);})*
-  )?
-
-  (
-    <option>
     (
-      optionNameTok=<ident> <assign> (optionValueTok=<ident> |
-                                      optionValueTok=<bool>)
-      {
-        t.setOption(optionNameTok.image, optionValueTok.image);
+      <input>
+      (inputTok = <ident> {t.addInput(inputTok.image);})*
+    )
+    |
+    (
+      <option>
+      (
+        optionNameTok=<ident> <assign> (optionValueTok=<ident> |
+                                        optionValueTok=<bool>)
+        {
+          t.setOption(optionNameTok.image, optionValueTok.image);
 
-        // control
-        if(optionNameTok.image.equalsIgnoreCase("control")) {
-          if(optionValueTok.image.equalsIgnoreCase("appelt"))
-            t.setRuleApplicationStyle(APPELT_STYLE);
-          else if(optionValueTok.image.equalsIgnoreCase("first"))
-            t.setRuleApplicationStyle(FIRST_STYLE);
-          else if(optionValueTok.image.equalsIgnoreCase("brill"))
-            t.setRuleApplicationStyle(BRILL_STYLE);
-          else if(optionValueTok.image.equalsIgnoreCase("once"))
-            t.setRuleApplicationStyle(ONCE_STYLE);
-          else if(optionValueTok.image.equalsIgnoreCase("all"))
-            t.setRuleApplicationStyle(ALL_STYLE);
-          else
-            System.err.println(errorMsgPrefix(optionValueTok)+
-              "ignoring unknown control strategy " + option +
-              " (should be brill, appelt, first, once or all)"
-            );
-        } // control
-        else if(optionNameTok.image.equalsIgnoreCase("debug")) {
-          if(optionValueTok.image.equalsIgnoreCase("true") ||
-             optionValueTok.image.equalsIgnoreCase("yes") ||
-             optionValueTok.image.equalsIgnoreCase("y"))
-            t.setDebugMode(true);
-          else t.setDebugMode(false);
+          // control
+          if(optionNameTok.image.equalsIgnoreCase("control")) {
+            if(optionValueTok.image.equalsIgnoreCase("appelt"))
+              t.setRuleApplicationStyle(APPELT_STYLE);
+            else if(optionValueTok.image.equalsIgnoreCase("first"))
+              t.setRuleApplicationStyle(FIRST_STYLE);
+            else if(optionValueTok.image.equalsIgnoreCase("brill"))
+              t.setRuleApplicationStyle(BRILL_STYLE);
+            else if(optionValueTok.image.equalsIgnoreCase("once"))
+              t.setRuleApplicationStyle(ONCE_STYLE);
+            else if(optionValueTok.image.equalsIgnoreCase("all"))
+              t.setRuleApplicationStyle(ALL_STYLE);
+            else
+              System.err.println(errorMsgPrefix(optionValueTok)+
+                "ignoring unknown control strategy " + option +
+                " (should be brill, appelt, first, once or all)"
+              );
+          } // control
+          else if(optionNameTok.image.equalsIgnoreCase("debug")) {
+            if(optionValueTok.image.equalsIgnoreCase("true") ||
+               optionValueTok.image.equalsIgnoreCase("yes") ||
+               optionValueTok.image.equalsIgnoreCase("y"))
+              t.setDebugMode(true);
+            else t.setDebugMode(false);
+          }
+          else if(optionNameTok.image.equalsIgnoreCase("matchGroup")) {
+            if(optionValueTok.image.equalsIgnoreCase("true") ||
+               optionValueTok.image.equalsIgnoreCase("yes") ||
+               optionValueTok.image.equalsIgnoreCase("y"))
+              t.setMatchGroupMode(true);
+            else t.setMatchGroupMode(false);
+          }
         }
-        else if(optionNameTok.image.equalsIgnoreCase("matchGroup")) {
-          if(optionValueTok.image.equalsIgnoreCase("true") ||
-             optionValueTok.image.equalsIgnoreCase("yes") ||
-             optionValueTok.image.equalsIgnoreCase("y"))
-            t.setMatchGroupMode(true);
-          else t.setMatchGroupMode(false);
-        }
-      }
-    )*
-  )?
+      )*
+    )
+  )*
 
   (
     ( newRule=Rule(phaseNameTok.image,javaimportblock) { t.addRule(newRule); } )
