@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Various utility methods to make often-needed tasks more easy and
@@ -36,7 +37,7 @@ import java.util.List;
  * Annotation ann = // ...
  * use(gate.Utils) {
  *   println "Annotation has ${ann.length()} characters"
- *   println "and covers the string \"${doc.getStringForAnnotation(ann)}\""
+ *   println "and covers the string \"${doc.stringFor(ann)}\""
  * }
  * </pre>
  *
@@ -109,7 +110,7 @@ public class Utils {
    * @param ann the annotation for which to return the content.
    * @return a DocumentContent representing the content spanned by the annotation.
    */
-  public static DocumentContent getContentForAnnotation(
+  public static DocumentContent contentFor(
           SimpleDocument doc, SimpleAnnotation ann) {
     try {
       return doc.getContent().getContent(
@@ -126,7 +127,7 @@ public class Utils {
    * @param ann the annotation for which to return the text.
    * @return a String representing the text content spanned by the annotation.
    */
-  public static String getStringForAnnotation(
+  public static String stringFor(
           Document doc, SimpleAnnotation ann) {
     try {
       return doc.getContent().getContent(
@@ -148,7 +149,7 @@ public class Utils {
    * @return a DocumentContent representing the content spanned by the
    * annotation set.
    */
-  public static DocumentContent getContentForAnnotationSet(
+  public static DocumentContent contentFor(
           SimpleDocument doc, AnnotationSet anns) {
     try {
       return doc.getContent().getContent(
@@ -166,7 +167,7 @@ public class Utils {
    * @return a String representing the text content spanned by the annotation
    * set.
    */
-  public static String getStringForAnnotationSet(
+  public static String stringFor(
           Document doc, AnnotationSet anns) {
     try {
       return doc.getContent().getContent(
@@ -176,6 +177,49 @@ public class Utils {
       throw new GateRuntimeException(ex.getMessage());
     }
   }
+
+  /**
+   * Get the start offset of an annotation.
+   */
+  public static Long start(SimpleAnnotation a) {
+    return (a.getStartNode() == null) ? null : a.getStartNode().getOffset();
+  }
+
+  /**
+   * Get the start offset of an annotation set.
+   */
+  public static Long start(AnnotationSet as) {
+    return (as.firstNode() == null) ? null : as.firstNode().getOffset();
+  }
+
+  /**
+   * Get the start offset of a document (i.e. 0L).
+   */
+  public static Long start(SimpleDocument d) {
+    return Long.valueOf(0L);
+  }
+
+  /**
+   * Get the end offset of an annotation.
+   */
+  public static Long end(SimpleAnnotation a) {
+    return (a.getEndNode() == null) ? null : a.getEndNode().getOffset();
+  }
+
+  /**
+   * Get the end offset of an annotation set.
+   */
+  public static Long end(AnnotationSet as) {
+    return (as.lastNode() == null) ? null : as.lastNode().getOffset();
+  }
+
+  /**
+   * Get the end offset of a document.
+   */
+  public static Long end(SimpleDocument d) {
+    return d.getContent().size();
+  }
+
   /**
    * Return a the subset of annotations from the given annotation set
    * that start exactly at the given offset.
@@ -240,6 +284,19 @@ public class Utils {
         fm.put(values[i], values[++i]);
       }
     }
+    return fm;
+  }
+
+  /**
+   * Create a feature map from an existing map (typically one that does not
+   * itself implement FeatureMap).
+   *
+   * @param map the map to convert.
+   * @return a new FeatureMap containing the same mappings as the source map.
+   */
+  public static FeatureMap toFeatureMap(Map map) {
+    FeatureMap fm = Factory.newFeatureMap();
+    fm.putAll(map);
     return fm;
   }
 }
