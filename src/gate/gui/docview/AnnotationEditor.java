@@ -700,8 +700,7 @@ public class AnnotationEditor extends AbstractVisualResource
       super(text, icon, desc, mnemonic);
     }
     public void actionPerformed(ActionEvent evt){
-      long maxOffset = owner.getDocument().
-      		getContent().size().longValue() -1; 
+      long maxOffset = owner.getDocument().getContent().size().longValue(); 
       int increment = 1;
       if((evt.getModifiers() & ActionEvent.SHIFT_MASK) > 0){
         //CTRL pressed -> use tokens for advancing
