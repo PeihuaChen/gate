@@ -1916,7 +1916,7 @@ public class AnnotationSetsView extends AbstractDocumentView
       for(SetHandler setHandler : setHandlers) {
         for(Annotation ann : setHandler.set.get(
               Math.max(0l, textLocation-1),
-              Math.min(document.getContent().size()-1, textLocation+1))) {
+              Math.min(document.getContent().size(), textLocation+1))) {
           if(setHandler.getTypeHandler(ann.getType()).isSelected()) {
             AnnotationDataImpl annotAtPoint =
               new AnnotationDataImpl(setHandler.set, ann);
