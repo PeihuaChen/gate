@@ -229,8 +229,8 @@ public class AnnotationStackView  extends AbstractDocumentView
     try {
       text = document.getContent().getContent(
         Math.max(0l, caretPosition - context),
-        Math.min(Math.max(document.getContent().size()-1,0l), caretPosition + 1 + context))
-        .toString();
+        Math.min(document.getContent().size(),
+                 caretPosition + 1 + context)).toString();
     } catch (InvalidOffsetException e) {
       e.printStackTrace();
     }
@@ -256,7 +256,7 @@ public class AnnotationStackView  extends AbstractDocumentView
             null, null, AnnotationStack.CROP_MIDDLE);
           Set<Annotation> annotations = setHandler.set.get(typeHandler.name)
             .get(Math.max(0l, caretPosition - context), Math.min(
-              document.getContent().size()-1, caretPosition + context + 1));
+              document.getContent().size(), caretPosition + 1 + context));
           for (Annotation annotation : annotations) {
             stackPanel.addAnnotation(annotation);
           }
