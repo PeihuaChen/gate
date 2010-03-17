@@ -134,7 +134,8 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
       importblock + nl +
       "public class " + actionClassName + nl +
       "implements java.io.Serializable, RhsAction { " + nl +
-      "  public void doit(gate.Document doc, java.util.Map bindings, " + nl +
+      "  public void doit(gate.Document doc, " + nl +
+      "                   java.util.Map<java.lang.String, gate.AnnotationSet> bindings, " + nl +
       "                   gate.AnnotationSet annotations, " + nl +
       "                   gate.AnnotationSet inputAS, gate.AnnotationSet outputAS, " + nl +
       "                   gate.creole.ontology.Ontology ontology) throws gate.jape.JapeException {" + nl
@@ -174,7 +175,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
     if(blockNames.add(name)) // it wasn't already a member
       actionClassString.append(
-        "    gate.AnnotationSet " + name + "Annots = (gate.AnnotationSet)bindings.get(\""
+        "    gate.AnnotationSet " + name + "Annots = bindings.get(\""
         + name + "\"); " + nl
       );
 
@@ -335,7 +336,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
   }
   
   /** Makes changes to the document, using LHS bindings. */
-  public void transduce(Document doc, java.util.Map bindings,
+  public void transduce(Document doc, java.util.Map<String, AnnotationSet> bindings,
                         AnnotationSet inputAS, final AnnotationSet outputAS,
                         Ontology ontology)
                         throws JapeException {
