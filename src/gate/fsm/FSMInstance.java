@@ -55,7 +55,8 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
     * "FSMPosition" and made the bindings stored in "bindings".
     */
   public FSMInstance(FSM supportGraph, State FSMPosition,
-                     Node startNode, Node AGPosition, HashMap bindings,
+                     Node startNode, Node AGPosition,
+                     HashMap<String, AnnotationSet> bindings,
                      Document document) {
 
     this.supportGraph = supportGraph;
@@ -124,7 +125,7 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
     * process this FSM instance performed.
     * @return a HashMap object
     */
-  public HashMap getBindings() { return bindings; }
+  public HashMap<String, AnnotationSet> getBindings() { return bindings; }
 
   /** Returns the length of the parsed region in the document under scrutiny.
     * More precisely this is the distnace between the Node in the annotation
@@ -224,15 +225,15 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
         ioe.printStackTrace(Err.getPrintWriter());
       }
 
-      Iterator labelIter = bindings.keySet().iterator();
+      Iterator<String> labelIter = bindings.keySet().iterator();
       res += "\n{";
       while(labelIter.hasNext()){
         String label = (String)labelIter.next();
-        Collection annots = (Collection)bindings.get(label);
+        Collection<Annotation> annots = bindings.get(label);
         res += "\n" + label + ": ";
-        Iterator annIter = annots.iterator();
+        Iterator<Annotation> annIter = annots.iterator();
         while(annIter.hasNext()){
-          Annotation ann  = (Annotation)annIter.next();
+          Annotation ann  = annIter.next();
           res += ann.getType() + "(\"";
           try{
             res += document.getContent().
@@ -269,7 +270,7 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
     * bindings that took place during matching.
     * needs to be HashMap instead of simply Map in order to cloneable
     */
-  private HashMap bindings;
+  private HashMap<String, AnnotationSet> bindings;
 
   /** The size of the matched region in the Annotation Set*/
   private long length = 0;
@@ -295,7 +296,8 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
     */
   public static FSMInstance getNewInstance(FSM supportGraph, State FSMPosition,
                                            Node startNode, Node AGPosition,
-                                           HashMap bindings, Document doc) {
+                                           HashMap<String, AnnotationSet> bindings,
+                                           Document doc) {
     FSMInstance res;
     if(myInstances.isEmpty()) res = new FSMInstance(supportGraph, FSMPosition,
                                                     startNode, AGPosition,

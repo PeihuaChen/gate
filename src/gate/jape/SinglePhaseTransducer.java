@@ -321,7 +321,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
               fsm.getInitialState(),// fresh start
               state.startNode,// the matching starts form the current startNode
               state.startNode,// current position in AG is the start position
-              new java.util.HashMap(),// no bindings yet!
+              new java.util.HashMap<String, AnnotationSet>(),// no bindings yet!
               doc);
 
       // at this point ActiveFSMInstances should always be empty!
