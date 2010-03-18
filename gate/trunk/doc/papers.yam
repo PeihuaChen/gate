@@ -25,12 +25,12 @@ GATE papers
 
  - Agnoloni, T. Bacci, L. Francesconi, E. Peters, W. Montemagni, M., Venturi, G. (2009), A two-level knowledge approach to support multilingual legislative drafting. In: Breuker, J., Casanovas, P., Klein, M. and Francesconi, E. (eds.) Frontiers in Artificial Intelligence and Applications, Volume 188: Law, Ontologies and the Semantic Web - Channelling the Legal Information Flood
 
- - F.Amardeilh and D.Damljanovic: Du texte &agrave; la connaissance : annotation  s&eacute;mantique et peuplement d'ontologie appliqu&eacute;s &agrave; des artefacts logiciels,  Conference Ing&eacute;nierie des Connaissances 2009, 25-29 May, 2009. (in French). %(http://ic2009.inria.fr/docs/papers/AmardeilhDamljanovic_IC2009_29.pdf, PDF)
+ - F.Amardeilh and D.Damljanovic: Du texte a la connaissance : annotation  semantique et peuplement d'ontologie appliques a des artefacts logiciels,  Conference Ingenierie des Connaissances 2009, 25-29 May, 2009. (in French). %(http://ic2009.inria.fr/docs/papers/AmardeilhDamljanovic_IC2009_29.pdf, PDF)
 
 
  - K. Bontcheva, B. Davis, A. Funk, Y. Li and T. Wang. Human Language Technologies. Semantic Knowledge Management, John Davies, Marko Grobelnik, and Dunja Mladenic (Eds.), Springer, 37-49, 2009. %(http://www.springerlink.com/content/978-3-540-88844-4, On-line Link)
 
- - D.Damljanovic, F.Amardeilh, K.Bontcheva: CA Manager Framework: Creating Customised Workflows for Ontology Population and Semantic Annotation. In Proceedings of The Fifth International Conference on Knowledge Capture (KCAP'09), California, USA, September 1-4, 2009.%(http://delivery.acm.org/10.1145/1600000/1597770/p177-damljanovic.pdf?key1=1597770&amp;key2=5509954621&amp;coll=GUIDE&amp;dl=GUIDE&amp;CFID=75107900&amp;CFTOKEN=81656037,  PDF)%(http://gate.ac.uk/sale/eswc08/clone-ql/clone-ql.pdf, PDF).
+ - D.Damljanovic, F.Amardeilh, K.Bontcheva: CA Manager Framework: Creating Customised Workflows for Ontology Population and Semantic Annotation. In Proceedings of The Fifth International Conference on Knowledge Capture (KCAP'09), California, USA, September 1-4, 2009.%(http://delivery.acm.org/10.1145/1600000/1597770/p177-damljanovic.pdf?key1=1597770&amp;key2=5509954621&amp;coll=GUIDE&amp;dl=GUIDE&amp;CFID=75107900&amp;CFTOKEN=81656037,  PDF), %(http://gate.ac.uk/sale/eswc08/clone-ql/clone-ql.pdf, PDF).
 
  - D.Damljanovic, K.Bontcheva: Towards Enhanced Usability of Natural Language  Interfaces to Knowledge Bases. In Devedzic V. and Gasevic D. (Eds.), Special issue  on Semantic Web and Web 2.0, Annals of Information systems, Springer-Verlag, 2009.
 
@@ -63,7 +63,7 @@ GATE papers
 
  - Damljanovic, D.,Bontcheva, K.. Enhanced Semantic Access to Software Artefacts. In Workshop on Semantic Web Enabled Software Engineering (SWESE) held in conjunction with ISWC'08, Karlsruhe, Germany, October 2008. %(http://www.abdn.ac.uk/~r01srt7/swese2008/pdf/swese2008_submission_9.pdf, PDF)
 
- - Brian Davis, Ahmad Ali Iqbal, Adam Funk, Valentin Tablan, Kalina Bontcheva, Hamish Cunningham and Siegfried Handschuh: RoundTrip Ontology Authoring. In <i, Proceedings of the 7th International Semantic Web Conference (ISWC2008)</i, , Karlsruhe, Germany, October 2008.
+ - Brian Davis, Ahmad Ali Iqbal, Adam Funk, Valentin Tablan, Kalina Bontcheva, Hamish Cunningham and Siegfried Handschuh: RoundTrip Ontology Authoring. In _Proceedings of the 7th International Semantic Web Conference (ISWC2008)_, Karlsruhe, Germany, October 2008.
 
 
  - E. Della Valle, D. Cerizza, I. Celino, A. Turati, H. Lausen, N. Steinmetz, M. Erdmann and A. Funk. Service-Finder: realizing Web Service Discovery at Web Scale. In Proceedings of European Semantic Technology Conference (ESTC 2008), Vienna, Austria, September, 2008. %(http://videolectures.net/estc08_valle_rsf/, Video)
@@ -81,7 +81,7 @@ GATE papers
 
  - D. Maynard, W. Peters and Y. Li. Evaluating Evaluation Metrics for Ontology-Based Applications: Infinite Reflection. In Proc. of 6th International Conference on Language Resources and Evaluation (LREC), Marrakech, Morocco, 2008. %(http://gate.ac.uk/sale/lrec2008/bdm.pdf, PDF)
 
- - Montiel-Ponsoda, E., Aguado de Cea, G. and G&oacute;mez-P&eacute;rez, A., and Peters, W., Modeling multilinguality in ontologies, In: Proceedings of Coling 2008, Manchester, U.K.%(http://www.aclweb.org/anthology-new/C/C08/C08-2017.pdf, PDF)
+ - Montiel-Ponsoda, E., Aguado de Cea, G. and Gomez-Perez, A., and Peters, W., Modeling multilinguality in ontologies, In: Proceedings of Coling 2008, Manchester, U.K.%(http://www.aclweb.org/anthology-new/C/C08/C08-2017.pdf, PDF)
 
 
  - V. Tablan, D. Damljanovic, and K. Bontcheva. A natural language query interface to structured information. In Proceedings of the 5h European Semantic Web Conference (ESWC 2008), Tenerife, Spain, June, 2008. %(http://gate.ac.uk/sale/eswc08/clone-ql/clone-ql.pdf, PDF)
@@ -115,9 +115,9 @@ GATE papers
  - Peters, W., Sagri, M., and Tiscornia, D. 2007. The structuring of legal knowledge in LOIS. Artfiicial Intelligence and Law, 15, 2 (Jun. 2007), 117-135.%(http://www.springerlink.com/content/d04l7h2507700g45/, Link)
 
 
- - Peters, W., Montiel-Ponsoda, E., Aguado de Cea, G. and G&oacute;mez-P&eacute;rez, A., Localizing Ontologies in Owl, ISWC 2007 workshop Ontolex2007, Busan, Korea %(http://www.dcs.shef.ac.uk/~wim/ontolex2007-peters-montiel-aguado.pdf, PDF)
+ - Peters, W., Montiel-Ponsoda, E., Aguado de Cea, G. and Gomez-Perez, A., Localizing Ontologies in Owl, ISWC 2007 workshop Ontolex2007, Busan, Korea %(http://www.dcs.shef.ac.uk/~wim/ontolex2007-peters-montiel-aguado.pdf, PDF)
 
- - Montiel-Ponsoda, E. Aguado de Cea, G. Su&aacute;rez-Figueroa, M.C. Palma, R. Peters, W., LexOMV: An OMV extension to capture multilinguality. ISWC 2007 workshop Ontolex 2007, Busan, Korea %(http://www.neon-project.org/web-content/images/Publications/ontolex2007-lexomv-montiel-crv.pdf, PDF)
+ - Montiel-Ponsoda, E. Aguado de Cea, G. Suarez-Figueroa, M.C. Palma, R. Peters, W., LexOMV: An OMV extension to capture multilinguality. ISWC 2007 workshop Ontolex 2007, Busan, Korea %(http://www.neon-project.org/web-content/images/Publications/ontolex2007-lexomv-montiel-crv.pdf, PDF)
 
  - H.Saggion, SHEF: Semantic Tagging and Summarization Techniques Applied to Cross-document Coreference. In Proceedings of Semeval 2007, Association for Computational Linguistics, June, 2007. %(http://gate.ac.uk/sale/semeval07/papers/shef-semeval07.pdf, PDF)
 
