@@ -1,5 +1,6 @@
 /*
- *  Copyright (c) 1998-2009, The University of Sheffield and Ontotext.
+ *  Copyright (c) 1995-2010, The University of Sheffield. See the file
+ *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -490,12 +491,12 @@ public class AnnotationSetsView extends AbstractDocumentView
             && mainTable.getSelectedRowCount() == 1){
               TypeHandler tHandler = (TypeHandler)handler;
               popup.add(tHandler.changeColourAction);
-              popup.add(new DeleteSelectedAnnotationGroupAction("Delete"));
+              popup.add(new DeleteSelectedAnnotationsAction("Delete"));
             } else if (mainTable.getSelectedRowCount() > 1
                     || handler instanceof SetHandler) {
-              popup.add(new SetSelectedAnnotationGroupAction(true));
-              popup.add(new SetSelectedAnnotationGroupAction(false));
-              popup.add(new DeleteSelectedAnnotationGroupAction("Delete all"));
+              popup.add(new SetSelectedAnnotationsAction(true));
+              popup.add(new SetSelectedAnnotationsAction(false));
+              popup.add(new DeleteSelectedAnnotationsAction("Delete all"));
             }
             if (popup.getComponentCount() > 0) {
               popup.show(mainTable, evt.getX(), evt.getY());
@@ -532,7 +533,7 @@ public class AnnotationSetsView extends AbstractDocumentView
           } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
             if (handler instanceof TypeHandler){
               TypeHandler tHandler = (TypeHandler)handler;
-              (new SetSelectedAnnotationGroupAction(!tHandler.selected))
+              (new SetSelectedAnnotationsAction(!tHandler.selected))
                 .actionPerformed(null);
             } else if (handler instanceof SetHandler) {
               SetHandler sHandler = (SetHandler)handler;
@@ -543,7 +544,7 @@ public class AnnotationSetsView extends AbstractDocumentView
                   break;
                 }
               }
-              (new SetSelectedAnnotationGroupAction(allUnselected))
+              (new SetSelectedAnnotationsAction(allUnselected))
                 .actionPerformed(null);
             }
           } else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
@@ -588,13 +589,26 @@ public class AnnotationSetsView extends AbstractDocumentView
       }
     };
     
-    mainTable.getInputMap().put(
-            KeyStroke.getKeyStroke("DELETE"), "deleteAll");
-    mainTable.getActionMap().put("deleteAll", 
-            new DeleteSelectedAnnotationGroupAction("Delete"));
+    mainTable.getInputMap().put(KeyStroke.getKeyStroke("DELETE"), "deleteAll");
+    mainTable.getInputMap()
+      .put(KeyStroke.getKeyStroke("shift DELETE"), "deleteAll");
+    mainTable.getActionMap().put("deleteAll",
+      new DeleteSelectedAnnotationsAction("Delete"));
     newSetNameTextField.getInputMap().put(
-            KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "newSet");
+      KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "newSet");
     newSetNameTextField.getActionMap().put("newSet", newSetAction);
+    textPane.getInputMap()
+      .put(KeyStroke.getKeyStroke("control E"), "edit annotation");
+    textPane.getActionMap().put("edit annotation", new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        // use the same action as when the mouse stop over a selection
+        // or annotation but this time for a keyboard shortcut
+        mouseStoppedMovingAction.setTextLocation(textPane.getCaretPosition());
+        mouseStoppedMovingAction.actionPerformed(null);
+        SwingUtilities.invokeLater(new Runnable() { public void run() {
+          annotationEditor.setPinnedMode(true);
+        }});
+      }});
 
     // skip first column when tabbing
     InputMap im =
@@ -1360,6 +1374,7 @@ public class AnnotationSetsView extends AbstractDocumentView
     protected class ChangeColourAction extends AbstractAction{
       public ChangeColourAction(){
         super("Change colour");
+        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("ENTER"));
       }
       
       public void actionPerformed(ActionEvent evt){
@@ -2043,13 +2058,11 @@ public class AnnotationSetsView extends AbstractDocumentView
     private AnnotationData aData;
   }
   
-  protected class SetSelectedAnnotationGroupAction extends AbstractAction{
-    public SetSelectedAnnotationGroupAction(boolean selected){
-      super();
+  protected class SetSelectedAnnotationsAction extends AbstractAction{
+    public SetSelectedAnnotationsAction(boolean selected){
       String title = (selected) ? "Select all" : "Unselect all";
-      super.putValue(NAME, title);
-      super.putValue(SHORT_DESCRIPTION, title + " annotations.");
-      super.putValue(MNEMONIC_KEY, KeyEvent.VK_ENTER);
+      putValue(NAME, title);
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("SPACE"));
       this.selected = selected;
     }
     public void actionPerformed(ActionEvent evt){
@@ -2084,14 +2097,14 @@ public class AnnotationSetsView extends AbstractDocumentView
     boolean selected;
   }
 
-  protected class DeleteSelectedAnnotationGroupAction extends AbstractAction{
-    public DeleteSelectedAnnotationGroupAction(String name){
-      super();
-      super.putValue(NAME, name);
-      super.putValue(SHORT_DESCRIPTION, name + " annotations.");
-      super.putValue(MNEMONIC_KEY, KeyEvent.VK_DELETE);
+  protected class DeleteSelectedAnnotationsAction extends AbstractAction{
+    public DeleteSelectedAnnotationsAction(String name){
+      putValue(NAME, name);
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("DELETE"));
     }
     public void actionPerformed(ActionEvent evt){
+      // builds the list of type and set handlers to delete
+      Vector<String> resourcesToDelete = new Vector<String>(); 
       List<Object> handlersToDelete = new ArrayList<Object>();
       int[] selectedRows = mainTable.getSelectedRows();
       Arrays.sort(selectedRows);
@@ -2100,19 +2113,42 @@ public class AnnotationSetsView extends AbstractDocumentView
         if(handler instanceof SetHandler){
           // store the set handler
           handlersToDelete.add(0, handler);
+          String setName = ((SetHandler) handler).set.getName();
+          setName = (setName == null)? "Default set" : setName;
+          resourcesToDelete.add("set: " + setName);
         } else if(handler instanceof TypeHandler
         && !handlersToDelete.contains(((TypeHandler)handler).setHandler)){
           // store the type handler
           // only if not included in a previous selected set handler
           handlersToDelete.add(handlersToDelete.size(), handler);
+          String setName = ((TypeHandler) handler).setHandler.set.getName();
+          setName = (setName == null)? "Default set" : setName;
+          resourcesToDelete.add("type: " + ((TypeHandler) handler).name
+            + " in set: " + setName);
         }
       }
+      if ((evt.getModifiers() & ActionEvent.SHIFT_MASK) == 0) {
+        // shows a confirm dialog to delete types and sets
+        JList list = new JList(resourcesToDelete);
+        list.setVisibleRowCount(Math.min(resourcesToDelete.size()+1, 10));
+        int choice = JOptionPane.showOptionDialog(MainFrame.getInstance(), new
+          Object[]{"Are you sure you want to delete the following annotations?",
+          '\n', new JScrollPane(list),
+          "<html><i>You can use Shift+Delete to bypass this dialog.</i>\n\n"},
+          "Delete annotations",
+          JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null,
+          new String[]{"Delete annotations", "Cancel"}, "Cancel");
+        if (choice == JOptionPane.CLOSED_OPTION || choice == 1)  { return; }
+      }
+      // deletes types and sets
       for (Object handler : handlersToDelete) {
         if(handler instanceof SetHandler){
           SetHandler sHandler = (SetHandler)handler;
           if(sHandler.set == document.getAnnotations()){
             //the default annotation set - clear
-            sHandler.set.clear();
+            for (Annotation annotation: new HashSet<Annotation>(sHandler.set)) {
+              sHandler.set.remove(annotation);
+            }
           }else{
             document.removeAnnotationSet(sHandler.set.getName());
           }
