@@ -21,7 +21,7 @@ GATE papers
 %contents
 
 %1 Journals and Conference papers
-%2 2009
+%2* 2009
 
  - Agnoloni, T. Bacci, L. Francesconi, E. Peters, W. Montemagni, M., Venturi, G. (2009), A two-level knowledge approach to support multilingual legislative drafting. In: Breuker, J., Casanovas, P., Klein, M. and Francesconi, E. (eds.) Frontiers in Artificial Intelligence and Applications, Volume 188: Law, Ontologies and the Semantic Web - Channelling the Legal Information Flood
 
@@ -54,7 +54,7 @@ GATE papers
 
 
 
-%2 2008
+%2* 2008
 
 
  - M. Agatonovic, N. Aswani, K. Bontcheva, H. Cunningham, T. Heitz, Y. Li, I. Roberts and V. Tablan. Large-scale, Parallel Automatic Patent Annotation. In Proceedings of 1st International CIKM Workshop on Patent Information Retrieval - PaIR'08, Napa Valley, California, USA, 30 October, 2008. %(http://www.gate.ac.uk/sale/pair08/pair03-aswani.pdf, PDF)
@@ -88,7 +88,7 @@ GATE papers
 
 
 
-%2 2007
+%2* 2007
 
  - H. Saggion, A. Funk, D. Maynard, K. Bontcheva. Ontology-based Information Extraction for Business Applications. In Proceedings of the 6th International Semantic Web Conference (ISWC 2007), Busan, Korea, November, 2007. %(http://gate.ac.uk/sale/iswc07/musing/musing-iswc07.pdf, PDF)
 
@@ -122,7 +122,7 @@ GATE papers
  - H.Saggion, SHEF: Semantic Tagging and Summarization Techniques Applied to Cross-document Coreference. In Proceedings of Semeval 2007, Association for Computational Linguistics, June, 2007. %(http://gate.ac.uk/sale/semeval07/papers/shef-semeval07.pdf, PDF)
 
 
-%2 2006
+%2* 2006
 
  - N.Aswani, K.Bontcheva ;and H.Cunningham: ;Mining Information for Instance Unification. In the proceedings of 5th International Semantic Web conference, Athens, GA, USA, November, 2006. %(http://gate.ac.uk/sale/iswc06/iswc06.pdf, PDF)
 
@@ -145,7 +145,7 @@ GATE papers
  - T. Wang, Y. Li, K. Bontcheva, H. Cunningham, J. Wang. Automatic Extraction of Hierarchical Relations from Text. Proceedings of the Third European Semantic Web Conference (ESWC 2006), Lecture Notes in Computer Science 4011, Springer, 2006. %(http://gate.ac.uk/sale/eswc06/eswc06-relation.pdf, PDF)
 
 
-%2 2005
+%2* 2005
 
  - N. Aswani, V. Tablan, K. Bontcheva and H. Cunningham. Indexing and Querying Linguistic Metadata and Document Content. Proceedings of Fifth International Conference on Recent Advances in Natural Language Processing (RANLP-2005), 2005. %(http://gate.ac.uk/sale/ranlp05/ranlp05-annic.pdf, PDF)
 
@@ -185,7 +185,7 @@ GATE papers
 
 
 
-%2 2004
+%2* 2004
 
 
  - K. Bontcheva. Open-source Tools for Creation, Maintenance, and Storage of Lexical Resources for Language Generation from Ontologies. Fourth International Conference on Language Resources and Evaluation (LREC'2004). Lisbon, Portugal. 2004. %(http://www.dcs.shef.ac.uk/~kalina/papers/bontcheva-lrec04.pdf, PDF).
@@ -213,7 +213,7 @@ GATE papers
 
 
 
-%2 2003
+%2* 2003
 
 
  - K. Bontcheva, H. Cunningham. The Semantic Web: A New Opportunity and Challenge for Human Language Technology. Workshop on Human Language Technology for the Semantic Web and Web Services. Held in conjunction with the Second International Semantic Web Conference (ISWC'03). H. Cunningham, Y. Ding, A. Kiryakov (eds). Florida, USA. October 2003. %(http://www.gate.ac.uk/sale/iswc03/iswc03.pdf, PDF)
@@ -254,7 +254,7 @@ GATE papers
 
 
 
-%2 2002 and previous
+%2* 2002 and previous
 
  - P. Baker and A. Hardie and T. McEnery and H. Cunningham and R. Gaizauskas. EMILLE, A 67-Million Word Corpus of Indic Languages: Data Collection, Mark-up and Harmonisation. Proceedings of 3rd Language Resources and Evaluation Conference (LREC 2002) pp. 819-825. %(http://gandalf.aksis.uib.no/lrec2002/pdf/319.pdf, PDF)
 
