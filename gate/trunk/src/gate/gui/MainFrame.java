@@ -176,7 +176,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   protected static final String[] ICON_EXTENSIONS = {"", ".png", ".gif"};
 
   private static JDialog guiLock = null;
-
+  
   static public Icon getIcon(String baseName) {
     Icon result = iconByName.get(baseName);
     for(int i = 0; i < ICON_EXTENSIONS.length && result == null; i++) {
@@ -3815,8 +3815,10 @@ public class MainFrame extends JFrame implements ProgressListener,
                 if(Gate.getHiddenAttribute(((Controller)appIter.next())
                   .getFeatures())) { appIter.remove(); }
               }
+              // When saving the session file, save URLs relative to GATE home 
+              // but do not warn about them
               gate.util.persistence.PersistenceManager.saveObjectToFile(
-                appList, sessionFile);
+                appList, sessionFile, true, false);
             }
             catch(Exception error) {
               String message = "Failed to save session data.";

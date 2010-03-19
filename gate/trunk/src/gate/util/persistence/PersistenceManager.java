@@ -26,6 +26,8 @@ import java.util.*;
 
 import javax.xml.stream.*;
 
+import org.apache.log4j.Logger;
+
 import gate.*;
 import gate.creole.*;
 import gate.event.ProgressListener;
@@ -107,7 +109,10 @@ public class PersistenceManager {
    * URLs get upset when serialised and deserialised so we need to
    * convert them to strings for storage. In the case of
    * &quot;file:&quot; URLs the relative path to the persistence file
-   * will actually be stored.
+   * will actually be stored, except when the URL refers to a resource
+   * within the current GATE home directory in which case the relative path
+   * to the GATE home directory will be stored. In that case a warning
+   * is issued to 
    */
   public static class URLHolder implements Persistence {
     /**
@@ -116,12 +121,56 @@ public class PersistenceManager {
      */
     public void extractDataFromSource(Object source)
             throws PersistenceException {
+      final Logger logger = Logger.getLogger(URLHolder.class);
       try {
         URL url = (URL)source;
         if(url.getProtocol().equals("file")) {
           try {
-            urlString = relativePathMarker
-                    + getRelativePath(currentPersistenceFile().toURI().toURL(), url);
+            String pathMarker = relativePathMarker;
+            File gateCanonicalHome = null;
+            // if the persistence file does NOT reside in the GATE home
+            // tree and if the URL references something in the GATE home
+            // tree, use $gatehome$ instead of $relpath$
+            if(currentUseGateHome() || currentWarnAboutGateHome()) {
+            try {
+              String persistenceFilePathName = currentPersistenceFile().getCanonicalPath();
+              String gateHomePathName = Gate.getGateHome().getCanonicalPath();
+              gateCanonicalHome = Gate.getGateHome().getCanonicalFile();
+              String urlPathName = Files.fileFromURL(url).getCanonicalPath();
+              //logger.debug("persistenceFilePathName "+persistenceFilePathName);
+              //logger.debug("gateHomePathName        "+gateHomePathName);
+              //logger.debug("urlPathName             "+urlPathName);
+              if(!persistenceFilePathName.startsWith(gateHomePathName) &&
+                 urlPathName.startsWith(gateHomePathName)) {
+                //logger.debug("Setting path marker to "+gatehomePathMarker);
+                if(currentWarnAboutGateHome()) {
+                  if(!currentHaveWarnedAboutGateHome().getValue()) {
+                    logger.warn(
+                          "\nYour application is using some of the plug-ins "+
+                          "distributed with GATE, and may not work as expected "+
+                          "with different versions of GATE. You should consider "+
+                          "making private local copies of the plug-ins, and "+
+                          "distributing those with your application.");
+                    currentHaveWarnedAboutGateHome().setValue(true);
+                  }
+                  // the actual URL is shown every time
+                  logger.warn("GATE resource referenced: "+url);
+                }
+                if(currentUseGateHome()) {
+                  pathMarker = gatehomePathMarker;
+                }
+              }
+            } catch(IOException ex) {
+              // do nothing and proceed with using the relativePathMarker
+            }
+            }
+            if(pathMarker.equals(relativePathMarker)) {
+              urlString = pathMarker
+                 + getRelativePath(currentPersistenceFile().toURI().toURL(), url);
+            } else {
+              urlString = pathMarker
+                 + getRelativePath(gateCanonicalHome.toURI().toURL(), url);             
+            }
           }
           catch(MalformedURLException mue) {
             urlString = ((URL)source).toExternalForm();
@@ -474,8 +523,14 @@ public class PersistenceManager {
               + "need to be \"file:\" URLs!");
     }
   }
-
-  public static void saveObjectToFile(Object obj, File file)
+  
+  public static void saveObjectToFile(Object obj, File file) 
+    throws PersistenceException, IOException {
+    saveObjectToFile(obj, file, false, false);
+  }
+  
+  public static void saveObjectToFile(Object obj, File file, 
+          boolean usegatehome, boolean warnaboutgatehome)
           throws PersistenceException, IOException {
     ProgressListener pListener = (ProgressListener)MainFrame.getListeners()
             .get("gate.event.ProgressListener");
@@ -488,6 +543,8 @@ public class PersistenceManager {
     ObjectOutputStream oos = null;
     com.thoughtworks.xstream.XStream xstream = null;
     HierarchicalStreamWriter writer = null;
+    warnAboutGateHome.get().addFirst(warnaboutgatehome);
+    useGateHome.get().addFirst(usegatehome);
     startPersistingTo(file);
     try {
       if(Gate.getUseXMLSerialization()) {
@@ -556,6 +613,7 @@ public class PersistenceManager {
    * Set up the thread-local state for a new persistence run.
    */
   private static void startPersistingTo(File file) {
+    haveWarnedAboutGateHome.get().addFirst(new BooleanFlag(false));
     persistenceFile.get().addFirst(file);
     existingPersitentReplacements.get().addFirst(new HashMap());
   }
@@ -567,6 +625,18 @@ public class PersistenceManager {
     return persistenceFile.get().getFirst();
   }
 
+  private static Boolean currentWarnAboutGateHome() {
+    return warnAboutGateHome.get().getFirst();
+  }
+  
+  private static Boolean currentUseGateHome() {
+    return useGateHome.get().getFirst();
+  }
+  
+  private static BooleanFlag currentHaveWarnedAboutGateHome() {
+    return haveWarnedAboutGateHome.get().getFirst();
+  }
+  
   /**
    * Clean up the thread-local state for the current persistence run.
    */
@@ -828,6 +898,23 @@ public class PersistenceManager {
    */
   static ThreadLocal<LinkedList<URL>> persistenceURL;
 
+  private static final class BooleanFlag {
+    BooleanFlag(boolean initial) {
+      flag = initial;
+    }
+    private boolean flag;
+    public void setValue(boolean value) {
+      flag = value;
+    }
+    public boolean getValue() {
+      return flag;
+    }
+  }
+  
+  private static ThreadLocal<LinkedList<Boolean>> useGateHome;
+  private static ThreadLocal<LinkedList<Boolean>> warnAboutGateHome;
+  private static ThreadLocal<LinkedList<BooleanFlag>> haveWarnedAboutGateHome; 
+
   static {
     persistentReplacementTypes = new HashMap();
     try {
@@ -883,9 +970,13 @@ public class PersistenceManager {
       }
     
     }
+    
     existingPersitentReplacements = new ThreadLocalStack<Map>();
     existingTransientValues = new ThreadLocalStack<Map>();
     persistenceFile = new ThreadLocalStack<File>();
     persistenceURL = new ThreadLocalStack<URL>();
+    useGateHome = new ThreadLocalStack<Boolean>();
+    warnAboutGateHome = new ThreadLocalStack<Boolean>();
+    haveWarnedAboutGateHome = new ThreadLocalStack<BooleanFlag>();
   }
 }
