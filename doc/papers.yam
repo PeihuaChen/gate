@@ -1,20 +1,20 @@
 GATE papers
 
-%1* Which paper to cite if ..
+%2* Which paper to cite if ..
 
-%2* I used GATE/ANNIE:
+%3* I used GATE/ANNIE:
 
  - H. Cunningham, D. Maynard, K. Bontcheva, V. Tablan. GATE: A Framework and Graphical Development Environment for Robust NLP Tools and Applications. Proceedings of the 40th Anniversary Meeting of the Association for Computational Linguistics (ACL'02). Philadelphia, July 2002. %(../../sale/acl02/acl-main.pdf,PDF). %(gate.bib,BibTex entry).
 
-%2* I used the ontology features in GATE:
+%3* I used the ontology features in GATE:
 
  - K. Bontcheva, V. Tablan, D. Maynard, H. Cunningham. Evolving GATE to Meet New Challenges in Language Engineering. Natural Language Engineering. 10 (3/4), pp. 349-373. 2004. %(../../sale/jnle03/jnle-final.pdf,Pre-print). %(gate.bib,BibTex entry).
 
-%2* On GATE and multimedia:
+%3* On GATE and multimedia:
 
  - M. Dowman, V. Tablan, H. Cunningham and B. Popov. Web-Assisted Annotation, Semantic Indexing and Search of Television and Radio News. 14th International World Wide Web Conference. Chiba, Japan, 2005. %(http://gate.ac.uk/sale/www05/web-assisted-annotation.pdf,PDF), %(gate.bib,BibTex entry)
 
-%2* I used the machine learning facilities in GATE:
+%3* I used the machine learning facilities in GATE:
 
  - Y. Li, K. Bontcheva and H. Cunningham. Adapting SVM for Data Sparseness and Imbalance: A Case Study on Information Extraction. Natural Language Engineering, 15(02), 241-271, 2009. %(http://journals.cambridge.org/repo_A45LfkBD,On-line Link).
 
