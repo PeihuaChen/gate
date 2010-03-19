@@ -33,35 +33,66 @@ public class GappModel {
    */
   private URL gappFileURL;
 
+  /**
+   * The URL against which to resolve $gatehome$ relative paths.
+   */
+  private URL gateHomeURL;
+
+  /**
+   * Map whose keys are the resolved URLs of plugins referred to by relative
+   * paths in the GAPP file and whose values are the JDOM Elements of the
+   * &lt;urlString&gt; elements concerned.
+   */
   private Map<URL, List<Element>> pluginRelpathsMap =
           new HashMap<URL, List<Element>>();
 
+  /**
+   * Map whose keys are the resolved URLs of resource files other than plugin
+   * directories referred to by relative paths in the GAPP file and whose
+   * values are the JDOM Elements of the &lt;urlString&gt; elements concerned.
+   */
   private Map<URL, List<Element>> resourceRelpathsMap =
           new HashMap<URL, List<Element>>();
 
   /**
-   * XPath selecting all urlStrings that contain $relpath$ in the
+   * XPath selecting all urlStrings that contain $relpath$ or $gatehome$ in the
    * &lt;application&gt; section of the file.
    */
   private static XPath relativeResourcePathElementsXPath;
 
   /**
-   * XPath selecting all urlStrings that contain $relpath$ in the
+   * XPath selecting all urlStrings that contain $relpath$ or $gatehome$ in the
    * &lt;urlList&gt; section of the file.
    */
   private static XPath relativePluginPathElementsXPath;
 
   /**
+   * @see #GappModel(URL,URL)
+   */
+  public GappModel(URL gappFileURL) {
+    this(gappFileURL, null);
+  }
+
+  /**
    * Create a GappModel for a GAPP file.
    * 
    * @param gappFileURL the URL of the GAPP file to model.
+   * @param gateHomeURL the URL against which $gatehome$ relative paths should
+   * be resolved.  This may be null if you are sure that the GAPP you are
+   * packaging does not contain any $gatehome$ paths.  If no gateHomeURL is
+   * provided but the application does contain a $gatehome$ path, a
+   * GateRuntimeException will be thrown.
    */
   @SuppressWarnings("unchecked")
-  public GappModel(URL gappFileURL) {
+  public GappModel(URL gappFileURL, URL gateHomeURL) {
     if(!"file".equals(gappFileURL.getProtocol())) {
       throw new GateRuntimeException("GAPP URL must be a file: URL");
     }
+    if(gateHomeURL != null && !"file".equals(gateHomeURL.getProtocol())) {
+      throw new GateRuntimeException("GATE home URL must be a file: URL");
+    }
     this.gappFileURL = gappFileURL;
+    this.gateHomeURL = gateHomeURL;
 
     try {
       SAXBuilder builder = new SAXBuilder();
@@ -78,12 +109,14 @@ public class GappModel {
                 XPath
                         .newInstance("/gate.util.persistence.GateApplication/application"
                                 + "//gate.util.persistence.PersistenceManager-URLHolder"
-                                + "/urlString[starts-with(., '$relpath$')]");
+                                + "/urlString[starts-with(., '$relpath$') "
+                                + "or starts-with(., '$gatehome$')]");
         relativePluginPathElementsXPath =
                 XPath
                         .newInstance("/gate.util.persistence.GateApplication/urlList"
                                 + "//gate.util.persistence.PersistenceManager-URLHolder"
-                                + "/urlString[starts-with(., '$relpath$')]");
+                                + "/urlString[starts-with(., '$relpath$') "
+                                + "or starts-with(., '$gatehome$')]");
       }
       catch(JDOMException jdx) {
         throw new GateRuntimeException("Error creating XPath expression", jdx);
@@ -119,8 +152,21 @@ public class GappModel {
   private void buildRelpathsMap(List<Element> relpathElements,
           Map<URL, List<Element>> relpathsMap) throws MalformedURLException {
     for(Element el : relpathElements) {
-      String relativePath = el.getText().substring("$relpath$".length());
-      URL targetURL = new URL(gappFileURL, relativePath);
+      String elementText = el.getText();
+      URL targetURL = null;
+      if(elementText.startsWith("$gatehome$")) {
+        // complain if gateHomeURL not set
+        if(gateHomeURL == null) {
+          throw new GateRuntimeException("Found a $gatehome$ relative path in "
+              + "GAPP file, but no GATE home URL provided to resolve against");
+        }
+        String relativePath = el.getText().substring("$gatehome$".length());
+        targetURL = new URL(gateHomeURL, relativePath);
+      }
+      else if(elementText.startsWith("$relpath$")) {
+        String relativePath = el.getText().substring("$relpath$".length());
+        targetURL = new URL(gappFileURL, relativePath);
+      }
       List<Element> eltsForURL = relpathsMap.get(targetURL);
       if(eltsForURL == null) {
         eltsForURL = new ArrayList<Element>();

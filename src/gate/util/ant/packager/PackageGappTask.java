@@ -66,6 +66,12 @@ public class PackageGappTask extends Task {
   private File src;
 
   /**
+   * The location of the GATE home directory.  Only required if the GAPP file
+   * to be packaged contains URLs relative to $gatehome$.
+   */
+  private File gateHome;
+
+  /**
    * Should we copy the complete contents of referenced plugin
    * directories into the right place relative to the destFile? If not,
    * only the creole.xmls, any JARs they directly include, and directly
@@ -150,6 +156,22 @@ public class PackageGappTask extends Task {
    */
   public void setSrc(File src) {
     this.src = src;
+  }
+
+  /**
+   * Get the location of the GATE home directory, used to resolve $gatehome$
+   * relative paths in the GAPP file.
+   */
+  public File getGateHome() {
+    return gateHome;
+  }
+
+  /**
+   * Set the location of the GATE home directory, used to resolve $gatehome$
+   * relative paths in the GAPP file.
+   */
+  public void setGateHome(File gateHome) {
+    this.gateHome = gateHome;
   }
 
   /**
@@ -254,7 +276,12 @@ public class PackageGappTask extends Task {
     GappModel gappModel = null;
     URL newFileURL = null;
     try {
-      gappModel = new GappModel(src.toURI().toURL());
+      URL gateHomeURL = null;
+      // convert gateHome to a URL, if it was provided
+      if(gateHome != null) {
+        gateHomeURL = gateHome.toURI().toURL();
+      }
+      gappModel = new GappModel(src.toURI().toURL(), gateHomeURL);
       newFileURL = destFile.toURI().toURL();
       gappModel.setGappFileURL(newFileURL);
     }
