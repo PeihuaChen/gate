@@ -1031,8 +1031,10 @@ public class NameBearerHandle implements Handle, StatusListener,
           public void run() {
             try {
               Map<String, String> locations = fileChooser.getLocations();
+              // When saving an application state, use paths relative to 
+              // GATE HOME for resources inside GATE HOME and warn about them.
               gate.util.persistence.PersistenceManager
-                .saveObjectToFile(target, file);
+                .saveObjectToFile(target, file, true, true);
               // save also the location of the application as last application
               locations.put("lastapplication", file.getCanonicalPath());
               // add this application to the list of recent applications
@@ -1168,8 +1170,11 @@ public class NameBearerHandle implements Handle, StatusListener,
             File targetGapp = new File(temporaryDirectory, "application.xgapp");
 
             // save the application in a gapp file
+            // When exporting to TeamWare, the gapp file should not contain
+            // any paths relative to GATE HOME, but we still warn about 
+            // resources under GATE HOME
             gate.util.persistence.PersistenceManager
-              .saveObjectToFile(target, originalGapp);
+              .saveObjectToFile(target, originalGapp, false, true);
 
             // create instance of packager task and configure it
             PackageGappTask task = new PackageGappTask();
