@@ -158,6 +158,13 @@ public class PersistenceManager {
                 }
                 if(currentUseGateHome()) {
                   pathMarker = gatehomePathMarker;
+                  // we need to find the URL of the canonical file name since
+                  // this could really be inside GATE_HOME but be referenced
+                  // by a different name, e.g. a symbolic link. In that case
+                  // the original url would not match urlPathName from above.
+                  // and getRelativePath would build an URL string that goes
+                  // up to the root dir with "../" path elements.
+                  url = Files.fileFromURL(url).getCanonicalFile().toURI().toURL();
                 }
               }
             } catch(IOException ex) {
