@@ -458,7 +458,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     centerPanel = new AnnotationStack(150, 30);
 
     configureStackViewButton =
-      new ButtonBorder(new Color(250,250,250), new Insets(0,0,0,0), true);
+      new ButtonBorder(new Color(250,250,250), new Insets(0,0,0,3), true);
     configureStackViewButton.setHorizontalAlignment(SwingConstants.LEFT);
     configureStackViewButton.setAction(new ConfigureStackViewAction());
 
@@ -674,7 +674,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
     class RemoveCellEditorRenderer extends AbstractCellEditor
       implements TableCellRenderer, TableCellEditor, ActionListener {
-      private int row;
       private JButton button;
       public RemoveCellEditorRenderer() {
         button = new JButton();
@@ -683,6 +682,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         button.setToolTipText("Remove this row.");
         button.setContentAreaFilled(false);
         button.setBorderPainted(false);
+        button.setMargin(new Insets(0, 0, 0, 0));
         button.addActionListener(this);
       }
       public Component getTableCellRendererComponent(
@@ -695,15 +695,17 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         return false;
       }
       public void actionPerformed(ActionEvent e) {
+        int editingRow = oneRowStatisticsTable.getEditingRow();
+        fireEditingStopped();
         oneRowStatisticsTableModel.removeRow(
-          oneRowStatisticsTable.rowViewToModel(row));
+          oneRowStatisticsTable.rowViewToModel(editingRow));
       }
       public Object getCellEditorValue() {
         return null;
       }
       public Component getTableCellEditorComponent(JTable table,
               Object value, boolean isSelected, int row, int col) {
-        this.row = row;
+        button.setSelected(isSelected);
         return button;
       }
     }
@@ -727,8 +729,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     oneRowStatisticsTableModel = new DefaultTableModel(
       new Object[]{"Annotation Type/Feature","Count",""}, 0);
     oneRowStatisticsTable.setModel(oneRowStatisticsTableModel);
-    oneRowStatisticsTable.getColumnModel().getColumn(2).setMaxWidth(
-      MainFrame.getIcon("crystal-clear-action-edit-remove").getIconWidth()+6);
     oneRowStatisticsTable.getColumnModel().getColumn(2)
       .setCellEditor(new RemoveCellEditorRenderer());
     oneRowStatisticsTable.getColumnModel().getColumn(2)
@@ -2922,8 +2922,6 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       final class AddRemoveCellEditorRenderer extends AbstractCellEditor
       implements TableCellRenderer, TableCellEditor, ActionListener {
         private JButton button;
-        private int row;
-        private boolean addButton;
         public AddRemoveCellEditorRenderer() {
           button = new JButton();
           button.setHorizontalAlignment(SwingConstants.CENTER);
@@ -2949,7 +2947,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           return false;
         }
         public void actionPerformed(ActionEvent e) {
-          if (addButton) {
+          int row = stackRowsJTable.getEditingRow();
+          fireEditingStopped();
+          if (row == numStackRows) {
             if (stackRows[row][ANNOTATION_TYPE] != null
              && !stackRows[row][ANNOTATION_TYPE].equals("")) {
               if (numStackRows == maxStackRows) {
@@ -2959,8 +2959,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               } else {
                 // add a new row
                 numStackRows++;
-                configureStackViewTableModel
-                  .fireTableRowsInserted(row, row+1);
+                configureStackViewTableModel.fireTableRowsInserted(row, row+1);
                 updateStackView();
                 saveStackViewConfiguration();
               }
@@ -2982,9 +2981,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         }
         public Component getTableCellEditorComponent(JTable table,
                 Object value, boolean isSelected, int row, int col) {
-          this.addButton = (row == numStackRows);
-          this.row = row;
-          button.setIcon(MainFrame.getIcon((addButton) ?
+          button.setIcon(MainFrame.getIcon(row == numStackRows ?
             "crystal-clear-action-edit-add"
           : "crystal-clear-action-button-cancel"));
           return button;
@@ -3846,11 +3843,11 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         new EtchedBorder(EtchedBorder.LOWERED,
           highlight, highlight.darker().darker()),
         new EmptyBorder(insets));
-      this.setBorder(borderDarker);
-      this.setBorderPainted(showBorderWhenInactive);
-      this.setContentAreaFilled(false);
-      this.setFocusPainted(false);
-      this.addMouseListener(new MouseAdapter(){
+      setBorder(borderDarker);
+      setBorderPainted(showBorderWhenInactive);
+      setContentAreaFilled(false);
+      setFocusPainted(false);
+      addMouseListener(new MouseAdapter(){
         public void mouseEntered(MouseEvent e) {
           JButton button = ((JButton)e.getComponent());
           button.setBorder(borderDarkerDarker);
@@ -3870,7 +3867,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           button.setContentAreaFilled(false);
         }
       });
-      this.addFocusListener(new FocusAdapter() {
+      addFocusListener(new FocusAdapter() {
         public void focusGained(FocusEvent e) {
           JButton button = ((JButton)e.getComponent());
           button.setBorder(borderDarkerDarker);
