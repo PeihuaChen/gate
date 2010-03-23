@@ -20,6 +20,10 @@ import java.util.*;
 
 import gate.*;
 import gate.creole.*;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
+import gate.creole.metadata.RunTime;
 import gate.util.GateRuntimeException;
 
 /**
@@ -28,6 +32,8 @@ import gate.util.GateRuntimeException;
  * If put at the start of an application, it'll ensure that the
  * document is restored to its clean state before being processed.
  */
+@CreoleResource(name = "Document Reset PR",
+        comment = "Remove named annotation sets or reset the default annotation set")
 public class AnnotationDeletePR extends AbstractLanguageAnalyser
   implements ProcessingResource {
 
@@ -46,9 +52,31 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
   protected String markupSetName = GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME;
   protected List annotationTypes;
   protected List setsToKeep;
+  protected List<String> setsToRemove = null;
   protected Boolean keepOriginalMarkupsAS;
   
-
+  /**
+   * This parameter specifies the names of sets to remove or reset. If this 
+   * list is empty or null, it will be ignored. If this list is not empty,
+   * all the other parameters of this PR are ignored. In order to include
+   * the default annotation set in this list, add a list entry that is either
+   * null or an empty String.
+   * @param setsToRemove a List of String that contains the names of  
+   * annotation sets to remove.
+   */
+  @RunTime
+  @Optional
+  @CreoleParameter(
+    comment = "A list of annotation set names to reset/remove. If non-empty, ignore the parameters which specify what to keep" 
+    )
+  public void setSetsToRemove(List<String> setsToRemove) {
+    this.setsToRemove = setsToRemove;
+  }
+  public List<String> getSetsToRemove() {
+    return this.setsToRemove;
+  }  
+  
+  
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException
   {
@@ -74,65 +102,81 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
     if(document == null)
       throw new GateRuntimeException("No document to process!");
 
-    // determine which sets to keep
-    List keepSets = new ArrayList();
-    if(setsToKeep != null) keepSets.addAll(setsToKeep);
-    if(keepOriginalMarkupsAS.booleanValue() && 
-       !keepSets.contains(markupSetName)) {
-        keepSets.add(markupSetName);
-    }
-    
-    Map matchesMap = null;
-    Object matchesMapObject = document.getFeatures().get(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME);
-    if(matchesMapObject instanceof Map) {
-      matchesMap = (Map) matchesMapObject;
-    }
-
-    //Unless we've been asked to keep it, first clear the default set,
-    //which cannot be removed
-    if(!keepSets.contains(null) && !keepSets.contains("")) {
-      if (annotationTypes == null || annotationTypes.isEmpty()) {
-        document.getAnnotations().clear();
-        removeFromDocumentCorefData( (String)null, matchesMap);
-      } else {
-        removeSubSet(document.getAnnotations(), matchesMap);
+    if(setsToRemove != null && !setsToRemove.isEmpty()) {
+      // just remove or empty the sets in this list and ignore
+      // everything else
+      for(String setName : setsToRemove) {
+        if(setName == null || setName.equals("")) {
+          // clear the default annotation set
+          document.getAnnotations().clear();
+        } else {
+          // remove this named set
+          document.removeAnnotationSet(setName);
+        }
       }
-    }
-
-    //get the names of all sets
-    Map namedSets = document.getNamedAnnotationSets();
-    //nothing left to do if there are no named sets
-    if (namedSets != null && !namedSets.isEmpty()) {
-      //loop through the sets and delete them all unless
-      //we've been asked to keep them
-      List setNames = new ArrayList(namedSets.keySet());
-      Iterator iter = setNames.iterator();
-      String setName;
+    } else {
+      // ignore the setsToRemove parameter and process according to 
+      // the other parameters
       
-      while (iter.hasNext()) {
-        setName = (String) iter.next();
-        //check first whether this is the original markups or one of the sets
-        //that we want to keep
-        if (setName != null) {
-          // skip named sets from setsToKeep
-          if(keepSets.contains(setName)) continue;
-  
-          if (annotationTypes == null || annotationTypes.isEmpty()) {
-            document.removeAnnotationSet(setName);
-            removeFromDocumentCorefData( (String) setName, matchesMap);
-          } else {
-            removeSubSet(document.getAnnotations(setName), matchesMap);
-          }
-        }//if
+      // determine which sets to keep
+      List keepSets = new ArrayList();
+      if(setsToKeep != null) keepSets.addAll(setsToKeep);
+      if(keepOriginalMarkupsAS.booleanValue() && 
+         !keepSets.contains(markupSetName)) {
+          keepSets.add(markupSetName);
       }
-    }
 
-    // and finally we add it to the document
-    if(matchesMap != null) {
-      document.getFeatures().put(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME,
-                                 matchesMap);
-    }
+      Map matchesMap = null;
+      Object matchesMapObject = document.getFeatures().get(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME);
+      if(matchesMapObject instanceof Map) {
+        matchesMap = (Map) matchesMapObject;
+      }
 
+      //Unless we've been asked to keep it, first clear the default set,
+      //which cannot be removed
+      if(!keepSets.contains(null) && !keepSets.contains("")) {
+        if (annotationTypes == null || annotationTypes.isEmpty()) {
+          document.getAnnotations().clear();
+          removeFromDocumentCorefData( (String)null, matchesMap);
+        } else {
+          removeSubSet(document.getAnnotations(), matchesMap);
+        }
+      }
+
+      //get the names of all sets
+      Map namedSets = document.getNamedAnnotationSets();
+      //nothing left to do if there are no named sets
+      if (namedSets != null && !namedSets.isEmpty()) {
+        //loop through the sets and delete them all unless
+        //we've been asked to keep them
+        List setNames = new ArrayList(namedSets.keySet());
+        Iterator iter = setNames.iterator();
+        String setName;
+    
+        while (iter.hasNext()) {
+          setName = (String) iter.next();
+          //check first whether this is the original markups or one of the sets
+          //that we want to keep
+          if (setName != null) {
+            // skip named sets from setsToKeep
+            if(keepSets.contains(setName)) continue;
+  
+            if (annotationTypes == null || annotationTypes.isEmpty()) {
+              document.removeAnnotationSet(setName);
+              removeFromDocumentCorefData( (String) setName, matchesMap);
+            } else {
+              removeSubSet(document.getAnnotations(setName), matchesMap);
+            }
+          }//if
+        }
+      }
+
+      // and finally we add it to the document
+      if(matchesMap != null) {
+        document.getFeatures().put(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME,
+                                   matchesMap);
+      }
+    } // if(setsToRemove != null && !setsToRemove.isEmpty())
   } // execute()
 
   // method to undate the Document-Coref-data
