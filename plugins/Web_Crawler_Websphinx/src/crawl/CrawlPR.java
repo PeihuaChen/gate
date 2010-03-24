@@ -15,19 +15,23 @@
 
 package crawl;
 
+import java.net.URL;
+import java.util.*;
+import gate.Corpus;
+import gate.Document;
+import gate.Factory;
 import gate.ProcessingResource;
 import gate.Resource;
 import gate.creole.*;
-import gate.gui.MainFrame;
-import gate.corpora.*;
 import gate.util.*;
-import gate.*;
-
 import websphinx.*;
 
-public class CrawlPR extends AbstractLanguageAnalyser implements
-                                                     ProcessingResource {
+public class CrawlPR 
+  extends AbstractLanguageAnalyser 
+  implements ProcessingResource {
 
+  private static final long serialVersionUID = 7119190892757004776L;
+  
   private String root = null;
   private int depth = -1;
   private Corpus outputCorpus = null;
@@ -60,25 +64,40 @@ public class CrawlPR extends AbstractLanguageAnalyser implements
   }
 
   /**
+   * Override the default behaviour by interrupting the SphinxWrapper itself.  Otherwise,
+   * the SphinxWrapper would run uncontrollably.
+   * @throws ExecutionInterruptedException 
+   */
+  public void interrupt() {
+    this.interrupted = true;
+    if (crawler != null) {
+      crawler.interrupt();
+    }
+    
+  }
+  
+  
+  /**
    * This method runs the coreferencer. It assumes that all the needed
    * parameters are set. If they are not, an exception will be fired.
    */
   public void execute() throws ExecutionException {
     crawler = new SphinxWrapper();
     if(outputCorpus == null) { throw new ExecutionException(
-      "Output Corpus cannot be null"); }
+    "Output Corpus cannot be null"); }
 
     if(root == null && source == null) { throw new ExecutionException(
-      "Either root or source must be initialized"); }
+    "Either root or source must be initialized"); }
     if(depth == -1) { throw new ExecutionException("Limit is not initialized"); }
     if(dfs == null) { throw new ExecutionException("dfs is not initialized"); }
     if(domain == null) { throw new ExecutionException(
-      "domain type is not initialized.. Set to either SERVER/SUBTREE/WEB"); }
+    "domain type is not initialized.. Set to either SERVER/SUBTREE/WEB"); }
 
     try {
       crawler.setCorpus(outputCorpus);
       crawler.setDepth(depth);
       crawler.setDepthFirst(dfs.booleanValue());
+      
       if(domain == "SUBTREE") {
         crawler.setDomain(Crawler.SUBTREE);
       }
@@ -88,31 +107,47 @@ public class CrawlPR extends AbstractLanguageAnalyser implements
       else {
         crawler.setDomain(Crawler.WEB);
       }
+      
       if(max != -1) {
         crawler.setMaxPages(max);
       }
-      if(root != null && root != "") {
+      
+      if(root != null && (! root.isEmpty())) {
         crawler.setStart(root);
       }
       else {
-        CorpusImpl roots = (CorpusImpl)source;
-        // System.out.println("using the
-        // outputCorpus"+roots.getDocumentName(0));
-        Object rootArray[] = roots.toArray();
-        for(int i = 0; i < rootArray.length; i++) {
-          DocumentImpl doc = (DocumentImpl)rootArray[i];
-          System.out.println("adding ... " + doc.getSourceUrl().toString()
-            + "\n");
-          crawler.setStart(doc.getSourceUrl());
+        Corpus roots = (Corpus) source;
+        List<URL> urls = new ArrayList<URL>();
+        for(int i = 0; i < roots.size(); i++) {
+          boolean docWasLoaded = roots.isDocumentLoaded(i);
+          Document doc = (Document) roots.get(i);
+          URL url = doc.getSourceUrl();
+          if (url != null) {
+            System.out.println("adding   " + url.toString());
+            urls.add(url);
+          }
+          else {
+            System.out.println("skipping " + doc.getName());
+          }
+          
+          
+          if(! docWasLoaded) {
+            roots.unloadDocument(doc);
+            Factory.deleteResource(doc);
+          }
         }
+        crawler.setStarts(urls);
       }
 
       crawler.start();
-
+      if (interrupted) {
+        throw new ExecutionInterruptedException();
+      }
     }
     catch(Exception e) {
       String nl = Strings.getNl();
       Err.prln("  Exception was: " + e + nl + nl);
+      e.printStackTrace();
     }
   }
 
