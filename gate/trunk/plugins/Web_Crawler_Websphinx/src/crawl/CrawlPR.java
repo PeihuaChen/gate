@@ -112,7 +112,7 @@ public class CrawlPR
         crawler.setMaxPages(max);
       }
       
-      if(root != null && (! root.isEmpty())) {
+      if(root != null && (root.length() > 0)) {
         crawler.setStart(root);
       }
       else {
