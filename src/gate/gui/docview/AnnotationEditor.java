@@ -24,8 +24,6 @@ import javax.swing.*;
 import javax.swing.Timer;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
-import javax.swing.event.TableModelListener;
-import javax.swing.event.TableModelEvent;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.text.BadLocationException;
 
@@ -45,23 +43,20 @@ import gate.util.*;
  * does not enforce the schemas, allowing the user full control.
  */
 public class AnnotationEditor extends AbstractVisualResource 
-    implements gate.gui.annedit.OwnedAnnotationEditor{
+    implements OwnedAnnotationEditor{
   
   private static final long serialVersionUID = 1L;
 
-  public AnnotationEditor(){
-    
-  }
-  
-  
-  
   /* (non-Javadoc)
    * @see gate.creole.AbstractVisualResource#init()
    */
   @Override
   public Resource init() throws ResourceInstantiationException {
+
     super.init();
+    initData();
     initGUI();
+    initListeners();
     annotationEditorInstance = this;
     return this;
   }
@@ -112,8 +107,10 @@ public class AnnotationEditor extends AbstractVisualResource
     Gate.getCreoleRegister().addCreoleListener(creoleListener); 
   }
   
-  protected void initBottomWindow(Window parent){
-    popupWindow = new JWindow(parent) {
+  protected void initGUI(){
+
+    popupWindow = new JWindow(SwingUtilities.getWindowAncestor(
+        owner.getTextComponent())) {
       public void pack() {
         // increase the feature table size only if not bigger
         // than the main frame
@@ -131,8 +128,13 @@ public class AnnotationEditor extends AbstractVisualResource
         }
         super.pack();
       }
+      public void setVisible(boolean b) {
+        super.setVisible(b);
+        // when the editor is shown put the focus in the type combo box
+        if (b) { typeCombo.requestFocus(); }
+      }
     };
-    
+
     JPanel pane = new JPanel();
     pane.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
     pane.setLayout(new GridBagLayout());
@@ -186,7 +188,6 @@ public class AnnotationEditor extends AbstractVisualResource
     pinnedButton = new JToggleButton(MainFrame.getIcon("pin"));
     pinnedButton.setSelectedIcon(MainFrame.getIcon("pin-in"));
     pinnedButton.setSelected(false);
-    pinnedButton.setToolTipText("Press to pin window in place.");
     pinnedButton.setBorderPainted(false);
     pinnedButton.setContentAreaFilled(false);
     constraints.weightx = 1;
@@ -245,9 +246,8 @@ public class AnnotationEditor extends AbstractVisualResource
     popupWindow.pack();
   }
 
-
   protected void initListeners(){
-    //resize the window when the table cahnges. 
+    //resize the window when the table changes.
     featuresEditor.addComponentListener(new ComponentAdapter() {
       @Override
       public void componentResized(ComponentEvent e) {
@@ -256,7 +256,14 @@ public class AnnotationEditor extends AbstractVisualResource
       }
     });
 
-    
+    KeyAdapter keyAdapter = new KeyAdapter() {
+      public void keyPressed(KeyEvent e) {
+        hideTimer.stop();
+      }
+    };
+
+    typeCombo.getEditor().getEditorComponent().addKeyListener(keyAdapter);
+
     MouseListener windowMouseListener = new MouseAdapter() {
       public void mouseEntered(MouseEvent evt) {
         hideTimer.stop();
@@ -350,6 +357,16 @@ public class AnnotationEditor extends AbstractVisualResource
       "eorAction");
     actionMap.put("eorAction", eorAction);
 
+    pinnedButton.setToolTipText("<html>Press to pin window in place"
+      + "&nbsp;&nbsp;<font color=#667799><small>Ctrl-P"
+      + "&nbsp;&nbsp;</small></font></html>");
+    inputMap.put(KeyStroke.getKeyStroke("control P"), "toggle pin");
+    actionMap.put("toggle pin", new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        pinnedButton.doClick();
+      }
+    });
+
     DismissAction dismissAction = new DismissAction("", null,
       "Close the window", KeyEvent.VK_ESCAPE);
     dismissButton.setAction(dismissAction);
@@ -385,14 +402,6 @@ public class AnnotationEditor extends AbstractVisualResource
       }
     });
 
-  }
-  
-  protected void initGUI() {
-
-    initData();
-    initBottomWindow(SwingUtilities.getWindowAncestor(owner.getTextComponent()));
-    initListeners();
-
     hideTimer = new Timer(HIDE_DELAY, new ActionListener() {
       public void actionPerformed(ActionEvent evt) {
         annotationEditorInstance.setVisible(false);
@@ -422,8 +431,7 @@ public class AnnotationEditor extends AbstractVisualResource
     };
     owner.getTextComponent().addAncestorListener(textAncestorListener);
   }
-  
-  
+
   /* (non-Javadoc)
    * @see gate.gui.annedit.AnnotationEditor#isActive()
    */
@@ -456,10 +464,8 @@ public class AnnotationEditor extends AbstractVisualResource
 //    popupWindow.doLayout();
     popupWindow.validate();
     setEditingEnabled(true);
-    if (pinnedButton.isSelected()) {
-      setVisible(true);
-    } else {
-      setVisible(true);
+    setVisible(true);
+    if (!pinnedButton.isSelected()) {
       hideTimer.restart();
     }
   }
@@ -477,7 +483,6 @@ public class AnnotationEditor extends AbstractVisualResource
     return true;
   }
 
-
   public boolean isShowing(){
     return popupWindow.isShowing();
   }
@@ -491,11 +496,14 @@ public class AnnotationEditor extends AbstractVisualResource
     if (setVisible) {
       placeDialog(ann.getStartNode().getOffset().intValue(),
         ann.getEndNode().getOffset().intValue());
-      popupWindow.setVisible(true);
 
     } else {
       popupWindow.setVisible(false);
       pinnedButton.setSelected(false);
+      SwingUtilities.invokeLater(new Runnable() { public void run() {
+        // when hiding the editor put back the focus in the document
+        owner.getTextComponent().requestFocus();
+      }});
     }
   }
 
@@ -503,12 +511,9 @@ public class AnnotationEditor extends AbstractVisualResource
    * Finds the best location for the editor dialog for a given span of text.
    */
   public void placeDialog(int start, int end){
-    if(pinnedButton.isSelected()){
+    if(popupWindow.isVisible() && pinnedButton.isSelected()){
       //just resize
-      Point where = null;
-      if(popupWindow.isVisible()){
-        where = popupWindow.getLocation();
-      }
+      Point where = popupWindow.getLocation();
       popupWindow.pack();
       if(where != null){
         popupWindow.setLocation(where);
