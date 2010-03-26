@@ -775,12 +775,17 @@ public class MainFrame extends JFrame implements ProgressListener,
       new AbstractAction("Start Profiling Applications") {
       { putValue(SHORT_DESCRIPTION,
         "Toggles the profiling of processing resources"); }
+      
+      // stores the value held by the benchmarking switch before we started
+      // this profiling run.
+      boolean benchmarkWasEnabled;
+
       public void actionPerformed(ActionEvent evt) {
         if (getValue(NAME).equals("Start Profiling Applications")) {
           reportClearMenuItem.setEnabled(false);
-          if (!Benchmark.isBenchmarkingEnabled()) {
-            Benchmark.setBenchmarkingEnabled(true);
-          }
+          // store old value of benchmark switch
+          benchmarkWasEnabled = Benchmark.isBenchmarkingEnabled();
+          Benchmark.setBenchmarkingEnabled(true);
           Layout layout = new PatternLayout("%m%n");
           File logFile = new File(System.getProperty("java.io.tmpdir"),
             "gate-benchmark-log.txt");
@@ -796,6 +801,12 @@ public class MainFrame extends JFrame implements ProgressListener,
           Benchmark.logger.addAppender(appender);
           putValue(NAME, "Stop Profiling Applications");
         } else {
+          // reset old value of benchmark switch - i.e. if benchmarking was
+          // disabled before the user selected "start profiling" then we
+          // disable it again now, but if it was already enabled before they
+          // started profiling then we assume it was turned on explicitly and
+          // leave it alone.
+          Benchmark.setBenchmarkingEnabled(benchmarkWasEnabled);
           Benchmark.logger.removeAppender("gate-benchmark");
           putValue(NAME, "Start Profiling Applications");
           reportClearMenuItem.setEnabled(true);
