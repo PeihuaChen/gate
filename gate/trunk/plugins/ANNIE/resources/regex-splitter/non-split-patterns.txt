@@ -86,6 +86,8 @@
 \bet\.
 \betc\.(?!\s+\p{Upper}) 
 \bfig\.
+\bie\.
+\bi\.e\.
 \bp\.
 \bp\.m\.
 \busu\.
