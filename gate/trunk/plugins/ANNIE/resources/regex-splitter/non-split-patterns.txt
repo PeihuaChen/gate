@@ -82,6 +82,7 @@
 \bed\.
 \beds\.
 \beg\.
+\be\.g\.
 \bet\.
 \betc\.(?!\s+\p{Upper}) 
 \bfig\.
