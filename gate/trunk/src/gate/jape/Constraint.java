@@ -137,8 +137,9 @@ public class Constraint implements JapeConstants, gate.creole.ANNIEConstants,
                 ontLookupClassPred.getValue());
         if(!attr.getOperator().equals(ConstraintPredicate.EQUAL))
           gate.util.Err
-                  .println("Warning: Ontology class feature will be compared using =, not "
-                          + attr.getOperator());
+                  .println("Warning: If an ontology is specified at runtime, "
+                         + "Ontology class feature will be compared using "
+                         + "ontology subsumption, not " + attr.getOperator());
       }
       else if(featureName.equals(LOOKUP_ONTOLOGY_FEATURE_NAME)) {
         getOntFeatureMap().put(LOOKUP_ONTOLOGY_FEATURE_NAME, attr.getValue());
@@ -349,7 +350,7 @@ public class Constraint implements JapeConstants, gate.creole.ANNIEConstants,
         // ontology.  Note that we assume the operator for the predicate
         // was ==. We issue a warning when the predicate is first set
         // if it's anything else.
-        if(predicate == ontLookupClassPred)
+        if(predicate == ontLookupClassPred && ontologyLR != null)
           successful = annot.getFeatures().subsumes(ontologyLR, ontFeatureMap);
         else successful = predicate.matches(annot, context);
       }
