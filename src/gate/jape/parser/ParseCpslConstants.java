@@ -9,56 +9,57 @@ public interface ParseCpslConstants {
   int newline = 3;
   int digits = 4;
   int letter = 5;
-  int letters = 6;
-  int lettersAndDigits = 7;
-  int letterOrDigitOrDash = 8;
-  int lettersAndDigitsAndDashes = 9;
-  int multiphase = 10;
-  int phases = 11;
-  int path = 12;
-  int phasesWhiteSpace = 13;
-  int phasesSingleLineCStyleComment = 14;
-  int phasesSingleLineCpslStyleComment = 15;
-  int phasesCommentStart = 16;
-  int phasesCommentChars = 17;
-  int phasesCommentEnd = 18;
-  int javaimport = 19;
-  int phase = 20;
-  int input = 21;
-  int option = 22;
-  int rule = 23;
-  int macro = 24;
-  int priority = 25;
-  int pling = 26;
-  int kleeneOp = 27;
-  int attrOp = 28;
-  int metaPropOp = 29;
-  int integer = 30;
-  int string = 42;
-  int bool = 43;
-  int ident = 44;
-  int floatingPoint = 45;
-  int exponent = 46;
-  int colon = 47;
-  int semicolon = 48;
-  int period = 49;
-  int bar = 50;
-  int comma = 51;
-  int leftBrace = 52;
-  int rightBrace = 53;
-  int leftBracket = 54;
-  int rightBracket = 55;
-  int leftSquare = 56;
-  int rightSquare = 57;
-  int assign = 58;
-  int colonplus = 59;
-  int whiteSpace = 60;
-  int singleLineCStyleComment = 61;
-  int singleLineCpslStyleComment = 62;
-  int commentStart = 63;
-  int commentChars = 64;
-  int commentEnd = 65;
-  int other = 66;
+  int letterOrUnderscore = 6;
+  int letters = 7;
+  int lettersAndDigits = 8;
+  int letterOrDigitOrDash = 9;
+  int lettersAndDigitsAndDashes = 10;
+  int multiphase = 11;
+  int phases = 12;
+  int path = 13;
+  int phasesWhiteSpace = 14;
+  int phasesSingleLineCStyleComment = 15;
+  int phasesSingleLineCpslStyleComment = 16;
+  int phasesCommentStart = 17;
+  int phasesCommentChars = 18;
+  int phasesCommentEnd = 19;
+  int javaimport = 20;
+  int phase = 21;
+  int input = 22;
+  int option = 23;
+  int rule = 24;
+  int macro = 25;
+  int priority = 26;
+  int pling = 27;
+  int kleeneOp = 28;
+  int attrOp = 29;
+  int metaPropOp = 30;
+  int integer = 31;
+  int string = 43;
+  int bool = 44;
+  int ident = 45;
+  int floatingPoint = 46;
+  int exponent = 47;
+  int colon = 48;
+  int semicolon = 49;
+  int period = 50;
+  int bar = 51;
+  int comma = 52;
+  int leftBrace = 53;
+  int rightBrace = 54;
+  int leftBracket = 55;
+  int rightBracket = 56;
+  int leftSquare = 57;
+  int rightSquare = 58;
+  int assign = 59;
+  int colonplus = 60;
+  int whiteSpace = 61;
+  int singleLineCStyleComment = 62;
+  int singleLineCpslStyleComment = 63;
+  int commentStart = 64;
+  int commentChars = 65;
+  int commentEnd = 66;
+  int other = 67;
 
   int DEFAULT = 0;
   int IN_PHASES = 1;
@@ -73,6 +74,7 @@ public interface ParseCpslConstants {
     "<newline>",
     "<digits>",
     "<letter>",
+    "<letterOrUnderscore>",
     "<letters>",
     "<lettersAndDigits>",
     "<letterOrDigitOrDash>",
@@ -107,8 +109,8 @@ public interface ParseCpslConstants {
     "\"\\\\\\\"\"",
     "\"\\\\\\\'\"",
     "\"\\\\\\\\\"",
-    "<token of kind 40>",
     "<token of kind 41>",
+    "<token of kind 42>",
     "\"\\\"\"",
     "<bool>",
     "<ident>",

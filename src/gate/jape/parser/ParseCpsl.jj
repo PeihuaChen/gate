@@ -237,6 +237,7 @@ PARSER_END(ParseCpsl)
 <DEFAULT> TOKEN: { <#newline: ("\n" | "\r" | "\n\r" | "\r\n")> }
 <DEFAULT> TOKEN: { <#digits: (["0"-"9"])+> }
 <DEFAULT> TOKEN: { <#letter: ["A"-"Z", "a"-"z"]> }
+<DEFAULT> TOKEN: { <#letterOrUnderscore: ["A"-"Z", "a"-"z", "_"]> }
 <DEFAULT> TOKEN: { <#letters: (["A"-"Z", "a"-"z"])+> }
 <DEFAULT> TOKEN: { <#lettersAndDigits: (["A"-"Z", "a"-"z", "0"-"9"])+> }
 <DEFAULT> TOKEN: {
@@ -336,7 +337,7 @@ PARSER_END(ParseCpsl)
    }
 
 <DEFAULT> TOKEN: { <bool: "true" | "false" > }
-<DEFAULT> TOKEN: { <ident: <letter> (<letterOrDigitOrDash>)* > }
+<DEFAULT> TOKEN: { <ident: <letterOrUnderscore> (<letterOrDigitOrDash>)* > }
 <DEFAULT> TOKEN: {
   <floatingPoint:
       (["0"-"9"])+ "." (["0"-"9"])* (<exponent>)? (["f","F","d","D"])?
