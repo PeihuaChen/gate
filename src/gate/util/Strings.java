@@ -235,16 +235,21 @@ public class Strings {
      || string.length() < 3) {
       return map;
     }
-    try {
-      String[] entries = string.substring(1, string.length()-1).split(", "); 
-      for (String entry : entries) {
-        String[] keyValue = entry.split("=", 2);
+    String[] entries = string.substring(1, string.length()-1).split(", ");
+    String previousKey = null;
+    for (String entry : entries) {
+      String[] keyValue = entry.split("=", 2);
+      if (keyValue.length == 1) { // ', ' is used in the value
+        if (previousKey == null) {
+          Err.println("The string has not the format: {key=value, key=value}");
+          Err.println(string);
+        } else {
+          map.put(previousKey, map.get(previousKey) + ", " + entry);
+        }
+      } else {
         map.put(keyValue[0], keyValue[1]);
+        previousKey = keyValue[0];
       }
-    } catch(ArrayIndexOutOfBoundsException e) {
-      Err.println("The string has not the format: {key=value, key=value}");
-      Err.println(string);
-      throw e;
     }
     return map;
   }
