@@ -41,7 +41,7 @@ public class RealtimeCorpusController extends SerialAnalyserController {
 
   /** Profiler to track PR execute time */
   protected Profiler prof;
-  protected HashMap timeMap;
+  protected HashMap<String,Long> timeMap;
    
   public RealtimeCorpusController(){
     super();
@@ -49,22 +49,7 @@ public class RealtimeCorpusController extends SerialAnalyserController {
       prof = new Profiler();
       prof.enableGCCalling(false);
       prof.printToSystemOut(true);
-      timeMap = new HashMap();
-    }
-
-  }
-    
-  protected class TimeoutTask extends TimerTask{
-    public void run(){
-      Err.prln("Execution timeout, stopping worker thread...");
-      executionThread.stop();
-    }
-    Thread executionThread;
-    public Thread getExecutionThread() {
-      return executionThread;
-    }
-    public void setExecutionThread(Thread executionThread) {
-      this.executionThread = executionThread;
+      timeMap = new HashMap<String,Long>();
     }
   }
   
@@ -85,7 +70,6 @@ public class RealtimeCorpusController extends SerialAnalyserController {
           prof.initRun("Execute controller [" + getName() + "]");
         }
 
-  
         //execute all PRs in sequence
         interrupted = false;
         for (int j = 0; j < prList.size(); j++){
@@ -93,11 +77,29 @@ public class RealtimeCorpusController extends SerialAnalyserController {
               "The execution of the " + getName() +
               " application has been abruptly interrupted!");
   
-          runComponent(j);
+          if (Thread.currentThread().isInterrupted()) {
+            Err.println("Execution on document " + document.getName() + 
+              " has been stopped");
+            break;
+          }
+          
+          try {
+            runComponent(j);
+          }
+          catch (Throwable e)
+          {
+            if (!Thread.currentThread().isInterrupted())
+              throw e;
+            
+            Err.println("Execution on document " + document.getName() + 
+              " has been stopped");
+            break;
+          }
+          
           if (DEBUG) {
             prof.checkPoint("~Execute PR ["+((ProcessingResource)
                                    prList.get(j)).getName()+"]");
-            Long timeOfPR = (Long) timeMap.get(((ProcessingResource)
+            Long timeOfPR = timeMap.get(((ProcessingResource)
                                    prList.get(j)).getName());
             if (timeOfPR == null) 
               timeMap.put(((ProcessingResource)
@@ -163,14 +165,59 @@ public class RealtimeCorpusController extends SerialAnalyserController {
       Document doc = (Document)corpus.get(i);
       DocRunner docRunner = new DocRunner();
       docRunner.setDocument(doc);
-      Thread workerThread = new Thread(docRunner, 
+      final Thread workerThread = new Thread(docRunner, 
               this.getClass().getCanonicalName() + " worker thread (document " +
               doc.getName() + ")");
       
-      //prepare the timeout timer
-      TimeoutTask timeoutTask = new TimeoutTask();
-      timeoutTask.setExecutionThread(workerThread);
-      timeoutTimer.schedule(timeoutTask, timeout.longValue());
+      //We need three timer tasks to do a staged stop that gets harsher as we go on...
+      
+      //first we simply interrupt the PRs and the thread they are being run in
+      TimerTask gracefulTask = new TimerTask()
+      {
+        public void run() {
+          Err.prln("Execution timeout, attempting to gracefully stop worker thread...");
+          workerThread.interrupt();
+          for(int j = 0; j < prList.size(); j++){
+            ((Executable)prList.get(j)).interrupt();
+          }
+        }
+      };
+      
+      //if using interrupt didn't stop things then we nullify the document and corpus params
+      //in the hope that we will induce a null pointer exception
+      TimerTask nullifyTask = new TimerTask()
+      {
+        public void run() {
+          if (!workerThread.isAlive()) return;
+          Err.println("Execution timeout, attempting to induce exception in order to stop worker thread...");
+          for(int j = 0; j < prList.size(); j++){
+            ((LanguageAnalyser)prList.get(j)).setDocument(document);
+            ((LanguageAnalyser)prList.get(j)).setCorpus(corpus);
+          }
+        }
+      };
+      
+      //if the PR still hasn't stopped then be ruthless and just stop the thread dead in it's tracks!
+      TimerTask timeoutTask = new TimerTask()
+      {
+        public void run() {
+          if (!workerThread.isAlive()) return;
+          Err.println("Execution timout, worker thread will be forcibly terminated!");
+          workerThread.stop();
+        }
+      };
+      
+      //only schedule the first two tasks if the graceful timeout param makes sense 
+      if (graceful.longValue() != -1 && (timeout.longValue() == -1 || graceful.longValue() < timeout.longValue())) {
+        timeoutTimer.schedule(gracefulTask, graceful.longValue());
+        
+        long nullTime = graceful.longValue() + (timeout.longValue() != -1 ? (timeout.longValue()-graceful.longValue())/2 : graceful.longValue() / 2);
+        
+        timeoutTimer.schedule(nullifyTask, nullTime);
+      }
+      
+      if (timeout.longValue() != -1) timeoutTimer.schedule(timeoutTask, timeout.longValue());
+      
       //start the execution
       workerThread.start();
       
@@ -184,10 +231,11 @@ public class RealtimeCorpusController extends SerialAnalyserController {
         }
       }
       timeoutTask.cancel();
+      
       if(!docWasLoaded){
         //trigger saving
         getCorpus().unloadDocument(doc);
-        //close the previoulsy unloaded Doc
+        //close the previously unloaded Doc
         Factory.deleteResource(doc);
       }
     }
@@ -202,11 +250,23 @@ public class RealtimeCorpusController extends SerialAnalyserController {
   public Long getTimeout() {
     return timeout;
   }
-
+  
   @CreoleParameter(defaultValue = "60000",
-      comment = "Timout in milliseconds before execution on a document is stopped")
+      comment = "Timout in milliseconds before execution on a document is forcibly stopped (forcibly stopping execution may result in memory leaks and/or unexpected behaviour)")
   public void setTimeout(Long timeout) {
     this.timeout = timeout;
+  }
+  
+  protected Long graceful;
+
+  public Long getGracefulTimeout() {
+    return graceful;
+  }
+
+  @CreoleParameter(defaultValue = "-1",
+      comment = "Timeout in milliseconds before execution on a document is gracefully stopped. Defaults to -1 which disables this functionality and relies, as previously, on forcibly stoping execution.")
+  public void setGracefulTimeout(Long graceful) {
+    this.graceful = graceful;
   }
 
   /**
