@@ -21,6 +21,12 @@ public class SphinxWrapper extends Crawler{
   private static int maxPages = -1;
   private static int count = 0;
 
+  
+  protected void resetCounter() {
+    count = 0;
+  }
+  
+  
   @SuppressWarnings("unchecked")
   public void visit(Page p) {
     if ((maxPages != -1) && (count >= maxPages)) {
