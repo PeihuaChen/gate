@@ -78,11 +78,14 @@ public class CrawlPR
   
   
   /**
-   * This method runs the coreferencer. It assumes that all the needed
+   * This method runs the crawler. It assumes that all the needed
    * parameters are set. If they are not, an exception will be fired.
    */
   public void execute() throws ExecutionException {
+    interrupted = false;
     crawler = new SphinxWrapper();
+    crawler.resetCounter();
+    
     if(outputCorpus == null) { throw new ExecutionException(
     "Output Corpus cannot be null"); }
 
