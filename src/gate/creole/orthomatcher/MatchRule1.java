@@ -19,17 +19,20 @@ public class MatchRule1 implements OrthoMatcherRule{
 	
 	public boolean value(String s1,
 	          String s2) {
-		
+	    
+	  
 	    boolean retVal = OrthoMatcherHelper.straightCompare(s1, s2, orthomatcher.caseSensitive);
 	    //if straight compare didn't work, try a little extra logic
 	    if (!retVal)
-	      retVal = OrthoMatcherHelper.fuzzyMatch(orthomatcher.nicknameMap,s1, s2);
+	      retVal = orthomatcher.getOrthoAnnotation().fuzzyMatch(s1, s2);
 
 	    if (retVal && orthomatcher.log.isDebugEnabled()) {
 	      orthomatcher.log.debug("rule 1 matched " + s1 + "(id: " + orthomatcher.longAnnot.getId() + ") to "
 	              + s2+ "(id: " + orthomatcher.shortAnnot.getId() + ")");
 	    }
 	  
+	    if (retVal) OrthoMatcherHelper.usedRule(1);
+	    
 	    return retVal;
 	}
 	

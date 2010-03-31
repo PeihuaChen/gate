@@ -25,30 +25,36 @@ public class MatchRule8 implements OrthoMatcherRule {
 	
 	public boolean value(String s1, String s2) {
 		
-		//don't try it unless the second string is just one token
+	    boolean result=false;
+	   
+		  //don't try it unless the second string is just one token
 	    if (orthomatcher.tokensShortAnnot.size() != 1)
-	      return false;
-
-	    String previous_token = null;
-
-	    for (int i = 0;  i < orthomatcher.tokensLongAnnot.size(); i++ ) {
-	      if (orthomatcher.connector.containsKey( ((Annotation) orthomatcher.tokensLongAnnot.get(i)
-	      ).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME) )) {
-	        previous_token = (String) ((Annotation) orthomatcher.tokensLongAnnot.get(i-1)
-	        ).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
-
-	        break;
-	      }
+	      result = false;
+	    else
+	    {
+      	    String previous_token = null;
+      
+      	    for (int i = 0;  i < orthomatcher.tokensLongAnnot.size(); i++ ) {
+      	      if (orthomatcher.connector.containsKey( ((Annotation) orthomatcher.tokensLongAnnot.get(i)
+      	      ).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME) )) {
+      	        previous_token = (String) ((Annotation) orthomatcher.tokensLongAnnot.get(i-1)
+      	        ).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
+      
+      	        break;
+      	      }
+      	    }
+      
+      	    //now match previous_token with other name
+      	    if (previous_token != null) {
+      //	    if (s1.equalsIgnoreCase("chin") || s2.equalsIgnoreCase("chin"))
+      //	    Out.prln("Rule7");
+      	      result = OrthoMatcherHelper.straightCompare(previous_token,s2,orthomatcher.caseSensitive);
+      
+      	    }
 	    }
-
-	    //now match previous_token with other name
-	    if (previous_token != null) {
-//	    if (s1.equalsIgnoreCase("chin") || s2.equalsIgnoreCase("chin"))
-//	    Out.prln("Rule7");
-	      return OrthoMatcherHelper.straightCompare(previous_token,s2,orthomatcher.caseSensitive);
-
-	    }
-	    return false;
+	    
+	    if (result) OrthoMatcherHelper.usedRule(8);
+	    return result;
 
 	}
 	

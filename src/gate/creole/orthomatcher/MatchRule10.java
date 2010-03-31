@@ -23,7 +23,9 @@ public class MatchRule10 implements OrthoMatcherRule {
 	
 	public boolean value(String s1, String s2) {
 		
-		String token = null;
+	    boolean result=false;
+	  
+		  String token = null;
 	    String previous_token = null;
 	    String next_token = null;
 	    boolean invoke_rule=false;
@@ -44,24 +46,28 @@ public class MatchRule10 implements OrthoMatcherRule {
 	      }//while
 
 	      if (! invoke_rule)
-	        return false;
-
-	      if (i < orthomatcher.tokensLongAnnot.size()
-	              && previous_token != null)
-	        next_token= (String)
-	        ((Annotation) orthomatcher.tokensLongAnnot.get(i++)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME);
-	      else return false;
-
-	      String s21 = (String)
-	      ((Annotation) orthomatcher.tokensShortAnnot.get(0)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME);
-	      String s22 = (String)
-	      ((Annotation) orthomatcher.tokensShortAnnot.get(1)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME);
-	      // then compare (in reverse) with the first two tokens of s2
-	      if (OrthoMatcherHelper.straightCompare(next_token,(String) s21,orthomatcher.caseSensitive)
-	              && OrthoMatcherHelper.straightCompare(previous_token, s22,orthomatcher.caseSensitive))
-	        return true ;
+	        result = false;
+	      else {
+    	      if (i < orthomatcher.tokensLongAnnot.size()
+    	              && previous_token != null) {
+    	        next_token= (String)
+    	        ((Annotation) orthomatcher.tokensLongAnnot.get(i++)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME);
+    	        
+    	        String s21 = (String)
+              ((Annotation) orthomatcher.tokensShortAnnot.get(0)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME);
+              String s22 = (String)
+              ((Annotation) orthomatcher.tokensShortAnnot.get(1)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME);
+              // then compare (in reverse) with the first two tokens of s2
+              if (OrthoMatcherHelper.straightCompare(next_token,(String) s21,orthomatcher.caseSensitive)
+                      && OrthoMatcherHelper.straightCompare(previous_token, s22,orthomatcher.caseSensitive))
+                result = true ;
+    	        }
+    	      else result = false;
+	      }
 	    }//if (tokensLongAnnot.countTokens() >= 3
-	    return false;
+	    
+	    if (result) OrthoMatcherHelper.usedRule(10);
+	    return result;
 	}
 	
   public String getId(){

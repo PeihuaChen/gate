@@ -4,6 +4,8 @@ import gate.Annotation;
 
 import java.util.Iterator;
 
+import static gate.creole.orthomatcher.OrthoMatcher.*;
+
 /**
  * RULE #4: Does the first non-punctuation token from the long string match
  * the first token from the short string?
@@ -22,6 +24,7 @@ public class MatchRule4 implements OrthoMatcherRule {
 	}
 	
 	public boolean value(String s1, String s2) {
+
 		boolean allTokensMatch = true;
 	    // Out.prln("MR4:  Matching" + s1 + " with " + s2);
 
@@ -29,21 +32,24 @@ public class MatchRule4 implements OrthoMatcherRule {
 	    Iterator tokensShortAnnotIter = orthomatcher.tokensShortAnnot.iterator();
 	    while (tokensLongAnnotIter.hasNext() && tokensShortAnnotIter.hasNext()) {
 	      Annotation token = (Annotation) tokensLongAnnotIter.next();
-	      if (((String)token.getFeatures().get(orthomatcher.TOKEN_KIND_FEATURE_NAME)).equals(OrthoMatcher.PUNCTUATION_VALUE) ||
+	      if (((String)token.getFeatures().get(TOKEN_KIND_FEATURE_NAME)).equals(PUNCTUATION_VALUE) ||
 	              token.getFeatures().containsKey("ortho_stop"))
 	        continue;
 	      if (! ((String)(((Annotation) tokensShortAnnotIter.next()).
-	              getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME))).equals(
-	                      (String) token.getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME))) {
+	              getFeatures().get(TOKEN_STRING_FEATURE_NAME))).equals(
+	                      (String) token.getFeatures().get(TOKEN_STRING_FEATURE_NAME))) {
 	        allTokensMatch = false;
 	        break;
 	      } // if (!tokensLongAnnot.nextToken()
 	    } // while
 	//  if (allTokensMatch)
 	//  Out.prln("rule4 fired. result is: " + allTokensMatch);
-	     if (allTokensMatch && orthomatcher.log.isDebugEnabled()) {
-	       orthomatcher.log.debug("rule 4 matched " + s1 + "(id: " + orthomatcher.longAnnot.getId() + ") to " + s2+ "(id: " + orthomatcher.shortAnnot.getId() + ")");
+	     if (allTokensMatch && log.isDebugEnabled()) {
+	       log.debug("rule 4 matched " + s1 + "(id: " + orthomatcher.longAnnot.getId() + ") to " + s2+ "(id: " + orthomatcher.shortAnnot.getId() + ")");
 	     }
+	     
+	    if (allTokensMatch) OrthoMatcherHelper.usedRule(4);
+	    
 	    return allTokensMatch;
 	}
 	

@@ -16,14 +16,18 @@ public class MatchRule0 implements OrthoMatcherRule {
 		   this.orthomatcher=orthmatcher;
 	  }
 	 
-	  public boolean value(String _string1,String _string2){
+	  public boolean value(String string1,String string2){
 		 
-	      if (orthomatcher.spur_match.containsKey(_string1)
-	            && orthomatcher.spur_match.containsKey(_string2) )
-	      return
-	      orthomatcher.spur_match.get(_string1).toString().equals(orthomatcher.spur_match.get(_string2).toString());
+	      boolean result=false;
+	    
+	      if (orthomatcher.spur_match.containsKey(string1)
+	            && orthomatcher.spur_match.containsKey(string2) )
+	      result=
+	      orthomatcher.spur_match.get(string1).toString().equals(orthomatcher.spur_match.get(string2).toString());
 
-	    return false;
+	      if (result) OrthoMatcherHelper.usedRule(0);
+	      
+	      return result;
 	  }
 	  
 	  public String getId(){

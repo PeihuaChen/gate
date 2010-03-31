@@ -23,6 +23,9 @@ public class MatchRule9 implements OrthoMatcherRule {
 	}
 	
 	public boolean value(String s1, String s2) {
+	  
+	  boolean result=false;
+	  
 		// if (s1.equalsIgnoreCase("news") || s2.equalsIgnoreCase("news"))
 		//  Out.prln("Rule 9 " + s1 + " and " + s2);
 		    String s1_short = (String)
@@ -37,10 +40,11 @@ public class MatchRule9 implements OrthoMatcherRule {
 		      //we want
 		      if (matched)
 		    	  orthomatcher.allMatchingNeeded = true;
-		      return matched;
+		      result = matched;
 		    } //if
 
-		    return false;
+		    if (result) OrthoMatcherHelper.usedRule(9);
+		    return result;
 	}
 	
   public String getId(){

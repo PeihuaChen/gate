@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
+import static gate.creole.orthomatcher.OrthoMatcher.*;
 /**
  * RULE #4Name: Does all the non-punctuation tokens from the long string match the corresponding tokens 
  * in the short string?  
@@ -23,32 +24,36 @@ public class MatchRule5 implements OrthoMatcherRule {
 	}
 	
 	public boolean value(String s1, String s2) {
+	  
 		boolean allTokensMatch = true;
 //	    if (s1.equals("wilson")) {
 //	      log.debug("MR4 Name: Matching" + tokensLongAnnot + " with " + tokensShortAnnot);
 //	      log.debug("MR4 Name: Matching " + s1 + " with " + s2);
 //	    }  
 	    if (orthomatcher.tokensLongAnnot.size() == 0 || orthomatcher.tokensShortAnnot.size() == 0) {
-	      orthomatcher.log.debug("Rule 5 rejecting " + s1 + " and " + s2 + " because one doesn't have any tokens");
+	      log.debug("Rule 5 rejecting " + s1 + " and " + s2 + " because one doesn't have any tokens");
 	      return false;
 	    }
-	    Iterator tokensLongAnnotIter = orthomatcher.tokensLongAnnot.iterator();
-	    Iterator tokensShortAnnotIter = orthomatcher.tokensShortAnnot.iterator();
+	    Iterator<Annotation> tokensLongAnnotIter = orthomatcher.tokensLongAnnot.iterator();
+	    Iterator<Annotation> tokensShortAnnotIter = orthomatcher.tokensShortAnnot.iterator();
 	    while (tokensLongAnnotIter.hasNext() && tokensShortAnnotIter.hasNext()) {
 	      Annotation token = (Annotation) tokensLongAnnotIter.next();
-	      if (((String)token.getFeatures().get(orthomatcher.TOKEN_KIND_FEATURE_NAME)).equals(orthomatcher.PUNCTUATION_VALUE))
+	      if (((String)token.getFeatures().get(TOKEN_KIND_FEATURE_NAME)).equals(PUNCTUATION_VALUE))
 	        continue;
-	      if (! OrthoMatcherHelper.fuzzyMatch(orthomatcher.nicknameMap,(String)(((Annotation) tokensShortAnnotIter.next()).
-	              getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME)),
-	              (String) token.getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME))) {
+	      if (! orthomatcher.getOrthoAnnotation().fuzzyMatch((String)(tokensShortAnnotIter.next().
+	              getFeatures().get(TOKEN_STRING_FEATURE_NAME)),
+	              (String) token.getFeatures().get(TOKEN_STRING_FEATURE_NAME))) {
 	        allTokensMatch = false;
 	        break;
 	      }
 	    }
-	    if (allTokensMatch && orthomatcher.log.isDebugEnabled()) {
-	      orthomatcher.log.debug("rule 5 matched " + s1 + "(id: " + orthomatcher.longAnnot.getId() + ", offset: " + orthomatcher.longAnnot.getStartNode().getOffset() + ") to " + 
+	    if (allTokensMatch && log.isDebugEnabled()) {
+	      log.debug("rule 5 matched " + s1 + "(id: " + orthomatcher.longAnnot.getId() + ", offset: " + orthomatcher.longAnnot.getStartNode().getOffset() + ") to " + 
 	                                    s2+  "(id: " + orthomatcher.shortAnnot.getId() + ", offset: " + orthomatcher.shortAnnot.getStartNode().getOffset() + ")");
-	    }       
+	    }   
+	    
+	    if (allTokensMatch) OrthoMatcherHelper.usedRule(5);
+	    
 	    return allTokensMatch;
 	}
 	

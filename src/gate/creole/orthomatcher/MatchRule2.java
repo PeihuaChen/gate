@@ -18,16 +18,20 @@ public class MatchRule2 implements OrthoMatcherRule {
 	
 	public boolean value(String s1, String s2) {
 
+	  boolean result=false;
+	  
 	    if (orthomatcher.alias.containsKey(s1) && orthomatcher.alias.containsKey(s2)) {
 	      if (orthomatcher.alias.get(s1).toString().equals(orthomatcher.alias.get(s2).toString())) {
 	        if (orthomatcher.log.isDebugEnabled()) {
 	          orthomatcher.log.debug("rule 2 matched " + s1 + " to " + s2);
 	        }
-	        return true;
+	        result=true;
 	      }
 	    }
 
-	    return false;
+	    if(result) OrthoMatcherHelper.usedRule(2);
+	    
+	    return result;
 	  }
 	
   public String getId(){

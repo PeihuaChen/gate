@@ -17,7 +17,9 @@ public class MatchRule16 implements OrthoMatcherRule {
 	}
 	
 	public boolean value(String s1, String s2) {
-		
+	
+	  boolean result =true;
+	  
 		//do a token-by-token test
 	    Annotation token1, token2;
 	    // catch (ExecutionException e) {}
@@ -38,7 +40,7 @@ public class MatchRule16 implements OrthoMatcherRule {
 	        String ts2 = (String)token2.getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
 
 	        if (i == 0 && j == 0) {
-	          foundMatch = OrthoMatcherHelper.fuzzyMatch(orthmatcher.nicknameMap,ts1, ts2);
+	          foundMatch = orthmatcher.getOrthoAnnotation().fuzzyMatch(ts1, ts2);
 	        }
 	        else {
 	          if (orthmatcher.caseSensitive) {
@@ -58,14 +60,16 @@ public class MatchRule16 implements OrthoMatcherRule {
 	      //if no match for the current tokenShortAnnot, then it is not a coref of the
 	      //longer annot
 	      if (!foundMatch)
-	        return false;
+	        result = false;
 	    } // for
 
 	    //only get to here if all word tokens in the short annot were found in
 	    //the long annot, so there is a coref relation
 	    if (orthmatcher.log.isDebugEnabled())
 	      orthmatcher.log.debug("rule 16 matched " + s1 + " to " + s2);
-	    return true;
+	    
+	    if(result) OrthoMatcherHelper.usedRule(16);
+	    return result;
 	}
 	
   public String getId(){
