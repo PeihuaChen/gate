@@ -21,38 +21,48 @@ public class MatchRule6 implements OrthoMatcherRule {
 	}
 	
 	public boolean value(String s1, String s2) {
-		if (orthomatcher.tokensLongAnnot.size()> 1 &&
+	  
+	  boolean result=false;
+	  
+		   if (orthomatcher.tokensLongAnnot.size()> 1 &&
 	            ((Annotation) orthomatcher.tokensLongAnnot.get(0)).getFeatures().get("kind").equals("number"))
-	      return false;
-
-	    //  if (s1.startsWith("Patrick") || s2.startsWith("Patrick")) {
-	    //  Out.prln("Rule 5: " + s1 + "and " + s2);
-	    //  }
-
-	    //require that when matching person names, the shorter one to be of length 1
-	    //for the rule to apply. In other words, avoid matching Peter Smith and
-	    //Peter Kline, because they share a Peter token.
-	    if ( (orthomatcher.shortAnnot.getType().equals(orthomatcher.personType)
-	            || orthomatcher.longAnnot.getType().equals(orthomatcher.personType)
-	    )
-	    &&
-	    orthomatcher.tokensShortAnnot.size()>1
-	    )
-	      return false;
-
-	    if (orthomatcher.tokensLongAnnot.size()<=1)
-	      return false;
-	    if (((Annotation) orthomatcher.tokensShortAnnot.get(0)).getFeatures().containsKey("ortho_stop")) {
-	      return false;
-	    }
-	    boolean result = OrthoMatcherHelper.straightCompare((String)
-	            ((Annotation) orthomatcher.tokensLongAnnot.get(0)
-	            ).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME),
-	            s2,
-	            orthomatcher.caseSensitive);
-	    if (result && orthomatcher.log.isDebugEnabled()) {
-	      orthomatcher.log.debug("rule 6 matched " + s1 + " to " + s2);
-	    }
+	     result=false;
+		   {
+        	    //  if (s1.startsWith("Patrick") || s2.startsWith("Patrick")) {
+        	    //  Out.prln("Rule 5: " + s1 + "and " + s2);
+        	    //  }
+        
+        	    //require that when matching person names, the shorter one to be of length 1
+        	    //for the rule to apply. In other words, avoid matching Peter Smith and
+        	    //Peter Kline, because they share a Peter token.
+        	    if ( (orthomatcher.shortAnnot.getType().equals(orthomatcher.personType)
+        	            || orthomatcher.longAnnot.getType().equals(orthomatcher.personType)
+        	    )
+        	    &&
+        	    orthomatcher.tokensShortAnnot.size()>1
+        	    )
+        	      result = false;
+        	    else {
+              	    if (orthomatcher.tokensLongAnnot.size()<=1)
+              	      result = false; else 
+              	    if (((Annotation) orthomatcher.tokensShortAnnot.get(0)).getFeatures().containsKey("ortho_stop"))
+              	      result = false; else
+              	    
+              	    {result = OrthoMatcherHelper.straightCompare((String)
+              	            ((Annotation) orthomatcher.tokensLongAnnot.get(0)
+              	            ).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME),
+              	            s2,
+              	            orthomatcher.caseSensitive);
+              	    }
+        	    }
+	    
+		   }
+		   
+		  if (result && orthomatcher.log.isDebugEnabled()) {
+         orthomatcher.log.debug("rule 6 matched " + s1 + " to " + s2);
+       }
+	    if (result) OrthoMatcherHelper.usedRule(6);
+	    
 	    return result;
 	}
 	

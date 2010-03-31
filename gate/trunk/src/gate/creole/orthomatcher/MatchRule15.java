@@ -21,6 +21,8 @@ public class MatchRule15 implements OrthoMatcherRule {
 	
 	public boolean value(String s1, String s2) {
 		
+	  boolean result=false;
+	  
 	//  if (s1.equalsIgnoreCase("chin") || s2.equalsIgnoreCase("chin"))
 	//  Out.prln("Rule 14 " + s1 + " and " + s2);
 	    String s1_short = (String)
@@ -32,10 +34,11 @@ public class MatchRule15 implements OrthoMatcherRule {
 	       orthomatcher.log.debug("rule 15 matched " + s1 + "(id: " + orthomatcher.longAnnot.getId() + ") to "  + s2 
 	                + "(id: " + orthomatcher.shortAnnot.getId() + ")");
 	     }
-	      return true;
+	      result = true;
 	    }
 
-	    return false;
+	    if (result) OrthoMatcherHelper.usedRule(15);
+	    return result;
 	}
 	
   public String getId(){

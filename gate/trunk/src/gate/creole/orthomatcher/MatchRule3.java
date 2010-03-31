@@ -22,6 +22,8 @@ public class MatchRule3 implements OrthoMatcherRule {
 	
 	public boolean value(String s1,  String s2) { //short string
 
+	  boolean result=false;
+	  
 		if (s2.endsWith("'s") || s2.endsWith("'")
 	            ||(s1.endsWith("'s")|| s1.endsWith("'"))) {
 
@@ -34,7 +36,7 @@ public class MatchRule3 implements OrthoMatcherRule {
 	        if (orthomatcher.log.isDebugEnabled()) {
 	          orthomatcher.log.debug("rule 3 matched " + s1 + " to " + s2);
 	        }
-	        return true;
+	        result = true;
 	      }
 
 	      // now check the second case i.e. "Standard and Poor" == "Standard's"
@@ -48,11 +50,14 @@ public class MatchRule3 implements OrthoMatcherRule {
 	        if (orthomatcher.log.isDebugEnabled()){
 	          orthomatcher.log.debug("rule 3 matched " + s1 + " to " + s2);
 	        }
-	        return true;
+	        result = true;
 	      }
 
 	    } // if (s2.endsWith("'s")
-	    return false;
+		
+		  if (result) OrthoMatcherHelper.usedRule(3);
+		  
+	    return result;
 	}
 	
   public String getId(){

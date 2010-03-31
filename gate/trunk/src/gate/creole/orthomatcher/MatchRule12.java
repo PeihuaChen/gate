@@ -17,11 +17,11 @@ public class MatchRule12 implements OrthoMatcherRule {
 	}
 	
 	public boolean value(String s1, String s2) {
-
-	    // first do the easy case e.g. "Pan American" == "Pan Am"
-
+      // first do the easy case e.g. "Pan American" == "Pan Am"
+	    boolean result=false;
+   
 	    if (orthomatcher.tokensLongAnnot.size()>1 && orthomatcher.tokensShortAnnot.size()>1) {
-//	    Out.prln("Rule 12");
+        // Out.prln("Rule 12");
 
 	      // get first and last tokens of s1 & s2
 	      String s1_first = (String)
@@ -30,22 +30,25 @@ public class MatchRule12 implements OrthoMatcherRule {
 	      ((Annotation) orthomatcher.tokensShortAnnot.get(0)).getFeatures().get(orthomatcher.TOKEN_STRING_FEATURE_NAME);
 
 	      if (!OrthoMatcherHelper.straightCompare(s1_first,s2_first,orthomatcher.caseSensitive))
-	        return false;
-
-	      String s1_last = (String)
-	      ((Annotation) orthomatcher.tokensLongAnnot.get(orthomatcher.tokensLongAnnot.size()-1)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
-	      String s2_last = (String)
-	      ((Annotation) orthomatcher.tokensShortAnnot.get(orthomatcher.tokensShortAnnot.size()-1)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
-
-	      boolean retVal =  OrthoMatcherHelper.straightCompare(s1_last,s2_last,orthomatcher.caseSensitive);
-	      if (retVal && orthomatcher.log.isDebugEnabled()) {
-	        orthomatcher.log.debug("rule 12 matched " + s1 + "(id: " + orthomatcher.longAnnot.getId() + ") to "
-	                + s2+ "(id: " + orthomatcher.shortAnnot.getId() + ")");
+	        result = false;
+	      else {
+    	      String s1_last = (String)
+    	      ((Annotation) orthomatcher.tokensLongAnnot.get(orthomatcher.tokensLongAnnot.size()-1)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
+    	      String s2_last = (String)
+    	      ((Annotation) orthomatcher.tokensShortAnnot.get(orthomatcher.tokensShortAnnot.size()-1)).getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
+    
+    	      boolean retVal =  OrthoMatcherHelper.straightCompare(s1_last,s2_last,orthomatcher.caseSensitive);
+    	      if (retVal && orthomatcher.log.isDebugEnabled()) {
+    	        orthomatcher.log.debug("rule 12 matched " + s1 + "(id: " + orthomatcher.longAnnot.getId() + ") to "
+    	                + s2+ "(id: " + orthomatcher.shortAnnot.getId() + ")");
+    	      }
+    	      result = retVal;
 	      }
-	      return retVal;
 	      
 	    } // if (tokensLongAnnot.countTokens()>1
-	    return false;
+	    
+	    if (result) OrthoMatcherHelper.usedRule(12);
+	    return result;
 	}
 	
   public String getId(){

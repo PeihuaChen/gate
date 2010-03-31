@@ -42,8 +42,7 @@ import gate.*;
 import gate.creole.*;
 import gate.util.*;
 
-public class OrthoMatcher extends AbstractLanguageAnalyser
-implements ANNIEConstants{
+public class OrthoMatcher extends AbstractLanguageAnalyser {
   protected static final Logger log = Logger.getLogger(OrthoMatcher.class);
 
   public static final boolean DEBUG = false;
@@ -114,12 +113,12 @@ implements ANNIEConstants{
   //** Orthomatching is not case-sensitive by default*/
   protected boolean caseSensitive = false;
 
-  protected FeatureMap queryFM = Factory.newFeatureMap();
+  //protected FeatureMap queryFM = Factory.newFeatureMap();
 
   // name lookup tables (used for namematch)
   //gave them bigger default size, coz rehash is expensive
   protected HashMap alias = new HashMap(100);
-  protected HashSet cdg = new HashSet(50);
+  protected HashSet cdg = new HashSet();
   protected HashMap spur_match = new HashMap(100);
   protected HashMap def_art = new HashMap(20);
   protected HashMap connector = new HashMap(20);
@@ -127,11 +126,16 @@ implements ANNIEConstants{
 
 
   protected AnnotationSet nameAllAnnots = null;
+
   protected HashMap processedAnnots = new HashMap(150);
   protected HashMap annots2Remove = new HashMap(75);
   protected List matchesDocFeature = new ArrayList();
   //maps annotation ids to array lists of tokens
   protected HashMap tokensMap = new HashMap(150);
+  public HashMap getTokensMap() {
+    return tokensMap;
+  }
+
   protected HashMap normalizedTokensMap = new HashMap(150);
 
   protected Annotation shortAnnot;
@@ -139,17 +143,8 @@ implements ANNIEConstants{
 
   protected ArrayList<Annotation> tokensLongAnnot;
   protected ArrayList<Annotation> tokensShortAnnot;
-  
+
   protected ArrayList<Annotation> normalizedTokensLongAnnot, normalizedTokensShortAnnot;
-
-  /** a feature map to be used when retrieving annotations
-   *  declared here so can be reused for efficiency
-   *  clear() before each use
-   */
-  protected FeatureMap tempMap = Factory.newFeatureMap();
-
-  /** the size of the buffer */
-  private final static int BUFF_SIZE = 65000;
 
   /**
    * URL to the file containing the definition for this orthomatcher
@@ -161,9 +156,10 @@ implements ANNIEConstants{
   /** The encoding used for the definition file and associated lists.*/
   private String encoding;
 
-  protected Map<String,HashSet<String>> nicknameMap;
-  
-  private Map<Integer,OrthoMatcherRule> rules=new HashMap();
+  private Map<Integer,OrthoMatcherRule> rules=new HashMap<Integer,OrthoMatcherRule>();
+
+  /** to be initialized in init() */
+  private AnnotationOrthography orthoAnnotation;
 
   /** @link dependency */
   /*#OrthoMatcher lnkOrthoMatcher;*/
@@ -177,33 +173,33 @@ implements ANNIEConstants{
 
   /** Initialise the rules. The orthomatcher loads its build-in rules. */
   private void initRules(){
-	  //this line should be executed after spur_match is loaded
-	  rules.put(0,  new MatchRule0(this));
-	  rules.put(1,  new MatchRule1(this));
-	  rules.put(2,  new MatchRule2(this));
-	  rules.put(3,  new MatchRule3(this));
-	  rules.put(4,  new MatchRule4(this));
-	  rules.put(5,  new MatchRule5(this));
-	  rules.put(6,  new MatchRule6(this));
-	  rules.put(7,  new MatchRule7(this));
-	  rules.put(8,  new MatchRule8(this));
-	  rules.put(9,  new MatchRule9(this));
-	  rules.put(10, new MatchRule10(this));
-	  rules.put(11, new MatchRule11(this));
-	  rules.put(12, new MatchRule12(this));
-	  rules.put(13, new MatchRule13(this));
-	  rules.put(14, new MatchRule14(this));
-	  rules.put(15, new MatchRule15(this));
-	  rules.put(16, new MatchRule16(this));
-	  rules.put(17, new MatchRule17(this));
+    //this line should be executed after spur_match is loaded
+    rules.put(0,  new MatchRule0(this));
+    rules.put(1,  new MatchRule1(this));
+    rules.put(2,  new MatchRule2(this));
+    rules.put(3,  new MatchRule3(this));
+    rules.put(4,  new MatchRule4(this));
+    rules.put(5,  new MatchRule5(this));
+    rules.put(6,  new MatchRule6(this));
+    rules.put(7,  new MatchRule7(this));
+    rules.put(8,  new MatchRule8(this));
+    rules.put(9,  new MatchRule9(this));
+    rules.put(10, new MatchRule10(this));
+    rules.put(11, new MatchRule11(this));
+    rules.put(12, new MatchRule12(this));
+    rules.put(13, new MatchRule13(this));
+    rules.put(14, new MatchRule14(this));
+    rules.put(15, new MatchRule15(this));
+    rules.put(16, new MatchRule16(this));
+    rules.put(17, new MatchRule17(this));
 
   }
-  
+
   /** Override this method to add, replace, remove rules */
   protected void modifyRules(Map<Integer,OrthoMatcherRule> rules) {
-	  
+
   }
-  
+
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
     //initialise the list of annotations which we will match
@@ -211,6 +207,7 @@ implements ANNIEConstants{
       throw new ResourceInstantiationException(
       "No URL provided for the definition file!");
     }
+    String nicknameFile = null;
 
     //at this point we have the definition file
     try{
@@ -218,7 +215,7 @@ implements ANNIEConstants{
               new InputStreamReader(definitionFileURL.openStream(),
                       encoding));
       String lineRead = null;
-      boolean foundANickname = false;
+      //boolean foundANickname = false;
       while ((lineRead = reader.readLine()) != null){
         int index = lineRead.indexOf(":");
         if (index != -1){
@@ -228,8 +225,7 @@ implements ANNIEConstants{
             if (minimumNicknameLikelihood == null) {
               throw new ResourceInstantiationException("No value for the required parameter minimumNicknameLikelihood!");
             } 
-            initNicknames(nameFile,encoding, minimumNicknameLikelihood);
-            foundANickname = true;
+            nicknameFile = nameFile;
           }
           else {
             createAnnotList(nameFile,nameList);
@@ -237,12 +233,13 @@ implements ANNIEConstants{
         }// if
       }//while
       reader.close();
-      if (!foundANickname) {
-        nicknameMap = new HashMap<String,HashSet<String>>();
-        System.err.println("WARNING: "+
-                "No entry for nickname provided in definition file!");
-      }
-      
+
+      URL nicknameURL = null;
+      if (nicknameFile != null)
+        nicknameURL = new URL(definitionFileURL, nicknameFile);
+      this.orthoAnnotation = new BasicAnnotationOrhtography(
+              personType,extLists,unknownType,nicknameURL,
+              minimumNicknameLikelihood, encoding);
       initRules();
       modifyRules(rules);
 
@@ -250,52 +247,9 @@ implements ANNIEConstants{
       throw new ResourceInstantiationException(ioe);
     }
 
+
     return this;
   } // init()
-
-  protected void initNicknames(String nicknameRelativeUrl,
-          String nicknameFileEncoding, Double minimumNicknameLikelihood) throws IOException {
-    Pattern spacePat = Pattern.compile("(\\s+)");
-    nicknameMap = new HashMap<String,HashSet<String>>();
-
-    //create the relative URL
-    URL fileURL = new URL(definitionFileURL, nicknameRelativeUrl);
-    BufferedReader reader = new BufferedReader(
-            new InputStreamReader(fileURL.openStream(),
-                    nicknameFileEncoding));
-    String lineRead = null;
-    int ctr = 0;
-    while ((lineRead = reader.readLine()) != null){
-      if (lineRead.length() == 0 || lineRead.charAt(0) == '#') {
-        continue;
-      }
-
-      ArrayList<String> nickNameLine =
-        new ArrayList<String>(Arrays.asList(spacePat.split(lineRead.toLowerCase().trim())));
-      if (nickNameLine.size() != 3 &&
-              (nickNameLine.size() != 4 && ((nickNameLine.get(3) != "M") || nickNameLine.get(3) != "F"))) {
-        continue;
-      }
-      if (round2Places(Double.valueOf(nickNameLine.get(2))) < round2Places(minimumNicknameLikelihood)) {
-        continue;
-      }
-      if (nicknameMap.containsKey(nickNameLine.get(0))) {
-        /*        System.out.println("Adding to existing nickname of " + nickNameLine.get(0) + " "
-            + nickNameLine.get(1));*/
-        nicknameMap.get(nickNameLine.get(0)).add(nickNameLine.get(1));
-      }
-      else {
-        /*          System.out.println("Adding new nickname of " + nickNameLine.get(0) + " "
-              + nickNameLine.get(1));*/
-        nicknameMap.put(nickNameLine.get(0),
-                new HashSet<String>(Collections.singleton(nickNameLine.get(1))));
-      }
-    }
-  }
-
-  public Double round2Places(Double input) {
-    return Math.round(input*100.0)/100.0;
-  }
 
 
   /**  Run the resource. It doesn't make sense not to override
@@ -329,14 +283,19 @@ implements ANNIEConstants{
       docCleanup();
       Map matchesMap = (Map)document.getFeatures().
       get(DOCUMENT_COREF_FEATURE_NAME);
+  
 
       // creates the cdg list from the document
       //no need to create otherwise, coz already done in init()
       if (!extLists)
-        buildTables(nameAllAnnots);
+        cdg=orthoAnnotation.buildTables(nameAllAnnots);
+
 
       //Match all name annotations and unknown annotations
       matchNameAnnotations();
+      
+      //used to check if the Orthomatcher works properly
+      //OrthoMatcherHelper.setMatchesPositions(nameAllAnnots);
 
       // set the matches of the document
       //    determineMatchesDocument();
@@ -353,11 +312,13 @@ implements ANNIEConstants{
         //cannot do clear() as this has already been put on the document
         //so I need a new one for the next run of matcher
         matchesDocFeature = new ArrayList();
+        
+        
         fireStatusChanged("OrthoMatcher completed");
       }
     }finally{
       //make sure the cleanup happens even if there are errors.
-//    Out.prln("Processed strings" + processedAnnots.values());
+      //    Out.prln("Processed strings" + processedAnnots.values());
       //clean-up the internal data structures for next run
       nameAllAnnots = null;
       processedAnnots.clear();
@@ -369,6 +330,8 @@ implements ANNIEConstants{
       shortAnnot = null;
       tokensLongAnnot = null;
       tokensShortAnnot = null;
+
+      //if (log.isDebugEnabled()) OrthoMatcherHelper.saveUsedTable();
     }
   } // run()
 
@@ -394,16 +357,16 @@ implements ANNIEConstants{
         Integer id = nameAnnot.getId();
 
         // get string and value
-        String annotString = OrthoMatcherHelper.getStringForAnnotation(nameAnnot, document);
+        String annotString = orthoAnnotation.getStringForAnnotation(nameAnnot, document);
 
         //convert to lower case if we are not doing a case sensitive match
         if (!caseSensitive)
           annotString = annotString.toLowerCase();
-        
+
         if (DEBUG) {
           if (log.isDebugEnabled()) {
             log.debug("Now processing the annotation:  "
-                    + OrthoMatcherHelper.getStringForAnnotation(nameAnnot, document) + " Id: " + nameAnnot.getId() 
+                    + orthoAnnotation.getStringForAnnotation(nameAnnot, document) + " Id: " + nameAnnot.getId() 
                     + " Type: " + nameAnnot.getType() + " Offset: " + nameAnnot.getStartNode().getOffset());
           }
         }
@@ -416,7 +379,7 @@ implements ANNIEConstants{
         if (tokens.isEmpty()) {
           if (log.isDebugEnabled()) {
             log.debug("Didn't find any tokens for the following annotation.  We will be unable to perform coref on this annotation.  \n String:  "
-                    + OrthoMatcherHelper.getStringForAnnotation(nameAnnot, document) + " Id: " + nameAnnot.getId() + " Type: " + nameAnnot.getType());
+                    + orthoAnnotation.getStringForAnnotation(nameAnnot, document) + " Id: " + nameAnnot.getId() + " Type: " + nameAnnot.getType());
           }
           continue;
         }
@@ -425,7 +388,7 @@ implements ANNIEConstants{
         //needed coz new tokeniser conflates
         //strings with dashes. So British Gas-style is two tokens
         //instead of three. So cannot match properly British Gas
-//      tokens = checkTokens(tokens);
+        //      tokens = checkTokens(tokens);
         tokensMap.put(nameAnnot.getId(), tokens);
         normalizedTokensMap.put(nameAnnot.getId(), new ArrayList<Annotation>(tokens));
 
@@ -437,7 +400,7 @@ implements ANNIEConstants{
         // on a page.
         if (processedAnnots.containsValue(annotString) &&
                 (! (nameAnnot.getType().equals(personType) && (tokens.size() == 1)))) {
-          Annotation returnAnnot = updateMatches(nameAnnot, annotString);
+          Annotation returnAnnot = orthoAnnotation.updateMatches(nameAnnot, annotString,processedAnnots,nameAllAnnots,matchesDocFeature);
           if (returnAnnot != null) {
             if (DEBUG) {
               if (log.isDebugEnabled()) {
@@ -456,7 +419,7 @@ implements ANNIEConstants{
 
         //if a person, then remove their title before matching
         if (nameAnnot.getType().equals(personType)) {
-          annotString = stripPersonTitle(annotString, nameAnnot);
+          annotString = orthoAnnotation.stripPersonTitle(annotString, nameAnnot,document,tokensMap,normalizedTokensMap,nameAllAnnots);
           normalizePersonName(nameAnnot);
         }
         else if (nameAnnot.getType().equals(organizationType))
@@ -465,7 +428,7 @@ implements ANNIEConstants{
         if(null == annotString || "".equals(annotString) || tokens.isEmpty()) {
           if (log.isDebugEnabled()) {
             log.debug("Annotation ID " + nameAnnot.getId() + " of type" + nameAnnot.getType() +
-                    " refers to a null or empty string or one with no tokens after normalization.  Unable to process further.");
+            " refers to a null or empty string or one with no tokens after normalization.  Unable to process further.");
           }
           continue;
         }
@@ -498,7 +461,7 @@ implements ANNIEConstants{
       Annotation unknown = iter.next();
 
       // get string and value
-      String unknownString = OrthoMatcherHelper.getStringForAnnotation(unknown, document);
+      String unknownString = orthoAnnotation.getStringForAnnotation(unknown, document);
       //convert to lower case if we are not doing a case sensitive match
       if (!caseSensitive)
         unknownString = unknownString.toLowerCase();
@@ -520,10 +483,10 @@ implements ANNIEConstants{
       //first check whether we have not matched such a string already
       //if so, just consider it matched, don't bother calling the rules
       if (processedAnnots.containsValue(unknownString)) {
-        Annotation matchedAnnot = updateMatches(unknown, unknownString);
+        Annotation matchedAnnot = orthoAnnotation.updateMatches(unknown, unknownString,processedAnnots,nameAllAnnots,matchesDocFeature);
         if (matchedAnnot == null) {
           log.info("Unable to find the annotation: " +
-        		  OrthoMatcherHelper.getStringForAnnotation(unknown, document) +
+                  orthoAnnotation.getStringForAnnotation(unknown, document) +
           " in matchUnknown");
         }
         else {
@@ -587,7 +550,7 @@ implements ANNIEConstants{
     //because only exact match of the substring are considered
     if (processedAnnots.containsValue(unknownString)) {
       matched = true;
-      Annotation matchedAnnot = updateMatches(unknown, unknownString);
+      Annotation matchedAnnot = orthoAnnotation.updateMatches(unknown, unknownString,processedAnnots,nameAllAnnots,matchesDocFeature);
       //only do the matching if not a person, because we do not match
       //those on sub-strings
       iter.remove();
@@ -651,7 +614,7 @@ implements ANNIEConstants{
         continue;
 
       //check if we have already matched this annotation to the new one
-      if (matchedAlready(nameAnnot, prevAnnot) )
+      if (orthoAnnotation.matchedAlready(nameAnnot, prevAnnot,matchesDocFeature,nameAllAnnots) )
         continue;
 
       //now changed to a rule, here we just match by gender
@@ -685,7 +648,7 @@ implements ANNIEConstants{
       // shorter version with the longer, because it hasn't already been matched with a longer.
       boolean prevAnnotUsedToMatchWithLonger = prevAnnot.getFeatures().containsKey("matchedWithLonger");
       if (matchAnnotations(nameAnnot, annotString,  prevAnnot)) {
-        updateMatches(nameAnnot, prevAnnot);
+        orthoAnnotation.updateMatches(nameAnnot, prevAnnot,matchesDocFeature,nameAllAnnots);
         if (DEBUG) {
           log.debug("Just matched nameAnnot " + nameAnnot.getId() + " with prevAnnot " + prevAnnot.getId());
         }
@@ -725,11 +688,11 @@ implements ANNIEConstants{
         return;
       }
       else {
-        String updateAnnotString = OrthoMatcherHelper.getStringForAnnotation(updateAnnot, document).toLowerCase();
+        String updateAnnotString = orthoAnnotation.getStringForAnnotation(updateAnnot, document).toLowerCase();
         for (Integer nextId : matchesList) {
           Annotation a = nameAllAnnots.get(nextId);
 
-          if (OrthoMatcherHelper.fuzzyMatch(nicknameMap,OrthoMatcherHelper.getStringForAnnotation(a, document),updateAnnotString)) {
+          if (orthoAnnotation.fuzzyMatch(orthoAnnotation.getStringForAnnotation(a, document),updateAnnotString)) {
             if (DEBUG) {
               log.debug("propogateProperty: " + featureName + " " + value + " from: " + updateAnnot.getId() + " to: " + a.getId());
             }
@@ -754,10 +717,10 @@ implements ANNIEConstants{
     String prevAnnotString = (String) processedAnnots.get(prevAnnot.getId());
     // Out.prln("matchAnnotations processing " + annotString + " and " + prevAnnotString);
     if (prevAnnotString == null) {
-//    Out.prln("We discovered that the following string is null!:  " + prevAnnot.getId() +
-//    " For the previous annotation " + getStringForAnnotation(prevAnnot, document) +
-//    " which has annotation type " + prevAnnot.getType() +
-//    " Tried to compared it to the annotation string " + annotString);
+      //    Out.prln("We discovered that the following string is null!:  " + prevAnnot.getId() +
+      //    " For the previous annotation " + getStringForAnnotation(prevAnnot, document) +
+      //    " which has annotation type " + prevAnnot.getType() +
+      //    " Tried to compared it to the annotation string " + annotString);
       return false;
     }
 
@@ -869,117 +832,13 @@ implements ANNIEConstants{
 
         matchedAll = apply_rules_namematch(prevAnnot.getType(), shortName,longName,prevAnnot,newAnnot,
                 longerPrevious);
-//      if (newAnnot.getType().equals(unknownType))
-//      Out.prln("Loop: " + shortName + " and " + longName + ": result: " + matchedAll);
+        //      if (newAnnot.getType().equals(unknownType))
+        //      Out.prln("Loop: " + shortName + " and " + longName + ": result: " + matchedAll);
 
         i++;
     }//while
     return matchedAll;
   }
-
-
-  protected boolean matchedAlready(Annotation annot1, Annotation annot2) {
-    //the two annotations are already matched if the matches list of the first
-    //contains the id of the second
-    List matchesList = (List) annot1.getFeatures().
-    get(ANNOTATION_COREF_FEATURE_NAME);
-    if ((matchesList == null) || matchesList.isEmpty())
-      return false;
-    else if (matchesList.contains(annot2.getId()))
-      return true;
-    return false;
-  }
-
-  protected Annotation updateMatches(Annotation newAnnot, String annotString) {
-    Annotation matchedAnnot = null;
-    Integer id;
-
-    //first find a processed annotation with the same string
-    // TODO: Andrew Borthwick 7/26/08:  The below is very inefficient.  We should be doing a lookup into a hash
-    // which is indexed on string rather than testing every id. Need to have the index be String + Type
-    // for safety
-    Iterator iter = processedAnnots.keySet().iterator();
-    // System.out.println("ID's examined: ");
-    while (iter.hasNext()) {
-      id = (Integer) iter.next();
-      String oldString = (String) processedAnnots.get(id);
-      // System.out.print(id + " ");
-      if (annotString.equals(oldString)) {
-        Annotation tempAnnot = nameAllAnnots.get(id);
-        if (tempAnnot == null) {
-          log.warn("TempAnnot is null when looking at " + annotString
-                  + " | " + oldString + " | old id: " + id);
-          return null;
-        }
-        // Below is a new Spock addition to prevent unpredictable behavior when
-        // the same string is given more than one type.  We want to return null
-        // if there is no match on name + type (other than Unknown)
-        if (newAnnot.getType().equals(unknownType) ||
-                tempAnnot.getType().equals(newAnnot.getType())) {
-          matchedAnnot = tempAnnot;
-          break;
-        }
-      }
-    }//while
-    // System.out.println();
-
-    if (matchedAnnot == null) return null;
-
-    List matchesList = (List) matchedAnnot.getFeatures().
-    get(ANNOTATION_COREF_FEATURE_NAME);
-    if ((matchesList == null) || matchesList.isEmpty()) {
-      //no previous matches, so need to add
-      if (matchesList == null) {
-        matchesList = new ArrayList();
-        matchedAnnot.getFeatures().put(ANNOTATION_COREF_FEATURE_NAME,
-                matchesList);
-        matchesDocFeature.add(matchesList);
-      }//if
-      matchesList.add(matchedAnnot.getId());
-      matchesList.add(newAnnot.getId());
-    } else {
-      //just add the new annotation
-      matchesList.add(newAnnot.getId());
-    }//if
-    //add the matches list to the new annotation
-    newAnnot.getFeatures().put(ANNOTATION_COREF_FEATURE_NAME, matchesList);
-    return matchedAnnot;
-  }
-
-  protected void updateMatches(Annotation newAnnot, Annotation prevAnnot) {
-
-    List matchesList = (List) prevAnnot.getFeatures().
-    get(ANNOTATION_COREF_FEATURE_NAME);
-    if ((matchesList == null) || matchesList.isEmpty()) {
-      //no previous matches, so need to add
-      if (matchesList == null) {
-        matchesList = new ArrayList();
-        prevAnnot.getFeatures().put(ANNOTATION_COREF_FEATURE_NAME, matchesList);
-        matchesDocFeature.add(matchesList);
-      }//if
-      matchesList.add(prevAnnot.getId());
-      matchesList.add(newAnnot.getId());
-    } else {
-      //just add the new annotation
-      matchesList.add(newAnnot.getId());
-    }//if
-    //add the matches list to the new annotation
-    newAnnot.getFeatures().put(ANNOTATION_COREF_FEATURE_NAME, matchesList);
-    //propagate the gender if two persons are matched
-    if (prevAnnot.getType().equals(personType)) {
-      String prevGender =
-        (String) prevAnnot.getFeatures().get(PERSON_GENDER_FEATURE_NAME);
-      String newGender =
-        (String) newAnnot.getFeatures().get(PERSON_GENDER_FEATURE_NAME);
-      boolean unknownPrevGender = isUnknownGender(prevGender);
-      boolean unknownNewGender = isUnknownGender(newGender);
-      if (unknownPrevGender && !unknownNewGender)
-        prevAnnot.getFeatures().put(PERSON_GENDER_FEATURE_NAME, newGender);
-      else if (unknownNewGender && !unknownPrevGender)
-        newAnnot.getFeatures().put(PERSON_GENDER_FEATURE_NAME, prevGender);
-    }//if
-  }
-
 
   protected void docCleanup() {
     Object matchesValue = document.getFeatures().get(DOCUMENT_COREF_FEATURE_NAME);
@@ -995,7 +854,7 @@ implements ANNIEConstants{
     AnnotationSet annots =
       nameAllAnnots.get(null, fNames);
 
-//  Out.prln("Annots to cleanup" + annots);
+    //  Out.prln("Annots to cleanup" + annots);
 
     if (annots == null || annots.isEmpty())
       return;
@@ -1007,8 +866,9 @@ implements ANNIEConstants{
     } //while
   }//cleanup
   
+ 
   static Pattern periodPat = Pattern.compile("[\\.]+");
-  
+
   protected void normalizePersonName (Annotation annot) throws ExecutionException {
     ArrayList<Annotation> tokens = (ArrayList) normalizedTokensMap.get(annot.getId());
     for (int i = tokens.size() - 1; i >= 0; i--) {
@@ -1024,7 +884,7 @@ implements ANNIEConstants{
         tokens.get(i).getFeatures().put("ortho_stop", true);
       }
     }
-    
+
     ArrayList<Annotation> normalizedTokens = new ArrayList<Annotation>(tokens);
     for (int j = normalizedTokens.size() - 1; j >=  0;j--) {
       if (normalizedTokens.get(j).getFeatures().containsKey("ortho_stop")) {
@@ -1034,69 +894,6 @@ implements ANNIEConstants{
     }
     // log.debug("normalizedTokens size is: " + normalizedTokens.size());
     normalizedTokensMap.put(annot.getId(), normalizedTokens);
-  }
-  
-
-  /**
-   * Return a person name without a title.  Also remove title from global variable
-   * tokensMap
-   */
-  protected String stripPersonTitle (String annotString, Annotation annot)
-  throws ExecutionException {
-    // get the offsets
-    Long startAnnot = annot.getStartNode().getOffset();
-    Long endAnnot = annot.getEndNode().getOffset();
-
-    // determine "Lookup" annotation set
-    queryFM.clear();
-    queryFM.put("majorType", "title");
-    AnnotationSet as1 = nameAllAnnots.getContained(startAnnot,endAnnot);
-    if (as1 == null || as1.isEmpty())
-      return annotString;
-    AnnotationSet as =
-      as1.get("Lookup", queryFM);
-    if (as !=null && ! as.isEmpty()) {
-      List<Annotation> titles = new ArrayList<Annotation>(as);
-      Collections.sort(titles, new gate.util.OffsetComparator());
-
-      Iterator<Annotation> iter = titles.iterator();
-      while (iter.hasNext()) {
-        Annotation titleAnn = iter.next();
-
-        //we've not found a title at the start offset,
-        //there's no point in looking further
-        //coz titles come first
-        if (titleAnn.getStartNode().getOffset().compareTo(startAnnot) != 0)
-          return annotString;
-
-        try {
-          // the title from the current annotation
-          String annotTitle =
-            document.getContent().getContent(
-                    titleAnn.getStartNode().getOffset(),
-                    titleAnn.getEndNode().getOffset()
-            ).toString();
-
-          // eliminate the title from annotation string and return the result
-          if (annotTitle.length()<annotString.length()) {
-            //remove from the array of tokens, so then we can compare properly
-            //the remaining tokens
-//            log.debug("Removing title from: " + annot + " with string " + annotString);
-//            log.debug("Tokens are " + tokensMap.get(annot.getId()));
-//            log.debug("Title is " + annotTitle);
-            ((ArrayList) tokensMap.get(annot.getId())).remove(0);
-            ((ArrayList) normalizedTokensMap.get(annot.getId())).remove(0);
-            return annotString.substring(
-                    annotTitle.length()+1,annotString.length());
-          }
-        } catch (InvalidOffsetException ioe) {
-          throw new ExecutionException
-          ("Invalid offset of the annotation");
-        }//try
-      }// while
-    }//if
-    return annotString;
-
   }
 
   /** return an organization  without a designator and starting The*/
@@ -1142,14 +939,14 @@ implements ANNIEConstants{
       }
 
     }
-    
+
     ArrayList<Annotation> normalizedTokens = new ArrayList<Annotation>(tokens);
     for (int j = normalizedTokens.size() - 1; j >=  0;j--) {
       if (normalizedTokens.get(j).getFeatures().containsKey("ortho_stop")) {
         normalizedTokens.remove(j);
       }
     }
-    
+
     normalizedTokensMap.put(annot.getId(), normalizedTokens);
 
     StringBuffer newString = new StringBuffer(50);
@@ -1263,11 +1060,11 @@ implements ANNIEConstants{
    */
   private boolean basic_person_match_criteria(String shortName,
           String longName, boolean mr[]) {
-    
+
     if ( // For 4, 5, 14, and 15, need to mark shorter annot
-         //kalina: added 16, so it matches names when contain more than one first and one last name
-          OrthoMatcherHelper.ExecuteDisjunction(rules, new int[] {1,5,6,13,15,16},longName,shortName,mr)
-       ) {
+            //kalina: added 16, so it matches names when contain more than one first and one last name
+            OrthoMatcherHelper.executeDisjunction(rules, new int[] {1,5,6,13,15,16},longName,shortName,mr)
+    ) {
       return true;
     }
     return false;
@@ -1285,31 +1082,31 @@ implements ANNIEConstants{
       log.debug("Now matching " + longName + "(id: " + longAnnot.getId() + ") to "
               + shortName + "(id: " + shortAnnot.getId() + ")");
     }
-    
+
     if (rules.get(0).value(longName,shortName))
       return false;
     if (
             (// rules for all annotations
-             //no longer use rule1, coz I do the check for same string via the hash table
-              OrthoMatcherHelper.ExecuteDisjunction(rules, new int[] {2,3},longName,shortName,mr)
+                    //no longer use rule1, coz I do the check for same string via the hash table
+                    OrthoMatcherHelper.executeDisjunction(rules, new int[] {2,3},longName,shortName,mr)
 
             ) // rules for all annotations
             ||
             (// rules for organisation annotations
-               (annotationType.equals(organizationType)
-                    //ACE addition
-                    || annotationType.equals("Facility")
-               )
-               &&
-               // Should basically only match when you have a match of all tokens other than
-               // CDG's and function words
-               (
-                 (!highPrecisionOrgs && OrthoMatcherHelper.ExecuteDisjunction(rules,new int[] {4,6,7,8,9,10,11,12,14},longName,shortName,mr)) 
-                 ||
-                 (highPrecisionOrgs && OrthoMatcherHelper.ExecuteDisjunction(rules,new int[] {7,8,10,11,17},longName,shortName,mr))
-                )
+                    (annotationType.equals(organizationType)
+                            //ACE addition
+                            || annotationType.equals("Facility")
+                    )
+                    &&
+                    // Should basically only match when you have a match of all tokens other than
+                    // CDG's and function words
+                    (
+                            (!highPrecisionOrgs && OrthoMatcherHelper.executeDisjunction(rules,new int[] {4,6,7,8,9,10,11,12,14},longName,shortName,mr)) 
+                            ||
+                            (highPrecisionOrgs && OrthoMatcherHelper.executeDisjunction(rules,new int[] {7,8,10,11,17},longName,shortName,mr))
+                    )
             )
-       ) {// rules for organisation annotations
+    ) {// rules for organisation annotations
       return true;
     }
 
@@ -1410,14 +1207,7 @@ implements ANNIEConstants{
     return new Boolean(matchingUnknowns);
   }
 
-  protected boolean isUnknownGender(String gender) {
-    if (gender == null)
-      return true;
-    if (gender.equalsIgnoreCase("male") || gender.equalsIgnoreCase("female"))
-      return false;
-    return true;
 
-  } //isUnknownGender
 
   /**
   No Match Rule 1:
@@ -1429,14 +1219,14 @@ implements ANNIEConstants{
    */
   public boolean noMatchRule1(String s1,
           String s2,Annotation previousAnnot, boolean longerPrevious) {
-//    if (DEBUG) {
-//      try {
-//        String annotString = getStringForAnnotation(previousAnnot, document );
+    //    if (DEBUG) {
+    //      try {
+    //        String annotString = getStringForAnnotation(previousAnnot, document );
 
-//        log.debug("Previous annotation was " + annotString +  "(id: " + previousAnnot.getId() + ")" + " features are " + previousAnnot.getFeatures());
-//      }
-//      catch (ExecutionException e) {}
-//    }
+    //        log.debug("Previous annotation was " + annotString +  "(id: " + previousAnnot.getId() + ")" + " features are " + previousAnnot.getFeatures());
+    //      }
+    //      catch (ExecutionException e) {}
+    //    }
 
     if (longerPrevious || !previousAnnot.getFeatures().containsKey("matchedWithLonger")) {
       return false;
@@ -1445,7 +1235,7 @@ implements ANNIEConstants{
       return true;
     }
   }//noMatchRule1
-  
+
   /***
    * returns true if it detects a middle name which indicates that the name string contains a nickname or a 
    * compound last name
@@ -1461,7 +1251,7 @@ implements ANNIEConstants{
     }
     return false;
   }
-  
+
   /**
    * NoMatch Rule #2: Do we have a mismatch of middle initial?  
    * Condition(s):  Only applies to person names with more than two tokens in the name
@@ -1485,9 +1275,9 @@ implements ANNIEConstants{
         String firstNameLong = (String) normalizedTokensLongAnnot.get(0).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
         String firstNameShort = (String) normalizedTokensShortAnnot.get(0).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
         String lastNameLong = (String) normalizedTokensLongAnnot.get(normalizedTokensLongAnnot.size() - 1).
-          getFeatures().get(TOKEN_STRING_FEATURE_NAME);
+        getFeatures().get(TOKEN_STRING_FEATURE_NAME);
         String lastNameShort = (String) normalizedTokensShortAnnot.get(normalizedTokensShortAnnot.size() - 1).
-          getFeatures().get(TOKEN_STRING_FEATURE_NAME);
+        getFeatures().get(TOKEN_STRING_FEATURE_NAME);
         if (rules.get(1).value(firstNameLong,firstNameShort) && 
                 (rules.get(1).value(lastNameLong,lastNameShort))) {
           // Must have a match on first and last name for this non-match rule to take effect when the number of tokens differs
@@ -1514,9 +1304,9 @@ implements ANNIEConstants{
             s1_middle = s1_middle.toLowerCase();
             s2_middle = s2_middle.toLowerCase();
           }
-//          log.debug("noMatchRule2 comparing substring " + s1_middle + " to " + s2_middle);
+          //          log.debug("noMatchRule2 comparing substring " + s1_middle + " to " + s2_middle);
           if (!(rules.get(1).value(s1_middle,s2_middle) ||
-        		  OrthoMatcherHelper.initialMatch(s1_middle, s2_middle))) {
+                  OrthoMatcherHelper.initialMatch(s1_middle, s2_middle))) {
             // We found a mismatching middle name
             retval = true;
             break;
@@ -1531,49 +1321,6 @@ implements ANNIEConstants{
     } // if (normalizedTokensLongAnnot.size()>2 && normalizedTokensShortAnnot.size()>2)
     return false; 
   }//noMatchRule2
-
-  /** Tables for namematch info
-   * (used by the namematch rules)
-   */
-  protected void buildTables(AnnotationSet nameAllAnnots) {
-
-    //reset the tables first
-    cdg.clear();
-
-    if (! extLists) {
-      // i.e. get cdg from Lookup annotations
-      // get all Lookup annotations
-      tempMap.clear();
-      tempMap.put(LOOKUP_MAJOR_TYPE_FEATURE_NAME, "cdg");
-      //now get all lookup annotations which are cdg
-      AnnotationSet nameAnnots =
-        nameAllAnnots.get(LOOKUP_ANNOTATION_TYPE, tempMap);
-
-      if ((nameAnnots ==null) || nameAnnots.isEmpty())
-        return;
-
-      Iterator<Annotation> iter = nameAnnots.iterator();
-      while (iter.hasNext()) {
-        Annotation annot = iter.next();
-        // get the actual string
-        Long offsetStartAnnot = annot.getStartNode().getOffset();
-        Long offsetEndAnnot = annot.getEndNode().getOffset();
-        try {
-          gate.Document doc = nameAllAnnots.getDocument();
-          String annotString =
-            doc.getContent().getContent(
-                    offsetStartAnnot,offsetEndAnnot
-            ).toString();
-          cdg.add(annotString);
-        } catch (InvalidOffsetException ioe) {
-          ioe.printStackTrace(Err.getPrintWriter());
-        }
-      }// while
-    }//if
-  }//buildTables
-
-  
-
 
   public void setDefinitionFileURL(java.net.URL definitionFileURL) {
     this.definitionFileURL = definitionFileURL;
@@ -1610,6 +1357,14 @@ implements ANNIEConstants{
    */
   public void setHighPrecisionOrgs(Boolean highPrecisionOrgs) {
     this.highPrecisionOrgs = highPrecisionOrgs;
+  }
+
+  public void setOrthoAnnotation(AnnotationOrthography orthoAnnotation) {
+    this.orthoAnnotation = orthoAnnotation;
+  }
+
+  public AnnotationOrthography getOrthoAnnotation() {
+    return orthoAnnotation;
   }
 
   static Pattern punctPat = Pattern.compile("[\\p{Punct}]+");
