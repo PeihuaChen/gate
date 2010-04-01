@@ -40,7 +40,7 @@ public class MatchRule5 implements OrthoMatcherRule {
 	      Annotation token = (Annotation) tokensLongAnnotIter.next();
 	      if (((String)token.getFeatures().get(TOKEN_KIND_FEATURE_NAME)).equals(PUNCTUATION_VALUE))
 	        continue;
-	      if (! orthomatcher.getOrthoAnnotation().fuzzyMatch((String)(tokensShortAnnotIter.next().
+	      if (! orthomatcher.getOrthography().fuzzyMatch((String)(tokensShortAnnotIter.next().
 	              getFeatures().get(TOKEN_STRING_FEATURE_NAME)),
 	              (String) token.getFeatures().get(TOKEN_STRING_FEATURE_NAME))) {
 	        allTokensMatch = false;

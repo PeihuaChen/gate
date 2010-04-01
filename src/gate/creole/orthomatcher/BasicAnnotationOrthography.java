@@ -36,7 +36,7 @@ import static gate.creole.orthomatcher.OrthoMatcherHelper.*;
  * This class defines an orthography which defines the primary behavior of the Orthomatcher processing 
  * resource in GATE.
  */
-public class BasicAnnotationOrhtography implements AnnotationOrthography {
+public class BasicAnnotationOrthography implements AnnotationOrthography {
 
   private final boolean extLists;
   private final String personType;
@@ -44,7 +44,7 @@ public class BasicAnnotationOrhtography implements AnnotationOrthography {
   private Map<String,HashSet<String>> nicknameMap = new HashMap<String, HashSet<String>>();
   private final Double minimumNicknameLikelihood;
 
-  public BasicAnnotationOrhtography(String personType, boolean extLists,
+  public BasicAnnotationOrthography(String personType, boolean extLists,
           String unknownType, URL nicknameFile, Double minimumNicknameLikelihood, String encoding) {
     this.personType = personType;
     this.extLists = extLists;
@@ -59,7 +59,7 @@ public class BasicAnnotationOrhtography implements AnnotationOrthography {
     }
   }
 
-  protected static final Logger log = Logger.getLogger(BasicAnnotationOrhtography.class);
+  protected static final Logger log = Logger.getLogger(BasicAnnotationOrthography.class);
 
 
   public String getStringForAnnotation(Annotation a, gate.Document d) throws ExecutionException {
