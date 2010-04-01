@@ -237,7 +237,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
       URL nicknameURL = null;
       if (nicknameFile != null)
         nicknameURL = new URL(definitionFileURL, nicknameFile);
-      this.orthoAnnotation = new BasicAnnotationOrhtography(
+      this.orthoAnnotation = new BasicAnnotationOrthography(
               personType,extLists,unknownType,nicknameURL,
               minimumNicknameLikelihood, encoding);
       initRules();
@@ -1359,11 +1359,11 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
     this.highPrecisionOrgs = highPrecisionOrgs;
   }
 
-  public void setOrthoAnnotation(AnnotationOrthography orthoAnnotation) {
-    this.orthoAnnotation = orthoAnnotation;
+  public void setOrthography(AnnotationOrthography orthography) {
+    this.orthoAnnotation = orthography;
   }
 
-  public AnnotationOrthography getOrthoAnnotation() {
+  public AnnotationOrthography getOrthography() {
     return orthoAnnotation;
   }
 

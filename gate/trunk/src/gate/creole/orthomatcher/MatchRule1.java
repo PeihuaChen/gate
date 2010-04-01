@@ -24,7 +24,7 @@ public class MatchRule1 implements OrthoMatcherRule{
 	    boolean retVal = OrthoMatcherHelper.straightCompare(s1, s2, orthomatcher.caseSensitive);
 	    //if straight compare didn't work, try a little extra logic
 	    if (!retVal)
-	      retVal = orthomatcher.getOrthoAnnotation().fuzzyMatch(s1, s2);
+	      retVal = orthomatcher.getOrthography().fuzzyMatch(s1, s2);
 
 	    if (retVal && orthomatcher.log.isDebugEnabled()) {
 	      orthomatcher.log.debug("rule 1 matched " + s1 + "(id: " + orthomatcher.longAnnot.getId() + ") to "

@@ -20,8 +20,8 @@ public class MatchRule17 implements OrthoMatcherRule {
 	  OrthoMatcherHelper.usedRule(17);
 	  
 		//reversed execution of allNonStopTokensInOtherAnnot
-		if (orthomatcher.getOrthoAnnotation().allNonStopTokensInOtherAnnot(orthomatcher.tokensLongAnnot, orthomatcher.tokensShortAnnot,ANNIEConstants.TOKEN_STRING_FEATURE_NAME,orthomatcher.caseSensitive)) {
-		      result = orthomatcher.getOrthoAnnotation().allNonStopTokensInOtherAnnot(orthomatcher.tokensShortAnnot, orthomatcher.tokensLongAnnot,ANNIEConstants.TOKEN_STRING_FEATURE_NAME,orthomatcher.caseSensitive);
+		if (orthomatcher.getOrthography().allNonStopTokensInOtherAnnot(orthomatcher.tokensLongAnnot, orthomatcher.tokensShortAnnot,ANNIEConstants.TOKEN_STRING_FEATURE_NAME,orthomatcher.caseSensitive)) {
+		      result = orthomatcher.getOrthography().allNonStopTokensInOtherAnnot(orthomatcher.tokensShortAnnot, orthomatcher.tokensLongAnnot,ANNIEConstants.TOKEN_STRING_FEATURE_NAME,orthomatcher.caseSensitive);
 		    }
 		
 		return result;

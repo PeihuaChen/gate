@@ -40,7 +40,7 @@ public class MatchRule16 implements OrthoMatcherRule {
 	        String ts2 = (String)token2.getFeatures().get(OrthoMatcher.TOKEN_STRING_FEATURE_NAME);
 
 	        if (i == 0 && j == 0) {
-	          foundMatch = orthmatcher.getOrthoAnnotation().fuzzyMatch(ts1, ts2);
+	          foundMatch = orthmatcher.getOrthography().fuzzyMatch(ts1, ts2);
 	        }
 	        else {
 	          if (orthmatcher.caseSensitive) {
