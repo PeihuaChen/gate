@@ -191,8 +191,8 @@ public class RealtimeCorpusController extends SerialAnalyserController {
           if (!workerThread.isAlive()) return;
           Err.println("Execution timeout, attempting to induce exception in order to stop worker thread...");
           for(int j = 0; j < prList.size(); j++){
-            ((LanguageAnalyser)prList.get(j)).setDocument(document);
-            ((LanguageAnalyser)prList.get(j)).setCorpus(corpus);
+            ((LanguageAnalyser)prList.get(j)).setDocument(null);
+            ((LanguageAnalyser)prList.get(j)).setCorpus(null);
           }
         }
       };
