@@ -16,27 +16,44 @@ package gate.groovy;
 import gate.ProcessingResource;
 import gate.Resource;
 import gate.creole.*;
+import gate.creole.metadata.*;
 import gate.util.*;
 import gate.*;
 import java.util.*;
-import java.io.File;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URISyntaxException;
 import groovy.lang.Binding;
-import groovy.util.GroovyScriptEngine;
-import groovy.util.ScriptException;
-import groovy.util.ResourceException;
+import groovy.lang.Script;
+import groovy.lang.GroovyShell;
+import org.codehaus.groovy.control.CompilationFailedException;
 
 
 /**
  * Groovy Script PR.
  * 
- * @author Angus Roberts
+ * @author Angus Roberts, Ian Roberts
  * 
  */
+@CreoleResource(name = "Groovy scripting PR",
+    comment = "Runs a Groovy script as a processing resource",
+    helpURL = "http://gate.ac.uk/userguide/sec:api:groovy")
 public class ScriptPR extends AbstractLanguageAnalyser
                        implements ProcessingResource {
+
+  /**
+   * Standard list of import statements that are appended to any groovy script.
+   * These are the same imports available by default on the right-hand-side of
+   * JAPE rules.
+   */
+  public static final String STANDARD_IMPORTS =
+      "import gate.*;\n" +
+      "import gate.jape.*;\n" +
+      "import gate.creole.ontology.*;\n" +
+      "import gate.annotation.*;\n" +
+      "import gate.util.*;\n";
+   
 
   /**
    * Groovy script file
@@ -44,19 +61,19 @@ public class ScriptPR extends AbstractLanguageAnalyser
   private URL scriptURL;
 
   /**
-   * Groovy script file
-   */
-  private File scriptFile;
-
-  /**
    * Parameters passed to the Groovy script
    */
   private FeatureMap scriptParams;
  
   /**
-   * The Groovy script engine
+   * The compiled Groovy script.
    */
-  private GroovyScriptEngine scriptEngine;
+  private Script groovyScript;
+
+  /**
+   * The character encoding of the script file.
+   */
+  private String encoding;
 
   /**
    * Name of the output annotation set
@@ -71,26 +88,42 @@ public class ScriptPR extends AbstractLanguageAnalyser
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
 
-    // Create the script engine
-    try{
-      scriptFile = new File(scriptURL.toURI());
-    } catch(URISyntaxException use) {
-      throw new ResourceInstantiationException(
-        "Problem with path to script file", use);
+    // Create the shell, with the GateClassLoader as its parent (so the script
+    // will have access to plugin classes)
+    GroovyShell groovyShell = new GroovyShell(Gate.getClassLoader());
+    StringBuilder scriptText = new StringBuilder();
+
+    char[] buf = new char[4096];
+    int charsRead = 0;
+    try {
+      InputStreamReader reader = new InputStreamReader(scriptURL.openStream(),
+          encoding);
+      while((charsRead = reader.read(buf)) >= 0) {
+        scriptText.append(buf, 0, charsRead);
+      }
+      reader.close();
+    }
+    catch(IOException ioe) {
+      throw new ResourceInstantiationException("Error loading Groovy script "
+          + "from URL " + scriptURL, ioe);
     }
 
-    if(!scriptFile.exists())
-      throw new ResourceInstantiationException(
-        "Groovy script file does not exist");
-    if(!scriptFile.isFile())
-      throw new ResourceInstantiationException(
-        "Path given for Groovy script file is not a file");
+    // append a load of standard imports to the end of the script.  We put them
+    // at the end rather than the beginning because (in a script) imports work
+    // anywhere, and putting them at the end means we don't mess up line
+    // numbers in any compilation error messages.
+    scriptText.append("\n\n\n");
+    scriptText.append(STANDARD_IMPORTS);
 
-    try{ 
-      scriptEngine= new GroovyScriptEngine(scriptFile.getParent());
-    } catch(IOException ioe) {
-      throw new ResourceInstantiationException(
-        "Problem with Groovy script file", ioe);
+    // determine the file name of the script
+    String scriptFileName = scriptURL.toString();
+    scriptFileName = scriptFileName.substring(scriptFileName.lastIndexOf('/'));
+
+    try {
+      groovyScript = groovyShell.parse(scriptText.toString(), scriptFileName);
+    }
+    catch(CompilationFailedException e) {
+      throw new ResourceInstantiationException("Script compilation failed", e);
     }
 
     return this;
@@ -132,6 +165,9 @@ public class ScriptPR extends AbstractLanguageAnalyser
     binding.setVariable("content", document.getContent().toString());
     binding.setVariable("inputAS", inputAS);
     binding.setVariable("outputAS", outputAS);
+
+    // these should be deprecated, really, they're no longer necessary with the
+    // imports
     binding.setVariable("gate", Gate.class);
     binding.setVariable("factory", gate.Factory.class);
 
@@ -142,18 +178,16 @@ public class ScriptPR extends AbstractLanguageAnalyser
 
     // Run the script engine
     try {
-      scriptEngine.run(scriptFile.getName(), binding);
-    } catch(ResourceException re) {
-      throw new ExecutionException("Problem accessing Groovy script", re);
-    } catch(ScriptException se) {
-      throw new ExecutionException("Problem parsing Groovy script", se);
+      groovyScript.setBinding(binding);
+      groovyScript.run();
+    } catch(RuntimeException re) {
+      throw new ExecutionException("Problem running Groovy script", re);
     }
 
     // We've done
     fireProgressChanged(100);	
     fireProcessFinished();
     fireStatusChanged( "Groovy script PR finished" );
-
   }
 
   /**
@@ -168,6 +202,9 @@ public class ScriptPR extends AbstractLanguageAnalyser
    * sets name of the output annotaiton set
    * @param outputAS
    */
+  @Optional
+  @RunTime
+  @CreoleParameter
   public void setOutputASName(String outputAS) {
     this.outputASName = outputAS;
   }
@@ -184,6 +221,9 @@ public class ScriptPR extends AbstractLanguageAnalyser
    * sets name of the input annotaiton set
    * @param inputAS
    */
+  @Optional
+  @RunTime
+  @CreoleParameter
   public void setInputASName(String inputAS) {
     this.inputASName = inputAS;
   }
@@ -200,10 +240,27 @@ public class ScriptPR extends AbstractLanguageAnalyser
    * sets File of the Groovy script
    * @param script
    */
+  @CreoleParameter(comment = "Location of the Groovy script that will be "
+      + "run for each document")
   public void setScriptURL(URL script) {
     this.scriptURL = script;
   }
 
+  /**
+   * Get the character encoding used to load the script.
+   */
+  public String getEncoding() {
+    return encoding;
+  }
+
+  /**
+   * Set the character encoding used to load the script.
+   */
+  @CreoleParameter(defaultValue = "UTF-8", comment = "Character encoding used "
+      + "to read the script")
+  public void setEncoding(String encoding) {
+    this.encoding = encoding;
+  }
 
   /**
    * Get Map of parameters for the Groovy script
@@ -217,10 +274,12 @@ public class ScriptPR extends AbstractLanguageAnalyser
    * Set Map of parameters for the Groovy script
    * @return
    */
+  @Optional
+  @RunTime
+  @CreoleParameter(comment = "Optional additional parameters to pass to the "
+      + "script.")
   public void setScriptParams(FeatureMap params) {
     this.scriptParams = params;
   }
-
-
 
 }

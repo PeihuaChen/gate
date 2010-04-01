@@ -8,4 +8,4 @@
 
 m = content =~ scriptParams.regex
 while(m.find())
-  outputAS.add(m.start(),m.end(),scriptParams.type,factory.newFeatureMap())
+  outputAS.add(m.start(),m.end(),scriptParams.type,Factory.newFeatureMap())

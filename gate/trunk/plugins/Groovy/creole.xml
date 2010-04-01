@@ -1,24 +1,5 @@
 <?xml version="1.0"?>
 <CREOLE-DIRECTORY>
-  <CREOLE>   
-    <!-- creole.xml for Groovy resources -->
-    <RESOURCE>
-      <JAR>groovy.jar</JAR>
-      <JAR>lib/groovy-all-1.6.3.jar</JAR>
-      <NAME>Groovy scripting PR</NAME>
-      <CLASS>gate.groovy.ScriptPR</CLASS>
-      <COMMENT>Provides a Groovy scripting PR.</COMMENT>
-      <HELPURL>http://gate.ac.uk/userguide/sec:api:groovy</HELPURL>
-      <PARAMETER NAME="document" RUNTIME="true" COMMENT="Document on which script will run">gate.Document</PARAMETER>
-      <PARAMETER NAME="inputASName" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="outputASName" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="scriptURL" RUNTIME="false" OPTIONAL="false"
-      COMMENT="Groovy script that will be run for each
-      document">java.net.URL</PARAMETER>
-      <PARAMETER NAME="scriptParams" RUNTIME="true" OPTIONAL="true"
-      COMMENT="Optional set of parameters to be passed to the script, as
-      'key1=value1,key2=value2' comma and '=' delimited pairs">gate.FeatureMap</PARAMETER>
-    </RESOURCE>
-
-  </CREOLE>
+  <JAR SCAN="true">groovy-gate.jar</JAR>
+  <JAR>lib/groovy-all-1.6.3.jar</JAR>
 </CREOLE-DIRECTORY>
