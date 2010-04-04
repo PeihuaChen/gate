@@ -228,9 +228,9 @@ public class CreoleAnnotationHandler {
 
   /**
    * Process the {@link CreoleResource} data for this class. This method
-   * first extracts the non-inheritable data (PRIVATE, MAIN_VIEWER and
-   * NAME), then calls {@link #processInheritableResourceData} to
-   * process the inheritable data, then deals with any specified
+   * first extracts the non-inheritable data (PRIVATE, MAIN_VIEWER,
+   * NAME and TOOL), then calls {@link #processInheritableResourceData}
+   * to process the inheritable data, then deals with any specified
    * {@link AutoInstance}s.
    * 
    * @param resourceClass the resource class to process, which must be
@@ -244,6 +244,9 @@ public class CreoleAnnotationHandler {
     }
     if(cr.mainViewer() && element.getChild("MAIN_VIEWER") == null) {
       element.addContent(new Element("MAIN_VIEWER"));
+    }
+    if(cr.tool() && element.getChild("TOOL") == null) {
+      element.addContent(new Element("TOOL"));
     }
     // NAME is the name given in the annotation, or the simple name of
     // the class if omitted

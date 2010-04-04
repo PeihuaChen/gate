@@ -102,4 +102,10 @@ public @interface CreoleResource {
    * Only relevant for visual resources.
    */
   boolean mainViewer() default false;
+  
+  /**
+   * Is this resource a 'tool' (i.e. should its published actions be
+   * added to the Tools menu)?
+   */
+  boolean tool() default false;
 }
