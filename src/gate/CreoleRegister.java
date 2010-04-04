@@ -118,6 +118,9 @@ public interface CreoleRegister extends Map<String, ResourceData>, Serializable,
 
   /** Get the list of types of VR in the register. */
   public Set<String> getControllerTypes();
+  
+  /** Get the list of types of tool in the register. */
+  public Set<String> getToolTypes();
 
   /** Get a list of all instantiations of LR in the register. */
   public List<LanguageResource> getLrInstances();
