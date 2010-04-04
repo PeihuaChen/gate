@@ -119,6 +119,6 @@ public class XJMenu extends JMenu {
     });
   }
 
-  private StatusListener listener;
+  protected StatusListener listener;
   private String description;
 }
