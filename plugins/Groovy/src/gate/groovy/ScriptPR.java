@@ -43,19 +43,6 @@ public class ScriptPR extends AbstractLanguageAnalyser
                        implements ProcessingResource {
 
   /**
-   * Standard list of import statements that are appended to any groovy script.
-   * These are the same imports available by default on the right-hand-side of
-   * JAPE rules.
-   */
-  public static final String STANDARD_IMPORTS =
-      "import gate.*;\n" +
-      "import gate.jape.*;\n" +
-      "import gate.creole.ontology.*;\n" +
-      "import gate.annotation.*;\n" +
-      "import gate.util.*;\n";
-   
-
-  /**
    * Groovy script file
    */
   private URL scriptURL;
@@ -113,7 +100,7 @@ public class ScriptPR extends AbstractLanguageAnalyser
     // anywhere, and putting them at the end means we don't mess up line
     // numbers in any compilation error messages.
     scriptText.append("\n\n\n");
-    scriptText.append(STANDARD_IMPORTS);
+    scriptText.append(GroovySupport.STANDARD_IMPORTS);
 
     // determine the file name of the script
     String scriptFileName = scriptURL.toString();
