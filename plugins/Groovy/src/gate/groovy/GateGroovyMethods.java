@@ -12,6 +12,8 @@
 
 package gate.groovy;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,6 +38,44 @@ import groovy.lang.IntRange;
  */
 public class GateGroovyMethods {
 
+  /**
+   * Call the closure once for each document in this corpus, loading
+   * and unloading documents as appropriate in the case of a persistent
+   * corpus, and collecting the return values of each call into a list.
+   * 
+   * @param self the corpus to traverse
+   * @param closure the closure to call
+   * @return a list of the return values from each closure call.
+   */
+  public static List collect(Corpus self, Closure closure) {
+    return (List)collect(self, new ArrayList(), closure);
+  }
+  
+  /**
+   * Call the closure once for each document in this corpus, loading
+   * and unloading documents as appropriate in the case of a persistent
+   * corpus, and adding the return values of each call to the given
+   * collection.
+   * 
+   * @param self the corpus to traverse
+   * @param closure the closure to call
+   * @return a list of the return values from each closure call.
+   */
+  public static Collection collect(Corpus self, Collection coll,
+          Closure closure) {
+    for(int i = 0; i < self.size(); i++) {
+      boolean docWasLoaded = self.isDocumentLoaded(i);
+      Document doc = (Document)self.get(i);
+      coll.add(closure.call(doc));
+      if(!docWasLoaded) {
+        self.unloadDocument(doc);
+        Factory.deleteResource(doc);
+      }
+    }
+    return coll;
+  }
+
+  
   /**
    * Call the closure once for each document in this corpus, loading
    * and unloading documents as appropriate in the case of a persistent
