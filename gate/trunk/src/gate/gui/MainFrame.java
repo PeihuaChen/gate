@@ -4318,6 +4318,24 @@ public class MainFrame extends JFrame implements ProgressListener,
      */
     public void staticItemsAdded() {
       firstPluginItem = getItemCount();
+      processExistingTools();
+    }
+    
+    /**
+     * Populate the menu with all actions coming from tools that are
+     * already loaded.
+     */
+    protected void processExistingTools() {
+      Set<String> toolTypes = Gate.getCreoleRegister().getToolTypes();
+      for(String type : toolTypes) {
+        List<Resource> instances = Gate.getCreoleRegister()
+                    .get(type).getInstantiations();
+        for(Resource res : instances) {
+          if(res instanceof ActionsPublisher) {
+            toolLoaded(res);
+          }
+        }
+      }
     }
     
     /**
@@ -4329,13 +4347,22 @@ public class MainFrame extends JFrame implements ProgressListener,
       Resource res = e.getResource();
       if(Gate.getCreoleRegister().get(res.getClass().getName()).isTool()
               && res instanceof ActionsPublisher) {
-        List<Action> actions = ((ActionsPublisher)res).getActions();
-        List<JMenuItem> items = new ArrayList<JMenuItem>();
-        for(Action a : actions) {
-          items.add(addMenuItem(a));
-        }
-        itemsByResource.put(res, items);
+        toolLoaded(res);
       }
+    }
+
+    /**
+     * Add the actions published by the given tool to their appropriate
+     * places on the Tools menu.
+     * @param res the tool instance (which must implement ActionsPublisher)
+     */
+    protected void toolLoaded(Resource res) {
+      List<Action> actions = ((ActionsPublisher)res).getActions();
+      List<JMenuItem> items = new ArrayList<JMenuItem>();
+      for(Action a : actions) {
+        items.add(addMenuItem(a));
+      }
+      itemsByResource.put(res, items);
     }
     
     protected JMenuItem addMenuItem(Action a) {
