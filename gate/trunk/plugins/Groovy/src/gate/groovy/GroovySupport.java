@@ -1,3 +1,15 @@
+/*
+ *  Copyright (c) 2010, The University of Sheffield.
+ *
+ *  This file is part of the GATE/Groovy integration layer, and is free
+ *  software, released under the terms of the GNU Lesser General Public
+ *  Licence, version 2.1 (or any later version).  A copy of this licence
+ *  is provided in the file LICENCE in the distribution.
+ *
+ *  Groovy is developed by The Codehaus, details are available from
+ *  http://groovy.codehaus.org
+ */
+
 package gate.groovy;
 
 import java.awt.event.ActionEvent;
@@ -25,7 +37,16 @@ import gate.util.GateException;
 import gate.util.GateRuntimeException;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
+import groovy.lang.ReadOnlyPropertyException;
 
+/**
+ * Tool resource that sets up Groovy support for GATE.  When the Groovy
+ * plugin is loaded an instance of this resource is created, which (a)
+ * adds a menu item to GATE Developer to run the Groovy console and (b)
+ * mixes in the static methods of {@link gate.Utils} and
+ * {@link gate.groovy.GateGroovyMethods} so they can be used as instance
+ * methods by any Groovy code that runs after the plugin is loaded.
+ */
 @CreoleResource(name = "Groovy support for GATE", isPrivate = true, tool = true,
         autoinstances = @AutoInstance)
 public class GroovySupport extends AbstractResource implements ActionsPublisher {
@@ -42,23 +63,33 @@ public class GroovySupport extends AbstractResource implements ActionsPublisher 
       "import gate.util.*;\n";
 
   public Resource init() {
-    // mix-in gate.Utils
-    Class<gate.Utils> utilsClass = gate.Utils.class;
+    // mix-in gate.Utils and gate.groovy.GateGroovyMethods
+    mixinGlobally(gate.Utils.class);
+    mixinGlobally(GateGroovyMethods.class);
+    
+    return this;
+  }
+
+  /**
+   * Mix all the static methods of the given class into their
+   * respective types.
+   * @param classToMix a category class.
+   */
+  protected void mixinGlobally(Class<?> classToMix) {
     // find the set of types into which it needs to be mixed.
     // this means the types of the first argument of each
     // static method in the class.
     Set<Class<?>> typesToMixInto = new HashSet<Class<?>>();
-    for(Method method : utilsClass.getMethods()) {
+    for(Method method : classToMix.getMethods()) {
       if(Modifier.isStatic(method.getModifiers())
+              && method.getDeclaringClass() == classToMix
               && method.getParameterTypes().length > 0) {
         typesToMixInto.add(method.getParameterTypes()[0]);
       }
     }
     for(Class<?> clazz : typesToMixInto) {
-      DefaultGroovyMethods.mixin(clazz, utilsClass);
+      DefaultGroovyMethods.mixin(clazz, classToMix);
     }
-    
-    return this;
   }
   
   private List<Action> actions;
@@ -109,6 +140,11 @@ public class GroovySupport extends AbstractResource implements ActionsPublisher 
       super(delegateBinding.getVariables());
     }
     
+    /**
+     * Overridden to intercept requests for the 'pseudo-variables'
+     * corpora, docs, prs and apps and direct them to the relevant
+     * methods of the creole register.
+     */
     public Object getVariable(String name) {
       if("corpora".equals(name)) {
         return Gate.getCreoleRegister()
@@ -133,6 +169,20 @@ public class GroovySupport extends AbstractResource implements ActionsPublisher 
       else {
         return super.getVariable(name);
       }
+    }
+
+    /**
+     * Overridden to enforce read-only access to the 'pseudo-variables'
+     * corpora, docs, prs and apps.
+     * @throws ReadOnlyPropertyException if an attempt is made to set
+     *         any of these variables.
+     */
+    public void setVariable(String name, Object value) {
+      if("corpora".equals(name) || "docs".equals(name) || "prs".equals(name)
+              || "apps".equals(name)) {
+        throw new ReadOnlyPropertyException(name, this.getClass());
+      }
+      super.setVariable(name, value);
     }
   }
 
