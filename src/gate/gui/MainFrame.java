@@ -750,7 +750,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       menuBar.add(optionsMenu);
     }
 
-    JMenu toolsMenu = new XJMenu("Tools", null, this);
+    ToolsMenu toolsMenu = new ToolsMenu("Tools", null, this);
     toolsMenu.setMnemonic(KeyEvent.VK_T);
     toolsMenu.add(new XJMenuItem(new NewAnnotDiffAction(), this));
 
@@ -981,45 +981,10 @@ public class MainFrame extends JFrame implements ProgressListener,
                 "efficient grammars. See the user guide for more details.</body></html>", "JAPE Debugger", JOptionPane.INFORMATION_MESSAGE);
       }
     }, this));
-
     
-    // Groovy console menu: launches a groovy console, only visible if groovy
-    // is present. Move out to a groovy class at some point?
-    if(groovyPresent()) {
-      toolsMenu.add(new XJMenuItem(
-        new AbstractAction("Groovy Console", getIcon("groovyConsole")) {
-        { putValue(SHORT_DESCRIPTION, "Console for Groovy scripting"); }
-        private static final long serialVersionUID = 1L;
-          public void actionPerformed(ActionEvent evt) {
-          try {
-            Class gcClass = Gate.class.getClassLoader().loadClass(
-              "groovy.ui.Console");
-            Constructor gccons = gcClass.getConstructor();
-            java.lang.reflect.Method setvar
-              = gcClass.getMethod("setVariable", String.class, Object.class);
-            java.lang.reflect.Method run = gcClass.getMethod("run");
-            Object gc = gccons.newInstance();
-            setvar.invoke(gc, "Gate", Gate.class);
-            setvar.invoke(gc, "corpora",
-                     Gate.getCreoleRegister()
-                         .getLrInstances("gate.corpora.CorpusImpl"));
-            setvar.invoke(gc, "docs",
-                     Gate.getCreoleRegister()
-                     .getLrInstances("gate.corpora.DocumentImpl"));
-            setvar.invoke(gc, "prs",
-                     Gate.getCreoleRegister().getPrInstances());
-            setvar.invoke(gc, "apps",
-                     Gate.getCreoleRegister().getAllInstances(
-                       "gate.creole.AbstractController"));
-            setvar.invoke(gc, "factory", gate.Factory.class);
-
-            run.invoke(gc);
-          } catch (Exception ex) {
-            Out.prln("Groovy Console creation failed.");
-          }
-        }
-      }, this));
-    }
+    // add separator.  plugin menu items will appear after this separator
+    toolsMenu.addSeparator();
+    toolsMenu.staticItemsAdded();
 
     menuBar.add(toolsMenu);
 
@@ -2223,35 +2188,6 @@ public class MainFrame extends JFrame implements ProgressListener,
    * ProjectData(fileChooser.getSelectedFile(), parentFrame);
    * addProject(pData); } } }
    */
-
-  /**
-   * Flag the presence of grooovy on the classpath
-   */
-  private static boolean groovyPresentFlag = false;
-
-  /**
-   * Searches for groovy on the class path.
-   *
-   * @return true if groovy is on the classpath
-   */
-  private static boolean groovyPresent() {
-    if (!groovyPresentFlag ) {
-      log.debug("Looking for groovy.lang.GroovyObject");
-      try {
-        if (Gate.class.getClassLoader()
-                .loadClass("groovy.lang.GroovyObject") != null)
-        {
-          groovyPresentFlag = true;
-          log.debug("groovy.lang.GroovyObject loaded");
-        }
-      } catch (Exception e) {
-        groovyPresentFlag = false;
-        log.debug("groovy.lang.GroovyObject could not be loaded");
-      }
-    }
-    return groovyPresentFlag;
-  }
-
 
   /** This class represent an action which brings up the Annot Diff tool */
   class NewAnnotDiffAction extends AbstractAction {
@@ -4352,6 +4288,160 @@ public class MainFrame extends JFrame implements ProgressListener,
         fileChooser.setLocations(locations);
     }}, MainFrame.this));
     }
+  }
+  
+  /**
+   * The "Tools" menu, which includes some static menu items
+   * (added in initGuiComponents) and some dynamic items contributed
+   * by plugins.
+   * @author ian
+   */
+  class ToolsMenu extends XJMenu implements CreoleListener {
+
+    /**
+     * The first position in the menu that can be used by dynamic
+     * items.
+     */
+    protected int firstPluginItem = 0;
+    
+    protected IdentityHashMap<Resource, List<JMenuItem>> itemsByResource =
+      new IdentityHashMap<Resource, List<JMenuItem>>();
+
+    public ToolsMenu(String name, String description, StatusListener listener) {
+      super(name, description, listener);
+      Gate.getCreoleRegister().addCreoleListener(this);
+    }
+    
+    /**
+     * Called when the static items have been added to inform the menu
+     * that it can start doing its dynamic stuff.
+     */
+    public void staticItemsAdded() {
+      firstPluginItem = getItemCount();
+    }
+    
+    /**
+     * If the resource just loaded is a tool (according to the creole
+     * register) then see if it publishes any actions and if so, add
+     * them to the menu in the appropriate places.
+     */
+    public void resourceLoaded(CreoleEvent e) {
+      Resource res = e.getResource();
+      if(Gate.getCreoleRegister().get(res.getClass().getName()).isTool()
+              && res instanceof ActionsPublisher) {
+        List<Action> actions = ((ActionsPublisher)res).getActions();
+        List<JMenuItem> items = new ArrayList<JMenuItem>();
+        for(Action a : actions) {
+          items.add(addMenuItem(a));
+        }
+        itemsByResource.put(res, items);
+      }
+    }
+    
+    protected JMenuItem addMenuItem(Action a) {
+      // start by searching this menu
+      XJMenu menuToUse = this;
+      int firstIndex = firstPluginItem;
+      // if the action has a menu path set, navigate the path to find the
+      // right menu.
+      String[] menuPath = (String[])a.getValue(GateConstants.MENU_PATH_KEY);
+      if(menuPath != null) {
+        PATH_ELEMENT: for(String pathElement : menuPath) {
+          int i;
+          for(i = firstIndex; i < menuToUse.getItemCount(); i++) {
+            JMenuItem item = menuToUse.getItem(i);
+            if(item instanceof XJMenu && item.getText().equals(pathElement)) {
+              // found the menu for this path element, move on to the next one
+              firstIndex = 0;
+              menuToUse = (XJMenu)item;
+              continue PATH_ELEMENT;
+            }
+            else if(item.getText().compareTo(pathElement) < 0) {
+              // we've gone beyond where this menu should be in alpha
+              // order
+              break;
+            }
+          }
+          // if we get to here, we didn't find a menu to use - add one
+          XJMenu newMenu = new XJMenu(pathElement, pathElement, this.listener);
+          menuToUse.add(newMenu);
+          firstIndex = 0;
+          menuToUse = newMenu;
+        }
+      }
+      
+      // we now have the right menu, add the action at the right place
+      int pos = firstIndex;
+      while(pos < menuToUse.getItemCount()) {
+        JMenuItem item = menuToUse.getItem(pos);
+        if(item != null && item.getText().compareTo((String)a.getValue(Action.NAME)) > 0) {
+          break;
+        }
+        pos++;
+      }
+      // finally, add the menu item and return it
+      return menuToUse.insert(new XJMenuItem(a, this.listener), pos);
+    }
+
+    /**
+     * If the resoruce just unloaded is one that contributed some menu
+     * items then remove them again.
+     */
+    public void resourceUnloaded(CreoleEvent e) {
+      Resource res = e.getResource();
+      List<JMenuItem> items = itemsByResource.remove(res);
+      if(items != null) {
+        for(JMenuItem item : items) {
+          removeMenuItem(item);
+        }
+      }
+    }
+    
+    protected void removeMenuItem(JMenuItem itemToRemove) {
+      Action a = itemToRemove.getAction();
+      // start by searching this menu
+      XJMenu menuToUse = this;
+      int firstIndex = firstPluginItem;
+      // keep track of the parent menu
+      XJMenu parentMenu = null;
+      // if the action has a menu path set, navigate the path to find the
+      // right menu.
+      String[] menuPath = (String[])a.getValue(GateConstants.MENU_PATH_KEY);
+      if(menuPath != null) {
+        PATH_ELEMENT: for(String pathElement : menuPath) {
+          int i;
+          for(i = firstIndex; i < menuToUse.getItemCount(); i++) {
+            JMenuItem item = menuToUse.getItem(i);
+            if(item instanceof XJMenu && item.getText().equals(pathElement)) {
+              // found the menu for this path element, move on to the next one
+              firstIndex = 0;
+              parentMenu = menuToUse;
+              menuToUse = (XJMenu)item;
+              continue PATH_ELEMENT;
+            }
+          }
+          // we've reached the end of a menu without finding the sub-menu
+          // we were looking for.  This shouldn't happen, but if it does then
+          // we can ignore it as if there's no menu to remove the thing from
+          // then there's nothing to remove either.
+          return;
+        }
+      }
+      
+      // we have a menu to remove the item from: remove it
+      menuToUse.remove(itemToRemove);
+      if(menuToUse.getItemCount() == 0 && parentMenu != null) {
+        // sub-menu is empty, remove it from parent
+        parentMenu.remove(menuToUse);
+      }
+    }
+
+    // remaining CreoleListener methods not used
+    public void datastoreClosed(CreoleEvent e) { }
+    public void datastoreCreated(CreoleEvent e) { }
+    public void datastoreOpened(CreoleEvent e) { }
+    public void resourceRenamed(Resource resource, String oldName,
+            String newName) { }
   }
 
   /**
