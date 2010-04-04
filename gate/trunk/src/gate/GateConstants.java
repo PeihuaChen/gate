@@ -188,4 +188,10 @@ public interface GateConstants {
    * Key used in resource features for hiding the resource fromthe GUI.
    */
   public static final String HIDDEN_FEATURE_KEY = "gate.HIDDEN"; 
+  
+  /**
+   * Key used in TOOL actions to store the 'menu path' under which the
+   * action should be placed in the Tools menu.
+   */
+  public static final String MENU_PATH_KEY = "gate.MenuPath";
 } // GateConstants
