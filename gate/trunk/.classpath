@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" output="plugins/Groovy/build" path="plugins/Groovy/src"/>
 	<classpathentry kind="src" path="plugins/Ontology_OWLIM2/src"/>
 	<classpathentry kind="src" path="plugins/OpenNLP/src"/>
 	<classpathentry kind="src" path="plugins/Tagger_Framework/src"/>
@@ -113,5 +114,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/nekohtml-1.9.8+2039483.jar"/>
 	<classpathentry kind="lib" path="lib/gate-asm.jar"/>
 	<classpathentry kind="lib" path="lib/commons-lang-2.4.jar"/>
+	<classpathentry kind="lib" path="plugins/Groovy/lib/groovy-all-1.6.3.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
