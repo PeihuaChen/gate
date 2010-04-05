@@ -308,9 +308,14 @@ public class ShellSlacFrame extends MainFrame {
     } // if
 
     if(res instanceof Document) {
-      Document doc = (Document) res;
+      final Document doc = (Document) res;
       corpus.add(doc);
-      showDocument(doc);
+      if(DEBUG) Out.println("Document loaded, showing...");
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          showDocument(doc);
+        }
+      });
     } // if
   }// resourceLoaded();
 
@@ -337,6 +342,9 @@ public class ShellSlacFrame extends MainFrame {
     if(done){
       select(handle);
     } // if
+    else {
+      if(DEBUG) Out.println("Failed to find handle for document");
+    }
   } // showDocument(Document doc)
 
   /** Called when a {@link gate.DataStore} has been opened.
