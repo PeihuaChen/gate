@@ -16,27 +16,59 @@
 
 package gate;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.jar.*;
-import org.jdom.Attribute;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jdom.input.SAXBuilder;
-
 import gate.config.ConfigDataProcessor;
 import gate.creole.CreoleRegisterImpl;
 import gate.creole.ResourceData;
 import gate.creole.metadata.CreoleResource;
 import gate.event.CreoleListener;
-import gate.util.*;
+import gate.util.Benchmark;
+import gate.util.Err;
+import gate.util.Files;
+import gate.util.GateClassLoader;
+import gate.util.GateException;
+import gate.util.GateRuntimeException;
+import gate.util.LuckyException;
+import gate.util.OptionsMap;
+import gate.util.Out;
+import gate.util.Strings;
 import gate.util.asm.AnnotationVisitor;
 import gate.util.asm.ClassReader;
 import gate.util.asm.ClassVisitor;
 import gate.util.asm.Opcodes;
 import gate.util.asm.Type;
 import gate.util.asm.commons.EmptyVisitor;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.net.URLConnection;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
+
+import org.jdom.Attribute;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
 
 /**
  * The class is responsible for initialising the GATE libraries, and providing
@@ -90,6 +122,19 @@ public class Gate implements GateConstants {
   protected static final String ENABLE_BENCHMARKING_FEATURE_NAME =
     "gate.enable.benchmark";
 
+  private static boolean sandboxed = false;
+  
+  public static boolean isSandboxed() {
+    return sandboxed;
+  }
+  
+  public static void runInSandbox(boolean sandboxed) {
+    if (initFinished)
+      throw new IllegalStateException("Sandbox status cannot be changed after GATE has been initialised!");
+       
+    Gate.sandboxed = sandboxed;
+  }
+  
   /** Get the minimum supported version of the JDK */
   public static String getMinJdkVersion() {
     return MIN_JDK_VERSION;
@@ -104,15 +149,48 @@ public class Gate implements GateConstants {
    */
   public static void init() throws GateException {
     // init local paths
-    initLocalPaths();
+    if (!sandboxed) initLocalPaths();
+    
+    // check if benchmarking should be enabled or disabled
+    if(System.getProperty(ENABLE_BENCHMARKING_FEATURE_NAME) != null
+      && System.getProperty(ENABLE_BENCHMARKING_FEATURE_NAME).equalsIgnoreCase(
+        "true")) {
+      Benchmark.setBenchmarkingEnabled(true);
+    }
+    
+    // builtin creole dir
+    if(builtinCreoleDir == null) {
+      String builtinCreoleDirPropertyValue =
+        System.getProperty(BUILTIN_CREOLE_DIR_PROPERTY_NAME);
+      if(builtinCreoleDirPropertyValue == null) {
+        // default to /gate/resources/creole in gate.jar
+        builtinCreoleDir = Files.getGateResource("/creole/");
+      }
+      else {
+        String builtinCreoleDirPath = builtinCreoleDirPropertyValue;
+        // add a slash onto the end of the path if it doesn't have one already -
+        // a creole directory URL should always end with a forward slash
+        if(!builtinCreoleDirPath.endsWith("/")) {
+          builtinCreoleDirPath += "/";
+        }
+        try {
+          builtinCreoleDir = new URL(builtinCreoleDirPath);
+        }
+        catch(MalformedURLException mue) {
+          // couldn't parse as a File either, so throw an exception
+          throw new GateRuntimeException(BUILTIN_CREOLE_DIR_PROPERTY_NAME
+            + " value \"" + builtinCreoleDirPropertyValue + "\" could"
+            + " not be parsed as either a URL or a file path.");
+        }
+        Out.println("Using " + builtinCreoleDir + " as built-in CREOLE"
+          + " directory URL");
+      }
+    }
 
     // register the URL handler for the "gate://" URLs
     System.setProperty("java.protocol.handler.pkgs", System
       .getProperty("java.protocol.handler.pkgs")
       + "|" + "gate.util.protocols");
-
-    // System.setProperty("javax.xml.parsers.SAXParserFactory",
-    // "org.apache.xerces.jaxp.SAXParserFactoryImpl");
 
     // initialise the symbols generator
     lastSym = 0;
@@ -121,9 +199,9 @@ public class Gate implements GateConstants {
     if(classLoader == null)
       classLoader = new GateClassLoader(Gate.class.getClassLoader());
     if(creoleRegister == null) creoleRegister = new CreoleRegisterImpl();
-    if(knownPlugins == null) knownPlugins = new ArrayList();
-    if(autoloadPlugins == null) autoloadPlugins = new ArrayList();
-    if(pluginData == null) pluginData = new HashMap();
+    if(knownPlugins == null) knownPlugins = new ArrayList<URL>();
+    if(autoloadPlugins == null) autoloadPlugins = new ArrayList<URL>();
+    if(pluginData == null) pluginData = new HashMap<URL, DirectoryInfo>();
     // init the creole register
     initCreoleRegister();
     // init the data store register
@@ -131,9 +209,9 @@ public class Gate implements GateConstants {
 
     // read gate.xml files; this must come before creole register
     // initialisation in order for the CREOLE-DIR elements to have and effect
-    initConfigData();
+    if (!sandboxed) initConfigData();
 
-    initCreoleRepositories();
+    if (!sandboxed) initCreoleRepositories();
     // the creoleRegister acts as a proxy for datastore related events
     dataStoreRegister.addCreoleListener(creoleRegister);
 
@@ -277,44 +355,7 @@ public class Gate implements GateConstants {
         userSessionFile = new File(getDefaultUserSessionFileName());
       }
     }// if(userSessionFile == null)
-    Out.println("Using " + userSessionFile + " as user session file");
-
-    // builtin creole dir
-    if(builtinCreoleDir == null) {
-      String builtinCreoleDirPropertyValue =
-        System.getProperty(BUILTIN_CREOLE_DIR_PROPERTY_NAME);
-      if(builtinCreoleDirPropertyValue == null) {
-        // default to /gate/resources/creole in gate.jar
-        builtinCreoleDir = Files.getGateResource("/creole/");
-      }
-      else {
-        String builtinCreoleDirPath = builtinCreoleDirPropertyValue;
-        // add a slash onto the end of the path if it doesn't have one already -
-        // a creole directory URL should always end with a forward slash
-        if(!builtinCreoleDirPath.endsWith("/")) {
-          builtinCreoleDirPath += "/";
-        }
-        try {
-          builtinCreoleDir = new URL(builtinCreoleDirPath);
-        }
-        catch(MalformedURLException mue) {
-          // couldn't parse as a File either, so throw an exception
-          throw new GateRuntimeException(BUILTIN_CREOLE_DIR_PROPERTY_NAME
-            + " value \"" + builtinCreoleDirPropertyValue + "\" could"
-            + " not be parsed as either a URL or a file path.");
-        }
-        Out.println("Using " + builtinCreoleDir + " as built-in CREOLE"
-          + " directory URL");
-      }
-    }
-    
-    // check if benchmarking should be enabled or disabled
-    if(System.getProperty(ENABLE_BENCHMARKING_FEATURE_NAME) != null
-      && System.getProperty(ENABLE_BENCHMARKING_FEATURE_NAME).equalsIgnoreCase(
-        "true")) {
-      Benchmark.setBenchmarkingEnabled(true);
-    }
-    
+    Out.println("Using " + userSessionFile + " as user session file");    
   }
 
   /**
@@ -612,7 +653,7 @@ public class Gate implements GateConstants {
    * A list of names of classes that implement {@link gate.creole.ir.IREngine}
    * that will be used as information retrieval engines.
    */
-  private static Set registeredIREngines = new HashSet();
+  private static Set<String> registeredIREngines = new HashSet<String>();
 
   /**
    * Registers a new IR engine. The class named should implement
@@ -656,7 +697,7 @@ public class Gate implements GateConstants {
    * 
    * @return an unmodifiable {@link java.util.Set} value.
    */
-  public static Set getRegisteredIREngines() {
+  public static Set<String> getRegisteredIREngines() {
     return Collections.unmodifiableSet(registeredIREngines);
   }
 
@@ -967,6 +1008,10 @@ public class Gate implements GateConstants {
    * <TT>gate.xml</TT> file (create one if it doesn't exist).
    */
   public static void writeUserConfig() throws GateException {
+    
+    //if we are running in a sandbox then don't try and write anything
+    if (sandboxed) return;
+    
     String pluginsHomeStr;
     try {
       pluginsHomeStr = pluginsHome.getCanonicalPath();
@@ -1244,17 +1289,17 @@ public class Gate implements GateConstants {
         org.jdom.Document creoleDoc = builder.build(creoleFileURL);
 
         final Map<String, ResourceInfo> resInfos = new LinkedHashMap<String, ResourceInfo>();
-        List jobsList = new ArrayList();
+        List<Element> jobsList = new ArrayList<Element>();
         List<String> jarsToScan = new ArrayList<String>();
         List<String> allJars = new ArrayList<String>();
         jobsList.add(creoleDoc.getRootElement());
         while(!jobsList.isEmpty()) {
-          Element currentElem = (Element)jobsList.remove(0);
+          Element currentElem = jobsList.remove(0);
           if(currentElem.getName().equalsIgnoreCase("JAR")) {
-            List attrs = currentElem.getAttributes();
-            Iterator attrsIt = attrs.iterator();
+            List<Attribute> attrs = currentElem.getAttributes();
+            Iterator<Attribute> attrsIt = attrs.iterator();
             while(attrsIt.hasNext()) {
-              Attribute attr = (Attribute)attrsIt.next();
+              Attribute attr = attrsIt.next();
               if(attr.getName().equalsIgnoreCase("SCAN") && attr.getBooleanValue()) {
                 jarsToScan.add(currentElem.getTextTrim());
                 break;
@@ -1277,7 +1322,7 @@ public class Gate implements GateConstants {
           else {
             // this is some higher level element -> simulate recursion
             // we want Depth-first-search so we need to add at the beginning
-            List newJobsList = new ArrayList(currentElem.getChildren());
+            List<Element> newJobsList = new ArrayList<Element>(currentElem.getChildren());
             newJobsList.addAll(jobsList);
             jobsList = newJobsList;
           }
