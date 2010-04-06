@@ -1,6 +1,8 @@
 package gate.creole.gazetteer;
 
+import gate.Factory;
 import gate.Resource;
+import gate.creole.CustomDuplication;
 import gate.creole.ResourceInstantiationException;
 
 /**
@@ -11,7 +13,11 @@ import gate.creole.ResourceInstantiationException;
  * large Gazetteers as these can take a long time to initialise and take up a
  * lot of memory. This class provides a way to bootstrap a new gazetteer
  * instance off of an existing gazetteer instance while still maintaining all
- * thread level variables.
+ * thread level variables.  {@link DefaultGazetteer} implements
+ * {@link CustomDuplication} using this class, so the easiest way to build
+ * multiple copies of a {@link DefaultGazetteer} PR that share a single FSM
+ * is to create one in the usual way and then use
+ * {@link Factory#duplicate(Resource)} to copy it.
  *
  * NOTE: It is (probably) impossible to use this class from within either the
  * Gaze user interface or from a .gapp application file. You should only use
