@@ -26,6 +26,7 @@ import java.net.*;
 import java.util.*;
 
 import gate.creole.*;
+import gate.creole.gazetteer.Gazetteer;
 //import gate.creole.ontology.owlim.OWLIMOntologyLR;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
@@ -478,6 +479,249 @@ public abstract class Factory {
     doc.setSourceUrl(null);
     return doc;
   } // newDocument(String)
+  
+  /**
+   * <p>
+   * Create a <i>duplicate</i> of the given resource.  A duplicate is a
+   * an independent copy of the resource that has the same name and the
+   * same behaviour.  It does <i>not necessarily</i> have the same concrete
+   * class as the original, but if the original resource implements any of
+   * the following interfaces then the duplicate can be assumed to
+   * implement the same ones:
+   * </p>
+   * <ul>
+   * <li>{@link ProcessingResource}</li>
+   * <li>{@link LanguageResource}</li>
+   * <li>{@link LanguageAnalyser}</li>
+   * <li>{@link Controller}</li>
+   * <li>{@link CorpusController}</li>
+   * <li>{@link ConditionalController}</li>
+   * <li>{@link Gazetteer}</li>
+   * <li>{@link gate.creole.ontology.Ontology}</li>
+   * </ul>
+   * <p>
+   * The default duplication algorithm simply calls
+   * {@link #createResource(String, FeatureMap, FeatureMap, String)}
+   * with the type and name of the original resource, and with parameters
+   * and features which are copies of those from the original resource,
+   * but any Resource values in the maps will themselves be duplicated.
+   * A context is passed around all the duplicate calls that stem from the
+   * same call to this method so that if the same resource is referred to
+   * in different places, the same duplicate can be used in the
+   * corresponding places in the duplicated object graph.
+   * </p>
+   * <p>
+   * This default behaviour is sufficient for most resource types (and
+   * is roughly the equivalent of saving the resource's state using the
+   * persistence manager and then reloading it), but individual resource
+   * classes can override it by implementing the {@link CustomDuplication}
+   * interface.  This may be necessary for semantic reasons (e.g.
+   * controllers need to recursively duplicate the PRs they contain),
+   * or desirable for performance or memory consumption reasons (e.g. the
+   * behaviour of a DefaultGazetteer can be duplicated by a
+   * SharedDefaultGazetteer that shares the internal data structures).
+   * </p>
+   * 
+   * @param res the resource to duplicate
+   * @return an independent duplicate copy of the resource
+   * @throws ResourceInstantiationException if an exception occurs while
+   *         constructing the duplicate.
+   */
+  public static Resource duplicate(Resource res)
+          throws ResourceInstantiationException {
+    DuplicationContext ctx = new DuplicationContext();
+    try {
+      return duplicate(res, ctx);
+    }
+    finally {
+      // de-activate the context
+      ctx.active = false;
+    }
+  }
+  
+  /**
+   * Create a duplicate of the given resource, using the provided context.
+   * This method is intended for use by resources that implement the
+   * {@link CustomDuplication} interface when they need to duplicate
+   * their child resources.  Calls made to this method outside the scope
+   * of such a {@link CustomDuplication#duplicate} call will fail with a
+   * runtime exception.
+   * 
+   * @see #duplicate(Resource)
+   * @param res the resource to duplicate
+   * @param ctx the current context as passed to the
+   *         {@link CustomDuplication#duplicate} method.
+   * @return the duplicated resource
+   * @throws ResourceInstantiationException if an error occurs while
+   *         constructing the duplicate.
+   */
+  public static Resource duplicate(Resource res,
+          DuplicationContext ctx)
+            throws ResourceInstantiationException {
+    checkDuplicationContext(ctx);
+    // check for null
+    if(res == null) {
+      return null;
+    }
+    // check if we've seen this resource before
+    else if(ctx.knownResources.containsKey(res)) {
+      return ctx.knownResources.get(res);
+    }
+    else {
+      // create the duplicate
+      Resource newRes = null;
+      if(res instanceof CustomDuplication) {
+        // use custom duplicate if available
+        newRes = ((CustomDuplication)res).duplicate(ctx);
+      }
+      else {
+        newRes = defaultDuplicate(res, ctx);
+      }
+      // remember this duplicate in the context
+      ctx.knownResources.put(res, newRes);
+      return newRes;
+    }
+  }
+  
+  /**
+   * Implementation of the default duplication algorithm described
+   * in the comment for {@link #duplicate(Resource)}.  This method is
+   * public for the benefit of resources that implement
+   * {@link CustomDuplication} but only need to do some post-processing
+   * after the default duplication algorithm; they can call this method
+   * to obtain an initial duplicate and then post-process it before
+   * returning.  If they need to duplicate child resources they should
+   * call {@link #duplicate(Resource, DuplicationContext)} in the normal
+   * way.  Calls to this method made outside the context of a
+   * {@link CustomDuplication#duplicate} call will fail with a runtime
+   * exception.
+   * 
+   * @param res the resource to duplicate
+   * @param ctx the current context
+   * @return a duplicate of the given resource, constructed using the
+   *         default algorithm.  In particular, if <code>res</code>
+   *         implements {@link CustomDuplication} its own duplicate method
+   *         will <i>not</i> be called.
+   * @throws ResourceInstantiationException if an error occurs
+   *         while duplicating the given resource.
+   */
+  public static Resource defaultDuplicate(Resource res,
+          DuplicationContext ctx)
+            throws ResourceInstantiationException {
+    checkDuplicationContext(ctx);
+    String className = res.getClass().getName();
+    String resName = res.getName();
+
+    FeatureMap newResFeatures = duplicate(res.getFeatures(), ctx);
+    
+    // get the resource data to extract the parameters
+    ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(className);
+    if(rData == null)
+      throw new ResourceInstantiationException(
+              "Could not find CREOLE data for " + className);
+
+    ParameterList params = rData.getParameterList();
+    // init parameters
+    FeatureMap initParams = Factory.newFeatureMap();
+    for(List<Parameter> parDisjunction : params.getInitimeParameters()) {
+      for(Parameter p : parDisjunction) {
+        initParams.put(p.getName(), res.getParameterValue(p.getName()));
+      }
+    }
+    // duplicate any Resources in the params map
+    initParams = duplicate(initParams, ctx);
+    
+    // create the new resource
+    Resource newResource = createResource(className, initParams, newResFeatures, resName);
+    if(newResource instanceof ProcessingResource) {
+      // runtime params
+      FeatureMap runtimeParams = Factory.newFeatureMap();
+      for(List<Parameter> parDisjunction : params.getRuntimeParameters()) {
+        for(Parameter p : parDisjunction) {
+          runtimeParams.put(p.getName(), res.getParameterValue(p.getName()));
+        }
+      }
+      // duplicate any Resources in the params map
+      runtimeParams = duplicate(runtimeParams, ctx);
+      newResource.setParameterValues(runtimeParams);
+    }
+    
+    return newResource;
+  }
+  
+  /**
+   * Construct a feature map that is a copy of the one provided except
+   * that any {@link Resource} values in the map are replaced by their
+   * duplicates.  This method is public for the benefit of resources
+   * that implement {@link CustomDuplication} and will fail if called
+   * outside of a {@link CustomDuplication#duplicate} implementation.
+   * 
+   * @param fm the feature map to duplicate
+   * @param ctx the current context
+   * @return a duplicate feature map
+   * @throws ResourceInstantiationException if an error occurs while
+   *         duplicating any Resource in the feature map.
+   */
+  public static FeatureMap duplicate(FeatureMap fm,
+          DuplicationContext ctx)
+            throws ResourceInstantiationException {
+    checkDuplicationContext(ctx);
+    FeatureMap newFM = Factory.newFeatureMap();
+    for(Map.Entry<Object, Object> entry : fm.entrySet()) {
+      Object value = entry.getValue();
+      if(value instanceof Resource) {
+        value = duplicate((Resource)value, ctx);
+      }
+      newFM.put(entry.getKey(), value);
+    }
+    return newFM;
+  }
+  
+  /**
+   * Opaque memo object passed to {@link CustomDuplication#duplicate}
+   * methods to encapsulate the state of the current duplication run.
+   * If the duplicate method itself needs to duplicate any objects it
+   * should pass this context back to
+   * {@link #duplicate(Resource,DuplicationContext)}.
+   */
+  public static class DuplicationContext {
+    IdentityHashMap<Resource, Resource> knownResources =
+      new IdentityHashMap<Resource, Resource>();
+    
+    /**
+     * Whether this duplication context is part of an active duplicate
+     * call.
+     */
+    boolean active = true;
+
+    /**
+     * Overridden to ensure no public constructor.
+     */
+    DuplicationContext() {
+    }
+  }
+  
+  /**
+   * Throws an exception if the specified duplication context is
+   * null or not active.  This is to ensure that the Factory
+   * helper methods that take a DuplicationContext parameter can
+   * only be called in the context of a
+   * {@link #duplicate(Resource)} call.
+   * @param ctx the context to check.
+   * @throws NullPointerException if the provided context is null.
+   * @throws IllegalStateException if the provided context is not
+   *         active.
+   */
+  protected static void checkDuplicationContext(DuplicationContext ctx) {
+    if(ctx == null) {
+      throw new NullPointerException("No DuplicationContext provided");
+    }
+    if(!ctx.active) {
+      throw new IllegalStateException(
+              new Throwable().getStackTrace()[1].getMethodName()
+              + " helper method called outside an active duplicate call");
+    }
+  }
 
   static Class japeParserClass = ParseCpsl.class;
   public static Class getJapeParserClass() {

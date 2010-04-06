@@ -46,7 +46,8 @@ import gate.util.*;
  * will generate annotations of type Lookup having the attributes specified in
  * the definition file.
  */
-public class DefaultGazetteer extends AbstractGazetteer {
+public class DefaultGazetteer extends AbstractGazetteer
+                              implements CustomDuplication {
 
   /** Debug flag
    */
@@ -556,8 +557,24 @@ public class DefaultGazetteer extends AbstractGazetteer {
     addLookup(singleItem,lookup);
     return true;
   }
+  
+  /**
+   * Use a {@link SharedDefaultGazetteer} to duplicate this gazetteer
+   * by sharing the internal FSM rather than re-loading the lists.
+   */
+  public Resource duplicate(Factory.DuplicationContext ctx)
+          throws ResourceInstantiationException {
+    return Factory.createResource(SharedDefaultGazetteer.class.getName(),
+            Utils.featureMap(
+                    SharedDefaultGazetteer.SDEF_GAZ_BOOTSTRAP_GAZETTEER_PROPERTY_NAME,
+                    this),
+            Factory.duplicate(this.getFeatures(), ctx),
+            this.getName());
+  }
 
-//>>> DAM: TransArray optimization, new CharMap implementation
+
+
+  //>>> DAM: TransArray optimization, new CharMap implementation
   public static interface Iter
   {
       public boolean hasNext();

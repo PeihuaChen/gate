@@ -177,6 +177,38 @@ public class ConditionalSerialController extends SerialController
     strategiesList.clear();
   }
 
+  /**
+   * Custom duplication method for conditional controllers to handle
+   * duplicating the running strategies.
+   */
+  public Resource duplicate(Factory.DuplicationContext ctx)
+          throws ResourceInstantiationException {
+    ConditionalController c = (ConditionalController)super.duplicate(ctx);
+    Collection<ProcessingResource> newPRs = c.getPRs();
+    List<RunningStrategy> newStrategies = new ArrayList<RunningStrategy>(
+            strategiesList.size());
+    Iterator<RunningStrategy> oldRSIt = getRunningStrategies().iterator();
+    Iterator<ProcessingResource> prIt = newPRs.iterator();
+    while(oldRSIt.hasNext()) {
+      RunningStrategy oldStrat = oldRSIt.next();
+      ProcessingResource currentPR = prIt.next();
+      if(oldStrat instanceof AnalyserRunningStrategy) {
+        newStrategies.add(new AnalyserRunningStrategy(
+                (LanguageAnalyser)currentPR,
+                ((AnalyserRunningStrategy)oldStrat).getRunMode(),
+                ((AnalyserRunningStrategy)oldStrat).getFeatureName(),
+                ((AnalyserRunningStrategy)oldStrat).getFeatureValue()));
+      }
+      else {
+        // assume a run-always strategy.  Subclasses that know about other types
+        // of strategies can fix this up later
+        newStrategies.add(new RunningStrategy.RunAlwaysStrategy(currentPR));
+      }
+    }
+    c.setRunningStrategies(newStrategies);
+    
+    return c;
+  }
 
   /**
    * The list of running strategies for the member PRs.

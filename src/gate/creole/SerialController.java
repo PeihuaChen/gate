@@ -34,7 +34,8 @@ import gate.util.Out;
     comment = "A simple serial controller for PR pipelines.",
     helpURL = "http://gate.ac.uk/userguide/sec:developer:apps")
 public class SerialController extends AbstractController implements
-                                                        CreoleListener {
+                                                        CreoleListener,
+                                                        CustomDuplication {
 
   protected static final Logger log = Logger.getLogger(SerialController.class);
 
@@ -282,6 +283,28 @@ public class SerialController extends AbstractController implements
         //ignore
       }
     }
+  }
+  
+  /**
+   * Duplicate this controller.  We perform a default duplication of
+   * the controller itself, then recursively duplicate its contained
+   * PRs and add these duplicates to the copy.
+   */
+  public Resource duplicate(Factory.DuplicationContext ctx)
+          throws ResourceInstantiationException {
+    // duplicate this controller in the default way - this handles
+    // subclasses nicely
+    Controller c = (Controller)Factory.defaultDuplicate(this, ctx);
+    
+    // duplicate each of our PRs
+    List<ProcessingResource> newPRs = new ArrayList<ProcessingResource>();
+    for(Object pr : prList) {
+      newPRs.add((ProcessingResource)Factory.duplicate((Resource)pr, ctx));
+    }
+    // and set this duplicated list as the PRs of the copy
+    c.setPRs(newPRs);
+    
+    return c;
   }
 
   /** The list of contained PRs */
