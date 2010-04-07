@@ -136,6 +136,13 @@ public class Gate implements GateConstants {
     return sandboxed;
   }
   
+  /**
+   * Method to tell GATE if it is being run inside a JVM sandbox. If true then
+   * GATE will not attempt to load any local configuration information during
+   * Initialisation making it possible to use GATE from within unsigned
+   * applets and web start applications.
+   * @param sandboxed true if GATE is to be run in a sandbox, false otherwise
+   */
   public static void runInSandbox(boolean sandboxed) {
     if (initFinished)
       throw new IllegalStateException("Sandbox status cannot be changed after GATE has been initialised!");
