@@ -22,14 +22,12 @@ import gate.creole.ResourceData;
 import gate.creole.metadata.CreoleResource;
 import gate.event.CreoleListener;
 import gate.util.Benchmark;
-import gate.util.Err;
 import gate.util.Files;
 import gate.util.GateClassLoader;
 import gate.util.GateException;
 import gate.util.GateRuntimeException;
 import gate.util.LuckyException;
 import gate.util.OptionsMap;
-import gate.util.Out;
 import gate.util.Strings;
 import gate.util.asm.AnnotationVisitor;
 import gate.util.asm.ClassReader;
@@ -65,6 +63,7 @@ import java.util.StringTokenizer;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
+import org.apache.log4j.Logger;
 import org.jdom.Attribute;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -76,8 +75,9 @@ import org.jdom.input.SAXBuilder;
  * register and so on.
  */
 public class Gate implements GateConstants {
-  /** Debug flag */
-  private static final boolean DEBUG = false;
+  
+  /** A logger to use instead of sending messages to Out or Err **/
+  protected static final Logger log = Logger.getLogger(Gate.class);
 
   /**
    * The default StringBuffer size, it seems that we need longer string than the
@@ -122,8 +122,16 @@ public class Gate implements GateConstants {
   protected static final String ENABLE_BENCHMARKING_FEATURE_NAME =
     "gate.enable.benchmark";
 
+  /** Is true if GATE is to be run in a sandbox **/
   private static boolean sandboxed = false;
   
+  /**
+   * Find out if GATE is to be run in a sandbox or not. If true then
+   * GATE will not attempt to load any local configuration information during
+   * Initialisation making it possible to use GATE from within unsigned
+   * applets and web start applications.
+   * @return true if GATE is to be run in a sandbox, false otherwise
+   */
   public static boolean isSandboxed() {
     return sandboxed;
   }
@@ -147,7 +155,7 @@ public class Gate implements GateConstants {
    * 
    * @see #initCreoleRegister
    */
-  public static void init() throws GateException {
+  public static void init() throws GateException {    
     // init local paths
     if (!sandboxed) initLocalPaths();
     
@@ -182,7 +190,7 @@ public class Gate implements GateConstants {
             + " value \"" + builtinCreoleDirPropertyValue + "\" could"
             + " not be parsed as either a URL or a file path.");
         }
-        Out.println("Using " + builtinCreoleDir + " as built-in CREOLE"
+        log.info("Using " + builtinCreoleDir + " as built-in CREOLE"
           + " directory URL");
       }
     }
@@ -252,7 +260,7 @@ public class Gate implements GateConstants {
       }
       // if failed, try to guess
       if(gateHome == null || !gateHome.exists()) {
-        Err.println("GATE home system property (\"" + GATE_HOME_PROPERTY_NAME
+        log.warn("GATE home system property (\"" + GATE_HOME_PROPERTY_NAME
           + "\") not set.\nAttempting to guess...");
         URL gateURL =
           Thread.currentThread().getContextClassLoader().getResource(
@@ -272,7 +280,7 @@ public class Gate implements GateConstants {
             gateHome =
               gateClassFile.getParentFile().getParentFile().getParentFile();
           }
-          Err.println("Using \"" + gateHome.getCanonicalPath()
+          log.warn("Using \"" + gateHome.getCanonicalPath()
             + "\" as GATE Home.\nIf this is not correct please set it manually"
             + " using the -D" + GATE_HOME_PROPERTY_NAME
             + " option in your start-up script");
@@ -283,7 +291,7 @@ public class Gate implements GateConstants {
         }
       }
     }
-    Out.println("Using " + gateHome.toString() + " as GATE home");
+    log.info("Using " + gateHome.toString() + " as GATE home");
 
     // Plugins home
     if(pluginsHome == null) {
@@ -307,7 +315,7 @@ public class Gate implements GateConstants {
           + "Please set it manually using the -D" + PLUGINS_HOME_PROPERTY_NAME
           + " option in your start-up script."); }
     }
-    Out.println("Using " + pluginsHome.toString()
+    log.info("Using " + pluginsHome.toString()
       + " as installed plug-ins directory.");
 
     // site config
@@ -330,7 +338,7 @@ public class Gate implements GateConstants {
           + " or point to an existing one using the -D"
           + SITE_CONFIG_PROPERTY_NAME + " option in your start-up script!"); }
     }
-    Out.println("Using " + siteConfigFile.toString()
+    log.info("Using " + siteConfigFile.toString()
       + " as site configuration file.");
 
     // user config
@@ -342,7 +350,7 @@ public class Gate implements GateConstants {
         userConfigFile = new File(getDefaultUserConfigFileName());
       }
     }
-    Out.println("Using " + userConfigFile + " as user configuration file");
+    log.info("Using " + userConfigFile + " as user configuration file");
 
     // user session
     if(userSessionFile == null) {
@@ -355,7 +363,7 @@ public class Gate implements GateConstants {
         userSessionFile = new File(getDefaultUserSessionFileName());
       }
     }// if(userSessionFile == null)
-    Out.println("Using " + userSessionFile + " as user session file");    
+    log.info("Using " + userSessionFile + " as user session file");    
   }
 
   /**
@@ -382,7 +390,7 @@ public class Gate implements GateConstants {
           addKnownPlugin(aPluginURL);
         }
         catch(MalformedURLException mue) {
-          Err.prln("Plugin error: " + aKnownPluginPath + " is an invalid URL!");
+          log.error("Plugin error: " + aKnownPluginPath + " is an invalid URL!");
         }
       }
     }
@@ -425,8 +433,7 @@ public class Gate implements GateConstants {
         addAutoloadPlugin(aPluginURL);
       }
       catch(MalformedURLException mue) {
-        Err.println("Cannot load " + aDir + " CREOLE repository.");
-        mue.printStackTrace();
+        log.error("Cannot load " + aDir + " CREOLE repository.",mue);
       }
       try {
         Iterator<URL> loadPluginsIter = getAutoloadPlugins().iterator();
@@ -435,8 +442,7 @@ public class Gate implements GateConstants {
         }
       }
       catch(GateException ge) {
-        Err.println("Cannot load " + aDir + " CREOLE repository.");
-        ge.printStackTrace();
+        log.error("Cannot load " + aDir + " CREOLE repository.",ge);
       }
     }
   }
@@ -523,10 +529,8 @@ public class Gate implements GateConstants {
     // remember the init-time config options
     originalUserConfig.putAll(userConfig);
 
-    if(DEBUG) {
-      Out.prln("user config loaded; DBCONFIG="
+    log.debug("user config loaded; DBCONFIG="
         + DataStoreRegister.getConfigData());
-    }
   } // initConfigData()
 
   /**
@@ -585,7 +589,7 @@ public class Gate implements GateConstants {
         // tryNetServer("gate-internal.dcs.shef.ac.uk", 80, "/") ||
         // tryNetServer("derwent.dcs.shef.ac.uk", 80, "/gate.ac.uk/") ||
         tryNetServer("gate.ac.uk", 80, "/")) {
-          if(DEBUG) Out.prln("getUrl() returned " + urlBase);
+          log.debug("getUrl() returned " + urlBase);
           return urlBase;
         }
       } // if isNetConnected() ...
@@ -596,7 +600,7 @@ public class Gate implements GateConstants {
       if(isLocalWebServer()
         && tryNetServer(InetAddress.getLocalHost().getHostName(), 80,
           "/gate.ac.uk/")) {
-        if(DEBUG) Out.prln("getUrlBase() returned " + urlBase);
+        log.debug("getUrlBase() returned " + urlBase);
         return urlBase;
       }
 
@@ -612,7 +616,7 @@ public class Gate implements GateConstants {
     }
 
     // return value will be based on the file system, or null
-    if(DEBUG) Out.prln("getUrlBase() returned " + urlBase);
+    log.debug("getUrlBase() returned " + urlBase);
     return urlBase;
   } // getUrl()
 
@@ -637,7 +641,7 @@ public class Gate implements GateConstants {
       throw new GateException("Bad URL, getUrl( " + path + "): " + e);
     }
 
-    if(DEBUG) Out.prln("getUrl(" + path + ") returned " + newUrl);
+    log.debug("getUrl(" + path + ") returned " + newUrl);
     return newUrl;
   } // getUrl(path)
 
@@ -756,8 +760,7 @@ public class Gate implements GateConstants {
   public static boolean tryNetServer(String hostName, int serverPort,
     String path) throws MalformedURLException {
 
-    if(DEBUG)
-      Out.prln("tryNetServer(hostName=" + hostName + ", serverPort="
+    log.debug("tryNetServer(hostName=" + hostName + ", serverPort="
         + serverPort + ", path=" + path + ")");
 
     // is the host listening at the port?
@@ -783,7 +786,7 @@ public class Gate implements GateConstants {
   /** Try to find GATE files in the local file system */
   protected static boolean tryFileSystem() throws MalformedURLException {
     String urlBaseName = locateGateFiles();
-    if(DEBUG) Out.prln("tryFileSystem: " + urlBaseName);
+    log.debug("tryFileSystem: " + urlBaseName);
 
     urlBase = new URL(urlBaseName + "gate/resources/gate.ac.uk/");
     return urlBase == null;
@@ -1362,12 +1365,12 @@ public class Gate implements GateConstants {
       }
       catch(IOException ioe) {
         valid = false;
-        Err.prln("Problem while parsing plugin " + url.toExternalForm() + "!\n"
+        log.error("Problem while parsing plugin " + url.toExternalForm() + "!\n"
           + ioe.toString() + "\nPlugin not available!");
       }
       catch(JDOMException jde) {
         valid = false;
-        Err.prln("Problem while parsing plugin " + url.toExternalForm() + "!\n"
+        log.error("Problem while parsing plugin " + url.toExternalForm() + "!\n"
           + jde.toString() + "\nPlugin not available!");
       }
     }
