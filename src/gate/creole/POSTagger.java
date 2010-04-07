@@ -200,7 +200,7 @@ public class POSTagger extends AbstractLanguageAnalyser {
         (double)(System.currentTimeMillis() - startTime) / 1000) +
         " seconds!");
     }else{
-      throw new ExecutionException("No sentences or tokens to process!\n" +
+      throw new ExecutionException("No sentences or tokens to process in document "+document.getName()+"\n" +
                                      "Please run a sentence splitter "+
                                      "and tokeniser first!");
     }
