@@ -74,6 +74,9 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
   private boolean isTraining;
   /** Subdirectory for storing the data file produced by learning api. */
   private File wdResults = null;
+  /** Subdirectory used to store temporary files used by APPLICATION mode. */
+  private File applicationTempDir;
+  
   /** Doing evaluation. */
   private EvaluationBasedOnDocs evaluation;
   /** The MI learning information object. */
@@ -341,7 +344,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
 
           outNLPFeatures =
             new BufferedWriter(new OutputStreamWriter(
-              new FileOutputStream(new File(wdResults,
+              new FileOutputStream(new File(getApplicationTempDir(),
                 ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
           int numDoc;
           numDoc = endDocIdApp - startDocIdApp;
@@ -362,7 +365,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
           outNLPFeatures.flush();
           outNLPFeatures.close();
 
-          lightWeightApi.finishFVs(wdResults, numDoc, isTraining,
+          lightWeightApi.finishFVs(getApplicationTempDir(), numDoc, isTraining,
             learningSettings);
 
           Benchmark.checkPoint(startTime, getBenchmarkId() + "."
@@ -373,14 +376,14 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
           /** Open the normal NLP feature file. */
           inNLPFeatures =
             new BufferedReader(new InputStreamReader(
-              new FileInputStream(new File(wdResults,
+              new FileInputStream(new File(getApplicationTempDir(),
                 ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
           outFeatureVectors =
             new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-              new File(wdResults,
+              new File(getApplicationTempDir(),
                 ConstantParameters.FILENAMEOFFeatureVectorDataApp)), "UTF-8"));
 
-          lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures,
+          lightWeightApi.nlpfeatures2FVs(getApplicationTempDir(), inNLPFeatures,
             outFeatureVectors, numDoc, isTraining, learningSettings);
           inNLPFeatures.close();
           outFeatureVectors.flush();
@@ -390,14 +393,11 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
             + Benchmark.NLP_FEATURES_TO_FVS, this, benchmarkingFeatures);
 
           // Applying th model
-          String fvFileName =
-            wdResults.toString() + File.separator
-              + ConstantParameters.FILENAMEOFFeatureVectorDataApp;
 
           startTime = Benchmark.startPoint();
 
           lightWeightApi.applyModelInJava(corpus, startDocIdApp, endDocIdApp,
-            classTypeOriginal, learningSettings, fvFileName);
+            classTypeOriginal, learningSettings, getApplicationTempDir());
 
           Benchmark.checkPoint(startTime, getBenchmarkId() + "."
             + Benchmark.MODEL_APPLICATION, this, benchmarkingFeatures);
@@ -684,7 +684,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
                   .getType();
               outNLPFeatures =
                 new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-                  new File(wdResults,
+                  new File(getApplicationTempDir(),
                     ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
               numDoc = endDocIdApp - startDocIdApp;
 
@@ -705,7 +705,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
               outNLPFeatures.flush();
               outNLPFeatures.close();
 
-              lightWeightApi.finishFVs(wdResults, numDoc, isTraining,
+              lightWeightApi.finishFVs(getApplicationTempDir(), numDoc, isTraining,
                 learningSettings);
 
               Benchmark.checkPoint(startTime, getBenchmarkId() + "."
@@ -714,17 +714,17 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
               /** Open the normal NLP feature file. */
               inNLPFeatures =
                 new BufferedReader(new InputStreamReader(new FileInputStream(
-                  new File(wdResults,
+                  new File(getApplicationTempDir(),
                     ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
               outFeatureVectors =
                 new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-                  new File(wdResults,
+                  new File(getApplicationTempDir(),
                     ConstantParameters.FILENAMEOFFeatureVectorDataApp)),
                   "UTF-8"));
 
               startTime = Benchmark.startPoint();
 
-              lightWeightApi.nlpfeatures2FVs(wdResults, inNLPFeatures,
+              lightWeightApi.nlpfeatures2FVs(getApplicationTempDir(), inNLPFeatures,
                 outFeatureVectors, numDoc, isTraining, learningSettings);
 
               inNLPFeatures.close();
@@ -735,14 +735,11 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
                 + Benchmark.NLP_FEATURES_TO_FVS, this, benchmarkingFeatures);
 
               // Applying th model
-              String fvFileName =
-                wdResults.toString() + File.separator
-                  + ConstantParameters.FILENAMEOFFeatureVectorDataApp;
 
               startTime = Benchmark.startPoint();
 
               lightWeightApi.applyModelInJava(corpus, startDocIdApp,
-                endDocIdApp, classTypeOriginal, learningSettings, fvFileName);
+                endDocIdApp, classTypeOriginal, learningSettings, getApplicationTempDir());
 
               Benchmark.checkPoint(startTime, getBenchmarkId() + "."
                 + Benchmark.MODEL_APPLICATION, this, benchmarkingFeatures);
@@ -903,7 +900,54 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
     System.out.println(logMessage.toString());
     LogService.logMessage(logMessage.toString(), 1);
   }
-
+  
+  /**
+   * Determine the directory used to store temporary files when
+   * running in APPLICATION mode.
+   */
+  protected File getApplicationTempDir() {
+    if(applicationTempDir == null) {
+      LogService.logMessage("Creating temp directory for application-mode files", 1);
+      try {
+        applicationTempDir = File.createTempFile("appl", ".tmp", wdResults);
+        applicationTempDir.delete();
+        if(!applicationTempDir.mkdir()) {
+          throw new IOException("Error creating directory " + applicationTempDir);
+        }
+      }
+      catch(IOException ioe) {
+        LogService.logMessage("Could not create temporary directory for " +
+        		"application-mode temp files, using " + wdResults, 1);
+        applicationTempDir = wdResults;
+      }
+    }
+    return applicationTempDir;
+  }
+  
+  /**
+   * Delete the temporary directory for application-mode temp files
+   * when this resource is deleted.
+   */
+  public void cleanup() {
+    if(applicationTempDir != null && !applicationTempDir.equals(wdResults)) {
+      deleteRecursively(applicationTempDir);
+    }
+  }
+  
+  /**
+   * Delete a file or directory. If the argument is a directory, delete its
+   * contents first, then remove the directory itself.
+   */
+  private void deleteRecursively(File fileOrDir) {
+    if(fileOrDir.isDirectory()) {
+      for(File f : fileOrDir.listFiles()) {
+        deleteRecursively(f);
+      }
+    }
+    if(!fileOrDir.delete()) { LogService.logMessage("Couldn't delete "
+      + (fileOrDir.isDirectory() ? "directory " : "file ") + fileOrDir, 1); }
+  }
+  
   public void setConfigFileURL(URL workingDirectory) {
     this.configFileURL = workingDirectory;
   }

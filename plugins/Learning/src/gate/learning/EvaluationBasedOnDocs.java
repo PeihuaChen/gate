@@ -471,10 +471,8 @@ public class EvaluationBasedOnDocs {
           }
           ++numDoc;
         }
-      String fvFileName = wdResults.toString() + File.separator
-        + ConstantParameters.FILENAMEOFFeatureVectorDataApp;
       lightWeightApi.applyModelInJava(corpusTest, 0, corpusTest.size(),
-        classTypeTest, learningSettings, fvFileName);
+        classTypeTest, learningSettings, wdResults);
       //unload the documents in the test corpus from memory
       /*for(int i=0; i<corpusTest.size(); ++i) {
         Document toProcess = (Document)corpusOn.get(i);

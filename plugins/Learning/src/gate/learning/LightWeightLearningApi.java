@@ -782,15 +782,15 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
    * Java.
    */
   public void applyModelInJava(Corpus corpus, int startDocId, int endDocId,
-    String labelName, LearningEngineSettings engineSettings, String fvFileName)
+    String labelName, LearningEngineSettings engineSettings, File tempFilesDir)
     throws GateException {
     int numDocs = endDocId - startDocId;
     LogService.logMessage("\nApplication starts.", 1);
     // The files for training data and model
     File wdResults = new File(wd, ConstantParameters.SUBDIRFORRESULTS);
-    // String fvFileName = wdResults.toString() + File.separator
-    // + ConstantParameters.FILENAMEOFFeatureVectorData;
-    String nlpFileName = wdResults.toString() + File.separator
+    String fvFileName = tempFilesDir.toString() + File.separator
+     + ConstantParameters.FILENAMEOFFeatureVectorDataApp;
+    String nlpFileName = tempFilesDir.toString() + File.separator
       + ConstantParameters.FILENAMEOFNLPFeaturesData;
     String modelFileName = wdResults.toString() + File.separator
       + ConstantParameters.FILENAMEOFModels;
@@ -961,13 +961,13 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
    * implemented in Java.
    */
   public void applyModelInJavaPerDoc(Document doc, String labelName,
-    LearningEngineSettings engineSettings) throws GateException {
+    LearningEngineSettings engineSettings, File tempFilesDir) throws GateException {
     LogService.logMessage("\nApplication starts.", 1);
     // The files for training data and model
     File wdResults = new File(wd, ConstantParameters.SUBDIRFORRESULTS);
-    String fvFileName = wdResults.toString() + File.separator
+    String fvFileName = tempFilesDir.toString() + File.separator
       + ConstantParameters.FILENAMEOFFeatureVectorData;
-    String nlpFileName = wdResults.toString() + File.separator
+    String nlpFileName = tempFilesDir.toString() + File.separator
       + ConstantParameters.FILENAMEOFNLPFeaturesData;
     String modelFileName = wdResults.toString() + File.separator
       + ConstantParameters.FILENAMEOFModels;
@@ -1038,7 +1038,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
           engineSettings.multi2BinaryMode);
         // read data
          //      get the fv data
-        File  tempDataFile= new File(wdResults, 
+        File  tempDataFile= new File(tempFilesDir, 
           ConstantParameters.TempFILENAMEofFVData);
         boolean isUsingTempDataFile = false;
         //if(paumLearner.getLearnerName().equals("SVMExec"))
