@@ -1283,7 +1283,7 @@ public class Gate implements GateConstants {
     public DirectoryInfo(URL url) {
       this.url = normaliseCreoleUrl(url);
       valid = true;
-      resourceInfoList = new ArrayList();
+      resourceInfoList = new ArrayList<ResourceInfo>();
       // this may invalidate it if something goes wrong
       parseCreole();
     }
