@@ -20,9 +20,10 @@ import gate.Factory.DuplicationContext;
 /**
  * Interface which should be implemented by any Resource type which
  * cannot be duplicated in the standard way (see
- * {@link Factory#duplicate}). If a Resource class requires custom
- * duplication logic it should implement this interface and provide an
- * implementation of the {@link #duplicate()} method to create a new
+ * {@link Factory#duplicate(Resource) Factory.duplicate}). If a Resource
+ * class requires custom duplication logic it should implement this
+ * interface and provide an implementation of the
+ * {@link #duplicate(Resource) duplicate} method to create a new
  * resource instance that has the same behaviour as <code>this</code>.
  * 
  * @author ian
@@ -59,10 +60,10 @@ public interface CustomDuplication {
    * {@link Factory#duplicate(Resource)} instead.
    * </p>
    * 
-   * @param ctx the current {@link DuplicationContext}. If an implementation of
-   *          this method needs to duplicate any other resources as part
-   *          of the custom duplication process it should pass this context
-   *          back to the two-argument form of
+   * @param ctx the current {@link DuplicationContext duplication context}.
+   *          If an implementation of this method needs to duplicate any
+   *          other resources as part of the custom duplication process
+   *          it should pass this context back to the two-argument form of
    *          {@link Factory#duplicate(Resource, DuplicationContext) Factory.duplicate}
    *          rather than using the single-argument form.
    * @return an independent copy of this resource.
