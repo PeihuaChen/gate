@@ -24,6 +24,7 @@ import java.util.*;
 import gate.*;
 import gate.gui.MainFrame;
 import gate.creole.AbstractLanguageResource;
+import gate.creole.CustomDuplication;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.*;
 import gate.event.*;
@@ -39,7 +40,8 @@ import gate.util.Strings;
     interfaceName = "gate.Corpus", icon = "corpus-trans",
     helpURL = "http://gate.ac.uk/userguide/sec:developer:loadlr")
 public class CorpusImpl extends AbstractLanguageResource implements Corpus,
-                                                        CreoleListener {
+                                                        CreoleListener,
+                                                        CustomDuplication {
 
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -654,6 +656,20 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
       v.addElement(l);
       corpusListeners = v;
     }
+  }
+  
+  /**
+   * Custom duplication for a corpus - duplicate this corpus
+   * in the usual way, then duplicate the documents in this
+   * corpus and add them to the duplicate.
+   */
+  public Resource duplicate(Factory.DuplicationContext ctx)
+          throws ResourceInstantiationException {
+    Corpus newCorpus = (Corpus)Factory.defaultDuplicate(this, ctx);
+    for(Document d : (List<Document>)this) {
+      newCorpus.add((Document)Factory.duplicate(d, ctx));
+    }
+    return newCorpus;
   }
 
   /** Freeze the serialization UID. */

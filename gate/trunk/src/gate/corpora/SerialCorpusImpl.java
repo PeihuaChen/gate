@@ -22,6 +22,7 @@ import java.util.*;
 
 import gate.*;
 import gate.creole.AbstractLanguageResource;
+import gate.creole.CustomDuplication;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.ir.*;
 import gate.creole.metadata.*;
@@ -46,7 +47,8 @@ public class SerialCorpusImpl extends AbstractLanguageResource
                                                               Corpus,
                                                               CreoleListener,
                                                               DatastoreListener,
-                                                              IndexedCorpus {
+                                                              IndexedCorpus,
+                                                              CustomDuplication {
 
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -1012,6 +1014,15 @@ public class SerialCorpusImpl extends AbstractLanguageResource
         ie.printStackTrace();
       }
     }
+  }
+
+  /**
+   * SerialCorpusImpl does not support duplication.
+   */
+  public Resource duplicate(Factory.DuplicationContext ctx)
+          throws ResourceInstantiationException {
+    throw new ResourceInstantiationException("Duplication of "
+            + this.getClass().getName() + " not permitted");
   }
 
 }

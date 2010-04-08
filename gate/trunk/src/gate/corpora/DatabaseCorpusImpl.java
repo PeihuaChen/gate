@@ -821,6 +821,15 @@ public class DatabaseCorpusImpl extends CorpusImpl
 
     return supportList.equals(o);
   }
+  
+  /**
+   * DatabaseCorpusImpl does not support duplication.
+   */
+  public Resource duplicate(Factory.DuplicationContext ctx)
+          throws ResourceInstantiationException {
+    throw new ResourceInstantiationException("Duplication of "
+            + this.getClass().getName() + " not permitted");
+  }
 
 
 }
