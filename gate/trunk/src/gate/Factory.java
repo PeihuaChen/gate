@@ -501,7 +501,7 @@ public abstract class Factory {
    * </ul>
    * <p>
    * The default duplication algorithm simply calls
-   * {@link #createResource(String, FeatureMap, FeatureMap, String)}
+   * {@link #createResource(String, FeatureMap, FeatureMap, String) createResource}
    * with the type and name of the original resource, and with parameters
    * and features which are copies of those from the original resource,
    * but any Resource values in the maps will themselves be duplicated.
@@ -543,9 +543,9 @@ public abstract class Factory {
    * Create a duplicate of the given resource, using the provided context.
    * This method is intended for use by resources that implement the
    * {@link CustomDuplication} interface when they need to duplicate
-   * their child resources.  Calls made to this method outside the scope
-   * of such a {@link CustomDuplication#duplicate} call will fail with a
-   * runtime exception.
+   * their child resources.  Calls made to this method outside the scope of
+   * such a {@link CustomDuplication#duplicate CustomDuplication.duplicate}
+   * call will fail with a runtime exception.
    * 
    * @see #duplicate(Resource)
    * @param res the resource to duplicate
@@ -593,8 +593,8 @@ public abstract class Factory {
    * returning.  If they need to duplicate child resources they should
    * call {@link #duplicate(Resource, DuplicationContext)} in the normal
    * way.  Calls to this method made outside the context of a
-   * {@link CustomDuplication#duplicate} call will fail with a runtime
-   * exception.
+   * {@link CustomDuplication#duplicate CustomDuplication.duplicate}
+   * call will fail with a runtime exception.
    * 
    * @param res the resource to duplicate
    * @param ctx the current context
@@ -654,7 +654,9 @@ public abstract class Factory {
    * that any {@link Resource} values in the map are replaced by their
    * duplicates.  This method is public for the benefit of resources
    * that implement {@link CustomDuplication} and will fail if called
-   * outside of a {@link CustomDuplication#duplicate} implementation.
+   * outside of a
+   * {@link CustomDuplication#duplicate CustomDuplication.duplicate}
+   * implementation.
    * 
    * @param fm the feature map to duplicate
    * @param ctx the current context
@@ -678,7 +680,8 @@ public abstract class Factory {
   }
   
   /**
-   * Opaque memo object passed to {@link CustomDuplication#duplicate}
+   * Opaque memo object passed to
+   * {@link CustomDuplication#duplicate CustomDuplication.duplicate}
    * methods to encapsulate the state of the current duplication run.
    * If the duplicate method itself needs to duplicate any objects it
    * should pass this context back to
