@@ -25,15 +25,24 @@ import java.text.Collator;
 import java.io.*;
 
 import javax.swing.*;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import javax.swing.text.Position;
-import javax.swing.event.*;
-import javax.swing.table.*;
 
-import gate.*;
-import gate.util.AnnotationDiffer;
-import gate.util.Strings;
-import gate.util.ExtensionFileFilter;
-import gate.util.ClassificationMeasures;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Corpus;
+import gate.Document;
+import gate.Factory;
+import gate.Gate;
+import gate.Resource;
 import gate.creole.AbstractVisualResource;
 import gate.event.CorpusEvent;
 import gate.creole.metadata.CreoleResource;
@@ -41,6 +50,11 @@ import gate.creole.metadata.GuiType;
 import gate.event.CorpusListener;
 import gate.swing.XJTable;
 import gate.swing.XJFileChooser;
+import gate.util.AnnotationDiffer;
+import gate.util.ClassificationMeasures;
+import gate.util.ExtensionFileFilter;
+import gate.util.OptionsMap;
+import gate.util.Strings;
 
 /**
  * Quality assurance corpus view.
@@ -114,21 +128,26 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     JPanel sidePanel = new JPanel(new GridBagLayout());
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.gridx = 0;
-    gbc.anchor = GridBagConstraints.NORTHWEST;
     sidePanel.add(Box.createVerticalStrut(5), gbc);
+
+    // toolbar
     JToolBar toolbar = new JToolBar();
     toolbar.setFloatable(false);
     toolbar.add(openDocumentAction = new OpenDocumentAction());
     openDocumentAction.setEnabled(false);
     toolbar.add(openAnnotationDiffAction = new OpenAnnotationDiffAction());
     openAnnotationDiffAction.setEnabled(false);
-    toolbar.add(new ExportToHtmlAction());
+    toolbar.add(exportToHtmlAction = new ExportToHtmlAction());
     toolbar.add(reloadCacheAction = new ReloadCacheAction());
+    toolbar.add(new HelpAction());
+    gbc.anchor = GridBagConstraints.NORTHWEST;
     sidePanel.add(toolbar, gbc);
+    gbc.anchor = GridBagConstraints.NORTH;
     sidePanel.add(Box.createVerticalStrut(5), gbc);
+
+    // annotation sets list
     JLabel label = new JLabel("Annotation Sets A & B");
     label.setToolTipText("aka 'Key & Response sets'");
-    gbc.anchor = GridBagConstraints.NORTH;
     gbc.fill = GridBagConstraints.BOTH;
     sidePanel.add(label, gbc);
     sidePanel.add(Box.createVerticalStrut(2), gbc);
@@ -146,6 +165,8 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     });
     sidePanel.add(setCheck, gbc);
     sidePanel.add(Box.createVerticalStrut(5), gbc);
+
+    // annotation types list
     label = new JLabel("Annotation Types");
     label.setToolTipText("Annotation types to compare");
     sidePanel.add(label, gbc);
@@ -164,6 +185,8 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     });
     sidePanel.add(typeCheck, gbc);
     sidePanel.add(Box.createVerticalStrut(5), gbc);
+
+    // annotation features list
     label = new JLabel("Annotation Features");
     label.setToolTipText("Annotation features to compare");
     sidePanel.add(label, gbc);
@@ -182,41 +205,115 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     });
     sidePanel.add(featureCheck, gbc);
     sidePanel.add(Box.createVerticalStrut(5), gbc);
+
+    // measures tabbed panes
     label = new JLabel("Measures");
     label.setToolTipText("Measures used to compare annotations");
-    sidePanel.add(label, gbc);
+    optionsButton = new JToggleButton("Options");
+    optionsButton.setMargin(new Insets(1, 1, 1, 1));
+    JPanel labelButtonPanel = new JPanel(new BorderLayout());
+    labelButtonPanel.add(label, BorderLayout.WEST);
+    labelButtonPanel.add(optionsButton, BorderLayout.EAST);
+    sidePanel.add(labelButtonPanel, gbc);
     sidePanel.add(Box.createVerticalStrut(2), gbc);
+    final JScrollPane measureScrollPane = new JScrollPane();
     measureList = new JList();
     measureList.setSelectionModel(new ToggleSelectionModel());
-    measureList.setModel(new ExtendedListModel(
-      new String[]{"F1-score strict","F1-score lenient", "F1-score average"}));
+    String prefix = getClass().getName() + '.';
+    double beta = (userConfig.getDouble(prefix+"fscorebeta") == null) ?
+      1.0 : userConfig.getDouble(prefix+"fscorebeta");
+    double beta2 = (userConfig.getDouble(prefix+"fscorebeta2") == null) ?
+      0.5 : userConfig.getDouble(prefix+"fscorebeta2");
+    String fscore = "F" + beta + "-score ";
+    String fscore2 = "F" + beta2 + "-score ";
+    measureList.setModel(new ExtendedListModel(new String[]{
+      fscore+"strict",fscore+"lenient", fscore+"average",
+      fscore2+"strict", fscore2+"lenient", fscore2+"average"}));
     measureList.setPrototypeCellValue("present in every document");
     measureList.setVisibleRowCount(3);
+    measureScrollPane.setViewportView(measureList);
     measure2List = new JList();
     measure2List.setSelectionModel(new ToggleSelectionModel());
-    measure2List.setModel(new ExtendedListModel(
-      new String[]{"Observed agreement", "Cohen's Kappa" , "Pi's Kappa"}));
+    measure2List.setModel(new ExtendedListModel(new String[]{
+      "Observed agreement", "Cohen's Kappa" , "Pi's Kappa"}));
     measure2List.setPrototypeCellValue("present in every document");
     measure2List.setVisibleRowCount(3);
     measureTabbedPane = new JTabbedPane();
     measureTabbedPane.addTab("F-Score", null,
-      new JScrollPane(measureList), "Inter-annotator agreement");
+      measureScrollPane, "Inter-annotator agreement");
     measureTabbedPane.addTab("Classification", null,
       new JScrollPane(measure2List), "Classification agreement");
     sidePanel.add(measureTabbedPane, gbc);
-    sidePanel.add(Box.createVerticalStrut(2), gbc);
-    JButton button = new JButton(compareAction = new CompareAction());
+    sidePanel.add(Box.createVerticalStrut(5), gbc);
+    gbc.weighty = 1;
+    sidePanel.add(Box.createVerticalGlue(), gbc);
+    gbc.weighty = 0;
+
+    // options panel
+    final JPanel measureOptionsPanel = new JPanel();
+    measureOptionsPanel.setLayout(
+      new BoxLayout(measureOptionsPanel, BoxLayout.Y_AXIS));
+    JPanel betaPanel = new JPanel();
+    betaPanel.setLayout(new BoxLayout(betaPanel, BoxLayout.X_AXIS));
+    JLabel betaLabel = new JLabel("Fscore Beta 1:");
+    final JSpinner betaSpinner =
+      new JSpinner(new SpinnerNumberModel(beta, 0, 1, 0.1));
+    betaPanel.add(betaLabel);
+    betaPanel.add(Box.createHorizontalStrut(5));
+    betaPanel.add(betaSpinner);
+    betaPanel.add(Box.createHorizontalGlue());
+    measureOptionsPanel.add(betaPanel);
+    betaSpinner.setMaximumSize(new Dimension(Integer.MAX_VALUE,
+      Math.round(betaLabel.getPreferredSize().height*1.5f)));
+    JPanel beta2Panel = new JPanel();
+    beta2Panel.setLayout(new BoxLayout(beta2Panel, BoxLayout.X_AXIS));
+    JLabel beta2Label = new JLabel("Fscore Beta 2:");
+    final JSpinner beta2Spinner =
+      new JSpinner(new SpinnerNumberModel(beta2, 0, 1, 0.1));
+    beta2Panel.add(beta2Label);
+    beta2Panel.add(Box.createHorizontalStrut(5));
+    beta2Panel.add(beta2Spinner);
+    beta2Panel.add(Box.createHorizontalGlue());
+    measureOptionsPanel.add(beta2Panel);
+    beta2Spinner.setMaximumSize(new Dimension(Integer.MAX_VALUE,
+      Math.round(beta2Label.getPreferredSize().height*1.5f)));
+    optionsButton.setAction(new AbstractAction("Options") {
+      int[] selectedIndices;
+      public void actionPerformed(ActionEvent e) {
+        JToggleButton button = (JToggleButton) e.getSource();
+        // switch measure options panel and measure list
+        if (button.isSelected()) {
+          selectedIndices = measureList.getSelectedIndices();
+          measureScrollPane.setViewportView(measureOptionsPanel);
+        } else {
+          // update beta with new values
+          String fscore = "F" + betaSpinner.getValue() + "-score ";
+          String fscore2 = "F" + beta2Spinner.getValue() + "-score ";
+          measureList.setModel(new ExtendedListModel(new String[]{
+            fscore+"strict",fscore+"lenient", fscore+"average",
+            fscore2+"strict", fscore2+"lenient", fscore2+"average"}));
+          measureScrollPane.setViewportView(measureList);
+          measureList.setSelectedIndices(selectedIndices);
+          // save in GATE preferences
+          String prefix = getClass().getEnclosingClass().getName() + '.';
+          userConfig.put(prefix+"fscorebeta", betaSpinner.getValue());
+          userConfig.put(prefix+"fscorebeta2", beta2Spinner.getValue());
+        }
+      }
+    });
+
+    // compare button and progress bar
+    JButton compareButton = new JButton(compareAction = new CompareAction());
     compareAction.setEnabled(false);
-    sidePanel.add(button, gbc);
+    sidePanel.add(compareButton, gbc);
     sidePanel.add(Box.createVerticalStrut(5), gbc);
     progressBar = new JProgressBar();
     progressBar.setStringPainted(true);
     progressBar.setString("");
     sidePanel.add(progressBar, gbc);
-    gbc.gridheight = GridBagConstraints.REMAINDER;
-    gbc.weighty = 1;
     sidePanel.add(Box.createVerticalStrut(5), gbc);
 
+    // tables
     annotationTable = new XJTable(annotationTableModel) {
       // table header tool tips
       protected JTableHeader createDefaultTableHeader() {
@@ -336,15 +433,20 @@ public class CorpusQualityAssurance extends AbstractVisualResource
               } else {
                 someTypes.addAll(typesFeatures.keySet());
               }
+            } else if (typeCheck.isSelected()) {
+              // empty set no types to display
+              break;
             }
             typesFeatures = setsTypesFeatures.get(
               responseSetName.equals("[Default set]") ? "" : responseSetName);
             if (typesFeatures != null) {
-              if (typeCheck.isSelected() && !firstLoop) {
+              if (typeCheck.isSelected()) {
                 someTypes.retainAll(typesFeatures.keySet());
               } else {
                 someTypes.addAll(typesFeatures.keySet());
               }
+            } else if (typeCheck.isSelected()) {
+              break;
             }
             firstLoop = false;
           }
@@ -405,19 +507,24 @@ public class CorpusQualityAssurance extends AbstractVisualResource
                   }
                 }
               }
+            } else if (featureCheck.isSelected()) {
+              // empty type no features to display
+              break;
             }
             typesFeatures = sets.get(responseSetName.equals("[Default set]") ?
               "" : responseSetName);
             if (typesFeatures != null) {
               for (String typeName : typesFeatures.keySet()) {
                 if (typeNames.contains(typeName)) {
-                  if (featureCheck.isSelected() && !firstLoop) {
+                  if (featureCheck.isSelected()) {
                     features.retainAll(typesFeatures.get(typeName));
                   } else {
                     features.addAll(typesFeatures.get(typeName));
                   }
                 }
               }
+            } else if (featureCheck.isSelected()) {
+              break;
             }
             firstLoop = false;
           }
@@ -457,6 +564,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         openDocumentAction.setEnabled(false);
         openAnnotationDiffAction.setEnabled(false);
         if (tabbedPane.getTitleAt(selectedTab).equals("F-Score")) {
+          optionsButton.setEnabled(true);
           compareAction.setEnabled(keySetName != null
                            && responseSetName != null);
           selectedMeasures = FSCORE_MEASURES;
@@ -467,6 +575,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
             new JScrollPane(documentTable),
             "Compare each documents in the corpus with theirs annotations");
         } else {
+          optionsButton.setEnabled(false);
           compareAction.setEnabled(featureList.getSelectedIndex() != -1);
           selectedMeasures = CLASSIFICATION_MEASURES;
           tableTabbedPane.addTab("Document statistics", null,
@@ -508,6 +617,11 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         }
       }
     );
+
+    InputMap inputMap = getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+    ActionMap actionMap = getActionMap();
+    inputMap.put(KeyStroke.getKeyStroke("F1"), "help");
+    actionMap.put("help", new HelpAction());
   }
 
   protected static class ExtendedListModel extends DefaultListModel {
@@ -726,10 +840,14 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       for (String document : docsSetsTypesFeatures.keySet()) {
         // get the list of set names
         sets = docsSetsTypesFeatures.get(document).keySet();
-        if (setCheck.isSelected() && !firstLoop) {
-          setsNames.retainAll(sets);
-        } else {
-          setsNames.addAll(sets);
+        if (!sets.isEmpty()) {
+          if (setCheck.isSelected() && !firstLoop) {
+            setsNames.retainAll(sets);
+          } else {
+            setsNames.addAll(sets);
+          }
+        } else if (setCheck.isSelected()) {
+          break;
         }
         firstLoop = false;
       }
@@ -779,7 +897,10 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       typeCheck.setEnabled(false);
       featureList.setEnabled(false);
       featureCheck.setEnabled(false);
+      optionsButton.setEnabled(false);
+      measureTabbedPane.setEnabled(false);
       measureList.setEnabled(false);
+      exportToHtmlAction.setEnabled(false);
       reloadCacheAction.setEnabled(false);
     }});
     differsByDocThenType.clear();
@@ -927,7 +1048,10 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       typeCheck.setEnabled(true);
       featureList.setEnabled(true);
       featureCheck.setEnabled(true);
+      optionsButton.setEnabled(true);
+      measureTabbedPane.setEnabled(true);
       measureList.setEnabled(true);
+      exportToHtmlAction.setEnabled(true);
       reloadCacheAction.setEnabled(true);
     }});
     if (progressValuePrevious > -1) {
@@ -976,32 +1100,32 @@ public class CorpusQualityAssurance extends AbstractVisualResource
                                    int columnCount) {
     int colMeasure = (column - columnCount) % 3;
     int measureIndex = (column  - columnCount) / 3;
-    String measure = (String)
-      measureList.getSelectedValues()[measureIndex];
+    String measure = (String) measureList.getSelectedValues()[measureIndex];
     switch (colMeasure) {
       case COL_RECALL:
-        if (measure.equals("F1-score strict")) {
+        if (measure.endsWith("strict")) {
           return differ.getRecallStrict();
-        } else if (measure.equals("F1-score lenient")) {
+        } else if (measure.endsWith("lenient")) {
           return differ.getRecallLenient();
-        } else if (measure.equals("F1-score average")) {
+        } else {
           return differ.getRecallAverage();
         }
       case COL_PRECISION:
-        if (measure.equals("F1-score strict")) {
+        if (measure.endsWith("strict")) {
           return differ.getPrecisionStrict();
-        } else if (measure.equals("F1-score lenient")) {
+        } else if (measure.endsWith("lenient")) {
           return differ.getPrecisionLenient();
-        } else if (measure.equals("F1-score average")) {
+        } else {
           return differ.getPrecisionAverage();
         }
       case COL_FMEASURE:
-        if (measure.equals("F1-score strict")) {
-          return differ.getFMeasureStrict(1.0);
-        } else if (measure.equals("F1-score lenient")) {
-          return differ.getFMeasureLenient(1.0);
-        } else if (measure.equals("F1-score average")) {
-          return differ.getFMeasureAverage(1.0);
+        double beta = Double.valueOf(measure.substring(1,measure.indexOf('-')));
+        if (measure.endsWith("strict")) {
+          return differ.getFMeasureStrict(beta);
+        } else if (measure.endsWith("lenient")) {
+          return differ.getFMeasureLenient(beta);
+        } else {
+          return differ.getFMeasureAverage(beta);
         }
       default:
         return 0.0;
@@ -1014,16 +1138,10 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       columnNames = new ArrayList<String>(Arrays.asList(COLUMN_NAMES));
       headerTooltips = new ArrayList<String>(Arrays.asList(HEADER_TOOLTIPS));
       for (Object measure : measureList.getSelectedValues()) {
-        if (measure.equals("F1-score strict")) {
-          columnNames.addAll(Arrays.asList("Rec.B/A", "Prec.B/A", "F1-strict"));
-        } else if (measure.equals("F1-score lenient")) {
-          columnNames.addAll(Arrays.asList("Rec.B/A", "Prec.B/A", "F1-lenient"));
-        } else if (measure.equals("F1-score average")) {
-          columnNames.addAll(Arrays.asList("Rec.B/A", "Prec.B/A", "F1-average"));
-        }
+        String measureString = ((String) measure).replaceFirst("score ","");
+        columnNames.addAll(Arrays.asList("Rec.B/A", "Prec.B/A", measureString));
         headerTooltips.addAll(Arrays.asList("Recall for B relative to A",
-          "Precision for B relative to A",
-          "Combine precision and recall with the same weight for each"));
+          "Precision for B relative to A", "Combine precision and recall"));
       }
     }
 
@@ -1142,16 +1260,10 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       columnNames = new ArrayList<String>(Arrays.asList(COLUMN_NAMES));
       headerTooltips = new ArrayList<String>(Arrays.asList(HEADER_TOOLTIPS));
       for (Object measure : measureList.getSelectedValues()) {
-        if (measure.equals("F1-score strict")) {
-          columnNames.addAll(Arrays.asList("Rec.B/A", "Prec.B/A", "F1-strict"));
-        } else if (measure.equals("F1-score lenient")) {
-          columnNames.addAll(Arrays.asList("Rec.B/A", "Prec.B/A", "F1-lenient"));
-        } else if (measure.equals("F1-score average")) {
-          columnNames.addAll(Arrays.asList("Rec.B/A", "Prec.B/A", "F1-average"));
-        }
+        String measureString = ((String) measure).replaceFirst("score ","");
+        columnNames.addAll(Arrays.asList("Rec.B/A", "Prec.B/A", measureString));
         headerTooltips.addAll(Arrays.asList("Recall for B relative to A",
-          "Precision for B relative to A",
-          "Combine precision and recall with the same weight for each"));
+          "Precision for B relative to A", "Combine precision and recall"));
       }
     }
 
@@ -1497,16 +1609,23 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     }
   }
 
-  protected XJTable documentTable;
-  protected DocumentTableModel documentTableModel;
-  protected XJTable annotationTable;
-  protected AnnotationTableModel annotationTableModel;
-  protected XJTable document2Table;
-  protected DefaultTableModel document2TableModel;
-  protected XJTable confusionTable;
-  protected DefaultTableModel confusionTableModel;
-  protected JTabbedPane tableTabbedPane;
+  protected class HelpAction extends AbstractAction {
+    public HelpAction() {
+      super();
+      putValue(SHORT_DESCRIPTION, "User guide for this component");
+      putValue(SMALL_ICON, MainFrame.getIcon("crystal-clear-action-info"));
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("F1"));
+    }
+    public void actionPerformed(ActionEvent e) {
+      MainFrame.getInstance().showHelpFrame(
+        "sec:eval:corpusqualityassurance",
+        CorpusQualityAssurance.class.getName());
+    }
+  }
+
+  // local variables
   protected Corpus corpus;
+  protected boolean corpusChanged;
   protected TreeSet<String> types;
   /** cache for document*set*type*feature names */
   final protected Map<String, TreeMap<String, TreeMap<String, TreeSet<String>>>>
@@ -1521,24 +1640,6 @@ public class CorpusQualityAssurance extends AbstractVisualResource
   protected String responseSetName;
   protected Object[] typesSelected;
   protected Object[] featuresSelected;
-  protected JList setList;
-  protected JList typeList;
-  protected JList featureList;
-  protected JTabbedPane measureTabbedPane;
-  protected JList measureList;
-  protected JList measure2List;
-  protected JCheckBox setCheck;
-  protected JCheckBox typeCheck;
-  protected JCheckBox featureCheck;
-  protected Collator collator;
-  protected Comparator<String> doubleComparator;
-  protected Comparator<String> totalComparator;
-  protected boolean corpusChanged;
-  protected OpenDocumentAction openDocumentAction;
-  protected OpenAnnotationDiffAction openAnnotationDiffAction;
-  protected CompareAction compareAction;
-  protected ReloadCacheAction reloadCacheAction;
-  protected JProgressBar progressBar;
   protected Timer timer = new Timer("CorpusQualityAssurance", true);
   protected TimerTask timerTask;
   protected Thread readSetsTypesFeaturesThread;
@@ -1550,4 +1651,37 @@ public class CorpusQualityAssurance extends AbstractVisualResource
   protected int selectedMeasures;
   protected static final int FSCORE_MEASURES = 0;
   protected static final int CLASSIFICATION_MEASURES = 1;
+  protected Collator collator;
+  protected Comparator<String> doubleComparator;
+  protected Comparator<String> totalComparator;
+  protected OptionsMap userConfig = Gate.getUserConfig();
+
+  // user interface components
+  protected XJTable documentTable;
+  protected DocumentTableModel documentTableModel;
+  protected XJTable annotationTable;
+  protected AnnotationTableModel annotationTableModel;
+  protected XJTable document2Table;
+  protected DefaultTableModel document2TableModel;
+  protected XJTable confusionTable;
+  protected DefaultTableModel confusionTableModel;
+  protected JTabbedPane tableTabbedPane;
+  protected JList setList;
+  protected JList typeList;
+  protected JList featureList;
+  protected JToggleButton optionsButton;
+  protected JTabbedPane measureTabbedPane;
+  protected JList measureList;
+  protected JList measure2List;
+  protected JCheckBox setCheck;
+  protected JCheckBox typeCheck;
+  protected JCheckBox featureCheck;
+  protected JProgressBar progressBar;
+
+  // actions
+  protected OpenDocumentAction openDocumentAction;
+  protected OpenAnnotationDiffAction openAnnotationDiffAction;
+  protected ExportToHtmlAction exportToHtmlAction;
+  protected ReloadCacheAction reloadCacheAction;
+  protected CompareAction compareAction;
 }
