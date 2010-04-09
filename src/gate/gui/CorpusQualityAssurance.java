@@ -618,6 +618,28 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       }
     );
 
+    // double click on a document loads it in the document editor
+    documentTable.addMouseListener(new MouseAdapter() {
+      public void mouseClicked(MouseEvent e) {
+        if (!e.isPopupTrigger()
+          && e.getClickCount() == 2
+          && openDocumentAction.isEnabled()) {
+          openDocumentAction.actionPerformed(null);
+        }
+      }
+    });
+
+    // double click on a document loads it in the document editor
+    document2Table.addMouseListener(new MouseAdapter() {
+      public void mouseClicked(MouseEvent e) {
+        if (!e.isPopupTrigger()
+          && e.getClickCount() == 2
+          && openDocumentAction.isEnabled()) {
+          openDocumentAction.actionPerformed(null);
+        }
+      }
+    });
+
     InputMap inputMap = getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
     ActionMap actionMap = getActionMap();
     inputMap.put(KeyStroke.getKeyStroke("F1"), "help");
@@ -903,8 +925,10 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       exportToHtmlAction.setEnabled(false);
       reloadCacheAction.setEnabled(false);
     }});
-    differsByDocThenType.clear();
-    documentNames.clear();
+    if (selectedMeasures == FSCORE_MEASURES) {
+      differsByDocThenType.clear();
+      documentNames.clear();
+    }
     ArrayList<ClassificationMeasures> classificationMeasuresList =
       new ArrayList<ClassificationMeasures>();
     // for each document
@@ -976,7 +1000,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         classificationMeasuresList.add(classificationMeasures);
         ArrayList<Object> values = new ArrayList<Object>();
         // fill the document table
-        values.add(documentNames.get(documentNames.size()-1));
+        values.add(document.getName());
         values.add(String.valueOf((int)
           classificationMeasures.getAgreedTrials()));
         values.add(String.valueOf((int)
@@ -995,8 +1019,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         document2TableModel.addRow(values.toArray());
         // fill the confusion matrices table
         printConfusionMatrices(classificationMeasures, confusionTableModel,
-          confusionTableModel.getRowCount()-1,
-          documentNames.get(documentNames.size()-1));
+          confusionTableModel.getRowCount()-1, document.getName());
       }
       final int progressValue = row + 1;
       SwingUtilities.invokeLater(new Runnable(){ public void run(){
@@ -1612,7 +1635,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
   protected class HelpAction extends AbstractAction {
     public HelpAction() {
       super();
-      putValue(SHORT_DESCRIPTION, "User guide for this component");
+      putValue(SHORT_DESCRIPTION, "User guide for this tool");
       putValue(SMALL_ICON, MainFrame.getIcon("crystal-clear-action-info"));
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("F1"));
     }
