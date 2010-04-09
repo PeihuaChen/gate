@@ -59,6 +59,20 @@ public class OptionsMap extends TreeMap<Object, Object> {
   }
 
   /**
+   * If the object stored under key is an Double then returns its value
+   * otherwise returns null.
+   * @param key key associated to the value to retrieve
+   * @return the associated Double
+   */
+  public Double getDouble(Object key) {
+    try {
+      return Double.valueOf((String) get(key));
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  /**
    * If the object stored under key is a Boolean then returns its value
    * otherwise returns false.
    * @param key key associated to the value to retrieve
