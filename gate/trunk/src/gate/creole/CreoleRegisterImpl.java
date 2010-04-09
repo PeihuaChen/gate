@@ -43,7 +43,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.AbstractList;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -55,10 +54,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
+import org.apache.log4j.Logger;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -66,11 +62,7 @@ import org.jdom.input.SAXBuilder;
 import org.jdom.output.Format;
 import org.jdom.output.SAXOutputter;
 import org.jdom.output.XMLOutputter;
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.helpers.XMLFilterImpl;
 
 /**
  * This class implements the CREOLE register interface. DO NOT construct objects
@@ -87,6 +79,10 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
                                                                      implements
                                                                      CreoleRegister,
                                                                      CreoleListener {
+
+  /** A logger to use instead of sending messages to Out or Err **/
+  protected static final Logger log = Logger.getLogger(CreoleRegisterImpl.class);
+  
   /** Debug flag */
   protected static final boolean DEBUG = false;
 
@@ -158,14 +154,11 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
     }
     // indicates a well-formedness error
     catch(JDOMException e) {
-      System.out.println(PLUGIN_NAMES_MAPPING_FILE + " is not well-formed.");
-      System.out.println(e.getMessage());
+      log.warn(PLUGIN_NAMES_MAPPING_FILE + " is not well-formed.", e);
     }
     catch(IOException e) {
-      System.out.println("Could not check " + PLUGIN_NAMES_MAPPING_FILE);
-      System.out.println(" because " + e.getMessage());
+      log.warn("Could not check " + PLUGIN_NAMES_MAPPING_FILE,e);
     }
-
   }
 
   /**
@@ -186,7 +179,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   } // addDirectory
 
   /** Get the list of CREOLE directory URLs. */
-  public Set getDirectories() {
+  public Set<URL> getDirectories() {
     return Collections.unmodifiableSet(directories);
   } // getDirectories
 
@@ -263,10 +256,10 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
           urlName.substring(0, indexOfSeparator + 1) + newPluginName + "/";
 
         try {
-          System.err.println("Trying to use new plugin name for " + pluginName);
+          log.warn("Trying to use new plugin name for " + pluginName);
           directoryXmlFileUrl = new URL(urlName + "creole.xml");
           creoleStream = directoryXmlFileUrl.openStream();
-          System.err.println("Please note that plugin names have changed. "
+          log.warn("Please note that plugin names have changed. "
             + "Please correct your application to rename " + pluginName
             + " to " + newPluginName);
         }
@@ -287,7 +280,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
       try {
         parseDirectory(creoleStream, directoryUrl,
           directoryXmlFileUrl);
-        System.out.println("CREOLE plugin loaded: " + urlName);
+        log.info("CREOLE plugin loaded: " + urlName);
       }
       catch(GateException e) {
         // it failed: remove it
@@ -365,7 +358,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
       parseDirectory(creoleFileURL.openStream(), creoleDirURL, creoleFileURL);
     }
     catch(IOException e) {
-      if(DEBUG) Out.println(e);
+      if(DEBUG) log.debug(e);
       throw (new GateException(e));
     }
   } // registerBuiltins()
@@ -453,13 +446,13 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
    */
   public void removeDirectory(URL directory) {
     if(directories.remove(directory)) {
-      DirectoryInfo dInfo = (DirectoryInfo)Gate.getDirectoryInfo(directory);
+      DirectoryInfo dInfo = Gate.getDirectoryInfo(directory);
       if(dInfo != null) {
         for(ResourceInfo rInfo : dInfo.getResourceInfoList()) {
           remove(rInfo.getResourceClassName());
         }
       }
-      System.out.println("CREOLE plugin unloaded: " + directory);
+      log.info("CREOLE plugin unloaded: " + directory);
     }
   }
 
@@ -933,15 +926,15 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
 
   public synchronized void removeCreoleListener(CreoleListener l) {
     if(creoleListeners != null && creoleListeners.contains(l)) {
-      Vector v = (Vector)creoleListeners.clone();
+      Vector<CreoleListener> v = (Vector<CreoleListener>)creoleListeners.clone();
       v.removeElement(l);
       creoleListeners = v;
     }
   }
 
   public synchronized void addCreoleListener(CreoleListener l) {
-    Vector v =
-      creoleListeners == null ? new Vector(2) : (Vector)creoleListeners.clone();
+    Vector<CreoleListener> v =
+      creoleListeners == null ? new Vector<CreoleListener>(2) : (Vector<CreoleListener>)creoleListeners.clone();
     if(!v.contains(l)) {
       v.addElement(l);
       creoleListeners = v;
@@ -984,24 +977,24 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   /** A list of the types of TOOL in the register. */
   protected Set<String> toolTypes;
 
-  private transient Vector creoleListeners;
+  private transient Vector<CreoleListener> creoleListeners;
 
   protected void fireResourceLoaded(CreoleEvent e) {
     if(creoleListeners != null) {
-      Vector listeners = creoleListeners;
+      Vector<CreoleListener> listeners = creoleListeners;
       int count = listeners.size();
       for(int i = 0; i < count; i++) {
-        ((CreoleListener)listeners.elementAt(i)).resourceLoaded(e);
+        listeners.elementAt(i).resourceLoaded(e);
       }
     }
   }
 
   protected void fireResourceUnloaded(CreoleEvent e) {
     if(creoleListeners != null) {
-      Vector listeners = creoleListeners;
+      Vector<CreoleListener> listeners = creoleListeners;
       int count = listeners.size();
       for(int i = 0; i < count; i++) {
-        ((CreoleListener)listeners.elementAt(i)).resourceUnloaded(e);
+        listeners.elementAt(i).resourceUnloaded(e);
       }
     }
   }
@@ -1009,10 +1002,10 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   protected void fireResourceRenamed(Resource res, String oldName,
     String newName) {
     if(creoleListeners != null) {
-      Vector listeners = creoleListeners;
+      Vector<CreoleListener> listeners = creoleListeners;
       int count = listeners.size();
       for(int i = 0; i < count; i++) {
-        ((CreoleListener)listeners.elementAt(i)).resourceRenamed(res, oldName,
+        listeners.elementAt(i).resourceRenamed(res, oldName,
           newName);
       }
     }
@@ -1020,30 +1013,30 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
 
   protected void fireDatastoreOpened(CreoleEvent e) {
     if(creoleListeners != null) {
-      Vector listeners = creoleListeners;
+      Vector<CreoleListener> listeners = creoleListeners;
       int count = listeners.size();
       for(int i = 0; i < count; i++) {
-        ((CreoleListener)listeners.elementAt(i)).datastoreOpened(e);
+        listeners.elementAt(i).datastoreOpened(e);
       }
     }
   }
 
   protected void fireDatastoreCreated(CreoleEvent e) {
     if(creoleListeners != null) {
-      Vector listeners = creoleListeners;
+      Vector<CreoleListener> listeners = creoleListeners;
       int count = listeners.size();
       for(int i = 0; i < count; i++) {
-        ((CreoleListener)listeners.elementAt(i)).datastoreCreated(e);
+        listeners.elementAt(i).datastoreCreated(e);
       }
     }
   }
 
   protected void fireDatastoreClosed(CreoleEvent e) {
     if(creoleListeners != null) {
-      Vector listeners = creoleListeners;
+      Vector<CreoleListener> listeners = creoleListeners;
       int count = listeners.size();
       for(int i = 0; i < count; i++) {
-        ((CreoleListener)listeners.elementAt(i)).datastoreClosed(e);
+        listeners.elementAt(i).datastoreClosed(e);
       }
     }
   }
