@@ -130,7 +130,7 @@ public class OrthoMatcherHelper {
 	       return result;
 	  }
 	  /*
-	   * It sorts a list of pair by the first number which is the start point of an annotation.
+	   * It sorts a list of pairs by the first number which is the start point of an annotation.
 	   * It encodes the pair in a single number, sorts by this number and then decodes to the original pair.
 	   */
 	  public static String SortByStartPosition(String input) {
