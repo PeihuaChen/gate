@@ -151,30 +151,15 @@ public class XJTable extends JTable{
           //if needed, increase the max width
           if(tColumn.getMaxWidth() < minWidth) tColumn.setMaxWidth(minWidth);
           if(tColumn.getMinWidth() < minWidth) tColumn.setMinWidth(minWidth);
-          
-          
-          int maxWidth = cellComponent.getMaximumSize().width;
-          //only components that have a real max width are considered
-          if(maxWidth < Integer.MAX_VALUE){
-            maxWidth += spacing.width;
-            //max width can only decrease (it will never go larger than 
-            //min width due to Swing implementation)
-            if(tColumn.getMaxWidth() > maxWidth) tColumn.setMaxWidth(maxWidth);  
-          }
-                    
-//          if(tColumn.getMaxWidth() > width ){
-//            tColumn.setMaxWidth(width);
-//          }
+          //we prefer not to have any extra space.
+          tColumn.setPreferredWidth(minWidth);
+
           //now fix the row height
           int height = cellComponent.getPreferredSize().height;
           if(newRowHeight < (height + spacing.height)) 
             newRowHeight = height + spacing.height;
         }
         setRowHeight(row, newRowHeight);
-        //JTable seems to revert to using the default (and single) rowHeight value
-        //after editing
-        //turns out this actually deletes the row model in JTable
-  //      if(getRowHeight() < newRowHeight) setRowHeight(newRowHeight);
       }
     }finally{
       componentSizedProperly = true;
