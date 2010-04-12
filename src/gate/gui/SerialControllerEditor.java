@@ -829,7 +829,8 @@ public class SerialControllerEditor extends AbstractVisualResource
 
     addAncestorListener(new AncestorListener() {
       public void ancestorAdded(AncestorEvent event) {
-        // need updating when another controller has just included this one
+        // every time the user switches back to this view, we check
+        // whether another controller has just included this one
         loadedPRsTableModel.fireTableDataChanged();
         memberPRsTableModel.fireTableDataChanged();
       }
