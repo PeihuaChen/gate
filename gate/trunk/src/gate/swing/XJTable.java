@@ -128,13 +128,18 @@ public class XJTable extends JTable{
           headerRenderer = tHeader.getDefaultRenderer();
           tColumn.setHeaderRenderer(headerRenderer);
         }
+        //initialise sizes for columns:
+        // - min size = header size
+        // - pref size = header size
         if(headerRenderer != null){
           Component c = headerRenderer.getTableCellRendererComponent(
                   XJTable.this, tColumn.getHeaderValue(), false, false, 0, 0);
           int width = c.getMinimumSize().width  + spacing.width;
           if(tColumn.getMinWidth() != width) tColumn.setMinWidth(width);
+          tColumn.setPreferredWidth(width);
         }else{
           tColumn.setMinWidth(1);
+          tColumn.setPreferredWidth(1);
         }
       }
       
@@ -142,6 +147,8 @@ public class XJTable extends JTable{
       for(int row = 0; row < getRowCount(); row++){
         //start with all rows of size 1      
         int newRowHeight = 1;
+        // update the preferred size of the column ( to make it larger if any 
+        // components are larger than then header.
         for(int column = 0; column < getColumnCount(); column ++){
           Component cellComponent = prepareRenderer(getCellRenderer(row, column), 
                   row, column);
@@ -149,10 +156,9 @@ public class XJTable extends JTable{
           int minWidth = cellComponent.getMinimumSize().width + spacing.width;
           //minimum width can only grow
           //if needed, increase the max width
-          if(tColumn.getMaxWidth() < minWidth) tColumn.setMaxWidth(minWidth);
-          if(tColumn.getMinWidth() < minWidth) tColumn.setMinWidth(minWidth);
+//          if(tColumn.getMaxWidth() < minWidth) tColumn.setMaxWidth(minWidth);
           //we prefer not to have any extra space.
-          tColumn.setPreferredWidth(minWidth);
+          if(tColumn.getPreferredWidth() < minWidth) tColumn.setPreferredWidth(minWidth);
 
           //now fix the row height
           int height = cellComponent.getPreferredSize().height;
