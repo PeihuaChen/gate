@@ -106,65 +106,69 @@ public class XJTable extends JTable{
   
   protected void calculatePreferredSize(){
     try{
-      if(sizingInProgress || componentSizedProperly){
+      if(sizingInProgress){
         return;
       }else{
         sizingInProgress = true;
       }
-      Dimension spacing = getIntercellSpacing();
-      //start with all columns at header size
-      int colCount = getColumnModel().getColumnCount();
-      for(int col = 0; col < colCount; col++){
-        TableColumn tColumn = getColumnModel().getColumn(col);
-        TableCellRenderer headerRenderer = tColumn.getHeaderRenderer();
-        if(headerRenderer == null){
-          //no header renderer provided -> use default implementation
-          JTableHeader tHeader = getTableHeader();
-          if(tHeader == null){
-            tHeader = new JTableHeader();
-          }
-          headerRenderer = tHeader.getDefaultRenderer();
-          tColumn.setHeaderRenderer(headerRenderer);
-        }
-        //initialise sizes for columns:
-        // - min size = header size
-        // - pref size = header size
-        if(headerRenderer != null){
-          Component c = headerRenderer.getTableCellRendererComponent(
-                  XJTable.this, tColumn.getHeaderValue(), false, false, 0, 0);
-          int width = c.getMinimumSize().width  + spacing.width;
-          if(tColumn.getMinWidth() != width) tColumn.setMinWidth(width);
-          tColumn.setPreferredWidth(width);
-        }else{
-          tColumn.setMinWidth(1);
-          tColumn.setPreferredWidth(1);
-        }
-      }
       
-      //now fix the row height and column min/max widths
-      for(int row = 0; row < getRowCount(); row++){
-        //start with all rows of size 1      
-        int newRowHeight = 1;
-        // update the preferred size of the column ( to make it larger if any 
-        // components are larger than then header.
-        for(int column = 0; column < getColumnCount(); column ++){
-          Component cellComponent = prepareRenderer(getCellRenderer(row, column), 
-                  row, column);
-          TableColumn tColumn = getColumnModel().getColumn(column);
-          int minWidth = cellComponent.getMinimumSize().width + spacing.width;
-          //minimum width can only grow
-          //if needed, increase the max width
-//          if(tColumn.getMaxWidth() < minWidth) tColumn.setMaxWidth(minWidth);
-          //we prefer not to have any extra space.
-          if(tColumn.getPreferredWidth() < minWidth) tColumn.setPreferredWidth(minWidth);
-
-          //now fix the row height
-          int height = cellComponent.getPreferredSize().height;
-          if(newRowHeight < (height + spacing.height)) 
-            newRowHeight = height + spacing.height;
+      int colCount = getColumnModel().getColumnCount();
+      //recalculate the preferred sizes if anything changed 
+      if(!componentSizedProperly){
+        Dimension spacing = getIntercellSpacing();
+        //start with all columns at header size
+        for(int col = 0; col < colCount; col++){
+          TableColumn tColumn = getColumnModel().getColumn(col);
+          TableCellRenderer headerRenderer = tColumn.getHeaderRenderer();
+          if(headerRenderer == null){
+            //no header renderer provided -> use default implementation
+            JTableHeader tHeader = getTableHeader();
+            if(tHeader == null){
+              tHeader = new JTableHeader();
+            }
+            headerRenderer = tHeader.getDefaultRenderer();
+            tColumn.setHeaderRenderer(headerRenderer);
+          }
+          //initialise sizes for columns:
+          // - min size = header size
+          // - pref size = header size
+          if(headerRenderer != null){
+            Component c = headerRenderer.getTableCellRendererComponent(
+                    XJTable.this, tColumn.getHeaderValue(), false, false, 0, 0);
+            int width = c.getMinimumSize().width  + spacing.width;
+            if(tColumn.getMinWidth() != width) tColumn.setMinWidth(width);
+            tColumn.setPreferredWidth(width);
+          }else{
+            tColumn.setMinWidth(1);
+            tColumn.setPreferredWidth(1);
+          }
         }
-        setRowHeight(row, newRowHeight);
-      }
+        
+        //now fix the row height and column min/max widths
+        for(int row = 0; row < getRowCount(); row++){
+          //start with all rows of size 1      
+          int newRowHeight = 1;
+          // update the preferred size of the column ( to make it larger if any 
+          // components are larger than then header.
+          for(int column = 0; column < getColumnCount(); column ++){
+            Component cellComponent = prepareRenderer(getCellRenderer(row, column), 
+                    row, column);
+            TableColumn tColumn = getColumnModel().getColumn(column);
+            int minWidth = cellComponent.getMinimumSize().width + spacing.width;
+            //minimum width can only grow
+            //if needed, increase the max width
+//            if(tColumn.getMaxWidth() < minWidth) tColumn.setMaxWidth(minWidth);
+            //we prefer not to have any extra space.
+            if(tColumn.getPreferredWidth() < minWidth) tColumn.setPreferredWidth(minWidth);
+
+            //now fix the row height
+            int height = cellComponent.getPreferredSize().height;
+            if(newRowHeight < (height + spacing.height)) 
+              newRowHeight = height + spacing.height;
+          }
+          setRowHeight(row, newRowHeight);
+        }        
+      }//if(!componentSizedProperly){
 
       //now adjust the column widths, if we need to fill all the space
       if(getAutoResizeMode() != AUTO_RESIZE_OFF){
@@ -216,6 +220,14 @@ public class XJTable extends JTable{
     }
   }
   
+  
+  
+  @Override
+  public void doLayout() {
+    calculatePreferredSize();
+    super.doLayout();
+  }
+
   @Override
   /**
    * Overridden so that the preferred size can be calculated properly
