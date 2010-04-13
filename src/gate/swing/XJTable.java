@@ -25,16 +25,12 @@ import java.awt.event.*;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.*;
 
-import gate.gui.MainFrame;
 import gate.util.ObjectComparator;
-import gate.util.Tools;
 
 /**
  * A &quot;smarter&quot; JTable. Features include:
@@ -42,6 +38,8 @@ import gate.util.Tools;
  * <li>sorting the table using the values from a column as keys</li>
  * <li>updating the widths of the columns so they accommodate the contents to
  * their preferred sizes.</li>
+ * <li>filling the whole viewport by default, unless told not to auto resize 
+ * (see {@link JTable#setAutoResizeMode(int)}.
  * <li>sizing the rows according to the preferred sizes of the renderers</li>
  * <li>ability to hide/show columns</li>
  * <li>ability for tab key to skip uneditable cells
