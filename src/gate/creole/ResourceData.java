@@ -176,10 +176,14 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
     //persistantInstantiationList.add(resource);
   } // makeInstantiationPersistant
 
-  /** Remove an instantiation of the resource from the register of these */
-  public void removeInstantiation(Resource resource) {
+  /**
+   * Remove an instantiation of the resource from the register of these.
+   * @return true if the given instance was contained in the register,
+   *         false otherwise (i.e. the instance had already been removed).
+   */
+  public boolean removeInstantiation(Resource resource) {
     synchronized(instantiationStack) {
-      instantiationStack.remove(resource);
+      return instantiationStack.remove(resource);
     }
     //persistantInstantiationList.remove(resource);
   } // removeInstantiation
