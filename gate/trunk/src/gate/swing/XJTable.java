@@ -107,12 +107,12 @@ public class XJTable extends JTable{
   }
   
   protected void calculatePreferredSize(){
-    if(sizingInProgress){
-      return;
-    }else{
-      sizingInProgress = true;
-    }
     try{
+      if(sizingInProgress || componentSizedProperly){
+        return;
+      }else{
+        sizingInProgress = true;
+      }
       Dimension spacing = getIntercellSpacing();
       //start with all columns at header size
       int colCount = getColumnModel().getColumnCount();
@@ -167,6 +167,51 @@ public class XJTable extends JTable{
         }
         setRowHeight(row, newRowHeight);
       }
+
+      //now adjust the column widths, if we need to fill all the space
+      if(getAutoResizeMode() != AUTO_RESIZE_OFF){
+        //the column being resized (if any)
+        TableColumn resizingCol = null;
+        if(getTableHeader() != null) resizingCol = 
+            getTableHeader().getResizingColumn();
+        
+        int prefWidth = 0;
+        for(int i = 0; i < colCount; i++){
+          int colWidth = getColumnModel().getColumn(i).getPreferredWidth();
+          if(colWidth > 0) prefWidth += colWidth;
+        }
+        
+        int requestedWidth = getWidth();
+        Container parent = this.getParent();
+        if(parent != null && parent instanceof JViewport) {
+          // only track the viewport width if it is big enough.
+          int viewportWidth = ((JViewport)parent).getExtentSize().width;
+          if(viewportWidth > requestedWidth){
+            requestedWidth = viewportWidth;
+          }
+        }
+        int extra = 0;
+        
+        if(requestedWidth > prefWidth){
+          //we have extra space to fill
+          extra = requestedWidth - prefWidth;
+          if(getAutoResizeMode() == AUTO_RESIZE_ALL_COLUMNS){
+            int extraCol = extra / colCount;
+            //distribute the extra space to all columns
+            for(int col = 0; col < colCount - 1; col++){
+              TableColumn tColumn = getColumnModel().getColumn(col);
+              //we leave the resizing column alone
+              if(tColumn != resizingCol){
+                tColumn.setPreferredWidth(tColumn.getPreferredWidth() + extraCol);
+                extra -= extraCol;
+              }
+            }
+          }
+          //all the remainder goes to the last col
+          TableColumn tColumn = getColumnModel().getColumn(colCount - 1);
+          tColumn.setPreferredWidth(tColumn.getPreferredWidth() + extra);        
+        }//if(requestedWidth > prefWidth){        
+      }//if(getAutoResizeMode() != AUTO_RESIZE_OFF){
     }finally{
       componentSizedProperly = true;
       sizingInProgress = false;
