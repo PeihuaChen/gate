@@ -417,12 +417,12 @@ public abstract class Factory {
   public static void deleteResource(Resource resource) {
     ResourceData rd =
       (ResourceData) reg.get(resource.getClass().getName());
-    if(rd!= null)
-      rd.removeInstantiation(resource);
-    creoleProxy.fireResourceUnloaded(
-      new CreoleEvent(resource, CreoleEvent.RESOURCE_UNLOADED)
-    );
-    resource.cleanup();
+    if(rd!= null && rd.removeInstantiation(resource)) {
+      creoleProxy.fireResourceUnloaded(
+        new CreoleEvent(resource, CreoleEvent.RESOURCE_UNLOADED)
+      );
+      resource.cleanup();
+    }
   } // deleteResource
 
   /** Create a new transient Corpus. */
@@ -491,13 +491,15 @@ public abstract class Factory {
    * </p>
    * <ul>
    * <li>{@link ProcessingResource}</li>
-   * <li>{@link LanguageResource}</li>
    * <li>{@link LanguageAnalyser}</li>
    * <li>{@link Controller}</li>
    * <li>{@link CorpusController}</li>
    * <li>{@link ConditionalController}</li>
    * <li>{@link Gazetteer}</li>
+   * <li>{@link LanguageResource}</li>
    * <li>{@link gate.creole.ontology.Ontology}</li>
+   * <li>{@link Document}</li>
+   * <li>{@link Corpus}</li>
    * </ul>
    * <p>
    * The default duplication algorithm simply calls
