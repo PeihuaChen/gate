@@ -44,7 +44,7 @@ public class CompoundDocumentEditor extends AbstractVisualResource
 
   private JTabbedPane tabbedPane;
 
-  private HashMap<String, JComponent> documentsMap;
+  private HashMap<String, Handle> documentsMap;
 
   protected JToolBar toolbar;
 
@@ -74,7 +74,7 @@ public class CompoundDocumentEditor extends AbstractVisualResource
    */
   public Resource init() throws ResourceInstantiationException {
     tabbedPane = new JTabbedPane();
-    documentsMap = new HashMap<String, JComponent>();
+    documentsMap = new HashMap<String, Handle>();
     toolbar = new JToolBar();
     toolbar.setFloatable(false);
     toolbar.add(newDocumentAction = new NewDocumentAction());
@@ -115,13 +115,9 @@ public class CompoundDocumentEditor extends AbstractVisualResource
         if(largeView != null) {
           tabbedPane.addTab(nbHandle.getTitle(), nbHandle.getIcon(), largeView,
                   nbHandle.getTooltipText());
-          documentsMap.put(doc.getName(), largeView);
+          documentsMap.put(doc.getName(), nbHandle);
 
         }
-        ResourceData rd = (ResourceData)Gate.getCreoleRegister().get(
-                doc.getClass().getName());
-        if(rd != null) rd.removeInstantiation(doc);
-        Gate.setHiddenAttribute(doc.getFeatures(), false);
       }
     }
     catch(Exception e) {
@@ -471,14 +467,7 @@ public class CompoundDocumentEditor extends AbstractVisualResource
                     largeView, nbHandle.getTooltipText());
           }
         });
-        documentsMap.put(doc.getName(), largeView);
-      }
-
-      if(Gate.getHiddenAttribute(doc.getFeatures())) {
-        ResourceData rd = (ResourceData)Gate.getCreoleRegister().get(
-                doc.getClass().getName());
-        if(rd != null) rd.removeInstantiation(doc);
-        Gate.setHiddenAttribute(doc.getFeatures(), false);
+        documentsMap.put(doc.getName(), nbHandle);
       }
       tabbedPane.updateUI();
     }
@@ -488,19 +477,27 @@ public class CompoundDocumentEditor extends AbstractVisualResource
   }
 
   public void documentRemoved(CompoundDocumentEvent event) {
-    Component cmp = (Component)documentsMap.get(event.getDocumentID());
-    if(cmp != null) {
-      tabbedPane.remove(cmp);
+    Handle handle = (Handle)documentsMap.remove(event.getDocumentID());
+    if(handle != null) {
+      tabbedPane.remove(handle.getLargeView());
       tabbedPane.updateUI();
+      // clean up the document's VRs
+      handle.cleanup();
       Document doc = event.getSource().getDocument(event.getDocumentID());
-      ResourceData rd = (ResourceData)Gate.getCreoleRegister().get(
-              doc.getClass().getName());
-      if(rd != null) {
-        if(!rd.getInstantiations().contains(doc)) {
-          Factory.deleteResource(event.getSource().getDocument(
-                  event.getDocumentID()));
-        }
+      if(Gate.getHiddenAttribute(doc.getFeatures())) {
+        Factory.deleteResource(event.getSource().getDocument(
+                event.getDocumentID()));
       }
+    }
+  }
+  
+  /**
+   * Clean up the VRs for our component documents.
+   */
+  public void cleanup() {
+    for(Handle h : documentsMap.values()) {
+      tabbedPane.remove(h.getLargeView());
+      h.cleanup();
     }
   }
 

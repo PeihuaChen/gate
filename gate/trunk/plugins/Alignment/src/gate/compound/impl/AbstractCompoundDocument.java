@@ -4,6 +4,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectInputValidation;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -110,7 +112,11 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
     Iterator<Document> iter = documents.values().iterator();
     while(iter.hasNext()) {
       Document doc = iter.next();
-      doc.cleanup();
+      if(Gate.getHiddenAttribute(doc.getFeatures())) {
+        // assume the document was created by this compound,
+        // so it's up to us to delete it
+        Factory.deleteResource(doc);
+      }
     }
   } // cleanup()
 
@@ -830,5 +836,28 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
     else {
       this.documentIDs = null;
     }
+  }
+  
+  /**
+   * Overridden to properly register component documents with
+   * the creole register when this compound is deserialized.
+   */
+  private void readObject(ObjectInputStream stream)
+          throws IOException, ClassNotFoundException {
+    stream.defaultReadObject();
+    // register a validation callback to add our child documents
+    // to the creole register and fire the relevant events.  This
+    // is what the Factory would do if the children were loaded in
+    // the normal way.
+    stream.registerValidation(new ObjectInputValidation() {
+      public void validateObject() {
+        for(Document d : documents.values()) {
+          Gate.getCreoleRegister().get(
+                  d.getClass().getName()).addInstantiation(d);
+          Gate.getCreoleRegister().resourceLoaded(
+                  new CreoleEvent(d, CreoleEvent.RESOURCE_LOADED));
+        }
+      }
+    }, 0);
   }
 }
