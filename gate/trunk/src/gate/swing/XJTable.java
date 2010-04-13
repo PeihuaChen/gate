@@ -246,7 +246,7 @@ public class XJTable extends JTable{
       if(parent != null && parent instanceof JViewport) {
         // only track the viewport width if it is big enough.
         return ((JViewport)parent).getExtentSize().width
-                    > this.getMinimumSize().width;
+                    > this.getPreferredSize().width;
       } else {
         return true;
       }
@@ -954,7 +954,16 @@ public class XJTable extends JTable{
    * //http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4330950:
    */   
   public void columnMarginChanged(ChangeEvent e) {
+    //save the current edit (otherwise it gets lost)
     if (isEditing()) cellEditor.stopCellEditing();
+    //allow resizing of columns even if JTable believes we should block it.
+    TableColumn resizingCol = null;
+    if(getTableHeader() != null) resizingCol = 
+        getTableHeader().getResizingColumn();
+    if (resizingCol != null) {
+      resizingCol.setPreferredWidth(resizingCol.getWidth());
+    }
+    
     super.columnMarginChanged(e);
   }
 
