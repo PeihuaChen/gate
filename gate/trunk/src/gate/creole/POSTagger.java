@@ -18,11 +18,17 @@ import java.text.NumberFormat;
 import java.util.*;
 
 import gate.*;
+import gate.creole.metadata.*;
 import gate.util.GateRuntimeException;
 import gate.util.OffsetComparator;
+import org.apache.log4j.Logger;
+import org.apache.log4j.Level;
 /**
  * This class is a wrapper for HepTag, Mark Hepple's POS tagger.
  */
+@CreoleResource(name = "ANNIE POS Tagger",
+        helpURL = "http://gate.ac.uk/userguide/sec:annie:tagger",
+        comment = "Mark Hepple's Brill-style POS tagger")
 public class POSTagger extends AbstractLanguageAnalyser {
 
   public static final String
@@ -53,9 +59,24 @@ public class POSTagger extends AbstractLanguageAnalyser {
   public static final String
   	TAG_OUTPUT_AS_PARAMETER_NAME = "outputASName";
 
+  @RunTime
+  @Optional
+  @CreoleParameter(
+    comment = "Throw and exception when there are none of the required input annotations",
+    defaultValue = "true")  
+  public void setFailOnMissingInputAnnotations(Boolean fail) {
+    failOnMissingInputAnnotations = fail;
+  }
+  public Boolean getFailOnMissingInputAnnotations() {
+    return failOnMissingInputAnnotations;
+  }
+  protected Boolean failOnMissingInputAnnotations = true;
+  
   public POSTagger() {
   }
 
+  protected Logger logger = Logger.getLogger(this.getClass().getName());
+  
   public Resource init()throws ResourceInstantiationException{
     if(lexiconURL == null){
       throw new ResourceInstantiationException(
@@ -179,7 +200,7 @@ public class POSTagger extends AbstractLanguageAnalyser {
         //run the POS tagger
         List taggerResults = (List)tagger.runTagger(sentencesForTagger).get(0);
         //add the results
-        //make sure no malfunction accured
+        //make sure no malfunction occurred
         if(taggerResults.size() != tokensInCurrentSentence.size())
           throw new ExecutionException(
               "POS Tagger malfunction: the output size (" +
@@ -200,9 +221,14 @@ public class POSTagger extends AbstractLanguageAnalyser {
         (double)(System.currentTimeMillis() - startTime) / 1000) +
         " seconds!");
     }else{
-      throw new ExecutionException("No sentences or tokens to process in document "+document.getName()+"\n" +
+      if(failOnMissingInputAnnotations) {
+        throw new ExecutionException("No sentences or tokens to process in document "+document.getName()+"\n" +
                                      "Please run a sentence splitter "+
                                      "and tokeniser first!");
+      } else {
+        Utils.logOnce(logger,Level.INFO,"POS tagger: no sentence or token annotations in input document - see debug log for details.");
+        logger.debug("No input annotations in document "+document.getName());
+      }
     }
 
 //OLD version

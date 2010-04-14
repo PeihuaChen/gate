@@ -22,15 +22,21 @@ package gate.creole.morph;
 import java.net.URL;
 import java.util.Iterator;
 
+import org.apache.log4j.Logger;
+import org.apache.log4j.Level;
+
 import gate.*;
 import gate.creole.*;
-import gate.gui.MainFrame;
+import gate.creole.metadata.*;
 import gate.util.GateRuntimeException;
 
 /**
  * Description: This class is a wrapper for {@link gate.creole.morph.Interpret},
  * the Morphological Analyzer.
  */
+@CreoleResource(name = "GATE Morphological analyser",
+        helpURL = "http://gate.ac.uk/userguide/sec:parsers:morpher",
+        comment = "Morphological Analyzer for the English Language")
 public class Morph
     extends AbstractLanguageAnalyser
     implements ProcessingResource {
@@ -39,7 +45,7 @@ public class Morph
   /** Document to be processed by the morpher, must be provided at Runtime. */
   protected gate.Document document;
 
-  /** File which cotains rules to be processed */
+  /** File which contains rules to be processed */
   protected URL rulesFile;
 
   /** Instance of BaseWord class - English Morpher */
@@ -59,6 +65,21 @@ public class Morph
 
   protected Boolean considerPOSTag;
 
+  @RunTime
+  @Optional
+  @CreoleParameter(
+    comment = "Throw and exception when there are none of the required input annotations",
+    defaultValue = "true")  
+  public void setFailOnMissingInputAnnotations(Boolean fail) {
+    failOnMissingInputAnnotations = fail;
+  }
+  public Boolean getFailOnMissingInputAnnotations() {
+    return failOnMissingInputAnnotations;
+  }
+  protected Boolean failOnMissingInputAnnotations = false;
+  
+  protected Logger logger = Logger.getLogger(this.getClass().getName());  
+  
   /** Default Constructor */
   public Morph() {
   }
@@ -118,7 +139,13 @@ public class Morph
     AnnotationSet tokens = inputAs.get(TOKEN_ANNOTATION_TYPE);
     if (tokens == null || tokens.isEmpty()) {
       fireProcessFinished();
-      throw new ExecutionException("Either "+document.getName()+" does not have any contents or \n run the POS Tagger first and then Morpher");
+      if(failOnMissingInputAnnotations) {
+        throw new ExecutionException("Either "+document.getName()+" does not have any contents or \n run the POS Tagger first and then Morpher");
+      } else {
+        Utils.logOnce(logger,Level.INFO,"Morphological analyser: either a document does not have any contents or run the POS Tagger first - see debug log for details.");
+        logger.debug("No input annotations in document "+document.getName());
+        return;
+      }
       //javax.swing.JOptionPane.showMessageDialog(MainFrame.getInstance(), "Either "+document.getName()+" does not have any contents or \n run the POS Tagger first and then Morpher"); ;
       //return;
     }
@@ -138,7 +165,13 @@ public class Morph
                                     get(TOKEN_STRING_FEATURE_NAME));
       if(considerPOSTag != null && considerPOSTag.booleanValue() && !currentToken.getFeatures().containsKey(TOKEN_CATEGORY_FEATURE_NAME)) {
         fireProcessFinished();
-        throw new ExecutionException("please run the POS Tagger first and then Morpher");
+        if(failOnMissingInputAnnotations) {
+          throw new ExecutionException("please run the POS Tagger first and then Morpher");
+        } else {
+          Utils.logOnce(logger,Level.INFO,"Morphological analyser: no input annotations, run the POS Tagger first - see debug log for details.");
+          logger.debug("No input annotations in document "+document.getName());
+          return;
+        }
         //javax.swing.JOptionPane.showMessageDialog(MainFrame.getInstance(), "please run the POS Tagger first and then Morpher"); ;
         //return;
       }
