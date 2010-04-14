@@ -21,9 +21,14 @@ import gate.util.GateRuntimeException;
 import gate.util.OffsetComparator;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import org.apache.log4j.Logger;
+import org.apache.log4j.Level;
 
 /**
  * Various utility methods to make often-needed tasks more easy and
@@ -299,4 +304,24 @@ public class Utils {
     fm.putAll(map);
     return fm;
   }
+  
+  /**
+   * Issue a message to the log but only if the same message has not
+   * been logged already in the same GATE session.
+   * This is intended for explanations or warnings that should not be 
+   * repeated every time the same situation occurs.
+   * 
+   * @param logger - the logger instance to use
+   * @param level  - the severity level for the message
+   * @param message - the message itself
+   */
+  public static void logOnce (Logger logger, Level level, String message) {
+    if(!alreadyLoggedMessages.contains(message)) { 
+      logger.log(level, message);
+      alreadyLoggedMessages.add(message);
+    }
+  }
+  private static final Set<String> alreadyLoggedMessages = 
+    Collections.synchronizedSet(new HashSet<String>());
+
 }
