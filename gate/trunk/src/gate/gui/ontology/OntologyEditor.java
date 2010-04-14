@@ -1237,7 +1237,7 @@ public class OntologyEditor extends AbstractVisualResource
         subList.add(prop);
         continue;
       }
-      Set<RDFProperty> set = prop.getSuperProperties(OConstants.DIRECT_CLOSURE);
+      Set<RDFProperty> set = prop.getSuperProperties(OConstants.Closure.DIRECT_CLOSURE);
       if(set != null && !set.isEmpty()) {
         continue;
       }
@@ -1277,7 +1277,7 @@ public class OntologyEditor extends AbstractVisualResource
    * classes and instances.
    * 
    * @param parent the parent node.
-   * @param children the lsit of children objects.
+   * @param children the List<OResource> of children objects.
    * @param comparator the Comparator used to sort the children.
    */
   protected void addChidrenRec(DefaultMutableTreeNode parent,
@@ -1305,11 +1305,11 @@ public class OntologyEditor extends AbstractVisualResource
         // add all the subclasses
         OClass aClass = (OClass)aChild;
         List<OResource> childList = new ArrayList<OResource>(aClass
-                .getSubClasses(OClass.DIRECT_CLOSURE));
+                .getSubClasses(OConstants.Closure.DIRECT_CLOSURE));
         Collections.sort(childList, comparator);
         addChidrenRec(childNode, childList, comparator);
         childList = new ArrayList<OResource>(ontology.getOInstances(aClass,
-                OConstants.DIRECT_CLOSURE));
+                OConstants.Closure.DIRECT_CLOSURE));
         Collections.sort(childList, comparator);
         addChidrenRec(childNode, childList, comparator);
       }
@@ -1353,7 +1353,7 @@ public class OntologyEditor extends AbstractVisualResource
         childNode.setAllowsChildren(true);
         // add all the sub properties
         List<RDFProperty> childList = new ArrayList<RDFProperty>(aChild
-                .getSubProperties(OConstants.DIRECT_CLOSURE));
+                .getSubProperties(OConstants.Closure.DIRECT_CLOSURE));
         Collections.sort(childList, comparator);
         addPropertyChidrenRec(childNode, childList, comparator);
       }
@@ -1372,7 +1372,7 @@ public class OntologyEditor extends AbstractVisualResource
    */
   protected void classIsAdded(OClass aClass) {
     // we first obtain its superClasses
-    Set<OClass> superClasses = aClass.getSuperClasses(OClass.DIRECT_CLOSURE);
+    Set<OClass> superClasses = aClass.getSuperClasses(OConstants.Closure.DIRECT_CLOSURE);
     List<OResource> list = new ArrayList<OResource>();
     list.add(aClass);
     if(superClasses == null || superClasses.isEmpty()) {
@@ -1422,7 +1422,7 @@ public class OntologyEditor extends AbstractVisualResource
       return;
     }
     Set<RDFProperty> superProperties = p
-            .getSuperProperties(OConstants.DIRECT_CLOSURE);
+            .getSuperProperties(OConstants.Closure.DIRECT_CLOSURE);
     List<RDFProperty> list = new ArrayList<RDFProperty>();
     list.add(p);
     if(superProperties == null || superProperties.isEmpty()) {
@@ -1460,7 +1460,7 @@ public class OntologyEditor extends AbstractVisualResource
       }
     }
     Set<OClass> superClasses = anInstance
-            .getOClasses(OConstants.DIRECT_CLOSURE);
+            .getOClasses(OConstants.Closure.DIRECT_CLOSURE);
     List<OResource> list = new ArrayList<OResource>();
     list.add(anInstance);
     Iterator<OClass> iter = superClasses.iterator();
@@ -1509,7 +1509,7 @@ public class OntologyEditor extends AbstractVisualResource
     // the property which is added as a subProperty might not have any
     // super RDFProperty before
     // so we first remove it from the propertyTree
-    Set<RDFProperty> props = p.getSubProperties(OConstants.DIRECT_CLOSURE);
+    Set<RDFProperty> props = p.getSubProperties(OConstants.Closure.DIRECT_CLOSURE);
     List<RDFProperty> ps = new ArrayList<RDFProperty>(props);
     Collections.sort(ps, itemComparator);
     for(RDFProperty subP : ps) {
@@ -1557,7 +1557,7 @@ public class OntologyEditor extends AbstractVisualResource
     }
     // now we need to add it again
     Set<RDFProperty> superProperties = p
-            .getSuperProperties(OConstants.DIRECT_CLOSURE);
+            .getSuperProperties(OConstants.Closure.DIRECT_CLOSURE);
     List<RDFProperty> list = new ArrayList<RDFProperty>();
     list.add(p);
     if(superProperties != null) {
@@ -1590,7 +1590,7 @@ public class OntologyEditor extends AbstractVisualResource
     // the class which is added as a subClass might not have any
     // super Class before
     // so we first remove it from the tree
-    Set<OClass> classes = c.getSubClasses(OClass.DIRECT_CLOSURE);
+    Set<OClass> classes = c.getSubClasses(OClass.Closure.DIRECT_CLOSURE);
     List<OClass> cs = new ArrayList<OClass>(classes);
     Collections.sort(cs, itemComparator);
     for(OClass subC : cs) {
@@ -1655,7 +1655,7 @@ public class OntologyEditor extends AbstractVisualResource
               // lets check if its parents is the current node
               if(res instanceof OClass) {
                 if(((OClass)res).isSubClassOf(parentClass,
-                        OConstants.DIRECT_CLOSURE)) {
+                        OConstants.Closure.DIRECT_CLOSURE)) {
                   // continue;
                 }
                 else {
@@ -1674,7 +1674,7 @@ public class OntologyEditor extends AbstractVisualResource
     }
 
     // now we need to add it again
-    Set<OClass> superClasses = c.getSuperClasses(OClass.DIRECT_CLOSURE);
+    Set<OClass> superClasses = c.getSuperClasses(OConstants.Closure.DIRECT_CLOSURE);
     List<OResource> list = new ArrayList<OResource>();
     list.add(c);
 
@@ -1790,7 +1790,7 @@ public class OntologyEditor extends AbstractVisualResource
                     if(parentResource instanceof RDFProperty) {
                       List<RDFProperty> children = new ArrayList<RDFProperty>(
                               ((RDFProperty)parentResource)
-                                      .getSubProperties(OConstants.DIRECT_CLOSURE));
+                                      .getSubProperties(OConstants.Closure.DIRECT_CLOSURE));
                       Enumeration en = parentNode.children();
                       while(en.hasMoreElements()) {
                         DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode)en
@@ -1815,10 +1815,10 @@ public class OntologyEditor extends AbstractVisualResource
                     else {
                       List<OResource> children = new ArrayList<OResource>(
                               ((OClass)parentResource)
-                                      .getSubClasses(OConstants.DIRECT_CLOSURE));
+                                      .getSubClasses(OConstants.Closure.DIRECT_CLOSURE));
                       children.addAll(ontology
                               .getOInstances((OClass)parentResource,
-                                      OConstants.DIRECT_CLOSURE));
+                                      OConstants.Closure.DIRECT_CLOSURE));
                       Enumeration en = parentNode.children();
                       while(en.hasMoreElements()) {
                         DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode)en
