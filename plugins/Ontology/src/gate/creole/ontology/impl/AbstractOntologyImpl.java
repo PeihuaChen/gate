@@ -1472,35 +1472,38 @@ public abstract class AbstractOntologyImpl
     }
   }
 
+  /**
+   * Dummy implementation - this method is not supported any more.
+   */
   public boolean transationStarted() {
     throw new UnsupportedOperationException("Not supported any more in this implementation");
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see gate.creole.ontology.Ontology#getSesameRepository()
+  /**
+   * Dummy implementation - this method is not supported any more.
+   * To get the sesame repository for a sesame ontology, the ontology
+   * object should get cast to a gate.creole.contology.impl.sesame.OntologyLR
+   * object and getSesameRepositoryConnection() to get the connection which
+   * can be used to get the repository object.
    */
   public Object getSesameRepository() {
     throw new UnsupportedOperationException("Not supported any more in this implementation");
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see gate.creole.ontology.Ontology#getSesameRepositoryID()
+  /**
+   * Dummy implementation - this method is not supported any more.
    */
   public String getSesameRepositoryID() {
     throw new UnsupportedOperationException("Not supported in this implementation");
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see gate.creole.ontology.Ontology#getOResourceFromMap(java.lang.String)
+  /**
+   * Dummy implementation - this method is deprecated and only kept as long
+   * as it will be used in the gate.gui.ontology package. It is strongly
+   * recommended to replace all occurrences of this method by one of the 
+   * methods that gets a specific ontology entity (e.g. OInstance, Oclass).
    */
   public OResource getOResourceFromMap(String uri) {
-    //Utils.warnDeprecation("getOResourceFromMap");
     // TODO: this tries to provide a replacement without the map for
     // backwards compatibility but this should really be dropped entirely!
     OURI ouri = this.createOURI(uri);
@@ -1522,24 +1525,18 @@ public abstract class AbstractOntologyImpl
     //throw new UnsupportedOperationException("getResourceFromMap not supported any more");
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see gate.creole.ontology.Ontology#addOResourceToMap(java.lang.String,
-   * gate.creole.ontology.OResource)
+  /**
+   * Dummy implementation - this method is not supported any more.
    */
   public void addOResourceToMap(String uri, OResource resource) {
     throw new UnsupportedOperationException("addOResourceToMap not supported any more");
   }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see gate.creole.ontology.Ontology#removeOResourceFromMap(java.lang.String)
-   */
   
+  /**
+   * Dummy implementation - this method is not supported any more.
+   */
   public void removeOResourceFromMap(String uri) {
-    throw new UnsupportedOperationException("rremoveOResourceFromMap not supported any more");
+    throw new UnsupportedOperationException("removeOResourceFromMap not supported any more");
   }
 
 
@@ -1548,14 +1545,16 @@ public abstract class AbstractOntologyImpl
 
 
   /**
-   * This method checks in its cache find out the URI for the given resource
-   * name. However, doesn't guranttee that it will be able to return the URI. It
-   * is also possible for two resources to have a same name but different name
-   * spaces. This method returns a List containing all such URIs.
+   * Try to return the only OResource with the given resource name.
+   * If there is no such resource return null. If there is more than 
+   * one OResource where the fragment identifier of the URI matches the
+   * given resource name, return an arbitrary one and output a warning.
    * 
    * @param resourceName
-   * @return
+   * @return an OResource object that matches the name or null, if none found
    */
+  // NOTE: this should stay deprecated as it can return a random of several
+  // matching resources. 
   public OResource getOResourceByName(String resourceName) {
     //System.err.println("getOResourceByName called");
     //new GateOntologyException("NO USE").printStackTrace();
@@ -1566,30 +1565,26 @@ public abstract class AbstractOntologyImpl
           .print("Warning : there are more than one resources matching with the name "
             + resourceName);
       }
-      //if(resources.size() == 1) {
-        return resources.get(0);
-      //}
+      return resources.get(0);
     }
     return null;
   }
 
   /**
-   * This method checks in its cache to find out the OResources for the given
-   * resource name. It is possible for two resources to have a same name but
-   * different name spaces. This method returns a list of resources with the
-   * common name. Please note that deleting an instance from this list (e.g.
-   * list.remove(int/Object)) does not delete the resource from an ontology. One
-   * must use appropriate method from the Ontology interface to delete such
-   * resources.
+   * Find all OResources for the given resource name. These can be OResources
+   * with different URI but identical fragment identifier. If the ontology
+   * is not OWL-Lite (which is not officially supported by this implementation)
+   * this could also be an URI that can be represented by different subtypes
+   * of OResource, e.g. an entity which is both an instance and a class
+   * (which is possible in OWL-Full).
    * 
    * @param resourceName
-   * @return
+   * @return a list of OResource objects that have the given resource name.
    */
-  // TODO: replace by actual lookup!
+  // NOTE: this method should get un-deprecated but strongly discouraged as
+  // it is rather slow and the type of the requested resource should usually
+  // be known beforehand.
   public List<OResource> getOResourcesByName(String resourceName) {
-    //Utils.warnDeprecation("getOResourcesByName");
-    //System.err.println("getOResourcesByName called");
-    //new GateOntologyException("NO USE").printStackTrace();
     List<OResource> toReturn = new ArrayList<OResource>();
     Set<OClass> classes = getOClassesByName(resourceName);
     toReturn.addAll(classes);
@@ -1600,10 +1595,6 @@ public abstract class AbstractOntologyImpl
     Set<RDFProperty> properties = getPropertiesByName(resourceName);
     toReturn.addAll(properties);
     properties = null;
-    //List<OResource> resources = resourceNamesToOResourcesMap.get(resourceName);
-    //if(resources == null) { return null; }
-    //List<OResource> toReturn = new ArrayList<OResource>();
-    //toReturn.addAll(resources);
     return toReturn;
   }
 
