@@ -31,9 +31,12 @@ public class NamespaceHandler extends NamespaceHandlerSupport {
     registerBeanDefinitionParser("resource", new ResourceBeanDefinitionParser());
     registerBeanDefinitionParser("saved-application",
             new SavedApplicationBeanDefinitionParser());
+    registerBeanDefinitionParser("duplicate", new DuplicateBeanDefinitionParser());
     registerBeanDefinitionParser("set-parameter",
             new SetParameterBeanDefinitionParser());
     registerBeanDefinitionParser("add-pr", new AddPRBeanDefinitionParser());
+    registerBeanDefinitionDecorator("pooled-proxy",
+            new PooledProxyBeanDefinitionDecorator());
   }
 
 }
