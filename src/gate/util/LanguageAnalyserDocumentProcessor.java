@@ -19,7 +19,6 @@ import gate.Corpus;
 import gate.LanguageAnalyser;
 import gate.Document;
 import gate.Factory;
-import gate.creole.ExecutionException;
 
 /**
  * {@link DocumentProcessor} that processes documents using a
@@ -70,6 +69,8 @@ public class LanguageAnalyserDocumentProcessor implements DocumentProcessor {
    */
   public synchronized void cleanup() {
     Factory.deleteResource(analyser);
-    Factory.deleteResource(corpus);
+    if(corpus != null) {
+      Factory.deleteResource(corpus);
+    }
   }
 }
