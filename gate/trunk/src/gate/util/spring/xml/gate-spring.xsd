@@ -112,7 +112,38 @@
       </xsd:complexContent>
     </xsd:complexType>
   </xsd:element>
-  
+
+  <xsd:element name="duplicate">
+    <xsd:annotation>
+      <xsd:documentation>
+        Defines a factory bean that returns a new duplicate copy of
+        its template resource every time it is injected or fetched.
+        Supports a nested customisers element giving transformations
+        to carry out on the duplicate once it is created (e.g. to
+        override particular runtime parameters with values from
+        the Spring context).
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:complexContent>
+        <xsd:extension base="beans:identifiedType">
+          <xsd:sequence>
+            <xsd:choice minOccurs="0" maxOccurs="1">
+              <xsd:element ref="beans:ref" />
+              <xsd:element ref="beans:bean" />
+              <xsd:any namespace="##any" processContents="strict"/>
+            </xsd:choice>
+            <xsd:element ref="tns:customisers" 
+                         minOccurs="0" maxOccurs="1"/>
+          </xsd:sequence>
+          <xsd:attribute name="template-ref" type="xsd:string" use="optional" />
+          <xsd:attribute name="return-template" type="xsd:string" use="optional" />
+          <xsd:attribute name="scope" type="xsd:string" use="optional" />
+        </xsd:extension>
+      </xsd:complexContent>
+    </xsd:complexType>
+  </xsd:element>
+    
   <xsd:element name="customisers">
     <xsd:annotation>
       <xsd:documentation>
@@ -167,6 +198,22 @@
       <xsd:attribute name="add-before" type="xsd:string" use="optional" />
       <xsd:attribute name="add-after" type="xsd:string" use="optional" />
       <xsd:attribute name="index" type="xsd:nonNegativeInteger" use="optional" />
+    </xsd:complexType>
+  </xsd:element>
+  
+  <xsd:element name="pooled-proxy">
+    <xsd:annotation>
+      <xsd:documentation>
+        Decorator element that replaces a singleton bean definition with
+        a proxy backed by a pool of instances of the original bean
+        definition converted to prototype scope.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:attribute name="proxy-target-class" type="xsd:boolean" use="optional" />
+      <xsd:attribute name="initial-size" type="xsd:nonNegativeInteger" use="optional" />
+      <!-- Allow any attributes, as they can pass through to the target source -->
+      <xsd:anyAttribute processContents="skip"/>
     </xsd:complexType>
   </xsd:element>
   
