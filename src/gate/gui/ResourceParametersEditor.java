@@ -710,14 +710,14 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
           }
         }
       });
-      // select the opposite element when tab/right key is pressed
+      // select the opposite element when tab key is pressed
       textField.addKeyListener(new KeyAdapter() {
         public void keyPressed(KeyEvent e) {
           JTextField textField = (JTextField) e.getSource();
-          if((e.getKeyCode() == KeyEvent.VK_TAB
-          || e.getKeyCode() == KeyEvent.VK_RIGHT)
+          if((e.getKeyCode() == KeyEvent.VK_TAB)
           && textField.getParent().getComponentCount() == 3) {
             textField.getParent().getComponent(2).requestFocusInWindow();
+            e.consume();
           }
         }
       });
