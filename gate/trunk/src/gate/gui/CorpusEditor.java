@@ -648,9 +648,9 @@ public class CorpusEditor extends AbstractVisualResource
 
     public void actionPerformed(ActionEvent e){
       Component root = SwingUtilities.getRoot(CorpusEditor.this);
-      if(! (root instanceof MainFrame)){ return; }
-      MainFrame mainFrame = (MainFrame)root;
-      int[] selectedRows = docTable.getSelectedRows();
+      if (!(root instanceof MainFrame)) { return; }
+      final MainFrame mainFrame = (MainFrame) root;
+      final int[] selectedRows = docTable.getSelectedRows();
       if (selectedRows.length > 10) {
         Object[] possibleValues =
           { "Open the "+selectedRows.length+" documents", "Don't open" };
@@ -665,30 +665,23 @@ public class CorpusEditor extends AbstractVisualResource
           return;
         }
       }
-      for(int row : selectedRows) {
-        Document doc = (Document) corpus.get(docTable.rowViewToModel(row));
-        // try to select the document in the main frame
-        mainFrame.select(doc);
+      for (int row : selectedRows) {
+        // load the document if inside a datastore
+        corpus.get(docTable.rowViewToModel(row));
       }
+      SwingUtilities.invokeLater(new Runnable() { public void run() {
+        for (int row : selectedRows) {
+          Document doc = (Document) corpus.get(docTable.rowViewToModel(row));
+          // show the document in the central view
+          mainFrame.select(doc);
+        }
+      }});
     }
   }
 
   protected void changeMessage() {
     SwingUtilities.invokeLater(new Runnable(){ public void run() {
-    if (corpus != null
-    && documentsLoadedCount > 0
-    && documentsLoadedCount == corpus.size()) {
-      newDocumentAction.setEnabled(false);
-      messageLabel.setText("All the documents loaded in the " +
-        "system are in this corpus.");
-      messageLabel.setVisible(true);
-    } else if (documentsLoadedCount == 0) {
-      newDocumentAction.setEnabled(false);
-      messageLabel.setText(
-        "There are no documents loaded in the system. " +
-        "Press F1 for help.");
-      messageLabel.setVisible(true);
-    } else if (corpus == null || corpus.size() == 0) {
+    if (corpus == null || corpus.size() == 0) {
       newDocumentAction.setEnabled(true);
       messageLabel.setText(
         "<html>To add or remove documents to this corpus:<ul>" +
@@ -696,6 +689,22 @@ public class CorpusEditor extends AbstractVisualResource
         "<li>drag documents from the left resources tree and drop them below" +
         "<li>right click on the corpus in the resources tree and choose 'Populate'" +
         "</ul></html>");
+      messageLabel.setVisible(true);
+    } else if (documentsLoadedCount > 0
+            && documentsLoadedCount == corpus.size()) {
+      newDocumentAction.setEnabled(false);
+      messageLabel.setText("All the documents loaded in the " +
+        "system are in this corpus.");
+      messageLabel.setVisible(true);
+    } else if (documentsLoadedCount == 0) {
+      newDocumentAction.setEnabled(false);
+      if (corpus.getDataStore() == null) {
+        messageLabel.setText(
+          "There are no documents loaded in the system. " +
+          "Press F1 for help.");
+      } else {
+        messageLabel.setText("Open a document to load it from the datastore.");
+      }
       messageLabel.setVisible(true);
     } else {
       newDocumentAction.setEnabled(true);
