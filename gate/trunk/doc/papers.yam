@@ -24,49 +24,28 @@ GATE papers
 %2* 2010
 
 - D. Damljanovic, M. Agatonovic, H. Cunningham: Natural Language Interfaces to Ontologies: Combining Syntactic Analysis and Ontology-based Lookup through the User Interaction. In Proceedings of the 7th Extended Semantic Web Conference (ESWC 2010), Springer Verlag, Heraklion, Greece, May 31-June 3, 2010.
-
 - D. Damljanovic, M. Agatonovic, H. Cunningham: Identification of the Question Focus: Combining Syntactic Analysis and Ontology-based Lookup through the User Interaction. In Proceedings of the 7th Language Resources and Evaluation Conference (LREC 2010), ELRA 2010, La Valletta, Malta, May 17-23, 2010.
-
 - N. Aswani, R. Gaizauskas: Developing Morphological Analysers for South Asian Languages: Experimenting with the Hindi and Gujarati Languages. In Proceedings of the 7th Language Resources and Evaluation Conference (LREC 2010), ELRA 2010, La Valletta, Malta, May 17-23, 2010.
-
 - N. Aswani, R. Gaizauskas: English-Hindi Transliteration using Multiple Similarity Metrics. In Proceedings of the 7th Language Resources and Evaluation Conference (LREC 2010), ELRA 2010, La Valletta, Malta, May 17-23, 2010.
 
 %2* 2009
 
 - N. Aswani, R. Gaizauskas: Evolving a General Framework for Text Alignment: Case Studies with Two South Asian Languages. In Proceedings of the International Conference on Machine Translation: Twenty-Five Years On, Cranfield, Bedfordshire, UK, November 21-22, 2009.
-
 - Agnoloni, T. Bacci, L. Francesconi, E. Peters, W. Montemagni, M., Venturi, G. (2009), A two-level knowledge approach to support multilingual legislative drafting. In: Breuker, J., Casanovas, P., Klein, M. and Francesconi, E. (eds.) Frontiers in Artificial Intelligence and Applications, Volume 188: Law, Ontologies and the Semantic Web - Channelling the Legal Information Flood
-
 - F. Amardeilh and D. Damljanovic and K. Bontcheva: CA Manager: a Framework for Creating Customised Workflows for Ontology Population and Semantic Annotation. In the Proceedings of the Semantic Authoring, Annotation and Knowledge Markup Workshop (SAAKM 2009) co-located with the 5th International Conference on Knowledge Capture (K-CAP 2009), Redondo Beach, California, USA, 1-4 September, 2009. %(http://hal.archives-ouvertes.fr/docs/00/41/12/47/PDF/saakm09-camanager-final.pdf, PDF)
-
- - F.Amardeilh and D.Damljanovic: Du texte a la connaissance : annotation  semantique et peuplement d'ontologie appliques a des artefacts logiciels,  Conference Ingenierie des Connaissances 2009, 25-29 May, 2009. (in French). %(http://ic2009.inria.fr/docs/papers/AmardeilhDamljanovic_IC2009_29.pdf, PDF)
-
- - K. Bontcheva, B. Davis, A. Funk, Y. Li and T. Wang. Human Language Technologies. Semantic Knowledge Management, John Davies, Marko Grobelnik, and Dunja Mladenic (Eds.), Springer, 37-49, 2009. %(http://www.springerlink.com/content/978-3-540-88844-4, On-line Link)
-
- - D. Damljanovic, F. Amardeilh, K. Bontcheva: CA Manager Framework: Creating Customised Workflows for Ontology Population and Semantic Annotation. In Proceedings of The Fifth International Conference on Knowledge Capture (KCAP'09), California, USA, September 1-4, 2009.%(http://delivery.acm.org/10.1145/1600000/1597770/p177-damljanovic.pdf?key1=1597770&amp;key2=5509954621&amp;coll=GUIDE&amp;dl=GUIDE&amp;CFID=75107900&amp;CFTOKEN=81656037,  PDF).
-
- - D. Damljanovic, K. Bontcheva: Towards Enhanced Usability of Natural Language  Interfaces to Knowledge Bases. In Devedzic V. and Gasevic D. (Eds.), Special issue  on Semantic Web and Web 2.0, Annals of Information systems, Springer-Verlag, 2009.
-
- - D. Damljanovic, M. Agatonovic, H. Cunningham:  %(http://gate.ac.uk/sale/cnl09/poster/freya-poster.pdf, Usability of Natural Language Interfaces for querying ontologies) presented at %(http://attempto.ifi.uzh.ch/site/cnl2009/, Workshop on Controlled Natural Language (CNL 2009) ), Marettimo Island, Italy, June 08-10, 2009.
-
- - B.Davis, P.Varma, S.Handschuh, L.Dragan, H.Cunningham: Controlled Natural Language for Semantic Annotation. In Workshop on Controlled Natural Language (CNL) 2009, Marettimo Island, Italy, 2009.
-
- - B.Davis, P.Varma, S.Handschuh, L.Dragan, H.Cunningham: On designing Controlled Natural Languages for Semantic Annotation. In Proceedings of the Workshop on Controlled Natural Language (CNL09),
-Springer-Verlag, Heidelberg, Germany. (In Press) Marettimo Island, Italy, 2009.
-
- - M. Laclavik and D. Maynard. Motivating intelligent email in business: an investigation into current trends for email processing and communication research. Proceedings of Workshop on Emails in e-Commerce and Enterprise Context, 11th IEEE Conference on Commerce and Enterprise Computing, Vienna, Austria, 2009. %(http://gate.ac.uk/sale/e3c-2009/e3c_sota_email.pdf, PDF)
-
- - Y. Li, K. Bontcheva and H. Cunningham. Adapting SVM for Data Sparseness and Imbalance: A Case Study on Information Extraction. Natural Language Engineering, 15(02), 241-271, 2009. %(http://journals.cambridge.org/repo_A45LfkBD, On-line Link)
-
- - D. Maynard and A. Funk and W. Peters. Using Lexico-Syntactic Ontology Design Patterns for ontology creation and population. In Proceedings of ISWC Workshop on Ontology Patterns (WOP 2009), Washington, 2009. %(http://gate.ac.uk/sale/iswc09/odp09/sardine.pdf, PDF)
-
- - D. Maynard and A. Funk and W. Peters. NLP-based support for ontology lifecycle development. Proceedings of ISWC Workshop on Collaborative Construction, Management and Linking of Ontologies (CK 2009), Washington, 2009. %(http://gate.ac.uk/sale/iswc09/ck09/neon.pdf, PDF)
-
- - D. Maynard and A. Funk and W. Peters. SPRAT: a tool for automatic semantic pattern-based ontology population. Proceedings of the International Conference for Digital Libraries and the Semantic Web, Trento, Italy, 2009. %(http://gate.ac.uk/sale/icsd09/sprat.pdf, PDF)
-
-
- - W.Peters: Text-based Legal Ontology Enrichment, In: proceedings of LOAIT 2009, Barcelona, Spain.%(http://sunsite.informatik.rwth-aachen.de/Publications/CEUR-WS/Vol-465/paper7.pdf, PDF)
-
+- F.Amardeilh and D.Damljanovic: Du texte a la connaissance : annotation  semantique et peuplement d'ontologie appliques a des artefacts logiciels,  Conference Ingenierie des Connaissances 2009, 25-29 May, 2009. (in French). %(http://ic2009.inria.fr/docs/papers/AmardeilhDamljanovic_IC2009_29.pdf, PDF)
+- K. Bontcheva, B. Davis, A. Funk, Y. Li and T. Wang. Human Language Technologies. Semantic Knowledge Management, John Davies, Marko Grobelnik, and Dunja Mladenic (Eds.), Springer, 37-49, 2009. %(http://www.springerlink.com/content/978-3-540-88844-4, On-line Link)
+- D. Damljanovic, F. Amardeilh, K. Bontcheva: CA Manager Framework: Creating Customised Workflows for Ontology Population and Semantic Annotation. In Proceedings of The Fifth International Conference on Knowledge Capture (KCAP'09), California, USA, September 1-4, 2009.%(http://delivery.acm.org/10.1145/1600000/1597770/p177-damljanovic.pdf?key1=1597770&amp;key2=5509954621&amp;coll=GUIDE&amp;dl=GUIDE&amp;CFID=75107900&amp;CFTOKEN=81656037,  PDF).
+- D. Damljanovic, K. Bontcheva: Towards Enhanced Usability of Natural Language  Interfaces to Knowledge Bases. In Devedzic V. and Gasevic D. (Eds.), Special issue  on Semantic Web and Web 2.0, Annals of Information systems, Springer-Verlag, 2009.
+- D. Damljanovic, M. Agatonovic, H. Cunningham:  %(http://gate.ac.uk/sale/cnl09/poster/freya-poster.pdf, Usability of Natural Language Interfaces for querying ontologies) presented at %(http://attempto.ifi.uzh.ch/site/cnl2009/, Workshop on Controlled Natural Language (CNL 2009) ), Marettimo Island, Italy, June 08-10, 2009.
+- B.Davis, P.Varma, S.Handschuh, L.Dragan, H.Cunningham: Controlled Natural Language for Semantic Annotation. In Workshop on Controlled Natural Language (CNL) 2009, Marettimo Island, Italy, 2009.
+- B.Davis, P.Varma, S.Handschuh, L.Dragan, H.Cunningham: On designing Controlled Natural Languages for Semantic Annotation. In Proceedings of the Workshop on Controlled Natural Language (CNL09), Springer-Verlag, Heidelberg, Germany. (In Press) Marettimo Island, Italy, 2009.
+- M. Laclavik and D. Maynard. Motivating intelligent email in business: an investigation into current trends for email processing and communication research. Proceedings of Workshop on Emails in e-Commerce and Enterprise Context, 11th IEEE Conference on Commerce and Enterprise Computing, Vienna, Austria, 2009. %(http://gate.ac.uk/sale/e3c-2009/e3c_sota_email.pdf, PDF)
+- Y. Li, K. Bontcheva and H. Cunningham. Adapting SVM for Data Sparseness and Imbalance: A Case Study on Information Extraction. Natural Language Engineering, 15(02), 241-271, 2009. %(http://journals.cambridge.org/repo_A45LfkBD, On-line Link)
+- D. Maynard and A. Funk and W. Peters. Using Lexico-Syntactic Ontology Design Patterns for ontology creation and population. In Proceedings of ISWC Workshop on Ontology Patterns (WOP 2009), Washington, 2009. %(http://gate.ac.uk/sale/iswc09/odp09/sardine.pdf, PDF)
+- D. Maynard and A. Funk and W. Peters. NLP-based support for ontology lifecycle development. Proceedings of ISWC Workshop on Collaborative Construction, Management and Linking of Ontologies (CK 2009), Washington, 2009. %(http://gate.ac.uk/sale/iswc09/ck09/neon.pdf, PDF)
+- D. Maynard and A. Funk and W. Peters. SPRAT: a tool for automatic semantic pattern-based ontology population. Proceedings of the International Conference for Digital Libraries and the Semantic Web, Trento, Italy, 2009. %(http://gate.ac.uk/sale/icsd09/sprat.pdf, PDF)
+- W.Peters: Text-based Legal Ontology Enrichment, In: proceedings of LOAIT 2009, Barcelona, Spain.%(http://sunsite.informatik.rwth-aachen.de/Publications/CEUR-WS/Vol-465/paper7.pdf, PDF)
  - H.Saggion, A.Funk: Extracting Opinions and Facts for Business Intelligence. ; RNTI Journal.E-17 pp119-146 ; 2009. %(http://gate.ac.uk/sale/rnti-09/final-version/Saggion-Funks-OM-09.pdf, PDF)
 
 %2* 2008
