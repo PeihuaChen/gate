@@ -84,7 +84,7 @@ public class LearningEngineSettings {
   /** Number of document as interval between trainings in MI-learning mode. */
   public int miDocInterval = 1;
   /** The document number interval for one applicataion in batch learning mode. */
-  public int docNumIntevalApp = 100;
+  public int docNumIntevalApp = 1;
   /**
    * Define the number of the NLP features with the biggest weights in linear
    * SVM model.
@@ -134,7 +134,7 @@ public class LearningEngineSettings {
       learningSettings.miDocInterval = Integer.parseInt(value);
     }
     /** Set the number of documents as interval for batch application. */
-    learningSettings.docNumIntevalApp = 100;
+    learningSettings.docNumIntevalApp = 1;
     if(rootElement.getChild("BATCH-APP-INTERVAL") != null) {
       String value = rootElement.getChild("BATCH-APP-INTERVAL").getAttribute(
         "num").getValue();
