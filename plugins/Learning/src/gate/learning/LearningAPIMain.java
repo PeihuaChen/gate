@@ -345,7 +345,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
             if(toProcess.getDataStore() != null
                     && corpus.getDataStore() != null) {// (isDatastore)
               corpus.getDataStore().sync(corpus);
-              Factory.deleteResource(toProcess);
+              //Factory.deleteResource(toProcess);
             }
           }
           outNLPFeatures.flush();
@@ -681,7 +681,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
                         learningSettings);
                 if(toProcess.getDataStore() != null
                         && corpus.getDataStore() != null) {// (isDatastore)
-                  Factory.deleteResource(toProcess);
+                  //Factory.deleteResource(toProcess);
                   corpus.getDataStore().sync(corpus);
                 }
               }

@@ -920,7 +920,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
           labelsAndId);
         if(toProcess.getDataStore() != null && corpus.getDataStore() != null) {
           corpus.getDataStore().sync(corpus);
-          Factory.deleteResource(toProcess);
+          //Factory.deleteResource(toProcess);
         }
       }
       Benchmark.checkPoint(startTime, benchmarkID + "." + "postProcessing",
@@ -950,7 +950,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
           instanceType, featName, labelName, labelsAndId, engineSettings);
         if(toProcess.getDataStore() != null && corpus.getDataStore() != null) {
           corpus.getDataStore().sync(corpus);
-          Factory.deleteResource(toProcess);
+          //Factory.deleteResource(toProcess);
         }
       }
     }
