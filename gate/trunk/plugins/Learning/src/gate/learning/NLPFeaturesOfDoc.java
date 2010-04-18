@@ -86,7 +86,7 @@ public class NLPFeaturesOfDoc {
       if(dsd.arg2 != null) {
         ArgOfRelation arg = dsd.arg2;
         boolean[][] isArgInRel = matchArgInstanceWithInst(annotations, dsd
-          .getInstanceType(), arg.type, dsd.arg1Feat, arg.feat);
+          .getInstanceType(), arg.type, dsd.arg2Feat, arg.feat);
         if(arg.arrs.numTypes>0)
           gatedoc2NLPFeaturesArg(annotations, arg.type,
             arg.arrs.typesInDataSetDef, arg.arrs.featuresInDataSetDef,
