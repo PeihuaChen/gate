@@ -24,13 +24,13 @@
      <FEATURES-ARG1>
        <ARG>
         <NAME>ARG1</NAME>
-        <SEMTYPE>SEMTYPE>NOMINAL</SEMTYPE>
+        <SEMTYPE>NOMINAL</SEMTYPE>
 	<TYPE>ACEEntity</TYPE>
 	<FEATURE>MENTION_ID</FEATURE>
        </ARG>
        <ATTRIBUTE>
          <NAME>Form</NAME>
-         <SEMTYPE>SEMTYPE>NOMINAL</SEMTYPE>
+         <SEMTYPE>NOMINAL</SEMTYPE>
          <TYPE>Token</TYPE>
          <FEATURE>string</FEATURE>
          <POSITION>0</POSITION>
@@ -38,7 +38,7 @@
 
        <ATTRIBUTE>
          <NAME>POS</NAME>
-         <SEMTYPE>SEMTYPE>NOMINAL</SEMTYPE>
+         <SEMTYPE>NOMINAL</SEMTYPE>
 	 <TYPE>Token</TYPE>
 	 <FEATURE>category</FEATURE>
          <POSITION>0</POSITION>
@@ -48,13 +48,13 @@
        <FEATURES-ARG2>
         <ARG>
           <NAME>ARG2</NAME>
-          <SEMTYPE>SEMTYPE>NOMINAL</SEMTYPE>
+          <SEMTYPE>NOMINAL</SEMTYPE>
 	  <TYPE>ACEEntity</TYPE>
 	  <FEATURE>MENTION_ID</FEATURE>
         </ARG>
         <ATTRIBUTE>
           <NAME>Form</NAME>
-          <SEMTYPE>SEMTYPE>NOMINAL</SEMTYPE>
+          <SEMTYPE>NOMINAL</SEMTYPE>
 	  <TYPE>Token</TYPE>
 	  <FEATURE>string</FEATURE>
           <POSITION>0</POSITION>
@@ -62,7 +62,7 @@
 
         <ATTRIBUTE>
           <NAME>POS</NAME>
-          <SEMTYPE>SEMTYPE>NOMINAL</SEMTYPE>
+          <SEMTYPE>NOMINAL</SEMTYPE>
 	  <TYPE>Token</TYPE>
 	  <FEATURE>category</FEATURE>
           <POSITION>0</POSITION>
