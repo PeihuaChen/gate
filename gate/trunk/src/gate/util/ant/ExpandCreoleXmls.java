@@ -69,6 +69,10 @@ public class ExpandCreoleXmls extends Task {
         File creoleFile = new File(ds.getBasedir(), f);
         try {
           File plugin = creoleFile.getParentFile();
+          File destFile = new File(toDir, f);
+          File destPlugin = destFile.getParentFile();
+
+          log("Expanding " + creoleFile + " to " + destFile, Project.MSG_VERBOSE);
           Gate.addKnownPlugin(plugin.toURI().toURL());
           CreoleAnnotationHandler annotationHandler = new CreoleAnnotationHandler(creoleFile.toURI().toURL());
           Document creoleDoc = builder.build(creoleFile);
@@ -76,8 +80,6 @@ public class ExpandCreoleXmls extends Task {
           annotationHandler.createResourceElementsForDirInfo(creoleDoc);
           annotationHandler.processAnnotations(creoleDoc);
           
-          File destFile = new File(toDir, f);
-          File destPlugin = destFile.getParentFile();
           destPlugin.mkdirs();
           FileOutputStream fos = new FileOutputStream(destFile);
           try {
