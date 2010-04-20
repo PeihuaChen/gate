@@ -117,4 +117,9 @@
   <!-- Build everything - the code and JavaDoc -->
   <target name="all" depends="jar, javadoc" />
 
+  <!-- Targets used by the main GATE build file -->
+  <target name="build" depends="jar" />
+  <target name="test" />
+  <target name="distro.prepare" depends="clean.classes" />
+
 </project>
