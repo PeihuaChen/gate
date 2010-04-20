@@ -30,7 +30,7 @@ public class LanguageIdentifier extends gate.creole.AbstractLanguageAnalyser {
 		String language = (String) document.getFeatures().get(languageFeatureName);
 		if(language != null && language.length() > 0)
 			return;
-		if(languageFeatureName == null || languageFeatureName.isEmpty())
+		if(languageFeatureName == null || "".equals(languageFeatureName))
 			languageFeatureName = "language";
 		TextCategorizer guesser = new TextCategorizer();
 	    String category = guesser.categorize(document.getContent().toString());
