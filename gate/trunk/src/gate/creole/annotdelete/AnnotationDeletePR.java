@@ -101,6 +101,13 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
 
     if(document == null)
       throw new GateRuntimeException("No document to process!");
+    
+    
+    Map matchesMap = null;
+    Object matchesMapObject = document.getFeatures().get(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME);
+    if(matchesMapObject instanceof Map) {
+      matchesMap = (Map) matchesMapObject;
+    }
 
     if(setsToRemove != null && !setsToRemove.isEmpty()) {
       // just remove or empty the sets in this list and ignore
@@ -108,10 +115,20 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
       for(String setName : setsToRemove) {
         if(setName == null || setName.equals("")) {
           // clear the default annotation set
-          document.getAnnotations().clear();
+          if (annotationTypes == null || annotationTypes.isEmpty()) {
+            document.getAnnotations().clear();
+            removeFromDocumentCorefData( (String)null, matchesMap);
+          } else {
+            removeSubSet(document.getAnnotations(), matchesMap);
+          }
         } else {
           // remove this named set
-          document.removeAnnotationSet(setName);
+          if (annotationTypes == null || annotationTypes.isEmpty()) {
+            document.removeAnnotationSet(setName);
+            removeFromDocumentCorefData( (String) setName, matchesMap);
+          } else {
+            removeSubSet(document.getAnnotations(setName), matchesMap);
+          }
         }
       }
     } else {
@@ -124,12 +141,6 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
       if(keepOriginalMarkupsAS.booleanValue() && 
          !keepSets.contains(markupSetName)) {
           keepSets.add(markupSetName);
-      }
-
-      Map matchesMap = null;
-      Object matchesMapObject = document.getFeatures().get(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME);
-      if(matchesMapObject instanceof Map) {
-        matchesMap = (Map) matchesMapObject;
       }
 
       //Unless we've been asked to keep it, first clear the default set,
