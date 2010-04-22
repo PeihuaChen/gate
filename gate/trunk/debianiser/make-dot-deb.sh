@@ -32,7 +32,7 @@ mv $$ control
 
 # the checksums
 >../${SUMS}
-for f in `find . -type f |grep -v '\.svn' |sed 's,^\./,,'`
+for f in `find . -type f |egrep -v '\.svn|\..*.swp' |sed 's,^\./,,'`
 do
   md5sum $f >> ../${SUMS}
 done
@@ -41,7 +41,7 @@ cd ..
 # the control and data .tgzs and the .deb
 cd control && fakeroot tar czf ../${DEBELS}/control.tar.gz *
 cd ../data && fakeroot tar czf ../${DEBELS}/data.tar.gz *
-cd ../${DEBELS} && ar -cr ../${DEBFILE} control.tar.gz data.tar.gz debian-binary
+cd ../${DEBELS} && ar -cr ../${DEBFILE} debian-binary control.tar.gz data.tar.gz
 cd ..
 
 # all done
