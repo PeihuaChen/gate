@@ -1,0 +1,13 @@
+8f2f1c6dcc2fa5cdfd78d3db509f775b  preinst
+54ff9a0fab836ca1ab655de240e810eb  md5sums
+23e4d9902e13b1b5040bcf5a3315745a  postinst
+f53e6d5cbab68cd0485850197d971275  .preinst.swp
+4f8ece855e31249f538b63c386e83bbe  .prerm.swp
+c65d4a1fdb4ac28f49c14f34552a5033  .config.swp
+8defc32b6e9ac714332db35703956586  postrm
+231aba4655a3f8f2bb5481313f8b8eee  config
+4aeb1318e6c8ca22fc60ec314b42ca5e  .control.swp
+94d8163bef8213af17f40a975e359358  .postrm.swp
+4327f3a1161d005148182f9790da72db  .postinst.swp
+635292a20c9b00aca16a17028e4d75bc  control
+7beb83fc273f18982f9b0789b0e9ca68  prerm
