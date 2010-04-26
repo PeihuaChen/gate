@@ -3,9 +3,6 @@
  */
 package gate.clone.ql;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import gate.clone.ql.utils.Ontology2Map;
 import gate.creole.ontology.Ontology;
 
@@ -18,7 +15,7 @@ public class Ontology2MapManager {
   }
 
   private static Ontology2MapManager myInstance;
-  private static Map ontology2Map = new HashMap();
+  private static Ontology2Map ontology2Map;
 
   public static Ontology2MapManager getInstance() {
     if(myInstance == null) myInstance = new Ontology2MapManager();
@@ -26,11 +23,11 @@ public class Ontology2MapManager {
   }
 
   public void addOntologyToIndex(Ontology ontology) {
-    Ontology2Map os = new Ontology2Map(ontology);
-    ontology2Map.put(ontology.getURL().toString(), os);
+    ontology2Map = new Ontology2Map(ontology);
+   // ontology2Map.put(ontology.getURL().toString(), os);
   }
 
-  public Ontology2Map getOntology2Map(String ontologyURL) {
-    return (Ontology2Map)ontology2Map.get(ontologyURL);
+  public Ontology2Map getOntology2Map() {
+    return ontology2Map;
   }
 }
