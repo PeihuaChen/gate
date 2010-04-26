@@ -67,7 +67,10 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
       return set;
   }
   public Set<OClass> getOClasses(Closure closure) {
-    throw new UnsupportedOperationException("Not supported in this implementation");
+    byte bclosure = closure == Closure.DIRECT_CLOSURE
+    ? OConstants.DIRECT_CLOSURE
+    : OConstants.TRANSITIVE_CLOSURE;
+    return getOClasses(bclosure);
   }
 
   public void addOClass(OClass theClass) {
@@ -85,7 +88,10 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
               this.uri.toString(), closure);
   }
   public boolean isInstanceOf(OClass aClass, Closure closure) {
-    throw new UnsupportedOperationException("Not supported in this implementation");
+    byte bclosure = closure == Closure.DIRECT_CLOSURE
+    ? OConstants.DIRECT_CLOSURE
+    : OConstants.TRANSITIVE_CLOSURE;
+    return isInstanceOf(aClass, bclosure);
   }
 
   /*

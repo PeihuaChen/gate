@@ -15,6 +15,7 @@ import gate.creole.ontology.OClass;
 import gate.creole.ontology.OConstants;
 import gate.creole.ontology.Ontology;
 import gate.creole.ontology.URI;
+import gate.creole.ontology.OConstants.Closure;
 import gate.util.ClosableIterator;
 
 /**
@@ -40,7 +41,9 @@ public class OClassImpl extends OResourceImpl implements OClass {
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.OClass#addSubClass(gate.creole.ontology.OClass)
+   * @see
+   * gate.creole.ontology.OClass#addSubClass(gate.creole.ontology.OClass
+   * )
    */
   public void addSubClass(OClass subClass) {
     // lets first check if the current class is a subclass of the
@@ -66,13 +69,16 @@ public class OClassImpl extends OResourceImpl implements OClass {
 
     owlim.addSubClass(this.repositoryID, this.uri.toString(), subClass.getURI()
             .toString());
-    ontology.fireResourceRelationChanged(this, subClass, OConstants.SUB_CLASS_ADDED_EVENT);
+    ontology.fireResourceRelationChanged(this, subClass,
+            OConstants.SUB_CLASS_ADDED_EVENT);
   }
 
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.OClass#removeSubClass(gate.creole.ontology.OClass)
+   * @see
+   * gate.creole.ontology.OClass#removeSubClass(gate.creole.ontology
+   * .OClass)
    */
   public void removeSubClass(OClass subClass) {
 
@@ -90,7 +96,8 @@ public class OClassImpl extends OResourceImpl implements OClass {
 
     owlim.removeSubClass(this.repositoryID, this.uri.toString(), subClass
             .getURI().toString());
-    ontology.fireResourceRelationChanged(this, subClass, OConstants.SUB_CLASS_REMOVED_EVENT);  
+    ontology.fireResourceRelationChanged(this, subClass,
+            OConstants.SUB_CLASS_REMOVED_EVENT);
   }
 
   /*
@@ -112,11 +119,19 @@ public class OClassImpl extends OResourceImpl implements OClass {
   }
 
   public Set<OClass> getSubClasses(Closure closure) {
-    throw new UnsupportedOperationException("Not supported in this implementation");
+    byte bclosure = closure == Closure.DIRECT_CLOSURE
+            ? OConstants.DIRECT_CLOSURE
+            : OConstants.TRANSITIVE_CLOSURE;
+    return getSubClasses(bclosure);
   }
+
   public ClosableIterator<OClass> getSubClassesIterator(Closure closure) {
-    throw new UnsupportedOperationException("Not supported in this implementation");
+    byte bclosure = closure == Closure.DIRECT_CLOSURE
+            ? OConstants.DIRECT_CLOSURE
+            : OConstants.TRANSITIVE_CLOSURE;
+    return new ResourceIterator<OClass>(getSubClasses(bclosure));
   }
+
   /*
    * (non-Javadoc)
    * 
@@ -135,14 +150,18 @@ public class OClassImpl extends OResourceImpl implements OClass {
   }
 
   public Set<OClass> getSuperClasses(Closure closure) {
-    throw new UnsupportedOperationException("Not supported in this implementation");
+    byte bclosure = closure == Closure.DIRECT_CLOSURE
+            ? OConstants.DIRECT_CLOSURE
+            : OConstants.TRANSITIVE_CLOSURE;
+    return getSuperClasses(bclosure);
   }
 
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.OClass#isSuperClassOf(gate.creole.ontology.OClass,
-   *      byte)
+   * @see
+   * gate.creole.ontology.OClass#isSuperClassOf(gate.creole.ontology
+   * .OClass, byte)
    */
   public boolean isSuperClassOf(OClass aClass, byte closure) {
     return owlim.isSuperClassOf(this.repositoryID, this.uri.toString(), aClass
@@ -150,14 +169,18 @@ public class OClassImpl extends OResourceImpl implements OClass {
   }
 
   public boolean isSuperClassOf(OClass aClass, Closure closure) {
-    throw new UnsupportedOperationException("Not supported in this implementation");
+    byte bclosure = closure == Closure.DIRECT_CLOSURE
+    ? OConstants.DIRECT_CLOSURE
+    : OConstants.TRANSITIVE_CLOSURE;
+    return isSuperClassOf(aClass, bclosure);
   }
 
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.OClass#isSubClassOf(gate.creole.ontology.OClass,
-   *      byte)
+   * @see
+   * gate.creole.ontology.OClass#isSubClassOf(gate.creole.ontology.OClass
+   * , byte)
    */
   public boolean isSubClassOf(OClass aClass, byte closure) {
     return owlim.isSubClassOf(this.repositoryID, aClass.getURI().toString(),
@@ -165,9 +188,11 @@ public class OClassImpl extends OResourceImpl implements OClass {
   }
 
   public boolean isSubClassOf(OClass aClass, Closure closure) {
-    throw new UnsupportedOperationException("Not supported in this implementation");
+    byte bclosure = closure == Closure.DIRECT_CLOSURE
+    ? OConstants.DIRECT_CLOSURE
+    : OConstants.TRANSITIVE_CLOSURE;
+    return isSubClassOf(aClass, bclosure);
   }
-
 
   /*
    * (non-Javadoc)
@@ -181,7 +206,9 @@ public class OClassImpl extends OResourceImpl implements OClass {
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.OClass#setSameClassAs(gate.creole.ontology.OClass)
+   * @see
+   * gate.creole.ontology.OClass#setSameClassAs(gate.creole.ontology
+   * .OClass)
    */
   public void setEquivalentClassAs(OClass theClass) {
     // lets first check if the current class is a subclass of the
@@ -195,7 +222,8 @@ public class OClassImpl extends OResourceImpl implements OClass {
 
     owlim.setEquivalentClassAs(this.repositoryID, this.uri.toString(), theClass
             .getURI().toString());
-    ontology.fireResourceRelationChanged(this, theClass, OConstants.EQUIVALENT_CLASS_EVENT);
+    ontology.fireResourceRelationChanged(this, theClass,
+            OConstants.EQUIVALENT_CLASS_EVENT);
   }
 
   /*
@@ -217,7 +245,9 @@ public class OClassImpl extends OResourceImpl implements OClass {
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.OClass#isSameClassAs(gate.creole.ontology.OClass)
+   * @see
+   * gate.creole.ontology.OClass#isSameClassAs(gate.creole.ontology.
+   * OClass)
    */
   public boolean isEquivalentClassAs(OClass aClass) {
     return owlim.isEquivalentClassAs(this.repositoryID, this.uri.toString(),

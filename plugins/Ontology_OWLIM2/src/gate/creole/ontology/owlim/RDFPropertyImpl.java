@@ -47,7 +47,9 @@ public class RDFPropertyImpl extends OResourceImpl implements RDFProperty {
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.RDFProperty#setSamePropertyAs(gate.creole.ontology.RDFProperty)
+   * @see
+   * gate.creole.ontology.RDFProperty#setSamePropertyAs(gate.creole.
+   * ontology.RDFProperty)
    */
   public void setEquivalentPropertyAs(RDFProperty theProperty) {
     if(this == theProperty) {
@@ -58,7 +60,8 @@ public class RDFPropertyImpl extends OResourceImpl implements RDFProperty {
 
     owlim.setEquivalentPropertyAs(repositoryID, uri.toString(), theProperty
             .getURI().toString());
-    ontology.fireResourceRelationChanged(this, theProperty, OConstants.EQUIVALENT_PROPERTY_EVENT);
+    ontology.fireResourceRelationChanged(this, theProperty,
+            OConstants.EQUIVALENT_PROPERTY_EVENT);
   }
 
   /*
@@ -80,7 +83,9 @@ public class RDFPropertyImpl extends OResourceImpl implements RDFProperty {
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.RDFProperty#isSamePropertyAs(gate.creole.ontology.RDFProperty)
+   * @see
+   * gate.creole.ontology.RDFProperty#isSamePropertyAs(gate.creole.ontology
+   * .RDFProperty)
    */
   public boolean isEquivalentPropertyAs(RDFProperty theProperty) {
     return owlim.isEquivalentPropertyAs(this.repositoryID, uri.toString(),
@@ -102,28 +107,39 @@ public class RDFPropertyImpl extends OResourceImpl implements RDFProperty {
     }
     return set;
   }
+
   public Set<RDFProperty> getSuperProperties(Closure closure) {
-    throw new UnsupportedOperationException("Not supported in this implementation");
+    byte bclosure = closure == Closure.DIRECT_CLOSURE
+            ? OConstants.DIRECT_CLOSURE
+            : OConstants.TRANSITIVE_CLOSURE;
+    return getSuperProperties(bclosure);
   }
 
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.RDFProperty#isSuperPropertyOf(gate.creole.ontology.RDFProperty,
-   *      byte)
+   * @see
+   * gate.creole.ontology.RDFProperty#isSuperPropertyOf(gate.creole.
+   * ontology.RDFProperty, byte)
    */
   public boolean isSuperPropertyOf(RDFProperty theProperty, byte closure) {
     return owlim.isSuperPropertyOf(this.repositoryID, uri.toString(),
             theProperty.getURI().toString(), closure);
   }
+
   public boolean isSuperPropertyOf(RDFProperty theProperty, Closure closure) {
-    throw new UnsupportedOperationException("Not supported in this implementation");
+    byte bclosure = closure == Closure.DIRECT_CLOSURE
+    ? OConstants.DIRECT_CLOSURE
+    : OConstants.TRANSITIVE_CLOSURE;
+    return isSuperPropertyOf(theProperty, bclosure);
   }
 
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.RDFProperty#addSubProperty(gate.creole.ontology.RDFProperty)
+   * @see
+   * gate.creole.ontology.RDFProperty#addSubProperty(gate.creole.ontology
+   * .RDFProperty)
    */
   public void addSubProperty(RDFProperty theProperty) {
     // lets first check if the current class is a subclass of the
@@ -151,18 +167,22 @@ public class RDFPropertyImpl extends OResourceImpl implements RDFProperty {
 
     owlim.addSubProperty(this.repositoryID, uri.toString(), theProperty
             .getURI().toString());
-    ontology.fireResourceRelationChanged(this, theProperty, OConstants.SUB_PROPERTY_ADDED_EVENT);    
+    ontology.fireResourceRelationChanged(this, theProperty,
+            OConstants.SUB_PROPERTY_ADDED_EVENT);
   }
 
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.RDFProperty#removeSubProperty(gate.creole.ontology.RDFProperty)
+   * @see
+   * gate.creole.ontology.RDFProperty#removeSubProperty(gate.creole.
+   * ontology.RDFProperty)
    */
   public void removeSubProperty(RDFProperty theProperty) {
     owlim.removeSubProperty(this.repositoryID, uri.toString(), theProperty
             .getURI().toString());
-    ontology.fireResourceRelationChanged(this, theProperty, OConstants.SUB_PROPERTY_REMOVED_EVENT);    
+    ontology.fireResourceRelationChanged(this, theProperty,
+            OConstants.SUB_PROPERTY_REMOVED_EVENT);
   }
 
   /*
@@ -180,22 +200,32 @@ public class RDFPropertyImpl extends OResourceImpl implements RDFProperty {
     }
     return set;
   }
+
   public Set<RDFProperty> getSubProperties(Closure closure) {
-    throw new UnsupportedOperationException("Not supported in this implementation");
+    byte bclosure = closure == Closure.DIRECT_CLOSURE
+    ? OConstants.DIRECT_CLOSURE
+    : OConstants.TRANSITIVE_CLOSURE;
+    return getSubProperties(bclosure);
   }
 
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.RDFProperty#isSubPropertyOf(gate.creole.ontology.RDFProperty,
-   *      byte)
+   * @see
+   * gate.creole.ontology.RDFProperty#isSubPropertyOf(gate.creole.ontology
+   * .RDFProperty, byte)
    */
   public boolean isSubPropertyOf(RDFProperty theProperty, byte closure) {
     return owlim.isSubPropertyOf(this.repositoryID, theProperty.getURI()
             .toString(), uri.toString(), closure);
   }
+
   public boolean isSubPropertyOf(RDFProperty theProperty, Closure closure) {
-    throw new UnsupportedOperationException("Not supported in this implementation");
+    byte bclosure = closure == Closure.DIRECT_CLOSURE
+    ? OConstants.DIRECT_CLOSURE
+    : OConstants.TRANSITIVE_CLOSURE;
+
+    return isSubPropertyOf(theProperty, bclosure);
   }
 
   /*
@@ -238,7 +268,9 @@ public class RDFPropertyImpl extends OResourceImpl implements RDFProperty {
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.RDFProperty#isValidRange(gate.creole.ontology.OResource)
+   * @see
+   * gate.creole.ontology.RDFProperty#isValidRange(gate.creole.ontology
+   * .OResource)
    */
   public boolean isValidRange(OResource aResource) {
     ResourceInfo[] listOfOResources = owlim.getRange(this.repositoryID, uri
@@ -296,7 +328,9 @@ public class RDFPropertyImpl extends OResourceImpl implements RDFProperty {
   /*
    * (non-Javadoc)
    * 
-   * @see gate.creole.ontology.RDFProperty#isValidDomain(gate.creole.ontology.OResource)
+   * @see
+   * gate.creole.ontology.RDFProperty#isValidDomain(gate.creole.ontology
+   * .OResource)
    */
   public boolean isValidDomain(OResource aResource) {
     ResourceInfo[] listOfOResources = owlim.getDomain(this.repositoryID, uri
@@ -435,7 +469,8 @@ public class RDFPropertyImpl extends OResourceImpl implements RDFProperty {
   }
 
   public OURI getOURI() {
-    throw new UnsupportedOperationException("Not supported in this implementation");
+    throw new UnsupportedOperationException(
+            "Not supported in this implementation");
   }
 
 }
