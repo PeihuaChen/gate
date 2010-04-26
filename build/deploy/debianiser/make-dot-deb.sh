@@ -6,7 +6,7 @@
 unset CDPATH
 
 # some constants
-VERSION=`cat ../build/version.txt`-`cat ../build/build.txt`-0ubuntu1
+VERSION=`cat ../../version.txt`-`cat ../../build.txt`-0ubuntu1
 DEBFILE=gate-developer-${VERSION}_all.deb
 DEBELS=deb-elements
 SUMS=control/md5sums
@@ -18,7 +18,7 @@ CHANGELOG=usr/share/doc/gate-developer/changelog.Debian
 
 # the startup script
 sed 's,GATE_HOME=`dirname.*$,GATE_HOME=/usr/share/gate-developer,' \
-  ../bin/gate.sh >${STARTSCRIPT}
+  ../../../bin/gate.sh >${STARTSCRIPT}
 chmod 755 ${STARTSCRIPT}
 
 # the changelog
