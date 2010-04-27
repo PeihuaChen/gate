@@ -194,19 +194,17 @@ public class GazetteerEditor extends AbstractVisualResource
         listTableModel.setFilterText("");
         listFilterTextField.setText("");
         listTableModel.fireTableDataChanged();
-        int lastRow = listTableModel.getRowCount() - 1;
-        listTableModel.fireTableRowsInserted(lastRow, lastRow);
         // scroll and select the new row
         final int row = listTable.rowModelToView(listTable.getRowCount()-1);
         final int column = listTable.convertColumnIndexToView(0);
-        listTable.setRowSelectionInterval(row, row);
-        newEntryButton.setEnabled(false);
-        newEntryTextField.selectAll();
+        newEntryTextField.setText("");
         newEntryTextField.requestFocusInWindow();
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
             listTable.scrollRectToVisible(
               listTable.getCellRect(row, column, true));
+            listTable.setRowSelectionInterval(row, row);
+            listTable.setColumnSelectionInterval(column, column);
           }
         });
       }
@@ -302,7 +300,7 @@ public class GazetteerEditor extends AbstractVisualResource
     };
     listTable.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
     listTable.setRowSelectionAllowed(true);
-    listTable.setColumnSelectionAllowed(false);
+    listTable.setColumnSelectionAllowed(true);
     listTable.setEnableHidingColumns(true);
     listTable.setAutoResizeMode(XJTable.AUTO_RESIZE_OFF);
     listTable.setModel(listTableModel);

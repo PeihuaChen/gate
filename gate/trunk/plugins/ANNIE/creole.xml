@@ -647,7 +647,7 @@
       <NAME>Gazetteer Editor</NAME>
       <CLASS>gate.gui.GazetteerEditor</CLASS>
       <COMMENT>Gazetteer viewer and editor.</COMMENT>
-      <HELPURL>http://gate.ac.uk/userguide/sec:gazetteers:gaze</HELPURL>
+      <HELPURL>http://gate.ac.uk/userguide/sec:gazetteers:anniegazeditor</HELPURL>
       <GUI TYPE="large">
         <MAIN_VIEWER />
         <RESOURCE_DISPLAYED>
