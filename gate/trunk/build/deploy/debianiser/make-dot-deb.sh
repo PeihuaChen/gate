@@ -6,12 +6,14 @@
 unset CDPATH
 
 # some constants
+FARFARAWAY=../../../..
 VERSION=`cat ../../version.txt`-`cat ../../build.txt`-0ubuntu1
-DEBFILE=gate-developer-${VERSION}_all.deb
+DEBFILE=${FARFARAWAY}/gate-developer-${VERSION}_all.deb
 DEBELS=deb-elements
 SUMS=control/md5sums
 STARTSCRIPT=data/usr/bin/gate-developer
 CHANGELOG=usr/share/doc/gate-developer/changelog.Debian
+SHAREGATE=usr/share/gate
 
 # dump the previous one if it exists
 [ -f ${DEBFILE} ] && rm ${DEBFILE}
@@ -29,6 +31,18 @@ cd data
 cd ../control
 sed 's,^Version:.*$,Version: '${VERSION}',' control >$$
 mv $$ control
+
+# usr/share/gate
+cd ../../../..
+HERE=`pwd`
+cd `dirname ${HERE}`
+TARGET=gate/build/deploy/debianiser/data/${SHAREGATE}/
+mkdir -p ${TARGET}
+echo -n doing rsync -a --exclude=debianiser gate ${TARGET} from `pwd`...
+# TODO rsync -a --exclude=debianiser gate ${TARGET}
+rsync -a --exclude=debianiser --exclude=plugins gate ${TARGET}
+echo ...done
+cd gate/build/deploy/debianiser/control
 
 # the checksums
 >../${SUMS}
