@@ -284,16 +284,16 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         // switch measure options panel and measure list
         if (button.isSelected()) {
           selectedIndices = measureList.getSelectedIndices();
-          measureScrollPane.setViewportView(measureOptionsPanel);
+            measureScrollPane.setViewportView(measureOptionsPanel);
         } else {
           // update beta with new values
           String fscore = "F" + betaSpinner.getValue() + "-score ";
           String fscore2 = "F" + beta2Spinner.getValue() + "-score ";
-          measureList.setModel(new ExtendedListModel(new String[]{
-            fscore+"strict",fscore+"lenient", fscore+"average",
-            fscore2+"strict", fscore2+"lenient", fscore2+"average"}));
-          measureScrollPane.setViewportView(measureList);
-          measureList.setSelectedIndices(selectedIndices);
+            measureList.setModel(new ExtendedListModel(new String[]{
+              fscore+"strict",fscore+"lenient", fscore+"average",
+              fscore2+"strict", fscore2+"lenient", fscore2+"average"}));
+            measureScrollPane.setViewportView(measureList);
+            measureList.setSelectedIndices(selectedIndices);
           // save in GATE preferences
           String prefix = getClass().getEnclosingClass().getName() + '.';
           userConfig.put(prefix+"fscorebeta", betaSpinner.getValue());
@@ -1000,7 +1000,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         classificationMeasuresList.add(classificationMeasures);
         ArrayList<Object> values = new ArrayList<Object>();
         // fill the document table
-        values.add(document.getName());
+        values.add(documentNames.get(documentNames.size()-1));
         values.add(String.valueOf((int)
           classificationMeasures.getAgreedTrials()));
         values.add(String.valueOf((int)
@@ -1019,7 +1019,8 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         document2TableModel.addRow(values.toArray());
         // fill the confusion matrices table
         printConfusionMatrices(classificationMeasures, confusionTableModel,
-          confusionTableModel.getRowCount()-1, document.getName());
+          confusionTableModel.getRowCount()-1,
+          documentNames.get(documentNames.size()-1));
       }
       final int progressValue = row + 1;
       SwingUtilities.invokeLater(new Runnable(){ public void run(){
@@ -1036,8 +1037,13 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       for (int col = 1; col < document2TableModel.getColumnCount(); col++) {
         sum = 0;
         for (int row = 0; row < document2TableModel.getRowCount(); row++) {
-          sum += Float.parseFloat((String)
-            document2TableModel.getValueAt(row, col));
+          try {
+            sum += Float.parseFloat((String)
+              document2TableModel.getValueAt(row, col));
+          } catch(NumberFormatException e) {
+            sum = 0;
+            break;
+          }
         }
         values.add(f.format(sum / document2TableModel.getRowCount()));
       }
