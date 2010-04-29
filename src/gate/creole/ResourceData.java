@@ -336,10 +336,19 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
     */
   public boolean isValid() {
     boolean valid = true;
+    validityMessage = "";
 //******************************
 // here should check that the resource has all mandatory elements,
 // e.g. class name, and non-presence of runtime params on LRs and VRs etc.
 //******************************
+    if(getClassName() == null || getClassName().length() == 0){
+      validityMessage += "No class name provided for the resource!";
+      valid = false;
+    }
+    if(getName() == null || getName().length() == 0){
+      //no name provided.
+      setName(className.substring(className.lastIndexOf('.') + 1));
+    }
     return valid;
   } // isValid()
 
