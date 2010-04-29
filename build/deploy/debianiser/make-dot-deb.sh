@@ -19,7 +19,7 @@ SHAREGATE=usr/share/gate
 [ -f ${DEBFILE} ] && rm ${DEBFILE}
 
 # the startup script
-sed 's,GATE_HOME=`dirname.*$,GATE_HOME=/usr/share/gate-developer,' \
+sed 's,GATE_HOME=`dirname.*$,GATE_HOME=/usr/share/gate,' \
   ../../../bin/gate.sh >${STARTSCRIPT}
 chmod 755 ${STARTSCRIPT}
 
@@ -35,14 +35,13 @@ mv $$ control
 # usr/share/gate
 cd ../../../..
 HERE=`pwd`
-cd `dirname ${HERE}`
-TARGET=gate/build/deploy/debianiser/data/${SHAREGATE}/
+TARGET=build/deploy/debianiser/data/${SHAREGATE}/
 mkdir -p ${TARGET}
-echo -n doing rsync -a --exclude=debianiser gate ${TARGET} from `pwd`...
+echo -n doing rsync -a --exclude=build/deploy/debianiser --exclude=**/.svn --exclude=GATE.app --exclude=gate.exe --exclude=classes --exclude=DISTRIBUTION \* ${TARGET} from `pwd`
 # TODO rsync -a --exclude=debianiser gate ${TARGET}
-rsync -a --exclude=debianiser --exclude=plugins gate ${TARGET}
+rsync -a --exclude=build/deploy/debianiser --exclude=**/.svn --exclude=GATE.app --exclude=gate.exe --exclude=classes --exclude=DISTRIBUTION * ${TARGET}
 echo ...done
-cd gate/build/deploy/debianiser/control
+cd build/deploy/debianiser/control
 
 # the checksums
 >../${SUMS}
@@ -53,8 +52,8 @@ done
 cd ..
 
 # the control and data .tgzs and the .deb
-cd control && fakeroot tar czf ../${DEBELS}/control.tar.gz *
-cd ../data && fakeroot tar czf ../${DEBELS}/data.tar.gz *
+cd control && fakeroot tar -czf ../${DEBELS}/control.tar.gz --exclude=.svn *
+cd ../data && fakeroot tar -czf ../${DEBELS}/data.tar.gz --exclude=.svn *
 cd ../${DEBELS} && ar -cr ../${DEBFILE} debian-binary control.tar.gz data.tar.gz
 cd ..
 

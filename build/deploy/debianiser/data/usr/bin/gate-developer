@@ -12,7 +12,7 @@ while [ -h "$PRG" ] ; do
     PRG=`dirname "$PRG"`"/$link"
   fi
 done
-GATE_HOME=/usr/share/gate-developer
+GATE_HOME=/usr/share/gate
 # make it fully qualified
 # When CDPATH is set, the cd command prints out the dir name. Because of this
 # wee need to execute the cd command separately, and only then get the value
