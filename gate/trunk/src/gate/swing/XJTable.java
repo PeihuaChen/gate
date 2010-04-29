@@ -113,6 +113,7 @@ public class XJTable extends JTable{
       }
       
       int colCount = getColumnModel().getColumnCount();
+      if (colCount == 0) { return; }
       //recalculate the preferred sizes if anything changed 
       if(!componentSizedProperly){
         Dimension spacing = getIntercellSpacing();
