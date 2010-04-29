@@ -312,7 +312,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     }
     corpusToSearchIn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ie) {
-        updateAnnotationSetsList();
+        SwingUtilities.invokeLater(new Runnable() { public void run() {
+          updateAnnotationSetsList();
+        }});
       }
     });
     topPanel.add(corpusToSearchIn, gbc);
@@ -3746,12 +3748,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         allAnnotTypesAndFeaturesFromDatastore = searcher
                 .getAnnotationTypesMap();
 
-        // lets fire the update event on combobox
-        SwingUtilities.invokeLater(new Runnable() {
-          public void run() {
-            updateAnnotationSetsList();
-          }
-        });
+        SwingUtilities.invokeLater(new Runnable() { public void run() {
+          updateAnnotationSetsList();
+        }});
       }
       catch(SearchException e) {
         throw new GateRuntimeException(e);
@@ -3814,7 +3813,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     try {
       annotationSetIDsFromDataStore = searcher.getIndexedAnnotationSetNames();
       allAnnotTypesAndFeaturesFromDatastore = searcher.getAnnotationTypesMap();
-      updateAnnotationSetsList();
+      SwingUtilities.invokeLater(new Runnable() { public void run() {
+        updateAnnotationSetsList();
+      }});
 
     } catch(SearchException se) {
       throw new GateRuntimeException(se);
