@@ -6,6 +6,7 @@ import gate.FeatureMap;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
+import gate.util.Files;
 import gate.util.InvalidOffsetException;
 import gate.util.LuckyException;
 
@@ -170,7 +171,7 @@ public class KimGazetteer extends AbstractLanguageAnalyser {
 	}
 
 	public void setDictionaryPath(URL dictironaryPath) {
-		this.dictionaryPath = new File(dictironaryPath.getPath());
+		this.dictionaryPath = Files.fileFromURL(dictironaryPath);
 	} 
 
 	/**
