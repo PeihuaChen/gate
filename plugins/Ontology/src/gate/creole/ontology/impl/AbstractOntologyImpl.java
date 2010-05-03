@@ -1559,7 +1559,7 @@ public abstract class AbstractOntologyImpl
     //System.err.println("getOResourceByName called");
     //new GateOntologyException("NO USE").printStackTrace();
     List<OResource> resources = getOResourcesByName(resourceName);
-    if(resources != null) {
+    if(resources != null && !resources.isEmpty()) {
       if(resources.size() > 1) {
         System.err
           .print("Warning : there are more than one resources matching with the name "
