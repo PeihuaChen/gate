@@ -147,8 +147,13 @@ public class GroovySupport extends AbstractResource implements ActionsPublisher 
      */
     public Object getVariable(String name) {
       if("corpora".equals(name)) {
-        return Gate.getCreoleRegister()
-          .getLrInstances("gate.corpora.CorpusImpl");
+        try {
+          return Gate.getCreoleRegister().getAllInstances(
+            "gate.Corpus");
+        }
+        catch(GateException e) {
+          throw new GateRuntimeException(e);
+        }
       }
       else if("docs".equals(name)) {
         return Gate.getCreoleRegister()
