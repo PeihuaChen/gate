@@ -39,6 +39,7 @@ import gate.creole.ontology.DataType;
 import gate.creole.ontology.DatatypeProperty;
 import gate.creole.ontology.GateOntologyException;
 import gate.creole.ontology.HasValueRestriction;
+import gate.creole.ontology.InvalidURIException;
 import gate.creole.ontology.InvalidValueException;
 import gate.creole.ontology.Literal;
 import gate.creole.ontology.MaxCardinalityRestriction;
@@ -1506,19 +1507,24 @@ public abstract class AbstractOntologyImpl
   public OResource getOResourceFromMap(String uri) {
     // TODO: this tries to provide a replacement without the map for
     // backwards compatibility but this should really be dropped entirely!
-    OURI ouri = this.createOURI(uri);
-    List<OResource> toReturn = new ArrayList<OResource>();
-    OClass c = getOClass(ouri);
-    if(c != null) {
-      return c;
+    try {
+      OURI ouri = this.createOURI(uri);
+      List<OResource> toReturn = new ArrayList<OResource>();
+      OClass c = getOClass(ouri);
+      if(c != null) {
+        return c;
+      }
+      OInstance i = getOInstance(ouri);
+      if(i != null) {
+        return i;
+      }
+      RDFProperty r = getProperty(ouri);
+      if(r != null) {
+        return r;
+      }
     }
-    OInstance i = getOInstance(ouri);
-    if(i != null) {
-      return i;
-    }
-    RDFProperty r = getProperty(ouri);
-    if(r != null) {
-      return r;
+    catch(InvalidURIException iue) {
+      // do nothing, we will just return null
     }
     return null;
 
