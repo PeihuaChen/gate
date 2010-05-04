@@ -409,7 +409,7 @@ public class OResourceImpl implements OResource {
   }
 
   public ONodeID getONodeID() {
-    throw new UnsupportedOperationException("Not supported in this implementation");
+    return getURI();
   }
 
 }
