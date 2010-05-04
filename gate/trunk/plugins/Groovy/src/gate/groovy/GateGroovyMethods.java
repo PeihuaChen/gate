@@ -27,7 +27,7 @@ import gate.Resource;
 import gate.SimpleAnnotationSet;
 import gate.util.InvalidOffsetException;
 import groovy.lang.Closure;
-import groovy.lang.IntRange;
+import groovy.lang.Range;
 
 /**
  * Class containing static methods that will be mixed in to
@@ -123,28 +123,51 @@ public class GateGroovyMethods {
   
   /**
    * Sub-range access for annotation sets (mapping to getContained).
-   * Allows <code>someAnnotationSet[15..20]</code>
+   * Allows <code>someAnnotationSet[15..20]</code>.  This works with ranges
+   * whose end points are any numeric type, so as well as using integer
+   * literals you can do <code>someAnnotationSet[ann.start()..ann.end()]</code>
+   * (as start and end return Long).
    * @see AnnotationSet#getContained(Long, Long)
    */
-  public static AnnotationSet getAt(AnnotationSet self, IntRange range) {
-    return self.getContained(Long.valueOf(range.getFromInt()),
-            Long.valueOf(range.getToInt()));
+  public static AnnotationSet getAt(AnnotationSet self, Range range) {
+    if(range.getFrom() instanceof Number) {
+      return self.getContained(
+              Long.valueOf(((Number)range.getFrom()).longValue()),
+              Long.valueOf(((Number)range.getTo()).longValue()));
+    }
+    else if(range.getFrom() instanceof String) {
+      return getAt(self, (List<String>)range);
+    }
+    else {
+      throw new IllegalArgumentException(
+          "AnnotationSet.getAt expects a numeric or string range");
+    }
   }
   
   /**
    * Sub-range access for document content.  Allows
-   * <code>documentContent[15..20]</code>
+   * <code>documentContent[15..20]</code>.  This works with ranges
+   * whose end points are any numeric type, so as well as using integer
+   * literals you can do <code>documentContent[ann.start()..ann.end()]</code>
+   * (as start and end return Long).
    * @param self
    * @param range
    * @return
    */
-  public static DocumentContent getAt(DocumentContent self, IntRange range) {
-    try {
-      return self.getContent(Long.valueOf(range.getFromInt()),
-              Long.valueOf(range.getToInt()));
+  public static DocumentContent getAt(DocumentContent self, Range range) {
+    if(range.getFrom() instanceof Number) {
+      try {
+        return self.getContent(
+                Long.valueOf(((Number)range.getFrom()).longValue()),
+                Long.valueOf(((Number)range.getTo()).longValue()));
+      }
+      catch(InvalidOffsetException ioe) {
+        throw new IndexOutOfBoundsException(ioe.getMessage());
+      }
     }
-    catch(InvalidOffsetException ioe) {
-      throw new IndexOutOfBoundsException(ioe.getMessage());
+    else {
+      throw new IllegalArgumentException(
+          "DocumentContent.getAt expects a numeric range");
     }
   }
   
