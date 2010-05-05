@@ -165,8 +165,6 @@ public class GUISaveOptionsPane extends JPanel {
           new String[]{"OK", "Cancel"}, "OK");
       if (returnValue == JOptionPane.OK_OPTION) {
         String name = saveFileField.getText();
-        System.out.println("Running the action!");
-        System.out.println("File is: " + name);
         if ( // name.isEmpty() -- does not work with java 1.5
              name.length() == 0
            ) {
