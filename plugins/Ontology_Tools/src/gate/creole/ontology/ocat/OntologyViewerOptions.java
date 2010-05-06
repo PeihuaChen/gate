@@ -284,7 +284,8 @@ public class OntologyViewerOptions implements DocumentListener {
     childFeatureCB = new JCheckBox("Disable child feature");
     selectedTextAsPropertyValue =
       new JCheckBox("Selected Text As Property Value?");
-    propertyName = new JTextField("alias", 15);
+    propertyName = new JTextField(
+            "http://www.w3.org/2000/01/rdf-schema#label", 15);
     OntologyViewerOptionsActions ovoa = new OntologyViewerOptionsActions();
     
     deleteConfirmationCB = new JCheckBox("Enable confirm deletion");

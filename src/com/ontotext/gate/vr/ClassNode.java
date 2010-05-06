@@ -318,9 +318,12 @@ public class ClassNode
         if (sub.getSource() instanceof OInstance &&
             c.getOntology() instanceof Ontology){
           OInstance inst = (OInstance) sub.getSource();
-          Iterator<OClass> instClasses = inst.getOClasses(OConstants.DIRECT_CLOSURE).iterator();
-          while(instClasses.hasNext())
-            ((Ontology)c.getOntology()).addOInstance(inst.getURI(), instClasses.next());
+          if(!((Ontology)c.getOntology()).containsOInstance(inst.getOURI())) {
+            Iterator<OClass> instClasses = inst.getOClasses(OConstants.DIRECT_CLOSURE).iterator();
+            while(instClasses.hasNext()) {
+              ((Ontology)c.getOntology()).addOInstance(inst.getURI(), instClasses.next());
+            }
+          }
           
           children.add(sub);
         }
