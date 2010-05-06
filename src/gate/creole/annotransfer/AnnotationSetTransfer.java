@@ -14,6 +14,8 @@ package gate.creole.annotransfer;
 
 import gate.Annotation;
 import gate.AnnotationSet;
+import gate.Factory;
+import gate.FeatureMap;
 import gate.GateConstants;
 import gate.ProcessingResource;
 import gate.Resource;
@@ -159,17 +161,16 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
     for(Annotation annot : toTransfer) {
       Mapping m = mappings.get(annot.getType());
       
-      if(m == null || m.newName == null) {
-        to.add(annot);
-      } else {
-        // 
-        try {
-          to.add(annot.getStartNode().getOffset(), annot.getEndNode()
-                  .getOffset(), m.newName, annot.getFeatures());
-        } catch(InvalidOffsetException e) {
-          throw new ExecutionException(e);
-        }
-      }
+      String name = (m == null || m.newName == null ? annot.getType() : m.newName);
+      
+      try {
+        FeatureMap params = Factory.newFeatureMap();
+        params.putAll(annot.getFeatures());
+        to.add(annot.getId(),annot.getStartNode().getOffset(), annot.getEndNode()
+                .getOffset(), name, params);
+      } catch(InvalidOffsetException e) {
+        throw new ExecutionException(e);
+      }      
     }
   }
 
