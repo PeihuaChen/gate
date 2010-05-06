@@ -7,56 +7,78 @@
  */
 package gate.creole.ontology;
 
+import gate.util.GateRuntimeException;
+
 import java.util.HashMap;
 import java.util.Locale;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
+
 /**
- * This class provides a list of datatypes, supported by the ontology API.
+ * This class provides a list of datatypes, supported by the ontology
+ * API.
  * 
  * @author Niraj Aswani
  */
 public class DataType {
   /**
-   * for each datatype, there exists a XML Schema URI in ontology which is used
-   * to denote the specific datatype. For example to denote the boolean datatype
-   * one would have to use "http://www.w3.org/2001/XMLSchema#boolean".
+   * for each datatype, there exists a XML Schema URI in ontology which
+   * is used to denote the specific datatype. For example to denote the
+   * boolean datatype one would have to use
+   * "http://www.w3.org/2001/XMLSchema#boolean".
    * 
    */
-  //protected OURI xmlSchemaURI;
+  // protected OURI xmlSchemaURI;
   protected String xmlSchemaURIString;
+
+  static DatatypeFactory datatypeFactory = null;
+  static {
+    try {
+      datatypeFactory = DatatypeFactory.newInstance();
+    }
+    catch(DatatypeConfigurationException e) {
+      throw new GateRuntimeException(
+              "could not initialize data type factory :\n", e);
+    }
+  }
 
   /**
    * Constructor
    * 
-   * @param xmlSchemaURI
-   *          for each datatype, there exists a XML Schema URI in ontology which
-   *          is used to denote the specific datatype. For example to denote the
-   *          boolean datatype one would have to use
+   * @param xmlSchemaURI for each datatype, there exists a XML Schema
+   *          URI in ontology which is used to denote the specific
+   *          datatype. For example to denote the boolean datatype one
+   *          would have to use
    *          "http://www.w3.org/2001/XMLSchema#boolean".
    */
   public DataType(OURI xmlSchemaURI) {
-    //this.xmlSchemaURI = xmlSchemaURI;
+    // this.xmlSchemaURI = xmlSchemaURI;
     this.xmlSchemaURIString = xmlSchemaURI.toString();
   }
 
   public DataType(String xmlSchemaURIString) {
     this.xmlSchemaURIString = xmlSchemaURIString;
-    // TODO: make checks here, the schema URI really must be one of those
+    // TODO: make checks here, the schema URI really must be one of
+    // those
     // defined in the standard!
   }
 
   public boolean isStringDataType() {
-    return this.xmlSchemaURIString.equals("http://www.w3.org/2001/XMLSchema#string");
+    return this.xmlSchemaURIString
+            .equals("http://www.w3.org/2001/XMLSchema#string");
   }
-
 
   /**
    * denotes the "http://www.w3.org/2001/XMLSchema#boolean" datatype.
    */
   public static DataType getBooleanDataType() {
     try {
-      return new BooleanDT(new URI("http://www.w3.org/2001/XMLSchema#boolean", false));
-    } catch(InvalidURIException iue) {
+      return new BooleanDT(new URI("http://www.w3.org/2001/XMLSchema#boolean",
+              false));
+    }
+    catch(InvalidURIException iue) {
       return null;
     }
   }
@@ -67,7 +89,8 @@ public class DataType {
   public static DataType getByteDataType() {
     try {
       return new ByteDT(new URI("http://www.w3.org/2001/XMLSchema#byte", false));
-    } catch(InvalidURIException iue) {
+    }
+    catch(InvalidURIException iue) {
       return null;
     }
   }
@@ -77,8 +100,9 @@ public class DataType {
    */
   public static DataType getDateDataType() {
     try {
-      return new DataType(new URI("http://www.w3.org/2001/XMLSchema#date", false));
-    } catch(InvalidURIException iue) {
+      return new DateDT(new URI("http://www.w3.org/2001/XMLSchema#date", false));
+    }
+    catch(InvalidURIException iue) {
       return null;
     }
   }
@@ -88,9 +112,10 @@ public class DataType {
    */
   public static DataType getDecimalDataType() {
     try {
-      return new DoubleDT(new URI(
-              "http://www.w3.org/2001/XMLSchema#decimal", false));
-    } catch(InvalidURIException iue) {
+      return new DoubleDT(new URI("http://www.w3.org/2001/XMLSchema#decimal",
+              false));
+    }
+    catch(InvalidURIException iue) {
       return null;
     }
   }
@@ -100,9 +125,10 @@ public class DataType {
    */
   public static DataType getDoubleDataType() {
     try {
-      return new DoubleDT(
-              new URI("http://www.w3.org/2001/XMLSchema#double", false));
-    } catch(InvalidURIException iue) {
+      return new DoubleDT(new URI("http://www.w3.org/2001/XMLSchema#double",
+              false));
+    }
+    catch(InvalidURIException iue) {
       return null;
     }
   }
@@ -112,9 +138,10 @@ public class DataType {
    */
   public static DataType getDurationDataType() {
     try {
-      return new LongDT(
-              new URI("http://www.w3.org/2001/XMLSchema#duration", false));
-    } catch(InvalidURIException iue) {
+      return new LongDT(new URI("http://www.w3.org/2001/XMLSchema#duration",
+              false));
+    }
+    catch(InvalidURIException iue) {
       return null;
     }
   }
@@ -124,8 +151,10 @@ public class DataType {
    */
   public static DataType getFloatDataType() {
     try {
-      return new FloatDT(new URI("http://www.w3.org/2001/XMLSchema#float", false));
-    } catch(InvalidURIException iue) {
+      return new FloatDT(new URI("http://www.w3.org/2001/XMLSchema#float",
+              false));
+    }
+    catch(InvalidURIException iue) {
       return null;
     }
   }
@@ -135,8 +164,10 @@ public class DataType {
    */
   public static DataType getIntDataType() {
     try {
-      return new IntegerDT(new URI("http://www.w3.org/2001/XMLSchema#int", false));
-    } catch(InvalidURIException iue) {
+      return new IntegerDT(new URI("http://www.w3.org/2001/XMLSchema#int",
+              false));
+    }
+    catch(InvalidURIException iue) {
       return null;
     }
   }
@@ -146,9 +177,10 @@ public class DataType {
    */
   public static DataType getIntegerDataType() {
     try {
-      return new IntegerDT(new URI(
-              "http://www.w3.org/2001/XMLSchema#integer", false));
-    } catch(InvalidURIException iue) {
+      return new IntegerDT(new URI("http://www.w3.org/2001/XMLSchema#integer",
+              false));
+    }
+    catch(InvalidURIException iue) {
       return null;
     }
   }
@@ -159,55 +191,64 @@ public class DataType {
   public static DataType getLongDataType() {
     try {
       return new LongDT(new URI("http://www.w3.org/2001/XMLSchema#long", false));
-    } catch(InvalidURIException iue) {
+    }
+    catch(InvalidURIException iue) {
       return null;
     }
   }
 
   /**
-   * denotes the "http://www.w3.org/2001/XMLSchema#negativeInteger" datatype.
+   * denotes the "http://www.w3.org/2001/XMLSchema#negativeInteger"
+   * datatype.
    */
   public static DataType getNegativeIntegerDataType() {
     try {
       return new NegativeIntegerDT(new URI(
               "http://www.w3.org/2001/XMLSchema#negativeInteger", false));
-    } catch(InvalidURIException iue) {
+    }
+    catch(InvalidURIException iue) {
       return null;
     }
   }
 
   /**
-   * denotes the "http://www.w3.org/2001/XMLSchema#nonNegativeInteger" datatype.
+   * denotes the "http://www.w3.org/2001/XMLSchema#nonNegativeInteger"
+   * datatype.
    */
   public static DataType getNonNegativeIntegerDataType() {
     try {
       return new NonNegativeIntegerDT(new URI(
               "http://www.w3.org/2001/XMLSchema#nonNegativeInteger", false));
-    } catch(InvalidURIException iue) {
+    }
+    catch(InvalidURIException iue) {
       return null;
     }
   }
 
   /**
-   * denotes the "http://www.w3.org/2001/XMLSchema#nonPositiveInteger" datatype.
+   * denotes the "http://www.w3.org/2001/XMLSchema#nonPositiveInteger"
+   * datatype.
    */
   public static DataType getNonPositiveIntegerDataType() {
     try {
       return new NegativeIntegerDT(new URI(
               "http://www.w3.org/2001/XMLSchema#nonPositiveInteger", false));
-    } catch(InvalidURIException iue) {
+    }
+    catch(InvalidURIException iue) {
       return null;
     }
   }
 
   /**
-   * denotes the "http://www.w3.org/2001/XMLSchema#positiveInteger" datatype.
+   * denotes the "http://www.w3.org/2001/XMLSchema#positiveInteger"
+   * datatype.
    */
   public static DataType getPositiveIntegerDataType() {
     try {
       return new NonNegativeIntegerDT(new URI(
               "http://www.w3.org/2001/XMLSchema#positiveInteger", false));
-    } catch(InvalidURIException iue) {
+    }
+    catch(InvalidURIException iue) {
       return null;
     }
   }
@@ -217,8 +258,10 @@ public class DataType {
    */
   public static DataType getShortDataType() {
     try {
-      return new ShortDT(new URI("http://www.w3.org/2001/XMLSchema#short", false));
-    } catch(InvalidURIException iue) {
+      return new ShortDT(new URI("http://www.w3.org/2001/XMLSchema#short",
+              false));
+    }
+    catch(InvalidURIException iue) {
       return null;
     }
   }
@@ -228,9 +271,10 @@ public class DataType {
    */
   public static DataType getStringDataType() {
     try {
-      return new DataType(
-              new URI("http://www.w3.org/2001/XMLSchema#string", false));
-    } catch(InvalidURIException iue) {
+      return new DataType(new URI("http://www.w3.org/2001/XMLSchema#string",
+              false));
+    }
+    catch(InvalidURIException iue) {
       return null;
     }
   }
@@ -240,8 +284,9 @@ public class DataType {
    */
   public static DataType getTimeDataType() {
     try {
-      return new DataType(new URI("http://www.w3.org/2001/XMLSchema#time", false));
-    } catch(InvalidURIException iue) {
+      return new TimeDT(new URI("http://www.w3.org/2001/XMLSchema#time", false));
+    }
+    catch(InvalidURIException iue) {
       return null;
     }
   }
@@ -251,63 +296,73 @@ public class DataType {
    */
   public static DataType getDateTimeDataType() {
     try {
-      return new DataType(new URI("http://www.w3.org/2001/XMLSchema#dateTime", false));
-    } catch(InvalidURIException iue) {
+      return new DateTimeDT(new URI(
+              "http://www.w3.org/2001/XMLSchema#dateTime", false));
+    }
+    catch(InvalidURIException iue) {
       return null;
     }
   }
-  
+
   /**
-   * denotes the "http://www.w3.org/2001/XMLSchema#unsignedByte" datatype.
+   * denotes the "http://www.w3.org/2001/XMLSchema#unsignedByte"
+   * datatype.
    */
   public static DataType getUnsignedByteDataType() {
     try {
       return new UnsignedByteDT(new URI(
               "http://www.w3.org/2001/XMLSchema#unsignedByte", false));
-    } catch(InvalidURIException iue) {
+    }
+    catch(InvalidURIException iue) {
       return null;
     }
   }
 
   /**
-   * denotes the "http://www.w3.org/2001/XMLSchema#unsignedInt" datatype.
+   * denotes the "http://www.w3.org/2001/XMLSchema#unsignedInt"
+   * datatype.
    */
   public static DataType getUnsignedIntDataType() {
     try {
       return new NonNegativeIntegerDT(new URI(
               "http://www.w3.org/2001/XMLSchema#unsignedInt", false));
-    } catch(InvalidURIException iue) {
+    }
+    catch(InvalidURIException iue) {
       return null;
     }
   }
 
   /**
-   * denotes the "http://www.w3.org/2001/XMLSchema#unsignedLong" datatype.
+   * denotes the "http://www.w3.org/2001/XMLSchema#unsignedLong"
+   * datatype.
    */
   public static DataType getUnsignedLongDataType() {
     try {
       return new UnsignedLongDT(new URI(
               "http://www.w3.org/2001/XMLSchema#unsignedLong", false));
-    } catch(InvalidURIException iue) {
+    }
+    catch(InvalidURIException iue) {
       return null;
     }
   }
 
   /**
-   * denotes the "http://www.w3.org/2001/XMLSchema#unsignedShort" datatype.
+   * denotes the "http://www.w3.org/2001/XMLSchema#unsignedShort"
+   * datatype.
    */
   public static DataType getUnsignedShortDataType() {
     try {
       return new UnsignedShortDT(new URI(
               "http://www.w3.org/2001/XMLSchema#unsignedShort", false));
-    } catch(InvalidURIException iue) {
+    }
+    catch(InvalidURIException iue) {
       return null;
     }
   }
 
   @Deprecated
   public OURI getXmlSchemaURI() {
-    return new URI(xmlSchemaURIString,false);
+    return new URI(xmlSchemaURIString, false);
   }
 
   public String getXmlSchemaURIString() {
@@ -315,27 +370,29 @@ public class DataType {
   }
 
   /**
-   * Compares if the two objects are same, i.e. if their string representations
-   * are identical.
+   * Compares if the two objects are same, i.e. if their string
+   * representations are identical.
    */
   public boolean equals(Object o) {
     if(o instanceof DataType) {
       DataType dt = (DataType)o;
-      //return this.xmlSchemaURI.getNameSpace().equals(dt.xmlSchemaURI.getNameSpace()) &&
-      //        this.xmlSchemaURI.getResourceName().equals(dt.xmlSchemaURI.getResourceName());
+      // return
+      // this.xmlSchemaURI.getNameSpace().equals(dt.xmlSchemaURI.getNameSpace())
+      // &&
+      // this.xmlSchemaURI.getResourceName().equals(dt.xmlSchemaURI.getResourceName());
       return this.getXmlSchemaURIString().equals(dt.getXmlSchemaURIString());
     }
     return false;
   }
 
   /**
-   * Checks whether the provided value is a valid value for the datatype (e.g.
-   * if the datatype is integer, parsing a string value into integer causes the
-   * exception or not.
+   * Checks whether the provided value is a valid value for the datatype
+   * (e.g. if the datatype is integer, parsing a string value into
+   * integer causes the exception or not.
    * 
    * @param value
-   * @return true, if the provided value can be parsed correctly into the
-   *         datatype, otherwise - false.
+   * @return true, if the provided value can be parsed correctly into
+   *         the datatype, otherwise - false.
    */
   public boolean isValidValue(String value) {
     return true;
@@ -538,10 +595,11 @@ public class DataType {
     localsMap.put("zh", OConstants.CHINESE);
     localsMap.put("zu", OConstants.ZULU);
   }
+
   /**
    * Gets the respective datatype for the given datatype URI. If the URI
    * is invalid, the method returns null.
-   *
+   * 
    * @param datatypeURI
    * @return
    */
@@ -552,7 +610,7 @@ public class DataType {
   /**
    * Gets the respective locale for the given 2 character language code.
    * If the code doesn't match, the method returns null.
-   *
+   * 
    * @param languageCode
    * @return
    */
@@ -561,15 +619,11 @@ public class DataType {
     return localsMap.get(languageCode.toLowerCase());
   }
 
-
-
 }
 
-
-
-
 /**
- * Boolean DataType 
+ * Boolean DataType
+ * 
  * @author niraj
  */
 class BooleanDT extends DataType {
@@ -582,9 +636,11 @@ class BooleanDT extends DataType {
    */
   public boolean isValidValue(String value) {
     try {
-      if((Boolean.parseBoolean(value)+"").equalsIgnoreCase(value)) return true;
+      if((Boolean.parseBoolean(value) + "").equalsIgnoreCase(value))
+        return true;
       return false;
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       return false;
     }
   }
@@ -592,8 +648,9 @@ class BooleanDT extends DataType {
 
 /**
  * Byte DataType
+ * 
  * @author niraj
- *
+ * 
  */
 class ByteDT extends DataType {
   public ByteDT(URI xmlSchemaURI) {
@@ -605,9 +662,11 @@ class ByteDT extends DataType {
    */
   public boolean isValidValue(String value) {
     try {
-      if((Byte.parseByte(value)+"").equalsIgnoreCase(value)) return true;;
+      if((Byte.parseByte(value) + "").equalsIgnoreCase(value)) return true;
+      ;
       return false;
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       return false;
     }
   }
@@ -615,8 +674,9 @@ class ByteDT extends DataType {
 
 /**
  * Double Datatype
+ * 
  * @author niraj
- *
+ * 
  */
 class DoubleDT extends DataType {
   public DoubleDT(URI xmlSchemaURI) {
@@ -630,7 +690,72 @@ class DoubleDT extends DataType {
     try {
       Double.parseDouble(value);
       return true;
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
+      return false;
+    }
+  }
+}
+
+class DateDT extends DataType {
+  public DateDT(URI xmlSchemaURI) {
+    super(xmlSchemaURI);
+  }
+
+  /**
+   * Methods check if the value is valid for the datatype
+   */
+  public boolean isValidValue(String value) {
+    try {
+      XMLGregorianCalendar cal = datatypeFactory.newXMLGregorianCalendar(value);
+      String schema = cal.getXMLSchemaType().getNamespaceURI() + "#"
+              + cal.getXMLSchemaType().getLocalPart();
+      return schema.equals(getXmlSchemaURIString());
+    }
+    catch(Exception e) {
+      return false;
+    }
+  }
+}
+
+class DateTimeDT extends DataType {
+  public DateTimeDT(URI xmlSchemaURI) {
+    super(xmlSchemaURI);
+  }
+
+  /**
+   * Methods check if the value is valid for the datatype
+   */
+  public boolean isValidValue(String value) {
+    try {
+      XMLGregorianCalendar cal = datatypeFactory.newXMLGregorianCalendar(value);
+      String schema = cal.getXMLSchemaType().getNamespaceURI() + "#"
+              + cal.getXMLSchemaType().getLocalPart();
+      return schema.equals(getXmlSchemaURIString());
+    }
+    catch(Exception e) {
+      e.printStackTrace();
+      return false;
+    }
+  }
+}
+
+class TimeDT extends DataType {
+  public TimeDT(URI xmlSchemaURI) {
+    super(xmlSchemaURI);
+  }
+
+  /**
+   * Methods check if the value is valid for the datatype
+   */
+  public boolean isValidValue(String value) {
+    try {
+      XMLGregorianCalendar cal = datatypeFactory.newXMLGregorianCalendar(value);
+      String schema = cal.getXMLSchemaType().getNamespaceURI() + "#"
+              + cal.getXMLSchemaType().getLocalPart();
+      return schema.equals(getXmlSchemaURIString());
+    }
+    catch(Exception e) {
       return false;
     }
   }
@@ -638,8 +763,9 @@ class DoubleDT extends DataType {
 
 /**
  * Long Datatype
+ * 
  * @author niraj
- *
+ * 
  */
 class LongDT extends DataType {
   public LongDT(URI xmlSchemaURI) {
@@ -651,9 +777,11 @@ class LongDT extends DataType {
    */
   public boolean isValidValue(String value) {
     try {
-      if((Long.parseLong(value)+"").equalsIgnoreCase(value)) return true;;
+      if((Long.parseLong(value) + "").equalsIgnoreCase(value)) return true;
+      ;
       return false;
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       return false;
     }
   }
@@ -661,8 +789,9 @@ class LongDT extends DataType {
 
 /**
  * Float Datatype
+ * 
  * @author niraj
- *
+ * 
  */
 class FloatDT extends DataType {
   public FloatDT(URI xmlSchemaURI) {
@@ -676,7 +805,8 @@ class FloatDT extends DataType {
     try {
       Float.parseFloat(value);
       return true;
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       return false;
     }
   }
@@ -684,8 +814,9 @@ class FloatDT extends DataType {
 
 /**
  * Integer Datatype
+ * 
  * @author niraj
- *
+ * 
  */
 class IntegerDT extends DataType {
   public IntegerDT(URI xmlSchemaURI) {
@@ -697,9 +828,11 @@ class IntegerDT extends DataType {
    */
   public boolean isValidValue(String value) {
     try {
-      if((Integer.parseInt(value)+"").equalsIgnoreCase(value)) return true;;
+      if((Integer.parseInt(value) + "").equalsIgnoreCase(value)) return true;
+      ;
       return false;
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       return false;
     }
   }
@@ -707,8 +840,9 @@ class IntegerDT extends DataType {
 
 /**
  * Negative Integer Datatype
+ * 
  * @author niraj
- *
+ * 
  */
 class NegativeIntegerDT extends DataType {
   public NegativeIntegerDT(URI xmlSchemaURI) {
@@ -721,9 +855,10 @@ class NegativeIntegerDT extends DataType {
   public boolean isValidValue(String value) {
     try {
       int intVal = Integer.parseInt(value);
-      if(!(intVal+"").equalsIgnoreCase(value)) return false;
+      if(!(intVal + "").equalsIgnoreCase(value)) return false;
       return intVal < 0;
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       return false;
     }
   }
@@ -731,8 +866,9 @@ class NegativeIntegerDT extends DataType {
 
 /**
  * NonNegativeInteger Datatype
+ * 
  * @author niraj
- *
+ * 
  */
 class NonNegativeIntegerDT extends DataType {
   public NonNegativeIntegerDT(URI xmlSchemaURI) {
@@ -745,9 +881,10 @@ class NonNegativeIntegerDT extends DataType {
   public boolean isValidValue(String value) {
     try {
       int intVal = Integer.parseInt(value);
-      if(!(intVal+"").equalsIgnoreCase(value)) return false;
+      if(!(intVal + "").equalsIgnoreCase(value)) return false;
       return intVal > -1;
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       return false;
     }
   }
@@ -755,8 +892,9 @@ class NonNegativeIntegerDT extends DataType {
 
 /**
  * Short Datatype
+ * 
  * @author niraj
- *
+ * 
  */
 class ShortDT extends DataType {
   public ShortDT(URI xmlSchemaURI) {
@@ -769,9 +907,10 @@ class ShortDT extends DataType {
   public boolean isValidValue(String value) {
     try {
       short intVal = Short.parseShort(value);
-      if(!(intVal+"").equalsIgnoreCase(value)) return false;
+      if(!(intVal + "").equalsIgnoreCase(value)) return false;
       return true;
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       return false;
     }
   }
@@ -779,8 +918,9 @@ class ShortDT extends DataType {
 
 /**
  * UnsignedByte Datatype
+ * 
  * @author niraj
- *
+ * 
  */
 class UnsignedByteDT extends DataType {
   public UnsignedByteDT(URI xmlSchemaURI) {
@@ -793,9 +933,10 @@ class UnsignedByteDT extends DataType {
   public boolean isValidValue(String value) {
     try {
       byte byteVal = Byte.parseByte(value);
-      if(!(byteVal+"").equalsIgnoreCase(value)) return false;
+      if(!(byteVal + "").equalsIgnoreCase(value)) return false;
       return byteVal > -1;
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       return false;
     }
   }
@@ -803,8 +944,9 @@ class UnsignedByteDT extends DataType {
 
 /**
  * UnsignedLong Datatype
+ * 
  * @author niraj
- *
+ * 
  */
 class UnsignedLongDT extends DataType {
   public UnsignedLongDT(URI xmlSchemaURI) {
@@ -817,19 +959,20 @@ class UnsignedLongDT extends DataType {
   public boolean isValidValue(String value) {
     try {
       long longVal = Long.parseLong(value);
-      if(!(longVal+"").equalsIgnoreCase(value)) return false;
+      if(!(longVal + "").equalsIgnoreCase(value)) return false;
       return longVal > -1;
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       return false;
     }
   }
 }
 
-
 /**
  * UnsignedShort Datatype
+ * 
  * @author niraj
- *
+ * 
  */
 class UnsignedShortDT extends DataType {
   public UnsignedShortDT(URI xmlSchemaURI) {
@@ -842,13 +985,12 @@ class UnsignedShortDT extends DataType {
   public boolean isValidValue(String value) {
     try {
       short shortVal = Short.parseShort(value);
-      if(!(shortVal+"").equalsIgnoreCase(value)) return false;
+      if(!(shortVal + "").equalsIgnoreCase(value)) return false;
       return shortVal > -1;
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       return false;
     }
   }
-
-
 
 }
