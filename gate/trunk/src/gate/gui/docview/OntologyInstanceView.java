@@ -30,8 +30,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import java.awt.*;
@@ -59,7 +57,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
     instanceSet = new HashSet<OInstance>();
     propertiesSet = new HashSet<ObjectProperty>();
     propertiesNotSet = new HashSet<ObjectProperty>();
-    propertyClassesMap = new HashMap<String, Set<OClass>>();
+    classByPropertyMap = new HashMap<String, Set<OClass>>();
   }
 
   protected void initGUI() {
@@ -99,30 +97,11 @@ public class OntologyInstanceView extends AbstractDocumentView {
     addLabelButton.setEnabled(false);
     addLabelButton.setToolTipText(
       "Add label from selection to the selected instance");
-    newInstanceButton.setMnemonic(KeyEvent.VK_A);
+    addLabelButton.setMnemonic(KeyEvent.VK_A);
     filterButtonsPanel.add(addLabelButton);
     filterPanel.add(filterButtonsPanel, gbc);
 
     mainPanel.add(filterPanel, BorderLayout.NORTH);
-
-    DefaultTableCellRenderer fullWidthRenderer =
-        new DefaultTableCellRenderer() {
-      @Override
-      public Dimension getMaximumSize() {
-        // we don't mind being extended horizontally
-        Dimension dim = super.getMaximumSize();
-        if(dim != null){
-          dim.width = Integer.MAX_VALUE;
-          setMaximumSize(dim);
-        }
-        return dim;
-      }
-      @Override
-      public Dimension getMinimumSize() {
-        // we don't like being squashed!
-        return getPreferredSize();
-      }
-    };
 
     // tables at the bottom
     JPanel tablesPanel = new JPanel(new GridLayout(1, 2));
@@ -131,8 +110,6 @@ public class OntologyInstanceView extends AbstractDocumentView {
         return false;
       }
     };
-    // create a renderer that doesn't mind being extended horizontally.
-    instanceTable.setDefaultRenderer(Object.class, fullWidthRenderer);
     DefaultTableModel model = new DefaultTableModel();
     model.addColumn("Instance");
     model.addColumn("Label");
@@ -144,8 +121,6 @@ public class OntologyInstanceView extends AbstractDocumentView {
         return convertColumnIndexToModel(column) == 1;
       }
     };
-    // create a renderer that doesn't mind being extended horizontally.
-    propertyTable.setDefaultRenderer(Object.class, fullWidthRenderer);
     model = new DefaultTableModel();
     model.addColumn("Property");
     model.addColumn("Value");
@@ -233,14 +208,14 @@ public class OntologyInstanceView extends AbstractDocumentView {
                           document.getAnnotations(classView.getSelectedSet());
                         for (Annotation annotation :
                           annotationSet.get("Mention")) {
-                          if (annotation.getFeatures().containsKey("ontology")
-                          && annotation.getFeatures().get("ontology")
+                          if (annotation.getFeatures().containsKey(ONTOLOGY)
+                          && annotation.getFeatures().get(ONTOLOGY)
                             .equals(selectedOntology.getOntologyURI())
-                          && annotation.getFeatures().containsKey("class")
-                          && annotation.getFeatures().get("class")
+                          && annotation.getFeatures().containsKey(CLASS)
+                          && annotation.getFeatures().get(CLASS)
                             .equals(selectedClass.getONodeID().toString())
-                          && annotation.getFeatures().containsKey("inst")
-                          && annotation.getFeatures().get("inst")
+                          && annotation.getFeatures().containsKey(INSTANCE)
+                          && annotation.getFeatures().get(INSTANCE)
                             .equals(oInstance.getONodeID().toString())) {
                             // delete the annotation
                             annotationSet.remove(annotation);
@@ -379,7 +354,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
   public void updateInstanceTable(OClass selectedClass) {
     this.selectedClass = selectedClass;
     instanceSet.clear();
-    DefaultTableModel tableModel = new DefaultTableModel();
+    final DefaultTableModel tableModel = new DefaultTableModel();
     tableModel.addColumn("Instance");
     tableModel.addColumn("Label");
     if (selectedClass != null) {
@@ -414,9 +389,8 @@ public class OntologyInstanceView extends AbstractDocumentView {
         }
       }
     }
-    instanceTable.setModel(tableModel);
     SwingUtilities.invokeLater(new Runnable() { public void run() {
-      ((AbstractTableModel) instanceTable.getModel()).fireTableDataChanged();
+      instanceTable.setModel(tableModel);
       if (instanceTable.getRowCount() > 0) {
         instanceTable.setRowSelectionInterval(0, 0);
       }
@@ -425,7 +399,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
 
   public void updatePropertyTable() {
     selectedInstance = null;
-    DefaultTableModel tableModel = new DefaultTableModel();
+    final DefaultTableModel tableModel = new DefaultTableModel();
     tableModel.addColumn("Property");
     tableModel.addColumn("Value");
     if (instanceTable.getSelectedRow() != -1) {
@@ -456,7 +430,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
                 if (ranges.isEmpty()) {
                   ranges.add("All classes");
                 }
-                propertyClassesMap.put(property.getName(), rangeClasses);
+                classByPropertyMap.put(property.getName(), rangeClasses);
                 tableModel.addRow(new Object[]{property.getName(),
                   Strings.toString(ranges)});
               }
@@ -476,11 +450,10 @@ public class OntologyInstanceView extends AbstractDocumentView {
         }
       }
     }
-    propertyTable.setModel(tableModel);
     SwingUtilities.invokeLater(new Runnable() { public void run() {
+      propertyTable.setModel(tableModel);
       propertyTable.getColumnModel().getColumn(1)
         .setCellEditor(new PropertyValueCellEditor());
-      ((AbstractTableModel) propertyTable.getModel()).fireTableDataChanged();
     }});
   }
 
@@ -501,6 +474,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
         this.putValue(SHORT_DESCRIPTION, newInstanceButton.getToolTipText()); }
       public void actionPerformed(ActionEvent e) {
         createFromSelection(selectedSet, selectedText, start, end, true);
+        filterTextField.setText("");
       }
     });
     newInstanceButton.setEnabled(true);
@@ -510,6 +484,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
         this.putValue(SHORT_DESCRIPTION, addLabelButton.getToolTipText()); }
       public void actionPerformed(ActionEvent e) {
         createFromSelection(selectedSet, selectedText, start, end, false);
+        filterTextField.setText("");
       }
     });
     filterTextField.setText(selectedText);
@@ -531,7 +506,6 @@ public class OntologyInstanceView extends AbstractDocumentView {
                                      int start, int end, boolean newInstance) {
     newInstanceButton.setEnabled(false);
     addLabelButton.setEnabled(false);
-    selectedText = selectedText.replaceAll(" ", "_");
     AnnotationProperty annotationProperty;
     RDFProperty property = selectedOntology.getProperty(
       selectedOntology.createOURIForName("label"));
@@ -549,10 +523,14 @@ public class OntologyInstanceView extends AbstractDocumentView {
     }
     OInstance instance = selectedInstance;
     if (newInstance) {
+      OURI instanceOURI = selectedOntology.createOURIForName(selectedText);
+      for (int i = 0; selectedOntology.containsOInstance(instanceOURI)
+          && i < Integer.MAX_VALUE; i++) {
+        // instance name already existing so suffix with a number
+        instanceOURI = selectedOntology.createOURIForName(selectedText+'_'+i);
+      }
       // create a new instance from the text selected
-      instance = selectedOntology.addOInstance(
-        selectedOntology.createOURIForName(selectedText),
-        selectedClass);
+      instance = selectedOntology.addOInstance(instanceOURI, selectedClass);
     }
     // add a property 'label' with the selected text as value
     instance.addAnnotationPropertyValue(annotationProperty,
@@ -561,9 +539,9 @@ public class OntologyInstanceView extends AbstractDocumentView {
     Integer id;
     try {
       features = Factory.newFeatureMap();
-      features.put("ontology", selectedOntology.getOntologyURI());
-      features.put("class", selectedClass.getONodeID().toString());
-      features.put("inst", instance.getONodeID().toString());
+      features.put(ONTOLOGY, selectedOntology.getOntologyURI());
+      features.put(CLASS, selectedClass.getONodeID().toString());
+      features.put(INSTANCE, instance.getONodeID().toString());
       // create a new annotation from the text selected
       id = set.add((long) start, (long) end, "Mention", features);
     } catch(InvalidOffsetException e) {
@@ -595,7 +573,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
         boolean isSelected, int row, int column) {
       oldValue = (String) value;
       TreeSet<String> ts = new TreeSet<String>(comparator);
-      Set<OClass> classes = propertyClassesMap.get((String)
+      Set<OClass> classes = classByPropertyMap.get((String)
         propertyTable.getModel().getValueAt(row, 0));
       if (classes.isEmpty()) { classes = selectedOntology.getOClasses(false); }
       for (OClass oClass : classes) {
@@ -696,5 +674,11 @@ public class OntologyInstanceView extends AbstractDocumentView {
   protected Set<OInstance> instanceSet;
   protected Set<ObjectProperty> propertiesSet;
   protected Set<ObjectProperty> propertiesNotSet;
-  protected Map<String, Set<OClass>> propertyClassesMap;
+  protected Map<String, Set<OClass>> classByPropertyMap;
+  protected static final String ONTOLOGY =
+    gate.creole.ANNIEConstants.LOOKUP_ONTOLOGY_FEATURE_NAME;
+  protected static final String CLASS =
+    gate.creole.ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME;
+  protected static final String INSTANCE =
+    gate.creole.ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME;
 }
