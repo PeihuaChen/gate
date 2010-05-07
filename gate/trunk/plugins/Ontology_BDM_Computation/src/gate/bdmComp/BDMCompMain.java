@@ -1,10 +1,17 @@
-/*
- *  BDMCompMain.java
- * 
+/**
+ *  Copyright (c) 1995-2010, The University of Sheffield. See the file
+ *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
  *  Yaoyong Li 15/03/2009
  *
  *  $Id: IaaMain.java, v 1.0 2009-03-15 12:58:16 +0000 yaoyong $
  */
+
 package gate.bdmComp;
 
 import java.io.BufferedWriter;
@@ -31,6 +38,11 @@ import gate.creole.ResourceInstantiationException;
 import gate.creole.ontology.OClass;
 import gate.creole.ontology.Ontology;
 
+/**
+ * TODO: the output file is always growing for each run of the PR
+ * it's like if the local variables are not reset for each run so it
+ * reuses the previous results plus the new
+ */
 public class BDMCompMain extends AbstractLanguageAnalyser implements
 ProcessingResource {
   /** File name or URL storing the ontology. */
@@ -320,9 +332,8 @@ ProcessingResource {
       }
       if(isExistingResultFile) {
         bdmResultsWriter.flush();
-        bdmResultsWriter.close();
       }
-      
+
 	  }
     catch(UnsupportedEncodingException e1) {
       e1.printStackTrace();
@@ -335,6 +346,18 @@ ProcessingResource {
     }
     catch(IOException e) {
       e.printStackTrace();
+    }
+    finally { // in any case
+      if(isExistingResultFile) {
+        try {
+          // close the output file
+          bdmResultsWriter.close();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+      // unload the ontology
+      Factory.deleteResource(ontologyUsed);
     }
       
 	  

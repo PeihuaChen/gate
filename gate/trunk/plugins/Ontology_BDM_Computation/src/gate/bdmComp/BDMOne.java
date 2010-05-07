@@ -1,3 +1,17 @@
+/**
+ *  Copyright (c) 1995-2010, The University of Sheffield. See the file
+ *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  Yaoyong Li 15/03/2009
+ *
+ *  $Id$
+ */
+
 package gate.bdmComp;
 
 import gate.creole.ontology.OClass;
@@ -46,10 +60,11 @@ public class BDMOne {
   }
   public String printResult() {
     String text = "";
-    text += "key="+con11+", response="+con22+", ";
+    text += "key="+con11.getONodeID().toString()+", ";
+    text += "response="+con22.getONodeID().toString()+", ";
     text += "bdm="+bdmScore +", "; 
     //text += "("+con11.getName()+","+con22.getName()+"), ";
-    if(msca != null) text += "msca="+msca.getName()+", ";
+    if(msca != null) text += "msca="+msca.getONodeID().toString()+", ";
     else text +=" no MSCA! ";
     text += "cp="+cp+", dpk="+dpk+", dpr="+dpr+", ";
     text += "n0="+n0+", n1="+n1+", n2="+n2+", bran="+bran;
