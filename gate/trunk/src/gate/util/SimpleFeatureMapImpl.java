@@ -174,7 +174,7 @@ public class SimpleFeatureMapImpl
               Out.prln("\nisSubClassOf: " + subClass.isSubClassOf(superClass, OConstants.TRANSITIVE_CLOSURE));
             }
 
-            return subClass == superClass || 
+            return subClass.equals(superClass) || 
                 subClass.isSubClassOf(superClass, 
                         OConstants.TRANSITIVE_CLOSURE);
           } catch (Exception ex) {
