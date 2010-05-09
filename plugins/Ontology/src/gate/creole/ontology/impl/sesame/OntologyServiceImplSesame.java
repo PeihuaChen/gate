@@ -67,6 +67,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 
 
 import org.apache.commons.io.FileUtils;
@@ -74,6 +75,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
+import org.openrdf.model.Namespace;
 import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.query.MalformedQueryException;
@@ -258,6 +260,26 @@ public class OntologyServiceImplSesame implements OntologyService {
 
   // *************** IMPORT / EXPORT *******************************************
 
+  // TODO: Sesame does not support getting the base uri or default namespace
+  // as of version 2.3.1 so we have no chance to figure those out ...
+  // This was for debugging ...
+  /*
+  private void handleBaseURIafterLoad() {
+    String baseURI = null;
+    try {
+      baseURI = repositoryConnection.getNamespace("rdf");
+      RepositoryResult<Namespace> nss = repositoryConnection.getNamespaces();
+      for(Namespace ns : nss.asList()) {
+        System.out.println("Have namespace: "+ns.getPrefix()+"="+ns.getName());
+      }
+    } catch (RepositoryException ex) {
+      System.err.println("Error when trying to get base uri after loading: "+ex);
+    }
+    System.out.println("baseURI after loading: "+baseURI);
+  }
+   * 
+   */
+
   public void readOntologyData(File selectedFile, String baseURI,
       OntologyFormat ontologyFormat, boolean asImport) {
     org.openrdf.model.URI contextURI;
@@ -274,7 +296,9 @@ public class OntologyServiceImplSesame implements OntologyService {
           "Could not load/import ontology data from file " +
           selectedFile.getAbsolutePath(), ex);
     }
+    //handleBaseURIafterLoad();
   }
+
   public void readOntologyData(InputStream is, String baseURI,
       OntologyFormat ontologyFormat, boolean asImport) {
     org.openrdf.model.URI contextURI;
@@ -290,6 +314,7 @@ public class OntologyServiceImplSesame implements OntologyService {
       throw new GateOntologyException(
           "Could not load/import ontology data from input stream ", ex);
     }
+    //handleBaseURIafterLoad();
   }
   public void readOntologyData(Reader ir, String baseURI,
       OntologyFormat ontologyFormat, boolean asImport) {
@@ -306,6 +331,7 @@ public class OntologyServiceImplSesame implements OntologyService {
       throw new GateOntologyException(
           "Could not load/import ontology data from reader ", ex);
     }
+    //handleBaseURIafterLoad();
   }
 
   public void writeOntologyData(Writer out, OntologyFormat ontologyFormat,
@@ -667,7 +693,7 @@ public class OntologyServiceImplSesame implements OntologyService {
     Set<OClass> classes = new HashSet<OClass>();
 
     UtilTupleQueryIterator q;
-    String qs = qs_getClassesByNameNoW3.replaceAll("yyy1", "\""+name+"\"");
+    String qs = qs_getClassesByNameNoW3.replaceAll("yyy1", "\"[/#]"+name+"\\$\"");
     q = new UtilTupleQueryIterator(
             repositoryConnection, qs, ql_getClassesByNameNoW3);
       while (q.hasNext()) {
@@ -2578,10 +2604,41 @@ public class OntologyServiceImplSesame implements OntologyService {
 
   public Set<RDFProperty> getPropertiesByName(String name) {
     Set<RDFProperty> properties = new HashSet<RDFProperty>();
-    // TODOD: !!!!!!
-    // TODO: get all rdf properties, object properties, symmetric properties
-    // etc where the URI fragment identifier matches the name
-    return properties;
+    // TODO: filter out system properties
+    // TODO: should this include rdf properties (filter out even more sys props)
+    //       and annotation properties?
+    String queryd =
+        "Select distinct X from {X} rdf:type {T} " +
+        "  WHERE T = <" +OWL.DATATYPEPROPERTY +"> AND "+
+        "       ( X LIKE yyy1 OR X LIKE yyy2 )";
+    String queryo =
+        "Select distinct X from {X} rdf:type {T} " +
+        "  WHERE  T = <" +OWL.OBJECTPROPERTY +"> AND "+
+        "       ( X LIKE yyy1 OR X LIKE yyy2 ) ";
+    queryd = queryd.replaceAll("yyy1", "\"*#"+name+"\"");
+    queryd = queryd.replaceAll("yyy2", "\"*/"+name+"\"");
+    queryo = queryo.replaceAll("yyy1", "\"*#"+name+"\"");
+    queryo = queryo.replaceAll("yyy2", "\"*/"+name+"\"");
+    UtilTupleQueryIterator q = new UtilTupleQueryIterator(repositoryConnection,
+        queryo,OConstants.QueryLanguage.SERQL);
+    while(q.hasNext()) {
+      Value v = q.nextFirstAsValue();
+      properties.add (
+              Utils.createOProperty(ontology,
+                this, v.toString(),OConstants.OBJECT_PROPERTY)
+              );
+    }
+    q = new UtilTupleQueryIterator(repositoryConnection,
+        queryd,OConstants.QueryLanguage.SERQL);
+    while(q.hasNext()) {
+      Value v = q.nextFirstAsValue();
+      properties.add (
+              Utils.createOProperty(ontology,
+                this, v.toString(),OConstants.DATATYPE_PROPERTY)
+              );
+    }
+
+   return properties;
   }
 
   /**
@@ -3038,8 +3095,12 @@ public class OntologyServiceImplSesame implements OntologyService {
   public Set<OInstance> getInstancesByName(String name) {
     Set<OInstance> instances = new HashSet<OInstance>();
     String query =
-        "Select distinct X from {X} rdf:type {Y} rdf:type {<http://www.w3.org/2002/07/owl#Class>} WHERE Y != <http://www.w3.org/2002/07/owl#Thing> AND X LIKE yyy1 ";
-    query = query.replaceAll("yyy1", "\"*"+name+"\"");
+        "Select distinct X from {X} rdf:type {Y} " +
+        "  rdf:type {<http://www.w3.org/2002/07/owl#Class>} " +
+        "WHERE Y != <http://www.w3.org/2002/07/owl#Thing> AND " +
+        "  ( X LIKE yyy1 OR X LIKE yyy2 )";
+    query = query.replaceAll("yyy1", "\"*#"+name+"\"");
+    query = query.replaceAll("yyy2", "\"*/"+name+"\"");
     //System.out.println("Query for instances: "+query);
     UtilTupleQueryIterator q = new UtilTupleQueryIterator(repositoryConnection,
         query,OConstants.QueryLanguage.SERQL);
@@ -4161,6 +4222,22 @@ public class OntologyServiceImplSesame implements OntologyService {
         break;
       default:
         throw new GateOntologyException("Unsupported ontology format: " + ontologyFormat);
+    }
+    // TODO: the following code for now sets the default name space declaration
+    //   to what we have stored to be the current default name space
+    //   This is fairly useless for GATE when reloading the file though,
+    //   since Sesame does not let us to get the value of the declaration
+    //   after loading ...
+    if(ontology.getDefaultNameSpace() != null) {
+      //System.out.println("Trying to set base URI on writing to "+ontology.getDefaultNameSpace());
+      try {
+        writer.handleNamespace("", ontology.getDefaultNameSpace());
+      } catch(org.openrdf.rio.RDFHandlerException ex) {
+        throw new GateOntologyException("Could not set default namespace for export "+ex);
+      }
+    } else {
+      //System.out.println("Default namespace is not set!");
+      logger.debug("No default namespace set when writing ontology");
     }
     return writer;
   }

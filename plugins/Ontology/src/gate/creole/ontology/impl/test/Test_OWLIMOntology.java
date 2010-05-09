@@ -21,6 +21,7 @@ import gate.FeatureMap;
 import gate.Gate;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.ontology.OConstants.Closure;
+import gate.creole.ontology.impl.AbstractOntologyImpl;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -279,7 +280,7 @@ public class Test_OWLIMOntology extends TestCase {
     System.out.println("Starting to expand all classes ... ");
     List<ONodeID> allIDs = new ArrayList<ONodeID>();
     expandAllClasses(classes, allIDs, 0);
-    System.out.println("Exapnding classes complete");
+    System.out.println("Expanding classes complete");
     System.out.println("##### expanded WINE classes: "+allIDs.size());
     System.out.println("@@@@@ expanded WINE classes: "+elapsed1);
     //List<ONodeID> uriList = new ArrayList<ONodeID>(allIDs);
@@ -287,6 +288,56 @@ public class Test_OWLIMOntology extends TestCase {
     //for(ONodeID u : uriList) {
     //  System.out.println("=== "+u);
     //}
+
+    beginTime = System.nanoTime();
+    Set<OClass> ocbn = ((AbstractOntologyImpl)ontology).getOClassesByName("Wine");
+    System.out.println("Classes with name Wine: ");
+    for(OClass cl : ocbn) {
+      System.out.println("  "+cl.getONodeID().toTurtle());
+    }
+    System.out.println("##### classes by name wine: "+ocbn.size());
+    System.out.println("@@@@@ classes by name wine: "+elapsed1);
+    assertEquals("Classes for name Wine",2,ocbn.size());
+
+    beginTime = System.nanoTime();
+    List<OResource> ors = ontology.getOResourcesByName("yearValue");
+    System.out.println("Resources with name yearValue: ");
+    for(OResource or : ors) {
+      System.out.println("  "+or.getONodeID().toTurtle());
+    }
+    System.out.println("##### resources by name yearValue: "+ors.size());
+    System.out.println("@@@@@ resources by name yearValue: "+elapsed1);
+    assertEquals("Resources for name yearValue",1,ors.size());
+    assertTrue("yearValue is a datatype property",ontology.isDatatypeProperty((OURI)ors.get(0).getONodeID()));
+
+    beginTime = System.nanoTime();
+    ors = ontology.getOResourcesByName("Wine");
+    System.out.println("Resources with name Wine: ");
+    for(OResource or : ors) {
+      System.out.println("  "+or.getONodeID().toTurtle());
+    }
+    System.out.println("##### resources by name Wine: "+ors.size());
+    System.out.println("@@@@@ resources by name Wine: "+elapsed1);
+    assertEquals("Resources for name Wine",2,ors.size());
+    assertEquals("Class of resource 1 for wine",
+            "gate.creole.ontology.impl.OClassImpl",
+            ors.get(0).getClass().getName());
+    assertEquals("Class of resource 2 for wine",
+            "gate.creole.ontology.impl.OClassImpl",
+            ors.get(1).getClass().getName());
+
+    beginTime = System.nanoTime();
+    ors = ontology.getOResourcesByName("Delicate");
+    System.out.println("Resources with name Delicate: ");
+    for(OResource or : ors) {
+      System.out.println("  "+or.getONodeID().toTurtle());
+    }
+    System.out.println("##### resources by name Delicate: "+ors.size());
+    System.out.println("@@@@@ resources by name Delicate: "+elapsed1);
+    assertEquals("Resources for name Delicate",2,ors.size());
+    assertEquals("Class of resource 1 for Delicate",
+            "gate.creole.ontology.impl.OInstanceImpl",
+            ors.get(0).getClass().getName());
 
     // TODO: try to find the WineColor class ...
     OClass c1 = ontology.getOClass(getURI4Name(ontology,"WineColor"));
