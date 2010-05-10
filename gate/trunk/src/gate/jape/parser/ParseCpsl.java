@@ -11,12 +11,16 @@ import gate.jape.*;
 import gate.jape.constraint.*;
 import gate.event.*;
 
+import org.apache.log4j.Logger;
+
 
 /**
   * A parser for the CPSL language. Generated using JavaCC.
   * @author Hamish Cunningham
   */
 public class ParseCpsl implements JapeConstants, ParseCpslConstants {
+
+  private static final Logger log = Logger.getLogger(ParseCpsl.class);
 
   /** Construct from a URL and an encoding
     */
@@ -67,6 +71,30 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
   }
 
   protected void finishBPE(BasicPatternElement bpe) {
+  }
+
+  /**
+   * Attempt to parse a multi phase transducer from the current file.  This
+   * method ensures that the JAPE file reader is properly closed when the
+   * method completes, whether it completes successfully or throws an
+   * exception.
+   */
+  public MultiPhaseTransducer MultiPhaseTransducer() throws ParseException {
+    try {
+      return _MultiPhaseTransducer();
+    }
+    finally {
+      // this is a bit nasty but I couldn't find a better way to get at the
+      // underlying Reader
+      if(jj_input_stream.inputStream != null) {
+        try {
+          jj_input_stream.inputStream.close();
+        }
+        catch(IOException e) {
+          log.warn("Couldn't close input stream while parsing " + baseURL, e);
+        }
+      }
+    }
   }
 
   /**
@@ -195,7 +223,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
 //////////////
 // the grammar
 //////////////
-  final public MultiPhaseTransducer MultiPhaseTransducer() throws ParseException {
+  final public MultiPhaseTransducer _MultiPhaseTransducer() throws ParseException {
   // macrosMap = new HashMap();
   SinglePhaseTransducer s = null;
   MultiPhaseTransducer m = new MultiPhaseTransducer();
@@ -316,7 +344,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     throw new Error("Missing return statement in function");
   }
 
-  // MultiPhaseTransducer
+  // _MultiPhaseTransducer
   final public SinglePhaseTransducer SinglePhaseTransducer(String javaimportblock) throws ParseException {
   ruleNumber = 0;
   Token phaseNameTok = null;
@@ -1411,62 +1439,18 @@ AnnotationAccessor accessor = null;
     finally { jj_save(1, xla); }
   }
 
-  final private boolean jj_3R_25() {
-    if (jj_scan_token(pling)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_21() {
-    if (jj_scan_token(string)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_19() {
-    if (jj_scan_token(leftBracket)) return true;
-    if (jj_3R_22()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_24() {
-    if (jj_3R_13()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_23() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_25()) jj_scanpos = xsp;
-    if (jj_scan_token(ident)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_17() {
-    if (jj_3R_19()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_22() {
-    Token xsp;
-    if (jj_3R_24()) return true;
-    while (true) {
-      xsp = jj_scanpos;
-      if (jj_3R_24()) { jj_scanpos = xsp; break; }
-    }
-    return false;
-  }
-
   final private boolean jj_3R_16() {
     if (jj_3R_18()) return true;
     return false;
   }
 
-  final private boolean jj_3R_15() {
-    if (jj_scan_token(ident)) return true;
+  final private boolean jj_3_2() {
+    if (jj_3R_14()) return true;
     return false;
   }
 
-  final private boolean jj_3_2() {
-    if (jj_3R_14()) return true;
+  final private boolean jj_3R_15() {
+    if (jj_scan_token(ident)) return true;
     return false;
   }
 
@@ -1508,6 +1492,50 @@ AnnotationAccessor accessor = null;
     if (jj_scan_token(colon)) return true;
     if (jj_scan_token(ident)) return true;
     if (jj_scan_token(leftBrace)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_25() {
+    if (jj_scan_token(pling)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_21() {
+    if (jj_scan_token(string)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_19() {
+    if (jj_scan_token(leftBracket)) return true;
+    if (jj_3R_22()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_24() {
+    if (jj_3R_13()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_23() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_25()) jj_scanpos = xsp;
+    if (jj_scan_token(ident)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_17() {
+    if (jj_3R_19()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_22() {
+    Token xsp;
+    if (jj_3R_24()) return true;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_24()) { jj_scanpos = xsp; break; }
+    }
     return false;
   }
 
