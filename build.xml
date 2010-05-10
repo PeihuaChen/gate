@@ -47,6 +47,7 @@
 
   <!-- if deprecation warnings should be shown -->
   <property name="deprecation" value="true"/>
+  <property name="gate.compile.maxwarnings" value="10000" />
 
   <!-- OS specific properties
        To set a system property for GATE running on a specific platform, define
@@ -369,7 +370,7 @@
            includes="gate/**,com/**,hepple/**"
            classpathref="build.class.path">
       <compilerarg value="-Xmaxwarns"/>
-      <compilerarg value="10000"/>
+      <compilerarg value="${gate.compile.maxwarnings}"/>
     </javac>
   </target>
 
