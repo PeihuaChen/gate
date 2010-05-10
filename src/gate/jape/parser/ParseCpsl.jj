@@ -38,12 +38,16 @@ import gate.jape.*;
 import gate.jape.constraint.*;
 import gate.event.*;
 
+import org.apache.log4j.Logger;
+
 
 /**
   * A parser for the CPSL language. Generated using JavaCC.
   * @author Hamish Cunningham
   */
 public class ParseCpsl implements JapeConstants {
+
+  private static final Logger log = Logger.getLogger(ParseCpsl.class);
 
   /** Construct from a URL and an encoding
     */
@@ -94,6 +98,30 @@ public class ParseCpsl implements JapeConstants {
   }
 
   protected void finishBPE(BasicPatternElement bpe) {
+  }
+
+  /**
+   * Attempt to parse a multi phase transducer from the current file.  This
+   * method ensures that the JAPE file reader is properly closed when the
+   * method completes, whether it completes successfully or throws an
+   * exception.
+   */
+  public MultiPhaseTransducer MultiPhaseTransducer() throws ParseException {
+    try {
+      return _MultiPhaseTransducer();
+    }
+    finally {
+      // this is a bit nasty but I couldn't find a better way to get at the
+      // underlying Reader
+      if(jj_input_stream.inputStream != null) {
+        try {
+          jj_input_stream.inputStream.close();
+        }
+        catch(IOException e) {
+          log.warn("Couldn't close input stream while parsing " + baseURL, e);
+        }
+      }
+    }
   }
 
   /**
@@ -392,7 +420,7 @@ PARSER_END(ParseCpsl)
 // the grammar
 //////////////
 
-MultiPhaseTransducer MultiPhaseTransducer() :
+MultiPhaseTransducer _MultiPhaseTransducer() :
 {
   // macrosMap = new HashMap();
   SinglePhaseTransducer s = null;
@@ -497,7 +525,7 @@ MultiPhaseTransducer MultiPhaseTransducer() :
     return m;
   }
 
-} // MultiPhaseTransducer
+} // _MultiPhaseTransducer
 
 
 SinglePhaseTransducer SinglePhaseTransducer(String javaimportblock) :

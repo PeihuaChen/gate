@@ -9,6 +9,7 @@ import gate.util.*;
 import gate.jape.*;
 import gate.jape.constraint.*;
 import gate.event.*;
+import org.apache.log4j.Logger;
 
 public class ParseCpslTokenManager implements ParseCpslConstants
 {
