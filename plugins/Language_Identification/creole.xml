@@ -2,6 +2,7 @@
 	<CREOLE>
 		<RESOURCE>
 			<JAR SCAN="true">languageID.jar</JAR>
+			<JAR>lib/textcat-1.0.1.jar</JAR>
 			<NAME>TextCat PR</NAME>
 			<CLASS>org.knallgrau.utils.textcat.LanguageIdentifier</CLASS>
 			<COMMENT>Recognizes the document language using TextCat. Possible languages: german, english, french, 
