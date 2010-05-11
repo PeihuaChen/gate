@@ -395,7 +395,13 @@ public class GATEApplicationAnnotator extends Annotator_ImplBase
     String docText = cas.getDocumentText();
     gate.Document gateDoc = null;
     try {
-      gateDoc = Factory.newDocument(docText);
+      // load the document text without unpacking any markup
+      FeatureMap docParams = Factory.newFeatureMap();
+      docParams.put(Document.DOCUMENT_STRING_CONTENT_PARAMETER_NAME, docText);
+      docParams.put(
+          Document.DOCUMENT_MARKUP_AWARE_PARAMETER_NAME, Boolean.FALSE);
+      gateDoc = (Document)Factory.createResource("gate.corpora.DocumentImpl",
+          docParams);
     }
     catch(ResourceInstantiationException rix) {
       throw new AnnotatorProcessException(MESSAGE_DIGEST,
