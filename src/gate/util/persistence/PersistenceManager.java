@@ -673,6 +673,9 @@ public class PersistenceManager {
     if(pListener != null) pListener.progressChanged(0);
 
     startLoadingFrom(url);
+    //the actual stream obtained from the URL. We keep a reference to this
+    //so we can ensure it gets closed.
+    InputStream rawStream = null;
     try {
       long startTime = System.currentTimeMillis();
       // Determine whether the file contains an application serialized in
@@ -687,7 +690,8 @@ public class PersistenceManager {
       // on
       // whether serialization is native or xml.
       if(xmlStream) {
-        Reader inputReader = new java.io.InputStreamReader(url.openStream());
+        Reader inputReader = new java.io.InputStreamReader(
+                rawStream = url.openStream());
         try {
           XMLInputFactory inputFactory = XMLInputFactory.newInstance();
           XMLStreamReader xsr = inputFactory.createXMLStreamReader(
@@ -695,6 +699,8 @@ public class PersistenceManager {
           reader = new StaxReader(new QNameMap(), xsr);
         }
         catch(XMLStreamException xse) {
+          // make sure the stream is closed, on error
+          inputReader.close();
           throw new PersistenceException("Error creating reader", xse);
         }
         
@@ -737,7 +743,6 @@ public class PersistenceManager {
         // now we can read the saved object in the presence of all
         // the right plugins
         res = ois.readObject();
-        ois.close();
   
         // ensure a fresh start
         clearCurrentTransients();
@@ -762,9 +767,14 @@ public class PersistenceManager {
       catch(Exception ex) {
         if(sListener != null) sListener.statusChanged("Loading failed!");
         throw new PersistenceException(ex);
+      } finally {
+        //make sure the stream gets closed
+        if (ois != null) ois.close();
+        if(reader != null) reader.close();
       }
     }
     finally {
+      if(rawStream != null) rawStream.close();
       finishedLoading();
       if(pListener != null) pListener.processFinished();
     }
@@ -820,10 +830,15 @@ public class PersistenceManager {
     if(DEBUG) {
       System.out.println("Checking whether file is xml");
     }
-    java.io.BufferedReader fileReader = new java.io.BufferedReader(
-            new java.io.InputStreamReader(url.openStream()));
-    String firstLine = fileReader.readLine();
-    fileReader.close();
+    String firstLine;
+    BufferedReader fileReader = null;
+    try {
+      fileReader = new java.io.BufferedReader(
+              new java.io.InputStreamReader(url.openStream()));
+      firstLine = fileReader.readLine();
+    } finally {
+      if(fileReader != null) fileReader.close();
+    }
 
     for(String startOfXml : STARTOFXMLAPPLICATIONFILES) {
       if(firstLine.length() >= startOfXml.length()
