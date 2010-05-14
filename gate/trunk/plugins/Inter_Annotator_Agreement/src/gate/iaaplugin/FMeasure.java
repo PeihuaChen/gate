@@ -1,16 +1,12 @@
 /**
- *
- *  Copyright (c) 1995-2010, The University of Sheffield. See the file
- *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
- *
- *  This file is part of GATE (see http://gate.ac.uk/), and is free
- *  software, licenced under the GNU Library General Public License,
- *  Version 2, June 1991 (in the distribution as file licence.html,
- *  and also available at http://gate.ac.uk/gate/licence.html).
- *
- *  $Id: FMeasure.java 12006 2009-12-01 17:24:28Z thomas_heitz $
+ * Copyright (c) 1995-2010, The University of Sheffield. See the file
+ * COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt This
+ * file is part of GATE (see http://gate.ac.uk/), and is free software, licenced
+ * under the GNU Library General Public License, Version 2, June 1991 (in the
+ * distribution as file licence.html, and also available at
+ * http://gate.ac.uk/gate/licence.html). $Id: FMeasure.java 12006 2009-12-01
+ * 17:24:28Z thomas_heitz $
  */
-
 package gate.iaaplugin;
 
 /**
@@ -21,26 +17,43 @@ package gate.iaaplugin;
 public class FMeasure {
   /** Precision for exact matches. */
   public float precision;
+
   /** Recall for exact matches. */
   public float recall;
+
   /** F1 for exact matches. */
   public float f1;
+
   /** Precision for exact and partial matches. */
   public float precisionLenient;
+
   /** Recall for exact and partial matches. */
   public float recallLenient;
+
   /** F1 for exact and partial matches. */
   public float f1Lenient;
+
   /** Number of exact matches. */
   public float correct;
+
   /** Number of instances incorretly with predicted label. */
   public float spurious;
+
   /** Number of positive instances missed by the system. */
   public float missing;
+
+  /**
+   * Number n for BDM computation, number of matches, instead of number of match
+   * bdm score.
+   */
+  public float BDMn = 0;
+
   /** Number of only partial matches. */
   public float partialCor;
+
   /** Number of positive examples in key set. */
   private float keySize;
+
   /** Number of positive examples in the results. */
   private float resSize;
 
@@ -56,12 +69,17 @@ public class FMeasure {
     spurious = 0;
     missing = 0;
     partialCor = 0;
+    BDMn = 0;
   }
 
   /** Compute the F-measures from the numbers. */
   public void computeFmeasure() {
     keySize = correct + partialCor + spurious;
     resSize = correct + partialCor + missing;
+    if(BDMn > 0) {
+      keySize = BDMn + spurious;
+      resSize = BDMn + missing;
+    }
     if((keySize) == 0)
       precision = 0;
     else precision = (float)correct / keySize;
@@ -78,6 +96,10 @@ public class FMeasure {
   public void computeFmeasureLenient() {
     keySize = correct + partialCor + spurious;
     resSize = correct + partialCor + missing;
+    if(BDMn > 0) {
+      keySize = BDMn + spurious;
+      resSize = BDMn + missing;
+    }
     if((keySize) == 0)
       precisionLenient = 0;
     else precisionLenient = (float)(correct + partialCor) / keySize;
@@ -86,8 +108,9 @@ public class FMeasure {
     else recallLenient = (float)(correct + partialCor) / resSize;
     if((precisionLenient + recallLenient) == 0)
       f1Lenient = 0;
-    else f1Lenient = 2 * precisionLenient * recallLenient
-      / (precisionLenient + recallLenient);
+    else f1Lenient =
+            2 * precisionLenient * recallLenient
+                    / (precisionLenient + recallLenient);
     return;
   }
 
@@ -103,6 +126,7 @@ public class FMeasure {
     this.precisionLenient += anotherMeasure.precisionLenient;
     this.recallLenient += anotherMeasure.recallLenient;
     this.f1Lenient += anotherMeasure.f1Lenient;
+    this.BDMn += anotherMeasure.BDMn;
     return;
   }
 
@@ -119,10 +143,10 @@ public class FMeasure {
       this.precisionLenient /= k;
       this.recallLenient /= k;
       this.f1Lenient /= k;
-    }
-    else {
+      this.BDMn /= k;
+    } else {
       System.out
-        .println("Warning: the macro averaged F measure cannot be done because the number of pairs is less than 1.");
+              .println("Warning: the macro averaged F measure cannot be done because the number of pairs is less than 1.");
     }
     return;
   }
@@ -130,14 +154,12 @@ public class FMeasure {
   /** Print out the results. */
   public String printResults() {
     StringBuffer logMessage = new StringBuffer();
-    logMessage
-      .append("  (correct, partial, spurious, missing)= (" + correct
-        + ", " + partialCor + ", " + spurious + ", " + missing + ");  ");
+    logMessage.append("  (correct, partial, spurious, missing)= (" + correct
+            + ", " + partialCor + ", " + spurious + ", " + missing + ");  ");
     logMessage.append("(precision, recall, F1)= (" + precision + ", " + recall
-      + ", " + f1 + ");  ");
+            + ", " + f1 + ");  ");
     logMessage.append("Lenient: (" + (new Float(precisionLenient)) + ", "
-      + recallLenient + ", " + f1Lenient + ")\n");
+            + recallLenient + ", " + f1Lenient + ")\n");
     return logMessage.toString();
   }
-
 }
