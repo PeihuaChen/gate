@@ -126,6 +126,8 @@ public class ScriptPR extends AbstractLanguageAnalyser
 
   public void controllerExecutionStarted(Controller c)
           throws ExecutionException {
+    // ensure scriptParams are available to the callback
+    groovyScript.getBinding().setVariable("scriptParams", scriptParams);
     callControllerAwareMethod("beforeCorpus", c);
   }
 
