@@ -149,6 +149,7 @@ public class ScriptPR extends AbstractLanguageAnalyser
     // Create the variable bindings
     Binding binding = new Binding();
     binding.setVariable("doc", document);
+    binding.setVariable("corpus", corpus);
     binding.setVariable("content", document.getContent().toString());
     binding.setVariable("inputAS", inputAS);
     binding.setVariable("outputAS", outputAS);
