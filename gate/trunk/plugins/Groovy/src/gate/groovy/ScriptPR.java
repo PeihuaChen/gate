@@ -25,9 +25,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URISyntaxException;
 import groovy.lang.Binding;
-import groovy.lang.Script;
 import groovy.lang.GroovyShell;
+import groovy.lang.MetaMethod;
+import groovy.lang.Script;
 import org.codehaus.groovy.control.CompilationFailedException;
+import org.codehaus.groovy.runtime.InvokerInvocationException;
 
 
 /**
@@ -40,7 +42,7 @@ import org.codehaus.groovy.control.CompilationFailedException;
     comment = "Runs a Groovy script as a processing resource",
     helpURL = "http://gate.ac.uk/userguide/sec:api:groovy")
 public class ScriptPR extends AbstractLanguageAnalyser
-                       implements ProcessingResource {
+                       implements ProcessingResource, ControllerAwarePR {
 
   /**
    * Groovy script file
@@ -118,6 +120,58 @@ public class ScriptPR extends AbstractLanguageAnalyser
 
   public void reInit() throws ResourceInstantiationException {
     init();
+  }
+
+  // ControllerAwarePR implementation
+
+  public void controllerExecutionStarted(Controller c)
+          throws ExecutionException {
+    callControllerAwareMethod("beforeCorpus", c);
+  }
+
+  public void controllerExecutionFinished(Controller c)
+          throws ExecutionException {
+    callControllerAwareMethod("afterCorpus", c);
+  }
+
+  public void controllerExecutionAborted(Controller c, Throwable t)
+          throws ExecutionException {
+    callControllerAwareMethod("aborted", c);
+  }
+
+  /**
+   * Check whether the script declares a method with the given name that takes
+   * a corpus parameter, and if so, call it passing the corpus from the given
+   * controller.  If the controller is not a CorpusController, do nothing.
+   *
+   * @throws ExecutionException if the script method throws an
+   *         ExecutionException we re-throw it
+   */
+  protected void callControllerAwareMethod(String methodName, Controller c)
+          throws ExecutionException {
+    if(!(c instanceof CorpusController)) { return; }
+    List<MetaMethod> metaMethods = groovyScript.getMetaClass().respondsTo(
+        groovyScript, methodName, new Class[] {gate.Corpus.class});
+    if(!metaMethods.isEmpty()) {
+      try {
+        metaMethods.get(0).invoke(
+            groovyScript, new Corpus[] { ((CorpusController)c).getCorpus() });
+      }
+      catch(InvokerInvocationException iie) {
+        if(iie.getCause() instanceof ExecutionException) {
+          throw (ExecutionException)iie.getCause();
+        }
+        else if(iie.getCause() instanceof RuntimeException) {
+          throw (RuntimeException)iie.getCause();
+        }
+        else if(iie.getCause() instanceof Error) {
+          throw (Error)iie.getCause();
+        }
+        else {
+          throw iie;
+        }
+      }
+    }
   }
 
   /**
