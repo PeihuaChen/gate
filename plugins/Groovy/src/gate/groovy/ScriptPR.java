@@ -201,7 +201,7 @@ public class ScriptPR extends AbstractLanguageAnalyser
 
 
     // Create the variable bindings
-    Binding binding = new Binding();
+    Binding binding = groovyScript.getBinding();
     binding.setVariable("doc", document);
     binding.setVariable("corpus", corpus);
     binding.setVariable("content", document.getContent().toString());
@@ -220,7 +220,6 @@ public class ScriptPR extends AbstractLanguageAnalyser
 
     // Run the script engine
     try {
-      groovyScript.setBinding(binding);
       groovyScript.run();
     } catch(RuntimeException re) {
       throw new ExecutionException("Problem running Groovy script", re);
