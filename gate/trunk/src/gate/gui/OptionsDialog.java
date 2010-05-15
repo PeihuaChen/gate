@@ -27,6 +27,7 @@ import javax.swing.plaf.FontUIResource;
 
 import gate.Gate;
 import gate.GateConstants;
+import gate.Main;
 import gate.swing.JFontChooser;
 import gate.util.GateRuntimeException;
 import gate.util.OptionsMap;
@@ -525,16 +526,19 @@ public class OptionsDialog extends JDialog {
         setComponentsFont(componentsFont);
         setTextComponentsFont(textComponentsFont);
         userConfig.put(GateConstants.LOOK_AND_FEEL, lookAndFeelClassName);
-        try{
+        /*try{
           UIManager.setLookAndFeel(lookAndFeelClassName);
         }catch(Exception e){
           throw new GateRuntimeException(
                   "Error while setting the look and feel", e);
-        }
-        Iterator rootsIter = MainFrame.getGuiRoots().iterator();
+        }*/
+        
+        Main.applyUserPreferences();
+        
+        Iterator<Component> rootsIter = MainFrame.getGuiRoots().iterator();
         while(rootsIter.hasNext()){
           try{
-            SwingUtilities.updateComponentTreeUI((Component)rootsIter.next());
+            SwingUtilities.updateComponentTreeUI(rootsIter.next());
           }catch(Exception e){
             throw new GateRuntimeException(
                     "Error while updating the graphical interface", e);

@@ -40,6 +40,8 @@
 			<string>true</string>
 			<key>com.apple.mrj.application.growbox.intrudes</key>
 			<string>true</string>
+			<key>apple.awt.antialiasing</key>
+			<string>true</string>
 		</dict>
 	</dict>
 </dict>

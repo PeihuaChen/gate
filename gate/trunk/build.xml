@@ -639,6 +639,7 @@
        <sysproperty key="java.ext.dirs" value="${ext.dirs}"/>
        <sysproperty key="sun.java2d.opengl" value="true"/>
        <sysproperty key="apple.laf.useScreenMenuBar" value="true"/>
+       <sysproperty key="apple.awt.antialiasing" value="true"/>
        <sysproperty key="com.apple.mrj.application.growbox.intrudes" value="false"/>
        <sysproperty key="com.apple.mrj.application.live-resize" value="true"/>
        <!-- use "line" rather than "value" as runtime.arch may be empty -->
