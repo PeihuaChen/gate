@@ -21,7 +21,6 @@ import gate.Gate;
 import gate.LanguageResource;
 import gate.Resource;
 import gate.creole.ontology.OClass;
-import gate.creole.ontology.OURI;
 import gate.creole.ontology.Ontology;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
@@ -295,11 +294,11 @@ public class OntologyClassView extends AbstractDocumentView
     boolean returnValue = false;
     List<LanguageResource> resources =
       gate.Gate.getCreoleRegister().getPublicLrInstances();
-    Map<OURI, Ontology> ontologyMap = new HashMap<OURI, Ontology>();
+    Map<String, Ontology> ontologyMap = new HashMap<String, Ontology>();
     for (LanguageResource resource : resources) {
       if (resource instanceof Ontology) {
         Ontology ontology = (Ontology) resource;
-        ontologyMap.put(ontology.getOntologyURI(), ontology);
+        ontologyMap.put(ontology.getOntologyURI().toString(), ontology);
       }
     }
     for (Annotation annotation :
@@ -309,7 +308,7 @@ public class OntologyClassView extends AbstractDocumentView
        && features.get(CLASS) != null
        && features.get(INSTANCE) != null) {
         // find the corresponding ontology
-        Ontology ontology = ontologyMap.get((OURI) features.get(ONTOLOGY));
+        Ontology ontology = ontologyMap.get((String) features.get(ONTOLOGY));
         if (ontology != null) {
           // choose a background color for the annotation type tree node
           OClass oClass = ontology.getOClass(ontology
@@ -331,147 +330,150 @@ public class OntologyClassView extends AbstractDocumentView
    */
   private void loadOntology(final Ontology ontology) {
 
-      // create the class tree
-      final JTree tree = new JTree(new Object[]{"Loading..."});
-      treeByOntologyMap.put(ontology, tree);
-      tree.setRootVisible(false);
-      tree.setShowsRootHandles(true);
-      tree.setEditable(true);
-      tree.getSelectionModel().setSelectionMode(
-        TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
+    // create the class tree
+    final JTree tree = new JTree(new Object[]{"Loading..."});
+    treeByOntologyMap.put(ontology, tree);
+    tree.setRootVisible(false);
+    tree.setShowsRootHandles(true);
+    tree.setEditable(true);
+    tree.getSelectionModel().setSelectionMode(
+      TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
 
-      final JPanel treePanel = new JPanel(new BorderLayout());
-      final JCheckBox disclosureCheckBox = new JCheckBox(
-        ontology.getName(), MainFrame.getIcon("closed"), false);
-      disclosureCheckBox.setSelectedIcon(MainFrame.getIcon("expanded"));
-      treePanel.add(disclosureCheckBox, BorderLayout.NORTH);
+    final JPanel treePanel = new JPanel(new BorderLayout());
+    final JCheckBox disclosureCheckBox = new JCheckBox(
+      ontology.getName(), MainFrame.getIcon("closed"), false);
+    disclosureCheckBox.setSelectedIcon(MainFrame.getIcon("expanded"));
+    treePanel.add(disclosureCheckBox, BorderLayout.NORTH);
 
-      // show/hide the tree when clicking the disclosure checkbox
-      disclosureCheckBox.addActionListener(new ActionListener() {
-        boolean isTreeBuilt = false;
-        public void actionPerformed(ActionEvent e) {
-          if (disclosureCheckBox.isSelected()) {
-            if (!isTreeBuilt) {
-              tree.expandRow(0); // expands "Loading..." node
-              buildClassTree(tree, ontology);
-              isTreeBuilt = true;
-            }
-            treePanel.add(tree, BorderLayout.CENTER);
-          } else {
-            treePanel.remove(tree);
+    // show/hide the tree when clicking the disclosure checkbox
+    disclosureCheckBox.addActionListener(new ActionListener() {
+      boolean isTreeBuilt = false;
+      public void actionPerformed(ActionEvent e) {
+        if (disclosureCheckBox.isSelected()) {
+          if (!isTreeBuilt) {
+            tree.expandRow(0); // expands "Loading..." node
+            buildClassTree(tree, ontology);
+            isTreeBuilt = true;
           }
-          treesPanel.revalidate();
+          treePanel.add(tree, BorderLayout.CENTER);
+        } else {
+          treePanel.remove(tree);
         }
-      });
+        treesPanel.revalidate();
+      }
+    });
 
-      // context menu to show root classes
-      disclosureCheckBox.addMouseListener(new MouseAdapter() {
-        public void mousePressed(MouseEvent e) { processMouseEvent(e); }
-        public void mouseReleased(MouseEvent e) { processMouseEvent(e); }
-        public void mouseClicked(MouseEvent e) { processMouseEvent(e); }
-        protected void processMouseEvent(MouseEvent e) {
-          JPopupMenu popup = new JPopupMenu();
-          if (e.isPopupTrigger()) {
-            popup.add(new JMenuItem(
-              new AbstractAction("Show all root classes") {
-              public void actionPerformed(ActionEvent e) {
-                disclosureCheckBox.setSelected(true);
-                hiddenClassesList.clear();
-                DefaultMutableTreeNode node = (DefaultMutableTreeNode)
-                  tree.getModel().getRoot();
-                final Set<OClass> classes = ontology.getOClasses(true);
-                // add first level nodes to the tree
-                addNodes(tree, node, classes, false);
+    // context menu to show root classes
+    disclosureCheckBox.addMouseListener(new MouseAdapter() {
+      public void mousePressed(MouseEvent e) { processMouseEvent(e); }
+      public void mouseReleased(MouseEvent e) { processMouseEvent(e); }
+      public void mouseClicked(MouseEvent e) { processMouseEvent(e); }
+      protected void processMouseEvent(MouseEvent e) {
+        JPopupMenu popup = new JPopupMenu();
+        if (e.isPopupTrigger()) {
+          popup.add(new JMenuItem(
+            new AbstractAction("Show all root classes") {
+            public void actionPerformed(ActionEvent e) {
+              if (!disclosureCheckBox.isSelected()) {
+                disclosureCheckBox.doClick();
               }
-            }));
-            popup.show(e.getComponent(), e.getX(), e.getY());
-          }
-        }
-      });
-
-      // when a class is selected in the tree update the instance table
-      tree.getSelectionModel().addTreeSelectionListener(
-        new TreeSelectionListener() {
-          public void valueChanged(TreeSelectionEvent e) {
-            if (e.getNewLeadSelectionPath() == null) {
-              selectedClass = null;
-            } else { // a class is selected
+              hiddenClassesList.clear();
               DefaultMutableTreeNode node = (DefaultMutableTreeNode)
-                e.getNewLeadSelectionPath().getLastPathComponent();
-              selectedClass = (OClass)
-                ((OResourceNode) node.getUserObject()).getResource();
-              // clear selection in other trees
-              for (JTree aTree : treeByOntologyMap.values()) {
-                if (!aTree.equals(tree)) {
-                  aTree.clearSelection();
-                }
-              }
+                tree.getModel().getRoot();
+              final Set<OClass> classes = ontology.getOClasses(true);
+              // add first level nodes to the tree
+              addNodes(tree, node, classes, false);
             }
-            instanceView.updateInstanceTable(selectedClass);
-          }
-        }
-      );
-
-      // context menu to hide/show classes
-      tree.addMouseListener(new MouseAdapter() {
-        public void mousePressed(MouseEvent e) {
-          TreePath path = tree.getClosestPathForLocation(e.getX(), e.getY());
-          if (e.isPopupTrigger()
-          && !tree.isPathSelected(path)) {
-            // if right click outside the selection then reset selection
-            tree.getSelectionModel().setSelectionPath(path);
-          }
-          processMouseEvent(e);
-        }
-        public void mouseReleased(MouseEvent e) {
-          processMouseEvent(e);
-        }
-        public void mouseClicked(MouseEvent e) {
-          processMouseEvent(e);
-        }
-        protected void processMouseEvent(MouseEvent e) {
-          JPopupMenu popup = new JPopupMenu();
-          if (!e.isPopupTrigger()) { return; }
-              popup.add(new JMenuItem(
-                new AbstractAction("Hide selected classes") {
-                public void actionPerformed(ActionEvent e) {
-                  DefaultTreeModel treeModel =
-                    (DefaultTreeModel) tree.getModel();
-                  TreePath[] selectedPaths = tree.getSelectionPaths();
-                  for (TreePath selectedPath : selectedPaths) {
-                    DefaultMutableTreeNode node = (DefaultMutableTreeNode)
-                      selectedPath.getLastPathComponent();
-                    if (node.getParent() != null) {
-                      treeModel.removeNodeFromParent(node);
-                      Object userObject = node.getUserObject();
-                      OClass oClass = (OClass)
-                        ((OResourceNode) userObject).getResource();
-                      hiddenClassesList.add(oClass.getONodeID().toString());
-                    }
-                  }
-                }
-              }));
-
-            if (tree.getSelectionCount() == 1) {
-              popup.add(new JMenuItem(
-                new AbstractAction("Show all sub classes") {
-                public void actionPerformed(ActionEvent e) {
-                  DefaultMutableTreeNode node = (DefaultMutableTreeNode)
-                    tree.getSelectionPath().getLastPathComponent();
-                  Object userObject = node.getUserObject();
-                  OClass oClass = (OClass)
-                    ((OResourceNode) userObject).getResource();
-                  final Set<OClass> classes =
-                    oClass.getSubClasses(OClass.Closure.DIRECT_CLOSURE);
-                  addNodes(tree, node, classes, false);
-                }
-              }));
-            }
+          }));
           popup.show(e.getComponent(), e.getX(), e.getY());
         }
-      });
+      }
+    });
 
-      treesPanel.add(treePanel);
+    // when a class is selected in the tree update the instance table
+    tree.getSelectionModel().addTreeSelectionListener(
+      new TreeSelectionListener() {
+        public void valueChanged(TreeSelectionEvent e) {
+          if (e.getNewLeadSelectionPath() == null) {
+           if (treeByOntologyMap.get(selectedClass.getOntology()).equals(tree)){
+             // only nullify selectedClass if unselect from the same tree
+            selectedClass = null;
+           }
+          } else { // a class is selected
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode)
+              e.getNewLeadSelectionPath().getLastPathComponent();
+            selectedClass = (OClass)
+              ((OResourceNode) node.getUserObject()).getResource();
+            // clear selection in other trees
+            for (JTree aTree : treeByOntologyMap.values()) {
+              if (!aTree.equals(tree)) {
+                aTree.clearSelection();
+              }
+            }
+          }
+          instanceView.updateInstanceTable(selectedClass);
+        }
+      }
+    );
+
+    // context menu to hide/show classes
+    tree.addMouseListener(new MouseAdapter() {
+      public void mousePressed(MouseEvent e) {
+        TreePath path = tree.getClosestPathForLocation(e.getX(), e.getY());
+        if (e.isPopupTrigger()
+        && !tree.isPathSelected(path)) {
+          // if right click outside the selection then reset selection
+          tree.getSelectionModel().setSelectionPath(path);
+        }
+        processMouseEvent(e);
+      }
+      public void mouseReleased(MouseEvent e) {
+        processMouseEvent(e);
+      }
+      public void mouseClicked(MouseEvent e) {
+        processMouseEvent(e);
+      }
+      protected void processMouseEvent(MouseEvent e) {
+        JPopupMenu popup = new JPopupMenu();
+        if (!e.isPopupTrigger()) { return; }
+        popup.add(new JMenuItem(
+          new AbstractAction("Hide selected classes") {
+          public void actionPerformed(ActionEvent e) {
+            DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+            TreePath[] selectedPaths = tree.getSelectionPaths();
+            for (TreePath selectedPath : selectedPaths) {
+              DefaultMutableTreeNode node = (DefaultMutableTreeNode)
+                selectedPath.getLastPathComponent();
+              if (node.getParent() != null) {
+                treeModel.removeNodeFromParent(node);
+                Object userObject = node.getUserObject();
+                OClass oClass = (OClass)
+                  ((OResourceNode) userObject).getResource();
+                hiddenClassesList.add(oClass.getONodeID().toString());
+              }
+            }
+          }
+        }));
+
+        if (tree.getSelectionCount() == 1) {
+          popup.add(new JMenuItem(new AbstractAction("Show all sub classes") {
+            public void actionPerformed(ActionEvent e) {
+              DefaultMutableTreeNode node = (DefaultMutableTreeNode)
+                tree.getSelectionPath().getLastPathComponent();
+              Object userObject = node.getUserObject();
+              OClass oClass = (OClass)
+                ((OResourceNode) userObject).getResource();
+              final Set<OClass> classes =
+                oClass.getSubClasses(OClass.Closure.DIRECT_CLOSURE);
+              addNodes(tree, node, classes, false);
+            }
+          }));
+        }
+        popup.show(e.getComponent(), e.getX(), e.getY());
+      }
+    });
+
+    treesPanel.add(treePanel);
   }
 
   /**
@@ -491,17 +493,16 @@ public class OntologyClassView extends AbstractDocumentView
           event.getPath().getLastPathComponent();
         DefaultMutableTreeNode nodeFirstChild =
           (DefaultMutableTreeNode) node.getChildAt(0);
-        if (!nodeFirstChild.getUserObject().equals("Loading...")) {
-          // if this node has already been expanded then return
-          return;
+        if (nodeFirstChild.getUserObject().equals("Loading...")) {
+          // if this node has not already been expanded
+          node.removeAllChildren();
+          Object userObject = node.getUserObject();
+          OClass oClass = (OClass) ((OResourceNode) userObject).getResource();
+          Set<OClass> classes =
+            oClass.getSubClasses(OClass.Closure.DIRECT_CLOSURE);
+          // add children nodes to the current tree node
+          addNodes(tree, node, classes, true);
         }
-        node.removeAllChildren();
-        Object userObject = node.getUserObject();
-        OClass oClass = (OClass) ((OResourceNode) userObject).getResource();
-        Set<OClass> classes =
-          oClass.getSubClasses(OClass.Closure.DIRECT_CLOSURE);
-        // add children nodes to the current tree node
-        addNodes(tree, node, classes, true);
       }
       public void treeWillCollapse(TreeExpansionEvent event)
         throws ExpandVetoException {
@@ -552,6 +553,7 @@ public class OntologyClassView extends AbstractDocumentView
     // for each children classes to add to the parent node
     for (OClass subClass : subClasses) {
       index++;
+      if (index > parent.getChildCount()) { index = parent.getChildCount(); }
       if (filterClasses) {
         if (hiddenClassesList.contains(subClass.getONodeID().toString())) {
           // this class is filtered so skip it
@@ -673,7 +675,8 @@ public class OntologyClassView extends AbstractDocumentView
       for (Annotation annotation : annotationSet.get("Mention")) {
         FeatureMap features = annotation.getFeatures();
         if (features.get(ONTOLOGY) != null
-        && features.get(ONTOLOGY).equals(oClass.getOntology().getOntologyURI())
+        && features.get(ONTOLOGY)
+          .equals(oClass.getOntology().getOntologyURI().toString())
         && features.get(CLASS) != null
         && features.get(CLASS).equals(oClass.getONodeID().toString())
         && features.get(INSTANCE) != null) {

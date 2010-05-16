@@ -54,10 +54,10 @@ public class OntologyInstanceView extends AbstractDocumentView {
 
   public OntologyInstanceView() {
 
-    instanceSet = new HashSet<OInstance>();
-    propertiesSet = new HashSet<ObjectProperty>();
-    propertiesNotSet = new HashSet<ObjectProperty>();
-    classByPropertyMap = new HashMap<String, Set<OClass>>();
+    instances = new HashSet<OInstance>();
+    setProperties = new HashSet<ObjectProperty>();
+    properties = new HashSet<ObjectProperty>();
+    classesByPropertyMap = new HashMap<String, Set<OClass>>();
   }
 
   protected void initGUI() {
@@ -198,7 +198,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
               popup.add(new AbstractAction(table.getSelectedRowCount() > 1 ?
                 "Delete instances" : "Delete instance") {
                 public void actionPerformed(ActionEvent e) {
-                  for (OInstance oInstance : instanceSet) {
+                  for (OInstance oInstance : instances) {
                     for (int selectedRow : table.getSelectedRows()) {
                       if (oInstance.getName().equals(
                           table.getModel().getValueAt(selectedRow, 0))) {
@@ -210,7 +210,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
                           annotationSet.get("Mention")) {
                           if (annotation.getFeatures().containsKey(ONTOLOGY)
                           && annotation.getFeatures().get(ONTOLOGY)
-                            .equals(selectedOntology.getOntologyURI())
+                           .equals(selectedOntology.getOntologyURI().toString())
                           && annotation.getFeatures().containsKey(CLASS)
                           && annotation.getFeatures().get(CLASS)
                             .equals(selectedClass.getONodeID().toString())
@@ -267,7 +267,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
               popup.add(new AbstractAction(table.getSelectedRowCount() > 1 ?
                 "Delete properties" : "Delete property") {
                 public void actionPerformed(ActionEvent e) {
-                  for (ObjectProperty objectProperty : propertiesSet) {
+                  for (ObjectProperty objectProperty : setProperties) {
                     for (int selectedRow : table.getSelectedRows()) {
                       // find the property that matches the first column value
                       if (objectProperty.getName().equals(
@@ -353,7 +353,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
    */
   public void updateInstanceTable(OClass selectedClass) {
     this.selectedClass = selectedClass;
-    instanceSet.clear();
+    instances.clear();
     final DefaultTableModel tableModel = new DefaultTableModel();
     tableModel.addColumn("Instance");
     tableModel.addColumn("Label");
@@ -368,7 +368,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
           instance.getSetAnnotationProperties();
         for (AnnotationProperty property : properties) {
           if (property.getName().equals("label")) {
-            instanceSet.add(instance);
+            this.instances.add(instance);
             List<Literal> values =
               instance.getAnnotationPropertyValues(property);
             Set<String> labels = new HashSet<String>();
@@ -383,7 +383,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
               tableModel.addRow(new Object[]{instance.getName(),
                 Strings.toString(labels)});
             } else {
-              instanceSet.remove(instance);
+              this.instances.remove(instance);
             }
           }
         }
@@ -406,12 +406,12 @@ public class OntologyInstanceView extends AbstractDocumentView {
       String selectedValue = (String) instanceTable.getValueAt(
         instanceTable.getSelectedRow(),
         instanceTable.convertColumnIndexToView(0));
-      for (OInstance instance : instanceSet) {
+      for (OInstance instance : instances) {
         if (instance.getName().equals(selectedValue)) {
           // found the instance matching the name in the table
           selectedInstance = instance;
-          propertiesSet.clear();
-          propertiesNotSet.clear();
+          setProperties.clear();
+          properties.clear();
           // get all object properties that can be set for this instance
           Set<OClass> classes =
             instance.getOClasses(OConstants.Closure.DIRECT_CLOSURE);
@@ -419,7 +419,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
             for (RDFProperty property :
                  oClass.getPropertiesWithResourceAsDomain()) {
               if (property instanceof ObjectProperty) {
-                propertiesNotSet.add((ObjectProperty) property);
+                properties.add((ObjectProperty) property);
                 Set<String> ranges = new HashSet<String>();
                 Set<OClass> rangeClasses = new HashSet<OClass>();
                 for (OResource range :
@@ -430,7 +430,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
                 if (ranges.isEmpty()) {
                   ranges.add("All classes");
                 }
-                classByPropertyMap.put(property.getName(), rangeClasses);
+                classesByPropertyMap.put(property.getName(), rangeClasses);
                 tableModel.addRow(new Object[]{property.getName(),
                   Strings.toString(ranges)});
               }
@@ -439,7 +439,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
           // get all set object properties and values for this instance
           for (ObjectProperty objectProperty :
                instance.getSetObjectProperties()) {
-            propertiesSet.add(objectProperty);
+            setProperties.add(objectProperty);
             for (OInstance oInstance :
                  instance.getObjectPropertyValues(objectProperty)) {
                   tableModel.addRow(new Object[]{objectProperty.getName(),
@@ -539,7 +539,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
     Integer id;
     try {
       features = Factory.newFeatureMap();
-      features.put(ONTOLOGY, selectedOntology.getOntologyURI());
+      features.put(ONTOLOGY, selectedOntology.getOntologyURI().toString());
       features.put(CLASS, selectedClass.getONodeID().toString());
       features.put(INSTANCE, instance.getONodeID().toString());
       // create a new annotation from the text selected
@@ -573,7 +573,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
         boolean isSelected, int row, int column) {
       oldValue = (String) value;
       TreeSet<String> ts = new TreeSet<String>(comparator);
-      Set<OClass> classes = classByPropertyMap.get((String)
+      Set<OClass> classes = classesByPropertyMap.get((String)
         propertyTable.getModel().getValueAt(row, 0));
       if (classes.isEmpty()) { classes = selectedOntology.getOClasses(false); }
       for (OClass oClass : classes) {
@@ -606,7 +606,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
       String selectedProperty = (String) propertyTable.getModel().getValueAt(
         propertyTable.getSelectedRow(), 0);
       // search the object property to set
-      for (ObjectProperty objectProperty : propertiesSet) {
+      for (ObjectProperty objectProperty : setProperties) {
         // verify that the property value correspond
         if (objectProperty.getName().equals(selectedProperty)) {
           for (OInstance oInstance :
@@ -629,7 +629,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
           }
         }
       }
-      for (ObjectProperty objectProperty : propertiesNotSet) {
+      for (ObjectProperty objectProperty : properties) {
         if (objectProperty.getName().equals(selectedProperty)) {
           try {
             // set the new value for the selected object property
@@ -669,12 +669,17 @@ public class OntologyInstanceView extends AbstractDocumentView {
   protected XJTable propertyTable;
 
   // local objects
+  /** Class that has the lead selection in the focused tree. */
   protected OClass selectedClass;
+  /** Instance selected in the instance table. */
   protected OInstance selectedInstance;
-  protected Set<OInstance> instanceSet;
-  protected Set<ObjectProperty> propertiesSet;
-  protected Set<ObjectProperty> propertiesNotSet;
-  protected Map<String, Set<OClass>> classByPropertyMap;
+  /** Instances in the instance table for the selected class and filter. */
+  protected Set<OInstance> instances;
+  /** Properties set in the property table for the selected class and filter. */
+  protected Set<ObjectProperty> setProperties;
+  /** Properties in the instance table for the selected class and filter. */
+  protected Set<ObjectProperty> properties;
+  protected Map<String, Set<OClass>> classesByPropertyMap;
   protected static final String ONTOLOGY =
     gate.creole.ANNIEConstants.LOOKUP_ONTOLOGY_FEATURE_NAME;
   protected static final String CLASS =
