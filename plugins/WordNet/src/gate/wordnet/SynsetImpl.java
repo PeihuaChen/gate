@@ -75,9 +75,9 @@ public class SynsetImpl implements Synset {
       //construct the proper word form
       WordSense gateWordSense = null;
 
-      if (this.synsetPOS == WordNet.POS_ADJECTIVE) {
+     /* if (this.synsetPOS == WordNet.POS_ADJECTIVE) {
 
-        Assert.assertTrue(jwWord instanceof net.didion.jwnl.data.Adjective);
+        //Assert.assertTrue(jwWord instanceof net.didion.jwnl.data.Adjective);
         net.didion.jwnl.data.Adjective jwAdjective = (net.didion.jwnl.data.Adjective)jwWord;
 
         gateWordSense = new AdjectiveImpl(gateWord,
@@ -89,7 +89,8 @@ public class SynsetImpl implements Synset {
                                           this.wnDictionary);
       }
 
-      else if (this.synsetPOS == WordNet.POS_VERB) {
+      else*/ 
+        if (this.synsetPOS == WordNet.POS_VERB) {
 
         Assert.assertTrue(jwWord instanceof net.didion.jwnl.data.Verb);
         net.didion.jwnl.data.Verb jwVerb = (net.didion.jwnl.data.Verb)jwWord;
@@ -198,8 +199,9 @@ public class SynsetImpl implements Synset {
         if (true == currPointer.isLexical()) {
           continue;
         }
-
         PointerType currType = currPointer.getType();
+        try {
+        
 //        PointerTarget ptrSource = currPointer.getSource();
         PointerTarget ptrTarget = currPointer.getTarget();
         Assert.assertTrue(ptrTarget instanceof net.didion.jwnl.data.Synset);
@@ -211,6 +213,10 @@ public class SynsetImpl implements Synset {
                                                             gateTargetSynset);
         //add to list of sem relations for this synset
         this.semRelations.add(currSemRel);
+        }
+        catch (IllegalArgumentException e){
+          //System.err.println("Unknown PointerType:" + currType);
+        }
       }
     }
     catch(JWNLException e) {

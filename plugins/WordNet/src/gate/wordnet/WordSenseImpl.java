@@ -150,6 +150,7 @@ public class WordSenseImpl implements WordSense {
         }
 
         PointerType currType = currPointer.getType();
+        try{
 //        PointerTarget ptrSource = currPointer.getSource();
         PointerTarget ptrTarget = currPointer.getTarget();
         Assert.assertTrue(ptrTarget instanceof net.didion.jwnl.data.Word);
@@ -177,6 +178,10 @@ public class WordSenseImpl implements WordSense {
                                                             gateTargetWordSense);
         //add to list of sem relations for this synset
         this.lexRelations.add(gateLexRel);
+        }
+        catch (IllegalArgumentException e) {
+          //System.err.println("Unknown PointerType: " + currType);
+        }
       }
     }
     catch(JWNLException e) {

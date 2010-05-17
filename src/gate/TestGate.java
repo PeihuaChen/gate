@@ -16,38 +16,53 @@
 
 package gate;
 
+import gate.annotation.TestAnnotation;
+import gate.config.TestConfig;
+import gate.corpora.TestCorpus;
+import gate.corpora.TestDocument;
+import gate.corpora.TestDocumentStaxUtils;
+import gate.corpora.TestSerialCorpus;
+import gate.creole.TestControllers;
+import gate.creole.TestCreole;
+import gate.creole.TestCreoleAnnotationHandler;
+import gate.creole.TestPR;
+import gate.creole.TestXSchema;
+import gate.creole.annic.test.TestAnnic;
+import gate.creole.gazetteer.TestFlexibleGazetteer;
+import gate.creole.gazetteer.TestGazetteer;
+import gate.creole.ir.TestIndex;
+import gate.creole.morph.TestMorph;
+import gate.email.TestEmail;
+import gate.html.TestHtml;
+import gate.jape.TestJape;
+import gate.persist.TestPersist;
+import gate.sgml.TestSgml;
+import gate.util.Err;
+import gate.util.GateException;
+import gate.util.Out;
+import gate.util.TestAnnotationMerging;
+import gate.util.TestClassificationMeasures;
+import gate.util.TestDiffer;
+import gate.util.TestFeatureMap;
+import gate.util.TestFiles;
+import gate.util.TestJavac;
+import gate.util.TestRBTreeMap;
+import gate.util.TestReload;
+import gate.util.TestTemplate;
+import gate.util.TestTools;
+import gate.xml.TestRepositioningInfo;
+import gate.xml.TestXml;
+import gnu.getopt.Getopt;
+
 import java.io.File;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.StringTokenizer;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import com.ontotext.gate.gazetteer.TestHashGazetteer;
-
-import gate.annotation.TestAnnotation;
-import gate.config.TestConfig;
-import gate.corpora.*;
-import gate.creole.*;
-import gate.creole.ir.TestIndex;
-import gate.creole.morph.TestMorph;
-import gate.creole.annic.test.TestAnnic;
-import gate.creole.gazetteer.TestFlexibleGazetteer;
-import gate.creole.gazetteer.TestGazetteer;
-import gate.email.TestEmail;
-import gate.html.TestHtml;
-import gate.jape.TestJape;
-import gate.persist.TestPersist;
-import gate.security.TestSecurity;
-import gate.sgml.TestSgml;
-import gate.util.*;
-import gate.wordnet.TestWordNet;
-import gate.xml.TestXml;
-import gate.xml.TestRepositioningInfo;
-
-import gnu.getopt.Getopt;
 
 /** Top-level entry point for GATE test suite;
   * "main" will run the JUnit test runner interface.
@@ -241,7 +256,9 @@ public class TestGate {
       } else {
         suite.addTest(TestAnnic.suite());
         // no test name specified, so run them all
-        suite.addTest(TestWordNet.suite());
+
+        //WordNet has been moved into a plugin along with the test
+        //suite.addTest(TestWordNet.suite());
         suite.addTest(TestIndex.suite());
         suite.addTest(TestPersist.suite());
         suite.addTest(TestControllers.suite());
