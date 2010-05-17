@@ -1,5 +1,5 @@
 /*
- *  WordNet.java
+ *  JWNLWordNetInpl.java
  *
  *  Copyright (c) 1995-2010, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
@@ -8,10 +8,6 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- *
- *  Marin Dimitrov, 16/May/2002
- *
- *  $Id$
  */
 
 package gate.wordnet;
@@ -34,7 +30,7 @@ import gate.util.GateRuntimeException;
 import gate.util.MethodNotImplementedException;
 
 
-public class IndexFileWordNetImpl extends AbstractLanguageResource
+public class JWNLWordNetImpl extends AbstractLanguageResource
                                   implements WordNet {
 
 
@@ -44,7 +40,7 @@ public class IndexFileWordNetImpl extends AbstractLanguageResource
   private URL       propertyUrl;
 
 
-  public IndexFileWordNetImpl() {
+  public JWNLWordNetImpl() {
   }
 
   /** Initialise this resource, and return it. */

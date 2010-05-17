@@ -14,7 +14,7 @@
  *  $Id$
  */
 
-package gate.wordnet;
+package gate.wordnet.test;
 
 import java.io.File;
 import java.util.Iterator;
@@ -25,10 +25,11 @@ import junit.framework.*;
 import gate.Gate;
 import gate.GateConstants;
 import gate.util.Err;
+import gate.wordnet.*;
 
 public class TestWordNet extends TestCase {
 
-  private static IndexFileWordNetImpl wnMain = null;
+  private static WordNet wnMain = null;
 
   public TestWordNet(String dummy) {
     super(dummy);
@@ -371,7 +372,7 @@ System.out.println(iSet);
                           get(GateConstants.WORDNET_CONFIG_FILE);
     if(wnConfigFile == null) return;
     if (null == wnMain) {
-      wnMain = new IndexFileWordNetImpl();
+      wnMain = new JWNLWordNetImpl();
       wnMain.setPropertyUrl(new File(wnConfigFile).toURI().toURL());
       wnMain.init();
     }

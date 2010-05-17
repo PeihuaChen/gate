@@ -52,23 +52,7 @@ public class WordNetViewer extends AbstractVisualResource
   public final static int SENTENCE_FRAMES = 33001;
 
   public WordNetViewer(){
-    jbInit();
-    //initResources();
-  }
-
-  private void initResources(){
-    try {
-      Gate.init();
-      wnMain = new IndexFileWordNetImpl();
-      wnMain.setPropertyUrl(new URL(propertiesFile));
-      wnMain.init();
-    } catch (Exception e){
-      e.printStackTrace();
-    }
-  }
-
-  void jbInit(){
-    searchLabel.setText("Search Word:");
+     searchLabel.setText("Search Word:");
         this.setLayout(gridBagLayout1);
         searchButton.setText("Search");
         searchButton.addActionListener(new java.awt.event.ActionListener() {

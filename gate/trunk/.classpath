@@ -27,6 +27,7 @@
 	<classpathentry kind="src" output="plugins/Alignment/classes" path="plugins/Alignment/src"/>
 	<classpathentry kind="src" output="plugins/Learning/build" path="plugins/Learning/src"/>
 	<classpathentry kind="src" output="plugins/Stemmer_Snowball/classes" path="plugins/Stemmer_Snowball/src"/>
+	<classpathentry kind="src" output="GATE/plugins/WordNet/classes" path="plugins/WordNet/src"/>
 	<classpathentry exported="true" kind="lib" path="lib/Bib2HTML.jar"/>
 	<classpathentry kind="lib" path="lib/ext/nl.mpi.lookup.jar"/>
 	<classpathentry kind="lib" path="lib/plugins/rdf_backend.jar"/>
@@ -36,7 +37,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/jdom.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/junit.jar"/>
 	<classpathentry kind="lib" path="lib/ext/guk.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jwnl.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/GnuGetOpt.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ontotext.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/gateHmm.jar"/>
@@ -68,6 +68,8 @@
 	<classpathentry kind="lib" path="plugins/Ontology_OWLIM2/lib/owlim-2.8.4.jar"/>
 	<classpathentry kind="lib" path="plugins/Ontology_OWLIM2/lib/commons-io-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/spring-aop-2.0.8.jar"/>
+	<classpathentry kind="lib" path="lib/jwnl.jar"/>
+	<classpathentry kind="lib" path="plugins/WordNet/lib/jwnl.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="lib" path="lib/javacc.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/servlet-2_3.zip"/>
