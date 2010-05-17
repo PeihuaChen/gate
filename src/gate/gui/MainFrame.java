@@ -4648,10 +4648,9 @@ public class MainFrame extends JFrame implements ProgressListener,
       }
       try {
       showHelpFrame("http://sourceforge.net/search/index.php?" +
-       "group_id=143829&form_submit=Search&search_subject=1&search_body=1" +
-       "&type_of_search=mlists&ml_name=gate-users&limit=50&all_words=" +
-       java.net.URLEncoder.encode(keywords, "UTF-8") +
-       "#content", "mailing list");
+       "group_id=143829&form_submit=Search&type_of_search=mlists" +
+       "&q=" + java.net.URLEncoder.encode(keywords, "UTF-8"),
+       "mailing list");
 
       } catch (UnsupportedEncodingException error) {
         String message = "The Character Encoding is not supported.";
