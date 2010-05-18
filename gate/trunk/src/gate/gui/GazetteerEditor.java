@@ -15,19 +15,21 @@
 package gate.gui;
 
 import gate.Factory;
-import gate.FeatureMap;
 import gate.Resource;
 import gate.creole.AbstractVisualResource;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.gazetteer.*;
+import gate.swing.XJFileChooser;
 import gate.swing.XJTable;
 import gate.util.Err;
+import gate.util.ExtensionFileFilter;
 import gate.util.Files;
 import gate.util.GateRuntimeException;
 
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
@@ -36,6 +38,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.net.MalformedURLException;
 import java.text.Collator;
 import java.util.*;
 import java.util.List;
@@ -43,21 +46,23 @@ import java.util.Timer;
 
 /**
  * Editor for {@link gate.creole.gazetteer.Gazetteer ANNIE Gazetteer}.
-<p>
-Main features:<ul>
-<li>left table with 4 columns (List name, Major, Minor, Language) for the
+<pre>
+ Main features:
+- left table with 4 columns (List name, Major, Minor, Language) for the
   definition
-<li>right table with 1+n columns (Value, Feature 1...Feature n) for the lists
-<li>TODO: both sorted case *insensitively* on the first column by default
-<li>'Save' on the context menu of the resources tree and tab
-<li>context menu on both tables to delete selected rows
-<li>list name drop down list with .lst files in directory and button [New List]
-<li>value text field and button [New Entry]
-<li>for the second table: [Add Cols]
-<li>TODO: for the separator character test when editing feature columns
-<li>remove feature/value columns when containing only spaces or empty
-<li>a text field 'Filter' at the bottom of the right table
-</p>
+- right table with 1+n columns (Value, Feature 1...Feature n) for the lists
+- 'Save' on the context menu of the resources tree and tab
+- context menu on both tables to delete selected rows
+- list name drop down list with .lst files in directory and button [New List]
+- value text field and button [New Entry]
+- for the second table: [Add Cols]
+- a text field case insensitive 'Filter' at the bottom of the right table
+- both tables sorted case insensitively on the first column by default
+- display in red the list name when the list is modified
+- for the separator character test when editing feature columns
+- make feature map ordered
+- remove feature/value columns when containing only spaces or empty
+</pre>
 */
 public class GazetteerEditor extends AbstractVisualResource
     implements GazetteerListener, ActionsPublisher {
@@ -89,6 +94,8 @@ public class GazetteerEditor extends AbstractVisualResource
     newListComboBox = new JComboBox();
     newListComboBox.setEditable(true);
     newListComboBox.setPrototypeDisplayValue("123456789012345");
+    newListComboBox.setToolTipText(
+      "Lists available in the gazetteer directory");
     newListButton = new JButton("New List");
     // enable/disable [New] button according to the text field content
     JTextComponent listTextComponent = (JTextField)
@@ -176,6 +183,29 @@ public class GazetteerEditor extends AbstractVisualResource
     definitionTable.setEnableHidingColumns(true);
     definitionTable.setAutoResizeMode(XJTable.AUTO_RESIZE_OFF);
     definitionTable.setModel(definitionTableModel);
+    definitionTable.setSortable(true);
+    definitionTable.setSortedColumn(0);
+    // use red colored font for modified lists name
+    definitionTable.getColumnModel().getColumn(0).setCellRenderer(
+      new DefaultTableCellRenderer() {
+        public Component getTableCellRendererComponent(JTable table,
+            Object value, boolean isSelected, boolean hasFocus,
+            int row, int column) {
+          super.getTableCellRendererComponent(
+            table, value, isSelected, hasFocus, row, column);
+          setForeground(table.getForeground());
+          LinearNode linearNode = (LinearNode)
+            linearDefinition.getNodesByListNames().get(value);
+          if (linearNode != null) {
+            GazetteerList gazetteerList = (GazetteerList)
+              linearDefinition.getListsByNode().get(linearNode);
+            if (gazetteerList != null && gazetteerList.isModified()) {
+              setForeground(Color.RED);
+            }
+          }
+          return this;
+        }
+      });
     definitionPanel.add(new JScrollPane(definitionTable), BorderLayout.CENTER);
 
     // list table pane
@@ -205,6 +235,10 @@ public class GazetteerEditor extends AbstractVisualResource
               listTable.getCellRect(row, column, true));
             listTable.setRowSelectionInterval(row, row);
             listTable.setColumnSelectionInterval(column, column);
+            GazetteerList gazetteerList = (GazetteerList)
+              linearDefinition.getListsByNode().get(selectedLinearNode);
+            gazetteerList.setModified(true);
+            definitionTable.repaint();
           }
         });
       }
@@ -304,6 +338,8 @@ public class GazetteerEditor extends AbstractVisualResource
     listTable.setEnableHidingColumns(true);
     listTable.setAutoResizeMode(XJTable.AUTO_RESIZE_OFF);
     listTable.setModel(listTableModel);
+    listTable.setSortable(true);
+    listTable.setSortedColumn(0);
     listPanel.add(new JScrollPane(listTable), BorderLayout.CENTER);
     JPanel listBottomPanel = new JPanel(new BorderLayout());
     JPanel filterPanel = new JPanel();
@@ -351,6 +387,7 @@ public class GazetteerEditor extends AbstractVisualResource
         public void valueChanged(ListSelectionEvent e) {
           if (definitionTable.getSelectedRow() == -1) {
             listTableModel.setGazetteerList(new GazetteerList());
+            selectedLinearNode = null;
           } else {
             String listName = (String) definitionTable.getValueAt(
               definitionTable.getSelectedRow(),
@@ -360,18 +397,25 @@ public class GazetteerEditor extends AbstractVisualResource
             if (selectedLinearNode != null) {
               listTableModel.setGazetteerList((GazetteerList)
                 linearDefinition.getListsByNode().get(selectedLinearNode));
-              listTable.setSortable(false);
+            }
+          }
+          if (!listFilterTextField.getText().equals("")) {
+            listFilterTextField.setText("");
+          }
+          if (!newEntryTextField.getText().equals("")) {
+            newEntryTextField.setText("");
+          }
+          listTableModel.setFilterText("");
+          listTableModel.fireTableStructureChanged();
+          if (definitionTable.getSelectedRow() != -1) {
+            if (selectedLinearNode != null) {
               for (int col = 0 ; col < listTable.getColumnCount(); col++) {
                 listTable.setComparator(col, collator);
               }
-              listTable.setSortedColumn(0);
-              listTable.setSortable(true);
+              // TODO: this is only to sort the rows, how to avoid it?
+              listTableModel.fireTableDataChanged();
             }
           }
-          listTableModel.setFilterText("");
-          listFilterTextField.setText("");
-          listTableModel.fireTableStructureChanged();
-          newEntryTextField.setText("");
         }
       }
     );
@@ -423,6 +467,7 @@ public class GazetteerEditor extends AbstractVisualResource
           && table.getSelectedRowCount() > 0) {
             JPopupMenu popup = new JPopupMenu();
             popup.add(new DeleteSelectedLinearNodeAction());
+            popup.add(new ReloadGazetteerListAction());
             popup.show(table, me.getX(), me.getY());
         }
       }
@@ -469,6 +514,8 @@ public class GazetteerEditor extends AbstractVisualResource
     ActionMap actionMap = getActionMap();
     inputMap.put(KeyStroke.getKeyStroke("control S"), "save gazetteer");
     actionMap.put("save gazetteer", actions.get(0));
+    inputMap.put(KeyStroke.getKeyStroke("control R"), "reload list");
+    actionMap.put("reload list", new ReloadGazetteerListAction());
   }
 
   public void setTarget(Object target) {
@@ -486,6 +533,7 @@ public class GazetteerEditor extends AbstractVisualResource
 
   public void processGazetteerEvent(GazetteerEvent e) {
     gazetteer = (Gazetteer) e.getSource();
+
     // read and display the definition of the gazetteer
     if (e.getType() == GazetteerEvent.REINIT) {
       linearDefinition = gazetteer.getLinearDefinition();
@@ -493,6 +541,18 @@ public class GazetteerEditor extends AbstractVisualResource
         throw new GateRuntimeException(
           "Linear definition of a gazetteer should not be null.");
       }
+
+      // reload the lists with ordered feature maps
+      try {
+        if (linearDefinition.getSeparator() != null
+         && linearDefinition.getSeparator().length() > 0) {
+          linearDefinition.loadLists(true);
+        }
+      } catch (ResourceInstantiationException rie) {
+        rie.printStackTrace();
+        return;
+      }
+
       // add the gazetteer definition data to the table
       definitionTableModel.setRowCount(0);
       ArrayList<String> values = new ArrayList<String>();
@@ -505,12 +565,10 @@ public class GazetteerEditor extends AbstractVisualResource
         definitionTableModel.addRow(values.toArray());
         values.clear();
       }
-      definitionTable.setSortable(false);
       for (int col = 0 ; col < definitionTable.getColumnCount(); col++) {
         definitionTable.setComparator(col, collator);
       }
-      definitionTable.setSortedColumn(0);
-      definitionTable.setSortable(true);
+
       // update file list name in the drop down list
       File gazetteerDirectory = new File(
         Files.fileFromURL(gazetteer.getListsURL()).getParent());
@@ -586,8 +644,6 @@ public class GazetteerEditor extends AbstractVisualResource
           return "";
         }
         List<String> features = new ArrayList<String>(featureMap.keySet());
-        // there is no order in feature map so try to create one
-        Collections.sort(features);
         int featureCount = (column + (column % 2)) / 2;
         if (column % 2 == 1) {
           return features.get(featureCount-1);
@@ -599,6 +655,35 @@ public class GazetteerEditor extends AbstractVisualResource
 
     public void setValueAt(Object value, int row, int column) {
       if (row == -1 || column == -1) { return; }
+      // remove separator characters that are contained in the value
+      // and display a tooltip to explain it
+      if (linearDefinition.getSeparator() != null
+       && linearDefinition.getSeparator().length() > 0
+       && ((String)value).contains(linearDefinition.getSeparator())) {
+        final Point point = listTable.getCellRect(listTable.getSelectedRow(),
+          listTable.getSelectedColumn(), true).getLocation();
+        point.translate(listTable.getLocationOnScreen().x,
+          listTable.getLocationOnScreen().y);
+        final Timer timer = new Timer("GazetteerEditor tooltip timer", true);
+        SwingUtilities.invokeLater(new Runnable() { public void run() {
+          if (!listTable.isShowing()) { return; }
+          JToolTip toolTip = listTable.createToolTip();
+          toolTip.setTipText("No separator character allowed: [" +
+            linearDefinition.getSeparator() + "]");
+          PopupFactory popupFactory = PopupFactory.getSharedInstance();
+          final Popup popup = popupFactory.getPopup(
+            listTable, toolTip, point.x, point.y - 20);
+          popup.show();
+          Date timeToRun = new Date(System.currentTimeMillis() + 3000);
+          timer.schedule(new TimerTask() { public void run() {
+            SwingUtilities.invokeLater(new Runnable() { public void run() {
+              popup.hide(); // hide the tooltip after some time
+            }});
+          }}, timeToRun);
+        }});
+        value = ((String)value).replaceAll(
+          "\\Q"+linearDefinition.getSeparator()+"\\E", "");
+      }
       GazetteerNode gazetteerNode =
         (GazetteerNode) gazetteerListFiltered.get(row);
       if (column == 0) {
@@ -606,7 +691,7 @@ public class GazetteerEditor extends AbstractVisualResource
         gazetteerNode.setEntry((String) value);
       } else {
         // update the whole feature map
-        FeatureMap newFeatureMap = Factory.newFeatureMap();
+        Map newFeatureMap = new LinkedHashMap();
         for (int col = 1; col+1 < getColumnCount(); col += 2) {
           String feature = (String) ((col == column) ?
             value : getValueAt(row, col));
@@ -617,6 +702,8 @@ public class GazetteerEditor extends AbstractVisualResource
         gazetteerNode.setFeatureMap(newFeatureMap);
         fireTableRowsUpdated(row, row);
       }
+      gazetteerList.setModified(true);
+      definitionTable.repaint();
     }
 
     public void fireTableStructureChanged() {
@@ -646,20 +733,21 @@ public class GazetteerEditor extends AbstractVisualResource
 
     protected void filterRows() {
       gazetteerListFiltered.clear();
+      String filterUC = filter.toUpperCase();
       for (Object object : gazetteerList) {
         GazetteerNode node = (GazetteerNode) object;
         boolean match = false;
         Map map = node.getFeatureMap();
         if (map != null) {
           for (Object key : map.keySet()) {
-            if (((String)key).contains(filter)
-             || ((String)map.get(key)).contains(filter)) {
+            if (((String)key).toUpperCase().contains(filterUC)
+             || ((String)map.get(key)).toUpperCase().contains(filterUC)) {
               match = true;
               break;
             }
           }
         }
-        if (match || node.getEntry().contains(filter)) {
+        if (match || node.getEntry().toUpperCase().contains(filterUC)) {
           // gazetteer node matches the filter
           gazetteerListFiltered.add(node);
         }
@@ -692,7 +780,7 @@ public class GazetteerEditor extends AbstractVisualResource
     }
 
     /**
-     * @param row row number in the model
+     * @param row row index in the model
      */
     public void removeRow(int row) {
       gazetteerList.remove(gazetteerListFiltered.get(row));
@@ -712,31 +800,74 @@ public class GazetteerEditor extends AbstractVisualResource
     return actions;
   }
 
+  protected class ReloadGazetteerListAction extends AbstractAction {
+    public ReloadGazetteerListAction() {
+      super("Reload List");
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control R"));
+    }
+    public void actionPerformed(ActionEvent e) {
+      GazetteerList gazetteerList = (GazetteerList)
+        linearDefinition.getListsByNode().get(selectedLinearNode);
+      gazetteerList.clear();
+      try {
+        gazetteerList.load(true);
+      } catch (ResourceInstantiationException rie) {
+        rie.printStackTrace();
+        return;
+      }
+      // reselect the row to redisplay the list
+      int row = definitionTable.getSelectedRow();
+      definitionTable.clearSelection();
+      definitionTable.getSelectionModel().setSelectionInterval(row, row);
+    }
+  }
+
   protected class SaveGazetteerAction extends AbstractAction {
     public SaveGazetteerAction() {
-      super("Save Gazetteer");
+      super("Save as...");
       putValue(SHORT_DESCRIPTION, "Save the definition and all the lists");
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control S"));
     }
     public void actionPerformed(ActionEvent e) {
-      try {
-        linearDefinition.store();
-        for (Object object : linearDefinition.getListsByNode().values()) {
-          GazetteerList gazetteerList = (GazetteerList) object;
-          gazetteerList.store();
-        }
-        MainFrame.getInstance().statusChanged("Gazetteer saved sucessfuly");
+      XJFileChooser fileChooser = MainFrame.getFileChooser();
+      ExtensionFileFilter filter =
+        new ExtensionFileFilter("Gazetteer files", "def");
+      fileChooser.addChoosableFileFilter(filter);
+      fileChooser.setMultiSelectionEnabled(false);
+      fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+      fileChooser.setDialogTitle("Select a file name...");
+      fileChooser.setResource(GazetteerEditor.class.getName());
+      int result = fileChooser.showSaveDialog(GazetteerEditor.this);
+      if (result == JFileChooser.APPROVE_OPTION) {
+        File selectedFile = fileChooser.getSelectedFile();
+        if (selectedFile == null) { return; }
+        try {
+          linearDefinition.setURL(selectedFile.toURI().toURL());
+          linearDefinition.store();
+          for (Object object : linearDefinition.getListsByNode().values()) {
+            GazetteerList gazetteerList = (GazetteerList) object;
+            gazetteerList.setURL(new File(selectedFile.getParentFile(),
+              Files.fileFromURL(gazetteerList.getURL()).getName())
+              .toURI().toURL());
+            gazetteerList.store();
+          }
+          MainFrame.getInstance().statusChanged("Gazetteer saved sucessfuly");
+          definitionTable.repaint();
 
-      } catch (ResourceInstantiationException re) {
-        MainFrame.getInstance().statusChanged("Unable to save the Gazetteer.");
-        Err.prln("Unable to save the Gazetteer.\n" + re.getMessage());
+        } catch (ResourceInstantiationException re) {
+          MainFrame.getInstance().statusChanged(
+            "Unable to save the Gazetteer.");
+          Err.prln("Unable to save the Gazetteer.\n" + re.getMessage());
+        } catch (MalformedURLException mue) {
+          mue.printStackTrace();
+        }
       }
     }
   }
 
   protected class DeleteSelectedLinearNodeAction extends AbstractAction {
     public DeleteSelectedLinearNodeAction() {
-      super("Delete selected rows");
+      super("Delete Selection");
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("shift DELETE"));
     }
 
@@ -756,7 +887,7 @@ public class GazetteerEditor extends AbstractVisualResource
 
   protected class DeleteSelectedGazetteerNodeAction extends AbstractAction {
     public DeleteSelectedGazetteerNodeAction() {
-      super("Delete selected rows");
+      super("Delete Selection");
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("shift DELETE"));
     }
 

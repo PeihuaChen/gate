@@ -1,17 +1,17 @@
 /*
- * GazetteerList.java
+ *  GazetteerList.java
  *
- * Copyright (c) 2002, The University of Sheffield.
+ *  Copyright (c) 1995-2010, The University of Sheffield. See the file
+ *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
- * This file is part of GATE (see http://gate.ac.uk/), and is free
- * software, licenced under the GNU Library General Public License,
- * Version 2, June1991.
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
  *
- * A copy of this licence is included in the distribution in the file
- * licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ *  borislav popov 02/2002
  *
- * borislav popov 02/2002
- *
+ *  $Id$
  */
 
 package gate.creole.gazetteer;
@@ -21,6 +21,7 @@ import java.net.URL;
 import java.util.*;
 
 import gate.creole.ResourceInstantiationException;
+import gate.util.Files;
 
 
 /** Gazetteer List provides the means for uploading, managing and
@@ -114,9 +115,18 @@ implements List {
 
   /**
    * Loads a gazetteer list
-   * @throws ResourceInstantiationException
+   * @throws ResourceInstantiationException when the resource cannot be created
    */
   public void load() throws ResourceInstantiationException {
+    load(false);
+  }
+
+  /**
+   * Loads a gazetteer list
+   * @param isOrdered true if the feature maps used should be ordered
+   * @throws ResourceInstantiationException when the resource cannot be created
+   */
+  public void load(boolean isOrdered) throws ResourceInstantiationException {
     try {
       if (null == url) {
         throw new ResourceInstantiationException("URL not specified (null).");
@@ -128,7 +138,7 @@ implements List {
                               (url).openStream(), encoding));
       String line;
       while (null != (line = listReader.readLine())) {
-        entries.add(new GazetteerNode(line,separator));
+        entries.add(new GazetteerNode(line, separator, isOrdered));
       } //while
 
       listReader.close();
@@ -155,7 +165,7 @@ implements List {
                     );
       } // if gate:path url
 
-      File fileo = new File(tempUrl.getFile());
+      File fileo = Files.fileFromURL(tempUrl);
 
       fileo.delete();
       OutputStreamWriter listWriter  = new OutputStreamWriter(
@@ -201,7 +211,7 @@ implements List {
   }
 
   /**
-   * @param seperator the seperator to set
+   * @param separator the separator to set
    */
   public void setSeparator(String separator) {
     this.separator = separator;
