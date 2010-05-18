@@ -337,21 +337,13 @@ public class Main {
    * any GUI components are created.
    */
   public static void applyUserPreferences(){
-    
-    String osname = System.getProperty("os.name").toLowerCase();
-    boolean OS_IS_MAC = osname.startsWith("mac");
-    boolean OS_IS_LINUX = osname.indexOf("linux") != -1;
-    
-    Map<String, Object> uiDelegates = null;
-    
     //look and feel
     String lnfClassName = Gate.getUserConfig().
                           getString(GateConstants.LOOK_AND_FEEL);
-        
     if(lnfClassName == null){
       //if running on Linux, default to Metal rather than GTK because GTK LnF
       //doesn't play nicely with most Gnome themes
-      if(OS_IS_LINUX){
+      if(System.getProperty("os.name").toLowerCase().indexOf("linux") != -1){
         //running on Linux
         lnfClassName = UIManager.getCrossPlatformLookAndFeelClassName();
       }else{
@@ -359,25 +351,6 @@ public class Main {
       }
       Gate.getUserConfig().put(GateConstants.LOOK_AND_FEEL, lnfClassName);
     }
-    
-    if (OS_IS_MAC && !lnfClassName.equals(UIManager.getSystemLookAndFeelClassName())) {
-      try {
-        //this trick comes from http://www.pushing-pixels.org/?p=366
-        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        
-        uiDelegates = new HashMap<String, Object>();        
-        uiDelegates.put("MenuBarUI", UIManager.get("MenuBarUI"));
-        uiDelegates.put("MenuUI", UIManager.get("MenuUI"));
-        uiDelegates.put("MenuItemUI", UIManager.get("MenuItemUI"));
-        uiDelegates.put("CheckBoxMenuItemUI", UIManager.get("CheckBoxMenuItemUI"));
-        uiDelegates.put("RadioButtonMenuItemUI", UIManager.get("RadioButtonMenuItemUI"));
-        uiDelegates.put("PopupMenuUI", UIManager.get("PopupMenuUI"));
-      }
-      catch (Exception e) {
-        uiDelegates = null;
-      }
-    }
-    
     try {
       UIManager.setLookAndFeel(lnfClassName);
     } catch(Exception e) {
@@ -390,13 +363,6 @@ public class Main {
         System.err.print(
                 "Could not set the cross-platform Look and Feel either. The error was:\n" +
                 e1.toString() + "\nGiving up on Look and Feel.");
-      }
-    }
-    
-    if (uiDelegates != null) {
-      //this is the second half of the trick from http://www.pushing-pixels.org/?p=366
-      for (Map.Entry<String, Object> uiDelegate : uiDelegates.entrySet()) {
-        UIManager.put(uiDelegate.getKey(),uiDelegate.getValue());
       }
     }
 
