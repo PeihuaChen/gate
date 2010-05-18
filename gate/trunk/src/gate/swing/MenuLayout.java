@@ -82,11 +82,6 @@ public class MenuLayout implements LayoutManager {
       }
     }
 
-    //correct offscreen showing
-    if(location.x < 0 || location.y < 0){
-      location.x = Math.max(0, location.x);
-      location.y = Math.max(0, location.y);
-    }
     //find the maximum size
     Toolkit toolkit = Toolkit.getDefaultToolkit();
     Rectangle contentsBounds = new Rectangle(toolkit.getScreenSize());
@@ -200,16 +195,6 @@ public class MenuLayout implements LayoutManager {
   public void layoutContainer(Container target) {
     Insets insets = target.getInsets();
     Rectangle bounds = target.getBounds();
-    //correct off-screen showing
-    if(target.isShowing()){
-      Point locationOnScreen = target.getLocationOnScreen();
-      if(locationOnScreen.x < 0 || locationOnScreen.y < 0){
-        Window parent = SwingUtilities.getWindowAncestor(target);
-        int newx = Math.max(0, locationOnScreen.x);
-        int newy = Math.max(0, locationOnScreen.y);
-        parent.setLocation(newx, newy);
-      }
-    }
     int maxheight = bounds.height - insets.bottom;
     int compCnt = target.getComponentCount();
     int y = insets.top;
