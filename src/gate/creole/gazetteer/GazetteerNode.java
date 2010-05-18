@@ -1,11 +1,20 @@
+/*
+ *  Copyright (c) 1995-2010, The University of Sheffield. See the file
+ *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  $Id$
+ */
+
 package gate.creole.gazetteer;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import gate.util.GateRuntimeException;
+
+import java.util.*;
 
 /**
  * <p>
@@ -44,17 +53,15 @@ public class GazetteerNode {
     this.featureMap = featureMap;
   }
 
-  
   /**
    * Parses and create a gazetteer node from a string using no separator, i.e.
    * the whole node is considered as the string to match, and there are no
    * additional features.
    * 
    * @param node the gazetteer node to be parsed
-   * @throws InvalidFormatException
    */
   public GazetteerNode(String node) {
-    this(node,(String)null);
+    this(node, (String) null, false);
   }
   
   /**
@@ -62,11 +69,23 @@ public class GazetteerNode {
    * 
    * @param node the gazetteer node to be parsed
    * @param separator the separator used in the gazetteer node string to delimit 
-   * each name-value pair of features. If the separator is null, then the whole 
+   * each name-value pair of features. If the separator is null, then the whole
    * node will be used as the gazetteer entry
-   * @throws InvalidFormatException
    */
   public GazetteerNode(String node, String separator) {
+    this(node, separator, false);
+  }
+  
+  /**
+   * Parses and create a gazetteer node from a string
+   *
+   * @param node the gazetteer node to be parsed
+   * @param separator the separator used in the gazetteer node string to delimit
+   * each name-value pair of features. If the separator is null, then the whole
+   * node will be used as the gazetteer entry
+   * @param isOrdered true if the feature maps used should be ordered
+   */
+  public GazetteerNode(String node, String separator, boolean isOrdered) {
     this.separator = (separator != null && separator.length() == 0)? null : separator;
     int index_sep;
     if(this.separator == null || (index_sep = node.indexOf(this.separator)) == -1 ) {
@@ -75,21 +94,21 @@ public class GazetteerNode {
     } else {
       entry = node.substring(0, index_sep);
       String features = node.substring(index_sep + 1);
-      featureMap = getFeatures(features);
+      featureMap = getFeatures(features, isOrdered);
     }
   }
-  
+
   /**
    * Given a string of name-value pairs in the format "name=value", separated
    * by whatever this GazetteerNode's separator has been set to, convert it
-   * to the equilivant map.
+   * to the equivalent map.
    * 
    * @param features a string in the format "name=value" separated by whatever
    * the separator has been set to.
+   * @param isOrdered true if the map returned should be ordered
    * @return a Map of the features
-   * @throws InvalidFormatException
    */
-  private Map getFeatures(String features) {
+  private Map getFeatures(String features, boolean isOrdered) {
     
     if (separator == null)
       return null;
@@ -118,12 +137,18 @@ public class GazetteerNode {
     }
     
     // extract the name and value from the pair strings and put in feature map
-    Map<String,String> featureMap = new HashMap<String,String>(pairs.length);
+    Map<String,String> featureMap;
+    if (isOrdered) {
+      featureMap = new LinkedHashMap<String,String>(pairs.length);
+    } else {
+      featureMap = new HashMap<String,String>(pairs.length);
+    }
     for(int i = 0; i < pairs.length; i++) {
       String pair = pairs[i];
       int sep = pair.indexOf('=');
       if(sep == -1) {
-        throw new gate.util.GateRuntimeException("Correct format for gazetteer entry features is: [entry]([separator][featureName]=[featureValue])*");
+        throw new GateRuntimeException("Correct format for gazetteer entry" +
+          " features is: [entry]([separator][featureName]=[featureValue])*");
       } else {
         String name = pair.substring(0, sep).trim();
         String value = pair.substring(sep + 1).trim();
@@ -140,20 +165,26 @@ public class GazetteerNode {
   }
 
   /**
-   * Converts a featureMap to separated name value pairs. Note: the string will begin
-   * with the separator character.
+   * Converts a featureMap to separated name value pairs. Note: the string will
+   * begin with the separator character.
    * 
-   * @param featureMap
-   * @return
+   * @param featureMap map to be converted
+   * @return string of name/value pairs
    */
   public String featureMapToString(Map featureMap) {
     String str = "";
-    // sort into a predictable order
-    List sortedKeys = new ArrayList(featureMap.keySet()); 
-    Collections.sort(sortedKeys);
-    for(Iterator it = sortedKeys.iterator(); it.hasNext();) {
-      String key = (String)it.next();
-      str += separator + key + "=" + featureMap.get(key);
+    if (featureMap instanceof LinkedHashMap) {
+      for (Object key : featureMap.keySet()) {
+        str += separator + key + "=" + featureMap.get(key);
+      }
+    } else {
+      // sort into a predictable order
+      List sortedKeys = new ArrayList(featureMap.keySet());
+      Collections.sort(sortedKeys);
+      for(Iterator it = sortedKeys.iterator(); it.hasNext();) {
+        String key = (String)it.next();
+        str += separator + key + "=" + featureMap.get(key);
+      }
     }
     return str;
   }

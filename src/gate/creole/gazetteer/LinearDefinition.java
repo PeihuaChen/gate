@@ -1,17 +1,17 @@
 /*
- * LinearDefinition.java
+ *  LinearDefinition.java
  *
- * Copyright (c) 2002, The University of Sheffield.
+ *  Copyright (c) 1995-2010, The University of Sheffield. See the file
+ *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
- * This file is part of GATE (see http://gate.ac.uk/), and is free
- * software, licenced under the GNU Library General Public License,
- * Version 2, June1991.
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
  *
- * A copy of this licence is included in the distribution in the file
- * licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
+ *  borislav popov 02/2002
  *
- * borislav popov 02/2002
- *
+ *  $Id$
  */
 package gate.creole.gazetteer;
 
@@ -21,6 +21,7 @@ import java.net.URL;
 import java.util.*;
 
 import gate.creole.ResourceInstantiationException;
+import gate.util.Files;
 
 
 /** Represents a Linear Definition [lists.def] file <br>
@@ -81,9 +82,21 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
   /**
    * Loads the gazetteer lists and maps them to the nodes
    * @return a map of nodes vs GazetteerLists
-   * @throws ResourceInstantiationException
+   * @throws ResourceInstantiationException when the resource cannot be created
    */
-  public Map loadLists() throws ResourceInstantiationException {
+  public Map loadLists()
+      throws ResourceInstantiationException {
+    return loadLists(false);
+  }
+
+  /**
+   * Loads the gazetteer lists and maps them to the nodes
+   * @return a map of nodes vs GazetteerLists
+   * @param isOrdered true if the feature maps used should be ordered
+   * @throws ResourceInstantiationException when the resource cannot be created
+   */
+  public Map loadLists(boolean isOrdered)
+      throws ResourceInstantiationException {
     try {
       gazListsByNode = new HashMap();
       Iterator inodes = nodes.iterator();
@@ -95,7 +108,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
         URL lurl = new URL(url,node.getList());
         list.setURL(lurl);
         list.setEncoding(encoding);
-        list.load();
+        list.load(isOrdered);
 
         gazListsByNode.put(node,list);
       } // while inodes
@@ -225,7 +238,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
                     );
       } // if gate:path url
 
-      File fileo = new File(tempUrl.getFile());
+      File fileo = Files.fileFromURL(tempUrl);
       fileo.delete();
       BufferedWriter defWriter = new BufferedWriter(new FileWriter(fileo));
       Iterator inodes = nodes.iterator();
