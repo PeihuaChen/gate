@@ -23,7 +23,7 @@ void beforeCorpus(c) {
 frequencies << [:]
 
 // iterate over the requested annotations
-doc.annotations[scriptParams.annotationType].each {
+inputAS[scriptParams.annotationType].each {
   def str = doc.stringFor(it)
   // increment term frequency for this term
   frequencies[docNum][str] =
@@ -37,7 +37,7 @@ doc.annotations[scriptParams.annotationType].each {
 }
 
 // normalize counts by doc length
-def docLength = doc.annotations[scriptParams.annotationType].size()
+def docLength = inputAS[scriptParams.annotationType].size()
 frequencies[docNum].each { freq ->
   freq.value = ((double)freq.value) / docLength
 }
