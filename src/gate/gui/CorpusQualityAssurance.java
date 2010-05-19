@@ -122,7 +122,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     };
   }
 
-  protected void initGuiComponents(){
+  protected void initGuiComponents() {
     setLayout(new BorderLayout());
 
     JPanel sidePanel = new JPanel(new GridBagLayout());
@@ -154,8 +154,9 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     setList = new JList();
     setList.setSelectionModel(new ToggleSelectionABModel(setList));
     setList.setPrototypeCellValue("present in every document");
-    setList.setVisibleRowCount(4);
+    gbc.weighty = 1;
     sidePanel.add(new JScrollPane(setList), gbc);
+    gbc.weighty = 0;
     sidePanel.add(Box.createVerticalStrut(2), gbc);
     setCheck = new JCheckBox("present in every document", false);
     setCheck.addActionListener(new AbstractAction(){
@@ -174,8 +175,9 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     typeList = new JList();
     typeList.setSelectionModel(new ToggleSelectionModel());
     typeList.setPrototypeCellValue("present in every document");
-    typeList.setVisibleRowCount(5);
+    gbc.weighty = 1;
     sidePanel.add(new JScrollPane(typeList), gbc);
+    gbc.weighty = 0;
     sidePanel.add(Box.createVerticalStrut(2), gbc);
     typeCheck = new JCheckBox("present in every selected set", false);
     typeCheck.addActionListener(new AbstractAction(){
@@ -194,8 +196,9 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     featureList = new JList();
     featureList.setSelectionModel(new ToggleSelectionModel());
     featureList.setPrototypeCellValue("present in every document");
-    featureList.setVisibleRowCount(4);
+    gbc.weighty = 1;
     sidePanel.add(new JScrollPane(featureList), gbc);
+    gbc.weighty = 0;
     sidePanel.add(Box.createVerticalStrut(2), gbc);
     featureCheck = new JCheckBox("present in every selected type", false);
     featureCheck.addActionListener(new AbstractAction(){
@@ -230,24 +233,22 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       fscore+"strict",fscore+"lenient", fscore+"average",
       fscore2+"strict", fscore2+"lenient", fscore2+"average"}));
     measureList.setPrototypeCellValue("present in every document");
-    measureList.setVisibleRowCount(3);
     measureScrollPane.setViewportView(measureList);
     measure2List = new JList();
     measure2List.setSelectionModel(new ToggleSelectionModel());
     measure2List.setModel(new ExtendedListModel(new String[]{
       "Observed agreement", "Cohen's Kappa" , "Pi's Kappa"}));
     measure2List.setPrototypeCellValue("present in every document");
-    measure2List.setVisibleRowCount(3);
     measureTabbedPane = new JTabbedPane();
     measureTabbedPane.addTab("F-Score", null,
       measureScrollPane, "Inter-annotator agreement");
     measureTabbedPane.addTab("Classification", null,
       new JScrollPane(measure2List), "Classification agreement");
-    sidePanel.add(measureTabbedPane, gbc);
-    sidePanel.add(Box.createVerticalStrut(5), gbc);
     gbc.weighty = 1;
-    sidePanel.add(Box.createVerticalGlue(), gbc);
+    sidePanel.add(measureTabbedPane, gbc);
     gbc.weighty = 0;
+    sidePanel.add(Box.createVerticalStrut(5), gbc);
+    sidePanel.add(Box.createVerticalGlue(), gbc);
 
     // options panel
     final JPanel measureOptionsPanel = new JPanel();
