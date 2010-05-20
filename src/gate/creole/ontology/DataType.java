@@ -75,8 +75,7 @@ public class DataType {
    */
   public static DataType getBooleanDataType() {
     try {
-      return new BooleanDT(new URI("http://www.w3.org/2001/XMLSchema#boolean",
-              false));
+      return new BooleanDT("http://www.w3.org/2001/XMLSchema#boolean");
     }
     catch(InvalidURIException iue) {
       return null;
@@ -88,7 +87,7 @@ public class DataType {
    */
   public static DataType getByteDataType() {
     try {
-      return new ByteDT(new URI("http://www.w3.org/2001/XMLSchema#byte", false));
+      return new ByteDT("http://www.w3.org/2001/XMLSchema#byte");
     }
     catch(InvalidURIException iue) {
       return null;
@@ -100,7 +99,7 @@ public class DataType {
    */
   public static DataType getDateDataType() {
     try {
-      return new DateDT(new URI("http://www.w3.org/2001/XMLSchema#date", false));
+      return new DateDT("http://www.w3.org/2001/XMLSchema#date");
     }
     catch(InvalidURIException iue) {
       return null;
@@ -112,8 +111,7 @@ public class DataType {
    */
   public static DataType getDecimalDataType() {
     try {
-      return new DoubleDT(new URI("http://www.w3.org/2001/XMLSchema#decimal",
-              false));
+      return new DoubleDT("http://www.w3.org/2001/XMLSchema#decimal");
     }
     catch(InvalidURIException iue) {
       return null;
@@ -125,8 +123,7 @@ public class DataType {
    */
   public static DataType getDoubleDataType() {
     try {
-      return new DoubleDT(new URI("http://www.w3.org/2001/XMLSchema#double",
-              false));
+      return new DoubleDT("http://www.w3.org/2001/XMLSchema#double");
     }
     catch(InvalidURIException iue) {
       return null;
@@ -138,8 +135,7 @@ public class DataType {
    */
   public static DataType getDurationDataType() {
     try {
-      return new LongDT(new URI("http://www.w3.org/2001/XMLSchema#duration",
-              false));
+      return new LongDT("http://www.w3.org/2001/XMLSchema#duration");
     }
     catch(InvalidURIException iue) {
       return null;
@@ -151,8 +147,7 @@ public class DataType {
    */
   public static DataType getFloatDataType() {
     try {
-      return new FloatDT(new URI("http://www.w3.org/2001/XMLSchema#float",
-              false));
+      return new FloatDT("http://www.w3.org/2001/XMLSchema#float");
     }
     catch(InvalidURIException iue) {
       return null;
@@ -164,8 +159,7 @@ public class DataType {
    */
   public static DataType getIntDataType() {
     try {
-      return new IntegerDT(new URI("http://www.w3.org/2001/XMLSchema#int",
-              false));
+      return new IntegerDT("http://www.w3.org/2001/XMLSchema#int");
     }
     catch(InvalidURIException iue) {
       return null;
@@ -177,8 +171,7 @@ public class DataType {
    */
   public static DataType getIntegerDataType() {
     try {
-      return new IntegerDT(new URI("http://www.w3.org/2001/XMLSchema#integer",
-              false));
+      return new IntegerDT("http://www.w3.org/2001/XMLSchema#integer");
     }
     catch(InvalidURIException iue) {
       return null;
@@ -190,7 +183,7 @@ public class DataType {
    */
   public static DataType getLongDataType() {
     try {
-      return new LongDT(new URI("http://www.w3.org/2001/XMLSchema#long", false));
+      return new LongDT("http://www.w3.org/2001/XMLSchema#long");
     }
     catch(InvalidURIException iue) {
       return null;
@@ -203,8 +196,8 @@ public class DataType {
    */
   public static DataType getNegativeIntegerDataType() {
     try {
-      return new NegativeIntegerDT(new URI(
-              "http://www.w3.org/2001/XMLSchema#negativeInteger", false));
+      return new NegativeIntegerDT(
+              "http://www.w3.org/2001/XMLSchema#negativeInteger");
     }
     catch(InvalidURIException iue) {
       return null;
@@ -217,8 +210,8 @@ public class DataType {
    */
   public static DataType getNonNegativeIntegerDataType() {
     try {
-      return new NonNegativeIntegerDT(new URI(
-              "http://www.w3.org/2001/XMLSchema#nonNegativeInteger", false));
+      return new NonNegativeIntegerDT(
+              "http://www.w3.org/2001/XMLSchema#nonNegativeInteger");
     }
     catch(InvalidURIException iue) {
       return null;
@@ -231,8 +224,8 @@ public class DataType {
    */
   public static DataType getNonPositiveIntegerDataType() {
     try {
-      return new NegativeIntegerDT(new URI(
-              "http://www.w3.org/2001/XMLSchema#nonPositiveInteger", false));
+      return new NegativeIntegerDT(
+              "http://www.w3.org/2001/XMLSchema#nonPositiveInteger");
     }
     catch(InvalidURIException iue) {
       return null;
@@ -245,8 +238,8 @@ public class DataType {
    */
   public static DataType getPositiveIntegerDataType() {
     try {
-      return new NonNegativeIntegerDT(new URI(
-              "http://www.w3.org/2001/XMLSchema#positiveInteger", false));
+      return new NonNegativeIntegerDT(
+              "http://www.w3.org/2001/XMLSchema#positiveInteger");
     }
     catch(InvalidURIException iue) {
       return null;
@@ -258,8 +251,7 @@ public class DataType {
    */
   public static DataType getShortDataType() {
     try {
-      return new ShortDT(new URI("http://www.w3.org/2001/XMLSchema#short",
-              false));
+      return new ShortDT("http://www.w3.org/2001/XMLSchema#short");
     }
     catch(InvalidURIException iue) {
       return null;
@@ -271,8 +263,7 @@ public class DataType {
    */
   public static DataType getStringDataType() {
     try {
-      return new DataType(new URI("http://www.w3.org/2001/XMLSchema#string",
-              false));
+      return new DataType("http://www.w3.org/2001/XMLSchema#string");
     }
     catch(InvalidURIException iue) {
       return null;
@@ -284,7 +275,7 @@ public class DataType {
    */
   public static DataType getTimeDataType() {
     try {
-      return new TimeDT(new URI("http://www.w3.org/2001/XMLSchema#time", false));
+      return new TimeDT("http://www.w3.org/2001/XMLSchema#time");
     }
     catch(InvalidURIException iue) {
       return null;
@@ -296,8 +287,8 @@ public class DataType {
    */
   public static DataType getDateTimeDataType() {
     try {
-      return new DateTimeDT(new URI(
-              "http://www.w3.org/2001/XMLSchema#dateTime", false));
+      return new DateTimeDT(
+              "http://www.w3.org/2001/XMLSchema#dateTime");
     }
     catch(InvalidURIException iue) {
       return null;
@@ -310,8 +301,8 @@ public class DataType {
    */
   public static DataType getUnsignedByteDataType() {
     try {
-      return new UnsignedByteDT(new URI(
-              "http://www.w3.org/2001/XMLSchema#unsignedByte", false));
+      return new UnsignedByteDT(
+              "http://www.w3.org/2001/XMLSchema#unsignedByte");
     }
     catch(InvalidURIException iue) {
       return null;
@@ -324,8 +315,8 @@ public class DataType {
    */
   public static DataType getUnsignedIntDataType() {
     try {
-      return new NonNegativeIntegerDT(new URI(
-              "http://www.w3.org/2001/XMLSchema#unsignedInt", false));
+      return new NonNegativeIntegerDT(
+              "http://www.w3.org/2001/XMLSchema#unsignedInt");
     }
     catch(InvalidURIException iue) {
       return null;
@@ -338,8 +329,8 @@ public class DataType {
    */
   public static DataType getUnsignedLongDataType() {
     try {
-      return new UnsignedLongDT(new URI(
-              "http://www.w3.org/2001/XMLSchema#unsignedLong", false));
+      return new UnsignedLongDT(
+              "http://www.w3.org/2001/XMLSchema#unsignedLong");
     }
     catch(InvalidURIException iue) {
       return null;
@@ -352,8 +343,8 @@ public class DataType {
    */
   public static DataType getUnsignedShortDataType() {
     try {
-      return new UnsignedShortDT(new URI(
-              "http://www.w3.org/2001/XMLSchema#unsignedShort", false));
+      return new UnsignedShortDT(
+              "http://www.w3.org/2001/XMLSchema#unsignedShort");
     }
     catch(InvalidURIException iue) {
       return null;
@@ -627,8 +618,11 @@ public class DataType {
  * @author niraj
  */
 class BooleanDT extends DataType {
-  public BooleanDT(URI xmlSchemaURI) {
+  public BooleanDT(OURI xmlSchemaURI) {
     super(xmlSchemaURI);
+  }
+  public BooleanDT(String xmlSchemaURIString) {
+    super(xmlSchemaURIString);
   }
 
   /**
@@ -653,8 +647,11 @@ class BooleanDT extends DataType {
  * 
  */
 class ByteDT extends DataType {
-  public ByteDT(URI xmlSchemaURI) {
+  public ByteDT(OURI xmlSchemaURI) {
     super(xmlSchemaURI);
+  }
+  public ByteDT(String xmlSchemaURIString) {
+    super(xmlSchemaURIString);
   }
 
   /**
@@ -679,8 +676,11 @@ class ByteDT extends DataType {
  * 
  */
 class DoubleDT extends DataType {
-  public DoubleDT(URI xmlSchemaURI) {
+  public DoubleDT(OURI xmlSchemaURI) {
     super(xmlSchemaURI);
+  }
+  public DoubleDT(String xmlSchemaURIString) {
+    super(xmlSchemaURIString);
   }
 
   /**
@@ -698,8 +698,11 @@ class DoubleDT extends DataType {
 }
 
 class DateDT extends DataType {
-  public DateDT(URI xmlSchemaURI) {
+  public DateDT(OURI xmlSchemaURI) {
     super(xmlSchemaURI);
+  }
+  public DateDT(String xmlSchemaURIString) {
+    super(xmlSchemaURIString);
   }
 
   /**
@@ -719,8 +722,11 @@ class DateDT extends DataType {
 }
 
 class DateTimeDT extends DataType {
-  public DateTimeDT(URI xmlSchemaURI) {
+  public DateTimeDT(OURI xmlSchemaURI) {
     super(xmlSchemaURI);
+  }
+  public DateTimeDT(String xmlSchemaURIString) {
+    super(xmlSchemaURIString);
   }
 
   /**
@@ -741,8 +747,11 @@ class DateTimeDT extends DataType {
 }
 
 class TimeDT extends DataType {
-  public TimeDT(URI xmlSchemaURI) {
+  public TimeDT(OURI xmlSchemaURI) {
     super(xmlSchemaURI);
+  }
+  public TimeDT(String xmlSchemaURIString) {
+    super(xmlSchemaURIString);
   }
 
   /**
@@ -768,8 +777,11 @@ class TimeDT extends DataType {
  * 
  */
 class LongDT extends DataType {
-  public LongDT(URI xmlSchemaURI) {
+  public LongDT(OURI xmlSchemaURI) {
     super(xmlSchemaURI);
+  }
+  public LongDT(String xmlSchemaURIString) {
+    super(xmlSchemaURIString);
   }
 
   /**
@@ -794,8 +806,11 @@ class LongDT extends DataType {
  * 
  */
 class FloatDT extends DataType {
-  public FloatDT(URI xmlSchemaURI) {
+  public FloatDT(OURI xmlSchemaURI) {
     super(xmlSchemaURI);
+  }
+  public FloatDT(String xmlSchemaURIString) {
+    super(xmlSchemaURIString);
   }
 
   /**
@@ -819,8 +834,11 @@ class FloatDT extends DataType {
  * 
  */
 class IntegerDT extends DataType {
-  public IntegerDT(URI xmlSchemaURI) {
+  public IntegerDT(OURI xmlSchemaURI) {
     super(xmlSchemaURI);
+  }
+  public IntegerDT(String xmlSchemaURIString) {
+    super(xmlSchemaURIString);
   }
 
   /**
@@ -845,8 +863,11 @@ class IntegerDT extends DataType {
  * 
  */
 class NegativeIntegerDT extends DataType {
-  public NegativeIntegerDT(URI xmlSchemaURI) {
+  public NegativeIntegerDT(OURI xmlSchemaURI) {
     super(xmlSchemaURI);
+  }
+  public NegativeIntegerDT(String xmlSchemaURIString) {
+    super(xmlSchemaURIString);
   }
 
   /**
@@ -871,8 +892,11 @@ class NegativeIntegerDT extends DataType {
  * 
  */
 class NonNegativeIntegerDT extends DataType {
-  public NonNegativeIntegerDT(URI xmlSchemaURI) {
+  public NonNegativeIntegerDT(OURI xmlSchemaURI) {
     super(xmlSchemaURI);
+  }
+  public NonNegativeIntegerDT(String xmlSchemaURIString) {
+    super(xmlSchemaURIString);
   }
 
   /**
@@ -897,8 +921,11 @@ class NonNegativeIntegerDT extends DataType {
  * 
  */
 class ShortDT extends DataType {
-  public ShortDT(URI xmlSchemaURI) {
+  public ShortDT(OURI xmlSchemaURI) {
     super(xmlSchemaURI);
+  }
+  public ShortDT(String xmlSchemaURIString) {
+    super(xmlSchemaURIString);
   }
 
   /**
@@ -923,8 +950,11 @@ class ShortDT extends DataType {
  * 
  */
 class UnsignedByteDT extends DataType {
-  public UnsignedByteDT(URI xmlSchemaURI) {
+  public UnsignedByteDT(OURI xmlSchemaURI) {
     super(xmlSchemaURI);
+  }
+  public UnsignedByteDT(String xmlSchemaURIString) {
+    super(xmlSchemaURIString);
   }
 
   /**
@@ -949,8 +979,11 @@ class UnsignedByteDT extends DataType {
  * 
  */
 class UnsignedLongDT extends DataType {
-  public UnsignedLongDT(URI xmlSchemaURI) {
+  public UnsignedLongDT(OURI xmlSchemaURI) {
     super(xmlSchemaURI);
+  }
+  public UnsignedLongDT(String xmlSchemaURIString) {
+    super(xmlSchemaURIString);
   }
 
   /**
@@ -975,8 +1008,11 @@ class UnsignedLongDT extends DataType {
  * 
  */
 class UnsignedShortDT extends DataType {
-  public UnsignedShortDT(URI xmlSchemaURI) {
+  public UnsignedShortDT(OURI xmlSchemaURI) {
     super(xmlSchemaURI);
+  }
+  public UnsignedShortDT(String xmlSchemaURIString) {
+    super(xmlSchemaURIString);
   }
 
   /**
