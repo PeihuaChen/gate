@@ -260,31 +260,31 @@ public class DetailsTableModel extends AbstractTableModel {
           resourceInfo.getValues().addAll(Utils.getDetailsToAdd(tclass));
       } else {
         resourceInfo.getValues().add(tclass);
-        resourceInfo.getValues().add(new KeyValuePair(tclass, "URI", tclass.getURI().toString(), false));
+        resourceInfo.getValues().add(new KeyValuePair(tclass, "URI", tclass.getONodeID().toString(), false));
         resourceInfo.getValues().add(new KeyValuePair(tclass, "TYPE", "Ontology Class", false));
       }
       
       // direct super classes
-      Set<OClass> set = tclass.getSuperClasses(OConstants.DIRECT_CLOSURE);
+      Set<OClass> set = tclass.getSuperClasses(OConstants.Closure.DIRECT_CLOSURE);
       directSuperClasses.getValues().clear();
       directSuperClasses.getValues().addAll(set);
       Collections.sort(directSuperClasses.getValues(), itemComparator);
 
       // all super classes
-      Set<OClass> set1 = tclass.getSuperClasses(OConstants.TRANSITIVE_CLOSURE);
+      Set<OClass> set1 = tclass.getSuperClasses(OConstants.Closure.TRANSITIVE_CLOSURE);
       allSuperClasses.getValues().clear();
       allSuperClasses.getValues().addAll(set1);
       Collections.sort(allSuperClasses.getValues(), itemComparator);
       
 
       // direct subclasses
-      Set<OClass> set2 = tclass.getSubClasses(OConstants.DIRECT_CLOSURE);
+      Set<OClass> set2 = tclass.getSubClasses(OConstants.Closure.DIRECT_CLOSURE);
       directSubClasses.getValues().clear();
       directSubClasses.getValues().addAll(set2);
       Collections.sort(directSubClasses.getValues(), itemComparator);
       
       // all sub classes
-      Set<OClass> set3 = tclass.getSubClasses(OConstants.TRANSITIVE_CLOSURE);
+      Set<OClass> set3 = tclass.getSubClasses(OConstants.Closure.TRANSITIVE_CLOSURE);
       allSubClasses.getValues().clear();
       allSubClasses.getValues().addAll(set3);
       Collections.sort(allSubClasses.getValues(), itemComparator);
@@ -319,7 +319,7 @@ public class DetailsTableModel extends AbstractTableModel {
 
       // instances
       Set<OInstance> set5 = ontology.getOInstances(tclass,
-              OConstants.DIRECT_CLOSURE);
+              OConstants.Closure.DIRECT_CLOSURE);
       instances.getValues().clear();
       if(set5 != null) {
         instances.getValues().addAll(set5);
@@ -333,11 +333,11 @@ public class DetailsTableModel extends AbstractTableModel {
 
       resourceInfo.getValues().clear();
       resourceInfo.getValues().add(oinstance);
-      resourceInfo.getValues().add(new KeyValuePair(oinstance, "URI", oinstance.getURI().toString(), false));
+      resourceInfo.getValues().add(new KeyValuePair(oinstance, "URI", oinstance.getOURI().toString(), false));
       resourceInfo.getValues().add(new KeyValuePair(oinstance, "TYPE", "Ontology Instance", false));
       
       // direct classes
-      Set<OClass> set1 = oinstance.getOClasses(OConstants.DIRECT_CLOSURE);
+      Set<OClass> set1 = oinstance.getOClasses(OConstants.Closure.DIRECT_CLOSURE);
       directTypes.getValues().clear();
       if(set1 != null) {
         for(OClass aClass : set1) {
@@ -346,7 +346,7 @@ public class DetailsTableModel extends AbstractTableModel {
       }
 
       // all classes
-      Set<OClass> set2 = oinstance.getOClasses(OConstants.TRANSITIVE_CLOSURE);
+      Set<OClass> set2 = oinstance.getOClasses(OConstants.Closure.TRANSITIVE_CLOSURE);
       allTypes.getValues().clear();
       if(set2 != null) {
         for(OClass aClass : set2) {
