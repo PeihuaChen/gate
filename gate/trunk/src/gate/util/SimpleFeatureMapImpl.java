@@ -171,12 +171,12 @@ public class SimpleFeatureMapImpl
             if (DEBUG) {
               Out.prln("\nClass in rule: " + keyValueFromAFeatureMap.toString());
               Out.prln("\nClass in annotation: " + keyValueFromThis.toString());
-              Out.prln("\nisSubClassOf: " + subClass.isSubClassOf(superClass, OConstants.TRANSITIVE_CLOSURE));
+              Out.prln("\nisSubClassOf: " + subClass.isSubClassOf(superClass, OConstants.Closure.TRANSITIVE_CLOSURE));
             }
 
             return subClass.equals(superClass) || 
                 subClass.isSubClassOf(superClass, 
-                        OConstants.TRANSITIVE_CLOSURE);
+                        OConstants.Closure.TRANSITIVE_CLOSURE);
           } catch (Exception ex) {
             throw new gate.util.GateRuntimeException(ex);
           }
