@@ -280,7 +280,7 @@ public class OWLIMOntology
       storageFolderDir = new File(dataDirectory,storageFolderName);
       storageFolderDir.mkdir();
       // TODO: replace by logger.info
-      System.out.println("Storing data in folder: "+storageFolderDir.getAbsolutePath());
+      logger.info("Storing data in folder: "+storageFolderDir.getAbsolutePath());
 
       // get the configuration file , check if the system import files
       // are there
@@ -300,7 +300,7 @@ public class OWLIMOntology
       repoConfig = new File(configDir,"owlim-max-nopartial.ttl");
       
       logger.debug("Using config "+repoConfig.getAbsolutePath());
-      System.out.println("Using config file: "+repoConfig.getAbsolutePath());
+      logger.info("Using config file: "+repoConfig.getAbsolutePath());
 
       if(!repoConfig.exists()) {
         throw new ResourceInstantiationException(
@@ -352,7 +352,6 @@ public class OWLIMOntology
               " using format "+ontologyFormat+" and base URI "+getBaseURI());
         readOntologyData(ontologyURL, getBaseURI(), ontologyFormat, false);
         logger.debug("default name space after loading: "+getDefaultNameSpace());
-        System.out.println("Default name space is "+getDefaultNameSpace());
         logger.debug("Ontology data loaded");
         if(loadImports) {
           Map<String,String> mappings = null;
@@ -367,6 +366,17 @@ public class OWLIMOntology
           logger.debug("Import resolving done");
         }
       }
+      // if we did not set the default name space when loading or if we
+      // did not load anything in the first place, and if we do have a
+      // baseURI set, use it to set the default name space
+      if (getDefaultNameSpace() == null) {
+        if (getBaseURI() != null && !getBaseURI().matches("\\s*")) {
+          setDefaultNameSpace(getBaseURI());
+        } else {
+          setDefaultNameSpace(OConstants.ONTOLOGY_DEFAULT_BASE_URI);
+        }
+      }
+      logger.info("Default name space is "+getDefaultNameSpace());
 
     } catch(Exception ioe) {
       throw new ResourceInstantiationException(ioe);
