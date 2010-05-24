@@ -160,7 +160,7 @@ public class GUISaveOptionsPane extends JPanel {
     while (true) {
       int returnValue =
           JOptionPane.showOptionDialog(instance, this,
-          "SearchableDataStore", JOptionPane.PLAIN_MESSAGE,
+          "Save Ontology As...", JOptionPane.PLAIN_MESSAGE,
           JOptionPane.OK_CANCEL_OPTION, MainFrame.getIcon("empty"),
           new String[]{"OK", "Cancel"}, "OK");
       if (returnValue == JOptionPane.OK_OPTION) {
