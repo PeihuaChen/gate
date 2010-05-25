@@ -112,6 +112,16 @@ public class SingletonAnnotationSet implements AnnotationSet {
     return emptyAnnotationSet;
   }
   
+  
+
+  public AnnotationSet getCovering(String neededType, Long startOffset,
+          Long endOffset) {
+    if(annotation.getType().equals(neededType) &&
+       annotation.getStartNode().getOffset()<= startOffset &&
+       annotation.getEndNode().getOffset() >= endOffset)
+      return new SingletonAnnotationSet(annotation);
+    return emptyAnnotationSet;
+  }
 
   public Set<String> getAllTypes() {
     HashSet set  = new HashSet();
