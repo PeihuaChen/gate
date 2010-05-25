@@ -24,7 +24,6 @@ import org.apache.log4j.Priority;
 
 import gate.*;
 import gate.annotation.AnnotationSetImpl;
-import gate.annotation.SingletonAnnotationSet;
 import gate.creole.ExecutionException;
 import gate.creole.ExecutionInterruptedException;
 import gate.event.ProgressListener;
@@ -641,34 +640,19 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
           java.util.Iterator labelsIter = currentTransition.getBindings()
                   .iterator();
           String oneLabel;
+          AnnotationSet boundAnnots, newSet;
           while(labelsIter.hasNext()) {
             oneLabel = (String)labelsIter.next();
-            AnnotationSet boundAnnots = (AnnotationSet)binds.get(oneLabel);
-            if(boundAnnots == null){
-              //first time we're adding annotations to this label
-              if(tuple.size() == 1){
-                // at this step we're only adding one annotation - 
-                // maybe a singleton set will suffice.
-                // Create one by removing the only annotation
-                boundAnnots = new SingletonAnnotationSet(tuple.get(0));
-              }else{
-                //more than 1 annots
-                boundAnnots = new AnnotationSetImpl(document);
-                boundAnnots.addAll(tuple);
-              }
-              binds.put(oneLabel, boundAnnots);
-            } else {
-              //we are only adding some annots to an old set
-              if(boundAnnots.size() == 1){
-                //we need to convert to a "proper" annotation set
-                AnnotationSet newSet = new AnnotationSetImpl(document);
-                newSet.add(((Annotation[])boundAnnots.toArray())[0]);
-                boundAnnots = newSet;
-                binds.put(oneLabel, boundAnnots);
-              }
-              boundAnnots.addAll(tuple);  
+            boundAnnots = (AnnotationSet)binds.get(oneLabel);
+            if(boundAnnots != null)
+              newSet = new AnnotationSetImpl(boundAnnots);
+            else newSet = new AnnotationSetImpl(document);
+  
+            for(Annotation annot : tuple) {
+              newSet.add(annot);
             }
-            
+  
+            binds.put(oneLabel, newSet);
           }// while(labelsIter.hasNext())
           if(currentInstance != newFSMI){
             if(newActiveInstances == null) {
