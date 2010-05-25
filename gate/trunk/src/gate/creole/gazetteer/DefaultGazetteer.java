@@ -598,17 +598,10 @@ public class DefaultGazetteer extends AbstractGazetteer
           int newsz = itemsKeys.length + 1;
           char[] tempKeys = new char[newsz];
           Object[] tempObjs = new Object[newsz];
-          int i;
-          for (i= 0; i < index; i++)
-          {
-              tempKeys[i] = itemsKeys[i];
-              tempObjs[i] = itemsObjs[i];
-          }
-          for (i= index+1; i < newsz; i++)
-          {
-              tempKeys[i] = itemsKeys[i-1];
-              tempObjs[i] = itemsObjs[i-1];
-          }
+          System.arraycopy(itemsKeys, 0, tempKeys, 0, index);
+          System.arraycopy(itemsObjs, 0, tempObjs, 0, index);
+          System.arraycopy(itemsKeys, index, tempKeys, index + 1, newsz - index - 1);
+          System.arraycopy(itemsObjs, index, tempObjs, index + 1, newsz - index - 1);
 
           itemsKeys = tempKeys;
           itemsObjs = tempObjs;
