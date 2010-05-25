@@ -68,7 +68,6 @@
 	<classpathentry kind="lib" path="plugins/Ontology_OWLIM2/lib/owlim-2.8.4.jar"/>
 	<classpathentry kind="lib" path="plugins/Ontology_OWLIM2/lib/commons-io-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/spring-aop-2.0.8.jar"/>
-	<classpathentry kind="lib" path="lib/jwnl.jar"/>
 	<classpathentry kind="lib" path="plugins/WordNet/lib/jwnl.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="lib" path="lib/javacc.jar"/>
