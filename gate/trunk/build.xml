@@ -46,7 +46,7 @@
   <property name="runtime.spawn" value="true" />
 
   <!-- if deprecation warnings should be shown -->
-  <property name="deprecation" value="true"/>
+  <property name="deprecation" value="false"/>
   <property name="gate.compile.maxwarnings" value="10000" />
 
   <!-- OS specific properties
