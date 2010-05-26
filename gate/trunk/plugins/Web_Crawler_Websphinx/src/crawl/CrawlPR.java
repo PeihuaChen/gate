@@ -8,38 +8,49 @@
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
- *
- *  Google API and other sources subject to Google License. Please
- *  see http://www.google.com/apis/
  */
-
 package crawl;
 
-import java.net.URL;
-import java.util.*;
-import gate.Corpus;
 import gate.Document;
 import gate.Factory;
 import gate.ProcessingResource;
 import gate.Resource;
 import gate.creole.*;
+import gate.creole.metadata.*;
 import gate.util.*;
+import gate.*;
+import java.net.URL;
+import java.util.*;
+
+import org.apache.commons.lang.StringUtils;
+
 import websphinx.*;
 
+@CreoleResource(name = "Crawler PR",
+        comment = "GATE implementation of the Websphinx crawling API",
+        helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:crawler")
 public class CrawlPR 
   extends AbstractLanguageAnalyser 
   implements ProcessingResource {
 
-  private static final long serialVersionUID = 7119190892757004776L;
-  
+  private static final long serialVersionUID = 3904269406671650905L;
+  @SuppressWarnings("unused")
+  private static final String __SVNID = "$Id";
+
   private String root = null;
   private int depth = -1;
   private Corpus outputCorpus = null;
-  private Boolean dfs = null;
+  private Boolean dfs;
+  private Boolean caseSensitiveKeywords;
   private SphinxWrapper crawler;
-  private String domain = null;
+  private DomainMode domain = null;
   private Corpus source = null;
-  private int max = -1;
+  private int maxFetch = -1;
+  private int maxKeep  = -1;
+  private Boolean convertXmlTypes;
+  
+  // ignore keyword requirement if null or empty
+  private List<String> keywords = null;
 
   /** Constructor of the class */
   public CrawlPR() {
@@ -63,10 +74,9 @@ public class CrawlPR
     init();
   }
 
+  
   /**
-   * Override the default behaviour by interrupting the SphinxWrapper itself.  Otherwise,
-   * the SphinxWrapper would run uncontrollably.
-   * @throws ExecutionInterruptedException 
+   * Override the default behaviour by interrupting the SphinxWrapper itself. 
    */
   public void interrupt() {
     this.interrupted = true;
@@ -77,75 +87,88 @@ public class CrawlPR
   }
   
   
+  
   /**
    * This method runs the crawler. It assumes that all the needed
    * parameters are set. If they are not, an exception will be fired.
    */
   public void execute() throws ExecutionException {
-    interrupted = false;
+    this.interrupted = false;
     crawler = new SphinxWrapper();
+    crawler.clear();
+    crawler.setKeywords(keywords, caseSensitiveKeywords);
+    crawler.setConvertXmlTypes(convertXmlTypes);
     crawler.resetCounter();
     
-    if(outputCorpus == null) { throw new ExecutionException(
-    "Output Corpus cannot be null"); }
+    if(outputCorpus == null) { 
+        throw new ExecutionException("Output Corpus cannot be null");
+    }
 
-    if(root == null && source == null) { throw new ExecutionException(
-    "Either root or source must be initialized"); }
-    if(depth == -1) { throw new ExecutionException("Limit is not initialized"); }
-    if(dfs == null) { throw new ExecutionException("dfs is not initialized"); }
-    if(domain == null) { throw new ExecutionException(
-    "domain type is not initialized.. Set to either SERVER/SUBTREE/WEB"); }
+    if ( (root == null) && (source == null) ) {
+        throw new ExecutionException("Either root or source must be initialized");
+    }
+    if(depth < 0) {
+        throw new ExecutionException("Limit is not initialized");
+    }
+    if(dfs == null) {
+        throw new ExecutionException("dfs is not initialized");
+    }
+    if(domain == null) {
+      throw new ExecutionException("domain type is not initialized.. Set to either SERVER/SUBTREE/WEB");
+    }
 
     try {
       crawler.setCorpus(outputCorpus);
       crawler.setDepth(depth);
       crawler.setDepthFirst(dfs.booleanValue());
       
-      if(domain == "SUBTREE") {
+      if(domain.equals(DomainMode.SUBTREE)) {
         crawler.setDomain(Crawler.SUBTREE);
       }
-      else if(domain == "SERVER") {
+      else if(domain.equals(DomainMode.SERVER)) {
         crawler.setDomain(Crawler.SERVER);
       }
       else {
         crawler.setDomain(Crawler.WEB);
       }
-      
-      if(max != -1) {
-        crawler.setMaxPages(max);
+
+      if (maxFetch != -1) {
+        crawler.setMaxPages(maxFetch);
       }
       
-      if(root != null && (root.length() > 0)) {
-        crawler.setStart(root);
+      if (maxKeep != -1) {
+        crawler.setMaxKeep(maxKeep);
       }
-      else {
-        Corpus roots = (Corpus) source;
-        List<URL> urls = new ArrayList<URL>();
-        for(int i = 0; i < roots.size(); i++) {
-          boolean docWasLoaded = roots.isDocumentLoaded(i);
-          Document doc = (Document) roots.get(i);
+
+      if (root != null && (root.length() > 0)) {
+        crawler.addStartLink(root);
+      }
+
+      if (source != null) {
+        for(int i = 0; i < source.size(); i++) {
+          boolean docWasLoaded = source.isDocumentLoaded(i);
+          Document doc = (Document) source.get(i);
           URL url = doc.getSourceUrl();
           if (url != null) {
-            System.out.println("adding   " + url.toString());
-            urls.add(url);
+            crawler.addStartLink(url);
           }
           else {
-            System.out.println("skipping " + doc.getName());
+            System.out.println("Skipping source document:" + doc.getName());
           }
           
-          
           if(! docWasLoaded) {
-            roots.unloadDocument(doc);
+            source.unloadDocument(doc);
             Factory.deleteResource(doc);
           }
         }
-        crawler.setStarts(urls);
       }
-
+      
       crawler.start();
-      if (interrupted) {
+      
+      if (this.interrupted) {
         throw new ExecutionInterruptedException();
       }
+    
     }
     catch(Exception e) {
       String nl = Strings.getNl();
@@ -154,6 +177,37 @@ public class CrawlPR
     }
   }
 
+  
+  public static boolean containsAnyKeyword(Document doc, List<String> keywords, boolean caseSensitive) {
+    if ( (keywords == null) || keywords.isEmpty()) {
+      return true;
+    }
+    
+    // implied else: test the keywords
+    String content = doc.getContent().toString();
+    
+    if (caseSensitive) {
+      for (String kw : keywords) {
+        if (StringUtils.contains(content, kw)) {
+          return true;  
+        }
+      }
+    }
+    
+    else { // case-insensitive
+      for (String kw : keywords) {
+        if (StringUtils.containsIgnoreCase(content, kw)) {
+          return true;
+        }
+      }
+    }
+    
+    return false;
+  }
+
+  @Optional
+  @RunTime
+  @CreoleParameter(comment = "The starting URL for the crawl")
   public void setRoot(String root) {
     this.root = root;
   }
@@ -162,6 +216,9 @@ public class CrawlPR
     return this.root;
   }
 
+  @RunTime
+  @CreoleParameter(comment = "The depth to which the crawl must proceed",
+    defaultValue = "3")
   public void setDepth(Integer limit) {
     this.depth = limit.intValue();
   }
@@ -170,6 +227,9 @@ public class CrawlPR
     return new Integer(this.depth);
   }
 
+  @RunTime
+  @CreoleParameter(comment = "true for depth-first search; false for breadth-first search",
+          defaultValue = "true")
   public void setDfs(Boolean dfs) {
     this.dfs = dfs;
   }
@@ -178,14 +238,20 @@ public class CrawlPR
     return this.dfs;
   }
 
-  public void setDomain(String domain) {
+  @RunTime
+  @CreoleParameter(comment = "The domain restriction for the crawl",
+          defaultValue = "SUBTREE")
+  public void setDomain(DomainMode domain) {
     this.domain = domain;
   }
 
-  public String getDomain() {
+  public DomainMode getDomain() {
     return this.domain;
   }
 
+  @RunTime
+  @Optional
+  @CreoleParameter(comment = "corpus whose gate.SourceURL document features will be used to seed the crawl")
   public void setSource(Corpus source) {
     this.source = source;
   }
@@ -194,20 +260,84 @@ public class CrawlPR
     return this.source;
   }
 
-  public void setMax(Integer max) {
-    this.max = max.intValue();
+  @RunTime
+  @Optional
+  @CreoleParameter(comment = "Stop the crawl after fetching this many pages (-1 to ignore)",
+          defaultValue = "-1")
+  public void setStopAfter(Integer max) {
+    this.maxFetch = max.intValue();
   }
 
+  // stopAfter was maxFetch in AF's first revision
+  public Integer getStopAfter() {
+    return Integer.valueOf(this.maxFetch);
+  }
+  
+  @RunTime
+  @Optional
+  @CreoleParameter(comment = "Stop the crawl after saving this many pages (-1 to ignore)",
+          defaultValue = "-1")
+  public void setMax(Integer max) {
+    this.maxKeep = max.intValue();
+  }
+  
+  // max was maxKeep in AF's first revision;
   public Integer getMax() {
-    return new Integer(this.max);
+    return Integer.valueOf(this.maxKeep);
+  }
+
+  @RunTime
+  @CreoleParameter(comment = "Store the crawl output here")
+  public void setOutputCorpus(Corpus outputCorpus) {
+    this.outputCorpus = outputCorpus;
   }
 
   public Corpus getOutputCorpus() {
     return outputCorpus;
   }
+  
+  @Optional
+  @RunTime
+  @CreoleParameter(comment = "Pages that don't match at least one keyword will be dropped; leave empty to keep all pages")
+  public void setKeywords(List<String> keywords) {
+    this.keywords = keywords;
+  }
+   
+  public List<String> getKeywords() {
+    return this.keywords;
+  }
 
-  public void setOutputCorpus(Corpus outputCorpus) {
-    this.outputCorpus = outputCorpus;
+  
+  @RunTime
+  @CreoleParameter(comment = "Are keywords case-sensitive?",
+          defaultValue = "true")
+  public void setKeywordsCaseSensitive(Boolean kcs) {
+    this.caseSensitiveKeywords = kcs;
+  }
+  
+  public Boolean getKeywordsCaseSensitive() {
+    return this.caseSensitiveKeywords;
+  }
+  
+  @RunTime
+  @CreoleParameter(comment = "Convert other XML mime types to text/xml",
+          defaultValue = "true")
+  public void setConvertXmlTypes(Boolean convert) {
+    this.convertXmlTypes = convert;
+  }
+  
+  public Boolean getConvertXmlTypes() {
+    return this.convertXmlTypes;
+  }
+  
+  @HiddenCreoleParameter
+  public void setDocument(Document x) {
+    // NOTHING
+  }
+
+  @HiddenCreoleParameter
+  public void setCorpus(Corpus x) {
+    // NOTHING
   }
 
 }
