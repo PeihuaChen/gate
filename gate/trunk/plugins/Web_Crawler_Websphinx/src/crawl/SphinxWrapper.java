@@ -205,12 +205,14 @@ public class SphinxWrapper extends Crawler{
   }
 
 
-  /* TODO: make this test more sophisticated
-   * It should handle RSS applications, but now it incorrectly
-   * takes "image/svg+xml".      */
+  /* yes: application/rss+xml.xml
+   * no:  image/svg+xml.xml
+   */
   private String convertMimeType(String originalType) {
     String result = originalType;
-    if (originalType.endsWith("xml")) {
+    if (originalType.endsWith("xml")
+            && (originalType.startsWith("application") || originalType.startsWith("application") )
+    ) {
       result = "text/xml";
     }
     return result;
