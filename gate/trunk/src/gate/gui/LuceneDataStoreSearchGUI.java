@@ -2745,7 +2745,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
               buffer.append("; ");
             }
           }
-          buffer.delete(buffer.length()-2, buffer.length());
+          if (buffer.length() > 2) {
+            buffer.delete(buffer.length()-2, buffer.length());
+          }
           return buffer.toString();
         case QUERY_COLUMN:
           return result.getQueryString();
