@@ -149,8 +149,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
   /** Number of stackRows. */
   private int numStackRows = 0;
   /** Double array that contains [row, column] of the stackRows data. */
-  private String[][] stackRows =
-    new String[maxStackRows+1][columnNames.length];
+  private String[][] stackRows = new String[maxStackRows+1][columnNames.length];
   private ConfigureStackViewTableModel configureStackViewTableModel;
   private DefaultTableModel oneRowStatisticsTableModel;
   private DefaultTableModel globalStatisticsTableModel;
@@ -2673,6 +2672,11 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
    * Table model for the Result Tables.
    */
   protected class ResultTableModel extends AbstractTableModel {
+
+    public ResultTableModel() {
+      featureByTypeMap = new HashMap<String, String>();
+    }
+
     public int getRowCount() {
       return results.size();
     }
@@ -2723,17 +2727,26 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           return result.getPatternText(result.getEndOffset(), result
                   .getRightContextEndOffset()).replaceAll("[\n ]+", " ");
         case FEATURES_COLUMN:
+          if (featureByTypeMap.isEmpty()) { return ""; }
           StringBuffer buffer = new StringBuffer();
-          for (PatternAnnotation annotation  : result.getPatternAnnotations(
-                 result.getStartOffset(), result.getEndOffset())) {
-            buffer.append(annotation.getType()).append('=')
-              .append(Strings.toString(annotation.getFeatures())).append(", ");
+          for (Map.Entry<String, String> featureType :
+                 featureByTypeMap.entrySet()) {
+            String type = featureType.getKey();
+            String feature = featureType.getValue();
+            PatternAnnotation[] annotations =
+              result.getPatternAnnotations(type, feature);
+            if (annotations.length > 0) {
+              buffer.append(type).append('.').append(feature).append('=');
+              for (PatternAnnotation annotation : annotations) {
+                buffer.append(annotation.getFeatures().get(feature))
+                      .append(", ");
+              }
+              buffer.delete(buffer.length()-2, buffer.length());
+              buffer.append("; ");
+            }
           }
-          String s = buffer.toString();
-          if (s.endsWith(", ")) {
-            s = s.substring(0, s.length()-2);
-          }
-          return s;
+          buffer.delete(buffer.length()-2, buffer.length());
+          return buffer.toString();
         case QUERY_COLUMN:
           return result.getQueryString();
         case DOCUMENT_COLUMN:
@@ -2743,6 +2756,20 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
         default:
           return Object.class;
       }
+    }
+
+    public void fireTableDataChanged() {
+      // reinitialise types and features to display in the "Features" column
+      featureByTypeMap.clear();
+      for (int row = 0; row < numStackRows; row++) {
+        if (!stackRows[row][DISPLAY].equals("false")
+         && !stackRows[row][FEATURE].equals("")) {
+          String feature = stackRows[row][FEATURE];
+          String type = stackRows[row][ANNOTATION_TYPE];
+          featureByTypeMap.put(type, feature);
+        }
+      }
+      super.fireTableDataChanged();
     }
 
     /** Maximum number of characters for the result column. */
@@ -2755,6 +2782,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     static public final int DOCUMENT_COLUMN = 5;
     static public final int SET_COLUMN = 6;
     static public final int COLUMN_COUNT = 7;
+    protected Map<String, String> featureByTypeMap;
   }
 
   /**
