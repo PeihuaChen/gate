@@ -81,6 +81,7 @@ list</a>.</p>
 <li><a href='#Tagger_Abner'>Tagger_Abner</a></li>
 <li><a href='#Tagger_Chemistry'>Tagger_Chemistry</a></li>
 <li><a href='#Tagger_Framework'>Tagger_Framework</a></li>
+<li><a href='#Tagger_MetaMap'>Tagger_MetaMap</a></li>
 <li><a href='#Tagger_NP_Chunking'>Tagger_NP_Chunking</a></li>
 <li><a href='#Tagger_OpenCalais'>Tagger_OpenCalais</a></li>
 <li><a href='#Tagger_TreeTagger'>Tagger_TreeTagger</a></li>
@@ -780,6 +781,14 @@ list</a>.</p>
 		<td>gate.taggerframework.GenericTagger</td>
 	</tr>
 	<tr>
+		<th colspan='3'><a name='Tagger_MetaMap'>Tagger_MetaMap</a></th>
+	</tr>
+	<tr>
+		<td>MetaMap Annotator&nbsp;</td>
+		<td>This plugin uses the MetaMap Java API to send GATE document content to MetaMap skrmedpostctl server and PrologBeans mmserver instances running on the given machine/port (<a href="http://gate.ac.uk/userguide/sec:misc-creole:metamap">docs</a>)&nbsp;</td>
+		<td>gate.metamap.MetaMapPR</td>
+	</tr>
+	<tr>
 		<th colspan='3'><a name='Tagger_NP_Chunking'>Tagger_NP_Chunking</a></th>
 	</tr>
 	<tr>
@@ -854,7 +863,7 @@ list</a>.</p>
 	</tr>
 	<tr>
 		<td>CrawlerPR&nbsp;</td>
-		<td>Provides interface to the webspinx API. (<a href="http://gate.ac.uk/userguide/sec:misc-creole:crawler">docs</a>)&nbsp;</td>
+		<td>GATE implementation of the Websphinx crawling API (<a href="http://gate.ac.uk/userguide/sec:misc-creole:crawler">docs</a>)&nbsp;</td>
 		<td>crawl.CrawlPR</td>
 	</tr>
 	<tr>
@@ -882,7 +891,12 @@ list</a>.</p>
 		<td>gate.wordnet.IndexFileWordNetImpl</td>
 	</tr>
 	<tr>
-		<td>WordNet 1.6 Viewer&nbsp;</td>
+		<td>WordNet&nbsp;</td>
+		<td>WordNet (<a href="http://gate.ac.uk/userguide/sec:misc-creole:wn">docs</a>)&nbsp;</td>
+		<td>gate.wordnet.JWNLWordNetImpl</td>
+	</tr>
+	<tr>
+		<td>WordNet Viewer&nbsp;</td>
 		<td>WordNet viewer&nbsp;</td>
 		<td>gate.gui.wordnet.WordNetViewer</td>
 	</tr>
