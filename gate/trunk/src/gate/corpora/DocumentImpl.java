@@ -1963,10 +1963,12 @@ public class DocumentImpl extends AbstractLanguageResource implements
    *          the name of the annotation set to be removed
    */
   public void removeAnnotationSet(String name) {
-    AnnotationSet removed = namedAnnotSets.remove(name);
-    if(removed != null) {
-      fireAnnotationSetRemoved(new DocumentEvent(this,
-              DocumentEvent.ANNOTATION_SET_REMOVED, name));
+    if(namedAnnotSets != null) {
+      AnnotationSet removed = namedAnnotSets.remove(name);
+      if(removed != null) {
+        fireAnnotationSetRemoved(new DocumentEvent(this,
+                DocumentEvent.ANNOTATION_SET_REMOVED, name));
+      }
     }
   }
 
