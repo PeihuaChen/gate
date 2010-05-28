@@ -131,6 +131,10 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
           }
         }
       }
+      if(matchesMap != null) {
+        document.getFeatures().put(ANNIEConstants.DOCUMENT_COREF_FEATURE_NAME,
+                                   matchesMap);
+      }
     } else {
       // ignore the setsToRemove parameter and process according to 
       // the other parameters
