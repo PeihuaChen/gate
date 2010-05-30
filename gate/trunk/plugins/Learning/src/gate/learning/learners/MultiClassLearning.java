@@ -823,7 +823,7 @@ public class MultiClassLearning {
               for(int i1 = 0; i1 < numTraining; ++i1) {
                 if(labelsTrainingNT[i1] > 0) ++numP;
               }
-              modelBuff.append("Class1=_NULL" + " Class2="
+              modelBuff.append("Class1="+ array1.get(i).toString()+ " Class2="
                 + array1.get(j).toString() + " numTraining=" + numTraining
                 + " numPos=" + numP + "\n");
               long time1 = new Date().getTime();
