@@ -21,10 +21,8 @@ import gate.util.*;
 import gate.*;
 import java.net.URL;
 import java.util.*;
-
-import org.apache.commons.lang.StringUtils;
-
 import websphinx.*;
+
 
 @CreoleResource(name = "Crawler PR",
         comment = "GATE implementation of the Websphinx crawling API",
@@ -35,7 +33,7 @@ public class CrawlPR
 
   private static final long serialVersionUID = 3904269406671650905L;
   @SuppressWarnings("unused")
-  private static final String __SVNID = "$Id";
+  private static final String __SVNID = "$Id$";
 
   private String root = null;
   private int depth = -1;
@@ -132,13 +130,8 @@ public class CrawlPR
         crawler.setDomain(Crawler.WEB);
       }
 
-      if (maxFetch != -1) {
-        crawler.setMaxPages(maxFetch);
-      }
-      
-      if (maxKeep != -1) {
-        crawler.setMaxKeep(maxKeep);
-      }
+      crawler.setMaxPages(maxFetch);
+      crawler.setMaxKeep(maxKeep);
 
       if (root != null && (root.length() > 0)) {
         crawler.addStartLink(root);
@@ -178,33 +171,9 @@ public class CrawlPR
   }
 
   
-  public static boolean containsAnyKeyword(Document doc, List<String> keywords, boolean caseSensitive) {
-    if ( (keywords == null) || keywords.isEmpty()) {
-      return true;
-    }
-    
-    // implied else: test the keywords
-    String content = doc.getContent().toString();
-    
-    if (caseSensitive) {
-      for (String kw : keywords) {
-        if (StringUtils.contains(content, kw)) {
-          return true;  
-        }
-      }
-    }
-    
-    else { // case-insensitive
-      for (String kw : keywords) {
-        if (StringUtils.containsIgnoreCase(content, kw)) {
-          return true;
-        }
-      }
-    }
-    
-    return false;
-  }
-
+  
+  /*  CREOLE PARAMETERS  */
+  
   @Optional
   @RunTime
   @CreoleParameter(comment = "The starting URL for the crawl")
