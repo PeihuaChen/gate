@@ -2727,25 +2727,36 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           return result.getPatternText(result.getEndOffset(), result
                   .getRightContextEndOffset()).replaceAll("[\n ]+", " ");
         case FEATURES_COLUMN:
-          if (featureByTypeMap.isEmpty()) { return ""; }
           StringBuffer buffer = new StringBuffer();
           for (Map.Entry<String, String> featureType :
                  featureByTypeMap.entrySet()) {
             String type = featureType.getKey();
             String feature = featureType.getValue();
-            PatternAnnotation[] annotations =
-              result.getPatternAnnotations(type, feature);
-            if (annotations.length > 0) {
-              buffer.append(type).append('.').append(feature).append('=');
-              for (PatternAnnotation annotation : annotations) {
+            List<PatternAnnotation> annotations = result.getPatternAnnotations(
+              result.getStartOffset(), result.getEndOffset());
+            buffer.append(type).append('.').append(feature).append('=');
+            for (PatternAnnotation annotation : annotations) {
+              if (annotation.getType().equals(type)
+               && annotation.getFeature(feature) != null) {
                 buffer.append(annotation.getFeatures().get(feature))
                       .append(", ");
               }
-              buffer.delete(buffer.length()-2, buffer.length());
-              buffer.append("; ");
+            }
+            if (buffer.length() > 2) {
+              if (buffer.codePointAt(buffer.length()-2) == ',') {
+                // delete the last ", "
+                buffer.delete(buffer.length()-2, buffer.length());
+                // and replace it with a "; "
+                buffer.append("; ");
+              } else if (buffer.codePointAt(buffer.length()-1) == '=') {
+                // delete the last "Type.Feature="
+                buffer.delete(buffer.length()-type.length()-feature.length()-2,
+                  buffer.length());
+              }
             }
           }
           if (buffer.length() > 2) {
+            // delete the last "; "
             buffer.delete(buffer.length()-2, buffer.length());
           }
           return buffer.toString();
