@@ -45,9 +45,9 @@ public class TestMaxentWrapper extends TestCase {
       Gate.init();
 
       File anniePlugin = new File(System.getProperty("annie.plugin"));
-      Gate.getCreoleRegister().registerDirectories(anniePlugin.toURL());
+      Gate.getCreoleRegister().registerDirectories(anniePlugin.toURI().toURL());
       File mlPlugin = new File(System.getProperty("machinelearning.plugin"));
-      Gate.getCreoleRegister().registerDirectories(mlPlugin.toURL());
+      Gate.getCreoleRegister().registerDirectories(mlPlugin.toURI().toURL());
       gateInited = true;
     }
   }

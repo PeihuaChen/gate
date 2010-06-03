@@ -208,7 +208,7 @@ public class CorpusImporter extends AbstractVisualResource {
                 for(int i = 0; i < textFiles.length; i++){
                   if(textFiles[i].isDirectory()) continue;
                   FeatureMap params = Factory.newFeatureMap();
-                  params.put("sourceUrl", textFiles[i].toURL());
+                  params.put("sourceUrl", textFiles[i].toURI().toURL());
                   if(encoding != null && encoding.length() > 0)
                     params.put("encoding", encoding);
                   Document doc = (Document)Factory.createResource(

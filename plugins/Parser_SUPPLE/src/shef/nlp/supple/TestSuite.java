@@ -42,12 +42,12 @@ public class TestSuite
          Gate.init();
          CreoleRegister reg=Gate.getCreoleRegister();
          f=new File(creoleURL);
-         reg.registerDirectories(f.toURL());
+         reg.registerDirectories(f.toURI().toURL());
 
          if (gate.Main.version.startsWith("3"))
          {
             f = new File(System.getProperty("gate.home"),"plugins/Tools/");
-            reg.registerDirectories(f.toURL());
+            reg.registerDirectories(f.toURI().toURL());
          }
 
          SerialAnalyserController controller = (SerialAnalyserController)Factory.createResource("gate.creole.SerialAnalyserController");
@@ -145,9 +145,9 @@ public class TestSuite
          try
          {
             FeatureMap fm=Factory.newFeatureMap();
-            fm.put(SUPPLE.CONFIG_FILE_PAR,(new File(configURL)).toURL());
-            fm.put(SUPPLE.FEATURE_FILE_PAR,(new File(tableURL)).toURL());
-            fm.put("SUPPLEFile",new File(parserFile).toURL());
+            fm.put(SUPPLE.CONFIG_FILE_PAR,(new File(configURL)).toURI().toURL());
+            fm.put(SUPPLE.FEATURE_FILE_PAR,(new File(tableURL)).toURI().toURL());
+            fm.put("SUPPLEFile",new File(parserFile).toURI().toURL());
             fm.put("prologImplementation",implementation);
 
             ProcessingResource supple=(ProcessingResource)Factory.createResource("shef.nlp.supple.SUPPLE",fm);

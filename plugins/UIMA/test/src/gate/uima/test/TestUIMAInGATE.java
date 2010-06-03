@@ -86,11 +86,11 @@ public class TestUIMAInGATE extends TestCase {
       Gate.setGateHome(gateHomeDir);
       Gate.init();
       // load ANNIE
-      Gate.getCreoleRegister().registerDirectories(new File(Gate.getPluginsHome(), "ANNIE").toURL());
+      Gate.getCreoleRegister().registerDirectories(new File(Gate.getPluginsHome(), "ANNIE").toURI().toURL());
       // load the uima plugin
-      Gate.getCreoleRegister().registerDirectories(uimaPluginDir.toURL());
+      Gate.getCreoleRegister().registerDirectories(uimaPluginDir.toURI().toURL());
       // load the example annotators into the GATE classloader
-      Gate.getCreoleRegister().registerDirectories(examplesDir.toURL());
+      Gate.getCreoleRegister().registerDirectories(examplesDir.toURI().toURL());
       gateInited = true;
     }
   }
@@ -174,8 +174,8 @@ public class TestUIMAInGATE extends TestCase {
     File gateMapping = new File(mappingDir, "TokenHandlerGateMapping.xml");
 
     FeatureMap aeprParams = Factory.newFeatureMap();
-    aeprParams.put("analysisEngineDescriptor", aeDescriptor.toURL());
-    aeprParams.put("mappingDescriptor", gateMapping.toURL());
+    aeprParams.put("analysisEngineDescriptor", aeDescriptor.toURI().toURL());
+    aeprParams.put("mappingDescriptor", gateMapping.toURI().toURL());
 
     LanguageAnalyser aepr = (LanguageAnalyser)Factory.createResource(
         "gate.uima.AnalysisEnginePR", aeprParams);
@@ -231,8 +231,8 @@ public class TestUIMAInGATE extends TestCase {
     File gateMapping = new File(mappingDir, "RemoveEvenGateMapping.xml");
 
     FeatureMap aeprParams = Factory.newFeatureMap();
-    aeprParams.put("analysisEngineDescriptor", aeDescriptor.toURL());
-    aeprParams.put("mappingDescriptor", gateMapping.toURL());
+    aeprParams.put("analysisEngineDescriptor", aeDescriptor.toURI().toURL());
+    aeprParams.put("mappingDescriptor", gateMapping.toURI().toURL());
 
     LanguageAnalyser aepr = (LanguageAnalyser)Factory.createResource(
         "gate.uima.AnalysisEnginePR", aeprParams);
