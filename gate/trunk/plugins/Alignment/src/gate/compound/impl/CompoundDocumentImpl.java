@@ -145,7 +145,7 @@ public class CompoundDocumentImpl extends AbstractCompoundDocument {
         features.put("encoding", encoding);
         features.put("markupAware", new Boolean(true));
         features.put("preserveOriginalContent", preserveOriginalContent);
-        features.put("sourceUrl", newFile.toURL());
+        features.put("sourceUrl", newFile.toURI().toURL());
         FeatureMap subFeatures = Factory.newFeatureMap();
         Gate.setHiddenAttribute(subFeatures, true);
         Document doc = (Document)Factory.createResource(

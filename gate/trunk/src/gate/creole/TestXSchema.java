@@ -54,7 +54,7 @@ public class TestXSchema extends TestCase
     // write back the XSchema fom memory
     // File file = Files.writeTempFile(new ByteArrayInputStream(s.getBytes()));
     // load it again.
-    //annotSchema.fromXSchema(file.toURL());
+    //annotSchema.fromXSchema(file.toURI().toURL());
     annotSchema.fromXSchema(new ByteArrayInputStream(s.getBytes()));
   } // testFromAndToXSchema()
 

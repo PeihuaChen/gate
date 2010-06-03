@@ -45,7 +45,7 @@ public class TestLearningAPI extends TestCase {
       Gate.init();
       learningHome = new File(new File(Gate.getGateHome(), "plugins"),
         "Learning");
-      Gate.getCreoleRegister().addDirectory(learningHome.toURL());
+      Gate.getCreoleRegister().addDirectory(learningHome.toURI().toURL());
       initialized = true;
     }
   }
@@ -74,7 +74,7 @@ public class TestLearningAPI extends TestCase {
     if(LogService.minVerbosityLevel>0)
       System.out.println("Learning Home : " + learningHome.getAbsolutePath());
     FeatureMap parameters = Factory.newFeatureMap();
-    URL configFileURL = new File(configFileName).toURL();
+    URL configFileURL = new File(configFileName).toURI().toURL();
     parameters.put("configFileURL", configFileURL);
     learningApi = (LearningAPIMain)Factory.createResource(
       "gate.learning.LearningAPIMain", parameters);
@@ -95,7 +95,7 @@ public class TestLearningAPI extends TestCase {
           corpus.add(doc);
       }
     }
-//    URL tempURL = new File(corpusDirName).toURL();
+//    URL tempURL = new File(corpusDirName).toURI().toURL();
 //    corpus.populate(tempURL, fileFilter, "UTF-8", false);
     // Set the inputAS
     learningApi.setInputASName(inputasN);

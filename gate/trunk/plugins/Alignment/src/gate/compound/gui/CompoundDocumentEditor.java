@@ -373,7 +373,7 @@ public class CompoundDocumentEditor extends AbstractVisualResource
 
         for(File aFile : files) {
           FeatureMap fets = Factory.newFeatureMap();
-          fets.put("sourceUrl", aFile.toURL());
+          fets.put("sourceUrl", aFile.toURI().toURL());
           fets.put("documentIDs", docIds);
           fets.put("encoding", "UTF-8");
           CompoundDocument cd = (CompoundDocument)Factory.createResource(

@@ -44,7 +44,7 @@ public class TestIaaPlugin extends TestCase {
       Gate.init();
       iaaPluginHome = new File(new File(Gate.getGateHome(), "plugins"),
         "Inter_Annotator_Agreement");
-      Gate.getCreoleRegister().addDirectory(iaaPluginHome.toURL());
+      Gate.getCreoleRegister().addDirectory(iaaPluginHome.toURI().toURL());
       initialized = true;
     }
   }
@@ -81,7 +81,7 @@ public class TestIaaPlugin extends TestCase {
       //fileFilter.addExtension("xml");
       //iaaPluginHome = new File(new File(Gate.getGateHome(), "plugins"),
       //"iaaPlugin");
-      //Gate.getCreoleRegister().addDirectory(iaaPluginHome.toURL());
+      //Gate.getCreoleRegister().addDirectory(iaaPluginHome.toURI().toURL());
 
       // Load the documents into a corpus
       Corpus data = Factory.newCorpus("data");
@@ -110,8 +110,8 @@ public class TestIaaPlugin extends TestCase {
       //String testDir = "plugins/iaaPlugin/test/";
       
       //System.out.println("testDir00=*"+(new File(testDir,"beijing-opera.xml")).getAbsolutePath().toString()+"*");
-      /*Document doc = Factory.newDocument(new File("C:\\svn\\gate\\plugins\\iaaPlugin\\test\\beijing-opera.xml").toURL(), "UTF-8");
-      Document doc1 = Factory.newDocument(new File("C:\\svn\\gate\\plugins\\iaaPlugin\\test\\beijing-opera-2.xml").toURL(), "UTF-8");
+      /*Document doc = Factory.newDocument(new File("C:\\svn\\gate\\plugins\\iaaPlugin\\test\\beijing-opera.xml").toURI().toURL(), "UTF-8");
+      Document doc1 = Factory.newDocument(new File("C:\\svn\\gate\\plugins\\iaaPlugin\\test\\beijing-opera-2.xml").toURI().toURL(), "UTF-8");
       data.add(doc);
       data.add(doc1);*/
       
@@ -206,8 +206,8 @@ public class TestIaaPlugin extends TestCase {
       //String testDir = "plugins/iaaPlugin/test/";
       
       //System.out.println("testDir00=*"+(new File(testDir,"beijing-opera.xml")).getAbsolutePath().toString()+"*");
-      /*Document doc = Factory.newDocument(new File("C:\\svn\\gate\\plugins\\iaaPlugin\\test\\beijing-opera.xml").toURL(), "UTF-8");
-      Document doc1 = Factory.newDocument(new File("C:\\svn\\gate\\plugins\\iaaPlugin\\test\\beijing-opera-2.xml").toURL(), "UTF-8");
+      /*Document doc = Factory.newDocument(new File("C:\\svn\\gate\\plugins\\iaaPlugin\\test\\beijing-opera.xml").toURI().toURL(), "UTF-8");
+      Document doc1 = Factory.newDocument(new File("C:\\svn\\gate\\plugins\\iaaPlugin\\test\\beijing-opera-2.xml").toURI().toURL(), "UTF-8");
       data.add(doc);
       data.add(doc1);*/
       

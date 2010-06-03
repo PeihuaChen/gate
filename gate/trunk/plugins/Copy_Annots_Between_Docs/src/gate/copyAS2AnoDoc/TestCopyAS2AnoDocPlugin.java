@@ -45,7 +45,7 @@ public class TestCopyAS2AnoDocPlugin extends TestCase {
       Gate.init();
       learningHome = new File(new File(Gate.getGateHome(), "plugins"),
         "Copy_Annots_Between_Docs");
-      Gate.getCreoleRegister().addDirectory(learningHome.toURL());
+      Gate.getCreoleRegister().addDirectory(learningHome.toURI().toURL());
       initialized = true;
     }
   }

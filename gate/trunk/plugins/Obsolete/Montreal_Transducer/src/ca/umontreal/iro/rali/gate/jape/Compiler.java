@@ -97,7 +97,7 @@ public class Compiler {
     Transducer transducer = null;
 
     try {
-      ParseCpsl cpslParser = new ParseCpsl(new File(japeFileName).toURL(),
+      ParseCpsl cpslParser = new ParseCpsl(new File(japeFileName).toURI().toURL(),
                                            encoding);
       transducer = cpslParser.MultiPhaseTransducer();
     } catch(ParseException e) {

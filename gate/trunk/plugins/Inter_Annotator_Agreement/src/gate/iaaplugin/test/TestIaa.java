@@ -85,7 +85,7 @@ public class TestIaa extends TestCase {
       String nameAnnFeat;
      
       data.add(loadDocument("tests/iaa/beijing-opera.xml", "beijing-opera.xml"));
-      //Document doc = Factory.newDocument(new File("C:\\svn\\gate\\src\\gate\\resources\\gate.ac.uk\\tests\\iaa\\beijing-opera.xml").toURL(), "UTF-8");
+      //Document doc = Factory.newDocument(new File("C:\\svn\\gate\\src\\gate\\resources\\gate.ac.uk\\tests\\iaa\\beijing-opera.xml").toURI().toURL(), "UTF-8");
       //data.add(doc);
       // Test with feature
       nameAnnSet = "ann1;ann2;ann3";

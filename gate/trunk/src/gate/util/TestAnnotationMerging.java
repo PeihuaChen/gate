@@ -66,7 +66,7 @@ public class TestAnnotationMerging extends TestCase {
       data.add(loadDocument("tests/iaa/beijing-opera.xml", "beijing-opera.xml"));
       //ExtensionFileFilter fileFilter = new ExtensionFileFilter();
       //fileFilter.addExtension("xml");
-      //data.populate(new File("C:\\yaoyong_h\\work\\iaa\\data\\smallData").toURL(), fileFilter, "UTF-8", false);
+      //data.populate(new File("C:\\yaoyong_h\\work\\iaa\\data\\smallData").toURI().toURL(), fileFilter, "UTF-8", false);
       
       nameAnnSet = "ann1;ann2;ann3";
       boolean isUsingMajority=false;
