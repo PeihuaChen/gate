@@ -2102,7 +2102,7 @@ public class AnnotationSetsView extends AbstractDocumentView
       putValue(NAME, name);
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("DELETE"));
     }
-    public void actionPerformed(ActionEvent evt){
+    public void actionPerformed(ActionEvent event){
       // builds the list of type and set handlers to delete
       Vector<String> resourcesToDelete = new Vector<String>(); 
       List<Object> handlersToDelete = new ArrayList<Object>();
@@ -2127,7 +2127,10 @@ public class AnnotationSetsView extends AbstractDocumentView
             + " in set: " + setName);
         }
       }
-      if ((evt.getModifiers() & ActionEvent.SHIFT_MASK) == 0) {
+      if ((event.getModifiers() & ActionEvent.SHIFT_MASK)
+                               != ActionEvent.SHIFT_MASK
+       && (event.getModifiers() & InputEvent.BUTTON1_MASK)
+                               != InputEvent.BUTTON1_MASK) {
         // shows a confirm dialog to delete types and sets
         JList list = new JList(resourcesToDelete);
         list.setVisibleRowCount(Math.min(resourcesToDelete.size()+1, 10));

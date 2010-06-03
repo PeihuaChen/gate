@@ -1,5 +1,7 @@
 /*
- *  Copyright (c) 1998-2009, The University of Sheffield and Ontotext.
+ *  Copyright (c) 2009-2010, Ontotext AD.
+ *  Copyright (c) 1995-2010, The University of Sheffield. See the file
+ *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -19,6 +21,7 @@ import gate.*;
 import gate.creole.*;
 import gate.event.AnnotationEvent;
 import gate.event.AnnotationListener;
+import gate.gui.MainFrame;
 import gate.gui.annedit.*;
 import gate.swing.XJTable;
 import gate.util.*;
@@ -250,20 +253,15 @@ public class AnnotationListView extends AbstractDocumentView
         });
 
     // select all the rows containing the text from filterTextField
-    filterTextField.getDocument().addDocumentListener(
-      new DocumentListener() {
+    filterTextField.getDocument().addDocumentListener( new DocumentListener() {
       private Timer timer = new Timer("Annotation list selection timer", true);
       private TimerTask timerTask;
       public void changedUpdate(DocumentEvent e) { /* do nothing */ }
-      public void insertUpdate(DocumentEvent e) {
-        update();
-      }
-      public void removeUpdate(DocumentEvent e) {
-        update();
-      }
+      public void insertUpdate(DocumentEvent e) { update(); }
+      public void removeUpdate(DocumentEvent e) { update(); }
       private void update() {
         if (timerTask != null) { timerTask.cancel(); }
-        Date timeToRun = new Date(System.currentTimeMillis() + 1000);
+        Date timeToRun = new Date(System.currentTimeMillis() + 300);
         timerTask = new TimerTask() { public void run() {
           selectRows();
         }};
@@ -298,15 +296,16 @@ public class AnnotationListView extends AbstractDocumentView
       }
     });
 
-       // Delete key for deleting selected annotations
-       table.addKeyListener(new KeyAdapter() {
-         public void keyPressed(KeyEvent e) {
-           if (e.getKeyCode() == KeyEvent.VK_DELETE) {
-             new DeleteAction().actionPerformed(null);
-           }
-         }
-       });
-   }
+    // Delete key for deleting selected annotations
+    table.addKeyListener(new KeyAdapter() {
+     public void keyPressed(KeyEvent e) {
+       if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+         new DeleteAction().actionPerformed(new ActionEvent(e.getSource(),
+           e.getID(), "", e.getWhen(), e.getModifiers()));
+       }
+     }
+    });
+  }
 
   public List<Action> getSpecificEditorActions(AnnotationSet set,
                                                Annotation annotation) {
@@ -371,12 +370,27 @@ public class AnnotationListView extends AbstractDocumentView
     return actions;
   }
 
-  protected class DeleteAction extends AbstractAction{
+  protected class DeleteAction extends AbstractAction {
     public DeleteAction() {
-      super("Delete");
+      super("Delete Annotations");
       putValue(SHORT_DESCRIPTION, "Delete selected annotations");
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("DELETE"));
     }
-    public void actionPerformed(ActionEvent evt){
+    public void actionPerformed(ActionEvent event){
+      if ((event.getModifiers() & ActionEvent.SHIFT_MASK)
+                               != ActionEvent.SHIFT_MASK
+       && (event.getModifiers() & InputEvent.BUTTON1_MASK)
+                               != InputEvent.BUTTON1_MASK) {
+        // shows a confirm dialog before to delete annotations
+        int choice = JOptionPane.showOptionDialog(MainFrame.getInstance(), new
+          Object[]{"Are you sure you want to delete the "
+          + table.getSelectedRowCount() + " selected annotations?",
+          "<html><i>You can use Shift+Delete to bypass this dialog.</i>\n\n"},
+          "Delete annotations",
+          JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null,
+          new String[]{"Delete annotations", "Cancel"}, "Cancel");
+        if (choice == JOptionPane.CLOSED_OPTION || choice == 1)  { return; }
+      }
       List<AnnotationData> annotationsData = new ArrayList<AnnotationData>();
       for (int selectedRow : table.getSelectedRows()) {
         annotationsData.add(annDataList.get(table.rowViewToModel(selectedRow)));
@@ -437,11 +451,11 @@ public class AnnotationListView extends AbstractDocumentView
      int row = annDataList.size() -1;
      try{
        localSelectionUpdating = true;
-       if(tableModel != null) tableModel.fireTableRowsInserted(row, row);  
+       if(tableModel != null) tableModel.fireTableRowsInserted(row, row);
      }finally{
        localSelectionUpdating = false;
      }
-     
+
      //listen for the new annotation's events
      aData.getAnnotation().addAnnotationListener(AnnotationListView.this);
      return aData;
@@ -465,8 +479,8 @@ public class AnnotationListView extends AbstractDocumentView
          if(tableModel != null) tableModel.fireTableRowsDeleted(row, row);
        }finally{
          localSelectionUpdating = false;
-       }
      }
+   }
    }
 
    public void removeAnnotations(Collection<AnnotationData> tags){
@@ -556,7 +570,7 @@ public class AnnotationListView extends AbstractDocumentView
      if(selection != null){
        for(int i = 0; i < selection.length; i++){
          table.addRowSelectionInterval(selection[i], selection[i]);
-       }
+   }
      }
    }
 
@@ -572,11 +586,10 @@ public class AnnotationListView extends AbstractDocumentView
 
      //first get the local list of selected annotations
      int[] viewRows = table.getSelectedRows();
-     AnnotationData aHandler = null;
      List<AnnotationData> localSelAnns = new ArrayList<AnnotationData>();
-     for(int i = 0; i < viewRows.length; i++){
-       int modelRow = table.rowViewToModel(viewRows[i]);
-       if(modelRow >= 0){
+     for (int viewRow : viewRows) {
+       int modelRow = table.rowViewToModel(viewRow);
+       if (modelRow >= 0) {
          localSelAnns.add(annDataList.get(modelRow));
        }
      }
