@@ -9,6 +9,7 @@ import gate.alignment.gui.AlignmentFactory;
 import gate.compound.CompoundDocumentEvent;
 import gate.compound.CompoundDocumentListener;
 import gate.creole.ResourceInstantiationException;
+import gate.util.Files;
 
 /**
  * Implemention of the CompoundDocument. Compound Document is a set of
@@ -61,7 +62,7 @@ public class CompoundDocumentImpl extends AbstractCompoundDocument {
       }
 
       // source URL can be a file
-      File file = new File(sourceUrl.getFile());
+      File file = Files.fileFromURL(sourceUrl);
       if(file.isDirectory()) {
         throw new ResourceInstantiationException(
                 "You must select one of the files!");

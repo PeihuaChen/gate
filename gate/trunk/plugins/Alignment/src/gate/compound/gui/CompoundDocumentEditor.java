@@ -21,6 +21,7 @@ import gate.gui.ActionsPublisher;
 import gate.gui.Handle;
 import gate.gui.MainFrame;
 import gate.gui.NameBearerHandle;
+import gate.util.Files;
 import gate.util.GateException;
 import gate.util.GateRuntimeException;
 
@@ -223,7 +224,7 @@ public class CompoundDocumentEditor extends AbstractVisualResource
             file = new File(dir.getAbsolutePath() + "/Composite.xml");
           }
           else {
-            file = new File(doc.getSourceUrl().getFile());
+            file = Files.fileFromURL(doc.getSourceUrl());
             file = new File(dir.getAbsolutePath() + "/" + file.getName());
           }
 

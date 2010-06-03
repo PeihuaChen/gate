@@ -304,7 +304,7 @@ public class MtlTransducer extends AbstractLanguageAnalyser {
       // get the absolute path of the jar file that contains this class
       String className = this.getClass().getName();
       ResourceData resData = (ResourceData) Gate.getCreoleRegister().get(className);
-      File jarFile = new File(resData.getJarFileUrl().getPath());
+      File jarFile = Files.fileFromURL(resData.getJarFileUrl());
       String jarPath = jarFile.getAbsolutePath();
 
       // split the classpath into its elements

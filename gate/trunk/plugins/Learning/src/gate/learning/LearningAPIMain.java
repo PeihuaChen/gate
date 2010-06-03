@@ -15,6 +15,7 @@ import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
 import gate.util.Benchmark;
 import gate.util.Benchmarkable;
+import gate.util.Files;
 import gate.util.GateException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -128,7 +129,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
     try {
       wd = new File(configFileURL.toURI()).getParentFile();
     } catch(URISyntaxException use) {
-      wd = new File(configFileURL.getFile()).getParentFile();
+      wd = Files.fileFromURL(configFileURL).getParentFile();
     }
     // it must be a directory
     if(!wd.isDirectory()) { throw new ResourceInstantiationException(wd

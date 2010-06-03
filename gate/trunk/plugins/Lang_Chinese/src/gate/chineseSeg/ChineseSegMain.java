@@ -33,6 +33,7 @@ import gate.learning.learners.MultiClassLearning;
 import gate.learning.learners.PostProcessing;
 import gate.learning.learners.SupervisedLearner;
 import gate.util.ExtensionFileFilter;
+import gate.util.Files;
 import gate.util.GateException;
 
 import java.io.BufferedWriter;
@@ -108,7 +109,7 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
     // File wdResults = new
     // File("C:\\yaoyong\\javawk\\chineseSeg\\test\\data\\",
     // ConstantParameters.FILENAME_resultsDir);
-    wdResults = new File(modelURL.getPath());
+    wdResults = Files.fileFromURL(modelURL);
     if(!wdResults.exists()) wdResults.mkdir();
     
     
@@ -139,7 +140,7 @@ public class ChineseSegMain extends AbstractLanguageAnalyser implements
       //ExtensionFileFilter fileFilter = new ExtensionFileFilter();
       //fileFilter.addExtension("txt");
       ExtensionFileFilter fileFilter = null;
-      File[] xmlFiles = new File(this.textFilesURL.getPath())
+      File[] xmlFiles = Files.fileFromURL(this.textFilesURL)
         .listFiles(fileFilter);
       Arrays.sort(xmlFiles, new Comparator<File>() {
         public int compare(File a, File b) {

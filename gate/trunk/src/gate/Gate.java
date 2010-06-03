@@ -283,7 +283,7 @@ public class Gate implements GateConstants {
           }
           else if(gateURL.getProtocol().equals("file")) {
             // running from classes directory
-            File gateClassFile = new File(gateURL.getFile());
+            File gateClassFile = Files.fileFromURL(gateURL);
             gateHome =
               gateClassFile.getParentFile().getParentFile().getParentFile();
           }
@@ -1037,7 +1037,7 @@ public class Gate implements GateConstants {
       URL aPluginURL = pluginIter.next();
       // do not save installed plug-ins - they get loaded automatically
       if(aPluginURL.getProtocol().equals("file")) {
-        File pluginDirectory = new File(aPluginURL.getFile());
+        File pluginDirectory = Files.fileFromURL(aPluginURL);
         try {
           if(pluginDirectory.getCanonicalPath().startsWith(pluginsHomeStr))
             continue;

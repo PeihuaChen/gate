@@ -80,7 +80,7 @@ public class Tools {
       packageDir.replace('.', Strings.getPathSep().charAt(0));
       URL packageURL = Gate.getClassLoader().getResource(packageDir);
       if(packageURL != null){
-        File directory = new File(packageURL.getFile());
+        File directory = Files.fileFromURL(packageURL);
         if(directory.exists()){
           String [] files = directory.list();
           for (int j=0; j < files.length; j++){

@@ -21,6 +21,7 @@ import java.net.URL;
 import java.util.*;
 
 import gate.creole.ResourceInstantiationException;
+import gate.util.Files;
 
 /** Represents a mapping definition which maps gazetteer lists to ontology classes */
 public class MappingDefinition extends gate.creole.AbstractLanguageResource
@@ -110,7 +111,7 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
       throw new ResourceInstantiationException("URL not set (null).");
     }
     try {
-    File fileo = new File(url.getFile());
+    File fileo = Files.fileFromURL(url);
     fileo.delete();
     BufferedWriter mapWriter = new BufferedWriter(new FileWriter(fileo));
     for (int index = 0 ; index < nodes.size() ; index++) {

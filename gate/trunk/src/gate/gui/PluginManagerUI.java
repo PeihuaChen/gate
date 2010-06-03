@@ -348,7 +348,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
       Gate.DirectoryInfo dInfo = Gate.getDirectoryInfo(visibleRows.get(row));
       if (dInfo == null) { return null; }
       switch (column){
-        case NAME_COLUMN: return new File(dInfo.getUrl().getFile()).getName();
+        case NAME_COLUMN: return Files.fileFromURL(dInfo.getUrl()).getName();
         case ICON_COLUMN: return
           dInfo.isValid() ? (
             dInfo.getUrl().getProtocol().equalsIgnoreCase("file") ? 
