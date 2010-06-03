@@ -170,7 +170,7 @@ public class POSTaggerPR extends AbstractLanguageAnalyser implements
           Set<Double> vals = scores.get(theTags[m]);
           if(vals == null) {
             vals = new HashSet<Double>();
-            f.put(theTags[m], vals);
+            scores.put(theTags[m], vals);
           }
           vals.add(score);
         }
