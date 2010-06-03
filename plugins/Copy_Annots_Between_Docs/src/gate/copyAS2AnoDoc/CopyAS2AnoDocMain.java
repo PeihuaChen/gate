@@ -16,6 +16,7 @@ import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
 import gate.util.ExtensionFileFilter;
+import gate.util.Files;
 import gate.util.InvalidOffsetException;
 
 import java.io.File;
@@ -67,7 +68,7 @@ ProcessingResource {
       
       //collect all the file names in the source dir
       ExtensionFileFilter fileFilter = null;
-      xmlFiles = new File(this.sourceFilesURL.getPath())
+      xmlFiles = Files.fileFromURL(this.sourceFilesURL)
         .listFiles(fileFilter);
       Arrays.sort(xmlFiles, new Comparator<File>() {
         public int compare(File a, File b) {

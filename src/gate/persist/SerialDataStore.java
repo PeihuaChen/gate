@@ -89,7 +89,7 @@ extends AbstractFeatureBearer implements DataStore {
     try {
       this.storageDir = new File(storageUrl.toURI());
     } catch(URISyntaxException use){
-      this.storageDir = new File(storageUrl.getFile());
+      this.storageDir = Files.fileFromURL(storageUrl);
     }
   } // setStorageUrl
 

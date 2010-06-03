@@ -75,7 +75,7 @@ public class ConfigDataProcessor
     String configString = null; // for debug messages
     try {
       if(DEBUG) {
-        File configFile = new File(configUrl.getFile());
+        File configFile = Files.fileFromURL(configUrl);
         if(configFile.exists())
           configString = Files.getString(configUrl.getFile());
         else

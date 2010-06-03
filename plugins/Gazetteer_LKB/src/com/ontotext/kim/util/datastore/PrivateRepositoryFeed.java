@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
 
+import gate.util.Files;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -37,7 +38,7 @@ public class PrivateRepositoryFeed implements QueryResultListener.Feed {
 		this.configFile = url;
 		this.query = query;
 		this.settingsHash = settingsHash;
-		dictionaryPath = new File(configFile.getFile()).getParentFile().getAbsoluteFile();
+		dictionaryPath = Files.fileFromURL(configFile).getParentFile().getAbsoluteFile();
 		
 		if (!verifyHash(dictionaryPath, settingsHash)) {
 			boolean deleteSuccesful = new File(dictionaryPath, "kim.trusted.entities.cache").delete();
@@ -81,7 +82,7 @@ public class PrivateRepositoryFeed implements QueryResultListener.Feed {
 	}
 
 	private Reader getConfigReader() throws IOException {
-		String configTemplate = FileUtils.readFileToString(new File(configFile.getFile()));
+		String configTemplate = FileUtils.readFileToString(Files.fileFromURL(configFile));
 		configTemplate = configTemplate.replace("%relpath%", dictionaryPath.getAbsolutePath().replace('\\', '/'));
 		return new StringReader(configTemplate);
 	}

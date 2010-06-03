@@ -30,6 +30,7 @@ import gate.creole.annic.apache.lucene.search.Hits;
 import gate.creole.annic.apache.lucene.search.IndexSearcher;
 import gate.creole.annic.apache.lucene.search.TermQuery;
 import gate.Corpus;
+import gate.util.Files;
 
 /**
  * This class provides a Lucene based implementation for the Indexer
@@ -84,7 +85,7 @@ public class LuceneIndexer implements Indexer {
     try {
       file = new File(indexLocation.toURI());
     } catch(URISyntaxException use) {
-      file = new File(indexLocation.getFile());
+      file = Files.fileFromURL(indexLocation);
     }
       
       if(file.exists()) {
@@ -155,7 +156,7 @@ public class LuceneIndexer implements Indexer {
       try {
         file = new File(indexLocation.toURI());
       } catch(URISyntaxException use) {
-        file = new File(indexLocation.getFile());
+        file = Files.fileFromURL(indexLocation);
       }
 
 

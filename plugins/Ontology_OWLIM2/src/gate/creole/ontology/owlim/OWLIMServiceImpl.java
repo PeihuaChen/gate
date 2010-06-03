@@ -27,6 +27,7 @@ import java.util.Set;
 
 import javax.jws.WebService;
 
+import gate.util.Files;
 import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Resource;
@@ -4960,7 +4961,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
                     tempString + fileName.substring(m - 1, fileName.length());
 
                   fileName =
-                    new File(new URL(fileName).getFile()).getAbsolutePath();
+                    Files.fileFromURL(new URL(fileName)).getAbsolutePath();
                   // lets normalize the name by replacing .. in the path
                   // file://abc/xyz/../../pqr
 
@@ -5219,7 +5220,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
           findURL = true;
         }
         else if(ontoFileUrl.startsWith("file:")) {
-          currentRepository.addData(new File(new URL(ontoFileUrl).getFile()),
+          currentRepository.addData(Files.fileFromURL(new URL(ontoFileUrl)),
             baseURI, getRDFFormat(format), true, this);
           findURL = true;
         }
