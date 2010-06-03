@@ -67,21 +67,19 @@ public class OptionsDialog extends JDialog {
     List<LNFData> supportedLNFs = new ArrayList<LNFData>();
     LNFData currentLNF = null;
     UIManager.LookAndFeelInfo[] lnfs = UIManager.getInstalledLookAndFeels();
-    for(int i = 0; i < lnfs.length; i++){
-      UIManager.LookAndFeelInfo lnf = lnfs[i];
-      try{
+    for (UIManager.LookAndFeelInfo lnf : lnfs) {
+      try {
         Class lnfClass = Class.forName(lnf.getClassName());
-        if(((LookAndFeel)(lnfClass.newInstance())).isSupportedLookAndFeel()){
-          if(lnf.getName().equals(UIManager.getLookAndFeel().getName())){
+        if (((LookAndFeel) (lnfClass.newInstance())).isSupportedLookAndFeel()) {
+          if (lnf.getName().equals(UIManager.getLookAndFeel().getName())) {
             supportedLNFs.add(currentLNF =
-                              new LNFData(lnf.getClassName(), lnf.getName()));
-          }else{
+              new LNFData(lnf.getClassName(), lnf.getName()));
+          } else {
             supportedLNFs.add(new LNFData(lnf.getClassName(), lnf.getName()));
           }
         }
-      }catch(ClassNotFoundException cnfe){
-      }catch(IllegalAccessException iae){
-      }catch(InstantiationException ie){
+      } catch (Exception e) {
+        e.printStackTrace();
       }
     }
     lnfCombo = new JComboBox(supportedLNFs.toArray());
@@ -169,30 +167,6 @@ public class OptionsDialog extends JDialog {
       .DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME) )
       addSpaceOnMarkupUnpackChk.setSelected(false);
 
-    ButtonGroup bGroup = new ButtonGroup();
-    doceditInsertAppendChk = new JRadioButton("Append");
-    doceditInsertAppendChk.setToolTipText(
-      "Inserts a character after the caret.");
-    bGroup.add(doceditInsertAppendChk);
-    doceditInsertPrependChk = new JRadioButton("Prepend");
-    doceditInsertPrependChk.setToolTipText(
-      "Inserts a character before the caret.");
-    bGroup.add(doceditInsertPrependChk);
-    doceditInsertPrependChk.setSelected(
-      userConfig.getBoolean(GateConstants.DOCEDIT_INSERT_PREPEND));
-    doceditInsertAppendChk.setSelected(
-      userConfig.getBoolean(GateConstants.DOCEDIT_INSERT_APPEND));
-    //if none set then set the default one
-    if(!(doceditInsertAppendChk.isSelected()||
-         doceditInsertPrependChk.isSelected()))
-      doceditInsertAppendChk.setSelected(true);
-
-    docReadOnlyChk = new JCheckBox("Read-only");
-    docReadOnlyChk.setSelected(
-      userConfig.getBoolean(GateConstants.DOCEDIT_READ_ONLY));
-    docReadOnlyChk.setToolTipText(
-      "Prevents text editing but not annotation editing.");
-
     browserComboBox = new JComboBox(new String[] {
       "Default browser", "Java", "Custom"});
     browserComboBox.setPrototypeDisplayValue("Default browser");
@@ -260,27 +234,6 @@ public class OptionsDialog extends JDialog {
       hBox2.add(saveOptionsChk);
       hBox2.add(Box.createVerticalStrut(5));
       hBox2.add(saveSessionChk);
-      hBox2.add(Box.createVerticalStrut(5));
-    hBox.add(hBox2);
-    hBox.add(Box.createHorizontalStrut(5));
-    hBox.add(Box.createHorizontalGlue());
-    advancedBox.add(hBox);
-
-    advancedBox.add(Box.createVerticalStrut(5));
-
-    hBox = Box.createHorizontalBox();
-    hBox.setBorder(BorderFactory.createTitledBorder(" Document editor "));
-    hBox.add(Box.createHorizontalStrut(5));
-      hBox2 = Box.createHorizontalBox();
-      hBox2.setBorder(BorderFactory.createTitledBorder(" Insert "));
-      hBox2.add(doceditInsertAppendChk);
-      hBox2.add(Box.createVerticalStrut(5));
-      hBox2.add(doceditInsertPrependChk);
-      hBox2.add(Box.createHorizontalGlue());
-    hBox.add(hBox2);
-      hBox2 = Box.createHorizontalBox();
-      hBox2.add(Box.createVerticalStrut(5));
-      hBox2.add(docReadOnlyChk);
       hBox2.add(Box.createVerticalStrut(5));
     hBox.add(hBox2);
     hBox.add(Box.createHorizontalStrut(5));
@@ -550,12 +503,6 @@ public class OptionsDialog extends JDialog {
         includeFeaturesOnPreserveFormatChk.isSelected());
       userConfig.put(GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME,
         addSpaceOnMarkupUnpackChk.isSelected());
-      userConfig.put(GateConstants.DOCEDIT_INSERT_APPEND,
-        doceditInsertAppendChk.isSelected());
-      userConfig.put(GateConstants.DOCEDIT_INSERT_PREPEND,
-        doceditInsertPrependChk.isSelected());
-      userConfig.put(GateConstants.DOCEDIT_READ_ONLY,
-        docReadOnlyChk.isSelected());
       userConfig.put(MainFrame.class.getName()+".browsercommandline",
         browserCommandLineTextField.getText());
       userConfig.put(MainFrame.class.getName()+".treeselectview",
@@ -699,15 +646,6 @@ public class OptionsDialog extends JDialog {
    * The "Add extra space markup unpack if needed" checkbox
    */
   protected JCheckBox addSpaceOnMarkupUnpackChk;
-
-  /** Document insertion append */
-  protected JRadioButton doceditInsertAppendChk;
-
-  /** Document insertion prepend */
-  protected JRadioButton doceditInsertPrependChk;
-
-  /** The Document read-only checkbox */
-  protected JCheckBox docReadOnlyChk;
 
   /**
    * The name of the look and feel class
