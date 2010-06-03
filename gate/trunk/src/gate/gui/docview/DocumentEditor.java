@@ -39,11 +39,14 @@ import gate.gui.annedit.AnnotationData;
 import gate.gui.annedit.SearchExpressionsAction;
 import gate.swing.JMenuButton;
 import gate.util.GateRuntimeException;
+import gate.util.OptionsMap;
 
 /**
  * This is the GATE Document viewer/editor. This class is only the shell of the
  * main document VR, which gets populated with views (objects that implement
  * the {@link DocumentView} interface.
+ *
+ * Contains a search dialog and an option menu button.
  */
 
 @CreoleResource(name = "Document Editor", guiType = GuiType.LARGE,
@@ -248,25 +251,18 @@ public class DocumentEditor extends AbstractVisualResource
     remove(progressBar);
     add(horizontalSplit, BorderLayout.CENTER);
     searchAction = new SearchAction();
-    searchAction.putValue(Action.SHORT_DESCRIPTION,
-      "<html>"+searchAction.getValue(Action.SHORT_DESCRIPTION)
-      +"&nbsp;&nbsp;<font color=#667799><small>Ctrl-F"
-      +"&nbsp;&nbsp;</small></font></html>");
     JButton searchButton = new JButton(searchAction);
-    searchButton.setText("");
     searchButton.setMargin(new Insets(0, 0, 0, 0));
     topBar.add(Box.createHorizontalStrut(5));
     topBar.add(searchButton);
-    setEditable(!Gate.getUserConfig()
-      .getBoolean(GateConstants.DOCEDIT_READ_ONLY));
 
     // add a key binding for the search function
     getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(
       KeyStroke.getKeyStroke("control F"), "Search in text");
     getActionMap().put("Search in text", searchAction);
 
-    // create menu that contains a checkbox item for restoring automatically
-    // the layout and an action item for saving the current layout
+    // create menu that contains several options for the document editor
+    final OptionsMap config = Gate.getUserConfig();
     final JPopupMenu optionsMenu = new JPopupMenu("Options menu");
     final JMenuItem saveCurrentLayoutMenuItem = new JMenuItem(
       new AbstractAction("Save Current Layout") {
@@ -282,12 +278,52 @@ public class DocumentEditor extends AbstractVisualResource
     restoreLayoutAutomaticallyMenuItem.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         // whenever the user checks/unchecks, update the config
-        Gate.getUserConfig().put(
-          DocumentEditor.class.getName()+".restoreLayoutAutomatically",
+        config.put(DocumentEditor.class.getName()+".restoreLayoutAutomatically",
         restoreLayoutAutomaticallyMenuItem.isSelected());
       }
     });
     optionsMenu.add(restoreLayoutAutomaticallyMenuItem);
+    final JCheckBoxMenuItem readOnly = new JCheckBoxMenuItem("Read-only");
+    readOnly.addItemListener(new ItemListener() {
+      public void itemStateChanged(ItemEvent e) {
+        config.put(GateConstants.DOCEDIT_READ_ONLY, readOnly.isSelected());
+        setEditable(!readOnly.isSelected());
+      }
+    });
+    readOnly.setSelected(config.getBoolean(GateConstants.DOCEDIT_READ_ONLY));
+    optionsMenu.addSeparator();
+    optionsMenu.add(readOnly);
+    ButtonGroup buttonGroup = new ButtonGroup();
+    final JRadioButtonMenuItem insertAppend =
+      new JRadioButtonMenuItem("Insert Append");
+    buttonGroup.add(insertAppend);
+    insertAppend.setSelected(
+      config.getBoolean(GateConstants.DOCEDIT_INSERT_APPEND));
+    insertAppend.addItemListener(new ItemListener() {
+      public void itemStateChanged(ItemEvent e) {
+        config.put(GateConstants.DOCEDIT_INSERT_APPEND,
+          insertAppend.isSelected());
+      }
+    });
+    optionsMenu.addSeparator();
+    optionsMenu.add(insertAppend);
+    final JRadioButtonMenuItem insertPrepend =
+      new JRadioButtonMenuItem("Insert Prepend");
+    buttonGroup.add(insertPrepend);
+    insertPrepend.setSelected(
+      config.getBoolean(GateConstants.DOCEDIT_INSERT_PREPEND));
+    insertPrepend.addItemListener(new ItemListener() {
+      public void itemStateChanged(ItemEvent e) {
+        config.put(GateConstants.DOCEDIT_INSERT_PREPEND,
+          insertPrepend.isSelected());
+      }
+    });
+    optionsMenu.add(insertPrepend);
+    // if none set then set the default one
+    if (!(insertAppend.isSelected()
+       || insertPrepend.isSelected())) {
+      insertAppend.setSelected(true);
+    }
     JMenuButton menuButton = new JMenuButton(optionsMenu);
     menuButton.setIcon(MainFrame.getIcon("expanded"));
     menuButton.setToolTipText("Options for the document editor");
@@ -351,48 +387,44 @@ public class DocumentEditor extends AbstractVisualResource
 //      	bottomBar.add(new ViewButton(view, name));
       	break;
       default :
-        throw new GateRuntimeException(getClass().getName() +  ": Invalid view type");
+        throw new GateRuntimeException(
+          getClass().getName() +  ": Invalid view type");
     }
 
     // binds a F-key to each view toggle button
     // avoid the F-Key F1,2,6,8,10 because already used
-    if ((functionKeyNumber == 5)
-     || (functionKeyNumber == 7)
-     || (functionKeyNumber == 9)) {
-      functionKeyNumber++;
+    if ((fKeyNumber == 5) || (fKeyNumber == 7) || (fKeyNumber == 9)) {
+      fKeyNumber++;
     }
     getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-      .put(KeyStroke.getKeyStroke("F"+(functionKeyNumber +1)),
-      "Shows view "+ functionKeyNumber +1);
-    getActionMap().put("Shows view "+ functionKeyNumber +1,
-        new AbstractAction() {
-            public void actionPerformed(ActionEvent evt) {
-              viewButton.doClick();
-            }
+      .put(KeyStroke.getKeyStroke("F" + (fKeyNumber + 1)),
+        "Shows view "+ fKeyNumber + 1);
+    getActionMap().put("Shows view " + fKeyNumber + 1,
+      new AbstractAction() {
+        public void actionPerformed(ActionEvent evt) {
+          viewButton.doClick();
         }
+      }
     );
     // add a tooltip with the key shortcut
     if (view instanceof AnnotationSetsView) {
       getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-        .put(KeyStroke.getKeyStroke("shift F"+(functionKeyNumber +1)),
-        "Shows view "+ functionKeyNumber +1);
+        .put(KeyStroke.getKeyStroke("shift F" + (fKeyNumber + 1)),
+        "Shows view " + fKeyNumber + 1);
 
-      viewButton.setToolTipText("<html>Toggle the view of "+name
-        +"&nbsp;&nbsp;<font color=#667799><small>F"
-        +(functionKeyNumber +1)
+      viewButton.setToolTipText("<html>Toggle the view of " + name
+        +"&nbsp;&nbsp;<font color=#667799><small>F" + (fKeyNumber + 1)
         +"&nbsp;&nbsp;</small></font>"
         +"<br>Set last selected annotations "
-        +"&nbsp;&nbsp;<font color=#667799><small>Shift+F"
-        +(functionKeyNumber +1)
+        +"&nbsp;&nbsp;<font color=#667799><small>Shift+F" + (fKeyNumber + 1)
         +"&nbsp;&nbsp;</small></font></html>");
 
     } else {
-      viewButton.setToolTipText("<html>Toggle the view of "+name
-        +"&nbsp;&nbsp;<font color=#667799><small>F"
-        +(functionKeyNumber +1)
+      viewButton.setToolTipText("<html>Toggle the view of "+ name
+        +"&nbsp;&nbsp;<font color=#667799><small>F" + (fKeyNumber + 1)
         +"&nbsp;&nbsp;</small></font></html>");
     }
-    functionKeyNumber++;
+    fKeyNumber++;
   }
 
   /**
@@ -687,8 +719,11 @@ public class DocumentEditor extends AbstractVisualResource
   protected class SearchAction extends AbstractAction {
 
     public SearchAction() {
-      super("Search", MainFrame.getIcon("search"));
-      putValue(SHORT_DESCRIPTION, "Search within the document.");
+      super();
+      putValue(SHORT_DESCRIPTION, "<html>Search within the document." +
+        "&nbsp;&nbsp;<font color=#667799><small>Ctrl-F" +
+        "&nbsp;&nbsp;</small></font></html>");
+      putValue(SMALL_ICON, MainFrame.getIcon("search"));
     }
 
     public void actionPerformed(ActionEvent evt) {
@@ -1231,5 +1266,5 @@ public class DocumentEditor extends AbstractVisualResource
   /**
    * Used to know the last F-key used when adding a new view.
    */
-  protected int functionKeyNumber = 2;
+  protected int fKeyNumber = 2;
 }
