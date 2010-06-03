@@ -148,7 +148,9 @@ public class TextualDocumentView extends AbstractDocumentView {
    */
   public void moveHighlight(Object tag, int newStart, int newEnd)
     throws BadLocationException{
-    textView.getHighlighter().changeHighlight(tag, newStart, newEnd);
+    if(tag instanceof HighlightData){
+      textView.getHighlighter().changeHighlight(((HighlightData)tag).tag, newStart, newEnd);
+    }
   }
 
 
