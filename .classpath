@@ -27,7 +27,7 @@
 	<classpathentry kind="src" output="plugins/Alignment/classes" path="plugins/Alignment/src"/>
 	<classpathentry kind="src" output="plugins/Learning/build" path="plugins/Learning/src"/>
 	<classpathentry kind="src" output="plugins/Stemmer_Snowball/classes" path="plugins/Stemmer_Snowball/src"/>
-	<classpathentry kind="src" output="GATE/plugins/WordNet/classes" path="plugins/WordNet/src"/>
+	<classpathentry kind="src" output="plugins/WordNet/classes" path="plugins/WordNet/src"/>
 	<classpathentry exported="true" kind="lib" path="lib/Bib2HTML.jar"/>
 	<classpathentry kind="lib" path="lib/ext/nl.mpi.lookup.jar"/>
 	<classpathentry kind="lib" path="lib/plugins/rdf_backend.jar"/>
