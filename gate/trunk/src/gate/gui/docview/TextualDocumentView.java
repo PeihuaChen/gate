@@ -574,12 +574,6 @@ public class TextualDocumentView extends AbstractDocumentView {
   protected Map<AnnotationData, HighlightData> blinkingTagsForAnnotations;
 
   /**
-   * This map stores the highlight tags from the text view's highlighter
-   * indexed by the corresponding {@link HighlightData} objects.
-   */
-  protected Map tagsForHighlights;
-
-  /**
    * This list stores the {@link HighlightData} values for annotations pending
    * highlighting
    */
