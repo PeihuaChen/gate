@@ -1346,6 +1346,8 @@ public class AnnotationSetsView extends AbstractDocumentView
       Iterator annIter = hghltTagsForAnnId.keySet().iterator();
       while(annIter.hasNext()){
         Annotation ann = setHandler.set.get((Integer)annIter.next());
+        // editing the text sometimes leads to annotations being deleted 
+        if(ann == null) continue;
         int annStart = ann.getStartNode().getOffset().intValue();
         int annEnd = ann.getEndNode().getOffset().intValue();
         if((annStart <= start && start <= annEnd) ||
