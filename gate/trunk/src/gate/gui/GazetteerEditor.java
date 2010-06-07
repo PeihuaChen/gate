@@ -39,6 +39,7 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.Collator;
 import java.util.*;
 import java.util.List;
@@ -76,6 +77,7 @@ public class GazetteerEditor extends AbstractVisualResource
     listTableModel = new ListTableModel();
     actions = new ArrayList<Action>();
     actions.add(new SaveGazetteerAction());
+    actions.add(new SaveAsGazetteerAction());
   }
 
   public Resource init() throws ResourceInstantiationException {
@@ -163,10 +165,6 @@ public class GazetteerEditor extends AbstractVisualResource
     definitionTopPanel.add(newListButton);
     definitionPanel.add(definitionTopPanel, BorderLayout.NORTH);
     definitionTable = new XJTable() {
-      // makes 'List name' column uneditable
-      public boolean isCellEditable(int row, int column) {
-        return definitionTable.convertColumnIndexToModel(column) != 0;
-      }
       // shift + Delete keys delete the selected rows
       protected void processKeyEvent(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_DELETE
@@ -385,6 +383,10 @@ public class GazetteerEditor extends AbstractVisualResource
     definitionTable.getSelectionModel().addListSelectionListener(
       new ListSelectionListener() {
         public void valueChanged(ListSelectionEvent e) {
+          if (e.getValueIsAdjusting()
+           || definitionTable.isEditing()) {
+            return;
+          }
           if (definitionTable.getSelectedRow() == -1) {
             listTableModel.setGazetteerList(new GazetteerList());
             selectedLinearNode = null;
@@ -430,6 +432,32 @@ public class GazetteerEditor extends AbstractVisualResource
             if (r == -1 || c == -1) { return; }
             String newValue = (String) definitionTableModel.getValueAt(r, c);
             if (c == 0) {
+              if (selectedLinearNode.getList().equals(newValue)) { return; }
+              // save the previous list and copy it to the new name of the list
+              try {
+                GazetteerList gazetteerList = (GazetteerList)
+                  linearDefinition.getListsByNode().get(selectedLinearNode);
+                // save the previous list
+                gazetteerList.store();
+                MainFrame.getInstance().statusChanged("Previous list saved in "
+                  + gazetteerList.getURL().getPath());
+                File source = Files.fileFromURL(gazetteerList.getURL());
+                File destination = new File(source.getParentFile(), newValue);
+                // change the list URL to the new list name
+                gazetteerList.setURL(destination.toURI().toURL());
+                gazetteerList.setModified(false);
+                // change the key of the node in the map
+                linearDefinition.getNodesByListNames()
+                  .remove(selectedLinearNode.getList());
+                linearDefinition.getNodesByListNames()
+                  .put(newValue, selectedLinearNode);
+
+              } catch (Exception ex) {
+                MainFrame.getInstance().statusChanged(
+                  "Unable to save the list.");
+                Err.prln("Unable to save the list.\n" + ex.getMessage());
+              }
+
               selectedLinearNode.setList(newValue);
             } else if (c == 1) {
               selectedLinearNode.setMajorType(newValue);
@@ -512,8 +540,10 @@ public class GazetteerEditor extends AbstractVisualResource
     // add key shortcuts for actions
     InputMap inputMap = getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
     ActionMap actionMap = getActionMap();
-    inputMap.put(KeyStroke.getKeyStroke("control S"), "save gazetteer");
-    actionMap.put("save gazetteer", actions.get(0));
+    inputMap.put(KeyStroke.getKeyStroke("control S"), "save");
+    actionMap.put("save", actions.get(0));
+    inputMap.put(KeyStroke.getKeyStroke("control shift S"), "save as");
+    actionMap.put("save as", actions.get(1));
     inputMap.put(KeyStroke.getKeyStroke("control R"), "reload list");
     actionMap.put("reload list", new ReloadGazetteerListAction());
   }
@@ -773,6 +803,10 @@ public class GazetteerEditor extends AbstractVisualResource
           }
         }
       }
+      for (Object object : gazetteerList) {
+        GazetteerNode node = (GazetteerNode) object;
+        node.setSeparator(linearDefinition.getSeparator());
+      }
     }
 
     public void addRow(GazetteerNode gazetteerNode) {
@@ -824,9 +858,34 @@ public class GazetteerEditor extends AbstractVisualResource
 
   protected class SaveGazetteerAction extends AbstractAction {
     public SaveGazetteerAction() {
-      super("Save as...");
+      super("Save");
       putValue(SHORT_DESCRIPTION, "Save the definition and all the lists");
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control S"));
+    }
+    public void actionPerformed(ActionEvent e) {
+      try {
+        linearDefinition.store();
+        for (Object object : linearDefinition.getListsByNode().values()) {
+          GazetteerList gazetteerList = (GazetteerList) object;
+          gazetteerList.store();
+        }
+        MainFrame.getInstance().statusChanged("Gazetteer saved in " +
+          linearDefinition.getURL().getPath());
+        definitionTable.repaint();
+
+      } catch (ResourceInstantiationException re) {
+        MainFrame.getInstance().statusChanged(
+          "Unable to save the Gazetteer.");
+        Err.prln("Unable to save the Gazetteer.\n" + re.getMessage());
+      }
+    }
+  }
+
+  protected class SaveAsGazetteerAction extends AbstractAction {
+    public SaveAsGazetteerAction() {
+      super("Save as...");
+      putValue(SHORT_DESCRIPTION, "Save the definition and all the lists");
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control shift S"));
     }
     public void actionPerformed(ActionEvent e) {
       XJFileChooser fileChooser = MainFrame.getFileChooser();
@@ -842,16 +901,22 @@ public class GazetteerEditor extends AbstractVisualResource
         File selectedFile = fileChooser.getSelectedFile();
         if (selectedFile == null) { return; }
         try {
+          URL previousURL = linearDefinition.getURL();
           linearDefinition.setURL(selectedFile.toURI().toURL());
           linearDefinition.store();
+          linearDefinition.setURL(previousURL);
           for (Object object : linearDefinition.getListsByNode().values()) {
             GazetteerList gazetteerList = (GazetteerList) object;
+            previousURL = gazetteerList.getURL();
             gazetteerList.setURL(new File(selectedFile.getParentFile(),
               Files.fileFromURL(gazetteerList.getURL()).getName())
               .toURI().toURL());
             gazetteerList.store();
+            gazetteerList.setURL(previousURL);
+            gazetteerList.setModified(false);
           }
-          MainFrame.getInstance().statusChanged("Gazetteer saved sucessfuly");
+          MainFrame.getInstance().statusChanged("Gazetteer saved in " +
+            selectedFile.getAbsolutePath());
           definitionTable.repaint();
 
         } catch (ResourceInstantiationException re) {
