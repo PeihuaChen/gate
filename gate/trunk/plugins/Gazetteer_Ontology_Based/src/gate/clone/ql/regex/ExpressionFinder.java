@@ -26,22 +26,23 @@ import org.apache.oro.text.regex.PatternMatcherInput;
 import org.apache.oro.text.regex.StringSubstitution;
 import org.apache.oro.text.regex.Substitution;
 import org.apache.oro.text.regex.Util;
+
 /**
  * 
  * @author Danica Damljanovic
- *
+ * 
  */
 public class ExpressionFinder {
   Logger logger = Logger.getLogger(ExpressionFinder.class.getName());
 
-   /**
-   * This method finds camelCase words inside the input string and substitutes
-   * all occurencies with lowerCase substitute (usually one space) upperCase
-   * Maching group is defined by regularExpression.
+  /**
+   * This method finds camelCase words inside the input string and
+   * substitutes all occurencies with lowerCase substitute (usually one
+   * space) upperCase Maching group is defined by regularExpression.
    * 
-   * Example: inputString="detectCamelCaseWord" call method: String resultString =
-   * findAndSeparateCamelCases(inputString, CloneQlConstants.REGEX_CAMEL_CASE, "
-   * ");
+   * Example: inputString="detectCamelCaseWord" call method: String
+   * resultString = findAndSeparateCamelCases(inputString,
+   * CloneQlConstants.REGEX_CAMEL_CASE, " ");
    * 
    * Result: "detect Camel Case Word"
    * 
@@ -50,7 +51,7 @@ public class ExpressionFinder {
    * @return
    */
   public static String findAndSeparateCamelCases(String inputString,
-    String regularExpression, String substituteString) {
+          String regularExpression, String substituteString) {
     String afterSubstitution = null;
     int matches = 0;
     Pattern pattern = null;
@@ -71,6 +72,11 @@ public class ExpressionFinder {
       System.err.println(e.getMessage());
       System.exit(1);
     }
+    // remove all non-ascii chars as this awk library does support only ascii
+    // chars
+    // TODO investigate whether it is important to handle non-ascii chars and if
+    // yes use another library
+    inputString = inputString.replaceAll("[^\\p{ASCII}]", "");
     input = new PatternMatcherInput(inputString);
     // System.out.println("\nPatternMatcherInput: " + input);
     // Loop until there are no more matches left.
@@ -85,15 +91,15 @@ public class ExpressionFinder {
 
       String lowerCase = chars[1];
       String upperCase = chars[2];
-      // adding space (substitute string) in between lower and upper case
-      StringBuffer substitute =
-        new StringBuffer(lowerCase).append(substituteString).append(upperCase);
+      // adding space (substitute string) in between lower and upper
+      // case
+      StringBuffer substitute = new StringBuffer(lowerCase).append(
+              substituteString).append(upperCase);
 
-      Substitution aSubstitution =
-        new StringSubstitution(substitute.toString());
+      Substitution aSubstitution = new StringSubstitution(substitute.toString());
       // Perform substitution and print result.
-      String newString =
-        Util.substitute(matcher, pattern, aSubstitution, input.toString(), 1);
+      String newString = Util.substitute(matcher, pattern, aSubstitution, input
+              .toString(), 1);
       afterSubstitution = newString;
       // System.out.println("newString: " + newString);
       input = new PatternMatcherInput(newString);
@@ -127,16 +133,17 @@ public class ExpressionFinder {
     }
     return result;
   }
-/**
- * Main method for testing.
- * @param args
- */
+
+  /**
+   * Main method for testing.
+   * 
+   * @param args
+   */
   public static final void main(String args[]) {
 
     String inputString = "camelCaseDetection";
-    String resultString =
-      findAndSeparateCamelCases(inputString, CATConstants.REGEX_CAMEL_CASE,
-        " ");
+    String resultString = findAndSeparateCamelCases(inputString,
+            CATConstants.REGEX_CAMEL_CASE, " ");
     System.out.println(resultString);
   }
 }
