@@ -75,7 +75,7 @@ public class LanguageIdentifier
 	
 	@RunTime
 	@Optional
-	@CreoleParameter(comment = "Name of the document feature which will be used for language.",
+	@CreoleParameter(comment = "name of document or annotation features for the language identified",
 	        defaultValue = "LANGUAGE")
 	public void setLanguageFeatureName(String languageFeatureName) {
 		this.languageFeatureName = languageFeatureName;
@@ -90,7 +90,7 @@ public class LanguageIdentifier
 	
 	@RunTime
 	@Optional
-	@CreoleParameter(comment = "Type of annotations to classify; if null or empty, this PR will classify whole documents.",
+	@CreoleParameter(comment = "type of annotations to classify; leave blank for whole-document classification",
 	        defaultValue = "")
 	public void setAnnotationType(String atype) {
 	  this.annotationType = atype;
@@ -104,7 +104,7 @@ public class LanguageIdentifier
 	
 	@RunTime
 	@Optional
-	@CreoleParameter(comment = "name of input/output annotation set (not used for whole-document categorization)")
+	@CreoleParameter(comment = " annotation set used for input/output (ignored for whole-document classification)")
   public void setAnnotationSetName(String inputASName) {
     this.annotationSetName = inputASName;
   }
