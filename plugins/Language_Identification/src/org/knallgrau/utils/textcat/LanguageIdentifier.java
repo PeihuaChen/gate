@@ -57,7 +57,7 @@ public class LanguageIdentifier
 		 * (specified by AS and type) and save the result as
 		 * an annotation feature.		 */
 		else {
-		  AnnotationSet annotations = document.getAnnotations(inputASName).get(annotationType);
+		  AnnotationSet annotations = document.getAnnotations(annotationSetName).get(annotationType);
 		  for (Annotation annotation : annotations) {
 		    String text = Utils.stringFor(document, annotation);
 		    String category = guesser.categorize(text);
@@ -104,16 +104,16 @@ public class LanguageIdentifier
 	
 	@RunTime
 	@Optional
-	@CreoleParameter(comment = "name of input annotation set (not used for whole-document categorization)")
-  public void setInputASName(String inputASName) {
-    this.inputASName = inputASName;
+	@CreoleParameter(comment = "name of input/output annotation set (not used for whole-document categorization)")
+  public void setAnnotationSetName(String inputASName) {
+    this.annotationSetName = inputASName;
   }
 
-  public String getInputASName() {
-    return inputASName;
+  public String getAnnotationSetName() {
+    return annotationSetName;
   }
 
-  private String inputASName;
+  private String annotationSetName;
 
 	
 	/*  MISC. INHERITED STUFF */
