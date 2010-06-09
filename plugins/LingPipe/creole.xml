@@ -26,15 +26,9 @@
     </RESOURCE>
 
     <RESOURCE>
-      <JAR>lingpipe.jar</JAR>
+      <JAR SCAN="true">lingpipe.jar</JAR>
       <JAR>lib/lingpipe-3.8.1.jar</JAR>
-      <NAME>LingPipe Language Identifier PR</NAME>
       <CLASS>gate.lingpipe.LanguageIdentifierPR</CLASS>
-      <COMMENT>LingPipe Identifier PR</COMMENT>
-      <HELPURL>http://gate.ac.uk/userguide/sec:misc-creole:lingpipe:langid</HELPURL>
-      <PARAMETER NAME="document" RUNTIME="true" COMMENT="document to process">gate.Document</PARAMETER>
-      <PARAMETER NAME="languageIdFeatureName" RUNTIME="true" OPTIONAL="true" COMMENT="The feature name to use as a document feature to hold the language id">java.lang.String</PARAMETER>
-      <PARAMETER NAME="modelFileUrl" RUNTIME="false" OPTIONAL="false" COMMENT="Model file to use for Language Identification">java.net.URL</PARAMETER>
     </RESOURCE>
 
 
