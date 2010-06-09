@@ -1,20 +1,27 @@
+/*
+ *  Copyright (c) 2009--2010 University of Sheffield
+ * 
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ */
 package gate.lingpipe;
 
-import gate.ProcessingResource;
-import gate.Resource;
+import gate.*;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
 import gate.util.GateRuntimeException;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-
 import com.aliasi.classify.Classification;
 import com.aliasi.classify.Classifier;
 import com.aliasi.util.AbstractExternalizable;
+import gate.creole.metadata.*;
 
 /**
  * A Processing resource to identify language of the document based on
@@ -36,10 +43,19 @@ import com.aliasi.util.AbstractExternalizable;
  * @author niraj
  * 
  */
-public class LanguageIdentifierPR extends AbstractLanguageAnalyser implements
-                                                                  ProcessingResource {
+@CreoleResource(name = "LingPipe Language Identifier PR",
+        helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:lingpipe:langid",
+        comment = "GATE PR for language identification using LingPipe")
+public class LanguageIdentifierPR 
+  extends AbstractLanguageAnalyser 
+  implements ProcessingResource {
 
-  /** File which cotains model for NE */
+  private static final long serialVersionUID = -4141432815604763890L;
+  @SuppressWarnings("unused")
+  private static final String __SVNID = "$Id$";
+
+  
+  /** File which contains model for NE */
   protected URL modelFileUrl;
 
   /** Model file extracted from the URL */
@@ -50,6 +66,8 @@ public class LanguageIdentifierPR extends AbstractLanguageAnalyser implements
 
   /** document feature name */
   protected String languageIdFeatureName;
+  private String annotationSetName;
+  private String annotationType;
 
   /**
    * Initializes this resource
@@ -57,6 +75,7 @@ public class LanguageIdentifierPR extends AbstractLanguageAnalyser implements
    * @return Resource
    * @throws ResourceInstantiationException
    */
+  @SuppressWarnings("unchecked")
   public Resource init() throws ResourceInstantiationException {
     if(modelFileUrl == null)
       throw new ResourceInstantiationException("No model file provided!");
@@ -74,8 +93,7 @@ public class LanguageIdentifierPR extends AbstractLanguageAnalyser implements
     }
 
     try {
-      classifier = (Classifier<CharSequence, Classification>)AbstractExternalizable
-              .readObject(modelFile);
+      classifier = (Classifier<CharSequence, Classification>) AbstractExternalizable.readObject(modelFile);
     }
     catch(IOException e) {
       throw new ResourceInstantiationException(e);
@@ -108,52 +126,83 @@ public class LanguageIdentifierPR extends AbstractLanguageAnalyser implements
             || languageIdFeatureName.trim().length() == 0)
       languageIdFeatureName = "lang";
 
-    String docText = document.getContent().toString();
-    Classification classification = classifier.classify(docText);
-
-    document.getFeatures().put(languageIdFeatureName,
-            classification.bestCategory());
+    /* Default behaviour: classify the text of the whole document and 
+     * store the result as a document feature.     */
+    if ( (annotationType == null) || (annotationType.length() == 0) ) {
+      String docText = document.getContent().toString();
+      Classification classification = classifier.classify(docText);
+      document.getFeatures().put(languageIdFeatureName, classification.bestCategory());
+    }
+    
+    /* Optional behaviour: classify the text underlying each annotation 
+     * and store each results as an annotation feature.     */
+    else {
+      AnnotationSet annotations = document.getAnnotations(annotationSetName).get(annotationType);
+      
+      for (Annotation annotation : annotations) {
+        String text = Utils.stringFor(document, annotation);
+        Classification classification = classifier.classify(text);
+        annotation.getFeatures().put(languageIdFeatureName, classification.bestCategory());
+      }
+    }
 
     // process finished, acknowledge user about this.
     fireProcessFinished();
   }
 
+  
+  
+  /*  CREOLE PARAMETERS  */
+  
   /**
-   * gets the model to be used for identifying language of the document
-   * 
-   * @return
+   * Required init parameter.
    */
-  public URL getModelFileUrl() {
-    return modelFileUrl;
-  }
-
-  /**
-   * sets the model to be used for identifying language of the document
-   * 
-   * @param modelFileUrl
-   */
+  @CreoleParameter (comment = "Model file to use for Language Identification",
+          defaultValue = "resources/models/langid-leipzig.classifier")
   public void setModelFileUrl(URL modelFileUrl) {
     this.modelFileUrl = modelFileUrl;
   }
 
-  /**
-   * gets name of the feature which is used for storing the identified
-   * language
-   * 
-   * @return
-   */
+  public URL getModelFileUrl() {
+    return modelFileUrl;
+  }
+
+  
+  @Optional
+  @RunTime
+  @CreoleParameter(comment = "name of document or annotation features for the language identified",
+          defaultValue = "lang")
+  public void setLanguageIdFeatureName(String languageIdFeatureName) {
+    this.languageIdFeatureName = languageIdFeatureName;
+  }
+  
   public String getLanguageIdFeatureName() {
     return languageIdFeatureName;
   }
 
-  /**
-   * sets name of the feature that should be used for storing the
-   * identified language of the document
-   * 
-   * @param languageIdFeatureName
-   */
-  public void setLanguageIdFeatureName(String languageIdFeatureName) {
-    this.languageIdFeatureName = languageIdFeatureName;
+  
+  @Optional
+  @RunTime
+  @CreoleParameter(comment = "annotation set used for input/output (ignored for whole-document classification)",
+            defaultValue = "")
+  public void setAnnotationSetName(String name) {
+    this.annotationSetName = name;
   }
-
+  
+  public String getAnnotationSetName() {
+    return this.annotationSetName;
+  }
+  
+  @Optional
+  @RunTime
+  @CreoleParameter(comment = "type of annotations to classify; leave blank for whole-document classification", 
+          defaultValue = "")
+  public void setAnnotationType(String type) {
+    this.annotationType = type;
+  }
+  
+  public String getAnnotationType() {
+    return this.annotationType;
+  }
+  
 }
