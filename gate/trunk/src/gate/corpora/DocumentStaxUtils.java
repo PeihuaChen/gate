@@ -901,8 +901,8 @@ public class DocumentStaxUtils {
   public static void writeDocument(Document doc,
           Map<String, Collection<Annotation>> annotationSets,
           XMLStreamWriter xsw, String namespaceURI) throws XMLStreamException {
-    xsw.writeStartElement(namespaceURI, "GateDocument");
     xsw.setDefaultNamespace(namespaceURI);
+    xsw.writeStartElement(namespaceURI, "GateDocument");
     if(namespaceURI.length() > 0) {
       xsw.writeDefaultNamespace(namespaceURI);
     }
@@ -1521,6 +1521,9 @@ public class DocumentStaxUtils {
           OutputStream os, String encoding) throws XMLStreamException {
     XMLStreamWriter xsw = null;
     try {
+      if(outputFactory == null) {
+        outputFactory = XMLOutputFactory.newInstance();
+      }      
       if(encoding == null) {
         xsw = outputFactory.createXMLStreamWriter(os);
         xsw.writeStartDocument();
