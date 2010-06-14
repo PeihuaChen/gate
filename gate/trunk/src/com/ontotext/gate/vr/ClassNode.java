@@ -76,7 +76,7 @@ public class ClassNode
         //if we include instances, then get them too
         if (includeInstances && (o instanceof Ontology)) {
           Ontology kb = (Ontology) o;
-          Set<OInstance> instances = kb.getOInstances(ocl, OConstants.DIRECT_CLOSURE);
+          Set<OInstance> instances = kb.getOInstances(ocl, OConstants.Closure.DIRECT_CLOSURE);
           if (instances != null && !instances.isEmpty()) {
             Iterator<OInstance> insti = instances.iterator();
             while (insti.hasNext())
@@ -84,7 +84,7 @@ public class ClassNode
           }
         }
 
-        if (0 == ocl.getSubClasses(OConstants.DIRECT_CLOSURE).size()) {
+        if (0 == ocl.getSubClasses(OConstants.Closure.DIRECT_CLOSURE).size()) {
           if (!kids.isEmpty())
             //add the instances as children, but do not add them for future
             //traversal to allKids
@@ -92,7 +92,7 @@ public class ClassNode
           continue;
         }  // if 0 children
 
-        Iterator<OClass> kidsi = ocl.getSubClasses(OConstants.DIRECT_CLOSURE).iterator();
+        Iterator<OClass> kidsi = ocl.getSubClasses(OConstants.Closure.DIRECT_CLOSURE).iterator();
 
         while ( kidsi.hasNext()) {
           OClass aClass = kidsi.next();
@@ -140,11 +140,11 @@ public class ClassNode
         ClassNode parent = parents.get(i);
 
         OClass ocl = (OClass) parent.getSource();
-        if (0 == ocl.getSubClasses(OConstants.DIRECT_CLOSURE).size()) {
+        if (0 == ocl.getSubClasses(OConstants.Closure.DIRECT_CLOSURE).size()) {
           continue;
         }  // if 0 children
 
-        Iterator<OClass> kidsi = ocl.getSubClasses(OConstants.DIRECT_CLOSURE).iterator();
+        Iterator<OClass> kidsi = ocl.getSubClasses(OConstants.Closure.DIRECT_CLOSURE).iterator();
 
         kids = new Vector<ClassNode>();
         while ( kidsi.hasNext()) {
@@ -312,16 +312,20 @@ public class ClassNode
         if (sub.getSource() instanceof OClass) {
           OClass sc = (OClass) sub.getSource();
           c.addSubClass(sc);
-          c.getOntology().addOClass(sc.getURI(), OConstants.OWL_CLASS);
+          // this code originally used the deprecated method addOClass(URI, byte)
+          // with the byte constant indicating a class, without checking for
+          // sc not being an anonymous class. 
+          c.getOntology().addOClass((OURI)sc.getONodeID());
           children.add(sub);
         }
         if (sub.getSource() instanceof OInstance &&
             c.getOntology() instanceof Ontology){
           OInstance inst = (OInstance) sub.getSource();
           if(!((Ontology)c.getOntology()).containsOInstance(inst.getOURI())) {
-            Iterator<OClass> instClasses = inst.getOClasses(OConstants.DIRECT_CLOSURE).iterator();
+            Iterator<OClass> instClasses =
+                    inst.getOClasses(OConstants.Closure.DIRECT_CLOSURE).iterator();
             while(instClasses.hasNext()) {
-              ((Ontology)c.getOntology()).addOInstance(inst.getURI(), instClasses.next());
+              ((Ontology)c.getOntology()).addOInstance(inst.getOURI(), instClasses.next());
             }
           }
           
@@ -334,7 +338,7 @@ public class ClassNode
           if (!(sub.getSource() instanceof OClass))
             throw new GateRuntimeException("The sub node's source is not an instance of TClass");
           OClass sc = (OClass)sub.getSource();
-          o.addOClass(sc.getURI(), OConstants.OWL_CLASS);
+          o.addOClass((OURI)sc.getONodeID());
           children.add(sub);
         } else  {
           throw new GateRuntimeException(

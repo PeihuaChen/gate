@@ -181,23 +181,23 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
     // else provide further details
 
     Set<RDFProperty> set = property
-            .getSuperProperties(OConstants.DIRECT_CLOSURE);
+            .getSuperProperties(OConstants.Closure.DIRECT_CLOSURE);
     if(set != null) {
       directSuperProps.getValues().addAll(set);
       Collections.sort(directSuperProps.getValues(), itemComparator);
     }
     
-    set = property.getSuperProperties(OConstants.TRANSITIVE_CLOSURE);
+    set = property.getSuperProperties(OConstants.Closure.TRANSITIVE_CLOSURE);
     if(set != null) {
       allSuperProps.getValues().addAll(set);
       Collections.sort(allSuperProps.getValues(), itemComparator);
     }
-    set = property.getSubProperties(OConstants.DIRECT_CLOSURE);
+    set = property.getSubProperties(OConstants.Closure.DIRECT_CLOSURE);
     if(set != null) {
       directSubProps.getValues().addAll(set);
       Collections.sort(directSubProps.getValues(), itemComparator);
     }
-    set = property.getSubProperties(OConstants.TRANSITIVE_CLOSURE);
+    set = property.getSubProperties(OConstants.Closure.TRANSITIVE_CLOSURE);
     if(set != null) {
       allSubProps.getValues().addAll(set);
       Collections.sort(allSubProps.getValues(), itemComparator);
