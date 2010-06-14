@@ -1875,7 +1875,7 @@ public class OntologyEditor extends AbstractVisualResource
                           continue;
                         }
                         Set<RDFProperty> set = prop
-                                .getSuperProperties(OConstants.DIRECT_CLOSURE);
+                                .getSuperProperties(OConstants.Closure.DIRECT_CLOSURE);
                         if(set != null && !set.isEmpty()) {
                           continue;
                         }
