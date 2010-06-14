@@ -185,7 +185,7 @@ public class OntologyTreeListener extends MouseAdapter {
               classNames.add(node.toString());
               if(aClass instanceof OClass) {
                 Set<OClass> classes =
-                  ((OClass)aClass).getSubClasses(OConstants.TRANSITIVE_CLOSURE);
+                  ((OClass)aClass).getSubClasses(OConstants.Closure.TRANSITIVE_CLOSURE);
 
                 for(OClass ac : classes) {
                   classNames.add(ac.getName());
@@ -193,7 +193,7 @@ public class OntologyTreeListener extends MouseAdapter {
 
                 Set<OInstance> instances =
                   ontology.getOInstances((OClass)aClass,
-                    OConstants.TRANSITIVE_CLOSURE);
+                    OConstants.Closure.TRANSITIVE_CLOSURE);
                 for(OInstance ai : instances) {
                   classNames.add(ai.getName());
                 }
@@ -221,7 +221,7 @@ public class OntologyTreeListener extends MouseAdapter {
               classNames.add(node.toString());
               if(aClass instanceof OClass) {
                 Set<OClass> classes =
-                  ((OClass)aClass).getSubClasses(OConstants.TRANSITIVE_CLOSURE);
+                  ((OClass)aClass).getSubClasses(OConstants.Closure.TRANSITIVE_CLOSURE);
 
                 for(OClass ac : classes) {
                   classNames.add(ac.getName());
@@ -229,7 +229,7 @@ public class OntologyTreeListener extends MouseAdapter {
 
                 Set<OInstance> instances =
                   ontology.getOInstances((OClass)aClass,
-                    OConstants.TRANSITIVE_CLOSURE);
+                    OConstants.Closure.TRANSITIVE_CLOSURE);
                 for(OInstance ai : instances) {
                   classNames.add(ai.getName());
                 }
@@ -257,7 +257,7 @@ public class OntologyTreeListener extends MouseAdapter {
               classNames.add(node.toString());
               if(aClass instanceof OClass) {
                 Set<OClass> classes =
-                  ((OClass)aClass).getSubClasses(OConstants.TRANSITIVE_CLOSURE);
+                  ((OClass)aClass).getSubClasses(OConstants.Closure.TRANSITIVE_CLOSURE);
 
                 for(OClass ac : classes) {
                   classNames.add(ac.getName());
@@ -265,7 +265,7 @@ public class OntologyTreeListener extends MouseAdapter {
 
                 Set<OInstance> instances =
                   ontology.getOInstances((OClass)aClass,
-                    OConstants.TRANSITIVE_CLOSURE);
+                    OConstants.Closure.TRANSITIVE_CLOSURE);
                 for(OInstance ai : instances) {
                   classNames.add(ai.getName());
                 }
@@ -293,7 +293,7 @@ public class OntologyTreeListener extends MouseAdapter {
               classNames.add(node.toString());
               if(aClass instanceof OClass) {
                 Set<OClass> classes =
-                  ((OClass)aClass).getSubClasses(OConstants.TRANSITIVE_CLOSURE);
+                  ((OClass)aClass).getSubClasses(OConstants.Closure.TRANSITIVE_CLOSURE);
 
                 for(OClass ac : classes) {
                   classNames.add(ac.getName());
@@ -301,7 +301,7 @@ public class OntologyTreeListener extends MouseAdapter {
 
                 Set<OInstance> instances =
                   ontology.getOInstances((OClass)aClass,
-                    OConstants.TRANSITIVE_CLOSURE);
+                    OConstants.Closure.TRANSITIVE_CLOSURE);
                 for(OInstance ai : instances) {
                   classNames.add(ai.getName());
                 }
@@ -638,7 +638,7 @@ public class OntologyTreeListener extends MouseAdapter {
         OResource res = (OResource)node.getSource();
         if(res instanceof OInstance) {
           Set<OClass> classes =
-            ((OInstance)res).getOClasses(OConstants.DIRECT_CLOSURE);
+            ((OInstance)res).getOClasses(OConstants.Closure.DIRECT_CLOSURE);
           if(classes.size() > 0) {
             classFeature = classes.iterator().next().getURI().toString();
           }

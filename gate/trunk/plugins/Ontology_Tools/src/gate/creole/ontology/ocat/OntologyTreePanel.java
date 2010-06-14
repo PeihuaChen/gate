@@ -420,7 +420,7 @@ public class OntologyTreePanel extends JPanel {
     Iterator<OInstance> instIter = instances.iterator();
     while(instIter.hasNext()) {
       OInstance anInst = instIter.next();
-      Set<OClass> classes = anInst.getOClasses(OConstants.DIRECT_CLOSURE);
+      Set<OClass> classes = anInst.getOClasses(OConstants.Closure.DIRECT_CLOSURE);
       updatePVnInst2ClassesMap(anInst, propertySet, classes, map);
     }
     return map;
