@@ -799,7 +799,7 @@ public class OntologyViewer extends AbstractDocumentView implements
 
     if(resource instanceof OInstance) {
       OInstance inst1 = (OInstance)resource;
-      Set<OClass> oClasses = inst1.getOClasses(OConstants.DIRECT_CLOSURE);
+      Set<OClass> oClasses = inst1.getOClasses(OConstants.Closure.DIRECT_CLOSURE);
       // for each class find out its class nodes
       for(OClass aClass : oClasses) {
         List<ClassNode> cnodes = ontologyTreePanel.getNode(aClass.getName());
