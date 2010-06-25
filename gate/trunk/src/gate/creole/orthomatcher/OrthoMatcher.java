@@ -921,8 +921,9 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
           tokenString = tokenString.toLowerCase();
         }
         // Out.prln("tokenString: " + tokenString + " kind: " + kind + " category: " + category);
-        if (kind.equals(PUNCTUATION_VALUE) || category.equals("DT") || category.equals("IN")
-                || cdg.contains(tokenString)) {
+        if (kind.equals(PUNCTUATION_VALUE) || 
+	    ( (category != null) && (category.equals("DT") || category.equals("IN")) )
+	    || cdg.contains(tokenString)) {
           // Out.prln("Now tagging it!");
           tokens.get(i).getFeatures().put("ortho_stop", true);
         }
