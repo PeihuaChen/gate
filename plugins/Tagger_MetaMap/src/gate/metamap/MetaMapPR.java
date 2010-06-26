@@ -52,7 +52,7 @@ public class MetaMapPR extends AbstractLanguageAnalyser
     private String outputASType;
     private ArrayList<String> inputASTypes;
     private OutputMode outputMode;
-
+    private Boolean annotatePhrases;
     private String metaMapOptions;
     private ArrayList<String> excludeSemanticTypes;
     private ArrayList<String> restrictSemanticTypes;
@@ -144,6 +144,33 @@ public class MetaMapPR extends AbstractLanguageAnalyser
 
     }
 
+    /**
+     * 
+     * @param phrase
+     * @throws Exception
+     */
+    public void processPhrase(PCM pcm, Long lngInitialOffset) throws Exception {
+        AnnotationSet outputAs = (outputASName == null || outputASName.trim().length() == 0) ? document.getAnnotations() : document.getAnnotations(outputASName);
+
+        Phrase phrase = pcm.getPhrase();
+        Position pos = phrase.getPosition();
+
+        int intStartPos = pos.getX();
+        int intEndPos = pos.getY() + intStartPos;
+
+        FeatureMap fm = Factory.newFeatureMap();
+        fm.put("Type", "Phrase");
+        
+        Long lngStartPos = new Long((long) intStartPos + lngInitialOffset.longValue());
+        Long lngEndPos = new Long((long) intEndPos + lngInitialOffset.longValue());
+        try {
+            outputAs.add(lngStartPos, lngEndPos, outputASType, fm);
+        } catch (InvalidOffsetException ie) {
+            throw ie;
+        }
+    }
+
+    
     /**
      *
      * @param eVList
@@ -261,13 +288,19 @@ public class MetaMapPR extends AbstractLanguageAnalyser
         for (Utterance utterance : result.getUtteranceList()) {
 
             for (PCM pcm : utterance.getPCMList()) {
-                if (outputMode.equals(OutputMode.CandidatesAndMappings)  || outputMode.equals(OutputMode.CandidatesOnly) ) {
+                int numPCMMappings = pcm.getMappings().size();
+
+                if (outputMode.equals(OutputMode.CandidatesAndMappings) || outputMode.equals(OutputMode.CandidatesOnly)) {
                     this.processCandidates(pcm, negList, lngInitialOffset);
                 }
-                if (outputMode.equals(OutputMode.CandidatesAndMappings)  || outputMode.equals(OutputMode.MappingsOnly) ) {
+                if (outputMode.equals(OutputMode.CandidatesAndMappings) || outputMode.equals(OutputMode.MappingsOnly)) {
                     this.processMappings(pcm, negList, lngInitialOffset);
                 }
-                
+
+                // only annotate phrases if they contain MetaMap mappings
+                if (annotatePhrases && numPCMMappings > 0) {
+                    this.processPhrase(pcm, lngInitialOffset);
+                }
             }
         }
     }
@@ -389,7 +422,17 @@ public class MetaMapPR extends AbstractLanguageAnalyser
     public OutputMode getOutputMode() {
         return outputMode;
     }
-    
+
+    @RunTime
+    @CreoleParameter(defaultValue = "false",
+    comment = "Output MetaMap phrase-level annotations?")
+    public void setAnnotatePhrases(Boolean annotatePhrases) {
+        this.annotatePhrases = annotatePhrases;
+    }
+
+    public Boolean getAnnotatePhrases() {
+        return annotatePhrases;
+    }
 
     @Optional
     @CreoleParameter(comment = "Exclude the following semantic types from the output (equivalent to -k option in MetaMap)")
