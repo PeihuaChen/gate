@@ -56,6 +56,8 @@ outputASType: output annotation name to be used for all MetaMap annotations
 
 - Run-time
 ----------------
+annotatePhrases: set to true to output MetaMap phrase-level annotations (generally noun-phrase chunks). Only phrases containing a MetaMap mapping will be annotated. Can be useful for post-coordination of phrase-level terms that do not exist in a pre-coordinated form in UMLS.
+
 inputASName: input Annotation Set name. Use in conjunction with inputASTypes 
 (see below). Unless specified, the entire document content will be sent to 
 MetaMap. 
@@ -66,12 +68,9 @@ sent to MetaMap.
 
 metaMapOptions: set parameter-less MetaMap options here. Default is -Xt 
 (truncate Candidates mappings and do not use full text parsing). See 
-http://metamap.nlm.nih.gov/README_javaapi.html for more details. N
-
-B: only set the -y parameter (word-sense disambiguation) if wsdserverctl is 
+http://metamap.nlm.nih.gov/README_javaapi.html for more details. NB: only set the -y parameter (word-sense disambiguation) if wsdserverctl is 
 running. Running the Java MetaMap API with a large corpus with word-sense 
-disambiguation can cause a 'too many open files' error - this appears to be a 
-PrologServer bug.
+disambiguation can cause a 'too many open files' error - this appears to be a PrologServer bug.
 
 outputASName: output Annotation Set name.
 
