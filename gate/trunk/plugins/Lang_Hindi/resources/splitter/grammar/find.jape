@@ -52,7 +52,7 @@ Rule: Split1
 )
 :split
 -->
-:split.Split = {kind = "internal"}
+:split.Split = {kind = "internal", rule="Split1"}
 
 
 //

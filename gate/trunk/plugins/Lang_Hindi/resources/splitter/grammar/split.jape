@@ -14,7 +14,7 @@
 */
 
 Phase:split
-Input: Token Split
+Input: Split Token
 Options: control = first
 
 
@@ -49,7 +49,8 @@ Rule: r1
  ({Token})+ {Split.kind == "internal"}
 ) :sentence
 -->
-:sentence.Sentence = {}
+:sentence.Sentence = {rule="r1"}
+
 
 //sentence that doesn't consume a split
 Rule: r2
@@ -58,4 +59,5 @@ Rule: r2
 ):sentence
 ({Split.kind == "external"})
 -->
-:sentence.Sentence = {}
+:sentence.Sentence = {rule="r2"}
+
