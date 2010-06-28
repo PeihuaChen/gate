@@ -11,9 +11,11 @@ import gate.composite.CombiningMethodException;
 import gate.composite.CompositeDocument;
 import gate.composite.OffsetDetails;
 import gate.compound.CompoundDocument;
+import gate.corpora.DocumentImpl;
 import gate.creole.ResourceInstantiationException;
 import gate.util.InvalidOffsetException;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,6 +23,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 
 /**
  * Abstract implementation of the combining method. Classes extending
@@ -76,20 +82,40 @@ public abstract class AbstractCombiningMethod implements CombiningMethod {
                       + "call the startDocument() method to initialize the "
                       + "composite document");
 
-    String documentString = toAdd + encodeXml(documentContent.toString())
-            + "</composite>";
-    FeatureMap features = Factory.newFeatureMap();
-    features.put("collectRepositioningInfo", containerDocument
-            .getCollectRepositioningInfo());
-    features.put("encoding", containerDocument.getEncoding());
-    features.put("markupAware", new Boolean(true));
-    features.put("preserveOriginalContent", containerDocument
-            .getPreserveOriginalContent());
-    features.put("stringContent", documentString);
-    FeatureMap subFeatures = Factory.newFeatureMap();
-    Gate.setHiddenAttribute(subFeatures, true);
+    XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
+    String encoding = containerDocument.getEncoding();
+    if(encoding == null) encoding = "UTF-8";
+    StringWriter sw = new StringWriter();
+    try {
+
+      XMLStreamWriter xsw = outputFactory.createXMLStreamWriter(sw);
+      xsw.writeStartDocument(encoding, "1.0");
+      xsw.writeStartElement("", "composite");
+      char[] result = documentContent.toString().toCharArray();
+      replaceXMLIllegalCharacters(result);
+      xsw.writeCharacters(new String(result));
+      xsw.writeEndElement();
+      xsw.writeEndDocument();
+      xsw.close();
+    }
+    catch(XMLStreamException e2) {
+      throw new CombiningMethodException(e2);
+    }
+
     CompositeDocument doc = null;
     try {
+      FeatureMap features = Factory.newFeatureMap();
+      features.put("collectRepositioningInfo", containerDocument
+              .getCollectRepositioningInfo());
+      features.put("encoding", encoding);
+      features.put("markupAware", new Boolean(true));
+      features.put("preserveOriginalContent", containerDocument
+              .getPreserveOriginalContent());
+      features.put(DocumentImpl.DOCUMENT_STRING_CONTENT_PARAMETER_NAME, sw
+              .toString());
+      FeatureMap subFeatures = Factory.newFeatureMap();
+      Gate.setHiddenAttribute(subFeatures, true);
+
       doc = (CompositeDocument)Factory.createResource(
               "gate.composite.impl.CompositeDocumentImpl", features,
               subFeatures);
@@ -241,8 +267,46 @@ public abstract class AbstractCombiningMethod implements CombiningMethod {
     }
   }
 
-  protected String encodeXml(String str) {
-    return str.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">",
-            "&gt;").replaceAll("\"", "&quot;").replaceAll("'", "&apos;");
+  static void replaceXMLIllegalCharacters(char[] buf) {
+    for(int i = 0; i < buf.length; i++) {
+      if(buf[i] <= 0x0008 || buf[i] == 0x000B || buf[i] == 0x000C
+              || (buf[i] >= 0x000E && buf[i] <= 0x001F)) {
+        buf[i] = ' ';
+        continue;
+      }
+
+      // buf[i) is a high surrogate...
+      if(buf[i] >= 0xD800 && buf[i] <= 0xDBFF) {
+        // if we're not at the end of the buffer we can look ahead
+        if(i < buf.length - 1) {
+          // followed by a low surrogate is OK
+          if(buf[i + 1] >= 0xDC00 && buf[i + 1] <= 0xDFFF) {
+            continue;
+          }
+        }
+        buf[i] = ' ';
+        continue;
+      }
+
+      // buf[i) is a low surrogate...
+      if(buf[i] >= 0xDC00 && buf[i] <= 0xDFFF) {
+        // if we're not at the start of the buffer we can look behind
+        if(i > 0) {
+          // preceded by a high surrogate is OK
+          if(buf[i - 1] >= 0xD800 && buf[i - 1] <= 0xDBFF) {
+            continue;
+          }
+        }
+
+        buf[i] = ' ';
+        continue;
+      }
+
+      // buf[i) is a BOM character
+      if(buf[i] == 0xFFFE || buf[i] == 0xFFFF) {
+        buf[i] = ' ';
+        continue;
+      }
+    }
   }
 }
