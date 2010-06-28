@@ -46,16 +46,15 @@ Options: control = first
 //sentence that consumes a split
 Rule: r1
 (
- ({Token})+ {Split.kind == "internal"}
+ ({Token, !Split})+ {Split.kind == "internal"}
 ) :sentence
 -->
 :sentence.Sentence = {rule="r1"}
 
-
 //sentence that doesn't consume a split
 Rule: r2
 (
- ({Token})+
+ ({Token, !Split})+
 ):sentence
 ({Split.kind == "external"})
 -->
