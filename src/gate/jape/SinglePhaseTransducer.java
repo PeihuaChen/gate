@@ -348,48 +348,41 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     List<FSMInstance> newActiveInstances = null;
     List<FSMInstance> newAcceptingInstances = null;
 
-    // Attempt advancing the current instance until it blocks.
+    // Attempt advancing the current instance.
     // While doing that, generate new active FSM instances and 
     // new accepting FSM instances, as required
-    boolean currentInstanceBlocked = false;
-    while(!currentInstanceBlocked){
-      // create a clone to be used for creating new states
-      // the actual current instance cannot be used itself, as it may change
-      FSMInstance currentClone = (FSMInstance)currentInstance.clone();
-      
-      // process the current FSM instance
-      if(currentInstance.getFSMPosition().isFinal()) {
-        // the current FSM is in a final state
-        if(newAcceptingInstances == null){
-          newAcceptingInstances = new ArrayList<FSMInstance>();
-        }
-//        newAcceptingInstances.add((FSMInstance)currentInstance.clone());
-        newAcceptingInstances.add((FSMInstance)currentClone);
-        // if we're only looking for the shortest stop here
-        if(ruleApplicationStyle == FIRST_STYLE ||
-           ruleApplicationStyle == ONCE_STYLE ) break;
-      }
 
-      currentInstanceBlocked = true;
-      // get all the annotations that start where the current FSM
-      // finishes
-      SimpleSortedSet offsetsTailSet = offsets.tailSet(currentInstance
-              .getAGPosition().getOffset().longValue());
-      List<Annotation> paths;
-      long theFirst = offsetsTailSet.first();
-      if(theFirst < 0) {
-        break;
+    // create a clone to be used for creating new states
+    // the actual current instance cannot be used itself, as it may change
+    FSMInstance currentClone = (FSMInstance)currentInstance.clone();
+    
+    // process the current FSM instance
+    if(currentInstance.getFSMPosition().isFinal()) {
+      // the current FSM is in a final state
+      if(newAcceptingInstances == null){
+        newAcceptingInstances = new ArrayList<FSMInstance>();
       }
-        
-  
-      paths = (List)annotationsByOffset.get(theFirst);
-  
-      if(paths == null || paths.isEmpty()) {
-        break;
+//        newAcceptingInstances.add((FSMInstance)currentInstance.clone());
+      newAcceptingInstances.add((FSMInstance)currentClone);
+      // if we're only looking for the shortest stop here
+      if(ruleApplicationStyle == FIRST_STYLE ||
+         ruleApplicationStyle == ONCE_STYLE ) {
+        if (Benchmark.isBenchmarkingEnabled()) {
+          updateRuleTime(currentInstance, startTime);
+        }
+        return new FSMMatcherResult(newActiveInstances, newAcceptingInstances);
       }
-              
-        
-  
+    }
+
+    // get all the annotations that start where the current FSM
+    // finishes
+    SimpleSortedSet offsetsTailSet = offsets.tailSet(currentInstance
+            .getAGPosition().getOffset().longValue());
+    long theFirst = offsetsTailSet.first();
+    List<Annotation> paths = (theFirst >= 0 ) ?
+            (List)annotationsByOffset.get(theFirst) : null;
+
+    if(paths != null && !paths.isEmpty()) {
       // get the transitions for the current state of the FSM
       State currentState = currentClone.getFSMPosition();
       Iterator transitionsIter = currentState.getTransitions().iterator();
@@ -397,7 +390,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       // A flag used to indicate when advancing the current instance requires 
       // the creation of a clone (i.e. when there are more than 1 ways to advance).
       boolean newInstanceRequired = false;
-
+  
       // for each transition, keep the set of annotations starting at
       // current node (the "paths") that match each constraint of the
       // transition.
@@ -503,9 +496,6 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
           Annotation matchingAnnot = getRightMostAnnotation(tuple);
   
           // we have a match.
-          // mark the fact that we're not blocked yet
-          currentInstanceBlocked = false;
-          
           FSMInstance newFSMI;
           // create a new FSMInstance, advance it over
           // the current
@@ -545,15 +535,13 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   
             binds.put(oneLabel, newSet);
           }// while(labelsIter.hasNext())
-          if(currentInstance != newFSMI){
-            if(newActiveInstances == null) {
-              newActiveInstances = new ArrayList<FSMInstance>();
-            }
-            newActiveInstances.add(newFSMI);
+          if(newActiveInstances == null) {
+            newActiveInstances = new ArrayList<FSMInstance>();
           }
+          newActiveInstances.add(newFSMI);
         } // iter over matching combinations
       }// while(transitionsIter.hasNext())
-    }//while(!currentInstanceBlocked){
+    }
     if (Benchmark.isBenchmarkingEnabled()) {
       updateRuleTime(currentInstance, startTime);
     }
