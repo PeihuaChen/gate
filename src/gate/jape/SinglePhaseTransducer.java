@@ -43,20 +43,6 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   protected static final Logger log = Logger
           .getLogger(SinglePhaseTransducer.class);
 
-  private static final boolean USE_MULTI_THREADING = false;
-  
-  // The executor service used to advance FSM Instances when using 
-  // multi-threading
-  private static ThreadPoolExecutor fsmRunnerPool = null;
-  static{
-    //temporary solution used for experiments only!
-    if(USE_MULTI_THREADING){
-      fsmRunnerPool = new ThreadPoolExecutor(0, Integer.MAX_VALUE, 
-              10, TimeUnit.SECONDS, 
-              new LinkedBlockingQueue());
-    }
-  }
-
   /*
    * A structure to pass information to/from the fireRule() method.
    * Since Java won't let us return multiple values, we stuff them into
@@ -90,36 +76,6 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     private List<FSMInstance> acceptingFSMInstances;
     private List<FSMInstance> activeFSMInstances;
     
-  }
-
-  private class FSMMatcher implements Callable<FSMMatcherResult>{
-    
-    /**
-     * @param currentInstance
-     * @param offsets
-     * @param annotationsByOffset
-     * @param document
-     */
-    public FSMMatcher(FSMInstance currentInstance, SimpleSortedSet offsets,
-            SimpleSortedSet annotationsByOffset, Document document, 
-            AnnotationSet inputAS) {
-      this.currentInstance = currentInstance;
-      this.offsets = offsets;
-      this.annotationsByOffset = annotationsByOffset;
-      this.document = document;
-      this.inputAS = inputAS;
-    }
-    
-    public FSMMatcherResult call() {
-      return attemptAdvance(currentInstance, offsets, annotationsByOffset, 
-              document, inputAS);
-    }            
-
-    FSMInstance currentInstance;
-    SimpleSortedSet offsets;
-    SimpleSortedSet annotationsByOffset;
-    Document document;
-    AnnotationSet inputAS;
   }
 
   /** Construction from name. */
@@ -304,13 +260,6 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     // The structure that fireRule() will update
     SearchState state = new SearchState(startNode, startNodeOff, 0);
 
-    // A list storing the active tasks and used to obtain the results
-    // from them
-    List<Future<FSMMatcherResult>> runningTasks = null;
-    if(USE_MULTI_THREADING){
-      runningTasks = new LinkedList<Future<FSMMatcherResult>>();
-    }
-
     // the big while for the actual parsing
     while(state.startNodeOff != -1) {
       // while there are more annotations to parse
@@ -347,77 +296,19 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 //          if(ruleApplicationStyle == FIRST_STYLE) break;
 //        }
 
-        if(USE_MULTI_THREADING) {
-          // multi-threaded alternative
-          // queue a task to advance the current FSM Instance
-          FSMMatcher fsmMatcher = new FSMMatcher(currentFSM, offsets,
-                  annotationsByOffset, doc, inputAS);
-          runningTasks.add(fsmRunnerPool.submit(fsmMatcher));
-
-          // we're finished if all threads have finished and there are
-          // no more
-          // active FSMs
-          // if there are still running tasks, wait for them to finish,
-          // in case
-          // they create more active FSM Instances
-          while(activeFSMInstances.isEmpty() && !runningTasks.isEmpty()) {
-            // remove finished tasks
-            Iterator<Future<FSMMatcherResult>> taskIter = runningTasks
-                    .iterator();
-            while(taskIter.hasNext()) {
-              Future<FSMMatcherResult> aTask = taskIter.next();
-              if(aTask.isDone()) {
-                taskIter.remove();
-                if(!aTask.isCancelled()) {
-                  try {
-                    FSMMatcherResult result = aTask.get();
-                    if(result != null){
-                      if(result.acceptingFSMInstances != null && 
-                              !result.acceptingFSMInstances.isEmpty()) {
-                        acceptingFSMInstances.addAll(result.acceptingFSMInstances);
-                        if(ruleApplicationStyle == FIRST_STYLE ||
-                           ruleApplicationStyle == ONCE_STYLE) break activeFSMWhile;
-                      }
-                      
-                      if(result.activeFSMInstances != null && 
-                              !result.activeFSMInstances.isEmpty()) {
-                        activeFSMInstances.addAll(result.activeFSMInstances);
-                        // we already have some more active instances: no
-                        // point
-                        // looking for more just yet.
-                        break;                      
-                      }
-                    }
-                  }
-                  catch(InterruptedException e) {
-                    throw new GateRuntimeException(
-                            "JAPE FSM Matcher was interrupted!", e);
-                  }
-                  catch(java.util.concurrent.ExecutionException e) {
-//                    fsmRunnerPool.shutdownNow();
-                    throw new GateRuntimeException(
-                            "JAPE FSM Matcher exception!", e.getCause());
-                  }
-                }
-              }
-            }
+        FSMMatcherResult result = attemptAdvance(currentFSM, offsets,
+                annotationsByOffset, doc, inputAS);
+        if(result != null){
+          if(result.acceptingFSMInstances != null && 
+                  !result.acceptingFSMInstances.isEmpty()) {
+            acceptingFSMInstances.addAll(result.acceptingFSMInstances);
+            if(ruleApplicationStyle == FIRST_STYLE ||
+               ruleApplicationStyle == ONCE_STYLE) break activeFSMWhile;
           }
-        } else {
-          // single threaded solution
-          FSMMatcherResult result = attemptAdvance(currentFSM, offsets,
-                  annotationsByOffset, doc, inputAS);
-          if(result != null){
-            if(result.acceptingFSMInstances != null && 
-                    !result.acceptingFSMInstances.isEmpty()) {
-              acceptingFSMInstances.addAll(result.acceptingFSMInstances);
-              if(ruleApplicationStyle == FIRST_STYLE ||
-                 ruleApplicationStyle == ONCE_STYLE) break activeFSMWhile;
-            }
-            
-            if(result.activeFSMInstances != null && 
-                    !result.activeFSMInstances.isEmpty()) {
-              activeFSMInstances.addAll(result.activeFSMInstances);
-            }
+          
+          if(result.activeFSMInstances != null && 
+                  !result.activeFSMInstances.isEmpty()) {
+            activeFSMInstances.addAll(result.activeFSMInstances);
           }
         }
       }
