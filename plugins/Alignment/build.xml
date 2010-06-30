@@ -31,7 +31,9 @@
 
 
   <target name="compile" depends="init">
-    <javac classpathref="compile.classpath" debug="true" deprecation="true" destdir="${dest}" nowarn="false">
+    <javac classpathref="compile.classpath" source="1.5" 
+          debug="true" deprecation="true" destdir="${dest}" 
+          nowarn="false">
       <src path="${src}"/>
     </javac>
   </target>
