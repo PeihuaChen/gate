@@ -174,5 +174,8 @@
       </GUI>
     </RESOURCE>
   </CREOLE>
+  
+  <JAR SCAN="true">tools.jar</JAR>
+
 </CREOLE-DIRECTORY>
 
