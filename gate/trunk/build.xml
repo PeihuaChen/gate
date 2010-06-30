@@ -488,8 +488,8 @@
       Machine_Learning Ontology Ontology_BDM_Computation Ontology_OWLIM2
       Ontology_Tools OpenNLP Parser_Minipar Parser_RASP Parser_Stanford
       Stemmer_Snowball Tagger_Abner Tagger_Chemistry Tagger_Framework
-      Tagger_MetaMap Tagger_NP_Chunking Tagger_OpenCalais Tagger_TreeTagger UIMA
-      Web_Crawler_Websphinx Web_Search_Google Web_Search_Yahoo 
+      Tagger_MetaMap Tagger_NP_Chunking Tagger_OpenCalais Tagger_TreeTagger 
+      Tools UIMA Web_Crawler_Websphinx Web_Search_Google Web_Search_Yahoo 
       Web_Translate_Google WordNet
     " />
   <target name="plugins.build" depends="jar" >
