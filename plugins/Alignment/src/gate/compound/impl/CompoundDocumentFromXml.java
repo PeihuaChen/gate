@@ -1,5 +1,16 @@
 package gate.compound.impl;
 
+import gate.Document;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.Resource;
+import gate.alignment.Alignment;
+import gate.creole.ResourceInstantiationException;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.util.GateRuntimeException;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -15,16 +26,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import gate.*;
-import gate.alignment.Alignment;
-import gate.creole.ResourceInstantiationException;
-import gate.util.GateRuntimeException;
-
 /**
- * Implemention of the CompoundDocument. Compound Document is a set of
- * one or more documents. It provides a more convenient way to group
- * documents and interpret them as a single document. It has a
- * capability to switch the focus among the different memebers of it.
+ * Those compound documents saved in a single xml document can be
+ * reloaded in GATE using this LR.
  * 
  * @author niraj
  */
@@ -32,17 +36,20 @@ public class CompoundDocumentFromXml extends CompoundDocumentImpl {
 
   private static final long serialVersionUID = 8114328411647768889L;
 
+  // files that need to be deleted at the end
+  private List<File> filesToDelete = new ArrayList<File>();
+
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
     // set up the source URL and create the content
-    if(sourceUrl == null) {
+    if(compoundDocumentUrl == null) {
       throw new ResourceInstantiationException(
-              "The sourceURL and document's content were null.");
+              "The compoundDocumentUrl is null.");
     }
 
     try {
       StringBuilder xmlString = new StringBuilder();
-      BufferedReader br = new BufferedReader(new InputStreamReader(sourceUrl
+      BufferedReader br = new BufferedReader(new InputStreamReader(compoundDocumentUrl
               .openStream(), "utf-8"));
       String line = br.readLine();
       while(line != null) {
@@ -78,6 +85,7 @@ public class CompoundDocumentFromXml extends CompoundDocumentImpl {
         throw new GateRuntimeException("Temporary folder "
                 + tempFolder.getAbsolutePath() + " could not be created");
       }
+
       tempFile.deleteOnExit();
       tempFolder.deleteOnExit();
 
@@ -85,8 +93,8 @@ public class CompoundDocumentFromXml extends CompoundDocumentImpl {
       List<String> docIDs = new ArrayList<String>();
       for(String id : docXmls.keySet()) {
         docIDs.add(id);
-        File newFile = new File("X." + id + ".xml");
-        newFile.deleteOnExit();
+        File newFile = new File(tempFolder, "X." + id + ".xml");
+        filesToDelete.add(newFile);
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
                 new FileOutputStream(newFile), encoding));
         bw.write(docXmls.get(id));
@@ -107,9 +115,6 @@ public class CompoundDocumentFromXml extends CompoundDocumentImpl {
       this.setName(name);
       super.init();
 
-      Document aDoc = getCurrentDocument();
-      setCurrentDocument(null);
-
       FeatureMap docFeatures = (FeatureMap)globalMap.get("docFeats");
       for(Object key : docFeatures.keySet()) {
         Object value = docFeatures.get(key);
@@ -119,8 +124,6 @@ public class CompoundDocumentFromXml extends CompoundDocumentImpl {
       }
 
       setFeatures(docFeatures);
-
-      if(aDoc != null) setCurrentDocument(aDoc.getName());
       br.close();
     }
     catch(UnsupportedEncodingException uee) {
@@ -131,4 +134,30 @@ public class CompoundDocumentFromXml extends CompoundDocumentImpl {
     }
     return this;
   } // init()
+
+  /**
+   * Cleanup the document
+   */
+  @Override
+  public void cleanup() {
+    super.cleanup();
+
+    // delete all the temporarily created files
+    for(File fileToDelete : filesToDelete) {
+      fileToDelete.delete();
+    }
+  }
+ 
+  /**
+   * Url of the compound document
+   */
+  private URL compoundDocumentUrl;
+
+  public URL getCompoundDocumentUrl() {
+    return compoundDocumentUrl;
+  }
+
+  public void setCompoundDocumentUrl(URL compoundDocumentUrl) {
+    this.compoundDocumentUrl = compoundDocumentUrl;
+  }
 }

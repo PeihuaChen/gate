@@ -1,19 +1,18 @@
 package gate.alignment.gui.actions.impl;
 
-import java.util.Set;
 import gate.Annotation;
-import gate.Document;
 import gate.alignment.Alignment;
 import gate.alignment.AlignmentException;
-import gate.alignment.gui.AlignmentEditor;
-import gate.compound.CompoundDocument;
+import gate.alignment.gui.AlignmentTask;
+import gate.alignment.gui.AlignmentView;
+
+import java.util.Set;
 
 /**
- * It uses the highlighted annotations from the editor and aligns them
- * with one other.
+ * It uses the highlighted annotations from the editor and aligns them with one
+ * other.
  * 
  * @author niraj
- * 
  */
 public class AlignAction extends AbstractAlignmentAction {
 
@@ -22,18 +21,15 @@ public class AlignAction extends AbstractAlignmentAction {
    * 
    * @see AlignmentAction.execute(...)
    */
-  public void execute(AlignmentEditor editor, CompoundDocument document,
-          Document srcDocument, String srcAS,
-          Set<Annotation> srcAlignedAnnotations, Document tgtDocument,
-          String tgtAS, Set<Annotation> tgtAlignedAnnotations,
-          Annotation clickedAnnotation) throws AlignmentException {
+  public void executeAlignmentAction(AlignmentView alignmentView, AlignmentTask task,
+          Set<Annotation> srcAlignedAnnotations,
+          Set<Annotation> tgtAlignedAnnotations, Annotation clickedAnnotation)
+          throws AlignmentException {
 
-    // alignment object
-    Alignment alignment = document.getAlignmentInformation(editor
-            .getAlignmentFeatureName());
+    Alignment alignment = task.getAlignment();
 
     // so first of all clear the latestSelection
-    editor.clearLatestAnnotationsSelection();
+    alignmentView.clearLatestAnnotationsSelection();
 
     if(srcAlignedAnnotations == null || srcAlignedAnnotations.isEmpty())
       return;
@@ -53,8 +49,8 @@ public class AlignAction extends AbstractAlignmentAction {
                     Alignment.ALIGNMENT_METHOD_FEATURE_NAME, "manual");
           }
 
-          alignment.align(srcAnnotation, srcAS, srcDocument, tgtAnnotation,
-                  tgtAS, tgtDocument);
+          alignment.align(srcAnnotation, task.getSrcASName(), task.getSrcDoc(),
+                  tgtAnnotation, task.getTgtASName(), task.getTgtDoc());
 
         }
       }

@@ -1,38 +1,58 @@
 package gate.compound.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.io.File;
-import java.util.*;
-
-import javax.swing.*;
-
-import gate.*;
+import gate.Document;
+import gate.Factory;
+import gate.Gate;
+import gate.Main;
+import gate.Resource;
+import gate.alignment.gui.AlignmentEditor;
 import gate.compound.CompoundDocument;
 import gate.compound.CompoundDocumentEvent;
 import gate.compound.CompoundDocumentListener;
 import gate.compound.impl.AbstractCompoundDocument;
 import gate.corpora.DocumentImpl;
-import gate.creole.*;
+import gate.creole.AbstractVisualResource;
+import gate.creole.ResourceInstantiationException;
 import gate.event.ProgressListener;
 import gate.gui.ActionsPublisher;
 import gate.gui.Handle;
 import gate.gui.MainFrame;
 import gate.gui.NameBearerHandle;
-import gate.util.Files;
 import gate.util.GateException;
 import gate.util.GateRuntimeException;
 
-import java.io.*;
+import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
+
+import javax.swing.AbstractAction;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 
 /**
- * This is an extention of the GATE Document viewer/editor. This class
+ * This is an extension of the GATE Document viewer/editor. This class
  * provides the implementation for CompoundDocument Editor. Compound
- * document is a set of multiple documents. this class simply wrapps all
- * document editors for all compound document's member documents under a
- * single component.
+ * document is a set of multiple documents. this class simply wraps all
+ * document editors for all member documents of the compound document under
+ * a single component.
  */
 
 public class CompoundDocumentEditor extends AbstractVisualResource
@@ -43,15 +63,25 @@ public class CompoundDocumentEditor extends AbstractVisualResource
 
   private static final long serialVersionUID = -7623216613025540025L;
 
+  /**
+   * Tabbed pane for showing document members.
+   */
   private JTabbedPane tabbedPane;
 
+  /**
+   * document id to document editor map
+   */
   private HashMap<String, Handle> documentsMap;
-
+  
+  /**
+   * Set of alignment editors created
+   */
+  private Set<AlignmentEditor> alignmentEditors;
+  
+  /**
+   * Toolbar containing various actions
+   */
   protected JToolBar toolbar;
-
-  protected NewDocumentAction newDocumentAction;
-
-  protected RemoveDocumentsAction removeDocumentsAction;
 
   /**
    * The document view is just an empty shell. This method publishes the
@@ -59,12 +89,6 @@ public class CompoundDocumentEditor extends AbstractVisualResource
    */
   public List getActions() {
     List actions = new ArrayList();
-    actions.add(new SaveAllDocuments());
-    actions.add(new SaveAsASingleXML());
-    actions.add(new SwitchDocument());
-    actions.add(new LoadFromXML());
-    actions.add(new PopulateCorpus());
-    actions.add(new PopulateCorpusFromXML());
     return actions;
   }
 
@@ -74,12 +98,19 @@ public class CompoundDocumentEditor extends AbstractVisualResource
    * @see gate.Resource#init()
    */
   public Resource init() throws ResourceInstantiationException {
-    tabbedPane = new JTabbedPane();
+    alignmentEditors = new HashSet<AlignmentEditor>();
     documentsMap = new HashMap<String, Handle>();
+    tabbedPane = new JTabbedPane();
     toolbar = new JToolBar();
-    toolbar.setFloatable(false);
-    toolbar.add(newDocumentAction = new NewDocumentAction());
-    toolbar.add(removeDocumentsAction = new RemoveDocumentsAction());
+    toolbar.add(new NewDocumentAction());
+    toolbar.add(new RemoveDocumentsAction());
+    toolbar.addSeparator();
+    toolbar.add(new SaveAllDocuments());
+    toolbar.add(new SaveAsASingleXML());
+    toolbar.addSeparator();
+    toolbar.add(new SwitchDocument());
+    toolbar.addSeparator();
+    toolbar.add(new ShowAlignmentEditorAction());
 
     this.setLayout(new java.awt.BorderLayout());
     this.add(tabbedPane, java.awt.BorderLayout.CENTER);
@@ -126,12 +157,16 @@ public class CompoundDocumentEditor extends AbstractVisualResource
     }
   }
 
+  /**
+   * Allows adding an existing GATE document as a member to the compound document 
+   * @author niraj
+   *
+   */
   class NewDocumentAction extends AbstractAction {
     public NewDocumentAction() {
-      super("Add document", MainFrame.getIcon("add-document"));
+      super("Add");
       putValue(SHORT_DESCRIPTION,
               "Add new document(s) to this compound document");
-      putValue(MNEMONIC_KEY, KeyEvent.VK_ENTER);
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -181,12 +216,33 @@ public class CompoundDocumentEditor extends AbstractVisualResource
     }
   }
 
+  /**
+   * Creating new instance of alignment editor.
+   * @author niraj
+   *
+   */
+  class ShowAlignmentEditorAction extends AbstractAction {
+    public ShowAlignmentEditorAction() {
+      super("Alignment Editor");
+      putValue(SHORT_DESCRIPTION, "Brings up new Alignment editor");
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      AlignmentEditor editor = new AlignmentEditor(((CompoundDocument)document));
+      alignmentEditors.add(editor);
+    }
+  }
+
+  /**
+   * Action to allow deletion of a member from the compound document
+   * @author niraj
+   *
+   */
   class RemoveDocumentsAction extends AbstractAction {
     public RemoveDocumentsAction() {
-      super("Remove documents", MainFrame.getIcon("remove-document"));
+      super("Remove");
       putValue(SHORT_DESCRIPTION,
               "Removes selected document(s) from this corpus");
-      putValue(MNEMONIC_KEY, KeyEvent.VK_DELETE);
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -197,12 +253,19 @@ public class CompoundDocumentEditor extends AbstractVisualResource
     }
   }
 
+  /**
+   * All documents are saved in individual xml files.
+   * @author niraj
+   *
+   */
   class SaveAllDocuments extends AbstractAction {
 
     private static final long serialVersionUID = -1377052643002026640L;
 
     public SaveAllDocuments() {
-      super("Save All Documents As XML!");
+      super("Save");
+      putValue(SHORT_DESCRIPTION,
+              "Saves all member documents in individual XML files");
     }
 
     public void actionPerformed(ActionEvent ae) {
@@ -224,7 +287,7 @@ public class CompoundDocumentEditor extends AbstractVisualResource
             file = new File(dir.getAbsolutePath() + "/Composite.xml");
           }
           else {
-            file = Files.fileFromURL(doc.getSourceUrl());
+            file = new File(doc.getSourceUrl().getFile());
             file = new File(dir.getAbsolutePath() + "/" + file.getName());
           }
 
@@ -242,164 +305,25 @@ public class CompoundDocumentEditor extends AbstractVisualResource
     }
   }
 
-  class LoadFromXML extends AbstractAction {
-
-    private static final long serialVersionUID = -1377052643002026640L;
-
-    public LoadFromXML() {
-      super("Compound Document from XML");
-    }
-
-    public void actionPerformed(ActionEvent ae) {
-      CompoundDocument cd = (CompoundDocument)document;
-
-      JFileChooser fileChooser = new JFileChooser();
-      fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-      try {
-        fileChooser.showOpenDialog(Main.getMainFrame());
-        File fileToOpen = null;
-        if((fileToOpen = fileChooser.getSelectedFile()) == null) {
-          return;
-        }
-
-        StringBuilder xmlString = new StringBuilder();
-        BufferedReader br = new BufferedReader(new InputStreamReader(
-                new FileInputStream(fileToOpen), "utf-8"));
-        String line = br.readLine();
-        while(line != null) {
-          xmlString.append("\n").append(line);
-          line = br.readLine();
-        }
-        AbstractCompoundDocument.fromXml(xmlString.toString());
-        br.close();
-      }
-      catch(Exception e) {
-        e.printStackTrace();
-      }
-    }
-  }
-
-  class PopulateCorpusFromXML extends AbstractAction {
-
-    private static final long serialVersionUID = -1377052643002026640L;
-
-    public PopulateCorpusFromXML() {
-      super("Populate Corpus From XML");
-    }
-
-    public void actionPerformed(ActionEvent ae) {
-      JFileChooser fileChooser = new JFileChooser();
-      fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-      try {
-        fileChooser.showOpenDialog(Main.getMainFrame());
-        File fileToOpen = null;
-        if((fileToOpen = fileChooser.getSelectedFile()) == null) {
-          return;
-        }
-
-        File[] files = fileToOpen.listFiles(new FilenameFilter() {
-          public boolean accept(File dir, String name) {
-            if(name.endsWith(".xml")) {
-              return true;
-            }
-            return false;
-          }
-        });
-
-        // file to Open is a directory
-        String corpusName = JOptionPane.showInputDialog("Enter CorpusName");
-        Corpus corpusToUse = Factory.newCorpus(corpusName);
-
-        for(File aFile : files) {
-          StringBuilder xmlString = new StringBuilder();
-          BufferedReader br = new BufferedReader(new InputStreamReader(
-                  new FileInputStream(aFile), "utf-8"));
-          String line = br.readLine();
-          while(line != null) {
-            xmlString.append("\n").append(line);
-            line = br.readLine();
-          }
-          CompoundDocument doc = AbstractCompoundDocument.fromXml(xmlString
-                  .toString());
-          corpusToUse.add(doc);
-          br.close();
-        }
-      }
-      catch(Exception e) {
-        e.printStackTrace();
-      }
-    }
-  }
-
-  class PopulateCorpus extends AbstractAction {
-
-    private static final long serialVersionUID = -1377052643002026640L;
-
-    public PopulateCorpus() {
-      super("Populate Corpus With Compound Documents");
-    }
-
-    public void actionPerformed(ActionEvent ae) {
-      JFileChooser fileChooser = new JFileChooser();
-      fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-      try {
-        fileChooser.showOpenDialog(Main.getMainFrame());
-        File fileToOpen = null;
-        if((fileToOpen = fileChooser.getSelectedFile()) == null) {
-          return;
-        }
-
-        // file to Open is a directory
-        String corpusName = JOptionPane.showInputDialog("Enter CorpusName");
-        Corpus corpusToUse = Factory.newCorpus(corpusName);
-
-        // file to Open is a directory
-        String langCodes = JOptionPane
-                .showInputDialog("Enter language codes (comma separated)");
-        final String[] codes = langCodes.split(",");
-
-        File[] files = fileToOpen.listFiles(new FilenameFilter() {
-          public boolean accept(File dir, String name) {
-            if(name.indexOf("." + codes[0] + ".") > 0) {
-              return true;
-            }
-            return false;
-          }
-        });
-
-        List<String> docIds = new ArrayList<String>();
-        for(String code : codes) {
-          docIds.add(code);
-        }
-
-        for(File aFile : files) {
-          FeatureMap fets = Factory.newFeatureMap();
-          fets.put("sourceUrl", aFile.toURI().toURL());
-          fets.put("documentIDs", docIds);
-          fets.put("encoding", "UTF-8");
-          CompoundDocument cd = (CompoundDocument)Factory.createResource(
-                  "gate.compound.impl.CompoundDocumentImpl", fets);
-          corpusToUse.add(cd);
-        }
-      }
-      catch(Exception e) {
-        e.printStackTrace();
-      }
-    }
-  }
-
+  /**
+   * Action to save all the member documents in a single xml file.
+   * @author niraj
+   *
+   */
   public class SaveAsASingleXML extends AbstractAction {
 
     private static final long serialVersionUID = -1377052643002026640L;
 
     public SaveAsASingleXML() {
-      super("Save in a single XML Document");
+      super("Save As XML");
+      putValue(SHORT_DESCRIPTION, "Saves all documents in a single XML file");
+
     }
 
     public void actionPerformed(ActionEvent ae) {
       CompoundDocument cd = (CompoundDocument)document;
 
-      JFileChooser fileChooser = new JFileChooser();
+      JFileChooser fileChooser = MainFrame.getFileChooser();
       fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
       try {
         fileChooser.showSaveDialog(Main.getMainFrame());
@@ -421,12 +345,24 @@ public class CompoundDocumentEditor extends AbstractVisualResource
     }
   }
 
+  /**
+   * Action that allows users to switch the focus to one of the member documents
+   * @author niraj
+   *
+   */
   class SwitchDocument extends AbstractAction {
 
     private static final long serialVersionUID = -1377052643002026640L;
 
+    /**
+     * Constructor
+     */
     public SwitchDocument() {
-      super("Switch Document");
+      super("Switch");
+      putValue(SHORT_DESCRIPTION,
+              "Allows setting focus of the compound document to one of"
+                      + " its member documents");
+
     }
 
     public void actionPerformed(ActionEvent ae) {
@@ -443,12 +379,12 @@ public class CompoundDocumentEditor extends AbstractVisualResource
         ((CompoundDocument)document).setCurrentDocument(documentID);
       }
     }
-  }
+  } //SwitchDocument
 
   protected Document document;
 
   public void processFinished() {
-    ((CompoundDocument)this.document).setCurrentDocument("null");
+    ((CompoundDocument)this.document).setCurrentDocument(null);
   }
 
   public void progressChanged(int prgress) {
@@ -470,6 +406,7 @@ public class CompoundDocumentEditor extends AbstractVisualResource
         });
         documentsMap.put(doc.getName(), nbHandle);
       }
+
       tabbedPane.updateUI();
     }
     catch(Exception e) {
@@ -482,7 +419,6 @@ public class CompoundDocumentEditor extends AbstractVisualResource
     if(handle != null) {
       tabbedPane.remove(handle.getLargeView());
       tabbedPane.updateUI();
-      // clean up the document's VRs
       handle.cleanup();
       Document doc = event.getSource().getDocument(event.getDocumentID());
       if(Gate.getHiddenAttribute(doc.getFeatures())) {
@@ -491,15 +427,21 @@ public class CompoundDocumentEditor extends AbstractVisualResource
       }
     }
   }
-  
-  /**
-   * Clean up the VRs for our component documents.
-   */
+
   public void cleanup() {
+    // close all open alignment editors
+    for(AlignmentEditor editor : alignmentEditors) {
+      // dispose will clean up the editor internally
+      editor.dispose();
+    }
+    /*
+     * close all documents as well
+     */
     for(Handle h : documentsMap.values()) {
       tabbedPane.remove(h.getLargeView());
       h.cleanup();
     }
+    super.cleanup();
   }
 
 }

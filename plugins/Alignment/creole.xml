@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
 <CREOLE-DIRECTORY>
+  
+  <JAR scan="true">aligntools.jar</JAR>
+  
   <CREOLE>
-
-
 	<RESOURCE>
       <NAME>Compound Document</NAME>
       <CLASS>gate.compound.impl.CompoundDocumentImpl</CLASS>
@@ -35,7 +36,7 @@
       <INTERFACE>gate.compound.CompoundDocument</INTERFACE>
       <COMMENT>GATE Compound Document.</COMMENT>
       <HELPURL>http://gate.ac.uk/userguide/sec:alignment:compounddocument</HELPURL>
-      <PARAMETER NAME="sourceUrl"
+      <PARAMETER NAME="compoundDocumentUrl"
           SUFFIXES="xml"
           COMMENT="Source URL">java.net.URL</PARAMETER>
       <ICON>lr.gif</ICON>
@@ -62,18 +63,6 @@
       <ICON>document</ICON>
       <PRIVATE/>
     </RESOURCE>
-
-
-    <RESOURCE>
-      <NAME>Alignment Editor</NAME>
-      <CLASS>gate.alignment.gui.AlignmentEditor</CLASS>
-      <COMMENT>Alignment editor.</COMMENT>
-      <HELPURL>http://gate.ac.uk/userguide/sec:alignment:editor</HELPURL>
-      <GUI TYPE="large">
-        <RESOURCE_DISPLAYED>gate.compound.impl.CompoundDocumentImpl</RESOURCE_DISPLAYED>
-      </GUI>
-    </RESOURCE>
-    
 
 	<RESOURCE>
       <NAME>Switch Member PR</NAME>
