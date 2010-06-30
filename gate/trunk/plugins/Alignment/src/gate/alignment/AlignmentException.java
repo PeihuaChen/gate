@@ -4,8 +4,9 @@ import java.io.Serializable;
 
 /**
  * Exception that could occur while aligning annotations with one other
- * @author gate
- *
+ * 
+ * @author niraj
+ * 
  */
 public class AlignmentException extends Exception implements Serializable {
 
@@ -14,7 +15,7 @@ public class AlignmentException extends Exception implements Serializable {
   public AlignmentException(String message, Throwable t) {
     super(message, t);
   }
-  
+
   public AlignmentException(String message) {
     super(message);
   }

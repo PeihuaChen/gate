@@ -1,13 +1,26 @@
 package gate.compound.impl;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
+import gate.AnnotationSet;
+import gate.DataStore;
+import gate.Document;
+import gate.DocumentContent;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.Resource;
+import gate.annotation.AnnotationSetImpl;
+import gate.compound.CompoundDocument;
+import gate.corpora.DocumentContentImpl;
+import gate.corpora.DocumentImpl;
+import gate.event.CreoleEvent;
+import gate.event.DatastoreEvent;
+import gate.event.DocumentListener;
+import gate.util.InvalidOffsetException;
+import gate.util.Strings;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectInputValidation;
-import java.io.OutputStreamWriter;
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URL;
 import java.util.ArrayList;
@@ -18,28 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
-
-import gate.AnnotationSet;
-import gate.DataStore;
-import gate.Document;
-import gate.DocumentContent;
-import gate.Factory;
-import gate.FeatureMap;
-import gate.Gate;
-import gate.Resource;
-import gate.alignment.Alignment;
-import gate.annotation.AnnotationSetImpl;
-import gate.compound.CompoundDocument;
-import gate.corpora.DocumentContentImpl;
-import gate.corpora.DocumentImpl;
-import gate.creole.ResourceInstantiationException;
-import gate.event.CreoleEvent;
-import gate.event.DatastoreEvent;
-import gate.event.DocumentListener;
-import gate.util.GateRuntimeException;
-import gate.util.InvalidOffsetException;
-import gate.util.SimpleFeatureMapImpl;
-import gate.util.Strings;
 
 /**
  * This is an abstract implementation of the AbstractAlignedDocument
@@ -90,6 +81,9 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
   /** Freeze the serialization UID. */
   static final long serialVersionUID = -8456893608311510260L;
 
+  /**
+   * Document listeners
+   */
   private transient Vector<DocumentListener> documentListeners;
 
   /**
@@ -120,17 +114,14 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
     }
   } // cleanup()
 
-  /** Cover unpredictable Features creation */
+  /**
+   * This method always returns features of the compound document. If
+   * you want access to features of the member document - you can use
+   * getDocument(documentId).getFeatures()
+   * */
+  @Override
   public FeatureMap getFeatures() {
-    if(currentDocument == null) {
-      if(features == null) {
-        features = new SimpleFeatureMapImpl();
-      }
-      return features;
-    }
-    else {
-      return currentDocument.getFeatures();
-    }
+    return features;
   }
 
   /** Documents are identified by URLs */
@@ -192,8 +183,8 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
 
   /**
    * Allow/disallow collecting of repositioning information. If is
-   * <B>true</B> information will be retrieved and preserved as
-   * document feature.<BR>
+   * <B>true</B> information will be retrieved and preserved as document
+   * feature.<BR>
    * Preserving of repositioning information give the possibilities for
    * converting of coordinates between the original document content and
    * extracted from the document text.
@@ -503,113 +494,10 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
     features.put("name", aCompoundDoc.getName());
     globalMap.put("feats", features);
 
-    Document aDoc = aCompoundDoc.getCurrentDocument();
-    aCompoundDoc.setCurrentDocument(null);
     globalMap.put("docFeats", aCompoundDoc.getFeatures());
-    if(aDoc != null) aCompoundDoc.setCurrentDocument(aDoc.getName());
 
     xstream.toXML(globalMap, stringToReturn);
     return stringToReturn.toString();
-  }
-
-  /**
-   * Loads the compound document with given xmlString. Please note that
-   * the string should have been generated with the
-   * toXmlAsASingleDocument method.
-   * 
-   * @param xmlString
-   * @return
-   */
-  public static CompoundDocument fromXml(String xmlString) {
-    StringReader reader = new StringReader(xmlString);
-    com.thoughtworks.xstream.XStream xstream = new com.thoughtworks.xstream.XStream(
-            new com.thoughtworks.xstream.io.xml.StaxDriver());
-
-    // asking the xstream library to use gate class loader
-    xstream.setClassLoader(Gate.getClassLoader());
-
-    // reading the xml object
-    Map<String, Object> globalMap = (HashMap<String, Object>)xstream
-            .fromXML(reader);
-
-    // now we read individual information
-    Map<String, String> docXmls = (HashMap<String, String>)globalMap
-            .get("docXmls");
-    Map<String, Object> features = (Map<String, Object>)globalMap.get("feats");
-    String encoding = (String)features.get("encoding");
-
-    try {
-      File tempFile = File.createTempFile("example", ".xml");
-      File tempFolder = new File(tempFile.getParentFile(), "temp"
-              + Gate.genSym());
-      
-      if(!tempFolder.exists() && !tempFolder.mkdirs()) {
-        throw new GateRuntimeException("Temporary folder "
-                + tempFolder.getAbsolutePath() + " could not be created");
-      }
-      tempFile.deleteOnExit();
-      tempFolder.deleteOnExit();
-
-      URL sourceUrl = null;
-      List<String> docIDs = new ArrayList<String>();
-      for(String id : docXmls.keySet()) {
-        docIDs.add(id);
-        File newFile = new File("X." + id + ".xml");
-        newFile.deleteOnExit();
-        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
-                new FileOutputStream(newFile), encoding));
-        bw.write(docXmls.get(id));
-        bw.flush();
-        bw.close();
-        sourceUrl = newFile.toURI().toURL();
-      }
-
-      features.put("sourceUrl", sourceUrl);
-      String name = (String)features.get("name");
-      features.remove("name");
-      FeatureMap fets = Factory.newFeatureMap();
-      for(String s : features.keySet()) {
-        fets.put(s, features.get(s));
-      }
-
-      FeatureMap hideFeats = Factory.newFeatureMap();
-      //Gate.setHiddenAttribute(hideFeats, true);
-//      CompoundDocument cd = new gate.compound.impl.CompoundDocumentImpl();
-//      cd.setName(name);
-//      cd.setSourceUrl(sourceUrl);
-//      ((CompoundDocumentImpl) cd).setEncoding(encoding);
-//      ((CompoundDocumentImpl) cd).setDocumentIDs(docIDs);
-//      cd.init();
-      CompoundDocument cd = (CompoundDocument)Factory.createResource(
-              "gate.compound.impl.CompoundDocumentImpl", fets, hideFeats);
-      cd.setName(name);
-      Document aDoc = cd.getCurrentDocument();
-      cd.setCurrentDocument(null);
-      FeatureMap docFeatures = (FeatureMap)globalMap.get("docFeats");
-      for(Object key : docFeatures.keySet()) {
-        Object value = docFeatures.get(key);
-        if(value instanceof Alignment) {
-          ((Alignment)value).setSourceDocument(cd);
-        }
-      }
-      
-      cd.setFeatures(docFeatures);
-      
-      if(aDoc != null) cd.setCurrentDocument(aDoc.getName());
-
-      
-      return cd;
-    }
-    catch(IOException ioe) {
-      throw new GateRuntimeException(ioe);
-    }
-    catch(ResourceInstantiationException rie) {
-      throw new GateRuntimeException(rie);
-    } finally {
-      if(reader != null)
-        reader.close();
-    }
-
   }
 
   /**
@@ -837,23 +725,23 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
       this.documentIDs = null;
     }
   }
-  
+
   /**
-   * Overridden to properly register component documents with
-   * the creole register when this compound is deserialized.
+   * Overridden to properly register component documents with the creole
+   * register when this compound is deserialized.
    */
-  private void readObject(ObjectInputStream stream)
-          throws IOException, ClassNotFoundException {
+  private void readObject(ObjectInputStream stream) throws IOException,
+          ClassNotFoundException {
     stream.defaultReadObject();
     // register a validation callback to add our child documents
-    // to the creole register and fire the relevant events.  This
+    // to the creole register and fire the relevant events. This
     // is what the Factory would do if the children were loaded in
     // the normal way.
     stream.registerValidation(new ObjectInputValidation() {
       public void validateObject() {
         for(Document d : documents.values()) {
-          Gate.getCreoleRegister().get(
-                  d.getClass().getName()).addInstantiation(d);
+          Gate.getCreoleRegister().get(d.getClass().getName())
+                  .addInstantiation(d);
           Gate.getCreoleRegister().resourceLoaded(
                   new CreoleEvent(d, CreoleEvent.RESOURCE_LOADED));
         }

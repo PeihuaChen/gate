@@ -53,13 +53,14 @@ public class Alignment implements Serializable {
   /**
    * the document this alignment object belongs to.
    */
-  protected CompoundDocument compoundDocument;
+  protected transient CompoundDocument compoundDocument;
 
   /**
-   * A feature that PRs can use to specify which method was used to align that particular annotation.
+   * A feature that PRs can use to specify which method was used to
+   * align that particular annotation.
    */
-  public static final String ALIGNMENT_METHOD_FEATURE_NAME = "align-method"; 
-  
+  public static final String ALIGNMENT_METHOD_FEATURE_NAME = "align-method";
+
   /**
    * Constructor
    */
@@ -264,7 +265,9 @@ public class Alignment implements Serializable {
   }
 
   /**
-   * calls the annotationsAligned(...) method on each of the registered listeners
+   * calls the annotationsAligned(...) method on each of the registered
+   * listeners
+   * 
    * @param srcAnnotation
    * @param srcAS
    * @param srcDocument
@@ -285,7 +288,9 @@ public class Alignment implements Serializable {
   }
 
   /**
-   * calls the annotationsUnaligned(...) method on each of the resitered listeners
+   * calls the annotationsUnaligned(...) method on each of the resitered
+   * listeners
+   * 
    * @param srcAnnotation
    * @param srcAS
    * @param srcDocument
@@ -307,6 +312,7 @@ public class Alignment implements Serializable {
 
   /**
    * Returns a list of registered listeners
+   * 
    * @return
    */
   public List<AlignmentListener> getAlignmentListeners() {

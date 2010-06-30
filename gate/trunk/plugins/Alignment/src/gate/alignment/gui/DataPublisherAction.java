@@ -1,19 +1,13 @@
 package gate.alignment.gui;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import javax.swing.table.AbstractTableModel;
-
-import gate.Annotation;
-import gate.Document;
 import gate.alignment.AlignmentActionInitializationException;
-import gate.alignment.AlignmentException;
-import gate.compound.CompoundDocument;
 
 /**
- * Implementers of these are resources publishes their data to the outer world.
+ * Implementers of this interface are the resources wishing to publish
+ * data in the Alignment editor. The registered instance of
+ * DataPublisherAction appears as one of the tabs in the Alignment
+ * Editor. This is useful for displaying various statistics, such as the
+ * collected entries, model parameters etc.
  * 
  * @author niraj
  */
@@ -36,15 +30,42 @@ public interface DataPublisherAction {
    */
   public void cleanup();
 
+  /**
+   * data model used for obtaining data to be published.
+   * @param ddm
+   */
   public void setDataModel(DefaultDataModel ddm);
-  
+
+  /**
+   * Number of columns.
+   * @return
+   */
   public int getColumnCount();
 
+  /**
+   * Number of rows
+   * @return
+   */
   public int getRowCount();
 
+  /**
+   * Gets the value at the specified row and column
+   * @param rowIndex
+   * @param columnIndex
+   * @return
+   */
   public String getValueAt(int rowIndex, int columnIndex);
 
+  /**
+   * Column title
+   * @param column
+   * @return
+   */
   public String getColumnName(int column);
-  
+
+  /**
+   * Title for the table (this one appears in the tab heading)
+   * @return
+   */
   public String getTableTitle();
 }

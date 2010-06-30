@@ -13,26 +13,32 @@ import gate.Document;
 public interface AlignmentListener {
 
   /**
-   * This method is invoked whenever two annotations are aligned with each other.
+   * This method is invoked whenever two annotations are aligned with
+   * each other.
+   * 
    * @param srcAnnotation
    * @param srcAS - annotation set the source annotation belongs to
    * @param srcDocument - document that the source annotation belongs to
-   * @param targetAnnotation 
+   * @param targetAnnotation
    * @param tgtAS - annotation set the target annotation belongs to
-   * @param targetDocument - document that the target annotation belongs to
+   * @param targetDocument - document that the target annotation belongs
+   *          to
    */
   public void annotationsAligned(Annotation srcAnnotation, String srcAS,
           Document srcDocument, Annotation targetAnnotation, String tgtAS,
           Document targetDocument);
 
   /**
-   * This method is invoked whenever two annotations are unaligned with each other.
+   * This method is invoked whenever two annotations are unaligned with
+   * each other.
+   * 
    * @param srcAnnotation
    * @param srcAS - annotation set the source annotation belongs to
    * @param srcDocument - document that the source annotation belongs to
-   * @param targetAnnotation 
+   * @param targetAnnotation
    * @param tgtAS - annotation set the target annotation belongs to
-   * @param targetDocument - document that the target annotation belongs to
+   * @param targetDocument - document that the target annotation belongs
+   *          to
    */
   public void annotationsUnaligned(Annotation srcAnnotation, String srcAS,
           Document srcDocument, Annotation targetAnnotation, String tgtAS,
