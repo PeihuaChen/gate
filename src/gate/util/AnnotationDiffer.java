@@ -14,6 +14,7 @@
  */
 package gate.util;
 
+import java.text.NumberFormat;
 import java.util.*;
 
 import gate.Annotation;
@@ -40,8 +41,6 @@ public class AnnotationDiffer {
   /**
    * Constructor to be used when you have a collection of AnnotationDiffer
    * and want to consider it as only one AnnotationDiffer.
-   * It simply set the correct, partial, spurious and missing values to be
-   * the sum of those in the collection.
    * Then you can only use the methods getPrecision/Recall/FMeasure...().
    * @param differs collection to be regrouped in one AnnotationDiffer
    */
@@ -53,6 +52,8 @@ public class AnnotationDiffer {
     int keyCount = 0;
     int responseCount = 0;
     for (AnnotationDiffer differ : differs) {
+      // set the correct, partial, spurious and missing values to be
+      // the sum of those in the collection
       correctMatches += differ.getCorrectMatches();
       partiallyCorrectMatches += differ.getPartiallyCorrectMatches();
       missing += differ.getMissing();
@@ -780,9 +781,9 @@ public class AnnotationDiffer {
   /**
    * A method that returns specific type of annotations
    * @param type
-   * @return a {@link Set} of {@link Pairing}s.
+   * @return a {@link Set} of {@link Annotation}s.
    */
-  public Set getAnnotationsOfType(int type) {
+  public Set<Annotation> getAnnotationsOfType(int type) {
     switch(type) {
       case CORRECT_TYPE:
         return (correctAnnotations == null)? new HashSet() : correctAnnotations;
@@ -797,8 +798,51 @@ public class AnnotationDiffer {
     }
   }
 
+  /**
+   * @return annotation type for all the annotations
+   */
+  public String getAnnotationType() {
+    if (!keyList.isEmpty()) {
+      return ((Annotation) keyList.iterator().next()).getType();
+    } else if (!responseList.isEmpty()) {
+      return ((Annotation) responseList.iterator().next()).getType();
+    } else {
+      return "";
+    }
+  }
 
-  public HashSet correctAnnotations, partiallyCorrectAnnotations, 
+  public List<String> getMeasuresRow(Object[] measures, String title) {
+    NumberFormat f = NumberFormat.getInstance(Locale.ENGLISH);
+    f.setMaximumFractionDigits(2);
+    f.setMinimumFractionDigits(2);
+    List<String> row = new ArrayList<String>();
+    row.add(title);
+    row.add(Integer.toString(getCorrectMatches()));
+    row.add(Integer.toString(getMissing()));
+    row.add(Integer.toString(getSpurious()));
+    row.add(Integer.toString(getPartiallyCorrectMatches()));
+    for (Object object : measures) {
+      String measure = (String) object;
+      double beta = Double.valueOf(
+        measure.substring(1,measure.indexOf('-')));
+      if (measure.endsWith("strict")) {
+        row.add(f.format(getRecallStrict()));
+        row.add(f.format(getPrecisionStrict()));
+        row.add(f.format(getFMeasureStrict(beta)));
+      } else if (measure.endsWith("lenient")) {
+        row.add(f.format(getRecallLenient()));
+        row.add(f.format(getPrecisionLenient()));
+        row.add(f.format(getFMeasureLenient(beta)));
+      } else if (measure.endsWith("average")) {
+        row.add(f.format(getRecallAverage()));
+        row.add(f.format(getPrecisionAverage()));
+        row.add(f.format(getFMeasureAverage(beta)));
+      }
+    }
+    return row;
+  }
+
+  public HashSet correctAnnotations, partiallyCorrectAnnotations,
                  missingAnnotations, spuriousAnnotations;
 
 

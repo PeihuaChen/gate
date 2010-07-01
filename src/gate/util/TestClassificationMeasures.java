@@ -63,26 +63,33 @@ public class TestClassificationMeasures extends TestCase{
       AnnotationSet as1 = doc1.getAnnotations("ann1");
       AnnotationSet as2 = doc2.getAnnotations("ann2");
 
-      ClassificationMeasures myClassificationMeasures1 = new ClassificationMeasures(as1, as2, type, feature);
-      assertEquals(myClassificationMeasures1.getObservedAgreement(), new Float(0.7777778).floatValue());
-      assertEquals(myClassificationMeasures1.getKappaCohen(), new Float(0.6086957).floatValue());
-      assertEquals(myClassificationMeasures1.getKappaPi(), new Float(0.59550565).floatValue());
+      ClassificationMeasures myClassificationMeasures1 =
+        new ClassificationMeasures();
+      myClassificationMeasures1.calculateConfusionMatrix(
+        as1, as2, type, feature, true);
+      assertEquals(myClassificationMeasures1.getObservedAgreement(), 0.7777778f);
+      assertEquals(myClassificationMeasures1.getKappaCohen(), 0.6086957f);
+      assertEquals(myClassificationMeasures1.getKappaPi(), 0.59550565f);
       
       AnnotationSet as3 = doc3.getAnnotations("ann1");
       AnnotationSet as4 = doc4.getAnnotations("ann2");
        
-      ClassificationMeasures myClassificationMeasures2 = new ClassificationMeasures(as3, as4, type, feature);
-      assertEquals(myClassificationMeasures2.getObservedAgreement(), new Float(0.96875).floatValue());
-      assertEquals(myClassificationMeasures2.getKappaCohen(), new Float(0.3263158).floatValue());
-      assertEquals(myClassificationMeasures2.getKappaPi(), new Float(0.3227513).floatValue());
+      ClassificationMeasures myClassificationMeasures2 =
+        new ClassificationMeasures();
+      myClassificationMeasures2.calculateConfusionMatrix(
+        as3, as4, type, feature, true);
+      assertEquals(myClassificationMeasures2.getObservedAgreement(), 0.96875f);
+      assertEquals(myClassificationMeasures2.getKappaCohen(), 0.3263158f);
+      assertEquals(myClassificationMeasures2.getKappaPi(), 0.3227513f);
        
       ArrayList<ClassificationMeasures> tablesList = new ArrayList<ClassificationMeasures>();
       tablesList.add(myClassificationMeasures1);
       tablesList.add(myClassificationMeasures2);
-      ClassificationMeasures myNewClassificationMeasures = new ClassificationMeasures(tablesList);
-      assertEquals(myNewClassificationMeasures.getObservedAgreement(), new Float(0.94520545).floatValue());
-      assertEquals(myNewClassificationMeasures.getKappaCohen(), new Float(0.7784521).floatValue());
-      assertEquals(myNewClassificationMeasures.getKappaPi(), new Float(0.7778622).floatValue());
+      ClassificationMeasures myNewClassificationMeasures =
+        new ClassificationMeasures(tablesList);
+      assertEquals(myNewClassificationMeasures.getObservedAgreement(), 0.94520545f);
+      assertEquals(myNewClassificationMeasures.getKappaCohen(), 0.7784521f);
+      assertEquals(myNewClassificationMeasures.getKappaPi(), 0.7778622f);
        
     } else {
       System.out.println("Failed to create docs from URLs.");
