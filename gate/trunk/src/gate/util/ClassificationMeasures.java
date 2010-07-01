@@ -15,10 +15,15 @@ package gate.util;
 import gate.AnnotationSet;
 import gate.Annotation;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -51,32 +56,14 @@ public class ClassificationMeasures {
   }
 
   /**
-   * See {@link #createConfusionMatrix(gate.AnnotationSet, gate.AnnotationSet,
-   *  String, String)}.
-   */
-  public ClassificationMeasures(AnnotationSet aS1, AnnotationSet aS2, String type,
-                          String feature)
-  {
-    createConfusionMatrix(aS1, aS2, type, feature);
-  }
-  
-  /**
-   * See {@link #combineConfusionMatrices(java.util.ArrayList)}.
-   */
-  public ClassificationMeasures(ArrayList<ClassificationMeasures> tables)
-  {
-    combineConfusionMatrices(tables);
-  }
-  
-  /**
    * Portion of the instances on which the annotators agree.
    * @return a number between 0 and 1. 1 means perfect agreements.
    */
   public float getObservedAgreement()
   {
-    float agreed = this.getAgreedTrials();
-    float total = this.getTotalTrials();
-    if(total>0){
+    float agreed = getAgreedTrials();
+    float total = getTotalTrials();
+    if(total>0) {
       return agreed/total;
     } else {
       return 0;
@@ -116,23 +103,20 @@ public class ClassificationMeasures {
   }
   
   /**
-   * Return the confusion matrix describing how annotations in one
-   * set are classified in the other and vice versa. To understand
-   * exactly which types are being confused with which other types
-   * you will need to view this array in conjunction with featureValues,
-   * which gives the class labels (annotation types) in the correct
-   * order.
-   * @return
+   * To understand exactly which types are being confused with which other
+   * types you will need to view this array in conjunction with featureValues,
+   * which gives the class labels (annotation types) in the correct order.
+   * @return confusion matrix describing how annotations in one
+   * set are classified in the other and vice versa
    */
   public float[][] getConfusionMatrix(){
       return confusionMatrix.clone();
   }
   
   /**
-   * Return the list of annotation types (class labels) in the
-   * order in which they appear in the confusion matrix. This is
-   * necessary to make sense of the confusion matrix.
-   * @return
+   * This is necessary to make sense of the confusion matrix.
+   * @return list of annotation types (class labels) in the
+   * order in which they appear in the confusion matrix
    */
   public SortedSet<String> getFeatureValues(){
     return Collections.unmodifiableSortedSet(featureValues);
@@ -147,9 +131,10 @@ public class ClassificationMeasures {
    * @param aS2 annotation set to compare to the first
    * @param type annotation type containing the features to compare
    * @param feature feature name whose values will be compared
+   * @param verbose message error output when ignoring annotations
    */
-  public void createConfusionMatrix(AnnotationSet aS1, AnnotationSet aS2,
-                                    String type, String feature)
+  public void calculateConfusionMatrix(AnnotationSet aS1, AnnotationSet aS2,
+    String type, String feature, boolean verbose)
   {   
     // We'll accumulate a list of the feature values (a.k.a. class labels)
     featureValues = new TreeSet<String>();
@@ -170,40 +155,42 @@ public class ClassificationMeasures {
 
       // First we need to check that this annotation is not identical in span
       // to anything else in the same set. Duplicates should be excluded.
-      int dupecount = 0;
+      List<Annotation> dupeAnnotations = new ArrayList<Annotation>();
       for (Annotation aRelevantAnns1 : relevantAnns1) {
-        if (aRelevantAnns1.getStartNode().getOffset().equals(
-          relevantAnn1.getStartNode().getOffset())
-          && aRelevantAnns1.getEndNode().getOffset().equals(
-          relevantAnn1.getEndNode().getOffset())) {
-          dupecount++;
+        if (aRelevantAnns1.equals(relevantAnn1)) { continue; }
+        if (aRelevantAnns1.coextensive(relevantAnn1)) {
+          dupeAnnotations.add(aRelevantAnns1);
+          dupeAnnotations.add(relevantAnn1);
         }
       }
 
-      if (dupecount > 1) {
-        Out.prln("ClassificationMeasures: Same span annotations detected! Ignoring.");
+      if (dupeAnnotations.size() > 1) {
+        if (verbose) {
+          Out.prln("ClassificationMeasures: " +
+            "Same span annotations in set 1 detected! Ignoring.");
+          Out.prln(Arrays.toString(dupeAnnotations.toArray()));
+        }
       } else {
         // Find the match in as2
-        int howManyCoextensiveAnnotations = 0;
-        Annotation doc2Match = null;
+        List<Annotation>  coextensiveAnnotations = new ArrayList<Annotation>();
         for (Annotation relevantAnn2 : relevantAnns2) {
-          if (relevantAnn2.getStartNode().getOffset().equals(
-            relevantAnn1.getStartNode().getOffset())
-            && relevantAnn2.getEndNode().getOffset().equals(
-            relevantAnn1.getEndNode().getOffset())) {
-            howManyCoextensiveAnnotations++;
-            doc2Match = relevantAnn2;
+          if (relevantAnn2.coextensive(relevantAnn1)) {
+            coextensiveAnnotations.add(relevantAnn2);
           }
         }
 
-        if (howManyCoextensiveAnnotations == 0) {
-          Out.prln("ClassificationMeasures: Annotation with no counterpart" +
-            " detected!");
-        } else if (howManyCoextensiveAnnotations == 1) {
+        if (coextensiveAnnotations.size() == 0) {
+          if (verbose) {
+            Out.prln("ClassificationMeasures: Annotation in set 1 " +
+              "with no counterpart in set 2 detected! Ignoring.");
+            Out.prln(relevantAnn1.toString());
+          }
+        } else if (coextensiveAnnotations.size() == 1) {
 
           // What are our feature values?
           String featVal1 = (String) relevantAnn1.getFeatures().get(feature);
-          String featVal2 = (String) doc2Match.getFeatures().get(feature);
+          String featVal2 = (String)
+            coextensiveAnnotations.get(0).getFeatures().get(feature);
 
           // Make sure both are present in our feature value list
           featureValues.add(featVal1);
@@ -233,9 +220,12 @@ public class ClassificationMeasures {
             }
 
           }
-        } else if (howManyCoextensiveAnnotations > 1) {
-          Out.prln("ClassificationMeasures: Same span annotations detected!" +
-            " Ignoring.");
+        } else if (coextensiveAnnotations.size() > 1) {
+          if (verbose) {
+            Out.prln("ClassificationMeasures: " +
+              "Same span annotations in set 2 detected! Ignoring.");
+            Out.prln(Arrays.toString(coextensiveAnnotations.toArray()));
+          }
         }
       }
     }
@@ -251,8 +241,7 @@ public class ClassificationMeasures {
    * figures for the entire set.
    * @param tables tables to combine
    */
-  public void combineConfusionMatrices(ArrayList<ClassificationMeasures> tables)
-  {
+  public ClassificationMeasures(Collection<ClassificationMeasures> tables) {
     /* A hash of hashes for the actual values.
      * This will later be converted to a 2D float array for
      * compatibility with the existing code. */
@@ -307,10 +296,9 @@ public class ClassificationMeasures {
     isCalculatedKappas = false;
   }
   
-  
   /** Compute Cohen's and Pi kappas for two annotators.
    */
-  public void computeKappaPairwise()
+  protected void computeKappaPairwise()
   {
     // Compute the agreement
     float observedAgreement = getObservedAgreement();
@@ -397,35 +385,57 @@ public class ClassificationMeasures {
   }
   
   /**
-   * Print out the confusion matrix on the standard out stream.
+   * @param title matrix title
+   * @return confusion matrix as a list of list of String
    */
-  public void printConfusionMatrix()
-  {
-    StringBuffer logMessage = new StringBuffer();
-
-    int numL = this.featureValues.size();
-    int x = 0;
-    for(String featureValue : featureValues){
-      Out.prln(x + ": " + featureValue);
-      x++;
-    }
-    
-    logMessage.append("\t|");
-    for(int i = 0; i < numL; i++) {
-      logMessage.append("\t").append(i).append("\t|");
-    }
-    logMessage.append("\n");
-    for(int i = 0; i < numL; i++) {
-      logMessage.append(i).append("\t|");
-      for(int j = 0; j < numL; j++){
-        logMessage.append("\t").append(this.confusionMatrix[i][j])
-          .append("\t|");
+  public List<List<String>> getConfusionMatrix(String title) {
+    List<List<String>> matrix = new ArrayList<List<String>>();
+    List<String> row = new ArrayList<String>();
+    row.add(" ");
+    matrix.add(row); // spacer
+    row = new ArrayList<String>();
+    row.add(title);
+    matrix.add(row); // title
+    SortedSet<String> features = new TreeSet<String>(getFeatureValues());
+    row = new ArrayList<String>();
+    row.add("");
+    row.addAll(features);
+    matrix.add(row); // heading horizontal
+    for (float[] confusionValues : getConfusionMatrix()) {
+      row = new ArrayList<String>();
+      row.add(features.first()); // heading vertical
+      features.remove(features.first());
+      for (float confusionValue : confusionValues) {
+        row.add(String.valueOf((int) confusionValue));
       }
-      logMessage.append("\n");
+      matrix.add(row); // confusion values
     }
-    Out.pr(logMessage);
+    return matrix;
   }
-  
+
+  public List<String> getMeasuresRow(Object[] measures, String documentName) {
+    NumberFormat f = NumberFormat.getInstance(Locale.ENGLISH);
+    f.setMaximumFractionDigits(2);
+    f.setMinimumFractionDigits(2);
+    List<String> row = new ArrayList<String>();
+    row.add(documentName);
+    row.add(String.valueOf((int) getAgreedTrials()));
+    row.add(String.valueOf((int) getTotalTrials()));
+    for (Object object : measures) {
+      String measure = (String) object;
+      if (measure.equals("Observed agreement")) {
+        row.add(f.format(getObservedAgreement()));
+      }
+      if (measure.equals("Cohen's Kappa")) {
+        row.add(f.format(getKappaCohen()));
+      }
+      if (measure.equals("Pi's Kappa")) {
+        row.add(f.format(getKappaPi()));
+      }
+    }
+    return row;
+  }
+
   /**
    * Convert between two formats of confusion matrix.
    * A hashmap of hashmaps is easier to populate but an array is better for
