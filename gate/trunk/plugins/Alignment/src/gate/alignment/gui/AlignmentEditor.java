@@ -31,6 +31,8 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -854,7 +856,7 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
     addHighlights();
   }
 
-  class SelectHighlightListener extends MouseAdapter {
+  class SelectHighlightListener implements MouseMotionListener, MouseListener {
 
     Set<Object> srcToDel = new HashSet<Object>();
 
@@ -912,6 +914,26 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
 
     public void mouseExited(MouseEvent e) {
       mouseMovementTimer.stop();
+    }
+
+    public void mouseClicked(MouseEvent e) {
+      // do nothing
+      
+    }
+
+    public void mouseEntered(MouseEvent e) {
+      // do nothing
+      
+    }
+
+    public void mousePressed(MouseEvent e) {
+      // do nothing
+      
+    }
+
+    public void mouseReleased(MouseEvent e) {
+      // do nothing
+      
     }
   }
 
