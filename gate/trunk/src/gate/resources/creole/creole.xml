@@ -44,16 +44,10 @@
       <CLASS>gate.corpora.SgmlDocumentFormat</CLASS>
     </RESOURCE>
     <RESOURCE>
-      <CLASS>gate.corpora.RtfDocumentFormat</CLASS>
+      <CLASS>gate.corpora.TikaFormat</CLASS>
     </RESOURCE>
     <RESOURCE>
       <CLASS>gate.corpora.EmailDocumentFormat</CLASS>
-    </RESOURCE>
-    <RESOURCE>
-      <CLASS>gate.corpora.PdfDocumentFormat</CLASS>
-    </RESOURCE>
-    <RESOURCE>
-      <CLASS>gate.corpora.MSWordDocumentFormat</CLASS>
     </RESOURCE>
   </CREOLE>
 

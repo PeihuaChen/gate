@@ -458,7 +458,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
 
   /** Set method for the document's URL */
   @CreoleParameter(disjunction = "source", comment = "Source URL",
-      suffixes = "txt;text;xml;xhtm;xhtml;html;htm;sgml;sgm;mail;email;eml;rtf;pdf;doc")
+      suffixes = "txt;text;xml;xhtm;xhtml;html;htm;sgml;sgm;mail;email;eml;rtf;pdf;doc;ppt;pptx;docx;xls;xlsx;ods;odt;odp")
   public void setSourceUrl(URL sourceUrl) {
     this.sourceUrl = sourceUrl;
   } // setSourceUrl

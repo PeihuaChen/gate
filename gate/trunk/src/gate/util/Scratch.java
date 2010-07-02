@@ -29,9 +29,6 @@ import java.util.zip.GZIPOutputStream;
 
 import javax.swing.*;
 
-import org.pdfbox.pdmodel.PDDocument;
-import org.pdfbox.util.PDFTextStripper;
-
 import gate.*;
 import gate.creole.*;
 import gate.creole.gazetteer.DefaultGazetteer;

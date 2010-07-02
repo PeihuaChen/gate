@@ -36,7 +36,6 @@
 	<classpathentry kind="lib" path="lib/plugins/rdf-api.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jdom.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/junit.jar"/>
-	<classpathentry kind="lib" path="lib/ext/guk.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/GnuGetOpt.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ontotext.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/gateHmm.jar"/>
@@ -68,22 +67,33 @@
 	<classpathentry kind="lib" path="plugins/Ontology_OWLIM2/lib/commons-io-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/spring-aop-2.0.8.jar"/>
 	<classpathentry kind="lib" path="plugins/WordNet/lib/jwnl.jar"/>
+	<classpathentry kind="lib" path="lib/tika-core-0.7.jar" />
+	<classpathentry kind="lib" path="lib/tika-parsers-0.7.jar"/>
+	<classpathentry kind="lib" path="lib/commons-compress-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/commons-io-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/fontbox-1.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/jempbox-1.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/bcmail-jdk15-1.45.jar"/>
+	<classpathentry kind="lib" path="lib/bcprov-jdk15-1.45.jar"/>
+	<classpathentry kind="lib" path="lib/poi-3.6.jar"/>
+	<classpathentry kind="lib" path="lib/poi-ooxml-3.6.jar"/>
+	<classpathentry kind="lib" path="lib/poi-ooxml-schemas-3.6.jar"/>
+	<classpathentry kind="lib" path="lib/poi-scratchpad-3.6.jar"/>
+	<classpathentry kind="lib" path="lib/dom4j-1.6.1.jar"/>
+	<classpathentry kind="lib" path="lib/xmlbeans-2.3.0.jar"/>
+	<classpathentry kind="lib" path="lib/pdfbox-1.1.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="lib" path="lib/javacc.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/servlet-2_3.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/orajdbc9i.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/xstream-1.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/gate-compiler-jdt.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-logging.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/concurrent.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/icu4j.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jakarta-oro-2.0.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/log4j-1.2.14.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/poi-2.5.1-final-20040804.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/tm-extractors-0.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/xercesImpl.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/xml-apis.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/PDFBox-0.7.2.jar"/>
 	<classpathentry kind="lib" path="lib/xmlunit-1.2.jar"/>
 	<classpathentry kind="lib" path="plugins/Learning/lib/weka.jar"/>
 	<classpathentry kind="lib" path="plugins/Web_Crawler_Websphinx/lib/websphinx.jar"/>
@@ -116,5 +126,6 @@
 	<classpathentry kind="lib" path="lib/gate-asm.jar"/>
 	<classpathentry kind="lib" path="lib/commons-lang-2.4.jar"/>
 	<classpathentry kind="lib" path="plugins/Groovy/lib/groovy-all-1.6.3.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
