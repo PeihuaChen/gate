@@ -36,6 +36,7 @@
 	<classpathentry kind="lib" path="lib/plugins/rdf-api.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jdom.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/junit.jar"/>
+	<classpathentry kind="lib" path="lib/ext/guk.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/GnuGetOpt.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ontotext.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/gateHmm.jar"/>
