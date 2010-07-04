@@ -65,6 +65,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     if(controller != null) controller.removeControllerListener(this);
     this.controller = (SerialController)target;
     controller.addControllerListener(this);
+    corpusControllerMode = controller instanceof CorpusController;
     analyserMode = controller instanceof SerialAnalyserController ||
                    controller instanceof ConditionalSerialAnalyserController;
     conditionalMode = controller instanceof ConditionalController;
@@ -330,7 +331,7 @@ public class SerialControllerEditor extends AbstractVisualResource
       constraints.gridy++;
     }//if conditional mode    
     
-    if(analyserMode){
+    if(corpusControllerMode){
       //we need to add the corpus combo
       corpusCombo = new JComboBox(corpusComboModel = new CorporaComboModel());
       corpusCombo.setRenderer(new ResourceRenderer());
@@ -338,14 +339,13 @@ public class SerialControllerEditor extends AbstractVisualResource
                                                corpusCombo.getPreferredSize().
                                                height));
       Corpus corpus = null;
-      if(controller instanceof SerialAnalyserController){
-        corpus = ((SerialAnalyserController)controller).getCorpus();
-      }else if(controller instanceof ConditionalSerialAnalyserController){
-        corpus = ((ConditionalSerialAnalyserController)controller).getCorpus();
+      if(controller instanceof CorpusController){
+        corpus = ((CorpusController)controller).getCorpus();
       }else{
-        throw new GateRuntimeException("Controller editor in analyser mode " +
+        throw new GateRuntimeException("Controller editor in corpus " +
+                                       "controller mode " +
                                        "but the target controller is not an " +
-                                       "analyser!");
+                                       "CorpusController!");
       }
 
       if(corpus != null){
@@ -372,7 +372,7 @@ public class SerialControllerEditor extends AbstractVisualResource
       //all the following rows have one element only
       constraints.gridwidth = 1;
       constraints.gridy++;
-    }//if(analyserMode)    
+    }//if(corpusControllerMode)    
     
     parametersPanel = new JPanel();
     parametersPanel.setLayout(new BoxLayout(parametersPanel, BoxLayout.Y_AXIS));
@@ -813,7 +813,7 @@ public class SerialControllerEditor extends AbstractVisualResource
       });
     }//if conditional
     
-    if(analyserMode){
+    if(corpusControllerMode){
       corpusCombo.addPopupMenuListener(new PopupMenuListener() {
         public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
           corpusComboModel.fireDataChanged();
@@ -911,7 +911,7 @@ public class SerialControllerEditor extends AbstractVisualResource
       //this is a list of lists
       List<List<Parameter>> parameters = 
           rData.getParameterList().getRuntimeParameters();
-      if(analyserMode){
+      if(corpusControllerMode){
         //remove corpus and document
         //create a new list so we don't change the one from CreoleReg.
         List<List<Parameter>> oldParameters = parameters;
@@ -998,7 +998,7 @@ public class SerialControllerEditor extends AbstractVisualResource
       memberPRsTableModel.fireTableDataChanged();
 //      repaint(100);
     }else if(e.getResource() instanceof LanguageResource){
-      if(e.getResource() instanceof Corpus && analyserMode){
+      if(e.getResource() instanceof Corpus && corpusControllerMode){
         corpusComboModel.fireDataChanged();
       }
     }
@@ -1016,7 +1016,7 @@ public class SerialControllerEditor extends AbstractVisualResource
 //      repaint(100);
     }
     else if(e.getResource() instanceof LanguageResource) {
-      if(e.getResource() instanceof Corpus && analyserMode) {
+      if(e.getResource() instanceof Corpus && corpusControllerMode) {
         Corpus c = (Corpus)e.getResource();
         if(controller instanceof CorpusController) {
           if(c == ((CorpusController)controller).getCorpus()) {
@@ -1461,11 +1461,11 @@ public class SerialControllerEditor extends AbstractVisualResource
               return;
           }
 
-          if(analyserMode){
+          if(corpusControllerMode){
             //set the corpus
             Object value = corpusCombo.getSelectedItem();
             Corpus corpus = value.equals("<none>") ? null : (Corpus)value;
-            if(corpus == null){
+            if(analyserMode && corpus == null){
               JOptionPane.showMessageDialog(
                 SerialControllerEditor.this,
                 "No corpus provided!\n" +
@@ -1693,6 +1693,11 @@ public class SerialControllerEditor extends AbstractVisualResource
 
   /** Action that runs the application*/
   protected RunAction runAction;
+
+  /**
+   * Is the controller displayed a CorpusController?
+   */
+  protected boolean corpusControllerMode = false;
 
   /**
    * Is the controller displayed an analyser controller?
