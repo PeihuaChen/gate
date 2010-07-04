@@ -296,7 +296,7 @@ public class PersistenceManager {
    *          persistent equivalent.
    * @return the persistent equivalent value for the provided target
    */
-  static Serializable getPersistentRepresentation(Object target)
+  public static Serializable getPersistentRepresentation(Object target)
           throws PersistenceException {
     if(target == null) return null;
     // first check we don't have it already
@@ -333,7 +333,7 @@ public class PersistenceManager {
     return res;
   }
 
-  static Object getTransientRepresentation(Object target)
+  public static Object getTransientRepresentation(Object target)
           throws PersistenceException, ResourceInstantiationException {
 
     if(target == null || target instanceof SlashDevSlashNull) return null;
