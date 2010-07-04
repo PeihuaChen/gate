@@ -1217,24 +1217,20 @@ public class SerialControllerEditor extends AbstractVisualResource
 
     //use the controller for data caching
     public void setSelectedItem(Object anItem){
-      if(controller instanceof SerialAnalyserController)
-      ((SerialAnalyserController)controller).
-        setCorpus((Corpus)(anItem.equals("<none>") ? null : anItem));
-      else if(controller instanceof ConditionalSerialAnalyserController)
-      ((ConditionalSerialAnalyserController)controller).
+      if(controller instanceof CorpusController)
+      ((CorpusController)controller).
         setCorpus((Corpus)(anItem.equals("<none>") ? null : anItem));
     }
 
     public Object getSelectedItem(){
       Corpus corpus = null;
-      if(controller instanceof SerialAnalyserController){
-        corpus = ((SerialAnalyserController)controller).getCorpus();
-      }else if(controller instanceof ConditionalSerialAnalyserController){
-        corpus = ((ConditionalSerialAnalyserController)controller).getCorpus();
+      if(controller instanceof CorpusController) {
+        corpus = ((CorpusController)controller).getCorpus();
       }else{
-        throw new GateRuntimeException("Controller editor in analyser mode " +
-                                       "but the target controller is not an " +
-                                       "analyser!");
+        throw new GateRuntimeException("Controller editor in corpus " +
+                                       "controller mode " +
+                                       "but the target controller is not a " +
+                                       "CorpusController!");
       }
       return (corpus == null ? (Object)"<none>" : (Object)corpus);
     }
