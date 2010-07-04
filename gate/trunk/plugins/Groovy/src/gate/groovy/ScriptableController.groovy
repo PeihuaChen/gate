@@ -8,9 +8,20 @@ import gate.util.*
 import java.beans.PropertyChangeSupport
 import java.beans.PropertyChangeListener
 
-@CreoleResource(comment =
+@CreoleResource(name = "Scriptable Controller", comment =
     "A controller whose execution strategy is controlled by a Groovy script")
-public class ScriptableController extends SerialAnalyserController {
+public class ScriptableController extends SerialController
+                          implements CorpusController, LanguageAnalyser {
+
+  /**
+   * The corpus over which we are running.
+   */
+  Corpus corpus
+
+  /**
+   * The document over which we are running, when in LanguageAnalyser mode.
+   */
+  Document document
 
   /**
    * Text of the Groovy script that controls execution.
@@ -174,6 +185,18 @@ eachDocument {
     if(log.isDebugEnabled()) {
       prof.checkPoint("Execute controller [" + getName() + "] finished");
     }
+  }
+
+  /**
+   * Always return an empty list for "offending" PRs - even if a parameter is
+   * not set before execution, it might be set dynamically by the script at
+   * runtime.
+   *
+   * Yes, this is another typo in the superclass, the method really is called
+   * getOffendingP(r)ocessingResources.
+   */
+  public List getOffendingPocessingResources() {
+    return []
   }
 
   /**
