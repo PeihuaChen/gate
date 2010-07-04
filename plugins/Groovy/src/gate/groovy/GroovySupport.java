@@ -29,12 +29,15 @@ import gate.Gate;
 import gate.GateConstants;
 import gate.Resource;
 import gate.creole.AbstractResource;
+import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.AutoInstance;
 import gate.creole.metadata.CreoleResource;
 import gate.gui.ActionsPublisher;
 import gate.gui.MainFrame;
+import gate.persist.PersistenceException;
 import gate.util.GateException;
 import gate.util.GateRuntimeException;
+import gate.util.persistence.PersistenceManager;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.ReadOnlyPropertyException;
@@ -62,10 +65,19 @@ public class GroovySupport extends AbstractResource implements ActionsPublisher 
       "import gate.annotation.*;\n" +
       "import gate.util.*;\n";
 
-  public Resource init() {
+  public Resource init() throws ResourceInstantiationException {
     // mix-in gate.Utils and gate.groovy.GateGroovyMethods
     mixinGlobally(gate.Utils.class);
     mixinGlobally(GateGroovyMethods.class);
+    // register the ScriptableController with the persistence mechanism
+    // (yes, the method is called registerPersi(s)tentEquivalent)
+    try {
+      PersistenceManager.registerPersitentEquivalent(ScriptableController.class,
+          ScriptableControllerPersistence.class);
+    }
+    catch(PersistenceException e) {
+      throw new ResourceInstantiationException(e);
+    }
     
     return this;
   }
