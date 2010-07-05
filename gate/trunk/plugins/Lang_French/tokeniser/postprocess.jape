@@ -1,41 +1,78 @@
-Phase:postprocess
+Imports: {
+import static gate.Utils.*;
+}
+
+Phase: postprocess
 Input: Token SpaceToken
 Options: control = appelt
 
 //adjusts the tokeniser output
 
-Rule: simpleJoin
-/* joins a final apostrophe with the preceding word, to make it the same as the
-TreeTagger output, e.g. d' should be one Token not two */
+// this rule is apparently no more needed by the TreeTagger
 
- (
-  (
-   {Token.string == "d"}|
-   {Token.string == "D"}|
-   {Token.string == "L"}|
-   {Token.string == "l"}|
-   {Token.string == "n"}|
-   {Token.string == "N"}
-  )
-  {Token.string == "'"}
- ):left
+// Rule: simpleJoin
+// /* joins a final apostrophe with the preceding word, to make it the same as the
+// TreeTagger output, e.g. d' should be one Token not two */
+
+//  (
+//   (
+//    {Token.string == "d"}|
+//    {Token.string == "D"}|
+//    {Token.string == "L"}|
+//    {Token.string == "l"}|
+//    {Token.string == "n"}|
+//    {Token.string == "N"}
+//   )
+//   {Token.string == "'"}
+//  ):left
+// -->
+// {
+//   gate.AnnotationSet toRemove = (gate.AnnotationSet)bindings.get("left");
+//   outputAS.removeAll(toRemove);
+//   //get the tokens
+//   java.util.ArrayList tokens = new java.util.ArrayList(toRemove);
+//   //define a comparator for annotations by start offset
+//   Collections.sort(tokens, new gate.util.OffsetComparator());
+//   String text = "";
+//   Iterator tokIter = tokens.iterator();
+//   while(tokIter.hasNext())
+//     text += (String)((Annotation)tokIter.next()).getFeatures().get("string");
+
+//   gate.FeatureMap features = Factory.newFeatureMap();
+//   features.put("kind", "word");
+//   features.put("string", text);
+//   features.put("length", Integer.toString(text.length()));
+//   features.put("orth", "artapos");
+//   outputAS.add(toRemove.firstNode(), toRemove.lastNode(), "Token", features);
+// }
+
+Rule: simpleSplit
+/* split compound word, to make it the same as the
+TreeTagger output, e.g. apprend-on should be two Tokens not one */
+
+(
+  {Token.kind == word, Token.string =~ "[^-]+(-[^-]+){1,2}"}
+):match
 -->
 {
-  gate.AnnotationSet toRemove = (gate.AnnotationSet)bindings.get("left");
-  outputAS.removeAll(toRemove);
-  //get the tokens
-  java.util.ArrayList tokens = new java.util.ArrayList(toRemove);
-  //define a comparator for annotations by start offset
-  Collections.sort(tokens, new gate.util.OffsetComparator());
-  String text = "";
-  Iterator tokIter = tokens.iterator();
-  while(tokIter.hasNext())
-    text += (String)((Annotation)tokIter.next()).getFeatures().get("string");
-
-  gate.FeatureMap features = Factory.newFeatureMap();
-  features.put("kind", "word");
-  features.put("string", text);
-  features.put("length", Integer.toString(text.length()));
-  features.put("orth", "artapos");
-  outputAS.add(toRemove.firstNode(), toRemove.lastNode(), "Token", features);
+  AnnotationSet set = bindings.get("match");
+  Annotation annotation = set.iterator().next();
+  String content = stringFor(doc, annotation);
+  long start = start(annotation);
+  long end = end(annotation);
+  long length = length(annotation);
+  String[] words = content.split("-");
+  try {
+    long index = start;
+    for (String word : words) {
+     FeatureMap features = Factory.newFeatureMap();
+     features.putAll(annotation.getFeatures());
+     features.put("string", content.substring(0, content.length()-3));
+     outputAS.add(index, index+word.length(), "Token", features);
+     index += word.length();
+    }
+  } catch (InvalidOffsetException e) {
+    throw new LuckyException(e);
+  }
+  outputAS.remove(annotation);
 }
