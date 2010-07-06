@@ -499,6 +499,12 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       JMenuItem menuItem;
 
       public void mousePressed(MouseEvent e) {
+        int row =  resultTable.rowAtPoint(e.getPoint());
+        if(e.isPopupTrigger()
+        && !resultTable.isRowSelected(row)) {
+          // if right click outside the selection then reset selection
+          resultTable.getSelectionModel().setSelectionInterval(row, row);
+        }
         if (e.isPopupTrigger()) {
           createPopup();
           mousePopup.show(e.getComponent(), e.getX(), e.getY());
@@ -514,10 +520,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
       private void createPopup() {
         mousePopup = new JPopupMenu();
-        menuItem = new JMenuItem("Remove the selected result");
-        if(resultTable.getSelectedRowCount() > 1) {
-          menuItem.setText(menuItem.getText()+"s");
-        }
+        menuItem = new JMenuItem("Remove the selected result" +
+          (resultTable.getSelectedRowCount() > 1 ? "s" : ""));
         mousePopup.add(menuItem);
         menuItem.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent ae) {
@@ -535,39 +539,66 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           }
         });
 
-        if(resultTable.getSelectedRowCount() == 1
-        && target instanceof LuceneDataStoreImpl) {
-          menuItem = new JMenuItem("Open the selected document");
+        if(target instanceof LuceneDataStoreImpl
+        && SwingUtilities.getRoot(LuceneDataStoreSearchGUI.this)
+            instanceof MainFrame) {
+          menuItem = new JMenuItem("Open the selected document" +
+            (resultTable.getSelectedRowCount() > 1 ? "s" : ""));
           menuItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-              // create and display the document for this result
-              int row = resultTable.rowViewToModel(
-                resultTable.getSelectedRow());
-              final Pattern result = (Pattern) results.get(row);
-              FeatureMap features = Factory.newFeatureMap();
-              features.put(DataStore.DATASTORE_FEATURE_NAME, target);
-              features.put(DataStore.LR_ID_FEATURE_NAME,result.getDocumentID());
-              final Document doc;
-              try {
-                doc = (Document)Factory
-                  .createResource("gate.corpora.DocumentImpl", features);
-              } catch (gate.util.GateException e) {
-                e.printStackTrace();
-                return;
+              Set<Pattern> patterns = new HashSet<Pattern>();
+              Set<String> documentIds = new HashSet<String>();
+              for (int rowView : resultTable.getSelectedRows()) {
+                // create and display the document for this result
+                int rowModel = resultTable.rowViewToModel(rowView);
+                Pattern pattern = (Pattern) results.get(rowModel);
+                if (!documentIds.contains(pattern.getDocumentID())) {
+                  patterns.add(pattern);
+                  documentIds.add(pattern.getDocumentID());
+                }
               }
-              // show the expression in the document
-              SwingUtilities.invokeLater(new Runnable() {
-              public void run() {
-                MainFrame.getInstance().select(doc);
-                // wait some time for the document to be displayed
-                Date timeToRun = new Date(System.currentTimeMillis() + 1000);
-                Timer timer = new Timer("Annic show document timer", true);
-                timer.schedule(new TimerTask() {
-                  public void run() {
-                    showResultInDocument(doc, result);
-                  }
-                }, timeToRun);
-              }});
+              if (patterns.size() > 10) {
+                Object[] possibleValues =
+                 { "Open the "+patterns.size()+" documents", "Don't open" };
+                int selectedValue = JOptionPane.showOptionDialog(
+                  LuceneDataStoreSearchGUI.this,
+                  "Do you want to open " + patterns.size() +
+                  " documents in the central tabbed pane ?",
+                  "Warning", JOptionPane.DEFAULT_OPTION,
+                  JOptionPane.QUESTION_MESSAGE, null,
+                  possibleValues, possibleValues[1]);
+                if (selectedValue == 1
+                 || selectedValue == JOptionPane.CLOSED_OPTION) {
+                  return;
+                }
+              }
+              for (final Pattern pattern : patterns) {
+                // create and display the document for this result
+                FeatureMap features = Factory.newFeatureMap();
+                features.put(DataStore.DATASTORE_FEATURE_NAME, target);
+                features.put(DataStore.LR_ID_FEATURE_NAME,
+                  pattern.getDocumentID());
+                final Document doc;
+                try {
+                  doc = (Document) Factory.createResource(
+                    "gate.corpora.DocumentImpl", features);
+                } catch (gate.util.GateException e) {
+                  e.printStackTrace();
+                  return;
+                }
+                // show the expression in the document
+                SwingUtilities.invokeLater(new Runnable() { public void run() {
+                  MainFrame.getInstance().select(doc);
+                }});
+                if (patterns.size() == 1) {
+                  // wait some time for the document to be displayed
+                  Date timeToRun = new Date(System.currentTimeMillis() + 2000);
+                  Timer timer = new Timer("Annic show document timer", true);
+                  timer.schedule(new TimerTask() { public void run() {
+                    showResultInDocument(doc, pattern);
+                  }}, timeToRun);
+                }
+              }
             }
           });
           mousePopup.add(menuItem);
