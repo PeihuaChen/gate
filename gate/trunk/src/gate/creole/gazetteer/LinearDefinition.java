@@ -185,6 +185,10 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
     return isModified;
   }
 
+  public void setModified(boolean modified) {
+    isModified = modified;
+  }
+
   /**Gets the url of this linear definition
    * @return the url of this linear definition   */
   public URL getURL() {
