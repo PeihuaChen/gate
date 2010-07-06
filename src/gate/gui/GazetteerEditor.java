@@ -76,7 +76,7 @@ public class GazetteerEditor extends AbstractVisualResource
     definitionTableModel.addColumn("Language");
     listTableModel = new ListTableModel();
     actions = new ArrayList<Action>();
-    actions.add(new SaveGazetteerAction());
+    actions.add(new SaveAndReinitialiseGazetteerAction());
     actions.add(new SaveAsGazetteerAction());
   }
 
@@ -432,7 +432,8 @@ public class GazetteerEditor extends AbstractVisualResource
             if (r == -1 || c == -1) { return; }
             String newValue = (String) definitionTableModel.getValueAt(r, c);
             if (c == 0) {
-              if (selectedLinearNode.getList().equals(newValue)) { return; }
+              String oldValue = selectedLinearNode.getList();
+              if (oldValue != null && oldValue.equals(newValue)) { return; }
               // save the previous list and copy it to the new name of the list
               try {
                 GazetteerList gazetteerList = (GazetteerList)
@@ -451,6 +452,7 @@ public class GazetteerEditor extends AbstractVisualResource
                   .remove(selectedLinearNode.getList());
                 linearDefinition.getNodesByListNames()
                   .put(newValue, selectedLinearNode);
+                linearDefinition.setModified(true);
 
               } catch (Exception ex) {
                 MainFrame.getInstance().statusChanged(
@@ -460,11 +462,20 @@ public class GazetteerEditor extends AbstractVisualResource
 
               selectedLinearNode.setList(newValue);
             } else if (c == 1) {
+              String oldValue = selectedLinearNode.getMajorType();
+              if (oldValue != null && oldValue.equals(newValue)) { return; }
               selectedLinearNode.setMajorType(newValue);
+              linearDefinition.setModified(true);
             } else if (c == 2) {
+              String oldValue = selectedLinearNode.getMinorType();
+              if (oldValue != null && oldValue.equals(newValue)) { return; }
               selectedLinearNode.setMinorType(newValue);
+              linearDefinition.setModified(true);
             } else {
+              String oldValue = selectedLinearNode.getLanguage();
+              if (oldValue != null && oldValue.equals(newValue)) { return; }
               selectedLinearNode.setLanguage(newValue);
+              linearDefinition.setModified(true);
             }
             break;
         }
@@ -856,19 +867,25 @@ public class GazetteerEditor extends AbstractVisualResource
     }
   }
 
-  protected class SaveGazetteerAction extends AbstractAction {
-    public SaveGazetteerAction() {
-      super("Save");
-      putValue(SHORT_DESCRIPTION, "Save the definition and all the lists");
+  protected class SaveAndReinitialiseGazetteerAction extends AbstractAction {
+    public SaveAndReinitialiseGazetteerAction() {
+      super("Save and Reinitialise");
+      putValue(SHORT_DESCRIPTION,
+        "Save the definition and all the lists then reinitialise");
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control S"));
     }
     public void actionPerformed(ActionEvent e) {
       try {
-        linearDefinition.store();
+        if (linearDefinition.isModified()) {
+          linearDefinition.store();
+        }
         for (Object object : linearDefinition.getListsByNode().values()) {
           GazetteerList gazetteerList = (GazetteerList) object;
-          gazetteerList.store();
+          if (gazetteerList.isModified()) {
+            gazetteerList.store();
+          }
         }
+        gazetteer.reInit();
         MainFrame.getInstance().statusChanged("Gazetteer saved in " +
           linearDefinition.getURL().getPath());
         definitionTable.repaint();
