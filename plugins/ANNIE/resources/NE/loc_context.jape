@@ -76,7 +76,7 @@ Priority: 50
 ):loc
 (
  {Token.string == ","}
- {Location.kind == region}
+ {Location.locType == region}
 )
 -->
  :loc.Location = {rule = "UnknownLocRegion"}
