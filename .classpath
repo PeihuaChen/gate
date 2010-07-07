@@ -68,7 +68,7 @@
 	<classpathentry kind="lib" path="plugins/Ontology_OWLIM2/lib/commons-io-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/spring-aop-2.0.8.jar"/>
 	<classpathentry kind="lib" path="plugins/WordNet/lib/jwnl.jar"/>
-	<classpathentry kind="lib" path="lib/tika-core-0.7.jar" />
+	<classpathentry kind="lib" path="lib/tika-core-0.7.jar"/>
 	<classpathentry kind="lib" path="lib/tika-parsers-0.7.jar"/>
 	<classpathentry kind="lib" path="lib/commons-compress-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-1.4.jar"/>
@@ -128,5 +128,6 @@
 	<classpathentry kind="lib" path="lib/commons-lang-2.4.jar"/>
 	<classpathentry kind="lib" path="plugins/Groovy/lib/groovy-all-1.6.3.jar"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
+	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
