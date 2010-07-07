@@ -15,7 +15,7 @@
 
 
 Phase:	Name
-Input: Token Lookup Title FirstPerson TempDate
+Input: Token Lookup Title FirstPerson TempDate Split
 Options: control = appelt debug = false
 
 ///////////////////////////////////////////////////////////////
@@ -606,6 +606,27 @@ outputAS.add(personSet.firstNode(), personSet.lastNode(), "TempPerson",
 features);
 }
 
+
+Rule:PersonOrgAmbig
+Priority: 50
+// if the last name is an organisation ending, treat as an organisation not person
+// e.g. A.B. Consulting
+
+(
+ {Token.category == DT}
+)?
+(
+ ((FIRSTNAME | FIRSTNAMEAMBIG) )+
+ ({Lookup.majorType == org_key}|
+  {Lookup.majorType == org_base}
+ ) 
+)
+:orgName -->
+ :orgName.TempOrganization = {kind = "unknown", rule = "PersonOrgAmbig"}
+
+
+
+
 ///////////////////////////////////////////////////////////////////
 // Organisation Rules
 
@@ -807,6 +828,22 @@ Priority: 500
 :org
 -->
 :org.TempOrganization = {kind = "unknown", rule = "TheOrgXKey"}
+
+Rule: NotOrgXKey
+Priority: 150
+// if all the names are org_base or org_key, it's not an organisation
+// e.g. Business Consulting
+
+(
+ ({Lookup.majorType == org_key}|
+  {Lookup.majorType == org_base}
+ )+
+ ({Lookup.majorType == org_ending})?
+)
+:org
+-->
+{}
+
 
 Rule:	OrgXKey
 Priority: 125
@@ -1218,7 +1255,8 @@ Rule:LocKey
 
 Rule:InLoc1
 (
- {Token.string == "in"}
+ {Token.string == "in"}|
+ {Token.string == "to"}
 )
 (
  {Lookup.majorType == location}
