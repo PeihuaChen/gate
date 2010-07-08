@@ -49,6 +49,13 @@
     </groovyc>
   </target>
 
+  <target name="copy.resources" depends="init"
+        description="Copy non-source files from src to build">
+    <copy todir="${build}">
+      <fileset dir="${src}" excludes="**/*.java, **/*.groovy" />
+    </copy>
+  </target>
+
   <!-- Build JavaDoc documentation -->
   <target name="doc.prepare">
     <mkdir dir="${javadoc.dir}" />
@@ -69,7 +76,7 @@
   </target>
 
 
-  <target name="dist" depends="compile"
+  <target name="dist" depends="compile, copy.resources"
         description="generate the distribution" >
     <!-- Create the distribution directory -->
     <mkdir dir="${dist}/lib"/>
