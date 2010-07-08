@@ -179,16 +179,14 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     }
 
     // read the user config data for annotation stack rows
-    // saved as a string: "[[true, Cat, Token, category, Crop end], [...]]"
-    if (Gate.getUserConfig().containsKey(
-        LuceneDataStoreSearchGUI.class.getName()+".rows")) {
-      List<List<String>> listOfList = Gate.getUserConfig().getListOfList(
-        LuceneDataStoreSearchGUI.class.getName()+".rows");
-      for (int row = 0; row < listOfList.size() && row < maxStackRows; row++) {
-        if (listOfList.get(row).size() != columnNames.length) { continue; }
-        stackRows[row] = listOfList.get(row)
-          .toArray(new String[columnNames.length]);
-        numStackRows++;
+    // saved as a string: "[true, Cat, Token, category, Crop end, ...]"
+    String prefix = LuceneDataStoreSearchGUI.class.getName() + ".";
+    if (Gate.getUserConfig().containsKey(prefix + "rows")) {
+      List<String> list = Gate.getUserConfig().getList(prefix + "rows");
+      for (int i = 0; i < list.size()
+          && i < (maxStackRows * columnNames.length); i++) {
+        stackRows[i / columnNames.length][i % columnNames.length] = list.get(i);
+        if (i % columnNames.length == 0) { numStackRows++; }
       }
     }
 
@@ -1341,11 +1339,12 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
    * Save the user config data.
    */
   protected void saveStackViewConfiguration() {
-    String[][] stackRowsCopy = new String[numStackRows][columnNames.length];
-    System.arraycopy(stackRows, 0, stackRowsCopy, 0, numStackRows);
-    Gate.getUserConfig().put(
-      LuceneDataStoreSearchGUI.class.getName()+".rows",
-      Strings.toString(stackRowsCopy));
+    List<String> list = new ArrayList<String>();
+    for (int row = 0; row < numStackRows; row++) {
+      list.addAll(Arrays.asList(stackRows[row]));
+    }
+    Gate.getUserConfig().put(LuceneDataStoreSearchGUI.class.getName()+".rows",
+      Strings.toString(list));
   }
   
   /**
