@@ -182,52 +182,95 @@ public class Strings {
   }
 
   /**
-   * If the string has the format [value, value] like with
-   * {@link Arrays#deepToString(Object[])} then returns a List of String.
-   *
-   * @param string String to convert to a List
-   * @return a List
+   * Create a String representation of a List of String with the format
+   * [value, value].
+   * Escape with a backslash the separator character.
+   * @param list list to convert to one String
+   * @return a String that represent the list
+   * @see #toList(String, String)
    */
-  public static List<String> toList(String string) {
+  public static String toString(List<String> list) {
+    StringBuilder builder = new StringBuilder();
+    builder.append('[');
+    for (String element : list) {
+      // escape list separator
+      String escapedElement = element.replaceAll(",", "\\\\,");
+      builder.append(escapedElement).append(", ");
+    }
+    if (builder.length() > 1) { // remove last list separator
+      builder.delete(builder.length()-2, builder.length());
+    }
+    builder.append("]");
+    return builder.toString();
+  }
+
+  /**
+   * Create a String representation of a Map of String*String with the format
+   * {key=value, key=value}.
+   * Escape with a backslash the separator characters.
+   * @param map map to convert to one String
+   * @return a String that represent the map
+   * @see #toMap(String)
+   */
+  public static String toString(Map<String, String> map) {
+    StringBuilder builder = new StringBuilder();
+    builder.append('{');
+    for (Map.Entry<String, String> entry : map.entrySet()) {
+      // escape list separator
+      String escapedKey = entry.getKey().replaceAll("=", "\\\\=")
+        .replaceAll(",", "\\\\,");
+      String escapedValue = entry.getValue().replaceAll("=", "\\\\=")
+        .replaceAll(",", "\\\\,");
+      builder.append(escapedKey).append("=").append(escapedValue).append(", ");
+    }
+    if (builder.length() > 1) { // remove last list separator
+      builder.delete(builder.length()-2, builder.length());
+    }
+    builder.append("}");
+    return builder.toString();
+  }
+
+  /**
+   * Get back a List of String from its String representation.
+   * Unescape backslashed separator characters.
+   * @param string String to convert to a List
+   * @param separator String that delimits the element of the list
+   * @return a List
+   * @see #toString(java.util.List)
+   */
+  public static List<String> toList(String string, String separator) {
+    List<String> list = new ArrayList<String>();
     if (string == null
      || string.length() < 3) {
-      return new ArrayList<String>();
+      return list;
     }
-    return new ArrayList<String>(Arrays.asList(
-      string.substring(1, string.length()-1) // remove brackets []
-        .split(", "))); // split on list separator
+    // remove last character
+    String value = string.substring(0, string.length()-1);
+    int index = 1;
+    int startIndex = 1;
+    int separatorIndex;
+    // split on list separator
+    while ((separatorIndex = value.indexOf(separator, index)) != -1) {
+      // check that the separator is not an escaped character
+      if (value.charAt(separatorIndex-1) != '\\') {
+        list.add(value.substring(startIndex, separatorIndex)
+          // unescape separator
+          .replaceAll("\\\\"+separator.charAt(0), ""+separator.charAt(0)));
+        startIndex = separatorIndex + separator.length();
+      }
+      index = separatorIndex + separator.length();
+    }
+    // last element of the list
+    list.add(value.substring(startIndex));
+    return list;
   }
 
   /**
-   * If the string has the format [[value, value], [value, value]]
-   * like with {@link Arrays#deepToString(Object[])}
-   * then returns a List of List of String.
-   *
-   * @param string String to convert to a List of List
-   * @return a List of List
-   */
-  public static List<List<String>> toListOfList(String string) {
-    List<List<String>> listOfList = new ArrayList<List<String>>();
-    if (string == null
-     || string.length() < 5) {
-      listOfList.add(new ArrayList<String>());
-      return listOfList;
-    }
-    string = string.substring(2, string.length()-2); // remove brackets [[]]
-    String[] lists = string.split("\\], \\[");
-    for (String list : lists) {
-      // split on list separator
-      listOfList.add(new ArrayList<String>(Arrays.asList(list.split(", "))));
-    }
-    return listOfList;
-  }
-
-  /**
-   * If the string has the format {key=value, key=value} like with
-   * {@link Arrays#deepToString(Object[])} then returns a Map of String*String.
-   *
+   * Get back a Map of String*String from its String representation.
+   * Unescape backslashed separator characters.
    * @param string String to convert to a Map
    * @return a Map
+   * @see #toString(java.util.Map)
    */
   public static Map<String, String> toMap(String string) {
     Map<String, String> map = new HashMap<String, String>();
@@ -235,20 +278,14 @@ public class Strings {
      || string.length() < 3) {
       return map;
     }
-    String[] entries = string.substring(1, string.length()-1).split(", ");
-    String previousKey = null;
-    for (String entry : entries) {
-      String[] keyValue = entry.split("=", 2);
-      if (keyValue.length == 1) { // ', ' is used in the value
-        if (previousKey == null) {
-          Err.println("The string has not the format: {key=value, key=value}");
-          Err.println(string);
-        } else {
-          map.put(previousKey, map.get(previousKey) + ", " + entry);
-        }
+    List<String> firstList = toList(string, ", ");
+    for (String element : firstList) {
+      List<String> secondList = toList("["+element+"]", "=");
+      if (secondList.size() == 2) {
+        map.put(secondList.get(0), secondList.get(1));
       } else {
-        map.put(keyValue[0], keyValue[1]);
-        previousKey = keyValue[0];
+        Err.prln("Ignoring element: [" + element + "]");
+        Err.prln("Expecting: [key=value]");
       }
     }
     return map;
