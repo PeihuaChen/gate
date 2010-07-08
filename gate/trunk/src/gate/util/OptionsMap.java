@@ -22,7 +22,7 @@ import java.io.Serializable;
  * A map that stores values as strings and provides support for converting some
  * frequently used types to and from string.<br>
  * Not very efficient as there is a lot of conversions from/to String.
- * The conversion could happend only when loading/saving from/to a file.
+ * The conversion could happen only when loading/saving from/to a file.
  */
 public class OptionsMap extends TreeMap<Object, Object> {
 
@@ -41,6 +41,14 @@ public class OptionsMap extends TreeMap<Object, Object> {
       boolean bold = font.isBold();
       value = family + "#" + size + "#" + italic + "#" + bold;
     }
+    return super.put(key, Strings.toString(value));
+  }
+
+  public Object put(Object key, List<String> value) {
+    return super.put(key, Strings.toString(value));
+  }
+
+  public Object put(Object key, Map<String, String> value) {
     return super.put(key, Strings.toString(value));
   }
 
@@ -138,18 +146,7 @@ public class OptionsMap extends TreeMap<Object, Object> {
    * @return the associated list
    */
   public List<String> getList(Object key) {
-    return Strings.toList((String) get(key));
-  }
-
-  /**
-   * If the object stored under key is a list of list
-   * then returns its value otherwise returns an empty list of empty list.
-   *
-   * @param key key associated to the value to retrieve
-   * @return the associated list of list
-   */
-  public List<List<String>> getListOfList(Object key) {
-      return Strings.toListOfList((String) get(key));
+    return Strings.toList((String) get(key), ", ");
   }
 
   /**
