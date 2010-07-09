@@ -160,6 +160,7 @@ eachDocument {
   }
 
   protected void executeImpl() throws ExecutionException {
+    interrupted = false
     if(script == null) {
       parseScript()
     }
