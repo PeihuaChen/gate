@@ -143,6 +143,7 @@ public class CompositeDocumentImpl extends DocumentImpl implements
           }
         }
         catch(InvalidOffsetException ioe) {
+          System.out.println(aDoc.getName() + "=" + stOffset + "=" + enOffset);
           throw new GateRuntimeException(ioe);
         }
 

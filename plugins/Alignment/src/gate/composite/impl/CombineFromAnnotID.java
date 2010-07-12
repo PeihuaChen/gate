@@ -1,12 +1,13 @@
 package gate.composite.impl;
 
-import java.util.Map;
 import gate.Annotation;
 import gate.AnnotationSet;
 import gate.Document;
 import gate.composite.CombiningMethodException;
 import gate.composite.CompositeDocument;
 import gate.compound.CompoundDocument;
+
+import java.util.Map;
 
 /**
  * User can specify which of the annotation should be copied to the
@@ -45,11 +46,24 @@ public class CombineFromAnnotID extends AbstractCombiningMethod {
     Integer annotationID = (Integer)parameters.get(ANNOTATION_ID_FEATURE_NAME);
     String inputASName = (String)parameters.get(INPUT_AS_NAME_FEATURE_NAME);
     String documentID = (String)parameters.get(DOCUMENT_ID_FEATURE_NAME);
+    
+
+    if(debug) {
+      System.out.println("Combine method called");
+      System.out.println("\tannotationID" + annotationID);
+      System.out.println("\tinputASName" + inputASName);
+      System.out.println("\tdocumentID" + documentID);
+    }
 
     // start a document
     startDocument(compoundDocument, annotationTypesToCopy);
 
     Document adoc = compoundDocument.getDocument(documentID);
+    if(debug) {
+      System.out.println("obtaining :" + adoc.getName()
+              + " from the compound document");
+    }
+    
     AnnotationSet inputAS = inputASName == null
             || inputASName.trim().length() == 0 ? adoc.getAnnotations() : adoc
             .getAnnotations(inputASName);
