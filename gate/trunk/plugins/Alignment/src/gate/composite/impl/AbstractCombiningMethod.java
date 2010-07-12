@@ -6,6 +6,7 @@ import gate.Document;
 import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
+import gate.Utils;
 import gate.composite.CombiningMethod;
 import gate.composite.CombiningMethodException;
 import gate.composite.CompositeDocument;
@@ -53,6 +54,8 @@ public abstract class AbstractCombiningMethod implements CombiningMethod {
 
   private boolean startDocumentCalled = false;
 
+  protected boolean debug = false;
+
   /**
    * User must call this method to start a composite document
    * 
@@ -64,6 +67,10 @@ public abstract class AbstractCombiningMethod implements CombiningMethod {
    */
   protected void startDocument(CompoundDocument containerDocument,
           Set<String> annotationTypesToCopy) throws CombiningMethodException {
+    if(debug) {
+      System.out.println("Start Document called");
+    }
+    
     offsetMappings = new HashMap<String, List<OffsetDetails>>();
     this.containerDocument = containerDocument;
     this.annotationTypesToCopy = annotationTypesToCopy;
@@ -72,10 +79,19 @@ public abstract class AbstractCombiningMethod implements CombiningMethod {
     documentContent = new StringBuffer();
     toAdd = "<?xml version=\"1.0\"?><composite>";
     startDocumentCalled = true;
+
+    if(debug) {
+      System.out.println("Exiting Start Document");
+    }
+    
   }
 
   protected CompositeDocument finalizeDocument()
           throws CombiningMethodException {
+    if(debug) {
+      System.out.println("FinalizeDocument called");
+    }
+
     if(!startDocumentCalled)
       throw new CombiningMethodException(
               "CompositeDocument is not initialized - please "
@@ -142,17 +158,22 @@ public abstract class AbstractCombiningMethod implements CombiningMethod {
         od.setNewAnnotation(aSet.get(id));
       }
       catch(InvalidOffsetException e) {
+        System.out.println("Offsets :" + od.getNewStartOffset() + "=>"
+                + od.getNewEndOffset());
         throw new CombiningMethodException(e);
       }
     }
     ((gate.composite.impl.CompositeDocumentImpl)doc).disableListener = false;
 
-    doc.setName(CompositeDocument.COMPOSITE_DOC_NAME);
     doc.setCombiningMethod(this);
     doc.setOffsetMappingInformation(offsetMappings);
     doc.setCombinedDocumentsIds(new HashSet<String>(containerDocument
             .getDocumentIDs()));
     doc.setCompoundDocument(containerDocument);
+    if(debug) {
+      System.out.println("Exiting FinalizDocument");
+    }
+    
     return doc;
   }
 
@@ -176,6 +197,10 @@ public abstract class AbstractCombiningMethod implements CombiningMethod {
    */
   protected long[] addContent(Document srcDocument, Annotation unitAnnotation)
           throws CombiningMethodException {
+    if(debug) {
+      System.out.println("AddContent called");
+    }
+
     if(!startDocumentCalled)
       throw new CombiningMethodException(
               "CompositeDocument is not initialized - please "
@@ -194,18 +219,18 @@ public abstract class AbstractCombiningMethod implements CombiningMethod {
             .longValue());
     offset.setOldEndOffset(unitAnnotation.getEndNode().getOffset().longValue());
     offset.setNewStartOffset(documentContent.length());
-    try {
-      documentContent.append(srcDocument.getContent().getContent(
-              unitAnnotation.getStartNode().getOffset(),
-              unitAnnotation.getEndNode().getOffset()));
-    }
-    catch(InvalidOffsetException e2) {
-      throw new CombiningMethodException(e2);
-    }
+    documentContent.append(gate.Utils.contentFor(srcDocument, unitAnnotation));
     offset.setNewEndOffset(documentContent.length());
     offset.setOriginalAnnotation(unitAnnotation);
     offsets.add(offset);
     annotations.add(offset);
+
+    if(debug) {
+      System.out.println("Unit annotation:" + unitAnnotation.getType() + "=>"
+              + offset.getOldStartOffset() + "=>" + offset.getOldEndOffset()
+              + "=>" + offset.getNewStartOffset() + "=>"
+              + offset.getNewEndOffset());
+    }
 
     OffsetDetails unitAnnotDetails = new OffsetDetails();
     unitAnnotDetails.setOldStartOffset(offset.getOldStartOffset());
@@ -216,6 +241,10 @@ public abstract class AbstractCombiningMethod implements CombiningMethod {
 
     if(annotationTypesToCopy == null || !annotationTypesToCopy.isEmpty()) {
 
+      if(debug) {
+        System.out
+                .println("copying annotations from the default Annotation set");
+      }
       // copy annotations under the default annotation set
       copyAnnotations(srcDocument.getAnnotations(), unitAnnotation, offset);
 
@@ -224,40 +253,73 @@ public abstract class AbstractCombiningMethod implements CombiningMethod {
               .getNamedAnnotationSets();
       if(annotationSets != null) {
         for(String asName : annotationSets.keySet()) {
+          if(debug) {
+            System.out.println("copying annotations from the :" + asName
+                    + " Annotation set");
+          }
           copyAnnotations(srcDocument.getAnnotations(asName), unitAnnotation,
                   offset);
         }
       }
     }
     documentContent.append("\n");
-    offsetMappings.put(documentID, offsets);
+    if(debug) {
+      System.out.println("Exiting AddContent");
+    }
+
     return new long[] {unitAnnotDetails.getNewStartOffset(),
         unitAnnotDetails.getNewEndOffset()};
   }
 
   private void copyAnnotations(AnnotationSet inputAS,
           Annotation unitAnnotation, OffsetDetails boundaries) {
-    AnnotationSet tempSet = inputAS.getContained(unitAnnotation.getStartNode()
-            .getOffset(), unitAnnotation.getEndNode().getOffset());
+    if(debug) {
+      System.out.println("CopyAnnotations called");
+    }
+
+    if(debug) {
+      System.out.println("Obtaning annotations between :"
+              + Utils.start(unitAnnotation) + " and "
+              + Utils.end(unitAnnotation));
+    }
+    AnnotationSet tempSet = inputAS.getContained(Utils.start(unitAnnotation),
+            Utils.end(unitAnnotation));
     if(annotationTypesToCopy != null && !annotationTypesToCopy.isEmpty()) {
       tempSet = tempSet.get(annotationTypesToCopy);
     }
 
     Iterator<Annotation> iter = tempSet.iterator();
     while(iter.hasNext()) {
+
       Annotation anAnnot = iter.next();
+      if(anAnnot == unitAnnotation) continue;
+      Long start = Utils.start(anAnnot);
+      Long end = Utils.end(anAnnot);
+      if(start < boundaries.getOldStartOffset() || start > boundaries.getOldEndOffset())
+        continue;
+      
+      if(end < boundaries.getOldStartOffset() || end > boundaries.getOldEndOffset())
+        continue;
+      
       OffsetDetails anOffset = new OffsetDetails();
-      anOffset
-              .setOldStartOffset(anAnnot.getStartNode().getOffset().longValue());
-      anOffset.setOldEndOffset(anAnnot.getEndNode().getOffset().longValue());
+      anOffset.setOldStartOffset(start);
+      anOffset.setOldEndOffset(end);
 
       long stDiff = anOffset.getOldStartOffset()
               - boundaries.getOldStartOffset();
-      long enDiff = anOffset.getOldEndOffset() - boundaries.getOldEndOffset();
+      long len = anOffset.getOldEndOffset() - anOffset.getOldStartOffset();
 
       anOffset.setNewStartOffset(boundaries.getNewStartOffset() + stDiff);
-      anOffset.setNewEndOffset(boundaries.getNewEndOffset() + enDiff);
+      anOffset.setNewEndOffset(anOffset.getNewStartOffset() + len);
       anOffset.setOriginalAnnotation(anAnnot);
+
+      if(debug) {
+        System.out.println("\tCopied" + anAnnot.getType() + "="
+                + anOffset.getOldStartOffset() + "="
+                + anOffset.getOldEndOffset() + "="
+                + anOffset.getNewStartOffset() + "="
+                + anOffset.getNewEndOffset());
+      }
 
       // this will be interned - making it easier to store and less
       // expensive
@@ -265,6 +327,10 @@ public abstract class AbstractCombiningMethod implements CombiningMethod {
       offsets.add(anOffset);
       annotations.add(anOffset);
     }
+    if(debug) {
+      System.out.println("Exiting copy contents");
+    }
+    
   }
 
   static void replaceXMLIllegalCharacters(char[] buf) {

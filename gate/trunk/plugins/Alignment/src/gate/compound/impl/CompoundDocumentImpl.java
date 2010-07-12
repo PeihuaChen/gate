@@ -1,15 +1,22 @@
 package gate.compound.impl;
 
-import java.io.File;
-import java.util.*;
-
-import gate.*;
+import gate.Document;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.Resource;
 import gate.alignment.Alignment;
 import gate.alignment.gui.AlignmentFactory;
 import gate.compound.CompoundDocumentEvent;
 import gate.compound.CompoundDocumentListener;
 import gate.creole.ResourceInstantiationException;
 import gate.util.Files;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Implemention of the CompoundDocument. Compound Document is a set of
@@ -171,8 +178,12 @@ public class CompoundDocumentImpl extends AbstractCompoundDocument {
     if(document.getName() == null) {
       document.setName(documentID);
     }
-    
-    if(documents.containsKey(documentID)) return;
+
+    if(documents.containsKey(documentID)) {
+      System.err.println("Document with name \"" + documentID
+              + "\" already exists. Document has not been added");
+      return;
+    }
     documents.put(documentID, document);
     documentIDs.add(documentID);
     fireDocumentAdded(documentID);
