@@ -311,7 +311,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     JPanel bdmFilePanel = new JPanel();
     bdmFilePanel.setLayout(new BoxLayout(bdmFilePanel, BoxLayout.X_AXIS));
     JLabel bdmFileLabel = new JLabel("BDM file:");
-    JButton bdmFileButton = new JButton(new LoadBdmFileAction());
+    JButton bdmFileButton = new JButton(new SetBdmFileAction());
     bdmFilePanel.add(bdmFileLabel);
     bdmFilePanel.add(Box.createHorizontalStrut(5));
     bdmFilePanel.add(bdmFileButton);
@@ -399,33 +399,10 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         };
       }
     };
-//    annotationTable = new XJTable() {
-//      public boolean isCellEditable(int rowIndex, int vColIndex) {
-//        return false;
-//      }
-//    };
+    annotationTable.setModel(annotationTableModel);
     annotationTable.setSortable(false);
     annotationTable.setEnableHidingColumns(true);
     annotationTable.setAutoResizeMode(XJTable.AUTO_RESIZE_ALL_COLUMNS);
-//    documentTable = new XJTable(documentTableModel) {
-//      // table header tool tips
-//      protected JTableHeader createDefaultTableHeader() {
-//        return new JTableHeader(columnModel) {
-//          public String getToolTipText(MouseEvent e) {
-//            Point p = e.getPoint();
-//            int index = columnModel.getColumnIndexAtX(p.x);
-//            if (index == -1) { return null; }
-//            int realIndex = columnModel.getColumn(index).getModelIndex();
-//            return documentTableModel.headerTooltips.get(realIndex);
-//          }
-//        };
-//      }
-//    };
-//    documentTable = new XJTable() {
-//      public boolean isCellEditable(int rowIndex, int vColIndex) {
-//        return false;
-//      }
-//    };
     documentTable = new XJTable() {
       public boolean isCellEditable(int rowIndex, int vColIndex) {
         return false;
@@ -646,7 +623,16 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     featureList.addListSelectionListener(new ListSelectionListener() {
       public void valueChanged(ListSelectionEvent e) {
         if (measuresType == CLASSIFICATION_MEASURES) {
-          compareAction.setEnabled(featureList.getSelectedIndex() != -1);
+          if (typeList.getSelectedIndices().length == 1
+           && featureList.getSelectedIndices().length == 1) {
+            compareAction.setEnabled(true);
+            compareAction.putValue(Action.SHORT_DESCRIPTION,
+              "Compare annotations between sets A and B");
+          } else {
+            compareAction.setEnabled(false);
+            compareAction.putValue(Action.SHORT_DESCRIPTION,
+              "You must select exactly one type and one feature");
+          }
         }
       }
     });
@@ -663,9 +649,11 @@ public class CorpusQualityAssurance extends AbstractVisualResource
           optionsButton.doClick(); // hide the options panel if shown
         }
         if (tabbedPane.getTitleAt(selectedTab).equals("F-Score")) {
+          measuresType = FSCORE_MEASURES;
           compareAction.setEnabled(keySetName != null
                            && responseSetName != null);
-          measuresType = FSCORE_MEASURES;
+          compareAction.putValue(Action.SHORT_DESCRIPTION,
+            "Compare annotations between sets A and B");
           tableTabbedPane.addTab("Corpus statistics", null,
             new JScrollPane(annotationTable),
             "Compare each annotation type for the whole corpus");
@@ -673,8 +661,8 @@ public class CorpusQualityAssurance extends AbstractVisualResource
             new JScrollPane(documentTable),
             "Compare each documents in the corpus with theirs annotations");
         } else {
-          compareAction.setEnabled(featureList.getSelectedIndex() != -1);
           measuresType = CLASSIFICATION_MEASURES;
+          featureList.getListSelectionListeners()[0].valueChanged(null);
           tableTabbedPane.addTab("Document statistics", null,
             new JScrollPane(document2Table),
             "Compare each documents in the corpus with theirs annotations");
@@ -1072,7 +1060,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       new ArrayList<OntologyMeasures>();
     List<OntologyMeasures> annotationOntologyMeasuresList =
       new ArrayList<OntologyMeasures>();
-    List<Object> values = new ArrayList<Object>();
+//    List<Object> values = new ArrayList<Object>();
 
     // for each document
     for (int row = 0; row < corpus.size(); row++) {
@@ -1095,7 +1083,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         .contains(responseSetName)) {
         responses = document.getAnnotations(responseSetName);
       }
-      if (!documentWasLoaded) {
+      if (!documentWasLoaded) { // in case of datastore
         corpus.unloadDocument(document);
         Factory.deleteResource(document);
       }
@@ -1850,10 +1838,10 @@ public class CorpusQualityAssurance extends AbstractVisualResource
 //    public static final int COLUMN_COUNT = 5;
 //  }
 
-  protected class LoadBdmFileAction extends AbstractAction {
-    public LoadBdmFileAction() {
+  protected class SetBdmFileAction extends AbstractAction {
+    public SetBdmFileAction() {
       super("Browse");
-      putValue(SHORT_DESCRIPTION, "Loads a BDM file to compute BDM measures");
+      putValue(SHORT_DESCRIPTION, "Choose a BDM file to compute BDM measures");
     }
     public void actionPerformed(ActionEvent evt) {
       XJFileChooser fileChooser = MainFrame.getFileChooser();
@@ -1878,8 +1866,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
   protected class CompareAction extends AbstractAction {
     public CompareAction() {
       super("Compare");
-      putValue(SHORT_DESCRIPTION,
-        "Compare annotations between sets A and B");
+      putValue(SHORT_DESCRIPTION, "Compare annotations between sets A and B");
       putValue(MNEMONIC_KEY, KeyEvent.VK_ENTER);
       putValue(SMALL_ICON, MainFrame.getIcon("crystal-clear-action-run"));
     }
@@ -1889,7 +1876,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         if (((String) measure).contains("BDM")) { useBdm = true; break; }
       }
       if (useBdm && measuresType == FSCORE_MEASURES && bdmFileUrl == null) {
-        new LoadBdmFileAction().actionPerformed(null);
+        new SetBdmFileAction().actionPerformed(null);
         if (bdmFileUrl == null) { return; }
       }
 
