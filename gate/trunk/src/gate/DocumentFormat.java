@@ -20,6 +20,8 @@ import java.io.*;
 import java.net.URL;
 import java.util.*;
 
+import org.apache.commons.io.IOUtils;
+
 import gate.corpora.MimeType;
 import gate.corpora.RepositioningInfo;
 import gate.creole.AbstractLanguageResource;
@@ -184,6 +186,8 @@ extends AbstractLanguageResource implements LanguageResource{
     // We expect to get contentType something like this:
     // "text/html; charset=iso-8859-1"
     // Charset is optional
+    
+    try {
     try{
       is = url.openConnection().getInputStream();
       contentType = url.openConnection().getContentType();
@@ -229,6 +233,10 @@ extends AbstractLanguageResource implements LanguageResource{
     // Let's perform a magic numbers guess..
     mimeTypeFromMagicNumbers = guessTypeUsingMagicNumbers(is,
                                                     charsetFromWebServer);
+    }
+    finally {
+      IOUtils.closeQuietly(is); //null safe
+    }
     //All those types enter into a deciding system
     return decideBetweenThreeMimeTypes( mimeTypeFromWebServer,
                                         mimeTypeFromFileSuffix,
