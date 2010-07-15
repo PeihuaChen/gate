@@ -75,12 +75,15 @@ public class CompositeDocumentImpl extends DocumentImpl implements
   public Resource init() throws ResourceInstantiationException {
     super.init();
     this.getAnnotations().addAnnotationSetListener(this);
-    Set<String> annotNames = this.getNamedAnnotationSets().keySet();
-    if(annotNames != null && !annotNames.isEmpty()) {
-      Iterator<String> iter = annotNames.iterator();
-      while(iter.hasNext()) {
-        String asName = (String)iter.next();
-        this.getAnnotations(asName).addAnnotationSetListener(this);
+    Map<String, AnnotationSet> namedAnnotationSets = this.getNamedAnnotationSets();
+    if(namedAnnotationSets != null) {
+      Set<String> annotNames = namedAnnotationSets.keySet();
+      if(annotNames != null && !annotNames.isEmpty()) {
+        Iterator<String> iter = annotNames.iterator();
+        while(iter.hasNext()) {
+          String asName = (String)iter.next();
+          this.getAnnotations(asName).addAnnotationSetListener(this);
+        }
       }
     }
     this.addDocumentListener(this);
