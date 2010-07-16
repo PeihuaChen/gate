@@ -57,7 +57,7 @@ import java.util.List;
  * open only first level of classes when opening an ontology
  * load lazily the ontology trees
  * context menu for classes to hide/show them, saved in user configuration
- * TODO
+ * TODO:
  * blink the instances selected like for the annotation list view
  * mouse hovering an annotation in the document select the instance
  *    in the instance table
@@ -298,7 +298,9 @@ public class OntologyClassView extends AbstractDocumentView
     for (LanguageResource resource : resources) {
       if (resource instanceof Ontology) {
         Ontology ontology = (Ontology) resource;
-        ontologyMap.put(ontology.getOntologyURI().toString(), ontology);
+        String ontologyName = ontology.getDefaultNameSpace();
+        ontologyName = ontologyName.substring(0, ontologyName.length()-1);
+        ontologyMap.put(ontologyName, ontology);
       }
     }
     for (Annotation annotation :
@@ -672,11 +674,12 @@ public class OntologyClassView extends AbstractDocumentView
       final List<AnnotationData> annotationsData =
         new ArrayList<AnnotationData>();
       AnnotationSet annotationSet = document.getAnnotations(selectedSet);
+      String ontologyName = oClass.getOntology().getDefaultNameSpace();
+      ontologyName = ontologyName.substring(0, ontologyName.length()-1);
       for (Annotation annotation : annotationSet.get("Mention")) {
         FeatureMap features = annotation.getFeatures();
         if (features.get(ONTOLOGY) != null
-        && features.get(ONTOLOGY)
-          .equals(oClass.getOntology().getOntologyURI().toString())
+        && features.get(ONTOLOGY).equals(ontologyName)
         && features.get(CLASS) != null
         && features.get(CLASS).equals(oClass.getONodeID().toString())
         && features.get(INSTANCE) != null) {
@@ -870,7 +873,7 @@ public class OntologyClassView extends AbstractDocumentView
     return selectedSet;
   }
 
-  // external resources
+// external resources
   protected TextualDocumentView textView;
   protected JTextArea textArea;
   protected OntologyInstanceView instanceView;
