@@ -106,17 +106,6 @@
       <NAME>Co-reference Editor</NAME>
       <CLASS>gate.gui.docview.CorefEditor</CLASS>
     </RESOURCE>
-<!-- uncomment to get the new ontology annotation tool in the document editor
-    <RESOURCE>
-      <NAME>Class</NAME>
-      <CLASS>gate.gui.docview.OntologyClassView</CLASS>
-    </RESOURCE>
-    <RESOURCE>
-      <NAME>Instance</NAME>
-      <CLASS>gate.gui.docview.OntologyInstanceView</CLASS>
-      <PRIVATE/>
-    </RESOURCE>
--->
 
 		<!-- The default annotation editor -->
     <RESOURCE>
