@@ -46,5 +46,19 @@
       <CLASS>gate.creole.ontology.ocat.OntologyViewer</CLASS>
     </RESOURCE>
     
+    <RESOURCE>
+      <NAME>RATC</NAME>
+      <COMMENT>Relation Annotation Tool Class view.</COMMENT>
+      <HELPURL>http://gate.ac.uk/userguide/sec:ontologies:rat</HELPURL>
+      <CLASS>gate.gui.docview.OntologyClassView</CLASS>
+    </RESOURCE>
+
+    <RESOURCE>
+      <NAME>RATI</NAME>
+      <COMMENT>Relation Annotation Tool Instance view.</COMMENT>
+      <HELPURL>http://gate.ac.uk/userguide/sec:ontologies:rat</HELPURL>
+      <CLASS>gate.gui.docview.OntologyInstanceView</CLASS>
+    </RESOURCE>
+
   </CREOLE>
 </CREOLE-DIRECTORY>
