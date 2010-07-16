@@ -669,6 +669,7 @@ public class OntologyTreeListener extends MouseAdapter {
       }
     }
 
+    // to be compatible with KIM which has ontology feature without ending #
     String dns = ontologyTreePanel.getCurrentOntology().getDefaultNameSpace();
     newMap.put(gate.creole.ANNIEConstants.LOOKUP_ONTOLOGY_FEATURE_NAME, dns
       .substring(0, dns.length() - 1));
