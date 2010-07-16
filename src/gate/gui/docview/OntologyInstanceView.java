@@ -198,6 +198,8 @@ public class OntologyInstanceView extends AbstractDocumentView {
               popup.add(new AbstractAction(table.getSelectedRowCount() > 1 ?
                 "Delete instances" : "Delete instance") {
                 public void actionPerformed(ActionEvent e) {
+                  String ontology = selectedOntology.getDefaultNameSpace();
+                  ontology = ontology.substring(0, ontology.length()-1);
                   for (OInstance oInstance : instances) {
                     for (int selectedRow : table.getSelectedRows()) {
                       if (oInstance.getName().equals(
@@ -210,7 +212,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
                           annotationSet.get("Mention")) {
                           if (annotation.getFeatures().containsKey(ONTOLOGY)
                           && annotation.getFeatures().get(ONTOLOGY)
-                           .equals(selectedOntology.getOntologyURI().toString())
+                            .equals(ontology)
                           && annotation.getFeatures().containsKey(CLASS)
                           && annotation.getFeatures().get(CLASS)
                             .equals(selectedClass.getONodeID().toString())
@@ -538,8 +540,12 @@ public class OntologyInstanceView extends AbstractDocumentView {
     AnnotationSet set = document.getAnnotations(selectedSet);
     Integer id;
     try {
+      String ontology = selectedOntology.getDefaultNameSpace();
+      // to be compatible with KIM and OAT which have
+      // ontology feature without ending #
+      ontology = ontology.substring(0, ontology.length()-1);
       features = Factory.newFeatureMap();
-      features.put(ONTOLOGY, selectedOntology.getOntologyURI().toString());
+      features.put(ONTOLOGY, ontology);
       features.put(CLASS, selectedClass.getONodeID().toString());
       features.put(INSTANCE, instance.getONodeID().toString());
       // create a new annotation from the text selected
