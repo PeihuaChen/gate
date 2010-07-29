@@ -47,14 +47,14 @@
     </RESOURCE>
     
     <RESOURCE>
-      <NAME>RATC</NAME>
+      <NAME>RAT-C</NAME>
       <COMMENT>Relation Annotation Tool Class view.</COMMENT>
       <HELPURL>http://gate.ac.uk/userguide/sec:ontologies:rat</HELPURL>
       <CLASS>gate.gui.docview.OntologyClassView</CLASS>
     </RESOURCE>
 
     <RESOURCE>
-      <NAME>RATI</NAME>
+      <NAME>RAT-I</NAME>
       <COMMENT>Relation Annotation Tool Instance view.</COMMENT>
       <HELPURL>http://gate.ac.uk/userguide/sec:ontologies:rat</HELPURL>
       <CLASS>gate.gui.docview.OntologyInstanceView</CLASS>
