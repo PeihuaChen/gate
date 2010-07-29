@@ -76,7 +76,7 @@ Macro: NEGATION
 
   
 Rule: FVGSimPrePas
-// Simple Present Pasive: is eaten or are eaten
+// Simple Present Passive: is eaten or are eaten
 // (is | are) VBN
 
 (
@@ -594,7 +594,7 @@ neg = "yes"
 }
 
 
-Rule: FVGSimPreActNeg
+Rule: FVGSimPasActNeg
 
 (
 
@@ -652,7 +652,7 @@ neg = "yes"}
 
 
 Rule: FVGSimPasActNeg
-// Simple Present Active: was not
+// Simple Passive Active: was not
 // VB not
 
 (
@@ -673,7 +673,7 @@ Rule: FVGSimPasActNeg
 :annotate --> :annotate.VG = 
 
 { type = "FVG",
-  tense = "SimPre",
+  tense = "SimPas",
   voice = "active",
 neg = "yes"}
 
