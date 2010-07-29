@@ -83,11 +83,13 @@ public class OntologyInstanceView extends AbstractDocumentView {
     filterPanel.add(filterTextField = new JTextField(20), gbc);
     gbc.fill = GridBagConstraints.NONE;
     gbc.weightx = 0;
-    filterTextField.setToolTipText("Filter the instance table rows");
-    JPanel filterButtonsPanel = new JPanel();
+    filterTextField.setToolTipText("Filter the instance table on labels");
     clearFilterButton = new JButton();
     clearFilterButton.setBorder(BorderFactory.createEmptyBorder());
-    filterButtonsPanel.add(clearFilterButton);
+    filterPanel.add(clearFilterButton, gbc);
+    hiddenInstancesLabel = new JLabel(" 0 hidden ");
+    filterPanel.add(hiddenInstancesLabel, gbc);
+    JPanel filterButtonsPanel = new JPanel();
     newInstanceButton = new JButton("New Inst.");
     newInstanceButton.setEnabled(false);
     newInstanceButton.setToolTipText("New instance from the selection");
@@ -333,7 +335,13 @@ public class OntologyInstanceView extends AbstractDocumentView {
     });
   }
 
-  protected void registerHooks() { /* do nothing */ }
+  protected void registerHooks() {
+    // show the class view at the right
+    if (!classView.isActive()) {
+      classView.setActive(true);
+      textView.getOwner().setRightView(classView);
+    }
+  }
 
   protected void unregisterHooks() { /* do nothing */ }
 
@@ -356,21 +364,37 @@ public class OntologyInstanceView extends AbstractDocumentView {
   public void updateInstanceTable(OClass selectedClass) {
     this.selectedClass = selectedClass;
     instances.clear();
+    Set<OInstance> allInstances = new HashSet<OInstance>();
     final DefaultTableModel tableModel = new DefaultTableModel();
     tableModel.addColumn("Instance");
     tableModel.addColumn("Label");
     if (selectedClass != null) {
       selectedOntology = selectedClass.getOntology();
-      Set<OInstance> instances = selectedOntology.getOInstances(
-        selectedClass, OConstants.Closure.TRANSITIVE_CLOSURE);
+      allInstances.addAll(selectedOntology.getOInstances(
+        selectedClass, OConstants.Closure.TRANSITIVE_CLOSURE));
       String filter = filterTextField.getText()
         .trim().toLowerCase(Locale.ENGLISH);
-      for (OInstance instance : instances) {
+      // get the list of highlighted annotation instance feature values
+//      List<String> instanceNames = new ArrayList<String>();
+//      if (classView.getHighlightsDataByClassMap().containsKey(selectedClass)) {
+//        for (Object object :
+//              classView.getHighlightsDataByClassMap().get(selectedClass)) {
+//          HighlightData annotationData = (AnnotationData) object;
+//          instanceNames.add((String) annotationData.getAnnotation()
+//            .getFeatures().get(INSTANCE));
+//        }
+//      }
+      for (OInstance instance : allInstances) {
+//        if (!instanceNames.contains(instance.getONodeID().toString())) {
+//          continue; // skip this instance because no corresponding highlight
+//        }
         Set<AnnotationProperty> properties =
           instance.getSetAnnotationProperties();
+        boolean hasLabelProperty = false;
+        instances.add(instance);
         for (AnnotationProperty property : properties) {
           if (property.getName().equals("label")) {
-            this.instances.add(instance);
+            hasLabelProperty = true;
             List<Literal> values =
               instance.getAnnotationPropertyValues(property);
             Set<String> labels = new HashSet<String>();
@@ -385,13 +409,19 @@ public class OntologyInstanceView extends AbstractDocumentView {
               tableModel.addRow(new Object[]{instance.getName(),
                 Strings.toString(labels)});
             } else {
-              this.instances.remove(instance);
+              instances.remove(instance);
             }
           }
         }
+        if (!hasLabelProperty) {
+          // add instance row without label property
+          tableModel.addRow(new Object[]{instance.getName(), ""});
+        }
       }
     }
+    final int hiddenInstances = allInstances.size() - instances.size();
     SwingUtilities.invokeLater(new Runnable() { public void run() {
+      hiddenInstancesLabel.setText(" " + hiddenInstances + " hidden ");
       instanceTable.setModel(tableModel);
       if (instanceTable.getRowCount() > 0) {
         instanceTable.setRowSelectionInterval(0, 0);
@@ -669,6 +699,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
   protected JPanel mainPanel;
   protected JTextField filterTextField;
   protected JButton clearFilterButton;
+  protected JLabel hiddenInstancesLabel;
   protected JButton newInstanceButton;
   protected JButton addLabelButton;
   protected XJTable instanceTable;

@@ -128,11 +128,6 @@ public class OntologyClassView extends AbstractDocumentView
 
     initListeners();
 
-    // show the instance view at the bottom
-    instanceView.setClassView(this);
-    instanceView.setActive(true);
-    textView.getOwner().setBottomView(instanceView);
-
     // fill the annotation sets list
     List<String> annotationSets = new ArrayList<String>();
     annotationSets.add("");
@@ -209,6 +204,12 @@ public class OntologyClassView extends AbstractDocumentView
         }
       }
     }});
+    // show the instance view at the bottom
+    if (!instanceView.isActive()) {
+      instanceView.setClassView(this);
+      instanceView.setActive(true);
+      textView.getOwner().setBottomView(instanceView);
+    }
   }
 
   protected void unregisterHooks() {
@@ -401,11 +402,15 @@ public class OntologyClassView extends AbstractDocumentView
              // only nullify selectedClass if unselect from the same tree
             selectedClass = null;
            }
-          } else { // a class is selected
+          } else {
+            if (tree.getSelectionCount() == 1) { // a class is selected
             DefaultMutableTreeNode node = (DefaultMutableTreeNode)
               e.getNewLeadSelectionPath().getLastPathComponent();
             selectedClass = (OClass)
               ((OResourceNode) node.getUserObject()).getResource();
+            } else { // several classes are selected
+              selectedClass = null;
+            }
             // clear selection in other trees
             for (JTree aTree : treeByOntologyMap.values()) {
               if (!aTree.equals(tree)) {
@@ -655,8 +660,8 @@ public class OntologyClassView extends AbstractDocumentView
       selectedText = selectedText.replaceAll("\\s+", "_");
       selectedText = selectedText.replaceAll("<>\"&", "_");
       // take only the first 20 characters of the selection
-      if (selectedText.length() > 20) {
-        selectedText = selectedText.substring(0, 20);
+      if (selectedText.length() > 100) {
+        selectedText = selectedText.substring(0, 100);
       }
       instanceView.addSelectionToFilter(selectedSet, selectedText, start, end);
     }
