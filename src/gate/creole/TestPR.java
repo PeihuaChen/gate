@@ -124,14 +124,14 @@ public class TestPR extends TestCase
     // assertions for doc 1
     assertTrue("Found in "+doc1.getSourceUrl().getFile()+ " "+
       doc1.getAnnotations().size() +
-      " Token annotations, instead of the expected 1281.",
-      doc1.getAnnotations().size()== 1281);
+      " Token annotations, instead of the expected 1279.",
+      doc1.getAnnotations().size()== 1279);
 
     // assertions for doc 2
     assertTrue("Found in "+ doc2.getSourceUrl().getFile()+ " "+
       doc2.getAnnotations().size() +
-      " Token annotations, instead of the expected 2135.",
-      doc2.getAnnotations().size()== 2135);
+      " Token annotations, instead of the expected 2134.",
+      doc2.getAnnotations().size()== 2134);
 
     // assertions for doc 3
     assertTrue("Found in "+ doc3.getSourceUrl().getFile()+ " "+
@@ -231,13 +231,13 @@ public class TestPR extends TestCase
     // assertions for doc 2
     assertTrue("Found in "+ doc2.getSourceUrl().getFile()+ " "+
       doc2.getAnnotations().get(ANNIEConstants.SENTENCE_ANNOTATION_TYPE).size() +
-      " Sentence annotations, instead of the expected 51.",
-      doc2.getAnnotations().get(ANNIEConstants.SENTENCE_ANNOTATION_TYPE).size()== 51);
+      " Sentence annotations, instead of the expected 52.",
+      doc2.getAnnotations().get(ANNIEConstants.SENTENCE_ANNOTATION_TYPE).size()== 52);
 
     assertTrue("Found in "+ doc2.getSourceUrl().getFile()+ " "+
       doc2.getAnnotations().get("Split").size() +
-      " Split annotations, instead of the expected 74.",
-      doc2.getAnnotations().get("Split").size()== 74);
+      " Split annotations, instead of the expected 75.",
+      doc2.getAnnotations().get("Split").size()== 75);
 
     // assertions for doc 3
     assertTrue("Found in "+ doc3.getSourceUrl().getFile()+ " "+
@@ -283,14 +283,14 @@ public class TestPR extends TestCase
       doc1.getAnnotations().get(ANNIEConstants.TOKEN_ANNOTATION_TYPE, fType);
 
     assertTrue("Found in "+ doc1.getSourceUrl().getFile()+ " "+ annots.size() +
-      " Token annotations with category feature, instead of the expected 677.",
-      annots.size() == 677);
+      " Token annotations with category feature, instead of the expected 675.",
+      annots.size() == 675);
 
     // assertions for doc 2
     annots = doc2.getAnnotations().get(ANNIEConstants.TOKEN_ANNOTATION_TYPE, fType);
     assertTrue("Found in "+  doc2.getSourceUrl().getFile()+ " "+annots.size() +
-      " Token annotations with category feature, instead of the expected 1133.",
-      annots.size() == 1133);
+      " Token annotations with category feature, instead of the expected 1131.",
+      annots.size() == 1131);
 
     // assertions for doc 3
     annots = doc3.getAnnotations().get(ANNIEConstants.TOKEN_ANNOTATION_TYPE, fType);
@@ -369,7 +369,7 @@ public class TestPR extends TestCase
     // assertions for doc 3
     assertTrue("Found in "+doc3.getSourceUrl().getFile()+ " "+
       doc3.getAnnotations().get(ANNIEConstants.ORGANIZATION_ANNOTATION_TYPE).size() +
-      " Organization annotations, instead of the expected 29",
+      " Organization annotations, instead of the expected 32",
       doc3.getAnnotations().get(ANNIEConstants.ORGANIZATION_ANNOTATION_TYPE).size()== 32);
     assertTrue("Found in "+doc3.getSourceUrl().getFile()+ " "+
       doc3.getAnnotations().get(ANNIEConstants.LOCATION_ANNOTATION_TYPE).size() +
