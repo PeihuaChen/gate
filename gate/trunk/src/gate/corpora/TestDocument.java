@@ -311,7 +311,7 @@ public class TestDocument extends TestCase
           htmlDoc.getContent().toString());
 
       assertEquals("Document created with explicit mime type has wrong number "
-          + "of Original markups annotations.", 4,
+          + "of Original markups annotations.", 5,
           htmlDoc.getAnnotations(
             GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME).size());
 
