@@ -27,7 +27,7 @@ import gate.util.*;
  * A fast sentence splitter replacement based on regular expressions.
  */
 public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
-  
+
   /**
    * Parameter name
    */
@@ -35,7 +35,7 @@ public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
 
   /**
    * Parameter name
-   */  
+   */
   public static final String SPLIT_INPUT_AS_PARAMETER_NAME = "inputASName";
 
   /**
@@ -52,13 +52,13 @@ public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
    * Parameter name
    */
   public static final String SPLIT_SPLIT_LIST_PARAMETER_NAME = "splitListURL";
-  
-  
+
+
   /**
    * Parameter name
    */
-  public static final String SPLIT_NON_SPLIT_LIST_PARAMETER_NAME = "nonSplitListURL";  
-  
+  public static final String SPLIT_NON_SPLIT_LIST_PARAMETER_NAME = "nonSplitListURL";
+
   /**
    * serialisation ID
    */
@@ -68,49 +68,48 @@ public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
    * The document to be processed
    */
   protected Document document;
-  
+
   /**
    * Output annotation set name.
-   */  
+   */
   protected String outputASName;
-  
+
   /**
-   * Encoding used when reading config files 
+   * Encoding used when reading config files
    */
   protected String encoding;
 
   /**
-   * URL pointing to a file with regex patterns for internal sentence splits. 
+   * URL pointing to a file with regex patterns for internal sentence splits.
    */
   protected URL internalSplitListURL;
-  
+
   /**
-   * URL pointing to a file with regex patterns for external sentence splits. 
+   * URL pointing to a file with regex patterns for external sentence splits.
    */
   protected URL externalSplitListURL;
-  
+
   /**
-   * URL pointing to a file with regex patterns for non sentence splits. 
-   */  
+   * URL pointing to a file with regex patterns for non sentence splits.
+   */
   protected URL nonSplitListURL;
-  
-  
+
+
   protected Pattern internalSplitsPattern;
-  
+
   protected Pattern externalSplitsPattern;
-  
+
   protected Pattern nonSplitsPattern;
-  
-  protected Pattern compilePattern(URL paternsListUrl, String encoding) 
+
+  protected Pattern compilePattern(URL paternsListUrl, String encoding)
     throws UnsupportedEncodingException, IOException{
-    BufferedReader reader = new BufferedReader(
-            new InputStreamReader(paternsListUrl.openStream(), encoding));
+    BufferedReader reader = new BomStrippingInputStreamReader(paternsListUrl.openStream(), encoding);
     StringBuffer patternString = new StringBuffer();
-    
+
     String line = reader.readLine();
     while(line != null){
       line = line.trim();
-      
+
       if(line.length() == 0 || line.startsWith("//")){
         //ignore empty lines and comments
       }else{
@@ -123,11 +122,11 @@ public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
     return Pattern.compile(patternString.toString());
   }
 
-  
+
 //  protected enum StartEnd {START, END};
-  
+
   /**
-   * A comparator for MatchResult objects. This is used to find the next match 
+   * A comparator for MatchResult objects. This is used to find the next match
    * result in a text. A null value is used to signify that no more matches are
    * available, hence nulls are the largest value, according to this comparator.
    * @author Valentin Tablan (valyt)
@@ -145,26 +144,26 @@ public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
       return o1.start() - o2.start();
     }
   }
-  
+
   @Override
   public void execute() throws ExecutionException {
     interrupted = false;
     int lastProgress = 0;
     fireProgressChanged(lastProgress);
     //get pointers to the annotation sets
-    AnnotationSet outputAS = (outputASName == null || 
+    AnnotationSet outputAS = (outputASName == null ||
             outputASName.trim().length() == 0) ?
                              document.getAnnotations() :
                              document.getAnnotations(outputASName);
-    
+
     String docText = document.getContent().toString();
-    
+
     /* If the document's content is empty or contains only whitespace,
      * we drop out right here, since there's nothing to sentence-split.     */
     if (docText.trim().length() < 1)  {
       return;
     }
-    
+
     Matcher internalSplitMatcher = internalSplitsPattern.matcher(docText);
     Matcher externalSplitMatcher = externalSplitsPattern.matcher(docText);
 
@@ -189,7 +188,7 @@ public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
     }
     MatchResultComparator comparator = new MatchResultComparator();
     int lastSentenceEnd = 0;
-    
+
     while(!nextSplitMatches.isEmpty()){
       //see which one matches first
       Collections.sort(nextSplitMatches, comparator);
@@ -206,7 +205,7 @@ public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
                     "Split", features);
             //generate the sentence annotation
             int endOffset = nextMatch.end();
-            //find the first non whitespace character starting from where the 
+            //find the first non whitespace character starting from where the
             //last sentence ended
             while(lastSentenceEnd < endOffset &&
                   Character.isWhitespace(
@@ -216,12 +215,12 @@ public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
             //if there is any useful text between the two offsets, generate
             //a new sentence
             if(lastSentenceEnd < nextMatch.start()){
-              outputAS.add(new Long(lastSentenceEnd), new Long(endOffset), 
-                      ANNIEConstants.SENTENCE_ANNOTATION_TYPE, 
+              outputAS.add(new Long(lastSentenceEnd), new Long(endOffset),
+                      ANNIEConstants.SENTENCE_ANNOTATION_TYPE,
                       Factory.newFeatureMap());
             }
             //store the new sentence end
-            lastSentenceEnd = endOffset;            
+            lastSentenceEnd = endOffset;
           } catch(InvalidOffsetException e) {
             // this should never happen
             throw new ExecutionException(e);
@@ -245,26 +244,26 @@ public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
             outputAS.add(new Long(nextMatch.start()), new Long(nextMatch.end()),
                     "Split", features);
             //generate the sentence annotation
-            //find the last non whitespace character, going backward from 
+            //find the last non whitespace character, going backward from
             //where the external skip starts
             int endOffset = nextMatch.start();
             while(endOffset > lastSentenceEnd &&
                     Character.isSpaceChar(
                             Character.codePointAt(docText, endOffset -1))){
-              endOffset--;            
+              endOffset--;
             }
-            //find the first non whitespace character starting from where the 
+            //find the first non whitespace character starting from where the
             //last sentence ended
             while(lastSentenceEnd < endOffset &&
                     Character.isSpaceChar(
-                            Character.codePointAt(docText, lastSentenceEnd))){                   
+                            Character.codePointAt(docText, lastSentenceEnd))){
               lastSentenceEnd++;
             }
             //if there is any useful text between the two offsets, generate
             //a new sentence
             if(lastSentenceEnd < endOffset){
-              outputAS.add(new Long(lastSentenceEnd), new Long(endOffset), 
-                      ANNIEConstants.SENTENCE_ANNOTATION_TYPE, 
+              outputAS.add(new Long(lastSentenceEnd), new Long(endOffset),
+                      ANNIEConstants.SENTENCE_ANNOTATION_TYPE,
                       Factory.newFeatureMap());
             }
             //store the new sentence end
@@ -292,21 +291,21 @@ public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
         fireProgressChanged(lastProgress);
       }
     }//while(!nextMatches.isEmpty()){
-    fireProcessFinished();    
+    fireProcessFinished();
   }
 
 
   /**
-   * Checks whether a possible match is being vetoed by a non split match. A 
+   * Checks whether a possible match is being vetoed by a non split match. A
    * possible match is vetoed if it any nay overlap with a veto region.
-   * 
+   *
    * @param split the match result representing the split to be tested
-   * @param vetoRegions regions where matches are not allowed. For efficiency 
+   * @param vetoRegions regions where matches are not allowed. For efficiency
    * reasons, this method assumes these regions to be non overlapping and sorted
    * in ascending order.
-   * All veto regions that end before the proposed match are also discarded 
-   * (again for efficiency reasons). This requires the proposed matches to be 
-   * sent to this method in ascending order, so as to avoid malfunctions. 
+   * All veto regions that end before the proposed match are also discarded
+   * (again for efficiency reasons). This requires the proposed matches to be
+   * sent to this method in ascending order, so as to avoid malfunctions.
    * @return <tt>true</tt> iff the proposed split should be ignored
    */
   private boolean veto(MatchResult split, List<int[]> vetoRegions){
@@ -319,7 +318,7 @@ public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
         //--> discard the veto region
         vetoRegIter.remove();
       }else if(split.end() -1 < aVetoRegion[0]){
-        //veto region starts after the split ends 
+        //veto region starts after the split ends
         //-> we can return false
         return false;
       }else{
@@ -330,21 +329,21 @@ public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
     //if we got this far, all veto regions are before the split
     return false;
   }
-  
+
   @Override
   public Resource init() throws ResourceInstantiationException {
     super.init();
     try {
       //sanity checks
-      if(internalSplitListURL == null) 
+      if(internalSplitListURL == null)
         throw new ResourceInstantiationException("No list of internal splits provided!");
-      if(externalSplitListURL == null) 
+      if(externalSplitListURL == null)
         throw new ResourceInstantiationException("No list of external splits provided!");
-      if(nonSplitListURL == null) 
+      if(nonSplitListURL == null)
         throw new ResourceInstantiationException("No list of non splits provided!");
-      if(encoding == null) 
-        throw new ResourceInstantiationException("No encoding provided!");      
-      
+      if(encoding == null)
+        throw new ResourceInstantiationException("No encoding provided!");
+
       //load the known abbreviations list
       internalSplitsPattern = compilePattern(internalSplitListURL, encoding);
       externalSplitsPattern = compilePattern(externalSplitListURL, encoding);
@@ -354,7 +353,7 @@ public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
     } catch(IOException e) {
       throw new ResourceInstantiationException(e);
     }
-    
+
     return this;
   }
 

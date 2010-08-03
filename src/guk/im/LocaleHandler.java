@@ -16,6 +16,8 @@
  */
 package guk.im;
 
+import gate.util.BomStrippingInputStreamReader;
+
 import java.awt.event.InputEvent;
 import java.io.*;
 import java.util.*;
@@ -42,7 +44,7 @@ public class LocaleHandler {
                        + fileName);
 	  if (is==null) throw new IllegalArgumentException
 	   ("Failed to retrieve resource '"+fileName+"'. Please reset classpath.");
-    BufferedReader br = new BufferedReader(new InputStreamReader(is));
+    BufferedReader br = new BomStrippingInputStreamReader(is);
     String line = br.readLine();
     initialState = new State();
 

@@ -19,6 +19,7 @@ package gate.corpora;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.*;
 
 import gate.*;
@@ -28,6 +29,7 @@ import gate.creole.CustomDuplication;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.*;
 import gate.event.*;
+import gate.util.BomStrippingInputStreamReader;
 import gate.util.Err;
 import gate.util.Files;
 import gate.util.Strings;
@@ -53,7 +55,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
 
   /**
    * Gets the names of the documents in this corpus.
-   * 
+   *
    * @return a {@link List} of Strings representing the names of the documents
    *         in this corpus.
    */
@@ -67,7 +69,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
 
   /**
    * Gets the name of a document in this corpus.
-   * 
+   *
    * @param index
    *          the index of the document
    * @return a String value representing the name of the document at
@@ -288,13 +290,13 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
     return this;
   } // init()
 
-  
+
   /**
    * Fills the provided corpus with documents created on the fly from selected
    * files in a directory. Uses a {@link FileFilter} to select which files will
    * be used and which will be ignored. A simple file filter based on extensions
    * is provided in the Gate distribution ({@link gate.util.ExtensionFileFilter}).
-   * 
+   *
    * @param corpus
    *          the corpus to be populated
    * @param directory
@@ -315,17 +317,17 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
    * @throws java.io.IOException if a file doesn't exist
    */
   public static void populate(Corpus corpus, URL directory, FileFilter filter,
-    String encoding, boolean recurseDirectories) 
+    String encoding, boolean recurseDirectories)
       throws IOException {
     populate(corpus, directory, filter, encoding, null, recurseDirectories);
   }
-  
+
   /**
    * Fills the provided corpus with documents created on the fly from selected
    * files in a directory. Uses a {@link FileFilter} to select which files will
    * be used and which will be ignored. A simple file filter based on extensions
    * is provided in the Gate distribution ({@link gate.util.ExtensionFileFilter}).
-   * 
+   *
    * @param corpus
    *          the corpus to be populated
    * @param directory
@@ -346,7 +348,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
    * @throws java.io.IOException if a file doesn't exist
    */
   public static void populate(Corpus corpus, URL directory, FileFilter filter,
-    String encoding, String mimeType, boolean recurseDirectories) 
+    String encoding, String mimeType, boolean recurseDirectories)
       throws IOException {
 
     // check input
@@ -421,7 +423,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
 
   /**
    * Fills this corpus with documents created from files in a directory.
-   * 
+   *
    * @param filter
    *          the file filter used to select files from the target directory. If
    *          the filter is <tt>null</tt> all the files will be accepted.
@@ -446,10 +448,10 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
     populate(this, directory, filter, encoding, null, recurseDirectories);
   }
 
-  
+
   /**
    * Fills this corpus with documents created from files in a directory.
-   * 
+   *
    * @param filter
    *          the file filter used to select files from the target directory. If
    *          the filter is <tt>null</tt> all the files will be accepted.
@@ -461,9 +463,9 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
    *          {@link gate.corpora.CorpusImpl#populate(Corpus, URL, FileFilter, String, boolean)}.
    * @param encoding
    *          the encoding to be used for reading the documents
-   *@param mimeType the mime type to be used when loading documents. If null, 
+   *@param mimeType the mime type to be used when loading documents. If null,
    *then the mime type will be detected automatically.
-   *          
+   *
    * @param recurseDirectories
    *          should the directory be parsed recursively?. If <tt>true</tt>
    *          all the files from the provided directory and all its children
@@ -471,12 +473,12 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
    *          accepted by the filter otherwise the children directories will be
    *          ignored.
    */
-  public void populate(URL directory, FileFilter filter, String encoding, 
+  public void populate(URL directory, FileFilter filter, String encoding,
           String mimeType, boolean recurseDirectories) throws IOException,
     ResourceInstantiationException {
     populate(this, directory, filter, encoding, mimeType, recurseDirectories);
   }
-  
+
   private static String replaceAmpChars(String s) {
     s = s.replaceAll("&", "&amp;");
     // s = s.replaceAll("<","&lt;");
@@ -489,7 +491,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
   /**
    * Fills the provided corpus with documents extracted from the provided trec
    * file.
-   * 
+   *
    * @param corpus the corpus to be populated.
    * @param trecFile the trec file.
    * @param encoding the encoding of the trec file.
@@ -521,15 +523,13 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
     try {
       String encodingLine = null;
       if(encoding != null && encoding.trim().length() != 0) {
-        br =
-          new BufferedReader(new InputStreamReader(new FileInputStream(dir),
-            encoding), 10485760);
+        br = new BomStrippingInputStreamReader(new FileInputStream(dir),
+                encoding, 10485760);
         encodingLine = "<?xml version=\"1.0\" encoding=\"" + encoding + "\" ?>";
       }
       else {
-        br =
-          new BufferedReader(new InputStreamReader(new FileInputStream(dir)),
-            10485760);
+        br =  new BomStrippingInputStreamReader(new FileInputStream(dir),
+                10485760);
         encodingLine = "<?xml version=\"1.0\" ?>";
       }
 
@@ -538,7 +538,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
       boolean searchingForStartElement = true;
       int count = 1;
       long lengthInBytes = 0;
- 
+
       while(line != null) {
         if(numberOfDocumentsToExtract != -1
           && (count-1) == numberOfDocumentsToExtract) break;
@@ -628,7 +628,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
   /**
    * Fills the provided corpus with documents extracted from the provided trec
    * file.
-   * 
+   *
    * @param trecFile the trec file.
    * @param encoding the encoding of the trec file.
    * @param numberOfFilesToExtract indicates the number of files to extract
@@ -657,7 +657,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
       corpusListeners = v;
     }
   }
-  
+
   /**
    * Custom duplication for a corpus - duplicate this corpus
    * in the usual way, then duplicate the documents in this

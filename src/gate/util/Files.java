@@ -123,15 +123,11 @@ public class Files {
     InputStream resourceStream = getResourceAsStream(resourceName);
     if(resourceStream == null) return null;
     BufferedReader resourceReader;
-    InputStreamReader inputStreamReader;
     if(encoding == null) {
-      inputStreamReader = new InputStreamReader(resourceStream);
-      if(inputStreamReader == null) return null;
+      resourceReader = new BomStrippingInputStreamReader(resourceStream);
     } else {
-      inputStreamReader = new InputStreamReader(resourceStream, encoding);
-      if(inputStreamReader == null) return null;
+      resourceReader = new BomStrippingInputStreamReader(resourceStream, encoding);
     }
-    resourceReader = new BufferedReader(inputStreamReader);
     if(resourceReader == null) return null;
     StringBuffer resourceBuffer = new StringBuffer();
 
@@ -162,7 +158,7 @@ public class Files {
 
     InputStream resourceStream = getGateResourceAsStream(resourceName);
     BufferedReader resourceReader =
-      new BufferedReader(new InputStreamReader(resourceStream));
+      new BomStrippingInputStreamReader(resourceStream);
     StringBuffer resourceBuffer = new StringBuffer();
 
     int i;
@@ -345,7 +341,7 @@ public class Files {
     if(resourceName.charAt(0) == '/') {
       resourceName = resourceName.substring(1);
     }
-    
+
     ClassLoader gcl = Gate.getClassLoader();
     if(gcl == null) {
       // if the GATE ClassLoader has not been initialised yet (i.e. this
@@ -356,7 +352,7 @@ public class Files {
     else {
       // if we can, get the resource through the GATE ClassLoader to allow
       // loading of resources from plugin JARs as well as gate.jar
-      return gcl.getResourceAsStream(resourceName);      
+      return gcl.getResourceAsStream(resourceName);
     }
     //return  ClassLoader.getSystemResourceAsStream(resourceName);
   } // getResourceAsStream(String)
@@ -375,7 +371,7 @@ public class Files {
     else return getResourceAsStream(resourcePath + "/" + resourceName);
   } // getResourceAsStream(String)
 
-  /** 
+  /**
    * Get a resource from the GATE ClassLoader.  The return value is a
    * {@link java.net.URL} that can be used to retrieve the contents of the
    * resource.
@@ -385,7 +381,7 @@ public class Files {
     if(resourceName.charAt(0) == '/') {
       resourceName = resourceName.substring(1);
     }
-    
+
     ClassLoader gcl = Gate.getClassLoader();
     if(gcl == null) {
       // if the GATE ClassLoader has not been initialised yet (i.e. this
@@ -399,8 +395,8 @@ public class Files {
       return gcl.getResource(resourceName);
     }
   }
-  
-  /** 
+
+  /**
    * Get a resource from the GATE resources directory.  The return value is a
    * {@link java.net.URL} that can be used to retrieve the contents of the
    * resource.
@@ -412,7 +408,7 @@ public class Files {
   public static URL getGateResource(String resourceName) {
     if(resourceName.startsWith("/") || resourceName.startsWith("\\") )
       return getResource(resourcePath + resourceName);
-    else return getResource(resourcePath + "/" + resourceName);    
+    else return getResource(resourcePath + "/" + resourceName);
   }
 
   /**
@@ -435,9 +431,9 @@ public class Files {
     } catch(NullPointerException npe) {
       npe.printStackTrace(Err.getPrintWriter());
     }
-      
+
       Pattern pattern = Pattern.compile("^"+regex);
-      
+
       if (file.isDirectory()){
         tab = file.list();
         for (int i=0;i<=tab.length-1;i++){
@@ -445,7 +441,7 @@ public class Files {
           Matcher matcher = pattern.matcher(finalPath);
           if (matcher.matches()){
               regexfinal.add(finalPath);
-          }         
+          }
         }
       }
       else {
@@ -453,7 +449,7 @@ public class Files {
             Matcher matcher = pattern.matcher(pathFile);
             if (matcher.matches()){
                 regexfinal.add(pathFile);
-            }         
+            }
         }
       }
 
@@ -584,8 +580,7 @@ public class Files {
       CharsetDecoder decoder = utfCharset.newDecoder()
         .onUnmappableCharacter(CodingErrorAction.REPORT)
         .onMalformedInput(CodingErrorAction.REPORT);
-      InputStreamReader isr = new InputStreamReader(fis, decoder);
-      utfFileReader = new BufferedReader(isr);
+      utfFileReader = new BomStrippingInputStreamReader(fis, decoder);
       newXml = updateXmlElement(utfFileReader, elementName, newAttrs);
     }
     catch(CharacterCodingException cce) {

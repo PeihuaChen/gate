@@ -19,6 +19,8 @@
 
 package mark.chunking;
 
+import gate.util.BomStrippingInputStreamReader;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -58,7 +60,7 @@ public class Chunker
 
 		in.close();
 
-		in = new BufferedReader(new InputStreamReader(System.in));
+		in = new BomStrippingInputStreamReader(System.in);
 
 		line = in.readLine();
 
@@ -138,7 +140,7 @@ public class Chunker
 	public Chunker(URL u) throws IOException
 	{
 		//Open up the rules file read for reading
-		BufferedReader in = new BufferedReader(new InputStreamReader(u.openStream()));
+		BufferedReader in = new BomStrippingInputStreamReader(u.openStream());
 
 		//read in the first rule from the file
 		String rule = in.readLine();

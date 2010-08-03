@@ -1,5 +1,7 @@
 package gate.creole.morph;
 
+import gate.util.BomStrippingInputStreamReader;
+
 import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
@@ -29,8 +31,8 @@ public class ReadFile {
     data = new ArrayList();
 
     try {
-      br = new BufferedReader(new InputStreamReader(fileURL.openStream(),
-              "UTF-8"));
+      br = new BomStrippingInputStreamReader(fileURL.openStream(),
+              "UTF-8");
     } catch(FileNotFoundException e) {
       e.printStackTrace();
     } catch(IOException e) {

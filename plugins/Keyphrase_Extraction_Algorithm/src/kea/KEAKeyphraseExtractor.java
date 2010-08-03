@@ -18,6 +18,8 @@
  */
 package kea;
 
+import gate.util.BomStrippingInputStreamReader;
+
 import java.io.*;
 import java.util.*;
 
@@ -61,10 +63,10 @@ import weka.core.Option;
  * @version 1.0
  */
 public class KEAKeyphraseExtractor implements OptionHandler {
-  
+
   /** Name of directory */
   String m_dirName = null;
-  
+
   /** Name of model */
   String m_modelName = null;
 
@@ -76,133 +78,133 @@ public class KEAKeyphraseExtractor implements OptionHandler {
 
   /** The KEA filter object */
   KEAFilter m_KEAFilter = null;
-  
+
   /** The number of phrases to extract. */
   int m_numPhrases = 5;
 
   /** Also write stemmed phrase and score into .key file. */
   boolean m_AdditionalInfo = false;
-  
+
   /**
    * Get the value of AdditionalInfo.
    *
    * @return Value of AdditionalInfo.
    */
   public boolean getAdditionalInfo() {
-    
+
     return m_AdditionalInfo;
   }
-  
+
   /**
    * Set the value of AdditionalInfo.
    *
    * @param newAdditionalInfo Value to assign to AdditionalInfo.
    */
   public void setAdditionalInfo(boolean newAdditionalInfo) {
-    
+
     m_AdditionalInfo = newAdditionalInfo;
   }
-  
+
   /**
    * Get the value of numPhrases.
    *
    * @return Value of numPhrases.
    */
   public int getNumPhrases() {
-    
+
     return m_numPhrases;
   }
-  
+
   /**
    * Set the value of numPhrases.
    *
    * @param newnumPhrases Value to assign to numPhrases.
    */
   public void setNumPhrases(int newnumPhrases) {
-    
+
     m_numPhrases = newnumPhrases;
   }
-  
+
   /**
    * Get the value of debug.
    *
    * @return Value of debug.
    */
   public boolean getDebug() {
-    
+
     return m_debug;
   }
-  
+
   /**
    * Set the value of debug.
    *
    * @param newdebug Value to assign to debug.
    */
   public void setDebug(boolean newdebug) {
-    
+
     m_debug = newdebug;
   }
-  
+
   /**
    * Get the value of encoding.
    *
    * @return Value of encoding.
    */
   public String getEncoding() {
-    
+
     return m_encoding;
   }
-  
+
   /**
    * Set the value of encoding.
    *
    * @param newencoding Value to assign to encoding.
    */
   public void setEncoding(String newencoding) {
-    
+
     m_encoding = newencoding;
   }
-  
+
   /**
    * Get the value of modelName.
    *
    * @return Value of modelName.
    */
   public String getModelName() {
-    
+
     return m_modelName;
   }
-  
+
   /**
    * Set the value of modelName.
    *
    * @param newmodelName Value to assign to modelName.
    */
   public void setModelName(String newmodelName) {
-    
+
     m_modelName = newmodelName;
   }
-  
+
   /**
    * Get the value of dirName.
    *
    * @return Value of dirName.
    */
   public String getDirName() {
-    
+
     return m_dirName;
   }
-  
+
   /**
    * Set the value of dirName.
    *
    * @param newdirName Value to assign to dirName.
    */
   public void setDirName(String newdirName) {
-    
+
     m_dirName = newdirName;
   }
-  
+
   /**
    * Parses a given list of options controlling the behaviour of this object.
    * Valid options are:<p>
@@ -271,13 +273,13 @@ public class KEAKeyphraseExtractor implements OptionHandler {
     String [] options = new String [10];
     int current = 0;
 
-    options[current++] = "-l"; 
+    options[current++] = "-l";
     options[current++] = "" + (getDirName());
-    options[current++] = "-m"; 
+    options[current++] = "-m";
     options[current++] = "" + (getModelName());
-    options[current++] = "-e"; 
+    options[current++] = "-e";
     options[current++] = "" + (getEncoding());
-    options[current++] = "-n"; 
+    options[current++] = "-n";
     options[current++] = "" + (getNumPhrases());
     if (getDebug()) {
       options[current++] = "-d";
@@ -351,7 +353,7 @@ public class KEAKeyphraseExtractor implements OptionHandler {
    * Builds the model from the files
    */
   public void extractKeyphrases(Hashtable stems) throws Exception {
-    
+
     Vector stats = new Vector();
 
     // Check whether there is actually any data
@@ -371,11 +373,11 @@ public class KEAKeyphraseExtractor implements OptionHandler {
       double[] newInst = new double[2];
       try {
 	File txt = new File(m_dirName + "/" + str + ".txt");
-	InputStreamReader is;
+	Reader is;
 	if (!m_encoding.equals("default")) {
-	  is = new InputStreamReader(new FileInputStream(txt), m_encoding);
+	  is = new BomStrippingInputStreamReader(new FileInputStream(txt), m_encoding);
 	} else {
-	  is = new InputStreamReader(new FileInputStream(txt));
+	  is = new BomStrippingInputStreamReader(new FileInputStream(txt));
 	}
 	StringBuffer txtStr = new StringBuffer();
 	int c;
@@ -391,17 +393,17 @@ public class KEAKeyphraseExtractor implements OptionHandler {
       }
       try {
 	File key = new File(m_dirName + "/" + str + ".key");
-	InputStreamReader is; 
+	Reader is;
 	if (!m_encoding.equals("default")) {
-	  is = new InputStreamReader(new FileInputStream(key), m_encoding);
+	  is = new BomStrippingInputStreamReader(new FileInputStream(key), m_encoding);
 	} else {
-	  is = new InputStreamReader(new FileInputStream(key));
+	  is = new BomStrippingInputStreamReader(new FileInputStream(key));
 	}
 	StringBuffer keyStr = new StringBuffer();
 	int c;
 	while ((c = is.read()) != -1) {
 	  keyStr.append((char)c);
-	}      
+	}
 	newInst[1] = (double)data.attribute(1).addStringValue(keyStr.toString());
       } catch (Exception e) {
 	if (m_debug) {
@@ -427,7 +429,7 @@ public class KEAKeyphraseExtractor implements OptionHandler {
 	System.err.println("-- Keyphrases and feature values:");
       }
       FileOutputStream out = null;
-      PrintWriter printer = null; 
+      PrintWriter printer = null;
       File key = new File(m_dirName + "/" + str + ".key");
       if (!key.exists()) {
 	out = new FileOutputStream(m_dirName + "/" + str + ".key");
@@ -445,7 +447,7 @@ public class KEAKeyphraseExtractor implements OptionHandler {
 	    numExtracted += 1.0;
 	  }
 	  if ((int)topRankedInstances[i].
-	      value(topRankedInstances[i].numAttributes() - 1) == 
+	      value(topRankedInstances[i].numAttributes() - 1) ==
 	      topRankedInstances[i].
 	      attribute(topRankedInstances[i].numAttributes() - 1).
 	      indexOfValue("True")) {
@@ -490,29 +492,29 @@ public class KEAKeyphraseExtractor implements OptionHandler {
     double avg = Utils.mean(st);
     double stdDev = Math.sqrt(Utils.variance(st));
     System.err.println("Avg. number of correct keyphrases: " +
-		       Utils.doubleToString(avg, 2) + " +/- " + 
+		       Utils.doubleToString(avg, 2) + " +/- " +
 		       Utils.doubleToString(stdDev, 2));
     System.err.println("Based on " + stats.size() + " documents");
     m_KEAFilter.batchFinished();
   }
-  
-  /** 
+
+  /**
    * Loads the extraction model from the file.
    */
   public void loadModel() throws Exception {
-    
+
     BufferedInputStream inStream =
       new BufferedInputStream(new FileInputStream(m_modelName));
     ObjectInputStream in = new ObjectInputStream(inStream);
     m_KEAFilter = (KEAFilter)in.readObject();
     in.close();
   }
-  
+
   /**
-   * The main method.  
+   * The main method.
    */
   public static void main(String[] ops) {
-    
+
     KEAKeyphraseExtractor kmb = new KEAKeyphraseExtractor();
     try {
       kmb.setOptions(ops);

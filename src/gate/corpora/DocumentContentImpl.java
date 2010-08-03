@@ -20,6 +20,7 @@ import java.io.*;
 import java.net.URL;
 
 import gate.DocumentContent;
+import gate.util.BomStrippingInputStreamReader;
 import gate.util.InvalidOffsetException;
 
 /** Represents the commonalities between all sorts of document contents.
@@ -57,13 +58,9 @@ public class DocumentContentImpl implements DocumentContent
     }
 
     if(encoding != null && !encoding.equalsIgnoreCase("")) {
-      uReader = new BufferedReader(
-        new InputStreamReader(u.openStream(), encoding), INTERNAL_BUFFER_SIZE
-      );
+      uReader = new BomStrippingInputStreamReader(u.openStream(), encoding, INTERNAL_BUFFER_SIZE);
     } else {
-      uReader = new BufferedReader(
-        new InputStreamReader(u.openStream()), INTERNAL_BUFFER_SIZE
-      );
+      uReader = new BomStrippingInputStreamReader(u.openStream(), INTERNAL_BUFFER_SIZE);
     };
 
     // 1. skip S characters
@@ -98,7 +95,7 @@ public class DocumentContentImpl implements DocumentContent
   void edit(Long start, Long end, DocumentContent replacement)
   {
     int s = start.intValue(), e = end.intValue();
-    String repl = replacement == null ? "" : 
+    String repl = replacement == null ? "" :
       ((DocumentContentImpl) replacement).content;
     StringBuffer newContent = new StringBuffer(content);
     newContent.replace(s, e, repl);

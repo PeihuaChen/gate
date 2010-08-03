@@ -39,6 +39,7 @@ import gate.Resource;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
+import gate.util.BomStrippingInputStreamReader;
 import gate.util.InvalidOffsetException;
 
 /**
@@ -52,7 +53,7 @@ public class Tagger extends AbstractLanguageAnalyser implements
   private LanguageAnalyser gazo = null;
 
   private LanguageAnalyser net = null;
-  
+
   private String annotationSetName = null;
 
   // // Init parameters ////
@@ -69,11 +70,11 @@ public class Tagger extends AbstractLanguageAnalyser implements
   public URL getCompoundListsURL() {
     return compoundListsURL;
   }
-  
+
   public void setAnnotationSetName(String name) {
     annotationSetName = name;
   }
-  
+
   public String getAnnotationSetName() {
     return annotationSetName;
   }
@@ -142,8 +143,8 @@ public class Tagger extends AbstractLanguageAnalyser implements
     elementSymbol = new ArrayList<String>();
     elementName = new ArrayList<String>();
     try {
-      BufferedReader in = new BufferedReader(new InputStreamReader(
-              elementMapURL.openStream()));
+      BufferedReader in = new BomStrippingInputStreamReader(
+              elementMapURL.openStream());
       String symbol = in.readLine();
       while(symbol != null) {
         symbol = symbol.trim();
@@ -174,16 +175,16 @@ public class Tagger extends AbstractLanguageAnalyser implements
   }
 
   @Override public void execute() throws ExecutionException {
-      
+
     Document doc = getDocument();
-    
+
     try {
       gazc.setDocument(doc);
       gazc.setParameterValue("annotationSetName", annotationSetName);
 
       gazo.setDocument(doc);
       gazo.setParameterValue("annotationSetName", annotationSetName);
-      
+
       net.setDocument(doc);
       net.setParameterValue("inputASName", annotationSetName);
       net.setParameterValue("outputASName", annotationSetName);
@@ -191,7 +192,7 @@ public class Tagger extends AbstractLanguageAnalyser implements
     catch(ResourceInstantiationException rie) {
       throw new ExecutionException(rie);
     }
-    
+
     try
     {
       gazc.execute();
@@ -200,9 +201,9 @@ public class Tagger extends AbstractLanguageAnalyser implements
       // This lot used to be in the clean.jape file but it was slowing
       // things down a lot as what I really wanted would have required
       // the brill style to do what it is meant to do.
-      
+
       AnnotationSet docAS = doc.getAnnotations(annotationSetName);
-      
+
       FeatureMap params = Factory.newFeatureMap();
       AnnotationSet temp = docAS.get("NotACompound", params);
       if(temp != null) docAS.removeAll(temp);

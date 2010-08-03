@@ -9,6 +9,7 @@ import gate.jape.parser.ParseCpslConstants;
 import gate.jape.parser.ParseCpslTokenManager;
 import gate.jape.parser.SimpleCharStream;
 import gate.jape.parser.Token;
+import gate.util.BomStrippingInputStreamReader;
 import gate.util.GateRuntimeException;
 
 import java.awt.BorderLayout;
@@ -41,7 +42,7 @@ import javax.swing.tree.TreeSelectionModel;
  * A JAPE viewer that allows access to all phases of the grammar and
  * provides syntax highlighting. Future versions may allow editing and
  * reload of JAPE files.
- * 
+ *
  * @author Mark A. Greenwood
  */
 public class JapeViewer extends AbstractVisualResource implements
@@ -57,7 +58,7 @@ public class JapeViewer extends AbstractVisualResource implements
    * The tree in which the phases of the grammar will be shown
    */
   private JTree treePhases;
-  
+
   private JScrollPane treeScroll;
 
   /**
@@ -213,10 +214,10 @@ public class JapeViewer extends AbstractVisualResource implements
     try {
       Reader japeReader = null;
       if(transducer.getEncoding() == null) {
-        japeReader = new InputStreamReader(url.openStream());
+        japeReader = new BomStrippingInputStreamReader(url.openStream());
       }
       else {
-        japeReader = new InputStreamReader(url.openStream(), transducer
+        japeReader = new BomStrippingInputStreamReader(url.openStream(), transducer
                 .getEncoding());
       }
       BufferedReader br = new BufferedReader(japeReader);

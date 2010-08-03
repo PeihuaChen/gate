@@ -366,8 +366,8 @@ public class OntologyMeasures {
     }
     BufferedReader bdmResultsReader = null;
     try {
-      bdmResultsReader = new BufferedReader(new InputStreamReader(
-        new FileInputStream(Files.fileFromURL(bdmFile)), "UTF-8"));
+      bdmResultsReader = new BomStrippingInputStreamReader(
+        new FileInputStream(Files.fileFromURL(bdmFile)), "UTF-8");
       bdmResultsReader.readLine(); // skip the first line as the header
       String line = bdmResultsReader.readLine();
       while (line != null) {

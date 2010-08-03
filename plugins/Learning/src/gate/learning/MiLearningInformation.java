@@ -1,5 +1,7 @@
 package gate.learning;
 
+import gate.util.BomStrippingInputStreamReader;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -16,17 +18,17 @@ public class MiLearningInformation {
   int miNumDocsTraining;
   /** Number of document got since last training. */
   int miNumDocsFromLast;
-  
+
   MiLearningInformation(){
     this.miNumDocsTraining = 0;
     this.miNumDocsFromLast = 0;
   }
-  
+
   MiLearningInformation(int numTraining, int numFromLast){
     this.miNumDocsTraining = numTraining;
     this.miNumDocsFromLast = numFromLast;
   }
-  
+
   /** Read information from the data file. */
   public void readDataFromFile(File miInforFile) {
     if(!miInforFile.exists()) {
@@ -35,8 +37,8 @@ public class MiLearningInformation {
       return;
     }
     try {
-      BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(
-        miInforFile), "UTF-8"));
+      BufferedReader in = new BomStrippingInputStreamReader(new FileInputStream(
+        miInforFile), "UTF-8");
       String [] line = in.readLine().split(ConstantParameters.ITEMSEPARATOR);
       miNumDocsTraining = Integer.parseInt(line[0]);
       line = in.readLine().split(ConstantParameters.ITEMSEPARATOR);
@@ -49,9 +51,9 @@ public class MiLearningInformation {
     } catch(IOException e) {
       e.printStackTrace();
     }
-      
+
   }
-  
+
   /** Write the information into the data file. */
   public void writeDataIntoFile(File miInforFile) {
     try {
@@ -70,6 +72,6 @@ public class MiLearningInformation {
     } catch(IOException e) {
       e.printStackTrace();
     }
-      
+
   }
 }

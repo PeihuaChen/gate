@@ -15,6 +15,7 @@ import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
+import gate.util.BomStrippingInputStreamReader;
 import gate.util.Files;
 import gate.util.OffsetComparator;
 
@@ -46,11 +47,11 @@ import java.util.regex.Pattern;
  * provide this framework, but any tagger that expects one annotation
  * type per line and outputs one annotation type per line (input and
  * output do not have to be the same) should be compatible with this PR.
- * 
+ *
  * @author Mark A. Greenwood
  * @author Rene Witte
  */
-@CreoleResource(comment = "The Generic Tagger is Generic!", 
+@CreoleResource(comment = "The Generic Tagger is Generic!",
         helpURL = "http://gate.ac.uk/userguide/sec:parsers:taggerframework")
 public class GenericTagger extends AbstractLanguageAnalyser implements
                                                            ProcessingResource {
@@ -93,7 +94,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   /**
    * This method initialises the tagger. This involves loading the pre
    * and post processing JAPE grammars as well as a few sanity checks.
-   * 
+   *
    * @throws ResourceInstantiationException if an error occurs while
    *           initialising the PR
    */
@@ -141,7 +142,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
    * the right order so that an input file is written, a command line is
    * built, the tagger is run and then finally the output of the tagger
    * is added as annotations onto the GATE document being processed.
-   * 
+   *
    * @throws ExecutionException if an error occurs during any stage of
    *           running the tagger
    */
@@ -223,7 +224,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
    * is run by the provided shell. This is useful on Windows where you
    * will usually need to run the tagger under Cygwin or the Command
    * Prompt.
-   * 
+   *
    * @param textfile the file containing the input to the tagger
    * @return a String array containing the correctly assembled command
    *         line
@@ -288,7 +289,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
    * written to separate lines in the file. If this assumption does not
    * match the tagger you wish to use then you will need to create a
    * subclass and override this method.
-   * 
+   *
    * @return a File object which contains the input to the tagger
    * @throws ExecutionException if an error occurs while building the
    *           tagger input file
@@ -377,7 +378,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   /**
    * This method is responsible for executing the external tagger. If a
    * problem is going to occur this is likely to be the place!
-   * 
+   *
    * @param cmdline the command line we want to execute
    * @return an InputStream from which the output of the tagger can be
    *         read
@@ -415,7 +416,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
    * back into the GATE document. If the tagger doesn't produce one line
    * per output type then you will need to override this to do something
    * different.
-   * 
+   *
    * @param in the InputStream frmo which the method will read the
    *          output from the tagger
    * @throws ExecutionException if an error occurs while handling the
@@ -452,8 +453,8 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
     try {
       // get a reader over the output from the tagger remembering to
       // handle the encoding
-      BufferedReader input = new BufferedReader(new InputStreamReader(in,
-              charsetDecoder));
+      BufferedReader input = new BomStrippingInputStreamReader(in,
+              charsetDecoder);
 
       // compile the regular expression so that we can interpret the
       // output

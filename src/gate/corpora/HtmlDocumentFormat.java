@@ -81,8 +81,7 @@ public class HtmlDocumentFormat extends TextualDocumentFormat
                "GATE document is null or no content found. Nothing to parse!");
     }// End if
 
-    reader = new InputStreamReader(
-             new ByteArrayInputStream(doc.getContent().toString().getBytes()));
+    reader = new StringReader(doc.getContent().toString());
 
     // create a new Htmldocument handler
     HtmlDocumentHandler htmlDocHandler = new

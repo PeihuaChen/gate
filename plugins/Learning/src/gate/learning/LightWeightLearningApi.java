@@ -1,6 +1,6 @@
 /*
  *  LightWeightLearningApi.java
- * 
+ *
  *  Yaoyong Li 22/03/2007
  *
  *  $Id: LightWeightLearningApi.java, v 1.0 2007-03-22 12:58:16 +0000 yaoyong $
@@ -42,6 +42,7 @@ import gate.learning.learners.weka.WekaLearner;
 import gate.learning.learners.weka.WekaLearning;
 import gate.util.Benchmark;
 import gate.util.Benchmarkable;
+import gate.util.BomStrippingInputStreamReader;
 import gate.util.GateException;
 import gate.util.InvalidOffsetException;
 import gate.util.OffsetComparator;
@@ -335,9 +336,9 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       // Reading the names of all documents and the total number of them
       int numDocs = 0;
       // Read the names of documents from a file
-      BufferedReader inDocsName = new BufferedReader(new InputStreamReader(
+      BufferedReader inDocsName = new BomStrippingInputStreamReader(
         new FileInputStream(new File(wdResults,
-          ConstantParameters.FILENAMEOFDocsName)), "UTF-8"));
+          ConstantParameters.FILENAMEOFDocsName)), "UTF-8");
       String str = inDocsName.readLine();
       numDocs = Integer.parseInt(str.substring(str.indexOf("=") + 1));
       String[] docsName = new String[numDocs];
@@ -402,7 +403,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
           MultiClassLearning chunkLearning = new MultiClassLearning(
             engineSettings.multi2BinaryMode);
           // read data
-          File  tempDataFile= new File(wdResults, 
+          File  tempDataFile= new File(wdResults,
             ConstantParameters.TempFILENAMEofFVData);
           boolean isUsingTempDataFile = false;
           //if(paumLearner.getLearnerName().equals("SVMExec"))
@@ -471,14 +472,14 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
 
   /**
    * obtained the total number of docs and the selected docs for AL.
-   * 
+   *
    * @throws IOException
    */
   private int obtainDocsForAL(File docsFile, List<String> selectedDocs)
     throws IOException {
     int numDocsSelected = 0;
-    BufferedReader inDocs = new BufferedReader(new InputStreamReader(
-      new FileInputStream(docsFile), "UTF-8"));
+    BufferedReader inDocs = new BomStrippingInputStreamReader(
+      new FileInputStream(docsFile), "UTF-8");
     String str = inDocs.readLine();
     while(str != null && str != "") {
       selectedDocs.add(str);
@@ -550,9 +551,9 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       BufferedWriter outTFs = new BufferedWriter(new OutputStreamWriter(
         new FileOutputStream(new File(wdResults,
           ConstantParameters.FILENAMEOFTermFreqMatrix), true), "UTF-8"));
-      BufferedReader inFVs = new BufferedReader(new InputStreamReader(
+      BufferedReader inFVs = new BomStrippingInputStreamReader(
         new FileInputStream(new File(wdResults,
-          ConstantParameters.FILENAMEOFFeatureVectorData)), "UTF-8"));
+          ConstantParameters.FILENAMEOFFeatureVectorData)), "UTF-8");
       HashMap<Integer, String> indexTerm = new HashMap<Integer, String>();
       for(Object obj : featuresList.featuresList.keySet()) {
         indexTerm.put(
@@ -612,9 +613,8 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       BufferedWriter outNLPFeatures = new BufferedWriter(
         new OutputStreamWriter(new FileOutputStream(new File(wdResults,
           ConstantParameters.FILENAMEOFNLPFeaturesData), true), "UTF-8"));
-      BufferedReader inNLPFeaturesTemp = new BufferedReader(
-        new InputStreamReader(new FileInputStream(new File(wdResults,
-          ConstantParameters.FILENAMEOFNLPFeaturesDataTemp)), "UTF-8"));
+      BufferedReader inNLPFeaturesTemp = new BomStrippingInputStreamReader(new FileInputStream(new File(wdResults,
+          ConstantParameters.FILENAMEOFNLPFeaturesDataTemp)), "UTF-8");
       String line = inNLPFeaturesTemp.readLine();
       if(miNumDocsTraining == 0) {
         outNLPFeatures.append(line);
@@ -745,19 +745,19 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         startTime = Benchmark.startPoint();
         benchmarkingFeatures.put("dataFile", dataFile.getAbsolutePath());
         //      read data
-        File  tempDataFile= new File(wdResults, 
+        File  tempDataFile= new File(wdResults,
           ConstantParameters.TempFILENAMEofFVData);
         boolean isUsingTempDataFile = false;
-        if(paumLearner.getLearnerName().equals("SVMExec") || 
+        if(paumLearner.getLearnerName().equals("SVMExec") ||
           paumLearner.getLearnerName().equals("PAUMExec") )
-          isUsingTempDataFile = true; //using the temp data file 
+          isUsingTempDataFile = true; //using the temp data file
         chunkLearning.getDataFromFile(numDocs, dataFile, isUsingTempDataFile, tempDataFile);
         Benchmark.checkPoint(startTime, benchmarkID + "."
           + "readingChunkLearningData", this, benchmarkingFeatures);
         benchmarkingFeatures.remove("dataFile");
         LogService.logMessage("The number of classes in dataset: "
           + chunkLearning.numClasses, 1);
-        
+
         // training
         startTime = Benchmark.startPoint();
         benchmarkingFeatures.put("modelFile", modelFile.getAbsolutePath());
@@ -766,7 +766,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
           chunkLearning.training(paumLearner, modelFile);
         else //for not using thread
           chunkLearning.trainingNoThread(paumLearner, modelFile, isUsingTempDataFile, tempDataFile);
-        
+
         Benchmark.checkPoint(startTime,
           benchmarkID + "." + "paumModelTraining", this, benchmarkingFeatures);
         benchmarkingFeatures.remove("modelFile");
@@ -870,7 +870,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         // read data
         startTime = Benchmark.startPoint();
         //get the fv data
-        File  tempDataFile= new File(wdResults, 
+        File  tempDataFile= new File(wdResults,
           ConstantParameters.TempFILENAMEofFVData);
         boolean isUsingTempDataFile = false;
         //if(paumLearner.getLearnerName().equals("SVMExec"))
@@ -886,7 +886,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
           chunkLearning.apply(paumLearner, modelFile);
         else //for not using thread
           chunkLearning.applyNoThread(paumLearner, modelFile);
-        
+
         Benchmark.checkPoint(startTime, benchmarkID + "."
           + "paumModelApplication", this, benchmarkingFeatures);
         benchmarkingFeatures.remove("modelFile");
@@ -1038,7 +1038,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
           engineSettings.multi2BinaryMode);
         // read data
          //      get the fv data
-        File  tempDataFile= new File(tempFilesDir, 
+        File  tempDataFile= new File(tempFilesDir,
           ConstantParameters.TempFILENAMEofFVData);
         boolean isUsingTempDataFile = false;
         //if(paumLearner.getLearnerName().equals("SVMExec"))
@@ -1103,7 +1103,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
 
   /**
    * Add the annotation into documents for chunk learning.
-   * 
+   *
    * @throws InvalidOffsetException
    */
   private void addAnnsInDoc(Document doc, HashSet chunks, String instanceType,
@@ -1144,7 +1144,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
 
   /**
    * Add the annotation into documents for classification.
-   * 
+   *
    * @throws InvalidOffsetException
    */
   private void addAnnsInDocClassification(Document doc, int[] selectedLabels,
@@ -1207,7 +1207,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
   /**
    * Add a ranked list of label for each example in documents for
    * classification, not just a single label.
-   * 
+   *
    * @throws InvalidOffsetException
    */
   private void addLabelListInDocClassification(Document doc,
@@ -1284,10 +1284,10 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
     File labelInDataFile, File nlpDataLabelFile, int numDocs,
     boolean surroundingMode) {
     try {
-      BufferedReader inData = new BufferedReader(new InputStreamReader(
-        new FileInputStream(dataFile), "UTF-8"));
-      BufferedReader inNlpData = new BufferedReader(new InputStreamReader(
-        new FileInputStream(nlpDataFile), "UTF-8"));
+      BufferedReader inData = new BomStrippingInputStreamReader(
+        new FileInputStream(dataFile), "UTF-8");
+      BufferedReader inNlpData = new BomStrippingInputStreamReader(
+        new FileInputStream(nlpDataFile), "UTF-8");
       BufferedWriter outNlpDataLabel = new BufferedWriter(
         new OutputStreamWriter(new FileOutputStream(nlpDataLabelFile), "UTF-8"));
       HashSet uniqueLabels = new HashSet();
@@ -1295,7 +1295,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       String line = inNlpData.readLine();
       outNlpDataLabel.append(line);
       outNlpDataLabel.newLine();
-      String[] items; 
+      String[] items;
       // For each document
       for(int iDoc = 0; iDoc < numDocs; ++iDoc) {
         int numLabels;
@@ -1316,9 +1316,9 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
           numLabels = Integer.parseInt(items[1]);
           StringBuffer labels = new StringBuffer();
           labels.append(items[1]);
-          
+
           //System.out.println("line="+line+", items[1]="+items[1]);
-          
+
           for(int j = 0; j < numLabels; ++j) {
             labels.append(ConstantParameters.ITEMSEPARATOR);
             labels.append(items[j + 2]);
@@ -1362,7 +1362,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
 
   /**
    * Flitering out the negative examples of the training data using the SVM.
-   * 
+   *
    * @throws GateException
    */
   public void FilteringNegativeInstsInJava(int numDocs,
@@ -1381,11 +1381,11 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
     MultiClassLearning chunkLearning = new MultiClassLearning(
       engineSettings.multi2BinaryMode);
     // read data
-    File  tempDataFile= new File(wdResults, 
+    File  tempDataFile= new File(wdResults,
       ConstantParameters.TempFILENAMEofFVData);
     boolean isUsingTempDataFile = false;
     //if(paumLearner.getLearnerName().equals("SVMExec"))
-      //isUsingTempDataFile = true; //using the temp data file     
+      //isUsingTempDataFile = true; //using the temp data file
     chunkLearning.getDataFromFile(numDocs, dataFile, isUsingTempDataFile, tempDataFile);
     // Back up the label data before it is reset.
     LabelsOfFeatureVectorDoc[] labelsFVDocB = new LabelsOfFeatureVectorDoc[numDocs];
@@ -1443,7 +1443,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       chunkLearning.trainingNoThread(paumLearner, modelFile, isUsingTempDataFile, tempDataFile);
       chunkLearning.applyNoThread(paumLearner, modelFile);
     }
-      
+
     // Store the scores of negative examples.
     float[] scoresNegB = new float[numNeg];
     float[] scoresNeg = new float[numNeg];
@@ -1575,8 +1575,8 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
       if(modelFile.exists() && !modelFile.isDirectory()) {
         // see whether we're trying to apply an old-style model
         // stored all in one file
-        BufferedReader buff = new BufferedReader(new InputStreamReader(
-          new FileInputStream(modelFile), "UTF-8"));
+        BufferedReader buff = new BomStrippingInputStreamReader(
+          new FileInputStream(modelFile), "UTF-8");
         String firstLine = buff.readLine();
         buff.close();
         if(firstLine != null && firstLine.endsWith("#numTrainingDocs")) {
@@ -1589,7 +1589,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         }
       }
       if(!modelFile.exists()) { throw new IllegalStateException(
-        "Model directory " + modelFile + " does not exist"); 
+        "Model directory " + modelFile + " does not exist");
       }
       //Read the training meta information from the meta data file
       // include the total number of features and number of tags (numClasses)
@@ -1612,9 +1612,8 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         final File thisClassModelFile = new File(modelFile, String.format(
           ConstantParameters.FILENAMEOFPerClassModel, Integer
             .valueOf(classIndex++)));
-        BufferedReader modelBuff = new BufferedReader(
-          new InputStreamReader(
-            new FileInputStream(thisClassModelFile), "UTF-8"));
+        BufferedReader modelBuff = new BomStrippingInputStreamReader(
+            new FileInputStream(thisClassModelFile), "UTF-8");
         //Read the header line
         String items[] = modelBuff.readLine().split(" ");
         // Get the weight vector
@@ -1781,7 +1780,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
 
   /**
    * Returns the benchmark ID of the parent of this resource.
-   * 
+   *
    * @return
    */
   public String getParentBenchmarkId() {
@@ -1790,7 +1789,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
 
   /**
    * Returns the benchmark ID of this resource.
-   * 
+   *
    * @return
    */
   public String getBenchmarkId() {
@@ -1803,7 +1802,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
   /**
    * Given an ID of the parent resource, this method is responsible for
    * producing the Benchmark ID, unique to this resource.
-   * 
+   *
    * @param parentID
    */
   public void createBenchmarkId(String parentID) {
@@ -1814,7 +1813,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
 
   /**
    * This method sets the benchmarkID for this resource.
-   * 
+   *
    * @param benchmarkID
    */
   public void setParentBenchmarkId(String benchmarkID) {
@@ -1823,7 +1822,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
 
   /**
    * Returns the logger object being used by this resource.
-   * 
+   *
    * @return
    */
   public Logger getLogger() {

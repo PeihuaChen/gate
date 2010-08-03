@@ -24,12 +24,13 @@ import java.util.*;
 import gate.event.DocumentEvent;
 import gate.event.DocumentListener;
 import gate.gui.MainFrame;
+import gate.util.BomStrippingInputStreamReader;
 import gate.util.GateRuntimeException;
 
 /**
  * Description: This class Provides options window to set the options for
  * Ontology Viewer
- * 
+ *
  * @author Niraj Aswani
  * @version 1.0
  */
@@ -200,7 +201,7 @@ public class OntologyViewerOptions implements DocumentListener {
 
   /**
    * Constructor
-   * 
+   *
    * @param ontologyTreePanel
    */
   public OntologyViewerOptions(OntologyTreePanel ontoTree) {
@@ -231,7 +232,7 @@ public class OntologyViewerOptions implements DocumentListener {
   /**
    * The method disables the graphical selection of selectedAnnotationSetName
    * and will allow user to provide the annotationSetName explicitly
-   * 
+   *
    * @param annotationSetName
    */
   public void disableAnnotationSetSelection(String annotationSetName) {
@@ -249,7 +250,7 @@ public class OntologyViewerOptions implements DocumentListener {
   /**
    * This will reenable the graphical support for selecting
    * annotationSetsNamesCB
-   * 
+   *
    * @param annotationSetName
    */
   public void enabledAnnotationSetSelection() {
@@ -274,20 +275,20 @@ public class OntologyViewerOptions implements DocumentListener {
   private void initGUI() {
     classesToHide = new HashSet<String>();
     classesToShow = new HashSet<String>();
-    
+
     optionPanel = new JPanel(new GridBagLayout());
     GridBagConstraints c = new GridBagConstraints();
     c.fill = GridBagConstraints.NONE;
     c.gridx = 0;
     c.anchor = GridBagConstraints.FIRST_LINE_START;
-    
+
     childFeatureCB = new JCheckBox("Disable child feature");
     selectedTextAsPropertyValue =
       new JCheckBox("Selected Text As Property Value?");
     propertyName = new JTextField(
             "http://www.w3.org/2000/01/rdf-schema#label", 15);
     OntologyViewerOptionsActions ovoa = new OntologyViewerOptionsActions();
-    
+
     deleteConfirmationCB = new JCheckBox("Enable confirm deletion");
     showAnonymousClassesCB = new JCheckBox("Show Anonymous classes");
     addAllFeatureCaseSensitiveCB =
@@ -313,7 +314,7 @@ public class OntologyViewerOptions implements DocumentListener {
     instanceURIFeatureName = new JRadioButton();
     otherInstanceURIFeatureName = new JRadioButton();
     otherInstanceURITF = new JTextField(12);
-    
+
     showAnonymousClassesCB.setSelected(false);
     addAllFeatureCaseSensitiveCB.setSelected(true);
 
@@ -421,10 +422,10 @@ public class OntologyViewerOptions implements DocumentListener {
     c.gridy = 9; optionPanel.add(selectedTextAsPropertyValue, c);
     c.gridwidth = 1;
     c.gridx = 0;
-    c.gridy = 10; 
+    c.gridy = 10;
     optionPanel.add(new JLabel("Annotation property: "), c);
     c.gridx = 1;
-    c.gridwidth = 4; 
+    c.gridwidth = 4;
     optionPanel.add(propertyName, c);
     c.gridwidth = 1;
     c.gridy = 11;
@@ -450,8 +451,8 @@ public class OntologyViewerOptions implements DocumentListener {
     c.gridx = 4;
     optionPanel.add(annotationTypesCB, c);
 
-    
-    c.gridy = 13; 
+
+    c.gridy = 13;
     c.gridx = 0;
     optionPanel.add(new JLabel("Class URI feature name: "), c);
     c.gridx = 1;
@@ -463,7 +464,7 @@ public class OntologyViewerOptions implements DocumentListener {
     c.gridx = 4;
     optionPanel.add(otherClassURITF, c);
 
-    c.gridy = 14; 
+    c.gridy = 14;
     c.gridx = 0;
     optionPanel.add(new JLabel("Instance URI feature name: "), c);
     c.gridx = 1;
@@ -486,7 +487,7 @@ public class OntologyViewerOptions implements DocumentListener {
 
   /**
    * Returns the panel for ontoOption Panel
-   * 
+   *
    * @return
    */
   public Component getGUI() {
@@ -495,7 +496,7 @@ public class OntologyViewerOptions implements DocumentListener {
 
   /**
    * Inner class that implements the actions for various options
-   * 
+   *
    * @author Niraj Aswani
    * @version 1.0
    */
@@ -505,7 +506,7 @@ public class OntologyViewerOptions implements DocumentListener {
      * Serial version ID
      */
     private static final long serialVersionUID = 3906926759864643636L;
-    
+
     public void actionPerformed(ActionEvent ae) {
 
       if(ae.getSource() == otherAS) {
@@ -831,8 +832,8 @@ public class OntologyViewerOptions implements DocumentListener {
       if(classesToHideFileURL == null || !readClassesToHideFile) return;
       classesToHide.clear();
       BufferedReader br =
-        new BufferedReader(new InputStreamReader(classesToHideFileURL
-          .openStream()));
+        new BomStrippingInputStreamReader(classesToHideFileURL
+          .openStream());
       String line = br.readLine();
       while(line != null) {
         classesToHide.add(line.trim());
@@ -852,8 +853,8 @@ public class OntologyViewerOptions implements DocumentListener {
       if(classesToShowFileURL == null || !readClassesToShowFile) return;
       classesToShow.clear();
       BufferedReader br =
-        new BufferedReader(new InputStreamReader(classesToShowFileURL
-          .openStream()));
+        new BomStrippingInputStreamReader(classesToShowFileURL
+          .openStream());
       String line = br.readLine();
       while(line != null) {
         classesToShow.add(line.trim());
@@ -870,7 +871,7 @@ public class OntologyViewerOptions implements DocumentListener {
 
   /**
    * Use this method to switch on and off the filter.
-   * 
+   *
    * @param onOff
    */
   public void setClassesToHideOn(boolean onOff) {
@@ -882,7 +883,7 @@ public class OntologyViewerOptions implements DocumentListener {
 
   /**
    * Use this method to switch on and off the filter.
-   * 
+   *
    * @param onOff
    */
   public void setClassesToShowOn(boolean onOff) {
@@ -904,7 +905,7 @@ public class OntologyViewerOptions implements DocumentListener {
 
   /**
    * Returns if case sensitive option is set to ON/OFF
-   * 
+   *
    * @return
    */
   public boolean isAddAllOptionCaseSensitive() {
@@ -954,7 +955,7 @@ public class OntologyViewerOptions implements DocumentListener {
   /**
    * This methods implements the actions when any selectedAnnotationSetName is
    * removed from
-   * 
+   *
    * @param de
    */
   public void annotationSetRemoved(DocumentEvent de) {
@@ -967,7 +968,7 @@ public class OntologyViewerOptions implements DocumentListener {
 
   /**
    * Gets the URL of the filter file being used.
-   * 
+   *
    * @return
    */
   public URL getClassesToHideFileURL() {
@@ -976,7 +977,7 @@ public class OntologyViewerOptions implements DocumentListener {
 
   /**
    * Sets the filter file to be used.
-   * 
+   *
    * @param classesToHideFileURL
    */
   public void setClassesToHideFileURL(URL filterFileURL) {
@@ -988,7 +989,7 @@ public class OntologyViewerOptions implements DocumentListener {
 
   /**
    * Gets the URL of the filter file being used.
-   * 
+   *
    * @return
    */
   public URL getClassesToShowFileURL() {
@@ -997,7 +998,7 @@ public class OntologyViewerOptions implements DocumentListener {
 
   /**
    * Sets the filter file to be used.
-   * 
+   *
    * @param classesToHideFileURL
    */
   public void setClassesToShowFileURL(URL filterFileURL) {
@@ -1009,7 +1010,7 @@ public class OntologyViewerOptions implements DocumentListener {
 
   /**
    * Gets a set of ontology classes disabled in the OCAT.
-   * 
+   *
    * @return
    */
   public HashSet<String> getClassesToHide() {
@@ -1018,7 +1019,7 @@ public class OntologyViewerOptions implements DocumentListener {
 
   /**
    * Gets a set of ontology classes disabled in the OCAT.
-   * 
+   *
    * @return
    */
   public HashSet<String> getClassesToShow() {
@@ -1033,7 +1034,7 @@ public class OntologyViewerOptions implements DocumentListener {
   /**
    * This method should be called to specify the ontology classes that should be
    * disabled from the ocat.
-   * 
+   *
    * @param classesToHide
    */
   public void setClassesToHide(HashSet<String> ontologyClassesToFilterOut) {
@@ -1066,7 +1067,7 @@ public class OntologyViewerOptions implements DocumentListener {
   /**
    * This method should be called to specify the ontology classes that should be
    * disabled from the ocat.
-   * 
+   *
    * @param classesToHide
    */
   public void setClassesToShow(HashSet<String> ontologyClassesToShow) {
@@ -1098,7 +1099,7 @@ public class OntologyViewerOptions implements DocumentListener {
 
   /**
    * Disable Filtering.
-   * 
+   *
    * @param shouldDisable
    */
   public void disableFiltering(boolean shouldDisable) {

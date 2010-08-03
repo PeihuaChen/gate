@@ -28,6 +28,7 @@ import gate.Resource;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
+import gate.util.BomStrippingInputStreamReader;
 import gate.util.GateRuntimeException;
 import gate.util.OffsetComparator;
 
@@ -139,8 +140,8 @@ public class GATEWrapper extends AbstractLanguageAnalyser implements
 
       // Open a reader over the pos_tag_dict file so we can load
       // the database
-      BufferedReader in = new BufferedReader(new InputStreamReader(posTagURL
-              .openStream()));
+      BufferedReader in = new BomStrippingInputStreamReader(posTagURL
+              .openStream());
 
       // read in the first line of the file
       String line = in.readLine();

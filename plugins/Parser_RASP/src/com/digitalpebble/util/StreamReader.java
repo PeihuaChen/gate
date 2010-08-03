@@ -1,24 +1,34 @@
 package com.digitalpebble.util;
 
+import gate.util.BomStrippingInputStreamReader;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 
-/** 
+/**
  * Thread used to store the output ofan external process.
  **/
 
 public class StreamReader implements Runnable {
   private static final int SIZE = 1024;
-  private InputStreamReader is;
+  private Reader is;
   private StringBuffer internalBuffer = new StringBuffer();
 
   public StreamReader(InputStream is) {
-    this.is = new InputStreamReader(is);
+    this.is = new BomStrippingInputStreamReader(is);
   }
-  
+
+  // This used to ignore 'charset'.
   public StreamReader(InputStream is, String charset) {
-	this.is = new InputStreamReader(is);
+    try {
+      this.is = new BomStrippingInputStreamReader(is, charset);
+    }
+    catch(UnsupportedEncodingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public void run() {

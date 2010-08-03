@@ -21,6 +21,7 @@ import gate.gui.OptionsDialog;
 import gate.gui.ShellSlacFrame;
 import gate.gui.Splash;
 import gate.gui.UserGroupEditor;
+import gate.util.BomStrippingInputStreamReader;
 import gate.util.CorpusBenchmarkTool;
 import gate.util.Err;
 import gate.util.Files;
@@ -45,6 +46,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -171,7 +173,7 @@ public class Main {
     } catch(Exception e) {
       // the debug classes from SwingHelper are not available
     }
-    
+
     Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
     //show the splash
     SwingUtilities.invokeLater(new Runnable(){
@@ -180,10 +182,10 @@ public class Main {
         JPanel splashBox = new JPanel();
         splashBox.setLayout(new GridBagLayout());
         splashBox.setBackground(Color.white);
-        
+
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.insets = new Insets(2, 2, 2, 2);
-        
+
         String splashName =
           System.getProperty(GateConstants.APP_SPLASH_JAVA_PROPERTY_NAME);
         if(splashName == null)
@@ -198,7 +200,7 @@ public class Main {
         GraphicsConfiguration gc = GraphicsEnvironment.
           getLocalGraphicsEnvironment().getDefaultScreenDevice().
           getDefaultConfiguration();
-        
+
         splash = new Splash(null, gc, splashBox);
         splash.showSplash();
       }
@@ -220,7 +222,7 @@ public class Main {
         System.exit(1);
       }
     }
-    
+
 
     //create the main frame, show it and hide the splash
     SwingUtilities.invokeLater(new Runnable(){
@@ -228,7 +230,7 @@ public class Main {
         GraphicsConfiguration gc = GraphicsEnvironment.
         getLocalGraphicsEnvironment().getDefaultScreenDevice().
         getDefaultConfiguration();
-        
+
         //this needs to run before any GUI component is constructed.
         //the initial gate splash is exempted from this rule.
         applyUserPreferences();
@@ -427,8 +429,7 @@ public class Main {
       if (ver==null) {
         throw new IOException();
       }
-      BufferedReader reader = new BufferedReader(new InputStreamReader(ver,
-          "UTF-8"));
+      BufferedReader reader = new BomStrippingInputStreamReader(ver, "UTF-8");
       Main.version = reader.readLine();
     } catch(IOException ioe) {
       Main.version = "5.0";
@@ -440,13 +441,12 @@ public class Main {
       if (build==null) {
         throw new IOException();
       }
-      BufferedReader reader = new BufferedReader(new InputStreamReader(build,
-          "UTF-8"));
+      BufferedReader reader = new BomStrippingInputStreamReader(build, "UTF-8");
       Main.build = reader.readLine();
     } catch(IOException ioe) {
       Main.build = "0000";
     }
-  } // static initialiser finding build and version
+  } // static initializer finding build and version
 
 
 /**

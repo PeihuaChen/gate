@@ -1,6 +1,6 @@
 /*
  *  DataForLearning.java
- * 
+ *
  *  Yaoyong Li 22/03/2007
  *
  *  $Id: DataForLearning.java, v 1.0 2007-03-22 12:58:16 +0000 yaoyong $
@@ -20,6 +20,7 @@ import gate.learning.DocFeatureVectors;
 import gate.learning.LabelsOfFeatureVectorDoc;
 import gate.learning.SparseFeatureVector;
 import gate.learning.learners.svm.svm_node;
+import gate.util.BomStrippingInputStreamReader;
 /**
  * Data used for learning, read from the feature vector file.
  */
@@ -51,7 +52,7 @@ public class DataForLearning {
     // the array to store the training data
     trainingFVinDoc = new DocFeatureVectors[numTrainingDocs];
     labelsFVDoc = new LabelsOfFeatureVectorDoc[numTrainingDocs];
-    //Open the 
+    //Open the
     // read the training data from the file
     // first open the training data file
     try {
@@ -63,8 +64,8 @@ public class DataForLearning {
       }
        //    compute the total number of features
       totalNumFeatures = 0;
-      BufferedReader in = new BufferedReader(new InputStreamReader(
-        new FileInputStream(trainingData), "UTF-8"));
+      BufferedReader in = new BomStrippingInputStreamReader(
+        new FileInputStream(trainingData), "UTF-8");
       String line;
       String[] items;
       for(int iCounter = 0; iCounter < numTrainingDocs; ++iCounter) {
@@ -80,7 +81,7 @@ public class DataForLearning {
         trainingFVinDoc[i].setDocID(items[2]);
         labelsFVDoc[i] = new LabelsOfFeatureVectorDoc();
         trainingFVinDoc[i].readDocFVFromFile(in, num, labelsFVDoc[i]);
-        
+
         SparseFeatureVector[] fvs = trainingFVinDoc[i].getFvs();
         for(int j = 0; j < trainingFVinDoc[i].getNumInstances(); ++j) {
           //int[] indexes = fvs[j].getIndexes();
@@ -90,7 +91,7 @@ public class DataForLearning {
           if(totalNumFeatures < fvs[j].nodes[len - 1].index)
             totalNumFeatures = fvs[j].nodes[len - 1].index;
         }
-        
+
         if(isUsingFile) {
           SparseFeatureVector[] fvsInDoc = trainingFVinDoc[i].getFvs();
           // For each instance
@@ -113,7 +114,7 @@ public class DataForLearning {
       numTraining = 0;
       for(int i = 0; i < numTrainingDocs; ++i)
         numTraining += trainingFVinDoc[i].getNumInstances();
-        
+
       // add 3 for safety, because the index is counted from 1, not 0
       totalNumFeatures += 5;
     } catch(IOException e) {
@@ -129,8 +130,8 @@ public class DataForLearning {
     // read the training data from the file
     // first open the training data file
     try {
-      BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(
-        trainingData), "UTF-8"));
+      BufferedReader in = new BomStrippingInputStreamReader(new FileInputStream(
+        trainingData), "UTF-8");
       String line;
       String[] items;
       for(int i = 0; i < numTrainingDocs; ++i) {

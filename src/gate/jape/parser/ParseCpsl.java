@@ -31,9 +31,8 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
   /** Construct from a URL and an encoding
     */
   public ParseCpsl(URL url, String encoding, HashMap existingMacros) throws IOException {
-    this(new InputStreamReader(
-           new BufferedInputStream(url.openStream()),
-           encoding), existingMacros);
+    this(new BomStrippingInputStreamReader(url.openStream(), encoding),
+         existingMacros);
     baseURL = url;
     this.encoding = encoding;
   }
@@ -1439,18 +1438,28 @@ AnnotationAccessor accessor = null;
     finally { jj_save(1, xla); }
   }
 
+  final private boolean jj_3R_22() {
+    Token xsp;
+    if (jj_3R_24()) return true;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_24()) { jj_scanpos = xsp; break; }
+    }
+    return false;
+  }
+
   final private boolean jj_3R_16() {
     if (jj_3R_18()) return true;
     return false;
   }
 
-  final private boolean jj_3_2() {
-    if (jj_3R_14()) return true;
+  final private boolean jj_3R_15() {
+    if (jj_scan_token(ident)) return true;
     return false;
   }
 
-  final private boolean jj_3R_15() {
-    if (jj_scan_token(ident)) return true;
+  final private boolean jj_3_2() {
+    if (jj_3R_14()) return true;
     return false;
   }
 
@@ -1526,16 +1535,6 @@ AnnotationAccessor accessor = null;
 
   final private boolean jj_3R_17() {
     if (jj_3R_19()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_22() {
-    Token xsp;
-    if (jj_3R_24()) return true;
-    while (true) {
-      xsp = jj_scanpos;
-      if (jj_3R_24()) { jj_scanpos = xsp; break; }
-    }
     return false;
   }
 

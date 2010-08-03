@@ -56,7 +56,7 @@ public class TreeTagger
   private Charset charset;
 
   private boolean failOnUnmappableChar;
-  
+
   /**
    * Initialize this resource.  This method mostly consists of sanity checks on
    * the user's environment to ensure that the tree tagger binary will work.
@@ -98,12 +98,12 @@ public class TreeTagger
 
     //get current text from GATE for the TreeTagger
     File textfile = getCurrentText();
-    
+
     // check that the file exists
     File scriptfile = Files.fileFromURL(treeTaggerBinary);
     if (scriptfile.exists()==false)
       throw new ExecutionException("Script "+scriptfile.getAbsolutePath()+" does not exist");
-    
+
     // build the command line.
     // If the system property treetagger.sh.path is set, use this as the path
     // to the bourne shell interpreter and place it as the first item on the
@@ -123,7 +123,7 @@ public class TreeTagger
     else {
       treeTaggerCmd = new String[2];
     }
-    
+
     //generate TreeTagger command line
     treeTaggerCmd[index] = scriptfile.getAbsolutePath();
     treeTaggerCmd[index+1] = textfile.getAbsolutePath();
@@ -176,14 +176,13 @@ public class TreeTagger
       // Token
       CharsetDecoder charsetDecoder = charset.newDecoder();
       FileInputStream fis = new FileInputStream(gateTextFile);
-      InputStreamReader isr = new InputStreamReader(fis, charsetDecoder);
-      BufferedReader br = new BufferedReader(isr);
+      BufferedReader br = new BomStrippingInputStreamReader(fis, charsetDecoder);
 
       for(int i=0;i<tokens.size();i++) {
         FeatureMap features = ((Annotation) tokens.get(i)).getFeatures();
         features.put(TREE_TAGGER_STRING_FEATURE_NAME, br.readLine());
       }
-      
+
     }
     catch (CharacterCodingException cce) {
       throw (ExecutionException)new ExecutionException(
@@ -215,8 +214,7 @@ public class TreeTagger
 
       //get its tree tagger output (gate input)
       BufferedReader input =
-          new BufferedReader
-          (new InputStreamReader(p.getInputStream(), charsetDecoder));
+          new BomStrippingInputStreamReader(p.getInputStream(), charsetDecoder);
 
       // let us store all tagged data in lines
       // there must be at leat the original form a tab a POS

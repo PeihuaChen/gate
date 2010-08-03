@@ -27,6 +27,7 @@ import java.util.Set;
 
 import javax.jws.WebService;
 
+import gate.util.BomStrippingInputStreamReader;
 import gate.util.Files;
 import org.openrdf.model.BNode;
 import org.openrdf.model.Literal;
@@ -68,7 +69,7 @@ import org.openrdf.vocabulary.RDFS;
 /**
  * Implementation of the GATE Ontology Services. This class provides an
  * implementation of each and every service defined under the OWLIM interface.
- * 
+ *
  * @author niraj
  */
 @WebService(endpointInterface = "gate.creole.ontology.owlim.OWLIM", targetNamespace = "http://gate.ac.uk/ns/ontology/owlim")
@@ -369,7 +370,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
    * the following: + or - that indicates addition or removal of the tripple.
    * subject - URI or * if all predicate - URI or * if all object - URI or * if
    * all datatype - URI or * if all
-   * 
+   *
    * @param repositoryID
    * @return
    * @throws GateOntologyException
@@ -387,7 +388,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * Gets the default name space for this ontology. The defaultNameSpace is (by
    * default) used for the newly created resources.
-   * 
+   *
    * @return a String value.
    */
   public String getDefaultNameSpace(String repositoryID)
@@ -404,7 +405,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Adds the ontology data
-   * 
+   *
    * @param repositoryID
    * @param data
    * @param baseURI
@@ -435,7 +436,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * Exports the ontology data into the provided format to the provided output
    * stream.
-   * 
+   *
    * @param out
    * @param format
    */
@@ -479,7 +480,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * Exports the ontology data into the provided format using the provided
    * writer.
-   * 
+   *
    * @param out
    * @param format
    */
@@ -539,7 +540,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * Returns whether the theSuperClass is indeed a super class of the
    * theSubClassURI.
-   * 
+   *
    * @param repositoryID
    * @param theSuperClassURI
    * @param theSubClassURI
@@ -625,7 +626,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * Returns whether the theSubClass is indeed a sub class of the
    * theSuperClassURI.
-   * 
+   *
    * @param repositoryID
    * @param theSuperClassURI
    * @param theSubClassURI
@@ -640,7 +641,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Given a property URI, this method returns an object of Property
-   * 
+   *
    * @param repositoryID
    * @param thePropertyURI
    * @return
@@ -655,7 +656,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Checks whether the two classes defined as same in the ontology.
-   * 
+   *
    * @param theClassURI1
    * @param theClassURI2
    * @return
@@ -689,7 +690,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   // ************
   /**
    * Creates a new AnnotationProperty.
-   * 
+   *
    * @param aPropertyURI
    *          URI of the property to be added into the ontology. Done
    */
@@ -708,7 +709,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
    * properties set on the resource. For each property in the ontology, this
    * method checks if the current resource is valid domain. If so, the property
    * is said to be applicable, and otherwise not..
-   * 
+   *
    * @return
    */
   public Property[] getPropertiesWithResourceAsDomain(String repositoryID,
@@ -890,7 +891,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
    * properties set on the resource. For each property in the ontology, this
    * method checks if the current resource is valid range. If so, the property
    * is said to be applicable, and otherwise not.
-   * 
+   *
    * @return
    */
   public Property[] getPropertiesWithResourceAsRange(String repositoryID,
@@ -1035,7 +1036,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Gets the annotation properties set on the specified resource
-   * 
+   *
    * @param repositoryID
    * @param theResourceURI
    * @return
@@ -1068,7 +1069,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Gets the RDF properties set on the specified resource
-   * 
+   *
    * @param repositoryID
    * @param theResourceURI
    * @return
@@ -1101,7 +1102,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Gets the datatype properties set on the specified resource
-   * 
+   *
    * @param repositoryID
    * @param theResourceURI
    * @return
@@ -1129,7 +1130,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Gets the object properties set on the specified resource
-   * 
+   *
    * @param repositoryID
    * @param theResourceURI
    * @return
@@ -1156,7 +1157,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Gets the transitive properties set on the specified resource
-   * 
+   *
    * @param repositoryID
    * @param theResourceURI
    * @return
@@ -1184,7 +1185,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Gets the symmetric properties set on the specified resource
-   * 
+   *
    * @param repositoryID
    * @param theResourceURI
    * @return
@@ -1212,7 +1213,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * returns if the given property is an Annotation property
-   * 
+   *
    * @param aPropertyURI
    * @return Done
    */
@@ -1227,7 +1228,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Adds a new annotation property value and specifies the language.
-   * 
+   *
    * @param theAnnotationProperty
    *          the annotation property
    * @param value
@@ -1248,7 +1249,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Gets the list of annotation property values
-   * 
+   *
    * @param repositoryID
    * @param theResourceURI
    * @param theAnnotationPropertyURI
@@ -1285,7 +1286,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Gets the annotation property for the given resource uri.
-   * 
+   *
    * @param repositoryID
    * @param theResourceURI
    * @param theAnnotationPropertyURI
@@ -1322,7 +1323,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * For the current resource, the method removes the given literal for the
    * given property.
-   * 
+   *
    * @param theAnnotationProperty
    * @param literal
    */
@@ -1343,7 +1344,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Removes all values for a named property.
-   * 
+   *
    * @param theProperty
    *          the property
    */
@@ -1376,7 +1377,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * The method adds a generic property specifiying domain and range for the
    * same. All classes specified in domain and range must exist.
-   * 
+   *
    * @param aPropertyURI
    * @param domainClassesURIs
    * @param rangeClassesTypes
@@ -1408,7 +1409,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * returns if the given property is an RDF property
-   * 
+   *
    * @param aPropertyURI
    * @return Done
    */
@@ -1438,7 +1439,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * The method adds a data type property specifiying domain and range for the
    * same. All classes specified in domain and range must exist.
-   * 
+   *
    * @param aPropertyURI
    * @param domainClassesURIs
    * @param dataTypeURI
@@ -1466,7 +1467,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Returns the datatype uri specified for the given datatype property.
-   * 
+   *
    * @param repositoryID
    * @param theDatatypePropertyURI
    * @return
@@ -1497,7 +1498,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * The method adds a symmetric property specifying domain and range for the
    * same. All classes specified in domain and range must exist.
-   * 
+   *
    * @param aPropertyURI
    * @param domainAndRangeClassesURIs
    *          Done
@@ -1523,7 +1524,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Checkes whether the two properties are Equivalent.
-   * 
+   *
    * @param repositoryID
    * @param aPropertyURI
    * @return
@@ -1540,7 +1541,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * for the given property, the method returns all its super properties
-   * 
+   *
    * @param aPropertyURI
    * @param direct
    * @return
@@ -1606,7 +1607,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * for the given property, the method returns all its sub properties
-   * 
+   *
    * @param aPropertyURI
    * @param direct
    * @return
@@ -1670,7 +1671,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Checkes whether the two properties have a super-sub relation.
-   * 
+   *
    * @param repositoryID
    * @param aSuperPropertyURI
    * @param aSubPropertyURI
@@ -1734,7 +1735,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Checkes whether the two properties have a super-sub relation.
-   * 
+   *
    * @param repositoryID
    * @param aSuperPropertyURI
    * @param aSubPropertyURI
@@ -1752,7 +1753,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
    * Given a class and instance URIs, the method checks if the latter is a
    * member of former. If the boolean parameter direct is set to true, the
    * method also checks if the literal is a direct instance of the class.
-   * 
+   *
    * @param aSuperClassURI
    * @param individualURI
    * @return Done
@@ -1765,7 +1766,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Returns whether the individual1 is different from the individual2.
-   * 
+   *
    * @param theInstanceURI1
    * @param theInstanceURI2
    * @return
@@ -1783,7 +1784,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Checkes whether the two individuals are same.
-   * 
+   *
    * @param repositoryID
    * @param individualURI1
    * @param invidualURI2
@@ -1805,7 +1806,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   // **************
   /**
    * adds the RDF Property value on the specified instance
-   * 
+   *
    * @param repositoryID
    * @param anInstanceURI
    * @param anRDFPropertyURI
@@ -1822,7 +1823,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Removes the specified RDF Property Value
-   * 
+   *
    * @param repositoryID
    * @param anInstanceURI
    * @param anRDFPropertyURI
@@ -1840,7 +1841,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * gets the rdf property values for the specified instance.
-   * 
+   *
    * @param repositoryID
    * @param anInstanceURI
    * @param anRDFPropertyURI
@@ -1869,7 +1870,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Removes all the RDF Property values from the given instance.
-   * 
+   *
    * @param repositoryID
    * @param anInstanceURI
    * @param anRDFPropertyURI
@@ -1896,7 +1897,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   // *****************
   /**
    * Adds the value for the given Property.
-   * 
+   *
    * @param repositoryID
    * @param anInstanceURI
    * @param aDatatypePropertyURI
@@ -1917,7 +1918,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Removes the provided value for the given instance.
-   * 
+   *
    * @param repositoryID
    * @param anInstanceURI
    * @param aDatatypePropertyURI
@@ -1939,7 +1940,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Gets a list of values for the given Property.
-   * 
+   *
    * @param repositoryID
    * @param anInstanceURI
    * @param aDatatypePropertyURI
@@ -1979,7 +1980,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * Removes all property values set on the provided instance for the current
    * property.
-   * 
+   *
    * @param repositoryID
    * @param anInstanceURI
    * @param aDatatypePropertyURI
@@ -2001,7 +2002,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   // *****************
   /**
    * Adds the value for the given property (Object, Symmetric and Transitive).
-   * 
+   *
    * @param repositoryID
    * @param sourceInstanceURI
    * @param anObjectPropertyURI
@@ -2023,7 +2024,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * Remove the provided value for the given property (Object, Symmetric and
    * Transitive).
-   * 
+   *
    * @param repositoryID
    * @param sourceInstanceURI
    * @param anObjectPropertyURI
@@ -2047,7 +2048,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * Gets a list of values for the given Property (Object, Symmetric and
    * Transitive).
-   * 
+   *
    * @param repositoryID
    * @param sourceInstanceURI
    * @param anObjectPropertyURI
@@ -2083,7 +2084,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * Removes all property values set for the current property (Object, Symmetric
    * and Transitive).
-   * 
+   *
    * @param repositoryID
    * @param sourceInstanceURI
    * @param anObjectPropertyURI
@@ -2115,7 +2116,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
    * modify access to any of the repositories (unless given write access to
    * world users) available on the server. However, unregistered users are and
    * will be allowed to have read access on all repositories.
-   * 
+   *
    * @param username
    * @param password
    * @return
@@ -2231,7 +2232,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
    * allowing users to add more data into it. Otherwise the graph is populated
    * with the given ontology. The user is also asked to provide the RDF format
    * information (i.e. ''N3'', ''TURTLE'', ''NTRIPLES'' or ''RDFXML'') .
-   * 
+   *
    * @param repositoryID
    * @param username
    * @param password
@@ -2289,7 +2290,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
    * more data into it. Otherwise the graph is populated with the given ontology
    * URL. The user is also asked to provide the RDF format information (i.e.
    * ''N3'', ''TURTLE'', ''NTRIPLES'' or ''RDFXML'') .
-   * 
+   *
    * @param repositoryID
    * @param username
    * @param password
@@ -2337,7 +2338,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Removes the repository with given ID
-   * 
+   *
    * @param repositoryID
    * @return
    */
@@ -2392,7 +2393,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
    * parameters (i.e. ''N3'', ''TURTLE'', ''NTRIPLES'' or ''RDFXML'') , the
    * method returns an equivalent string representation of the data in the
    * supplied format.
-   * 
+   *
    * @param format
    * @return
    */
@@ -2407,7 +2408,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
       InputStream stream =
         currentRepository.extractRDF(getRDFFormat(format), true, true, true,
           true);
-      BufferedReader br = new BufferedReader(new InputStreamReader(stream));
+      BufferedReader br = new BomStrippingInputStreamReader(stream);
       String line = br.readLine();
       StringBuffer sb = new StringBuffer(1028);
       while(line != null) {
@@ -2428,7 +2429,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * The method allows adding version information to the repository.
-   * 
+   *
    * @param versionInfo
    */
   public void setVersion(String repositoryID, String versionInfo)
@@ -2442,7 +2443,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * The method returns the version information of the repository.
-   * 
+   *
    * @return
    */
   public String getVersion(String repositoryID) throws GateOntologyException {
@@ -2463,7 +2464,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   // *******************************************************************
   /**
    * The method allows adding a class to repository.
-   * 
+   *
    * @param classURI
    */
   public void addClass(String repositoryID, String classURI, byte classType)
@@ -2486,7 +2487,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Given a class to delete, it removes it from the repository.
-   * 
+   *
    * @param repositoryID
    * @param classURI
    * @param removeSubTree
@@ -2613,7 +2614,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * The method returns if the current repository has a class with URI that
    * matches with the class parameter.
-   * 
+   *
    * @return
    */
   public boolean hasClass(String repositoryID, String classURI)
@@ -2627,7 +2628,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
    * if top set to true, the method returns only the top classes (i.e. classes
    * with no super class). Otherwise it returns all classes available in
    * repository.
-   * 
+   *
    * @param top
    * @return
    */
@@ -2684,7 +2685,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Returns if the given class is a top class.
-   * 
+   *
    * @param classURI
    * @return
    */
@@ -2696,7 +2697,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Returns if the given property is a top property.
-   * 
+   *
    * @param classURI
    * @return
    */
@@ -2714,7 +2715,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
    * The method creates a new class with the URI as specified in className and
    * adds it as a subClassOf the parentClass. It also adds the provided comment
    * on the subClass.
-   * 
+   *
    * @param superClassURI
    * @param subClassURI
    */
@@ -2731,7 +2732,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
    * The method creates a new class with the URI as specified in className and
    * adds it as a superClassOf the parentClass. It also adds the provided
    * comment on the subClass.
-   * 
+   *
    * @param superClassURI
    * @param subClassURI
    */
@@ -2746,7 +2747,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Removes the subclass relationship
-   * 
+   *
    * @param superClassURI
    * @param subClassURI
    */
@@ -2761,7 +2762,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Removes the superclass relationship
-   * 
+   *
    * @param superClassURI
    * @param subClassURI
    */
@@ -2776,7 +2777,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * This method returns all sub classes of the given class
-   * 
+   *
    * @param superClassURI
    * @param direct
    * @return
@@ -2837,7 +2838,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * This method returns all super classes of the given class
-   * 
+   *
    * @param subClassURI
    * @param direct
    * @return
@@ -2896,7 +2897,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Sets the classes as disjoint
-   * 
+   *
    * @param class1URI
    * @param class2URI
    */
@@ -2911,7 +2912,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Sets the classes as same classes
-   * 
+   *
    * @param class1URI
    * @param class2URI
    */
@@ -2927,7 +2928,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * returns an array of classes which are marked as disjoint for the given
    * class
-   * 
+   *
    * @param classURI
    * @return
    */
@@ -2956,7 +2957,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * returns an array of classes which are equivalent as the given class
-   * 
+   *
    * @param aClassURI
    * @return
    */
@@ -2984,7 +2985,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Removes the given property
-   * 
+   *
    * @param repositoryID
    * @param aPropertyURI
    * @param removeSubTree
@@ -3048,7 +3049,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * The method adds an object property specifiying domain and range for the
    * same. All classes specified in domain and range must exist.
-   * 
+   *
    * @param aPropertyURI
    * @param domainClassesURIs
    * @param rangeClassesTypes
@@ -3080,7 +3081,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * The method adds a transitive property specifiying domain and range for the
    * same. All classes specified in domain and range must exist.
-   * 
+   *
    * @param aPropertyURI
    * @param domainClassesURIs
    * @param rangeClassesTypes
@@ -3112,7 +3113,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * The method returns an array of properties. Property is a complex structure,
    * which contains name, comment, information about its domain and range.
-   * 
+   *
    * @return
    */
   public Property[] getRDFProperties(String repositoryID)
@@ -3140,7 +3141,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * The method returns an array of properties. Property is a complex structure,
    * which contains name, comment, information about its domain and range.
-   * 
+   *
    * @return
    */
   public Property[] getObjectProperties(String repositoryID)
@@ -3182,7 +3183,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * The method returns an array of properties. Property is a complex structure,
    * which contains name, comment, information about its domain and range.
-   * 
+   *
    * @return
    */
   public Property[] getSymmetricProperties(String repositoryID)
@@ -3204,7 +3205,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * The method returns an array of properties. Property is a complex structure,
    * which contains name, comment, information about its domain and range.
-   * 
+   *
    * @return
    */
   public Property[] getTransitiveProperties(String repositoryID)
@@ -3226,7 +3227,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * The method returns an array of properties. Property is a complex structure,
    * which contains name, comment, information about its domain and range.
-   * 
+   *
    * @return
    */
   public Property[] getDatatypeProperties(String repositoryID)
@@ -3248,7 +3249,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * The method returns an array of properties. Property is a complex structure,
    * which contains name, comment, information about its domain and range.
-   * 
+   *
    * @return
    */
   public Property[] getAnnotationProperties(String repositoryID)
@@ -3274,7 +3275,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Given a property, this method returns its domain
-   * 
+   *
    * @param aPropertyURI
    * @return
    */
@@ -3299,7 +3300,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Given a property, this method returns its range
-   * 
+   *
    * @param aPropertyURI
    * @return
    */
@@ -3326,7 +3327,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Returns if the provided property is functional
-   * 
+   *
    * @param aPropertyURI
    * @return
    */
@@ -3342,7 +3343,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * sets the current property as functional
-   * 
+   *
    * @param aPropertyURI
    * @param isFunctional
    */
@@ -3364,7 +3365,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * returns if the given property is inverse functional property
-   * 
+   *
    * @param aPropertyURI
    * @return
    */
@@ -3380,7 +3381,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Sets the current property as inverse functional property
-   * 
+   *
    * @param aPropertyURI
    * @param isInverseFunctional
    */
@@ -3402,7 +3403,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * returns if the given property is a symmetric property
-   * 
+   *
    * @param aPropertyURI
    * @return
    */
@@ -3418,7 +3419,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * returns if the given property is a transitive property
-   * 
+   *
    * @param aPropertyURI
    * @return
    */
@@ -3434,7 +3435,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * returns if the given property is a datatype property
-   * 
+   *
    * @param aPropertyURI
    * @return
    */
@@ -3450,7 +3451,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * returns if the given property is an object property
-   * 
+   *
    * @param aPropertyURI
    * @return
    */
@@ -3469,7 +3470,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   // *************************************
   /**
    * Sets two properties as same
-   * 
+   *
    * @param property1URI
    * @param property2URI
    */
@@ -3485,7 +3486,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * For the given property, this method returns all properties marked as
    * Equivalent as it
-   * 
+   *
    * @param aPropertyURI
    * @return
    */
@@ -3507,7 +3508,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * For the given properties, this method registers the super, sub relation
-   * 
+   *
    * @param superPropertyURI
    * @param subPropertyURI
    */
@@ -3522,7 +3523,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * For the given properties, this method removes the super, sub relation
-   * 
+   *
    * @param superPropertyURI
    * @param subPropertyURI
    */
@@ -3537,7 +3538,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * For the given properties, this method registers the super, sub relation
-   * 
+   *
    * @param superPropertyURI
    * @param subPropertyURI
    */
@@ -3552,7 +3553,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * For the given properties, this method removes the super, sub relation
-   * 
+   *
    * @param superPropertyURI
    * @param subPropertyURI
    */
@@ -3567,7 +3568,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * for the given property, the method returns all its super properties
-   * 
+   *
    * @param aPropertyURI
    * @param direct
    * @return
@@ -3581,7 +3582,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * for the given property, the method returns all its sub properties
-   * 
+   *
    * @param aPropertyURI
    * @param direct
    * @return
@@ -3595,7 +3596,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * for the given property, the method returns all its inverse properties
-   * 
+   *
    * @param aPropertyURI
    * @return
    */
@@ -3617,7 +3618,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * property1 is set as inverse of property 2
-   * 
+   *
    * @param property1URI
    * @param property2URI
    */
@@ -3636,7 +3637,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * The method adds a new instance (literal) into the repository. It then
    * creates a statement indicating membership relation with the provided class.
-   * 
+   *
    * @param superClassURI
    * @param individualURI
    */
@@ -3651,7 +3652,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * The method removes the provided instance from the repository.
-   * 
+   *
    * @param individual
    * @return
    */
@@ -3696,7 +3697,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * The method returns all member instances of the provided class. It returns
    * only the direct instances if the boolean parameter direct is set to true.
-   * 
+   *
    * @param superClassURI
    * @param direct
    */
@@ -3730,7 +3731,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * returns all resources registered as individuals in the ontology
-   * 
+   *
    * @return
    */
   public String[] getIndividuals(String repositoryID)
@@ -3752,7 +3753,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
    * Given a class and instance URIs, the method checks if the latter is a
    * member of former. If the boolean parameter direct is set to true, the
    * method also checks if the literal is a direct instance of the class.
-   * 
+   *
    * @param aSuperClassURI
    * @param individualURI
    * @return
@@ -3786,7 +3787,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * For the given individual, the method returns a set of classes for which the
    * individual is registered as instance of
-   * 
+   *
    * @param individualURI
    */
   public ResourceInfo[] getClassesOfIndividual(String repositoryID,
@@ -3818,7 +3819,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   // *******************************************************************
   /**
    * individual1 is sets as different individual from individual2
-   * 
+   *
    * @param individual1URI
    * @param individual2URI
    */
@@ -3834,7 +3835,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * for the given individual, the method returns all individuals registered as
    * different from the given individual
-   * 
+   *
    * @param individualURI
    * @return
    */
@@ -3856,7 +3857,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * individual1 is set as same as the individual2
-   * 
+   *
    * @param individual1URI
    * @param individual2URI
    */
@@ -3872,7 +3873,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * for the given individual, the method returns all individuals which are
    * registered as same as the provided individual
-   * 
+   *
    * @param inidividualURI
    * @return
    */
@@ -3898,7 +3899,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * This method given a restriction uri returns the value for the onProperty
    * element.
-   * 
+   *
    * @param repositoryId
    * @param restrictionURI
    * @return
@@ -3926,7 +3927,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * This method sets the value for onProperty element on the given restriction.
-   * 
+   *
    * @param repositoryId
    * @param restrictionURI
    * @param propertyURI
@@ -3944,7 +3945,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Gets the datatype uri specified on the given restriction uri.
-   * 
+   *
    * @param repositoryID
    * @param restrictionURI
    * @return
@@ -3984,7 +3985,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Sets the datatype uri for the given restriction uri.
-   * 
+   *
    * @param repositoryID
    * @param restrictionURI
    * @param datatypeURI
@@ -4041,7 +4042,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Gets the cardinality value specified on the given restriction uri.
-   * 
+   *
    * @param repositoryID
    * @param restrictionURI
    * @param restrictionType
@@ -4101,7 +4102,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
           classType = OConstants.MAX_CARDINALITY_RESTRICTION;
         }
       }
-      
+
       if(classType == OConstants.OWL_CLASS) {
         if(res instanceof BNode)
           classType = OConstants.ANNONYMOUS_CLASS;
@@ -4135,11 +4136,11 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
     QueryResultsTable iter = performQuery(query);
     return iter.getRowCount() > 0;
 
-  }  
-  
+  }
+
   /**
    * Sets the cardinality value for the given restriction uri.
-   * 
+   *
    * @param repositoryID
    * @param restrictionURI
    * @param restrictionType
@@ -4201,7 +4202,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
    * CARDINALITY_RESTRICTION, MIN_CARDINALITY_RESTRICTION,
    * MAX_CARDINALITY_RESTRICTION, HAS_VALUE_RESTRICTION,
    * ALL_VALUES_FROM_RESTRICTION.
-   * 
+   *
    * @param repositoryID
    * @param restrictionURI
    * @return
@@ -4276,7 +4277,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
    * The method is useful for adding statements into the graph. All three values
    * must exist in repository. These values are cast in Resources and then added
    * into the graph of repository.
-   * 
+   *
    * @param subjectURI
    * @param predicateURI
    * @param objectURI
@@ -4309,7 +4310,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
    * The method is useful for removing statements from the graph of repository.
    * All three values must exist in repository. these values are cast in
    * Resources and then removed from teh graph of repository.
-   * 
+   *
    * @param subjectURI
    * @param predicateURI
    * @param objectURI
@@ -4605,7 +4606,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
   /**
    * This method tells whether the resource is imported or added as an explicit
    * statement.
-   * 
+   *
    * @param repositoryID
    * @param resourceURI
    * @return
@@ -4707,7 +4708,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * given a string, return the equivalent RDFFormat
-   * 
+   *
    * @param format
    * @return
    */
@@ -4756,7 +4757,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Set the provided repository as a current repository
-   * 
+   *
    * @param repositoryID
    * @param ontoFileUrl
    * @param baseURI
@@ -5055,7 +5056,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Creates a new user
-   * 
+   *
    * @param username
    * @param password
    * @return
@@ -5077,7 +5078,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Creates a new Repository
-   * 
+   *
    * @param repositoryID
    * @param baseURI
    * @param persist
@@ -5201,7 +5202,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * Adds ontology Data
-   * 
+   *
    * @param ontoFileUrl
    * @param baseURI
    * @param format
@@ -5254,7 +5255,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * This method is used to obtain the most specific classes
-   * 
+   *
    * @param repositoryID
    * @param values
    * @return
@@ -5305,7 +5306,7 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
 
   /**
    * This method is used to obtain the most specific classes
-   * 
+   *
    * @param repositoryID
    * @param values
    * @return

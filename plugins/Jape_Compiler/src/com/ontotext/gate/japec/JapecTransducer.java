@@ -160,7 +160,7 @@ public class JapecTransducer extends AbstractLanguageAnalyser {
                                                        });
 
     BufferedReader error =
-      new BufferedReader(new InputStreamReader(p.getErrorStream()));
+      new BomStrippingInputStreamReader(p.getErrorStream());
     String line;
     while ((line = error.readLine()) != null) {
       Err.prln(line);
@@ -168,7 +168,7 @@ public class JapecTransducer extends AbstractLanguageAnalyser {
     error.close();
 
     BufferedReader input =
-      new BufferedReader(new InputStreamReader(p.getInputStream()));
+      new BomStrippingInputStreamReader(p.getInputStream());
     while ((line = input.readLine()) != null) {
       Err.prln(line);
     }

@@ -105,7 +105,7 @@ public class NekoHtmlDocumentFormat extends HtmlDocumentFormat {
    * URL.If the URL is not valid, or is null, then the doc's content
    * will be parsed. If the doc's content is not a valid XML then the
    * parser might crash.
-   * 
+   *
    * @param doc The gate document you want to parse. If
    *          <code>doc.getSourceUrl()</code> returns <b>null</b>
    *          then the content of doc will be parsed. Using a URL is
@@ -171,6 +171,7 @@ public class NekoHtmlDocumentFormat extends HtmlDocumentFormat {
       else if(doc instanceof TextualDocument) {
         // textual document - load with user specified encoding
         String docEncoding = ((TextualDocument)doc).getEncoding();
+        // XML, so no BOM stripping.
         Reader docReader =
                 new InputStreamReader(doc.getSourceUrl().openStream(),
                         docEncoding);
@@ -194,7 +195,7 @@ public class NekoHtmlDocumentFormat extends HtmlDocumentFormat {
 
       /* The following line can forward an
        * ArrayIndexOutOfBoundsException from
-       * org.cyberneko.html.HTMLConfiguration.parse and crash GATE.    */ 
+       * org.cyberneko.html.HTMLConfiguration.parse and crash GATE.    */
       parser.parse(is);
       // Angel - end
       ((DocumentImpl)doc).setNextAnnotationId(handler.getCustomObjectsId());
@@ -205,7 +206,7 @@ public class NekoHtmlDocumentFormat extends HtmlDocumentFormat {
       throw new DocumentFormatException("I/O exception for "
               + doc.getSourceUrl().toString(), e);
     }
-    
+
     /* Handle XNIException and ArrayIndexOutOfBoundsException:
      * flag the parsing error and keep going.     */
     catch(Exception e) {
@@ -246,7 +247,7 @@ public class NekoHtmlDocumentFormat extends HtmlDocumentFormat {
    * the document. The HTML parser only reports event positions as line
    * and column numbers, so we need this information to be able to
    * correctly infer the repositioning information.
-   * 
+   *
    * @param docContent
    * @return
    */
@@ -261,7 +262,7 @@ public class NekoHtmlDocumentFormat extends HtmlDocumentFormat {
       }
       numMatches++;
     }
-    
+
     int[] lineOffsets = new int[numMatches];
 
     // ... and then again to populate the array with values.
