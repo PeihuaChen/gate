@@ -11,6 +11,7 @@ import gate.alignment.gui.FinishedAlignmentAction;
 import gate.alignment.gui.PUAPair;
 import gate.alignment.gui.PreDisplayAction;
 import gate.alignment.utils.Regex;
+import gate.util.BomStrippingInputStreamReader;
 import gate.util.GateRuntimeException;
 
 import java.io.BufferedReader;
@@ -39,9 +40,9 @@ import java.util.regex.Pattern;
 /**
  * Alignment Cache is used for automatically aligning units of alignment
  * that were automatically aligned.
- * 
+ *
  * @author niraj
- * 
+ *
  */
 public class AlignmentCache implements PreDisplayAction,
                            FinishedAlignmentAction {
@@ -88,8 +89,8 @@ public class AlignmentCache implements PreDisplayAction,
           dictionary = new HashMap<String, SortedSet<String>>();
 
           if(new File(args[0]).exists()) {
-            BufferedReader br = new BufferedReader(new InputStreamReader(
-                    new FileInputStream(new File(args[0])), "UTF-8"));
+            BufferedReader br = new BomStrippingInputStreamReader(
+                    new FileInputStream(new File(args[0])), "UTF-8");
 
             String line = br.readLine();
             while(line != null) {

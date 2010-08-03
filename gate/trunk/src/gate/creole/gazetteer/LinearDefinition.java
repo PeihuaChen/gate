@@ -21,6 +21,7 @@ import java.net.URL;
 import java.util.*;
 
 import gate.creole.ResourceInstantiationException;
+import gate.util.BomStrippingInputStreamReader;
 import gate.util.Files;
 
 
@@ -60,10 +61,10 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
 
   /** flag whether the definition has been modified after loading */
   private boolean isModified = false;
-  
+
   /** the separator used to delimit feature name-value pairs in gazetteer lists */
   private String separator;
-  
+
   public LinearDefinition() {
   }
 
@@ -211,7 +212,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
     }
     try {
       BufferedReader defReader =
-      new BufferedReader(new InputStreamReader((url).openStream(), ENCODING));
+      new BomStrippingInputStreamReader((url).openStream(), ENCODING);
 
       String line;
       LinearNode node;
@@ -564,7 +565,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
   public String getSeparator() {
     return separator;
   }
-  
+
   /**
    * @param separator the separator to set
    */

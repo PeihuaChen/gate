@@ -58,9 +58,8 @@ public class ParseCpsl implements JapeConstants {
   /** Construct from a URL and an encoding
     */
   public ParseCpsl(URL url, String encoding, HashMap existingMacros) throws IOException {
-    this(new InputStreamReader(
-           new BufferedInputStream(url.openStream()),
-           encoding), existingMacros);
+    this(new BomStrippingInputStreamReader(url.openStream(), encoding), 
+         existingMacros);
     baseURL = url;
     this.encoding = encoding;
   }

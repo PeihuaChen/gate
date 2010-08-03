@@ -1,5 +1,7 @@
 package gate.util.ant.packager;
 
+import gate.util.BomStrippingInputStreamReader;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -46,7 +48,7 @@ public class GazetteerLists extends DataType implements ResourceCollection {
    * Set the location of the definition file from which the lists should
    * be extracted. The list definition file is parsed and the .lst files
    * found are added as pathelements to this path.
-   * 
+   *
    * @throws BuildException if an error occurs parsing the definition
    *           file.
    */
@@ -96,21 +98,20 @@ public class GazetteerLists extends DataType implements ResourceCollection {
               "\"definition\" attribute is required for gazetteerlists");
     }
     log("definition file: " + definition, Project.MSG_VERBOSE);
-    
+
     Set<String> lists = new HashSet<String>();
     File definitionDir = definition.getParentFile();
     try {
       FileInputStream fis = new FileInputStream(definition);
       try {
-        InputStreamReader isr = null;
+        BufferedReader in = null;
         if(encoding == null) {
-          isr = new InputStreamReader(fis);
+          in = new BomStrippingInputStreamReader(fis);
         }
         else {
-          isr = new InputStreamReader(fis, encoding);
+          in = new BomStrippingInputStreamReader(fis, encoding);
         }
 
-        BufferedReader in = new BufferedReader(isr);
         String line;
         while((line = in.readLine()) != null) {
           int indexOfColon = line.indexOf(':');
@@ -130,7 +131,7 @@ public class GazetteerLists extends DataType implements ResourceCollection {
       throw new BuildException("Error reading gazetteer definition file "
               + definition, ioe);
     }
-    
+
     listNames = lists.toArray(new String[lists.size()]);
   }
 

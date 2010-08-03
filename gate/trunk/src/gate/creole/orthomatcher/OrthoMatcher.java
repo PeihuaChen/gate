@@ -211,9 +211,8 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
 
     //at this point we have the definition file
     try{
-      BufferedReader reader = new BufferedReader(
-              new InputStreamReader(definitionFileURL.openStream(),
-                      encoding));
+      BufferedReader reader = new BomStrippingInputStreamReader(definitionFileURL.openStream(),
+                      encoding);
       String lineRead = null;
       //boolean foundANickname = false;
       while ((lineRead = reader.readLine()) != null){
@@ -224,7 +223,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
           if (nameList.equals("nickname")) {
             if (minimumNicknameLikelihood == null) {
               throw new ResourceInstantiationException("No value for the required parameter minimumNicknameLikelihood!");
-            } 
+            }
             nicknameFile = nameFile;
           }
           else {
@@ -283,7 +282,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
       docCleanup();
       Map matchesMap = (Map)document.getFeatures().
       get(DOCUMENT_COREF_FEATURE_NAME);
-  
+
 
       // creates the cdg list from the document
       //no need to create otherwise, coz already done in init()
@@ -293,7 +292,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
 
       //Match all name annotations and unknown annotations
       matchNameAnnotations();
-      
+
       //used to check if the Orthomatcher works properly
       //OrthoMatcherHelper.setMatchesPositions(nameAllAnnots);
 
@@ -312,8 +311,8 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
         //cannot do clear() as this has already been put on the document
         //so I need a new one for the next run of matcher
         matchesDocFeature = new ArrayList();
-        
-        
+
+
         fireStatusChanged("OrthoMatcher completed");
       }
     }finally{
@@ -366,7 +365,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
         if (DEBUG) {
           if (log.isDebugEnabled()) {
             log.debug("Now processing the annotation:  "
-                    + orthoAnnotation.getStringForAnnotation(nameAnnot, document) + " Id: " + nameAnnot.getId() 
+                    + orthoAnnotation.getStringForAnnotation(nameAnnot, document) + " Id: " + nameAnnot.getId()
                     + " Type: " + nameAnnot.getType() + " Offset: " + nameAnnot.getStartNode().getOffset());
           }
         }
@@ -404,7 +403,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
           if (returnAnnot != null) {
             if (DEBUG) {
               if (log.isDebugEnabled()) {
-                log.debug("Exact match criteria matched " + annotString + " from (id: " + nameAnnot.getId() + ", offset: " + nameAnnot.getStartNode().getOffset() + ") to " + 
+                log.debug("Exact match criteria matched " + annotString + " from (id: " + nameAnnot.getId() + ", offset: " + nameAnnot.getStartNode().getOffset() + ") to " +
                         "(id: " + returnAnnot.getId() + ", offset: " + returnAnnot.getStartNode().getOffset() + ")");
               }
             }
@@ -865,8 +864,8 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
         iter.next().getFeatures().remove(ANNOTATION_COREF_FEATURE_NAME);
     } //while
   }//cleanup
-  
- 
+
+
   static Pattern periodPat = Pattern.compile("[\\.]+");
 
   protected void normalizePersonName (Annotation annot) throws ExecutionException {
@@ -921,7 +920,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
           tokenString = tokenString.toLowerCase();
         }
         // Out.prln("tokenString: " + tokenString + " kind: " + kind + " category: " + category);
-        if (kind.equals(PUNCTUATION_VALUE) || 
+        if (kind.equals(PUNCTUATION_VALUE) ||
 	    ( (category != null) && (category.equals("DT") || category.equals("IN")) )
 	    || cdg.contains(tokenString)) {
           // Out.prln("Now tagging it!");
@@ -971,8 +970,8 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
     //create the relative URL
     URL fileURL = new URL(definitionFileURL, nameFile);
     BufferedReader bufferedReader =
-      new BufferedReader(new InputStreamReader(fileURL.openStream(),
-              encoding));
+      new BomStrippingInputStreamReader(fileURL.openStream(),
+              encoding);
 
     String lineRead = null;
     while ((lineRead = bufferedReader.readLine()) != null){
@@ -1102,7 +1101,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
                     // Should basically only match when you have a match of all tokens other than
                     // CDG's and function words
                     (
-                            (!highPrecisionOrgs && OrthoMatcherHelper.executeDisjunction(rules,new int[] {4,6,7,8,9,10,11,12,14},longName,shortName,mr)) 
+                            (!highPrecisionOrgs && OrthoMatcherHelper.executeDisjunction(rules,new int[] {4,6,7,8,9,10,11,12,14},longName,shortName,mr))
                             ||
                             (highPrecisionOrgs && OrthoMatcherHelper.executeDisjunction(rules,new int[] {7,8,10,11,17},longName,shortName,mr))
                     )
@@ -1113,7 +1112,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
 
     if  (// rules for person annotations
             (    annotationType.equals(personType))) {
-      if (noMatchRule1(longName, shortName,prevAnnot, longerPrevious) || 
+      if (noMatchRule1(longName, shortName,prevAnnot, longerPrevious) ||
               noMatchRule2(longName, shortName)) {
         // Out.prln("noMatchRule1 rejected match between " + longName + " and " + shortName);
         return false;
@@ -1238,7 +1237,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
   }//noMatchRule1
 
   /***
-   * returns true if it detects a middle name which indicates that the name string contains a nickname or a 
+   * returns true if it detects a middle name which indicates that the name string contains a nickname or a
    * compound last name
    */
   private boolean detectBadMiddleTokens(ArrayList<Annotation> tokArray) {
@@ -1246,7 +1245,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
       String currentToken = (String) tokArray.get(j).getFeatures().get(TOKEN_STRING_FEATURE_NAME);
       Matcher matcher = badMiddleTokens.matcher(currentToken.toLowerCase().trim());
       if (matcher.find()) {
-        // We have found a case of a ", ', 
+        // We have found a case of a ", ',
         return true;
       }
     }
@@ -1254,9 +1253,9 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
   }
 
   /**
-   * NoMatch Rule #2: Do we have a mismatch of middle initial?  
+   * NoMatch Rule #2: Do we have a mismatch of middle initial?
    * Condition(s):  Only applies to person names with more than two tokens in the name
-   * 
+   *
    * Want George W. Bush != George H. W. Bush and George Walker Bush != George Herbert Walker Bush
    * and
    * John T. Smith != John Q. Smith
@@ -1266,7 +1265,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
    * Hillary Rodham Clinton == Hillary Rodham-Clinton
    * be careful about
    * Carlos Bueno de Lopez == Bueno de Lopez
-   * and 
+   * and
    * Cynthia Morgan de Rothschild == Cynthia de Rothschild
    */
   public boolean noMatchRule2(String s1,String s2) {
@@ -1279,12 +1278,12 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
         getFeatures().get(TOKEN_STRING_FEATURE_NAME);
         String lastNameShort = (String) normalizedTokensShortAnnot.get(normalizedTokensShortAnnot.size() - 1).
         getFeatures().get(TOKEN_STRING_FEATURE_NAME);
-        if (rules.get(1).value(firstNameLong,firstNameShort) && 
+        if (rules.get(1).value(firstNameLong,firstNameShort) &&
                 (rules.get(1).value(lastNameLong,lastNameShort))) {
           // Must have a match on first and last name for this non-match rule to take effect when the number of tokens differs
           if (detectBadMiddleTokens(tokensLongAnnot) || detectBadMiddleTokens(tokensShortAnnot)) {
-            // Exclude the William (Bill) H. Gates vs. William H. Gates case and the 
-            // Cynthia Morgan de Rothschild vs. Cynthia de Rothschild case 
+            // Exclude the William (Bill) H. Gates vs. William H. Gates case and the
+            // Cynthia Morgan de Rothschild vs. Cynthia de Rothschild case
             if (DEBUG && log.isDebugEnabled()) {
               log.debug("noMatchRule2Name did not non-match because of bad middle tokens " + s1 + "(id: " + longAnnot.getId() + ") to "
                       + s2+ "(id: " + shortAnnot.getId() + ")");
@@ -1320,7 +1319,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
       }
       return retval;
     } // if (normalizedTokensLongAnnot.size()>2 && normalizedTokensShortAnnot.size()>2)
-    return false; 
+    return false;
   }//noMatchRule2
 
   public void setDefinitionFileURL(java.net.URL definitionFileURL) {

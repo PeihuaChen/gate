@@ -3,6 +3,8 @@ package gate.learning.learners;
 import gate.creole.ResourceInstantiationException;
 import gate.learning.SparseFeatureVector;
 import gate.learning.learners.svm.svm_parameter;
+import gate.util.BomStrippingInputStreamReader;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -19,26 +21,26 @@ import java.io.PrintWriter;
 public class SvmForExec extends SupervisedLearner{
   /** The uneven margins parameter. */
   private float tau = (float)0.4;
-  
+
   /** The data file for svm learning.*/
   private String svmDat;
   /** The model file for svm learning.*/
   private String modelSVMFile;
-  
+
   /** The kernel type. */
-  private int kernelType =0; //linear kernel as default value 
+  private int kernelType =0; //linear kernel as default value
   /** kernel_type */
   public static final int LINEAR = 0;
   public static final int POLY = 1;
   public static final int RBF = 2;
   public static final int SIGMOID = 3;
   public static final int PRECOMPUTED = 4;
-  
+
   /**Parameters in the kernel function.*/
   int paramD = 3;
   double paramG = 1.0;
   double paramR = 0.0;
-  
+
   /**Class constructor without parameter.*/
   public SvmForExec() {
   }
@@ -46,19 +48,19 @@ public class SvmForExec extends SupervisedLearner{
   public SvmForExec(float t) {
     this.tau = t;
   }
-  
+
   /**Class constructor with tau parameter.*/
   public SvmForExec(float t, String command) {
     this.tau = t;
     this.commandLine = command;
   }
- 
+
   /** Get the parameters from the command line.
    * @throws  */
   public void getParametersFromCommmand() {
 
     System.out.println("commandline=*"+commandLine+"*");
-    
+
     if(commandLine == null) {
       System.out.println("Error: no command for executing!!");
       try {
@@ -96,10 +98,10 @@ public class SvmForExec extends SupervisedLearner{
       if(coef1!=0)
         this.paramR /= coef1;
     }
-        
+
   }
-  
-  /** Method for training, by reading from data file for feature vectors, and 
+
+  /** Method for training, by reading from data file for feature vectors, and
    * with label as input. */
   public void trainingWithDataFile(BufferedWriter modelFile,
       BufferedReader dataFile, int totalNumFeatures,
@@ -111,7 +113,7 @@ public class SvmForExec extends SupervisedLearner{
         final int i = iCounter;
         if(classLabels[i]>0)
           svmDataBuff.append("1 ");
-        else 
+        else
           svmDataBuff.append("-1 ");
         //int [] indexes = dataLearning[i].getIndexes();
         //float [] values = dataLearning[i].getValues();
@@ -122,25 +124,25 @@ public class SvmForExec extends SupervisedLearner{
         svmDataBuff.append("\n");
       }
       svmDataBuff.close();
-      
+
       //Execute the command for the SVM  learning
       //Get the command line for the svm_learn, by getting rid of the tau parameter
       String commandLineSVM = obtainSVMCommandline(commandLine);
       //Run the external svm learn exectuable
       runExternalCommand(commandLineSVM);
       //runExternalCommandWithRedirect(commandLineSVM);
-      
+
       //Read the model from the svm results file and write it into our model file
       writeSVMModelIntoFile(modelSVMFile, kernelType, modelFile, totalNumFeatures);
-      
-      
+
+
     } catch(IOException e) {
       e.printStackTrace();
     }
   }
 
-  
-  public void training(BufferedWriter modelFile, SparseFeatureVector [] dataLearning, 
+
+  public void training(BufferedWriter modelFile, SparseFeatureVector [] dataLearning,
           int totalNumFeatures, short [] classLabels, int numTraining) {
     try {
       //Write the data into the data file for svm learning
@@ -149,7 +151,7 @@ public class SvmForExec extends SupervisedLearner{
         final int i = iCounter;
         if(classLabels[i]>0)
           svmDataBuff.append("1");
-        else 
+        else
           svmDataBuff.append("-1");
         //int [] indexes = dataLearning[i].getIndexes();
         //float [] values = dataLearning[i].getValues();
@@ -158,24 +160,24 @@ public class SvmForExec extends SupervisedLearner{
         svmDataBuff.append("\n");
       }
       svmDataBuff.close();
-      
+
       //Execute the command for the SVM  learning
       //Get the command line for the svm_learn, by getting rid of the tau parameter
       String commandLineSVM = obtainSVMCommandline(commandLine);
       //Run the external svm learn exectuable
       runExternalCommand(commandLineSVM);
       //runExternalCommandWithRedirect(commandLineSVM);
-      
+
       //Read the model from the svm results file and write it into our model file
       writeSVMModelIntoFile(modelSVMFile, kernelType, modelFile, totalNumFeatures);
-      
-      
+
+
     } catch(IOException e) {
       e.printStackTrace();
     }
 
   }
-  
+
   /** Get the command line for the svm_learn, by getting rid of the tau parameter.*/
   public static String obtainSVMCommandline(String commandLine) {
     StringBuffer commandSVM = new StringBuffer();
@@ -190,11 +192,11 @@ public class SvmForExec extends SupervisedLearner{
       }
       ++len;
     }
-    
+
     return commandSVM.toString();
   }
-  
-  public static void writeSVMModelIntoFile(String modelSVMFile, int kernelType, 
+
+  public static void writeSVMModelIntoFile(String modelSVMFile, int kernelType,
           BufferedWriter modelFile, int totalNumFeatures) {
     //Open the svm model file
     BufferedReader svmModelBuff;
@@ -235,7 +237,7 @@ public class SvmForExec extends SupervisedLearner{
         }
         line = svmModelBuff.readLine(); //read in one more line for the libsvm model file
       }
-      
+
       System.out.println("b="+b+", num_sv="+numSV+"*");
       //Convert into primal form, if it is linear kernel
       if(kernelType == 0) {
@@ -267,14 +269,14 @@ public class SvmForExec extends SupervisedLearner{
       e.printStackTrace();
     }
   }
-  
-  
+
+
   public void applying(BufferedReader modelFile, DataForLearning dataFVinDoc, int totalNumFeatures, int numClasses) {
     float optB;
     optB = (1-tau)/(1+tau);
     svm_parameter svmParam = setSvmParamByCommandline();
     SvmLibSVM.svmApplying(modelFile, dataFVinDoc, totalNumFeatures, numClasses, optB, svmParam, this.isUseTauALLCases);
-    
+
   }
   /** Set the svm_parameter.*/
   svm_parameter setSvmParamByCommandline() {
@@ -283,16 +285,16 @@ public class SvmForExec extends SupervisedLearner{
     param.degree = paramD;
     param.gamma = paramG;
     param.coef0 = paramR;
-    
+
     return param;
   }
-  
+
 
 //a class used for execute an external command
   class StreamGobbler extends Thread {
       InputStream is;
       String type;
-      
+
       StreamGobbler(InputStream is, String type)
       {
           this.is = is;
@@ -303,23 +305,22 @@ public class SvmForExec extends SupervisedLearner{
       {
           try
           {
-              InputStreamReader isr = new InputStreamReader(is);
-              BufferedReader br = new BufferedReader(isr);
+              BufferedReader br = new BomStrippingInputStreamReader(is);
               String line=null;
               while ( (line = br.readLine()) != null)
-                  System.out.println(type + ">" + line);    
+                  System.out.println(type + ">" + line);
               } catch (IOException ioe)
                 {
-                  ioe.printStackTrace();  
+                  ioe.printStackTrace();
                 }
       }
   }
-  
+
 
   public void runExternalCommand(String command) {
-      
+
       try
-      {            
+      {
           String osName = System.getProperty("os.name" );
           String[] cmd = new String[3];
           boolean isWindows = false;
@@ -342,48 +343,48 @@ public class SvmForExec extends SupervisedLearner{
               cmd[1] = " " ;
               cmd[2] = command;
           }
-          
+
           Runtime rt = Runtime.getRuntime();
-          //System.out.println("Execing " + cmd[0] + " " + cmd[1] 
+          //System.out.println("Execing " + cmd[0] + " " + cmd[1]
               //               + " " + cmd[2]);
           Process proc = null;
-          if(isWindows) 
+          if(isWindows)
             proc = rt.exec(cmd);
-          else 
+          else
             proc = rt.exec(command); //linux cannot run the empty command
           // any error message?
-          StreamGobbler errorGobbler = new 
-              StreamGobbler(proc.getErrorStream(), "ERROR");            
-          
+          StreamGobbler errorGobbler = new
+              StreamGobbler(proc.getErrorStream(), "ERROR");
+
           // any output?
-          StreamGobbler outputGobbler = new 
+          StreamGobbler outputGobbler = new
               StreamGobbler(proc.getInputStream(), "OUTPUT");
-              
+
           // kick them off
           errorGobbler.start();
           outputGobbler.start();
-                                  
+
           // any error???
           int exitVal = proc.waitFor();
-          //System.out.println("ExitValue: " + exitVal);        
+          //System.out.println("ExitValue: " + exitVal);
       } catch (Throwable t)
         {
           t.printStackTrace();
         }
   }
-  
+
 //a class used for execute an external command
   class StreamGobblerForDirect extends Thread {
       InputStream is;
       String type;
       OutputStream os;
-      
+
       StreamGobblerForDirect(InputStream is, String type)
       {
           this.is = is;
           this.type = type;
       }
-      
+
       StreamGobblerForDirect(InputStream is, String type, OutputStream redirect)
       {
           this.is = is;
@@ -398,31 +399,30 @@ public class SvmForExec extends SupervisedLearner{
               PrintWriter pw = null;
               if (os != null)
                   pw = new PrintWriter(os);
-                  
-              InputStreamReader isr = new InputStreamReader(is);
-              BufferedReader br = new BufferedReader(isr);
+
+              BufferedReader br = new BomStrippingInputStreamReader(is);
               String line=null;
               while ( (line = br.readLine()) != null)
               {
                   if (pw != null)
                       pw.println(line);
-                  System.out.println(type + ">" + line);    
+                  System.out.println(type + ">" + line);
               }
               if (pw != null)
                   pw.flush();
           } catch (IOException ioe)
               {
-              ioe.printStackTrace();  
+              ioe.printStackTrace();
               }
       }
 
   }
-  
-  
+
+
   public void runExternalCommandWithRedirect(String command) {
-      
+
       try
-      {            
+      {
           String osName = System.getProperty("os.name" );
           String[] cmd = new String[3];
 
@@ -442,36 +442,36 @@ public class SvmForExec extends SupervisedLearner{
               cmd[1] = " " ;
               cmd[2] = command;
           }
-          
+
           Runtime rt = Runtime.getRuntime();
-          System.out.println("Execing " + cmd[0] + " " + cmd[1] 
+          System.out.println("Execing " + cmd[0] + " " + cmd[1]
                              + " " + cmd[2]);
           Process proc = rt.exec(cmd);
           // any error message?
-          StreamGobblerForDirect errorGobbler = new 
-              StreamGobblerForDirect(proc.getErrorStream(), "ERROR");            
-          
+          StreamGobblerForDirect errorGobbler = new
+              StreamGobblerForDirect(proc.getErrorStream(), "ERROR");
+
           // any output?
           String outFileName = command.substring(command.lastIndexOf('>')+1);
           FileOutputStream fos = new FileOutputStream(outFileName);
-          StreamGobblerForDirect outputGobbler = new 
+          StreamGobblerForDirect outputGobbler = new
               StreamGobblerForDirect(proc.getInputStream(), "OUTPUT", fos);
-              
+
           // kick them off
           errorGobbler.start();
           outputGobbler.start();
-                                  
+
           // any error???
           int exitVal = proc.waitFor();
-          System.out.println("ExitValue: " + exitVal); 
+          System.out.println("ExitValue: " + exitVal);
           fos.flush();
-          fos.close();        
+          fos.close();
       } catch (Throwable t)
         {
           t.printStackTrace();
         }
 
   }
-  
-  
+
+
 }

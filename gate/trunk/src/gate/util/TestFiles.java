@@ -41,11 +41,10 @@ public class TestFiles extends TestCase
     String japeResName = "jape/combined/testloc.jape";
     String firstLine = "// testloc.jape";
 
-    InputStreamReader resReader =
-      new InputStreamReader(Files.getGateResourceAsStream(japeResName));
-    BufferedReader bufResReader = new BufferedReader(resReader);
+    BufferedReader bufResReader =
+      new BomStrippingInputStreamReader(Files.getGateResourceAsStream(japeResName));
     assertTrue(bufResReader.readLine().equals(firstLine));
-    resReader.close();
+    bufResReader.close();
 
     String resString = Files.getGateResourceAsString(japeResName);
     assertTrue(resString.startsWith(firstLine));

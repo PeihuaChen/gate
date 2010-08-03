@@ -16,20 +16,30 @@
 
 package gate.email;
 
-import java.io.*;
-import java.util.*;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.GateConstants;
+import gate.event.StatusListener;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 import junit.framework.Assert;
-
-import gate.*;
-import gate.event.StatusListener;
 
 /**
   * This class implements the behaviour of the Email reader
   * It takes the Gate Document representing a list with e-mails and
   * creates Gate annotations on it.
   */
-public class EmailDocumentHandler{
+public class EmailDocumentHandler {
 
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -86,8 +96,7 @@ public class EmailDocumentHandler{
 
 //    gateDocumentReader = new BufferedReader(new InputStreamReader(
 //              gateDocument.getSourceUrl().openConnection().getInputStream()));
-    gateDocumentReader = new BufferedReader(new InputStreamReader(
-                                new ByteArrayInputStream(content.getBytes())));
+    gateDocumentReader = new BufferedReader(new StringReader(content));
 
     // for each line read from the gateDocumentReader do
     // if the line begins an e-mail message then fire a status listener, mark

@@ -20,10 +20,9 @@ import gate.creole.metadata.*;
 import gate.util.*;
 import gate.*;
 import java.util.*;
-import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.net.URL;
-import java.net.URISyntaxException;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.MetaMethod;
@@ -34,9 +33,9 @@ import org.codehaus.groovy.runtime.InvokerInvocationException;
 
 /**
  * Groovy Script PR.
- * 
+ *
  * @author Angus Roberts, Ian Roberts
- * 
+ *
  */
 @CreoleResource(name = "Groovy scripting PR",
     comment = "Runs a Groovy script as a processing resource",
@@ -54,7 +53,7 @@ public class ScriptPR extends AbstractLanguageAnalyser
    * Parameters passed to the Groovy script
    */
   private FeatureMap scriptParams;
- 
+
   /**
    * The compiled Groovy script.
    */
@@ -86,7 +85,7 @@ public class ScriptPR extends AbstractLanguageAnalyser
     char[] buf = new char[4096];
     int charsRead = 0;
     try {
-      InputStreamReader reader = new InputStreamReader(scriptURL.openStream(),
+      Reader reader = new BomStrippingInputStreamReader(scriptURL.openStream(),
           encoding);
       while((charsRead = reader.read(buf)) >= 0) {
         scriptText.append(buf, 0, charsRead);
@@ -217,7 +216,7 @@ public class ScriptPR extends AbstractLanguageAnalyser
     binding.setVariable("factory", gate.Factory.class);
 
     // The FeatureMap is passed in its entirety, making the keys available in
-    // a bean-like way. So in a map with k=v, the script can say 
+    // a bean-like way. So in a map with k=v, the script can say
     // assert scriptParams.k == v
     binding.setVariable("scriptParams", scriptParams);
 
@@ -229,7 +228,7 @@ public class ScriptPR extends AbstractLanguageAnalyser
     }
 
     // We've done
-    fireProgressChanged(100);	
+    fireProgressChanged(100);
     fireProcessFinished();
     fireStatusChanged( "Groovy script PR finished" );
   }

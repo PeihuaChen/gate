@@ -1,6 +1,8 @@
 
 package org.tartarus.snowball;
 
+import gate.util.BomStrippingInputStreamReader;
+
 import java.lang.reflect.Method;
 import java.io.Reader;
 import java.io.Writer;
@@ -24,13 +26,12 @@ public class TestApp {
             return;
         }
 
-	Class stemClass = Class.forName("org.tartarus.snowball.ext." +
+	Class<?> stemClass = Class.forName("org.tartarus.snowball.ext." +
 					args[0] + "Stemmer");
         SnowballStemmer stemmer = (SnowballStemmer) stemClass.newInstance();
 
 	Reader reader;
-	reader = new InputStreamReader(new FileInputStream(args[1]));
-	reader = new BufferedReader(reader);
+	reader = new BomStrippingInputStreamReader(new FileInputStream(args[1]));
 
 	StringBuffer input = new StringBuffer();
 

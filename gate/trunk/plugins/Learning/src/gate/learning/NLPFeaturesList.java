@@ -1,11 +1,13 @@
 /*
  *  NLPFeaturesList.java
- * 
+ *
  *  Yaoyong Li 22/03/2007
  *
  *  $Id: NLPFeaturesList.java, v 1.0 2007-03-22 12:58:16 +0000 yaoyong $
  */
 package gate.learning;
+
+import gate.util.BomStrippingInputStreamReader;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -51,8 +53,8 @@ public class NLPFeaturesList {
     File fileFeaturesList = new File(parentDir, filename);
     if(fileFeaturesList.exists()) {
       try {
-        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream
-          (fileFeaturesList), tcode));
+        BufferedReader in = new BomStrippingInputStreamReader(new FileInputStream
+          (fileFeaturesList), tcode);
         // featuresList = new Hashtable();
         String line;
         if((line = in.readLine()) != null)
@@ -108,7 +110,7 @@ public class NLPFeaturesList {
           int ind = features[j].lastIndexOf('[');
           features[j] = features[j].substring(0,ind);
         }
-        //if the feature is an empty, don't count it as a feature at all. 
+        //if the feature is an empty, don't count it as a feature at all.
         if(features[j].equals(""))
           continue;
         String feat = features[j];
@@ -140,7 +142,7 @@ public class NLPFeaturesList {
     // update the total number of docs
     totalNumDocs += fd.numInstances;
   }
-  
+
   /** Clear the label list object for another run in evaluation. */
   public void clearAllData() {
     featuresList.clear();

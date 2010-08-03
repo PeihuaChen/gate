@@ -1,6 +1,6 @@
 /*
  *  WekaLearning.java
- * 
+ *
  *  Yaoyong Li 22/03/2007
  *
  *  $Id: WekaLearning.java, v 1.0 2007-03-22 12:58:16 +0000 yaoyong $
@@ -32,6 +32,7 @@ import gate.learning.LabelsOfFeatureVectorDoc;
 import gate.learning.NLPFeaturesList;
 import gate.learning.SparseFeatureVector;
 import gate.learning.learners.MultiClassLearning;
+import gate.util.BomStrippingInputStreamReader;
 
 /**
  * The interface between the Weka learner and the data defined in the ML Api,
@@ -179,8 +180,8 @@ public class WekaLearning {
     labelsFVDoc = new LabelsOfFeatureVectorDoc[numDocs];
     try {
       BufferedReader inData;
-      inData = new BufferedReader(new InputStreamReader(new FileInputStream(
-        dataFile), "UTF-8"));
+      inData = new BomStrippingInputStreamReader(new FileInputStream(
+        dataFile), "UTF-8");
       // Get the number of attributes in the data
       String[] items = inData.readLine()
         .split(ConstantParameters.ITEMSEPARATOR);

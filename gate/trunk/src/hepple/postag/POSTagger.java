@@ -17,14 +17,14 @@
 
 /*
  * INSTRUCTIONS for STAND-ALONE USE
- * 
+ *
  * SYNOPSIS
  *     java hepple.postag.POSTagger [options] file1 [file2 ...]
  * OPTIONS:
  *     -h, --help : displays this message
  *     -l, --lexicon <lexicon file> : uses specified lexicon
  *     -r, --rules <rules file> : uses specified rules
- * 
+ *
  * NOTE: requires gnu.getopt package
  */
 
@@ -43,6 +43,7 @@ import java.io.*;
 import java.net.URL;
 import java.util.*;
 
+import gate.util.BomStrippingInputStreamReader;
 import gnu.getopt.*;
 
 import hepple.postag.rules.*;
@@ -119,7 +120,7 @@ public class POSTagger {
                                                           IOException {
       this(lexiconURL, rulesURL, null);
     }
-    
+
     /**
      * Construct a POS tagger using the specified encoding to read the lexicon
      * and rules files.
@@ -168,7 +169,7 @@ public class POSTagger {
         String newWord = (String)wordsIter.next();
         oneStep(newWord, taggedSentence);
       }//while(wordsIter.hasNext())
-      //finished adding all the words from a sentence, add six more 
+      //finished adding all the words from a sentence, add six more
       //staarts to flush all words out of the tagging buffer
       for(int i = 0; i < 6; i++){
         oneStep(staart, taggedSentence);
@@ -247,11 +248,11 @@ public class POSTagger {
   public void readRules(URL rulesURL) throws IOException, InvalidRuleException{
     BufferedReader rulesReader;
     if(encoding == null) {
-      rulesReader = new BufferedReader(new InputStreamReader(rulesURL.
-          openStream()));
+      rulesReader = new BomStrippingInputStreamReader(rulesURL.
+          openStream());
     } else {
-      rulesReader = new BufferedReader(new InputStreamReader(rulesURL.
-          openStream(), this.encoding));
+      rulesReader = new BomStrippingInputStreamReader(rulesURL.
+          openStream(), this.encoding);
     }
 
     String line;

@@ -1,6 +1,6 @@
 /*
  *  MultiClassLearning.java
- * 
+ *
  *  Yaoyong Li 22/03/2007
  *
  *  $Id: MultiClassLearning.java, v 1.0 2007-03-22 12:58:16 +0000 yaoyong $
@@ -12,6 +12,7 @@ import gate.learning.LabelsOfFV;
 import gate.learning.LogService;
 import gate.learning.SparseFeatureVector;
 import gate.learning.DocFeatureVectors.LongCompactor;
+import gate.util.BomStrippingInputStreamReader;
 import gate.util.GateException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -87,7 +88,7 @@ public class MultiClassLearning {
   /** Get the training data -- feature vectors and labels. */
   public void getDataFromFile(int numDocs, File trainingDataFile, boolean isUsingFile, File tempFVDataFile) {
     dataFVinDoc = new DataForLearning(numDocs);
-    //Open the temp file for writing the fv data 
+    //Open the temp file for writing the fv data
     dataFVinDoc.readingFVsFromFile(trainingDataFile, isUsingFile, tempFVDataFile);
     // First, get the unique labels from the trainign data
     class2NumberInstances = new HashMap();
@@ -361,7 +362,7 @@ public class MultiClassLearning {
 
   /**
    * Move all the files from one directory into another.
-   * 
+   *
    * @param src
    *          the directory whose contents are to be moved
    * @param dest
@@ -385,8 +386,8 @@ public class MultiClassLearning {
       if(modelFile.exists() && !modelFile.isDirectory()) {
         // see whether we're trying to apply an old-style model
         // stored all in one file
-        BufferedReader buff = new BufferedReader(new InputStreamReader(
-          new FileInputStream(modelFile), "UTF-8"));
+        BufferedReader buff = new BomStrippingInputStreamReader(
+                new FileInputStream(modelFile), "UTF-8");
         String firstLine = buff.readLine();
         buff.close();
         if(firstLine != null && firstLine.endsWith("#numTrainingDocs")) {
@@ -402,8 +403,8 @@ public class MultiClassLearning {
         "Model directory " + modelFile + " does not exist"); }
       File metaDataFile = new File(modelFile,
         ConstantParameters.FILENAMEOFModelMetaData);
-      BufferedReader metaDataBuff = new BufferedReader(new InputStreamReader(
-        new FileInputStream(metaDataFile), "UTF-8"));
+      BufferedReader metaDataBuff = new BomStrippingInputStreamReader(
+        new FileInputStream(metaDataFile), "UTF-8");
       // Read the training meta information from the model file's header
       // include the total number of features and number of tags (numClasses)
       int totalNumFeatures;
@@ -446,9 +447,8 @@ public class MultiClassLearning {
                 .valueOf(classIndex++)));
             tasks.add(new Callable<Boolean>() {
               public Boolean call() throws Exception {
-                BufferedReader modelBuff = new BufferedReader(
-                  new InputStreamReader(
-                    new FileInputStream(thisClassModelFile), "UTF-8"));
+                BufferedReader modelBuff = new BomStrippingInputStreamReader(
+                        new FileInputStream(thisClassModelFile), "UTF-8");
                 learner.applying(modelBuff, dataFVinDoc, finalTotalNumFeatures,
                   iClass);
                 modelBuff.close();
@@ -489,9 +489,8 @@ public class MultiClassLearning {
                 .valueOf(classIndex++)));
             tasks.add(new Callable<Boolean>() {
               public Boolean call() throws Exception {
-                BufferedReader modelBuff = new BufferedReader(
-                  new InputStreamReader(
-                    new FileInputStream(thisClassModelFile), "UTF-8"));
+                BufferedReader modelBuff = new BomStrippingInputStreamReader(
+                        new FileInputStream(thisClassModelFile), "UTF-8");
                 learner.applying(modelBuff, dataFVinDoc, finalTotalNumFeatures,
                   iClass);
                 modelBuff.close();
@@ -564,8 +563,8 @@ public class MultiClassLearning {
     modelFile.delete();
     modelFile.mkdir();
     // open the backup model file and copy its sections into new files
-    BufferedReader oldModelsBuff = new BufferedReader(new InputStreamReader(
-      new FileInputStream(backupModelFile), "UTF-8"));
+    BufferedReader oldModelsBuff = new BomStrippingInputStreamReader(
+      new FileInputStream(backupModelFile), "UTF-8");
     // first 8 lines are the meta data
     File metaDataFile = new File(modelFile,
       ConstantParameters.FILENAMEOFModelMetaData);
@@ -700,13 +699,13 @@ public class MultiClassLearning {
       }
       if(!tmpDirFile.mkdir()) { throw new IOException(
         "Couldn't create temporary directory for training"); }
-      
+
       File metaDataFile = new File(tmpDirFile,
         ConstantParameters.FILENAMEOFModelMetaData);
       BufferedWriter metaDataBuff = new BufferedWriter(new OutputStreamWriter(
         new FileOutputStream(metaDataFile), "UTF-8"));
       int classIndex = 1; //class index for model's file name
-      
+
       // Open the mode file for writing the model into it
       // convert the multi-class to binary class -- labels conversion
       labelsTrainingNT = new short[dataFVinDoc.numTraining];
@@ -720,7 +719,7 @@ public class MultiClassLearning {
             .getNumTrainingDocs(), dataFVinDoc.getTotalNumFeatures(), modelFile
             .getAbsolutePath(), learner);
           metaDataBuff.close();
-       
+
           for(int iCounter = 0; iCounter < array1.size(); ++iCounter) {
             final int i = iCounter;
             final File thisClassModelFile = new File(tmpDirFile, String.format(
@@ -739,8 +738,8 @@ public class MultiClassLearning {
               + " numTraining=" + numTraining + " numPos=" + numP + "\n");
             long time1 = new Date().getTime();
             if(isUsingTempDataFile) {//using the data file
-              BufferedReader fvTempRd = new BufferedReader(new InputStreamReader(
-                new FileInputStream(tempFVDataFile), "UTF-8"));
+              BufferedReader fvTempRd = new BomStrippingInputStreamReader(
+                new FileInputStream(tempFVDataFile), "UTF-8");
               learner.trainingWithDataFile(modelBuff, fvTempRd, totalNumFeatures,
                 labelsTrainingNT, numTraining);
               fvTempRd.close();
@@ -789,8 +788,8 @@ public class MultiClassLearning {
                 + " numPos=" + numP + "\n");
               long time1 = new Date().getTime();
               if(isUsingTempDataFile) {//using the data file
-                BufferedReader fvTempRd = new BufferedReader(new InputStreamReader(
-                  new FileInputStream(tempFVDataFile), "UTF-8"));
+                BufferedReader fvTempRd = new BomStrippingInputStreamReader(
+                  new FileInputStream(tempFVDataFile), "UTF-8");
                 learner.trainingWithDataFile(modelBuff, fvTempRd, totalNumFeatures,
                   labelsTrainingNT, numTraining);
                 fvTempRd.close();
@@ -828,8 +827,8 @@ public class MultiClassLearning {
                 + " numPos=" + numP + "\n");
               long time1 = new Date().getTime();
               if(isUsingTempDataFile) { //using the data file
-                BufferedReader fvTempRd = new BufferedReader(new InputStreamReader(
-                  new FileInputStream(tempFVDataFile), "UTF-8"));
+                BufferedReader fvTempRd = new BomStrippingInputStreamReader(
+                  new FileInputStream(tempFVDataFile), "UTF-8");
                 learner.trainingWithDataFile(modelBuff, fvTempRd, totalNumFeatures,
                   labelsTrainingNT, numTraining);
                 fvTempRd.close();
@@ -869,8 +868,8 @@ public class MultiClassLearning {
       if(modelFile.exists() && !modelFile.isDirectory()) {
         // see whether we're trying to apply an old-style model
         // stored all in one file
-        BufferedReader buff = new BufferedReader(new InputStreamReader(
-          new FileInputStream(modelFile), "UTF-8"));
+        BufferedReader buff = new BomStrippingInputStreamReader(
+                new FileInputStream(modelFile), "UTF-8");
         String firstLine = buff.readLine();
         buff.close();
         if(firstLine != null && firstLine.endsWith("#numTrainingDocs")) {
@@ -886,8 +885,8 @@ public class MultiClassLearning {
         "Model directory " + modelFile + " does not exist"); }
       File metaDataFile = new File(modelFile,
         ConstantParameters.FILENAMEOFModelMetaData);
-      BufferedReader metaDataBuff = new BufferedReader(new InputStreamReader(
-        new FileInputStream(metaDataFile), "UTF-8"));
+      BufferedReader metaDataBuff = new BomStrippingInputStreamReader(
+        new FileInputStream(metaDataFile), "UTF-8");
        //    Read the training meta information from the model file's header
       // include the total number of features and number of tags (numClasses)
       int totalNumFeatures;
@@ -926,9 +925,8 @@ public class MultiClassLearning {
             final File thisClassModelFile = new File(modelFile, String.format(
               ConstantParameters.FILENAMEOFPerClassModel, Integer
                 .valueOf(classIndex++)));
-            BufferedReader modelBuff = new BufferedReader(
-              new InputStreamReader(
-                new FileInputStream(thisClassModelFile), "UTF-8"));
+            BufferedReader modelBuff = new BomStrippingInputStreamReader(
+                    new FileInputStream(thisClassModelFile), "UTF-8");
             learner.applying(modelBuff, dataFVinDoc, finalTotalNumFeatures,
               iClass);
             modelBuff.close();
@@ -954,14 +952,12 @@ public class MultiClassLearning {
             final File thisClassModelFile = new File(modelFile, String.format(
               ConstantParameters.FILENAMEOFPerClassModel, Integer
                 .valueOf(classIndex++)));
-            BufferedReader modelBuff = new BufferedReader(
-              new InputStreamReader(
-                new FileInputStream(thisClassModelFile), "UTF-8"));
+            BufferedReader modelBuff = new BomStrippingInputStreamReader(new FileInputStream(thisClassModelFile), "UTF-8");
             learner.applying(modelBuff, dataFVinDoc, finalTotalNumFeatures,
               iClass);
             modelBuff.close();
-          }   
-         
+          }
+
           PostProcessing postProc = new PostProcessing();
           // Get the number of classes of the problem, since the numClasses
           // refers to the number
@@ -993,11 +989,11 @@ public class MultiClassLearning {
       e.printStackTrace();
     }
   }
-  
+
   /**
    * Obtain the learner from the learner's name speficied by the learning
    * configuration file.
-   * 
+   *
    * @throws GateException
    */
   public static SupervisedLearner obtainLearnerFromName(String learnerName,

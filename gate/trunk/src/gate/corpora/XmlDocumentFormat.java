@@ -93,7 +93,7 @@ public class XmlDocumentFormat extends TextualDocumentFormat {
    * parse the XML document pointed by the URL.If the URL is not valid,
    * or is null, then the doc's content will be parsed. If the doc's
    * content is not a valid XML then the parser might crash.
-   * 
+   *
    * @param doc The gate document you want to parse. If
    *          <code>doc.getSourceUrl()</code> returns <b>null</b>
    *          then the content of doc will be parsed. Using a URL is
@@ -135,7 +135,7 @@ public class XmlDocumentFormat extends TextualDocumentFormat {
 
   /**
    * Unpacks markup in the GATE-specific standoff XML markup format.
-   * 
+   *
    * @param doc the document to process
    * @param statusListener optional status listener to receive status
    *          messages
@@ -156,6 +156,7 @@ public class XmlDocumentFormat extends TextualDocumentFormat {
       }
       else if(doc instanceof TextualDocument) {
         String encoding = ((TextualDocument)doc).getEncoding();
+        // Don't strip BOM on XML.
         inputReader = new InputStreamReader(doc.getSourceUrl().openStream(),
                 encoding);
         // create stream reader with the URL as system ID, to support
@@ -213,7 +214,7 @@ public class XmlDocumentFormat extends TextualDocumentFormat {
   /**
    * Returns the StAX input factory, creating one if it is currently
    * null.
-   * 
+   *
    * @return <code>staxFactory</code>
    * @throws XMLStreamException
    */
@@ -233,7 +234,7 @@ public class XmlDocumentFormat extends TextualDocumentFormat {
   /**
    * Unpack markup from any XML format. The XML elements are translated
    * to annotations on the Original markups annotation set.
-   * 
+   *
    * @param doc the document to process
    * @throws DocumentFormatException
    */
@@ -292,6 +293,7 @@ public class XmlDocumentFormat extends TextualDocumentFormat {
         else if(doc instanceof TextualDocument) {
           // textual document - load with user specified encoding
           String docEncoding = ((TextualDocument)doc).getEncoding();
+          // don't strip BOM on XML.
           docReader = new InputStreamReader(doc.getSourceUrl()
                   .openStream(), docEncoding);
           is = new InputSource(docReader);

@@ -26,6 +26,7 @@ import gate.corpora.MimeType;
 import gate.corpora.RepositioningInfo;
 import gate.creole.AbstractLanguageResource;
 import gate.event.StatusListener;
+import gate.util.BomStrippingInputStreamReader;
 import gate.util.DocumentFormatException;
 
 /** The format of Documents. Subclasses of DocumentFormat know about
@@ -186,7 +187,7 @@ extends AbstractLanguageResource implements LanguageResource{
     // We expect to get contentType something like this:
     // "text/html; charset=iso-8859-1"
     // Charset is optional
-    
+
     try {
     try{
       is = url.openConnection().getInputStream();
@@ -347,23 +348,23 @@ extends AbstractLanguageResource implements LanguageResource{
                                                             String anEncoding){
 
     if (aInputStream == null) return null;
-    InputStreamReader reader = null;
+    Reader reader = null;
     if (anEncoding != null)
       try{
-        reader = new InputStreamReader(aInputStream, anEncoding);
+        reader = new BomStrippingInputStreamReader(aInputStream, anEncoding);
       } catch (UnsupportedEncodingException e){
         reader = null;
       }
     if (reader == null)
       // Create a reader with the default encoding system
-      reader = new InputStreamReader(aInputStream);
+      reader = new BomStrippingInputStreamReader(aInputStream);
 
     // We have a input stream reader
     return runMagicNumbers(reader);
   }//guessTypeUsingMagicNumbers
 
   /** Performs magic over Gate Document */
-  protected static MimeType runMagicNumbers(InputStreamReader aReader){
+  protected static MimeType runMagicNumbers(Reader aReader) {
     // No reader, nothing to detect
     if( aReader == null) return null;
 

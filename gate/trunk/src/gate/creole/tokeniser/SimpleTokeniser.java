@@ -126,7 +126,7 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
     Reader rulesReader;
     try{
       if(rulesURL != null){
-        rulesReader = new InputStreamReader(rulesURL.openStream(), encoding);
+        rulesReader = new BomStrippingInputStreamReader(rulesURL.openStream(), encoding);
       }else{
         //no init data, Scream!
         throw new ResourceInstantiationException(

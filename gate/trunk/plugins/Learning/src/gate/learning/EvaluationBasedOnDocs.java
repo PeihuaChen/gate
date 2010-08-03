@@ -1,6 +1,6 @@
 /*
  *  EvaluationBasedOnDocs.java
- * 
+ *
  *  Yaoyong Li 22/03/2007
  *
  *  $Id: EvaluationBasedOnDocs.java, v 1.0 2007-03-22 12:58:16 +0000 yaoyong $
@@ -15,6 +15,7 @@ import gate.Factory;
 import gate.FeatureMap;
 import gate.creole.ResourceInstantiationException;
 import gate.util.AnnotationDiffer;
+import gate.util.BomStrippingInputStreamReader;
 import gate.util.GateException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -81,7 +82,7 @@ public class EvaluationBasedOnDocs {
 
   /**
    * Main method for evaluation.
-   * 
+   *
    * @throws IOException
    */
   public void evaluation(LearningEngineSettings learningSettings,
@@ -323,7 +324,7 @@ public class EvaluationBasedOnDocs {
 
   /**
    * One run of the evaluation: training, testing and measuring results.
-   * 
+   *
    * @throws
    * @throws UnsupportedEncodingException
    */
@@ -359,9 +360,9 @@ public class EvaluationBasedOnDocs {
       outNLPFeatures.close();
       lightWeightApi.finishFVs(wdResults, numDoc, isTraining, learningSettings);
       // Open the normal NLP feature file.
-      inNLPFeatures = new BufferedReader(new InputStreamReader(
+      inNLPFeatures = new BomStrippingInputStreamReader(
         new FileInputStream(new File(wdResults,
-          ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
+          ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8");
       outFeatureVectors = new BufferedWriter(new OutputStreamWriter(
         new FileOutputStream(new File(wdResults,
           ConstantParameters.FILENAMEOFFeatureVectorData)), "UTF-8"));
@@ -440,9 +441,9 @@ public class EvaluationBasedOnDocs {
       outNLPFeatures.flush();
       outNLPFeatures.close();
       lightWeightApi.finishFVs(wdResults, numDoc, isTraining, learningSettings);
-      inNLPFeatures = new BufferedReader(new InputStreamReader(
+      inNLPFeatures = new BomStrippingInputStreamReader(
         new FileInputStream(new File(wdResults,
-          ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8"));
+          ConstantParameters.FILENAMEOFNLPFeaturesData)), "UTF-8");
       outFeatureVectors = new BufferedWriter(new OutputStreamWriter(
         new FileOutputStream(new File(wdResults,
           ConstantParameters.FILENAMEOFFeatureVectorDataApp)), "UTF-8"));
@@ -467,7 +468,7 @@ public class EvaluationBasedOnDocs {
           corpusTest.add(d);
           if(corpusTest.getDataStore() != null) {
             corpusTest.getDataStore().sync(corpusTest);
-            Factory.deleteResource(d);            
+            Factory.deleteResource(d);
           }
           ++numDoc;
         }
@@ -486,7 +487,7 @@ public class EvaluationBasedOnDocs {
       if(corpusTest.getDataStore() != null) {
         corpusTest.getDataStore().delete(corpusTest.getClass().getName(), corpusTest.getLRPersistenceId());
       }
-      
+
       // Do the evaluation on test using the AnnotationDiff
       // First get all the labels in the training data,
       // so that we can do evaluation on each single label

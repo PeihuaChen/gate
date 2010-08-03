@@ -40,7 +40,7 @@ import gate.util.*;
 /**
  * This class provides utility methods for saving resources through
  * serialisation via static methods.
- * 
+ *
  * It now supports both native and xml serialization.
  */
 public class PersistenceManager {
@@ -81,7 +81,7 @@ public class PersistenceManager {
    * {@link PersistenceManager#registerPersitentEquivalent(Class , Class)})
    * effectively stops all values of the specified type from being
    * serialised.
-   * 
+   *
    * Maps that contain values that should not be serialised will have
    * that entry removed. In any other places where such values occur
    * they will be replaced by null after deserialisation.
@@ -112,7 +112,7 @@ public class PersistenceManager {
    * will actually be stored, except when the URL refers to a resource
    * within the current GATE home directory in which case the relative path
    * to the GATE home directory will be stored. In that case a warning
-   * is issued to 
+   * is issued to
    */
   public static class URLHolder implements Persistence {
     /**
@@ -176,7 +176,7 @@ public class PersistenceManager {
                  + getRelativePath(currentPersistenceFile().toURI().toURL(), url);
             } else {
               urlString = pathMarker
-                 + getRelativePath(gateCanonicalHome.toURI().toURL(), url);             
+                 + getRelativePath(gateCanonicalHome.toURI().toURL(), url);
             }
           }
           catch(MalformedURLException mue) {
@@ -262,7 +262,7 @@ public class PersistenceManager {
      * direction a NotComparableException will be thrown. both input
      * objects should be Class values otherwise a
      * {@link ClassCastException} will be thrown.
-     * 
+     *
      */
     public int compare(Object o1, Object o2) {
       Class c1 = (Class)o1;
@@ -291,7 +291,7 @@ public class PersistenceManager {
   /**
    * Recursively traverses the provided object and replaces it and all
    * its contents with the appropriate persistent equivalent classes.
-   * 
+   *
    * @param target the object to be analysed and translated into a
    *          persistent equivalent.
    * @return the persistent equivalent value for the provided target
@@ -361,7 +361,7 @@ public class PersistenceManager {
    * the most specific types are considered to be the ones that don't
    * belong to either java or GATE followed by the ones that belong to
    * GATE and followed by the ones that belong to java.
-   * 
+   *
    * E.g. if there are registered persitent types for
    * {@link gate.Resource} and for {@link gate.LanguageResource} than
    * such a request for a {@link gate.Document} will yield the
@@ -439,7 +439,7 @@ public class PersistenceManager {
   /**
    * Calculates the relative path for a file: URL starting from a given
    * context which is also a file: URL.
-   * 
+   *
    * @param context the URL to be used as context.
    * @param target the URL for which the relative path is computed.
    * @return a String value representing the relative path. Constructing
@@ -530,13 +530,13 @@ public class PersistenceManager {
               + "need to be \"file:\" URLs!");
     }
   }
-  
-  public static void saveObjectToFile(Object obj, File file) 
+
+  public static void saveObjectToFile(Object obj, File file)
     throws PersistenceException, IOException {
     saveObjectToFile(obj, file, false, false);
   }
-  
-  public static void saveObjectToFile(Object obj, File file, 
+
+  public static void saveObjectToFile(Object obj, File file,
           boolean usegatehome, boolean warnaboutgatehome)
           throws PersistenceException, IOException {
     ProgressListener pListener = (ProgressListener)MainFrame.getListeners()
@@ -635,15 +635,15 @@ public class PersistenceManager {
   private static Boolean currentWarnAboutGateHome() {
     return warnAboutGateHome.get().getFirst();
   }
-  
+
   private static Boolean currentUseGateHome() {
     return useGateHome.get().getFirst();
   }
-  
+
   private static BooleanFlag currentHaveWarnedAboutGateHome() {
     return haveWarnedAboutGateHome.get().getFirst();
   }
-  
+
   /**
    * Clean up the thread-local state for the current persistence run.
    */
@@ -690,7 +690,8 @@ public class PersistenceManager {
       // on
       // whether serialization is native or xml.
       if(xmlStream) {
-        Reader inputReader = new java.io.InputStreamReader(
+        // we don't want to strip the BOM on XML.
+        Reader inputReader = new InputStreamReader(
                 rawStream = url.openStream());
         try {
           XMLInputFactory inputFactory = XMLInputFactory.newInstance();
@@ -703,7 +704,7 @@ public class PersistenceManager {
           inputReader.close();
           throw new PersistenceException("Error creating reader", xse);
         }
-        
+
         xstream = new XStream(new StaxDriver(new XStream11XmlFriendlyReplacer())) {
           protected boolean useXStream11XmlFriendlyMapper() {
             return true;
@@ -719,15 +720,15 @@ public class PersistenceManager {
         // GATE ClassLoader if they can't be loaded through the one
         // ObjectInputStream would normally use
         ois = new GateAwareObjectInputStream(url.openStream());
-        
+
       }
       Object res = null;
       try {
         // first read the list of creole URLs.
-        Iterator urlIter = 
+        Iterator urlIter =
           ((Collection)getTransientRepresentation(ois.readObject()))
           .iterator();
-        
+
         // and re-register them
         while(urlIter.hasNext()) {
           URL anUrl = (URL)urlIter.next();
@@ -739,11 +740,11 @@ public class PersistenceManager {
                     + anUrl.toExternalForm());
           }
         }
-        
+
         // now we can read the saved object in the presence of all
         // the right plugins
         res = ois.readObject();
-  
+
         // ensure a fresh start
         clearCurrentTransients();
         res = getTransientRepresentation(res);
@@ -820,7 +821,7 @@ public class PersistenceManager {
   /**
    * Determine whether the URL contains a GATE application serialized
    * using XML.
-   * 
+   *
    * @param url The URL to check.
    * @return true if the URL refers to an xml serialized application,
    *         false otherwise.
@@ -833,8 +834,7 @@ public class PersistenceManager {
     String firstLine;
     BufferedReader fileReader = null;
     try {
-      fileReader = new java.io.BufferedReader(
-              new java.io.InputStreamReader(url.openStream()));
+      fileReader = new BomStrippingInputStreamReader(url.openStream());
       firstLine = fileReader.readLine();
     } finally {
       if(fileReader != null) fileReader.close();
@@ -861,7 +861,7 @@ public class PersistenceManager {
   /**
    * Sets the persistent equivalent type to be used to (re)store a given
    * type of transient objects.
-   * 
+   *
    * @param transientType the type that will be replaced during
    *          serialisation operations
    * @param persistentType the type used to replace objects of transient
@@ -932,10 +932,10 @@ public class PersistenceManager {
       return flag;
     }
   }
-  
+
   private static ThreadLocal<LinkedList<Boolean>> useGateHome;
   private static ThreadLocal<LinkedList<Boolean>> warnAboutGateHome;
-  private static ThreadLocal<LinkedList<BooleanFlag>> haveWarnedAboutGateHome; 
+  private static ThreadLocal<LinkedList<BooleanFlag>> haveWarnedAboutGateHome;
 
   static {
     persistentReplacementTypes = new HashMap();
@@ -960,7 +960,7 @@ public class PersistenceManager {
 
       registerPersitentEquivalent(ConditionalController.class,
               ConditionalControllerPersistence.class);
-      
+
       registerPersitentEquivalent(ConditionalSerialAnalyserController.class,
               ConditionalSerialAnalyserControllerPersistence.class);
 
@@ -972,7 +972,7 @@ public class PersistenceManager {
 
       registerPersitentEquivalent(gate.persist.JDBCDataStore.class,
               JDBCDSPersistence.class);
-      
+
       registerPersitentEquivalent(gate.creole.AnalyserRunningStrategy.class,
               AnalyserRunningStrategyPersistence.class);
     }
@@ -980,7 +980,7 @@ public class PersistenceManager {
       // builtins shouldn't raise this
       pe.printStackTrace();
     }
-    
+
     /**
      * Thread-local stack.
      */
@@ -990,9 +990,9 @@ public class PersistenceManager {
         // TODO Auto-generated method stub
         return new LinkedList<T>();
       }
-    
+
     }
-    
+
     existingPersitentReplacements = new ThreadLocalStack<Map>();
     existingTransientValues = new ThreadLocalStack<Map>();
     persistenceFile = new ThreadLocalStack<File>();

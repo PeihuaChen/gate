@@ -113,7 +113,7 @@ public class ShellSlacFrame extends MainFrame {
       fileMenu.add(new XJMenuItem(action, this));
 
     } // if
-    
+
     // Open All... action - open multiple files from directory
     corpusFiller = new CorpusFillerComponent();
     action = new PopulateCorpusAction();
@@ -135,7 +135,7 @@ public class ShellSlacFrame extends MainFrame {
     action = new ExportDocumentInlineAction();
     exportMenu.add(new XJMenuItem(action, this));
     fileMenu.add(exportMenu);
-    
+
     JMenu exportAllMenu = new JMenu("Export All");
     action = new ExportAllDocumentAction();
     exportAllMenu.add(new XJMenuItem(action, this));
@@ -809,10 +809,10 @@ public class ShellSlacFrame extends MainFrame {
       while(tokenizer.hasMoreTokens()) {
         set.add(tokenizer.nextToken());
       } // while
-      
+
       return set;
     }
-    
+
     public void run() {
       if(document == null || targetFile == null) return;
       MainFrame.lockGUI("Store document with inline markup...");
@@ -827,7 +827,7 @@ public class ShellSlacFrame extends MainFrame {
           Set typesSet = getTypes(enumaratedAnnTypes);
           annotationsToDump = annotationsToDump.get(typesSet);
         } // if
-        
+
         // Prepare to write into the xmlFile using the original encoding
         String encoding = ((gate.TextualDocument)document).getEncoding();
         if(encoding == null || encoding.length() == 0)
@@ -854,14 +854,14 @@ public class ShellSlacFrame extends MainFrame {
         if("text/plain".equalsIgnoreCase(mimeType)) {
           toXml = "<GATE>\n"+ toXml + "\n</GATE>";
         } // if
-        
+
         writer.write(toXml);
         writer.flush();
         writer.close();
       } catch (Exception ex){
         ex.printStackTrace(Out.getPrintWriter());
       }// End try
-      
+
       MainFrame.unlockGUI();
     } // run()
   } // ExportInline
@@ -929,7 +929,7 @@ public class ShellSlacFrame extends MainFrame {
           URL fileURL;
           Runnable run;
           Thread thread;
-          
+
           for(int i=0; i<corpus.size(); ++i) {
             currentDoc = (Document) corpus.get(i);
 
@@ -944,10 +944,10 @@ public class ShellSlacFrame extends MainFrame {
             } // if
             if(fileName.length() == 0) {
               fileName = "gate_result"+i;
-            } // if      
+            } // if
             // create full file name
             fileName = fileName+".gate";
-            
+
             // run export
             run = new ExportInline(currentDoc, new File(directory, fileName));
             thread = new Thread(run, "");
@@ -1090,8 +1090,7 @@ public class ShellSlacFrame extends MainFrame {
             dlg.setVisible(true);
           } // if
           else {
-            BufferedReader reader = new BufferedReader(
-              new InputStreamReader(url.openStream()));
+            BufferedReader reader = new BomStrippingInputStreamReader(url.openStream());
             String line = "";
             StringBuffer content = new StringBuffer();
             do {
@@ -1121,7 +1120,7 @@ public class ShellSlacFrame extends MainFrame {
     } // actionPerformed(ActionEvent e)
   } // class HelpAboutSlugAction extends AbstractAction
 
-  
+
   /**
    * Component used to select the options for corpus populating
    */
@@ -1187,5 +1186,5 @@ public class ShellSlacFrame extends MainFrame {
       thread.start();
     } // actionPerformed(ActionEvent e)
   } // class PopulateCorpusAction extends AbstractAction
-  
+
 } // class ShellSlacFrame

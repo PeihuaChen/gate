@@ -21,6 +21,7 @@ import java.net.URL;
 import java.util.*;
 
 import gate.creole.ResourceInstantiationException;
+import gate.util.BomStrippingInputStreamReader;
 import gate.util.Files;
 
 
@@ -53,7 +54,7 @@ implements List {
 
   /** the content of this list */
   private String content = null;
-  
+
   /** the separator used to delimit feature name-value pairs in gazetteer lists */
   private String separator;
 
@@ -134,8 +135,8 @@ implements List {
 
       BufferedReader listReader;
 
-      listReader = new BufferedReader(new InputStreamReader(
-                              (url).openStream(), encoding));
+      listReader = new BomStrippingInputStreamReader(
+                              (url).openStream(), encoding);
       String line;
       while (null != (line = listReader.readLine())) {
         entries.add(new GazetteerNode(line, separator, isOrdered));
@@ -202,7 +203,7 @@ implements List {
     return url;
   }
 
-  
+
   /**
    * @return the seperator
    */
@@ -217,7 +218,7 @@ implements List {
     this.separator = separator;
   }
 
-  
+
 /*--------------implementation of java.util.List--------------------*/
   public int size() {
     return entries.size();
@@ -448,5 +449,5 @@ implements List {
     } // switch mode
   } // updateContent(String)
 
-  
+
 } // Class GazetteerList

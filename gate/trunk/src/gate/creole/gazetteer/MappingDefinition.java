@@ -21,6 +21,7 @@ import java.net.URL;
 import java.util.*;
 
 import gate.creole.ResourceInstantiationException;
+import gate.util.BomStrippingInputStreamReader;
 import gate.util.Files;
 
 /** Represents a mapping definition which maps gazetteer lists to ontology classes */
@@ -80,7 +81,7 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
     }
     try {
       BufferedReader mapReader =
-      new BufferedReader(new InputStreamReader((url).openStream(), ENCODING));
+      new BomStrippingInputStreamReader((url).openStream(), ENCODING);
 
       String line;
       MappingNode node;

@@ -619,8 +619,7 @@ public class BootStrap {
           InputStream currentInputStream =
               Files.getGateResourceAsStream(oldResource+oldPathFile);
 
-          InputStreamReader inputStreamReader = new InputStreamReader (
-                                                    currentInputStream);
+          Reader inputStreamReader = new BomStrippingInputStreamReader(currentInputStream);
           int  charRead = 0;
           String text = null;
           while(

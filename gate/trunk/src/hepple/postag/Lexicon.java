@@ -25,6 +25,8 @@ package hepple.postag;
  * @version 1.0
  */
 
+import gate.util.BomStrippingInputStreamReader;
+
 import java.util.*;
 import java.io.*;
 import java.net.URL;
@@ -69,9 +71,9 @@ class Lexicon extends HashMap {
     String line;
     BufferedReader lexiconReader;
     if(encoding == null) {
-      lexiconReader = new BufferedReader(new InputStreamReader(lexiconURL.openStream()));
+      lexiconReader = new BomStrippingInputStreamReader(lexiconURL.openStream());
     } else {
-      lexiconReader = new BufferedReader(new InputStreamReader(lexiconURL.openStream(),encoding));
+      lexiconReader = new BomStrippingInputStreamReader(lexiconURL.openStream(),encoding);
     }
 
     line = lexiconReader.readLine();

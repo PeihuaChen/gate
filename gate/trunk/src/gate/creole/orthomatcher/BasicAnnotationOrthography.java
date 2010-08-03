@@ -23,6 +23,7 @@ import gate.Document;
 import gate.Factory;
 import gate.FeatureMap;
 import gate.creole.ExecutionException;
+import gate.util.BomStrippingInputStreamReader;
 import gate.util.Err;
 import gate.util.InvalidOffsetException;
 
@@ -33,7 +34,7 @@ import static gate.creole.ANNIEConstants.PERSON_GENDER_FEATURE_NAME;
 import static gate.creole.orthomatcher.OrthoMatcherHelper.*;
 
 /*
- * This class defines an orthography which defines the primary behavior of the Orthomatcher processing 
+ * This class defines an orthography which defines the primary behavior of the Orthomatcher processing
  * resource in GATE.
  */
 public class BasicAnnotationOrthography implements AnnotationOrthography {
@@ -284,7 +285,7 @@ public class BasicAnnotationOrthography implements AnnotationOrthography {
 
   /** Tables for namematch info
    * (used by the namematch rules)
-   * @return 
+   * @return
    */
   public HashSet buildTables(AnnotationSet nameAllAnnots) {
 
@@ -337,8 +338,8 @@ public class BasicAnnotationOrthography implements AnnotationOrthography {
   } //isUnknownGender
 
   protected Map<String,HashSet<String>> initNicknames(
-          String nicknameFileEncoding, 
-          java.net.URL fileURL 
+          String nicknameFileEncoding,
+          java.net.URL fileURL
   ) throws IOException {
 
 
@@ -347,9 +348,8 @@ public class BasicAnnotationOrthography implements AnnotationOrthography {
     nicknameMap = new HashMap<String,HashSet<String>>();
 
     //create the relative URL
-    BufferedReader reader = new BufferedReader(
-            new InputStreamReader(fileURL.openStream(),
-                    nicknameFileEncoding));
+    BufferedReader reader = new BomStrippingInputStreamReader(fileURL.openStream(),
+                    nicknameFileEncoding);
     String lineRead = null;
     int ctr = 0;
     while ((lineRead = reader.readLine()) != null){

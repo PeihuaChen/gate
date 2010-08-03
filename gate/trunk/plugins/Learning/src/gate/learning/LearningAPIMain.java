@@ -1,8 +1,8 @@
 /*
  * LearningAPIMain.java
- * 
+ *
  * Yaoyong Li 22/03/2007
- * 
+ *
  * $Id: LearningAPIMain.java, v 1.0 2007-03-22 12:58:16 +0000 yaoyong $
  */
 package gate.learning;
@@ -15,6 +15,7 @@ import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
 import gate.util.Benchmark;
 import gate.util.Benchmarkable;
+import gate.util.BomStrippingInputStreamReader;
 import gate.util.Files;
 import gate.util.GateException;
 import java.io.BufferedReader;
@@ -211,7 +212,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
 
   /**
    * Run the resource.
-   * 
+   *
    * @throws ExecutionException
    */
   public void execute() throws ExecutionException {
@@ -359,13 +360,12 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
           startTime = Benchmark.startPoint();
           /** Open the normal NLP feature file. */
           inNLPFeatures =
-                  new BufferedReader(
-                          new InputStreamReader(
+                  new BomStrippingInputStreamReader(
                                   new FileInputStream(
                                           new File(
                                                   getApplicationTempDir(),
                                                   ConstantParameters.FILENAMEOFNLPFeaturesData)),
-                                  "UTF-8"));
+                                  "UTF-8");
           outFeatureVectors =
                   new BufferedWriter(
                           new OutputStreamWriter(
@@ -449,13 +449,12 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
                     benchmarkingFeatures);
             /** Open the normal NLP feature file. */
             inNLPFeatures =
-                    new BufferedReader(
-                            new InputStreamReader(
+                    new BomStrippingInputStreamReader(
                                     new FileInputStream(
                                             new File(
                                                     wdResults,
                                                     ConstantParameters.FILENAMEOFNLPFeaturesData)),
-                                    "UTF-8"));
+                                    "UTF-8");
             outFeatureVectors =
                     new BufferedWriter(
                             new OutputStreamWriter(
@@ -583,13 +582,12 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
             }
             /** Open the normal NLP feature file. */
             inNLPFeatures =
-                    new BufferedReader(
-                            new InputStreamReader(
+                    new BomStrippingInputStreamReader(
                                     new FileInputStream(
                                             new File(
                                                     wdResults,
                                                     ConstantParameters.FILENAMEOFNLPFeaturesData)),
-                                    "UTF-8"));
+                                    "UTF-8");
             outFeatureVectors =
                     new BufferedWriter(
                             new OutputStreamWriter(
@@ -695,13 +693,12 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
                       benchmarkingFeatures);
               /** Open the normal NLP feature file. */
               inNLPFeatures =
-                      new BufferedReader(
-                              new InputStreamReader(
+                      new BomStrippingInputStreamReader(
                                       new FileInputStream(
                                               new File(
                                                       getApplicationTempDir(),
                                                       ConstantParameters.FILENAMEOFNLPFeaturesData)),
-                                      "UTF-8"));
+                                      "UTF-8");
               outFeatureVectors =
                       new BufferedWriter(
                               new OutputStreamWriter(
@@ -783,13 +780,12 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
              * MI-training.
              */
             inNLPFeatures =
-                    new BufferedReader(
-                            new InputStreamReader(
+                    new BomStrippingInputStreamReader(
                                     new FileInputStream(
                                             new File(
                                                     wdResults,
                                                     ConstantParameters.FILENAMEOFNLPFeaturesDataTemp)),
-                                    "UTF-8"));
+                                    "UTF-8");
             outFeatureVectors =
                     new BufferedWriter(
                             new OutputStreamWriter(
@@ -977,7 +973,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
 
   /**
    * Returns the benchmark ID of the parent of this resource.
-   * 
+   *
    * @return
    */
   public String getParentBenchmarkId() {
@@ -986,7 +982,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
 
   /**
    * Returns the benchmark ID of this resource.
-   * 
+   *
    * @return
    */
   public String getBenchmarkId() {
@@ -1000,7 +996,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
   /**
    * Given an ID of the parent resource, this method is responsible for
    * producing the Benchmark ID, unique to this resource.
-   * 
+   *
    * @param parentID
    */
   public void createBenchmarkId(String parentID) {
@@ -1010,7 +1006,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
 
   /**
    * This method sets the benchmarkID for this resource.
-   * 
+   *
    * @param benchmarkID
    */
   public void setParentBenchmarkId(String benchmarkID) {
@@ -1019,7 +1015,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
 
   /**
    * Returns the logger object being used by this resource.
-   * 
+   *
    * @return
    */
   public Logger getLogger() {

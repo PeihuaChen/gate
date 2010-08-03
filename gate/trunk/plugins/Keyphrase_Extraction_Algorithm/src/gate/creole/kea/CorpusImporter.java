@@ -1,6 +1,6 @@
 /*
  *    CorpusImporter.java
- * 
+ *
  *    Copyright (c) 1998-2005, The University of Sheffield.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -27,6 +27,7 @@ import gate.*;
 import gate.creole.AbstractVisualResource;
 import gate.creole.ExecutionException;
 import gate.gui.MainFrame;
+import gate.util.BomStrippingInputStreamReader;
 import gate.util.Err;
 import gate.util.ExtensionFileFilter;
 
@@ -224,9 +225,8 @@ public class CorpusImporter extends AbstractVisualResource {
                   try{
                     BufferedReader reader;
                     if(encoding != null && encoding.length() > 0){
-                      reader = new BufferedReader(
-                               new InputStreamReader(
-                               new FileInputStream(fileName), encoding));
+                      reader = new BomStrippingInputStreamReader(
+                                 new FileInputStream(fileName), encoding);
                     }else{
                       reader = new BufferedReader(new FileReader(fileName));
                     }

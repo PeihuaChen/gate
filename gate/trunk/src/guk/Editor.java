@@ -28,6 +28,7 @@ import javax.swing.event.*;
 import javax.swing.text.*;
 import javax.swing.undo.UndoManager;
 
+import gate.util.BomStrippingInputStreamReader;
 import guk.im.GateIM;
 
 /**
@@ -183,9 +184,8 @@ public class Editor extends JFrame {
             if(encoding == null) return;
             file = filer.getSelectedFile();
             try {
-              InputStreamReader reader = new InputStreamReader(
-                new BufferedInputStream(new FileInputStream(file)),
-                (String)encoding);
+              BufferedReader reader = new BomStrippingInputStreamReader(new FileInputStream(file),
+                      (String)encoding);
               textPane.selectAll();
               textPane.replaceSelection("");
               textPane.read(reader, null);
@@ -352,7 +352,7 @@ public class Editor extends JFrame {
         if(res == JOptionPane.OK_OPTION){
           frame.setVisible(false);
           frame.dispose();
-          
+
         }
       }// actionPerformed(ActionEvent e)
     };

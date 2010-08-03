@@ -12,6 +12,8 @@ import junit.framework.*;
 import gate.*;
 import gate.creole.*;
 import gate.corpora.*;
+import gate.util.BomStrippingInputStreamReader;
+
 import java.net.*;
 import java.io.*;
 
@@ -82,8 +84,8 @@ public class TestRepositioningInfo
       writer.write(((gate.Document)doc).toXml(null, true));
       writer.flush();
       writer.close();
-      InputStreamReader readerForSource = new InputStreamReader(new URL(testFile).openStream(),encoding);
-      InputStreamReader readerForDesti = new InputStreamReader(new FileInputStream(outputFile),encoding);
+      Reader readerForSource = new BomStrippingInputStreamReader(new URL(testFile).openStream(),encoding);
+      Reader readerForDesti = new BomStrippingInputStreamReader(new FileInputStream(outputFile),encoding);
       while(true) {
         int input1 = readerForSource.read();
         int input2 = readerForDesti.read();

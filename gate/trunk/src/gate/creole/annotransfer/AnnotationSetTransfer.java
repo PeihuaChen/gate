@@ -1,13 +1,13 @@
 /*
  * AnnotationSetTransfer.java
- * 
+ *
  * Copyright (c) 2009, The University of Sheffield.
- * 
+ *
  * This file is part of GATE (see http://gate.ac.uk/), and is free software,
  * licenced under the GNU Library General Public License, Version 2, June 1991
  * (in the distribution as file licence.html, and also available at
  * http://gate.ac.uk/gate/licence.html).
- * 
+ *
  * Mark A. Greenwood, 7/10/2009
  */
 package gate.creole.annotransfer;
@@ -22,6 +22,7 @@ import gate.Resource;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
+import gate.util.BomStrippingInputStreamReader;
 import gate.util.InvalidOffsetException;
 
 import java.io.BufferedReader;
@@ -39,18 +40,18 @@ import java.util.Map;
  * This plugin allows the names of annotations and features to be changed as
  * well as transfered from one annotation set to another. Think of it as an
  * extended version of the old AnnotationSet Transfer plugin.
- * 
+ *
  * @author Mark A. Greenwood
  */
 public class AnnotationSetTransfer extends AbstractLanguageAnalyser
                                                                      implements
                                                                      ProcessingResource,
                                                                      Serializable {
-  
+
   private String tagASName = GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME;
 
   private String outputASName, inputASName, textTagName;
-  
+
   private URL configURL;
 
   private Boolean copyAnnotations, transferAllUnlessFound;
@@ -58,7 +59,7 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
   private gate.AnnotationSet bodyAnnotations = null;
 
   private List<String> annotationTypes = null;
-  
+
   Map<String, Mapping> mappings = new HashMap<String, Mapping>();
 
   @Override
@@ -74,13 +75,13 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
     AnnotationSet annotsToTransfer = null;
 
     mappings.clear();
-    
+
     //TODO clean this up so we don't have to repeat ourselves
     if (configURL != null) {
-      
+
       try {
-        BufferedReader in = new BufferedReader(new InputStreamReader(configURL.openStream()));
-        
+        BufferedReader in = new BomStrippingInputStreamReader(configURL.openStream());
+
         String line = in.readLine();
         while (line != null) {
           if (!line.trim().equals("")) {
@@ -94,20 +95,20 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
       }
       catch (IOException ioe) {
         ioe.printStackTrace();
-      }    
+      }
     }
     else if (annotationTypes != null) {
       for(String type : annotationTypes) {
         String[] data = type.split("=", 2);
         String oldName = data[0].trim();
         String newName = data.length == 2 ? data[1].trim() : null;
-        
+
         mappings.put(oldName, new Mapping(oldName, newName));
       }
     }
     //else
     //  throw new ExecutionException("The annotation list and URL cannot both be null");
-    
+
     if(mappings.size() > 0) {
       annotsToTransfer = inputAS.get(mappings.keySet());
     } else {
@@ -160,9 +161,9 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
           throws ExecutionException {
     for(Annotation annot : toTransfer) {
       Mapping m = mappings.get(annot.getType());
-      
+
       String name = (m == null || m.newName == null ? annot.getType() : m.newName);
-      
+
       try {
         FeatureMap params = Factory.newFeatureMap();
         params.putAll(annot.getFeatures());
@@ -170,7 +171,7 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
                 .getOffset(), name, params);
       } catch(InvalidOffsetException e) {
         throw new ExecutionException(e);
-      }      
+      }
     }
   }
 
@@ -216,11 +217,11 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
   public void setAnnotationTypes(List<String> newTypes) {
     annotationTypes = newTypes;
   }
-  
+
   public void setConfigURL(URL url) {
     configURL = url;
   }
-  
+
   public URL getConfigURL() {
     return configURL;
   }

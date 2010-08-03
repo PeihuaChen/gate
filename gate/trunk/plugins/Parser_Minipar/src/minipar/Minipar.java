@@ -37,7 +37,7 @@ public class Minipar extends AbstractLanguageAnalyser implements
 	 * document in order to process it with Minipar
 	 */
 	public static final String GATETEXTFILE = "GATESentences";
-  
+
   /**
    * The Minipar executable limits the length of a sentence to 1024 characters.
    * If a sentence is longer than the maximal length it is not sent to MINIPAR7
@@ -170,7 +170,7 @@ public class Minipar extends AbstractLanguageAnalyser implements
 	 * Minipar Binary file takes a file as an argument, which has one sentence
 	 * written on one line. It takes one sentence at a time and parses them one
 	 * by one.
-	 * 
+	 *
 	 * @return The list containing annotations of type *Sentence*
 	 * @throws ExecutionException
 	 */
@@ -202,7 +202,7 @@ public class Minipar extends AbstractLanguageAnalyser implements
 
     // only the sentences shorter than maxSentenceLength are sent to Minipar
     ArrayList sentencesSent =  new ArrayList(allSentences.size());
-    
+
 		// save sentence strings to file for Minipar
 		ListIterator sentenceIterator = allSentences.listIterator();
 		try {
@@ -241,7 +241,7 @@ public class Minipar extends AbstractLanguageAnalyser implements
 	 * Core of the wrapper. GATETEXTFILE is processed with Minipar. Minipar
 	 * given a text file, binary executable and the location of data directory,
 	 * returns a parse, which is then mapped over the GATE document.
-	 * 
+	 *
 	 * @param allSentences -
 	 *            GATE sentence annotations
 	 * @throws ExecutionException
@@ -265,8 +265,7 @@ public class Minipar extends AbstractLanguageAnalyser implements
 		try {
 			String line;
 			Process p = Runtime.getRuntime().exec(cmdline);
-			BufferedReader input = new BufferedReader(new InputStreamReader(p
-					.getInputStream()));
+			BufferedReader input = new BomStrippingInputStreamReader(p.getInputStream());
 
 			// this has ArrayList as its each element
 			// this element consists of all annotations for that particular

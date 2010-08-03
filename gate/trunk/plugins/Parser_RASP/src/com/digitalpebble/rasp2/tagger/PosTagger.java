@@ -8,6 +8,7 @@ import gate.Resource;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
+import gate.util.BomStrippingInputStreamReader;
 import gate.util.OffsetComparator;
 
 import java.io.BufferedReader;
@@ -42,7 +43,7 @@ public class PosTagger extends AbstractLanguageAnalyser {
 
 	private URL raspHome = null;
 
-	// parameters passed to the native POS tagger 
+	// parameters passed to the native POS tagger
 	// no need to modify that
 	private final String parametersString = "B1 b C1 N t auxiliary_files/slb.trn d auxiliary_files/seclarge.lex j auxiliary_files/unkstats-seclarge m auxiliary_files/tags.map";
 
@@ -50,7 +51,7 @@ public class PosTagger extends AbstractLanguageAnalyser {
 	private String RASPTaggerRoot;
 
 	private String POSexecutable;
-	
+
 	public Resource init() throws ResourceInstantiationException {
 
 		if (getRaspHome() == null) {
@@ -86,7 +87,7 @@ public class PosTagger extends AbstractLanguageAnalyser {
 			charset = encoding;
 
 		File tempToken = null;
-		
+
 		// create a temp file
 		try {
 			tempToken = java.io.File.createTempFile("rasp", ".token");
@@ -109,9 +110,9 @@ public class PosTagger extends AbstractLanguageAnalyser {
 		Iterator sentenceIterator = sents.iterator();
 
 		AnnotationSet tokens = inputAS.get("Token");
-		
+
 		List<Annotation> tokenEntities = new ArrayList<Annotation>(tokens.size());
-		
+
 		try {
 			while (sentenceIterator.hasNext()) {
 				Annotation sentence = (Annotation) sentenceIterator.next();
@@ -123,7 +124,7 @@ public class PosTagger extends AbstractLanguageAnalyser {
 						.getOffset()));
 				java.util.Collections.sort(toks, new OffsetComparator());
 				Iterator<Annotation> iter = toks.iterator();
-				
+
 				while (iter.hasNext()) {
 					Annotation token = (Annotation) iter.next();
 					String form = (String) token.getFeatures().get("string");
@@ -189,9 +190,8 @@ public class PosTagger extends AbstractLanguageAnalyser {
 
 		// read from the POS temporary file
 		try {
-			InputStreamReader in = new InputStreamReader(new FileInputStream(
+			BufferedReader input = new BomStrippingInputStreamReader(new FileInputStream(
 					tempPOS), charset);
-			BufferedReader input = new BufferedReader(in);
 			String line = null;
 			while ((line = input.readLine()) != null) {
 				// ignore sentence markers
@@ -236,12 +236,12 @@ public class PosTagger extends AbstractLanguageAnalyser {
 					// create a new instance of Form
 					// add it to the annotationset with the same position as the original
 					// Token
-					
+
 					FeatureMap features = Factory.newFeatureMap();
 					features.put("string", currentTokenString);
 					features.put("probability", Double.parseDouble(score));
 					features.put("pos", pos);
-					
+
 					outputAS.add(currentToken.getStartNode().getOffset(), currentToken.getEndNode().getOffset(), "WordForm", features);
 					wfNum++;
 				}
@@ -318,18 +318,18 @@ class WFComparator implements Comparator {
 	// compare two WordForms on the basis of their probabilities
 	// otherwise use their tag
 	public int compare(Annotation arg0, Annotation arg1) {
-		if (arg0.getType().equals("WordForm")==false) throw new RuntimeException("WFComparator should have annotations of type WordForm - found "+arg0.getType()); 
+		if (arg0.getType().equals("WordForm")==false) throw new RuntimeException("WFComparator should have annotations of type WordForm - found "+arg0.getType());
 		if (arg1.getType().equals("WordForm")==false) throw new RuntimeException("WFComparator should have annotations of type WordForm - found "+arg1.getType());
-		
+
 		FeatureMap fm1 = arg0.getFeatures();
 		FeatureMap fm2 = arg1.getFeatures();
-		
+
 		Double pro1 = (Double) fm1.get("probability");
 		Double pro2 = (Double) fm2.get("probability");
-		
+
 		String pos1 = (String) fm1.get("pos");
 		String pos2 = (String) fm2.get("pos");
-		
+
 		double diff = pro1 - pro2;
 		if (diff < 0)
 			return -1;

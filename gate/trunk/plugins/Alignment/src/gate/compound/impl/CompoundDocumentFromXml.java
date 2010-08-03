@@ -9,6 +9,7 @@ import gate.alignment.Alignment;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
+import gate.util.BomStrippingInputStreamReader;
 import gate.util.GateRuntimeException;
 
 import java.io.BufferedReader;
@@ -29,7 +30,7 @@ import java.util.Map;
 /**
  * Those compound documents saved in a single xml document can be
  * reloaded in GATE using this LR.
- * 
+ *
  * @author niraj
  */
 public class CompoundDocumentFromXml extends CompoundDocumentImpl {
@@ -49,8 +50,8 @@ public class CompoundDocumentFromXml extends CompoundDocumentImpl {
 
     try {
       StringBuilder xmlString = new StringBuilder();
-      BufferedReader br = new BufferedReader(new InputStreamReader(compoundDocumentUrl
-              .openStream(), "utf-8"));
+      BufferedReader br = new BomStrippingInputStreamReader(compoundDocumentUrl
+              .openStream(), "utf-8");
       String line = br.readLine();
       while(line != null) {
         xmlString.append("\n").append(line);
@@ -147,7 +148,7 @@ public class CompoundDocumentFromXml extends CompoundDocumentImpl {
       fileToDelete.delete();
     }
   }
- 
+
   /**
    * Url of the compound document
    */

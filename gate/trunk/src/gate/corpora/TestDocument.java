@@ -24,6 +24,7 @@ import java.util.*;
 import junit.framework.*;
 
 import gate.*;
+import gate.util.BomStrippingInputStreamReader;
 import gate.util.Err;
 import gate.util.GateException;
 import gate.util.SimpleFeatureMapImpl;
@@ -138,7 +139,7 @@ public class TestDocument extends TestCase
     // get some text out of the test URL
     BufferedReader uReader = null;
     try {
-      uReader = new BufferedReader(new InputStreamReader(u.openStream()));
+      uReader = new BomStrippingInputStreamReader(u.openStream());
       assertEquals(uReader.readLine(), "<HTML>");
     } catch(UnknownHostException e) { // no network connection
       return;
@@ -157,7 +158,7 @@ public class TestDocument extends TestCase
     */
   } // testLotsOfThings
 
-  
+
   public void testDocRender() throws Exception
   {
       Document doc = Factory.newDocument("Hi Mom");
@@ -168,8 +169,8 @@ public class TestDocument extends TestCase
       // Will fail, content is "<Foo>Hi Mom</Foo>"
       assertEquals("<Foo>Hi</Foo> Mom", content);
   }
-  
-  
+
+
   /** The reason this is method begins with verify and not with test is that it
    *  gets called by various other test methods. It is somehow a utility test
    *  method. It should be called on all gate documents having annotation sets.

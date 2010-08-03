@@ -7,6 +7,7 @@ import gate.Resource;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
+import gate.util.BomStrippingInputStreamReader;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -28,7 +29,7 @@ import org.apache.log4j.Logger;
 
 /**
  * Wrapper for the open nlp pos tagger
- * 
+ *
  * @author <A
  *         HREF="mailto:georgiev@ontotext.com">georgi.georgiev@ontotext.com</A>
  *         Created: Thu Dec 11 16:25:59 EET 2008
@@ -162,9 +163,8 @@ class OpenNlpPOS extends AbstractLanguageAnalyser {
 		// model.getFile() +
 		// " dictionary: "+dictionary.getFile());
 		try {
-			BufferedReader dictionaryReader = new BufferedReader(
-					new InputStreamReader(dictionary.openStream(),
-							dictionaryEncoding));
+			BufferedReader dictionaryReader = new BomStrippingInputStreamReader(dictionary.openStream(),
+							dictionaryEncoding);
 			pos = new POSTaggerME(getModel(model), new POSDictionary(
 					dictionaryReader, true));
 		} catch (IOException e) {

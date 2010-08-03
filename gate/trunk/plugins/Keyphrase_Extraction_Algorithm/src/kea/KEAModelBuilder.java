@@ -19,6 +19,8 @@
 
 package kea;
 
+import gate.util.BomStrippingInputStreamReader;
+
 import java.io.*;
 import java.util.*;
 
@@ -80,10 +82,10 @@ import weka.core.Option;
  * @version 1.0
  */
 public class KEAModelBuilder implements OptionHandler {
-  
+
   /** Name of directory */
   String m_dirName = null;
-  
+
   /** Name of model */
   String m_modelName = null;
 
@@ -154,7 +156,7 @@ public class KEAModelBuilder implements OptionHandler {
     this.m_Stopwords = newM_Stopwords;
   }
 
-  
+
   /**
    * Get the Stemmer value.
    * @return the Stemmer value.
@@ -172,187 +174,187 @@ public class KEAModelBuilder implements OptionHandler {
 
     this.m_Stemmer = newStemmer;
   }
-  
+
   /**
    * Get the value of MinNumOccur.
    *
    * @return Value of MinNumOccur.
    */
   public int getMinNumOccur() {
-    
+
     return m_MinNumOccur;
   }
-  
+
   /**
    * Set the value of MinNumOccur.
    *
    * @param newMinNumOccur Value to assign to MinNumOccur.
    */
   public void setMinNumOccur(int newMinNumOccur) {
-    
+
     m_MinNumOccur = newMinNumOccur;
   }
-  
+
   /**
    * Get the value of MaxPhraseLength.
    *
    * @return Value of MaxPhraseLength.
    */
   public int getMaxPhraseLength() {
-    
+
     return m_MaxPhraseLength;
   }
-  
+
   /**
    * Set the value of MaxPhraseLength.
    *
    * @param newMaxPhraseLength Value to assign to MaxPhraseLength.
    */
   public void setMaxPhraseLength(int newMaxPhraseLength) {
-    
+
     m_MaxPhraseLength = newMaxPhraseLength;
   }
-  
+
   /**
    * Get the value of MinPhraseLength.
    *
    * @return Value of MinPhraseLength.
    */
   public int getMinPhraseLength() {
-    
+
     return m_MinPhraseLength;
   }
-  
+
   /**
    * Set the value of MinPhraseLength.
    *
    * @param newMinPhraseLength Value to assign to MinPhraseLength.
    */
   public void setMinPhraseLength(int newMinPhraseLength) {
-    
+
     m_MinPhraseLength = newMinPhraseLength;
   }
-  
+
   /**
    * Get the value of disallowIPeriods.
    *
    * @return Value of disallowIPeriods.
    */
   public boolean getDisallowIPeriods() {
-    
+
     return m_disallowIPeriods;
   }
-  
+
   /**
    * Set the value of disallowIPeriods.
    *
    * @param newdisallowIPeriods Value to assign to disallowIPeriods.
    */
   public void setDisallowIPeriods(boolean newdisallowIPeriods) {
-    
+
     m_disallowIPeriods = newdisallowIPeriods;
   }
-  
+
   /**
    * Get the value of useKFrequency.
    *
    * @return Value of useKFrequency.
    */
   public boolean getUseKFrequency() {
-    
+
     return m_useKFrequency;
   }
-  
+
   /**
    * Set the value of useKFrequency.
    *
    * @param newuseKFrequency Value to assign to useKFrequency.
    */
   public void setUseKFrequency(boolean newuseKFrequency) {
-    
+
     m_useKFrequency = newuseKFrequency;
   }
-  
+
   /**
    * Get the value of debug.
    *
    * @return Value of debug.
    */
   public boolean getDebug() {
-    
+
     return m_debug;
   }
-  
+
   /**
    * Set the value of debug.
    *
    * @param newdebug Value to assign to debug.
    */
   public void setDebug(boolean newdebug) {
-    
+
     m_debug = newdebug;
   }
-  
+
   /**
    * Get the value of encoding.
    *
    * @return Value of encoding.
    */
   public String getEncoding() {
-    
+
     return m_encoding;
   }
-  
+
   /**
    * Set the value of encoding.
    *
    * @param newencoding Value to assign to encoding.
    */
   public void setEncoding(String newencoding) {
-    
+
     m_encoding = newencoding;
   }
-  
+
   /**
    * Get the value of modelName.
    *
    * @return Value of modelName.
    */
   public String getModelName() {
-    
+
     return m_modelName;
   }
-  
+
   /**
    * Set the value of modelName.
    *
    * @param newmodelName Value to assign to modelName.
    */
   public void setModelName(String newmodelName) {
-    
+
     m_modelName = newmodelName;
   }
-  
+
   /**
    * Get the value of dirName.
    *
    * @return Value of dirName.
    */
   public String getDirName() {
-    
+
     return m_dirName;
   }
-  
+
   /**
    * Set the value of dirName.
    *
    * @param newdirName Value to assign to dirName.
    */
   public void setDirName(String newdirName) {
-    
+
     m_dirName = newdirName;
   }
-  
+
   /**
    * Parses a given list of options controlling the behaviour of this object.
    * Valid options are:<p>
@@ -461,11 +463,11 @@ public class KEAModelBuilder implements OptionHandler {
     String [] options = new String [20];
     int current = 0;
 
-    options[current++] = "-l"; 
+    options[current++] = "-l";
     options[current++] = "" + (getDirName());
-    options[current++] = "-m"; 
+    options[current++] = "-m";
     options[current++] = "" + (getModelName());
-    options[current++] = "-e"; 
+    options[current++] = "-e";
     options[current++] = "" + (getEncoding());
     if (getUseKFrequency()) {
       options[current++] = "-k";
@@ -476,15 +478,15 @@ public class KEAModelBuilder implements OptionHandler {
     if (getDisallowIPeriods()) {
       options[current++] = "-p";
     }
-    options[current++] = "-x"; 
+    options[current++] = "-x";
     options[current++] = "" + (getMaxPhraseLength());
-    options[current++] = "-y"; 
+    options[current++] = "-y";
     options[current++] = "" + (getMinPhraseLength());
-    options[current++] = "-o"; 
+    options[current++] = "-o";
     options[current++] = "" + (getMinNumOccur());
-    options[current++] = "-s"; 
+    options[current++] = "-s";
     options[current++] = "" + (getStopwords().getClass().getName());
-    options[current++] = "-t"; 
+    options[current++] = "-t";
     options[current++] = "" + (getStemmer().getClass().getName());
     if (getCheckForProperNouns()) {
       options[current++] = "-n";
@@ -541,7 +543,7 @@ public class KEAModelBuilder implements OptionHandler {
     newVector.addElement(new Option(
 	      "\tDo not check for proper nouns.",
               "n", 0, "-n"));
- 
+
     return newVector.elements();
   }
 
@@ -574,7 +576,7 @@ public class KEAModelBuilder implements OptionHandler {
    * Builds the model from the files
    */
   public void buildModel(Hashtable stems) throws Exception {
-    
+
     // Check whether there is actually any data
     if (stems.size() == 0) {
       throw new Exception("Couldn't find any data!");
@@ -603,11 +605,11 @@ public class KEAModelBuilder implements OptionHandler {
       double[] newInst = new double[2];
       try {
 	File txt = new File(m_dirName + "/" + str + ".txt");
-	InputStreamReader is;
+	BufferedReader is;
 	if (!m_encoding.equals("default")) {
-	  is = new InputStreamReader(new FileInputStream(txt), m_encoding);
+	  is = new BomStrippingInputStreamReader(new FileInputStream(txt), m_encoding);
 	} else {
-	  is = new InputStreamReader(new FileInputStream(txt));
+	  is = new BomStrippingInputStreamReader(new FileInputStream(txt));
 	}
 	StringBuffer txtStr = new StringBuffer();
 	int c;
@@ -623,17 +625,17 @@ public class KEAModelBuilder implements OptionHandler {
       }
       try {
 	File key = new File(m_dirName + "/" + str + ".key");
-	InputStreamReader is; 
+	BufferedReader is;
 	if (!m_encoding.equals("default")) {
-	  is = new InputStreamReader(new FileInputStream(key), m_encoding);
+	  is = new BomStrippingInputStreamReader(new FileInputStream(key), m_encoding);
 	} else {
-	  is = new InputStreamReader(new FileInputStream(key));
+	  is = new BomStrippingInputStreamReader(new FileInputStream(key));
 	}
 	StringBuffer keyStr = new StringBuffer();
 	int c;
 	while ((c = is.read()) != -1) {
 	  keyStr.append((char)c);
-	}      
+	}
 	newInst[1] = (double)data.attribute(1).addStringValue(keyStr.toString());
       } catch (Exception e) {
 	if (m_debug) {
@@ -646,30 +648,29 @@ public class KEAModelBuilder implements OptionHandler {
       data = data.stringFreeStructure();
     }
     m_KEAFilter.batchFinished();
-    
+
     // Get rid of instances in filter
-    Instance dummy;
-    while ((dummy = m_KEAFilter.output()) != null) {};
+    while (m_KEAFilter.output() != null) {};
   }
-  
-  /** 
+
+  /**
    * Saves the extraction model to the file.
    */
   public void saveModel() throws Exception {
-    
-    BufferedOutputStream bufferedOut = 
+
+    BufferedOutputStream bufferedOut =
       new BufferedOutputStream(new FileOutputStream(m_modelName));
     ObjectOutputStream out = new ObjectOutputStream(bufferedOut);
     out.writeObject(m_KEAFilter);
     out.flush();
     out.close();
   }
-  
+
   /**
-   * The main method.  
+   * The main method.
    */
   public static void main(String[] ops) {
-    
+
     KEAModelBuilder kmb = new KEAModelBuilder();
     try {
       kmb.setOptions(ops);

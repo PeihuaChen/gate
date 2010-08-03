@@ -140,7 +140,7 @@ public abstract class Factory {
     * @param parameterValues the feature map containing intialisation time
     *   parameterValues for the resource.
     * @param features the features for the new resource or null to not assign
-    *   any (new) features. 
+    *   any (new) features.
     * @param resourceName the name to be given to the resource or null to assign
     *   a default name.
     * @return an instantiated resource.
@@ -329,8 +329,8 @@ public abstract class Factory {
         if(sourceUrl != null){
           URI sourceURI = sourceUrl.toURI();
           resourceName = sourceURI.getPath().trim();
-          if(resourceName == null || 
-             resourceName.length() == 0 || 
+          if(resourceName == null ||
+             resourceName.length() == 0 ||
              resourceName.equals("/")){
             //this URI has no path -> use the whole string
             resourceName = sourceURI.toString();
@@ -344,7 +344,7 @@ public abstract class Factory {
           }
         }
       }catch(Exception t){
-        //there were problems while trying to guess a name  
+        //there were problems while trying to guess a name
         //we can safely ignore them
       }finally{
         //make sure there is a name provided, whatever happened
@@ -356,7 +356,7 @@ public abstract class Factory {
       res.setName(resourceName);
     } // else if(res.getName() == null)
     // if res.getName() != null, leave it as it is
-    
+
     Map listeners = new HashMap(gate.gui.MainFrame.getListeners());
     // set the listeners if any
     if(listeners != null && !listeners.isEmpty()) {
@@ -479,7 +479,7 @@ public abstract class Factory {
     doc.setSourceUrl(null);
     return doc;
   } // newDocument(String)
-  
+
   /**
    * <p>
    * Create a <i>duplicate</i> of the given resource.  A duplicate is a
@@ -523,7 +523,7 @@ public abstract class Factory {
    * behaviour of a DefaultGazetteer can be duplicated by a
    * SharedDefaultGazetteer that shares the internal data structures).
    * </p>
-   * 
+   *
    * @param res the resource to duplicate
    * @return an independent duplicate copy of the resource
    * @throws ResourceInstantiationException if an exception occurs while
@@ -540,7 +540,7 @@ public abstract class Factory {
       ctx.active = false;
     }
   }
-  
+
   /**
    * Create a duplicate of the given resource, using the provided context.
    * This method is intended for use by resources that implement the
@@ -548,7 +548,7 @@ public abstract class Factory {
    * their child resources.  Calls made to this method outside the scope of
    * such a {@link CustomDuplication#duplicate CustomDuplication.duplicate}
    * call will fail with a runtime exception.
-   * 
+   *
    * @see #duplicate(Resource)
    * @param res the resource to duplicate
    * @param ctx the current context as passed to the
@@ -584,7 +584,7 @@ public abstract class Factory {
       return newRes;
     }
   }
-  
+
   /**
    * Implementation of the default duplication algorithm described
    * in the comment for {@link #duplicate(Resource)}.  This method is
@@ -597,7 +597,7 @@ public abstract class Factory {
    * way.  Calls to this method made outside the context of a
    * {@link CustomDuplication#duplicate CustomDuplication.duplicate}
    * call will fail with a runtime exception.
-   * 
+   *
    * @param res the resource to duplicate
    * @param ctx the current context
    * @return a duplicate of the given resource, constructed using the
@@ -615,7 +615,7 @@ public abstract class Factory {
     String resName = res.getName();
 
     FeatureMap newResFeatures = duplicate(res.getFeatures(), ctx);
-    
+
     // get the resource data to extract the parameters
     ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(className);
     if(rData == null)
@@ -632,7 +632,7 @@ public abstract class Factory {
     }
     // duplicate any Resources in the params map
     initParams = duplicate(initParams, ctx);
-    
+
     // create the new resource
     Resource newResource = createResource(className, initParams, newResFeatures, resName);
     if(newResource instanceof ProcessingResource) {
@@ -647,10 +647,10 @@ public abstract class Factory {
       runtimeParams = duplicate(runtimeParams, ctx);
       newResource.setParameterValues(runtimeParams);
     }
-    
+
     return newResource;
   }
-  
+
   /**
    * Construct a feature map that is a copy of the one provided except
    * that any {@link Resource} values in the map are replaced by their
@@ -659,7 +659,7 @@ public abstract class Factory {
    * outside of a
    * {@link CustomDuplication#duplicate CustomDuplication.duplicate}
    * implementation.
-   * 
+   *
    * @param fm the feature map to duplicate
    * @param ctx the current context
    * @return a duplicate feature map
@@ -680,7 +680,7 @@ public abstract class Factory {
     }
     return newFM;
   }
-  
+
   /**
    * Opaque memo object passed to
    * {@link CustomDuplication#duplicate CustomDuplication.duplicate}
@@ -692,7 +692,7 @@ public abstract class Factory {
   public static class DuplicationContext {
     IdentityHashMap<Resource, Resource> knownResources =
       new IdentityHashMap<Resource, Resource>();
-    
+
     /**
      * Whether this duplication context is part of an active duplicate
      * call.
@@ -705,7 +705,7 @@ public abstract class Factory {
     DuplicationContext() {
     }
   }
-  
+
   /**
    * Throws an exception if the specified duplication context is
    * null or not active.  This is to ensure that the Factory
@@ -757,8 +757,8 @@ public abstract class Factory {
   }
 
   public static ParseCpsl newJapeParser(URL japeURL, String encoding) throws IOException {
-      java.io.Reader stream = new InputStreamReader
-        (new BufferedInputStream(japeURL.openStream()), encoding);
+    // the stripping stream is buffered, no need to buffer the URL stream.
+      java.io.Reader stream = new BomStrippingInputStreamReader(japeURL.openStream(), encoding);
 
       ParseCpsl parser = newJapeParser(stream, new HashMap());
       parser.setBaseURL(japeURL);

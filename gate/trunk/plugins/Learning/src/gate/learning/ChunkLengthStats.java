@@ -1,6 +1,6 @@
 /*
  *  ChunkLengthStats.java
- * 
+ *
  *  Yaoyong Li 22/03/2007
  *
  *  $Id: ChunkLengthStats.java, v 1.0 2007-03-22 12:58:16 +0000 yaoyong $
@@ -10,6 +10,8 @@ package gate.learning;
 import gate.Annotation;
 import gate.AnnotationSet;
 import gate.learning.DocFeatureVectors.LongCompactor;
+import gate.util.BomStrippingInputStreamReader;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -48,8 +50,8 @@ public class ChunkLengthStats {
     File file1 = new File(parentDir, filename);
     if(file1.exists()) {
       try {
-        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(
-          new File(parentDir, filename)), "UTF-8"));
+        BufferedReader in = new BomStrippingInputStreamReader(new FileInputStream(
+          new File(parentDir, filename)), "UTF-8");
         String line;
         while((line = in.readLine()) != null) {
           line.trim();
@@ -61,7 +63,7 @@ public class ChunkLengthStats {
           ChunkLengthStats chunkLens;
           if(chunkLenHash.containsKey(label)) {
             chunkLens = (ChunkLengthStats)chunkLenHash.get(label);
-          } else 
+          } else
             chunkLens = new ChunkLengthStats();
           for(int i = 0; i < num; ++i) {
             items = (in.readLine()).split(ConstantParameters.ITEMSEPARATOR);
@@ -78,7 +80,7 @@ public class ChunkLengthStats {
         System.out
           .println("No chunk length statistics list file in initialisation phrase.");
     }
-    
+
     return chunkLenHash;
   }
 
