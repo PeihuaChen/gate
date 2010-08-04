@@ -15,6 +15,8 @@
  */
 
 package gate;
+import java.util.List;
+
 import gate.event.CorpusListener;
 
 /** Corpora are lists of Document. TIPSTER equivalent: Collection.
