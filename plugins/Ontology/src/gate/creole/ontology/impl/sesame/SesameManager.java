@@ -58,6 +58,7 @@ import org.openrdf.repository.config.RepositoryImplConfig;
 import org.openrdf.repository.config.RepositoryRegistry;
 import org.openrdf.sail.memory.model.MemValueFactory;
 import gate.creole.ontology.OntologyTupleQuery;
+import org.openrdf.http.client.HTTPClient;
 /**
  * A class to encapsulate management of a Sesame2 repository and
  * make handling different repository types easier.
@@ -204,7 +205,26 @@ public class SesameManager {
      */
     public void connectToRemoteLocation(String url) {
       isManagedRepository = true;
-    setManager(new RemoteRepositoryManager(url), url);
+      HTTPClient httpClient = new HTTPClient();
+      httpClient.setServerURL(url);
+      RemoteRepositoryManager mgr = new RemoteRepositoryManager(url);
+      try {
+        java.net.URL javaurl = new java.net.URL(url);
+        String userpass = javaurl.getUserInfo();
+        if(userpass != null) {
+          String[] userpassfields = userpass.split(":");
+          if(userpassfields.length != 2) {
+            throw new SesameManagerException("URL has login data but not username and password");
+          } else {
+            System.out.println("Setting username and password to "+userpassfields[0]+"/"+userpassfields[1]);
+            mgr.setUsernameAndPassword(userpassfields[0], userpassfields[1]);
+          }
+        }
+      } catch(Exception ex) {
+        throw new SesameManagerException("Problem processing remote URL: "+ex);
+      }
+      setManager(mgr, url);
+    
   }
 
   /**
