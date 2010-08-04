@@ -1,0 +1,230 @@
+<?xml version="1.0"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>gate</groupId>
+	<artifactId>gate</artifactId>
+	<name>GATE Embedded</name>
+	<description>
+		GATE - general achitecture for text engineering - is 
+		open source software capable of solving almost any text processing problem.
+		This artifact enables you to embed the complete GATE Embedded with all its dependencies.
+		If you need to use only a small part of GATE functionality and thus dependencies,
+		consider depending on gate-core instead.
+	</description>
+	<version>6.0-SNAPSHOT</version>
+	<url>http://gate.ac.uk/</url>
+	<packaging>pom</packaging>
+    
+	<dependencies>
+		<dependency>
+			<groupId>gate</groupId>
+			<artifactId>gate-core</artifactId>
+			<version>6.0-SNAPSHOT</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+		</dependency>			
+
+		<dependency>
+			<groupId>gate</groupId>
+			<artifactId>gate-asm</artifactId>
+			<version>5.0.0-beta1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>jdom</groupId>
+			<artifactId>jdom</artifactId>
+			<version>1.0</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.thoughtworks.xstream</groupId>
+			<artifactId>xstream</artifactId>
+			<version>1.3.1</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.hp.hpl.jena</groupId>
+			<artifactId>jena</artifactId>
+			<version>2.6.0</version>
+			<exclusions>
+				<exclusion>
+					<!-- ARQ is the SPARQL engine in Jena which is quite heavy, but
+					     not used at this point -->
+					<groupId>com.hp.hpl.jena</groupId>
+					<artifactId>arg</artifactId>
+				</exclusion>		
+			</exclusions>
+		</dependency>
+		
+		<dependency>
+			<groupId>xpp3</groupId>
+			<artifactId>xpp3_min</artifactId>
+			<version>1.1.3.4.O</version>
+		</dependency>  
+		
+		<dependency>
+			<!-- repackaging of the Eclipse JDT compiler, by prepending gate.
+			     to all pacakges; that way gate can be embedded in software
+				 that depends on another version of that compiler -->
+			<groupId>gate</groupId>
+			<artifactId>gate-compiler-jdt</artifactId>
+			<version>1.0</version>
+		</dependency>		
+		
+		<dependency>
+			<groupId>stax</groupId>
+			<artifactId>stax</artifactId>
+			<version>1.2.0</version>
+		</dependency> 
+
+		<dependency>
+			<groupId>urbanophile</groupId>
+			<artifactId>java-getopt</artifactId>
+			<version>1.0.9</version>
+		</dependency>		
+		
+		<dependency>
+			<groupId>net.didion</groupId>
+			<artifactId>jwnl</artifactId>
+			<version>1.3</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>nl.mpi</groupId>
+			<artifactId>lookup</artifactId>
+			<version>4.0</version>
+		</dependency>
+		
+		<dependency>
+		  <groupId>gate</groupId>
+		  <artifactId>gate-hmm</artifactId>     
+		  <version>UNKNOWN</version>
+		</dependency>	
+		
+		<dependency>
+		  <groupId>org.apache.ant</groupId>
+		  <artifactId>ant</artifactId>     
+		  <version>${ant.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.ant</groupId>
+			<artifactId>ant-launcher</artifactId>     
+			<version>${ant.version}</version>
+		</dependency>
+		
+		<dependency>
+		  <groupId>org.apache.ant</groupId>
+		  <artifactId>ant-trax</artifactId>     
+		  <version>${ant.version}</version>
+		</dependency>
+		
+		<dependency>
+		  <groupId>org.apache.ant</groupId>
+		  <artifactId>ant-junit</artifactId>     
+		  <version>${ant.version}</version>
+		</dependency>
+		
+		<dependency>
+		  <groupId>org.apache.ant</groupId>
+		  <artifactId>ant-nodeps</artifactId>     
+		  <version>${ant.version}</version>
+		</dependency>
+		
+		<dependency>
+		  <groupId>org.springframework</groupId>
+		  <artifactId>spring-aop</artifactId>     
+		  <version>2.0.8</version>
+		</dependency>
+		
+		<dependency>
+		  <groupId>org.apache.lucene</groupId>
+		  <artifactId>lucene-core</artifactId>     
+		  <version>2.2.0</version>
+		</dependency>
+
+		<!-- Document importing dependencies -->
+		<dependency>
+		    <groupId>net.sourceforge.nekohtml</groupId>
+		    <artifactId>nekohtml</artifactId>
+		    <version>1.9.14</version>
+		</dependency> 
+		
+		<dependency>
+		   <groupId>org.apache.tika</groupId>
+		   <artifactId>tika-parsers</artifactId>
+		   <version>0.7</version>
+		</dependency>
+		<!-- End of document importing dependencies -->
+		
+		<dependency>
+			<groupId>xmlunit</groupId>
+			<artifactId>xmlunit</artifactId>
+			<version>1.2</version>
+		</dependency>
+		
+		<dependency>
+			<!-- manual -->
+			<groupId>com.oracle</groupId>
+			<artifactId>ojdbc14</artifactId>
+			<version>10.2.0.4.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.ontotext.gate</groupId>
+			<artifactId>hash-gazetteer</artifactId>
+			<version>UNKNOWN</version>
+		</dependency>
+		
+	</dependencies> 
+	
+	<repositories>
+		<!-- Note that the repository URLs should NOT end in / -->
+		<repository>
+			<id>public</id>
+			<name>Ontotext Public Repository</name>
+			<url>http://maven.ontotext.com/archiva/repository/public</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+	
+	<distributionManagement>
+		<repository>
+			<id>ontotext-public</id>
+			<url>dav:http://maven.ontotext.com/archiva/repository/public</url>
+		</repository>
+		<snapshotRepository>
+			<id>ontotext-public</id>
+			<url>dav:http://maven.ontotext.com/archiva/repository/public</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+	<properties>
+		<ant.version>1.8.0</ant.version>
+	</properties>
+
+	<mailingLists>
+		<mailingList>
+		  <name>GATE Users</name>
+		  <post>gate-users@lists.sourceforge.net</post>
+		  <archive>http://news.gmane.org/gmane.comp.ai.gate.general</archive>
+		</mailingList>
+	</mailingLists>
+
+	<scm>
+		<connection>
+			scm:svn:https://gate.svn.sourceforge.net/svnroot/gate</connection>
+		<developerConnection>
+			scm:svn:https://gate.svn.sourceforge.net/svnroot/gate</developerConnection>
+		<url>http://gate.svn.sourceforge.net/viewvc/gate</url>
+	</scm>
+</project>
