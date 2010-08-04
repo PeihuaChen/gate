@@ -16,13 +16,17 @@
 package gate.jape;
 
 import gate.*;
+import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
 import gate.jape.parser.ParseCpsl;
 import gate.util.*;
 
+import java.io.File;
 import java.io.StringReader;
 import java.util.*;
+
+import org.apache.log4j.BasicConfigurator;
 
 import junit.framework.TestCase;
 
@@ -31,31 +35,39 @@ import junit.framework.TestCase;
  */
 public class BaseJapeTests extends TestCase {
 
+  private static boolean gateAwake = false;
   protected static final String DEFAULT_DATA_FILE = "jape/InputTexts/AveShort";
-
+  protected String transducerClass;
   public BaseJapeTests(String name) {
     super(name);
+    this.transducerClass = gate.creole.Transducer.class.getName();
+    
+    if (gateAwake)
+      return;
+    try {
+      BasicConfigurator.configure();
+      assertTrue(new File("./plugins").isDirectory());
+      System.setProperty("gate.home", ".");
+      Gate.init();
+      Gate.getCreoleRegister().registerDirectories(new File("./plugins/ANNIE").toURI().toURL());
+      gateAwake = true;
+    }
+    catch(Exception e) {
+      throw new RuntimeException(e);
+    }    
   }
 
   protected Set<Annotation> doTest(String dataFile, String japeFile, AnnotationCreator ac)
-          throws ResourceInstantiationException, JapeException,
-          ExecutionException {
-    Corpus c = createCorpus(dataFile);
-    // add some annotations
-    Document doc = (Document)c.get(0);
-    ac.createAnnots(doc);
-
-    Set<Annotation> orderedResults = runTransducer(c, japeFile);
-    return orderedResults;
+          throws Exception {
+    Document doc = Factory.newDocument(Files.getGateResourceAsString(dataFile));
+    return doTest(doc, japeFile, ac);
   }
 
   protected Set<Annotation> doTest(Document doc, String japeFile,
           AnnotationCreator ac) throws ResourceInstantiationException,
           JapeException, ExecutionException {
-    Corpus c = createCorpus(doc);
     ac.createAnnots(doc);
-
-    Set<Annotation> orderedResults = runTransducer(c, japeFile);
+    Set<Annotation> orderedResults = runTransducer(doc, japeFile);
     return orderedResults;
   }
 
@@ -63,8 +75,7 @@ public class BaseJapeTests extends TestCase {
           Set<Annotation> actualResults) {
     int i = 0;
 
-    assertEquals("Different number of results expected",
-            expectedResults.length, actualResults.size());
+    assertEquals(expectedResults.length, actualResults.size());
 
     for(Annotation annot : actualResults) {
       String ruleName = (String)annot.getFeatures().get("rule");
@@ -82,7 +93,7 @@ public class BaseJapeTests extends TestCase {
     }
     catch(Exception e) {
       e.printStackTrace(Err.getPrintWriter());
-      assertTrue("Error creating corpus", false);
+      fail("Error creating corpus");
     }
     return null;
   }
@@ -94,37 +105,19 @@ public class BaseJapeTests extends TestCase {
     return c;
   }
 
-
-  /**
-   * Creates a document with the given text
-   * @param text
-   * @return
-   */
-  protected Document createDoc(String text) {
+  protected Set<Annotation> runTransducer(Document doc, String japeFile)
+          throws JapeException, ExecutionException, ResourceInstantiationException {
     FeatureMap params = Factory.newFeatureMap();
-    params.put("stringContent", text);
-    params.put("markupAware", "true");
-    params.put("mimeType", "text/plain");
-    Document d = null;
-    try {
-        d = (Document) Factory.createResource("gate.corpora.DocumentImpl", params);
-    }
-    catch (ResourceInstantiationException e) {
-        throw new RuntimeException(e);
-    }
-    return d;
-}
-
-  protected Set<Annotation> runTransducer(Corpus c, String japeFile)
-          throws JapeException, ExecutionException {
-    Document doc;
-    Batch batch = new Batch(Files.getGateResource(japeFile), "UTF-8");
-    batch.transduce(c);
+    params.put("grammarURL", Files.getGateResource(japeFile));
+    params.put("encoding", "UTF-8");
+    params.put("outputASName", "Output");
+    AbstractLanguageAnalyser transducer = (AbstractLanguageAnalyser)Factory.createResource(transducerClass, params);
+    transducer.setDocument(doc);
+    transducer.execute();
     // check the results
-    doc = (Document)c.get(0);
     Set<Annotation> orderedResults = new TreeSet<Annotation>(
             new OffsetComparator());
-    orderedResults.addAll(doc.getAnnotations().get("Result"));
+    orderedResults.addAll(doc.getAnnotations("Output").get("Result"));
     return orderedResults;
   }
 

@@ -23,10 +23,12 @@ import gate.persist.PersistenceException;
 import gate.util.*;
 import gate.util.persistence.PersistenceManager;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Set;
 
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import junit.framework.Test;
@@ -42,12 +44,6 @@ public class TestJape extends BaseJapeTests
 
   /** Construction */
   public TestJape(String name) { super(name); }
-
-  /** Fixture set up */
-  public void setUp() {
-    //Out.println("TestJape.setUp()");
-  } // setUp
-
 
   /** Batch run */
   public void testBatch() throws Exception{
@@ -77,16 +73,7 @@ public class TestJape extends BaseJapeTests
     } catch(gate.util.InvalidOffsetException ioe) {
       ioe.printStackTrace(Err.getPrintWriter());
     }
-/*
-    // run the parser test
-    Batch batch = null;
-    // String japeFileName = "/gate/jape/Test11.jape";
-    String japeFileName = Files.getResourcePath() + "/jape/TestABC.jape";
-    // String japeFileName = "/gate/jape/Country.jape";
-    InputStream japeFileStream = Files.getResourceAsStream(japeFileName);
-    if(japeFileStream == null)
-      throw new JapeException("couldn't open " + japeFileName);
-*/
+
     Batch batch = new Batch(
             Files.getGateResource("/jape/TestABC.jape"), "UTF-8");
     // test code: print the first line of the jape stream

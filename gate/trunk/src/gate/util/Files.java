@@ -28,6 +28,8 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.CharacterCodingException;
 
+import org.apache.commons.io.IOUtils;
+
 
 /** Some utilities for use with Files and with resources.
   * <P>
@@ -155,26 +157,15 @@ public class Files {
     */
   public static String getGateResourceAsString(String resourceName)
     throws IOException {
-
     InputStream resourceStream = getGateResourceAsStream(resourceName);
-    BufferedReader resourceReader =
-      new BomStrippingInputStreamReader(resourceStream);
-    StringBuffer resourceBuffer = new StringBuffer();
-
-    int i;
-
-    int charsRead = 0;
-    final int size = 1024;
-    char[] charArray = new char[size];
-
-    while( (charsRead = resourceReader.read(charArray,0,size)) != -1 )
-      resourceBuffer.append (charArray,0,charsRead);
-
-    while( (i = resourceReader.read()) != -1 )
-      resourceBuffer.append((char) i);
-
-    resourceReader.close();
-    return resourceBuffer.toString();
+    if (resourceStream == null)
+      throw new IOException("No such resource on classpath: " + resourceName);
+    try {
+      return IOUtils.toString(resourceStream);
+    }
+    finally {
+      resourceStream.close();
+    }
   } // getGateResourceAsString(String)
 
   /**
