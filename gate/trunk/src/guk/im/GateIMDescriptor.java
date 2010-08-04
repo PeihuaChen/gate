@@ -16,8 +16,6 @@
  */
 package guk.im;
 
-import gate.util.BomStrippingInputStreamReader;
-
 import java.awt.AWTException;
 import java.awt.Image;
 import java.awt.im.spi.InputMethod;
@@ -43,7 +41,7 @@ public class GateIMDescriptor implements InputMethodDescriptor {
                          GateIM.getIMBase() + "im.list");
 	    if (is==null) throw new IllegalArgumentException(
               "Failed to retrieve resource 'im.list'. Please reset classpath.");
-      BufferedReader br = new BomStrippingInputStreamReader(is);
+      BufferedReader br = new BufferedReader(new InputStreamReader(is));
       String line = br.readLine();
       StringTokenizer st;
       String filename, language, country, variant;
