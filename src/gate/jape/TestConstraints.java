@@ -167,7 +167,7 @@ public class TestConstraints extends BaseJapeTests {
       }
     };
 
-    Set<Annotation> actualResults = doTest(createDoc(data), japeFile, ac);
+    Set<Annotation> actualResults = doTest(Factory.newDocument(data), japeFile, ac);
     Out.println(actualResults);
     compareResults(expectedResults, actualResults);
   }
