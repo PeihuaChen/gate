@@ -28,14 +28,14 @@ import gate.util.NameBearer;
 /**
  * Corpora are lists of Document. TIPSTER equivalent: Collection.
  */
-public interface SimpleCorpus extends LanguageResource, List, NameBearer {
+public interface SimpleCorpus extends LanguageResource, List<Document>, NameBearer {
 
   public static final String CORPUS_NAME_PARAMETER_NAME = "name";
   public static final String CORPUS_DOCLIST_PARAMETER_NAME = "documentsList";
 
   /**
    * Gets the names of the documents in this corpus.
-   * 
+   *
    * @return a {@link List} of Strings representing the names of the documents
    *         in this corpus.
    */
@@ -43,7 +43,7 @@ public interface SimpleCorpus extends LanguageResource, List, NameBearer {
 
   /**
    * Gets the name of a document in this corpus.
-   * 
+   *
    * @param index
    *          the index of the document
    * @return a String value representing the name of the document at
@@ -56,7 +56,7 @@ public interface SimpleCorpus extends LanguageResource, List, NameBearer {
    * a directory. Uses a {@link FileFilter} to select which files will be used
    * and which will be ignored. A simple file filter based on extensions is
    * provided in the Gate distribution ({@link gate.util.ExtensionFileFilter}).
-   * 
+   *
    * @param directory
    *          the directory from which the files will be picked. This parameter
    *          is an URL for uniformity. It needs to be a URL of type file
@@ -84,7 +84,7 @@ public interface SimpleCorpus extends LanguageResource, List, NameBearer {
    * a directory. Uses a {@link FileFilter} to select which files will be used
    * and which will be ignored. A simple file filter based on extensions is
    * provided in the Gate distribution ({@link gate.util.ExtensionFileFilter}).
-   * 
+   *
    * @param directory
    *          the directory from which the files will be picked. This parameter
    *          is an URL for uniformity. It needs to be a URL of type file
@@ -96,8 +96,8 @@ public interface SimpleCorpus extends LanguageResource, List, NameBearer {
    *          the filter is <tt>null</tt> all the files will be accepted.
    * @param encoding
    *          the encoding to be used for reading the documents
-   *@param mimeType the mime type to be used when loading documents. If null, 
-   *then the mime type will be automatically determined.           
+   *@param mimeType the mime type to be used when loading documents. If null,
+   *then the mime type will be automatically determined.
    * @param recurseDirectories
    *          should the directory be parsed recursively?. If <tt>true</tt>
    *          all the files from the provided directory and all its children
@@ -105,14 +105,14 @@ public interface SimpleCorpus extends LanguageResource, List, NameBearer {
    *          accepted by the filter otherwise the children directories will be
    *          ignored.
    */
-  public void populate(URL directory, FileFilter filter, String encoding, 
+  public void populate(URL directory, FileFilter filter, String encoding,
           String mimeType, boolean recurseDirectories) throws IOException,
     ResourceInstantiationException;
-  
+
   /**
    * Fills the provided corpus with documents extracted from the provided trec
    * file.
-   * 
+   *
    * @param trecFile
    *          the trec file.
    * @param encoding
