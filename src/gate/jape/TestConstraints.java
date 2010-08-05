@@ -43,7 +43,7 @@ public class TestConstraints extends BaseJapeTests {
         "NotEqualandGreaterEqual", "NotEqual", "EqualAndNotEqualRegEx",
         "EqualAndNotExistance", "OntoTest", "OntoTest2"};
 
-    Set<Annotation> actualResults = doTest(DEFAULT_DATA_FILE, japeFile, basicAnnotCreator);
+    Set<Annotation> actualResults = doTest(DEFAULT_DATA_FILE, japeFile, basicAnnotCreator, "http://gate.ac.uk/tests/demo.owl");
     Out.println(actualResults);
     compareResults(expectedResults, actualResults);
   }
@@ -167,7 +167,7 @@ public class TestConstraints extends BaseJapeTests {
       }
     };
 
-    Set<Annotation> actualResults = doTest(Factory.newDocument(data), japeFile, ac);
+    Set<Annotation> actualResults = doTest(Factory.newDocument(data), japeFile, ac, null);
     Out.println(actualResults);
     compareResults(expectedResults, actualResults);
   }
