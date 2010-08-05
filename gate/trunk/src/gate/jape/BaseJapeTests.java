@@ -17,23 +17,28 @@ package gate.jape;
 
 import gate.*;
 import gate.creole.AbstractLanguageAnalyser;
-import gate.creole.ExecutionException;
-import gate.creole.ResourceInstantiationException;
+import gate.creole.ontology.impl.sesame.OWLIMOntology;
 import gate.jape.parser.ParseCpsl;
-import gate.util.*;
+import gate.util.Err;
+import gate.util.Files;
+import gate.util.InvalidOffsetException;
+import gate.util.OffsetComparator;
 
 import java.io.File;
 import java.io.StringReader;
-import java.util.*;
-
-import org.apache.log4j.BasicConfigurator;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.TreeSet;
 
 import junit.framework.TestCase;
+
+import org.apache.log4j.BasicConfigurator;
 
 /**
  * Tests for Constraint predicate logic
  */
-public class BaseJapeTests extends TestCase {
+public abstract class BaseJapeTests extends TestCase {
 
   private static boolean gateAwake = false;
   protected static final String DEFAULT_DATA_FILE = "jape/InputTexts/AveShort";
@@ -41,7 +46,7 @@ public class BaseJapeTests extends TestCase {
   public BaseJapeTests(String name) {
     super(name);
     this.transducerClass = gate.creole.Transducer.class.getName();
-    
+
     if (gateAwake)
       return;
     try {
@@ -49,7 +54,8 @@ public class BaseJapeTests extends TestCase {
       assertTrue(new File("./plugins").isDirectory());
       System.setProperty("gate.home", ".");
       Gate.init();
-      Gate.getCreoleRegister().registerDirectories(new File("./plugins/ANNIE").toURI().toURL());
+      Gate.getCreoleRegister().registerDirectories(new File("./plugins/ANNIE").getCanonicalFile().toURI().toURL());
+      Gate.getCreoleRegister().registerDirectories(new File("./plugins/Ontology").getCanonicalFile().toURI().toURL());
       gateAwake = true;
     }
     catch(Exception e) {
@@ -57,17 +63,21 @@ public class BaseJapeTests extends TestCase {
     }    
   }
 
-  protected Set<Annotation> doTest(String dataFile, String japeFile, AnnotationCreator ac)
-          throws Exception {
+  protected Set<Annotation> doTest(String dataFile, String japeFile, AnnotationCreator ac, String ontologyURL)
+  throws Exception {
     Document doc = Factory.newDocument(Files.getGateResourceAsString(dataFile));
-    return doTest(doc, japeFile, ac);
+    return doTest(doc, japeFile, ac, ontologyURL);
+  }  
+
+  protected Set<Annotation> doTest(String dataFile, String japeFile, AnnotationCreator ac)
+  throws Exception {
+    return doTest(dataFile, japeFile, ac, null);
   }
 
   protected Set<Annotation> doTest(Document doc, String japeFile,
-          AnnotationCreator ac) throws ResourceInstantiationException,
-          JapeException, ExecutionException {
+          AnnotationCreator ac, String ontologyURL) throws Exception {
     ac.createAnnots(doc);
-    Set<Annotation> orderedResults = runTransducer(doc, japeFile);
+    Set<Annotation> orderedResults = runTransducer(doc, japeFile, ontologyURL);
     return orderedResults;
   }
 
@@ -85,32 +95,16 @@ public class BaseJapeTests extends TestCase {
     }
   }
 
-  protected Corpus createCorpus(String fileName)
-          throws ResourceInstantiationException {
-    try {
-      Document doc = Factory.newDocument(Files.getGateResourceAsString(fileName));
-      return createCorpus(doc);
-    }
-    catch(Exception e) {
-      e.printStackTrace(Err.getPrintWriter());
-      fail("Error creating corpus");
-    }
-    return null;
-  }
-
-  protected Corpus createCorpus(Document doc)
-          throws ResourceInstantiationException {
-    Corpus c = Factory.newCorpus("TestJape corpus");
-    c.add(doc);
-    return c;
-  }
-
-  protected Set<Annotation> runTransducer(Document doc, String japeFile)
-          throws JapeException, ExecutionException, ResourceInstantiationException {
+  private Set<Annotation> runTransducer(Document doc, String japeFile, String ontologyURL)
+  throws Exception {
     FeatureMap params = Factory.newFeatureMap();
     params.put("grammarURL", Files.getGateResource(japeFile));
     params.put("encoding", "UTF-8");
     params.put("outputASName", "Output");
+    if (ontologyURL != null) {
+      Object ontology = createOntology(ontologyURL);
+      params.put("ontology", ontology);   
+    }
     AbstractLanguageAnalyser transducer = (AbstractLanguageAnalyser)Factory.createResource(transducerClass, params);
     transducer.setDocument(doc);
     transducer.execute();
@@ -119,6 +113,14 @@ public class BaseJapeTests extends TestCase {
             new OffsetComparator());
     orderedResults.addAll(doc.getAnnotations("Output").get("Result"));
     return orderedResults;
+  }
+
+  private Object createOntology(String ontologyURL) throws Exception {        
+    OWLIMOntology ont = new OWLIMOntology();
+    ont.setRdfXmlURL(new URL(ontologyURL));
+    ont.setLoadImports(true);
+    ont.init();
+    return ont;
   }
 
   /**
