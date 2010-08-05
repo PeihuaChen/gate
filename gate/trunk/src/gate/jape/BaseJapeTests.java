@@ -17,15 +17,17 @@ package gate.jape;
 
 import gate.*;
 import gate.creole.AbstractLanguageAnalyser;
-import gate.creole.ontology.impl.sesame.OWLIMOntology;
 import gate.jape.parser.ParseCpsl;
 import gate.util.Err;
 import gate.util.Files;
+import gate.util.GateException;
 import gate.util.InvalidOffsetException;
 import gate.util.OffsetComparator;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.StringReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Set;
@@ -46,6 +48,7 @@ public abstract class BaseJapeTests extends TestCase {
   public BaseJapeTests(String name) {
     super(name);
     this.transducerClass = gate.creole.Transducer.class.getName();
+    //this.transducerClass = "gate.jape.plus.Transducer";
 
     if (gateAwake)
       return;
@@ -53,14 +56,31 @@ public abstract class BaseJapeTests extends TestCase {
       BasicConfigurator.configure();
       assertTrue(new File("./plugins").isDirectory());
       System.setProperty("gate.home", ".");
-      Gate.init();
-      Gate.getCreoleRegister().registerDirectories(new File("./plugins/ANNIE").getCanonicalFile().toURI().toURL());
-      Gate.getCreoleRegister().registerDirectories(new File("./plugins/Ontology").getCanonicalFile().toURI().toURL());
+      Gate.init();      
+      registerCREOLE("./plugins/Ontology");
+      
+      // JAPE implementation - uncomment only one
+      // Regular one
+      registerCREOLE("./plugins/ANNIE");
+      
+      // JAPE Plus
+      // registerCREOLE("../gate-futures/jplus");
+
+      // JAPE PDA Plus      
+      // registerCREOLE("../gate-futures/jpdaplus");
       gateAwake = true;
+    }
+    catch (RuntimeException e) {
+      throw e;
     }
     catch(Exception e) {
       throw new RuntimeException(e);
     }    
+  }
+
+  private void registerCREOLE(String pathname) throws GateException,
+          MalformedURLException, IOException {
+    Gate.getCreoleRegister().registerDirectories(new File(pathname).getCanonicalFile().toURI().toURL());
   }
 
   protected Set<Annotation> doTest(String dataFile, String japeFile, AnnotationCreator ac, String ontologyURL)
@@ -98,7 +118,13 @@ public abstract class BaseJapeTests extends TestCase {
   private Set<Annotation> runTransducer(Document doc, String japeFile, String ontologyURL)
   throws Exception {
     FeatureMap params = Factory.newFeatureMap();
-    params.put("grammarURL", Files.getGateResource(japeFile));
+    if (transducerClass.contains("plus")) {
+      params.put("sourceType", "JAPE");
+      params.put("sourceURL", Files.getGateResource(japeFile));
+    }
+    else {
+      params.put("grammarURL", Files.getGateResource(japeFile));
+    }
     params.put("encoding", "UTF-8");
     params.put("outputASName", "Output");
     if (ontologyURL != null) {
@@ -115,12 +141,11 @@ public abstract class BaseJapeTests extends TestCase {
     return orderedResults;
   }
 
-  private Object createOntology(String ontologyURL) throws Exception {        
-    OWLIMOntology ont = new OWLIMOntology();
-    ont.setRdfXmlURL(new URL(ontologyURL));
-    ont.setLoadImports(true);
-    ont.init();
-    return ont;
+  private Object createOntology(String ontologyURL) throws Exception { 
+    FeatureMap params = Factory.newFeatureMap();
+    params.put("rdfXmlURL", new URL(ontologyURL));
+    params.put("loadImports", true);
+    return Factory.createResource("gate.creole.ontology.impl.sesame.OWLIMOntology", params);
   }
 
   /**
