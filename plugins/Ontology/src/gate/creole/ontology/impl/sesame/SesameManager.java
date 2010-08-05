@@ -216,7 +216,6 @@ public class SesameManager {
           if(userpassfields.length != 2) {
             throw new SesameManagerException("URL has login data but not username and password");
           } else {
-            System.out.println("Setting username and password to "+userpassfields[0]+"/"+userpassfields[1]);
             mgr.setUsernameAndPassword(userpassfields[0], userpassfields[1]);
           }
         }
