@@ -48,7 +48,7 @@ public abstract class BaseJapeTests extends TestCase {
     super(name);
     this.transducerClass = gate.creole.Transducer.class.getName();
     //this.transducerClass = "gate.jape.plus.Transducer";
-
+    //this.transducerClass = "com.ontotext.jape.pda.Transducer";
     if (gateAwake)
       return;
     try {
@@ -62,13 +62,16 @@ public abstract class BaseJapeTests extends TestCase {
 
       // JAPE implementation - uncomment only one
       // Regular one
-      registerCREOLE(new File(Gate.getPluginsHome(), "ANNIE"));
+       registerCREOLE(new File(Gate.getPluginsHome(), "ANNIE"));
 
       // JAPE Plus
       // registerCREOLE(new File("../gate-futures/jplus"));
 
       // JAPE PDA Plus      
       // registerCREOLE(new File("../gate-futures/jpdaplus"));
+      
+      // JAPE PDS
+      //registerCREOLE(new File("C:/Users/mnozchev/kim/artifacts/environments/kim-platform/files/plugins/japePDA"));
       }
       catch (GateException e) {
         e.printStackTrace();
@@ -95,21 +98,22 @@ public abstract class BaseJapeTests extends TestCase {
     }
   }
 
-  protected Set<Annotation> doTest(String dataFile, String japeFile, AnnotationCreator ac, String ontologyURL)
+  protected Set<Annotation> doTest(String dataResourcePath, String japeResourcePath, AnnotationCreator ac, String ontologyURL)
   throws Exception {
-    Document doc = Factory.newDocument(Files.getGateResourceAsString(dataFile));
-    return doTest(doc, japeFile, ac, ontologyURL);
+    Document doc = Factory.newDocument(Files.getGateResourceAsString(dataResourcePath));
+    return doTest(doc, japeResourcePath, ac, ontologyURL);
   }  
 
-  protected Set<Annotation> doTest(String dataFile, String japeFile, AnnotationCreator ac)
+  protected Set<Annotation> doTest(String dataResourcePath, String japeResourcePath, AnnotationCreator ac)
   throws Exception {
-    return doTest(dataFile, japeFile, ac, null);
+    return doTest(dataResourcePath, japeResourcePath, ac, null);
   }
 
-  protected Set<Annotation> doTest(Document doc, String japeFile,
+  protected Set<Annotation> doTest(Document doc, String japeResourcePath,
           AnnotationCreator ac, String ontologyURL) throws Exception {
-    ac.createAnnots(doc);
-    Set<Annotation> orderedResults = runTransducer(doc, japeFile, ontologyURL);
+    if (ac != null)
+      ac.createAnnots(doc);
+    Set<Annotation> orderedResults = runTransducer(doc, japeResourcePath, ontologyURL);
     return orderedResults;
   }
 
@@ -127,15 +131,36 @@ public abstract class BaseJapeTests extends TestCase {
     }
   }
 
+  protected final void compareStartOffsets(Set<Annotation> res, int... startOffsets) {
+    assertEquals(startOffsets.length, res.size());
+    int i = 0;
+    for(Annotation annot : res) {
+      assertEquals("Start offset of annotation id: " + annot.getId() + " did not match as expected",
+              startOffsets[i], annot.getStartNode().getOffset().intValue());
+      i++;
+    }    
+  }
+  
+  protected final void compareEndOffsets(Set<Annotation> res, int... endOffsets) {
+    assertEquals(endOffsets.length, res.size());
+    int i = 0;
+    for(Annotation annot : res) {
+      assertEquals("End offset of annotation id: " + annot.getId() + " did not match as expected",
+              endOffsets[i], annot.getEndNode().getOffset().intValue());
+      i++;
+    }    
+  }   
   private Set<Annotation> runTransducer(Document doc, String japeFile, String ontologyURL)
   throws Exception {
     FeatureMap params = Factory.newFeatureMap();
+    URL japeUrl = Files.getGateResource(japeFile);
+    assertNotNull("Resource with relative path: " + japeFile + " is missing.", japeUrl);
     if (transducerClass.contains("plus")) {
       params.put("sourceType", "JAPE");
-      params.put("sourceURL", Files.getGateResource(japeFile));
+      params.put("sourceURL", japeUrl);
     }
     else {
-      params.put("grammarURL", Files.getGateResource(japeFile));
+      params.put("grammarURL", japeUrl);
     }
     params.put("encoding", "UTF-8");
     params.put("outputASName", "Output");
@@ -149,7 +174,7 @@ public abstract class BaseJapeTests extends TestCase {
     // check the results
     Set<Annotation> orderedResults = new TreeSet<Annotation>(
             new OffsetComparator());
-    orderedResults.addAll(doc.getAnnotations("Output").get("Result"));
+    orderedResults.addAll(doc.getAnnotations("Output"));
     return orderedResults;
   }
 
