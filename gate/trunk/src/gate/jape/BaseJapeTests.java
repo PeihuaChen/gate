@@ -27,7 +27,6 @@ import gate.util.OffsetComparator;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Set;
@@ -53,21 +52,28 @@ public abstract class BaseJapeTests extends TestCase {
     if (gateAwake)
       return;
     try {
-      BasicConfigurator.configure();
-      assertTrue(new File("./plugins").isDirectory());
-      System.setProperty("gate.home", ".");
-      Gate.init();      
-      registerCREOLE("./plugins/Ontology");
-      
+      BasicConfigurator.configure();     
+      if (System.getProperty("gate.home") == null)
+        System.setProperty("gate.home", ".");
+      Gate.init();    
+      assertTrue(Gate.getPluginsHome().isDirectory());
+      try {
+      registerCREOLE(new File(Gate.getPluginsHome(), "Ontology"));
+
       // JAPE implementation - uncomment only one
       // Regular one
-      registerCREOLE("./plugins/ANNIE");
-      
+      registerCREOLE(new File(Gate.getPluginsHome(), "ANNIE"));
+
       // JAPE Plus
-      // registerCREOLE("../gate-futures/jplus");
+      // registerCREOLE(new File("../gate-futures/jplus"));
 
       // JAPE PDA Plus      
-      // registerCREOLE("../gate-futures/jpdaplus");
+      // registerCREOLE(new File("../gate-futures/jpdaplus"));
+      }
+      catch (GateException e) {
+        e.printStackTrace();
+        System.out.println("Some plugins were not loaded.");
+      }
       gateAwake = true;
     }
     catch (RuntimeException e) {
@@ -78,9 +84,15 @@ public abstract class BaseJapeTests extends TestCase {
     }    
   }
 
-  private void registerCREOLE(String pathname) throws GateException,
-          MalformedURLException, IOException {
-    Gate.getCreoleRegister().registerDirectories(new File(pathname).getCanonicalFile().toURI().toURL());
+  private void registerCREOLE(File pathname) throws GateException{
+    try {
+      File creolePath = pathname.getCanonicalFile();
+      //assertTrue(creolePath.isDirectory());
+      Gate.getCreoleRegister().registerDirectories(creolePath.toURI().toURL());
+    }
+    catch (IOException e) {
+      throw new GateException(e);
+    }
   }
 
   protected Set<Annotation> doTest(String dataFile, String japeFile, AnnotationCreator ac, String ontologyURL)
