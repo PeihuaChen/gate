@@ -20,19 +20,22 @@ import gate.*;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
 import gate.persist.PersistenceException;
-import gate.util.*;
+import gate.util.AnnotationDiffer;
+import gate.util.Files;
+import gate.util.GateException;
+import gate.util.Out;
 import gate.util.persistence.PersistenceManager;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URL;
 import java.util.Set;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import org.apache.commons.io.output.NullOutputStream;
+import org.apache.log4j.Logger;
 
 
 
@@ -46,47 +49,32 @@ public class TestJape extends BaseJapeTests
   public TestJape(String name) { super(name); }
 
   /** Batch run */
-  public void testBatch() throws Exception{
-    Corpus c = Factory.newCorpus("TestJape corpus");
-    c.add(
-      Factory.newDocument(Files.getGateResourceAsString("texts/doc0.html"))
-    );
-    //add some annotations on the first (only) document in corpus c
-    Document doc = (Document)c.get(0);
-    AnnotationSet defaultAS = doc.getAnnotations();
-
-    try {
-      FeatureMap feat = Factory.newFeatureMap();
-      // defaultAS.add(new Long( 0), new Long( 2), "A",feat);
-      defaultAS.add(new Long( 2), new Long( 4), "A",feat);
-      // defaultAS.add(new Long( 4), new Long( 6), "A",feat);
-      // defaultAS.add(new Long( 6), new Long( 8), "A",feat);
-      defaultAS.add(new Long( 4), new Long(6), "B",feat);
-      // defaultAS.add(new Long(10), new Long(12), "B",feat);
-      // defaultAS.add(new Long(12), new Long(14), "B",feat);
-      // defaultAS.add(new Long(14), new Long(16), "B",feat);
-      // defaultAS.add(new Long(16), new Long(18), "B",feat);
-      defaultAS.add(new Long(6), new Long(8), "C",feat);
-      defaultAS.add(new Long(8), new Long(10), "C",feat);
-      // defaultAS.add(new Long(22), new Long(24), "C",feat);
-      // defaultAS.add(new Long(24), new Long(26), "C",feat);
-    } catch(gate.util.InvalidOffsetException ioe) {
-      ioe.printStackTrace(Err.getPrintWriter());
-    }
-
-    Batch batch = new Batch(
-            Files.getGateResource("/jape/TestABC.jape"), "UTF-8");
-    // test code: print the first line of the jape stream
-    // Out.println(
-    //   new BufferedReader(new InputStreamReader(japeFileStream)).readLine()
-    // );
-
-    // test the transducers
-    batch.transduce(c);
-    // check the results
-    doc = (Document)c.get(0);
-    // defaultAS = doc.getAnnotations();
-    // Out.println(defaultAS);
+  public void testSimple() throws Exception{
+    AnnotationCreator ac = new BaseAnnotationCreator() {
+      
+      public AnnotationSet createAnnots(Document doc) {
+        setDoc(doc);
+        // defaultAS.add(new Long( 0), new Long( 2), "A",feat);
+        add(2, 4, "A");
+        // defaultAS.add(new Long( 4), new Long( 6), "A",feat);
+        // defaultAS.add(new Long( 6), new Long( 8), "A",feat);
+        add(4,6, "B");
+        // defaultAS.add(new Long(10), new Long(12), "B",feat);
+        // defaultAS.add(new Long(12), new Long(14), "B",feat);
+        // defaultAS.add(new Long(14), new Long(16), "B",feat);
+        // defaultAS.add(new Long(16), new Long(18), "B",feat);
+        add(6, 8, "C");
+        add(8, 10, "C");
+        // defaultAS.add(new Long(22), new Long(24), "C",feat);
+        // defaultAS.add(new Long(24), new Long(26), "C",feat);
+        return doc.getAnnotations();
+      }
+    };
+    Set<Annotation> res = doTest("texts/doc0.html", "/jape/TestABC.jape", ac);
+    System.out.println(res);
+    assertEquals(res.toString(), 3, res.size());
+    compareStartOffsets(res, 2, 2, 2);
+    compareEndOffsets(res, 6, 8, 10);
   } // testBatch()
 
   /**
@@ -137,17 +125,8 @@ public class TestJape extends BaseJapeTests
    * (RhsError.jape) that will throw a null pointer exception.
    * The test succeeds so long as we get that exception.
    */
-  public void testRhsErrorMessages() {
-    boolean gotException = false;
-
+  public void disabled_testRhsErrorMessages() {
     try {
-      if(log.isDebugEnabled()) {
-        log.info(
-          "Opening Jape grammar... " + Gate.getUrl("tests/RhsError.jape")
-        );
-      }
-      // a JAPE batcher
-      Batch batch = new Batch(Gate.getUrl("tests/RhsError.jape"), "UTF-8");
 
       // a document with an annotation
       Document doc = Factory.newDocument("This is a Small Document.");
@@ -155,15 +134,12 @@ public class TestJape extends BaseJapeTests
       features.put("orth", "upperInitial");
       doc.getAnnotations().add(new Long(0), new Long(8), "Token", features);
 
-      // run jape on the document
-      batch.transduce(doc);
+      doTest(doc, "tests/RhsError.jape", null, null);
+      fail("Bad JAPE grammar didn't throw an exception");
     } catch(Exception e) {
       if(log.isDebugEnabled())
         log.info("Exception in Jape rule: " + e);
-      gotException = true;
     }
-
-    assertTrue("Bad JAPE grammar didn't throw an exception", gotException);
 
   }  // testRhsErrorMessages
 
@@ -246,43 +222,32 @@ public class TestJape extends BaseJapeTests
   } // testAppelt()
 
 
-//  /**
-//   * This test sets up a JAPE transducer based on a grammar
-//   * (RhsError2.jape) that will throw a compiler error.
-//   * The test succeeds so long as we get that exception.
-//   */
-//  public void testRhsErrorMessages2() {
-//    boolean gotException = false;
-//
-//    // disable System.out so that the compiler can't splash its error on screen
-//    if(DEBUG) System.out.println("hello 1");
-//    PrintStream sysout = System.out;
-//    System.setOut(new PrintStream(new ByteArrayOutputStream()));
-//    if(DEBUG) System.out.println("hello 2");
-//
-//    // run a JAPE batch on the faulty grammar
-//    try {
-//      if(DEBUG) {
-//        Out.print(
-//          "Opening Jape grammar... " + Gate.getUrl("tests/RhsError2.jape")
-//        );
-//      }
-//      // a JAPE batcher
-//      Batch batch = new Batch(Gate.getUrl("tests/RhsError2.jape"), "UTF-8");
-//    } catch(Exception e) {
-//      if(DEBUG) Out.prln(e);
-//      gotException = true;
-//    } finally {
-//
-//      // re-enable System.out
-//      System.setOut(sysout);
-//      if(DEBUG) System.out.println("hello 3");
-//    }
-//
-//    assertTrue("Bad JAPE grammar (2) didn't throw an exception", gotException);
-//
-//  }  // testRhsErrorMessages2
-//
+  /**
+   * This test sets up a JAPE transducer based on a grammar
+   * (RhsError2.jape) that will throw a compiler error.
+   * The test succeeds so long as we get that exception.
+   */
+  public void disabled_testRhsErrorMessages2() {
+
+    PrintStream sysout = System.out;
+    System.setOut(new PrintStream(new NullOutputStream()));
+
+    // run a JAPE batch on the faulty grammar
+    try {
+      Document doc = Factory.newDocument("This is a Small Document.");
+      FeatureMap features = Factory.newFeatureMap();
+      features.put("orth", "upperInitial");
+      doc.getAnnotations().add(new Long(0), new Long(8), "Token", features);
+      doTest(doc, "tests/RhsError2.jape", null, null);
+      fail("Bad JAPE grammar (2) didn't throw an exception");
+    } catch(Exception e) {
+      // success
+    } finally {
+      System.setOut(sysout);
+    }
+
+  }  // testRhsErrorMessages2
+
 
   /** Test suite routine for the test runner */
   public static Test suite() {
