@@ -171,6 +171,7 @@ public class SerialController extends AbstractController implements
     if(log.isDebugEnabled()) {
       prof.checkPoint("Execute controller [" + getName() + "] finished");
     }
+    fireStatusChanged("Finished running " + getName());
 
   } // executeImpl()
 

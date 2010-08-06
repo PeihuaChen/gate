@@ -1511,11 +1511,16 @@ public class SerialControllerEditor extends AbstractVisualResource
 
           Gate.setExecutable(controller);
 
-          MainFrame.lockGUI("Running " + controller.getName() + "...");
+          int corpusSize = 1;
+          if (controller instanceof CorpusController) {
+            corpusSize = ((CorpusController) controller).getCorpus().size();
+          }
+          MainFrame.lockGUI("Running " + controller.getName() + " on "
+            + corpusSize + (corpusSize == 1 ? " document" : " documents"));
           //execute the thing
           long startTime = System.currentTimeMillis();
-          fireStatusChanged("Running " +
-                            controller.getName());
+          fireStatusChanged("Start running " + controller.getName() + " on "
+            + corpusSize + (corpusSize == 1 ? " document" : " documents"));
           fireProgressChanged(0);
 
           try {
