@@ -78,6 +78,8 @@ public class MainFrame extends JFrame implements ProgressListener,
 
   protected JProgressBar progressBar;
 
+  protected JProgressBar globalProgressBar;
+
   protected XJTabbedPane mainTabbedPane;
 
   protected JScrollPane projectTreeScroll;
@@ -518,6 +520,13 @@ public class MainFrame extends JFrame implements ProgressListener,
     progressBar.setForeground(new Color(150, 75, 150));
     progressBar.setStringPainted(false);
 
+    globalProgressBar = new JProgressBar(JProgressBar.HORIZONTAL);
+    globalProgressBar.setBorder(BorderFactory.createEmptyBorder());
+    globalProgressBar.setForeground(new Color(150, 75, 150));
+    globalProgressBar.setStringPainted(true);
+    globalProgressBar.setPreferredSize(new Dimension(100,
+      globalProgressBar.getPreferredSize().height));
+
     Icon alertIcon = getIcon("crystal-clear-app-error");
     alertButton = new JButton(alertIcon);
     alertButton.setToolTipText("There was no error");
@@ -530,10 +539,14 @@ public class MainFrame extends JFrame implements ProgressListener,
     southBox.setBorder(BorderFactory.createEmptyBorder());
     southBox.add(statusBar, BorderLayout.WEST);
     southBox.add(progressBar, BorderLayout.CENTER);
-    southBox.add(alertButton, BorderLayout.EAST);
+    JPanel southEastBox = new JPanel(new BorderLayout());
+    southEastBox.add(globalProgressBar, BorderLayout.CENTER);
+    southEastBox.add(alertButton, BorderLayout.EAST);
+    southBox.add(southEastBox, BorderLayout.EAST);
 
     this.getContentPane().add(southBox, BorderLayout.SOUTH);
     progressBar.setVisible(false);
+    globalProgressBar.setVisible(false);
 
     // extra stuff
     newResourceDialog =
@@ -1714,11 +1727,35 @@ public class MainFrame extends JFrame implements ProgressListener,
     // });
     // }
     SwingUtilities.invokeLater(new ProgressBarUpdater(0));
+    SwingUtilities.invokeLater(new Runnable() { public void run() {
+      globalProgressBar.setVisible(false);
+    }});
     animator.deactivate();
   }
 
   public void statusChanged(String text) {
     SwingUtilities.invokeLater(new StatusBarUpdater(text));
+    if (text != null) {
+      if (text.startsWith("Start running ")) {
+        // get the corpus size from the status text
+        final int corpusSize = Integer.valueOf(
+          text.substring(text.indexOf("on ") + 3, text.indexOf(" document")));
+        SwingUtilities.invokeLater(new Runnable() { public void run() {
+          // initialise the progress bar
+          globalProgressBar.setMaximum(corpusSize);
+          globalProgressBar.setValue(0);
+          globalProgressBar.setString("0/" + corpusSize);
+          globalProgressBar.setVisible(true);
+        }});
+      } else if (text.startsWith("Finished running ")) {
+        SwingUtilities.invokeLater(new Runnable() { public void run() {
+          // update the progress bar with one document processed
+          globalProgressBar.setValue(globalProgressBar.getValue() + 1);
+          globalProgressBar.setString(globalProgressBar.getValue() + "/"
+            + globalProgressBar.getMaximum());
+        }});
+      }
+    }
   }
 
   public void resourceLoaded(CreoleEvent e) {
