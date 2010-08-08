@@ -19,7 +19,6 @@ package gate.util.spring;
 import gate.Factory;
 import gate.FeatureMap;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
@@ -64,22 +63,7 @@ public class FeatureMapFactoryBean extends GateAwareObject implements
 
         // convert Spring resources to URLs
         if(value instanceof Resource) {
-          File resourceFile = null;
-          try {
-            resourceFile = ((Resource)value).getFile();
-          }
-          catch(IOException e) {
-            // ignore, leaving resourceFile == null
-          }
-
-          if(resourceFile == null) {
-            // couldn't get a file, so resolve the resource as a URL
-            value = ((Resource)value).getURL();
-          }
-          else {
-            // get the URL to the file
-            value = resourceFile.toURI().toURL();
-          }
+          value = SpringFactory.resourceToUrl((Resource)value);
         }
 
         fm.put(key, value);

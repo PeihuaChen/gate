@@ -48,6 +48,21 @@
       </xsd:complexContent>
     </xsd:complexType>
   </xsd:element>
+  
+  <xsd:element name="url">
+    <xsd:annotation>
+      <xsd:documentation>
+        Defines a URL, given a string representing a Spring resource.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:simpleContent>
+        <xsd:extension base="xsd:anyURI">
+          <xsd:attribute name="id" type="xsd:ID" use="optional" />
+        </xsd:extension>
+      </xsd:simpleContent>
+    </xsd:complexType>
+  </xsd:element>
 
   <xsd:element name="feature-map">
     <xsd:annotation>
@@ -216,5 +231,4 @@
       <xsd:anyAttribute processContents="skip"/>
     </xsd:complexType>
   </xsd:element>
-  
 </xsd:schema>
