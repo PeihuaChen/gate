@@ -23,6 +23,7 @@ import gate.util.persistence.PersistenceManager;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 
 import org.springframework.beans.factory.DisposableBean;
@@ -76,20 +77,8 @@ public class SavedApplicationFactoryBean extends GateAwareObject implements
     if(object == null) {
       ensureGateInit();
 
-      File locationFile = null;
-      try {
-        locationFile = location.getFile();
-      }
-      catch(IOException ioe) {
-        // OK, so we can't get a file...
-      }
-
-      if(locationFile == null) {
-        object = PersistenceManager.loadObjectFromUrl(location.getURL());
-      }
-      else {
-        object = PersistenceManager.loadObjectFromFile(locationFile);
-      }
+      object = PersistenceManager.loadObjectFromUrl(
+              SpringFactory.resourceToUrl(location));
 
       if(customisers != null) {
         for(ResourceCustomiser c : customisers) {
