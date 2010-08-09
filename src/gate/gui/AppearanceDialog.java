@@ -25,6 +25,10 @@ import gate.Gate;
 import gate.GateConstants;
 import gate.swing.JFontChooser;
 
+/**
+ * No more used and replaced by {@link OptionsDialog}.
+ * @deprecated
+ */
 public class AppearanceDialog extends JDialog {
 
   public AppearanceDialog(Frame owner, String title, boolean modal,

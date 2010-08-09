@@ -82,8 +82,6 @@ public class MainFrame extends JFrame implements ProgressListener,
 
   protected XJTabbedPane mainTabbedPane;
 
-  protected JScrollPane projectTreeScroll;
-
   protected JScrollPane lowerScroll;
 
   /**
@@ -138,8 +136,6 @@ public class MainFrame extends JFrame implements ProgressListener,
 
   static private MainFrame instance;
 
-  protected AppearanceDialog appearanceDialog;
-
   protected OptionsDialog optionsDialog;
 
   protected CartoonMinder animator;
@@ -153,7 +149,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   /**
    * Holds all the icons used in the Gate GUI indexed by filename. This
    * is needed so we do not need to decode the icon everytime we need it
-   * as that would use unecessary CPU time and memory. Access to this
+   * as that would use unnecessary CPU time and memory. Access to this
    * data is available through the {@link #getIcon(String)} method.
    */
   protected static Map<String, Icon> iconByName = new HashMap<String, Icon>();
@@ -2791,7 +2787,10 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
   }
 
-  // TODO: delete this method as it has moved to PluginManagerUI?
+  /**
+   * TODO: delete this method as it has moved to {@link PluginManagerUI}
+   * @deprecated
+   */
   class LoadCreoleRepositoryAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public LoadCreoleRepositoryAction() {
@@ -5102,7 +5101,7 @@ public class MainFrame extends JFrame implements ProgressListener,
    * progress reporting so the progress bar would not work at all so we
    * need a way to let the user know that things are happening. We chose
    * for purpose to show the user a small cartoon in the form of an
-   * animated gif. This class handles the diplaying and updating of
+   * animated gif. This class handles the displaying and updating of
    * those cartoons.
    */
   class CartoonMinder implements Runnable {
