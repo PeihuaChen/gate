@@ -162,8 +162,8 @@ public class MainFrame extends JFrame implements ProgressListener,
    * values are the actual listeners (e.g "gate.event.StatusListener" ->
    * this).
    */
-  private static java.util.Map<String, JFrame> listeners =
-    new HashMap<String, JFrame>();
+  private static java.util.Map<String, EventListener> listeners =
+    new HashMap<String, EventListener>();
 
   protected static java.util.Collection<Component> guiRoots =
     new ArrayList<Component>();
@@ -1979,7 +1979,7 @@ public class MainFrame extends JFrame implements ProgressListener,
    * this map will be visible to everyone.
    * @return the listeners map
    */
-  public static java.util.Map<String, JFrame> getListeners() {
+  public static java.util.Map<String, EventListener> getListeners() {
     return listeners;
   }
 
