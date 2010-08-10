@@ -2007,6 +2007,7 @@ public abstract class AbstractOntologyImpl
         String[] s = strLine.split("[\\t\\s]+", 2);
         if (s.length == 2) {
           String theMapping = s[1];
+          theMapping = theMapping.trim();
           if(!theMapping.startsWith("http:") &&
              !theMapping.startsWith("file:") &&
              !theMapping.startsWith("/")) {
