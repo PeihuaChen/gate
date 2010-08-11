@@ -21,8 +21,8 @@ import javax.swing.JComponent;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
 
+import gate.Gate;
 import gate.event.StatusListener;
-import gate.gui.MainFrame;
 import gate.util.Err;
 
 
@@ -171,7 +171,7 @@ public class JComponentPrinter implements Pageable{
       component.setDoubleBuffered(wasBuffered);
 
       //fire the events
-      StatusListener sListener = (StatusListener)MainFrame.getListeners().
+      StatusListener sListener = (StatusListener)Gate.getListeners().
                                  get("gate.event.StatusListener");
       if(sListener != null){
         sListener.statusChanged("Printing page " + (pageIndex + 1) +

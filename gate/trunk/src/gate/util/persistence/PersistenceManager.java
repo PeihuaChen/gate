@@ -32,7 +32,6 @@ import gate.*;
 import gate.creole.*;
 import gate.event.ProgressListener;
 import gate.event.StatusListener;
-import gate.gui.MainFrame;
 import gate.persist.GateAwareObjectInputStream;
 import gate.persist.PersistenceException;
 import gate.util.*;
@@ -322,7 +321,7 @@ public class PersistenceManager {
       throw new PersistenceException(e);
     }
     if(target instanceof NameBearer) {
-      StatusListener sListener = (StatusListener)MainFrame.getListeners().get(
+      StatusListener sListener = (StatusListener)Gate.getListeners().get(
               "gate.event.StatusListener");
       if(sListener != null) {
         sListener.statusChanged("Storing " + ((NameBearer)target).getName());
@@ -539,9 +538,9 @@ public class PersistenceManager {
   public static void saveObjectToFile(Object obj, File file,
           boolean usegatehome, boolean warnaboutgatehome)
           throws PersistenceException, IOException {
-    ProgressListener pListener = (ProgressListener)MainFrame.getListeners()
+    ProgressListener pListener = (ProgressListener)Gate.getListeners()
             .get("gate.event.ProgressListener");
-    StatusListener sListener = (gate.event.StatusListener)MainFrame
+    StatusListener sListener = (gate.event.StatusListener)Gate
             .getListeners().get("gate.event.StatusListener");
     long startTime = System.currentTimeMillis();
     if(pListener != null) pListener.progressChanged(0);
@@ -666,9 +665,9 @@ public class PersistenceManager {
 
   public static Object loadObjectFromUrl(URL url) throws PersistenceException,
           IOException, ResourceInstantiationException {
-    ProgressListener pListener = (ProgressListener)MainFrame.getListeners()
+    ProgressListener pListener = (ProgressListener)Gate.getListeners()
             .get("gate.event.ProgressListener");
-    StatusListener sListener = (gate.event.StatusListener)MainFrame
+    StatusListener sListener = (gate.event.StatusListener)Gate
             .getListeners().get("gate.event.StatusListener");
     if(pListener != null) pListener.progressChanged(0);
 

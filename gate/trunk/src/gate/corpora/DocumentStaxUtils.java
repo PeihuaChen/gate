@@ -924,7 +924,7 @@ public class DocumentStaxUtils {
     newLine(xsw);
     // Serialize as XML all document's annotation sets
     // Serialize the default AnnotationSet
-    StatusListener sListener = (StatusListener)gate.gui.MainFrame
+    StatusListener sListener = (StatusListener)gate.Gate
             .getListeners().get("gate.event.StatusListener");
     if(annotationSets.containsKey(null)) {
       if(sListener != null)

@@ -23,7 +23,6 @@ import java.nio.charset.Charset;
 import java.util.*;
 
 import gate.*;
-import gate.gui.MainFrame;
 import gate.creole.AbstractLanguageResource;
 import gate.creole.CustomDuplication;
 import gate.creole.ResourceInstantiationException;
@@ -384,7 +383,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
     for(File file : files) {
       if (file.isDirectory()) { continue; }
       StatusListener sListener =
-        (StatusListener) MainFrame.getListeners().get(
+        (StatusListener) Gate.getListeners().get(
           "gate.event.StatusListener");
       if(sListener != null)
         sListener.statusChanged("Reading: " + file.getName());
@@ -574,7 +573,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
             // here lets create a new document
             // create the doc
             StatusListener sListener =
-              (StatusListener)gate.gui.MainFrame.getListeners().get(
+              (StatusListener)gate.Gate.getListeners().get(
                 "gate.event.StatusListener");
             if(sListener != null)
               sListener.statusChanged("Reading File Number :" + count);

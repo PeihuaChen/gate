@@ -145,7 +145,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   protected NewResourceDialog newResourceDialog;
 
   protected HelpFrame helpFrame;
-  
+
   /**
    * Holds all the icons used in the Gate GUI indexed by filename. This
    * is needed so we do not need to decode the icon everytime we need it
@@ -153,17 +153,6 @@ public class MainFrame extends JFrame implements ProgressListener,
    * data is available through the {@link #getIcon(String)} method.
    */
   protected static Map<String, Icon> iconByName = new HashMap<String, Icon>();
-
-  /**
-   * A Map which holds listeners that are singletons (e.g. the status
-   * listener that updates the status bar on the main frame or the
-   * progress listener that updates the progress bar on the main frame).
-   * The keys used are the class names of the listener interface and the
-   * values are the actual listeners (e.g "gate.event.StatusListener" ->
-   * this).
-   */
-  private static java.util.Map<String, EventListener> listeners =
-    new HashMap<String, EventListener>();
 
   protected static java.util.Collection<Component> guiRoots =
     new ArrayList<Component>();
@@ -174,7 +163,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   protected static final String[] ICON_EXTENSIONS = {"", ".png", ".gif"};
 
   private static JDialog guiLock = null;
-  
+
   static public Icon getIcon(String baseName) {
     Icon result = iconByName.get(baseName);
     for(int i = 0; i < ICON_EXTENSIONS.length && result == null; i++) {
@@ -215,7 +204,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   /**
    * Gets the original system output stream, which was later redirected
    * to the messages pane.
-   * 
+   *
    * @return a {@link PrintStream} value.
    */
   public PrintStream getOriginalOut() {
@@ -225,7 +214,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   /**
    * Gets the original system error output stream, which was later
    * redirected to the messages pane.
-   * 
+   *
    * @return a {@link PrintStream} value.
    */
   public PrintStream getOriginalErr() {
@@ -254,10 +243,10 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
     return handle;
   }
-  
+
   /**
    * Selects a resource if loaded in the system and not invisible.
-   * 
+   *
    * @param res the resource to be selected.
    */
   public void select(Resource res) {
@@ -674,7 +663,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             "Load OpenNLP System", "OpenNLP", "resources/opennlp.gapp"), this));
 
     fileMenu.add(new XJMenuItem(new ManagePluginsAction(), this));
-    
+
     if(!Gate.runningOnMac()) {
       fileMenu.addSeparator();
       fileMenu.add(new XJMenuItem(new ExitGateAction(), this));
@@ -784,7 +773,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       new AbstractAction("Start Profiling Applications") {
       { putValue(SHORT_DESCRIPTION,
         "Toggles the profiling of processing resources"); }
-      
+
       // stores the value held by the benchmarking switch before we started
       // this profiling run.
       boolean benchmarkWasEnabled;
@@ -990,7 +979,7 @@ public class MainFrame extends JFrame implements ProgressListener,
                 "efficient grammars. See the user guide for more details.</body></html>", "JAPE Debugger", JOptionPane.INFORMATION_MESSAGE);
       }
     }, this));
-    
+
     // add separator.  plugin menu items will appear after this separator
     toolsMenu.addSeparator();
     toolsMenu.staticItemsAdded();
@@ -1577,8 +1566,8 @@ public class MainFrame extends JFrame implements ProgressListener,
       }
     });
 
-    listeners.put("gate.event.StatusListener", MainFrame.this);
-    listeners.put("gate.event.ProgressListener", MainFrame.this);
+    Gate.listeners.put("gate.event.StatusListener", MainFrame.this);
+    Gate.listeners.put("gate.event.ProgressListener", MainFrame.this);
     if(Gate.runningOnMac()) {
       // mac-specific initialisation
       initMacListeners();
@@ -1846,12 +1835,12 @@ public class MainFrame extends JFrame implements ProgressListener,
   public void datastoreOpened(CreoleEvent e) {
     DataStore ds = e.getDatastore();
     if(ds.getName() == null || ds.getName().length() == 0){
-      String name = ds.getStorageUrl(); 
+      String name = ds.getStorageUrl();
       StringBuilder nameBuilder = new StringBuilder();
-      //quick and dirty FSA 
+      //quick and dirty FSA
       int state = 0;
       for(int i = name.length() -1; i >= 0 && state != 2 ; i--){
-        char currentChar = name.charAt(i); 
+        char currentChar = name.charAt(i);
         switch (state) {
           case 0:
             //consuming slashes at the end
@@ -1878,7 +1867,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
       }
       if(nameBuilder.length() > 0) name = nameBuilder.toString();
-      ds.setName(name);  
+      ds.setName(name);
     }
 
     NameBearerHandle handle = new NameBearerHandle(ds, MainFrame.this);
@@ -1978,9 +1967,10 @@ public class MainFrame extends JFrame implements ProgressListener,
    * actual data member used to store the listeners so any changes in
    * this map will be visible to everyone.
    * @return the listeners map
+   * @deprecated Use {@link Gate#getListeners()} instead
    */
   public static java.util.Map<String, EventListener> getListeners() {
-    return listeners;
+    return Gate.getListeners();
   }
 
   public static java.util.Collection<Component> getGuiRoots() {
@@ -3510,7 +3500,7 @@ public class MainFrame extends JFrame implements ProgressListener,
               String message = error.getMessage();
               alertButton.setAction(new AlertAction(error, message, null));
             }
-          });          
+          });
         }
         finally {
           processFinished();
@@ -3798,7 +3788,7 @@ public class MainFrame extends JFrame implements ProgressListener,
                 if(Gate.getHiddenAttribute(((Controller)appIter.next())
                   .getFeatures())) { appIter.remove(); }
               }
-              // When saving the session file, save URLs relative to GATE home 
+              // When saving the session file, save URLs relative to GATE home
               // but do not warn about them
               gate.util.persistence.PersistenceManager.saveObjectToFile(
                 appList, sessionFile, true, false);
@@ -4325,7 +4315,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     }}, MainFrame.this));
     }
   }
-  
+
   /**
    * The "Tools" menu, which includes some static menu items
    * (added in initGuiComponents) and some dynamic items contributed
@@ -4339,7 +4329,7 @@ public class MainFrame extends JFrame implements ProgressListener,
      * items.
      */
     protected int firstPluginItem = 0;
-    
+
     protected IdentityHashMap<Resource, List<JMenuItem>> itemsByResource =
       new IdentityHashMap<Resource, List<JMenuItem>>();
 
@@ -4347,7 +4337,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       super(name, description, listener);
       Gate.getCreoleRegister().addCreoleListener(this);
     }
-    
+
     /**
      * Called when the static items have been added to inform the menu
      * that it can start doing its dynamic stuff.
@@ -4356,7 +4346,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       firstPluginItem = getItemCount();
       processExistingTools();
     }
-    
+
     /**
      * Populate the menu with all actions coming from tools that are
      * already loaded.
@@ -4373,7 +4363,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
       }
     }
-    
+
     /**
      * If the resource just loaded is a tool (according to the creole
      * register) then see if it publishes any actions and if so, add
@@ -4400,7 +4390,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       }
       itemsByResource.put(res, items);
     }
-    
+
     protected JMenuItem addMenuItem(Action a) {
       // start by searching this menu
       XJMenu menuToUse = this;
@@ -4432,7 +4422,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           menuToUse = newMenu;
         }
       }
-      
+
       // we now have the right menu, add the action at the right place
       int pos = firstIndex;
       while(pos < menuToUse.getItemCount()) {
@@ -4459,7 +4449,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
       }
     }
-    
+
     protected void removeMenuItem(JMenuItem itemToRemove) {
       Action a = itemToRemove.getAction();
       // start by searching this menu
@@ -4490,7 +4480,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           return;
         }
       }
-      
+
       // we have a menu to remove the item from: remove it
       menuToUse.remove(itemToRemove);
       if(menuToUse.getItemCount() == 0 && parentMenu != null) {
@@ -4906,7 +4896,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         ResourceData rd = Gate.getCreoleRegister().get(resourceClassName);
         helpURL = rd.getHelpURL();
       }
-      
+
       if(helpURL == null) {
         // otherwise search in the associated VRs of the resource
         List<String> vrList = Gate.getCreoleRegister()
@@ -5063,7 +5053,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
       }
       nodeChanged(aNode);
-      
+
     }
   }
 
@@ -5294,7 +5284,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   class AlertAction extends AbstractAction {
     private Timer timer =
       new java.util.Timer("MainFrame alert tooltip hide timer", true);
-    
+
     /**
      * Action for the alert button that shows a message in a popup.
      * A detailed dialog can be shown when the button or popup are clicked.
@@ -5316,7 +5306,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       final int lines = description.split("<br>").length;
       putValue(Action.SMALL_ICON, MainFrame.getIcon("crystal-clear-app-error"));
       putValue(Action.SHORT_DESCRIPTION, description);
-      
+
       this.error = error;
       this.message = message;
       if (actions == null) {

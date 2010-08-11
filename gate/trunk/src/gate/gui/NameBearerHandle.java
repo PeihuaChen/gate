@@ -963,7 +963,7 @@ public class NameBearerHandle implements Handle, StatusListener,
               MainFrame.lockGUI("Saving "
                 + ((LanguageResource)target).getName());
               StatusListener sListener =
-                (StatusListener)gate.gui.MainFrame.getListeners().get(
+                (StatusListener)gate.Gate.getListeners().get(
                   "gate.event.StatusListener");
               if(sListener != null)
                 sListener.statusChanged("Saving: "
@@ -1286,7 +1286,7 @@ public class NameBearerHandle implements Handle, StatusListener,
                   + ((LanguageResource)target).getName());
 
                 StatusListener sListener =
-                  (StatusListener)gate.gui.MainFrame.getListeners().get(
+                  (StatusListener)gate.Gate.getListeners().get(
                     "gate.event.StatusListener");
                 if(sListener != null)
                   sListener.statusChanged("Saving: "
@@ -1317,7 +1317,7 @@ public class NameBearerHandle implements Handle, StatusListener,
                         .get("group"));
                 }// if security info
                 StatusListener sListener =
-                  (StatusListener)gate.gui.MainFrame.getListeners().get(
+                  (StatusListener)gate.Gate.getListeners().get(
                     "gate.event.StatusListener");
                 MainFrame.lockGUI("Saving "
                   + ((LanguageResource)target).getName());

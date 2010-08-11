@@ -52,6 +52,7 @@ import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -75,7 +76,7 @@ import org.jdom.input.SAXBuilder;
  * register and so on.
  */
 public class Gate implements GateConstants {
-  
+
   /** A logger to use instead of sending messages to Out or Err **/
   protected static final Logger log = Logger.getLogger(Gate.class);
 
@@ -96,7 +97,7 @@ public class Gate implements GateConstants {
   /**
    * The database schema owner (GATEADMIN is default) this one should not be
    * hardcoded but set in the XML initialization files
-   * 
+   *
    */
   public static final String DB_OWNER = "gateadmin";
 
@@ -124,7 +125,7 @@ public class Gate implements GateConstants {
 
   /** Is true if GATE is to be run in a sandbox **/
   private static boolean sandboxed = false;
-  
+
   /**
    * Find out if GATE is to be run in a sandbox or not. If true then
    * GATE will not attempt to load any local configuration information during
@@ -135,7 +136,7 @@ public class Gate implements GateConstants {
   public static boolean isSandboxed() {
     return sandboxed;
   }
-  
+
   /**
    * Method to tell GATE if it is being run inside a JVM sandbox. If true then
    * GATE will not attempt to load any local configuration information during
@@ -146,10 +147,10 @@ public class Gate implements GateConstants {
   public static void runInSandbox(boolean sandboxed) {
     if (initFinished)
       throw new IllegalStateException("Sandbox status cannot be changed after GATE has been initialised!");
-       
+
     Gate.sandboxed = sandboxed;
   }
-  
+
   /** Get the minimum supported version of the JDK */
   public static String getMinJdkVersion() {
     return MIN_JDK_VERSION;
@@ -159,20 +160,20 @@ public class Gate implements GateConstants {
    * Initialisation - must be called by all clients before using any other parts
    * of the library. Also initialises the CREOLE register and reads config data (<TT>gate.xml</TT>
    * files).
-   * 
+   *
    * @see #initCreoleRegister
    */
-  public static void init() throws GateException {    
+  public static void init() throws GateException {
     // init local paths
     if (!sandboxed) initLocalPaths();
-    
+
     // check if benchmarking should be enabled or disabled
     if(System.getProperty(ENABLE_BENCHMARKING_FEATURE_NAME) != null
       && System.getProperty(ENABLE_BENCHMARKING_FEATURE_NAME).equalsIgnoreCase(
         "true")) {
       Benchmark.setBenchmarkingEnabled(true);
     }
-    
+
     // builtin creole dir
     if(builtinCreoleDir == null) {
       String builtinCreoleDirPropertyValue =
@@ -370,7 +371,7 @@ public class Gate implements GateConstants {
         userSessionFile = new File(getDefaultUserSessionFileName());
       }
     }// if(userSessionFile == null)
-    log.info("Using " + userSessionFile + " as user session file");    
+    log.info("Using " + userSessionFile + " as user session file");
   }
 
   /**
@@ -631,7 +632,7 @@ public class Gate implements GateConstants {
    * Get a URL that points to either an HTTP server or a file system that
    * contains GATE files (such as test cases). Calls <TT>getUrl()</TT> then
    * adds the <TT>path</TT> parameter to the result.
-   * 
+   *
    * @param path
    *          a path to add to the base URL.
    * @see #getUrl()
@@ -670,7 +671,7 @@ public class Gate implements GateConstants {
    * Registers a new IR engine. The class named should implement
    * {@link gate.creole.ir.IREngine} and be accessible via the GATE class
    * loader.
-   * 
+   *
    * @param className
    *          the fully qualified name of the class to be registered
    * @throws GateException
@@ -693,7 +694,7 @@ public class Gate implements GateConstants {
 
   /**
    * Unregisters a previously registered IR engine.
-   * 
+   *
    * @param className
    *          the name of the class to be removed from the list of registered IR
    *          engines.
@@ -705,7 +706,7 @@ public class Gate implements GateConstants {
 
   /**
    * Gets the set of registered IR engines.
-   * 
+   *
    * @return an unmodifiable {@link java.util.Set} value.
    */
   public static Set<String> getRegisteredIREngines() {
@@ -714,7 +715,7 @@ public class Gate implements GateConstants {
 
   /**
    * Gets the GATE home location.
-   * 
+   *
    * @return a File value.
    */
   public static File getGateHome() {
@@ -754,7 +755,7 @@ public class Gate implements GateConstants {
   /**
    * Try to contact a network server. When sucessfull sets urlBase to an HTTP
    * URL for the server.
-   * 
+   *
    * @param hostName
    *          the name of the host to try and connect to
    * @param serverPort
@@ -922,7 +923,7 @@ public class Gate implements GateConstants {
 
   /**
    * Returns the curently set executable.
-   * 
+   *
    * @see #setExecutable(gate.Executable)
    */
   public synchronized static gate.Executable getExecutable() {
@@ -1018,10 +1019,10 @@ public class Gate implements GateConstants {
    * <TT>gate.xml</TT> file (create one if it doesn't exist).
    */
   public static void writeUserConfig() throws GateException {
-    
+
     //if we are running in a sandbox then don't try and write anything
     if (sandboxed) return;
-    
+
     String pluginsHomeStr;
     try {
       pluginsHomeStr = pluginsHome.getCanonicalPath();
@@ -1090,7 +1091,7 @@ public class Gate implements GateConstants {
   /**
    * Get the name of the user's <TT>gate.xml</TT> config file (this doesn't
    * guarantee that file exists!).
-   * 
+   *
    * @deprecated Use {@link #getUserConfigFile} instead.
    */
   public static String getUserConfigFileName() {
@@ -1101,7 +1102,7 @@ public class Gate implements GateConstants {
    * Get the default path to the user's config file, which is used unless an
    * alternative name has been specified via system properties or
    * {@link #setUserConfigFile}.
-   * 
+   *
    * @return the default user config file path.
    */
   public static String getDefaultUserConfigFileName() {
@@ -1118,7 +1119,7 @@ public class Gate implements GateConstants {
    * Get the default path to the user's session file, which is used unless an
    * alternative name has been specified via system properties or
    * {@link #setUserSessionFile(File)}
-   * 
+   *
    * @return the default user session file path.
    */
   public static String getDefaultUserSessionFileName() {
@@ -1159,7 +1160,7 @@ public class Gate implements GateConstants {
    * Returns the list of CREOLE directories the system knows about (either
    * pre-installed plugins in the plugins directory or CREOLE directories that
    * have previously been loaded manually).
-   * 
+   *
    * @return a {@link List} of {@link URL}s.
    */
   public static List<URL> getKnownPlugins() {
@@ -1168,7 +1169,7 @@ public class Gate implements GateConstants {
 
   /**
    * Adds the plugin to the list of known plugins.
-   * 
+   *
    * @param pluginURL
    *          the URL for the new plugin.
    */
@@ -1181,7 +1182,7 @@ public class Gate implements GateConstants {
   /**
    * Makes sure the provided URL ends with "/" (CREOLE URLs always point to
    * directories so thry should always end with a slash.
-   * 
+   *
    * @param url
    *          the URL to be normalised
    * @return the (maybe) corrected URL.
@@ -1207,7 +1208,7 @@ public class Gate implements GateConstants {
   /**
    * Returns the list of CREOLE directories the system loads automatically at
    * start-up.
-   * 
+   *
    * @return a {@link List} of {@link URL}s.
    */
   public static List<URL> getAutoloadPlugins() {
@@ -1217,7 +1218,7 @@ public class Gate implements GateConstants {
   /**
    * Adds a new directory to the list of plugins that are loaded automatically
    * at start-up.
-   * 
+   *
    * @param pluginUrl
    *          the URL for the new plugin.
    */
@@ -1232,7 +1233,7 @@ public class Gate implements GateConstants {
 
   /**
    * Gets the information about a known directory.
-   * 
+   *
    * @param directory
    *          the URL for the directory in question.
    * @return a {@link DirectoryInfo} value.
@@ -1252,7 +1253,7 @@ public class Gate implements GateConstants {
    * directory. If the specified directory was loaded, it will be unloaded as
    * well - i.e. all the metadata relating to resources defined by this
    * directory will be removed from memory.
-   * 
+   *
    * @param pluginURL
    */
   public static void removeKnownPlugin(URL pluginURL) {
@@ -1267,7 +1268,7 @@ public class Gate implements GateConstants {
    * Tells the system to remove a plugin URL from the list of plugins that are
    * loaded automatically at system start-up. This will be reflected in the
    * user's configuration data file.
-   * 
+   *
    * @param pluginURL
    *          the URL to be removed.
    */
@@ -1615,7 +1616,7 @@ public class Gate implements GateConstants {
 
   /**
    * Set the location of the GATE home directory.
-   * 
+   *
    * @throws IllegalStateException
    *           if the value has already been set.
    */
@@ -1627,7 +1628,7 @@ public class Gate implements GateConstants {
 
   /**
    * Set the location of the plugins directory.
-   * 
+   *
    * @throws IllegalStateException
    *           if the value has already been set.
    */
@@ -1639,7 +1640,7 @@ public class Gate implements GateConstants {
 
   /**
    * Get the location of the plugins directory.
-   * 
+   *
    * @return the plugins drectory, or null if this has not yet been set (i.e.
    *         <code>Gate.init()</code> has not yet been called).
    */
@@ -1649,7 +1650,7 @@ public class Gate implements GateConstants {
 
   /**
    * Set the location of the user's config file.
-   * 
+   *
    * @throws IllegalStateException
    *           if the value has already been set.
    */
@@ -1661,7 +1662,7 @@ public class Gate implements GateConstants {
 
   /**
    * Get the location of the user's config file.
-   * 
+   *
    * @return the user config file, or null if this has not yet been set (i.e.
    *         <code>Gate.init()</code> has not yet been called).
    */
@@ -1672,7 +1673,7 @@ public class Gate implements GateConstants {
   /**
    * Set the URL to the "builtin" creole directory. The URL must point to a
    * directory, and must end with a forward slash.
-   * 
+   *
    * @throws IllegalStateException
    *           if the value has already been set.
    */
@@ -1695,7 +1696,7 @@ public class Gate implements GateConstants {
    * Set the user session file. This can only done prior to calling Gate.init()
    * which will set the file to either the OS-specific default or whatever has
    * been set by the property gate.user.session
-   * 
+   *
    * @throws IllegalStateException
    *           if the value has already been set.
    */
@@ -1707,7 +1708,7 @@ public class Gate implements GateConstants {
 
   /**
    * Get the user session file.
-   * 
+   *
    * @return the file corresponding to the user session file or null, if not yet
    *         set.
    */
@@ -1764,5 +1765,34 @@ public class Gate implements GateConstants {
   public static boolean getUseXMLSerialization() {
     return useXMLSerialization;
   }
+
+  /**
+   * Returns the listeners map, a map that holds all the listeners that
+   * are singletons (e.g. the status listener that updates the status
+   * bar on the main frame or the progress listener that updates the
+   * progress bar on the main frame). The keys used are the class names
+   * of the listener interface and the values are the actual listeners
+   * (e.g "gate.event.StatusListener" -> this). The returned map is the
+   * actual data member used to store the listeners so any changes in
+   * this map will be visible to everyone.
+   * @return the listeners map
+   */
+  public static java.util.Map<String, EventListener> getListeners() {
+    return listeners;
+  }
+
+  /**
+   * A Map which holds listeners that are singletons (e.g. the status
+   * listener that updates the status bar on the main frame or the
+   * progress listener that updates the progress bar on the main frame).
+   * The keys used are the class names of the listener interface and the
+   * values are the actual listeners (e.g "gate.event.StatusListener" ->
+   * this).
+   *
+   * Deprecated. Call getListeners instead.
+   */
+  @Deprecated
+  public static java.util.Map<String, EventListener> listeners =
+    new HashMap<String, EventListener>();
 
 } // class Gate
