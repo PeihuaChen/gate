@@ -56,7 +56,7 @@ public class CreoleAnnotationHandler {
 
   /**
    * Create an annotation handler for the given creole.xml file.
-   * 
+   *
    * @param creoleFileUrl location of the creole.xml file.
    */
   public CreoleAnnotationHandler(URL creoleFileUrl) {
@@ -66,7 +66,7 @@ public class CreoleAnnotationHandler {
   /**
    * Extract all JAR elements from the given JDOM document and add the
    * jars they reference to the GateClassLoader.
-   * 
+   *
    * @param jdomDoc JDOM document representing a parsed creole.xml file.
    */
   public void addJarsToClassLoader(Document jdomDoc)
@@ -77,7 +77,7 @@ public class CreoleAnnotationHandler {
   /**
    * Recursively search the given element for JAR entries and add these
    * jars to the GateClassLoader
-   * 
+   *
    * @param jdomElt JDOM element representing a creole.xml file
    */
   private void addJarsToClassLoader(Element jdomElt)
@@ -104,7 +104,7 @@ public class CreoleAnnotationHandler {
    * and adds additional RESOURCE elements to the given JDOM document so
    * that it contains a RESOURCE for every resource type defined in the
    * plugin's directory info.
-   * 
+   *
    * @param jdomDoc JDOM document which should be the parsed creole.xml
    *          that this handler was configured for.
    */
@@ -150,7 +150,7 @@ public class CreoleAnnotationHandler {
    * Processes annotations for resource classes named in the given
    * creole.xml document, adding the relevant XML elements to the
    * document as appropriate.
-   * 
+   *
    * @param jdomDoc the parsed creole.xml file
    */
   public void processAnnotations(Document jdomDoc) throws GateException {
@@ -161,7 +161,7 @@ public class CreoleAnnotationHandler {
    * Process annotations for the given element. If the element is a
    * RESOURCE it is processed, otherwise the method calls itself
    * recursively for all the children of the given element.
-   * 
+   *
    * @param element the element to process.
    */
   private void processAnnotations(Element element) throws GateException {
@@ -178,7 +178,7 @@ public class CreoleAnnotationHandler {
   /**
    * Process the given RESOURCE element, adding extra elements to it
    * based on the annotations on the resource class.
-   * 
+   *
    * @param element the RESOURCE element to process.
    */
   private void processAnnotationsForResource(Element element)
@@ -198,6 +198,12 @@ public class CreoleAnnotationHandler {
               + " for resource in " + creoleFileUrl);
     }
 
+    processCreoleResourceAnnotations(element, resourceClass);
+  }
+
+  @SuppressWarnings("unchecked")
+  public void processCreoleResourceAnnotations(Element element,
+          Class<?> resourceClass) throws GateException {
     CreoleResource creoleResourceAnnot = resourceClass
             .getAnnotation(CreoleResource.class);
     if(creoleResourceAnnot != null) {
@@ -232,7 +238,7 @@ public class CreoleAnnotationHandler {
    * NAME and TOOL), then calls {@link #processInheritableResourceData}
    * to process the inheritable data, then deals with any specified
    * {@link AutoInstance}s.
-   * 
+   *
    * @param resourceClass the resource class to process, which must be
    *          annotated with {@link CreoleResource}.
    * @param element the RESOURCE element to which data should be added.
@@ -265,7 +271,7 @@ public class CreoleAnnotationHandler {
    * the method calls itself recursively for the superclass and any
    * implemented interfaces. For any given attribute, the first value
    * specified wins (i.e. the one on the most specific class).
-   * 
+   *
    * @param clazz the class to process
    * @param element the RESOURCE element to which data should be added.
    */
@@ -300,7 +306,7 @@ public class CreoleAnnotationHandler {
    * Adds an element with the given name and text value to the parent
    * element, but only if no such child element already exists and the
    * value is not the empty string.
-   * 
+   *
    * @param parent the parent element
    * @param value the text value for the new child
    * @param elementName the name of the new child element
@@ -315,7 +321,7 @@ public class CreoleAnnotationHandler {
    * Process the {@link AutoInstance} annotations contained in the given
    * {@link CreoleResource} and add the corresponding
    * AUTOINSTANCE/HIDDEN-AUTOINSTANCE elements to the given parent.
-   * 
+   *
    * @param cr the {@link CreoleResource} annotation
    * @param element the parent element
    */
@@ -341,7 +347,7 @@ public class CreoleAnnotationHandler {
    * Process any {@link CreoleParameter} and
    * {@link HiddenCreoleParameter} annotations on set methods of the
    * given class and set up the corresponding PARAMETER elements.
-   * 
+   *
    * @param resourceClass the resource class to process
    * @param resourceElement the RESOURCE element to which the PARAMETERs
    *          are to be added
@@ -456,7 +462,7 @@ public class CreoleAnnotationHandler {
    * {@link Collection}, use the method's generic type information to
    * determine the collection element type and store it as the
    * ITEM_CLASS_NAME attribute of the given Element.
-   * 
+   *
    * @param method the setter method
    * @param paramElt the PARAMETER element
    */
@@ -480,7 +486,7 @@ public class CreoleAnnotationHandler {
 
   /**
    * Find the collection element type for the given type.
-   * 
+   *
    * @param type the type to use. To be able to find the element type,
    *          this must be a Class that is assignable from Collection or
    *          a ParameterizedType whose raw type is assignable from
@@ -496,7 +502,7 @@ public class CreoleAnnotationHandler {
   /**
    * Recursive method to find the collection element type for the given
    * type.
-   * 
+   *
    * @param type the type to use
    * @param tvMap map from type variables to the classes they are
    *          ultimately bound to. The reflection APIs can tell us that
@@ -584,7 +590,7 @@ public class CreoleAnnotationHandler {
    * Add an attribute with the given value to the given element, but
    * only if the element does not already have the attribute, and the
    * value is not equal to the given default value.
-   * 
+   *
    * @param paramElt the element
    * @param value the attribute value (which will be converted to a
    *          string)
