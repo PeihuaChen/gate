@@ -201,7 +201,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
 
 
   public void registerComponent(Class<? extends Resource> resourceClass) throws GateException {
-    URL creoleFileUrl = resourceClass.getResource("dummy.class");
+    URL creoleFileUrl = resourceClass.getResource("/gate/creole/CreoleRegisterImpl.class");
     Gate.addKnownPlugin(creoleFileUrl);
     Document doc = new Document();
     Element element;
