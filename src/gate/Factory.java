@@ -357,7 +357,7 @@ public abstract class Factory {
     } // else if(res.getName() == null)
     // if res.getName() != null, leave it as it is
 
-    Map listeners = new HashMap(gate.gui.MainFrame.getListeners());
+    Map listeners = new HashMap(gate.Gate.getListeners());
     // set the listeners if any
     if(listeners != null && !listeners.isEmpty()) {
       try {

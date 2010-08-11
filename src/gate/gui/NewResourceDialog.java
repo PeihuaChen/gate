@@ -199,14 +199,14 @@ public class NewResourceDialog extends JDialog {
 
           Resource res;
           gate.event.StatusListener sListener =
-            (gate.event.StatusListener)MainFrame.getListeners().
+            (gate.event.StatusListener)Gate.getListeners().
                                        get("gate.event.StatusListener");
           if(sListener != null) sListener.statusChanged("Loading " +
                                                         nameField.getText() +
                                                         "...");
 
           gate.event.ProgressListener pListener =
-            (gate.event.ProgressListener)MainFrame.getListeners().
+            (gate.event.ProgressListener)Gate.getListeners().
                                          get("gate.event.ProgressListener");
           if(pListener != null){
             pListener.progressChanged(0);

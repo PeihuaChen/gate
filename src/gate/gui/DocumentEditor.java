@@ -3724,7 +3724,7 @@ Out.prln("NULL size");
 
               printerJob.print();
               //fire the events
-              StatusListener sListener = (StatusListener)MainFrame.
+              StatusListener sListener = (StatusListener)Gate.
                                          getListeners().
                                          get("gate.event.StatusListener");
               if(sListener != null){

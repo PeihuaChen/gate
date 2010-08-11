@@ -213,7 +213,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
       }
       try {
         if(docFormat != null) {
-          StatusListener sListener = (StatusListener)gate.gui.MainFrame
+          StatusListener sListener = (StatusListener)gate.Gate
                   .getListeners().get("gate.event.StatusListener");
           if(sListener != null) docFormat.addStatusListener(sListener);
           // set the flag if true and if the document format support collecting
@@ -696,7 +696,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
      * was not empty."+ "All annotation it contained were lost.");
      * dumpingSet.clear(); }// End if
      */
-    StatusListener sListener = (StatusListener)gate.gui.MainFrame
+    StatusListener sListener = (StatusListener)gate.Gate
             .getListeners().get("gate.event.StatusListener");
     // Construct the dumping set in that way that all annotations will verify
     // the condition that there are not annotations which are crossed.
@@ -1363,7 +1363,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
             GateConstants.DOCUMENT_REPOSITIONING_INFO_FEATURE_NAME);
     docContStrBuff = new StringBuffer(origContent);
     if(aSourceAnnotationSet == null) return docContStrBuff.toString();
-    StatusListener sListener = (StatusListener)gate.gui.MainFrame
+    StatusListener sListener = (StatusListener)gate.Gate
             .getListeners().get("gate.event.StatusListener");
     AnnotationSet originalMarkupsAnnotSet = this
             .getAnnotations(GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);

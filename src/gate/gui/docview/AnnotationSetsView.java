@@ -1651,7 +1651,7 @@ public class AnnotationSetsView extends AbstractDocumentView
           if(fileChooser.showSaveDialog(owner) == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
             if(selectedFile == null) return;
-            StatusListener sListener = (StatusListener)MainFrame.getListeners().
+            StatusListener sListener = (StatusListener)Gate.getListeners().
               get("gate.event.StatusListener");
             if (sListener != null) 
               sListener.statusChanged("Please wait while dumping annotations"+

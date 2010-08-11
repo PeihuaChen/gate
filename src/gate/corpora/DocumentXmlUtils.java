@@ -81,7 +81,7 @@ public class DocumentXmlUtils {
     xmlContent.append("</TextWithNodes>\n");
     // Serialize as XML all document's annotation sets
     // Serialize the default AnnotationSet
-    StatusListener sListener = (StatusListener)gate.gui.MainFrame
+    StatusListener sListener = (StatusListener)gate.Gate
             .getListeners().get("gate.event.StatusListener");
     if(sListener != null)
       sListener.statusChanged("Saving the default annotation set ");
