@@ -22,6 +22,7 @@ import java.net.URL;
 import java.util.*;
 
 import gate.creole.ResourceData;
+import gate.creole.metadata.CreoleResource;
 import gate.event.CreoleListener;
 import gate.util.GateException;
 
@@ -79,6 +80,20 @@ public interface CreoleRegister extends Map<String, ResourceData>, Serializable,
     */
   public void registerDirectories() throws GateException;
 
+  /**
+   * Given the class object for a class with {@link CreoleResource}
+   * annotations, register that class is if it was found in a scanned jar
+   * file with no additional creole.xml information.
+   *
+   * This API is intended for use in embedded GATE applications where
+   * the 'application' is created via the API. Components registered with this
+   *  API won't work in saved applications, but they can be added
+   *  to saved applications at runtime.
+   *
+   * @param clazz Class object for class with CreoleResource annotations.
+   */
+  public void registerComponent(Class<? extends Resource> clazz) throws GateException;
+
   /** Register a single CREOLE directory. The <CODE>creole.xml</CODE>
     * file at the URL is parsed, and <CODE>CreoleData</CODE> objects added
     * to the register. If the directory URL has not yet been added it
@@ -91,7 +106,7 @@ public interface CreoleRegister extends Map<String, ResourceData>, Serializable,
    * @param directory
    */
   public void removeDirectory(URL directory);
-  
+
   /** Register resources that are built in to the GATE distribution.
     * These resources are described by the <TT>creole.xml</TT> file in
     * <TT>resources/creole</TT>.
@@ -118,7 +133,7 @@ public interface CreoleRegister extends Map<String, ResourceData>, Serializable,
 
   /** Get the list of types of VR in the register. */
   public Set<String> getControllerTypes();
-  
+
   /** Get the list of types of tool in the register. */
   public Set<String> getToolTypes();
 
@@ -216,7 +231,7 @@ public interface CreoleRegister extends Map<String, ResourceData>, Serializable,
 
   /**
    * Removes a {@link gate.event.CreoleListener} previously registered with this
-   * CreoleRegister. 
+   * CreoleRegister.
    * @see #addCreoleListener(CreoleListener)
    */
   public void removeCreoleListener(CreoleListener l);

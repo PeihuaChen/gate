@@ -32,6 +32,7 @@ import gate.creole.gazetteer.TestFlexibleGazetteer;
 import gate.creole.gazetteer.TestGazetteer;
 import gate.creole.ir.TestIndex;
 import gate.creole.morph.TestMorph;
+import gate.creole.test.DynamicRegistrationTest;
 import gate.email.TestEmail;
 import gate.html.TestHtml;
 import gate.jape.TestJape;
@@ -262,18 +263,18 @@ public class TestGate {
         suite.addTest(TestIndex.suite());
         suite.addTest(TestPersist.suite());
         suite.addTest(TestControllers.suite());
-        
+
         // the db isn't usually available so this will always fail
         //suite.addTest(TestSecurity.suite());
         suite.addTest(TestConfig.suite());
         suite.addTest(TestAnnotation.suite());
         suite.addTest(TestEmail.suite());
-        
+
         suite.addTest(TestXml.suite());
         suite.addTest(TestHtml.suite());
         suite.addTest(TestSgml.suite());
         suite.addTest(TestXSchema.suite());
-        
+
         suite.addTest(TestCreole.suite());
         suite.addTest(CookBook.suite());
         suite.addTest(TestFiles.suite());
@@ -309,6 +310,9 @@ public class TestGate {
         suite.addTest(TestHashGazetteer.suite());
         suite.addTest(TestRepositioningInfo.suite());
         suite.addTest(TestFlexibleGazetteer.suite());
+
+        // Dynamic creole registration
+        suite.addTest(DynamicRegistrationTest.suite());
 
       } // if(allTests)
 

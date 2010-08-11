@@ -72,7 +72,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * The CREOLE register records the set of resources that are currently known to
  * the system. Each member of the register is a {@link gate.creole.ResourceData}
  * object, indexed by the class name of the resource.
- * 
+ *
  * @see gate.CreoleRegister
  */
 public class CreoleRegisterImpl extends HashMap<String, ResourceData>
@@ -82,7 +82,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
 
   /** A logger to use instead of sending messages to Out or Err **/
   protected static final Logger log = Logger.getLogger(CreoleRegisterImpl.class);
-  
+
   /** Debug flag */
   protected static final boolean DEBUG = false;
 
@@ -121,7 +121,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
 
     // read plugin name mappings file
     readPluginNamesMappings();
-    
+
   } // default constructor
 
   /**
@@ -166,7 +166,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
    * directory will be automatically registered. This method is equivalent with
    * #registerDirectories(URL) which it actually calls and it's only kept here
    * for backwards compatibility reasons.
-   * 
+   *
    * @deprecated
    */
   public void addDirectory(URL directoryUrl) {
@@ -187,7 +187,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
    * All CREOLE directories are now automatically registered when they are added
    * so this method does nothing now. It is only kept here for backwards
    * compatibility reasons.
-   * 
+   *
    * @deprecated
    */
   public void registerDirectories() throws GateException {
@@ -198,6 +198,31 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
     // registerDirectories(directoryUrl);
     // }
   } // registerDirectories
+
+
+  public void registerComponent(Class<? extends Resource> resourceClass) throws GateException {
+    URL creoleFileUrl = resourceClass.getResource("dummy.class");
+    Gate.addKnownPlugin(creoleFileUrl);
+    Document doc = new Document();
+    Element element;
+    doc.addContent(element = new Element("CREOLE-DIRECTORY"));
+    element.addContent(element = new Element("CREOLE"));
+    element.addContent(element = new Element("RESOURCE"));
+    Element classElement  = new Element("CLASS");
+    classElement.setText(resourceClass.getName());
+    element.addContent(classElement);
+    CreoleAnnotationHandler annotationHandler = new CreoleAnnotationHandler(creoleFileUrl);
+    annotationHandler.processCreoleResourceAnnotations(element, resourceClass);
+    try {
+      processFullCreoleXmlTree(new URL(creoleFileUrl, "."), creoleFileUrl, doc, annotationHandler);
+    }
+    catch(IOException e) {
+      throw new GateException(e);
+    }
+    catch(JDOMException e) {
+      throw new GateException(e);
+    }
+  }
 
   /**
    * Register a single CREOLE directory. The <CODE>creole.xml</CODE> file at the
@@ -313,26 +338,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
       // directory defines
       annotationHandler.createResourceElementsForDirInfo(jdomDoc);
 
-      // now we can process any annotations on the new classes
-      // and augment the XML definition
-      annotationHandler.processAnnotations(jdomDoc);
-
-      // debugging
-      if(DEBUG) {
-        XMLOutputter xmlOut = new XMLOutputter(Format.getPrettyFormat());
-        xmlOut.output(jdomDoc, System.out);
-      }
-
-      // finally, parse the augmented definition with the normal parser
-      DefaultHandler handler =
-        new CreoleXmlHandler(this, directoryUrl, creoleFileUrl);
-      SAXOutputter outputter =
-        new SAXOutputter(handler, handler, handler, handler);
-      outputter.output(jdomDoc);
-      if(DEBUG) {
-        Out.prln("done parsing "
-          + ((directoryUrl == null) ? "null" : directoryUrl.toString()));
-      }
+      processFullCreoleXmlTree(directoryUrl, creoleFileUrl, jdomDoc, annotationHandler);
     }
     catch(IOException e) {
       throw (new GateException(e));
@@ -343,6 +349,31 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
     }
 
   } // parseDirectory
+
+  private void processFullCreoleXmlTree(URL directoryUrl, URL creoleFileUrl,
+          Document jdomDoc, CreoleAnnotationHandler annotationHandler)
+          throws GateException, IOException, JDOMException {
+    // now we can process any annotations on the new classes
+    // and augment the XML definition
+    annotationHandler.processAnnotations(jdomDoc);
+
+    // debugging
+    if(DEBUG) {
+      XMLOutputter xmlOut = new XMLOutputter(Format.getPrettyFormat());
+      xmlOut.output(jdomDoc, System.out);
+    }
+
+    // finally, parse the augmented definition with the normal parser
+    DefaultHandler handler =
+      new CreoleXmlHandler(this, directoryUrl, creoleFileUrl);
+    SAXOutputter outputter =
+      new SAXOutputter(handler, handler, handler, handler);
+    outputter.output(jdomDoc);
+    if(DEBUG) {
+      Out.prln("done parsing "
+        + ((directoryUrl == null) ? "null" : directoryUrl.toString()));
+    }
+  }
 
   /**
    * Register resources that are built in to the GATE distribution. These
@@ -441,7 +472,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
 
   /**
    * Removes a CREOLE directory from the set of loaded directories.
-   * 
+   *
    * @param directory
    */
   public void removeDirectory(URL directory) {
@@ -678,7 +709,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
    * Returns a list of strings representing class names for large VRs valid for
    * a given type of language/processing resource. The default VR will be the
    * first in the returned list.
-   * 
+   *
    * @param resourceClassName
    *          the name of the resource that has large viewers. If
    *          resourceClassName is <b>null</b> then an empty list will be
@@ -694,7 +725,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
    * Returns a list of strings representing class names for small VRs valid for
    * a given type of language/processing resource The default VR will be the
    * first in the returned list.
-   * 
+   *
    * @param resourceClassName
    *          the name of the resource that has large viewers. If
    *          resourceClassName is <b>null</b> then an empty list will be
@@ -710,7 +741,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
    * Returns a list of strings representing class names for guiType VRs valid
    * for a given type of language/processing resource The default VR will be the
    * first in the returned list.
-   * 
+   *
    * @param resourceClassName
    *          the name of the resource that has large viewers. If
    *          resourceClassName is <b>null</b> then an empty list will be
@@ -777,7 +808,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
    * Returns a list of strings representing class names for annotation VRs that
    * are able to display/edit all types of annotations. The default VR will be
    * the first in the returned list.
-   * 
+   *
    * @return a list with all VRs that can display all annotation types
    */
   public List<String> getAnnotationVRs() {
@@ -1090,4 +1121,5 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
       return backingList.size();
     }
   }
+
 } // class CreoleRegisterImpl
