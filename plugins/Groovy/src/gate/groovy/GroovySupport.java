@@ -70,9 +70,8 @@ public class GroovySupport extends AbstractResource implements ActionsPublisher 
     mixinGlobally(gate.Utils.class);
     mixinGlobally(GateGroovyMethods.class);
     // register the ScriptableController with the persistence mechanism
-    // (yes, the method is called registerPersi(s)tentEquivalent)
     try {
-      PersistenceManager.registerPersitentEquivalent(ScriptableController.class,
+      PersistenceManager.registerPersistentEquivalent(ScriptableController.class,
           ScriptableControllerPersistence.class);
     }
     catch(PersistenceException e) {

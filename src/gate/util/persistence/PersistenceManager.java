@@ -49,7 +49,7 @@ public class PersistenceManager {
   /**
    * A reference to an object; it uses the identity hashcode and the
    * equals defined by object identity. These values will be used as
-   * keys in the {link #existingPersitentReplacements} map.
+   * keys in the {link #existingPersistentReplacements} map.
    */
   static protected class ObjectHolder {
     ObjectHolder(Object target) {
@@ -77,7 +77,7 @@ public class PersistenceManager {
    * This class is used as a marker for types that should NOT be
    * serialised when saving the state of a gate object. Registering this
    * type as the persistent equivalent for a specific class (via
-   * {@link PersistenceManager#registerPersitentEquivalent(Class , Class)})
+   * {@link PersistenceManager#registerPersistentEquivalent(Class , Class)})
    * effectively stops all values of the specified type from being
    * serialised.
    *
@@ -299,7 +299,7 @@ public class PersistenceManager {
           throws PersistenceException {
     if(target == null) return null;
     // first check we don't have it already
-    Persistence res = (Persistence)existingPersitentReplacements
+    Persistence res = (Persistence)existingPersistentReplacements
             .get().getFirst().get(new ObjectHolder(target));
     if(res != null) return res;
 
@@ -328,7 +328,7 @@ public class PersistenceManager {
       }
     }
     res.extractDataFromSource(target);
-    existingPersitentReplacements.get().getFirst().put(new ObjectHolder(target), res);
+    existingPersistentReplacements.get().getFirst().put(new ObjectHolder(target), res);
     return res;
   }
 
@@ -621,7 +621,7 @@ public class PersistenceManager {
   private static void startPersistingTo(File file) {
     haveWarnedAboutGateHome.get().addFirst(new BooleanFlag(false));
     persistenceFile.get().addFirst(file);
-    existingPersitentReplacements.get().addFirst(new HashMap());
+    existingPersistentReplacements.get().addFirst(new HashMap());
   }
 
   /**
@@ -651,9 +651,9 @@ public class PersistenceManager {
     if(persistenceFile.get().isEmpty()) {
       persistenceFile.remove();
     }
-    existingPersitentReplacements.get().removeFirst();
-    if(existingPersitentReplacements.get().isEmpty()) {
-      existingPersitentReplacements.remove();
+    existingPersistentReplacements.get().removeFirst();
+    if(existingPersistentReplacements.get().isEmpty()) {
+      existingPersistentReplacements.remove();
     }
   }
 
@@ -858,6 +858,14 @@ public class PersistenceManager {
       "<gate.util.persistence.GateApplication>", "<?xml", "<!DOCTYPE"};
 
   /**
+   * @deprecated Use {@link #registerPersistentEquivalent(Class,Class)} instead
+   */
+  public static Class registerPersitentEquivalent(Class transientType,
+          Class persistentType) throws PersistenceException {
+            return registerPersistentEquivalent(transientType, persistentType);
+          }
+
+  /**
    * Sets the persistent equivalent type to be used to (re)store a given
    * type of transient objects.
    *
@@ -869,7 +877,7 @@ public class PersistenceManager {
    * @return the persitent type that was used before this mapping if
    *         such existed.
    */
-  public static Class registerPersitentEquivalent(Class transientType,
+  public static Class registerPersistentEquivalent(Class transientType,
           Class persistentType) throws PersistenceException {
     if(!Persistence.class.isAssignableFrom(persistentType)) {
       throw new PersistenceException(
@@ -892,7 +900,7 @@ public class PersistenceManager {
    * same object. The keys used are {@link ObjectHolder}s that contain
    * the transient values being converted to persistent equivalents.
    */
-  private static ThreadLocal<LinkedList<Map>> existingPersitentReplacements;
+  private static ThreadLocal<LinkedList<Map>> existingPersistentReplacements;
 
   /**
    * Stores the transient values obtained from persistent replacements
@@ -940,39 +948,39 @@ public class PersistenceManager {
     persistentReplacementTypes = new HashMap();
     try {
       // VRs don't get saved, ....sorry guys :)
-      registerPersitentEquivalent(VisualResource.class, SlashDevSlashNull.class);
+      registerPersistentEquivalent(VisualResource.class, SlashDevSlashNull.class);
 
-      registerPersitentEquivalent(URL.class, URLHolder.class);
+      registerPersistentEquivalent(URL.class, URLHolder.class);
 
-      registerPersitentEquivalent(Map.class, MapPersistence.class);
-      registerPersitentEquivalent(Collection.class, CollectionPersistence.class);
+      registerPersistentEquivalent(Map.class, MapPersistence.class);
+      registerPersistentEquivalent(Collection.class, CollectionPersistence.class);
 
-      registerPersitentEquivalent(ProcessingResource.class, PRPersistence.class);
+      registerPersistentEquivalent(ProcessingResource.class, PRPersistence.class);
 
-      registerPersitentEquivalent(DataStore.class, DSPersistence.class);
+      registerPersistentEquivalent(DataStore.class, DSPersistence.class);
 
-      registerPersitentEquivalent(LanguageResource.class, LRPersistence.class);
+      registerPersistentEquivalent(LanguageResource.class, LRPersistence.class);
 
-      registerPersitentEquivalent(Corpus.class, CorpusPersistence.class);
+      registerPersistentEquivalent(Corpus.class, CorpusPersistence.class);
 
-      registerPersitentEquivalent(Controller.class, ControllerPersistence.class);
+      registerPersistentEquivalent(Controller.class, ControllerPersistence.class);
 
-      registerPersitentEquivalent(ConditionalController.class,
+      registerPersistentEquivalent(ConditionalController.class,
               ConditionalControllerPersistence.class);
 
-      registerPersitentEquivalent(ConditionalSerialAnalyserController.class,
+      registerPersistentEquivalent(ConditionalSerialAnalyserController.class,
               ConditionalSerialAnalyserControllerPersistence.class);
 
-      registerPersitentEquivalent(LanguageAnalyser.class,
+      registerPersistentEquivalent(LanguageAnalyser.class,
               LanguageAnalyserPersistence.class);
 
-      registerPersitentEquivalent(SerialAnalyserController.class,
+      registerPersistentEquivalent(SerialAnalyserController.class,
               SerialAnalyserControllerPersistence.class);
 
-      registerPersitentEquivalent(gate.persist.JDBCDataStore.class,
+      registerPersistentEquivalent(gate.persist.JDBCDataStore.class,
               JDBCDSPersistence.class);
 
-      registerPersitentEquivalent(gate.creole.AnalyserRunningStrategy.class,
+      registerPersistentEquivalent(gate.creole.AnalyserRunningStrategy.class,
               AnalyserRunningStrategyPersistence.class);
     }
     catch(PersistenceException pe) {
@@ -992,7 +1000,7 @@ public class PersistenceManager {
 
     }
 
-    existingPersitentReplacements = new ThreadLocalStack<Map>();
+    existingPersistentReplacements = new ThreadLocalStack<Map>();
     existingTransientValues = new ThreadLocalStack<Map>();
     persistenceFile = new ThreadLocalStack<File>();
     persistenceURL = new ThreadLocalStack<URL>();

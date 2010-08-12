@@ -8,6 +8,7 @@ import gate.util.persistence.PersistenceManager;
 import gate.Corpus;
 
 public class ScriptableControllerPersistence extends ControllerPersistence {
+  private static final long serialVersionUID = -3300898388318335063L;
   /**
    * Populates this Persistence with the data that needs to be stored from the
    * original source object.
