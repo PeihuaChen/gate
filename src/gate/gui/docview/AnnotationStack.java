@@ -340,7 +340,7 @@ public class AnnotationStack extends JPanel {
               + map.getKey() + "</strong></td><td>"
               + ((Strings.toString(map.getValue()).length() > 500) ?
               "<textarea rows=\"20\" cols=\"40\" cellspacing=\"0\">"
-                + ((String)map.getValue()).replaceAll("(.{50,60})\\b", "$1\n")
+                + (Strings.toString(map.getValue())).replaceAll("(.{50,60})\\b", "$1\n")
                 + "</textarea>" :
               Strings.toString(map.getValue()).replaceAll("\n", "<br>"))
               + "</td></tr>";
