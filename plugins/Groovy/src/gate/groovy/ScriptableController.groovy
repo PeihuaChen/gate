@@ -1,6 +1,7 @@
 package gate.groovy
 
 import gate.*
+import gate.Factory.DuplicationContext;
 import gate.creole.*
 import gate.creole.metadata.*
 import gate.util.*
@@ -202,6 +203,15 @@ eachDocument {
     return []
   }
 
+  /**
+   * Copy the control script text when duplicating a ScriptableController.
+   */
+  public Resource duplicate(DuplicationContext ctx)
+          throws ResourceInstantiationException {
+    ScriptableController dup = (ScriptableController)super.duplicate(ctx);
+    dup.controlScript = this.controlScript
+    return dup
+  }
   /**
    * Property change support for the controlScript bound property.
    */
