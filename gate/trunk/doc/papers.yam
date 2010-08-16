@@ -23,9 +23,11 @@ GATE papers
 %1 Journals and Conference papers
 %2* 2010
 
-- A. Wyner, K. Angelov, G. Barzdins, D. Damljanovic, B. Davis, N. Fuchs, S. Hoefler, K. Jones, K. Kaljurand, T. Kuhn, M. Luts, J. Pool, M. Rosner, R. Schwitter, J. Sowa: On controlled natural languages: Properties and prospects. In N. Fuchs, ed.: Controlled Natural Language. Volume 5972 of Lecture Notes in Computer Science. Springer Berlin/Heidelberg (2010) 281–289 10.1007/978-3-642-14418-9 17.
-
 - Y. Zeng, Y. Wang, Z. Huang, D. Damljanovic, N. Zhong, and C. Wang. User Interests: Definition, Vocabulary, and Utilization in Unifying Search and Reasoning.  Proceedings of the 2010 International Conference on Active Media Technology, Lecture Notes in Computer Science 6335, 98-107, 2010 (to appear).
+
+- D. Damljanovic. Towards portable controlled natural languages for querying ontologies. In Rosner, M., Fuchs, N., eds.: Proceedings of the 2nd Workshop on Controlled Natural Language. Lecture Notes in Computer Science. Springer Berlin/Heidelberg, Marettimo Island, Sicily, 2010. (to appear).
+
+- A. Wyner, K. Angelov, G. Barzdins, D. Damljanovic, B. Davis, N. Fuchs, S. Hoefler, K. Jones, K. Kaljurand, T. Kuhn, M. Luts, J. Pool, M. Rosner, R. Schwitter, J. Sowa: On controlled natural languages: Properties and prospects. In N. Fuchs, ed.: Controlled Natural Language. Volume 5972 of Lecture Notes in Computer Science. Springer Berlin/Heidelberg (2010) 281–289 10.1007/978-3-642-14418-9 17.
 
 - D. Damljanovic, J. Petrak, H. Cunningham: Random Indexing for Searching Large RDF Graphs. In the Proceedings of the 7th Extended Semantic Web Conference (ESWC 2010), Springer Verlag, Heraklion, Greece, May 31-June 3, 2010. Poster session, %(http://gate.ac.uk/sale/eswc10/ri-rdf-final.pdf, PDF)
 
