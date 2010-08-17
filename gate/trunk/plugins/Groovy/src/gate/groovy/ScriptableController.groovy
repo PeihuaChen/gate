@@ -125,17 +125,31 @@ eachDocument {
               args[0].call(document)
             }
             else {
+              benchmarkFeatures.put(Benchmark.CORPUS_NAME_FEATURE, corpus.name)
+
               // process each document in the corpus - corpus.each does the
               // right thing with corpora stored in datastores
               corpus.each {
-                checkInterrupted()
-                script.binding.setVariable('doc', it)
-                args[0].call(it)
+                String savedBenchmarkId = getBenchmarkId()
+                try {
+                  // include the document name in the benchmark ID for sub-events
+                  setBenchmarkId(Benchmark.createBenchmarkId("doc_${it.name}",
+                          getBenchmarkId()))
+                  benchmarkFeatures.put(Benchmark.DOCUMENT_NAME_FEATURE, it.name)
+                  checkInterrupted()
+                  script.binding.setVariable('doc', it)
+                  args[0].call(it)
+                }
+                finally {
+                  setBenchmarkId(savedBenchmarkId)
+                  benchmarkFeatures.remove(Benchmark.DOCUMENT_NAME_FEATURE)
+                }
               }
             }
           }
           finally {
             script.binding.setVariable('doc', savedCurrentDoc)
+            benchmarkFeatures.remove(Benchmark.CORPUS_NAME_FEATURE)
           }
         }
         else if("allPRs".equals(name) && !args) {
@@ -172,7 +186,6 @@ eachDocument {
       prof.initRun("Execute controller [" + getName() + "]");
     }
 
-    //TODO benchmarking here
     // Set initial variable values
     script.binding.setVariable('prs', prList)
     script.binding.setVariable('corpus', corpus)
