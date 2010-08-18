@@ -1805,6 +1805,14 @@ public abstract class AbstractOWLIMOntologyImpl
     return (new URI(uri, false));
   }
 
+  public OURI createOURIForName(String resourceName) {
+    return createOURIForName(resourceName, defaultNameSpace);
+  }
+
+  public OURI createOURIForName(String resourceName, String baseURI) {
+    return new URI(baseURI + resourceName, false);
+  }
+
   public AnonymousClass addAnonymousClass() {
     throw new UnsupportedOperationException(
             "Not supported in this implementation");
@@ -1866,16 +1874,6 @@ public abstract class AbstractOWLIMOntologyImpl
   }
 
   public OntologyTupleQuery createTupleQuery(String query, QueryLanguage lang) {
-    throw new UnsupportedOperationException(
-            "Not supported in this implementation");
-  }
-
-  public OURI createOURIForName(String resourceName) {
-    throw new UnsupportedOperationException(
-            "Not supported in this implementation");
-  }
-
-  public OURI createOURIForName(String resourceName, String baseURI) {
     throw new UnsupportedOperationException(
             "Not supported in this implementation");
   }
