@@ -30,6 +30,11 @@ import gate.creole.ir.*;
 /** This class represents Lucene implementation of serching in index. */
 public class LuceneSearch implements Search {
 
+  /** Default number of maximum results when no limit is specified
+   * in a search method call 
+   */
+  private static int DEFAULTMAXRESULTS = 1000000;
+  
   /** An instance of indexed corpus*/
   private IndexedCorpus indexedCorpus;
 
@@ -38,10 +43,11 @@ public class LuceneSearch implements Search {
     this.indexedCorpus = ic;
   }
 
-  /** Search in corpus with this query. Unlimited result length.*/
+  /** Search in corpus with this query. 
+   * Result length is limited by DEFAULTMAXRESULTS */
   public QueryResultList search(String query)
                                          throws IndexException, SearchException{
-    return search(query, -1);
+    return search(query, DEFAULTMAXRESULTS);
   }
 
   /** Search in corpus with this query.
@@ -53,14 +59,14 @@ public class LuceneSearch implements Search {
 
   /** Search in corpus with this query.
    *  In each QueryResult will be added values of theise fields.
-   *  Result length is unlimited. */
+   *  Result length is limited by DEFAULTMAXRESULTS. */
   public QueryResultList search(String query, List fieldNames)
                                          throws IndexException, SearchException{
-    return search(query, -1, fieldNames);
+    return search(query, DEFAULTMAXRESULTS, fieldNames);
   }
 
   /** Search in corpus with this query.
-   *  In each QueryResult will be added values of theise fields.
+   *  In each QueryResult will be added values of these fields.
    *  Result length is limited. */
   public QueryResultList search(String query, int limit, List fieldNames)
                                          throws IndexException, SearchException{
