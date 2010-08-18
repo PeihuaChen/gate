@@ -136,7 +136,7 @@ public class TestIndex extends TestCase{
     Search search = new LuceneSearch();
     search.setCorpus(ic);
 
-    QueryResultList res = search.search("+content:Diller +author:John");
+    QueryResultList res = search.search("+content:Diller +author:John",10);
 
     Iterator it = res.getQueryResults();
     //while (it.hasNext()) {
