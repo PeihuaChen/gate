@@ -7,7 +7,8 @@
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
  *  Version 2, June 1991 (in the distribution as file licence.html,
- *  and also available at http://gate.ac.uk/gate/licence.html).
+ *  and also available at http://gaI enjoy seeing
+the occasional update on Facebook :te.ac.uk/gate/licence.html).
  *
  *  Rosen Marinov, 19/Apr/2002
  *
@@ -30,6 +31,7 @@ import org.apache.lucene.analysis.SimpleAnalyzer;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.store.FSDirectory;
 
 /** This class represents Lucene implementation of IndexManeager interface.*/
 public class LuceneIndexManager implements IndexManager{
@@ -78,8 +80,12 @@ public class LuceneIndexManager implements IndexManager{
       corpus.getFeatures().put(CORPUS_INDEX_FEATURE, CORPUS_INDEX_FEATURE_VALUE);
       /* End */
 
-      IndexWriter writer = new IndexWriter(location,
-                                           new SimpleAnalyzer(), true);
+      IndexWriter writer = new IndexWriter(
+              FSDirectory.open(new File(location)),
+              new SimpleAnalyzer(), 
+              true,
+              new IndexWriter.MaxFieldLength(IndexWriter.DEFAULT_MAX_FIELD_LENGTH)
+              );
 
       for(int i = 0; i<corpus.size(); i++) {
         boolean isLoaded = corpus.isDocumentLoaded(i);
@@ -91,6 +97,7 @@ public class LuceneIndexManager implements IndexManager{
         }
       }//for (all documents)
 
+      writer.commit();
       writer.close();
       corpus.sync();
     } catch (java.io.IOException ioe){
@@ -107,9 +114,13 @@ public class LuceneIndexManager implements IndexManager{
     if(indexDefinition == null)
       throw new GateRuntimeException("Index definition is null!");
     try {
-      IndexWriter writer = new IndexWriter(indexDefinition.getIndexLocation(),
-                                         new SimpleAnalyzer(), false);
+      IndexWriter writer = new IndexWriter(
+              FSDirectory.open(new File(indexDefinition.getIndexLocation())),
+              new SimpleAnalyzer(), 
+              false,
+              new IndexWriter.MaxFieldLength(IndexWriter.DEFAULT_MAX_FIELD_LENGTH));
       writer.optimize();
+      writer.commit();
       writer.close();
     } catch (java.io.IOException ioe){
       throw new IndexException(ioe.getMessage());
@@ -142,7 +153,7 @@ public class LuceneIndexManager implements IndexManager{
     String location = indexDefinition.getIndexLocation();
     try {
 
-      IndexReader reader = IndexReader.open(location);
+      IndexReader reader = IndexReader.open(FSDirectory.open(new File(location)),false);
       
       for (int i = 0; i<removedIDs.size(); i++) {
         String id = removedIDs.get(i).toString();
@@ -161,8 +172,12 @@ public class LuceneIndexManager implements IndexManager{
 
       reader.close();
 
-      IndexWriter writer = new IndexWriter(location,
-                                          new SimpleAnalyzer(), false);
+      IndexWriter writer = new IndexWriter(
+              FSDirectory.open(new File(location)),
+              new SimpleAnalyzer(), 
+              false,
+              new IndexWriter.MaxFieldLength(IndexWriter.DEFAULT_MAX_FIELD_LENGTH)
+              );
 
       for(int i = 0; i<added.size(); i++) {
         gate.Document gateDoc = (gate.Document) added.get(i);
@@ -189,7 +204,7 @@ public class LuceneIndexManager implements IndexManager{
 //                                gateDoc.getLRPersistenceId().toString()));
 
     // update version of Lucene
-    luceneDoc.add(new Field(DOCUMENT_ID,gateDoc.getLRPersistenceId().toString(),Field.Store.YES,Field.Index.UN_TOKENIZED));
+    luceneDoc.add(new Field(DOCUMENT_ID,gateDoc.getLRPersistenceId().toString(),Field.Store.YES,Field.Index.NOT_ANALYZED));
     
     while (fields.hasNext()) {
       IndexField field = (IndexField) fields.next();
@@ -202,10 +217,10 @@ public class LuceneIndexManager implements IndexManager{
       } //if-else reader or feature
 
       if (field.isPreseved()) {
-        luceneDoc.add(new Field(field.getName(),valueForIndexing,Field.Store.YES,Field.Index.UN_TOKENIZED));
+        luceneDoc.add(new Field(field.getName(),valueForIndexing,Field.Store.YES,Field.Index.NOT_ANALYZED));
         // luceneDoc.add(Field.Keyword(field.getName(),valueForIndexing));
       } else {
-        luceneDoc.add(new Field(field.getName(),valueForIndexing,Field.Store.NO,Field.Index.TOKENIZED));
+        luceneDoc.add(new Field(field.getName(),valueForIndexing,Field.Store.NO,Field.Index.ANALYZED));
         // luceneDoc.add(Field.UnStored(field.getName(),valueForIndexing));
       } // if-else keyword or text
 
