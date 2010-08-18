@@ -29,6 +29,8 @@ import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
 import java.util.Timer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Method;
@@ -1717,14 +1719,20 @@ public class MainFrame extends JFrame implements ProgressListener,
     }});
     animator.deactivate();
   }
+  
+  /**
+   * Regular expression pattern for the "Start running" message.
+   */
+  private static final Pattern START_RUNNING_PATTERN =
+    Pattern.compile("Start running .* on (\\d+) documents?");
 
   public void statusChanged(String text) {
     SwingUtilities.invokeLater(new StatusBarUpdater(text));
     if (text != null) {
-      if (text.startsWith("Start running ")) {
+      Matcher m = START_RUNNING_PATTERN.matcher(text);
+      if (m.matches()) {
         // get the corpus size from the status text
-        final int corpusSize = Integer.valueOf(
-          text.substring(text.indexOf("on ") + 3, text.indexOf(" document")));
+        final int corpusSize = Integer.valueOf(m.group(1));
         SwingUtilities.invokeLater(new Runnable() { public void run() {
           // initialise the progress bar
           globalProgressBar.setMaximum(corpusSize);
