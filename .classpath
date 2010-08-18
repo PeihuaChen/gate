@@ -120,7 +120,6 @@
 	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-document-annotation.jar"/>
 	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-tools.jar"/>
 	<classpathentry kind="lib" path="plugins/Web_Search_Yahoo/lib/yahoo_search-1.1.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/lucene-core-2.2.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/tools.jar"/>
 	<classpathentry kind="lib" path="plugins/Parser_Stanford/lib/stanford-parser.jar"/>
 	<classpathentry kind="lib" path="lib/gate-asm.jar"/>
@@ -129,5 +128,6 @@
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
 	<classpathentry kind="lib" path="lib/nekohtml-1.9.14.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-core-3.0.1.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

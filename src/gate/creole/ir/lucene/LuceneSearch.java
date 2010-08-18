@@ -15,12 +15,15 @@
 
 package gate.creole.ir.lucene;
 
+import java.io.File;
 import java.util.List;
 import java.util.Vector;
 
 import org.apache.lucene.analysis.SimpleAnalyzer;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.*;
+import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.Version;
 
 import gate.creole.ir.*;
 
@@ -64,15 +67,27 @@ public class LuceneSearch implements Search {
     Vector result = new Vector();
 
     try {
-      IndexSearcher searcher = new IndexSearcher(indexedCorpus.getIndexDefinition().getIndexLocation());
-      QueryParser parser = new QueryParser("body", new SimpleAnalyzer());
+      IndexSearcher searcher = new IndexSearcher(
+        FSDirectory.open(
+           new File(indexedCorpus.getIndexDefinition().getIndexLocation())
+           ),
+        true);
+      QueryParser parser = new QueryParser(
+              Version.LUCENE_29,
+              "body", 
+              new SimpleAnalyzer());
       Query luceneQuery = parser.parse(query);
 
-      Hits hits = searcher.search(luceneQuery);
-      int resultlength = hits.length();
-      if (limit>-1) {
-        resultlength = Math.min(limit,resultlength);
-      }
+      // JP was for lucene 2.2
+      // Hits hits = searcher.search(luceneQuery);
+      //int resultlength = hits.length();
+      //if (limit>-1) {
+      //  resultlength = Math.min(limit,resultlength);
+      //}
+      TopDocs topDocs = searcher.search(luceneQuery, limit);
+      ScoreDoc[] hits = topDocs.scoreDocs;
+      int resultlength = hits.length;
+
 
       Vector fieldValues = null;
       for (int i=0; i<resultlength; i++) {
@@ -80,11 +95,16 @@ public class LuceneSearch implements Search {
         if (fieldNames != null){
           fieldValues = new Vector();
           for (int j=0; j<fieldNames.size(); j++){
-            fieldValues.add(new gate.creole.ir.Term( fieldNames.get(j).toString(), hits.doc(i).get(fieldNames.get(j).toString())));
+            fieldValues.add(new gate.creole.ir.Term( 
+                    fieldNames.get(j).toString(), 
+                    searcher.doc(hits[i].doc).get(fieldNames.get(j).toString()))
+            );
           }
         }
 
-        result.add(new QueryResult(hits.doc(i).get(LuceneIndexManager.DOCUMENT_ID),hits.score(i),fieldValues));
+        result.add(new QueryResult(
+                searcher.doc(hits[i].doc).get(LuceneIndexManager.DOCUMENT_ID),
+                  hits[i].score,fieldValues));
       }// for (all search hints)
 
       searcher.close();
