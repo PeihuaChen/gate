@@ -163,10 +163,9 @@ public class SimpleFeatureMapImpl
           // ontology aware processing
 
           try {
+            OClass superClass = getClassForURIOrName(ontologyLR, keyValueFromAFeatureMap.toString());
+            OClass subClass = getClassForURIOrName(ontologyLR, keyValueFromThis.toString());
 
-            // lets first find out the classes with the names
-            OClass superClass = (OClass) ontologyLR.getOResourceByName(keyValueFromAFeatureMap.toString());
-            OClass subClass = (OClass) ontologyLR.getOResourceByName(keyValueFromThis.toString());
             if(superClass == null || subClass == null) return false;
             if (DEBUG) {
               Out.prln("\nClass in rule: " + keyValueFromAFeatureMap.toString());
@@ -192,6 +191,36 @@ public class SimpleFeatureMapImpl
 
     return true;
   } //subsumes(ontology)
+  
+  /**
+   * Look up the given name in the given ontology.  First we try
+   * treating the name as a complete URI and attempt to find the
+   * matching OClass.  If this fails (either the name is not a URI
+   * or there is no class by that URI) then we try again, treating
+   * the name as local to the default namespace of the ontology.
+   * @param ontologyLR the ontology
+   * @param name the URI or local resource name to look up
+   * @return the corresponding OClass, or <code>null</code> if no
+   * suitable class could be found.
+   */
+  protected OClass getClassForURIOrName(Ontology ontologyLR, String name) {
+    OClass cls = null;
+    try {
+      cls = ontologyLR.getOClass(ontologyLR.createOURI(name));
+    }
+    catch(Exception e) {
+      // do nothing, but leave cls == null
+    }
+    if(cls == null) {
+      try {
+        cls = ontologyLR.getOClass(ontologyLR.createOURIForName(name));
+      }
+      catch(Exception e) {
+        // do nothing, but leave cls == null
+      }
+    }
+    return cls;
+  }
 
 
   /** Tests if <b>this</b> featureMap object includes aFeatureMap but only
