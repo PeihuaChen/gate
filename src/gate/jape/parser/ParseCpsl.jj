@@ -238,22 +238,29 @@ public class ParseCpsl implements JapeConstants {
       throw new ParseException(errorMsgPrefix(templateNameTok) +
               "unknown template name " + templateNameTok.image);
     }
+    log.debug("Substituting template " + templateNameTok.image + " with map "
+            + values + ". Template is " + template);
     StringBuffer buf = new StringBuffer();
-    Matcher mat = Pattern.compile("\\$\\{([^\\{]+)\\}").matcher(template);
+    Matcher mat = Pattern.compile("\\$\\{([^\\}]+)\\}").matcher(template);
     while(mat.find()) {
       String key = mat.group(1);
       if(values.containsKey(key)) {
-        mat.appendReplacement(buf, String.valueOf(values.get(key)));
+        // this next line looks weird, but it's replacing the regular expression
+        // \$ (matching a single dollar character) with the two character string
+        // backslash dollar, but the dollar in the replacement string must itself
+        // be backslash escaped to prevent it being treated as a backreference...
+        mat.appendReplacement(buf,
+                String.valueOf(values.get(key)).replaceAll("\\$", "\\\\$"));
       }
       else {
-        mat.appendReplacement(buf, "${");
+        mat.appendReplacement(buf, "\\${");
         buf.append(key);
         buf.append("}");
       }
     }
     mat.appendTail(buf);
     
-    log.debug("Substituted template " + templateNameTok.image + " with map " + values + " producing " + buf.toString());
+    log.debug("Template substitution produced " + buf.toString());
     
     return buf.toString();
   }
@@ -763,15 +770,20 @@ void TemplateDef() :
 {
   Token templateNameTok = null;
   Token valueTok = null;
+  String value = null;
 }
 {
   <template> templateNameTok=<ident>
   <assign>
-  valueTok=<string>
+  (
+    (valueTok=<string> {
+      value = valueTok.image.substring(1, valueTok.image.length() - 1);
+    })
+    |
+    value=TemplateCall()
+  )
   {
-    // strip the quotes off the value string
-    templatesMap.put(templateNameTok.image,
-            valueTok.image.substring(1, valueTok.image.length() - 1));
+    templatesMap.put(templateNameTok.image, value);
   }
 } // TemplateDef
 
