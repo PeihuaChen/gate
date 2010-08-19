@@ -1263,7 +1263,7 @@ Rule:InLoc1
 )
 :locName
 -->
- :locName.TempLocation = {kind = "locName", rule = InLoc1}
+ :locName.TempLocation = {kind = "locName", rule = InLoc1, locType = :locName.Lookup.minorType}
 
 Rule:LocGeneralKey
 Priority: 30
