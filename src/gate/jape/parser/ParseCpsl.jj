@@ -58,15 +58,24 @@ public class ParseCpsl implements JapeConstants {
   /** Construct from a URL and an encoding
     */
   public ParseCpsl(URL url, String encoding, HashMap existingMacros) throws IOException {
+    this(url, encoding, existingMacros, new HashMap());
+  }
+
+  public ParseCpsl(URL url, String encoding, HashMap existingMacros, HashMap existingTemplates) throws IOException {
     this(new BomStrippingInputStreamReader(url.openStream(), encoding), 
-         existingMacros);
+         existingMacros, existingTemplates);
     baseURL = url;
     this.encoding = encoding;
   }
 
   public ParseCpsl(java.io.Reader stream, HashMap existingMacros) {
+    this(stream, existingMacros, new HashMap());
+  }
+  
+  public ParseCpsl(java.io.Reader stream, HashMap existingMacros, HashMap existingTemplates) {
     this(stream);
     macrosMap = existingMacros;
+    templatesMap = existingTemplates;
   }
 
   //StatusReporter Implementation
@@ -87,7 +96,7 @@ public class ParseCpsl implements JapeConstants {
   }
 
   protected ParseCpsl spawn(URL sptURL) throws IOException{
-    return new ParseCpsl(sptURL, encoding, macrosMap);
+    return new ParseCpsl(sptURL, encoding, macrosMap, templatesMap);
   }
 
   protected void finishSPT(SinglePhaseTransducer t) throws ParseException {
@@ -213,6 +222,41 @@ public class ParseCpsl implements JapeConstants {
       blockBuffer.append("      }" + nl);
       blockBuffer.append("      // end of RHS assignment block");
   }
+  
+  /**
+   * Takes a string containing ${key} placeholders and substitutes
+   * in the corresponding values from the given map.  If there is
+   * no value in the map for a particular placeholder it is left
+   * un-resolved, i.e. given a template of "${key1}/${key2}" and
+   * a values map of just [key1: "hello"], this method would return
+   * "hello/${key2}".
+   */
+  protected String substituteTemplate(Token templateNameTok,
+          Map<String, Object> values) throws ParseException {
+    String template = (String)templatesMap.get(templateNameTok.image);
+    if(template == null) {
+      throw new ParseException(errorMsgPrefix(templateNameTok) +
+              "unknown template name " + templateNameTok.image);
+    }
+    StringBuffer buf = new StringBuffer();
+    Matcher mat = Pattern.compile("\\$\\{([^\\{]+)\\}").matcher(template);
+    while(mat.find()) {
+      String key = mat.group(1);
+      if(values.containsKey(key)) {
+        mat.appendReplacement(buf, String.valueOf(values.get(key)));
+      }
+      else {
+        mat.appendReplacement(buf, "${");
+        buf.append(key);
+        buf.append("}");
+      }
+    }
+    mat.appendTail(buf);
+    
+    log.debug("Substituted template " + templateNameTok.image + " with map " + values + " producing " + buf.toString());
+    
+    return buf.toString();
+  }
 
   public void setBaseURL (URL newURL) {
     baseURL = newURL;
@@ -240,6 +284,9 @@ public class ParseCpsl implements JapeConstants {
 
   /** A table of macro definitions. */
   protected HashMap macrosMap;
+  
+  /** A table of template definitions. */
+  protected HashMap templatesMap;
 
   protected URL baseURL;
   protected String encoding;
@@ -308,6 +355,7 @@ PARSER_END(ParseCpsl)
 <DEFAULT> TOKEN [IGNORE_CASE]: { <option:       "Options:"> }
 <DEFAULT> TOKEN [IGNORE_CASE]: { <rule:         "Rule:"> }
 <DEFAULT> TOKEN [IGNORE_CASE]: { <macro:        "Macro:"> }
+<DEFAULT> TOKEN [IGNORE_CASE]: { <template:     "Template:"> }
 <DEFAULT> TOKEN [IGNORE_CASE]: { <priority:     "Priority:"> }
 <DEFAULT> TOKEN: { <pling: "!"> }
 <DEFAULT> TOKEN: { <kleeneOp: "*" | "+" | "?"> }
@@ -598,6 +646,8 @@ SinglePhaseTransducer SinglePhaseTransducer(String javaimportblock) :
     ( newRule=Rule(phaseNameTok.image,javaimportblock) { t.addRule(newRule); } )
     |
     MacroDef()
+    |
+    TemplateDef()
   )*
   {
     finishSPT(t);
@@ -708,6 +758,22 @@ void MacroDef() :
     macrosMap.put(macroNameTok.image, body);
   }
 } // MacroDef
+
+void TemplateDef() :
+{
+  Token templateNameTok = null;
+  Token valueTok = null;
+}
+{
+  <template> templateNameTok=<ident>
+  <assign>
+  valueTok=<string>
+  {
+    // strip the quotes off the value string
+    templatesMap.put(templateNameTok.image,
+            valueTok.image.substring(1, valueTok.image.length() - 1));
+  }
+} // TemplateDef
 
 
 LeftHandSide LeftHandSide() :
@@ -990,58 +1056,90 @@ AnnotationAccessor accessor = null;
 Pair AttrVal() :
 {
   Token attrValTok = null;
+  String attrValString = null;
   Pair val = new Pair();
 }
 {
   (
-    attrValTok=<string> | attrValTok=<ident> |
-    attrValTok=<integer> | attrValTok=<floatingPoint> |
-    attrValTok=<bool>
+    (
+      attrValTok=<string> | attrValTok=<ident> |
+      attrValTok=<integer> | attrValTok=<floatingPoint> |
+      attrValTok=<bool>
+    )
+    {
+      val.first = new Integer(attrValTok.kind);
+
+      switch(attrValTok.kind) {
+        case string:
+          // strip the quotes
+          val.second
+            = attrValTok.image.substring(1, attrValTok.image.length() - 1);
+          break;
+        case integer:
+          try {
+            val.second = Long.valueOf(attrValTok.image);
+          } catch(NumberFormatException e) {
+            System.err.println(errorMsgPrefix(attrValTok)+
+              "couldn't parse integer " +
+              attrValTok.image + " - treating as 0");
+            val.second = new Long(0);
+          }
+          break;
+        case ident:
+          val.second = new String(attrValTok.image);
+          break;
+        case bool:
+          val.second = Boolean.valueOf(attrValTok.image);
+          break;
+        case floatingPoint:
+          try {
+            val.second = Double.valueOf(attrValTok.image);
+          } catch(NumberFormatException e) {
+            System.err.println(errorMsgPrefix(attrValTok)+
+              "couldn't parse float " +
+              attrValTok.image + " - treating as 0.0");
+            val.second = new Double(0.0);
+          }
+          break;
+        default:
+          System.err.println(errorMsgPrefix(attrValTok)+
+            "didn't understand type of " + attrValTok.image + ": ignoring"
+          );
+          val.second = new String("");
+          break;
+      } // switch
+
+      return val;
+    }
   )
-  {
-    val.first = new Integer(attrValTok.kind);
+  |
+  (
+    attrValString=TemplateCall() {
+      // attr val is a string whose value is the filled-in template
+      val.first = string;
+      val.second = attrValString;
+      return val;
+    }
+  )
+}
 
-    switch(attrValTok.kind) {
-      case string:
-        // strip the quotes
-        val.second
-          = attrValTok.image.substring(1, attrValTok.image.length() - 1);
-        break;
-      case integer:
-        try {
-          val.second = Long.valueOf(attrValTok.image);
-        } catch(NumberFormatException e) {
-          System.err.println(errorMsgPrefix(attrValTok)+
-            "couldn't parse integer " +
-            attrValTok.image + " - treating as 0");
-          val.second = new Long(0);
-        }
-        break;
-      case ident:
-        val.second = new String(attrValTok.image);
-        break;
-      case bool:
-        val.second = Boolean.valueOf(attrValTok.image);
-        break;
-      case floatingPoint:
-        try {
-          val.second = Double.valueOf(attrValTok.image);
-        } catch(NumberFormatException e) {
-          System.err.println(errorMsgPrefix(attrValTok)+
-            "couldn't parse float " +
-            attrValTok.image + " - treating as 0.0");
-          val.second = new Double(0.0);
-        }
-        break;
-      default:
-        System.err.println(errorMsgPrefix(attrValTok)+
-          "didn't understand type of " + attrValTok.image + ": ignoring"
-        );
-        val.second = new String("");
-        break;
-    } // switch
-
-    return val;
+String TemplateCall() :
+{
+  Token templateNameTok = null;
+  Token attrNameTok = null;
+  Pair attrVal = null;
+  Map<String, Object> placeholders = new HashMap<String, Object>();
+}
+{
+  <leftSquare> templateNameTok=<ident>
+  (
+    attrNameTok=<ident> <assign> attrVal=AttrVal() {
+      placeholders.put(attrNameTok.image, attrVal.second);
+    }
+    (<comma>)? // yes, I've allowed redundant trailing commas on this one
+  )*
+  <rightSquare> {
+    return substituteTemplate(templateNameTok, placeholders);
   }
 }
 
