@@ -29,37 +29,38 @@ public interface ParseCpslConstants {
   int option = 23;
   int rule = 24;
   int macro = 25;
-  int priority = 26;
-  int pling = 27;
-  int kleeneOp = 28;
-  int attrOp = 29;
-  int metaPropOp = 30;
-  int integer = 31;
-  int string = 43;
-  int bool = 44;
-  int ident = 45;
-  int floatingPoint = 46;
-  int exponent = 47;
-  int colon = 48;
-  int semicolon = 49;
-  int period = 50;
-  int bar = 51;
-  int comma = 52;
-  int leftBrace = 53;
-  int rightBrace = 54;
-  int leftBracket = 55;
-  int rightBracket = 56;
-  int leftSquare = 57;
-  int rightSquare = 58;
-  int assign = 59;
-  int colonplus = 60;
-  int whiteSpace = 61;
-  int singleLineCStyleComment = 62;
-  int singleLineCpslStyleComment = 63;
-  int commentStart = 64;
-  int commentChars = 65;
-  int commentEnd = 66;
-  int other = 67;
+  int template = 26;
+  int priority = 27;
+  int pling = 28;
+  int kleeneOp = 29;
+  int attrOp = 30;
+  int metaPropOp = 31;
+  int integer = 32;
+  int string = 44;
+  int bool = 45;
+  int ident = 46;
+  int floatingPoint = 47;
+  int exponent = 48;
+  int colon = 49;
+  int semicolon = 50;
+  int period = 51;
+  int bar = 52;
+  int comma = 53;
+  int leftBrace = 54;
+  int rightBrace = 55;
+  int leftBracket = 56;
+  int rightBracket = 57;
+  int leftSquare = 58;
+  int rightSquare = 59;
+  int assign = 60;
+  int colonplus = 61;
+  int whiteSpace = 62;
+  int singleLineCStyleComment = 63;
+  int singleLineCpslStyleComment = 64;
+  int commentStart = 65;
+  int commentChars = 66;
+  int commentEnd = 67;
+  int other = 68;
 
   int DEFAULT = 0;
   int IN_PHASES = 1;
@@ -94,6 +95,7 @@ public interface ParseCpslConstants {
     "\"Options:\"",
     "\"Rule:\"",
     "\"Macro:\"",
+    "\"Template:\"",
     "\"Priority:\"",
     "\"!\"",
     "<kleeneOp>",
@@ -109,8 +111,8 @@ public interface ParseCpslConstants {
     "\"\\\\\\\"\"",
     "\"\\\\\\\'\"",
     "\"\\\\\\\\\"",
-    "<token of kind 41>",
     "<token of kind 42>",
+    "<token of kind 43>",
     "\"\\\"\"",
     "<bool>",
     "<ident>",
