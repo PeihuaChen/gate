@@ -180,6 +180,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     setList = new JList();
     setList.setSelectionModel(new ToggleSelectionABModel(setList));
     setList.setPrototypeCellValue("present in every document");
+    setList.setVisibleRowCount(4);
     gbc.weighty = 1;
     sidePanel.add(new JScrollPane(setList), gbc);
     gbc.weighty = 0;
@@ -201,6 +202,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     typeList = new JList();
     typeList.setSelectionModel(new ToggleSelectionModel());
     typeList.setPrototypeCellValue("present in every document");
+    typeList.setVisibleRowCount(4);
     gbc.weighty = 1;
     sidePanel.add(new JScrollPane(typeList), gbc);
     gbc.weighty = 0;
@@ -222,6 +224,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     featureList = new JList();
     featureList.setSelectionModel(new ToggleSelectionModel());
     featureList.setPrototypeCellValue("present in every document");
+    featureList.setVisibleRowCount(4);
     gbc.weighty = 1;
     sidePanel.add(new JScrollPane(featureList), gbc);
     gbc.weighty = 0;
@@ -261,6 +264,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       fscore2+"strict", fscore2+"lenient", fscore2+"average",
       fscore2+"strict BDM", fscore2+"lenient BDM", fscore2+"average BDM"}));
     measureList.setPrototypeCellValue("present in every document");
+    measureList.setVisibleRowCount(4);
     measureScrollPane.setViewportView(measureList);
     final JScrollPane measure2ScrollPane = new JScrollPane();
     measure2List = new JList();
@@ -268,6 +272,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     measure2List.setModel(new ExtendedListModel(new String[]{
       "Observed agreement", "Cohen's Kappa" , "Pi's Kappa"}));
     measure2List.setPrototypeCellValue("present in every document");
+    measure2List.setVisibleRowCount(4);
     measure2ScrollPane.setViewportView(measure2List);
     measureTabbedPane = new JTabbedPane();
     measureTabbedPane.addTab("F-Score", null,
@@ -450,7 +455,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     splitPane.setOneTouchExpandable(true);
     splitPane.setResizeWeight(0.80);
     splitPane.setLeftComponent(tableTabbedPane);
-    splitPane.setRightComponent(sidePanel);
+    splitPane.setRightComponent(new JScrollPane(sidePanel));
 
     add(splitPane);
   }
