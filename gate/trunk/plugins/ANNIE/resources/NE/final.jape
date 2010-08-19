@@ -104,7 +104,7 @@ Priority: 10
 gate.AnnotationSet org = (gate.AnnotationSet)bindings.get("org");
 gate.Annotation orgAnn = (gate.Annotation)org.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
-features.put("orgType", orgAnn.getFeatures().get("orgType"));
+if (orgAnn.getFeatures().containsKey("orgType"))  features.put("orgType", orgAnn.getFeatures().get("orgType"));
 features.put("rule1", orgAnn.getFeatures().get("rule"));
 features.put("rule2", "OrgFinal");
 outputAS.add(org.firstNode(), org.lastNode(), "Organization",
