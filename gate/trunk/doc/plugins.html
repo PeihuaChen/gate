@@ -90,6 +90,7 @@ list</a>.</p>
 <li><a href='#Web_Crawler_Websphinx'>Web_Crawler_Websphinx</a></li>
 <li><a href='#Web_Search_Google'>Web_Search_Google</a></li>
 <li><a href='#Web_Search_Yahoo'>Web_Search_Yahoo</a></li>
+<li><a href='#Web_Translate_Google'>Web_Translate_Google</a></li>
 <li><a href='#WordNet'>WordNet</a></li>
 </ul>
 <table border='1'>
@@ -117,11 +118,6 @@ list</a>.</p>
 		<td>gate.composite.impl.CompositeDocumentImpl</td>
 	</tr>
 	<tr>
-		<td>Alignment Editor&nbsp;</td>
-		<td>Alignment editor. (<a href="http://gate.ac.uk/userguide/sec:alignment:editor">docs</a>)&nbsp;</td>
-		<td>gate.alignment.gui.AlignmentEditor</td>
-	</tr>
-	<tr>
 		<td>Switch Member PR&nbsp;</td>
 		<td>Sets the focus of a compound document to a specified member document. (<a href="http://gate.ac.uk/userguide/sec:alignment:switchmembers">docs</a>)&nbsp;</td>
 		<td>gate.compound.impl.SwitchMemberPR</td>
@@ -140,6 +136,11 @@ list</a>.</p>
 		<td>Segment Processing PR&nbsp;</td>
 		<td>Processes individual segments as separate documents (<a href="http://gate.ac.uk/userguide/sec:alignment:segment-processing">docs</a>)&nbsp;</td>
 		<td>gate.composite.impl.SegmentProcessingPR</td>
+	</tr>
+	<tr>
+		<td>ExportAlignmentPR&nbsp;</td>
+		<td>A PR to export alignment information in an xml file.&nbsp;</td>
+		<td>gate.alignment.ExportAlignmentPR</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='ANNIE'>ANNIE</a></th>
@@ -233,14 +234,14 @@ list</a>.</p>
 		<td>gate.gui.jape.JapeViewer</td>
 	</tr>
 	<tr>
-		<td>Gazetteer Editor&nbsp;</td>
-		<td>Gazetteer viewer and editor. (<a href="http://gate.ac.uk/userguide/sec:gazetteers:anniegazeditor">docs</a>)&nbsp;</td>
-		<td>gate.gui.GazetteerEditor</td>
-	</tr>
-	<tr>
 		<td>Gaze&nbsp;</td>
 		<td>HashGazetteer viewer and editor. (<a href="http://gate.ac.uk/userguide/sec:gazetteers:gaze">docs</a>)&nbsp;</td>
 		<td>com.ontotext.gate.vr.Gaze</td>
+	</tr>
+	<tr>
+		<td>Gazetteer Editor&nbsp;</td>
+		<td>Gazetteer viewer and editor. (<a href="http://gate.ac.uk/userguide/sec:gazetteers:anniegazeditor">docs</a>)&nbsp;</td>
+		<td>gate.gui.GazetteerEditor</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='Annotation_Merging'>Annotation_Merging</a></th>
@@ -306,6 +307,16 @@ list</a>.</p>
 		<td>Groovy scripting PR&nbsp;</td>
 		<td>Runs a Groovy script as a processing resource (<a href="http://gate.ac.uk/userguide/sec:api:groovy">docs</a>)&nbsp;</td>
 		<td>gate.groovy.ScriptPR</td>
+	</tr>
+	<tr>
+		<td>Scriptable Controller&nbsp;</td>
+		<td>A controller whose execution strategy is controlled by a Groovy script (<a href="http://gate.ac.uk/userguide/sec:api:groovy:controller">docs</a>)&nbsp;</td>
+		<td>gate.groovy.ScriptableController</td>
+	</tr>
+	<tr>
+		<td>Control Script&nbsp;</td>
+		<td>Editor for the Groovy script controlling a scriptable controller&nbsp;</td>
+		<td>gate.groovy.gui.ControllerScriptEditor</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='Information_Retrieval'>Information_Retrieval</a></th>
@@ -513,7 +524,7 @@ list</a>.</p>
 	</tr>
 	<tr>
 		<td>LingPipe Language Identifier PR&nbsp;</td>
-		<td>LingPipe Identifier PR (<a href="http://gate.ac.uk/userguide/sec:misc-creole:lingpipe:langid">docs</a>)&nbsp;</td>
+		<td>GATE PR for language identification using LingPipe (<a href="http://gate.ac.uk/userguide/sec:misc-creole:lingpipe:langid">docs</a>)&nbsp;</td>
 		<td>gate.lingpipe.LanguageIdentifierPR</td>
 	</tr>
 	<tr>
@@ -648,6 +659,16 @@ list</a>.</p>
 		<td>OAT&nbsp;</td>
 		<td>Ontology Annotation Tool. (<a href="http://gate.ac.uk/userguide/sec:ontologies:ocat">docs</a>)&nbsp;</td>
 		<td>gate.creole.ontology.ocat.OntologyViewer</td>
+	</tr>
+	<tr>
+		<td>RAT-C&nbsp;</td>
+		<td>Relation Annotation Tool Class view. (<a href="http://gate.ac.uk/userguide/sec:ontologies:rat">docs</a>)&nbsp;</td>
+		<td>gate.gui.docview.OntologyClassView</td>
+	</tr>
+	<tr>
+		<td>RAT-I&nbsp;</td>
+		<td>Relation Annotation Tool Instance view. (<a href="http://gate.ac.uk/userguide/sec:ontologies:rat">docs</a>)&nbsp;</td>
+		<td>gate.gui.docview.OntologyInstanceView</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='OpenNLP'>OpenNLP</a></th>
@@ -851,6 +872,11 @@ list</a>.</p>
 		<td>gate.gui.SyntaxTreeViewer</td>
 	</tr>
 	<tr>
+		<td>Quality Assurance PR&nbsp;</td>
+		<td>The Quality Assurance PR that runs when the pipeline is processing the last document&nbsp;</td>
+		<td>gate.qa.QualityAssurancePR</td>
+	</tr>
+	<tr>
 		<th colspan='3'><a name='UIMA'>UIMA</a></th>
 	</tr>
 	<tr>
@@ -881,6 +907,14 @@ list</a>.</p>
 		<td>YahooPR&nbsp;</td>
 		<td>Provides an interface to Yahoo API. (<a href="http://gate.ac.uk/userguide/sec:misc-creole:yahoo">docs</a>)&nbsp;</td>
 		<td>gate.yahoo.YahooPR</td>
+	</tr>
+	<tr>
+		<th colspan='3'><a name='Web_Translate_Google'>Web_Translate_Google</a></th>
+	</tr>
+	<tr>
+		<td>Google Translator PR&nbsp;</td>
+		<td>Runs a google translator over the source member document and produces the translated document. User can also specify if he/she wants to align unitOfTranslation in the source and the target documents.&nbsp;</td>
+		<td>gate.translate.google.GoogleTranslatorPR</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='WordNet'>WordNet</a></th>
