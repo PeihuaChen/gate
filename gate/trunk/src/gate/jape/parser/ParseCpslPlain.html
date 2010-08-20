@@ -35,7 +35,7 @@
 <TR>
 <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod6">TemplateDef</A></TD>
 <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
-<TD ALIGN=LEFT VALIGN=BASELINE>&lt;template&gt; &lt;ident&gt; &lt;assign&gt; ( ( &lt;string&gt; ) | <A HREF="#prod12">TemplateCall</A> )</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>&lt;template&gt; &lt;ident&gt; &lt;assign&gt; <A HREF="#prod12">AttrVal</A></TD>
 </TR>
 <TR>
 <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod8">LeftHandSide</A></TD>
@@ -75,7 +75,7 @@
 <TR>
 <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod16">Constraint</A></TD>
 <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
-<TD ALIGN=LEFT VALIGN=BASELINE>( &lt;pling&gt; )? &lt;ident&gt; ( ( <A HREF="#prod18">FeatureAccessor</A> &lt;attrOp&gt; <A HREF="#prod19">AttrVal</A> ) | ( &lt;metaPropOp&gt; &lt;ident&gt; &lt;attrOp&gt; <A HREF="#prod19">AttrVal</A> ) | ( &lt;ident&gt; ( ( &lt;leftBrace&gt; <A HREF="#prod16">Constraint</A> &lt;rightBrace&gt; ) | ( <A HREF="#prod16">Constraint</A> ) ) ) )?</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( &lt;pling&gt; )? &lt;ident&gt; ( ( <A HREF="#prod18">FeatureAccessor</A> &lt;attrOp&gt; <A HREF="#prod12">AttrVal</A> ) | ( &lt;metaPropOp&gt; &lt;ident&gt; &lt;attrOp&gt; <A HREF="#prod12">AttrVal</A> ) | ( &lt;ident&gt; ( ( &lt;leftBrace&gt; <A HREF="#prod16">Constraint</A> &lt;rightBrace&gt; ) | ( <A HREF="#prod16">Constraint</A> ) ) ) )?</TD>
 </TR>
 <TR>
 <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod18">FeatureAccessor</A></TD>
@@ -83,19 +83,19 @@
 <TD ALIGN=LEFT VALIGN=BASELINE>( &lt;period&gt; &lt;ident&gt; )</TD>
 </TR>
 <TR>
-<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod19">AttrVal</A></TD>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod12">AttrVal</A></TD>
 <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
 <TD ALIGN=LEFT VALIGN=BASELINE>( ( &lt;string&gt; | &lt;ident&gt; | &lt;integer&gt; | &lt;floatingPoint&gt; | &lt;bool&gt; ) )</TD>
 </TR>
 <TR>
 <TD ALIGN=RIGHT VALIGN=BASELINE></TD>
 <TD ALIGN=CENTER VALIGN=BASELINE>|</TD>
-<TD ALIGN=LEFT VALIGN=BASELINE>( <A HREF="#prod12">TemplateCall</A> )</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( <A HREF="#prod19">TemplateCall</A> )</TD>
 </TR>
 <TR>
-<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod12">TemplateCall</A></TD>
+<TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod19">TemplateCall</A></TD>
 <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
-<TD ALIGN=LEFT VALIGN=BASELINE>&lt;leftSquare&gt; &lt;ident&gt; ( &lt;ident&gt; &lt;assign&gt; <A HREF="#prod19">AttrVal</A> ( &lt;comma&gt; )? )* &lt;rightSquare&gt;</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>&lt;leftSquare&gt; &lt;ident&gt; ( &lt;ident&gt; &lt;assign&gt; <A HREF="#prod12">AttrVal</A> ( &lt;comma&gt; )? )* &lt;rightSquare&gt;</TD>
 </TR>
 <TR>
 <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod9">RightHandSide</A></TD>
@@ -120,7 +120,7 @@
 <TR>
 <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod22">AssignmentExpression</A></TD>
 <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
-<TD ALIGN=LEFT VALIGN=BASELINE>( &lt;colon&gt; | &lt;colonplus&gt; ) &lt;ident&gt; &lt;period&gt; &lt;ident&gt; &lt;assign&gt; &lt;leftBrace&gt; ( &lt;ident&gt; &lt;assign&gt; ( <A HREF="#prod19">AttrVal</A> | ( &lt;colon&gt; &lt;ident&gt; &lt;period&gt; &lt;ident&gt; ( &lt;period&gt; | &lt;metaPropOp&gt; ) &lt;ident&gt; ) ) ( &lt;comma&gt; )? )* &lt;rightBrace&gt;</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( &lt;colon&gt; | &lt;colonplus&gt; ) &lt;ident&gt; &lt;period&gt; &lt;ident&gt; &lt;assign&gt; &lt;leftBrace&gt; ( &lt;ident&gt; &lt;assign&gt; ( <A HREF="#prod12">AttrVal</A> | ( &lt;colon&gt; &lt;ident&gt; &lt;period&gt; &lt;ident&gt; ( &lt;period&gt; | &lt;metaPropOp&gt; ) &lt;ident&gt; ) ) ( &lt;comma&gt; )? )* &lt;rightBrace&gt;</TD>
 </TR>
 <TR>
 <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod23">appendSpecials</A></TD>
