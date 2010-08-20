@@ -570,7 +570,9 @@ public class DocumentImpl extends AbstractLanguageResource implements
   /** Set method for the document content */
   public void setContent(DocumentContent content) {
     this.content = content;
-    this.stringContent = content.toString();
+    // stringContent is a parameter, not a normal field, and
+    // should not be overwritten here.
+    //this.stringContent = content.toString();
   }
 
   /** Get the encoding of the document content source */
