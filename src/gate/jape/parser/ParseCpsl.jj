@@ -32,6 +32,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.regex.*;
+
 import gate.Factory;
 import gate.util.*;
 import gate.jape.*;
@@ -231,38 +232,59 @@ public class ParseCpsl implements JapeConstants {
    * a values map of just [key1: "hello"], this method would return
    * "hello/${key2}".
    */
-  protected String substituteTemplate(Token templateNameTok,
+  protected Pair substituteTemplate(Token templateNameTok,
           Map<String, Object> values) throws ParseException {
-    String template = (String)templatesMap.get(templateNameTok.image);
+    Pair template = (Pair)templatesMap.get(templateNameTok.image);
     if(template == null) {
       throw new ParseException(errorMsgPrefix(templateNameTok) +
               "unknown template name " + templateNameTok.image);
     }
-    log.debug("Substituting template " + templateNameTok.image + " with map "
-            + values + ". Template is " + template);
-    StringBuffer buf = new StringBuffer();
-    Matcher mat = Pattern.compile("\\$\\{([^\\}]+)\\}").matcher(template);
-    while(mat.find()) {
-      String key = mat.group(1);
-      if(values.containsKey(key)) {
-        // this next line looks weird, but it's replacing the regular expression
-        // \$ (matching a single dollar character) with the two character string
-        // backslash dollar, but the dollar in the replacement string must itself
-        // be backslash escaped to prevent it being treated as a backreference...
-        mat.appendReplacement(buf,
-                String.valueOf(values.get(key)).replaceAll("\\$", "\\\\$"));
+    Pair returnVal = null;
+    Set<String> unusedParams = new HashSet<String>(values.keySet());
+    if(((Integer)template.first).intValue() == string) {
+      log.debug("Substituting template " + templateNameTok.image + " with map "
+              + values + ". Template is " + template);
+      StringBuffer buf = new StringBuffer();
+      Matcher mat = Pattern.compile("\\$\\{([^\\}]+)\\}")
+              .matcher((String)template.second);
+      while(mat.find()) {
+        String key = mat.group(1);
+        if(values.containsKey(key)) {
+          // this next line looks weird, but it's replacing the regular
+          // expression \$ (matching a single dollar character) with the
+          // two character string backslash dollar, but the dollar in the
+          // replacement string must itself be backslash escaped to
+          // prevent it being treated as a backreference...
+          mat.appendReplacement(buf,
+                  String.valueOf(values.get(key)).replaceAll("\\$", "\\\\$"));
+          unusedParams.remove(key);
+        }
+        else {
+          mat.appendReplacement(buf, "\\${");
+          buf.append(key);
+          buf.append("}");
+        }
       }
-      else {
-        mat.appendReplacement(buf, "\\${");
-        buf.append(key);
-        buf.append("}");
-      }
+      mat.appendTail(buf);
+      
+      returnVal = new Pair();
+      returnVal.first = Integer.valueOf(string);
+      returnVal.second = buf.toString();
+      log.debug("Template substitution produced " + returnVal.second);
     }
-    mat.appendTail(buf);
-    
-    log.debug("Template substitution produced " + buf.toString());
-    
-    return buf.toString();
+    else {
+      returnVal = template;
+    }
+
+    // check that there were no invalid parameters
+    if(!unusedParams.isEmpty()) {
+      throw new ParseException(errorMsgPrefix(templateNameTok) +
+              "invalid parameters " + unusedParams +
+              " for template " + templateNameTok.image);
+    }
+    else {
+      return returnVal;
+    }
   }
 
   public void setBaseURL (URL newURL) {
@@ -292,7 +314,11 @@ public class ParseCpsl implements JapeConstants {
   /** A table of macro definitions. */
   protected HashMap macrosMap;
   
-  /** A table of template definitions. */
+  /**
+   * A table of template definitions. Keys are template names,
+   * values are Pairs of token kind and value, as returned by
+   * AttrVal.
+   */
   protected HashMap templatesMap;
 
   protected URL baseURL;
@@ -769,19 +795,12 @@ void MacroDef() :
 void TemplateDef() :
 {
   Token templateNameTok = null;
-  Token valueTok = null;
-  String value = null;
+  Pair value = null;
 }
 {
   <template> templateNameTok=<ident>
   <assign>
-  (
-    (valueTok=<string> {
-      value = valueTok.image.substring(1, valueTok.image.length() - 1);
-    })
-    |
-    value=TemplateCall()
-  )
+  value=AttrVal()
   {
     templatesMap.put(templateNameTok.image, value);
   }
@@ -1126,16 +1145,13 @@ Pair AttrVal() :
   )
   |
   (
-    attrValString=TemplateCall() {
-      // attr val is a string whose value is the filled-in template
-      val.first = string;
-      val.second = attrValString;
+    val=TemplateCall() {
       return val;
     }
   )
 }
 
-String TemplateCall() :
+Pair TemplateCall() :
 {
   Token templateNameTok = null;
   Token attrNameTok = null;
