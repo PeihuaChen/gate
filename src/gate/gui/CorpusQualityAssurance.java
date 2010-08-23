@@ -1560,9 +1560,11 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       } else if (measure.equals("Observed agreement")) {
         values.add(f.format(classificationMeasures.getObservedAgreement()));
       } else if (measure.equals("Cohen's Kappa")) {
-        values.add(f.format(classificationMeasures.getKappaCohen()));
+        float result = classificationMeasures.getKappaCohen();
+        values.add(Float.isNaN(result) ? "" : f.format(result));
       } else if (measure.equals("Pi's Kappa")) {
-        values.add(f.format(classificationMeasures.getKappaPi()));
+        float result = classificationMeasures.getKappaPi();
+        values.add(Float.isNaN(result) ? "" : f.format(result));
       }
     }
     tableModel.insertRow(insertionRow + 1, values.toArray());
