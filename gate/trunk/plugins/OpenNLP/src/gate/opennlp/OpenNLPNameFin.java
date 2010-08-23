@@ -210,7 +210,7 @@ public @SuppressWarnings("all") class OpenNLPNameFin extends AbstractLanguageAna
 		// add a trailing slash to the model dir if necessary
 		try {
 			URL modelDir = model;
-			if(modelDir.toExternalForm().endsWith("/"))
+			if(!modelDir.toExternalForm().endsWith("/"))
 				modelDir = new URL(modelDir.toExternalForm() + "/");
 			List<String> models = new LinkedList<String>();
 			models.add("person.bin.gz");
