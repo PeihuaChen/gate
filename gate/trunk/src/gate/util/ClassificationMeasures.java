@@ -327,7 +327,7 @@ public class ClassificationMeasures {
         pE += (marginalArrayC[i] * marginalArrayR[i]) / doubleSum;
     }
     // Compute Cohen's Kappa
-    if(totalSum > 0)
+    if(totalSum > 0) // FIXME: division by zero when pE = 1
       kappaCohen = (observedAgreement - pE) / (1 - pE);
     else kappaCohen = 0;
     // Compute S&C's chance agreement
@@ -339,7 +339,7 @@ public class ClassificationMeasures {
         pE += p * p;
       }
     }
-    if(totalSum > 0)
+    if(totalSum > 0) // FIXME: division by zero when pE = 1
       kappaPi = (observedAgreement - pE) / (1 - pE);
     else kappaPi = 0;
     // Compute the specific agreement for each label using marginal sums
@@ -427,10 +427,12 @@ public class ClassificationMeasures {
         row.add(f.format(getObservedAgreement()));
       }
       if (measure.equals("Cohen's Kappa")) {
-        row.add(f.format(getKappaCohen()));
+        float result = getKappaCohen();
+        row.add(Float.isNaN(result) ? "" : f.format(result));
       }
       if (measure.equals("Pi's Kappa")) {
-        row.add(f.format(getKappaPi()));
+        float result = getKappaPi();
+        row.add(Float.isNaN(result) ? "" : f.format(result));
       }
     }
     return row;
