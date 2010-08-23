@@ -515,6 +515,10 @@ public class PersistenceManager {
         relativePath += "/" + targetFile.getName();
       }
 
+      if(target.toExternalForm().endsWith("/")) {
+        // original target ended with a slash, so relative path should do too
+        relativePath += "/";
+      }
       try {
         URI relativeURI = new URI(null, null, relativePath, null, null);
         return relativeURI.getRawPath();
