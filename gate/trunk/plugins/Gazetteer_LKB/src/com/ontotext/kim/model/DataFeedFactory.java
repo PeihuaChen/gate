@@ -18,6 +18,7 @@ import com.ontotext.kim.client.semanticrepository.QueryResultListener;
 import com.ontotext.kim.client.semanticrepository.SemanticRepositoryAPI;
 import com.ontotext.kim.client.semanticrepository.QueryResultListener.Feed;
 import com.ontotext.kim.gate.SettingsHashBuilder;
+import com.ontotext.kim.util.datastore.GazetteerListFeed;
 import com.ontotext.kim.util.datastore.PrivateRepositoryFeed;
 
 /**
@@ -59,6 +60,9 @@ public class DataFeedFactory {
 			result = createSesameFeed(dictionaryPath);
 		}
 
+		if (result == null && !FileUtils.listFiles(dictionaryPath, new String[]{"def"}, false).isEmpty()) {
+		  result = new GazetteerListFeed(dictionaryPath);
+		}
 		if (result == null) {
 			result = new DummyFeed(dictionaryPath);
 		}
