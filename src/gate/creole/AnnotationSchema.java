@@ -242,7 +242,7 @@ public class AnnotationSchema extends AbstractLanguageResource{
 
     // See if it has a type attribute associated
     String featureTypeName = anAttributeElement.getAttributeValue("type");
-    if (featureType != null)
+    if (featureTypeName != null)
       // Set it to the corresponding Java type
       featureType = xSchema2JavaMap.get(featureTypeName);
 
