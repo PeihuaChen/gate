@@ -1,10 +1,10 @@
 package com.ontotext.kim.gate;
 
-import java.io.File;
+import gate.util.Files;
+
 import java.io.IOException;
 import java.net.URL;
 
-import gate.util.Files;
 import org.apache.commons.io.FileUtils;
 
 import com.ontotext.kim.util.StringTransformations;

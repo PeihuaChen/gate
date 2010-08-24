@@ -17,9 +17,12 @@
          owlim:ruleset "owl-horst" ;
 		 owlim:partialRDFS  "true" ;
          owlim:noPersist "true" ;
+
+         #By default, this folder will be created in a temporary folder.
+	 #Use an aboslute path here to avoid that. The %relpath% can be used as well.
          owlim:storage-folder "owlim-storage" ;
-		 owlim:base-URL "http://proton.semanticweb.org/2006/05/protons#" ;
-         owlim:new-triples-file "new-triples-file.nt" ;
+
+	 owlim:base-URL "http://proton.semanticweb.org/2006/05/protons#" ;
          owlim:entity-index-size "200000" ;
          owlim:jobsize "200" ;
 		 owlim:repository-type "in-memory-repository" ;
