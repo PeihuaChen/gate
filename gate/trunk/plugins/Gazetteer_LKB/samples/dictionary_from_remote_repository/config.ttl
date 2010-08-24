@@ -8,7 +8,7 @@
 [] a rep:Repository ;
    rep:repositoryImpl [
       rep:repositoryType "openrdf:HTTPRepository" ;
-      hr:repositoryURL <http://ldsr.ontotext.com/openrdf-sesame/repositories/owlim>
+      hr:repositoryURL <http://factforge.net/sparql>
    ];
    rep:repositoryID "owlim" ;
    rdfs:label "LDSR" .

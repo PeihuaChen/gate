@@ -1,7 +1,6 @@
-PREFIX opencyc: <http://sw.opencyc.org/2008/06/10/concept/en/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
 SELECT ?Name ?Person WHERE {
-	?Person a opencyc:Entertainer ; rdfs:label ?Name .           
-    FILTER (lang(?Name) = "en") 
+	?Person a <http://dbpedia.org/ontology/Actor> ; rdfs:label ?Name .           
+    FILTER (regex(?Name, " ")) 
 } LIMIT 10000

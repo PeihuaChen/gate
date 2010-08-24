@@ -1,12 +1,13 @@
 package com.ontotext.kim.util.datastore;
 
+import gate.util.Files;
+
 import java.io.*;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
 
-import gate.util.Files;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -21,7 +22,9 @@ import com.ontotext.kim.semanticrepository.TimedListener;
 import com.ontotext.kim.semanticrepository.UnmanagedRepositoryFactory;
 
 /**
- * @author mnozchev
+ * Feed implementation over a Sesame 2 repository, defined by a given 
+ * configuration file. All results from a given SPARQL or SeRQL query
+ * will be piped to the feed's listener.
  *
  */
 public class PrivateRepositoryFeed implements QueryResultListener.Feed {
@@ -55,11 +58,23 @@ public class PrivateRepositoryFeed implements QueryResultListener.Feed {
 		UnmanagedRepositoryFactory factory = new UnmanagedRepositoryFactory();
 		TimedListener timedListener = new TimedListener(true, listener, -1);
 		
-		FileUtils.deleteQuietly(new File("owlim-storage"));
+		String dataPath = System.getProperty("run.java.io.tmpdir");
+		if (dataPath == null)
+		  dataPath = System.getProperty("java.io.tmpdir");
+		
+		File dataDir;
+		if (dataPath == null)
+		  dataDir = dictionaryPath;
+		else
+		  dataDir = new File(dataPath, "GATE_Gazetteer_LKB_" + Long.toString(System.currentTimeMillis(),36));
+		
+    dataDir.mkdir();
+    
 		Reader configReader = null;
 		try {
 			configReader = getConfigReader();
 			Repository rep = factory.createRepository(configReader);
+			rep.setDataDir(dataDir);
 			rep.initialize();
 			log.info("Initialized Sesame repository: " + (rep instanceof SailRepository ? ((SailRepository)rep).getSail().toString() : rep.toString()));
 			try {				
@@ -84,6 +99,7 @@ public class PrivateRepositoryFeed implements QueryResultListener.Feed {
 	private Reader getConfigReader() throws IOException {
 		String configTemplate = FileUtils.readFileToString(Files.fileFromURL(configFile));
 		configTemplate = configTemplate.replace("%relpath%", dictionaryPath.getAbsolutePath().replace('\\', '/'));
+		configTemplate = configTemplate.replace("%temp%", System.getProperty("java.io.tmpdir", ".").replace('\\', '/'));
 		return new StringReader(configTemplate);
 	}
 

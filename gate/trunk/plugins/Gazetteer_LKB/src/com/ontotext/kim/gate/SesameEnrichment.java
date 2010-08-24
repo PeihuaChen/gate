@@ -5,6 +5,10 @@ import gate.Resource;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
+import gate.creole.metadata.RunTime;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,13 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.openrdf.query.Binding;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
+import org.openrdf.query.*;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
@@ -37,32 +35,38 @@ import org.openrdf.repository.http.HTTPRepository;
  * "connections" feature of the same annotation.
  * 
  * @author mnozchev
- *
  */
+@CreoleResource(
+        name="Semantic Enrichment PR", 
+        comment="The Semantic Enrichment PR allows adding new data to semantic annotations by querying external RDF (Linked Data) repositories.",
+        helpURL="http://nmwiki.ontotext.com/lkb_gazetteer/semantic_encrichment_pr.html")
 public class SesameEnrichment extends AbstractLanguageAnalyser {
 
-	private static final long serialVersionUID = 3650L;
+  private static final Logger log = Logger.getLogger(SesameEnrichment.class);
+	private static final long serialVersionUID = 13010L;
 	
+	// Initialized during init()
 	private RepositoryConnection conn;
 	private Repository rep;
-	private String server;
-	private String repositoryId;
+	
+	// Fields for creole parameters
+	private String repositoryUrl;
 	private String inputASName;
 	private Set<String> annTypes = new HashSet<String>(Arrays.asList("Lookup"));
 	private boolean deleteOnNoRelations = true;
+  private String query = 
+    "SELECT ?Person WHERE { " +
+    "?Person <http://dbpedia.org/ontology/birthplace> ?BirthPlace . " +
+    "?BirthPlace <http://www.geonames.org/ontology#parentFeature> <%s> . " +
+    "?Person a <http://sw.opencyc.org/2008/06/10/concept/en/Entertainer> .} LIMIT 100";
+  
+	// Output buffer, reused between executions
 	private final StringBuilder outputData = new StringBuilder(2000);
-	private String query = 
-		"SELECT ?Person WHERE { " +
-		"?Person <http://dbpedia.org/ontology/birthplace> ?BirthPlace . " +
-		"?BirthPlace <http://www.geonames.org/ontology#parentFeature> <%s> . " +
-		"?Person a <http://sw.opencyc.org/2008/06/10/concept/en/Entertainer> .} LIMIT 100";
-	
-	private static final Logger log = Logger.getLogger(SesameEnrichment.class);
 	
 	@Override
 	public Resource init() throws ResourceInstantiationException {
 		try {
-			rep = new HTTPRepository(server, repositoryId);
+			rep = new HTTPRepository(repositoryUrl);
 			conn = rep.getConnection();
 		}
 		catch (RepositoryException e) {
@@ -110,8 +114,8 @@ public class SesameEnrichment extends AbstractLanguageAnalyser {
 		try {
 			while (tqr.hasNext()) {
 				BindingSet bs = tqr.next();
-				for (Object val : bs)
-					outputData.append(((Binding)val).getValue().stringValue()).append(",");						
+				for (Binding val : bs)
+					outputData.append(val.getValue().stringValue()).append(",");						
 			}
 		}
 		finally {
@@ -142,38 +146,40 @@ public class SesameEnrichment extends AbstractLanguageAnalyser {
 		}
 	}
 	
-	
-	public String getServer() {
-		return server;
-	}
+	public String getRepositoryUrl() {
+    return repositoryUrl;
+  }
 
-	public void setServer(String server) {
-		this.server = server;
-	}
+	@CreoleParameter(comment="The URL of a Sesame 2 HTTP repository. Supports generic SPARQL endpoints as well.", defaultValue="http://factforge.net/sparql")
+  public void setRepositoryUrl(String repositoryUrl) {
+    this.repositoryUrl = repositoryUrl;
+  }
 
-	public String getRepositoryId() {
-		return repositoryId;
-	}
-
-	public void setRepositoryId(String repositoryId) {
-		this.repositoryId = repositoryId;
-	}
-
-	public String getInputASName() {
+  public String getInputASName() {
 		return inputASName;
 	}
-
+  
+  @Optional
+  @RunTime
+  @CreoleParameter(comment="Input annotation set to be scanned for semantic annotations")
 	public void setInputASName(String inputASName) {
 		this.inputASName = inputASName;
 	}
+  
+  @RunTime
+  @CreoleParameter(comment="Types of annotations that will be enriched.")  
 	public void setAnnotationTypes(List<String> annTypes) {
-		this.annTypes = new HashSet<String>(annTypes);
+    if (annTypes != null)
+      this.annTypes = new HashSet<String>(annTypes);
 	}
 
 	public List<String> getAnnotationTypes() {
 		return new ArrayList<String>(annTypes);
 	}
 
+	@Optional
+	@RunTime
+	@CreoleParameter(comment="The sparql query pattern. The query will be processed like this - String.format(query, uriFromAnnotation), so you can use parameters like %s or %1$s")
 	public void setQuery(String query) {
 		this.query = query.replace("\\", "");
 	}
@@ -182,6 +188,9 @@ public class SesameEnrichment extends AbstractLanguageAnalyser {
 		return query;
 	}
 
+  @Optional
+  @RunTime
+  @CreoleParameter(comment="Whether we want to delete the annotation that weren't encriched.", defaultValue="false")  
 	public void setDeleteOnNoRelations(Boolean deleteOnNoRelations) {
 		if (deleteOnNoRelations != null)
 			this.deleteOnNoRelations = deleteOnNoRelations;
@@ -195,6 +204,8 @@ public class SesameEnrichment extends AbstractLanguageAnalyser {
 		return this.getClass().getPackage().getImplementationVersion();		
 	}
 	
+	@CreoleParameter(comment="The version of the Gazetteer_LKB build. Read-only",defaultValue="to be loaded from jar manifest")
+	@Optional
 	public void setVersion(String v) {
 		
 	}

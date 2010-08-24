@@ -11,8 +11,7 @@ import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResultHandler;
 import org.openrdf.query.parser.QueryParserFactory;
-import org.openrdf.query.parser.serql.SeRQLParserFactory;
-import org.openrdf.query.parser.sparql.SPARQLParserFactory;
+import org.openrdf.query.parser.QueryParserRegistry;
 import org.openrdf.repository.RepositoryConnection;
 
 import com.ontotext.kim.client.model.WKBConstants;
@@ -20,7 +19,14 @@ import com.ontotext.kim.client.query.KIMQueryException;
 import com.ontotext.kim.client.semanticrepository.QueryResultListener;
 import com.ontotext.kim.semanticrepository.ListenerAdapter;
 
-class RepositoryFeed implements QueryResultListener.Feed {
+/**
+ * Feed implementation over an instance of a Sesame 2 repository and
+ * a given SPARQL or SeRQL query
+ * 
+ * @see QueryResultListener.Feed
+ * @author mnozchev
+ */
+public class RepositoryFeed implements QueryResultListener.Feed {
 
 	private final RepositoryConnection conn;
 	private final Constructor<TupleQueryResultHandler> wrapperFactory;
@@ -44,7 +50,6 @@ class RepositoryFeed implements QueryResultListener.Feed {
 		}
 
 		try {			 
-			
 			// Note that conn.prepareTupleQuery(ql, query) may not actually parse the query 
 			// if the repository is remote.
 			
@@ -58,7 +63,9 @@ class RepositoryFeed implements QueryResultListener.Feed {
 
 	private final QueryLanguage findLanguage(String query) throws MalformedQueryException {
 		String message = "";
-		for (QueryParserFactory qp : Arrays.asList(new SPARQLParserFactory(), new SeRQLParserFactory())) {
+		for (QueryParserFactory qp : Arrays.asList(
+				QueryParserRegistry.getInstance().get(QueryLanguage.SERQL),
+				QueryParserRegistry.getInstance().get(QueryLanguage.SPARQL))) {
 			try {
 				qp.getParser().parseQuery(query, WKBConstants.WKB_NS);
 				return qp.getQueryLanguage();
