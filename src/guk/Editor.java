@@ -22,13 +22,10 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.util.*;
-
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
 import javax.swing.undo.UndoManager;
-
-import gate.util.BomStrippingInputStreamReader;
 import guk.im.GateIM;
 
 /**
@@ -184,8 +181,8 @@ public class Editor extends JFrame {
             if(encoding == null) return;
             file = filer.getSelectedFile();
             try {
-              BufferedReader reader = new BomStrippingInputStreamReader(new FileInputStream(file),
-                      (String)encoding);
+              BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file),
+                      (String)encoding));
               textPane.selectAll();
               textPane.replaceSelection("");
               textPane.read(reader, null);
