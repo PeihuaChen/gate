@@ -167,6 +167,14 @@ public class FeatureSchema implements Serializable {
       return featureValue;
     else return "";
   } // getFeatureValue
+  
+  /**
+   * This method returns the value of the feature regardless of the
+   * current value of featureUse. 
+   */
+  public String getRawFeatureValue() {
+    return featureValue;
+  } // getRawFeatureValue
 
   /**
    * This method sets the value of the feature.
