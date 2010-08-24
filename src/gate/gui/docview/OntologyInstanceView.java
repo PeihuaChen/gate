@@ -228,8 +228,8 @@ public class OntologyInstanceView extends AbstractDocumentView {
                       }
                     }
                   }
-                  classView.setClassSelected(selectedClass, false);
-                  classView.setClassSelected(selectedClass, true);
+                  classView.setClassHighlighted(selectedClass, false);
+                  classView.setClassHighlighted(selectedClass, true);
                   updateInstanceTable(selectedClass);
                 }
               });
@@ -374,20 +374,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
         selectedClass, OConstants.Closure.TRANSITIVE_CLOSURE));
       String filter = filterTextField.getText()
         .trim().toLowerCase(Locale.ENGLISH);
-      // get the list of highlighted annotation instance feature values
-//      List<String> instanceNames = new ArrayList<String>();
-//      if (classView.getHighlightsDataByClassMap().containsKey(selectedClass)) {
-//        for (Object object :
-//              classView.getHighlightsDataByClassMap().get(selectedClass)) {
-//          HighlightData annotationData = (AnnotationData) object;
-//          instanceNames.add((String) annotationData.getAnnotation()
-//            .getFeatures().get(INSTANCE));
-//        }
-//      }
       for (OInstance instance : allInstances) {
-//        if (!instanceNames.contains(instance.getONodeID().toString())) {
-//          continue; // skip this instance because no corresponding highlight
-//        }
         Set<AnnotationProperty> properties =
           instance.getSetAnnotationProperties();
         boolean hasLabelProperty = false;
@@ -429,7 +416,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
     }});
   }
 
-  public void updatePropertyTable() {
+  protected void updatePropertyTable() {
     selectedInstance = null;
     final DefaultTableModel tableModel = new DefaultTableModel();
     tableModel.addColumn("Property");
@@ -583,10 +570,26 @@ public class OntologyInstanceView extends AbstractDocumentView {
     } catch(InvalidOffsetException e) {
       throw new LuckyException(e);
     }
-    classView.setClassSelected(selectedClass, false);
-    classView.setClassSelected(selectedClass, true);
+    classView.setClassHighlighted(selectedClass, false);
+    classView.setClassHighlighted(selectedClass, true);
 //    classView.selectInstance(set, set.get(id), selectedClass);
     updateInstanceTable(selectedClass);
+  }
+
+  /**
+   * Select an instance in the instance table if it exists..
+   * @param oInstance instance to be selected
+   */
+  public void selectInstance(OInstance oInstance) {
+    for (int row = 0; row < instanceTable.getRowCount(); row++) {
+      if (oInstance.getONodeID().toString().endsWith(
+        (String) instanceTable.getValueAt(row, 0))) {
+        int rowModel = instanceTable.rowViewToModel(row);
+        instanceTable.getSelectionModel()
+          .setSelectionInterval(rowModel, rowModel);
+        break;
+      }
+    }
   }
 
   protected class PropertyValueCellEditor extends AbstractCellEditor

@@ -28,14 +28,17 @@ import gate.gui.MainFrame;
 import gate.gui.annedit.AnnotationData;
 import gate.gui.annedit.AnnotationDataImpl;
 import gate.gui.ontology.OntologyItemComparator;
-import gate.gui.ontology.OResourceNode;
 import gate.util.LuckyException;
 import gate.util.OptionsMap;
 
 import javax.swing.*;
 import javax.swing.Timer;
 import javax.swing.border.Border;
-import javax.swing.event.*;
+import javax.swing.event.MouseInputAdapter;
+import javax.swing.event.TreeExpansionEvent;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.event.TreeWillExpandListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.tree.*;
 import java.awt.*;
@@ -57,10 +60,6 @@ import java.util.List;
  * open only first level of classes when opening an ontology
  * load lazily the ontology trees
  * context menu for classes to hide/show them, saved in user configuration
- * TODO:
- * blink the instances selected like for the annotation list view
- * mouse hovering an annotation in the document select the instance
- *    in the instance table
  */
 public class OntologyClassView extends AbstractDocumentView
     implements CreoleListener {
@@ -68,7 +67,7 @@ public class OntologyClassView extends AbstractDocumentView
   public OntologyClassView() {
 
     colorByClassMap = new HashMap<OClass, Color>();
-    selectedClasses = new HashSet<OClass>();
+    highlightedClasses = new HashSet<OClass>();
     highlightsDataByClassMap = new HashMap<OClass, List>();
     treeByOntologyMap = new HashMap<Ontology, JTree>();
     String prefix = getClass().getName() + '.';
@@ -168,13 +167,13 @@ public class OntologyClassView extends AbstractDocumentView
         setColorTreeNodesWhenInstancesFound(selectedSet);
         // unselect annotations
         SwingUtilities.invokeLater(new Runnable() { public void run() {
-          for (OClass oClass : selectedClasses) {
+          for (OClass oClass : highlightedClasses) {
             if (highlightsDataByClassMap.containsKey(oClass)) {
               textView.removeHighlights(highlightsDataByClassMap.get(oClass));
             }
           }
           highlightsDataByClassMap.clear();
-          selectedClasses.clear();
+          highlightedClasses.clear();
           // update showing trees
           for (JTree tree : treeByOntologyMap.values()) {
             if (tree.isShowing()) {
@@ -198,7 +197,7 @@ public class OntologyClassView extends AbstractDocumentView
     textArea.addMouseMotionListener(textMouseListener);
     // reselect annotations
     SwingUtilities.invokeLater(new Runnable() { public void run() {
-      for (OClass oClass : new HashSet<OClass>(selectedClasses)) {
+      for (OClass oClass : new HashSet<OClass>(highlightedClasses)) {
         if (highlightsDataByClassMap.containsKey(oClass)) {
           textView.addHighlights(highlightsDataByClassMap.get(oClass));
         }
@@ -217,7 +216,7 @@ public class OntologyClassView extends AbstractDocumentView
     textArea.removeMouseMotionListener(textMouseListener);
     // unselect annotations
     SwingUtilities.invokeLater(new Runnable() { public void run() {
-      for (OClass oClass : selectedClasses) {
+      for (OClass oClass : highlightedClasses) {
         if (highlightsDataByClassMap.containsKey(oClass)) {
           textView.removeHighlights(highlightsDataByClassMap.get(oClass));
         }
@@ -331,7 +330,7 @@ public class OntologyClassView extends AbstractDocumentView
    * Add the ontology in a disclosure panel, closed at start.
    * @param ontology ontology to display
    */
-  private void loadOntology(final Ontology ontology) {
+  protected void loadOntology(final Ontology ontology) {
 
     // create the class tree
     final JTree tree = new JTree(new Object[]{"Loading..."});
@@ -406,8 +405,7 @@ public class OntologyClassView extends AbstractDocumentView
             if (tree.getSelectionCount() == 1) { // a class is selected
             DefaultMutableTreeNode node = (DefaultMutableTreeNode)
               e.getNewLeadSelectionPath().getLastPathComponent();
-            selectedClass = (OClass)
-              ((OResourceNode) node.getUserObject()).getResource();
+            selectedClass = (OClass) node.getUserObject();
             } else { // several classes are selected
               selectedClass = null;
             }
@@ -454,8 +452,7 @@ public class OntologyClassView extends AbstractDocumentView
               if (node.getParent() != null) {
                 treeModel.removeNodeFromParent(node);
                 Object userObject = node.getUserObject();
-                OClass oClass = (OClass)
-                  ((OResourceNode) userObject).getResource();
+                OClass oClass = (OClass) userObject;
                 hiddenClassesList.add(oClass.getONodeID().toString());
               }
             }
@@ -468,8 +465,7 @@ public class OntologyClassView extends AbstractDocumentView
               DefaultMutableTreeNode node = (DefaultMutableTreeNode)
                 tree.getSelectionPath().getLastPathComponent();
               Object userObject = node.getUserObject();
-              OClass oClass = (OClass)
-                ((OResourceNode) userObject).getResource();
+              OClass oClass = (OClass) userObject;
               final Set<OClass> classes =
                 oClass.getSubClasses(OClass.Closure.DIRECT_CLOSURE);
               addNodes(tree, node, classes, false);
@@ -504,7 +500,7 @@ public class OntologyClassView extends AbstractDocumentView
           // if this node has not already been expanded
           node.removeAllChildren();
           Object userObject = node.getUserObject();
-          OClass oClass = (OClass) ((OResourceNode) userObject).getResource();
+          OClass oClass = (OClass) userObject;
           Set<OClass> classes =
             oClass.getSubClasses(OClass.Closure.DIRECT_CLOSURE);
           // add children nodes to the current tree node
@@ -544,8 +540,8 @@ public class OntologyClassView extends AbstractDocumentView
       DefaultMutableTreeNode node =
         (DefaultMutableTreeNode) parent.getChildAt(i);
       Object userObject = node.getUserObject();
-      if (userObject instanceof OResourceNode) {
-        OClass oClass = (OClass) ((OResourceNode) userObject).getResource();
+      if (userObject instanceof OClass) {
+        OClass oClass = (OClass) userObject;
         children.add(oClass);
       } else if (userObject.equals("Loading...")) {
         parent.removeAllChildren();
@@ -569,8 +565,7 @@ public class OntologyClassView extends AbstractDocumentView
       } else {
         hiddenClassesList.remove(subClass.getONodeID().toString());
       }
-      DefaultMutableTreeNode subNode =
-        new DefaultMutableTreeNode(new OResourceNode(subClass));
+      DefaultMutableTreeNode subNode = new DefaultMutableTreeNode(subClass);
       if (!filterClasses || !children.contains(subClass)) {
         if (!subClass.getSubClasses(OClass.Closure.DIRECT_CLOSURE).isEmpty()) {
           subNode.insert(new DefaultMutableTreeNode("Loading..."), 0);
@@ -642,6 +637,63 @@ public class OntologyClassView extends AbstractDocumentView
    */
   protected class MouseStoppedMovingAction extends AbstractAction {
     public void actionPerformed(ActionEvent evt) {
+      List<LanguageResource> resources =
+        gate.Gate.getCreoleRegister().getPublicLrInstances();
+      Map<String, Ontology> ontologyMap = new HashMap<String, Ontology>();
+      for (LanguageResource resource : resources) {
+        if (resource instanceof Ontology) {
+          Ontology ontology = (Ontology) resource;
+          String ontologyName = ontology.getDefaultNameSpace();
+          ontologyName = ontologyName.substring(0, ontologyName.length()-1);
+          ontologyMap.put(ontologyName, ontology);
+        }
+      }
+      // check for annotations at mouse location
+      String setName = (String) setComboBox.getSelectedItem();
+      for (Annotation annotation : document.getAnnotations(setName)
+            .get("Mention").get(Math.max(0l, textLocation-1),
+              Math.min(document.getContent().size(), textLocation+1))) {
+        final FeatureMap features = annotation.getFeatures();
+        if (features.get(ONTOLOGY) != null
+         && features.get(CLASS) != null
+         && features.get(INSTANCE) != null) {
+          // find the corresponding ontology
+          final Ontology ontology =
+            ontologyMap.get((String) features.get(ONTOLOGY));
+          if (ontology != null) {
+            OClass oClass = ontology.getOClass(ontology
+              .createOURI((String) features.get(CLASS)));
+            // find if the annotation class is highlighted
+            if (oClass != null
+             && highlightedClasses.contains(oClass)) {
+              final JTree tree = treeByOntologyMap.get(ontology);
+              DefaultMutableTreeNode node =
+                (DefaultMutableTreeNode) tree.getModel().getRoot();
+              Enumeration nodesEnum = node.preorderEnumeration();
+              boolean done = false;
+              // traverse the class tree
+              while(!done && nodesEnum.hasMoreElements()) {
+                node = (DefaultMutableTreeNode) nodesEnum.nextElement();
+                done = node.getUserObject() instanceof OClass
+                    && node.getUserObject().equals(oClass);
+              }
+              if (done) {
+                // select the class in the tree
+                TreePath nodePath = new TreePath(node.getPath());
+                tree.setSelectionPath(nodePath);
+                tree.scrollPathToVisible(nodePath);
+                SwingUtilities.invokeLater(new Runnable() { public void run() {
+                  // select the annotation in the instances table
+                  instanceView.selectInstance(ontology.getOInstance(
+                    ontology.createOURI((String) features.get(INSTANCE))));
+                }});
+                break;
+              }
+            }
+          }
+        }
+      }
+
       int start = textArea.getSelectionStart();
       int end   = textArea.getSelectionEnd();
       String selectedText = textArea.getSelectedText();
@@ -672,10 +724,10 @@ public class OntologyClassView extends AbstractDocumentView
     int textLocation;
   }
 
-  public void setClassSelected(final OClass oClass, boolean isSelected) {
+  public void setClassHighlighted(final OClass oClass, boolean isHighlighted) {
     final JTree tree = treeByOntologyMap.get(oClass.getOntology());
-    if (isSelected) {
-      // find all annotations for the selected class
+    if (isHighlighted) {
+      // find all annotations for the class
       final List<AnnotationData> annotationsData =
         new ArrayList<AnnotationData>();
       AnnotationSet annotationSet = document.getAnnotations(selectedSet);
@@ -691,7 +743,7 @@ public class OntologyClassView extends AbstractDocumentView
           annotationsData.add(new AnnotationDataImpl(annotationSet,annotation));
         }
       }
-      selectedClasses.add(oClass);
+      highlightedClasses.add(oClass);
       if (annotationsData.isEmpty()) {
         // no instance annotation for this class
         colorByClassMap.remove(oClass);
@@ -716,8 +768,8 @@ public class OntologyClassView extends AbstractDocumentView
           tree.repaint();
         }});
       }
-    } else { // if (!isSelected)
-      selectedClasses.remove(oClass);
+    } else { // if (!isHighlighted)
+      highlightedClasses.remove(oClass);
         SwingUtilities.invokeLater(new Runnable() { public void run() {
           if (highlightsDataByClassMap.containsKey(oClass)) {
             textView.removeHighlights(highlightsDataByClassMap.get(oClass));
@@ -734,12 +786,12 @@ public class OntologyClassView extends AbstractDocumentView
    * @param oClass class
    * @param tree tree
    */
-  public void selectInstance(AnnotationSet set, Annotation annotation,
-                             final OClass oClass, final JTree tree) {
+  public void highlightInstance(AnnotationSet set, Annotation annotation,
+                                final OClass oClass, final JTree tree) {
     final AnnotationData annotationData = new AnnotationDataImpl(set, annotation);
     final List highlightsData = highlightsDataByClassMap.containsKey(oClass) ?
       highlightsDataByClassMap.get(oClass) : new ArrayList();
-    selectedClasses.add(oClass);
+    highlightedClasses.add(oClass);
     final Color color;
     if (colorByClassMap.containsKey(oClass)) {
       color = colorByClassMap.get(oClass);
@@ -798,9 +850,8 @@ public class OntologyClassView extends AbstractDocumentView
       DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
       userObject = node.getUserObject();
       if (node.getUserObject() == null) { return this; }
-      OClass oClass = (OClass)
-        ((OResourceNode) node.getUserObject()).getResource();
-      checkBox.setSelected(selectedClasses.contains(oClass));
+      OClass oClass = (OClass) node.getUserObject();
+      checkBox.setSelected(highlightedClasses.contains(oClass));
       checkBox.setBackground(isSelected ? selectionColor : backgroundColor);
 //      checkBox.setBorder(isSelected ? selectionBorder : normalBorder);
       label.setText(oClass.getName());
@@ -830,9 +881,9 @@ public class OntologyClassView extends AbstractDocumentView
     public Object getCellEditorValue() {
       boolean isSelected = renderer.getCheckBox().isSelected();
       Object userObject = renderer.getUserObject();
-      OClass oClass = (OClass) ((OResourceNode) userObject).getResource();
+      OClass oClass = (OClass) userObject;
       // show/hide highlights according to the checkbox state
-      setClassSelected(oClass, isSelected);
+      setClassHighlighted(oClass, isSelected);
       return userObject;
     }
 
@@ -890,10 +941,11 @@ public class OntologyClassView extends AbstractDocumentView
   protected JComboBox setComboBox;
 
   // local objects
-  /** Class that has the lead selection in the focused tree. */
+  /** Class that has the lead selection in the focused ontology tree. */
   protected OClass selectedClass;
-  /** Classes selected in the class tree with their checkboxes ticked. */
-  protected Set<OClass> selectedClasses;
+  /** Classes highlighted in the document with their checkboxes ticked
+   *  in the class tree. */
+  protected Set<OClass> highlightedClasses;
   /** Colors for class and their instances only if the latter exist. */
   protected Map<OClass, Color> colorByClassMap;
   /** HighlightData list for each class. */
