@@ -15,24 +15,44 @@
  */
 package gate.gui.annedit;
 
-import java.awt.*;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.creole.AnnotationSchema;
+import gate.creole.FeatureSchema;
+import gate.creole.ResourceInstantiationException;
+import gate.swing.JChoice;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.HeadlessException;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.net.MalformedURLException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.JToolBar;
 import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-
-import gate.Factory;
-import gate.FeatureMap;
-import gate.creole.*;
-import gate.event.FeatureMapListener;
-import gate.gui.MainFrame;
-import gate.swing.JChoice;
 
 /**
  * A GUI component for editing a feature map based on a feature schema object.
@@ -80,8 +100,10 @@ public class SchemaFeaturesEditor extends JPanel{
     public FeatureEditor(String featureName, Boolean defaultValue){
       this.featureName = featureName;
       this.type = FeatureType.bool;
-      this.defaultValue = defaultValue.booleanValue() ? BOOLEAN_TRUE : 
-        BOOLEAN_FALSE;
+      if (defaultValue != null )
+          this.defaultValue = defaultValue.booleanValue() ? BOOLEAN_TRUE : BOOLEAN_FALSE;
+      else
+          this.defaultValue = null;
       this.values = new String[]{BOOLEAN_FALSE, BOOLEAN_TRUE};
       buildGui();
     }
@@ -105,7 +127,7 @@ public class SchemaFeaturesEditor extends JPanel{
     protected void buildGui(){
       //prepare the action listener
       sharedActionListener = new ActionListener(){
-        public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent e) {          
           Object newValue = null;
           if(e.getSource() == checkbox){
             newValue = new Boolean(checkbox.isSelected());
@@ -168,7 +190,12 @@ public class SchemaFeaturesEditor extends JPanel{
           jchoice.setDefaultButtonMargin(new Insets(0, 2, 0, 2));
           jchoice.setMaximumFastChoices(20);
           jchoice.setMaximumWidth(300);
-          jchoice.setSelectedItem(value);
+          if (BOOLEAN_TRUE.equals(value))
+            jchoice.setSelectedItem(BOOLEAN_TRUE);
+          else if (BOOLEAN_FALSE.equals(value))
+            jchoice.setSelectedItem(BOOLEAN_FALSE);
+          else
+            jchoice.setSelectedItem(null);
           jchoice.addActionListener(sharedActionListener);
           gui.add(jchoice);
           break;
@@ -315,7 +342,12 @@ public class SchemaFeaturesEditor extends JPanel{
           jchoice.setSelectedItem(value);
           break;
         case bool:
-          jchoice.setSelectedItem(value);
+          if (BOOLEAN_TRUE.equals(value))
+            jchoice.setSelectedItem(BOOLEAN_TRUE);
+          else if (BOOLEAN_FALSE.equals(value))
+            jchoice.setSelectedItem(BOOLEAN_FALSE);
+          else
+            jchoice.setSelectedItem(null);
           break;          
 //        case bool:
 //          checkbox.setSelected(value != null && Boolean.parseBoolean(value));
@@ -498,8 +530,13 @@ public class SchemaFeaturesEditor extends JPanel{
           //we don't have any permitted set of values specified
           if(aFeatureSchema.getFeatureValueClass().equals(Boolean.class)){
             //boolean value
-            anEditor = new FeatureEditor(aFeatureName, 
-                    Boolean.parseBoolean(defaultValue));
+            Boolean tValue = null;
+            if (BOOLEAN_FALSE.equals(defaultValue))
+              tValue = false;
+            else if (BOOLEAN_TRUE.equals(defaultValue))
+              tValue = true;
+                         
+            anEditor = new FeatureEditor(aFeatureName, tValue);
           }else{
             //plain text value
             anEditor = new FeatureEditor(aFeatureName, defaultValue);
