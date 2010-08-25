@@ -181,8 +181,8 @@ public class Editor extends JFrame {
             if(encoding == null) return;
             file = filer.getSelectedFile();
             try {
-              BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file),
-                      (String)encoding));
+              BufferedReader reader = new GukBomStrippingInputStreamReader(new FileInputStream(file),
+                      (String)encoding);
               textPane.selectAll();
               textPane.replaceSelection("");
               textPane.read(reader, null);
