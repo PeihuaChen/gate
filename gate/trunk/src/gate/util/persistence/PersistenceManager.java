@@ -127,12 +127,26 @@ public class PersistenceManager {
           try {
             String pathMarker = relativePathMarker;
             File gateCanonicalHome = null;
+            URL urlPersistenceFilePath = currentPersistenceFile().toURI().toURL();
+            // try to get the canonical representation of the file both URLs
+            // so that the relative paths are not getting confused by symbolic
+            // links. If this fails, just proceed with the original URLs
+            try {
+              urlPersistenceFilePath =
+                currentPersistenceFile().getCanonicalFile().toURI().toURL();
+              url =
+                Files.fileFromURL(url).getCanonicalFile().toURI().toURL();
+            } catch (IOException ex) {
+              // ignore
+            }
+            
             // if the persistence file does NOT reside in the GATE home
             // tree and if the URL references something in the GATE home
             // tree, use $gatehome$ instead of $relpath$
             if(currentUseGateHome() || currentWarnAboutGateHome()) {
             try {
-              String persistenceFilePathName = currentPersistenceFile().getCanonicalPath();
+              String persistenceFilePathName =
+                currentPersistenceFile().getCanonicalPath();
               String gateHomePathName = Gate.getGateHome().getCanonicalPath();
               gateCanonicalHome = Gate.getGateHome().getCanonicalFile();
               String urlPathName = Files.fileFromURL(url).getCanonicalPath();
@@ -157,13 +171,6 @@ public class PersistenceManager {
                 }
                 if(currentUseGateHome()) {
                   pathMarker = gatehomePathMarker;
-                  // we need to find the URL of the canonical file name since
-                  // this could really be inside GATE_HOME but be referenced
-                  // by a different name, e.g. a symbolic link. In that case
-                  // the original url would not match urlPathName from above.
-                  // and getRelativePath would build an URL string that goes
-                  // up to the root dir with "../" path elements.
-                  url = Files.fileFromURL(url).getCanonicalFile().toURI().toURL();
                 }
               }
             } catch(IOException ex) {
@@ -172,7 +179,7 @@ public class PersistenceManager {
             }
             if(pathMarker.equals(relativePathMarker)) {
               urlString = pathMarker
-                 + getRelativePath(currentPersistenceFile().toURI().toURL(), url);
+                 + getRelativePath(urlPersistenceFilePath, url);
             } else {
               urlString = pathMarker
                  + getRelativePath(gateCanonicalHome.toURI().toURL(), url);
@@ -361,7 +368,7 @@ public class PersistenceManager {
    * belong to either java or GATE followed by the ones that belong to
    * GATE and followed by the ones that belong to java.
    *
-   * E.g. if there are registered persitent types for
+   * E.g. if there are registered persistent types for
    * {@link gate.Resource} and for {@link gate.LanguageResource} than
    * such a request for a {@link gate.Document} will yield the
    * registered type for {@link gate.LanguageResource}.
