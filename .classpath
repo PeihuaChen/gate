@@ -94,7 +94,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/jakarta-oro-2.0.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/log4j-1.2.14.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/xercesImpl.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/xml-apis.jar"/>
 	<classpathentry kind="lib" path="lib/xmlunit-1.2.jar"/>
 	<classpathentry kind="lib" path="plugins/Learning/lib/weka.jar"/>
 	<classpathentry kind="lib" path="plugins/Web_Crawler_Websphinx/lib/websphinx.jar"/>
