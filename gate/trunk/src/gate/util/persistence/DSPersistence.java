@@ -14,11 +14,13 @@
  */
 package gate.util.persistence;
 
+import java.net.MalformedURLException;
 import java.util.Iterator;
 
 import gate.*;
 import gate.creole.ResourceInstantiationException;
 import gate.persist.PersistenceException;
+import java.net.URL;
 
 public class DSPersistence implements Persistence{
 
@@ -40,6 +42,12 @@ public class DSPersistence implements Persistence{
     DataStore ds = (DataStore)source;
     className = ds.getClass().getName();
     storageUrlString = ds.getStorageUrl();
+    try {
+      storageUrl = PersistenceManager.getPersistentRepresentation(
+        new URL(storageUrlString));
+    } catch(MalformedURLException e) {
+      // ignore and just stay with storageUrlString
+    }
   }
 
   /**
@@ -48,17 +56,26 @@ public class DSPersistence implements Persistence{
    */
   public Object createObject()throws PersistenceException,
                                      ResourceInstantiationException{
+    if(storageUrl != null) {
+      storageUrlString =
+        ((URL)PersistenceManager.getTransientRepresentation(storageUrl))
+          .toExternalForm();
+    }
+
     //check if the same datastore is not already open
     Iterator dsIter = Gate.getDataStoreRegister().iterator();
     while(dsIter.hasNext()){
       DataStore aDS = (DataStore)dsIter.next();
-      if(aDS.getStorageUrl().equals(storageUrlString)) return aDS;
+      if(aDS.getStorageUrl().equals(storageUrlString)) {
+        return aDS;
+      }
     }
     //if we got this far, then it's a new datastore that needs opening
     return Factory.openDataStore(className, storageUrlString);
   }
-
+ 
   protected String className;
   protected String storageUrlString;
+  protected Object storageUrl;
   static final long serialVersionUID = 5952924943977701708L;
 }
