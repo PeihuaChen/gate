@@ -73,5 +73,67 @@
 	</plugins>
       </build>
     </profile>
+    <profile>
+      <id>publish-gate-compiler-jdt</id>
+      <build>
+	<defaultGoal>verify</defaultGoal>
+	<plugins>
+	  <plugin>
+	    <groupId>org.apache.maven.plugins</groupId>
+	    <artifactId>maven-gpg-plugin</artifactId>
+	    <version>1.1</version>
+	    <executions>
+	      <execution>
+		<id>gate-asm</id>
+		<phase>verify</phase>
+		<goals>
+		  <goal>sign-and-deploy-file</goal>
+		</goals>
+		<configuration>
+		  <file>../../../lib/gate-compiler-jdt.jar</file>
+		  <repositoryId>gate-oss</repositoryId>
+		  <url>${oss.release.repo}</url>
+		  <pomFile>gate-compiler-jdt.pom.xml</pomFile>
+		  <keyname>${gate.gpg.keyname}</keyname>
+		  <passphrase>${gate.gpg.passphrase}</passphrase>
+		</configuration>
+	      </execution>
+	      <execution>
+		<id>gate-compiler-jdt-javadoc</id>
+		<phase>verify</phase>
+		<goals>
+		  <goal>sign-and-deploy-file</goal>
+		</goals>
+		<configuration>
+		  <file>gate-compiler-jdt-javadoc.jar</file>
+		  <classifier>javadoc</classifier>
+		  <repositoryId>gate-oss</repositoryId>
+		  <url>${oss.release.repo}</url>
+		  <pomFile>gate-compiler-jdt.pom.xml</pomFile>
+		  <keyname>${gate.gpg.keyname}</keyname>
+		  <passphrase>${gate.gpg.passphrase}</passphrase>
+		</configuration>
+	      </execution>
+	      <execution>
+		<id>gate-compiler-jdt-sources</id>
+		<phase>verify</phase>
+		<goals>
+		  <goal>sign-and-deploy-file</goal>
+		</goals>
+		<configuration>
+		  <file>gate-compiler-jdt-sources.jar</file>
+		  <classifier>sources</classifier>
+		  <repositoryId>gate-oss</repositoryId>
+		  <url>${oss.release.repo}</url>
+		  <pomFile>gate-compiler-jdt.pom.xml</pomFile>
+		  <keyname>${gate.gpg.keyname}</keyname>
+		  <passphrase>${gate.gpg.passphrase}</passphrase>
+		</configuration>
+	      </execution>
+	    </executions>
+	  </plugin>
+	</plugins>
+      </build>
+    </profile>
   </profiles>
 </project>
