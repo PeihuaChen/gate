@@ -358,7 +358,13 @@ public class PackageGappTask extends Task {
       String pluginName = pluginURL.getFile();
       log("Processing plugin " + pluginName, Project.MSG_VERBOSE);
       // we will map the plugin whose directory name is X to plugins/X
-      pluginName = pluginName.substring(pluginName.lastIndexOf('/') + 1);
+      if(pluginName.endsWith("/")) {
+        pluginName = pluginName.substring(
+                pluginName.lastIndexOf('/', pluginName.length() - 2) + 1);
+      }
+      else {
+        pluginName = pluginName.substring(pluginName.lastIndexOf('/') + 1);
+      }
       log("  Plugin name is " + pluginName, Project.MSG_VERBOSE);
       URL newPluginURL = null;
       try {
