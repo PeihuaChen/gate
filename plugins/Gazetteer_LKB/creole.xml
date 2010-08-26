@@ -24,7 +24,8 @@
  <JAR>lib/slf4j-log4j12.jar</JAR>
  <JAR>lib/trove.jar</JAR>
  <JAR>lib/owlim-3.3.jar</JAR>
- <JAR>lib/trree-3.3.jar</JAR>	
+ <JAR>lib/trree-3.3.jar</JAR>
+ <JAR>lib/openrdf-sesame-2.3.2-onejar.jar</JAR> 
  <JAR>lkb-gazetteer.jar</JAR>	
  <CREOLE>
 
