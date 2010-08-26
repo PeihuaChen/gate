@@ -1,0 +1,17 @@
+ <project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>uk.ac.gate</groupId>
+  <artifactId>gate-asm</artifactId>
+  <packaging>jar</packaging>
+  <name>Repackaged version of ASM 3.1 for GATE</name>
+  <version>3.1</version>
+  <description>The ASM 3.1 library with packages renamed.</description>
+  <url>http://gate.ac.uk</url>
+  <licenses>
+    <license>
+      <name>INRIA copyright</name>
+      <url>http://asm.ow2.org/license.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+</project>
