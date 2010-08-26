@@ -36,6 +36,38 @@
 		  <passphrase>${gate.gpg.passphrase}</passphrase>
 		</configuration>
 	      </execution>
+	      <execution>
+		<id>gate-asm-javadoc</id>
+		<phase>verify</phase>
+		<goals>
+		  <goal>sign-and-deploy-file</goal>
+		</goals>
+		<configuration>
+		  <file>gate-asm-javadoc.jar</file>
+		  <classifier>javadoc</classifier>
+		  <repositoryId>gate-oss</repositoryId>
+		  <url>${oss.release.repo}</url>
+		  <pomFile>gate-asm.pom.xml</pomFile>
+		  <keyname>${gate.gpg.keyname}</keyname>
+		  <passphrase>${gate.gpg.passphrase}</passphrase>
+		</configuration>
+	      </execution>
+	      <execution>
+		<id>gate-asm-sources</id>
+		<phase>verify</phase>
+		<goals>
+		  <goal>sign-and-deploy-file</goal>
+		</goals>
+		<configuration>
+		  <file>gate-asm-sources.jar</file>
+		  <classifier>sources</classifier>
+		  <repositoryId>gate-oss</repositoryId>
+		  <url>${oss.release.repo}</url>
+		  <pomFile>gate-asm.pom.xml</pomFile>
+		  <keyname>${gate.gpg.keyname}</keyname>
+		  <passphrase>${gate.gpg.passphrase}</passphrase>
+		</configuration>
+	      </execution>
 	    </executions>
 	  </plugin>
 	</plugins>
