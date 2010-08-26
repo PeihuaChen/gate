@@ -17,6 +17,17 @@
        includes="gate-asm-readme.txt"
        />
   </target>
+  <target name="gate-compiler-jdt-extra-jars">
+    <jar destfile="gate-compiler-jdt-javadoc.jar"
+       basedir="."
+       includes="gate-compiler-jdt-readme.txt"
+       />
+    <jar destfile="gate-compiler-jdt-sources.jar"
+       basedir="."
+       includes="gate-compiler-jdt-readme.txt"
+       />
+  </target>
+
   <target name="publish-gate-asm">
     <artifact:mvn pom="sign-and-deploy.pom.xml">
       <arg value="-Ppublish-gate-asm"/>
