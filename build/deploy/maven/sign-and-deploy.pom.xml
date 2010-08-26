@@ -135,5 +135,67 @@
 	</plugins>
       </build>
     </profile>
+    <profile>
+      <id>publish-generic</id>
+      <build>
+	<defaultGoal>verify</defaultGoal>
+	<plugins>
+	  <plugin>
+	    <groupId>org.apache.maven.plugins</groupId>
+	    <artifactId>maven-gpg-plugin</artifactId>
+	    <version>1.1</version>
+	    <executions>
+	      <execution>
+		<id>code</id>
+		<phase>verify</phase>
+		<goals>
+		  <goal>sign-and-deploy-file</goal>
+		</goals>
+		<configuration>
+		  <file>${file}.jar</file>
+		  <repositoryId>gate-oss</repositoryId>
+		  <url>${oss.release.repo}</url>
+		  <pomFile>${pom}</pomFile>
+		  <keyname>${gate.gpg.keyname}</keyname>
+		  <passphrase>${gate.gpg.passphrase}</passphrase>
+		</configuration>
+	      </execution>
+	      <execution>
+		<id>javadoc</id>
+		<phase>verify</phase>
+		<goals>
+		  <goal>sign-and-deploy-file</goal>
+		</goals>
+		<configuration>
+		  <file>${file}-javadoc.jar</file>
+		  <classifier>javadoc</classifier>
+		  <repositoryId>gate-oss</repositoryId>
+		  <url>${oss.release.repo}</url>
+		  <pomFile>${pom}</pomFile>
+		  <keyname>${gate.gpg.keyname}</keyname>
+		  <passphrase>${gate.gpg.passphrase}</passphrase>
+		</configuration>
+	      </execution>
+	      <execution>
+		<id>sources</id>
+		<phase>verify</phase>
+		<goals>
+		  <goal>sign-and-deploy-file</goal>
+		</goals>
+		<configuration>
+		  <file>${file}-sources.jar</file>
+		  <classifier>sources</classifier>
+		  <repositoryId>gate-oss</repositoryId>
+		  <url>${oss.release.repo}</url>
+		  <pomFile>${pom}</pomFile>
+		  <keyname>${gate.gpg.keyname}</keyname>
+		  <passphrase>${gate.gpg.passphrase}</passphrase>
+		</configuration>
+	      </execution>
+	    </executions>
+	  </plugin>
+	</plugins>
+      </build>
+    </profile>
   </profiles>
 </project>
