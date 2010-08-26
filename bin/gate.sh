@@ -28,6 +28,7 @@ cd "$CURDIR"
 
 config=
 session=
+initdir=
 while test "$1" != "";
 do
   case "$1" in
@@ -48,6 +49,7 @@ EOF
   -ld)
     config="-Drun.gate.user.config=$CURDIR/.gate.xml"
     session="-Drun.gate.user.session=$CURDIR/.gate.session"
+    initdir="-Drun.gate.user.filechooser.defaultdir=$CURDIR"
     shift
     ;;
   -ln)
@@ -56,6 +58,7 @@ EOF
     shift
     config="-Drun.gate.user.config=$CURDIR/$base.xml"
     session="-Drun.gate.user.session=$CURDIR/$base.session"
+    initdir="-Drun.gate.user.filechooser.defaultdir=$CURDIR"
     ;;
   *)
     break
@@ -63,5 +66,5 @@ EOF
   esac
 done
 
-#echo running: $GATE_HOME/bin/ant run $config $session "$@"
-exec "$GATE_HOME/bin/ant" run -f "$GATE_HOME/build.xml" $config $session "$@"
+# echo running: $GATE_HOME/bin/ant run -f "$GATE_HOME/build.xml"  $config $session $initdir "$@"
+exec "$GATE_HOME/bin/ant" run -f "$GATE_HOME/build.xml" $config $session $initdir "$@"

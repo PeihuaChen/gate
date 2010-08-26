@@ -85,6 +85,8 @@ public class XJFileChooser extends JFileChooser {
   public void setSelectedFileFromPreferences() {
     String lastUsedPath = getLocationForResource(resource);
     File file;
+    String specifiedDefaultDir =
+      System.getProperty("gate.user.filechooser.defaultdir");
     if (isFileSelected) {
       // a file has already been selected so do not use the saved one
       return; 
@@ -97,9 +99,21 @@ public class XJFileChooser extends JFileChooser {
     } else if (lastUsedPath != null) {
       file = new File(lastUsedPath);
     } else if (fileName != null) {
-      file = new File(System.getProperty("user.home"), fileName);
+      // if the property for setting a default directory has been set,
+      // use that for finding the file, otherwise use whatever the
+      // user home directory is on this operating system.
+      if(specifiedDefaultDir != null) {
+        file = new File(specifiedDefaultDir, fileName);
+      } else {
+        file = new File(System.getProperty("user.home"), fileName);
+      }
     } else {
-      // nothing has been set so use the file chooser default behaviour
+      // if the property for setting a default directory has been set,
+      // let the filechooser know, otherwise just do whatever the
+      // default behavior is.
+      if(specifiedDefaultDir != null) {
+        this.setCurrentDirectory(new File(specifiedDefaultDir));
+      }
       return;
     }
     setSelectedFile(file);
