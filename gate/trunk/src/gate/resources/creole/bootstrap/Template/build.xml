@@ -31,7 +31,16 @@
   <!-- Name of the plugin -->
   <property name="plugin.name" value="___RESOURCE___"/>
 
-  <!-- location of the top-level GATE installation directory -->
+  <!-- Make environment variables available -->
+  <property environment="env" />
+
+  <!-- If environment variable GATE_HOME is set, use it for
+       gate.home (unless it was already set in build.properties -->
+  <property name="gate.home" value="${env.GATE_HOME}" />
+
+  <!-- If gate.home is not set from build.properties or the 
+       environment variable GATE_HOME, assume that this
+       plugin is in GATE Developer's plugin directory -->
   <property name="gate.home" location="../.." />
 
   <!-- location of GATE lib directory - should be inferred from gate.home -->
