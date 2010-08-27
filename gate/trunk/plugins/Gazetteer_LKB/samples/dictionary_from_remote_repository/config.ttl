@@ -1,17 +1,23 @@
-# Sesame configuration template for a (proxy for a) remote repository
+# Gazetteer_LKB dictionary configuration file.
+#
+# %temp% will be automatically replaced with the TEMP folder for the current user
+# %relpath% will be replaced with the path to the dictionary folder.
 #
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix rep: <http://www.openrdf.org/config/repository#>.
 @prefix hr: <http://www.openrdf.org/config/repository/http#>.
 @prefix lkbg: <http://www.ontotext.com/lkb_gazetteer#>.
 
+# The dictionary will be loaded from a remote Sesame HTTP repository. 
+# Its configuration follow. See the Sesame configuration for detals.
+# http://www.openrdf.org/doc/sesame2/users/ch07.html#section-repository-config
 [] a rep:Repository ;
    rep:repositoryImpl [
       rep:repositoryType "openrdf:HTTPRepository" ;
       hr:repositoryURL <http://factforge.net/sparql>
    ];
    rep:repositoryID "owlim" ;
-   rdfs:label "LDSR" .
+   rdfs:label "FactForge" .
    
 [] a lkbg:DictionaryConfiguration ; 
   lkbg:caseSensitivity "CASE_INSENTIVE" .
