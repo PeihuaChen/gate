@@ -1,36 +1,42 @@
 <?xml version="1.0"?>
-
-<project xmlns:artifact="antlib:org.apache.maven.artifact.ant"
-    name="GATE-MAVEN-DEPLOY" basedir=".">
-  <path id="maven-ant-tasks.classpath" path="maven-ant-tasks-2.1.1.jar" />
-  <typedef resource="org/apache/maven/artifact/ant/antlib.xml"
-           uri="antlib:org.apache.maven.artifact.ant"
-           classpathref="maven-ant-tasks.classpath" />
-  <description>Ant build file that pushes GATE pieces to the sonatype nexus.</description>
-  <target name="gate-asm-extra-jars">
-    <jar destfile="gate-asm-javadoc.jar"
-       basedir="."
-       includes="gate-asm-readme.txt"
-       />
-    <jar destfile="gate-asm-sources.jar"
-       basedir="."
-       includes="gate-asm-readme.txt"
-       />
-  </target>
-  <target name="gate-compiler-jdt-extra-jars">
-    <jar destfile="gate-compiler-jdt-javadoc.jar"
-       basedir="."
-       includes="gate-compiler-jdt-readme.txt"
-       />
-    <jar destfile="gate-compiler-jdt-sources.jar"
-       basedir="."
-       includes="gate-compiler-jdt-readme.txt"
-       />
-  </target>
-
-  <target name="publish-gate-asm">
-    <artifact:mvn pom="sign-and-deploy.pom.xml">
-      <arg value="-Ppublish-gate-asm"/>
-    </artifact:mvn>
-  </target>
+<project xmlns:artifact="antlib:org.apache.maven.artifact.ant" name="GATE-MAVEN-DEPLOY" basedir=".">
+    <path id="maven-ant-tasks.classpath" path="maven-ant-tasks-2.1.1.jar"/>
+    <typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="antlib:org.apache.maven.artifact.ant" classpathref="maven-ant-tasks.classpath"/>
+    <description>Ant build file that pushes GATE pieces to the sonatype nexus.</description>
+    <property name="top" value="../../.."/>
+    <property name="build" value="${top}/build/maven"/>
+    <property name="oss.snapshots.repo.url" value="https://oss.sonatype.org/content/repositories/snapshots"/>
+    <property name="oss.username" value="-SET-ME-"/>
+    <property name="oss.password" value="-SET-ME-"/>
+    <!-- snapshot release production. We push the complete set of artifacts.  -->
+    <target name="snapshot-release">
+        <property name="version" value="6.0-SNAPSHOT"/>
+        <mkdir dir="${build}"/>
+        <jar destfile="${build}/gate-core-javadoc.jar" basedir="${top}/doc/javadoc"/>
+        <jar destfile="${build}/gate-core-sources.jar" basedir="${top}/src"/>
+        <!-- we could filter this to get the version -->
+        <artifact:pom id="gate-core.6.0-SNAPSHOT.pom" file="gate-core.6.0-SNAPSHOT.pom.xml"/>
+        <artifact:deploy file="${top}/bin/gate.jar">
+            <attach file="${build}/gate-core-javadoc.jar" classifier="javadoc"/>
+            <attach file="${build}/gate-core-sources.jar" classifier="sources"/>
+            <remoteRepository url="${oss.snapshots.repo.url}">
+                <authentication username="${oss.username}" password="${oss.password}"/>
+            </remoteRepository>
+            <pom refid="gate-core.6.0-SNAPSHOT.pom"/>
+        </artifact:deploy>
+    </target>
+    <!-- here are some targets that were used to set up the initial push of 5.2.1 -->
+    <target name="gate-asm-extra-jars">
+        <jar destfile="gate-asm-javadoc.jar" basedir="." includes="gate-asm-readme.txt"/>
+        <jar destfile="gate-asm-sources.jar" basedir="." includes="gate-asm-readme.txt"/>
+    </target>
+    <target name="gate-compiler-jdt-extra-jars">
+        <jar destfile="gate-compiler-jdt-javadoc.jar" basedir="." includes="gate-compiler-jdt-readme.txt"/>
+        <jar destfile="gate-compiler-jdt-sources.jar" basedir="." includes="gate-compiler-jdt-readme.txt"/>
+    </target>
+    <target name="publish-gate-asm">
+        <artifact:mvn pom="sign-and-deploy.pom.xml">
+            <arg value="-Ppublish-gate-asm"/>
+        </artifact:mvn>
+    </target>
 </project>
