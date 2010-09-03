@@ -35,7 +35,7 @@ public interface SesameCLIOptions {
   String getConfig();
   boolean isConfig();
 
-  @Option(shortName="e",longName="do",description="what to do: query,import,export,clear,create,delete")
+  @Option(shortName="e",longName="do",description="what to do: query,import,export,clear,create,delete,listids")
   String getCmd();
 
   @Option(shortName="i",longName="id",description="Repository id")

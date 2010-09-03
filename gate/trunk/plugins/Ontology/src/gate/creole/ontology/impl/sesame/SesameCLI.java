@@ -105,9 +105,12 @@ public class SesameCLI {
     } else if (optionCmd.equals("delete")) {
       do_delete();
       mManager.disconnect();
+    } else if (optionCmd.equals("listids")) {
+      do_listids();
+      mManager.disconnect();
     } else {
       System.err.println("Unknown command: " + optionCmd);
-      System.err.println("Use one of: query,import,create,clear");
+      System.err.println("Use one of: query,import,export,create,clear,delete,listids");
       System.exit(1);
     }
   }
@@ -222,6 +225,14 @@ public class SesameCLI {
     configData = SesameManager.substituteConfigTemplate(configData, map);
     System.out.println("Config file is: \n"+configData);
     mManager.createRepository(configData);
+  }
+
+  private static void do_listids() {
+    setManager(optionDir,optionUrl,null);
+    Set<String> reps = mManager.getRepositories();
+    for(String rep : reps) {
+      System.out.println(rep);
+    }
   }
 
   private static String readTextFile(String f, String encoding)
