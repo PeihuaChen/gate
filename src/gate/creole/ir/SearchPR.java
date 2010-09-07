@@ -78,7 +78,7 @@ public class SearchPR extends AbstractProcessingResource
     /* Niraj */
     // we need to check if this is the corpus with the specified feature
     String val = (String) corpus.getFeatures().get(gate.creole.ir.lucene.LuceneIndexManager.CORPUS_INDEX_FEATURE);
-    if(!val.equals(gate.creole.ir.lucene.LuceneIndexManager.CORPUS_INDEX_FEATURE_VALUE)) {
+    if(!gate.creole.ir.lucene.LuceneIndexManager.CORPUS_INDEX_FEATURE_VALUE.equals(val)) {
       throw new ExecutionException("This corpus was not indexed by the specified IR");
     }
     /* End */
