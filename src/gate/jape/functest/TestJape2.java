@@ -16,7 +16,7 @@
  *  Description: Test class for JAPE.
  */
 
-package gate.jape;
+package gate.jape.functest;
 
 import java.io.File;
 import java.util.ArrayList;
