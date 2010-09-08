@@ -50,7 +50,7 @@ import org.apache.log4j.PropertyConfigurator;
  */
 public abstract class BaseJapeTests extends TestCase {
     /** JAPE Transducer under test. CHANGE THIS to test another Transducer */
-    public static final TransducerType transducerType = TransducerType.PDAPLUS;
+    public static final TransducerType transducerType = TransducerType.CLASSIC;
 
     private static final Logger logger = Logger.getLogger(BaseJapeTests.class);
 
@@ -112,8 +112,8 @@ public abstract class BaseJapeTests extends TestCase {
 	}
 
 	try {
-	    registerCREOLE(transducerType.getPlugInDir());
-	} catch (GateException e) {
+	    registerCREOLE((transducerType == TransducerType.CLASSIC) ? new File(Gate.getPluginsHome(), "ANNIE") : transducerType.getPlugInDir());
+	} catch (Exception e) {
 	    String errMsg = "JAPE Transducer plug-in cannot be loaded.";
 	    logger.fatal(errMsg);
 	    throw new RuntimeException(errMsg);
