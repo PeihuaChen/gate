@@ -35,7 +35,7 @@ import gate.creole.morph.TestMorph;
 import gate.creole.test.DynamicRegistrationTest;
 import gate.email.TestEmail;
 import gate.html.TestHtml;
-import gate.jape.TestJape;
+import gate.jape.functest.TestJape;
 import gate.persist.TestPersist;
 import gate.sgml.TestSgml;
 import gate.util.Err;
