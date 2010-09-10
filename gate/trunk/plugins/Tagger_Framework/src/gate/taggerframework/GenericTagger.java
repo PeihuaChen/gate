@@ -18,6 +18,7 @@ import gate.creole.metadata.RunTime;
 import gate.util.BomStrippingInputStreamReader;
 import gate.util.Files;
 import gate.util.OffsetComparator;
+import gate.util.Strings;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -25,7 +26,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.nio.charset.CharacterCodingException;
@@ -55,6 +55,9 @@ import java.util.regex.Pattern;
         helpURL = "http://gate.ac.uk/userguide/sec:parsers:taggerframework")
 public class GenericTagger extends AbstractLanguageAnalyser implements
                                                            ProcessingResource {
+
+  // Pattern to match ${...} placeholder sequences in the inputTemplate
+  protected static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\$\\{([^\\}]+)\\}");
 
   // TODO Think about moving this to a runtime parameter
   public static final String STRING_FEATURE_NAME = "string";
@@ -90,6 +93,13 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   // a comma separated list of feature names mapped to regex capturing
   // groups
   private FeatureMap featureMapping;
+  
+  // A template string defining how to map annotation features to the
+  // line of text that will be passed to the tagger.
+  protected String inputTemplate;
+  
+  // A copy of the inputTemplate with Java escape sequences like \t unescaped
+  protected String inputTemplateUnescaped;
 
   /**
    * This method initialises the tagger. This involves loading the pre
@@ -284,11 +294,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
 
   /**
    * This method copies specific annotations from the current GATE
-   * document into a file that can be read by the tagger. The assumption
-   * here is that the string feature of each input annotation will be
-   * written to separate lines in the file. If this assumption does not
-   * match the tagger you wish to use then you will need to create a
-   * subclass and override this method.
+   * document into a file that can be read by the tagger.
    *
    * @return a File object which contains the input to the tagger
    * @throws ExecutionException if an error occurs while building the
@@ -342,18 +348,8 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
 
       // and now start writing them in a file
       for(int i = 0; i < inputAnnotations.size(); i++) {
-        // get the features of the annotation
-        FeatureMap features = inputAnnotations.get(i).getFeatures();
-
-        if(features == null || features.size() == 0
-                || !features.containsKey(STRING_FEATURE_NAME)) {
-          // if there is no string feature then throw an exception
-          throw new ExecutionException(inputAnnotationType + " must have '"
-                  + STRING_FEATURE_NAME + "' feature, which couldn't be found");
-        }
-
         // write the string to the file
-        bw.write((String)features.get(STRING_FEATURE_NAME));
+        bw.write(taggerInputFor(inputAnnotations.get(i)));
 
         // if there are more annotations to process then write a blank
         // line as well
@@ -373,6 +369,52 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
               "Error creating temporary file for tagger").initCause(ioe);
     }
     return (gateTextFile);
+  }
+  
+  /**
+   * Returns the text that will be sent to the tagger for a given annotation.
+   * By default this is simply the value of the "string" feature from
+   * the annotation. If this assumption does not
+   * match the tagger you wish to use then you will need to create a
+   * subclass and override this method.
+   * @param ann the annotation
+   * @return the string to be passed to the tagger for this annotation
+   */
+  protected String taggerInputFor(Annotation ann) throws ExecutionException {
+    StringBuffer buf = new StringBuffer();
+    Matcher mat = PLACEHOLDER_PATTERN.matcher(inputTemplateUnescaped);
+    // keep track of whether we have made any substitutions for this
+    // annotation.  If we haven't substituted in *any* feature values
+    // for a given annotation then something is wrong...
+    boolean substitutionMade = false;
+    while(mat.find()) {
+      String key = mat.group(1);
+      if(features.containsKey(key)) {
+        substitutionMade = true;
+        // this next line looks weird, but it's replacing the regular
+        // expression \$ (matching a single dollar character) with the
+        // two character string backslash dollar, but the dollar in the
+        // replacement string must itself be backslash escaped to
+        // prevent it being treated as a backreference...
+        mat.appendReplacement(buf,
+                String.valueOf(features.get(key)).replaceAll("\\$", "\\\\$"));
+      }
+      else {
+        // use an empty string if the annotation doesn't have the requested
+        // feature
+        mat.appendReplacement(buf, "");
+      }
+    }
+
+    if(substitutionMade) {
+      mat.appendTail(buf);
+      return buf.toString();
+    }
+    else {
+      throw new ExecutionException(
+              "None of the specified input features were found in " +
+              "annotation " + ann);
+    }
   }
 
   /**
@@ -496,8 +538,12 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
             // for each feature in the provided mapping, get the
             // associated capture group from the matcher and store the
             // info in the feature map
-            features.put(kv.getKey(), m.group(Integer.parseInt(String
-                    .valueOf(kv.getValue()))));
+            int groupNumber = Integer.parseInt(String
+                    .valueOf(kv.getValue()));
+            // ignore mapping if there isn't a match for that group
+            if(groupNumber <= m.groupCount()) {
+              features.put(kv.getKey(), m.group(groupNumber));
+            }
           }
 
           while(updateAnnotations && outputAnnotations.size() == 0) {
@@ -622,13 +668,29 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
               "Error occurred running tagger").initCause(err);
     }
   }
+  
+  public String getInputTemplate() {
+    return inputTemplate;
+  }
+  
+  @RunTime
+  @CreoleParameter(defaultValue = "${string}",
+          comment = "Template used to build the line of input " +
+          		"to the tagger from the features of a single " +
+          		"annotation.  Should include ${feature} placeholders " +
+          		"which will be replaced by the value of the " +
+          		"corresponding feature from the annotation.")
+  public void setInputTemplate(String inputTemplate) {
+    this.inputTemplate = inputTemplate;
+    this.inputTemplateUnescaped = Strings.unescape(inputTemplate);
+  }
 
   public FeatureMap getFeatureMapping() {
     return featureMapping;
   }
 
   @RunTime
-  @CreoleParameter(defaultValue = "string=1;category=2;lemma=3", comment = "mapping from matching groups to feature names, this must include a mapping for 'string'")
+  @CreoleParameter(defaultValue = "string=1;category=2;lemma=3", comment = "mapping from feature names to matching groups, this must include a mapping for 'string'")
   public void setFeatureMapping(FeatureMap featureMapping) {
     this.featureMapping = featureMapping;
   }
