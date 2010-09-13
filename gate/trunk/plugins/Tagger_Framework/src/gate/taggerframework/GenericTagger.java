@@ -542,7 +542,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
             int groupNumber = Integer.parseInt(String
                     .valueOf(kv.getValue()));
             // ignore mapping if there isn't a match for that group
-            if(groupNumber <= m.groupCount()) {
+            if(m.start(groupNumber) >= 0) {
               features.put(kv.getKey(), m.group(groupNumber));
             }
           }
