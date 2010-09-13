@@ -381,6 +381,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
    * @return the string to be passed to the tagger for this annotation
    */
   protected String taggerInputFor(Annotation ann) throws ExecutionException {
+    FeatureMap features = ann.getFeatures();
     StringBuffer buf = new StringBuffer();
     Matcher mat = PLACEHOLDER_PATTERN.matcher(inputTemplateUnescaped);
     // keep track of whether we have made any substitutions for this
