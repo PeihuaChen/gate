@@ -223,13 +223,8 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       while(mat.find()) {
         String key = mat.group(1);
         if(values.containsKey(key)) {
-          // this next line looks weird, but it's replacing the regular
-          // expression \$ (matching a single dollar character) with the
-          // two character string backslash dollar, but the dollar in the
-          // replacement string must itself be backslash escaped to
-          // prevent it being treated as a backreference...
           mat.appendReplacement(buf,
-                  String.valueOf(values.get(key)).replaceAll("\\$", "\\\\$"));
+                  Matcher.quoteReplacement(String.valueOf(values.get(key))));
           unusedParams.remove(key);
         }
         else {
@@ -1586,6 +1581,33 @@ AnnotationAccessor accessor = null;
     finally { jj_save(1, xla); }
   }
 
+  final private boolean jj_3R_23() {
+    Token xsp;
+    if (jj_3R_25()) return true;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_25()) { jj_scanpos = xsp; break; }
+    }
+    return false;
+  }
+
+  final private boolean jj_3R_17() {
+    if (jj_3R_19()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_15() {
+    if (jj_scan_token(colon)) return true;
+    if (jj_scan_token(ident)) return true;
+    if (jj_scan_token(leftBrace)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_16() {
+    if (jj_scan_token(ident)) return true;
+    return false;
+  }
+
   final private boolean jj_3R_21() {
     if (jj_scan_token(leftBrace)) return true;
     if (jj_3R_24()) return true;
@@ -1656,33 +1678,6 @@ AnnotationAccessor accessor = null;
 
   final private boolean jj_3R_18() {
     if (jj_3R_20()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_23() {
-    Token xsp;
-    if (jj_3R_25()) return true;
-    while (true) {
-      xsp = jj_scanpos;
-      if (jj_3R_25()) { jj_scanpos = xsp; break; }
-    }
-    return false;
-  }
-
-  final private boolean jj_3R_17() {
-    if (jj_3R_19()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_15() {
-    if (jj_scan_token(colon)) return true;
-    if (jj_scan_token(ident)) return true;
-    if (jj_scan_token(leftBrace)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_16() {
-    if (jj_scan_token(ident)) return true;
     return false;
   }
 
