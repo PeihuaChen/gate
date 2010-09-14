@@ -392,13 +392,8 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
       String key = mat.group(1);
       if(features.containsKey(key)) {
         substitutionMade = true;
-        // this next line looks weird, but it's replacing the regular
-        // expression \$ (matching a single dollar character) with the
-        // two character string backslash dollar, but the dollar in the
-        // replacement string must itself be backslash escaped to
-        // prevent it being treated as a backreference...
         mat.appendReplacement(buf,
-                String.valueOf(features.get(key)).replaceAll("\\$", "\\\\$"));
+                Matcher.quoteReplacement(String.valueOf(features.get(key))));
       }
       else {
         // use an empty string if the annotation doesn't have the requested
