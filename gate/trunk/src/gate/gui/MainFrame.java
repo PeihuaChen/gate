@@ -497,8 +497,6 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     // status and progress bars
     statusBar = new JLabel();
-    statusBar.setPreferredSize(new Dimension(400,
-      statusBar.getPreferredSize().height));
     statusBar.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
 
     UIManager.put("ProgressBar.cellSpacing", 0);
@@ -511,8 +509,6 @@ public class MainFrame extends JFrame implements ProgressListener,
     globalProgressBar.setBorder(BorderFactory.createEmptyBorder());
     globalProgressBar.setForeground(new Color(150, 75, 150));
     globalProgressBar.setStringPainted(true);
-    globalProgressBar.setPreferredSize(new Dimension(100,
-      globalProgressBar.getPreferredSize().height));
 
     Icon alertIcon = getIcon("crystal-clear-app-error");
     alertButton = new JButton(alertIcon);
@@ -522,14 +518,18 @@ public class MainFrame extends JFrame implements ProgressListener,
       alertIcon.getIconHeight()));
     alertButton.setEnabled(false);
 
-    JPanel southBox = new JPanel(new BorderLayout());
-    southBox.setBorder(BorderFactory.createEmptyBorder());
-    southBox.add(statusBar, BorderLayout.WEST);
-    southBox.add(progressBar, BorderLayout.CENTER);
-    JPanel southEastBox = new JPanel(new BorderLayout());
-    southEastBox.add(globalProgressBar, BorderLayout.CENTER);
-    southEastBox.add(alertButton, BorderLayout.EAST);
-    southBox.add(southEastBox, BorderLayout.EAST);
+    JPanel southBox = new JPanel(new GridBagLayout());
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.anchor = GridBagConstraints.WEST;
+    gbc.weightx = 1;
+    southBox.add(statusBar, gbc);
+    gbc.insets = new Insets(0, 3, 0, 3);
+    gbc.anchor = GridBagConstraints.EAST;
+    gbc.weightx = 0;
+    southBox.add(progressBar, gbc);
+    southBox.add(globalProgressBar, gbc);
+    southBox.add(alertButton, gbc);
 
     this.getContentPane().add(southBox, BorderLayout.SOUTH);
     progressBar.setVisible(false);
@@ -1501,6 +1501,16 @@ public class MainFrame extends JFrame implements ProgressListener,
     addComponentListener(new ComponentAdapter() {
       public void componentShown(ComponentEvent e) {
         leftSplit.setDividerLocation(0.7);
+      }
+      public void componentResized(ComponentEvent e) {
+        // resize proportionally the status bar elements
+        int width = MainFrame.this.getWidth();
+        statusBar.setPreferredSize(new Dimension(width*70/100,
+          statusBar.getPreferredSize().height));
+        progressBar.setPreferredSize(new Dimension(width*20/100,
+          progressBar.getPreferredSize().height));
+        globalProgressBar.setPreferredSize(new Dimension(width*5/100,
+          globalProgressBar.getPreferredSize().height));
       }
     });
 
