@@ -1219,6 +1219,46 @@ outputAS.add(locSet.firstNode(), locSet.lastNode(), "TempLocation",
 features);
 }
 
+Rule:	GazLocationLocation
+Priority: 100
+
+(
+ ({Lookup.majorType == location}):locName1
+ {Token.string == ","}
+ ({Lookup.majorType == location}):locName2
+) 
+--> 	
+
+{
+ gate.FeatureMap features = Factory.newFeatureMap();
+ gate.FeatureMap morefeatures = Factory.newFeatureMap();
+gate.AnnotationSet loc1Set = (gate.AnnotationSet)bindings.get("locName1");
+gate.AnnotationSet loc1 = (gate.AnnotationSet)loc1Set.get("Lookup");
+
+gate.AnnotationSet loc2Set = (gate.AnnotationSet)bindings.get("locName2");
+gate.AnnotationSet loc2 = (gate.AnnotationSet)loc2Set.get("Lookup");
+
+// if the annotation type Lookup doesn't exist, do nothing
+if (loc1 != null && loc1.size()>0)
+{
+  gate.Annotation loc1Ann = (gate.Annotation)loc1.iterator().next();
+  features.put("locType", loc1Ann.getFeatures().get("minorType"));
+}
+
+if (loc2 != null && loc2.size()>0)
+{
+  gate.Annotation loc2Ann = (gate.Annotation)loc2.iterator().next();
+  morefeatures.put("locType", loc2Ann.getFeatures().get("minorType"));
+}
+
+features.put("rule", "GazLocation");
+outputAS.add(loc1Set.firstNode(), loc1Set.lastNode(), "TempLocation", features);
+
+morefeatures.put("rule", "GazLocation");
+outputAS.add(loc2Set.firstNode(), loc2Set.lastNode(), "TempLocation", morefeatures);
+}
+
+
 
 
 
