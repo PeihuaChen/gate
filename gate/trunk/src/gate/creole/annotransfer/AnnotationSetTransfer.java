@@ -74,6 +74,8 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
     AnnotationSet tagAS = document.getAnnotations(tagASName);
     AnnotationSet annotsToTransfer = null;
 
+    boolean newID = copyAnnotations && inputAS.equals(outputAS);
+
     mappings.clear();
 
     // TODO clean this up so we don't have to repeat ourselves
@@ -125,7 +127,8 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
     if(textTagName == null || textTagName.equals("")) {
       // remove from input set unless we copy only
       if(!copyAnnotations) inputAS.removeAll(annotsToTransfer);
-      transferAnnotations(new ArrayList<Annotation>(annotsToTransfer), outputAS);
+      transferAnnotations(new ArrayList<Annotation>(annotsToTransfer),
+              outputAS, newID);
 
       return;
     }
@@ -137,7 +140,7 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
         // remove from input set unless we copy only
         if(!copyAnnotations) inputAS.removeAll(annotsToTransfer);
         transferAnnotations(new ArrayList<Annotation>(annotsToTransfer),
-                outputAS);
+                outputAS, newID);
       }
       return;
     }
@@ -153,11 +156,11 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
       annots2Move.addAll(annots2Copy);
     }
     if(!copyAnnotations) inputAS.removeAll(annots2Move);
-    transferAnnotations(annots2Move, outputAS);
+    transferAnnotations(annots2Move, outputAS, newID);
   }
 
-  private void transferAnnotations(List<Annotation> toTransfer, AnnotationSet to)
-          throws ExecutionException {
+  private void transferAnnotations(List<Annotation> toTransfer,
+          AnnotationSet to, boolean newID) throws ExecutionException {
     for(Annotation annot : toTransfer) {
       Mapping m = mappings.get(annot.getType());
 
@@ -168,8 +171,14 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
       try {
         FeatureMap params = Factory.newFeatureMap();
         params.putAll(annot.getFeatures());
-        to.add(annot.getId(), annot.getStartNode().getOffset(), annot
-                .getEndNode().getOffset(), name, params);
+        if(newID) {
+          to.add(annot.getStartNode().getOffset(), annot.getEndNode()
+                  .getOffset(), name, params);
+        }
+        else {
+          to.add(annot.getId(), annot.getStartNode().getOffset(), annot
+                  .getEndNode().getOffset(), name, params);
+        }
       }
       catch(InvalidOffsetException e) {
         throw new ExecutionException(e);
