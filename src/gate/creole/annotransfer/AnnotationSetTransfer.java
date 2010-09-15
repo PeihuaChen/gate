@@ -27,7 +27,6 @@ import gate.util.InvalidOffsetException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
@@ -37,16 +36,17 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This plugin allows the names of annotations and features to be changed as
- * well as transfered from one annotation set to another. Think of it as an
- * extended version of the old AnnotationSet Transfer plugin.
- *
+ * This plugin allows the names of annotations and features to be
+ * changed as well as transfered from one annotation set to another.
+ * Think of it as an extended version of the old AnnotationSet Transfer
+ * plugin.
+ * 
  * @author Mark A. Greenwood
  */
 public class AnnotationSetTransfer extends AbstractLanguageAnalyser
-                                                                     implements
-                                                                     ProcessingResource,
-                                                                     Serializable {
+                                                                   implements
+                                                                   ProcessingResource,
+                                                                   Serializable {
 
   private String tagASName = GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME;
 
@@ -76,16 +76,17 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
 
     mappings.clear();
 
-    //TODO clean this up so we don't have to repeat ourselves
-    if (configURL != null) {
+    // TODO clean this up so we don't have to repeat ourselves
+    if(configURL != null) {
 
       try {
-        BufferedReader in = new BomStrippingInputStreamReader(configURL.openStream());
+        BufferedReader in = new BomStrippingInputStreamReader(configURL
+                .openStream());
 
         String line = in.readLine();
-        while (line != null) {
-          if (!line.trim().equals("")) {
-            String[] data = line.split("=",2);
+        while(line != null) {
+          if(!line.trim().equals("")) {
+            String[] data = line.split("=", 2);
             String oldName = data[0].trim();
             String newName = data.length == 2 ? data[1].trim() : null;
             mappings.put(oldName, new Mapping(oldName, newName));
@@ -93,11 +94,11 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
           line = in.readLine();
         }
       }
-      catch (IOException ioe) {
+      catch(IOException ioe) {
         ioe.printStackTrace();
       }
     }
-    else if (annotationTypes != null) {
+    else if(annotationTypes != null) {
       for(String type : annotationTypes) {
         String[] data = type.split("=", 2);
         String oldName = data[0].trim();
@@ -106,12 +107,14 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
         mappings.put(oldName, new Mapping(oldName, newName));
       }
     }
-    //else
-    //  throw new ExecutionException("The annotation list and URL cannot both be null");
+    // else
+    // throw new
+    // ExecutionException("The annotation list and URL cannot both be null");
 
     if(mappings.size() > 0) {
       annotsToTransfer = inputAS.get(mappings.keySet());
-    } else {
+    }
+    else {
       // transfer everything
       annotsToTransfer = inputAS.get();
     }
@@ -120,11 +123,10 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
     // check if we have a BODY annotation
     // if not, just copy all
     if(textTagName == null || textTagName.equals("")) {
-      // outputAS.addAll(inputAS);
-      transferAnnotations(new ArrayList<Annotation>(annotsToTransfer),
-              outputAS);
       // remove from input set unless we copy only
       if(!copyAnnotations) inputAS.removeAll(annotsToTransfer);
+      transferAnnotations(new ArrayList<Annotation>(annotsToTransfer), outputAS);
+
       return;
     }
     // get the BODY annotation
@@ -132,11 +134,10 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
     if(bodyAnnotations == null || bodyAnnotations.isEmpty()) {
       // outputAS.addAll(inputAS);
       if(transferAllUnlessFound) {
-        // outputAS.addAll(annotsToTransfer);
-        transferAnnotations(new ArrayList<Annotation>(annotsToTransfer),
-                outputAS);
         // remove from input set unless we copy only
         if(!copyAnnotations) inputAS.removeAll(annotsToTransfer);
+        transferAnnotations(new ArrayList<Annotation>(annotsToTransfer),
+                outputAS);
       }
       return;
     }
@@ -147,14 +148,12 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
       Long start = bodyAnn.getStartNode().getOffset();
       Long end = bodyAnn.getEndNode().getOffset();
       // get all annotations we want transferred
-      // AnnotationSet annots2Copy = inputAS.getContained(start, end);
       AnnotationSet annots2Copy = annotsToTransfer.getContained(start, end);
       // copy them to the new set and delete them from the old one
       annots2Move.addAll(annots2Copy);
     }
-    // outputAS.addAll(annots2Move);
-    transferAnnotations(annots2Move, outputAS);
     if(!copyAnnotations) inputAS.removeAll(annots2Move);
+    transferAnnotations(annots2Move, outputAS);
   }
 
   private void transferAnnotations(List<Annotation> toTransfer, AnnotationSet to)
@@ -162,14 +161,17 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
     for(Annotation annot : toTransfer) {
       Mapping m = mappings.get(annot.getType());
 
-      String name = (m == null || m.newName == null ? annot.getType() : m.newName);
+      String name = (m == null || m.newName == null
+              ? annot.getType()
+              : m.newName);
 
       try {
         FeatureMap params = Factory.newFeatureMap();
         params.putAll(annot.getFeatures());
-        to.add(annot.getId(),annot.getStartNode().getOffset(), annot.getEndNode()
-                .getOffset(), name, params);
-      } catch(InvalidOffsetException e) {
+        to.add(annot.getId(), annot.getStartNode().getOffset(), annot
+                .getEndNode().getOffset(), name, params);
+      }
+      catch(InvalidOffsetException e) {
         throw new ExecutionException(e);
       }
     }
@@ -245,15 +247,16 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
   class Mapping {
     String oldName, newName;
 
-    //TODO implement the renaming of features as well as annotations
-    //Map<String, String> features = new HashMap<String, String>();
+    // TODO implement the renaming of features as well as annotations
+    // Map<String, String> features = new HashMap<String, String>();
 
     public Mapping(String oldName, String newName) {
       this.oldName = oldName;
       this.newName = newName;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
       StringBuilder result = new StringBuilder();
       result.append(oldName);
       if(newName != null) {
