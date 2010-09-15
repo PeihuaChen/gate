@@ -102,7 +102,6 @@ public class DocumentContentImpl implements DocumentContent
     content = newContent.toString();
   } // edit(start,end,replacement)
 
-  /** The contents under a particular span. */
   public DocumentContent getContent(Long start, Long end)
     throws InvalidOffsetException
   {
