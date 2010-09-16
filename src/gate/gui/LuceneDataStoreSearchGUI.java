@@ -77,7 +77,7 @@ import javax.swing.event.*;
     comment = "GUI allowing to write a query with a JAPE derived syntax for querying\n" +
         " a Lucene Datastore and display the results with a stacked view of the\n" +
         " annotations and their values.",
-        helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:annic")
+        helpURL = "http://gate.ac.uk/userguide/chap:annic")
 public class LuceneDataStoreSearchGUI extends AbstractVisualResource
                implements DatastoreListener {
 
