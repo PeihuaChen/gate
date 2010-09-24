@@ -662,7 +662,128 @@ public class TestConstraints extends BaseJapeTests {
     assertEquals("RHS value must be equals to matched text", "     and when    the   lamb opened  the     seventh     seal", (String)oValue);
   
   }
-/*
+  
+  /**
+   * GATE Tao: 8.1.5
+   * 
+   * Multiple Patterns/Actions - Sequential
+   * 
+   * @throws Exception
+   */
+  public void test815MultiPatternActionsSequential() throws Exception{
+    final String japeFilePath = "/jape/test/japefiles/Req-GATETao-8.1.5-multipat-seq.jape";
+    final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.5.txt";
+    
+    String[] expectedResults = {"PersonJobTitle1", "PersonJobTitle2"};
+    int[] expectedStartOffsets = {6, 13};
+    int[] expectedEndOffsets = {12, 21};
+    
+    doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator815MultipleActions);
+  
+  }
+  
+  /**
+   * GATE Tao: 8.1.5
+   * 
+   * Multiple Patterns/Actions - Nested
+   * 
+   * @throws Exception
+   */
+  public void test815MultiPatternActionsNested() throws Exception{
+    final String japeFilePath = "/jape/test/japefiles/Req-GATETao-8.1.5-multipat-nest.jape";
+    final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.5.txt";
+    
+    String[] expectedResults = {"PersonJobTitle1", "PersonJobTitle2"};
+    int[] expectedStartOffsets = {36, 36};
+    int[] expectedEndOffsets = {50, 59};
+    
+    doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator815MultipleActions);
+  }
+  
+  
+  /**
+   * GATE Tao: 8.1.6
+   * 
+   * LHS Macros
+   * 
+   * @throws Exception
+   */
+  public void test816Macro() throws Exception{
+    final String japeFilePath = "/jape/test/japefiles/Req-GATETao-8.1.6-macro.jape";
+    final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.6.txt";
+    
+    String[] expectedResults = {"MoneyCurrencyUnit", "MoneyCurrencyUnit"};
+    int[] expectedStartOffsets = {31, 49};
+    int[] expectedEndOffsets = {44, 57};
+    
+    AnnotationCreator annoCreator816Macros = new BaseAnnotationCreator() {
+      public AnnotationSet createAnnots(Document doc) throws InvalidOffsetException {
+        final String token = "Token";
+        FeatureMap feats = Factory.newFeatureMap();
+        feats.put("kind", "number");
+        add(31, 32, token, feats);
+        add(33, 36, token, feats);
+        add(49, 53, token, feats);
+        
+        feats = Factory.newFeatureMap();
+        feats.put("string", ",");
+        add(32,33, token, feats);
+        
+        feats = Factory.newFeatureMap();
+        feats.put("string", "K");
+        add(36, 36, token, feats);
+
+        feats = Factory.newFeatureMap();
+        feats.put("majorType", "currency_unit");
+        add(41, 44, "Lookup", feats);
+        
+        feats = Factory.newFeatureMap();
+        feats.put("majorType", "currency_unit");
+        add(54, 57, "Lookup", feats);
+        return as;
+      }
+    };
+    doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator816Macros);
+  }
+  
+  /**
+   * GATE Tao: 8.1.7
+   * 
+   * Contexts
+   * 
+   * @throws Exception
+   */
+  public void test817ContextForeAndAft() throws Exception{
+    final String japeFilePath = "/jape/test/japefiles/Req-GATETao-8.1.7-ctx-foreaft.jape";
+    final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.7.txt";
+    
+    String[] expectedResults = {"Emailaddress1"};
+    int[] expectedStartOffsets = {9};
+    int[] expectedEndOffsets = {25};
+    
+    
+    doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator817Contexts);
+  }
+  
+  /**
+   * GATE Tao: 8.1.8
+   * 
+   * Contexts
+   * 
+   * @throws Exception
+   */
+  public void test818ContextBeginsAt() throws Exception{
+    final String japeFilePath = "/jape/test/japefiles/Req-GATETao-8.1.7-ctx-begins.jape";
+    final String docFilePath = "/jape/test/docfiles/Req-GATETao-8.1.7.txt";
+    
+    String[] expectedResults = {"SurnameStartingWithDe"};
+    int[] expectedStartOffsets = {58};
+    int[] expectedEndOffsets = {66};
+    
+    doCommonTest(japeFilePath, docFilePath, expectedResults, expectedStartOffsets, expectedEndOffsets, annoCreator817Contexts);
+  }
+  
+  
   public void testGoodOperators() throws Exception {
     String japeFile = "/jape/operators/operator_tests.jape";
     String[] expectedResults = {"AndEqual", "RegExMatch",
@@ -949,7 +1070,7 @@ public class TestConstraints extends BaseJapeTests {
     Out.println(actualResults);
     compareResults(expectedResults, actualResults);
   }
-*/
+
   /* Utility features */
 public void doCommonTest(String japeFilePath, String docFilePath, 
         String[] expectedResults, int[] expectedStartOffsets, int[] expectedEndOffsets, 
@@ -962,13 +1083,13 @@ public void doCommonTest(String japeFilePath, String docFilePath,
   compareEndOffsets(actualResults, expectedEndOffsets);
 }
   
-private  AnnotationCreator annoCreatorEmpty = new BaseAnnotationCreator() {
+private final   AnnotationCreator annoCreatorEmpty = new BaseAnnotationCreator() {
   public AnnotationSet createAnnots(Document doc) throws InvalidOffsetException {
     return as;
   }
 };
 
-private AnnotationCreator annoCreator81LocOrgDateJob = new BaseAnnotationCreator() {
+private final AnnotationCreator annoCreator81LocOrgDateJob = new BaseAnnotationCreator() {
   public AnnotationSet createAnnots(Document doc) throws InvalidOffsetException {
     /* line 1 */
     add(1, 6, "Location");
@@ -1006,7 +1127,7 @@ private AnnotationCreator annoCreator81LocOrgDateJob = new BaseAnnotationCreator
   }
 };
   
-AnnotationCreator annoCreator813Operators = new BaseAnnotationCreator() {
+private final AnnotationCreator annoCreator813Operators = new BaseAnnotationCreator() {
   public AnnotationSet createAnnots(Document doc) throws InvalidOffsetException {
     FeatureMap feat = Factory.newFeatureMap();
     feat.put("string", "room");
@@ -1039,13 +1160,60 @@ AnnotationCreator annoCreator813Operators = new BaseAnnotationCreator() {
   }
 };
 
-AnnotationCreator annoCreator814MetaProps = new BaseAnnotationCreator() {
+private final  AnnotationCreator annoCreator814MetaProps = new BaseAnnotationCreator() {
   public AnnotationSet createAnnots(Document doc) throws InvalidOffsetException {
     add(1, 61, "Span");
     return as;
   }
 };
 
+private final AnnotationCreator annoCreator815MultipleActions = new BaseAnnotationCreator() {
+  public AnnotationSet createAnnots(Document doc) throws InvalidOffsetException {
+    final String tp = "TempPerson";
+    add(1, 5, tp);
+    
+    FeatureMap feats = Factory.newFeatureMap();
+    feats.put("majorType", "jobtitle");
+    add(6,12, "Lookup", feats);
+    add(13, 21, tp);
+    
+    add(36, 50, "Lookup", feats);
+    add(36, 59, tp);
+    
+    return as;
+  }
+};
+
+private final AnnotationCreator annoCreator817Contexts = new BaseAnnotationCreator() {
+  public AnnotationSet createAnnots(Document doc) throws InvalidOffsetException {
+    final String tok = "Token";
+    final String str = "string";
+    
+    FeatureMap feats = Factory.newFeatureMap();
+    feats.put("type", "elmail");
+    add(9, 25, "Annotation", feats);
+    add(30, 44, "Annotation", feats);
+   
+    feats = Factory.newFeatureMap();
+    feats.put(str, "<");
+    add(8,9, tok, feats);
+    
+    feats = Factory.newFeatureMap();
+    feats.put(str, ">");
+    add(25, 26, tok, feats);
+
+    feats = Factory.newFeatureMap();
+    feats.put(str, "de");
+    add(58, 60, tok, feats);
+    
+    feats = Factory.newFeatureMap();
+    feats.put("majorType", "name");
+    feats.put("minorType", "surname");
+    add(58, 66, "Lookup", feats);
+
+    return as;
+  }
+};
 
   /**
    * Visually, this creates an annot set like this:
