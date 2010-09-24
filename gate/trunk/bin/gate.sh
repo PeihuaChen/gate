@@ -1,7 +1,7 @@
 #!/bin/sh
-# adapted from ant starting script
+#set -x
 PRG="$0"
-export CURDIR=`pwd`
+CURDIR="`pwd`"
 # need this for relative symlinks
 while [ -h "$PRG" ] ; do
   ls=`ls -ld "$PRG"`
@@ -29,6 +29,7 @@ cd "$CURDIR"
 config=
 session=
 initdir=
+log4j=
 while test "$1" != "";
 do
   case "$1" in
@@ -40,6 +41,8 @@ The following options can be passed immediately after the command name:
                in the current directory
   -ln name ... create or use a config file name.xml and session file name.session 
                in the current directory
+  -ll      ... if the current directory contains a file log4j.properties use
+               this file to configure the logging
   -h       ... show this help
 All other options will be passed on to the "ant run" command
 EOF
@@ -60,11 +63,20 @@ EOF
     session="-Drun.gate.user.session=$CURDIR/$base.session"
     initdir="-Drun.gate.user.filechooser.defaultdir=$CURDIR"
     ;;
+  -ll)
+    shift
+    if [ -f "$CURDIR/log4j.properties" ]
+    then
+      log4j="-Drun.log4j.configuration=file://$CURDIR/log4j.properties"
+    fi
+    ;;
   *)
     break
     ;;
   esac
 done
 
-# echo running: $GATE_HOME/bin/ant run -f "$GATE_HOME/build.xml"  $config $session $initdir "$@"
-exec "$GATE_HOME/bin/ant" run -f "$GATE_HOME/build.xml" $config $session $initdir "$@"
+
+#echo running: $GATE_HOME/bin/ant run -f "$GATE_HOME/build.xml"  $config $session $initdir $log4j "$@"
+exec "$GATE_HOME/bin/ant" run -f "$GATE_HOME/build.xml" "$config" "$session" "$initdir" "$log4j" "$@"
+
