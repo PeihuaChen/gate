@@ -5,7 +5,7 @@ import java.io.File;
 public enum TransducerType {
 	//TODO: fix plug-in locations
 	CLASSIC ("gate.creole.Transducer", ""),
-	PDA("gate.jape.plus.Transducer", ""),
+	PDA("com.ontotext.jape.pda.Transducer", "/home/mihail/Work/Ontotext/Projects/GATE/External/Artifacts/SourceCode/japePDA"),
 	PLUS("gate.jape.plus.Transducer", "../gate-futures/jplus"),
 	PDAPLUS("gate.jape.plus.Transducer", "/home/mihail/Work/Ontotext/Projects/GATE/External/Artifacts/SourceCode/jpdaplus");
 	
