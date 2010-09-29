@@ -77,6 +77,21 @@ Priority: 30
 :date -->
  :date.TempDate = {rule = "ModifierDate"}
 
+Rule: ModifierNamedDate
+Priority: 30
+// last October
+// next Tuesday
+
+(
+ {Lookup.majorType == time_modifier} 
+ ({Lookup.minorType == month}|
+  {Lookup.minorType == day}
+ )
+)
+:date -->
+ :date.TempDate = {rule = "ModifierNamedDate"}
+
+
 Rule: EarlyDate
 // early in 2002
 // in early 2002
