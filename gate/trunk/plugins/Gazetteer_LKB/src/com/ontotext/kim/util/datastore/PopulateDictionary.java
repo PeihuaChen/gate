@@ -27,7 +27,7 @@ public class PopulateDictionary {
 			try {
 				dictionaryPath = new File("cache").getCanonicalFile();
 				prepareOutputFolder(dictionaryPath);
-				initCache(el, dataFeed, dictionaryPath);
+				initCache(el, dataFeed, dictionaryPath, true);
 			} catch (IOException e) {
 				throw new KIMRuntimeException(e.getMessage());
 			}			

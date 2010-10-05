@@ -84,8 +84,6 @@ public class KimGazetteer extends AbstractLanguageAnalyser {
 		verifyLoggers("org.openrdf.sesame");
 		verifyLoggers("httpclient");
 		verifyLoggers("org.apache.commons.httpclient");
-		
-		// This doesn't match the specification exactly. Will be improved.
 		String caseSens = forceCaseSensitive ? KIMConstants.CASE_SENSITIV : KIMConstants.CASE_INSENSITIV;
 		
 		return init(AliasCacheImpl.getInstance(dictionaryPath, caseSens, getName()));

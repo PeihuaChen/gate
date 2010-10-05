@@ -45,7 +45,7 @@ public class DataFeedFactory {
 		}
 
 		public void feedTo(QueryResultListener listener) throws KIMQueryException {
-			String configPath = new File(dictionaryPath, "config.ttl").getAbsolutePath();
+			String configPath = new File(dictionaryPath, Options.getConfigFileName()).getAbsolutePath();
 			throw new KIMQueryException("Could not find a valid configuration file. Please check if " + configPath + " exists.");			
 		}
 
@@ -91,7 +91,7 @@ public class DataFeedFactory {
 		try {
 			semRep = kimSvc.getSemanticRepositoryAPI();
 		} catch (RemoteException e) {						
-			log.info("Semantic repository is not available.: " + e.getMessage());
+			log.info("Semantic repository is not available: " + e.getMessage());
 			return null;
 		}
 
