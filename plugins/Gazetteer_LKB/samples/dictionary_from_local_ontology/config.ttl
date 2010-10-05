@@ -3,11 +3,15 @@
 # %temp% will be automatically replaced with the TEMP folder for the current user
 # %relpath% will be replaced with the path to the dictionary folder.
 #
+# The file format is a Turtle RDF. You can edit it programatically using any RDF library,
+# including Sesame in the gazetteer /lib folder.
+
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix rep: <http://www.openrdf.org/config/repository#>.
 @prefix sr: <http://www.openrdf.org/config/repository/sail#>.
 @prefix sail: <http://www.openrdf.org/config/sail#>.
 @prefix owlim: <http://www.ontotext.com/trree/owlim#>.
+@prefix lkbg: <http://www.ontotext.com/lkb_gazetteer#>.
 
 # The dictionary will be loaded from a local SwiftOWLIM repository. 
 # Its configuration as a Sesame SAIL repository follows. 
@@ -22,17 +26,15 @@
       rep:repositoryType "openrdf:SailRepository" ;
       sr:sailImpl [
          sail:sailType "swiftowlim:Sail" ;
-         owlim:ruleset "owl-horst" ;
-		 owlim:partialRDFS  "true" ;
+         owlim:ruleset "owl-horst-optimized" ;
          owlim:noPersist "true" ;
 
          #By default, this relative path will be created in a the current temporary folder.
 	     #Use an absolute path here to avoid that. You can use the %temp% and %relpath% templates as well.
          owlim:storage-folder "owlim-storage" ;
 
-	 owlim:base-URL "http://proton.semanticweb.org/2006/05/protons#" ;
+	     owlim:base-URL "http://proton.semanticweb.org/2006/05/protons#" ;
          owlim:entity-index-size "200000" ;
-         owlim:jobsize "200" ;
 		 owlim:repository-type "in-memory-repository" ;
 		 #New resource - add line to 'imports' and a corresponding line to 'defaultNS'.
 		 #Order and count of both 'imports' and 'defaultNS' matters!
@@ -51,3 +53,19 @@
 				http://www.ontotext.com/kim/2006/05/wkb#;"          
       ]
    ].
+   
+# The gazetteer-specific options follow.
+lkbg:DictionaryConfiguration 
+   # Whether the gazeetteer will be sensitive to case.
+   # Possible values: caseinsensitive, casesensitive
+   lkbg:caseSensitivity "caseinsensitive" ;
+   
+   # Whether the gazetteer will cache the dictionary after loading it from the data source.   
+   # Put "enabled" to enable the cache, any other values will disable it.
+   lkbg:caching "enabled" .
+   
+   # The cache will be automatically reloaded on initialization if the configuration have been    
+   # modified since the last initialization. However, changes in the underlying datastore 
+   # can't be detected and the cache will not be automatically reloaded in that case. 
+   # Thus, if you expect changes in your datastore, disable the cache, or make use
+   # of the modifications API.

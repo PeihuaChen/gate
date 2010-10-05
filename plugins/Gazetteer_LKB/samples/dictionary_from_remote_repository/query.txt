@@ -1,6 +1,7 @@
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
-SELECT ?Name ?Person WHERE {
-	?Person a <http://dbpedia.org/ontology/Actor> ; rdfs:label ?Name .           
-    FILTER (regex(?Name, " ")) 
-} LIMIT 10000
+SELECT ?Name ?Person ?Cls WHERE {
+	?Person a ?Cls ; rdfs:label ?Name .           
+    FILTER (lang(?Name) = "en") 
+	FILTER (?Cls = <http://dbpedia.org/ontology/Actor>)
+}
