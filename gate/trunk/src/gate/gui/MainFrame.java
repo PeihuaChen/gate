@@ -985,6 +985,10 @@ public class MainFrame extends JFrame implements ProgressListener,
     // add separator.  plugin menu items will appear after this separator
     toolsMenu.addSeparator();
     toolsMenu.staticItemsAdded();
+    if (toolsMenu.getMenuComponent(toolsMenu.getMenuComponentCount()-1)
+        instanceof JSeparator) { // remove separator if no tools
+      toolsMenu.remove(toolsMenu.getMenuComponentCount()-1);
+    }
 
     menuBar.add(toolsMenu);
 
@@ -4325,10 +4329,10 @@ public class MainFrame extends JFrame implements ProgressListener,
       });
       add(item);
     }
-    add(new XJMenuItem(new AbstractAction("Remove Last Element") {
+    add(new XJMenuItem(new AbstractAction("Clear List") {
       public void actionPerformed(ActionEvent e) {
-        // remove the last element from the applications list
-        locations.put("applications", list.replaceFirst("[^;]+;?$", ""));
+        // clear the applications list
+        locations.put("applications", "");
         fileChooser.setLocations(locations);
     }}, MainFrame.this));
     }
@@ -4455,7 +4459,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
 
     /**
-     * If the resoruce just unloaded is one that contributed some menu
+     * If the resource just unloaded is one that contributed some menu
      * items then remove them again.
      */
     public void resourceUnloaded(CreoleEvent e) {
