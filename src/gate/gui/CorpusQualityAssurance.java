@@ -44,7 +44,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-//import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.text.Position;
@@ -92,16 +91,12 @@ public class CorpusQualityAssurance extends AbstractVisualResource
   protected void initLocalData(){
     collator = Collator.getInstance(Locale.ENGLISH);
     collator.setStrength(Collator.TERTIARY);
-//    f.setMaximumFractionDigits(2); // format used for all decimal values
-//    f.setMinimumFractionDigits(2);
-//    documentTableModel = new DocumentTableModel();
     documentTableModel = new DefaultTableModel();
     documentTableModel.addColumn("Document");
     documentTableModel.addColumn("Match");
     documentTableModel.addColumn("Only A");
     documentTableModel.addColumn("Only B");
     documentTableModel.addColumn("Overlap");
-//    annotationTableModel = new AnnotationTableModel();
     annotationTableModel = new DefaultTableModel();
     annotationTableModel.addColumn("Annotation");
     annotationTableModel.addColumn("Match");
@@ -1047,17 +1042,13 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       reloadCacheAction.setEnabled(false);
     }});
 
-//    List<Object> selectedMeasures = null;
     boolean useBdm = false;
     if (measuresType == FSCORE_MEASURES) {
       differsByDocThenType.clear();
       documentNames.clear();
-//      selectedMeasures = Arrays.asList(measureList.getSelectedValues());
       for (Object measure : measureList.getSelectedValues()) {
         if (((String) measure).contains("BDM")) { useBdm = true; break; }
       }
-//    } else if (measuresType == CLASSIFICATION_MEASURES) {
-//      selectedMeasures = Arrays.asList(measure2List.getSelectedValues());
     }
     List<ClassificationMeasures> classificationMeasuresList =
       new ArrayList<ClassificationMeasures>();
@@ -1065,7 +1056,6 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       new ArrayList<OntologyMeasures>();
     List<OntologyMeasures> annotationOntologyMeasuresList =
       new ArrayList<OntologyMeasures>();
-//    List<Object> values = new ArrayList<Object>();
 
     // for each document
     for (int row = 0; row < corpus.size(); row++) {
@@ -1141,50 +1131,6 @@ public class CorpusQualityAssurance extends AbstractVisualResource
             documentNames.get(documentNames.size()-1));
         }
         documentTableModel.addRow(measuresRow.toArray());
-//        values.clear();
-//        values.add(documentNames.get(documentNames.size()-1));
-//        values.add(Integer.toString(differ.getCorrectMatches()));
-//        values.add(Integer.toString(differ.getMissing()));
-//        values.add(Integer.toString(differ.getSpurious()));
-//        values.add(Integer.toString(differ.getPartiallyCorrectMatches()));
-//        OntologyMeasures ontologyMeasures = null;
-//        if (useBdm) {
-//          ontologyMeasures = new OntologyMeasures();
-//          ontologyMeasures.setBdmFile(bdmFileUrl);
-//          ontologyMeasures.calculateBdm(differsByType.values());
-//          documentOntologyMeasuresList.add(ontologyMeasures);
-//        }
-//        for (Object object : measureList.getSelectedValues()) {
-//          String measure = (String) object;
-//          double beta = Double.valueOf(
-//            measure.substring(1,measure.indexOf('-')));
-//          if (measure.endsWith("strict")) {
-//            values.add(f.format(differ.getRecallStrict()));
-//            values.add(f.format(differ.getPrecisionStrict()));
-//            values.add(f.format(differ.getFMeasureStrict(beta)));
-//          } else if (measure.endsWith("strict BDM")) {
-//            values.add(f.format(ontologyMeasures.getRecallStrictBdm()));
-//            values.add(f.format(ontologyMeasures.getPrecisionStrictBdm()));
-//            values.add(f.format(ontologyMeasures.getFMeasureStrictBdm(beta)));
-//          } else if (measure.endsWith("lenient")) {
-//            values.add(f.format(differ.getRecallLenient()));
-//            values.add(f.format(differ.getPrecisionLenient()));
-//            values.add(f.format(differ.getFMeasureLenient(beta)));
-//          } else if (measure.endsWith("lenient BDM")) {
-//            values.add(f.format(ontologyMeasures.getRecallLenientBdm()));
-//            values.add(f.format(ontologyMeasures.getPrecisionLenientBdm()));
-//            values.add(f.format(ontologyMeasures.getFMeasureLenientBdm(beta)));
-//          } else if (measure.endsWith("average")) {
-//            values.add(f.format(differ.getRecallAverage()));
-//            values.add(f.format(differ.getPrecisionAverage()));
-//            values.add(f.format(differ.getFMeasureAverage(beta)));
-//          } else if (measure.endsWith("average BDM")) {
-//            values.add(f.format(ontologyMeasures.getRecallAverageBdm()));
-//            values.add(f.format(ontologyMeasures.getPrecisionAverageBdm()));
-//            values.add(f.format(ontologyMeasures.getFMeasureAverageBdm(beta)));
-//          }
-//        }
-//        documentTableModel.addRow(values.toArray());
 
         // add data to the classification document table
       } else if (measuresType == CLASSIFICATION_MEASURES
@@ -1201,22 +1147,6 @@ public class CorpusQualityAssurance extends AbstractVisualResource
           measure2List.getSelectedValues(),
           documentNames.get(documentNames.size()-1));
         document2TableModel.addRow(measuresRow.toArray());
-//        values.clear();
-//        values.add(documentNames.get(documentNames.size()-1));
-//        values.add(String.valueOf((int)
-//          classificationMeasures.getAgreedTrials()));
-//        values.add(String.valueOf((int)
-//          classificationMeasures.getTotalTrials()));
-//        if (selectedMeasures.contains("Observed agreement")) {
-//          values.add(f.format(classificationMeasures.getObservedAgreement()));
-//        }
-//        if (selectedMeasures.contains("Cohen's Kappa")) {
-//          values.add(f.format(classificationMeasures.getKappaCohen()));
-//        }
-//        if (selectedMeasures.contains("Pi's Kappa")) {
-//          values.add(f.format(classificationMeasures.getKappaPi()));
-//        }
-//        document2TableModel.addRow(values.toArray());
         List<List<String>> matrix = classificationMeasures
           .getConfusionMatrix(documentNames.get(documentNames.size()-1));
         for (List<String> matrixRow : matrix) {
@@ -1240,13 +1170,6 @@ public class CorpusQualityAssurance extends AbstractVisualResource
               differsByDocThenType) {
           differs.add(differsByType.get(type));
         }
-//        values.clear();
-//        values.add(type);
-//        values.add(Integer.toString(differ.getCorrectMatches()));
-//        values.add(Integer.toString(differ.getMissing()));
-//        values.add(Integer.toString(differ.getSpurious()));
-//        values.add(Integer.toString(differ.getPartiallyCorrectMatches()));
-//        OntologyMeasures ontologyMeasures = null;
         List<String> measuresRow;
         if (useBdm) {
           OntologyMeasures ontologyMeasures = new OntologyMeasures();
@@ -1261,81 +1184,11 @@ public class CorpusQualityAssurance extends AbstractVisualResource
             measureList.getSelectedValues(), type);
         }
         annotationTableModel.addRow(measuresRow.toArray());
-//        for (Object object : selectedMeasures) {
-//          String measure = (String) object;
-//          double beta = Double.valueOf(
-//            measure.substring(1,measure.indexOf('-')));
-//          if (measure.endsWith("strict")) {
-//            values.add(f.format(differ.getRecallStrict()));
-//            values.add(f.format(differ.getPrecisionStrict()));
-//            values.add(f.format(differ.getFMeasureStrict(beta)));
-//          } else if (measure.endsWith("strict BDM")) {
-//            values.add(f.format(ontologyMeasures.getRecallStrictBdm()));
-//            values.add(f.format(ontologyMeasures.getPrecisionStrictBdm()));
-//            values.add(f.format(ontologyMeasures.getFMeasureStrictBdm(beta)));
-//          } else if (measure.endsWith("lenient")) {
-//            values.add(f.format(differ.getRecallLenient()));
-//            values.add(f.format(differ.getPrecisionLenient()));
-//            values.add(f.format(differ.getFMeasureLenient(beta)));
-//          } else if (measure.endsWith("lenient BDM")) {
-//            values.add(f.format(ontologyMeasures.getRecallLenientBdm()));
-//            values.add(f.format(ontologyMeasures.getPrecisionLenientBdm()));
-//            values.add(f.format(ontologyMeasures.getFMeasureLenientBdm(beta)));
-//          } else if (measure.endsWith("average")) {
-//            values.add(f.format(differ.getRecallAverage()));
-//            values.add(f.format(differ.getPrecisionAverage()));
-//            values.add(f.format(differ.getFMeasureAverage(beta)));
-//          } else if (measure.endsWith("average BDM")) {
-//            values.add(f.format(ontologyMeasures.getRecallAverageBdm()));
-//            values.add(f.format(ontologyMeasures.getPrecisionAverageBdm()));
-//            values.add(f.format(ontologyMeasures.getFMeasureAverageBdm(beta)));
-//          }
-//        }
-//        annotationTableModel.addRow(values.toArray());
       }
     }
 
     // add summary rows to the fscore tables
     if (measuresType == FSCORE_MEASURES) {
-//      values.clear();
-//      values.add("Macro summary");
-//      for (int col = 1; col < documentTableModel.getColumnCount(); col++) {
-//        if (col < 5) {
-//          values.add("");
-//        } else {
-//          float sumF = 0;
-//          for (int row = 0; row < documentTableModel.getRowCount(); row++) {
-//            try {
-//              sumF += Float.parseFloat((String)
-//                documentTableModel.getValueAt(row, col));
-//            } catch(NumberFormatException e) {
-//              // do nothing
-//            }
-//          }
-//          values.add(f.format(sumF / documentTableModel.getRowCount()));
-//        }
-//      }
-//      documentTableModel.addRow(values.toArray());
-//      values.clear();
-//      values.add("Micro summary");
-//      for (int col = 1; col < 5; col++) {
-//        int sum = 0;
-//        for (int row = 0; row < documentTableModel.getRowCount()-1; row++) {
-//          try {
-//            sum += Integer.valueOf((String)
-//              documentTableModel.getValueAt(row, col));
-//          } catch(NumberFormatException e) {
-//            // do nothing
-//          }
-//        }
-//        values.add(Integer.toString(sum));
-//      }
-//      List<AnnotationDiffer> differs = new ArrayList<AnnotationDiffer>();
-//      for (Map<String, AnnotationDiffer> differsByType : differsByDocThenType) {
-//        differs.addAll(differsByType.values());
-//      }
-//      AnnotationDiffer differ = new AnnotationDiffer(differs);
-//      OntologyMeasures ontologyMeasures = null;
       if (useBdm) {
         OntologyMeasures ontologyMeasures =
           new OntologyMeasures(documentOntologyMeasuresList);
@@ -1356,88 +1209,11 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         printSummary(differ, annotationTableModel, 5,
           annotationTableModel.getRowCount(), measureList.getSelectedValues());
       }
-//      for (Object object : selectedMeasures) {
-//        String measure = (String) object;
-//        double beta = Double.valueOf(
-//          measure.substring(1,measure.indexOf('-')));
-//        if (measure.endsWith("strict")) {
-//          values.add(f.format(differ.getRecallStrict()));
-//          values.add(f.format(differ.getPrecisionStrict()));
-//          values.add(f.format(differ.getFMeasureStrict(beta)));
-//        } else if (measure.endsWith("strict BDM")) {
-//          values.add(f.format(ontologyMeasures.getRecallStrictBdm()));
-//          values.add(f.format(ontologyMeasures.getPrecisionStrictBdm()));
-//          values.add(f.format(ontologyMeasures.getFMeasureStrictBdm(beta)));
-//        } else if (measure.endsWith("lenient")) {
-//          values.add(f.format(differ.getRecallLenient()));
-//          values.add(f.format(differ.getPrecisionLenient()));
-//          values.add(f.format(differ.getFMeasureLenient(beta)));
-//        } else if (measure.endsWith("lenient BDM")) {
-//          values.add(f.format(ontologyMeasures.getRecallLenientBdm()));
-//          values.add(f.format(ontologyMeasures.getPrecisionLenientBdm()));
-//          values.add(f.format(ontologyMeasures.getFMeasureLenientBdm(beta)));
-//        } else if (measure.endsWith("average")) {
-//          values.add(f.format(differ.getRecallAverage()));
-//          values.add(f.format(differ.getPrecisionAverage()));
-//          values.add(f.format(differ.getFMeasureAverage(beta)));
-//        } else if (measure.endsWith("average BDM")) {
-//          values.add(f.format(ontologyMeasures.getRecallAverageBdm()));
-//          values.add(f.format(ontologyMeasures.getPrecisionAverageBdm()));
-//          values.add(f.format(ontologyMeasures.getFMeasureAverageBdm(beta)));
-//        }
-//      }
-//      documentTableModel.addRow(values.toArray());
 
       // add summary rows to the classification tables
     } else if (measuresType == CLASSIFICATION_MEASURES) {
-//      values.clear();
-//      values.add("Macro summary");
-//      float sum;
-//      for (int col = 1; col < document2TableModel.getColumnCount(); col++) {
-//        if (col < 3) {
-//          values.add("");
-//        } else {
-//          sum = 0;
-//          for (int row = 0; row < document2TableModel.getRowCount(); row++) {
-//            try {
-//              sum += Float.parseFloat((String)
-//                document2TableModel.getValueAt(row, col));
-//            } catch(NumberFormatException e) {
-//              sum = 0;
-//              break;
-//            }
-//          }
-//          values.add(f.format(sum / document2TableModel.getRowCount()));
-//        }
-//      }
-//      document2TableModel.addRow(values.toArray());
-//      values.clear();
-//      values.add("Micro summary");
-//      for (int col = 1; col < 3; col++) {
-//        sum = 0;
-//        for (int row = 0; row < document2TableModel.getRowCount(); row++) {
-//          try {
-//            sum += Integer.valueOf((String)
-//              document2TableModel.getValueAt(row, col));
-//          } catch(NumberFormatException e) {
-//            sum = 0;
-//            break;
-//          }
-//        }
-//        values.add(Float.toString(sum));
-//      }
       ClassificationMeasures classificationMeasures =
         new ClassificationMeasures(classificationMeasuresList);
-//      if (selectedMeasures.contains("Observed agreement")) {
-//        values.add(f.format(classificationMeasures.getObservedAgreement()));
-//      }
-//      if (selectedMeasures.contains("Cohen's Kappa")) {
-//        values.add(f.format(classificationMeasures.getKappaCohen()));
-//      }
-//      if (selectedMeasures.contains("Pi's Kappa")) {
-//        values.add(f.format(classificationMeasures.getKappaPi()));
-//      }
-//      document2TableModel.addRow(values.toArray());
       printSummary(classificationMeasures, document2TableModel, 3,
         document2TableModel.getRowCount(), measure2List.getSelectedValues());
       List<List<String>> matrix = classificationMeasures
@@ -1570,281 +1346,6 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     tableModel.insertRow(insertionRow + 1, values.toArray());
   }
 
-//  protected double getMeasureValue(int column, AnnotationDiffer differ,
-//                                   int columnCount) {
-//    int colMeasure = (column - columnCount) % 3;
-//    int measureIndex = (column  - columnCount) / 3;
-//    String measure = (String) measureList.getSelectedValues()[measureIndex];
-//    switch (colMeasure) {
-//      case COL_RECALL:
-//        if (measure.endsWith("strict")) {
-//          return differ.getRecallStrict();
-//        } else if (measure.endsWith("lenient")) {
-//          return differ.getRecallLenient();
-//        } else {
-//          return differ.getRecallAverage();
-//        }
-//      case COL_PRECISION:
-//        if (measure.endsWith("strict")) {
-//          return differ.getPrecisionStrict();
-//        } else if (measure.endsWith("lenient")) {
-//          return differ.getPrecisionLenient();
-//        } else {
-//          return differ.getPrecisionAverage();
-//        }
-//      case COL_FMEASURE:
-//        double beta = Double.valueOf(measure.substring(1,measure.indexOf('-')));
-//        if (measure.endsWith("strict")) {
-//          return differ.getFMeasureStrict(beta);
-//        } else if (measure.endsWith("lenient")) {
-//          return differ.getFMeasureLenient(beta);
-//        } else {
-//          return differ.getFMeasureAverage(beta);
-//        }
-//      default:
-//        return 0.0;
-//    }
-//  }
-
-//  protected class AnnotationTableModel extends AbstractTableModel{
-//
-//    public void updateColumns() {
-//      columnNames = new ArrayList<String>(Arrays.asList(COLUMN_NAMES));
-//      headerTooltips = new ArrayList<String>(Arrays.asList(HEADER_TOOLTIPS));
-//      for (Object measure : measureList.getSelectedValues()) {
-//        String measureString = ((String) measure).replaceFirst("score ","");
-//        columnNames.addAll(Arrays.asList("Rec.B/A", "Prec.B/A", measureString));
-//        headerTooltips.addAll(Arrays.asList("Recall for B relative to A",
-//          "Precision for B relative to A", "Combine precision and recall"));
-//      }
-//    }
-//
-//    public int getColumnCount() {
-//      return columnNames.size();
-//    }
-//
-//    public int getRowCount() {
-//      return (types.isEmpty()) ? 0 : types.size() + 2;
-//    }
-//
-//    public Object getValueAt(int rowIndex, int columnIndex) {
-//      // get the counts and measures for the current type/row
-//      if (rowIndex < types.size()) {
-//        String type = (String) types.toArray()[rowIndex];
-//        ArrayList<AnnotationDiffer> differs =
-//          new ArrayList<AnnotationDiffer>();
-//        for (HashMap<String, AnnotationDiffer> differsByType :
-//            differsByDocThenType) {
-//          differs.add(differsByType.get(type));
-//        }
-//        AnnotationDiffer differ = new AnnotationDiffer(differs);
-//        switch(columnIndex) {
-//          case COL_ANNOTATION:
-//            return type;
-//          case COL_CORRECT:
-//            return Integer.toString(differ.getCorrectMatches());
-//          case COL_MISSING:
-//            return Integer.toString(differ.getMissing());
-//          case COL_SPURIOUS:
-//            return Integer.toString(differ.getSpurious());
-//          case COL_PARTIAL:
-//            return Integer.toString(differ.getPartiallyCorrectMatches());
-//          default:
-//            return f.format(getMeasureValue(columnIndex, differ, COLUMN_COUNT));
-//        }
-//      } else if (rowIndex == types.size()) {
-//        // average measures by document
-//        switch(columnIndex) {
-//          case COL_ANNOTATION:
-//            return "Macro summary";
-//          case COL_CORRECT:
-//          case COL_MISSING:
-//          case COL_SPURIOUS:
-//          case COL_PARTIAL:
-//            return "";
-//          default:
-//            double sumDbl= 0;
-//            for (int row = 0; row < types.size(); row++) {
-//              // TODO: reuse previous values instead of recalculate
-//              sumDbl += Double.valueOf((String) getValueAt(row, columnIndex));
-//            }
-//            return f.format(sumDbl / types.size());
-//        }
-//      } else if (rowIndex == types.size() + 1) {
-//        // sum counts and recalculate measures like the corpus is one document
-//        switch(columnIndex) {
-//          case COL_ANNOTATION:
-//            return "Micro summary";
-//          case COL_CORRECT:
-//          case COL_MISSING:
-//          case COL_SPURIOUS:
-//          case COL_PARTIAL:
-//            int sumInt = 0;
-//            for (int row = 0; row < types.size(); row++) {
-//              sumInt += Integer.valueOf((String) getValueAt(row, columnIndex));
-//            }
-//            return Integer.toString(sumInt);
-//          default:
-//            ArrayList<AnnotationDiffer> differs =
-//              new ArrayList<AnnotationDiffer>();
-//            for (HashMap<String, AnnotationDiffer> differsByType :
-//                differsByDocThenType) {
-//              differs.addAll(differsByType.values());
-//            }
-//            AnnotationDiffer differ = new AnnotationDiffer(differs);
-//            return f.format(getMeasureValue(columnIndex, differ, COLUMN_COUNT));
-//        }
-//      } else {
-//        return "";
-//      }
-//    }
-//
-//    public Class<?> getColumnClass(int columnIndex) {
-//      return String.class;
-//    }
-//
-//    public String getColumnName(int column) {
-//      return columnNames.get(column);
-//    }
-//
-//    public boolean isCellEditable(int rowIndex, int columnIndex) {
-//      return false;
-//    }
-//
-//    private final String[] COLUMN_NAMES = {
-//      "Annotation", "Match", "Only A", "Only B", "Overlap"};
-//    private final String[] HEADER_TOOLTIPS = {null,
-//      "aka 'Correct'", "aka 'Missing'", "aka 'Spurious'", "aka 'Partial'"};
-//    private ArrayList<String> columnNames =
-//      new ArrayList<String>(Arrays.asList(COLUMN_NAMES));
-//    public ArrayList<String> headerTooltips =
-//      new ArrayList<String>(Arrays.asList(HEADER_TOOLTIPS));
-//
-//    public static final int COL_ANNOTATION = 0;
-//    public static final int COL_CORRECT = 1;
-//    public static final int COL_MISSING = 2;
-//    public static final int COL_SPURIOUS = 3;
-//    public static final int COL_PARTIAL = 4;
-//    public static final int COLUMN_COUNT = 5;
-//  }
-
-//  protected class DocumentTableModel extends AbstractTableModel{
-//
-//    public void updateColumns() {
-//      columnNames = new ArrayList<String>(Arrays.asList(COLUMN_NAMES));
-//      headerTooltips = new ArrayList<String>(Arrays.asList(HEADER_TOOLTIPS));
-//      for (Object measure : measureList.getSelectedValues()) {
-//        String measureString = ((String) measure).replaceFirst("score ","");
-//        columnNames.addAll(Arrays.asList("Rec.B/A", "Prec.B/A", measureString));
-//        headerTooltips.addAll(Arrays.asList("Recall for B relative to A",
-//          "Precision for B relative to A", "Combine precision and recall"));
-//      }
-//    }
-//
-//    public int getColumnCount() {
-//      return columnNames.size();
-//    }
-//
-//    public int getRowCount() {
-//      return (differsByDocThenType.isEmpty()) ?
-//        0 : differsByDocThenType.size() + 2;
-//    }
-//
-//    public Object getValueAt(int rowIndex, int columnIndex) {
-//      if (rowIndex < differsByDocThenType.size()) {
-//        // get the counts and measures for the current document/row
-//        HashMap<String, AnnotationDiffer> differsByType =
-//          differsByDocThenType.get(rowIndex);
-//        AnnotationDiffer differ = new AnnotationDiffer(differsByType.values());
-//        switch(columnIndex) {
-//          case COL_DOCUMENT:
-//            return documentNames.get(rowIndex);
-//          case COL_CORRECT:
-//            return Integer.toString(differ.getCorrectMatches());
-//          case COL_MISSING:
-//            return Integer.toString(differ.getMissing());
-//          case COL_SPURIOUS:
-//            return Integer.toString(differ.getSpurious());
-//          case COL_PARTIAL:
-//            return Integer.toString(differ.getPartiallyCorrectMatches());
-//          default:
-//            return f.format(getMeasureValue(columnIndex, differ, COLUMN_COUNT));
-//        }
-//      } else if (rowIndex == differsByDocThenType.size()) {
-//        // average measures by document
-//        switch(columnIndex) {
-//          case COL_DOCUMENT:
-//            return "Macro summary";
-//          case COL_CORRECT:
-//          case COL_MISSING:
-//          case COL_SPURIOUS:
-//          case COL_PARTIAL:
-//            return "";
-//          default:
-//            double sumDbl= 0;
-//            for (int row = 0; row < differsByDocThenType.size(); row++) {
-//              sumDbl += Double.valueOf((String) getValueAt(row, columnIndex));
-//            }
-//            return f.format(sumDbl / differsByDocThenType.size());
-//        }
-//      } else if (rowIndex == differsByDocThenType.size() + 1) {
-//        // sum counts and recalculate measures like the corpus is one document
-//        switch(columnIndex) {
-//          case COL_DOCUMENT:
-//            return "Micro summary";
-//          case COL_CORRECT:
-//          case COL_MISSING:
-//          case COL_SPURIOUS:
-//          case COL_PARTIAL:
-//            int sumInt = 0;
-//            for (int row = 0; row < differsByDocThenType.size(); row++) {
-//              sumInt += Integer.valueOf((String) getValueAt(row, columnIndex));
-//            }
-//            return Integer.toString(sumInt);
-//          default:
-//            ArrayList<AnnotationDiffer> differs =
-//              new ArrayList<AnnotationDiffer>();
-//            for (HashMap<String, AnnotationDiffer> differsByType :
-//                differsByDocThenType) {
-//              differs.addAll(differsByType.values());
-//            }
-//            AnnotationDiffer differ = new AnnotationDiffer(differs);
-//            return f.format(getMeasureValue(columnIndex, differ, COLUMN_COUNT));
-//        }
-//      } else {
-//        return "";
-//      }
-//    }
-//
-//    public Class<?> getColumnClass(int columnIndex) {
-//      return String.class;
-//    }
-//
-//    public String getColumnName(int column) {
-//      return columnNames.get(column);
-//    }
-//
-//    public boolean isCellEditable(int rowIndex, int columnIndex) {
-//      return false;
-//    }
-//
-//    private final String[] COLUMN_NAMES = {
-//      "Document", "Match", "Only A", "Only B", "Overlap"};
-//    private final String[] HEADER_TOOLTIPS = {null,
-//      "aka 'Correct'", "aka 'Missing'", "aka 'Spurious'", "aka 'Partial'"};
-//    private ArrayList<String> columnNames =
-//      new ArrayList<String>(Arrays.asList(COLUMN_NAMES));
-//    public ArrayList<String> headerTooltips =
-//      new ArrayList<String>(Arrays.asList(HEADER_TOOLTIPS));
-//
-//    public static final int COL_DOCUMENT = 0;
-//    public static final int COL_CORRECT = 1;
-//    public static final int COL_MISSING = 2;
-//    public static final int COL_SPURIOUS = 3;
-//    public static final int COL_PARTIAL = 4;
-//    public static final int COLUMN_COUNT = 5;
-//  }
-
   protected class SetBdmFileAction extends AbstractAction {
     public SetBdmFileAction() {
       super("Browse");
@@ -1920,30 +1421,22 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         }
         compareAnnotation(); // do all the computation
         // update data
-//        documentTableModel.updateColumns();
-//        annotationTableModel.updateColumns();
 
         SwingUtilities.invokeLater(new Runnable() { public void run() {
           // redraw document table
-//          documentTable.setSortable(false);
           documentTable.setModel(documentTableModel);
-//          documentTableModel.fireTableStructureChanged();
           for (int col = 0; col < documentTable.getColumnCount(); col++) {
             documentTable.setComparator(col, doubleComparator);
           }
           documentTable.setComparator(0, totalComparator);
           documentTable.setSortedColumn(0);
-//          documentTable.setSortable(true);
           // redraw annotation table
-//          annotationTable.setSortable(false);
           annotationTable.setModel(annotationTableModel);
-//          annotationTableModel.fireTableStructureChanged();
           for (int col = 0; col < annotationTable.getColumnCount(); col++) {
             annotationTable.setComparator(col, doubleComparator);
           }
           annotationTable.setComparator(0, totalComparator);
           annotationTable.setSortedColumn(0);
-//          annotationTable.setSortable(true);
           CorpusQualityAssurance.this.setCursor(
             Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
           setEnabled(true);
@@ -2067,13 +1560,10 @@ public class CorpusQualityAssurance extends AbstractVisualResource
         fw.write("<P>&nbsp;</P>" + nl);
 
         ArrayList<JTable> tablesToExport = new ArrayList<JTable>();
-//        if (measuresType == FSCORE_MEASURES) {
-          tablesToExport.add(annotationTable);
-          tablesToExport.add(documentTable);
-//        } else if (measuresType == CLASSIFICATION_MEASURES) {
-          tablesToExport.add(document2Table);
-          tablesToExport.add(confusionTable);
-//        }
+        tablesToExport.add(annotationTable);
+        tablesToExport.add(documentTable);
+        tablesToExport.add(document2Table);
+        tablesToExport.add(confusionTable);
         for (JTable table : tablesToExport) {
           fw.write(BEGINTABLE + nl + "<TR>" + nl);
           for(int col = 0; col < table.getColumnCount(); col++){
@@ -2172,10 +1662,6 @@ public class CorpusQualityAssurance extends AbstractVisualResource
   protected Timer timer = new Timer("CorpusQualityAssurance", true);
   protected TimerTask timerTask;
   protected Thread readSetsTypesFeaturesThread;
-//  protected NumberFormat f = NumberFormat.getInstance(Locale.ENGLISH);
-//  protected static final int COL_RECALL = 0;
-//  protected static final int COL_PRECISION = 1;
-//  protected static final int COL_FMEASURE = 2;
   /** FSCORE_MEASURES or CLASSIFICATION_MEASURES */
   protected int measuresType;
   protected static final int FSCORE_MEASURES = 0;
@@ -2188,10 +1674,8 @@ public class CorpusQualityAssurance extends AbstractVisualResource
 
   // user interface components
   protected XJTable documentTable;
-//  protected DocumentTableModel documentTableModel;
   protected DefaultTableModel documentTableModel;
   protected XJTable annotationTable;
-//  protected AnnotationTableModel annotationTableModel;
   protected DefaultTableModel annotationTableModel;
   protected XJTable document2Table;
   protected DefaultTableModel document2TableModel;
