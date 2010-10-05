@@ -389,7 +389,6 @@ public abstract class AbstractOntologyImpl
 
     String[] deletedResources =
       ontologyService.removeIndividual(theInstance.getOURI().toString());
-    System.out.println("Deleted for "+theInstance+": "+deletedResources);
     fireOntologyResourcesRemoved(deletedResources);
   }
 
