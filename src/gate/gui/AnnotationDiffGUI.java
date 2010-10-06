@@ -220,7 +220,8 @@ public class AnnotationDiffGUI extends JFrame{
     constraints.insets = new Insets(2, 2, 2, 2);
     noFeaturesBtn.setSelected(true);
     weightTxt = new JTextField("1.0");
-    weightTxt.setToolTipText("<html>Relative weight of precision and recall." +
+    weightTxt.setToolTipText(
+      "<html>Relative weight of precision and recall aka beta." +
       "<ul><li>1 weights equally precision and recall" +
       "<li>0.5 weights precision twice as much as recall" +
       "<li>2 weights recall twice as much as precision</ul></html>");
