@@ -289,6 +289,11 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     JLabel betaLabel = new JLabel("Fscore Beta 1:");
     final JSpinner betaSpinner =
       new JSpinner(new SpinnerNumberModel(beta, 0, 1, 0.1));
+    betaSpinner.setToolTipText(
+      "<html>Relative weight of precision and recall." +
+      "<ul><li>1 weights equally precision and recall" +
+      "<li>0.5 weights precision twice as much as recall" +
+      "<li>2 weights recall twice as much as precision</ul></html>");
     betaPanel.add(betaLabel);
     betaPanel.add(Box.createHorizontalStrut(5));
     betaPanel.add(betaSpinner);
@@ -301,6 +306,7 @@ public class CorpusQualityAssurance extends AbstractVisualResource
     JLabel beta2Label = new JLabel("Fscore Beta 2:");
     final JSpinner beta2Spinner =
       new JSpinner(new SpinnerNumberModel(beta2, 0, 1, 0.1));
+    beta2Spinner.setToolTipText(betaSpinner.getToolTipText());
     beta2Panel.add(beta2Label);
     beta2Panel.add(Box.createHorizontalStrut(5));
     beta2Panel.add(beta2Spinner);
