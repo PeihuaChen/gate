@@ -1509,12 +1509,14 @@ public class MainFrame extends JFrame implements ProgressListener,
       public void componentResized(ComponentEvent e) {
         // resize proportionally the status bar elements
         int width = MainFrame.this.getWidth();
-        statusBar.setPreferredSize(new Dimension(width*70/100,
+        statusBar.setPreferredSize(new Dimension(width*65/100,
           statusBar.getPreferredSize().height));
         progressBar.setPreferredSize(new Dimension(width*20/100,
           progressBar.getPreferredSize().height));
-        globalProgressBar.setPreferredSize(new Dimension(width*5/100,
+        progressBar.setMinimumSize(new Dimension(80, 0));
+        globalProgressBar.setPreferredSize(new Dimension(width*10/100,
           globalProgressBar.getPreferredSize().height));
+        globalProgressBar.setMinimumSize(new Dimension(80, 0));
       }
     });
 
