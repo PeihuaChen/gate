@@ -144,6 +144,24 @@ public class Utils {
   }
 
   /**
+   * Returns the document text between the provided offsets.
+   * @param doc the document from which to extract the document text
+   * @param start the start offset 
+   * @param end the end offset
+   * @return document text between the provided offsets
+   */
+  public static String stringFor(
+          Document doc, Long start, Long end) {
+    try {
+      return doc.getContent().getContent(
+              start,
+              end).toString();
+    } catch(gate.util.InvalidOffsetException ex) {
+      throw new GateRuntimeException(ex.getMessage());
+    }
+  }
+
+  /**
    * Return the DocumentContent covered by the given annotation set.
    * <p>
    * Note: the DocumentContent object returned will also contain the
