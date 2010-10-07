@@ -30,6 +30,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import java.awt.*;
@@ -38,6 +39,8 @@ import java.text.Collator;
 import java.util.*;
 import java.util.List;
 import java.util.Timer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Document view that shows two tables: one instances and one for properties.
@@ -70,6 +73,15 @@ public class OntologyInstanceView extends AbstractDocumentView {
       if(aView instanceof TextualDocumentView)
         textView = (TextualDocumentView) aView;
     }
+    // get a pointer to the class view
+    Iterator verticalViewsIter = owner.getVerticalViews().iterator();
+    while(classView == null && verticalViewsIter.hasNext()){
+      DocumentView aView = (DocumentView)verticalViewsIter.next();
+      if (aView instanceof OntologyClassView) {
+        classView = (OntologyClassView) aView;
+      }
+    }
+    classView.setOwner(owner);
 
     mainPanel = new JPanel(new BorderLayout());
 
@@ -114,7 +126,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
     };
     DefaultTableModel model = new DefaultTableModel();
     model.addColumn("Instance");
-    model.addColumn("Label");
+    model.addColumn("Labels");
     instanceTable.setModel(model);
     tablesPanel.add(new JScrollPane(instanceTable));
     propertyTable = new XJTable(){
@@ -338,12 +350,16 @@ public class OntologyInstanceView extends AbstractDocumentView {
   protected void registerHooks() {
     // show the class view at the right
     if (!classView.isActive()) {
-      classView.setActive(true);
-      textView.getOwner().setRightView(classView);
+      owner.setRightView(owner.verticalViews.indexOf(classView));
     }
   }
 
-  protected void unregisterHooks() { /* do nothing */ }
+  protected void unregisterHooks() {
+    // hide the class view at the right
+    if (classView.isActive()) {
+      owner.setRightView(-1);
+    }
+  }
 
   public Component getGUI() {
     return mainPanel;
@@ -351,10 +367,6 @@ public class OntologyInstanceView extends AbstractDocumentView {
 
   public int getType() {
     return HORIZONTAL;
-  }
-
-  public void setClassView(OntologyClassView classView) {
-    this.classView = classView;
   }
 
   /**
@@ -367,7 +379,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
     Set<OInstance> allInstances = new HashSet<OInstance>();
     final DefaultTableModel tableModel = new DefaultTableModel();
     tableModel.addColumn("Instance");
-    tableModel.addColumn("Label");
+    tableModel.addColumn("Labels");
     if (selectedClass != null) {
       selectedOntology = selectedClass.getOntology();
       allInstances.addAll(selectedOntology.getOInstances(
@@ -473,6 +485,35 @@ public class OntologyInstanceView extends AbstractDocumentView {
       propertyTable.setModel(tableModel);
       propertyTable.getColumnModel().getColumn(1)
         .setCellEditor(new PropertyValueCellEditor());
+      propertyTable.getColumnModel().getColumn(0)
+        .setCellRenderer(new DefaultTableCellRenderer() {
+          public Component getTableCellRendererComponent(JTable table, Object
+            value, boolean isSelected, boolean hasFocus, int row, int column) {
+            super.getTableCellRendererComponent(
+              table, value, isSelected, hasFocus, row, column);
+            setForeground(table.getForeground());
+            Object nextValue = table.getModel().getValueAt(row, 1);
+            if (nextValue != null && ((String)nextValue).startsWith("[")) {
+              // change foreground color for rows that have no values set
+              setForeground(new Color(150, 150, 150));
+            }
+            return this;
+          }
+        });
+      propertyTable.getColumnModel().getColumn(1)
+        .setCellRenderer(new DefaultTableCellRenderer() {
+          public Component getTableCellRendererComponent(JTable table, Object
+            value, boolean isSelected, boolean hasFocus, int row, int column) {
+            super.getTableCellRendererComponent(
+              table, value, isSelected, hasFocus, row, column);
+            setForeground(table.getForeground());
+            if (value != null && ((String)value).startsWith("[")) {
+              // change foreground color for rows that have no values set
+              setForeground(new Color(150, 150, 150));
+            }
+            return this;
+          }
+        });
     }});
   }
 
@@ -494,6 +535,8 @@ public class OntologyInstanceView extends AbstractDocumentView {
       public void actionPerformed(ActionEvent e) {
         createFromSelection(selectedSet, selectedText, start, end, true);
         filterTextField.setText("");
+//        filterTextField.setBackground(
+//          UIManager.getColor("TextField.background"));
       }
     });
     newInstanceButton.setEnabled(true);
@@ -504,10 +547,17 @@ public class OntologyInstanceView extends AbstractDocumentView {
       public void actionPerformed(ActionEvent e) {
         createFromSelection(selectedSet, selectedText, start, end, false);
         filterTextField.setText("");
+//        filterTextField.setBackground(
+//          UIManager.getColor("TextField.background"));
       }
     });
     filterTextField.setText(selectedText);
+    filterTextField.selectAll();
+    filterTextField.requestFocusInWindow();
     addLabelButton.setEnabled(selectedInstance != null);
+//    filterTextField.setBackground(new Color(252, 255, 194));
+//    filterTextField.setBackground(
+//      UIManager.getColor("TextField.background"));
   }
 
   /**
@@ -542,11 +592,18 @@ public class OntologyInstanceView extends AbstractDocumentView {
     }
     OInstance instance = selectedInstance;
     if (newInstance) {
-      OURI instanceOURI = selectedOntology.createOURIForName(selectedText);
+      // squeeze spaces, replace spaces and HTML characters with underscores
+      String instanceName = selectedText.replaceAll("\\s+", "_");
+      instanceName = instanceName.replaceAll("<>\"&", "_");
+      // take only the first 20 characters of the selection
+      if (instanceName.length() > 100) {
+        instanceName = instanceName.substring(0, 100);
+      }
+      OURI instanceOURI = selectedOntology.createOURIForName(instanceName);
       for (int i = 0; selectedOntology.containsOInstance(instanceOURI)
           && i < Integer.MAX_VALUE; i++) {
         // instance name already existing so suffix with a number
-        instanceOURI = selectedOntology.createOURIForName(selectedText+'_'+i);
+        instanceOURI = selectedOntology.createOURIForName(instanceName+'_'+i);
       }
       // create a new instance from the text selected
       instance = selectedOntology.addOInstance(instanceOURI, selectedClass);
@@ -598,6 +655,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
     private Collator comparator;
     private String oldValue;
     private Map<String, OInstance> nameInstanceMap;
+    private Pattern instanceLabelsPattern;
 
     private PropertyValueCellEditor() {
       valueComboBox = new JComboBox();
@@ -606,6 +664,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
       comparator = Collator.getInstance();
       comparator.setStrength(java.text.Collator.TERTIARY);
       nameInstanceMap = new HashMap<String, OInstance>();
+      instanceLabelsPattern = Pattern.compile("^(.+) \\[.*\\]$");
     }
 
     public Component getTableCellEditorComponent(JTable table, Object value,
@@ -620,8 +679,20 @@ public class OntologyInstanceView extends AbstractDocumentView {
         Set<OInstance> instances = selectedOntology.getOInstances(
           oClass, OConstants.Closure.TRANSITIVE_CLOSURE);
         for (OInstance instance : instances) {
-          // for each class add their instance names
-          ts.add(instance.getName());
+          Set<String> labelSet = new HashSet<String>();
+          Set<AnnotationProperty> properties =
+            instance.getSetAnnotationProperties();
+          for (AnnotationProperty property : properties) {
+            if (property.getName().equals("label")) {
+              List<Literal> labels =
+                instance.getAnnotationPropertyValues(property);
+              for (Literal label : labels) {
+                labelSet.add(label.getValue());
+              }
+            }
+          }
+          // for each class add their instance names and labels list
+          ts.add(instance.getName() + " " + Strings.toString(labelSet));
           nameInstanceMap.put(instance.getName(), instance);
         }
       }
@@ -641,6 +712,9 @@ public class OntologyInstanceView extends AbstractDocumentView {
         fireEditingCanceled();
         return;
       }
+      Matcher matcher = instanceLabelsPattern.matcher(newValue);
+      // remove the list of labels from the selected instance value
+      if (matcher.matches()) { newValue = matcher.group(1); }
       super.fireEditingStopped();
       String selectedProperty = (String) propertyTable.getModel().getValueAt(
         propertyTable.getSelectedRow(), 0);
