@@ -534,9 +534,11 @@ public class GazetteerEditor extends AbstractVisualResource
         XJTable table = (XJTable) me.getSource();
         if (me.isPopupTrigger()
           && table.getSelectedRowCount() > 0) {
-            JPopupMenu popup = new JPopupMenu();
-            popup.add(new DeleteSelectedGazetteerNodeAction());
-            popup.show(table, me.getX(), me.getY());
+          JPopupMenu popup = new JPopupMenu();
+          popup.add(new FillDownSelectionAction());
+          popup.add(new ClearSelectionAction());
+          popup.add(new DeleteSelectedGazetteerNodeAction());
+          popup.show(table, me.getX(), me.getY());
         }
       }
     });
@@ -949,7 +951,7 @@ public class GazetteerEditor extends AbstractVisualResource
 
   protected class DeleteSelectedLinearNodeAction extends AbstractAction {
     public DeleteSelectedLinearNodeAction() {
-      super("Delete Selection");
+      super("Delete Rows");
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("shift DELETE"));
     }
 
@@ -969,7 +971,7 @@ public class GazetteerEditor extends AbstractVisualResource
 
   protected class DeleteSelectedGazetteerNodeAction extends AbstractAction {
     public DeleteSelectedGazetteerNodeAction() {
-      super("Delete Selection");
+      super("Delete Rows");
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("shift DELETE"));
     }
 
@@ -984,6 +986,49 @@ public class GazetteerEditor extends AbstractVisualResource
         listTableModel.removeRow(rowsToDelete[i]);
       }
       listTableModel.fireTableDataChanged();
+    }
+  }
+
+  protected class FillDownSelectionAction extends AbstractAction {
+    public FillDownSelectionAction() {
+      super("Fill Down Selection");
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control D"));
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      int[] rows = listTable.getSelectedRows();
+      int[] columns = listTable.getSelectedColumns();
+      listTable.clearSelection();
+      for (int column : columns) {
+        String firstCell = (String) listTable.getValueAt(rows[0], column);
+        for (int row : rows) {
+          listTableModel.setValueAt(firstCell,
+            listTable.rowViewToModel(row),
+            listTable.convertColumnIndexToModel(column));
+        }
+        listTableModel.fireTableDataChanged();
+      }
+    }
+  }
+
+  protected class ClearSelectionAction extends AbstractAction {
+    public ClearSelectionAction() {
+      super("Clear Selection");
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control DELETE"));
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      int[] rows = listTable.getSelectedRows();
+      int[] columns = listTable.getSelectedColumns();
+      listTable.clearSelection();
+      for (int column : columns) {
+        for (int row : rows) {
+          listTableModel.setValueAt("",
+            listTable.rowViewToModel(row),
+            listTable.convertColumnIndexToModel(column));
+        }
+        listTableModel.fireTableDataChanged();
+      }
     }
   }
 
