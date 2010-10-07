@@ -20,8 +20,7 @@ import gate.FeatureMap;
 import gate.Gate;
 import gate.LanguageResource;
 import gate.Resource;
-import gate.creole.ontology.OClass;
-import gate.creole.ontology.Ontology;
+import gate.creole.ontology.*;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
 import gate.gui.MainFrame;
@@ -90,8 +89,9 @@ public class OntologyClassView extends AbstractDocumentView
     Iterator horizontalViewsIter = owner.getHorizontalViews().iterator();
     while(instanceView == null && horizontalViewsIter.hasNext()){
       DocumentView aView = (DocumentView)horizontalViewsIter.next();
-      if(aView instanceof OntologyInstanceView)
+      if (aView instanceof OntologyInstanceView) {
         instanceView = (OntologyInstanceView) aView;
+      }
     }
     instanceView.setOwner(owner);
 
@@ -99,8 +99,7 @@ public class OntologyClassView extends AbstractDocumentView
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.gridx = 0;
     treesPanel = new JPanel();
-    treesPanel.setLayout(new BoxLayout(treesPanel, BoxLayout.Y_AXIS));
-    treesPanel.setAlignmentY(JComponent.TOP_ALIGNMENT);
+    treesPanel.setLayout(new GridBagLayout());
     // add a disclosure panel for each loaded ontology in the system
     boolean isOntologyLoaded = false;
     List<LanguageResource> resources =
@@ -153,7 +152,8 @@ public class OntologyClassView extends AbstractDocumentView
       messageLabel.setBorder(BorderFactory.createEmptyBorder(5, 2, 5, 2));
       messageLabel.setBackground(
         UIManager.getColor("Tree.selectionBackground"));
-      treesPanel.add(messageLabel);
+      gbc = new GridBagConstraints();
+      treesPanel.add(messageLabel, gbc);
     }
   }
 
@@ -205,9 +205,7 @@ public class OntologyClassView extends AbstractDocumentView
     }});
     // show the instance view at the bottom
     if (!instanceView.isActive()) {
-      instanceView.setClassView(this);
-      instanceView.setActive(true);
-      textView.getOwner().setBottomView(instanceView);
+      owner.setBottomView(owner.horizontalViews.indexOf(instanceView));
     }
   }
 
@@ -222,6 +220,10 @@ public class OntologyClassView extends AbstractDocumentView
         }
       }
     }});
+    // hide the instance view at the bottom
+    if (instanceView.isActive()) {
+      owner.setBottomView(-1);
+    }
   }
 
   public void cleanup() {
@@ -361,7 +363,7 @@ public class OntologyClassView extends AbstractDocumentView
         } else {
           treePanel.remove(tree);
         }
-        treesPanel.revalidate();
+        treesPanel.repaint();
       }
     });
 
@@ -476,7 +478,31 @@ public class OntologyClassView extends AbstractDocumentView
       }
     });
 
-    treesPanel.add(treePanel);
+    // listen to modification of classes in the ontology to rebuild the tree
+    ontology.addOntologyModificationListener(new OntologyModificationListener() {
+      public void resourceRelationChanged(Ontology ontology, OResource
+        resource1, OResource resource2, int eventType) { /* do nothing */  }
+      public void resourcePropertyValueChanged(Ontology ontology, OResource
+        resource, RDFProperty property, Object value, int eventType) {
+        /* do nothing */  }
+      public void resourcesRemoved(Ontology ontology, String[] resources) {
+      }
+      public void resourceAdded(Ontology ontology, OResource resource) {
+        if (resource instanceof OClass) {
+//           disclosureCheckBox.doClick();
+//           disclosureCheckBox.doClick();
+        }
+      }
+      public void ontologyReset(Ontology ontology) { /* do nothing */ }
+    });
+
+    GridBagConstraints  gbc = new GridBagConstraints();
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.anchor = GridBagConstraints.NORTHWEST;
+    gbc.gridx = 0;
+    gbc.weightx = 1;
+    gbc.weighty = 1;
+    treesPanel.add(treePanel, gbc);
   }
 
   /**
@@ -508,8 +534,7 @@ public class OntologyClassView extends AbstractDocumentView
         }
       }
       public void treeWillCollapse(TreeExpansionEvent event)
-        throws ExpandVetoException {
-      }
+        throws ExpandVetoException { /* do nothing */  }
     });
 
     final DefaultMutableTreeNode node = new DefaultMutableTreeNode(null, true);
@@ -520,6 +545,12 @@ public class OntologyClassView extends AbstractDocumentView
       tree.setModel(new DefaultTreeModel(node));
       tree.setCellRenderer(new ClassTreeCellRenderer());
       tree.setCellEditor(new ClassTreeCellEditor(tree));
+      DefaultMutableTreeNode node = (DefaultMutableTreeNode)
+        tree.getModel().getRoot();
+      // expand tree until second level
+      for (int row = 0; row < node.getChildCount(); row++) {
+        tree.expandRow(row);
+      }
     }});
   }
 
@@ -528,8 +559,8 @@ public class OntologyClassView extends AbstractDocumentView
    * @param tree tree to update
    * @param parent parent node
    * @param newChildren children classes to add
-   * @param filterClasses if children nodes contain an hidden class
-   * then don't add it.
+   * @param filterClasses if children nodes contain hidden classes
+   * then don't add them.
    */
   protected void addNodes(JTree tree, DefaultMutableTreeNode parent,
                           Set<OClass> newChildren,
@@ -705,16 +736,9 @@ public class OntologyClassView extends AbstractDocumentView
        || start == end) {
         return;
       }
-      // remove selection to avoid calling again this method
-//      textArea.setSelectionStart(start);
-//      textArea.setSelectionEnd(start);
-      // squeeze spaces, replace spaces and HTML characters with underscores
-      selectedText = selectedText.replaceAll("\\s+", "_");
-      selectedText = selectedText.replaceAll("<>\"&", "_");
-      // take only the first 20 characters of the selection
-      if (selectedText.length() > 100) {
-        selectedText = selectedText.substring(0, 100);
-      }
+      // remove selection
+      textArea.setSelectionStart(start);
+      textArea.setSelectionEnd(start);
       instanceView.addSelectionToFilter(selectedSet, selectedText, start, end);
     }
 
@@ -853,15 +877,11 @@ public class OntologyClassView extends AbstractDocumentView
       OClass oClass = (OClass) node.getUserObject();
       checkBox.setSelected(highlightedClasses.contains(oClass));
       checkBox.setBackground(isSelected ? selectionColor : backgroundColor);
-//      checkBox.setBorder(isSelected ? selectionBorder : normalBorder);
       label.setText(oClass.getName());
       label.setBackground(colorByClassMap.containsKey(oClass) ?
         colorByClassMap.get(oClass) : isSelected ?
           selectionColor : backgroundColor);
-//      label.setBorder(isSelected ? selectionBorder : normalBorder);
-//      if (!colorByClassMap.containsKey(oClass)) {
         setBackground(isSelected ? selectionColor : backgroundColor);
-//      }
       setBorder(isSelected ? selectionBorder : normalBorder);
 
       return this;
