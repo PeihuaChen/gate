@@ -432,16 +432,32 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
                                                     wdResults,
                                                     ConstantParameters.FILENAMEOFNLPFeaturesData)),
                                     "UTF-8"));
+            
+            //In the meantime, also write the name of documents and total number of them into a file
+            BufferedWriter outDocsName =
+                    new BufferedWriter(new OutputStreamWriter(
+                            new FileOutputStream(new File(wdResults,
+                                    ConstantParameters.FILENAMEOFDocsName)),
+                            "UTF-8"));
+            outDocsName.append("##totalDocs=" + numDoc);
+            outDocsName.newLine();
             for(int i = 0; i < numDoc; ++i) {
               Document toProcess = (Document)corpus.get(i);
               lightWeightApi.annotations2NLPFeatures(toProcess, i,
                       outNLPFeatures, isTraining, learningSettings);
+              String docN = toProcess.getName();
+              if(docN.contains("_"))
+                docN = docN.substring(0, docN.lastIndexOf("_"));
+              outDocsName.append(docN);
+              outDocsName.newLine();
               if(toProcess.getDataStore() != null
                       && corpus.getDataStore() != null)
                 Factory.deleteResource(toProcess);
             }
             outNLPFeatures.flush();
             outNLPFeatures.close();
+            outDocsName.flush();
+            outDocsName.close();
             lightWeightApi.finishFVs(wdResults, numDoc, isTraining,
                     learningSettings);
             Benchmark.checkPoint(startTime, getBenchmarkId() + "."
@@ -511,23 +527,6 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
               }
             }
             benchmarkingFeatures.remove("numDocs");
-            // Write the name of documents and total number of them into a file
-            BufferedWriter outDocsName =
-                    new BufferedWriter(new OutputStreamWriter(
-                            new FileOutputStream(new File(wdResults,
-                                    ConstantParameters.FILENAMEOFDocsName)),
-                            "UTF-8"));
-            outDocsName.append("##totalDocs=" + numDoc);
-            outDocsName.newLine();
-            for(int i = 0; i < numDoc; ++i) {
-              String docN = ((Document)corpus.get(i)).getName();
-              if(docN.contains("_"))
-                docN = docN.substring(0, docN.lastIndexOf("_"));
-              outDocsName.append(docN);
-              outDocsName.newLine();
-            }
-            outDocsName.flush();
-            outDocsName.close();
             // Create the document for storing the names of selected documents
             // if it doesn't exist.
             File selectedFile =
