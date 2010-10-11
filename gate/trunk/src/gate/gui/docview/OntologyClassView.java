@@ -61,7 +61,7 @@ import java.util.List;
  * context menu for classes to hide/show them, saved in user configuration
  */
 public class OntologyClassView extends AbstractDocumentView
-    implements CreoleListener {
+    implements CreoleListener, OntologyModificationListener {
 
   public OntologyClassView() {
 
@@ -259,7 +259,10 @@ public class OntologyClassView extends AbstractDocumentView
         }
         setComboBox.setSelectedItem(selectedSet);
       }
-      loadOntology((Ontology) e.getResource());
+      Ontology ontology = (Ontology) e.getResource();
+      loadOntology(ontology);
+      // listen to modification of classes in the ontology to rebuild the tree
+      ontology.addOntologyModificationListener(this);
     }
   }
 
@@ -285,6 +288,38 @@ public class OntologyClassView extends AbstractDocumentView
 
   public void resourceRenamed(Resource resource, String oldName,
                               String newName) { /* do nothing */ }
+  public void resourceRelationChanged(Ontology ontology, OResource
+    resource1, OResource resource2, int eventType) { /* do nothing */  }
+
+  public void resourcePropertyValueChanged(Ontology ontology, OResource
+    resource, RDFProperty property, Object value, int eventType) {
+    /* do nothing */  }
+
+  public void resourcesRemoved(Ontology ontology, String[] resources) {  }
+
+  public void resourceAdded(Ontology ontology, OResource resource) {
+    if (resource instanceof OClass) {
+      final JTree tree = treeByOntologyMap.get(ontology);
+      final Enumeration<TreePath> enumeration =
+        tree.getExpandedDescendants(tree.getPathForRow(0));
+      SwingUtilities.invokeLater(new Runnable() { public void run() {
+        // traverse the expanded class tree and update all the nodes
+        while (enumeration.hasMoreElements()) {
+          TreePath treePath = enumeration.nextElement();
+          DefaultMutableTreeNode node = (DefaultMutableTreeNode)
+            treePath.getLastPathComponent();
+          Object userObject = node.getUserObject();
+          OClass oClass = (OClass) userObject;
+            Set<OClass> classes = oClass.getSubClasses(
+              OConstants.Closure.DIRECT_CLOSURE);
+            // add the modified node
+            addNodes(tree, node, classes, false);
+        }
+      }});
+    }
+  }
+
+  public void ontologyReset(Ontology ontology) { /* do nothing */ }
 
   /**
    * Extract annotations that have been created by this view and
@@ -468,32 +503,14 @@ public class OntologyClassView extends AbstractDocumentView
                 tree.getSelectionPath().getLastPathComponent();
               Object userObject = node.getUserObject();
               OClass oClass = (OClass) userObject;
-              final Set<OClass> classes =
-                oClass.getSubClasses(OClass.Closure.DIRECT_CLOSURE);
+              Set<OClass> classes = oClass.getSubClasses(
+                OClass.Closure.DIRECT_CLOSURE);
               addNodes(tree, node, classes, false);
             }
           }));
         }
         popup.show(e.getComponent(), e.getX(), e.getY());
       }
-    });
-
-    // listen to modification of classes in the ontology to rebuild the tree
-    ontology.addOntologyModificationListener(new OntologyModificationListener() {
-      public void resourceRelationChanged(Ontology ontology, OResource
-        resource1, OResource resource2, int eventType) { /* do nothing */  }
-      public void resourcePropertyValueChanged(Ontology ontology, OResource
-        resource, RDFProperty property, Object value, int eventType) {
-        /* do nothing */  }
-      public void resourcesRemoved(Ontology ontology, String[] resources) {
-      }
-      public void resourceAdded(Ontology ontology, OResource resource) {
-        if (resource instanceof OClass) {
-//           disclosureCheckBox.doClick();
-//           disclosureCheckBox.doClick();
-        }
-      }
-      public void ontologyReset(Ontology ontology) { /* do nothing */ }
     });
 
     GridBagConstraints  gbc = new GridBagConstraints();
@@ -547,9 +564,11 @@ public class OntologyClassView extends AbstractDocumentView
       tree.setCellEditor(new ClassTreeCellEditor(tree));
       DefaultMutableTreeNode node = (DefaultMutableTreeNode)
         tree.getModel().getRoot();
+      Enumeration enumeration = node.children();
       // expand tree until second level
-      for (int row = 0; row < node.getChildCount(); row++) {
-        tree.expandRow(row);
+      while (enumeration.hasMoreElements()) {
+        node = (DefaultMutableTreeNode) enumeration.nextElement();
+        tree.expandPath(new TreePath(node.getPath()));
       }
     }});
   }
