@@ -250,12 +250,16 @@ public class MainFrame extends JFrame implements ProgressListener,
    * Selects a resource if loaded in the system and not invisible.
    *
    * @param res the resource to be selected.
+   * @return the {@link Handle} for the resource, null if not found.
    */
-  public void select(Resource res) {
+  public Handle select(Resource res) {
     // first find the handle for the resource
     Handle handle = findHandleForResource(res);
     // now select the handle if found
-    if(handle != null) select(handle);
+    if(handle != null) {
+      select(handle);
+    }
+    return handle;
   }
 
   protected void select(Handle handle) {

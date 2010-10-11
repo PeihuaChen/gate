@@ -2250,6 +2250,14 @@ public class OntologyEditor extends AbstractVisualResource
 
   } // end of DnDJTree
 
+  public void selectResourceInClassTree(final OResource resource) {
+    SwingUtilities.invokeLater(new Runnable() { public void run() {
+      tabbedPane.setSelectedComponent(scroller);
+      tree.setSelectionPath(new TreePath(uri2TreeNodesListMap.get(
+        resource.getURI().toString()).get(0).getPath()));
+      tree.scrollPathToVisible(tree.getSelectionPath());
+    }});
+  }
   /**
    * the ontology instance
    */

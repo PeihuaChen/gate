@@ -17,7 +17,9 @@ package gate.gui.docview;
 import gate.Annotation;
 import gate.AnnotationSet;
 import gate.Factory;
+import gate.gui.Handle;
 import gate.gui.MainFrame;
+import gate.gui.ontology.OntologyEditor;
 import gate.swing.XJTable;
 import gate.creole.ontology.*;
 import gate.util.InvalidOffsetException;
@@ -208,43 +210,12 @@ public class OntologyInstanceView extends AbstractDocumentView {
           if (evt.isPopupTrigger()) {
             // context menu
             JPopupMenu popup = new JPopupMenu();
+            if (table.getSelectedRowCount() == 1) {
+              popup.add(new ShowInstanceInOntologyEditorAction());
+              popup.addSeparator();
+            }
             if (table.getSelectedRowCount() > 0) {
-              popup.add(new AbstractAction(table.getSelectedRowCount() > 1 ?
-                "Delete instances" : "Delete instance") {
-                public void actionPerformed(ActionEvent e) {
-                  String ontology = selectedOntology.getDefaultNameSpace();
-                  ontology = ontology.substring(0, ontology.length()-1);
-                  for (OInstance oInstance : instances) {
-                    for (int selectedRow : table.getSelectedRows()) {
-                      if (oInstance.getName().equals(
-                          table.getModel().getValueAt(selectedRow, 0))) {
-                        selectedOntology.removeOInstance(oInstance);
-                        // find annotations related to this instance
-                        AnnotationSet annotationSet =
-                          document.getAnnotations(classView.getSelectedSet());
-                        for (Annotation annotation :
-                          annotationSet.get("Mention")) {
-                          if (annotation.getFeatures().containsKey(ONTOLOGY)
-                          && annotation.getFeatures().get(ONTOLOGY)
-                            .equals(ontology)
-                          && annotation.getFeatures().containsKey(CLASS)
-                          && annotation.getFeatures().get(CLASS)
-                            .equals(selectedClass.getONodeID().toString())
-                          && annotation.getFeatures().containsKey(INSTANCE)
-                          && annotation.getFeatures().get(INSTANCE)
-                            .equals(oInstance.getONodeID().toString())) {
-                            // delete the annotation
-                            annotationSet.remove(annotation);
-                          }
-                        }
-                      }
-                    }
-                  }
-                  classView.setClassHighlighted(selectedClass, false);
-                  classView.setClassHighlighted(selectedClass, true);
-                  updateInstanceTable(selectedClass);
-                }
-              });
+              popup.add(new DeleteSelectedInstanceAction());
             }
             if (popup.getComponentCount() > 0) {
               popup.show(table, evt.getX(), evt.getY());
@@ -280,33 +251,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
             // context menu
             JPopupMenu popup = new JPopupMenu();
             if (table.getSelectedRowCount() > 0) {
-              popup.add(new AbstractAction(table.getSelectedRowCount() > 1 ?
-                "Delete properties" : "Delete property") {
-                public void actionPerformed(ActionEvent e) {
-                  for (ObjectProperty objectProperty : setProperties) {
-                    for (int selectedRow : table.getSelectedRows()) {
-                      // find the property that matches the first column value
-                      if (objectProperty.getName().equals(
-                          table.getModel().getValueAt(selectedRow, 0))) {
-                        for (OInstance oInstance : selectedInstance
-                            .getObjectPropertyValues(objectProperty)) {
-                          String value = oInstance.getONodeID()
-                            .getResourceName();
-                          // find the value that matches the second column value
-                          if (value.equals(table.getModel()
-                              .getValueAt(selectedRow, 1))) {
-                            // delete the property
-                            selectedInstance.removeObjectPropertyValue(
-                              objectProperty, oInstance);
-                            break;
-                          }
-                        }
-                      }
-                    }
-                  }
-                  updatePropertyTable();
-                }
-              });
+              popup.add(new DeleteSelectedPropertyAction());
             }
             if (popup.getComponentCount() > 0) {
               popup.show(table, evt.getX(), evt.getY());
@@ -764,6 +709,116 @@ public class OntologyInstanceView extends AbstractDocumentView {
       } else {
         fireEditingStopped();
       }
+    }
+  }
+
+  protected class ShowInstanceInOntologyEditorAction extends AbstractAction {
+    public ShowInstanceInOntologyEditorAction() {
+      super("Show In Ontology Editor");
+    }
+
+    public void actionPerformed(ActionEvent event) {
+      // show the ontology editor if not already displayed
+      SwingUtilities.invokeLater(new Runnable() { public void run() {
+        final Handle handle = MainFrame.getInstance().select(selectedOntology);
+        if (handle == null) { return; }
+        // wait some time for the ontology editor to be displayed
+        Date timeToRun = new Date(System.currentTimeMillis() + 1000);
+        Timer timer = new Timer("Ontology Instance View Timer", true);
+        timer.schedule(new TimerTask() { public void run() {
+          String instanceName = (String) instanceTable.getModel()
+            .getValueAt(instanceTable.getSelectedRow(), 0);
+          for (OInstance oInstance : instances) {
+            if (oInstance.getName().equals(instanceName)) {
+              // found the corresponding instance in the ontology
+              JComponent largeView = handle.getLargeView();
+              if (largeView != null
+              && largeView instanceof JTabbedPane
+              && ((JTabbedPane)largeView).getSelectedComponent() != null) {
+                  ((OntologyEditor) ((JTabbedPane) largeView)
+                    .getSelectedComponent())
+                      .selectResourceInClassTree(oInstance);
+              }
+              break;
+            }
+          }
+        }}, timeToRun);
+      }});
+    }
+  }
+
+  protected class DeleteSelectedInstanceAction extends AbstractAction {
+    public DeleteSelectedInstanceAction() {
+      super(instanceTable.getSelectedRowCount() > 1 ?
+        "Delete instances" : "Delete instance");
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("shift DELETE"));
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      String ontology = selectedOntology.getDefaultNameSpace();
+      ontology = ontology.substring(0, ontology.length()-1);
+      for (OInstance oInstance : instances) {
+        for (int selectedRow : instanceTable.getSelectedRows()) {
+          if (oInstance.getName().equals(
+              instanceTable.getModel().getValueAt(selectedRow, 0))) {
+            selectedOntology.removeOInstance(oInstance);
+            // find annotations related to this instance
+            AnnotationSet annotationSet =
+              document.getAnnotations(classView.getSelectedSet());
+            for (Annotation annotation :
+              annotationSet.get("Mention")) {
+              if (annotation.getFeatures().containsKey(ONTOLOGY)
+              && annotation.getFeatures().get(ONTOLOGY)
+                .equals(ontology)
+              && annotation.getFeatures().containsKey(CLASS)
+              && annotation.getFeatures().get(CLASS)
+                .equals(selectedClass.getONodeID().toString())
+              && annotation.getFeatures().containsKey(INSTANCE)
+              && annotation.getFeatures().get(INSTANCE)
+                .equals(oInstance.getONodeID().toString())) {
+                // delete the annotation
+                annotationSet.remove(annotation);
+              }
+            }
+          }
+        }
+      }
+      classView.setClassHighlighted(selectedClass, false);
+      classView.setClassHighlighted(selectedClass, true);
+      updateInstanceTable(selectedClass);
+    }
+  }
+
+  protected class DeleteSelectedPropertyAction extends AbstractAction {
+    public DeleteSelectedPropertyAction() {
+      super(propertyTable.getSelectedRowCount() > 1 ?
+        "Delete properties" : "Delete property");
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("shift DELETE"));
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      for (ObjectProperty objectProperty : setProperties) {
+        for (int selectedRow : propertyTable.getSelectedRows()) {
+          // find the property that matches the first column value
+          if (objectProperty.getName().equals(
+              propertyTable.getModel().getValueAt(selectedRow, 0))) {
+            for (OInstance oInstance : selectedInstance
+                .getObjectPropertyValues(objectProperty)) {
+              String value = oInstance.getONodeID()
+                .getResourceName();
+              // find the value that matches the second column value
+              if (value.equals(propertyTable.getModel()
+                  .getValueAt(selectedRow, 1))) {
+                // delete the property
+                selectedInstance.removeObjectPropertyValue(
+                  objectProperty, oInstance);
+                break;
+              }
+            }
+          }
+        }
+      }
+      updatePropertyTable();
     }
   }
 
