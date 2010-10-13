@@ -12,21 +12,19 @@
 	http://www.gate.ac.uk/sale/tao/splitch3.html#x5-630003.4
 	http://www.gate.ac.uk/sale/tao/splitch4.html#x6-1150004 -->
 <CREOLE-DIRECTORY>		     
- <JAR>lib/commons-cli.jar</JAR>
- <JAR>lib/commons-codec.jar</JAR>
- <JAR>lib/commons-collections.jar</JAR>
- <JAR>lib/commons-httpclient.jar</JAR>
- <JAR>lib/commons-io.jar</JAR>
- <JAR>lib/commons-lang.jar</JAR>
- <JAR>lib/kim-api.jar</JAR>
- <JAR>lib/kim-util.jar</JAR>
- <JAR>lib/slf4j-api.jar</JAR>
- <JAR>lib/slf4j-log4j12.jar</JAR>
- <JAR>lib/trove.jar</JAR>
+ <JAR>lib/commons-cli-1.1.jar</JAR>
+ <JAR>lib/commons-codec-1.3.jar</JAR>
+ <JAR>lib/commons-collections-3.2.1.jar</JAR>
+ <JAR>lib/commons-httpclient-3.1.jar</JAR>
+ <JAR>lib/kim-api-3.0-RC5.jar</JAR>
+ <JAR>lib/kim-util-3.0-RC5.jar</JAR>
+ <JAR>lib/slf4j-api-1.5.6.jar</JAR>
+ <JAR>lib/slf4j-log4j12-1.5.6.jar</JAR>
+ <JAR>lib/trove-1.1-beta-5.jar</JAR>
  <JAR>lib/owlim-3.3.jar</JAR>
  <JAR>lib/trree-3.3.jar</JAR>
  <JAR>lib/openrdf-sesame-2.3.2-onejar.jar</JAR> 
- <JAR>lkb-gazetteer.jar</JAR>	
+ <JAR>Gazetteer_LKB.jar</JAR>	
  <CREOLE>
 
     <!-- 

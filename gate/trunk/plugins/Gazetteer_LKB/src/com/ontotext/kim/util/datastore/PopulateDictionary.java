@@ -11,17 +11,17 @@ import org.openrdf.query.TupleQueryResultHandler;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 
-import com.ontotext.kim.KIMConstants;
 import com.ontotext.kim.client.KIMRuntimeException;
 import com.ontotext.kim.client.semanticrepository.QueryResultListener;
 import com.ontotext.kim.model.AliasCacheImpl;
+import com.ontotext.kim.model.Options;
 import com.ontotext.kim.semanticrepository.UnmanagedRepositoryFactory;
 
 public class PopulateDictionary {
 
 	private static class TempAliasCache extends AliasCacheImpl {
 		public TempAliasCache(QueryResultListener.Feed dataFeed) {
-			super(KIMConstants.CASE_SENSITIV);
+			super(Options.SENSITIVE);
 			List<String> el = Collections.emptyList(); 
 			File dictionaryPath;
 			try {

@@ -1,0 +1,188 @@
+<?xml version="1.0"?>
+<project>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.ontotext.kim</groupId>
+	<artifactId>lkb-gazetteer</artifactId>
+	<name>lkb-gazetteer</name>
+	<version>1.1</version>
+	<url>http://nmwiki.ontotext.com/lkb_gazetteer/</url>
+
+	<description>
+	The large knowledge base (KB) gazetteer allows loading huge collections 
+	of identifiers and labels and using them for gazetteer lookup.
+    This gazetteer extracts can dictionary from a remote RDF repository,
+	local set of RDF files ot pregenerated binary image of a such collection. 
+	</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>gate</groupId>
+			<artifactId>gate-core</artifactId>
+			<version>5.2.1</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.ontotext.kim</groupId>
+			<artifactId>kim-util</artifactId>
+			<version>3.0-RC5</version>
+			<exclusions>
+				<exclusion>	  
+					<groupId>com.ontotext</groupId>
+					<artifactId>platform-api</artifactId>
+				</exclusion>
+			</exclusions>		
+		</dependency>
+		<dependency>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
+			<version>3.2.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>trove</groupId>
+			<artifactId>trove</artifactId>     
+			<version>1.1-beta-5</version>
+		</dependency>	
+
+		<!-- Swift OWLIM can be used when loading local RDF files -->
+		<dependency>
+			<groupId>com.ontotext</groupId>
+			<artifactId>owlim</artifactId>
+			<version>3.3</version> 
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+
+		<!-- PROTON for the local ontology sample -->
+
+		<dependency>
+			<groupId>com.ontotext.kim.resources</groupId>
+			<artifactId>kim-upper-ontology</artifactId>
+			<version>2006-05.0.5</version>
+			<type>zip</type>
+			<classifier>bin</classifier>
+			<optional>true</optional>
+		</dependency>			
+
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-onejar</artifactId>
+			<version>2.3.2</version> 
+		</dependency>
+
+		<!-- Optional dependency of sesame-onejar; Required here for HTTPRepository
+	     and SPARQL Endpoint support -->
+		<dependency>
+			<groupId>commons-httpclient</groupId>
+			<artifactId>commons-httpclient</artifactId>
+			<version>3.1</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.easymock</groupId>
+			<artifactId>easymock</artifactId>
+			<version>2.5.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<!-- Scope is not "test" due to some functional tests present in src/main -->
+		</dependency>	 
+	</dependencies>
+
+	<build>
+		<sourceDirectory>src</sourceDirectory>
+		<plugins>  
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+
+					<!-- See the bottom for actual value -->
+					<encoding>${project.build.sourceEncoding}</encoding>
+
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<finalName>lkb_gazetteer</finalName>
+					<descriptors>
+						<descriptor>creole-bin.xml</descriptor>
+					</descriptors>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<repositories>
+		<!-- Note that the repository URLs should NOT end in / -->
+		<repository>
+			<id>public</id>
+			<name>Ontotext Public Repository</name>
+			<url>
+      http://maven.ontotext.com/archiva/repository/public</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
+	<distributionManagement>
+		<repository>
+			<id>public</id>
+			<url>dav:http://maven.ontotext.com/archiva/repository/public</url>
+		</repository>
+		<snapshotRepository>
+			<id>public</id>
+			<url>
+      dav:http://maven.ontotext.com/archiva/repository/public</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+	<developers>
+		<developer>
+			<id>danko</id>
+			<name>Danail Kozhuharov</name>
+			<email>danko@ontotext.com</email>
+		</developer>
+		<developer>
+			<id>mnozhchev</id>
+			<name>Marin Nozhchev</name>
+			<email>marin.nozhchev@ontotext.com</email>
+		</developer>	
+	</developers>
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-pmd-plugin</artifactId>
+				<configuration>
+					<sourceEncoding>utf-8</sourceEncoding>
+					<minimumTokens>100</minimumTokens>
+					<targetJdk>1.5</targetJdk>
+				</configuration>
+			</plugin>
+		</plugins>
+	</reporting> 
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<organization.logo>http://ontotext.com/images/ontotext_logo.jpg</organization.logo>
+	</properties>	
+</project>

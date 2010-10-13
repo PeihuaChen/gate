@@ -8,10 +8,6 @@
 
      {gate.home}/bin/ant
 
-   or, on Windows
-     
-     {gate.home}\bin\ant
-
    where {gate.home} is the directory in which GATE was installed.
 
 =======================================================================-->
@@ -22,11 +18,12 @@
   <!--=======================================================
     Property settings.  You should not need to edit these
     directly, if you need to set a different value for any
-    property you should edit build.properties and override
-    them there.
+    property you should create or edit build.properties and override
+    them there. build.properties is ignored in SVN, so you can safely
+	put local settings there.
   ========================================================-->
 
-  <property name="plugin.name" value="lkb-gazetteer" />
+  <property name="plugin.name" value="Gazetteer_LKB" />
 
   <!-- location of the top-level GATE installation directory -->
   <property name="gate.home" location="../.." />

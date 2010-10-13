@@ -21,7 +21,6 @@ import com.ontotext.kim.client.semanticrepository.QueryResultListener;
 import com.ontotext.kim.client.semanticrepository.QueryResultListener.Feed;
 import com.ontotext.kim.gate.KimLookupParser;
 import com.ontotext.kim.gate.KimLookupParser.AliasLookupDictionary;
-import com.ontotext.kim.util.ListReader;
 import com.ontotext.kim.util.StringTransformations;
 
 
@@ -85,9 +84,8 @@ public class AliasCacheImpl implements AliasLookupDictionary {
   private static Map<File, LoadedCache> aliasDictionaries = new HashMap<File, LoadedCache>();
   private static Object instanceLock = new Object();
 
-  public static AliasCacheImpl getInstance() throws ResourceInstantiationException {
-    String caseSens = System.getProperty("com.ontotext.kim.KIMConstants.ENTITY_CASE_TYPE", KIMConstants.CASE_INSENSITIV);
-    return getInstance(new File(KIMConstants.KIM_CACHE_PATH), caseSens, "<unknown>");
+  public static AliasCacheImpl getInstance() throws ResourceInstantiationException {    
+    return getInstance(new File(KIMConstants.KIM_CACHE_PATH), "<unknown>");
   }
 
   private static class LoadedCache {
@@ -99,11 +97,10 @@ public class AliasCacheImpl implements AliasLookupDictionary {
    * A static method for generation/access to the one and only instance
    * of the alias cache
    * @param dictionaryPath 
-   * @param caseSens (currently ignored; TODO)
    * @return - the instance of the cache
    * @throws ResourceInstantiationException
    */
-  public static AliasCacheImpl getInstance(File dictionaryPath, String caseSens, String clientId) throws ResourceInstantiationException {
+  public static AliasCacheImpl getInstance(File dictionaryPath, String clientId) throws ResourceInstantiationException {
     synchronized(instanceLock) {
       if ( !aliasDictionaries.containsKey(dictionaryPath)) {     
         LoadedCache lc = new LoadedCache();
@@ -135,7 +132,21 @@ public class AliasCacheImpl implements AliasLookupDictionary {
     Options opt = Options.load(dictionaryPath);
     AliasCacheImpl aliasCacheInstance = new AliasCacheImpl(opt.getCaseSensitivity());
     Feed feed = feedFactory.createFeed(dictionaryPath);
-    Set<String> ignoreList = ListReader.fromFile(KIMConstants.KIM_GAZETEER_IGNORE_LIST_PATH,log);
+    Set<String> ignoreList = Collections.emptySet();
+    File ignoreListFile = opt.getIgnoreListPath();
+    if (ignoreListFile != null) {
+      if (ignoreListFile.isFile()) {
+        try {
+          ignoreList = new HashSet<String>(FileUtils.readLines(opt.getIgnoreListPath(), "UTF-8"));
+          log.info(ignoreList.size() +  " unique entries loaded from ignore list at " + ignoreListFile.getAbsolutePath());
+        }
+        catch(IOException e) {
+          log.warn("Could not read " + ignoreListFile.getAbsolutePath(), e);
+        }
+      } else {
+        log.warn("Ignore list at " + ignoreListFile.getAbsolutePath() + " is not present or is not an accessible file.");
+      }
+    }
     try {											
       aliasCacheInstance.initCache(ignoreList, feed, dictionaryPath, opt.isCacheEnabled());
     } catch (RemoteException e) {
@@ -203,7 +214,7 @@ public class AliasCacheImpl implements AliasLookupDictionary {
 
     // Create a TextTransformer instance for Alias text normalization
     Transformer tt = new AliasTextTransformer(
-            caseSensitivity.equals(KIMConstants.CASE_INSENSITIV));
+            caseSensitivity.equals(Options.INSENSITIVE));
     ParsingFrame.frameTT = tt;
     aliasToIgnore = new HashRegister();
     if (ignoreAliases != null) {
@@ -211,7 +222,7 @@ public class AliasCacheImpl implements AliasLookupDictionary {
         // Apply same text normalization to the aliases to be ignored 
         alias = (String)tt.transform(alias);
         aliasToIgnore.add(alias.hashCode(), alias);
-        if (caseSensitivity.equals(KIMConstants.CASE_SENSITIV_ALLUPPER)) {
+        if (caseSensitivity.equals(Options.ALL_UPPER)) {
           alias = alias.toUpperCase();
           aliasToIgnore.add(alias.hashCode(), alias);
         }
@@ -483,7 +494,7 @@ public class AliasCacheImpl implements AliasLookupDictionary {
     String[] tmp;
 
     // Enrich with UPPER case versions if needed
-    if (caseSensitivity.equals(KIMConstants.CASE_SENSITIV_ALLUPPER)) {
+    if (caseSensitivity.equals(Options.ALL_UPPER)) {
       tmp = aliases.toArray(new String[0]);
       for (int i=0; i<tmp.length; i++) {
         String tmpNew = tmp[i].toUpperCase();
