@@ -203,7 +203,7 @@ public class PRTimeReporter implements BenchmarkReportable {
                 pipelineNames.add(splittedBIDs[0]);
               }
               organizeEntries(globalStore, (matcher.group(3).replaceFirst(
-                  "\\Q" + docName + "\\E.", "")).split("\\."), matcher.group(2));
+                  Pattern.quote(docName) + ".", "")).split("\\."), matcher.group(2));
             }
           }
         }
