@@ -398,8 +398,8 @@ public class DocTimeReporter implements BenchmarkReportable {
         }
         Matcher matcher = pattern.matcher(str);
         Matcher matcherDocName = patternDocName.matcher(str);
-        Pattern patternDocEnd = Pattern.compile("(\\d+) (\\d+) " + startToken
-            + " (.*) \\{(.*)\\}.*");
+        Pattern patternDocEnd = Pattern.compile("(\\d+) (\\d+) \\Q" + startToken
+            + "\\E (.*) \\{(.*)\\}.*");
         Matcher matcherDocEnd = patternDocEnd.matcher(str);
         if (matcherDocName != null) {
           if (matcherDocName.matches()) {
@@ -415,8 +415,8 @@ public class DocTimeReporter implements BenchmarkReportable {
           }
         }
         if (matcher != null && matcher.matches()) {
-          String benchmarkIDs = matcher.group(3).replaceFirst(startToken + ".",
-              "").replaceFirst("doc_" + docName + ".", "");
+          String benchmarkIDs = matcher.group(3).replaceFirst("\\Q" + startToken + "\\E.",
+              "").replaceFirst("doc_\\Q" + docName + "\\E.", "");
           String[] splittedBenchmarkIDs = benchmarkIDs.split("\\.");
           // Getting the exact PR name and storing only entries matching PR name
           if (PRMatchingRegex.equals(MATCH_ALL_PR_REGEX)) {
