@@ -31,17 +31,17 @@ public class PrivateRepositoryFeed implements QueryResultListener.Feed {
 
 	private static final String SETTINGS_HASH_PROPERTY = "settingsHash";
 	private static final String SNAPSHOT_PROPERTIES_FILENAME = "snapshot.properties";
-	private final URL configFile;
+	private final File configFile;
 	private final String query;
 	private final int settingsHash;
 	private final Logger log = Logger.getLogger(PrivateRepositoryFeed.class);
 	private final File dictionaryPath;
 	
-	public PrivateRepositoryFeed(URL url, String query, int settingsHash) {
-		this.configFile = url;
+	public PrivateRepositoryFeed(URL configFileUrl, String query, int settingsHash) {
+		this.configFile = Files.fileFromURL(configFileUrl);		
 		this.query = query;
 		this.settingsHash = settingsHash;
-		dictionaryPath = Files.fileFromURL(configFile).getParentFile().getAbsoluteFile();
+		dictionaryPath = configFile.getParentFile().getAbsoluteFile();
 		
 		if (!verifyHash(dictionaryPath, settingsHash)) {
 			boolean deleteSuccesful = new File(dictionaryPath, "kim.trusted.entities.cache").delete();
@@ -97,7 +97,7 @@ public class PrivateRepositoryFeed implements QueryResultListener.Feed {
 	}
 
 	private Reader getConfigReader() throws IOException {
-		String configTemplate = FileUtils.readFileToString(Files.fileFromURL(configFile));
+		String configTemplate = FileUtils.readFileToString(configFile);
 		configTemplate = configTemplate.replace("%relpath%", dictionaryPath.getAbsolutePath().replace('\\', '/'));
 		configTemplate = configTemplate.replace("%temp%", System.getProperty("java.io.tmpdir", ".").replace('\\', '/'));
 		return new StringReader(configTemplate);

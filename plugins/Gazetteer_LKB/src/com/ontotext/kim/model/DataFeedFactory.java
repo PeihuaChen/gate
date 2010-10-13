@@ -1,5 +1,7 @@
 package com.ontotext.kim.model;
 
+import gate.util.Files;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -7,11 +9,8 @@ import java.rmi.RemoteException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.openrdf.query.QueryLanguage;
 
-import com.ontotext.kim.KIMConstants;
 import com.ontotext.kim.client.GetService;
-import com.ontotext.kim.client.KIMRuntimeException;
 import com.ontotext.kim.client.KIMService;
 import com.ontotext.kim.client.query.KIMQueryException;
 import com.ontotext.kim.client.semanticrepository.QueryResultListener;
@@ -53,13 +52,14 @@ public class DataFeedFactory {
 	public Feed createFeed(File dictionaryPath) {
 		final KIMService kimSvc = GetService.getKIMService();
 		Feed result = null;
-		if (kimSvc != null)
-			result = createFeed(kimSvc);
 
 		if (result == null) {
 			result = createSesameFeed(dictionaryPath);
 		}
 
+    if (result == null && kimSvc != null)
+      result = createFeed(kimSvc, dictionaryPath);
+    
 		if (result == null && !FileUtils.listFiles(dictionaryPath, new String[]{"def"}, false).isEmpty()) {
 		  result = new GazetteerListFeed(dictionaryPath);
 		}
@@ -72,7 +72,11 @@ public class DataFeedFactory {
 	private QueryResultListener.Feed createSesameFeed(File dictionaryPath) {
 		File queryFile = new File(dictionaryPath, "query.txt").getAbsoluteFile();
 		try {			
-			URL configFileUrl = new File(dictionaryPath, "config.ttl").getAbsoluteFile().toURI().toURL();				
+			URL configFileUrl = new File(dictionaryPath, "config.ttl").getAbsoluteFile().toURI().toURL();
+			if (!Files.fileFromURL(configFileUrl).isFile()) {
+			  log.info("No config.ttl file in " + dictionaryPath);
+			  return null;
+			}
 			String queryString = FileUtils.readFileToString(queryFile);
 			log.info("Query loaded from " + queryFile);
 			int settingsHash = new SettingsHashBuilder().getHash(configFileUrl, queryString);
@@ -84,7 +88,7 @@ public class DataFeedFactory {
 		return null;
 	}
 
-	private QueryResultListener.Feed createFeed(final KIMService kimSvc) {
+	private QueryResultListener.Feed createFeed(final KIMService kimSvc, File dictionaryPath) {
 
 		SemanticRepositoryAPI semRep;
 
@@ -95,13 +99,14 @@ public class DataFeedFactory {
 			return null;
 		}
 
-		String query;
-		try {
-			query = LabelsModel.get().getAllTrustedEntitiesSeRQL() + " UNION " + KIMConstants.QUERY_LEX_RES_VS_DIRECT_TYPE;
-		}
-		catch (KIMRuntimeException e) { // in case the labels model hasn't been initialized yet
-			query = KIMConstants.QUERY_LEX_RES_VS_DIRECT_TYPE;
-		}
-		return new KIMDataFeed(semRep, QueryLanguage.SERQL.getName(), query);
+    File queryFile = new File(dictionaryPath, "query.txt").getAbsoluteFile();
+    try {     
+      String queryString = FileUtils.readFileToString(queryFile);
+      return new KIMDataFeed(semRep, null, queryString);
+    } 
+    catch (IOException e) {
+      log.warn("Error while reading " + queryFile.getAbsolutePath(), e);        
+    } 
+    return null;
 	}	
 }

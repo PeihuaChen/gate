@@ -21,8 +21,6 @@ import org.openrdf.rio.RDFParser;
 import org.openrdf.rio.helpers.StatementCollector;
 import org.openrdf.rio.turtle.TurtleParser;
 
-import com.ontotext.kim.KIMConstants;
-
 /**
  * Options reader for the LKB Gazetteer
  * 
@@ -30,11 +28,17 @@ import com.ontotext.kim.KIMConstants;
  */
 public class Options {
 
+  public static final String SENSITIVE = "casesensitive";
+  public static final String ALL_UPPER = "casesensitiveAllUpper";
+  public static final String INSENSITIVE = "caseinsensitive";
+  
   private final Map<String, String> opts;
   private final static Logger log = Logger.getLogger(Options.class);
+  private final File dictionaryPath;
   
-  public Options(Map<String, String> opts) {
+  public Options(Map<String, String> opts, File dictionaryPath) {
     this.opts = opts;
+    this.dictionaryPath = dictionaryPath;
   }
   
   /**
@@ -43,7 +47,7 @@ public class Options {
    * @param dictionaryPath the dictionary path, not null
    * @return an Options instance, no null
    */
-  public static Options load(File dictionaryPath) {
+  public static Options load(File dictionaryPath) {    
     Map<String, String> opts = new HashMap<String, String>();
     Reader inp = null;
     try {
@@ -70,7 +74,7 @@ public class Options {
     finally {
       IOUtils.closeQuietly(inp);
     }
-    return new Options(Collections.unmodifiableMap(opts));
+    return new Options(Collections.unmodifiableMap(opts), dictionaryPath);
   }
 
   public static String getConfigFileName() {    
@@ -83,10 +87,18 @@ public class Options {
 
   public String getCaseSensitivity() {    
     String res = opts.get("casesensitivity");
-    return res != null ? res : KIMConstants.CASE_INSENSITIV;
+    return res != null ? res : INSENSITIVE;
   }
   
   public Map<String, String> getMap() {
     return opts; // unmodifiable
+  }
+
+  public File getIgnoreListPath() {   
+    String igPath = opts.get("ignorelist");
+    if (igPath == null)
+      return null;
+    File res = new File(igPath);
+    return res.isAbsolute() ? res : new File(dictionaryPath, igPath); 
   }
 }
