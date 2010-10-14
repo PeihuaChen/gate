@@ -324,7 +324,7 @@ public class AnnotationSchema extends AbstractLanguageResource{
     else {
       schemaString.append(">\n  <complexType>\n");
       for(FeatureSchema fs : featureSchemaSet){
-        schemaString.append("   " + fs.toXSchema(java2xSchemaMap));
+        schemaString.append(fs.toXSchema(java2xSchemaMap));
       }
       schemaString.append("  </complexType>\n");
       schemaString.append(" </element>\n");
