@@ -18,6 +18,7 @@ package gate.util;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Implements Map interface in using less memory. Very simple but usefull
@@ -58,10 +59,11 @@ class SimpleMapImpl implements Map<Object, Object>,
   transient static Object nullKey = new Object();
 
   /** the static 'all keys' collection */
-  transient public static HashMap theKeysHere = new HashMap();
+  transient public static ConcurrentHashMap theKeysHere;
 
   /** additional static members initialization */
   static {
+    theKeysHere = new ConcurrentHashMap();
     theKeysHere.put(nullKey, nullKey);
   } // static code
 
@@ -158,7 +160,7 @@ class SimpleMapImpl implements Map<Object, Object>,
       key = nullKey;
       gKey = nullKey;
     } else
-      gKey = theKeysHere.get(key);
+      gKey = theKeysHere.putIfAbsent(key, key);
     // if the key is already in the 'all keys' map - try to find it in that instance
     // comparing by reference
     if (gKey != null) {
@@ -172,7 +174,6 @@ class SimpleMapImpl implements Map<Object, Object>,
       } // for
     } else {// if(gKey != null)
       // no, the key is not in the 'all keys' map - put it there
-      theKeysHere.put(key, key);
       gKey = key;
     }
     // enlarge the containers if necessary
@@ -447,16 +448,16 @@ class SimpleMapImpl implements Map<Object, Object>,
       throws IOException, ClassNotFoundException {
     s.defaultReadObject();
     if (theKeysHere == null) {
-      theKeysHere = new HashMap();
-      theKeysHere.put(nullKey, nullKey);
+      synchronized(SimpleMapImpl.class) {
+        theKeysHere = new ConcurrentHashMap();
+        theKeysHere.put(nullKey, nullKey);
+      }
     }
     for (int i = 0; i < theKeys.length; i++) {
-      // if the key is in the 'all keys' map
-      Object o = theKeysHere.get(theKeys[i]);
+      // check if the key is in the 'all keys' map, adding it if not
+      Object o = theKeysHere.putIfAbsent(theKeys[i], theKeys[i]);
       if (o != null) // yes - so reuse the reference
         theKeys[i] = o;
-      else // no - put it in the 'all keys' map
-        theKeysHere.put(theKeys[i], theKeys[i]);
     }//for
   }//readObject
 } //SimpleMapImpl
