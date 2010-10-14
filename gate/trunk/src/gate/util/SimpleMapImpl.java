@@ -17,6 +17,7 @@ package gate.util;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,6 +28,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 class SimpleMapImpl implements Map<Object, Object>,
       java.lang.Cloneable, java.io.Serializable {
+  
+  /**
+   * Special marker class used to represent null in the keys array.
+   */
+  private static class NullKey implements Serializable {
+    private static final long serialVersionUID = 6391916290867211345L;
+
+    private NullKey() {
+    }
+  }
 
   /**
    * The capacity of the map
@@ -51,12 +62,12 @@ class SimpleMapImpl implements Map<Object, Object>,
    * to one and the same entry
    */
   Object theValues[];
-
+  
   /** Freeze the serialization UID. */
   static final long serialVersionUID = -6747241616127229116L;
 
   /** the Object instance that will represent the NULL keys in the map */
-  transient static Object nullKey = new Object();
+  transient static Object nullKey = new NullKey();
 
   /** the static 'all keys' collection */
   transient public static ConcurrentHashMap theKeysHere;
@@ -454,10 +465,15 @@ class SimpleMapImpl implements Map<Object, Object>,
       }
     }
     for (int i = 0; i < theKeys.length; i++) {
-      // check if the key is in the 'all keys' map, adding it if not
-      Object o = theKeysHere.putIfAbsent(theKeys[i], theKeys[i]);
-      if (o != null) // yes - so reuse the reference
-        theKeys[i] = o;
+      if(theKeys[i] instanceof NullKey) {
+        theKeys[i] = nullKey;
+      }
+      else if(theKeys[i] != null) {
+        // check if the key is in the 'all keys' map, adding it if not
+        Object o = theKeysHere.putIfAbsent(theKeys[i], theKeys[i]);
+        if (o != null) // yes - so reuse the reference
+          theKeys[i] = o;
+      }
     }//for
   }//readObject
 } //SimpleMapImpl
