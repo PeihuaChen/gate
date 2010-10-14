@@ -126,7 +126,7 @@ public class FeatureSchema implements Serializable {
   public String toXSchema(Map aJava2XSchemaMap) {
 
     StringBuffer schemaString = new StringBuffer();
-    schemaString.append("<attribute name=\"" + featureName + "\" ");
+    schemaString.append("   <attribute name=\"" + featureName + "\" ");
     schemaString.append("use=\"" + featureUse + "\"");
 
     // If there are no permissible values that means that the type must
@@ -135,22 +135,22 @@ public class FeatureSchema implements Serializable {
       schemaString.append(" type=\""
               + (String)aJava2XSchemaMap.get(featureValueClass) + "\"/>\n");
     else {
-      schemaString.append(">\n <simpleType>\n");
-      schemaString.append("  <restriction base=\"" + featureValueClass
-              + "\">\n");
+      schemaString.append(">\n    <simpleType>\n");
+      schemaString.append("     <restriction base=\""
+              + (String)aJava2XSchemaMap.get(featureValueClass) + "\">\n");
       Iterator featurePermissibleValuesSetIterator = featurePermissibleValuesSet
               .iterator();
 
       while(featurePermissibleValuesSetIterator.hasNext()) {
         String featurePermissibleValue = (String)featurePermissibleValuesSetIterator
                 .next();
-        schemaString.append("   <enumeration value=\""
+        schemaString.append("      <enumeration value=\""
                 + featurePermissibleValue + "\"/>\n");
       }// end while
 
-      schemaString.append("  </restriction>\n");
-      schemaString.append(" </simpleType>\n");
-      schemaString.append("</attribute>\n");
+      schemaString.append("     </restriction>\n");
+      schemaString.append("    </simpleType>\n");
+      schemaString.append("   </attribute>\n");
 
     }// end if else
 
@@ -167,10 +167,10 @@ public class FeatureSchema implements Serializable {
       return featureValue;
     else return "";
   } // getFeatureValue
-  
+
   /**
    * This method returns the value of the feature regardless of the
-   * current value of featureUse. 
+   * current value of featureUse.
    */
   public String getRawFeatureValue() {
     return featureValue;
