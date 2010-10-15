@@ -80,7 +80,7 @@ gate.AnnotationSet org = (gate.AnnotationSet)bindings.get("org");
 //(there will always be at least one)
 gate.Annotation orgAnn = org.get("TempOrganization").iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
-features.put("orgType", orgAnn.getFeatures().get("orgType"));
+if (orgAnn.getFeatures().containsKey("orgType"))  features.put("orgType", orgAnn.getFeatures().get("orgType"));
 features.put("rule1", orgAnn.getFeatures().get("rule"));
 features.put("rule2", "OrgCountryFinal");
 outputAS.add(org.firstNode(), org.lastNode(), "Organization",
@@ -132,6 +132,7 @@ gate.Annotation locAnn = (gate.Annotation)loc.iterator().next();
 gate.FeatureMap features = Factory.newFeatureMap();
 features.put("rule1", locAnn.getFeatures().get("rule"));
 features.put("rule2", "PersonLocFinal");
+features.put("locType", "airport");
 outputAS.add(loc.firstNode(), loc.lastNode(), "Location",
 features);
 outputAS.removeAll(loc);
