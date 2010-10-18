@@ -16,6 +16,16 @@
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.HashMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import org.apache.log4j.Logger;
+
 import gate.*;
 import gate.creole.metadata.*;
 import gate.util.Err;
@@ -26,9 +36,6 @@ import gate.util.Out;
  * specified amount of time has elapsed. It also ignores all errors/exceptions 
  * that may occur during execution and simply carries on with the next document
  * when that happens.
- * 
- * @author Valentin Tablan
- *
  */
 @CreoleResource(name = "Real-Time Corpus Pipeline",
     comment = "A serial controller for PR pipelines over corpora which "
@@ -38,11 +45,27 @@ import gate.util.Out;
 public class RealtimeCorpusController extends SerialAnalyserController {
 	
   private final static boolean DEBUG = false;
+  
+  /**
+   * Shared logger object.
+   */
+  private static final Logger logger = Logger.getLogger(
+          RealtimeCorpusController.class);
 
   /** Profiler to track PR execute time */
   protected Profiler prof;
   protected HashMap<String,Long> timeMap;
-   
+  
+  /**
+   * An executor service used to execute the PRs over the document .
+   */
+  protected ExecutorService threadSource;
+  
+  /**
+   * The tread currently running the document processing.
+   */
+  protected volatile Thread currentWorkingThread;
+  
   public RealtimeCorpusController(){
     super();
     if(DEBUG) {
@@ -53,104 +76,118 @@ public class RealtimeCorpusController extends SerialAnalyserController {
     }
   }
   
-  protected class DocRunner implements Runnable{
-    public void run(){
-      try{
-        //run the system over the current document
-        //set the doc and corpus
-        for(int j = 0; j < prList.size(); j++){
+  protected class DocRunner implements Callable<Object>{
+    
+    public DocRunner(Document document) {
+      this.document = document;
+    }
+    
+    public Object call() {
+      try {
+        // save a reference to the executor thread
+        currentWorkingThread = Thread.currentThread();
+        // run the system over the current document
+        // set the doc and corpus
+        for(int j = 0; j < prList.size(); j++) {
           ((LanguageAnalyser)prList.get(j)).setDocument(document);
           ((LanguageAnalyser)prList.get(j)).setCorpus(corpus);
-        }        
+        }
         interrupted = false;
-        //execute the PRs
-        //check all the PRs have the right parameters
+        // execute the PRs
+        // check all the PRs have the right parameters
         checkParameters();
         if(DEBUG) {
           prof.initRun("Execute controller [" + getName() + "]");
         }
 
-        //execute all PRs in sequence
+        // execute all PRs in sequence
         interrupted = false;
-        for (int j = 0; j < prList.size(); j++){
-          if(isInterrupted()) throw new ExecutionInterruptedException(
-              "The execution of the " + getName() +
-              " application has been abruptly interrupted!");
-  
-          if (Thread.currentThread().isInterrupted()) {
-            Err.println("Execution on document " + document.getName() + 
-              " has been stopped");
+        for(int j = 0; j < prList.size(); j++) {
+          if(isInterrupted())
+            throw new ExecutionInterruptedException("The execution of the "
+                    + getName() + " application has been abruptly interrupted!");
+
+          if(Thread.currentThread().isInterrupted()) {
+            Err.println("Execution on document " + document.getName()
+                    + " has been stopped");
             break;
           }
-          
+
           try {
             runComponent(j);
           }
-          catch (Throwable e)
-          {
-            if (!Thread.currentThread().isInterrupted())
-              throw e;
-            
-            Err.println("Execution on document " + document.getName() + 
-              " has been stopped");
+          catch(Throwable e) {
+            if(!Thread.currentThread().isInterrupted()) throw e;
+
+            Err.println("Execution on document " + document.getName()
+                    + " has been stopped");
             break;
           }
-          
-          if (DEBUG) {
-            prof.checkPoint("~Execute PR ["+((ProcessingResource)
-                                   prList.get(j)).getName()+"]");
-            Long timeOfPR = timeMap.get(((ProcessingResource)
-                                   prList.get(j)).getName());
-            if (timeOfPR == null) 
-              timeMap.put(((ProcessingResource)
-                                   prList.get(j)).getName(), new Long(prof.getLastDuration()));
-            else 
-              timeMap.put(((ProcessingResource)
-                                   prList.get(j)).getName(), new Long(timeOfPR.longValue() + prof.getLastDuration())); 
-            Out.println("Time taken so far by " + ((ProcessingResource)
-                                   prList.get(j)).getName() + ": " 
-				      + timeMap.get(((ProcessingResource) prList.get(j)).getName()));
 
-      }
-
+          if(DEBUG) {
+            prof.checkPoint("~Execute PR ["
+                    + ((ProcessingResource)prList.get(j)).getName() + "]");
+            Long timeOfPR = timeMap.get(((ProcessingResource)prList.get(j))
+                    .getName());
+            if(timeOfPR == null)
+              timeMap.put(((ProcessingResource)prList.get(j)).getName(),
+                      new Long(prof.getLastDuration()));
+            else timeMap.put(((ProcessingResource)prList.get(j)).getName(),
+                    new Long(timeOfPR.longValue() + prof.getLastDuration()));
+            Out.println("Time taken so far by "
+                    + ((ProcessingResource)prList.get(j)).getName()
+                    + ": "
+                    + timeMap.get(((ProcessingResource)prList.get(j)).getName()));
+          }
         }
-      }catch(ThreadDeath td){
-        //special case as we need to re-throw this one
-        Err.prln("Execution on document " + document.getName() + 
-                " has been stopped");
-        throw(td);
-      }catch(Throwable cause){
-        Err.prln("Execution on document " + document.getName() + 
-                " has caused an error:\n=========================");
+      }
+      catch(ThreadDeath td) {
+        // special case as we need to re-throw this one
+        Err.prln("Execution on document " + document.getName()
+                + " has been stopped");
+        throw (td);
+      }
+      catch(Throwable cause) {
+        Err.prln("Execution on document " + document.getName()
+                + " has caused an error:\n=========================");
         cause.printStackTrace(Err.getPrintWriter());
         Err.prln("=========================\nError ignored...\n");
-      }finally{
-        //unset the doc and corpus
-        for(int j = 0; j < prList.size(); j++){
+      }
+      finally {
+        // remove the reference to the thread, as we're now done
+        currentWorkingThread = null;
+        // unset the doc and corpus
+        for(int j = 0; j < prList.size(); j++) {
           ((LanguageAnalyser)prList.get(j)).setDocument(null);
           ((LanguageAnalyser)prList.get(j)).setCorpus(null);
         }
-        
-        if (DEBUG) {
+
+        if(DEBUG) {
           prof.checkPoint("Execute controller [" + getName() + "] finished");
         }
       }
+      
+      return null;
     }
-    
-    Document document;
-    public Document getDocument() {
-      return document;
-    }
-    public void setDocument(Document document) {
-      this.document = document;
-    }
-    
+    private Document document;
   }
   
+  @Override
+  public void cleanup() {
+    threadSource.shutdownNow();
+    super.cleanup();
+  }
+
+  @Override
+  public Resource init() throws ResourceInstantiationException {
+    // we normally require 2 threads: one to execute the PRs and another one to
+    // to execute the job stoppers. More threads are created ar required.
+    threadSource = Executors.newSingleThreadExecutor();
+    return super.init();
+  }
+
   /** Run the Processing Resources in sequence. */
   public void executeImpl() throws ExecutionException{
-    Timer timeoutTimer = new Timer(this.getClass().getName() + 
-        " timeout timer");
     interrupted = false;
     if(corpus == null) throw new ExecutionException(
       "(SerialAnalyserController) \"" + getName() + "\":\n" +
@@ -163,75 +200,83 @@ public class RealtimeCorpusController extends SerialAnalyserController {
 
       boolean docWasLoaded = corpus.isDocumentLoaded(i);
       Document doc = (Document)corpus.get(i);
-      DocRunner docRunner = new DocRunner();
-      docRunner.setDocument(doc);
-      final Thread workerThread = new Thread(docRunner, 
-              this.getClass().getCanonicalName() + " worker thread (document " +
-              doc.getName() + ")");
-      
-      //We need three timer tasks to do a staged stop that gets harsher as we go on...
-      
-      //first we simply interrupt the PRs and the thread they are being run in
-      TimerTask gracefulTask = new TimerTask()
-      {
-        public void run() {
-          Err.prln("Execution timeout, attempting to gracefully stop worker thread...");
-          workerThread.interrupt();
+      // start the execution, in the separate thread
+      Future<?> docRunnerFuture = threadSource.submit(new DocRunner(doc));
+      // how long have we already waited 
+      long waitSoFar = 0;
+      // check if we should use graceful stop first 
+      if (graceful != -1 && (timeout == -1 || graceful < timeout )) {
+        try {
+          docRunnerFuture.get(graceful, TimeUnit.MILLISECONDS);
+        } catch(TimeoutException e) {
+          // we waited the graceful period, and the task did not finish
+          // -> interrupt the job (nicely)
+          waitSoFar += graceful;
+          logger.info("Execution timeout, attempting to gracefully stop worker thread...");
+          docRunnerFuture.cancel(true);
           for(int j = 0; j < prList.size(); j++){
             ((Executable)prList.get(j)).interrupt();
           }
-        }
-      };
-      
-      //if using interrupt didn't stop things then we nullify the document and corpus params
-      //in the hope that we will induce a null pointer exception
-      TimerTask nullifyTask = new TimerTask()
-      {
-        public void run() {
-          if (!workerThread.isAlive()) return;
-          Err.println("Execution timeout, attempting to induce exception in order to stop worker thread...");
-          for(int j = 0; j < prList.size(); j++){
-            ((LanguageAnalyser)prList.get(j)).setDocument(null);
-            ((LanguageAnalyser)prList.get(j)).setCorpus(null);
+          // next check scheduled for 
+          // - half-time between graceful and timeout, or
+          // - graceful-and-a-half (if no timeout)
+          long waitTime = (timeout != -1) ? 
+                          (timeout - graceful) / 2 : 
+                          (graceful / 2);
+          try {
+            docRunnerFuture.get(waitTime, TimeUnit.MILLISECONDS);
+          } catch(TimeoutException e1) {
+            // the mid point has been reached: try nullify
+            waitSoFar += waitTime;
+            logger.info("Execution timeout, attempting to induce exception in order to stop worker thread...");
+            for(int j = 0; j < prList.size(); j++){
+              ((LanguageAnalyser)prList.get(j)).setDocument(null);
+              ((LanguageAnalyser)prList.get(j)).setCorpus(null);
+            }            
+          } catch(InterruptedException e1) {
+            // the current thread (not the execution thread!) was interrupted
+            // throw it forward
+            Thread.currentThread().interrupt();
+          } catch(java.util.concurrent.ExecutionException e2) {
+            throw new ExecutionException(e2);
           }
-        }
-      };
-      
-      //if the PR still hasn't stopped then be ruthless and just stop the thread dead in it's tracks!
-      TimerTask timeoutTask = new TimerTask()
-      {
-        public void run() {
-          if (!workerThread.isAlive()) return;
-          Err.println("Execution timout, worker thread will be forcibly terminated!");
-          workerThread.stop();
-        }
-      };
-      
-      //only schedule the first two tasks if the graceful timeout param makes sense 
-      if (graceful.longValue() != -1 && (timeout.longValue() == -1 || graceful.longValue() < timeout.longValue())) {
-        timeoutTimer.schedule(gracefulTask, graceful.longValue());
-        
-        long nullTime = graceful.longValue() + (timeout.longValue() != -1 ? (timeout.longValue()-graceful.longValue())/2 : graceful.longValue() / 2);
-        
-        timeoutTimer.schedule(nullifyTask, nullTime);
-      }
-      
-      if (timeout.longValue() != -1) timeoutTimer.schedule(timeoutTask, timeout.longValue());
-      
-      //start the execution
-      workerThread.start();
-      
-      //wait for the execution to finish or timeout
-      while(workerThread.isAlive()){
-        try{
-          Thread.sleep(POLL_INTERVAL);
-        }catch(InterruptedException ie){
-          //we don't like being interrupted -> clear the interrupted flag
-          Thread.interrupted();
+        } catch(java.util.concurrent.ExecutionException e) {
+          throw new ExecutionException(e);
+        } catch(InterruptedException e) {
+          // the current thread (not the execution thread!) was interrupted
+          // throw it forward
+          Thread.currentThread().interrupt();
         }
       }
-      timeoutTask.cancel();
+      // wait before we call stop()
+      if(timeout != -1) {
+        long waitTime = timeout - waitSoFar;
+        if(waitTime > 0) {
+          try {
+            docRunnerFuture.get(waitTime, TimeUnit.MILLISECONDS);
+          } catch(TimeoutException e) {
+            // we're out of time: stop the thread
+            logger.info("Execution timeout, worker thread will be forcibly terminated!");
+            // using a volatile variable instead of synchronisation
+            Thread theThread = currentWorkingThread;
+            if(theThread != null) theThread.stop();
+          } catch(InterruptedException e) {
+            // the current thread (not the execution thread!) was interrupted
+            // throw it forward
+            Thread.currentThread().interrupt();
+          } catch(java.util.concurrent.ExecutionException e) {
+            throw new ExecutionException(e);
+          }
+        } else {
+          // stop now!
+          logger.info("Execution timeout, worker thread will be forcibly terminated!");
+          // using a volatile variable instead of synchronisation
+          Thread theThread = currentWorkingThread;
+          if(theThread != null) theThread.stop();
+        }
+      }
       
+      // at this point we finished execution (one way or another)
       if(!docWasLoaded){
         //trigger saving
         getCorpus().unloadDocument(doc);
@@ -239,30 +284,62 @@ public class RealtimeCorpusController extends SerialAnalyserController {
         Factory.deleteResource(doc);
       }
     }
-    
-    //get rid of the timeout timer.
-    timeoutTimer.cancel();
   }
   
   
+  /**
+   * The timeout in milliseconds before execution on a document is 
+   * forcibly stopped (forcibly stopping execution may result in memory leaks 
+   * and/or unexpected behaviour).   
+   */
   protected Long timeout;
 
+  /**
+   * Gets the timeout in milliseconds before execution on a document is 
+   * forcibly stopped (forcibly stopping execution may result in memory leaks 
+   * and/or unexpected behaviour).
+   * @return
+   */
   public Long getTimeout() {
     return timeout;
   }
   
+  
+  /**
+   * Sets the timeout in milliseconds before execution on a document is 
+   * forcibly stopped (forcibly stopping execution may result in memory leaks 
+   * and/or unexpected behaviour).
+   * @param timeout
+   */
   @CreoleParameter(defaultValue = "60000",
-      comment = "Timout in milliseconds before execution on a document is forcibly stopped (forcibly stopping execution may result in memory leaks and/or unexpected behaviour)")
+      comment = "Timeout in milliseconds before execution on a document is forcibly stopped (forcibly stopping execution may result in memory leaks and/or unexpected behaviour)")
   public void setTimeout(Long timeout) {
     this.timeout = timeout;
   }
   
+  /**
+   * The timeout in milliseconds before execution on a document is 
+   * gracefully stopped. Defaults to -1 which disables this functionality and 
+   * relies, as previously, on forcibly stopping execution.
+   */
   protected Long graceful;
 
+  /**
+   * Gets the timeout in milliseconds before execution on a document is 
+   * gracefully stopped. Defaults to -1 which disables this functionality and 
+   * relies, as previously, on forcibly stopping execution.
+   * @return
+   */
   public Long getGracefulTimeout() {
     return graceful;
   }
 
+  /**
+   * Sets the timeout in milliseconds before execution on a document is 
+   * gracefully stopped. Defaults to -1 which disables this functionality and 
+   * relies, as previously, on forcibly stopping execution.
+   * @param graceful
+   */
   @CreoleParameter(defaultValue = "-1",
       comment = "Timeout in milliseconds before execution on a document is gracefully stopped. Defaults to -1 which disables this functionality and relies, as previously, on forcibly stoping execution.")
   public void setGracefulTimeout(Long graceful) {
