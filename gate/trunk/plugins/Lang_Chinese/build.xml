@@ -5,6 +5,10 @@
         ANNIE like resources for the Chinese language. A Chinese segmenter 
         plugin, using the PAUM learning algorithm see http://gate.ac.uk
     </description>
+
+    <!-- Prevent Ant from warning about includeantruntime not being set -->
+    <property name="build.sysclasspath" value="ignore" />
+
 	<!-- ******************************************************************* 
        ****************  USER OPTIONS ************************************ 
        *******************************************************************

@@ -13,6 +13,9 @@
 =======================================================================-->
 <project name="lkb-gazetteer" basedir="." default="all">
 
+  <!-- Prevent Ant from warning about includeantruntime not being set -->
+  <property name="build.sysclasspath" value="ignore" />
+
   <property file="build.properties" />
 
   <!--=======================================================
