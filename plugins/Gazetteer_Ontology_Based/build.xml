@@ -3,6 +3,10 @@
     	An Ontology_Based_Gazetteer: a plugin for creating ontology-aware 
     	annotations.
     </description>
+
+  <!-- Prevent Ant from warning about includeantruntime not being set -->
+  <property name="build.sysclasspath" value="ignore" />
+
   <!-- set global properties for this build -->
   <property name="src" location="src"/>
   <property name="jar.location" location="obg.jar" />

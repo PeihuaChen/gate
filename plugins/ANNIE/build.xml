@@ -5,6 +5,9 @@
         GATE see http://gate.ac.uk
     </description>
   <!-- set global properties for this build -->
+  <!-- Prevent Ant from warning about includeantruntime not being set -->
+  <property name="build.sysclasspath" value="ignore" />
+
   <!-- Name of the output jar file -->
   <property name="jarFile"  location="heptag_wrapper.jar"/>
   

@@ -2,6 +2,10 @@
     <description>
         A plugin for Multilingual data [Hindi]
     </description>
+
+  <!-- Prevent Ant from warning about includeantruntime not being set -->
+  <property name="build.sysclasspath" value="ignore" />
+
   <!-- set global properties for this build -->
   <property name="src" location="src"/>
   <property name="build" location="build"/>

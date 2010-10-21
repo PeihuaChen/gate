@@ -23,6 +23,9 @@ Ian Roberts (i.roberts@dcs.shef.ac.uk), March 2006
     Building the SUPPLE Wrapper
   </description>
 
+  <!-- Prevent Ant from warning about includeantruntime not being set -->
+  <property name="build.sysclasspath" value="ignore" />
+
 
    <!-- ###################################################################
                             USER MODIFIABLE OPTIONS

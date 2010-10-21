@@ -3,6 +3,9 @@
         A compiler for JAPE grammars..
     </description>
 
+  <!-- Prevent Ant from warning about includeantruntime not being set -->
+  <property name="build.sysclasspath" value="ignore" />
+
   <property file="build.properties" />
 
   <!-- set global properties for this build -->

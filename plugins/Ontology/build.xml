@@ -2,6 +2,10 @@
   <description>
         A plugin for the OWLIM 3 ontology implementation 
   </description>
+
+  <!-- Prevent Ant from warning about includeantruntime not being set -->
+  <property name="build.sysclasspath" value="ignore" />
+
   <!-- set global properties for this build -->
   <property environment="env"/>
   <property file="build.properties" />
