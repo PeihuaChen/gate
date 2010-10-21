@@ -194,7 +194,8 @@
 
   <!-- The build CLASSPATH -->
   <path id="build.class.path">
-		<fileset refid="libs"/>
+    <path refid="tools.jar.path"/>
+    <fileset refid="libs"/>
     <fileset refid="exts"/>
   </path>
 
