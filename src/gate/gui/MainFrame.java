@@ -969,23 +969,6 @@ public class MainFrame extends JFrame implements ProgressListener,
       }
     }, this));
 
-    toolsMenu.add(new XJMenuItem(new AbstractAction("JAPE Debugger",
-            getIcon("application")) {
-      {
-        putValue(SHORT_DESCRIPTION, "Debugger for JAPE grammars");
-      }
-
-      private static final long serialVersionUID = 1L;
-
-      public void actionPerformed(ActionEvent evt) {
-        JOptionPane.showMessageDialog(MainFrame.this, "<html><body>"+
-                "The JAPE Debugger has been removed. GATE now provides<br>"+
-                "better JAPE related error messages to aid debugging and<br>"+
-                "better profiling support to help in the creation of more<br>"+
-                "efficient grammars. See the user guide for more details.</body></html>", "JAPE Debugger", JOptionPane.INFORMATION_MESSAGE);
-      }
-    }, this));
-
     // add separator.  plugin menu items will appear after this separator
     toolsMenu.addSeparator();
     toolsMenu.staticItemsAdded();
