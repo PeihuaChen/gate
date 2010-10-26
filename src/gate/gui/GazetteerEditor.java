@@ -35,9 +35,13 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.*;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.Collator;
@@ -504,10 +508,11 @@ public class GazetteerEditor extends AbstractVisualResource
         XJTable table = (XJTable) me.getSource();
         if (me.isPopupTrigger()
           && table.getSelectedRowCount() > 0) {
-            JPopupMenu popup = new JPopupMenu();
-            popup.add(new DeleteSelectedLinearNodeAction());
-            popup.add(new ReloadGazetteerListAction());
-            popup.show(table, me.getX(), me.getY());
+          JPopupMenu popup = new JPopupMenu();
+          popup.add(new ReloadGazetteerListAction());
+          popup.addSeparator();
+          popup.add(new DeleteSelectedLinearNodeAction());
+          popup.show(table, me.getX(), me.getY());
         }
       }
     });
@@ -535,8 +540,12 @@ public class GazetteerEditor extends AbstractVisualResource
         if (me.isPopupTrigger()
           && table.getSelectedRowCount() > 0) {
           JPopupMenu popup = new JPopupMenu();
+          popup.add(new CopySelectionAction());
+          popup.add(new PasteSelectionAction());
+          popup.addSeparator();
           popup.add(new FillDownSelectionAction());
           popup.add(new ClearSelectionAction());
+          popup.addSeparator();
           popup.add(new DeleteSelectedGazetteerNodeAction());
           popup.show(table, me.getX(), me.getY());
         }
@@ -550,7 +559,7 @@ public class GazetteerEditor extends AbstractVisualResource
       }
     });
 
-    // add key shortcuts for actions
+    // add key shortcuts for global actions
     InputMap inputMap = getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
     ActionMap actionMap = getActionMap();
     inputMap.put(KeyStroke.getKeyStroke("control S"), "save");
@@ -559,6 +568,12 @@ public class GazetteerEditor extends AbstractVisualResource
     actionMap.put("save as", actions.get(1));
     inputMap.put(KeyStroke.getKeyStroke("control R"), "reload list");
     actionMap.put("reload list", new ReloadGazetteerListAction());
+
+    // add key shortcuts for the list table actions
+    inputMap = listTable.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+    actionMap = listTable.getActionMap();
+    inputMap.put(KeyStroke.getKeyStroke("control V"), "paste table selection");
+    actionMap.put("paste table selection", new PasteSelectionAction());
   }
 
   public void setTarget(Object target) {
@@ -755,6 +770,7 @@ public class GazetteerEditor extends AbstractVisualResource
     }
 
     public void fireTableChanged(TableModelEvent e) {
+      if (gazetteerList == null) { return; }
       if (filter.length() < 2) {
         gazetteerListFiltered.clear();
         gazetteerListFiltered.addAll(gazetteerList);
@@ -951,7 +967,8 @@ public class GazetteerEditor extends AbstractVisualResource
 
   protected class DeleteSelectedLinearNodeAction extends AbstractAction {
     public DeleteSelectedLinearNodeAction() {
-      super("Delete Rows");
+      super(definitionTable.getSelectedRowCount() > 1 ?
+        "Delete Rows" : "Delete Row");
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("shift DELETE"));
     }
 
@@ -971,7 +988,8 @@ public class GazetteerEditor extends AbstractVisualResource
 
   protected class DeleteSelectedGazetteerNodeAction extends AbstractAction {
     public DeleteSelectedGazetteerNodeAction() {
-      super("Delete Rows");
+      super(listTable.getSelectedRowCount() > 1 ?
+        "Delete Rows" : "Delete Row");
       putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("shift DELETE"));
     }
 
@@ -1008,6 +1026,62 @@ public class GazetteerEditor extends AbstractVisualResource
         }
         listTableModel.fireTableDataChanged();
       }
+    }
+  }
+
+  protected class CopySelectionAction extends AbstractAction {
+    public CopySelectionAction() {
+      super("Copy Selection");
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control C"));
+    }
+
+    public void actionPerformed(ActionEvent e) {
+       listTable.getActionMap().get("copy").actionPerformed(
+        new ActionEvent(listTable, ActionEvent.ACTION_PERFORMED, null));
+//        // generate a Control + V keyboard event
+//        listTable.dispatchEvent(
+//          new KeyEvent(listTable, KeyEvent.KEY_PRESSED,
+//            e.getWhen()+1, KeyEvent.CTRL_DOWN_MASK,
+//            KeyEvent.VK_V, KeyEvent.CHAR_UNDEFINED));
+    }
+  }
+
+  protected class PasteSelectionAction extends AbstractAction {
+    public PasteSelectionAction() {
+      super("Paste Selection");
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control V"));
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      int firstRow = listTable.getSelectedRow();
+      int firstColumn = listTable.getSelectedColumn();
+      Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+      String valueCopied = null;
+      try {
+        if (clipboard.isDataFlavorAvailable(DataFlavor.stringFlavor)) {
+          valueCopied = (String) clipboard.getContents(null)
+            .getTransferData(DataFlavor.stringFlavor);
+        }
+      } catch (UnsupportedFlavorException e1) {
+        e1.printStackTrace();
+      } catch (IOException e1) {
+        e1.printStackTrace();
+      }
+      if (valueCopied == null) { return; }
+      int rowToPaste = firstRow;
+      int columnToPaste = firstColumn;
+      for (String rowCopied : valueCopied.split("\t")) {
+        for (String cellCopied : rowCopied.split("\n")) {
+          listTableModel.setValueAt(cellCopied,
+            listTable.rowViewToModel(rowToPaste),
+            listTable.convertColumnIndexToModel(columnToPaste));
+          rowToPaste++;
+          if (rowToPaste + 1 > listTable.getRowCount()) { break; }
+        }
+        columnToPaste++;
+        if (columnToPaste + 1 > listTable.getColumnCount()) { break; }
+      }
+      listTableModel.fireTableDataChanged();
     }
   }
 
