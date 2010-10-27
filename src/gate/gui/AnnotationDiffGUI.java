@@ -148,6 +148,38 @@ public class AnnotationDiffGUI extends JFrame{
     getContentPane().add(keyDocLabel, constraints);
     keyDocCombo = new JComboBox();
     keyDocCombo.setPrototypeDisplayValue("long_document_name");
+    // add the value of the combobox in a tooltip for long value
+    keyDocCombo.setRenderer(new DefaultListCellRenderer() {
+      @Override
+      public Component getListCellRendererComponent(JList list, Object value,
+          int index, boolean isSelected, boolean cellHasFocus) {
+        super.getListCellRendererComponent(
+          list, value, index, isSelected, cellHasFocus);
+        if (value != null) {
+          Rectangle textRectangle = new Rectangle(keyDocCombo.getSize().width,
+            getPreferredSize().height);
+          String shortText = SwingUtilities.layoutCompoundLabel(this,
+            getFontMetrics(getFont()), value.toString(), null,
+            getVerticalAlignment(), getHorizontalAlignment(),
+            getHorizontalTextPosition(), getVerticalTextPosition(),
+            textRectangle, new Rectangle(), textRectangle, getIconTextGap());
+          if (shortText.equals(value)) { // no tooltip
+            if (index == -1) {
+              keyDocCombo.setToolTipText(null);
+            } else {
+              setToolTipText(null);
+            }
+          } else { // add tooltip because text is shortened
+            if (index == -1) {
+              keyDocCombo.setToolTipText(value.toString());
+            } else {
+              setToolTipText(value.toString());
+            }
+          }
+        }
+        return this;
+      }
+    });
     getContentPane().add(keyDocCombo, constraints);
     JLabel keySetLabel = new JLabel("Key set:");
     keySetLabel.setToolTipText("Key annotation set");
@@ -189,6 +221,37 @@ public class AnnotationDiffGUI extends JFrame{
     constraints.gridx = GridBagConstraints.RELATIVE;
     resDocCombo = new JComboBox();
     resDocCombo.setPrototypeDisplayValue("long_document_name");
+    resDocCombo.setRenderer(new DefaultListCellRenderer() {
+      @Override
+      public Component getListCellRendererComponent(JList list, Object value,
+          int index, boolean isSelected, boolean cellHasFocus) {
+        super.getListCellRendererComponent(
+          list, value, index, isSelected, cellHasFocus);
+        if (value != null) {
+          Rectangle textRectangle = new Rectangle(resDocCombo.getSize().width,
+            getPreferredSize().height);
+          String shortText = SwingUtilities.layoutCompoundLabel(this,
+            getFontMetrics(getFont()), value.toString(), null,
+            getVerticalAlignment(), getHorizontalAlignment(),
+            getHorizontalTextPosition(), getVerticalTextPosition(),
+            textRectangle, new Rectangle(), textRectangle, getIconTextGap());
+          if (shortText.equals(value)) { // no tooltip
+            if (index == -1) {
+              resDocCombo.setToolTipText(null);
+            } else {
+              setToolTipText(null);
+            }
+          } else { // add tooltip because text is shortened
+            if (index == -1) {
+              resDocCombo.setToolTipText(value.toString());
+            } else {
+              setToolTipText(value.toString());
+            }
+          }
+        }
+        return this;
+      }
+    });
     getContentPane().add(resDocCombo, constraints);
     JLabel responseSetLabel = new JLabel("Resp. set:");
     responseSetLabel.setToolTipText("Response annotation set");
