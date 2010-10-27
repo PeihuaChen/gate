@@ -436,11 +436,11 @@ public class OntologyInstanceView extends AbstractDocumentView {
             value, boolean isSelected, boolean hasFocus, int row, int column) {
             super.getTableCellRendererComponent(
               table, value, isSelected, hasFocus, row, column);
-            setForeground(table.getForeground());
+            setBackground(table.getBackground());
             Object nextValue = table.getModel().getValueAt(row, 1);
             if (nextValue != null && ((String)nextValue).startsWith("[")) {
-              // change foreground color for rows that have no values set
-              setForeground(new Color(150, 150, 150));
+              // change color for rows that have no values set
+              setBackground(new Color(252, 252, 176));
             }
             return this;
           }
@@ -451,10 +451,10 @@ public class OntologyInstanceView extends AbstractDocumentView {
             value, boolean isSelected, boolean hasFocus, int row, int column) {
             super.getTableCellRendererComponent(
               table, value, isSelected, hasFocus, row, column);
-            setForeground(table.getForeground());
+            setBackground(table.getBackground());
             if (value != null && ((String)value).startsWith("[")) {
-              // change foreground color for rows that have no values set
-              setForeground(new Color(150, 150, 150));
+              // change color for rows that have no values set
+              setBackground(new Color(252, 252, 176));
             }
             return this;
           }
