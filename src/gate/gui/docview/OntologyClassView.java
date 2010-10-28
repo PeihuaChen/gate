@@ -300,20 +300,24 @@ public class OntologyClassView extends AbstractDocumentView
   public void resourceAdded(Ontology ontology, OResource resource) {
     if (resource instanceof OClass) {
       final JTree tree = treeByOntologyMap.get(ontology);
-      final Enumeration<TreePath> enumeration =
-        tree.getExpandedDescendants(tree.getPathForRow(0));
+      DefaultMutableTreeNode node =
+        (DefaultMutableTreeNode) tree.getModel().getRoot();
+      final Enumeration enumeration = node.preorderEnumeration();
       SwingUtilities.invokeLater(new Runnable() { public void run() {
         // traverse the expanded class tree and update all the nodes
         while (enumeration.hasMoreElements()) {
-          TreePath treePath = enumeration.nextElement();
-          DefaultMutableTreeNode node = (DefaultMutableTreeNode)
-            treePath.getLastPathComponent();
+          DefaultMutableTreeNode node =
+            (DefaultMutableTreeNode) enumeration.nextElement();
           Object userObject = node.getUserObject();
-          OClass oClass = (OClass) userObject;
+          if (userObject != null
+          && !userObject.equals("Loading...")) {
+            // node already expanded
+            OClass oClass = (OClass) userObject;
             Set<OClass> classes = oClass.getSubClasses(
               OConstants.Closure.DIRECT_CLOSURE);
-            // add the modified node
+            // readd all the children node
             addNodes(tree, node, classes, false);
+          }
         }
       }});
     }
