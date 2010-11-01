@@ -1355,33 +1355,42 @@ public class SerialControllerEditor extends AbstractVisualResource
     }
 
     public void actionPerformed(ActionEvent e){
-      List<ProcessingResource> prs = new ArrayList<ProcessingResource>();
-      int selectedRows[] = loadedPRsTable.getSelectedRows();
-      Arrays.sort(selectedRows);
-      for (int row : selectedRows) {
-        prs.add((ProcessingResource) loadedPRsTable
-          .getValueAt(row, loadedPRsTable.convertColumnIndexToView(0)));
-      }
-      //insert the new PRs after the last currently selected row.
-      selectedRows = memberPRsTable.getSelectedRows();
-      Arrays.sort(selectedRows);
-      int insertion = selectedRows.length == 0 ?
-              memberPRsTable.getRowCount() :
-              selectedRows[selectedRows.length -1] +1;
-      for (ProcessingResource pr : prs) {
-        controller.add(insertion, pr);
-        insertion++;
-      }      
-      //select the newly added PRs
-      for (ProcessingResource pr : prs) {
-        for (int row = 0; row < memberPRsTable.getRowCount(); row++) {
-          if (memberPRsTable.getValueAt(row,
-                memberPRsTable.convertColumnIndexToView(1)) == pr) {
-            memberPRsTable.addRowSelectionInterval(row, row);
+      try {
+        List<ProcessingResource> prs = new ArrayList<ProcessingResource>();
+        int selectedRows[] = loadedPRsTable.getSelectedRows();
+        Arrays.sort(selectedRows);
+        for (int row : selectedRows) {
+          prs.add((ProcessingResource) loadedPRsTable
+            .getValueAt(row, loadedPRsTable.convertColumnIndexToView(0)));
+        }
+        //insert the new PRs after the last currently selected row.
+        selectedRows = memberPRsTable.getSelectedRows();
+        Arrays.sort(selectedRows);
+        int insertion = selectedRows.length == 0 ?
+                memberPRsTable.getRowCount() :
+                selectedRows[selectedRows.length -1] +1;
+        for (ProcessingResource pr : prs) {
+          controller.add(insertion, pr);
+          insertion++;
+        }      
+        //select the newly added PRs
+        for (ProcessingResource pr : prs) {
+          for (int row = 0; row < memberPRsTable.getRowCount(); row++) {
+            if (memberPRsTable.getValueAt(row,
+                  memberPRsTable.convertColumnIndexToView(1)) == pr) {
+              memberPRsTable.addRowSelectionInterval(row, row);
+            }
           }
         }
+        memberPRsTable.requestFocusInWindow();
       }
-      memberPRsTable.requestFocusInWindow();
+      catch(GateRuntimeException ex) {
+        JOptionPane.showMessageDialog(SerialControllerEditor.this,
+              "Could not add PR to pipeline:\n"
+              +ex.getMessage(),
+              "GATE", JOptionPane.ERROR_MESSAGE);
+            return;
+      }
     }
   }
 
