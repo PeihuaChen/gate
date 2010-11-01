@@ -60,16 +60,34 @@ public interface RunningStrategy{
    */
   public static final int RUN_CONDITIONAL = 4;
 
-  public static class RunAlwaysStrategy implements RunningStrategy{
-    public RunAlwaysStrategy(ProcessingResource pr){
+  /**
+   * RunningStrateguy implementation that unconditionally either runs
+   * or doesn't run a given PR.
+   */
+  public static class UnconditionalRunningStrategy implements RunningStrategy {
+    public UnconditionalRunningStrategy(ProcessingResource pr, boolean run) {
       this.pr = pr;
+      this.shouldRun = run;
     }
-    public boolean shouldRun(){return true;}
+    public boolean shouldRun(){return shouldRun;}
+    
+    public void shouldRun(boolean run) { this.shouldRun = run; }
 
-    public int getRunMode(){return RUN_ALWAYS;}
+    public int getRunMode(){return shouldRun ? RUN_ALWAYS : RUN_NEVER;}
 
     public ProcessingResource getPR(){return pr;}
 
     ProcessingResource pr;
+    boolean shouldRun;
+  }
+  
+  /**
+   * @deprecated use {@link UnconditionalRunningStrategy} instead.
+   */
+  @Deprecated
+  public static class RunAlwaysStrategy extends UnconditionalRunningStrategy{
+    public RunAlwaysStrategy(ProcessingResource pr){
+      super(pr, true);
+    }
   }
 }

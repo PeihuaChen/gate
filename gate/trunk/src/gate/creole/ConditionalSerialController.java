@@ -17,6 +17,7 @@ package gate.creole;
 import java.util.*;
 
 import gate.*;
+import gate.creole.RunningStrategy.UnconditionalRunningStrategy;
 import gate.creole.metadata.CreoleResource;
 import gate.event.ControllerEvent;
 import gate.util.Benchmark;
@@ -57,7 +58,7 @@ public class ConditionalSerialController extends SerialController
                                                       RunningStrategy.RUN_ALWAYS,
                                                       null, null));
     }else{
-      strategiesList.add(index, new RunningStrategy.RunAlwaysStrategy(pr));
+      strategiesList.add(index, new RunningStrategy.UnconditionalRunningStrategy(pr, true));
     }
     super.add(index, pr);
   }
@@ -72,7 +73,7 @@ public class ConditionalSerialController extends SerialController
                                                       RunningStrategy.RUN_ALWAYS,
                                                       null, null));
     }else{
-      strategiesList.add(new RunningStrategy.RunAlwaysStrategy(pr));
+      strategiesList.add(new RunningStrategy.UnconditionalRunningStrategy(pr, true));
     }
     super.add(pr);
   }
@@ -200,9 +201,13 @@ public class ConditionalSerialController extends SerialController
                 ((AnalyserRunningStrategy)oldStrat).getFeatureValue()));
       }
       else {
-        // assume a run-always strategy.  Subclasses that know about other types
+        boolean run = true;
+        if(oldStrat instanceof UnconditionalRunningStrategy) {
+          run = oldStrat.shouldRun();
+        }
+        // assume an unconditional strategy.  Subclasses that know about other types
         // of strategies can fix this up later
-        newStrategies.add(new RunningStrategy.RunAlwaysStrategy(currentPR));
+        newStrategies.add(new RunningStrategy.UnconditionalRunningStrategy(currentPR, run));
       }
     }
     c.setRunningStrategies(newStrategies);

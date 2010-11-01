@@ -993,6 +993,9 @@ public class PersistenceManager {
 
       registerPersistentEquivalent(gate.creole.AnalyserRunningStrategy.class,
               AnalyserRunningStrategyPersistence.class);
+      
+      registerPersistentEquivalent(gate.creole.RunningStrategy.UnconditionalRunningStrategy.class,
+              UnconditionalRunningStrategyPersistence.class);
     }
     catch(PersistenceException pe) {
       // builtins shouldn't raise this

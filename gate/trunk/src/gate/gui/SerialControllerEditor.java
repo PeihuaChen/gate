@@ -40,6 +40,7 @@ import javax.swing.table.TableCellRenderer;
 
 import gate.*;
 import gate.creole.*;
+import gate.creole.RunningStrategy.UnconditionalRunningStrategy;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.GuiType;
 import gate.event.*;
@@ -738,18 +739,27 @@ public class SerialControllerEditor extends AbstractVisualResource
        */
       ItemListener strategyModeListener = new ItemListener() {
         public void itemStateChanged(ItemEvent e) {
-          if(selectedPRRunStrategy != null &&
-                  selectedPRRunStrategy instanceof AnalyserRunningStrategy){
-             AnalyserRunningStrategy strategy =
-               (AnalyserRunningStrategy)selectedPRRunStrategy;
-             if(yes_RunRBtn.isSelected()){
-               strategy.setRunMode(RunningStrategy.RUN_ALWAYS);
-             }else if(no_RunRBtn.isSelected()){
-               strategy.setRunMode(RunningStrategy.RUN_NEVER);
-             }else if(conditional_RunRBtn.isSelected()){
-               strategy.setRunMode(RunningStrategy.RUN_CONDITIONAL);
-             }
-           }
+          if(selectedPRRunStrategy != null) {
+            if(selectedPRRunStrategy instanceof AnalyserRunningStrategy){
+              AnalyserRunningStrategy strategy =
+                (AnalyserRunningStrategy)selectedPRRunStrategy;
+              if(yes_RunRBtn.isSelected()){
+                strategy.setRunMode(RunningStrategy.RUN_ALWAYS);
+              }else if(no_RunRBtn.isSelected()){
+                strategy.setRunMode(RunningStrategy.RUN_NEVER);
+              }else if(conditional_RunRBtn.isSelected()){
+                strategy.setRunMode(RunningStrategy.RUN_CONDITIONAL);
+              }
+            } else if(selectedPRRunStrategy instanceof UnconditionalRunningStrategy) {
+              UnconditionalRunningStrategy strategy =
+                (UnconditionalRunningStrategy)selectedPRRunStrategy;
+              if(yes_RunRBtn.isSelected()){
+                strategy.shouldRun(true);
+              }else if(no_RunRBtn.isSelected()){
+                strategy.shouldRun(false);
+              }
+            }
+          }
           //some icons may have changed!
           memberPRsTable.repaint();
         }
@@ -946,12 +956,18 @@ public class SerialControllerEditor extends AbstractVisualResource
         if(newStrategy instanceof AnalyserRunningStrategy){
           featureNameTextField.setEnabled(true);
           featureValueTextField.setEnabled(true);
+          conditional_RunRBtn.setEnabled(true);
           featureNameTextField.setText(
                 ((AnalyserRunningStrategy)newStrategy).
                 getFeatureName());
           featureValueTextField.setText(
                 ((AnalyserRunningStrategy)newStrategy).
                 getFeatureValue());
+        }
+        else {
+          featureNameTextField.setEnabled(false);
+          featureValueTextField.setEnabled(false);
+          conditional_RunRBtn.setEnabled(false);
         }
         switch(newStrategy.getRunMode()){
           case RunningStrategy.RUN_ALWAYS:{
