@@ -643,7 +643,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
       if(DEBUG)
         Out.prln("documents after remove of " + docName + " are " + documents);
       // documentRemoved(oldDoc.getLRPersistenceId().toString());
-      documentRemoved(docPersistentID.toString());
+      if(docPersistentID != null) documentRemoved(docPersistentID.toString());
       // fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this,
       // oldDoc,
       // index,
@@ -803,7 +803,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     // try to get the actual document if it was loaded
     Document res = isDocumentLoaded(index) ? (Document)get(index) : null;
     Object docLRID =((DocumentData)docDataList.get(index)).persistentID; 
-    documentRemoved(docLRID.toString());
+    if(docLRID != null) documentRemoved(docLRID.toString());
     docDataList.remove(index);
     documents.remove(index);
     fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this, res, index,
