@@ -200,12 +200,6 @@ public class OptionsDialog extends JDialog {
     viewSelectTreeChk.setToolTipText(
       "Selection of the main view select item in left resources tree");
 
-    annicDisableAutocompletionChk = new JCheckBox("Disable autocompletion",
-      userConfig.getBoolean(LuceneDataStoreSearchGUI.class.getName()
-        + ".disableautocompletion"));
-    annicDisableAutocompletionChk.setToolTipText(
-      "Temporary option in case the autocompletion doesn't work.");
-
     JPanel advancedBox =  new JPanel();
     advancedBox.setLayout(new BoxLayout(advancedBox, BoxLayout.Y_AXIS));
     advancedBox.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -266,19 +260,6 @@ public class OptionsDialog extends JDialog {
     hBox.add(hBox2);
     hBox.add(Box.createHorizontalStrut(5));
     hBox.add(Box.createHorizontalGlue());
-    advancedBox.add(hBox);
-
-    advancedBox.add(Box.createVerticalStrut(5));
-
-    hBox = Box.createHorizontalBox();
-    hBox.setBorder(BorderFactory.createTitledBorder(
-      " Annic (Lucene datastore) "));
-    hBox.add(Box.createHorizontalStrut(5));
-      vBox = Box.createVerticalBox();
-      vBox.add(annicDisableAutocompletionChk);
-      vBox.add(Box.createVerticalStrut(5));
-    hBox.add(vBox);
-    hBox.add(Box.createHorizontalStrut(5));
     advancedBox.add(hBox);
 
     mainTabbedPane.add("Advanced", advancedBox);
@@ -509,8 +490,6 @@ public class OptionsDialog extends JDialog {
         treeSelectViewChk.isSelected());
       userConfig.put(MainFrame.class.getName()+".viewselecttree",
         viewSelectTreeChk.isSelected());
-      userConfig.put(LuceneDataStoreSearchGUI.class.getName()
-        + ".disableautocompletion", annicDisableAutocompletionChk.isSelected());
       setVisible(false);
     }// void actionPerformed(ActionEvent evt)
   }
@@ -689,8 +668,6 @@ public class OptionsDialog extends JDialog {
    * Browser command line.
    */
   protected JTextField browserCommandLineTextField;
-
-  protected JCheckBox annicDisableAutocompletionChk;
 
   protected JCheckBox treeSelectViewChk;
 
