@@ -20,8 +20,8 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import gate.*;
 import gate.util.*;
@@ -133,7 +133,7 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
   }
   
   /** The stack of instantiations */
-  protected LinkedList<Resource> instantiationStack = new LinkedList<Resource>();
+  protected List<Resource> instantiationStack = new CopyOnWriteArrayList<Resource>();
   
   /**
    * Unmodifiable view of the instantiation stack, returned by
@@ -159,9 +159,7 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
 
   /** Add an instantiation of the resource to the register of these */
   public void addInstantiation(Resource resource) {
-    synchronized(instantiationStack) {
-      instantiationStack.addFirst(resource);
-    }
+    instantiationStack.add(0, resource);
   } // addInstantiation
 
   /** This method makes a certain resource persistent by adding it into a
@@ -182,9 +180,7 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
    *         false otherwise (i.e. the instance had already been removed).
    */
   public boolean removeInstantiation(Resource resource) {
-    synchronized(instantiationStack) {
-      return instantiationStack.remove(resource);
-    }
+    return instantiationStack.remove(resource);
     //persistantInstantiationList.remove(resource);
   } // removeInstantiation
 
