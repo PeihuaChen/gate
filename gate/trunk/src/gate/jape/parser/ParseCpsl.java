@@ -1422,62 +1422,94 @@ AnnotationAccessor accessor = null;
             "        gate.AnnotationSet " + existingAnnotSetName +
             " = (gate.AnnotationSet)bindings.get(");
           appendJavaStringLiteral(blockBuffer, nameTok.image);
-          blockBuffer.append("); " + nl);
-        jj_consume_token(period);
-        nameTok = jj_consume_token(ident);
-                                   existingAnnotType = nameTok.image;
+          blockBuffer.append("); " + nl +
+            "        Object existingFeatureValue;" + nl);
         switch (jj_nt.kind) {
         case period:
-          opTok = jj_consume_token(period);
+          jj_consume_token(period);
+          nameTok = jj_consume_token(ident);
+                                       existingAnnotType = nameTok.image;
+          switch (jj_nt.kind) {
+          case period:
+            opTok = jj_consume_token(period);
+            break;
+          case metaPropOp:
+            opTok = jj_consume_token(metaPropOp);
+            break;
+          default:
+            jj_la1[37] = jj_gen;
+            jj_consume_token(-1);
+            throw new ParseException();
+          }
+          nameTok = jj_consume_token(ident);
+                opName = opTok.image; existingAttrName = nameTok.image;
+              blockBuffer.append(
+    "        if (" + existingAnnotSetName + " != null) {" + nl +
+    "          gate.AnnotationSet existingAnnots = " + nl +
+    "          " + existingAnnotSetName + ".get(");
+              appendJavaStringLiteral(blockBuffer, existingAnnotType);
+              blockBuffer.append(");" + nl +
+    "          if (existingAnnots != null) {" + nl +
+    "            java.util.Iterator iter = existingAnnots.iterator();" + nl +
+    "            while(iter.hasNext()) {" + nl +
+    "              gate.Annotation existingA = (gate.Annotation) iter.next();" + nl);
+
+              if(opName.equals("@") && existingAttrName.equals("string")) {
+                blockBuffer.append(
+    "              int from = existingA.getStartNode().getOffset().intValue();" + nl +
+    "              int to   = existingA.getEndNode().getOffset().intValue();" + nl +
+    "              existingFeatureValue = doc.getContent().toString().substring(from,to);" + nl
+                );
+              } else {
+                blockBuffer.append("existingFeatureValue = existingA.getFeatures().get(");
+                appendJavaStringLiteral(blockBuffer, existingAttrName);
+                blockBuffer.append(");" + nl);
+              }
+
+              blockBuffer.append(
+    "              if(existingFeatureValue != null) {" + nl +
+    "                features.put(");
+              appendJavaStringLiteral(blockBuffer, newAttrName);
+              blockBuffer.append(", existingFeatureValue);" + nl +
+    "                break;" + nl +
+    "              }" + nl +
+    "            } // while" + nl +
+    "          } // if not null" + nl +
+    "        } // if not null" + nl);
           break;
         case metaPropOp:
           opTok = jj_consume_token(metaPropOp);
+          nameTok = jj_consume_token(ident);
+              opName = opTok.image; existingAttrName = nameTok.image;
+              if(opName.equals("@") && existingAttrName.equals("string")) {
+                blockBuffer.append(
+    "        if (" + existingAnnotSetName + " != null) {" + nl +
+    "          int from = " + existingAnnotSetName +".firstNode().getOffset().intValue();" + nl +
+    "          int to   = " + existingAnnotSetName +".lastNode().getOffset().intValue();" + nl +
+    "          existingFeatureValue = doc.getContent().toString().substring(from,to);" + nl +
+    "          if(existingFeatureValue != null) {" + nl +
+    "            features.put(");
+                appendJavaStringLiteral(blockBuffer, newAttrName);
+                blockBuffer.append(", existingFeatureValue);" + nl +
+    "          }" + nl +
+    "        } // if not null" + nl);
+              }
+              else {
+                {if (true) throw new ParseException(errorMsgPrefix(nameTok) +
+                        "Unsupported RHS meta-property " + nameTok.image);}
+              }
           break;
         default:
-          jj_la1[37] = jj_gen;
+          jj_la1[38] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
         }
-        nameTok = jj_consume_token(ident);
-            opName = opTok.image; existingAttrName = nameTok.image;
           blockBuffer.append(
-"        if (" + existingAnnotSetName + " != null) {" + nl +
-"          gate.AnnotationSet existingAnnots = " + nl +
-"          " + existingAnnotSetName + ".get(");
-          appendJavaStringLiteral(blockBuffer, existingAnnotType);
-          blockBuffer.append(");" + nl +
-"          if (existingAnnots != null) {" + nl +
-"            java.util.Iterator iter = existingAnnots.iterator();" + nl +
-"            while(iter.hasNext()) {" + nl +
-"              gate.Annotation existingA = (gate.Annotation) iter.next();" + nl +
-"              Object existingFeatureValue;" + nl );
-
-          if(opName.equals("@") && existingAttrName.equals("string")) {
-            blockBuffer.append(
-"              int from = existingA.getStartNode().getOffset().intValue();" + nl +
-"              int to   = existingA.getEndNode().getOffset().intValue();" + nl +
-"              existingFeatureValue = doc.getContent().toString().substring(from,to);" + nl
-            );
-          } else {
-            blockBuffer.append("existingFeatureValue = existingA.getFeatures().get(");
-            appendJavaStringLiteral(blockBuffer, existingAttrName);
-            blockBuffer.append(");" + nl);
-          }
-
-          blockBuffer.append(
-"              if(existingFeatureValue != null) {" + nl +
-"                features.put(");
-          appendJavaStringLiteral(blockBuffer, newAttrName);
-          blockBuffer.append(", existingFeatureValue);" + nl +
-"                break;" + nl +
-"              }" + nl + "        } // while" + nl +
-"            } // if not null" + nl +
-"          } // if not null" + nl +
-"        } // block for existing annots" + nl
+  "      } // block for existing annots" + nl
           );
         break;
       default:
-        jj_la1[38] = jj_gen;
+        jj_la1[39] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -1486,7 +1518,7 @@ AnnotationAccessor accessor = null;
         jj_consume_token(comma);
         break;
       default:
-        jj_la1[39] = jj_gen;
+        jj_la1[40] = jj_gen;
         ;
       }
     }
@@ -1689,7 +1721,7 @@ AnnotationAccessor accessor = null;
   public boolean lookingAhead = false;
   private boolean jj_semLA;
   private int jj_gen;
-  final private int[] jj_la1 = new int[40];
+  final private int[] jj_la1 = new int[41];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static private int[] jj_la1_2;
@@ -1699,13 +1731,13 @@ AnnotationAccessor accessor = null;
       jj_la1_2();
    }
    private static void jj_la1_0() {
-      jj_la1_0 = new int[] {0x800,0x200000,0x2000,0x301000,0xc00000,0x0,0x0,0x0,0xc00000,0x7000000,0x7000000,0x100000,0x8000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x20000000,0x0,0x0,0x0,0x20000000,0x10000000,0x10000000,0x80000000,0x80000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x80000000,0x0,0x0,};
+      jj_la1_0 = new int[] {0x800,0x200000,0x2000,0x301000,0xc00000,0x0,0x0,0x0,0xc00000,0x7000000,0x7000000,0x100000,0x8000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x20000000,0x0,0x0,0x0,0x20000000,0x10000000,0x10000000,0x80000000,0x80000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x80000000,0x80000000,0x0,0x0,};
    }
    private static void jj_la1_1() {
-      jj_la1_1 = new int[] {0x0,0x0,0x0,0x0,0x0,0x4000,0x4000,0x6000,0x0,0x0,0x0,0x0,0x0,0x20424000,0x1405000,0x100000,0x1405000,0x1405000,0x200000,0x401000,0x4000000,0x4001,0x20000,0x200000,0x4000000,0x0,0x404000,0x84000,0x84000,0xf001,0x400f001,0x4000,0x200000,0x200000,0x20424000,0x20020000,0x4000,0x80000,0x402f001,0x200000,};
+      jj_la1_1 = new int[] {0x0,0x0,0x0,0x0,0x0,0x4000,0x4000,0x6000,0x0,0x0,0x0,0x0,0x0,0x20424000,0x1405000,0x100000,0x1405000,0x1405000,0x200000,0x401000,0x4000000,0x4001,0x20000,0x200000,0x4000000,0x0,0x404000,0x84000,0x84000,0xf001,0x400f001,0x4000,0x200000,0x200000,0x20424000,0x20020000,0x4000,0x80000,0x80000,0x402f001,0x200000,};
    }
    private static void jj_la1_2() {
-      jj_la1_2 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+      jj_la1_2 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
    }
   final private JJCalls[] jj_2_rtns = new JJCalls[2];
   private boolean jj_rescan = false;
@@ -1720,7 +1752,7 @@ AnnotationAccessor accessor = null;
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
     jj_gen = 0;
-    for (int i = 0; i < 40; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 41; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1733,7 +1765,7 @@ AnnotationAccessor accessor = null;
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
     jj_gen = 0;
-    for (int i = 0; i < 40; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 41; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1743,7 +1775,7 @@ AnnotationAccessor accessor = null;
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
     jj_gen = 0;
-    for (int i = 0; i < 40; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 41; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1753,7 +1785,7 @@ AnnotationAccessor accessor = null;
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
     jj_gen = 0;
-    for (int i = 0; i < 40; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 41; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1762,7 +1794,7 @@ AnnotationAccessor accessor = null;
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
     jj_gen = 0;
-    for (int i = 0; i < 40; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 41; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1771,7 +1803,7 @@ AnnotationAccessor accessor = null;
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
     jj_gen = 0;
-    for (int i = 0; i < 40; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 41; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1882,7 +1914,7 @@ AnnotationAccessor accessor = null;
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 40; i++) {
+    for (int i = 0; i < 41; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
