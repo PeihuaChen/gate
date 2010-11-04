@@ -3204,109 +3204,124 @@ public class MainFrame extends JFrame implements ProgressListener,
       editFTE.setBorderPainted(false);
       editFTE.setContentAreaFilled(false);
 
-      int returnValue =
-        JOptionPane.showOptionDialog(instance, mainPanel,
-          "SearchableDataStore", JOptionPane.PLAIN_MESSAGE,
-          JOptionPane.OK_CANCEL_OPTION, getIcon("empty"),
-          new String[]{"OK", "Cancel"}, "OK");
-      if(returnValue == JOptionPane.OK_OPTION) {
-
-        DataStore ds =
-          Factory.createDataStore("gate.persist.LuceneDataStoreImpl",
-            dsLocation.getText());
-
-        // we need to set Indexer
-        Class[] consParam = new Class[1];
-        consParam[0] = URL.class;
-        Constructor constructor =
-          Class.forName("gate.creole.annic.lucene.LuceneIndexer", true,
-            Gate.getClassLoader()).getConstructor(consParam);
-        Object indexer =
-          constructor.newInstance(new URL(indexLocation.getText()));
-
-        Map<String, Object> parameters = new HashMap<String, Object>();
-        parameters.put(Constants.INDEX_LOCATION_URL, new URL(indexLocation
-          .getText()));
-        parameters.put(Constants.BASE_TOKEN_ANNOTATION_TYPE, btat.getText());
-        parameters.put(Constants.INDEX_UNIT_ANNOTATION_TYPE, iuat.getText());
-        parameters.put(Constants.CREATE_TOKENS_AUTOMATICALLY,
-          createTokensAutomatically.isSelected());
-
-        if(inputAS.getText().trim().length() > 0) {
-          ArrayList<String> inputASList1 = new ArrayList<String>();
-          String[] inputASArray = inputAS.getText().trim().split(";");
-          if(inputASArray != null && inputASArray.length > 0) {
-            inputASList1.addAll(Arrays.asList(inputASArray));
-          }
-          if(asie.getSelectedIndex() == 0) {
-            // user has provided values for inclusion
-            parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_INCLUDE,
-              inputASList1);
-            parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_EXCLUDE,
-              new ArrayList<String>());
+      boolean validEntry = false;
+      while(!validEntry) {
+        int returnValue =
+          JOptionPane.showOptionDialog(instance, mainPanel,
+            "SearchableDataStore", JOptionPane.PLAIN_MESSAGE,
+            JOptionPane.OK_CANCEL_OPTION, getIcon("empty"),
+            new String[]{"OK", "Cancel"}, "OK");
+        if(returnValue == JOptionPane.OK_OPTION) {
+          
+          // sanity check parameters
+          if(dsLocation.getText().equals(indexLocation.getText())) {
+            JOptionPane.showMessageDialog(instance,
+                    "Datastore and index may not be in the same directory",
+                    "Error", JOptionPane.ERROR_MESSAGE);
           }
           else {
-            // user has provided values for exclusion
-            parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_EXCLUDE,
-              inputASList1);
-            parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_INCLUDE,
-              new ArrayList<String>());
+            validEntry = true;
+            DataStore ds =
+              Factory.createDataStore("gate.persist.LuceneDataStoreImpl",
+                dsLocation.getText());
+    
+            // we need to set Indexer
+            Class[] consParam = new Class[1];
+            consParam[0] = URL.class;
+            Constructor constructor =
+              Class.forName("gate.creole.annic.lucene.LuceneIndexer", true,
+                Gate.getClassLoader()).getConstructor(consParam);
+            Object indexer =
+              constructor.newInstance(new URL(indexLocation.getText()));
+    
+            Map<String, Object> parameters = new HashMap<String, Object>();
+            parameters.put(Constants.INDEX_LOCATION_URL, new URL(indexLocation
+              .getText()));
+            parameters.put(Constants.BASE_TOKEN_ANNOTATION_TYPE, btat.getText());
+            parameters.put(Constants.INDEX_UNIT_ANNOTATION_TYPE, iuat.getText());
+            parameters.put(Constants.CREATE_TOKENS_AUTOMATICALLY,
+              createTokensAutomatically.isSelected());
+    
+            if(inputAS.getText().trim().length() > 0) {
+              ArrayList<String> inputASList1 = new ArrayList<String>();
+              String[] inputASArray = inputAS.getText().trim().split(";");
+              if(inputASArray != null && inputASArray.length > 0) {
+                inputASList1.addAll(Arrays.asList(inputASArray));
+              }
+              if(asie.getSelectedIndex() == 0) {
+                // user has provided values for inclusion
+                parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_INCLUDE,
+                  inputASList1);
+                parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_EXCLUDE,
+                  new ArrayList<String>());
+              }
+              else {
+                // user has provided values for exclusion
+                parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_EXCLUDE,
+                  inputASList1);
+                parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_INCLUDE,
+                  new ArrayList<String>());
+              }
+            }
+            else {
+              parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_EXCLUDE,
+                new ArrayList<String>());
+              parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_INCLUDE,
+                new ArrayList<String>());
+            }
+    
+            if(fte.getText().trim().length() > 0) {
+              ArrayList<String> fteList1 = new ArrayList<String>();
+              String[] inputASArray = fte.getText().trim().split(";");
+              if(inputASArray != null && inputASArray.length > 0) {
+                fteList1.addAll(Arrays.asList(inputASArray));
+              }
+              if(ftie.getSelectedIndex() == 0) {
+                // user has provided values for inclusion
+                parameters.put(Constants.FEATURES_TO_INCLUDE, fteList1);
+                parameters.put(Constants.FEATURES_TO_EXCLUDE,
+                  new ArrayList<String>());
+              }
+              else {
+                // user has provided values for exclusion
+                parameters.put(Constants.FEATURES_TO_EXCLUDE, fteList1);
+                parameters.put(Constants.FEATURES_TO_INCLUDE,
+                  new ArrayList<String>());
+              }
+            }
+            else {
+              parameters
+                .put(Constants.FEATURES_TO_EXCLUDE, new ArrayList<String>());
+              parameters
+                .put(Constants.FEATURES_TO_INCLUDE, new ArrayList<String>());
+            }
+    
+            Class[] params = new Class[2];
+            params[0] =
+              Class.forName("gate.creole.annic.Indexer", true, Gate
+                .getClassLoader());
+            params[1] = Map.class;
+            Method indexerMethod = ds.getClass().getMethod("setIndexer", params);
+            indexerMethod.invoke(ds, indexer, parameters);
+    
+            // Class[] searchConsParams = new Class[0];
+            Constructor searcherConst =
+              Class.forName("gate.creole.annic.lucene.LuceneSearcher", true,
+                Gate.getClassLoader()).getConstructor();
+            Object searcher = searcherConst.newInstance();
+            Class[] searchParams = new Class[1];
+            searchParams[0] =
+              Class.forName("gate.creole.annic.Searcher", true, Gate
+                .getClassLoader());
+            Method searcherMethod =
+              ds.getClass().getMethod("setSearcher", searchParams);
+            searcherMethod.invoke(ds, searcher);
+            return ds;
           }
         }
         else {
-          parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_EXCLUDE,
-            new ArrayList<String>());
-          parameters.put(Constants.ANNOTATION_SETS_NAMES_TO_INCLUDE,
-            new ArrayList<String>());
+          validEntry = true;
         }
-
-        if(fte.getText().trim().length() > 0) {
-          ArrayList<String> fteList1 = new ArrayList<String>();
-          String[] inputASArray = fte.getText().trim().split(";");
-          if(inputASArray != null && inputASArray.length > 0) {
-            fteList1.addAll(Arrays.asList(inputASArray));
-          }
-          if(ftie.getSelectedIndex() == 0) {
-            // user has provided values for inclusion
-            parameters.put(Constants.FEATURES_TO_INCLUDE, fteList1);
-            parameters.put(Constants.FEATURES_TO_EXCLUDE,
-              new ArrayList<String>());
-          }
-          else {
-            // user has provided values for exclusion
-            parameters.put(Constants.FEATURES_TO_EXCLUDE, fteList1);
-            parameters.put(Constants.FEATURES_TO_INCLUDE,
-              new ArrayList<String>());
-          }
-        }
-        else {
-          parameters
-            .put(Constants.FEATURES_TO_EXCLUDE, new ArrayList<String>());
-          parameters
-            .put(Constants.FEATURES_TO_INCLUDE, new ArrayList<String>());
-        }
-
-        Class[] params = new Class[2];
-        params[0] =
-          Class.forName("gate.creole.annic.Indexer", true, Gate
-            .getClassLoader());
-        params[1] = Map.class;
-        Method indexerMethod = ds.getClass().getMethod("setIndexer", params);
-        indexerMethod.invoke(ds, indexer, parameters);
-
-        // Class[] searchConsParams = new Class[0];
-        Constructor searcherConst =
-          Class.forName("gate.creole.annic.lucene.LuceneSearcher", true,
-            Gate.getClassLoader()).getConstructor();
-        Object searcher = searcherConst.newInstance();
-        Class[] searchParams = new Class[1];
-        searchParams[0] =
-          Class.forName("gate.creole.annic.Searcher", true, Gate
-            .getClassLoader());
-        Method searcherMethod =
-          ds.getClass().getMethod("setSearcher", searchParams);
-        searcherMethod.invoke(ds, searcher);
-        return ds;
       }
       return null;
     }
