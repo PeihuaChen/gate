@@ -110,8 +110,7 @@ public class FlexibleGazetteer extends AbstractLanguageAnalyser implements
       inputFeatureNames = new ArrayList();
     }
 
-    // The method getTokenIterator returns the sorted iterator
-    Iterator tokenIter = getTokenIterator(document, inputAnnotationSetName);
+    Iterator tokenIter = getSortedAnnotationIterator(document, inputAnnotationSetName);
     long totalDeductedSpaces = 0;
     fireStatusChanged("Replacing contents with the feature value...");
 
@@ -142,11 +141,11 @@ public class FlexibleGazetteer extends AbstractLanguageAnalyser implements
         changedNodes.add(newNode);
         newdocString = newdocString.insert((int)newStartOffset, ' ');
         continue outer;
-      }
+      } // chineseSplit if
 
       // search in the provided inputFeaturesNames
-      // if the current token has a feature value that user
-      // wants to paste on and replace the original string of the token
+      // if the current annotation has a feature value that user
+      // wants to paste on and replace the original string
       inner: for(int i = 0; i < inputFeatureNames.size(); i++) {
         String[] keyVal = ((String)(inputFeatureNames.get(i))).split("[.]");
 
@@ -187,16 +186,11 @@ public class FlexibleGazetteer extends AbstractLanguageAnalyser implements
               NodePosition newNode = new NodePosition(startOffset, endOffset,
                       newStartOffset, newEndOffset, totalDeductedSpaces);
               changedNodes.add(newNode);
-              // how many spaces have been added or removed till the
-              // current
-              // position of the token
 
               // and finally replace the actual string in the document
               // with the new document
               newdocString = newdocString.replace((int)newStartOffset,
-                      (int)newStartOffset +
-                      // actualString.length(), // original code
-                              (int)actualLength, // replacement code
+                      (int)newStartOffset + (int)actualLength, // replacement code
                       newTokenValue);
               break inner;
             }
@@ -240,72 +234,53 @@ public class FlexibleGazetteer extends AbstractLanguageAnalyser implements
     // from
     // this temp document to the original document
     fireStatusChanged("Transfering new tags to the original one...");
-    Iterator lookupIter = getTokenIterator(tempDoc, outputAnnotationSetName);
+    Iterator lookupIter = getSortedAnnotationIterator(tempDoc, outputAnnotationSetName);
     AnnotationSet original = (outputAnnotationSetName == null) ? document
             .getAnnotations() : document
             .getAnnotations(outputAnnotationSetName);
+
+    int positionOfI = 0;
     while(lookupIter != null && lookupIter.hasNext()) {
       Annotation currentLookup = (Annotation)(lookupIter.next());
       long startOffset = currentLookup.getStartNode().getOffset().longValue();
       long endOffset = currentLookup.getEndNode().getOffset().longValue();
 
       // if there was any change node before the startOffset
-      long spacesToAddToSO = 0;
-      long spacesToAddToEO = 0;
-      int i = 0;
+
+      NodePosition toUse = null;
+      int i = positionOfI;
       for(; i < changedNodes.size(); i++) {
         NodePosition np = (NodePosition)changedNodes.get(i);
 
         // continue until we find a node whose new end node has a value
         // greater than or equal to the current lookup
         if(np.getNewStartNode() < startOffset) {
+          positionOfI = i;
+          toUse = np;
           continue;
-        }
-        
-        if(np.getNewStartNode() == startOffset) {
-          if(i > 0) {
-            // there is atleast one change node before the start offset
-            NodePosition leftNode = (NodePosition) changedNodes.get(i-1);
-            // find out the spaces we need to add in the startOffset
-            spacesToAddToSO = leftNode.getDeductedSpaces();
-          } else {
-            spacesToAddToSO = 0;
-          }
+        } else {
           break;
         }
-        
-        i-=2;
-        if(i >= 0) {
-          // there is atleast one change node before the start offset
-          NodePosition leftNode = (NodePosition) changedNodes.get(i);
-          // find out the spaces we need to add in the startOffset
-          spacesToAddToSO = leftNode.getDeductedSpaces();
-        } else {
-          spacesToAddToSO = 0;
-        }
-        break;
       }
       
+      long spacesToAddToSO = toUse != null ? toUse.getDeductedSpaces() : 0;
+      
+      toUse = null;
       for(; i < changedNodes.size(); i++) {
         NodePosition np = (NodePosition)changedNodes.get(i);
 
-        // continue until we find a node whose new start node has a
-        // value greater than or equal to the current lookup's end node
-        if(np.getNewEndNode() < endOffset) {
+        // continue until we find a node whose new end node has a value
+        // less tgreater than or equal to the current lookup
+        if(np.getNewStartNode() <= endOffset) {
+          toUse = np;
           continue;
+        } else {
+          break;
         }
-        
-        // there is atleast one change node before the start offset
-        NodePosition rightNode = (NodePosition) changedNodes.get(i);
-        // find out the spaces we need to add in the startOffset
-        spacesToAddToEO = rightNode.getDeductedSpaces();
-        break;
       }
       
-      // 0xyz3 4resources13 14xyzresources26 27pqr30 0 3 0 3 0 -> 4 13 4
-      // 12 1 -> 14 26 13 24 2 -> 27 30 25 28 2
-      // 0xyz3 4resource12 13xyz16resource24 25pqr28
-
+      long spacesToAddToEO = toUse != null ? toUse.getDeductedSpaces() : spacesToAddToSO;
+      
       try {
         original.add(new Long(startOffset + spacesToAddToSO), new Long(
                 endOffset + spacesToAddToEO), currentLookup.getType(),
@@ -415,7 +390,7 @@ public class FlexibleGazetteer extends AbstractLanguageAnalyser implements
    * @param annotationSetName
    * @return an {@link Iterator}
    */
-  public Iterator getTokenIterator(gate.Document doc, String annotationSetName) {
+  public Iterator getSortedAnnotationIterator(gate.Document doc, String annotationSetName) {
     AnnotationSet inputAs = (annotationSetName == null)
             ? doc.getAnnotations()
             : doc.getAnnotations(annotationSetName);
