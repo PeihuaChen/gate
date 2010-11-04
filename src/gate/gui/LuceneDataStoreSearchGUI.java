@@ -3336,12 +3336,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
       int pos = ev.getOffset();
 
-      if (Gate.getUserConfig().getBoolean(
-        LuceneDataStoreSearchGUI.class.getName() + ".disableautocompletion")
-      || ev.getLength() != 1
+      if (ev.getLength() != 1
       || (pos < start || pos > end)) {
-        // cancel any autocompletion if disabled in the options
-        // or the user cut some text
+        // cancel any autocompletion if the user cut some text
         // or delete outside brackets when in POPUP mode
         cleanup();
         return;
@@ -3380,11 +3377,8 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
       int pos = ev.getOffset();
 
-      if (Gate.getUserConfig().getBoolean(
-        LuceneDataStoreSearchGUI.class.getName() + ".disableautocompletion")
-       || ev.getLength() != 1) {
-        // cancel any autocompletion if disabled in the options
-        // or the user paste some text
+      if (ev.getLength() != 1) {
+        // cancel any autocompletion if the user paste some text
         cleanup();
         return;
       }
