@@ -381,12 +381,16 @@ public class PackageGappTask extends Task {
       pluginCopyMap.put(pluginURL, newPluginURL);
 
       // now look for resources located under that plugin
+      String pluginUri = pluginURL.toExternalForm();
+      if(!pluginUri.endsWith("/")) {
+        pluginUri += "/";
+      }
       Iterator<URL> resourcesIt = resources.iterator();
       while(resourcesIt.hasNext()) {
         URL resourceURL = resourcesIt.next();
         try {
           if(resourceURL.toExternalForm().startsWith(
-                  pluginURL.toExternalForm() + "/")) {
+                  pluginUri)) {
             // found a resource under this plugin, so relocate it to be
             // under the re-located plugin dir
             resourcesIt.remove();

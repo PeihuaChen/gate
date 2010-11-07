@@ -43,6 +43,7 @@ import gate.swing.XJFileChooser;
 import gate.util.*;
 import gate.util.ant.packager.PackageGappTask;
 
+import org.apache.log4j.Logger;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.BuildListener;
@@ -1061,6 +1062,7 @@ public class NameBearerHandle implements Handle, StatusListener,
   }
 
   class ExportToTeamware extends AbstractAction {
+    private Logger log = Logger.getLogger("gate.gui.ExportForTeamware");
     private static final long serialVersionUID = 1L;
     public ExportToTeamware() {
       super("Export for Teamware");
@@ -1115,6 +1117,8 @@ public class NameBearerHandle implements Handle, StatusListener,
         if(buildEvent.getPriority() <= Project.MSG_INFO) {
           statusChanged(buildEvent.getMessage());
         }
+        // log the message to log4j for debugging purposes
+        log.debug(buildEvent.getPriority() + ": " + buildEvent.getMessage());
       }
       
       // not interested in these events
