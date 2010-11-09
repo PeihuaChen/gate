@@ -136,6 +136,13 @@
       </build>
     </profile>
     <profile>
+      <!-- use this with publish-generic -->
+      <id>gate-6.0</id>
+      <properties>
+	<pom>gate-core.6.0.pom.xml</pom>
+      </properties>
+    </profile>
+    <profile>
       <id>publish-generic</id>
       <build>
 	<defaultGoal>verify</defaultGoal>
