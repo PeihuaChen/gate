@@ -55,8 +55,27 @@ Given all of this, and a copy of maven version 2.2.1 or newer, you can run:
 
     mvn -f sign-and-deploy.pom.xml -Pgate_release,WHATEVER
 
-WHATEVER gets replaced by a profile name that specifies what you are trying to do. As of this writing, the only thing filled in
-is publish-gate-asm, which pushes version 3.1 of gate-asm.
+To be specific, to release 6.0, I proceeded as follows:
+
+1: grabbed the zip file from the to-be-released build.
+
+2: edited build.xml to put in the pathname of where I unpacked it as
+part of the prep-release target.
+
+3: ran 'ant prep-release' 
+
+4: copied the main gate jar into the staging dir where ant put the
+javadoc and source.
+
+5: added a 'gate-6.0' profile to sign-and-deploy.xml that contained
+the pathname of the POM to use for 6.0 and the staging directory I
+populated from prep-release.
+
+6: ran (using maven 3.0) mvn -f sign-and-deploy.xml
+-Pgate_release,gate-6.0,publish-generic
+
+This signed the pieces and pushed them to the OSS repository.
+
 
 (Note that there is a requirement to provide javadoc and sources. There is a build.xml in here that creates those from the rest 
 of the gate build tree.)

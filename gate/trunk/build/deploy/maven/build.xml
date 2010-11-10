@@ -25,6 +25,16 @@
             <pom refid="gate-core.6.0-SNAPSHOT.pom"/>
         </artifact:deploy>
     </target>
+<!-- set up the extra jars for 6.0 -->
+    <target name="prep-release">
+        <property name="top6" location="/users/benson/x/gate6/gate-6.0-build3764-ALL"/>
+	<property name="build6" location="/users/benson/x/gate6/stage"/>
+        <property name="version" value="6.0"/>
+        <mkdir dir="${build6}"/>
+        <jar destfile="${build6}/gate-core-javadoc.jar" basedir="${top6}/doc/javadoc"/>
+        <jar destfile="${build6}/gate-core-sources.jar" basedir="${top6}/src"/>
+    </target>
+
     <!-- here are some targets that were used to set up the initial push of 5.2.1 -->
     <target name="gate-asm-extra-jars">
         <jar destfile="gate-asm-javadoc.jar" basedir="." includes="gate-asm-readme.txt"/>
