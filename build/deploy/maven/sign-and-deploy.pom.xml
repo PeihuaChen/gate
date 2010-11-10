@@ -140,6 +140,7 @@
       <id>gate-6.0</id>
       <properties>
 	<pom>gate-core.6.0.pom.xml</pom>
+	<file>/users/benson/x/gate6/stage/gate-core</file>
       </properties>
     </profile>
     <profile>
