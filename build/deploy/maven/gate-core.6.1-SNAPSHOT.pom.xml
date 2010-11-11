@@ -4,8 +4,8 @@
     <groupId>uk.ac.gate</groupId>
     <artifactId>gate-core</artifactId>
     <name>GATE Embedded Core</name>
-    <version>6.0-SNAPSHOT</version>
-    <!-- a POM for publishing GATE 6.0 to Central via OSS -->
+    <version>6.1-SNAPSHOT</version>
+    <!-- a POM for publishing GATE 6.1 to Central via OSS -->
     <description>
 		GATE - general achitecture for text engineering - is 
 		open source software capable of solving almost any text processing problem.
