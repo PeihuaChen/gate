@@ -176,8 +176,8 @@
         </mailingList>
     </mailingLists>
     <scm>
-        <connection>scm:svn:http://gate.svn.sourceforge.net/svnroot/gate/tags/release-6.0</connection>
-        <developerConnection>scm:svn:https://gate.svn.sourceforge.net/svnroot/gate/release-6.0</developerConnection>
+        <connection>scm:svn:http://gate.svn.sourceforge.net/svnroot/gate/gate/tags/release-6.0</connection>
+        <developerConnection>scm:svn:https://gate.svn.sourceforge.net/svnroot/gate/gate/tags/release-6.0</developerConnection>
         <url>http://gate.svn.sourceforge.net/viewvc/gate</url>
     </scm>
     <profiles>
