@@ -55,7 +55,7 @@ extends SimpleAnnotation, Serializable {
     * @param anAnnot a gate Annotation.
     * @param aFeatureNamesSet is a set containing certian key that will be
     * intersected with <b>this</b>'s FeatureMap's keys.
-    * @return <code>true</code> if aAnnot is compatible with <b>this</> and
+    * @return <code>true</code> if aAnnot is compatible with <b>this</b> and
     * <code>false</code> otherwise.
     */
   public boolean isCompatible(Annotation anAnnot, Set aFeatureNamesSet);
@@ -90,11 +90,15 @@ extends SimpleAnnotation, Serializable {
     */
   public boolean coextensive(Annotation anAnnot);
 
-  /** This method tells if <b>this</b> overlaps aAnnot.
-    * @param aAnnot a gate Annotation.
-    * @return <code>true</code> if they overlap and <code>false</code> false if
-    * they don't.
-    */
+  /** 
+   * This method determines if <b>this</b> overlaps aAnnot, i.e. if either
+   * the beginning or the end (or both) of anAnnot is
+   * contained in the span of <b>this</b>.
+   * 
+   * @param aAnnot a gate Annotation.
+   * @return <code>true</code> if they overlap and <code>false</code> false if
+   * they don't or if aAnnot is null.
+   */
   public boolean overlaps(Annotation aAnnot);
   
   /** This method tells if <b>this</b> annotation's text range is 
