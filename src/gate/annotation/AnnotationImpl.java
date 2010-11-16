@@ -206,7 +206,7 @@ public class AnnotationImpl extends AbstractFeatureBearer
     * <b>this</b> is incuded into aAnnot FeatureMap.
     * @param anAnnot a gate Annotation. If anAnnotation is null then false is
     * returned.
-    * @return <code>true</code> if aAnnot is compatible with <b>this</> and
+    * @return <code>true</code> if aAnnot is compatible with <b>this</b> and
     * <code>false</code> otherwise.
     */
   public boolean isCompatible(Annotation anAnnot){
@@ -229,7 +229,7 @@ public class AnnotationImpl extends AbstractFeatureBearer
     * @param aFeatureNamesSet is a set containing certian key that will be
     * intersected with <b>this</b>'s FeatureMap's keys.If param is null then
     * isCompatible(Annotation) will be called.
-    * @return <code>true</code> if aAnnot is compatible with <b>this</> and
+    * @return <code>true</code> if aAnnot is compatible with <b>this</b> and
     * <code>false</code> otherwise.
     */
   public boolean isCompatible(Annotation anAnnot, Set aFeatureNamesSet){
@@ -326,11 +326,6 @@ public class AnnotationImpl extends AbstractFeatureBearer
     return true;
   }//coextensive
 
-  /** This method tells if <b>this</b> overlaps aAnnot.
-    * @param aAnnot a gate Annotation.
-    * @return <code>true</code> if they overlap and <code>false</code> false if
-    * they don't.
-    */
   public boolean overlaps(Annotation aAnnot){
     if (aAnnot == null) return false;
     if (aAnnot.getStartNode() == null ||
