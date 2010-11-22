@@ -15,7 +15,7 @@
 
 
 Phase:	Org_Context
-Input: SpaceToken Token Lookup Organization Unknown Location Person
+Input: Token Lookup Organization Unknown Location Person
 Options: control = appelt
 
 
@@ -33,7 +33,7 @@ Priority: 1
   )
  )?
 )
-(
+( 
  {Unknown.kind == PN}
 )
 :org
@@ -149,7 +149,7 @@ Priority: 50
   {Token.string == "joins"}|
   {Token.string == "join"}
  )
- SPACE
+
 )
 ( 
  {Unknown.kind ==PN}
@@ -177,7 +177,7 @@ Priority: 20
  ({Token.string == "'"}
   ({Token.string == "s"})?
  )?
- SPACE
+
  {Person.rule1 == PersonTitle}
 )
 --> 
@@ -203,9 +203,7 @@ Priority: 10
 {Unknown.kind == PN}
 ):org
 (
-(SPACE)
 {Token.category == CC}
-(SPACE)
 {Organization}
 )
 -->
@@ -224,9 +222,7 @@ Priority: 10
 
 (
  {Organization}
- (SPACE)
  {Token.category == CC}
- (SPACE)
 )
 (
  {Unknown.kind == PN}
@@ -249,7 +245,6 @@ Priority: 30
  {Unknown.kind == PN}
 ):org
 ( 
- SPACE
  {Lookup.majorType == jobtitle}
 )
 -->
