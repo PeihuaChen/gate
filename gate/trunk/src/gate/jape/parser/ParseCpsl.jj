@@ -720,6 +720,8 @@ Rule Rule(String phaseName, String currentImports) :
   LeftHandSide lhs = null;
   RightHandSide rhs = null;
   Rule newRule = null;
+  // forget the labels we saw in the previous rule
+  bindingNameSet.clear();
 }
 {
   <rule> ruleNameTok=<ident> { ruleName=ruleNameTok.image; }
@@ -1176,22 +1178,10 @@ RightHandSide RightHandSide(
 }
 {
   block=Action() {
-    // did we get a non-existent block name?
-    if(block[0] != null)
-      if(! bindingNameSet.contains(block[0])) {
-        throw(new ParseException(errorMsgPrefix(null)+
-          "unknown label in RHS action: " + block[0]));
-      }
     rhs.addBlock(block[0], block[1]);
   }
   (
     <comma> block=Action() {
-      // did we get a non-existent block name?
-      if(block[0] != null)
-        if(! bindingNameSet.contains(block[0])) {
-          throw(new ParseException(errorMsgPrefix(null)+
-            "unknown label in RHS action: " + block[0]));
-        }
       rhs.addBlock(block[0], block[1]);
     }
   )*
@@ -1254,7 +1244,15 @@ String[] NamedJavaBlock() :
   Token nameTok = null;
 }
 {
-  <colon> nameTok=<ident> { block[0] = nameTok.image; }
+  <colon> nameTok=<ident> {
+    block[0] = nameTok.image;
+    // did we get a non-existent block name?
+    if(block[0] != null)
+      if(! bindingNameSet.contains(block[0])) {
+        throw(new ParseException(errorMsgPrefix(nameTok)+
+          "unknown label in RHS action: " + block[0]));
+      }
+  }
   <leftBrace> block[1]=ConsumeBlock()
   { return block; }
 
@@ -1310,6 +1308,13 @@ String[] AssignmentExpression() :
   // the name of the bound annotation set we're referencing
   nameTok=<ident> {
     block[0] = nameTok.image;
+    // did we get a non-existent block name?
+    if(block[0] != null)
+      if(! bindingNameSet.contains(block[0])) {
+        throw(new ParseException(errorMsgPrefix(nameTok)+
+          "unknown label in RHS action: " + block[0]));
+      }
+
     annotSetName = block[0] + "Annots";
   }
 
