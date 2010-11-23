@@ -602,6 +602,8 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
   LeftHandSide lhs = null;
   RightHandSide rhs = null;
   Rule newRule = null;
+  // forget the labels we saw in the previous rule
+  bindingNameSet.clear();
     jj_consume_token(rule);
     ruleNameTok = jj_consume_token(ident);
                                ruleName=ruleNameTok.image;
@@ -1183,12 +1185,6 @@ AnnotationAccessor accessor = null;
   String[] block = new String[2];
   RightHandSide rhs = new RightHandSide(phaseName, ruleName, lhs, imports);
     block = Action();
-    // did we get a non-existent block name?
-    if(block[0] != null)
-      if(! bindingNameSet.contains(block[0])) {
-        {if (true) throw(new ParseException(errorMsgPrefix(null)+
-          "unknown label in RHS action: " + block[0]));}
-      }
     rhs.addBlock(block[0], block[1]);
     label_12:
     while (true) {
@@ -1202,12 +1198,6 @@ AnnotationAccessor accessor = null;
       }
       jj_consume_token(comma);
       block = Action();
-      // did we get a non-existent block name?
-      if(block[0] != null)
-        if(! bindingNameSet.contains(block[0])) {
-          {if (true) throw(new ParseException(errorMsgPrefix(null)+
-            "unknown label in RHS action: " + block[0]));}
-        }
       rhs.addBlock(block[0], block[1]);
     }
     {if (true) return rhs;} /* action class not created yet */
@@ -1273,7 +1263,13 @@ AnnotationAccessor accessor = null;
   Token nameTok = null;
     jj_consume_token(colon);
     nameTok = jj_consume_token(ident);
-                            block[0] = nameTok.image;
+    block[0] = nameTok.image;
+    // did we get a non-existent block name?
+    if(block[0] != null)
+      if(! bindingNameSet.contains(block[0])) {
+        {if (true) throw(new ParseException(errorMsgPrefix(nameTok)+
+          "unknown label in RHS action: " + block[0]));}
+      }
     jj_consume_token(leftBrace);
     block[1] = ConsumeBlock();
     {if (true) return block;}
@@ -1327,6 +1323,13 @@ AnnotationAccessor accessor = null;
     // the name of the bound annotation set we're referencing
       nameTok = jj_consume_token(ident);
     block[0] = nameTok.image;
+    // did we get a non-existent block name?
+    if(block[0] != null)
+      if(! bindingNameSet.contains(block[0])) {
+        {if (true) throw(new ParseException(errorMsgPrefix(nameTok)+
+          "unknown label in RHS action: " + block[0]));}
+      }
+
     annotSetName = block[0] + "Annots";
     jj_consume_token(period);
     nameTok = jj_consume_token(ident);
@@ -1613,28 +1616,6 @@ AnnotationAccessor accessor = null;
     finally { jj_save(1, xla); }
   }
 
-  final private boolean jj_3R_23() {
-    Token xsp;
-    if (jj_3R_25()) return true;
-    while (true) {
-      xsp = jj_scanpos;
-      if (jj_3R_25()) { jj_scanpos = xsp; break; }
-    }
-    return false;
-  }
-
-  final private boolean jj_3R_17() {
-    if (jj_3R_19()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_15() {
-    if (jj_scan_token(colon)) return true;
-    if (jj_scan_token(ident)) return true;
-    if (jj_scan_token(leftBrace)) return true;
-    return false;
-  }
-
   final private boolean jj_3R_16() {
     if (jj_scan_token(ident)) return true;
     return false;
@@ -1666,6 +1647,18 @@ AnnotationAccessor accessor = null;
     jj_scanpos = xsp;
     if (jj_3R_22()) return true;
     }
+    return false;
+  }
+
+  final private boolean jj_3_2() {
+    if (jj_3R_15()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_15() {
+    if (jj_scan_token(colon)) return true;
+    if (jj_scan_token(ident)) return true;
+    if (jj_scan_token(leftBrace)) return true;
     return false;
   }
 
@@ -1703,13 +1696,23 @@ AnnotationAccessor accessor = null;
     return false;
   }
 
-  final private boolean jj_3_2() {
-    if (jj_3R_15()) return true;
+  final private boolean jj_3R_18() {
+    if (jj_3R_20()) return true;
     return false;
   }
 
-  final private boolean jj_3R_18() {
-    if (jj_3R_20()) return true;
+  final private boolean jj_3R_23() {
+    Token xsp;
+    if (jj_3R_25()) return true;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_25()) { jj_scanpos = xsp; break; }
+    }
+    return false;
+  }
+
+  final private boolean jj_3R_17() {
+    if (jj_3R_19()) return true;
     return false;
   }
 
