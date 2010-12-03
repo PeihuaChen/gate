@@ -36,6 +36,7 @@ public interface RhsAction extends Serializable {
    * compatibility
    * @param inputAS the input annotation set
    * @param outputAS the output annotation set
+   * @param ontology
    * @throws JapeException
    */
   public void doit(Document doc, Map<String, AnnotationSet> bindings,
@@ -43,5 +44,8 @@ public interface RhsAction extends Serializable {
                    AnnotationSet inputAS, AnnotationSet outputAS,
                    Ontology ontology)
               throws JapeException;
+
+  public void setActionContext(ActionContext actionContext);
+  public ActionContext getActionContext();
 
 } // RhsAction

@@ -646,7 +646,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
         currentRHS = currentAcceptor.getFSMPosition().getAction();
 
         currentRHS.transduce(doc, currentAcceptor.getBindings(), inputAS,
-                outputAS, ontology);
+                outputAS, ontology, actionContext);
 
         if(ruleApplicationStyle == BRILL_STYLE) {
           // find the maximal next position
@@ -699,7 +699,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       RightHandSide currentRHS = currentAcceptor.getFSMPosition().getAction();
 
       currentRHS.transduce(doc, currentAcceptor.getBindings(), inputAS,
-              outputAS, ontology);
+              outputAS, ontology, actionContext);
 
       // if in matchGroup mode check other possible patterns in this
       // span
@@ -738,7 +738,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
               currentRHS = rivalAcceptor.getFSMPosition().getAction();
 
               currentRHS.transduce(doc, rivalAcceptor.getBindings(), inputAS,
-                      outputAS, ontology);
+                      outputAS, ontology, actionContext);
 
             } // equal rival
           }

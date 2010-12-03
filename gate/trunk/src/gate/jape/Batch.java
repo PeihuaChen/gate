@@ -57,6 +57,12 @@ public class Batch implements JapeConstants, Benchmarkable {
   /** The JAPE transducer. */
   private Transducer transducer;
 
+  private ActionContext actionContext;
+
+  public void setActionContext(ActionContext ac) {
+    actionContext = ac;
+  }
+
   /** A stream connected to the JAPE file (often null). */
 //  private InputStream japeStream = null;
 
@@ -353,6 +359,7 @@ public class Batch implements JapeConstants, Benchmarkable {
     //no need to transduce empty document
     if (inputAS == null || inputAS.isEmpty())
       return;
+    transducer.setActionContext(actionContext);
     transducer.transduce(doc, inputAS, outputAS);
 
   } // transduce(doc)

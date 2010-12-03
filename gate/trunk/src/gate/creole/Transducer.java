@@ -16,10 +16,10 @@ package gate.creole;
 import gate.*;
 import gate.gui.MainFrame;
 import gate.jape.Batch;
+import gate.jape.DefaultActionContext;
 import gate.jape.JapeException;
 import gate.jape.constraint.AnnotationAccessor;
 import gate.jape.constraint.ConstraintPredicate;
-import gate.util.Benchmark;
 import gate.util.Benchmarkable;
 import gate.util.Err;
 import java.io.File;
@@ -35,10 +35,10 @@ import javax.swing.*;
  * A cascaded multi-phase transducer using the Jape language which is a variant
  * of the CPSL language.
  */
-public class Transducer extends AbstractLanguageAnalyser
-                                                        implements
-                                                        gate.gui.ActionsPublisher,
-                                                        Benchmarkable {
+public class Transducer
+  extends AbstractLanguageAnalyser
+  implements gate.gui.ActionsPublisher, Benchmarkable, ControllerAwarePR
+{
   public static final String TRANSD_DOCUMENT_PARAMETER_NAME = "document";
 
   public static final String TRANSD_INPUT_AS_PARAMETER_NAME = "inputASName";
@@ -57,6 +57,7 @@ public class Transducer extends AbstractLanguageAnalyser
 
 
   protected List<Action> actionList;
+  protected DefaultActionContext actionContext;
 
   /**
    * Default constructor. Does nothing apart from calling the default
@@ -115,6 +116,7 @@ public class Transducer extends AbstractLanguageAnalyser
     } finally {
       fireProcessFinished();
     }
+    actionContext = new DefaultActionContext();
     batch.addProgressListener(new IntervalProgressListener(0, 100));
     return this;
   }
@@ -128,6 +130,11 @@ public class Transducer extends AbstractLanguageAnalyser
     if(document == null) throw new ExecutionException("No document provided!");
     if(inputASName != null && inputASName.equals("")) inputASName = null;
     if(outputASName != null && outputASName.equals("")) outputASName = null;
+    // the action context always reflects, for each document executed,
+    // the current PR features and the corpus, if present
+    actionContext.setCorpus(corpus);
+    actionContext.setPRFeatures(features);
+    batch.setActionContext(actionContext);
     try {
       batch.transduce(document, inputASName == null
               ? document.getAnnotations()
@@ -497,4 +504,22 @@ public class Transducer extends AbstractLanguageAnalyser
   public void setBinaryGrammarURL(java.net.URL binaryGrammarURL) {
     this.binaryGrammarURL = binaryGrammarURL;
   }
+
+  // methods implemeting ControllerAwarePR
+  public void controllerExecutionStarted(Controller c)
+    throws ExecutionException {
+    actionContext.setCorpus(corpus);
+  }
+
+  public void controllerExecutionFinished(Controller c)
+    throws ExecutionException {
+    actionContext.setCorpus(null);
+  }
+
+  public void controllerExecutionAborted(Controller c, Throwable t)
+    throws ExecutionException {
+    actionContext.setCorpus(null);
+  }
+
+
 }
