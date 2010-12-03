@@ -239,6 +239,12 @@ public abstract class Transducer implements Serializable, Benchmarkable
   }
 
   //ProcessProgressReporter implementation ends here
+  
+  protected ActionContext actionContext;
+  public void setActionContext(ActionContext ac) {
+    actionContext = ac;
+  }
+
 
 } // class Transducer
 

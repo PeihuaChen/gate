@@ -134,6 +134,9 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
       importblock + nl +
       "public class " + actionClassName + nl +
       "implements java.io.Serializable, RhsAction { " + nl +
+      "  private ActionContext ctx;"+nl+
+      "  public void setActionContext(ActionContext ac) { ctx = ac; }"+nl+
+      "  public ActionContext getActionContext() { return ctx; }"+nl+
       "  public void doit(gate.Document doc, " + nl +
       "                   java.util.Map<java.lang.String, gate.AnnotationSet> bindings, " + nl +
       "                   gate.AnnotationSet annotations, " + nl +
@@ -338,7 +341,8 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
   /** Makes changes to the document, using LHS bindings. */
   public void transduce(Document doc, java.util.Map<String, AnnotationSet> bindings,
                         AnnotationSet inputAS, final AnnotationSet outputAS,
-                        Ontology ontology)
+                        Ontology ontology,
+                        ActionContext actionContext)
                         throws JapeException {
     if(theActionObject == null) {
       instantiateActionClass();
@@ -411,6 +415,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     
     // run the action class
     try {
+      ((RhsAction) theActionObject).setActionContext(actionContext);
       ((RhsAction) theActionObject).doit(doc, bindings, annotations,
                                          inputAS, outputAS, ontology);
     } catch (NonFatalJapeException e) {

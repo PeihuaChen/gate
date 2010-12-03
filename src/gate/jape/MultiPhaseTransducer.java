@@ -177,6 +177,7 @@ implements JapeConstants, java.io.Serializable
         t.addProgressListener(pListener);
         t.addStatusListener(sListener);
 
+        t.setActionContext(actionContext);
         t.transduce(doc, input, output);
         t.removeProgressListener(pListener);
         t.removeStatusListener(sListener);
