@@ -31,6 +31,7 @@ import gate.creole.ontology.Ontology;
 import gate.event.ProgressListener;
 import gate.fsm.*;
 import gate.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Represents a complete CPSL grammar, with a phase name, options and
@@ -44,6 +45,8 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 
   protected static final Logger log = Logger
           .getLogger(SinglePhaseTransducer.class);
+
+  private static AtomicInteger actionClassNumber = new AtomicInteger();
 
   /*
    * A structure to pass information to/from the fireRule() method.
@@ -170,12 +173,16 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 
     if(controllerEventBlocksActionClassSource != null) {
       Map<String,String> cbacm = new HashMap<String,String>(1);
-      cbacm.put("japeactionclasses.ControllerEventBlocksActionClass", controllerEventBlocksActionClassSource);
+      String ceb_classname =  "ControllerEventBlocksActionClass" +
+        actionClassNumber.getAndIncrement();
+      controllerEventBlocksActionClassSource =
+        controllerEventBlocksActionClassSource.replace("%%classname%%", ceb_classname);
+      cbacm.put("japeactionclasses."+ceb_classname, controllerEventBlocksActionClassSource);
       try {
         gate.util.Javac.loadClasses(cbacm);
         controllerEventBlocksActionClass =
           Gate.getClassLoader().
-            loadClass("japeactionclasses.ControllerEventBlocksActionClass").newInstance();
+            loadClass("japeactionclasses."+ceb_classname).newInstance();
       } catch (Exception ex) {
         throw new GateRuntimeException(ex);
       }
@@ -982,7 +989,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     "import gate.*;"+nl+
     "import gate.creole.ontology.*;"+nl+
     "import gate.jape.*;"+nl+
-    "public class ControllerEventBlocksActionClass implements ControllerEventBlocksAction {"+nl+
+    "public class %%classname%% implements ControllerEventBlocksAction {"+nl+
     "  private Ontology ontology;"+nl+
     "  public void setOntology(Ontology o) { ontology = o; }"+nl+
     "  public Ontology getOntology() { return ontology; }"+nl+
