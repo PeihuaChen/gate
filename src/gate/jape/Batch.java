@@ -648,6 +648,19 @@ public class Batch implements JapeConstants, Benchmarkable {
   public void setBenchmarkId(String benchmarkId) {
     transducer.setBenchmarkId(benchmarkId);
   }
+
+
+  public void runControllerExecutionAbortedBlock(ActionContext ac, Controller c, Throwable t) {
+    transducer.runControllerExecutionAbortedBlock(ac, c,t);
+  }
+
+  public void runControllerExecutionFinishedBlock(ActionContext ac, Controller c) {
+    transducer.runControllerExecutionFinishedBlock(ac, c);
+  }
+
+  public void runControllerExecutionStartedBlock(ActionContext ac, Controller c) {
+    transducer.runControllerExecutionStartedBlock(ac,c);
+  }
   
   /*
   private void writeObject(ObjectOutputStream oos) throws IOException {

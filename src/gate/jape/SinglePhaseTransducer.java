@@ -18,6 +18,7 @@ package gate.jape;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.logging.Level;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
@@ -158,6 +159,25 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     }
     catch(Exception e) {
       throw new GateRuntimeException(e);
+    }
+
+    // TODO:
+    // if this SPT has one or more corpus blocks (for begin, end, abort) defined,
+    // create an action class implementing CorpusBlock with methods running those
+    // blocks and load the action class.
+    //
+
+    if(controllerEventBlocksActionClassSource != null) {
+      Map<String,String> cbacm = new HashMap<String,String>(1);
+      cbacm.put("japeactionclasses.ControllerEventBlocksActionClass", controllerEventBlocksActionClassSource);
+      try {
+        gate.util.Javac.loadClasses(cbacm);
+        controllerEventBlocksActionClass =
+          Gate.getClassLoader().
+            loadClass("japeactionclasses.ControllerEventBlocksActionClass").newInstance();
+      } catch (Exception ex) {
+        throw new GateRuntimeException(ex);
+      }
     }
 
     // build the finite state machine transition graph
@@ -954,6 +974,121 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     return ruleApplicationStyle;
   }
 
+  private String controllerEventBlocksActionClassSource = null;
+  private static final String nl = "\n";
+  private static final String controllerEventBlocksActionClassSourceTemplate =
+    "package japeactionclasses;"+nl+
+    "import gate.*;"+nl+
+    "import gate.jape.*;"+nl+
+    "public class ControllerEventBlocksActionClass implements ControllerEventBlocksAction {"+nl+
+    "  private ActionContext ctx;"+nl+
+    "  public void setActionContext(ActionContext ac) { ctx = ac; }"+nl+
+    "  public ActionContext getActionContext() { return ctx; }"+nl+
+    "  private Controller controller;"+nl+
+    "  public void setController(Controller c) { controller = c; }"+nl+
+    "  public Controller getController() { return controller; }"+nl+
+    "  private Corpus corpus;"+nl+
+    "  public void setCorpus(Corpus c) { corpus = c; }"+nl+
+    "  public Corpus getCorpus() { return corpus; }"+nl+
+    "  private Throwable throwable;"+nl+
+    "  public void setThrowable(Throwable t) { throwable = t; }"+nl+
+    "  public Throwable getThrowable() { return throwable; }"+nl+
+    "  public void controllerExecutionStarted() {"+nl+
+    "    %%started%%"+nl+
+    "  }"+nl+
+    "  public void controllerExecutionFinished() {"+nl+
+    "    %%finished%%"+nl+
+    "  }"+nl+
+    "  public void controllerExecutionAborted() {"+nl+
+    "    %%aborted%%"+nl+
+    "  }"+nl+
+    "}"+nl+
+    ""+nl;
+  public void setControllerEventBlocks(String started, String finished, String aborted) {
+    // if any of the three blocks is not null, set the corpusBlockActionClassSource
+    // to the final source code of the class
+    if(started != null || finished != null || aborted != null) {
+      controllerEventBlocksActionClassSource =
+        controllerEventBlocksActionClassSourceTemplate;
+      controllerEventBlocksActionClassSource =
+        controllerEventBlocksActionClassSource.replace("%%started%%",
+          started != null ? started : "// no code defined");
+      controllerEventBlocksActionClassSource =
+        controllerEventBlocksActionClassSource.replace("%%finished%%",
+          finished != null ? finished : "// no code defined");
+      controllerEventBlocksActionClassSource =
+        controllerEventBlocksActionClassSource.replace("%%aborted%%",
+          aborted != null ? aborted : "// no code defined");
+    }
+  }
+
+  private Object controllerEventBlocksActionClass = null;
+
+  @Override
+  public void runControllerExecutionStartedBlock(ActionContext ac, Controller c) {
+    if(controllerEventBlocksActionClass != null) {
+      ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
+        setController(c);
+      ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
+        setActionContext(ac);
+      if(c instanceof CorpusController) {
+        Corpus corpus = ((CorpusController)c).getCorpus();
+         ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
+          setCorpus(corpus);
+      } else {
+        ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
+          setCorpus(null);
+      }
+      ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
+        setThrowable(null);
+      ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
+        controllerExecutionStarted();
+    }
+  }
+
+  @Override
+  public void runControllerExecutionFinishedBlock(ActionContext ac, Controller c) {
+    if(controllerEventBlocksActionClass != null) {
+      ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
+        setController(c);
+      ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
+        setActionContext(ac);
+      if(c instanceof CorpusController) {
+        Corpus corpus = ((CorpusController)c).getCorpus();
+         ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
+          setCorpus(corpus);
+      } else {
+        ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
+          setCorpus(null);
+      }
+      ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
+        setThrowable(null);
+      ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
+         controllerExecutionFinished();
+    }
+  }
+
+  @Override
+  public void runControllerExecutionAbortedBlock(ActionContext ac, Controller c, Throwable t) {
+    if(controllerEventBlocksActionClass != null) {
+      ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
+        setController(c);
+      ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
+        setActionContext(ac);
+      if(c instanceof CorpusController) {
+        Corpus corpus = ((CorpusController)c).getCorpus();
+         ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
+          setCorpus(corpus);
+      } else {
+        ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
+          setCorpus(null);
+      }
+      ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
+        setThrowable(t);
+      ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
+         controllerExecutionFinished();
+    }
+  }
   /*
    * private void writeObject(ObjectOutputStream oos) throws IOException {
    * Out.prln("writing spt"); oos.defaultWriteObject();

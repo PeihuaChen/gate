@@ -15,6 +15,7 @@
 
 package gate.jape;
 
+import gate.Controller;
 import gate.Corpus;
 import gate.FeatureMap;
 
@@ -38,4 +39,10 @@ public interface ActionContext {
    * @return the FeatureMap of the processing resource
    */
   public FeatureMap getPRFeatures();
+  /**
+   * Provide access to the controller running the PR this action context
+   * lives in.
+   * @return the Controller resource
+   */
+  public Controller getController();
 }

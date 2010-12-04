@@ -305,6 +305,9 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
   Token mptNameTok = null;
   Token phaseNameTok = null;
   String javaimportblock = null;
+  String controllerstartedblock = null;
+  String controllerfinishedblock = null;
+  String controllerabortedblock = null;
     switch (jj_nt.kind) {
     case multiphase:
       jj_consume_token(multiphase);
@@ -317,14 +320,22 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     }
     switch (jj_nt.kind) {
     case javaimport:
+    case controllerstarted:
+    case controllerfinished:
+    case controlleraborted:
     case phase:
       javaimportblock = JavaImportBlock();
+      controllerstartedblock = ControllerStartedBlock();
+      controllerfinishedblock = ControllerFinishedBlock();
+      controllerabortedblock = ControllerAbortedBlock();
       label_1:
       while (true) {
         try {
           s = SinglePhaseTransducer(javaimportblock);
                 m.addPhase(s.getName(), s);
                 s.setBaseURL(baseURL);
+                s.setControllerEventBlocks(controllerstartedblock,
+                  controllerfinishedblock,controllerabortedblock);
         } catch (Throwable e) {
             // try to wrap the exception with info about what file/resource
             // it occurred in.
@@ -594,6 +605,54 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     throw new Error("Missing return statement in function");
   }
 
+  final public String ControllerStartedBlock() throws ParseException {
+                                    String block = null;
+    switch (jj_nt.kind) {
+    case controllerstarted:
+      jj_consume_token(controllerstarted);
+      jj_consume_token(leftBrace);
+      block = ConsumeBlock();
+      break;
+    default:
+      jj_la1[12] = jj_gen;
+      ;
+    }
+    {if (true) return block;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public String ControllerFinishedBlock() throws ParseException {
+                                     String block = null;
+    switch (jj_nt.kind) {
+    case controllerfinished:
+      jj_consume_token(controllerfinished);
+      jj_consume_token(leftBrace);
+      block = ConsumeBlock();
+      break;
+    default:
+      jj_la1[13] = jj_gen;
+      ;
+    }
+    {if (true) return block;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public String ControllerAbortedBlock() throws ParseException {
+                                    String block = null;
+    switch (jj_nt.kind) {
+    case controlleraborted:
+      jj_consume_token(controlleraborted);
+      jj_consume_token(leftBrace);
+      block = ConsumeBlock();
+      break;
+    default:
+      jj_la1[14] = jj_gen;
+      ;
+    }
+    {if (true) return block;}
+    throw new Error("Missing return statement in function");
+  }
+
   final public Rule Rule(String phaseName, String currentImports) throws ParseException {
   Token ruleNameTok = null;
   String ruleName = null;
@@ -620,11 +679,11 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       }
       break;
     default:
-      jj_la1[12] = jj_gen;
+      jj_la1[15] = jj_gen;
       ;
     }
     lhs = LeftHandSide();
-    jj_consume_token(69);
+    jj_consume_token(72);
     rhs = RightHandSide(phaseName, ruleName, lhs, currentImports);
     try {
       rhs.createActionClass();
@@ -674,7 +733,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         body = Action();
         break;
       default:
-        jj_la1[13] = jj_gen;
+        jj_la1[16] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -721,7 +780,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         ;
         break;
       default:
-        jj_la1[14] = jj_gen;
+        jj_la1[17] = jj_gen;
         break label_7;
       }
     }
@@ -732,7 +791,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         ;
         break;
       default:
-        jj_la1[15] = jj_gen;
+        jj_la1[18] = jj_gen;
         break label_8;
       }
       jj_consume_token(bar);
@@ -749,7 +808,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
           ;
           break;
         default:
-          jj_la1[16] = jj_gen;
+          jj_la1[19] = jj_gen;
           break label_9;
         }
       }
@@ -795,7 +854,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       pat = ComplexPatternElement(lhs);
       break;
     default:
-      jj_la1[17] = jj_gen;
+      jj_la1[20] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -841,7 +900,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
           ;
           break;
         default:
-          jj_la1[18] = jj_gen;
+          jj_la1[21] = jj_gen;
           break label_10;
         }
         jj_consume_token(comma);
@@ -858,7 +917,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       );
       break;
     default:
-      jj_la1[19] = jj_gen;
+      jj_la1[22] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -881,7 +940,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       kleeneOperator = KleeneOperator();
       break;
     default:
-      jj_la1[20] = jj_gen;
+      jj_la1[23] = jj_gen;
       ;
     }
     switch (jj_nt.kind) {
@@ -895,13 +954,13 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         bindingNameTok = jj_consume_token(integer);
         break;
       default:
-        jj_la1[21] = jj_gen;
+        jj_la1[24] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
       break;
     default:
-      jj_la1[22] = jj_gen;
+      jj_la1[25] = jj_gen;
       ;
     }
     String bindingName = null;
@@ -943,7 +1002,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         maxTok = jj_consume_token(integer);
         break;
       default:
-        jj_la1[23] = jj_gen;
+        jj_la1[26] = jj_gen;
         ;
       }
       jj_consume_token(rightSquare);
@@ -954,7 +1013,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
           {if (true) return new KleeneOperator(min, max);}
       break;
     default:
-      jj_la1[24] = jj_gen;
+      jj_la1[27] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -979,7 +1038,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
              negate = true;
       break;
     default:
-      jj_la1[25] = jj_gen;
+      jj_la1[28] = jj_gen;
       ;
     }
     // the annotation type
@@ -1021,7 +1080,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
           embeddedConstraint = Constraint();
           break;
         default:
-          jj_la1[26] = jj_gen;
+          jj_la1[29] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
         }
@@ -1030,13 +1089,13 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
         c.addAttribute(Factory.getConstraintFactory().createPredicate(opString, accessor, embeddedConstraint));
         break;
       default:
-        jj_la1[27] = jj_gen;
+        jj_la1[30] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
       break;
     default:
-      jj_la1[28] = jj_gen;
+      jj_la1[31] = jj_gen;
       ;
     }
     {if (true) return c;}
@@ -1086,7 +1145,7 @@ AnnotationAccessor accessor = null;
         attrValTok = jj_consume_token(bool);
         break;
       default:
-        jj_la1[29] = jj_gen;
+        jj_la1[32] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -1139,7 +1198,7 @@ AnnotationAccessor accessor = null;
       {if (true) return val;}
       break;
     default:
-      jj_la1[30] = jj_gen;
+      jj_la1[33] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1160,7 +1219,7 @@ AnnotationAccessor accessor = null;
         ;
         break;
       default:
-        jj_la1[31] = jj_gen;
+        jj_la1[34] = jj_gen;
         break label_11;
       }
       attrNameTok = jj_consume_token(ident);
@@ -1172,7 +1231,7 @@ AnnotationAccessor accessor = null;
         jj_consume_token(comma);
         break;
       default:
-        jj_la1[32] = jj_gen;
+        jj_la1[35] = jj_gen;
         ;
       }
     }
@@ -1193,7 +1252,7 @@ AnnotationAccessor accessor = null;
         ;
         break;
       default:
-        jj_la1[33] = jj_gen;
+        jj_la1[36] = jj_gen;
         break label_12;
       }
       jj_consume_token(comma);
@@ -1248,7 +1307,7 @@ AnnotationAccessor accessor = null;
       }
         break;
       default:
-        jj_la1[34] = jj_gen;
+        jj_la1[37] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -1316,7 +1375,7 @@ AnnotationAccessor accessor = null;
         ParseException(":+ not a legal operator (no multi-span annots)");}
       break;
     default:
-      jj_la1[35] = jj_gen;
+      jj_la1[38] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1346,7 +1405,7 @@ AnnotationAccessor accessor = null;
         ;
         break;
       default:
-        jj_la1[36] = jj_gen;
+        jj_la1[39] = jj_gen;
         break label_13;
       }
       // the name of the attribute, and equals sign
@@ -1440,7 +1499,7 @@ AnnotationAccessor accessor = null;
             opTok = jj_consume_token(metaPropOp);
             break;
           default:
-            jj_la1[37] = jj_gen;
+            jj_la1[40] = jj_gen;
             jj_consume_token(-1);
             throw new ParseException();
           }
@@ -1503,7 +1562,7 @@ AnnotationAccessor accessor = null;
               }
           break;
         default:
-          jj_la1[38] = jj_gen;
+          jj_la1[41] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
         }
@@ -1512,7 +1571,7 @@ AnnotationAccessor accessor = null;
           );
         break;
       default:
-        jj_la1[39] = jj_gen;
+        jj_la1[42] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -1521,7 +1580,7 @@ AnnotationAccessor accessor = null;
         jj_consume_token(comma);
         break;
       default:
-        jj_la1[40] = jj_gen;
+        jj_la1[43] = jj_gen;
         ;
       }
     }
@@ -1616,17 +1675,6 @@ AnnotationAccessor accessor = null;
     finally { jj_save(1, xla); }
   }
 
-  final private boolean jj_3R_16() {
-    if (jj_scan_token(ident)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_21() {
-    if (jj_scan_token(leftBrace)) return true;
-    if (jj_3R_24()) return true;
-    return false;
-  }
-
   final private boolean jj_3R_14() {
     Token xsp;
     xsp = jj_scanpos;
@@ -1716,6 +1764,17 @@ AnnotationAccessor accessor = null;
     return false;
   }
 
+  final private boolean jj_3R_16() {
+    if (jj_scan_token(ident)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_21() {
+    if (jj_scan_token(leftBrace)) return true;
+    if (jj_3R_24()) return true;
+    return false;
+  }
+
   public ParseCpslTokenManager token_source;
   SimpleCharStream jj_input_stream;
   public Token token, jj_nt;
@@ -1724,7 +1783,7 @@ AnnotationAccessor accessor = null;
   public boolean lookingAhead = false;
   private boolean jj_semLA;
   private int jj_gen;
-  final private int[] jj_la1 = new int[41];
+  final private int[] jj_la1 = new int[44];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static private int[] jj_la1_2;
@@ -1734,13 +1793,13 @@ AnnotationAccessor accessor = null;
       jj_la1_2();
    }
    private static void jj_la1_0() {
-      jj_la1_0 = new int[] {0x800,0x200000,0x2000,0x301000,0xc00000,0x0,0x0,0x0,0xc00000,0x7000000,0x7000000,0x100000,0x8000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x20000000,0x0,0x0,0x0,0x20000000,0x10000000,0x10000000,0x80000000,0x80000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x80000000,0x80000000,0x0,0x0,};
+      jj_la1_0 = new int[] {0x800,0x1000000,0x2000,0x1f01000,0x6000000,0x0,0x0,0x0,0x6000000,0x38000000,0x38000000,0x100000,0x200000,0x400000,0x800000,0x40000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x80000000,0x80000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
    }
    private static void jj_la1_1() {
-      jj_la1_1 = new int[] {0x0,0x0,0x0,0x0,0x0,0x4000,0x4000,0x6000,0x0,0x0,0x0,0x0,0x0,0x20424000,0x1405000,0x100000,0x1405000,0x1405000,0x200000,0x401000,0x4000000,0x4001,0x20000,0x200000,0x4000000,0x0,0x404000,0x84000,0x84000,0xf001,0x400f001,0x4000,0x200000,0x200000,0x20424000,0x20020000,0x4000,0x80000,0x80000,0x402f001,0x200000,};
+      jj_la1_1 = new int[] {0x0,0x0,0x0,0x0,0x0,0x20000,0x20000,0x30000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x2120000,0xa028000,0x800000,0xa028000,0xa028000,0x1000000,0x2008000,0x20000001,0x20008,0x100000,0x1000000,0x20000001,0x0,0x2020000,0x420004,0x420004,0x78008,0x20078008,0x20000,0x1000000,0x1000000,0x2120000,0x100000,0x20000,0x400004,0x400004,0x20178008,0x1000000,};
    }
    private static void jj_la1_2() {
-      jj_la1_2 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+      jj_la1_2 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x1,0x0,0x0,0x0,0x0,0x0,};
    }
   final private JJCalls[] jj_2_rtns = new JJCalls[2];
   private boolean jj_rescan = false;
@@ -1755,7 +1814,7 @@ AnnotationAccessor accessor = null;
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
     jj_gen = 0;
-    for (int i = 0; i < 41; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 44; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1768,7 +1827,7 @@ AnnotationAccessor accessor = null;
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
     jj_gen = 0;
-    for (int i = 0; i < 41; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 44; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1778,7 +1837,7 @@ AnnotationAccessor accessor = null;
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
     jj_gen = 0;
-    for (int i = 0; i < 41; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 44; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1788,7 +1847,7 @@ AnnotationAccessor accessor = null;
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
     jj_gen = 0;
-    for (int i = 0; i < 41; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 44; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1797,7 +1856,7 @@ AnnotationAccessor accessor = null;
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
     jj_gen = 0;
-    for (int i = 0; i < 41; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 44; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1806,7 +1865,7 @@ AnnotationAccessor accessor = null;
     token = new Token();
     token.next = jj_nt = token_source.getNextToken();
     jj_gen = 0;
-    for (int i = 0; i < 41; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 44; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1909,15 +1968,15 @@ AnnotationAccessor accessor = null;
 
   public ParseException generateParseException() {
     jj_expentries.removeAllElements();
-    boolean[] la1tokens = new boolean[70];
-    for (int i = 0; i < 70; i++) {
+    boolean[] la1tokens = new boolean[73];
+    for (int i = 0; i < 73; i++) {
       la1tokens[i] = false;
     }
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 41; i++) {
+    for (int i = 0; i < 44; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
@@ -1932,7 +1991,7 @@ AnnotationAccessor accessor = null;
         }
       }
     }
-    for (int i = 0; i < 70; i++) {
+    for (int i = 0; i < 73; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;
