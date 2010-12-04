@@ -378,6 +378,9 @@ PARSER_END(ParseCpsl)
 }
 
 <DEFAULT> TOKEN [IGNORE_CASE]: { <javaimport:   "Imports:"> }
+<DEFAULT> TOKEN [IGNORE_CASE]: { <controllerstarted:     "ControllerStarted:"> }
+<DEFAULT> TOKEN [IGNORE_CASE]: { <controllerfinished:    "ControllerFinished:"> }
+<DEFAULT> TOKEN [IGNORE_CASE]: { <controlleraborted:     "ControllerAborted:"> }
 <DEFAULT> TOKEN [IGNORE_CASE]: { <phase:        "Phase:"> }
 <DEFAULT> TOKEN [IGNORE_CASE]: { <input:        "Input:"> }
 <DEFAULT> TOKEN [IGNORE_CASE]: { <option:       "Options:"> }
@@ -504,6 +507,9 @@ MultiPhaseTransducer _MultiPhaseTransducer() :
   Token mptNameTok = null;
   Token phaseNameTok = null;
   String javaimportblock = null;
+  String controllerstartedblock = null;
+  String controllerfinishedblock = null;
+  String controllerabortedblock = null;
 }
 {
   // transducer name
@@ -517,12 +523,17 @@ MultiPhaseTransducer _MultiPhaseTransducer() :
     // sptrannies in this file
     (
       (javaimportblock=JavaImportBlock())
+      (controllerstartedblock=ControllerStartedBlock())
+      (controllerfinishedblock=ControllerFinishedBlock())
+      (controllerabortedblock=ControllerAbortedBlock())
       (
         
         try {
             s=SinglePhaseTransducer(javaimportblock) {
                 m.addPhase(s.getName(), s);
                 s.setBaseURL(baseURL);
+                s.setControllerEventBlocks(controllerstartedblock,
+                  controllerfinishedblock,controllerabortedblock);
             }
         } catch (Throwable e) {
             // try to wrap the exception with info about what file/resource
@@ -709,6 +720,22 @@ String JavaImportBlock() :
       return defaultimportblock;
     }
   }
+}
+
+String ControllerStartedBlock() : { String block = null; }
+{
+  ( <controllerstarted> <leftBrace> block=ConsumeBlock() )?
+  { return block; }
+}
+String ControllerFinishedBlock() : { String block = null; }
+{
+  ( <controllerfinished> <leftBrace> block=ConsumeBlock() )?
+  { return block; }
+}
+String ControllerAbortedBlock() : { String block = null; }
+{
+  ( <controlleraborted> <leftBrace> block=ConsumeBlock() )?
+  { return block; }
 }
 
 Rule Rule(String phaseName, String currentImports) :

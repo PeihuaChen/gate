@@ -17,6 +17,7 @@
 
 package gate.jape;
 
+import gate.Controller;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.HashMap;
@@ -244,6 +245,11 @@ public abstract class Transducer implements Serializable, Benchmarkable
   public void setActionContext(ActionContext ac) {
     actionContext = ac;
   }
+
+  void runControllerExecutionStartedBlock(ActionContext ac, Controller c) { }
+  void runControllerExecutionFinishedBlock(ActionContext ac, Controller c) { }
+  void runControllerExecutionAbortedBlock(ActionContext ac, Controller c, Throwable t) { }
+ 
 
 
 } // class Transducer

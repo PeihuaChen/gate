@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import gate.AnnotationSet;
+import gate.Controller;
 import gate.Document;
 import gate.creole.ExecutionException;
 import gate.creole.ExecutionInterruptedException;
@@ -247,6 +248,28 @@ implements JapeConstants, java.io.Serializable
    */
   public void setPhases(ArrayList phases) {
 	  this.phases = phases;
+  }
+
+  @Override
+  public void runControllerExecutionStartedBlock(ActionContext ac, Controller c) {
+    for(Iterator i = phases.iterator(); i.hasNext(); ) {
+      Transducer t = (Transducer) i.next();
+      t.runControllerExecutionStartedBlock(ac, c);
+    }
+  }
+  @Override
+  public void runControllerExecutionFinishedBlock(ActionContext ac, Controller c) {
+    for(Iterator i = phases.iterator(); i.hasNext(); ) {
+      Transducer t = (Transducer) i.next();
+      t.runControllerExecutionFinishedBlock(ac, c);
+    }
+  }
+  @Override
+  public void runControllerExecutionAbortedBlock(ActionContext ac, Controller c, Throwable throwable) {
+    for(Iterator i = phases.iterator(); i.hasNext(); ) {
+      Transducer t = (Transducer) i.next();
+      t.runControllerExecutionAbortedBlock(ac, c,throwable);
+    }
   }
 
 } // class MultiPhaseTransducer

@@ -24,43 +24,46 @@ public interface ParseCpslConstants {
   int phasesCommentChars = 18;
   int phasesCommentEnd = 19;
   int javaimport = 20;
-  int phase = 21;
-  int input = 22;
-  int option = 23;
-  int rule = 24;
-  int macro = 25;
-  int template = 26;
-  int priority = 27;
-  int pling = 28;
-  int kleeneOp = 29;
-  int attrOp = 30;
-  int metaPropOp = 31;
-  int integer = 32;
-  int string = 44;
-  int bool = 45;
-  int ident = 46;
-  int floatingPoint = 47;
-  int exponent = 48;
-  int colon = 49;
-  int semicolon = 50;
-  int period = 51;
-  int bar = 52;
-  int comma = 53;
-  int leftBrace = 54;
-  int rightBrace = 55;
-  int leftBracket = 56;
-  int rightBracket = 57;
-  int leftSquare = 58;
-  int rightSquare = 59;
-  int assign = 60;
-  int colonplus = 61;
-  int whiteSpace = 62;
-  int singleLineCStyleComment = 63;
-  int singleLineCpslStyleComment = 64;
-  int commentStart = 65;
-  int commentChars = 66;
-  int commentEnd = 67;
-  int other = 68;
+  int controllerstarted = 21;
+  int controllerfinished = 22;
+  int controlleraborted = 23;
+  int phase = 24;
+  int input = 25;
+  int option = 26;
+  int rule = 27;
+  int macro = 28;
+  int template = 29;
+  int priority = 30;
+  int pling = 31;
+  int kleeneOp = 32;
+  int attrOp = 33;
+  int metaPropOp = 34;
+  int integer = 35;
+  int string = 47;
+  int bool = 48;
+  int ident = 49;
+  int floatingPoint = 50;
+  int exponent = 51;
+  int colon = 52;
+  int semicolon = 53;
+  int period = 54;
+  int bar = 55;
+  int comma = 56;
+  int leftBrace = 57;
+  int rightBrace = 58;
+  int leftBracket = 59;
+  int rightBracket = 60;
+  int leftSquare = 61;
+  int rightSquare = 62;
+  int assign = 63;
+  int colonplus = 64;
+  int whiteSpace = 65;
+  int singleLineCStyleComment = 66;
+  int singleLineCpslStyleComment = 67;
+  int commentStart = 68;
+  int commentChars = 69;
+  int commentEnd = 70;
+  int other = 71;
 
   int DEFAULT = 0;
   int IN_PHASES = 1;
@@ -90,6 +93,9 @@ public interface ParseCpslConstants {
     "<phasesCommentChars>",
     "<phasesCommentEnd>",
     "\"Imports:\"",
+    "\"ControllerStarted:\"",
+    "\"ControllerFinished:\"",
+    "\"ControllerAborted:\"",
     "\"Phase:\"",
     "\"Input:\"",
     "\"Options:\"",
@@ -111,8 +117,8 @@ public interface ParseCpslConstants {
     "\"\\\\\\\"\"",
     "\"\\\\\\\'\"",
     "\"\\\\\\\\\"",
-    "<token of kind 42>",
-    "<token of kind 43>",
+    "<token of kind 45>",
+    "<token of kind 46>",
     "\"\\\"\"",
     "<bool>",
     "<ident>",

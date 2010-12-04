@@ -117,6 +117,7 @@ public class Transducer
       fireProcessFinished();
     }
     actionContext = new DefaultActionContext();
+    batch.setActionContext(actionContext);
     batch.addProgressListener(new IntervalProgressListener(0, 100));
     return this;
   }
@@ -134,7 +135,6 @@ public class Transducer
     // the current PR features and the corpus, if present
     actionContext.setCorpus(corpus);
     actionContext.setPRFeatures(features);
-    batch.setActionContext(actionContext);
     try {
       batch.transduce(document, inputASName == null
               ? document.getAnnotations()
@@ -508,17 +508,22 @@ public class Transducer
   // methods implemeting ControllerAwarePR
   public void controllerExecutionStarted(Controller c)
     throws ExecutionException {
-    actionContext.setCorpus(corpus);
+    actionContext.setController(c);
+    batch.runControllerExecutionStartedBlock(actionContext,c);
   }
 
   public void controllerExecutionFinished(Controller c)
     throws ExecutionException {
+    batch.runControllerExecutionFinishedBlock(actionContext,c);
     actionContext.setCorpus(null);
+    actionContext.setController(null);
   }
 
   public void controllerExecutionAborted(Controller c, Throwable t)
     throws ExecutionException {
+    batch.runControllerExecutionAbortedBlock(actionContext,c,t);
     actionContext.setCorpus(null);
+    actionContext.setController(null);
   }
 
 

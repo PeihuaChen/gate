@@ -15,6 +15,7 @@
 
 package gate.jape;
 
+import gate.Controller;
 import gate.Corpus;
 import gate.FeatureMap;
 
@@ -25,7 +26,8 @@ import gate.FeatureMap;
  */
 public class DefaultActionContext implements ActionContext {
   private Corpus corpus;
-  private FeatureMap features;
+  private FeatureMap prfeatures;
+  private Controller controller;
 
   public DefaultActionContext() {}
 
@@ -33,7 +35,7 @@ public class DefaultActionContext implements ActionContext {
     this.corpus = corpus;
   }
   public void setPRFeatures(FeatureMap features) {
-    this.features = features;
+    this.prfeatures = features;
   }
 
   public Corpus getCorpus() {
@@ -41,7 +43,15 @@ public class DefaultActionContext implements ActionContext {
   }
 
   public FeatureMap getPRFeatures() {
-    return features;
+    return prfeatures;
+  }
+
+  public void setController(Controller c) {
+    controller = c;
+  }
+
+  public Controller getController() {
+    return controller;
   }
 
 }
