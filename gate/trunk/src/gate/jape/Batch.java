@@ -31,6 +31,7 @@ import java.util.Vector;
 
 import gate.*;
 import gate.creole.ExecutionException;
+import gate.creole.ontology.Ontology;
 import gate.event.ProgressListener;
 import gate.event.StatusListener;
 import gate.util.Benchmark;
@@ -650,16 +651,19 @@ public class Batch implements JapeConstants, Benchmarkable {
   }
 
 
-  public void runControllerExecutionAbortedBlock(ActionContext ac, Controller c, Throwable t) {
-    transducer.runControllerExecutionAbortedBlock(ac, c,t);
+  public void runControllerExecutionAbortedBlock(
+    ActionContext ac, Controller c, Throwable t, Ontology o) {
+    transducer.runControllerExecutionAbortedBlock(ac, c, t, o);
   }
 
-  public void runControllerExecutionFinishedBlock(ActionContext ac, Controller c) {
-    transducer.runControllerExecutionFinishedBlock(ac, c);
+  public void runControllerExecutionFinishedBlock(
+    ActionContext ac, Controller c, Ontology o) {
+    transducer.runControllerExecutionFinishedBlock(ac, c, o);
   }
 
-  public void runControllerExecutionStartedBlock(ActionContext ac, Controller c) {
-    transducer.runControllerExecutionStartedBlock(ac,c);
+  public void runControllerExecutionStartedBlock(
+    ActionContext ac, Controller c, Ontology o) {
+    transducer.runControllerExecutionStartedBlock(ac, c, o);
   }
   
   /*

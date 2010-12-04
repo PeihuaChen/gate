@@ -17,6 +17,7 @@ package gate.jape;
 
 import gate.Controller;
 import gate.Corpus;
+import gate.creole.ontology.Ontology;
 
 /**
  * The interface used by the action class generated for controller event blocks.
@@ -35,4 +36,6 @@ public interface ControllerEventBlocksAction {
   public Corpus getCorpus();
   public void setActionContext(ActionContext ac);
   public ActionContext getActionContext();
+  public void setOntology(Ontology o);
+  public Ontology getOntology();
 }

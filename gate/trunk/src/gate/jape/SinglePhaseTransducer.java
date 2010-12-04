@@ -27,6 +27,7 @@ import gate.*;
 import gate.annotation.AnnotationSetImpl;
 import gate.creole.ExecutionException;
 import gate.creole.ExecutionInterruptedException;
+import gate.creole.ontology.Ontology;
 import gate.event.ProgressListener;
 import gate.fsm.*;
 import gate.util.*;
@@ -979,8 +980,12 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   private static final String controllerEventBlocksActionClassSourceTemplate =
     "package japeactionclasses;"+nl+
     "import gate.*;"+nl+
+    "import gate.creole.ontology.*;"+nl+
     "import gate.jape.*;"+nl+
     "public class ControllerEventBlocksActionClass implements ControllerEventBlocksAction {"+nl+
+    "  private Ontology ontology;"+nl+
+    "  public void setOntology(Ontology o) { ontology = o; }"+nl+
+    "  public Ontology getOntology() { return ontology; }"+nl+
     "  private ActionContext ctx;"+nl+
     "  public void setActionContext(ActionContext ac) { ctx = ac; }"+nl+
     "  public ActionContext getActionContext() { return ctx; }"+nl+
@@ -1025,10 +1030,13 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   private Object controllerEventBlocksActionClass = null;
 
   @Override
-  public void runControllerExecutionStartedBlock(ActionContext ac, Controller c) {
+  public void runControllerExecutionStartedBlock(
+    ActionContext ac, Controller c, Ontology o) {
     if(controllerEventBlocksActionClass != null) {
       ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
         setController(c);
+      ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
+        setOntology(o);
       ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
         setActionContext(ac);
       if(c instanceof CorpusController) {
@@ -1047,10 +1055,13 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   }
 
   @Override
-  public void runControllerExecutionFinishedBlock(ActionContext ac, Controller c) {
+  public void runControllerExecutionFinishedBlock(
+    ActionContext ac, Controller c, Ontology o) {
     if(controllerEventBlocksActionClass != null) {
       ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
         setController(c);
+      ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
+        setOntology(o);
       ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
         setActionContext(ac);
       if(c instanceof CorpusController) {
@@ -1069,10 +1080,13 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   }
 
   @Override
-  public void runControllerExecutionAbortedBlock(ActionContext ac, Controller c, Throwable t) {
+  public void runControllerExecutionAbortedBlock(
+    ActionContext ac, Controller c, Throwable t, Ontology o) {
     if(controllerEventBlocksActionClass != null) {
       ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
         setController(c);
+      ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
+        setOntology(o);
       ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
         setActionContext(ac);
       if(c instanceof CorpusController) {
