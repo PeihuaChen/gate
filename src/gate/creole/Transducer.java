@@ -509,19 +509,19 @@ public class Transducer
   public void controllerExecutionStarted(Controller c)
     throws ExecutionException {
     actionContext.setController(c);
-    batch.runControllerExecutionStartedBlock(actionContext,c);
+    batch.runControllerExecutionStartedBlock(actionContext,c,ontology);
   }
 
   public void controllerExecutionFinished(Controller c)
     throws ExecutionException {
-    batch.runControllerExecutionFinishedBlock(actionContext,c);
+    batch.runControllerExecutionFinishedBlock(actionContext,c,ontology);
     actionContext.setCorpus(null);
     actionContext.setController(null);
   }
 
   public void controllerExecutionAborted(Controller c, Throwable t)
     throws ExecutionException {
-    batch.runControllerExecutionAbortedBlock(actionContext,c,t);
+    batch.runControllerExecutionAbortedBlock(actionContext,c,t,ontology);
     actionContext.setCorpus(null);
     actionContext.setController(null);
   }

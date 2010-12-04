@@ -246,9 +246,9 @@ public abstract class Transducer implements Serializable, Benchmarkable
     actionContext = ac;
   }
 
-  void runControllerExecutionStartedBlock(ActionContext ac, Controller c) { }
-  void runControllerExecutionFinishedBlock(ActionContext ac, Controller c) { }
-  void runControllerExecutionAbortedBlock(ActionContext ac, Controller c, Throwable t) { }
+  void runControllerExecutionStartedBlock(ActionContext ac, Controller c, Ontology o) { }
+  void runControllerExecutionFinishedBlock(ActionContext ac, Controller c, Ontology o) { }
+  void runControllerExecutionAbortedBlock(ActionContext ac, Controller c, Throwable t, Ontology o) { }
  
 
 

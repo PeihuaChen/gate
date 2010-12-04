@@ -251,24 +251,27 @@ implements JapeConstants, java.io.Serializable
   }
 
   @Override
-  public void runControllerExecutionStartedBlock(ActionContext ac, Controller c) {
+  public void runControllerExecutionStartedBlock(
+    ActionContext ac, Controller c, Ontology o) {
     for(Iterator i = phases.iterator(); i.hasNext(); ) {
       Transducer t = (Transducer) i.next();
-      t.runControllerExecutionStartedBlock(ac, c);
+      t.runControllerExecutionStartedBlock(ac, c, o);
     }
   }
   @Override
-  public void runControllerExecutionFinishedBlock(ActionContext ac, Controller c) {
+  public void runControllerExecutionFinishedBlock(
+    ActionContext ac, Controller c, Ontology o) {
     for(Iterator i = phases.iterator(); i.hasNext(); ) {
       Transducer t = (Transducer) i.next();
-      t.runControllerExecutionFinishedBlock(ac, c);
+      t.runControllerExecutionFinishedBlock(ac, c, o);
     }
   }
   @Override
-  public void runControllerExecutionAbortedBlock(ActionContext ac, Controller c, Throwable throwable) {
+  public void runControllerExecutionAbortedBlock(
+    ActionContext ac, Controller c, Throwable throwable, Ontology o) {
     for(Iterator i = phases.iterator(); i.hasNext(); ) {
       Transducer t = (Transducer) i.next();
-      t.runControllerExecutionAbortedBlock(ac, c,throwable);
+      t.runControllerExecutionAbortedBlock(ac, c,throwable, o);
     }
   }
 
