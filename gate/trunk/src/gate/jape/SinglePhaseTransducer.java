@@ -166,12 +166,6 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       throw new GateRuntimeException(e);
     }
 
-    // TODO:
-    // if this SPT has one or more corpus blocks (for begin, end, abort) defined,
-    // create an action class implementing CorpusBlock with methods running those
-    // blocks and load the action class.
-    //
-
     if(controllerEventBlocksActionClassSource != null) {
       Map<String,String> cbacm = new HashMap<String,String>(1);
       String ceb_classname =  "ControllerEventBlocksActionClass" +
