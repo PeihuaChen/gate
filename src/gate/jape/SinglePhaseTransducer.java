@@ -1117,13 +1117,14 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 
   private void writeObject(java.io.ObjectOutputStream out)
   throws IOException{
+    Object save = controllerEventBlocksActionClass;
     controllerEventBlocksActionClass = null;
     out.defaultWriteObject();
-    //now we need to save the class for the action
-    try{
+    controllerEventBlocksActionClass = save;
+    try {
 		  Class class1 = Gate.getClassLoader().loadClass(controllerEventBlocksActionClassName);
-		    System.out.println(class1.getName());
-		    out.writeObject(class1);
+		  //System.out.println(class1.getName());
+		  out.writeObject(class1);
     }catch(ClassNotFoundException cnfe){
       throw new GateRuntimeException(cnfe);
     }
@@ -1131,24 +1132,22 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 
   private void readObject(java.io.ObjectInputStream in)
   throws IOException, ClassNotFoundException{
-    System.out.println("Restoring SinglePhaseTransducer ... default");
     in.defaultReadObject();
-    System.out.println("Trying to find class "+controllerEventBlocksActionClassName);
-    Object theClass = Gate.getClassLoader().findExistingClass(controllerEventBlocksActionClassName);
-	  if(theClass == null) {
-		  try{
-        System.out.println("Trying to recompile it!");
-			  Map<String,String> actionClasses = new HashMap<String,String>();
-			  actionClasses.put(controllerEventBlocksActionClassName, controllerEventBlocksActionClassSource);
-        System.out.println("Source is "+controllerEventBlocksActionClassSource);
-			  gate.util.Javac.loadClasses(actionClasses);
-        
-		  }catch(Exception e1){
-			  throw new GateRuntimeException (e1);
-	  	}
+    if(controllerEventBlocksActionClassSource != null) {
+    if(Gate.getClassLoader().findExistingClass(controllerEventBlocksActionClassName) == null) {
+        try {
+			    Map<String,String> actionClasses = new HashMap<String,String>();
+			    actionClasses.put(controllerEventBlocksActionClassName, controllerEventBlocksActionClassSource);
+          System.out.println("Source is "+controllerEventBlocksActionClassSource);
+			    gate.util.Javac.loadClasses(actionClasses);
+          controllerEventBlocksActionClass =
+            Gate.getClassLoader().
+              loadClass(controllerEventBlocksActionClassName).newInstance();
+		    }catch(Exception e1){
+			    throw new GateRuntimeException (e1);
+	  	  }
+      }
     }
-    controllerEventBlocksActionClass = 
-      Gate.getClassLoader().loadClass(controllerEventBlocksActionClassName);
   }
 
   /*
