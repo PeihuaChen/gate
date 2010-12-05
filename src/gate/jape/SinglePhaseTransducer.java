@@ -31,6 +31,7 @@ import gate.creole.ontology.Ontology;
 import gate.event.ProgressListener;
 import gate.fsm.*;
 import gate.util.*;
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -183,6 +184,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
         controllerEventBlocksActionClass =
           Gate.getClassLoader().
             loadClass("japeactionclasses."+ceb_classname).newInstance();
+        controllerEventBlocksActionClassName = "japeactionclasses."+ceb_classname;
       } catch (Exception ex) {
         throw new GateRuntimeException(ex);
       }
@@ -982,6 +984,8 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     return ruleApplicationStyle;
   }
 
+  private Object controllerEventBlocksActionClass = null;
+  private String controllerEventBlocksActionClassName;
   private String controllerEventBlocksActionClassSource = null;
   private static final String nl = "\n";
   private static final String controllerEventBlocksActionClassSourceTemplate =
@@ -1034,7 +1038,6 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     }
   }
 
-  private Object controllerEventBlocksActionClass = null;
 
   @Override
   public void runControllerExecutionStartedBlock(
@@ -1110,6 +1113,44 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
          controllerExecutionFinished();
     }
   }
+
+
+  private void writeObject(java.io.ObjectOutputStream out)
+  throws IOException{
+    controllerEventBlocksActionClass = null;
+    out.defaultWriteObject();
+    //now we need to save the class for the action
+    try{
+		  Class class1 = Gate.getClassLoader().loadClass(controllerEventBlocksActionClassName);
+		    System.out.println(class1.getName());
+		    out.writeObject(class1);
+    }catch(ClassNotFoundException cnfe){
+      throw new GateRuntimeException(cnfe);
+    }
+  }
+
+  private void readObject(java.io.ObjectInputStream in)
+  throws IOException, ClassNotFoundException{
+    System.out.println("Restoring SinglePhaseTransducer ... default");
+    in.defaultReadObject();
+    System.out.println("Trying to find class "+controllerEventBlocksActionClassName);
+    Object theClass = Gate.getClassLoader().findExistingClass(controllerEventBlocksActionClassName);
+	  if(theClass == null) {
+		  try{
+        System.out.println("Trying to recompile it!");
+			  Map<String,String> actionClasses = new HashMap<String,String>();
+			  actionClasses.put(controllerEventBlocksActionClassName, controllerEventBlocksActionClassSource);
+        System.out.println("Source is "+controllerEventBlocksActionClassSource);
+			  gate.util.Javac.loadClasses(actionClasses);
+        
+		  }catch(Exception e1){
+			  throw new GateRuntimeException (e1);
+	  	}
+    }
+    controllerEventBlocksActionClass = 
+      Gate.getClassLoader().loadClass(controllerEventBlocksActionClassName);
+  }
+
   /*
    * private void writeObject(ObjectOutputStream oos) throws IOException {
    * Out.prln("writing spt"); oos.defaultWriteObject();

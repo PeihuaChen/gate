@@ -18,13 +18,14 @@ package gate.jape;
 import gate.Controller;
 import gate.Corpus;
 import gate.creole.ontology.Ontology;
+import java.io.Serializable;
 
 /**
  * The interface used by the action class generated for controller event blocks.
  *
  * @author Johann Petrak
  */
-public interface ControllerEventBlocksAction {
+public interface ControllerEventBlocksAction extends Serializable {
   public void controllerExecutionStarted();
   public void controllerExecutionFinished();
   public void controllerExecutionAborted();
