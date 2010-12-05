@@ -315,7 +315,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     //now we need to save the class for the action
     try{
 		Class class1 = Gate.getClassLoader().loadClass(actionClassQualifiedName);
-		System.out.println(class1.getName());
+		//System.out.println(class1.getName());
 		out.writeObject(class1);
     }catch(ClassNotFoundException cnfe){
       throw new GateRuntimeException(cnfe);
