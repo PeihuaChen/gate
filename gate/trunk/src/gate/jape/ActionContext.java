@@ -18,6 +18,7 @@ package gate.jape;
 import gate.Controller;
 import gate.Corpus;
 import gate.FeatureMap;
+import java.io.Serializable;
 
 /**
  * Interface describing an "action context" for a JAPE Java RHS. An action
@@ -26,7 +27,7 @@ import gate.FeatureMap;
  *
  * @author Johann Petrak
  */
-public interface ActionContext {
+public interface ActionContext  extends Serializable {
   /**
    * Provide access to the corpus a JAPE processing resource is running on.
    * @return the corpus LR the JAPE transducer is processing, null if no
