@@ -170,15 +170,14 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       Map<String,String> cbacm = new HashMap<String,String>(1);
       String ceb_classname =  "ControllerEventBlocksActionClass" +
         actionClassNumber.getAndIncrement();
-      controllerEventBlocksActionClassSource =
-        controllerEventBlocksActionClassSource.replace("%%classname%%", ceb_classname);
-      cbacm.put("japeactionclasses."+ceb_classname, controllerEventBlocksActionClassSource);
+      controllerEventBlocksActionClassName = "japeactionclasses." + ceb_classname;
+      String source = controllerEventBlocksActionClassSource.replace("%%classname%%",ceb_classname);
+      cbacm.put("japeactionclasses."+ceb_classname, source);
       try {
         gate.util.Javac.loadClasses(cbacm);
         controllerEventBlocksActionClass =
           Gate.getClassLoader().
             loadClass("japeactionclasses."+ceb_classname).newInstance();
-        controllerEventBlocksActionClassName = "japeactionclasses."+ceb_classname;
       } catch (Exception ex) {
         throw new GateRuntimeException(ex);
       }
@@ -1115,24 +1114,20 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     controllerEventBlocksActionClass = null;
     out.defaultWriteObject();
     controllerEventBlocksActionClass = save;
-    try {
-		  Class class1 = Gate.getClassLoader().loadClass(controllerEventBlocksActionClassName);
-		  //System.out.println(class1.getName());
-		  out.writeObject(class1);
-    }catch(ClassNotFoundException cnfe){
-      throw new GateRuntimeException(cnfe);
-    }
   }
 
   private void readObject(java.io.ObjectInputStream in)
   throws IOException, ClassNotFoundException{
     in.defaultReadObject();
     if(controllerEventBlocksActionClassSource != null) {
-    if(Gate.getClassLoader().findExistingClass(controllerEventBlocksActionClassName) == null) {
+      String ceb_classname =  "ControllerEventBlocksActionClass" +
+        actionClassNumber.getAndIncrement();
+      controllerEventBlocksActionClassName = "japeactionclasses." + ceb_classname;
+      // replace the name in the sources
+      String source = controllerEventBlocksActionClassSource.replace("%%classname%%",ceb_classname);
         try {
 			    Map<String,String> actionClasses = new HashMap<String,String>();
-			    actionClasses.put(controllerEventBlocksActionClassName, controllerEventBlocksActionClassSource);
-          System.out.println("Source is "+controllerEventBlocksActionClassSource);
+			    actionClasses.put(controllerEventBlocksActionClassName, source);
 			    gate.util.Javac.loadClasses(actionClasses);
           controllerEventBlocksActionClass =
             Gate.getClassLoader().
@@ -1140,7 +1135,6 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 		    }catch(Exception e1){
 			    throw new GateRuntimeException (e1);
 	  	  }
-      }
     }
   }
 
