@@ -152,6 +152,12 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 
     // each rule has a RHS which has a string for java code
     // those strings need to be compiled now
+    
+    // TODO: (JP) if we have some binary JAPE grammars loaded and then we
+    // compile additional action classes here, we can potentially
+    // get duplicate class names.
+    // Instead, we should modify and increment the classname until
+    // we find one that is not already taken.
     Map actionClasses = new HashMap(rules.size());
     for(Iterator i = rules.iterator(); i.hasNext();) {
       Rule rule = (Rule)i.next();
@@ -165,23 +171,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     catch(Exception e) {
       throw new GateRuntimeException(e);
     }
-
-    if(controllerEventBlocksActionClassSource != null) {
-      Map<String,String> cbacm = new HashMap<String,String>(1);
-      String ceb_classname =  "ControllerEventBlocksActionClass" +
-        actionClassNumber.getAndIncrement();
-      controllerEventBlocksActionClassName = "japeactionclasses." + ceb_classname;
-      String source = controllerEventBlocksActionClassSource.replace("%%classname%%",ceb_classname);
-      cbacm.put("japeactionclasses."+ceb_classname, source);
-      try {
-        gate.util.Javac.loadClasses(cbacm);
-        controllerEventBlocksActionClass =
-          Gate.getClassLoader().
-            loadClass("japeactionclasses."+ceb_classname).newInstance();
-      } catch (Exception ex) {
-        throw new GateRuntimeException(ex);
-      }
-    }
+    compileEventBlocksActionClassIfNecessary();
 
     // build the finite state machine transition graph
     fsm = createFSM();
@@ -1119,15 +1109,28 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   private void readObject(java.io.ObjectInputStream in)
   throws IOException, ClassNotFoundException{
     in.defaultReadObject();
+    compileEventBlocksActionClassIfNecessary();
+  }
+
+  private void compileEventBlocksActionClassIfNecessary() {
     if(controllerEventBlocksActionClassSource != null) {
-      String ceb_classname =  "ControllerEventBlocksActionClass" +
-        actionClassNumber.getAndIncrement();
-      controllerEventBlocksActionClassName = "japeactionclasses." + ceb_classname;
-      // replace the name in the sources
-      String source = controllerEventBlocksActionClassSource.replace("%%classname%%",ceb_classname);
+			Map<String,String> actionClasses = new HashMap<String,String>(1);
+      boolean neednewclassname = true;
+      String  ceb_classname = "";
+      while(neednewclassname) {
+        ceb_classname =  "ControllerEventBlocksActionClass" +
+          actionClassNumber.getAndIncrement();
+        controllerEventBlocksActionClassName = "japeactionclasses." + ceb_classname;
         try {
-			    Map<String,String> actionClasses = new HashMap<String,String>();
-			    actionClasses.put(controllerEventBlocksActionClassName, source);
+          Gate.getClassLoader().loadClass(controllerEventBlocksActionClassName);
+          neednewclassname = true;
+        } catch (ClassNotFoundException e) {
+          neednewclassname = false;
+        }
+      }
+      String source = controllerEventBlocksActionClassSource.replace("%%classname%%",ceb_classname);
+			actionClasses.put(controllerEventBlocksActionClassName, source);
+      try {
 			    gate.util.Javac.loadClasses(actionClasses);
           controllerEventBlocksActionClass =
             Gate.getClassLoader().
@@ -1137,7 +1140,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 	  	  }
     }
   }
-
+  
   /*
    * private void writeObject(ObjectOutputStream oos) throws IOException {
    * Out.prln("writing spt"); oos.defaultWriteObject();
