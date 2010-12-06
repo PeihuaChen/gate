@@ -10,7 +10,7 @@
 <TR>
 <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod1">_MultiPhaseTransducer</A></TD>
 <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
-<TD ALIGN=LEFT VALIGN=BASELINE>( &lt;multiphase&gt; &lt;ident&gt; )? ( ( ( <A HREF="#prod2">JavaImportBlock</A> ) ( <A HREF="#prod3">ControllerStartedBlock</A> ) ( <A HREF="#prod4">ControllerFinishedBlock</A> ) ( <A HREF="#prod5">ControllerAbortedBlock</A> ) ( <A HREF="#prod6">SinglePhaseTransducer</A> )+ ) | ( &lt;phases&gt; ( &lt;path&gt; )+ ) ) &lt;EOF&gt;</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( &lt;multiphase&gt; &lt;ident&gt; )? ( ( ( <A HREF="#prod2">JavaImportBlock</A> ) ( ( <A HREF="#prod3">ControllerStartedBlock</A> ) | ( <A HREF="#prod4">ControllerFinishedBlock</A> ) | ( <A HREF="#prod5">ControllerAbortedBlock</A> ) )* ( <A HREF="#prod6">SinglePhaseTransducer</A> )+ ) | ( &lt;phases&gt; ( &lt;path&gt; )+ ) ) &lt;EOF&gt;</TD>
 </TR>
 <TR>
 <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod6">SinglePhaseTransducer</A></TD>
@@ -25,17 +25,17 @@
 <TR>
 <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod3">ControllerStartedBlock</A></TD>
 <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
-<TD ALIGN=LEFT VALIGN=BASELINE>( &lt;controllerstarted&gt; &lt;leftBrace&gt; <A HREF="#prod10">ConsumeBlock</A> )?</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( &lt;controllerstarted&gt; &lt;leftBrace&gt; <A HREF="#prod10">ConsumeBlock</A> )</TD>
 </TR>
 <TR>
 <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod4">ControllerFinishedBlock</A></TD>
 <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
-<TD ALIGN=LEFT VALIGN=BASELINE>( &lt;controllerfinished&gt; &lt;leftBrace&gt; <A HREF="#prod10">ConsumeBlock</A> )?</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( &lt;controllerfinished&gt; &lt;leftBrace&gt; <A HREF="#prod10">ConsumeBlock</A> )</TD>
 </TR>
 <TR>
 <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod5">ControllerAbortedBlock</A></TD>
 <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
-<TD ALIGN=LEFT VALIGN=BASELINE>( &lt;controlleraborted&gt; &lt;leftBrace&gt; <A HREF="#prod10">ConsumeBlock</A> )?</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( &lt;controlleraborted&gt; &lt;leftBrace&gt; <A HREF="#prod10">ConsumeBlock</A> )</TD>
 </TR>
 <TR>
 <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod7">Rule</A></TD>
