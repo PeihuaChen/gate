@@ -39,22 +39,18 @@ public class HashGazetteer extends AbstractGazetteer {
   private Map<String, List<Lookup>> mapsList[];
 
   private int mapsListSize;
-
-  private AnnotationSet annotationSet;
-
-  @SuppressWarnings("unchecked")
-  public HashGazetteer() {
-    categoryList = null;
-    mapsList = new HashMap[1000];
-    mapsListSize = 0;
-  }
+  
+  private AnnotationSet annotationSet = null;
 
   @SuppressWarnings("unchecked")
   public Resource init() throws ResourceInstantiationException {
+    System.out.println("HashGazetteer is being initialized!");
     if(listsURL == null)
       throw new ResourceInstantiationException(
               "No URL provided for gazetteer creation!");
+    
     try {
+      mapsList = new HashMap[1000];
       definition = new LinearDefinition();
       definition.setURL(listsURL);
       definition.load();
@@ -81,11 +77,8 @@ public class HashGazetteer extends AbstractGazetteer {
 
   public void execute() throws ExecutionException {
     if(document == null) throw new ExecutionException("Document is null!");
-
-    if(annotationSetName == null || annotationSetName.equals(""))
-      annotationSet = document.getAnnotations();
-    else annotationSet = document.getAnnotations(annotationSetName);
-
+    annotationSet = document.getAnnotations(annotationSetName);
+    
     String s = document.getContent().toString() + " ";
 
     int i = s.length();
@@ -246,7 +239,6 @@ public class HashGazetteer extends AbstractGazetteer {
   }
 
   private boolean annotate(String s, int i, int j, int k) {
-    // boolean flag1 = false;
     if(k >= mapsListSize) return false;
     Map<String, List<Lookup>> hashmap = mapsList[k];
     if(hashmap == null) return false;
