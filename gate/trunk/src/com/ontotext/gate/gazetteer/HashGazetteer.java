@@ -65,7 +65,7 @@ public class HashGazetteer extends AbstractGazetteer {
       Iterator<LinearNode> iterator = definition.iterator();
       int j = 0;
       LinearNode linearnode;
-      for(; iterator.hasNext(); readList(linearnode, true)) {
+      for(; iterator.hasNext(); readList(linearnode)) {
         linearnode = (LinearNode)iterator.next();
         fireStatusChanged("Reading " + linearnode.toString());
         fireProgressChanged((++j * 100) / i);
@@ -81,10 +81,13 @@ public class HashGazetteer extends AbstractGazetteer {
 
   public void execute() throws ExecutionException {
     if(document == null) throw new ExecutionException("Document is null!");
+
     if(annotationSetName == null || annotationSetName.equals(""))
       annotationSet = document.getAnnotations();
     else annotationSet = document.getAnnotations(annotationSetName);
+
     String s = document.getContent().toString() + " ";
+
     int i = s.length();
     int j = 0;
     int k = 0;
@@ -243,39 +246,40 @@ public class HashGazetteer extends AbstractGazetteer {
   }
 
   private boolean annotate(String s, int i, int j, int k) {
-    boolean flag1 = false;
+    // boolean flag1 = false;
     if(k >= mapsListSize) return false;
     Map<String, List<Lookup>> hashmap = mapsList[k];
     if(hashmap == null) return false;
-    if(hashmap.containsKey(s)) {
-      List<Lookup> arraylist = hashmap.get(s);
-      flag1 = true;
-      if(null != arraylist) {
-        for(Iterator<Lookup> iterator = arraylist.iterator(); iterator
-                .hasNext();) {
-          Lookup lookup1 = (Lookup)iterator.next();
-          FeatureMap featuremap = Factory.newFeatureMap();
-          featuremap.put("majorType", lookup1.majorType);
-          if(null != lookup1.oClass && null != lookup1.ontology) {
-            featuremap.put("class", lookup1.oClass);
-            featuremap.put("ontology", lookup1.ontology);
-          }
-          if(null != lookup1.minorType) {
-            featuremap.put("minorType", lookup1.minorType);
-            if(null != lookup1.languages)
-              featuremap.put("language", lookup1.languages);
-          }
-          try {
-            annotationSet.add(new Long(i), new Long(j), "Lookup", featuremap);
-          }
-          catch(InvalidOffsetException invalidoffsetexception) {
-            throw new LuckyException(invalidoffsetexception.toString());
-          }
-        }
+    if(!hashmap.containsKey(s)) return false;
+    List<Lookup> arraylist = hashmap.get(s);
 
+    // TODO shouldn't this return false if arraylist is null?
+
+    if(null != arraylist) {
+      for(Iterator<Lookup> iterator = arraylist.iterator(); iterator.hasNext();) {
+        Lookup lookup1 = (Lookup)iterator.next();
+        FeatureMap featuremap = Factory.newFeatureMap();
+        featuremap.put("majorType", lookup1.majorType);
+        if(null != lookup1.oClass && null != lookup1.ontology) {
+          featuremap.put("class", lookup1.oClass);
+          featuremap.put("ontology", lookup1.ontology);
+        }
+        if(null != lookup1.minorType) {
+          featuremap.put("minorType", lookup1.minorType);
+          if(null != lookup1.languages)
+            featuremap.put("language", lookup1.languages);
+        }
+        try {
+          annotationSet.add(new Long(i), new Long(j), "Lookup", featuremap);
+        }
+        catch(InvalidOffsetException invalidoffsetexception) {
+          throw new LuckyException(invalidoffsetexception.toString());
+        }
       }
+
     }
-    return flag1;
+
+    return true;
   }
 
   /**
@@ -402,9 +406,7 @@ public class HashGazetteer extends AbstractGazetteer {
     return s1;
   }
 
-  private void readList(LinearNode linearnode, boolean flag)
-          throws GazetteerException {
-    // TODO should we remove the flag param as it is always set to true?
+  private void readList(LinearNode linearnode) throws GazetteerException {
 
     if(linearnode == null)
       throw new GazetteerException("LinearNode node is null");
@@ -431,21 +433,18 @@ public class HashGazetteer extends AbstractGazetteer {
     lookup1.list = s;
     categoryList.add(lookup1);
 
-    if(flag) {
+    @SuppressWarnings("unchecked")
+    Iterator<GazetteerNode> iterator = gazetteerlist.iterator();
+    String s6 = null;
 
-      @SuppressWarnings("unchecked")
-      Iterator<GazetteerNode> iterator = gazetteerlist.iterator();
-      String s6 = null;
-
-      for(; iterator.hasNext(); add(s6, lookup1)) {
-        String s4 = iterator.next().toString();
-        s4.trim();
-        int i = s4.length();
-        for(int j = 0; j < i; j++) {
-          if(j + 1 != i && !Character.isWhitespace(s4.charAt(j))) continue;
-          if(j + 1 == i) j = i;
-          s6 = s4.substring(0, j).trim();
-        }
+    for(; iterator.hasNext(); add(s6, lookup1)) {
+      String s4 = iterator.next().toString();
+      s4.trim();
+      int i = s4.length();
+      for(int j = 0; j < i; j++) {
+        if(j + 1 != i && !Character.isWhitespace(s4.charAt(j))) continue;
+        if(j + 1 == i) j = i;
+        s6 = s4.substring(0, j).trim();
       }
     }
   }
