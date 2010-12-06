@@ -32,6 +32,16 @@ import java.util.Set;
 public class HashGazetteer extends AbstractGazetteer {
   private static final long serialVersionUID = -4603155688378104052L;
 
+  private ArrayList<Lookup> categoryList;
+
+  private Map<LinearNode, GazetteerList> listsByNode;
+
+  private Map<String, List<Lookup>> mapsList[];
+
+  private int mapsListSize;
+
+  private AnnotationSet annotationSet;
+
   @SuppressWarnings("unchecked")
   public HashGazetteer() {
     categoryList = null;
@@ -80,10 +90,11 @@ public class HashGazetteer extends AbstractGazetteer {
     int k = 0;
 
     StringBuffer stringbuffer = new StringBuffer();
-    boolean flag4 = false;
-    boolean flag6 = false;
-    boolean flag8 = false;
+    boolean prevIsSymbol = false;
+    boolean prevIsDigit = false;
+    boolean prevIsLetter = false;
 
+    // TODO what does this do, as it is only ever set to false
     boolean flag11 = false;
 
     String s3 = "";
@@ -92,30 +103,35 @@ public class HashGazetteer extends AbstractGazetteer {
 
     for(int l1 = 0; l1 < i; l1++) {
       char c = s.charAt(l1);
-      boolean flag2 = Character.isWhitespace(c);
-      if(flag2 && stringbuffer.length() == 0) {
+      boolean currIsWhitespace = Character.isWhitespace(c);
+      if(currIsWhitespace && stringbuffer.length() == 0) {
         j++;
-        flag8 = flag6 = flag4 = flag11 = false;
+        prevIsLetter = prevIsDigit = prevIsSymbol = flag11 = false;
         continue;
       }
-      if(flag2 && flag4 && stringbuffer.length() == 1) {
+      if(currIsWhitespace && prevIsSymbol && stringbuffer.length() == 1) {
         j += 2;
-        flag8 = flag6 = flag4 = flag11 = false;
+        prevIsLetter = prevIsDigit = prevIsSymbol = flag11 = false;
         stringbuffer.delete(0, stringbuffer.length());
         continue;
       }
-      boolean flag7 = Character.isLetter(c);
-      boolean flag5 = Character.isDigit(c);
-      boolean flag3 = !flag2 && !flag7 && !flag5;
-      boolean flag10 = Character.isLowerCase(c);
-      if(k <= j && (flag2 || flag3 || flag11 && !flag10 || !flag8 && flag7))
+      boolean currIsLetter = Character.isLetter(c);
+      boolean currIsDigit = Character.isDigit(c);
+      boolean currIsSymbol = !currIsWhitespace && !currIsLetter && !currIsDigit;
+      boolean currIsLowerCase = Character.isLowerCase(c);
+      if(k <= j
+              && (currIsWhitespace || currIsSymbol || flag11
+                      && !currIsLowerCase || !prevIsLetter && currIsLetter))
         k = l1;
-      boolean flag13 = flag8 && (flag5 || flag3 || flag2) || flag8 && flag7
-              && flag11 && !flag10 || flag6 && (flag7 || flag3 || flag2)
-              || flag4;
+      boolean flag13 = prevIsLetter
+              && (currIsDigit || currIsSymbol || currIsWhitespace)
+              || prevIsLetter && currIsLetter && flag11 && !currIsLowerCase
+              || prevIsDigit
+              && (currIsLetter || currIsSymbol || currIsWhitespace)
+              || prevIsSymbol;
       if(l1 == i - 1) flag13 = true;
       if(flag13) {
-        boolean flag16 = !flag3 && !flag5;
+        boolean flag16 = !currIsSymbol && !currIsDigit;
         if(l1 == i - 1) flag16 = true;
         String s2 = normalizeWhitespace(stringbuffer.toString());
         int k1 = s2.length();
@@ -124,7 +140,7 @@ public class HashGazetteer extends AbstractGazetteer {
         if(i1 != j || !s2.equals(s3)) {
           int l = s2.length();
           if(l > 0) {
-            boolean flag14 = annotate(s2, j, l1, l, false);
+            boolean flag14 = annotate(s2, j, l1, l);
             if(flag14) {
               s3 = s2;
               i1 = j;
@@ -140,9 +156,9 @@ public class HashGazetteer extends AbstractGazetteer {
         }
       }
       stringbuffer.append(c);
-      flag6 = flag5;
-      flag8 = flag7;
-      flag4 = flag3;
+      prevIsDigit = currIsDigit;
+      prevIsLetter = currIsLetter;
+      prevIsSymbol = currIsSymbol;
     }
 
     fireProcessFinished();
@@ -226,7 +242,7 @@ public class HashGazetteer extends AbstractGazetteer {
     }
   }
 
-  private boolean annotate(String s, int i, int j, int k, boolean flag) {
+  private boolean annotate(String s, int i, int j, int k) {
     boolean flag1 = false;
     if(k >= mapsListSize) return false;
     Map<String, List<Lookup>> hashmap = mapsList[k];
@@ -262,8 +278,14 @@ public class HashGazetteer extends AbstractGazetteer {
     return flag1;
   }
 
+  /**
+   * Removes a string from the gazetteer
+   * 
+   * @param s the item to remove
+   * @return true if the operation was successful
+   */
   public boolean remove(String s) {
-    boolean flag = false;
+
     String s1 = a(s, true);
     int i = s1.length();
     if(i > mapsListSize) return false;
@@ -271,11 +293,20 @@ public class HashGazetteer extends AbstractGazetteer {
     if(hashmap == null) return false;
     if(hashmap.containsKey(s1)) {
       hashmap.remove(s1);
-      flag = true;
+      return true;
     }
-    return flag;
+    return false;
   }
 
+  /**
+   * Works backwards through the String parameter removing each
+   * character until it encounters a letter, digit, or whitespace at
+   * which point it returns the truncated string.
+   * 
+   * @param s the String you wish to remove trailing symbols from
+   * @return the truncated String that now ends in a letter, digit, or
+   *         whitespace character
+   */
   private String removeTrailingSymbols(String s) {
     for(int i = s.length() - 1; i >= 0; i--) {
       char c = s.charAt(i);
@@ -288,19 +319,33 @@ public class HashGazetteer extends AbstractGazetteer {
     return s;
   }
 
+  /**
+   * Normalizes the whitespace within the String instance by replacing
+   * any sequence of one or more whitespace characters with a single
+   * space. Not that any leading/trailing whitespace is also removed.
+   * 
+   * @param s the String to normalize
+   * @return the normalized String
+   */
   private String normalizeWhitespace(String s) {
+
+    // this seems to be the same as String.replaceAll("\\s+", " ")
+
     StringBuffer stringbuffer = new StringBuffer();
     s = s.trim();
     char ac[] = s.toCharArray();
     int i = s.length();
-    boolean flag1 = false;
+    boolean prevWasWhitespace = false;
     for(int j = 0; j < i; j++) {
       char c = ac[j];
-      boolean flag = Character.isWhitespace(c);
-      if(flag && !flag1)
+
+      boolean currIsWhitespace = Character.isWhitespace(c);
+
+      if(currIsWhitespace && !prevWasWhitespace)
         stringbuffer.append(' ');
-      else if(!flag) stringbuffer.append(c);
-      flag1 = flag;
+      else if(!currIsWhitespace) stringbuffer.append(c);
+
+      prevWasWhitespace = currIsWhitespace;
     }
 
     return stringbuffer.toString();
@@ -324,14 +369,15 @@ public class HashGazetteer extends AbstractGazetteer {
 
     for(int j = 1; j < i; j++) {
       char c1 = ac[j];
-      boolean flag9 = !Character.isLetterOrDigit(c1);
-      boolean flag12 = Character.isWhitespace(c1);
-      boolean flag3 = Character.isLetter(c1);
-      boolean flag6 = Character.isDigit(c1);
+      boolean currNotLetterOrDigit = !Character.isLetterOrDigit(c1);
+      boolean currIsWhitespace = Character.isWhitespace(c1);
+      boolean currIsLetter = Character.isLetter(c1);
+      boolean currIsDigit = Character.isDigit(c1);
       if(j > 0 && flag2) {
-        if(prevNotLetterOrDigit && flag12) continue;
-        flag2 = prevIsLetter && flag9 || prevNotLetterOrDigit && flag3;
-        if(flag9) {
+        if(prevNotLetterOrDigit && currIsWhitespace) continue;
+        flag2 = prevIsLetter && currNotLetterOrDigit || prevNotLetterOrDigit
+                && currIsLetter;
+        if(currNotLetterOrDigit) {
           if(c2 == 'p') c2 = c1;
           flag2 = flag10 = c2 == c1;
         }
@@ -341,14 +387,14 @@ public class HashGazetteer extends AbstractGazetteer {
           stringbuffer.append(Character.toLowerCase(c3));
         }
       }
-      if(flag3 || flag6) {
-        if(flag && flag3) flag1 &= Character.isUpperCase(c1);
+      if(currIsLetter || currIsDigit) {
+        if(flag && currIsLetter) flag1 &= Character.isUpperCase(c1);
         if(!flag10) c1 = Character.toLowerCase(c1);
         stringbuffer.append(c1);
       }
       else if(!flag2) flag10 = false;
-      prevIsLetter = flag3;
-      prevNotLetterOrDigit = flag9;
+      prevIsLetter = currIsLetter;
+      prevNotLetterOrDigit = currNotLetterOrDigit;
     }
 
     String s1 = stringbuffer.toString();
@@ -356,35 +402,41 @@ public class HashGazetteer extends AbstractGazetteer {
     return s1;
   }
 
-  void readList(LinearNode linearnode, boolean flag) throws GazetteerException {
-    if(null == linearnode)
-      throw new GazetteerException(" LinearNode node is null ");
+  private void readList(LinearNode linearnode, boolean flag)
+          throws GazetteerException {
+    // TODO should we remove the flag param as it is always set to true?
+
+    if(linearnode == null)
+      throw new GazetteerException("LinearNode node is null");
+
+    GazetteerList gazetteerlist = (GazetteerList)listsByNode.get(linearnode);
+    if(gazetteerlist == null)
+      throw new GazetteerException("gazetteer list not found by node");
+
     String s = linearnode.getList();
     String majorType = linearnode.getMajorType();
     String minorType = linearnode.getMinorType();
     String language = linearnode.getLanguage();
-    GazetteerList gazetteerlist = (GazetteerList)listsByNode.get(linearnode);
-    if(null == gazetteerlist)
-      throw new GazetteerException("gazetteer list not found by node");
-    List<Lookup> arraylist = new ArrayList<Lookup>(1);
+
     Lookup lookup1 = new Lookup(s, majorType, minorType, language);
-    if(null != mappingDefinition) {
+
+    if(mappingDefinition != null) {
       MappingNode mappingnode = mappingDefinition.getNodeByList(s);
       if(null != mappingnode) {
         lookup1.oClass = mappingnode.getClassID();
         lookup1.ontology = mappingnode.getOntologyID();
       }
     }
-    lookup1.list = s;
-    arraylist.add(lookup1);
-    categoryList.add(lookup1);
-    @SuppressWarnings("unchecked")
-    Iterator<GazetteerNode> iterator = gazetteerlist.iterator();
-    String s6 = null;
 
-    //TODO is s5 and the else clause needed?
-    String s5;
-    if(flag)
+    lookup1.list = s;
+    categoryList.add(lookup1);
+
+    if(flag) {
+
+      @SuppressWarnings("unchecked")
+      Iterator<GazetteerNode> iterator = gazetteerlist.iterator();
+      String s6 = null;
+
       for(; iterator.hasNext(); add(s6, lookup1)) {
         String s4 = iterator.next().toString();
         s4.trim();
@@ -394,19 +446,7 @@ public class HashGazetteer extends AbstractGazetteer {
           if(j + 1 == i) j = i;
           s6 = s4.substring(0, j).trim();
         }
-
       }
-    else while(iterator.hasNext())
-      s5 = iterator.next().toString();
+    }
   }
-
-  private ArrayList<Lookup> categoryList;
-
-  private Map<LinearNode, GazetteerList> listsByNode;
-
-  private Map<String, List<Lookup>> mapsList[];
-
-  private int mapsListSize;
-
-  private AnnotationSet annotationSet;
 }
