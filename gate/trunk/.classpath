@@ -22,7 +22,6 @@
 	<classpathentry kind="src" output="plugins/Ontology_Tools/build" path="plugins/Ontology_Tools/src"/>
 	<classpathentry kind="src" output="plugins/Tagger_NP_Chunking/classes" path="plugins/Tagger_NP_Chunking/src"/>
 	<classpathentry kind="src" output="plugins/Lang_Arabic/build" path="plugins/Lang_Arabic/src"/>
-	<classpathentry kind="src" output="plugins/Tagger_TreeTagger/classes" path="plugins/Tagger_TreeTagger/src"/>
 	<classpathentry kind="src" output="plugins/Lang_Cebuano/build" path="plugins/Lang_Cebuano/src"/>
 	<classpathentry kind="src" output="plugins/Alignment/classes" path="plugins/Alignment/src"/>
 	<classpathentry kind="src" output="plugins/Learning/build" path="plugins/Learning/src"/>
