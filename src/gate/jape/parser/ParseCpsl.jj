@@ -510,6 +510,9 @@ MultiPhaseTransducer _MultiPhaseTransducer() :
   String controllerstartedblock = null;
   String controllerfinishedblock = null;
   String controllerabortedblock = null;
+  boolean haveControllerStartedBlock = false;
+  boolean haveControllerFinishedBlock = false;
+  boolean haveControllerAbortedBlock = false;
 }
 {
   // transducer name
@@ -523,9 +526,29 @@ MultiPhaseTransducer _MultiPhaseTransducer() :
     // sptrannies in this file
     (
       (javaimportblock=JavaImportBlock())
-      (controllerstartedblock=ControllerStartedBlock())
-      (controllerfinishedblock=ControllerFinishedBlock())
-      (controllerabortedblock=ControllerAbortedBlock())
+      (
+        (  controllerstartedblock=ControllerStartedBlock()
+           { if(haveControllerStartedBlock)
+               throw new ParseException("Only one ControllerStarted block allowed");
+             else
+               haveControllerStartedBlock = true;
+           }
+        ) |
+        (controllerfinishedblock=ControllerFinishedBlock()
+           { if(haveControllerFinishedBlock)
+               throw new ParseException("Only one ControllerFinished block allowed");
+             else
+               haveControllerFinishedBlock = true;
+           }
+        ) |
+        (controllerabortedblock=ControllerAbortedBlock()
+           { if(haveControllerAbortedBlock)
+               throw new ParseException("Only one ControllerAborted block allowed");
+             else
+               haveControllerAbortedBlock = true;
+           }
+        )
+      )*
       (
         
         try {
@@ -533,7 +556,7 @@ MultiPhaseTransducer _MultiPhaseTransducer() :
                 m.addPhase(s.getName(), s);
                 s.setBaseURL(baseURL);
                 s.setControllerEventBlocks(controllerstartedblock,
-                  controllerfinishedblock,controllerabortedblock);
+                  controllerfinishedblock,controllerabortedblock,javaimportblock);
             }
         } catch (Throwable e) {
             // try to wrap the exception with info about what file/resource
@@ -724,17 +747,17 @@ String JavaImportBlock() :
 
 String ControllerStartedBlock() : { String block = null; }
 {
-  ( <controllerstarted> <leftBrace> block=ConsumeBlock() )?
+  ( <controllerstarted> <leftBrace> block=ConsumeBlock() )
   { return block; }
 }
 String ControllerFinishedBlock() : { String block = null; }
 {
-  ( <controllerfinished> <leftBrace> block=ConsumeBlock() )?
+  ( <controllerfinished> <leftBrace> block=ConsumeBlock() )
   { return block; }
 }
 String ControllerAbortedBlock() : { String block = null; }
 {
-  ( <controlleraborted> <leftBrace> block=ConsumeBlock() )?
+  ( <controlleraborted> <leftBrace> block=ConsumeBlock() )
   { return block; }
 }
 

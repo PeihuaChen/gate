@@ -973,9 +973,14 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   private static final String nl = "\n";
   private static final String controllerEventBlocksActionClassSourceTemplate =
     "package japeactionclasses;"+nl+
+    "import java.io.*;"+nl+
+    "import java.util.*;"+nl+
     "import gate.*;"+nl+
-    "import gate.creole.ontology.*;"+nl+
     "import gate.jape.*;"+nl+
+    "import gate.creole.ontology.*;"+nl+
+    "import gate.annotation.*;"+nl+
+    "import gate.util.*;"+nl+
+    "%%javaimports%%"+nl+nl+
     "public class %%classname%% implements ControllerEventBlocksAction {"+nl+
     "  private Ontology ontology;"+nl+
     "  public void setOntology(Ontology o) { ontology = o; }"+nl+
@@ -1003,7 +1008,11 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     "  }"+nl+
     "}"+nl+
     ""+nl;
-  public void setControllerEventBlocks(String started, String finished, String aborted) {
+  public void setControllerEventBlocks(
+    String started,
+    String finished,
+    String aborted,
+    String javaimports) {
     // if any of the three blocks is not null, set the corpusBlockActionClassSource
     // to the final source code of the class
     if(started != null || finished != null || aborted != null) {
@@ -1018,6 +1027,9 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       controllerEventBlocksActionClassSource =
         controllerEventBlocksActionClassSource.replace("%%aborted%%",
           aborted != null ? aborted : "// no code defined");
+      controllerEventBlocksActionClassSource =
+        controllerEventBlocksActionClassSource.replace("%%javaimports%%",
+          javaimports != null ? javaimports : "// no 'Imports:' block for more imports defined");
     }
   }
 
