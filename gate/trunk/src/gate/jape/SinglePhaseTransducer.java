@@ -17,11 +17,8 @@
 package gate.jape;
 
 import java.util.*;
-import java.util.concurrent.*;
-import java.util.logging.Level;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.Priority;
 
 import gate.*;
 import gate.annotation.AnnotationSetImpl;
