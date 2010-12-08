@@ -650,19 +650,18 @@ public class Batch implements JapeConstants, Benchmarkable {
     transducer.setBenchmarkId(benchmarkId);
   }
 
-
   public void runControllerExecutionAbortedBlock(
-    ActionContext ac, Controller c, Throwable t, Ontology o) {
+    ActionContext ac, Controller c, Throwable t, Ontology o) throws ExecutionException {
     transducer.runControllerExecutionAbortedBlock(ac, c, t, o);
   }
 
   public void runControllerExecutionFinishedBlock(
-    ActionContext ac, Controller c, Ontology o) {
+    ActionContext ac, Controller c, Ontology o) throws ExecutionException {
     transducer.runControllerExecutionFinishedBlock(ac, c, o);
   }
 
   public void runControllerExecutionStartedBlock(
-    ActionContext ac, Controller c, Ontology o) {
+    ActionContext ac, Controller c, Ontology o) throws ExecutionException {
     transducer.runControllerExecutionStartedBlock(ac, c, o);
   }
   
