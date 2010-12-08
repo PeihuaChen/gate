@@ -33,7 +33,6 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
@@ -78,7 +77,8 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
   private String actionClassClassFileName;
   
   /** A list of source info object for mapping between Java and Jape. */
-  private transient List<SourceInfo> sourceInfo;
+  //private transient List<SourceInfo> sourceInfo;
+  private transient SourceInfo sourceInfo;
 
   /** Cardinality of the action class set. Used for ensuring class name
     * uniqueness.
@@ -88,7 +88,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
   /** The set of block names.
     * Used to ensure we only get their annotations once in the action class.
     */
-  private HashSet blockNames;
+  private Set<String> blockNames;
 
   /** Returns the string for the java code */
   public String getActionClassString() { return actionClassString.toString(); }
@@ -125,8 +125,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     actionClassName = new String(
       transducerName + ruleName + "ActionClass" + actionClassNumber.getAndIncrement()
     );
-    blockNames = new HashSet();
-    sourceInfo = new ArrayList<SourceInfo>();
+    blockNames = new HashSet<String>();
 
     actionClassString = new StringBuffer(
       "// " + actionClassName + nl +
@@ -154,6 +153,8 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
       "." + actionClassName;
     actionClassClassFileName =
       actionClassQualifiedName.replace('.', File.separatorChar) + ".class";
+    
+    sourceInfo = new SourceInfo(actionClassQualifiedName, phaseName, ruleName);
   } // Construction from lhs
 
   /** Add an anonymous block to the action class */
@@ -161,7 +162,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     actionClassString.append(nl);
     actionClassString.append("if (true) {");
     actionClassString.append(nl);
-    actionClassString.append(storeSourceInfo(anonymousBlock));
+    actionClassString.append(sourceInfo.addBlock(actionClassString.toString(), anonymousBlock));
     actionClassString.append(nl);
     actionClassString.append("}");
     actionClassString.append(nl);
@@ -186,78 +187,15 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
       "    if(" + name + "Annots != null && " + name +
       "Annots.size() != 0) { " + nl);
       
-    actionClassString.append(storeSourceInfo(namedBlock));
+    actionClassString.append(sourceInfo.addBlock(actionClassString.toString(), namedBlock));
       
    actionClassString.append(
       nl + "    }" + nl
     );
   } // addBlock(name, block)
   
-  private String storeSourceInfo(String codeBlock) {
-    if(!codeBlock.startsWith("  // JAPE Source:")) return codeBlock;
-
-    String info = codeBlock.substring(18, codeBlock.indexOf("\n")).trim();
-    String code = codeBlock.substring(codeBlock.indexOf("\n") + 1);
-
-    String japeURL = info.substring(0, info.lastIndexOf(":"));
-    int lineNumber = Integer
-            .parseInt(info.substring(info.lastIndexOf(":") + 1));
-
-    int startLine = actionClassString.toString().split("\n").length + 1;
-    int endLine = startLine + code.split("\n").length;
-
-    int startOffset = actionClassString.length();
-    int endOfset = actionClassString.length() + code.length();
-    
-    sourceInfo.add(new SourceInfo(japeURL, lineNumber, startLine, endLine,
-            startOffset, endOfset));
-
-    return code;
-  }
   
-  /**
-   * Enhances a Throwable by replacing mentions of Java code inside a
-   * Jape RhsAction with a reference to the original Jape source where
-   * available.
-   * 
-   * @param t the Throwable to enhance with Jape source information
-   */
-  private void enhanceTheThrowable(Throwable t) {
-    if(t.getCause() != null) {
-      enhanceTheThrowable(t.getCause());
-    }
-
-    List<StackTraceElement> stack = new ArrayList<StackTraceElement>();
-
-    for(StackTraceElement ste : t.getStackTrace()) {
-      if(ste.getClassName().equals(actionClassQualifiedName)) {
-
-        StackTraceElement japeSTE = null;
-
-        if(ste.getLineNumber() >= 0 && sourceInfo != null) {
-          for(SourceInfo info : sourceInfo) {
-            japeSTE = info.getStackTraceElement(ste.getLineNumber());
-
-            if(japeSTE != null) break;
-          }
-        }
-        else {
-          // this will happen if we are running from a
-          // serialised jape grammar as we don't keep the
-          // source info
-          japeSTE = new StackTraceElement(getPhaseName(), getRuleName(), null,
-                  -1);
-        }
-
-        stack.add(japeSTE != null ? japeSTE : ste);
-      }
-      else {
-        stack.add(ste);
-      }
-    }
-
-    t.setStackTrace(stack.toArray(new StackTraceElement[stack.size()]));
-  }
+  
 
   /** Create the action class and an instance of it. */
   public void createActionClass() throws JapeException {
@@ -327,10 +265,10 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     in.defaultReadObject();
     //now read the class
 	String className = getActionClassName();
-	if(Gate.getClassLoader().findExistingClass(getActionClassName()) == null) {
+	if(Gate.getClassLoader().findExistingClass(className) == null) {
 		try{
-			Map actionClasses = new HashMap();
-			actionClasses.put(getActionClassName(), getActionClassString());
+			Map<String, String> actionClasses = new HashMap<String, String>();
+			actionClasses.put(className, getActionClassString());
 			gate.util.Javac.loadClasses(actionClasses);
 		}catch(Exception e1){
 			throw new GateRuntimeException (e1);
@@ -364,7 +302,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
                       throws Throwable {
 
                 StackTraceElement japeSTE = null;
-                SourceInfo source = null;
+                int lineNumber = -1;
 
                 // find the stack trace element corresponding to the
                 // call on the annotations proxy. This should always be
@@ -374,15 +312,8 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
                   if(ste.getClassName().equals(actionClassQualifiedName)) {
 
                     if(ste.getLineNumber() >= 0 && sourceInfo != null) {
-                      for(SourceInfo info : sourceInfo) {
-                        japeSTE = info
-                                .getStackTraceElement(ste.getLineNumber());
-
-                        if(japeSTE != null) {
-                          source = info;
-                          break;
-                        }
-                      }
+                      japeSTE = sourceInfo.getStackTraceElement(ste.getLineNumber());
+                      lineNumber = ste.getLineNumber();
                     }
                     else {
                       // this will happen if we are running from a
@@ -394,7 +325,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 
                     break;
                   }
-                }
+                }                
 
                 if(!warnings.contains(japeSTE)) {
                   // we only want to warn about each use once per
@@ -402,8 +333,8 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
                   // trace elements we have already warned about
                   Err.println(nl + "WARNING: the JAPE 'annotations' parameter has been deprecated. Please use 'inputAS' or 'outputAS' instead.");
                   Err.println(japeSTE);
-                  if(japeSTE.getLineNumber() >= 0)
-                    Err.println("\t" + source.getSource(japeSTE.getLineNumber()).trim());
+                  if(lineNumber >= 0)
+                    Err.println("\t" + sourceInfo.getSource(getActionClassString(), lineNumber).trim());
 
                   warnings.add(japeSTE);
                 }
@@ -426,7 +357,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
       Err.println("A non-fatal JAPE exception occurred while processing document '"+doc.getName()+"'.");
       Err.println("The issue occurred during execution of rule '"+getRuleName()+"' in phase '"+getPhaseName()+"':");
       if (t != null) {
-        enhanceTheThrowable(t);
+        sourceInfo.enhanceTheThrowable(t);
         t.printStackTrace(Err.getPrintWriter());
       } else {
         Err.println("Line number and exception details are not available!");
@@ -435,7 +366,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
       // if the action class throws an exception, re-throw it with a
       // full description of the problem, inc. stack trace and the RHS
       // action class code
-      enhanceTheThrowable(e);
+      sourceInfo.enhanceTheThrowable(e);
       if(e instanceof Error) {
         throw (Error)e;
       }
@@ -495,64 +426,6 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     return ruleName;
   } // toString
   
-  /**
-   * A simple class to store and use the mapping between Java and Jape
-   * source code for error reporting.
-   * 
-   * @author Mark A. Greenwood
-   */
-  class SourceInfo implements java.io.Serializable {
-    String japeURL;
-
-    int japeLine;
-
-    int startLine, endLine;
-
-    int startOffset, endOffset;
-
-    SourceInfo(String japeURL, int japeLine, int startLine, int endLine,
-            int startOffset, int endOffset) {
-      this.japeURL = japeURL;
-      this.japeLine = japeLine;
-      this.startLine = startLine;
-      this.endLine = endLine;
-      this.startOffset = startOffset;
-      this.endOffset = endOffset;
-    }
-
-    public boolean contains(int lineNumber) {
-      return (startLine <= lineNumber && lineNumber <= endLine);
-    }
-
-    public String getNumberedSource() {
-      return Strings.addLineNumbers(getSource(), japeLine);
-    }
-
-    public String getSource(int line) {      
-      String[] lines = getSource().split("\n");
-      
-      return lines[line-japeLine];
-    }
-    
-    public int getJapeLineNumber(int javaLineNumber) {
-      if(!contains(javaLineNumber)) return -1;
-
-      return japeLine + (javaLineNumber - startLine);
-    }
-
-    public StackTraceElement getStackTraceElement(int javaLineNumber) {
-      int japeLineNumber = getJapeLineNumber(javaLineNumber);
-
-      if(japeLineNumber == -1) return null;
-
-      return new StackTraceElement(RightHandSide.this.getPhaseName(),
-              RightHandSide.this.getRuleName(), japeURL, japeLineNumber);
-    }
-    
-    public String getSource() {
-      return actionClassString.substring(startOffset, endOffset);
-    }
-  }
 } // class RightHandSide
 
 
