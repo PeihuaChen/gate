@@ -1010,6 +1010,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     "  }"+nl+
     "}"+nl+
     ""+nl;
+  
   public void setControllerEventBlocks(
     String started,
     String finished,
@@ -1020,6 +1021,26 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     if(started != null || finished != null || aborted != null) {
       controllerEventBlocksActionClassSource =
         controllerEventBlocksActionClassSourceTemplate;
+      
+      boolean neednewclassname = true;
+      String  ceb_classname = "";
+      while(neednewclassname) {
+        ceb_classname =  "ControllerEventBlocksActionClass" +
+          actionClassNumber.getAndIncrement();
+        controllerEventBlocksActionClassName = "japeactionclasses." + ceb_classname;
+        try {
+          Gate.getClassLoader().loadClass(controllerEventBlocksActionClassName);
+          neednewclassname = true;
+        } catch (ClassNotFoundException e) {
+          neednewclassname = false;
+        }
+      }
+      
+      controllerEventBlocksActionClassSource = 
+        controllerEventBlocksActionClassSource.replace("%%classname%%",ceb_classname);
+      controllerEventBlocksActionClassSource =
+        controllerEventBlocksActionClassSource.replace("%%javaimports%%",
+          javaimports != null ? javaimports : "// no 'Imports:' block for more imports defined");
       controllerEventBlocksActionClassSource =
         controllerEventBlocksActionClassSource.replace("%%started%%",
           started != null ? started : "// no code defined");
@@ -1029,12 +1050,8 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       controllerEventBlocksActionClassSource =
         controllerEventBlocksActionClassSource.replace("%%aborted%%",
           aborted != null ? aborted : "// no code defined");
-      controllerEventBlocksActionClassSource =
-        controllerEventBlocksActionClassSource.replace("%%javaimports%%",
-          javaimports != null ? javaimports : "// no 'Imports:' block for more imports defined");
     }
   }
-
 
   @Override
   public void runControllerExecutionStartedBlock(
@@ -1111,7 +1128,6 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     }
   }
 
-
   private void writeObject(java.io.ObjectOutputStream out)
   throws IOException{
     Object save = controllerEventBlocksActionClass;
@@ -1129,21 +1145,8 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   private void compileEventBlocksActionClassIfNecessary() {
     if(controllerEventBlocksActionClassSource != null) {
 			Map<String,String> actionClasses = new HashMap<String,String>(1);
-      boolean neednewclassname = true;
-      String  ceb_classname = "";
-      while(neednewclassname) {
-        ceb_classname =  "ControllerEventBlocksActionClass" +
-          actionClassNumber.getAndIncrement();
-        controllerEventBlocksActionClassName = "japeactionclasses." + ceb_classname;
-        try {
-          Gate.getClassLoader().loadClass(controllerEventBlocksActionClassName);
-          neednewclassname = true;
-        } catch (ClassNotFoundException e) {
-          neednewclassname = false;
-        }
-      }
-      String source = controllerEventBlocksActionClassSource.replace("%%classname%%",ceb_classname);
-			actionClasses.put(controllerEventBlocksActionClassName, source);
+			actionClasses.put(controllerEventBlocksActionClassName,
+			        controllerEventBlocksActionClassSource);			
       try {
 			    gate.util.Javac.loadClasses(actionClasses);
           controllerEventBlocksActionClass =
