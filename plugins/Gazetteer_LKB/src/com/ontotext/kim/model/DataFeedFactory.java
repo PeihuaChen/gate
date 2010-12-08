@@ -57,8 +57,9 @@ public class DataFeedFactory {
 			result = createSesameFeed(dictionaryPath);
 		}
 
-    if (result == null && kimSvc != null)
-      result = createFeed(kimSvc, dictionaryPath);
+		if (result == null && kimSvc != null) {
+			result = createFeed(kimSvc, dictionaryPath);
+		}
     
 		if (result == null && !FileUtils.listFiles(dictionaryPath, new String[]{"def"}, false).isEmpty()) {
 		  result = new GazetteerListFeed(dictionaryPath);
@@ -71,10 +72,14 @@ public class DataFeedFactory {
 
 	private QueryResultListener.Feed createSesameFeed(File dictionaryPath) {
 		File queryFile = new File(dictionaryPath, "query.txt").getAbsoluteFile();
-		try {			
+		try {
 			URL configFileUrl = new File(dictionaryPath, "config.ttl").getAbsoluteFile().toURI().toURL();
 			if (!Files.fileFromURL(configFileUrl).isFile()) {
 			  log.info("No config.ttl file in " + dictionaryPath);
+			  return null;
+			}
+			if (!queryFile.exists()) {
+			  log.info("No query.txt file in " + dictionaryPath);
 			  return null;
 			}
 			String queryString = FileUtils.readFileToString(queryFile);
@@ -84,7 +89,7 @@ public class DataFeedFactory {
 		} 
 		catch (IOException e) {
 			log.warn("Error while reading " + queryFile.getAbsolutePath(), e);				
-		}	
+		}
 		return null;
 	}
 
@@ -99,14 +104,14 @@ public class DataFeedFactory {
 			return null;
 		}
 
-    File queryFile = new File(dictionaryPath, "query.txt").getAbsoluteFile();
-    try {     
-      String queryString = FileUtils.readFileToString(queryFile);
-      return new KIMDataFeed(semRep, null, queryString);
-    } 
-    catch (IOException e) {
-      log.warn("Error while reading " + queryFile.getAbsolutePath(), e);        
-    } 
-    return null;
-	}	
+	    File queryFile = new File(dictionaryPath, "query.txt").getAbsoluteFile();
+	    try {     
+	      String queryString = FileUtils.readFileToString(queryFile);
+	      return new KIMDataFeed(semRep, null, queryString);
+	    } 
+	    catch (IOException e) {
+	      log.warn("Error while reading " + queryFile.getAbsolutePath(), e);        
+	    } 
+	    return null;
+	}
 }
