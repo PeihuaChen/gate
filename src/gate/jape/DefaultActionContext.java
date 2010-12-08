@@ -20,14 +20,19 @@ import gate.Corpus;
 import gate.FeatureMap;
 
 /**
- * Default implementation for an action context.
+ * Default implementation for an action context.<br>
+ * Note: A JAPE RHS should only ever use the methods defined in
+ * the ActionContext interface, the additional methods implemented here
+ * are for use by the Transducer only.
  * 
  * @author Johann Petrak
  */
 public class DefaultActionContext implements ActionContext {
-  private Corpus corpus;
-  private FeatureMap prfeatures;
-  private Controller controller;
+  protected Corpus corpus;
+  protected FeatureMap prfeatures;
+  protected Controller controller;
+  protected boolean endPhaseSupported;
+  protected boolean phaseEnded = false;
 
   public DefaultActionContext() {}
 
@@ -52,6 +57,24 @@ public class DefaultActionContext implements ActionContext {
 
   public Controller getController() {
     return controller;
+  }
+
+  public boolean endPhase() {
+    phaseEnded = true;
+    // all transducers using this ActionContext implementation support
+    // ending a phase. If another implementation does not support it,
+    // use a different ActionContext implementation (e.g. a subclass of this)
+    // or change the way singalling this is implemented.
+    return true;
+  }
+
+
+  public boolean isPhaseEnded() {
+    return phaseEnded;
+  }
+
+  public void setPhaseEnded(boolean isended) {
+    phaseEnded = isended;
   }
 
 }

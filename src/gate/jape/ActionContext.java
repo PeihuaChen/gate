@@ -46,4 +46,13 @@ public interface ActionContext  extends Serializable {
    * @return the Controller resource
    */
   public Controller getController();
+  /**
+   * Request the current JAPE phase to be ended as soon as possible.
+   * After the current RHS code has returned, the phase will be ended as soon
+   * as possible if the JAPE implementation supports this feature.
+   * The method returns false if this feature is not supported or if it is
+   * known that ending the phase prematurely is not possible, true otherwise.
+   * @return true if ending the phase prematurely is supported, false otherwise
+   */
+  public boolean endPhase();
 }

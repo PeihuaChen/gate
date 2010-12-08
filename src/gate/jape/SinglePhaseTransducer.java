@@ -324,8 +324,12 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       }
       boolean keepGoing = fireRule(acceptingFSMInstances, state, lastNodeOff,
               offsets, inputAS, outputAS, doc, annotationsByOffset);
-      if(!keepGoing) return;
-
+      if(!keepGoing) break;
+      if(((DefaultActionContext)actionContext).isPhaseEnded()) {
+        ((DefaultActionContext)actionContext).setPhaseEnded(false);
+        System.out.println("DEBUG: Ending phase prematurely");
+        break;
+      }
     }// while(state.startNodeOff != -1)
     // fsmRunnerPool.shutdown();
 
@@ -860,10 +864,11 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     }
 
     buf.append("rules(" + newline);
+    if(rules != null) {
     Iterator rulesIterator = rules.iterator();
-    while(rulesIterator.hasNext())
-      buf.append(((Rule)rulesIterator.next()).toString(newPad) + " ");
-
+      while(rulesIterator.hasNext())
+        buf.append(((Rule)rulesIterator.next()).toString(newPad) + " ");
+    }
     buf.append(newline + pad + ")." + newline);
 
     return buf.toString();
@@ -967,7 +972,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   private Object controllerEventBlocksActionClass = null;
   private String controllerEventBlocksActionClassName;
   private String controllerEventBlocksActionClassSource = null;
-  private static final String nl = "\n";
+  private static final String nl = Strings.getNl();
   private static final String controllerEventBlocksActionClassSourceTemplate =
     "package japeactionclasses;"+nl+
     "import java.io.*;"+nl+
