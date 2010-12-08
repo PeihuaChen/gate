@@ -23,11 +23,11 @@ import gate.*;
 import gate.creole.*;
 import gate.util.*;
 
-/** This component is responsible for doing lists lookup. The implementaion is
+/** This component is responsible for doing lists lookup. The implementation is
  * based on finite state machines.
  * The phrases to be recognised should be listed in a set of files, one for
- * each type of occurences.
- * The gazeteer is build with the information from a file that contains the set
+ * each type of occurrences.
+ * The gazetteer is build with the information from a file that contains the set
  * of lists (which are files as well) and the associated type for each list.
  * The file defining the set of lists should have the following syntax:
  * each list definition should be written on its own line and should contain:
@@ -42,7 +42,7 @@ import gate.util.*;
  * <code>personmale.lst:person:male:english</code>
  * Each list file named in the lists definition file is just a list containing
  * one entry per line.
- * When this gazetter will be run over some input text (a Gate document) it
+ * When this gazetteer will be run over some input text (a Gate document) it
  * will generate annotations of type Lookup having the attributes specified in
  * the definition file.
  */
@@ -81,7 +81,7 @@ public class DefaultGazetteer extends AbstractGazetteer
   protected Map listsByNode;
 
   /** 
-   * Build a gazetter using the default lists from the gate resources
+   * Build a gazetteer using the default lists from the gate resources
    */
   public DefaultGazetteer(){
   }
@@ -121,7 +121,7 @@ public class DefaultGazetteer extends AbstractGazetteer
    *
    * @param node the node
    * @param add if <b>true</b> will add the phrases found in the list to the ones
-   *     recognised by this gazetter, if <b>false</b> the phrases found in the
+   *     recognised by this gazetteer, if <b>false</b> the phrases found in the
    *     list will be removed from the list of phrases recognised by this
    *     gazetteer.
    */
@@ -143,7 +143,7 @@ public class DefaultGazetteer extends AbstractGazetteer
 
     Iterator iline = gazList.iterator();
     
-    // create default lookup for entries with no arbitary features
+    // create default lookup for entries with no arbitrary features
     Lookup defaultLookup = new Lookup(listName,majorType, minorType, languages);
     defaultLookup.list = node.getList();
     if ( null != mappingDefinition){
@@ -583,7 +583,7 @@ public class DefaultGazetteer extends AbstractGazetteer
 
   /**
    * class implementing the map using binary search by char as key
-   * to retrive the coresponding object.
+   * to retrieve the corresponding object.
    */
   public static class CharMap
   {
@@ -591,7 +591,7 @@ public class DefaultGazetteer extends AbstractGazetteer
       Object[] itemsObjs = null;
 
       /**
-       * resize the containers by one leavaing empty elemant at position 'index'
+       * resize the containers by one, leaving empty element at position 'index'
        */
       void resize(int index)
       {
@@ -619,7 +619,7 @@ public class DefaultGazetteer extends AbstractGazetteer
           return itemsObjs[index];
       }
   /**
-   * put the object into the char map using the chat as the key
+   * put the object into the char map using the char as the key
    */
       Object put(char key, Object value)
       {

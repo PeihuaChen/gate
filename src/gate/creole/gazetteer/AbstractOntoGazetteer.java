@@ -16,7 +16,7 @@
 package gate.creole.gazetteer;
 
 /**AbstratOntoGazetteer
- * This class implemnents the methods common for all ontology-aware gazetteers.*/
+ * This class implements the methods common for all ontology-aware gazetteers.*/
 public abstract class AbstractOntoGazetteer
 extends AbstractGazetteer implements OntoGazetteer {
 

@@ -40,7 +40,7 @@ public abstract class AbstractGazetteer
 
   /**
    * The value of this property is the URL that will be used for reading the
-   * lists dtaht define this Gazetteer
+   * lists that define this Gazetteer
    */
   protected java.net.URL listsURL;
 
@@ -70,7 +70,7 @@ public abstract class AbstractGazetteer
   /** the linear definition of the gazetteer */
   protected LinearDefinition definition;
 
-  /** reference to mapping definiton info
+  /** reference to mapping definition info
    *  allows filling of Lookup.ontologyClass according to a list*/
   protected MappingDefinition mappingDefinition;
 
