@@ -865,9 +865,9 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 
     buf.append("rules(" + newline);
     if(rules != null) {
-    Iterator rulesIterator = rules.iterator();
-      while(rulesIterator.hasNext())
-        buf.append(((Rule)rulesIterator.next()).toString(newPad) + " ");
+      Iterator rulesIterator = rules.iterator();
+        while(rulesIterator.hasNext())
+          buf.append(((Rule)rulesIterator.next()).toString(newPad) + " ");
     }
     buf.append(newline + pad + ")." + newline);
 
