@@ -252,7 +252,7 @@ implements JapeConstants, java.io.Serializable
 
   @Override
   public void runControllerExecutionStartedBlock(
-    ActionContext ac, Controller c, Ontology o) {
+    ActionContext ac, Controller c, Ontology o) throws ExecutionException {
     for(Iterator i = phases.iterator(); i.hasNext(); ) {
       Transducer t = (Transducer) i.next();
       t.runControllerExecutionStartedBlock(ac, c, o);
@@ -260,7 +260,7 @@ implements JapeConstants, java.io.Serializable
   }
   @Override
   public void runControllerExecutionFinishedBlock(
-    ActionContext ac, Controller c, Ontology o) {
+    ActionContext ac, Controller c, Ontology o) throws ExecutionException {
     for(Iterator i = phases.iterator(); i.hasNext(); ) {
       Transducer t = (Transducer) i.next();
       t.runControllerExecutionFinishedBlock(ac, c, o);
@@ -268,7 +268,7 @@ implements JapeConstants, java.io.Serializable
   }
   @Override
   public void runControllerExecutionAbortedBlock(
-    ActionContext ac, Controller c, Throwable throwable, Ontology o) {
+    ActionContext ac, Controller c, Throwable throwable, Ontology o) throws ExecutionException {
     for(Iterator i = phases.iterator(); i.hasNext(); ) {
       Transducer t = (Transducer) i.next();
       t.runControllerExecutionAbortedBlock(ac, c,throwable, o);

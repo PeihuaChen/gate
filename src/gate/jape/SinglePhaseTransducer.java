@@ -969,6 +969,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     return ruleApplicationStyle;
   }
 
+  private transient SourceInfo sourceInfo = null;
   private Object controllerEventBlocksActionClass = null;
   private String controllerEventBlocksActionClassName;
   private String controllerEventBlocksActionClassSource = null;
@@ -1019,6 +1020,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     // if any of the three blocks is not null, set the corpusBlockActionClassSource
     // to the final source code of the class
     if(started != null || finished != null || aborted != null) {
+            
       controllerEventBlocksActionClassSource =
         controllerEventBlocksActionClassSourceTemplate;
       
@@ -1036,26 +1038,37 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
         }
       }
       
+      sourceInfo = new SourceInfo(controllerEventBlocksActionClassName,name,"controllerEvents");
+      
       controllerEventBlocksActionClassSource = 
         controllerEventBlocksActionClassSource.replace("%%classname%%",ceb_classname);
       controllerEventBlocksActionClassSource =
         controllerEventBlocksActionClassSource.replace("%%javaimports%%",
           javaimports != null ? javaimports : "// no 'Imports:' block for more imports defined");
+      
+      int index = controllerEventBlocksActionClassSource.indexOf("%%started%%");
+      String previousCode = controllerEventBlocksActionClassSource.substring(0, index).trim();
       controllerEventBlocksActionClassSource =
         controllerEventBlocksActionClassSource.replace("%%started%%",
-          started != null ? started : "// no code defined");
+          started != null ? sourceInfo.addBlock(previousCode, started) : "// no code defined");
+      
+      index = controllerEventBlocksActionClassSource.indexOf("%%finished%%");
+      previousCode = controllerEventBlocksActionClassSource.substring(0, index).trim();
       controllerEventBlocksActionClassSource =
         controllerEventBlocksActionClassSource.replace("%%finished%%",
-          finished != null ? finished : "// no code defined");
+          finished != null ? sourceInfo.addBlock(previousCode, finished) : "// no code defined");
+      
+      index = controllerEventBlocksActionClassSource.indexOf("%%aborted%%");
+      previousCode = controllerEventBlocksActionClassSource.substring(0, index).trim();
       controllerEventBlocksActionClassSource =
         controllerEventBlocksActionClassSource.replace("%%aborted%%",
-          aborted != null ? aborted : "// no code defined");
+          aborted != null ? sourceInfo.addBlock(previousCode, aborted) : "// no code defined");
     }
   }
 
   @Override
   public void runControllerExecutionStartedBlock(
-    ActionContext ac, Controller c, Ontology o) {
+    ActionContext ac, Controller c, Ontology o) throws ExecutionException {
     if(controllerEventBlocksActionClass != null) {
       ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
         setController(c);
@@ -1073,14 +1086,34 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       }
       ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
         setThrowable(null);
-      ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
-        controllerExecutionStarted();
+      
+      try {
+        ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
+          controllerExecutionStarted();
+      }
+      catch (Throwable e) {
+      // if the action class throws an exception, re-throw it with a
+      // full description of the problem, inc. stack trace and the RHS
+      // action class code
+      if (sourceInfo != null) sourceInfo.enhanceTheThrowable(e);
+      
+      if(e instanceof Error) {
+        throw (Error)e;
+      }   
+      if(e instanceof RuntimeException) {
+        throw (RuntimeException)e;
+      }
+      
+      // shouldn't happen...
+      throw new ExecutionException(
+          "Couldn't run controller started action", e);
+      }
     }
   }
 
   @Override
   public void runControllerExecutionFinishedBlock(
-    ActionContext ac, Controller c, Ontology o) {
+    ActionContext ac, Controller c, Ontology o) throws ExecutionException {
     if(controllerEventBlocksActionClass != null) {
       ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
         setController(c);
@@ -1098,14 +1131,34 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       }
       ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
         setThrowable(null);
-      ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
-         controllerExecutionFinished();
+      
+      try {
+        ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
+          controllerExecutionFinished();
+      }
+      catch (Throwable e) {
+      // if the action class throws an exception, re-throw it with a
+      // full description of the problem, inc. stack trace and the RHS
+      // action class code
+      if (sourceInfo != null) sourceInfo.enhanceTheThrowable(e);
+      
+      if(e instanceof Error) {
+        throw (Error)e;
+      }   
+      if(e instanceof RuntimeException) {
+        throw (RuntimeException)e;
+      }
+      
+      // shouldn't happen...
+      throw new ExecutionException(
+          "Couldn't run controller started action", e);
+      }
     }
   }
 
   @Override
   public void runControllerExecutionAbortedBlock(
-    ActionContext ac, Controller c, Throwable t, Ontology o) {
+    ActionContext ac, Controller c, Throwable t, Ontology o) throws ExecutionException {
     if(controllerEventBlocksActionClass != null) {
       ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
         setController(c);
@@ -1123,8 +1176,28 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       }
       ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
         setThrowable(t);
-      ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
-         controllerExecutionFinished();
+      
+      try {
+        ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
+          controllerExecutionFinished();
+      }
+      catch (Throwable e) {
+      // if the action class throws an exception, re-throw it with a
+      // full description of the problem, inc. stack trace and the RHS
+      // action class code
+      if (sourceInfo != null) sourceInfo.enhanceTheThrowable(e);
+      
+      if(e instanceof Error) {
+        throw (Error)e;
+      }   
+      if(e instanceof RuntimeException) {
+        throw (RuntimeException)e;
+      }
+      
+      // shouldn't happen...
+      throw new ExecutionException(
+          "Couldn't run controller started action", e);
+      }
     }
   }
 

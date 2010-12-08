@@ -366,7 +366,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
       // if the action class throws an exception, re-throw it with a
       // full description of the problem, inc. stack trace and the RHS
       // action class code
-      sourceInfo.enhanceTheThrowable(e);
+      if (sourceInfo != null) sourceInfo.enhanceTheThrowable(e);
       if(e instanceof Error) {
         throw (Error)e;
       }

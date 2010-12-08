@@ -93,7 +93,7 @@ public class SourceInfo {
     if(t.getCause() != null) {
       enhanceTheThrowable(t.getCause());
     }
-
+    
     List<StackTraceElement> stack = new ArrayList<StackTraceElement>();
 
     for(StackTraceElement ste : t.getStackTrace()) {
