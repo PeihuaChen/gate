@@ -1194,7 +1194,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       
       try {
         ((ControllerEventBlocksAction) controllerEventBlocksActionClass).
-          controllerExecutionFinished();
+          controllerExecutionAborted();
       }
       catch (Throwable e) {
       // if the action class throws an exception, re-throw it with a
