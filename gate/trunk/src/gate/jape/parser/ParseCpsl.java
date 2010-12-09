@@ -376,6 +376,10 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
                 s.setBaseURL(baseURL);
                 s.setControllerEventBlocks(controllerstartedblock,
                   controllerfinishedblock,controllerabortedblock,javaimportblock);
+              // only the first SPT in a MPT file should define/execute the blocks
+              controllerstartedblock = null;
+              controllerfinishedblock = null;
+              controllerabortedblock = null;
         } catch (Throwable e) {
             // try to wrap the exception with info about what file/resource
             // it occurred in.
@@ -1694,29 +1698,6 @@ AnnotationAccessor accessor = null;
     finally { jj_save(1, xla); }
   }
 
-  final private boolean jj_3R_15() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_17()) {
-    jj_scanpos = xsp;
-    if (jj_3R_18()) {
-    jj_scanpos = xsp;
-    if (jj_3R_19()) return true;
-    }
-    }
-    return false;
-  }
-
-  final private boolean jj_3R_20() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_22()) {
-    jj_scanpos = xsp;
-    if (jj_3R_23()) return true;
-    }
-    return false;
-  }
-
   final private boolean jj_3_2() {
     if (jj_3R_16()) return true;
     return false;
@@ -1791,6 +1772,29 @@ AnnotationAccessor accessor = null;
   final private boolean jj_3R_22() {
     if (jj_scan_token(leftBrace)) return true;
     if (jj_3R_25()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_15() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_17()) {
+    jj_scanpos = xsp;
+    if (jj_3R_18()) {
+    jj_scanpos = xsp;
+    if (jj_3R_19()) return true;
+    }
+    }
+    return false;
+  }
+
+  final private boolean jj_3R_20() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_22()) {
+    jj_scanpos = xsp;
+    if (jj_3R_23()) return true;
+    }
     return false;
   }
 

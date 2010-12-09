@@ -557,6 +557,10 @@ MultiPhaseTransducer _MultiPhaseTransducer() :
                 s.setBaseURL(baseURL);
                 s.setControllerEventBlocks(controllerstartedblock,
                   controllerfinishedblock,controllerabortedblock,javaimportblock);
+              // only the first SPT in a MPT file should define/execute the blocks
+              controllerstartedblock = null;
+              controllerfinishedblock = null;
+              controllerabortedblock = null;
             }
         } catch (Throwable e) {
             // try to wrap the exception with info about what file/resource
