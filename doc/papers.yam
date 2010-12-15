@@ -23,11 +23,13 @@ GATE papers
 %1 Journals and Conference papers
 %2* 2010
 
+- H. Wang, D. Damljanovic, J Sun.	 Enhanced Semantic Access to Formal Software Models. In the Proceedings of the 12th International Conference on Formal Engineering Methods, November 16 - 19, 2010, Shanghai, China. %(http://dx.doi.org/10.1007/978-3-642-16901-4_17, PDF)
+
 - K. Bontcheva, H. Cunningham, I. Roberts, V. Tablan. Web-based Collaborative Corpus Annotation: Requirements and a Framework Implementation. In "New Challenges for NLP Frameworks" workshop at LREC, Malta, May 2010.%(http://gate.ac.uk/sale/lrec2010/teamware/teamware-lrec10.pdf,PDF)
 
-- Y. Zeng, Y. Wang, Z. Huang, D. Damljanovic, N. Zhong, and C. Wang. User Interests: Definition, Vocabulary, and Utilization in Unifying Search and Reasoning.  Proceedings of the 2010 International Conference on Active Media Technology, Lecture Notes in Computer Science 6335, 98-107, 2010 (to appear).
+- Y. Zeng, Y. Wang, Z. Huang, D. Damljanovic, N. Zhong, and C. Wang. User Interests: Definition, Vocabulary, and Utilization in Unifying Search and Reasoning.  Proceedings of the 2010 International Conference on Active Media Technology, Lecture Notes in Computer Science 6335, 98-107, 2010.
 
-- D. Damljanovic. Towards portable controlled natural languages for querying ontologies. In Rosner, M., Fuchs, N., eds.: Proceedings of the 2nd Workshop on Controlled Natural Language. Lecture Notes in Computer Science. Springer Berlin/Heidelberg, Marettimo Island, Sicily, 2010. (to appear).
+- D. Damljanovic. Towards portable controlled natural languages for querying ontologies. In Rosner, M., Fuchs, N., eds.: Proceedings of the 2nd Workshop on Controlled Natural Language. Lecture Notes in Computer Science. Springer Berlin/Heidelberg, Marettimo Island, Sicily, 2010. %(http://gate.ac.uk/sale/dd/experiments/cnl/abstract.pdf, PDF)
 
 - A. Wyner, K. Angelov, G. Barzdins, D. Damljanovic, B. Davis, N. Fuchs, S. Hoefler, K. Jones, K. Kaljurand, T. Kuhn, M. Luts, J. Pool, M. Rosner, R. Schwitter, J. Sowa: On controlled natural languages: Properties and prospects. In N. Fuchs, ed.: Controlled Natural Language. Volume 5972 of Lecture Notes in Computer Science. Springer Berlin/Heidelberg (2010) 281–289 10.1007/978-3-642-14418-9 17.
 
@@ -61,7 +63,7 @@ GATE papers
 
 - D. Damljanovic, F. Amardeilh, K. Bontcheva: CA Manager Framework: Creating Customised Workflows for Ontology Population and Semantic Annotation. In Proceedings of The Fifth International Conference on Knowledge Capture (KCAP'09), California, USA, September 1-4, 2009.%(http://delivery.acm.org/10.1145/1600000/1597770/p177-damljanovic.pdf?key1=1597770&amp;key2=5509954621&amp;coll=GUIDE&amp;dl=GUIDE&amp;CFID=75107900&amp;CFTOKEN=81656037,  PDF).
 
-- D. Damljanovic, K. Bontcheva: Towards Enhanced Usability of Natural Language  Interfaces to Knowledge Bases. In Devedzic V. and Gasevic D. (Eds.), Special issue  on Semantic Web and Web 2.0, Annals of Information systems, Springer-Verlag, 2009.
+- D. Damljanovic, K. Bontcheva: Towards Enhanced Usability of Natural Language  Interfaces to Knowledge Bases. In Devedzic V. and Gasevic D. (Eds.), Special issue  on Semantic Web and Web 2.0, Annals of Information systems, Springer-Verlag, 2009. %(http://gate.ac.uk/sale/annals-of-is/main.pdf, PDF)
 
 - D. Damljanovic, M. Agatonovic, H. Cunningham:  %(http://gate.ac.uk/sale/cnl09/poster/freya-poster.pdf, Usability of Natural Language Interfaces for querying ontologies) presented at %(http://attempto.ifi.uzh.ch/site/cnl2009/, Workshop on Controlled Natural Language (CNL 2009) ), Marettimo Island, Italy, June 08-10, 2009.
 
