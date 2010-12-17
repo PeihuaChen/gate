@@ -27,13 +27,13 @@ public class PrivateRepositoryFeedTest extends TestCase {
 	}
 	
 	public void testWithLocal() throws IOException, KIMQueryException {
-		File configFile = new File("target/lkb_gazetteer/samples/dictionary_from_local_ontology/config.ttl").getCanonicalFile();
+		File configFile = new File("plugins/Gazetteer_LKB/samples/dictionary_from_local_ontology/config.ttl").getCanonicalFile();
 		URL configReader = configFile.toURI().toURL();
 		String query = FileUtils.readFileToString(new File(configFile.getParentFile(), "query.txt"));
 		int settingsHash = new SettingsHashBuilder().getHash(configReader, query);
 		PrivateRepositoryFeed feed = new PrivateRepositoryFeed(configReader, query, settingsHash);
 		QueryResultCounter counter = new QueryResultCounter();
 		feed.feedTo(counter);
-		assertEquals(79, counter.getCount());
+		assertEquals(327, counter.getCount());
 	}	
 }
