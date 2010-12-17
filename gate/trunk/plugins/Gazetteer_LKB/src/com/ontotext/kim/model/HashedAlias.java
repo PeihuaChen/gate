@@ -40,86 +40,100 @@ import java.io.Serializable;
  *
  */
 public class HashedAlias implements Serializable, Comparable<HashedAlias> {
-    private static final long serialVersionUID = 4500L;
+  private static final long serialVersionUID = 4500L;
 
-    //===========================
-    // Hashed alias - data fields 
-    //===========================
-    /** The hash-code of the whole Alias */
-    public final int aliasHash2;
+  //===========================
+  // Hashed alias - data fields 
+  //===========================
+  /** The hash-code of the whole Alias */
+  public final int aliasHash2;
 
-    /** The size of the symbolic prefix */
-    public final byte prefLen;
-    /** The size of the symbolic suffix */
-    public final byte suffLen;
-    
-    // Properties of the related Entity
-    /** The internal class identifier of the Entity */
-    public final int classID;
-    /** The compressed instance URI of the Entity*/
-    public final String shortInstURI;
-    
-    /**
-     * This constructor initializes all final fields of the class and checks
-     * for valid value ranges.
-     * @param aliasHash2 - the hash-code value derived from the plain Alias text
-     * @param prefLen - the size of the non-alpha-numeric prefix of the Alias
-     * @param suffLen - the size of the non-alpha-numeric suffix of the Alias
-     * @param shortInstURI - the compressed instance identifier
-     * @param classID - the encoded semantic class identifier
-     */
-    public HashedAlias(int aliasHash2, int prefLen, int suffLen,
-            String shortInstURI, int classID) {
-        if (prefLen > 127 || suffLen > 127 )
-            throw new RuntimeException("Cannot create HashedAlias with" +
-            		"symbolic prefix/suffix longer than 127!");
-        this.aliasHash2 = aliasHash2;
-        this.prefLen = (byte) prefLen;
-        this.suffLen = (byte) suffLen;
-        this.classID = classID;
-        this.shortInstURI = shortInstURI;
+  /** The size of the symbolic prefix */
+  public final byte prefLen;
+  /** The size of the symbolic suffix */
+  public final byte suffLen;
+
+  // Properties of the related Entity
+  /** The internal class identifier of the Entity */
+  public final int classID;
+  /** The compressed instance URI of the Entity*/
+  public final String shortInstURI;
+
+  /**
+   * This constructor initializes all final fields of the class and checks
+   * for valid value ranges.
+   * @param aliasHash2 - the hash-code value derived from the plain Alias text
+   * @param prefLen - the size of the non-alpha-numeric prefix of the Alias
+   * @param suffLen - the size of the non-alpha-numeric suffix of the Alias
+   * @param shortInstURI - the compressed instance identifier
+   * @param classID - the encoded semantic class identifier
+   */
+  public HashedAlias(int aliasHash2, int prefLen, int suffLen,
+          String shortInstURI, int classID) {
+    if (prefLen > 127 || suffLen > 127 )
+      throw new RuntimeException("Cannot create HashedAlias with" +
+      "symbolic prefix/suffix longer than 127!");
+    this.aliasHash2 = aliasHash2;
+    this.prefLen = (byte) prefLen;
+    this.suffLen = (byte) suffLen;
+    this.classID = classID;
+    this.shortInstURI = shortInstURI;
+  }
+
+  public int compareTo(HashedAlias o) {
+    if (this.prefLen < o.prefLen)  return -1;
+    else if (this.prefLen == o.prefLen && this.suffLen < o.suffLen) return -1;
+    else if (this.prefLen == o.prefLen && this.suffLen == o.suffLen
+            && this.aliasHash2 < o.aliasHash2) return -1;
+    else if (this.prefLen == o.prefLen && this.suffLen == o.suffLen
+            && this.aliasHash2 == o.aliasHash2) {
+      // Here null is considered the smallest possible string value 
+      if (this.shortInstURI == null) {
+        if (o.shortInstURI == null)
+          return 0;
+        else
+          return -1;
+      }
+      else {
+        if (o.shortInstURI == null)
+          return 1;
+        else
+          return this.shortInstURI.compareTo(o.shortInstURI);
+      }
+    }
+    return 1;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (! (obj instanceof HashedAlias) )  return false;
+    HashedAlias he = (HashedAlias) obj;
+
+    if (he.aliasHash2 == this.aliasHash2)
+      return false;
+
+    if (he.prefLen == this.prefLen)
+      return false;
+
+    if (he.suffLen == this.suffLen)
+      return false;
+
+    if (he.shortInstURI == null) {
+      if (this.shortInstURI != null)
+        return false;
+    }
+    else {
+      if (!he.shortInstURI.equals(this.shortInstURI))
+        return false;
     }
 
-    public int compareTo(HashedAlias o) {
-        if (this.prefLen < o.prefLen)  return -1;
-        else if (this.prefLen == o.prefLen && this.suffLen < o.suffLen) return -1;
-        else if (this.prefLen == o.prefLen && this.suffLen == o.suffLen
-                && this.aliasHash2 < o.aliasHash2) return -1;
-        else if (this.prefLen == o.prefLen && this.suffLen == o.suffLen
-                && this.aliasHash2 == o.aliasHash2) {
-            // Here null is considered the smallest possible string value 
-            if (this.shortInstURI == null) {
-                if (o.shortInstURI == null)
-                    return 0;
-                else
-                    return -1;
-            }
-            else {
-                if (o.shortInstURI == null)
-                    return 1;
-                else
-                    return this.shortInstURI.compareTo(o.shortInstURI);
-            }
-        }
-        return 1;
-    }
+    return classID == he.classID;
+  }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (! (obj instanceof HashedAlias) )  return false;
-        HashedAlias he = (HashedAlias) obj;
-        
-        return (he.aliasHash2 == this.aliasHash2) && (he.prefLen == this.prefLen)
-                && (he.suffLen == this.suffLen) &&
-                ( (he.shortInstURI==null)?
-                        (this.shortInstURI == null):
-                            (he.shortInstURI.equals(this.shortInstURI)));
-    }
-    
-    @Override
-    public String toString() {
-        return "(" + this.prefLen + "<"+ this.aliasHash2 +">" + this.suffLen + ")"+
-        this.shortInstURI;
-    }
-    
+  @Override
+  public String toString() {
+    return "(" + this.prefLen + "<"+ this.aliasHash2 +">" + this.suffLen + ")"+
+    this.shortInstURI;
+  }
+
 }
