@@ -621,8 +621,9 @@ public class OntologyEditor extends AbstractVisualResource
 
           JMenu addProperty = new JMenu("Properties");
           Set<RDFProperty> rdfprops = ontology.getPropertyDefinitions();
-          Iterator<RDFProperty> iter = props.iterator();
-
+          Iterator<RDFProperty> iter = rdfprops.iterator();
+          menu.add(addProperty);
+          
           JMenu whereToAdd = addProperty;
           int propertyCounter = 0;
 
@@ -653,9 +654,9 @@ public class OntologyEditor extends AbstractVisualResource
                     candidate.addAnnotationPropertyValue((AnnotationProperty)p,
                             new Literal(value));
                   }
-                  TreePath path = tree.getSelectionPath();
-                  tree.setSelectionRow(0);
-                  tree.setSelectionPath(path);
+                  TreePath path = propertyTree.getSelectionPath();
+                  propertyTree.setSelectionRow(0);
+                  propertyTree.setSelectionPath(path);
                   return;
                 }
               });
