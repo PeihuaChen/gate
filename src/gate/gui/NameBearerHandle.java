@@ -1041,7 +1041,7 @@ public class NameBearerHandle implements Handle, StatusListener,
               // add this application to the list of recent applications
               String list = locations.get("applications");
               if (list == null) { list = ""; }
-              list = list.replaceFirst("\\Q"+target.getName()+"\\E;?", "");
+              list = list.replaceFirst("\\Q"+target.getName()+"\\E(;|$)", "");
               list = target.getName() + ";" + list;
               locations.put("applications", list);
               fileChooser.setLocations(locations);
