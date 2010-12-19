@@ -3496,7 +3496,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             // add this application to the list of recent applications
             String list = locations.get("applications");
             if (list == null) { list = ""; }
-            list = list.replaceFirst("\\Q"+res.getName()+"\\E;?", "");
+            list = list.replaceFirst("\\Q"+res.getName()+"\\E(;|$)", "");
             list = res.getName() + ";" + list;
             locations.put("applications", list);
             fileChooser.setLocations(locations);
@@ -4294,7 +4294,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             alertButton.setAction(new AlertAction(e, message, null));
             if (e instanceof IOException) {
               // remove selected element from the applications list
-              locations.put("applications", list.replaceFirst(name + ";?", ""));
+              locations.put("applications", list.replaceFirst(name + "(;|$)", ""));
               fileChooser.setLocations(locations);
             }
           } finally { processFinished(); }}};
@@ -4307,7 +4307,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         public void menuKeyPressed(MenuKeyEvent e) {
           if (e.getKeyCode() == KeyEvent.VK_DELETE) {
             // remove selected element from the applications list
-            locations.put("applications", list.replaceFirst(name + ";?", ""));
+            locations.put("applications", list.replaceFirst(name + "(;|$)", ""));
             fileChooser.setLocations(locations);
             // TODO: update the menu
 //            item.setVisible(false);
