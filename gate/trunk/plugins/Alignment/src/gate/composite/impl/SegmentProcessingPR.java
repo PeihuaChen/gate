@@ -18,6 +18,7 @@ import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
 import gate.util.OffsetComparator;
+import gate.util.Out;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -102,9 +103,11 @@ public class SegmentProcessingPR extends AbstractLanguageAnalyser implements
             : document.getAnnotations(inputASName);
 
     AnnotationSet segmentSet = set.get(segmentAnnotationType);
-    if(set.isEmpty())
-      throw new ExecutionException("Could not find annotations of type :"
-              + segmentAnnotationType);
+    if(set.isEmpty()) {
+      Out.prln("Could not find annotations of type: " +  segmentAnnotationType +
+        " in the document: " + document.getName());
+      return;
+    }
 
     String originalDocument = document.getName();
 
