@@ -109,13 +109,13 @@ public class HashedAlias implements Serializable, Comparable<HashedAlias> {
     if (! (obj instanceof HashedAlias) )  return false;
     HashedAlias he = (HashedAlias) obj;
 
-    if (he.aliasHash2 == this.aliasHash2)
+    if (he.aliasHash2 != this.aliasHash2)
       return false;
 
-    if (he.prefLen == this.prefLen)
+    if (he.prefLen != this.prefLen)
       return false;
 
-    if (he.suffLen == this.suffLen)
+    if (he.suffLen != this.suffLen)
       return false;
 
     if (he.shortInstURI == null) {
