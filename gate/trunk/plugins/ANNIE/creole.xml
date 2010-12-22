@@ -257,96 +257,12 @@
 
 		<!-- creole.xml for JapeTransducer -->
 		<RESOURCE>
-			<NAME>Jape Transducer</NAME>
 			<CLASS>gate.creole.Transducer</CLASS>
-			<COMMENT>A module for executing Jape grammars.</COMMENT>
-			<HELPURL>http://gate.ac.uk/userguide/chap:jape</HELPURL>
-			<PARAMETER NAME="document" RUNTIME="true"
-				COMMENT="The document to be processed">
-				gate.Document
-			</PARAMETER>
-			<PARAMETER NAME="inputASName" RUNTIME="true"
-				COMMENT="The annotation set to be used as input for the transducer"
-				OPTIONAL="true">
-				java.lang.String
-			</PARAMETER>
-			<PARAMETER NAME="outputASName" RUNTIME="true"
-				COMMENT="The annotation set to be used as output for the transducer"
-				OPTIONAL="true">
-				java.lang.String
-			</PARAMETER>
-			<OR>
-				<PARAMETER NAME="grammarURL"
-					COMMENT="The URL to the grammar file" SUFFIXES="jape">
-					java.net.URL
-				</PARAMETER>
-				<PARAMETER NAME="binaryGrammarURL"
-					COMMENT="The URL to the binary grammar file" SUFFIXES="jape">
-					java.net.URL
-				</PARAMETER>
-			</OR>
-			<PARAMETER NAME="encoding" DEFAULT="UTF-8"
-				COMMENT="The encoding used for reading the grammar">
-				java.lang.String
-			</PARAMETER>
-			<PARAMETER NAME="ontology"
-				COMMENT="The ontology to be used by this transducer" OPTIONAL="true"
-				RUNTIME="true">
-				gate.creole.ontology.Ontology
-			</PARAMETER>
-			<PARAMETER NAME="operators" RUNTIME="false" OPTIONAL="true"
-        COMMENT="Class names that implement gate.jape.constraint.ConstraintPredicate."
-				ITEM_CLASS_NAME="java.lang.String">
-				java.util.ArrayList
-			</PARAMETER>
-			<PARAMETER NAME="annotationAccessors" RUNTIME="false" OPTIONAL="true"
-        COMMENT="Class names that implement gate.jape.constraint.AnnotationAccessor."
-				ITEM_CLASS_NAME="java.lang.String">
-				java.util.ArrayList
-			</PARAMETER>
-			<ICON>jape</ICON>
 		</RESOURCE>
 
 		<!-- creole.xml for ANNIE Transducer -->
 		<RESOURCE>
-			<NAME>ANNIE NE Transducer</NAME>
 			<CLASS>gate.creole.ANNIETransducer</CLASS>
-			<COMMENT>ANNIE named entity grammar.</COMMENT>
-			<HELPURL>http://gate.ac.uk/userguide/sec:annie:semantic-tagger</HELPURL>
-			<PARAMETER NAME="document" RUNTIME="true"
-				COMMENT="The document to be processed">
-				gate.Document
-			</PARAMETER>
-			<PARAMETER NAME="inputASName" RUNTIME="true"
-				COMMENT="The annotation set to be used as input for the transducer"
-				OPTIONAL="true">
-				java.lang.String
-			</PARAMETER>
-			<PARAMETER NAME="outputASName" RUNTIME="true"
-				COMMENT="The annotation set to be used as output for the transducer"
-				OPTIONAL="true">
-				java.lang.String
-			</PARAMETER>
-			<PARAMETER NAME="grammarURL"
-				COMMENT="The URL to the grammar file"
-				DEFAULT="resources/NE/main.jape" SUFFIXES="jape">
-				java.net.URL
-			</PARAMETER>
-			<PARAMETER NAME="encoding" DEFAULT="UTF-8"
-				COMMENT="The encoding used for reading the grammar">
-				java.lang.String
-			</PARAMETER>
-			<PARAMETER NAME="operators" RUNTIME="false" OPTIONAL="true"
-        COMMENT="Class names that implement gate.jape.constraint.ConstraintPredicate."
-				ITEM_CLASS_NAME="java.lang.String">
-				java.util.ArrayList
-			</PARAMETER>
-			<PARAMETER NAME="annotationAccessors" RUNTIME="false" OPTIONAL="true"
-        COMMENT="Class names that implement gate.jape.constraint.AnnotationAccessor."
-				ITEM_CLASS_NAME="java.lang.String">
-				java.util.ArrayList
-			</PARAMETER>
-			<ICON>ne-transducer</ICON>
 		</RESOURCE>
 
 		<!-- creole.xml for Sentence splitter-->

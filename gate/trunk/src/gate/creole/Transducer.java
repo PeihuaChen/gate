@@ -14,6 +14,10 @@
 package gate.creole;
 
 import gate.*;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
+import gate.creole.metadata.RunTime;
 import gate.gui.MainFrame;
 import gate.jape.Batch;
 import gate.jape.DefaultActionContext;
@@ -35,6 +39,11 @@ import javax.swing.*;
  * A cascaded multi-phase transducer using the Jape language which is a variant
  * of the CPSL language.
  */
+@CreoleResource(name = "JAPE Transducer",
+  comment = "A module for executing Jape grammars.",
+  helpURL = "http://gate.ac.uk/userguide/chap:jape",
+  icon = "jape"
+  )
 public class Transducer
   extends AbstractLanguageAnalyser
   implements gate.gui.ActionsPublisher, Benchmarkable, ControllerAwarePR
@@ -296,6 +305,11 @@ public class Transducer
    * @param newGrammarURL
    *          an URL to a file containing a Jape grammar.
    */
+  @CreoleParameter(
+    comment = "The URL to the grammar file.",
+    suffixes = "jape",
+    disjunction = "grammar"
+  )
   public void setGrammarURL(java.net.URL newGrammarURL) {
     grammarURL = newGrammarURL;
   }
@@ -319,6 +333,10 @@ public class Transducer
    * @param newEncoding
    *          a {link String} representing the encoding.
    */
+  @CreoleParameter(
+    comment = "The encoding used for reading the grammar",
+    defaultValue = "UTF-8"
+  )
   public void setEncoding(String newEncoding) {
     encoding = newEncoding;
   }
@@ -336,6 +354,11 @@ public class Transducer
    * @param newInputASName
    *          a {@link gate.AnnotationSet}
    */
+  @RunTime
+  @Optional
+  @CreoleParameter(
+    comment = "The annotation set to be used as input for the transducer"
+  )
   public void setInputASName(String newInputASName) {
     inputASName = newInputASName;
   }
@@ -355,6 +378,11 @@ public class Transducer
    * @param newOutputASName
    *          a {@link gate.AnnotationSet}
    */
+  @RunTime
+  @Optional
+  @CreoleParameter(
+    comment = "The annotation set to be used as output for the transducer"
+  )
   public void setOutputASName(String newOutputASName) {
     outputASName = newOutputASName;
   }
@@ -388,6 +416,10 @@ public class Transducer
    * Sets the list of class names for any custom boolean operators.
    * Classes must implement {@link gate.jape.constraint.ConstraintPredicate}.
    */
+  @Optional
+  @CreoleParameter(
+    comment = "Class names that implement gate.jape.constraint.ConstraintPredicate."
+  )
   public void setOperators(List<String> operators) {
     this.operators = operators;
   }
@@ -404,6 +436,10 @@ public class Transducer
    * Sets the list of class names for any custom
    * {@link gate.jape.constraint.AnnotationAccessor}s.
    */
+  @Optional
+  @CreoleParameter(
+    comment = "Class names that implement gate.jape.constraint.AnnotationAccessor."
+  )
   public void setAnnotationAccessors(List<String> annotationAccessors) {
     this.annotationAccessors = annotationAccessors;
   }
@@ -484,6 +520,11 @@ public class Transducer
    * @param ontology
    *          an {@link gate.creole.ontology.Ontology} value.
    */
+  @RunTime
+  @Optional
+  @CreoleParameter(
+    comment = "The ontology to be used by this transducer"
+  )
   public void setOntology(gate.creole.ontology.Ontology ontology) {
     this.ontology = ontology;
     //ontology is now a run-time param so we need to propagate it down to the
@@ -501,6 +542,11 @@ public class Transducer
     return binaryGrammarURL;
   }
 
+  @CreoleParameter(
+    comment = "The URL to the binary grammar file.",
+    suffixes = "jape",
+    disjunction = "grammar"
+  )
   public void setBinaryGrammarURL(java.net.URL binaryGrammarURL) {
     this.binaryGrammarURL = binaryGrammarURL;
   }
