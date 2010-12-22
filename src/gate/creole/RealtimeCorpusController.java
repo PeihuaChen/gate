@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -181,8 +182,17 @@ public class RealtimeCorpusController extends SerialAnalyserController {
   @Override
   public Resource init() throws ResourceInstantiationException {
     // we normally require 2 threads: one to execute the PRs and another one to
-    // to execute the job stoppers. More threads are created ar required.
-    threadSource = Executors.newSingleThreadExecutor();
+    // to execute the job stoppers. More threads are created as required.  We
+    // use a custom ThreadFactory that returns daemon threads so we don't block
+    // GATE from exiting if this controller has not been properly disposed of.
+    threadSource = Executors.newSingleThreadExecutor(new ThreadFactory() {
+      private ThreadFactory dtf = Executors.defaultThreadFactory();
+      public Thread newThread(Runnable r) {
+        Thread t = dtf.newThread(r);
+        t.setDaemon(true);
+        return t;
+      }
+    });
     return super.init();
   }
 
@@ -213,7 +223,13 @@ public class RealtimeCorpusController extends SerialAnalyserController {
           // -> interrupt the job (nicely)
           waitSoFar += graceful;
           logger.info("Execution timeout, attempting to gracefully stop worker thread...");
-          docRunnerFuture.cancel(true);
+          // interrupt the working thread - we can't cancel the future as
+          // that would cause future get() calls to fail immediately with
+          // a CancellationException
+          Thread t = currentWorkingThread;
+          if(t != null) {
+            t.interrupt();
+          }
           for(int j = 0; j < prList.size(); j++){
             ((Executable)prList.get(j)).interrupt();
           }
