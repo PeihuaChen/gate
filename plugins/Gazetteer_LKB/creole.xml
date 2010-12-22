@@ -20,7 +20,7 @@
  <JAR>lib/kim-util-3.0-RC5.jar</JAR>
  <JAR>lib/slf4j-api-1.5.6.jar</JAR>
  <JAR>lib/slf4j-log4j12-1.5.6.jar</JAR>
- <JAR>lib/trove-1.1-beta-5.jar</JAR>
+ <JAR>lib/trove-2.0.2.jar</JAR>
  <JAR>lib/owlim-3.3.jar</JAR>
  <JAR>lib/trree-3.3.jar</JAR>
  <JAR>lib/openrdf-sesame-2.3.2-onejar.jar</JAR> 
