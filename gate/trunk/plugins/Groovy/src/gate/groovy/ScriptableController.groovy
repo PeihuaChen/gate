@@ -6,8 +6,20 @@ import gate.creole.*
 import gate.creole.metadata.*
 import gate.util.*
 
+import groovy.time.TimeCategory
+
 import java.beans.PropertyChangeSupport
 import java.beans.PropertyChangeListener
+
+import java.util.concurrent.Callable
+import java.util.concurrent.Future
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.ThreadFactory
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
+
+import org.apache.log4j.Logger
 
 @CreoleResource(name = "Scriptable Controller", comment =
     "A controller whose execution strategy is controlled by a Groovy script",
@@ -16,6 +28,8 @@ import java.beans.PropertyChangeListener
 public class ScriptableController extends SerialController
                           implements CorpusController, LanguageAnalyser {
 
+  protected static final Logger log = Logger.getLogger(ScriptableController)
+                            
   /**
    * The corpus over which we are running.
    */
@@ -25,6 +39,16 @@ public class ScriptableController extends SerialController
    * The document over which we are running, when in LanguageAnalyser mode.
    */
   Document document
+  
+  /**
+   * The PR (if any) currently being executed.
+   */
+  private transient volatile ProcessingResource currentPR
+  
+  /**
+   * The executor used to run timeLimit tasks in a background thread.
+   */
+  private transient ExecutorService timeLimitExecutor
 
   /**
    * Text of the Groovy script that controls execution.
@@ -99,9 +123,11 @@ eachDocument {
             }
           }
           // execute the PR using SerialController.runComponent
+          currentPR = pr
           runComponent(index)
         }
         finally {
+          currentPR = null
           if(pr instanceof LanguageAnalyser) {
             pr.corpus = null
             pr.document = null
@@ -112,51 +138,48 @@ eachDocument {
 
       mc.invokeMethod = { String name, args ->
         checkInterrupted()
+        // somePR() or somePR(param1:val1, param2:val2)
         if(prsByName.containsKey(name) && (!args || args[0] instanceof Map)) {
           def params = args ? args[0] : [:]
           prsByName[name].each(runPr.curry(params))
         }
+        // eachDocument { ... }
         else if("eachDocument".equals(name) && args && args[0] instanceof Closure) {
-          def savedCurrentDoc = script.binding.variables.doc
-          try {
-            if(document) {
-              // we are a language analyser, so just process the single document
-              script.binding.setVariable('doc', document)
-              args[0].call(document)
-            }
-            else {
-              benchmarkFeatures.put(Benchmark.CORPUS_NAME_FEATURE, corpus.name)
-
-              // process each document in the corpus - corpus.each does the
-              // right thing with corpora stored in datastores
-              corpus.each {
-                String savedBenchmarkId = getBenchmarkId()
-                try {
-                  // include the document name in the benchmark ID for sub-events
-                  setBenchmarkId(Benchmark.createBenchmarkId("doc_${it.name}",
-                          getBenchmarkId()))
-                  benchmarkFeatures.put(Benchmark.DOCUMENT_NAME_FEATURE, it.name)
-                  checkInterrupted()
-                  script.binding.setVariable('doc', it)
-                  args[0].call(it)
-                }
-                finally {
-                  setBenchmarkId(savedBenchmarkId)
-                  benchmarkFeatures.remove(Benchmark.DOCUMENT_NAME_FEATURE)
-                }
-              }
-            }
-          }
-          finally {
-            script.binding.setVariable('doc', savedCurrentDoc)
-            benchmarkFeatures.remove(Benchmark.CORPUS_NAME_FEATURE)
-          }
+          eachDocument(args[0])
         }
+        // allPRs()
         else if("allPRs".equals(name) && !args) {
           // special case - allPrs() runs all the PRs in order
           (0 ..< prList.size()).each(runPr.curry([:]))
         }
+        // ignoringErrors { ... }
+        else if("ignoringErrors".equals(name) && args?.length == 1 && (args[0] instanceof Closure)) {
+          try {
+            args[0].call()
+          }
+          catch(ThreadDeath td) {
+            // special case - rethrow ThreadDeath. This is in case someone puts
+            // an ignoringErrors block *inside* a timeLimit block, we don't want
+            // to gobble up the hard limit stop() signal.
+            throw td
+          }
+          catch(Throwable err) {
+            log.warn("Ignored error", err)
+          }
+        }
+        // timeLimit(60000) {} or timeLimit(1.minute) {} (treated as a soft limit)
+        // or timeLimit(soft:1.minute, exception:30.seconds, hard:45.seconds) {}
+        else if("timeLimit".equals(name) && args?.length == 2 && (args[1] instanceof Closure)
+            && ((args[0] instanceof Map && args[0].soft || args[0].hard || args[0].exception)
+               || args[0] instanceof Number || args[0].respondsTo("toMilliseconds"))) {
+          def timeouts = args[0]
+          if(!(timeouts instanceof Map)) {
+            timeouts = [soft:timeouts]
+          }
+          timeLimit(timeouts, args[1])
+        }
         else {
+          // support for methods declared in the script itself
           MetaMethod mm = mc.getMetaMethod(name, args)
           if(mm) {
             return mm.invoke(delegate, args)
@@ -172,6 +195,177 @@ eachDocument {
     catch(Exception e) {
       throw new ExecutionException("Error parsing control script", e)
     }
+  }
+  
+  /**
+   * Iterate over this controller's corpus, calling the supplied
+   * closure once for each document in the corpus.
+   */
+  protected void eachDocument(Closure c) throws ExecutionException {
+    def savedCurrentDoc = script.binding.variables.doc
+    try {
+      if(document) {
+        // we are a language analyser, so just process the single document
+        script.binding.setVariable('doc', document)
+        c.call(document)
+      }
+      else {
+        benchmarkFeatures.put(Benchmark.CORPUS_NAME_FEATURE, corpus.name)
+
+        // process each document in the corpus - corpus.each does the
+        // right thing with corpora stored in datastores
+        corpus.each {
+          String savedBenchmarkId = getBenchmarkId()
+          try {
+            // include the document name in the benchmark ID for sub-events
+            setBenchmarkId(Benchmark.createBenchmarkId("doc_${it.name}",
+                    getBenchmarkId()))
+            benchmarkFeatures.put(Benchmark.DOCUMENT_NAME_FEATURE, it.name)
+            checkInterrupted()
+            script.binding.setVariable('doc', it)
+            c.call(it)
+          }
+          finally {
+            setBenchmarkId(savedBenchmarkId)
+            benchmarkFeatures.remove(Benchmark.DOCUMENT_NAME_FEATURE)
+          }
+        }
+      }
+    }
+    finally {
+      script.binding.setVariable('doc', savedCurrentDoc)
+      benchmarkFeatures.remove(Benchmark.CORPUS_NAME_FEATURE)
+    }
+  }
+  
+  protected void timeLimit(Map timeouts, Closure c) throws ExecutionException {
+    // convert any Durations back to milliseconds.  This allows us to use the groovy
+    // TimeCategory to say things like timeLimit(soft:1.minute+30.seconds, hard:5.minutes) {...}
+    timeouts.each { Map.Entry e ->
+      if(e.value.respondsTo("toMilliseconds")) {
+        e.value = e.value.toMilliseconds()
+      } else {
+        e.value = e.value as Long
+      }
+    }
+    
+    // if we have soft and hard timeouts but no "exception" timeout then
+    // make the exception timeout fall half way between the soft
+    // and hard timeouts
+    if(timeouts.hard && timeouts.soft && !timeouts.exception) {
+      timeouts.exception = (timeouts.hard / 2) as Long
+      timeouts.hard = timeouts.exception
+    }
+    
+    Thread runningThread = null
+    // a closure that catches exceptions and returns them
+    def callable = {
+      runningThread = Thread.currentThread()
+      try {
+        // need to use(TimeCategory) again here, as use
+        // scopes are thread-local
+        use(TimeCategory, c)
+      }
+      catch(InterruptedException e) {
+        // something was interrupted
+        return new ExecutionInterruptedException("The execution of the " +
+          name + " application has been abruptly interrupted", e)
+      }
+      catch(Throwable t) {
+        return t
+      }
+      finally {
+        runningThread = null
+      }
+      return null
+    }
+    
+    Future<Throwable> future = executor.submit(callable as Callable<Throwable>)
+    if(timeouts.soft) {
+      try {
+        Throwable exception = future.get(timeouts.soft, TimeUnit.MILLISECONDS)
+        if(exception) {
+          throw exception
+        }
+        // finished successfully
+        return
+      }
+      catch(TimeoutException te) {
+        // we have hit the soft timeout - try and stop the thread
+        // gently
+        log.info("ScriptableController.timeLimit: soft limit reached")
+        Thread t = runningThread
+        if(t) t.interrupt()
+        currentPR?.interrupt()
+      }
+      catch(InterruptedException ie) {
+        Thread.currentThread().interrupt()
+      }
+    }
+    if(timeouts.exception) {
+      try {
+        Throwable exception = future.get(timeouts.exception, TimeUnit.MILLISECONDS)
+        if(exception) {
+          throw exception
+        }
+        // finished successfully
+        return
+      }
+      catch(TimeoutException te) {
+        // we have hit the exception timeout - try and induce an exception
+        log.info("ScriptableController.timeLimit: 'exception' limit reached, " +
+                 "attempting to induce an exception")
+        def pr = currentPR
+        if(pr instanceof LanguageAnalyser) {
+          pr.corpus = null
+          pr.document = null
+        }
+      }
+      catch(InterruptedException ie) {
+        Thread.currentThread().interrupt()
+      }
+    }
+    if(timeouts.hard) {
+      try {
+        Throwable exception = future.get(timeouts.hard, TimeUnit.MILLISECONDS)
+        if(exception) {
+          throw exception
+        }
+        // finished successfully
+        return
+      }
+      catch(TimeoutException te) {
+        // we have hit the hard timeout
+        log.info("ScriptableController.timeLimit: hard limit reached, " +
+                 "terminating thread")
+        Thread t = runningThread
+        if(t) t.stop()
+        throw new ExecutionInterruptedException("ScriptableController.timeLimit: hard limit reached")
+      }
+      catch(InterruptedException ie) {
+        Thread.currentThread().interrupt()
+      }
+    }
+    
+    // if we get here we don't have a hard limit, so wait until task is complete
+    Throwable exception = future.get()
+    if(exception) {
+      throw exception
+    }
+  }
+  
+  /**
+   * Create the timeLimit executor lazily the first time it is requested.
+   * @return
+   */
+  private ExecutorService getExecutor() {
+    if(!timeLimitExecutor) {
+      // use a cached thread pool rather than a single thread
+      // executor to avoid deadlock in the case of nested
+      // timeLimit calls.
+      timeLimitExecutor = Executors.newCachedThreadPool(new DaemonThreadFactory())
+    }
+    return timeLimitExecutor
   }
 
   protected void executeImpl() throws ExecutionException {
@@ -193,7 +387,18 @@ eachDocument {
       script.binding.setVariable('doc', document)
     }
     try {
-      script.run()
+      // run the script using the Groovy TimeCategory to allow nicer
+      // specification of the timeouts in a timeLimit block
+      use(TimeCategory, script.&run)
+    }
+    catch(ExecutionException e) {
+      throw e
+    }
+    catch(RuntimeException e) {
+      throw e
+    }
+    catch(Exception e) {
+      throw new ExecutionException(e)
     }
     finally {
       prsByName = null
@@ -202,6 +407,11 @@ eachDocument {
     if(log.isDebugEnabled()) {
       prof.checkPoint("Execute controller [" + getName() + "] finished");
     }
+  }
+  
+  public void cleanup() {
+    timeLimitExecutor?.shutdownNow()
+    super.cleanup()
   }
 
   /**
@@ -236,5 +446,20 @@ eachDocument {
 
   public void removePropertyChangeListener(String propName, PropertyChangeListener l) {
     pcs.removePropertyChangeListener(propName, l)
+  }
+}
+                          
+/**
+ * ThreadFactory implementation that fetches threads from the
+ * default ThreadFactory but sets their daemon status before
+ * returning them.
+ */
+class DaemonThreadFactory implements ThreadFactory {
+  private ThreadFactory dtf = Executors.defaultThreadFactory()
+  
+  public Thread newThread(Runnable r) {
+    Thread t = dtf.newThread(r)
+    t.daemon = true
+    return t
   }
 }

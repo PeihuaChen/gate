@@ -13,6 +13,7 @@
 package gate.groovy;
 
 import java.awt.event.ActionEvent;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 
 import org.codehaus.groovy.runtime.DefaultGroovyMethods;
+import org.codehaus.groovy.runtime.InvokerHelper;
 
 import gate.Gate;
 import gate.GateConstants;
@@ -40,6 +42,7 @@ import gate.util.GateRuntimeException;
 import gate.util.persistence.PersistenceManager;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
+import groovy.lang.GroovySystem;
 import groovy.lang.ReadOnlyPropertyException;
 
 /**
@@ -134,6 +137,29 @@ public class GroovySupport extends AbstractResource implements ActionsPublisher 
                 }
               });
             }
+            
+            /**
+             * This is a workaround for a strange behaviour in Groovy. At some
+             * point the superclass attempts to do "scriptRunning = false" from
+             * inside a closure which is defined in a method of the Console
+             * class.  But rather than treating that as an assignment to the
+             * private field scriptRunning in that class, Groovy treats this
+             * as a setProperty, which fails when this object is a subclass
+             * of Console.  So we have to implement the property setter here,
+             * delegating to the real private field in the superclass.
+             */
+            public void setScriptRunning(boolean b) {
+              try {
+                Field f = groovy.ui.Console.class.getDeclaredField("scriptRunning");
+                boolean a = f.isAccessible();
+                f.setAccessible(true);
+                f.set(this, b);
+                f.setAccessible(a);
+              }
+              catch(Exception e) {
+                // give up
+              }
+            } 
           };
           console.run();
         }

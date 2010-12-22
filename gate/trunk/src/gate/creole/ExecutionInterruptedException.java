@@ -21,6 +21,14 @@ public class ExecutionInterruptedException extends ExecutionException {
   public ExecutionInterruptedException(String message){
     super(message);
   }
+  
+  public ExecutionInterruptedException(Throwable cause) {
+    super(cause);
+  }
+  
+  public ExecutionInterruptedException(String message, Throwable cause) {
+    super(message, cause);
+  }
 
   public ExecutionInterruptedException(){
   }
