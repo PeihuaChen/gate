@@ -19,24 +19,7 @@
 
     <!-- creole.xml for VP Chunker Transducer -->
     <RESOURCE>
-      <NAME>ANNIE VP Chunker</NAME>
       <CLASS>gate.creole.VPChunker</CLASS>
-      <COMMENT>ANNIE VP Chunker component.</COMMENT>
-      <HELPURL>http://gate.ac.uk/userguide/sec:parsers:vgchunker</HELPURL>
-      <PARAMETER NAME="document" RUNTIME="true"
-        COMMENT="The document to be processed">gate.Document</PARAMETER>
-      <PARAMETER NAME="inputASName" RUNTIME="true"
-        COMMENT="The annotation set to be used as input for the transducer"
-        OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="outputASName" RUNTIME="true"
-        COMMENT="The annotation set to be used as output for the transducer"
-        OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="grammarURL" COMMENT="The URL to the grammar file"
-        DEFAULT="../ANNIE/resources/VP/VerbGroups.jape" SUFFIXES="jape">
-        java.net.URL</PARAMETER>
-      <PARAMETER NAME="encoding" DEFAULT="UTF-8"
-        COMMENT="The encoding used for reading the grammar">
-        java.lang.String</PARAMETER>
     </RESOURCE>
 
     <RESOURCE>

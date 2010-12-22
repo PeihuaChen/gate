@@ -13,10 +13,63 @@
  */
 package gate.creole;
 
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.HiddenCreoleParameter;
+import gate.creole.ontology.Ontology;
+import java.net.URL;
+import java.util.List;
+
 /**
  * ANNIE VP Chunker module. It is actually a JAPE grammar; this class is here
  * so we can have a separate entry in creol.xml inorder to point to the default
  * VP chunking grammar.
  */
+@CreoleResource(name = "ANNIE VP Chunker",
+  comment = "ANNIE VP Chunker component.",
+  helpURL = "http://gate.ac.uk/userguide/sec:parsers:vgchunker",
+  icon = "pr"
+  )
 public class VPChunker extends Transducer {
+
+  @HiddenCreoleParameter
+  @Override
+  public void setOntology(Ontology o) {
+    super.setOntology(o);
+  }
+
+  @HiddenCreoleParameter
+  @Override
+  public void setBinaryGrammarURL(URL grammar) {
+    super.setBinaryGrammarURL(grammar);
+  }
+
+  @HiddenCreoleParameter
+  @Override
+  public void setAnnotationAccessors(List<String> accessors) {
+    super.setAnnotationAccessors(accessors);
+  }
+
+  @HiddenCreoleParameter
+  @Override
+  public void setOperators(List<String> operators) {
+    super.setOperators(operators);
+  }
+
+  /**
+   * The grammarURL parameter provides the ANNIE VerbGroups.jape file as a default
+   * for this PR.
+   *
+   * @param newGrammarURL
+   */
+  @CreoleParameter(
+    comment = "The URL to the grammar file.",
+    suffixes = "jape",
+    defaultValue = "../ANNIE/resources/VP/VerbGroups.jape"
+  )
+  @Override
+  public void setGrammarURL(java.net.URL newGrammarURL) {
+    super.setGrammarURL(newGrammarURL);
+  }
+
 }
