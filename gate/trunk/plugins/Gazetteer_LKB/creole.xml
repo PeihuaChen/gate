@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- 
 	This is a GATE CREOLE plugin descriptor.
-	It contains GATE processing resources (PRs), defined in kim, which can be used without rinning
+	It contains GATE processing resources (PRs), defined in kim, which can be used without running
 	a KIM server. Compare these with the processing resources, defined in 
-	envrionments/*/files/config.xml which require running a KIM Server either in the same
+	environments/*/files/config.xml which require running a KIM Server either in the same
 	virtual machine or as a separate process. The PRs below are pre-configured not use any 
 	KIM service. 
 	
