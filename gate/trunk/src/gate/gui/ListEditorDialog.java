@@ -18,6 +18,7 @@ package gate.gui;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.util.*;
 
 import javax.swing.*;
@@ -157,7 +158,9 @@ public class ListEditorDialog extends JDialog {
     //the buttons box
     Box buttonsBox = Box.createHorizontalBox();
     addBtn = new JButton(addAction);
+    addBtn.setMnemonic(KeyEvent.VK_A);
     removeBtn = new JButton(removeAction);
+    removeBtn.setMnemonic(KeyEvent.VK_R);
     buttonsBox.add(Box.createHorizontalGlue());
     buttonsBox.add(addBtn);
     buttonsBox.add(Box.createHorizontalStrut(5));
@@ -217,6 +220,22 @@ public class ListEditorDialog extends JDialog {
       }
     });
 
+    // define keystrokes action bindings at the level of the main window
+    InputMap inputMap = ((JComponent)this.getContentPane()).
+      getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+    ActionMap actionMap = ((JComponent)this.getContentPane()).getActionMap();
+    inputMap.put(KeyStroke.getKeyStroke("ENTER"), "Apply");
+    actionMap.put("Apply", new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        okButton.doClick();
+      }
+    });
+    inputMap.put(KeyStroke.getKeyStroke("ESCAPE"), "Cancel");
+    actionMap.put("Cancel", new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        cancelButton.doClick();
+      }
+    });
 
     if(moveUpBtn != null) {
       moveUpBtn.addActionListener(new ActionListener() {
@@ -286,6 +305,9 @@ public class ListEditorDialog extends JDialog {
         }//public void actionPerformed(ActionEvent e)
       });
     }
+
+  
+  
   }
 
   /**
