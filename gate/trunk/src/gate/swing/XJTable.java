@@ -706,6 +706,7 @@ public class XJTable extends JTable{
      */
     public void sort(){
       try {
+        if (sortedColumn >= columnData.size()) { return; }
         //save the selection
         int[] rows = getSelectedRows();
         //convert to model co-ordinates
