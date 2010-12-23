@@ -214,9 +214,11 @@ public class GazetteerEditor extends AbstractVisualResource
     JPanel listPanel = new JPanel(new BorderLayout());
     JPanel listTopPanel = new JPanel();
     newEntryTextField = new JTextField(10);
+    newEntryTextField.setEnabled(false);
     final JButton newEntryButton = new JButton("New Entry ");
     newEntryButton.setToolTipText("New entry in the list");
     newEntryButton.setMargin(new Insets(2, 2, 2, 2));
+    newEntryButton.setEnabled(false);
     newEntryButton.addActionListener(new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
         // update the gazetteer
@@ -347,6 +349,7 @@ public class GazetteerEditor extends AbstractVisualResource
     JPanel filterPanel = new JPanel();
     listFilterTextField = new JTextField(15);
     listFilterTextField.setToolTipText("Filter rows on all column values");
+    listFilterTextField.setEnabled(false);
     // select all the rows containing the text from filterTextField
     listFilterTextField.getDocument().addDocumentListener(
         new DocumentListener() {
@@ -391,10 +394,12 @@ public class GazetteerEditor extends AbstractVisualResource
            || definitionTable.isEditing()) {
             return;
           }
-          if (definitionTable.getSelectedRow() == -1) {
+          if (definitionTable.getSelectedRow() == -1) { // no list selected
             listTableModel.setGazetteerList(new GazetteerList());
             selectedLinearNode = null;
-          } else {
+            newEntryTextField.setEnabled(false);
+            listFilterTextField.setEnabled(false);
+          } else { // list selected
             String listName = (String) definitionTable.getValueAt(
               definitionTable.getSelectedRow(),
               definitionTable.convertColumnIndexToView(0));
@@ -404,6 +409,8 @@ public class GazetteerEditor extends AbstractVisualResource
               listTableModel.setGazetteerList((GazetteerList)
                 linearDefinition.getListsByNode().get(selectedLinearNode));
             }
+            newEntryTextField.setEnabled(true);
+            listFilterTextField.setEnabled(true);
           }
           if (!listFilterTextField.getText().equals("")) {
             listFilterTextField.setText("");
