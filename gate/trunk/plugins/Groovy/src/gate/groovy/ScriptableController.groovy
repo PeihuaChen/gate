@@ -249,14 +249,6 @@ eachDocument {
       }
     }
     
-    // if we have soft and hard timeouts but no "exception" timeout then
-    // make the exception timeout fall half way between the soft
-    // and hard timeouts
-    if(timeouts.hard && timeouts.soft && !timeouts.exception) {
-      timeouts.exception = (timeouts.hard / 2) as Long
-      timeouts.hard = timeouts.exception
-    }
-    
     Thread runningThread = null
     // a closure that catches exceptions and returns them
     def callable = {
