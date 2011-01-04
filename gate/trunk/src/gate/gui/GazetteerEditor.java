@@ -297,9 +297,10 @@ public class GazetteerEditor extends AbstractVisualResource
         }
       }
     });
-    final JButton addColumnsButton = new JButton("Add Cols");
+    addColumnsButton = new JButton("Add Cols");
     addColumnsButton.setToolTipText("Add a couple of columns Feature and Value");
     addColumnsButton.setMargin(new Insets(2, 2, 2, 2));
+    addColumnsButton.setEnabled(false);
     addColumnsButton.addActionListener(new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
         if (linearDefinition.getSeparator() == null
@@ -398,6 +399,7 @@ public class GazetteerEditor extends AbstractVisualResource
             listTableModel.setGazetteerList(new GazetteerList());
             selectedLinearNode = null;
             newEntryTextField.setEnabled(false);
+            addColumnsButton.setEnabled(false);
             listFilterTextField.setEnabled(false);
           } else { // list selected
             String listName = (String) definitionTable.getValueAt(
@@ -410,6 +412,7 @@ public class GazetteerEditor extends AbstractVisualResource
                 linearDefinition.getListsByNode().get(selectedLinearNode));
             }
             newEntryTextField.setEnabled(true);
+            addColumnsButton.setEnabled(true);
             listFilterTextField.setEnabled(true);
           }
           if (!listFilterTextField.getText().equals("")) {
@@ -1076,17 +1079,17 @@ public class GazetteerEditor extends AbstractVisualResource
       }
       if (valueCopied == null) { return; }
       int rowToPaste = firstRow;
-      int columnToPaste = firstColumn;
-      for (String rowCopied : valueCopied.split("\t")) {
-        for (String cellCopied : rowCopied.split("\n")) {
+      for (String rowCopied : valueCopied.split("\n")) {
+        int columnToPaste = firstColumn;
+        for (String cellCopied : rowCopied.split("\t")) {
           listTableModel.setValueAt(cellCopied,
             listTable.rowViewToModel(rowToPaste),
             listTable.convertColumnIndexToModel(columnToPaste));
-          rowToPaste++;
-          if (rowToPaste + 1 > listTable.getRowCount()) { break; }
+          if (columnToPaste + 1 > listTable.getColumnCount()) { break; }
+          columnToPaste++;
         }
-        columnToPaste++;
-        if (columnToPaste + 1 > listTable.getColumnCount()) { break; }
+        if (rowToPaste + 1 > listTable.getRowCount()) { break; }
+        rowToPaste++;
       }
       listTableModel.fireTableDataChanged();
     }
@@ -1130,6 +1133,7 @@ public class GazetteerEditor extends AbstractVisualResource
   protected JComboBox newListComboBox;
   protected JButton newListButton;
   protected JTextField newEntryTextField;
+  protected JButton addColumnsButton;
   protected JTextField listFilterTextField;
   protected JLabel listCountLabel;
 }
