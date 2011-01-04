@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -28,6 +29,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
@@ -54,6 +58,23 @@ import org.jdom.xpath.XPath;
  * @author Ian Roberts
  */
 public class PackageGappTask extends Task {
+  
+  /**
+   * Comparator to compare URLs by lexicographic ordering of their
+   * getPath() values.  <code>null</code> compares less-than anything
+   * not <code>null</code>.
+   */
+  public static final Comparator<URL> PATH_COMPARATOR = new Comparator<URL>() {
+    public int compare(URL a, URL b) {
+      if(a == null) {
+        return (b == null) ? 0 : -1;
+      }
+      if(b == null) {
+        return 1;
+      }
+      return a.getPath().compareTo(b.getPath());
+    }
+  };
 
   /**
    * The file into which the modified gapp will be written.
@@ -87,7 +108,7 @@ public class PackageGappTask extends Task {
    * the whole contents of <code>f.getParentFile()</code>.
    */
   private boolean copyResourceDirs = false;
-
+  
   /**
    * Path-like structure listing extra resources that should be packaged
    * with the gapp, as if they had been referenced by relpaths from
@@ -268,8 +289,8 @@ public class PackageGappTask extends Task {
 
     // map to store the necessary file copy operations
     Map<URL, URL> fileCopyMap = new HashMap<URL, URL>();
-    Map<URL, URL> pluginCopyMap = new HashMap<URL, URL>();
     Map<URL, URL> dirCopyMap = new HashMap<URL, URL>();
+    TreeMap<URL, URL> pluginCopyMap = new TreeMap<URL, URL>(PATH_COMPARATOR);
 
     log("Packaging gapp file " + src);
     // do the work
@@ -290,8 +311,13 @@ public class PackageGappTask extends Task {
               getLocation());
     }
 
-    Set<URL> plugins = new HashSet<URL>(gappModel.getPluginURLs());
-    Set<URL> resources = new HashSet<URL>(gappModel.getResourceURLs());
+    // we use TreeSet for these sets so we will process the paths
+    // higher up the directory tree before paths pointing to their
+    // subdirectories.
+    Set<URL> plugins = new TreeSet<URL>(PATH_COMPARATOR);
+    plugins.addAll(gappModel.getPluginURLs());
+    Set<URL> resources = new TreeSet<URL>(PATH_COMPARATOR);
+    resources.addAll(gappModel.getResourceURLs());
 
     // process the extraresourcespath elements (if any)
     processExtraResourcesPaths(resources);
@@ -355,24 +381,62 @@ public class PackageGappTask extends Task {
     while(pluginsIt.hasNext()) {
       URL pluginURL = pluginsIt.next();
       pluginsIt.remove();
+      URL newPluginURL = null;
+      
       String pluginName = pluginURL.getFile();
       log("Processing plugin " + pluginName, Project.MSG_VERBOSE);
-      // we will map the plugin whose directory name is X to plugins/X
-      if(pluginName.endsWith("/")) {
-        pluginName = pluginName.substring(
-                pluginName.lastIndexOf('/', pluginName.length() - 2) + 1);
+
+      // first check whether this plugin is a subdirectory of another plugin
+      // we have already processed
+      SortedMap<URL, URL> possibleAncestors = pluginCopyMap.headMap(pluginURL);
+      URL ancestorPlugin = null;
+      if(!possibleAncestors.isEmpty()) ancestorPlugin = possibleAncestors.lastKey();
+      if(ancestorPlugin != null && pluginURL.toExternalForm().startsWith(
+              ancestorPlugin.toExternalForm())) {
+        // this plugin is under one we have already dealt with
+        log("  Plugin is located under another plugin " + ancestorPlugin, Project.MSG_VERBOSE);
+        String relPath = PersistenceManager.getRelativePath(ancestorPlugin, pluginURL);
+        try {
+          newPluginURL = new URL(pluginCopyMap.get(ancestorPlugin), relPath);
+        }
+        catch(MalformedURLException e) {
+          throw new BuildException("Couldn't construct URL relative to plugins/"
+                  + " for " + pluginURL, e, getLocation());
+        }
       }
       else {
-        pluginName = pluginName.substring(pluginName.lastIndexOf('/') + 1);
-      }
-      log("  Plugin name is " + pluginName, Project.MSG_VERBOSE);
-      URL newPluginURL = null;
-      try {
-        newPluginURL = new URL(newFileURL, "plugins/" + pluginName);
-      }
-      catch(MalformedURLException e) {
-        throw new BuildException("Couldn't construct URL relative to plugins/"
-                + " for " + pluginURL, e, getLocation());
+        // normal case, this plugin is not a subdir of another plugin
+        boolean addSlash = false;
+        // we will map the plugin whose directory name is X to plugins/X
+        if(pluginName.endsWith("/")) {
+          addSlash = true;
+          pluginName = pluginName.substring(
+                  pluginName.lastIndexOf('/', pluginName.length() - 2) + 1,
+                  pluginName.length() - 1);
+        }
+        else {
+          pluginName = pluginName.substring(pluginName.lastIndexOf('/') + 1);
+        }
+        log("  Plugin name is " + pluginName, Project.MSG_VERBOSE);
+        try {
+          newPluginURL = new URL(newFileURL, "plugins/" + pluginName + (addSlash ? "/" : ""));
+          // a gapp may refer to two or more plugins with the same name.
+          // If plugins/{pluginName} is already taken, try
+          // plugins/{pluginName}-2, plugins/{pluginName}-3, etc.,
+          // until we find one that is available.
+          if(pluginCopyMap.containsValue(newPluginURL)) {
+            int index = 2;
+            do {
+              newPluginURL =
+                      new URL(newFileURL, "plugins/" + pluginName + "-"
+                              + (index++) + (addSlash ? "/" : ""));
+            } while(pluginCopyMap.containsValue(newPluginURL));
+          }
+        }
+        catch(MalformedURLException e) {
+          throw new BuildException("Couldn't construct URL relative to plugins/"
+                  + " for " + pluginURL, e, getLocation());
+        }
       }
       log("  Relocating to " + newPluginURL, Project.MSG_VERBOSE);
 
@@ -453,7 +517,9 @@ public class PackageGappTask extends Task {
                     + newFileURL + " for application-resources", e,
                     getLocation());
           }
-          Map<URL, URL> unresolvedResourcesSubDirs = new HashMap<URL, URL>();
+          // map to track where under application-resources we should map
+          // each directory that contains unresolved resources
+          TreeMap<URL, URL> unresolvedResourcesSubDirs = new TreeMap<URL, URL>(PATH_COMPARATOR);
           log("There were unresolved resources, which have been gathered into "
                   + unresolvedResourcesDir, Project.MSG_INFO);
           for(URL res : resources) {
@@ -511,16 +577,24 @@ public class PackageGappTask extends Task {
     for(Map.Entry<URL, URL> resEntry : fileCopyMap.entrySet()) {
       File source = Files.fileFromURL(resEntry.getKey());
       File dest = Files.fileFromURL(resEntry.getValue());
-      // ensure parent directory exists
-      dest.getParentFile().mkdirs();
-      try {
-        log("Copying " + source + " to " + dest, Project.MSG_VERBOSE);
-        FileUtils.getFileUtils().copyFile(source, dest);
+      if(source.isDirectory()) {
+        // source URL points to a directory, so create a corresponding
+        // directory dest
+        dest.mkdirs();
       }
-      catch(IOException e) {
-        throw new BuildException(
-                "Error copying file " + source + " to " + dest, e,
-                getLocation());
+      else {
+        // source URL points to a file, so copy the file but first
+        // ensure parent directory exists
+        dest.getParentFile().mkdirs();
+        try {
+          log("Copying " + source + " to " + dest, Project.MSG_VERBOSE);
+          FileUtils.getFileUtils().copyFile(source, dest);
+        }
+        catch(IOException e) {
+          throw new BuildException(
+                  "Error copying file " + source + " to " + dest, e,
+                  getLocation());
+        }
       }
     }
 
@@ -661,49 +735,70 @@ public class PackageGappTask extends Task {
    *         the returned URL would typically be
    *         &lt;applicationResourcesDir&gt;/foo, but if a different
    *         directory with the same name has already been mapped then
-   *         we will return the first ..../foo-1, foo-2, etc. that is
-   *         not already in use.
+   *         we will return the first ..../foo-2, foo-3, etc. that is
+   *         not already in use.  If one of the directory's ancestors
+   *         has already been mapped then we return a URL pointing
+   *         to the same relative path inside that ancestor's mapping,
+   *         e.g. if .../foo has already been mapped to a-r/foo-2 then
+   *         .../foo/bar/baz will map to a-r/foo-2/bar/baz.
    */
   private URL getUnresolvedResourcesTarget(
-          Map<URL, URL> unresolvedResourcesSubDirs, URL unresolvedResourcesDir,
+          TreeMap<URL, URL> unresolvedResourcesSubDirs, URL unresolvedResourcesDir,
           URL resourceDir) throws BuildException {
     URL targetDir = unresolvedResourcesSubDirs.get(resourceDir);
-    if(targetDir == null) {
-      try {
-        // extract the last directory component of the source URL
-        String resourcePath = resourceDir.getFile();
-        if(resourcePath.endsWith("/")) {
-          resourcePath = resourcePath.substring(0, resourcePath.length() - 1);
+    try {
+      if(targetDir == null) {
+        // no exact match, try an ancestor match
+        SortedMap<URL, URL> possibleAncestors = unresolvedResourcesSubDirs.headMap(resourceDir);
+        URL nearestAncestor = null;
+        if(!possibleAncestors.isEmpty()) nearestAncestor = possibleAncestors.lastKey();
+        if(nearestAncestor != null && resourceDir.toExternalForm().startsWith(
+                nearestAncestor.toExternalForm())) {
+          // found an ancestor mapping, so take the relative path
+          // from the ancestor to this dir and map it to the same
+          // path under the ancestor's mapping.
+          String relPath = PersistenceManager.getRelativePath(nearestAncestor, resourceDir);
+          targetDir = new URL(unresolvedResourcesSubDirs.get(nearestAncestor), relPath);
         }
-        String targetDirName =
-                resourcePath.substring(resourcePath.lastIndexOf('/') + 1);
-        if(targetDirName.length() == 0) {
-          // edge case, if the source URL points to the directory "/"
-          targetDirName = "resources";
+        else {
+          // no ancestors currently mapped, so start a new sub-dir of
+          // unresolvedResourcesDir whose name is the last path
+          // component of the source URL
+          String resourcePath = resourceDir.getFile();
+          if(resourcePath.endsWith("/")) {
+            resourcePath = resourcePath.substring(0, resourcePath.length() - 1);
+          }
+          String targetDirName =
+                  resourcePath.substring(resourcePath.lastIndexOf('/') + 1);
+          if(targetDirName.length() == 0) {
+            // edge case, if the source URL points to the root directory "/"
+            targetDirName = "resources";
+          }
+          // try application-resources/{targetDirName} as the target
+          targetDir = new URL(unresolvedResourcesDir, targetDirName + "/");
+          // if this is already taken, try
+          // application-resources/{targetDirName}-2,
+          // application-resources/{targetDirName}-3, etc., until we find
+          // one that is available.
+          if(unresolvedResourcesSubDirs.containsValue(targetDir)) {
+            int index = 2;
+            do {
+              targetDir =
+                      new URL(unresolvedResourcesDir, targetDirName + "-"
+                              + (index++) + "/");
+            } while(unresolvedResourcesSubDirs.containsValue(targetDir));
+          }
         }
-        // try application-resources/{targetDirName} as the target
-        targetDir = new URL(unresolvedResourcesDir, targetDirName + "/");
-        // if this is already taken, try
-        // application-resources/{targetDirName}-1,
-        // application-resources/{targetDirName}-2, etc., until we find
-        // one that is available.
-        if(unresolvedResourcesSubDirs.containsValue(targetDir)) {
-          int index = 1;
-          do {
-            targetDir =
-                    new URL(unresolvedResourcesDir, targetDirName + "-"
-                            + (index++) + "/");
-          } while(unresolvedResourcesSubDirs.containsValue(targetDir));
-        }
-
+        
         // store the mapping for future use
         unresolvedResourcesSubDirs.put(resourceDir, targetDir);
       }
-      catch(MalformedURLException e) {
-        throw new BuildException("Can't construct target URL for directory "
-                + resourceDir, e, getLocation());
-      }
     }
+    catch(MalformedURLException e) {
+      throw new BuildException("Can't construct target URL for directory "
+              + resourceDir, e, getLocation());
+    }
+
     return targetDir;
   }
 

@@ -1170,6 +1170,11 @@ public class NameBearerHandle implements Handle, StatusListener,
               throw new IOException("Unable to create temporary directory.\n"
                 + temporaryDirectory.getCanonicalPath());
             }
+            // canonicalise (e.g. on Mac OS X java.io.tmpdir is
+            // /var/folders/something, but /var is a symlink to /private/var,
+            // and this can confuse the relpaths which are based on canonical
+            // path strings)
+            temporaryDirectory = temporaryDirectory.getCanonicalFile();
             File originalGapp = new File(temporaryDirectory, "original.xgapp");
             File targetGapp = new File(temporaryDirectory, "application.xgapp");
 
