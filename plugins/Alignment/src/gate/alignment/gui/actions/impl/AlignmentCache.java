@@ -72,7 +72,10 @@ public class AlignmentCache implements PreDisplayAction,
   private String outputFileName;
 
   /**
-   * the init method
+   * the init method.
+   * Arguments: 
+   * args[0] = name of the file where the alignment should be stored.
+   * args[1] = Optional. feature that should be used for locating alignment.
    */
   public void init(String[] args) throws AlignmentActionInitializationException {
     if(initCalled) return;
