@@ -48,6 +48,9 @@ import java.text.Collator;
 import java.util.*;
 import java.util.List;
 import java.util.Timer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Editor for {@link gate.creole.gazetteer.Gazetteer ANNIE Gazetteer}.
@@ -373,6 +376,29 @@ public class GazetteerEditor extends AbstractVisualResource
     });
     filterPanel.add(new JLabel("Filter: "));
     filterPanel.add(listFilterTextField);
+    filterPanel.add(caseInsensitiveCheckBox = new JCheckBox("Case Ins."));
+    caseInsensitiveCheckBox.setSelected(true);
+    caseInsensitiveCheckBox.setToolTipText("Case Insensitive");
+    caseInsensitiveCheckBox.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        // redisplay the table with the new filter option
+        listFilterTextField.setText(listFilterTextField.getText());
+      }
+    });
+    filterPanel.add(regexCheckBox = new JCheckBox("Regex"));
+    regexCheckBox.setToolTipText("Regular Expression");
+    regexCheckBox.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        listFilterTextField.setText(listFilterTextField.getText());
+      }
+    });
+    filterPanel.add(onlyValueCheckBox = new JCheckBox("Value"));
+    onlyValueCheckBox.setToolTipText("Filter only Value column");
+    onlyValueCheckBox.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        listFilterTextField.setText(listFilterTextField.getText());
+      }
+    });
     listBottomPanel.add(filterPanel, BorderLayout.WEST);
     listBottomPanel.add(listCountLabel = new JLabel(), BorderLayout.EAST);
     listPanel.add(listBottomPanel, BorderLayout.SOUTH);
@@ -801,22 +827,33 @@ public class GazetteerEditor extends AbstractVisualResource
     }
 
     protected void filterRows() {
+      String patternText = filter;
+      String prefixPattern = regexCheckBox.isSelected() ? "":"\\Q";
+      String suffixPattern = regexCheckBox.isSelected() ? "":"\\E";
+      patternText = prefixPattern + patternText + suffixPattern;
+      Pattern pattern;
+      try {
+        pattern = caseInsensitiveCheckBox.isSelected() ?
+          Pattern.compile(patternText, Pattern.CASE_INSENSITIVE) :
+          Pattern.compile(patternText);
+      } catch (PatternSyntaxException e) {
+        return;
+      }
       gazetteerListFiltered.clear();
-      String filterUC = filter.toUpperCase();
       for (Object object : gazetteerList) {
         GazetteerNode node = (GazetteerNode) object;
         boolean match = false;
         Map map = node.getFeatureMap();
-        if (map != null) {
+        if (map != null && !onlyValueCheckBox.isSelected()) {
           for (Object key : map.keySet()) {
-            if (((String)key).toUpperCase().contains(filterUC)
-             || ((String)map.get(key)).toUpperCase().contains(filterUC)) {
+            if (pattern.matcher((String) key).find()
+             || pattern.matcher((String) map.get(key)).find()) { 
               match = true;
               break;
             }
           }
         }
-        if (match || node.getEntry().toUpperCase().contains(filterUC)) {
+        if (match || pattern.matcher(node.getEntry()).find()) {
           // gazetteer node matches the filter
           gazetteerListFiltered.add(node);
         }
@@ -1135,5 +1172,8 @@ public class GazetteerEditor extends AbstractVisualResource
   protected JTextField newEntryTextField;
   protected JButton addColumnsButton;
   protected JTextField listFilterTextField;
+  protected JCheckBox regexCheckBox;
+  protected JCheckBox caseInsensitiveCheckBox;
+  protected JCheckBox onlyValueCheckBox;
   protected JLabel listCountLabel;
 }
