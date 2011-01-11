@@ -766,6 +766,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         // create a new log file
         File logFile = new File(System.getProperty("java.io.tmpdir"),
           "gate-benchmark-log.txt");
+        logFile.deleteOnExit();
         if (logFile.exists() && !logFile.delete()) {
           log.info("Error when deleting the file:\n" +
             logFile.getAbsolutePath());
@@ -793,6 +794,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           Layout layout = new PatternLayout("%m%n");
           File logFile = new File(System.getProperty("java.io.tmpdir"),
             "gate-benchmark-log.txt");
+          logFile.deleteOnExit();
           Appender appender;
           try {
             appender =
@@ -818,6 +820,11 @@ public class MainFrame extends JFrame implements ProgressListener,
       }
     }, this));
     reportMenu.add(reportClearMenuItem);
+    reportMenu.add(new XJMenuItem(new AbstractAction("Help on this tool") {
+      public void actionPerformed(ActionEvent e) {
+        showHelpFrame("chap:profiling", "Profiling Processing Resources");
+      }
+    }, this));
     reportMenu.addSeparator();
 
     final JCheckBoxMenuItem reportZeroTimesCheckBox = new JCheckBoxMenuItem();
