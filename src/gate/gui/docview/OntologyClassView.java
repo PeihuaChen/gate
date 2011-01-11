@@ -345,7 +345,7 @@ public class OntologyClassView extends AbstractDocumentView
       }
     }
     for (Annotation annotation :
-        document.getAnnotations(setName).get("Mention")) {
+        document.getAnnotations(setName).get(ANNOTATION_TYPE)) {
       FeatureMap features = annotation.getFeatures();
       if (features.get(ONTOLOGY) != null
        && features.get(CLASS) != null
@@ -705,7 +705,7 @@ public class OntologyClassView extends AbstractDocumentView
       // check for annotations at mouse location
       String setName = (String) setComboBox.getSelectedItem();
       for (Annotation annotation : document.getAnnotations(setName)
-            .get("Mention").get(Math.max(0l, textLocation-1),
+            .get(ANNOTATION_TYPE).get(Math.max(0l, textLocation-1),
               Math.min(document.getContent().size(), textLocation+1))) {
         final FeatureMap features = annotation.getFeatures();
         if (features.get(ONTOLOGY) != null
@@ -780,7 +780,7 @@ public class OntologyClassView extends AbstractDocumentView
       AnnotationSet annotationSet = document.getAnnotations(selectedSet);
       String ontologyName = oClass.getOntology().getDefaultNameSpace();
       ontologyName = ontologyName.substring(0, ontologyName.length()-1);
-      for (Annotation annotation : annotationSet.get("Mention")) {
+      for (Annotation annotation : annotationSet.get(ANNOTATION_TYPE)) {
         FeatureMap features = annotation.getFeatures();
         if (features.get(ONTOLOGY) != null
         && features.get(ONTOLOGY).equals(ontologyName)
@@ -972,7 +972,7 @@ public class OntologyClassView extends AbstractDocumentView
     return selectedSet;
   }
 
-// external resources
+  // external resources
   protected TextualDocumentView textView;
   protected JTextArea textArea;
   protected OntologyInstanceView instanceView;
@@ -1005,10 +1005,13 @@ public class OntologyClassView extends AbstractDocumentView
   protected Timer mouseMovementTimer;
   protected static final int MOUSE_MOVEMENT_TIMER_DELAY = 500;
   protected OptionsMap userConfig = Gate.getUserConfig();
+
+  // constants for annotation feature, annotation type
   protected static final String ONTOLOGY =
     gate.creole.ANNIEConstants.LOOKUP_ONTOLOGY_FEATURE_NAME;
   protected static final String CLASS =
     gate.creole.ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME;
   protected static final String INSTANCE =
     gate.creole.ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME;
+  protected static final String ANNOTATION_TYPE = "Mention";
 }

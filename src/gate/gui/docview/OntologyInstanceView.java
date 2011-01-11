@@ -568,7 +568,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
       features.put(CLASS, selectedClass.getONodeID().toString());
       features.put(INSTANCE, instance.getONodeID().toString());
       // create a new annotation from the text selected
-      id = set.add((long) start, (long) end, "Mention", features);
+      id = set.add((long) start, (long) end, ANNOTATION_TYPE, features);
     } catch(InvalidOffsetException e) {
       throw new LuckyException(e);
     }
@@ -766,7 +766,7 @@ public class OntologyInstanceView extends AbstractDocumentView {
             AnnotationSet annotationSet =
               document.getAnnotations(classView.getSelectedSet());
             for (Annotation annotation :
-              annotationSet.get("Mention")) {
+              annotationSet.get(ANNOTATION_TYPE)) {
               if (annotation.getFeatures().containsKey(ONTOLOGY)
               && annotation.getFeatures().get(ONTOLOGY)
                 .equals(ontology)
@@ -849,10 +849,13 @@ public class OntologyInstanceView extends AbstractDocumentView {
   /** Properties in the instance table for the selected class and filter. */
   protected Set<ObjectProperty> properties;
   protected Map<String, Set<OClass>> classesByPropertyMap;
+
+  // constants for annotation feature, annotation type
   protected static final String ONTOLOGY =
     gate.creole.ANNIEConstants.LOOKUP_ONTOLOGY_FEATURE_NAME;
   protected static final String CLASS =
     gate.creole.ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME;
   protected static final String INSTANCE =
     gate.creole.ANNIEConstants.LOOKUP_INSTANCE_FEATURE_NAME;
+  protected static final String ANNOTATION_TYPE = "Mention";
 }
