@@ -1166,7 +1166,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       
       // shouldn't happen...
       throw new ExecutionException(
-          "Couldn't run controller started action", e);
+          "Couldn't run controller finished action", e);
       }
     }
   }
@@ -1211,7 +1211,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       
       // shouldn't happen...
       throw new ExecutionException(
-          "Couldn't run controller started action", e);
+          "Couldn't run controller aborted action", e);
       }
     }
   }
@@ -1247,6 +1247,18 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 			    throw new GateRuntimeException (e1);
 	  	  }
     }
+  }
+
+  /**
+   * This returns any compiled controller event blocks action class that
+   * may exist at the time of calling or null. This is mainly needed for
+   * alternate implementations of JAPE that are based on the core JAPE
+   * classes and want to support controller event blocks too.
+   *
+   * @return an object that represents the compiled event blocks or null
+   */
+  public ControllerEventBlocksAction getControllerEventBlocksActionClass() {
+    return (ControllerEventBlocksAction)controllerEventBlocksActionClass;
   }
   
   /*
