@@ -135,8 +135,10 @@ public class AnnotationDiffGUI extends JFrame{
   protected void initGUI(){
     getContentPane().setLayout(new GridBagLayout());
     GridBagConstraints constraints = new GridBagConstraints();
+    constraints.fill = GridBagConstraints.HORIZONTAL;
     constraints.anchor = GridBagConstraints.WEST;
     constraints.insets = new Insets(2, 2, 2, 2);
+    constraints.weightx = 1;
 
     /*******************************************
      * First row - Settings and 'Compare' button *
@@ -180,7 +182,9 @@ public class AnnotationDiffGUI extends JFrame{
         return this;
       }
     });
+    constraints.weightx = 3;
     getContentPane().add(keyDocCombo, constraints);
+    constraints.weightx = 1;
     JLabel keySetLabel = new JLabel("Key set:");
     keySetLabel.setToolTipText("Key annotation set");
     getContentPane().add(keySetLabel, constraints);
@@ -252,7 +256,9 @@ public class AnnotationDiffGUI extends JFrame{
         return this;
       }
     });
+    constraints.weightx = 3;
     getContentPane().add(resDocCombo, constraints);
+    constraints.weightx = 1;
     JLabel responseSetLabel = new JLabel("Resp. set:");
     responseSetLabel.setToolTipText("Response annotation set");
     getContentPane().add(responseSetLabel, constraints);
@@ -504,32 +510,38 @@ public class AnnotationDiffGUI extends JFrame{
     constraints2.insets = new Insets(2, 6, 6, 2);
     bottomPanel.add(statusLabel, constraints2);
 
-    // progress bar
-    progressBar = new JProgressBar();
-    progressBar.setMinimumSize(new Dimension(5, 5));
-    progressBar.setBackground(diffTable.getBackground());
-    progressBar.setOpaque(true);
-    progressBar.setVisible(false);
-    bottomPanel.add(progressBar, constraints2);
-
-    // Show Document and Export to HTML buttons
-    constraints2.gridy++;
-    constraints2.gridwidth = 2;
-    constraints2.fill = GridBagConstraints.NONE;
+    // toolbar
+    JToolBar toolbar = new JToolBar();
+    toolbar.setFloatable(false);
     if (!isStandalone) {
       showDocumentAction = new ShowDocumentAction();
       showDocumentAction.setEnabled(false);
       showDocumentBtn = new JButton(showDocumentAction);
       showDocumentBtn.setToolTipText("Use first the \"Compare\"" +
         " button then select an annotation in the table.");
-      bottomPanel.add(showDocumentBtn, constraints2);
+      toolbar.add(showDocumentBtn);
     }
-    constraints2.gridy++;
     htmlExportAction = new HTMLExportAction();
     htmlExportAction.setEnabled(false);
     htmlExportBtn = new JButton(htmlExportAction);
     htmlExportBtn.setToolTipText("Use first the \"Compare\" button.");
-    bottomPanel.add(htmlExportBtn, constraints2);
+    toolbar.add(htmlExportBtn);
+    if (!isStandalone) {
+      toolbar.add(new HelpAction());
+    }
+    constraints2.gridy++;
+    constraints2.fill = GridBagConstraints.NONE;
+    constraints2.anchor = GridBagConstraints.NORTHWEST;
+    bottomPanel.add(toolbar, constraints2);
+
+    // progress bar
+    progressBar = new JProgressBar();
+    progressBar.setMinimumSize(new Dimension(5, 5));
+    progressBar.setBackground(diffTable.getBackground());
+    progressBar.setOpaque(true);
+    constraints2.gridy++;
+    constraints2.anchor = GridBagConstraints.SOUTHWEST;
+    bottomPanel.add(progressBar, constraints2);
 
     // add the bottom panel to the fourth row
     constraints.gridy++;
@@ -597,14 +609,14 @@ public class AnnotationDiffGUI extends JFrame{
         if(!keySetNames.isEmpty()) {
           keySetCombo.setSelectedIndex(0);
           if(resSetCombo.getItemCount() > 0) {
-            // find annotation sets with annotations in common
+            // find first annotation set with annotation type in common
             for(int res = 0; res < resSetCombo.getItemCount(); res++) {
               resSetCombo.setSelectedIndex(res);
               for(int key = 0; key < keySetCombo.getItemCount(); key++) {
                 if (keyDoc.equals(resDoc)
                  && resSetCombo.getItemAt(res).equals(
                     keySetCombo.getItemAt(key))) {
-                  continue;
+                  continue; // same document, skip it
                 }
                 keySetCombo.setSelectedIndex(key);
                 if (annTypeCombo.getSelectedItem() != null) { break; }
@@ -612,12 +624,12 @@ public class AnnotationDiffGUI extends JFrame{
               if (annTypeCombo.getSelectedItem() != null) { break; }
             }
             if (annTypeCombo.getSelectedItem() == null) {
-              statusLabel.setText("There is no annotations in common.");
+              statusLabel.setText("There is no annotation type in common.");
               statusLabel.setForeground(Color.RED);
             } else if (statusLabel.getText().equals(
-              "There is no annotations in common.")) {
+                "There is no annotation type in common.")) {
               statusLabel.setText("The first annotation sets with" +
-                " annotations in common have been automatically selected.");
+                " annotation type in common have been automatically selected.");
               statusLabel.setForeground(Color.BLACK);
             }
           }
@@ -1033,8 +1045,6 @@ public class AnnotationDiffGUI extends JFrame{
 
       // waiting animations
       progressBar.setIndeterminate(true);
-      statusLabel.setVisible(false);
-      progressBar.setVisible(true);
       getContentPane().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
       // compute the differences
@@ -1121,8 +1131,6 @@ public class AnnotationDiffGUI extends JFrame{
         diffTable.requestFocusInWindow();
         // stop waiting animations
         progressBar.setIndeterminate(false);
-        progressBar.setVisible(false);
-        statusLabel.setVisible(true);
         getContentPane().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         showDocumentAction.setEnabled(false);
 
@@ -1244,7 +1252,6 @@ public class AnnotationDiffGUI extends JFrame{
 
   protected class HTMLExportAction extends AbstractAction{
     public HTMLExportAction(){
-      super("Export to HTML");
       putValue(SHORT_DESCRIPTION, "Export the results to HTML");
       putValue(SMALL_ICON,
         MainFrame.getIcon("crystal-clear-app-download-manager"));
@@ -1351,7 +1358,6 @@ public class AnnotationDiffGUI extends JFrame{
 
   protected class ShowDocumentAction extends AbstractAction{
     public ShowDocumentAction(){
-      super("Show document");
       putValue(SHORT_DESCRIPTION,
         "Show the selected annotation in the document editor.");
       putValue(SMALL_ICON, MainFrame.getIcon("document"));
@@ -1436,6 +1442,19 @@ public class AnnotationDiffGUI extends JFrame{
       } catch (gate.util.GateException e) {
         e.printStackTrace();
       }
+    }
+  }
+
+  protected class HelpAction extends AbstractAction {
+    public HelpAction() {
+      super();
+      putValue(SHORT_DESCRIPTION, "User guide for this tool");
+      putValue(SMALL_ICON, MainFrame.getIcon("crystal-clear-action-info"));
+      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("F1"));
+    }
+    public void actionPerformed(ActionEvent e) {
+      MainFrame.getInstance().showHelpFrame(
+        "sec:eval:annotationdiff", AnnotationDiffGUI.class.getName());
     }
   }
 
@@ -1534,8 +1553,11 @@ public class AnnotationDiffGUI extends JFrame{
           ((JCheckBox)component).setSelected(keyCopyValueRows.get(rowModel));
           break;
         case DiffTableModel.COL_MATCH: tip =
-          "correct =, partially correct ~, missing -?, false positives ?-," +
-          " mismatch <>";
+          value.equals("=")  ? "correct" :
+          value.equals("~")  ? "partially correct" :
+          value.equals("-?") ? "missing" :
+          value.equals("?-") ? "false positives" :
+          value.equals("<>") ? "mismatch" : "";
           break;
         case DiffTableModel.COL_RES_COPY:
           tip = (pairing.getResponse() == null) ?
@@ -1936,46 +1958,46 @@ public class AnnotationDiffGUI extends JFrame{
     protected static final int COL_RES_FEATURES = 10;
   } // protected class DiffTableModel extends AbstractTableModel
 
+  // Local objects
   protected AnnotationDiffer differ;
   protected List<AnnotationDiffer.Pairing> pairings;
   protected List<Boolean> keyCopyValueRows;
   protected List<Boolean> resCopyValueRows;
+  protected List<Resource> documents;
   protected Document keyDoc;
   protected Document resDoc;
-  protected Set<String> significantFeatures;
-  protected List<Resource> documents;
   protected List<AnnotationSet> keySets;
   protected List<AnnotationSet> resSets;
   protected AnnotationSet keySet;
   protected AnnotationSet resSet;
-  protected HTMLExportAction htmlExportAction;
+  protected Set<String> significantFeatures;
+
+  // Actions
   protected DiffAction diffAction;
   protected CopyToTargetSetAction copyToTargetSetAction;
+  protected HTMLExportAction htmlExportAction;
   protected ShowDocumentAction showDocumentAction;
 
-  protected JList featuresList;
-  protected DefaultListModel featureslistModel;
-  protected DiffTableModel diffTableModel;
-  protected XJTable diffTable;
-  protected JScrollPane scroller;
+  // Top part of the UI from left to right
   protected JComboBox keyDocCombo;
-  protected JComboBox keySetCombo;
-  protected JComboBox annTypeCombo;
   protected JComboBox resDocCombo;
+  protected JComboBox keySetCombo;
   protected JComboBox resSetCombo;
-  protected JLabel statusLabel;
-  protected JProgressBar progressBar;
-
+  protected JComboBox annTypeCombo;
+  protected DefaultListModel featureslistModel;
+  protected JList featuresList;
   protected JRadioButton allFeaturesBtn;
   protected JRadioButton someFeaturesBtn;
   protected JRadioButton noFeaturesBtn;
   protected JTextField weightTxt;
   protected JButton doDiffBtn;
-  protected JTextField consensusASTextField;
-  protected JButton copyToConsensusBtn;
-  protected JButton htmlExportBtn;
-  protected JButton showDocumentBtn;
 
+  // Center part of the UI
+  protected JScrollPane scroller;
+  protected DiffTableModel diffTableModel;
+  protected XJTable diffTable;
+
+  // Bottom part of the UI
   protected JTabbedPane bottomTabbedPane;
   protected JPanel statisticsPane;
   protected JLabel correctLbl;
@@ -1991,7 +2013,14 @@ public class AnnotationDiffGUI extends JFrame{
   protected JLabel recallAveLbl;
   protected JLabel precisionAveLbl;
   protected JLabel fmeasureAveLbl;
+  protected JTextField consensusASTextField;
+  protected JButton copyToConsensusBtn;
+  protected JLabel statusLabel;
+  protected JButton htmlExportBtn;
+  protected JButton showDocumentBtn;
+  protected JProgressBar progressBar;
 
+  // Constants
   protected static final Color PARTIALLY_CORRECT_BG = new Color(173,215,255);
   protected static final Color MISSING_BG = new Color(255,173,181);
   protected static final Color FALSE_POSITIVE_BG = new Color(255,231,173);
