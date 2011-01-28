@@ -115,7 +115,7 @@ public class TestPR extends TestCase
     //run the tokeniser for doc3
     tokeniser.setDocument(doc3);
     tokeniser.execute();
-    
+
     tokeniser.setDocument(doc4);
     tokeniser.execute();
 
@@ -136,8 +136,8 @@ public class TestPR extends TestCase
     // assertions for doc 3
     assertTrue("Found in "+ doc3.getSourceUrl().getFile()+ " "+
       doc3.getAnnotations().size() +
-      " Token annotations, instead of the expected 2806.",
-      doc3.getAnnotations().size()== 2806);
+      " Token annotations, instead of the expected 2807.",
+      doc3.getAnnotations().size()== 2807);
 
   }// testTokenizer
 
@@ -149,19 +149,19 @@ public class TestPR extends TestCase
     //run gazetteer for doc1
     gaz.setDocument(doc1);
     gaz.execute();
-    
+
     //run gazetteer for doc2
     gaz.setDocument(doc2);
     gaz.execute();
-    
+
     //run gazetteer for doc3
     gaz.setDocument(doc3);
     gaz.execute();
-    
+
     //run gazetteer for doc3
     gaz.setDocument(doc4);
     gaz.execute();
-    
+
 
     Factory.deleteResource(gaz);
 
@@ -169,28 +169,28 @@ public class TestPR extends TestCase
 //      doc1.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size() +
 //      " Lookup annotations, instead of the expected 60.",
 //      doc1.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size()== 60);
-    assertEquals("Wrong number of annotations produced in " +  
-            doc1.getSourceUrl().getFile(), 
-            57, 
+    assertEquals("Wrong number of annotations produced in " +
+            doc1.getSourceUrl().getFile(),
+            57,
             doc1.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size());
-    
+
 //    assertTrue("Found in "+ doc2.getSourceUrl().getFile()+ " "+
 //      doc2.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size() +
 //      " Lookup annotations, instead of the expected 134.",
 //      doc2.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size()== 134);
-    assertEquals("Wrong number of annotations produced in " +  
-            doc2.getSourceUrl().getFile(), 
-            127, 
+    assertEquals("Wrong number of annotations produced in " +
+            doc2.getSourceUrl().getFile(),
+            127,
             doc2.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size());
-    
+
 //    assertTrue("Found in "+ doc3.getSourceUrl().getFile()+ " "+
 //      doc3.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size() +
 //      " Lookup annotations, instead of the expected 144.",
 //      doc3.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size()== 144);
-    assertEquals("Wrong number of annotations produced in " +  
-            doc3.getSourceUrl().getFile(), 
-            139, 
-            doc3.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size());    
+    assertEquals("Wrong number of annotations produced in " +
+            doc3.getSourceUrl().getFile(),
+            139,
+            doc3.getAnnotations().get(ANNIEConstants.LOOKUP_ANNOTATION_TYPE).size());
   }//testGazetteer
 
   public void testSplitter() throws Exception {
@@ -213,8 +213,8 @@ public class TestPR extends TestCase
     //run splitter for doc3
     splitter.setDocument(doc4);
     splitter.execute();
-    
-    
+
+
     Factory.deleteResource(splitter);
 
     // assertions for doc 1
@@ -268,7 +268,7 @@ public class TestPR extends TestCase
     //run the tagger for doc3
     tagger.setDocument(doc3);
     tagger.execute();
-    
+
     //run the tagger for doc3
     tagger.setDocument(doc4);
     tagger.execute();
@@ -277,7 +277,7 @@ public class TestPR extends TestCase
 
     HashSet<String> fType = new HashSet<String>();
     fType.add(ANNIEConstants.TOKEN_CATEGORY_FEATURE_NAME);
-    
+
     // assertions for doc 1
     AnnotationSet annots =
       doc1.getAnnotations().get(ANNIEConstants.TOKEN_ANNOTATION_TYPE, fType);
@@ -295,8 +295,8 @@ public class TestPR extends TestCase
     // assertions for doc 3
     annots = doc3.getAnnotations().get(ANNIEConstants.TOKEN_ANNOTATION_TYPE, fType);
     assertTrue("Found in "+ doc3.getSourceUrl().getFile()+ " "+ annots.size() +
-      " Token annotations with category feature, instead of the expected 1446.",
-      annots.size() == 1446);
+      " Token annotations with category feature, instead of the expected 1447.",
+      annots.size() == 1447);
   }//testTagger()
 
   public void testTransducer() throws Exception {
@@ -315,7 +315,7 @@ public class TestPR extends TestCase
     //run the transducer for doc3
     transducer.setDocument(doc3);
     transducer.execute();
-    
+
     //run the transducer for doc3
     transducer.setDocument(doc4);
     transducer.execute();
@@ -387,8 +387,8 @@ public class TestPR extends TestCase
       doc3.getAnnotations().get(ANNIEConstants.MONEY_ANNOTATION_TYPE).size() +
       " Money annotations, instead of the expected 4",
       doc3.getAnnotations().get(ANNIEConstants.MONEY_ANNOTATION_TYPE).size()== 4);
-    
-    assertEquals("Wrong number of Person annotations in OrthoMatcher test document",22, 
+
+    assertEquals("Wrong number of Person annotations in OrthoMatcher test document",22,
             doc4.getAnnotations().get(ANNIEConstants.PERSON_ANNOTATION_TYPE).size());
   }//testTransducer
 
@@ -438,7 +438,7 @@ public class TestPR extends TestCase
     //run the orthomatcher for doc3
     orthomatcher.setDocument(doc3);
     orthomatcher.execute();
-    
+
     //run the orthomatcher for doc3
     orthomatcher.setDocument(doc4);
     orthomatcher.execute();
@@ -450,37 +450,37 @@ public class TestPR extends TestCase
     AnnotationSet annots =
                   doc1.getAnnotations().get(null,fType);
 
-//    assertEquals("Wrong number of annotations with matches feature", 
+//    assertEquals("Wrong number of annotations with matches feature",
 //            17, annots.size());
 
     annots = doc2.getAnnotations().get(null,fType);
-//    assertEquals("Wrong number of annotations with matches feature", 
+//    assertEquals("Wrong number of annotations with matches feature",
 //            31, annots.size());
 
     annots = doc3.getAnnotations().get(null,fType);
 //    assertTrue("Found in "+doc3.getSourceUrl().getFile()+ " "+ annots.size() +
 //      " annotations with matches feature, instead of the expected 39.",
 //      annots.size() == 39);
-    
+
     AnnotationSet personAnnots = doc4.getAnnotations().get("Person");
     Annotation sarahAnnot = personAnnots.get(new Long(806), new Long(811)).iterator().next();
-    assertEquals("Wrong number of matches for second Sarah in document", 2, 
+    assertEquals("Wrong number of matches for second Sarah in document", 2,
             ((java.util.ArrayList) sarahAnnot.getFeatures().get("matches")).size());
-    
+
     Annotation robertQJones = personAnnots.get(new Long(300), new Long(315)).iterator().next();
-    assertEquals("Wrong number of matches for Robert Q Jones in document", 3, 
-            ((java.util.ArrayList) robertQJones.getFeatures().get("matches")).size());  
-    
+    assertEquals("Wrong number of matches for Robert Q Jones in document", 3,
+            ((java.util.ArrayList) robertQJones.getFeatures().get("matches")).size());
+
     Annotation robertCJones = personAnnots.get(new Long(0), new Long(15)).iterator().next();
-    assertEquals("Wrong number of matches for Robert C Jones in document", 3, 
-            ((java.util.ArrayList) robertCJones.getFeatures().get("matches")).size()); 
-    
+    assertEquals("Wrong number of matches for Robert C Jones in document", 3,
+            ((java.util.ArrayList) robertCJones.getFeatures().get("matches")).size());
+
     Annotation robertAnderson = personAnnots.get(new Long(1188), new Long(1203)).iterator().next();
     assertEquals("Found a match for Robert Anderson, but he should not have been matched.", false,
-            robertAnderson.getFeatures().containsKey("matches")); 
-    
-    
-    
+            robertAnderson.getFeatures().containsKey("matches"));
+
+
+
   }//testOrthomatcher
 
   /** A test for comparing the annotation sets*/
