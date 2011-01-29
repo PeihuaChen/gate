@@ -583,17 +583,20 @@ public class PackageGappTask extends Task {
         dest.mkdirs();
       }
       else {
-        // source URL points to a file, so copy the file but first
+        // source URL doesn't point to a directory, so
         // ensure parent directory exists
         dest.getParentFile().mkdirs();
-        try {
-          log("Copying " + source + " to " + dest, Project.MSG_VERBOSE);
-          FileUtils.getFileUtils().copyFile(source, dest);
-        }
-        catch(IOException e) {
-          throw new BuildException(
-                  "Error copying file " + source + " to " + dest, e,
-                  getLocation());
+        if(source.isFile()) {
+          // source URL points to an existing file, copy it
+          try {
+            log("Copying " + source + " to " + dest, Project.MSG_VERBOSE);
+            FileUtils.getFileUtils().copyFile(source, dest);
+          }
+          catch(IOException e) {
+            throw new BuildException(
+                    "Error copying file " + source + " to " + dest, e,
+                    getLocation());
+          }
         }
       }
     }
@@ -645,6 +648,9 @@ public class PackageGappTask extends Task {
   private void copyDirectories(Map<URL, URL> copyMap, boolean minimalPlugin) {
     for(Map.Entry<URL, URL> copyEntry : copyMap.entrySet()) {
       File source = Files.fileFromURL(copyEntry.getKey());
+      if(!source.exists()) {
+        return;
+      }
       File dest = Files.fileFromURL(copyEntry.getValue());
       // set up a copy task to do the copying
       Copy copyTask = new Copy();
