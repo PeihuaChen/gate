@@ -188,36 +188,6 @@ public class DefaultGazetteer extends AbstractGazetteer
    * @param lookup the description of the annotation to be added when this
    *     phrase is recognised
    */
-// >>> DAM, was
-/*
-  public void addLookup(String text, Lookup lookup) {
-    Character currentChar;
-    FSMState currentState = initialState;
-    FSMState nextState;
-    Lookup oldLookup;
-    boolean isSpace;
-
-    for(int i = 0; i< text.length(); i++) {
-      isSpace = Character.isWhitespace(text.charAt(i));
-      if(isSpace) currentChar = new Character(' ');
-      else currentChar = (caseSensitive.booleanValue()) ?
-                          new Character(text.charAt(i)) :
-                          new Character(Character.toUpperCase(text.charAt(i))) ;
-      nextState = currentState.next(currentChar);
-      if(nextState == null){
-        nextState = new FSMState(this);
-        currentState.put(currentChar, nextState);
-        if(isSpace) nextState.put(new Character(' '),nextState);
-      }
-      currentState = nextState;
-    } //for(int i = 0; i< text.length(); i++)
-
-    currentState.addLookup(lookup);
-    //Out.println(text + "|" + lookup.majorType + "|" + lookup.minorType);
-
-  } // addLookup
-*/
-// >>> DAM: TransArray optimization
   public void addLookup(String text, Lookup lookup) {
     char currentChar;
     FSMState currentState = initialState;
@@ -245,34 +215,12 @@ public class DefaultGazetteer extends AbstractGazetteer
     //Out.println(text + "|" + lookup.majorType + "|" + lookup.minorType);
 
   } // addLookup
-// >>> DAM, end
 
   /** Removes one phrase to the list of phrases recognised by this gazetteer
    *
    * @param text the phrase to be removed
    * @param lookup the description of the annotation associated to this phrase
    */
-// >>> DAM, was
-/*
-  public void removeLookup(String text, Lookup lookup) {
-    Character currentChar;
-    FSMState currentState = initialState;
-    FSMState nextState;
-    Lookup oldLookup;
-    boolean isSpace;
-
-    for(int i = 0; i< text.length(); i++) {
-      isSpace = Character.isWhitespace(text.charAt(i));
-      if(isSpace) currentChar = new Character(' ');
-      else currentChar = new Character(text.charAt(i));
-      nextState = currentState.next(currentChar);
-      if(nextState == null) return;//nothing to remove
-      currentState = nextState;
-    } //for(int i = 0; i< text.length(); i++)
-    currentState.removeLookup(lookup);
-  } // removeLookup
-*/
-// >>> DAM: TransArray optimization
   public void removeLookup(String text, Lookup lookup) {
     char currentChar;
     FSMState currentState = initialState;
@@ -288,36 +236,28 @@ public class DefaultGazetteer extends AbstractGazetteer
     } //for(int i = 0; i< text.length(); i++)
     currentState.removeLookup(lookup);
   } // removeLookup
-// >>> DAM, end
 
   /** Returns a string representation of the deterministic FSM graph using
    * GML.
    */
   public String getFSMgml() {
     String res = "graph[ \ndirected 1\n";
-    ///String nodes = "", edges = "";
     StringBuffer nodes = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE),
                 edges = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
     Iterator fsmStatesIter = fsmStates.iterator();
     while (fsmStatesIter.hasNext()){
       FSMState currentState = (FSMState)fsmStatesIter.next();
       int stateIndex = currentState.getIndex();
-      /*nodes += "node[ id " + stateIndex +
-               " label \"" + stateIndex;
-      */
       nodes.append("node[ id ");
       nodes.append(stateIndex);
       nodes.append(" label \"");
       nodes.append(stateIndex);
 
              if(currentState.isFinal()){
-              ///nodes += ",F\\n" + currentState.getLookupSet();
               nodes.append(",F\\n");
               nodes.append(currentState.getLookupSet());
              }
-             ///nodes +=  "\"  ]\n";
              nodes.append("\"  ]\n");
-      //edges += currentState.getEdgesGML();
       edges.append(currentState.getEdgesGML());
     }
     res += nodes.toString() + edges.toString() + "]\n";
@@ -358,13 +298,7 @@ public class DefaultGazetteer extends AbstractGazetteer
     fireStatusChanged("Performing look-up in " + document.getName() + "...");
     String content = document.getContent().toString();
     int length = content.length();
-// >>> DAM, was
-/*
-    Character currentChar;
-*/
-// >>> DAM: TransArray optimization
     char currentChar;
-// >>> DAM, end
     FSMState currentState = initialState;
     FSMState nextState;
     FSMState lastMatchingState = null;
@@ -375,24 +309,12 @@ public class DefaultGazetteer extends AbstractGazetteer
     FeatureMap fm;
     Lookup currentLookup;
 
-// >>> DAM, was
-/*
-    while(charIdx < length) {
-      if(Character.isWhitespace(content.charAt(charIdx)))
-        currentChar = new Character(' ');
-      else currentChar = (caseSensitive.booleanValue()) ?
-                         new Character(content.charAt(charIdx)) :
-                         new Character(Character.toUpperCase(
-                                       content.charAt(charIdx)));
-*/
-// >>> DAM: TransArray optimization
     while(charIdx < length) {
       currentChar = content.charAt(charIdx);
       if(Character.isWhitespace(currentChar)) currentChar = ' ';
       else currentChar = caseSensitive.booleanValue() ?
                           currentChar :
                           Character.toUpperCase(currentChar);
-// >>> DAM, end
       nextState = currentState.next(currentChar);
       if(nextState == null) {
         //the matching stopped
@@ -573,8 +495,6 @@ public class DefaultGazetteer extends AbstractGazetteer
   }
 
 
-
-  //>>> DAM: TransArray optimization, new CharMap implementation
   public static interface Iter
   {
       public boolean hasNext();
@@ -641,19 +561,6 @@ public class DefaultGazetteer extends AbstractGazetteer
           }
           return itemsObjs[index];
       } // put
-  /**
-   * the keys itereator
-   * /
-      public Iter iter()
-      {
-          return new Iter()
-          {
-              int counter = 0;
-              public boolean hasNext() {return counter < itemsKeys.length;}
-              public char next() { return itemsKeys[counter];}
-          };
-      } // iter()
-   */
 
   }// class CharMap
 
