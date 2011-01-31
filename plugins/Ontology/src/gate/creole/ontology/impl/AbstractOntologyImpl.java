@@ -2139,7 +2139,7 @@ public abstract class AbstractOntologyImpl
 
   @Override
   public void setDataStore(DataStore dataStore) throws PersistenceException {
-    throw new GateRuntimeException("This ontology LR cannot be saved to a datastore");
+    throw new PersistenceException("This ontology LR cannot be saved to a datastore");
   } // setDataStore(DS)
 
 
