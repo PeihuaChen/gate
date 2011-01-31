@@ -69,7 +69,7 @@ public class OWLIMOntology
   protected Boolean isPersistent = false;
 
   @Optional
-  @CreoleParameter(comment="",disjunction="url")
+  @CreoleParameter(comment="",disjunction="url",priority=1)
   public void setRdfXmlURL(URL theURL) {
     rdfXmlURL = theURL;
   }
@@ -79,7 +79,7 @@ public class OWLIMOntology
   protected URL rdfXmlURL;
 
   @Optional
-  @CreoleParameter(comment="",disjunction="url")
+  @CreoleParameter(comment="",disjunction="url",priority=2)
   public void setN3URL(URL theURL) {
     n3URL = theURL;
   }
@@ -89,7 +89,7 @@ public class OWLIMOntology
   protected URL n3URL;
 
   @Optional
-  @CreoleParameter(comment="",disjunction="url")
+  @CreoleParameter(comment="",disjunction="url",priority=3)
   public void setNtriplesURL(URL theURL) {
     ntriplesURL = theURL;
   }
@@ -99,7 +99,7 @@ public class OWLIMOntology
   protected URL ntriplesURL;
 
   @Optional
-  @CreoleParameter(comment="",disjunction="url")
+  @CreoleParameter(comment="",disjunction="url",priority=4)
   public void setTurtleURL(URL theURL) {
     turtleURL = theURL;
   }

@@ -308,7 +308,8 @@ public class Transducer
   @CreoleParameter(
     comment = "The URL to the grammar file.",
     suffixes = "jape",
-    disjunction = "grammar"
+    disjunction = "grammar",
+    priority = 1
   )
   public void setGrammarURL(java.net.URL newGrammarURL) {
     grammarURL = newGrammarURL;
@@ -545,7 +546,8 @@ public class Transducer
   @CreoleParameter(
     comment = "The URL to the binary grammar file.",
     suffixes = "jape",
-    disjunction = "grammar"
+    disjunction = "grammar",
+    priority = 100
   )
   public void setBinaryGrammarURL(java.net.URL binaryGrammarURL) {
     this.binaryGrammarURL = binaryGrammarURL;

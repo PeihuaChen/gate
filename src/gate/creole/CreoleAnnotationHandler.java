@@ -53,7 +53,7 @@ import org.jdom.Element;
 public class CreoleAnnotationHandler {
 
   private URL creoleFileUrl;
-
+  
   /**
    * Create an annotation handler for the given creole.xml file.
    *
@@ -425,6 +425,8 @@ public class CreoleAnnotationHandler {
             addAttribute(paramElt, paramAnnot.suffixes(), "", "SUFFIXES");
             addAttribute(paramElt, paramAnnot.defaultValue(),
                     CreoleParameter.NO_DEFAULT_VALUE, "DEFAULT");
+            addAttribute(paramElt, String.valueOf(paramAnnot.priority()),
+                    String.valueOf(CreoleParameter.DEFAULT_PRIORITY), "PRIORITY");
 
             // runtime and optional are based on marker annotations
             String runtimeParam = "";
