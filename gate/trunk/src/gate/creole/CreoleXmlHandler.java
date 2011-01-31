@@ -49,8 +49,23 @@ public class CreoleXmlHandler extends DefaultHandler {
   /** The current parameter list */
   private ParameterList currentParamList = new ParameterList();
 
-  /** The current parameter disjunction */
-  private List currentParamDisjunction = new ArrayList();
+  /**
+   * The current parameter disjunction.  This is a map where each key
+   * is a "priority" and the value is a list of parameters tagged with
+   * that priority.  This map is flattened into a single list when
+   * all the parameters in a single disjunction have been processed,
+   * such that parameters with a smaller priority value are listed
+   * ahead of those with a larger value, and those with no explicit
+   * priority are listed last of all.  Parameters at the same priority
+   * are listed in document order.  This is not so useful when writing
+   * creole.xml files by hand but is necessary to ensure a predictable
+   * order when using CreoleParameter annotations.  The GATE developer
+   * GUI offers the first listed (i.e. highest priority) parameter for
+   * each disjunction as the default option in the resource parameters
+   * dialog box. 
+   */
+  private SortedMap<Integer, List<Parameter>> currentParamDisjunction =
+    new TreeMap<Integer, List<Parameter>>();
 
   /** The current parameter */
   private Parameter currentParam;
@@ -242,8 +257,8 @@ public class CreoleXmlHandler extends DefaultHandler {
     // (note that they're not disjunctive or previous "/OR" would have got 'em)
     if(elementName.toUpperCase().equals("OR")) {
       if(! currentParamDisjunction.isEmpty()) {
-        currentParamList.addAll(currentParamDisjunction);
-        currentParamDisjunction = new ArrayList();
+        currentParamList.addAll(currentFlattenedDisjunction());
+        currentParamDisjunction.clear();
       }// End if
     }// End if
   } // startElement()
@@ -302,8 +317,8 @@ public class CreoleXmlHandler extends DefaultHandler {
       // if there are any parameters awaiting addition to the list, add them
       // (note that they're not disjunctive or the "/OR" would have got them)
       if(! currentParamDisjunction.isEmpty()) {
-        currentParamList.addAll(currentParamDisjunction);
-        currentParamDisjunction = new ArrayList();
+        currentParamList.addAll(currentFlattenedDisjunction());
+        currentParamDisjunction.clear();
       }// End if
 
       // add the parameter list to the resource (and reinitialise it)
@@ -418,14 +433,31 @@ public class CreoleXmlHandler extends DefaultHandler {
     // End ICON processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("OR")) {
-      currentParamList.add(currentParamDisjunction);
-      currentParamDisjunction = new ArrayList();
+      currentParamList.add(currentFlattenedDisjunction());
+      currentParamDisjunction.clear();
     // End OR processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("PARAMETER")) {
       checkStack("endElement", "PARAMETER");
       currentParam.typeName = (String) contentStack.pop();
-      currentParamDisjunction.add(currentParam);
+      String priorityStr = currentAttributes.getValue("PRIORITY");
+      // if no priority specified, assume lowest (i.e. parameters with an
+      // explicit priority come ahead of those without).
+      Integer priority = Integer.MAX_VALUE;
+      try {
+        if(priorityStr != null) priority = Integer.valueOf(priorityStr);
+      }
+      catch(NumberFormatException nfe) {
+        throw new GateRuntimeException ("Found in creole.xml a PARAM element" +
+                " for resource "+ resourceData.getClassName()+ " with a non-numeric"+
+                " PRIORITY attribute. Check the file and try again.");
+      }
+      List<Parameter> paramList = currentParamDisjunction.get(priority);
+      if(paramList == null) {
+        paramList = new ArrayList<Parameter>();
+        currentParamDisjunction.put(priority, paramList);
+      }
+      paramList.add(currentParam);
       if(DEBUG)
         Out.prln("added param: " + currentParam);
       currentParam = new Parameter(creoleFileUrl);
@@ -511,6 +543,18 @@ public class CreoleXmlHandler extends DefaultHandler {
     contentStack.push(content);
     if(DEBUG) Out.println(content);
   } // characters
+  
+  /**
+   * Flatten the currentParamDisjunction map into a single list
+   * ordered by priority.
+   */
+  protected List<Parameter> currentFlattenedDisjunction() {
+    List<Parameter> listToReturn = new ArrayList<Parameter>();
+    for(List<Parameter> l : currentParamDisjunction.values()) {
+      listToReturn.addAll(l);
+    }
+    return listToReturn;
+  }
 
   /** Called when the SAX parser encounts white space */
   public void ignorableWhitespace(char ch[], int start, int length)

@@ -62,7 +62,7 @@ public class OWLIMOntologyLR
   }
 
   @Optional
-  @CreoleParameter(comment="",disjunction="url")
+  @CreoleParameter(comment="",disjunction="url",priority=1)
   @Override
   public void setRdfXmlURL(URL theURL) {
     rdfXmlURL = theURL;
@@ -72,7 +72,7 @@ public class OWLIMOntologyLR
   }
 
   @Optional
-  @CreoleParameter(comment="",disjunction="url")
+  @CreoleParameter(comment="",disjunction="url",priority=2)
   @Override
   public void setN3URL(URL theURL) {
     n3URL = theURL;
@@ -83,7 +83,7 @@ public class OWLIMOntologyLR
   }
 
   @Optional
-  @CreoleParameter(comment="",disjunction="url")
+  @CreoleParameter(comment="",disjunction="url",priority=3)
   @Override
   public void setNtriplesURL(URL theURL) {
     ntriplesURL = theURL;
@@ -94,7 +94,7 @@ public class OWLIMOntologyLR
   }
 
   @Optional
-  @CreoleParameter(comment="",disjunction="url")
+  @CreoleParameter(comment="",disjunction="url",priority=4)
   @Override
   public void setTurtleURL(URL theURL) {
     turtleURL = theURL;

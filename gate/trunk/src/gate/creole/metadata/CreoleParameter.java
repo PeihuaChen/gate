@@ -57,7 +57,13 @@ public @interface CreoleParameter {
    * parameter.
    */
   public static final String NO_DEFAULT_VALUE = "____NO_DEFAULT____";
-
+  
+  /**
+   * The default priority value assumed if no explicit priority
+   * is set.
+   */
+  public static final int DEFAULT_PRIORITY = Integer.MAX_VALUE;
+  
   /**
    * The item class name for parameters whose type is a Collection, Set
    * or List. When annotating a field or get method with a parameterised type
@@ -96,4 +102,20 @@ public @interface CreoleParameter {
    * be considered as part of a disjunction.
    */
   String disjunction() default "";
+  
+  /**
+   * If this parameter is part of a disjunction, the order in which
+   * the disjunctive parameters are listed is determined by their
+   * priority values.  Parameters with smaller priority values are
+   * considered "more important" than those with larger values (i.e.
+   * 1 is higher priority than 10).  When creating a new resource
+   * instance in GATE Developer, the parameters dialog offers the
+   * parameters in each disjunction in priority order, so you should
+   * assign priorities to your parameters such that the most important
+   * parameter in each disjunction is the most frequent use case.  For
+   * example, in a JAPE transducer the grammarURL parameter (for
+   * loading a .jape file) is considered more important than the
+   * binaryGrammarURL (for loading a serialized transducer).
+   */
+  int priority() default Integer.MAX_VALUE;
 }
