@@ -13,6 +13,7 @@
  */
 package gate.creole.ontology.impl;
 
+import gate.DataStore;
 import gate.Gate;
 import java.io.File;
 import java.io.IOException;
@@ -60,6 +61,7 @@ import gate.creole.ontology.RDFProperty;
 import gate.creole.ontology.SomeValuesFromRestriction;
 import gate.creole.ontology.SymmetricProperty;
 import gate.creole.ontology.TransitiveProperty;
+import gate.persist.PersistenceException;
 import gate.util.ClosableIterator;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -2134,5 +2136,11 @@ public abstract class AbstractOntologyImpl
       throw new GateOntologyException("More than one ontology URI found: "+uris);
     }
   }
+
+  @Override
+  public void setDataStore(DataStore dataStore) throws PersistenceException {
+    throw new GateRuntimeException("This ontology LR cannot be saved to a datastore");
+  } // setDataStore(DS)
+
 
 }
