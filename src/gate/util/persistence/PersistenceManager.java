@@ -849,7 +849,9 @@ public class PersistenceManager {
     } finally {
       if(fileReader != null) fileReader.close();
     }
-
+    if(firstLine == null) {
+      return false;
+    }
     for(String startOfXml : STARTOFXMLAPPLICATIONFILES) {
       if(firstLine.length() >= startOfXml.length()
               && firstLine.substring(0, startOfXml.length()).equals(startOfXml)) {
