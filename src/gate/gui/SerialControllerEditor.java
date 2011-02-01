@@ -1024,7 +1024,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     if(Gate.getHiddenAttribute(e.getResource().getFeatures())) return;
     if(e.getResource() instanceof ProcessingResource){
       ProcessingResource pr = (ProcessingResource)e.getResource();
-      if(controller.getPRs().contains(pr)){
+      if(controller != null && controller.getPRs().contains(pr)){
         controller.remove(pr);
       }
       loadedPRsTableModel.fireTableDataChanged();
