@@ -1,18 +1,11 @@
 MetaMap 
 =================================
 
-MetaMap, from the National Library of Medicine (NLM), maps biomedical text to 
-the UMLS Metathesaurus and allows Metathesaurus concepts to be discovered in a 
-text corpus.
+MetaMap, from the National Library of Medicine (NLM), maps biomedical text to the UMLS Metathesaurus and allows Metathesaurus concepts to be discovered in a text corpus.
 
-The MetaMap plugin for GATE wraps the MetaMap Java API client to allow GATE to 
-communicate with a remote (or local) MetaMap PrologBeans mmserver and MetaMap 
-distribution. This allows the content of specified annotations (or the entire 
-document content) to be processed by MetaMap and the results converted to GATE 
-annotations and features.
+The MetaMap plugin for GATE wraps the MetaMap Java API client to allow GATE to communicate with a remote (or local) MetaMap PrologBeans mmserver10 and MetaMap distribution. This allows the content of specified annotations (or the entire document content) to be processed by MetaMap and the results converted to GATE annotations and features.
 
-To use this plugin, you will need access to a remote MetaMap server, or install 
-one locally by downloading and installing the complete distribution:
+To use this plugin, you will need access to a remote MetaMap server, or install one locally by downloading and installing the complete distribution:
 
 http://metamap.nlm.nih.gov/
 
@@ -20,74 +13,39 @@ and Java PrologBeans mmserver
 
 http://metamap.nlm.nih.gov/README_javaapi.html
 
+The default mmserver10 location and port locations are localhost and 8066. To use a different server location and/or port, see the above API documentation and specify the --metamap_server_host and --metamap_server_port options within the metaMapOptions run-time parameter.
 
 
 Parameters
 ==========
 
- - Initialisation-time
----------------------------
-
-excludeSemanticTypes: list of MetaMap semantic types that should be excluded 
-from the final output annotation set. Useful for reducing the number of generic 
-annotations output (e.g. for qualitative and temporal concepts).
-
-restrictSemanticTypes: list of MetaMap semantic types that should be the only 
-types from which output annotations are created. E.g. if bpoc (Body Part Organ 
-or Organ Component) is specified here, only MetaMap matches of these concepts 
-will result in GATE annotations being created for these matches, and no others. 
-Overrides the excludeSemanticTypes parameter.
-
-mmServerHost: name or IP address of the server on which the MetaMap terminology 
-server (skrmedpostctl), disambiguation server (wsdserverctl) and API 
-PrologServer (mmserver09) are running. Default is localhost.
-
-NB: all three need to be on the same server, unless you wish to recompile 
-mmserver09 from source and add functionality to point to different terminology 
-and word-sense disambiguation server locations.
-
-mmServerPort: port number of the mmserver09 PrologServer running on 
-mmServerHost. Default is 8066
-
-mmServerTimeout: milliseconds to wait for PrologServer. Default is 150000
-
-outputASType: output annotation name to be used for all MetaMap annotations
-
-
 - Run-time
 ----------------
-annotatePhrases: set to true to output MetaMap phrase-level annotations (generally noun-phrase chunks). Only phrases containing a MetaMap mapping will be annotated. Can be useful for post-coordination of phrase-level terms that do not exist in a pre-coordinated form in UMLS.
+annotateNegEx: set this to true to add NegEx features to annotations (NegExType and NegExTrigger). See http://www.dbmi.pitt.edu/chapman/NegEx.html for more on NegEx
 
-inputASName: input Annotation Set name. Use in conjunction with inputASTypes 
-(see below). Unless specified, the entire document content will be sent to 
-MetaMap. 
+annotatePhrases: set to true to output MetaMap phrase-level annotations (generally noun-phrase chunks). Only phrases containing a MetaMap mapping will be annotated. Can be useful for later post-coordination of phrase-level terms that do not exist in a pre-coordinated form in UMLS.
 
-inputASTypes: only send the content of the named annotations listed here, within
-inputASName, to MetaMap. Unless specified, the entire document content will be 
-sent to MetaMap.
+inputASName: input Annotation Set name. Use in conjunction with inputASTypes (see below). Unless specified, the entire document content will be sent to MetaMap. 
 
-metaMapOptions: set parameter-less MetaMap options here. Default is -Xt 
-(truncate Candidates mappings and do not use full text parsing). See 
-http://metamap.nlm.nih.gov/README_javaapi.html for more details. NB: only set the -y parameter (word-sense disambiguation) if wsdserverctl is 
-running. Running the Java MetaMap API with a large corpus with word-sense 
-disambiguation can cause a 'too many open files' error - this appears to be a PrologServer bug.
+inputASTypes: only send the content of these annotations within inputASName to MetaMap and add new MetaMap annotations inside each. Unless specified, the entire document content will be sent to MetaMap.
+
+inputASTypeFeature: send the content of this feature within inputASTypes to MetaMap and wrap a new MetaMap annotation around each annotation in inputASTypes. If the feature is empty or does not exist, then the annotation content is sent instead.
+
+linebreakCount: specify the number of linebreak/whitespace characters between paragraphs if processing a document with multiple paragraphs separated by blank lines. The MetaMap API processCitationsFromString() method used by this plugin chunks text separated by blank lines (i.e. \n[\\s]*\n), and the resulting output resets the start offset of each chunk to 0, so the offset between each paragraph is effectively lost if this allowance is not made.
+
+metaMapOptions: set MetaMap options here. Default is -Xdt (truncate Candidates mappings, disallow derivational variants and do not use full text parsing). See http://metamap.nlm.nih.gov/README_javaapi.html for more details of accepted arguments. NB: only set the -y parameter (word-sense disambiguation) if wsdserverctl is running. 
 
 outputASName: output Annotation Set name.
 
-outputMode: determines which mappings are output as annotations in the GATE 
-document:
-- MappingsOnly: only annotate the final MetaMap Mappings. This will result in 
-  fewer annotations with higher precision (e.g. for 'lung cancer' only the 
-  complete phrase will be annotated as neop)
-- CandidatesOnly: annotate only Candidate mappings and not the final Mappings. 
-  This will result in more annotations with less precision (e.g. for 'lung 
-  cancer' both 'lung' (bpoc) and 'lung cancer' (neop) will be annotated).
-- CandidatesAndMappings: annotate both Candidate and final mappings. This will 
-  usually result in multiple, overlapping annotations for each term/phrase
+outputASType: output annotation name to be used for all MetaMap annotations
 
-scoreThreshold: set from 0 to 1000. The lower the threshold, the greater the 
-number of annotations but the lower precision. Default is 500.
+outputMode: determines which MetaMap mappings are output as annotations in the GATE document, for each phrase:
+- AllCandidatesAndMappings: annotate all Candidate and final Mappings. This will usually result in multiple, overlapping annotations for each term/phrase
+- AllMappings: annotate all the final Mappings for each phrase. This will result in fewer annotations with higher precision (e.g. for 'lung cancer' only the complete phrase will be annotated as Neoplastic Process [neop])
+- HighestMappingOnly: annotate only the highest scoring MetaMap Mapping for each phrase. If two Mappings have the same score, the first returned by MetaMap is output. 
+- AllCandidates: annotate all Candidate mappings and not the final Mappings. This will result in more annotations with less precision (e.g. for 'lung cancer' both 'lung' (bpoc) and 'lung cancer' (neop) will be annotated).
 
-useNegEx: set this to true to add NegEx features to annotations (NegExType and 
-NegExTrigger). See http://www.dbmi.pitt.edu/chapman/NegEx.html for more 
-information on NegEx
+taggerMode: determines whether all term instances are processed by MetaMap, the first instance only, or the first instance with coreference annotations added. Only used if the inputASTypes parameter has been set.
+- FirstOccurrenceOnly: only process and annotate the first instance of each term in the document
+- CoReference: process and annotate the first instance and coreference following instances
+- AllOccurrences: process and annotate all term instances independently
