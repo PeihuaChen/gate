@@ -2,7 +2,7 @@
  *  MetaMapPR.java
  *
  *
- * Copyright (c) 2010, The University of Sheffield.
+ * Copyright (c) 2010,2011 The University of Sheffield.
  *
  * This file is part of GATE (see http://gate.ac.uk/), and is free
  * software, licenced under the GNU Library General Public License,
@@ -11,7 +11,7 @@
  * A copy of this licence is included in the distribution in the file
  * licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
  *
- *  philipgooch, 20/2/2010
+ *  philipgooch, 30/01/2011
  */
 package gate.metamap;
 
@@ -47,21 +47,18 @@ comment = "This plugin uses the MetaMap Java API to send GATE document content t
 public class MetaMapPR extends AbstractLanguageAnalyser
         implements ProcessingResource, Serializable {
 
-    private String inputASName;
-    private String outputASName;
-    private String outputASType;
-    private ArrayList<String> inputASTypes;
-    private OutputMode outputMode;
-    private Boolean annotatePhrases;
-    private String metaMapOptions;
-    private ArrayList<String> excludeSemanticTypes;
-    private ArrayList<String> restrictSemanticTypes;
-    private Long scoreThreshold;
-
-    private Integer mmServerPort;
-    private String mmServerHost;
-    private Integer mmServerTimeout;
-    private Boolean useNegEx;
+    private String inputASName;     // name of input annotation set in which inputASTypes occur
+    private ArrayList<String> inputASTypes; // list of input annotations from which string content will be submitted
+    private String inputASTypeFeature;      // name of feature within inputASTypes from which string content will be submitted
+    private String outputASName;    // output annotation set name for MetaMap annotations
+    private String outputASType;    // output annotation name within outputASName for MetaMap annotations
+    private OutputMode outputMode;  // output HighestMappingOnly, AllMappings, AllCandidates, or AllCandidatesAndMappings 
+    private Boolean annotatePhrases; // annotate MetaMap phrase chunks with outputASType
+    private String metaMapOptions;   // MetaMap command line string
+    private Boolean annotateNegEx;  // output NegEx results as features to outputASType
+    private Integer linebreakCount;    // number of linebreak/whitespace characters between paragraph chunks
+    private TaggerMode taggerMode;  // term tagger behaviour: all instances, first only, or first+coreferences
+    
     
     @Override
     public Resource init() throws ResourceInstantiationException {
@@ -70,83 +67,302 @@ public class MetaMapPR extends AbstractLanguageAnalyser
         if (outputMode == null) {
             throw new ResourceInstantiationException("outputMode parameter must be set");
         }
-        
-        if (outputASType == null || outputASType.trim().length() == 0) {
-            throw new ResourceInstantiationException("outputASType parameter must be set");
+
+        // check required parameters are set
+        if (taggerMode == null) {
+            throw new ResourceInstantiationException("taggerMode parameter must be set");
         }
-        if (mmServerHost == null || mmServerHost.trim().length() == 0) {
-            throw new ResourceInstantiationException("mmServerHost parameter must be set");
-        }
-        if (mmServerPort == null || !(mmServerPort instanceof Integer)) {
-            throw new ResourceInstantiationException("mmServerPort parameter must be set");
-        }
-        if (mmServerTimeout == null || !(mmServerTimeout instanceof Integer)) {
-            throw new ResourceInstantiationException("mmServerTimeout parameter must be set");
-        }
+
         return this;
     }
 
+    
     @Override
     public void execute() throws ExecutionException {
+        MetaMapApi mmInst;
+
         // If no document provided to process throw an exception
         if (document == null) {
             fireProcessFinished();
             throw new ExecutionException("No document to process!");
         }
 
-
-        // Need to check whether scoreThreshold is null and if not, whether it is a Long
-        if (scoreThreshold == null || !(scoreThreshold instanceof Long)) {
+        if (outputASType == null || outputASType.trim().length() == 0) {
             fireProcessFinished();
-            throw new ExecutionException("Invalid score threshold value!");
+            throw new ExecutionException("outputASType parameter must be set!");
+        }
+
+        if (linebreakCount == null || !(linebreakCount instanceof Integer)) {
+            linebreakCount = 2;
+        }
+
+        // set up MetaMap API instance
+        try {
+            mmInst = setUpApi();
+        } catch (Exception e) {
+            fireProcessFinished();
+            throw new ExecutionException("unable to create MetaMap session instance");
         }
 
         Long lngInitialOffset = Long.valueOf(0);
+        Long lngEndOffset = null;
 
-        if (inputASTypes != null) {
+        if (inputASTypes != null && !(inputASTypes.isEmpty())) {
             AnnotationSet inputAS = (inputASName == null || inputASName.trim().length() == 0) ? document.getAnnotations() : document.getAnnotations(inputASName);
-           
+            AnnotationSet outputAS = (outputASName == null || outputASName.trim().length() == 0) ? document.getAnnotations() : document.getAnnotations(outputASName);
+
+            // process the content of each annot in inputASTypes
             for (String inputAnn : inputASTypes) {
-                Iterator<Annotation> itr = inputAS.get(inputAnn).iterator();
+                // Iterator<Annotation> itr = inputAS.get(inputAnn).iterator();
+
+                // get annots in document order, so we can just want to process the first instance of each
+                Iterator<Annotation> itr = gate.Utils.inDocumentOrder(inputAS.get(inputAnn)).listIterator();
+
+                // Need to create a map of annotations whose string content appears
+                // elsewhere in the document, as we only want to process each term
+                // once through MetaMap
+                HashMap<Integer, ArrayList<Integer>> termMapById = new HashMap<Integer, ArrayList<Integer>>();        // map of annots with content duplicated by other annots, indexed by annot id
+                HashMap<String, Integer> termMapByString = new HashMap<String, Integer>();    // as above, but indexed by string content
+                
+                // iterate over each annot of type inputAnn
                 while (itr.hasNext()) {
 
                     Annotation ann = itr.next();
                     String annContent = "";
-                    
+
                     try {
+                        lngEndOffset = null;
                         lngInitialOffset = ann.getStartNode().getOffset();
+                        // grab the string content of the annotation, or the
+                        // value of the feature inputASTypeFeature if specified
                         annContent = document.getContent().getContent(lngInitialOffset,
-                                ann.getEndNode().getOffset()).toString();
+                                ann.getEndNode().getOffset()).toString().toLowerCase();
+                        if (inputASTypeFeature == null || inputASTypeFeature.trim().length() == 0) {
+                            // if inputASTypeFeature not specified, continue to pass the string content of the ann
+                        } else {
+                            Object o = ann.getFeatures().get(inputASTypeFeature);
+                            String annFeatureContent = (o == null) ? null : o.toString();
+                            if (annFeatureContent == null || annFeatureContent.trim().length() == 0) {
+                                // if feature has no value, continue to pass the string content of the ann
+                            } else {
+                                // otherwise, pass the string content of the feature
+                                // and keep track of the ann's end point
+                                // as we will wrap new annots around our existing ann
+                                annContent = annFeatureContent;
+                                lngEndOffset = ann.getEndNode().getOffset();
+                            }
+                        }
                     } catch (InvalidOffsetException ioe) {
                         // this should never happen
                         fireProcessFinished();
                         throw new ExecutionException(ioe);
+
+                    } // end try
+
+                    Integer annId = ann.getId();
+                    // Only process ann / ann feature string values once if this option has been set
+                    if (taggerMode == TaggerMode.FirstOccurrenceOnly || taggerMode == TaggerMode.CoReference) {
+                        if (termMapByString.get(annContent) == null) {
+                            // if string annContent not already processed ...
+                            termMapById.put(annId, new ArrayList<Integer>());
+                            termMapByString.put(annContent, annId);
+                            try {
+                                this.processWithMetaMap(mmInst, annContent, lngInitialOffset, lngEndOffset);
+                            } catch (Exception e) {
+                                fireProcessFinished();
+                                throw new ExecutionException(e);
+                            }
+                        } else {
+                            // string annContent already processed, so keep a note
+                            // of the annotation id - we'll copy over the MetaMap annotations later
+                            Integer uniqueId =  termMapByString.get(annContent);
+                            ArrayList<Integer> dupAnnIds =  termMapById.get(uniqueId);
+                            dupAnnIds.add(annId);
+                        }
+                    } else {
+                        // process every annot
+                        try {
+                            this.processWithMetaMap(mmInst, annContent, lngInitialOffset, lngEndOffset);
+                        } catch (Exception e) {
+                            fireProcessFinished();
+                            throw new ExecutionException(e);
+                        }
                     }
-                    try {
-                        this.processWithMetaMap(annContent, lngInitialOffset);
-                    } catch (Exception e) {
-                        fireProcessFinished();
-                        throw new ExecutionException(e);
-                    }
+
+                } // end while
+
+                // process coreferences, if this option has been set
+                if (taggerMode == TaggerMode.CoReference) {
+                    doCoreferenceAnnots(termMapById, inputAS, outputAS);
                 }
-            }
+
+            } // end for
+
         } else {
+            // Just process the entire document
             String docText = document.getContent().toString();
             try {
-                this.processWithMetaMap(docText, lngInitialOffset);
+                this.processWithMetaMap(mmInst, docText, lngInitialOffset, lngEndOffset);
             } catch (Exception e) {
                 fireProcessFinished();
                 throw new ExecutionException(e);
             }
-        }
+        } // end if
+
+        // options are sticky between session connects, so need to reset them
+        mmInst.resetOptions();
 
         fireProcessFinished();
 
     }
 
     /**
+     *
+     * @param termMapById   HashMap containing first occurrence of each of term
+     * @param inputAS   input AnnotationSet
+     * @param outputAS  output AnnotationSet
+     * @throws ExecutionException
+     */
+    public void doCoreferenceAnnots(HashMap<Integer, ArrayList<Integer>> termMapById, AnnotationSet inputAS, AnnotationSet outputAS) throws ExecutionException {
+        // Iterate over the annotations in termMapById and
+        // copy over the MetaMap annotations contained to the
+        // other annotations with the same string content
+
+        if (termMapById == null) {
+            return;
+        }
+        Set keys = termMapById.keySet();
+        // System.out.println("Keys: " + keys);
+        Iterator keyIter = keys.iterator();
+
+        while (keyIter.hasNext()) {
+            Integer key = (Integer) keyIter.next();  // Get the id of the processed annot
+
+            ArrayList<Integer> dupAnnIds = termMapById.get(key);  // Get list containing annots with duplicate content.
+
+            Annotation pAnn = inputAS.get(key);
+            FeatureMap fm = pAnn.getFeatures();
+            fm.put("coreferences:", dupAnnIds);
+            AnnotationSet mmAnns = outputAS.getContained(pAnn.getStartNode().getOffset(), pAnn.getEndNode().getOffset()).get(outputASType);
+
+            //System.out.println(pAnn.getId() + ":" + mmAnns.toString());
+
+            // Copy all the MetaMap annots within mmAnns to the
+            // unprocessed annotations that have the same string value
+            // as the annots we processed through MetaMap
+            for (Integer dupAnnId : dupAnnIds) {
+                Annotation uAnn = inputAS.get(dupAnnId);
+                Long startOffset = uAnn.getStartNode().getOffset();
+                Long endOffset = uAnn.getEndNode().getOffset();
+                for (Annotation mmAnn : mmAnns) {
+                    FeatureMap mmFm = mmAnn.getFeatures();
+                    try {
+                        outputAS.add(startOffset, endOffset, outputASType, mmFm);
+                    } catch (InvalidOffsetException ie) {
+                        throw new ExecutionException(ie);
+                    }
+                } // end for
+
+            } // end for
+
+        } // end while
+    }
+
+    /**
      * 
-     * @param phrase
+     * @return MetaMapApi instance
+     * @throws Exception
+     */
+    public MetaMapApi setUpApi() throws Exception {
+        List<String> mmOptions = new ArrayList<String>();
+
+        // mmserver10 now supports parameters with arguments
+        String[] args = getMetaMapOptions().split("\\s+");
+
+        String serverhost = MetaMapApi.DEFAULT_SERVER_HOST;
+        int serverport = MetaMapApi.DEFAULT_SERVER_PORT; 	// default port
+        int timeout = -1; // use default timeout
+
+        int i = 0;
+
+        while (i < args.length) {
+            if (args[i] == null || args[i].length() == 0) {
+                args[i] = " ";
+            }
+            if (args[i].charAt(0) == '-') {
+                if (args[i].equals("-%") || args[i].equals("--XML")) {
+                    mmOptions.add(args[i]);
+                    i++;
+                    mmOptions.add(args[i]);
+                } else if (args[i].equals("-@") || args[i].equals("--WSD")) {
+                    mmOptions.add(args[i]);
+                    i++;
+                    mmOptions.add(args[i]);
+                } else if (args[i].equals("-J") || args[i].equals("--restrict_to_sts")) {
+                    mmOptions.add(args[i]);
+                    i++;
+                    mmOptions.add(args[i]);
+                } else if (args[i].equals("-R") || args[i].equals("--restrict_to_sources")) {
+                    mmOptions.add(args[i]);
+                    i++;
+                    mmOptions.add(args[i]);
+                } else if (args[i].equals("-S") || args[i].equals("--tagger")) {
+                    mmOptions.add(args[i]);
+                    i++;
+                    mmOptions.add(args[i]);
+                } else if (args[i].equals("-V") || args[i].equals("--mm_data_version")) {
+                    mmOptions.add(args[i]);
+                    i++;
+                    mmOptions.add(args[i]);
+                } else if (args[i].equals("-Z") || args[i].equals("--mm_data_year")) {
+                    mmOptions.add(args[i]);
+                    i++;
+                    mmOptions.add(args[i]);
+                } else if (args[i].equals("-e") || args[i].equals("--exclude_sources")) {
+                    mmOptions.add(args[i]);
+                    i++;
+                    mmOptions.add(args[i]);
+                } else if (args[i].equals("-k") || args[i].equals("--exclude_sts")) {
+                    mmOptions.add(args[i]);
+                    i++;
+                    mmOptions.add(args[i]);
+                } else if (args[i].equals("-r") || args[i].equals("--threshold")) {
+                    mmOptions.add(args[i]);
+                    i++;
+                    mmOptions.add(args[i]);
+                } else if (args[i].equals("--metamap_server_host")) {
+                    i++;
+                    serverhost = args[i];
+                } else if (args[i].equals("--metamap_server_port")) {
+                    i++;
+                    serverport = Integer.parseInt(args[i]);
+                } else if (args[i].equals("--metamap_server_timeout")) {
+                    i++;
+                    timeout = Integer.parseInt(args[i]);
+                } else if (args[i].equals("--output")) {
+                    i++;
+                    // ignore - not relevant within GATE
+                } else {
+                    mmOptions.add(args[i]);
+                }
+            }
+            i++;
+        } // end while
+
+        MetaMapApi api = new MetaMapApiImpl(serverhost, serverport, timeout);
+
+        if (mmOptions.size() > 0) {
+            api.setOptions(mmOptions);
+        }
+
+        return api;
+    }
+
+
+    /**
+     * 
+     * @param pcm - phrase chunk returned by MetaMap
+     * @param lngInitialOffset - offset start of annotation relative to prior text
      * @throws Exception
      */
     public void processPhrase(PCM pcm, Long lngInitialOffset) throws Exception {
@@ -160,7 +376,7 @@ public class MetaMapPR extends AbstractLanguageAnalyser
 
         FeatureMap fm = Factory.newFeatureMap();
         fm.put("Type", "Phrase");
-        
+
         Long lngStartPos = new Long((long) intStartPos + lngInitialOffset.longValue());
         Long lngEndPos = new Long((long) intEndPos + lngInitialOffset.longValue());
         try {
@@ -170,19 +386,22 @@ public class MetaMapPR extends AbstractLanguageAnalyser
         }
     }
 
-    
     /**
      *
-     * @param eVList
+     * @param eVList - list of events returned by MetaMap
+     * @param negList - list of negated terms returned by MetaMap
+     * @param type - Candidate or Mapping
+     * @param lngInitialOffset - offset start of annotation relative to prior text
+     * @param lngEndOffset - use existing annotation end if annotating feature inside annotation
      * @throws Exception
      */
-    public void processEvents(List<Ev> eVList, List<Negation> negList, String type, Long lngInitialOffset) throws Exception {
+    public void processEvents(List<Ev> eVList, List<Negation> negList, String type, Long lngInitialOffset, Long lngEndOffset) throws Exception {
         AnnotationSet outputAs = (outputASName == null || outputASName.trim().length() == 0) ? document.getAnnotations() : document.getAnnotations(outputASName);
 
 
         for (Ev mapEv : eVList) {
             FeatureMap fm = Factory.newFeatureMap();
-            
+
             List<Position> lstSpans = mapEv.getPositionalInfo();
 
             int numSpans = lstSpans.size();
@@ -190,149 +409,158 @@ public class MetaMapPR extends AbstractLanguageAnalyser
             int intStartPos = lstSpans.get(0).getX();
             int intEndPos = lstSpans.get(numSpans - 1).getX() + lstSpans.get(numSpans - 1).getY();
 
-            int intScore = Math.abs(mapEv.getScore());
 
-            boolean blnIncludeType = true;
-            // don't include mapping if the semantic type is in the exclusion list
-            if (excludeSemanticTypes != null) {
-                for (String s : mapEv.getSemanticTypes()) {
-                    if (excludeSemanticTypes.contains(s)) {
-                        blnIncludeType = false;
+            if (negList != null && negList.size() > 0) {
+                // see if there is a NegEx match at the same position as Event match
+                // if so, add an annotation feature for the NexEx type and trigger
+                for (Negation ne : negList) {
+                    List<Position> p = ne.getConceptPositionList();
+
+                    int intNegStartPos = p.get(0).getX();
+                    int negSpans = p.size();
+
+                    int intNegEndPos = p.get(negSpans - 1).getX() + p.get(negSpans - 1).getY();
+
+                    if (intNegStartPos == intStartPos && intNegEndPos == intEndPos) {
+                        fm.put("NegExType", ne.getType());
+                        fm.put("NegExTrigger", ne.getTrigger());
                         break;
                     }
                 }
+            } // end if
+            fm.put("Type", type);
+            fm.put("Score", mapEv.getScore());
+            fm.put("ConceptId", mapEv.getConceptId());
+            fm.put("ConceptName", mapEv.getConceptName());
+            fm.put("PreferredName", mapEv.getPreferredName());
+            fm.put("SemanticTypes", mapEv.getSemanticTypes());
+            fm.put("Sources", mapEv.getSources());
+
+
+            // lngEndOffset will be null if we are processing the whole document
+            // or the string content of individual annotations.
+            // Otherwise, we are processing the feature content, in which case
+            // we will simply wrap our MetaMap annotation around our existing annotations
+            Long lngStartPos = (lngEndOffset == null) ? new Long((long) intStartPos + lngInitialOffset.longValue()) : lngInitialOffset;
+            Long lngEndPos = (lngEndOffset == null) ? new Long((long) intEndPos + lngInitialOffset.longValue()) : lngEndOffset;
+            try {
+                outputAs.add(lngStartPos, lngEndPos, outputASType, fm);
+            } catch (InvalidOffsetException ie) {
+                throw ie;
             }
 
-            // only include mapping if the semantic type is in the inclusion list
-            if (restrictSemanticTypes != null) {
-                blnIncludeType = false;
-                for (String s : mapEv.getSemanticTypes()) {
-                    if (restrictSemanticTypes.contains(s)) {
-                        blnIncludeType = true;
-                        break;
-                    }
-                }
-            }
-            // blnIncludeType = true;
-            if (blnIncludeType && intScore >= scoreThreshold) {
-                if (negList != null && negList.size() > 0) {
-                    // see if there is a NegEx match at the same position as Event match
-                    // if so, add an annotation feature for the NexEx type and trigger
-                    for (Negation ne : negList) {
-                        List<Position> p = ne.getConceptPositionList();
-                        
-                        int intNegStartPos = p.get(0).getX();
-                        int negSpans = p.size();
+        } // end for
+    }
 
-                        int intNegEndPos = p.get(negSpans - 1).getX() + p.get(negSpans - 1).getY();
 
-                        if (intNegStartPos == intStartPos && intNegEndPos == intEndPos) {
-                            fm.put("NegExType", ne.getType());
-                            fm.put("NegExTrigger", ne.getTrigger());
-                            break;
-                        }
-                    }
-                }
-                fm.put("Type", type);
-                fm.put("Score", mapEv.getScore());
-                fm.put("ConceptId", mapEv.getConceptId());
-                fm.put("ConceptName", mapEv.getConceptName());
-                fm.put("PreferredName", mapEv.getPreferredName());
-                fm.put("SemanticTypes", mapEv.getSemanticTypes());
-                fm.put("Sources", mapEv.getSources());
 
-                Long lngStartPos = new Long((long)intStartPos + lngInitialOffset.longValue());
-                Long lngEndPos = new Long((long)intEndPos + lngInitialOffset.longValue());
-                try {
-                    outputAs.add(lngStartPos, lngEndPos, outputASType, fm);
-                } catch (InvalidOffsetException ie) {
-                    throw ie;
-                }
+    /**
+     *
+     * @param pcm - phrase chunk returned by MetaMap
+     * @param negList - list of negated terms returned by MetaMap
+     * @param lngInitialOffset - offset start of annotation relative to prior text
+     * @param lngEndOffset - use existing annotation end if annotating feature inside annotation
+     * @throws Exception
+     */
+    public void processMappings(PCM pcm, List<Negation> negList, Long lngInitialOffset, Long lngEndOffset) throws Exception {
+        
+        List<Mapping> mappings = pcm.getMappingList();
+
+        // Mappings are ordered by score, so outputting the first item will give the mapping
+        // with the highest score, if requested
+        if ( outputMode.equals(OutputMode.HighestMappingOnly) && ! (mappings.isEmpty()) ) {
+            processEvents(mappings.get(0).getEvList(), negList, "Mapping", lngInitialOffset, lngEndOffset);
+        } else {
+            for (Mapping map : mappings) {
+                processEvents(map.getEvList(), negList, "Mapping", lngInitialOffset, lngEndOffset);
             }
         }
     }
 
+
+    
     /**
      *
-     * @param pcm
+     * @param pcm - phrase chunk returned by MetaMap
+     * @param negList - list of negated terms returned by MetaMap
+     * @param lngInitialOffset - offset start of annotation relative to prior text
+     * @param lngEndOffset - use existing annotation end if annotating feature inside annotation
      * @throws Exception
      */
-    public void processMappings(PCM pcm, List<Negation> negList, Long lngInitialOffset) throws Exception {
-        for (gov.nih.nlm.nls.metamap.Map map : pcm.getMappings()) {
-            processEvents(map.getEvList(), negList, "Mapping", lngInitialOffset);
-        }
+    public void processCandidates(PCM pcm, List<Negation> negList, Long lngInitialOffset, Long lngEndOffset) throws Exception {
+        processEvents(pcm.getCandidates(), negList, "Candidate", lngInitialOffset, lngEndOffset);
     }
 
     /**
      *
-     * @param pcm
+     * @param result - result returned by MetaMap
+     * @param lngInitialOffset - offset start of annotation relative to prior text
+     * @param lngEndOffset - use existing annotation end if annotating feature inside annotation
      * @throws Exception
      */
-    public void processCandidates(PCM pcm, List<Negation> negList, Long lngInitialOffset) throws Exception {
-        processEvents(pcm.getCandidates(), negList, "Candidate", lngInitialOffset);
-    }
-
-    /**
-     *
-     * @param result
-     * @throws Exception
-     */
-    public void processUtterances(Result result, Long lngInitialOffset) throws Exception {
+    public void processUtterances(Result result, Long lngInitialOffset, Long lngEndOffset) throws Exception {
 
         List<Negation> negList = null;
 
-        if (useNegEx) {
-             negList = result.getNegations();
+        if (annotateNegEx) {
+            negList = result.getNegations();
         }
 
-        for (Utterance utterance : result.getUtteranceList()) {
+        for (Utterance utterance : result.getUtteranceList()) { // each utterance (sentence ?)
 
-            for (PCM pcm : utterance.getPCMList()) {
+            for (PCM pcm : utterance.getPCMList()) { // each phrase in the utterance
                 int numPCMMappings = pcm.getMappings().size();
 
-                if (outputMode.equals(OutputMode.CandidatesAndMappings) || outputMode.equals(OutputMode.CandidatesOnly)) {
-                    this.processCandidates(pcm, negList, lngInitialOffset);
+                if (outputMode.equals(OutputMode.AllCandidatesAndMappings) || outputMode.equals(OutputMode.AllCandidates)) {
+                    this.processCandidates(pcm, negList, lngInitialOffset, lngEndOffset);
                 }
-                if (outputMode.equals(OutputMode.CandidatesAndMappings) || outputMode.equals(OutputMode.MappingsOnly)) {
-                    this.processMappings(pcm, negList, lngInitialOffset);
+                if (outputMode.equals(OutputMode.AllCandidatesAndMappings) || outputMode.equals(OutputMode.AllMappings)
+                        || outputMode.equals(OutputMode.HighestMappingOnly)) {
+                    this.processMappings(pcm, negList, lngInitialOffset, lngEndOffset);
                 }
 
-                // only annotate phrases if they contain MetaMap mappings
-                if (annotatePhrases && numPCMMappings > 0) {
+
+                // only annotate phrases if they contain MetaMap mappings and we're not annotating the feature
+                if (annotatePhrases && numPCMMappings > 0 && lngEndOffset == null) {
                     this.processPhrase(pcm, lngInitialOffset);
                 }
-            }
-        }
+            } // end for
+        } // end for
     }
 
-    
+
 
     /**
-     *
+     * @param api - MetaMapApi instance
      * @param text - text to be annotated
+     * @param lngInitialOffset - offset start of annotation relative to prior text
+     * @param lngEndOffset - use existing annotation end if annotating feature inside annotation
      * @throws Exception
      */
-    public void processWithMetaMap(String text, Long lngInitialOffset) throws Exception {
-        MetaMapApi api = new MetaMapApiImpl(mmServerHost, mmServerPort.intValue(), mmServerTimeout.intValue());
-
-        List<String> mmOptions = new ArrayList<String>();
-
-        mmOptions.add(this.getMetaMapOptions());
-
-        if (mmOptions.size() > 0) {
-            api.setOptions(mmOptions);
-        }
-
-        Result result = null;
+    public void processWithMetaMap(MetaMapApi api, String text, Long lngInitialOffset, Long lngEndOffset) throws Exception {
+        /* metamap API 2010 now has processCitationsFromString as opposed to
+         * processString, and it returns List<Result> rather than Result
+         */
+        List<Result> resultList = null;
 
         String asciiText = filterNonAscii(normalizeString(text));
 
-        result = api.processString(asciiText);
+        resultList = api.processCitationsFromString(asciiText);
 
-        if (result != null) {
-            this.processUtterances(result, lngInitialOffset);
-        } else {
-            throw new Exception("NULL result instance! ");
+        int resultLength = 0;
+
+        if (resultList != null) {
+            for (Result result : resultList) {
+                if (result != null) {
+                    this.processUtterances(result, lngInitialOffset + resultLength, (lngEndOffset == null) ? null : lngEndOffset + resultLength);
+                    // Need to assume linebreakCount line breaks between each result chunk.
+                    // The API processCitationsFromString() method chunks text in linebreak separated fragments,
+                    // but does not keep track of the offset of each fragment.
+                    resultLength = resultLength + result.getInputText().length() + linebreakCount;
+                } else {
+                    throw new Exception("NULL result instance! ");
+                }
+            }
         }
     }
 
@@ -347,7 +575,7 @@ public class MetaMapPR extends AbstractLanguageAnalyser
         // Allows compilation under both Java 5 and Java 6
         StringFilter stringFilter = TextNormalizer.getNormalizationStringFilter();
         String nfdNormalizedString = stringFilter.filter(str);
-        
+
         // Normalizer is Java 6 only
         // String nfdNormalizedString = java.text.Normalizer.normalize(str, Normalizer.Form.NFD);
         Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
@@ -390,6 +618,7 @@ public class MetaMapPR extends AbstractLanguageAnalyser
         return outputASName;
     }
 
+    @RunTime
     @CreoleParameter(defaultValue = "MetaMap",
     comment = "Name for the MetaMap Annotation types")
     public void setOutputASType(String outputASType) {
@@ -402,7 +631,7 @@ public class MetaMapPR extends AbstractLanguageAnalyser
 
     @Optional
     @RunTime
-    @CreoleParameter(comment = "Only send the content of the given Annotations in the input Annotation Set to MetaMap")
+    @CreoleParameter(comment = "If set, only send the content of the given Annotations in the input Annotation Set to MetaMap")
     public void setInputASTypes(ArrayList<String> inputASTypes) {
         this.inputASTypes = inputASTypes;
     }
@@ -411,10 +640,20 @@ public class MetaMapPR extends AbstractLanguageAnalyser
         return inputASTypes;
     }
 
+    @Optional
+    @RunTime
+    @CreoleParameter(comment = "If set, only send the content of the given feature from annotations within inputASTypes to MetaMap")
+    public void setInputASTypeFeature(String inputASTypeFeature) {
+        this.inputASTypeFeature = inputASTypeFeature;
+    }
+
+    public String getInputASTypeFeature() {
+        return inputASTypeFeature;
+    }
 
     @RunTime
-    @CreoleParameter(defaultValue = "MappingsOnly",
-    comment = "Output only final mappings, only candidate terms, or both")
+    @CreoleParameter(defaultValue = "HighestMappingOnly",
+    comment = "Output highest scoring final mapping, all mappings, all candidate terms, or all candidates and mappings")
     public void setOutputMode(OutputMode outputMode) {
         this.outputMode = outputMode;
     }
@@ -435,40 +674,8 @@ public class MetaMapPR extends AbstractLanguageAnalyser
     }
 
     @Optional
-    @CreoleParameter(comment = "Exclude the following semantic types from the output (equivalent to -k option in MetaMap)")
-    public void setExcludeSemanticTypes(ArrayList<String> excludeSemanticTypes) {
-        this.excludeSemanticTypes = excludeSemanticTypes;
-    }
-
-    public ArrayList<String> getExcludeSemanticTypes() {
-        return excludeSemanticTypes;
-    }
-
-    @Optional
-    @CreoleParameter(comment = "Restrict output to the following semantic types (equivalent to -J option in MetaMap)")
-    public void setRestrictSemanticTypes(ArrayList<String> restrictSemanticTypes) {
-        this.restrictSemanticTypes = restrictSemanticTypes;
-    }
-
-    public ArrayList<String> getRestrictSemanticTypes() {
-        return restrictSemanticTypes;
-    }
-
-    @Optional
     @RunTime
-    @CreoleParameter(defaultValue = "500",
-    comment = "Omit Candidates and Mappings with a score less than this number (equivalent to -r option in MetaMap)")
-    public void setScoreThreshold(Long scoreThreshold) {
-        this.scoreThreshold = scoreThreshold;
-    }
-
-    public Long getScoreThreshold() {
-        return scoreThreshold;
-    }
-
-    @Optional
-    @RunTime
-    @CreoleParameter(defaultValue = "-Xt",
+    @CreoleParameter(defaultValue = "-Xdt",
     comment = "MetaMap runtime options")
     public void setMetaMapOptions(String metaMapOptions) {
         this.metaMapOptions = metaMapOptions;
@@ -478,49 +685,37 @@ public class MetaMapPR extends AbstractLanguageAnalyser
         return metaMapOptions;
     }
 
-
-
-    @CreoleParameter(defaultValue = "150000",
-    comment = "Time in milliseconds to wait for Prolog server before timing out")
-    public void setMmServerTimeout(Integer timeout) {
-        this.mmServerTimeout = timeout;
-    }
-
-    public Integer getMmServerTimeout() {
-        return mmServerTimeout;
-    }
-
-    
-    @CreoleParameter(defaultValue = "8066",
-    comment = "MetaMap mmserver port number")
-    public void setMmServerPort(Integer port) {
-        this.mmServerPort = port;
-    }
-
-    public Integer getMmServerPort() {
-        return mmServerPort;
-    }
-
-    @CreoleParameter(defaultValue = "localhost",
-    comment = "MetaMap mmserver host name or IP address")
-    public void setMmServerHost(String host) {
-        this.mmServerHost = host;
-    }
-
-    public String getMmServerHost() {
-        return mmServerHost;
-    }
-
-
     @RunTime
     @CreoleParameter(defaultValue = "false",
     comment = "Output NegEx negation annotations and features?")
-    public void setUseNegEx(Boolean useNegEx) {
-        this.useNegEx = useNegEx;
+    public void setAnnotateNegEx(Boolean annotateNegEx) {
+        this.annotateNegEx = annotateNegEx;
     }
 
-    public Boolean getUseNegEx() {
-        return useNegEx;
+    public Boolean getAnnotateNegEx() {
+        return annotateNegEx;
+    }
+
+    @RunTime
+    @CreoleParameter(defaultValue = "2",
+    comment = "Number of linebreak/whitespace characters between paragraphs")
+    public void setLinebreakCount(Integer linebreakCount) {
+        this.linebreakCount = linebreakCount;
+    }
+
+    public Integer getLinebreakCount() {
+        return linebreakCount;
+    }
+
+    @RunTime
+    @CreoleParameter(defaultValue = "CoReference",
+    comment = "Map first instance of a term only, first instance plus coreferences, or all instances independently")
+    public void setTaggerMode(TaggerMode taggerMode) {
+        this.taggerMode = taggerMode;
+    }
+
+    public TaggerMode getTaggerMode() {
+        return taggerMode;
     }
 } // class MetaMapPR
 

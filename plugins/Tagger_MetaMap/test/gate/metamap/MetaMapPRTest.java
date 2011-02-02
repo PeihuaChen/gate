@@ -50,15 +50,13 @@ public class MetaMapPRTest extends TestCase  {
     public void testInit() throws Exception {
         System.out.println("init");
         MetaMapPR instance = new MetaMapPR();
-        instance.setOutputMode(OutputMode.MappingsOnly);
+        instance.setOutputMode(OutputMode.AllMappings);
+        instance.setTaggerMode(TaggerMode.CoReference);
         instance.setOutputASType("MetaMap");
-        instance.setMmServerHost("dummy");
-        instance.setMmServerPort(1234);
-        instance.setMmServerTimeout(5000);
         
         Resource result = instance.init();
         assertNotNull("Instance should not be null", result);
-        assertEquals(instance.getOutputMode(), OutputMode.MappingsOnly);
+        assertEquals(instance.getOutputMode(), OutputMode.AllMappings);
     }
 
 

@@ -9,6 +9,6 @@ package gate.metamap;
  *
  * @author philipgooch
  */
-public enum OutputMode {
-    HighestMappingOnly, AllMappings, AllCandidates, AllCandidatesAndMappings
+public enum TaggerMode {
+    FirstOccurrenceOnly, CoReference, AllOccurrences
 }
