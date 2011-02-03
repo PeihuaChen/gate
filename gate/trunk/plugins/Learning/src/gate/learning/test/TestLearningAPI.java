@@ -1,6 +1,6 @@
 /*
  *  TestLearningAPI.java
- * 
+ *
  *  Yaoyong Li 22/03/2007
  *
  *  $Id: TestLearningAPI.java, v 1.0 2007-03-22 12:58:16 +0000 yaoyong $
@@ -56,7 +56,7 @@ public class TestLearningAPI extends TestCase {
   /** The controller include the ML Api as one PR. */
   gate.creole.SerialAnalyserController controller;
   /** Set up method (does nothing because it may have
-   * different behaviour in different enviroment. 
+   * different behaviour in different enviroment.
    */
   protected void setUp() throws Exception {
     super.setUp();
@@ -65,8 +65,8 @@ public class TestLearningAPI extends TestCase {
   protected void tearDown() throws Exception {
     super.tearDown();
   }
-  /** Loading the configurationg file and corpus for testing. 
-   * And make settings as in the GATE Gui. 
+  /** Loading the configurationg file and corpus for testing.
+   * And make settings as in the GATE Gui.
    */
   void loadSettings(String configFileName, String corpusDirName, String inputasN, String outputasN)
     throws GateException, IOException {
@@ -82,7 +82,7 @@ public class TestLearningAPI extends TestCase {
     corpus = Factory.newCorpus("DataSet");
     ExtensionFileFilter fileFilter = new ExtensionFileFilter();
     fileFilter.addExtension("xml");
-    File[] xmlFiles = new File(corpusDirName).listFiles(fileFilter);  
+    File[] xmlFiles = new File(corpusDirName).listFiles(fileFilter);
     Arrays.sort(xmlFiles, new Comparator<File>() {
       public int compare(File a, File b) {
         return a.getName().compareTo(b.getName());
@@ -115,7 +115,7 @@ public class TestLearningAPI extends TestCase {
     Factory.deleteResource(controller);
   }
   /** Test the chunk learning by using the SVM with linear kernel and
-   * a small part of the OntoNews corpus. 
+   * a small part of the OntoNews corpus.
    */
   public void testSVMChunkLearnng() throws IOException, GateException {
     // Initialisation
@@ -126,8 +126,8 @@ public class TestLearningAPI extends TestCase {
       .getAbsolutePath();
     String corpusDirName = new File(chunklearningHome, "data-ontonews")
       .getAbsolutePath();
-    //Remove the label list file, feature list file and chunk length files. 
-    String wdResults = new File(chunklearningHome, 
+    //Remove the label list file, feature list file and chunk length files.
+    String wdResults = new File(chunklearningHome,
       ConstantParameters.SUBDIRFORRESULTS).getAbsolutePath();
     emptySavedFiles(wdResults);
     String inputASN = "Key";
@@ -143,7 +143,7 @@ public class TestLearningAPI extends TestCase {
     assertEquals("Wrong value for partial: ", 10, (int)Math.floor(evaluation.macroMeasuresOfResults.partialCor));
     assertEquals("Wrong value for spurious: ", 11, (int)Math.floor(evaluation.macroMeasuresOfResults.spurious));
     assertEquals("Wrong value for missing: ", 40, (int)Math.floor(evaluation.macroMeasuresOfResults.missing));
-    
+
     System.out.println("completed");
     // Remove the resources
     clearOneTest();
@@ -159,8 +159,8 @@ public class TestLearningAPI extends TestCase {
       "engines-naivebayesweka.xml").getAbsolutePath();
     String corpusDirName = new File(chunklearningHome, "data-ontonews")
       .getAbsolutePath();
-    //Remove the label list file, feature list file and chunk length files. 
-    String wdResults = new File(chunklearningHome, 
+    //Remove the label list file, feature list file and chunk length files.
+    String wdResults = new File(chunklearningHome,
       ConstantParameters.SUBDIRFORRESULTS).getAbsolutePath();
     emptySavedFiles(wdResults);
     String inputASN = "Key";
@@ -178,7 +178,7 @@ public class TestLearningAPI extends TestCase {
     assertEquals(evaluation.macroMeasuresOfResults.missing, 68);*/
     assertEquals("Wrong value for correct: ", 27, (int)Math.floor(evaluation.macroMeasuresOfResults.correct));
     assertEquals("Wrong value for partial: ", 3, (int)Math.floor(evaluation.macroMeasuresOfResults.partialCor));
-    assertEquals("Wrong value for spurious: ", 27, (int)Math.floor(evaluation.macroMeasuresOfResults.spurious));
+    assertEquals("Wrong value for spurious: ", 26, (int)Math.floor(evaluation.macroMeasuresOfResults.spurious));
     assertEquals("Wrong value for missing: ", 42, (int)Math.floor(evaluation.macroMeasuresOfResults.missing));
     // Remove the resources
     clearOneTest();
@@ -195,8 +195,8 @@ public class TestLearningAPI extends TestCase {
       "engines-paum.xml").getAbsolutePath();
     String corpusDirName = new File(chunklearningHome, "data-ontonews")
       .getAbsolutePath();
-    //Remove the label list file, feature list file and chunk length files. 
-    String wdResults = new File(chunklearningHome, 
+    //Remove the label list file, feature list file and chunk length files.
+    String wdResults = new File(chunklearningHome,
       ConstantParameters.SUBDIRFORRESULTS).getAbsolutePath();
     emptySavedFiles(wdResults);
     String inputASN = "Key";
@@ -214,14 +214,14 @@ public class TestLearningAPI extends TestCase {
     assertEquals(evaluation.macroMeasuresOfResults.missing, 68);*/
     assertEquals("Wrong value for correct: ", 52, (int)Math.floor(evaluation.macroMeasuresOfResults.correct));
     assertEquals("Wrong value for partial: ", 12, (int)Math.floor(evaluation.macroMeasuresOfResults.partialCor));
-    assertEquals("Wrong value for spurious: ", 27, (int)Math.floor(evaluation.macroMeasuresOfResults.spurious));
+    assertEquals("Wrong value for spurious: ", 24, (int)Math.floor(evaluation.macroMeasuresOfResults.spurious));
     assertEquals("Wrong value for missing: ", 30, (int)Math.floor(evaluation.macroMeasuresOfResults.missing));
     // Remove the resources
     clearOneTest();
     System.out.println("completed");
   }
   /** Test the text classification by using the SVM with linear kernel
-   * and the data for sentence classification. 
+   * and the data for sentence classification.
    */
   /*public void testSVMClassification() throws GateException, IOException {
     // Initialisation
@@ -231,8 +231,8 @@ public class TestLearningAPI extends TestCase {
     String configFileURL = new File(scHome, "engines-svm.xml")
       .getAbsolutePath();
     String corpusDirName = new File(scHome, "data-h").getAbsolutePath();
-    //Remove the label list file, feature list file and chunk length files. 
-    String wdResults = new File(scHome, 
+    //Remove the label list file, feature list file and chunk length files.
+    String wdResults = new File(scHome,
       ConstantParameters.SUBDIRFORRESULTS).getAbsolutePath();
     emptySavedFiles(wdResults);
     String inputASN = null;
@@ -253,7 +253,7 @@ public class TestLearningAPI extends TestCase {
     System.out.println("completed");
   }*/
   /** Test the text classification by using the SVM with quadratic kernel
-   * and the data for sentence classification. 
+   * and the data for sentence classification.
    */
   /*public void testSVMKernelClassification() throws GateException, IOException {
     System.out.print("Testing the SVM with quadratic kernel on text classification...");
@@ -263,8 +263,8 @@ public class TestLearningAPI extends TestCase {
     String configFileURL = new File(scHome, "engines-svm-quadratickernel.xml")
       .getAbsolutePath();
     String corpusDirName = new File(scHome, "data-h").getAbsolutePath();
-    //Remove the label list file, feature list file and chunk length files. 
-    String wdResults = new File(scHome, 
+    //Remove the label list file, feature list file and chunk length files.
+    String wdResults = new File(scHome,
       ConstantParameters.SUBDIRFORRESULTS).getAbsolutePath();
     emptySavedFiles(wdResults);
     String inputASN = null;
@@ -285,7 +285,7 @@ public class TestLearningAPI extends TestCase {
     System.out.println("completed");
   }*/
   /** Test the text classification by using the KNN
-   * and the data for sentence classification. 
+   * and the data for sentence classification.
    */
   /*public void testKNNClassification() throws GateException, IOException {
     System.out.print("Testing the KNN on text classification...");
@@ -295,8 +295,8 @@ public class TestLearningAPI extends TestCase {
     String configFileURL = new File(scHome, "engines-knnweka.xml")
       .getAbsolutePath();
     String corpusDirName = new File(scHome, "data-h").getAbsolutePath();
-    //Remove the label list file, feature list file and chunk length files. 
-    String wdResults = new File(scHome, 
+    //Remove the label list file, feature list file and chunk length files.
+    String wdResults = new File(scHome,
       ConstantParameters.SUBDIRFORRESULTS).getAbsolutePath();
     emptySavedFiles(wdResults);
     String inputASN = null;
@@ -317,7 +317,7 @@ public class TestLearningAPI extends TestCase {
     System.out.println("completed");
   }*/
   /** Test the text classification by using the C4.5 algorithm
-   * and the data for sentence classification. 
+   * and the data for sentence classification.
    */
   /*public void testC45Classification() throws GateException, IOException {
     System.out.print("Testing the C4.5 on text classification...");
@@ -327,8 +327,8 @@ public class TestLearningAPI extends TestCase {
     String configFileURL = new File(scHome, "engines-c45weka.xml")
       .getAbsolutePath();
     String corpusDirName = new File(scHome, "data-h").getAbsolutePath();
-    //Remove the label list file, feature list file and chunk length files. 
-    String wdResults = new File(scHome, 
+    //Remove the label list file, feature list file and chunk length files.
+    String wdResults = new File(scHome,
       ConstantParameters.SUBDIRFORRESULTS).getAbsolutePath();
     emptySavedFiles(wdResults);
     String inputASN = null;
@@ -349,7 +349,7 @@ public class TestLearningAPI extends TestCase {
     System.out.println("completed");
   }*/
   /** Test the relation extraction by using the SVM with linear kernel
-   * and a small part of data from ACE-04 relation extraction. 
+   * and a small part of data from ACE-04 relation extraction.
    */
   /*public void testSVMRelationLearning() throws GateException, IOException {
     System.out.print("Testing the SVM with linear kernel on relation extraction...");
@@ -359,8 +359,8 @@ public class TestLearningAPI extends TestCase {
       .getAbsolutePath();
     String corpusDirName = new File(scHome, "data-acerelation")
       .getAbsolutePath();
-    //Remove the label list file, feature list file and chunk length files. 
-    String wdResults = new File(scHome, 
+    //Remove the label list file, feature list file and chunk length files.
+    String wdResults = new File(scHome,
       ConstantParameters.SUBDIRFORRESULTS).getAbsolutePath();
     emptySavedFiles(wdResults);
     String inputASN = "Key";
@@ -385,7 +385,7 @@ public class TestLearningAPI extends TestCase {
     System.out.println("completed");
   }*/
   /** Test the relation extraction by using the SVM with linear kernel
-   * and a small part of data from ACE-04 relation extraction. 
+   * and a small part of data from ACE-04 relation extraction.
    */
   /*public void testSVMRelationLearningWithNgramFeatures() throws GateException, IOException {
     System.out.print("Testing the SVM with Ngram features on relation extraction ...");
@@ -395,8 +395,8 @@ public class TestLearningAPI extends TestCase {
       .getAbsolutePath();
     String corpusDirName = new File(scHome, "data-acerelation")
       .getAbsolutePath();
-    //Remove the label list file, feature list file and chunk length files. 
-    String wdResults = new File(scHome, 
+    //Remove the label list file, feature list file and chunk length files.
+    String wdResults = new File(scHome,
       ConstantParameters.SUBDIRFORRESULTS).getAbsolutePath();
     emptySavedFiles(wdResults);
     String inputASN = "Key";
