@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 1995-2010, The University of Sheffield. See the file
+ *  Copyright (c) 1995-2011, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -12,11 +12,18 @@
  *  $Id$
  */
 
-
 package gate.creole.splitter;
 
-import gate.*;
-import gate.creole.*;
+import gate.AnnotationSet;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.Resource;
+import gate.creole.AbstractLanguageAnalyser;
+import gate.creole.ExecutionException;
+import gate.creole.ExecutionInterruptedException;
+import gate.creole.ResourceInstantiationException;
+import gate.creole.Transducer;
 import gate.creole.gazetteer.DefaultGazetteer;
 import gate.event.ProgressListener;
 import gate.event.StatusListener;
@@ -24,7 +31,7 @@ import gate.util.Benchmark;
 import gate.util.Benchmarkable;
 import gate.util.GateRuntimeException;
 import gate.util.InvalidOffsetException;
-import gate.util.LuckyException;
+
 /**
  * A sentence splitter. This is module contains a tokeniser, a
  * gazetteer and a Jape grammar. This class is used so we can have a different
@@ -60,42 +67,57 @@ public class SentenceSplitter extends AbstractLanguageAnalyser implements Benchm
     FeatureMap params;
     FeatureMap features;
 
-    //gazetteer
-    fireStatusChanged("Creating the gazetteer");
-    params = Factory.newFeatureMap();
-    if(gazetteerListsURL != null)
-      params.put(DefaultGazetteer.DEF_GAZ_LISTS_URL_PARAMETER_NAME,
-                                             gazetteerListsURL);
-    params.put(DefaultGazetteer.DEF_GAZ_ENCODING_PARAMETER_NAME, encoding);
-    features = Factory.newFeatureMap();
-    Gate.setHiddenAttribute(features, true);
+    if (gazetteer == null) {
+      //gazetteer
+      fireStatusChanged("Creating the gazetteer");
+      params = Factory.newFeatureMap();
+      if(gazetteerListsURL != null)
+        params.put(DefaultGazetteer.DEF_GAZ_LISTS_URL_PARAMETER_NAME,
+                gazetteerListsURL);
+      params.put(DefaultGazetteer.DEF_GAZ_ENCODING_PARAMETER_NAME, encoding);
+      features = Factory.newFeatureMap();
+      Gate.setHiddenAttribute(features, true);
 
-
-    gazetteer = (DefaultGazetteer)Factory.createResource(
-                    "gate.creole.gazetteer.DefaultGazetteer",
-                    params, features);
-    gazetteer.setName("Gazetteer " + System.currentTimeMillis());
+      gazetteer = (DefaultGazetteer)Factory.createResource(
+              "gate.creole.gazetteer.DefaultGazetteer",
+              params, features);
+      gazetteer.setName("Gazetteer " + System.currentTimeMillis());
+    }
+    else {
+      gazetteer.reInit();
+    }
+    
     fireProgressChanged(10);
 
-    //transducer
-    fireStatusChanged("Creating the JAPE transducer");
+    if (transducer == null) {
+      //transducer
+      fireStatusChanged("Creating the JAPE transducer");
 
-    params = Factory.newFeatureMap();
-    if(transducerURL != null)
-      params.put(Transducer.TRANSD_GRAMMAR_URL_PARAMETER_NAME, transducerURL);
-    params.put(Transducer.TRANSD_ENCODING_PARAMETER_NAME, encoding);
-    features = Factory.newFeatureMap();
-    Gate.setHiddenAttribute(features, true);
+      params = Factory.newFeatureMap();
+      if(transducerURL != null)
+        params.put(Transducer.TRANSD_GRAMMAR_URL_PARAMETER_NAME, transducerURL);
+      params.put(Transducer.TRANSD_ENCODING_PARAMETER_NAME, encoding);
+      features = Factory.newFeatureMap();
+      Gate.setHiddenAttribute(features, true);
 
-    transducer = (Transducer)Factory.createResource(
-                    "gate.creole.Transducer",
-                    params, features);
-    transducer.setName("Transducer " + System.currentTimeMillis());
-
+      transducer = (Transducer)Factory.createResource(
+              "gate.creole.Transducer",
+              params, features);
+      transducer.setName("Transducer " + System.currentTimeMillis());
+    }
+    else {
+      transducer.reInit();
+    }
+    
     fireProgressChanged(100);
     fireProcessFinished();
 
     return this;
+  }
+  
+  public void cleanup() {
+    Factory.deleteResource(gazetteer);
+    Factory.deleteResource(transducer);
   }
 
   public void execute() throws ExecutionException{

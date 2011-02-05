@@ -44,44 +44,60 @@ public class DefaultTokeniser extends AbstractLanguageAnalyser implements Benchm
       FeatureMap params;
       FeatureMap features;
 
-      //tokeniser
-      fireStatusChanged("Creating a tokeniser");
-      params = Factory.newFeatureMap();
-      if(tokeniserRulesURL != null)
-        params.put(SimpleTokeniser.SIMP_TOK_RULES_URL_PARAMETER_NAME,
-                   tokeniserRulesURL);
-      params.put(SimpleTokeniser.SIMP_TOK_ENCODING_PARAMETER_NAME, encoding);
-      if(DEBUG) Out.prln("Parameters for the tokeniser: \n" + params);
-      features = Factory.newFeatureMap();
-      Gate.setHiddenAttribute(features, true);
-      tokeniser = (SimpleTokeniser)Factory.createResource(
-                    "gate.creole.tokeniser.SimpleTokeniser",
-                    params, features);
-      tokeniser.setName("Tokeniser " + System.currentTimeMillis());
-
+      if (tokeniser == null) {
+        //tokeniser
+        fireStatusChanged("Creating a tokeniser");
+        params = Factory.newFeatureMap();
+        if(tokeniserRulesURL != null)
+          params.put(SimpleTokeniser.SIMP_TOK_RULES_URL_PARAMETER_NAME,
+                     tokeniserRulesURL);
+        params.put(SimpleTokeniser.SIMP_TOK_ENCODING_PARAMETER_NAME, encoding);
+        if(DEBUG) Out.prln("Parameters for the tokeniser: \n" + params);
+        features = Factory.newFeatureMap();
+        Gate.setHiddenAttribute(features, true);
+        tokeniser = (SimpleTokeniser)Factory.createResource(
+                "gate.creole.tokeniser.SimpleTokeniser",
+                params, features);
+        tokeniser.setName("Tokeniser " + System.currentTimeMillis());
+      }
+      else {
+        tokeniser.reInit();
+      }
+      
       fireProgressChanged(50);
 
-      //transducer
-      fireStatusChanged("Creating a Jape transducer");
-      params.clear();
-      if(transducerGrammarURL != null)
-       params.put(Transducer.TRANSD_GRAMMAR_URL_PARAMETER_NAME,
-                                                  transducerGrammarURL);
-      params.put(Transducer.TRANSD_ENCODING_PARAMETER_NAME, encoding);
-      if(DEBUG) Out.prln("Parameters for the transducer: \n" + params);
-      features.clear();
-      Gate.setHiddenAttribute(features, true);
-      transducer = (Transducer)Factory.createResource("gate.creole.Transducer",
-                                                      params, features);
+      if (transducer == null) {
+        //transducer
+        fireStatusChanged("Creating a Jape transducer");
+        params = Factory.newFeatureMap();
+        if(transducerGrammarURL != null)
+          params.put(Transducer.TRANSD_GRAMMAR_URL_PARAMETER_NAME,
+                  transducerGrammarURL);
+        params.put(Transducer.TRANSD_ENCODING_PARAMETER_NAME, encoding);
+        if(DEBUG) Out.prln("Parameters for the transducer: \n" + params);
+        features = Factory.newFeatureMap();
+        Gate.setHiddenAttribute(features, true);
+        transducer = (Transducer)Factory.createResource("gate.creole.Transducer",
+                params, features);
+        transducer.setName("Transducer " + System.currentTimeMillis());
+      }
+      else {
+        transducer.reInit();
+      }
       fireProgressChanged(100);
       fireProcessFinished();
-      transducer.setName("Transducer " + System.currentTimeMillis());
+      
     }catch(ResourceInstantiationException rie){
       throw rie;
     }catch(Exception e){
       throw new ResourceInstantiationException(e);
     }
     return this;
+  }
+  
+  public void cleanup() {
+    Factory.deleteResource(transducer);
+    Factory.deleteResource(tokeniser);
   }
 
   public void execute() throws ExecutionException{
