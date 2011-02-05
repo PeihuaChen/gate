@@ -44,14 +44,15 @@ public class DefaultTokeniser extends AbstractLanguageAnalyser implements Benchm
       FeatureMap params;
       FeatureMap features;
 
+      params = Factory.newFeatureMap();
+      if(tokeniserRulesURL != null)
+        params.put(SimpleTokeniser.SIMP_TOK_RULES_URL_PARAMETER_NAME,
+                   tokeniserRulesURL);
+      params.put(SimpleTokeniser.SIMP_TOK_ENCODING_PARAMETER_NAME, encoding);
+
       if (tokeniser == null) {
         //tokeniser
         fireStatusChanged("Creating a tokeniser");
-        params = Factory.newFeatureMap();
-        if(tokeniserRulesURL != null)
-          params.put(SimpleTokeniser.SIMP_TOK_RULES_URL_PARAMETER_NAME,
-                     tokeniserRulesURL);
-        params.put(SimpleTokeniser.SIMP_TOK_ENCODING_PARAMETER_NAME, encoding);
         if(DEBUG) Out.prln("Parameters for the tokeniser: \n" + params);
         features = Factory.newFeatureMap();
         Gate.setHiddenAttribute(features, true);
@@ -61,19 +62,21 @@ public class DefaultTokeniser extends AbstractLanguageAnalyser implements Benchm
         tokeniser.setName("Tokeniser " + System.currentTimeMillis());
       }
       else {
+        tokeniser.setParameterValues(params);
         tokeniser.reInit();
       }
       
       fireProgressChanged(50);
 
+      params = Factory.newFeatureMap();
+      if(transducerGrammarURL != null)
+        params.put(Transducer.TRANSD_GRAMMAR_URL_PARAMETER_NAME,
+                transducerGrammarURL);
+      params.put(Transducer.TRANSD_ENCODING_PARAMETER_NAME, encoding);
+
       if (transducer == null) {
         //transducer
         fireStatusChanged("Creating a Jape transducer");
-        params = Factory.newFeatureMap();
-        if(transducerGrammarURL != null)
-          params.put(Transducer.TRANSD_GRAMMAR_URL_PARAMETER_NAME,
-                  transducerGrammarURL);
-        params.put(Transducer.TRANSD_ENCODING_PARAMETER_NAME, encoding);
         if(DEBUG) Out.prln("Parameters for the transducer: \n" + params);
         features = Factory.newFeatureMap();
         Gate.setHiddenAttribute(features, true);
@@ -82,6 +85,7 @@ public class DefaultTokeniser extends AbstractLanguageAnalyser implements Benchm
         transducer.setName("Transducer " + System.currentTimeMillis());
       }
       else {
+        transducer.setParameterValues(params);
         transducer.reInit();
       }
       fireProgressChanged(100);
