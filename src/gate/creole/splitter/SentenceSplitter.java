@@ -67,14 +67,15 @@ public class SentenceSplitter extends AbstractLanguageAnalyser implements Benchm
     FeatureMap params;
     FeatureMap features;
 
+    params = Factory.newFeatureMap();
+    if(gazetteerListsURL != null)
+      params.put(DefaultGazetteer.DEF_GAZ_LISTS_URL_PARAMETER_NAME,
+              gazetteerListsURL);
+    params.put(DefaultGazetteer.DEF_GAZ_ENCODING_PARAMETER_NAME, encoding);
+
     if (gazetteer == null) {
       //gazetteer
       fireStatusChanged("Creating the gazetteer");
-      params = Factory.newFeatureMap();
-      if(gazetteerListsURL != null)
-        params.put(DefaultGazetteer.DEF_GAZ_LISTS_URL_PARAMETER_NAME,
-                gazetteerListsURL);
-      params.put(DefaultGazetteer.DEF_GAZ_ENCODING_PARAMETER_NAME, encoding);
       features = Factory.newFeatureMap();
       Gate.setHiddenAttribute(features, true);
 
@@ -84,19 +85,20 @@ public class SentenceSplitter extends AbstractLanguageAnalyser implements Benchm
       gazetteer.setName("Gazetteer " + System.currentTimeMillis());
     }
     else {
+      gazetteer.setParameterValues(params);
       gazetteer.reInit();
     }
     
     fireProgressChanged(10);
 
+    params = Factory.newFeatureMap();
+    if(transducerURL != null)
+      params.put(Transducer.TRANSD_GRAMMAR_URL_PARAMETER_NAME, transducerURL);
+    params.put(Transducer.TRANSD_ENCODING_PARAMETER_NAME, encoding);
+
     if (transducer == null) {
       //transducer
       fireStatusChanged("Creating the JAPE transducer");
-
-      params = Factory.newFeatureMap();
-      if(transducerURL != null)
-        params.put(Transducer.TRANSD_GRAMMAR_URL_PARAMETER_NAME, transducerURL);
-      params.put(Transducer.TRANSD_ENCODING_PARAMETER_NAME, encoding);
       features = Factory.newFeatureMap();
       Gate.setHiddenAttribute(features, true);
 
@@ -106,6 +108,7 @@ public class SentenceSplitter extends AbstractLanguageAnalyser implements Benchm
       transducer.setName("Transducer " + System.currentTimeMillis());
     }
     else {
+      transducer.setParameterValues(params);
       transducer.reInit();
     }
     
