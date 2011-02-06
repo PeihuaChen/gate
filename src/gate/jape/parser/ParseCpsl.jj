@@ -836,7 +836,7 @@ void MacroDef() :
     LOOKAHEAD(2) // both blocks and PEs may start with "{"
     body=PatternElement(null)
     |
-    body=Action()
+    body=Action(false)
   )
   {
     macrosMap.put(macroNameTok.image, body);
@@ -1231,11 +1231,11 @@ RightHandSide RightHandSide(
   RightHandSide rhs = new RightHandSide(phaseName, ruleName, lhs, imports);
 }
 {
-  block=Action() {
+  block=Action(true) {
     rhs.addBlock(block[0], block[1]);
   }
   (
-    <comma> block=Action() {
+    <comma> block=Action(true) {
       rhs.addBlock(block[0], block[1]);
     }
   )*
@@ -1247,8 +1247,12 @@ RightHandSide RightHandSide(
 
 
 // actions return 2 strings, one for the name of the block, and
-// one for the block itself. if the name is null, it is an anonymous block
-String[] Action() :
+// one for the block itself. if the name is null, it is an anonymous block.
+// The checkLabel parameter indicates whether named blocks should check
+// at parse time that the label they refer to is bound.  Actions in
+// a MacroDef can't make this check at parse time, but instead the
+// check is done when the macro is referenced.
+String[] Action(boolean checkLabel) :
 {
   String[] block = new String[2];
   Token macroRefTok = null;
@@ -1258,9 +1262,9 @@ String[] Action() :
     // both named blocks and assignments start with ":"<ident>, so:
     LOOKAHEAD(3)
 
-      block=NamedJavaBlock()
+      block=NamedJavaBlock(checkLabel)
     | block=AnonymousJavaBlock()
-    | block=AssignmentExpression()
+    | block=AssignmentExpression(checkLabel)
     | macroRefTok=<ident> // macro reference
     {
       Object macro = macrosMap.get(macroRefTok.image);
@@ -1282,6 +1286,13 @@ String[] Action() :
         );
       else { // macro is an action
         block = (String[]) macro;
+        // if the macro is a named block or assignment, check that
+        // the label is valid
+        if(block[0] != null && !bindingNameSet.contains(block[0])) {
+          throw(new ParseException(errorMsgPrefix(macroRefTok)+
+            "RHS macro reference " + macroRefTok.image +
+            " refers to unknown label: " + block[0]));
+        }
       }
     } // macro reference
   )
@@ -1292,7 +1303,11 @@ String[] Action() :
 } // Action
 
 
-String[] NamedJavaBlock() :
+// A :bind { ... } code block.  The checkLabel parameter
+// indicates whether or not we should check *at parse time* that the
+// :bind label is valid.  Assignments that are the body of a MacroDef
+// can't check this at parse time but will be checked at reference time
+String[] NamedJavaBlock(boolean checkLabel) :
 {
   String[] block = new String[2];
   Token nameTok = null;
@@ -1301,7 +1316,7 @@ String[] NamedJavaBlock() :
   <colon> nameTok=<ident> {
     block[0] = nameTok.image;
     // did we get a non-existent block name?
-    if(block[0] != null)
+    if(checkLabel && block[0] != null)
       if(! bindingNameSet.contains(block[0])) {
         throw(new ParseException(errorMsgPrefix(nameTok)+
           "unknown label in RHS action: " + block[0]));
@@ -1325,7 +1340,11 @@ String[] AnonymousJavaBlock() :
 } // AnonymousJavaBlock
 
 
-String[] AssignmentExpression() :
+// A :bind.Type = {features} assignment.  The checkLabel parameter
+// indicates whether or not we should check *at parse time* that the
+// :bind label is valid.  Assignments that are the body of a MacroDef
+// can't check this at parse time but will be checked at reference time
+String[] AssignmentExpression(boolean checkLabel) :
 {
   String[] block = new String[2];
   StringBuffer blockBuffer = new StringBuffer();
@@ -1363,7 +1382,7 @@ String[] AssignmentExpression() :
   nameTok=<ident> {
     block[0] = nameTok.image;
     // did we get a non-existent block name?
-    if(block[0] != null)
+    if(checkLabel && block[0] != null)
       if(! bindingNameSet.contains(block[0])) {
         throw(new ParseException(errorMsgPrefix(nameTok)+
           "unknown label in RHS action: " + block[0]));
@@ -1449,7 +1468,7 @@ String[] AssignmentExpression() :
       (
         <colon> nameTok=<ident> {
           existingAnnotSetName = nameTok.image + "ExistingAnnots";
-          if(! bindingNameSet.contains(nameTok.image))
+          if(checkLabel && ! bindingNameSet.contains(nameTok.image))
             throw(
               new ParseException(errorMsgPrefix(nameTok)+
                 "unknown label in RHS action(2): " + nameTok.image

@@ -753,7 +753,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       case colon:
       case leftBrace:
       case colonplus:
-        body = Action();
+        body = Action(false);
         break;
       default:
         jj_la1[15] = jj_gen;
@@ -1266,7 +1266,7 @@ AnnotationAccessor accessor = null;
   final public RightHandSide RightHandSide(String phaseName, String ruleName, LeftHandSide lhs, String imports) throws ParseException {
   String[] block = new String[2];
   RightHandSide rhs = new RightHandSide(phaseName, ruleName, lhs, imports);
-    block = Action();
+    block = Action(true);
     rhs.addBlock(block[0], block[1]);
     label_13:
     while (true) {
@@ -1279,7 +1279,7 @@ AnnotationAccessor accessor = null;
         break label_13;
       }
       jj_consume_token(comma);
-      block = Action();
+      block = Action(true);
       rhs.addBlock(block[0], block[1]);
     }
     {if (true) return rhs;} /* action class not created yet */
@@ -1291,12 +1291,16 @@ AnnotationAccessor accessor = null;
 
 
 // actions return 2 strings, one for the name of the block, and
-// one for the block itself. if the name is null, it is an anonymous block
-  final public String[] Action() throws ParseException {
+// one for the block itself. if the name is null, it is an anonymous block.
+// The checkLabel parameter indicates whether named blocks should check
+// at parse time that the label they refer to is bound.  Actions in
+// a MacroDef can't make this check at parse time, but instead the
+// check is done when the macro is referenced.
+  final public String[] Action(boolean checkLabel) throws ParseException {
   String[] block = new String[2];
   Token macroRefTok = null;
     if (jj_2_2(3)) {
-      block = NamedJavaBlock();
+      block = NamedJavaBlock(checkLabel);
     } else {
       switch (jj_nt.kind) {
       case leftBrace:
@@ -1304,7 +1308,7 @@ AnnotationAccessor accessor = null;
         break;
       case colon:
       case colonplus:
-        block = AssignmentExpression();
+        block = AssignmentExpression(checkLabel);
         break;
       case ident:
         macroRefTok = jj_consume_token(ident);
@@ -1327,6 +1331,13 @@ AnnotationAccessor accessor = null;
         );}
       else { // macro is an action
         block = (String[]) macro;
+        // if the macro is a named block or assignment, check that
+        // the label is valid
+        if(block[0] != null && !bindingNameSet.contains(block[0])) {
+          {if (true) throw(new ParseException(errorMsgPrefix(macroRefTok)+
+            "RHS macro reference " + macroRefTok.image +
+            " refers to unknown label: " + block[0]));}
+        }
       }
         break;
       default:
@@ -1340,14 +1351,20 @@ AnnotationAccessor accessor = null;
   }
 
   // Action
-  final public String[] NamedJavaBlock() throws ParseException {
+
+
+// A :bind { ... } code block.  The checkLabel parameter
+// indicates whether or not we should check *at parse time* that the
+// :bind label is valid.  Assignments that are the body of a MacroDef
+// can't check this at parse time but will be checked at reference time
+  final public String[] NamedJavaBlock(boolean checkLabel) throws ParseException {
   String[] block = new String[2];
   Token nameTok = null;
     jj_consume_token(colon);
     nameTok = jj_consume_token(ident);
     block[0] = nameTok.image;
     // did we get a non-existent block name?
-    if(block[0] != null)
+    if(checkLabel && block[0] != null)
       if(! bindingNameSet.contains(block[0])) {
         {if (true) throw(new ParseException(errorMsgPrefix(nameTok)+
           "unknown label in RHS action: " + block[0]));}
@@ -1369,7 +1386,13 @@ AnnotationAccessor accessor = null;
   }
 
   // AnonymousJavaBlock
-  final public String[] AssignmentExpression() throws ParseException {
+
+
+// A :bind.Type = {features} assignment.  The checkLabel parameter
+// indicates whether or not we should check *at parse time* that the
+// :bind label is valid.  Assignments that are the body of a MacroDef
+// can't check this at parse time but will be checked at reference time
+  final public String[] AssignmentExpression(boolean checkLabel) throws ParseException {
   String[] block = new String[2];
   StringBuffer blockBuffer = new StringBuffer();
   Token nameTok = null;
@@ -1406,7 +1429,7 @@ AnnotationAccessor accessor = null;
       nameTok = jj_consume_token(ident);
     block[0] = nameTok.image;
     // did we get a non-existent block name?
-    if(block[0] != null)
+    if(checkLabel && block[0] != null)
       if(! bindingNameSet.contains(block[0])) {
         {if (true) throw(new ParseException(errorMsgPrefix(nameTok)+
           "unknown label in RHS action: " + block[0]));}
@@ -1495,7 +1518,7 @@ AnnotationAccessor accessor = null;
         jj_consume_token(colon);
         nameTok = jj_consume_token(ident);
           existingAnnotSetName = nameTok.image + "ExistingAnnots";
-          if(! bindingNameSet.contains(nameTok.image))
+          if(checkLabel && ! bindingNameSet.contains(nameTok.image))
             {if (true) throw(
               new ParseException(errorMsgPrefix(nameTok)+
                 "unknown label in RHS action(2): " + nameTok.image
@@ -1698,18 +1721,6 @@ AnnotationAccessor accessor = null;
     finally { jj_save(1, xla); }
   }
 
-  final private boolean jj_3_2() {
-    if (jj_3R_16()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_16() {
-    if (jj_scan_token(colon)) return true;
-    if (jj_scan_token(ident)) return true;
-    if (jj_scan_token(leftBrace)) return true;
-    return false;
-  }
-
   final private boolean jj_3_1() {
     if (jj_3R_15()) return true;
     return false;
@@ -1764,6 +1775,13 @@ AnnotationAccessor accessor = null;
     return false;
   }
 
+  final private boolean jj_3R_16() {
+    if (jj_scan_token(colon)) return true;
+    if (jj_scan_token(ident)) return true;
+    if (jj_scan_token(leftBrace)) return true;
+    return false;
+  }
+
   final private boolean jj_3R_17() {
     if (jj_scan_token(ident)) return true;
     return false;
@@ -1772,6 +1790,11 @@ AnnotationAccessor accessor = null;
   final private boolean jj_3R_22() {
     if (jj_scan_token(leftBrace)) return true;
     if (jj_3R_25()) return true;
+    return false;
+  }
+
+  final private boolean jj_3_2() {
+    if (jj_3R_16()) return true;
     return false;
   }
 
