@@ -31,7 +31,7 @@
 			<string>lib/ant-launcher.jar</string>
 		</array>
 		<key>JVMVersion</key>
-		<string>1.5+</string>
+		<string>1.6+</string>
 		<key>MainClass</key>
 		<string>org.apache.tools.ant.launch.Launcher</string>
 		<key>Properties</key>
