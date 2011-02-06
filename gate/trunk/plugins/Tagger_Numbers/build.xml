@@ -1,7 +1,7 @@
 <project name="Numbers" basedir=".">
 	<property file="build.properties" />
 
-	<property name="gate.home" location="../../../../gate" />
+	<property name="gate.home" location="../.." />
 	<property name="gate.lib" location="${gate.home}/lib" />
 	<property name="src.dir" location="src" />
 	<property name="classes.dir" location="classes" />
