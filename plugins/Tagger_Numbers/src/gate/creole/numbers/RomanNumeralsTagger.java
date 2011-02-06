@@ -40,11 +40,11 @@ import java.util.regex.Pattern;
 /**
  * A GATE PR which annotates Roman Numerals with their numeric value.
  * 
- * @see <a href="http://gate.ac.uk/userguide/">The GATE User Guide</a>
+ * @see <a href="http://gate.ac.uk/userguide/sec:misc-creole:numbers:roman">The GATE User Guide</a>
  * @author Mark A. Greenwood
  * @author Valentin Tablan
  */
-@CreoleResource(name = "Roman Numerals Tagger", comment = "Finds and annotates Roman numerals", icon = "roman.png")
+@CreoleResource(name = "Roman Numerals Tagger", comment = "Finds and annotates Roman numerals", icon = "roman.png", helpURL="http://gate.ac.uk/userguide/sec:misc-creole:numbers:roman")
 public class RomanNumeralsTagger extends AbstractLanguageAnalyser {
 
   private static final long serialVersionUID = 8568794158677464398L;
