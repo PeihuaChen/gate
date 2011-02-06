@@ -63,11 +63,11 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * the annotations produced can also be used as a preliminary step towards more
  * complex annotations such as measurements or monetary units.
  * 
- * @see <a href="http://gate.ac.uk/userguide/">The GATE User Guide</a>
+ * @see <a href="http://gate.ac.uk/userguide/sec:misc-creole:numbers:numbers">The GATE User Guide</a>
  * @author Mark A. Greenwood
  * @author Thomas Heitz
  */
-@CreoleResource(name = "Numbers Tagger", comment = "Finds numbers in (both words and digits) and annotates them with their numeric value", icon = "numbers.png")
+@CreoleResource(name = "Numbers Tagger", comment = "Finds numbers in (both words and digits) and annotates them with their numeric value", icon = "numbers.png", helpURL="http://gate.ac.uk/userguide/sec:misc-creole:numbers:numbers")
 public class NumbersTagger extends AbstractLanguageAnalyser {
 
   private static final long serialVersionUID = 8568794158677464398L;
