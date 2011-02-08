@@ -76,7 +76,7 @@ public @interface CreoleParameter {
   /**
    * The default value for the parameter, expressed as a string. For
    * non-string parameters, follow the rules given in the <a
-   * href="http://gate.ac.uk/userguide/sec:howto:creoleconfig">user
+   * href="http://gate.ac.uk/userguide/sec:creole-model:config:xml">user
    * guide</a>. If not specified, the default is <code>null</code>.
    */
   String defaultValue() default NO_DEFAULT_VALUE;
