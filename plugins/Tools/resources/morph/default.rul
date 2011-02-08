@@ -34,6 +34,7 @@ defineRules
 <verb>"wast"{ESEDING}  ==> semi_reg_stem(0,"e")
 
 
+
 // WordNet irregular verb exceptions
 
 <verb>abode  ==> irreg_stem("abide","ed")
@@ -1453,3 +1454,8 @@ defineRules
 <verb>"'ve"  ==> irreg_stem("have","")
 
 <*>{A}+"'s" ==> stem(2,"","'")
+
+
+// Result of tokenizing "can't" 
+<verb>ca  ==> irreg_stem("can","")
+
