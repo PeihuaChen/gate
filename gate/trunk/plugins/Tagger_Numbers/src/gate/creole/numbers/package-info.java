@@ -12,7 +12,7 @@
  * appearing within documents. As well as annotating the numbers the value of
  * the number is determined and added as a feature on the annotation.
  * 
- * @see <a href="http://gate.ac.uk/userguide/sec:misc-creole:numbers">The GATE User Guide</a>
+ * @see <a href="http://gate.ac.uk/userguide/sec:parsers:numbers">The GATE User Guide</a>
  * @author Mark A. Greenwood
  * @author Valentin Tablan
  * @author Thomas Heitz
