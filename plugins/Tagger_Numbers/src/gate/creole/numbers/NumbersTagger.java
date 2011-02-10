@@ -30,6 +30,7 @@ import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
+import gate.util.BomStrippingInputStreamReader;
 import gate.util.InvalidOffsetException;
 
 import java.io.IOException;
@@ -456,8 +457,8 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
       // attempt to load the configuration from the supplied URL
       XStream xstream =
               Config.getXStream(configURL, getClass().getClassLoader());
-      InputStreamReader in =
-              new InputStreamReader(configURL.openStream(), encoding);
+      BomStrippingInputStreamReader in =
+              new BomStrippingInputStreamReader(configURL.openStream(), encoding);
       config = (Config)xstream.fromXML(in);
       in.close();
     } catch(Exception e) {
@@ -633,9 +634,9 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
           String encoding = entry.getValue();
           XStream xstream = getXStream(url, getClass().getClassLoader());
 
-          InputStreamReader in = null;
+          BomStrippingInputStreamReader in = null;
           try {
-            in = new InputStreamReader(url.openStream(), encoding);
+            in = new BomStrippingInputStreamReader(url.openStream(), encoding);
 
             // load the config file and then...
             Config c = (Config)xstream.fromXML(in);
