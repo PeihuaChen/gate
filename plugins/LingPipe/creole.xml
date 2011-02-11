@@ -4,7 +4,7 @@
     <!-- creole.xml for LingPipe resources -->
     <RESOURCE>
       <JAR>lingpipe.jar</JAR>
-      <JAR>lib/lingpipe-3.8.1.jar</JAR>
+      <JAR>lib/lingpipe-4.0.1.jar</JAR>
       <NAME>LingPipe Tokenizer PR</NAME>
       <CLASS>gate.lingpipe.TokenizerPR</CLASS>
       <COMMENT>Provides a LingPipe tokenizer.</COMMENT>
@@ -15,7 +15,7 @@
 
     <RESOURCE>
       <JAR>lingpipe.jar</JAR>
-      <JAR>lib/lingpipe-3.8.1.jar</JAR>
+      <JAR>lib/lingpipe-4.0.1.jar</JAR>
       <NAME>LingPipe NER PR</NAME>
       <CLASS>gate.lingpipe.NamedEntityRecognizerPR</CLASS>
       <COMMENT>LingPipe Named Entity Recognizer</COMMENT>
@@ -27,14 +27,14 @@
 
     <RESOURCE>
       <JAR SCAN="true">lingpipe.jar</JAR>
-      <JAR>lib/lingpipe-3.8.1.jar</JAR>
+      <JAR>lib/lingpipe-4.0.1.jar</JAR>
       <CLASS>gate.lingpipe.LanguageIdentifierPR</CLASS>
     </RESOURCE>
 
 
     <RESOURCE>
       <JAR>lingpipe.jar</JAR>
-      <JAR>lib/lingpipe-3.8.1.jar</JAR>
+      <JAR>lib/lingpipe-4.0.1.jar</JAR>
       <NAME>LingPipe POS Tagger PR</NAME>
       <CLASS>gate.lingpipe.POSTaggerPR</CLASS>
       <COMMENT>Provides a LingPipe part of speech tagger.</COMMENT>
@@ -47,7 +47,7 @@
 
     <RESOURCE>
       <JAR>lingpipe.jar</JAR>
-      <JAR>lib/lingpipe-3.8.1.jar</JAR>
+      <JAR>lib/lingpipe-4.0.1.jar</JAR>
       <NAME>LingPipe Sentence Splitter PR</NAME>
       <CLASS>gate.lingpipe.SentenceSplitterPR</CLASS>
       <COMMENT>Provides an interface to LingPipe sentence splitter API.</COMMENT>

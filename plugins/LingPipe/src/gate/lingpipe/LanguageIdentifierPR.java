@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import com.aliasi.classify.Classification;
-import com.aliasi.classify.Classifier;
+import com.aliasi.classify.LMClassifier;
 import com.aliasi.util.AbstractExternalizable;
 import gate.creole.metadata.*;
 
@@ -62,7 +62,7 @@ public class LanguageIdentifierPR
   protected File modelFile;
 
   /** classifier object */
-  protected Classifier<CharSequence, Classification> classifier;
+  protected LMClassifier classifier;
 
   /** document feature name */
   protected String languageIdFeatureName;
@@ -75,7 +75,6 @@ public class LanguageIdentifierPR
    * @return Resource
    * @throws ResourceInstantiationException
    */
-  @SuppressWarnings("unchecked")
   public Resource init() throws ResourceInstantiationException {
     if(modelFileUrl == null)
       throw new ResourceInstantiationException("No model file provided!");
@@ -93,7 +92,7 @@ public class LanguageIdentifierPR
     }
 
     try {
-      classifier = (Classifier<CharSequence, Classification>) AbstractExternalizable.readObject(modelFile);
+      classifier = (LMClassifier) AbstractExternalizable.readObject(modelFile);
     }
     catch(IOException e) {
       throw new ResourceInstantiationException(e);
