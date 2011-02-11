@@ -34,7 +34,6 @@ import gate.util.BomStrippingInputStreamReader;
 import gate.util.InvalidOffsetException;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
