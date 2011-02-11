@@ -64,7 +64,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * the annotations produced can also be used as a preliminary step towards more
  * complex annotations such as measurements or monetary units.
  * 
- * @see <a href="http://gate.ac.uk/userguide/sec:parsers:numbers:numbers">The GATE User Guide</a>
+ * @see <a href="http://gate.ac.uk/userguide/sec:misc-creole:numbers:numbers">The GATE User Guide</a>
  * @author Mark A. Greenwood
  * @author Thomas Heitz
  */
