@@ -8,28 +8,20 @@ import gate.Resource;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
-import gate.util.InvalidOffsetException;
 import gate.util.OffsetComparator;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import java.util.*;
+import com.aliasi.classify.ConditionalClassification;
 import com.aliasi.hmm.HiddenMarkovModel;
 import com.aliasi.hmm.HmmDecoder;
-import com.aliasi.hmm.TagWordLattice;
-import com.aliasi.util.ScoredObject;
+import com.aliasi.tag.ScoredTagging;
+import com.aliasi.tag.TagLattice;
+import com.aliasi.tag.Tagging;
 import com.aliasi.util.Streams;
 
 /**
@@ -40,6 +32,9 @@ import com.aliasi.util.Streams;
 public class POSTaggerPR extends AbstractLanguageAnalyser implements
                                                        ProcessingResource {
 
+  private static final long serialVersionUID = -1159974411962638525L;
+
+  
   /** File which cotains model for NE */
   protected URL modelFileUrl;
 
@@ -88,7 +83,7 @@ public class POSTaggerPR extends AbstractLanguageAnalyser implements
       FileInputStream fileIn = new FileInputStream(modelFile);
       ObjectInputStream objIn = new ObjectInputStream(fileIn);
       HiddenMarkovModel hmm = (HiddenMarkovModel)objIn.readObject();
-      Streams.closeInputStream(objIn);
+      Streams.closeQuietly(objIn);
       decoder = new HmmDecoder(hmm);
     }
     catch(IOException ioe) {
@@ -128,27 +123,21 @@ public class POSTaggerPR extends AbstractLanguageAnalyser implements
 
     List<Annotation> tokenList = new ArrayList<Annotation>(inputAs.get("Token"));
     Collections.sort(tokenList, new OffsetComparator());
-    String[] tokens = new String[tokenList.size()];
+    List<String> tokenStrList = new ArrayList<String>();
     for(int i = 0; i < tokenList.size(); i++) {
       Annotation ann = tokenList.get(i);
-      try {
-        tokens[i] = document.getContent().getContent(
-                ann.getStartNode().getOffset(), ann.getEndNode().getOffset())
-                .toString();
-      }
-      catch(InvalidOffsetException e) {
-        throw new ExecutionException(e);
-      }
+      String underlying = gate.Utils.stringFor(document, ann);
+      tokenStrList.add(underlying);
     }
 
     if(applicationMode == POSApplicationMode.FIRSTBEST) {
-      String[] tags = firstBest(tokens, decoder);
-      for(int m = 0; m < tags.length; m++) {
-        tokenList.get(m).getFeatures().put("category", tags[m]);
+      List<String> tags = firstBest(tokenStrList, decoder);
+      for(int m = 0; m < tags.size(); m++) {
+        tokenList.get(m).getFeatures().put("category", tags.get(m));
       }
     }
     else if(applicationMode == POSApplicationMode.CONFIDENCE) {
-      List<Map<String, Double>> tags = confidence(tokens, decoder);
+      List<Map<String, Double>> tags = confidence(tokenStrList, decoder);
       for(int m = 0; m < tags.size(); m++) {
         tokenList.get(m).getFeatures().put("category", tags.get(m));
       }
@@ -156,21 +145,21 @@ public class POSTaggerPR extends AbstractLanguageAnalyser implements
     else {
       // key is the overall score for the tagset
       // value is the tagset for the entire document
-      Map<Double, String[]> tags = nBest(tokens, decoder);
+      Map<Double, List<String>> tags = nBest(tokenStrList, decoder);
       for(Double score : tags.keySet()) {
-        String[] theTags = tags.get(score);
-        for(int m = 0; m < theTags.length; m++) {
+        List<String> theTags = tags.get(score);
+        for(int m = 0; m < theTags.size(); m++) {
           FeatureMap f = tokenList.get(m).getFeatures();
-          Map<String, Set<Double>> scores = (Map<String, Set<Double>>)f.get("category");
+          Map<String, Set<Double>> scores = (Map<String, Set<Double>>) f.get("category");
           if(scores == null) {
             scores = new HashMap<String, Set<Double>>();
             f.put("category", scores);
           }
           
-          Set<Double> vals = scores.get(theTags[m]);
+          Set<Double> vals = scores.get(theTags.get(m));
           if(vals == null) {
             vals = new HashSet<Double>();
-            scores.put(theTags[m], vals);
+            scores.put(theTags.get(m), vals);
           }
           vals.add(score);
         }
@@ -187,8 +176,9 @@ public class POSTaggerPR extends AbstractLanguageAnalyser implements
    * @param decoder
    * @return an array of pos tags.
    */
-  private String[] firstBest(String[] tokens, HmmDecoder decoder) {
-    return decoder.firstBest(tokens);
+  private List<String> firstBest(List<String> tokens, HmmDecoder decoder) {
+    Tagging<String> tagging = decoder.tag(tokens);
+    return tagging.tags();
   }
 
   /**
@@ -197,13 +187,13 @@ public class POSTaggerPR extends AbstractLanguageAnalyser implements
    * @param decoder
    * @return
    */
-  private Map<Double, String[]> nBest(String[] tokens, HmmDecoder decoder) {
-    Map<Double, String[]> toReturn = new HashMap<Double, String[]>();
-    Iterator<ScoredObject<String[]>> nBestIt = decoder.nBest(tokens);
+  private Map<Double, List<String>> nBest(List<String> tokens, HmmDecoder decoder) {
+    Map<Double, List<String>> toReturn = new HashMap<Double, List<String>>();
+    Iterator<ScoredTagging<String>> nBestIt = decoder.tagNBest(tokens, 5);
     for(int n = 0; n < nBest.intValue() && nBestIt.hasNext(); ++n) {
-      ScoredObject<String[]> tagScores = (ScoredObject<String[]>)nBestIt.next();
+      ScoredTagging<String> tagScores = (ScoredTagging<String>) nBestIt.next();
       double score = tagScores.score();
-      String[] tags = (String[])tagScores.getObject();
+      List<String> tags = tagScores.tags();
       toReturn.put(new Double(score), tags);
     }
     return toReturn;
@@ -215,19 +205,19 @@ public class POSTaggerPR extends AbstractLanguageAnalyser implements
    * @param decoder
    * @return
    */
-  private List<Map<String, Double>> confidence(String[] tokens,
+  private List<Map<String, Double>> confidence(List<String> tokens,
           HmmDecoder decoder) {
     List<Map<String, Double>> toReturn = new ArrayList<Map<String, Double>>();
-    TagWordLattice lattice = decoder.lattice(tokens);
-    for(int tokenIndex = 0; tokenIndex < tokens.length; ++tokenIndex) {
-      List<ScoredObject<String>> tagScores = lattice
-              .log2ConditionalTagList(tokenIndex);
+    TagLattice<String> lattice = decoder.tagMarginal(tokens);
+    for(int tokenIndex = 0; tokenIndex < tokens.size(); ++tokenIndex) {
+      ConditionalClassification tagScores = lattice.tokenClassification(tokenIndex);
 
       Map<String, Double> map = new HashMap<String, Double>();
-      for(int i = 0; i < 5; ++i) {
-        double logProb = tagScores.get(i).score();
-        double conditionalProb = java.lang.Math.pow(2.0, logProb);
-        String tag = tagScores.get(i).getObject();
+      for(int i = 0; i < tagScores.size(); ++i) {
+        //double logProb = tagScores.get(i).score();
+        //double conditionalProb = java.lang.Math.pow(2.0, logProb);
+        double conditionalProb = tagScores.conditionalProbability(i);
+        String tag = tagScores.category(i);
         map.put(tag, new Double(conditionalProb));
       }
       toReturn.add(map);
