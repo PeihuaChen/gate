@@ -40,7 +40,7 @@ import java.util.regex.Pattern;
 /**
  * A GATE PR which annotates Roman Numerals with their numeric value.
  * 
- * @see <a href="http://gate.ac.uk/userguide/sec:parsers:numbers:roman">The GATE User Guide</a>
+ * @see <a href="http://gate.ac.uk/userguide/sec:misc-creole:numbers:roman">The GATE User Guide</a>
  * @author Mark A. Greenwood
  * @author Valentin Tablan
  */
