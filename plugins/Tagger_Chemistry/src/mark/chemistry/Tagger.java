@@ -58,8 +58,8 @@ public class Tagger extends AbstractLanguageAnalyser implements
 
   // // Init parameters ////
   /**
-   * The URL of the gazetteer lists definition for spotting elements as part of
-   * compounds.
+   * The URL of the gazetteer lists definition for spotting elements as
+   * part of compounds.
    */
   private URL compoundListsURL;
 
@@ -80,8 +80,8 @@ public class Tagger extends AbstractLanguageAnalyser implements
   }
 
   /**
-   * The URL of the gazetteer lists definition for spotting elements on their
-   * own.
+   * The URL of the gazetteer lists definition for spotting elements on
+   * their own.
    */
   private URL elementListsURL;
 
@@ -129,17 +129,24 @@ public class Tagger extends AbstractLanguageAnalyser implements
   private List<String> elementSymbol, elementName;
 
   /**
-   * Create the tagger by creating the various gazetteers and JAPE transducers
-   * it uses.
+   * Create the tagger by creating the various gazetteers and JAPE
+   * transducers it uses.
    */
-  @Override public Resource init() throws ResourceInstantiationException {
+  @Override
+  public Resource init() throws ResourceInstantiationException {
     // sanity check parameters
-    if(compoundListsURL == null) { throw new ResourceInstantiationException(
-            "Compound lists URL must be specified"); }
-    if(elementListsURL == null) { throw new ResourceInstantiationException(
-            "Element lists URL must be specified"); }
-    if(transducerGrammarURL == null) { throw new ResourceInstantiationException(
-            "Transducer grammar URL must be specified"); }
+    if(compoundListsURL == null) {
+      throw new ResourceInstantiationException(
+              "Compound lists URL must be specified");
+    }
+    if(elementListsURL == null) {
+      throw new ResourceInstantiationException(
+              "Element lists URL must be specified");
+    }
+    if(transducerGrammarURL == null) {
+      throw new ResourceInstantiationException(
+              "Transducer grammar URL must be specified");
+    }
     elementSymbol = new ArrayList<String>();
     elementName = new ArrayList<String>();
     try {
@@ -153,28 +160,58 @@ public class Tagger extends AbstractLanguageAnalyser implements
         elementName.add(name.toLowerCase());
         symbol = in.readLine();
       }
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       throw new ResourceInstantiationException("Malformed element map file");
     }
     FeatureMap hidden = Factory.newFeatureMap();
     Gate.setHiddenAttribute(hidden, true);
+
     FeatureMap params = Factory.newFeatureMap();
     params.put("listsURL", compoundListsURL);
     params.put("wholeWordsOnly", Boolean.FALSE);
-    gazc = (LanguageAnalyser)Factory.createResource(
-            "gate.creole.gazetteer.DefaultGazetteer", params, hidden);
+    if(gazc == null) {
+      gazc = (LanguageAnalyser)Factory.createResource(
+              "gate.creole.gazetteer.DefaultGazetteer", params, hidden);
+    }
+    else {
+      gazc.setParameterValues(params);
+      gazc.reInit();
+    }
+
     params = Factory.newFeatureMap();
     params.put("listsURL", elementListsURL);
-    gazo = (LanguageAnalyser)Factory.createResource(
-            "gate.creole.gazetteer.DefaultGazetteer", params, hidden);
+    if(gazo == null) {
+      gazo = (LanguageAnalyser)Factory.createResource(
+              "gate.creole.gazetteer.DefaultGazetteer", params, hidden);
+    }
+    else {
+      gazo.setParameterValues(params);
+      gazo.reInit();
+    }
+
     params = Factory.newFeatureMap();
     params.put("grammarURL", transducerGrammarURL);
-    net = (LanguageAnalyser)Factory.createResource("gate.creole.Transducer",
-            params, hidden);
+    if(net == null) {
+      net = (LanguageAnalyser)Factory.createResource("gate.creole.Transducer",
+              params, hidden);
+    }
+    else {
+      net.setParameterValues(params);
+      net.reInit();
+    }
+    
     return this;
   }
 
-  @Override public void execute() throws ExecutionException {
+  public void cleanup() {
+    Factory.deleteResource(gazc);
+    Factory.deleteResource(gazo);
+    Factory.deleteResource(net);
+  }
+
+  @Override
+  public void execute() throws ExecutionException {
 
     Document doc = getDocument();
 
@@ -193,8 +230,7 @@ public class Tagger extends AbstractLanguageAnalyser implements
       throw new ExecutionException(rie);
     }
 
-    try
-    {
+    try {
       gazc.execute();
       gazo.execute();
       net.execute();
@@ -215,15 +251,14 @@ public class Tagger extends AbstractLanguageAnalyser implements
       if(temp != null) docAS.removeAll(temp);
       if(removeElements.booleanValue()) {
         params = Factory.newFeatureMap();
-        AnnotationSet compounds = docAS.get("ChemicalCompound",
-                params);
+        AnnotationSet compounds = docAS.get("ChemicalCompound", params);
         if(compounds != null) {
           Iterator<Annotation> cit = compounds.iterator();
           while(cit.hasNext()) {
             Annotation compound = cit.next();
-            AnnotationSet elements = docAS.get(
-                    "ChemicalElement", compound.getStartNode().getOffset(),
-                    compound.getEndNode().getOffset());
+            AnnotationSet elements = docAS.get("ChemicalElement", compound
+                    .getStartNode().getOffset(), compound.getEndNode()
+                    .getOffset());
             if(elements != null) {
               docAS.removeAll(elements);
             }
@@ -231,16 +266,16 @@ public class Tagger extends AbstractLanguageAnalyser implements
         }
       }
       params = Factory.newFeatureMap();
-      AnnotationSet elements = docAS.get("ChemicalElement",
-              params);
+      AnnotationSet elements = docAS.get("ChemicalElement", params);
       if(elements != null) {
         Iterator<Annotation> eit = elements.iterator();
         while(eit.hasNext()) {
           Annotation element = eit.next();
           try {
-            String span = doc.getContent().getContent(
-                    element.getStartNode().getOffset(),
-                    element.getEndNode().getOffset()).toString();
+            String span = doc
+                    .getContent()
+                    .getContent(element.getStartNode().getOffset(),
+                            element.getEndNode().getOffset()).toString();
             FeatureMap feats = element.getFeatures();
             String type = (String)feats.get("kind");
             if(type.equalsIgnoreCase("symbol")) {
@@ -252,7 +287,8 @@ public class Tagger extends AbstractLanguageAnalyser implements
               feats.put("uri",
                       "http://www.daml.org/2003/01/periodictable/PeriodicTable.owl#"
                               + span);
-            } else if(type.equalsIgnoreCase("name")) {
+            }
+            else if(type.equalsIgnoreCase("name")) {
               feats.put("name", span);
               int index = elementName.indexOf(span.toLowerCase());
               if(index != -1) {
@@ -263,11 +299,13 @@ public class Tagger extends AbstractLanguageAnalyser implements
                                 + symbol);
               }
             }
-          } catch(InvalidOffsetException ioe) {
+          }
+          catch(InvalidOffsetException ioe) {
           }
         }
       }
-    } finally {
+    }
+    finally {
       // make sure document references are released after use
       gazc.setDocument(null);
       gazo.setDocument(null);
