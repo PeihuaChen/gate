@@ -985,6 +985,17 @@ public class AnnotationDiffGUI extends JFrame{
         }
       }
     });
+
+    // define keystrokes action bindings at the level of the main window
+    InputMap inputMap = ((JComponent)this.getContentPane()).
+      getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+    ActionMap actionMap = ((JComponent)this.getContentPane()).getActionMap();
+    inputMap.put(KeyStroke.getKeyStroke("F1"), "Help");
+    actionMap.put("Help", new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        new HelpAction().actionPerformed(null);
+      }
+    });
   }
 
   public void pack(){
@@ -1054,16 +1065,18 @@ public class AnnotationDiffGUI extends JFrame{
         Set<Annotation> responses = new HashSet<Annotation>(
           resSet.get((String)annTypeCombo.getSelectedItem()));
         int countHidden = 0;
-        for (Annotation annotation : new ArrayList<Annotation>(keys)) {
-          if (annotation.getFeatures().containsKey("anndiffstep")) {
-            keys.remove(annotation); // previously copied
-            countHidden++;
+        if (bottomTabbedPane.getSelectedIndex() == 1) { // adjudication mode
+          for (Annotation annotation : new ArrayList<Annotation>(keys)) {
+            if (annotation.getFeatures().containsKey("anndiffstep")) {
+              keys.remove(annotation); // previously copied
+              countHidden++;
+            }
           }
-        }
-        for (Annotation annotation : new ArrayList<Annotation>(responses)) {
-          if (annotation.getFeatures().containsKey("anndiffstep")) {
-            responses.remove(annotation); // previously copied
-            countHidden++;
+          for (Annotation annotation : new ArrayList<Annotation>(responses)) {
+            if (annotation.getFeatures().containsKey("anndiffstep")) {
+              responses.remove(annotation); // previously copied
+              countHidden++;
+            }
           }
         }
         if(someFeaturesBtn.isSelected())
