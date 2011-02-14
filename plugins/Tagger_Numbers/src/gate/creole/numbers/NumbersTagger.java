@@ -213,11 +213,11 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
                                         Pattern.quote(config.decimalSymbol),
                                         ".")));
         hasNumbers = true;
-      } else if((value = config.words.get(word)) != null) {
+      } else if((value = config.words.get(word.toLowerCase())) != null) {
         // the word is a normal number so store it
         values.put(0d, values.get(0d) + value);
         hasWords = true;
-      } else if((value = config.multipliers.get(word)) != null) {
+      } else if((value = config.multipliers.get(word.toLowerCase())) != null) {
         // the word is a multiplier so...
 
         int sum = 0;
@@ -349,7 +349,7 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
       if(isInterrupted()) { throw new ExecutionInterruptedException(
               "The execution of the \"" + getName()
                       + "\" Numbers Tagger has been abruptly interrupted!"); }
-
+      
       // split the sequence of numbers into a list
       // TODO can we do this from the matching groups of the main regex?
       List<String> words = new ArrayList<String>();
@@ -513,7 +513,7 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
     }
 
     String separatorsRegex =
-            "(?:\\s{1,2}(?:-" + withSpaces + ")\\s{1,2}|\\s{1,2}|-"
+            "(?i:\\s{1,2}(?:-" + withSpaces + ")\\s{1,2}|\\s{1,2}|-"
                     + withoutSpaces + ")";
 
     // create a regex for recognising numbers written using numbers taking into
@@ -530,7 +530,7 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
     Collections.sort(list, lengthComparator);
 
     // put all the words into one big or regex
-    StringBuilder builder = new StringBuilder("(?:");
+    StringBuilder builder = new StringBuilder("(?i:");
     for(String word : list) {
       builder.append(Pattern.quote(word)).append("|");
     }
@@ -726,7 +726,7 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
 
                 String value = reader.getAttribute("whole");
                 reader.moveDown();
-                String word = reader.getValue();
+                String word = reader.getValue().toLowerCase();
                 reader.moveUp();
                 map.put(word, Boolean.parseBoolean(value));
               } else {
@@ -737,7 +737,7 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
                 // easier when configuring things like 1/3
                 String[] values = reader.getAttribute("value").split("/");
                 reader.moveDown();
-                String word = reader.getValue();
+                String word = reader.getValue().toLowerCase();
                 reader.moveUp();
 
                 double value = Double.parseDouble(values[0]);
