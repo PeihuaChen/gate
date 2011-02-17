@@ -39,6 +39,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,16 +59,19 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 /**
- * A GATE PR which annotates numbers which appear as both words or numbers (or a
- * combination) and determines their numeric value. Whilst useful on their own
- * the annotations produced can also be used as a preliminary step towards more
- * complex annotations such as measurements or monetary units.
+ * A GATE PR which annotates numbers which appear as both words or
+ * numbers (or a combination) and determines their numeric value. Whilst
+ * useful on their own the annotations produced can also be used as a
+ * preliminary step towards more complex annotations such as
+ * measurements or monetary units.
  * 
- * @see <a href="http://gate.ac.uk/userguide/sec:misc-creole:numbers:numbers">The GATE User Guide</a>
+ * @see <a
+ *      href="http://gate.ac.uk/userguide/sec:misc-creole:numbers:numbers">The
+ *      GATE User Guide</a>
  * @author Mark A. Greenwood
  * @author Thomas Heitz
  */
-@CreoleResource(name = "Numbers Tagger", comment = "Finds numbers in (both words and digits) and annotates them with their numeric value", icon = "numbers.png", helpURL="http://gate.ac.uk/userguide/sec:misc-creole:numbers:numbers")
+@CreoleResource(name = "Numbers Tagger", comment = "Finds numbers in (both words and digits) and annotates them with their numeric value", icon = "numbers.png", helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:numbers:numbers")
 public class NumbersTagger extends AbstractLanguageAnalyser {
 
   private static final long serialVersionUID = 8568794158677464398L;
@@ -170,13 +174,12 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
   }
 
   /**
-   * Turns an array of words into a FeatureMap containing their total numeric
-   * value and the type of words used
+   * Turns an array of words into a FeatureMap containing their total
+   * numeric value and the type of words used
    * 
-   * @param words
-   *          an sequence of words that represent a number
-   * @return a FeatureMap detailing the numeric value and type of the number, or
-   *         null if the words are not a number
+   * @param words an sequence of words that represent a number
+   * @return a FeatureMap detailing the numeric value and type of the
+   *         number, or null if the words are not a number
    */
   private FeatureMap calculateValue(String... words) {
 
@@ -192,56 +195,91 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
     // key 3 is for 1000-999 999
     // etc.
     values.put(0d, 0d);
-    for(double v : config.multipliers.values()) {
-      values.put(v, 0d);
+    for(Multiplier m : config.multipliers.values()) {
+      if(m.type.equals(Multiplier.Type.BASE_10)) values.put(m.value, 0d);
     }
 
     // for each word
 
     for(String word : words) {
       Double value;
+      Multiplier multiplier;
       if(word.matches(numericPattern.pattern())) {
-        // the word is actually a number in numbers so convert the decimal and
-        // grouping symbols to the normal Java versions and then parse as a if
+        // the word is actually a number in numbers so convert the
+        // decimal and
+        // grouping symbols to the normal Java versions and then parse
+        // as a if
         // it was a normal double representation
-        values.put(
-                0d,
-                values.get(0d)
-                        + Double.parseDouble(word.replaceAll(
-                                Pattern.quote(config.digitGroupingSymbol), "")
-                                .replaceAll(
-                                        Pattern.quote(config.decimalSymbol),
-                                        ".")));
+        values.put(0d, values.get(0d)
+                + Double.parseDouble(word.replaceAll(
+                        Pattern.quote(config.digitGroupingSymbol), "")
+                        .replaceAll(Pattern.quote(config.decimalSymbol), ".")));
         hasNumbers = true;
-      } else if((value = config.words.get(word.toLowerCase())) != null) {
+      }
+      else if((value = config.words.get(word.toLowerCase())) != null) {
         // the word is a normal number so store it
         values.put(0d, values.get(0d) + value);
         hasWords = true;
-      } else if((value = config.multipliers.get(word.toLowerCase())) != null) {
+      }
+      else if((multiplier = config.multipliers.get(word.toLowerCase())) != null) {
         // the word is a multiplier so...
-
-        int sum = 0;
-        for(double power : values.keySet()) {
-          if(power == value) {
-            break;
+        value = multiplier.value;
+        if(multiplier.type.equals(Multiplier.Type.FRACTION)) {
+          double sum = 0;
+          for(double power : values.keySet()) {
+            System.out.println(power+", "+values.get(power)+", " +(values.get(power) / value));
+            values.put(power, values.get(power) / value);
+            sum += values.get(power);
           }
-          // move all values from inferior powers to the current power
-          values.put(
-                  value,
-                  values.get(value) + values.get(power)
-                          * Math.round(Math.pow(10, power)));
-          sum += values.get(power);
 
-          // reset value for this inferior power
-          values.put(power, 0D);
+          if(sum == 0) {
+            values.put(0d, 1/value);
+          }
         }
-        if(sum == 0) {
-          // 'a thousand' -> 1000
-          values.put(value, 1D);
+        else if(multiplier.type.equals(Multiplier.Type.POWER)) {
+          double sum = 0;
+          for(double power : values.keySet()) {
+            // raise values in each to actual power and then square etc.
+            // and then root from the power
+            double actual = values.get(power) * Math.round(Math.pow(10, power));
+
+            actual = Math.pow(actual,value);
+            
+            actual = actual / Math.round(Math.pow(10, power));
+            
+            values.put(power, actual);
+            sum += values.get(power);
+          }
+
+          if(sum == 0) {
+            values.put(0d, 1d/value);
+          }
+        }
+        else {
+
+          int sum = 0;
+          for(double power : values.keySet()) {
+            if(power == value) {
+              break;
+            }
+            // move all values from inferior powers to the current power
+            values.put(value, values.get(value) + values.get(power)
+                    * Math.round(Math.pow(10, power)));
+            sum += values.get(power);
+
+            // reset value for this inferior power
+            values.put(power, 0D);
+          }
+          if(sum == 0) {
+            // 'a thousand' -> 1000
+            values.put(value, 1D);
+          }
         }
         hasWords = true;
-      } else {
-        // this isn't anything we know about so the whole sequence can't be
+      }
+      else {
+        // this isn't anything we know about so the whole sequence can't
+        // be
         // valid and so we need to return null
         return null;
       }
@@ -279,35 +317,42 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
     // get the annotation set we will be working with
     AnnotationSet annotationSet = document.getAnnotations(annotationSetName);
 
-    // the post-processing requires Token annotations so lets check we have some
+    // the post-processing requires Token annotations so lets check we
+    // have some
     // now before we do any more work
     AnnotationSet tokens = annotationSet.get(TOKEN_ANNOTATION_TYPE);
     if(tokens == null || tokens.size() < 1) {
-      if(failOnMissingInputAnnotations) { throw new ExecutionException(
-              "No tokens to process in document " + document.getName() + "\n"
-                      + "Please run a tokeniser first!"); }
+      if(failOnMissingInputAnnotations) {
+        throw new ExecutionException("No tokens to process in document "
+                + document.getName() + "\n" + "Please run a tokeniser first!");
+      }
 
-      Utils.logOnce(
-              logger,
-              Level.INFO,
-              "Numbers Tagger: no token annotations in input document - see debug log for details.");
+      Utils
+              .logOnce(
+                      logger,
+                      Level.INFO,
+                      "Numbers Tagger: no token annotations in input document - see debug log for details.");
       logger.debug("No input annotations in document " + document.getName());
       return;
     }
 
-    // the post-processing requires Sentence annotations so lets check we have
+    // the post-processing requires Sentence annotations so lets check
+    // we have
     // some
     // now before we do any more work
     AnnotationSet sentences = annotationSet.get(SENTENCE_ANNOTATION_TYPE);
     if(sentences == null || sentences.size() < 1) {
-      if(failOnMissingInputAnnotations) { throw new ExecutionException(
-              "No sentences to process in document " + document.getName()
-                      + "\n" + "Please run a sentence splitter first!"); }
+      if(failOnMissingInputAnnotations) {
+        throw new ExecutionException("No sentences to process in document "
+                + document.getName() + "\n"
+                + "Please run a sentence splitter first!");
+      }
 
-      Utils.logOnce(
-              logger,
-              Level.INFO,
-              "Numbers Tagger: no sentence annotations in input document - see debug log for details.");
+      Utils
+              .logOnce(
+                      logger,
+                      Level.INFO,
+                      "Numbers Tagger: no sentence annotations in input document - see debug log for details.");
       logger.debug("No input annotations in document " + document.getName());
       return;
     }
@@ -324,9 +369,11 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
     Matcher matcher = numericPattern.matcher(text);
     while(matcher.find()) {
       // if we have been asked to stop then do so
-      if(isInterrupted()) { throw new ExecutionInterruptedException(
-              "The execution of the \"" + getName()
-                      + "\" Numbers Tagger has been abruptly interrupted!"); }
+      if(isInterrupted()) {
+        throw new ExecutionInterruptedException("The execution of the \""
+                + getName()
+                + "\" Numbers Tagger has been abruptly interrupted!");
+      }
 
       // get the value of the number
       FeatureMap fm = calculateValue(matcher.group());
@@ -335,7 +382,8 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
           // create a new annotation with the right features
           annotationSet.add((long)matcher.start(), (long)matcher.end(),
                   NUMBER_ANNOTATION_NAME, fm);
-        } catch(InvalidOffsetException e) {
+        }
+        catch(InvalidOffsetException e) {
           // this can never happen!
         }
       }
@@ -346,10 +394,12 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
 
     while(matcher.find()) {
       // if we have been asked to stop then do so
-      if(isInterrupted()) { throw new ExecutionInterruptedException(
-              "The execution of the \"" + getName()
-                      + "\" Numbers Tagger has been abruptly interrupted!"); }
-      
+      if(isInterrupted()) {
+        throw new ExecutionInterruptedException("The execution of the \""
+                + getName()
+                + "\" Numbers Tagger has been abruptly interrupted!");
+      }
+
       // split the sequence of numbers into a list
       // TODO can we do this from the matching groups of the main regex?
       List<String> words = new ArrayList<String>();
@@ -364,8 +414,10 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
 
       if(fm != null) {
         try {
-          // if there are already number annotations at this point then it must
-          // be from the numeric only bit above so remove them as they are
+          // if there are already number annotations at this point then
+          // it must
+          // be from the numeric only bit above so remove them as they
+          // are
           // superseded by the new annotation
           annotationSet.removeAll(annotationSet.getContained(
                   (long)matcher.start(), (long)matcher.end()).get(
@@ -374,26 +426,27 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
           // create the new annotation
           annotationSet.add((long)matcher.start(), (long)matcher.end(),
                   NUMBER_ANNOTATION_NAME, fm);
-        } catch(InvalidOffsetException e) {
+        }
+        catch(InvalidOffsetException e) {
           // this can never happen
         }
       }
     }
 
     // again if we have been asked to stop then do so
-    if(isInterrupted()) { throw new ExecutionInterruptedException(
-            "The execution of the \"" + getName()
-                    + "\" Numbers Tagger has been abruptly interrupted!"); }
+    if(isInterrupted()) {
+      throw new ExecutionInterruptedException("The execution of the \""
+              + getName() + "\" Numbers Tagger has been abruptly interrupted!");
+    }
 
     if(useHintsFromOriginalMarkups) {
-      // look at the Oringal markups set for hints that might help the jape
-      AnnotationSet supAnnotations =
-              document.getAnnotations(ORIGINAL_MARKUPS_ANNOT_SET_NAME).get(
-                      "sup");
+      // look at the Oringal markups set for hints that might help the
+      // jape
+      AnnotationSet supAnnotations = document.getAnnotations(
+              ORIGINAL_MARKUPS_ANNOT_SET_NAME).get("sup");
       for(Annotation sup : supAnnotations) {
-        AnnotationSet numbers =
-                annotationSet.getContained(sup.getStartNode().getOffset(), sup
-                        .getEndNode().getOffset());
+        AnnotationSet numbers = annotationSet.getContained(sup.getStartNode()
+                .getOffset(), sup.getEndNode().getOffset());
 
         for(Annotation num : numbers) {
           num.getFeatures().put(HINT_FEATURE_NAME, "sup");
@@ -402,12 +455,14 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
     }
 
     try {
-      // now configure the JAPE transducer ready for the post-processing steps
+      // now configure the JAPE transducer ready for the post-processing
+      // steps
       jape.setDocument(getDocument());
       jape.setParameterValue("inputASName", annotationSetName);
       jape.setParameterValue("outputASName", annotationSetName);
 
-      // pass some of the configuration through so that JAPE rules can make use
+      // pass some of the configuration through so that JAPE rules can
+      // make use
       // of it if they wish. These values can be accessed through the
       // ActionContext object available on the RHS of each JAPE rule.
       jape.getFeatures().put("decimalSymbol", config.decimalSymbol);
@@ -416,11 +471,14 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
 
       // now run the JAPE transducer
       jape.execute();
-    } catch(ResourceInstantiationException e) {
-      // if for some reason we can't init the transducer properly then turn this
+    }
+    catch(ResourceInstantiationException e) {
+      // if for some reason we can't init the transducer properly then
+      // turn this
       // into an execution problem and report it
       throw new ExecutionException(e);
-    } finally {
+    }
+    finally {
       // make sure we release the document properly
       jape.setDocument(null);
     }
@@ -435,9 +493,12 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
   }
 
   public void cleanup() {
-    // when someone deletes us we need to delete the jape we created otherwise
-    // it becomes an orphan and eats memory that no one is willing to pay for.
-    // In a nightmare world it might even starting singing songs from Oliver!
+    // when someone deletes us we need to delete the jape we created
+    // otherwise
+    // it becomes an orphan and eats memory that no one is willing to
+    // pay for.
+    // In a nightmare world it might even starting singing songs from
+    // Oliver!
     Factory.deleteResource(jape);
   }
 
@@ -454,27 +515,30 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
 
     try {
       // attempt to load the configuration from the supplied URL
-      XStream xstream =
-              Config.getXStream(configURL, getClass().getClassLoader());
-      BomStrippingInputStreamReader in =
-              new BomStrippingInputStreamReader(configURL.openStream(), encoding);
+      XStream xstream = Config.getXStream(configURL, getClass()
+              .getClassLoader());
+      BomStrippingInputStreamReader in = new BomStrippingInputStreamReader(
+              configURL.openStream(), encoding);
       config = (Config)xstream.fromXML(in);
       in.close();
-    } catch(Exception e) {
+    }
+    catch(Exception e) {
       throw new ResourceInstantiationException(e);
     }
 
-    // sanity check the configuration of the decimal and grouping symbols
+    // sanity check the configuration of the decimal and grouping
+    // symbols
     if(config.decimalSymbol.equals(config.digitGroupingSymbol))
       throw new ResourceInstantiationException(
               "The decimal symbol and digit grouping symbol must be different!");
 
     Set<String> allWords = config.words.keySet();
     Set<String> allMultipliers = config.multipliers.keySet();
-    List<String> conjunctions =
-            new ArrayList<String>(config.conjunctions.keySet());
+    List<String> conjunctions = new ArrayList<String>(config.conjunctions
+            .keySet());
 
-    // sanity check the words and modifiers to ensure that they don't overlap
+    // sanity check the words and modifiers to ensure that they don't
+    // overlap
     if(allWords.removeAll(allMultipliers))
       throw new ResourceInstantiationException(
               "The set of words and multipliers must be disjoint!");
@@ -489,7 +553,8 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
       throw new ResourceInstantiationException(
               "Conjunctions cannot also be words or multipliers!");
 
-    // Create a comparator for sorting String elements by their length, longest
+    // Create a comparator for sorting String elements by their length,
+    // longest
     // first
     Comparator<String> lengthComparator = new Comparator<String>() {
       public int compare(String o1, String o2) {
@@ -501,7 +566,8 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
     // sort the conjunctions
     Collections.sort(conjunctions, lengthComparator);
 
-    // build a regex from the conjunctions taking into account if they need to
+    // build a regex from the conjunctions taking into account if they
+    // need to
     // be surrounded by spaces or not
     StringBuilder withSpaces = new StringBuilder();
     StringBuilder withoutSpaces = new StringBuilder();
@@ -512,17 +578,17 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
       }
     }
 
-    String separatorsRegex =
-            "(?i:\\s{1,2}(?:-" + withSpaces + ")\\s{1,2}|\\s{1,2}|-"
-                    + withoutSpaces + ")";
+    String separatorsRegex = "(?i:\\s{1,2}(?:-" + withSpaces
+            + ")\\s{1,2}|\\s{1,2}|-" + withoutSpaces + ")";
 
-    // create a regex for recognising numbers written using numbers taking into
-    // account the decimal and grouping symbols from the configuration file
-    String numericRegex =
-            "[-+]?(?:(?:(?:(?:[0-9]+"
-                    + Pattern.quote(config.digitGroupingSymbol) + ")*[0-9]+(?:"
-                    + Pattern.quote(config.decimalSymbol) + "[0-9]+)?))|(?:"
-                    + Pattern.quote(config.decimalSymbol) + "[0-9]+))";
+    // create a regex for recognising numbers written using numbers
+    // taking into
+    // account the decimal and grouping symbols from the configuration
+    // file
+    String numericRegex = "[-+]?(?:(?:(?:(?:[0-9]+"
+            + Pattern.quote(config.digitGroupingSymbol) + ")*[0-9]+(?:"
+            + Pattern.quote(config.decimalSymbol) + "[0-9]+)?))|(?:"
+            + Pattern.quote(config.decimalSymbol) + "[0-9]+))";
 
     numericPattern = Pattern.compile(numericRegex);
 
@@ -538,24 +604,21 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
     numbersRegex += ")";
 
     // build up a regexp allowing repeated words
-    String regex =
-            "(?:(?:" + numericRegex + separatorsRegex + "?)?(?:" + numbersRegex
-                    + separatorsRegex + "){0,10}" + numbersRegex + ")";
+    String regex = "(?:(?:" + numericRegex + separatorsRegex + "?)?(?:"
+            + numbersRegex + separatorsRegex + "){0,10}" + numbersRegex + ")";
 
     // make sure the whole number doesn't appear within a word
-    pattern =
-            Pattern.compile("(?:^|(?<=\\s|[^\\p{Alnum}]))" + regex
-                    + "(?:(?=\\s|[^\\p{Alnum}])|$)", Pattern.CASE_INSENSITIVE
-                    + Pattern.UNICODE_CASE);
+    pattern = Pattern.compile("(?:^|(?<=\\s|[^\\p{Alnum}]))" + regex
+            + "(?:(?=\\s|[^\\p{Alnum}])|$)", Pattern.CASE_INSENSITIVE
+            + Pattern.UNICODE_CASE);
 
-    // create a simple regexp for extracting each piece from a whole number
+    // create a simple regexp for extracting each piece from a whole
+    // number
     // TODO can we just use matching groups from the main regex
-    regex =
-            "(" + numbersRegex + "|" + numericRegex + ")" + separatorsRegex
-                    + "?";
-    subPattern =
-            Pattern.compile(regex, Pattern.CASE_INSENSITIVE
-                    + Pattern.UNICODE_CASE);
+    regex = "(" + numbersRegex + "|" + numericRegex + ")" + separatorsRegex
+            + "?";
+    subPattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE
+            + Pattern.UNICODE_CASE);
 
     // now we need to create the JAPE transducer that is used for
     // post-processing of the numbers found by the complex regex
@@ -566,10 +629,10 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
       // only create the transducer if it doesn't already exist
       FeatureMap hidden = Factory.newFeatureMap();
       Gate.setHiddenAttribute(hidden, true);
-      jape =
-              (Transducer)Factory.createResource("gate.creole.Transducer",
-                      params, hidden);
-    } else {
+      jape = (Transducer)Factory.createResource("gate.creole.Transducer",
+              params, hidden);
+    }
+    else {
       // if it exists just reinitialize it
       jape.setParameterValues(params);
       jape.reInit();
@@ -579,9 +642,9 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
   }
 
   /**
-   * This class provides access to the configuration file in a simple fashion.
-   * It is instantiated using XStream to map from the XML configuration file to
-   * the Object structure.
+   * This class provides access to the configuration file in a simple
+   * fashion. It is instantiated using XStream to map from the XML
+   * configuration file to the Object structure.
    * 
    * @author Mark A. Greenwood
    */
@@ -591,7 +654,7 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
 
     private Map<String, Double> words;
 
-    private Map<String, Double> multipliers;
+    private Map<String, Multiplier> multipliers;
 
     private Map<String, Boolean> conjunctions;
 
@@ -607,10 +670,10 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
     }
 
     /**
-     * Ensures that all fields have been initialised to useful values after the
-     * instance has been created from the configuration file. This includes
-     * creating default values if certain aspects have not been specified and
-     * the importing of linked configuration files.
+     * Ensures that all fields have been initialised to useful values
+     * after the instance has been created from the configuration file.
+     * This includes creating default values if certain aspects have not
+     * been specified and the importing of linked configuration files.
      * 
      * @return a correctly initialised Config object.
      */
@@ -618,7 +681,7 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
 
       // make sure every field has a sensible default value
       if(words == null) words = new HashMap<String, Double>();
-      if(multipliers == null) multipliers = new HashMap<String, Double>();
+      if(multipliers == null) multipliers = new HashMap<String, Multiplier>();
       if(conjunctions == null) conjunctions = new HashMap<String, Boolean>();
 
       if(decimalSymbol == null) decimalSymbol = ".";
@@ -626,7 +689,8 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
 
       if(imports == null) {
         imports = new HashMap<URL, String>();
-      } else {
+      }
+      else {
         for(Map.Entry<URL, String> entry : imports.entrySet()) {
           // for each import...
           URL url = entry.getKey();
@@ -644,13 +708,16 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
             words.putAll(c.words);
             multipliers.putAll(c.multipliers);
             conjunctions.putAll(c.conjunctions);
-          } catch(IOException ioe) {
+          }
+          catch(IOException ioe) {
             // ignore this for now
-          } finally {
+          }
+          finally {
             if(in != null) {
               try {
                 in.close();
-              } catch(Exception e) {
+              }
+              catch(Exception e) {
                 // damn stupid exception!
               }
             }
@@ -662,19 +729,17 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
     }
 
     /**
-     * Creates a correctly configured XStream for reading the XML configuration
-     * files.
+     * Creates a correctly configured XStream for reading the XML
+     * configuration files.
      * 
-     * @param url
-     *          the URL of the config file you are loading. This is required so
-     *          that we can correctly handle relative paths in import
-     *          statements.
-     * @param cl
-     *          the Classloader which has access to the classes required. This
-     *          is needed as otherwise loading this through GATE we somehow
-     *          can't find some of the classes.
-     * @return an XStream instance that can load the XML config files for this
-     *         PR.
+     * @param url the URL of the config file you are loading. This is
+     *          required so that we can correctly handle relative paths
+     *          in import statements.
+     * @param cl the Classloader which has access to the classes
+     *          required. This is needed as otherwise loading this
+     *          through GATE we somehow can't find some of the classes.
+     * @return an XStream instance that can load the XML config files
+     *         for this PR.
      */
     static XStream getXStream(final URL url, ClassLoader cl) {
 
@@ -687,7 +752,8 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
 
       xstream.alias("config", Config.class);
 
-      // This is a custom HashMap converter that allows us to support the rather
+      // This is a custom HashMap converter that allows us to support
+      // the rather
       // odd XML structure I created
       xstream.registerConverter(new Converter() {
         @SuppressWarnings("rawtypes")
@@ -699,12 +765,13 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
                 MarshallingContext context) {
           throw new RuntimeException(
                   "Writing config files is not currently supported!");
-          // if we do eventually support writing files then remember that
+          // if we do eventually support writing files then remember
+          // that
           // OutputStreamWriter out = new OutputStreamWriter(new
           // FileOutputStream(f), "UTF-8");
         }
 
-        @SuppressWarnings({"rawtypes", "unchecked"})
+        @SuppressWarnings( {"rawtypes", "unchecked"})
         public Object unmarshal(HierarchicalStreamReader reader,
                 UnmarshallingContext context) {
           HashMap map = new HashMap();
@@ -720,7 +787,8 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
                 String rURL = reader.getValue();
                 reader.moveUp();
                 map.put(new URL(url, rURL), encoding);
-              } else if(reader.getNodeName().equals("conjunctions")) {
+              }
+              else if(reader.getNodeName().equals("conjunctions")) {
                 // Elements in this map look like
                 // <word whole="true">and</word>
 
@@ -729,13 +797,16 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
                 String word = reader.getValue().toLowerCase();
                 reader.moveUp();
                 map.put(word, Boolean.parseBoolean(value));
-              } else {
+              }
+              else {
                 // Elements in all other maps look like
                 // <word value="3.0">three</word>
 
-                // support numbers written as fractions to make like a little
+                // support numbers written as fractions to make like a
+                // little
                 // easier when configuring things like 1/3
                 String[] values = reader.getAttribute("value").split("/");
+                String type = reader.getAttribute("type");
                 reader.moveDown();
                 String word = reader.getValue().toLowerCase();
                 reader.moveUp();
@@ -745,9 +816,16 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
                   value = value / Double.parseDouble(values[i]);
                 }
 
-                map.put(word, value);
+                if(reader.getNodeName().equals("multipliers")) {
+                  map.put(word,
+                          new Multiplier(value, type == null ? "e" : type));
+                }
+                else {
+                  map.put(word, value);
+                }
               }
-            } catch(Exception e) {
+            }
+            catch(Exception e) {
               e.printStackTrace();
             }
           }
@@ -758,4 +836,35 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
       return xstream;
     }
   }
+
+  private static class Multiplier {
+    private enum Type {
+      BASE_10("e"), FRACTION("/"), POWER("^");
+
+      final String description;
+
+      Type(String description) {
+        this.description = description;
+      }
+
+      public static Type get(String type) {
+        for(Type t : EnumSet.allOf(Type.class)) {
+          if(t.description.equals(type)) return t;
+        }
+
+        throw new IllegalArgumentException("'" + type
+                + "' is not a valid multiplier type type");
+      }
+    }
+
+    Type type;
+
+    Double value;
+
+    public Multiplier(Double value, String type) {
+      this.value = value;
+      this.type = Type.get(type);
+    }
+  }
 }
+
