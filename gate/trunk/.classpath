@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" output="plugins/Groovy/build" path="plugins/Groovy/src"/>
 	<classpathentry kind="src" path="plugins/Ontology_OWLIM2/src"/>
 	<classpathentry kind="src" path="plugins/OpenNLP/src"/>
 	<classpathentry kind="src" path="plugins/Tagger_Framework/src"/>
