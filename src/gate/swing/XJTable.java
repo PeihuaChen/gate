@@ -121,7 +121,9 @@ public class XJTable extends JTable{
         for(int col = 0; col < colCount; col++){
           TableColumn tColumn = getColumnModel().getColumn(col);
           TableCellRenderer headerRenderer = tColumn.getHeaderRenderer();
+          boolean needToResetRenderer = false;
           if(headerRenderer == null){
+            needToResetRenderer = true;
             //no header renderer provided -> use default implementation
             JTableHeader tHeader = getTableHeader();
             if(tHeader == null){
@@ -143,6 +145,8 @@ public class XJTable extends JTable{
             tColumn.setMinWidth(1);
             tColumn.setPreferredWidth(1);
           }
+          
+          if (needToResetRenderer) tColumn.setHeaderRenderer(null);
         }
         
         //now fix the row height and column min/max widths
