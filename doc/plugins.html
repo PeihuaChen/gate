@@ -77,12 +77,15 @@ list</a>.</p>
 <li><a href='#Parser_Stanford'>Parser_Stanford</a></li>
 <li><a href='#Parser_SUPPLE'>Parser_SUPPLE</a></li>
 <li><a href='#Schema_Annotation_Editor'>Schema_Annotation_Editor</a></li>
+<li><a href='#Schema_Tools'>Schema_Tools</a></li>
 <li><a href='#Stemmer_Snowball'>Stemmer_Snowball</a></li>
 <li><a href='#Tagger_Abner'>Tagger_Abner</a></li>
+<li><a href='#Tagger_Boilerpipe'>Tagger_Boilerpipe</a></li>
 <li><a href='#Tagger_Chemistry'>Tagger_Chemistry</a></li>
 <li><a href='#Tagger_Framework'>Tagger_Framework</a></li>
 <li><a href='#Tagger_MetaMap'>Tagger_MetaMap</a></li>
 <li><a href='#Tagger_NP_Chunking'>Tagger_NP_Chunking</a></li>
+<li><a href='#Tagger_Numbers'>Tagger_Numbers</a></li>
 <li><a href='#Tagger_OpenCalais'>Tagger_OpenCalais</a></li>
 <li><a href='#Tools'>Tools</a></li>
 <li><a href='#UIMA'>UIMA</a></li>
@@ -179,7 +182,7 @@ list</a>.</p>
 		<td>com.ontotext.gate.gazetteer.HashGazetteer</td>
 	</tr>
 	<tr>
-		<td>Jape Transducer&nbsp;</td>
+		<td>JAPE Transducer&nbsp;</td>
 		<td>A module for executing Jape grammars. (<a href="http://gate.ac.uk/userguide/chap:jape">docs</a>)&nbsp;</td>
 		<td>gate.creole.Transducer</td>
 	</tr>
@@ -769,6 +772,24 @@ list</a>.</p>
 		<td>gate.gui.annedit.SchemaAnnotationEditor</td>
 	</tr>
 	<tr>
+		<th colspan='3'><a name='Schema_Tools'>Schema_Tools</a></th>
+	</tr>
+	<tr>
+		<td>Annotation Schema&nbsp;</td>
+		<td>An annotation type and its features. (<a href="http://gate.ac.uk/userguide/sec:corpora:schemas">docs</a>)&nbsp;</td>
+		<td>gate.creole.AnnotationSchema</td>
+	</tr>
+	<tr>
+		<td>Schema Enforcer&nbsp;</td>
+		<td>Produces an annotation set whose content is restricted by the specified set of schemas (<a href="http://gate.ac.uk/userguide/sec:misc-creole:schemaenforcer">docs</a>)&nbsp;</td>
+		<td>gate.creole.schema.SchemaEnforcer</td>
+	</tr>
+	<tr>
+		<td>Simple Schema Viewer&nbsp;</td>
+		<td>A Simple Annotation Schema Viewer&nbsp;</td>
+		<td>gate.gui.schema.SimpleSchemaViewer</td>
+	</tr>
+	<tr>
 		<th colspan='3'><a name='Stemmer_Snowball'>Stemmer_Snowball</a></th>
 	</tr>
 	<tr>
@@ -783,6 +804,14 @@ list</a>.</p>
 		<td>AbnerTagger&nbsp;</td>
 		<td>Gate wrapper over Abner. (<a href="http://gate.ac.uk/userguide/sec:parsers:abner">docs</a>)&nbsp;</td>
 		<td>gate.abner.AbnerTagger</td>
+	</tr>
+	<tr>
+		<th colspan='3'><a name='Tagger_Boilerpipe'>Tagger_Boilerpipe</a></th>
+	</tr>
+	<tr>
+		<td>Boilerpipe Content Detection&nbsp;</td>
+		<td>Uses boilerpipe to determine which sections of a document are interesting content and which are just boilerplate (<a href="http://gate.ac.uk/userguide/sec:misc-creole:boilerpipe">docs</a>)&nbsp;</td>
+		<td>gate.creole.boilerpipe.BoilerPipe</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='Tagger_Chemistry'>Tagger_Chemistry</a></th>
@@ -815,6 +844,19 @@ list</a>.</p>
 		<td>Noun Phrase Chunker&nbsp;</td>
 		<td>Implementation of the Ramshaw and Marcus base noun phrase chunker (<a href="http://gate.ac.uk/userguide/sec:parsers:npchunker">docs</a>)&nbsp;</td>
 		<td>mark.chunking.GATEWrapper</td>
+	</tr>
+	<tr>
+		<th colspan='3'><a name='Tagger_Numbers'>Tagger_Numbers</a></th>
+	</tr>
+	<tr>
+		<td>Numbers Tagger&nbsp;</td>
+		<td>Finds numbers in (both words and digits) and annotates them with their numeric value (<a href="http://gate.ac.uk/userguide/sec:misc-creole:numbers:numbers">docs</a>)&nbsp;</td>
+		<td>gate.creole.numbers.NumbersTagger</td>
+	</tr>
+	<tr>
+		<td>Roman Numerals Tagger&nbsp;</td>
+		<td>Finds and annotates Roman numerals (<a href="http://gate.ac.uk/userguide/sec:misc-creole:numbers:roman">docs</a>)&nbsp;</td>
+		<td>gate.creole.numbers.RomanNumeralsTagger</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='Tagger_OpenCalais'>Tagger_OpenCalais</a></th>
@@ -963,7 +1005,7 @@ list</a>.</p>
 		<td>Durm German lemmatizer</td>
 		<td>The Durm German Lemmatization System consists of a number of GATE components and resources that perform morphological analysis and lemmatization for German nouns.
 </td>
-		<td></td>
+		<td>&nbsp;</td>
 	</tr>
 
 
@@ -1017,15 +1059,48 @@ list</a>.</p>
 		<td>ru.itbrains.gate.morph.MorphTagger</td>
 	</tr>
 	<tr>
-		<th colspan='3'><a name="ofai"></a>OFAI List Gazetteer<br/><a
-                href="http://www.ofai.at/research/nlu/aurex/">website</a> <a
-                href="http://www.ofai.at/research/nlu/aurex/ofaiplugin.zip">download</a></th>
+		<th colspan='3'><a name="extendedgazetteer"></a>Extended List Gazetteer<br/><a
+                href="http://www.ofai.at/~johann.petrak/GATE/ExtendedGazetteer.html">website</a></th>
 	</tr>
-	<tr><td colspan='3'><center><i>This plugin provides an extended version of the original GATE ListGazetteer. In addition to the features of the original, built-in version of the List Gazetteer, this version provides features for more powerful matching of partial words.</i></center></td></tr>
+	<tr><td colspan='3'><center><i>This plugin provides an extended version of the original GATE ListGazetteer. In addition to the features of the original, built-in version of the List Gazetteer, this version provides features for more powerful matching of partial words and annotating prefixes and suffixes as well as more versatile handling of word boundaries and whitespace.</i></center></td></tr>
 	<tr>
-		<td>OFAI List Gazetteer</td>
-		<td>Extended version of the transducer-based List Gazetteer</td>
-		<td>at.ofai.gate.ListGazetteer</td>
+		<td>Extended List Gazetteer</td>
+		<td>Extended version of the GATE Default List Gazetteer</td>
+		<td>at.ofai.gate.extendedgazetteer.ExtendedGazetteer</td>
+	</tr>
+	<tr>
+		<th colspan='3'><a name="appdoc"></a>AppDoc &mdash; GATE Application Documentation<br/>
+		  <a href="http://www.ofai.at/~johann.petrak/GATE/AppDoc.html">website</a>
+                 <a href="http://code.google.com/p/gateplugin-appdoc/downloads/list">download</a>
+               </th>
+	</tr>
+	<tr><td colspan='3'><center><i>A plugin that generations documentation from your application/pipeline/gapp files in various formats. In addition it provides new visual resources in the GATE Developer GUI to add author, version and documentation comments to pipelines and processing resources.</i></center></td></tr>
+	<tr>
+		<td>AppDoc</td>
+		<td>Visual resource for adding author/version/comment to pipelines and processing resources</td>
+		<td>at.ofai.gate.appdoc.AppDoc</td>
+	</tr>
+	<tr>
+		<td>AppDocGen</td>
+		<td>Visual resource for selecting a documentation template and generating documentation files</td>
+		<td>at.ofai.gate.appdoc.AppDocGen</td>
+	</tr>
+	<tr>
+		<th colspan='3'><a name="virtualcorpus"></a>VirtualCorpus &mdash; Directory- and JDBC Corpus LRs<br/>
+		  <a href="http://www.ofai.at/~johann.petrak/GATE/VirtualCorpus.html">website</a>
+                 <a href="http://code.google.com/p/gateplugin-virtualcorpus/downloads/list">download</a>
+               </th>
+	</tr>
+	<tr><td colspan='3'><center><i>A plugin that provides two new corpus language resources, DirectoryCorpus for directly using files in a directory through a corpus LR and JDBCCorpus for directly using documents stored in a field of a JDBC database table.</i></center></td></tr>
+	<tr>
+		<td>DirectoryCorpus</td>
+		<td>Language resource for accessing GATE XML files in a directory directly via a corpus resource</td>
+		<td>at.ofai.gate.virtualcorpus.DirectoryCorpus</td>
+	</tr>
+	<tr>
+		<td>JDBCCorpus</td>
+		<td>Language resource for accessing GATE XML documents stored in a field of a JDBC database table directly via a corpus resource</td>
+		<td>at.ofai.gate.virtualcorpus.JDBCCorpus</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name="bwp"></a>BWP Gazetteer<br/>
@@ -1036,7 +1111,7 @@ list</a>.</p>
 	<tr>
 		<td>BWP Gazetteer</td>
 		<td>Extended version of the transducer-based List Gazetteer</td>
-		<td></td>
+		<td>&nbsp;</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name="apolda"></a>Apolda<br/>
@@ -1064,12 +1139,12 @@ list</a>.</p>
 	<tr>
 		<td>Reporting Verb marker</td>
 		<td>JAPE transducer which tags reporting verbs</td>
-		<td></td>
+		<td>&nbsp;</td>
 	</tr>
 	<tr>
 		<td>Reported Speech finder</td>
 		<td>JAPE transducer which tags reported speech</td>
-		<td></td>
+		<td>&nbsp;</td>
 	</tr>
 
 
@@ -1084,33 +1159,33 @@ list</a>.</p>
 	</tr>
 	<tr>
 	  <td>FrequencyAnalyser</td>
-	  <td></td>
-	  <td></td>
+	  <td>&nbsp;</td>
+	  <td>&nbsp;</td>
 	</tr>
 	<tr>
 	  <td>KeywordAnalyser</td>
-	  <td></td>
-	  <td></td>
+	  <td>&nbsp;</td>
+	  <td>&nbsp;</td>
 	</tr>
 	<tr>
 	  <td>LanguageIdentification</td>
 	  <td>identifies the language of a document using character n-grams</td>
-	  <td></td>
+	  <td>&nbsp;</td>
 	</tr>
 	<tr>
 	  <td>POSTagMapper</td>
-	  <td></td>
-	  <td></td>
+	  <td>&nbsp;</td>
+	  <td>&nbsp;</td>
 	</tr>
 	<tr>
 	  <td>SimpleNounChunking</td>
-	  <td></td>
-	  <td></td>
+	  <td>&nbsp;</td>
+	  <td>&nbsp;</td>
 	</tr>
 	<tr>
 	  <td>StopwordMarker</td>
-	  <td></td>
-	  <td></td>
+	  <td>&nbsp;</td>
+	  <td>&nbsp;</td>
 	</tr>
 	
 </table>
