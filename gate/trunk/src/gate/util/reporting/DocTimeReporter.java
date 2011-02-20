@@ -121,7 +121,21 @@ public class DocTimeReporter implements BenchmarkReportable {
    */
   public DocTimeReporter() {
     // some initialisations
-    try {
+    initTmpDir();
+  }
+
+  /**
+   * A constructor to be used while executing the tool from the command line.
+   *
+   * @param args array containing command line arguments.
+   */
+  DocTimeReporter(String[] args) {
+      initTmpDir();
+      parseArguments(args);
+  }
+
+  private void initTmpDir() {
+     try {
       temporaryDirectory = File.createTempFile("benchmark-reports", "", null);
       if (!temporaryDirectory.delete()
        || !temporaryDirectory.mkdir()) {
@@ -133,15 +147,6 @@ public class DocTimeReporter implements BenchmarkReportable {
     }
   }
 
-  /**
-   * A constructor to be used while executing the tool from the command line.
-   *
-   * @param args array containing command line arguments.
-   */
-  DocTimeReporter(String[] args) {
-      super();
-      parseArguments(args);
-  }
 
   /**
    * Calculates the total of the time taken by processing element at each leaf
