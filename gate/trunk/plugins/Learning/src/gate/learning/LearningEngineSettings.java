@@ -112,6 +112,7 @@ public class LearningEngineSettings {
     try {
       jdomDoc = saxBuilder.build(xmlengines);
     } catch(Exception e) {
+      throw new GateException("Problem parsing config file",e);
     }
     Element rootElement = jdomDoc.getRootElement();
     if(!rootElement.getName().equals("ML-CONFIG"))
