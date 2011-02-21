@@ -152,6 +152,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
               LearningEngineSettings
                       .loadLearningSettingsFromFile(configFileURL);
     } catch(Exception e) {
+      e.printStackTrace();
       throw new ResourceInstantiationException(e);
     }
     try {
