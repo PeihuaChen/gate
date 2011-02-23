@@ -915,12 +915,16 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
           numClasses, chunks, chunkLenHash);
         // System.out.println("**
         // documentName="+((Document)corpus.get(i)).getName());
+        boolean wasLoaded = corpus.isDocumentLoaded(i+startDocId);
         Document toProcess = (Document)corpus.get(i + startDocId);
         addAnnsInDoc(toProcess, chunks, instanceType, featName, labelName,
           labelsAndId);
         if(toProcess.getDataStore() != null && corpus.getDataStore() != null) {
           corpus.getDataStore().sync(corpus);
-          //Factory.deleteResource(toProcess);
+        }
+        if(!wasLoaded) {
+          corpus.unloadDocument(toProcess);
+          Factory.deleteResource(toProcess);
         }
       }
       Benchmark.checkPoint(startTime, benchmarkID + "." + "postProcessing",
@@ -941,6 +945,7 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
         float[] valuesLabels = new float[labelsFVDoc[i].multiLabels.length];
         postPr.postProcessingClassification((short)3,
           labelsFVDoc[i].multiLabels, selectedLabels, valuesLabels);
+        boolean wasLoaded = corpus.isDocumentLoaded(i+startDocId);
         Document toProcess = (Document)corpus.get(i + startDocId);
         // Add the ranked label list and their scores, not just a single label
         // addLabelListInDocClassification(toProcess,
@@ -950,7 +955,10 @@ public class LightWeightLearningApi extends Object implements Benchmarkable {
           instanceType, featName, labelName, labelsAndId, engineSettings);
         if(toProcess.getDataStore() != null && corpus.getDataStore() != null) {
           corpus.getDataStore().sync(corpus);
-          //Factory.deleteResource(toProcess);
+        }
+        if(!wasLoaded) {
+          corpus.unloadDocument(toProcess);
+          Factory.deleteResource(toProcess);
         }
       }
     }

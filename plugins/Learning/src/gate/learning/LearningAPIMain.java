@@ -341,6 +341,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
           long startTime = Benchmark.startPoint();
           benchmarkingFeatures.put("numDocs", "" + numDoc);
           for(int i = startDocIdApp; i < endDocIdApp; ++i) {
+            boolean wasLoaded = corpus.isDocumentLoaded(i);
             Document toProcess = (Document)corpus.get(i);
             lightWeightApi.annotations2NLPFeatures(toProcess,
                     i - startDocIdApp, outNLPFeatures, isTraining,
@@ -348,7 +349,10 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
             if(toProcess.getDataStore() != null
                     && corpus.getDataStore() != null) {// (isDatastore)
               corpus.getDataStore().sync(corpus);
-              //Factory.deleteResource(toProcess);
+            }
+            if(!wasLoaded) {
+              corpus.unloadDocument(toProcess);
+              Factory.deleteResource(toProcess);
             }
           }
           outNLPFeatures.flush();
@@ -674,14 +678,18 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
               benchmarkingFeatures.put("numDocs", "" + numDoc);
               startTime = Benchmark.startPoint();
               for(int i = startDocIdApp; i < endDocIdApp; ++i) {
+                boolean wasLoaded = corpus.isDocumentLoaded(i);
                 Document toProcess = (Document)corpus.get(i);
                 lightWeightApi.annotations2NLPFeatures(toProcess, i
                         - startDocIdApp, outNLPFeatures, isTraining,
                         learningSettings);
                 if(toProcess.getDataStore() != null
                         && corpus.getDataStore() != null) {// (isDatastore)
-                  //Factory.deleteResource(toProcess);
                   corpus.getDataStore().sync(corpus);
+                }
+                if(!wasLoaded) {
+                  corpus.unloadDocument(toProcess);
+                  Factory.deleteResource(toProcess);
                 }
               }
               outNLPFeatures.flush();
