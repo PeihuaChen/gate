@@ -130,10 +130,13 @@ public class NLPFeaturesList {
                 .toString())).longValue() + 1));
             }
           } else {
-            System.out
-              .println("There are more NLP features from the training docuemnts");
-            System.out.println(" than the pre-defined maximal number"
-              + new Long(ConstantParameters.MAXIMUMFEATURES));
+            String msg = 
+              "There are more NLP features from the training docuements" +
+              " than the pre-defined maximal number" + 
+              ConstantParameters.MAXIMUMFEATURES;
+            if(!gate.Utils.isLoggedOnce(msg)) {
+              System.out.println(msg);
+            }
             return;
           }
         }
