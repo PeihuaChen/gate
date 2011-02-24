@@ -339,6 +339,25 @@ public class Utils {
       alreadyLoggedMessages.add(message);
     }
   }
+
+  /**
+   * Check if a message has already been logged or shown. This does not log
+   * or show anything but only stores the message as one that has been shown
+   * already if necessary and returns if the message has been shown or not.
+   *
+   * @param message - the message that should only be logged or shown once
+   * @return - true if the message has already been logged or checked with
+   * this method.
+   *
+   */
+   public static boolean isLoggedOnce(String message) {
+     boolean isThere = alreadyLoggedMessages.contains(message);
+     if(!isThere) {
+       alreadyLoggedMessages.add(message);
+     }
+     return isThere;
+   }
+
   private static final Set<String> alreadyLoggedMessages = 
     Collections.synchronizedSet(new HashSet<String>());
 
