@@ -19,8 +19,6 @@ import java.util.Set;
 public class Utils {
 
 
-  static Set<String> seenWarningMessages = new HashSet<String>();
-
   /**
    * Given required parameters, this method, based on the provided type,
    * returns an appropriate object of a property.
@@ -222,14 +220,9 @@ public class Utils {
   }
 
   public static void warnDeprecation(String methodName) {
-    warnOnce("Method "+methodName+" is deprecated and should not be used any more!");
-  }
-
-  public static void warnOnce(String message) {
-    if(!seenWarningMessages.contains(message)) {
-      System.err.println(message);
-      new GateOntologyException().printStackTrace();
-      seenWarningMessages.add(message);
+    String msg = "Method "+methodName+" is deprecated and should not be used any more!";
+    if(gate.Utils.isLoggedOnce(msg)) {
+      warning("Method "+methodName+" is deprecated and should not be used any more!");
     }
   }
 
