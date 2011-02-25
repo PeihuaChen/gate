@@ -51,7 +51,7 @@ public class CompoundDocumentFromXml extends CompoundDocumentImpl {
     try {
       StringBuilder xmlString = new StringBuilder();
       BufferedReader br = new BomStrippingInputStreamReader(compoundDocumentUrl
-              .openStream(), "utf-8");
+              .openStream(), getEncoding());
       String line = br.readLine();
       while(line != null) {
         xmlString.append("\n").append(line);
