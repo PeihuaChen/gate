@@ -39,6 +39,8 @@
       <PARAMETER NAME="compoundDocumentUrl"
           SUFFIXES="xml"
           COMMENT="Source URL">java.net.URL</PARAMETER>
+      <PARAMETER NAME="encoding" OPTIONAL="false" COMMENT="Encoding" DEFAULT="UTF-8">
+        java.lang.String</PARAMETER>
       <ICON>lr.gif</ICON>
     </RESOURCE>
 
