@@ -557,6 +557,8 @@ public class Transducer
   public void controllerExecutionStarted(Controller c)
     throws ExecutionException {
     actionContext.setController(c);
+    actionContext.setCorpus(corpus);
+    actionContext.setPRFeatures(features);
     batch.runControllerExecutionStartedBlock(actionContext,c,ontology);
   }
 
