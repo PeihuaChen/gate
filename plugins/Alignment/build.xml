@@ -36,7 +36,7 @@
   <target name="compile" depends="init">
     <javac classpathref="compile.classpath" source="1.5" 
           debug="true" deprecation="true" destdir="${dest}" 
-          nowarn="false">
+          nowarn="false" encoding="UTF-8">
       <src path="${src}"/>
     </javac>
   </target>
