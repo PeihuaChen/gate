@@ -89,6 +89,7 @@
            srcdir="${src.dir}"
            destdir="${classes.dir}"
            debug="true"
+           encoding="UTF-8"
            debuglevel="lines,source"
            source="1.5" />
   </target>
