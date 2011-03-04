@@ -9,6 +9,9 @@ import java.util.Collection;
 import java.util.Iterator;
 
 public class ImmutableAnnotationSetImpl extends AnnotationSetImpl {
+  
+  private static final long serialVersionUID = 2658641359323106241L;
+
   /**
    * Constructs an ImmutableAnnotationSet. ImmutableAnnotationSet are returned
    * by the get* methods of AnnotationSet

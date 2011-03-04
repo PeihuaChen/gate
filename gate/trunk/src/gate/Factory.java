@@ -37,6 +37,7 @@ import gate.persist.SerialDataStore;
 import gate.security.*;
 import gate.security.SecurityException;
 import gate.util.*;
+import gate.annotation.ImmutableAnnotationSetImpl;
 
 /** Provides static methods for the creation of Resources.
   */
@@ -480,6 +481,24 @@ public abstract class Factory {
     return doc;
   } // newDocument(String)
 
+  
+  /**
+   * Utility method to create an immutable annotation set. If the provided 
+   * collection of annotations is <code>null</null>, the newly created set will
+   * be empty.
+   * @param document the document this set belongs to. 
+   * @param annotations the set of annotations that should be contained in the
+   * returned {@link AnnotationSet}. 
+   * @return an {@link AnnotationSet} that throws exceptions on all attempts 
+   * to modify it.
+   */
+  public static AnnotationSet createImmutableAnnotationSet(Document document, 
+          Collection<Annotation> annotations) {
+    return new ImmutableAnnotationSetImpl(document, annotations){
+      private static final long serialVersionUID = -6703131102439043539L;
+    };
+  }
+  
   /**
    * <p>
    * Create a <i>duplicate</i> of the given resource.  A duplicate is a
