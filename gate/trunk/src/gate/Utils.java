@@ -17,6 +17,7 @@
 package gate;
 
 import gate.annotation.AnnotationSetImpl;
+import gate.annotation.ImmutableAnnotationSetImpl;
 import gate.util.GateRuntimeException;
 import gate.util.OffsetComparator;
 import java.util.ArrayList;
@@ -267,6 +268,104 @@ public class Utils {
     }
     return ret;
   }
+
+  /**
+   * Get all the annotations from the source annotation set that lie within
+   * the range of the containing annotation.
+   * 
+   * @param sourceAnnotationSet the annotation set from which to select
+   * @param containingAnnotation the annotation whose range must contain the
+   * selected annotations
+   * @return the AnnotationSet containing all annotations fully contained in
+   * the offset range of the containingAnnotation
+   */
+  public static AnnotationSet getContainedAnnotations(
+    AnnotationSet sourceAnnotationSet,
+    Annotation containingAnnotation) {
+    return getContainedAnnotations(sourceAnnotationSet,containingAnnotation,"");
+  }
+
+  /**
+   * Get all the annotations of type targetType
+   * from the source annotation set that lie within
+   * the range of the containing annotation.
+   *
+   * @param sourceAnnotationSet the annotation set from which to select
+   * @param containingAnnotation the annotation whose range must contain the
+   * @param targetType the type the selected annotations must have. If the
+   * empty string, no filtering on type is done.
+   * @return the AnnotationSet containing all annotations fully contained in
+   * the offset range of the containingAnnotation
+   */
+  public static AnnotationSet getContainedAnnotations(
+    AnnotationSet sourceAnnotationSet,
+    Annotation containingAnnotation,
+    String targetType) {
+    if(targetType.equals("")) {
+      return sourceAnnotationSet.getContained(
+        containingAnnotation.getStartNode().getOffset(),
+        containingAnnotation.getEndNode().getOffset());
+    } else {
+      return sourceAnnotationSet.getContained(
+        containingAnnotation.getStartNode().getOffset(),
+        containingAnnotation.getEndNode().getOffset()).get(targetType);
+    }
+  }
+
+  /**
+   * Get all the annotations from the source annotation set that lie within
+   * the range of the containing annotation set, i.e. within the offset range
+   * between the start of the first annotation in the containing set and the
+   * end of the last annotation in the annotation set. If the containing
+   * annotation set is empty, an empty set is returned.
+   *
+   * @param sourceAnnotationSet the annotation set from which to select
+   * @param containingAnnotationSet the annotation set whose range must contain
+   * the selected annotations
+   * @return the AnnotationSet containing all annotations fully contained in
+   * the offset range of the containingAnnotationSet
+   */
+  public static AnnotationSet getContainedAnnotations(
+    AnnotationSet sourceAnnotationSet,
+    AnnotationSet containingAnnotationSet) {
+    return getContainedAnnotations(sourceAnnotationSet,containingAnnotationSet,"");
+  }
+
+  /**
+   * Get all the annotations from the source annotation set with a type equal to
+   * targetType that lie within
+   * the range of the containing annotation set, i.e. within the offset range
+   * between the start of the first annotation in the containing set and the
+   * end of the last annotation in the annotation set. If the containing
+   * annotation set is empty, an empty set is returned.
+   *
+   * @param sourceAnnotationSet the annotation set from which to select
+   * @param containingAnnotationSet the annotation set whose range must contain
+   * the selected annotations
+   * @param targetType the type the selected annotations must have
+   * @return the AnnotationSet containing all annotations fully contained in
+   * the offset range of the containingAnnotationSet
+   */
+  public static AnnotationSet getContainedAnnotations(
+    AnnotationSet sourceAnnotationSet,
+    AnnotationSet containingAnnotationSet,
+    String targetType) {
+    if(containingAnnotationSet.size() == 0) {
+      return new ImmutableAnnotationSetImpl(null,null) { 
+        private static final long serialVersionUID = -6703131102439043539L;
+      };
+    }
+    if(targetType.equals("")) {
+      return sourceAnnotationSet.getContained(
+        containingAnnotationSet.firstNode().getOffset(),
+        containingAnnotationSet.lastNode().getOffset());
+    } else {
+      return sourceAnnotationSet.getContained(
+        containingAnnotationSet.firstNode().getOffset(),
+        containingAnnotationSet.lastNode().getOffset()).get(targetType);
+    }
+  }
+
 
   /**
    * Return a List containing the annotations in the given annotation set, in
