@@ -16,30 +16,57 @@
 
 package gate.corpora;
 
-import java.io.*;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.*;
-
-import gate.*;
+import gate.Corpus;
+import gate.Document;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.Resource;
 import gate.creole.AbstractLanguageResource;
 import gate.creole.CustomDuplication;
 import gate.creole.ResourceInstantiationException;
-import gate.creole.metadata.*;
-import gate.event.*;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
+import gate.event.CorpusEvent;
+import gate.event.CorpusListener;
+import gate.event.CreoleEvent;
+import gate.event.CreoleListener;
+import gate.event.StatusListener;
 import gate.util.BomStrippingInputStreamReader;
 import gate.util.Err;
 import gate.util.Files;
 import gate.util.Strings;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Serializable;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Vector;
+
 /**
- * Corpora are sets of Document. They are ordered by lexicographic collation on
- * Url.
+ * Corpora are sets of Document. They are ordered by lexicographic
+ * collation on Url.
  */
-@CreoleResource(name = "GATE Corpus", comment = "GATE transient corpus.",
-    interfaceName = "gate.Corpus", icon = "corpus-trans",
-    helpURL = "http://gate.ac.uk/userguide/sec:developer:loadlr")
+@CreoleResource(name = "GATE Corpus", comment = "GATE transient corpus.", interfaceName = "gate.Corpus", icon = "corpus-trans", helpURL = "http://gate.ac.uk/userguide/sec:developer:loadlr")
 public class CorpusImpl extends AbstractLanguageResource implements Corpus,
                                                         CreoleListener,
                                                         CustomDuplication {
@@ -54,23 +81,22 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
 
   /**
    * Gets the names of the documents in this corpus.
-   *
-   * @return a {@link List} of Strings representing the names of the documents
-   *         in this corpus.
+   * 
+   * @return a {@link List} of Strings representing the names of the
+   *         documents in this corpus.
    */
   public List<String> getDocumentNames() {
     ArrayList<String> res = new ArrayList<String>(supportList.size());
-    for (Object document : supportList) {
-      res.add(((Document) document).getName());
+    for(Object document : supportList) {
+      res.add(((Document)document).getName());
     }
     return res;
   }
 
   /**
    * Gets the name of a document in this corpus.
-   *
-   * @param index
-   *          the index of the document
+   * 
+   * @param index the index of the document
    * @return a String value representing the name of the document at
    *         <tt>index</tt> in this corpus.
    */
@@ -79,7 +105,8 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
   }
 
   /**
-   * This method does not make sense for transient corpora, so it does nothing.
+   * This method does not make sense for transient corpora, so it does
+   * nothing.
    */
   public void unloadDocument(Document doc) {
     return;
@@ -91,10 +118,10 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
   protected List supportList = null;
 
   /**
-   * A proxy list that stores the actual data in an internal list and forwards
-   * all operations to that one but it also fires the appropiate corpus events
-   * when necessary. It also does some type checking so only Documents are
-   * accepted as corpus members.
+   * A proxy list that stores the actual data in an internal list and
+   * forwards all operations to that one but it also fires the
+   * appropiate corpus events when necessary. It also does some type
+   * checking so only Documents are accepted as corpus members.
    */
   protected class VerboseList extends AbstractList implements Serializable {
 
@@ -117,15 +144,15 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
 
         // fire the 2 events
         fireDocumentRemoved(new CorpusEvent(CorpusImpl.this, oldDoc, index,
-          CorpusEvent.DOCUMENT_REMOVED));
+                CorpusEvent.DOCUMENT_REMOVED));
         fireDocumentAdded(new CorpusEvent(CorpusImpl.this, newDoc, index,
-          CorpusEvent.DOCUMENT_ADDED));
+                CorpusEvent.DOCUMENT_ADDED));
         return oldDoc;
       }
       else {
         throw new UnsupportedOperationException(getClass().getName()
-          + " only accepts gate.Document values as members!\n"
-          + element.getClass().getName() + " is not a gate.Document");
+                + " only accepts gate.Document values as members!\n"
+                + element.getClass().getName() + " is not a gate.Document");
       }
     }
 
@@ -135,12 +162,12 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
 
         // fire the event
         fireDocumentAdded(new CorpusEvent(CorpusImpl.this, (Document)element,
-          index, CorpusEvent.DOCUMENT_ADDED));
+                index, CorpusEvent.DOCUMENT_ADDED));
       }
       else {
         throw new UnsupportedOperationException(getClass().getName()
-          + " only accepts gate.Document values as members!\n"
-          + element.getClass().getName() + " is not a gate.Document");
+                + " only accepts gate.Document values as members!\n"
+                + element.getClass().getName() + " is not a gate.Document");
       }
     }
 
@@ -148,7 +175,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
       Document oldDoc = (Document)data.remove(index);
 
       fireDocumentRemoved(new CorpusEvent(CorpusImpl.this, oldDoc, index,
-        CorpusEvent.DOCUMENT_REMOVED));
+              CorpusEvent.DOCUMENT_REMOVED));
       return oldDoc;
     }
 
@@ -159,7 +186,8 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
   }
 
   /**
-   * This method returns true when the document is already loaded in memory
+   * This method returns true when the document is already loaded in
+   * memory
    */
   public boolean isDocumentLoaded(int index) {
     return true;
@@ -289,88 +317,87 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
     return this;
   } // init()
 
-
   /**
-   * Fills the provided corpus with documents created on the fly from selected
-   * files in a directory. Uses a {@link FileFilter} to select which files will
-   * be used and which will be ignored. A simple file filter based on extensions
-   * is provided in the Gate distribution ({@link gate.util.ExtensionFileFilter}).
-   *
-   * @param corpus
-   *          the corpus to be populated
-   * @param directory
-   *          the directory from which the files will be picked. This parameter
-   *          is an URL for uniformity. It needs to be a URL of type file
-   *          otherwise an InvalidArgumentException will be thrown.
-   * @param filter
-   *          the file filter used to select files from the target directory. If
-   *          the filter is <tt>null</tt> all the files will be accepted.
-   * @param encoding
-   *          the encoding to be used for reading the documents
-   * @param recurseDirectories
-   *          should the directory be parsed recursively?. If <tt>true</tt>
-   *          all the files from the provided directory and all its children
-   *          directories (on as many levels as necessary) will be picked if
-   *          accepted by the filter otherwise the children directories will be
+   * Fills the provided corpus with documents created on the fly from
+   * selected files in a directory. Uses a {@link FileFilter} to select
+   * which files will be used and which will be ignored. A simple file
+   * filter based on extensions is provided in the Gate distribution (
+   * {@link gate.util.ExtensionFileFilter}).
+   * 
+   * @param corpus the corpus to be populated
+   * @param directory the directory from which the files will be picked.
+   *          This parameter is an URL for uniformity. It needs to be a
+   *          URL of type file otherwise an InvalidArgumentException
+   *          will be thrown.
+   * @param filter the file filter used to select files from the target
+   *          directory. If the filter is <tt>null</tt> all the files
+   *          will be accepted.
+   * @param encoding the encoding to be used for reading the documents
+   * @param recurseDirectories should the directory be parsed
+   *          recursively?. If <tt>true</tt> all the files from the
+   *          provided directory and all its children directories (on as
+   *          many levels as necessary) will be picked if accepted by
+   *          the filter otherwise the children directories will be
    *          ignored.
    * @throws java.io.IOException if a file doesn't exist
    */
   public static void populate(Corpus corpus, URL directory, FileFilter filter,
-    String encoding, boolean recurseDirectories)
-      throws IOException {
+          String encoding, boolean recurseDirectories) throws IOException {
     populate(corpus, directory, filter, encoding, null, recurseDirectories);
   }
 
   /**
-   * Fills the provided corpus with documents created on the fly from selected
-   * files in a directory. Uses a {@link FileFilter} to select which files will
-   * be used and which will be ignored. A simple file filter based on extensions
-   * is provided in the Gate distribution ({@link gate.util.ExtensionFileFilter}).
-   *
-   * @param corpus
-   *          the corpus to be populated
-   * @param directory
-   *          the directory from which the files will be picked. This parameter
-   *          is an URL for uniformity. It needs to be a URL of type file
-   *          otherwise an InvalidArgumentException will be thrown.
-   * @param filter
-   *          the file filter used to select files from the target directory. If
-   *          the filter is <tt>null</tt> all the files will be accepted.
-   * @param encoding
-   *          the encoding to be used for reading the documents
-   * @param recurseDirectories
-   *          should the directory be parsed recursively?. If <tt>true</tt>
-   *          all the files from the provided directory and all its children
-   *          directories (on as many levels as necessary) will be picked if
-   *          accepted by the filter otherwise the children directories will be
+   * Fills the provided corpus with documents created on the fly from
+   * selected files in a directory. Uses a {@link FileFilter} to select
+   * which files will be used and which will be ignored. A simple file
+   * filter based on extensions is provided in the Gate distribution (
+   * {@link gate.util.ExtensionFileFilter}).
+   * 
+   * @param corpus the corpus to be populated
+   * @param directory the directory from which the files will be picked.
+   *          This parameter is an URL for uniformity. It needs to be a
+   *          URL of type file otherwise an InvalidArgumentException
+   *          will be thrown.
+   * @param filter the file filter used to select files from the target
+   *          directory. If the filter is <tt>null</tt> all the files
+   *          will be accepted.
+   * @param encoding the encoding to be used for reading the documents
+   * @param recurseDirectories should the directory be parsed
+   *          recursively?. If <tt>true</tt> all the files from the
+   *          provided directory and all its children directories (on as
+   *          many levels as necessary) will be picked if accepted by
+   *          the filter otherwise the children directories will be
    *          ignored.
    * @throws java.io.IOException if a file doesn't exist
    */
   public static void populate(Corpus corpus, URL directory, FileFilter filter,
-    String encoding, String mimeType, boolean recurseDirectories)
-      throws IOException {
+          String encoding, String mimeType, boolean recurseDirectories)
+          throws IOException {
 
     // check input
     if(!directory.getProtocol().equalsIgnoreCase("file"))
       throw new IllegalArgumentException(
-        "The URL provided is not of type \"file:\"!");
+              "The URL provided is not of type \"file:\"!");
 
     File dir = Files.fileFromURL(directory);
     if(!dir.exists()) throw new FileNotFoundException(dir.toString());
 
     if(!dir.isDirectory())
       throw new IllegalArgumentException(dir.getAbsolutePath()
-        + " is not a directory!");
+              + " is not a directory!");
 
     File[] files;
     // populate the corpus
-    if (recurseDirectories) {
+    if(recurseDirectories) {
       files = Files.listFilesRecursively(dir, filter);
-    } else {
+    }
+    else {
       files = dir.listFiles(filter);
     }
 
-    if(files == null) { return; }
+    if(files == null) {
+      return;
+    }
 
     // sort the files alphabetically regardless of their paths
     Arrays.sort(files, new Comparator<File>() {
@@ -381,25 +408,24 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
 
     // create the GATE documents
     for(File file : files) {
-      if (file.isDirectory()) { continue; }
-      StatusListener sListener =
-        (StatusListener) Gate.getListeners().get(
-          "gate.event.StatusListener");
+      if(file.isDirectory()) {
+        continue;
+      }
+      StatusListener sListener = (StatusListener)Gate.getListeners().get(
+              "gate.event.StatusListener");
       if(sListener != null)
         sListener.statusChanged("Reading: " + file.getName());
       String docName = file.getName() + "_" + Gate.genSym();
       FeatureMap params = Factory.newFeatureMap();
-      params.put(Document.DOCUMENT_URL_PARAMETER_NAME,
-        file.toURI().toURL());
+      params.put(Document.DOCUMENT_URL_PARAMETER_NAME, file.toURI().toURL());
       if(encoding != null)
         params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, encoding);
       if(mimeType != null)
         params.put(Document.DOCUMENT_MIME_TYPE_PARAMETER_NAME, mimeType);
 
       try {
-        Document doc =
-          (Document) Factory.createResource(DocumentImpl.class.getName(),
-            params, null, docName);
+        Document doc = (Document)Factory.createResource(DocumentImpl.class
+                .getName(), params, null, docName);
         corpus.add(doc);
         if(corpus.getLRPersistenceId() != null) {
           // persistent corpus -> unload the document
@@ -409,72 +435,70 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
       }
       catch(Throwable t) {
         String nl = Strings.getNl();
-        Err.prln("WARNING: Corpus.populate could not instantiate document"
-          + nl + "  Document name was: " + docName + nl
-          + "  Exception was: " + t + nl + nl);
+        Err.prln("WARNING: Corpus.populate could not instantiate document" + nl
+                + "  Document name was: " + docName + nl + "  Exception was: "
+                + t + nl + nl);
         t.printStackTrace();
       }
-      if(sListener != null)
-        sListener.statusChanged(file.getName() + " read");
+      if(sListener != null) sListener.statusChanged(file.getName() + " read");
     }
 
   }// public static void populate
 
   /**
    * Fills this corpus with documents created from files in a directory.
-   *
-   * @param filter
-   *          the file filter used to select files from the target directory. If
-   *          the filter is <tt>null</tt> all the files will be accepted.
-   * @param directory
-   *          the directory from which the files will be picked. This parameter
-   *          is an URL for uniformity. It needs to be a URL of type file
-   *          otherwise an InvalidArgumentException will be thrown. An
-   *          implementation for this method is provided as a static method at
-   *          {@link gate.corpora.CorpusImpl#populate(Corpus, URL, FileFilter, String, boolean)}.
-   * @param encoding
-   *          the encoding to be used for reading the documents
-   * @param recurseDirectories
-   *          should the directory be parsed recursively?. If <tt>true</tt>
-   *          all the files from the provided directory and all its children
-   *          directories (on as many levels as necessary) will be picked if
-   *          accepted by the filter otherwise the children directories will be
+   * 
+   * @param filter the file filter used to select files from the target
+   *          directory. If the filter is <tt>null</tt> all the files
+   *          will be accepted.
+   * @param directory the directory from which the files will be picked.
+   *          This parameter is an URL for uniformity. It needs to be a
+   *          URL of type file otherwise an InvalidArgumentException
+   *          will be thrown. An implementation for this method is
+   *          provided as a static method at
+   *          {@link gate.corpora.CorpusImpl#populate(Corpus, URL, FileFilter, String, boolean)}
+   *          .
+   * @param encoding the encoding to be used for reading the documents
+   * @param recurseDirectories should the directory be parsed
+   *          recursively?. If <tt>true</tt> all the files from the
+   *          provided directory and all its children directories (on as
+   *          many levels as necessary) will be picked if accepted by
+   *          the filter otherwise the children directories will be
    *          ignored.
    */
   public void populate(URL directory, FileFilter filter, String encoding,
-    boolean recurseDirectories) throws IOException,
-    ResourceInstantiationException {
+          boolean recurseDirectories) throws IOException,
+          ResourceInstantiationException {
     populate(this, directory, filter, encoding, null, recurseDirectories);
   }
 
-
   /**
    * Fills this corpus with documents created from files in a directory.
-   *
-   * @param filter
-   *          the file filter used to select files from the target directory. If
-   *          the filter is <tt>null</tt> all the files will be accepted.
-   * @param directory
-   *          the directory from which the files will be picked. This parameter
-   *          is an URL for uniformity. It needs to be a URL of type file
-   *          otherwise an InvalidArgumentException will be thrown. An
-   *          implementation for this method is provided as a static method at
-   *          {@link gate.corpora.CorpusImpl#populate(Corpus, URL, FileFilter, String, boolean)}.
-   * @param encoding
-   *          the encoding to be used for reading the documents
-   *@param mimeType the mime type to be used when loading documents. If null,
-   *then the mime type will be detected automatically.
-   *
-   * @param recurseDirectories
-   *          should the directory be parsed recursively?. If <tt>true</tt>
-   *          all the files from the provided directory and all its children
-   *          directories (on as many levels as necessary) will be picked if
-   *          accepted by the filter otherwise the children directories will be
+   * 
+   * @param filter the file filter used to select files from the target
+   *          directory. If the filter is <tt>null</tt> all the files
+   *          will be accepted.
+   * @param directory the directory from which the files will be picked.
+   *          This parameter is an URL for uniformity. It needs to be a
+   *          URL of type file otherwise an InvalidArgumentException
+   *          will be thrown. An implementation for this method is
+   *          provided as a static method at
+   *          {@link gate.corpora.CorpusImpl#populate(Corpus, URL, FileFilter, String, boolean)}
+   *          .
+   * @param encoding the encoding to be used for reading the documents
+   *@param mimeType the mime type to be used when loading documents. If
+   *          null, then the mime type will be detected automatically.
+   * 
+   * @param recurseDirectories should the directory be parsed
+   *          recursively?. If <tt>true</tt> all the files from the
+   *          provided directory and all its children directories (on as
+   *          many levels as necessary) will be picked if accepted by
+   *          the filter otherwise the children directories will be
    *          ignored.
    */
   public void populate(URL directory, FileFilter filter, String encoding,
           String mimeType, boolean recurseDirectories) throws IOException,
-    ResourceInstantiationException {
+          ResourceInstantiationException {
     populate(this, directory, filter, encoding, mimeType, recurseDirectories);
   }
 
@@ -488,23 +512,29 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
   }
 
   /**
-   * Fills the provided corpus with documents extracted from the provided trec
-   * file.
-   *
+   * Fills the provided corpus with documents extracted from the
+   * provided trec file.
+   * 
    * @param corpus the corpus to be populated.
-   * @param trecFile the trec file.
+   * @param singleConcatenatedFile the trec file.
+   * @param documentRootElement text between this element (start and
+   *          end) is considered for creating a new document.
    * @param encoding the encoding of the trec file.
-   * @param numberOfDocumentsToExtract
-   *          extracts the specified number of documents from the trecweb file;
-   *          -1 to indicate all files.
-   * @return total length of populated documents in the corpus in number of bytes
+   * @param numberOfDocumentsToExtract extracts the specified number of
+   *          documents from the trecweb file; -1 to indicate all files.
+   * @param documentType type of the document it is (i.e. xml, html etc)
+   * @return total length of populated documents in the corpus in number
+   *         of bytes
    * @throws java.io.IOException
    */
-  public static long populate(Corpus corpus, URL trecFile, String encoding,
-    int numberOfDocumentsToExtract) throws IOException {
+  public static long populate(Corpus corpus, URL singleConcatenatedFile,
+          String documentRootElement, String encoding,
+          int numberOfDocumentsToExtract, String documentNamePrefix,
+          DocType documentType) throws IOException {
+    documentRootElement = documentRootElement.toLowerCase();
     File dir = null;
     try {
-      dir = new File(trecFile.toURI());
+      dir = new File(singleConcatenatedFile.toURI());
     }
     catch(URISyntaxException use) {
       throw new IOException(use.getMessage());
@@ -514,22 +544,26 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
 
     if(dir.isDirectory())
       throw new IllegalArgumentException(dir.getAbsolutePath()
-        + " is a directory!");
+              + " is a directory!");
 
     // we start a new document when we find <DOC> and close it when we
     // find </DOC>
     BufferedReader br = null;
     try {
-      String encodingLine = null;
+      String encodingLine = "";
       if(encoding != null && encoding.trim().length() != 0) {
         br = new BomStrippingInputStreamReader(new FileInputStream(dir),
                 encoding, 10485760);
-        encodingLine = "<?xml version=\"1.0\" encoding=\"" + encoding + "\" ?>";
+
+        if(documentType == DocType.XML)
+          encodingLine = "<?xml version=\"1.0\" encoding=\"" + encoding
+                  + "\" ?>";
       }
       else {
-        br =  new BomStrippingInputStreamReader(new FileInputStream(dir),
+        br = new BomStrippingInputStreamReader(new FileInputStream(dir),
                 10485760);
-        encodingLine = "<?xml version=\"1.0\" ?>";
+        if(documentType == DocType.XML)
+          encodingLine = "<?xml version=\"1.0\" ?>";
       }
 
       String line = br.readLine();
@@ -537,15 +571,15 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
       boolean searchingForStartElement = true;
       int count = 1;
       long lengthInBytes = 0;
-
       while(line != null) {
+        String lowerCasedLine = line.toLowerCase();
         if(numberOfDocumentsToExtract != -1
-          && (count-1) == numberOfDocumentsToExtract) break;
+                && (count - 1) == numberOfDocumentsToExtract) break;
 
         if(searchingForStartElement) {
-          int index = line.indexOf("<DOC ");
+          int index = lowerCasedLine.indexOf("<" + documentRootElement + " ");
           if(index < 0) {
-            index = line.indexOf("<DOC>");
+            index = lowerCasedLine.indexOf("<" + documentRootElement + ">");
           }
 
           if(index < 0) {
@@ -560,36 +594,71 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
           }
         }
         else {
-          int index = line.indexOf("</DOC>");
+          int index = lowerCasedLine.indexOf("</" + documentRootElement + ">");
           if(index < 0) {
             documentString += line + "\n";
             line = br.readLine();
             continue;
           }
           else {
-            documentString += line.substring(0, index + 6);
+            documentString += line.substring(0, index
+                    + documentRootElement.length() + 3);
             searchingForStartElement = true;
 
             // here lets create a new document
             // create the doc
-            StatusListener sListener =
-              (StatusListener)gate.Gate.getListeners().get(
-                "gate.event.StatusListener");
+            StatusListener sListener = (StatusListener)gate.Gate.getListeners()
+                    .get("gate.event.StatusListener");
             if(sListener != null)
               sListener.statusChanged("Reading File Number :" + count);
-            String docName = "Trec_File_" + count + "_" + Gate.genSym();
+            String docName = documentNamePrefix + count + "_" + Gate.genSym();
             FeatureMap params = Factory.newFeatureMap();
-            params.put(Document.DOCUMENT_STRING_CONTENT_PARAMETER_NAME,
-              replaceAmpChars(documentString));
+
+            // lets store this on a disc
+            File tempOutputFile = null;
+            String suffix = "";
+            if(documentType == DocType.XML) {
+              suffix = ".xml";
+            }
+            else if(documentType == DocType.HTML) {
+              suffix = ".html";
+            }
+
+            tempOutputFile = File.createTempFile(docName, suffix);
+            if(sListener != null)
+              sListener.statusChanged("Writing it on disk :"
+                      + tempOutputFile.getAbsolutePath());
+
+            BufferedWriter writer = null;
+            if(encoding != null && encoding.trim().length() > 0) {
+              writer = new BufferedWriter(new OutputStreamWriter(
+                      new FileOutputStream(tempOutputFile), encoding));
+            }
+            else {
+              writer = new BufferedWriter(new FileWriter(tempOutputFile));
+            }
+
+            if(documentType == DocType.XML)
+              writer.write(replaceAmpChars(documentString));
+            else writer.write(documentString);
+            writer.close();
+
+            // lets create the gate document
+            if(sListener != null)
+              sListener.statusChanged("Creating GATE document for :"
+                      + tempOutputFile.getAbsolutePath());
+
+            params.put(Document.DOCUMENT_URL_PARAMETER_NAME, tempOutputFile
+                    .toURI().toURL());
+
             // calculate the length
             lengthInBytes += documentString.getBytes().length;
             if(encoding != null && encoding.trim().length() > 0)
               params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, encoding);
 
             try {
-              Document doc =
-                (Document)Factory.createResource(DocumentImpl.class.getName(),
-                  params, null, docName);
+              Document doc = (Document)Factory.createResource(
+                      DocumentImpl.class.getName(), params, null, docName);
               count++;
               corpus.add(doc);
               if(corpus.getLRPersistenceId() != null) {
@@ -601,13 +670,22 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
             catch(Throwable t) {
               String nl = Strings.getNl();
               Err
-                .prln("WARNING: Corpus.populate could not instantiate document"
-                  + nl + "  Document name was: " + docName + nl
-                  + "  Exception was: " + t + nl + nl);
+                      .prln("WARNING: Corpus.populate could not instantiate document"
+                              + nl
+                              + "  Document name was: "
+                              + docName
+                              + nl
+                              + "  Exception was: " + t + nl + nl);
               t.printStackTrace();
             }
+            finally {
+              // delete the temporary file created for this document
+              writer = null;
+              tempOutputFile.delete();
+            }
+
             documentString = "";
-            if(sListener != null) sListener.statusChanged(docName + " read");
+            if(sListener != null) sListener.statusChanged(docName + " created!");
 
             if(line.length() > index + 7)
               line = line.substring(index + 6);
@@ -625,19 +703,27 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
   }// public static void populate
 
   /**
-   * Fills the provided corpus with documents extracted from the provided trec
-   * file.
-   *
+   * Fills the provided corpus with documents extracted from the
+   * provided single concatenated file.
+   * 
    * @param trecFile the trec file.
+   * @param documentRootElement content between the start and end of
+   *          this element is considered for documents.
    * @param encoding the encoding of the trec file.
-   * @param numberOfFilesToExtract indicates the number of files to extract
-   *   from the trecweb file.
-   * @return total length of populated documents in the corpus
-   *   in number of bytes
+   * @param numberOfFilesToExtract indicates the number of files to
+   *          extract from the trecweb file.
+   * @param documentNamePrefix the prefix to use for document names when
+   *          creating from
+   * @param documentType type of the document it is (i.e. html, xml)
+   * @return total length of populated documents in the corpus in number
+   *         of bytes
    */
-  public long populate(URL trecFile, String encoding, int numberOfFilesToExtract)
-    throws IOException, ResourceInstantiationException {
-    return populate(this, trecFile, encoding, numberOfFilesToExtract);
+  public long populate(URL singleConcatenatedFile, String documentRootElement,
+          String encoding, int numberOfFilesToExtract,
+          String documentNamePrefix, DocType documentType) throws IOException,
+          ResourceInstantiationException {
+    return populate(this, singleConcatenatedFile, documentRootElement,
+            encoding, numberOfFilesToExtract, documentNamePrefix, documentType);
   }
 
   public synchronized void removeCorpusListener(CorpusListener l) {
@@ -649,8 +735,9 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
   }
 
   public synchronized void addCorpusListener(CorpusListener l) {
-    Vector v =
-      corpusListeners == null ? new Vector(2) : (Vector)corpusListeners.clone();
+    Vector v = corpusListeners == null
+            ? new Vector(2)
+            : (Vector)corpusListeners.clone();
     if(!v.contains(l)) {
       v.addElement(l);
       corpusListeners = v;
@@ -658,9 +745,9 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
   }
 
   /**
-   * Custom duplication for a corpus - duplicate this corpus
-   * in the usual way, then duplicate the documents in this
-   * corpus and add them to the duplicate.
+   * Custom duplication for a corpus - duplicate this corpus in the
+   * usual way, then duplicate the documents in this corpus and add them
+   * to the duplicate.
    */
   public Resource duplicate(Factory.DuplicationContext ctx)
           throws ResourceInstantiationException {
@@ -699,8 +786,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
   }
 
   @Optional
-  @CreoleParameter(collectionElementType = Document.class,
-      comment = "A list of GATE documents")
+  @CreoleParameter(collectionElementType = Document.class, comment = "A list of GATE documents")
   public void setDocumentsList(java.util.List documentsList) {
     this.documentsList = documentsList;
   }

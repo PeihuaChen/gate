@@ -16,20 +16,47 @@
 
 package gate.corpora;
 
-import java.io.*;
-import java.net.URL;
-import java.util.*;
-
-import gate.*;
+import gate.Corpus;
+import gate.DataStore;
+import gate.Document;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.GateConstants;
+import gate.Resource;
 import gate.creole.AbstractLanguageResource;
 import gate.creole.CustomDuplication;
 import gate.creole.ResourceInstantiationException;
-import gate.creole.ir.*;
-import gate.creole.metadata.*;
-import gate.event.*;
+import gate.creole.ir.IREngine;
+import gate.creole.ir.IndexDefinition;
+import gate.creole.ir.IndexException;
+import gate.creole.ir.IndexManager;
+import gate.creole.ir.IndexStatistics;
+import gate.creole.ir.IndexedCorpus;
+import gate.creole.metadata.CreoleResource;
+import gate.event.CorpusEvent;
+import gate.event.CorpusListener;
+import gate.event.CreoleEvent;
+import gate.event.CreoleListener;
+import gate.event.DatastoreEvent;
+import gate.event.DatastoreListener;
 import gate.persist.PersistenceException;
 import gate.security.SecurityException;
-import gate.util.*;
+import gate.util.Err;
+import gate.util.GateRuntimeException;
+import gate.util.MethodNotImplementedException;
+import gate.util.Out;
+
+import java.io.FileFilter;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Vector;
 
 // The initial design was to implement this on the basis of a WeakValueHashMap.
 // However this creates problems, because the user might e.g., add a transient
@@ -39,9 +66,7 @@ import gate.util.*;
 // a documentUnload() method, which sets the in-memory copy to null but can
 // always restore the doc, because it has its persistence ID.
 
-@CreoleResource(name = "GATE Serial Corpus", isPrivate = true,
-    comment = "GATE persistent corpus (serialisation)", icon = "corpus",
-    helpURL = "http://gate.ac.uk/userguide/sec:developer:datastores")
+@CreoleResource(name = "GATE Serial Corpus", isPrivate = true, comment = "GATE persistent corpus (serialisation)", icon = "corpus", helpURL = "http://gate.ac.uk/userguide/sec:developer:datastores")
 public class SerialCorpusImpl extends AbstractLanguageResource
                                                               implements
                                                               Corpus,
@@ -56,6 +81,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   static final long serialVersionUID = 3632609241787241616L;
 
   protected transient Vector corpusListeners;
+
   protected java.util.List docDataList = null;
 
   // here I keep document index as key (same as the index in docDataList
@@ -63,18 +89,22 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   protected transient List documents = null;
 
   protected transient IndexManager indexManager = null;
+
   protected transient List addedDocs = null;
+
   protected transient List removedDocIDs = null;
+
   protected transient List changedDocs = null;
 
   public SerialCorpusImpl() {
   }
 
   /**
-   * Constructor to create a SerialCorpus from a transient one. This is called
-   * by adopt() to store the transient corpus and re-route the methods calls to
-   * it, until the corpus is sync-ed on disk. After that, the transientCorpus
-   * will always be null, so the new functionality will be used instead.
+   * Constructor to create a SerialCorpus from a transient one. This is
+   * called by adopt() to store the transient corpus and re-route the
+   * methods calls to it, until the corpus is sync-ed on disk. After
+   * that, the transientCorpus will always be null, so the new
+   * functionality will be used instead.
    */
   protected SerialCorpusImpl(Corpus tCorpus) {
     // copy the corpus name and features from the one in memory
@@ -87,7 +117,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     for(int i = 0; i < docNames.size(); i++) {
       Document doc = (Document)tCorpus.get(i);
       docDataList.add(new DocumentData((String)docNames.get(i), null, doc
-        .getClass().getName()));
+              .getClass().getName()));
     }
 
     // copy all the documents from the transient corpus
@@ -101,14 +131,14 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   /**
    * Gets the names of the documents in this corpus.
    * 
-   * @return a {@link List} of Strings representing the names of the documents
-   *         in this corpus.
+   * @return a {@link List} of Strings representing the names of the
+   *         documents in this corpus.
    */
   public List<String> getDocumentNames() {
     List<String> docsNames = new ArrayList<String>();
     if(docDataList == null) return docsNames;
-    for (Object aDocDataList : docDataList) {
-      DocumentData data = (DocumentData) aDocDataList;
+    for(Object aDocDataList : docDataList) {
+      DocumentData data = (DocumentData)aDocDataList;
       docsNames.add(data.getDocumentName());
     }
     return docsNames;
@@ -117,8 +147,8 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   /**
    * Gets the persistent IDs of the documents in this corpus.
    * 
-   * @return a {@link List} of Objects representing the persistent IDs of the
-   *         documents in this corpus.
+   * @return a {@link List} of Objects representing the persistent IDs
+   *         of the documents in this corpus.
    */
   public List getDocumentPersistentIDs() {
     List docsIDs = new ArrayList();
@@ -134,8 +164,8 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   /**
    * Gets the persistent IDs of the documents in this corpus.
    * 
-   * @return a {@link List} of Objects representing the persistent IDs of the
-   *         documents in this corpus.
+   * @return a {@link List} of Objects representing the persistent IDs
+   *         of the documents in this corpus.
    */
   public List getDocumentClassTypes() {
     List docsIDs = new ArrayList();
@@ -160,8 +190,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   /**
    * Gets the name of a document in this corpus.
    * 
-   * @param index
-   *          the index of the document
+   * @param index the index of the document
    * @return a String value representing the name of the document at
    *         <tt>index</tt> in this corpus.
    *         <P>
@@ -175,8 +204,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   /**
    * Gets the persistent ID of a document in this corpus.
    * 
-   * @param index
-   *          the index of the document
+   * @param index the index of the document
    * @return a value representing the persistent ID of the document at
    *         <tt>index</tt> in this corpus.
    *         <P>
@@ -194,22 +222,24 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   /**
    * Unloads a document from memory.
    * 
-   * @param index
-   *          the index of the document to be unloaded.
-   * @param sync
-   *          should the document be sync'ed (i.e. saved) before unloading.
+   * @param index the index of the document to be unloaded.
+   * @param sync should the document be sync'ed (i.e. saved) before
+   *          unloading.
    */
   public void unloadDocument(int index, boolean sync) {
     // 1. check whether its been loaded and is a persistent one
     // if a persistent doc is not loaded, there's nothing we need to do
     if((!isDocumentLoaded(index)) && isPersistentDocument(index)) return;
-    // 2. If requested, sync the document before releasing it from memory,
-    // because the creole register garbage collects all LRs which are not used
+    // 2. If requested, sync the document before releasing it from
+    // memory,
+    // because the creole register garbage collects all LRs which are
+    // not used
     // any more
     if(sync) {
       Document doc = (Document)documents.get(index);
       try {
-        // if the document is not already adopted, we need to do that first
+        // if the document is not already adopted, we need to do that
+        // first
         if(doc.getLRPersistenceId() == null) {
           doc = (Document)this.getDataStore().adopt(doc, null);
           this.getDataStore().sync(doc);
@@ -220,11 +250,11 @@ public class SerialCorpusImpl extends AbstractLanguageResource
       }
       catch(PersistenceException ex) {
         throw new GateRuntimeException("Error unloading document from corpus"
-          + "because document sync failed: " + ex.getMessage());
+                + "because document sync failed: " + ex.getMessage());
       }
       catch(gate.security.SecurityException ex1) {
         throw new GateRuntimeException("Error unloading document from corpus"
-          + "because of document access error: " + ex1.getMessage());
+                + "because of document access error: " + ex1.getMessage());
       }
     }
     // 3. remove the document from the memory
@@ -235,10 +265,9 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   /**
    * Unloads a document from memory
    * 
-   * @param doc
-   *          the document to be unloaded
-   * @param sync
-   *          should the document be sync'ed (i.e. saved) before unloading.
+   * @param doc the document to be unloaded
+   * @param sync should the document be sync'ed (i.e. saved) before
+   *          unloading.
    */
   public void unloadDocument(Document doc, boolean sync) {
     if(DEBUG) Out.prln("Document to be unloaded :" + doc.getName());
@@ -252,28 +281,28 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   }
 
   /**
-   * Unloads a document from memory, calling sync() first, to store the changes.
+   * Unloads a document from memory, calling sync() first, to store the
+   * changes.
    * 
-   * @param doc
-   *          the document to be unloaded.
+   * @param doc the document to be unloaded.
    */
   public void unloadDocument(Document doc) {
     unloadDocument(doc, true);
   }
 
   /**
-   * Unloads the document from memory, calling sync() first, to store the
-   * changes.
+   * Unloads the document from memory, calling sync() first, to store
+   * the changes.
    * 
-   * @param index
-   *          the index of the document to be unloaded.
+   * @param index the index of the document to be unloaded.
    */
   public void unloadDocument(int index) {
     unloadDocument(index, true);
   }
 
   /**
-   * This method returns true when the document is already loaded in memory
+   * This method returns true when the document is already loaded in
+   * memory
    */
   public boolean isDocumentLoaded(int index) {
     if(documents == null || documents.isEmpty()) return false;
@@ -281,8 +310,8 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   }
 
   /**
-   * This method returns true when the document is already stored on disk i.e.,
-   * is not transient
+   * This method returns true when the document is already stored on
+   * disk i.e., is not transient
    */
   public boolean isPersistentDocument(int index) {
     if(documents == null || documents.isEmpty()) return false;
@@ -290,10 +319,10 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   }
 
   /**
-   * Every LR that is a CreoleListener (and other Listeners too) must override
-   * this method and make sure it removes itself from the objects which it has
-   * been listening to. Otherwise, the object will not be released from memory
-   * (memory leak!).
+   * Every LR that is a CreoleListener (and other Listeners too) must
+   * override this method and make sure it removes itself from the
+   * objects which it has been listening to. Otherwise, the object will
+   * not be released from memory (memory leak!).
    */
   public void cleanup() {
     if(DEBUG) Out.prln("serial corpus cleanup called");
@@ -309,76 +338,82 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   /**
    * Fills this corpus with documents created from files in a directory.
    * 
-   * @param filter
-   *          the file filter used to select files from the target directory. If
-   *          the filter is <tt>null</tt> all the files will be accepted.
-   * @param directory
-   *          the directory from which the files will be picked. This parameter
-   *          is an URL for uniformity. It needs to be a URL of type file
-   *          otherwise an InvalidArgumentException will be thrown. An
-   *          implementation for this method is provided as a static method at
-   *          {@link gate.corpora.CorpusImpl#populate(Corpus, URL, FileFilter, String, boolean)}.
-   * @param encoding
-   *          the encoding to be used for reading the documents
-   * @param recurseDirectories
-   *          should the directory be parsed recursively?. If <tt>true</tt>
-   *          all the files from the provided directory and all its children
-   *          directories (on as many levels as necessary) will be picked if
-   *          accepted by the filter otherwise the children directories will be
+   * @param filter the file filter used to select files from the target
+   *          directory. If the filter is <tt>null</tt> all the files
+   *          will be accepted.
+   * @param directory the directory from which the files will be picked.
+   *          This parameter is an URL for uniformity. It needs to be a
+   *          URL of type file otherwise an InvalidArgumentException
+   *          will be thrown. An implementation for this method is
+   *          provided as a static method at
+   *          {@link gate.corpora.CorpusImpl#populate(Corpus, URL, FileFilter, String, boolean)}
+   *          .
+   * @param encoding the encoding to be used for reading the documents
+   * @param recurseDirectories should the directory be parsed
+   *          recursively?. If <tt>true</tt> all the files from the
+   *          provided directory and all its children directories (on as
+   *          many levels as necessary) will be picked if accepted by
+   *          the filter otherwise the children directories will be
    *          ignored.
    */
   public void populate(URL directory, FileFilter filter, String encoding,
-    boolean recurseDirectories) throws IOException,
-    ResourceInstantiationException {
+          boolean recurseDirectories) throws IOException,
+          ResourceInstantiationException {
     CorpusImpl.populate(this, directory, filter, encoding, recurseDirectories);
   }
 
   /**
    * Fills this corpus with documents created from files in a directory.
    * 
-   * @param filter
-   *          the file filter used to select files from the target directory. If
-   *          the filter is <tt>null</tt> all the files will be accepted.
-   * @param directory
-   *          the directory from which the files will be picked. This parameter
-   *          is an URL for uniformity. It needs to be a URL of type file
-   *          otherwise an InvalidArgumentException will be thrown. An
-   *          implementation for this method is provided as a static method at
-   *          {@link gate.corpora.CorpusImpl#populate(Corpus, URL, FileFilter, String, boolean)}.
-   * @param encoding
-   *          the encoding to be used for reading the documents
-   * @param recurseDirectories
-   *          should the directory be parsed recursively?. If <tt>true</tt>
-   *          all the files from the provided directory and all its children
-   *          directories (on as many levels as necessary) will be picked if
-   *          accepted by the filter otherwise the children directories will be
+   * @param filter the file filter used to select files from the target
+   *          directory. If the filter is <tt>null</tt> all the files
+   *          will be accepted.
+   * @param directory the directory from which the files will be picked.
+   *          This parameter is an URL for uniformity. It needs to be a
+   *          URL of type file otherwise an InvalidArgumentException
+   *          will be thrown. An implementation for this method is
+   *          provided as a static method at
+   *          {@link gate.corpora.CorpusImpl#populate(Corpus, URL, FileFilter, String, boolean)}
+   *          .
+   * @param encoding the encoding to be used for reading the documents
+   * @param recurseDirectories should the directory be parsed
+   *          recursively?. If <tt>true</tt> all the files from the
+   *          provided directory and all its children directories (on as
+   *          many levels as necessary) will be picked if accepted by
+   *          the filter otherwise the children directories will be
    *          ignored.
    */
   public void populate(URL directory, FileFilter filter, String encoding,
           String mimeType, boolean recurseDirectories) throws IOException,
-    ResourceInstantiationException {
+          ResourceInstantiationException {
     CorpusImpl.populate(this, directory, filter, encoding, mimeType,
             recurseDirectories);
   }
-  
+
   /**
-   * Fills the provided corpus with documents extracted from the provided trec
-   * file.
+   * Fills the provided corpus with documents extracted from the
+   * provided single concatenated file.
    * 
-   * @param trecfile
-   *          the trec file.
-   * @param encoding
-   *          the encoding of the trec file.
-   * @param numberOfDocumentsToExtract
-   *          extracts the specified number of documents from the trecweb file;
-   *          -1 to indicate all files.
-   * @return total length of populated documents in the corpus in number of bytes
+   * @param trecFile the trec file.
+   * @param documentRootElement content between the start and end of
+   *          this element is considered for documents.
+   * @param encoding the encoding of the trec file.
+   * @param numberOfFilesToExtract indicates the number of files to
+   *          extract from the trecweb file.
+   * @param documentNamePrefix the prefix to use for document names when
+   *          creating from
+   * @param documentType type of the document it is (i.e. xml or html
+   *          etc.)
+   * @return total length of populated documents in the corpus in number
+   *         of bytes
    */
-  public long populate(URL trecFile, String encoding,
-    int numberOfDocumentsToExtract) throws IOException,
-    ResourceInstantiationException {
-    return CorpusImpl.populate(this, trecFile, encoding,
-      numberOfDocumentsToExtract);
+  public long populate(URL singleConcatenatedFile, String documentRootElement,
+          String encoding, int numberOfFilesToExtract,
+          String documentNamePrefix, DocType documentType) throws IOException,
+          ResourceInstantiationException {
+    return CorpusImpl.populate(this, singleConcatenatedFile,
+            documentRootElement, encoding, numberOfFilesToExtract,
+            documentNamePrefix, documentType);
   }
 
   public synchronized void removeCorpusListener(CorpusListener l) {
@@ -390,8 +425,9 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   }
 
   public synchronized void addCorpusListener(CorpusListener l) {
-    Vector v =
-      corpusListeners == null ? new Vector(2) : (Vector)corpusListeners.clone();
+    Vector v = corpusListeners == null
+            ? new Vector(2)
+            : (Vector)corpusListeners.clone();
     if(!v.contains(l)) {
       v.addElement(l);
       corpusListeners = v;
@@ -454,7 +490,8 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     if(!e.getDatastore().equals(this.getDataStore())) return;
     if(this.getDataStore() != null)
       this.getDataStore().removeDatastoreListener(this);
-    // close this corpus, since it cannot stay open when the DS it comes from
+    // close this corpus, since it cannot stay open when the DS it comes
+    // from
     // is closed
     Factory.deleteResource(this);
   }
@@ -486,17 +523,19 @@ public class SerialCorpusImpl extends AbstractLanguageResource
 
     boolean isDirty = false;
     // the problem here is that I only have the doc persistent ID
-    // and nothing else, so I need to determine the index of the doc first
+    // and nothing else, so I need to determine the index of the doc
+    // first
     for(int i = 0; i < docDataList.size(); i++) {
       DocumentData docData = (DocumentData)docDataList.get(i);
       // we've found the correct document
       // don't break the loop, because it might appear more than once
       if(docID.equals(docData.getPersistentID())) {
         if(evt.getResource() == null) {
-          // instead of calling remove() which tries to load the document
+          // instead of calling remove() which tries to load the
+          // document
           // remove it from the documents and docDataList
           documentRemoved(((DocumentData)docDataList.get(i)).persistentID
-            .toString());
+                  .toString());
           docDataList.remove(i);
           documents.remove(i);
           isDirty = true;
@@ -521,7 +560,8 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   }// resourceDeleted
 
   /**
-   * Called by a datastore when a resource has been wrote into the datastore
+   * Called by a datastore when a resource has been wrote into the
+   * datastore
    */
   public void resourceWritten(DatastoreEvent evt) {
     if(evt.getResourceID().equals(this.getLRPersistenceId())) {
@@ -571,7 +611,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
 
       public void remove() {
         throw new UnsupportedOperationException("SerialCorpusImpl does not "
-          + "support remove in the iterators");
+                + "support remove in the iterators");
       }
     }; // return
 
@@ -579,19 +619,21 @@ public class SerialCorpusImpl extends AbstractLanguageResource
 
   public String toString() {
     return "document data " + docDataList.toString() + " documents "
-      + documents;
+            + documents;
   }
 
   public Object[] toArray() {
-    // there is a problem here, because some docs might not be instantiated
+    // there is a problem here, because some docs might not be
+    // instantiated
     throw new MethodNotImplementedException(
-      "toArray() is not implemented for SerialCorpusImpl");
+            "toArray() is not implemented for SerialCorpusImpl");
   }
 
   public Object[] toArray(Object[] a) {
-    // there is a problem here, because some docs might not be instantiated
+    // there is a problem here, because some docs might not be
+    // instantiated
     throw new MethodNotImplementedException(
-      "toArray(Object[] a) is not implemented for SerialCorpusImpl");
+            "toArray(Object[] a) is not implemented for SerialCorpusImpl");
   }
 
   public boolean add(Object o) {
@@ -601,7 +643,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     // make it accept only docs from its own datastore
     if(doc.getDataStore() != null && !this.dataStore.equals(doc.getDataStore())) {
       Err.prln("Error: Persistent corpus can only accept documents "
-        + "from its own datastore!");
+              + "from its own datastore!");
       return false;
     }// if
 
@@ -609,14 +651,13 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     // in this case, since it's going to be added to the end
     // the index will be the size of the docDataList before
     // the addition
-    DocumentData docData =
-      new DocumentData(doc.getName(), doc.getLRPersistenceId(), doc.getClass()
-        .getName());
+    DocumentData docData = new DocumentData(doc.getName(), doc
+            .getLRPersistenceId(), doc.getClass().getName());
     boolean result = docDataList.add(docData);
     documents.add(doc);
     documentAdded(doc);
     fireDocumentAdded(new CorpusEvent(SerialCorpusImpl.this, doc, docDataList
-      .size() - 1, doc.getLRPersistenceId(), CorpusEvent.DOCUMENT_ADDED));
+            .size() - 1, doc.getLRPersistenceId(), CorpusEvent.DOCUMENT_ADDED));
 
     return result;
   }
@@ -631,14 +672,16 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     if(index == -1) return false;
 
     if(index < docDataList.size()) { // we found it, so remove it
-      // by Andrey Shafirin: this part of code can produce an exception if
+      // by Andrey Shafirin: this part of code can produce an exception
+      // if
       // document wasn't loaded
       String docName = ((DocumentData)docDataList.get(index)).getDocumentName();
       Object docPersistentID = getDocumentPersistentID(index);
       docDataList.remove(index);
       // Document oldDoc = (Document) documents.remove(index);
       documents.remove(index);
-      // if (DEBUG) Out.prln("documents after remove of " + oldDoc.getName()
+      // if (DEBUG) Out.prln("documents after remove of " +
+      // oldDoc.getName()
       // + " are " + documents);
       if(DEBUG)
         Out.prln("documents after remove of " + docName + " are " + documents);
@@ -649,7 +692,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
       // index,
       // CorpusEvent.DOCUMENT_REMOVED));
       fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this, (Document)o,
-        index, docPersistentID, CorpusEvent.DOCUMENT_REMOVED));
+              index, docPersistentID, CorpusEvent.DOCUMENT_REMOVED));
     }
 
     return true;
@@ -668,8 +711,8 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     for(index = 0; iter.hasNext(); index++) {
       docData = (DocumentData)iter.next();
       if(docData.getDocumentName().equals(doc.getName())
-        && docData.getPersistentID().equals(doc.getLRPersistenceId())
-        && docData.getClassType().equals(doc.getClass().getName())) {
+              && docData.getPersistentID().equals(doc.getLRPersistenceId())
+              && docData.getClassType().equals(doc.getClass().getName())) {
         found = true;
         break;
       }
@@ -722,14 +765,14 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   public boolean equals(Object o) {
     if(!(o instanceof SerialCorpusImpl)) return false;
     SerialCorpusImpl oCorpus = (SerialCorpusImpl)o;
-    if (oCorpus == null) return false;
+    if(oCorpus == null) return false;
     if(oCorpus == this) return true;
     if((oCorpus.lrPersistentId == this.lrPersistentId || (this.lrPersistentId != null && this.lrPersistentId
-      .equals(oCorpus.lrPersistentId)))
-      && oCorpus.name.equals(this.name)
-      && (oCorpus.dataStore == this.dataStore || oCorpus.dataStore
-        .equals(this.dataStore)) && oCorpus.docDataList.equals(docDataList))
-      return true;
+            .equals(oCorpus.lrPersistentId)))
+            && oCorpus.name.equals(this.name)
+            && (oCorpus.dataStore == this.dataStore || oCorpus.dataStore
+                    .equals(this.dataStore))
+            && oCorpus.docDataList.equals(docDataList)) return true;
     return false;
   }
 
@@ -751,10 +794,9 @@ public class SerialCorpusImpl extends AbstractLanguageResource
       parameters.put(DataStore.DATASTORE_FEATURE_NAME, this.dataStore);
       try {
         parameters.put(DataStore.LR_ID_FEATURE_NAME, ((DocumentData)docDataList
-          .get(index)).getPersistentID());
-        Resource lr =
-          Factory.createResource(((DocumentData)docDataList.get(index))
-            .getClassType(), parameters);
+                .get(index)).getPersistentID());
+        Resource lr = Factory.createResource(((DocumentData)docDataList
+                .get(index)).getClassType(), parameters);
         if(DEBUG) Out.prln("Loaded document :" + lr.getName());
         // change the result to the newly loaded doc
         res = lr;
@@ -775,10 +817,11 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     throw new gate.util.MethodNotImplementedException();
     // fire the 2 events
     /*
-     * fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this, oldDoc,
-     * ((Integer) key).intValue(), CorpusEvent.DOCUMENT_REMOVED));
-     * fireDocumentAdded(new CorpusEvent(SerialCorpusImpl.this, newDoc,
-     * ((Integer) key).intValue(), CorpusEvent.DOCUMENT_ADDED));
+     * fireDocumentRemoved(new CorpusEvent(SerialCorpusImpl.this,
+     * oldDoc, ((Integer) key).intValue(),
+     * CorpusEvent.DOCUMENT_REMOVED)); fireDocumentAdded(new
+     * CorpusEvent(SerialCorpusImpl.this, newDoc, ((Integer)
+     * key).intValue(), CorpusEvent.DOCUMENT_ADDED));
      */
   }
 
@@ -786,15 +829,14 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     if(!(o instanceof Document) || o == null) return;
     Document doc = (Document)o;
 
-    DocumentData docData =
-      new DocumentData(doc.getName(), doc.getLRPersistenceId(), doc.getClass()
-        .getName());
+    DocumentData docData = new DocumentData(doc.getName(), doc
+            .getLRPersistenceId(), doc.getClass().getName());
     docDataList.add(index, docData);
 
     documents.add(index, doc);
     documentAdded(doc);
-    fireDocumentAdded(new CorpusEvent(SerialCorpusImpl.this, doc, index,
-            doc.getLRPersistenceId(), CorpusEvent.DOCUMENT_ADDED));
+    fireDocumentAdded(new CorpusEvent(SerialCorpusImpl.this, doc, index, doc
+            .getLRPersistenceId(), CorpusEvent.DOCUMENT_ADDED));
 
   }
 
@@ -802,7 +844,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     if(DEBUG) Out.prln("Remove index called");
     // try to get the actual document if it was loaded
     Document res = isDocumentLoaded(index) ? (Document)get(index) : null;
-    Object docLRID =((DocumentData)docDataList.get(index)).persistentID; 
+    Object docLRID = ((DocumentData)docDataList.get(index)).persistentID;
     if(docLRID != null) documentRemoved(docLRID.toString());
     docDataList.remove(index);
     documents.remove(index);
@@ -830,15 +872,15 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   }
 
   /**
-   * persistent Corpus does not support this method as all the documents might
-   * no be in memory
+   * persistent Corpus does not support this method as all the documents
+   * might no be in memory
    */
   public List subList(int fromIndex, int toIndex) {
     throw new gate.util.MethodNotImplementedException();
   }
 
   public void setDataStore(DataStore dataStore)
-    throws gate.persist.PersistenceException {
+          throws gate.persist.PersistenceException {
     super.setDataStore(dataStore);
     if(this.dataStore != null) this.dataStore.addDatastoreListener(this);
   }
@@ -846,9 +888,12 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   public void setTransientSource(Object source) {
     if(!(source instanceof Corpus)) return;
 
-    // the following initialisation is only valid when we're constructing
-    // this object from a transient one. If it has already been stored in
-    // a datastore, then the initialisation is done in readObject() since
+    // the following initialisation is only valid when we're
+    // constructing
+    // this object from a transient one. If it has already been stored
+    // in
+    // a datastore, then the initialisation is done in readObject()
+    // since
     // this method is the one called by serialisation, when objects
     // are restored.
     if(this.dataStore != null && this.lrPersistentId != null) return;
@@ -865,7 +910,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     for(int i = 0; i < docNames.size(); i++) {
       Document aDoc = (Document)tCorpus.get(i);
       docDataList.add(new DocumentData((String)docNames.get(i), null, aDoc
-        .getClass().getName()));
+              .getClass().getName()));
     }
 
     // copy all the documents from the transient corpus
@@ -895,13 +940,13 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   }
 
   /**
-   * readObject - calls the default readObject() and then initialises the
-   * transient data
+   * readObject - calls the default readObject() and then initialises
+   * the transient data
    * 
    * @serialData Read serializable fields. No optional data read.
    */
   private void readObject(ObjectInputStream s) throws IOException,
-    ClassNotFoundException {
+          ClassNotFoundException {
     s.defaultReadObject();
     documents = new ArrayList(docDataList.size());
     for(int i = 0; i < docDataList.size(); i++)
@@ -912,9 +957,8 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     if(this.dataStore != null) this.dataStore.addDatastoreListener(this);
 
     // if indexed construct the manager.
-    IndexDefinition definition =
-      (IndexDefinition)this.getFeatures().get(
-        GateConstants.CORPUS_INDEX_DEFINITION_FEATURE_KEY);
+    IndexDefinition definition = (IndexDefinition)this.getFeatures().get(
+            GateConstants.CORPUS_INDEX_DEFINITION_FEATURE_KEY);
     if(definition != null) {
       String className = definition.getIrEngineClassName();
       try {
@@ -944,7 +988,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
   public void setIndexDefinition(IndexDefinition definition) {
     if(definition != null) {
       this.getFeatures().put(GateConstants.CORPUS_INDEX_DEFINITION_FEATURE_KEY,
-        definition);
+              definition);
 
       String className = definition.getIrEngineClassName();
       try {
@@ -973,7 +1017,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
 
   public IndexDefinition getIndexDefinition() {
     return (IndexDefinition)this.getFeatures().get(
-      GateConstants.CORPUS_INDEX_DEFINITION_FEATURE_KEY);
+            GateConstants.CORPUS_INDEX_DEFINITION_FEATURE_KEY);
   }
 
   public IndexManager getIndexManager() {
@@ -982,7 +1026,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
 
   public IndexStatistics getIndexStatistics() {
     return (IndexStatistics)this.getFeatures().get(
-      GateConstants.CORPUS_INDEX_STATISTICS_FEATURE_KEY);
+            GateConstants.CORPUS_INDEX_STATISTICS_FEATURE_KEY);
   }
 
   private void documentAdded(Document doc) {
