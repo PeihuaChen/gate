@@ -115,18 +115,20 @@ public interface SimpleCorpus extends LanguageResource, List, NameBearer {
    * Fills the provided corpus with documents extracted from the
    * provided trec file.
    * 
-   * @param trecFile the trec file.
+   * @param singleConcatenatedFile the file with multiple documents in it.
    * @param documentRootElement content between the start and end of
    *          this element is considered for documents.
    * @param encoding the encoding of the trec file.
    * @param numberOfFilesToExtract indicates the number of files to
-   *          extract from the concatenated file. -1 to indicate all files.
+   *          extract from the concatenated file. -1 to indicate all
+   *          files.
    * @param documentNamePrefix the prefix to use for document names when
    *          creating from
+   * @param documentType type of the document (i.e. xml, html  etc.) 
    * @return total length of populated documents in the corpus in number
    *         of bytes
    */
-  public long populate(URL trecFile, String documentRootElement,
+  public long populate(URL singleConcatenatedFile, String documentRootElement,
           String encoding, int numberOfDocumentsToExtract,
           String documentNamePrefix, DocType documentType) throws IOException,
           ResourceInstantiationException;
