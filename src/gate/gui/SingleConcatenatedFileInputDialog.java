@@ -282,8 +282,14 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
       return -1;
     }
     else {
-      return Integer.parseInt(this.numOfDocumentsToFetchTextField.getText()
-              .trim());
+      // if error in parsing the text as integer, lets obtain all the documents
+      try {
+        return Integer.parseInt(this.numOfDocumentsToFetchTextField.getText()
+                .trim());
+      }
+      catch(NumberFormatException nfe) {
+        return -1;
+      }
     }
   }
 
