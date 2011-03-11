@@ -507,7 +507,7 @@ public class AnnotationListView extends AbstractDocumentView
        //hence we need to queue it to the GUI thread
        SwingUtilities.invokeLater(new Runnable(){
        public void run(){
-         owner.setSelectedAnnotations(selAnns);  
+         owner.setSelectedAnnotations(selAnns);
        }});
      }
    }
@@ -568,9 +568,11 @@ public class AnnotationListView extends AbstractDocumentView
      //restore selection
      table.clearSelection();
      if(selection != null){
+       localSelectionUpdating = true;
        for(int i = 0; i < selection.length; i++){
          table.addRowSelectionInterval(selection[i], selection[i]);
-   }
+       }
+       localSelectionUpdating = false;
      }
    }
 
