@@ -531,7 +531,18 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
           String documentRootElement, String encoding,
           int numberOfDocumentsToExtract, String documentNamePrefix,
           DocType documentType) throws IOException {
+
+    // obtain the root element that user has provided
+    // content between the start and end of root element is considered
+    // for creating documents
     documentRootElement = documentRootElement.toLowerCase();
+
+    // document name prefix could be an empty string
+    documentNamePrefix = documentNamePrefix == null ? "" : documentNamePrefix
+            .trim()
+            + "_";
+
+    // starting to read the file
     File dir = null;
     try {
       dir = new File(singleConcatenatedFile.toURI());
@@ -540,14 +551,17 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
       throw new IOException(use.getMessage());
     }
 
+    // it must exist
     if(!dir.exists()) throw new FileNotFoundException(dir.toString());
 
+    // we are expecting a file
     if(dir.isDirectory())
       throw new IllegalArgumentException(dir.getAbsolutePath()
               + " is a directory!");
 
-    // we start a new document when we find <DOC> and close it when we
-    // find </DOC>
+    // we start a new document when we find <documentRootElement> and
+    // close it
+    // when we find </documentRootElement>
     BufferedReader br = null;
     try {
       String encodingLine = "";
@@ -555,6 +569,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
         br = new BomStrippingInputStreamReader(new FileInputStream(dir),
                 encoding, 10485760);
 
+        // if xml add the xml line at the top
         if(documentType == DocType.XML)
           encodingLine = "<?xml version=\"1.0\" encoding=\"" + encoding
                   + "\" ?>";
@@ -562,47 +577,84 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
       else {
         br = new BomStrippingInputStreamReader(new FileInputStream(dir),
                 10485760);
+
+        // if xml add the xml line at the top
         if(documentType == DocType.XML)
           encodingLine = "<?xml version=\"1.0\" ?>";
       }
 
+      // reading line by line
       String line = br.readLine();
-      String documentString = "";
+
+      // this is where we store document content
+      StringBuilder documentString = new StringBuilder();
+
+      // toggle switch to indicate search for start element
       boolean searchingForStartElement = true;
+
+      // keeping count of number of documents extracted
       int count = 1;
+
+      // length in bytes read so far (to return)
       long lengthInBytes = 0;
+
+      // continue until reached the end of file
       while(line != null) {
-        String lowerCasedLine = line.toLowerCase();
+
+        // already extracted requested num of documents?
         if(numberOfDocumentsToExtract != -1
                 && (count - 1) == numberOfDocumentsToExtract) break;
 
+        // lowercase the line in order to match documentRootElement in
+        // any case
+        String lowerCasedLine = line.toLowerCase();
+
+        // if searching for startElement?
         if(searchingForStartElement) {
+
+          // may be its with attributes
           int index = lowerCasedLine.indexOf("<" + documentRootElement + " ");
+
+          // may be no attributes?
           if(index < 0) {
             index = lowerCasedLine.indexOf("<" + documentRootElement + ">");
           }
 
+          // if index <0, we are out of the content boundaries, so
+          // simply
+          // skip the current line and start reading from the next line
           if(index < 0) {
             line = br.readLine();
             continue;
           }
           else {
-            documentString = encodingLine + "\n" + line.substring(index) + "\n";
+
+            // if found, that's the first line
+            documentString.append(encodingLine + "\n" + line.substring(index)
+                    + "\n");
             searchingForStartElement = false;
             line = br.readLine();
             continue;
           }
         }
         else {
+
+          // now searching for last element
           int index = lowerCasedLine.indexOf("</" + documentRootElement + ">");
+
+          // if not found.. this is the content of a new document
           if(index < 0) {
-            documentString += line + "\n";
+            documentString.append(line + "\n");
             line = br.readLine();
             continue;
           }
           else {
-            documentString += line.substring(0, index
-                    + documentRootElement.length() + 3);
+
+            // found.. then end the document
+            documentString.append(line.substring(0, index
+                    + documentRootElement.length() + 3));
+
+            // getting ready for the next document
             searchingForStartElement = true;
 
             // here lets create a new document
@@ -630,18 +682,35 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
                       + tempOutputFile.getAbsolutePath());
 
             BufferedWriter writer = null;
-            if(encoding != null && encoding.trim().length() > 0) {
-              writer = new BufferedWriter(new OutputStreamWriter(
-                      new FileOutputStream(tempOutputFile), encoding));
-            }
-            else {
-              writer = new BufferedWriter(new FileWriter(tempOutputFile));
-            }
 
-            if(documentType == DocType.XML)
-              writer.write(replaceAmpChars(documentString));
-            else writer.write(documentString);
-            writer.close();
+            // proper handing of io calls
+            try {
+              if(encoding != null && encoding.trim().length() > 0) {
+                writer = new BufferedWriter(new OutputStreamWriter(
+                        new FileOutputStream(tempOutputFile), encoding));
+              }
+              else {
+                writer = new BufferedWriter(new FileWriter(tempOutputFile));
+              }
+
+              if(documentType == DocType.XML)
+                writer.write(replaceAmpChars(documentString.toString()));
+              else writer.write(documentString.toString());
+            }
+            catch(IOException ioe) {
+              String nl = Strings.getNl();
+              Err
+                      .prln("WARNING: Corpus.populate could not instantiate document"
+                              + nl
+                              + "  Document name was: "
+                              + docName
+                              + nl
+                              + "  Exception was: " + ioe + nl + nl);
+              ioe.printStackTrace();
+            }
+            finally {
+              if(writer != null) writer.close();
+            }
 
             // lets create the gate document
             if(sListener != null)
@@ -652,7 +721,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
                     .toURI().toURL());
 
             // calculate the length
-            lengthInBytes += documentString.getBytes().length;
+            lengthInBytes += documentString.toString().getBytes().length;
             if(encoding != null && encoding.trim().length() > 0)
               params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, encoding);
 
@@ -684,8 +753,9 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
               tempOutputFile.delete();
             }
 
-            documentString = "";
-            if(sListener != null) sListener.statusChanged(docName + " created!");
+            documentString = new StringBuilder();
+            if(sListener != null)
+              sListener.statusChanged(docName + " created!");
 
             if(line.length() > index + 7)
               line = line.substring(index + 6);

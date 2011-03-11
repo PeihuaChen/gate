@@ -1685,6 +1685,24 @@ public class NameBearerHandle implements Handle, StatusListener,
       Runnable runnable = new Runnable() {
         public void run() {
           if(answer) {
+
+            String message = null;
+            // lets first check the parameters
+            if(scfInputDialog.getUrlString().trim().length() == 0) {
+              message = "file URL cannot be empty";
+            }
+            else if(scfInputDialog.getDocumentRootElement().trim().length() == 0) {
+              message = "document root element cannot be empty";
+            }
+
+            // if something wrong say it to the user
+            if(message != null) {
+              JOptionPane.showMessageDialog(getLargeView(), message, "GATE",
+                      JOptionPane.ERROR_MESSAGE);
+              return;
+            }
+
+            // all parameters fine, proceed 
             long startTime = System.currentTimeMillis();
             URL url = null;
             try {
