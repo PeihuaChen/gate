@@ -217,7 +217,7 @@ extends AbstractLanguageResource implements LanguageResource{
         charsetFromWebServer = null;
         // Discarding the first token which is : "charset"
         if (st.hasMoreTokens())
-          st.nextToken().toUpperCase();
+          st.nextToken();
         // Get the encoding : "ISO-8859-1"
         if (st.hasMoreTokens())
           charsetFromWebServer = st.nextToken().toUpperCase();
