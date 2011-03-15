@@ -402,7 +402,7 @@ public class EmailDocumentHandler {
 
       if (firstToken != null){
         // trim it
-        firstToken.trim();
+        firstToken = firstToken.trim();
         if (containsWhiteSpaces(firstToken)) return false;
 
         // set the member field
