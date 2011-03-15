@@ -355,7 +355,7 @@ public class EmailDocumentHandler {
     else return false;
 
     // trim it
-    firstToken.trim();
+    firstToken = firstToken.trim();
 
     // check against "From" word
     // if the first token is not From then the entire line can not begin
@@ -368,7 +368,7 @@ public class EmailDocumentHandler {
 
       // get the next token
       String token = tokenizer.nextToken();
-      token.trim();
+      token = token.trim();
 
       // see if it has a meaning(analize if is a Day, Month,Zone, Time, Year )
       if (hasAMeaning(token))
