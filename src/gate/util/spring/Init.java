@@ -17,7 +17,16 @@
 package gate.util.spring;
 
 import gate.Gate;
+import gate.util.GateException;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.core.io.Resource;
+
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.io.File;
 import java.io.IOException;
@@ -25,10 +34,12 @@ import java.util.List;
 import java.util.Iterator;
 
 /**
- * <p>Helper class to support GATE initialisation via
- * <a href="http://www.springframework.org">Spring</a>.  The following is a
- * typical XML fragment to initialise GATE.</p>
- *
+ * <p>
+ * Helper class to support GATE initialisation via <a
+ * href="http://www.springframework.org">Spring</a>. The following is a
+ * typical XML fragment to initialise GATE.
+ * </p>
+ * 
  * <pre>
  * &lt;beans xmlns="http://www.springframework.org/schema/beans"
  *        xmlns:gate="http://gate.ac.uk/ns/spring"
@@ -38,7 +49,7 @@ import java.util.Iterator;
  *          http://www.springframework.org/schema/beans/spring-beans.xsd
  *          http://gate.ac.uk/ns/spring
  *          http://gate.ac.uk/ns/spring.xsd"&gt;
- *
+ * 
  *   &lt;gate:init gate-home="path/to/GATE"
  *              site-config-file="site/gate.xml"
  *              user-config-file="user/gate.xml"&gt;
@@ -48,16 +59,31 @@ import java.util.Iterator;
  *     &lt;/gate:preload-plugins&gt;
  *   &lt;/gate:init&gt;
  * </pre>
- *
- * <p>Valid attributes are <code>gate-home</code>, <code>plugins-home</code>,
- * <code>site-config-file</code>, <code>user-config-file</code> and
- * <code>builtin-creole-dir</code> - Spring <code>Resource</code>s
- * corresponding to the equivalent static set methods of {@link gate.Gate}.
- * Also, <code>preload-plugins</code> is a list of <code>Resource</code>s that
- * will be loaded as GATE plugins after GATE is initialised.</p>
- *
- * <p>The equivalent definition in "normal" Spring form (without the
- * <code>gate:</code> namespace) would be:</p>
+ * 
+ * <p>
+ * Valid attributes are <code>gate-home</code>,
+ * <code>plugins-home</code>, <code>site-config-file</code>,
+ * <code>user-config-file</code> and <code>builtin-creole-dir</code> -
+ * Spring <code>Resource</code>s corresponding to the equivalent static
+ * set methods of {@link gate.Gate}. Also, <code>preload-plugins</code>
+ * is a list of <code>Resource</code>s that will be loaded as GATE
+ * plugins after GATE is initialised.
+ * </p>
+ * 
+ * <p>
+ * As well as any plugins specified using <code>preload-plugins</code>,
+ * we also scan the defining bean factory for any beans of type
+ * {@link ExtraGatePlugin}, and load the plugins they refer to. This is
+ * useful if bean definitions are provided in several separate files, or
+ * if you are providing additional bean definitions to a context that
+ * already defines an Init bean definition that you cannot edit.
+ * </p>
+ * 
+ * <p>
+ * The equivalent definition in "normal" Spring form (without the
+ * <code>gate:</code> namespace) would be:
+ * </p>
+ * 
  * <pre>
  * &lt;bean class="gate.util.spring.Init"
  *      init-method="init"&gt;
@@ -72,39 +98,43 @@ import java.util.Iterator;
  *   &lt;/property&gt;
  * &lt;/bean&gt;
  * </pre>
- *
+ * 
  * <b>Note that when using this form the init-method="init" in the above
- * definition is vital.  GATE will not work if it is omitted.</b>
+ * definition is vital. GATE will not work if it is omitted.</b>
  */
-public class Init {
+public class Init implements BeanFactoryAware {
+  
+  private static final Logger log = Logger.getLogger(Init.class);
 
   /**
    * An optional list of plugins to load after GATE initialisation.
    */
   private List<Resource> plugins;
-  
+
+  private BeanFactory beanFactory;
+
+  public void setBeanFactory(BeanFactory beanFactory) {
+    this.beanFactory = beanFactory;
+  }
+
   public void setGateHome(Resource gateHome) throws IOException {
-    if(! Gate.isInitialised())
-      Gate.setGateHome(gateHome.getFile());
+    if(!Gate.isInitialised()) Gate.setGateHome(gateHome.getFile());
   }
 
   public void setPluginsHome(Resource pluginsHome) throws IOException {
-    if(! Gate.isInitialised())
-      Gate.setPluginsHome(pluginsHome.getFile());
+    if(!Gate.isInitialised()) Gate.setPluginsHome(pluginsHome.getFile());
   }
 
   public void setSiteConfigFile(Resource siteConfigFile) throws IOException {
-    if(! Gate.isInitialised())
-      Gate.setSiteConfigFile(siteConfigFile.getFile());
+    if(!Gate.isInitialised()) Gate.setSiteConfigFile(siteConfigFile.getFile());
   }
 
   public void setUserConfigFile(Resource userConfigFile) throws IOException {
-    if(! Gate.isInitialised())
-      Gate.setUserConfigFile(userConfigFile.getFile());
+    if(!Gate.isInitialised()) Gate.setUserConfigFile(userConfigFile.getFile());
   }
 
   public void setBuiltinCreoleDir(Resource builtinCreoleDir) throws IOException {
-    if(! Gate.isInitialised())
+    if(!Gate.isInitialised())
       Gate.setBuiltinCreoleDir(builtinCreoleDir.getURL());
   }
 
@@ -113,29 +143,55 @@ public class Init {
   }
 
   /**
-   * Initialises GATE and loads any preloadPlugins that have been specified.
+   * Initialises GATE and loads any preloadPlugins that have been
+   * specified, as well as any defined by {@link ExtraGatePlugin} beans
+   * in the containing factory.
    */
   public void init() throws Exception {
-    if(! Gate.isInitialised()) {
+    if(!Gate.isInitialised()) {
+      log.info("Initialising GATE");
       Gate.init();
-      if(plugins != null && !plugins.isEmpty()) {
-        for(Resource plugin : plugins) {
-          File pluginFile = null;
-          try {
-            pluginFile = plugin.getFile();
-          }
-          catch(IOException e) {
-            // no problem, try just as URL
-          }
-
-          if(pluginFile == null) {
-            Gate.getCreoleRegister().registerDirectories(plugin.getURL());
-          }
-          else {
-            Gate.getCreoleRegister().registerDirectories(pluginFile.toURI().toURL());
-          }
+    }
+    else {
+      log.info("GATE already initialised");
+    }
+    if(plugins != null && !plugins.isEmpty()) {
+      for(Resource plugin : plugins) {
+        log.debug("Loading preload-plugin " + plugin);
+        loadPlugin(plugin);
+      }
+    }
+    // look for any ExtraGatePlugin beans
+    if(beanFactory instanceof ListableBeanFactory) {
+      String[] extraPluginBeanNames = BeanFactoryUtils
+              .beanNamesForTypeIncludingAncestors(
+                      (ListableBeanFactory)beanFactory, ExtraGatePlugin.class);
+      for(String name : extraPluginBeanNames) {
+        Resource plugin = ((ExtraGatePlugin)beanFactory.getBean(name,
+                ExtraGatePlugin.class)).getLocation();
+        if(plugin != null) {
+          log.debug("Loading extra-plugin " + plugin);
+          loadPlugin(plugin);
         }
       }
     }
   } // init()
+
+  private void loadPlugin(Resource plugin) throws GateException, IOException,
+          MalformedURLException {
+    File pluginFile = null;
+    try {
+      pluginFile = plugin.getFile();
+    }
+    catch(IOException e) {
+      // no problem, try just as URL
+    }
+
+    if(pluginFile == null) {
+      Gate.getCreoleRegister().registerDirectories(plugin.getURL());
+    }
+    else {
+      Gate.getCreoleRegister().registerDirectories(pluginFile.toURI().toURL());
+    }
+  }
 }

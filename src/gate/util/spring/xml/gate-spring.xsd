@@ -64,6 +64,22 @@
     </xsd:complexType>
   </xsd:element>
 
+  <xsd:element name="extra-plugin">
+    <xsd:annotation>
+      <xsd:documentation>
+        Defines a URL to an extra plugin (to be loaded after Gate.init),
+        given a string representing a Spring resource.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType>
+      <xsd:simpleContent>
+        <xsd:extension base="xsd:anyURI">
+          <xsd:attribute name="id" type="xsd:ID" use="optional" />
+        </xsd:extension>
+      </xsd:simpleContent>
+    </xsd:complexType>
+  </xsd:element>
+
   <xsd:element name="feature-map">
     <xsd:annotation>
       <xsd:documentation>

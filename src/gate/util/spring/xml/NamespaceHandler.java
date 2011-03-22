@@ -27,6 +27,8 @@ public class NamespaceHandler extends NamespaceHandlerSupport {
   public void init() {
     registerBeanDefinitionParser("init", new InitBeanDefinitionParser());
     registerBeanDefinitionParser("url", new UrlBeanDefinitionParser());
+    registerBeanDefinitionParser("extra-plugin",
+            new ExtraGatePluginBeanDefinitionParser());
     registerBeanDefinitionParser("feature-map",
             new FeatureMapBeanDefinitionParser());
     registerBeanDefinitionParser("resource", new ResourceBeanDefinitionParser());
