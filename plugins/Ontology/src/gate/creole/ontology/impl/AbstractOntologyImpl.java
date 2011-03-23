@@ -1975,15 +1975,11 @@ public abstract class AbstractOntologyImpl
   protected File pluginDir = null;
 
   public File getPluginDir() {
-      System.out.println("Running getPluginDir");
     if (pluginDir == null) {
       ResourceData myResourceData =
           Gate.getCreoleRegister().get("gate.creole.ontology.impl.sesame.OWLIMOntology");
-      System.out.println("Got the resource data: "+myResourceData);
       java.net.URL creoleXml = myResourceData.getXmlFileUrl();
-      System.out.println("Got the creoleXML URL "+creoleXml);
       pluginDir = gate.util.Files.fileFromURL(creoleXml).getParentFile();
-      System.out.println("Got the plugin Dir "+pluginDir);
     }
     return pluginDir;
   }
