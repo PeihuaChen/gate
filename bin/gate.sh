@@ -18,7 +18,7 @@ GATE_HOME=`dirname "$PRG"`/..
 # wee need to execute the cd command separately, and only then get the value
 # via `pwd`
 cd "$GATE_HOME"
-export GATE_HOME=`pwd`
+export GATE_HOME="`pwd`"
 export ANT_HOME=$GATE_HOME
 cd "$CURDIR"
 
@@ -77,6 +77,6 @@ EOF
 done
 
 
-#echo running: $GATE_HOME/bin/ant run -f "$GATE_HOME/build.xml"  $config $session $initdir $log4j "$@"
+echo running: "$GATE_HOME/bin/ant" run -f "$GATE_HOME/build.xml"  "$config" "$sessioni" "$initdir" "$log4j" "$@"
 exec "$GATE_HOME/bin/ant" run -f "$GATE_HOME/build.xml" "$config" "$session" "$initdir" "$log4j" "$@"
 
