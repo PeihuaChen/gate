@@ -22,6 +22,7 @@ import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.Optional;
 import gate.creole.ontology.OConstants;
 import gate.creole.ontology.OConstants.OntologyFormat;
+import gate.util.Files;
 
 import java.io.File;
 import java.io.IOException;
@@ -263,7 +264,7 @@ public class OWLIMOntology
       if(!actualDataDirectoryURL.getProtocol().equals("file")) {
         throw new ResourceInstantiationException("dataDirectoryURL must be a local file");
       }
-      dataDirectory = new File(actualDataDirectoryURL.toURI());
+      dataDirectory = Files.fileFromURL(actualDataDirectoryURL);
       if(!dataDirectory.exists()) {
         if(!dataDirectory.mkdir()) {
           throw new ResourceInstantiationException(
