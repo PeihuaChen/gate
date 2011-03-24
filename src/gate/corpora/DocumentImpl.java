@@ -1633,7 +1633,9 @@ public class DocumentImpl extends AbstractLanguageResource implements
         strBuff.append(annot.getType());
         strBuff.append(" ");
         if(includeNamespace) {
-          strBuff.append(" xmlns:gate=\"http://www.gate.ac.uk\"");
+          // but don't add the gate ns declaration if it's already there!
+          if (annot.getFeatures().get("xmlns:gate") == null)
+            strBuff.append("xmlns:gate=\"http://www.gate.ac.uk\"");
           strBuff.append(" gate:");
         }
         strBuff.append("gateId=\"");
