@@ -1,6 +1,5 @@
 package gate.qa;
 
-import gate.Annotation;
 import gate.AnnotationSet;
 import gate.Document;
 import gate.Factory;
@@ -29,7 +28,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * This PR has the same functionality as the Quality Assurance GUI. If
@@ -37,14 +35,17 @@ import java.util.Set;
  * making sure that the statistics are calculated on the entire corpus.
  * User can provide various run-time parameters to configure the PR. One
  * of the parameters is the output directory where the results are
- * stored. The PR produces two files - one for the corpus statistics and
- * one for the documents statistics. Please see the section on QA and
- * this PR in the userguide for more information.
+ * stored. The PR produces two main files - one for the corpus
+ * statistics and one for the documents statistics. In case of the
+ * latter, each document in the output file is linked with the output of
+ * annotationDiff utility containing annotation by annotation comparison
+ * for every annotation type specified in annotationTypes parameter.
  * 
  * @author niraj
  * 
  */
-@CreoleResource(name="Quality Assurance PR", comment = "The Quality Assurance PR that runs when the pipeline is processing the last document")
+@CreoleResource(name = "Quality Assurance PR", comment = "The Quality Assurance PR provides a functionality of"
+        + " the Corpus QA Tool in GATE Developer")
 public class QualityAssurancePR extends AbstractLanguageAnalyser implements
                                                                 ProcessingResource {
 
@@ -95,6 +96,9 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
     return this;
   } // init()
 
+  /**
+   * The execute method
+   */
   public void execute() throws ExecutionException {
 
     // the corpus cannot be null or empty
@@ -196,29 +200,52 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
               || responseASName.trim().length() == 0 ? document
               .getAnnotations() : document.getAnnotations(responseASName);
 
-      // unload the document if it wasnt loaded earlier
-      if(!documentWasLoaded) {
-        corpus.unloadDocument(document);
-        Factory.deleteResource(document);
-      }
-
       // a differ object for each type
-      HashMap<String, AnnotationDiffer> differsByType = new HashMap<String, AnnotationDiffer>();
-      AnnotationDiffer differ;
-      Set<Annotation> keysIter = new HashSet<Annotation>();
-      Set<Annotation> responsesIter = new HashSet<Annotation>();
+      Map<String, AnnotationDiffer> differsByType = new HashMap<String, AnnotationDiffer>();
+
+      // differ doesn't have any method to access results letter, so
+      // storing
+      // results in a temporary map
+      Map<AnnotationDiffer, List<AnnotationDiffer.Pairing>> pairingsByDiffer = new HashMap<AnnotationDiffer, List<AnnotationDiffer.Pairing>>();
 
       // configure differs for one annotation type at a time
       for(String type : annotationTypes) {
-        keysIter = keys.get(type);
-        responsesIter = responses.get(type);
+        AnnotationSet keyAS = keys.get(type);
+        AnnotationSet respAS = responses.get(type);
 
-        differ = new AnnotationDiffer();
+        // perform annotation diff for this type
+        AnnotationDiffer differ = new AnnotationDiffer();
         differ.setSignificantFeaturesSet(new HashSet<String>(featureNames));
-        differ.calculateDiff(keysIter, responsesIter); // compare
+        List<AnnotationDiffer.Pairing> pairings = differ.calculateDiff(keyAS,
+                respAS);
+
+        // store results in temporary maps
+        pairingsByDiffer.put(differ, pairings);
         differsByType.put(type, differ);
       }
+
+      // differs object would be needed later to produce summary
       differsByDocThenType.add(differsByType);
+
+      // using diff Exporter to produce a single html file containing
+      // annotation
+      // diff results for all annotation types
+      AnnotationDiffExporter diffExporter = new AnnotationDiffExporter(
+              pairingsByDiffer, document, getKeyASName(), getResponseASName());
+
+      try {
+        diffExporter.export(getDiffResultsExportFile(document.getName()));
+      }
+      catch(IOException e) {
+        throw new ExecutionException(e);
+      }
+      finally {
+        // unload the document if it wasnt loaded earlier
+        if(!documentWasLoaded) {
+          corpus.unloadDocument(document);
+          Factory.deleteResource(document);
+        }
+      }
     }
 
     // calculate corpus statistics for the different annotation types
@@ -233,19 +260,43 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
             + corpusStats + "<br></body></html>";
     String documentOutput = "<html><body><b> Document Statistics</b><br>"
             + documentStats + "<br></body></html>";
+
+    // writer object
+    BufferedWriter bw = null;
     try {
-      BufferedWriter bw = new BufferedWriter(new FileWriter(new File(
-              outputFolder, "corpus-stats.html")));
+      bw = new BufferedWriter(new FileWriter(new File(outputFolder,
+              "corpus-stats.html")));
       bw.write(corpusOutput);
       bw.close();
       bw = new BufferedWriter(new FileWriter(new File(outputFolder,
               "document-stats.html")));
       bw.write(documentOutput);
-      bw.close();
     }
     catch(IOException ioe) {
       throw new ExecutionException(ioe);
     }
+    finally {
+      if(bw != null) {
+        try {
+          bw.close();
+        }
+        catch(IOException e) {
+          throw new ExecutionException(e);
+        }
+      }
+    }
+  }
+
+  /**
+   * Generates a file name to export annotation diff results to.
+   * 
+   * @return
+   */
+  protected File getDiffResultsExportFile(String documentName) {
+    // document Name - keyASName - responseASNAme - diff.html
+    String fileName = documentName.replaceAll("[ ]+", "_") + "-"
+            + getKeyASName() + "-" + getResponseASName() + "-diff.html";
+    return new File(getOutputFolderUrl().getFile(), fileName);
   }
 
   /**
@@ -301,9 +352,13 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
    * @param documentNames
    * @param differsByDocThenType
    * @return
+   * @throws ExecutionException
    */
   private String calculateDocumentStats(List<String> documentNames,
-          List<Map<String, AnnotationDiffer>> differsByDocThenType) {
+          List<Map<String, AnnotationDiffer>> differsByDocThenType)
+          throws ExecutionException {
+
+    // document names + two rows for macro and micro averages
     String[] docNames = new String[differsByDocThenType.size() + 2];
 
     // column names for the html table
@@ -319,10 +374,10 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
               .get(rowIndex);
 
       // creating a differ for this doc using all differs of different
-      // types in
-      // this document
+      // annotation types in this document
       AnnotationDiffer differ = new AnnotationDiffer(differsByType.values());
 
+      // collecting stats
       docNames[rowIndex] = documentNames.get(rowIndex);
       vals[rowIndex][0] = differ.getCorrectMatches();
       vals[rowIndex][1] = differ.getMissing();
@@ -369,7 +424,13 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
     vals[i][6] = tempvals[2];
 
     // finally populate the html table with column names and values
-    return toHtmlTable(docNames, vals, colnames);
+    String[] exportFileNames = new String[docNames.length - 2];
+    for(int j = 0; j < exportFileNames.length; j++) {
+      exportFileNames[j] = getDiffResultsExportFile(docNames[j]).getName();
+    }
+
+    // coverting results into an html table
+    return toHtmlTable(docNames, exportFileNames, vals, colnames);
   }
 
   /**
@@ -380,8 +441,8 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
    * @param columnNames
    * @return
    */
-  private String toHtmlTable(String[] firstCol, double[][] vals,
-          String[] columnNames) {
+  private String toHtmlTable(String[] firstCol, String[] anchorsOnFirstCol,
+          double[][] vals, String[] columnNames) {
     StringBuffer buffer = new StringBuffer();
     buffer.append("<table>\n");
     buffer.append("\t<tr>\n");
@@ -398,7 +459,19 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
     for(int i = 0; i < firstCol.length; i++) {
       buffer.append("\t<tr>\n");
       buffer.append("\t\t<td>\n");
+
+      // if there are links to individual annotation diff results
+      // available
+      // link doc names to respective file names
+      boolean endAnchor = false;
+      if(anchorsOnFirstCol != null && i < anchorsOnFirstCol.length) {
+        buffer.append("<a href=\"" + anchorsOnFirstCol[i] + "\">");
+        endAnchor = true;
+      }
       buffer.append(firstCol[i]);
+      if(endAnchor) {
+        buffer.append("</a>");
+      }
       buffer.append("\t\t</td>\n");
 
       double[] colvals = vals[i];
@@ -494,7 +567,7 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
     vals[i][6] = tempvals[2];
 
     // populate the html table with values
-    return toHtmlTable(typesNames, vals, colnames);
+    return toHtmlTable(typesNames, null, vals, colnames);
   }
 
   /**
