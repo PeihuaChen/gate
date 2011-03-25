@@ -2,7 +2,7 @@ package gate.qa;
 
 /**
  * ENUM for different measure types. User can select one of these as a
- * parameter for the QualityAssurance PR.
+ * parameter for the PRs such as QualityAssurance PR and QA for Teamware PR.
  * 
  * @author niraj
  * 
