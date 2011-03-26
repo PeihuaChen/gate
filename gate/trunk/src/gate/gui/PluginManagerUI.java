@@ -21,11 +21,14 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 import java.util.Timer;
 import java.util.List;
 import java.text.Collator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
@@ -348,7 +351,7 @@ public class PluginManagerUI extends JDialog implements GateConstants{
       Gate.DirectoryInfo dInfo = Gate.getDirectoryInfo(visibleRows.get(row));
       if (dInfo == null) { return null; }
       switch (column){
-        case NAME_COLUMN: return Files.fileFromURL(dInfo.getUrl()).getName();
+        case NAME_COLUMN: return getName4URL(dInfo.getUrl());
         case ICON_COLUMN: return
           dInfo.isValid() ? (
             dInfo.getUrl().getProtocol().equalsIgnoreCase("file") ? 
@@ -361,7 +364,25 @@ public class PluginManagerUI extends JDialog implements GateConstants{
         default: return null;
       }
     }
-    
+
+    private String getName4URL(URL url) {
+      String path = "";
+      try {
+        path = url.toURI().getPath();
+      } catch (URISyntaxException ex) {
+        // ignore, this should have been checked when adding the URL!
+      }
+      if(path.endsWith("/")) {
+        path = path.substring(0,path.length()-1);
+      }
+      int lastSlash = path.lastIndexOf("/");
+      if(lastSlash == -1) {
+        return path;
+      } else {
+        return path.substring(lastSlash+1);
+      }
+    }
+
     public boolean isCellEditable(int rowIndex, int columnIndex){
       return columnIndex == LOAD_NOW_COLUMN || 
         columnIndex == LOAD_ALWAYS_COLUMN ||
