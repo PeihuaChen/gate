@@ -370,6 +370,14 @@ public class OWLIMOntology
       // if we did not set the default name space when loading or if we
       // did not load anything in the first place, and if we do have a
       // baseURI set, use it to set the default name space
+
+      // TODO: once Sesame 2.3.3 is released, the bug that prevented to
+      // get the default namespace from the repository should be
+      // corrected. We should then get the default namespace from the
+      // repository and only use the baseURI or the default if necessary.
+      // Also, if the (RDFXML) parser is able to return the base UR
+      // that is defined in the RDFXML file, and we do not have anything
+      // else, we should use that for setting the default.
       if (getDefaultNameSpace() == null) {
         if (getBaseURI() != null && !getBaseURI().matches("\\s*")) {
           setDefaultNameSpace(getBaseURI());
