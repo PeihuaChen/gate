@@ -19,7 +19,7 @@ Options: control = appelt
 Rule:Ignore
 Priority: 1000
 (
-	{CannotBeAMeasurement}
+	{CannotBeAMeasurement}|{Measurement}
 )
 -->
 {}
