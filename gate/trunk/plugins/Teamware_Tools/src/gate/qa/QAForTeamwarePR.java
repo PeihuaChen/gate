@@ -56,8 +56,7 @@ import java.util.Set;
  * @author niraj
  * 
  */
-@CreoleResource(name = "QA Summariser for Teamware", 
-                comment = "The Quality Assurance PR for teamware")
+@CreoleResource(name = "QA Summariser for Teamware", comment = "The Quality Assurance PR for teamware")
 public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
                                                              ProcessingResource {
 
@@ -113,6 +112,16 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
    */
   private SerialAnalyserController controller;
 
+  /**
+   * name of the consensus annotation set
+   */
+  public static final String CONSENSUS_AS_NAME = "consensus";
+
+  /**
+   * Indicates if the consensus annotation set exists in documents
+   */
+  private boolean consensusExists = false;
+
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
     f.setMaximumFractionDigits(2); // format used for all decimal values
@@ -129,7 +138,7 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
     catch(GateException e) {
       throw new ResourceInstantiationException(e);
     }
-    
+
     // using QualityAssurancePR internally to calculate QA stats
     // but hiding this PR just in case
     FeatureMap hideParams = Factory.newFeatureMap();
@@ -149,6 +158,7 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
    * The execute method
    */
   public void execute() throws ExecutionException {
+
     // the corpus cannot be null or empty
     if(corpus == null || corpus.size() == 0) {
       throw new ExecutionException("Corpus cannot be null or empty");
@@ -171,7 +181,12 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
       annotatorToDocuments = new HashMap<String, Set<Object>>();
       annotatorsPairToDocuments = new HashMap<String, Set<Object>>();
       results = new HashMap<String, Map<String, Result>>();
+      consensusExists = false;
     }
+
+    // checking if consensus annotation set exists
+    consensusExists = (consensusExists || document.getNamedAnnotationSets()
+            .containsKey(CONSENSUS_AS_NAME));
 
     // annotators found in this document
     Set<String> annotators = new HashSet<String>();
@@ -188,7 +203,8 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
     // if no annotators found print a warning
     if(annotators.isEmpty()) {
       System.err.println("No annotators found for the document "
-              + document.getName());
+              + document.getName() + "\n"
+              + "Please make sure the document is annotated using Teamware!");
     }
 
     // if documents are loaded from datastore, we store only the
@@ -289,13 +305,13 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
       }
 
       // calculating IAA stats between annotator's annotations and
-      // consensus
-      // annotation set
-      calculateIAA(corpus, annName, "consensus", annName);
+      // consensus annotation set
+      if(consensusExists) {
+        calculateIAA(corpus, annName, CONSENSUS_AS_NAME, annName);
+      }
 
       // deleting newly created annotation set and unloading documents
-      // if
-      // necessary
+      // if necessary
       for(int k = corpus.size() - 1; k >= 0; k--) {
         Document aDoc = (Document)corpus.get(k);
         if(deleteDocs) {
@@ -399,8 +415,8 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
 
     // authors found in the corpus
     List<String> columnAuthorNames = new ArrayList<String>();
-    double concensusMacro = 0.0D;
-    double concensusMicro = 0.0D;
+    double consensusMacro = 0.0D;
+    double consensusMicro = 0.0D;
     double annotatorMacro = 0.0D;
     double annotatorMicro = 0.0D;
 
@@ -419,7 +435,7 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
       // IAA
       if(index < 0) {
         author1 = fileName;
-        author2 = "consensus";
+        author2 = CONSENSUS_AS_NAME;
       }
       else {
         author1 = fileName.substring(0, index);
@@ -527,13 +543,15 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
     for(String author2 : columnAuthorNames) {
       buffer.append("\t\t<td colspan=\"2\"><b>" + author2 + "</b></td>\n");
     }
+    buffer.append("\t\t<td colspan=\"2\"><b> Averages </b></td>\n");
     buffer.append("\t</tr>\n");
 
     // second row
     buffer.append("\t<tr>\n");
     buffer.append("\t\t<td>&nbsp;</td>\n");
 
-    for(int i = 0; i < columnAuthorNames.size(); i++) {
+    // additional columns for averages
+    for(int i = 0; i <= columnAuthorNames.size(); i++) {
       buffer.append("\t\t<td><b>Macro</b></td>\n");
       buffer.append("\t\t<td><b>Micro</b></td>\n");
     }
@@ -545,8 +563,6 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
     // 0.5 = white
     // ... as we proceed we brighten the red color
     // 0.0 = red
-    Color gc = Color.GREEN;
-    Color rc = Color.RED;
 
     List<String> authorNamesList = new ArrayList<String>(results.keySet());
     Collections.sort(authorNamesList);
@@ -570,35 +586,13 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
           buffer.append("\t\t<td colspan=\"2\">&nbsp;</td>\n");
         }
         else {
-          Color macCol = null;
-          Color micCol = null;
 
-          if(r.macro > 0.50) {
-            macCol = new Color(gc.getRed(), gc.getGreen(), gc.getBlue(),
-                    ((int)(r.macro * 100) * 2) - 100);
-          }
-          else {
-            macCol = new Color(rc.getRed(), rc.getGreen(), rc.getBlue(),
-                    100 - ((int)(r.macro * 100) * 2));
-          }
+          // append macro micro figures to the table
+          appendMacroMicroFigures(buffer, r.macro, r.micro);
 
-          if(r.micro > 0.50) {
-            micCol = new Color(gc.getRed(), gc.getGreen(), gc.getBlue(),
-                    ((int)(r.micro * 100) * 2) - 100);
-          }
-          else {
-            micCol = new Color(rc.getRed(), rc.getGreen(), rc.getBlue(),
-                    100 - ((int)(r.micro * 100) * 2));
-          }
-
-          buffer.append("\t\t<td " + colorToHTMLStyleTag(macCol) + " >"
-                  + f.format(r.macro) + "</td>\n");
-          buffer.append("\t\t<td " + colorToHTMLStyleTag(micCol) + " >"
-                  + f.format(r.micro) + "</td>\n");
-
-          if(author1.equals("consensus")) {
-            concensusMacro += r.macro;
-            concensusMicro += r.micro;
+          if(author1.equals(CONSENSUS_AS_NAME)) {
+            consensusMacro += r.macro;
+            consensusMicro += r.micro;
           }
           else {
             annMacro += r.macro;
@@ -607,9 +601,24 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
           }
         }
       }
-      if(docs != 0) {
-        annotatorMacro += (double)(annMacro / (double)(docs));
-        annotatorMicro += (double)(annMicro / (double)(docs));
+
+      // adding averages to the last 2 columns
+      if(author1.equals(CONSENSUS_AS_NAME)) {
+        double caMacroAvg = (double)(consensusMacro / (double)(columnAuthorNames
+                .size() - 1));
+        double caMicroAvg = (double)(consensusMicro / (double)(columnAuthorNames
+                .size() - 1));
+
+        appendMacroMicroFigures(buffer, caMacroAvg, caMicroAvg);
+      }
+      else {
+        double aaMacroAvg = (double)(annMacro / (double)(docs));
+        double aaMicroAvg = (double)(annMicro / (double)(docs));
+
+        annotatorMacro += aaMacroAvg;
+        annotatorMicro += aaMicroAvg;
+
+        appendMacroMicroFigures(buffer, aaMacroAvg, aaMicroAvg);
       }
 
       buffer.append("\t</tr>\n");
@@ -627,17 +636,26 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
                   + r.documentFileName + "\">document</a></td>\n");
         }
       }
+
+      buffer.append("\t\t<td colspan=\"2\">&nbsp;</td>\n");
     }
 
     buffer.append("</table>\n");
-    buffer.append("<hr><br><b>Avg. consensus macro avg:</b> "
-            + (f
-                    .format((double)concensusMacro
-                            / (columnAuthorNames.size() - 1))));
-    buffer.append("<br><b>Avg. consensus micro avg:</b> "
-            + (f
-                    .format((double)concensusMicro
-                            / (columnAuthorNames.size() - 1))));
+
+    buffer.append("<hr>");
+
+    if(consensusExists) {
+      buffer.append("<br><b>Avg. "
+              + CONSENSUS_AS_NAME
+              + " macro avg:</b> "
+              + (f.format((double)consensusMacro
+                      / (columnAuthorNames.size() - 1))));
+      buffer.append("<br><b>Avg. "
+              + CONSENSUS_AS_NAME
+              + " micro avg:</b> "
+              + (f.format((double)consensusMicro
+                      / (columnAuthorNames.size() - 1))));
+    }
     buffer.append("<br><b>Avg. IAA macro avg:</b> "
             + (f
                     .format((double)annotatorMacro
@@ -671,12 +689,58 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
   }
 
   /**
-   * Converting a java Color object into html style tag
+   * A method that adds two columns to the buffer - one for the macro
+   * figure and the other one for the micro figure. It also adds
+   * relevant style tag to give a proper color to each cell depending on
+   * the value of macro and micro figures. See documentation of the
+   * getStyleTag(double) for more information on how cell backgrounds
+   * are color coded.
    * 
-   * @param c
+   * @param buffer
+   * @param macro
+   * @param micro
+   */
+  private void appendMacroMicroFigures(StringBuffer buffer, double macro,
+          double micro) {
+    String macCol = getStyleTag(macro);
+    String micCol = getStyleTag(micro);
+
+    buffer.append("\t\t<td " + macCol + " >" + f.format(macro) + "</td>\n");
+    buffer.append("\t\t<td " + micCol + " >" + f.format(micro) + "</td>\n");
+
+  }
+
+  /**
+   * Gets the style tag based on the score.
+   * 
+   * The color green is used for a cell background to indicate full
+   * agreement (i.e. 1.0). The background color becomes lighter as the
+   * agreement reduces towards 0.5. At 0.5 agreement, the background
+   * color of a cell is fully white. From 0.5 downwards, the color red
+   * is used and as the agreement reduces further, the color becomes
+   * darker with dark red at 0.0 agreement.
+   * 
+   * @param score
    * @return
    */
-  private String colorToHTMLStyleTag(Color c) {
+  private String getStyleTag(double score) {
+
+    // two colors
+    Color gc = Color.GREEN;
+    Color rc = Color.RED;
+
+    Color c = null;
+
+    // if score is above .50, use the green color, otherwise the red one
+    if(score > 0.50) {
+      c = new Color(gc.getRed(), gc.getGreen(), gc.getBlue(),
+              ((int)(score * 100) * 2) - 100);
+    }
+    else {
+      c = new Color(rc.getRed(), rc.getGreen(), rc.getBlue(),
+              100 - ((int)(score * 100) * 2));
+    }
+
     return "style=\"background-color: rgba(" + c.getRed() + "," + c.getGreen()
             + "," + c.getBlue() + "," + ((double)c.getAlpha() / 100) + ")\"";
   }
