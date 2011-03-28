@@ -100,8 +100,14 @@ public class SesameCLI {
       do_export();
       mManager.disconnect();
     } else if (optionCmd.equals("create")) {
-      do_create();
-      mManager.disconnect();
+      try {
+        do_create();
+      } catch(Exception ex) {
+        System.err.println("Problem creating repository");
+        ex.printStackTrace(System.err);
+      } finally {
+        mManager.disconnect();
+      }
     } else if (optionCmd.equals("delete")) {
       do_delete();
       mManager.disconnect();

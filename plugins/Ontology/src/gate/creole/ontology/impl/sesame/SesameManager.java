@@ -368,6 +368,7 @@ public class SesameManager {
       throw new SesameManagerException("No connect prior to createRepository");
     }
     Repository systemRepo = mRepositoryManager.getSystemRepository();
+
     ValueFactory vf = systemRepo.getValueFactory();
     Graph graph = new GraphImpl(vf);
     RDFParser rdfParser = Rio.createParser(RDFFormat.TURTLE, vf);
@@ -375,15 +376,16 @@ public class SesameManager {
     try {
       rdfParser.parse(new StringReader(config), RepositoryConfigSchema.NAMESPACE);
     } catch (Exception e) {
-      throw new SesameManagerException("Error parsing the config string: "+e);
+      throw new SesameManagerException("Error parsing the config string: ",e);
     }
     try {
-	    Resource repositoryNode =
-          GraphUtil.getUniqueSubject(graph, RDF.TYPE,RepositoryConfigSchema.REPOSITORY);
-			RepositoryConfig repConfig = RepositoryConfig.create(graph, repositoryNode);
-			repConfig.validate();
-			if (RepositoryConfigUtil.hasRepositoryConfig(systemRepo, repConfig.getID())) {
-        throw new SesameManagerException("Repository already exists with ID "+repConfig.getID());
+      Resource repositoryNode =
+        GraphUtil.getUniqueSubject(graph, RDF.TYPE,RepositoryConfigSchema.REPOSITORY);
+      RepositoryConfig repConfig = RepositoryConfig.create(graph, repositoryNode);
+      repConfig.validate();
+      if (RepositoryConfigUtil.hasRepositoryConfig(systemRepo, repConfig.getID())) {
+        throw new SesameManagerException("Repository already exists with ID "+
+          repConfig.getID());
       } else {
         RepositoryConfigUtil.updateRepositoryConfigs(systemRepo, repConfig);
         mRepository = mRepositoryManager.getRepository(repConfig.getID());
@@ -393,13 +395,14 @@ public class SesameManager {
         try {
           mRepository.initialize();
         } catch (IllegalStateException ex) {
+          System.err.println("Got an IllegalStateException, ignored: "+ex);
           // we get this if the SAIL has already been initialized, just
           // ignore and be happy that we can be sure that indeed it has
         }
         openRepository(repConfig.getID());
       }
     } catch (Exception e) {
-      throw new SesameManagerException("Error creating repository "+e);
+      throw new SesameManagerException("Error creating repository",e);
     }
   }
 
