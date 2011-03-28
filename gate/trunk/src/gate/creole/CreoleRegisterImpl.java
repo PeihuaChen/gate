@@ -248,6 +248,14 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
         throw new GateRuntimeException(mue);
       }
     }
+    // normalise to remove any /../ path components
+    try {
+      directoryUrl = new URL(directoryUrl, ".");
+      urlName = directoryUrl.toExternalForm();
+    }
+    catch(MalformedURLException mue) {
+      throw new GateRuntimeException(mue);
+    }
     // create a URL for the creole.xml file, based on the directory URL
     URL directoryXmlFileUrl = directoryUrl;
     try {

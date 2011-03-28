@@ -1239,6 +1239,7 @@ public class Gate implements GateConstants {
    * @return a {@link DirectoryInfo} value.
    */
   public static DirectoryInfo getDirectoryInfo(URL directory) {
+    directory = normaliseCreoleUrl(directory);
     if(!knownPlugins.contains(directory)) return null;
     DirectoryInfo dInfo = pluginData.get(directory);
     if(dInfo == null) {
