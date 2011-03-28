@@ -46,6 +46,8 @@ public class CrawlPR
   private int maxFetch = -1;
   private int maxKeep  = -1;
   private Boolean convertXmlTypes;
+  private String userAgent; // for spoofing
+  private int maxPageSize;  // in kB
   
   // ignore keyword requirement if null or empty
   private List<String> keywords = null;
@@ -92,8 +94,13 @@ public class CrawlPR
    */
   public void execute() throws ExecutionException {
     this.interrupted = false;
+    DownloadParameters downloadParameters = new DownloadParameters();
+    downloadParameters = downloadParameters.changeUserAgent(userAgent);
+    downloadParameters = downloadParameters.changeMaxPageSize(maxPageSize);
+    
     crawler = new SphinxWrapper();
     crawler.clear();
+    crawler.setDownloadParameters(downloadParameters);
     crawler.setKeywords(keywords, caseSensitiveKeywords);
     crawler.setConvertXmlTypes(convertXmlTypes);
     crawler.resetCounter();
@@ -206,6 +213,31 @@ public class CrawlPR
   public Boolean getDfs() {
     return this.dfs;
   }
+  
+  
+  @Optional
+  @RunTime
+  @CreoleParameter(comment = "HTTP User Agent to spoof (leave blank for default)",
+          defaultValue = "")
+  public void setUserAgent(String ua) {
+    this.userAgent = ua;
+  }
+  
+  public String getUserAgent() {
+    return this.userAgent;
+  }
+
+  @Optional
+  @RunTime
+  @CreoleParameter(comment = "max page size in kB (0 for no limit)", defaultValue = "100")
+  public void setMaxPageSize(Integer mps) {
+    this.maxPageSize = mps.intValue();
+  }
+  
+  public Integer getMaxPageSize() {
+    return Integer.valueOf(this.maxPageSize);
+  }
+  
 
   @RunTime
   @CreoleParameter(comment = "The domain restriction for the crawl",
