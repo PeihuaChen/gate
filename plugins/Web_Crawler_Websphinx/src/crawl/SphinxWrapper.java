@@ -224,9 +224,9 @@ public class SphinxWrapper extends Crawler{
 
 
  
-  private static Document makeDocument(Page p) {
-    String url = p.toURL();
-    String content = p.getContent();
+  private static Document makeDocument(Page page) {
+    String url = page.toURL();
+    String content = page.getContent();
     FeatureMap params = Factory.newFeatureMap();
     
     // This is more efficient than creating the gate.Document from the URL
@@ -238,7 +238,7 @@ public class SphinxWrapper extends Crawler{
 
     /* Take advantage of the MIME type from the server when
      * constructing the GATE document.      */
-    String contentTypeStr = p.getContentType();
+    String contentTypeStr = page.getContentType();
     String originalMimeType = null;
 
     if (contentTypeStr != null) {
@@ -272,9 +272,12 @@ public class SphinxWrapper extends Crawler{
       doc = (Document) Factory.createResource(
               DocumentImpl.class.getName(), params, null, docName);
       FeatureMap docFeatures = doc.getFeatures();
+
+      Integer originalLength = page.getLength();
+      docFeatures.put("originalLength", originalLength);
       
       /* Use the Last-Modified HTTP header if available.  */
-      long lastModified = p.getLastModified();
+      long lastModified = page.getLastModified();
       Date date;
       if (lastModified > 0L) {
         date = new Date(lastModified);
@@ -288,7 +291,7 @@ public class SphinxWrapper extends Crawler{
         docFeatures.put("originalMimeType", originalMimeType);
       }
       
-      doc.setSourceUrl(p.getURL());
+      doc.setSourceUrl(page.getURL());
       docFeatures.put("gate.SourceURL", url);
     }
     catch (ResourceInstantiationException e) {
