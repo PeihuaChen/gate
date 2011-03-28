@@ -263,17 +263,9 @@ public abstract class Factory {
     // type-specific stuff for VRs
     } else if(VisualResource.class.isAssignableFrom(resClass)) {
       if(DEBUG) Out.prln(resClass.getName() + " is a VR");
-
-    // we have a resource which is not an LR, PR or VR
     } else if(Controller.class.isAssignableFrom(resClass)){
       //type specific stuff for Controllers
-    } else if(!resData.isTool()) {
-      // it's probably a bad idea to instantiate a non-PR, LR or VR
-      // unless it's a tool
-      Err.prln("WARNING: instantiating resource which is not a PR, LR or VR:");
-      Err.prln(resData + "END OF WARNING" + Strings.getNl());
     }
-
 
 
     //set the parameterValues of the resource
