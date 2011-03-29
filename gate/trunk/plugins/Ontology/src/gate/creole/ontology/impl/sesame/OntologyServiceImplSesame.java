@@ -263,20 +263,56 @@ public class OntologyServiceImplSesame implements OntologyService {
   // TODO: Sesame does not support getting the base uri or default namespace
   // as of version 2.3.1 so we have no chance to figure those out ...
   // This was for debugging ...
+  //
+  // Latest news is that in version 2.3.3 there will be support to get
+  // the default namespace after loading, but not to get the base uri,
+  // if there is a base URI declared in the RDF element.
+  // Also the code for version 2.3.3 shows that a repository's default namespace
+  // will be set from the first file loaded and after that, never overwritten
+  // by a loaded file.
+  // In order to get this right in the future we need to define more precisely
+  // the semantics of ontology.setDefaultNamespace and probably also change the
+  // semantics:
+  //  - should setting the default namespace actually set it in the repository?
+  //    pro: more consistent with expectation
+  //    con: not possible if repository is read-only but even for read-only
+  //      repositories, we want the functionality of what setDefaultNamespace
+  //      was used so far: provide a default URI prefix.
+  //  - related: should what we set be saved? If we only set the default
+  //    namespace for the writer, we can do this for read-only repositories.
+  //  - compromise: set it for the repository but catch the exception if
+  //    the repository is R/O and just issue a warning. Always handle for the
+  //    writer.
+  // Also, if a repository is read, we should set the Ontology default namespace
+  // from the definition in the file (but only from the first file). So
+  // we could always set our ontology default NS after reading from the
+  // repository. Except if the user has already *set* the default namespace.
+  // In that case, the reverse should be done: after reading, the repositories
+  // DNS gets overwritten by the user's.
+  // The Base URI optionally passed as a parameter should be used, if given
+  //   - as a parameter for the Sesame file reader
+  //   - if neither the user nor the file has a DNS to set the DNS
+  // Eventually we might want to make general NS handling available in the
+  // Ontology interface by adding a createURIForName(nsabbrev,name) and a
+  // OURI.getResourceName(nsabbrev) method?
+  // Also review the documentation and comments (and code) to distinguish
+  // properly between default namespace and base URI!!
   /*
-  private void handleBaseURIafterLoad() {
-    String baseURI = null;
-    try {
-      baseURI = repositoryConnection.getNamespace("rdf");
-      RepositoryResult<Namespace> nss = repositoryConnection.getNamespaces();
-      for(Namespace ns : nss.asList()) {
-        System.out.println("Have namespace: "+ns.getPrefix()+"="+ns.getName());
+   //  for later/debugging
+  private void handleDefaultNSafterLoad() {
+    if(defaultnshasbeensetbyuser) {
+      // check if this would be necessary at all if we already set
+      // the DNS on the repository?
+      try {
+        repositoryConnection.setNamesapce("",ontology.getDefaultNamespace())
+      } catch(repoisreadonly) {
+        logwarning
       }
-    } catch (RepositoryException ex) {
-      System.err.println("Error when trying to get base uri after loading: "+ex);
+    } else {
+      repoDNS = repositoryConnection.getNamespace("");
+      // not the normal method invoked by the user which sets the repo DNS too
+      ontology.justSetTgheNamespace(repoDNS);
     }
-    System.out.println("baseURI after loading: "+baseURI);
-  }
    * 
    */
 
@@ -296,7 +332,6 @@ public class OntologyServiceImplSesame implements OntologyService {
           "Could not load/import ontology data from file " +
           selectedFile.getAbsolutePath(), ex);
     }
-    //handleBaseURIafterLoad();
   }
 
   public void readOntologyData(InputStream is, String baseURI,
@@ -314,7 +349,6 @@ public class OntologyServiceImplSesame implements OntologyService {
       throw new GateOntologyException(
           "Could not load/import ontology data from input stream ", ex);
     }
-    //handleBaseURIafterLoad();
   }
   public void readOntologyData(Reader ir, String baseURI,
       OntologyFormat ontologyFormat, boolean asImport) {
@@ -331,7 +365,6 @@ public class OntologyServiceImplSesame implements OntologyService {
       throw new GateOntologyException(
           "Could not load/import ontology data from reader ", ex);
     }
-    //handleBaseURIafterLoad();
   }
 
   public void writeOntologyData(Writer out, OntologyFormat ontologyFormat,
@@ -4201,6 +4234,7 @@ public class OntologyServiceImplSesame implements OntologyService {
       default:
         throw new GateOntologyException("Unsupported ontology format: " + ontologyFormat);
     }
+    addDefaultNamespaceHandler(writer);
     return writer;
   }
 
@@ -4223,13 +4257,13 @@ public class OntologyServiceImplSesame implements OntologyService {
       default:
         throw new GateOntologyException("Unsupported ontology format: " + ontologyFormat);
     }
-    // TODO: the following code for now sets the default name space declaration
-    //   to what we have stored to be the current default name space
-    //   This is fairly useless for GATE when reloading the file though,
-    //   since Sesame does not let us to get the value of the declaration
-    //   after loading ...
+    addDefaultNamespaceHandler(writer);
+    return writer;
+  }
+
+  private void addDefaultNamespaceHandler(RDFWriter writer) {
     if(ontology.getDefaultNameSpace() != null) {
-      //System.out.println("Trying to set base URI on writing to "+ontology.getDefaultNameSpace());
+      //System.out.println("Trying to set default namespace URI on writing to "+ontology.getDefaultNameSpace());
       try {
         writer.handleNamespace("", ontology.getDefaultNameSpace());
       } catch(org.openrdf.rio.RDFHandlerException ex) {
@@ -4239,7 +4273,6 @@ public class OntologyServiceImplSesame implements OntologyService {
       //System.out.println("Default namespace is not set!");
       logger.debug("No default namespace set when writing ontology");
     }
-    return writer;
   }
 
   private RDFFormat ontologyFormat2RDFFormat(OntologyFormat format) {
