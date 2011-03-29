@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This PR has the same functionality as the Quality Assurance GUI. If
@@ -215,7 +216,11 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
 
         // perform annotation diff for this type
         AnnotationDiffer differ = new AnnotationDiffer();
-        differ.setSignificantFeaturesSet(new HashSet<String>(featureNames));
+        Set<String> featuresSet = new HashSet<String>();
+        if(featureNames != null && !featureNames.isEmpty()) {
+          featuresSet.addAll(featureNames);
+        }
+        differ.setSignificantFeaturesSet(new HashSet<String>(featuresSet));
         List<AnnotationDiffer.Pairing> pairings = differ.calculateDiff(keyAS,
                 respAS);
 
@@ -647,6 +652,7 @@ public class QualityAssurancePR extends AbstractLanguageAnalyser implements
    * @param featureNames
    */
   @RunTime
+  @Optional
   @CreoleParameter
   public void setFeatureNames(List<String> featureNames) {
     this.featureNames = featureNames;
