@@ -17,6 +17,7 @@ import gate.creole.ResourceInstantiationException;
 import gate.creole.SerialAnalyserController;
 import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
 import gate.persist.PersistenceException;
 import gate.security.SecurityException;
@@ -530,8 +531,10 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
     }
     buffer.append("<br>");
     buffer.append("<b>Features:</b> ");
-    for(String aFeature : featureNames) {
-      buffer.append(aFeature + ";");
+    if(featureNames != null && !featureNames.isEmpty()) {
+      for(String aFeature : featureNames) {
+        buffer.append(aFeature + ";");
+      }
     }
     buffer.append("<br>");
     buffer.append("<b>Measure:</b> " + measure.toString() + "<br>");
@@ -803,7 +806,9 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
 
     // lets set the params on qualityAssurancePR
     assurancePR.setAnnotationTypes(annotationTypes);
-    assurancePR.setFeatureNames(featureNames);
+    assurancePR.setFeatureNames(featureNames == null
+            ? new ArrayList<String>()
+            : featureNames);
     assurancePR.setMeasure(measure);
     assurancePR.setOutputFolderUrl(outputFolderUrl);
 
@@ -871,6 +876,7 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
    * @param featureNames
    */
   @RunTime
+  @Optional
   @CreoleParameter
   public void setFeatureNames(List<String> featureNames) {
     this.featureNames = featureNames;
