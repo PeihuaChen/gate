@@ -46,6 +46,7 @@ public class FeatureMapEditorDialog extends JDialog {
    *          will be returned.
    */
   public FeatureMapEditorDialog(Component owner, FeatureMap data) {
+    super(MainFrame.getInstance());
     setLocationRelativeTo(owner);
     initLocalData(data);
     initGuiComponents();
