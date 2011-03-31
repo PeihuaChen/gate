@@ -57,7 +57,9 @@ import java.util.Set;
  * @author niraj
  * 
  */
-@CreoleResource(name = "QA Summariser for Teamware", comment = "The Quality Assurance PR for teamware")
+@CreoleResource(name = "QA Summariser for Teamware", 
+                comment = "The Quality Assurance PR for teamware",
+                helpURL = "http://gate.ac.uk/userguide/sec:eval:qaForTW")
 public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
                                                              ProcessingResource {
 
