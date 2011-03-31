@@ -485,6 +485,11 @@ public class DocumentStaxUtils {
           stringRep.append(xsr.getTextCharacters(), xsr.getTextStart(), xsr
                   .getTextLength());
           break;
+		  
+        case XMLStreamConstants.CDATA:
+          stringRep.append(xsr.getTextCharacters(), xsr.getTextStart(), xsr
+                  .getTextLength());
+          break;
 
         case XMLStreamConstants.START_ELEMENT:
           throw new XMLStreamException("Elements not allowed within "
