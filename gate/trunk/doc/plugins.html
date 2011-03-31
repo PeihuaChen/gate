@@ -82,11 +82,14 @@ list</a>.</p>
 <li><a href='#Tagger_Abner'>Tagger_Abner</a></li>
 <li><a href='#Tagger_Boilerpipe'>Tagger_Boilerpipe</a></li>
 <li><a href='#Tagger_Chemistry'>Tagger_Chemistry</a></li>
+<li><a href='#Tagger_DateNormalizer'>Tagger_DateNormalizer</a></li>
 <li><a href='#Tagger_Framework'>Tagger_Framework</a></li>
+<li><a href='#Tagger_Measurements'>Tagger_Measurements</a></li>
 <li><a href='#Tagger_MetaMap'>Tagger_MetaMap</a></li>
 <li><a href='#Tagger_NP_Chunking'>Tagger_NP_Chunking</a></li>
 <li><a href='#Tagger_Numbers'>Tagger_Numbers</a></li>
 <li><a href='#Tagger_OpenCalais'>Tagger_OpenCalais</a></li>
+<li><a href='#Teamware_Tools'>Teamware_Tools</a></li>
 <li><a href='#Tools'>Tools</a></li>
 <li><a href='#UIMA'>UIMA</a></li>
 <li><a href='#Web_Crawler_Websphinx'>Web_Crawler_Websphinx</a></li>
@@ -822,12 +825,28 @@ list</a>.</p>
 		<td>mark.chemistry.Tagger</td>
 	</tr>
 	<tr>
+		<th colspan='3'><a name='Tagger_DateNormalizer'>Tagger_DateNormalizer</a></th>
+	</tr>
+	<tr>
+		<td>Date Normalizer&nbsp;</td>
+		<td>provides normalized values for all known dates&nbsp;</td>
+		<td>gate.creole.dates.DateNormalizer</td>
+	</tr>
+	<tr>
 		<th colspan='3'><a name='Tagger_Framework'>Tagger_Framework</a></th>
 	</tr>
 	<tr>
 		<td>GenericTagger&nbsp;</td>
 		<td>The Generic Tagger is Generic! (<a href="http://gate.ac.uk/userguide/sec:parsers:taggerframework">docs</a>)&nbsp;</td>
 		<td>gate.taggerframework.GenericTagger</td>
+	</tr>
+	<tr>
+		<th colspan='3'><a name='Tagger_Measurements'>Tagger_Measurements</a></th>
+	</tr>
+	<tr>
+		<td>Measurement Tagger&nbsp;</td>
+		<td>A measurement tagger based upon GNU Units&nbsp;</td>
+		<td>gate.creole.measurements.MeasurementsTagger</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='Tagger_MetaMap'>Tagger_MetaMap</a></th>
@@ -865,6 +884,14 @@ list</a>.</p>
 		<td>OpenCalais Tagger&nbsp;</td>
 		<td>An OpenCalais based semantic annotator (<a href="http://gate.ac.uk/userguide/sec:misc-creole:OpenCalais">docs</a>)&nbsp;</td>
 		<td>gate.opencalais.OpenCalais</td>
+	</tr>
+	<tr>
+		<th colspan='3'><a name='Teamware_Tools'>Teamware_Tools</a></th>
+	</tr>
+	<tr>
+		<td>QA Summariser for Teamware&nbsp;</td>
+		<td>The Quality Assurance PR for teamware&nbsp;</td>
+		<td>gate.qa.QAForTeamwarePR</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='Tools'>Tools</a></th>
@@ -906,7 +933,7 @@ list</a>.</p>
 	</tr>
 	<tr>
 		<td>Quality Assurance PR&nbsp;</td>
-		<td>The Quality Assurance PR that runs when the pipeline is processing the last document&nbsp;</td>
+		<td>The Quality Assurance PR provides a functionality of the Corpus QA Tool in GATE Developer&nbsp;</td>
 		<td>gate.qa.QualityAssurancePR</td>
 	</tr>
 	<tr>
