@@ -50,7 +50,6 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
     //update the selection in the list view
     //this is necessary because sometimes the call to eidtAnnotaiton is 
     //internally received from the search and annotate function.
-//    updateListSelection(3);
     //update the editor display
     String annType = annotation == null ? null : annotation.getType();
     //update the border for the types choice
@@ -448,8 +447,10 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
       
       public void ancestorAdded(AncestorEvent event) {
         if(dialogActive){
-          placeDialog(annotation.getStartNode().getOffset().intValue(),
-                  annotation.getEndNode().getOffset().intValue());
+          if(annotation != null){
+            placeDialog(annotation.getStartNode().getOffset().intValue(),
+                    annotation.getEndNode().getOffset().intValue());
+          }
           dialogActive = false;
         }
       }
