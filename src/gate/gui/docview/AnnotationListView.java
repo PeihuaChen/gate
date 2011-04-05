@@ -558,6 +558,9 @@ public class AnnotationListView extends AbstractDocumentView
      if(table == null)	return;
      //save selection
      int[] selection = table.getSelectedRows();
+     if(selection != null){
+       localSelectionUpdating = true;
+     }
      Annotation ann = (Annotation)e.getSource();
      if(tableModel != null){
        for(int i = 0; i < annDataList.size(); i++){
