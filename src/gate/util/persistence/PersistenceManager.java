@@ -15,6 +15,9 @@
 package gate.util.persistence;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.reflection.FieldDictionary;
+import com.thoughtworks.xstream.converters.reflection.Sun14ReflectionProvider;
+import com.thoughtworks.xstream.converters.reflection.XStream12FieldKeySorter;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.xml.*;
@@ -567,7 +570,9 @@ public class PersistenceManager {
       if(Gate.getUseXMLSerialization()) {
         // Just create the xstream and the filewriter that will later be
         // used to serialize objects.
-        xstream = new XStream(new StaxDriver(new XStream11XmlFriendlyReplacer())) {
+        xstream = new XStream(
+          new Sun14ReflectionProvider(new FieldDictionary(new XStream12FieldKeySorter())),
+          new StaxDriver(new XStream11XmlFriendlyReplacer())) {
           protected boolean useXStream11XmlFriendlyMapper() {
             return true;
           }
