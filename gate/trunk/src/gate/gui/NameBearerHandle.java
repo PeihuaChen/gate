@@ -422,7 +422,7 @@ public class NameBearerHandle implements Handle, StatusListener,
       staticPopupItems.add(null);
       staticPopupItems.add(new XJMenuItem(new DumpToFileAction(),
               sListenerProxy));
-      staticPopupItems.add(new XJMenuItem(new ExportToTeamware(),
+      staticPopupItems.add(new XJMenuItem(new ExportApplicationAction(),
               sListenerProxy));
     }
   }
@@ -1135,13 +1135,13 @@ public class NameBearerHandle implements Handle, StatusListener,
 
   }
 
-  class ExportToTeamware extends AbstractAction {
-    private Logger log = Logger.getLogger("gate.gui.ExportForTeamware");
+  class ExportApplicationAction extends AbstractAction {
+    private Logger log = Logger.getLogger("gate.gui.ExportApplicationAction");
 
     private static final long serialVersionUID = 1L;
 
-    public ExportToTeamware() {
-      super("Export for Teamware");
+    public ExportApplicationAction() {
+      super("Export for GATECloud.net");
       putValue(SHORT_DESCRIPTION,
               "Saves the resources of this application in a ZIP file");
     }
@@ -1234,100 +1234,95 @@ public class NameBearerHandle implements Handle, StatusListener,
 
       if(fileChooser.showSaveDialog(largeView) == JFileChooser.APPROVE_OPTION) {
         final File targetZipFile = fileChooser.getSelectedFile();
-        InputOutputAnnotationSetsDialog inOutDialog = new InputOutputAnnotationSetsDialog(
-                (Controller)target);
+        Runnable runnable = new Runnable() {
+          public void run() {
+            try {
+              // create and configure Ant Project
+              Project project = new Project();
+              ExporterBuildListener buildListener = new ExporterBuildListener();
+              Gate.setExecutable(buildListener);
+              project.addBuildListener(buildListener);
+              project.init();
+              MainFrame.lockGUI("Exporting application...");
 
-        if(inOutDialog.showDialog(window)) {
-          Runnable runnable = new Runnable() {
-            public void run() {
-              try {
-                // create and configure Ant Project
-                Project project = new Project();
-                ExporterBuildListener buildListener = new ExporterBuildListener();
-                Gate.setExecutable(buildListener);
-                project.addBuildListener(buildListener);
-                project.init();
-                MainFrame.lockGUI("Exporting application...");
-
-                // create a temporary directory, and save the
-                // application
-                // in the normal way to that directory
-                File temporaryDirectory = File.createTempFile("gapp-packager",
-                        "", null);
-                if(!temporaryDirectory.delete() || !temporaryDirectory.mkdir()) {
-                  throw new IOException(
-                          "Unable to create temporary directory.\n"
-                                  + temporaryDirectory.getCanonicalPath());
-                }
-                // canonicalise (e.g. on Mac OS X java.io.tmpdir is
-                // /var/folders/something, but /var is a symlink to
-                // /private/var,
-                // and this can confuse the relpaths which are based on
-                // canonical
-                // path strings)
-                temporaryDirectory = temporaryDirectory.getCanonicalFile();
-                File originalGapp = new File(temporaryDirectory,
-                        "original.xgapp");
-                File targetGapp = new File(temporaryDirectory,
-                        "application.xgapp");
-
-                // save the application in a gapp file
-                // When exporting to TeamWare, the gapp file should not
-                // contain
-                // any paths relative to GATE HOME, but we still warn
-                // about
-                // resources under GATE HOME
-                gate.util.persistence.PersistenceManager.saveObjectToFile(
-                        target, originalGapp, false, true);
-
-                // create instance of packager task and configure it
-                PackageGappTask task = new PackageGappTask();
-                task.setProject(project);
-                task.setSrc(originalGapp);
-                task.setDestFile(targetGapp);
-                // sensible default settings
-                task.setCopyPlugins(true);
-                task.setCopyResourceDirs(true);
-                task.setOnUnresolved(PackageGappTask.UnresolvedAction.recover);
-                task.init();
-
-                // run the task.
-                task.perform();
-
-                // create zip file using standard Ant zip task
-                Zip zipTask = new Zip();
-                zipTask.setProject(project);
-                zipTask.setDestFile(targetZipFile);
-                FileSet fs = new FileSet();
-                fs.setProject(project);
-                zipTask.addFileset(fs);
-                fs.setDir(temporaryDirectory);
-                // exclude the unpackaged gapp file from the zip
-                fs.setExcludes("original.xgapp");
-                zipTask.perform();
-
-                // delete temporary files
-                Delete deleteTask = new Delete();
-                deleteTask.setProject(project);
-                deleteTask.setDir(temporaryDirectory);
-                deleteTask.perform();
+              // create a temporary directory, and save the
+              // application
+              // in the normal way to that directory
+              File temporaryDirectory = File.createTempFile("gapp-packager",
+                      "", null);
+              if(!temporaryDirectory.delete() || !temporaryDirectory.mkdir()) {
+                throw new IOException(
+                        "Unable to create temporary directory.\n"
+                                + temporaryDirectory.getCanonicalPath());
               }
-              catch(Exception e) {
-                MainFrame.unlockGUI();
-                JOptionPane.showMessageDialog(getLargeView(), "Error!\n"
-                        + e.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
-                e.printStackTrace(Err.getPrintWriter());
-              }
-              finally {
-                MainFrame.unlockGUI();
-                Gate.setExecutable(null);
-              }
+              // canonicalise (e.g. on Mac OS X java.io.tmpdir is
+              // /var/folders/something, but /var is a symlink to
+              // /private/var,
+              // and this can confuse the relpaths which are based on
+              // canonical
+              // path strings)
+              temporaryDirectory = temporaryDirectory.getCanonicalFile();
+              File originalGapp = new File(temporaryDirectory,
+                      "original.xgapp");
+              File targetGapp = new File(temporaryDirectory,
+                      "application.xgapp");
+
+              // save the application in a gapp file
+              // When exporting to cloud, the gapp file should not
+              // contain
+              // any paths relative to GATE HOME, but we still warn
+              // about
+              // resources under GATE HOME
+              gate.util.persistence.PersistenceManager.saveObjectToFile(
+                      target, originalGapp, false, true);
+
+              // create instance of packager task and configure it
+              PackageGappTask task = new PackageGappTask();
+              task.setProject(project);
+              task.setSrc(originalGapp);
+              task.setDestFile(targetGapp);
+              // sensible default settings
+              task.setCopyPlugins(true);
+              task.setCopyResourceDirs(true);
+              task.setOnUnresolved(PackageGappTask.UnresolvedAction.recover);
+              task.init();
+
+              // run the task.
+              task.perform();
+
+              // create zip file using standard Ant zip task
+              Zip zipTask = new Zip();
+              zipTask.setProject(project);
+              zipTask.setDestFile(targetZipFile);
+              FileSet fs = new FileSet();
+              fs.setProject(project);
+              zipTask.addFileset(fs);
+              fs.setDir(temporaryDirectory);
+              // exclude the unpackaged gapp file from the zip
+              fs.setExcludes("original.xgapp");
+              zipTask.perform();
+
+              // delete temporary files
+              Delete deleteTask = new Delete();
+              deleteTask.setProject(project);
+              deleteTask.setDir(temporaryDirectory);
+              deleteTask.perform();
             }
-          };
-          Thread thread = new Thread(runnable);
-          thread.setPriority(Thread.MIN_PRIORITY);
-          thread.start();
-        }
+            catch(Exception e) {
+              MainFrame.unlockGUI();
+              JOptionPane.showMessageDialog(getLargeView(), "Error!\n"
+                      + e.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
+              e.printStackTrace(Err.getPrintWriter());
+            }
+            finally {
+              MainFrame.unlockGUI();
+              Gate.setExecutable(null);
+            }
+          }
+        };
+        Thread thread = new Thread(runnable);
+        thread.setPriority(Thread.MIN_PRIORITY);
+        thread.start();
       }
     }
 
