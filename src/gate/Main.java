@@ -432,7 +432,7 @@ public class Main {
       BufferedReader reader = new BomStrippingInputStreamReader(ver, "UTF-8");
       Main.version = reader.readLine();
     } catch(IOException ioe) {
-      Main.version = "5.0";
+      Main.version = "6.1";
     }
 
     // find out the build number
