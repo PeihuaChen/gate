@@ -760,27 +760,37 @@ public class AnnotationSetsView extends AbstractDocumentView
    */
   @Override
   public void setSelectedAnnotations(List<AnnotationData> selectedAnnots) {
-    //for this view, only a single selected annotation makes sense.
-    //by convention, we use the first one
-    if(selectedAnnots.size() > 0){
-      final AnnotationData aData = selectedAnnots.get(0);
-      //queue the select action to the events minder
-      PerformActionEvent actionEvent = new PerformActionEvent(new Runnable(){
-        public void run(){
-          //select the annotation for editing, if editing enabled
-          if(annotationEditor != null && annotationEditor.isActive()){
+    if(annotationEditor != null && annotationEditor.isActive()){
+      // editor active - let's update it.
+      // For annotation editing purposes, only a single selected annotation 
+      // makes sense. Anything else is equivalent to no selection.
+      PerformActionEvent actionEvent = null;
+      if(selectedAnnots.size() == 1){
+        final AnnotationData aData = selectedAnnots.get(0);
+        //queue the select action to the events minder
+        actionEvent = new PerformActionEvent(new Runnable(){
+          public void run(){
+            //select the annotation for editing, if editing enabled
             if(annotationEditor.getAnnotationSetCurrentlyEdited() != 
-                   aData.getAnnotationSet() ||
+                  aData.getAnnotationSet() ||
                annotationEditor.getAnnotationCurrentlyEdited() != 
                    aData.getAnnotation()){
               annotationEditor.editAnnotation(aData.getAnnotation(),
                       aData.getAnnotationSet());
             }
           }
-        }
-      });
+        });
+      } else {
+        actionEvent = new PerformActionEvent(new Runnable(){
+          public void run(){
+            // un-select the edited annotation
+            annotationEditor.editAnnotation(null, 
+                annotationEditor.getAnnotationSetCurrentlyEdited());
+          }
+        });
+      }
       pendingEvents.offer(actionEvent);
-      eventMinder.restart();
+      eventMinder.restart();      
     }
   }
 
@@ -1309,9 +1319,10 @@ public class AnnotationSetsView extends AbstractDocumentView
                     textView.addHighlight(
                             new AnnotationDataImpl(setHandler.set, ann),
                             colour));
-        if(!annListTagsForAnn.containsKey(ann.getId())) 
-            annListTagsForAnn.put(ann.getId(), 
-            listView.addAnnotation(ann, setHandler.set));
+        if(!annListTagsForAnn.containsKey(ann.getId())){
+          annListTagsForAnn.put(ann.getId(), 
+              listView.addAnnotation(ann, setHandler.set));
+        }
         //update the stack view
         stackView.updateStackView();
       }
@@ -1581,6 +1592,7 @@ public class AnnotationSetsView extends AbstractDocumentView
 	        //edit the new annotation
 	        pendingEvents.offer(new PerformActionEvent(
 	                new EditAnnotationAction(new AnnotationDataImpl(set, ann))));
+	        eventMinder.restart();
         }catch(InvalidOffsetException ioe){
           //this should never happen
           throw new GateRuntimeException(ioe);
@@ -1922,8 +1934,8 @@ public class AnnotationSetsView extends AbstractDocumentView
 
       //check for selection hovering
       if(textPane.getSelectedText() != null
-      && textPane.getSelectionStart() <= textLocation
-      && textPane.getSelectionEnd() >= textLocation){
+          && textPane.getSelectionStart() <= textLocation
+          && textPane.getSelectionEnd() >= textLocation){
         //add 'New annotation' to the popup menu
         popup.add(new NewAnnotationAction(textPane.getSelectedText()));
         popup.addSeparator();
@@ -2049,11 +2061,17 @@ public class AnnotationSetsView extends AbstractDocumentView
       //if the editor is done with the current annotation, we can move to the 
       //next one
       if(annotationEditor.editingFinished()){
-        //set the annotation as selected
+        //queue an event to set the annotation as selected
         selectAnnotation(aData);
-        //show the annotation editor
-        annotationEditor.editAnnotation(aData.getAnnotation(), 
-                aData.getAnnotationSet());
+        //queue an event to show the annotation editor
+        Runnable action = new Runnable() {
+          public void run() {
+            annotationEditor.editAnnotation(aData.getAnnotation(), 
+                    aData.getAnnotationSet());
+          }
+        };
+        pendingEvents.offer(new PerformActionEvent(action));
+        eventMinder.restart();
       }
     }
     
