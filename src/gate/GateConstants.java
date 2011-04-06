@@ -194,4 +194,18 @@ public interface GateConstants {
    * action should be placed in the Tools menu.
    */
   public static final String MENU_PATH_KEY = "gate.MenuPath";
+
+
+  /**
+   * Keys used in gate.xml or user config to specify the feature name to use
+   * to add to annotations in Original markups AS that contain namespace URI
+   * and prefix information.
+   * E.g. title namespaceURI="http://purl.org/dc/elements/1.1/" namespacePrefix="dc"
+   */
+
+  public static final String ADD_NAMESPACE_FEATURES="addNamespaceFeatures";
+
+  public static final String ELEMENT_NAMESPACE_URI="namespaceURI";
+
+  public static final String ELEMENT_NAMESPACE_PREFIX="namespacePrefix";
 } // GateConstants
