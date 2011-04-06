@@ -158,10 +158,36 @@ public class DocumentImpl extends AbstractLanguageResource implements
    */
   private Annotation crossedOverAnnotation = null;
 
+  
+  /** Flag to determine whether to serialize namespace information held as
+   *  annotation features into namespace prefix and URI in the XML
+   */
+  private boolean serializeNamespaceInfo = false;
+  /** Feature name used for namespace uri in namespaced elements */
+  private String namespaceURIFeature = null;
+  /** Feature name used for namespace prefix in namespaced elements */
+  private String namespacePrefixFeature = null;
+
+  
   /** Default construction. Content left empty. */
   public DocumentImpl() {
     content = new DocumentContentImpl();
     stringContent = "";
+
+    /** We will attempt to serialize namespace if
+     *  three parameters are set in the global or local config file:
+     *  ADD_NAMESPACE_FEATURES: boolean flag
+     *  ELEMENT_NAMESPACE_URI: feature name used to hold namespace uri
+     *  ELEMENT_NAMESPACE_PREFIX: feature name used to hold namespace prefix
+     */
+    Map configData = Gate.getUserConfig();
+
+    boolean addNSFeature = Boolean.parseBoolean((String)configData.get(GateConstants.ADD_NAMESPACE_FEATURES));
+    namespaceURIFeature = (String) configData.get(GateConstants.ELEMENT_NAMESPACE_URI);
+    namespacePrefixFeature = (String) configData.get(GateConstants.ELEMENT_NAMESPACE_PREFIX);
+
+    serializeNamespaceInfo = (addNSFeature && namespacePrefixFeature != null && !namespacePrefixFeature.isEmpty() && namespaceURIFeature != null && !namespaceURIFeature.isEmpty());
+
   } // default construction
 
   /** Cover unpredictable Features creation */
@@ -1618,6 +1644,14 @@ public class DocumentImpl extends AbstractLanguageResource implements
   /** Returns a string representing a start tag based on the input annot */
   private String writeStartTag(Annotation annot, boolean includeFeatures,
           boolean includeNamespace) {
+
+    // Get the annot feature used to store the namespace prefix, if it
+    // has been defined
+    String nsPrefix = null;
+    
+    if (serializeNamespaceInfo)
+      nsPrefix = (String)annot.getFeatures().get(namespacePrefixFeature);
+
     AnnotationSet originalMarkupsAnnotSet = this
             .getAnnotations(GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
     StringBuffer strBuff = new StringBuffer("");
@@ -1630,6 +1664,8 @@ public class DocumentImpl extends AbstractLanguageResource implements
       // spoil all links in an HTML file!
       if(includeFeatures) {
         strBuff.append("<");
+        if (nsPrefix != null && !nsPrefix.isEmpty())
+          strBuff.append(nsPrefix + ":");
         strBuff.append(annot.getType());
         strBuff.append(" ");
         if(includeNamespace) {
@@ -1652,11 +1688,15 @@ public class DocumentImpl extends AbstractLanguageResource implements
         strBuff.append(">");
       } else if(originalMarkupsAnnotSet.contains(annot)) {
         strBuff.append("<");
+        if (nsPrefix != null && !nsPrefix.isEmpty())
+          strBuff.append(nsPrefix + ":");
         strBuff.append(annot.getType());
         strBuff.append(writeFeatures(annot.getFeatures(), includeNamespace));
         strBuff.append(">");
       } else {
         strBuff.append("<");
+        if (nsPrefix != null && !nsPrefix.isEmpty())
+          strBuff.append(nsPrefix + ":");
         strBuff.append(annot.getType());
         strBuff.append(">");
       }
@@ -1666,6 +1706,8 @@ public class DocumentImpl extends AbstractLanguageResource implements
       // spoil all links in an HTML file!
       if(includeFeatures) {
         strBuff.append("<");
+        if (nsPrefix != null && !nsPrefix.isEmpty())
+          strBuff.append(nsPrefix + ":");
         strBuff.append(annot.getType());
         strBuff.append(" ");
         if(includeNamespace) {
@@ -1678,11 +1720,15 @@ public class DocumentImpl extends AbstractLanguageResource implements
         strBuff.append(">");
       } else if(originalMarkupsAnnotSet.contains(annot)) {
         strBuff.append("<");
+        if (nsPrefix != null && !nsPrefix.isEmpty())
+          strBuff.append(nsPrefix + ":");
         strBuff.append(annot.getType());
         strBuff.append(writeFeatures(annot.getFeatures(), includeNamespace));
         strBuff.append(">");
       } else {
         strBuff.append("<");
+        if (nsPrefix != null && !nsPrefix.isEmpty())
+          strBuff.append(nsPrefix + ":");
         strBuff.append(annot.getType());
         strBuff.append(">");
       }
@@ -1817,11 +1863,20 @@ public class DocumentImpl extends AbstractLanguageResource implements
     return writeEmptyTag(annot, true);
   } // writeEmptyTag
 
+  
   /** Returns a string representing an empty tag based on the input annot */
   private String writeEmptyTag(Annotation annot, boolean includeNamespace) {
+    // Get the annot feature used to store the namespace prefix, if it
+    // has been defined
+    String nsPrefix = null;
+    if (serializeNamespaceInfo)
+      nsPrefix = (String)annot.getFeatures().get(namespacePrefixFeature);
+
     StringBuffer strBuff = new StringBuffer("");
     if(annot == null) return strBuff.toString();
     strBuff.append("<");
+    if (nsPrefix != null && !nsPrefix.isEmpty())
+          strBuff.append(nsPrefix + ":");
     strBuff.append(annot.getType());
     AnnotationSet originalMarkupsAnnotSet = this
             .getAnnotations(GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
@@ -1837,13 +1892,22 @@ public class DocumentImpl extends AbstractLanguageResource implements
 
   /** Returns a string representing an end tag based on the input annot */
   private String writeEndTag(Annotation annot) {
+    // Get the annot feature used to store the namespace prefix, if it
+    // has been defined
+    String nsPrefix = null;
+    if (serializeNamespaceInfo)
+      nsPrefix = (String)annot.getFeatures().get(namespacePrefixFeature);
+
     StringBuffer strBuff = new StringBuffer("");
     if(annot == null) return strBuff.toString();
     /*
      * if (annot.getType().indexOf(" ") != -1) Out.prln("Warning: Truncating end
      * tag to first word for annot type \"" +annot.getType()+ "\". ");
      */
-    strBuff.append("</" + annot.getType() + ">");
+    strBuff.append("</");
+    if (nsPrefix != null && !nsPrefix.isEmpty())
+          strBuff.append(nsPrefix + ":");
+    strBuff.append(annot.getType() + ">");
     return strBuff.toString();
   }// writeEndTag()
 
@@ -1856,6 +1920,23 @@ public class DocumentImpl extends AbstractLanguageResource implements
       Object key = it.next();
       Object value = feat.get(key);
       if((key != null) && (value != null)) {
+        /**
+         * Eliminate namespace prefix feature and rename namespace uri feature
+         * to xmlns:prefix=uri
+         * if these have been specified in the markup and in the config
+         */
+        if (serializeNamespaceInfo) {
+          String nsPrefix = "xmlns:" + (String)feat.get(namespacePrefixFeature);
+
+          if (nsPrefix.equals(key.toString())) continue;
+          if (namespacePrefixFeature.equals(key.toString())) continue;
+          
+          if (namespaceURIFeature.equals(key.toString())) {
+            strBuff.append(" ");
+            strBuff.append(nsPrefix + "=\"" + value.toString() + "\"");
+            return strBuff.toString();
+          }
+        }
         // Eliminate a feature inserted at reading time and which help to
         // take some decissions at saving time
         if("isEmptyAndSpan".equals(key.toString())) continue;
