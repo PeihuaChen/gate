@@ -189,15 +189,9 @@ public abstract class AbstractOntologyImplSesame extends AbstractOntologyImpl {
         String uri = ouris.iterator().next().toString();
         String ontouri = uri;
         // if there is a hash, remove everything after it
-        if (uri.indexOf("#") < (uri.length() - 1)) {
+        if (uri.contains("#") && (uri.indexOf("#") < (uri.length() - 1))) {
           uri = uri.substring(0, uri.indexOf("#") + 1);
-        } else {
-          // otherwise, if the URI does not end in a slash, remove
-          // everything after the last slash
-          if (!uri.endsWith("/")) {
-            uri = uri.substring(0, uri.lastIndexOf("/") + 1);
-          }
-        }
+        } 
         if (!uri.endsWith("/") && !uri.endsWith("#")) {
           uri += "#";
         }
