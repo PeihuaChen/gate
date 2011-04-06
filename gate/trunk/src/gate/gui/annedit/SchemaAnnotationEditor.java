@@ -92,7 +92,8 @@ public class SchemaAnnotationEditor extends AbstractVisualResource
       }
       featuresEditor.editFeatureMap(features);
     }
-    setEditingEnabled(true);
+    // enable editing if there is an annotation, disable if not
+    setEditingEnabled(annType != null);
     if(dialog != null){
       if(annotation != null){
         placeDialog(annotation.getStartNode().getOffset().intValue(),
