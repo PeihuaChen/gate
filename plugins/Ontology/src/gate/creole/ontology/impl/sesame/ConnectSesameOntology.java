@@ -111,20 +111,8 @@ public class ConnectSesameOntology  extends OntologyLR
     OntologyServiceImplSesame owlimService = new OntologyServiceImplSesame(this);
     owlimService.connectToRepository(repositoryLocation,repositoryID);
     ontologyService = owlimService;
-    Set<OURI> ouris = ontologyService.getOntologyURIs();
-    if(ouris.size() == 1) {
-      String uri = ouris.iterator().next().toString();
-      if(!uri.endsWith("/") && !uri.endsWith("#")) {
-        uri = uri + "#";
-      }
-      setDefaultNameSpace(uri);
-      System.out.println("Default name space set to "+uri);
-    } else if(ouris.size() == 0) {
-      setDefaultNameSpace(OConstants.ONTOLOGY_DEFAULT_BASE_URI);
-      System.err.println("Warning: no ontology URI found, setting default name space to: "+OConstants.ONTOLOGY_DEFAULT_BASE_URI);
-    } else if(ouris.size() == 0) {
-      System.err.println("Error: several ontology URIs found, could not set default name space");
-    }
+
+    setDefaultNameSpaceFromOntologyURI();
 
     this.setURL(getSourceURL());
     logger.debug("Initializing complete");
