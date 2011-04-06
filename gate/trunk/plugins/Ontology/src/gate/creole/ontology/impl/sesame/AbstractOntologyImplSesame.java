@@ -31,12 +31,24 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Set;
+import java.util.logging.Level;
+import org.apache.log4j.Logger;
+import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.RepositoryException;
 
 /**
  *
  * @author johann
  */
 public abstract class AbstractOntologyImplSesame extends AbstractOntologyImpl {
+
+  private Logger logger;
+
+  public AbstractOntologyImplSesame() {
+    logger = Logger.getLogger(this.getClass().getName());
+  }
+
+
 
 
   public void readOntologyData(java.net.URL theURL, String baseURI,
@@ -150,13 +162,53 @@ public abstract class AbstractOntologyImplSesame extends AbstractOntologyImpl {
     }
   }
 
-  private void setDefaultNameSpaceFromOntologyURI() {
-    if(getDefaultNameSpace() == null && getOntologyURIs().size() == 1) {
-      String uri = getOntologyURIs().get(0).toString();
-      if(!uri.endsWith("#")) {
-        uri = uri + "#";
+  // sets the default namespace if it is not already set from
+  // either the default name space of the loaded ontology or
+  // if no default namespace is found, the URI prefix of the ontology URI.
+  // If both fail to set the default name space, the calling
+  // OntologyLR might still use a BaseURI parameter, if given to set it.
+  // Note: accessing the default namespace from the repository will
+  // only work from Sesame version 2.3.3 onward, not with the current
+  // version 2.3.2.
+  protected void setDefaultNameSpaceFromOntologyURI() {
+    if (getDefaultNameSpace() == null) {
+      RepositoryConnection conn = ((OntologyServiceImplSesame)ontologyService).getRepositoryConnection();
+      String defaultNamespace = null;
+      try {
+        defaultNamespace = conn.getNamespace("");
+        if(defaultNamespace != null && !defaultNamespace.isEmpty()) {
+          setDefaultNameSpace(defaultNamespace);
+        }
+      } catch (RepositoryException ex) {
+        logger.info("Could not get default namespace from repository: "+ex);
       }
-      setDefaultNameSpace(uri);
+    }
+    if (getDefaultNameSpace() == null) {
+      Set<OURI> ouris = ontologyService.getOntologyURIs();
+      if (ouris.size() == 1) {
+        String uri = ouris.iterator().next().toString();
+        String ontouri = uri;
+        // if there is a hash, remove everything after it
+        if (uri.indexOf("#") < (uri.length() - 1)) {
+          uri = uri.substring(0, uri.indexOf("#") + 1);
+        } else {
+          // otherwise, if the URI does not end in a slash, remove
+          // everything after the last slash
+          if (!uri.endsWith("/")) {
+            uri = uri.substring(0, uri.lastIndexOf("/") + 1);
+          }
+        }
+        if (!uri.endsWith("/") && !uri.endsWith("#")) {
+          uri += "#";
+        }
+        setDefaultNameSpace(uri);
+        logger.info("Default name space set from ontology URI " + ontouri + " to " + uri);
+      } else if (ouris.isEmpty()) {
+        setDefaultNameSpace(OConstants.ONTOLOGY_DEFAULT_BASE_URI);
+        logger.info("Warning: no ontology URI found, setting default name space to: " + OConstants.ONTOLOGY_DEFAULT_BASE_URI);
+      } else if (ouris.size() > 0) {
+        logger.info("Error: several ontology URIs found, could not set default name space");
+      }
     }
   }
 
