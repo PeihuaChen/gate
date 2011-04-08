@@ -321,21 +321,6 @@ public class OWLIMOntology
 
       OntologyServiceImplSesame oService = new OntologyServiceImplSesame(this);
 
-      // the following code would create an unmanaged repository, but in
-      // order to make it easier to re-use a repository in the case of a
-      // crash, we use a managed repository instead
-      /*
-      // read the config file
-      String configData = FileUtils.readFileToString(repoConfig);
-      Map<String,String> varsmap = new HashMap<String,String>();
-      varsmap.put("id", "owlim3repository");
-      varsmap.put("sf", storageFolderName);
-      configData = SesameManager.substituteConfigTemplate(configData, varsmap);
-      logger.debug("Using config data: "+configData);
-
-      ((OntologyServiceImplSesame)ontologyService)
-          .createRepository(dataDirectory, configData);
-      */
       // create a managed repository
       oService.createManagedRepository(
         storageFolderDir.toURI().toURL(),
@@ -369,16 +354,9 @@ public class OWLIMOntology
       }
       // if we did not set the default name space when loading or if we
       // did not load anything in the first place, and if we do have a
-      // baseURI set, use it to set the default name space
+      // baseURI set, use it to set the default name space, otherwise
+      // set the default name space to a constant fallback URI
 
-      // TODO: once Sesame 2.3.3 is released, the bug that prevented to
-      // get the default namespace from the repository should be
-      // corrected. We should then get the default namespace from the
-      // repository and only use the baseURI or the default if necessary.
-      // Also, if the (RDFXML) parser is able to return the base URI
-      // that is defined in the RDFXML file, and we do not have anything
-      // else, we should use that for setting the default.
-      // Check out AbstractOntologyImplSesame.setDefaultNameSpaceFromRepository()
       if (getDefaultNameSpace() == null) {
         if (getBaseURI() != null && !getBaseURI().matches("\\s*")) {
           setDefaultNameSpace(getBaseURI());
