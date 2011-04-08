@@ -74,15 +74,8 @@ public abstract class AbstractOntologyImplSesame extends AbstractOntologyImpl {
     if(!asImport) {
       if(isBaseURIset && getDefaultNameSpace() == null) {
         setDefaultNameSpace(baseURI);
-      }
-      Set<OURI> us = addOntologyURIs();
-      int n = us.size();
-      if(n == 0) {
-        Utils.warning("No ontology URI found for ontology loaded from "+theURL);
-      } else if(n > 1) {
-        Utils.warning("More than one("+n+") ontology URI found for ontology loaded from "+theURL+": "+us);
       } else {
-        setDefaultNameSpaceFromOntologyURI();
+        setDefaultNameSpaceFromRepository();
       }
     }
   }
@@ -99,15 +92,8 @@ public abstract class AbstractOntologyImplSesame extends AbstractOntologyImpl {
     if(!asImport) {
       if(isBaseURIset && getDefaultNameSpace() == null) {
         setDefaultNameSpace(baseURI);
-      }
-      Set<OURI> us = addOntologyURIs();
-      int n = us.size();
-      if(n == 0) {
-        Utils.warning("No ontology URI found for ontology loaded from "+selectedFile.getAbsolutePath());
-      } else if(n > 1) {
-        Utils.warning("More than one("+n+") ontology URI found for ontology loaded from "+selectedFile.getAbsolutePath()+": "+us);
       } else {
-        setDefaultNameSpaceFromOntologyURI();
+        setDefaultNameSpaceFromRepository();
       }
     }
   }
@@ -124,15 +110,8 @@ public abstract class AbstractOntologyImplSesame extends AbstractOntologyImpl {
     if(!asImport) {
       if(isBaseURIset && getDefaultNameSpace() == null) {
         setDefaultNameSpace(baseURI);
-      }
-      Set<OURI> us = addOntologyURIs();
-      int n = us.size();
-      if(n == 0) {
-        Utils.warning("No ontology URI found for ontology loaded");
-      } else if(n > 1) {
-        Utils.warning("More than one("+n+") ontology URI found for ontology loaded: "+us);
       } else {
-        setDefaultNameSpaceFromOntologyURI();
+        setDefaultNameSpaceFromRepository();
       }
     }
   }
@@ -149,15 +128,8 @@ public abstract class AbstractOntologyImplSesame extends AbstractOntologyImpl {
     if(!asImport) {
       if(isBaseURIset && getDefaultNameSpace() == null) {
         setDefaultNameSpace(baseURI);
-      }
-      Set<OURI> us = addOntologyURIs();
-      int n = us.size();
-      if(n == 0) {
-        Utils.warning("No ontology URI found for ontology loaded");
-      } else if(n > 1) {
-        Utils.warning("More than one("+n+") ontology URI found for ontology loaded: "+us);
       } else {
-        setDefaultNameSpaceFromOntologyURI();
+        setDefaultNameSpaceFromRepository();
       }
     }
   }
@@ -170,12 +142,14 @@ public abstract class AbstractOntologyImplSesame extends AbstractOntologyImpl {
   // Note: accessing the default namespace from the repository will
   // only work from Sesame version 2.3.3 onward, not with the current
   // version 2.3.2.
-  protected void setDefaultNameSpaceFromOntologyURI() {
+  protected void setDefaultNameSpaceFromRepository() {
+    System.out.println("Setting def ns, is at the moment: "+getDefaultNameSpace());
     if (getDefaultNameSpace() == null) {
       RepositoryConnection conn = ((OntologyServiceImplSesame)ontologyService).getRepositoryConnection();
       String defaultNamespace = null;
       try {
         defaultNamespace = conn.getNamespace("");
+        System.out.println("Default namespace from connection: "+defaultNamespace);
         if(defaultNamespace != null && !defaultNamespace.isEmpty()) {
           setDefaultNameSpace(defaultNamespace);
         }

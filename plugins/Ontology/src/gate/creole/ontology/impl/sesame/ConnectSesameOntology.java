@@ -112,7 +112,7 @@ public class ConnectSesameOntology  extends OntologyLR
     owlimService.connectToRepository(repositoryLocation,repositoryID);
     ontologyService = owlimService;
 
-    setDefaultNameSpaceFromOntologyURI();
+    setDefaultNameSpaceFromRepository();
 
     this.setURL(getSourceURL());
     logger.debug("Initializing complete");
