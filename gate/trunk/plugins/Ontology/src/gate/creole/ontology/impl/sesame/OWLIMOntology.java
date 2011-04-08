@@ -378,7 +378,7 @@ public class OWLIMOntology
       // Also, if the (RDFXML) parser is able to return the base URI
       // that is defined in the RDFXML file, and we do not have anything
       // else, we should use that for setting the default.
-      // Check out AbstractOntologyImplSesame.setDefaultNameSpaceFromOntologyURI()
+      // Check out AbstractOntologyImplSesame.setDefaultNameSpaceFromRepository()
       if (getDefaultNameSpace() == null) {
         if (getBaseURI() != null && !getBaseURI().matches("\\s*")) {
           setDefaultNameSpace(getBaseURI());
