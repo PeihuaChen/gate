@@ -168,6 +168,7 @@ public class SchemaFeaturesEditor extends JPanel{
           }
         }
       };
+      
       //build the empty shell
       gui = new JPanel();
       gui.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -211,15 +212,18 @@ public class SchemaFeaturesEditor extends JPanel{
 //          break;
         case text:
           gui.setLayout(new BoxLayout(gui, BoxLayout.LINE_AXIS));
-          textField = new JTextField(20);
+          textField = new JNullableTextField();
+          textField.setColumns(20);
           if(value != null){
             textField.setText(value);
           }else if(defaultValue != null){
             textField.setText(defaultValue);
           }
-          textField.addActionListener(sharedActionListener);
-          textField.getDocument().addDocumentListener(new DocumentListener(){
+          textField.addDocumentListener(new DocumentListener(){
             public void changedUpdate(DocumentEvent e) {
+              sharedActionListener.actionPerformed(
+                      new ActionEvent(textField, ActionEvent.ACTION_PERFORMED, 
+                              null));
             }
             public void insertUpdate(DocumentEvent e) {
               sharedActionListener.actionPerformed(
@@ -241,7 +245,7 @@ public class SchemaFeaturesEditor extends JPanel{
       gui.setBorder(defaultBorder);
     }
     
-    protected JTextField textField;
+    protected JNullableTextField textField;
     protected JCheckBox checkbox;
     protected JChoice jchoice;
     
@@ -337,6 +341,9 @@ public class SchemaFeaturesEditor extends JPanel{
      * @param value
      */
     public void setValue(String value) {
+      // cache the actually provided value: if the value is null, we need to 
+      // know, as the text editor would return "" when asked rather than null
+      this.value = value;
       switch(type){
         case nominal:
           jchoice.setSelectedItem(value);
