@@ -230,7 +230,7 @@ public class DateNormalizer extends AbstractLanguageAnalyser {
 
     // fire some progress notifications
     long startTime = System.currentTimeMillis();
-    fireStatusChanged("Performing content detection in " + document.getName());
+    fireStatusChanged("Performing date normalization in " + document.getName());
     fireProgressChanged(0);
 
     // if there is no document to process then stop right now
@@ -368,7 +368,7 @@ public class DateNormalizer extends AbstractLanguageAnalyser {
         Utils.logOnce(
                 logger,
                 Level.INFO,
-                "Content Detection: either a document does not have any text or you need to run the tokenizer first - see debug log for details.");
+                "Date Normalization: either a document does not have any text or you need to run the tokenizer first - see debug log for details.");
         logger.debug("No input annotations in document " + document.getName());
         return;
       }
