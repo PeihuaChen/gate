@@ -38,32 +38,51 @@
             <version>1.0</version>
         </dependency>
         <dependency>
-            <groupId>xerces</groupId>
-            <artifactId>xercesImpl</artifactId>
-            <version>2.9.1</version>
-        </dependency>
-        <dependency>
             <groupId>uk.ac.gate</groupId>
             <artifactId>gate-asm</artifactId>
             <version>3.1</version>
         </dependency>
-        <!-- Optional dependencies -->
-        <!-- You need to expicitly add the below dependencies in your project, if you
-		     intend to use parts of GATE that rely on them. If you are not sure which ones
-			 you need, consider depending on gate:gate instead of gate:gate-core. -->
         <!-- Document importing dependencies -->
         <dependency>
             <groupId>net.sourceforge.nekohtml</groupId>
             <artifactId>nekohtml</artifactId>
             <version>1.9.14</version>
-            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <version>2.9.1</version>
+            <!-- We don't need the xml-apis transitive dep as it's part of
+            Java core -->
+            <exclusions>
+                <exclusion>
+                    <groupId>xml-apis</groupId>
+                    <artifactId>xml-apis</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-parsers</artifactId>
             <version>0.7</version>
-            <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>org.codehaus.woodstox</groupId>
+            <artifactId>wstx-lgpl</artifactId>
+            <version>3.2.3</version>
+            <!-- Exclude the stax-api transitive dependency as GATE 6.1 and
+            later requires Java 6, which includes this API in core -->
+            <exclusions>
+                <exclusion>
+                    <groupId>stax</groupId>
+                    <artifactId>stax-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- Optional dependencies -->
+        <!-- You need to expicitly add the below dependencies in your project, if you
+		     intend to use parts of GATE that rely on them. If you are not sure which ones
+			 you need, consider depending on gate:gate instead of gate:gate-core. -->
         <!-- End of document importing dependencies -->
         <dependency>
             <groupId>com.thoughtworks.xstream</groupId>
@@ -87,12 +106,6 @@
             <optional>true</optional>
         </dependency>
         <!-- End of Java compiler dependencies -->
-        <dependency>
-            <groupId>stax</groupId>
-            <artifactId>stax</artifactId>
-            <version>1.2.0</version>
-            <optional>true</optional>
-        </dependency>
         <dependency>
             <groupId>urbanophile</groupId>
             <artifactId>java-getopt</artifactId>
