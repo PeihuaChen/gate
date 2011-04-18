@@ -131,7 +131,7 @@ public class AliasCacheImpl implements AliasLookupDictionary {
   throws ResourceInstantiationException {
     Options opt = Options.load(dictionaryPath);
     AliasCacheImpl aliasCacheInstance = new AliasCacheImpl(opt.getCaseSensitivity());
-    Feed feed = feedFactory.createFeed(dictionaryPath);
+    Feed feed = feedFactory.createFeed(dictionaryPath, opt);
     Set<String> ignoreList = Collections.emptySet();
     File ignoreListFile = opt.getIgnoreListPath();
     if (ignoreListFile != null) {
@@ -361,10 +361,9 @@ public class AliasCacheImpl implements AliasLookupDictionary {
       entityListener = StatisticListener.wrap(entityListener, "Thrusted Entities");
     }
     try {
-      // semRep.evaluateSelectSeRQL(, entityListener);
-
       dataFeed.feedTo(entityListener);
-    } catch (KIMQueryException e) {                        
+    } catch (KIMQueryException e) {       
+      log.error("Loading failed.", e);
       throw new KIMRuntimeException("The loading failed.", e);
     } finally {
       log.info("The loading from Sesame finished");

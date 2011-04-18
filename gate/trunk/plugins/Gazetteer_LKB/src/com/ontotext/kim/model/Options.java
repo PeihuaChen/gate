@@ -15,11 +15,12 @@ import org.openrdf.model.Graph;
 import org.openrdf.model.Statement;
 import org.openrdf.model.impl.GraphImpl;
 import org.openrdf.model.impl.URIImpl;
+import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParseException;
 import org.openrdf.rio.RDFParser;
+import org.openrdf.rio.RDFParserRegistry;
 import org.openrdf.rio.helpers.StatementCollector;
-import org.openrdf.rio.turtle.TurtleParser;
 
 /**
  * Options reader for the LKB Gazetteer
@@ -52,7 +53,7 @@ public class Options {
     Reader inp = null;
     try {
       inp = new FileReader(new File(dictionaryPath, getConfigFileName()));
-      RDFParser parser = new TurtleParser();
+      RDFParser parser = RDFParserRegistry.getInstance().get(RDFFormat.TURTLE).getParser();
       Graph statements = new GraphImpl();
       parser.setRDFHandler(new StatementCollector(statements));      
       parser.parse(inp, "http://www.ontotext.com/lkb_gazetteer#");
