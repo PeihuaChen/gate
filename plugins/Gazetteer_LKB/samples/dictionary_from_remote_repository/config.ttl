@@ -25,6 +25,12 @@ lkbg:DictionaryConfiguration
    # Possible values: caseinsensitive, casesensitive
    lkbg:caseSensitivity "caseinsensitive" ;
    
+   #(optional) Authentication
+   #If you are connecting to a repository guarded by HTTP basic authentication,
+   #supply credentials as follows:
+   #lkbg:username "<username>" ;
+   #lkbg:password "<password>" ;
+      
    # Whether the gazetteer will cache the dictionary after loading it from the data source.   
    # Put "enabled" to enable the cache, any other values will disable it.
    lkbg:caching "enabled" .
@@ -34,3 +40,4 @@ lkbg:DictionaryConfiguration
    # can't be detected and the cache will not be automatically reloaded in that case. 
    # Thus, if you expect changes in your datastore, disable the cache, or make use
    # of the modifications API.
+   

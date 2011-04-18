@@ -14,10 +14,12 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.apache.log4j.Logger;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.http.HTTPRepository;
 import org.openrdf.repository.sail.SailRepository;
 
 import com.ontotext.kim.client.query.KIMQueryException;
 import com.ontotext.kim.client.semanticrepository.QueryResultListener;
+import com.ontotext.kim.model.Options;
 import com.ontotext.kim.semanticrepository.TimedListener;
 import com.ontotext.kim.semanticrepository.UnmanagedRepositoryFactory;
 
@@ -36,12 +38,16 @@ public class PrivateRepositoryFeed implements QueryResultListener.Feed {
 	private final int settingsHash;
 	private final Logger log = Logger.getLogger(PrivateRepositoryFeed.class);
 	private final File dictionaryPath;
+	private final String username;
+	private final String password;
 	
-	public PrivateRepositoryFeed(URL configFileUrl, String query, int settingsHash) {
+	public PrivateRepositoryFeed(URL configFileUrl, String query, int settingsHash, Options opt) {
 		this.configFile = Files.fileFromURL(configFileUrl);		
 		this.query = query;
 		this.settingsHash = settingsHash;
 		dictionaryPath = configFile.getParentFile().getAbsoluteFile();
+		this.username = opt.getMap().get("username");
+		this.password = opt.getMap().get("password");
 		
 		if (!verifyHash(dictionaryPath, settingsHash)) {
 			boolean deleteSuccesful = new File(dictionaryPath, "kim.trusted.entities.cache").delete();
@@ -74,6 +80,14 @@ public class PrivateRepositoryFeed implements QueryResultListener.Feed {
 		try {
 			configReader = getConfigReader();
 			Repository rep = factory.createRepository(configReader);
+			if (username != null) {
+			  if (rep instanceof HTTPRepository) {
+			    ((HTTPRepository)rep).setUsernameAndPassword(username, password != null ? password : "");
+			  }
+			  else {
+			    log.warn("Authentication supported only for HTTP repositories. Username and password ignored.");
+			  }
+			}
 			rep.setDataDir(dataDir);
 			rep.initialize();
 			log.info("Initialized Sesame repository: " + (rep instanceof SailRepository ? ((SailRepository)rep).getSail().toString() : rep.toString()));
@@ -88,7 +102,7 @@ public class PrivateRepositoryFeed implements QueryResultListener.Feed {
 			}
 		}
 		catch (Exception e) {
-			throw new KIMQueryException(e);
+			throw new KIMQueryException("Error in repository connection.", e);
 		}
 		finally {
 			IOUtils.closeQuietly(configReader);

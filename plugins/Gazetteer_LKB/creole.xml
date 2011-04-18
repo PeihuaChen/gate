@@ -9,9 +9,9 @@
 	<JAR>lib/slf4j-api-1.5.11.jar</JAR>
 	<JAR>lib/slf4j-log4j12-1.5.11.jar</JAR>
 	<JAR>lib/trove4j-2.0.2.jar</JAR>
-	<JAR>lib/owlim-3.3.jar</JAR>
-	<JAR>lib/trree-3.3.jar</JAR>
-	<JAR>lib/openrdf-sesame-2.3.2-onejar.jar</JAR> 
+	<JAR>lib/owlim-3.5.jar</JAR>
+	<JAR>lib/trree-3.5.jar</JAR>
+	<JAR>lib/openrdf-sesame-2.3.3-onejar.jar</JAR> 
 	<JAR>Gazetteer_LKB.jar</JAR>	
 	<CREOLE>
 

@@ -14,8 +14,8 @@ import com.ontotext.kim.client.GetService;
 import com.ontotext.kim.client.KIMService;
 import com.ontotext.kim.client.query.KIMQueryException;
 import com.ontotext.kim.client.semanticrepository.QueryResultListener;
-import com.ontotext.kim.client.semanticrepository.SemanticRepositoryAPI;
 import com.ontotext.kim.client.semanticrepository.QueryResultListener.Feed;
+import com.ontotext.kim.client.semanticrepository.SemanticRepositoryAPI;
 import com.ontotext.kim.gate.SettingsHashBuilder;
 import com.ontotext.kim.util.datastore.GazetteerListFeed;
 import com.ontotext.kim.util.datastore.PrivateRepositoryFeed;
@@ -49,12 +49,12 @@ public class DataFeedFactory {
 		}
 
 	}
-	public Feed createFeed(File dictionaryPath) {
+	public Feed createFeed(File dictionaryPath, Options opt) {
 		final KIMService kimSvc = GetService.getKIMService();
 		Feed result = null;
 
 		if (result == null) {
-			result = createSesameFeed(dictionaryPath);
+			result = createSesameFeed(dictionaryPath, opt);
 		}
 
 		if (result == null && kimSvc != null) {
@@ -70,7 +70,7 @@ public class DataFeedFactory {
 		return result;
 	}
 
-	private QueryResultListener.Feed createSesameFeed(File dictionaryPath) {
+	private QueryResultListener.Feed createSesameFeed(File dictionaryPath, Options opt) {
 		File queryFile = new File(dictionaryPath, "query.txt").getAbsoluteFile();
 		try {
 			URL configFileUrl = new File(dictionaryPath, "config.ttl").getAbsoluteFile().toURI().toURL();
@@ -85,7 +85,7 @@ public class DataFeedFactory {
 			String queryString = FileUtils.readFileToString(queryFile);
 			log.info("Query loaded from " + queryFile);
 			int settingsHash = new SettingsHashBuilder().getHash(configFileUrl, queryString);
-			return new PrivateRepositoryFeed(configFileUrl, queryString, settingsHash);
+			return new PrivateRepositoryFeed(configFileUrl, queryString, settingsHash, opt);
 		} 
 		catch (IOException e) {
 			log.warn("Error while reading " + queryFile.getAbsolutePath(), e);				
