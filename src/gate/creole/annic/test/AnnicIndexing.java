@@ -81,8 +81,7 @@ public class AnnicIndexing {
   }
 
   /**
-   * This method runs the coreferencer. It assumes that all the needed
-   * parameters are set. If they are not, an exception will be fired.
+   * This method creates a lucene index.
    */
   public void execute() throws ExecutionException {
     long start = System.currentTimeMillis();

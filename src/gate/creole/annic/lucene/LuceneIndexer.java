@@ -59,7 +59,9 @@ public class LuceneIndexer implements Indexer {
    * @throws IOException
    */
   public LuceneIndexer(URL indexLocationUrl) throws IOException {
-    if(indexLocationUrl != null) readParametersFromDisk(indexLocationUrl);
+    if(indexLocationUrl != null) {
+      readParametersFromDisk(indexLocationUrl);
+    }
   }
 
   /**
@@ -488,6 +490,8 @@ public class LuceneIndexer implements Indexer {
   
       // Saving is accomplished just using XML serialization of the map.
       this.parameters = (HashMap)xstream.fromXML(fileReader);
+      // setting the index location URL
+      this.parameters.put(Constants.INDEX_LOCATION_URL, indexLocationUrl);
     }
     finally {
       fileReader.close();
@@ -516,6 +520,7 @@ public class LuceneIndexer implements Indexer {
     Iterator iter = parameters.keySet().iterator();
     while(iter.hasNext()) {
       Object key = iter.next();
+      if(key.equals(Constants.INDEX_LOCATION_URL)) continue;
       indexInformation.put(key, parameters.get(key));
     }
 
