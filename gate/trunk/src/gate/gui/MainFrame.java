@@ -2909,10 +2909,14 @@ public class MainFrame extends JFrame implements ProgressListener,
    */
   protected DataStore createSearchableDataStore() {
     try {
+
       JPanel mainPanel = new JPanel(new GridBagLayout());
 
       final JTextField dsLocation = new JTextField("", 20);
+      dsLocation.setEditable(false);
+      
       final JTextField indexLocation = new JTextField("", 20);
+      indexLocation.setToolTipText("directory to store the the lucene index");
 
       JTextField btat = new JTextField("Token", 20);
       btat.setToolTipText("Examples: Token, AnnotationSetName.Token, "
@@ -2926,9 +2930,12 @@ public class MainFrame extends JFrame implements ProgressListener,
 
       final List<String> inputASList = new ArrayList<String>();
       inputASList.add("Key");
+      inputASList.add(Constants.DEFAULT_ANNOTATION_SET_NAME);
+      
       final JTextField inputAS = new JTextField("", 20);
-      inputAS.setText("Key");
+      inputAS.setText("Key;"+Constants.DEFAULT_ANNOTATION_SET_NAME);
       inputAS.setEditable(false);
+      
       JButton editInputAS = new JButton(getIcon("edit-list"));
       editInputAS.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent ae) {
@@ -2960,7 +2967,9 @@ public class MainFrame extends JFrame implements ProgressListener,
       });
 
       JComboBox asie = new JComboBox(new String[]{"include", "exclude"});
-      inputAS.setToolTipText("Leave blank for indexing all annotation sets");
+      inputAS.setToolTipText("Leave blank for indexing all annotation sets. \"" 
+              + Constants.DEFAULT_ANNOTATION_SET_NAME + 
+              "\" indicates the default annotation set");
 
       final List<String> fteList = new ArrayList<String>();
       fteList.add("SpaceToken");
@@ -3002,28 +3011,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       ftie.setSelectedIndex(1);
       fte.setToolTipText("Leave blank for inclusion of all features");
 
-      JButton dsBrowse = new JButton(getIcon("open-file"));
       JButton indexBrowse = new JButton(getIcon("open-file"));
-      dsBrowse.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent ae) {
-          // first we need to ask for a new empty directory
-          fileChooser.setDialogTitle(
-            "Please create a new empty directory for datastore");
-          fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-          fileChooser.setResource("gate.DataStore.data");
-          if(fileChooser.showOpenDialog(MainFrame.this)
-            == JFileChooser.APPROVE_OPTION) {
-            try {
-              dsLocation.setText(fileChooser.getSelectedFile().toURI().toURL()
-                .toExternalForm());
-            }
-            catch(Exception e) {
-              dsLocation.setText("");
-            }
-          }
-        }
-      });
-
       indexBrowse.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent ae) {
           // first we need to ask for a new empty directory
@@ -3056,19 +3044,10 @@ public class MainFrame extends JFrame implements ProgressListener,
       constraints = new GridBagConstraints();
       constraints.gridx = GridBagConstraints.RELATIVE;
       constraints.gridy = 0;
-      constraints.gridwidth = 5;
+      constraints.gridwidth = 6;
       constraints.fill = GridBagConstraints.HORIZONTAL;
       constraints.insets = new Insets(0, 0, 0, 10);
       mainPanel.add(dsLocation, constraints);
-
-      constraints = new GridBagConstraints();
-      constraints.gridx = GridBagConstraints.RELATIVE;
-      constraints.gridy = 0;
-      constraints.gridwidth = 1;
-      constraints.anchor = GridBagConstraints.NORTHWEST;
-      mainPanel.add(dsBrowse, constraints);
-      dsBrowse.setBorderPainted(false);
-      dsBrowse.setContentAreaFilled(false);
 
       // second row
       constraints = new GridBagConstraints();
@@ -3211,23 +3190,92 @@ public class MainFrame extends JFrame implements ProgressListener,
       editFTE.setBorderPainted(false);
       editFTE.setContentAreaFilled(false);
 
+      // get the URL (a folder in this case)
+      fileChooser.setDialogTitle("Please create a new empty directory");
+      fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+      fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
+      fileChooser.setResource("gate.persist.LuceneDataStoreImpl");
+      int response = fileChooser.showOpenDialog(MainFrame.this);
+      if(response == JFileChooser.APPROVE_OPTION) {
+        try {
+          File dsFolder = fileChooser.getSelectedFile();
+          dsLocation.setText(dsFolder.toURI().toURL().toExternalForm());
+          File indexFolder = 
+            new File(dsFolder.getParentFile(), dsFolder.getName()+"-index");
+          indexLocation.setText(indexFolder.toURI().toURL().toExternalForm());
+        }
+        catch(MalformedURLException mue) {
+          JOptionPane.showMessageDialog(MainFrame.this,
+            "Invalid location\n " + mue.toString(), "GATE",
+            JOptionPane.ERROR_MESSAGE);
+        }
+      } else {
+        return null;
+      }
+      
+      
       boolean validEntry = false;
       while(!validEntry) {
         int returnValue =
-          JOptionPane.showOptionDialog(instance, mainPanel,
+          JOptionPane.showOptionDialog(MainFrame.this, mainPanel,
             "SearchableDataStore", JOptionPane.PLAIN_MESSAGE,
             JOptionPane.OK_CANCEL_OPTION, getIcon("empty"),
             new String[]{"OK", "Cancel"}, "OK");
+        
         if(returnValue == JOptionPane.OK_OPTION) {
           
           // sanity check parameters
+          
           if(dsLocation.getText().equals(indexLocation.getText())) {
-            JOptionPane.showMessageDialog(instance,
-                    "Datastore and index may not be in the same directory",
+            JOptionPane.showMessageDialog(MainFrame.this,
+                    "Datastore and index cannot be stored in the same directory",
                     "Error", JOptionPane.ERROR_MESSAGE);
           }
           else {
-            validEntry = true;
+            // check if index folder can be created
+            try {
+              File indexDir = 
+                new File(new URL(indexLocation.getText()).getFile());
+              if(indexDir.exists() && indexDir.isFile()) {
+                JOptionPane.showMessageDialog(MainFrame.this,
+                        indexDir.getAbsolutePath() + 
+                        " is a file on your disk. Index directory must be an" +
+                        " empty folder.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                continue;
+              } else if(indexDir.isDirectory() && indexDir.list().length > 0) {
+                JOptionPane.showMessageDialog(instance,
+                        "Index directory " + indexDir.getAbsolutePath() + 
+                        " must be an empty folder. ",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                continue;
+              } else {
+                if(!indexDir.exists()) {
+                  if(!indexDir.mkdirs()) {
+                    JOptionPane.showMessageDialog(MainFrame.this,
+                            "Cannot create index directory " + 
+                            indexDir.getAbsolutePath() + "an empty folder. ",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                    continue;
+                  }
+                }
+              }
+            } catch(MalformedURLException mue) {
+              JOptionPane.showMessageDialog(MainFrame.this,
+                      "Invalid index location "+indexLocation.getText(),
+                      "Error", JOptionPane.ERROR_MESSAGE);
+              continue;
+            } catch(SecurityException se) {
+              JOptionPane.showMessageDialog(MainFrame.this,
+                      "Could not create a directory "+indexLocation.getText() + 
+                      " because "+se.getMessage(),
+                      "Error", JOptionPane.ERROR_MESSAGE);
+              continue;
+            }
+            
+            // if here.. an empty index directory exists
+            // break the loop by setting validEntry to true 
+            validEntry = true;            
             DataStore ds =
               Factory.createDataStore("gate.persist.LuceneDataStoreImpl",
                 dsLocation.getText());

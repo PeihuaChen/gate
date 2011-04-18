@@ -1,5 +1,33 @@
 package gate.persist;
 
+import gate.Corpus;
+import gate.DataStore;
+import gate.Document;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.LanguageResource;
+import gate.Resource;
+import gate.corpora.SerialCorpusImpl;
+import gate.creole.ResourceInstantiationException;
+import gate.creole.annic.Constants;
+import gate.creole.annic.Hit;
+import gate.creole.annic.IndexException;
+import gate.creole.annic.Indexer;
+import gate.creole.annic.SearchException;
+import gate.creole.annic.SearchableDataStore;
+import gate.creole.annic.Searcher;
+import gate.creole.annic.lucene.LuceneIndexer;
+import gate.creole.annic.lucene.LuceneSearcher;
+import gate.event.CorpusEvent;
+import gate.event.CorpusListener;
+import gate.event.CreoleEvent;
+import gate.event.CreoleListener;
+import gate.security.SecurityException;
+import gate.util.GateRuntimeException;
+import gate.util.Strings;
+import gate.util.persistence.PersistenceManager;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -22,26 +50,9 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import gate.*;
-import gate.corpora.SerialCorpusImpl;
-import gate.creole.ResourceInstantiationException;
-import gate.event.*;
-import gate.security.SecurityException;
-import gate.util.GateRuntimeException;
-import gate.util.Strings;
-import gate.creole.annic.Constants;
-import gate.creole.annic.Hit;
-import gate.creole.annic.IndexException;
-import gate.creole.annic.Indexer;
-import gate.creole.annic.SearchException;
-import gate.creole.annic.SearchableDataStore;
-import gate.creole.annic.Searcher;
-import gate.creole.annic.lucene.LuceneIndexer;
-import gate.creole.annic.lucene.LuceneSearcher;
-
 public class LuceneDataStoreImpl extends SerialDataStore implements
                                                         SearchableDataStore,
-                                                        CorpusListener, 
+                                                        CorpusListener,
                                                         CreoleListener {
 
   /**
@@ -52,9 +63,8 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
   /**
    * To store canonical lock objects for each LR ID.
    */
-  protected Map<Object, LabelledSoftReference> lockObjects =
-          new HashMap<Object, LabelledSoftReference>();
-  
+  protected Map<Object, LabelledSoftReference> lockObjects = new HashMap<Object, LabelledSoftReference>();
+
   /**
    * Reference queue with which the soft references in the lockObjects
    * map will be registered.
@@ -70,24 +80,21 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
    * Executor to run the indexing tasks
    */
   protected ScheduledThreadPoolExecutor executor;
-  
+
   /**
-   * Map keeping track of the most recent indexing task
-   * for each LR ID.
+   * Map keeping track of the most recent indexing task for each LR ID.
    */
-  protected ConcurrentMap<Object, IndexingTask> currentTasks =
-          new ConcurrentHashMap<Object, IndexingTask>();
-  
+  protected ConcurrentMap<Object, IndexingTask> currentTasks = new ConcurrentHashMap<Object, IndexingTask>();
+
   /**
-   * Number of milliseconds we should wait after a sync
-   * before attempting to re-index a document.  If sync
-   * is called again for the same document within this time
-   * then the timer for the re-indexing task is reset.  Thus
-   * if several changes to the same document are made in
-   * quick succession it will only be re-indexed once.
-   * On the other hand, if the delay is set too long the 
-   * document may never be indexed until the data store is
-   * closed.  The default delay is 1000 (one second).
+   * Number of milliseconds we should wait after a sync before
+   * attempting to re-index a document. If sync is called again for the
+   * same document within this time then the timer for the re-indexing
+   * task is reset. Thus if several changes to the same document are
+   * made in quick succession it will only be re-indexed once. On the
+   * other hand, if the delay is set too long the document may never be
+   * indexed until the data store is closed. The default delay is 1000
+   * (one second).
    */
   protected long indexDelay = 1000L;
 
@@ -116,12 +123,11 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
    */
   protected Map searchParameters;
 
-  
   /** Close the data store. */
   public void close() throws PersistenceException {
-    //stop listening to Creole events
+    // stop listening to Creole events
     Gate.getCreoleRegister().removeCreoleListener(this);
-    // shut down the executor.  We submit the shutdown request
+    // shut down the executor. We submit the shutdown request
     // as a zero-delay task rather than calling shutdown directly,
     // in order to interrupt any timed wait currently in progress.
     executor.execute(new Runnable() {
@@ -137,24 +143,23 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
       // propagate the interruption
       Thread.currentThread().interrupt();
     }
-    
+
     // At this point, any in-progress indexing tasks have
-    // finished.  We now process any tasks that were queued
+    // finished. We now process any tasks that were queued
     // but not run, running them in the current thread.
     Collection<IndexingTask> queuedTasks = currentTasks.values();
     // copy the tasks into an array to avoid concurrent
     // modification issues, as IndexingTask.run modifies
     // the currentTasks map
-    IndexingTask[] queuedTasksArray = queuedTasks.toArray(
-            new IndexingTask[queuedTasks.size()]);
+    IndexingTask[] queuedTasksArray = queuedTasks
+            .toArray(new IndexingTask[queuedTasks.size()]);
     for(IndexingTask task : queuedTasksArray) {
       task.run();
     }
-    
-    super.close();     
+
+    super.close();
   } // close()
-  
-  
+
   /** Open a connection to the data store. */
   public void open() throws PersistenceException {
     super.open();
@@ -168,9 +173,28 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
       FileReader fis = new FileReader(getVersionFile());
       BufferedReader isr = new BufferedReader(fis);
       currentProtocolVersion = isr.readLine();
-      String url = isr.readLine();
-      if(url != null && url.trim().length() > 1) {
-        indexURL = new URL(url);
+      String indexDirRelativePath = isr.readLine();
+      if(indexDirRelativePath != null
+              && indexDirRelativePath.trim().length() > 1) {
+
+        // compatibility check for old datastores
+        if(indexDirRelativePath.startsWith("file:/")) {
+          // old index
+          indexURL = new URL(indexDirRelativePath);
+        }
+        else {
+          // index directory
+          File indexDir = new File(storageDir, indexDirRelativePath);
+
+          // check if index directory exists
+          if(!indexDir.exists()) {
+            throw new PersistenceException("Index directory "
+                    + indexDirRelativePath
+                    + " could not be found in the context of "
+                    + storageDir.getAbsolutePath());
+          }
+          indexURL = indexDir.toURI().toURL();
+        }
         this.indexer = new LuceneIndexer(indexURL);
         this.searcher = new LuceneSearcher();
         ((LuceneSearcher)this.searcher).setLuceneDatastore(this);
@@ -186,19 +210,20 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
 
     // Lets create a separate indexer thread which keeps running in the
     // background
-    executor = new ScheduledThreadPoolExecutor(1, Executors.defaultThreadFactory());
+    executor = new ScheduledThreadPoolExecutor(1, Executors
+            .defaultThreadFactory());
     // set up the executor so it does not execute delayed indexing tasks
-    // that are still waiting when it is shut down.  We run these tasks
+    // that are still waiting when it is shut down. We run these tasks
     // immediately at shutdown time rather than waiting.
     executor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
     executor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
-    //start listening to Creole events
+    // start listening to Creole events
     Gate.getCreoleRegister().addCreoleListener(this);
   }
 
   /**
-   * Obtain the lock object on which we must synchronize when
-   * loading or saving the LR with the given ID.
+   * Obtain the lock object on which we must synchronize when loading or
+   * saving the LR with the given ID.
    * 
    * @param id
    * @return
@@ -217,38 +242,37 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
         ref.label = id;
         lockObjects.put(id, ref);
       }
-      
+
       return lock;
     }
   }
-  
+
   /**
-   * Cleans up the lockObjects map by removing any entries
-   * whose SoftReference values have been cleared by the
-   * garbage collector.
+   * Cleans up the lockObjects map by removing any entries whose
+   * SoftReference values have been cleared by the garbage collector.
    */
   private void processRefQueue() {
     LabelledSoftReference ref = null;
     while((ref = LabelledSoftReference.class.cast(refQueue.poll())) != null) {
-      // check that the queued ref hasn't already been replaced in the map
+      // check that the queued ref hasn't already been replaced in the
+      // map
       if(lockObjects.get(ref.label) == ref) {
         lockObjects.remove(ref.label);
       }
     }
   }
-  
+
   /**
-   * Submits the given LR ID for indexing.  The task is delayed
-   * by 5 seconds, so multiple updates to the same LR in close
-   * succession do not un-necessarily trigger multiple re-indexing
-   * passes.
+   * Submits the given LR ID for indexing. The task is delayed by 5
+   * seconds, so multiple updates to the same LR in close succession do
+   * not un-necessarily trigger multiple re-indexing passes.
    */
   protected void queueForIndexing(Object lrID) {
     IndexingTask existingTask = currentTasks.get(lrID);
     if(existingTask != null) {
       existingTask.disable();
     }
-    
+
     IndexingTask newTask = new IndexingTask(lrID);
     currentTasks.put(lrID, newTask);
     // set the LR to be indexed after the configured delay
@@ -265,7 +289,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
     if(task != null) {
       task.disable();
     }
-    
+
     // and we delete it from the datastore
     // we obtained the lock on this - in order to avoid clashing between
     // the object being loaded by the indexer thread and the thread that
@@ -332,8 +356,8 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
   }
 
   /**
-   * Get a resource from the persistent store. <B>Don't use this method -
-   * use Factory.createResource with DataStore and DataStoreInstanceId
+   * Get a resource from the persistent store. <B>Don't use this method
+   * - use Factory.createResource with DataStore and DataStoreInstanceId
    * parameters set instead.</B> (Sometimes I wish Java had "friend"
    * declarations...)
    */
@@ -346,7 +370,6 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
     return lr;
   }
 
-  
   /**
    * Save: synchonise the in-memory image of the LR with the persistent
    * image.
@@ -360,7 +383,8 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
         super.sync(lr);
       }
       lock = null;
-    } else {
+    }
+    else {
       super.sync(lr);
     }
 
@@ -386,7 +410,9 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
       OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(
               versionFile));
       osw.write(versionNumber + Strings.getNl());
-      osw.write(indexURL.toString());
+      String indexDirRelativePath = PersistenceManager.getRelativePath(
+              storageDir.toURI().toURL(), indexURL);
+      osw.write(indexDirRelativePath);
       osw.close();
     }
     catch(IOException e) {
@@ -408,22 +434,22 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
   public Searcher getSearcher() {
     return this.searcher;
   }
-  
+
   /**
    * Sets the delay in milliseconds that we should wait after a sync
-   * before attempting to re-index a document.  If sync is called
-   * again for the same document within this time then the timer
-   * for the re-indexing task is reset.  Thus if several changes
-   * to the same document are made in quick succession it will only
-   * be re-indexed once. On the other hand, if the delay is set too
-   * long the document may never be indexed until the data store is
-   * closed.  The default delay is 1000ms (one second), which should
-   * be appropriate for usage in the GATE GUI.
+   * before attempting to re-index a document. If sync is called again
+   * for the same document within this time then the timer for the
+   * re-indexing task is reset. Thus if several changes to the same
+   * document are made in quick succession it will only be re-indexed
+   * once. On the other hand, if the delay is set too long the document
+   * may never be indexed until the data store is closed. The default
+   * delay is 1000ms (one second), which should be appropriate for usage
+   * in the GATE GUI.
    */
   public void setIndexDelay(long indexDelay) {
     this.indexDelay = indexDelay;
   }
-  
+
   public long getIndexDelay() {
     return indexDelay;
   }
@@ -467,7 +493,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
       catch(IndexException ie) {
         throw new GateRuntimeException(ie);
       }
-//      queueForIndexing(docLRID);
+      // queueForIndexing(docLRID);
     }
   }
 
@@ -482,60 +508,77 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
      * is part of the the datastore
      */
   }
-  
-  
-  
-  /* (non-Javadoc)
-   * @see gate.event.CreoleListener#datastoreClosed(gate.event.CreoleEvent)
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * gate.event.CreoleListener#datastoreClosed(gate.event.CreoleEvent)
    */
-  public void datastoreClosed(CreoleEvent e) {}
+  public void datastoreClosed(CreoleEvent e) {
+  }
 
-
-  /* (non-Javadoc)
-   * @see gate.event.CreoleListener#datastoreCreated(gate.event.CreoleEvent)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * gate.event.CreoleListener#datastoreCreated(gate.event.CreoleEvent)
    */
-  public void datastoreCreated(CreoleEvent e) {}
+  public void datastoreCreated(CreoleEvent e) {
+  }
 
-
-  /* (non-Javadoc)
-   * @see gate.event.CreoleListener#datastoreOpened(gate.event.CreoleEvent)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * gate.event.CreoleListener#datastoreOpened(gate.event.CreoleEvent)
    */
-  public void datastoreOpened(CreoleEvent e) {}
+  public void datastoreOpened(CreoleEvent e) {
+  }
 
-
-  /* (non-Javadoc)
-   * @see gate.event.CreoleListener#resourceLoaded(gate.event.CreoleEvent)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * gate.event.CreoleListener#resourceLoaded(gate.event.CreoleEvent)
    */
-  public void resourceLoaded(CreoleEvent e) {}
+  public void resourceLoaded(CreoleEvent e) {
+  }
 
-
-  /* (non-Javadoc)
-   * @see gate.event.CreoleListener#resourceRenamed(gate.Resource, java.lang.String, java.lang.String)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see gate.event.CreoleListener#resourceRenamed(gate.Resource,
+   * java.lang.String, java.lang.String)
    */
-  public void resourceRenamed(Resource resource, String oldName, 
-          String newName) {}
+  public void resourceRenamed(Resource resource, String oldName, String newName) {
+  }
 
-  /* (non-Javadoc)
-   * @see gate.event.CreoleListener#resourceUnloaded(gate.event.CreoleEvent)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * gate.event.CreoleListener#resourceUnloaded(gate.event.CreoleEvent)
    */
   public void resourceUnloaded(CreoleEvent e) {
-    //if the resource being close is one of our corpora. we need to remove
-    //the corpus listener associated with it
+    // if the resource being close is one of our corpora. we need to
+    // remove
+    // the corpus listener associated with it
     Resource res = e.getResource();
-    if(res instanceof Corpus){
+    if(res instanceof Corpus) {
       ((Corpus)res).removeCorpusListener(this);
     }
   }
 
   protected class IndexingTask implements Runnable {
     private AtomicBoolean disabled = new AtomicBoolean(false);
-    
+
     private Object lrID;
-    
+
     public IndexingTask(Object lrID) {
       this.lrID = lrID;
     }
-    
+
     public void disable() {
       disabled.set(true);
     }
@@ -553,7 +596,8 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
         // read the document from datastore
         FeatureMap features = Factory.newFeatureMap();
         features.put(DataStore.LR_ID_FEATURE_NAME, lrID);
-        features.put(DataStore.DATASTORE_FEATURE_NAME, LuceneDataStoreImpl.this);
+        features
+                .put(DataStore.DATASTORE_FEATURE_NAME, LuceneDataStoreImpl.this);
         FeatureMap hidefeatures = Factory.newFeatureMap();
         Gate.setHiddenAttribute(hidefeatures, true);
         try {
@@ -561,8 +605,8 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
           // which is in the process of being written
           Object lock = lockObjectForID(lrID);
           synchronized(lock) {
-            doc = (Document)Factory.createResource(
-                    "gate.corpora.DocumentImpl", features, hidefeatures);
+            doc = (Document)Factory.createResource("gate.corpora.DocumentImpl",
+                    features, hidefeatures);
           }
           lock = null;
         }
@@ -570,14 +614,14 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
           // this means the LR ID was null
           doc = null;
         }
-      
+
         // if the document is not null,
         // proceed to indexing it
         if(doc != null) {
 
           /*
-           * we need to reindex this document in order to
-           * synchronize it lets first remove it from the index
+           * we need to reindex this document in order to synchronize it
+           * lets first remove it from the index
            */
           ArrayList<Object> removed = new ArrayList<Object>();
           removed.add(lrID);
@@ -624,8 +668,8 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
             /*
              * it is also possible that the document is loaded from
              * datastore without being loaded from the corpus (e.g.
-             * using getLR(...) method of datastore) in this case
-             * the relevant corpus won't exist in memory
+             * using getLR(...) method of datastore) in this case the
+             * relevant corpus won't exist in memory
              */
             if(corpusPID == null) {
               List corpusPIDs = getLrIds(SerialCorpusImpl.class.getName());
@@ -636,15 +680,16 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
                   SerialCorpusImpl corpusLR = null;
                   // we will have to load this corpus
                   FeatureMap params = Factory.newFeatureMap();
-                  params.put(DataStore.DATASTORE_FEATURE_NAME, LuceneDataStoreImpl.this);
+                  params.put(DataStore.DATASTORE_FEATURE_NAME,
+                          LuceneDataStoreImpl.this);
                   params.put(DataStore.LR_ID_FEATURE_NAME, corpusID);
                   hidefeatures = Factory.newFeatureMap();
                   Gate.setHiddenAttribute(hidefeatures, true);
                   Object lock = lockObjectForID(corpusID);
                   synchronized(lock) {
                     corpusLR = (SerialCorpusImpl)Factory.createResource(
-                            SerialCorpusImpl.class.getCanonicalName(),
-                            params, hidefeatures);
+                            SerialCorpusImpl.class.getCanonicalName(), params,
+                            hidefeatures);
                   }
                   lock = null;
 
@@ -662,7 +707,7 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
             synchronized(indexer) {
               indexer.add(corpusPID, added);
             }
-            
+
             Factory.deleteResource(doc);
           }
           catch(Exception ie) {
@@ -671,15 +716,15 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
         }
       }
     }
-    
+
   }
-  
+
   /**
    * Soft reference with an associated label.
    */
   private class LabelledSoftReference extends SoftReference<Object> {
     Object label;
-    
+
     public LabelledSoftReference(Object referent) {
       super(referent);
     }

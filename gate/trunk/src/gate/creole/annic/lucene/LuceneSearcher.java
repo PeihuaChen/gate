@@ -21,7 +21,6 @@ import java.util.Set;
 import gate.creole.annic.Hit;
 import gate.creole.annic.Pattern;
 import gate.creole.annic.Constants;
-import gate.creole.annic.PatternAnnotation;
 import gate.creole.annic.SearchException;
 import gate.creole.annic.Searcher;
 import gate.creole.annic.apache.lucene.document.Document;
