@@ -390,6 +390,7 @@ public class OptionsDialog extends JDialog {
     pack();
     setLocationRelativeTo(getOwner());
     setVisible(true);
+    selectedFontBtn = null;
   }
 
   public static void main(String args[]){
