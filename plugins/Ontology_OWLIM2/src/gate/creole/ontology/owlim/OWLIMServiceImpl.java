@@ -4925,10 +4925,13 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
             // lets try to find out the file on local system
             int m = 0;
             boolean allFound = true;
-            for(; m < fileName.length() && m < ontoFileUrl.length(); m++) {
-              if(fileName.charAt(m) != ontoFileUrl.charAt(m)) {
-                allFound = false;
-                break;
+            if(!fileName.startsWith("http")) {
+              System.out.println(fileName + "=>" + ontoFileUrl);
+              for(; m < fileName.length() && m < ontoFileUrl.length(); m++) {
+                if(fileName.charAt(m) != ontoFileUrl.charAt(m)) {
+                  allFound = false;
+                  break;
+                }
               }
             }
 
