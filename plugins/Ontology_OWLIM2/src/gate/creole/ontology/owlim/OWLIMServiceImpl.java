@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.net.MalformedURLException;
@@ -4925,13 +4924,10 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
             // lets try to find out the file on local system
             int m = 0;
             boolean allFound = true;
-            if(!fileName.startsWith("http")) {
-              System.out.println(fileName + "=>" + ontoFileUrl);
-              for(; m < fileName.length() && m < ontoFileUrl.length(); m++) {
-                if(fileName.charAt(m) != ontoFileUrl.charAt(m)) {
-                  allFound = false;
-                  break;
-                }
+            for(; m < fileName.length() && m < ontoFileUrl.length(); m++) {
+              if(fileName.charAt(m) != ontoFileUrl.charAt(m)) {
+                allFound = false;
+                break;
               }
             }
 
@@ -4963,9 +4959,11 @@ public class OWLIMServiceImpl implements OWLIM, AdminListener {
                 if(continueProcessing) {
                   fileName =
                     tempString + fileName.substring(m - 1, fileName.length());
-
-                  fileName =
-                    Files.fileFromURL(new URL(fileName)).getAbsolutePath();
+                  
+                  if(!fileName.startsWith("http")) {
+                    fileName =
+                      Files.fileFromURL(new URL(fileName)).getAbsolutePath();
+                  }
                   // lets normalize the name by replacing .. in the path
                   // file://abc/xyz/../../pqr
 
