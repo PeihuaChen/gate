@@ -18,7 +18,7 @@ package gate.creole;
 import java.util.*;
 
 import gate.*;
-import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.*;
 import gate.event.CreoleEvent;
 import gate.util.*;
 
@@ -47,6 +47,9 @@ public class SerialAnalyserController extends SerialController
   /**
    * @param document the document to set
    */
+  @Optional
+  @RunTime
+  @CreoleParameter
   public void setDocument(Document document) {
     this.document = document;
   }
