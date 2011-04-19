@@ -357,7 +357,7 @@ ProcessingResource {
         }
       }
       // unload the ontology
-      Factory.deleteResource(ontologyUsed);
+      if (ontologyUsed != null) Factory.deleteResource(ontologyUsed);
     }
       
 	  
