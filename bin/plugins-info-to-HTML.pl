@@ -50,8 +50,9 @@ print HTMLFILE <<ENDHTML;
 <!--
 ****** This page is generated automatically by plugins-info-to-HTML.pl. ******
 ****** Do not edit it manually.  To modify the external plugins list at ******
-****** the bottom of this page edit external-plugins.html, change into  ******
-****** ../bin and run ./plugins-info-to-HTML.pl                         ******
+****** the bottom of this page edit external-plugins.html and run       ******
+****** "ant plugins.html" from the top-level GATE directory.            ******
+
 -->
 <html>
 
