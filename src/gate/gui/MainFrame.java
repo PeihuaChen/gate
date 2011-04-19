@@ -1005,7 +1005,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     helpMenu.add(new XJMenuItem(new AbstractAction("Demo Movies") {
       { this.putValue(Action.SHORT_DESCRIPTION, "Movie tutorials"); }
       public void actionPerformed(ActionEvent e) {
-        showHelpFrame("http://gate.ac.uk/demos/movies.html", "movies");
+        showHelpFrame("http://gate.ac.uk/demos/developer-videos/", "movies");
       }
     }, this));
     helpMenu.add(new XJMenuItem(new HelpMailingListAction(), this));
