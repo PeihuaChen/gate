@@ -3529,8 +3529,9 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     public void actionPerformed(ActionEvent e) {
       ExtensionFileFilter filter = new ExtensionFileFilter(
-        "GATE Application files", "gapp");
+        "GATE Application files (.gapp, .xgapp)", ".gapp", ".xgapp");
       fileChooser.addChoosableFileFilter(filter);
+      fileChooser.setFileFilter(filter);
       fileChooser.setDialogTitle("Select a file for this resource");
       fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
       fileChooser.setResource("lastapplication");
