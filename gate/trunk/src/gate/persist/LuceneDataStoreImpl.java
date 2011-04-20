@@ -24,6 +24,7 @@ import gate.event.CorpusListener;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
 import gate.security.SecurityException;
+import gate.util.Files;
 import gate.util.GateRuntimeException;
 import gate.util.Strings;
 import gate.util.persistence.PersistenceManager;
@@ -174,27 +175,21 @@ public class LuceneDataStoreImpl extends SerialDataStore implements
       BufferedReader isr = new BufferedReader(fis);
       currentProtocolVersion = isr.readLine();
       String indexDirRelativePath = isr.readLine();
+
       if(indexDirRelativePath != null
               && indexDirRelativePath.trim().length() > 1) {
-
-        // compatibility check for old datastores
-        if(indexDirRelativePath.startsWith("file:/")) {
-          // old index
-          indexURL = new URL(indexDirRelativePath);
+        URL storageDirURL = storageDir.toURI().toURL();
+        URL theIndexURL = new URL(storageDirURL, indexDirRelativePath);
+        // check if index directory exists
+        File indexDir = Files.fileFromURL(theIndexURL);
+        if(!indexDir.exists()) {
+          throw new PersistenceException("Index directory "
+                  + indexDirRelativePath
+                  + " could not be found for datastore at "
+                  + storageDirURL);
         }
-        else {
-          // index directory
-          File indexDir = new File(storageDir, indexDirRelativePath);
 
-          // check if index directory exists
-          if(!indexDir.exists()) {
-            throw new PersistenceException("Index directory "
-                    + indexDirRelativePath
-                    + " could not be found in the context of "
-                    + storageDir.getAbsolutePath());
-          }
-          indexURL = indexDir.toURI().toURL();
-        }
+        indexURL = theIndexURL;
         this.indexer = new LuceneIndexer(indexURL);
         this.searcher = new LuceneSearcher();
         ((LuceneSearcher)this.searcher).setLuceneDatastore(this);
