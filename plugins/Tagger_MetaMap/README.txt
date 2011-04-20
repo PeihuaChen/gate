@@ -31,8 +31,6 @@ inputASTypes: only send the content of these annotations within inputASName to M
 
 inputASTypeFeature: send the content of this feature within inputASTypes to MetaMap and wrap a new MetaMap annotation around each annotation in inputASTypes. If the feature is empty or does not exist, then the annotation content is sent instead.
 
-linebreakCount: specify the number of linebreak/whitespace characters between paragraphs if processing a document with multiple paragraphs separated by blank lines. The MetaMap API processCitationsFromString() method used by this plugin chunks text separated by blank lines (i.e. \n[\\s]*\n), and the resulting output resets the start offset of each chunk to 0, so the offset between each paragraph is effectively lost if this allowance is not made.
-
 metaMapOptions: set MetaMap options here. Default is -Xdt (truncate Candidates mappings, disallow derivational variants and do not use full text parsing). See http://metamap.nlm.nih.gov/README_javaapi.html for more details of accepted arguments. NB: only set the -y parameter (word-sense disambiguation) if wsdserverctl is running. 
 
 outputASName: output Annotation Set name.
