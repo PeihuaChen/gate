@@ -37,6 +37,7 @@ import info.olteanu.utils.*;
 import info.olteanu.interfaces.StringFilter;
 
 import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /** 
  * This class is the implementation of the resource METAMAP.
@@ -56,10 +57,8 @@ public class MetaMapPR extends AbstractLanguageAnalyser
     private Boolean annotatePhrases; // annotate MetaMap phrase chunks with outputASType
     private String metaMapOptions;   // MetaMap command line string
     private Boolean annotateNegEx;  // output NegEx results as features to outputASType
-    private Integer linebreakCount;    // number of linebreak/whitespace characters between paragraph chunks
     private TaggerMode taggerMode;  // term tagger behaviour: all instances, first only, or first+coreferences
-    
-    
+
     @Override
     public Resource init() throws ResourceInstantiationException {
 
@@ -76,7 +75,6 @@ public class MetaMapPR extends AbstractLanguageAnalyser
         return this;
     }
 
-    
     @Override
     public void execute() throws ExecutionException {
         MetaMapApi mmInst;
@@ -92,9 +90,6 @@ public class MetaMapPR extends AbstractLanguageAnalyser
             throw new ExecutionException("outputASType parameter must be set!");
         }
 
-        if (linebreakCount == null || !(linebreakCount instanceof Integer)) {
-            linebreakCount = 2;
-        }
 
         // set up MetaMap API instance
         try {
@@ -123,7 +118,7 @@ public class MetaMapPR extends AbstractLanguageAnalyser
                 // once through MetaMap
                 HashMap<Integer, ArrayList<Integer>> termMapById = new HashMap<Integer, ArrayList<Integer>>();        // map of annots with content duplicated by other annots, indexed by annot id
                 HashMap<String, Integer> termMapByString = new HashMap<String, Integer>();    // as above, but indexed by string content
-                
+
                 // iterate over each annot of type inputAnn
                 while (itr.hasNext()) {
 
@@ -175,8 +170,8 @@ public class MetaMapPR extends AbstractLanguageAnalyser
                         } else {
                             // string annContent already processed, so keep a note
                             // of the annotation id - we'll copy over the MetaMap annotations later
-                            Integer uniqueId =  termMapByString.get(annContent);
-                            ArrayList<Integer> dupAnnIds =  termMapById.get(uniqueId);
+                            Integer uniqueId = termMapByString.get(annContent);
+                            ArrayList<Integer> dupAnnIds = termMapById.get(uniqueId);
                             dupAnnIds.add(annId);
                         }
                     } else {
@@ -232,7 +227,7 @@ public class MetaMapPR extends AbstractLanguageAnalyser
             return;
         }
         Set keys = termMapById.keySet();
-        // System.out.println("Keys: " + keys);
+        
         Iterator keyIter = keys.iterator();
 
         while (keyIter.hasNext()) {
@@ -244,8 +239,6 @@ public class MetaMapPR extends AbstractLanguageAnalyser
             FeatureMap fm = pAnn.getFeatures();
             fm.put("coreferences:", dupAnnIds);
             AnnotationSet mmAnns = outputAS.getContained(pAnn.getStartNode().getOffset(), pAnn.getEndNode().getOffset()).get(outputASType);
-
-            //System.out.println(pAnn.getId() + ":" + mmAnns.toString());
 
             // Copy all the MetaMap annots within mmAnns to the
             // unprocessed annotations that have the same string value
@@ -358,7 +351,6 @@ public class MetaMapPR extends AbstractLanguageAnalyser
         return api;
     }
 
-
     /**
      * 
      * @param pcm - phrase chunk returned by MetaMap
@@ -452,8 +444,6 @@ public class MetaMapPR extends AbstractLanguageAnalyser
         } // end for
     }
 
-
-
     /**
      *
      * @param pcm - phrase chunk returned by MetaMap
@@ -463,12 +453,12 @@ public class MetaMapPR extends AbstractLanguageAnalyser
      * @throws Exception
      */
     public void processMappings(PCM pcm, List<Negation> negList, Long lngInitialOffset, Long lngEndOffset) throws Exception {
-        
+
         List<Mapping> mappings = pcm.getMappingList();
 
         // Mappings are ordered by score, so outputting the first item will give the mapping
         // with the highest score, if requested
-        if ( outputMode.equals(OutputMode.HighestMappingOnly) && ! (mappings.isEmpty()) ) {
+        if (outputMode.equals(OutputMode.HighestMappingOnly) && !(mappings.isEmpty())) {
             processEvents(mappings.get(0).getEvList(), negList, "Mapping", lngInitialOffset, lngEndOffset);
         } else {
             for (Mapping map : mappings) {
@@ -477,8 +467,6 @@ public class MetaMapPR extends AbstractLanguageAnalyser
         }
     }
 
-
-    
     /**
      *
      * @param pcm - phrase chunk returned by MetaMap
@@ -528,8 +516,6 @@ public class MetaMapPR extends AbstractLanguageAnalyser
         } // end for
     }
 
-
-
     /**
      * @param api - MetaMapApi instance
      * @param text - text to be annotated
@@ -543,24 +529,44 @@ public class MetaMapPR extends AbstractLanguageAnalyser
          */
         List<Result> resultList = null;
 
-        String asciiText = filterNonAscii(normalizeString(text));
+        String asciiText = filterNonAscii(normalizeString(text)) + "\n\n";
 
-        resultList = api.processCitationsFromString(asciiText);
+        // Create a pattern that strips leading whitespace and
+        // and chunks the text delimited by 2 or more blank lines
+        Pattern pattern = Pattern.compile("(?s)((\\p{Space}|\\p{Cntrl})*)(.+?)\n[\\s]*\n");
 
-        int resultLength = 0;
+        Matcher m = pattern.matcher(asciiText);
+        int iStart = 0;
+        String chunk = "";
+        int chunkLength = 0;
 
-        if (resultList != null) {
-            for (Result result : resultList) {
-                if (result != null) {
-                    this.processUtterances(result, lngInitialOffset + resultLength, (lngEndOffset == null) ? null : lngEndOffset + resultLength);
-                    // Need to assume linebreakCount line breaks between each result chunk.
-                    // The API processCitationsFromString() method chunks text in linebreak separated fragments,
-                    // but does not keep track of the offset of each fragment.
-                    resultLength = resultLength + result.getInputText().length() + linebreakCount;
-                } else {
-                    throw new Exception("NULL result instance! ");
+        while (m.find(iStart)) {
+            lngInitialOffset += m.group(1).length();
+            chunk = m.group(3);
+            chunkLength = chunk.length();
+
+            if (!chunk.trim().isEmpty()) {
+                resultList = api.processCitationsFromString(chunk);
+
+                int resultLength = 0;
+
+                if (resultList != null) {
+                    for (Result result : resultList) {
+                        if (result != null) {
+                            this.processUtterances(result, lngInitialOffset + resultLength, (lngEndOffset == null) ? null : lngEndOffset + resultLength);
+                            // We've pre-chunked the text now so this loop should only iterate once
+                            // but, if for some reason it iterates more often, we need to keep track
+                            // of the length of the previous result to update the start offset
+                            resultLength = resultLength + result.getInputText().length();
+                        } else {
+                            throw new Exception("NULL result instance! ");
+                        }
+                    }
                 }
             }
+
+            lngInitialOffset += chunkLength;
+            iStart = m.end(3);
         }
     }
 
@@ -696,16 +702,6 @@ public class MetaMapPR extends AbstractLanguageAnalyser
         return annotateNegEx;
     }
 
-    @RunTime
-    @CreoleParameter(defaultValue = "2",
-    comment = "Number of linebreak/whitespace characters between paragraphs")
-    public void setLinebreakCount(Integer linebreakCount) {
-        this.linebreakCount = linebreakCount;
-    }
-
-    public Integer getLinebreakCount() {
-        return linebreakCount;
-    }
 
     @RunTime
     @CreoleParameter(defaultValue = "CoReference",
