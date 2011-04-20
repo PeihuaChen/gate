@@ -922,12 +922,6 @@
       <fileset dir="plugins" includes="*/creole.xml" />
     </expandcreoles>
 
-    <!-- Copy the 'obsolete' creole.xmls directly, without annotation
-    processing -->
-    <copy todir="build/plugins">
-      <fileset dir="plugins" includes="Obsolete/**/creole.xml" />
-    </copy>
-
     <exec dir="bin" executable="${perl.bin}">
       <arg value="-CDS" />
       <arg file="bin/plugins-info-to-HTML.pl" />
