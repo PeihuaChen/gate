@@ -9,6 +9,7 @@ import java.rmi.RemoteException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.openrdf.repository.http.PrivateRepositoryFeed;
 
 import com.ontotext.kim.client.GetService;
 import com.ontotext.kim.client.KIMService;
@@ -18,7 +19,6 @@ import com.ontotext.kim.client.semanticrepository.QueryResultListener.Feed;
 import com.ontotext.kim.client.semanticrepository.SemanticRepositoryAPI;
 import com.ontotext.kim.gate.SettingsHashBuilder;
 import com.ontotext.kim.util.datastore.GazetteerListFeed;
-import com.ontotext.kim.util.datastore.PrivateRepositoryFeed;
 
 /**
  * 
