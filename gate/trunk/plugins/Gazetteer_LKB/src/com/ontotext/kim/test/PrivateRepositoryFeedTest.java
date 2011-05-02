@@ -9,12 +9,12 @@ import junit.framework.TestCase;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.openrdf.repository.http.PrivateRepositoryFeed;
 
 import com.ontotext.kim.client.query.KIMQueryException;
 import com.ontotext.kim.gate.SettingsHashBuilder;
 import com.ontotext.kim.model.Options;
 import com.ontotext.kim.query.QueryResultCounter;
-import com.ontotext.kim.util.datastore.PrivateRepositoryFeed;
 
 public class PrivateRepositoryFeedTest extends TestCase {
 

@@ -1,4 +1,4 @@
-package com.ontotext.kim.util.datastore;
+package org.openrdf.repository.http;
 
 import gate.util.Files;
 
@@ -14,7 +14,6 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.apache.log4j.Logger;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.http.HTTPRepository;
 import org.openrdf.repository.sail.SailRepository;
 
 import com.ontotext.kim.client.query.KIMQueryException;
@@ -22,6 +21,7 @@ import com.ontotext.kim.client.semanticrepository.QueryResultListener;
 import com.ontotext.kim.model.Options;
 import com.ontotext.kim.semanticrepository.TimedListener;
 import com.ontotext.kim.semanticrepository.UnmanagedRepositoryFactory;
+import com.ontotext.kim.util.datastore.RepositoryFeed;
 
 /**
  * Feed implementation over a Sesame 2 repository, defined by a given 
@@ -82,6 +82,7 @@ public class PrivateRepositoryFeed implements QueryResultListener.Feed {
 			Repository rep = factory.createRepository(configReader);
 			if (username != null) {
 			  if (rep instanceof HTTPRepository) {
+			    ((HTTPRepository)rep).getHTTPClient().setServerURL(((HTTPRepository)rep).getHTTPClient().getRepositoryURL());
 			    ((HTTPRepository)rep).setUsernameAndPassword(username, password != null ? password : "");
 			  }
 			  else {
