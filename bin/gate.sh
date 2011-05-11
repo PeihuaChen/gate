@@ -44,7 +44,12 @@ The following options can be passed immediately after the command name:
   -ll      ... if the current directory contains a file log4j.properties use
                this file to configure the logging
   -h       ... show this help
-All other options will be passed on to the "ant run" command
+All other options will be passed on to the "ant run" command, for example:
+  -propertyfile <file> ... use <file> instead of \$GATE_HOME/build.properties
+  -Drun.java.io.tmpdir=<somedir>
+Note that gate.sh does not use \$JAVA_OPTS. To adjust allocated memory use:
+  -Druntime.start.memory=<memorysize>
+  -Druntime.max.memory=<memorysize>
 EOF
     #exec bin/ant -h
     exit 0
