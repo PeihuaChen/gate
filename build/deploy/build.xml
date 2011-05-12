@@ -276,6 +276,7 @@ build/deploy all paths are relative to the top-level GATE directory -->
     </info>
     <!--  Load the native library used for generating Windows shortcuts -->
     <native type="izpack" name="ShellLink.dll"/>
+    <native type="izpack" name="ShellLink_x64.dll"/>
     <variables>
       <variable name="app-version" value="@{gate.version}"/>
       <variable name="InstallerFrame.logfilePath" value="default"/>
