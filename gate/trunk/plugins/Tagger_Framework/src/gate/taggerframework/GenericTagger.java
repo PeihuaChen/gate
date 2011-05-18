@@ -18,10 +18,13 @@ import gate.creole.metadata.RunTime;
 import gate.util.BomStrippingInputStreamReader;
 import gate.util.Files;
 import gate.util.OffsetComparator;
+import gate.util.ProcessManager;
 import gate.util.Strings;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -101,6 +104,9 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   // A copy of the inputTemplate with Java escape sequences like \t
   // unescaped
   protected String inputTemplateUnescaped;
+  
+  //a util class for dealing with external processes, i.e. the tagger
+  private ProcessManager processManager = new ProcessManager();
 
   /**
    * This method initialises the tagger. This involves loading the pre
@@ -445,26 +451,18 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
    * @throws ExecutionException if an error occurs executing the tagger
    */
   protected InputStream runTagger(String[] cmdline) throws ExecutionException {
-    // TODO: replace this with the ProcessManager from gate.util
-
-    // a handle to the process we are going to run
-    Process p = null;
-
+    
+    ByteArrayOutputStream baout = new ByteArrayOutputStream();
+    
     try {
       if(taggerDir == null) {
-        // if there is no dir specified just run the tagger
-        p = Runtime.getRuntime().exec(cmdline);
+        processManager.runProcess(cmdline, baout, (debug ? System.err : null));
       }
       else {
-        // if a dir is specified then make sure we run the tagger from
-        // there otherwise it probably won't work
-        p = Runtime.getRuntime().exec(cmdline, new String[] {},
-                Files.fileFromURL(taggerDir));
+        processManager.runProcess(cmdline, Files.fileFromURL(taggerDir), baout, (debug ? System.err : null));
       }
-
-      // return the input stream so that another method can read the
-      // output from the tagger
-      return p.getInputStream();
+      
+      return new ByteArrayInputStream(baout.toByteArray());
     }
     catch(Exception e) {
       throw new ExecutionException(e);

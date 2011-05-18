@@ -58,7 +58,12 @@ public class ProcessManager {
    */
   public synchronized int runProcess(String[] argv, boolean dumpOutput)
                           throws IOException {
-    return runProcess(argv, (dumpOutput ? System.out : null), (dumpOutput ? System.err : null));
+    return runProcess(argv, null, (dumpOutput ? System.out : null), (dumpOutput ? System.err : null));
+  }
+  
+  public synchronized int runProcess(String[] argv, OutputStream out, OutputStream err)
+  throws IOException {
+    return runProcess(argv, null, out, err);
   }
   
   /**
@@ -71,13 +76,14 @@ public class ProcessManager {
    * @param dumpOutput should we copy the process output and error streams to
    * the Java output and error streams or just consume them silently?
    */
-  public synchronized int runProcess(String[] argv, OutputStream out, OutputStream err)
+  public synchronized int runProcess(String[] argv, File dir, OutputStream out, OutputStream err)
                           throws IOException {
     // Start the process.  This may throw an exception
     if(DEBUG) {
       System.err.println("Starting process");
     }
-    Process proc = Runtime.getRuntime().exec(argv);
+    
+    Process proc = Runtime.getRuntime().exec(argv, null, dir);
     
     // set up the stream gobblers for stdout and stderr
     if(DEBUG) {
