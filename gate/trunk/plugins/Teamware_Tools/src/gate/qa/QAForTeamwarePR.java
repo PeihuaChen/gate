@@ -661,14 +661,20 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
               + (f.format((double)consensusMicro
                       / (columnAuthorNames.size() - 1))));
     }
+    
+    // if consensus annotation set exists, make sure the number used in 
+    // demoninator does not include consensus as one annotator 
+    int totalAuthors = consensusExists ? 
+            columnAuthorNames.size() - 1 : columnAuthorNames.size();
+    
     buffer.append("<br><b>Avg. IAA macro avg:</b> "
             + (f
                     .format((double)annotatorMacro
-                            / (columnAuthorNames.size() - 1))));
+                            / totalAuthors)));
     buffer.append("<br><b>Avg. IAA micro avg:</b> "
             + (f
                     .format((double)annotatorMicro
-                            / (columnAuthorNames.size() - 1))));
+                            / totalAuthors)));
     buffer.append("</body>\n</html>");
 
     BufferedWriter bw = null;
