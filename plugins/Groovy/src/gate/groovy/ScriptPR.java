@@ -13,20 +13,33 @@
 
 package gate.groovy;
 
+import gate.AnnotationSet;
+import gate.Controller;
+import gate.Corpus;
+import gate.CorpusController;
+import gate.FeatureMap;
+import gate.Gate;
 import gate.ProcessingResource;
 import gate.Resource;
-import gate.creole.*;
-import gate.creole.metadata.*;
-import gate.util.*;
-import gate.*;
-import java.util.*;
-import java.io.IOException;
-import java.io.Reader;
-import java.net.URL;
+import gate.creole.AbstractLanguageAnalyser;
+import gate.creole.ControllerAwarePR;
+import gate.creole.ExecutionException;
+import gate.creole.ResourceInstantiationException;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
+import gate.creole.metadata.RunTime;
+import gate.util.BomStrippingInputStreamReader;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.MetaMethod;
 import groovy.lang.Script;
+
+import java.io.IOException;
+import java.io.Reader;
+import java.net.URL;
+import java.util.List;
+
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.runtime.InvokerInvocationException;
 
@@ -77,6 +90,9 @@ public class ScriptPR extends AbstractLanguageAnalyser
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
 
+    if (scriptURL == null)
+      throw new ResourceInstantiationException("You must specify a Groovy script to load");
+    
     // Create the shell, with the GateClassLoader as its parent (so the script
     // will have access to plugin classes)
     GroovyShell groovyShell = new GroovyShell(Gate.getClassLoader());
