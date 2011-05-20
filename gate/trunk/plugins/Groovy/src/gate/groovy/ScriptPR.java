@@ -1,15 +1,14 @@
 /*
- *  Copyright (c) 2010, The University of Sheffield.
- *
- *  This file is part of the GATE/Groovy integration layer, and is free
- *  software, released under the terms of the GNU Lesser General Public
- *  Licence, version 2.1 (or any later version).  A copy of this licence
- *  is provided in the file LICENCE in the distribution.
- *
- *  Groovy is developed by The Codehaus, details are available from
- *  http://groovy.codehaus.org
+ * Copyright (c) 2010, The University of Sheffield.
+ * 
+ * This file is part of the GATE/Groovy integration layer, and is free software,
+ * released under the terms of the GNU Lesser General Public Licence, version
+ * 2.1 (or any later version). A copy of this licence is provided in the file
+ * LICENCE in the distribution.
+ * 
+ * Groovy is developed by The Codehaus, details are available from
+ * http://groovy.codehaus.org
  */
-
 
 package gate.groovy;
 
@@ -43,19 +42,15 @@ import java.util.List;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.runtime.InvokerInvocationException;
 
-
 /**
  * Groovy Script PR.
- *
+ * 
  * @author Angus Roberts, Ian Roberts
- *
  */
-@CreoleResource(name = "Groovy scripting PR",
-    comment = "Runs a Groovy script as a processing resource",
-    helpURL = "http://gate.ac.uk/userguide/sec:api:groovy",
-    icon = "/gate/groovy/script-pr")
-public class ScriptPR extends AbstractLanguageAnalyser
-                       implements ProcessingResource, ControllerAwarePR {
+@CreoleResource(name = "Groovy scripting PR", comment = "Runs a Groovy script as a processing resource", helpURL = "http://gate.ac.uk/userguide/sec:api:groovy", icon = "/gate/groovy/script-pr")
+public class ScriptPR extends AbstractLanguageAnalyser implements
+                                                      ProcessingResource,
+                                                      ControllerAwarePR {
 
   /**
    * Groovy script file
@@ -71,6 +66,11 @@ public class ScriptPR extends AbstractLanguageAnalyser
    * The compiled Groovy script.
    */
   private Script groovyScript;
+
+  /**
+   * the source of the loaded groovy script for use in the VR
+   */
+  private String groovySrc;
 
   /**
    * The character encoding of the script file.
@@ -90,9 +90,10 @@ public class ScriptPR extends AbstractLanguageAnalyser
   /** Initialise this resource, and return it. */
   public Resource init() throws ResourceInstantiationException {
 
-    if (scriptURL == null)
-      throw new ResourceInstantiationException("You must specify a Groovy script to load");
-    
+    if(scriptURL == null)
+      throw new ResourceInstantiationException(
+              "You must specify a Groovy script to load");
+
     // Create the shell, with the GateClassLoader as its parent (so the script
     // will have access to plugin classes)
     GroovyShell groovyShell = new GroovyShell(Gate.getClassLoader());
@@ -101,34 +102,38 @@ public class ScriptPR extends AbstractLanguageAnalyser
     char[] buf = new char[4096];
     int charsRead = 0;
     try {
-      Reader reader = new BomStrippingInputStreamReader(scriptURL.openStream(),
-          encoding);
+      Reader reader =
+              new BomStrippingInputStreamReader(scriptURL.openStream(),
+                      encoding);
       while((charsRead = reader.read(buf)) >= 0) {
         scriptText.append(buf, 0, charsRead);
       }
       reader.close();
-    }
-    catch(IOException ioe) {
-      throw new ResourceInstantiationException("Error loading Groovy script "
-          + "from URL " + scriptURL, ioe);
-    }
 
-    // append a load of standard imports to the end of the script.  We put them
-    // at the end rather than the beginning because (in a script) imports work
-    // anywhere, and putting them at the end means we don't mess up line
-    // numbers in any compilation error messages.
-    scriptText.append("\n\n\n");
-    scriptText.append(GroovySupport.STANDARD_IMPORTS);
+      groovySrc = scriptText.toString();
 
-    // determine the file name of the script
-    String scriptFileName = scriptURL.toString();
-    scriptFileName = scriptFileName.substring(scriptFileName.lastIndexOf('/'));
+      // append a load of standard imports to the end of the script. We put them
+      // at the end rather than the beginning because (in a script) imports work
+      // anywhere, and putting them at the end means we don't mess up line
+      // numbers in any compilation error messages.
+      scriptText.append("\n\n\n");
+      scriptText.append(GroovySupport.STANDARD_IMPORTS);
 
-    try {
+      // determine the file name of the script
+      String scriptFileName = scriptURL.toString();
+      scriptFileName =
+              scriptFileName.substring(scriptFileName.lastIndexOf('/'));
+
       groovyScript = groovyShell.parse(scriptText.toString(), scriptFileName);
+    } catch(IOException ioe) {
+      throw new ResourceInstantiationException("Error loading Groovy script "
+              + "from URL " + scriptURL, ioe);
     }
+
     catch(CompilationFailedException e) {
       throw new ResourceInstantiationException("Script compilation failed", e);
+    } finally {
+      fireProcessFinished();
     }
 
     return this;
@@ -158,34 +163,31 @@ public class ScriptPR extends AbstractLanguageAnalyser
   }
 
   /**
-   * Check whether the script declares a method with the given name that takes
-   * a corpus parameter, and if so, call it passing the corpus from the given
-   * controller.  If the controller is not a CorpusController, do nothing.
-   *
-   * @throws ExecutionException if the script method throws an
-   *         ExecutionException we re-throw it
+   * Check whether the script declares a method with the given name that takes a
+   * corpus parameter, and if so, call it passing the corpus from the given
+   * controller. If the controller is not a CorpusController, do nothing.
+   * 
+   * @throws ExecutionException
+   *           if the script method throws an ExecutionException we re-throw it
    */
   protected void callControllerAwareMethod(String methodName, Controller c)
           throws ExecutionException {
     if(!(c instanceof CorpusController)) { return; }
-    List<MetaMethod> metaMethods = groovyScript.getMetaClass().respondsTo(
-        groovyScript, methodName, new Class[] {gate.Corpus.class});
+    List<MetaMethod> metaMethods =
+            groovyScript.getMetaClass().respondsTo(groovyScript, methodName,
+                    new Class[]{gate.Corpus.class});
     if(!metaMethods.isEmpty()) {
       try {
-        metaMethods.get(0).invoke(
-            groovyScript, new Corpus[] { ((CorpusController)c).getCorpus() });
-      }
-      catch(InvokerInvocationException iie) {
+        metaMethods.get(0).invoke(groovyScript,
+                new Corpus[]{((CorpusController)c).getCorpus()});
+      } catch(InvokerInvocationException iie) {
         if(iie.getCause() instanceof ExecutionException) {
           throw (ExecutionException)iie.getCause();
-        }
-        else if(iie.getCause() instanceof RuntimeException) {
+        } else if(iie.getCause() instanceof RuntimeException) {
           throw (RuntimeException)iie.getCause();
-        }
-        else if(iie.getCause() instanceof Error) {
+        } else if(iie.getCause() instanceof Error) {
           throw (Error)iie.getCause();
-        }
-        else {
+        } else {
           throw iie;
         }
       }
@@ -199,9 +201,8 @@ public class ScriptPR extends AbstractLanguageAnalyser
    */
   public void execute() throws ExecutionException {
 
-    if(document == null) {
-      throw new ExecutionException("There is no loaded document");
-    }
+    if(document == null) { throw new ExecutionException(
+            "There is no loaded document"); }
 
     AnnotationSet outputAS = null;
     if(outputASName == null || outputASName.trim().length() == 0)
@@ -216,7 +217,6 @@ public class ScriptPR extends AbstractLanguageAnalyser
     // Status
     fireStatusChanged("Groovy script PR running on " + document.getSourceUrl());
     fireProgressChanged(0);
-
 
     // Create the variable bindings
     Binding binding = groovyScript.getBinding();
@@ -246,11 +246,12 @@ public class ScriptPR extends AbstractLanguageAnalyser
     // We've done
     fireProgressChanged(100);
     fireProcessFinished();
-    fireStatusChanged( "Groovy script PR finished" );
+    fireStatusChanged("Groovy script PR finished");
   }
 
   /**
    * gets name of the output annotation set
+   * 
    * @return
    */
   public String getOutputASName() {
@@ -259,6 +260,7 @@ public class ScriptPR extends AbstractLanguageAnalyser
 
   /**
    * sets name of the output annotaiton set
+   * 
    * @param outputAS
    */
   @Optional
@@ -270,6 +272,7 @@ public class ScriptPR extends AbstractLanguageAnalyser
 
   /**
    * gets name of the input annotation set
+   * 
    * @return
    */
   public String getInputASName() {
@@ -278,6 +281,7 @@ public class ScriptPR extends AbstractLanguageAnalyser
 
   /**
    * sets name of the input annotaiton set
+   * 
    * @param inputAS
    */
   @Optional
@@ -289,6 +293,7 @@ public class ScriptPR extends AbstractLanguageAnalyser
 
   /**
    * gets URL of the Groovy script
+   * 
    * @return
    */
   public URL getScriptURL() {
@@ -297,10 +302,11 @@ public class ScriptPR extends AbstractLanguageAnalyser
 
   /**
    * sets File of the Groovy script
+   * 
    * @param script
    */
   @CreoleParameter(comment = "Location of the Groovy script that will be "
-      + "run for each document")
+          + "run for each document")
   public void setScriptURL(URL script) {
     this.scriptURL = script;
   }
@@ -316,13 +322,14 @@ public class ScriptPR extends AbstractLanguageAnalyser
    * Set the character encoding used to load the script.
    */
   @CreoleParameter(defaultValue = "UTF-8", comment = "Character encoding used "
-      + "to read the script")
+          + "to read the script")
   public void setEncoding(String encoding) {
     this.encoding = encoding;
   }
 
   /**
    * Get Map of parameters for the Groovy script
+   * 
    * @return
    */
   public FeatureMap getScriptParams() {
@@ -331,14 +338,24 @@ public class ScriptPR extends AbstractLanguageAnalyser
 
   /**
    * Set Map of parameters for the Groovy script
+   * 
    * @return
    */
   @Optional
   @RunTime
   @CreoleParameter(comment = "Optional additional parameters to pass to the "
-      + "script.")
+          + "script.")
   public void setScriptParams(FeatureMap params) {
     this.scriptParams = params;
+  }
+
+  /**
+   * Return the source of the loaded groovy script
+   * 
+   * @return the source of the loaded groovy script
+   */
+  public String getGroovySrc() {
+    return groovySrc;
   }
 
 }
