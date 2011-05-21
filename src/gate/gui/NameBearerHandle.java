@@ -1233,7 +1233,15 @@ public class NameBearerHandle implements Handle, StatusListener,
       fileChooser.setResource("application.zip." + target.getName());
 
       if(fileChooser.showSaveDialog(largeView) == JFileChooser.APPROVE_OPTION) {
-        final File targetZipFile = fileChooser.getSelectedFile();
+        
+        //ensure that the ZIP file we produce actually ends .zip
+        File checkFile = fileChooser.getSelectedFile();        
+        if (!checkFile.getName().toLowerCase().endsWith(".zip")) {
+          checkFile = new File(checkFile.getParent(), checkFile.getName()+".zip");
+        }
+        
+        final File targetZipFile = checkFile;
+        
         Runnable runnable = new Runnable() {
           public void run() {
             try {
