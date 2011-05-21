@@ -286,7 +286,7 @@ public class Files {
   } // getResourceAsByteArray(String)
 
   /** Get a resource from the GATE resources directory as a byte array.
-    * The resource name should be relative to <code>resourcePath<code> which
+    * The resource name should be relative to <code>resourcePath</code> which
     * is equal with <TT>gate/resources</TT>; e.g.
     * for a resource stored as <TT>gate/resources/jape/Test11.jape</TT>,
     * this method should be passed the name <TT>jape/Test11.jape</TT>.
