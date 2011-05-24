@@ -66,11 +66,11 @@ public class ParameterDisjunction implements CreoleListener {
       }catch(ResourceInstantiationException rie){
         throw new GateRuntimeException(
           "Could not get read accessor method for \"" + names[i] +
-          "\"property of " + resource.getClass().getName());
+          "\"property of " + resource.getClass().getName(),rie);
       }catch(ParameterException pe){
         throw new GateRuntimeException(
           "Could not get default value for \"" + names[i] +
-          "\"property of " + resource.getClass().getName());
+          "\"property of " + resource.getClass().getName(),pe);
       }
       required[i] = new Boolean(!params[i].isOptional());
     }
