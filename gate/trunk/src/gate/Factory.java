@@ -45,12 +45,6 @@ public abstract class Factory {
   /** Debug flag */
   private static final boolean DEBUG = false;
 
-  /** The CREOLE register */
-  private static CreoleRegister reg = Gate.getCreoleRegister();
-
-  /** The DataStore register */
-  private static DataStoreRegister dsReg = Gate.getDataStoreRegister();
-
   /** An object to source events from. */
   private static CreoleProxy creoleProxy;
 
@@ -64,7 +58,7 @@ public abstract class Factory {
   throws ResourceInstantiationException
   {
     // get the resource metadata
-    ResourceData resData = (ResourceData) reg.get(resourceClassName);
+    ResourceData resData = (ResourceData) Gate.getCreoleRegister().get(resourceClassName);
     if(resData == null)
       throw new ResourceInstantiationException(
         "Couldn't get resource data for " + resourceClassName + ".\n\n" +
@@ -152,7 +146,7 @@ public abstract class Factory {
   ) throws ResourceInstantiationException
    {
     // get the resource metadata
-    ResourceData resData = (ResourceData) reg.get(resourceClassName);
+    ResourceData resData = (ResourceData) Gate.getCreoleRegister().get(resourceClassName);
     if(resData == null)
       throw new ResourceInstantiationException(
         "Couldn't get resource data for " + resourceClassName + ".\n\n" +
@@ -409,7 +403,7 @@ public abstract class Factory {
     */
   public static void deleteResource(Resource resource) {
     ResourceData rd =
-      (ResourceData) reg.get(resource.getClass().getName());
+      (ResourceData) Gate.getCreoleRegister().get(resource.getClass().getName());
     if(rd!= null && rd.removeInstantiation(resource)) {
       creoleProxy.fireResourceUnloaded(
         new CreoleEvent(resource, CreoleEvent.RESOURCE_UNLOADED)
@@ -801,7 +795,7 @@ public abstract class Factory {
   ) throws PersistenceException {
     DataStore ds = instantiateDataStore(dataStoreClassName, storageUrl);
     ds.open();
-    if(dsReg.add(ds))
+    if(Gate.getDataStoreRegister().add(ds))
       creoleProxy.fireDatastoreOpened(
         new CreoleEvent(ds, CreoleEvent.DATASTORE_OPENED)
       );
@@ -819,7 +813,7 @@ public abstract class Factory {
     DataStore ds = instantiateDataStore(dataStoreClassName, storageUrl);
     ds.create();
     ds.open();
-    if(dsReg.add(ds))
+    if(Gate.getDataStoreRegister().add(ds))
       creoleProxy.fireDatastoreCreated(
         new CreoleEvent(ds, CreoleEvent.DATASTORE_CREATED)
       );
@@ -840,8 +834,6 @@ public abstract class Factory {
       throw new PersistenceException("Couldn't create DS class: " + e);
     }
 
-    if(dsReg == null) // static init ran before Gate.init....
-      dsReg = Gate.getDataStoreRegister();
     godfreyTheDataStore.setStorageUrl(storageUrl.toString());
 
     return godfreyTheDataStore;
