@@ -4,7 +4,7 @@
 	<li><a href='#anc'>XCES tools</a></li>
 	<li><a href='#sen'><i>Sen</i> wrapper (Japanese morphological analyser)</a></li>
 	<li><a href='#russianprs'>Russian morph tagger</a></li>
-	<li><a href='#extendedgazetteer'>Extended List Gazetteer</a></li>
+	<li><a href='#stringannotation'>String Annotation</a></li>
 	<li><a href='#appdoc'>GATE Application Documentation</a></li>
 	<li><a href='#virtualcorpus'>VirtualCorpus - Directory- and JDBC Corpus LR</a></li>
 	<li><a href='#bwp'>BWP Gazetteer</a></li>
@@ -85,14 +85,21 @@
 		<td>ru.itbrains.gate.morph.MorphTagger</td>
 	</tr>
 	<tr>
-		<th colspan='3'><a name="extendedgazetteer"></a>Extended List Gazetteer<br/><a
-                href="http://www.ofai.at/~johann.petrak/GATE/ExtendedGazetteer.html">website</a></th>
+		<th colspan='3'><a name="stringannotation"></a>String Annotation Plugin<br/>
+		<a href="http://www.ofai.at/~johann.petrak/GATE/StringAnnotation.html">website</a>
+		<a href="http://code.google.com/p/gateplugin-stringannotation/downloads/list">download</a>
+		</th>
 	</tr>
-	<tr><td colspan='3'><center><i>This plugin provides an extended version of the original GATE ListGazetteer. In addition to the features of the original, built-in version of the List Gazetteer, this version provides features for more powerful matching of partial words and annotating prefixes and suffixes as well as more versatile handling of word boundaries and whitespace.</i></center></td></tr>
+	<tr><td colspan='3'><center><i>Processing resources for directly annotating the string content of a document.</i></center></td></tr>
 	<tr>
 		<td>Extended List Gazetteer</td>
-		<td>Extended version of the GATE Default List Gazetteer</td>
+		<td>Extended version of the GATE Default List Gazetteer. In addition to the features of the original, built-in version of the List Gazetteer, this version provides features for more powerful matching of partial words and annotating prefixes and suffixes as well as more versatile handling of word boundaries and whitespace.</td>
 		<td>at.ofai.gate.extendedgazetteer.ExtendedGazetteer</td>
+	</tr>
+	<tr>
+		<td>Simple Regexp Annotator</td>
+		<td>Use rules based on Java regular expressions to annotate the document content.</td>
+		<td>at.ofai.gate.regexpannotator.SimpleRegexpAnnotator</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name="appdoc"></a>AppDoc &mdash; GATE Application Documentation<br/>
