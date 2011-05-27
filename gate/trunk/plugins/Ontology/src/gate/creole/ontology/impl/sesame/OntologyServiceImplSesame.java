@@ -3613,63 +3613,6 @@ public class OntologyServiceImplSesame implements OntologyService {
   }
 
 
-  /**
-   * The method is useful for adding statements into the graph. All three values
-   * must exist in repository. These values are cast in Resources and then added
-   * into the graph of repository.
-   * 
-   * @param subjectURI
-   * @param predicateURI
-   * @param objectURI
-   */
-  public void addStatement(String subjectURI,
-      String predicateURI, String objectURI)
-  {
-    try {
-      startTransaction(null);
-      Resource s = subjectURI != null ? getResource(subjectURI) : null;
-      URI p =
-          predicateURI != null
-          ? repositoryConnection.getValueFactory().createURI(predicateURI)
-          : null;
-      Resource o = objectURI != null ? getResource(objectURI) : null;
-      repositoryConnection.add(s, p, o);
-      endTransaction(null);
-    } catch (Exception e) {
-      throw new GateOntologyException(
-          "error while adding statement into the repository where subject:" + subjectURI + " predicate:" + predicateURI + " objectURI:" + objectURI, e);
-    }
-  }
-
-  /**
-   * The method is useful for removing statements from the graph of repository.
-   * All three values must exist in repository. these values are cast in
-   * Resources and then removed from teh graph of repository.
-   * 
-   * @param subjectURI
-   * @param predicateURI
-   * @param objectURI
-   */
-  public void removeStatement(String subjectURI,
-      String predicateURI, String objectURI)
-  {
-    try {
-      startTransaction(null);
-      Resource s = subjectURI != null ? getResource(subjectURI) : null;
-      URI p =
-          predicateURI != null
-          ? repositoryConnection.getValueFactory().createURI(predicateURI)
-          : null;
-      Resource o = objectURI != null ? getResource(objectURI) : null;
-      repositoryConnection.remove(s, p, o);
-      endTransaction(null);
-    } catch (Exception e) {
-      throw new GateOntologyException(
-          "error while removing statement from the repository where subject:" + subjectURI + " predicate:" + predicateURI + " objectURI:" + objectURI, e);
-    }
-
-  }
-
   // ***************************************************************************
   // *********************** Other Utility Methods
   // **************************************************************************
@@ -3710,25 +3653,6 @@ public class OntologyServiceImplSesame implements OntologyService {
             : null;
       }
       repositoryConnection.add(s, p, o, DATA_CONTEXT_URI);
-      endTransaction(null);
-    } catch (Exception e) {
-      throw new GateOntologyException(
-          "error while adding statement into the repository where subject:" + subject + " predicate:" + predicate + " objectURI:" + object, e);
-    }
-  }
-
-  public void addStatement(String subject,
-      String predicate, String object, String datatype)
-  {
-    try {
-      startTransaction(null);
-      Resource s = subject != null ? getResource(subject) : null;
-      URI p =
-          predicate != null ? repositoryConnection.getValueFactory().createURI(predicate) : null;
-      URI d = repositoryConnection.getValueFactory().createURI(datatype);
-      Literal l =
-          object != null ? repositoryConnection.getValueFactory().createLiteral(object, d) : null;
-      repositoryConnection.add(s, p, l, DATA_CONTEXT_URI);
       endTransaction(null);
     } catch (Exception e) {
       throw new GateOntologyException(
@@ -3825,29 +3749,6 @@ public class OntologyServiceImplSesame implements OntologyService {
     }
   }
 
-  public void removeStatement(String subject,
-      String predicate, String object, String datatype)
-  {
-    try {
-      startTransaction(null);
-      Resource s = subject != null ? getResource(subject) : null;
-      URI p =
-          predicate != null ? repositoryConnection.getValueFactory().createURI(predicate) : null;
-      URI d = repositoryConnection.getValueFactory().createURI(datatype);
-      Literal l =
-          object != null ? repositoryConnection.getValueFactory().createLiteral(object) : null;
-
-      repositoryConnection.remove(s, p, l);
-
-      l =
-          object != null ? repositoryConnection.getValueFactory().createLiteral(object, d) : null;
-      repositoryConnection.remove(s, p, l);
-      endTransaction(null);
-    } catch (Exception e) {
-      throw new GateOntologyException(
-          "error while removing statement from the repository where subject:" + subject + " predicate:" + predicate + " objectURI:" + object, e);
-    }
-  }
 
   public void startTransaction(String repositoryID)
   {
