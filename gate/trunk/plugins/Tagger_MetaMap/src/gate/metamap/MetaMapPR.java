@@ -237,7 +237,7 @@ public class MetaMapPR extends AbstractLanguageAnalyser
 
             Annotation pAnn = inputAS.get(key);
             FeatureMap fm = pAnn.getFeatures();
-            fm.put("coreferences:", dupAnnIds);
+            fm.put("coreferences", dupAnnIds);
             AnnotationSet mmAnns = outputAS.getContained(pAnn.getStartNode().getOffset(), pAnn.getEndNode().getOffset()).get(outputASType);
 
             // Copy all the MetaMap annots within mmAnns to the
