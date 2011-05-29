@@ -1,3 +1,15 @@
+/*
+ * LanguageIdentifier
+ * 
+ * Copyright (c) 1995-2011, The University of Sheffield.
+ * 
+ * This file is part of GATE (see http://gate.ac.uk/), and is free software,
+ * licenced under the GNU Library General Public License, Version 3, June 2007
+ * (in the distribution as file licence.html, and also available at
+ * http://gate.ac.uk/gate/licence.html).
+ * 
+ * $Id$
+ */
 package org.knallgrau.utils.textcat;
 
 import gate.Annotation;
@@ -15,14 +27,10 @@ import java.net.URL;
 
 import at.knallgrau.textcat.TextCategorizer;
 
-@CreoleResource(name = "TextCat Language Identification", comment = "Recognizes the document language using TextCat", icon = "paw-print.png")
+@CreoleResource(name = "TextCat Language Identification", comment = "Recognizes the document language using TextCat", icon = "paw-print.png", helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:language-identification")
 public class LanguageIdentifier extends gate.creole.AbstractLanguageAnalyser {
 
   private static final long serialVersionUID = 5831213212185693826L;
-
-  @SuppressWarnings("unused")
-  private static final String __SVNID =
-          "$Id$";
 
   private TextCategorizer guesser;
 
