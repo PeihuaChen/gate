@@ -32,7 +32,7 @@ import java.net.URL;
 
 import at.knallgrau.textcat.FingerPrint;
 
-@CreoleResource(name = "TextCat Fingerprint Generator", comment = "Generate language fingerprints for use with the TextCat Language Indentification PR", icon = "fingerprint.png")
+@CreoleResource(name = "TextCat Fingerprint Generator", comment = "Generate language fingerprints for use with the TextCat Language Indentification PR", icon = "fingerprint.png", helpURL="http://gate.ac.uk/userguide/sec:misc-creole:language-identification:fingerprints")
 public class FingerprintGenerator extends AbstractLanguageAnalyser implements
                                                                   ControllerAwarePR {
 
