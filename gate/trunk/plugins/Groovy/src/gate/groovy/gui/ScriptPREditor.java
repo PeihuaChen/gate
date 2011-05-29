@@ -32,6 +32,7 @@ import java.io.FileWriter;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -167,7 +168,11 @@ public class ScriptPREditor extends AbstractVisualResource implements
   }
 
   public void processFinished() {
-    setTarget(pr);
+    SwingUtilities.invokeLater(new Thread() {
+      public void run() {
+        setTarget(pr);
+      }
+    });    
   }
 
   public void changedUpdate(DocumentEvent e) {
