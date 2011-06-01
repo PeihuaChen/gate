@@ -45,7 +45,7 @@ public class GENIASentenceSplitter extends AbstractLanguageAnalyser {
   }
 
   @RunTime
-  @CreoleParameter(defaultValue = "false")
+  @CreoleParameter(defaultValue = "false", comment = "if true then debugging info is reported")
   public void setDebug(Boolean debug) {
     this.debug = debug;
   }
@@ -55,7 +55,7 @@ public class GENIASentenceSplitter extends AbstractLanguageAnalyser {
   }
 
   @RunTime
-  @CreoleParameter()
+  @CreoleParameter(comment = "the URL of the GENIA sentence splitter binary")
   public void setSplitterBinary(URL splitterBinary) {
     this.splitterBinary = splitterBinary;
   }
@@ -66,55 +66,77 @@ public class GENIASentenceSplitter extends AbstractLanguageAnalyser {
 
   @RunTime
   @Optional
-  @CreoleParameter()
+  @CreoleParameter(comment = "the annotation set in which Sentence annotations will be created")
   public void setAnnotationSetName(String annotationSetName) {
     this.annotationSetName = annotationSetName;
   }
 
   public void execute() throws ExecutionException {
-    AnnotationSet annotationSet = document.getAnnotations(annotationSetName);
 
+    // get the sentence splitter file from the URL provided
     File splitter = Files.fileFromURL(splitterBinary);
 
+    // get the document content and replace non-breaking spaces with spaces
+    // TODO replace new-lines with spaces so we don't get a sentence per line
     String docContent =
             document.getContent().toString().replace((char)160, ' ');
 
     try {
+      // create temporary files to use with the external sentence splitter
       File tmpIn = File.createTempFile("GENIA", ".txt");
       File tmpOut = File.createTempFile("GENIA", ".txt");
 
+      // store the document content in the input file
       FileOutputStream fos = new FileOutputStream(tmpIn);
       fos.write(docContent.getBytes("utf8"));
       fos.close();
 
+      // setup the command line to run the sentence splitter
       String[] args =
               new String[]{splitter.getAbsolutePath(), tmpIn.getAbsolutePath(),
                   tmpOut.getAbsolutePath()};
 
-      manager.runProcess(args, splitter.getParentFile(), (debug ? System.out : null), (debug ? System.err : null));
+      // run the sentence splitter over the docuement
+      manager.runProcess(args, splitter.getParentFile(), (debug
+              ? System.out
+              : null), (debug ? System.err : null));
 
+      // get the annotation set we are going to store results in
+      AnnotationSet annotationSet = document.getAnnotations(annotationSetName);
+
+      // we haven't found any sentence yet so start looking for the next one
+      // from the beginning of the document
       int end = 0;
 
+      // read in the output from the sentence splitter one line at a time
       BufferedReader in = new BufferedReader(new FileReader(tmpOut));
       String sentence = in.readLine();
       while(sentence != null) {
 
+        // trim the sentence so we don't annotate extranious white space,
+        // this isn't python code after all :)
         sentence = sentence.trim();
 
+        //find the start of the sentence
+        //TODO throw a sensible exception if the sentence can't be found
         int start = docContent.indexOf(sentence, end);
 
+        //work out where the sentence ends
         end = start + sentence.length();
 
-        if(end > start && sentence.length() > 0) {
+        if(end > start) {
+          //the sentence has a length so annotate it 
           annotationSet.add((long)start, (long)end, "Sentence",
                   Factory.newFeatureMap());
         }
 
+        //get the next line from the output from the tagger
         sentence = in.readLine();
       }
-      
-      if (!debug && !tmpIn.delete()) tmpIn.deleteOnExit();
-      if (!debug && !tmpOut.delete()) tmpOut.deleteOnExit();
+
+      //delete the temp files
+      if(!debug && !tmpIn.delete()) tmpIn.deleteOnExit();
+      if(!debug && !tmpOut.delete()) tmpOut.deleteOnExit();
 
     } catch(Exception ioe) {
       throw new ExecutionException("An error occured running the splitter", ioe);
