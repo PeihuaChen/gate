@@ -85,7 +85,7 @@ public class SubClassAction extends AbstractAction implements
           "Invalid Class Name: " + className.getText());
         return;
       }
-      if(ontology.getOResourceFromMap(s + className.getText()) != null) {
+      if(Utils.getOResourceFromMap(ontology,s + className.getText()) != null) {
         JOptionPane.showMessageDialog(MainFrame.getInstance(),"<html>" +
           "Resource <b>" + s+className.getText() + "</b> already exists.");
         return;

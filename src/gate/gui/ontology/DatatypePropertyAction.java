@@ -125,7 +125,7 @@ public class DatatypePropertyAction extends AbstractAction implements
           "Invalid Property Name: " + propertyName.getText());
         return;
       }
-      if(ontology.getOResourceFromMap(s + propertyName.getText()) != null) {
+      if(Utils.getOResourceFromMap(ontology,s + propertyName.getText()) != null) {
         JOptionPane.showMessageDialog(MainFrame.getInstance(),"<html>" +
           "Resource <b>" + s+propertyName.getText() + "</b> already exists.");
         return;
@@ -133,7 +133,7 @@ public class DatatypePropertyAction extends AbstractAction implements
       String as[] = domainAction.getSelectedValues();
       HashSet<OClass> hashset = new HashSet<OClass>();
       for (String a : as) {
-        OClass oclass = (OClass) ontology.getOResourceFromMap(a);
+        OClass oclass = (OClass) Utils.getOResourceFromMap(ontology,a);
         hashset.add(oclass);
       }
       DataType dt = DataType.getDataType((String)

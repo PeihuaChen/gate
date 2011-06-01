@@ -319,12 +319,12 @@ public class OntologyEditor extends AbstractVisualResource
       }
       if(treeToUse == tree) {
         detailsTableModel
-                .setItem(((OResourceNode)((DefaultMutableTreeNode)selectedNodes
+                .setItem(((OResourceNode)(selectedNodes
                         .get(0)).getUserObject()).getResource());
       }
       else {
         propertyDetailsTableModel
-                .setItem(((OResourceNode)((DefaultMutableTreeNode)selectedNodes
+                .setItem(((OResourceNode)(selectedNodes
                         .get(0)).getUserObject()).getResource());
 
       }
@@ -376,7 +376,7 @@ public class OntologyEditor extends AbstractVisualResource
           if(selectedNodes == null || selectedNodes.size() != 1) return;
           final JPopupMenu menu = new JPopupMenu();
           final JMenu addProperty = new JMenu("Properties");
-          final OResource candidate = (OResource)((OResourceNode)((DefaultMutableTreeNode)selectedNodes
+          final OResource candidate = ((OResourceNode)(selectedNodes
                   .get(0)).getUserObject()).getResource();
           menu.add(addProperty);
           final JMenuItem sameAs = new JMenuItem(candidate instanceof OClass
@@ -429,8 +429,8 @@ public class OntologyEditor extends AbstractVisualResource
                         classArray, new String[0], false, null);
                 String[] selectedValues = vsa.getSelectedValues();
                 for(int i = 0; i < selectedValues.length; i++) {
-                  OClass byName = (OClass)ontology
-                          .getOResourceFromMap(selectedValues[i]);
+                  OClass byName = (OClass)
+                    Utils.getOResourceFromMap(ontology,selectedValues[i]);
                   if(byName == null) continue;
                   ((OClass)candidate).setEquivalentClassAs(byName);
                 }
@@ -463,8 +463,8 @@ public class OntologyEditor extends AbstractVisualResource
                         instancesArray, new String[0], false, null);
                 String[] selectedValues = vsa.getSelectedValues();
                 for(int i = 0; i < selectedValues.length; i++) {
-                  OInstance byName = (OInstance)ontology
-                          .getOResourceFromMap(selectedValues[i]);
+                  OInstance byName = (OInstance)
+                    Utils.getOResourceFromMap(ontology,selectedValues[i]);
                   if(byName == null) continue;
                   ((OInstance)candidate).setSameInstanceAs(byName);
                 }
@@ -600,8 +600,8 @@ public class OntologyEditor extends AbstractVisualResource
                       propArray, new String[0], false, null);
               String[] selectedValues = vsa.getSelectedValues();
               for(int i = 0; i < selectedValues.length; i++) {
-                RDFProperty byName = (RDFProperty)ontology
-                        .getOResourceFromMap(selectedValues[i]);
+                RDFProperty byName = (RDFProperty)
+                  Utils.getOResourceFromMap(ontology,selectedValues[i]);
                 if(byName == null) continue;
                 ((RDFProperty)candidate).setEquivalentPropertyAs(byName);
               }
@@ -1106,7 +1106,7 @@ public class OntologyEditor extends AbstractVisualResource
       String[] selectedValues = vsa.getSelectedValues();
       for(int i = 0; i < selectedValues.length; i++) {
         OInstance byName = (OInstance)
-          ontology.getOResourceFromMap(selectedValues[i]);
+          Utils.getOResourceFromMap(ontology,selectedValues[i]);
         if(byName == null) { continue; }
         try {
           ((OInstance)oResource).addObjectPropertyValue(property, byName);
@@ -1224,7 +1224,7 @@ public class OntologyEditor extends AbstractVisualResource
       ontologyClassesURIs = new ArrayList<String>();
     else ontologyClassesURIs.clear();
     uri2TreeNodesListMap = new HashMap<String, ArrayList<DefaultMutableTreeNode>>();
-    reverseMap = new HashMap<DefaultMutableTreeNode, URI>();
+    reverseMap = new HashMap<DefaultMutableTreeNode, ONodeID>();
     List<OResource> rootClasses = new ArrayList<OResource>(ontology
             .getOClasses(true));
     Collections.sort(rootClasses, itemComparator);
@@ -1298,7 +1298,7 @@ public class OntologyEditor extends AbstractVisualResource
         uri2TreeNodesListMap.put(aChild.getURI().toString(), list);
       }
       list.add(childNode);
-      reverseMap.put(childNode, aChild.getURI());
+      reverseMap.put(childNode, aChild.getONodeID());
       if(aChild instanceof OClass) {
         if(!ontologyClassesURIs.contains(aChild.getURI().toString()))
           ontologyClassesURIs.add(aChild.getURI().toString());
@@ -1346,7 +1346,7 @@ public class OntologyEditor extends AbstractVisualResource
         uri2TreeNodesListMap.put(aChild.getURI().toString(), list);
       }
       list.add(childNode);
-      reverseMap.put(childNode, aChild.getURI());
+      reverseMap.put(childNode, aChild.getONodeID());
       if(aChild instanceof AnnotationProperty) {
         childNode.setAllowsChildren(false);
       }
@@ -1488,7 +1488,7 @@ public class OntologyEditor extends AbstractVisualResource
         removeFromMap(model, (DefaultMutableTreeNode)children.get(i));
       }
     }
-    URI rURI = reverseMap.get(node);
+    ONodeID rURI = reverseMap.get(node);
     reverseMap.remove(node);
     ArrayList<DefaultMutableTreeNode> list = uri2TreeNodesListMap.get(rURI
             .toString());
@@ -1639,8 +1639,8 @@ public class OntologyEditor extends AbstractVisualResource
     for(int i = 0; i < nodeList.size(); i++) {
       DefaultMutableTreeNode node = nodeList.get(i);
       if(firstTime) {
-        OClass parentClass = (OClass)this.ontology
-                .getOResourceFromMap(reverseMap.get(node).toString());
+        OClass parentClass = (OClass)
+          Utils.getOResourceFromMap(this.ontology,reverseMap.get(node).toString());
         firstTime = false;
         // find out which class is deleted
         Enumeration e = node.children();
@@ -1648,10 +1648,10 @@ public class OntologyEditor extends AbstractVisualResource
           while(e.hasMoreElements()) {
             DefaultMutableTreeNode aNode = (DefaultMutableTreeNode)e
                     .nextElement();
-            URI rURI = reverseMap.get(aNode);
+            ONodeID rURI = reverseMap.get(aNode);
             // lets check with the ontology if this instance is still
             // there
-            OResource res = this.ontology.getOResourceFromMap(rURI.toString());
+            OResource res = Utils.getOResourceFromMap(this.ontology,rURI.toString());
             if(res != null) {
               // lets check if its parents is the current node
               if(res instanceof OClass) {
@@ -1731,7 +1731,7 @@ public class OntologyEditor extends AbstractVisualResource
     }
 
     final DefaultMutableTreeNode parentNode = probableParentNode;
-    final URI parentURI = reverseMap.get(parentNode);
+    final ONodeID parentURI = reverseMap.get(parentNode);
 
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
@@ -2259,6 +2259,7 @@ public class OntologyEditor extends AbstractVisualResource
       tree.scrollPathToVisible(tree.getSelectionPath());
     }});
   }
+
   /**
    * the ontology instance
    */
@@ -2378,7 +2379,7 @@ public class OntologyEditor extends AbstractVisualResource
 
   protected HashMap<String, ArrayList<DefaultMutableTreeNode>> uri2TreeNodesListMap;
 
-  protected HashMap<DefaultMutableTreeNode, URI> reverseMap;
+  protected HashMap<DefaultMutableTreeNode, ONodeID> reverseMap;
 
   protected JScrollPane propertyScroller, scroller;
 

@@ -108,7 +108,7 @@ public class ObjectPropertyAction extends AbstractAction implements
           "Invalid Property Name: " + propertyName.getText());
         return;
       }
-      if(ontology.getOResourceFromMap(s + propertyName.getText()) != null) {
+      if(Utils.getOResourceFromMap(ontology,s + propertyName.getText()) != null) {
         JOptionPane.showMessageDialog(MainFrame.getInstance(),"<html>" +
           "Resource <b>" + s+propertyName.getText() + "</b> already exists.");
         return;
@@ -117,14 +117,14 @@ public class ObjectPropertyAction extends AbstractAction implements
       HashSet<OClass> domainSet = new HashSet<OClass>();
       for (String domainSelectedValue : domainSelectedValues) {
         OClass oclass = (OClass)
-          ontology.getOResourceFromMap(domainSelectedValue);
+          Utils.getOResourceFromMap(ontology,domainSelectedValue);
         domainSet.add(oclass);
       }
       String rangeSelectedValues[] = rangeAction.getSelectedValues();
       HashSet<OClass> rangeSet = new HashSet<OClass>();
       for (String rangeSelectedValue : rangeSelectedValues) {
         OClass oclass = (OClass)
-          ontology.getOResourceFromMap(rangeSelectedValue);
+          Utils.getOResourceFromMap(ontology,rangeSelectedValue);
         rangeSet.add(oclass);
       }
       ontology.addObjectProperty(new URI(nameSpace.getText()

@@ -60,7 +60,7 @@ public class DeleteOntologyResourceAction extends AbstractAction implements
           continue;
         }
         if ((object instanceof RDFProperty)
-          && ontology.getOResourceFromMap(
+          && Utils.getOResourceFromMap(ontology,
             ((RDFProperty) object).getURI().toString()) != null)
           ontology.removeProperty((RDFProperty) object);
       }

@@ -79,7 +79,7 @@ public class InstanceAction extends AbstractAction implements
           "Invalid Instance: " + instanceName.getText());
         return;
       }
-      if(ontology.getOResourceFromMap(s + instanceName.getText()) != null) {
+      if(Utils.getOResourceFromMap(ontology,s + instanceName.getText()) != null) {
         JOptionPane.showMessageDialog(MainFrame.getInstance(),"<html>" +
           "Resource <b>" + s+instanceName.getText() + "</b> already exists.");
         return;
