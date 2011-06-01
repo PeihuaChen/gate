@@ -559,6 +559,7 @@ public class Transducer
     actionContext.setController(c);
     actionContext.setCorpus(corpus);
     actionContext.setPRFeatures(features);
+    actionContext.setPRName(this.getName());
     batch.runControllerExecutionStartedBlock(actionContext,c,ontology);
   }
 
