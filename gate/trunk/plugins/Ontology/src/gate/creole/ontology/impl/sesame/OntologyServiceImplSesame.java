@@ -11,6 +11,14 @@
  */
 package gate.creole.ontology.impl.sesame;
 
+// TODO: re-enable transactions, if possible so that we can make 
+//   api methods  complete fully or not at all. For this, move the transaction
+//   start and end calls into the abstract ontology code.
+//   Also, consider adding start/endTransaction to the Ontology API: that 
+//   -> if startTransaction is called on the API level all transaction 
+//   calls on the implementation level are ignored until endTransaction is 
+//   called on the API level. That we we ensure minimum atomic consistency
+//   but make it possible to get larger atomic actions.
 // TODO: we still get two different kinds of bnodeids: the old one without
 //  _: and the new one with _:
 // Figure out where the version without the prefix comes from and make
