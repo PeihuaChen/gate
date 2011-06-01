@@ -126,7 +126,6 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
       transducerName + ruleName + "ActionClass" + actionClassNumber.getAndIncrement()
     );
     blockNames = new HashSet<String>();
-
     actionClassString = new StringBuffer(
       "// " + actionClassName + nl +
       "package " + actionsDirName + "; " + nl +
@@ -134,6 +133,8 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
       "public class " + actionClassName + nl +
       "implements java.io.Serializable, RhsAction { " + nl +
       "  private ActionContext ctx;"+nl+
+      "  public String ruleName() { return \""+ruleName+"\"; }"+nl+
+      "  public String phaseName() { return \""+phaseName+"\"; }"+nl+
       "  public void setActionContext(ActionContext ac) { ctx = ac; }"+nl+
       "  public ActionContext getActionContext() { return ctx; }"+nl+
       "  public void doit(gate.Document doc, " + nl +

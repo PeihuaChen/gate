@@ -30,6 +30,7 @@ import gate.FeatureMap;
 public class DefaultActionContext implements ActionContext {
   protected Corpus corpus;
   protected FeatureMap prfeatures;
+  protected String prname;
   protected Controller controller;
   protected boolean endPhaseSupported;
   protected boolean phaseEnded = false;
@@ -43,12 +44,20 @@ public class DefaultActionContext implements ActionContext {
     this.prfeatures = features;
   }
 
+  public void setPRName(String name) {
+    this.prname = name;
+  }
+  
   public Corpus getCorpus() {
     return corpus;
   }
 
   public FeatureMap getPRFeatures() {
     return prfeatures;
+  }
+  
+  public String getPRName() {
+    return prname;
   }
 
   public void setController(Controller c) {

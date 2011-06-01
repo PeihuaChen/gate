@@ -45,6 +45,15 @@ public interface ActionContext  extends Serializable {
    * lives in.
    * @return the Controller resource
    */
+  
+  /**
+   * Provide access to the name of the current transducer PR. 
+   * 
+   * @return 
+   */
+  public String getPRName();
+  
+  
   public Controller getController();
   /**
    * Request the current JAPE phase to be ended as soon as possible.
