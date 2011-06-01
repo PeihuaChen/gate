@@ -75,7 +75,7 @@ public class AnnotationPropertyAction extends AbstractAction {
           "Invalid Property Name: " + propertyName.getText());
         return;
       }
-      if(ontology.getOResourceFromMap(s + propertyName.getText()) != null) {
+      if(Utils.getOResourceFromMap(ontology,s + propertyName.getText()) != null) {
         JOptionPane.showMessageDialog(MainFrame.getInstance(),"<html>" +
           "Resource <b>" + s+propertyName.getText() + "</b> already exists.");
         return;

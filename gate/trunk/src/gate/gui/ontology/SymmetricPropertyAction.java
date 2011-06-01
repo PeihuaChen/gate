@@ -97,7 +97,7 @@ public class SymmetricPropertyAction extends AbstractAction implements
           "Invalid Symmetric Property Name: " + propertyName.getText());
         return;
       }
-      if(ontology.getOResourceFromMap(nameSpace.getText()
+      if(Utils.getOResourceFromMap(ontology,nameSpace.getText()
               + propertyName.getText()) != null) {
         JOptionPane.showMessageDialog(MainFrame.getInstance(),"<html>" +
           "Resource <b>" + s+propertyName.getText() + "</b> already exists.");
@@ -107,7 +107,7 @@ public class SymmetricPropertyAction extends AbstractAction implements
       HashSet<OClass> domainSet = new HashSet<OClass>();
       for(int j = 0; j < domainSelectedValues.length; j++) {
         OClass oclass = (OClass)
-          ontology.getOResourceFromMap(domainSelectedValues[j]);
+          Utils.getOResourceFromMap(ontology,domainSelectedValues[j]);
         domainSet.add(oclass);
       }
       ontology.addSymmetricProperty(new URI(nameSpace.getText()

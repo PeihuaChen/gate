@@ -12,10 +12,15 @@ import gate.creole.ontology.AnnotationProperty;
 import gate.creole.ontology.CardinalityRestriction;
 import gate.creole.ontology.DatatypeProperty;
 import gate.creole.ontology.HasValueRestriction;
+import gate.creole.ontology.InvalidURIException;
 import gate.creole.ontology.Literal;
 import gate.creole.ontology.MaxCardinalityRestriction;
 import gate.creole.ontology.MinCardinalityRestriction;
+import gate.creole.ontology.OClass;
+import gate.creole.ontology.OInstance;
 import gate.creole.ontology.OResource;
+import gate.creole.ontology.OURI;
+import gate.creole.ontology.Ontology;
 import gate.creole.ontology.RDFProperty;
 import gate.creole.ontology.Restriction;
 import gate.creole.ontology.SomeValuesFromRestriction;
@@ -152,4 +157,35 @@ public class Utils {
     }
     return toAdd;
   }
+  
+  /** 
+   * Replacement for the deprecated method from gate.creole.ontology.Ontology.
+   * 
+   * @param o Ontology to use
+   * @param uri URI as a string of the resource to find
+   * @return the resource as an OResource object
+   */
+  static OResource getOResourceFromMap(Ontology o, String uri) {
+    try {
+      OURI ouri = o.createOURI(uri);
+      List<OResource> toReturn = new ArrayList<OResource>();
+      OClass c = o.getOClass(ouri);
+      if (c != null) {
+        return c;
+      }
+      OInstance i = o.getOInstance(ouri);
+      if (i != null) {
+        return i;
+      }
+      RDFProperty r = o.getProperty(ouri);
+      if (r != null) {
+        return r;
+      }
+    } catch (InvalidURIException iue) {
+      // do nothing, we will just return null
+    }
+    return null;
+  }
+  
+  
 }

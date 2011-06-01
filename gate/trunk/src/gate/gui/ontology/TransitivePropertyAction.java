@@ -108,7 +108,7 @@ public class TransitivePropertyAction extends AbstractAction implements
           "Invalid Property Name: " + propertyName.getText());
         return;
       }
-      if(ontology.getOResourceFromMap(s + propertyName.getText()) != null) {
+      if(Utils.getOResourceFromMap(ontology,s + propertyName.getText()) != null) {
         JOptionPane.showMessageDialog(MainFrame.getInstance(),"<html>" +
           "Resource <b>" + s+propertyName.getText() + "</b> already exists.");
         return;
@@ -116,15 +116,15 @@ public class TransitivePropertyAction extends AbstractAction implements
       String domainSelectedValues[] = domainAction.getSelectedValues();
       HashSet<OClass> domainSet = new HashSet<OClass>();
       for(int j = 0; j < domainSelectedValues.length; j++) {
-        OClass oclass = (OClass)ontology
-                .getOResourceFromMap(domainSelectedValues[j]);
+        OClass oclass = (OClass)
+          Utils.getOResourceFromMap(ontology,domainSelectedValues[j]);
         domainSet.add(oclass);
       }
       String rangeSelectedValues[] = rangeAction.getSelectedValues();
       HashSet<OClass> rangeSet = new HashSet<OClass>();
       for(int j = 0; j < rangeSelectedValues.length; j++) {
-        OClass oclass = (OClass)ontology.getOResourceFromMap(
-          rangeSelectedValues[j]);
+        OClass oclass = (OClass)Utils.getOResourceFromMap(
+          ontology,rangeSelectedValues[j]);
         rangeSet.add(oclass);
       }
       ontology.addTransitiveProperty(new URI(nameSpace.getText()
