@@ -118,7 +118,7 @@ public class GENIASentenceSplitter extends AbstractLanguageAnalyser {
         sentence = sentence.trim();
 
         //find the start of the sentence
-        //TODO throw a sensible exception if the sentence can't be found
+        //TODO throw a sensible exception if the sentence can't be found?
         int start = docContent.indexOf(sentence, end);
 
         //work out where the sentence ends
