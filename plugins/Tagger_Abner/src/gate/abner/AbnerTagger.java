@@ -65,8 +65,6 @@ public class AbnerTagger extends AbstractLanguageAnalyser {
     friendlyNames.put("RNA", "RNA");
   }
 
-  private Boolean toBeTokenized = true;
-
   private AbnerRunMode abnerMode = null;
 
   private String outputASName = null;
@@ -91,7 +89,7 @@ public class AbnerTagger extends AbstractLanguageAnalyser {
 
   @RunTime
   @Optional
-  @CreoleParameter
+  @CreoleParameter(comment="The annotation set in which new annotations will be created")
   public void setOutputASName(String a) {
     outputASName = a;
   }
@@ -134,40 +132,8 @@ public class AbnerTagger extends AbstractLanguageAnalyser {
       }
     }
 
-    abnerTagger.setTokenization(toBeTokenized);
-
-    // StringBuffer abnerInput = new StringBuffer();
-    /*
-     * i needed those for BioCreative String abnerStringInput = null; String
-     * abnerOutput = null;
-     */
-
     try {
       AnnotationSet annotations = document.getAnnotations(outputASName);
-
-      /*
-       * This is for custom tolkenization of the resource not needed for now
-       */
-      /*
-       * if(toBeTolkenized) { Set<String> setAnn = new HashSet<String>();
-       * setAnn.add(TOKEN); setAnn.add(SPLIT);
-       * 
-       * AnnotationSet tokenAnnotations = annotations.get(setAnn); if
-       * (tokenAnnotations == null) return;
-       * 
-       * 
-       * List<Annotation> tokens = new ArrayList<Annotation>(tokenAnnotations);
-       * if(tokens.isEmpty()) return;
-       * 
-       * Collections.sort(tokens, new OffsetTypeComparator());
-       * 
-       * Annotation currToken = null; for (int i=0; i<tokens.size();i++){
-       * currToken = tokens.get(i); if(currToken.getType().equals(TOKEN))
-       * abnerInput.append(currToken.getFeatures().get("string") + " "); else
-       * abnerInput.append("\n"); } }
-       */
-
-      logger.debug("Annotation loaded");
 
       @SuppressWarnings("unchecked")
       Vector<String[][]> tagged =
