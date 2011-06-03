@@ -43,7 +43,6 @@ import abner.Tagger;
 public class AbnerTagger extends AbstractLanguageAnalyser {
   public static final long serialVersionUID = 1L;
 
-  /* private members */
   private Boolean toBeTokenized = true;
 
   private AbnerRunMode abnerMode = null;
@@ -52,14 +51,9 @@ public class AbnerTagger extends AbstractLanguageAnalyser {
 
   private Long gateDocumentIndex = null;
 
-  // abner tagger
   private Tagger abnerTagger;
 
   // add parameter to define the anno type defaut to Abner
-
-  // enumeration for the modes
-
-  // remove namespace part
 
   private static final Logger logger = Logger.getLogger(AbnerTagger.class);
 
@@ -78,16 +72,6 @@ public class AbnerTagger extends AbstractLanguageAnalyser {
     friendlyNames.put("CELL_TYPE", "CellType");
     friendlyNames.put("DNA", "DNA");
     friendlyNames.put("RNA", "RNA");
-  }
-
-  /* getters and setters for the PR */
-  /* public members */
-  public void setToBeTokenized(Boolean a) {
-    toBeTokenized = a;
-  }
-
-  public Boolean getToBeTokenized() {
-    return toBeTokenized;
   }
 
   @RunTime
@@ -192,15 +176,11 @@ public class AbnerTagger extends AbstractLanguageAnalyser {
           
           if (friendlyName != null) {
             FeatureMap fm = Factory.newFeatureMap();
-
-            // type
             fm.put("source", "abner");
-            // source
             fm.put("type", friendlyName);
 
             annotations.add((startIndex - offset[1]) + offset[0],
                     gateDocumentIndex, "Tagger", fm);
-
           }
         }
       }// end iterate over sentences
