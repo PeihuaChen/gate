@@ -1,7 +1,9 @@
 # getSubClassesDirectFor
 #
 # get all direct subclasses for a given class
-
+# 
+# NOTE: do not allow for restriction types that cannot be represented
+# in the ontology API (all not in OWL-Lite).
 
 (SELECT DISTINCT X FROM 
   {X} sesame:directSubClassOf {yyy1} 
@@ -22,9 +24,6 @@ UNION
       #R = owl:intersectionOf OR
       #R = owl:complementOf OR
       R = owl:someValuesFrom ) )
-
-
-
 
 USING NAMESPACE
 xsd = <http://www.w3.org/2001/XMLSchema#>,

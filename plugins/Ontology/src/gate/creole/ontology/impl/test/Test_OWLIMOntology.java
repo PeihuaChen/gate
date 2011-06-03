@@ -24,6 +24,7 @@ import gate.creole.ontology.OConstants.Closure;
 import gate.creole.ontology.impl.AbstractOntologyImpl;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import junit.framework.Test;
@@ -32,7 +33,7 @@ import junit.framework.TestSuite;
 import org.apache.log4j.Logger;
 
 /**
- * Run all the essential regression tests for the OWLIMOntology LR.s
+ * Run various tests ...
  */
 public class Test_OWLIMOntology extends TestCase {
   public static void main(String[] args) throws GateException, MalformedURLException {
@@ -208,8 +209,8 @@ public class Test_OWLIMOntology extends TestCase {
     beginTime = System.nanoTime();
     Set<TransitiveProperty> transprops = ontology.getTransitiveProperties();
     elapsed1 = System.nanoTime() - beginTime;
-    System.out.println("##### symprops: "+transprops.size());
-    System.out.println("@@@@@ symprops: "+elapsed1);
+    System.out.println("##### transprops: "+transprops.size());
+    System.out.println("@@@@@ transprops: "+elapsed1);
     // assertEquals(0, insts.size());
 
     OURI cBAURI = ontology.createOURIForName("BusinessAbstraction");
@@ -222,14 +223,14 @@ public class Test_OWLIMOntology extends TestCase {
     elapsed1 = System.nanoTime() - beginTime;
     System.out.println("##### BA subclasses all: "+classes.size());
     System.out.println("@@@@@ BA subclasses all: "+elapsed1);
-    // assertEquals(0, insts.size());
+    assertEquals(2, classes.size());
 
     beginTime = System.nanoTime();
     classes = cBA.getSubClasses(DIRECT_CLOSURE);
     elapsed1 = System.nanoTime() - beginTime;
     System.out.println("##### BA subclasses direct: "+classes.size());
     System.out.println("@@@@@ BA subclasses direct: "+elapsed1);
-    // assertEquals(0, insts.size());
+    assertEquals(2, classes.size());
 
 
 
@@ -244,215 +245,6 @@ public class Test_OWLIMOntology extends TestCase {
     ontology.cleanup();
   }
 
-  public void testWineOntology() throws MalformedURLException,
-          ResourceInstantiationException {
-    FeatureMap fm = Factory.newFeatureMap();
-    // For local wine:
-    File demoFile = new File(ontologiesDir,"wine.rdfxml.owl");
-    URL rdfXmlURL = demoFile.toURI().toURL();
-    fm.put("rdfXmlURL", rdfXmlURL);
-    Ontology ontology = (Ontology)Factory.createResource(
-           "gate.creole.ontology.impl.sesame.OWLIMOntology", fm);
-
-    // For remote wine:
-    //fm.put("repositoryID","owlim-wine");
-    //fm.put("repositoryLocation","http://localhost:8080/openrdf-sesame");
-    //Ontology ontology = (Ontology)Factory.createResource(
-    //        "gate.creole.ontology.impl.sesame.ConnectSesameOntology", fm);
-
-    long beginTime;
-    long elapsed1;
-
-    beginTime = System.nanoTime();
-    Set<OClass> classes = ontology.getOClasses(false);
-    elapsed1 = System.nanoTime() - beginTime;
-    System.out.println("##### all WINE classes: "+classes.size());
-    System.out.println("@@@@@ all WINE classes: "+elapsed1);
-
-    beginTime = System.nanoTime();
-    classes = ontology.getOClasses(true);
-    elapsed1 = System.nanoTime() - beginTime;
-    System.out.println("##### top WINE classes: "+classes.size());
-    System.out.println("@@@@@ top WINE classes: "+elapsed1);
-    //System.out.println("Top wine classes: "+classes);
-
-    beginTime = System.nanoTime();
-    System.out.println("Starting to expand all classes ... ");
-    List<ONodeID> allIDs = new ArrayList<ONodeID>();
-    expandAllClasses(classes, allIDs, 0);
-    System.out.println("Expanding classes complete");
-    System.out.println("##### expanded WINE classes: "+allIDs.size());
-    System.out.println("@@@@@ expanded WINE classes: "+elapsed1);
-    //List<ONodeID> uriList = new ArrayList<ONodeID>(allIDs);
-    //Collections.sort(uriList);
-    //for(ONodeID u : uriList) {
-    //  System.out.println("=== "+u);
-    //}
-
-    beginTime = System.nanoTime();
-    Set<OClass> ocbn = ((AbstractOntologyImpl)ontology).getOClassesByName("Wine");
-    System.out.println("Classes with name Wine: ");
-    for(OClass cl : ocbn) {
-      System.out.println("  "+cl.getONodeID().toTurtle());
-    }
-    System.out.println("##### classes by name wine: "+ocbn.size());
-    System.out.println("@@@@@ classes by name wine: "+elapsed1);
-    assertEquals("Classes for name Wine",2,ocbn.size());
-
-    beginTime = System.nanoTime();
-    List<OResource> ors = ontology.getOResourcesByName("yearValue");
-    System.out.println("Resources with name yearValue: ");
-    for(OResource or : ors) {
-      System.out.println("  "+or.getONodeID().toTurtle());
-    }
-    System.out.println("##### resources by name yearValue: "+ors.size());
-    System.out.println("@@@@@ resources by name yearValue: "+elapsed1);
-    assertEquals("Resources for name yearValue",1,ors.size());
-    assertTrue("yearValue is a datatype property",ontology.isDatatypeProperty((OURI)ors.get(0).getONodeID()));
-
-    beginTime = System.nanoTime();
-    ors = ontology.getOResourcesByName("Wine");
-    System.out.println("Resources with name Wine: ");
-    for(OResource or : ors) {
-      System.out.println("  "+or.getONodeID().toTurtle());
-    }
-    System.out.println("##### resources by name Wine: "+ors.size());
-    System.out.println("@@@@@ resources by name Wine: "+elapsed1);
-    assertEquals("Resources for name Wine",2,ors.size());
-    assertEquals("Class of resource 1 for wine",
-            "gate.creole.ontology.impl.OClassImpl",
-            ors.get(0).getClass().getName());
-    assertEquals("Class of resource 2 for wine",
-            "gate.creole.ontology.impl.OClassImpl",
-            ors.get(1).getClass().getName());
-
-    beginTime = System.nanoTime();
-    ors = ontology.getOResourcesByName("Delicate");
-    System.out.println("Resources with name Delicate: ");
-    for(OResource or : ors) {
-      System.out.println("  "+or.getONodeID().toTurtle());
-    }
-    System.out.println("##### resources by name Delicate: "+ors.size());
-    System.out.println("@@@@@ resources by name Delicate: "+elapsed1);
-    assertEquals("Resources for name Delicate",2,ors.size());
-    assertEquals("Class of resource 1 for Delicate",
-            "gate.creole.ontology.impl.OInstanceImpl",
-            ors.get(0).getClass().getName());
-
-    // TODO: try to find the WineColor class ...
-    OClass c1 = ontology.getOClass(getURI4Name(ontology,"WineColor"));
-    assertNotNull("Find WineColor",c1);
-
-    // TODO: what is the atual correct number of total and top wine classes to
-    // expect, what is the number of instances and properties?
-    //assertEquals("Total number of wine classes and restrictions",542,allIDs.size());
-    ontology.cleanup();
-  }
-
-  public void test1Ontology() throws ResourceInstantiationException, MalformedURLException {
-    FeatureMap fm = Factory.newFeatureMap();
-    File demoFile = new File(ontologiesDir,"test1.rdfxml.owl");
-    URL rdfXmlURL = demoFile.toURI().toURL();
-    fm.put("rdfXmlURL", rdfXmlURL);
-    Ontology ontology = (Ontology)Factory.createResource(
-            "gate.creole.ontology.impl.sesame.OWLIMOntology", fm);
-
-    ontology.setDefaultNameSpace("http://dummyurl.com/20090825/test1.rdfxml.owl#");
-    long beginTime;
-    long elapsed1;
-
-    beginTime = System.nanoTime();
-    Set<OClass> classes = ontology.getOClasses(false);
-    elapsed1 = System.nanoTime() - beginTime;
-    System.out.println("##### t1 all classes: "+classes.size());
-    System.out.println("@@@@@ t1 all classes: "+elapsed1);
-    System.out.println("T1 All classes: "+classes);
-    //assertEquals(252, classes.size());
-
-
-    beginTime = System.nanoTime();
-    classes = ontology.getOClasses(true);
-    elapsed1 = System.nanoTime() - beginTime;
-    System.out.println("##### t1 top classes: "+classes.size());
-    System.out.println("@@@@@ t1 top classes: "+elapsed1);
-    System.out.println("T1 Top classes: "+classes);
-    //assertEquals(15, classes.size());
-
-    OClass c02a = ontology.getOClass(getURI4Name(ontology,"Class02a"));
-    assertNotNull(c02a);
-
-    OInstance i1 = ontology.addOInstance(getURI4Name(ontology,"Ic02a01"), c02a);
-    assertNotNull(i1);
-    Set<OClass> iclasses = i1.getOClasses(DIRECT_CLOSURE);
-    System.out.println("Direct classes for Ic02a01: "+iclasses);
-    assertEquals(iclasses.size(), 2);
-    iclasses = i1.getOClasses(TRANSITIVE_CLOSURE);
-    System.out.println("All classes for Ic02a01: "+iclasses);
-    assertEquals(iclasses.size(), 2);
-
-    OClass c02b = ontology.getOClass(getURI4Name(ontology,"Class02b"));
-    assertNotNull(c02b);
-
-    OClass newClass = ontology.addOClass(getURI4Name(ontology,"newClass01"));
-    i1.addOClass(newClass);
-    iclasses = i1.getOClasses(DIRECT_CLOSURE);
-    System.out.println("Direct classes for Ic02a01 after addOClass: "+iclasses);
-    assertEquals(iclasses.size(), 3);
-    iclasses = i1.getOClasses(TRANSITIVE_CLOSURE);
-    System.out.println("All classes for Ic02a01 after addOClass: "+iclasses);
-    assertEquals(iclasses.size(), 3);
-
-
-    // Class02b is asserted to be an equivalent class of Class02a so the
-    // newly added instance should also be an instance of c02b
-    Set<OInstance> is = ontology.getOInstances(c02b,TRANSITIVE_CLOSURE);
-    System.out.println("Instances of class02b: "+is);
-    System.out.println("Instances of c02b: "+is);
-    assertEquals(3, is.size());
-
-    i1 = is.iterator().next();
-
-    is = ontology.getOInstances();
-    System.out.println("All instances in ontology: "+is);
-    System.out.println("Number of all instances: "+is.size());
-    // the 30 from the stored ontology plus the one we created
-    assertEquals(31,is.size());
-
-    OInstance i2 = ontology.getOInstance(ontology.createOURIForName("IClass01_10"));
-    assertNotNull(i2);
-    iclasses = i2.getOClasses(DIRECT_CLOSURE);
-    System.out.println("Direct classes for IClass01_10: "+iclasses);
-    assertEquals(2,iclasses.size());
-    iclasses = i2.getOClasses(TRANSITIVE_CLOSURE);
-    System.out.println("Transitive classes for IClass01_10: "+iclasses);
-
-    OInstance i3 = ontology.getOInstance(ontology.createOURIForName("IPerson_01"));
-    iclasses = i3.getOClasses(DIRECT_CLOSURE);
-    System.out.println("Direct classes for IPerson_01: "+iclasses);
-    iclasses = i3.getOClasses(TRANSITIVE_CLOSURE);
-    System.out.println("Transitive classes for IPerson_01: "+iclasses);
-
-    //Set<OResource> x = new HashSet<OClass>();
-
-    // test deprecated getting resource by name
-    List<OResource> rs = ontology.getOResourcesByName("Animal");
-    for (OResource r : rs) {
-      System.out.println("Found resource: "+r+"/"+r.getClass().getName());
-    }
-    rs = ontology.getOResourcesByName("IPerson_02");
-    for (OResource r : rs) {
-      System.out.println("Found resource: "+r+"/"+r.getClass().getName());
-    }
-    rs = ontology.getOResourcesByName("iperson_02");
-    for (OResource r : rs) {
-      System.out.println("Found resource: "+r+"/"+r.getClass().getName());
-    }
-
-    String theQuery = "SELECT DISTINCT x,y " + " from {x} rdfs:subClassOf {y}";
-    String queryResult = ontology.executeQuery(theQuery);
-    //System.out.println("Query Result is: >"+queryResult+"<");
-    ontology.cleanup();
-  }
 
    public void testCreateModify() throws MalformedURLException,
           ResourceInstantiationException,
@@ -578,89 +370,26 @@ public class Test_OWLIMOntology extends TestCase {
   // ************************** HELPER METHODS 
   // ***************************************************************
 
-  // this is for testing if we can recursively expand all classes  and
-  // to see how many distinct IDs we find that way
-   // for each of the classes in the parameter, do a depth first exapansion
-   // of direct subclasses until we do not get any more.
-   // For each path down the subclass hierarchy, remember the IDs and
-   // check if we have already seen such an ID
-  public void expandAllClasses(Set<OClass> classes, List<ONodeID> allIDs, int depth) {
-    depth = depth + 1;
-    if(depth > 10) {
-      // TODO: print everything about the node that gets us into a loop here!
-      assertTrue("Depth must not exceed 10",false);
+   // recursively find the set of all subclasses for a given set of classes
+   // until no more subclasses are found. We limit the maximum depth at 20.
+   // The set initially should contain all the classes for which we want to
+   // find all the subclasses.
+   public void expandAllClasses(Set<OClass> classes, int depth) {
+     if(depth > 20) {
+      assertTrue("Depth must not exceed 20",false);
     }
-    if(classes.size() == 0) {
-      return;
-    }
-    //System.out.println("Expanding set: "+classes);
+    if(classes.isEmpty()) return;  // there are no classes to expand!
+    // number of new classes found
+    Set<OClass> addclasses = new HashSet<OClass>();
     for (OClass c : classes) {
-
-      //System.out.println("Processing class: "+c);
-      ONodeID n = c.getONodeID();
-      if(allIDs.contains(n)) {
-
-        System.err.println("Node ID already found: "+n);
-        System.err.println("Class is "+c.getClass().getName());
-        System.err.println("Equivalent classes: "+c.getEquivalentClasses());
-        System.err.println("SubClasses: "+c.getSubClasses(DIRECT_CLOSURE));
-        System.err.println("Expanding this set: "+classes);
-        System.err.println("Seen Nodes: "+allIDs);
-
+      Set<OClass> subclasses = c.getSubClasses(OConstants.Closure.DIRECT_CLOSURE);
+      if(subclasses.contains(c)) {
+        System.out.println("Subclass of itself: "+c);
+        assertTrue(false);
       }
-      // get the set of direct subclasses of this class
-      // only expand if it is not an anonymous class
-      //if(! (c instanceof AnonymousClass)) {
-        Set<OClass> subclasses = c.getSubClasses(OConstants.Closure.DIRECT_CLOSURE);
-        // check the subclasses ...
-        if(subclasses.contains(c)) {
-          System.out.println("Subclass of itself: "+c);
-          assertTrue(false);
-        }
-        //System.out.println("Subclasses for "+c+": "+subclasses);
-        List<ONodeID> newlist = new ArrayList<ONodeID>(allIDs);
-        newlist.add(n);
-        expandAllClasses(subclasses,newlist,depth);
-      //}
+      addclasses.addAll(subclasses);
     }
-  }
-  public void expandAllClassesOLD(Set<OClass> classes, Set<ONodeID> allIDs, int depth) {
-    depth = depth + 1;
-    if(depth > 10) {
-      // TODO: print everything about the node that gets us into a loop here!
-      assertTrue("Depth must not exceed 10",false);
-    }
-    if(classes.size() == 0) {
-      return;
-    }
-    //System.out.println("Expanding set: "+classes);
-    for (OClass c : classes) {
-      //System.out.println("Processing class: "+c);
-      ONodeID n = c.getONodeID();
-      if(allIDs.contains(n)) {
-
-        System.err.println("Node ID already found: "+n);
-        System.err.println("Class is "+c.getClass().getName());
-        System.err.println("Equivalent classes: "+c.getEquivalentClasses());
-        System.err.println("SubClasses: "+c.getSubClasses(DIRECT_CLOSURE));
-        System.err.println("Expanding this set: "+classes);
-        System.err.println("Seen Nodes: "+allIDs);
-
-      }
-      allIDs.add(n);
-      // get the set of direct subclasses of this class
-      // only expand if it is not an anonymous class
-      //if(! (c instanceof AnonymousClass)) {
-        Set<OClass> subclasses = c.getSubClasses(OConstants.Closure.DIRECT_CLOSURE);
-        // check the subclasses ...
-        if(subclasses.contains(c)) {
-          System.out.println("Subclass of itself: "+c);
-          assertTrue(false);
-        }
-        //System.out.println("Subclasses for "+c+": "+subclasses);
-        expandAllClassesOLD(subclasses,allIDs,depth);
-      //}
-    }
+    if(classes.addAll(addclasses)) expandAllClasses(classes,depth+1);
   }
 
   protected static File getUniqueTmpDir() {

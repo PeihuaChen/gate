@@ -61,39 +61,17 @@ public class DatatypePropertyImpl extends RDFPropertyImpl implements
   }
 
   /*
-   * (non-Javadoc)
-   * 
-   * @see gate.creole.ontology.DatatypeProperty#isValidDomain(gate.creole.ontology.OInstance)
+   * Check if the given instance is compatible with the domain of this 
+   * property.
    */
-public boolean isValidDomain(OInstance anInstance) {
-      ResourceInfo[] oClasses = ontologyService.getDomain(this.nodeId
-              .toString());
-      if(oClasses.length == 0) return true;
-      
-      // obtain sub classes of
-      // TODO: deal with use of getOResourcesFromMap here!!!!
-      Set<String> listOfOClasses = new HashSet<String>();
-      for(int i = 0; i < oClasses.length; i++) {
-        listOfOClasses.add(oClasses[i].getUri());
-        OResource resource = ontology.getOResourceFromMap(oClasses[i].getUri());
-        if(resource != null && resource instanceof OClass) {
-          Set<OClass> classes = ((OClass)resource).getSubClasses(OConstants.Closure.TRANSITIVE_CLOSURE);
-          Iterator<OClass> iter = classes.iterator();
-          while(iter.hasNext()) {
-            listOfOClasses.add(iter.next().getONodeID().toString());
-           }
-        }
-      }
-      // we need to obtain all the classes of anInstance
-      ResourceInfo[] instanceOClasses = ontologyService.getClassesOfIndividual(
-              anInstance.getOURI().toString(),
-              OConstants.Closure.DIRECT_CLOSURE);
-      Set<String> listOfICs = new HashSet<String>();
-      for(int i = 0; i < instanceOClasses.length; i++) {
-        listOfICs.add(instanceOClasses[i].getUri());
-      }
-      
-      return listOfOClasses.containsAll(listOfICs);
+  public boolean isValidDomain(OInstance anInstance) {
+    // For each class in the domain, there must
+    // be a direct type in the instance that is either identical or a subclass
+    // In other words, if we expand the classes of the instance, all the 
+    // domain classes must be contained in the expanded set.
+    Set<OResource> domainOResources = getDomain();
+    Set<OClass> instanceClassClosure = anInstance.getOClasses(OConstants.Closure.TRANSITIVE_CLOSURE);
+    return instanceClassClosure.containsAll(domainOResources);
   }
   /*
    * (non-Javadoc)
@@ -106,9 +84,9 @@ public boolean isValidDomain(OInstance anInstance) {
   }
 
   /*
-   * (non-Javadoc)
-   * 
-   * @see gate.creole.ontology.RDFProperty#isValidDomain(gate.creole.ontology.OResource)
+   * Included for compatibility with the super class. 
+   * If this is called with a resource that is not an OInstance, false 
+   * is returned.
    */
   public boolean isValidDomain(OResource aResource) {
     if(aResource instanceof OInstance)

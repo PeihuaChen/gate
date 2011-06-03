@@ -314,67 +314,27 @@ public class RDFPropertyImpl extends OResourceImpl implements RDFProperty {
   }
 
   /*
-   * (non-Javadoc)
-   * 
-   * @see gate.creole.ontology.RDFProperty#isValidDomain(gate.creole.ontology.OResource)
+   * For now, this will only return a resonable result if the resource passed
+   * is an instance and if the domain defined is from a user namespace.
+   * Otherwise the method returns false, even if the domain may be 
+   * compatible.
    */
   public boolean isValidDomain(OResource aResource) {
-    ResourceInfo[] listOfOResources = ontologyService.getDomain(nodeId
-            .toString());
-    if(listOfOResources.length == 0) return true;
-
-    Set<String> list = new HashSet<String>();
-    for(int i = 0; i < listOfOResources.length; i++) {
-      list.add(listOfOResources[i].getUri().toString());
-      OResource resource = ontology.getOResourceFromMap(listOfOResources[i]
-              .getUri());
-      if(resource != null && resource instanceof OClass) {
-        Set<OClass> classes = ((OClass)resource)
-                .getSubClasses(OConstants.Closure.TRANSITIVE_CLOSURE);
-        Iterator<OClass> iter = classes.iterator();
-        while(iter.hasNext()) {
-          list.add(iter.next().getONodeID().toString());
-        }
-      }
-      else if(resource != null && resource instanceof RDFProperty
-              && !(resource instanceof AnnotationProperty)) {
-        Set<RDFProperty> props = ((RDFProperty)resource)
-                .getSubProperties(OConstants.Closure.TRANSITIVE_CLOSURE);
-        Iterator<RDFProperty> iter = props.iterator();
-        while(iter.hasNext()) {
-          list.add(iter.next().getOURI().toString());
-        }
-      }
-    }
-
-    if(list.contains(aResource.getONodeID().toString())) {
-      return true;
-    }
     if(aResource instanceof OInstance) {
-      // lets find out all its super classes
-      ResourceInfo[] oClasses = ontologyService.getClassesOfIndividual(
-              aResource.getONodeID().toString(), OConstants.Closure.DIRECT_CLOSURE);
-      // if any of them is in listOfOResource, we return true, else
-      // false
-      Set<String> oClassList = new HashSet<String>();
-      for(int i = 0; i < oClasses.length; i++) {
-        oClassList.add(oClasses[i].getUri());
+      Set<OResource> domainResources = this.getDomain();
+      Set<OClass> domainClasses = new HashSet<OClass>();
+      for(OResource dr : domainResources) {
+        if(dr instanceof OClass) {
+          domainClasses.add((OClass)dr);
+        }        
       }
-      return list.containsAll(oClassList);
+      if(domainClasses.size() == 0) return true;
+      Set<OClass> instanceClassClosure = 
+        ((OInstance)aResource).getOClasses(Closure.TRANSITIVE_CLOSURE);
+      return instanceClassClosure.containsAll(domainClasses);
+    } else {
+      return false;
     }
-
-    if(aResource instanceof OClass) {
-      return list.contains(aResource);
-    }
-
-    if(aResource instanceof RDFProperty
-            && !(aResource instanceof AnnotationProperty)) {
-      if(list.contains(aResource.getONodeID().toString())) {
-        return true;
-      }
-    }
-
-    return false;
   }
 
   /*

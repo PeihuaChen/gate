@@ -1506,30 +1506,7 @@ public abstract class AbstractOntologyImpl
    * methods that gets a specific ontology entity (e.g. OInstance, Oclass).
    */
   public OResource getOResourceFromMap(String uri) {
-    // TODO: this tries to provide a replacement without the map for
-    // backwards compatibility but this should really be dropped entirely!
-    try {
-      OURI ouri = this.createOURI(uri);
-      List<OResource> toReturn = new ArrayList<OResource>();
-      OClass c = getOClass(ouri);
-      if(c != null) {
-        return c;
-      }
-      OInstance i = getOInstance(ouri);
-      if(i != null) {
-        return i;
-      }
-      RDFProperty r = getProperty(ouri);
-      if(r != null) {
-        return r;
-      }
-    }
-    catch(InvalidURIException iue) {
-      // do nothing, we will just return null
-    }
-    return null;
-
-    //throw new UnsupportedOperationException("getResourceFromMap not supported any more");
+    throw new UnsupportedOperationException("getResourceFromMap not supported any more");
   }
 
   /**

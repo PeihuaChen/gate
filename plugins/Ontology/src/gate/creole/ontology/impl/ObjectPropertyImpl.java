@@ -86,34 +86,13 @@ public class ObjectPropertyImpl extends RDFPropertyImpl implements
    * @see gate.creole.ontology.ObjectProperty#isValidRange(gate.creole.ontology.OInstance)
    */
   public boolean isValidRange(OInstance anInstance) {
-    ResourceInfo[] oClasses = ontologyService.getRange(this.nodeId
-            .toString());
-    if(oClasses.length == 0) return true;
-    // obtain sub classes of
-    Set<String> listOfOClasses = new HashSet<String>();
-    for(int i = 0; i < oClasses.length; i++) {
-      listOfOClasses.add(oClasses[i].getUri());
-      // TODO: properly remove use of map!
-      OResource resource = ontology.getOResourceFromMap(oClasses[i].getUri());
-      //OClass c = ontology.getOClass(new URI(oClasses[i].getUri()));
-      if(resource != null && resource instanceof OClass) {
-        Set<OClass> classes = ((OClass)resource)
-                .getSubClasses(OConstants.TRANSITIVE_CLOSURE);
-        Iterator<OClass> iter = classes.iterator();
-        while(iter.hasNext()) {
-          listOfOClasses.add(iter.next().getONodeID().toString());
-        }
-      }
-    }
-    // we need to obstain all the classes of anInstance
-    ResourceInfo[] instanceOClasses = ontologyService.getClassesOfIndividual(
-            anInstance.getOURI().toString(),
-            OConstants.Closure.DIRECT_CLOSURE);
-    Set<String> listOfICs = new HashSet<String>();
-    for(int i = 0; i < instanceOClasses.length; i++) {
-      listOfICs.add(instanceOClasses[i].getUri());
-    }
-    return listOfOClasses.containsAll(listOfICs);
+    // for this to be true, the instance must be a member of the intersection
+    // of all range classes. In other words, all the domain classes must either
+    // be identical to a direct type of the instance or a subclass of a direct
+    // type of an instance.
+    Set<OResource> rangeOResources = getRange();
+    Set<OClass> instanceClassClosure = anInstance.getOClasses(OConstants.Closure.TRANSITIVE_CLOSURE);
+    return instanceClassClosure.containsAll(rangeOResources);
   }
 
   /*
@@ -122,32 +101,13 @@ public class ObjectPropertyImpl extends RDFPropertyImpl implements
    * @see gate.creole.ontology.DatatypeProperty#isValidDomain(gate.creole.ontology.OInstance)
    */
   public boolean isValidDomain(OInstance anInstance) {
-    ResourceInfo[] oClasses = ontologyService.getDomain(this.nodeId
-            .toString());
-    if(oClasses.length == 0) return true;
-    // obtain sub classes of
-    Set<String> listOfOClasses = new HashSet<String>();
-    for(int i = 0; i < oClasses.length; i++) {
-      listOfOClasses.add(oClasses[i].getUri());
-      OResource resource = ontology.getOResourceFromMap(oClasses[i].getUri());
-      if(resource != null && resource instanceof OClass) {
-        Set<OClass> classes = ((OClass)resource)
-                .getSubClasses(OConstants.TRANSITIVE_CLOSURE);
-        Iterator<OClass> iter = classes.iterator();
-        while(iter.hasNext()) {
-          listOfOClasses.add(iter.next().getONodeID().toString());
-        }
-      }
-    }
-    // we need to obtain all the classes of anInstance
-    ResourceInfo[] instanceOClasses = ontologyService.getClassesOfIndividual(
-            anInstance.getOURI().toString(),
-            OConstants.Closure.DIRECT_CLOSURE);
-    Set<String> listOfICs = new HashSet<String>();
-    for(int i = 0; i < instanceOClasses.length; i++) {
-      listOfICs.add(instanceOClasses[i].getUri());
-    }
-    return listOfOClasses.containsAll(listOfICs);
+    // For each class in the domain, there must
+    // be a direct type in the instance that is either identical or a subclass
+    // In other words, if we expand the classes of the instance, all the 
+    // domain classes must be contained in the expanded set.
+    Set<OResource> domainOResources = getDomain();
+    Set<OClass> instanceClassClosure = anInstance.getOClasses(OConstants.Closure.TRANSITIVE_CLOSURE);
+    return instanceClassClosure.containsAll(domainOResources);
   }
 
   /*
