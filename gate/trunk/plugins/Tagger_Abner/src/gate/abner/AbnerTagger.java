@@ -30,7 +30,7 @@ import abner.Tagger;
 
 
 /**
- * Abner wrapper for gate. This tagger is based on CRF statistical modeling
+ * ABNER wrapper for GATE. This tagger is based on CRF statistical modeling
  * and is taken off the shelf. It also uses its own build in tokenizer and
  * sentence split. One can use without any other nlp components.
  * The tagger has two models:
@@ -96,7 +96,7 @@ public @SuppressWarnings("all") class AbnerTagger extends AbstractLanguageAnalys
 		/* Should be added with a property file */
 		modes.put("NLPBA", Tagger.NLPBA);
 		modes.put("BIOCREATIVE", Tagger.BIOCREATIVE);
-		logger.info("Abner intializing the "+abnerMode+" model...");
+		logger.info("ABNER intializing the "+abnerMode+" model...");
 //		logger.info("in the map: "+modes.get(abnerMode.toString())+" model...");
 //		logger.info("the map: "+modes.toString()+" model...");
 		abnerTagger = new Tagger(modes.get(abnerMode.toString()));//modes.get(abnerMode));
@@ -111,11 +111,11 @@ public @SuppressWarnings("all") class AbnerTagger extends AbstractLanguageAnalys
 
 
 	/**
-	 * @author georgiev this is the method that calls abner Tagger.getSegments
+	 * @author georgiev this is the method that calls ABNER Tagger.getSegments
 	 *         methods annotations are returned as string chunks with attached
 	 *         meta tags in vector of 2D arrays containing respectively 1. string
 	 *         chunks in first array 2. corresponding meta tags in second array
-	 *         one element of the vector contains one sentence in terms of abner
+	 *         one element of the vector contains one sentence in terms of ABNER
 	 *         (JLex) tokenization.
 	 */
 	public void execute() throws ExecutionException {
@@ -198,7 +198,7 @@ public @SuppressWarnings("all") class AbnerTagger extends AbstractLanguageAnalys
 						// source
 						fm
 								.put("type",
-										"Gene");
+										"Protein");
 
 						annotations.add((startIndex - offset[1]) + offset[0],
 								gateDocumentIndex, "Tagger", fm);
