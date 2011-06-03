@@ -46,7 +46,7 @@ public class AbnerTagger extends AbstractLanguageAnalyser {
   public static final long serialVersionUID = 1L;
 
   /* private members */
-  private Boolean toBeTolkenized = true;
+  private Boolean toBeTokenized = true;
 
   private AbnerRunMode abnerMode = null;
 
@@ -76,12 +76,12 @@ public class AbnerTagger extends AbstractLanguageAnalyser {
 
   /* getters and setters for the PR */
   /* public members */
-  public void setToBeTolkenized(Boolean a) {
-    toBeTolkenized = a;
+  public void setToBeTokenized(Boolean a) {
+    toBeTokenized = a;
   }
 
-  public Boolean getToBeTolkenized() {
-    return toBeTolkenized;
+  public Boolean getToBeTokenized() {
+    return toBeTokenized;
   }
 
   @RunTime
@@ -127,7 +127,7 @@ public class AbnerTagger extends AbstractLanguageAnalyser {
       }
     }
 
-    abnerTagger.setTokenization(toBeTolkenized);
+    abnerTagger.setTokenization(toBeTokenized);
 
     logger.debug("Execute Started");
     // StringBuffer abnerInput = new StringBuffer();
