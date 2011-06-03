@@ -136,7 +136,6 @@ public class AbnerTagger extends AbstractLanguageAnalyser {
 
     abnerTagger.setTokenization(toBeTokenized);
 
-    logger.debug("Execute Started");
     // StringBuffer abnerInput = new StringBuffer();
     /*
      * i needed those for BioCreative String abnerStringInput = null; String
@@ -206,8 +205,6 @@ public class AbnerTagger extends AbstractLanguageAnalyser {
           }
         }
       }// end iterate over sentences
-
-      logger.debug("Abner finished");
 
     } catch(Exception e) {
       e.printStackTrace();
