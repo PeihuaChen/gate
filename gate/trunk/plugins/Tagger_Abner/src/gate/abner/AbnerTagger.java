@@ -43,19 +43,10 @@ import abner.Tagger;
 public class AbnerTagger extends AbstractLanguageAnalyser {
   public static final long serialVersionUID = 1L;
 
-  private Boolean toBeTokenized = true;
-
-  private AbnerRunMode abnerMode = null;
-
-  private String outputASName = null;
-
-  private Long gateDocumentIndex = null;
-
-  private Tagger abnerTagger;
-
-  // add parameter to define the anno type defaut to Abner
-
   private static final Logger logger = Logger.getLogger(AbnerTagger.class);
+
+  private static final char[] compartibleChars = "[,.;:?!-+]{}\"`'()"
+          .toCharArray();
 
   private static final Map<String, Integer> modes =
           new HashMap<String, Integer>();
@@ -66,13 +57,27 @@ public class AbnerTagger extends AbstractLanguageAnalyser {
   static {
     modes.put("NLPBA", Tagger.NLPBA);
     modes.put("BIOCREATIVE", Tagger.BIOCREATIVE);
-    
+
     friendlyNames.put("PROTEIN", "Protein");
     friendlyNames.put("CELL_LINE", "CellLine");
     friendlyNames.put("CELL_TYPE", "CellType");
     friendlyNames.put("DNA", "DNA");
     friendlyNames.put("RNA", "RNA");
   }
+
+  private Boolean toBeTokenized = true;
+
+  private AbnerRunMode abnerMode = null;
+
+  private String outputASName = null;
+
+  private Long gateDocumentIndex = null;
+
+  private Tagger abnerTagger;
+
+  private String annotationName = null;
+
+  // add parameter to define the anno type defaut to Abner
 
   @RunTime
   @CreoleParameter(defaultValue = "BIOCREATIVE", comment = "This option allows tow different models to be used for tagging. Namely: NLPBA and BIOCREATIVE. NLPBA entity types are Gene, DNA, RNA, Cell Lines, Cell cultures. BIOCREATIVE entity type is Gene.")
@@ -93,6 +98,17 @@ public class AbnerTagger extends AbstractLanguageAnalyser {
 
   public String getOutputASName() {
     return outputASName;
+  }
+
+  @RunTime
+  @Optional
+  @CreoleParameter(defaultValue = "Tagger", comment="The name of the annotation to create, if blank (or null) the type of entity is used as the annotation name")
+  public void setAnnotationName(String annotationName) {
+    this.annotationName = annotationName;
+  }
+
+  public String getAnnotationName() {
+    return annotationName;
   }
 
   /**
@@ -171,16 +187,22 @@ public class AbnerTagger extends AbstractLanguageAnalyser {
           int offset[] = findLength(phrase);
 
           long startIndex = gateDocumentIndex;
-          
+
           String friendlyName = friendlyNames.get(annotation);
-          
-          if (friendlyName != null) {
+
+          if(friendlyName != null) {
             FeatureMap fm = Factory.newFeatureMap();
             fm.put("source", "abner");
-            fm.put("type", friendlyName);
+
+            String type =
+                    (annotationName == null || annotationName.trim().equals("")
+                            ? friendlyName
+                            : annotationName);
+
+            if(type.equals(annotationName)) fm.put("type", friendlyName);
 
             annotations.add((startIndex - offset[1]) + offset[0],
-                    gateDocumentIndex, "Tagger", fm);
+                    gateDocumentIndex, type, fm);
           }
         }
       }// end iterate over sentences
@@ -192,9 +214,6 @@ public class AbnerTagger extends AbstractLanguageAnalyser {
     }
 
   }
-
-  private static final char[] compartibleChars = "[,.;:?!-+]{}\"`'()"
-          .toCharArray();
 
   private static boolean isAbnerCompartible(char ch) {
     boolean bool = false;
