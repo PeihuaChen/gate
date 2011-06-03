@@ -11,10 +11,8 @@ import gate.Annotation;
 import gate.AnnotationSet;
 import gate.Factory;
 import gate.FeatureMap;
-import gate.Resource;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
-import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.Optional;
@@ -65,14 +63,22 @@ public class AbnerTagger extends AbstractLanguageAnalyser {
 
   private static final Logger logger = Logger.getLogger(AbnerTagger.class);
 
-  private static final Map<String, Integer> modes = new HashMap<String, Integer>();
-  
+  private static final Map<String, Integer> modes =
+          new HashMap<String, Integer>();
+
+  private static final Map<String, String> friendlyNames =
+          new HashMap<String, String>();
+
   static {
     modes.put("NLPBA", Tagger.NLPBA);
     modes.put("BIOCREATIVE", Tagger.BIOCREATIVE);
+    
+    friendlyNames.put("PROTEIN", "Protein");
+    friendlyNames.put("CELL_LINE", "CellLine");
+    friendlyNames.put("CELL_TYPE", "CellType");
+    friendlyNames.put("DNA", "DNA");
+    friendlyNames.put("RNA", "RNA");
   }
-
-  // private String abnerMode;
 
   /* getters and setters for the PR */
   /* public members */
@@ -115,7 +121,8 @@ public class AbnerTagger extends AbstractLanguageAnalyser {
   public void execute() throws ExecutionException {
     gateDocumentIndex = 0L;
 
-    if(abnerTagger == null || !(abnerTagger.getMode() == modes.get(getAbnerMode().toString()))) {
+    if(abnerTagger == null
+            || !(abnerTagger.getMode() == modes.get(getAbnerMode().toString()))) {
       try {
         if(modes.containsKey(getAbnerMode().toString()))
           abnerTagger = new Tagger(modes.get(getAbnerMode().toString()));
@@ -180,59 +187,20 @@ public class AbnerTagger extends AbstractLanguageAnalyser {
           int offset[] = findLength(phrase);
 
           long startIndex = gateDocumentIndex;
-
-          if(annotation.equals("PROTEIN")) {
+          
+          String friendlyName = friendlyNames.get(annotation);
+          
+          if (friendlyName != null) {
             FeatureMap fm = Factory.newFeatureMap();
 
             // type
             fm.put("source", "abner");
             // source
-            fm.put("type", "Protein");
+            fm.put("type", friendlyName);
 
             annotations.add((startIndex - offset[1]) + offset[0],
                     gateDocumentIndex, "Tagger", fm);
-          } else if(annotation.equals("CELL_LINE")) {
-            FeatureMap fm = Factory.newFeatureMap();
-            // fm.put("classid", "CELL_LINE");
 
-            // type
-            fm.put("source", "abner");
-            // source
-            fm.put("class", "CellLine");
-            annotations.add((startIndex - offset[1]) + offset[0],
-                    gateDocumentIndex, "Tagger", fm);
-          } else if(annotation.equals("CELL_TYPE")) {
-            FeatureMap fm = Factory.newFeatureMap();
-            // fm.put("classid", "CELL_TYPE");
-
-            // type
-            fm.put("source", "abner");
-            // source
-            fm.put("class", "CellType");
-            annotations.add((startIndex - offset[1]) + offset[0],
-                    gateDocumentIndex, "Tagger", fm);
-          } else if(annotation.equals("DNA")) {
-            FeatureMap fm = Factory.newFeatureMap();
-            // fm.put("classid", "DNA");
-
-            // type
-            fm.put("source", "abner");
-            // source
-            fm.put("class", "DNA");
-
-            annotations.add((startIndex - offset[1]) + offset[0],
-                    gateDocumentIndex, "Tagger", fm);
-          } else if(annotation.equals("RNA")) {
-            FeatureMap fm = Factory.newFeatureMap();
-            // fm.put("classid", "RNA");
-
-            // type
-            fm.put("source", "abner");
-            // source
-            fm.put("class", "RNA");
-
-            annotations.add((startIndex - offset[1]) + offset[0],
-                    gateDocumentIndex, "Tagger", fm);
           }
         }
       }// end iterate over sentences
