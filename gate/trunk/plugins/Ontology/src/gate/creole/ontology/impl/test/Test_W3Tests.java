@@ -1,5 +1,5 @@
 /*
- *  TestOntologyAPI.java
+ *  Test_W3Tests.java
  *
  *  $Id$
  */
@@ -24,14 +24,14 @@ import junit.framework.TestSuite;
 import org.apache.log4j.Logger;
 
 /**
- * Run all the essential regression tests for the OWLIMOntology LR.s
+ * Run tests based on selected examples from the W3 ontology test suite
  */
-public class Test_OntologyAPI extends TestCase {
+public class Test_W3Tests extends TestCase {
   public static void main(String[] args) throws GateException, MalformedURLException {
-    junit.textui.TestRunner.run(Test_OntologyAPI.class);
+    junit.textui.TestRunner.run(Test_W3Tests.class);
   }
 
-  public Test_OntologyAPI(String arg0) throws GateException, MalformedURLException {
+  public Test_W3Tests(String arg0) throws GateException, MalformedURLException {
     super(arg0);
   }
 
@@ -78,7 +78,7 @@ public class Test_OntologyAPI extends TestCase {
   /** Test suite routine for the test runner */
   public static Test suite() {
     System.out.println("Running suite");
-    return new TestSuite(Test_OntologyAPI.class);
+    return new TestSuite(Test_W3Tests.class);
   } // suite
 
   // ************************************ TESTS ***************************
