@@ -7,7 +7,6 @@
 
 package gate.abner;
 
-import gate.Annotation;
 import gate.AnnotationSet;
 import gate.Factory;
 import gate.FeatureMap;
@@ -20,7 +19,6 @@ import gate.creole.metadata.RunTime;
 import gate.util.InvalidOffsetException;
 
 import java.io.IOException;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -166,7 +164,7 @@ public class AbnerTagger extends AbstractLanguageAnalyser {
 
   }
 
-  private static boolean isAbnerCompartible(char ch) {
+  private static boolean isABNERCompartible(char ch) {
     boolean bool = false;
     for(char element : compartibleChars) {
       if(element == ch) bool = true;
@@ -181,7 +179,7 @@ public class AbnerTagger extends AbstractLanguageAnalyser {
     char[] returnDoc = document.toCharArray();
 
     for(int i = 0; i < charDoc.length; i++) {
-      if(isAbnerCompartible(charDoc[i])) {
+      if(isABNERCompartible(charDoc[i])) {
         returnDoc[i] = charDoc[i];
       } else if(Character.getNumericValue(charDoc[i]) > 255
               || Character.getNumericValue(charDoc[i]) < 0) {
@@ -201,7 +199,7 @@ public class AbnerTagger extends AbstractLanguageAnalyser {
   }
 
   private static boolean isASCII(char ch) {
-    if(isAbnerCompartible(ch)) {
+    if(isABNERCompartible(ch)) {
       return true;
     } else if(Character.getNumericValue(ch) > 255
             || Character.getNumericValue(ch) < 0) {
@@ -282,34 +280,5 @@ public class AbnerTagger extends AbstractLanguageAnalyser {
     int result[] = {start, length};
 
     return result;
-  }
-
-  /**
-   * This comparator, compares two annotations on offsets and type
-   */
-  public class OffsetTypeComparator implements Comparator<Annotation> {
-
-    public int compare(Annotation a1, Annotation a2) {
-
-      // compare start offsets
-      int result =
-              a1.getStartNode().getOffset()
-                      .compareTo(a2.getStartNode().getOffset());
-
-      // if start offsets are equal compare end offsets
-      if(result == 0) {
-        result =
-                a1.getEndNode().getOffset()
-                        .compareTo(a2.getEndNode().getOffset());
-      }
-
-      if(result == 0) {
-        result = a1.getType().compareTo(a2.getType());
-        // ivert the natural order, split after token wanted
-        return result * -1;
-      }
-
-      return result;
-    }
   }
 }
