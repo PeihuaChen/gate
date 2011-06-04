@@ -48,16 +48,10 @@ public class AbnerTagger extends AbstractLanguageAnalyser {
   private static final char[] compartibleChars = "[,.;:?!-+]{}\"`'()"
           .toCharArray();
 
-  private static final Map<String, Integer> modes =
-          new HashMap<String, Integer>();
-
   private static final Map<String, String> friendlyNames =
           new HashMap<String, String>();
 
   static {
-    modes.put("NLPBA", Tagger.NLPBA);
-    modes.put("BIOCREATIVE", Tagger.BIOCREATIVE);
-
     friendlyNames.put("PROTEIN", "Protein");
     friendlyNames.put("CELL_LINE", "CellLine");
     friendlyNames.put("CELL_TYPE", "CellType");
@@ -75,8 +69,6 @@ public class AbnerTagger extends AbstractLanguageAnalyser {
 
   private String annotationName = null;
 
-  // add parameter to define the anno type defaut to Abner
-
   @RunTime
   @CreoleParameter(defaultValue = "BIOCREATIVE", comment = "This option allows tow different models to be used for tagging. Namely: NLPBA and BIOCREATIVE. NLPBA entity types are Gene, DNA, RNA, Cell Lines, Cell cultures. BIOCREATIVE entity type is Gene.")
   public void setAbnerMode(AbnerRunMode a) {
@@ -89,7 +81,7 @@ public class AbnerTagger extends AbstractLanguageAnalyser {
 
   @RunTime
   @Optional
-  @CreoleParameter(comment="The annotation set in which new annotations will be created")
+  @CreoleParameter(comment = "The annotation set in which new annotations will be created")
   public void setOutputASName(String a) {
     outputASName = a;
   }
@@ -100,7 +92,7 @@ public class AbnerTagger extends AbstractLanguageAnalyser {
 
   @RunTime
   @Optional
-  @CreoleParameter(defaultValue = "Tagger", comment="The name of the annotation to create, if blank (or null) the type of entity is used as the annotation name")
+  @CreoleParameter(defaultValue = "Tagger", comment = "The name of the annotation to create, if blank (or null) the type of entity is used as the annotation name")
   public void setAnnotationName(String annotationName) {
     this.annotationName = annotationName;
   }
@@ -120,15 +112,11 @@ public class AbnerTagger extends AbstractLanguageAnalyser {
     gateDocumentIndex = 0L;
 
     if(abnerTagger == null
-            || !(abnerTagger.getMode() == modes.get(getAbnerMode().toString()))) {
+            || !(abnerTagger.getMode() == getAbnerMode().getValue())) {
       try {
-        if(modes.containsKey(getAbnerMode().toString()))
-          abnerTagger = new Tagger(modes.get(getAbnerMode().toString()));
-        else throw new InstantiationException();
-
-      } catch(InstantiationException e) {
-        logger.error("Can not instantiate abner, please" + " check the mode"
-                + "\n" + e.toString());
+        abnerTagger = new Tagger(getAbnerMode().getValue());
+      } catch(Exception e) {
+        throw new ExecutionException("Can not instantiate ABNER", e);
       }
     }
 
