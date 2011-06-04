@@ -1,18 +1,37 @@
+/*
+ * AbnerRunMode.java
+ * 
+ * Mark A. Greenwood
+ */
 package gate.abner;
 
+import java.util.EnumSet;
 
-/*
- *  AbnerRunMode.java
+import abner.Tagger;
+
+/**
+ * An Enum used to control which model ABNER uses when processing documents
  * 
- *  Georgi Georgiev
- *
- *  $Id: AbnerRunMode.java, v 1.0 Thu Jul 23 17:20:28 EEST 2009 georgiev $
+ * @author Mark A. Greenwood
  */
-
-/*
- * Enum data type for model mode in GUI.
- */
-
 public enum AbnerRunMode {
-	BIOCREATIVE, NLPBA
-	}
+  BIOCREATIVE(Tagger.BIOCREATIVE), NLPBA(Tagger.NLPBA);
+
+  private final int id;
+
+  private AbnerRunMode(int id) {
+    this.id = id;
+  }
+
+  public int getValue() {
+    return id;
+  }
+
+  public static AbnerRunMode get(int id) {
+    for(AbnerRunMode t : EnumSet.allOf(AbnerRunMode.class)) {
+      if(t.id == id) return t;
+    }
+
+    throw new IllegalArgumentException("'" + id + "' is not a run mode");
+  }
+}
