@@ -62,7 +62,7 @@
     <javadoc destdir="${javadoc.dir}" packagenames="*"
              classpathref="compile.classpath"
              encoding="UTF-8"
-             windowtitle="${plugin.name} JavaDoc"
+             windowtitle="ABNER Tagger JavaDoc"
              source="1.5">
       <sourcepath>
         <pathelement location="${src.dir}" />
