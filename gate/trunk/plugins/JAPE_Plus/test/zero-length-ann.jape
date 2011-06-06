@@ -1,0 +1,9 @@
+Phase:  Aaaa
+Input: A B
+Options: control = appelt
+
+
+Rule: B
+({B}):bind
+-->
+:bind.Bsingle = {}

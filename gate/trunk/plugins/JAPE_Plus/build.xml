@@ -17,7 +17,7 @@
   <property name="src.dir" location="src" />
   <property name="classes.dir" location="classes" />
   <property name="lib.dir" location="lib" />
-  <property name="jar.location" location="jpdaplus.jar" />
+  <property name="jar.location" location="jape-plus.jar" />
 
   <!-- Path to compile - includes gate.jar and GATE/lib/*.jar -->
   <path id="compile.classpath">
