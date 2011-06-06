@@ -54,8 +54,13 @@ import gate.jape.ControllerEventBlocksAction;
  */
 public class SPTBase extends AbstractLanguageAnalyser {
 
-  ActionContext actionContext;
-  void setActionContext(ActionContext ac) {
+  protected ActionContext actionContext;
+  
+  /**
+   * Sets the action context to be used during execution of RHS actions.
+   * @param ac
+   */
+  public void setActionContext(ActionContext ac) {
     actionContext = ac;
   }
   /**
@@ -863,6 +868,7 @@ public class SPTBase extends AbstractLanguageAnalyser {
           break;
         }
       }
+      
       if(annotationNext[idx] == NOT_CALCULATED) {
         // we could not find an exact match.
         // find first annotation after from
@@ -1133,10 +1139,6 @@ public class SPTBase extends AbstractLanguageAnalyser {
             break activeInstances;
           }
         }
-        // first transition out will simply advance current instance, others
-        // will
-        // create new instances
-        boolean instanceAlreadyAdvanced = false;
         // check all transitions and advance in all possible ways.
         transitions: for(Transition aTransition : states[fsmInstance.state].transitions) {
           if(aTransition.type == TransitionPDA.TYPE_OPENING_ROUND_BRACKET){
@@ -1166,7 +1168,9 @@ public class SPTBase extends AbstractLanguageAnalyser {
           // this stores a list of candidate annotations for each constraint
           IntArrayList[] annotsForConstraints =
                   new IntArrayList[aTransition.constraints.length];
-          for(int constraintIdx = 0; constraintIdx < aTransition.constraints.length; constraintIdx++) {
+          for(int constraintIdx = 0; 
+              constraintIdx < aTransition.constraints.length; 
+              constraintIdx++) {
             int[] constraint = aTransition.constraints[constraintIdx];
             annotations: for(int annIdx = fsmInstance.annotationIndex; 
                 annIdx < annotation.length &&
@@ -1213,15 +1217,6 @@ public class SPTBase extends AbstractLanguageAnalyser {
           // a next step is a set of bound annotations, one for each constraint
           List<int[]> nextSteps = enumerateCombinations(annotsForConstraints);
           for(int[] aStep : nextSteps) {
-//            FSMInstance nextInstance = null;
-//            if(instanceAlreadyAdvanced) {
-//              // create a clone of the instance, and queue it
-//              nextInstance = fsmInstance.clone();
-//            } else {
-//              // simply advance the current instance
-//              nextInstance = fsmInstance;
-//              instanceAlreadyAdvanced = true;
-//            }
             FSMInstance nextInstance = fsmInstance.clone();
             // update the data in the next instance
             nextInstance.state = aTransition.nextState;
@@ -1231,6 +1226,16 @@ public class SPTBase extends AbstractLanguageAnalyser {
                 if(nextAnnotationForInstance < nextAnnotation(aStep[i])) {
                   nextAnnotationForInstance = nextAnnotation(aStep[i]);
                 }
+              }
+            }
+            if(nextAnnotationForInstance == fsmInstance.annotationIndex) {
+              // this can happen if fsmInstance.annotationIndex is a zero-length
+              // annotation, and leads to infinite looping
+              if(nextAnnotationForInstance < annotation.length -2) {
+                nextAnnotationForInstance++;
+              } else {
+                // no more annotations
+                nextAnnotationForInstance = Integer.MAX_VALUE;
               }
             }
             nextInstance.annotationIndex = nextAnnotationForInstance;
@@ -1445,7 +1450,7 @@ public class SPTBase extends AbstractLanguageAnalyser {
     actionblocks.setThrowable(null);
   }
 
-  void runControllerExecutionStartedBlock(
+  protected void runControllerExecutionStartedBlock(
     ActionContext ac, Controller c, Ontology o) 
     throws ExecutionException
   {
@@ -1468,7 +1473,7 @@ public class SPTBase extends AbstractLanguageAnalyser {
     }
   }
 
-  void runControllerExecutionFinishedBlock(
+  protected void runControllerExecutionFinishedBlock(
     ActionContext ac, Controller c, Ontology o)
     throws ExecutionException
   {
@@ -1491,7 +1496,7 @@ public class SPTBase extends AbstractLanguageAnalyser {
     }
   }
 
-  void runControllerExecutionAbortedBlock(
+  protected void runControllerExecutionAbortedBlock(
     ActionContext ac, Controller c, Throwable t, Ontology o)
     throws ExecutionException
   {

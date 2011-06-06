@@ -29,6 +29,7 @@ import gate.gui.MainFrame;
 import gate.jape.MultiPhaseTransducer;
 import gate.jape.parser.ParseException;
 import gate.util.GateException;
+import gate.util.persistence.PersistenceManager;
 import gate.jape.DefaultActionContext;
 import gate.creole.ControllerAwarePR;
 import gate.creole.ontology.Ontology;
@@ -45,7 +46,7 @@ import com.ontotext.jape.pda.SinglePhaseTransducerPDA;
 /**
  * A JAPE-Plus transducer (with a {@link LanguageAnalyser} interface.
  */
-@CreoleResource(name = "JAPE-PDA-Plus Transducer", 
+@CreoleResource(name = "JAPE-Plus Transducer", 
     comment = "An optimised, JAPE-compatible transducer.")
 public class Transducer
   extends AbstractLanguageAnalyser
@@ -330,32 +331,20 @@ public class Transducer
 
   protected Ontology ontology = null;
 
+  /**
+   * This is testing code used during development.
+   * TODO: delete it!
+   */
   public static void main(String[] args){
     try {
       Gate.setUserSessionFile(new File(".session"));
       Gate.init();
       MainFrame.getInstance().setVisible(true);
-      Gate.getCreoleRegister().registerDirectories(
-              new File("").toURI().toURL());
+      Gate.getCreoleRegister().registerDirectories(new File(".").toURI().toURL());
       
-      Document doc = Factory.newDocument(new File("/home/valyt/tmp/jplus/news/ft-BT-briefing-02-aug-2001.xml").toURI().toURL());
-      Corpus corpus = Factory.newCorpus("TestABC");
-      corpus.add(doc);
+      PersistenceManager.loadObjectFromFile(new File(".session"));
       
-      FeatureMap params = Factory.newFeatureMap();
-      params.put("sourceURL", new File("C:\\gateOrig\\gate\\plugins\\ANNIE\\resources\\NE\\main.jape").toURI().toURL());
-      LanguageAnalyser analyser = (LanguageAnalyser)Factory.createResource(Transducer.class.getName(), params);
-      
-      analyser.setCorpus(corpus);
-      analyser.setDocument(doc);
-      long start = System.currentTimeMillis();
-      analyser.execute();
-      System.out.print("Executed in " + (System.currentTimeMillis() - start) + " ms");
-    } catch(GateException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch(MalformedURLException e) {
-      // TODO Auto-generated catch block
+    } catch(Exception e) {
       e.printStackTrace();
     }
   }
