@@ -1,6 +1,7 @@
 /*
  *  Tansducer.java
- *  Copyright (c) 1998-2009, The University of Sheffield.
+ *  
+ *  Copyright (c) 2009 - 2011, Valentin Tablan.
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
  *  software, licenced under the GNU Library General Public License,
@@ -9,7 +10,7 @@
  *
  *  Valentin Tablan, 17 Aug 2009
  *
- *  $Id$ 
+ *  $Id$
  */
 package gate.jape.plus;
 
@@ -100,31 +101,21 @@ public class Transducer
     }
   }
   
-  public URL getSourceURL() {
-    return sourceURL;
+  public URL getGrammarURL() {
+    return grammarURL;
   }
 
   @CreoleParameter(
       comment="URL for the data from which this transducer should be built.")
-  public void setSourceURL(URL source) {
-    this.sourceURL = source;
+  public void setGrammarURL(URL source) {
+    this.grammarURL = source;
   }
 
-  public SourceType getSourceType() {
-    return sourceType;
-  }
-
-  @CreoleParameter(
-          comment="The type of input used to create this transducer.", 
-          defaultValue="JAPE")
-  public void setSourceType(SourceType sourceType) {
-    this.sourceType = sourceType;
-  }
 
   /**
    * The source from which this transducer is created.
    */
-  protected URL sourceURL;
+  protected URL grammarURL;
   
   protected String encoding;
   
@@ -155,11 +146,6 @@ public class Transducer
    * The listener that keeps track of the annotation types that have changed.
    */
   protected AnnotationSetListener inputASListener;
-  
-  /**
-   * The type of the source.
-   */
-  protected SourceType sourceType;
   
   /**
    * The list of phases used in this transducer.
@@ -195,16 +181,7 @@ public class Transducer
   public Resource init() throws ResourceInstantiationException {
     super.init();
     try {
-      switch(sourceType){
-        case JAPE:
-          parseJape();
-          break;
-        case BINARY:
-          break;
-        default:
-          throw new ResourceInstantiationException("Unsupported source type " + 
-                  sourceType + "!");
-      }
+      parseJape();
     } catch(IOException e) {
       throw new ResourceInstantiationException(e);
     } catch(ParseException e) {
@@ -218,7 +195,7 @@ public class Transducer
 	Class oldClass = Factory.getJapeParserClass();
 	Factory.setJapeParserClass(ParseCpslPDA.class);
 	try{
-		ParseCpslPDA parser = (ParseCpslPDA) Factory.newJapeParser(sourceURL, encoding);
+		ParseCpslPDA parser = (ParseCpslPDA) Factory.newJapeParser(grammarURL, encoding);
 
 	    StatusListener listener = new StatusListener(){
 	      public void statusChanged(String text){
@@ -249,11 +226,9 @@ public class Transducer
 
   @Override
   public void execute() throws ExecutionException {
-	if (singlePhaseTransducers == null) {
-		if (SourceType.JAPE.equals(sourceType))
-			throw new IllegalStateException("init() was not called.");
-		throw new IllegalStateException("init() was not called or an invalid binary grammar was supplied.");
-	}
+  	if (singlePhaseTransducers == null) {
+  		throw new IllegalStateException("init() was not called.");
+  	}
     AnnotationSet inputAs = (inputASName == null || inputASName.length() == 0) ?
             document.getAnnotations() : document.getAnnotations(inputASName);
     try {
@@ -368,7 +343,6 @@ public class Transducer
       corpus.add(doc);
       
       FeatureMap params = Factory.newFeatureMap();
-      params.put("sourceType", SourceType.JAPE);
       params.put("sourceURL", new File("C:\\gateOrig\\gate\\plugins\\ANNIE\\resources\\NE\\main.jape").toURI().toURL());
       LanguageAnalyser analyser = (LanguageAnalyser)Factory.createResource(Transducer.class.getName(), params);
       
