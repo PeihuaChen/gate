@@ -24,6 +24,7 @@ import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
 import gate.event.AnnotationSetEvent;
 import gate.event.AnnotationSetListener;
+import gate.event.ProgressListener;
 import gate.event.StatusListener;
 import gate.gui.MainFrame;
 import gate.jape.MultiPhaseTransducer;
@@ -49,7 +50,7 @@ import com.ontotext.jape.pda.SinglePhaseTransducerPDA;
 @CreoleResource(name = "JAPE-Plus Transducer", 
     comment = "An optimised, JAPE-compatible transducer.")
 public class Transducer extends AbstractLanguageAnalyser 
-    implements ControllerAwarePR {
+    implements ControllerAwarePR, ProgressListener {
   /**
    * A comparator for annotations based on start offset and inverse length.
    */
@@ -150,7 +151,11 @@ public class Transducer extends AbstractLanguageAnalyser
    */
   protected SPTBase[] singlePhaseTransducers;
   
-  
+  /**
+   * The index in {@link #singlePhaseTransducers} for the SPT currently being
+   * executed, if any, -1 otherwise.
+   */
+  protected int currentSptIndex = -1;
   
   public String getEncoding() {
     return encoding;
@@ -209,6 +214,7 @@ public class Transducer extends AbstractLanguageAnalyser
 	    for(int i = 0; i < intermediate.getPhases().size(); i++){
 	      singlePhaseTransducers[i] = builder.buildSPT((SinglePhaseTransducerPDA)
 	              intermediate.getPhases().get(i));
+	      singlePhaseTransducers[i].addProgressListener(this);
 	    }
 	}
 	finally{
@@ -218,21 +224,28 @@ public class Transducer extends AbstractLanguageAnalyser
   
   @Override
   public void cleanup() {
-    // TODO Auto-generated method stub
     super.cleanup();
+    for(SPTBase aSpt : singlePhaseTransducers){
+      aSpt.removeProgressListener(this);
+      aSpt.cleanup();
+    }
   }
-
+  
   @Override
   public void execute() throws ExecutionException {
   	if (singlePhaseTransducers == null) {
   		throw new IllegalStateException("init() was not called.");
   	}
+  	interrupted = false;
     AnnotationSet inputAs = (inputASName == null || inputASName.length() == 0) ?
             document.getAnnotations() : document.getAnnotations(inputASName);
+    fireProgressChanged(0);
     try {
       inputAs.addAnnotationSetListener(inputASListener);
       sortedAnnotations.clear();
-      for(SPTBase aSpt : singlePhaseTransducers){
+      for(currentSptIndex = 0; currentSptIndex < singlePhaseTransducers.length; 
+          currentSptIndex++){
+        SPTBase aSpt = singlePhaseTransducers[currentSptIndex];
         changedTypes.clear();
         aSpt.setCorpus(corpus);
         aSpt.setDocument(document);
@@ -254,7 +267,23 @@ public class Transducer extends AbstractLanguageAnalyser
       }
     } finally {
       inputAs.removeAnnotationSetListener(inputASListener);
+      currentSptIndex = -1;
+      fireProcessFinished();
     }
+  }
+
+  
+  @Override
+  public void progressChanged(int i) {
+    // event coming from one of our SPTs
+    if(currentSptIndex >= 0) {
+      fireProgressChanged((currentSptIndex * 100 + i) / singlePhaseTransducers.length);
+    }
+  }
+
+  @Override
+  public void processFinished() {
+    // ignore
   }
 
   /**
