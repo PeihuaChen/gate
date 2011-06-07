@@ -1134,7 +1134,6 @@ public class SPTBase extends AbstractLanguageAnalyser {
         }
       }
       break;
-       // TODO: Implement this!
       case WITHIN: {
         int[] constraints = (int[])predicate.featureValue;
         // find all annotations containing this annotation
