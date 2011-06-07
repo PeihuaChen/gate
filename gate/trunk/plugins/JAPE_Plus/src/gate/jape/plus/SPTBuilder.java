@@ -277,12 +277,8 @@ public class SPTBuilder {
   
   protected int convertPredicate(String annotationType, 
           ConstraintPredicate oldPredicate) throws ResourceInstantiationException{
-    if(! (oldPredicate.getAccessor() instanceof AnnotationFeatureAccessor)){
-      throw new ResourceInstantiationException("Only predicates based on " +
-      		"annotation features are supported by JAPE-Plus!");
-    }
     Predicate newPredicate = new Predicate();
-    newPredicate.featureName = (String)oldPredicate.getAccessor().getKey();
+    newPredicate.annotationAccessor = oldPredicate.getAccessor();
     String operator = oldPredicate.getOperator();
     if(operator == ConstraintPredicate.EQUAL){
       newPredicate.type = PredicateType.EQ;
@@ -313,7 +309,41 @@ public class SPTBuilder {
               "Constraint predicates with operator \"" + operator +
               "\" are not supported in JAPE-Plus!");
     }
-    newPredicate.featureValue = oldPredicate.getValue();
+    if(newPredicate.type == PredicateType.CONTAINS) {
+      String containedAnnType = null;
+      List<Integer> containedPredicates = new LinkedList<Integer>();
+      // convert the value
+      ContainsPredicate contPredicate = (ContainsPredicate)oldPredicate;
+      Object value = oldPredicate.getValue();
+      if(value == null) {
+        // just annotation type
+        containedAnnType = contPredicate.getAnnotType();
+      } else  if(value instanceof String) {
+        // a simple annotation type
+        containedAnnType = (String)value;
+      } else if (value instanceof Constraint) {
+        Constraint constraint = (Constraint)value;
+        containedAnnType = constraint.getAnnotType();
+        for(ConstraintPredicate pred : constraint.getAttributeSeq()) {
+          containedPredicates.add(convertPredicate(containedAnnType, pred));
+        }
+      }
+      int[] newPredValue = new int[2 + containedPredicates.size()];
+      newPredValue[0] = annotationTypes.indexOf(containedAnnType);
+      if(newPredValue[0] == -1) {
+        annotationTypes.add(containedAnnType);
+        newPredValue[0] = annotationTypes.size() -1;
+      }
+      // contains predicates are always positive
+      newPredValue[1] = 1;
+      int predIdx = 2;
+      for(Integer predId : containedPredicates) {
+        newPredValue[predIdx++] = predId;
+      }
+      newPredicate.featureValue = newPredValue;
+    } else {
+      newPredicate.featureValue = oldPredicate.getValue();
+    }
     //now see if this is a new predicate or not
     List<Predicate> predsOfType = predicatesByType.get(annotationType);
     if(predsOfType == null){
@@ -354,7 +384,7 @@ public class SPTBuilder {
             case EQ:
               switch(other.type){
                 case EQ:
-                  if(one.featureName.equals(other.featureName)){
+                  if(one.annotationAccessor.equals(other.annotationAccessor)){
                     if(one.featureValue.equals(other.featureValue)){
                       alsoTrue[i].add(j);
                       alsoTrue[j].add(i);
