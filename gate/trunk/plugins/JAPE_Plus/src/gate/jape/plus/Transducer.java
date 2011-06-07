@@ -48,11 +48,8 @@ import com.ontotext.jape.pda.SinglePhaseTransducerPDA;
  */
 @CreoleResource(name = "JAPE-Plus Transducer", 
     comment = "An optimised, JAPE-compatible transducer.")
-public class Transducer
-  extends AbstractLanguageAnalyser
-  implements ControllerAwarePR
-{
-
+public class Transducer extends AbstractLanguageAnalyser 
+    implements ControllerAwarePR {
   /**
    * A comparator for annotations based on start offset and inverse length.
    */
@@ -331,25 +328,8 @@ public class Transducer
 
   protected Ontology ontology = null;
 
-  /**
-   * This is testing code used during development.
-   * TODO: delete it!
-   */
-  public static void main(String[] args){
-    try {
-      Gate.setUserSessionFile(new File(".session"));
-      Gate.init();
-      MainFrame.getInstance().setVisible(true);
-      Gate.getCreoleRegister().registerDirectories(new File(".").toURI().toURL());
-      
-      PersistenceManager.loadObjectFromFile(new File(".session"));
-      
-    } catch(Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  // methods implemeting ControllerAwarePR
+  // methods implementing ControllerAwarePR
+  @Override
   public void controllerExecutionStarted(Controller c)
     throws ExecutionException {
     actionContext.setController(c);
@@ -357,7 +337,8 @@ public class Transducer
       aSpt.runControllerExecutionStartedBlock(actionContext,c,ontology);
     }
   }
-
+  
+  @Override
   public void controllerExecutionFinished(Controller c)
     throws ExecutionException {
     for(SPTBase aSpt : singlePhaseTransducers){
@@ -369,6 +350,7 @@ public class Transducer
     actionContext.setController(null);
   }
 
+  @Override
   public void controllerExecutionAborted(Controller c, Throwable t)
     throws ExecutionException {
     for(SPTBase aSpt : singlePhaseTransducers){
@@ -380,4 +362,22 @@ public class Transducer
     actionContext.setController(null);
   }
 
+  
+  /**
+   * This is testing code used during development.
+   * TODO: delete it!
+   */
+  public static void main(String[] args){
+    try {
+      Gate.init();
+      MainFrame.getInstance().setVisible(true);
+      Gate.getCreoleRegister().registerDirectories(new File(".").toURI().toURL());
+      File session = Gate.getUserSessionFile();
+      if(session == null) session = new File(System.getProperty("user.home") + 
+              ".gate.session");
+      if(session.exists()) PersistenceManager.loadObjectFromFile(session);
+    } catch(Exception e) {
+      e.printStackTrace();
+    }
+  }
 }
