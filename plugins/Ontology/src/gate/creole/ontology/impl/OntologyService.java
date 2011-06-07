@@ -22,6 +22,7 @@ import gate.creole.ontology.OInstance;
 import gate.creole.ontology.ONodeID;
 import gate.creole.ontology.OURI;
 import gate.creole.ontology.LiteralOrONodeID;
+import gate.creole.ontology.OntologyTripleStore;
 import gate.creole.ontology.RDFProperty;
 import gate.util.ClosableIterator;
 import java.util.List;
@@ -1419,4 +1420,6 @@ public interface OntologyService {
 
   public Set<RDFProperty> getPropertiesByName(String name);
 
+  public OntologyTripleStore getOntologyTripleStore();
+  
 }

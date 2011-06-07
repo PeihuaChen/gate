@@ -20,6 +20,7 @@ import gate.creole.ontology.OConstants.OntologyFormat;
 import gate.creole.ontology.OConstants.QueryLanguage;
 import gate.creole.ontology.OURI;
 import gate.creole.ontology.OntologyBooleanQuery;
+import gate.creole.ontology.OntologyTripleStore;
 import gate.creole.ontology.OntologyTupleQuery;
 import gate.creole.ontology.impl.AbstractOntologyImpl;
 import java.io.File;
@@ -375,5 +376,28 @@ public abstract class AbstractOntologyImplSesame extends AbstractOntologyImpl {
     return ((OntologyServiceImplSesame)ontologyService).executeQuery(serqlQuery);
   }
 
+  
+  public static final String TRIPLE_CONTEXT_DATA =
+      "http://gate.ac.uk/dummyuri/OWLIM3OntologyPlugin/#DataContext";
 
+  public static final String TRIPLE_CONTEXT_META =
+      "http://gate.ac.uk/dummyuri/OWLIM3OntologyPlugin/#MetaContext";
+
+  
+  // Set this ontology to be a meta ontology. This only changes the URI of
+  // the graph where things get stored, thus allowing one and the same 
+  // Sesame repository to be used for both the Meta and the Domain ontology.
+  public void setTripleContextURI(String uri) {
+    ((OntologyServiceImplSesame)ontologyService).setContextURIString(uri);
+  }
+  
+  // Below is the stuff added for implementing the OntologyTripleStore 
+ 
+  public  OntologyTripleStore getOntologyTripleStore() {
+    OntologyTripleStore ots = 
+      ontologyService.getOntologyTripleStore();
+    return ots;
+  }
+  
+  
 }

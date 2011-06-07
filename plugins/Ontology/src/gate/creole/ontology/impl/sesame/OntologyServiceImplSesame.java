@@ -54,9 +54,11 @@ import gate.creole.ontology.OBNodeID;
 import gate.creole.ontology.OConstants.QueryLanguage;
 import gate.creole.ontology.OInstance;
 import gate.creole.ontology.ONodeID;
+import gate.creole.ontology.OntologyTripleStore;
 import gate.creole.ontology.RDFProperty;
 import gate.creole.ontology.impl.*;
 import gate.util.ClosableIterator;
+import gate.util.GateRuntimeException;
 
 import java.io.File;
 import java.util.Vector;
@@ -75,7 +77,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -123,12 +124,25 @@ public class OntologyServiceImplSesame implements OntologyService {
       "http://gate.ac.uk/dummyuri/OWLIM3OntologyPlugin/#ImportContext");
   private static final org.openrdf.model.URI DATA_CONTEXT_URI =
       new org.openrdf.model.impl.URIImpl(
-      "http://gate.ac.uk/dummyuri/OWLIM3OntologyPlugin/#DataContext");
+      AbstractOntologyImplSesame.TRIPLE_CONTEXT_DATA);
   private static final org.openrdf.model.URI SYSTEM_IMPORT_CONTEXT_URI =
       new org.openrdf.model.impl.URIImpl(
       "http://gate.ac.uk/dummyuri/OWLIM3OntologyPlugin/#SystemImportContext");
 
+  
+  private org.openrdf.model.URI contextURI = DATA_CONTEXT_URI;
 
+  public void setContextURIString(String uriString) {
+    contextURI = new org.openrdf.model.impl.URIImpl(uriString);
+  }
+  public String getContextURIString() {
+    return contextURI.toString();
+  }
+  
+  private org.openrdf.model.URI getContextURI() {
+    return contextURI;
+  }
+  
   // ***************************************************************************
   // **** CONSTANTS for prepared queries and the assiciated query variables
   // ***************************************************************************
@@ -143,7 +157,7 @@ public class OntologyServiceImplSesame implements OntologyService {
   public final AbstractOntologyImplSesame ontology;
   private String ontologyUrl;
 
-
+  private OntologyTripleStore ontologyTripleStore;
 
   /**
    * Constructor
@@ -151,9 +165,14 @@ public class OntologyServiceImplSesame implements OntologyService {
   public OntologyServiceImplSesame(AbstractOntologyImplSesame o) {
     super();
     ontology = o;
+    ontologyTripleStore = new OntologyTripleStoreImpl(o,this);
     logger = Logger.getLogger(this.getClass().getName());
   }
 
+  public OntologyTripleStore getOntologyTripleStore() {
+    return ontologyTripleStore;
+  }
+  
   // ***************************************************************************
   // *** METHODS RELATED TO THE ONTOLOGY AS A WHOLE
   // ***************************************************************************
@@ -326,7 +345,7 @@ public class OntologyServiceImplSesame implements OntologyService {
       OntologyFormat ontologyFormat, boolean asImport) {
     org.openrdf.model.URI contextURI;
     if (!asImport) {
-      contextURI = DATA_CONTEXT_URI;
+      contextURI = getContextURI();
     } else {
       contextURI = IMPORT_CONTEXT_URI;
     }
@@ -344,7 +363,7 @@ public class OntologyServiceImplSesame implements OntologyService {
       OntologyFormat ontologyFormat, boolean asImport) {
     org.openrdf.model.URI contextURI;
     if (!asImport) {
-      contextURI = DATA_CONTEXT_URI;
+      contextURI = getContextURI();
     } else {
       contextURI = IMPORT_CONTEXT_URI;
     }
@@ -360,7 +379,7 @@ public class OntologyServiceImplSesame implements OntologyService {
       OntologyFormat ontologyFormat, boolean asImport) {
     org.openrdf.model.URI contextURI;
     if (!asImport) {
-      contextURI = DATA_CONTEXT_URI;
+      contextURI = getContextURI();
     } else {
       contextURI = IMPORT_CONTEXT_URI;
     }
@@ -378,9 +397,9 @@ public class OntologyServiceImplSesame implements OntologyService {
     RDFWriter writer = getRDFWriter4Format(out, ontologyFormat);
     try {
       if (includeImports) {
-        repositoryConnection.export(writer, DATA_CONTEXT_URI, IMPORT_CONTEXT_URI);
+        repositoryConnection.export(writer, getContextURI(), IMPORT_CONTEXT_URI);
       } else {
-        repositoryConnection.export(writer, DATA_CONTEXT_URI);
+        repositoryConnection.export(writer, getContextURI());
       }
     } catch (Exception ex) {
       throw new GateOntologyException("Could not write ontology data",ex);
@@ -391,9 +410,9 @@ public class OntologyServiceImplSesame implements OntologyService {
     RDFWriter writer = getRDFWriter4Format(out, ontologyFormat);
     try {
       if (includeImports) {
-        repositoryConnection.export(writer, DATA_CONTEXT_URI, IMPORT_CONTEXT_URI);
+        repositoryConnection.export(writer, getContextURI(), IMPORT_CONTEXT_URI);
       } else {
-        repositoryConnection.export(writer, DATA_CONTEXT_URI);
+        repositoryConnection.export(writer, getContextURI());
       }
     } catch (Exception ex) {
       throw new GateOntologyException("Could not write ontology data",ex);
@@ -3621,10 +3640,112 @@ public class OntologyServiceImplSesame implements OntologyService {
   }
 
 
+  private Resource node2resource(ONodeID node) {
+    Resource r = null;
+    if (node != null) {
+      if (node.isAnonymousResource()) {
+        String id = node.toString();
+        if (id.startsWith("_:")) {
+          id = id.substring(2);
+        }
+        r = repositoryConnection.getValueFactory().createBNode(id);
+      } else {
+        r = repositoryConnection.getValueFactory().createURI(node.toString());
+      }
+    }
+    return r;
+  }
+  
+  // converts our own Literal represenation into a opnrdf sesame Literal
+  private org.openrdf.model.Literal literal2literal(gate.creole.ontology.Literal literal) {
+    org.openrdf.model.Literal l = null;
+    if (literal != null) {
+      if (literal.getLanguage() != null && !literal.getLanguage().getLanguage().equals("")) {
+        l = repositoryConnection.
+          getValueFactory().createLiteral(literal.getValue(), 
+            literal.getLanguage().getLanguage());
+      } else if (literal.getDataType() != null) {
+        l = repositoryConnection.getValueFactory().createLiteral(literal.getValue());
+      } else {
+        l = repositoryConnection.
+          getValueFactory().createLiteral(literal.getValue(),
+            literal.getDataType().getXmlSchemaURIString());
+      }
+    }
+    return l;
+  }
+  
+  void addTriple(ONodeID subject, OURI predicate, ONodeID object) {
+    if(subject == null || predicate == null || object == null) {
+      throw new GateRuntimeException(
+        "triple add - none subject/predicate/object may be null: "+
+        subject+"/"+predicate+"/"+object);
+    }
+    Resource rs = node2resource(subject);
+    URI rp = null;
+    rp = repositoryConnection.getValueFactory().createURI(predicate.toString());
+    Resource ro = node2resource(object);
+    try {
+      repositoryConnection.add(rs, rp, ro, getContextURI());
+    } catch (RepositoryException ex) {
+       throw new GateOntologyException(
+          "error while adding statement into the repository where subject:" + subject + " predicate:" + predicate + " objectURI:" + object, ex);     
+    }
+  }
+  
+  void addTriple(ONodeID subject, OURI predicate, gate.creole.ontology.Literal object) {
+    if(subject == null || predicate == null || object == null) {
+      throw new GateRuntimeException(
+        "triple add - none subject/predicate/literal may be null: "+
+        subject+"/"+predicate+"/"+object);
+    }
+    Resource s = node2resource(subject);
+    URI p = null;
+    p = repositoryConnection.getValueFactory().createURI(predicate.toString());
+    Literal o = literal2literal(object);
+    try {
+      repositoryConnection.add(s, p, o, getContextURI());
+    } catch (RepositoryException ex) {
+       throw new GateOntologyException(
+          "error while adding statement into the repository where subject:" + subject + " predicate:" + predicate + " objectURI:" + object, ex);     
+    }    
+  }
+  
+  void removeTriple(ONodeID subject, OURI predicate, ONodeID object) {
+    Resource rs = node2resource(subject);
+    URI rp = null;
+    if(predicate != null) {
+      rp = repositoryConnection.getValueFactory().createURI(predicate.toString());
+    }
+    Resource ro = node2resource(object);
+    try {
+      repositoryConnection.remove(rs, rp, ro, getContextURI());
+    } catch (RepositoryException ex) {
+       throw new GateOntologyException(
+          "error while removing statement from the repository where subject:" + subject + " predicate:" + predicate + " objectURI:" + object, ex);     
+    }
+  }
+  
+  void removeTriple(ONodeID subject, OURI predicate, gate.creole.ontology.Literal object) {
+    Resource s = node2resource(subject);
+    URI p = null;
+    if(predicate != null) {
+      p = repositoryConnection.getValueFactory().createURI(predicate.toString());
+    }
+    Literal o = literal2literal(object);
+    try {
+      repositoryConnection.remove(s, p, o, getContextURI());
+    } catch (RepositoryException ex) {
+       throw new GateOntologyException(
+          "error while removing statement from the repository where subject:" + subject + " predicate:" + predicate + " objectURI:" + object, ex);     
+    }    
+    
+  }
+
   // ***************************************************************************
   // *********************** Other Utility Methods
   // **************************************************************************
-  private void addUUUStatement(String subject, String predicate, String object)
+  void addUUUStatement(String subject, String predicate, String object)
   {
     try {
       startTransaction(null);
@@ -3632,7 +3753,7 @@ public class OntologyServiceImplSesame implements OntologyService {
       URI p =
           predicate != null ? repositoryConnection.getValueFactory().createURI(predicate) : null;
       Resource o = object != null ? getResource(object) : null;
-      repositoryConnection.add(s, p, o, DATA_CONTEXT_URI);
+      repositoryConnection.add(s, p, o, getContextURI());
       endTransaction(null);
     } catch (Exception e) {
       throw new GateOntologyException(
@@ -3640,7 +3761,7 @@ public class OntologyServiceImplSesame implements OntologyService {
     }
   }
 
-  private void addUULStatement(String subject, String predicate, String object,
+  void addUULStatement(String subject, String predicate, String object,
       String language) throws GateOntologyException {
     if (debug) {
       logger.debug("addUULStatement for " + subject + " / " + predicate + " / " + object);
@@ -3660,7 +3781,7 @@ public class OntologyServiceImplSesame implements OntologyService {
             ? repositoryConnection.getValueFactory().createLiteral(object, language)
             : null;
       }
-      repositoryConnection.add(s, p, o, DATA_CONTEXT_URI);
+      repositoryConnection.add(s, p, o, getContextURI());
       endTransaction(null);
     } catch (Exception e) {
       throw new GateOntologyException(
@@ -3668,7 +3789,7 @@ public class OntologyServiceImplSesame implements OntologyService {
     }
   }
 
-  public void addUUDStatement(String subject,
+  void addUUDStatement(String subject,
       String predicate, String object, String datatype)
   {
     try {
@@ -3679,7 +3800,7 @@ public class OntologyServiceImplSesame implements OntologyService {
       URI d = repositoryConnection.getValueFactory().createURI(datatype);
       Literal l =
           object != null ? repositoryConnection.getValueFactory().createLiteral(object, d) : null;
-      repositoryConnection.add(s, p, l, DATA_CONTEXT_URI);
+      repositoryConnection.add(s, p, l, getContextURI());
       endTransaction(null);
     } catch (Exception e) {
       throw new GateOntologyException(
@@ -3689,7 +3810,7 @@ public class OntologyServiceImplSesame implements OntologyService {
 
   // NOTE: this originally returned the number of removed statements, but
   // this does not work any more with Sesame2
-  private void removeUUUStatement(String subject, String predicate, String object)
+  void removeUUUStatement(String subject, String predicate, String object)
   {
     try {
       startTransaction(null);
@@ -3708,7 +3829,7 @@ public class OntologyServiceImplSesame implements OntologyService {
     }
   }
 
-  private void removeUULStatement(String subject, String predicate,
+  void removeUULStatement(String subject, String predicate,
       String object, String language)
   {
     try {
@@ -3733,7 +3854,7 @@ public class OntologyServiceImplSesame implements OntologyService {
     }
   }
 
-  public void removeUUDStatement(String subject,
+  void removeUUDStatement(String subject,
       String predicate, String object, String datatype)
   {
     try {
@@ -4383,6 +4504,13 @@ public class OntologyServiceImplSesame implements OntologyService {
     return debug;
   }
 
+  
+  // TODO: make it a constructor parameter or something that is settable
+  // if this service creates triples using the DATA or META graph URI.
+  // That way, the same repository can be used for both meta and data if
+  // we create to ontology objects with different graph URIs.
+  
+  
   // TODO: STUFF TO GET RID OF
   // TODO: get rid of this or make semantics available to API?
   // If it is just internal, make this local to whatever method and
