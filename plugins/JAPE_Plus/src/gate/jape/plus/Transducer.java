@@ -105,7 +105,7 @@ public class Transducer extends AbstractLanguageAnalyser
   }
 
   @CreoleParameter(
-      comment="URL for the data from which this transducer should be built.")
+      comment="URL for the data from which this transducer should be built.", suffixes="jape")
   public void setGrammarURL(URL source) {
     this.grammarURL = source;
   }
