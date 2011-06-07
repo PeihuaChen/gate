@@ -36,7 +36,10 @@
     <fileset dir="lib">
       <include name="*.jar"/>
     </fileset>
-    <pathelement location="." />
+    <!-- the following is necessary as long as the interfaces in 
+         gate.creole.ontology are still defined in this plugin and not 
+         in GATE core -->
+    <pathelement location="${jar.location}" />
   </path>
 
 
@@ -108,6 +111,21 @@
       <formatter type="plain" />
 
       <test name="gate.creole.ontology.impl.test.Test_OntoTest1" />
+    </junit>
+  </target>
+
+
+  <target name="testtriplestore" depends="jar">
+    <junit fork="true" showoutput="yes" printsummary="yes"  maxmemory="${run.memory}">
+      <classpath>
+        <pathelement location="Ontology.jar" />
+        <path refid="classpath" />
+      </classpath>
+                        <!-- run headless -->
+      <sysproperty key="java.awt.headless" value="true" />
+      <formatter type="plain" />
+
+      <test name="gate.creole.ontology.impl.test.Test_TripleStore" />
     </junit>
   </target>
 

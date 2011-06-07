@@ -57,6 +57,7 @@ import gate.creole.ontology.ONodeID;
 import gate.creole.ontology.ObjectProperty;
 import gate.creole.ontology.Ontology;
 import gate.creole.ontology.OntologyModificationListener;
+import gate.creole.ontology.OntologyTripleStore;
 import gate.creole.ontology.RDFProperty;
 import gate.creole.ontology.SomeValuesFromRestriction;
 import gate.creole.ontology.SymmetricProperty;
@@ -2115,4 +2116,13 @@ public abstract class AbstractOntologyImpl
   } // setDataStore(DS)
 
 
+  /**
+   * Return an object representing the triple store which backs the ontology.
+   * 
+   * @return The OntologyTripleStore object for this ontology or null if
+   * modifying the ontology via triples is not supported by the implementation.
+   */
+  public abstract OntologyTripleStore getOntologyTripleStore();
+  
+  
 }
