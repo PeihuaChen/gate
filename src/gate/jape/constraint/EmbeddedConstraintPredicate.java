@@ -103,4 +103,10 @@ public abstract class EmbeddedConstraintPredicate extends AbstractConstraintPred
       annotType = String.valueOf(v);
     }
   }
+
+  public String getAnnotType() {
+    return annotType;
+  }
+  
+  
 }
