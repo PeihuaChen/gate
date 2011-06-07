@@ -525,7 +525,6 @@ public class SPTBase extends AbstractLanguageAnalyser {
       //exit condition
       if(typeIndex[nextType] >= annotsByType[nextType].length){
         //sanity check
-        //TODO: remove this!
         if(annIdx != annCount){
           throw new RuntimeException(
                   "Malfunction while building the annotation table: " +
