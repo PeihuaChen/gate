@@ -149,14 +149,21 @@ public class SPTBase extends AbstractLanguageAnalyser {
       int res = other.annotationIndex - annotationIndex;
       if(res == 0) {
         // highest is better, hence the reversed test
-        res =
-                rules[states[other.state].rule].getPriority()
-                        - rules[states[state].rule].getPriority();
+        res = rules[states[other.state].rule].getPriority() - 
+            rules[states[state].rule].getPriority();
         if(res == 0) {
           // lower is better
-          res =
-                  rules[states[state].rule].getPosition()
-                          - rules[states[other.state].rule].getPosition();
+          res = rules[states[state].rule].getPosition() - 
+              rules[states[other.state].rule].getPosition();
+        }
+        if(res == 0) {
+          // same rule matching same document segment (probably some zero-length
+          // annotations are involved) -> prefer the version with more annotations
+          int thisSize = 0;
+          for(IntArrayList binds : bindings.values()) thisSize += binds.size();
+          int thatSize = 0;
+          for(IntArrayList binds : other.bindings.values()) thatSize += binds.size();
+          res = thatSize - thisSize;
         }
       }
       return res;
@@ -371,7 +378,7 @@ public class SPTBase extends AbstractLanguageAnalyser {
    * An array that, for each input annotation, points to the first annotation
    * starting at (or after) the offset where the current annotation ends.
    */
-  protected int[] annotationNext;
+  protected int[] annotationFollowing;
 
   /**
    * The states of the state machine. State at index 0 is always the initial
@@ -620,9 +627,9 @@ public class SPTBase extends AbstractLanguageAnalyser {
     
     
     // initialise the nextAnnotation array with -1
-    annotationNext = new int[annCount];
-    for(int i = 0; i < annotationNext.length; i++) {
-      annotationNext[i] = NOT_CALCULATED;
+    annotationFollowing = new int[annCount];
+    for(int i = 0; i < annotationFollowing.length; i++) {
+      annotationFollowing[i] = NOT_CALCULATED;
     }
     // calculate the annotationNextOffset array
     annotationNextOffset = new int[annCount];
@@ -762,9 +769,9 @@ public class SPTBase extends AbstractLanguageAnalyser {
     
     
     // initialise the nextAnnotation array with -1
-    annotationNext = new int[annCount];
-    for(int i = 0; i < annotationNext.length; i++) {
-      annotationNext[i] = NOT_CALCULATED;
+    annotationFollowing = new int[annCount];
+    for(int i = 0; i < annotationFollowing.length; i++) {
+      annotationFollowing[i] = NOT_CALCULATED;
     }
     // calculate the annotationNextOffset array
     annotationNextOffset = new int[annCount];
@@ -807,7 +814,7 @@ public class SPTBase extends AbstractLanguageAnalyser {
   /**
    * Returns the index in the {@link #annotation} array, where the range of next
    * annotations for a given annotation starts. This method is used to lazily
-   * fill the {@link #annotationNext} array (once a value is calculated, it is
+   * fill the {@link #annotationFollowing} array (once a value is calculated, it is
    * stored there; further requests for the same annotation idx will be answered
    * by directly looking up the previously calculated value).
    * 
@@ -817,8 +824,8 @@ public class SPTBase extends AbstractLanguageAnalyser {
    *         whose start offset is greater or equal than the end offset of the
    *         provided annotation.
    */
-  protected int nextAnnotation(int idx) {
-    if(annotationNext[idx] == NOT_CALCULATED) {
+  protected int followingAnnotation(int idx) {
+    if(annotationFollowing[idx] == NOT_CALCULATED) {
       // calculate the value first, using binary search
       long endOffset = annotation[idx].getEndNode().getOffset();
       // annotations are sorted by start offset, and have non-negative length
@@ -837,7 +844,7 @@ public class SPTBase extends AbstractLanguageAnalyser {
           }
           if(annotation[mid -1].getStartNode().getOffset() < endOffset){
             //we found the right value
-            annotationNext[idx] = mid;
+            annotationFollowing[idx] = mid;
             break;
           }else{
             to = mid - 1;
@@ -848,11 +855,11 @@ public class SPTBase extends AbstractLanguageAnalyser {
           mid = annotationNextOffset[mid];
           if(mid > annotation.length){
             //no more annotations
-            annotationNext[idx] = Integer.MAX_VALUE;
+            annotationFollowing[idx] = Integer.MAX_VALUE;
             break;
           }else if(annotation[mid].getStartNode().getOffset() > endOffset){
             //we found the right value
-            annotationNext[idx] = mid;
+            annotationFollowing[idx] = mid;
             break;
           }else{
             from = mid;  
@@ -864,22 +871,22 @@ public class SPTBase extends AbstractLanguageAnalyser {
                   && annotation[mid - 1].getStartNode().getOffset() == midStartOffset) {
             mid--;
           }
-          annotationNext[idx] = mid;
+          annotationFollowing[idx] = mid;
           break;
         }
       }
       
-      if(annotationNext[idx] == NOT_CALCULATED) {
+      if(annotationFollowing[idx] == NOT_CALCULATED) {
         // we could not find an exact match.
         // find first annotation after from
         if(from < annotation.length) {
-          annotationNext[idx] = from;
+          annotationFollowing[idx] = from;
         } else {
-          annotationNext[idx] = Integer.MAX_VALUE;
+          annotationFollowing[idx] = Integer.MAX_VALUE;
         }
       }
     }
-    return annotationNext[idx];
+    return annotationFollowing[idx];
   }
 
   /**
@@ -1150,7 +1157,7 @@ public class SPTBase extends AbstractLanguageAnalyser {
             // we do not advance the annotation index,
             // since opening-round-bracket
             // transitions are treated like epsilon transitions
-            continue;
+            continue transitions;
           }
           if(aTransition.type != TransitionPDA.TYPE_CONSTRAINT){
             // closing-round-bracket transition
@@ -1161,7 +1168,7 @@ public class SPTBase extends AbstractLanguageAnalyser {
             // we do not advance the annotation index,
             // since closing-round-bracket
             // transitions are treated like epsilon transitions
-            continue;
+            continue transitions;
           }
           // constrained transition;
           // for each constraint, for each annotation, see if they match
@@ -1218,21 +1225,27 @@ public class SPTBase extends AbstractLanguageAnalyser {
           List<int[]> nextSteps = enumerateCombinations(annotsForConstraints);
           for(int[] aStep : nextSteps) {
             FSMInstance nextInstance = fsmInstance.clone();
-            // update the data in the next instance
+            // update the data in the next instance            
             nextInstance.state = aTransition.nextState;
+            // Calculate the next annotation to look at: find the one starting
+            // after the longest matched annotation.
             int nextAnnotationForInstance = fsmInstance.annotationIndex;
+            int maxNextStep = -1;
             for(int i = 0; i < aStep.length; i++) {
               if(aStep[i]>= 0){
-                if(nextAnnotationForInstance < nextAnnotation(aStep[i])) {
-                  nextAnnotationForInstance = nextAnnotation(aStep[i]);
+                if(maxNextStep < aStep[i]) maxNextStep = aStep[i];
+                if(nextAnnotationForInstance < followingAnnotation(aStep[i])) {
+                  nextAnnotationForInstance = followingAnnotation(aStep[i]);
                 }
               }
             }
-            if(nextAnnotationForInstance == fsmInstance.annotationIndex) {
-              // this can happen if fsmInstance.annotationIndex is a zero-length
-              // annotation, and leads to infinite looping
-              if(nextAnnotationForInstance < annotation.length -2) {
-                nextAnnotationForInstance++;
+            // When zero-length annotations are used, followingAnnotation(annIDx)
+            // may not actually advance. To avoid infinite looping, we need to 
+            // make sure that next annotation is greater than all the ones
+            // already matched. 
+            if(nextAnnotationForInstance <= maxNextStep) {
+              if(maxNextStep < annotation.length -2) {
+                nextAnnotationForInstance = maxNextStep + 1;
               } else {
                 // no more annotations
                 nextAnnotationForInstance = Integer.MAX_VALUE;
@@ -1247,6 +1260,7 @@ public class SPTBase extends AbstractLanguageAnalyser {
       // at this point, there are no more active instances (or we exited due to
       // matching mode being First or Once).
       // fire all rules that need firing, update the currentAnnotation value
+      int oldCurrAnn = currentAnnotation;
       if(acceptingInstances.size() > 0) {
         try {
           switch(matchMode){
@@ -1277,7 +1291,6 @@ public class SPTBase extends AbstractLanguageAnalyser {
                   }
                 }
               }
-              acceptingInstances.clear();
               break;
             case BRILL:
               int maxNext = Integer.MIN_VALUE;
@@ -1288,38 +1301,58 @@ public class SPTBase extends AbstractLanguageAnalyser {
                 }
               }
               currentAnnotation = maxNext;
-              acceptingInstances.clear();
               break;
             case ALL:
               for(FSMInstance anInstance : acceptingInstances) {
                 applyRule(anInstance);
               }
-              acceptingInstances.clear();
-              currentAnnotation++;
+              // move to the next relevant offset in the input 
+              currentAnnotation = annotationNextOffset[currentAnnotation];
               break;
             case FIRST:
               FSMInstance anInstance = acceptingInstances.get(0);
               applyRule(anInstance);
               currentAnnotation = anInstance.annotationIndex;
-              acceptingInstances.clear();
               activeInstances.clear();
               break;
             case ONCE:
               applyRule(acceptingInstances.get(0));
               break topWhile;
           }
+          acceptingInstances.clear();
+          // make sure the matching advances by at least the minimum amount
+          // (a rule with only a Kleene* can legitimately match nothing, leading
+          // to an infinite loop)
+          if(currentAnnotation != Integer.MAX_VALUE &&
+             annotation[oldCurrAnn].getStartNode().getOffset() == 
+             annotation[currentAnnotation].getStartNode().getOffset()) {
+            // move to the next relevant offset in the input 
+            currentAnnotation = annotationNextOffset[currentAnnotation];
+          }
         } catch(JapeException e) {
           throw new ExecutionException(e);
         }
       }else{
         //no acceptors -> just move to next annotation
-        currentAnnotation++;
+        currentAnnotation = annotationNextOffset[currentAnnotation];
+//        currentAnnotation = followingAnnotation(currentAnnotation);
+//        while(currentAnnotation != Integer.MAX_VALUE &&
+//              oldCurrAnn == followingAnnotation(currentAnnotation)) {
+//            // this can happen when a rule has a Kleene * and nothing else
+//            // which allows it to successfully match nothing
+//            if(currentAnnotation < annotation.length -2){
+//              currentAnnotation ++;
+//            } else {
+//              // we've run out of annotations
+//              currentAnnotation = Integer.MAX_VALUE;
+//            }
+//          }        
       }
       
     }// while(currentAnnotation < annotation.length)
     // execution completed -> clean up the internal data structures.
     annotation = null;
-    annotationNext = null;
+    annotationFollowing = null;
     annotationNextOffset = null;
     annotationPredicateComputed = null;
     annotationPredicateValues = null;
