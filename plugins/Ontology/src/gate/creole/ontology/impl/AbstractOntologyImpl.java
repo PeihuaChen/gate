@@ -2115,14 +2115,4 @@ public abstract class AbstractOntologyImpl
     throw new PersistenceException("This ontology LR cannot be saved to a datastore");
   } // setDataStore(DS)
 
-
-  /**
-   * Return an object representing the triple store which backs the ontology.
-   * 
-   * @return The OntologyTripleStore object for this ontology or null if
-   * modifying the ontology via triples is not supported by the implementation.
-   */
-  public abstract OntologyTripleStore getOntologyTripleStore();
-  
-  
 }
