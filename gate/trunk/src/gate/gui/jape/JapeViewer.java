@@ -1,9 +1,11 @@
 package gate.gui.jape;
 
+import gate.LanguageAnalyser;
 import gate.Resource;
 import gate.creole.ANNIEConstants;
+import gate.creole.AbstractProcessingResource;
 import gate.creole.AbstractVisualResource;
-import gate.creole.Transducer;
+import gate.creole.ResourceInstantiationException;
 import gate.event.ProgressListener;
 import gate.jape.parser.ParseCpslConstants;
 import gate.jape.parser.ParseCpslTokenManager;
@@ -16,7 +18,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.MalformedURLException;
@@ -70,7 +71,7 @@ public class JapeViewer extends AbstractVisualResource implements
   /**
    * The JAPE transducer for which we need to show the JAPE source
    */
-  private Transducer transducer;
+  private LanguageAnalyser transducer;
 
   /**
    * A map that associates the syntactic elements of JAPE files with a
@@ -114,12 +115,14 @@ public class JapeViewer extends AbstractVisualResource implements
         if(e.getPath().getLastPathComponent() == null) return;
 
         try {
-          readJAPEFileContents(new URL(transducer.getGrammarURL(), e.getPath()
+          readJAPEFileContents(new URL((URL)transducer.getParameterValue("grammarURL"), e.getPath()
                   .getLastPathComponent()
                   + ".jape"));
         }
         catch(MalformedURLException mue) {
           mue.printStackTrace();
+        } catch(ResourceInstantiationException rie) {
+          rie.printStackTrace();
         }
       }
     });
@@ -176,19 +179,27 @@ public class JapeViewer extends AbstractVisualResource implements
 
   @Override
   public void setTarget(Object target) {
-    if(target == null || !(target instanceof Transducer)) {
+    if(target == null || !(target instanceof gate.creole.Transducer || target.getClass().getName().equals("gate.jape.plus.Transducer"))) {
       throw new IllegalArgumentException(
               "The GATE jape viewer can only be used with a GATE jape transducer!\n"
                       + target.getClass().toString()
                       + " is not a GATE Jape Transducer!");
     }
 
-    if(transducer != null) {
-      transducer.removeProgressListener(this);
+    if(transducer != null && transducer instanceof AbstractProcessingResource) {
+      ((AbstractProcessingResource)transducer).removeProgressListener(this);
     }
 
-    transducer = (Transducer)target;
-    URL japeFileURL = transducer.getGrammarURL();
+    transducer = (LanguageAnalyser)target;
+    URL japeFileURL = null;
+    
+    try {
+      japeFileURL = (URL)transducer.getParameterValue("grammarURL");
+    }
+    catch (ResourceInstantiationException rie) {
+      //ignore this for now and let the null catch take over
+      rie.printStackTrace();
+    }
 
     if(japeFileURL == null) {
       textArea.setText("The source for this JAPE grammar is not available!");
@@ -204,7 +215,9 @@ public class JapeViewer extends AbstractVisualResource implements
     treePhases.setSelectionRow(0);
 
     readJAPEFileContents(japeFileURL);
-    transducer.addProgressListener(this);
+    if(transducer instanceof AbstractProcessingResource) {
+      ((AbstractProcessingResource)transducer).addProgressListener(this);
+    }
   }
 
   private void readJAPEFileContents(URL url) {
@@ -213,12 +226,12 @@ public class JapeViewer extends AbstractVisualResource implements
 
     try {
       Reader japeReader = null;
-      if(transducer.getEncoding() == null) {
+      String encoding = (String)transducer.getParameterValue("encoding");
+      if(encoding == null) {
         japeReader = new BomStrippingInputStreamReader(url.openStream());
       }
       else {
-        japeReader = new BomStrippingInputStreamReader(url.openStream(), transducer
-                .getEncoding());
+        japeReader = new BomStrippingInputStreamReader(url.openStream(), encoding);
       }
       BufferedReader br = new BufferedReader(japeReader);
       String content = br.readLine();
@@ -284,6 +297,8 @@ public class JapeViewer extends AbstractVisualResource implements
     }
     catch(IOException ioe) {
       throw new GateRuntimeException(ioe);
+    } catch(ResourceInstantiationException rie) {
+      throw new GateRuntimeException(rie);
     }
 
     if(treePhases.getSelectionRows() != null
