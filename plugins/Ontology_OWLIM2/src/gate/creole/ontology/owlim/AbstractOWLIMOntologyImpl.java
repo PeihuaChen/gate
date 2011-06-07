@@ -56,6 +56,7 @@ import gate.creole.ontology.SomeValuesFromRestriction;
 import gate.creole.ontology.SymmetricProperty;
 import gate.creole.ontology.TransitiveProperty;
 import gate.creole.ontology.URI;
+import gate.creole.ontology.OntologyTripleStore;
 import gate.util.ClosableIterator;
 import java.io.InputStream;
 import java.io.Reader;
@@ -1911,4 +1912,10 @@ public abstract class AbstractOWLIMOntologyImpl
   public ClosableIterator getOClassesIterator(boolean toponly) {
     return new ResourceIterator<OClass>(getOClasses(toponly));
   }
+
+  public  OntologyTripleStore getOntologyTripleStore() {
+    return null;
+  }
+
+ 
 }
