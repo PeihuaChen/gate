@@ -66,14 +66,14 @@ extends AbstractResource implements ProcessingResource, ANNIEConstants
    * Checks whether this PR has been interrupted since the last time its
    * {@link #execute()} method was called.
    */
-  public synchronized boolean isInterrupted(){
+  public boolean isInterrupted(){
     return interrupted;
   }
 
   /**
    * Notifies this PR that it should stop its execution as soon as possible.
    */
-  public synchronized void interrupt(){
+  public void interrupt(){
     interrupted = true;
   }
 
@@ -210,5 +210,5 @@ extends AbstractResource implements ProcessingResource, ANNIEConstants
    */
   private transient Vector progressListeners;
 
-  protected boolean interrupted = false;
+  protected volatile boolean interrupted = false;
 } // class AbstractProcessingResource
