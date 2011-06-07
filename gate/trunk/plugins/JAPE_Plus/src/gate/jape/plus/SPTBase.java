@@ -1098,8 +1098,7 @@ public class SPTBase extends AbstractLanguageAnalyser {
               (String)actualValue).matches();
         }
         break;
-      // TODO: Implement these tests!
-      case CONTAINS:
+      case CONTAINS:{
         int[] constraints = (int[])predicate.featureValue;
         // find all annotations contained in this annotation
         // annotations are sorted by start offset
@@ -1133,9 +1132,41 @@ public class SPTBase extends AbstractLanguageAnalyser {
           // try the next ann
           currAnnIdx++;
         }
+      }
       break;
-      // case WITHIN:
-      // break;
+       // TODO: Implement this!
+      case WITHIN: {
+        int[] constraints = (int[])predicate.featureValue;
+        // find all annotations containing this annotation
+        // annotations are sorted by start offset
+        int currAnnIdx = 0;
+        int maxCurrAnn = annotationNextOffset[annotationId];
+        if(maxCurrAnn >= annotation.length) maxCurrAnn = annotation.length;
+        long endOffset = annotation[annotationId].getEndNode().getOffset();
+        // move left until we find the first annotation starting here
+        while(currAnnIdx < maxCurrAnn) {
+          if(annotationType[currAnnIdx] == constraints[0] &&
+             annotation[currAnnIdx].getEndNode().getOffset() >= endOffset) {
+            // annotation is of correct type and contains the current one
+            // now check the constraint predicates
+            boolean predicatesHappy = true;
+            for(int predIdx = 2;
+                predIdx < constraints.length && predicatesHappy; 
+                predIdx++) {
+              predicatesHappy &= (checkPredicate(currAnnIdx, constraints[predIdx]));
+            }
+            if((constraints[1] >= 0 && predicatesHappy) ||
+               // negated constraint 
+               (constraints[1] < 0 && !predicatesHappy)) {
+              result = true;
+              break predtype;
+            }
+          }
+          // try the next ann
+          currAnnIdx++;
+        }
+      }
+      break;
       default:
         throw new IllegalArgumentException("Predicate type " + predicate.type
                 + " not implemented");
