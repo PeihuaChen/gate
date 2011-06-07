@@ -216,8 +216,7 @@ public interface AnnotationSet extends SimpleAnnotationSet, Serializable {
    * completely and is bigger than the given one. Here we only get the
    * annotations between the two offsets.  Formally, all annotations
    * are returned whose start position is >= <code>startOffset</code>
-   * and &lt; <code>endOffset</code> and whose end position is
-   * &lt;= <code>endOffset</code>.
+   * and whose end position is &lt;= <code>endOffset</code>.
    *
    * @param startOffset the start of the interval, inclusive
    * @param endOffset the end of the interval, inclusive
