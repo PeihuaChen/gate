@@ -284,6 +284,11 @@ public class SPTBase extends AbstractLanguageAnalyser {
   protected String inputASName;
 
   /**
+   * The actual input annotation set.
+   */
+  protected AnnotationSet inputAS;
+  
+  /**
    * The name for the output annotation set.
    */
   protected String outputASName;
@@ -451,12 +456,11 @@ public class SPTBase extends AbstractLanguageAnalyser {
    * Populates the internal data structures with the input annotations.
    */
   protected void loadAnnotations() {
+    inputAS = (inputASName == null || inputASName.length() == 0) ? 
+              document.getAnnotations() : document.getAnnotations(inputASName);
     if(inputAnnotationTypes == null || inputAnnotationTypes.length == 0) {
       // no input specified -> load all annotation types.
-      AnnotationSet annSource = 
-        (inputASName == null || inputASName.length() == 0) ? 
-                document.getAnnotations() : document.getAnnotations(inputASName);
-      Set<String> allTypes = annSource.getAllTypes();
+      Set<String> allTypes = inputAS.getAllTypes();
       inputAnnotationTypes = new String[allTypes.size()];
       int index = 0;
       for(String aType : allTypes)
@@ -523,7 +527,6 @@ public class SPTBase extends AbstractLanguageAnalyser {
         //sanity check
         //TODO: remove this!
         if(annIdx != annCount){
-          System.out.print("gaga");
           throw new RuntimeException(
                   "Malfunction while building the annotation table: " +
                   "sorted " + annIdx + " annotations instead of " + annCount);
@@ -963,9 +966,9 @@ public class SPTBase extends AbstractLanguageAnalyser {
     boolean result = false;
     // the value of the tested feature on the annotation
     Object actualValue = null;
-    if(predicate.featureName != null) {
-      actualValue =
-              annotation[annotationId].getFeatures().get(predicate.featureName);
+    if(predicate.annotationAccessor != null) {
+      actualValue = predicate.annotationAccessor.getValue(
+          annotation[annotationId], inputAS); 
       if(actualValue != null) {
         // convert to the appropriate type, if necessary
         if(predicate.featureValue instanceof String) {
@@ -978,7 +981,7 @@ public class SPTBase extends AbstractLanguageAnalyser {
               actualValue = new Long(actualValue.toString());
             } catch(NumberFormatException e) {
               logger.warn("Could not convert value \"" + actualValue.toString()
-                      + "\" of feature \"" + predicate.featureName
+                      + "\" of feature \"" + predicate.annotationAccessor
                       + "\" to a Long. All constraint "
                       + "checks will use \"null\" instead.");
               actualValue = null;
@@ -990,7 +993,7 @@ public class SPTBase extends AbstractLanguageAnalyser {
               actualValue = new Double(actualValue.toString());
             } catch(NumberFormatException e) {
               logger.warn("Could not convert value \"" + actualValue.toString()
-                      + "\" of feature \"" + predicate.featureName
+                      + "\" of feature \"" + predicate.annotationAccessor
                       + "\" to a Double. All constraint "
                       + "checks will use \"null\" instead.");
               actualValue = null;
@@ -999,27 +1002,23 @@ public class SPTBase extends AbstractLanguageAnalyser {
         }
       }
     }
-    switch(predicate.type){
+    predtype: switch(predicate.type){
       case EQ:
         if(ontology != null && actualValue != null 
-                && predicate.featureName
+                && predicate.annotationAccessor.getKey().toString()
                         .equals(ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME)) {
           // we need to do ontological match
           // let's first find out the classes with the names
-          OResource superClass =
-                  ontology
-                          .getOResourceByName(predicate.featureValue.toString());
-          OResource subClass =
-                  ontology.getOResourceByName(actualValue.toString());
-          if(superClass == null || !(superClass instanceof OClass)
-                  || subClass == null || !(subClass instanceof OClass)) {
+          OResource superClass = ontology.getOResourceByName(
+              predicate.featureValue.toString());
+          OResource subClass = ontology.getOResourceByName(
+              actualValue.toString());
+          if(superClass == null || !(superClass instanceof OClass) || 
+             subClass == null || !(subClass instanceof OClass)) {
             result = false;
           } else {
-            result =
-                    subClass == superClass
-                            || ((OClass)subClass).isSubClassOf(
-                                    (OClass)superClass,
-                                    OConstants.TRANSITIVE_CLOSURE);
+            result = subClass == superClass || ((OClass)subClass).isSubClassOf(
+                (OClass)superClass, OConstants.TRANSITIVE_CLOSURE);
           }
         } else {
           if(actualValue == null) {
@@ -1095,14 +1094,46 @@ public class SPTBase extends AbstractLanguageAnalyser {
         if(actualValue == null) {
           result = false;
         } else {
-          result =
-                  !((Pattern)predicate.featureValue).matcher(
-                          (String)actualValue).matches();
+          result = !((Pattern)predicate.featureValue).matcher(
+              (String)actualValue).matches();
         }
         break;
       // TODO: Implement these tests!
-      // case CONTAINS:
-      // break;
+      case CONTAINS:
+        int[] constraints = (int[])predicate.featureValue;
+        // find all annotations contained in this annotation
+        // annotations are sorted by start offset
+        int currAnnIdx = annotationId;
+        long startOffset = annotation[annotationId].getStartNode().getOffset();
+        long endOffset = annotation[annotationId].getEndNode().getOffset();
+        // move left until we find the first annotation starting here
+        while(currAnnIdx > 0 && 
+            annotation[currAnnIdx -1].getStartNode().getOffset() == startOffset) {
+          currAnnIdx--;
+        }
+        while(currAnnIdx < annotation.length &&
+              annotation[currAnnIdx].getStartNode().getOffset() <= endOffset) {
+          if(annotationType[currAnnIdx] == constraints[0] &&
+             annotation[currAnnIdx].getEndNode().getOffset() <= endOffset) {
+            // annotation is of correct type and contained
+            // now check the constraint predicates
+            boolean predicatesHappy = true;
+            for(int predIdx = 2;
+                predIdx < constraints.length && predicatesHappy; 
+                predIdx++) {
+              predicatesHappy &= (checkPredicate(currAnnIdx, constraints[predIdx]));
+            }
+            if((constraints[1] >= 0 && predicatesHappy) ||
+               // negated constraint 
+               (constraints[1] < 0 && !predicatesHappy)) {
+              result = true;
+              break predtype;
+            }
+          }
+          // try the next ann
+          currAnnIdx++;
+        }
+      break;
       // case WITHIN:
       // break;
       default:

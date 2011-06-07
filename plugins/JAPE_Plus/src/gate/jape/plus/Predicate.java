@@ -15,6 +15,8 @@
 
 package gate.jape.plus;
 
+import gate.jape.constraint.AnnotationAccessor;
+
 import java.util.regex.Pattern;
 
 /**
@@ -41,11 +43,17 @@ public class Predicate{
   /**
    * The annotation feature this predicate refers to.
    */
-  protected String featureName;
+//  protected String featureName;
+  
+  protected AnnotationAccessor annotationAccessor;
   
   /**
    * The desired value for the feature. The only allowed types are 
-   * {@link String}, {@link Long}, {@link Double}, or {@link Pattern}!
+   * {@link String}, {@link Long}, {@link Double}, {@link Pattern} (for REGEX 
+   * predicates), or an int[] with annotationType, negated, pred1, pred2, ... 
+   * (i.e. constraints in the same format as 
+   * {@link SPTBase.Transition#constraints}) used by CONTAINS and WITHIN 
+   * predicates to validate potential matches!
    */
   protected Object featureValue;
   
@@ -87,7 +95,7 @@ public class Predicate{
     final int prime = 31;
     int result = 1;
     result =
-      prime * result + ((featureName == null) ? 0 : featureName.hashCode());
+      prime * result + ((annotationAccessor == null) ? 0 : annotationAccessor.hashCode());
     result =
       prime * result + ((featureValue == null) ? 0 : featureValue.hashCode());
     result = prime * result + ((type == null) ? 0 : type.hashCode());
@@ -103,9 +111,9 @@ public class Predicate{
     if(obj == null) return false;
     if(getClass() != obj.getClass()) return false;
     Predicate other = (Predicate)obj;
-    if(featureName == null) {
-      if(other.featureName != null) return false;
-    } else if(!featureName.equals(other.featureName)) return false;
+    if(annotationAccessor == null) {
+      if(other.annotationAccessor != null) return false;
+    } else if(!annotationAccessor.equals(other.annotationAccessor)) return false;
     if(featureValue == null) {
       if(other.featureValue != null) return false;
     } else if(!featureValue.equals(other.featureValue)) return false;
