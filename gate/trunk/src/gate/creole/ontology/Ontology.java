@@ -1128,6 +1128,16 @@ public interface Ontology extends LanguageResource {
   public OntologyBooleanQuery createBooleanQuery(String theQuery, QueryLanguage queryLanguage);
 
   /**
+   * Return an object representing the triple store which backs the ontology.
+   * 
+   * @return The OntologyTripleStore object for this ontology or null if
+   * modifying the ontology via triples is not supported by the implementation.
+   */
+  public abstract OntologyTripleStore getOntologyTripleStore();
+
+
+
+  /**
    * Create an ORUI object from the given URI string.
    *
    * @param theURI an URI or IRI string
