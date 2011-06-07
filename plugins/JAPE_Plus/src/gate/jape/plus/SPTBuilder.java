@@ -341,6 +341,38 @@ public class SPTBuilder {
         newPredValue[predIdx++] = predId;
       }
       newPredicate.featureValue = newPredValue;
+    } else if(newPredicate.type == PredicateType.WITHIN) {
+      String containedAnnType = null;
+      List<Integer> containedPredicates = new LinkedList<Integer>();
+      // convert the value
+      WithinPredicate contPredicate = (WithinPredicate)oldPredicate;
+      Object value = oldPredicate.getValue();
+      if(value == null) {
+        // just annotation type
+        containedAnnType = contPredicate.getAnnotType();
+      } else  if(value instanceof String) {
+        // a simple annotation type
+        containedAnnType = (String)value;
+      } else if (value instanceof Constraint) {
+        Constraint constraint = (Constraint)value;
+        containedAnnType = constraint.getAnnotType();
+        for(ConstraintPredicate pred : constraint.getAttributeSeq()) {
+          containedPredicates.add(convertPredicate(containedAnnType, pred));
+        }
+      }
+      int[] newPredValue = new int[2 + containedPredicates.size()];
+      newPredValue[0] = annotationTypes.indexOf(containedAnnType);
+      if(newPredValue[0] == -1) {
+        annotationTypes.add(containedAnnType);
+        newPredValue[0] = annotationTypes.size() -1;
+      }
+      // contains predicates are always positive
+      newPredValue[1] = 1;
+      int predIdx = 2;
+      for(Integer predId : containedPredicates) {
+        newPredValue[predIdx++] = predId;
+      }
+      newPredicate.featureValue = newPredValue;
     } else {
       newPredicate.featureValue = oldPredicate.getValue();
     }
