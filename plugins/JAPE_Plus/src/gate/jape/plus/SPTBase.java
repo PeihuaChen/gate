@@ -1118,11 +1118,14 @@ public class SPTBase extends AbstractLanguageAnalyser {
    * @throws ExecutionException
    */
   public void execute() throws ExecutionException {
+    // fire the progress start event
+    fireProgressChanged(0);
+    // the annotation for which we last reported the progress
+    int lastProgressReportAnnIdx = 0;    
     // prepare the annotations array
     loadAnnotations();
     predicateHits = 0;
     predicateMisses = 0;
-    
     activeInstances = new LinkedList<FSMInstance>();
     acceptingInstances = new ArrayList<FSMInstance>();
     int currentAnnotation = 0;
@@ -1131,12 +1134,12 @@ public class SPTBase extends AbstractLanguageAnalyser {
       activeInstances.add(new FSMInstance(currentAnnotation, 0,
               new HashMap<String, IntArrayList>()));      
       activeInstances: while(activeInstances.size() > 0) {
+        if(owner.isInterrupted()) throw new ExecutionInterruptedException(
+                "The execution of the \"" + getName() + 
+                "\" JAPE Plus transducer has been interrupted!");
         // The matching needs to run in breadth-first-search mode, in order to
         // support Once and First matching modes. The algorithm is that we
-        // advance
-        // the top instance, and queue all resulting instances (which may
-        // include
-        // the original one, if still active).
+        // advance the top instance, and queue all resulting instances.
         // get the first instance
         FSMInstance fsmInstance = activeInstances.removeFirst();
         if(states[fsmInstance.state].rule >= 0) {
@@ -1335,22 +1338,15 @@ public class SPTBase extends AbstractLanguageAnalyser {
       }else{
         //no acceptors -> just move to next annotation
         currentAnnotation = annotationNextOffset[currentAnnotation];
-//        currentAnnotation = followingAnnotation(currentAnnotation);
-//        while(currentAnnotation != Integer.MAX_VALUE &&
-//              oldCurrAnn == followingAnnotation(currentAnnotation)) {
-//            // this can happen when a rule has a Kleene * and nothing else
-//            // which allows it to successfully match nothing
-//            if(currentAnnotation < annotation.length -2){
-//              currentAnnotation ++;
-//            } else {
-//              // we've run out of annotations
-//              currentAnnotation = Integer.MAX_VALUE;
-//            }
-//          }        
       }
-      
+      // fire the progress event
+      if(currentAnnotation - lastProgressReportAnnIdx > annotation.length / 10) {
+        fireProgressChanged(currentAnnotation * 100 / annotation.length);
+        lastProgressReportAnnIdx = currentAnnotation;
+      }
     }// while(currentAnnotation < annotation.length)
     // execution completed -> clean up the internal data structures.
+    fireProcessFinished();
     annotation = null;
     annotationFollowing = null;
     annotationNextOffset = null;
@@ -1365,6 +1361,7 @@ public class SPTBase extends AbstractLanguageAnalyser {
 //            ((double)predicateHits / (predicateHits + predicateMisses))));
   }
 
+  
   protected void applyRule(FSMInstance instance) throws JapeException {
     // convert bindings to correct type
     Map<String, AnnotationSet> newBindings =
