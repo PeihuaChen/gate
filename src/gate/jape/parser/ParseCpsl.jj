@@ -1043,6 +1043,8 @@ KleeneOperator KleeneOperator() :
               min = new Integer(minTok.image);
           if (maxTok != null)
               max = new Integer(maxTok.image);
+          else
+              max = min;
           return new KleeneOperator(min, max);
       }
     )
@@ -1505,13 +1507,24 @@ String[] AssignmentExpression(boolean checkLabel) :
     "            java.util.Iterator iter = existingAnnots.iterator();" + nl +
     "            while(iter.hasNext()) {" + nl +
     "              gate.Annotation existingA = (gate.Annotation) iter.next();" + nl);
-    
-              if(opName.equals("@") && existingAttrName.equals("string")) {
+
+              // handle :bind.Type@string, :bind.Type@cleanString and :bind.Type@length
+              if(opName.equals("@") && ( existingAttrName.equals("string") || existingAttrName.equals("cleanString") || existingAttrName.equals("length") ) ) {
                 blockBuffer.append(
     "              int from = existingA.getStartNode().getOffset().intValue();" + nl +
     "              int to   = existingA.getEndNode().getOffset().intValue();" + nl +
     "              existingFeatureValue = doc.getContent().toString().substring(from,to);" + nl
                 );
+                if ( existingAttrName.equals("cleanString") ) {
+                  blockBuffer.append(
+    "                 existingFeatureValue = ((String)existingFeatureValue).replaceAll(\"\\\\s+\", \" \").trim();" + nl
+                  );
+                }
+                if ( existingAttrName.equals("length") ) {
+                  blockBuffer.append(
+    "                 existingFeatureValue = (long)to - (long)from;" + nl
+                  );
+                }
               } else {
                 blockBuffer.append("existingFeatureValue = existingA.getFeatures().get(");
                 appendJavaStringLiteral(blockBuffer, existingAttrName);
@@ -1535,14 +1548,26 @@ String[] AssignmentExpression(boolean checkLabel) :
             opTok=<metaPropOp> nameTok=<ident>
             { opName = opTok.image; existingAttrName = nameTok.image; }
             
-            // handle :bind@string
+            // handle :bind@string, :bind@cleanString and :bind@length
             {
-              if(opName.equals("@") && existingAttrName.equals("string")) {
+              if(opName.equals("@") && ( existingAttrName.equals("string") || existingAttrName.equals("cleanString") || existingAttrName.equals("length") ) ) {
                 blockBuffer.append(
     "        if (" + existingAnnotSetName + " != null) {" + nl +
     "          int from = " + existingAnnotSetName +".firstNode().getOffset().intValue();" + nl +
     "          int to   = " + existingAnnotSetName +".lastNode().getOffset().intValue();" + nl +
-    "          existingFeatureValue = doc.getContent().toString().substring(from,to);" + nl +
+    "          existingFeatureValue = doc.getContent().toString().substring(from,to);" + nl
+                );
+                if ( existingAttrName.equals("cleanString") ) {
+                  blockBuffer.append(
+    "                 existingFeatureValue = ((String)existingFeatureValue).replaceAll(\"\\\\s+\", \" \").trim();" + nl
+                  );
+                }
+                if ( existingAttrName.equals("length") ) {
+                  blockBuffer.append(
+    "                 existingFeatureValue = (long)to - (long)from;" + nl
+                  );
+                }
+                blockBuffer.append(
     "          if(existingFeatureValue != null) {" + nl +
     "            features.put(");
                 appendJavaStringLiteral(blockBuffer, newAttrName);

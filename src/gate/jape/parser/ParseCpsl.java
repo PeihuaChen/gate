@@ -1033,6 +1033,8 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
               min = new Integer(minTok.image);
           if (maxTok != null)
               max = new Integer(maxTok.image);
+          else
+              max = min;
           {if (true) return new KleeneOperator(min, max);}
       break;
     default:
@@ -1562,12 +1564,23 @@ AnnotationAccessor accessor = null;
     "            while(iter.hasNext()) {" + nl +
     "              gate.Annotation existingA = (gate.Annotation) iter.next();" + nl);
 
-              if(opName.equals("@") && existingAttrName.equals("string")) {
+              // handle :bind.Type@string, :bind.Type@cleanString and :bind.Type@length
+              if(opName.equals("@") && ( existingAttrName.equals("string") || existingAttrName.equals("cleanString") || existingAttrName.equals("length") ) ) {
                 blockBuffer.append(
     "              int from = existingA.getStartNode().getOffset().intValue();" + nl +
     "              int to   = existingA.getEndNode().getOffset().intValue();" + nl +
     "              existingFeatureValue = doc.getContent().toString().substring(from,to);" + nl
                 );
+                if ( existingAttrName.equals("cleanString") ) {
+                  blockBuffer.append(
+    "                 existingFeatureValue = ((String)existingFeatureValue).replaceAll(\"\\\\s+\", \" \").trim();" + nl
+                  );
+                }
+                if ( existingAttrName.equals("length") ) {
+                  blockBuffer.append(
+    "                 existingFeatureValue = (long)to - (long)from;" + nl
+                  );
+                }
               } else {
                 blockBuffer.append("existingFeatureValue = existingA.getFeatures().get(");
                 appendJavaStringLiteral(blockBuffer, existingAttrName);
@@ -1589,12 +1602,24 @@ AnnotationAccessor accessor = null;
           opTok = jj_consume_token(metaPropOp);
           nameTok = jj_consume_token(ident);
               opName = opTok.image; existingAttrName = nameTok.image;
-              if(opName.equals("@") && existingAttrName.equals("string")) {
+              if(opName.equals("@") && ( existingAttrName.equals("string") || existingAttrName.equals("cleanString") || existingAttrName.equals("length") ) ) {
                 blockBuffer.append(
     "        if (" + existingAnnotSetName + " != null) {" + nl +
     "          int from = " + existingAnnotSetName +".firstNode().getOffset().intValue();" + nl +
     "          int to   = " + existingAnnotSetName +".lastNode().getOffset().intValue();" + nl +
-    "          existingFeatureValue = doc.getContent().toString().substring(from,to);" + nl +
+    "          existingFeatureValue = doc.getContent().toString().substring(from,to);" + nl
+                );
+                if ( existingAttrName.equals("cleanString") ) {
+                  blockBuffer.append(
+    "                 existingFeatureValue = ((String)existingFeatureValue).replaceAll(\"\\\\s+\", \" \").trim();" + nl
+                  );
+                }
+                if ( existingAttrName.equals("length") ) {
+                  blockBuffer.append(
+    "                 existingFeatureValue = (long)to - (long)from;" + nl
+                  );
+                }
+                blockBuffer.append(
     "          if(existingFeatureValue != null) {" + nl +
     "            features.put(");
                 appendJavaStringLiteral(blockBuffer, newAttrName);
@@ -1721,13 +1746,21 @@ AnnotationAccessor accessor = null;
     finally { jj_save(1, xla); }
   }
 
-  final private boolean jj_3_1() {
-    if (jj_3R_15()) return true;
+  final private boolean jj_3R_27() {
+    if (jj_scan_token(pling)) return true;
     return false;
   }
 
-  final private boolean jj_3R_27() {
-    if (jj_scan_token(pling)) return true;
+  final private boolean jj_3R_25() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_27()) jj_scanpos = xsp;
+    if (jj_scan_token(ident)) return true;
+    return false;
+  }
+
+  final private boolean jj_3_1() {
+    if (jj_3R_15()) return true;
     return false;
   }
 
@@ -1747,11 +1780,10 @@ AnnotationAccessor accessor = null;
     return false;
   }
 
-  final private boolean jj_3R_25() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_27()) jj_scanpos = xsp;
+  final private boolean jj_3R_16() {
+    if (jj_scan_token(colon)) return true;
     if (jj_scan_token(ident)) return true;
+    if (jj_scan_token(leftBrace)) return true;
     return false;
   }
 
@@ -1775,26 +1807,19 @@ AnnotationAccessor accessor = null;
     return false;
   }
 
-  final private boolean jj_3R_16() {
-    if (jj_scan_token(colon)) return true;
+  final private boolean jj_3R_17() {
     if (jj_scan_token(ident)) return true;
-    if (jj_scan_token(leftBrace)) return true;
     return false;
   }
 
-  final private boolean jj_3R_17() {
-    if (jj_scan_token(ident)) return true;
+  final private boolean jj_3_2() {
+    if (jj_3R_16()) return true;
     return false;
   }
 
   final private boolean jj_3R_22() {
     if (jj_scan_token(leftBrace)) return true;
     if (jj_3R_25()) return true;
-    return false;
-  }
-
-  final private boolean jj_3_2() {
-    if (jj_3R_16()) return true;
     return false;
   }
 
