@@ -362,6 +362,9 @@ public class Transducer extends AbstractLanguageAnalyser
   public void controllerExecutionStarted(Controller c)
     throws ExecutionException {
     actionContext.setController(c);
+    actionContext.setCorpus(corpus);
+    actionContext.setPRFeatures(features);
+    actionContext.setPRName(this.getName());
     for(SPTBase aSpt : singlePhaseTransducers){
       aSpt.runControllerExecutionStartedBlock(actionContext,c,ontology);
     }
