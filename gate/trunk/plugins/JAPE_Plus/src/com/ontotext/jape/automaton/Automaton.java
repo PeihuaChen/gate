@@ -8,7 +8,6 @@
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
  *
- *
  *  $Id$
  */
 package com.ontotext.jape.automaton;
@@ -71,7 +70,7 @@ public class Automaton {
 	}
 
 	public Automaton(AutomatonBuildHelp help, int stateFinalityType) {
-		init(help, stateFinalityType, GenericWholeArrray.TYPE_SHORT);
+		init(help, stateFinalityType, GenericWholeArrray.TYPE_INT);
 	}
 
 	protected void init(AutomatonBuildHelp help, int stateFinalityType,
