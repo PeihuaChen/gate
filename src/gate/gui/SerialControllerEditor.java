@@ -856,8 +856,7 @@ public class SerialControllerEditor extends AbstractVisualResource
     getActionMap().put("Run", runAction);
   
   }//protected void initListeners()
-
-
+  
   public List getActions(){
     return actionList;
   }
@@ -1538,7 +1537,10 @@ public class SerialControllerEditor extends AbstractVisualResource
 
           int corpusSize = 1;
           if (controller instanceof CorpusController) {
-            corpusSize = ((CorpusController) controller).getCorpus().size();
+            Corpus corpus = ((CorpusController) controller).getCorpus();
+            if(corpus != null) {
+              corpusSize = corpus.size();
+            }
           }
           MainFrame.lockGUI("Running " + controller.getName() + " on "
             + corpusSize + (corpusSize == 1 ? " document" : " documents"));
