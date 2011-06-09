@@ -21,7 +21,11 @@ package com.ontotext.jape.automaton;
  * 
  */
 public class CodeInt {
-	public static int code(int number, int code, int hashLength) {
+	public static int code(int number, int codeInt, int hashLength) {
+	  // we extend that data to long while we do the calculations, as the 
+	  // multiplications below may lead to rollover.
+	  // Part of the fix for bug #3293320
+	  long code = codeInt;
 		code = (code * Constants.hashBase + (number & 0x000000FF)) % hashLength;
 		code = (code * Constants.hashBase + ((number & 0x0000FF00) >>> 8))
 				% hashLength;
@@ -29,6 +33,6 @@ public class CodeInt {
 				% hashLength;
 		code = (code * Constants.hashBase + ((number & 0xFF000000) >>> 24))
 				% hashLength;
-		return (code);
+		return (int)code;
 	}
 }
