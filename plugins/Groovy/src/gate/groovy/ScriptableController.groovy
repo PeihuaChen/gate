@@ -6,6 +6,7 @@ import gate.creole.*
 import gate.creole.metadata.*
 import gate.util.*
 
+import groovy.lang.Binding;
 import groovy.time.TimeCategory
 
 import java.beans.PropertyChangeSupport
@@ -96,6 +97,9 @@ eachDocument {
     try {
       script = new GroovyShell(Gate.getClassLoader()).parse(
           controlScript + "\n\n\n" + GroovySupport.STANDARD_IMPORTS)
+      // replace the binding with our "active" one that delegates
+      // corpus, controller and prs variables through to the controller
+      script.binding = new ScriptableControllerBinding(this, script.binding)
       GroovySystem.metaClassRegistry.removeMetaClass(script.getClass())
       def mc = script.getClass().metaClass
 
@@ -202,6 +206,10 @@ eachDocument {
    * closure once for each document in the corpus.
    */
   protected void eachDocument(Closure c) throws ExecutionException {
+    if(corpus == null) {
+      throw new ExecutionException(
+        "eachDocument not permitted when controller has no corpus")
+    }
     def savedCurrentDoc = script.binding.variables.doc
     try {
       if(document) {
@@ -373,8 +381,6 @@ eachDocument {
     }
 
     // Set initial variable values
-    script.binding.setVariable('prs', prList)
-    script.binding.setVariable('corpus', corpus)
     if(document) {
       script.binding.setVariable('doc', document)
     }
@@ -453,5 +459,56 @@ class DaemonThreadFactory implements ThreadFactory {
     Thread t = dtf.newThread(r)
     t.daemon = true
     return t
+  }
+}
+
+/**
+ * Specialized Binding for scriptable controller scripts that
+ * intercepts get and set calls to certain variables and redirects
+ * them to properties of the controller.  In particular:
+ * <dl>
+ *   <dt>controller</dt>
+ *   <dd>(read-only) a reference to the controller that owns this
+ *       script.</dd>
+ *   <dt>corpus</dt>
+ *   <dd>(read-write) the corpus of the current controller.  Thus
+ *       an assignment "corpus = ..." in the script is actually
+ *       a call to controller.setCorpus.</dd>
+ *   <dt>prs</dt>
+ *   <dd>(read-only) an unmodifiable wrapper around the controller's
+ *       prList.</dd>
+ * </dl>
+ */
+class ScriptableControllerBinding extends Binding {
+  private ScriptableController controller
+  
+  private List unmodifiablePrList
+  
+  ScriptableControllerBinding(ScriptableController controller,
+            Binding delegateBinding) {
+    super(delegateBinding.getVariables());
+    this.controller = controller
+    unmodifiablePrList = controller.prList.asImmutable()
+  }
+  
+  public getVariable(String name) {
+    switch(name) {
+      case 'controller': return controller; break
+      case 'corpus': return controller.corpus; break
+      case 'prs': return unmodifiablePrList; break
+      default: return super.getVariable(name); break
+    }
+  }
+  
+  public void setVariable(String name, value) {
+    switch(name) {
+      case 'controller':
+      case 'prs':
+        throw new ReadOnlyPropertyException(name, this.getClass()); break
+        
+      case 'corpus': controller.corpus = value; break
+      
+      default: super.setVariable(name, value); break
+    }
   }
 }
