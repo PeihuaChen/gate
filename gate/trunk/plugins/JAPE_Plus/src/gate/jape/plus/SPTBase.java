@@ -178,13 +178,13 @@ public class SPTBase extends AbstractLanguageAnalyser {
       newInstance.bindingStack = new IntArrayList[bindingStack.length];
       int j, length;
       for(int i = 0; i < bindingStackStored; i++){
-    	  if(bindingStack[i] != null){
-    		  newInstance.bindingStack[i] = new IntArrayList();
-    		  length = bindingStack[i].size();
-    		  for(j = 0; j < length; j++){
-    			  newInstance.bindingStack[i].add(bindingStack[i].get(j));
-    		  }
-    	  }
+        if(bindingStack[i] != null){
+          newInstance.bindingStack[i] = new IntArrayList();
+          length = bindingStack[i].size();
+          for(j = 0; j < length; j++){
+            newInstance.bindingStack[i].add(bindingStack[i].get(j));
+          }
+        }
       }
       newInstance.bindingStackStored = bindingStackStored;
       return newInstance;
@@ -206,71 +206,71 @@ public class SPTBase extends AbstractLanguageAnalyser {
      */
     protected Map<String, IntArrayList> bindings;
 
-	/**
-	 * A stack of bindings. It maps a number i to bindingStack[i]. A string
-	 * label L corresponds to each i. This label L becomes clear when a
-	 * transition '):L' (of type closing-round-bracket) is consumed. When L
-	 * becomes clear, we add the pair <L, bindingStack[i]> into the hash map
-	 * bindings.
-	 */
-	private IntArrayList[] bindingStack;
+  /**
+   * A stack of bindings. It maps a number i to bindingStack[i]. A string
+   * label L corresponds to each i. This label L becomes clear when a
+   * transition '):L' (of type closing-round-bracket) is consumed. When L
+   * becomes clear, we add the pair <L, bindingStack[i]> into the hash map
+   * bindings.
+   */
+  private IntArrayList[] bindingStack;
 
-	/**
-	 * The number of the annotation sets stored in the stack. If
-	 * bindingStackStored > 0, then the top set of the stack is
-	 * bindingStack[bindingStackStored - 1].
-	 */
-	private int bindingStackStored;
+  /**
+   * The number of the annotation sets stored in the stack. If
+   * bindingStackStored > 0, then the top set of the stack is
+   * bindingStack[bindingStackStored - 1].
+   */
+  private int bindingStackStored;
 
-	/**
-	 * Pushes a new empty annotation set in the binding stack. This method is
-	 * invoked for each opening-round-bracket transition that is consumed during
-	 * the traversal.
-	 */
-	public void pushNewEmptyBindingSet() {
-		if (bindingStack.length == bindingStackStored) {
-			bindingStack = Arrays.copyOf(bindingStack, 2 * bindingStackStored);
-		}
-		bindingStack[bindingStackStored] = null;
-		bindingStackStored++;
-	}
+  /**
+   * Pushes a new empty annotation set in the binding stack. This method is
+   * invoked for each opening-round-bracket transition that is consumed during
+   * the traversal.
+   */
+  public void pushNewEmptyBindingSet() {
+    if (bindingStack.length == bindingStackStored) {
+      bindingStack = Arrays.copyOf(bindingStack, 2 * bindingStackStored);
+    }
+    bindingStack[bindingStackStored] = null;
+    bindingStackStored++;
+  }
 
-	/**
-	 * Pops annotation set from the binding stack and puts it in the hash map
-	 * bindings. This method is invoked when a closing-round-bracket transition
-	 * '):label' is consumed during the traversal.
-	 */
-	public void popBindingSet(String label) {
-		// Here bindingStackStored is always > 0.
-		bindingStackStored--;
-		IntArrayList annotList = bindingStack[bindingStackStored];
-		if (annotList != null && !annotList.isEmpty()) {
-			IntArrayList annotSet = bindings.get(label);
-			if (annotSet == null) {
-				annotSet = new IntArrayList();
-			}
-			int length = annotList.size();
-			for (int i = 0; i < length; i++) {
-				annotSet.add(annotList.get(i));
-			}
-			bindings.put(label, annotSet);
-		}
-	}
+  /**
+   * Pops annotation set from the binding stack and puts it in the hash map
+   * bindings. This method is invoked when a closing-round-bracket transition
+   * '):label' is consumed during the traversal.
+   */
+  public void popBindingSet(String label) {
+    // Here bindingStackStored is always > 0.
+    bindingStackStored--;
+    IntArrayList annotList = bindingStack[bindingStackStored];
+    if (annotList != null && !annotList.isEmpty()) {
+      IntArrayList annotSet = bindings.get(label);
+      if (annotSet == null) {
+        annotSet = new IntArrayList();
+      }
+      int length = annotList.size();
+      for (int i = 0; i < length; i++) {
+        annotSet.add(annotList.get(i));
+      }
+      bindings.put(label, annotSet);
+    }
+  }
 
-	/**
-	 * Adds all input annotations to every annotation set stored in the binding stack.
-	 */
-	public void bindAnnotations(int[] aStep) {
-		int j;
-		for (int i = 0; i < bindingStackStored; i++) {
-			for (j = 0; j < aStep.length; j++) {
-				if (bindingStack[i] == null) {
-					bindingStack[i] = new IntArrayList();
-				}
-				bindingStack[i].add(aStep[j]);
-			}
-		}
-	}
+  /**
+   * Adds all input annotations to every annotation set stored in the binding stack.
+   */
+  public void bindAnnotations(int[] aStep) {
+    int j;
+    for (int i = 0; i < bindingStackStored; i++) {
+      for (j = 0; j < aStep.length; j++) {
+        if (bindingStack[i] == null) {
+          bindingStack[i] = new IntArrayList();
+        }
+        bindingStack[i].add(aStep[j]);
+      }
+    }
+  }
   }
 
   /**
@@ -519,114 +519,43 @@ public class SPTBase extends AbstractLanguageAnalyser {
     annotation = new Annotation[annCount];
     annotationType = new int[annCount];
     int annIdx = 0;
-
-    while(true){
-      int nextType = typesOrder[0];
-      //exit condition
-      if(typeIndex[nextType] >= annotsByType[nextType].length){
-        //sanity check
-        if(annIdx != annCount){
-          throw new RuntimeException(
-                  "Malfunction while building the annotation table: " +
-                  "sorted " + annIdx + " annotations instead of " + annCount);
+    if(typesOrder.length > 0){ // if there are any annotations
+      while(true){
+        int nextType = typesOrder[0];
+        //exit condition
+        if(typeIndex[nextType] >= annotsByType[nextType].length){
+          //sanity check
+          if(annIdx != annCount){
+            throw new RuntimeException(
+                    "Malfunction while building the annotation table: " +
+                    "sorted " + annIdx + " annotations instead of " + annCount);
+          }
+          break;
         }
-        break;
-      }
-      //take the next annotation
-      annotation[annIdx] = annotsByType[nextType][typeIndex[nextType]];
-      typeIndex[nextType]++;
-      //save the internal type
-      annotationType[annIdx] = internalTypes[nextType];
-      //increment the index
-      annIdx++;
-      //recalculate the position for the list we just used 
-      
-//      Sorting.mergeSort(typesOrder, 0, typesOrder.length, typeComparator);
-  
-//      int insertPos = 1;
-//      while(insertPos < typesOrder.length && 
-//            typeComparator.compare(typesOrder[0], typesOrder[insertPos]) > 0){
-//        insertPos++;
-//      }
-//      //we need to insert just before insertPos
-//      insertPos--;
-      
-      
-      int insertPos = binarySearchFromTo(typesOrder, 1, typesOrder.length -1, 
-              typeComparator);
-      if(insertPos < 0){
-        //no equal value found
-        insertPos = -1 -insertPos;
-      }
-      //everything gets shifted left, including the insertion point
-      insertPos -= 1;
-      
-      
-      for(int i = 0; i < insertPos; i++){
-        typesOrder[i] = typesOrder[i+1];
-      }
-      typesOrder[insertPos] = nextType;
+        //take the next annotation
+        annotation[annIdx] = annotsByType[nextType][typeIndex[nextType]];
+        typeIndex[nextType]++;
+        //save the internal type
+        annotationType[annIdx] = internalTypes[nextType];
+        //increment the index
+        annIdx++;
+        //recalculate the position for the list we just used 
+        int insertPos = binarySearchFromTo(typesOrder, 1, typesOrder.length -1, 
+                typeComparator);
+        if(insertPos < 0){
+          //no equal value found
+          insertPos = -1 -insertPos;
+        }
+        //everything gets shifted left, including the insertion point
+        insertPos -= 1;
+        
+        
+        for(int i = 0; i < insertPos; i++){
+          typesOrder[i] = typesOrder[i+1];
+        }
+        typesOrder[insertPos] = nextType;
+      }      
     }
-    
-    
-    //<XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-//    // now add all the input annotations to the main annotations table
-//    for(int aTypeInt = 0; aTypeInt < inputAnnotationTypes.length; aTypeInt++) {
-//      // calculate the internal type (a number)
-//      int internalType = ANNOTATION_TYPE_OTHER;
-//      for(int i = 0; i < annotationTypes.length; i++) {
-//        if(annotationTypes[i].equals(inputAnnotationTypes[aTypeInt])) {
-//          internalType = i;
-//          break;
-//        }
-//      }
-//      // add all annotations of current type
-//      for(Annotation ann : annotsByType[aTypeInt]) {
-//        annotation[annIdx] = ann;
-//        annotationType[annIdx] = internalType;
-//        annIdx++;
-//      }
-//    }
-//    // sort the annotation table
-//    GenericSorting.quickSort(0, annotation.length, new IntComparator() {
-////    GenericSorting.mergeSort(0, annotation.length, new IntComparator() {
-//      /**
-//       * Sorts by start offset and inverse length (at any position, the longest
-//       * annotation is first.
-//       */
-//      public int compare(int idx0, int idx1) {
-//        Annotation a0 = annotation[idx0];
-//        Annotation a1 = annotation[idx1];
-//        long start0 = a0.getStartNode().getOffset();
-//        long start1 = a1.getStartNode().getOffset();
-//        if(start0 < start1) {
-//          return -1;
-//        } else if(start0 > start1) {
-//          return 1;
-//        } else {
-//          long end0 = a0.getEndNode().getOffset();
-//          long end1 = a1.getEndNode().getOffset();
-//          if(end0 > end1) {
-//            return -1;
-//          } else if(end0 < end1) { return 1; }
-//          return 0;
-//        }
-//      }
-//    }, new Swapper() {
-//      public void swap(int idx0, int idx1) {
-//        // swap the annotations
-//        Annotation ann = annotation[idx0];
-//        annotation[idx0] = annotation[idx1];
-//        annotation[idx1] = ann;
-//        // swap the type values
-//        int typeTmp = annotationType[idx0];
-//        annotationType[idx0] = annotationType[idx1];
-//        annotationType[idx1] = typeTmp;
-//      }
-//    });
-    
-    //XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX>
-    
     
     // initialise the nextAnnotation array with -1
     annotationFollowing = new int[annCount];
@@ -682,136 +611,6 @@ public class SPTBase extends AbstractLanguageAnalyser {
     }
     return -(from + 1);  // key not found.
   }
-  
-  /**
-   * Populates the internal data structures with the input annotations.
-   */
-  protected void loadAnnotationsOld() {
-    
-    AnnotationSet annSource =
-            inputASName == null ? document.getAnnotations() : document
-                    .getAnnotations(inputASName);
-    if(inputAnnotationTypes == null || inputAnnotationTypes.length == 0) {
-      // no input specified -> load all annotation types.
-      Set<String> allTypes = annSource.getAllTypes();
-      inputAnnotationTypes = new String[allTypes.size()];
-      int index = 0;
-      for(String aType : allTypes)
-        inputAnnotationTypes[index++] = aType;
-    }
-    // calculate the total number of annotations, and separate them by type
-    int annCount = 0;
-    AnnotationSet[] annotsByType =
-            new AnnotationSet[inputAnnotationTypes.length];
-    for(int type = 0; type < inputAnnotationTypes.length; type++) {
-      String aType = inputAnnotationTypes[type];
-      AnnotationSet ofOneType = annSource.get(aType);
-      annCount += ofOneType.size();
-      annotsByType[type] = ofOneType;
-    }
-    annotation = new Annotation[annCount];
-    annotationType = new int[annCount];
-    int annIdx = 0;
-    // now add all the input annotations to the main annotations table
-    for(int aTypeInt = 0; aTypeInt < inputAnnotationTypes.length; aTypeInt++) {
-      // calculate the internal type (a number)
-      int internalType = ANNOTATION_TYPE_OTHER;
-      for(int i = 0; i < annotationTypes.length; i++) {
-        if(annotationTypes[i].equals(inputAnnotationTypes[aTypeInt])) {
-          internalType = i;
-          break;
-        }
-      }
-      // add all annotations of current type
-      for(Annotation ann : annotsByType[aTypeInt]) {
-        annotation[annIdx] = ann;
-        annotationType[annIdx] = internalType;
-        annIdx++;
-      }
-    }
-    // sort the annotation table
-    GenericSorting.quickSort(0, annotation.length, new IntComparator() {
-//    GenericSorting.mergeSort(0, annotation.length, new IntComparator() {
-      /**
-       * Sorts by start offset and inverse length (at any position, the longest
-       * annotation is first.
-       */
-      public int compare(int idx0, int idx1) {
-        Annotation a0 = annotation[idx0];
-        Annotation a1 = annotation[idx1];
-        long start0 = a0.getStartNode().getOffset();
-        long start1 = a1.getStartNode().getOffset();
-        if(start0 < start1) {
-          return -1;
-        } else if(start0 > start1) {
-          return 1;
-        } else {
-          long end0 = a0.getEndNode().getOffset();
-          long end1 = a1.getEndNode().getOffset();
-          if(end0 > end1) {
-            return -1;
-          } else if(end0 < end1) { return 1; }
-          return 0;
-        }
-      }
-    }, new Swapper() {
-      public void swap(int idx0, int idx1) {
-        // swap the annotations
-        Annotation ann = annotation[idx0];
-        annotation[idx0] = annotation[idx1];
-        annotation[idx1] = ann;
-        // swap the type values
-        int typeTmp = annotationType[idx0];
-        annotationType[idx0] = annotationType[idx1];
-        annotationType[idx1] = typeTmp;
-      }
-    });
-    
-    
-    
-    
-    // initialise the nextAnnotation array with -1
-    annotationFollowing = new int[annCount];
-    for(int i = 0; i < annotationFollowing.length; i++) {
-      annotationFollowing[i] = NOT_CALCULATED;
-    }
-    // calculate the annotationNextOffset array
-    annotationNextOffset = new int[annCount];
-    if(annCount > 0) {
-      long currentOffset = annotation[0].getStartNode().getOffset();
-      int currentOffsetStart = 0;
-      for(int i = 1; i < annotation.length; i++) {
-        long newOffset = annotation[i].getStartNode().getOffset();
-        if(newOffset > currentOffset) {
-          // we have a new start offset
-          for(int j = currentOffsetStart; j < i; j++) {
-            annotationNextOffset[j] = i;
-          }
-          currentOffset = newOffset;
-          currentOffsetStart = i;
-        }
-      }
-      // the last annotations don't have a next offset
-      for(int j = currentOffsetStart; j < annotation.length; j++) {
-        annotationNextOffset[j] = Integer.MAX_VALUE;
-      }
-    }
-    // initialise the predicates arrays
-    annotationPredicateComputed = new long[annCount][];
-    annotationPredicateValues = new long[annCount][];
-    for(int i = 0; i < annotation.length; i++) {
-      if(annotationType[i] >= 0 && 
-         predicatesByType[annotationType[i]] != null){
-        annotationPredicateComputed[i] =
-                QuickBitVector.makeBitVector(
-                        predicatesByType[annotationType[i]].length, 1);
-        annotationPredicateValues[i] =
-                QuickBitVector.makeBitVector(
-                        predicatesByType[annotationType[i]].length, 1);
-      }
-    } 
-  }
-  
 
   /**
    * Returns the index in the {@link #annotation} array, where the range of next
@@ -1213,10 +1012,10 @@ public class SPTBase extends AbstractLanguageAnalyser {
         transitions: for(Transition aTransition : states[fsmInstance.state].transitions) {
           if(aTransition.type == TransitionPDA.TYPE_OPENING_ROUND_BRACKET){
             //opening-round-bracket transition
-        	FSMInstance nextInstance = fsmInstance.clone();
-        	nextInstance.pushNewEmptyBindingSet();
-        	nextInstance.state = aTransition.nextState;
-        	activeInstances.addLast(nextInstance);
+          FSMInstance nextInstance = fsmInstance.clone();
+          nextInstance.pushNewEmptyBindingSet();
+          nextInstance.state = aTransition.nextState;
+          activeInstances.addLast(nextInstance);
             // we do not advance the annotation index,
             // since opening-round-bracket
             // transitions are treated like epsilon transitions
@@ -1224,10 +1023,10 @@ public class SPTBase extends AbstractLanguageAnalyser {
           }
           if(aTransition.type != TransitionPDA.TYPE_CONSTRAINT){
             // closing-round-bracket transition
-        	FSMInstance nextInstance = fsmInstance.clone();
-        	nextInstance.popBindingSet(arrayOfBindingNames[aTransition.type]);
-        	nextInstance.state = aTransition.nextState;
-        	activeInstances.addLast(nextInstance);
+          FSMInstance nextInstance = fsmInstance.clone();
+          nextInstance.popBindingSet(arrayOfBindingNames[aTransition.type]);
+          nextInstance.state = aTransition.nextState;
+          activeInstances.addLast(nextInstance);
             // we do not advance the annotation index,
             // since closing-round-bracket
             // transitions are treated like epsilon transitions
@@ -1609,6 +1408,4 @@ public class SPTBase extends AbstractLanguageAnalyser {
       "Couldn't run controller aborted action", e);
     }
   }
-  
-  
 }
