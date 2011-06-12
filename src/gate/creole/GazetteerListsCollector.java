@@ -177,7 +177,7 @@ public class GazetteerListsCollector extends AbstractLanguageAnalyser {
       gazetteer.add(text,
         new Lookup(listName, annotType, "inferred", theLanguage));
 //      theList.add(text + document.getSourceUrl().toString());
-      theList.add(text);
+      theList.add(new GazetteerNode(text));
 
 
       //for persons we want also to add their individual names to the list
@@ -191,7 +191,7 @@ public class GazetteerListsCollector extends AbstractLanguageAnalyser {
             continue;
           gazetteer.add(theString,
             new Lookup(listName, annotType, "inferred", theLanguage));
-          theList.add(theString);
+          theList.add(new GazetteerNode(theString));
         }
       }
     }
