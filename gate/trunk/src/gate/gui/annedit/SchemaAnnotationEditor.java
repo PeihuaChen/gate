@@ -35,6 +35,12 @@ import gate.gui.MainFrame;
 import gate.swing.JChoice;
 import gate.util.*;
 
+/**
+ * An annotation editor that enforces the annotation schemas currently loaded 
+ * in the system. Once the editing of an annotation is started, it cannot be
+ * completed until the annotation complies with the schema for that annotation
+ * type.  
+ */
 public class SchemaAnnotationEditor extends AbstractVisualResource 
     implements OwnedAnnotationEditor{
 
