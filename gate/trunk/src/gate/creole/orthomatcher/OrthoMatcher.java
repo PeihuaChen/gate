@@ -211,8 +211,8 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
 
     //at this point we have the definition file
     try{
-      BufferedReader reader = new BomStrippingInputStreamReader(definitionFileURL.openStream(),
-                      encoding);
+      BufferedReader reader = new BomStrippingInputStreamReader(
+          definitionFileURL.openStream(), encoding);
       String lineRead = null;
       //boolean foundANickname = false;
       while ((lineRead = reader.readLine()) != null){
@@ -222,11 +222,12 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
           String nameList = lineRead.substring(index+1,lineRead.length());
           if (nameList.equals("nickname")) {
             if (minimumNicknameLikelihood == null) {
-              throw new ResourceInstantiationException("No value for the required parameter minimumNicknameLikelihood!");
+              throw new ResourceInstantiationException(
+                  "No value for the required parameter " +
+                  "minimumNicknameLikelihood!");
             }
             nicknameFile = nameFile;
-          }
-          else {
+          } else {
             createAnnotList(nameFile,nameList);
           }
         }// if
@@ -991,21 +992,17 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
           if (!caseSensitive)
             expr = expr.toLowerCase();
           String code = lineRead.substring(index+1,lineRead.length());
-          if (nameList.equals(ALIASLISTNAME))
+          if (nameList.equals(ALIASLISTNAME)) {
             alias.put(expr, code);
-          else
-            if (nameList.equals(ARTLISTNAME))
-              def_art.put(expr, code);
-            else
-              if (nameList.equals(PREPLISTNAME))
-                prepos.put(expr, code);
-              else
-                if (nameList.equals(CONNECTORLISTNAME))
-                  connector.put(expr, code);
-                else
-                  if (nameList.equals(SPURLISTNAME))
-                    spur_match.put(expr, code);
-
+          } else if (nameList.equals(ARTLISTNAME)) {
+            def_art.put(expr, code);
+          } else if (nameList.equals(PREPLISTNAME)) {
+            prepos.put(expr, code);
+          } else if (nameList.equals(CONNECTORLISTNAME)) {
+            connector.put(expr, code);
+          } else if (nameList.equals(SPURLISTNAME)){
+            spur_match.put(expr, code);
+          }
         }//if
       }// else
 
