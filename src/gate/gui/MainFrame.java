@@ -387,7 +387,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     resourcesTree.setCellRenderer(treeCellRenderer);
     resourcesTree.setCellEditor(new ResourcesTreeCellEditor(resourcesTree,
       treeCellRenderer));
-
+    resourcesTree.setInvokesStopCellEditing(true);
     resourcesTree.setRowHeight(0);
     // expand all nodes
     resourcesTree.expandRow(0);
