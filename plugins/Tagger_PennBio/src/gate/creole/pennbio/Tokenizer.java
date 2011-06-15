@@ -30,7 +30,7 @@ import java.net.URL;
 
 import opennlp.tools.util.Span;
 
-@CreoleResource(name = "Penn BioTokenizer", icon = "tokeniser.png")
+@CreoleResource(name = "Penn BioTokenizer", icon = "tokeniser.png", helpURL = "http://gate.ac.uk/userguide/sec:domain-creole:biomed:pennbio")
 public class Tokenizer extends AbstractLanguageAnalyser {
 
   protected URL tokenizerURL;

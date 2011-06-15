@@ -29,7 +29,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.net.URL;
 
-@CreoleResource(name = "GENIA Sentence Splitter", icon = "sentence-splitter.png")
+@CreoleResource(name = "GENIA Sentence Splitter", icon = "sentence-splitter.png", helpURL = "http://gate.ac.uk/userguide/sec:domain-creole:biomed:genia")
 public class GENIASentenceSplitter extends AbstractLanguageAnalyser {
 
   private boolean debug = false;

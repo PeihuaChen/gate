@@ -17,7 +17,7 @@ import gate.creole.metadata.CreoleResource;
 
 import java.net.URL;
 
-@CreoleResource(name = "Penn BioTagger: Genes", icon = "bio.png")
+@CreoleResource(name = "Penn BioTagger: Genes", icon = "bio.png", helpURL = "http://gate.ac.uk/userguide/sec:domain-creole:biomed:pennbio")
 public class GeneTagger extends AbstractTagger {
 
   public GeneTagger() {
