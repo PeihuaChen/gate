@@ -684,13 +684,17 @@ public class XJTable extends JTable{
     }
     
     public boolean isCellEditable(int rowIndex, int columnIndex){
-      return sourceModel.isCellEditable(targetToSource(rowIndex),
-              columnIndex);
+      int sourceRow = targetToSource(rowIndex);
+      return sourceRow >= 0 ? 
+             sourceModel.isCellEditable(sourceRow, columnIndex) : 
+             false;
     }
+    
     public void setValueAt(Object aValue, int rowIndex, int columnIndex){
-      sourceModel.setValueAt(aValue, targetToSource(rowIndex), 
-              columnIndex);
+      int sourceRow = targetToSource(rowIndex);
+      if(sourceRow >= 0) sourceModel.setValueAt(aValue, sourceRow, columnIndex);
     }
+    
     public Object getValueAt(int row, int column){
       try{
         return sourceModel.getValueAt(targetToSource(row), column);
