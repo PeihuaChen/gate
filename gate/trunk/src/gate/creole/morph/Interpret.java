@@ -65,7 +65,6 @@ public class Interpret {
 	 * @param ruleFileName
 	 */
 	public void init(URL ruleFileURL) throws ResourceInstantiationException {
-		RHS.patIndex = 0;
 		vPat = Pattern.compile("((VB)[DGNPZ]?)|(MD)");
 		nPat = Pattern.compile("(NN)(S)*");
 		variables = new Storage();
@@ -508,7 +507,7 @@ public class Interpret {
 					+ "line " + file.getPointer() + " : " + line);
 		}
 
-		RHS rhs = new RHS(ruleParts[1], category);
+		RHS rhs = new RHS(ruleParts[1], category, (short)patterns.size());
 		ruleParts[0] = ruleParts[0].substring(i + 1, ruleParts[0].length())
 				.trim();
 		String regExp = ParsingFunctions.convertToRegExp(
