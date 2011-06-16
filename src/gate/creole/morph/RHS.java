@@ -5,10 +5,9 @@ public class RHS {
 	private String[] parameters;
 	private boolean verb = false;
 	private boolean noun = false;
-	public static short patIndex = 0;
 	private short patternIndex = 0; 
 	
-	public RHS(String function, String category) {
+	public RHS(String function, String category, short patternIndex) {
 		methodIndex = ParsingFunctions.getMethodIndex(function.trim());
 		parameters = ParsingFunctions.getParameterValues(function.trim());
 		if(category.equals("verb"))
@@ -19,8 +18,7 @@ public class RHS {
 			verb = true;
 			noun = true;
 		}
-		patternIndex = patIndex;
-		patIndex++;
+		this.patternIndex = patternIndex;
 	}
 
 	public short getMethodIndex() {
