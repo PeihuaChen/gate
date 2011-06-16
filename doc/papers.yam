@@ -6,6 +6,10 @@ GATE papers
 
  - H. Cunningham, D. Maynard, K. Bontcheva, V. Tablan. GATE: A Framework and Graphical Development Environment for Robust NLP Tools and Applications. Proceedings of the 40th Anniversary Meeting of the Association for Computational Linguistics (ACL'02). Philadelphia, July 2002. %(../../sale/acl02/acl-main.pdf,PDF). %(gate.bib,BibTex entry).
 
+%3* I used material from the GATE User Guide:
+
+- H. Cunningham, et al. Text Processing with GATE (Version 6). University of Sheffield Department of Computer Science. 15 April 2011. ISBN 0956599311. %(http://tinyurl.com/gatebook, Available from Amazon).
+
 %3* I used the ontology features in GATE:
 
  - K. Bontcheva, V. Tablan, D. Maynard, H. Cunningham. Evolving GATE to Meet New Challenges in Language Engineering. Natural Language Engineering. 10 (3/4), pp. 349-373. 2004. %(../../sale/jnle03/jnle-final.pdf,Pre-print). %(gate.bib,BibTex entry).
