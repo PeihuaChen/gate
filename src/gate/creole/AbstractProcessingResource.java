@@ -18,6 +18,8 @@ package gate.creole;
 
 import java.util.Vector;
 
+import gate.FeatureMap;
+import gate.Gate;
 import gate.ProcessingResource;
 import gate.Resource;
 import gate.event.ProgressListener;
@@ -167,6 +169,33 @@ extends AbstractResource implements ProcessingResource, ANNIEConstants
         ((ProgressListener) listeners.elementAt(i)).processFinished();
       }
     }
+  }
+  
+  /**
+   * Get the current values for all of a specified resource's
+   * registered runtime parameters.
+   */
+  public static FeatureMap getRuntimeParameterValues(Resource res)
+              throws ResourceInstantiationException {
+    ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(
+            res.getClass().getName());
+    if(rData == null)
+      throw new ResourceInstantiationException(
+              "Could not find CREOLE data for " + res.getClass().getName());
+
+    ParameterList params = rData.getParameterList();
+
+    return AbstractResource.getParameterValues(res,
+            params.getRuntimeParameters());
+  }
+  
+  /**
+   * Get the current values for all this resource's registered
+   * init-time parameters.
+   */
+  public FeatureMap getRuntimeParameterValues()
+              throws ResourceInstantiationException {
+    return getRuntimeParameterValues(this);
   }
 
   /**
