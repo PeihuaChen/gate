@@ -26,6 +26,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.Level;
 
 import gate.*;
+import gate.Factory.DuplicationContext;
 import gate.creole.*;
 import gate.creole.metadata.*;
 import gate.util.GateRuntimeException;
@@ -39,7 +40,7 @@ import gate.util.GateRuntimeException;
         comment = "Morphological Analyzer for the English Language")
 public class Morph
     extends AbstractLanguageAnalyser
-    implements ProcessingResource {
+    implements ProcessingResource, CustomDuplication {
 
 
   /** Document to be processed by the morpher, must be provided at Runtime. */
@@ -64,6 +65,12 @@ public class Morph
   protected Boolean caseSensitive;
 
   protected Boolean considerPOSTag;
+  
+  /**
+   * If this Morph PR is a duplicate of an existing PR, this property
+   * will hold a reference to the original PR's Interpret instance.
+   */
+  protected Interpret existingInterpret;
 
   @RunTime
   @Optional
@@ -93,16 +100,21 @@ public class Morph
    */
   public Resource init() throws ResourceInstantiationException {
     interpret = new Interpret();
-    if (rulesFile == null) {
-      // no rule file is there, simply run the interpret to interpret it and
-      throw new ResourceInstantiationException("\n\n No Rule File Provided");
+    if(existingInterpret != null) {
+      interpret.init(existingInterpret);
     }
-
-    fireStatusChanged("Reading Rule File...");
-    // compile the rules
-    interpret.init(rulesFile);
-    fireStatusChanged("Morpher created!");
-    fireProcessFinished();
+    else {
+      if (rulesFile == null) {
+        // no rule file is there, simply run the interpret to interpret it and
+        throw new ResourceInstantiationException("\n\n No Rule File Provided");
+      }
+  
+      fireStatusChanged("Reading Rule File...");
+      // compile the rules
+      interpret.init(rulesFile);
+      fireStatusChanged("Morpher created!");
+      fireProcessFinished();
+    }
     return this;
   }
 
@@ -333,5 +345,27 @@ public class Morph
 
   public void setConsiderPOSTag(Boolean value) {
     this.considerPOSTag = value;
+  }
+  
+  /**
+   * Only for use by the duplication mechanism.
+   */
+  public void setExistingInterpret(Interpret existingInterpret) {
+    this.existingInterpret = existingInterpret;
+  }
+
+  /**
+   * Duplicate this morpher, sharing the compiled regular expression
+   * patterns and finite state machine with the duplicate.
+   */
+  public Resource duplicate(DuplicationContext ctx)
+          throws ResourceInstantiationException {
+    String className = this.getClass().getName();
+    String resName = this.getName();
+    FeatureMap initParams = getInitParameterValues();
+    initParams.put("existingInterpret", interpret);
+    Resource res = Factory.createResource(className, initParams, this.getFeatures(), resName);
+    res.setParameterValues(getRuntimeParameterValues());
+    return res;
   }
 }

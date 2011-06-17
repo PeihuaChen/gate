@@ -43,9 +43,9 @@ public class Interpret {
 	/** This variables holds the affix */
 	private String affix;
 
-	private Pattern vPat;
+	private Pattern vPat = Pattern.compile("((VB)[DGNPZ]?)|(MD)");
 
-	private Pattern nPat;
+	private Pattern nPat = Pattern.compile("(NN)(S)*");
 
 	MorphFunctions morphInst;
 
@@ -65,8 +65,6 @@ public class Interpret {
 	 * @param ruleFileName
 	 */
 	public void init(URL ruleFileURL) throws ResourceInstantiationException {
-		vPat = Pattern.compile("((VB)[DGNPZ]?)|(MD)");
-		nPat = Pattern.compile("(NN)(S)*");
 		variables = new Storage();
 		prepareListOfMorphMethods();
 		file = new ReadFile(ruleFileURL);
@@ -84,6 +82,22 @@ public class Interpret {
 		variables = null;
 		file = null;
 		lastStates = null;
+	}
+	
+	/**
+	 * Initialize this Interpret by copying pointers to the sharable state
+	 * of an existing Interpret instance.
+	 */
+	public void init(Interpret existingInterpret) {
+    affix = null;
+    isDefineRulesSession = false;
+    isDefineVarSession = false;
+    morphInst = new MorphFunctions();
+    
+    // copy shared state
+    fsms = existingInterpret.fsms;
+    patterns = existingInterpret.patterns;
+    initialState = existingInterpret.initialState;
 	}
 
 	class CharClass {
