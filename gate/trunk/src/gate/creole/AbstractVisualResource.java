@@ -119,6 +119,14 @@ public abstract class AbstractVisualResource extends JPanel
               throws ResourceInstantiationException{
     AbstractResource.setParameterValues(this, parameters);
   }
+  
+  /**
+   * Get the current values for all this resource's registered
+   * init-time parameters.
+   */
+  public FeatureMap getInitParameterValues() throws ResourceInstantiationException {
+    return AbstractResource.getInitParameterValues(this);
+  }
 
   // Properties for the resource
   protected FeatureMap features;

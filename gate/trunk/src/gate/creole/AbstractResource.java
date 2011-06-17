@@ -413,6 +413,51 @@ extends AbstractFeatureBearer implements Resource, Serializable
               throws ResourceInstantiationException{
     setParameterValues(this, parameters);
   }
+  
+  /**
+   * Get the current values of the given parameters from the given
+   * resource.
+   * 
+   * @param res the resource
+   * @param params a list of parameter disjunctions such as would
+   *         be returned by {@link ParameterList#getInitimeParameters()}
+   *         or similar.
+   */
+  public static FeatureMap getParameterValues(Resource res,
+          List<List<Parameter>> params) throws ResourceInstantiationException {
+    FeatureMap fm = Factory.newFeatureMap();
+    for(List<Parameter> parDisjunction : params) {
+      for(Parameter p : parDisjunction) {
+        fm.put(p.getName(), res.getParameterValue(p.getName()));
+      }
+    }
+    return fm;
+  }
+  
+  /**
+   * Get the current values for all of a specified resource's
+   * registered init-time parameters.
+   */
+  public static FeatureMap getInitParameterValues(Resource res)
+              throws ResourceInstantiationException {
+    ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(
+            res.getClass().getName());
+    if(rData == null)
+      throw new ResourceInstantiationException(
+              "Could not find CREOLE data for " + res.getClass().getName());
+
+    ParameterList params = rData.getParameterList();
+
+    return getParameterValues(res, params.getInitimeParameters());
+  }
+  
+  /**
+   * Get the current values for all this resource's registered
+   * init-time parameters.
+   */
+  public FeatureMap getInitParameterValues() throws ResourceInstantiationException {
+    return getInitParameterValues(this);
+  }
 
   private static int beanCount = 0;
   private static Hashtable beanInfoCache = new Hashtable();

@@ -621,20 +621,8 @@ public abstract class Factory {
 
     FeatureMap newResFeatures = duplicate(res.getFeatures(), ctx);
 
-    // get the resource data to extract the parameters
-    ResourceData rData = (ResourceData)Gate.getCreoleRegister().get(className);
-    if(rData == null)
-      throw new ResourceInstantiationException(
-              "Could not find CREOLE data for " + className);
-
-    ParameterList params = rData.getParameterList();
     // init parameters
-    FeatureMap initParams = Factory.newFeatureMap();
-    for(List<Parameter> parDisjunction : params.getInitimeParameters()) {
-      for(Parameter p : parDisjunction) {
-        initParams.put(p.getName(), res.getParameterValue(p.getName()));
-      }
-    }
+    FeatureMap initParams = AbstractResource.getInitParameterValues(res);
     // duplicate any Resources in the params map
     initParams = duplicate(initParams, ctx);
 
@@ -642,12 +630,7 @@ public abstract class Factory {
     Resource newResource = createResource(className, initParams, newResFeatures, resName);
     if(newResource instanceof ProcessingResource) {
       // runtime params
-      FeatureMap runtimeParams = Factory.newFeatureMap();
-      for(List<Parameter> parDisjunction : params.getRuntimeParameters()) {
-        for(Parameter p : parDisjunction) {
-          runtimeParams.put(p.getName(), res.getParameterValue(p.getName()));
-        }
-      }
+      FeatureMap runtimeParams = AbstractProcessingResource.getRuntimeParameterValues(res);
       // duplicate any Resources in the params map
       runtimeParams = duplicate(runtimeParams, ctx);
       newResource.setParameterValues(runtimeParams);
