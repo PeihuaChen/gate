@@ -121,7 +121,8 @@ public interface OResource  {
           AnnotationProperty theAnnotationProperty, Literal literal);
 
   /**
-   * Gets the list of values for a given property name.
+   * Gets the list of values for a given property name. Values that are not
+   * literals are ignored. 
    * 
    * @param theAnnotationProperty
    * @return a List of {@link Literal}.
