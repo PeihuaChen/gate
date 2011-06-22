@@ -1095,7 +1095,6 @@ public class DocumentStaxUtils {
 
     // write the TextWithNodes element
     char[] textArray = aText.toCharArray();
-    replaceXMLIllegalCharacters(textArray);
     xsw.writeStartElement(namespaceURI, "TextWithNodes");
     int lastNodeOffset = 0;
     // offsetsSet iterator is in ascending order of offset, as it is a
@@ -1104,6 +1103,12 @@ public class DocumentStaxUtils {
     while(offsetsIterator.hasNext()) {
       int offset = offsetsIterator.next().intValue();
       // write characters since the last node output
+      // replace XML-illegal characters in this slice of text - we
+      // have to do this here rather than on the text as a whole in
+      // case the node falls between the two halves of a surrogate
+      // pair (in which case both halves are illegal and must be
+      // replaced).
+      replaceXMLIllegalCharacters(textArray, lastNodeOffset, offset - lastNodeOffset);
       writeCharactersOrCDATA(xsw, new String(textArray, lastNodeOffset, offset
               - lastNodeOffset));
       xsw.writeEmptyElement(namespaceURI, "Node");
@@ -1111,6 +1116,7 @@ public class DocumentStaxUtils {
       lastNodeOffset = offset;
     }
     // write any remaining text after the last node
+    replaceXMLIllegalCharacters(textArray, lastNodeOffset, textArray.length - lastNodeOffset);
     writeCharactersOrCDATA(xsw, new String(textArray, lastNodeOffset,
             textArray.length - lastNodeOffset));
     // and the closing TextWithNodes
@@ -1149,10 +1155,30 @@ public class DocumentStaxUtils {
    * @param buf the buffer to process
    */
   static void replaceXMLIllegalCharacters(char[] buf) {
-    ArrayCharSequence bufSequence = new ArrayCharSequence(buf);
-    for(int i = 0; i < buf.length; i++) {
+    replaceXMLIllegalCharacters(buf, 0, buf.length);
+  }
+
+  /**
+   * Replace any characters in the given buffer that are illegal in XML
+   * with spaces. Characters that are illegal in XML are:
+   * <ul>
+   * <li>Control characters U+0000 to U+001F, <i>except</i> U+0009,
+   * U+000A and U+000D, which are permitted.</li>
+   * <li><i>Unpaired</i> surrogates U+D800 to U+D8FF (valid surrogate
+   * pairs are OK).</li>
+   * <li>U+FFFE and U+FFFF (only allowed as part of the Unicode byte
+   * order mark).</li>
+   * </ul>
+   * 
+   * @param buf the buffer to process
+   * @param start TODO
+   * @param len TODO
+   */
+  static void replaceXMLIllegalCharacters(char[] buf, int start, int len) {
+    ArrayCharSequence bufSequence = new ArrayCharSequence(buf, start, len);
+    for(int i = 0; i < len; i++) {
       if(isInvalidXmlChar(bufSequence, i)) {
-        buf[i] = INVALID_CHARACTER_REPLACEMENT;
+        buf[start + i] = INVALID_CHARACTER_REPLACEMENT;
       }
     }
   }
@@ -1716,25 +1742,33 @@ public class DocumentStaxUtils {
    */
   static class ArrayCharSequence implements CharSequence {
     char[] array;
+    int offset;
+    int len;
 
     ArrayCharSequence(char[] array) {
+      this(array, 0, array.length);
+    }
+
+    ArrayCharSequence(char[] array, int offset, int len) {
       this.array = array;
+      this.offset = offset;
+      this.len = len;
     }
 
     public final char charAt(int i) {
-      return array[i];
+      return array[offset + i];
     }
 
     public final int length() {
-      return array.length;
+      return len;
     }
 
     public CharSequence subSequence(int start, int end) {
-      throw new UnsupportedOperationException("subSequence not implemented");
+      return new ArrayCharSequence(array, offset + start, offset + end);
     }
 
     public String toString() {
-      return String.valueOf(array);
+      return String.valueOf(array, offset, len);
     }
   } // ArrayCharSequence
 }
