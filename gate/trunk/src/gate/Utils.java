@@ -366,6 +366,88 @@ public class Utils {
     }
   }
 
+  
+  /**
+   * Get all the annotations from the source annotation set that cover
+   * the range of the specified annotation.
+   * 
+   * @param sourceAnnotationSet the annotation set from which to select
+   * @param coveredAnnotation the annotation whose range must equal or lie within
+   * the selected annotations
+   * @return the AnnotationSet containing all annotations that fully cover
+   * the offset range of the coveredAnnotation
+   */
+  public static AnnotationSet getCoveringAnnotations(
+    AnnotationSet sourceAnnotationSet,
+    Annotation coveredAnnotation) {
+    return getContainedAnnotations(sourceAnnotationSet,coveredAnnotation,"");
+  }
+
+  /**
+   * Get all the annotations of type targetType
+   * from the source annotation set that cover
+   * the range of the specified annotation.
+   *
+   * @param sourceAnnotationSet the annotation set from which to select
+   * @param coveredAnnotation the annotation whose range must be covered
+   * @param targetType the type the selected annotations must have. If the
+   * empty string, no filtering on type is done.
+   * @return the AnnotationSet containing all annotations that fully cover
+   * the offset range of the coveredAnnotation
+   */
+  public static AnnotationSet getCoveringAnnotations(
+    AnnotationSet sourceAnnotationSet,
+    Annotation coveredAnnotation,
+    String targetType) {
+    return sourceAnnotationSet.getCovering(targetType,
+        coveredAnnotation.getStartNode().getOffset(),
+        coveredAnnotation.getEndNode().getOffset());
+  }
+
+  /**
+   * Get all the annotations from the source annotation set that cover
+   * the range of the specified annotation set. If the covered
+   * annotation set is empty, an empty set is returned.
+   *
+   * @param sourceAnnotationSet the annotation set from which to select
+   * @param coveredAnnotationSet the annotation set whose range must be covered by
+   * the selected annotations
+   * @return the AnnotationSet containing all annotations that fully cover
+   * the offset range of the containingAnnotationSet
+   */
+  public static AnnotationSet getCoveringAnnotations(
+    AnnotationSet sourceAnnotationSet,
+    AnnotationSet coveredAnnotationSet) {
+    return getCoveringAnnotations(sourceAnnotationSet,coveredAnnotationSet,"");
+  }
+
+  /**
+   * Get all the annotations from the source annotation set with a type equal to
+   * targetType that cpver
+   * the range of the specified annotation set. If the specified
+   * annotation set is empty, an empty set is returned.
+   *
+   * @param sourceAnnotationSet the annotation set from which to select
+   * @param converedAnnotationSet the annotation set whose range must
+   * be covered by the selected annotations
+   * @param targetType the type the selected annotations must have
+   * @return the AnnotationSet containing all annotations that fully cover
+   * the offset range of the containingAnnotationSet
+   */
+  public static AnnotationSet getCoveringAnnotations(
+    AnnotationSet sourceAnnotationSet,
+    AnnotationSet coveredAnnotationSet,
+    String targetType) {
+    if(coveredAnnotationSet.size() == 0) {
+      return new ImmutableAnnotationSetImpl(null,null) {
+        private static final long serialVersionUID = -2222340068293006646L; 
+      };
+    }
+    return sourceAnnotationSet.getCovering(targetType,
+        coveredAnnotationSet.firstNode().getOffset(),
+        coveredAnnotationSet.lastNode().getOffset());
+  }
+
 
   /**
    * Return a List containing the annotations in the given annotation set, in
