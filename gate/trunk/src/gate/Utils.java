@@ -423,7 +423,7 @@ public class Utils {
 
   /**
    * Get all the annotations from the source annotation set with a type equal to
-   * targetType that cpver
+   * targetType that cover
    * the range of the specified annotation set. If the specified
    * annotation set is empty, an empty set is returned.
    *
