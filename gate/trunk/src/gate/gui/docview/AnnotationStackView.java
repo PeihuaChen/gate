@@ -15,6 +15,7 @@ package gate.gui.docview;
 
 import gate.event.AnnotationListener;
 import gate.event.AnnotationEvent;
+import gate.gui.MainFrame;
 import gate.gui.annedit.AnnotationData;
 import gate.gui.annedit.AnnotationDataImpl;
 import gate.*;
@@ -38,9 +39,9 @@ import java.text.Collator;
  * centred on the document caret.
  *
  * When double clicked, an annotation is copied to another set in order
- * to create a gold standard set from several annoatator sets.
+ * to create a gold standard set from several annotator sets.
  *
- * You can choose to display features with annotations by clicking
+ * You can choose to display a feature value by double clicking
  * the first column rectangles.
  */
 public class AnnotationStackView  extends AbstractDocumentView
@@ -92,7 +93,7 @@ public class AnnotationStackView  extends AbstractDocumentView
     toolBar.add(previousAnnotationAction = new PreviousAnnotationAction());
     toolBar.add(nextAnnotationAction = new NextAnnotationAction());
     toolBar.addSeparator();
-    toolBar.add(targetSetLabel = new JLabel());
+    toolBar.add(targetSetLabel = new JLabel("Target set: Undefined"));
     targetSetLabel.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
         askTargetSet();
@@ -353,7 +354,8 @@ public class AnnotationStackView  extends AbstractDocumentView
       processMouseEvent(me);
     }
     public void processMouseEvent(MouseEvent me) {
-      if(me.isPopupTrigger()) {
+
+      if(me.isPopupTrigger()) { // context menu
         // add annotation editors context menu
         JPopupMenu popup = new JPopupMenu();
         List<Action> specificEditorActions =
@@ -362,16 +364,26 @@ public class AnnotationStackView  extends AbstractDocumentView
         for (Action action : specificEditorActions) {
           popup.add(action);
         }
-        for (Action action : annotationListView.getGenericEditorActions(
-          annotationData.getAnnotationSet(), annotationData.getAnnotation())) {
+        List<Action> genericEditorActions =
+          annotationListView.getGenericEditorActions(
+            annotationData.getAnnotationSet(), annotationData.getAnnotation());
+        for (Action action : genericEditorActions) {
           if (specificEditorActions.contains(action)) { continue; }
           popup.add(action);
         }
-        popup.show(me.getComponent(), me.getX(), me.getY());
+        if (specificEditorActions.size() + genericEditorActions.size() > 1) {
+          popup.show(me.getComponent(), me.getX(), me.getY());
+        } else { // only one choice so use it directly
+          if (specificEditorActions.size() == 1) {
+            specificEditorActions.get(0).actionPerformed(null);
+          } else {
+            genericEditorActions.get(0).actionPerformed(null);
+          }
+        }
 
       } else if (me.getID() == MouseEvent.MOUSE_CLICKED
               && me.getButton() == MouseEvent.BUTTON1
-              && me.getClickCount() == 2) {
+              && me.getClickCount() == 2) { // double click
         if (targetSetName == null) {
           if (!askTargetSet()) { return; }
         }
@@ -398,6 +410,23 @@ public class AnnotationStackView  extends AbstractDocumentView
             }});
           }
         }, timeToRun);
+
+      } else if (me.getID() == MouseEvent.MOUSE_CLICKED
+              && me.getButton() == MouseEvent.BUTTON1
+              && me.getClickCount() == 1
+              && (me.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) != 0) {
+              // control + click -> delete the annotation
+        annotationData.getAnnotationSet().remove(annotation);
+
+      } else if (me.getID() == MouseEvent.MOUSE_CLICKED
+              && me.getButton() == MouseEvent.BUTTON1
+              && me.getClickCount() == 1) { // simple click
+        String feature = typesFeatures.get(annotation.getType());
+        if (feature == null) { return; }
+        String value = (String) annotation.getFeatures().get(feature);
+        if (!value.startsWith("http://")) { return; }
+        // if the feature value is an url then display it in a browser
+        MainFrame.getInstance().showHelpFrame(value, "Annotation Stack View");
       }
       textView.getTextView().requestFocusInWindow();
     }
@@ -416,7 +445,8 @@ public class AnnotationStackView  extends AbstractDocumentView
         toolTip = toolTip.replaceAll("</?html>", "");
         toolTip = "<html>" + (toolTip.length() == 0 ? "" : toolTip + "<br>")
           + "Double click to copy this annotation.<br>"
-          + "Right click to edit</html>";
+          + "Right click to edit<br>"
+          + "Control + click to delete</html>";
         label.setToolTipText(toolTip);
       }
       // make the tooltip indefinitely shown when the mouse is over
