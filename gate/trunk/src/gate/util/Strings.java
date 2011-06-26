@@ -15,12 +15,13 @@
 package gate.util;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 /** Some utilities for use with Strings. */
 public class Strings {
@@ -182,22 +183,22 @@ public class Strings {
   }
 
   /**
-   * Create a String representation of a List of String with the format
+   * Create a String representation of a Set of String with the format
    * [value, value].
    * Escape with a backslash the separator character.
-   * @param list list to convert to one String
-   * @return a String that represent the list
-   * @see #toList(String, String)
+   * @param set set to convert to one String
+   * @return a String that represent the set
+   * @see #toSet(String, String)
    */
-  public static String toString(List<String> list) {
+  public static String toString(LinkedHashSet<String> set) {
     StringBuilder builder = new StringBuilder();
     builder.append('[');
-    for (String element : list) {
-      // escape list separator
+    for (String element : set) {
+      // escape element separator
       String escapedElement = element.replaceAll(",", "\\\\,");
       builder.append(escapedElement).append(", ");
     }
-    if (builder.length() > 1) { // remove last list separator
+    if (builder.length() > 1) { // remove last element separator
       builder.delete(builder.length()-2, builder.length());
     }
     builder.append("]");
@@ -216,14 +217,14 @@ public class Strings {
     StringBuilder builder = new StringBuilder();
     builder.append('{');
     for (Map.Entry<String, String> entry : map.entrySet()) {
-      // escape list separator
+      // escape element separator
       String escapedKey = entry.getKey().replaceAll("=", "\\\\=")
         .replaceAll(",", "\\\\,");
       String escapedValue = entry.getValue().replaceAll("=", "\\\\=")
         .replaceAll(",", "\\\\,");
       builder.append(escapedKey).append("=").append(escapedValue).append(", ");
     }
-    if (builder.length() > 1) { // remove last list separator
+    if (builder.length() > 1) { // remove last element separator
       builder.delete(builder.length()-2, builder.length());
     }
     builder.append("}");
@@ -231,38 +232,38 @@ public class Strings {
   }
 
   /**
-   * Get back a List of String from its String representation.
+   * Get back a Set of String from its String representation.
    * Unescape backslashed separator characters.
    * @param string String to convert to a List
-   * @param separator String that delimits the element of the list
-   * @return a List
-   * @see #toString(java.util.List)
+   * @param separator String that delimits the element of the set
+   * @return a linked hashset
+   * @see #toString(java.util.LinkedHashSet)
    */
-  public static List<String> toList(String string, String separator) {
-    List<String> list = new ArrayList<String>();
+  public static LinkedHashSet<String> toSet(String string, String separator) {
+    LinkedHashSet<String> set = new LinkedHashSet<String>();
     if (string == null
      || string.length() < 3) {
-      return list;
+      return set;
     }
     // remove last character
     String value = string.substring(0, string.length()-1);
     int index = 1;
     int startIndex = 1;
     int separatorIndex;
-    // split on list separator
+    // split on element separator
     while ((separatorIndex = value.indexOf(separator, index)) != -1) {
       // check that the separator is not an escaped character
       if (value.charAt(separatorIndex-1) != '\\') {
-        list.add(value.substring(startIndex, separatorIndex)
+        set.add(value.substring(startIndex, separatorIndex)
           // unescape separator
           .replaceAll("\\\\"+separator.charAt(0), ""+separator.charAt(0)));
         startIndex = separatorIndex + separator.length();
       }
       index = separatorIndex + separator.length();
     }
-    // last element of the list
-    list.add(value.substring(startIndex));
-    return list;
+    // last element of the set
+    set.add(value.substring(startIndex));
+    return set;
   }
 
   /**
@@ -278,11 +279,12 @@ public class Strings {
      || string.length() < 3) {
       return map;
     }
-    List<String> firstList = toList(string, ", ");
+    Set<String> firstList = toSet(string, ", ");
     for (String element : firstList) {
-      List<String> secondList = toList("["+element+"]", "=");
+      LinkedHashSet<String> secondList = toSet("[" + element + "]", "=");
       if (secondList.size() == 2) {
-        map.put(secondList.get(0), secondList.get(1));
+        Iterator<String> iterator = secondList.iterator();
+        map.put(iterator.next(), iterator.next());
       } else {
         Err.prln("Ignoring element: [" + element + "]");
         Err.prln("Expecting: [key=value]");

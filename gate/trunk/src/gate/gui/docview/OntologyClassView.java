@@ -70,7 +70,7 @@ public class OntologyClassView extends AbstractDocumentView
     highlightsDataByClassMap = new HashMap<OClass, List>();
     treeByOntologyMap = new HashMap<Ontology, JTree>();
     String prefix = getClass().getName() + '.';
-    hiddenClassesList = userConfig.getList(prefix + "hiddenclasses");
+    hiddenClassesSet = userConfig.getSet(prefix + "hiddenclasses");
     itemComparator = new OntologyItemComparator();
   }
 
@@ -232,7 +232,7 @@ public class OntologyClassView extends AbstractDocumentView
     document = null;
     // save hidden classes to be reused next time
     String prefix = getClass().getName() + '.';
-    userConfig.put(prefix + "hiddenclasses", hiddenClassesList);
+    userConfig.put(prefix + "hiddenclasses", hiddenClassesSet);
   }
 
   public Component getGUI() {
@@ -420,7 +420,7 @@ public class OntologyClassView extends AbstractDocumentView
               if (!disclosureCheckBox.isSelected()) {
                 disclosureCheckBox.doClick();
               }
-              hiddenClassesList.clear();
+              hiddenClassesSet.clear();
               DefaultMutableTreeNode node = (DefaultMutableTreeNode)
                 tree.getModel().getRoot();
               final Set<OClass> classes = ontology.getOClasses(true);
@@ -494,7 +494,7 @@ public class OntologyClassView extends AbstractDocumentView
                 treeModel.removeNodeFromParent(node);
                 Object userObject = node.getUserObject();
                 OClass oClass = (OClass) userObject;
-                hiddenClassesList.add(oClass.getONodeID().toString());
+                hiddenClassesSet.add(oClass.getONodeID().toString());
               }
             }
           }
@@ -612,12 +612,12 @@ public class OntologyClassView extends AbstractDocumentView
       index++;
       if (index > parent.getChildCount()) { index = parent.getChildCount(); }
       if (filterClasses) {
-        if (hiddenClassesList.contains(subClass.getONodeID().toString())) {
+        if (hiddenClassesSet.contains(subClass.getONodeID().toString())) {
           // this class is filtered so skip it
           continue;
         }
       } else {
-        hiddenClassesList.remove(subClass.getONodeID().toString());
+        hiddenClassesSet.remove(subClass.getONodeID().toString());
       }
       DefaultMutableTreeNode subNode = new DefaultMutableTreeNode(subClass);
       if (!filterClasses || !children.contains(subClass)) {
@@ -996,7 +996,7 @@ public class OntologyClassView extends AbstractDocumentView
   /** Link trees with their ontologies. */
   protected Map<Ontology, JTree> treeByOntologyMap;
   /** Classes to hide in the trees. */
-  protected List<String> hiddenClassesList;
+  protected LinkedHashSet<String> hiddenClassesSet;
   /** Annotation set name where to read/save the instance annotations. */
   protected String selectedSet;
   protected OntologyItemComparator itemComparator;

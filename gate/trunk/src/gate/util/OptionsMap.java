@@ -44,7 +44,7 @@ public class OptionsMap extends TreeMap<Object, Object> {
     return super.put(key, Strings.toString(value));
   }
 
-  public Object put(Object key, List<String> value) {
+  public Object put(Object key, LinkedHashSet<String> value) {
     return super.put(key, Strings.toString(value));
   }
 
@@ -139,15 +139,16 @@ public class OptionsMap extends TreeMap<Object, Object> {
   }
 
   /**
-   * If the object stored under key is a list then returns its value
-   * otherwise returns an empty list.
+   * If the object stored under key is a set then returns its value
+   * otherwise returns an empty set.
    *
    * @param key key associated to the value to retrieve
-   * @return the associated list
+   * @return the associated linked hash set
    */
-  public List<String> getList(Object key) {
-    return Strings.toList((String) get(key), ", ");
+  public LinkedHashSet<String> getSet(Object key) {
+    return Strings.toSet((String) get(key), ", ");
   }
+
 
   /**
    * If the object stored under key is a map then returns its value

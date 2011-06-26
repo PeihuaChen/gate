@@ -179,14 +179,15 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     }
 
     // read the user config data for annotation stack rows
-    // saved as a string: "[true, Cat, Token, category, Crop end, ...]"
     String prefix = LuceneDataStoreSearchGUI.class.getName() + ".";
     if (Gate.getUserConfig().containsKey(prefix + "rows")) {
-      List<String> list = Gate.getUserConfig().getList(prefix + "rows");
-      for (int i = 0; i < list.size()
-          && i < (maxStackRows * columnNames.length); i++) {
-        stackRows[i / columnNames.length][i % columnNames.length] = list.get(i);
-        if (i % columnNames.length == 0) { numStackRows++; }
+      Map<String,String> map = Gate.getUserConfig().getMap(prefix + "rows");
+      for (int row = 0; row < maxStackRows; row++) {
+        if (!map.containsKey(columnNames[0]+'_'+row)) { break; }
+        for (int col = 0; col < columnNames.length; col++) {
+          stackRows[row][col] = map.get(columnNames[col]+'_'+row);
+        }
+        numStackRows++;
       }
     }
 
@@ -1339,12 +1340,14 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
    * Save the user config data.
    */
   protected void saveStackViewConfiguration() {
-    List<String> list = new ArrayList<String>();
+    Map<String,String> map = new HashMap<String,String>();
     for (int row = 0; row < numStackRows; row++) {
-      list.addAll(Arrays.asList(stackRows[row]));
+      for (int col = 0; col < columnNames.length; col++) {
+        map.put(columnNames[col]+'_'+row, stackRows[row][col]);
+      }
     }
     Gate.getUserConfig().put(LuceneDataStoreSearchGUI.class.getName()+".rows",
-      Strings.toString(list));
+      Strings.toString(map));
   }
   
   /**

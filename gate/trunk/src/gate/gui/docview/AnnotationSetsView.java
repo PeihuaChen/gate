@@ -358,7 +358,7 @@ public class AnnotationSetsView extends AbstractDocumentView
    * @param selected state of the selection
    */
   public void saveType(String setName, String typeName, boolean selected) {
-    List<String> typeList = Gate.getUserConfig().getList(
+    LinkedHashSet<String> typeList = Gate.getUserConfig().getSet(
       AnnotationSetsView.class.getName() + ".types");
     String prefix = (setName == null) ? "." : setName + ".";
     if (selected) {
@@ -374,7 +374,7 @@ public class AnnotationSetsView extends AbstractDocumentView
    * Restore previously selected types from the preferences.
    */
   public void restoreSavedSelectedTypes() {
-    List<String> typeList = Gate.getUserConfig().getList(
+    LinkedHashSet<String> typeList = Gate.getUserConfig().getSet(
       AnnotationSetsView.class.getName() + ".types");
     for (SetHandler sHandler : setHandlers){
       String prefix = (sHandler.set.getName() == null) ?
