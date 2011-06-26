@@ -40,6 +40,7 @@ import gate.gui.annedit.SearchExpressionsAction;
 import gate.swing.JMenuButton;
 import gate.util.GateRuntimeException;
 import gate.util.OptionsMap;
+import gate.util.Strings;
 
 /**
  * This is the GATE Document viewer/editor. This class is only the shell of the
@@ -57,53 +58,97 @@ public class DocumentEditor extends AbstractVisualResource
   private static final long serialVersionUID = 1L;
 
   /**
-   * Save and restore the layout of the views and selected annotations.
+   * Save the layout of the views and selected annotations.
    */
-  static class Settings {
-    int rightViewIdx = 0;
-    int bottomViewIdx = 0;
-    List<String[]> annotationSetsTypes = new ArrayList<String[]>();
-    
-    public void saveSettings(DocumentEditor de) {
-      rightViewIdx = de.rightViewIdx;
-      bottomViewIdx = de.bottomViewIdx;
-      annotationSetsTypes.clear();
-      DocumentView dv = de.getRightView();
-      if (dv instanceof AnnotationSetsView) {
-        AnnotationSetsView av = (AnnotationSetsView)dv;
-        for (AnnotationSetsView.SetHandler sh : av.setHandlers) {
-          for (AnnotationSetsView.TypeHandler th : sh.typeHandlers) {
-            if (th.isSelected()) {
-              annotationSetsTypes.add(new String[] {sh.set.getName(), th.name});
-            }
+  public void saveSettings() {
+    DocumentEditor de = DocumentEditor.this;
+    Gate.getUserConfig().put(DocumentEditor.class.getName()+".centralViewIdx",
+      Strings.toString(de.centralViewIdx));
+    Gate.getUserConfig().put(DocumentEditor.class.getName()+".rightViewIdx",
+      Strings.toString(de.rightViewIdx));
+    Gate.getUserConfig().put(DocumentEditor.class.getName()+".bottomViewIdx",
+      Strings.toString(de.bottomViewIdx));
+    Gate.getUserConfig().put(DocumentEditor.class.getName()+".topViewIdx",
+      Strings.toString(de.topViewIdx));
+    LinkedHashSet<String> setTypeSet = new LinkedHashSet<String>();
+    DocumentView dv = de.getRightView();
+    if (dv instanceof AnnotationSetsView) {
+      AnnotationSetsView av = (AnnotationSetsView)dv;
+      for (AnnotationSetsView.SetHandler sh : av.setHandlers) {
+        for (AnnotationSetsView.TypeHandler th : sh.typeHandlers) {
+          if (th.isSelected()) {
+            setTypeSet.add((sh.set.getName() == null? "" : sh.set.getName())
+              + '.' + th.name);
           }
         }
       }
     }
-
-    public void restoreSettings(DocumentEditor de) {
-      if (de.rightViewIdx != rightViewIdx) de.setRightView(rightViewIdx);
-      if (de.bottomViewIdx != bottomViewIdx) de.setBottomView(bottomViewIdx);
-      DocumentView dv = de.getRightView();
-      if (dv instanceof AnnotationSetsView) {
-        AnnotationSetsView av = (AnnotationSetsView) dv;
-        for (AnnotationSetsView.SetHandler sh : av.setHandlers) {
-          for (AnnotationSetsView.TypeHandler th : sh.typeHandlers) {
-            th.setSelected(false);
-            for (String[] annotationSetType : annotationSetsTypes) {
-              String setName = annotationSetType[0];
-              String typeName = annotationSetType[1];
-              if (av.getSetHandler(setName) != null
-               && av.getSetHandler(setName).getTypeHandler(typeName) != null) {
-                av.setTypeSelected(setName, typeName, true);
-              }
-            }
-          }
-        }
-      }
+    Gate.getUserConfig().put(DocumentEditor.class.getName()
+      + ".setTypeSet", Strings.toString(setTypeSet));
+    DocumentView bottomView = de.getBottomView();
+    if (bottomView instanceof AnnotationStackView) {
+      AnnotationStackView view = (AnnotationStackView) bottomView;
+      Gate.getUserConfig().put(DocumentEditor.class.getName()
+        + ".stackTypesFeatures", Strings.toString(view.typesFeatures));
+      Gate.getUserConfig().put(DocumentEditor.class.getName()
+        + ".stackTargetSetName", view.targetSetName);
     }
   }
-  static Settings settings = new Settings();   
+
+  /**
+   * Restore the layout of the views and selected annotations.
+   */
+  public void restoreSettings() {
+    final DocumentEditor de = DocumentEditor.this;
+    Integer value = Gate.getUserConfig()
+      .getInt(DocumentEditor.class.getName() + ".centralViewIdx");
+    int centralViewIdx = (value == null)? 0 :  value;
+    value = Gate.getUserConfig()
+      .getInt(DocumentEditor.class.getName() + ".rightViewIdx");
+    int rightViewIdx = (value == null)? 0 :  value;
+    value = Gate.getUserConfig()
+      .getInt(DocumentEditor.class.getName() + ".bottomViewIdx");
+    int bottomViewIdx = (value == null)? 0 :  value;
+    value = Gate.getUserConfig()
+      .getInt(DocumentEditor.class.getName() + ".topViewIdx");
+    int topViewIdx = (value == null)? 0 :  value;
+    if (de.centralViewIdx != centralViewIdx) de.setRightView(centralViewIdx);
+    if (de.rightViewIdx != rightViewIdx) de.setRightView(rightViewIdx);
+    if (de.bottomViewIdx != bottomViewIdx) de.setBottomView(bottomViewIdx);
+    if (de.topViewIdx != topViewIdx) de.setBottomView(topViewIdx);
+
+    DocumentView dv = de.getRightView();
+    if (dv instanceof AnnotationSetsView) {
+      Set<String> setTypeSet = Gate.getUserConfig()
+        .getSet(DocumentEditor.class.getName() + ".setTypeSet");
+      AnnotationSetsView av = (AnnotationSetsView) dv;
+      for (AnnotationSetsView.SetHandler sh : av.setHandlers) {
+        for (AnnotationSetsView.TypeHandler th : sh.typeHandlers) {
+          th.setSelected(false);
+          for (String setType : setTypeSet) {
+            String[] values = setType.split("\\.");
+            if (values.length != 2) { continue; }
+            String setName = values[0].equals("")? null : values[0];
+            String typeName = values[1];
+            if (av.getSetHandler(setName) != null
+             && av.getSetHandler(setName).getTypeHandler(typeName) != null) {
+              av.setTypeSelected(setName, typeName, true);
+            }
+          }
+        }
+      }
+    }
+    DocumentView bottomView = de.getBottomView();
+    if (bottomView instanceof AnnotationStackView) {
+      AnnotationStackView view = (AnnotationStackView) bottomView;
+      view.typesFeatures = Gate.getUserConfig()
+        .getMap(DocumentEditor.class.getName() + ".stackTypesFeatures");
+      view.targetSetName = Gate.getUserConfig()
+        .getString(DocumentEditor.class.getName() + ".stackTargetSetName");
+      view.targetSetLabel.setText("Target set: " + view.targetSetName);
+    }
+  }
+
   /**
    * The document view is just an empty shell. This method publishes the actions
    * from the contained views. 
@@ -267,7 +312,7 @@ public class DocumentEditor extends AbstractVisualResource
     final JMenuItem saveCurrentLayoutMenuItem = new JMenuItem(
       new AbstractAction("Save Current Layout") {
       public void actionPerformed(ActionEvent evt) {
-        settings.saveSettings(DocumentEditor.this);
+        saveSettings();
       }
     });
     optionsMenu.add(saveCurrentLayoutMenuItem);
@@ -332,16 +377,13 @@ public class DocumentEditor extends AbstractVisualResource
     topBar.add(menuButton);
 
     // when the editor is shown restore views if layout saving is enable
-    addFocusListener(new FocusAdapter () {
-      public void focusGained(FocusEvent e) {
-        super.focusGained(e);
-        if(Gate.getUserConfig().getBoolean(
-          DocumentEditor.class.getName()+".restoreLayoutAutomatically")) {
-          settings.restoreSettings(DocumentEditor.this);
-        }
+    SwingUtilities.invokeLater(new Runnable() { public void run() {
+      if (Gate.getUserConfig().getBoolean(
+        DocumentEditor.class.getName()+".restoreLayoutAutomatically")) {
+        restoreSettings();
       }
-    });
-    
+    }});
+
     validate();
   }
   
@@ -1208,9 +1250,10 @@ public class DocumentEditor extends AbstractVisualResource
 
   protected Action searchAction;
   /**
-   * Cahced value for the selected annotations.
+   * Cached value for the selected annotations.
    */
-  private List<AnnotationData> selectedAnnotations = new ArrayList<AnnotationData>();
+  private List<AnnotationData> selectedAnnotations =
+    new ArrayList<AnnotationData>();
   
   protected JToolBar topBar;
 //  protected JToolBar rightBar;
