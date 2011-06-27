@@ -459,10 +459,7 @@ build/deploy all paths are relative to the top-level GATE directory -->
 
   <!-- rebuild the Windows-specific exe launcher for GATE.  This should very
   rarely be necessary, probably only when new features are added to launch4j.
-  Currently this target requires a version of launch4j patched according to
-  https://sourceforge.net/support/tracker.php?aid=1707827 - if and when this
-  patch is accepted into launch4j proper I will update this launcher config
-  to match -->
+  This target requires launch4j 3.0.1 or later -->
   <target name="gate.exe" depends="launch4j-taskdef">
     <launch4j configFile="build/deploy/launch4j-gate.xml"
               outfile="gate.exe" />

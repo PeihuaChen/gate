@@ -1,5 +1,4 @@
-<!-- This configuration file requires a version of launch4j 3.0 patched with
-the patch at https://sourceforge.net/support/tracker.php?aid=1707827 -->
+<!-- This configuration file requires a launch4j 3.0.2 or later -->
 <launch4jConfig>
   <dontWrapJar>true</dontWrapJar>
   <headerType>gui</headerType>
@@ -14,9 +13,9 @@ the patch at https://sourceforge.net/support/tracker.php?aid=1707827 -->
   <stayAlive>false</stayAlive>
   <icon>gate-icon.ico</icon>
   <jre>
-    <minVersion>1.5.0</minVersion>
+    <minVersion>1.6.0</minVersion>
     <!-- prefer JDK but accept JRE if newer -->
-    <jdkPreference>2</jdkPreference>
+    <jdkPreference>preferJdk</jdkPreference>
     <initialHeapSize>0</initialHeapSize>
     <maxHeapSize>0</maxHeapSize>
   </jre>
@@ -24,6 +23,6 @@ the patch at https://sourceforge.net/support/tracker.php?aid=1707827 -->
     <startupErr>An error occurred while starting the installer.</startupErr>
     <bundledJreErr>This application was configured to use a bundled Java Runtime Environment but the runtime is missing or corrupted.</bundledJreErr>
     <jreVersionErr>GATE requires a Java Runtime Environment, and works best with a JDK.  Click OK to download one - minimum version</jreVersionErr>
-    <launcherErr>The registry refers to a nonexistent Java Runtime Environment installation or the runtime is corrupted.  Please ensure you have a valid installation of Java 5.0 or later.</launcherErr>
+    <launcherErr>The registry refers to a nonexistent Java Runtime Environment installation or the runtime is corrupted.  Please ensure you have a valid installation of Java 6.0 or later.</launcherErr>
   </messages>
 </launch4jConfig>
