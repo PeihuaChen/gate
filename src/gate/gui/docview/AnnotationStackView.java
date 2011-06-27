@@ -406,8 +406,8 @@ public class AnnotationStackView  extends AbstractDocumentView
           public void run() {
             SwingUtilities.invokeLater(new Runnable() { public void run() {
               // select the new annotation and update the stack view
-              annotationSetsView.selectAnnotation(annotation,
-                document.getAnnotations(targetSetName));
+              annotationSetsView.setTypeSelected(targetSetName,
+                annotation.getType(), true);
             }});
           }
         }, timeToRun);
