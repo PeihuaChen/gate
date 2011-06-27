@@ -33,6 +33,8 @@ import java.util.*;
 import java.util.Timer;
 import java.util.List;
 import java.text.Collator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Show a stack view of highlighted annotations in the document
@@ -397,7 +399,6 @@ public class AnnotationStackView  extends AbstractDocumentView
         } catch (InvalidOffsetException e) {
           e.printStackTrace();
         }
-
         // wait some time
         Date timeToRun = new Date(System.currentTimeMillis() + 1000);
         Timer timer = new Timer("Annotation stack view select type", true);
@@ -424,9 +425,13 @@ public class AnnotationStackView  extends AbstractDocumentView
         String feature = typesFeatures.get(annotation.getType());
         if (feature == null) { return; }
         String value = (String) annotation.getFeatures().get(feature);
-        if (!value.startsWith("http://")) { return; }
-        // if the feature value is an url then display it in a browser
-        MainFrame.getInstance().showHelpFrame(value, "Annotation Stack View");
+        Pattern pattern = Pattern.compile("(https?://[^\\s,;]+)");
+        Matcher matcher = pattern.matcher(value);
+        if (matcher.find()) {
+          // if the feature value contains a url then display it in a browser
+          MainFrame.getInstance().showHelpFrame(
+            matcher.group(), "Annotation Stack View");
+        }
       }
       textView.getTextView().requestFocusInWindow();
     }
