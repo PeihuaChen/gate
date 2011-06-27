@@ -105,17 +105,29 @@ public class DocumentEditor extends AbstractVisualResource
     int centralViewIdx = (value == null)? 0 :  value;
     value = Gate.getUserConfig()
       .getInt(DocumentEditor.class.getName() + ".rightViewIdx");
-    int rightViewIdx = (value == null)? 0 :  value;
+    int rightViewIdx = (value == null)? -1 :  value;
     value = Gate.getUserConfig()
       .getInt(DocumentEditor.class.getName() + ".bottomViewIdx");
-    int bottomViewIdx = (value == null)? 0 :  value;
+    int bottomViewIdx = (value == null)? -1 :  value;
     value = Gate.getUserConfig()
       .getInt(DocumentEditor.class.getName() + ".topViewIdx");
-    int topViewIdx = (value == null)? 0 :  value;
-    if (de.centralViewIdx != centralViewIdx) de.setRightView(centralViewIdx);
-    if (de.rightViewIdx != rightViewIdx) de.setRightView(rightViewIdx);
-    if (de.bottomViewIdx != bottomViewIdx) de.setBottomView(bottomViewIdx);
-    if (de.topViewIdx != topViewIdx) de.setBottomView(topViewIdx);
+    int topViewIdx = (value == null)? -1 :  value;
+    if (de.centralViewIdx != centralViewIdx
+        && centralViews.size() > centralViewIdx) {
+      de.setCentralView(centralViewIdx);
+    }
+    if (de.rightViewIdx != rightViewIdx
+        && verticalViews.size() > rightViewIdx) {
+      de.setRightView(rightViewIdx);
+    }
+    if (de.bottomViewIdx != bottomViewIdx
+        && horizontalViews.size() > centralViewIdx) {
+      de.setBottomView(bottomViewIdx);
+    }
+    if (de.topViewIdx != topViewIdx
+        && horizontalViews.size() > centralViewIdx) {
+      de.setTopView(topViewIdx);
+    }
 
     DocumentView dv = de.getRightView();
     if (dv instanceof AnnotationSetsView) {
@@ -755,8 +767,8 @@ public class DocumentEditor extends AbstractVisualResource
   /**
    * Dialog to search an expression in the document.
    * Select the current match in the document.
-   * Options: incremental search, case insensitive, whole word,
-   * hightlighted annotations, regular expression.
+   * Features: incremental search, case insensitive, whole word,
+   * highlighted annotations, regular expression.
    */
   protected class SearchAction extends AbstractAction {
 
