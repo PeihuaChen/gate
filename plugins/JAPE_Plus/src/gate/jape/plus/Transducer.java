@@ -253,6 +253,7 @@ public class Transducer extends AbstractLanguageAnalyser
         aSpt.setOutputASName(outputASName);
         aSpt.setOwner(this);
         actionContext.setCorpus(corpus);
+        actionContext.setPR(this);
         actionContext.setPRFeatures(features);
         aSpt.setActionContext(actionContext);
         aSpt.setOntology(ontology);
@@ -365,6 +366,7 @@ public class Transducer extends AbstractLanguageAnalyser
     actionContext.setCorpus(corpus);
     actionContext.setPRFeatures(features);
     actionContext.setPRName(this.getName());
+    actionContext.setPR(this);
     for(SPTBase aSpt : singlePhaseTransducers){
       aSpt.runControllerExecutionStartedBlock(actionContext,c,ontology);
     }
@@ -380,6 +382,7 @@ public class Transducer extends AbstractLanguageAnalyser
     }
     actionContext.setCorpus(null);
     actionContext.setController(null);
+    actionContext.setPR(null);
   }
 
   @Override
@@ -392,6 +395,7 @@ public class Transducer extends AbstractLanguageAnalyser
     }
     actionContext.setCorpus(null);
     actionContext.setController(null);
+    actionContext.setPR(null);
   }
 
   

@@ -144,6 +144,7 @@ public class Transducer
     // the current PR features and the corpus, if present
     actionContext.setCorpus(corpus);
     actionContext.setPRFeatures(features);
+    actionContext.setPR(this);
     try {
       batch.transduce(document, inputASName == null
               ? document.getAnnotations()
@@ -560,6 +561,7 @@ public class Transducer
     actionContext.setCorpus(corpus);
     actionContext.setPRFeatures(features);
     actionContext.setPRName(this.getName());
+    actionContext.setPR(this);
     batch.runControllerExecutionStartedBlock(actionContext,c,ontology);
   }
 
@@ -568,6 +570,7 @@ public class Transducer
     batch.runControllerExecutionFinishedBlock(actionContext,c,ontology);
     actionContext.setCorpus(null);
     actionContext.setController(null);
+    actionContext.setPR(null);
   }
 
   public void controllerExecutionAborted(Controller c, Throwable t)
@@ -575,6 +578,7 @@ public class Transducer
     batch.runControllerExecutionAbortedBlock(actionContext,c,t,ontology);
     actionContext.setCorpus(null);
     actionContext.setController(null);
+    actionContext.setPR(null);
   }
 
 

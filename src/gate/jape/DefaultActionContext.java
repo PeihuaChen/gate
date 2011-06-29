@@ -18,6 +18,7 @@ package gate.jape;
 import gate.Controller;
 import gate.Corpus;
 import gate.FeatureMap;
+import gate.ProcessingResource;
 
 /**
  * Default implementation for an action context.<br>
@@ -34,6 +35,7 @@ public class DefaultActionContext implements ActionContext {
   protected Controller controller;
   protected boolean endPhaseSupported;
   protected boolean phaseEnded = false;
+  protected ProcessingResource pr;
 
   public DefaultActionContext() {}
 
@@ -46,6 +48,10 @@ public class DefaultActionContext implements ActionContext {
 
   public void setPRName(String name) {
     this.prname = name;
+  }
+  
+  public void setPR(ProcessingResource pr) {
+    this.pr = pr;
   }
   
   public Corpus getCorpus() {
@@ -84,6 +90,10 @@ public class DefaultActionContext implements ActionContext {
 
   public void setPhaseEnded(boolean isended) {
     phaseEnded = isended;
+  }
+  
+  public boolean isPREnabled() {
+    return gate.Utils.isEnabled(controller, pr);
   }
 
 }
