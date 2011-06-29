@@ -53,6 +53,18 @@ public interface ActionContext  extends Serializable {
    */
   public String getPRName();
   
+  /**
+   * Returns true if the PR this transducer is running in has a chance to
+   * be run at all in its controller. This can be false if the PR is set
+   * to never run in a conditional controller. In such a case any controllerStarted,
+   * and controllerFinished blocks of the JAPE grammer are still run when
+   * the controller is starting or finishing. This method can be used in the
+   * controllerStarted or controllerFinished  blocks to prevent any unwanted
+   * processing if the PR is disabled.
+   * 
+   * @return
+   */
+  public boolean isPREnabled();
   
   public Controller getController();
   /**
