@@ -18,9 +18,12 @@ package gate;
 
 import gate.annotation.AnnotationSetImpl;
 import gate.annotation.ImmutableAnnotationSetImpl;
+import gate.creole.ConditionalSerialController;
+import gate.creole.RunningStrategy;
 import gate.util.GateRuntimeException;
 import gate.util.OffsetComparator;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -502,6 +505,67 @@ public class Utils {
     FeatureMap fm = Factory.newFeatureMap();
     fm.putAll(map);
     return fm;
+  }
+  
+  /** 
+   * This method can be used to check if a ProcessingResource has 
+   * a chance to be run in the given controller with the current settings.
+   * <p>
+   * That means that for a non-conditional controller, the method will return
+   * true if the PR is part of the controller. For a conditional controller,
+   * the method will return true if it is part of the controller and at least
+   * once (if the same PR is contained multiple times) it is not disabled.
+   * 
+   * @param controller 
+   * @param pr
+   * @return true or false depending on the conditions explained above.
+   */
+  public static boolean isEnabled(Controller controller, ProcessingResource pr) {
+    Collection<ProcessingResource> prs = controller.getPRs();
+    if(!prs.contains(pr)) {
+      return false;
+    }
+    if(controller instanceof ConditionalSerialController) {
+      Collection<RunningStrategy> rss = 
+        ((ConditionalSerialController)controller).getRunningStrategies();
+      for(RunningStrategy rs : rss) {
+        // if we find at least one occurrence of the PR that is not disabled
+        // return true
+        if(rs.getPR().equals(pr) && 
+           rs.getRunMode() != RunningStrategy.RUN_NEVER) {
+          return true;
+        }
+      }
+      // if we get here, no occurrence of the PR has found or none that
+      // is not disabled, so return false
+      return false;
+    }
+    return true;
+  }
+  
+  /**
+   * Return the running strategy of the PR in the controller, if the controller
+   * is a conditional controller. If the controller is not a conditional 
+   * controller, null is returned. If the controller is a conditional controller
+   * and the PR is contained multiple times, the running strategy for the 
+   * first occurrence the is found is returned.
+   * 
+   * @param controller
+   * @param pr
+   * @return A RunningStrategy object or null
+   */
+  public static RunningStrategy getRunningStrategy(Controller controller,
+          ProcessingResource pr) {
+    if(controller instanceof ConditionalSerialController) {
+      Collection<RunningStrategy> rss = 
+        ((ConditionalSerialController)controller).getRunningStrategies();
+      for(RunningStrategy rs : rss) {
+        if(rs.getPR() == pr) {
+          return rs;
+        }
+      } 
+    }
+    return null;
   }
   
   /**
