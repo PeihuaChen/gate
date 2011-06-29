@@ -23,7 +23,6 @@ import gate.ProcessingResource;
  * execution, for example to initialise internal data structures or to
  * do some aggregate processing of data gathered from a whole corpus.
  * </p>
- * 
  * <p>
  * If a controller contains several PRs that implement this interface,
  * the order in which their <code>controllerExecutionStarted</code> (<code>Finished</code>
@@ -34,7 +33,16 @@ import gate.ProcessingResource;
  * methods may not be called at all for this run. PRs should be robust
  * to this possibility.
  * </p>
- * 
+ * <p>
+ * If the processing resource implementing this interface is contained in
+ * a conditional controller the methods defined by this interface are invoked
+ * independently of the RunningStrategy for the processing resource: even if
+ * the PR is disabled, the methods will get invoked. The method
+ * {@see gate.Utils#isEnabled(Controller, ProcessingResource)} can be used
+ * inside the implementation of the methods defined in this interface 
+ * if necessary to find out if the processing resource has a chance to run
+ * in the controller.
+ * </p>
  * <p>
  * The controller should call this PRs started and finished (or aborted)
  * methods at most once per run, even if the controller allows the same
