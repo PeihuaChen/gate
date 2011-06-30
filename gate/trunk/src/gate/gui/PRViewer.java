@@ -61,7 +61,7 @@ public class PRViewer extends AbstractVisualResource {
     setLayout(new BorderLayout());
     editor = new ResourceParametersEditor();
     editor.setEditable(false);
-    editor.setAutoResizeMode(XJTable.AUTO_RESIZE_OFF);
+    editor.setAutoResizeMode(XJTable.AUTO_RESIZE_LAST_COLUMN);
     JScrollPane scroller = new JScrollPane(editor);
     scroller.setAlignmentX(Component.LEFT_ALIGNMENT);
     scroller.setAlignmentY(Component.TOP_ALIGNMENT);
