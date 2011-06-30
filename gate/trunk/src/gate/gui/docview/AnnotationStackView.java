@@ -94,6 +94,9 @@ public class AnnotationStackView  extends AbstractDocumentView
     toolBar.addSeparator();
     toolBar.add(previousAnnotationAction = new PreviousAnnotationAction());
     toolBar.add(nextAnnotationAction = new NextAnnotationAction());
+    overlappingCheckBox = new JCheckBox("Overlapping");
+    overlappingCheckBox.setToolTipText("Skip non overlapping annotations.");
+    toolBar.add(overlappingCheckBox);
     toolBar.addSeparator();
     toolBar.add(targetSetLabel = new JLabel("Target set: Undefined"));
     targetSetLabel.addMouseListener(new MouseAdapter() {
@@ -147,19 +150,41 @@ public class AnnotationStackView  extends AbstractDocumentView
     }
     public void actionPerformed(ActionEvent e) {
       nextAnnotationAction.setEnabled(true);
-      SortedSet<Annotation> set =
-        new TreeSet<Annotation>(new OffsetComparator());
+      List<Annotation> list = new ArrayList<Annotation>();
       for(SetHandler setHandler : annotationSetsView.setHandlers) {
         for(TypeHandler typeHandler: setHandler.typeHandlers) {
           if (typeHandler.isSelected()) {
-            set.addAll(setHandler.set.get(typeHandler.name).getContained(
+            // adds all the annotations from the selected type contained
+            // between the beginning of the document and the caret position - 1
+            list.addAll(setHandler.set.get(typeHandler.name).getContained(
               0l, (long)textView.getTextView().getCaretPosition()-1));
           }
         }
       }
-      if (set.size() > 0) {
-        textView.getTextView().setCaretPosition(
-          set.last().getEndNode().getOffset().intValue());
+      boolean enabled = false;
+      if (list.size() > 0) {
+        if (overlappingCheckBox.isSelected()) {
+          Collections.sort(list, new OffsetComparator());
+          boolean found = false;
+          for (int i = list.size()-1; i > 0; i--) {
+            if (list.get(i).overlaps(list.get(i-1))) {
+              if (found) { enabled = true; break; }
+              // set the caret on the previous overlapping annotation found
+              textView.getTextView().setCaretPosition(
+                list.get(i).getEndNode().getOffset().intValue());
+              found = true;
+            }
+          }
+        } else {
+          SortedSet<Annotation> set =
+            new TreeSet<Annotation>(new OffsetComparator());
+          set.addAll(list); // remove same offsets annotations
+          list = new ArrayList<Annotation>(set);
+          // set the caret on the previous annotation found
+          textView.getTextView().setCaretPosition(
+            list.get(list.size()-1).getEndNode().getOffset().intValue());
+          enabled = (list.size() > 1);
+        }
         try {
           textView.getTextView().scrollRectToVisible(
           textView.getTextView().modelToView(
@@ -168,7 +193,7 @@ public class AnnotationStackView  extends AbstractDocumentView
           exception.printStackTrace();
         }
       }
-      setEnabled(set.size() > 1);
+      setEnabled(enabled);
       textView.getTextView().requestFocusInWindow();
     }
   }
@@ -182,20 +207,42 @@ public class AnnotationStackView  extends AbstractDocumentView
     }
     public void actionPerformed(ActionEvent e) {
       previousAnnotationAction.setEnabled(true);
-      SortedSet<Annotation> set = new TreeSet<Annotation>(
-        Collections.reverseOrder(new OffsetComparator()));
+      List<Annotation> list = new ArrayList<Annotation>();
       for(SetHandler setHandler : annotationSetsView.setHandlers) {
         for(TypeHandler typeHandler: setHandler.typeHandlers) {
           if (typeHandler.isSelected()) {
-            set.addAll(setHandler.set.get(typeHandler.name).getContained(
+            // adds all the annotations from the selected type contained
+            // between the caret position and the end of the document
+            list.addAll(setHandler.set.get(typeHandler.name).getContained(
               (long)textView.getTextView().getCaretPosition(),
               document.getContent().size()-1));
           }
         }
       }
-      if (set.size() > 0) {
-        textView.getTextView().setCaretPosition(
-          set.last().getEndNode().getOffset().intValue());
+      boolean enabled = false;
+      if (list.size() > 0) {
+        if (overlappingCheckBox.isSelected()) {
+          Collections.sort(list, new OffsetComparator());
+          boolean found = false;
+          for (int i = 0; i < list.size()-1; i++) {
+            if (list.get(i).overlaps(list.get(i+1))) {
+              if (found) { enabled = true; break; }
+              // set the caret on the next overlapping annotation found
+              textView.getTextView().setCaretPosition(
+                list.get(i).getEndNode().getOffset().intValue());
+              found = true;
+            }
+          }
+        } else {
+          SortedSet<Annotation> set =
+            new TreeSet<Annotation>(new OffsetComparator());
+          set.addAll(list); // remove same offsets annotations
+          list = new ArrayList<Annotation>(set);
+          // set the caret on the next annotation found
+          textView.getTextView().setCaretPosition(
+            list.get(0).getEndNode().getOffset().intValue());
+          enabled = (list.size() > 1);
+        }
         try {
           textView.getTextView().scrollRectToVisible(
           textView.getTextView().modelToView(
@@ -204,7 +251,7 @@ public class AnnotationStackView  extends AbstractDocumentView
           exception.printStackTrace();
         }
       }
-      setEnabled(set.size() > 1);
+      setEnabled(enabled);
       textView.getTextView().requestFocusInWindow();
     }
   }
@@ -358,7 +405,7 @@ public class AnnotationStackView  extends AbstractDocumentView
     public void processMouseEvent(MouseEvent me) {
 
       if(me.isPopupTrigger()) { // context menu
-        // add annotation editors context menu
+        // add annotation editors to the context menu
         JPopupMenu popup = new JPopupMenu();
         List<Action> specificEditorActions =
           annotationListView.getSpecificEditorActions(
@@ -385,6 +432,30 @@ public class AnnotationStackView  extends AbstractDocumentView
 
       } else if (me.getID() == MouseEvent.MOUSE_CLICKED
               && me.getButton() == MouseEvent.BUTTON1
+              && me.getClickCount() == 1
+              && (me.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) != 0
+              && (me.getModifiersEx() & MouseEvent.SHIFT_DOWN_MASK) != 0) {
+              // control + shift + click -> delete the annotation
+        annotationData.getAnnotationSet().remove(annotation);
+
+      } else if (me.getID() == MouseEvent.MOUSE_CLICKED
+              && me.getButton() == MouseEvent.BUTTON1
+              && me.getClickCount() == 1
+              && (me.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) != 0) {
+               // control + click
+        String feature = typesFeatures.get(annotation.getType());
+        if (feature == null) { return; }
+        String value = (String) annotation.getFeatures().get(feature);
+        Pattern pattern = Pattern.compile("(https?://[^\\s,;]+)");
+        Matcher matcher = pattern.matcher(value);
+        if (matcher.find()) {
+          // if the feature value contains a url then display it in a browser
+          MainFrame.getInstance().showHelpFrame(
+            matcher.group(), "Annotation Stack View");
+        }
+
+      } else if (me.getID() == MouseEvent.MOUSE_CLICKED
+              && me.getButton() == MouseEvent.BUTTON1
               && me.getClickCount() == 2) { // double click
         if (targetSetName == null) {
           if (!askTargetSet()) { return; }
@@ -400,7 +471,7 @@ public class AnnotationStackView  extends AbstractDocumentView
           e.printStackTrace();
         }
         // wait some time
-        Date timeToRun = new Date(System.currentTimeMillis() + 1000);
+        Date timeToRun = new Date(System.currentTimeMillis() + 500);
         Timer timer = new Timer("Annotation stack view select type", true);
         timer.schedule(new TimerTask() {
           public void run() {
@@ -411,27 +482,6 @@ public class AnnotationStackView  extends AbstractDocumentView
             }});
           }
         }, timeToRun);
-
-      } else if (me.getID() == MouseEvent.MOUSE_CLICKED
-              && me.getButton() == MouseEvent.BUTTON1
-              && me.getClickCount() == 1
-              && (me.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) != 0) {
-              // control + click -> delete the annotation
-        annotationData.getAnnotationSet().remove(annotation);
-
-      } else if (me.getID() == MouseEvent.MOUSE_CLICKED
-              && me.getButton() == MouseEvent.BUTTON1
-              && me.getClickCount() == 1) { // simple click
-        String feature = typesFeatures.get(annotation.getType());
-        if (feature == null) { return; }
-        String value = (String) annotation.getFeatures().get(feature);
-        Pattern pattern = Pattern.compile("(https?://[^\\s,;]+)");
-        Matcher matcher = pattern.matcher(value);
-        if (matcher.find()) {
-          // if the feature value contains a url then display it in a browser
-          MainFrame.getInstance().showHelpFrame(
-            matcher.group(), "Annotation Stack View");
-        }
       }
       textView.getTextView().requestFocusInWindow();
     }
@@ -448,10 +498,10 @@ public class AnnotationStackView  extends AbstractDocumentView
         String toolTip = (label.getToolTipText() == null) ?
           "" : label.getToolTipText();
         toolTip = toolTip.replaceAll("</?html>", "");
-        toolTip = "<html>" + (toolTip.length() == 0 ? "" : toolTip + "<br>")
-          + "Double click to copy this annotation.<br>"
-          + "Right click to edit<br>"
-          + "Control + click to delete</html>";
+        toolTip = "<html>"
+          + "<b>" + (toolTip.length() == 0 ? "" : toolTip + "</b><br><br>")
+          + "Double click to copy, right click to edit,<br>"
+          + "control click to show url, control shift click to delete</html>";
         label.setToolTipText(toolTip);
       }
       // make the tooltip indefinitely shown when the mouse is over
@@ -606,17 +656,25 @@ public class AnnotationStackView  extends AbstractDocumentView
     JWindow popupWindow;
   }
 
-  JLabel targetSetLabel;
-  AnnotationStack stackPanel;
-  JScrollPane scroller;
-  JPanel mainPanel;
+  // external objects
   TextualDocumentView textView;
   AnnotationSetsView annotationSetsView;
   AnnotationListView annotationListView;
-  String targetSetName;
   Document document;
+
+  // user interface elements
+  JLabel targetSetLabel;
+  String targetSetName;
+  JCheckBox overlappingCheckBox;
+  AnnotationStack stackPanel;
+  JScrollPane scroller;
+  JPanel mainPanel;
+
+  // actions
   PreviousAnnotationAction previousAnnotationAction;
   NextAnnotationAction nextAnnotationAction;
+
+  // local objects
   /** optionally map a type to a feature when the feature value
    *  must be displayed in the rectangle annotation */
   Map<String,String> typesFeatures;
