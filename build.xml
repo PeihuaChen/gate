@@ -563,6 +563,9 @@
 
   <!-- Run the beast -->
   <target name="run" depends="run-pre,run-nonmac,run-mac" >
+    <echo level="info">
+      GATE doesn't start? Consult http://gate.ac.uk/wiki/gate-user-faq.html
+    </echo>
   </target>
 
   <!-- Prepares for running GATE -->
