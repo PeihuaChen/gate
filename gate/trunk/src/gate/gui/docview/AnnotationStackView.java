@@ -109,7 +109,7 @@ public class AnnotationStackView  extends AbstractDocumentView
       "Click to change it.</html>");
     mainPanel.add(toolBar, BorderLayout.NORTH);
 
-    stackPanel = new AnnotationStack(100, 20);
+    stackPanel = new AnnotationStack(100, 30);
     scroller = new JScrollPane(stackPanel);
     scroller.getViewport().setOpaque(true);
     mainPanel.add(scroller, BorderLayout.CENTER);
@@ -144,8 +144,10 @@ public class AnnotationStackView  extends AbstractDocumentView
   class PreviousAnnotationAction extends AbstractAction {
     public PreviousAnnotationAction() {
       super("Previous boundary");
-      putValue(SHORT_DESCRIPTION, "Centre the view on the closest previous " +
-        "annotation boundary among all displayed");
+      putValue(SHORT_DESCRIPTION,
+        "<html>Move to the previous annotation boundary" +
+        "&nbsp;&nbsp;<font color=#667799><small>Alt-Left" +
+        "&nbsp;&nbsp;</small></font></html>");
       putValue(MNEMONIC_KEY, KeyEvent.VK_LEFT);
     }
     public void actionPerformed(ActionEvent e) {
@@ -201,8 +203,10 @@ public class AnnotationStackView  extends AbstractDocumentView
   class NextAnnotationAction extends AbstractAction {
     public NextAnnotationAction() {
       super("Next boundary");
-      putValue(SHORT_DESCRIPTION, "Centre the view on the closest next " +
-        "annotation boundary among all displayed");
+      putValue(SHORT_DESCRIPTION,
+        "<html>Move to the next annotation boundary" +
+        "&nbsp;&nbsp;<font color=#667799><small>Alt-Right" +
+        "&nbsp;&nbsp;</small></font></html>");
       putValue(MNEMONIC_KEY, KeyEvent.VK_RIGHT);
     }
     public void actionPerformed(ActionEvent e) {
@@ -499,9 +503,9 @@ public class AnnotationStackView  extends AbstractDocumentView
           "" : label.getToolTipText();
         toolTip = toolTip.replaceAll("</?html>", "");
         toolTip = "<html>"
-          + "<b>" + (toolTip.length() == 0 ? "" : toolTip + "</b><br><br>")
-          + "Double click to copy, right click to edit,<br>"
-          + "control click to show url, control shift click to delete</html>";
+          + (toolTip.length() == 0 ? "" : ("<b>" + toolTip + "</b><br><br>"))
+          + "Double-click to copy. Right-click to edit.<br>"
+          + "Control-click to show URL. Control-shift-click to delete.</html>";
         label.setToolTipText(toolTip);
       }
       // make the tooltip indefinitely shown when the mouse is over
