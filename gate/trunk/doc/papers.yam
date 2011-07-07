@@ -424,7 +424,6 @@ GATE papers
 
  - A. Kiryakov. Technical Report CS--03--03, Department of Computer Science, University of Sheffield. Ontology and Reasoning in MUMIS: Towards the Semantic Web. 2003. %(../../sale/mumis-semweb/mumis-semweb.doc, Word.)
 
-
  - H. Cunningham and D. Maynard and V. Tablan. JAPE: a Java Annotation Patterns Engine (Second Edition). Technical report CS--00--10, University of Sheffield, Department of Computer Science, 2000. %(ftp://ftp.dcs.shef.ac.uk/home/hamish/auto_papers/Cun00e.ps.gz, PostScript ).
 
  - D. Maynard and H. Cunningham and K. Bontcheva and R. Catizone and G. Demetriou and R. Gaizauskas and O. Hamza and M. Hepple and P. Herring and B. Mitchell and M. Oakes and W. Peters and A. Setzer and M. Stevenson and V. Tablan and C. Ursu and Y. Wilks. A Survey of Uses of GATE. Technical report CS--00--06, University of Sheffield, Department of Computer Science, 2000. %(../../sale/coling2000/techrpt.html, HTML).
@@ -434,13 +433,13 @@ GATE papers
  - H. Cunningham. JAPE: a Java Annotation Patterns Engine. Department of Computer Science, University of Sheffield, May, 1999. %(http://citeseer.ist.psu.edu/rd/55076162%2C380721%2C1%2C0.25%2CDownload/http://coblitz.codeen.org:3125/citeseer.ist.psu.edu/cache/papers/cs/17310/ftp:zSzzSzftp.dcs.shef.ac.ukzSzhomezSzhamishzSzauto_paperszSzCun00e.pdf/cunningham00jape.pdf, PDF)
 
 
- - H. Cunningham and K. Humphreys and R. Gaizauskas and M. Stower. CREOLE Developer's Manual. Department of Computer Science, University of Sheffield, Department of Computer Science, University of Sheffield. 1996. http://gate.ac.uk/.
+ - H. Cunningham and K. Humphreys and R. Gaizauskas and M. Stower. CREOLE Developer's Manual. Department of Computer Science, University of Sheffield, Department of Computer Science, University of Sheffield. 1996.
 
- - R. Gaizauskas and P. Rodgers and H. Cunningham and K. Humphreys. GATE User Guide. Department of Computer Science, University of Sheffield, Department of Computer Science, University of Sheffield. 1996. http://gate.ac.uk/.
+ - R. Gaizauskas and P. Rodgers and H. Cunningham and K. Humphreys. GATE User Guide. Department of Computer Science, University of Sheffield, Department of Computer Science, University of Sheffield. 1996.
 
- - K. Humphreys and R. Gaizauskas and H. Cunningham and S. Azzam. CREOLE Module Specifications. Department of Computer Science, University of Sheffield, Department of Computer Science, University of Sheffield, 1996. http://gate.ac.uk//.
+ - K. Humphreys and R. Gaizauskas and H. Cunningham and S. Azzam. CREOLE Module Specifications. Department of Computer Science, University of Sheffield, Department of Computer Science, University of Sheffield, 1996.
 
- - H. Cunningham and R. Gaizauskas and Y. Wilks. A General Architecture for Text Engineering (GATE) -- a new approach to Language Engineering R&D. Department of Computer Science, University of Sheffield, 1995. %(http://xxx.lanl.gov/abs/cs.CL/9601009, http://xxx.lanl.gov/abs/cs.CL/9601009 ). bibs
+ - H. Cunningham and R. Gaizauskas and Y. Wilks. A General Architecture for Text Engineering (GATE) -- a new approach to Language Engineering R&D. Department of Computer Science, University of Sheffield, 1995. %(http://xxx.lanl.gov/abs/cs.CL/9601009, http://xxx.lanl.gov/abs/cs.CL/9601009 ).
 
 %1 Our BibTeX file.
 
