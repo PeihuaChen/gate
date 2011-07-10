@@ -2,13 +2,13 @@ GATE papers
 
 %2* Which paper to cite if ..
 
-%3* I used GATE/ANNIE:
-
- - H. Cunningham, D. Maynard, K. Bontcheva, V. Tablan. GATE: A Framework and Graphical Development Environment for Robust NLP Tools and Applications. Proceedings of the 40th Anniversary Meeting of the Association for Computational Linguistics (ACL'02). Philadelphia, July 2002. %(../../sale/acl02/acl-main.pdf,PDF). %(gate.bib,BibTex entry).
-
-%3* I used material from the GATE User Guide:
+%3* I used GATE:
 
 - H. Cunningham, et al. Text Processing with GATE (Version 6). University of Sheffield Department of Computer Science. 15 April 2011. ISBN 0956599311. %(http://tinyurl.com/gatebook, Available from Amazon).
+
+%3* I Used ANNIE:
+
+ - H. Cunningham, D. Maynard, K. Bontcheva, V. Tablan. GATE: A Framework and Graphical Development Environment for Robust NLP Tools and Applications. Proceedings of the 40th Anniversary Meeting of the Association for Computational Linguistics (ACL'02). Philadelphia, July 2002. %(../../sale/acl02/acl-main.pdf,PDF). %(gate.bib,BibTex entry).
 
 %3* I used the ontology features in GATE:
 
@@ -17,6 +17,10 @@ GATE papers
 %3* I used GATE Mímir:
 
 - H. Cunningham, V. Tablan, I. Roberts, M. A. Greenwood, and N. Aswani. Information Extraction and Semantic Annotation for Multi-Paradigm Information Management. In M. Lupu, K. Mayer, J. Tait, and A. J. Trippe, editors, Current Challenges in Patent Information Retrieval, volume 29 of The Information Retrieval Series. Springer, 2011. 
+
+%3* I used GATE for Information Retrieval
+
+- H. Cunningham, A. Hanbury, and S. Rüger. Scaling up high-value retrieval to medium-volume data. In H. Cunningham, A. Hanbury, and S. Rüger, editors, Advances in Multidisciplinary Retrieval (the 1st Information Retrieval Facility Conference). LNCS volume number: 6107, Lecture Notes in Computer Science, Vienna, Austria, May 2010. Springer. 
 
 %3* On GATE and multimedia:
 
