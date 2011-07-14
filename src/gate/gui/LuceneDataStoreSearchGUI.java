@@ -658,6 +658,31 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     globalStatisticsTable.setComparator(1, integerComparator);
     globalStatisticsTable.setSortedColumn(1);
     globalStatisticsTable.setAscending(false);
+    globalStatisticsTable.addMouseListener(new MouseInputAdapter() {
+      public void mousePressed(MouseEvent e) {
+        if (e.getButton() == MouseEvent.BUTTON1
+         && e.getClickCount() == 2) {
+          updateQuery();
+        }
+      }
+      private void updateQuery() {
+        int caretPosition = queryTextArea.getCaretPosition();
+        String query = queryTextArea.getText();
+        String type = (String) globalStatisticsTable.getValueAt(
+          globalStatisticsTable.getSelectedRow(),
+          globalStatisticsTable.convertColumnIndexToView(0));
+        String queryMiddle = "{"+type+"}";
+        String queryLeft =
+          (queryTextArea.getSelectionStart() == queryTextArea.getSelectionEnd())?
+            query.substring(0, caretPosition):
+            query.substring(0, queryTextArea.getSelectionStart());
+        String queryRight =
+          (queryTextArea.getSelectionStart() == queryTextArea.getSelectionEnd())?
+            query.substring(caretPosition, query.length()):
+            query.substring(queryTextArea.getSelectionEnd(), query.length());
+        queryTextArea.setText(queryLeft+queryMiddle+queryRight);
+      }
+    });
 
     statisticsTabbedPane.addTab("Global", null,
       new JScrollPane(globalStatisticsTable),
