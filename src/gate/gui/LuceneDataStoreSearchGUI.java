@@ -1701,6 +1701,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
     }
 
     public void actionPerformed(ActionEvent e) {
+      // to avoid having the frame behind a window
       configureStackViewFrame.setVisible(false);
       configureStackViewFrame.setVisible(true);
     }
@@ -2863,7 +2864,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
   protected class ConfigureStackViewFrame extends JFrame {
 
     private final int REMOVE = columnNames.length;
-    private JTable stackRowsJTable;
+    private JTable configureStackViewTable;
 
     public ConfigureStackViewFrame(String title) {
       super(title);
@@ -2876,8 +2877,9 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       scrollPane.getViewport().setOpaque(true);
 
       configureStackViewTableModel = new ConfigureStackViewTableModel();
-      stackRowsJTable = new XJTable(configureStackViewTableModel);
-      ((XJTable)stackRowsJTable).setSortable(false);
+      configureStackViewTable = new XJTable(configureStackViewTableModel);
+      ((XJTable) configureStackViewTable).setSortable(false);
+      configureStackViewTable.setCellSelectionEnabled(true);
 
       // combobox used as cell editor
 
@@ -2886,7 +2888,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
       // set the cell renderer and/or editor for each column
 
-      stackRowsJTable.getColumnModel().getColumn(DISPLAY)
+      configureStackViewTable.getColumnModel().getColumn(DISPLAY)
         .setCellRenderer(new DefaultTableCellRenderer() {
           public Component getTableCellRendererComponent(
             JTable table, Object color, boolean isSelected,
@@ -2922,10 +2924,10 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           return checkBox;
         }
       }
-      stackRowsJTable.getColumnModel().getColumn(DISPLAY)
+      configureStackViewTable.getColumnModel().getColumn(DISPLAY)
         .setCellEditor(new DisplayCellEditor());
 
-      stackRowsJTable.getColumnModel().getColumn(SHORTCUT)
+      configureStackViewTable.getColumnModel().getColumn(SHORTCUT)
         .setCellRenderer(new DefaultTableCellRenderer() {
           public Component getTableCellRendererComponent(
             JTable table, Object color, boolean isSelected,
@@ -2942,11 +2944,11 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
       DefaultCellEditor cellEditor = new DefaultCellEditor(new JTextField());
       cellEditor.setClickCountToStart(0);
-      stackRowsJTable.getColumnModel()
+      configureStackViewTable.getColumnModel()
         .getColumn(SHORTCUT)
         .setCellEditor(cellEditor);
 
-      stackRowsJTable.getColumnModel()
+      configureStackViewTable.getColumnModel()
       .getColumn(ANNOTATION_TYPE)
       .setCellRenderer(new DefaultTableCellRenderer() {
         public Component getTableCellRendererComponent(
@@ -2976,24 +2978,24 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           Object value, boolean isSelected, int row, int col) {
           TreeSet<String> ts = new TreeSet<String>(stringCollator);
           if (populatedAnnotationTypesAndFeatures.containsKey((String)
-               stackRowsJTable.getValueAt(row, ANNOTATION_TYPE))) {
+               configureStackViewTable.getValueAt(row, ANNOTATION_TYPE))) {
             // this annotation type still exists in the datastore
             ts.addAll(populatedAnnotationTypesAndFeatures.get((String)
-              stackRowsJTable.getValueAt(row, ANNOTATION_TYPE)));
+              configureStackViewTable.getValueAt(row, ANNOTATION_TYPE)));
           }
           DefaultComboBoxModel dcbm = new DefaultComboBoxModel(ts.toArray());
           dcbm.insertElementAt("", 0);
           featuresBox.setModel(dcbm);
           featuresBox.setSelectedItem(
-            ts.contains((String) stackRowsJTable.getValueAt(row, col)) ?
-              stackRowsJTable.getValueAt(row, col) : "");
+            ts.contains((String) configureStackViewTable.getValueAt(row, col)) ?
+              configureStackViewTable.getValueAt(row, col) : "");
           return featuresBox;
         }
       }
-      stackRowsJTable.getColumnModel().getColumn(FEATURE)
+      configureStackViewTable.getColumnModel().getColumn(FEATURE)
         .setCellEditor(new FeatureCellEditor());
 
-      stackRowsJTable.getColumnModel()
+      configureStackViewTable.getColumnModel()
       .getColumn(FEATURE)
       .setCellRenderer(new DefaultTableCellRenderer() {
         public Component getTableCellRendererComponent(
@@ -3006,10 +3008,10 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
 
       cellEditor = new DefaultCellEditor(cropBox);
       cellEditor.setClickCountToStart(0);
-      stackRowsJTable.getColumnModel()
+      configureStackViewTable.getColumnModel()
         .getColumn(CROP)
         .setCellEditor(cellEditor);
-      stackRowsJTable.getColumnModel()
+      configureStackViewTable.getColumnModel()
       .getColumn(CROP)
       .setCellRenderer(new DefaultTableCellRenderer() {
         public Component getTableCellRendererComponent(
@@ -3048,7 +3050,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           return false;
         }
         public void actionPerformed(ActionEvent e) {
-          int row = stackRowsJTable.getEditingRow();
+          int row = configureStackViewTable.getEditingRow();
           fireEditingStopped();
           if (row == numStackRows) {
             if (stackRows[row][ANNOTATION_TYPE] != null
@@ -3088,18 +3090,72 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
           return button;
         }
       }
-      stackRowsJTable.getColumnModel().getColumn(REMOVE)
+      configureStackViewTable.getColumnModel().getColumn(REMOVE)
         .setCellEditor(new AddRemoveCellEditorRenderer());
-      stackRowsJTable.getColumnModel().getColumn(REMOVE)
+      configureStackViewTable.getColumnModel().getColumn(REMOVE)
         .setCellRenderer(new AddRemoveCellEditorRenderer());
 
-      scrollPane.setViewportView(stackRowsJTable);
+      scrollPane.setViewportView(configureStackViewTable);
 
       add(scrollPane, BorderLayout.CENTER);
+
+      JButton closeButton = new JButton("Close");
+      closeButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          configureStackViewFrame.setVisible(false);
+        }
+      });
+      JButton moveRowUpButton = new JButton("Move row up");
+      moveRowUpButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          if (configureStackViewTable.getRowCount() < 2) { return; }
+          final int selectedRow = configureStackViewTable.getSelectedRow();
+          int lastRow = configureStackViewTable.getRowCount() - 2;
+          if (selectedRow > 0 && selectedRow <= lastRow) {
+            String[] stackRow = stackRows[selectedRow-1];
+            stackRows[selectedRow-1] = stackRows[selectedRow];
+            stackRows[selectedRow] = stackRow;
+            configureStackViewTableModel.fireTableDataChanged();
+            updateStackView();
+            saveStackViewConfiguration();
+            SwingUtilities.invokeLater(new Runnable() { public void run() {
+              configureStackViewTable.changeSelection(
+                selectedRow - 1, SHORTCUT, false, false);
+              configureStackViewTable.requestFocusInWindow();
+            }});
+          }
+        }
+      });
+      JButton moveRowDownButton = new JButton("Move row down");
+      moveRowDownButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          if (configureStackViewTable.getRowCount() < 2) { return; }
+          final int selectedRow = configureStackViewTable.getSelectedRow();
+          int lastRow = configureStackViewTable.getRowCount() - 2;
+          if (selectedRow >= 0 && selectedRow < lastRow) {
+            String[] stackRow = stackRows[selectedRow+1];
+            stackRows[selectedRow+1] = stackRows[selectedRow];
+            stackRows[selectedRow] = stackRow;
+            configureStackViewTableModel.fireTableDataChanged();
+            updateStackView();
+            saveStackViewConfiguration();
+            SwingUtilities.invokeLater(new Runnable() { public void run() {
+              configureStackViewTable.changeSelection(
+                selectedRow + 1, SHORTCUT, false, false);
+              configureStackViewTable.requestFocusInWindow();
+            }});
+          }
+        }
+      });
+      JPanel buttonPanel = new JPanel();
+      buttonPanel.add(closeButton);
+      buttonPanel.add(moveRowUpButton);
+      buttonPanel.add(moveRowDownButton);
+      add(buttonPanel, BorderLayout.SOUTH);
     }
     
     public JTable getTable() {
-      return stackRowsJTable;
+      return configureStackViewTable;
     }
   }
 
