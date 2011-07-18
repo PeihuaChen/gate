@@ -38,8 +38,6 @@ implements ProcessingResource {
   
   /* But "category" feature is compatible with the ANNIE POS tagger.  */
   private static final String  POS_TAG_FEATURE    = ANNIEConstants.TOKEN_CATEGORY_FEATURE_NAME;
-  private static final String  inputSentenceType  = ANNIEConstants.SENTENCE_ANNOTATION_TYPE;
-  private static final String  inputTokenType     = ANNIEConstants.TOKEN_ANNOTATION_TYPE;
 
   private static final String DEP_ANNOTATION_TYPE   = "Dependency";
   private static final String DEP_ARG_FEATURE       = "args";
@@ -67,10 +65,12 @@ implements ProcessingResource {
   private boolean                          mappingLoaded = false;
   
   /*  CREOLE parameters: what are we going to annotate, and how?  */
-  private boolean                          addConstituentAnnotations;
-  private boolean                          addDependencyFeatures;
-  private boolean                          addDependencyAnnotations;
-  private boolean                          addPosTags;
+  private boolean  addConstituentAnnotations;
+  private boolean  addDependencyFeatures;
+  private boolean  addDependencyAnnotations;
+  private boolean  addPosTags;
+  private String   inputSentenceType;
+  private String   inputTokenType;
 
 
   
@@ -190,7 +190,6 @@ implements ProcessingResource {
    * scanned for Tokens. You have to run the ANNIE tokenizer and splitter before
    * this PR.)
    */
-  @SuppressWarnings("unchecked")
   private void parseSentences() { 
     List<Annotation> sentences = new ArrayList<Annotation>(annotationSet.get(inputSentenceType));
     java.util.Collections.sort(sentences, offsetComparator);
@@ -650,6 +649,31 @@ implements ProcessingResource {
   public Boolean getAddDependencyAnnotations() {
     return new Boolean(this.addDependencyAnnotations);
   }
+  
+  
+  @RunTime
+  @CreoleParameter(comment = "input annotation type for each sentence",
+      defaultValue = ANNIEConstants.SENTENCE_ANNOTATION_TYPE )
+  public void setInputSentenceType(String sType) {
+    this.inputSentenceType = sType;
+  }
+  
+  public String getInputSentenceType() {
+    return this.inputSentenceType;
+  }
+  
+
+  @RunTime
+  @CreoleParameter(comment = "input annotation type for each token",
+      defaultValue = ANNIEConstants.TOKEN_ANNOTATION_TYPE )
+  public void setInputTokenType(String tType) {
+    this.inputTokenType = tType;
+  }
+  
+  public String getInputTokenType() {
+    return this.inputTokenType;
+  }
+
   
   @RunTime
   @CreoleParameter(comment = "Create annotations to show phrase structures",
