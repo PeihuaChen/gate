@@ -10,5 +10,5 @@ package gate.metamap;
  * @author philipgooch
  */
 public enum OutputMode {
-    HighestMappingOnly, AllMappings, AllCandidates, AllCandidatesAndMappings
+    HighestMappingLowestCUI, HighestMappingMostSources, HighestMappingOnly, AllMappings, AllCandidates, AllCandidatesAndMappings
 }
