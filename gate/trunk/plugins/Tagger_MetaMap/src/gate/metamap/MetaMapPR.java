@@ -420,14 +420,23 @@ public class MetaMapPR extends AbstractLanguageAnalyser
                     }
                 }
             } // end if
+            
             fm.put("Type", type);
             fm.put("Score", mapEv.getScore());
             fm.put("ConceptId", mapEv.getConceptId());
             fm.put("ConceptName", mapEv.getConceptName());
             fm.put("PreferredName", mapEv.getPreferredName());
-            fm.put("SemanticTypes", mapEv.getSemanticTypes());
-            fm.put("Sources", mapEv.getSources());
 
+            // Output semantic types and sources both as raw strings and as Lists
+            // so that they can be queried both via JAPE LHS matches and Java RHS
+            fm.put("SemanticTypes", mapEv.getSemanticTypes());
+            fm.put("SemanticTypesString", mapEv.getSemanticTypes().toString());
+            fm.put("Sources", mapEv.getSources().toString());
+            fm.put("SourcesString", mapEv.getSources().toString());
+
+            // Features missing from previous versions of plugin
+            fm.put("IsHead", mapEv.isHead());
+            fm.put("IsOvermatch", mapEv.isOvermatch());
 
             // lngEndOffset will be null if we are processing the whole document
             // or the string content of individual annotations.
@@ -456,9 +465,37 @@ public class MetaMapPR extends AbstractLanguageAnalyser
 
         List<Mapping> mappings = pcm.getMappingList();
 
-        // Mappings are ordered by score, so outputting the first item will give the mapping
-        // with the highest score, if requested
-        if (outputMode.equals(OutputMode.HighestMappingOnly) && !(mappings.isEmpty())) {
+        // Sort according to properties of the first map event in each mapping
+        Collections.sort(mappings, new Comparator<Mapping>(){
+            public int compare(Mapping m1, Mapping m2) {
+                int result = 0;
+                try {
+                    List<Ev> m1Evs = m1.getEvList();
+                    List<Ev> m2Evs = m2.getEvList();
+                    if ( outputMode.equals(OutputMode.HighestMappingMostSources) ) {
+                        // return highest number of sources
+                        result = m2Evs.get(0).getSources().size() - m1Evs.get(0).getSources().size();
+                    } else if ( outputMode.equals(OutputMode.HighestMappingLowestCUI) ) {
+                        // return lowest CUI
+                        result = m1Evs.get(0).getConceptId().compareTo(m2Evs.get(0).getConceptId());
+                    }
+                } catch (Exception e) {
+                    // we'll ignore this and return the default (i.e. sorted by score)
+                } finally {
+                    return result;
+                }
+            }
+        });
+        
+        
+
+        // By default, mappings are ordered by score, so outputting the first item will give the mapping
+        // with the highest score, if requested. Otherwise, the above sorting will be applied
+        if ((
+                outputMode.equals(OutputMode.HighestMappingOnly) ||
+                outputMode.equals(OutputMode.HighestMappingMostSources) ||
+                outputMode.equals(OutputMode.HighestMappingLowestCUI)
+             ) && !(mappings.isEmpty())) {
             processEvents(mappings.get(0).getEvList(), negList, "Mapping", lngInitialOffset, lngEndOffset);
         } else {
             for (Mapping map : mappings) {
@@ -502,8 +539,14 @@ public class MetaMapPR extends AbstractLanguageAnalyser
                 if (outputMode.equals(OutputMode.AllCandidatesAndMappings) || outputMode.equals(OutputMode.AllCandidates)) {
                     this.processCandidates(pcm, negList, lngInitialOffset, lngEndOffset);
                 }
-                if (outputMode.equals(OutputMode.AllCandidatesAndMappings) || outputMode.equals(OutputMode.AllMappings)
-                        || outputMode.equals(OutputMode.HighestMappingOnly)) {
+                if (
+                        outputMode.equals(OutputMode.AllCandidatesAndMappings)
+                        || outputMode.equals(OutputMode.AllMappings)
+                        || outputMode.equals(OutputMode.HighestMappingOnly)
+                        || outputMode.equals(OutputMode.HighestMappingMostSources)
+                        || outputMode.equals(OutputMode.HighestMappingLowestCUI)
+                   )
+                {
                     this.processMappings(pcm, negList, lngInitialOffset, lngEndOffset);
                 }
 
