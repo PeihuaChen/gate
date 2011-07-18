@@ -35,12 +35,11 @@ public class StanfordSentence {
    * in the Penn documentation.    */
   private static final String  UNKNOWN_TAG     = "NN";
   
-  @SuppressWarnings("unchecked")
+
   public StanfordSentence(Annotation sentence, String tokenType, 
     AnnotationSet inputAS, boolean usePosTags) {
     
     OffsetComparator  offsetComparator = new OffsetComparator();
-    Annotation token;
     String tokenString;
 
     startPosToOffset = new HashMap<Integer, Long>();
@@ -56,12 +55,10 @@ public class StanfordSentence {
     tokens = new ArrayList<Annotation>(inputAS.getContained(sentenceStartOffset, sentenceEndOffset).get(tokenType));
     java.util.Collections.sort(tokens, offsetComparator);
 
-    Iterator<Annotation> tokenIter = tokens.iterator();
     words = new ArrayList<Word>();
     int tokenNo = 0;
 
-    while(tokenIter.hasNext()) {
-      token = tokenIter.next();
+    for (Annotation token : tokens) {
       tokenString = escapeToken(token.getFeatures().get(STRING_FEATURE).toString());
       add(tokenNo, token);
       
