@@ -834,7 +834,7 @@ void MacroDef() :
   <macro> macroNameTok=<ident>
   (
     LOOKAHEAD(2) // both blocks and PEs may start with "{"
-    body=PatternElement(null)
+    body=PatternElement()
     |
     body=Action(false)
   )
@@ -861,42 +861,59 @@ void TemplateDef() :
 LeftHandSide LeftHandSide() :
 {
   ConstraintGroup cg = new ConstraintGroup();
-  LeftHandSide lhs = new LeftHandSide(cg);
 }
 {
-  ConstraintGroup(lhs, cg)
-  { return lhs; }
+  ConstraintGroup(cg)
+  {
+    LeftHandSide lhs = new LeftHandSide(cg);
+    // pull out all bindings (including nested ones) and add them to the LHS
+    Iterator<ComplexPatternElement> boundCPEs = cg.getCPEs();
+    while(boundCPEs.hasNext()) {
+      ComplexPatternElement cpe = boundCPEs.next();
+      String bindingName = cpe.getBindingName();
+      if(bindingName != null) {
+        try {
+          lhs.addBinding(bindingName, cpe, bindingNameSet);
+        } catch(JapeException e) {
+          System.err.println(errorMsgPrefix(null)+
+            "duplicate binding name " + bindingName +
+            " - ignoring this binding! exception was: " + e.toString()
+          );
+        }
+
+      }
+    }
+    return lhs;
+  }
 
 } // LeftHandSide
 
 
 // we pass the lhs down so we can add bindings in CPEs, and the cg
 // so we can add PEs and create disjunctions here
-void ConstraintGroup(LeftHandSide lhs, ConstraintGroup cg) :
+void ConstraintGroup(ConstraintGroup cg) :
 {
   PatternElement pat = null;
 }
 {
-  ( pat=PatternElement(lhs) { cg.addPatternElement(pat); } )+
+  ( pat=PatternElement() { cg.addPatternElement(pat); } )+
   (
     <bar> { cg.createDisjunction(); }
-    ( pat=PatternElement(lhs) { cg.addPatternElement(pat); } )+
+    ( pat=PatternElement() { cg.addPatternElement(pat); } )+
   )*
 
 } // ConstraintGroup
 
 
-PatternElement PatternElement(LeftHandSide lhs) :
+PatternElement PatternElement() :
 {
   PatternElement pat = null;
   Token macroRefTok = null;
-  boolean macroRef = false;
 }
 {
   (
     macroRefTok=<ident> // macro reference
     {
-      macroRef = true;
       Object macro = macrosMap.get(macroRefTok.image);
       if(macro == null)
         throw(new ParseException(errorMsgPrefix(macroRefTok)+
@@ -922,34 +939,11 @@ PatternElement PatternElement(LeftHandSide lhs) :
     |
     pat=BasicPatternElement()
     |
-    pat=ComplexPatternElement(lhs)
+    pat=ComplexPatternElement()
     // |
     // pat=FunctionCallPatternElement()
   )
-  {
-    // if its a CPE, make binding into the LHS
-    if(pat instanceof ComplexPatternElement) {
-
-      String bindingName = ((ComplexPatternElement) pat).getBindingName();
-
-      if(bindingName != null && lhs != null) {
-
-        try {
-          lhs.addBinding(
-            bindingName, (ComplexPatternElement) pat, bindingNameSet, macroRef
-          );
-        } catch(JapeException e) {
-          System.err.println(errorMsgPrefix(null)+
-            "duplicate binding name " + bindingName +
-            " - ignoring this binding! exception was: " + e.toString()
-          );
-        }
-
-      } // not null binding or lhs
-    } // its a CPE
-
-    return pat;
-  }
+  { return pat; }
 
 } // PatternElement
 
@@ -988,14 +982,14 @@ BasicPatternElement BasicPatternElement() :
 } // BasicPatternElement
 
 
-ComplexPatternElement ComplexPatternElement(LeftHandSide lhs) :
+ComplexPatternElement ComplexPatternElement() :
 {
   KleeneOperator kleeneOperator = null;
   Token bindingNameTok = null;
   ConstraintGroup cg = new ConstraintGroup();
 }
 {
-  <leftBracket> ConstraintGroup(lhs, cg) <rightBracket>
+  <leftBracket> ConstraintGroup(cg) <rightBracket>
   (kleeneOperator=KleeneOperator())?
   ( <colon> ( bindingNameTok=<ident> | bindingNameTok=<integer> ) )?
   {

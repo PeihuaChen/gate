@@ -106,7 +106,7 @@ extends PatternElement implements JapeConstants, java.io.Serializable
   } // addPatternElement
 
   /** Get an list of CPEs that we contain. */
-  protected Iterator getCPEs() {
+  public Iterator getCPEs() {
     ArrayList cpes = new ArrayList();
 
     // for each (conjunction) member of the pattern element discjunction
