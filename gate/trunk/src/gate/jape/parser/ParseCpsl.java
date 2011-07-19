@@ -746,7 +746,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     macroNameTok = jj_consume_token(ident);
     if (jj_2_1(2)) {
       // both blocks and PEs may start with "{"
-          body = PatternElement(null);
+          body = PatternElement();
     } else {
       switch (jj_nt.kind) {
       case ident:
@@ -778,8 +778,25 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
   // TemplateDef
   final public LeftHandSide LeftHandSide() throws ParseException {
   ConstraintGroup cg = new ConstraintGroup();
-  LeftHandSide lhs = new LeftHandSide(cg);
-    ConstraintGroup(lhs, cg);
+    ConstraintGroup(cg);
+    LeftHandSide lhs = new LeftHandSide(cg);
+    // pull out all bindings (including nested ones) and add them to the LHS
+    Iterator<ComplexPatternElement> boundCPEs = cg.getCPEs();
+    while(boundCPEs.hasNext()) {
+      ComplexPatternElement cpe = boundCPEs.next();
+      String bindingName = cpe.getBindingName();
+      if(bindingName != null) {
+        try {
+          lhs.addBinding(bindingName, cpe, bindingNameSet);
+        } catch(JapeException e) {
+          System.err.println(errorMsgPrefix(null)+
+            "duplicate binding name " + bindingName +
+            " - ignoring this binding! exception was: " + e.toString()
+          );
+        }
+
+      }
+    }
     {if (true) return lhs;}
     throw new Error("Missing return statement in function");
   }
@@ -789,12 +806,12 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
 
 // we pass the lhs down so we can add bindings in CPEs, and the cg
 // so we can add PEs and create disjunctions here
-  final public void ConstraintGroup(LeftHandSide lhs, ConstraintGroup cg) throws ParseException {
+  final public void ConstraintGroup(ConstraintGroup cg) throws ParseException {
   PatternElement pat = null;
     label_8:
     while (true) {
-      pat = PatternElement(lhs);
-                              cg.addPatternElement(pat);
+      pat = PatternElement();
+                           cg.addPatternElement(pat);
       switch (jj_nt.kind) {
       case string:
       case ident:
@@ -821,8 +838,8 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
             cg.createDisjunction();
       label_10:
       while (true) {
-        pat = PatternElement(lhs);
-                                cg.addPatternElement(pat);
+        pat = PatternElement();
+                             cg.addPatternElement(pat);
         switch (jj_nt.kind) {
         case string:
         case ident:
@@ -839,14 +856,12 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
   }
 
   // ConstraintGroup
-  final public PatternElement PatternElement(LeftHandSide lhs) throws ParseException {
+  final public PatternElement PatternElement() throws ParseException {
   PatternElement pat = null;
   Token macroRefTok = null;
-  boolean macroRef = false;
     switch (jj_nt.kind) {
     case ident:
       macroRefTok = jj_consume_token(ident);
-      macroRef = true;
       Object macro = macrosMap.get(macroRefTok.image);
       if(macro == null)
         {if (true) throw(new ParseException(errorMsgPrefix(macroRefTok)+
@@ -874,34 +889,13 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
       pat = BasicPatternElement();
       break;
     case leftBracket:
-      pat = ComplexPatternElement(lhs);
+      pat = ComplexPatternElement();
       break;
     default:
       jj_la1[19] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
-    // if its a CPE, make binding into the LHS
-    if(pat instanceof ComplexPatternElement) {
-
-      String bindingName = ((ComplexPatternElement) pat).getBindingName();
-
-      if(bindingName != null && lhs != null) {
-
-        try {
-          lhs.addBinding(
-            bindingName, (ComplexPatternElement) pat, bindingNameSet, macroRef
-          );
-        } catch(JapeException e) {
-          System.err.println(errorMsgPrefix(null)+
-            "duplicate binding name " + bindingName +
-            " - ignoring this binding! exception was: " + e.toString()
-          );
-        }
-
-      } // not null binding or lhs
-    } // its a CPE
-
     {if (true) return pat;}
     throw new Error("Missing return statement in function");
   }
@@ -950,12 +944,12 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
   }
 
   // BasicPatternElement
-  final public ComplexPatternElement ComplexPatternElement(LeftHandSide lhs) throws ParseException {
+  final public ComplexPatternElement ComplexPatternElement() throws ParseException {
   KleeneOperator kleeneOperator = null;
   Token bindingNameTok = null;
   ConstraintGroup cg = new ConstraintGroup();
     jj_consume_token(leftBracket);
-    ConstraintGroup(lhs, cg);
+    ConstraintGroup(cg);
     jj_consume_token(rightBracket);
     switch (jj_nt.kind) {
     case kleeneOp:
@@ -1746,72 +1740,6 @@ AnnotationAccessor accessor = null;
     finally { jj_save(1, xla); }
   }
 
-  final private boolean jj_3R_27() {
-    if (jj_scan_token(pling)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_25() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_27()) jj_scanpos = xsp;
-    if (jj_scan_token(ident)) return true;
-    return false;
-  }
-
-  final private boolean jj_3_1() {
-    if (jj_3R_15()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_23() {
-    if (jj_scan_token(string)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_21() {
-    if (jj_scan_token(leftBracket)) return true;
-    if (jj_3R_24()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_26() {
-    if (jj_3R_15()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_16() {
-    if (jj_scan_token(colon)) return true;
-    if (jj_scan_token(ident)) return true;
-    if (jj_scan_token(leftBrace)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_19() {
-    if (jj_3R_21()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_24() {
-    Token xsp;
-    if (jj_3R_26()) return true;
-    while (true) {
-      xsp = jj_scanpos;
-      if (jj_3R_26()) { jj_scanpos = xsp; break; }
-    }
-    return false;
-  }
-
-  final private boolean jj_3R_18() {
-    if (jj_3R_20()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_17() {
-    if (jj_scan_token(ident)) return true;
-    return false;
-  }
-
   final private boolean jj_3_2() {
     if (jj_3R_16()) return true;
     return false;
@@ -1843,6 +1771,72 @@ AnnotationAccessor accessor = null;
     jj_scanpos = xsp;
     if (jj_3R_23()) return true;
     }
+    return false;
+  }
+
+  final private boolean jj_3_1() {
+    if (jj_3R_15()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_27() {
+    if (jj_scan_token(pling)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_26() {
+    if (jj_3R_15()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_25() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_27()) jj_scanpos = xsp;
+    if (jj_scan_token(ident)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_23() {
+    if (jj_scan_token(string)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_21() {
+    if (jj_scan_token(leftBracket)) return true;
+    if (jj_3R_24()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_24() {
+    Token xsp;
+    if (jj_3R_26()) return true;
+    while (true) {
+      xsp = jj_scanpos;
+      if (jj_3R_26()) { jj_scanpos = xsp; break; }
+    }
+    return false;
+  }
+
+  final private boolean jj_3R_19() {
+    if (jj_3R_21()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_16() {
+    if (jj_scan_token(colon)) return true;
+    if (jj_scan_token(ident)) return true;
+    if (jj_scan_token(leftBrace)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_18() {
+    if (jj_3R_20()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_17() {
+    if (jj_scan_token(ident)) return true;
     return false;
   }
 

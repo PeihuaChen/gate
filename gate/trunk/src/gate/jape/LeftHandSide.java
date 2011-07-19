@@ -52,8 +52,7 @@ public class LeftHandSide implements JapeConstants, Serializable
   public void addBinding(
     String bindingName,
     ComplexPatternElement binding,
-    HashSet bindingNameSet,
-    boolean macroRef
+    HashSet bindingNameSet
   ) throws JapeException {
     if(bindingTable.get(bindingName) != null)
       throw new JapeException(
@@ -61,24 +60,6 @@ public class LeftHandSide implements JapeConstants, Serializable
       );
     bindingTable.put(bindingName, binding);
     bindingNameSet.add(bindingName);
-
-    // if it was a macro ref, we need to recursively set up bindings
-    // in any CPEs that this one contains
-    if(macroRef) {
-      for(Iterator i = binding.getCPEs(); i.hasNext(); ) {
-        binding = (ComplexPatternElement) i.next();
-        bindingName = binding.getBindingName();
-        if(bindingName == null) // not all CPEs have binding names
-          continue;
-        if(bindingTable.get(bindingName) != null)
-          throw new JapeException(
-            "LeftHandSide.addBinding: " + bindingName + " already bound"
-          );
-        bindingTable.put(bindingName, binding);
-        bindingNameSet.add(bindingName);
-      } // for each binding
-    } // macroRef
-
   } // addBinding
 
   /** Finish: replace dynamic data structures with Java arrays; called
