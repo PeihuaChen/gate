@@ -472,12 +472,27 @@ public class MetaMapPR extends AbstractLanguageAnalyser
                 try {
                     List<Ev> m1Evs = m1.getEvList();
                     List<Ev> m2Evs = m2.getEvList();
+                    Ev m1HeadEvent = m1Evs.get(0);
+                    Ev m2HeadEvent = m2Evs.get(0);
+                    // Iterate over both event lists to get and compare the head term
+                    for (Ev ev : m1Evs) {
+                        if (ev.isHead()) {
+                            m1HeadEvent = ev;
+                            break;
+                        }
+                    }
+                    for (Ev ev : m2Evs) {
+                        if (ev.isHead()) {
+                            m2HeadEvent = ev;
+                            break;
+                        }
+                    }
                     if ( outputMode.equals(OutputMode.HighestMappingMostSources) ) {
                         // return highest number of sources
-                        result = m2Evs.get(0).getSources().size() - m1Evs.get(0).getSources().size();
+                        result = m2HeadEvent.getSources().size() - m1HeadEvent.getSources().size();
                     } else if ( outputMode.equals(OutputMode.HighestMappingLowestCUI) ) {
                         // return lowest CUI
-                        result = m1Evs.get(0).getConceptId().compareTo(m2Evs.get(0).getConceptId());
+                        result = m1HeadEvent.getConceptId().compareTo(m2HeadEvent.getConceptId());
                     }
                 } catch (Exception e) {
                     // we'll ignore this and return the default (i.e. sorted by score)
