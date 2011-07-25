@@ -41,8 +41,8 @@ outputMode: determines which MetaMap mappings are output as annotations in the G
 - AllCandidatesAndMappings: annotate all Candidate and final Mappings. This will usually result in multiple, overlapping annotations for each term/phrase
 - AllMappings: annotate all the final Mappings for each phrase. This will result in fewer annotations with higher precision (e.g. for 'lung cancer' only the complete phrase will be annotated as Neoplastic Process [neop])
 - HighestMappingOnly: annotate only the highest scoring MetaMap Mapping for each phrase. If two Mappings have the same score, the first returned by MetaMap is output.
-- HighestMappingLowestCUI: Where there is more than one highest-scoring mapping, returns the mapping where the first map event has the lowest CUI.
-- HighestMappingMostSources: Where there is more than one highest-scoring mapping, returns the mapping where the first map event has the highest number of source vocabulary occurrences. 
+- HighestMappingLowestCUI: Where there is more than one highest-scoring mapping, returns the mapping where the head word map event has the lowest CUI.
+- HighestMappingMostSources: Where there is more than one highest-scoring mapping, returns the mapping where the head word map event has the highest number of source vocabulary occurrences. 
 - AllCandidates: annotate all Candidate mappings and not the final Mappings. This will result in more annotations with less precision (e.g. for 'lung cancer' both 'lung' (bpoc) and 'lung cancer' (neop) will be annotated).
 
 taggerMode: determines whether all term instances are processed by MetaMap, the first instance only, or the first instance with coreference annotations added. Only used if the inputASTypes parameter has been set.
