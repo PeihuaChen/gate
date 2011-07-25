@@ -1,6 +1,6 @@
-2011-07-18: Added additional outputMode options: 
-- HighestMappingLowestCUI: Where there is more than one highest-scoring mapping, returns the mapping where the first map event has the lowest CUI.
-- HighestMappingMostSources: Where there is more than one highest-scoring mapping, returns the mapping where the first map event has the highest number of source vocabulary occurrences.
+2011-07-25: Added additional outputMode options: 
+- HighestMappingLowestCUI: Where there is more than one highest-scoring mapping, returns the mapping where the head word map event has the lowest CUI.
+- HighestMappingMostSources: Where there is more than one highest-scoring mapping, returns the mapping where the head word map event has the highest number of source vocabulary occurrences.
 
 Added missing IsHead (true if the mapping is the head of the noun phrase) and IsOvermatch (true if the mapping is an overmatch, i.e. starts or terminates with non-matching words) boolean features to the output annotation.
 
