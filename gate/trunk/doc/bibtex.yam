@@ -14,7 +14,7 @@ BibTeX to help you create citations if ..
 }%>
 
 
-%#Cunningham2022 I Used ANNIE:
+%#Cunningham2022 I used ANNIE:
 
 %<@InProceedings{Cunningham2002,
   author = {Hamish Cunningham and Diana Maynard and Kalina Bontcheva and Valentin Tablan},
@@ -65,9 +65,17 @@ BibTeX to help you create citations if ..
   year = 2010
 }%>
 
-On GATE and multimedia:
 
-    M. Dowman, V. Tablan, H. Cunningham and B. Popov. Web-Assisted Annotation, Semantic Indexing and Search of Television and Radio News. 14th International World Wide Web Conference. Chiba, Japan, 2005. PDF, BibTex entry
+%#Dowman2005 I used GATE with multimedia:
+
+%<@InProceedings{Dowman2005,
+  author = {Mike Dowman and Valentin Tablan and Hamish Cunningham and Borislav Popov},
+  title = {Web-Assisted Annotation, Semantic Indexing and Search of Television and Radio News},
+  booktitle = {Proceedings of the 14th International World Wide Web Conference},
+  address = {Chiba, Japan},
+  note = {{\small {\tt http://gate.ac.uk/sale/www05/web-assisted-annotation.pdf}}},
+  year = 2005
+}%>
 
 I used the machine learning facilities in GATE:
 
