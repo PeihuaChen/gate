@@ -13,6 +13,7 @@ BibTeX to help you create citations if ..
   url = {http://tinyurl.com/gatebook}
 }%>
 
+
 %#Cunningham2022 I Used ANNIE:
 
 %<@InProceedings{Cunningham2002,
@@ -22,9 +23,18 @@ BibTeX to help you create citations if ..
   year = 2002
 }%>
 
-I used the ontology features in GATE:
 
-    K. Bontcheva, V. Tablan, D. Maynard, H. Cunningham. Evolving GATE to Meet New Challenges in Language Engineering. Natural Language Engineering. 10 (3/4), pp. 349-373. 2004. Pre-print. BibTex entry.
+%#Bontcheva2004 I used the ontology features in GATE:
+
+%<@Article{Bontcheva2004,
+  author = {Kalina Bontcheva and Valentin Tablan and Diana Maynard and Hamish Cunningham},
+  title = {{Evolving GATE to Meet New Challenges in Language Engineering}},
+  journal = {Natural Language Engineering},
+  volume = 10,
+  number = {3/4},
+  pages = {349---373},
+  year = 2004
+}%>
 
 I used GATE Mímir:
 
