@@ -49,9 +49,21 @@ BibTeX to help you create citations if ..
   year = 2011
 }%>
 
-I used GATE for Information Retrieval
 
-    H. Cunningham, A. Hanbury, and S. Rüger. Scaling up high-value retrieval to medium-volume data. In H. Cunningham, A. Hanbury, and S. Rüger, editors, Advances in Multidisciplinary Retrieval (the 1st Information Retrieval Facility Conference). LNCS volume number: 6107, Lecture Notes in Computer Science, Vienna, Austria, May 2010. Springer.
+%#Cunningham2010 I used GATE for Information Retrieval
+
+%<@InProceedings{Cunningham2010,
+  author = {Hamish Cunningham and Allan Hanbury and Stefan R\"{u}ger},
+  title = {Scaling up High-Value Retrieval to Medium-Volume Data},
+  booktitle = {Advances in Multidisciplinary Retrieval (the 1st Information Retrieval Facility Conference)},
+  month = {May},
+  series = {Lecture Notes in Computer Science, Volume 6107},
+  publisher = {Springer},
+  address = {Vienna, Austria},
+  editor = {Hamish Cunningham and Allan Hanbury and Stefan R\"{u}ger},
+  isbn = {978-3-642-13083-0},
+  year = 2010
+}%>
 
 On GATE and multimedia:
 
