@@ -796,12 +796,14 @@ public class PronominalCoref extends AbstractLanguageAnalyser
         while (itMatches.hasNext()) {
           Integer correferringID = (Integer)itMatches.next();
           Annotation coreferringEntity = this.defaultAnnotations.get(correferringID);
-          Assert.assertTrue(coreferringEntity.getType().equalsIgnoreCase(PERSON_ANNOTATION_TYPE));
-          String correferringGender = (String)coreferringEntity.getFeatures().get(PERSON_GENDER_FEATURE_NAME);
+          if (coreferringEntity != null) {
+            Assert.assertTrue(coreferringEntity.getType().equalsIgnoreCase(PERSON_ANNOTATION_TYPE));
+            String correferringGender = (String)coreferringEntity.getFeatures().get(PERSON_GENDER_FEATURE_NAME);
 
-          if (null != correferringGender) {
-            result = correferringGender;
-            break;
+            if (null != correferringGender) {
+              result = correferringGender;
+              break;
+            }
           }
         }
       }
