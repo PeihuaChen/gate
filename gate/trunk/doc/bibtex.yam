@@ -77,9 +77,9 @@ BibTeX to help you create citations if ..
 }%>
 
 
-%#Yaoyong2009 I used the machine learning facilities in GATE:
+%#Li2009 I used the machine learning facilities in GATE:
 
-%<@Article{Yaoyong2009,
+%<@Article{Li2009,
   author = {Yaoyong Li and Kalina Bontcheva and Hamish Cunningham},
   title = {{Adapting SVM for Data Sparseness and Imbalance: A Case Study on Information Extraction}},
   journal = {Natural Language Engineering},
