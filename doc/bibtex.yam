@@ -1,8 +1,8 @@
 BibTeX to help you create citations if ..
 
-%#Cunningham2011 I used GATE:
+%#Cunningham2011a I used GATE:
 
-%<@Book{Cunningham2011,
+%<@Book{Cunningham2011a,
   author = {Hamish Cunningham and Diana Maynard and Kalina Bontcheva and Valentin Tablan and Niraj Aswani and Ian Roberts and
     Genevieve Gorrell and Adam Funk and Angus Roberts and Danica Damljanovic and Thomas Heitz and Mark A. Greenwood and
     Horacio Saggion and Johann Petrak and Yaoyong Li and Wim Peters},
@@ -36,9 +36,18 @@ BibTeX to help you create citations if ..
   year = 2004
 }%>
 
-I used GATE Mímir:
+%#Cunningham2011b I used GATE Mímir:
 
-    H. Cunningham, V. Tablan, I. Roberts, M. A. Greenwood, and N. Aswani. Information Extraction and Semantic Annotation for Multi-Paradigm Information Management. In M. Lupu, K. Mayer, J. Tait, and A. J. Trippe, editors, Current Challenges in Patent Information Retrieval, volume 29 of The Information Retrieval Series. Springer, 2011.
+%<@InCollection{Cunningham2011b,
+  author = {Hamish Cunningham and Valentin Tablan and Ian Roberts and Mark A. Greenwood and Niraj Aswani},
+  title = {{Information Extraction and Semantic Annotation for Multi-Paradigm Information Management}},
+  booktitle = {{Current Challenges in Patent Information Retrieval}},
+  publisher = {Springer},
+  series = {The Information Retrieval Series},
+  volume =   29,
+  editor = {Mihai Lupu and Katja Mayer and John Tait and Anthony J. Trippe},
+  year = 2011
+}%>
 
 I used GATE for Information Retrieval
 
