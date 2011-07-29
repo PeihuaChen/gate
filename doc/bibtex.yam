@@ -2,7 +2,16 @@ BibTeX to help you create citations if ..
 
 I used GATE:
 
-    H. Cunningham, et al. Text Processing with GATE (Version 6). University of Sheffield Department of Computer Science. 15 April 2011. ISBN 0956599311. Available from Amazon.
+%<@BOOK{Cunningham2011,
+  AUTHOR =   {H. Cunningham and D. Maynard and K. Bontcheva and V. Tablan and N. Aswani and
+    I. Roberts and G. Gorrell and A. Funk and A. Roberts and D. Damljanovic and T. Heitz and
+    M.A. Greenwood and H. Saggion and J. Petrak and Y. Li and W. Peters},
+  PUBLISHER = {{\small {\tt http://gate.ac.uk/books.html}}},
+  TITLE =    {{Text Processing with GATE (Version 6)}},
+  ISBN =     {978-0956599315},
+  YEAR =     {2011},
+  URL =      {http://tinyurl.com/gatebook}
+}%>
 
 I Used ANNIE:
 
