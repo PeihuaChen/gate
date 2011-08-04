@@ -32,7 +32,7 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 
-@CreoleResource(name = "MutationFinder", comment = "GATE MutationFinder Wrapper", icon = "DNA.png")
+@CreoleResource(name = "MutationFinder", comment = "GATE MutationFinder Wrapper", icon = "DNA.png", helpURL = "http://gate.ac.uk/userguide/sec:domain-creole:biomed:mutationfinder")
 public class MutationFinderPR extends AbstractLanguageAnalyser {
 
   private MutationFinder finder = null;
