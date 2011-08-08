@@ -32,11 +32,7 @@ public class CleanStringAccessor extends StringAccessor {
    * to the document.
    */
   public Object getValue(Annotation annot, AnnotationSet context) {
-    String retVal = (String)super.getValue(annot, context);
-    if (retVal != null)
-      retVal = retVal.replaceAll("\\s+", " ").trim();
-
-    return retVal;
+    return Utils.cleanString((String)super.getValue(annot, context));
   }
 
   /**
