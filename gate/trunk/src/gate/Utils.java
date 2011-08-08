@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Level;
 
@@ -147,6 +148,19 @@ public class Utils {
     }
   }
 
+  
+  /**
+   * Return the cleaned document text as a String corresponding to the annotation.
+   * (Delete leading and trailing whitespace; normalize 
+   * internal whitespace to single spaces.)
+   * @param doc the document from which to extract the document text
+   * @param ann the annotation for which to return the text.
+   * @return a String representing the text content spanned by the annotation.
+   */
+  public static String cleanStringFor(Document doc, SimpleAnnotation ann) {
+    return cleanString(stringFor(doc, ann));
+  }
+  
   /**
    * Returns the document text between the provided offsets.
    * @param doc the document from which to extract the document text
@@ -165,6 +179,20 @@ public class Utils {
     }
   }
 
+  
+  /**
+   * Return the cleaned document text between the provided offsets.
+   * (Delete leading and trailing whitespace; normalize 
+   * internal whitespace to single spaces.)
+   * @param doc the document from which to extract the document text
+   * @param start the start offset 
+   * @param end the end offset
+   * @return document text between the provided offsets
+   */
+  public static String cleanStringFor(Document doc, Long start, Long end) {
+    return cleanString(stringFor(doc, start, end));
+  }
+  
   /**
    * Return the DocumentContent covered by the given annotation set.
    * <p>
@@ -205,6 +233,35 @@ public class Utils {
     }
   }
 
+  /**
+   * Return the cleaned document text as a String covered by the given annotation set.
+   * (Delete leading and trailing whitespace; normalize 
+   * internal whitespace to single spaces.)
+   * @param doc the document from which to extract the document text
+   * @param anns the annotation set for which to return the text.
+   * @return a String representing the text content spanned by the annotation
+   * set.
+   */
+  public static String cleanStringFor(Document doc, AnnotationSet anns) {
+    return cleanString(stringFor(doc, anns));
+  }
+  
+  /**
+   * Return a cleaned version of the input String. (Delete leading and trailing
+   * whitespace; normalize internal whitespace to single spaces; return an
+   * empty String if the input contains nothing but whitespace, but null
+   * if the input is null.)
+   * @param input
+   * @return
+   */
+  public static String cleanString(String input) {
+    if (input == null) {
+      return null;
+    }
+    // implied else
+    return input.replaceAll("\\s+", " ").trim();
+  }
+  
   /**
    * Get the start offset of an annotation.
    */
@@ -501,7 +558,7 @@ public class Utils {
    * @param map the map to convert.
    * @return a new FeatureMap containing the same mappings as the source map.
    */
-  public static FeatureMap toFeatureMap(Map map) {
+  public static FeatureMap toFeatureMap(Map<?,?> map) {
     FeatureMap fm = Factory.newFeatureMap();
     fm.putAll(map);
     return fm;
