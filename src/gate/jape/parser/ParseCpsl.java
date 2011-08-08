@@ -1567,7 +1567,7 @@ AnnotationAccessor accessor = null;
                 );
                 if ( existingAttrName.equals("cleanString") ) {
                   blockBuffer.append(
-    "                 existingFeatureValue = ((String)existingFeatureValue).replaceAll(\"\\\\s+\", \" \").trim();" + nl
+    "                 existingFeatureValue = gate.Utils.cleanString((String)existingFeatureValue);" + nl
                   );
                 }
                 if ( existingAttrName.equals("length") ) {
