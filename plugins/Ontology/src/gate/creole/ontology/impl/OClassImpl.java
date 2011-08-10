@@ -207,8 +207,7 @@ public class OClassImpl extends OResourceImpl implements OClass {
       return;
     }
 
-    ontologyService.setEquivalentClassAs(this.nodeId.toString(), theClass
-            .getONodeID().toString());
+    ontologyService.setEquivalentClassAs(this.nodeId, theClass.getONodeID());
     ontology.fireResourceRelationChanged(this, theClass, OConstants.EQUIVALENT_CLASS_EVENT);
   }
 
@@ -234,8 +233,8 @@ public class OClassImpl extends OResourceImpl implements OClass {
    * @see gate.creole.ontology.OClass#isSameClassAs(gate.creole.ontology.OClass)
    */
   public boolean isEquivalentClassAs(OClass aClass) {
-    return ontologyService.isEquivalentClassAs(this.nodeId.toString(),
-            aClass.getONodeID().toString());
+    return ontologyService.isEquivalentClassAs(this.nodeId,
+            aClass.getONodeID());
   }
 
   /**

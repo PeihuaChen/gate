@@ -138,16 +138,7 @@ public class ObjectPropertyImpl extends RDFPropertyImpl implements
    * @see gate.creole.ontology.RDFProperty#getDomain()
    */
   public Set<OResource> getDomain() {
-    ResourceInfo[] list = ontologyService.getDomain(nodeId.toString());
-    // this is a list of classes
-    Set<OResource> domain = new HashSet<OResource>();
-    // these resources can be anything - an instance, a property, or a
-    // class
-    for(int i = 0; i < list.length; i++) {
-      domain.add(Utils.createOClass(this.ontology,
-              this.ontologyService, list[i].getUri(), list[i].getClassType()));
-    }
-    return domain;
+    return ontologyService.getDomain(getOURI());
   }
 
   /*

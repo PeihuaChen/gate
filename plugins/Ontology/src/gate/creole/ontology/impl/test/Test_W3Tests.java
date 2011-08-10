@@ -147,7 +147,9 @@ public class Test_W3Tests extends TestCase {
     System.out.println("on property: "+prop+" / "+prop.getClass().getName());
     assertEquals("ourProp1",prop.toString());
 
-
+    ObjectProperty op1 = ont.getObjectProperty(ont.createOURIForName("ourProp1"));
+    assertNotNull(op1);
+    assertEquals("ourProp1", op1.getName());
 
 
     ont.cleanup();
@@ -170,13 +172,26 @@ public class Test_W3Tests extends TestCase {
 
     rdfps = ont.getRDFProperties();
     System.out.println("getRDFProperties: "+rdfps);
-    assertEquals(1,rdfps.size());
+    assertNotNull(rdfps);
+    assertTrue(rdfps.size() > 0);
+    Set<String> rdfpnames = new HashSet<String>();
+    for(RDFProperty rdfp : rdfps) {
+      rdfpnames.add(rdfp.getName());
+    }
+    assertTrue(rdfpnames.contains("domain"));
+    assertTrue(rdfpnames.contains("unionOf"));
 
     rdfps = ont.getPropertyDefinitions();
     System.out.println("getPropertyDefintiions: "+rdfps);
     us = rset2uset(rdfps);
     assertTrue(us.contains(ont.createOURIForName("p")));
 
+    ObjectProperty op2 = ont.getObjectProperty(ont.createOURIForName("p"));
+    assertNotNull(op2);
+    assertEquals("p", op2.getName());
+    
+    
+    
     ont.cleanup();
 
     // --------------------- cardinality002

@@ -14,6 +14,7 @@
 package gate.creole.ontology.impl;
 
 import gate.creole.ontology.GateOntologyException;
+import gate.creole.ontology.Literal;
 
 import gate.creole.ontology.OClass;
 import gate.creole.ontology.OConstants;
@@ -22,6 +23,8 @@ import gate.creole.ontology.OInstance;
 import gate.creole.ontology.ONodeID;
 import gate.creole.ontology.OURI;
 import gate.creole.ontology.LiteralOrONodeID;
+import gate.creole.ontology.OBNodeID;
+import gate.creole.ontology.OResource;
 import gate.creole.ontology.OntologyTripleStore;
 import gate.creole.ontology.RDFProperty;
 import gate.util.ClosableIterator;
@@ -35,16 +38,6 @@ public interface OntologyService {
 
    
 
-  /**
-   * This method tells whether the resource is imported or added as an explicit statement.
-   * @param resourceID
-   * @return
-   * @throws GateOntologyException
-   */
-  public boolean isImplicitResource(
-          String resourceID)
-          throws GateOntologyException ;
-  
   /**
    * Returns whether the theSuperClass is indeed a super class of the
    * theSubClassURI.
@@ -98,8 +91,8 @@ public interface OntologyService {
    * @throws GateOntologyException
    */
   public boolean isEquivalentClassAs(
-          String theClassURI1,
-          String theClassURI2)
+          ONodeID theClassURI1,
+          ONodeID theClassURI2)
           throws GateOntologyException;
 
   // *******************************************************************
@@ -115,7 +108,7 @@ public interface OntologyService {
    *          ontology. Done
    * @throws GateOntologyException 
    */
-  public void addAnnotationProperty(String aPropertyURI)
+  public void addAnnotationProperty(OURI aPropertyURI)
           throws GateOntologyException;
 
   /**
@@ -192,7 +185,7 @@ public interface OntologyService {
    * @throws GateOntologyException s
    */
   public boolean isAnnotationProperty(
-          String aPropertyURI)
+          OURI aPropertyURI)
           throws GateOntologyException;
 
   /**
@@ -206,8 +199,8 @@ public interface OntologyService {
    * @throws GateOntologyException
    */
   public void addAnnotationPropertyValue(
-          String theResourceURI,
-          String theAnnotationPropertyURI,
+          ONodeID theResourceURI,
+          OURI theAnnotationPropertyURI,
           String value,
           String language)
           throws GateOntologyException;
@@ -220,24 +213,9 @@ public interface OntologyService {
    * @return
    * @throws GateOntologyException
    */
-  public PropertyValue[] getAnnotationPropertyValues(
-          String theResourceURI,
-          String theAnnotationPropertyURI)
-          throws GateOntologyException;
-
-  /**
-   * Gets the annotation property for the given resource uri.
-   * 
-   * @param repositoryID
-   * @param theResourceURI
-   * @param theAnnotationPropertyURI
-   * @param language
-   * @return
-   */
-  public String getAnnotationPropertyValue(
-          String theResourceURI,
-          String theAnnotationPropertyURI,
-          String language)
+  public List<Literal> getAnnotationPropertyValues(
+          ONodeID theResourceURI,
+          OURI theAnnotationPropertyURI)
           throws GateOntologyException;
 
   /**
@@ -248,10 +226,9 @@ public interface OntologyService {
    * @param literal
    */
   public void removeAnnotationPropertyValue(
-          String theResourceURI,
-          String theAnnotationPropertyURI,
-          String value,
-          String language)
+          ONodeID theResourceURI,
+          OURI theAnnotationPropertyURI,
+          Literal value)
           throws GateOntologyException;
 
   /**
@@ -260,8 +237,8 @@ public interface OntologyService {
    * @param theProperty the property
    */
   public void removeAnnotationPropertyValues(
-          String theResourceURI,
-          String theAnnotationPropertyURI)
+          ONodeID theResourceURI,
+          OURI theAnnotationPropertyURI)
           throws GateOntologyException;
 
   // **************
@@ -276,9 +253,9 @@ public interface OntologyService {
    * @param rangeClassesTypes Done
    */
   public void addRDFProperty(
-          String aPropertyURI,
-          String[] domainClassesURIs,
-          String[] rangeClassesTypes)
+          OURI aPropertyURI,
+          Set<OResource> domain,
+          Set<OResource> range)
           throws GateOntologyException;
 
   /**
@@ -288,7 +265,7 @@ public interface OntologyService {
    * @return Done
    */
   public boolean isRDFProperty(
-          String aPropertyURI)
+          OURI aPropertyURI)
           throws GateOntologyException;
 
   // **************
@@ -303,8 +280,8 @@ public interface OntologyService {
    * @param dataTypeURI Done
    */
   public void addDataTypeProperty(
-          String aPropertyURI,
-          String[] domainClassesURIs,
+          OURI aPropertyURI,
+          Set<OClass> domainClassesURIs,
           String dataTypeURI)
           throws GateOntologyException;
 
@@ -317,7 +294,7 @@ public interface OntologyService {
    * @throws GateOntologyException
    */
   public String getDatatype(
-          String theDatatypePropertyURI)
+          OURI theDatatypePropertyURI)
           throws GateOntologyException;
 
   // **************
@@ -331,8 +308,8 @@ public interface OntologyService {
    * @param domainAndRangeClassesURIs Done
    */
   public void addSymmetricProperty(
-          String aPropertyURI,
-          String[] domainAndRangeClassesURIs)
+          OURI aPropertyURI,
+          Set<OClass> domainAndRangeClassesURIs)
           throws GateOntologyException;
 
   /**
@@ -344,8 +321,8 @@ public interface OntologyService {
    * @throws GateOntologyException
    */
       public boolean isEquivalentPropertyAs(
-                   String aPropertyURI1,
-          String aPropertyURI2)
+          OURI aPropertyURI1,
+          OURI aPropertyURI2)
           throws GateOntologyException;
 
   /**
@@ -414,8 +391,8 @@ public interface OntologyService {
    * @throws GateOntologyException
    */
       public boolean isDifferentIndividualFrom(
-                   String theInstanceURI1,
-          String theInstanceURI2)
+          OURI theInstanceURI1,
+          OURI theInstanceURI2)
           throws GateOntologyException;
 
   /**
@@ -428,8 +405,8 @@ public interface OntologyService {
    * @throws GateOntologyException
    */
       public boolean isSameIndividualAs(
-                   String theInstanceURI1,
-          String theInstanceURI2)
+          OURI theInstanceURI1,
+          OURI theInstanceURI2)
           throws GateOntologyException;
 
   // *************
@@ -445,9 +422,9 @@ public interface OntologyService {
    * @throws InvalidValueException
    */
       public void addRDFPropertyValue(
-                   String anInstanceURI,
-          String anRDFPropertyURI,
-          String aResourceURI)
+                   ONodeID anInstanceURI,
+          OURI anRDFPropertyURI,
+          ONodeID aResourceURI)
           throws GateOntologyException;
 
   /**
@@ -459,9 +436,9 @@ public interface OntologyService {
    * @param aResourceURI
    */
       public void removeRDFPropertyValue(
-                   String anInstanceURI,
-          String anRDFPropertyURI,
-          String aResourceURI)
+                   ONodeID anInstanceURI,
+          OURI anRDFPropertyURI,
+          ONodeID aResourceURI)
           throws GateOntologyException;
 
   /**
@@ -508,10 +485,9 @@ public interface OntologyService {
    * @throws InvalidValueException
    */
       public void addDatatypePropertyValue(
-                   String anInstanceURI,
-          String aDatatypePropertyURI,
-          String datatypeURI,
-          String value)
+          OURI anInstanceURI,
+          OURI aDatatypePropertyURI,
+          Literal value)
           throws GateOntologyException;
 
   /**
@@ -524,10 +500,9 @@ public interface OntologyService {
    * @param value
    */
       public void removeDatatypePropertyValue(
-                   String anInstanceURI,
-          String aDatatypePropertyURI,
-          String datatypeURI,
-          String value);
+          OURI anInstanceURI,
+          OURI aDatatypePropertyURI,
+          Literal value);
 
   /**
    * Gets a list of values for the given Property.
@@ -536,9 +511,9 @@ public interface OntologyService {
    * @param aDatatypePropertyURI
    * @return
    */
-        public PropertyValue[] getDatatypePropertyValues(
-                   String anInstanceURI,
-          String aDatatypePropertyURI);
+        public List<Literal> getDatatypePropertyValues(
+          OURI anInstanceURI,
+          OURI aDatatypePropertyURI);
 
   /**
    * Removes all property values set on the provided instance for the
@@ -549,8 +524,8 @@ public interface OntologyService {
    * @param aDatatypePropertyURI
    */
       public void removeDatatypePropertyValues(
-                   String anInstanceURI,
-          String aDatatypePropertyURI)
+          ONodeID anInstanceURI,
+          OURI aDatatypePropertyURI)
           throws GateOntologyException;
 
   // ******************
@@ -567,9 +542,9 @@ public interface OntologyService {
    * @throws InvalidValueException
    */
       public void addObjectPropertyValue(
-                   String sourceInstanceURI,
-          String anObjectPropertyURI,
-          String theValueInstanceURI)
+          ONodeID sourceInstanceURI,
+          OURI anObjectPropertyURI,
+          OURI theValueInstanceURI)
           throws GateOntologyException;
 
   /**
@@ -583,9 +558,9 @@ public interface OntologyService {
    * @return
    */
       public void removeObjectPropertyValue(
-                   String sourceInstanceURI,
-          String anObjectPropertyURI,
-          String theValueInstanceURI)
+          OURI sourceInstanceURI,
+          OURI anObjectPropertyURI,
+          OURI theValueInstanceURI)
           throws GateOntologyException;
 
   /**
@@ -597,9 +572,9 @@ public interface OntologyService {
    * @param anObjectPropertyURI
    * @return
    */
-        public String[] getObjectPropertyValues(
-                   String sourceInstanceURI,
-          String anObjectPropertyURI)
+        public List<OInstance> getObjectPropertyValues(
+                   OURI sourceInstanceURI,
+          OURI anObjectPropertyURI)
           throws GateOntologyException;
 
   /**
@@ -611,8 +586,8 @@ public interface OntologyService {
    * @param anObjectPropertyURI
    */
       public void removeObjectPropertyValues(
-                   String sourceInstanceURI,
-          String anObjectPropertyURI)
+          OURI sourceInstanceURI,
+          OURI anObjectPropertyURI)
           throws GateOntologyException;
 
   // ****************************************************************************
@@ -658,14 +633,6 @@ public interface OntologyService {
           throws GateOntologyException;
 
 
-  /**
-   * The method allows adding version information to the repository.
-   * 
-   * @param versionInfo
-   */
-      public void setVersion(
-                   String versionInfo)
-          throws GateOntologyException;
 
   /**
    * The method returns the version information of the repository.
@@ -682,15 +649,9 @@ public interface OntologyService {
    * The method allows adding a class to repository.
    * 
    * @param classURI
-   * @param classType - one of the following constant values from the
-   *          OConstants class. OWL_CLASS, CARDINALITY_RESTRICTION,
-   *          MIN_CARDINALITY_RESTRICTION, MAX_CARDINALITY_RESTRICTION,
-   *          HAS_VALUE_RESTRICTION, ALL_VALUES_FROM_RESTRICTION.
    */
-  public void addClass(
-          String classURI,
-          byte classType)
-          throws GateOntologyException;
+  public void addClass(OURI classURI) throws GateOntologyException;
+  public void addRestriction(OBNodeID classURI) throws GateOntologyException;
 
   /**
    * Given a class to delete, it removes it from the repository.
@@ -714,9 +675,12 @@ public interface OntologyService {
    * @return
    */
       public boolean hasClass(
-                   String classURI)
+                   ONodeID classURI)
           throws GateOntologyException;
 
+  public boolean containsURI(OURI theURI);
+    
+      
   /**
    * if top set to true, the method returns only the top classes (i.e.
    * classes with no super class). Otherwise it returns all classes
@@ -827,36 +791,14 @@ public interface OntologyService {
           throws GateOntologyException;
 
   /**
-   * Sets the classes as disjoint
-   * 
-   * @param class1URI
-   * @param class2URI
-   */
-      public void setDisjointClassWith(
-          String class1URI,
-          String class2URI)
-          throws GateOntologyException;
-
-  /**
    * Sets the classes as same classes
    * 
    * @param class1URI
    * @param class2URI
    */
       public void setEquivalentClassAs(
-          String class1URI,
-          String class2URI)
-          throws GateOntologyException;
-
-  /**
-   * returns an array of classes which are marked as disjoint for the
-   * given class
-   * 
-   * @param classURI
-   * @return
-   */
-        public String[] getDisjointClasses(
-          String classURI)
+          ONodeID class1URI,
+          ONodeID class2URI)
           throws GateOntologyException;
 
   /**
@@ -916,7 +858,7 @@ public interface OntologyService {
    * 
    * @return
    */
-        public Property[] getRDFProperties()
+        public Set<RDFProperty> getRDFProperties()
           throws GateOntologyException;
 
   /**
@@ -975,8 +917,8 @@ public interface OntologyService {
    * @param aPropertyURI
    * @return
    */
-        public ResourceInfo[] getDomain(
-          String aPropertyURI)
+        public Set<OResource> getDomain(
+          OURI aPropertyURI)
           throws GateOntologyException;
 
   /**
@@ -996,7 +938,7 @@ public interface OntologyService {
    * @return
    */
       public boolean isFunctional(
-          String aPropertyURI)
+          OURI aPropertyURI)
           throws GateOntologyException;
 
   /**
@@ -1017,7 +959,7 @@ public interface OntologyService {
    * @return
    */
       public boolean isInverseFunctional(
-          String aPropertyURI)
+          OURI aPropertyURI)
           throws GateOntologyException;
 
   /**
@@ -1038,7 +980,7 @@ public interface OntologyService {
    * @return
    */
       public boolean isSymmetricProperty(
-          String aPropertyURI)
+          OURI aPropertyURI)
           throws GateOntologyException;
 
   /**
@@ -1048,7 +990,7 @@ public interface OntologyService {
    * @return
    */
       public boolean isTransitiveProperty(
-          String aPropertyURI)
+          OURI aPropertyURI)
           throws GateOntologyException;
 
   /**
@@ -1058,7 +1000,7 @@ public interface OntologyService {
    * @return
    */
       public boolean isDatatypeProperty(
-          String aPropertyURI)
+          OURI aPropertyURI)
           throws GateOntologyException;
 
   /**
@@ -1068,7 +1010,7 @@ public interface OntologyService {
    * @return
    */
       public boolean isObjectProperty(
-          String aPropertyURI)
+          OURI aPropertyURI)
           throws GateOntologyException;
 
   // *************************************
@@ -1242,8 +1184,8 @@ public interface OntologyService {
    * @param individual2URI
    */
       public void setDifferentIndividualFrom(
-          String individual1URI,
-          String individual2URI)
+          ONodeID individual1URI,
+          ONodeID individual2URI)
           throws GateOntologyException;
 
   /**
@@ -1306,8 +1248,8 @@ public interface OntologyService {
    * @throws GateOntologyException
    */
       public void setOnPropertyValue(
-          String restrictionURI,
-          String propertyURI)
+          ONodeID restrictionURI,
+          OURI propertyURI)
           throws GateOntologyException;
 
   /**
@@ -1370,9 +1312,14 @@ public interface OntologyService {
    * @throws GateOntologyException
    */
       public void setRestrictionValue(
-          String restrictionURI,
-          byte restrictionType,
-          String value)
+          ONodeID restrictionURI,
+          OURI restrictionTypeURI,
+          ONodeID value)
+          throws GateOntologyException;
+      public void setRestrictionValue(
+          ONodeID restrictionURI,
+          OURI restrictionTypeURI,
+          Literal value)
           throws GateOntologyException;
 
   /**

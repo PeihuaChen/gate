@@ -120,15 +120,14 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * @see gate.creole.ontology.OInstance#setDifferentFrom(gate.creole.ontology.OInstance)
    */
   public void setDifferentFrom(OInstance theInstance) {
-      if(this == theInstance) {
-        Utils
-                .warning("setDifferentFrom(theInstance) : the source and the argument instances refer to the same instance and therefore cannot be set as different from each other");
-        return;
-      }
+    if (this == theInstance) {
+      Utils.warning("setDifferentFrom(theInstance) : the source and the argument instances refer to the same instance and therefore cannot be set as different from each other");
+      return;
+    }
 
-      ontologyService.setDifferentIndividualFrom(this.nodeId.toString(),
-              theInstance.getOURI().toString());
-      ontology.fireResourceRelationChanged(this, theInstance, OConstants.DIFFERENT_INSTANCE_EVENT);      
+    ontologyService.setDifferentIndividualFrom(this.nodeId,
+      theInstance.getOURI());
+    ontology.fireResourceRelationChanged(this, theInstance, OConstants.DIFFERENT_INSTANCE_EVENT);
   }
 
   /*
@@ -153,8 +152,8 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * @see gate.creole.ontology.OInstance#isDifferentFrom(gate.creole.ontology.OInstance)
    */
   public boolean isDifferentFrom(OInstance theInstance) {
-      return ontologyService.isDifferentIndividualFrom(this.nodeId
-              .toString(), theInstance.getOURI().toString());
+      return ontologyService.isDifferentIndividualFrom(
+        this.getOURI(), theInstance.getOURI());
   }
 
   /*
@@ -196,8 +195,7 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * @see gate.creole.ontology.OInstance#isSameInstanceAs(gate.creole.ontology.OInstance)
    */
   public boolean isSameInstanceAs(OInstance theInstance) {
-      return ontologyService.isSameIndividualAs(this.nodeId.toString(),
-              theInstance.getOURI().toString());
+      return ontologyService.isSameIndividualAs(this.getOURI(),theInstance.getOURI());
   }
 
   /*
@@ -226,8 +224,8 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
         return;
       }
 
-      ontologyService.addRDFPropertyValue(this.nodeId.toString(),
-              aProperty.getOURI().toString(), value.getONodeID().toString());
+      ontologyService.addRDFPropertyValue(this.nodeId,
+              aProperty.getOURI(), value.getONodeID());
       ontology.fireResourcePropertyValueChanged(this, aProperty,
           value, OConstants.RDF_PROPERTY_VALUE_ADDED_EVENT);
   }
@@ -239,8 +237,8 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    *      gate.creole.ontology.OResource)
    */
   public void removeRDFPropertyValue(RDFProperty aProperty, OResource value) {
-      ontologyService.removeRDFPropertyValue(this.nodeId.toString(),
-              aProperty.getOURI().toString(), value.getONodeID().toString());
+      ontologyService.removeRDFPropertyValue(this.nodeId,
+              aProperty.getOURI(), value.getONodeID());
       ontology.fireResourcePropertyValueChanged(this, aProperty, value,
           OConstants.RDF_PROPERTY_VALUE_REMOVED_EVENT);
   }
@@ -284,7 +282,8 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
           continue;
         }
         // is it a class
-        if(ontologyService.hasClass(list[i].getUri())) {
+        if(ontologyService.hasClass(ontology.createOURI(
+          list[i].getUri()))) {
           values.add(Utils.createOClass(this.ontology,
                   this.ontologyService, list[i].getUri(), list[i].getClassType()));
           continue;
@@ -330,7 +329,7 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
           continue;
         }
         // is it a class ..
-        if(ontologyService.hasClass(node.toString())) {
+        if(ontologyService.hasClass(ontology.createOURI(node.toString()))) {
           values.add(new OValueImpl(Utils.createOClass(this.ontology,
                   this.ontologyService, node.toString(),
                   ontologyService.getClassType(node.toString()))));
@@ -434,9 +433,8 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
                   + type.getXmlSchemaURIString());
       }
 
-      ontologyService.addDatatypePropertyValue(this.nodeId.toString(),
-              aProperty.getOURI().toString(), type.getXmlSchemaURIString(),
-              value.getValue());
+      ontologyService.addDatatypePropertyValue(this.getOURI(),
+              aProperty.getOURI(), value);
       ontology.fireResourcePropertyValueChanged(this, aProperty, value, OConstants.DATATYPE_PROPERTY_VALUE_ADDED_EVENT);  
   }
 
@@ -448,9 +446,8 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    */
   public void removeDatatypePropertyValue(DatatypeProperty aProperty,
           Literal value) {
-      ontologyService.removeDatatypePropertyValue(this.nodeId.toString(),
-              aProperty.getOURI().toString(), value.getDataType()
-                      .getXmlSchemaURIString(), value.getValue());
+      ontologyService.removeDatatypePropertyValue(getOURI(),
+              aProperty.getOURI(), value);
       ontology.fireResourcePropertyValueChanged(this, aProperty, value, OConstants.DATATYPE_PROPERTY_VALUE_REMOVED_EVENT);
   }
 
@@ -460,20 +457,7 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * @see gate.creole.ontology.OInstance#getDatatypePropertyValues(gate.creole.ontology.DatatypeProperty)
    */
   public List<Literal> getDatatypePropertyValues(DatatypeProperty aProperty) {
-    try {
-      PropertyValue[] values = ontologyService.getDatatypePropertyValues(
-              this.nodeId.toString(), aProperty.getOURI()
-                      .toString());
-      List<Literal> list = new ArrayList<Literal>();
-      for(int i = 0; i < values.length; i++) {
-        list.add(new Literal(values[i].getValue(), OntologyUtilities
-                .getDataType(values[i].getDatatype())));
-      }
-      return list;
-    }
-    catch(InvalidValueException ive) {
-      throw new GateOntologyException(ive);
-    }
+    return ontologyService.getDatatypePropertyValues(getOURI(), aProperty.getOURI());
   }
 
   /*
@@ -482,10 +466,10 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * @see gate.creole.ontology.OInstance#removeDatatypePropertyValues(gate.creole.ontology.DatatypeProperty)
    */
   public void removeDatatypePropertyValues(DatatypeProperty aProperty) {
-
-      ontologyService.removeDatatypePropertyValues(
-              this.nodeId.toString(), aProperty.getOURI().toString());
-      ontology.fireResourcePropertyValueChanged(this, aProperty, null, OConstants.DATATYPE_PROPERTY_VALUE_REMOVED_EVENT);
+    ontologyService.removeDatatypePropertyValues(
+      this.nodeId, aProperty.getOURI());
+    ontology.fireResourcePropertyValueChanged(
+      this, aProperty, null, OConstants.DATATYPE_PROPERTY_VALUE_REMOVED_EVENT);
   }
 
   /**
@@ -548,6 +532,12 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    */
   public void addObjectPropertyValue(ObjectProperty aProperty, OInstance value)
           throws InvalidValueException {
+    // check if the ontology actually contains aProperty as an object
+    // property
+    if(!ontologyService.isObjectProperty(aProperty.getOURI())) {
+      throw new GateOntologyException(
+        "Attempt to set object property value but not known as object property: "+aProperty);
+    }
       // we need to check if the current instance is a valid domain for
       // the property
       if(!aProperty.isValidDomain(this)) {
@@ -566,8 +556,8 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
         return;
       }
 
-      ontologyService.addObjectPropertyValue(this.nodeId.toString(),
-              aProperty.getOURI().toString(), value.getOURI().toString());
+      ontologyService.addObjectPropertyValue(this.nodeId,
+              aProperty.getOURI(), value.getOURI());
       ontology.fireResourcePropertyValueChanged(this, aProperty, value, OConstants.OBJECT_PROPERTY_VALUE_ADDED_EVENT);
   }
 
@@ -579,8 +569,8 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    */
   public void removeObjectPropertyValue(ObjectProperty aProperty,
           OInstance value) {
-      ontologyService.removeObjectPropertyValue(this.nodeId.toString(),
-              aProperty.getOURI().toString(), value.getOURI().toString());
+      ontologyService.removeObjectPropertyValue(getOURI(),
+              aProperty.getOURI(), value.getOURI());
       ontology.fireResourcePropertyValueChanged(this, aProperty, value, OConstants.OBJECT_PROPERTY_VALUE_REMOVED_EVENT);  
   }
 
@@ -590,14 +580,8 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * @see gate.creole.ontology.OInstance#getObjectPropertyValues(gate.creole.ontology.ObjectProperty)
    */
   public List<OInstance> getObjectPropertyValues(ObjectProperty aProperty) {
-      String[] list = ontologyService.getObjectPropertyValues(nodeId
-              .toString(), aProperty.getOURI().toString());
-      List<OInstance> values = new ArrayList<OInstance>();
-      for(int i = 0; i < list.length; i++) {
-        values.add(Utils.createOInstance(this.ontology,
-                this.ontologyService, list[i]));
-      }
-      return values;
+      return ontologyService.getObjectPropertyValues(getOURI(),
+         aProperty.getOURI());
   }
 
   /*
@@ -606,8 +590,8 @@ public class OInstanceImpl extends OResourceImpl implements OInstance {
    * @see gate.creole.ontology.OInstance#removeObjectPropertyValues(gate.creole.ontology.ObjectProperty)
    */
   public void removeObjectPropertyValues(ObjectProperty aProperty) {
-      ontologyService.removeObjectPropertyValues(this.nodeId.toString(),
-              aProperty.getOURI().toString());
+      ontologyService.removeObjectPropertyValues(getOURI(),
+              aProperty.getOURI());
       ontology.fireResourcePropertyValueChanged(this, aProperty, null, OConstants.OBJECT_PROPERTY_VALUE_REMOVED_EVENT);
   }
 

@@ -84,8 +84,8 @@ public class RDFPropertyImpl extends OResourceImpl implements RDFProperty {
    * @see gate.creole.ontology.RDFProperty#isSamePropertyAs(gate.creole.ontology.RDFProperty)
    */
   public boolean isEquivalentPropertyAs(RDFProperty theProperty) {
-    return ontologyService.isEquivalentPropertyAs(nodeId.toString(),
-            theProperty.getOURI().toString());
+    return ontologyService.isEquivalentPropertyAs(getOURI(),
+            theProperty.getOURI());
   }
 
   /*
@@ -222,7 +222,7 @@ public class RDFPropertyImpl extends OResourceImpl implements RDFProperty {
    * @see gate.creole.ontology.RDFProperty#isFunctional()
    */
   public boolean isFunctional() {
-    return ontologyService.isFunctional(nodeId.toString());
+    return ontologyService.isFunctional(getOURI());
   }
 
   /*
@@ -240,7 +240,7 @@ public class RDFPropertyImpl extends OResourceImpl implements RDFProperty {
    * @see gate.creole.ontology.RDFProperty#isInverseFunctional()
    */
   public boolean isInverseFunctional() {
-    return ontologyService.isInverseFunctional(nodeId.toString());
+    return ontologyService.isInverseFunctional(getOURI());
   }
 
   /*
@@ -343,39 +343,7 @@ public class RDFPropertyImpl extends OResourceImpl implements RDFProperty {
    * @see gate.creole.ontology.RDFProperty#getDomain()
    */
   public Set<OResource> getDomain() {
-    ResourceInfo[] list = ontologyService.getDomain(nodeId.toString());
-    Set<OResource> domain = new HashSet<OResource>();
-    //List<String> individuals = Arrays.asList(ontologyService
-    //        .getIndividuals());
-      ClosableIterator<OInstance> ii = ontologyService.getInstancesIterator(null, null);
-      List<String> individuals = new ArrayList<String>();
-      while(ii.hasNext()) {
-        individuals.add(ii.next().getOURI().toString());
-      }
-
-    // these resources can be anything - an instance, a property, or a
-    // class
-    for(int i = 0; i < list.length; i++) {
-      // lets first search if it is available in ontology cache
-      OResource resource = null;
-      if(individuals.contains(list[i].toString())) {
-        domain.add(Utils.createOInstance(this.ontology,
-                this.ontologyService, list[i].getUri()));
-        continue;
-      }
-      // otherwise we need to create it
-      if(ontologyService.hasClass(list[i].getUri())) {
-        // lets first check if this is a valid URI
-        domain.add(Utils.createOClass(this.ontology,
-                this.ontologyService, list[i].getUri(), list[i].getClassType()));
-        continue;
-      }
-      Property prop = ontologyService.getPropertyFromOntology(list[i]
-              .getUri());
-      domain.add(Utils.createOProperty(this.ontology,
-              this.ontologyService, prop.getUri(), prop.getType()));
-    }
-    return domain;
+    return ontologyService.getDomain(getOURI());
   }
 
   /*
@@ -405,7 +373,7 @@ public class RDFPropertyImpl extends OResourceImpl implements RDFProperty {
         continue;
       }
       // otherwise we need to create it
-      if(ontologyService.hasClass(list[i].getUri())) {
+      if(ontologyService.hasClass(ontology.createOURI(list[i].getUri()))) {
         domain.add(Utils.createOClass(this.ontology,
                 this.ontologyService, list[i].getUri(), list[i].getClassType()));
         continue;

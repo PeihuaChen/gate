@@ -190,7 +190,7 @@
     </junit>
   </target>
 
-  <target name="test" depends="testowlim,testw3tests,testontotest1,testontowine" />
+  <target name="test" depends="testowlim,testw3tests,testontotest1,testtriplestore,testontowine" />
 
   <!-- Targets used by the main GATE build file -->
   <target name="build" depends="jar" />

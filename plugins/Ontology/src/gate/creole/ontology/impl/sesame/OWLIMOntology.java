@@ -319,12 +319,17 @@ public class OWLIMOntology
       }
 
 
-      OntologyServiceImplSesame oService = new OntologyServiceImplSesame(this);
+      OntologyServiceImplSesame oService = 
+        OntologyServiceImplSesame.createForManagedRepository(
+          this,storageFolderDir.toURI().toURL(),
+        "owlim3",repoConfig.toURI().toURL());
+        
+        //new OntologyServiceImplSesame(this);
 
       // create a managed repository
-      oService.createManagedRepository(
-        storageFolderDir.toURI().toURL(),
-        "owlim3",repoConfig.toURI().toURL());
+      //oService.createManagedRepository(
+      //  storageFolderDir.toURI().toURL(),
+      //  "owlim3",repoConfig.toURI().toURL());
       ontologyService = oService;
 
       logger.debug("Repository created");

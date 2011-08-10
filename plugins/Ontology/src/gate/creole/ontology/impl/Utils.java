@@ -6,8 +6,6 @@ package gate.creole.ontology.impl;
 import org.openrdf.model.vocabulary.OWL;
 
 import gate.creole.ontology.*;
-import gate.creole.ontology.impl.sesame.OBNodeIDImpl;
-import gate.creole.ontology.impl.sesame.OURIImpl;
 import gate.util.GateRuntimeException;
 import java.util.HashSet;
 import java.util.Set;

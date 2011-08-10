@@ -17,7 +17,6 @@ import gate.creole.ontology.GateOntologyException;
 import gate.creole.ontology.LiteralOrONodeID;
 import gate.creole.ontology.OntologyBooleanQuery;
 import gate.creole.ontology.OConstants;
-import java.util.Vector;
 import org.apache.log4j.Logger;
 import org.openrdf.model.Value;
 import org.openrdf.query.QueryLanguage;
@@ -43,16 +42,21 @@ import org.openrdf.repository.RepositoryConnection;
  public class UtilBooleanQuery implements OntologyBooleanQuery {
 
     private RepositoryConnection mRepositoryConnection;
+    private SesameManager mSesameManager;
     private String mQuery;
     private BooleanQuery mBooleanQuery;
     private QueryLanguage mLang = QueryLanguage.SERQL;
     private Logger logger;
     private boolean mIsPrepared = false;
 
-    public UtilBooleanQuery(RepositoryConnection repositoryConnection,
-        String query, OConstants.QueryLanguage lang) {
+    public UtilBooleanQuery(
+      SesameManager sm,
+      String query, 
+      OConstants.QueryLanguage lang) 
+    {
       logger = Logger.getLogger(this.getClass().getName());
-      mRepositoryConnection = repositoryConnection;
+      mSesameManager = sm;
+      mRepositoryConnection = sm.getRepositoryConnection();
       logger.debug("Creating query: " + query);
       mQuery = query;
       if(lang == OConstants.QueryLanguage.SPARQL) {
@@ -81,7 +85,7 @@ import org.openrdf.repository.RepositoryConnection;
      * @param value
      */
     public void setBinding(String name, LiteralOrONodeID value) {
-      mBooleanQuery.setBinding(name, UtilConvert.toSesameValue(value));
+      mBooleanQuery.setBinding(name, mSesameManager.convertLiteralOrONodeID2SesameValue(value));
     }
 
     public void setBinding(String name, Value value) {

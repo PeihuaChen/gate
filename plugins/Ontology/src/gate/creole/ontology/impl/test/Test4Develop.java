@@ -376,7 +376,7 @@ public class Test4Develop extends TestCase {
 
     // Test new tuple query stuff
     UtilTupleQueryIterator q = new UtilTupleQueryIterator(
-        service.getRepositoryConnection(),
+        service.getSesameManager(),
         "select distinct ?x { ?a ?b ?x }",QueryLanguage.SPARQL);
 
     while(q.hasNext()) {
