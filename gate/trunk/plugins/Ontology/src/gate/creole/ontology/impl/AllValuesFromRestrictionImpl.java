@@ -52,14 +52,12 @@ public class AllValuesFromRestrictionImpl extends OClassImpl implements
    * @param resource
    */
   public void setHasValue(OResource resource) {
-    ontologyService.setRestrictionValue(this.nodeId.toString(),
-            OConstants.ALL_VALUES_FROM_RESTRICTION, resource.getONodeID()
-                    .toString());
+    ontologyService.setRestrictionValue(this.nodeId,
+      ontology.OURI_OWL_ALLVALUESFROM, resource.getONodeID());
   }
   public void setHasValue(OClass resource) {
-    ontologyService.setRestrictionValue(this.nodeId.toString(),
-            OConstants.ALL_VALUES_FROM_RESTRICTION, resource.getONodeID()
-                    .toString());
+    ontologyService.setRestrictionValue(this.nodeId,
+      ontology.OURI_OWL_ALLVALUESFROM, resource.getONodeID());
   }
 
   /*
@@ -80,13 +78,11 @@ public class AllValuesFromRestrictionImpl extends OClassImpl implements
    * @see gate.creole.ontology.Restriction#setOnPropertyValue(gate.creole.ontology.RDFProperty)
    */
   public void setOnPropertyValue(RDFProperty property) {
-    ontologyService.setOnPropertyValue(this.nodeId.toString(), property
-            .getOURI().toString());
+    ontologyService.setOnPropertyValue(this.nodeId, property.getOURI());
     ontology.fireResourceRelationChanged(this, property, OConstants.RESTRICTION_ON_PROPERTY_VALUE_CHANGED);
   }
   public void setOnPropertyValue(ObjectProperty property) {
-    ontologyService.setOnPropertyValue(this.nodeId.toString(), property
-            .getOURI().toString());
+    ontologyService.setOnPropertyValue(this.nodeId, property.getOURI());
     ontology.fireResourceRelationChanged(this, property, OConstants.RESTRICTION_ON_PROPERTY_VALUE_CHANGED);
   }
 

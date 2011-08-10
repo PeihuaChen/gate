@@ -6,10 +6,10 @@
      <!ENTITY owl  "http://www.w3.org/2002/07/owl#" >
    ]>
 
-<rdf:RDF xmlns="&owl;" xmlns:owl="&owl;" xml:base="http://www.w3.org/2002/07/owl" xmlns:rdf="&rdf;" xmlns:rdfs="&rdfs;">
+<rdf:RDF xmlns:owl="&owl;" xml:base="http://www.w3.org/2002/07/owl" xmlns:rdf="&rdf;" xmlns:rdfs="&rdfs;">
 
 <Ontology rdf:about="">
-  <imports rdf:resource="http://www.w3.org/2000/01/rdf-schema"/>
+  <owl:imports rdf:resource="http://www.w3.org/2000/01/rdf-schema"/>
   <rdfs:isDefinedBy rdf:resource="http://www.w3.org/TR/2004/REC-owl-semantics-20040210/" />
   <rdfs:isDefinedBy rdf:resource="http://www.w3.org/TR/2004/REC-owl-test-20040210/" />
   <rdfs:isDefinedBy rdf:resource="http://www.w3.org/TR/2004/REC-owl-features-20040210/" />
@@ -20,7 +20,7 @@
     explicitly into their ontology. People that do import this file
     should expect their ontology to be an OWL Full ontology. 
   </rdfs:comment>
-  <versionInfo>10 February 2004</versionInfo>
+  <owl:versionInfo>10 February 2004</owl:versionInfo>
 </Ontology>
 
 <rdfs:Class rdf:ID="Class">
@@ -28,20 +28,20 @@
   <rdfs:subClassOf rdf:resource="&rdfs;Class"/>
 </rdfs:Class>
 
-<Class rdf:ID="Thing">
+<owl:Class rdf:ID="Thing">
   <rdfs:label>Thing</rdfs:label>
-  <unionOf rdf:parseType="Collection">
-    <Class rdf:about="#Nothing"/>
-    <Class>
-      <complementOf rdf:resource="#Nothing"/>
-    </Class>
-  </unionOf>
-</Class>
+  <owl:unionOf rdf:parseType="Collection">
+    <owl:Class rdf:about="#Nothing"/>
+    <owl:Class>
+      <owl:complementOf rdf:resource="#Nothing"/>
+    </owl:Class>
+  </owl:unionOf>
+</owl:Class>
 
-<Class rdf:ID="Nothing">
+<owl:Class rdf:ID="Nothing">
   <rdfs:label>Nothing</rdfs:label>
-  <complementOf rdf:resource="#Thing"/>
-</Class>
+  <owl:complementOf rdf:resource="#Thing"/>
+</owl:Class>
 
 <rdf:Property rdf:ID="equivalentClass">
   <rdfs:label>equivalentClass</rdfs:label>

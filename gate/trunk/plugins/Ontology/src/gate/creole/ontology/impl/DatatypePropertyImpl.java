@@ -45,8 +45,7 @@ public class DatatypePropertyImpl extends RDFPropertyImpl implements
    * @see gate.creole.ontology.DatatypeProperty#getDataType()
    */
   public DataType getDataType() {
-      String datatypeURI = ontologyService.getDatatype(this.nodeId
-              .toString());
+      String datatypeURI = ontologyService.getDatatype(getOURI());
       if(datatypeURI == null) { return DataType.getStringDataType(); }
       return OntologyUtilities.getDataType(datatypeURI);
   }
@@ -100,15 +99,7 @@ public class DatatypePropertyImpl extends RDFPropertyImpl implements
    * @see gate.creole.ontology.RDFProperty#getDomain()
    */
   public Set<OResource> getDomain() {
-      ResourceInfo[] list = ontologyService.getDomain(nodeId.toString());
-      // this is a list of classes
-      Set<OResource> domain = new HashSet<OResource>();
-      // these resources can be anything - an instance, a property, or a class
-      for(int i = 0; i < list.length; i++) {
-        domain.add(Utils.createOClass(this.ontology,
-                this.ontologyService, list[i].getUri(), list[i].getClassType()));
-      }
-      return domain;
+      return ontologyService.getDomain(getOURI());
   }
 
   /*

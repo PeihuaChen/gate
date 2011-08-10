@@ -49,7 +49,7 @@ import org.apache.log4j.Logger;
 
 
     public void setBinding(String name, LiteralOrONodeID value) {
-      mQuery.setBinding(name, UtilConvert.toSesameValue(value));
+      mQuery.setBinding(name, mService.getSesameManager().convertLiteralOrONodeID2SesameValue(value));
     }
 
     public boolean hasNext() {

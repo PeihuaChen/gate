@@ -15,7 +15,14 @@
  */
 package gate.creole.ontology.impl.sesame;
 
+import gate.creole.ontology.impl.OURIImpl;
+import gate.creole.ontology.DataType;
+import gate.creole.ontology.GateOntologyException;
+import gate.creole.ontology.InvalidValueException;
+import gate.creole.ontology.LiteralOrONodeID;
 import gate.creole.ontology.OConstants;
+import gate.creole.ontology.ONodeID;
+import gate.creole.ontology.OURI;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.util.Map;
@@ -58,7 +65,17 @@ import org.openrdf.repository.config.RepositoryImplConfig;
 import org.openrdf.repository.config.RepositoryRegistry;
 import org.openrdf.sail.memory.model.MemValueFactory;
 import gate.creole.ontology.OntologyTupleQuery;
+import gate.creole.ontology.impl.LiteralOrONodeIDImpl;
+import gate.creole.ontology.impl.OBNodeIDImpl;
+import gate.creole.ontology.impl.ONodeIDImpl;
+import java.util.Locale;
 import org.openrdf.http.client.HTTPClient;
+import org.openrdf.model.BNode;
+import org.openrdf.model.URI;
+import org.openrdf.model.Value;
+import org.openrdf.model.impl.BNodeImpl;
+import org.openrdf.model.impl.LiteralImpl;
+import org.openrdf.model.impl.URIImpl;
 /**
  * A class to encapsulate management of a Sesame2 repository and
  * make handling different repository types easier.
@@ -660,7 +677,7 @@ public class SesameManager {
   public OntologyTupleQuery createQuery(String query) {
     if(mRepositoryConnection != null) {
       return new UtilTupleQueryIterator(
-          mRepositoryConnection,
+          this,
           query,
           OConstants.QueryLanguage.SPARQL);
     } else {
@@ -688,5 +705,174 @@ public class SesameManager {
     return mRepositoryConnection;
   }
 
+  
+  // Utility functions for converting between Sesame and our own 
+  // representations
+  /** 
+   * Convert a Sesame literal to a GATE literal
+   * 
+   * @param sesameLiteral 
+   * @return 
+   */
+  public gate.creole.ontology.Literal convertSesameLiteral2Literal(
+      org.openrdf.model.Literal sesameLiteral) {
+    URI dtu = sesameLiteral.getDatatype();
+    DataType dt;
+    String lang = sesameLiteral.getLanguage();
+    if(dtu == null) {
+      if(lang != null) {
+        //System.err.println("Could not get a datatype for literal, using string: "+sesameLiteral);
+        dt = DataType.getStringDataType();
+      } else {
+        //System.err.println("Could not get a datatype for literal, using anyType: "+sesameLiteral);
+        dt = new DataType(new OURIImpl("http://www.w3.org/2001/XMLSchema#anyType"));
+      }
+    } else {
+      dt = toGateDataType(dtu);
+    }
+    Locale locale = null;
+    if(lang != null) {
+      locale = lang2locale(lang);
+    }
+    if(locale != null) {
+      return new gate.creole.ontology.Literal(sesameLiteral.getLabel(),locale);
+    } else {
+      try {
+        return new gate.creole.ontology.Literal(sesameLiteral.getLabel(), dt);
+      } catch (InvalidValueException ex) {
+        // TODO: what to do here?
+        throw new GateOntologyException(
+            "Could not convert literal from Sesame: "+sesameLiteral);
+      }
+    }
+  }
+
+  
+  public org.openrdf.model.Value convertLiteralOrONodeID2SesameValue(LiteralOrONodeID val) {
+    if(val.isLiteral()) {
+      return toSesameLiteral(val.getLiteral());
+    } else {
+      ONodeID id = val.getONodeID();
+      return toSesameResource(id);
+    }
+  }
+  
+  public Value toSesameValue(ONodeID id) {
+    return toSesameResource(id);
+  }
+  
+  public gate.creole.ontology.DataType toGateDataType(org.openrdf.model.URI uri) {
+    DataType dt = new DataType(new OURIImpl(uri.toString()));
+    return dt;
+  }
+
+  public Locale lang2locale(String lang) {
+    if(lang == null) {
+      return null;
+    }
+    Locale locale = new Locale(lang);
+    System.out.println("Trying to convert language to locale: "+lang+"="+locale);
+    return locale;
+  }
+  
+  // ********************************************
+  // *********************** Sesame -> Ontology 
+  // ********************************************
+  public ONodeID toGateONodeID(org.openrdf.model.Resource resource) {
+    ONodeID onodeid = null;
+    if(resource instanceof BNode) {
+      return new OBNodeIDImpl(resource.stringValue());
+    } else if(resource instanceof org.openrdf.model.URI) {
+      return new OBNodeIDImpl(((org.openrdf.model.URI)resource).stringValue());
+    } else {
+      throw new SesameManagerException("Cannot convert Resource to ONodeID, not a BNode or a URI: "+resource);
+    }
+  }
+  
+  public OURI toGateOURI(org.openrdf.model.URI uri) {
+    return new OURIImpl(uri.stringValue());
+  }
+  
+  public LiteralOrONodeID toGateLiteralOrONodeID(Value v) {
+    if (v instanceof BNode) {
+      return new LiteralOrONodeIDImpl(new OBNodeIDImpl(v.stringValue()));
+    } else if (v instanceof org.openrdf.model.Literal) {
+      return new LiteralOrONodeIDImpl(
+        convertSesameLiteral2Literal((org.openrdf.model.Literal) v));
+    } else if (v instanceof org.openrdf.model.URI) {
+      URI u = (URI) v;
+      return new LiteralOrONodeIDImpl(new OURIImpl(u.stringValue()));
+    } else {
+      throw new SesameManagerException("Cannot convert Value to LiteralOrONodeID: " + v);
+    }
+  }
+  
+  // ******************************************** 
+  // ********************** Ontology -> Sesame 
+  // ********************************************
+  
+  /** 
+   * Convert an ontology plugin ONodeID to a Sesame Resource.
+   * 
+   * @param node
+   * @return 
+   */
+  public org.openrdf.model.Resource toSesameResource(ONodeID node) {
+    Resource r = null;
+    if (node != null) {
+      if (node.isAnonymousResource()) {
+        String id = node.toString();
+        if (id.startsWith("_:")) {
+          id = id.substring(2);
+        }
+        r = mRepositoryConnection.getValueFactory().createBNode(id);
+      } else {
+        r = mRepositoryConnection.getValueFactory().createURI(node.toString());
+      }
+    }
+    return r;
+  }
+  
+  /** 
+   * Convert an ontology plugin OURI to a Sesame URI
+   * 
+   * @param node
+   * @return 
+   */
+  public org.openrdf.model.URI toSesameURI(OURI node) {
+    org.openrdf.model.URI r = null;
+    if (node != null) {
+      r = mRepositoryConnection.getValueFactory().createURI(node.toString());
+    }
+    return r;
+  }
+  
+  
+  /**
+   * Convert an Ontology plugin Literal represenation into a Sesame Literal
+   * 
+   * @param literal
+   * @return  
+   */ 
+  public org.openrdf.model.Literal toSesameLiteral(gate.creole.ontology.Literal literal) {
+    org.openrdf.model.Literal l = null;
+    if (literal != null) {
+      if (literal.getLanguage() != null && !literal.getLanguage().getLanguage().equals("")) {
+        l = mRepositoryConnection.
+          getValueFactory().createLiteral(literal.getValue(), 
+            literal.getLanguage().getLanguage());
+      } else if (literal.getDataType() != null) {
+        l = mRepositoryConnection.getValueFactory().createLiteral(literal.getValue());
+      } else {
+        l = mRepositoryConnection.
+          getValueFactory().createLiteral(literal.getValue(),
+            literal.getDataType().getXmlSchemaURIString());
+      }
+    }
+    return l;
+  }
+  
+  
+  
 
 }

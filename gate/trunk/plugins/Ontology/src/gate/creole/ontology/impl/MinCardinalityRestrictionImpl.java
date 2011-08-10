@@ -80,8 +80,7 @@ public class MinCardinalityRestrictionImpl extends OClassImpl implements
    * @see gate.creole.ontology.Restriction#setOnPropertyValue(gate.creole.ontology.RDFProperty)
    */
   public void setOnPropertyValue(RDFProperty property) {
-    ontologyService.setOnPropertyValue(this.nodeId.toString(), property
-            .getOURI().toString());
+    ontologyService.setOnPropertyValue(this.nodeId, property.getOURI());
     ontology.fireResourceRelationChanged(this, property,OConstants.RESTRICTION_ON_PROPERTY_VALUE_CHANGED);
   }
 

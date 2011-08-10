@@ -19,11 +19,8 @@ import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 
-import gate.creole.ontology.OConstants;
-import gate.creole.ontology.OURI;
 import java.net.MalformedURLException;
 
-import java.util.Set;
 import org.apache.log4j.Logger;
 
 
@@ -87,7 +84,9 @@ public class ConnectSesameOntology  extends OntologyLR
     logger = Logger.getLogger(this.getClass().getName());
   }
 
-  /** Initialises this resource, and returns it. */
+  /** Initialises this resource, and returns it.
+   * @return 
+   */
   @Override
   public Resource init() throws ResourceInstantiationException {
     if(getRepositoryLocation() == null) {
@@ -108,8 +107,11 @@ public class ConnectSesameOntology  extends OntologyLR
    */
   public void load() throws ResourceInstantiationException {
     logger.debug("Initializing");
-    OntologyServiceImplSesame owlimService = new OntologyServiceImplSesame(this);
-    owlimService.connectToRepository(repositoryLocation,repositoryID);
+    OntologyServiceImplSesame owlimService = 
+      OntologyServiceImplSesame.createForRepositoryConnection(this, 
+        repositoryLocation, repositoryID); 
+    // new OntologyServiceImplSesame(this);
+    //owlimService.connectToRepository(repositoryLocation,repositoryID);
     ontologyService = owlimService;
 
     setDefaultNameSpaceFromRepository();

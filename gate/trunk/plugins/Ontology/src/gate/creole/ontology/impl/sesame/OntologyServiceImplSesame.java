@@ -54,6 +54,7 @@ import gate.creole.ontology.OBNodeID;
 import gate.creole.ontology.OConstants.QueryLanguage;
 import gate.creole.ontology.OInstance;
 import gate.creole.ontology.ONodeID;
+import gate.creole.ontology.OResource;
 import gate.creole.ontology.OntologyTripleStore;
 import gate.creole.ontology.RDFProperty;
 import gate.creole.ontology.impl.*;
@@ -76,6 +77,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
@@ -101,8 +103,6 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.RepositoryResult;
 import org.openrdf.model.Value;
-import org.openrdf.model.impl.BNodeImpl;
-import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.TupleQueryResult;
 
@@ -133,21 +133,17 @@ public class OntologyServiceImplSesame implements OntologyService {
   private org.openrdf.model.URI contextURI = DATA_CONTEXT_URI;
 
   public void setContextURIString(String uriString) {
-    contextURI = new org.openrdf.model.impl.URIImpl(uriString);
+    contextURI = repositoryConnection.getValueFactory().createURI(uriString);
+    ontologyTripleStore.setContextURI(contextURI);
   }
   public String getContextURIString() {
     return contextURI.toString();
   }
   
-  private org.openrdf.model.URI getContextURI() {
+  public org.openrdf.model.URI getContextURI() {
     return contextURI;
   }
   
-  // ***************************************************************************
-  // **** CONSTANTS for prepared queries and the assiciated query variables
-  // ***************************************************************************
-
-
   private Logger logger;
 
   protected SesameManager sesameManager;
@@ -157,28 +153,43 @@ public class OntologyServiceImplSesame implements OntologyService {
   public final AbstractOntologyImplSesame ontology;
   private String ontologyUrl;
 
-  private OntologyTripleStore ontologyTripleStore;
+  private OntologyTripleStoreImpl ontologyTripleStore;
 
   /**
-   * Constructor
+   * This is the constructor that is used from one of the factory methods
+   * that create an OntologyServiceImplSesame object. Only the factory
+   * methods can be used to create an instance. The factory method is 
+   * responsible for initializing all the delegate datastructures correctly:
+   * an instance of SesameManager and an instance of OntologyTripleStoreImpl.
+   * The OntologyTripleStoreImpl instance in turn uses the SesameManager 
+   * instance internally to access the Sesame repository connection. 
    */
-  public OntologyServiceImplSesame(AbstractOntologyImplSesame o) {
+  private OntologyServiceImplSesame(AbstractOntologyImplSesame o, SesameManager sm) {
     super();
     ontology = o;
-    ontologyTripleStore = new OntologyTripleStoreImpl(o,this);
+    sesameManager = sm;
+    repositoryConnection = sesameManager.getRepositoryConnection();
+    ontologyTripleStore = new OntologyTripleStoreImpl(o,sesameManager,contextURI);
     logger = Logger.getLogger(this.getClass().getName());
   }
 
-  public OntologyTripleStore getOntologyTripleStore() {
-    return ontologyTripleStore;
+  private OntologyServiceImplSesame() {
+    ontology = null;
+    throw new 
+      GateRuntimeException("Default constructor of OntologyServiceImpleSesame must not be used!");
   }
   
-  // ***************************************************************************
-  // *** METHODS RELATED TO THE ONTOLOGY AS A WHOLE
-  // ***************************************************************************
-
   // ********** CREATION, INITIALIZATION, SHUTDOWN
 
+  // OntologyServiceImplSesame Objects can only be created through one of 
+  // the static factory methods. If an instance of this class is returned
+  // by the factory method (i.e. no exception is thrown) then the instance
+  // is guaranteed to have its internal datastructures initialized. This means
+  // that once such an instance exists, the SesameManager and RepositoryConnection
+  // objects are initialized too ... until shutdown is called or something
+  // unexpected happens (e.g. a connection to a HTTP repository is lost).
+  
+  
   /**
    * Create an unmanaged repository in the given data directory from the
    * given configuration data string.
@@ -186,17 +197,21 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param dataDir
    * @param configData
    */
-  public void createRepository(File dataDir, String configData) {
-    sesameManager = new SesameManager();
+  public static OntologyServiceImplSesame 
+    createForRepository(AbstractOntologyImplSesame ontology, File dataDir, String configData) {
+    SesameManager sesameManager = new SesameManager();
     sesameManager.createUnmanagedRepository(dataDir, configData);
-    repositoryConnection = sesameManager.getRepositoryConnection();
+    RepositoryConnection rc = sesameManager.getRepositoryConnection();
     try {
-      repositoryConnection.setAutoCommit(true);
+      rc.setAutoCommit(true);
     } catch (RepositoryException ex) {
       sesameManager.disconnect();
       throw new GateOntologyException("Could not set autocommit");
     }
-    init();
+    OntologyServiceImplSesame osi = 
+      new OntologyServiceImplSesame(ontology,sesameManager);
+    osi.init();
+    return osi;
   }
 
   /**
@@ -210,10 +225,12 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param repositoryID
    * @param configFileURL
    */
-  void createManagedRepository(URL repoLoc, String repositoryID, URL configFileURL) {
+  static OntologyServiceImplSesame
+    createForManagedRepository(AbstractOntologyImplSesame ontology, 
+      URL repoLoc, String repositoryID, URL configFileURL) {
     HashMap<String, String> map = new HashMap<String, String>();
     map.put("id", repositoryID);
-    sesameManager = new SesameManager();
+    SesameManager sesameManager = new SesameManager();
     String configData;
     try {
       InputStream is = configFileURL.openStream();
@@ -231,36 +248,43 @@ public class OntologyServiceImplSesame implements OntologyService {
     configData = SesameManager.substituteConfigTemplate(configData, map);
     //logger.debug("Config file is: \n" + configData);
     sesameManager.createRepository(configData);
-    repositoryConnection = sesameManager.getRepositoryConnection();
+    RepositoryConnection repositoryConnection = sesameManager.getRepositoryConnection();
     try {
       repositoryConnection.setAutoCommit(true);
     } catch (RepositoryException ex) {
       sesameManager.disconnect();
       throw new GateOntologyException("Could not set autocommit");
     }
-    init();
+    OntologyServiceImplSesame osi = new OntologyServiceImplSesame(ontology,sesameManager);
+    osi.init();
+    return osi;
   }
 
   /**
-   * Conect to the repository with the given repository ID
+   * Connect to the repository with the given repository ID
    * at the given repository URL location, which could
    * be either a directory or a sesame server.
    *
+   * @param ontology 
    * @param repositoryURL
    * @param repositoryID
+   * @return  
    */
-  void connectToRepository(URL repositoryURL, String repositoryID) {
-    sesameManager = new SesameManager();
-    logger.debug("Service: calling connectToRepository for id " + repositoryID);
+  public static OntologyServiceImplSesame 
+    createForRepositoryConnection(AbstractOntologyImplSesame ontology,
+    URL repositoryURL, String repositoryID) {
+    SesameManager sesameManager = new SesameManager();
     sesameManager.connectToRepository(repositoryURL, repositoryID);
-    repositoryConnection = sesameManager.getRepositoryConnection();
+    RepositoryConnection repositoryConnection = sesameManager.getRepositoryConnection();
     try {
       repositoryConnection.setAutoCommit(true);
     } catch (RepositoryException ex) {
       sesameManager.disconnect();
       throw new GateOntologyException("Could not set autocommit");
     }
-    init();
+    OntologyServiceImplSesame osi = new OntologyServiceImplSesame(ontology,sesameManager);
+    osi.init();
+    return osi;
   }
 
   /**
@@ -282,6 +306,23 @@ public class OntologyServiceImplSesame implements OntologyService {
   public void shutdown() {
     sesameManager.disconnect();
   }
+  
+  
+  
+  
+  
+  public OntologyTripleStore getOntologyTripleStore() {
+    return ontologyTripleStore;
+  }
+  
+  public SesameManager getSesameManager() {
+    return sesameManager;
+  }
+  
+  // ***************************************************************************
+  // *** METHODS RELATED TO THE ONTOLOGY AS A WHOLE
+  // ***************************************************************************
+
 
   // *************** IMPORT / EXPORT *******************************************
 
@@ -500,14 +541,6 @@ public class OntologyServiceImplSesame implements OntologyService {
     return theURIs;
   }
 
-  /**
-   * The method allows adding version information to the repository.
-   *
-   * @param versionInfo
-   */
-  public void setVersion(String versionInfo) {
-    addUULStatement(this.ontologyUrl, OWL.VERSIONINFO.toString(), versionInfo, null);
-  }
 
   /**
    * The method returns the version information of the repository.
@@ -531,7 +564,7 @@ public class OntologyServiceImplSesame implements OntologyService {
 
 
   public void setOntologyURI(OURI theURI) {
-    addUUUStatement(theURI.toString(), RDF.TYPE.toString(), OWL.ONTOLOGY.toString());
+    ontologyTripleStore.addTriple(theURI, ontology.OURI_RDF_TYPE, ontology.OURI_OWL_ONTOLOGY);
   }
 
 
@@ -544,17 +577,15 @@ public class OntologyServiceImplSesame implements OntologyService {
    *
    * @param classURI
    */
-  public void addClass(String classURI, byte classType) {
-    switch (classType) {
-      case OConstants.OWL_CLASS:
-        addUUUStatement(classURI, RDF.TYPE.toString(), OWL.CLASS.toString());
-        return;
-      default:
-        addUUUStatement(classURI, RDF.TYPE.toString(), OWL.RESTRICTION.toString());
-        return;
-    }
+  public void addClass(OURI classURI) {
+    ontologyTripleStore.addTriple(classURI,ontology.OURI_RDF_TYPE,ontology.OURI_OWL_CLASS);
   }
-
+  
+  public void addRestriction(OBNodeID classURI) {
+    ontologyTripleStore.addTriple(classURI,ontology.OURI_RDF_TYPE,ontology.OURI_OWL_RESTRICTION);
+  }
+  
+  
   /**
    * Given a class to delete, it removes it from the repository.
    *
@@ -571,6 +602,8 @@ public class OntologyServiceImplSesame implements OntologyService {
   // TODO: subclasses: what if a subclass also is a subclass of some other
   // class that does not get removed?
   // test/clarify in API!
+  // TODO: !!! This is a complex method, add a tester for it and
+  // work on getting rid of all string methods
   public String[] removeClass(String classURI,
       boolean removeSubTree) throws GateOntologyException {
     logger.debug("removeClass");
@@ -587,6 +620,7 @@ public class OntologyServiceImplSesame implements OntologyService {
     //  currentEventsLog.addEvent(new OEvent(classURI, RDF.TYPE.toString(), null, false));
     //  deletedResources.add(classURI);
     //}
+    // TODO: !! replace !!
     removeUUUStatement(classURI, RDF.TYPE.toString(), null);
     deletedResources.add(classURI);
 
@@ -632,17 +666,28 @@ public class OntologyServiceImplSesame implements OntologyService {
           addSubClass(superClasses[j].getUri(), subclass.getONodeID().toString());
         }
       }
+      // get all the direct instances of the class to be removed
       ClosableIterator<OInstance> instIt =
           getInstancesIterator(string2ONodeID(classURI), Closure.DIRECT_CLOSURE);
       //for (int i = 0; i < individuals.length; i++) {
       while(instIt.hasNext()) {
-        removeUUUStatement(instIt.next().toString(), RDF.TYPE.toString(), classURI);
+        OInstance inst = instIt.next();
+        // remove the triple that says that that instance is of type class
+        ontologyTripleStore.removeTriple(inst.getONodeID(), ontology.createOURI(RDF.TYPE.toString()), ontology.createOURI(classURI));
+        //removeUUUStatement(instIt.next().toString(), RDF.TYPE.toString(), classURI);
+        // instead add a triple for each superclass of class 
         for (int j = 0; j < superClasses.length; j++) {
-          addUUUStatement(instIt.next().toString(), RDF.TYPE.toString(), superClasses[j].getUri());
+          //addUUUStatement(inst.toString(), RDF.TYPE.toString(), superClasses[j].getUri());
+          ontologyTripleStore.addTriple(inst.getONodeID(),ontology.createOURI(RDF.TYPE.toString()),ontology.createOURI(superClasses[j].getUri()));
         }
       }
     }
     try {
+      // The following deletes all the properties that have the deleted
+      // class as either a domain or range.
+      // TODO: is that the logical thing to do? How about just removing the
+      // domain or range restriction? Especially if we do not remove the 
+      // instance subtree, then we still can reasonably have relationships?
       startTransaction(null);
       RepositoryResult<Statement> iter =
           repositoryConnection.getStatements(null, makeSesameURI(RDFS.DOMAIN.toString()), getResource(classURI), true);
@@ -691,40 +736,26 @@ public class OntologyServiceImplSesame implements OntologyService {
    * The method returns if the current repository has a class with URI that
    * matches with the class parameter.
    *
+   * @param classURI 
    * @return
    */
-  public boolean hasClass(String classURI)
-  {
-    //System.out.println("Checking for class: "+classURI);
-    try {
-      // TODO: !!!!make two versions: one taking ONodeID and one String
-      boolean hasOWLClass = 
-          repositoryConnection.hasStatement(string2SesameResource(classURI),
-          RDF.TYPE, OWL.CLASS, true);
-      if (!hasOWLClass) {
-        boolean hasRDFSClass = 
-            repositoryConnection.hasStatement(string2SesameResource(classURI),
-            RDF.TYPE, RDFS.CLASS, true);
-        //System.out.println("OWL class not found, RDFS class "+hasRDFSClass);
-        return hasRDFSClass;
-      } else {
-        //System.out.println("OWL class found");
-        return true;
-      }
-    } catch (RepositoryException ex) {
-      throw new GateOntologyException("Could not do hasStatement for class "+classURI);
+  public boolean hasClass(ONodeID classURI) {
+    boolean hasOWLClass =
+      ontologyTripleStore.hasTriple(classURI, ontology.OURI_RDF_TYPE, ontology.OURI_OWL_CLASS);
+    if (!hasOWLClass) {
+      boolean hasRDFSClass =
+        ontologyTripleStore.hasTriple(classURI, ontology.OURI_RDF_TYPE, ontology.OURI_RDFS_CLASS);
+      return hasRDFSClass;
+    } else {
+      return true;
     }
   }
 
   public boolean containsURI(OURI theURI) {
-    try {
-      return
-          repositoryConnection.hasStatement(oNodeID2SesameResource(theURI), null, null, true) ||
-          repositoryConnection.hasStatement(null, (URI) oNodeID2SesameResource(theURI), null, true) ||
-          repositoryConnection.hasStatement(null, null, oNodeID2SesameResource(theURI), true);
-    } catch (RepositoryException ex) {
-      throw new GateOntologyException("Problem when looking up URI "+theURI,ex);
-    }
+    return 
+      ontologyTripleStore.hasTriple(theURI,null,(ONodeID)null) ||
+      ontologyTripleStore.hasTriple(null,theURI,(ONodeID)null) ||
+      ontologyTripleStore.hasTriple(null,null,theURI);
   }
 
 
@@ -753,7 +784,7 @@ public class OntologyServiceImplSesame implements OntologyService {
     UtilTupleQueryIterator q;
     String qs = qs_getClassesByNameNoW3.replaceAll("yyy1", "\"[/#]"+name+"\\$\"");
     q = new UtilTupleQueryIterator(
-            repositoryConnection, qs, ql_getClassesByNameNoW3);
+            sesameManager, qs, ql_getClassesByNameNoW3);
       while (q.hasNext()) {
         Vector<Value> tuple = q.nextAsValue();
         Value t1 = tuple.get(0);
@@ -857,7 +888,7 @@ public class OntologyServiceImplSesame implements OntologyService {
   protected void addSerqlQueryResultToCollection(String query, Collection<String> coll,
       boolean internIt) {
     UtilTupleQueryIterator result = 
-        new UtilTupleQueryIterator(repositoryConnection,query,QueryLanguage.SERQL);
+        new UtilTupleQueryIterator(sesameManager,query,QueryLanguage.SERQL);
     //UtilTupleQueryIterator result = performSerqlQuery(query);
     while (result.hasNext()) {
       if (internIt) {
@@ -873,7 +904,7 @@ public class OntologyServiceImplSesame implements OntologyService {
 
   protected void addSerqlQueryResultValuesToCollection(String query, Collection<Value> coll) {
     UtilTupleQueryIterator result = 
-        new UtilTupleQueryIterator(repositoryConnection,query,QueryLanguage.SERQL);
+        new UtilTupleQueryIterator(sesameManager,query,QueryLanguage.SERQL);
     //UtilTupleQueryIterator result = performSerqlQuery(query);
     while (result.hasNext()) {
       coll.add(result.nextFirstAsValue());
@@ -884,7 +915,7 @@ public class OntologyServiceImplSesame implements OntologyService {
   protected boolean hasSerqlQueryResultRows(String query) {
     //UtilTupleQueryIterator result = performSerqlQuery(query);
     UtilTupleQueryIterator result =
-        new UtilTupleQueryIterator(repositoryConnection,query,QueryLanguage.SERQL);
+        new UtilTupleQueryIterator(sesameManager,query,QueryLanguage.SERQL);
     boolean hasResult = result.hasNext();
     result.close();
     return hasResult;
@@ -892,7 +923,7 @@ public class OntologyServiceImplSesame implements OntologyService {
 
   protected UtilTupleQueryIterator performSerqlQuery(String serqlQuery) {
     return 
-        new UtilTupleQueryIterator(repositoryConnection,serqlQuery,QueryLanguage.SERQL);
+        new UtilTupleQueryIterator(sesameManager,serqlQuery,QueryLanguage.SERQL);
   }
 
 
@@ -933,16 +964,11 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @return
    * @throws Exception
    */
-  public boolean isEquivalentClassAs(String theClassURI1,
-      String theClassURI2)
+  public boolean isEquivalentClassAs(ONodeID theClassURI1,
+      ONodeID theClassURI2)
   {
-
-    String queryRep1 =  string2Turtle(theClassURI1);
-    String queryRep2 =  string2Turtle(theClassURI2);
-
-    String query =
-        "SELECT * FROM {" + queryRep1 + "} owl:equivalentClass {" + queryRep2 + "}";
-    return hasSerqlQueryResultRows(query);
+    return ontologyTripleStore.hasTriple(theClassURI1, 
+      ontology.OURI_OWL_EQUIVALENTCLASS, theClassURI2);
   }
 
   // *******************************************************************
@@ -957,9 +983,10 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param aPropertyURI
    *          URI of the property to be added into the ontology. Done
    */
-  public void addAnnotationProperty(String aPropertyURI)
+  public void addAnnotationProperty(OURI aPropertyURI)
       throws GateOntologyException {
-    addUUUStatement(aPropertyURI, RDF.TYPE.toString(), OWL.ANNOTATIONPROPERTY.toString());
+    //addUUUStatement(aPropertyURI, RDF.TYPE.toString(), OWL.ANNOTATIONPROPERTY.toString());
+    ontologyTripleStore.addTriple(aPropertyURI,ontology.OURI_RDF_TYPE,ontology.OURI_OWL_ANNOTATIONPROPERTY);
   }
 
   /**
@@ -1073,6 +1100,7 @@ public class OntologyServiceImplSesame implements OntologyService {
     result = performSerqlQuery(query);
     while (result.hasNext()) {
       String anAnnProp = result.nextFirstAsString();
+      OURI annOURI = ontology.createOURI(anAnnProp);
       // for each property we obtain its domain and search for the
       // resourceURI in it
       query =
@@ -1085,24 +1113,24 @@ public class OntologyServiceImplSesame implements OntologyService {
       byte type = OConstants.OBJECT_PROPERTY;
 
       if (set.isEmpty()) {
-        if (isSymmetricProperty(anAnnProp.toString().intern())) {
+        if (isSymmetricProperty(annOURI)) {
           type = OConstants.SYMMETRIC_PROPERTY;
-        } else if (isTransitiveProperty(anAnnProp.toString().intern())) {
+        } else if (isTransitiveProperty(annOURI)) {
           type = OConstants.TRANSITIVE_PROPERTY;
         }
 
-        list.add(new Property(type, anAnnProp.toString()));
+        list.add(new Property(type, anAnnProp));
         continue;
       }
       set.retainAll(toCheck);
       if (!set.isEmpty()) {
-        if (isSymmetricProperty(anAnnProp.toString().intern())) {
+        if (isSymmetricProperty(annOURI)) {
           type = OConstants.SYMMETRIC_PROPERTY;
-        } else if (isTransitiveProperty(anAnnProp.toString().intern())) {
+        } else if (isTransitiveProperty(annOURI)) {
           type = OConstants.TRANSITIVE_PROPERTY;
         }
 
-        list.add(new Property(type, anAnnProp.toString()));
+        list.add(new Property(type, anAnnProp));
       }
     }
     result.close();
@@ -1192,6 +1220,7 @@ public class OntologyServiceImplSesame implements OntologyService {
     result = performSerqlQuery(query);
     while (result.hasNext()) {
       String anAnnProp = result.nextFirstAsString();
+      OURI annOURI = ontology.createOURI(anAnnProp);
       // for each property we obtain its domain and search for the
       // resourceURI in it
       query =
@@ -1204,9 +1233,9 @@ public class OntologyServiceImplSesame implements OntologyService {
       byte type = OConstants.OBJECT_PROPERTY;
 
       if (set.isEmpty()) {
-        if (isSymmetricProperty(anAnnProp.toString().intern())) {
+        if (isSymmetricProperty(annOURI)) {
           type = OConstants.SYMMETRIC_PROPERTY;
-        } else if (isTransitiveProperty(anAnnProp.toString().intern())) {
+        } else if (isTransitiveProperty(annOURI)) {
           type = OConstants.TRANSITIVE_PROPERTY;
         }
 
@@ -1215,13 +1244,13 @@ public class OntologyServiceImplSesame implements OntologyService {
 
       set.retainAll(toCheck);
       if (!set.isEmpty()) {
-        if (isSymmetricProperty(anAnnProp.toString().intern())) {
+        if (isSymmetricProperty(annOURI)) {
           type = OConstants.SYMMETRIC_PROPERTY;
-        } else if (isTransitiveProperty(anAnnProp.toString().intern())) {
+        } else if (isTransitiveProperty(annOURI)) {
           type = OConstants.TRANSITIVE_PROPERTY;
         }
 
-        list.add(new Property(type, anAnnProp.toString()));
+        list.add(new Property(type, anAnnProp));
       }
     }
     result.close();
@@ -1281,11 +1310,14 @@ public class OntologyServiceImplSesame implements OntologyService {
 
     UtilTupleQueryIterator result = performSerqlQuery(query);
     while (result.hasNext()) {
-      String propString = result.nextFirstAsString();
-      if (isAnnotationProperty(propString) || isDatatypeProperty(propString) || isObjectProperty(propString) || isTransitiveProperty(propString) || isSymmetricProperty(propString)) {
+      LiteralOrONodeID tmp = result.nextFirst();
+      OURI propuri = (OURI)tmp.getONodeID();
+      if (isAnnotationProperty(propuri) || isDatatypeProperty(propuri) || 
+        isObjectProperty(propuri) || isTransitiveProperty(propuri) || 
+        isSymmetricProperty(propuri)) {
         continue;
       }
-      list.add(new Property(OConstants.RDF_PROPERTY, propString));
+      list.add(new Property(OConstants.RDF_PROPERTY, propuri.toString()));
     }
     result.close();
     return listToPropertyArray(list);
@@ -1384,23 +1416,23 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param aPropertyURI
    * @return Done
    */
-  public boolean isAnnotationProperty(String aPropertyURI)
+  public boolean isAnnotationProperty(OURI aPropertyURI)
   {
-    String query =
-        "Select * FROM {X} rdf:type {<" + OWL.ANNOTATIONPROPERTY + ">} WHERE X=<" + aPropertyURI + ">";
-    return hasSerqlQueryResultRows(query);
+    return ontologyTripleStore.hasTriple(aPropertyURI, 
+      ontology.OURI_RDF_TYPE, ontology.OURI_OWL_ANNOTATIONPROPERTY);
   }
 
   /**
    * Adds a new annotation property value and specifies the language.
    * 
-   * @param theAnnotationProperty
-   *          the annotation property
    * @param value
    *          the value containing some value
    */
-  public void addAnnotationPropertyValue(String theResourceURI, String theAnnotationPropertyURI, String value,
-      String language)
+  public void addAnnotationPropertyValue(
+    ONodeID theResourceURI, 
+    OURI theAnnotationPropertyURI, 
+    String value,
+    String language)
   {
     // isAnnotationProperty also checks for the correct repository so no
     // need to give a call to it
@@ -1408,7 +1440,9 @@ public class OntologyServiceImplSesame implements OntologyService {
       throw new GateOntologyException(
           "No annotation property found with the URI :" + theAnnotationPropertyURI);
     }
-    addUULStatement(theResourceURI, theAnnotationPropertyURI, value, language);
+    // TODO: !! replace !!
+    ontologyTripleStore.addTriple(theResourceURI, theAnnotationPropertyURI, 
+      new gate.creole.ontology.Literal(value, sesameManager.lang2locale(language)));
   }
 
   /**
@@ -1418,7 +1452,10 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param theAnnotationPropertyURI
    * @return
    */
-  public PropertyValue[] getAnnotationPropertyValues(String theResourceURI, String theAnnotationPropertyURI)
+  // TODO: make sure all values for annotation properties that are not literals
+  // are filtered out and ignored.
+  public List<gate.creole.ontology.Literal> getAnnotationPropertyValues(
+    ONodeID theResourceURI, OURI theAnnotationPropertyURI)
   {
     // isAnnotationProperty also checks for the correct repository so no
     // need to give a call to it
@@ -1427,117 +1464,63 @@ public class OntologyServiceImplSesame implements OntologyService {
           "No annotation property found with the URI :" + theAnnotationPropertyURI);
     }
 
-    Resource r2 = getResource(theResourceURI);
-    String queryRep21 = "<" + theResourceURI + ">";
-    if (r2 instanceof BNode) {
-      queryRep21 = "_:" + theResourceURI;
-    }
+    //Resource r2 = getResource(theResourceURI);
+    //String queryRep21 = "<" + theResourceURI + ">";
+    //if (r2 instanceof BNode) {
+    //  queryRep21 = "_:" + theResourceURI;
+    //}
+    String queryRep21 = theResourceURI.toTurtle();
 
-    List<PropertyValue> list = new ArrayList<PropertyValue>();
+    List<gate.creole.ontology.Literal> list = new ArrayList<gate.creole.ontology.Literal>();
     String query =
         "Select DISTINCT Y from {X} <" + theAnnotationPropertyURI + "> {Y} WHERE X=" + queryRep21 + " AND isLiteral(Y)";
 
     UtilTupleQueryIterator result = performSerqlQuery(query);
     while (result.hasNext()) {
-      // TODO: how to process a literal here? Is the string representation
-      // we get identical with literal.getLabel()?
-      PropertyValue pv;
-      Literal literal = (Literal) result.nextFirstAsValue();
-      //Literal literal = (Literal)iter.getValue(i, 0);
-      //pv = new PropertyValue(literal.getLanguage(), literal.getLabel());
-      pv = new PropertyValue(literal.getLanguage(), literal.getLabel());
-      list.add(pv);
+      LiteralOrONodeID theValue = result.nextFirst();
+      if(theValue.isLiteral()) {
+        gate.creole.ontology.Literal literal = theValue.getLiteral();
+        list.add(literal);
+      }
     }
-    return listToPropertyValueArray(list);
+    return list;
   }
 
-  /**
-   * Gets the annotation property for the given resource uri.
-   * 
-   * @param repositoryID
-   * @param theResourceURI
-   * @param theAnnotationPropertyURI
-   * @param language
-   * @return
-   */
-  public String getAnnotationPropertyValue(String theResourceURI, String theAnnotationPropertyURI, String language)
-  {
-    // isAnnotationProperty also checks for the correct repository so no
-    // need to give a call to it
-    if (!isAnnotationProperty(theAnnotationPropertyURI)) {
-      throw new GateOntologyException(
-          "No annotation property found with the URI :" + theAnnotationPropertyURI);
-    }
-    // TODO: !!! use toTurtle
-    Resource r2 = getResource(theResourceURI);
-    String queryRep21 = "<" + theResourceURI + ">";
-    if (r2 instanceof BNode) {
-      queryRep21 = "_:" + theResourceURI;
-    }
-
-    String query =
-        "Select Y from {X} <" + theAnnotationPropertyURI + "> {Y} WHERE X=" + queryRep21 + " AND isLiteral(Y) AND lang(Y) LIKE \"" + language + "\"";
-
-    UtilTupleQueryIterator result = performSerqlQuery(query);
-    Literal literal = null;
-    if (result.hasNext()) {
-      literal = (Literal) result.nextFirstAsValue();
-    }
-    result.close();
-    if (literal != null) {
-      return literal.getLabel();
-    } else {
-      return null;
-    }
-  }
 
   /**
    * For the current resource, the method removes the given literal for the
    * given property.
    * 
-   * @param theAnnotationProperty
-   * @param literal
+   * @param theResourceURI 
+   * @param theAnnotationPropertyURI 
+   * @param value 
+   * @param language  
    */
-  public void removeAnnotationPropertyValue(String theResourceURI, String theAnnotationPropertyURI, String value,
-      String language)
+  public void removeAnnotationPropertyValue(
+    ONodeID theResourceURI, OURI theAnnotationPropertyURI, 
+    gate.creole.ontology.Literal value)
   {
-    // isAnnotationProperty also checks for the correct repository so no
-    // need to give a call to it
     if (!isAnnotationProperty(theAnnotationPropertyURI)) {
       throw new GateOntologyException(
           "No annotation property found with the URI :" + theAnnotationPropertyURI);
     }
-    startTransaction(null);
-    removeUULStatement(theResourceURI, theAnnotationPropertyURI, value,
-        language);
-    endTransaction(null);
+    ontologyTripleStore.removeTriple(theResourceURI, theAnnotationPropertyURI, value);
   }
 
   /**
    * Removes all values for a named property.
    * 
-   * @param theProperty
-   *          the property
+   * @param theResourceURI 
+   * @param theAnnotationPropertyURI 
    */
-  public void removeAnnotationPropertyValues(String theResourceURI, String theAnnotationPropertyURI)
-  {
-    try {
-      // isAnnotationProperty also checks for the correct repository so
-      // no
-      // need to give a call to it
-      if (!isAnnotationProperty(theAnnotationPropertyURI)) {
-        throw new GateOntologyException(
-            "No annotation property found with the URI :" + theAnnotationPropertyURI);
-      }
-      startTransaction(null);
-      repositoryConnection.remove(
-          getResource(theResourceURI),
-          makeSesameURI(theAnnotationPropertyURI), null);
-      endTransaction(null);
-    } catch (Exception e) {
+  public void removeAnnotationPropertyValues(
+    ONodeID theResourceURI, OURI theAnnotationPropertyURI) {
+    if (!isAnnotationProperty(theAnnotationPropertyURI)) {
       throw new GateOntologyException(
-          "Error while removing annotation property values " + e.getMessage(), e);
+        "No annotation property found with the URI :" + theAnnotationPropertyURI);
     }
+    ontologyTripleStore.removeTriple(
+      theResourceURI, theAnnotationPropertyURI, (ONodeID)null);
   }
 
   // **************
@@ -1552,19 +1535,20 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param rangeClassesTypes
    *          Done
    */
-  public void addRDFProperty(String aPropertyURI,
-      String[] domainClassesURIs, String[] rangeClassesTypes)
+  public void addRDFProperty(OURI aPropertyURI,
+      Set<OResource> domain, Set<OResource> range)
       throws GateOntologyException {
-    addUUUStatement(aPropertyURI, RDF.TYPE.toString(), RDF.PROPERTY.toString());
+    ontologyTripleStore.addTriple(aPropertyURI,
+      ontology.OURI_RDF_TYPE,ontology.OURI_RDF_PROPERTY);
 
-    if (domainClassesURIs != null) {
-      for (int i = 0; i < domainClassesURIs.length; i++) {
-        addUUUStatement(aPropertyURI, RDFS.DOMAIN.toString(), domainClassesURIs[i]);
+    if (domain != null) {
+      for (OResource d : domain) {
+        ontologyTripleStore.addTriple(aPropertyURI, ontology.OURI_RDFS_DOMAIN, d.getONodeID());
       }
     }
-    if (rangeClassesTypes != null) {
-      for (int i = 0; i < rangeClassesTypes.length; i++) {
-        addUUUStatement(aPropertyURI, RDFS.RANGE.toString(), rangeClassesTypes[i]);
+    if (range != null) {
+      for (OResource r : range) {
+        ontologyTripleStore.addTriple(aPropertyURI, ontology.OURI_RDFS_RANGE, r.getONodeID());
       }
     }
   }
@@ -1575,14 +1559,13 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param aPropertyURI
    * @return Done
    */
-  public boolean isRDFProperty(String aPropertyURI)
+  public boolean isRDFProperty(OURI aPropertyURI)
   {
     boolean found =
         isAnnotationProperty(aPropertyURI) || isDatatypeProperty(aPropertyURI) || isObjectProperty(aPropertyURI) || isTransitiveProperty(aPropertyURI) || isSymmetricProperty(aPropertyURI);
     if (!found) {
-      String query =
-          "Select * FROM {X} rdf:type {<" + RDF.PROPERTY.toString() + ">} WHERE X=<" + aPropertyURI + ">";
-      return hasSerqlQueryResultRows(query);
+      return ontologyTripleStore.hasAssertedTriple(aPropertyURI, 
+        ontology.OURI_RDF_TYPE, ontology.OURI_RDF_PROPERTY);
     } else {
       return false;
     }
@@ -1600,37 +1583,39 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param dataTypeURI
    *          Done
    */
-  public void addDataTypeProperty(String aPropertyURI,
-      String[] domainClassesURIs, String dataTypeURI)
+  public void addDataTypeProperty(OURI aPropertyURI,
+      Set<OClass> domain, String dataTypeURI)
  {
-    addUUUStatement(aPropertyURI, RDF.TYPE.toString(), OWL.DATATYPEPROPERTY.toString());
-    addUUUStatement(aPropertyURI, RDFS.RANGE.toString(), dataTypeURI);
+   ontologyTripleStore.addTriple(aPropertyURI,ontology.OURI_RDF_TYPE,ontology.OURI_OWL_DATATYPEPROPERTY);
+    
+   ontologyTripleStore.addTriple(aPropertyURI,ontology.OURI_RDFS_RANGE,ontology.createOURI(dataTypeURI));
 
-    if (domainClassesURIs != null) {
-      for (int i = 0; i < domainClassesURIs.length; i++) {
-        addUUUStatement(aPropertyURI, RDFS.DOMAIN.toString(), domainClassesURIs[i]);
+    if (domain != null) {
+      for (OClass d : domain) {
+        ontologyTripleStore.addTriple(aPropertyURI,ontology.OURI_RDFS_DOMAIN,d.getONodeID());
       }
     }
   }
 
   /**
    * Returns the datatype uri specified for the given datatype property.
+   * <p>
+   * Note: this will return the first datatype URI found and ignore 
+   * all others if there are more than one.
    * 
    * @param theDatatypePropertyURI
    * @return
    * @throws GateOntologyException
-   */
-  public String getDatatype(String theDatatypePropertyURI)
+   */  
+  public String getDatatype(OURI theDatatypePropertyURI)
   {
-    // isAnnotationProperty also checks for the correct repository so no
-    // need to give a call to it
     if (!isDatatypeProperty(theDatatypePropertyURI)) {
       throw new GateOntologyException(
           "Invalid DatatypeProperty :" + theDatatypePropertyURI);
     }
 
     String query =
-        "Select Z from {<" + theDatatypePropertyURI + ">} rdfs:range" + " {Z}";
+        "Select Z from {" + theDatatypePropertyURI.toTurtle() + "} rdfs:range" + " {Z}";
     UtilTupleQueryIterator result = performSerqlQuery(query);
 
     String toReturn = null;
@@ -1652,20 +1637,20 @@ public class OntologyServiceImplSesame implements OntologyService {
    * same. All classes specified in domain and range must exist.
    * 
    * @param aPropertyURI
-   * @param domainAndRangeClassesURIs
-   *          Done
+   * @param domainAndRangeClasses 
    */
-  public void addSymmetricProperty(String aPropertyURI,
-      String[] domainAndRangeClassesURIs)
+  public void addSymmetricProperty(OURI aPropertyURI,
+      Set<OClass> domainAndRangeClasses)
   {
-    if (debug) {
-      logger.debug("addSymmetricProperty");
-    }
-    addUUUStatement(aPropertyURI, RDF.TYPE.toString(), OWL.SYMMETRICPROPERTY.toString());
-    if (domainAndRangeClassesURIs != null) {
-      for (int i = 0; i < domainAndRangeClassesURIs.length; i++) {
-        addUUUStatement(aPropertyURI, RDFS.DOMAIN.toString(), domainAndRangeClassesURIs[i]);
-        addUUUStatement(aPropertyURI, RDFS.RANGE.toString(), domainAndRangeClassesURIs[i]);
+    logger.debug("addSymmetricProperty");
+    ontologyTripleStore.addTriple(aPropertyURI, 
+      ontology.OURI_RDF_TYPE, ontology.OURI_OWL_SYMMETRICPROPERTY);
+    if (domainAndRangeClasses != null) {
+      for (OClass domainAndRangeClass : domainAndRangeClasses) {
+        ontologyTripleStore.addTriple(aPropertyURI, 
+          ontology.OURI_RDFS_DOMAIN, domainAndRangeClass.getONodeID());
+        ontologyTripleStore.addTriple(aPropertyURI, 
+          ontology.OURI_RDFS_RANGE, domainAndRangeClass.getONodeID());
       }
     }
   }
@@ -1677,11 +1662,10 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @return
    * @throws GateOntologyException
    */
-  public boolean isEquivalentPropertyAs(String aPropertyURI1, String aPropertyURI2)
+  public boolean isEquivalentPropertyAs(OURI aPropertyURI1, OURI aPropertyURI2)
   {
-    String query =
-        "Select * FROM {<" + aPropertyURI1 + ">} " + OWL.EQUIVALENTPROPERTY + " {<" + aPropertyURI2 + ">}";
-    return hasSerqlQueryResultRows(query);
+    return ontologyTripleStore.hasTriple(aPropertyURI1, 
+      ontology.OURI_OWL_EQUIVALENTPROPERTY, aPropertyURI2);
   }
 
   /**
@@ -1727,7 +1711,7 @@ public class OntologyServiceImplSesame implements OntologyService {
 
     ArrayList<Property> properties = new ArrayList<Property>();
     for (int i = 0; i < list.size(); i++) {
-      byte type = getPropertyType(list.get(i));
+      byte type = getPropertyType(ontology.createOURI(list.get(i)));
       properties.add(new Property(type, list.get(i)));
     }
 
@@ -1777,7 +1761,7 @@ public class OntologyServiceImplSesame implements OntologyService {
 
     ArrayList<Property> properties = new ArrayList<Property>();
     for (int i = 0; i < list.size(); i++) {
-      byte type = getPropertyType(list.get(i));
+      byte type = getPropertyType(ontology.createOURI(list.get(i)));
       properties.add(new Property(type, list.get(i)));
     }
 
@@ -1851,11 +1835,10 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param theInstanceURI2
    * @return
    */
-  public boolean isDifferentIndividualFrom(String theInstanceURI1, String theInstanceURI2)
+  public boolean isDifferentIndividualFrom(OURI theInstanceURI1, OURI theInstanceURI2)
   {
-    String query =
-        "Select * from {<" + theInstanceURI1 + ">} owl:differentFrom {<" + theInstanceURI2 + ">}";
-    return hasSerqlQueryResultRows(query);
+    return ontologyTripleStore.hasTriple(theInstanceURI1, 
+      ontology.OURI_OWL_DIFFERENTFROM, theInstanceURI2);
   }
 
   /**
@@ -1865,11 +1848,10 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param invidualURI2
    * @return
    */
-  public boolean isSameIndividualAs(String theInstanceURI1, String theInstanceURI2)
+  public boolean isSameIndividualAs(OURI theInstanceURI1, OURI theInstanceURI2)
   {
-    String query =
-        "Select * from {<" + theInstanceURI1 + ">} owl:sameAs {<" + theInstanceURI2 + ">}";
-    return hasSerqlQueryResultRows(query);
+    return ontologyTripleStore.hasTriple(theInstanceURI1, 
+      ontology.OURI_OWL_SAMEAS, theInstanceURI2);
   }
 
   // *************
@@ -1882,10 +1864,10 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param anRDFPropertyURI
    * @param aResourceURI
    */
-  public void addRDFPropertyValue(String anInstanceURI,
-      String anRDFPropertyURI, String aResourceURI)
+  public void addRDFPropertyValue(ONodeID anInstanceURI,
+      OURI anRDFPropertyURI, ONodeID aResourceURI)
   {
-    addUUUStatement(anInstanceURI, anRDFPropertyURI, aResourceURI);
+    ontologyTripleStore.addTriple(anInstanceURI, anRDFPropertyURI, aResourceURI);
   }
 
   /**
@@ -1895,11 +1877,11 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param anRDFPropertyURI
    * @param aResourceURI
    */
-  public void removeRDFPropertyValue(String anInstanceURI,
-      String anRDFPropertyURI, String aResourceURI)
+  public void removeRDFPropertyValue(ONodeID anInstanceURI,
+      OURI anRDFPropertyURI, ONodeID aResourceURI)
   {
     startTransaction(null);
-    removeUUUStatement(anInstanceURI, anRDFPropertyURI, aResourceURI);
+    ontologyTripleStore.removeTriple(anInstanceURI, anRDFPropertyURI, aResourceURI);
     endTransaction(null);
   }
 
@@ -1939,7 +1921,7 @@ public class OntologyServiceImplSesame implements OntologyService {
 
     UtilTupleQueryIterator qit =
         new UtilTupleQueryIterator(
-          repositoryConnection, query, OConstants.QueryLanguage.SERQL);
+          sesameManager, query, OConstants.QueryLanguage.SERQL);
     while(qit.hasNext()) {
       list.add(qit.nextFirst());
     }
@@ -1976,15 +1958,14 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param datatypeURI
    * @param value
    */
-  public void addDatatypePropertyValue(String anInstanceURI, String aDatatypePropertyURI, String datatypeURI,
-      String value)
+  public void addDatatypePropertyValue(OURI anInstanceURI, 
+    OURI aDatatypePropertyURI, gate.creole.ontology.Literal value)
   {
     if (!isDatatypeProperty(aDatatypePropertyURI)) {
       throw new GateOntologyException(
           "No datatype property exists with URI :" + aDatatypePropertyURI);
     }
-    addUUDStatement(anInstanceURI, aDatatypePropertyURI, value,
-        datatypeURI);
+    ontologyTripleStore.addTriple(anInstanceURI, aDatatypePropertyURI, value);
   }
 
   /**
@@ -1995,17 +1976,14 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param datatypeURI
    * @param value
    */
-  public void removeDatatypePropertyValue(String anInstanceURI, String aDatatypePropertyURI, String datatypeURI,
-      String value)
+  public void removeDatatypePropertyValue(OURI anInstanceURI, 
+    OURI aDatatypePropertyURI, gate.creole.ontology.Literal value)
   {
     if (!isDatatypeProperty(aDatatypePropertyURI)) {
       throw new GateOntologyException(
           "No datatype property exists with URI :" + aDatatypePropertyURI);
     }
-    startTransaction(null);
-    removeUUDStatement(anInstanceURI, aDatatypePropertyURI,
-        value, datatypeURI);
-    endTransaction(null);
+    ontologyTripleStore.removeTriple(anInstanceURI, aDatatypePropertyURI, value);
   }
 
   /**
@@ -2015,36 +1993,32 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param aDatatypePropertyURI
    * @return
    */
-  public PropertyValue[] getDatatypePropertyValues(String anInstanceURI, String aDatatypePropertyURI)
+  public List<gate.creole.ontology.Literal> getDatatypePropertyValues(
+    OURI anInstanceURI, OURI aDatatypePropertyURI)
   {
     if (!isDatatypeProperty(aDatatypePropertyURI)) {
       throw new GateOntologyException(
           "No datatype property exists with URI :" + aDatatypePropertyURI);
     }
 
-    Resource r2 = getResource(anInstanceURI);
-    // TODO: !!!!
-    String queryRep21 = "<" + anInstanceURI + ">";
-    if (r2 instanceof BNode) {
-      queryRep21 = "_:" + anInstanceURI;
-    }
+    //Resource r2 = getResource(anInstanceURI);
+    //String queryRep21 = "<" + anInstanceURI + ">";
+    //if (r2 instanceof BNode) {
+    //  queryRep21 = "_:" + anInstanceURI;
+    //}
 
-    List<PropertyValue> list = new ArrayList<PropertyValue>();
+    List<gate.creole.ontology.Literal> list = new ArrayList<gate.creole.ontology.Literal>();
     String query =
-        "Select DISTINCT Y from {X} <" + aDatatypePropertyURI + "> {Y} WHERE X=" + queryRep21 + " AND isLiteral(Y)";
+        "Select DISTINCT Y from {X} " + aDatatypePropertyURI.toTurtle() + " {Y} WHERE X=" + anInstanceURI.toTurtle() + " AND isLiteral(Y)";
 
     UtilTupleQueryIterator result = performSerqlQuery(query);
     while (result.hasNext()) {
-      PropertyValue pv;
-      Literal literal = (Literal) result.nextFirstAsValue();
-      String datatype = "http://www.w3.org/2001/XMLSchema#string";
-      if (literal.getDatatype() != null) {
-        datatype = literal.getDatatype().toString();
+      LiteralOrONodeID lo = result.nextFirst();
+      if(lo.isLiteral()) {
+        list.add(lo.getLiteral());
       }
-      pv = new PropertyValue(datatype, literal.getLabel());
-      list.add(pv);
     }
-    return listToPropertyValueArray(list);
+    return list;
   }
 
   /**
@@ -2054,14 +2028,15 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param anInstanceURI
    * @param aDatatypePropertyURI
    */
-  public void removeDatatypePropertyValues(String anInstanceURI, String aDatatypePropertyURI)
+  public void removeDatatypePropertyValues(
+    ONodeID anInstanceURI, OURI aDatatypePropertyURI)
   {
-    if (!isDatatypeProperty(aDatatypePropertyURI)) {
+    if (!isDatatypeProperty(aDatatypePropertyURI)) { 
       throw new GateOntologyException(
           "No datatype property exists with URI :" + aDatatypePropertyURI);
     }
     startTransaction(null);
-    removeUUUStatement(anInstanceURI, aDatatypePropertyURI, null);
+    ontologyTripleStore.removeTriple(anInstanceURI,aDatatypePropertyURI,(gate.creole.ontology.Literal)null);
     endTransaction(null);
   }
 
@@ -2075,21 +2050,10 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param anObjectPropertyURI
    * @param theValueInstanceURI
    */
-  public void addObjectPropertyValue(String sourceInstanceURI, String anObjectPropertyURI,
-      String theValueInstanceURI) {
-    try {
-      if (!repositoryConnection.hasStatement(
-          getResource(anObjectPropertyURI),
-          makeSesameURI(RDF.TYPE.toString()),
-          getResource(OWL.OBJECTPROPERTY.toString()),
-          true)) {
-        throw new GateOntologyException(
-            "No object property exists with URI :" + anObjectPropertyURI);
-      }
-    } catch (Exception e) {
-      throw new GateOntologyException("Could not check for statement", e);
-    }
-    addUUUStatement(sourceInstanceURI, anObjectPropertyURI, theValueInstanceURI);
+  public void addObjectPropertyValue(ONodeID sourceInstanceURI, 
+    OURI anObjectPropertyURI, OURI theValueInstanceURI) {
+    ontologyTripleStore.addTriple(sourceInstanceURI, 
+      anObjectPropertyURI, theValueInstanceURI);
   }
 
   /**
@@ -2100,18 +2064,15 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param anObjectPropertyURI
    * @param theValueInstanceURI
    */
-  public void removeObjectPropertyValue(String sourceInstanceURI, String anObjectPropertyURI,
-      String theValueInstanceURI)
+  public void removeObjectPropertyValue(OURI sourceInstanceURI, 
+    OURI anObjectPropertyURI, OURI theValueInstanceURI)
   {
     if (!isObjectProperty(anObjectPropertyURI)) {
       throw new GateOntologyException(
           "No object property exists with URI :" + anObjectPropertyURI);
     }
-
-    startTransaction(null);
-    removeUUUStatement(sourceInstanceURI, anObjectPropertyURI,
-        theValueInstanceURI);
-    endTransaction(null);
+    ontologyTripleStore.removeTriple(sourceInstanceURI, 
+      anObjectPropertyURI, theValueInstanceURI);
   }
 
   /**
@@ -2122,25 +2083,39 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param anObjectPropertyURI
    * @return
    */
-  public String[] getObjectPropertyValues(String sourceInstanceURI, String anObjectPropertyURI)
+  public List<OInstance> getObjectPropertyValues(OURI sourceInstanceURI, OURI anObjectPropertyURI)
   {
     if (!isObjectProperty(anObjectPropertyURI) && !isTransitiveProperty(anObjectPropertyURI) && !isSymmetricProperty(anObjectPropertyURI)) {
       throw new GateOntologyException(
           "No object/transitive/symmetric property exists with URI :" + anObjectPropertyURI);
     }
 
-    Resource r = getResource(sourceInstanceURI);
-    String queryRep2 = "<" + sourceInstanceURI + ">";
-    if (r instanceof BNode) {
-      queryRep2 = "_:" + sourceInstanceURI;
-    }
+    //Resource r = getResource(sourceInstanceURI);
+    //String queryRep2 = "<" + sourceInstanceURI + ">";
+    //if (r instanceof BNode) {
+    //  queryRep2 = "_:" + sourceInstanceURI;
+    //}
+    String queryRep1 = anObjectPropertyURI.toTurtle();
+    String queryRep2 = sourceInstanceURI.toTurtle();
 
-    List<String> list = new ArrayList<String>();
+    List<OInstance> list = new ArrayList<OInstance>();
     String query =
-        "Select DISTINCT Y from {X} <" + anObjectPropertyURI + "> {Y} WHERE X=" + queryRep2;
+        "Select DISTINCT Y from {X} " + queryRep1 + " {Y} WHERE X=" + queryRep2;
 
-    addSerqlQueryResultToCollection(query, list);
-    return listToArray(list);
+    
+    UtilTupleQueryIterator result = 
+        new UtilTupleQueryIterator(sesameManager,query,QueryLanguage.SERQL);
+    while (result.hasNext()) {
+      LiteralOrONodeID val = result.nextFirst();
+      if(val.isONodeID()) {
+        ONodeID on = val.getONodeID();
+        if(!on.isAnonymousResource()) {
+          list.add(Utils.createOInstance(ontology, this, val.toString()));
+        }
+      }
+    }
+    result.close();
+    return list;
   }
 
   /**
@@ -2150,15 +2125,15 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param sourceInstanceURI
    * @param anObjectPropertyURI
    */
-  public void removeObjectPropertyValues(String sourceInstanceURI, String anObjectPropertyURI)
+  public void removeObjectPropertyValues(OURI sourceInstanceURI, 
+    OURI anObjectPropertyURI)
   {
     if (!isObjectProperty(anObjectPropertyURI)) {
       throw new GateOntologyException(
           "No object property exists with URI :" + anObjectPropertyURI);
     }
-    startTransaction(null);
-    removeUUUStatement(sourceInstanceURI, anObjectPropertyURI, null);
-    endTransaction(null);
+    ontologyTripleStore.removeTriple(sourceInstanceURI, anObjectPropertyURI, 
+      (ONodeID)null);
   }
 
 
@@ -2188,6 +2163,7 @@ public class OntologyServiceImplSesame implements OntologyService {
   public void addSubClass(String superClassURI,
       String subClassURI)
   {
+    // TODO: !! replace !!
     addUUUStatement(subClassURI, RDFS.SUBCLASSOF.toString(), superClassURI);
   }
 
@@ -2202,6 +2178,7 @@ public class OntologyServiceImplSesame implements OntologyService {
   public void addSuperClass(String superClassURI,
       String subClassURI)
   {
+    // TODO: !! replace !!
     addUUUStatement(subClassURI, RDFS.SUBCLASSOF.toString(), superClassURI);
   }
 
@@ -2213,6 +2190,7 @@ public class OntologyServiceImplSesame implements OntologyService {
    */
   public void removeSubClass(String superClassURI,
       String subClassURI) {
+    // TODO: !! replace !!
     removeUUUStatement(subClassURI, RDFS.SUBCLASSOF.toString(), superClassURI);
   }
 
@@ -2236,7 +2214,7 @@ public class OntologyServiceImplSesame implements OntologyService {
       query = query.replaceAll("yyy1", forClass.toTurtle());
       UtilTupleQueryIterator qp_getSubClassesDirectFor =
           new UtilTupleQueryIterator(
-          repositoryConnection, query, ql_getSubClassesDirectFor);
+          sesameManager, query, ql_getSubClassesDirectFor);
       return new UtilResourceQueryIterator<OClass>(
           this, qp_getSubClassesDirectFor, OClass.class);
     } else {
@@ -2244,7 +2222,7 @@ public class OntologyServiceImplSesame implements OntologyService {
       query = query.replaceAll("yyy1", forClass.toTurtle());
       UtilTupleQueryIterator qp_getSubClassesAllFor =
           new UtilTupleQueryIterator(
-          repositoryConnection, query, ql_getSubClassesAllFor);
+          sesameManager, query, ql_getSubClassesAllFor);
       return new UtilResourceQueryIterator<OClass>(
           this, qp_getSubClassesAllFor, OClass.class);
 
@@ -2333,50 +2311,14 @@ public class OntologyServiceImplSesame implements OntologyService {
   }
 
   /**
-   * Sets the classes as disjoint
-   * 
-   * @param class1URI
-   * @param class2URI
-   */
-  public void setDisjointClassWith(String class1URI,
-      String class2URI)
-  {
-    addUUUStatement(class1URI, OWL.DISJOINTWITH.toString(), class2URI);
-  }
-
-  /**
    * Sets the classes as same classes
    * 
    * @param class1URI
    * @param class2URI
    */
-  public void setEquivalentClassAs(String class1URI,
-      String class2URI) {
-    addUUUStatement(class1URI, OWL.EQUIVALENTCLASS.toString(), class2URI);
-  }
-
-  /**
-   * returns an array of classes which are marked as disjoint for the given
-   * class
-   * 
-   * @param classURI
-   * @return
-   */
-  public String[] getDisjointClasses(String aClassURI)
-  {
-    Resource r1 = getResource(aClassURI);
-    // TODO: !!!! turtle
-    String queryRep1 = "<" + aClassURI + ">";
-    if (r1 instanceof BNode) {
-      queryRep1 = "_:" + aClassURI;
-    }
-
-    String query =
-        "Select distinct B FROM {A}" + " owl:disjointWith {B} WHERE A!=B AND A=" + queryRep1;
-
-    List<String> list = new ArrayList<String>();
-    addSerqlQueryResultToCollection(query, list);
-    return listToArray(list);
+  public void setEquivalentClassAs(ONodeID class1URI,
+      ONodeID class2URI) {
+    ontologyTripleStore.addTriple(class1URI, ontology.OURI_OWL_EQUIVALENTCLASS, class2URI);
   }
 
   /**
@@ -2421,6 +2363,7 @@ public class OntologyServiceImplSesame implements OntologyService {
     //     .addEvent(new OEvent(aPropertyURI, RDF.TYPE.toString(), null, false));
     //   deletedResources.add(aPropertyURI);
     // }
+    // TODO: !! replace !!
     removeUUUStatement(aPropertyURI, RDF.TYPE.toString(), null);
     deletedResources.add(aPropertyURI);
     try {
@@ -2452,6 +2395,7 @@ public class OntologyServiceImplSesame implements OntologyService {
         }
       }
     }
+    // TODO: !! replace !!
     removeUUUStatement(aPropertyURI, null, null);
     removeUUUStatement(null, aPropertyURI, null);
     removeUUUStatement(null, null, aPropertyURI);
@@ -2469,14 +2413,17 @@ public class OntologyServiceImplSesame implements OntologyService {
   public void addObjectProperty(String aPropertyURI,
       String[] domainClassesURIs, String[] rangeClassesTypes)
   {
+    // TODO: !! replace !!
     addUUUStatement(aPropertyURI, RDF.TYPE.toString(), OWL.OBJECTPROPERTY.toString());
     if (domainClassesURIs != null) {
       for (int i = 0; i < domainClassesURIs.length; i++) {
+        // TODO: !! replace !!
         addUUUStatement(aPropertyURI, RDFS.DOMAIN.toString(), domainClassesURIs[i]);
       }
     }
     if (rangeClassesTypes != null) {
       for (int i = 0; i < rangeClassesTypes.length; i++) {
+        // TODO: !! replace !!
         addUUUStatement(aPropertyURI, RDFS.RANGE.toString(), rangeClassesTypes[i]);
       }
     }
@@ -2493,14 +2440,17 @@ public class OntologyServiceImplSesame implements OntologyService {
   public void addTransitiveProperty(String aPropertyURI,
       String[] domainClassesURIs, String[] rangeClassesTypes)
   {
+    // TODO: !! replace !!
     addUUUStatement(aPropertyURI, RDF.TYPE.toString(), OWL.TRANSITIVEPROPERTY.toString());
     if (domainClassesURIs != null) {
       for (int i = 0; i < domainClassesURIs.length; i++) {
+        // TODO: !! replace !!
         addUUUStatement(aPropertyURI, RDFS.DOMAIN.toString(), domainClassesURIs[i]);
       }
     }
     if (rangeClassesTypes != null) {
       for (int i = 0; i < rangeClassesTypes.length; i++) {
+        // TODO: !! replace !!
         addUUUStatement(aPropertyURI, RDFS.RANGE.toString(), rangeClassesTypes[i]);
       }
     }
@@ -2512,22 +2462,33 @@ public class OntologyServiceImplSesame implements OntologyService {
    * 
    * @return
    */
-  public Property[] getRDFProperties()
+  public Set<RDFProperty> getRDFProperties()
   {
-    List<Property> list = new ArrayList<Property>();
+    Set<RDFProperty> set = new HashSet<RDFProperty>();
     String query =
         "Select distinct X FROM {X} rdf:type {<" + RDF.PROPERTY + ">}";
 
     UtilTupleQueryIterator result = performSerqlQuery(query);
     while (result.hasNext()) {
-      String propString = result.nextFirstAsString();
-      if (isAnnotationProperty(propString) || isDatatypeProperty(propString) || isObjectProperty(propString) || isTransitiveProperty(propString) || isSymmetricProperty(propString)) {
-        continue;
-      }
-      list.add(new Property(OConstants.RDF_PROPERTY, propString));
-    }
+      LiteralOrONodeID value = result.nextFirst();
+      if(value.isONodeID()) {
+        ONodeID valueONodeID = value.getONodeID();
+        if(!valueONodeID.isAnonymousResource()) {
+          OURI ouri = (OURI)valueONodeID;
+          if (isAnnotationProperty(ouri) || 
+            isDatatypeProperty(ouri) || 
+            isObjectProperty(ouri) || 
+            isTransitiveProperty(ouri) || 
+            isSymmetricProperty(ouri)) {
+           continue;
+          }
+          set.add(Utils.createOProperty(ontology, this, 
+            ouri.toString(), OConstants.RDF_PROPERTY));
+        } // not anonymous
+      } // an onodeid
+    } // while
     result.close();
-    return listToPropertyArray(list);
+    return set;
   }
 
   /**
@@ -2677,7 +2638,7 @@ public class OntologyServiceImplSesame implements OntologyService {
     queryd = queryd.replaceAll("yyy2", "\"*/"+name+"\"");
     queryo = queryo.replaceAll("yyy1", "\"*#"+name+"\"");
     queryo = queryo.replaceAll("yyy2", "\"*/"+name+"\"");
-    UtilTupleQueryIterator q = new UtilTupleQueryIterator(repositoryConnection,
+    UtilTupleQueryIterator q = new UtilTupleQueryIterator(sesameManager,
         queryo,OConstants.QueryLanguage.SERQL);
     while(q.hasNext()) {
       Value v = q.nextFirstAsValue();
@@ -2686,7 +2647,7 @@ public class OntologyServiceImplSesame implements OntologyService {
                 this, v.toString(),OConstants.OBJECT_PROPERTY)
               );
     }
-    q = new UtilTupleQueryIterator(repositoryConnection,
+    q = new UtilTupleQueryIterator(sesameManager,
         queryd,OConstants.QueryLanguage.SERQL);
     while(q.hasNext()) {
       Value v = q.nextFirstAsValue();
@@ -2707,16 +2668,19 @@ public class OntologyServiceImplSesame implements OntologyService {
    */
   // TODO: return ONodeIDs or Classes, make reducing to most
   // specific classes optional
-  public ResourceInfo[] getDomain(String aPropertyURI)
+  public Set<OResource> getDomain(OURI aPropertyURI)
   {
     if (isAnnotationProperty(aPropertyURI)) {
       throw new GateOntologyException(
           "AnnotationProperties do no specify any domain or range");
     }
-
+    // TODO: check if we can directly search for the most specific 
+    // classes using SPARQL 1.1 here!
+    // If not, avoid the use of ResourceInfo!
     String query =
-        "select distinct Y from {<" + aPropertyURI + ">} rdfs:domain {Y}";
+        "select distinct Y from {" + aPropertyURI.toTurtle() + "} rdfs:domain {Y}";
     UtilTupleQueryIterator result = performSerqlQuery(query);
+    Set<OResource> set = new HashSet<OResource>();
     List<ResourceInfo> list = new ArrayList<ResourceInfo>();
     while (result.hasNext()) {
       String classString = result.nextFirstAsString();
@@ -2724,10 +2688,15 @@ public class OntologyServiceImplSesame implements OntologyService {
       if (classType == OConstants.ANNONYMOUS_CLASS) {
         continue;
       }
+      //set.add(Utils.createOClass(ontology, this, classString, classType));
       list.add(new ResourceInfo(classString, classType));
     }
     result.close();
-    return reduceToMostSpecificClasses(list);
+    ResourceInfo[] res = reduceToMostSpecificClasses(list);
+    for(ResourceInfo r : res) {
+      set.add(Utils.createOClass(ontology, this, r.getUri(), r.getClassType()));
+    }
+    return set;
   }
 
   /**
@@ -2738,11 +2707,12 @@ public class OntologyServiceImplSesame implements OntologyService {
    */
   public ResourceInfo[] getRange(String aPropertyURI)
   {
-    if (isAnnotationProperty(aPropertyURI)) {
+    // TODO: make the whole method use OURI instead of String and ResourceInfo
+    if (isAnnotationProperty(ontology.createOURI(aPropertyURI))) {
       throw new GateOntologyException(
           "AnnotationProperties do no specify any domain or range");
     }
-    if (isDatatypeProperty(aPropertyURI)) {
+    if (isDatatypeProperty(ontology.createOURI(aPropertyURI))) {
       throw new GateOntologyException(
           "Please use getDatatype(String theDatatypeProerptyURI) method instead");
     }
@@ -2769,11 +2739,10 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param aPropertyURI
    * @return
    */
-  public boolean isFunctional(String aPropertyURI)
+  public boolean isFunctional(OURI aPropertyURI)
   {
-    String query =
-        "Select * FROM {X} rdf:type {<" + OWL.FUNCTIONALPROPERTY + ">} WHERE X=<" + aPropertyURI + ">";
-    return hasSerqlQueryResultRows(query);
+    return ontologyTripleStore.hasTriple(aPropertyURI, 
+      ontology.OURI_RDF_TYPE, ontology.OURI_OWL_FUNCTIONALPROPERTY);
   }
 
   /**
@@ -2786,8 +2755,10 @@ public class OntologyServiceImplSesame implements OntologyService {
       boolean isFunctional)
   {
     if (isFunctional) {
+      // TODO: !! replace !!
       addUUUStatement(aPropertyURI, RDF.TYPE.toString(), OWL.FUNCTIONALPROPERTY.toString());
     } else {
+      // TODO: !! replace !!
       removeUUUStatement(aPropertyURI, RDF.TYPE.toString(), OWL.FUNCTIONALPROPERTY.toString());
     }
   }
@@ -2798,11 +2769,10 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param aPropertyURI
    * @return
    */
-  public boolean isInverseFunctional(String aPropertyURI)
+  public boolean isInverseFunctional(OURI aPropertyURI)
   {
-    String query =
-        "Select * FROM {X} rdf:type {<" + OWL.INVERSEFUNCTIONALPROPERTY + ">} WHERE X=<" + aPropertyURI + ">";
-    return hasSerqlQueryResultRows(query);
+    return ontologyTripleStore.hasTriple(aPropertyURI, 
+      ontology.OURI_RDF_TYPE, ontology.OURI_OWL_INVERSEFUNCTIONALPROPERTY);
   }
 
   /**
@@ -2815,8 +2785,10 @@ public class OntologyServiceImplSesame implements OntologyService {
       boolean isInverseFunctional)
   {
     if (isInverseFunctional) {
+      // TODO: !! replace !!
       addUUUStatement(aPropertyURI, RDF.TYPE.toString(), OWL.INVERSEFUNCTIONALPROPERTY.toString());
     } else {
+      // TODO: !! replace !!
       removeUUUStatement(aPropertyURI, RDF.TYPE.toString(), OWL.INVERSEFUNCTIONALPROPERTY.toString());
     }
   }
@@ -2827,11 +2799,10 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param aPropertyURI
    * @return
    */
-  public boolean isSymmetricProperty(String aPropertyURI)
+  public boolean isSymmetricProperty(OURI aPropertyURI)
   {
-    String query =
-        "Select * FROM {X} rdf:type {<" + OWL.SYMMETRICPROPERTY + ">} WHERE X=<" + aPropertyURI + ">";
-    return hasSerqlQueryResultRows(query);
+    return ontologyTripleStore.hasTriple(aPropertyURI, 
+      ontology.OURI_RDF_TYPE, ontology.OURI_OWL_SYMMETRICPROPERTY);
   }
 
   /**
@@ -2840,11 +2811,10 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param aPropertyURI
    * @return
    */
-  public boolean isTransitiveProperty(String aPropertyURI)
+  public boolean isTransitiveProperty(OURI aPropertyURI)
   {
-    String query =
-        "Select * FROM {X} rdf:type {<" + OWL.TRANSITIVEPROPERTY + ">} WHERE X=<" + aPropertyURI + ">";
-    return hasSerqlQueryResultRows(query);
+    return ontologyTripleStore.hasTriple(aPropertyURI, 
+      ontology.OURI_RDF_TYPE, ontology.OURI_OWL_TRANSITIVEPROPERTY);
   }
 
   /**
@@ -2853,11 +2823,10 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param aPropertyURI
    * @return
    */
-  public boolean isDatatypeProperty(String aPropertyURI)
+  public boolean isDatatypeProperty(OURI aPropertyURI)
   {
-    String query =
-        "Select * FROM {X} rdf:type {<" + OWL.DATATYPEPROPERTY + ">} WHERE X=<" + aPropertyURI + ">";
-    return hasSerqlQueryResultRows(query);
+    return ontologyTripleStore.hasTriple(aPropertyURI, 
+      ontology.OURI_RDF_TYPE, ontology.OURI_OWL_DATATYPEPROPERTY);
   }
 
   /**
@@ -2866,11 +2835,10 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param aPropertyURI
    * @return
    */
-  public boolean isObjectProperty(String aPropertyURI)
+  public boolean isObjectProperty(OURI aPropertyURI)
   {
-    String query =
-        "Select * FROM {X} rdf:type {<" + OWL.OBJECTPROPERTY + ">} WHERE X=<" + aPropertyURI + ">";
-    return hasSerqlQueryResultRows(query);
+    return ontologyTripleStore.hasTriple(aPropertyURI, 
+      ontology.OURI_RDF_TYPE, ontology.OURI_OWL_OBJECTPROPERTY);
   }
 
   // *************************************
@@ -2885,6 +2853,7 @@ public class OntologyServiceImplSesame implements OntologyService {
   public void setEquivalentPropertyAs(String property1URI,
       String property2URI)
   {
+    // TODO: !! replace !!
     addUUUStatement(property1URI, OWL.EQUIVALENTPROPERTY.toString(), property2URI);
   }
 
@@ -2916,6 +2885,7 @@ public class OntologyServiceImplSesame implements OntologyService {
   public void addSuperProperty(String superPropertyURI,
       String subPropertyURI)
   {
+    // TODO: !! replace !!
     addUUUStatement(subPropertyURI, RDFS.SUBPROPERTYOF.toString(), superPropertyURI);
   }
 
@@ -2928,6 +2898,7 @@ public class OntologyServiceImplSesame implements OntologyService {
   public void removeSuperProperty(String superPropertyURI,
       String subPropertyURI)
   {
+    // TODO: !! replace !!
     removeUUUStatement(subPropertyURI, RDFS.SUBPROPERTYOF.toString(), superPropertyURI);
   }
 
@@ -2940,6 +2911,7 @@ public class OntologyServiceImplSesame implements OntologyService {
   public void addSubProperty(String superPropertyURI,
       String subPropertyURI)
   {
+    // TODO: !! replace !!
     addUUUStatement(subPropertyURI, RDFS.SUBPROPERTYOF.toString(), superPropertyURI);
   }
 
@@ -2952,6 +2924,7 @@ public class OntologyServiceImplSesame implements OntologyService {
   public void removeSubProperty(String superPropertyURI,
       String subPropertyURI)
   {
+    // TODO: !! replace !!
     removeUUUStatement(subPropertyURI, RDFS.SUBPROPERTYOF.toString(), superPropertyURI);
   }
 
@@ -3011,6 +2984,7 @@ public class OntologyServiceImplSesame implements OntologyService {
    */
   public void setInverseOf(String propertyURI1, String propertyURI2)
   {
+    // TODO: !! replace !!
     addUUUStatement(propertyURI1, OWL.INVERSEOF.toString(), propertyURI2);
   }
 
@@ -3027,6 +3001,7 @@ public class OntologyServiceImplSesame implements OntologyService {
   public void addIndividual(String superClassURI,
       String individualURI)
   {
+    // TODO: !! replace !!
     addUUUStatement(individualURI, RDF.TYPE.toString(), superClassURI);
   }
 
@@ -3047,6 +3022,7 @@ public class OntologyServiceImplSesame implements OntologyService {
     //if(no == 0)
     //  throw new GateOntologyException(individualURI
     //    + " is not an explicit Individual");
+    // TODO: !! replace !!
     removeUUUStatement(individualURI, RDF.TYPE.toString(), null);
 
 
@@ -3071,6 +3047,7 @@ public class OntologyServiceImplSesame implements OntologyService {
     } catch (Exception sue) {
       throw new GateOntologyException("error while removing individual:" + individualURI, sue);
     }
+    // TODO: !! replace !!
     removeUUUStatement(individualURI, null, null);
     removeUUUStatement(null, null, individualURI);
     removeUUUStatement(null, individualURI, null);
@@ -3160,7 +3137,7 @@ public class OntologyServiceImplSesame implements OntologyService {
     query = query.replaceAll("yyy1", "\"*#"+name+"\"");
     query = query.replaceAll("yyy2", "\"*/"+name+"\"");
     //System.out.println("Query for instances: "+query);
-    UtilTupleQueryIterator q = new UtilTupleQueryIterator(repositoryConnection,
+    UtilTupleQueryIterator q = new UtilTupleQueryIterator(sesameManager,
         query,OConstants.QueryLanguage.SERQL);
     while(q.hasNext()) {
       Value v = q.nextFirstAsValue();
@@ -3187,7 +3164,7 @@ public class OntologyServiceImplSesame implements OntologyService {
       query = query.replaceAll("yyy1", theURI.toTurtle());
       query = query.replaceAll("yyy2", theClass.toTurtle());
       UtilTupleQueryIterator qp_hasInstanceDirectFor =
-          new UtilTupleQueryIterator(repositoryConnection, query, ql_hasInstanceDirectFor);
+          new UtilTupleQueryIterator(sesameManager, query, ql_hasInstanceDirectFor);
       if(qp_hasInstanceDirectFor.hasNext()) {
         ret = true;
         qp_hasInstanceDirectFor.close();
@@ -3199,7 +3176,7 @@ public class OntologyServiceImplSesame implements OntologyService {
       query = query.replaceAll("yyy1", theURI.toTurtle());
       query = query.replaceAll("yyy2", theClass.toTurtle());
       UtilTupleQueryIterator qp_hasInstanceAllFor =
-          new UtilTupleQueryIterator(repositoryConnection, query, ql_hasInstanceAllFor);
+          new UtilTupleQueryIterator(sesameManager, query, ql_hasInstanceAllFor);
       if(qp_hasInstanceAllFor.hasNext()) {
         ret = true;
         qp_hasInstanceAllFor.close();
@@ -3241,12 +3218,11 @@ public class OntologyServiceImplSesame implements OntologyService {
    * 
    * @param individual1URI
    * @param individual2URI
+   * @throws GateOntologyException  
    */
-  public void setDifferentIndividualFrom(String individual1URI, String individual2URI) throws GateOntologyException {
-    if (debug) {
-      logger.debug("setDifferentIndividualFrom");
-    }
-    addUUUStatement(individual1URI, OWL.DIFFERENTFROM.toString(), individual2URI);
+  public void setDifferentIndividualFrom(ONodeID individual1URI, ONodeID individual2URI) throws GateOntologyException {
+    logger.debug("setDifferentIndividualFrom");
+    ontologyTripleStore.addTriple(individual1URI,ontology.OURI_OWL_DIFFERENTFROM,individual2URI);
   }
 
   /**
@@ -3275,6 +3251,7 @@ public class OntologyServiceImplSesame implements OntologyService {
     if (debug) {
       logger.debug("setSameIndividualAs");
     }
+    // TODO: !! replace !!
     addUUUStatement(individual1URI, OWL.SAMEAS.toString(), individual2URI);
   }
 
@@ -3334,10 +3311,11 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param propertyURI
    * @throws GateOntologyException
    */
-  public void setOnPropertyValue(String restrictionURI,
-      String propertyURI)
+  public void setOnPropertyValue(ONodeID restrictionURI,
+      OURI propertyURI)
   {
-    addUUUStatement(restrictionURI, OWL.ONPROPERTY.toString(), propertyURI);
+    ontologyTripleStore.addTriple(restrictionURI, 
+      ontology.OURI_OWL_ONPROPERTY, propertyURI);
   }
 
   /**
@@ -3427,8 +3405,10 @@ public class OntologyServiceImplSesame implements OntologyService {
 
     if (toDelete != null) {
       Literal l = (Literal) toDelete.getObject();
+      // TODO: !! replace !!
       removeUUUStatement(whatValueURI, l.getLabel(), l.getDatatype().toString());
     }
+    // TODO: !! replace !!
     addUUDStatement(restrictionURI, whatValueURI, value,
         datatypeURI);
   }
@@ -3535,45 +3515,43 @@ public class OntologyServiceImplSesame implements OntologyService {
    * @param value
    * @return
    */
-  public void setRestrictionValue(String restrictionURI,
-      byte restrictionType, String value)
+  public void setRestrictionValue(ONodeID restrictionURI,
+      OURI restrictionTypeURI, ONodeID value)
   {
-    String whatValueURI = null;
-    switch (restrictionType) {
-      case OConstants.ALL_VALUES_FROM_RESTRICTION:
-        whatValueURI = OWL.ALLVALUESFROM.toString();
-        break;
-      case OConstants.HAS_VALUE_RESTRICTION:
-        whatValueURI = OWL.HASVALUE.toString();
-        break;
-      case OConstants.SOME_VALUES_FROM_RESTRICTION:
-        whatValueURI = OWL.SOMEVALUESFROM.toString();
-        break;
-      default:
-        throw new GateOntologyException("Invalid restriction type:" + restrictionType + " for the restriction " + restrictionURI);
-
+    // TODO: should we check the restrictionTypeURI? SHould be one of
+    // ALLVALUESFROM, HASVALUE, SOMEVALUESFROM (even though HASVALUE is 
+    // not part of owl-lite)
+    
+    // if we have already such a restriction with some value ...
+    if(ontologyTripleStore.hasTriple(restrictionURI, restrictionTypeURI, (ONodeID)null)) {
+      // remove the triples for the old value before adding the new value
+      // TODO: check if removing all triples with any value is correct here 
+      // (originally the code explicitly only removed the triple with the 
+      // specific value found for the object)
+      ontologyTripleStore.removeTriple(restrictionURI, restrictionTypeURI, (ONodeID)null);
     }
-    Statement toDelete = null;
-    try {
-      RepositoryResult<Statement> iter =
-          repositoryConnection.getStatements(getResource(restrictionURI), makeSesameURI(whatValueURI),
-          null, true);
-      if (iter.hasNext()) {
-        Statement stmt = iter.next();
-        Value v = stmt.getObject();
-        toDelete = stmt;
-      }
-    } catch (Exception e) {
-      throw new GateOntologyException(e);
-    }
-
-    if (toDelete != null) {
-      String objectString = toDelete.getObject().toString();
-      removeUUUStatement(restrictionURI, whatValueURI, objectString);
-    }
-    addUUUStatement(restrictionURI, whatValueURI, value);
+    // add the new value
+    ontologyTripleStore.addTriple(restrictionURI, restrictionTypeURI, value);
   }
 
+  public void setRestrictionValue(ONodeID restrictionURI,
+      OURI restrictionTypeURI, gate.creole.ontology.Literal value)
+  {
+    // TODO: should we check the restrictionTypeURI? SHould be one of
+    // ALLVALUESFROM, HASVALUE, SOMEVALUESFROM (even though HASVALUE is 
+    // not part of owl-lite)
+    
+    // if we have already such a restriction with some value ...
+    if(ontologyTripleStore.hasTriple(restrictionURI, restrictionTypeURI, (ONodeID)null)) {
+      // remove the triples for the old value before adding the new value
+      // TODO: check if removing all triples with any value is correct here 
+      // (originally the code explicitly only removed the triple with the 
+      // specific value found for the object)
+      ontologyTripleStore.removeTriple(restrictionURI, restrictionTypeURI, (ONodeID)null);
+    }
+    // add the new value
+    ontologyTripleStore.addTriple(restrictionURI, restrictionTypeURI, value);
+  }
   /**
    * This method tells what type of restriction the given uri refers to. If the
    * given URI is not a restriction, the method returns -1. Otherwise one of the
@@ -3638,110 +3616,6 @@ public class OntologyServiceImplSesame implements OntologyService {
       return OConstants.OWL_CLASS;
     }
   }
-
-
-  private Resource node2resource(ONodeID node) {
-    Resource r = null;
-    if (node != null) {
-      if (node.isAnonymousResource()) {
-        String id = node.toString();
-        if (id.startsWith("_:")) {
-          id = id.substring(2);
-        }
-        r = repositoryConnection.getValueFactory().createBNode(id);
-      } else {
-        r = repositoryConnection.getValueFactory().createURI(node.toString());
-      }
-    }
-    return r;
-  }
-  
-  // converts our own Literal represenation into a opnrdf sesame Literal
-  private org.openrdf.model.Literal literal2literal(gate.creole.ontology.Literal literal) {
-    org.openrdf.model.Literal l = null;
-    if (literal != null) {
-      if (literal.getLanguage() != null && !literal.getLanguage().getLanguage().equals("")) {
-        l = repositoryConnection.
-          getValueFactory().createLiteral(literal.getValue(), 
-            literal.getLanguage().getLanguage());
-      } else if (literal.getDataType() != null) {
-        l = repositoryConnection.getValueFactory().createLiteral(literal.getValue());
-      } else {
-        l = repositoryConnection.
-          getValueFactory().createLiteral(literal.getValue(),
-            literal.getDataType().getXmlSchemaURIString());
-      }
-    }
-    return l;
-  }
-  
-  void addTriple(ONodeID subject, OURI predicate, ONodeID object) {
-    if(subject == null || predicate == null || object == null) {
-      throw new GateRuntimeException(
-        "triple add - none subject/predicate/object may be null: "+
-        subject+"/"+predicate+"/"+object);
-    }
-    Resource rs = node2resource(subject);
-    URI rp = null;
-    rp = repositoryConnection.getValueFactory().createURI(predicate.toString());
-    Resource ro = node2resource(object);
-    try {
-      repositoryConnection.add(rs, rp, ro, getContextURI());
-    } catch (RepositoryException ex) {
-       throw new GateOntologyException(
-          "error while adding statement into the repository where subject:" + subject + " predicate:" + predicate + " objectURI:" + object, ex);     
-    }
-  }
-  
-  void addTriple(ONodeID subject, OURI predicate, gate.creole.ontology.Literal object) {
-    if(subject == null || predicate == null || object == null) {
-      throw new GateRuntimeException(
-        "triple add - none subject/predicate/literal may be null: "+
-        subject+"/"+predicate+"/"+object);
-    }
-    Resource s = node2resource(subject);
-    URI p = null;
-    p = repositoryConnection.getValueFactory().createURI(predicate.toString());
-    Literal o = literal2literal(object);
-    try {
-      repositoryConnection.add(s, p, o, getContextURI());
-    } catch (RepositoryException ex) {
-       throw new GateOntologyException(
-          "error while adding statement into the repository where subject:" + subject + " predicate:" + predicate + " objectURI:" + object, ex);     
-    }    
-  }
-  
-  void removeTriple(ONodeID subject, OURI predicate, ONodeID object) {
-    Resource rs = node2resource(subject);
-    URI rp = null;
-    if(predicate != null) {
-      rp = repositoryConnection.getValueFactory().createURI(predicate.toString());
-    }
-    Resource ro = node2resource(object);
-    try {
-      repositoryConnection.remove(rs, rp, ro, getContextURI());
-    } catch (RepositoryException ex) {
-       throw new GateOntologyException(
-          "error while removing statement from the repository where subject:" + subject + " predicate:" + predicate + " objectURI:" + object, ex);     
-    }
-  }
-  
-  void removeTriple(ONodeID subject, OURI predicate, gate.creole.ontology.Literal object) {
-    Resource s = node2resource(subject);
-    URI p = null;
-    if(predicate != null) {
-      p = repositoryConnection.getValueFactory().createURI(predicate.toString());
-    }
-    Literal o = literal2literal(object);
-    try {
-      repositoryConnection.remove(s, p, o, getContextURI());
-    } catch (RepositoryException ex) {
-       throw new GateOntologyException(
-          "error while removing statement from the repository where subject:" + subject + " predicate:" + predicate + " objectURI:" + object, ex);     
-    }    
-    
-  }
-
   // ***************************************************************************
   // *********************** Other Utility Methods
   // **************************************************************************
@@ -3940,24 +3814,6 @@ public class OntologyServiceImplSesame implements OntologyService {
     return strings;
   }
 
-  /**
-   * This method tells whether the resource is imported or added as an explicit
-   * statement.
-   * 
-   * @param resourceURI
-   * @return
-   */
-
-  // JP: seems what is meant here is "implicit" not "imported"
-  public boolean isImplicitResource(String resourceURI)
-  {
-    try {
-      return !repositoryConnection.hasStatement(getResource(resourceURI),
-          makeSesameURI(RDF.TYPE.toString()), null, false);
-    } catch (Exception e) {
-      throw new GateOntologyException(e);
-    }
-  }
 
   private String[] listToArray(List<String> list) {
     if (list == null) {
@@ -4009,18 +3865,19 @@ public class OntologyServiceImplSesame implements OntologyService {
   // TODO: get rid of this and use ontology objects directly!
   private Property createPropertyObject(String uri)
       throws GateOntologyException {
+    OURI ouri = ontology.createOURI(uri);
     byte type = OConstants.ANNOTATION_PROPERTY;
-    if (isAnnotationProperty(uri)) {
+    if (isAnnotationProperty(ouri)) {
       type = OConstants.ANNOTATION_PROPERTY;
-    } else if (isObjectProperty(uri)) {
+    } else if (isObjectProperty(ouri)) {
       type = OConstants.OBJECT_PROPERTY;
-    } else if (isDatatypeProperty(uri)) {
+    } else if (isDatatypeProperty(ouri)) {
       type = OConstants.DATATYPE_PROPERTY;
-    } else if (isTransitiveProperty(uri)) {
+    } else if (isTransitiveProperty(ouri)) {
       type = OConstants.TRANSITIVE_PROPERTY;
-    } else if (isSymmetricProperty(uri)) {
+    } else if (isSymmetricProperty(ouri)) {
       type = OConstants.SYMMETRIC_PROPERTY;
-    } else if (isRDFProperty(uri)) {
+    } else if (isRDFProperty(ouri)) {
       type = OConstants.RDF_PROPERTY;
     } else {
       return null;
@@ -4110,7 +3967,7 @@ public class OntologyServiceImplSesame implements OntologyService {
     return classes;
   }
 
-  private byte getPropertyType(String aPropertyURI)
+  private byte getPropertyType(OURI aPropertyURI)
       throws GateOntologyException {
     if (isDatatypeProperty(aPropertyURI)) {
       return OConstants.DATATYPE_PROPERTY;
@@ -4127,7 +3984,8 @@ public class OntologyServiceImplSesame implements OntologyService {
     }
   }
 
-  private PropertyValue[] getPropertyValues(String aResourceURI, String aPropertyURI) throws GateOntologyException {
+  private PropertyValue[] getPropertyValues(
+    String aResourceURI, String aPropertyURI) throws GateOntologyException {
     Resource r = getResource(aResourceURI);
     String rep1 = "<" + aResourceURI + ">";
     String rep2 = "{" + rep1 + "}";
@@ -4329,40 +4187,6 @@ public class OntologyServiceImplSesame implements OntologyService {
     return queryRep1;
   }
 
-  private Resource string2SesameResource(String uriString) {
-    if(uriString.startsWith("_:")) {
-      return new BNodeImpl(uriString.substring(2));
-    } else {
-      // we can still get bnodeids from old methods where the initial _: is missing
-      // we assume that if the string contains a colon it must be a proper
-      // URI, otherwise it must be a Bnodeid
-      if(uriString.contains(":")) {
-        return new URIImpl(uriString);
-      } else {
-        return new BNodeImpl(uriString);
-      }
-    }
-  }
-  private Resource oNodeID2SesameResource(ONodeID id) {
-    if(id.isAnonymousResource()) {
-      // TODO: does this and should this include the _: part?
-      return new BNodeImpl(id.getResourceName());
-    } else {
-      return new URIImpl(id.toString());
-    }
-  }
-
-  private ONodeID string2ONodeID(String uri) {
-    if(uri.startsWith("_:")) {
-      return new OBNodeIDImpl(uri);
-    } else if(uri.contains(":")) {
-      return new OURIImpl(uri);
-    } else {
-      return new OBNodeIDImpl(uri);
-    }
-  }
-
-
 
   // The query language of the query is determined automatically: if the
   // query string contains "USING NAMESPACE" it is SERQL, if it contains
@@ -4443,7 +4267,7 @@ public class OntologyServiceImplSesame implements OntologyService {
       throw new GateOntologyException("Could not read query file: "+filename,ex);
     }
     QueryLanguage queryLanguage = determineQueryLanguage(queryString);
-    return new UtilTupleQueryIterator(repositoryConnection,
+    return new UtilTupleQueryIterator(sesameManager,
           queryString,queryLanguage);
   }
 
@@ -4467,7 +4291,7 @@ public class OntologyServiceImplSesame implements OntologyService {
       throw new GateOntologyException("Could not read query file: "+filename,ex);
     }
     QueryLanguage queryLanguage = determineQueryLanguage(queryString);
-    return new UtilBooleanQuery(repositoryConnection,
+    return new UtilBooleanQuery(sesameManager,
           queryString,queryLanguage);
 
   }
@@ -4517,6 +4341,39 @@ public class OntologyServiceImplSesame implements OntologyService {
   // context where it is relevant
   private boolean returnSystemStatements = false;
 
+  // at some point we should never need this as all our URIs already should
+  // be ONodeIDs or OURIs
+  @Deprecated
+  private ONodeID string2ONodeID(String uri) {
+    if(uri.startsWith("_:")) {
+      return new OBNodeIDImpl(uri);
+    } else if(uri.contains(":")) {
+      return new OURIImpl(uri);
+    } else {
+      return new OBNodeIDImpl(uri);
+    }
+  }
+
+  @Deprecated
+  private Resource string2SesameResource(String uriString) {
+    if(uriString.startsWith("_:")) {
+      return repositoryConnection.getValueFactory().createBNode(uriString.substring(2));
+      //return new BNodeImpl(uriString.substring(2));
+    } else {
+      // we can still get bnodeids from old methods where the initial _: is missing
+      // we assume that if the string contains a colon it must be a proper
+      // URI, otherwise it must be a Bnodeid
+      if(uriString.contains(":")) {
+        return repositoryConnection.getValueFactory().createURI(uriString);
+        //return new URIImpl(uriString);
+      } else {
+        return repositoryConnection.getValueFactory().createBNode(uriString);
+        //return new BNodeImpl(uriString);
+      }
+    }
+  }
+  
+  
 
 
 }

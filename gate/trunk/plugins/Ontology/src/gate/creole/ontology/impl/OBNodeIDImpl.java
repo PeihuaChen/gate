@@ -12,7 +12,7 @@
  *  $Id$
  */
 
-package gate.creole.ontology.impl.sesame;
+package gate.creole.ontology.impl;
 
 import gate.creole.ontology.OBNodeID;
 import gate.creole.ontology.OURI;

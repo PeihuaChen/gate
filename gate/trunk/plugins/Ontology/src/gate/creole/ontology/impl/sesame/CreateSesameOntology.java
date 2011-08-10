@@ -135,11 +135,14 @@ public class CreateSesameOntology extends OntologyLR
       throw new ResourceInstantiationException("Not found: "+getConfigFile());
     }
 
-    OntologyServiceImplSesame oService = new OntologyServiceImplSesame(this);
-
-    oService.createManagedRepository(
-        getRepositoryLocation(),
-        getRepositoryID(),getConfigFile());
+    OntologyServiceImplSesame oService = OntologyServiceImplSesame.
+      createForManagedRepository(this, getRepositoryLocation(), 
+      getRepositoryID(),getConfigFile());
+      
+    //new OntologyServiceImplSesame(this);
+    //oService.createManagedRepository(
+    //   getRepositoryLocation(),
+    //    getRepositoryID(),getConfigFile());
 
     ontologyService = oService;
 

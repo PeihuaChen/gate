@@ -40,7 +40,6 @@ import gate.creole.ontology.DataType;
 import gate.creole.ontology.DatatypeProperty;
 import gate.creole.ontology.GateOntologyException;
 import gate.creole.ontology.HasValueRestriction;
-import gate.creole.ontology.InvalidURIException;
 import gate.creole.ontology.InvalidValueException;
 import gate.creole.ontology.Literal;
 import gate.creole.ontology.MaxCardinalityRestriction;
@@ -57,7 +56,6 @@ import gate.creole.ontology.ONodeID;
 import gate.creole.ontology.ObjectProperty;
 import gate.creole.ontology.Ontology;
 import gate.creole.ontology.OntologyModificationListener;
-import gate.creole.ontology.OntologyTripleStore;
 import gate.creole.ontology.RDFProperty;
 import gate.creole.ontology.SomeValuesFromRestriction;
 import gate.creole.ontology.SymmetricProperty;
@@ -65,7 +63,6 @@ import gate.creole.ontology.TransitiveProperty;
 import gate.persist.PersistenceException;
 import gate.util.ClosableIterator;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import gate.util.GateRuntimeException;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -74,6 +71,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Random;
 import org.apache.log4j.Logger;
+import org.openrdf.model.BNode;
 
 /**
  * This class provides implementation of most of the methods of Ontology
@@ -88,6 +86,46 @@ public abstract class AbstractOntologyImpl
     extends AbstractLanguageResource
     implements Ontology {
 
+  
+  // a couple of useful constant OURIs that we need often in the ontology
+  // service impl and elsewhere
+  
+  // RDF 
+  public OURI OURI_RDF_PROPERTY = createOURI(OConstants.RDF.PROPERTY.toString());
+  public OURI OURI_RDF_TYPE = createOURI(OConstants.RDF.TYPE.toString());
+  // RDFS
+  public OURI OURI_RDFS_COMMENT = createOURI(OConstants.RDFS.COMMENT.toString());
+  public OURI OURI_RDFS_CLASS = createOURI(OConstants.RDFS.CLASS.toString());
+  public OURI OURI_RDFS_DOMAIN = createOURI(OConstants.RDFS.DOMAIN.toString());
+  public OURI OURI_RDFS_LABEL = createOURI(OConstants.RDFS.LABEL.toString());
+  public OURI OURI_RDFS_RANGE = createOURI(OConstants.RDFS.RANGE.toString());
+  public OURI OURI_RDFS_SUBCLASSOF = createOURI(OConstants.RDFS.SUBCLASSOF.toString());
+  // OWL
+  public OURI OURI_OWL_ALLVALUESFROM = createOURI(OConstants.OWL.ALLVALUESFROM.toString());
+  public OURI OURI_OWL_ANNOTATIONPROPERTY = createOURI(OConstants.OWL.ANNOTATIONPROPERTY.toString());
+  public OURI OURI_OWL_CLASS = createOURI(OConstants.OWL.CLASS.toString());
+  public OURI OURI_OWL_DATATYPEPROPERTY = createOURI(OConstants.OWL.DATATYPEPROPERTY.toString());
+  public OURI OURI_OWL_DIFFERENTFROM = createOURI(OConstants.OWL.DIFFERENTFROM.toString());
+  public OURI OURI_OWL_EQUIVALENTCLASS = createOURI(OConstants.OWL.EQUIVALENTCLASS.toString());
+  public OURI OURI_OWL_EQUIVALENTPROPERTY = createOURI(OConstants.OWL.EQUIVALENTPROPERTY.toString());
+  public OURI OURI_OWL_FUNCTIONALPROPERTY = createOURI(OConstants.OWL.FUNCTIONALPROPERTY.toString());
+  public OURI OURI_OWL_HASVALUE = createOURI(OConstants.OWL.HASVALUE.toString());
+  public OURI OURI_OWL_INVERSEFUNCTIONALPROPERTY = createOURI(OConstants.OWL.INVERSEFUNCTIONALPROPERTY.toString());
+  public OURI OURI_OWL_MAXCARDINALITY = createOURI(OConstants.OWL.MAXCARDINALITY.toString());
+  public OURI OURI_OWL_MINCARDINALITY = createOURI(OConstants.OWL.MINCARDINALITY.toString());
+  public OURI OURI_OWL_OBJECTPROPERTY = createOURI(OConstants.OWL.OBJECTPROPERTY.toString());
+  public OURI OURI_OWL_ONPROPERTY = createOURI(OConstants.OWL.ONPROPERTY.toString());
+  public OURI OURI_OWL_ONTOLOGY = createOURI(OConstants.OWL.ONTOLOGY.toString());
+  public OURI OURI_OWL_RESTRICTION = createOURI(OConstants.OWL.RESTRICTION.toString());
+  public OURI OURI_OWL_SAMEAS = createOURI(OConstants.OWL.SAMEAS.toString());
+  public OURI OURI_OWL_SOMEVALUESFROM = createOURI(OConstants.OWL.SOMEVALUESFROM.toString());
+  public OURI OURI_OWL_SYMMETRICPROPERTY = createOURI(OConstants.OWL.SYMMETRICPROPERTY.toString());
+  public OURI OURI_OWL_TRANSITIVEPROPERTY = createOURI(OConstants.OWL.TRANSITIVEPROPERTY.toString());
+  public OURI OURI_OWL_VERSIONINFO = createOURI(OConstants.OWL.VERSIONINFO.toString());
+  
+  
+  
+  
   /**
    * The ontology import URIs that were already processed for this ontology.
    * NOTE: this contains both the URIs from imports and the ontology URIs
@@ -216,7 +254,10 @@ public abstract class AbstractOntologyImpl
   }
 
   public void setVersion(String theVersion) {
-    ontologyService.setVersion(theVersion);
+    AnnotationProperty pr = (AnnotationProperty)Utils.createOProperty(
+      this, ontologyService, 
+      OConstants.OWL.VERSIONINFO, OConstants.ANNOTATION_PROPERTY);
+    setOntologyAnnotation(pr, new Literal(theVersion));
   }
 
   public String getVersion() {
@@ -229,7 +270,7 @@ public abstract class AbstractOntologyImpl
       Utils.warning(aURI + " already exists");
       return existing;
     }
-    ontologyService.addClass(aURI.toString(), classType);
+    ontologyService.addClass(aURI);
     OClass oClass =
       Utils.createOClass(this, ontologyService, aURI.toString(),
         classType);
@@ -246,7 +287,7 @@ public abstract class AbstractOntologyImpl
   }
 
   public OClass getOClass(ONodeID theClassURI) {
-    if(ontologyService.hasClass(theClassURI.toString())) {
+    if(ontologyService.hasClass(theClassURI)) {
       byte classType =
         ontologyService.getClassType(theClassURI.toString());
       return Utils.createOClass(this, ontologyService,
@@ -269,11 +310,11 @@ public abstract class AbstractOntologyImpl
   }
 
   public boolean containsOClass(ONodeID theURI) {
-    return ontologyService.hasClass(theURI.toString());
+    return ontologyService.hasClass(theURI);
   }
 
   public boolean containsOClass(OClass theClass) {
-    return ontologyService.hasClass(theClass.getONodeID().toString());
+    return ontologyService.hasClass(theClass.getONodeID());
   }
 
   public Set<OClass> getOClasses(boolean top) {
@@ -528,21 +569,9 @@ public abstract class AbstractOntologyImpl
   // OResources ... 
   public RDFProperty addRDFProperty(OURI aPropertyURI, Set<OResource> domain,
     Set<OResource> range) {
-    // TODO: properly remove map
-    // OResource res = null; //= getOResourceFromMap(aPropertyURI.toString());
-    /*
-    if(res != null) {
-      if(res instanceof RDFProperty) {
-        Utils.warning(aPropertyURI.toString() + " already exists");
-        return (RDFProperty)res;
-      }
-      else {
-        Utils.error(aPropertyURI.toString()
-          + " already exists but it is not an RDFProperty");
-        return null;
-      }
-    }
-     * */
+    // TODO: check if the property already exists or if the URI is 
+    // used for something other than a property
+    
     if(domain == null) {
       domain = new HashSet<OResource>();
     }
@@ -561,8 +590,8 @@ public abstract class AbstractOntologyImpl
     while(iter.hasNext()) {
       rangeURIs[counter] = iter.next().getONodeID().toString();
     }
-    ontologyService.addRDFProperty(aPropertyURI.toString(),
-      domainURIs, rangeURIs);
+    ontologyService.addRDFProperty(aPropertyURI,
+      domain, range);
     RDFProperty rp =
       Utils.createOProperty(this, ontologyService, aPropertyURI
         .toString(), OConstants.RDF_PROPERTY);
@@ -577,13 +606,7 @@ public abstract class AbstractOntologyImpl
    * @see gate.creole.ontology.Ontology#getRDFProperties()
    */
   public Set<RDFProperty> getRDFProperties() {
-    Property[] properties = ontologyService.getRDFProperties();
-    Set<RDFProperty> set = new HashSet<RDFProperty>();
-    for(int i = 0; i < properties.length; i++) {
-      set.add(Utils.createOProperty(
-          this, ontologyService, properties[i].getUri(), properties[i].getType()));
-    }
-    return set;
+    return ontologyService.getRDFProperties();
   }
 
   /*
@@ -592,8 +615,7 @@ public abstract class AbstractOntologyImpl
    * @see gate.creole.ontology.Ontology#isRDFProperty(gate.creole.ontology.URI)
    */
   public boolean isRDFProperty(OURI thePropertyURI) {
-    return ontologyService.isRDFProperty(thePropertyURI
-      .toString());
+    return ontologyService.isRDFProperty(thePropertyURI);
   }
 
   /*
@@ -630,8 +652,7 @@ public abstract class AbstractOntologyImpl
     }
 
 
-    ontologyService.addAnnotationProperty(aPropertyURI
-      .toString());
+    ontologyService.addAnnotationProperty(aPropertyURI);
     AnnotationProperty ap =
       (AnnotationProperty)Utils.createOProperty(this,
         ontologyService, aPropertyURI.toString(), OConstants.ANNOTATION_PROPERTY);
@@ -667,8 +688,7 @@ public abstract class AbstractOntologyImpl
    * .URI)
    */
   public boolean isAnnotationProperty(OURI thePropertyURI) {
-    return ontologyService.isAnnotationProperty(thePropertyURI
-      .toString());
+    return ontologyService.isAnnotationProperty(thePropertyURI);
   }
 
   public DatatypeProperty addDatatypeProperty(OURI aPropertyURI,
@@ -687,8 +707,8 @@ public abstract class AbstractOntologyImpl
          domainURIs[counter] = iter.next().getONodeID().toString();
         }
         if(domainURIs.length > 0) {
-          ontologyService.addDataTypeProperty(aPropertyURI.toString(),
-            domainURIs, aDatatype.getXmlSchemaURIString());
+          ontologyService.addDataTypeProperty(aPropertyURI,
+            domain, aDatatype.getXmlSchemaURIString());
         }
         return (DatatypeProperty)exists;
       }
@@ -702,8 +722,8 @@ public abstract class AbstractOntologyImpl
     while(iter.hasNext()) {
       domainURIs[counter] = iter.next().getONodeID().toString();
     }
-    ontologyService.addDataTypeProperty(aPropertyURI.toString(),
-      domainURIs, aDatatype.getXmlSchemaURIString());
+    ontologyService.addDataTypeProperty(aPropertyURI,
+      domain, aDatatype.getXmlSchemaURIString());
     DatatypeProperty dp =
       (DatatypeProperty)Utils.createOProperty(this,
         ontologyService, aPropertyURI.toString(), OConstants.DATATYPE_PROPERTY);
@@ -739,8 +759,7 @@ public abstract class AbstractOntologyImpl
    * gate.creole.ontology.Ontology#isDatatypeProperty(gate.creole.ontology.URI)
    */
   public boolean isDatatypeProperty(OURI thePropertyURI) {
-    return ontologyService.isDatatypeProperty(thePropertyURI
-      .toString());
+    return ontologyService.isDatatypeProperty(thePropertyURI);
   }
 
   /*
@@ -837,8 +856,7 @@ public abstract class AbstractOntologyImpl
    * gate.creole.ontology.Ontology#isObjectProperty(gate.creole.ontology.URI)
    */
   public boolean isObjectProperty(OURI thePropertyURI) {
-    return ontologyService.isObjectProperty(thePropertyURI
-      .toString());
+    return ontologyService.isObjectProperty(thePropertyURI);
   }
 
   /*
@@ -867,7 +885,7 @@ public abstract class AbstractOntologyImpl
         }
         if(domainURIs.length > 0) {
           ontologyService.addSymmetricProperty(
-            aPropertyURI.toString(), domainURIs);
+            aPropertyURI, domainAndRange);
         }
         return (SymmetricProperty)exists;
       }
@@ -883,7 +901,7 @@ public abstract class AbstractOntologyImpl
       counter++;
     }
     ontologyService.addSymmetricProperty(
-      aPropertyURI.toString(), domainURIs);
+      aPropertyURI, domainAndRange);
     SymmetricProperty sp =
       (SymmetricProperty)Utils.createOProperty(this,
         ontologyService, aPropertyURI.toString(), OConstants.SYMMETRIC_PROPERTY);
@@ -913,8 +931,7 @@ public abstract class AbstractOntologyImpl
   }
 
   public boolean isSymmetricProperty(OURI thePropertyURI) {
-    return ontologyService.isSymmetricProperty(thePropertyURI
-      .toString());
+    return ontologyService.isSymmetricProperty(thePropertyURI);
   }
 
   public TransitiveProperty addTransitiveProperty(OURI aPropertyURI,
@@ -1008,8 +1025,7 @@ public abstract class AbstractOntologyImpl
    * .URI)
    */
   public boolean isTransitiveProperty(OURI thePropertyURI) {
-    return ontologyService.isTransitiveProperty(thePropertyURI
-      .toString());
+    return ontologyService.isTransitiveProperty(thePropertyURI);
   }
 
   /*
@@ -1039,9 +1055,9 @@ public abstract class AbstractOntologyImpl
     return Utils.createOProperty(this, ontologyService,
       thePropertyURI.toString(), property.getType());
   }
-
+  
   public AnnotationProperty getAnnotationProperty(OURI theURI) {
-    if(ontologyService.isAnnotationProperty(theURI.toString())) {
+    if(ontologyService.isAnnotationProperty(theURI)) {
       return (AnnotationProperty) Utils.createOProperty(this,ontologyService,
           theURI.toString(), OConstants.ANNOTATION_PROPERTY);
     } else {
@@ -1049,7 +1065,7 @@ public abstract class AbstractOntologyImpl
     }
   }
   public DatatypeProperty getDatatypeProperty(OURI theURI) {
-    if(ontologyService.isDatatypeProperty(theURI.toString())) {
+    if(ontologyService.isDatatypeProperty(theURI)) {
       return (DatatypeProperty) Utils.createOProperty(this,ontologyService,
           theURI.toString(), OConstants.DATATYPE_PROPERTY);
     } else {
@@ -1057,7 +1073,7 @@ public abstract class AbstractOntologyImpl
     }
   }
   public ObjectProperty getObjectProperty(OURI theURI) {
-    if(ontologyService.isObjectProperty(theURI.toString())) {
+    if(ontologyService.isObjectProperty(theURI)) {
       return (ObjectProperty) Utils.createOProperty(this,ontologyService,
           theURI.toString(), OConstants.OBJECT_PROPERTY);
     } else {
@@ -1111,11 +1127,10 @@ public abstract class AbstractOntologyImpl
     DataType datatype =
       OntologyUtilities.getDataType(XMLSchema.NON_NEGATIVE_INTEGER.toString());
 
-    ontologyService.addClass(restId,
-      OConstants.MIN_CARDINALITY_RESTRICTION);
+    OBNodeID bnode = createOBNodeID(restId);
+    ontologyService.addRestriction(bnode);
 
-    ontologyService.setOnPropertyValue(restId, onProperty
-      .getOURI().toString());
+    ontologyService.setOnPropertyValue(bnode, onProperty.getOURI());
 
     if(!datatype.isValidValue(minCardinalityValue)) {
       throw new InvalidValueException(minCardinalityValue
@@ -1155,11 +1170,10 @@ public abstract class AbstractOntologyImpl
     DataType datatype =
       OntologyUtilities.getDataType(XMLSchema.NON_NEGATIVE_INTEGER.toString());
 
-    ontologyService.addClass(restId,
-      OConstants.MAX_CARDINALITY_RESTRICTION);
+    OBNodeID bnode = createOBNodeID(restId);
+    ontologyService.addRestriction(bnode);
 
-    ontologyService.setOnPropertyValue(restId, onProperty
-      .getOURI().toString());
+    ontologyService.setOnPropertyValue(bnode, onProperty.getOURI());
 
     if(!datatype.isValidValue(maxCardinalityValue)) {
       throw new InvalidValueException(maxCardinalityValue
@@ -1198,11 +1212,10 @@ public abstract class AbstractOntologyImpl
     DataType datatype =
       OntologyUtilities.getDataType(XMLSchema.NON_NEGATIVE_INTEGER.toString());
 
-    ontologyService.addClass(restId,
-      OConstants.CARDINALITY_RESTRICTION);
+    OBNodeID bnode = createOBNodeID(restId);
+    ontologyService.addRestriction(bnode);
 
-    ontologyService.setOnPropertyValue(restId, onProperty
-      .getOURI().toString());
+    ontologyService.setOnPropertyValue(bnode, onProperty.getOURI());
 
     if(!datatype.isValidValue(cardinalityValue))
       throw new InvalidValueException(cardinalityValue
@@ -1236,18 +1249,21 @@ public abstract class AbstractOntologyImpl
 
     String restId = getAutoGeneratedRestrictionName();
 
-    ontologyService.addClass(restId,
-      OConstants.HAS_VALUE_RESTRICTION);
+    OBNodeID bnode = createOBNodeID(restId);
+    ontologyService.addRestriction(bnode);
 
-    ontologyService.setOnPropertyValue(restId, onProperty
-      .getOURI().toString());
+    ontologyService.setOnPropertyValue(bnode, onProperty.getOURI());
 
-    String valueString =
-      hasValue instanceof Literal
-        ? ((Literal)hasValue).getValue()
-        : ((OResource)hasValue).getONodeID().toString();
-    ontologyService.setRestrictionValue(restId,
-      OConstants.HAS_VALUE_RESTRICTION, valueString);
+    // TODO: this was the original code here which obviously intended to 
+    // make this work correctly for both instances and literal values.
+    // However, OResource never could actually be a Literal, so this would
+    // never yield a literal value!
+    //String valueString =
+    //  hasValue instanceof Literal
+    //   ? ((Literal)hasValue).getValue()
+    //    : ((OResource)hasValue).getONodeID().toString();
+    ontologyService.setRestrictionValue(bnode,
+      OURI_OWL_HASVALUE, hasValue.getONodeID());
 
     HasValueRestriction hvr =
       (HasValueRestriction)Utils.createOClass(this,
@@ -1271,14 +1287,13 @@ public abstract class AbstractOntologyImpl
     RDFProperty onProperty, OResource hasValue) {
     String restId = getAutoGeneratedRestrictionName();
 
-    ontologyService.addClass(restId,
-      OConstants.ALL_VALUES_FROM_RESTRICTION);
+    OBNodeID bnode = createOBNodeID(restId);
+    ontologyService.addRestriction(bnode);
 
-    ontologyService.setOnPropertyValue(restId, onProperty
-      .getOURI().toString());
+    ontologyService.setOnPropertyValue(bnode, onProperty.getOURI());
 
-    ontologyService.setRestrictionValue(restId,
-      OConstants.ALL_VALUES_FROM_RESTRICTION, hasValue.getONodeID().toString());
+    ontologyService.setRestrictionValue(bnode,
+      OURI_OWL_ALLVALUESFROM, hasValue.getONodeID());
 
     AllValuesFromRestriction avfr =
       (AllValuesFromRestriction)Utils.createOClass(
@@ -1291,14 +1306,13 @@ public abstract class AbstractOntologyImpl
     ObjectProperty onProperty, OClass hasValue) {
     String restId = getAutoGeneratedRestrictionName();
 
-    ontologyService.addClass(restId,
-      OConstants.ALL_VALUES_FROM_RESTRICTION);
+    OBNodeID bnode = createOBNodeID(restId);
+    ontologyService.addRestriction(bnode);
 
-    ontologyService.setOnPropertyValue(restId, onProperty
-      .getOURI().toString());
+    ontologyService.setOnPropertyValue(bnode, onProperty.getOURI());
 
-    ontologyService.setRestrictionValue(restId,
-      OConstants.ALL_VALUES_FROM_RESTRICTION, hasValue.getONodeID().toString());
+    ontologyService.setRestrictionValue(bnode,
+      OURI_OWL_ALLVALUESFROM, hasValue.getONodeID());
 
     AllValuesFromRestriction avfr =
       (AllValuesFromRestriction)Utils.createOClass(
@@ -1322,14 +1336,13 @@ public abstract class AbstractOntologyImpl
     RDFProperty onProperty, OResource hasValue) {
     String restId = getAutoGeneratedRestrictionName();
 
-    ontologyService.addClass(restId,
-      OConstants.SOME_VALUES_FROM_RESTRICTION);
+    OBNodeID bnode = createOBNodeID(restId);
+    ontologyService.addRestriction(bnode);
 
-    ontologyService.setOnPropertyValue(restId, onProperty
-      .getOURI().toString());
+    ontologyService.setOnPropertyValue(bnode, onProperty.getOURI());
 
-    ontologyService.setRestrictionValue(restId,
-      OConstants.SOME_VALUES_FROM_RESTRICTION, hasValue.getONodeID().toString());
+    ontologyService.setRestrictionValue(bnode,
+      OURI_OWL_SOMEVALUESFROM, hasValue.getONodeID());
 
     SomeValuesFromRestriction svfr =
       (SomeValuesFromRestriction)Utils.createOClass(
@@ -2033,8 +2046,59 @@ public abstract class AbstractOntologyImpl
     throw new UnsupportedOperationException("Still to be implemented!");
   }
 
-  public abstract OBNodeID createOBNodeID(String id);
+  
+  public OURI createOURI(String uriString) {
+    return new OURIImpl(uriString);
+  }
 
+  public OBNodeID createOBNodeID(String id) {
+    return new OBNodeIDImpl(id);
+  }
+
+
+  public OURI createOURIForName(String resourceName) {
+    // TODO: check and normalize resourceName
+    String baseURI = getDefaultNameSpace();
+    if(baseURI == null) {
+      throw new GateOntologyException("Cannot create OURI, no system name space (base URI) set");
+    }
+    return new OURIImpl(baseURI+resourceName);
+  }
+
+  public OURI createOURIForName(String resourceName, String baseURI) {
+    // TODO: check and normalize resource name, maybe also URI, or do the
+    // latter in the OURI constructor?
+    return new OURIImpl(baseURI+resourceName);
+  }
+
+  public OURI generateOURI(String resourceName) {
+    String baseURI = getDefaultNameSpace();
+    if(baseURI == null) {
+      throw new GateOntologyException("No default name space set, cannot generate OURI");
+    }
+    return generateOURI(resourceName, baseURI);
+  }
+
+  public OURI generateOURI(String resourceName, String baseURI) {
+    if(resourceName == null) {
+      resourceName = "";
+    }
+    // TODO: check and normalize resource name so it is a valid part of an IRI
+
+    // now append a generated suffix .. if the OURI already exists, retry with
+    // a different suffix until we get a really new OURI.
+    while(true) {
+      String rn  = 
+        resourceName +
+        Long.toString(System.currentTimeMillis(),36) +
+        Integer.toString(Math.abs(randomGenerator.nextInt(1296)),36);
+      OURI uri = createOURIForName(rn);
+      if (!ontologyService.containsURI(uri)) {
+        return uri;
+      }
+    }
+  }
+  
   public List<Literal> getOntologyAnnotationValues(AnnotationProperty ann) {
     Set<OURI> ontouris = ontologyService.getOntologyURIs();
     if(ontouris.size() != 1) {
@@ -2043,16 +2107,8 @@ public abstract class AbstractOntologyImpl
           ontouris.size()+": "+ontouris);
     }
     OURI ouri = ontouris.iterator().next();
-    PropertyValue[] propValues = ontologyService.getAnnotationPropertyValues(
-            ouri.toString(), ann
-                    .getOURI().toString());
-    List<Literal> list = new ArrayList<Literal>();
-    for(int i = 0; i < propValues.length; i++) {
-      Literal l = new Literal(propValues[i].getValue(), OntologyUtilities
-              .getLocale(propValues[i].getDatatype()));
-      list.add(l);
-    }
-    return list;
+    return ontologyService.getAnnotationPropertyValues(
+            ouri, ann.getOURI());
   }
 
   public void setOntologyAnnotation(AnnotationProperty ann, Literal val)  {
@@ -2077,8 +2133,8 @@ public abstract class AbstractOntologyImpl
       return;
     }
 
-    ontologyService.addAnnotationPropertyValue(ouri.toString(),
-            ann.getOURI().toString(), val.getValue(),
+    ontologyService.addAnnotationPropertyValue(ouri,
+            ann.getOURI(), val.getValue(),
             val.getLanguage() != null
                     ? val.getLanguage().getLanguage()
                     : null);

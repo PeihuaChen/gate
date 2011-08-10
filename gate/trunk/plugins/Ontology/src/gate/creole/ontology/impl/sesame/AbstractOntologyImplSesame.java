@@ -14,7 +14,6 @@
 package gate.creole.ontology.impl.sesame;
 
 import gate.creole.ontology.GateOntologyException;
-import gate.creole.ontology.OBNodeID;
 import gate.creole.ontology.OConstants;
 import gate.creole.ontology.OConstants.OntologyFormat;
 import gate.creole.ontology.OConstants.QueryLanguage;
@@ -46,6 +45,7 @@ import org.openrdf.repository.RepositoryException;
  */
 public abstract class AbstractOntologyImplSesame extends AbstractOntologyImpl {
 
+  
   private Logger logger;
 
   public AbstractOntologyImplSesame() {
@@ -306,67 +306,16 @@ public abstract class AbstractOntologyImplSesame extends AbstractOntologyImpl {
     loadSystemImports();
   }
 
-  public OURI createOURI(String uriString) {
-    return new OURIImpl(uriString);
-  }
-
-  public OURI createOURIForName(String resourceName) {
-    // TODO: check and normalize resourceName
-    String baseURI = getDefaultNameSpace();
-    if(baseURI == null) {
-      throw new GateOntologyException("Cannot create OURI, no system name space (base URI) set");
-    }
-    return new OURIImpl(baseURI+resourceName);
-  }
-
-  public OURI createOURIForName(String resourceName, String baseURI) {
-    // TODO: check and normalize resource name, maybe also URI, or do the
-    // latter in the OURI constructor?
-    return new OURIImpl(baseURI+resourceName);
-  }
-
-  public OURI generateOURI(String resourceName) {
-    String baseURI = getDefaultNameSpace();
-    if(baseURI == null) {
-      throw new GateOntologyException("No default name space set, cannot generate OURI");
-    }
-    return generateOURI(resourceName, baseURI);
-  }
-
-  public OURI generateOURI(String resourceName, String baseURI) {
-    if(resourceName == null) {
-      resourceName = "";
-    }
-    // TODO: check and normalize resource name so it is a valid part of an IRI
-
-    // now append our generated suffix
-    resourceName = 
-        resourceName +
-        Long.toString(System.currentTimeMillis(),36) +
-        Integer.toString(Math.abs(randomGenerator.nextInt(1296)),36);
-    OURI uri = null;
-    while(true) {
-      uri = createOURIForName(resourceName);
-      if (!((OntologyServiceImplSesame)ontologyService).containsURI(uri)) {
-        break;
-      }
-    }
-    return uri;
-  }
-
-  public OBNodeID createOBNodeID(String id) {
-    return new OBNodeIDImpl(id);
-  }
 
   public OntologyBooleanQuery createBooleanQuery(String query, QueryLanguage lang) {
     return new UtilBooleanQuery(
-        ((OntologyServiceImplSesame)ontologyService).getRepositoryConnection(),
+        ((OntologyServiceImplSesame)ontologyService).getSesameManager(),
         query, lang);
   }
 
   public OntologyTupleQuery createTupleQuery(String query, QueryLanguage lang) {
     return new UtilTupleQueryIterator(
-        ((OntologyServiceImplSesame)ontologyService).getRepositoryConnection(),
+        ((OntologyServiceImplSesame)ontologyService).getSesameManager(),
         query, lang);
     
   }

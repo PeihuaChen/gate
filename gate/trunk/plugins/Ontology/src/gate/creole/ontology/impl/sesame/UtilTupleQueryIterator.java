@@ -13,6 +13,8 @@
  */
 package gate.creole.ontology.impl.sesame;
 
+import gate.creole.ontology.impl.OURIImpl;
+import gate.creole.ontology.impl.OBNodeIDImpl;
 import gate.creole.ontology.GateOntologyException;
 import gate.creole.ontology.LiteralOrONodeID;
 import gate.creole.ontology.Literal;
@@ -20,6 +22,7 @@ import gate.creole.ontology.ONodeID;
 import gate.creole.ontology.OConstants;
 import gate.creole.ontology.OntologyTupleQuery;
 import gate.creole.ontology.impl.LiteralOrONodeIDImpl;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 import org.apache.log4j.Logger;
@@ -60,18 +63,23 @@ import org.openrdf.repository.RepositoryConnection;
  public class UtilTupleQueryIterator implements OntologyTupleQuery {
 
     private RepositoryConnection mRepositoryConnection;
+    private SesameManager mSesameManager;
     private String mQuery;
     private TupleQueryResult mResult;
     private TupleQuery mTupleQuery;
-    private Vector<String> mVarnames;
+    private ArrayList<String> mVarnames;
     private QueryLanguage mLang = QueryLanguage.SERQL;
     private boolean mIsClosed = true;
     private boolean mIsPrepared = false;
     private boolean mIsEvaluated = false;
     private Logger logger;
 
-    public UtilTupleQueryIterator(RepositoryConnection repositoryConnection,
-        String query, OConstants.QueryLanguage queryLanguage) {
+    public UtilTupleQueryIterator(
+      SesameManager sm,
+      String query, 
+      OConstants.QueryLanguage queryLanguage) 
+    {
+      mSesameManager = sm;
       if(queryLanguage == OConstants.QueryLanguage.SPARQL) {
         mLang = QueryLanguage.SPARQL;
       } else if(queryLanguage == OConstants.QueryLanguage.SERQL) {
@@ -81,7 +89,7 @@ import org.openrdf.repository.RepositoryConnection;
       }
       //System.out.println("Created tuple query object: "+query);
       logger = Logger.getLogger(this.getClass().getName());
-      mRepositoryConnection = repositoryConnection;
+      mRepositoryConnection = sm.getRepositoryConnection();
       logger.debug("Creating query: " + query);
       mQuery = query;
       prepare();
@@ -106,13 +114,13 @@ import org.openrdf.repository.RepositoryConnection;
       mTupleQuery.setBinding(name, value);
     }
     public void setBinding(String name, LiteralOrONodeID value) {
-      mTupleQuery.setBinding(name, UtilConvert.toSesameValue(value));
+      mTupleQuery.setBinding(name, mSesameManager.convertLiteralOrONodeID2SesameValue(value));
     }
     public void setBinding(String name, Literal value) {
-      mTupleQuery.setBinding(name, UtilConvert.toSesameLiteral(value));
+      mTupleQuery.setBinding(name, mSesameManager.toSesameLiteral(value));
     }
     public void setBinding(String name, ONodeID value) {
-      mTupleQuery.setBinding(name, UtilConvert.toSesameValue(value));
+      mTupleQuery.setBinding(name, mSesameManager.toSesameValue(value));
     }
 
     /**
@@ -127,7 +135,7 @@ import org.openrdf.repository.RepositoryConnection;
           mResult = mTupleQuery.evaluate();
         mIsClosed = false;
         List<String> varnamesList = mResult.getBindingNames();
-        mVarnames = new Vector<String>(varnamesList);
+        mVarnames = new ArrayList<String>(varnamesList);
       } catch (Exception e) {
         throw new GateOntologyException("Cannot evaluate queyr: "+mQuery, e);
       }
@@ -164,7 +172,7 @@ import org.openrdf.repository.RepositoryConnection;
         return new LiteralOrONodeIDImpl(new OBNodeIDImpl(v.stringValue()));
       } else if(v instanceof org.openrdf.model.Literal) {
         return new LiteralOrONodeIDImpl(
-            UtilConvert.toGateLiteral((org.openrdf.model.Literal)v));
+            mSesameManager.convertSesameLiteral2Literal((org.openrdf.model.Literal)v));
       } else if(v instanceof org.openrdf.model.URI) {
         URI u = (URI)v;
         // TODO: check if we want toString or stringValue() here
@@ -241,7 +249,7 @@ import org.openrdf.repository.RepositoryConnection;
             result.add(new LiteralOrONodeIDImpl(new OBNodeIDImpl(value.stringValue())));
           } else if(value instanceof org.openrdf.model.Literal) {
              result.add(new LiteralOrONodeIDImpl(
-                 UtilConvert.toGateLiteral((org.openrdf.model.Literal)value)));
+                 mSesameManager.convertSesameLiteral2Literal((org.openrdf.model.Literal)value)));
           } else if(value instanceof org.openrdf.model.URI) {
              URI u = (URI)value;
              result.add(new LiteralOrONodeIDImpl(new OURIImpl(u.stringValue())));

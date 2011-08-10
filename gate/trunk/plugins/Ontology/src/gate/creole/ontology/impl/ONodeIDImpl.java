@@ -11,7 +11,7 @@
  *
  *  $Id$
  */
-package gate.creole.ontology.impl.sesame;
+package gate.creole.ontology.impl;
 
 import gate.creole.ontology.InvalidURIException;
 import gate.creole.ontology.ONodeID;

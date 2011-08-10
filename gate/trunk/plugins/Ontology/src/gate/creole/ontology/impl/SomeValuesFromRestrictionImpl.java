@@ -52,9 +52,8 @@ public class SomeValuesFromRestrictionImpl extends OClassImpl implements
    * @param resource
    */
   public void setHasValue(OResource resource) {
-    ontologyService.setRestrictionValue(this.nodeId.toString(),
-            OConstants.SOME_VALUES_FROM_RESTRICTION, resource.getONodeID()
-                    .toString());
+    ontologyService.setRestrictionValue(this.nodeId,
+      ontology.OURI_OWL_SOMEVALUESFROM, resource.getONodeID());
   }
   
   
@@ -76,8 +75,7 @@ public class SomeValuesFromRestrictionImpl extends OClassImpl implements
    * @see gate.creole.ontology.Restriction#setOnPropertyValue(gate.creole.ontology.RDFProperty)
    */
   public void setOnPropertyValue(RDFProperty property) {
-      ontologyService.setOnPropertyValue(this.nodeId.toString(), property
-              .getOURI().toString());
+      ontologyService.setOnPropertyValue(this.nodeId, property.getOURI());
       ontology.fireResourceRelationChanged(this, property, OConstants.RESTRICTION_ON_PROPERTY_VALUE_CHANGED);
   }
 

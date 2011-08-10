@@ -46,7 +46,7 @@ public class OResourceImpl implements OResource, Comparable<OResource> {
   /**
    * The ontology the current resource belongs to
    */
-  protected Ontology ontology;
+  protected AbstractOntologyImpl ontology;
 
   /**
    * Constructor
@@ -59,7 +59,7 @@ public class OResourceImpl implements OResource, Comparable<OResource> {
           OntologyService owlimPort) {
     this.nodeId = aURI;
     this.ontologyService = owlimPort;
-    this.ontology = ontology;
+    this.ontology = (AbstractOntologyImpl)ontology;
   }
 
   /*
@@ -100,17 +100,11 @@ public class OResourceImpl implements OResource, Comparable<OResource> {
    * @return
    */
   public Set<Literal> getLabels() {
-
-    PropertyValue[] pvalues = ontologyService.getAnnotationPropertyValues(
-            this.nodeId.toString(), RDFS.LABEL.toString());
-
-    Set<Literal> toReturn = new HashSet<Literal>();
-    for(PropertyValue pv : pvalues) {
-      toReturn.add(new Literal(pv.getValue(), OntologyUtilities.getLocale(pv
-              .getDatatype())));
-    }
-
-    return toReturn;
+    List<Literal> list = ontologyService.getAnnotationPropertyValues(
+            this.nodeId, ontology.OURI_RDFS_LABEL);
+    Set<Literal> set = new HashSet<Literal>();
+    set.addAll(list);
+    return set;
   }
 
   /**
@@ -119,16 +113,11 @@ public class OResourceImpl implements OResource, Comparable<OResource> {
    * @return
    */
   public Set<Literal> getComments() {
-    PropertyValue[] pvalues = ontologyService.getAnnotationPropertyValues(
-            this.nodeId.toString(), RDFS.COMMENT.toString());
-
-    Set<Literal> toReturn = new HashSet<Literal>();
-    for(PropertyValue pv : pvalues) {
-      toReturn.add(new Literal(pv.getValue(), OntologyUtilities.getLocale(pv
-              .getDatatype())));
-    }
-
-    return toReturn;
+    List<Literal> list = ontologyService.getAnnotationPropertyValues(
+            this.nodeId, ontology.OURI_RDFS_COMMENT);
+    Set<Literal> set = new HashSet<Literal>();
+    set.addAll(list);
+    return set;
   }
 
   /*
@@ -137,9 +126,18 @@ public class OResourceImpl implements OResource, Comparable<OResource> {
    * @see gate.creole.ontology.OResource#getComment(java.lang.String)
    */
   public String getComment(Locale language) {
-    return ontologyService.getAnnotationPropertyValue(this.nodeId
-            .toString(), RDFS.COMMENT.toString(), language != null ? language
-            .getLanguage() : null);
+    List<Literal> set = 
+      ontologyService.getAnnotationPropertyValues(this.nodeId,
+        ontology.OURI_RDFS_COMMENT);
+    // find the first value we find with the specified language
+    String comment = null;
+    for(Literal l : set) {
+      if(l.getLanguage().equals(language)) {
+        comment = l.getValue();
+        break;
+      }
+    }
+    return comment;
   }
 
   /*
@@ -149,8 +147,8 @@ public class OResourceImpl implements OResource, Comparable<OResource> {
    *      java.lang.String)
    */
   public void setComment(String aComment, Locale language) {
-    ontologyService.addAnnotationPropertyValue(this.nodeId.toString(),
-            RDFS.COMMENT.toString(), aComment, language != null
+    ontologyService.addAnnotationPropertyValue(this.nodeId,
+      ontology.OURI_RDFS_COMMENT, aComment, language != null
                     ? language.getLanguage()
                     : null);
     Literal l = new Literal(aComment, language);
@@ -169,10 +167,18 @@ public class OResourceImpl implements OResource, Comparable<OResource> {
    * @see gate.creole.ontology.OResource#getLabel(java.lang.String)
    */
   public String getLabel(Locale language) {
-    return ontologyService.getAnnotationPropertyValue(this.nodeId
-            .toString(), RDFS.LABEL.toString(), language != null
-            ? language.getLanguage()
-            : null);
+    List<Literal> set = 
+      ontologyService.getAnnotationPropertyValues(this.nodeId,
+        ontology.OURI_RDFS_LABEL);
+    // find the first value we find with the specified language
+    String label = null;
+    for(Literal l : set) {
+      if(l.getLanguage().equals(language)) {
+        label = l.getValue();
+        break;
+      }
+    }
+    return label;
   }
 
   /*
@@ -182,8 +188,8 @@ public class OResourceImpl implements OResource, Comparable<OResource> {
    *      java.lang.String)
    */
   public void setLabel(String aLabel, Locale language) {
-    ontologyService.addAnnotationPropertyValue(this.nodeId.toString(),
-            RDFS.LABEL.toString(), aLabel, language != null
+    ontologyService.addAnnotationPropertyValue(this.nodeId,
+            ontology.OURI_RDFS_LABEL, aLabel, language != null
                     ? language.getLanguage()
                     : null);
     Literal l = new Literal(aLabel, language);
@@ -237,8 +243,8 @@ public class OResourceImpl implements OResource, Comparable<OResource> {
       return;
     }
 
-    ontologyService.addAnnotationPropertyValue(this.nodeId.toString(),
-            theAnnotationProperty.getOURI().toString(), literal.getValue(),
+    ontologyService.addAnnotationPropertyValue(this.nodeId,
+            theAnnotationProperty.getOURI(), literal.getValue(),
             literal.getLanguage() != null
                     ? literal.getLanguage().getLanguage()
                     : null);
@@ -252,16 +258,8 @@ public class OResourceImpl implements OResource, Comparable<OResource> {
    */
   public List<Literal> getAnnotationPropertyValues(
           AnnotationProperty theAnnotationProperty) {
-    PropertyValue[] propValues = ontologyService.getAnnotationPropertyValues(
-            this.nodeId.toString(), theAnnotationProperty
-                    .getOURI().toString());
-    List<Literal> list = new ArrayList<Literal>();
-    for(int i = 0; i < propValues.length; i++) {
-      Literal l = new Literal(propValues[i].getValue(), OntologyUtilities
-              .getLocale(propValues[i].getDatatype()));
-      list.add(l);
-    }
-    return list;
+    return ontologyService.getAnnotationPropertyValues(
+            this.nodeId, theAnnotationProperty.getOURI());
   }
 
   /*
@@ -272,11 +270,8 @@ public class OResourceImpl implements OResource, Comparable<OResource> {
    */
   public void removeAnnotationPropertyValue(
           AnnotationProperty theAnnotationProperty, Literal literal) {
-    ontologyService.removeAnnotationPropertyValue(this.nodeId.toString(),
-            theAnnotationProperty.getOURI().toString(), literal.getValue(),
-            literal.getLanguage() != null
-                    ? literal.getLanguage().getLanguage()
-                    : null);
+    ontologyService.removeAnnotationPropertyValue(this.nodeId,
+            theAnnotationProperty.getOURI(), literal);
     ontology.fireResourcePropertyValueChanged(this, theAnnotationProperty, literal, OConstants.ANNOTATION_PROPERTY_VALUE_REMOVED_EVENT);
   }
 
@@ -288,7 +283,7 @@ public class OResourceImpl implements OResource, Comparable<OResource> {
   public void removeAnnotationPropertyValues(
           AnnotationProperty theAnnotationProperty) {
     ontologyService.removeAnnotationPropertyValues(
-            this.nodeId.toString(), theAnnotationProperty.getOURI().toString());
+            this.nodeId, theAnnotationProperty.getOURI());
     ontology.fireResourcePropertyValueChanged(this, theAnnotationProperty, null, OConstants.ANNOTATION_PROPERTY_VALUE_REMOVED_EVENT);
   }
 
