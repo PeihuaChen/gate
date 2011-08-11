@@ -617,22 +617,43 @@ public abstract class Factory {
             throws ResourceInstantiationException {
     checkDuplicationContext(ctx);
     String className = res.getClass().getName();
+    ResourceData resData = Gate.getCreoleRegister().get(className);
+    if(resData == null) {
+      throw new ResourceInstantiationException(
+          "Could not find CREOLE data for " + className);
+    }
     String resName = res.getName();
 
     FeatureMap newResFeatures = duplicate(res.getFeatures(), ctx);
 
     // init parameters
     FeatureMap initParams = AbstractResource.getInitParameterValues(res);
-    // duplicate any Resources in the params map
+    // remove parameters that are also sharable properties
+    for(String propName : resData.getSharableProperties()) {
+      initParams.remove(propName);
+    }
+    // duplicate any Resources in the params map (excluding sharable ones)
     initParams = duplicate(initParams, ctx);
+    // add sharable properties to the params map (unduplicated).  Some of these
+    // may be registered parameters but others may not be.
+    for(String propName : resData.getSharableProperties()) {
+      initParams.put(propName, res.getParameterValue(propName));
+    }
 
     // create the new resource
     Resource newResource = createResource(className, initParams, newResFeatures, resName);
     if(newResource instanceof ProcessingResource) {
       // runtime params
       FeatureMap runtimeParams = AbstractProcessingResource.getRuntimeParameterValues(res);
-      // duplicate any Resources in the params map
+      // remove parameters that are also sharable properties
+      for(String propName : resData.getSharableProperties()) {
+        runtimeParams.remove(propName);
+      }
+      // duplicate any Resources in the params map (excluding sharable ones)
       runtimeParams = duplicate(runtimeParams, ctx);
+      // do not need to add sharable properties here, they have already
+      // been injected by createResource
+      
       newResource.setParameterValues(runtimeParams);
     }
 
