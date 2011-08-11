@@ -17,13 +17,17 @@
 package gate.creole;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import gate.*;
+import gate.creole.metadata.Sharable;
 import gate.util.*;
 
 /** Models an individual CREOLE resource metadata, plus configuration data,
@@ -391,4 +395,61 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
   }// setAnnotationTypeDisplayed
   /** A simple accessor for annotationTypeDisplayed field*/
   public String getAnnotationTypeDisplayed(){return annotationTypeDisplayed;}
+  
+  // Sharable properties for duplication
+  protected Collection<String> sharableProperties = new HashSet<String>();
+  
+  /**
+   * Get the collection of property names that should be treated as
+   * sharable state when duplicating resources of this type.  The
+   * specified properties may also be declared as parameters of the
+   * resource but this is not required.
+   */
+  public Collection<String> getSharableProperties() {
+    return sharableProperties;
+  }
+  
+  /**
+   * Initialize this ResourceData.  Called by CreoleXmlHandler once all
+   * the properties of this ResourceData specified in the XML have been
+   * filled in, but before autoinstances are created.
+   */
+  public void init() throws Exception {
+    determineSharableProperties(getResourceClass(), new HashSet<String>());
+  }
+  
+  private void determineSharableProperties(Class<?> cls, Collection<String> hiddenPropertyNames) throws GateException {
+    for(Method m : cls.getDeclaredMethods()) {
+      Sharable sharableAnnot = m.getAnnotation(Sharable.class);
+      if(sharableAnnot != null) {
+        if(!m.getName().startsWith("set") || m.getName().length() < 4
+            || m.getParameterTypes().length != 1) {
+          throw new GateException("@Sharable annotation found on "
+                  + m
+                  + ", but only setter methods may have this annotation.");
+        }
+        // extract the property name from the method name
+        String propName = Character.toLowerCase(m.getName().charAt(3))
+                + m.getName().substring(4);
+        if(sharableAnnot.value() == false) {
+          // hide this property name from the search in superclasses
+          hiddenPropertyNames.add(propName);
+        }
+        else {
+          // this property is sharable if it has not been hidden in a subclass
+          if(!hiddenPropertyNames.contains(propName)) {
+            sharableProperties.add(propName);
+          }
+        }
+      }
+    }
+    
+    // go up the class tree
+    if(cls.getSuperclass() != null) {
+      determineSharableProperties(cls.getSuperclass(), hiddenPropertyNames);
+    }
+    for(Class<?> intf : cls.getInterfaces()) {
+      determineSharableProperties(intf, hiddenPropertyNames);
+    }
+  }
 } // ResourceData

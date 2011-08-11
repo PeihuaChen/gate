@@ -324,6 +324,15 @@ public class CreoleXmlHandler extends DefaultHandler {
       // add the parameter list to the resource (and reinitialise it)
       resourceData.setParameterList(currentParamList);
       currentParamList = new ParameterList();
+      
+      // final initialization of the ResourceData
+      try {
+        resourceData.init();
+      } catch(Exception ex) {
+        throw new GateSaxException(
+            "Couldn't initialize ResourceData for "
+            + resourceData.getName(), ex);
+      }
 
       if(DEBUG) Out.println("added: " + resourceData);
       // Iterate through autoinstances and try to instanciate them
