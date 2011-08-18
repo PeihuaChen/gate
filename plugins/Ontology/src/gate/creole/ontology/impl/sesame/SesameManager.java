@@ -771,7 +771,6 @@ public class SesameManager {
       return null;
     }
     Locale locale = new Locale(lang);
-    System.out.println("Trying to convert language to locale: "+lang+"="+locale);
     return locale;
   }
   
