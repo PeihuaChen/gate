@@ -679,6 +679,10 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
                     .getOffset());
           }
         }
+        else if (debug)
+        {
+          System.err.println("Line didn't match input pattern!");
+        }
       }
     }
     catch(Exception err) {
