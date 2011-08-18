@@ -455,12 +455,15 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
     ByteArrayOutputStream baout = new ByteArrayOutputStream();
     
     try {
+      int returnCode;
       if(taggerDir == null) {
-        processManager.runProcess(cmdline, baout, (debug ? System.err : null));
+        returnCode = processManager.runProcess(cmdline, baout, (debug ? System.err : null));
       }
       else {
-        processManager.runProcess(cmdline, Files.fileFromURL(taggerDir), baout, (debug ? System.err : null));
+        returnCode = processManager.runProcess(cmdline, Files.fileFromURL(taggerDir), baout, (debug ? System.err : null));
       }
+      
+      if (debug) System.err.println("Return Code From Tagger: "+returnCode);
       
       return new ByteArrayInputStream(baout.toByteArray());
     }
