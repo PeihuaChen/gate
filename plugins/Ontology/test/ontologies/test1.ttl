@@ -137,3 +137,21 @@
 :iClass99Intersection a :iClass99Intersection .
 # -> iClass99s1and2 must be member of class99intersection
 
+
+## Test the correct representation of literals 
+:Class100 a owl:Class .
+:dp100a a owl:DatatypeProperty .
+:iClass100I01 a :Class100 .
+:iClass100I01 :dp100a "plain literal, no language tag" .
+
+:iClass100I02 a :Class100 .
+:dp100b a owl:DatatypeProperty .
+:iClass100I02 :dp100b "plain literal, lang tag es"@es .
+
+:iClass100I03 a :Class100 .
+:dp100c a owl:DatatypeProperty .
+:iClass100I03 :dp100c "typed literal, string"^^xsd:string .
+
+:iClass100I04 a :Class100 .
+:dp100d a owl:DatatypeProperty .
+:iClass100I04 :dp100d "12"^^xsd:int .
