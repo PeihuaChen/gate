@@ -49,10 +49,12 @@ list</a>.</p>
 <li><a href='#Copy_Annots_Between_Docs'>Copy_Annots_Between_Docs</a></li>
 <li><a href='#Gazetteer_LKB'>Gazetteer_LKB</a></li>
 <li><a href='#Gazetteer_Ontology_Based'>Gazetteer_Ontology_Based</a></li>
+<li><a href='#GENIA'>GENIA</a></li>
 <li><a href='#Groovy'>Groovy</a></li>
 <li><a href='#Information_Retrieval'>Information_Retrieval</a></li>
 <li><a href='#Inter_Annotator_Agreement'>Inter_Annotator_Agreement</a></li>
 <li><a href='#Jape_Compiler'>Jape_Compiler</a></li>
+<li><a href='#JAPE_Plus'>JAPE_Plus</a></li>
 <li><a href='#Keyphrase_Extraction_Algorithm'>Keyphrase_Extraction_Algorithm</a></li>
 <li><a href='#Language_Identification'>Language_Identification</a></li>
 <li><a href='#Lang_Arabic'>Lang_Arabic</a></li>
@@ -82,9 +84,12 @@ list</a>.</p>
 <li><a href='#Tagger_Framework'>Tagger_Framework</a></li>
 <li><a href='#Tagger_Measurements'>Tagger_Measurements</a></li>
 <li><a href='#Tagger_MetaMap'>Tagger_MetaMap</a></li>
+<li><a href='#Tagger_MutationFinder'>Tagger_MutationFinder</a></li>
+<li><a href='#Tagger_NormaGene'>Tagger_NormaGene</a></li>
 <li><a href='#Tagger_NP_Chunking'>Tagger_NP_Chunking</a></li>
 <li><a href='#Tagger_Numbers'>Tagger_Numbers</a></li>
 <li><a href='#Tagger_OpenCalais'>Tagger_OpenCalais</a></li>
+<li><a href='#Tagger_PennBio'>Tagger_PennBio</a></li>
 <li><a href='#Teamware_Tools'>Teamware_Tools</a></li>
 <li><a href='#Tools'>Tools</a></li>
 <li><a href='#UIMA'>UIMA</a></li>
@@ -297,6 +302,14 @@ list</a>.</p>
 		<td>gate.clone.ql.FakeSentenceSplitter</td>
 	</tr>
 	<tr>
+		<th colspan='3'><a name='GENIA'>GENIA</a></th>
+	</tr>
+	<tr>
+		<td>GENIA Sentence Splitter&nbsp;</td>
+		<td>A processing resource that takes document and corpus parameters (<a href="http://gate.ac.uk/userguide/sec:domain-creole:biomed:genia">docs</a>)&nbsp;</td>
+		<td>gate.creole.genia.splitter.GENIASentenceSplitter</td>
+	</tr>
+	<tr>
 		<th colspan='3'><a name='Groovy'>Groovy</a></th>
 	</tr>
 	<tr>
@@ -318,6 +331,11 @@ list</a>.</p>
 		<td>Control Script&nbsp;</td>
 		<td>Editor for the Groovy script controlling a scriptable controller&nbsp;</td>
 		<td>gate.groovy.gui.ControllerScriptEditor</td>
+	</tr>
+	<tr>
+		<td>Script Editor&nbsp;</td>
+		<td>Editor for the Groovy script behind this PR&nbsp;</td>
+		<td>gate.groovy.gui.ScriptPREditor</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='Information_Retrieval'>Information_Retrieval</a></th>
@@ -349,6 +367,19 @@ list</a>.</p>
 		<td>com.ontotext.gate.japec.JapecTransducer</td>
 	</tr>
 	<tr>
+		<th colspan='3'><a name='JAPE_Plus'>JAPE_Plus</a></th>
+	</tr>
+	<tr>
+		<td>JAPE-Plus Viewer&nbsp;</td>
+		<td>A JAPE grammar file viewer (<a href="http://gate.ac.uk/userguide/chap:jape">docs</a>)&nbsp;</td>
+		<td>gate.gui.jape.plus.Viewer</td>
+	</tr>
+	<tr>
+		<td>JAPE-Plus Transducer&nbsp;</td>
+		<td>An optimised, JAPE-compatible transducer.&nbsp;</td>
+		<td>gate.jape.plus.Transducer</td>
+	</tr>
+	<tr>
 		<th colspan='3'><a name='Keyphrase_Extraction_Algorithm'>Keyphrase_Extraction_Algorithm</a></th>
 	</tr>
 	<tr>
@@ -365,10 +396,13 @@ list</a>.</p>
 		<th colspan='3'><a name='Language_Identification'>Language_Identification</a></th>
 	</tr>
 	<tr>
-		<td>TextCat PR&nbsp;</td>
-		<td>Recognizes the document language using TextCat. Possible languages: german, english, french, 
-				spanish, italian, swedish, polish, dutch, norwegian, finnish, albanian slovakian, 
-				slovenian, danish, hungarian. &nbsp;</td>
+		<td>TextCat Fingerprint Generator&nbsp;</td>
+		<td>Generate language fingerprints for use with the TextCat Language Indentification PR (<a href="http://gate.ac.uk/userguide/sec:misc-creole:language-identification:fingerprints">docs</a>)&nbsp;</td>
+		<td>org.knallgrau.utils.textcat.FingerprintGenerator</td>
+	</tr>
+	<tr>
+		<td>TextCat Language Identification&nbsp;</td>
+		<td>Recognizes the document language using TextCat (<a href="http://gate.ac.uk/userguide/sec:misc-creole:language-identification">docs</a>)&nbsp;</td>
 		<td>org.knallgrau.utils.textcat.LanguageIdentifier</td>
 	</tr>
 	<tr>
@@ -742,8 +776,8 @@ list</a>.</p>
 		<th colspan='3'><a name='Tagger_Abner'>Tagger_Abner</a></th>
 	</tr>
 	<tr>
-		<td>AbnerTagger&nbsp;</td>
-		<td>Gate wrapper over Abner. (<a href="http://gate.ac.uk/userguide/sec:parsers:abner">docs</a>)&nbsp;</td>
+		<td>ABNER Tagger&nbsp;</td>
+		<td>GATE wrapper over ABNER (<a href="http://gate.ac.uk/userguide/sec:parsers:abner">docs</a>)&nbsp;</td>
 		<td>gate.abner.AbnerTagger</td>
 	</tr>
 	<tr>
@@ -795,6 +829,22 @@ list</a>.</p>
 		<td>gate.metamap.MetaMapPR</td>
 	</tr>
 	<tr>
+		<th colspan='3'><a name='Tagger_MutationFinder'>Tagger_MutationFinder</a></th>
+	</tr>
+	<tr>
+		<td>MutationFinder&nbsp;</td>
+		<td>GATE MutationFinder Wrapper (<a href="http://gate.ac.uk/userguide/sec:domain-creole:biomed:mutationfinder">docs</a>)&nbsp;</td>
+		<td>gate.creole.mutationfinder.MutationFinderPR</td>
+	</tr>
+	<tr>
+		<th colspan='3'><a name='Tagger_NormaGene'>Tagger_NormaGene</a></th>
+	</tr>
+	<tr>
+		<td>NormaGene Tagger&nbsp;</td>
+		<td>A processing resource that takes document and corpus parameters&nbsp;</td>
+		<td>gate.creole.normagene.NormaGene</td>
+	</tr>
+	<tr>
 		<th colspan='3'><a name='Tagger_NP_Chunking'>Tagger_NP_Chunking</a></th>
 	</tr>
 	<tr>
@@ -822,6 +872,29 @@ list</a>.</p>
 		<td>OpenCalais Tagger&nbsp;</td>
 		<td>An OpenCalais based semantic annotator (<a href="http://gate.ac.uk/userguide/sec:misc-creole:OpenCalais">docs</a>)&nbsp;</td>
 		<td>gate.opencalais.OpenCalais</td>
+	</tr>
+	<tr>
+		<th colspan='3'><a name='Tagger_PennBio'>Tagger_PennBio</a></th>
+	</tr>
+	<tr>
+		<td>Penn BioTagger: Genes&nbsp;</td>
+		<td>A processing resource that takes document and corpus parameters (<a href="http://gate.ac.uk/userguide/sec:domain-creole:biomed:pennbio">docs</a>)&nbsp;</td>
+		<td>gate.creole.pennbio.GeneTagger</td>
+	</tr>
+	<tr>
+		<td>Penn BioTagger: Malignancy&nbsp;</td>
+		<td>A processing resource that takes document and corpus parameters (<a href="http://gate.ac.uk/userguide/sec:domain-creole:biomed:pennbio">docs</a>)&nbsp;</td>
+		<td>gate.creole.pennbio.MalignancyTagger</td>
+	</tr>
+	<tr>
+		<td>Penn BioTokenizer&nbsp;</td>
+		<td>A processing resource that takes document and corpus parameters (<a href="http://gate.ac.uk/userguide/sec:domain-creole:biomed:pennbio">docs</a>)&nbsp;</td>
+		<td>gate.creole.pennbio.Tokenizer</td>
+	</tr>
+	<tr>
+		<td>Penn BioTagger: Variation&nbsp;</td>
+		<td>A processing resource that takes document and corpus parameters (<a href="http://gate.ac.uk/userguide/sec:domain-creole:biomed:pennbio">docs</a>)&nbsp;</td>
+		<td>gate.creole.pennbio.VariationTagger</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='Teamware_Tools'>Teamware_Tools</a></th>
@@ -937,6 +1010,7 @@ list</a>.</p>
 <a name='external-plugins'></a>
 <h2>Other contributed plugins</h2>
 <ul type='circle'>
+	<li><a href='#OrganismTagger'>OrganismTagger</a></li>	
 	<li><a href='#munpex'>Multi-lingual Noun Phrase Extractor (MuNPEx)</a></li>
 	<li><a href='#durm'>Durm German lemmatizer</a></li> 
 	<li><a href='#anc'>XCES tools</a></li>
@@ -952,6 +1026,20 @@ list</a>.</p>
 </ul>
 
 <table border='1'>
+	<tr>
+		<th colspan='3'><a name="munpex"></a>OrganismTagger<br/><a
+                href="http://www.semanticsoftware.info/organism-tagger">website</a> <a
+                href="http://www.semanticsoftware.info/organism-tagger#Download">download</a></th>
+	</tr>
+	<tr>
+		<td>OrganismTagger</td>
+		<td>The OrganismTagger is a hybrid rule-based/machine-learning system that extracts organism
+		mentions from the biomedical literature, normalizes them to their scientific name, and provides
+		grounding to the NCBI Taxonomy database.
+		<td>&nbsp;</td>
+	</tr>
+
+
 	<tr>
 		<th colspan='3'><a name="munpex"></a>Multi-lingual Noun Phrase Extractor (MuNPEx)<br/><a
                 href="http://www.semanticsoftware.info/munpex">website</a> <a
