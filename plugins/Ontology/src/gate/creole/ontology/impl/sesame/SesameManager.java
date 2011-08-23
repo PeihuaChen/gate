@@ -26,6 +26,7 @@ import gate.creole.ontology.OURI;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.StringReader;
@@ -429,7 +430,7 @@ public class SesameManager {
    * 
    * @param configstring
    * @return
-   * @throws java.lang.Exception
+   * @throws java.sesame_lang.Exception
    */
   public void createUnmanagedRepository(File repositoryDirFile, String configstring) {
     isManagedRepository = false;
@@ -716,35 +717,60 @@ public class SesameManager {
    */
   public gate.creole.ontology.Literal convertSesameLiteral2Literal(
       org.openrdf.model.Literal sesameLiteral) {
-    URI dtu = sesameLiteral.getDatatype();
-    DataType dt;
-    String lang = sesameLiteral.getLanguage();
-    if(dtu == null) {
-      if(lang != null) {
-        //System.err.println("Could not get a datatype for literal, using string: "+sesameLiteral);
-        dt = DataType.getStringDataType();
-      } else {
-        //System.err.println("Could not get a datatype for literal, using anyType: "+sesameLiteral);
-        dt = new DataType(new OURIImpl("http://www.w3.org/2001/XMLSchema#anyType"));
+    URI sesame_datatype = sesameLiteral.getDatatype();
+    String sesame_lang = sesameLiteral.getLanguage();
+    
+    gate.creole.ontology.Literal ret = null;
+    if(sesame_datatype != null) {
+      try {
+        ret = new gate.creole.ontology.Literal(
+          sesameLiteral.getLabel(), 
+          toGateDataType(sesame_datatype));
+      } catch (InvalidValueException ex) {
+        throw new GateOntologyException(
+            "Could not convert literal from Sesame: "+sesameLiteral,ex);
       }
     } else {
-      dt = toGateDataType(dtu);
+      if(sesame_lang != null) {
+        ret = new gate.creole.ontology.Literal(
+          sesameLiteral.getLabel(),
+          lang2locale(sesame_lang));
+      } else {
+        ret = new gate.creole.ontology.Literal(sesameLiteral.getLabel());
+      }
+    }
+    /*
+    DataType gate_datatype = null;
+    System.out.println("Converting from Sesame Literal: "+sesameLiteral+","+sesameLiteral.getDatatype()+","+sesameLiteral.getLanguage());
+    if(sesame_datatype == null) {
+      if(sesame_lang != null) {
+        // If we find a language, we use String 
+        gate_datatype = DataType.getStringDataType();
+      } else {
+        // if there is no Datatype and no Language, use anyType
+        // gate_datatype = new DataType(new OURIImpl("http://www.w3.org/2001/XMLSchema#anyType"));
+      }
+    } else {
+      gate_datatype = toGateDataType(sesame_datatype);
     }
     Locale locale = null;
-    if(lang != null) {
-      locale = lang2locale(lang);
+    if(sesame_lang != null) {
+      locale = lang2locale(sesame_lang);
     }
+    gate.creole.ontology.Literal ret = null;
     if(locale != null) {
-      return new gate.creole.ontology.Literal(sesameLiteral.getLabel(),locale);
+      ret = new gate.creole.ontology.Literal(sesameLiteral.getLabel(),locale);
     } else {
       try {
-        return new gate.creole.ontology.Literal(sesameLiteral.getLabel(), dt);
+        ret = new gate.creole.ontology.Literal(sesameLiteral.getLabel(), gate_datatype);
       } catch (InvalidValueException ex) {
         // TODO: what to do here?
         throw new GateOntologyException(
             "Could not convert literal from Sesame: "+sesameLiteral);
       }
-    }
+    }*/
+    //System.out.println("Converted sesame to gate literal: "+sesameLiteral+"/"+ret.getValue()+","+ret.getDataType()+","+ret.getLanguage());
+    return ret;
   }
 
   
@@ -762,6 +788,9 @@ public class SesameManager {
   }
   
   public gate.creole.ontology.DataType toGateDataType(org.openrdf.model.URI uri) {
+    if(uri == null) {
+      return null;
+    }
     DataType dt = new DataType(new OURIImpl(uri.toString()));
     return dt;
   }
@@ -858,14 +887,22 @@ public class SesameManager {
     if (literal != null) {
       if (literal.getLanguage() != null && !literal.getLanguage().getLanguage().equals("")) {
         l = mRepositoryConnection.
-          getValueFactory().createLiteral(literal.getValue(), 
+          getValueFactory().
+          createLiteral(
+            literal.getValue(), 
             literal.getLanguage().getLanguage());
       } else if (literal.getDataType() != null) {
-        l = mRepositoryConnection.getValueFactory().createLiteral(literal.getValue());
+        l = mRepositoryConnection.
+          getValueFactory().
+          createLiteral(
+            literal.getValue(),
+            mRepositoryConnection.
+              getValueFactory().
+              createURI(literal.getDataType().getXmlSchemaURIString()));
       } else {
         l = mRepositoryConnection.
-          getValueFactory().createLiteral(literal.getValue(),
-            literal.getDataType().getXmlSchemaURIString());
+          getValueFactory().
+          createLiteral(literal.getValue());
       }
     }
     return l;
