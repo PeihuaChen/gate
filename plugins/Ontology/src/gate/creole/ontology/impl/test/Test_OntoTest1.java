@@ -10,8 +10,6 @@ package gate.creole.ontology.impl.test;
 import gate.creole.ontology.*;
 import gate.util.GateException;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Set;
@@ -21,10 +19,6 @@ import gate.FeatureMap;
 import gate.Gate;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.ontology.OConstants.Closure;
-import gate.creole.ontology.impl.AbstractOntologyImpl;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import junit.framework.Test;
@@ -217,6 +211,57 @@ public class Test_OntoTest1 extends TestCase {
     assertFalse(dpc04p2.isValidDomain(iClass04i01));
     assertTrue(dpc04p2.isValidDomain(iClass04i04));
 
+    OInstance iClass100I01 = ontology.getOInstance(getURI4Name(ontology,"iClass100I01"));
+    assertNotNull(iClass100I01);
+    DatatypeProperty dp100a = ontology.getDatatypeProperty(getURI4Name(ontology,"dp100a"));
+    assertNotNull(dp100a);
+    List<Literal> l100i01s = iClass100I01.getDatatypePropertyValues(dp100a);
+    assertEquals(1, l100i01s.size());
+    Literal l100i01 = l100i01s.iterator().next();
+    assertEquals("plain literal, no language tag", l100i01.getValue());
+    assertEquals(null,l100i01.getLanguage());
+    assertEquals(null,l100i01.getDataType());
+    assertEquals("\"plain literal, no language tag\"",l100i01.toTurtle());
+    
+    OInstance iClass100I02 = ontology.getOInstance(getURI4Name(ontology,"iClass100I02"));
+    assertNotNull(iClass100I02);
+    DatatypeProperty dp100b = ontology.getDatatypeProperty(getURI4Name(ontology,"dp100b"));
+    assertNotNull(dp100b);
+    List<Literal> l100i02s = iClass100I02.getDatatypePropertyValues(dp100b);
+    assertEquals(1, l100i02s.size());
+    Literal l100i02 = l100i02s.iterator().next();
+    assertEquals("plain literal, lang tag es", l100i02.getValue());
+    assertNotNull(l100i02.getLanguage());
+    assertEquals("es",l100i02.getLanguage().getLanguage());
+    assertEquals(null,l100i02.getDataType());
+    assertEquals("\"plain literal, lang tag es\"@es",l100i02.toTurtle());
+    
+    OInstance iClass100I03 = ontology.getOInstance(getURI4Name(ontology,"iClass100I03"));
+    assertNotNull(iClass100I03);
+    DatatypeProperty dp100c = ontology.getDatatypeProperty(getURI4Name(ontology,"dp100c"));
+    assertNotNull(dp100c);
+    List<Literal> l100i03s = iClass100I03.getDatatypePropertyValues(dp100c);
+    assertEquals(1, l100i03s.size());
+    Literal l100i03 = l100i03s.iterator().next();
+    assertEquals("typed literal, string", l100i03.getValue());
+    assertEquals(null,l100i03.getLanguage());
+    assertEquals(DataType.getStringDataType(),l100i03.getDataType());
+    System.out.println("l100i03 literal: "+l100i03.toTurtle());
+    assertEquals("\"typed literal, string\"^^<"+DataType.getStringDataType().getXmlSchemaURIString()+">",l100i03.toTurtle());
+
+    OInstance iClass100I04 = ontology.getOInstance(getURI4Name(ontology,"iClass100I04"));
+    assertNotNull(iClass100I04);
+    DatatypeProperty dp100d = ontology.getDatatypeProperty(getURI4Name(ontology,"dp100d"));
+    assertNotNull(dp100d);
+    List<Literal> l100i04s = iClass100I04.getDatatypePropertyValues(dp100d);
+    assertEquals(1, l100i04s.size());
+    Literal l100i04 = l100i04s.iterator().next();
+    assertEquals("12", l100i04.getValue());
+    assertEquals(null,l100i04.getLanguage());
+    assertEquals(DataType.getIntDataType(),l100i04.getDataType());
+    assertEquals("\"12\"^^<"+DataType.getIntDataType().getXmlSchemaURIString()+">",l100i04.toTurtle());
+
+    
     ontology.cleanup();
   }
 
