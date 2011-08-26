@@ -530,7 +530,7 @@
 				java.util.ArrayList
 			</PARAMETER>
 			<PARAMETER NAME="setsToKeep" RUNTIME="true" OPTIONAL="true"
-        COMMENT="The annotation sets to keep otherwise delete all"
+        COMMENT="The annotation sets to keep otherwise delete all" DEFAULT="Key"
 				ITEM_CLASS_NAME="java.lang.String">
 				java.util.ArrayList
 			</PARAMETER>
