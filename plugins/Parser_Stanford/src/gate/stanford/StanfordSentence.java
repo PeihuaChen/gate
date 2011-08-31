@@ -1,3 +1,14 @@
+/*
+ *  Copyright (c) 2006-2011, The University of Sheffield. See the file
+ *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  $Id$
+ */
 package gate.stanford;
 
 import java.util.*;
@@ -12,9 +23,6 @@ import gate.util.OffsetComparator;
  * This data structure is constructed from a Sentence Annotation, using the enclosed
  * Token Annotations, and yields the required List, as well as methods for
  * converting the parser's output spans into GATE Annotation offsets.
- * 
- * @author Adam Funk
- *
  */
 public class StanfordSentence {
   
@@ -124,7 +132,8 @@ public class StanfordSentence {
    * token boundaries re-numbered within each sentence, which we need to convert to 
    * GATE character offsets within the whole document.
    * 
-   * Example: "This is a test." starting at offset 100, containing five tokens.
+   * Example: 
+   * "This is a test." starting at document offset 100, containing five tokens.
    * Stanford says "This" starts at 0 and ends at 1; GATE says 100 to 104.
    * Stanford says "is a test" starts at 1 and ends at 4;
    * GATE says 105 to 114.

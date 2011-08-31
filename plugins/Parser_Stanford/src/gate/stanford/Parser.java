@@ -1,3 +1,14 @@
+/*
+ *  Copyright (c) 2006-2011, The University of Sheffield. See the file
+ *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  $Id$
+ */
 package gate.stanford;
 
 import edu.stanford.nlp.parser.lexparser.*;
@@ -20,7 +31,6 @@ import edu.stanford.nlp.ling.*;
  * structures, which it feeds to the LexicalizedParser. The parser's output can
  * be stored in the outputAS in various ways, controlled by CREOLE run-time
  * parameters.
- * @author adam
  */
 @CreoleResource(name = "StanfordParser", comment = "Stanford parser wrapper",
         helpURL = "http://gate.ac.uk/userguide/sec:parsers:stanford")
@@ -53,7 +63,7 @@ implements ProcessingResource {
   private OffsetComparator                 offsetComparator;
   private Map<String, String>              tagMap;
   protected StanfordSentence               stanfordSentence;
-  protected GrammaticalStructureFactory gsf;
+  protected GrammaticalStructureFactory    gsf;
   
 
   /*  CREOLE parameters for optional mapping  */
@@ -71,8 +81,6 @@ implements ProcessingResource {
   private boolean  addPosTags;
   private String   inputSentenceType;
   private String   inputTokenType;
-
-
   
 
   /**
@@ -82,20 +90,8 @@ implements ProcessingResource {
    * dependencies from the parse. In most cases you should leave this at
    * the default value, which is suitable for English text.
    */
-  protected String tlppClass =
-          "edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams";
+  private String tlppClass;
 
-  public String getTlppClass() {
-    return tlppClass;
-  }
-
-  @CreoleParameter(comment = "Class name of the TreebankLangParserParams "
-      + "implementation used to extract the dependencies",
-      defaultValue = 
-          "edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams")
-  public void setTlppClass(String tlppClass) {
-    this.tlppClass = tlppClass;
-  }
 
   /**
    * The name of the feature to add to tokens. The feature value is a
@@ -111,7 +107,7 @@ implements ProcessingResource {
    * method called by a CorpusController.)
    */
   public void execute() throws ExecutionException {
-    annotationSet  = convertASName(annotationSetName);
+    annotationSet  = document.getAnnotations(annotationSetName);
     
     if (debugMode) {
       System.out.println("Parsing document: " + document.getName());
@@ -539,17 +535,17 @@ implements ProcessingResource {
   }
 
 
-  protected AnnotationSet convertASName(String name) {
-    if ((name == null) || name.equals("") ) {
-      return document.getAnnotations();
-    }
-
-    /* implied else */
-    return document.getAnnotations(name);
+  /* get & set methods for the CREOLE parameters */
+  @CreoleParameter(comment = "TreebankLangParserParams implementation used to extract the dependencies",
+      defaultValue = "edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams")
+  public void setTlppClass(String tlppClass) {
+    this.tlppClass = tlppClass;
+  }
+  
+  public String getTlppClass() {
+    return tlppClass;
   }
 
-
-  /* get & set methods for the CREOLE parameters */
 
   @Optional
   @RunTime
