@@ -156,6 +156,9 @@ implements ProcessingResource {
               TreebankLangParserParams.class.cast(tlppClassObj.newInstance());
       gsf = tlpp.treebankLanguagePack().grammaticalStructureFactory();
     }
+    catch(UnsupportedOperationException e) {
+      throw new ResourceInstantiationException(e);
+    }
     catch(ClassNotFoundException e) {
       throw new ResourceInstantiationException("Class " + tlppClass
               + " not found", e);
