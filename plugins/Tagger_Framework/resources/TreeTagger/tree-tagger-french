@@ -14,13 +14,6 @@
 
 # THESE VARIABLES HAVE TO BE SET:
 
-# For Windows, these should be Windows paths with backslashes (which will need
-# single-quoting), not Cygwin-style paths, e.g.
-# BIN='C:\TreeTagger\bin'
-# The script will probably fail if the BIN or LIB directory names contain
-# spaces.  You should install the tree tagger in a directory that does not
-# contain spaces in its path (i.e. not under "Program Files").
-
 BIN=/usr/local/durmtools/TreeTagger/bin
 LIB=/usr/local/durmtools/TreeTagger/lib
 
@@ -98,7 +91,218 @@ $TAGGERCMD
 exit
 fi
 
+####### Tokenization for French texts
 cat -s $INPUT |\
+
+gawk '
+# SGML-Codes
+/^<.*>$/ { gsub(/ /, "~"); print; next }
+/<.*>/ {
+   gsub(/>/, "> ")
+}
+{
+# cut punctuation off
+  gsub(/\047/, "\047 ")
+  gsub(/  *%/, "%")
+  gsub(/\.\.\./, " ___ ")
+  gsub(/"/, " & ")
+  gsub(/[\.,;:!\?\)\]]/, " &")
+  gsub(/[\(\[]/, "& ")
+  gsub(/___/, "...")
+  gsub(/\#/, "")
+  gsub(/---?/, " - ")
+# Strip leading and trailing spaces
+  gsub(/^ */, "")
+  gsub(/ *$/, "")
+}
+{ print }' |\
+
+# One word per line
+
+tr ' ' '\12' |\
+grep -v '^$' |\
+
+
+
+############# Handle exceptions:
+
+gawk '
+
+# Abbreviations which are in the lexicon/parameter file)
+$0~/^\.$/ && p1~/^\*?(\..|Ets|Inc|M|MM|Mme|Mlle|Mr|etc|tél)$/ { append(N) }
+$0~/^(er|ère)$/ && p1~/^[1Ii]$/ { append(N) }
+$0~/^nde?$/ && p1~/^(2|II|ii)$/ { append(N) }
+
+# Abbreviations of type "U.e.f.a." and telephone numbers
+$0~/^\.[^\.]/ { append(N) }
+# decimal numbers
+$0~/^,[0-9]+/ && p1~/[0-9]+/ { append(N) }
+# append series of numbers (e.g. 300 000)
+$0~/^[0-9]+$/ && p1~/^[0-9]+$/ { append(N) }
+
+# print the remaining cases
+{printf "\n%s", $0; stack(N)}
+END {printf "\n"}
+
+function append(N) {
+  printf"%s", $0
+  stack(N); next
+}
+function append2(N) {
+  printf"_%s\n%s", $0, f1
+  p1=$0; $0=f1
+  stack(N); next
+}
+function stack(N) {
+  p1=$0
+}
+' |\
+
+# Hyphens
+
+gawk '
+############### Do not separate (forms are in the lexicon)
+
+$1~/^([mM]oi|\
+[tT]oi|\
+[lL]ui|\
+[eE]lle|\
+[nN]ous|\
+[vV]ous|\
+[eE]ux|\
+[eE]lles)-mêmes?$/ {
+  drucke($0)
+next
+}
+
+$1~/^([cC]elle|\
+[cC]elles|\
+[cC]elui|\
+[cC]eux|\
+[pP]ar)-(ci|là)$/ {
+  drucke($0)
+next
+}
+
+$1~/^rendez-vous|garde-à-vous$/ {
+  drucke($0)
+next
+}
+
+################ Separate: e.g. -il, -t-il
+
+$1 ~ /-(ce|ci|là|elle|elles|il|ils|je|la|le|les|leur|lui|même|mêmes|m\047|moi|nous|on|toi|tu|t\047|vous|en|y)$/ && (substr($1, 1, 1) != "-") {
+  max = split($1, wort, "-")
+   print lastword; lastword=""
+    print wort[1]
+      for(i=2; i<=max; i++) {
+	if(wort[i] == "t") {
+	  printf "-" wort[i]      # ohne CR: -t-elle ist Lexikoneintrag
+	    continue
+	}
+	print "-" wort[i]
+      }
+     next
+}
+
+############## Append words which should not be separated
+
+$1 ~ /^hui$/ {
+  if(match(lastword, /^[aA]ujourd\047$/)==1) joinwithlast($1)
+}
+
+$1 ~ /^est-à-dire$/ {
+  if(match(lastword, /^[cC]\047$/)==1) joinwithlast($1)
+}
+
+$1 ~ /^(abord|ailleurs|après|autant)$/ {
+  if(match(lastword, /^[dD]\047$/)==1) joinwithlast($1)
+}
+
+$1 ~ /^oeuvres?$/ {
+  if(match(lastword, /^d\047$/)==1) joinwithlast($1)
+}
+
+$1 ~ /^%$/ {
+  if(match(lastword, /^[0-9,\.]+$/)==1) joinwithlast($1)
+}
+
+# grand`père
+$1 ~ /^[gG]rand\047$/ {
+  drucke(N)
+   printf $0
+   getline f1
+    if(match(f1, /mère|père/) == 1) print f1
+      else {printf "\n"; lastword=f1}
+      next
+}
+# p`tit
+$1 ~ /^p\047$/ {
+  drucke(N)
+   printf $0
+   getline f1
+    if(match(f1, /tit/) == 1) print f1
+      else {printf "\n"; lastword=f1}
+      next
+}
+# quelqu`un
+$1 ~ /^[qQ]uelqu\047$/ {
+  drucke(N)
+   printf $0
+   getline f1
+    if(match(f1, /un/) == 1) print f1
+      else {printf "\n"; lastword=f1}
+      next
+}
+# entr`aimer
+$1 ~ /^[eE]ntr\047$/ {
+  drucke(N)
+   printf $0
+   getline f1
+    print f1
+     lastword=f1
+      next
+}
+# Mam`zelle
+$1 ~ /^[mM]am\047$/ {
+  drucke(N)
+   printf $0
+   getline f1
+    if(match(f1, /zelle/) == 1) print f1
+      else {printf "\n"; lastword=f1}
+      next
+}
+# v`là
+$1 ~ /^[vV]\047$/ {
+  drucke(N)
+   printf $0
+   getline f1
+    if(match(f1, /là/) == 1) print f1
+      else {printf "\n"; lastword=f1}
+      next
+}
+
+############## Default
+
+{ drucke($0) }
+
+END { print lastword }
+
+############# functions
+
+function drucke(N) {
+  if(NR>1) {
+    if(lastword != "") print lastword
+  }
+  lastword = N
+}
+
+function joinwithlast(N) {
+  printf lastword
+    lastword = N
+      next
+}'  |\
+
 
 
 $TAGGERCMD $PARAMETERS $TAGGEROPTS  |\

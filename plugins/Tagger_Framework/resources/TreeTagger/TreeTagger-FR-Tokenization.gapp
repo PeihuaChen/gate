@@ -155,7 +155,7 @@
                 <entry>
                   <string>taggerBinary</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>file:///usr/local/durmtools/TreeTagger/cmd/tree-tagger-french</urlString>
+                    <urlString>$relpath$../../../Tagger_Framework/resources/TreeTagger/tree-tagger-french</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
                 <entry>
