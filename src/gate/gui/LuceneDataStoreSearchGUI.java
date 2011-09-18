@@ -1135,9 +1135,7 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource
       centerPanel.addRow(null, type, feature, removeRowButton, shortcut, crop);
 
       // annotations for this row
-      PatternAnnotation[] annotations = feature.equals("") ?
-        result.getPatternAnnotations(type)
-      : result.getPatternAnnotations(type, feature);
+      PatternAnnotation[] annotations = result.getPatternAnnotations(type);
       if (annotations != null && annotations.length > 0) {
         for (PatternAnnotation annotation : annotations) {
           FeatureMap features = Factory.newFeatureMap();
