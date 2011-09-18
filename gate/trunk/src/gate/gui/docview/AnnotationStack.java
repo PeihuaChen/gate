@@ -317,38 +317,38 @@ public class AnnotationStack extends JPanel {
         label.setBackground(AnnotationSetsView.getColor(stackRow.getSet(),ann.getType()));
         label.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
         label.setOpaque(true);
-        if(feature.equals("")) {
-          label.addMouseListener(annotationMouseListener.createListener(
-            stackRow.getSet(), type, String.valueOf(ann.getId())));
-          // show the feature values in the tooltip
-          String width = (Strings.toString(ann.getFeatures()).length() > 100) ?
-            "500" : "100%";
-          String toolTip = "<html><table width=\"" + width
-            + "\" border=\"0\" cellspacing=\"0\" cellpadding=\"4\">";
-          Color color = (Color) UIManager.get("ToolTip.background");
-          float[] hsb = Color.RGBtoHSB(
-            color.getRed(), color.getGreen(), color.getBlue(), null);
-          color = Color.getHSBColor(hsb[0], hsb[1],
-            Math.max(0f, hsb[2] - hsb[2]*0.075f)); // darken the color
-          String hexColor = Integer.toHexString(color.getRed()) +
-            Integer.toHexString(color.getGreen()) +
-            Integer.toHexString(color.getBlue());
-          boolean odd = false; // alternate background color every other row
-          for(Map.Entry<Object, Object> map : ann.getFeatures().entrySet()) {
-            toolTip +="<tr align=\"left\""
-              + (odd?" bgcolor=\"#"+hexColor+"\"":"")+"><td><strong>"
-              + map.getKey() + "</strong></td><td>"
-              + ((Strings.toString(map.getValue()).length() > 500) ?
-              "<textarea rows=\"20\" cols=\"40\" cellspacing=\"0\">"
-                + (Strings.toString(map.getValue())).replaceAll("(.{50,60})\\b", "$1\n")
-                + "</textarea>" :
-              Strings.toString(map.getValue()).replaceAll("\n", "<br>"))
-              + "</td></tr>";
-            odd = !odd;
-          }
-          label.setToolTipText(toolTip + "</table></html>");
 
-        } else {
+        label.addMouseListener(annotationMouseListener.createListener(
+          stackRow.getSet(), type, String.valueOf(ann.getId())));
+        // show the feature values in the tooltip
+        String width = (Strings.toString(ann.getFeatures()).length() > 100) ?
+          "500" : "100%";
+        String toolTip = "<html><table width=\"" + width
+          + "\" border=\"0\" cellspacing=\"0\" cellpadding=\"4\">";
+        Color color = (Color) UIManager.get("ToolTip.background");
+        float[] hsb = Color.RGBtoHSB(
+          color.getRed(), color.getGreen(), color.getBlue(), null);
+        color = Color.getHSBColor(hsb[0], hsb[1],
+          Math.max(0f, hsb[2] - hsb[2]*0.075f)); // darken the color
+        String hexColor = Integer.toHexString(color.getRed()) +
+          Integer.toHexString(color.getGreen()) +
+          Integer.toHexString(color.getBlue());
+        boolean odd = false; // alternate background color every other row
+        for(Map.Entry<Object, Object> map : ann.getFeatures().entrySet()) {
+          toolTip +="<tr align=\"left\""
+            + (odd?" bgcolor=\"#"+hexColor+"\"":"")+"><td><strong>"
+            + map.getKey() + "</strong></td><td>"
+            + ((Strings.toString(map.getValue()).length() > 500) ?
+            "<textarea rows=\"20\" cols=\"40\" cellspacing=\"0\">"
+              + (Strings.toString(map.getValue())).replaceAll("(.{50,60})\\b", "$1\n")
+              + "</textarea>" :
+            Strings.toString(map.getValue()).replaceAll("\n", "<br>"))
+            + "</td></tr>";
+          odd = !odd;
+        }
+        label.setToolTipText(toolTip + "</table></html>");
+
+        if(!feature.equals("")) {
           label.addMouseListener(annotationMouseListener.createListener(
             stackRow.getSet(), type, feature, Strings.toString(
               ann.getFeatures().get(feature)), String.valueOf(ann.getId())));
