@@ -374,7 +374,6 @@ public class MainFrame extends JFrame implements ProgressListener,
     this.setSize(new Dimension(width == null ? 800 : width,
       height == null ? 600 : height));
 
-    // TODO: when upgrading to Java 1.6 use setIconImages() instead
     this.setIconImage(Toolkit.getDefaultToolkit().getImage(
       Files.getGateResource("/img/gate-icon.png")));
     resourcesTree = new ResourcesTree();
@@ -1266,6 +1265,8 @@ public class MainFrame extends JFrame implements ProgressListener,
           }
           else if(popup != null) {
             if(handle != null) {
+              // these menu items are added after
+              // gate.gui.NameBearerHandle#buildStaticPopupItems
 
               // add a close action
               if(handle instanceof NameBearerHandle) {
