@@ -51,6 +51,8 @@ public class AnnotationStackView  extends AbstractDocumentView
 
   public AnnotationStackView() {
     typesFeatures = new HashMap<String,String>();
+    annotationMouseListener = new AnnotationMouseListener();
+    headerMouseListener = new HeaderMouseListener();
   }
 
   public void cleanup() {
@@ -296,8 +298,8 @@ public class AnnotationStackView  extends AbstractDocumentView
     stackPanel.setContextBeforeSize(Math.min(caretPosition, context));
     stackPanel.setContextAfterSize(Math.min(
       document.getContent().size().intValue()-1-caretPosition, context));
-    stackPanel.setAnnotationMouseListener(new AnnotationMouseListener());
-    stackPanel.setHeaderMouseListener(new HeaderMouseListener());
+    stackPanel.setAnnotationMouseListener(annotationMouseListener);
+    stackPanel.setHeaderMouseListener(headerMouseListener);
     stackPanel.clearAllRows();
 
     // add stack rows and annotations for each selected annotation set
@@ -447,15 +449,23 @@ public class AnnotationStackView  extends AbstractDocumentView
               && me.getClickCount() == 1
               && (me.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) != 0) {
                // control + click
-        String feature = typesFeatures.get(annotation.getType());
-        if (feature == null) { return; }
-        String value = (String) annotation.getFeatures().get(feature);
-        Pattern pattern = Pattern.compile("(https?://[^\\s,;]+)");
-        Matcher matcher = pattern.matcher(value);
-        if (matcher.find()) {
-          // if the feature value contains a url then display it in a browser
-          MainFrame.getInstance().showHelpFrame(
-            matcher.group(), "Annotation Stack View");
+        String featureDisplayed = typesFeatures.get(annotation.getType());
+        Object[] features;
+        if (featureDisplayed != null) {
+          features = new Object[]{featureDisplayed};
+        } else {
+          features = annotation.getFeatures().keySet().toArray();
+        }
+        for (Object feature : features) {
+          String value = (String) annotation.getFeatures().get(feature);
+          if (value == null) { continue; }
+          Pattern pattern = Pattern.compile("(https?://[^\\s,;]+)");
+          Matcher matcher = pattern.matcher(value);
+          if (matcher.find()) {
+            // if the feature value contains an url display it in a browser
+            MainFrame.getInstance().showHelpFrame(
+              matcher.group(), "Annotation Stack View");
+          }
         }
 
       } else if (me.getID() == MouseEvent.MOUSE_CLICKED
@@ -496,16 +506,16 @@ public class AnnotationStackView  extends AbstractDocumentView
       reshowDelay = toolTipManager.getReshowDelay();
       enabled = toolTipManager.isEnabled();
       Component component = e.getComponent();
-      if (!isTooltipSet && component instanceof JLabel) {
-        isTooltipSet = true;
+      if (component instanceof JLabel
+      && !((JLabel)component).getToolTipText().contains("Ctr-Sh-click")) {
         JLabel label = (JLabel) component;
         String toolTip = (label.getToolTipText() == null) ?
           "" : label.getToolTipText();
         toolTip = toolTip.replaceAll("</?html>", "");
         toolTip = "<html>"
-          + (toolTip.length() == 0 ? "" : ("<b>" + toolTip + "</b><br><br>"))
+          + (toolTip.length() == 0 ? "" : ("<b>" + toolTip + "</b><br>"))
           + "Double-click to copy. Right-click to edit.<br>"
-          + "Control-click to show URL. Control-shift-click to delete.</html>";
+          + "Ctr-click to show URL. Ctr-Sh-click to delete.</html>";
         label.setToolTipText(toolTip);
       }
       // make the tooltip indefinitely shown when the mouse is over
@@ -527,7 +537,6 @@ public class AnnotationStackView  extends AbstractDocumentView
     boolean enabled;
     Annotation annotation;
     AnnotationData annotationData;
-    boolean isTooltipSet = false;
   }
 
   protected class HeaderMouseListener extends StackMouseListener {
@@ -682,4 +691,6 @@ public class AnnotationStackView  extends AbstractDocumentView
   /** optionally map a type to a feature when the feature value
    *  must be displayed in the rectangle annotation */
   Map<String,String> typesFeatures;
+  AnnotationMouseListener annotationMouseListener;
+  HeaderMouseListener headerMouseListener;
 }
