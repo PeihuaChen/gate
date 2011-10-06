@@ -39,7 +39,9 @@ class GrootilsExamples {
 /** Groovy utilities. */
 class Grootils {
   /**
-   * Adds a map to a class which amalgamates a set of properties. Makes is
+   * Adds a map to a class which amalgamates a set of properties so that you
+   * can list this set in only one place while still accessing each individual
+   * as a simple member variable. Makes it
    * possible to treat each property as a normal class member, then to access
    * a map of the members and their values at any point. Useful for classes
    * which set up a bunch of values (which can be accessed trivially as
