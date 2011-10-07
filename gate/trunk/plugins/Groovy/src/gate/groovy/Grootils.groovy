@@ -17,7 +17,7 @@ package gate.groovy
 /** Grootils example code. */
 class GrootilsExamples {
   static {
-    Grootils.wrap( GrootilsExamples.class, "thingStore", [ "a", "b", "c" ] )
+    Grootils.wrap( this, "thingStore", [ "a", "b", "c" ] )
   }
 
   static void main(String[] args) {
@@ -50,7 +50,7 @@ class Grootils {
    * class, e.g. given this initialiser in <tt>class Thing</tt>:
    * <pre>
    * static {
-   *   Grootils.wrap( Thing.class, "thingStore", [ "a", "b", "c" ] )
+   *   Grootils.wrap( this, "thingStore", [ "a", "b", "c" ] )
    * }
    * </pre>
    * we can then write:
