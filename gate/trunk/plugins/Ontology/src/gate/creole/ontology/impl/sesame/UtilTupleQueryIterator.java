@@ -280,5 +280,18 @@ import org.openrdf.repository.RepositoryConnection;
     public void remove() {
       throw new UnsupportedOperationException("remove method not supported");
     }
+    
+    public List<String> getBindingNames() {
+      if(!mIsPrepared) {
+        throw new GateOntologyException("Cannot get bindings for tuple query before it is prepared");
+      } else if(!mIsEvaluated) {
+        throw new GateOntologyException("Cannot get bindings for tuple query before it is evaluated");
+      } else if(mIsClosed) {
+        throw new GateOntologyException("Cannot get bindings for a closed tuple query");
+      } else {
+        return mResult.getBindingNames();
+      }
+    }
+    
   }
 
