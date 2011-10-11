@@ -41,6 +41,7 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.GraphImpl;
 import org.openrdf.model.util.GraphUtil;
 import org.openrdf.model.util.GraphUtilException;
+import org.openrdf.query.MalformedQueryException;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.sail.memory.MemoryStore;
 import org.openrdf.repository.manager.LocalRepositoryManager;
@@ -77,6 +78,9 @@ import org.openrdf.model.Value;
 import org.openrdf.model.impl.BNodeImpl;
 import org.openrdf.model.impl.LiteralImpl;
 import org.openrdf.model.impl.URIImpl;
+import org.openrdf.query.BooleanQuery;
+import org.openrdf.query.QueryLanguage;
+import org.openrdf.query.Update;
 /**
  * A class to encapsulate management of a Sesame2 repository and
  * make handling different repository types easier.
@@ -683,6 +687,30 @@ public class SesameManager {
           OConstants.QueryLanguage.SPARQL);
     } else {
       throw new SesameManagerException("Cannot create a query, no connection");
+    }
+  }
+
+  public BooleanQuery createAskQuery(String query) {
+    if(mRepositoryConnection != null) {
+      try {
+        return mRepositoryConnection.prepareBooleanQuery(QueryLanguage.SPARQL, query);
+      } catch (Exception ex) {
+        throw new SesameManagerException("Could not prepare BooleanQuery",ex);
+      }
+    } else {
+      throw new SesameManagerException("Could not create an ask query, no connection");
+    }
+  }
+
+  public Update createUpdate(String query) {
+    if(mRepositoryConnection != null) {
+      try {
+        return mRepositoryConnection.prepareUpdate(QueryLanguage.SPARQL, query);
+      } catch (Exception ex) {
+        throw new SesameManagerException("Could not prepare an Update operation",ex);
+      }
+    } else {
+      throw new SesameManagerException("Cannot create an update operation, no connection");
     }
   }
 
