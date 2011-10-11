@@ -29,6 +29,12 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.Vector;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.openrdf.query.BooleanQuery;
+import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.query.Update;
+import org.openrdf.query.UpdateExecutionException;
 import uk.co.flamingpenguin.jewel.cli.ArgumentValidationException;
 import uk.co.flamingpenguin.jewel.cli.CliFactory;
 
@@ -93,6 +99,12 @@ public class SesameCLI {
     } else if (optionCmd.equals("query")) {
       do_query();
       mManager.disconnect();
+    } else if (optionCmd.equals("ask")) {
+      do_ask();
+      mManager.disconnect();
+    } else if (optionCmd.equals("update")) {
+      do_update();
+      mManager.disconnect();
     } else if (optionCmd.equals("import")) {
       do_import();
       mManager.disconnect();
@@ -145,6 +157,7 @@ public class SesameCLI {
     mManager.deleteRepository(optionId);
     System.err.println("Command delete executed on "+optionUrl+", repository "+optionId);
   }
+   
  private static void do_query() {
     setManager(optionDir,optionUrl,optionId);
     String optionFrom = "file";
@@ -178,6 +191,57 @@ public class SesameCLI {
       System.exit(0);
     }
     doQuery(queryString, max, colsep);
+
+  }
+ 
+ private static void do_ask() {
+    setManager(optionDir,optionUrl,optionId);
+    String optionFrom = "file";
+    if (options.isFrom()) {
+      optionFrom = options.getFrom();
+    }
+    String optionFile = options.getFile();
+    String queryString = "";
+    if (optionFrom.equals("file")) {
+      try {
+        queryString = readTextFile(optionFile, "utf-8");
+      } catch (IOException e) {
+        System.err.println("Error reading file " + optionFile + ": " + e);
+        System.exit(2);
+      }
+    } else if (optionFrom.equals("stdin")) {
+      System.err.println("stdin not implemented yet!");
+      System.exit(2);
+    } else {
+      System.err.println("from must be stdin or file (onyl file implemented yet)");
+      System.exit(0);
+    }
+    doAsk(queryString);
+
+  }
+ private static void do_update() {
+    setManager(optionDir,optionUrl,optionId);
+    String optionFrom = "file";
+    if (options.isFrom()) {
+      optionFrom = options.getFrom();
+    }
+    String optionFile = options.getFile();
+    String queryString = "";
+    if (optionFrom.equals("file")) {
+      try {
+        queryString = readTextFile(optionFile, "utf-8");
+      } catch (IOException e) {
+        System.err.println("Error reading file " + optionFile + ": " + e);
+        System.exit(2);
+      }
+    } else if (optionFrom.equals("stdin")) {
+      System.err.println("stdin not implemented yet!");
+      System.exit(2);
+    } else {
+      System.err.println("from must be stdin or file (onyl file implemented yet)");
+      System.exit(0);
+    }
+    doUpdate(queryString);
 
   }
 
@@ -219,7 +283,7 @@ public class SesameCLI {
     try {
       configData = readTextFile(configFileName, "utf-8");
     } catch (IOException e) {
-      System.out.println("Could not open config file "+configFileName+": "+e);
+      System.err.println("Could not open config file "+configFileName+": "+e);
     }
     setManager(optionDir,optionUrl,null);
     // before we try to create the repository, lets check if it is already there
@@ -277,6 +341,26 @@ public class SesameCLI {
       }
       System.out.println();
       n++;
+    }
+  }
+  private static void doAsk(String query) {
+    BooleanQuery sq = mManager.createAskQuery(query);
+    boolean result;
+    try {
+      result = sq.evaluate();
+      System.out.println(result);
+    } catch (QueryEvaluationException ex) {
+      System.err.println("Could not evaluate boolean query: "+ex);
+    }
+  }
+  
+  private static void doUpdate(String query) {
+    Update sq = mManager.createUpdate(query);
+    try {
+      sq.execute();
+    } catch (UpdateExecutionException ex) {
+      System.err.println("Could not execute update: "+ex);
+      ex.printStackTrace(System.err);
     }
   }
 }

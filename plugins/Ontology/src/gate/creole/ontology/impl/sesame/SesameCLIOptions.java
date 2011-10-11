@@ -23,7 +23,7 @@ import java.util.List;
 public interface SesameCLIOptions {
 
   // TODO: pattern does not work?!?!?
-  @Option(shortName="u",longName="serverUrl",description="URL of where Sesame2 server is running")
+  @Option(shortName="u",longName="serverURL",description="URL of where Sesame2 server is running")
   String getUrl();
   boolean isUrl();
 
@@ -35,7 +35,7 @@ public interface SesameCLIOptions {
   String getConfig();
   boolean isConfig();
 
-  @Option(shortName="e",longName="do",description="what to do: query,import,export,clear,create,delete,listids")
+  @Option(shortName="e",longName="do",description="what to do: query,ask,update,import,export,clear,create,delete,listids")
   String getCmd();
 
   @Option(shortName="i",longName="id",description="Repository id")
