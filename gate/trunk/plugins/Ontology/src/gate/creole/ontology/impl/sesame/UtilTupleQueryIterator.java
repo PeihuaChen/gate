@@ -293,5 +293,14 @@ import org.openrdf.repository.RepositoryConnection;
       }
     }
     
+    public void setIncludeInferred(boolean value) {
+      mTupleQuery.setIncludeInferred(value);
+    }
+    
+    public boolean getIncludeInferred() {
+      return mTupleQuery.getIncludeInferred();
+    }
+    
+    
   }
 
