@@ -31,6 +31,8 @@ import java.util.Vector;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.openrdf.query.BooleanQuery;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.Update;
@@ -328,12 +330,23 @@ public class SesameCLI {
   private static void doQuery(String query, int max, String colsep) {
     OntologyTupleQuery sq = mManager.createQuery(query);
     int n = 0;
+    // for now we remove a trailing new line and replace embedded newlines
+    // and any occurrence of the colsep with a space.
+    // This may change in the future ...
+    Pattern trailingNL = Pattern.compile("\\n$");
+    Pattern embedded = Pattern.compile("\\n(?!$)|"+colsep);
     while (sq.hasNext() && (max == 0 || max > n)) {
       //System.err.println("Have a result row");
       Vector<String> row = sq.nextAsString();
       int i = 0;
       for (String value : row) {
+        Matcher trailingNLMatcher = trailingNL.matcher(value);
+        value = trailingNLMatcher.replaceAll("");
+        Matcher embeddedMatcher = embedded.matcher(value);
+        value = embeddedMatcher.replaceAll(" ");
         i++;
+        // clean the value: replace all occurrences of the column separator 
+        // and embedded newlines by space, completely remove trailing newlines
         System.out.print(value);
         if (i < row.size()) {
           System.out.print(colsep);
