@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" output="plugins/JAPE_Plus/classes" path="plugins/JAPE_Plus/src"/>
 	<classpathentry kind="src" output="plugins/Groovy/build" path="plugins/Groovy/src"/>
 	<classpathentry kind="src" path="plugins/Ontology_OWLIM2/src"/>
 	<classpathentry kind="src" path="plugins/OpenNLP/src"/>
@@ -129,8 +130,8 @@
 	<classpathentry kind="lib" path="lib/tika-core-0.9.jar"/>
 	<classpathentry kind="lib" path="lib/tika-parsers-0.9.jar"/>
 	<classpathentry kind="lib" path="lib/apache-mime4j-0.6.jar"/>
-	<classpathentry kind="lib" path="lib/boilerpipe-1.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/fontbox-1.6.0.jar"/>
 	<classpathentry kind="lib" path="lib/metadata-extractor-2.4.0-beta-1.jar"/>
+	<classpathentry kind="lib" path="plugins/JAPE_Plus/lib/colt-1.2.0-free.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
