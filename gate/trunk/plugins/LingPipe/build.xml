@@ -1,7 +1,7 @@
-<project name="google" default="dist" basedir=".">
-    <description>
-        A plugin for Google API Integration.
-    </description>
+<project name="LingPipe" default="dist" basedir=".">
+  <description>
+    GATE Resources for LingPipe
+  </description>
 
   <!-- Prevent Ant from warning about includeantruntime not being set -->
   <property name="build.sysclasspath" value="ignore" />
@@ -38,10 +38,10 @@
   </target>
 
   <target name="compile" depends="init"
-        description="compile the source " >
+	  description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
     <javac srcdir="${src}" destdir="${build}" debug="true" source="1.5">
-     <classpath refid="classpath"/> 
+      <classpath refid="classpath"/> 
     </javac>
   </target>
 
@@ -66,7 +66,7 @@
 
 
   <target name="dist" depends="compile"
-        description="generate the distribution" >
+	  description="generate the distribution" >
     <!-- Create the distribution directory -->
     <mkdir dir="${dist}/lib"/>
 
@@ -75,7 +75,7 @@
   </target>
 
   <target name="clean.classes"
-        description="clean up" >
+	  description="clean up" >
     <!-- Delete the ${build} and ${dist} directory trees -->
     <delete dir="${build}"/>
     <delete dir="${dist}"/>
@@ -91,4 +91,3 @@
   <target name="test" />
   <target name="distro.prepare" depends="clean.classes" />
 </project>
-
