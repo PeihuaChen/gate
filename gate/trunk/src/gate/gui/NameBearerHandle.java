@@ -26,6 +26,7 @@ import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
 import gate.GateConstants;
+import gate.LanguageAnalyser;
 import gate.LanguageResource;
 import gate.ProcessingResource;
 import gate.Resource;
@@ -34,8 +35,10 @@ import gate.corpora.DocumentStaxUtils;
 import gate.creole.AbstractResource;
 import gate.creole.AnnotationSchema;
 import gate.creole.ConditionalController;
+import gate.creole.ConditionalSerialAnalyserController;
 import gate.creole.ResourceData;
 import gate.creole.ResourceInstantiationException;
+import gate.creole.SerialAnalyserController;
 import gate.creole.ir.DefaultIndexDefinition;
 import gate.creole.ir.DocumentContentReader;
 import gate.creole.ir.FeatureReader;
@@ -47,7 +50,6 @@ import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
 import gate.event.ProgressListener;
 import gate.event.StatusListener;
-import gate.gui.teamware.InputOutputAnnotationSetsDialog;
 import gate.persist.LuceneDataStoreImpl;
 import gate.persist.PersistenceException;
 import gate.security.Group;
@@ -420,6 +422,11 @@ public class NameBearerHandle implements Handle, StatusListener,
     if(target instanceof Controller) {
       // Applications
       staticPopupItems.add(null);
+      
+      if (target instanceof SerialAnalyserController) {
+        staticPopupItems.add(new XJMenuItem(new MakeConditionalAction(), sListenerProxy));
+      }
+            
       staticPopupItems.add(new XJMenuItem(new DumpToFileAction(),
               sListenerProxy));
       staticPopupItems.add(new XJMenuItem(new ExportApplicationAction(),
@@ -1009,6 +1016,36 @@ public class NameBearerHandle implements Handle, StatusListener,
                   JOptionPane.ERROR_MESSAGE);
           ex.printStackTrace(Err.getPrintWriter());
         }
+      }
+    }
+  }
+  
+  class MakeConditionalAction extends AbstractAction {
+    private static final long serialVersionUID = 1L;
+
+    public MakeConditionalAction() {
+      super("Make Pipeline Conditional");
+      putValue(SHORT_DESCRIPTION, "Convert to a Conditional Corpus Pipeline");
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      SerialAnalyserController existingController =
+          (SerialAnalyserController)target;
+      try {
+        ConditionalSerialAnalyserController newController =
+            (ConditionalSerialAnalyserController)Factory
+                .createResource("gate.creole.ConditionalSerialAnalyserController");
+        newController.setName(existingController.getName());
+        Iterator<?> it = existingController.getPRs().iterator();
+        while(it.hasNext()) {
+          newController.add((ProcessingResource)it.next());
+        }
+        existingController.setPRs(Collections.emptyList());
+        Factory.deleteResource(existingController);
+      } catch(Exception ex) {
+        JOptionPane.showMessageDialog(getLargeView(),
+            "Error!\n" + ex.toString(), "GATE", JOptionPane.ERROR_MESSAGE);
+        ex.printStackTrace(Err.getPrintWriter());
       }
     }
   }
