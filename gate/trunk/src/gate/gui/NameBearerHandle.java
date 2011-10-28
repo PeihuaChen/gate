@@ -26,7 +26,6 @@ import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
 import gate.GateConstants;
-import gate.LanguageAnalyser;
 import gate.LanguageResource;
 import gate.ProcessingResource;
 import gate.Resource;
