@@ -19,8 +19,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1888,7 +1890,13 @@ public abstract class AbstractOntologyImpl
           }
           InputStream is;
           try {
-            is = location.openStream();
+            if(location.getProtocol().equals("http")) {
+              HttpURLConnection conn = (HttpURLConnection)location.openConnection();
+              conn.addRequestProperty("accept", "application/rdf+xml,application/xml;q=0.5,*/*;q=0.1");
+              is = conn.getInputStream();
+            } else {
+              is = location.openStream();  
+            }
           } catch (IOException ex) {
             throw new GateOntologyException(
                 "Problem opening the URL " + location +
