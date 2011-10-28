@@ -1890,13 +1890,10 @@ public abstract class AbstractOntologyImpl
           }
           InputStream is;
           try {
-            if(location.getProtocol().equals("http")) {
-              HttpURLConnection conn = (HttpURLConnection)location.openConnection();
-              conn.addRequestProperty("accept", "application/rdf+xml,application/xml;q=0.5,*/*;q=0.1");
-              is = conn.getInputStream();
-            } else {
-              is = location.openStream();  
-            }
+            URLConnection conn = location.openConnection();
+            conn.addRequestProperty("accept", 
+                "application/rdf+xml,application/xml;q=0.5,*/*;q=0.1");
+            is = conn.getInputStream();
           } catch (IOException ex) {
             throw new GateOntologyException(
                 "Problem opening the URL " + location +
