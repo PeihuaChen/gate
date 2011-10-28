@@ -1034,6 +1034,7 @@ public class NameBearerHandle implements Handle, StatusListener,
         ConditionalSerialAnalyserController newController =
             (ConditionalSerialAnalyserController)Factory
                 .createResource("gate.creole.ConditionalSerialAnalyserController");
+        newController.getFeatures().putAll(existingController.getFeatures());
         newController.setName(existingController.getName());
         Iterator<?> it = existingController.getPRs().iterator();
         while(it.hasNext()) {
