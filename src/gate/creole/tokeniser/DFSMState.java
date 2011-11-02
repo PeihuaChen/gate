@@ -159,7 +159,7 @@ class DFSMState implements java.io.Serializable { //extends FSMState{
         ///read = mainSt.nextToken("\"");
         //OT
         read = new StringBuffer(mainSt.nextToken("\""));
-        if(read.equals("\"")) ///read = "";
+        if(read.toString().equals("\"")) ///read = "";
             read = new StringBuffer(gate.Gate.STRINGBUFFER_SIZE);
         else {
           //delete the remaining enclosing quote and restore the delimiters
