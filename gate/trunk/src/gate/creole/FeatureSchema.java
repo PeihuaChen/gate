@@ -100,7 +100,7 @@ public class FeatureSchema implements Serializable {
   }// setPermissibleValues()
 
   /**
-   * Adds a value to the enumeration of permissible value for an feature
+   * Adds a value to the enumeration of permissible value for a feature
    * of this type. Returns false, i.e. fails, if the class name of the
    * feature value does not match the class name of the given object
    * 
@@ -109,7 +109,7 @@ public class FeatureSchema implements Serializable {
    */
   public boolean addPermissibleValue(Object obj) {
     if(obj == null) return false;
-    if(!obj.getClass().getName().equals(featureValueClass)) return false;
+    if(!obj.getClass().getName().equals(featureValueClass.getName())) return false;
     if(featurePermissibleValuesSet == null)
       featurePermissibleValuesSet = new HashSet();
     return featurePermissibleValuesSet.add(obj);
