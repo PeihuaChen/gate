@@ -516,14 +516,14 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
   }
 
   public boolean equals(Object o) {
-    boolean result = false;
     if ( o instanceof LinearDefinition ) {
       LinearDefinition def = (LinearDefinition) o;
-      result &= nodes.equals(def.nodes);
-      result &= lists.equals(def.lists);
-      result &= nodesByList.equals(def.lists);
-    }// if
-    return result;
+      return nodes.equals(def.nodes) && 
+             lists.equals(def.lists) && 
+             nodesByList.equals(def.nodesByList);
+    } else {
+      return false;
+    }
   } // equals()
 
  /*---end of implementation of interface java.util.List---*/
