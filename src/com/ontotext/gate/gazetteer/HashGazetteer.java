@@ -39,7 +39,7 @@ public class HashGazetteer extends AbstractGazetteer {
   private Map<String, List<Lookup>> mapsList[];
 
   private int mapsListSize;
-  
+
   private AnnotationSet annotationSet = null;
 
   @SuppressWarnings("unchecked")
@@ -48,7 +48,7 @@ public class HashGazetteer extends AbstractGazetteer {
     if(listsURL == null)
       throw new ResourceInstantiationException(
               "No URL provided for gazetteer creation!");
-    
+
     try {
       mapsList = new HashMap[1000];
       definition = new LinearDefinition();
@@ -78,7 +78,7 @@ public class HashGazetteer extends AbstractGazetteer {
   public void execute() throws ExecutionException {
     if(document == null) throw new ExecutionException("Document is null!");
     annotationSet = document.getAnnotations(annotationSetName);
-    
+
     String s = document.getContent().toString() + " ";
 
     int i = s.length();
@@ -172,7 +172,7 @@ public class HashGazetteer extends AbstractGazetteer {
 
     List<Lookup> arraylist = null;
     int j = 0;
-    s3.trim();
+    //s3.trim(); //doesn't do anything so comment it out
     j = s3.length();
 
     boolean prevIsLetter = false;
@@ -276,7 +276,7 @@ public class HashGazetteer extends AbstractGazetteer {
 
   /**
    * Removes a string from the gazetteer
-   * 
+   *
    * @param s the item to remove
    * @return true if the operation was successful
    */
@@ -298,7 +298,7 @@ public class HashGazetteer extends AbstractGazetteer {
    * Works backwards through the String parameter removing each
    * character until it encounters a letter, digit, or whitespace at
    * which point it returns the truncated string.
-   * 
+   *
    * @param s the String you wish to remove trailing symbols from
    * @return the truncated String that now ends in a letter, digit, or
    *         whitespace character
@@ -319,7 +319,7 @@ public class HashGazetteer extends AbstractGazetteer {
    * Normalizes the whitespace within the String instance by replacing
    * any sequence of one or more whitespace characters with a single
    * space. Not that any leading/trailing whitespace is also removed.
-   * 
+   *
    * @param s the String to normalize
    * @return the normalized String
    */
@@ -431,7 +431,7 @@ public class HashGazetteer extends AbstractGazetteer {
 
     for(; iterator.hasNext(); add(s6, lookup1)) {
       String s4 = iterator.next().toString();
-      s4.trim();
+      //s4.trim(); //doesn't do anything so comment it out
       int i = s4.length();
       for(int j = 0; j < i; j++) {
         if(j + 1 != i && !Character.isWhitespace(s4.charAt(j))) continue;
