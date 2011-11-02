@@ -301,9 +301,9 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
   public boolean equals(Object o) {
     if ( o instanceof MappingDefinition ) {
       MappingDefinition def = (MappingDefinition) o;
-      return nodes.equals(def.nodes) && 
-             lists.equals(def.lists) && 
-             nodesByList.equals(def.lists);
+      return nodes.equals(def.nodes) &&
+             lists.equals(def.lists) &&
+             nodesByList.equals(def.nodesByList);
     } else {
       return false;
     }
