@@ -77,7 +77,7 @@ public class Tools {
       String packageDir = packages[i].getName();
       //look in the file system
       if(!packageDir.startsWith("/")) packageDir = "/" + packageDir;
-      packageDir.replace('.', Strings.getPathSep().charAt(0));
+      packageDir = packageDir.replace('.', Strings.getPathSep().charAt(0));
       URL packageURL = Gate.getClassLoader().getResource(packageDir);
       if(packageURL != null){
         File directory = Files.fileFromURL(packageURL);
