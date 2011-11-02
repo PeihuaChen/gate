@@ -143,7 +143,7 @@ public class UserImpl
     }
 
     //1.5 check if user has right to change name
-    if (s.getID() != this.id && false == s.isPrivilegedSession()) {
+    if (s.getID().longValue() != this.id.longValue() && false == s.isPrivilegedSession()) {
       throw new SecurityException("insufficient privileges");
     }
 
@@ -215,7 +215,7 @@ public class UserImpl
     }
 
     //2. check privileges
-    if (false == s.isPrivilegedSession() && s.getID() != this.id) {
+    if (false == s.isPrivilegedSession() && s.getID().longValue() != this.id.longValue()) {
       throw new SecurityException("insuffieicent privileges");
     }
 
