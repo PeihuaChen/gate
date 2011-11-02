@@ -171,7 +171,7 @@ public class APFormatExporter extends AbstractLanguageAnalyser
         tmpDocId.append(token + ".");
     }// End while
     // if tokenization had place
-    if (!"".equals(tmpDocId)){
+    if (tmpDocId.length() > 0){
       // Remove the last dot
       tmpDocId.replace(tmpDocId.length()-1,tmpDocId.length(),"");
       docId = tmpDocId.toString();
