@@ -299,14 +299,14 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
   }
 
   public boolean equals(Object o) {
-    boolean result = false;
     if ( o instanceof MappingDefinition ) {
       MappingDefinition def = (MappingDefinition) o;
-      result &= nodes.equals(def.nodes);
-      result &= lists.equals(def.lists);
-      result &= nodesByList.equals(def.lists);
-    }// if
-    return result;
+      return nodes.equals(def.nodes) && 
+             lists.equals(def.lists) && 
+             nodesByList.equals(def.lists);
+    } else {
+      return false;
+    }
   } // equals()
 
   public List subList(int i1, int i2) {
