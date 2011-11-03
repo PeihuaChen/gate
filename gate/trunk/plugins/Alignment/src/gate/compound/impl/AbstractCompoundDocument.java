@@ -311,7 +311,7 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
    */
   public DocumentContent getContent() {
     if(currentDocument == null) {
-      return new DocumentContentImpl("");
+      throw new GateRuntimeException(CURR_DOC_NOT_SET_MSG);
     }
     else {
       return currentDocument.getContent();
@@ -459,7 +459,7 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
    */
   public String toXml() {
     if(currentDocument == null) {
-      throw new GateRuntimeException(CURR_DOC_NOT_SET_MSG);
+      return toXmlAsASingleDocument(this);
     }
     else {
       return currentDocument.toXml();
