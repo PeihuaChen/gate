@@ -17,6 +17,7 @@ import gate.event.DatastoreEvent;
 import gate.event.DocumentListener;
 import gate.util.InvalidOffsetException;
 import gate.util.Strings;
+import gate.util.GateRuntimeException;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -101,6 +102,11 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
   /** Is the document markup-aware? */
   protected Boolean markupAware = new Boolean(false);
 
+  /** exception message when the current document is not set */
+  protected String CURR_DOC_NOT_SET_MSG = "Please use " +
+        "setCurrentDocument(...) " +
+        " method first.";
+
   /** Clear all the data members of the object. */
   public void cleanup() {
     Iterator<Document> iter = documents.values().iterator();
@@ -122,6 +128,9 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
   @Override
   public FeatureMap getFeatures() {
     if(currentDocument == null) {
+      if(this.features == null) {
+        this.features = Factory.newFeatureMap();
+      }
       return this.features;
     } else {
       return currentDocument.getFeatures();  
@@ -342,7 +351,7 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
    */
   public AnnotationSet getAnnotations() {
     if(currentDocument == null) {
-      return new AnnotationSetImpl(this);
+	throw new GateRuntimeException(CURR_DOC_NOT_SET_MSG);
     }
     else {
       return currentDocument.getAnnotations();
@@ -356,7 +365,7 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
    */
   public AnnotationSet getAnnotations(String name) {
     if(currentDocument == null) {
-      return new AnnotationSetImpl(this);
+      throw new GateRuntimeException(CURR_DOC_NOT_SET_MSG);
     }
     else {
       return currentDocument.getAnnotations(name);
@@ -405,7 +414,8 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
    */
   public String toXml(Set aSourceAnnotationSet) {
     if(currentDocument == null) {
-      return currentDocument.toXml(new AnnotationSetImpl(this));
+      throw new GateRuntimeException(CURR_DOC_NOT_SET_MSG +
+              " OR call toXmlAsSingleDocument(...)");
     }
     else {
       return currentDocument.toXml(aSourceAnnotationSet);
@@ -433,7 +443,7 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
    */
   public String toXml(Set aSourceAnnotationSet, boolean includeFeatures) {
     if(currentDocument == null) {
-      return currentDocument.toXml(new AnnotationSetImpl(this));
+      throw new GateRuntimeException(CURR_DOC_NOT_SET_MSG);
     }
     else {
       return currentDocument.toXml(aSourceAnnotationSet, includeFeatures);
@@ -449,7 +459,7 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
    */
   public String toXml() {
     if(currentDocument == null) {
-      return currentDocument.toXml(new AnnotationSetImpl(this));
+      throw new GateRuntimeException(CURR_DOC_NOT_SET_MSG);
     }
     else {
       return currentDocument.toXml();
@@ -503,7 +513,7 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
    */
   public Map<String, AnnotationSet> getNamedAnnotationSets() {
     if(currentDocument == null) {
-      return new HashMap<String, AnnotationSet>();
+      throw new GateRuntimeException(CURR_DOC_NOT_SET_MSG);
     }
     else {
       return currentDocument.getNamedAnnotationSets();
@@ -512,7 +522,7 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
 
   public Set<String> getAnnotationSetNames() {
     if(currentDocument == null) {
-      return new HashSet<String>();
+      throw new GateRuntimeException(CURR_DOC_NOT_SET_MSG);
     }
     else {
       return currentDocument.getAnnotationSetNames();
