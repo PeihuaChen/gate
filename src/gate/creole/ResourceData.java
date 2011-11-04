@@ -84,6 +84,7 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
     * same name
     */
   public boolean equals(Object other) {
+    if (other == null) return false;
     if(name.equals(((ResourceData) other).getName()))
       return true;
     return false;

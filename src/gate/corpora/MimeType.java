@@ -31,7 +31,7 @@ public class MimeType {
   public MimeType(String type, String subType){
     this.type = type;
     this.subtype = subType;
-    parameters = new HashMap();
+    parameters = new HashMap<String,String>();
   }
 
   /**
@@ -40,7 +40,7 @@ public class MimeType {
    * @return true if the two MIME Types are the same.
    */
   public boolean equals(Object other){
-    return type.equals(((MimeType)other).getType()) &&
+    return other != null && type.equals(((MimeType)other).getType()) &&
            subtype.equals(((MimeType)other).getSubtype());
   }
 
@@ -91,7 +91,7 @@ public class MimeType {
    * @param param the name of the parameter.
    * @param value the value of the parameter.
    */
-  public void addParameter(java.lang.String param, java.lang.String value){
+  public void addParameter(String param, String value){
     parameters.put(param, value);
   }
 
@@ -100,8 +100,8 @@ public class MimeType {
    * @param name the name of the parameter.
    * @return a {@link java.lang.String} value.
    */
-  public java.lang.String getParameterValue(java.lang.String name){
-    return (String)parameters.get(name);
+  public String getParameterValue(String name){
+    return parameters.get(name);
   }
 
   /**
@@ -109,7 +109,7 @@ public class MimeType {
    * @param name the name of the parameter.
    * @return a boolean value.
    */
-  public boolean hasParameter(java.lang.String name){
+  public boolean hasParameter(String name){
     return parameters.containsKey(name);
   }
 
@@ -126,5 +126,5 @@ public class MimeType {
   /**
    * The parameters map.
    */
-  protected Map parameters;
+  protected Map<String,String> parameters;
 }
