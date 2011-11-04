@@ -527,13 +527,12 @@ extends AbstractFeatureBearer implements DataStore {
   /** Get a list of the names of LRs of a particular type that are present. */
   public List getLrNames(String lrType) throws PersistenceException {
     // the list of files storing LRs of this type; an array for the names
-    String[] lrFileNames = (String[]) getLrIds(lrType).toArray();
-    ArrayList lrNames = new ArrayList();
+    List<String> lrFileNames = getLrIds(lrType);
+    List<String> lrNames = new ArrayList<String>();
 
     // for each lr file name, munge its name and add to the lrNames list
-    for(int i = 0; i<lrFileNames.length; i++) {
-      String name = getLrName(lrFileNames[i]);
-      lrNames.add(name);
+    for(String fname : lrFileNames) {
+      lrNames.add(getLrName(fname));
     }
 
     return lrNames;
