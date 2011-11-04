@@ -37,17 +37,16 @@ public class CorpusBenchmarkTool {
   public CorpusBenchmarkTool() {}
 
   public void initPRs() {
+    if (applicationFile == null)
+      throw new GateRuntimeException("Application not set!");
+    
     try {
-      if (applicationFile == null)
-        Out.prln("Application not set!");
       Out.prln("App file is: " + applicationFile.getAbsolutePath());
       application = (Controller) gate.util.persistence.PersistenceManager
                     .loadObjectFromFile(applicationFile);
     }
     catch (Exception ex) {
-      throw (GateRuntimeException)
-        new GateRuntimeException("Corpus Benchmark Tool:" + ex.getMessage())
-        .initCause(ex);
+      throw new GateRuntimeException("Corpus Benchmark Tool:" + ex.getMessage(), ex);
     }
   } //initPRs
 
