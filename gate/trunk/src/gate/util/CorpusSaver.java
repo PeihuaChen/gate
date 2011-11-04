@@ -58,14 +58,16 @@ public class CorpusSaver {
   }
 
   public void initPRs() {
+    if (applicationFile == null)
+      throw new GateRuntimeException("Application not set!");
+    
     try {
-      if (applicationFile == null)
-        Out.prln("Application not set!");
       Out.prln("App file is: " + applicationFile.getAbsolutePath());
       application = (Controller) gate.util.persistence.PersistenceManager
-                                   .loadObjectFromFile(applicationFile);
-    } catch (Exception ex) {
-      throw new GateRuntimeException("Corpus Saver: "+ex.getMessage());
+                    .loadObjectFromFile(applicationFile);
+    }
+    catch (Exception ex) {
+      throw new GateRuntimeException("Corpus Benchmark Tool:" + ex.getMessage(), ex);
     }
   }//initPRs
 
