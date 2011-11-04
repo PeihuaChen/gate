@@ -65,11 +65,6 @@ public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
   private static final long serialVersionUID = 1L;
 
   /**
-   * The document to be processed
-   */
-  protected Document document;
-
-  /**
    * Output annotation set name.
    */
   protected String outputASName;
@@ -355,20 +350,6 @@ public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
     }
 
     return this;
-  }
-
-  /**
-   * @return the document
-   */
-  public Document getDocument() {
-    return document;
-  }
-
-  /**
-   * @param document the document to set
-   */
-  public void setDocument(Document document) {
-    this.document = document;
   }
 
   /**
