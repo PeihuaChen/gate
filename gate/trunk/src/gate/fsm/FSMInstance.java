@@ -143,6 +143,7 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
   }
 
   public boolean equals(Object other){
+    if (other == null) return false;
     if(other instanceof FSMInstance){
       FSMInstance otherFSM = (FSMInstance)other;
       boolean result = length == otherFSM.length &&
@@ -152,7 +153,9 @@ public class FSMInstance implements Comparable, Cloneable, Serializable {
              FSMPosition.getAction().equals(otherFSM.FSMPosition.getAction());
       return result;
     }else{
-      throw new ClassCastException(other.getClass().toString());
+      //equals should never throw an exception it should just return null
+      //throw new ClassCastException(other.getClass().toString());
+      return false;
     }
   }
 
