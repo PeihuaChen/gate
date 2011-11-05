@@ -15,10 +15,14 @@
  */
 package gate.creole.gazetteer;
 
+import java.io.Serializable;
+
 
 
 /**Represents a single node from the mapping definition*/
-public class MappingNode{
+public class MappingNode implements Serializable {
+
+  private static final long serialVersionUID = -4410243081697344856L;
 
   /** the gazetteer list filename */
   private String list;

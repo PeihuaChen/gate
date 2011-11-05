@@ -26,7 +26,7 @@ import gate.util.Files;
 
 /** Represents a mapping definition which maps gazetteer lists to ontology classes */
 public class MappingDefinition extends gate.creole.AbstractLanguageResource
-                              implements List {
+                              implements List<MappingNode> {
 
   private static final long serialVersionUID = 3617291212063848503L;
 
@@ -173,7 +173,7 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
    * @param o a node
    * @return true if the list of node is not already mapped with another node.
    */
-  public boolean add(Object o) {
+  public boolean add(MappingNode o) {
     boolean result = false;
     if (o instanceof MappingNode) {
       String list = ((MappingNode)o).getList();
@@ -191,7 +191,7 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
    * @param o a node
    * @param index position in the list
    */
-  public void add(int index,Object o) {
+  public void add(int index,MappingNode o) {
     if (o instanceof MappingNode) {
       String list = ((MappingNode)o).getList();
       if (!nodesByList.containsKey(list)) {
@@ -202,11 +202,11 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
     } // if a linear node
   } // add()
 
-  public Object set(int index, Object o) {
+  public MappingNode set(int index, MappingNode o) {
     throw new UnsupportedOperationException("this method has not been implemented");
   }
 
-  public Object get(int index){
+  public MappingNode get(int index){
     return nodes.get(index);
   }
 
@@ -221,8 +221,8 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
     return result;
   }// remove
 
-  public Object remove(int index) {
-    Object result = null;
+  public MappingNode remove(int index) {
+    MappingNode result = null;
     result = nodes.remove(index);
     if (null!=result) {
       String list = ((MappingNode)result).getList();
@@ -243,7 +243,7 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
     while (iter.hasNext()) {
       o = iter.next();
       if (o instanceof MappingNode)  {
-        result |= add(o);
+        result |= add((MappingNode)o);
       } // instance of MappingNode
     } // while
     return result;
@@ -256,7 +256,7 @@ public class MappingDefinition extends gate.creole.AbstractLanguageResource
     while (iter.hasNext()) {
       o = iter.next();
       if (o instanceof MappingNode)  {
-        add(index++, o);
+        add(index++, (MappingNode)o);
       } // instance of MappingNode
     } // while
     return (size!=nodes.size());
