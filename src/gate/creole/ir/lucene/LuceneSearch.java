@@ -70,7 +70,8 @@ public class LuceneSearch implements Search {
    *  Result length is limited. */
   public QueryResultList search(String query, int limit, List fieldNames)
                                          throws IndexException, SearchException{
-    Vector result = new Vector();
+    
+    List<QueryResult> result = new Vector<QueryResult>();
 
     try {
       IndexSearcher searcher = new IndexSearcher(
