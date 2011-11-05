@@ -46,7 +46,7 @@ public class SearchPRViewer extends AbstractVisualResource
   }
 
   protected void initLocalData(){
-    results = new ArrayList();
+    results = new ArrayList<QueryResult>();
   }
 
   protected void initGuiComponents(){
@@ -127,7 +127,7 @@ public class SearchPRViewer extends AbstractVisualResource
     results.clear();
     if(target != null){
       QueryResultList resultsList = target.getResult();
-      Iterator resIter = resultsList.getQueryResults();
+      Iterator<QueryResult> resIter = resultsList.getQueryResults();
       while(resIter.hasNext()){
         results.add(resIter.next());
       }
@@ -156,7 +156,7 @@ public class SearchPRViewer extends AbstractVisualResource
       }
     }
 
-    public Class getColumnClass(int columnIndex){
+    public Class<?> getColumnClass(int columnIndex){
       switch(columnIndex){
         case DOC_NAME_COLUMN: return String.class;
         case DOC_SCORE_COLUMN: return Float.class;
@@ -275,7 +275,7 @@ public class SearchPRViewer extends AbstractVisualResource
     protected void firePropertyChange(String propertyName, Object oldValue,
                                       Object newValue) {
       // Strings get interned...
-      if (propertyName=="text") {
+      if ("text".equals(propertyName)) {
         super.firePropertyChange(propertyName, oldValue, newValue);
       }
     }
@@ -308,6 +308,6 @@ public class SearchPRViewer extends AbstractVisualResource
    * Contains the {@link gate.creole.ir.QueryResult} objects returned by the
    * search.
    */
-  List results;
+  List<QueryResult> results;
 
 }

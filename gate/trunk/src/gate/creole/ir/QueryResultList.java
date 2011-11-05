@@ -27,7 +27,7 @@ public class QueryResultList{
   private IndexedCorpus corpus;
 
   /** List of QueryResult objects. */
-  private List results;
+  private List<QueryResult> results;
 
   /* Niraj */
   /* Default Constructor */
@@ -37,7 +37,7 @@ public class QueryResultList{
   /* End */
 
   /** Constructor of the class. */
-  public QueryResultList(String query, IndexedCorpus corpus, List results){
+  public QueryResultList(String query, IndexedCorpus corpus, List<QueryResult> results){
     this.queryString = query;
     this.corpus = corpus;
     this.results = results;
@@ -55,7 +55,7 @@ public class QueryResultList{
 
   /** @return Iterator of QueryResult objects.
    *  @see gate.creole.ir.QueryResult */
-  public Iterator getQueryResults(){
+  public Iterator<QueryResult> getQueryResults(){
     return results.iterator();
   }
 }
