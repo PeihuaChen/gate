@@ -219,7 +219,7 @@ public class ClassNode
     return children.indexOf(child);
   }
 
-  public Iterator getChildren() {
+  public Iterator<ClassNode> getChildren() {
     return children.iterator();
   }
 
@@ -227,7 +227,7 @@ public class ClassNode
     children = chldrn;
   }
 
-  public Vector children() {
+  public Vector<ClassNode> children() {
     return children;
   }
 
@@ -243,13 +243,24 @@ public class ClassNode
     return children.get(index);
   }
 
-  public boolean equals(Object o) {
-    boolean result = false;
-    if (o instanceof ClassNode) {
-      ClassNode node = (ClassNode) o;
-      result = node.source.equals(this.source);
-    }
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((source == null) ? 0 : source.hashCode());
     return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if(this == obj) return true;
+    if(obj == null) return false;
+    if(getClass() != obj.getClass()) return false;
+    ClassNode other = (ClassNode)obj;
+    if(source == null) {
+      if(other.source != null) return false;
+    } else if(!source.equals(other.source)) return false;
+    return true;
   }
 
   /**Gets the Source object

@@ -1,14 +1,28 @@
 package com.ontotext.gate.vr;
 
-import javax.swing.*;
-import javax.swing.tree.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
-import gate.gui.*;
-import gate.util.*;
-import gate.creole.gazetteer.*;
-import gate.creole.ontology.*;
+import gate.creole.gazetteer.MappingDefinition;
+import gate.creole.gazetteer.MappingNode;
+import gate.creole.ontology.OClass;
+import gate.gui.MainFrame;
+import gate.util.LazyProgrammerException;
+
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.Collections;
+import java.util.List;
+import java.util.Vector;
+
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
+import javax.swing.JTree;
+import javax.swing.SwingUtilities;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 
 
 
@@ -132,8 +146,7 @@ public class MappingTreeView extends JTree {
 
       public void mouseClicked(MouseEvent e){
           TreePath path=MappingTreeView.this.getSelectionPath();
-          javax.swing.JTree tree = new javax.swing.JTree();
-
+          
           ClassNode node =null;
           if (SwingUtilities.isLeftMouseButton(e)) {
             if (2 == e.getClickCount()) {
@@ -167,14 +180,13 @@ public class MappingTreeView extends JTree {
   /*Action Listener of the remove pop up menu item */
   class RemoveAL implements ActionListener{
     public void actionPerformed(ActionEvent e) {
-      JMenuItem item = (JMenuItem)e.getSource();
       ClassNode node = (ClassNode)MappingTreeView.this.getLastSelectedPathComponent();
       Object source = node.getSource();
       if (source instanceof MappingNode) {
         TreePath pp = MappingTreeView.this.getAnchorSelectionPath().getParentPath();
         if (null!=pp) {
           ClassNode pNode = (ClassNode)pp.getLastPathComponent();
-          Vector kids = pNode.children();
+          Vector<ClassNode> kids = pNode.children();
           kids.remove(node);
           pNode.setChildren(kids);
           mapping.remove(source);
@@ -189,11 +201,10 @@ public class MappingTreeView extends JTree {
   /*Action Listener of the insert pop up menu item */
   class InsertAL implements ActionListener {
     public void actionPerformed(ActionEvent e) {
-      JMenuItem item = (JMenuItem)e.getSource();
       ClassNode node = (ClassNode)MappingTreeView.this.getLastSelectedPathComponent();
       Object source = node.getSource();
       if (source instanceof OClass) {
-        java.util.List lists = gaze.getLists();
+        List lists = gaze.getLists();
         Collections.sort(lists);
 
         Object result = JOptionPane.showInputDialog(MappingTreeView.this,
@@ -208,7 +219,7 @@ public class MappingTreeView extends JTree {
               node.toString());
           mapping.add(mn);
           ClassNode cn = new ClassNode(mn);
-          Vector kids = node.children();
+          Vector<ClassNode> kids = node.children();
           kids.add(cn);
           MappingTreeView.this.updateUI();
           gaze.updateMappingUI();
