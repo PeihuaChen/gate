@@ -1740,17 +1740,6 @@ AnnotationAccessor accessor = null;
     finally { jj_save(1, xla); }
   }
 
-  final private boolean jj_3_2() {
-    if (jj_3R_16()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_22() {
-    if (jj_scan_token(leftBrace)) return true;
-    if (jj_3R_25()) return true;
-    return false;
-  }
-
   final private boolean jj_3R_15() {
     Token xsp;
     xsp = jj_scanpos;
@@ -1837,6 +1826,17 @@ AnnotationAccessor accessor = null;
 
   final private boolean jj_3R_17() {
     if (jj_scan_token(ident)) return true;
+    return false;
+  }
+
+  final private boolean jj_3_2() {
+    if (jj_3R_16()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_22() {
+    if (jj_scan_token(leftBrace)) return true;
+    if (jj_3R_25()) return true;
     return false;
   }
 

@@ -392,7 +392,7 @@ PARSER_END(ParseCpsl)
 <DEFAULT> TOKEN: { <kleeneOp: "*" | "+" | "?"> }
 <DEFAULT> TOKEN: { <attrOp: "==" | "!=" | ">" | "<" | ">=" | "<=" | "=~" | "!~" | "==~" | "!=~"> }
 <DEFAULT> TOKEN: { <metaPropOp: "@"> }
-<DEFAULT> TOKEN: { <integer: ( ["0"-"9"] )+ > }
+<DEFAULT> TOKEN: { <integer: (["+","-"])? ( ["0"-"9"] )+ > }
 
 
 //starts a string
@@ -446,10 +446,12 @@ PARSER_END(ParseCpsl)
 <DEFAULT> TOKEN: { <ident: <letterOrUnderscore> (<letterOrDigitOrDash>)* > }
 <DEFAULT> TOKEN: {
   <floatingPoint:
-      (["0"-"9"])+ "." (["0"-"9"])* (<exponent>)? (["f","F","d","D"])?
+      (["+","-"])? 
+   (  (["0"-"9"])+ "." (["0"-"9"])* (<exponent>)? (["f","F","d","D"])?
     | "." (["0"-"9"])+ (<exponent>)? (["f","F","d","D"])?
     | (["0"-"9"])+ <exponent> (["f","F","d","D"])?
     | (["0"-"9"])+ (<exponent>)? ["f","F","d","D"]
+   )
   >
 }
 <DEFAULT> TOKEN: { <#exponent: ["e","E"] (["+","-"])? (["0"-"9"])+ > }
