@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 1995-2010, The University of Sheffield. See the file
+ *  Copyright (c) 1995-2011, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -124,10 +124,30 @@ public class AnnotationDiffer {
     else
       responseList = new ArrayList<Annotation>(response);
 
-    if(correctAnnotations != null) correctAnnotations.clear();
-    if(partiallyCorrectAnnotations != null) partiallyCorrectAnnotations.clear();
-    if(missingAnnotations != null) missingAnnotations.clear();
-    if(spuriousAnnotations != null) spuriousAnnotations.clear();
+    if(correctAnnotations != null) {
+      correctAnnotations.clear();
+    }
+    else {
+      correctAnnotations = new HashSet<Annotation>();
+    }
+    if(partiallyCorrectAnnotations != null) {
+      partiallyCorrectAnnotations.clear();
+    }
+    else {
+      partiallyCorrectAnnotations = new HashSet<Annotation>();
+    }
+    if(missingAnnotations != null) {
+      missingAnnotations.clear();
+    }
+    else {
+      missingAnnotations = new HashSet<Annotation>();
+    }
+    if(spuriousAnnotations != null) {
+      spuriousAnnotations.clear();
+    }
+    else {
+      spuriousAnnotations = new HashSet<Annotation>();
+    }
     
     keyChoices = new ArrayList<List<Pairing>>(keyList.size());
     keyChoices.addAll(Collections.nCopies(keyList.size(), (List<Pairing>) null));
@@ -186,25 +206,21 @@ public class AnnotationDiffer {
       finalChoices.add(bestChoice);
       switch(bestChoice.value){
         case CORRECT_VALUE:{
-          if(correctAnnotations == null) correctAnnotations = new HashSet<Annotation>();
           correctAnnotations.add(bestChoice.getResponse());
           correctMatches++;
           bestChoice.setType(CORRECT_TYPE);
           break;
         }
         case PARTIALLY_CORRECT_VALUE:{
-          if(partiallyCorrectAnnotations == null) partiallyCorrectAnnotations = new HashSet<Annotation>();
           partiallyCorrectAnnotations.add(bestChoice.getResponse());
           partiallyCorrectMatches++;
           bestChoice.setType(PARTIALLY_CORRECT_TYPE);
           break;
         }
         case MISMATCH_VALUE:{
-          //this is a mising and a spurious annotations together
-          if(missingAnnotations == null) missingAnnotations = new HashSet<Annotation>();
+          //this is a missing and a spurious annotations together
           missingAnnotations.add(bestChoice.getKey());
           missing ++;
-          if(spuriousAnnotations == null) spuriousAnnotations = new HashSet<Annotation>();
           spuriousAnnotations.add(bestChoice.getResponse());
           spurious ++;
           bestChoice.setType(MISMATCH_TYPE);
