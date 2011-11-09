@@ -623,10 +623,10 @@ public class AnnotationDiffer {
       sameResponseChoices.remove(this);
       possibleChoices.removeAll(sameResponseChoices);
 
-      for (Pairing item : sameKeyChoices) {
+      for (Pairing item : new ArrayList<Pairing>(sameKeyChoices)) {
         item.remove();
       }
-      for (Pairing item : sameResponseChoices) {
+      for (Pairing item : new ArrayList<Pairing>(sameResponseChoices)) {
         item.remove();
       }
       sameKeyChoices.add(this);
