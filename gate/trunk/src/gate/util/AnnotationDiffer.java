@@ -61,8 +61,8 @@ public class AnnotationDiffer {
       keyCount += differ.getKeysCount();
       responseCount += differ.getResponsesCount();
     }
-    keyList = new ArrayList(Collections.nCopies(keyCount, null));
-    responseList = new ArrayList(Collections.nCopies(responseCount, null));
+    keyList = new ArrayList<Annotation>(Collections.nCopies(keyCount, (Annotation) null));
+    responseList = new ArrayList<Annotation>(Collections.nCopies(responseCount, (Annotation) null));
   }
 
   public AnnotationDiffer() {
@@ -81,6 +81,13 @@ public class AnnotationDiffer {
      */
     public Annotation getKey();
 
+    public int getResponseIndex();
+    public int getValue();
+    public int getKeyIndex();
+    public int getScore();
+    public void setType(int i);
+    public void remove();
+    
     /**
      * Gets the response annotation of the pairing. Can be <tt>null</tt> (for 
      * missing matches).
@@ -104,30 +111,30 @@ public class AnnotationDiffer {
    * @return a list of {@link Pairing} objects representing the pairing set
    * that results in the best score.
    */
-  public List calculateDiff(Collection key, Collection response){
+  public List<Pairing> calculateDiff(Collection<Annotation> key, Collection<Annotation> response){
     
     //initialise data structures
     if(key == null || key.size() == 0)
-      keyList = new ArrayList();
+      keyList = new ArrayList<Annotation>();
     else
-      keyList = new ArrayList(key);
+      keyList = new ArrayList<Annotation>(key);
 
     if(response == null || response.size() == 0)
-      responseList = new ArrayList();
+      responseList = new ArrayList<Annotation>();
     else
-      responseList = new ArrayList(response);
+      responseList = new ArrayList<Annotation>(response);
 
     if(correctAnnotations != null) correctAnnotations.clear();
     if(partiallyCorrectAnnotations != null) partiallyCorrectAnnotations.clear();
     if(missingAnnotations != null) missingAnnotations.clear();
     if(spuriousAnnotations != null) spuriousAnnotations.clear();
     
-    keyChoices = new ArrayList(keyList.size());
-    keyChoices.addAll(Collections.nCopies(keyList.size(), null));
-    responseChoices = new ArrayList(responseList.size());
-    responseChoices.addAll(Collections.nCopies(responseList.size(), null));
+    keyChoices = new ArrayList<List<Pairing>>(keyList.size());
+    keyChoices.addAll(Collections.nCopies(keyList.size(), (List<Pairing>) null));
+    responseChoices = new ArrayList<List<Pairing>>(responseList.size());
+    responseChoices.addAll(Collections.nCopies(responseList.size(), (List<Pairing>) null));
 
-    possibleChoices = new ArrayList();
+    possibleChoices = new ArrayList<Pairing>();
 
     //1) try all possible pairings
     for(int i = 0; i < keyList.size(); i++){
@@ -167,7 +174,7 @@ public class AnnotationDiffer {
     //maximises the total score
     Collections.sort(possibleChoices, new PairingScoreComparator());
     Collections.reverse(possibleChoices);
-    finalChoices = new ArrayList();
+    finalChoices = new ArrayList<Pairing>();
     correctMatches = 0;
     partiallyCorrectMatches = 0;
     missing = 0;
@@ -179,14 +186,14 @@ public class AnnotationDiffer {
       finalChoices.add(bestChoice);
       switch(bestChoice.value){
         case CORRECT_VALUE:{
-          if(correctAnnotations == null) correctAnnotations = new HashSet();
+          if(correctAnnotations == null) correctAnnotations = new HashSet<Annotation>();
           correctAnnotations.add(bestChoice.getResponse());
           correctMatches++;
           bestChoice.setType(CORRECT_TYPE);
           break;
         }
         case PARTIALLY_CORRECT_VALUE:{
-          if(partiallyCorrectAnnotations == null) partiallyCorrectAnnotations = new HashSet();
+          if(partiallyCorrectAnnotations == null) partiallyCorrectAnnotations = new HashSet<Annotation>();
           partiallyCorrectAnnotations.add(bestChoice.getResponse());
           partiallyCorrectMatches++;
           bestChoice.setType(PARTIALLY_CORRECT_TYPE);
@@ -194,10 +201,10 @@ public class AnnotationDiffer {
         }
         case MISMATCH_VALUE:{
           //this is a mising and a spurious annotations together
-          if(missingAnnotations == null) missingAnnotations = new HashSet();
+          if(missingAnnotations == null) missingAnnotations = new HashSet<Annotation>();
           missingAnnotations.add(bestChoice.getKey());
           missing ++;
-          if(spuriousAnnotations == null) spuriousAnnotations = new HashSet();
+          if(spuriousAnnotations == null) spuriousAnnotations = new HashSet<Annotation>();
           spuriousAnnotations.add(bestChoice.getResponse());
           spurious ++;
           bestChoice.setType(MISMATCH_TYPE);
@@ -206,14 +213,14 @@ public class AnnotationDiffer {
         case WRONG_VALUE:{
           if(bestChoice.getKey() != null){
             //we have a missed key
-            if(missingAnnotations == null) missingAnnotations = new HashSet();
+            if(missingAnnotations == null) missingAnnotations = new HashSet<Annotation>();
             missingAnnotations.add(bestChoice.getKey());
             missing ++;
             bestChoice.setType(MISSING_TYPE);
           }
           if(bestChoice.getResponse() != null){
             //we have a spurious response
-            if(spuriousAnnotations == null) spuriousAnnotations = new HashSet();
+            if(spuriousAnnotations == null) spuriousAnnotations = new HashSet<Annotation>();
             spuriousAnnotations.add(bestChoice.getResponse());
             spurious ++;
             bestChoice.setType(SPURIOUS_TYPE);
@@ -229,11 +236,11 @@ public class AnnotationDiffer {
     //add choices for the incorrect matches (MISSED, SPURIOUS)
     //get the unmatched keys
     for(int i = 0; i < keyChoices.size(); i++){
-      List aList = (List)keyChoices.get(i);
+      List<Pairing> aList = keyChoices.get(i);
       if(aList == null || aList.isEmpty()){
-        if(missingAnnotations == null) missingAnnotations = new HashSet();
+        if(missingAnnotations == null) missingAnnotations = new HashSet<Annotation>();
         missingAnnotations.add((Annotation)(keyList.get(i)));
-        PairingImpl choice = new PairingImpl(i, -1, WRONG_VALUE);
+        Pairing choice = new PairingImpl(i, -1, WRONG_VALUE);
         choice.setType(MISSING_TYPE);
         finalChoices.add(choice);
         missing ++;
@@ -242,9 +249,9 @@ public class AnnotationDiffer {
 
     //get the unmatched responses
     for(int i = 0; i < responseChoices.size(); i++){
-      List aList = (List)responseChoices.get(i);
+      List<Pairing> aList = responseChoices.get(i);
       if(aList == null || aList.isEmpty()){
-        if(spuriousAnnotations == null) spuriousAnnotations = new HashSet();
+        if(spuriousAnnotations == null) spuriousAnnotations = new HashSet<Annotation>();
         spuriousAnnotations.add((Annotation)(responseList.get(i)));
         PairingImpl choice = new PairingImpl(-1, i, WRONG_VALUE);
         choice.setType(SPURIOUS_TYPE);
@@ -437,14 +444,12 @@ public class AnnotationDiffer {
    */
   public void printMissmatches(){
     //get the partial correct matches
-    Iterator iter = finalChoices.iterator();
-    while(iter.hasNext()){
-      PairingImpl aChoice = (PairingImpl)iter.next();
-      switch(aChoice.value){
+    for (Pairing aChoice : finalChoices) {
+      switch(aChoice.getValue()){
         case PARTIALLY_CORRECT_VALUE:{
           System.out.println("Missmatch (partially correct):");
-          System.out.println("Key: " + keyList.get(aChoice.keyIndex).toString());
-          System.out.println("Response: " + responseList.get(aChoice.responseIndex).toString());
+          System.out.println("Key: " + keyList.get(aChoice.getKeyIndex()).toString());
+          System.out.println("Response: " + responseList.get(aChoice.getResponseIndex()).toString());
           break;
         }
       }
@@ -452,7 +457,7 @@ public class AnnotationDiffer {
 
     //get the unmatched keys
     for(int i = 0; i < keyChoices.size(); i++){
-      List aList = (List)keyChoices.get(i);
+      List<Pairing> aList = keyChoices.get(i);
       if(aList == null || aList.isEmpty()){
         System.out.println("Missed Key: " + keyList.get(i).toString());
       }
@@ -460,7 +465,7 @@ public class AnnotationDiffer {
 
     //get the unmatched responses
     for(int i = 0; i < responseChoices.size(); i++){
-      List aList = (List)responseChoices.get(i);
+      List<Pairing> aList = responseChoices.get(i);
       if(aList == null || aList.isEmpty()){
         System.out.println("Spurious Response: " + responseList.get(i).toString());
       }
@@ -476,17 +481,16 @@ public class AnnotationDiffer {
    */
   void sanityCheck()throws Exception{
     //all keys and responses should have at most one choice left
-    Iterator iter =keyChoices.iterator();
-    while(iter.hasNext()){
-      List choices = (List)iter.next();
+    for (List<Pairing> choices : keyChoices)  {
       if(choices != null){
         if(choices.size() > 1){
           throw new Exception("Multiple choices found!");
-        }else if(!choices.isEmpty()){
+        }
+        else if(!choices.isEmpty()){
           //size must be 1
-          PairingImpl aChoice = (PairingImpl)choices.get(0);
+          Pairing aChoice = choices.get(0);
           //the SAME choice should be found for the associated response
-          List otherChoices = (List)responseChoices.get(aChoice.responseIndex);
+          List<?> otherChoices = (List<?>) responseChoices.get(aChoice.getResponseIndex());
           if(otherChoices == null ||
              otherChoices.size() != 1 ||
              otherChoices.get(0) != aChoice){
@@ -496,17 +500,16 @@ public class AnnotationDiffer {
       }
     }
 
-    iter =responseChoices.iterator();
-    while(iter.hasNext()){
-      List choices = (List)iter.next();
+    for (List<Pairing> choices : responseChoices) {
       if(choices != null){
         if(choices.size() > 1){
           throw new Exception("Multiple choices found!");
-        }else if(!choices.isEmpty()){
+        }
+        else if(!choices.isEmpty()){
           //size must be 1
-          PairingImpl aChoice = (PairingImpl)choices.get(0);
+          Pairing aChoice = choices.get(0);
           //the SAME choice should be found for the associated response
-          List otherChoices = (List)keyChoices.get(aChoice.keyIndex);
+          List<?> otherChoices = (List<?>) keyChoices.get(aChoice.getKeyIndex());
           if(otherChoices == null){
             throw new Exception("Reciprocity error : null!");
           }else if(otherChoices.size() != 1){
@@ -526,10 +529,10 @@ public class AnnotationDiffer {
    * @param listOfPairings the list of {@link Pairing}s where the
    * pairing should be added
    */
-  protected void addPairing(PairingImpl pairing, int index, List listOfPairings){
-    List existingChoices = (List)listOfPairings.get(index);
+  protected void addPairing(Pairing pairing, int index, List<List<Pairing>> listOfPairings){
+    List<Pairing> existingChoices = listOfPairings.get(index);
     if(existingChoices == null){
-      existingChoices = new ArrayList();
+      existingChoices = new ArrayList<Pairing>();
       listOfPairings.set(index, existingChoices);
     }
     existingChoices.add(pairing);
@@ -539,7 +542,7 @@ public class AnnotationDiffer {
    * Gets the set of features considered significant for the matching algorithm.
    * @return a Set.
    */
-  public java.util.Set getSignificantFeaturesSet() {
+  public java.util.Set<?> getSignificantFeaturesSet() {
     return significantFeaturesSet;
   }
 
@@ -551,7 +554,7 @@ public class AnnotationDiffer {
    * significant. 
    * @param significantFeaturesSet a Set of String values or <tt>null<tt>.
    */
-  public void setSignificantFeaturesSet(java.util.Set significantFeaturesSet) {
+  public void setSignificantFeaturesSet(java.util.Set<?> significantFeaturesSet) {
     this.significantFeaturesSet = significantFeaturesSet;
   }
 
@@ -575,6 +578,18 @@ public class AnnotationDiffer {
       }
     }
 
+    public int getKeyIndex() {
+      return this.keyIndex;
+    }
+    
+    public int getResponseIndex() {
+      return this.responseIndex;
+    }
+    
+    public int getValue() {
+      return this.value;
+    }
+    
     public Annotation getKey(){
       return keyIndex == -1 ? null : (Annotation)keyList.get(keyIndex);
     }
@@ -600,21 +615,19 @@ public class AnnotationDiffer {
      */
     public void consume(){
       possibleChoices.remove(this);
-      List sameKeyChoices = (List)keyChoices.get(keyIndex);
+      List<Pairing> sameKeyChoices = keyChoices.get(keyIndex);
       sameKeyChoices.remove(this);
       possibleChoices.removeAll(sameKeyChoices);
 
-      List sameResponseChoices = (List)responseChoices.get(responseIndex);
+      List<Pairing> sameResponseChoices = responseChoices.get(responseIndex);
       sameResponseChoices.remove(this);
       possibleChoices.removeAll(sameResponseChoices);
 
-      Iterator iter = new ArrayList(sameKeyChoices).iterator();
-      while(iter.hasNext()){
-        ((PairingImpl)iter.next()).remove();
+      for (Pairing item : sameKeyChoices) {
+        item.remove();
       }
-      iter = new ArrayList(sameResponseChoices).iterator();
-      while(iter.hasNext()){
-        ((PairingImpl)iter.next()).remove();
+      for (Pairing item : sameResponseChoices) {
+        item.remove();
       }
       sameKeyChoices.add(this);
       sameResponseChoices.add(this);
@@ -623,10 +636,10 @@ public class AnnotationDiffer {
     /**
      * Removes this choice from the two lists it belongs to
      */
-    protected void remove(){
-      List fromKey = (List)keyChoices.get(keyIndex);
+    public void remove(){
+      List<Pairing> fromKey = keyChoices.get(keyIndex);
       fromKey.remove(this);
-      List fromResponse = (List)responseChoices.get(responseIndex);
+      List<Pairing> fromResponse = responseChoices.get(responseIndex);
       fromResponse.remove(this);
     }
 
@@ -636,16 +649,17 @@ public class AnnotationDiffer {
      */
     void calculateScore(){
       //this needs to be a set so we don't count conflicts twice
-      Set conflictSet = new HashSet();
+      Set<Pairing> conflictSet = new HashSet<Pairing>();
       //add all the choices from the same response annotation
-      conflictSet.addAll((List)responseChoices.get(responseIndex));
+      conflictSet.addAll(responseChoices.get(responseIndex));
       //add all the choices from the same key annotation
-      conflictSet.addAll((List)keyChoices.get(keyIndex));
+      conflictSet.addAll(keyChoices.get(keyIndex));
       //remove this choice from the conflict set
       conflictSet.remove(this);
       score = value;
-      Iterator conflictIter = conflictSet.iterator();
-      while(conflictIter.hasNext()) score -= ((PairingImpl)conflictIter.next()).value;
+      for (Pairing item : conflictSet) {
+        score -= item.getValue();
+      }
       scoreCalculated = true;
     }
 
@@ -683,7 +697,7 @@ public class AnnotationDiffer {
     * for the same score the better type is preferred (exact matches are
     * preffered to partial ones).
     */   
-	protected static class PairingScoreComparator implements Comparator{
+	protected static class PairingScoreComparator implements Comparator<Pairing> {
     /**
      * Compares two choices:
      * the better score is preferred;
@@ -693,9 +707,7 @@ public class AnnotationDiffer {
      * zero if they score the same or negative otherwise.
      */
 
-	  public int compare(Object o1, Object o2){
-	    PairingImpl first = (PairingImpl)o1;
-	    PairingImpl second = (PairingImpl)o2;
+	  public int compare(Pairing first, Pairing second){
       //compare by score
       int res = first.getScore() - second.getScore();
       //compare by type
@@ -716,14 +728,12 @@ public class AnnotationDiffer {
      * Compares two choices based on start offset of key (or response
      * if key not present) and type if offsets are equal.
      */
-	public static class PairingOffsetComparator implements Comparator{
+	public static class PairingOffsetComparator implements Comparator<Pairing> {
     /**
      * Compares two choices based on start offset of key (or response
      * if key not present) and type if offsets are equal.
      */
-	  public int compare(Object o1, Object o2){
-	    Pairing first = (Pairing)o1;
-	    Pairing second = (Pairing)o2;
+	  public int compare(Pairing first, Pairing second){
 	    Annotation key1 = first.getKey();
 	    Annotation key2 = second.getKey();
 	    Annotation res1 = first.getResponse();
@@ -786,15 +796,15 @@ public class AnnotationDiffer {
   public Set<Annotation> getAnnotationsOfType(int type) {
     switch(type) {
       case CORRECT_TYPE:
-        return (correctAnnotations == null)? new HashSet() : correctAnnotations;
+        return (correctAnnotations == null)? new HashSet<Annotation>() : correctAnnotations;
       case PARTIALLY_CORRECT_TYPE:
-        return (partiallyCorrectAnnotations == null) ? new HashSet() : partiallyCorrectAnnotations;
+        return (partiallyCorrectAnnotations == null) ? new HashSet<Annotation>() : partiallyCorrectAnnotations;
       case SPURIOUS_TYPE:
-        return (spuriousAnnotations == null) ? new HashSet() : spuriousAnnotations;
+        return (spuriousAnnotations == null) ? new HashSet<Annotation>() : spuriousAnnotations;
       case MISSING_TYPE:
-        return (missingAnnotations == null) ? new HashSet() : missingAnnotations;
+        return (missingAnnotations == null) ? new HashSet<Annotation>() : missingAnnotations;
       default:
-        return new HashSet();
+        return new HashSet<Annotation>();
     }
   }
 
@@ -842,7 +852,7 @@ public class AnnotationDiffer {
     return row;
   }
 
-  public HashSet correctAnnotations, partiallyCorrectAnnotations,
+  public Set<Annotation> correctAnnotations, partiallyCorrectAnnotations,
                  missingAnnotations, spuriousAnnotations;
 
 
@@ -897,7 +907,7 @@ public class AnnotationDiffer {
   /**
    * The set of significant features used for matching.
    */
-  private java.util.Set significantFeaturesSet;
+  private java.util.Set<?> significantFeaturesSet;
 
   /**
    * The number of correct matches.
@@ -922,31 +932,31 @@ public class AnnotationDiffer {
   /**
    * A list with all the key annotations
    */
-  protected List keyList;
+  protected List<Annotation> keyList;
 
   /**
    * A list with all the response annotations
    */
-  protected List responseList;
+  protected List<Annotation> responseList;
 
   /**
    * A list of lists representing all possible choices for each key
    */
-  protected List keyChoices;
+  protected List<List<Pairing>> keyChoices;
 
   /**
    * A list of lists representing all possible choices for each response
    */
-  protected List responseChoices;
+  protected List<List<Pairing>> responseChoices;
 
   /**
    * All the posible choices are added to this list for easy iteration.
    */
-  protected List possibleChoices;
+  protected List<Pairing> possibleChoices;
 
   /**
    * A list with the choices selected for the best result.
    */
-  protected List finalChoices;
+  protected List<Pairing> finalChoices;
 
 }
