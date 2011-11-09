@@ -159,7 +159,8 @@ public class XJTable extends JTable{
             Component cellComponent = prepareRenderer(getCellRenderer(row, column), 
                     row, column);
             TableColumn tColumn = getColumnModel().getColumn(column);
-            int minWidth = cellComponent.getMinimumSize().width + spacing.width;
+            int minWidth = ( cellComponent == null ? 0 : 
+                cellComponent.getMinimumSize().width ) + spacing.width;
             //minimum width can only grow
             //if needed, increase the max width
 //            if(tColumn.getMaxWidth() < minWidth) tColumn.setMaxWidth(minWidth);
