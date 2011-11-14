@@ -1666,12 +1666,16 @@ AnnotationAccessor accessor = null;
   }
   }
 
-  String ConsumeBlock() throws ParseException {
+  String ConsumeBlock() throws ParseException, ParseException {
   StringBuffer block = new StringBuffer(); // to collect the block in
   int nesting = 1; // the first "{" was consumed before we were called
 
   // this is the first 'proper' token in the block
   Token nextTok = getNextToken();
+  if(nextTok.kind == EOF) {
+    throw new ParseException(errorMsgPrefix(nextTok)
+            + "Unexpected EOF in Java block");
+  }
 
   // for line numbers in the original Jape we want the first
   // token, normal or special (i.e. comments) so look back from
@@ -1717,7 +1721,13 @@ AnnotationAccessor accessor = null;
 
         // if we haven't worked all the way out of the nesting
         // then get the next token
-        if (nesting != 0) nextTok = getNextToken();
+        if (nesting != 0) {
+          nextTok = getNextToken();
+          if(nextTok.kind == EOF) {
+            throw new ParseException(errorMsgPrefix(nextTok)
+                    + "Unexpected EOF in Java block");
+          }
+        }
 
   } // while
 
