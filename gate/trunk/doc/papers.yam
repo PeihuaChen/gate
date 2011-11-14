@@ -38,17 +38,20 @@ GATE papers
 
 - T. Risse, S. Dietze, D. Maynard and N. Tahmasebi.  Using Events for Content Appraisal and Selection in Web Archives. In Proceedings of DeRiVE 2011: Workshop in conjunction with the 10th International Semantic Web Conference 2011, October 2011, Bonn, Germany. %(http://gate.ac.uk/sale/iswc11/Derive.pdf, PDF)
 
-
 - D. Damljanovic, U. Kruschwitz and M. Albakour. Using Virtual Documents to move Information Retrieval and Knowledge Management Closer Together, 4th Workshop on Exploiting Semantic Annotation in Information Retrieval, collocated with the 20th ACM Conference on Information and Knowledge Management (CIKM) 2011, October 28, 2011
 
 - D. Maynard and A. Funk. Automatic detection of political opinions in tweets. In Proceedings of MSM 2011: Making Sense of Microposts. Workshop at 8th Extended Semantic Web Conference (ESWC 2011). Heraklion, Greece. June 2011. %(http://gate.ac.uk/sale/eswc11/opinion-mining.pdf, PDF)
 
 - H. Wang, D. Damljanovic, T. Payne, N. Gibbins, and K. Bontcheva: Transition of Legacy Systems to Semantically Enabled Applications: TAO Method and Tools. Semantic Web Journal, IOS Press, 2011. (to appear)
 
+- D. Damljanovic, M. Agatonovic, H. Cunningham: FREyA: an Interactive Way of Querying Linked Data using Natural Language. In Raúl García-Castro, Dieter Fensel and Grigoris Antoniou (eds.) The Semantic Web: ESWC 2011 Selected Workshop Papers, Lecture Notes in Computer Science, Springer, 2011. %(gate.ac.uk/sale/dd/experiments/qald/post-proceedings/paper.pdf, PDF) (improved version of QALD-1 paper)
+
 - D. Damljanovic, M. Agatonovic, H. Cunningham: FREyA: an Interactive Way of Querying Linked Data using Natural Language. In: Proceedings of 1st Workshop on Question Answering over Linked Data (QALD-1), 
   Collocated with the 8th Extended Semantic Web Conference (ESWC 2011). Heraklion, Greece (June 2011) %(http://www.sc.cit-ec.uni-bielefeld.de/sites/www.sc.cit-ec.uni-bielefeld.de/files/proceedings.pdf, PDF)
 
-- D. Damljanovic, J. Petrak, M. Lupu, H. Cunningham, M. Carlsson, G. Engstrom, B. Andersson: Random Indexing for Finding Similar Nodes within Large RDF graphs. In: Proceedings of the Fourth International Workshop on Resource Discovery, 
+- D. Damljanovic, J. Petrak, M. Lupu, H. Cunningham, M. Carlsson, G. Engstrom, B. Andersson: Random Indexing for Finding Similar Nodes within Large RDF graphs. In Raúl García-Castro, Dieter Fensel and Grigoris Antoniou (eds.) The Semantic Web: ESWC 2011 Selected Workshop Papers, Lecture Notes in Computer Science, Springer, 2011. %(gate.ac.uk/sale/dd/experiments/RED2011/postproceedings/ri-main.pdf, PDF) (improved version of RED2011 paper)
+
+- D. Damljanovic, J. Petrak, M. Lupu, H. Cunningham, M. Carlsson, G. Engstrom, B. Andersson: Random Indexing for Finding Similar Nodes within Large RDF graphs. In: Proceedings of the Fourth International Workshop on Resource Discovery (RED2011), 
   Collocated with the 8th Extended Semantic Web Conference (ESWC 2011). Heraklion, Greece (June 2011)  %(http://gate.ac.uk/sale/dd/experiments/RED2011/ri-main-final.pdf, PDF)
 
 - M. Assel, A. Cheptsov, B. Czink, D. Damljanovic, J. Quesada: MPI Realization of  High  Performance  Search  for  Querying  Large  RDF  Graphs  using  Statistical Semantics . In: Proceedings of the 1st Workshop on High-Performance Computing for the Semantic Web, Collocated with the 8th Extended Semantic Web Conference (ESWC 2011). Heraklion, Greece (June 2011) %(http://wiki.larkc.eu/LarkcProject/statisticalSemantics?action=AttachFile&do=get&target=parallel-random-indexing.pdf, PDF)
