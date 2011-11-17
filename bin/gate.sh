@@ -30,6 +30,7 @@ config=
 session=
 initdir=
 log4j=
+rh=
 while test "$1" != "";
 do
   case "$1" in
@@ -43,6 +44,8 @@ The following options can be passed immediately after the command name:
                in the current directory
   -ll      ... if the current directory contains a file log4j.properties use
                this file to configure the logging
+  -rh path ... set the resources home path, this is a shortcut for 
+               -Druntime.gate.user.resourceshome=path 
   -h       ... show this help
 All other options will be passed on to the "ant run" command, for example:
   -propertyfile <file> ... use <file> instead of \$GATE_HOME/build.properties
@@ -75,6 +78,13 @@ EOF
       log4j="-Drun.log4j.configuration=file://$CURDIR/log4j.properties"
     fi
     ;;
+  -rh)
+    shift
+    resourceshome=$1
+    resourceshome=`cd "$resourceshome"; pwd -P`
+    shift
+    rh="-Drun.gate.user.resourceshome=$resourceshome"
+    ;;  
   *)
     break
     ;;
@@ -82,6 +92,6 @@ EOF
 done
 
 
-echo running: "$GATE_HOME/bin/ant" run -f "$GATE_HOME/build.xml"  "$config" "$sessioni" "$initdir" "$log4j" "$@"
-exec "$GATE_HOME/bin/ant" run -f "$GATE_HOME/build.xml" "$config" "$session" "$initdir" "$log4j" "$@"
+echo running: "$GATE_HOME/bin/ant" run -f "$GATE_HOME/build.xml"  "$config" "$sessioni" "$initdir" "$log4j" "$rh" "$@"
+exec "$GATE_HOME/bin/ant" run -f "$GATE_HOME/build.xml" "$config" "$session" "$initdir" "$log4j" "$rh" "$@"
 
