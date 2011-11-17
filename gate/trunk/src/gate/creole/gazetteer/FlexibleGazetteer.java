@@ -1,4 +1,4 @@
-0;271;0c/*
+/*
  * FlexibleGazetteer.java
  *
  * Copyright (c) 2004-2011, The University of Sheffield.
