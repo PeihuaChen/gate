@@ -23,6 +23,9 @@ import javax.swing.event.MouseInputAdapter;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.EmptyBorder;
+
+import org.apache.commons.lang.StringEscapeUtils;
+
 import java.util.*;
 import java.awt.*;
 
@@ -342,9 +345,9 @@ public class AnnotationStack extends JPanel {
               + map.getKey() + "</strong></td><td>"
               + ((Strings.toString(map.getValue()).length() > 500) ?
               "<textarea rows=\"20\" cols=\"40\" cellspacing=\"0\">"
-                + (Strings.toString(map.getValue())).replaceAll("(.{50,60})\\b", "$1\n")
+                + StringEscapeUtils.escapeHtml(Strings.toString(map.getValue()).replaceAll("(.{50,60})\\b", "$1\n"))
                 + "</textarea>" :
-              Strings.toString(map.getValue()).replaceAll("\n", "<br>"))
+              StringEscapeUtils.escapeHtml(Strings.toString(map.getValue())).replaceAll("\n", "<br>"))
               + "</td></tr>";
             odd = !odd;
           }
