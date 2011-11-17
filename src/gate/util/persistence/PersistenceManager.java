@@ -27,6 +27,7 @@ import java.net.*;
 import java.text.NumberFormat;
 import java.util.*;
 
+import java.util.logging.Level;
 import javax.xml.stream.*;
 
 import org.apache.log4j.Logger;
@@ -113,8 +114,11 @@ public class PersistenceManager {
    * &quot;file:&quot; URLs the relative path to the persistence file
    * will actually be stored, except when the URL refers to a resource
    * within the current GATE home directory in which case the relative path
-   * to the GATE home directory will be stored. In that case a warning
-   * is issued to
+   * to the GATE home directory will be stored. If the property 
+   * gate.user.resourceshom is set to a directory path and the URL refers 
+   * to a resource inside this directory, the relative path to this directory
+   * will be stored. If resources are stored relative to gate home or
+   * resources home, a warning will also be logged.
    */
   public static class URLHolder implements Persistence {
     /**
@@ -129,40 +133,45 @@ public class PersistenceManager {
         if(url.getProtocol().equals("file")) {
           try {
             String pathMarker = relativePathMarker;
-            File gateCanonicalHome = null;
-            URL urlPersistenceFilePath = currentPersistenceFile().toURI().toURL();
-            // try to get the canonical representation of the file both URLs
-            // so that the relative paths are not getting confused by symbolic
-            // links. If this fails, just proceed with the original URLs
-            try {
-              urlPersistenceFilePath =
-                currentPersistenceFile().getCanonicalFile().toURI().toURL();
-              url =
-                Files.fileFromURL(url).getCanonicalFile().toURI().toURL();
-            } catch (IOException ex) {
-              // ignore
-            }
-            
-            // if the persistence file does NOT reside in the GATE home
+            File gateHomePath = getGateHomePath();
+            URL urlPersistenceFilePath = 
+              getCanonicalFileIfPossible(currentPersistenceFile()).toURI().toURL();
+            File urlPath = 
+              getCanonicalFileIfPossible(Files.fileFromURL(url));
+            url = urlPath.toURI().toURL();
+
+            // If the persistence file does NOT reside in the GATE home
             // tree and if the URL references something in the GATE home
             // tree, use $gatehome$ instead of $relpath$
+            // Also if the system property for $resourceshome$ is set and the
+            // persistence file does not reside in the projecthome tree but
+            // the URL references something in the projecthome tree, use
+            // $resourceshome$ instead of $relpath$
+            // $resourceshome$ is only used when $gatehome$ would also be used,
+            // but there is a separate warning which is shown once something
+            // is stored relative to $resourceshome$
+            // If URL can be made relative to both gatehome and projecthome,
+            // gatehome is preferred.
             if(currentUseGateHome() || currentWarnAboutGateHome()) {
-            try {
               String persistenceFilePathName =
-                currentPersistenceFile().getCanonicalPath();
-              String gateHomePathName = Gate.getGateHome().getCanonicalPath();
-              gateCanonicalHome = Gate.getGateHome().getCanonicalFile();
-              String urlPathName = Files.fileFromURL(url).getCanonicalPath();
-              //logger.debug("persistenceFilePathName "+persistenceFilePathName);
-              //logger.debug("gateHomePathName        "+gateHomePathName);
-              //logger.debug("urlPathName             "+urlPathName);
+                urlPersistenceFilePath.getPath();
+              String gateHomePathName = gateHomePath.getPath();
+              String urlPathName = urlPath.getPath();
+              String resourceshomePathName = null;
+              if(getResourceshomePath() != null) {
+                resourceshomePathName = getResourceshomePath().getPath();
+              }
+              //logger.debug("urlPathName:           "+urlPathName);
+              //logger.debug("persistenFilePathName: "+persistenceFilePathName);
+              //logger.debug("gateHomePathName:      "+gateHomePathName);
+              //logger.debug("resourceshomePathName:   "+resourceshomePathName);
               if(!persistenceFilePathName.startsWith(gateHomePathName) &&
                  urlPathName.startsWith(gateHomePathName)) {
                 //logger.debug("Setting path marker to "+gatehomePathMarker);
                 if(currentWarnAboutGateHome()) {
                   if(!currentHaveWarnedAboutGateHome().getValue()) {
                     logger.warn(
-                          "\nYour application is using some of the plug-ins "+
+                          "\nYour application is using some of the resources/plugins "+
                           "distributed with GATE, and may not work as expected "+
                           "with different versions of GATE. You should consider "+
                           "making private local copies of the plug-ins, and "+
@@ -175,17 +184,38 @@ public class PersistenceManager {
                 if(currentUseGateHome()) {
                   pathMarker = gatehomePathMarker;
                 }
+              } else if(resourceshomePathName != null &&
+                 !persistenceFilePathName.startsWith(resourceshomePathName) &&
+                 urlPathName.startsWith(resourceshomePathName)) {
+                 if(currentWarnAboutGateHome()) {
+                  if(!currentHaveWarnedAboutResourceshome().getValue()) {
+                    logger.warn(
+                          "\nYour application is using resources from your project "+
+                          "path at "+getResourceshomePath()+". Restoring the application "+
+                          "will only work if the same project path is set.");
+                    currentHaveWarnedAboutResourceshome().setValue(true);
+                  }
+                  // the actual URL is shown every time
+                  logger.warn("Resource referenced: "+url);
+                }
+                if(currentUseGateHome()) {
+                  pathMarker = resourceshomePathMarker;
+                }
+               
               }
-            } catch(IOException ex) {
-              // do nothing and proceed with using the relativePathMarker
-            }
             }
             if(pathMarker.equals(relativePathMarker)) {
               urlString = pathMarker
                  + getRelativePath(urlPersistenceFilePath, url);
-            } else {
+            } else if(pathMarker.equals(gatehomePathMarker)) {
               urlString = pathMarker
-                 + getRelativePath(gateCanonicalHome.toURI().toURL(), url);
+                 + getRelativePath(gateHomePath.toURI().toURL(), url);
+            } else if(pathMarker.equals(resourceshomePathMarker)) {
+              urlString = pathMarker
+                 + getRelativePath(getResourceshomePath().toURI().toURL(), url);
+            } else {
+              // this should really never happen!
+              throw new GateRuntimeException("Unexpected error when persisting URL "+url);
             }
           }
           catch(MalformedURLException mue) {
@@ -213,11 +243,18 @@ public class PersistenceManager {
           return new URL(context, urlString.substring(relativePathMarker
                   .length()));
         } else if(urlString.startsWith(gatehomePathMarker)) {
-          URL gatehome =  Gate.getGateHome().toURI().toURL();
+          URL gatehome =  getCanonicalFileIfPossible(getGateHomePath()).toURI().toURL();
           return new URL(gatehome, urlString.substring(gatehomePathMarker.length()));
         } else if(urlString.startsWith(gatepluginsPathMarker)) {
           URL gateplugins = Gate.getPluginsHome().toURI().toURL();
           return new URL(gateplugins, urlString.substring(gatepluginsPathMarker.length()));
+        } else if(urlString.startsWith(resourceshomePathMarker)) {
+          if(getResourceshomePath() == null) {
+            throw new GateRuntimeException("Cannot restore URL "+urlString+
+                    "property "+resourceshomePropertyName+" is not set");
+          }
+          URL resourceshomeurl = getResourceshomePath().toURI().toURL();          
+          return new URL(resourceshomeurl, urlString.substring(resourceshomePathMarker.length()));
         } else if(urlString.startsWith(syspropMarker)) {
           String urlRestString = urlString.substring(syspropMarker.length());
           int dollarindex = urlRestString.indexOf("$");
@@ -246,7 +283,46 @@ public class PersistenceManager {
         throw new PersistenceException(mue);
       }
     }
+    
+    public File getGateHomePath() {
+      if(gatehomePath != null) {
+        return gatehomePath;
+      } else {
+        gatehomePath = getCanonicalFileIfPossible(Gate.getGateHome());
+        return gatehomePath;
+      }
+    }
+    
+    public File getResourceshomePath() {
+      if(haveResourceshomePath == null) {
+        String resourceshomeString = (String)System.getProperty(resourceshomePropertyName);
+        if(resourceshomeString == null) {
+          haveResourceshomePath = false;
+          return null;
+        }
+        resourceshomePath = new File(resourceshomeString);
+        resourceshomePath = getCanonicalFileIfPossible(resourceshomePath);
+        haveResourceshomePath = true;
+        System.out.println("Found project home path "+resourceshomePath);
+        return resourceshomePath;
+      } else if(haveResourceshomePath) {
+        return resourceshomePath;
+      } else {
+        return null;
+      }
+    }
 
+
+    public File getCanonicalFileIfPossible(File file) {
+      File tmp = file;
+      try {
+        tmp = tmp.getCanonicalFile();
+      } catch (IOException ex) {
+        // ignore
+      }
+      return tmp;
+    }
+    
     String urlString;
 
     /**
@@ -257,8 +333,20 @@ public class PersistenceManager {
     private static final String gatehomePathMarker = "$gatehome$";
     private static final String gatepluginsPathMarker = "$gateplugins$";
     private static final String syspropMarker = "$sysprop:";
-
+    private static final String resourceshomePathMarker = "$resourceshome$";
+    private static final String resourceshomePropertyName = "gate.user.resourceshome";
+    
+    // After initialisation this is either the canonical path to the project
+    // home as set by the property resourceshomePropertyName or null if the
+    // property has not been set.
+    private static File resourceshomePath = null;
+    private static Boolean haveResourceshomePath = null;
+    
+    // The canoncial gate home path gets cached in this field 
+    private static File gatehomePath = null;
+    
     static final long serialVersionUID = 7943459208429026229L;
+    
   }
 
   public static class ClassComparator implements Comparator {
@@ -636,6 +724,7 @@ public class PersistenceManager {
    */
   private static void startPersistingTo(File file) {
     haveWarnedAboutGateHome.get().addFirst(new BooleanFlag(false));
+    haveWarnedAboutResourceshome.get().addFirst(new BooleanFlag(false));
     persistenceFile.get().addFirst(file);
     existingPersistentReplacements.get().addFirst(new HashMap());
   }
@@ -657,6 +746,9 @@ public class PersistenceManager {
 
   private static BooleanFlag currentHaveWarnedAboutGateHome() {
     return haveWarnedAboutGateHome.get().getFirst();
+  }
+  private static BooleanFlag currentHaveWarnedAboutResourceshome() {
+    return haveWarnedAboutResourceshome.get().getFirst();
   }
 
   /**
@@ -961,7 +1053,9 @@ public class PersistenceManager {
   private static ThreadLocal<LinkedList<Boolean>> useGateHome;
   private static ThreadLocal<LinkedList<Boolean>> warnAboutGateHome;
   private static ThreadLocal<LinkedList<BooleanFlag>> haveWarnedAboutGateHome;
-
+  private static ThreadLocal<LinkedList<BooleanFlag>> haveWarnedAboutResourceshome;
+  
+  
   static {
     persistentReplacementTypes = new HashMap();
     try {
@@ -1028,5 +1122,6 @@ public class PersistenceManager {
     useGateHome = new ThreadLocalStack<Boolean>();
     warnAboutGateHome = new ThreadLocalStack<Boolean>();
     haveWarnedAboutGateHome = new ThreadLocalStack<BooleanFlag>();
+    haveWarnedAboutResourceshome = new ThreadLocalStack<BooleanFlag>();
   }
 }
