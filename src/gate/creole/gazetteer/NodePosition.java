@@ -19,7 +19,7 @@ package gate.creole.gazetteer;
 /**
  * <p>Title: NodePosition.java </p>
  * <p>Description: This class is used to store the information about the
- * changes in the text and the addition or the substraction of the spaces.
+ * changes in the text and the addition or the subtraction of the spaces.
  * It is used by FlexibleGazetteer. </p>
  * @author Niraj Aswani
  * @version 1.0
