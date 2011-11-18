@@ -1,7 +1,7 @@
 /*
  * NodePosition.java
  *
- * Copyright (c) 2004, The University of Sheffield.
+ * Copyright (c) 2004--2011, The University of Sheffield.
  *
  * This file is part of GATE (see http://gate.ac.uk/), and is free
  * software, licenced under the GNU Library General Public License,
@@ -11,10 +11,14 @@
  * licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
  *
  * Niraj Aswani 02/2002
+ * $Id$
  *
+ * 2011-11-18: AF made this immutable.
  */
 
 package gate.creole.gazetteer;
+
+import java.util.Comparator;
 
 /**
  * <p>Title: NodePosition.java </p>
@@ -22,31 +26,21 @@ package gate.creole.gazetteer;
  * changes in the text and the addition or the subtraction of the spaces.
  * It is used by FlexibleGazetteer. </p>
  * @author Niraj Aswani
- * @version 1.0
  */
 
 public class NodePosition {
 
   /** The original start offset before changes */
-  private long oldStartNode;
+  private long originalStartOffset;
 
   /** The original end offset before changes */
-  private long oldEndNode;
+  private long originalEndOffset;
 
   /** The new start offset after the changes */
-  private long newStartNode;
+  private long newStartOffset;
 
   /** The new end offset after the changes */
-  private long newEndNode;
-
-  /** total deducted spaces due to change in the text before the start
-   * offset in the document
-   */
-  private long deductedSpaces;
-
-  /** Constructor */
-  public NodePosition() {
-  }
+  private long newEndOffset;
 
   /**
    * constructor
@@ -57,91 +51,70 @@ public class NodePosition {
    * @param space - total deducted spaces due to change in the text before
    * the start offset in the document
    */
-  public NodePosition(long osn, long oen, long nsn, long nen, long space) {
-    oldStartNode = osn;
-    oldEndNode = oen;
-    newStartNode = nsn;
-    newEndNode = nen;
-    deductedSpaces = space;
+  public NodePosition(long osn, long oen, long nsn, long nen) {
+    originalStartOffset = osn;
+    originalEndOffset = oen;
+    newStartOffset = nsn;
+    newEndOffset = nen;
   }
 
   /**
    * Returns the old start offset
    * @return a <tt>long</tt> value.
    */
-  public long getOldStartNode() {
-    return oldStartNode;
+  public long getOriginalStartOffset() {
+    return originalStartOffset;
   }
 
   /**
    * Returns the old end offset
    * @return a <tt>long</tt> value.
    */
-  public long getOldEndNode() {
-    return oldEndNode;
+  public long getOriginalEndOffset() {
+    return originalEndOffset;
   }
 
   /**
    * Returns new start offset
    * @return  a <tt>long</tt> value.
    */
-  public long getNewStartNode() {
-    return newStartNode;
+  public long getNewStartOffset() {
+    return newStartOffset;
   }
 
   /**
    * Returns the new end offset
    * @return a <tt>long</tt> value.
    */
-  public long getNewEndNode() {
-    return newEndNode;
+  public long getNewEndOffset() {
+    return newEndOffset;
   }
 
-  /**
-   * Sets the old start offset
-   * @param node
-   */
-  public void setOldStartNode(long node) {
-    oldStartNode = node;
-  }
+}
 
-  /**
-   * Sets the old end offset
-   * @param node
-   */
-  public void setOldEndNode(long node) {
-    oldEndNode = node;
-  }
 
-  /**
-   * sets the new start offset
-   * @param node
-   */
-  public void setNewStartNode(long node) {
-    newStartNode = node;
-  }
+class NodePositionComparator implements Comparator<NodePosition> {
 
-  /**
-   * Sets the new end offset
-   * @param node
-   */
-  public void setNewEndNode(long node) {
-    newEndNode = node;
+  public int compare(NodePosition arg0, NodePosition arg1) {
+    long diff = arg0.getNewStartOffset() - arg1.getNewStartOffset();
+    if (diff != 0L) {
+      return (int) Long.signum(diff);
+    }
+    // implied else
+    diff = arg0.getNewEndOffset() - arg1.getNewEndOffset();
+    if (diff != 0L) {
+      return (int) Long.signum(diff);
+    }
+    // implied else
+    diff = arg0.getOriginalStartOffset() - arg1.getOriginalStartOffset();
+    if (diff != 0L) {
+      return (int) Long.signum(diff);
+    }
+    // implied else
+    diff = arg0.getOriginalEndOffset() - arg1.getOriginalEndOffset();
+    return (int) Long.signum(diff);
   }
-
-  /**
-   * Sets the deducted spaces
-   * @param space
-   */
-  public void setDeductedSpaces(long space) {
-    deductedSpaces = space;
-  }
-
-  /**
-   * Returns the total deducted spaces
-   * @return a <tt>long</tt> value.
-   */
-  public long getDeductedSpaces() {
-    return deductedSpaces;
-  }
+  
+  
+  
 }

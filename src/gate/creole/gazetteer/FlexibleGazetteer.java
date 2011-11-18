@@ -77,11 +77,9 @@ implements ProcessingResource {
    * be called before the gazetteer can be used
    */
   public Resource init() throws ResourceInstantiationException {
-    // check for parameters
-    if(gazetteerInst == null)
+    if(gazetteerInst == null)  {
       throw new ResourceInstantiationException("No Gazetteer Provided!");
-
-    this.changedNodes = new ArrayList<NodePosition>();
+    }
     return this;
   }
 
@@ -90,7 +88,7 @@ implements ProcessingResource {
    * parameters are set. If they are not, an exception will be fired.
    */
   public void execute() throws ExecutionException {
-    changedNodes = new ArrayList<NodePosition>();
+    annotationMappings = new ArrayList<NodePosition>();
     fireProgressChanged(0);
     fireStatusChanged("Checking Document...");
     if(document == null) {
@@ -108,7 +106,7 @@ implements ProcessingResource {
     long totalDeductedSpaces = 0;
     fireStatusChanged("Replacing contents with the feature value...");
     outer: for (Annotation currentToken : Utils.inDocumentOrder(document.getAnnotations(inputAnnotationSetName))) {
-      // check if it is a chinesesplit; if it is, replace no space character with a single space
+      // Where ChineseSplits occur, insert a single space
       if(currentToken.getType().equals(ANNIEConstants.SPACE_TOKEN_ANNOTATION_TYPE)
           && ((String)(currentToken.getFeatures().get(ANNIEConstants.TOKEN_KIND_FEATURE_NAME))).equals("ChineseSplit")) {
 
@@ -119,12 +117,14 @@ implements ProcessingResource {
         // the endoffset will become newStartOffset + 1
         long newStartOffset = startOffset - totalDeductedSpaces;
         long newEndOffset = newStartOffset + 1;
-        NodePosition newNode = new NodePosition(startOffset, startOffset,
-                newStartOffset, newEndOffset, totalDeductedSpaces);
+        NodePosition mapping = new NodePosition(startOffset, startOffset,
+                newStartOffset, newEndOffset);
 
         // here is the addition of space in the document
         totalDeductedSpaces--;
-        changedNodes.add(newNode);
+        // Should these Splits actually be mappable from the temp document
+        // back to the original one?  (AF)
+        annotationMappings.add(mapping);
         newdocString = newdocString.insert((int)newStartOffset, ' ');
         continue outer;
       } // chineseSplit if
@@ -146,13 +146,10 @@ implements ProcessingResource {
             long startOffset = currentToken.getStartNode().getOffset().longValue();
             long endOffset = currentToken.getEndNode().getOffset().longValue();
             
-            // replacement code start
-            long actualLength = endOffset - startOffset;
             // let us find the difference between the lengths of the
             // actual string and the newTokenValue
+            long actualLength = endOffset - startOffset;
             long lengthDifference = actualLength - newTokenValue.length();
-            
-            // replacement code end
             
             // so lets find out the new startOffset and endOffset
             long newStartOffset = startOffset - totalDeductedSpaces;
@@ -160,9 +157,9 @@ implements ProcessingResource {
             totalDeductedSpaces += lengthDifference;
             
             // and make the entry for this
-            NodePosition newNode = new NodePosition(startOffset, endOffset,
-                newStartOffset, newEndOffset, totalDeductedSpaces);
-            changedNodes.add(newNode);
+            NodePosition mapping = new NodePosition(startOffset, endOffset,
+                newStartOffset, newEndOffset);
+            annotationMappings.add(mapping);
             
             // and finally replace the actual string in the document
             // with the new document
@@ -174,6 +171,9 @@ implements ProcessingResource {
         }
       } // END OF "inner" LOOP
     } // END OF "outer" LOOP
+    
+    // make sure the conversion table is in the right order
+    Collections.sort(annotationMappings, new NodePositionComparator());
 
     fireStatusChanged("New Document to be processed with Gazetteer...");
     try {
@@ -185,7 +185,6 @@ implements ProcessingResource {
       }
       
       FeatureMap features = Factory.newFeatureMap();
-      // Gate.setHiddenAttribute(features, true);
       tempDoc = (Document)Factory.createResource("gate.corpora.DocumentImpl",
               params, features);
     }
@@ -194,7 +193,6 @@ implements ProcessingResource {
     }
 
     // lets create the gazetteer based on the provided gazetteer name
-    //FeatureMap params = Factory.newFeatureMap();
     gazetteerInst.setDocument(tempDoc);
     gazetteerInst.setAnnotationSetName(this.outputAnnotationSetName);
 
@@ -217,40 +215,35 @@ implements ProcessingResource {
 
       long originalStart = 0;
       long originalEnd = tempDoc.getContent().size() - 1L;
-
-      int i = 0;
-      for(; i < changedNodes.size(); i++) {
-        NodePosition np = changedNodes.get(i);
-
-        // Find the last node whose temp start node is less than or equal 
+      boolean foundStart = false;
+      
+      for (NodePosition mapping : annotationMappings)  {
+        // Find the last mapping whose temp start offset is less than or equal 
         // to the temp lookup's start 
-        if(np.getNewStartNode() <= startOffset) {
-          originalStart = np.getOldStartNode();
-        } 
-        else {
+        if (! foundStart) {
+          if (mapping.getNewStartOffset() <= startOffset)  {
+            originalStart = mapping.getOriginalStartOffset();
+          }
+          else {
+            foundStart = true;
+          }
+        }
+        
+        // Find the first mapping whose temp end offset is greater than or equal
+        // to the temp lookup's end; typically this will be the same as the mapping found
+        // for the start offset
+        if (mapping.getNewEndOffset() >= endOffset) {
+          originalEnd = mapping.getOriginalEndOffset();
           break;
         }
       }
       
-      for(; i < changedNodes.size(); i++) {
-        NodePosition np = changedNodes.get(i);
-
-        // Find the first node whose temp end node is greater than or equal
-        // to the temp lookup's end
-        if(np.getNewEndNode() >= endOffset) {
-          originalEnd = np.getOldEndNode();
-          break;
-        }
-      }
-
       try { 
-        original.add(originalStart, originalEnd, 
-            currentLookup.getType(), currentLookup.getFeatures());
+        original.add(originalStart, originalEnd, currentLookup.getType(), currentLookup.getFeatures());
       } // This should no longer happen
       catch(InvalidOffsetException ioe) {
         throw new ExecutionException(ioe);
       }
-
     }
 
     // now remove the newDoc
@@ -357,5 +350,5 @@ implements ProcessingResource {
   private java.util.List<String> inputFeatureNames;
 
   // parameters required within the program
-  private ArrayList<NodePosition> changedNodes;
+  private ArrayList<NodePosition> annotationMappings;
 }
