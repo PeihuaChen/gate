@@ -232,8 +232,6 @@ implements ProcessingResource {
         }
       }
       
-      i--;
-      
       for(; i < changedNodes.size(); i++) {
         NodePosition np = changedNodes.get(i);
 
