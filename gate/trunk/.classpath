@@ -3,9 +3,9 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" output="plugins/JAPE_Plus/classes" path="plugins/JAPE_Plus/src"/>
 	<classpathentry kind="src" output="plugins/Groovy/build" path="plugins/Groovy/src"/>
-	<classpathentry kind="src" path="plugins/OpenNLP/src"/>
-	<classpathentry kind="src" path="plugins/Tagger_Framework/src"/>
-	<classpathentry kind="src" path="plugins/Gazetteer_Ontology_Based/src"/>
+	<classpathentry kind="src" output="plugins/OpenNLP/classes" path="plugins/OpenNLP/src"/>
+	<classpathentry kind="src" output="plugins/Tagger_Framework/classes" path="plugins/Tagger_Framework/src"/>
+	<classpathentry kind="src" output="plugins/Gazetteer_Ontology_Based/build" path="plugins/Gazetteer_Ontology_Based/src"/>
 	<classpathentry kind="src" output="plugins/Parser_Stanford/classes" path="plugins/Parser_Stanford/src"/>
 	<classpathentry kind="src" output="plugins/Lang_Chinese/build" path="plugins/Lang_Chinese/src"/>
 	<classpathentry kind="src" output="plugins/Web_Search_Google/build" path="plugins/Web_Search_Google/src"/>
@@ -27,8 +27,8 @@
 	<classpathentry kind="src" output="plugins/Learning/build" path="plugins/Learning/src"/>
 	<classpathentry kind="src" output="plugins/Stemmer_Snowball/classes" path="plugins/Stemmer_Snowball/src"/>
 	<classpathentry kind="src" output="plugins/WordNet/classes" path="plugins/WordNet/src"/>
-	<classpathentry kind="src" path="plugins/LingPipe/src"/>
-	<classpathentry kind="src" path="plugins/Ontology/src"/>
+	<classpathentry kind="src" output="plugins/LingPipe/build" path="plugins/LingPipe/src"/>
+	<classpathentry kind="src" output="plugins/Ontology/build" path="plugins/Ontology/src"/>
 	<classpathentry exported="true" kind="lib" path="lib/Bib2HTML.jar"/>
 	<classpathentry kind="lib" path="lib/ext/nl.mpi.lookup.jar"/>
 	<classpathentry kind="lib" path="lib/plugins/rdf_backend.jar"/>
