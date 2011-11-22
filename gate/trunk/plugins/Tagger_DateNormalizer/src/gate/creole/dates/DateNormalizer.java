@@ -10,7 +10,6 @@
  * 
  * Mark A. Greenwood, 16/11/2010
  */
-
 package gate.creole.dates;
 
 import gate.Annotation;
@@ -53,13 +52,12 @@ import org.apache.log4j.Logger;
  * href="http://greenwoodma.servehttp.com/hudson/job/Date%20Parser/">Date
  * Parser</a> library to perform the normalisation.
  * 
- * @see <a href="http://gate.ac.uk/userguide/sec:misc-creole:datenormalizer">The GATE
- *      User Guide</a>
+ * @see <a href="http://gate.ac.uk/userguide/sec:misc-creole:datenormalizer">The
+ *      GATE User Guide</a>
  * @author Mark A. Greenwood
  */
 @CreoleResource(name = "Date Normalizer", interfaceName = "gate.ProcessingResource", icon = "date-normalizer.png", comment = "provides normalized values for all known dates")
 public class DateNormalizer extends AbstractLanguageAnalyser {
-
   private static final long serialVersionUID = -6580533128028166284L;
 
   private transient Logger logger = Logger.getLogger(this.getClass().getName());
@@ -69,39 +67,29 @@ public class DateNormalizer extends AbstractLanguageAnalyser {
    * feature) and then by offset
    */
   private static final Comparator<Annotation> PRIORITY_ORDER =
-          new Comparator<Annotation>() {
-
-            public int compare(Annotation a1, Annotation a2) {
-
-              Integer p1 = 0;
-              try {
-                if(a1.getFeatures().containsKey("priority"))
-                  p1 =
-                          Integer.valueOf(a1.getFeatures().get("priority")
-                                  .toString());
-              } catch(Exception e) {
-                // ignore this and use a priority of 0
-              }
-
-              Integer p2 = 0;
-              try {
-                if(a2.getFeatures().containsKey("priority"))
-                  p2 =
-                          Integer.valueOf(a2.getFeatures().get("priority")
-                                  .toString());
-              } catch(Exception e) {
-                // ignore this and use a priority of 0
-              }
-
-              // order by highest priority first
-              if(!p1.equals(p2)) return p2.compareTo(p1);
-
-              // order by lowest offset first
-              return a1.getStartNode().getOffset()
-                      .compareTo(a2.getStartNode().getOffset());
-            }
-
-          };
+      new Comparator<Annotation>() {
+        public int compare(Annotation a1, Annotation a2) {
+          Integer p1 = 0;
+          try {
+            if(a1.getFeatures().containsKey("priority"))
+              p1 = Integer.valueOf(a1.getFeatures().get("priority").toString());
+          } catch(Exception e) {
+            // ignore this and use a priority of 0
+          }
+          Integer p2 = 0;
+          try {
+            if(a2.getFeatures().containsKey("priority"))
+              p2 = Integer.valueOf(a2.getFeatures().get("priority").toString());
+          } catch(Exception e) {
+            // ignore this and use a priority of 0
+          }
+          // order by highest priority first
+          if(!p1.equals(p2)) return p2.compareTo(p1);
+          // order by lowest offset first
+          return a1.getStartNode().getOffset()
+              .compareTo(a2.getStartNode().getOffset());
+        }
+      };
 
   private String inputASName = null;
 
@@ -127,6 +115,18 @@ public class DateNormalizer extends AbstractLanguageAnalyser {
 
   public String getOutputASName() {
     return outputASName;
+  }
+
+  private String annotationName = null;
+
+  @RunTime
+  @CreoleParameter(defaultValue = "Date", comment = "the annotation type produced by the PR")
+  public void setAnnotationName(String name) {
+    annotationName = name;
+  }
+
+  public String getAnnotationName() {
+    return annotationName;
   }
 
   private List<String> documentDates = null;
@@ -208,108 +208,86 @@ public class DateNormalizer extends AbstractLanguageAnalyser {
 
   @Override
   public Resource init() throws ResourceInstantiationException {
-
     // if a locale was specified in the init params then try and create such a
     // locale now so we don't have to do it for each document
     if(localeName != null && !localeName.trim().equals("")) {
       locale = DateParser.getLocale(localeName.trim());
-
       if(locale == null)
         throw new ResourceInstantiationException("The locale specified, '"
-                + localeName + "' is not valid");
+            + localeName + "' is not valid");
     }
-
     return this;
   }
 
   @Override
   public void execute() throws ExecutionException {
-
     // assume we haven't been interrupted yet
     interrupted = false;
-
     // fire some progress notifications
     long startTime = System.currentTimeMillis();
     fireStatusChanged("Performing date normalization in " + document.getName());
     fireProgressChanged(0);
-
     // if there is no document to process then stop right now
     if(document == null)
       throw new ExecutionException("No document to process!");
-
     // we are supposed to be giving text output but there is no format specified
     // to stop right now
     if(!numericOutput
-            && (dateFormat == null || dateFormat.trim().length() == 0))
+        && (dateFormat == null || dateFormat.trim().length() == 0))
       throw new ExecutionException("no date format specified");
-
+    if(annotationName == null)
+      throw new ExecutionException("Output annotation type must be specified");
     // configure the formatter using the format specified by the user
     DateFormat df =
-            new SimpleDateFormat(numericOutput ? "yyyyMMdd" : dateFormat);
-
+        new SimpleDateFormat(numericOutput ? "yyyyMMdd" : dateFormat);
     // determine the locale to use for parsing. Check the document first
     // then the init time param and then finally use the default
     Locale docLocale = null;
     docLocale =
-            DateParser.getLocale((String)document.getFeatures().get("locale"));
+        DateParser.getLocale((String)document.getFeatures().get("locale"));
     if(docLocale == null) docLocale = locale;
     if(docLocale == null) docLocale = Locale.getDefault();
-
     // create an instance of the parser
     DateParser dp = new DateParser(docLocale);
-
     // get handles to the document content and the input and output annotation
     // sets so that we can easily refer to them later
     String docContent = document.getContent().toString();
     AnnotationSet inputAS = document.getAnnotations(inputASName);
     AnnotationSet outputAS = document.getAnnotations(outputASName);
-
     // a parse position that will help us to parse the document dates
     ParsePositionEx pp = new ParsePositionEx();
-
     // lets try and figure out what date the document was written on
     Date documentDate = null;
-
     if(documentDates != null) {
       // a holder for the document date string
       String dd = null;
-
       for(String dateFeature : documentDates) {
         // for each document source the user has specified...
-
         try {
-
           // split the source at a . and assume it's of the form
           // Annotation.Feature
           String[] parts = dateFeature.split("\\.", 2);
-
           // try and get the annotations from the document
           List<Annotation> annotations =
-                  new ArrayList<Annotation>(inputAS.get(parts[0],
-                          Factory.newFeatureMap()));
-
+              new ArrayList<Annotation>(inputAS.get(parts[0],
+                  Factory.newFeatureMap()));
           if(annotations.size() > 0) {
             // if there are annotations then sort them by their priority
             Collections.sort(annotations, PRIORITY_ORDER);
-
             for(Annotation a : annotations) {
               // for each of the annotations get the string that might be a date
               // either from the specified feature or from the underlying string
               if(parts.length == 1) {
                 dd =
-                        docContent.substring(a.getStartNode().getOffset()
-                                .intValue(), a.getEndNode().getOffset()
-                                .intValue());
+                    docContent.substring(a.getStartNode().getOffset()
+                        .intValue(), a.getEndNode().getOffset().intValue());
               } else {
                 dd = (String)a.getFeatures().get(parts[1]);
               }
-
               // try and parse the string we have just extracted
               Date d = dp.parse(dd, pp.reset(), null);
-
               if(d != null
-                      && pp.getFeatures().get("inferred")
-                              .equals(DateParser.NONE)) {
+                  && pp.getFeatures().get("inferred").equals(DateParser.NONE)) {
                 // we have found a fully specified date so let's assume this is
                 // the date of the document and stop
                 documentDate = d;
@@ -320,11 +298,9 @@ public class DateNormalizer extends AbstractLanguageAnalyser {
             // the document date source is actually a document feature so let's
             // parse that instead
             dd = (String)document.getFeatures().get(dateFeature);
-
             Date d = dp.parse(dd, pp.reset(), null);
-
             if(d != null
-                    && pp.getFeatures().get("inferred").equals(DateParser.NONE)) {
+                && pp.getFeatures().get("inferred").equals(DateParser.NONE)) {
               // we have found a fully specified date so let's assume this is
               // the date of the document and stop
               documentDate = d;
@@ -334,38 +310,34 @@ public class DateNormalizer extends AbstractLanguageAnalyser {
         } catch(Exception e) {
           // ignore this and try the next feature
         }
-
         if(documentDate != null) break;
       }
     }
-
     // if there is no document date then assume the document was written today
     if(documentDate == null) documentDate = new Date();
-
     // if a normalized date feature has been specified then store the document
     // date we have just found in that feature
     if(normalizedDocumentFeature != null
-            && normalizedDocumentFeature.trim().length() > 0) {
+        && normalizedDocumentFeature.trim().length() > 0) {
       document.getFeatures().put(
-              normalizedDocumentFeature,
-              (numericOutput ? Integer.parseInt(df.format(documentDate)) : df
-                      .format(documentDate)));
+          normalizedDocumentFeature,
+          (numericOutput ? Integer.parseInt(df.format(documentDate)) : df
+              .format(documentDate)));
     }
-
     // get a list of Token annotations
     List<Annotation> tokens =
-            new ArrayList<Annotation>(inputAS.get(TOKEN_ANNOTATION_TYPE,
-                    Factory.newFeatureMap()));
-
+        new ArrayList<Annotation>(inputAS.get(TOKEN_ANNOTATION_TYPE,
+            Factory.newFeatureMap()));
     if(tokens.size() == 0) {
       // if there are no tokens then either fail or print a warning
       if(failOnMissingInputAnnotations) {
         throw new ExecutionException(
-                "Either "
-                        + document.getName()
-                        + " does not have any contents or \n you need to run the tokenizer first");
+            "Either "
+                + document.getName()
+                + " does not have any contents or \n you need to run the tokenizer first");
       } else {
-        Utils.logOnce(
+        Utils
+            .logOnce(
                 logger,
                 Level.INFO,
                 "Date Normalization: either a document does not have any text or you need to run the tokenizer first - see debug log for details.");
@@ -373,93 +345,74 @@ public class DateNormalizer extends AbstractLanguageAnalyser {
         return;
       }
     }
-
     // sort the list of tokens so they are in document order
     Collections.sort(tokens, new OffsetComparator());
-
     // lets start at the beginning of the document
     long start = 0;
-
     // get the list of keywords from the parser (this includes things like
     // today, tomorrow and the names of the days of the week and months of the
     // year)
     Set<String> words = dp.getWords();
-
     for(Annotation token : tokens) {
       // for each annotation...
-
       // if we have been asked to stop then do so
       if(isInterrupted()) { throw new ExecutionInterruptedException(
-              "The execution of the \"" + getName()
-                      + "\" Date Normalizer has been abruptly interrupted!"); }
-
+          "The execution of the \"" + getName()
+              + "\" Date Normalizer has been abruptly interrupted!"); }
       // if the token is before where we need to start from then skip it
       if(token.getStartNode().getOffset() < start) continue;
-
       try {
-
         // if the token isn't a number or a keyword then skip it as it can't
         // possibly be the start of a date
         if(!Character.isDigit(token.getFeatures().get("string").toString()
-                .charAt(0))
-                && !words.contains(token.getFeatures().get("string").toString()
-                        .toLowerCase())) continue;
-
+            .charAt(0))
+            && !words.contains(token.getFeatures().get("string").toString()
+                .toLowerCase())) continue;
         // try and parse the document content starting from the beginning of the
         // current token
         Date d =
-                dp.parse(docContent,
-                        pp.reset(token.getStartNode().getOffset().intValue()),
-                        documentDate);
-
+            dp.parse(docContent,
+                pp.reset(token.getStartNode().getOffset().intValue()),
+                documentDate);
         // if the text didn't parse skip on to the next token
         if(d == null) continue;
-
         // create a FeatureMap to hold the parameters of the annotation we are
         // about to create
         FeatureMap params = Factory.newFeatureMap();
-
         // normalize the date and store the value
         params.put("normalized", numericOutput
-                ? Integer.parseInt(df.format(d))
-                : df.format(d));
-
+            ? Integer.parseInt(df.format(d))
+            : df.format(d));
         // set the complete feature based on the inferred flags from the parser
         if(pp.getFeatures().get("inferred").equals(DateParser.NONE)) {
           params.put("complete", "true");
         } else {
           params.put("complete", "false");
         }
-
         // copy the relative date feature from the parser into the feature map
         params.put("relative", pp.getFeatures().get("relative"));
-
         // now create the annotation
         outputAS.add(token.getStartNode().getOffset(), (long)pp.getIndex(),
-                "Date", params);
-
+            annotationName, params);
         // move parsing on to the end of the annotation we have just created in
         // order to avoid overlapping annotations
         start = pp.getIndex();
-
       } catch(Exception e) {
         // not quite sure how we got here but continue on by moving parsing to
         // the end of the current token
         start = token.getEndNode().getOffset();
       }
-
       // calcualte percentage complete using the parsing position within the
       // document content
       fireProgressChanged((int)(start / docContent.length()) * 100);
     }
-
     // we have finished so update anyone who cares
     fireProcessFinished();
     fireStatusChanged("Dates detected and normalized in \""
-            + document.getName()
-            + "\" in "
-            + NumberFormat.getInstance().format(
-                    (double)(System.currentTimeMillis() - startTime) / 1000)
-            + " seconds!");
+        + document.getName()
+        + "\" in "
+        + NumberFormat.getInstance().format(
+            (double)(System.currentTimeMillis() - startTime) / 1000)
+        + " seconds!");
   }
 }
