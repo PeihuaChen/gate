@@ -71,7 +71,7 @@ public class FlexibleGazetteer extends AbstractLanguageAnalyser
 implements ProcessingResource {
 
   private static final long serialVersionUID = -1023682327651886920L;
-
+  
   /**
    * Does the actual loading and parsing of the lists. This method must
    * be called before the gazetteer can be used
@@ -187,9 +187,19 @@ implements ProcessingResource {
       FeatureMap features = Factory.newFeatureMap();
       tempDoc = (Document)Factory.createResource("gate.corpora.DocumentImpl",
               params, features);
+      
+      /* Mark the document with the locations of the input annotations so
+       * that we can later eliminate Lookups that are out of scope.       */
+      for (NodePosition mapping : annotationMappings) {
+        tempDoc.getAnnotations().add(mapping.getNewStartOffset(), mapping.getNewEndOffset(), "Input", Factory.newFeatureMap());
+      }
+      
     }
     catch(ResourceInstantiationException rie) {
-      throw new ExecutionException("Temporary document cannot be created");
+      throw new ExecutionException("Temporary document cannot be created", rie);
+    } 
+    catch(InvalidOffsetException e) {
+      throw new ExecutionException("Temporary document cannot be created", e);
     }
 
     // lets create the gazetteer based on the provided gazetteer name
@@ -208,41 +218,48 @@ implements ProcessingResource {
     // from this temp document to the original document
     fireStatusChanged("Transfering new tags to the original one...");
     AnnotationSet original = document.getAnnotations(outputAnnotationSetName);
+    AnnotationSet tempInputAS = tempDoc.getAnnotations().get("Input");
+    //System.out.printf("temp Input size = %d\n", tempInputAS.size());
 
     for (Annotation currentLookup : Utils.inDocumentOrder(tempDoc.getAnnotations(outputAnnotationSetName))) {
-      long startOffset = currentLookup.getStartNode().getOffset().longValue();
-      long endOffset = currentLookup.getEndNode().getOffset().longValue();
+      long tempStartOffset = currentLookup.getStartNode().getOffset().longValue();
+      long tempEndOffset = currentLookup.getEndNode().getOffset().longValue();
 
-      long originalStart = 0;
-      long originalEnd = tempDoc.getContent().size() - 1L;
-      boolean foundStart = false;
-      
-      for (NodePosition mapping : annotationMappings)  {
-        // Find the last mapping whose temp start offset is less than or equal 
-        // to the temp lookup's start 
-        if (! foundStart) {
-          if (mapping.getNewStartOffset() <= startOffset)  {
+      /* Ignore Lookups that are out of the range of the input annotations.
+       */
+      if (coveredByInput(tempStartOffset, tempEndOffset, tempInputAS)) {
+        long originalStart = 0;
+        long originalEnd = document.getContent().size() - 1L;
+        
+        int i = 0;
+        
+        for ( ; i < annotationMappings.size() ; i++) {
+          /* Find the last mapping whose temp start offset is less than or equal 
+           * to the temp lookup's start   */ 
+          NodePosition mapping = annotationMappings.get(i);
+          if (mapping.getNewStartOffset() <= tempStartOffset)  {
             originalStart = mapping.getOriginalStartOffset();
           }
           else {
-            foundStart = true;
+            /* At this point, we are on the Token after the first one that 
+             * matches the Lookup; the current one might also match, but we need to
+             * back up to be sure.             */
+            i--;
+            break;
           }
         }
         
-        // Find the first mapping whose temp end offset is greater than or equal
-        // to the temp lookup's end; typically this will be the same as the mapping found
-        // for the start offset
-        if (mapping.getNewEndOffset() >= endOffset) {
-          originalEnd = mapping.getOriginalEndOffset();
-          break;
+        for ( ; i < annotationMappings.size() ; i++) {
+          /* Find the first mapping whose temp end offset is greater than or equal
+           * to the temp lookup's end; typically this will be the same mapping as used for
+           * for the start offset, but it could be a subsequent one.         */
+          NodePosition mapping = annotationMappings.get(i);
+          if (mapping.getNewEndOffset() >= tempEndOffset) {
+            originalEnd = mapping.getOriginalEndOffset();
+            addToOriginal(original, originalStart, originalEnd, tempStartOffset, tempEndOffset, currentLookup, tempDoc);
+            break;
+          }
         }
-      }
-      
-      try { 
-        original.add(originalStart, originalEnd, currentLookup.getType(), currentLookup.getFeatures());
-      } // This should no longer happen
-      catch(InvalidOffsetException ioe) {
-        throw new ExecutionException(ioe);
       }
     }
 
@@ -251,6 +268,36 @@ implements ProcessingResource {
     fireProcessFinished();
   } // END execute METHOD
 
+  
+  private void addToOriginal(AnnotationSet original, long originalStart, long originalEnd, 
+      long tempStart, long tempEnd, Annotation tempLookup, Document tempDoc) throws ExecutionException {
+    try {
+      original.add(originalStart, originalEnd, tempLookup.getType(), tempLookup.getFeatures());
+    } // This should no longer happen
+    catch(InvalidOffsetException ioe) {
+      // Better debugging info for when it does
+      System.err.printf("temp %d, %d [%s]-> original %d, %d\n", tempStart, tempEnd, Utils.stringFor(tempDoc, tempLookup), 
+          originalStart, originalEnd);
+      throw new ExecutionException(ioe);
+    }
+  }
+
+  /* Is this Lookup within the scope of the input annotations?  It might not be, if Token annotations
+   * have been copied by AST only over the significant sections of the document.
+   */
+  private boolean coveredByInput(long tempStart, long tempEnd, AnnotationSet tempInputAS) {
+    if (tempInputAS.getCovering("Input", tempStart, tempStart).isEmpty()) {
+      return false;
+    }
+    // implied else
+    if (tempInputAS.getCovering("Input", tempEnd, tempEnd).isEmpty()) {
+      return false;
+    }
+    // implied else
+    return true;
+  }
+  
+  
   /**
    * Sets the document to work on
    * 
