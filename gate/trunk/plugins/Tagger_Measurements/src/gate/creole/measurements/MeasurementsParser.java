@@ -232,19 +232,6 @@ public class MeasurementsParser {
   /**
    * Attempt to parse the string as a measurement. Parsing does not have to
    * consume the entire string in order for a measurement to be found and
-   * returned. Parsing will start from the beginning of the string.
-   * 
-   * @param text
-   *          the text to parse
-   * @return a measurement if one is found, null otherwise
-   */
-  public Measurement parse(String text) {
-    return parse(text, 0);
-  }
-
-  /**
-   * Attempt to parse the string as a measurement. Parsing does not have to
-   * consume the entire string in order for a measurement to be found and
    * returned.
    * 
    * @param text
@@ -253,7 +240,8 @@ public class MeasurementsParser {
    *          the index within the text to start parsing from
    * @return a measurement if one is found, null otherwise
    */
-  public Measurement parse(String text, int index) {
+  @Deprecated
+  private Measurement parse(String text, int index) {
     Measurement v = Measurement.fromString(text, index, this);
     if(v == null) return null;
     if(v.getNormalizedUnit().trim().equals("")) return null;

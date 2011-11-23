@@ -86,7 +86,13 @@ public class Measurement {
    * @return the unit recognised in the parsed text
    */
   public String getUnit() {
-    return origUnit;
+    // TODO it turns out that the origUnit isn't valid as it just sorts the
+    // pieces in alphabetical order which isn't really helpful, so far now we
+    // just revert to using the parsed text. It would be nice if we could figure
+    // out a way of normalizing units without reduction (i.e. miles --> mile)
+    return origText.trim();
+
+    //return origUnit;
   }
 
   /**
