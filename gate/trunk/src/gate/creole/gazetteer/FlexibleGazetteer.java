@@ -171,6 +171,18 @@ implements ProcessingResource {
         }
       } // END OF "inner" LOOP
     } // END OF "outer" LOOP
+
+    
+    /* If the conversion table is empty, there were no input annotations in the original
+     * document, so there is no reason to run the underlying gazetteer.  Save time
+     * by ending execution on this document     */
+    if (annotationMappings.isEmpty())  {
+      Factory.deleteResource(tempDoc);
+      fireProcessFinished();
+      return;
+    }
+    
+    
     
     // make sure the conversion table is in the right order
     Collections.sort(annotationMappings, new NodePositionComparator());
@@ -188,7 +200,7 @@ implements ProcessingResource {
       tempDoc = (Document)Factory.createResource("gate.corpora.DocumentImpl",
               params, features);
       
-      /* Mark the document with the locations of the input annotations so
+      /* Mark the temp document with the locations of the input annotations so
        * that we can later eliminate Lookups that are out of scope.       */
       for (NodePosition mapping : annotationMappings) {
         tempDoc.getAnnotations().add(mapping.getNewStartOffset(), mapping.getNewEndOffset(), "Input", Factory.newFeatureMap());
@@ -221,47 +233,60 @@ implements ProcessingResource {
     AnnotationSet tempInputAS = tempDoc.getAnnotations().get("Input");
     //System.out.printf("temp Input size = %d\n", tempInputAS.size());
 
-    for (Annotation currentLookup : Utils.inDocumentOrder(tempDoc.getAnnotations(outputAnnotationSetName))) {
+    for (Annotation currentLookup : tempDoc.getAnnotations(outputAnnotationSetName)) {
       long tempStartOffset = currentLookup.getStartNode().getOffset().longValue();
       long tempEndOffset = currentLookup.getEndNode().getOffset().longValue();
 
       /* Ignore Lookups that are out of the range of the input annotations.
        */
       if (coveredByInput(tempStartOffset, tempEndOffset, tempInputAS)) {
-        long originalStart = 0;
+        long originalStart = -1L;
         long originalEnd = document.getContent().size() - 1L;
         
         int i = 0;
         
         for ( ; i < annotationMappings.size() ; i++) {
           /* Find the last mapping whose temp start offset is less than or equal 
-           * to the temp lookup's start   */ 
+           * to the temp lookup's start.
+           * 
+           * If the last matching mapping is the last mapping in the list,
+           * this loop will finish with the correct originalStart value but
+           * without hitting the i-- and break statements.
+           * 
+           * This is also the case if (unusually) there is only 1 mapping
+           * (input annotation).             */ 
           NodePosition mapping = annotationMappings.get(i);
           if (mapping.getNewStartOffset() <= tempStartOffset)  {
             originalStart = mapping.getOriginalStartOffset();
           }
           else {
-            /* At this point, we are on the Token after the first one that 
-             * matches the Lookup; the current one might also match, but we need to
-             * back up to be sure.             */
+            /* Here, counter i points to the Token after the correct mapping
+             * for the Lookup's start.  We need to back up one position in case
+             * the correct mapping for the Lookup's start is also the correct one
+             * for the Lookup's end.           */
             i--;
             break;
           }
-        }
+        } // END for FINDING START OFFSET
         
-        for ( ; i < annotationMappings.size() ; i++) {
-          /* Find the first mapping whose temp end offset is greater than or equal
-           * to the temp lookup's end; typically this will be the same mapping as used for
-           * for the start offset, but it could be a subsequent one.         */
-          NodePosition mapping = annotationMappings.get(i);
-          if (mapping.getNewEndOffset() >= tempEndOffset) {
-            originalEnd = mapping.getOriginalEndOffset();
-            addToOriginal(original, originalStart, originalEnd, tempStartOffset, tempEndOffset, currentLookup, tempDoc);
-            break;
-          }
-        }
-      }
-    }
+        /* If we didn't match the Lookup's start, there's no point in looking
+         * for its end (although the coveredByInput test should prevent
+         * that error).         */
+        if (originalStart >= 0) { 
+          for ( ; i < annotationMappings.size() ; i++) {
+            /* Find the first mapping whose temp end offset is greater than or equal
+             * to the temp lookup's end; typically this will be the same mapping as used for
+             * for the start offset, but it could be a subsequent one.         */
+            NodePosition mapping = annotationMappings.get(i);
+            if (mapping.getNewEndOffset() >= tempEndOffset) {
+              originalEnd = mapping.getOriginalEndOffset();
+              addToOriginal(original, originalStart, originalEnd, tempStartOffset, tempEndOffset, currentLookup, tempDoc);
+              break;
+            }
+          } // END for FINDING END OFFSET
+        } // END if FINDING END OFFSET
+      } // END if coveredByInput(...)
+    } // END for OVER ALL THE Lookups
 
     // now remove the newDoc
     Factory.deleteResource(tempDoc);
@@ -273,15 +298,16 @@ implements ProcessingResource {
       long tempStart, long tempEnd, Annotation tempLookup, Document tempDoc) throws ExecutionException {
     try {
       original.add(originalStart, originalEnd, tempLookup.getType(), tempLookup.getFeatures());
-    } // This should no longer happen
+    } // This really should no longer happen
     catch(InvalidOffsetException ioe) {
-      // Better debugging info for when it does
-      System.err.printf("temp %d, %d [%s]-> original %d, %d\n", tempStart, tempEnd, Utils.stringFor(tempDoc, tempLookup), 
+      // Better debugging info in case it does
+      String errorDetails = String.format("temp %d, %d [%s]-> original %d, %d\n", tempStart, tempEnd, Utils.stringFor(tempDoc, tempLookup), 
           originalStart, originalEnd);
-      throw new ExecutionException(ioe);
+      throw new ExecutionException(errorDetails, ioe);
     }
   }
 
+  
   /* Is this Lookup within the scope of the input annotations?  It might not be, if Token annotations
    * have been copied by AST only over the significant sections of the document.
    */
