@@ -440,7 +440,7 @@ public class Utils {
   public static AnnotationSet getCoveringAnnotations(
     AnnotationSet sourceAnnotationSet,
     Annotation coveredAnnotation) {
-    return getContainedAnnotations(sourceAnnotationSet,coveredAnnotation,"");
+    return getCoveringAnnotations(sourceAnnotationSet,coveredAnnotation,"");
   }
 
   /**
