@@ -29,7 +29,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -72,8 +71,7 @@ import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.DefaultHighlighter.DefaultHighlightPainter;
 
 /**
- * This class provides an editor for aligning texts in a compound
- * document.
+ * This class provides an editor for aligning texts in a compound document.
  */
 public class AlignmentEditor extends JFrame implements FeatureMapListener,
                                            DocumentListener {
@@ -84,8 +82,8 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
   AlignmentEditor editor = null;
 
   /**
-   * Menus for creating new alignment tasks, setting up active learning
-   * setup, specifying user preferences etc.
+   * Menus for creating new alignment tasks, setting up active learning setup,
+   * specifying user preferences etc.
    */
   JMenuBar menubar;
 
@@ -180,28 +178,29 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
   private static final int MOUSE_MOVEMENT_TIMER_DELAY = 300;
 
   /**
-   * Action that should be taken when the mouse has stopped moving and
-   * is on one of the highlights
+   * Action that should be taken when the mouse has stopped moving and is on one
+   * of the highlights
    */
   protected MouseStoppedMovingAction mouseStoppedMovingAction;
 
   /**
    * Highlight used for highlighting aligned annotations.
    */
-  final DefaultHighlighter.DefaultHighlightPainter HIGHLIGHT = new DefaultHighlighter.DefaultHighlightPainter(
+  final DefaultHighlighter.DefaultHighlightPainter HIGHLIGHT =
+      new DefaultHighlighter.DefaultHighlightPainter(
           getColor(Color.GREEN, 0.1f));
 
   /**
    * Highlight used for highlighting selected aligned annotations.
    */
-  final DefaultHighlighter.DefaultHighlightPainter SELECTED_HIGHLIGHT = new DefaultHighlighter.DefaultHighlightPainter(
-          getColor(Color.RED, 0.5f));
+  final DefaultHighlighter.DefaultHighlightPainter SELECTED_HIGHLIGHT =
+      new DefaultHighlighter.DefaultHighlightPainter(getColor(Color.RED, 0.5f));
 
   /**
    * Highlight used for highlighting selected aligned annotations.
    */
-  final DefaultHighlighter.DefaultHighlightPainter PROCESSING_HIGHLIGHT = new DefaultHighlighter.DefaultHighlightPainter(
-          getColor(Color.BLUE, 0.5f));
+  final DefaultHighlighter.DefaultHighlightPainter PROCESSING_HIGHLIGHT =
+      new DefaultHighlighter.DefaultHighlightPainter(getColor(Color.BLUE, 0.5f));
 
   /**
    * Color generator used for generatig color
@@ -221,7 +220,8 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
   /**
    * Stores alignment tasks objects
    */
-  private Map<String, AlignmentTask> alignmentTasks = new HashMap<String, AlignmentTask>();
+  private Map<String, AlignmentTask> alignmentTasks =
+      new HashMap<String, AlignmentTask>();
 
   /**
    * The current alignment task that is being shown on the screen
@@ -229,10 +229,11 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
   private AlignmentTask currentAT = null;
 
   /**
-   * every alignment task has a view associated with it. This map is
-   * used for storing the reference
+   * every alignment task has a view associated with it. This map is used for
+   * storing the reference
    */
-  private HashMap<AlignmentTask, AlignmentTaskView> alignmentTaskViews = new HashMap<AlignmentTask, AlignmentTaskView>();
+  private HashMap<AlignmentTask, AlignmentTaskView> alignmentTaskViews =
+      new HashMap<AlignmentTask, AlignmentTaskView>();
 
   /**
    * Alignment task panel
@@ -287,7 +288,6 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
     srcDoc.addDocumentListener(this);
     tgtDoc.addDocumentListener(this);
 
-    Document doc = this.document.getCurrentDocument();
     this.document.getFeatures().addFeatureMapListener(this);
   }
 
@@ -304,18 +304,16 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
   public void cleanup() {
 
     // delete document listeners and feature update listener
-    if(this.srcDoc != null)
-      this.srcDoc.removeDocumentListener(this);
-    
-    if(this.tgtDoc != null)
-      this.tgtDoc.removeDocumentListener(this);
-    
+    if(this.srcDoc != null) this.srcDoc.removeDocumentListener(this);
+
+    if(this.tgtDoc != null) this.tgtDoc.removeDocumentListener(this);
+
     this.document.getFeatures().removeFeatureMapListener(this);
   }
 
   /**
-   * Introduces transparency to the given color. If c is null, a new
-   * random color is generated using the color generater class.
+   * Introduces transparency to the given color. If c is null, a new random
+   * color is generated using the color generater class.
    * 
    * @param c
    * @return
@@ -326,8 +324,8 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
       components = colorGenerator.getNextColor().getComponents(null);
     else components = c.getComponents(null);
 
-    Color colour = new Color(components[0], components[1], components[2],
-            alphaValue);
+    Color colour =
+        new Color(components[0], components[1], components[2], alphaValue);
     int rgb = colour.getRGB();
     int alpha = colour.getAlpha();
     int rgba = rgb | (alpha << 24);
@@ -398,8 +396,8 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
     /**
      * Obtain all the alignment feature names
      */
-    List<String> alignmentFeatureNames = new ArrayList<String>(document
-            .getAllAlignmentFeatureNames());
+    List<String> alignmentFeatureNames =
+        new ArrayList<String>(document.getAllAlignmentFeatureNames());
     this.alignmentFeatures = new JComboBox(alignmentFeatureNames.toArray());
 
     controls.add(new JLabel("Alignment Features:"));
@@ -417,7 +415,8 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
     controls.add(refreshHighlights);
 
     mouseStoppedMovingAction = new MouseStoppedMovingAction();
-    mouseMovementTimer = new javax.swing.Timer(MOUSE_MOVEMENT_TIMER_DELAY,
+    mouseMovementTimer =
+        new javax.swing.Timer(MOUSE_MOVEMENT_TIMER_DELAY,
             mouseStoppedMovingAction);
     mouseMovementTimer.setRepeats(false);
     alignmentTaskPanel = new JPanel();
@@ -448,7 +447,8 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
       // add new highlights
       if(pair.sourceAnnotations != null) {
         for(Annotation a : pair.sourceAnnotations) {
-          Object o = sourceEditor.getHighlighter().addHighlight(
+          Object o =
+              sourceEditor.getHighlighter().addHighlight(
                   a.getStartNode().getOffset().intValue(),
                   a.getEndNode().getOffset().intValue(), PROCESSING_HIGHLIGHT);
           srcSelectedHighlights.add(o);
@@ -458,14 +458,14 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
       // add new highlights
       if(pair.targetAnnotations != null) {
         for(Annotation a : pair.targetAnnotations) {
-          Object o = targetEditor.getHighlighter().addHighlight(
+          Object o =
+              targetEditor.getHighlighter().addHighlight(
                   a.getStartNode().getOffset().intValue(),
                   a.getEndNode().getOffset().intValue(), PROCESSING_HIGHLIGHT);
           tgtSelectedHighlights.add(o);
         }
       }
-    }
-    catch(BadLocationException e) {
+    } catch(BadLocationException e) {
       throw new GateRuntimeException(e);
     }
   }
@@ -474,7 +474,6 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
    * Action to show the next pair
    * 
    * @author niraj
-   * 
    */
   class NextPairAction extends AbstractAction {
 
@@ -501,16 +500,14 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
 
         // ask this only if the pair hasn't been marked as finished
         if(!task.current().isAlignmentFinished()) {
-          int answer = JOptionPane.showConfirmDialog(editor,
+          int answer =
+              JOptionPane.showConfirmDialog(editor,
                   "Is alignment complete for this pair?");
           if(answer == JOptionPane.YES_OPTION) {
             task.getAlignmentActionsManager().executeFinishedAlignmentActions(
-                    task.current());
+                task.current());
             task.current().setAlignmentFinished(true);
-          }
-          else if(answer == JOptionPane.CANCEL_OPTION) {
-            return;
-          }
+          } else if(answer == JOptionPane.CANCEL_OPTION) { return; }
         }
       }
 
@@ -519,8 +516,7 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
         task.getAlignmentActionsManager().executePreDisplayActions(pair);
         highlightParentAnnotations(pair);
         view.updateView(pair);
-      }
-      else {
+      } else {
         JOptionPane.showMessageDialog(editor, "Reached End of the Document");
       }
     }
@@ -530,7 +526,6 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
    * Shows the previous pair
    * 
    * @author niraj
-   * 
    */
   class PreviousPairAction extends AbstractAction {
 
@@ -548,24 +543,21 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
 
       // ask this only if the pair hasn't been marked as finished
       if(!task.current().isAlignmentFinished()) {
-        int answer = JOptionPane.showConfirmDialog(editor,
+        int answer =
+            JOptionPane.showConfirmDialog(editor,
                 "Is alignment complete for this pair?");
         if(answer == JOptionPane.YES_OPTION) {
           task.getAlignmentActionsManager().executeFinishedAlignmentActions(
-                  task.current());
+              task.current());
           task.current().setAlignmentFinished(true);
-        }
-        else if(answer == JOptionPane.CANCEL_OPTION) {
-          return;
-        }
+        } else if(answer == JOptionPane.CANCEL_OPTION) { return; }
       }
 
       if(task.hasPrevious()) {
         PUAPair pair = task.previous();
         highlightParentAnnotations(pair);
         view.updateView(pair);
-      }
-      else {
+      } else {
         JOptionPane.showMessageDialog(editor, "Reached Start of the Document");
       }
     }
@@ -575,7 +567,6 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
    * Create a new alignment task
    * 
    * @author niraj
-   * 
    */
   class NewAlignmentTaskAction extends AbstractAction {
 
@@ -588,7 +579,7 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
       if(alignmentTask == null) return;
       alignmentTasks.put(alignmentTask.getName(), alignmentTask);
       alignmentTasksMenu.add(new SwitchAlignmentTaskAction(alignmentTask
-              .getName()));
+          .getName()));
       currentAT = alignmentTask;
 
       // updateGUI
@@ -657,8 +648,8 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
 
         for(int i = 0; i < alignmentTasksMenu.getItemCount(); i++) {
           JMenuItem mi = alignmentTasksMenu.getItem(i);
-          SwitchAlignmentTaskAction sata = (SwitchAlignmentTaskAction)mi
-                  .getAction();
+          SwitchAlignmentTaskAction sata =
+              (SwitchAlignmentTaskAction)mi.getAction();
           if(sata.taskName.equals(currentAT.getName())) {
             alignmentTasksMenu.remove(mi);
             alignmentTasksMenu.updateUI();
@@ -694,7 +685,7 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
         currentAT = AlignmentTask.fromXML(document, selected.getAbsolutePath());
         alignmentTasks.put(currentAT.getName(), currentAT);
         alignmentTasksMenu.add(new SwitchAlignmentTaskAction(currentAT
-                .getName()));
+            .getName()));
 
         // updateGUI
         alignmentTaskPanel.removeAll();
@@ -748,8 +739,8 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
       public void focusGained(FocusEvent e) {
         if(reload) {
           JOptionPane
-                  .showMessageDialog(editor,
-                          "Alignment information has changed - the document will be refreshed!");
+              .showMessageDialog(editor,
+                  "Alignment information has changed - the document will be refreshed!");
           reload = false;
 
           // execute the refreshHighlight action
@@ -786,15 +777,18 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
     if(selectedIndex == -1) return;
 
     boolean isDefault = srcAnnotationSets.getSelectedIndex() == 0;
-    srcAS = isDefault ? srcDoc.getAnnotations() : srcDoc
+    srcAS =
+        isDefault ? srcDoc.getAnnotations() : srcDoc
             .getAnnotations((String)srcAnnotationSets.getSelectedItem());
 
     isDefault = tgtAnnotationSets.getSelectedIndex() == 0;
-    tgtAS = isDefault ? tgtDoc.getAnnotations() : tgtDoc
+    tgtAS =
+        isDefault ? tgtDoc.getAnnotations() : tgtDoc
             .getAnnotations((String)tgtAnnotationSets.getSelectedItem());
 
     // obtain the alignment object
-    alignment = document.getAlignmentInformation((String)alignmentFeatures
+    alignment =
+        document.getAlignmentInformation((String)alignmentFeatures
             .getSelectedItem());
 
     refreshHighlights();
@@ -813,8 +807,7 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
   }
 
   /**
-   * Adds highlights to the document - indicating which annotations are
-   * aligned
+   * Adds highlights to the document - indicating which annotations are aligned
    * 
    * @param alignment
    * @param editorPane
@@ -836,13 +829,12 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
    * @param painter
    */
   private Object addHighlight(Annotation a, JTextArea editorPane,
-          DefaultHighlightPainter painter) {
+      DefaultHighlightPainter painter) {
     try {
       return editorPane.getHighlighter().addHighlight(
-              a.getStartNode().getOffset().intValue(),
-              a.getEndNode().getOffset().intValue(), painter);
-    }
-    catch(BadLocationException e) {
+          a.getStartNode().getOffset().intValue(),
+          a.getEndNode().getOffset().intValue(), painter);
+    } catch(BadLocationException e) {
       throw new GateRuntimeException(e);
     }
   }
@@ -892,22 +884,20 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
         Rectangle viewLocation = textPane.modelToView(textLocation);
         // expand the rectangle a bit
         int error = 10;
-        viewLocation = new Rectangle(viewLocation.x - error, viewLocation.y
-                - error, viewLocation.width + 2 * error, viewLocation.height
-                + 2 * error);
+        viewLocation =
+            new Rectangle(viewLocation.x - error, viewLocation.y - error,
+                viewLocation.width + 2 * error, viewLocation.height + 2 * error);
         if(viewLocation.contains(e.getPoint())) {
           mouseStoppedMovingAction.setTextLocation(textLocation);
           mouseStoppedMovingAction.setEditorPane(textPane);
-        }
-        else {
+        } else {
           mouseStoppedMovingAction.setTextLocation(-1);
         }
       }
 
       catch(BadLocationException e1) {
         // don't do anything
-      }
-      finally {
+      } finally {
         mouseMovementTimer.restart();
       }
     }
@@ -918,22 +908,22 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
 
     public void mouseClicked(MouseEvent e) {
       // do nothing
-      
+
     }
 
     public void mouseEntered(MouseEvent e) {
       // do nothing
-      
+
     }
 
     public void mousePressed(MouseEvent e) {
       // do nothing
-      
+
     }
 
     public void mouseReleased(MouseEvent e) {
       // do nothing
-      
+
     }
   }
 
@@ -946,13 +936,14 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
   /**
    * types of views we support
    */
-  private final String[] VIEWS = new String[] {LINKS_VIEW, MATRIX_VIEW,
+  private final String[] VIEWS = new String[]{LINKS_VIEW, MATRIX_VIEW,
       PARALLEL_VIEW};
 
   private AlignmentTask createAlignmentTask() {
     JPanel mainPanel = new JPanel(new GridBagLayout());
     // two combo-boxes
-    JTextField taskName = new JTextField("AlignmentTask"
+    JTextField taskName =
+        new JTextField("AlignmentTask"
             + ("" + Math.random() * 5000).substring(0, 4), 25);
     JTextField unitOfAlignment = new JTextField("Token", 25);
     JTextField parentOfUnitOfAlignment = new JTextField("Sentence", 25);
@@ -1109,9 +1100,8 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
         if(result == JFileChooser.APPROVE_OPTION) {
           try {
             actionsFile.setText(fileChooser.getSelectedFile().toURI().toURL()
-                    .toExternalForm());
-          }
-          catch(Exception e) {
+                .toExternalForm());
+          } catch(Exception e) {
             actionsFile.setText("");
           }
         }
@@ -1119,24 +1109,23 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
       }
     });
 
-    int returnValue = JOptionPane.showOptionDialog(editor.getContentPane(),
-            mainPanel, "New Alignment Task", JOptionPane.PLAIN_MESSAGE,
+    int returnValue =
+        JOptionPane.showOptionDialog(editor.getContentPane(), mainPanel,
+            "New Alignment Task", JOptionPane.PLAIN_MESSAGE,
             JOptionPane.OK_CANCEL_OPTION, MainFrame.getIcon("annotation-diff"),
-            new String[] {"OK", "Cancel"}, "OK");
+            new String[]{"OK", "Cancel"}, "OK");
     if(returnValue == JOptionPane.OK_OPTION) {
       AlignmentTask alignmentTask = new AlignmentTask(document);
 
       File actionsConfFile = null;
       if(actionsFile.getText().trim().length() > 0) {
         try {
-          actionsConfFile = new File(new URL(actionsFile.getText().trim())
-                  .toURI());
-        }
-        catch(MalformedURLException e) {
+          actionsConfFile =
+              new File(new URL(actionsFile.getText().trim()).toURI());
+        } catch(MalformedURLException e) {
           e.printStackTrace();
           actionsConfFile = null;
-        }
-        catch(URISyntaxException e) {
+        } catch(URISyntaxException e) {
           e.printStackTrace();
           actionsConfFile = null;
         }
@@ -1145,29 +1134,25 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
       // MainFrame.lockGUI("Initializing alignment task : "+
       // taskName.getText()+"... ");
       try {
-        alignmentTask.initialize(taskName.getText(), srcDoc.getName(), tgtDoc
-                .getName(), (String)srcAnnotationSets.getSelectedItem(),
-                (String)tgtAnnotationSets.getSelectedItem(), unitOfAlignment
-                        .getText(), parentOfUnitOfAlignment.getText(),
-                (String)dataSources.getSelectedItem(), (String)storeAlignmentIn
-                        .getSelectedItem(), (String)viewsToSelectFrom
-                        .getSelectedItem(), actionsConfFile == null
-                        ? null
-                        : actionsConfFile.getAbsolutePath());
-      }
-      finally {
+        alignmentTask.initialize(taskName.getText(), srcDoc.getName(),
+            tgtDoc.getName(), (String)srcAnnotationSets.getSelectedItem(),
+            (String)tgtAnnotationSets.getSelectedItem(),
+            unitOfAlignment.getText(), parentOfUnitOfAlignment.getText(),
+            (String)dataSources.getSelectedItem(),
+            (String)storeAlignmentIn.getSelectedItem(),
+            (String)viewsToSelectFrom.getSelectedItem(),
+            actionsConfFile == null ? null : actionsConfFile.getAbsolutePath());
+      } finally {
         // MainFrame.unlockGUI();
       }
       return alignmentTask;
-    }
-    else {
+    } else {
       return null;
     }
   }
 
   /**
-   * This method invokes a dialog that asks for source and target
-   * documents
+   * This method invokes a dialog that asks for source and target documents
    * 
    * @return
    */
@@ -1212,19 +1197,18 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
     constraints.insets = new Insets(0, 0, 0, 10);
     mainPanel.add(targetDocs, constraints);
 
-    int returnValue = JOptionPane.showOptionDialog(editor.getContentPane(),
-            mainPanel, "Select Source and Target Documents",
-            JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, MainFrame
-                    .getIcon("annotation-diff"), new String[] {"OK", "Cancel"},
-            "OK");
+    int returnValue =
+        JOptionPane.showOptionDialog(editor.getContentPane(), mainPanel,
+            "Select Source and Target Documents", JOptionPane.PLAIN_MESSAGE,
+            JOptionPane.OK_CANCEL_OPTION, MainFrame.getIcon("annotation-diff"),
+            new String[]{"OK", "Cancel"}, "OK");
     if(returnValue == JOptionPane.OK_OPTION) {
-      Document srcDoc = document.getDocument((String)sourceDocs
-              .getSelectedItem());
-      Document tgtDoc = document.getDocument((String)targetDocs
-              .getSelectedItem());
-      return new Document[] {srcDoc, tgtDoc};
-    }
-    else {
+      Document srcDoc =
+          document.getDocument((String)sourceDocs.getSelectedItem());
+      Document tgtDoc =
+          document.getDocument((String)targetDocs.getSelectedItem());
+      return new Document[]{srcDoc, tgtDoc};
+    } else {
       return null;
     }
   }
@@ -1238,7 +1222,7 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
     JTextArea container;
 
     public HighlightAlignedAnnotation(Annotation a, Alignment alignment,
-            JTextArea container) {
+        JTextArea container) {
       super(a.getType());
       this.a = a;
       this.alignment = alignment;
@@ -1273,12 +1257,12 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
 
       for(Annotation a : srcAlignedAnnots) {
         srcSelectedHighlights.add(addHighlight(a, sourceEditor,
-                SELECTED_HIGHLIGHT));
+            SELECTED_HIGHLIGHT));
       }
 
       for(Annotation a : tgtAlignedAnnots) {
         tgtSelectedHighlights.add(addHighlight(a, targetEditor,
-                SELECTED_HIGHLIGHT));
+            SELECTED_HIGHLIGHT));
       }
     }
   }
@@ -1290,15 +1274,14 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
       JPopupMenu popup = new JPopupMenu();
 
       // check for annotations at location
-      JTextArea editorToUse = editorPane == sourceEditor
-              ? sourceEditor
-              : targetEditor;
+      JTextArea editorToUse =
+          editorPane == sourceEditor ? sourceEditor : targetEditor;
       AnnotationSet setToUse = editorPane == sourceEditor ? srcAS : tgtAS;
       Document docToUse = editorPane == sourceEditor ? srcDoc : tgtDoc;
 
       HighlightAlignedAnnotation haa = null;
-      for(Annotation a : setToUse.get(Math.max(0l, textLocation - 1), Math.min(
-              docToUse.getContent().size() - 1, textLocation + 1))) {
+      for(Annotation a : setToUse.get(Math.max(0l, textLocation - 1),
+          Math.min(docToUse.getContent().size() - 1, textLocation + 1))) {
 
         if(alignment.isAnnotationAligned(a)) {
           haa = new HighlightAlignedAnnotation(a, alignment, editorPane);
@@ -1311,12 +1294,10 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
         if(popup.getComponentCount() > 1) {
           rect = editorToUse.modelToView(textLocation);
           popup.show(editorToUse, rect.x + 10, rect.y);
-        }
-        else if(popup.getComponentCount() == 1) {
+        } else if(popup.getComponentCount() == 1) {
           haa.actionPerformed(null);
         }
-      }
-      catch(BadLocationException e) {
+      } catch(BadLocationException e) {
         e.printStackTrace();
       }
     }
@@ -1356,21 +1337,18 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
 
       if(alignmentTask.getAlignmentView().equals(LINKS_VIEW)) {
         alignmentView = new LinksView(alignmentTask);
-      }
-      else if(alignmentTask.getAlignmentView().equals(MATRIX_VIEW)) {
+      } else if(alignmentTask.getAlignmentView().equals(MATRIX_VIEW)) {
         alignmentView = new MatrixView(alignmentTask);
-      }
-      else if(alignmentTask.getAlignmentView().endsWith(PARALLEL_VIEW)) {
+      } else if(alignmentTask.getAlignmentView().endsWith(PARALLEL_VIEW)) {
         alignmentView = new ParallelTextView(alignmentTask);
-      }
-      else {
+      } else {
         throw new GateRuntimeException("Invalid alignment view :"
-                + alignmentTask.getAlignmentView());
+            + alignmentTask.getAlignmentView());
       }
 
       thisInstance.add((JPanel)alignmentView, BorderLayout.CENTER);
       viewsToolbar.add(new JLabel("Selected View:"
-              + alignmentTask.getAlignmentView()));
+          + alignmentTask.getAlignmentView()));
       viewsToolbar.addSeparator();
 
       viewsToolbar.add(new JLabel("Pair:"));
@@ -1403,16 +1381,16 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
       selectedFeature = (String)this.alignmentFeatures.getSelectedItem();
     }
 
-    List<String> alignmentFeatureNames = new ArrayList<String>(document
-            .getAllAlignmentFeatureNames());
-    final boolean reselect = selectedFeature != null ? alignmentFeatureNames
+    List<String> alignmentFeatureNames =
+        new ArrayList<String>(document.getAllAlignmentFeatureNames());
+    final boolean reselect =
+        selectedFeature != null ? alignmentFeatureNames
             .contains(selectedFeature) : false;
-    DefaultComboBoxModel model = new DefaultComboBoxModel(alignmentFeatureNames
-            .toArray());
+    DefaultComboBoxModel model =
+        new DefaultComboBoxModel(alignmentFeatureNames.toArray());
     if(this.alignmentFeatures == null) {
       this.alignmentFeatures = new JComboBox(model);
-    }
-    else {
+    } else {
       this.alignmentFeatures.setModel(model);
     }
 
@@ -1425,8 +1403,7 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
         if(reselect) {
           alignmentFeatures.setSelectedItem(featureToReselect);
           refreshHighlightsAction();
-        }
-        else {
+        } else {
           // delete any highlights
           sourceEditor.getHighlighter().removeAllHighlights();
           targetEditor.getHighlighter().removeAllHighlights();
@@ -1436,19 +1413,17 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
   }
 
   /**
-   * update the src or target annotation sets when there's any new
-   * annotation set added
+   * update the src or target annotation sets when there's any new annotation
+   * set added
    */
   public void annotationSetAdded(DocumentEvent e) {
     Document doc = (Document)e.getSource();
     JComboBox comboBox = null;
     if(srcDoc == doc) {
       comboBox = this.srcAnnotationSets;
-    }
-    else if(tgtDoc == doc) {
+    } else if(tgtDoc == doc) {
       comboBox = this.tgtAnnotationSets;
-    }
-    else {
+    } else {
       return;
     }
 
@@ -1476,8 +1451,7 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
         if(ASToReselect != null) {
           finalComboBox.setSelectedItem(ASToReselect);
           refreshHighlightsAction();
-        }
-        else {
+        } else {
           // delete any highlights
           sourceEditor.getHighlighter().removeAllHighlights();
           targetEditor.getHighlighter().removeAllHighlights();
@@ -1487,19 +1461,17 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
   }
 
   /**
-   * update the src or target annotation set combobox when an annotation
-   * set is deleted.
+   * update the src or target annotation set combobox when an annotation set is
+   * deleted.
    */
   public void annotationSetRemoved(DocumentEvent e) {
     Document doc = (Document)e.getSource();
     JComboBox comboBox = null;
     if(srcDoc == doc) {
       comboBox = this.srcAnnotationSets;
-    }
-    else if(tgtDoc == doc) {
+    } else if(tgtDoc == doc) {
       comboBox = this.tgtAnnotationSets;
-    }
-    else {
+    } else {
       return;
     }
 
@@ -1516,9 +1488,8 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
     DefaultComboBoxModel model = (DefaultComboBoxModel)comboBox.getModel();
     model.removeElement(deletedASName);
 
-    final String ASToReselect = selectedASName.equals(deletedASName)
-            ? null
-            : deletedASName;
+    final String ASToReselect =
+        selectedASName.equals(deletedASName) ? null : deletedASName;
     final JComboBox finalComboBox = comboBox;
 
     // update ui
@@ -1529,8 +1500,7 @@ public class AlignmentEditor extends JFrame implements FeatureMapListener,
         if(ASToReselect != null) {
           finalComboBox.setSelectedItem(ASToReselect);
           refreshHighlightsAction();
-        }
-        else {
+        } else {
           // delete any highlights
           sourceEditor.getHighlighter().removeAllHighlights();
           targetEditor.getHighlighter().removeAllHighlights();

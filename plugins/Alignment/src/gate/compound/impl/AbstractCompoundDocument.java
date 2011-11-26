@@ -8,16 +8,15 @@ import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
 import gate.Resource;
-import gate.annotation.AnnotationSetImpl;
 import gate.compound.CompoundDocument;
 import gate.corpora.DocumentContentImpl;
 import gate.corpora.DocumentImpl;
 import gate.event.CreoleEvent;
 import gate.event.DatastoreEvent;
 import gate.event.DocumentListener;
+import gate.util.GateRuntimeException;
 import gate.util.InvalidOffsetException;
 import gate.util.Strings;
-import gate.util.GateRuntimeException;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -26,7 +25,6 @@ import java.io.StringWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -34,9 +32,9 @@ import java.util.Set;
 import java.util.Vector;
 
 /**
- * This is an abstract implementation of the AbstractAlignedDocument
- * This class overrides the methods of DocumentImpl and provide generic
- * implementation of some of the methods of AlignedDocument
+ * This is an abstract implementation of the AbstractAlignedDocument This class
+ * overrides the methods of DocumentImpl and provide generic implementation of
+ * some of the methods of AlignedDocument
  * 
  * @author niraj
  */
@@ -47,16 +45,15 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
   protected String encoding = null;
 
   /**
-   * If you set this flag to true the repositioning information for the
-   * document will be kept in the document feature. <br>
-   * Default value is false to avoid the unnecessary waste of time and
-   * memory
+   * If you set this flag to true the repositioning information for the document
+   * will be kept in the document feature. <br>
+   * Default value is false to avoid the unnecessary waste of time and memory
    */
   protected Boolean collectRepositioningInfo = new Boolean(false);
 
   /**
-   * If you set this flag to true the original content of the document
-   * will be kept in the document feature. <br>
+   * If you set this flag to true the original content of the document will be
+   * kept in the document feature. <br>
    * Default value is false to avoid the unnecessary waste of memory
    */
   protected Boolean preserveOriginalContent = new Boolean(false);
@@ -88,14 +85,14 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
   private transient Vector<DocumentListener> documentListeners;
 
   /**
-   * The start of the range that the content comes from at the source
-   * URL (or null if none).
+   * The start of the range that the content comes from at the source URL (or
+   * null if none).
    */
   protected Long sourceUrlStartOffset;
 
   /**
-   * The end of the range that the content comes from at the source URL
-   * (or null if none).
+   * The end of the range that the content comes from at the source URL (or null
+   * if none).
    */
   protected Long sourceUrlEndOffset;
 
@@ -103,12 +100,12 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
   protected Boolean markupAware = new Boolean(false);
 
   /** exception message when the current document is not set */
-  protected String CURR_DOC_NOT_SET_MSG = "Please use " +
-        "setCurrentDocument(...) " +
-        " method first.";
+  protected String CURR_DOC_NOT_SET_MSG = "Please use "
+      + "setCurrentDocument(...) method first!";
 
   /** Clear all the data members of the object. */
   public void cleanup() {
+    setCurrentDocument(null);
     Iterator<Document> iter = documents.values().iterator();
     while(iter.hasNext()) {
       Document doc = iter.next();
@@ -121,28 +118,21 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
   } // cleanup()
 
   /**
-   * This method always returns features of the compound document. If
-   * you want access to features of the member document - you can use
+   * This method always returns features of the compound document. If you want
+   * access to features of the member document - you can use
    * getDocument(documentId).getFeatures()
-   * */
+   */
   @Override
   public FeatureMap getFeatures() {
-    if(currentDocument == null) {
-      if(this.features == null) {
-        this.features = Factory.newFeatureMap();
-      }
-      return this.features;
-    } else {
-      return currentDocument.getFeatures();  
+    if(this.features == null) {
+      this.features = Factory.newFeatureMap();
     }
+    return this.features;
   }
 
-  
   /** gets the name of the current document */
   public String getName() {
-    if(currentDocument == null) {
-      return super.getName();
-    }
+    if(currentDocument == null) { return super.getName(); }
     return currentDocument.getName();
   }
 
@@ -154,12 +144,10 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
       currentDocument.setName(name);
     }
   }
-  
+
   /** Documents are identified by URLs */
   public URL getSourceUrl() {
-    if(currentDocument == null) {
-      return sourceUrl;
-    }
+    if(currentDocument == null) { return sourceUrl; }
     return currentDocument.getSourceUrl();
   }
 
@@ -167,33 +155,30 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
   public void setSourceUrl(URL sourceUrl) {
     if(currentDocument == null) {
       this.sourceUrl = sourceUrl;
-    }
-    else {
+    } else {
       currentDocument.setSourceUrl(sourceUrl);
     }
   } // setSourceUrl
 
   /**
-   * Documents may be packed within files; in this case an optional pair
-   * of offsets refer to the location of the document.
+   * Documents may be packed within files; in this case an optional pair of
+   * offsets refer to the location of the document.
    */
   public Long[] getSourceUrlOffsets() {
-    if(currentDocument == null) {
-      return new Long[] {sourceUrlStartOffset, sourceUrlEndOffset};
-    }
+    if(currentDocument == null) { return new Long[]{sourceUrlStartOffset,
+        sourceUrlEndOffset}; }
     return currentDocument.getSourceUrlOffsets();
   } // getSourceUrlOffsets
 
   /**
    * Allow/disallow preserving of the original document content. If is
-   * <B>true</B> the original content will be retrieved from the
-   * DocumentContent object and preserved as document feature.
+   * <B>true</B> the original content will be retrieved from the DocumentContent
+   * object and preserved as document feature.
    */
   public void setPreserveOriginalContent(Boolean b) {
     if(currentDocument == null) {
       this.preserveOriginalContent = b;
-    }
-    else {
+    } else {
       currentDocument.setPreserveOriginalContent(b);
     }
   } // setPreserveOriginalContent
@@ -206,16 +191,14 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
   public Boolean getPreserveOriginalContent() {
     if(currentDocument == null) {
       return preserveOriginalContent;
-    }
-    else {
+    } else {
       return currentDocument.getPreserveOriginalContent();
     }
   } // getPreserveOriginalContent
 
   /**
-   * Allow/disallow collecting of repositioning information. If is
-   * <B>true</B> information will be retrieved and preserved as document
-   * feature.<BR>
+   * Allow/disallow collecting of repositioning information. If is <B>true</B>
+   * information will be retrieved and preserved as document feature.<BR>
    * Preserving of repositioning information give the possibilities for
    * converting of coordinates between the original document content and
    * extracted from the document text.
@@ -223,97 +206,88 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
   public void setCollectRepositioningInfo(Boolean b) {
     if(currentDocument == null) {
       collectRepositioningInfo = b;
-    }
-    else {
+    } else {
       currentDocument.setCollectRepositioningInfo(b);
     }
   } // setCollectRepositioningInfo
 
   /**
-   * Get the collectiong and preserving of repositioning information for
-   * the Document. <BR>
+   * Get the collectiong and preserving of repositioning information for the
+   * Document. <BR>
    * Preserving of repositioning information give the possibilities for
    * converting of coordinates between the original document content and
    * extracted from the document text.
    * 
-   * @return whether the Document should collect and preserve
-   *         information.
+   * @return whether the Document should collect and preserve information.
    */
   public Boolean getCollectRepositioningInfo() {
     if(currentDocument == null) {
       return collectRepositioningInfo;
-    }
-    else {
+    } else {
       return currentDocument.getCollectRepositioningInfo();
     }
   } // getCollectRepositioningInfo
 
   /**
-   * Documents may be packed within files; in this case an optional pair
-   * of offsets refer to the location of the document. This method gets
-   * the start offset.
+   * Documents may be packed within files; in this case an optional pair of
+   * offsets refer to the location of the document. This method gets the start
+   * offset.
    */
   public Long getSourceUrlStartOffset() {
     if(currentDocument == null) {
       return sourceUrlStartOffset;
-    }
-    else {
+    } else {
       return currentDocument.getSourceUrlStartOffset();
     }
   }
 
   /**
-   * Documents may be packed within files; in this case an optional pair
-   * of offsets refer to the location of the document. This method sets
-   * the start offset.
+   * Documents may be packed within files; in this case an optional pair of
+   * offsets refer to the location of the document. This method sets the start
+   * offset.
    */
   public void setSourceUrlStartOffset(Long sourceUrlStartOffset) {
     if(currentDocument == null) {
       this.sourceUrlStartOffset = sourceUrlStartOffset;
-    }
-    else {
+    } else {
       currentDocument.setSourceUrlStartOffset(sourceUrlStartOffset);
     }
 
   } // setSourceUrlStartOffset
 
   /**
-   * Documents may be packed within files; in this case an optional pair
-   * of offsets refer to the location of the document. This method gets
-   * the end offset.
+   * Documents may be packed within files; in this case an optional pair of
+   * offsets refer to the location of the document. This method gets the end
+   * offset.
    */
   public Long getSourceUrlEndOffset() {
     if(currentDocument == null) {
       return sourceUrlEndOffset;
-    }
-    else {
+    } else {
       return currentDocument.getSourceUrlEndOffset();
     }
   }
 
   /**
-   * Documents may be packed within files; in this case an optional pair
-   * of offsets refer to the location of the document. This method sets
-   * the end offset.
+   * Documents may be packed within files; in this case an optional pair of
+   * offsets refer to the location of the document. This method sets the end
+   * offset.
    */
   public void setSourceUrlEndOffset(Long sourceUrlEndOffset) {
     if(currentDocument == null) {
       this.sourceUrlEndOffset = sourceUrlEndOffset;
-    }
-    else {
+    } else {
       currentDocument.setSourceUrlEndOffset(sourceUrlEndOffset);
     }
   } // setSourceUrlStartOffset
 
   /**
-   * The content of the document: a String for text; MPEG for video;
-   * etc.
+   * The content of the document: a String for text; MPEG for video; etc.
    */
   public DocumentContent getContent() {
     if(currentDocument == null) {
-      throw new GateRuntimeException(CURR_DOC_NOT_SET_MSG);
-    }
-    else {
+      return new DocumentContentImpl("");
+    } else {
       return currentDocument.getContent();
     }
   }
@@ -329,8 +303,7 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
   public String getEncoding() {
     if(currentDocument == null) {
       return this.encoding;
-    }
-    else {
+    } else {
       return ((DocumentImpl)currentDocument).getEncoding();
     }
   }
@@ -339,53 +312,49 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
   public void setEncoding(String encoding) {
     if(currentDocument == null) {
       this.encoding = encoding;
-    }
-    else {
+    } else {
       ((DocumentImpl)currentDocument).setEncoding(encoding);
     }
   }
 
   /**
-   * Get the default set of annotations. The set is created if it
-   * doesn't exist yet.
+   * Get the default set of annotations. The set is created if it doesn't exist
+   * yet.
    */
   public AnnotationSet getAnnotations() {
     if(currentDocument == null) {
-	throw new GateRuntimeException(CURR_DOC_NOT_SET_MSG);
-    }
-    else {
+      throw new GateRuntimeException(CURR_DOC_NOT_SET_MSG);
+    } else {
       return currentDocument.getAnnotations();
     }
   } // getAnnotations()
 
   /**
-   * Get a named set of annotations. Creates a new set if one with this
-   * name doesn't exist yet. If the provided name is null then it
-   * returns the default annotation set.
+   * Get a named set of annotations. Creates a new set if one with this name
+   * doesn't exist yet. If the provided name is null then it returns the default
+   * annotation set.
    */
   public AnnotationSet getAnnotations(String name) {
     if(currentDocument == null) {
       throw new GateRuntimeException(CURR_DOC_NOT_SET_MSG);
-    }
-    else {
+    } else {
       return currentDocument.getAnnotations(name);
     }
   } // getAnnotations(name)
 
   /**
    * Make the document markup-aware. This will trigger the creation of a
-   * DocumentFormat object at Document initialisation time; the
-   * DocumentFormat object will unpack the markup in the Document and
-   * add it as annotations. Documents are <B>not</B> markup-aware by
-   * default.
+   * DocumentFormat object at Document initialisation time; the DocumentFormat
+   * object will unpack the markup in the Document and add it as annotations.
+   * Documents are <B>not</B> markup-aware by default.
    * 
-   * @param newMarkupAware markup awareness status.
+   * @param newMarkupAware
+   *          markup awareness status.
    */
   public void setMarkupAware(Boolean newMarkupAware) {
     if(currentDocument == null) {
       this.markupAware = newMarkupAware;
-    }
-    else {
+    } else {
       currentDocument.setMarkupAware(newMarkupAware);
     }
   }
@@ -399,69 +368,65 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
   public Boolean getMarkupAware() {
     if(currentDocument == null) {
       return this.markupAware;
-    }
-    else {
+    } else {
       return currentDocument.getMarkupAware();
     }
   }
 
   /**
    * Returns an XML document aming to preserve the original markups( the
-   * original markup will be in the same place and format as it was
-   * before processing the document) and include (if possible) the
-   * annotations specified in the aSourceAnnotationSet. It is equivalent
-   * to toXml(aSourceAnnotationSet, true).
+   * original markup will be in the same place and format as it was before
+   * processing the document) and include (if possible) the annotations
+   * specified in the aSourceAnnotationSet. It is equivalent to
+   * toXml(aSourceAnnotationSet, true).
    */
   public String toXml(Set aSourceAnnotationSet) {
     if(currentDocument == null) {
-      throw new GateRuntimeException(CURR_DOC_NOT_SET_MSG +
-              " OR call toXmlAsSingleDocument(...)");
-    }
-    else {
+      throw new GateRuntimeException(CURR_DOC_NOT_SET_MSG);
+    } else {
       return currentDocument.toXml(aSourceAnnotationSet);
     }
   }
 
   /**
    * Returns an XML document aming to preserve the original markups( the
-   * original markup will be in the same place and format as it was
-   * before processing the document) and include (if possible) the
-   * annotations specified in the aSourceAnnotationSet. <b>Warning:</b>
-   * Annotations from the aSourceAnnotationSet will be lost if they will
-   * cause a crosed over situation.
+   * original markup will be in the same place and format as it was before
+   * processing the document) and include (if possible) the annotations
+   * specified in the aSourceAnnotationSet. <b>Warning:</b> Annotations from the
+   * aSourceAnnotationSet will be lost if they will cause a crosed over
+   * situation.
    * 
-   * @param aSourceAnnotationSet is an annotation set containing all the
-   *          annotations that will be combined with the original marup
-   *          set. If the param is <code>null</code> it will only dump
-   *          the original markups.
-   * @param includeFeatures is a boolean that controls whether the
-   *          annotation features should be included or not. If false,
-   *          only the annotation type is included in the tag.
-   * @return a string representing an XML document containing the
-   *         original markup + dumped annotations form the
-   *         aSourceAnnotationSet
+   * @param aSourceAnnotationSet
+   *          is an annotation set containing all the annotations that will be
+   *          combined with the original marup set. If the param is
+   *          <code>null</code> it will only dump the original markups.
+   * @param includeFeatures
+   *          is a boolean that controls whether the annotation features should
+   *          be included or not. If false, only the annotation type is included
+   *          in the tag.
+   * @return a string representing an XML document containing the original
+   *         markup + dumped annotations form the aSourceAnnotationSet
    */
   public String toXml(Set aSourceAnnotationSet, boolean includeFeatures) {
     if(currentDocument == null) {
       throw new GateRuntimeException(CURR_DOC_NOT_SET_MSG);
-    }
-    else {
+    } else {
       return currentDocument.toXml(aSourceAnnotationSet, includeFeatures);
     }
   }// End toXml()
 
   /**
-   * Returns a GateXml document that is a custom XML format for wich
-   * there is a reader inside GATE called gate.xml.GateFormatXmlHandler.
-   * What it does is to serialize a GATE document in an XML format.
+   * Returns a GateXml document that is a custom XML format for wich there is a
+   * reader inside GATE called gate.xml.GateFormatXmlHandler. What it does is to
+   * serialize a GATE document in an XML format.
    * 
    * @return a string representing a Gate Xml document.
    */
   public String toXml() {
     if(currentDocument == null) {
+
       return toXmlAsASingleDocument(this);
-    }
-    else {
+    } else {
       return currentDocument.toXml();
     }
   }// toXml
@@ -484,38 +449,44 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
     globalMap.put("docXmls", docXmls);
 
     // we would use XStream library to store annic patterns
-    com.thoughtworks.xstream.XStream xstream = new com.thoughtworks.xstream.XStream();
+    com.thoughtworks.xstream.XStream xstream =
+        new com.thoughtworks.xstream.XStream();
 
     // Saving is accomplished just using XML serialization of the map.
     StringWriter stringToReturn = new StringWriter();
 
+    Document currentDoc = aCompoundDoc.getCurrentDocument();
+    aCompoundDoc.setCurrentDocument(null);
+
     // other features
     Map<String, Object> features = new HashMap<String, Object>();
     features.put("encoding", aCompoundDoc.getEncoding());
-    features.put("collectRepositioningInfo", aCompoundDoc
-            .getCollectRepositioningInfo());
-    features.put("preserveOriginalContent", aCompoundDoc
-            .getPreserveOriginalContent());
+    features.put("collectRepositioningInfo",
+        aCompoundDoc.getCollectRepositioningInfo());
+    features.put("preserveOriginalContent",
+        aCompoundDoc.getPreserveOriginalContent());
     features.put("documentIDs", aCompoundDoc.getDocumentIDs());
     features.put("markupAware", new Boolean(true));
     features.put("name", aCompoundDoc.getName());
     globalMap.put("feats", features);
-
     globalMap.put("docFeats", aCompoundDoc.getFeatures());
+
+    // restore the original settings
+    aCompoundDoc.setCurrentDocument(currentDoc == null ? null : currentDoc
+        .getName());
 
     xstream.toXML(globalMap, stringToReturn);
     return stringToReturn.toString();
   }
 
   /**
-   * Returns a map with the named annotation sets. It returns
-   * <code>null</code> if no named annotaton set exists.
+   * Returns a map with the named annotation sets. It returns <code>null</code>
+   * if no named annotaton set exists.
    */
   public Map<String, AnnotationSet> getNamedAnnotationSets() {
     if(currentDocument == null) {
       throw new GateRuntimeException(CURR_DOC_NOT_SET_MSG);
-    }
-    else {
+    } else {
       return currentDocument.getNamedAnnotationSets();
     }
   } // getNamedAnnotationSets
@@ -523,17 +494,17 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
   public Set<String> getAnnotationSetNames() {
     if(currentDocument == null) {
       throw new GateRuntimeException(CURR_DOC_NOT_SET_MSG);
-    }
-    else {
+    } else {
       return currentDocument.getAnnotationSetNames();
     }
   }
 
   /**
-   * Removes one of the named annotation sets. Note that the default
-   * annotation set cannot be removed.
+   * Removes one of the named annotation sets. Note that the default annotation
+   * set cannot be removed.
    * 
-   * @param name the name of the annotation set to be removed
+   * @param name
+   *          the name of the annotation set to be removed
    */
   public void removeAnnotationSet(String name) {
     if(currentDocument != null) {
@@ -543,7 +514,7 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
 
   /** Propagate edit changes to the document content and annotations. */
   public void edit(Long start, Long end, DocumentContent replacement)
-          throws InvalidOffsetException {
+      throws InvalidOffsetException {
     if(currentDocument != null) {
       currentDocument.edit(start, end, replacement);
     }
@@ -566,8 +537,7 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
       s.append("  sourceUrl:" + sourceUrl + n);
       s.append(n);
       return s.toString();
-    }
-    else {
+    } else {
       return currentDocument.toString();
     }
   } // toString
@@ -581,8 +551,7 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
   public synchronized void removeDocumentListener(DocumentListener l) {
     if(currentDocument != null) {
       currentDocument.removeDocumentListener(l);
-    }
-    else {
+    } else {
       if(documentListeners != null && documentListeners.contains(l)) {
         Vector v = (Vector)documentListeners.clone();
         v.removeElement(l);
@@ -594,9 +563,9 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
   public synchronized void addDocumentListener(DocumentListener l) {
     if(currentDocument != null) {
       currentDocument.addDocumentListener(l);
-    }
-    else {
-      Vector v = documentListeners == null
+    } else {
+      Vector v =
+          documentListeners == null
               ? new Vector<DocumentListener>(2)
               : (Vector)documentListeners.clone();
       if(!v.contains(l)) {
@@ -665,7 +634,7 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
   }
 
   public void setDataStore(DataStore dataStore)
-          throws gate.persist.PersistenceException {
+      throws gate.persist.PersistenceException {
     super.setDataStore(dataStore);
     if(this.dataStore != null) this.dataStore.addDatastoreListener(this);
   }
@@ -678,8 +647,7 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
     Object obj = documents.get(documentID);
     if(obj == null) {
       return this;
-    }
-    else {
+    } else {
       return (Document)obj;
     }
   }
@@ -693,8 +661,7 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
     Object obj = documents.get(documentID);
     if(obj == null) {
       currentDocument = null;
-    }
-    else {
+    } else {
       currentDocument = (Document)obj;
     }
   }
@@ -711,8 +678,7 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
     if(docIDs != null) {
       this.documentIDs = new ArrayList<String>();
       this.documentIDs.addAll(docIDs);
-    }
-    else {
+    } else {
       this.documentIDs = null;
     }
   }
@@ -722,7 +688,7 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
    * register when this compound is deserialized.
    */
   private void readObject(ObjectInputStream stream) throws IOException,
-          ClassNotFoundException {
+      ClassNotFoundException {
     stream.defaultReadObject();
     // register a validation callback to add our child documents
     // to the creole register and fire the relevant events. This
@@ -732,9 +698,9 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
       public void validateObject() {
         for(Document d : documents.values()) {
           Gate.getCreoleRegister().get(d.getClass().getName())
-                  .addInstantiation(d);
+              .addInstantiation(d);
           Gate.getCreoleRegister().resourceLoaded(
-                  new CreoleEvent(d, CreoleEvent.RESOURCE_LOADED));
+              new CreoleEvent(d, CreoleEvent.RESOURCE_LOADED));
         }
       }
     }, 0);
