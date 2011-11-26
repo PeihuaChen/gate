@@ -429,6 +429,8 @@ public class CompoundDocumentEditor extends AbstractVisualResource
   }
 
   public void cleanup() {
+    super.cleanup();
+    
     // close all open alignment editors
     for(AlignmentEditor editor : alignmentEditors) {
       // dispose will clean up the editor internally
@@ -441,7 +443,6 @@ public class CompoundDocumentEditor extends AbstractVisualResource
       tabbedPane.remove(h.getLargeView());
       h.cleanup();
     }
-    super.cleanup();
+    
   }
-
 }
