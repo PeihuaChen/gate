@@ -48,7 +48,6 @@ import java.text.Collator;
 import java.util.*;
 import java.util.List;
 import java.util.Timer;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -61,10 +60,9 @@ import java.util.regex.PatternSyntaxException;
 - right table with 1+n columns (Value, Feature 1...Feature n) for the lists
 - 'Save' on the context menu of the resources tree and tab
 - context menu on both tables to delete selected rows
-- list name drop down list with .lst files in directory and button [New List]
-- value text field and button [New Entry]
-- for the second table: [Add Cols]
-- a text field case insensitive 'Filter' at the bottom of the right table
+- drop down list with .lst files in directory
+- text fields and buttons to add a list/entry
+- for the second table, a button to filter the list and another to add columns
 - both tables sorted case insensitively on the first column by default
 - display in red the list name when the list is modified
 - for the separator character test when editing feature columns
@@ -97,16 +95,19 @@ public class GazetteerEditor extends AbstractVisualResource
     collator = Collator.getInstance(Locale.ENGLISH);
     collator.setStrength(Collator.TERTIARY);
 
-    // definition table pane
+    /*************************/
+    /* Definition table pane */
+    /*************************/
+
     JPanel definitionPanel = new JPanel(new BorderLayout());
-    JPanel definitionTopPanel = new JPanel();
+    JPanel definitionTopPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
     newListComboBox = new JComboBox();
     newListComboBox.setEditable(true);
     newListComboBox.setPrototypeDisplayValue("123456789012345");
     newListComboBox.setToolTipText(
       "Lists available in the gazetteer directory");
-    newListButton = new JButton("New List");
-    // enable/disable [New] button according to the text field content
+    newListButton = new JButton("Add");
+    // enable/disable button according to the text field content
     JTextComponent listTextComponent = (JTextField)
       newListComboBox.getEditor().getEditorComponent();
     listTextComponent.getDocument().addDocumentListener(new DocumentListener() {
@@ -119,17 +120,17 @@ public class GazetteerEditor extends AbstractVisualResource
           String value = document.getText(0, document.getLength());
           if (value.trim().length() == 0) {
             newListButton.setEnabled(false);
-            newListButton.setText("New List");
+            newListButton.setText("Add");
           } else if (value.contains(":")) {
             newListButton.setEnabled(false);
-            newListButton.setText("No colon");
+            newListButton.setText("Colon Char Forbidden");
           } else if (linearDefinition.getLists().contains(value)) {
             // this list already exists in the gazetteer
             newListButton.setEnabled(false);
             newListButton.setText("Existing");
           } else {
             newListButton.setEnabled(true);
-            newListButton.setText("New List");
+            newListButton.setText("Add");
           }
         } catch (BadLocationException ble) {
           ble.printStackTrace();
@@ -145,7 +146,7 @@ public class GazetteerEditor extends AbstractVisualResource
         }
       }
     });
-    newListButton.setToolTipText("New list in the gazetteer");
+    newListButton.setToolTipText("Add a list in the gazetteer");
     newListButton.setMargin(new Insets(2, 2, 2, 2));
     newListButton.addActionListener(new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
@@ -213,29 +214,43 @@ public class GazetteerEditor extends AbstractVisualResource
       });
     definitionPanel.add(new JScrollPane(definitionTable), BorderLayout.CENTER);
 
-    // list table pane
+    /*******************/
+    /* List table pane */
+    /*******************/
+
     JPanel listPanel = new JPanel(new BorderLayout());
-    JPanel listTopPanel = new JPanel();
-    newEntryTextField = new JTextField(10);
-    newEntryTextField.setEnabled(false);
-    final JButton newEntryButton = new JButton("New Entry ");
-    newEntryButton.setToolTipText("New entry in the list");
+    JPanel listTopPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    listEntryTextField = new JTextField(10);
+    listEntryTextField.setEnabled(false);
+    final JButton filterListButton = new JButton("Filter");
+    filterListButton.setToolTipText("Filter the list on the text entered");
+    filterListButton.setMargin(new Insets(2, 2, 2, 2));
+    filterListButton.setEnabled(false);
+    filterListButton.addActionListener(new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        String filter = listEntryTextField.getText().trim();
+        listTableModel.setFilterText(filter);
+        listTableModel.fireTableDataChanged();
+      }
+    });
+    final JButton newEntryButton = new JButton("Add");
+    newEntryButton.setToolTipText("Add the text in the list");
     newEntryButton.setMargin(new Insets(2, 2, 2, 2));
     newEntryButton.setEnabled(false);
     newEntryButton.addActionListener(new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
         // update the gazetteer
         GazetteerNode newGazetteerNode = new GazetteerNode(
-          newEntryTextField.getText(), Factory.newFeatureMap());
+          listEntryTextField.getText(), Factory.newFeatureMap());
         listTableModel.addRow(newGazetteerNode);
         listTableModel.setFilterText("");
-        listFilterTextField.setText("");
+        listEntryTextField.setText("");
         listTableModel.fireTableDataChanged();
         // scroll and select the new row
         final int row = listTable.rowModelToView(listTable.getRowCount()-1);
         final int column = listTable.convertColumnIndexToView(0);
-        newEntryTextField.setText("");
-        newEntryTextField.requestFocusInWindow();
+        listEntryTextField.setText("");
+        listEntryTextField.requestFocusInWindow();
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
             listTable.scrollRectToVisible(
@@ -251,15 +266,15 @@ public class GazetteerEditor extends AbstractVisualResource
       }
     });
     // Enter key in the text field add the entry to the table
-    newEntryTextField.addKeyListener(new KeyAdapter() {
+    listEntryTextField.addKeyListener(new KeyAdapter() {
       public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
           newEntryButton.doClick();
         }
       }
     });
-    // enable/disable [New] button according to the text field content
-    newEntryTextField.getDocument().addDocumentListener(new DocumentListener() {
+    // enable/disable button according to the text field content
+    listEntryTextField.getDocument().addDocumentListener(new DocumentListener() {
       public void insertUpdate(DocumentEvent e) { update(e); }
       public void removeUpdate(DocumentEvent e) { update(e); }
       public void changedUpdate(DocumentEvent e) { update(e); }
@@ -269,12 +284,18 @@ public class GazetteerEditor extends AbstractVisualResource
           String value = document.getText(0, document.getLength());
           if (value.trim().length() == 0) {
             newEntryButton.setEnabled(false);
-            newEntryButton.setText("New Entry");
+            newEntryButton.setText("Add");
+            filterListButton.setEnabled(false);
+            // stop filtering the list
+            listTableModel.setFilterText("");
+            listTableModel.fireTableDataChanged();
           } else if (linearDefinition.getSeparator() != null
                   && linearDefinition.getSeparator().length() > 0
                   && value.contains(linearDefinition.getSeparator())) {
             newEntryButton.setEnabled(false);
-            newEntryButton.setText("No char "+linearDefinition.getSeparator());
+            newEntryButton.setText("Char Forbidden: "
+              + linearDefinition.getSeparator());
+            filterListButton.setEnabled(false);
           } else {
             // check if the entry already exists in the list
             GazetteerList gazetteerList = (GazetteerList)
@@ -292,16 +313,17 @@ public class GazetteerEditor extends AbstractVisualResource
               newEntryButton.setText("Existing ");
             } else {
               newEntryButton.setEnabled(true);
-              newEntryButton.setText("New Entry");
+              newEntryButton.setText("Add");
             }
+            filterListButton.setEnabled(true);
           }
         } catch (BadLocationException ble) {
           ble.printStackTrace();
         }
       }
     });
-    addColumnsButton = new JButton("Add Cols");
-    addColumnsButton.setToolTipText("Add a couple of columns Feature and Value");
+    addColumnsButton = new JButton("+Cols");
+    addColumnsButton.setToolTipText("Add a couple of columns: Feature, Value");
     addColumnsButton.setMargin(new Insets(2, 2, 2, 2));
     addColumnsButton.setEnabled(false);
     addColumnsButton.addActionListener(new AbstractAction() {
@@ -320,14 +342,16 @@ public class GazetteerEditor extends AbstractVisualResource
         }
         listTableModel.addEmptyFeatureColumns();
         // cancel filtering and redisplay the table
-        listFilterTextField.setText("");
+        listEntryTextField.setText("");
         listTableModel.setFilterText("");
         listTableModel.fireTableStructureChanged();
       }
     });
-    listTopPanel.add(newEntryTextField);
+    listTopPanel.add(listEntryTextField);
+    listTopPanel.add(filterListButton);
     listTopPanel.add(newEntryButton);
     listTopPanel.add(addColumnsButton);
+    listTopPanel.add(listCountLabel = new JLabel());
     listPanel.add(listTopPanel, BorderLayout.NORTH);
     listTable = new XJTable() {
       // shift + Delete keys delete the selected rows
@@ -349,59 +373,59 @@ public class GazetteerEditor extends AbstractVisualResource
     listTable.setSortable(true);
     listTable.setSortedColumn(0);
     listPanel.add(new JScrollPane(listTable), BorderLayout.CENTER);
-    JPanel listBottomPanel = new JPanel(new BorderLayout());
-    JPanel filterPanel = new JPanel();
-    listFilterTextField = new JTextField(15);
-    listFilterTextField.setToolTipText("Filter rows on all column values");
-    listFilterTextField.setEnabled(false);
+//    JPanel listBottomPanel = new JPanel(new BorderLayout());
+//    JPanel filterPanel = new JPanel();
+//    listEntryTextField = new JTextField(15);
+//    listEntryTextField.setToolTipText("Filter rows on all column values");
+//    listEntryTextField.setEnabled(false);
     // select all the rows containing the text from filterTextField
-    listFilterTextField.getDocument().addDocumentListener(
-        new DocumentListener() {
-      private Timer timer = new Timer("Gazetteer list filter timer", true);
-      private TimerTask timerTask;
-      public void changedUpdate(DocumentEvent e) { /* do nothing */ }
-      public void insertUpdate(DocumentEvent e) { update(); }
-      public void removeUpdate(DocumentEvent e) { update(); }
-      private void update() {
-        if (timerTask != null) { timerTask.cancel(); }
-        Date timeToRun = new Date(System.currentTimeMillis() + 300);
-        timerTask = new TimerTask() { public void run() {
-          String filter = listFilterTextField.getText().trim();
-          listTableModel.setFilterText(filter);
-          listTableModel.fireTableDataChanged();
-        }};
-        // add a delay
-        timer.schedule(timerTask, timeToRun);
-      }
-    });
-    filterPanel.add(new JLabel("Filter: "));
-    filterPanel.add(listFilterTextField);
-    filterPanel.add(caseInsensitiveCheckBox = new JCheckBox("Case Ins."));
+//    listEntryTextField.getDocument().addDocumentListener(
+//        new DocumentListener() {
+//      private Timer timer = new Timer("Gazetteer list filter timer", true);
+//      private TimerTask timerTask;
+//      public void changedUpdate(DocumentEvent e) { /* do nothing */ }
+//      public void insertUpdate(DocumentEvent e) { update(); }
+//      public void removeUpdate(DocumentEvent e) { update(); }
+//      private void update() {
+//        if (timerTask != null) { timerTask.cancel(); }
+//        Date timeToRun = new Date(System.currentTimeMillis() + 300);
+//        timerTask = new TimerTask() { public void run() {
+//          String filter = listEntryTextField.getText().trim();
+//          listTableModel.setFilterText(filter);
+//          listTableModel.fireTableDataChanged();
+//        }};
+//        // add a delay
+//        timer.schedule(timerTask, timeToRun);
+//      }
+//    });
+//    filterPanel.add(new JLabel("Filter: "));
+//    filterPanel.add(listEntryTextField);
+    listTopPanel.add(caseInsensitiveCheckBox = new JCheckBox("Case Ins."));
     caseInsensitiveCheckBox.setSelected(true);
     caseInsensitiveCheckBox.setToolTipText("Case Insensitive");
     caseInsensitiveCheckBox.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         // redisplay the table with the new filter option
-        listFilterTextField.setText(listFilterTextField.getText());
+        listEntryTextField.setText(listEntryTextField.getText());
       }
     });
-    filterPanel.add(regexCheckBox = new JCheckBox("Regex"));
+    listTopPanel.add(regexCheckBox = new JCheckBox("Regex"));
     regexCheckBox.setToolTipText("Regular Expression");
     regexCheckBox.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        listFilterTextField.setText(listFilterTextField.getText());
+        listEntryTextField.setText(listEntryTextField.getText());
       }
     });
-    filterPanel.add(onlyValueCheckBox = new JCheckBox("Value"));
+    listTopPanel.add(onlyValueCheckBox = new JCheckBox("Value"));
     onlyValueCheckBox.setToolTipText("Filter only Value column");
     onlyValueCheckBox.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        listFilterTextField.setText(listFilterTextField.getText());
+        listEntryTextField.setText(listEntryTextField.getText());
       }
     });
-    listBottomPanel.add(filterPanel, BorderLayout.WEST);
-    listBottomPanel.add(listCountLabel = new JLabel(), BorderLayout.EAST);
-    listPanel.add(listBottomPanel, BorderLayout.SOUTH);
+//    listBottomPanel.add(filterPanel, BorderLayout.WEST);
+//    listBottomPanel.add(listCountLabel = new JLabel(), BorderLayout.EAST);
+//    listPanel.add(listBottomPanel, BorderLayout.SOUTH);
 
     JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
     splitPane.add(definitionPanel);
@@ -424,9 +448,8 @@ public class GazetteerEditor extends AbstractVisualResource
           if (definitionTable.getSelectedRow() == -1) { // no list selected
             listTableModel.setGazetteerList(new GazetteerList());
             selectedLinearNode = null;
-            newEntryTextField.setEnabled(false);
+            listEntryTextField.setEnabled(false);
             addColumnsButton.setEnabled(false);
-            listFilterTextField.setEnabled(false);
           } else { // list selected
             String listName = (String) definitionTable.getValueAt(
               definitionTable.getSelectedRow(),
@@ -437,15 +460,11 @@ public class GazetteerEditor extends AbstractVisualResource
               listTableModel.setGazetteerList((GazetteerList)
                 linearDefinition.getListsByNode().get(selectedLinearNode));
             }
-            newEntryTextField.setEnabled(true);
+            listEntryTextField.setEnabled(true);
             addColumnsButton.setEnabled(true);
-            listFilterTextField.setEnabled(true);
           }
-          if (!listFilterTextField.getText().equals("")) {
-            listFilterTextField.setText("");
-          }
-          if (!newEntryTextField.getText().equals("")) {
-            newEntryTextField.setText("");
+          if (!listEntryTextField.getText().equals("")) {
+            listEntryTextField.setText("");
           }
           listTableModel.setFilterText("");
           listTableModel.fireTableStructureChanged();
@@ -807,7 +826,7 @@ public class GazetteerEditor extends AbstractVisualResource
 
     public void fireTableChanged(TableModelEvent e) {
       if (gazetteerList == null) { return; }
-      if (filter.length() < 2) {
+      if (filter.length() < 1) {
         gazetteerListFiltered.clear();
         gazetteerListFiltered.addAll(gazetteerList);
         super.fireTableChanged(e);
@@ -1169,9 +1188,8 @@ public class GazetteerEditor extends AbstractVisualResource
   protected ListTableModel listTableModel;
   protected JComboBox newListComboBox;
   protected JButton newListButton;
-  protected JTextField newEntryTextField;
   protected JButton addColumnsButton;
-  protected JTextField listFilterTextField;
+  protected JTextField listEntryTextField;
   protected JCheckBox regexCheckBox;
   protected JCheckBox caseInsensitiveCheckBox;
   protected JCheckBox onlyValueCheckBox;
