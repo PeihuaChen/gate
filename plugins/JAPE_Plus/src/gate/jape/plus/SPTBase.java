@@ -267,7 +267,7 @@ public class SPTBase extends AbstractLanguageAnalyser {
         if (bindingStack[i] == null) {
           bindingStack[i] = new IntArrayList();
         }
-        bindingStack[i].add(aStep[j]);
+        if(aStep[j] >= 0) bindingStack[i].add(aStep[j]);
       }
     }
   }
@@ -711,7 +711,7 @@ public class SPTBase extends AbstractLanguageAnalyser {
       Predicate predicate =
         predicatesByType[annotationType[annotationId]][predicateId];
 
-      boolean result = calculatPredicateValue(annotationId, predicateId);
+      boolean result = calculatePredicateValue(annotationId, predicateId);
       // store the calculated result
       // first mark the predicate as computed
       QuickBitVector
@@ -756,7 +756,7 @@ public class SPTBase extends AbstractLanguageAnalyser {
             predicateId);
   }
 
-  protected boolean calculatPredicateValue(int annotationId, int predicateId) {
+  protected boolean calculatePredicateValue(int annotationId, int predicateId) {
     Predicate predicate =
             predicatesByType[annotationType[annotationId]][predicateId];
     
@@ -1228,7 +1228,7 @@ public class SPTBase extends AbstractLanguageAnalyser {
     for(Map.Entry<String, IntArrayList> entry : instance.bindings.entrySet()) {
       AnnotationSet boundAnnots = new AnnotationSetImpl(document);
       for(int i = 0; i < entry.getValue().size(); i++) {
-        boundAnnots.add(annotation[entry.getValue().get(i)]);
+        boundAnnots.add(annotation[entry.getValue().getQuick(i)]);
       }
       newBindings.put(entry.getKey(), boundAnnots);
     }
