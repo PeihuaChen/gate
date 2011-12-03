@@ -177,7 +177,6 @@ implements ProcessingResource {
      * document, so there is no reason to run the underlying gazetteer.  Save time
      * by ending execution on this document     */
     if (annotationMappings.isEmpty())  {
-      Factory.deleteResource(tempDoc);
       fireProcessFinished();
       return;
     }
