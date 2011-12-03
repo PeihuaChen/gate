@@ -21,6 +21,7 @@ import gate.creole.CreoleRegisterImpl;
 import gate.creole.ResourceData;
 import gate.creole.metadata.CreoleResource;
 import gate.event.CreoleListener;
+import gate.gui.creole.manager.PluginUpdateManager;
 import gate.util.Benchmark;
 import gate.util.Files;
 import gate.util.GateClassLoader;
@@ -1031,6 +1032,16 @@ public class Gate implements GateConstants {
       throw new GateRuntimeException(
         "Problem while locating the plug-ins home!", ioe);
     }
+        
+    String userPluginHomeStr;
+    try {
+      File userPluginHome = PluginUpdateManager.getUserPluginsHome();
+      userPluginHomeStr = (userPluginHome != null ? userPluginHome.getCanonicalPath() : null);
+    }
+    catch (IOException ioe) {
+      throw new GateRuntimeException("Unable to access user plugin directory!", ioe);
+    }
+    
     // update the values for knownPluginPath
     String knownPluginPath = "";
     Iterator<URL> pluginIter = getKnownPlugins().iterator();
@@ -1041,6 +1052,9 @@ public class Gate implements GateConstants {
         File pluginDirectory = Files.fileFromURL(aPluginURL);
         try {
           if(pluginDirectory.getCanonicalPath().startsWith(pluginsHomeStr))
+            continue;
+          
+          if (userPluginHomeStr != null && pluginDirectory.getCanonicalPath().startsWith(userPluginHomeStr))
             continue;
         }
         catch(IOException ioe) {
@@ -1721,7 +1735,7 @@ public class Gate implements GateConstants {
    * The list of plugins (aka CREOLE directories) the system knows about. This
    * list contains URL objects.
    */
-  protected static List<URL> knownPlugins;
+  private static List<URL> knownPlugins;
 
   /**
    * The list of plugins (aka CREOLE directories) the system loads automatically

@@ -436,6 +436,7 @@ public class PluginUpdateManager extends JDialog {
       }
 
       if(updateSites.size() == 0) {
+        //TODO we need to change this to something more sensible
         updateSites.add(new RemoteUpdateSite("Default Test Site", new URI(
                 "http://greenwoodma.servehttp.com/gate-plugins/"), true));
       }
