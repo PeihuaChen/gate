@@ -49,7 +49,7 @@ public class VersionComparator implements Comparator<String> {
     Matcher m1 = VERSION_PATTERN.matcher(v1);
     Matcher m2 = VERSION_PATTERN.matcher(v2);
 
-    if(!m1.find() | !m2.find()) {
+    if(!m1.find() || !m2.find()) {
       // these don't represent versions so sort as strings
       return v1.compareTo(v2);
     }
