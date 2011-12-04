@@ -30,161 +30,149 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 @SuppressWarnings("serial")
-public class ProgressPanel extends JPanel implements ComponentListener
-{
-	private JProgressBar progressTotal, progressSingle;
-	private JLabel message, dlMsg;
+public class ProgressPanel extends JPanel implements ComponentListener {
+  private JProgressBar progressTotal, progressSingle;
 
-	public ProgressPanel()
-	{
-		super();
+  private JLabel message, dlMsg;
 
-		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+  public ProgressPanel() {
+    super();
 
-		progressTotal = new JProgressBar();
-		progressTotal.setAlignmentX(CENTER_ALIGNMENT);
-		progressTotal.setMaximumSize(new Dimension(250, progressTotal.getPreferredSize().height));
-		progressTotal.setIndeterminate(true);
-		
-		progressSingle = new JProgressBar();
-		progressSingle.setAlignmentX(CENTER_ALIGNMENT);
-		progressSingle.setMaximumSize(new Dimension(250, progressTotal.getPreferredSize().height));
-		progressSingle.setIndeterminate(true);
-		progressSingle.setVisible(false);
-		progressSingle.setMinimum(0);
-		progressSingle.setMaximum(100);
-		
-		message = new JLabel("");
-		message.setIcon(new ProgressIcon(48,48));
-		message.setHorizontalTextPosition(SwingConstants.RIGHT);
-		message.setHorizontalAlignment(SwingConstants.CENTER);
-		message.setAlignmentX(CENTER_ALIGNMENT);
-		
-	  dlMsg = new JLabel("Downloading CREOLE Plugin...");
-	  dlMsg.setIcon(new DownloadIcon(48, 48));
-	  dlMsg.setHorizontalTextPosition(SwingConstants.RIGHT);
-	  dlMsg.setHorizontalAlignment(SwingConstants.CENTER);
-	  dlMsg.setAlignmentX(CENTER_ALIGNMENT);
-	  dlMsg.setVisible(false);
-		
-		add(Box.createVerticalGlue());
-		add(message);
-		add(Box.createVerticalStrut(5));
-		add(progressTotal);
-		add(Box.createVerticalStrut(10));
-		add(dlMsg);
-		add(Box.createVerticalStrut(5));
-		add(progressSingle);
-		add(Box.createVerticalGlue());
+    setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-		addComponentListener(this);
-	}
-	
-	public void downloadStarting(final String name, final boolean sizeUnknown) {
-	  SwingUtilities.invokeLater(new Thread() {
-	    @Override
-	    public void run()
-      {
+    progressTotal = new JProgressBar();
+    progressTotal.setAlignmentX(CENTER_ALIGNMENT);
+    progressTotal.setMaximumSize(new Dimension(250, progressTotal
+            .getPreferredSize().height));
+    progressTotal.setIndeterminate(true);
+
+    progressSingle = new JProgressBar();
+    progressSingle.setAlignmentX(CENTER_ALIGNMENT);
+    progressSingle.setMaximumSize(new Dimension(250, progressTotal
+            .getPreferredSize().height));
+    progressSingle.setIndeterminate(true);
+    progressSingle.setVisible(false);
+    progressSingle.setMinimum(0);
+    progressSingle.setMaximum(100);
+
+    message = new JLabel("");
+    message.setIcon(new ProgressIcon(48, 48));
+    message.setHorizontalTextPosition(SwingConstants.RIGHT);
+    message.setHorizontalAlignment(SwingConstants.CENTER);
+    message.setAlignmentX(CENTER_ALIGNMENT);
+
+    dlMsg = new JLabel("Downloading CREOLE Plugin...");
+    dlMsg.setIcon(new DownloadIcon(48, 48));
+    dlMsg.setHorizontalTextPosition(SwingConstants.RIGHT);
+    dlMsg.setHorizontalAlignment(SwingConstants.CENTER);
+    dlMsg.setAlignmentX(CENTER_ALIGNMENT);
+    dlMsg.setVisible(false);
+
+    add(Box.createVerticalGlue());
+    add(message);
+    add(Box.createVerticalStrut(5));
+    add(progressTotal);
+    add(Box.createVerticalStrut(10));
+    add(dlMsg);
+    add(Box.createVerticalStrut(5));
+    add(progressSingle);
+    add(Box.createVerticalGlue());
+
+    addComponentListener(this);
+  }
+
+  public void downloadStarting(final String name, final boolean sizeUnknown) {
+    SwingUtilities.invokeLater(new Thread() {
+      @Override
+      public void run() {
         progressSingle.setValue(0);
         progressSingle.setIndeterminate(sizeUnknown);
         dlMsg.setText("Downloading " + name + " CREOLE Plugin...");
         dlMsg.setVisible(true);
         progressSingle.setVisible(true);
       }
-	  });	  
-	}
-	
-	public void downloadFinished() {
-	  SwingUtilities.invokeLater(new Thread() {
-	    @Override
-	    public void run()
-      {
+    });
+  }
+
+  public void downloadFinished() {
+    SwingUtilities.invokeLater(new Thread() {
+      @Override
+      public void run() {
         dlMsg.setVisible(false);
         progressSingle.setVisible(false);
       }
-	  });
-	}
-	
-	public void downloadProgress(final int progress) {
-	  SwingUtilities.invokeLater(new Thread() {
-	    @Override
-	    public void run()
-      {
+    });
+  }
+
+  public void downloadProgress(final int progress) {
+    SwingUtilities.invokeLater(new Thread() {
+      @Override
+      public void run() {
         progressSingle.setValue(progress);
       }
     });
-	}
+  }
 
-	public void valueIncrement()
-	{
-		SwingUtilities.invokeLater(new Thread() {
-		  @Override
-		  public void run()
-			{
-				progressTotal.setValue(progressTotal.getValue() + 1);
-			}
-		});
-	}
+  public void valueIncrement() {
+    SwingUtilities.invokeLater(new Thread() {
+      @Override
+      public void run() {
+        progressTotal.setValue(progressTotal.getValue() + 1);
+      }
+    });
+  }
 
-	public void valueChanged(final int value)
-	{
-		SwingUtilities.invokeLater(new Thread() {
-		  @Override
-		  public void run()
-			{
-				progressTotal.setValue(value);
-			}
-		});
-	}
+  public void valueChanged(final int value) {
+    SwingUtilities.invokeLater(new Thread() {
+      @Override
+      public void run() {
+        progressTotal.setValue(value);
+      }
+    });
+  }
 
-	public void rangeChanged(final int min, final int max)
-	{
-		SwingUtilities.invokeLater(new Thread() {
-		  @Override
-		  public void run()
-			{
-				progressTotal.setMinimum(min);
-				progressTotal.setMaximum(max);
-				progressTotal.setIndeterminate(min == max);
-			}
-		});
-	}
+  public void rangeChanged(final int min, final int max) {
+    SwingUtilities.invokeLater(new Thread() {
+      @Override
+      public void run() {
+        progressTotal.setMinimum(min);
+        progressTotal.setMaximum(max);
+        progressTotal.setIndeterminate(min == max);
+      }
+    });
+  }
 
-	public void messageChanged(final String newMessage)
-	{
-		SwingUtilities.invokeLater(new Thread() {
-		  @Override
-		  public void run()
-			{
-				message.setText("<html><body>"+newMessage+"</body></html>");
-			}
-		});
-	}
+  public void messageChanged(final String newMessage) {
+    SwingUtilities.invokeLater(new Thread() {
+      @Override
+      public void run() {
+        message.setText("<html><body>" + newMessage + "</body></html>");
+      }
+    });
+  }
 
-	@Override
-	public void componentHidden(ComponentEvent e)
-	{
-		// we don't currently need this
-	}
+  @Override
+  public void componentHidden(ComponentEvent e) {
+    // we don't currently need this
+  }
 
-	@Override
-	public void componentMoved(ComponentEvent e)
-	{
-		// we don't currently need this
-	}
+  @Override
+  public void componentMoved(ComponentEvent e) {
+    // we don't currently need this
+  }
 
-	@Override
-	public void componentResized(ComponentEvent e)
-	{
-		int width = Math.min(400, (int)(getSize().width * (2f/3)));
-	  progressTotal.setMaximumSize(new Dimension(width, progressTotal.getPreferredSize().height));
-		progressSingle.setMaximumSize(new Dimension(width, progressSingle.getPreferredSize().height));
-	}
+  @Override
+  public void componentResized(ComponentEvent e) {
+    int width = Math.min(400, (int)(getSize().width * (2f / 3)));
+    progressTotal.setMaximumSize(new Dimension(width, progressTotal
+            .getPreferredSize().height));
+    progressSingle.setMaximumSize(new Dimension(width, progressSingle
+            .getPreferredSize().height));
+  }
 
-	@Override
-	public void componentShown(ComponentEvent e)
-	{
-		valueChanged(0);
-		componentResized(e);
-	}
+  @Override
+  public void componentShown(ComponentEvent e) {
+    valueChanged(0);
+    componentResized(e);
+  }
 }

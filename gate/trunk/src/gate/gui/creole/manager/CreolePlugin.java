@@ -85,11 +85,11 @@ public class CreolePlugin {
 
   public static CreolePlugin load(URL creoleURL) throws Exception {
     SAXBuilder builder = new SAXBuilder(false);
-    
+
     URLConnection conn = creoleURL.openConnection();
     conn.setReadTimeout(5000);
     conn.setConnectTimeout(5000);
-    
+
     org.jdom.Document creoleDoc = builder.build(conn.getInputStream());
 
     Element root = creoleDoc.getRootElement();
@@ -135,9 +135,10 @@ public class CreolePlugin {
 
     if(gateMin == null || VersionComparator.isGATENewEnough(gateMin))
       return " <i>(Discontinued after GATE " + gateMax + ")</i>";
-    
-    if(gateMax == null || VersionComparator.compareVersions(Main.version, gateMax) <= 0)
-      return " <i>(Requires GATE " + gateMin + " or above)</i>";   
+
+    if(gateMax == null
+            || VersionComparator.compareVersions(Main.version, gateMax) <= 0)
+      return " <i>(Requires GATE " + gateMin + " or above)</i>";
 
     // we should never get to here but just in case...
     return " <i>(Requires GATE " + gateMin + " to " + gateMax + ")</i>";
