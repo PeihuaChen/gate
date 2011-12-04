@@ -24,6 +24,7 @@ import gate.resources.img.svg.GATEIcon;
 import gate.resources.img.svg.GATEUpdateSiteIcon;
 import gate.resources.img.svg.InvalidIcon;
 import gate.resources.img.svg.OpenFileIcon;
+import gate.resources.img.svg.RefreshIcon;
 import gate.resources.img.svg.RemoveIcon;
 import gate.resources.img.svg.UpdateSiteIcon;
 import gate.resources.img.svg.UpdatesIcon;
@@ -82,6 +83,8 @@ import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpringLayout;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 
 import org.apache.tools.ant.Project;
@@ -581,7 +584,10 @@ public class PluginUpdateManager extends JDialog {
             .createTitledBorder("Plugin Repositories:"));
     final XJTable tblSites = new XJTable(sitesModel);
     tblSites.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    pnlUpdateSites.add(new JScrollPane(tblSites), BorderLayout.CENTER);
+    
+    JScrollPane scroller = new JScrollPane(tblSites);
+    scroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+    pnlUpdateSites.add(scroller, BorderLayout.CENTER);
     final JPanel pnlEdit = new JPanel(new SpringLayout());
     final JTextField txtName = new JTextField(20);
     final JTextField txtURL = new JTextField(20);
@@ -613,7 +619,10 @@ public class PluginUpdateManager extends JDialog {
         }
       }
     });
-    JButton btnRemove = new JButton(new RemoveIcon(24, 24));
+    
+    final JButton btnRemove = new JButton(new RemoveIcon(24, 24));
+    btnRemove.setEnabled(false);
+    btnRemove.setDisabledIcon(new ImageIcon(GrayFilter.createDisabledImage((new RemoveIcon(24, 24)).getImage())));
     btnRemove.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
@@ -625,7 +634,10 @@ public class PluginUpdateManager extends JDialog {
         loadData();
       }
     });
-    JButton btnEdit = new JButton(new EditIcon(24, 24));
+    
+    final JButton btnEdit = new JButton(new EditIcon(24, 24));
+    btnEdit.setDisabledIcon(new ImageIcon(GrayFilter.createDisabledImage((new EditIcon(24, 24)).getImage())));
+    btnEdit.setEnabled(false);
     btnEdit.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
@@ -657,11 +669,41 @@ public class PluginUpdateManager extends JDialog {
         }
       }
     });
+    
+    final JButton btnRefresh = new JButton(new RefreshIcon(24,24));
+    btnRefresh.setDisabledIcon(new ImageIcon(GrayFilter.createDisabledImage((new RefreshIcon(24, 24)).getImage())));
+    btnRefresh.setEnabled(false);
+    btnRefresh.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent arg0) {
+        int row = tblSites.getSelectedRow();
+        if(row == -1) return;
+        RemoteUpdateSite site = updateSites.get(row);
+        site.plugins = null;
+        showProgressPanel(true);
+        saveConfig();
+        loadData();
+      }
+    });
+    
+    tblSites.getSelectionModel().addListSelectionListener(new ListSelectionListener() {      
+      @Override
+      public void valueChanged(ListSelectionEvent e) {
+        if (e.getValueIsAdjusting()) return;
+        
+        boolean enable = (tblSites.getSelectedRow() != -1);
+        btnRemove.setEnabled(enable);
+        btnEdit.setEnabled(enable);
+        btnRefresh.setEnabled(enable);
+      }
+    });
+    
     JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
     toolbar.setFloatable(false);
     toolbar.add(btnAdd);
     toolbar.add(btnRemove);
-    toolbar.add(btnEdit);
+    toolbar.add(btnRefresh);
+    toolbar.add(btnEdit);    
     pnlUpdateSites.add(toolbar, BorderLayout.EAST);
 
     // the user plugin dir area
