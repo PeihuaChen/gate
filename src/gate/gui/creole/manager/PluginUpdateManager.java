@@ -279,7 +279,7 @@ public class PluginUpdateManager extends JDialog {
           Expander expander = new Expander();
           expander.setOverwrite(true);
           expander.setDest(getUserPluginsHome());
-          
+
           // store the list of failed plugins
           List<CreolePlugin> failed = new ArrayList<CreolePlugin>();
 
@@ -327,7 +327,7 @@ public class PluginUpdateManager extends JDialog {
               try {
 
                 // download the new version
-                File downloaded = File.createTempFile("gate-plugin", ".zip");                
+                File downloaded = File.createTempFile("gate-plugin", ".zip");
                 downloadFile(p.getName(), p.downloadURL, downloaded);
 
                 // try to rename the existing plugin folder
@@ -674,10 +674,12 @@ public class PluginUpdateManager extends JDialog {
     pnlUserPlugins.setFloatable(false);
     pnlUserPlugins.setLayout(new BoxLayout(pnlUserPlugins, BoxLayout.X_AXIS));
     pnlUserPlugins.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+
     String userPluginsDir = (String)Gate.getUserConfig().get(GATE_USER_PLUGINS);
     final JTextField txtUserPlugins =
             new JTextField(userPluginsDir == null ? "" : userPluginsDir);
     txtUserPlugins.setEditable(false);
+
     JButton btnUserPlugins = new JButton(new OpenFileIcon(24, 24));
     btnUserPlugins.addActionListener(new ActionListener() {
       @Override
@@ -687,9 +689,43 @@ public class PluginUpdateManager extends JDialog {
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
         fileChooser.setResource(GATE_USER_PLUGINS);
-        int result = fileChooser.showOpenDialog(PluginUpdateManager.this);
-        if(result == JFileChooser.APPROVE_OPTION) {
+
+        if(fileChooser.showOpenDialog(PluginUpdateManager.this) == JFileChooser.APPROVE_OPTION) {
           userPluginDir = fileChooser.getSelectedFile();
+
+          if(!userPluginDir.exists()) {
+            JOptionPane
+                    .showMessageDialog(
+                            owner,
+                            "<html><body style='width: 350px;'><b>Selected Folder Doesn't Exist!</b><br><br>"
+                                    + "In order to install new CREOLE plugins you must choose a user plugins folder, "+
+                                    "which exists and is writable.",
+                            "CREOLE Plugin Manager", JOptionPane.ERROR_MESSAGE);
+            return;
+          }
+
+          if(!userPluginDir.isDirectory()) {
+            JOptionPane
+            .showMessageDialog(
+                    owner,
+                    "<html><body style='width: 350px;'><b>You Selected A File Instead Of A Folder!</b><br><br>"
+                            + "In order to install new CREOLE plugins you must choose a user plugins folder, "+
+                            "which exists and is writable.",
+                    "CREOLE Plugin Manager", JOptionPane.ERROR_MESSAGE);
+            return;
+          }
+
+          if(!userPluginDir.canWrite()) {
+            JOptionPane
+            .showMessageDialog(
+                    owner,
+                    "<html><body style='width: 350px;'><b>Selected Folder Is Read Only!</b><br><br>"
+                            + "In order to install new CREOLE plugins you must choose a user plugins folder, "+
+                            "which exists and is writable.",
+                    "CREOLE Plugin Manager", JOptionPane.ERROR_MESSAGE);
+            return;
+          }
+
           txtUserPlugins.setText(userPluginDir.getAbsolutePath());
           saveConfig();
           loadData();
