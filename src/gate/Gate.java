@@ -47,6 +47,7 @@ import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLConnection;
@@ -1314,14 +1315,63 @@ public class Gate implements GateConstants {
    * Stores information about the contents of a CREOLE directory.
    */
   public static class DirectoryInfo {
+    
+    private String name, html;
+    
+    private boolean core, remote;
+    
+    public boolean isCorePlugin() {
+      return core;
+    }
+    
+    public boolean isRemotePlugin() {
+      return remote;
+    }
+    
+    public String toHTMLString() {
+      return html;
+    }
+    
     public DirectoryInfo(URL url) {
       this.url = normaliseCreoleUrl(url);
       valid = true;
       resourceInfoList = new ArrayList<ResourceInfo>();
       // this may invalidate it if something goes wrong
       parseCreole();
+
+      remote = !this.url.getProtocol().equalsIgnoreCase("file");
+      
+      core = !remote && (url.toString().startsWith(Gate.getPluginsHome().toURI().toString()));
+
+      html =
+              "<html><body>"
+                      + getName()
+                      + "<br><span style='font-size: 80%;'>"
+                      + (remote ? this.url.toString() : Files.fileFromURL(
+                              this.url).getAbsolutePath())
+                      + "</span></body></html>";
     }
 
+    public String getName() {
+      if(name != null) return name;
+
+      name = "";
+      try {
+        name = url.toURI().getPath();
+      } catch(URISyntaxException ex) {
+        // ignore, this should have been checked when adding the URL!
+      }
+      if(name.endsWith("/")) {
+        name = name.substring(0, name.length() - 1);
+      }
+      int lastSlash = name.lastIndexOf("/");
+      if(lastSlash != -1) {
+        name = name.substring(lastSlash + 1);
+      }
+
+      return name;
+    }
+    
     /**
      * Performs a shallow parse of the creole.xml file to get the information
      * about the resources contained.

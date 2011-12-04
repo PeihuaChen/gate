@@ -41,7 +41,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.Collator;
 import java.util.ArrayList;
@@ -286,8 +285,7 @@ public class AvailablePlugins extends JPanel {
     loadAlwaysByURL.clear();
     visibleRows.clear();
     visibleRows.addAll(Gate.getKnownPlugins());
-    if (mainTable.getRowCount() > 0)
-      mainTable.setRowSelectionInterval(0, 0);
+    if(mainTable.getRowCount() > 0) mainTable.setRowSelectionInterval(0, 0);
     filterRows("");
   }
 
@@ -424,16 +422,11 @@ public class AvailablePlugins extends JPanel {
       if(dInfo == null) { return null; }
       switch(column){
         case NAME_COLUMN:
-          return "<html><body>" + getName4URL(dInfo.getUrl())
-                  + "<br><span style='font-size: 80%;'>"
-                  + dInfo.getUrl().toString() + "</span></body></html>";
+          return dInfo.toHTMLString();
         case ICON_COLUMN:
           if(!dInfo.isValid()) return invalidIcon;
-          if(!dInfo.getUrl().getProtocol().equalsIgnoreCase("file"))
-            return remoteIcon;
-          if(dInfo.getUrl().toString()
-                  .startsWith(Gate.getPluginsHome().toURI().toString()))
-            return coreIcon;
+          if(dInfo.isRemotePlugin()) return remoteIcon;
+          if(dInfo.isCorePlugin()) return coreIcon;
           File userPluginsHome = PluginUpdateManager.getUserPluginsHome();
           if(userPluginsHome != null
                   && dInfo.getUrl().toString()
@@ -446,24 +439,6 @@ public class AvailablePlugins extends JPanel {
           return getLoadAlways(dInfo.getUrl());
         default:
           return null;
-      }
-    }
-
-    private String getName4URL(URL url) {
-      String path = "";
-      try {
-        path = url.toURI().getPath();
-      } catch(URISyntaxException ex) {
-        // ignore, this should have been checked when adding the URL!
-      }
-      if(path.endsWith("/")) {
-        path = path.substring(0, path.length() - 1);
-      }
-      int lastSlash = path.lastIndexOf("/");
-      if(lastSlash == -1) {
-        return path;
-      } else {
-        return path.substring(lastSlash + 1);
       }
     }
 
