@@ -232,15 +232,16 @@ public class PluginUpdateManager extends JDialog {
         SwingUtilities.invokeLater(new Thread() {
           @Override
           public void run() {
-            // TODO probably not needed once the user dir is enumerated by the
-            // main GATE methods
+            // update all the tables
             installed.reInit();
             updatesModel.dataChanged();
             availableModel.dataChanged();
 
-            // if we are going to load stuff then make the tabs available
+            // enable the update tab if there are any
             tabs.setEnabledAt(1, updatesModel.data.size() > 0);
             tabs.setEnabledAt(2, true);
+
+            // remove the progress panel
             showProgressPanel(false);
           }
         });
@@ -505,7 +506,7 @@ public class PluginUpdateManager extends JDialog {
     };
     JButton btnCancel = new JButton(cancelAction);
 
-    // ... and the help button    
+    // ... and the help button
     Action helpAction = new AbstractAction("Help") {
       @Override
       public void actionPerformed(ActionEvent e) {
@@ -514,20 +515,20 @@ public class PluginUpdateManager extends JDialog {
       }
     };
     JButton btnHelp = new JButton(helpAction);
-    
-    //add the buttons to the panel
+
+    // add the buttons to the panel
     pnlButtons.add(btnHelp);
     pnlButtons.add(Box.createHorizontalGlue());
     pnlButtons.add(btnApply);
     pnlButtons.add(Box.createHorizontalStrut(5));
     pnlButtons.add(btnCancel);
-    
-    //and the panel to the main GUI
+
+    // and the panel to the main GUI
     panel.add(pnlButtons, BorderLayout.SOUTH);
-    
-    //make the main GUI the currently visisble dialog item
+
+    // make the main GUI the currently visisble dialog item
     add(panel, BorderLayout.CENTER);
-    
+
     // define keystrokes action bindings at the level of the main window
     getRootPane().registerKeyboardAction(cancelAction,
             KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
@@ -535,8 +536,8 @@ public class PluginUpdateManager extends JDialog {
     getRootPane().registerKeyboardAction(helpAction,
             KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0),
             JComponent.WHEN_IN_FOCUSED_WINDOW);
-    
-    //make sure the dialog is a reasonable size
+
+    // make sure the dialog is a reasonable size
     pack();
     Dimension screenSize = getGraphicsConfiguration().getBounds().getSize();
     Dimension dialogSize = getPreferredSize();
@@ -550,11 +551,8 @@ public class PluginUpdateManager extends JDialog {
                     : dialogSize.height;
     setSize(width, height);
     validate();
-    
-    //TODO move this so we remember different folders for different actions
-    MainFrame.getFileChooser().setResource(getClass().getName());
-    
-    //place the dialog somewhere sensible
+
+    // place the dialog somewhere sensible
     setLocationRelativeTo(owner);
   }
 
@@ -586,7 +584,8 @@ public class PluginUpdateManager extends JDialog {
   }
 
   private Component buildConfig() {
-    JPanel panel = new JPanel(new BorderLayout());
+
+    // the main update site area
     JPanel pnlUpdateSites = new JPanel(new BorderLayout());
     pnlUpdateSites.setBorder(BorderFactory
             .createTitledBorder("Plugin Repositories:"));
@@ -673,6 +672,8 @@ public class PluginUpdateManager extends JDialog {
     toolbar.add(btnRemove);
     toolbar.add(btnEdit);
     pnlUpdateSites.add(toolbar, BorderLayout.EAST);
+
+    // the user plugin dir area
     JToolBar pnlUserPlugins = new JToolBar(JToolBar.HORIZONTAL);
     pnlUserPlugins.setOpaque(false);
     pnlUserPlugins.setFloatable(false);
@@ -690,7 +691,7 @@ public class PluginUpdateManager extends JDialog {
         fileChooser.setMultiSelectionEnabled(false);
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
-        fileChooser.setResource("gate.CreoleRegister");
+        fileChooser.setResource(GATE_USER_PLUGINS);
         int result = fileChooser.showOpenDialog(PluginUpdateManager.this);
         if(result == JFileChooser.APPROVE_OPTION) {
           userPluginDir = fileChooser.getSelectedFile();
@@ -704,6 +705,8 @@ public class PluginUpdateManager extends JDialog {
             .createTitledBorder("User Plugin Directory: "));
     pnlUserPlugins.add(txtUserPlugins);
     pnlUserPlugins.add(btnUserPlugins);
+
+    // the suppress warnings area
     JPanel pnlSuppress = new JPanel();
     pnlSuppress.setLayout(new BoxLayout(pnlSuppress, BoxLayout.X_AXIS));
     pnlSuppress.setBorder(BorderFactory
@@ -728,6 +731,9 @@ public class PluginUpdateManager extends JDialog {
     };
     chkUpdateInsatlled.addActionListener(chkListener);
     chkUserPlugins.addActionListener(chkListener);
+
+    // assemble the full panel and return it
+    JPanel panel = new JPanel(new BorderLayout());
     panel.add(pnlUpdateSites, BorderLayout.CENTER);
     panel.add(pnlUserPlugins, BorderLayout.NORTH);
     panel.add(pnlSuppress, BorderLayout.SOUTH);
@@ -735,26 +741,55 @@ public class PluginUpdateManager extends JDialog {
     return panel;
   }
 
+  /**
+   * Download a file from a URL into a local file while updating the progress
+   * panel so the user knows how far through we are
+   * 
+   * @param name
+   *          the name of the plugin for the progress feedback
+   * @param url
+   *          the URL to download from
+   * @param file
+   *          the file to save into
+   * @throws IOException
+   *           if any IO related problems occur
+   */
   private void downloadFile(String name, URL url, File file) throws IOException {
     InputStream in = null;
     FileOutputStream out = null;
+
     try {
+      // get a connection to the URL
       URLConnection conn = url.openConnection();
-      in = conn.getInputStream();
+
+      // use this to configure the progress info
       int expectedSize = conn.getContentLength();
       progressPanel.downloadStarting(name, expectedSize == -1);
       int downloaded = 0;
+
+      // create a 1KB buffer to speed up downloaded
       byte[] buf = new byte[1024];
+
+      // records how much of the buffer was filled
       int length;
+
+      // open the input and output streams
+      in = conn.getInputStream();
       out = new FileOutputStream(file);
+
+      // keep filling the buffer and then writing it out to the file until there
+      // is no more data, all the time keep updating the progress bar
       while((in != null) && ((length = in.read(buf)) != -1)) {
         downloaded += length;
         out.write(buf, 0, length);
         if(expectedSize != -1)
           progressPanel.downloadProgress((downloaded * 100) / expectedSize);
       }
+
+      // flush the output file to ensure everything is written to disk
       out.flush();
     } finally {
+      // once we have finished close all the streams and report that we are done
       progressPanel.downloadFinished();
       if(out != null) out.close();
       if(in != null) in.close();
@@ -764,9 +799,12 @@ public class PluginUpdateManager extends JDialog {
   @Override
   public void setVisible(boolean visible) {
     if(visible) {
+      // if the window is about to be made visible then do some quick setup
       tabs.setSelectedIndex(0);
       installed.reInit();
       loadData();
+
+      // warn the user if their plugni dir isn't set
       if(userPluginDir == null
               && !Gate.getUserConfig().getBoolean(SUPPRESS_USER_PLUGINS)) {
         JOptionPane
@@ -780,6 +818,8 @@ public class PluginUpdateManager extends JDialog {
                                 48));
       }
     }
+
+    // now actually show/hide the window
     super.setVisible(visible);
   }
 
