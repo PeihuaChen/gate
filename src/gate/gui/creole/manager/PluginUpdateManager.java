@@ -1046,10 +1046,18 @@ public class PluginUpdateManager extends JDialog {
       site.enabled = (Boolean)value;
       saveConfig();
 
-      // TODO this is required to update the available/update tabs but it causes
-      // the table to be redrawn which causes the row to be unselected which
-      // isn't great, can we do things differently to avoid this
-      loadData();
+      if (site.enabled) {
+        //TODO can we do this without a complete reload?
+        showProgressPanel(true);
+        loadData();
+      }
+      else {
+        availableModel.data.removeAll(site.getCreolePlugins());
+        updatesModel.data.removeAll(site.getCreolePlugins());
+        availableModel.dataChanged();
+        updatesModel.dataChanged();
+        tabs.setEnabledAt(1, updatesModel.getRowCount()>0);
+      }
     }
 
     public void dataChanged() {

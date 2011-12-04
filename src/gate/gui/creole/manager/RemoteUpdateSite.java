@@ -14,7 +14,6 @@
 
 package gate.gui.creole.manager;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
