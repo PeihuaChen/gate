@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Collections;
 import java.util.List;
 
 import com.thoughtworks.xstream.XStream;
@@ -41,30 +42,36 @@ public class RemoteUpdateSite {
   }
 
   @SuppressWarnings("unchecked")
-  public List<CreolePlugin> getCreolePlugins() throws IOException {
+  public List<CreolePlugin> getCreolePlugins() {
     if(plugins == null) {
+      valid = true;
+      try {
+        XStream xs = new XStream();
+        xs.setClassLoader(RemoteUpdateSite.class.getClassLoader());
+        xs.alias("UpdateSite", List.class);
+        xs.alias("CreolePlugin", CreolePlugin.class);
+        xs.useAttributeFor(CreolePlugin.class, "id");
+        xs.useAttributeFor(CreolePlugin.class, "description");
+        xs.useAttributeFor(CreolePlugin.class, "version");
+        xs.useAttributeFor(CreolePlugin.class, "downloadURL");
+        xs.useAttributeFor(CreolePlugin.class, "url");
+        xs.useAttributeFor(CreolePlugin.class, "gateMin");
+        xs.useAttributeFor(CreolePlugin.class, "gateMax");
 
-      XStream xs = new XStream();
-      xs.setClassLoader(RemoteUpdateSite.class.getClassLoader());
-      xs.alias("UpdateSite", List.class);
-      xs.alias("CreolePlugin", CreolePlugin.class);
-      xs.useAttributeFor(CreolePlugin.class, "id");
-      xs.useAttributeFor(CreolePlugin.class, "description");
-      xs.useAttributeFor(CreolePlugin.class, "version");
-      xs.useAttributeFor(CreolePlugin.class, "downloadURL");
-      xs.useAttributeFor(CreolePlugin.class, "url");
-      xs.useAttributeFor(CreolePlugin.class, "gateMin");
-      xs.useAttributeFor(CreolePlugin.class, "gateMax");
+        URLConnection conn =
+                (new URL(uri.toURL(), "site.xml")).openConnection();
+        conn.setConnectTimeout(5000);
+        conn.setReadTimeout(5000);
 
-      URLConnection conn = (new URL(uri.toURL(), "site.xml")).openConnection();
-      conn.setConnectTimeout(5000);
-      conn.setReadTimeout(5000);
-
-      plugins = (List<CreolePlugin>)xs.fromXML(conn.getInputStream());
-    }
-
-    for(CreolePlugin p : plugins) {
-      p.reset();
+        plugins = (List<CreolePlugin>)xs.fromXML(conn.getInputStream());
+      } catch(Exception e) {
+        valid = false;
+        return Collections.EMPTY_LIST;
+      }
+    } else {
+      for(CreolePlugin p : plugins) {
+        p.reset();
+      }
     }
 
     return plugins;

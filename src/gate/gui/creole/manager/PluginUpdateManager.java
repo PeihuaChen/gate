@@ -185,13 +185,7 @@ public class PluginUpdateManager extends JDialog {
         // invalid for some reason
         for(RemoteUpdateSite rus : updateSites) {
           if(rus.enabled && (rus.valid == null || rus.valid)) {
-            try {
-              availableModel.data.addAll(rus.getCreolePlugins());
-              rus.valid = true;
-            } catch(Exception e) {
-              e.printStackTrace();
-              rus.valid = false;
-            }
+            availableModel.data.addAll(rus.getCreolePlugins());
           }
         }
 
@@ -236,6 +230,7 @@ public class PluginUpdateManager extends JDialog {
             installed.reInit();
             updatesModel.dataChanged();
             availableModel.dataChanged();
+            sitesModel.dataChanged();
 
             // enable the update tab if there are any
             tabs.setEnabledAt(1, updatesModel.data.size() > 0);
@@ -610,7 +605,7 @@ public class PluginUpdateManager extends JDialog {
         try {
           updateSites.add(new RemoteUpdateSite(txtName.getText().trim(),
                   new URI(txtURL.getText().trim()), true));
-          sitesModel.dataChanged();
+          showProgressPanel(true);
           saveConfig();
           loadData();
         } catch(Exception ex) {
@@ -622,10 +617,10 @@ public class PluginUpdateManager extends JDialog {
     btnRemove.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
+        showProgressPanel(true);
         int row = tblSites.getSelectedRow();
         if(row == -1) return;
         updateSites.remove(row);
-        sitesModel.dataChanged();
         saveConfig();
         loadData();
       }
@@ -653,9 +648,10 @@ public class PluginUpdateManager extends JDialog {
           }
           site.name = txtName.getText().trim();
           site.valid = null;
-          sitesModel.dataChanged();
+          showProgressPanel(true);
           saveConfig();
           loadData();
+          
         } catch(Exception ex) {
           ex.printStackTrace();
         }
@@ -698,31 +694,31 @@ public class PluginUpdateManager extends JDialog {
                     .showMessageDialog(
                             owner,
                             "<html><body style='width: 350px;'><b>Selected Folder Doesn't Exist!</b><br><br>"
-                                    + "In order to install new CREOLE plugins you must choose a user plugins folder, "+
-                                    "which exists and is writable.",
+                                    + "In order to install new CREOLE plugins you must choose a user plugins folder, "
+                                    + "which exists and is writable.",
                             "CREOLE Plugin Manager", JOptionPane.ERROR_MESSAGE);
             return;
           }
 
           if(!userPluginDir.isDirectory()) {
             JOptionPane
-            .showMessageDialog(
-                    owner,
-                    "<html><body style='width: 350px;'><b>You Selected A File Instead Of A Folder!</b><br><br>"
-                            + "In order to install new CREOLE plugins you must choose a user plugins folder, "+
-                            "which exists and is writable.",
-                    "CREOLE Plugin Manager", JOptionPane.ERROR_MESSAGE);
+                    .showMessageDialog(
+                            owner,
+                            "<html><body style='width: 350px;'><b>You Selected A File Instead Of A Folder!</b><br><br>"
+                                    + "In order to install new CREOLE plugins you must choose a user plugins folder, "
+                                    + "which exists and is writable.",
+                            "CREOLE Plugin Manager", JOptionPane.ERROR_MESSAGE);
             return;
           }
 
           if(!userPluginDir.canWrite()) {
             JOptionPane
-            .showMessageDialog(
-                    owner,
-                    "<html><body style='width: 350px;'><b>Selected Folder Is Read Only!</b><br><br>"
-                            + "In order to install new CREOLE plugins you must choose a user plugins folder, "+
-                            "which exists and is writable.",
-                    "CREOLE Plugin Manager", JOptionPane.ERROR_MESSAGE);
+                    .showMessageDialog(
+                            owner,
+                            "<html><body style='width: 350px;'><b>Selected Folder Is Read Only!</b><br><br>"
+                                    + "In order to install new CREOLE plugins you must choose a user plugins folder, "
+                                    + "which exists and is writable.",
+                            "CREOLE Plugin Manager", JOptionPane.ERROR_MESSAGE);
             return;
           }
 

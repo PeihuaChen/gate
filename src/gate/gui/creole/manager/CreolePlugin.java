@@ -26,8 +26,6 @@ import org.jdom.input.SAXBuilder;
 
 public class CreolePlugin {
 
-  // TODO can we merge this with Gate.DirectoryInfo?
-
   protected String id, description, gateMin, gateMax;
 
   protected URL downloadURL, url;
