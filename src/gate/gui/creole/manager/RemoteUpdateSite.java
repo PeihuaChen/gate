@@ -27,7 +27,7 @@ public class RemoteUpdateSite {
   protected URI uri;
 
   protected String name;
-  
+
   protected Boolean enabled = false;
 
   protected transient Boolean valid = null;
@@ -39,8 +39,6 @@ public class RemoteUpdateSite {
     this.uri = uri;
     this.enabled = enabled;
   }
-  
-  
 
   @SuppressWarnings("unchecked")
   public List<CreolePlugin> getCreolePlugins() throws IOException {

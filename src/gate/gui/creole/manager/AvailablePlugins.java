@@ -630,7 +630,7 @@ public class AvailablePlugins extends JPanel {
     @Override
     public void actionPerformed(ActionEvent e) {
       JTextField urlTextField = new JTextField(20);
-      
+
       class URLfromFileAction extends AbstractAction {
         URLfromFileAction(JTextField textField) {
           super(null, new OpenFileIcon(24, 24));
@@ -672,24 +672,36 @@ public class AvailablePlugins extends JPanel {
       JLabel lblDir = new JLabel("Select a Directory");
       JLabel lblOR = new JLabel("or");
 
-      msgLayout.setHorizontalGroup(msgLayout
-              .createSequentialGroup()
-              .addGroup(msgLayout.createParallelGroup().addComponent(lblURL).addComponent(urlTextField))
-              .addComponent(lblOR)
-              .addGroup(
-                      msgLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
-                              .addComponent(lblDir)
-                              .addComponent(fileBtn)));
+      msgLayout
+              .setHorizontalGroup(msgLayout
+                      .createSequentialGroup()
+                      .addGroup(
+                              msgLayout.createParallelGroup()
+                                      .addComponent(lblURL)
+                                      .addComponent(urlTextField))
+                      .addComponent(lblOR)
+                      .addGroup(
+                              msgLayout
+                                      .createParallelGroup(
+                                              GroupLayout.Alignment.CENTER)
+                                      .addComponent(lblDir)
+                                      .addComponent(fileBtn)));
 
-      msgLayout.setVerticalGroup(msgLayout
-              .createSequentialGroup()
-              .addGroup(
-                      msgLayout.createParallelGroup().addComponent(lblURL)
-                              .addComponent(lblDir))
-              
-              .addGroup(
-                      msgLayout.createParallelGroup(GroupLayout.Alignment.CENTER).addComponent(urlTextField).addComponent(lblOR)
-                              .addComponent(fileBtn)));
+      msgLayout
+              .setVerticalGroup(msgLayout
+                      .createSequentialGroup()
+                      .addGroup(
+                              msgLayout.createParallelGroup()
+                                      .addComponent(lblURL)
+                                      .addComponent(lblDir))
+
+                      .addGroup(
+                              msgLayout
+                                      .createParallelGroup(
+                                              GroupLayout.Alignment.CENTER)
+                                      .addComponent(urlTextField)
+                                      .addComponent(lblOR)
+                                      .addComponent(fileBtn)));
 
       if(JOptionPane.showConfirmDialog(AvailablePlugins.this, message,
               "Register a new CREOLE directory", JOptionPane.OK_CANCEL_OPTION,

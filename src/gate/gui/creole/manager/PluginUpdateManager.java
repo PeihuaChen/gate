@@ -115,7 +115,7 @@ public class PluginUpdateManager extends JDialog {
   private JFrame owner;
 
   private List<RemoteUpdateSite> updateSites =
-      new ArrayList<RemoteUpdateSite>();
+          new ArrayList<RemoteUpdateSite>();
 
   private static final String GATE_USER_PLUGINS = "gate.user.plugins";
 
@@ -124,7 +124,7 @@ public class PluginUpdateManager extends JDialog {
   private static final String SUPPRESS_USER_PLUGINS = "suppress.user.plugins";
 
   private static final String SUPPRESS_UPDATE_INSTALLED =
-      "suppress.update.install";
+          "suppress.update.install";
 
   public static File getUserPluginsHome() {
     // TODO move this into gate.util.OptionaMap as a getFile() method
@@ -201,7 +201,7 @@ public class PluginUpdateManager extends JDialog {
               if(pluginInfo.exists()) {
                 try {
                   CreolePlugin plugin =
-                      CreolePlugin.load(pluginInfo.toURI().toURL());
+                          CreolePlugin.load(pluginInfo.toURI().toURL());
                   if(plugin != null) {
                     int index = availableModel.data.indexOf(plugin);
                     if(index != -1) {
@@ -257,7 +257,7 @@ public class PluginUpdateManager extends JDialog {
   private void applyChanges() {
     progressPanel.messageChanged("Updating CREOLE Plugin Configuration...");
     progressPanel.rangeChanged(0, updatesModel.data.size()
-        + availableModel.data.size());
+            + availableModel.data.size());
     showProgressPanel(true);
     // the assumption is that this code is run from the EDT so we need to run
     // the time consuming stuff in a different thread to stop things locking up
@@ -270,20 +270,22 @@ public class PluginUpdateManager extends JDialog {
           expander.setDest(getUserPluginsHome());
           List<CreolePlugin> failed = new ArrayList<CreolePlugin>();
           boolean hasBeenWarned =
-              Gate.getUserConfig().getBoolean(SUPPRESS_UPDATE_INSTALLED);
+                  Gate.getUserConfig().getBoolean(SUPPRESS_UPDATE_INSTALLED);
           Iterator<CreolePlugin> it = updatesModel.data.iterator();
           while(it.hasNext()) {
             CreolePlugin p = it.next();
             if(p.install) {
               if(!hasBeenWarned) {
                 if(JOptionPane
-                    .showConfirmDialog(
-                        PluginUpdateManager.this,
-                        "<html><body style='width: 350px;'><b>UPDATE WARNING!</b><br><br>"
-                            + "Updating installed plugins will remove any customizations you may have made. "
-                            + "Are you sure you wish to continue?</body></html>",
-                        "CREOLE Plugin Manager", JOptionPane.OK_CANCEL_OPTION,
-                        JOptionPane.QUESTION_MESSAGE, new DownloadIcon(48, 48)) == JOptionPane.OK_OPTION) {
+                        .showConfirmDialog(
+                                PluginUpdateManager.this,
+                                "<html><body style='width: 350px;'><b>UPDATE WARNING!</b><br><br>"
+                                        + "Updating installed plugins will remove any customizations you may have made. "
+                                        + "Are you sure you wish to continue?</body></html>",
+                                "CREOLE Plugin Manager",
+                                JOptionPane.OK_CANCEL_OPTION,
+                                JOptionPane.QUESTION_MESSAGE, new DownloadIcon(
+                                        48, 48)) == JOptionPane.OK_OPTION) {
                   hasBeenWarned = true;
                 } else {
                   SwingUtilities.invokeLater(new Thread() {
@@ -296,18 +298,19 @@ public class PluginUpdateManager extends JDialog {
                 }
               }
               progressPanel
-                  .messageChanged("Updating CREOLE Plugin Configuration...<br>Currently Updating: "
-                      + p.getName());
+                      .messageChanged("Updating CREOLE Plugin Configuration...<br>Currently Updating: "
+                              + p.getName());
               try {
                 File renamed =
-                    new File(getUserPluginsHome(), "renamed-"
-                        + System.currentTimeMillis());
+                        new File(getUserPluginsHome(), "renamed-"
+                                + System.currentTimeMillis());
                 if(!p.dir.renameTo(renamed)) {
                   failed.add(p);
                 } else {
                   Files.rmdir(renamed);
                   File downloaded =
-                      new File("pluigin-" + System.currentTimeMillis() + ".zip");
+                          new File("pluigin-" + System.currentTimeMillis()
+                                  + ".zip");
                   downloadFile(p.getName(), p.downloadURL, downloaded);
                   expander.setSrc(downloaded);
                   expander.execute();
@@ -325,11 +328,12 @@ public class PluginUpdateManager extends JDialog {
             CreolePlugin p = it.next();
             if(p.install) {
               progressPanel
-                  .messageChanged("Updating CREOLE Plugin Configuration...<br>Currently Installing: "
-                      + p.getName());
+                      .messageChanged("Updating CREOLE Plugin Configuration...<br>Currently Installing: "
+                              + p.getName());
               try {
                 File downloaded =
-                    new File("pluigin-" + System.currentTimeMillis() + ".zip");
+                        new File("pluigin-" + System.currentTimeMillis()
+                                + ".zip");
                 downloadFile(p.getName(), p.downloadURL, downloaded);
                 expander.setSrc(downloaded);
                 expander.execute();
@@ -343,14 +347,14 @@ public class PluginUpdateManager extends JDialog {
           }
           if(failed.size() > 0)
             JOptionPane
-                .showMessageDialog(
-                    PluginUpdateManager.this,
-                    "<html><body style='width: 350px;'><b>Installation of "
-                        + failed.size()
-                        + " plugins failed!</b><br><br>"
-                        + "Try unloading all plugins and then restarting GATE before trying to install or update plugins.</body></html>",
-                    PluginUpdateManager.this.getTitle(),
-                    JOptionPane.ERROR_MESSAGE);
+                    .showMessageDialog(
+                            PluginUpdateManager.this,
+                            "<html><body style='width: 350px;'><b>Installation of "
+                                    + failed.size()
+                                    + " plugins failed!</b><br><br>"
+                                    + "Try unloading all plugins and then restarting GATE before trying to install or update plugins.</body></html>",
+                            PluginUpdateManager.this.getTitle(),
+                            JOptionPane.ERROR_MESSAGE);
         }
         progressPanel.messageChanged("Updating CREOLE Plugin Configuration...");
         installed.updateAvailablePlugins();
@@ -372,23 +376,22 @@ public class PluginUpdateManager extends JDialog {
     Map<String, String> sites = Gate.getUserConfig().getMap(GATE_UPDATE_SITES);
     for(Map.Entry<String, String> site : sites.entrySet()) {
       try {
-        updateSites.add(new RemoteUpdateSite(site.getValue().substring(1), new URI(site
-            .getKey()), site.getValue().charAt(0) == '1'));
+        updateSites.add(new RemoteUpdateSite(site.getValue().substring(1),
+                new URI(site.getKey()), site.getValue().charAt(0) == '1'));
       } catch(URISyntaxException e) {
         e.printStackTrace();
       }
     }
-    
+
     if(updateSites.size() == 0) {
-      /*try {
-        // TODO we need to change this to something more sensible
-        updateSites.add(new RemoteUpdateSite("Default Test Site", new URI(
-            "http://greenwoodma.servehttp.com/gate-plugins/"), true));
-      } catch(URISyntaxException e) {
-        // this can never happen!
-      }*/
+      /*
+       * try { // TODO we need to change this to something more sensible
+       * updateSites.add(new RemoteUpdateSite("Default Test Site", new URI(
+       * "http://greenwoodma.servehttp.com/gate-plugins/"), true)); }
+       * catch(URISyntaxException e) { // this can never happen! }
+       */
     }
-    
+
     setTitle("CREOLE Plugin Manager");
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     setLayout(new BorderLayout());
@@ -400,16 +403,16 @@ public class PluginUpdateManager extends JDialog {
     tabs.addTab("Installed Plugins", new AvailableIcon(20, 20), installed);
     tabs.addTab("Available Updates", new UpdatesIcon(20, 20), buildUpdates());
     tabs.addTab("Available to Install", new DownloadIcon(20, 20),
-        buildAvailable());
+            buildAvailable());
     tabs.addTab("Configuration", new AdvancedIcon(20, 20), buildConfig());
     tabs.setDisabledIconAt(
-        1,
-        new ImageIcon(GrayFilter.createDisabledImage((new UpdatesIcon(20, 20))
-            .getImage())));
+            1,
+            new ImageIcon(GrayFilter.createDisabledImage((new UpdatesIcon(20,
+                    20)).getImage())));
     tabs.setDisabledIconAt(
-        2,
-        new ImageIcon(GrayFilter.createDisabledImage((new DownloadIcon(20, 20))
-            .getImage())));
+            2,
+            new ImageIcon(GrayFilter.createDisabledImage((new DownloadIcon(20,
+                    20)).getImage())));
     tabs.setEnabledAt(1, false);
     tabs.setEnabledAt(2, false);
     JPanel pnlButtons = new JPanel();
@@ -433,7 +436,7 @@ public class PluginUpdateManager extends JDialog {
       @Override
       public void actionPerformed(ActionEvent e) {
         MainFrame.getInstance().showHelpFrame("sec:howto:plugins",
-            "gate.gui.creole.PluginUpdateManager");
+                "gate.gui.creole.PluginUpdateManager");
       }
     };
     JButton btnHelp = new JButton(helpAction);
@@ -447,22 +450,22 @@ public class PluginUpdateManager extends JDialog {
     add(panel, BorderLayout.CENTER);
     // define keystrokes action bindings at the level of the main window
     getRootPane().registerKeyboardAction(cancelAction,
-        KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-        JComponent.WHEN_IN_FOCUSED_WINDOW);
+            KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+            JComponent.WHEN_IN_FOCUSED_WINDOW);
     getRootPane().registerKeyboardAction(helpAction,
-        KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0),
-        JComponent.WHEN_IN_FOCUSED_WINDOW);
+            KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0),
+            JComponent.WHEN_IN_FOCUSED_WINDOW);
     pack();
     Dimension screenSize = getGraphicsConfiguration().getBounds().getSize();
     Dimension dialogSize = getPreferredSize();
     int width =
-        dialogSize.width > screenSize.width
-            ? screenSize.width * 3 / 4
-            : dialogSize.width;
+            dialogSize.width > screenSize.width
+                    ? screenSize.width * 3 / 4
+                    : dialogSize.width;
     int height =
-        dialogSize.height > screenSize.height
-            ? screenSize.height * 2 / 3
-            : dialogSize.height;
+            dialogSize.height > screenSize.height
+                    ? screenSize.height * 2 / 3
+                    : dialogSize.height;
     setSize(width, height);
     validate();
     MainFrame.getFileChooser().setResource(getClass().getName());
@@ -472,7 +475,7 @@ public class PluginUpdateManager extends JDialog {
   private Component buildUpdates() {
     XJTable tblUpdates = new XJTable(updatesModel);
     tblUpdates.getColumnModel().getColumn(0)
-        .setCellRenderer(new CheckBoxTableCellRenderer());
+            .setCellRenderer(new CheckBoxTableCellRenderer());
     tblUpdates.setSortable(false);
     tblUpdates.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     tblUpdates.getColumnModel().getColumn(0).setMaxWidth(100);
@@ -486,7 +489,7 @@ public class PluginUpdateManager extends JDialog {
   private Component buildAvailable() {
     XJTable tblAvailable = new XJTable(availableModel);
     tblAvailable.getColumnModel().getColumn(0)
-        .setCellRenderer(new CheckBoxTableCellRenderer());
+            .setCellRenderer(new CheckBoxTableCellRenderer());
     tblAvailable.setSortable(false);
     tblAvailable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     tblAvailable.getColumnModel().getColumn(0).setMaxWidth(100);
@@ -500,7 +503,7 @@ public class PluginUpdateManager extends JDialog {
     JPanel panel = new JPanel(new BorderLayout());
     JPanel pnlUpdateSites = new JPanel(new BorderLayout());
     pnlUpdateSites.setBorder(BorderFactory
-        .createTitledBorder("Plugin Repositories:"));
+            .createTitledBorder("Plugin Repositories:"));
     final XJTable tblSites = new XJTable(sitesModel);
     tblSites.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     pnlUpdateSites.add(new JScrollPane(tblSites), BorderLayout.CENTER);
@@ -519,14 +522,14 @@ public class PluginUpdateManager extends JDialog {
         txtName.setText("");
         txtURL.setText("");
         if(JOptionPane.showConfirmDialog(PluginUpdateManager.this, pnlEdit,
-            "Plugin Repository Info", JOptionPane.OK_CANCEL_OPTION,
-            JOptionPane.QUESTION_MESSAGE, new UpdateSiteIcon(48, 48)) != JOptionPane.OK_OPTION)
+                "Plugin Repository Info", JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.QUESTION_MESSAGE, new UpdateSiteIcon(48, 48)) != JOptionPane.OK_OPTION)
           return;
         if(txtName.getText().trim().equals("")) return;
         if(txtURL.getText().trim().equals("")) return;
         try {
           updateSites.add(new RemoteUpdateSite(txtName.getText().trim(),
-              new URI(txtURL.getText().trim()), true));
+                  new URI(txtURL.getText().trim()), true));
           sitesModel.dataChanged();
           saveConfig();
           loadData();
@@ -557,8 +560,8 @@ public class PluginUpdateManager extends JDialog {
         txtName.setText(site.name);
         txtURL.setText(site.uri.toString());
         if(JOptionPane.showConfirmDialog(PluginUpdateManager.this, pnlEdit,
-            "Update Site Info", JOptionPane.OK_CANCEL_OPTION,
-            JOptionPane.QUESTION_MESSAGE, new UpdateSiteIcon(48, 48)) != JOptionPane.OK_OPTION)
+                "Update Site Info", JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.QUESTION_MESSAGE, new UpdateSiteIcon(48, 48)) != JOptionPane.OK_OPTION)
           return;
         if(txtName.getText().trim().equals("")) return;
         if(txtURL.getText().trim().equals("")) return;
@@ -591,7 +594,7 @@ public class PluginUpdateManager extends JDialog {
     pnlUserPlugins.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
     String userPluginsDir = (String)Gate.getUserConfig().get(GATE_USER_PLUGINS);
     final JTextField txtUserPlugins =
-        new JTextField(userPluginsDir == null ? "" : userPluginsDir);
+            new JTextField(userPluginsDir == null ? "" : userPluginsDir);
     txtUserPlugins.setEditable(false);
     JButton btnUserPlugins = new JButton(new OpenFileIcon(24, 24));
     btnUserPlugins.addActionListener(new ActionListener() {
@@ -612,29 +615,29 @@ public class PluginUpdateManager extends JDialog {
       }
     });
     pnlUserPlugins.setBorder(BorderFactory
-        .createTitledBorder("User Plugin Directory: "));
+            .createTitledBorder("User Plugin Directory: "));
     pnlUserPlugins.add(txtUserPlugins);
     pnlUserPlugins.add(btnUserPlugins);
     JPanel pnlSuppress = new JPanel();
     pnlSuppress.setLayout(new BoxLayout(pnlSuppress, BoxLayout.X_AXIS));
     pnlSuppress.setBorder(BorderFactory
-        .createTitledBorder("Suppress Warning Messages:"));
+            .createTitledBorder("Suppress Warning Messages:"));
     final JCheckBox chkUserPlugins =
-        new JCheckBox("User Plugin Directory Not Set", Gate.getUserConfig()
-            .getBoolean(SUPPRESS_USER_PLUGINS));
+            new JCheckBox("User Plugin Directory Not Set", Gate.getUserConfig()
+                    .getBoolean(SUPPRESS_USER_PLUGINS));
     pnlSuppress.add(chkUserPlugins);
     pnlSuppress.add(Box.createHorizontalStrut(10));
     final JCheckBox chkUpdateInsatlled =
-        new JCheckBox("Update Of Installed Plugin", Gate.getUserConfig()
-            .getBoolean(SUPPRESS_UPDATE_INSTALLED));
+            new JCheckBox("Update Of Installed Plugin", Gate.getUserConfig()
+                    .getBoolean(SUPPRESS_UPDATE_INSTALLED));
     pnlSuppress.add(chkUpdateInsatlled);
     ActionListener chkListener = new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent arg0) {
         Gate.getUserConfig().put(SUPPRESS_USER_PLUGINS,
-            chkUserPlugins.isSelected());
+                chkUserPlugins.isSelected());
         Gate.getUserConfig().put(SUPPRESS_UPDATE_INSTALLED,
-            chkUpdateInsatlled.isSelected());
+                chkUpdateInsatlled.isSelected());
       }
     };
     chkUpdateInsatlled.addActionListener(chkListener);
@@ -679,15 +682,16 @@ public class PluginUpdateManager extends JDialog {
       installed.reInit();
       loadData();
       if(userPluginDir == null
-          && !Gate.getUserConfig().getBoolean(SUPPRESS_USER_PLUGINS)) {
+              && !Gate.getUserConfig().getBoolean(SUPPRESS_USER_PLUGINS)) {
         JOptionPane
-            .showMessageDialog(
-                owner,
-                "<html><body style='width: 350px;'><b>The user plugin folder has not yet been configured!</b><br><br>"
-                    + "In order to install new CREOLE plugins you must choose a user plugins folder. "
-                    + "This can be achieved from the Configuration tab of the CREOLE Plugin Manager.",
-                "CREOLE Plugin Manager", JOptionPane.INFORMATION_MESSAGE,
-                new UserPluginIcon(48, 48));
+                .showMessageDialog(
+                        owner,
+                        "<html><body style='width: 350px;'><b>The user plugin folder has not yet been configured!</b><br><br>"
+                                + "In order to install new CREOLE plugins you must choose a user plugins folder. "
+                                + "This can be achieved from the Configuration tab of the CREOLE Plugin Manager.",
+                        "CREOLE Plugin Manager",
+                        JOptionPane.INFORMATION_MESSAGE, new UserPluginIcon(48,
+                                48));
       }
     }
     super.setVisible(visible);
@@ -720,12 +724,12 @@ public class PluginUpdateManager extends JDialog {
           return plugin.install;
         case 1:
           return "<html><body>"
-              + plugin.getName()
-              + plugin.compatabilityInfo()
-              + (plugin.description != null
-                  ? "<br><span style='font-size: 80%;'>" + plugin.description
-                      + "</span>"
-                  : "") + "</body></html>";
+                  + plugin.getName()
+                  + plugin.compatabilityInfo()
+                  + (plugin.description != null
+                          ? "<br><span style='font-size: 80%;'>"
+                                  + plugin.description + "</span>"
+                          : "") + "</body></html>";
         case 2:
           return plugin.version;
         case 3:
@@ -869,8 +873,8 @@ public class PluginUpdateManager extends JDialog {
           return site.enabled;
         case 2:
           return "<html><body>" + site.name
-              + "<br><span style='font-size: 80%;'>" + site.uri
-              + "</span></body></html>";
+                  + "<br><span style='font-size: 80%;'>" + site.uri
+                  + "</span></body></html>";
         default:
           return null;
       }
