@@ -178,8 +178,8 @@ public class PluginUpdateManager extends JDialog {
     new Thread() {
       @Override
       public void run() {
-        //TODO why was this called here?
-        //installed.reInit();
+        // TODO why was this called here?
+        // installed.reInit();
         // reset the info ready for a reload
         availableModel.data.clear();
         updatesModel.data.clear();
@@ -585,7 +585,7 @@ public class PluginUpdateManager extends JDialog {
             .createTitledBorder("Plugin Repositories:"));
     final XJTable tblSites = new XJTable(sitesModel);
     tblSites.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    
+
     JScrollPane scroller = new JScrollPane(tblSites);
     scroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
     pnlUpdateSites.add(scroller, BorderLayout.CENTER);
@@ -620,10 +620,11 @@ public class PluginUpdateManager extends JDialog {
         }
       }
     });
-    
+
     final JButton btnRemove = new JButton(new RemoveIcon(24, 24));
     btnRemove.setEnabled(false);
-    btnRemove.setDisabledIcon(new ImageIcon(GrayFilter.createDisabledImage((new RemoveIcon(24, 24)).getImage())));
+    btnRemove.setDisabledIcon(new ImageIcon(GrayFilter
+            .createDisabledImage((new RemoveIcon(24, 24)).getImage())));
     btnRemove.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
@@ -635,9 +636,10 @@ public class PluginUpdateManager extends JDialog {
         loadData();
       }
     });
-    
+
     final JButton btnEdit = new JButton(new EditIcon(24, 24));
-    btnEdit.setDisabledIcon(new ImageIcon(GrayFilter.createDisabledImage((new EditIcon(24, 24)).getImage())));
+    btnEdit.setDisabledIcon(new ImageIcon(GrayFilter
+            .createDisabledImage((new EditIcon(24, 24)).getImage())));
     btnEdit.setEnabled(false);
     btnEdit.addActionListener(new ActionListener() {
       @Override
@@ -664,15 +666,16 @@ public class PluginUpdateManager extends JDialog {
           showProgressPanel(true);
           saveConfig();
           loadData();
-          
+
         } catch(Exception ex) {
           ex.printStackTrace();
         }
       }
     });
-    
-    final JButton btnRefresh = new JButton(new RefreshIcon(24,24));
-    btnRefresh.setDisabledIcon(new ImageIcon(GrayFilter.createDisabledImage((new RefreshIcon(24, 24)).getImage())));
+
+    final JButton btnRefresh = new JButton(new RefreshIcon(24, 24));
+    btnRefresh.setDisabledIcon(new ImageIcon(GrayFilter
+            .createDisabledImage((new RefreshIcon(24, 24)).getImage())));
     btnRefresh.setEnabled(false);
     btnRefresh.addActionListener(new ActionListener() {
       @Override
@@ -686,25 +689,26 @@ public class PluginUpdateManager extends JDialog {
         loadData();
       }
     });
-    
-    tblSites.getSelectionModel().addListSelectionListener(new ListSelectionListener() {      
-      @Override
-      public void valueChanged(ListSelectionEvent e) {
-        if (e.getValueIsAdjusting()) return;
-        
-        boolean enable = (tblSites.getSelectedRow() != -1);
-        btnRemove.setEnabled(enable);
-        btnEdit.setEnabled(enable);
-        btnRefresh.setEnabled(enable);
-      }
-    });
-    
+
+    tblSites.getSelectionModel().addListSelectionListener(
+            new ListSelectionListener() {
+              @Override
+              public void valueChanged(ListSelectionEvent e) {
+                if(e.getValueIsAdjusting()) return;
+
+                boolean enable = (tblSites.getSelectedRow() != -1);
+                btnRemove.setEnabled(enable);
+                btnEdit.setEnabled(enable);
+                btnRefresh.setEnabled(enable);
+              }
+            });
+
     JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
     toolbar.setFloatable(false);
     toolbar.add(btnAdd);
     toolbar.add(btnRemove);
     toolbar.add(btnRefresh);
-    toolbar.add(btnEdit);    
+    toolbar.add(btnEdit);
     pnlUpdateSites.add(toolbar, BorderLayout.EAST);
 
     // the user plugin dir area
@@ -1041,6 +1045,11 @@ public class PluginUpdateManager extends JDialog {
       RemoteUpdateSite site = updateSites.get(row);
       site.enabled = (Boolean)value;
       saveConfig();
+
+      // TODO this is required to update the available/update tabs but it causes
+      // the table to be redrawn which causes the row to be unselected which
+      // isn't great, can we do things differently to avoid this
+      loadData();
     }
 
     public void dataChanged() {
