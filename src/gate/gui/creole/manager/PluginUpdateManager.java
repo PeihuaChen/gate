@@ -145,7 +145,7 @@ public class PluginUpdateManager extends JDialog {
   private void saveConfig() {
     Map<String, String> sites = new HashMap<String, String>();
     for(RemoteUpdateSite rus : updateSites) {
-      sites.put((rus.enabled ? "1" : "0") + rus.uri.toString(), rus.name);
+      sites.put(rus.uri.toString(), (rus.enabled ? "1" : "0") + rus.name);
     }
     OptionsMap userConfig = Gate.getUserConfig();
     userConfig.put(GATE_UPDATE_SITES, sites);
@@ -372,8 +372,8 @@ public class PluginUpdateManager extends JDialog {
     Map<String, String> sites = Gate.getUserConfig().getMap(GATE_UPDATE_SITES);
     for(Map.Entry<String, String> site : sites.entrySet()) {
       try {
-        updateSites.add(new RemoteUpdateSite(site.getValue(), new URI(site
-            .getKey().substring(1)), site.getKey().charAt(0) == '1'));
+        updateSites.add(new RemoteUpdateSite(site.getValue().substring(1), new URI(site
+            .getKey()), site.getValue().charAt(0) == '1'));
       } catch(URISyntaxException e) {
         e.printStackTrace();
       }
