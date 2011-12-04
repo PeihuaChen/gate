@@ -178,7 +178,8 @@ public class PluginUpdateManager extends JDialog {
     new Thread() {
       @Override
       public void run() {
-        installed.reInit();
+        //TODO why was this called here?
+        //installed.reInit();
         // reset the info ready for a reload
         availableModel.data.clear();
         updatesModel.data.clear();
