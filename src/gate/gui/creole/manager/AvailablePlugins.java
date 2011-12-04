@@ -286,6 +286,8 @@ public class AvailablePlugins extends JPanel {
     loadAlwaysByURL.clear();
     visibleRows.clear();
     visibleRows.addAll(Gate.getKnownPlugins());
+    if (mainTable.getRowCount() > 0)
+      mainTable.setRowSelectionInterval(0, 0);
     filterRows("");
   }
 
@@ -295,10 +297,10 @@ public class AvailablePlugins extends JPanel {
             mainTable.getSelectedRow() == -1 ? "" : (String)mainTable
                     .getValueAt(mainTable.getSelectedRow(),
                             mainTable.convertColumnIndexToView(NAME_COLUMN));
-    // ArrayList<URL> previousVisibleRows = new ArrayList<URL>(visibleRows);
     if(filter.length() < 2) {
       // one character or less, don't filter rows
-      visibleRows = new ArrayList<URL>(Gate.getKnownPlugins());
+      visibleRows.clear();
+      visibleRows.addAll(Gate.getKnownPlugins());
     } else {
       // filter rows case insensitively on each plugin URL and its resources
       visibleRows.clear();
@@ -317,10 +319,9 @@ public class AvailablePlugins extends JPanel {
         }
       }
     }
-    // commented out so that the newly added plugins show up
-    // if(!previousVisibleRows.equals(visibleRows)) {
+
     mainTableModel.fireTableDataChanged();
-    // }
+
     if(mainTable.getRowCount() > 0) {
       SwingUtilities.invokeLater(new Runnable() {
         @Override
