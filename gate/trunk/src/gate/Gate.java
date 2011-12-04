@@ -421,6 +421,24 @@ public class Gate implements GateConstants {
         }
       }
     }
+    
+    // register plugins installed in the user plugin directory
+    File userPluginsHome = PluginUpdateManager.getUserPluginsHome();
+    if (userPluginsHome != null) {
+      for (File dir : userPluginsHome.listFiles()) {
+        File creoleFile = new File(dir, "creole.xml");
+        if(creoleFile.exists()) {
+          try {
+            URL pluginURL = dir.toURI().toURL();
+            addKnownPlugin(pluginURL);
+          }
+          catch(MalformedURLException mue) {
+            // this should never happen
+            throw new GateRuntimeException(mue);
+          }
+        }
+      }
+    }
 
     // process the autoload plugins
     String pluginPath = getUserConfig().getString(AUTOLOAD_PLUGIN_PATH_KEY);

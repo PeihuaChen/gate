@@ -11,7 +11,6 @@
  * 
  * Mark A. Greenwood, 29/10/2011
  */
-
 package gate.gui.creole.manager;
 
 import gate.Gate;
@@ -97,7 +96,6 @@ import org.apache.tools.ant.taskdefs.Expand;
  */
 @SuppressWarnings("serial")
 public class PluginUpdateManager extends JDialog {
-
   private PluginTableModel availableModel = new PluginTableModel(3);
 
   private PluginTableModel updatesModel = new PluginTableModel(4);
@@ -117,7 +115,7 @@ public class PluginUpdateManager extends JDialog {
   private JFrame owner;
 
   private List<RemoteUpdateSite> updateSites =
-          new ArrayList<RemoteUpdateSite>();
+      new ArrayList<RemoteUpdateSite>();
 
   private static final String GATE_USER_PLUGINS = "gate.user.plugins";
 
@@ -126,7 +124,7 @@ public class PluginUpdateManager extends JDialog {
   private static final String SUPPRESS_USER_PLUGINS = "suppress.user.plugins";
 
   private static final String SUPPRESS_UPDATE_INSTALLED =
-          "suppress.update.install";
+      "suppress.update.install";
 
   public static File getUserPluginsHome() {
     // TODO move this into gate.util.OptionaMap as a getFile() method
@@ -144,15 +142,12 @@ public class PluginUpdateManager extends JDialog {
    * the main user config. Note that this doesn't actually persist the data,
    * that is only done on a clean exit of the GUI by code hidden somewhere else.
    */
-  private void saveConfig() {   
+  private void saveConfig() {
     Map<String, String> sites = new HashMap<String, String>();
-
     for(RemoteUpdateSite rus : updateSites) {
       sites.put((rus.enabled ? "1" : "0") + rus.url.toString(), rus.name);
     }
-
     OptionsMap userConfig = Gate.getUserConfig();
-
     userConfig.put(GATE_UPDATE_SITES, sites);
     userConfig.put(GATE_USER_PLUGINS, userPluginDir.getAbsolutePath());
   }
@@ -162,11 +157,9 @@ public class PluginUpdateManager extends JDialog {
    * sites as well as checking what is installed in the user plugin directory
    */
   private void loadData() {
-
     // display the progress panel to stop user input and show progress
     progressPanel.messageChanged("Loading CREOLE Plugin Information...");
     progressPanel.rangeChanged(0, 0);
-
     if(getUserPluginsHome() == null) {
       // if the user plugin directory is not set then there is no point trying
       // to load any of the data, just disable the update/install tabs
@@ -175,19 +168,15 @@ public class PluginUpdateManager extends JDialog {
       showProgressPanel(false);
       return;
     }
-
     // the assumption is that this code is run from the EDT so we need to run
     // the time consuming stuff in a different thread to stop things locking up
     new Thread() {
       @Override
       public void run() {
-
         installed.reInit();
-
         // reset the info ready for a reload
         availableModel.data.clear();
         updatesModel.data.clear();
-
         // go through all the known update sites and get all the plugins they
         // are making available, skipping those sites which are marked as
         // invalid for some reason
@@ -202,7 +191,6 @@ public class PluginUpdateManager extends JDialog {
             }
           }
         }
-
         // now work through the folders in the user plugin directory to see if
         // there are updates for any of the installed plugins
         if(userPluginDir.exists() && userPluginDir.isDirectory()) {
@@ -213,13 +201,11 @@ public class PluginUpdateManager extends JDialog {
               if(pluginInfo.exists()) {
                 try {
                   CreolePlugin plugin =
-                          CreolePlugin.load(pluginInfo.toURI().toURL());
-
+                      CreolePlugin.load(pluginInfo.toURI().toURL());
                   if(plugin != null) {
                     int index = availableModel.data.indexOf(plugin);
                     if(index != -1) {
                       CreolePlugin ap = availableModel.data.remove(index);
-
                       if(ap.version > plugin.version) {
                         ap.installed = plugin.version;
                         ap.dir = f;
@@ -227,10 +213,9 @@ public class PluginUpdateManager extends JDialog {
                       }
                     }
                   }
-
-                  // TODO have the user plugin dir enumerated by GATE
+                  // add the plugin. most will already be known but this will
+                  // catch any that have just been installed
                   Gate.addKnownPlugin(f.toURI().toURL());
-
                 } catch(Exception e) {
                   e.printStackTrace();
                 }
@@ -238,21 +223,17 @@ public class PluginUpdateManager extends JDialog {
             }
           }
         }
-
         SwingUtilities.invokeLater(new Thread() {
           @Override
           public void run() {
             // TODO probably not needed once the user dir is enumerated by the
             // main GATE methods
             installed.reInit();
-
             updatesModel.dataChanged();
             availableModel.dataChanged();
-
             // if we are going to load stuff then make the tabs available
             tabs.setEnabledAt(1, updatesModel.data.size() > 0);
             tabs.setEnabledAt(2, true);
-
             showProgressPanel(false);
           }
         });
@@ -262,7 +243,6 @@ public class PluginUpdateManager extends JDialog {
 
   private void showProgressPanel(final boolean visible) {
     if(visible == getRootPane().getGlassPane().isVisible()) return;
-
     if(visible) {
       remove(panel);
       add(progressPanel, BorderLayout.CENTER);
@@ -270,7 +250,6 @@ public class PluginUpdateManager extends JDialog {
       remove(progressPanel);
       add(panel, BorderLayout.CENTER);
     }
-
     getRootPane().getGlassPane().setVisible(visible);
     validate();
   }
@@ -278,9 +257,8 @@ public class PluginUpdateManager extends JDialog {
   private void applyChanges() {
     progressPanel.messageChanged("Updating CREOLE Plugin Configuration...");
     progressPanel.rangeChanged(0, updatesModel.data.size()
-            + availableModel.data.size());
+        + availableModel.data.size());
     showProgressPanel(true);
-
     // the assumption is that this code is run from the EDT so we need to run
     // the time consuming stuff in a different thread to stop things locking up
     new Thread() {
@@ -290,28 +268,22 @@ public class PluginUpdateManager extends JDialog {
           Expander expander = new Expander();
           expander.setOverwrite(true);
           expander.setDest(getUserPluginsHome());
-
           List<CreolePlugin> failed = new ArrayList<CreolePlugin>();
-
           boolean hasBeenWarned =
-                  Gate.getUserConfig().getBoolean(SUPPRESS_UPDATE_INSTALLED);
-
+              Gate.getUserConfig().getBoolean(SUPPRESS_UPDATE_INSTALLED);
           Iterator<CreolePlugin> it = updatesModel.data.iterator();
           while(it.hasNext()) {
             CreolePlugin p = it.next();
             if(p.install) {
-
               if(!hasBeenWarned) {
                 if(JOptionPane
-                        .showConfirmDialog(
-                                PluginUpdateManager.this,
-                                "<html><body style='width: 350px;'><b>UPDATE WARNING!</b><br><br>"
-                                        + "Updating installed plugins will remove any customizations you may have made. "
-                                        + "Are you sure you wish to continue?</body></html>",
-                                "CREOLE Plugin Manager",
-                                JOptionPane.OK_CANCEL_OPTION,
-                                JOptionPane.QUESTION_MESSAGE, new DownloadIcon(
-                                        48, 48)) == JOptionPane.OK_OPTION) {
+                    .showConfirmDialog(
+                        PluginUpdateManager.this,
+                        "<html><body style='width: 350px;'><b>UPDATE WARNING!</b><br><br>"
+                            + "Updating installed plugins will remove any customizations you may have made. "
+                            + "Are you sure you wish to continue?</body></html>",
+                        "CREOLE Plugin Manager", JOptionPane.OK_CANCEL_OPTION,
+                        JOptionPane.QUESTION_MESSAGE, new DownloadIcon(48, 48)) == JOptionPane.OK_OPTION) {
                   hasBeenWarned = true;
                 } else {
                   SwingUtilities.invokeLater(new Thread() {
@@ -320,34 +292,25 @@ public class PluginUpdateManager extends JDialog {
                       showProgressPanel(false);
                     }
                   });
-
                   return;
                 }
               }
-
               progressPanel
-                      .messageChanged("Updating CREOLE Plugin Configuration...<br>Currently Updating: "
-                              + p.getName());
-
+                  .messageChanged("Updating CREOLE Plugin Configuration...<br>Currently Updating: "
+                      + p.getName());
               try {
                 File renamed =
-                        new File(getUserPluginsHome(), "renamed-"
-                                + System.currentTimeMillis());
-
+                    new File(getUserPluginsHome(), "renamed-"
+                        + System.currentTimeMillis());
                 if(!p.dir.renameTo(renamed)) {
                   failed.add(p);
                 } else {
-
                   Files.rmdir(renamed);
-
                   File downloaded =
-                          new File("pluigin-" + System.currentTimeMillis()
-                                  + ".zip");
+                      new File("pluigin-" + System.currentTimeMillis() + ".zip");
                   downloadFile(p.getName(), p.downloadURL, downloaded);
-
                   expander.setSrc(downloaded);
                   expander.execute();
-
                   if(!downloaded.delete()) downloaded.deleteOnExit();
                 }
               } catch(IOException ex) {
@@ -355,54 +318,42 @@ public class PluginUpdateManager extends JDialog {
                 failed.add(p);
               }
             }
-
             progressPanel.valueIncrement();
           }
-
           it = availableModel.data.iterator();
           while(it.hasNext()) {
             CreolePlugin p = it.next();
             if(p.install) {
               progressPanel
-                      .messageChanged("Updating CREOLE Plugin Configuration...<br>Currently Installing: "
-                              + p.getName());
+                  .messageChanged("Updating CREOLE Plugin Configuration...<br>Currently Installing: "
+                      + p.getName());
               try {
                 File downloaded =
-                        new File("pluigin-" + System.currentTimeMillis()
-                                + ".zip");
+                    new File("pluigin-" + System.currentTimeMillis() + ".zip");
                 downloadFile(p.getName(), p.downloadURL, downloaded);
-
                 expander.setSrc(downloaded);
                 expander.execute();
-
                 if(!downloaded.delete()) downloaded.deleteOnExit();
-
               } catch(IOException ex) {
                 ex.printStackTrace();
                 failed.add(p);
               }
               progressPanel.valueIncrement();
-
             }
           }
-
           if(failed.size() > 0)
             JOptionPane
-                    .showMessageDialog(
-                            PluginUpdateManager.this,
-                            "<html><body style='width: 350px;'><b>Installation of "
-                                    + failed.size()
-                                    + " plugins failed!</b><br><br>"
-                                    + "Try unloading all plugins and then restarting GATE before trying to install or update plugins.</body></html>",
-                            PluginUpdateManager.this.getTitle(),
-                            JOptionPane.ERROR_MESSAGE);
-
+                .showMessageDialog(
+                    PluginUpdateManager.this,
+                    "<html><body style='width: 350px;'><b>Installation of "
+                        + failed.size()
+                        + " plugins failed!</b><br><br>"
+                        + "Try unloading all plugins and then restarting GATE before trying to install or update plugins.</body></html>",
+                    PluginUpdateManager.this.getTitle(),
+                    JOptionPane.ERROR_MESSAGE);
         }
-
         progressPanel.messageChanged("Updating CREOLE Plugin Configuration...");
-
         installed.updateAvailablePlugins();
-
         loadData();
       }
     }.start();
@@ -416,62 +367,53 @@ public class PluginUpdateManager extends JDialog {
 
   public PluginUpdateManager(JFrame owner) {
     super(owner, true);
-
     MainFrame.getGuiRoots().add(this);
-
     this.owner = owner;
-
-    try {
-
-      Map<String, String> sites =
-              Gate.getUserConfig().getMap(GATE_UPDATE_SITES);
-
-      for(Map.Entry<String, String> site : sites.entrySet()) {
-        try {
-          updateSites.add(new RemoteUpdateSite(site.getValue(), new URI(site
-                  .getKey().substring(1)), site.getKey().charAt(0) ==  '1'));
-        } catch(URISyntaxException e) {
-          e.printStackTrace();
-        }
+    Map<String, String> sites = Gate.getUserConfig().getMap(GATE_UPDATE_SITES);
+    for(Map.Entry<String, String> site : sites.entrySet()) {
+      try {
+        updateSites.add(new RemoteUpdateSite(site.getValue(), new URI(site
+            .getKey().substring(1)), site.getKey().charAt(0) == '1'));
+      } catch(URISyntaxException e) {
+        e.printStackTrace();
       }
-
-      if(updateSites.size() == 0) {
-        //TODO we need to change this to something more sensible
-        updateSites.add(new RemoteUpdateSite("Default Test Site", new URI(
-                "http://greenwoodma.servehttp.com/gate-plugins/"), true));
-      }
-    } catch(URISyntaxException e) {
-      // this can never happen!
     }
-
+    
+    if(updateSites.size() == 0) {
+      try {
+        // TODO we need to change this to something more sensible
+        updateSites.add(new RemoteUpdateSite("Default Test Site", new URI(
+            "http://greenwoodma.servehttp.com/gate-plugins/"), true));
+      } catch(URISyntaxException e) {
+        // this can never happen!
+      }
+    }
+    
     setTitle("CREOLE Plugin Manager");
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-
     setLayout(new BorderLayout());
-
     panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-
     panel.add(tabs, BorderLayout.CENTER);
-
     setIconImages(Arrays.asList(new Image[]{new GATEIcon(64, 64).getImage(),
         new GATEIcon(48, 48).getImage(), new GATEIcon(32, 32).getImage(),
         new GATEIcon(22, 22).getImage(), new GATEIcon(16, 16).getImage()}));
-
     tabs.addTab("Installed Plugins", new AvailableIcon(20, 20), installed);
     tabs.addTab("Available Updates", new UpdatesIcon(20, 20), buildUpdates());
     tabs.addTab("Available to Install", new DownloadIcon(20, 20),
-            buildAvailable());
+        buildAvailable());
     tabs.addTab("Configuration", new AdvancedIcon(20, 20), buildConfig());
-    
-    tabs.setDisabledIconAt(1, new ImageIcon(GrayFilter.createDisabledImage((new UpdatesIcon(20, 20)).getImage())));
-    tabs.setDisabledIconAt(2, new ImageIcon(GrayFilter.createDisabledImage((new DownloadIcon(20, 20)).getImage())));
-
+    tabs.setDisabledIconAt(
+        1,
+        new ImageIcon(GrayFilter.createDisabledImage((new UpdatesIcon(20, 20))
+            .getImage())));
+    tabs.setDisabledIconAt(
+        2,
+        new ImageIcon(GrayFilter.createDisabledImage((new DownloadIcon(20, 20))
+            .getImage())));
     tabs.setEnabledAt(1, false);
     tabs.setEnabledAt(2, false);
-
     JPanel pnlButtons = new JPanel();
     pnlButtons.setLayout(new BoxLayout(pnlButtons, BoxLayout.X_AXIS));
-
     JButton btnApply = new JButton("Apply All");
     getRootPane().setDefaultButton(btnApply);
     btnApply.addActionListener(new ActionListener() {
@@ -480,7 +422,6 @@ public class PluginUpdateManager extends JDialog {
         PluginUpdateManager.this.applyChanges();
       }
     });
-
     Action cancelAction = new AbstractAction("Close") {
       @Override
       public void actionPerformed(ActionEvent e) {
@@ -488,16 +429,14 @@ public class PluginUpdateManager extends JDialog {
       }
     };
     JButton btnCancel = new JButton(cancelAction);
-
     Action helpAction = new AbstractAction("Help") {
       @Override
       public void actionPerformed(ActionEvent e) {
         MainFrame.getInstance().showHelpFrame("sec:howto:plugins",
-                "gate.gui.creole.PluginUpdateManager");
+            "gate.gui.creole.PluginUpdateManager");
       }
     };
     JButton btnHelp = new JButton(helpAction);
-
     pnlButtons.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
     pnlButtons.add(btnHelp);
     pnlButtons.add(Box.createHorizontalGlue());
@@ -505,114 +444,90 @@ public class PluginUpdateManager extends JDialog {
     pnlButtons.add(Box.createHorizontalStrut(5));
     pnlButtons.add(btnCancel);
     panel.add(pnlButtons, BorderLayout.SOUTH);
-
     add(panel, BorderLayout.CENTER);
-
     // define keystrokes action bindings at the level of the main window
     getRootPane().registerKeyboardAction(cancelAction,
-            KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-            JComponent.WHEN_IN_FOCUSED_WINDOW);
+        KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+        JComponent.WHEN_IN_FOCUSED_WINDOW);
     getRootPane().registerKeyboardAction(helpAction,
-            KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0),
-            JComponent.WHEN_IN_FOCUSED_WINDOW);
-
+        KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0),
+        JComponent.WHEN_IN_FOCUSED_WINDOW);
     pack();
-
     Dimension screenSize = getGraphicsConfiguration().getBounds().getSize();
     Dimension dialogSize = getPreferredSize();
     int width =
-            dialogSize.width > screenSize.width
-                    ? screenSize.width * 3 / 4
-                    : dialogSize.width;
+        dialogSize.width > screenSize.width
+            ? screenSize.width * 3 / 4
+            : dialogSize.width;
     int height =
-            dialogSize.height > screenSize.height
-                    ? screenSize.height * 2 / 3
-                    : dialogSize.height;
+        dialogSize.height > screenSize.height
+            ? screenSize.height * 2 / 3
+            : dialogSize.height;
     setSize(width, height);
     validate();
-
     MainFrame.getFileChooser().setResource(getClass().getName());
-
     setLocationRelativeTo(owner);
   }
 
   private Component buildUpdates() {
     XJTable tblUpdates = new XJTable(updatesModel);
     tblUpdates.getColumnModel().getColumn(0)
-            .setCellRenderer(new CheckBoxTableCellRenderer());
+        .setCellRenderer(new CheckBoxTableCellRenderer());
     tblUpdates.setSortable(false);
     tblUpdates.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
     tblUpdates.getColumnModel().getColumn(0).setMaxWidth(100);
     tblUpdates.getColumnModel().getColumn(2).setMaxWidth(100);
     tblUpdates.getColumnModel().getColumn(3).setMaxWidth(100);
-
     JScrollPane scroller = new JScrollPane(tblUpdates);
     scroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-
     return scroller;
   }
 
   private Component buildAvailable() {
     XJTable tblAvailable = new XJTable(availableModel);
     tblAvailable.getColumnModel().getColumn(0)
-            .setCellRenderer(new CheckBoxTableCellRenderer());
+        .setCellRenderer(new CheckBoxTableCellRenderer());
     tblAvailable.setSortable(false);
     tblAvailable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
     tblAvailable.getColumnModel().getColumn(0).setMaxWidth(100);
     tblAvailable.getColumnModel().getColumn(2).setMaxWidth(100);
-
     JScrollPane scroller = new JScrollPane(tblAvailable);
     scroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-
     return scroller;
   }
 
   private Component buildConfig() {
     JPanel panel = new JPanel(new BorderLayout());
-
     JPanel pnlUpdateSites = new JPanel(new BorderLayout());
-
     pnlUpdateSites.setBorder(BorderFactory
-            .createTitledBorder("Plugin Repositories:"));
-
+        .createTitledBorder("Plugin Repositories:"));
     final XJTable tblSites = new XJTable(sitesModel);
     tblSites.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
     pnlUpdateSites.add(new JScrollPane(tblSites), BorderLayout.CENTER);
-
     final JPanel pnlEdit = new JPanel(new SpringLayout());
     final JTextField txtName = new JTextField(20);
     final JTextField txtURL = new JTextField(20);
-
     pnlEdit.add(new JLabel("Name: "));
     pnlEdit.add(txtName);
     pnlEdit.add(new JLabel("URL: "));
     pnlEdit.add(txtURL);
     SpringUtilities.makeCompactGrid(pnlEdit, 2, 2, 6, 6, 6, 6);
-
     JButton btnAdd = new JButton(new AddIcon(24, 24));
     btnAdd.addActionListener(new ActionListener() {
-
       @Override
       public void actionPerformed(ActionEvent e) {
         txtName.setText("");
         txtURL.setText("");
-
         if(JOptionPane.showConfirmDialog(PluginUpdateManager.this, pnlEdit,
-                "Plugin Repository Info", JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.QUESTION_MESSAGE, new UpdateSiteIcon(48, 48)) != JOptionPane.OK_OPTION)
+            "Plugin Repository Info", JOptionPane.OK_CANCEL_OPTION,
+            JOptionPane.QUESTION_MESSAGE, new UpdateSiteIcon(48, 48)) != JOptionPane.OK_OPTION)
           return;
-
         if(txtName.getText().trim().equals("")) return;
         if(txtURL.getText().trim().equals("")) return;
-
         try {
           updateSites.add(new RemoteUpdateSite(txtName.getText().trim(),
-                  new URI(txtURL.getText().trim()), true));
+              new URI(txtURL.getText().trim()), true));
           sitesModel.dataChanged();
-
           saveConfig();
           loadData();
         } catch(Exception ex) {
@@ -620,46 +535,33 @@ public class PluginUpdateManager extends JDialog {
         }
       }
     });
-
     JButton btnRemove = new JButton(new RemoveIcon(24, 24));
     btnRemove.addActionListener(new ActionListener() {
-
       @Override
       public void actionPerformed(ActionEvent e) {
         int row = tblSites.getSelectedRow();
-
         if(row == -1) return;
-
         updateSites.remove(row);
         sitesModel.dataChanged();
-
         saveConfig();
         loadData();
       }
     });
-
     JButton btnEdit = new JButton(new EditIcon(24, 24));
     btnEdit.addActionListener(new ActionListener() {
-
       @Override
       public void actionPerformed(ActionEvent e) {
         int row = tblSites.getSelectedRow();
-
         if(row == -1) return;
-
         RemoteUpdateSite site = updateSites.get(row);
-
         txtName.setText(site.name);
         txtURL.setText(site.url.toString());
-
         if(JOptionPane.showConfirmDialog(PluginUpdateManager.this, pnlEdit,
-                "Update Site Info", JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.QUESTION_MESSAGE, new UpdateSiteIcon(48, 48)) != JOptionPane.OK_OPTION)
+            "Update Site Info", JOptionPane.OK_CANCEL_OPTION,
+            JOptionPane.QUESTION_MESSAGE, new UpdateSiteIcon(48, 48)) != JOptionPane.OK_OPTION)
           return;
-
         if(txtName.getText().trim().equals("")) return;
         if(txtURL.getText().trim().equals("")) return;
-
         try {
           URI url = new URI(txtURL.getText().trim());
           if(!url.equals(site.url)) {
@@ -669,34 +571,27 @@ public class PluginUpdateManager extends JDialog {
           site.name = txtName.getText().trim();
           site.valid = null;
           sitesModel.dataChanged();
-
           saveConfig();
           loadData();
-
         } catch(Exception ex) {
           ex.printStackTrace();
         }
       }
     });
-
     JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
     toolbar.setFloatable(false);
     toolbar.add(btnAdd);
     toolbar.add(btnRemove);
     toolbar.add(btnEdit);
-
     pnlUpdateSites.add(toolbar, BorderLayout.EAST);
-
     JToolBar pnlUserPlugins = new JToolBar(JToolBar.HORIZONTAL);
     pnlUserPlugins.setOpaque(false);
     pnlUserPlugins.setFloatable(false);
     pnlUserPlugins.setLayout(new BoxLayout(pnlUserPlugins, BoxLayout.X_AXIS));
     pnlUserPlugins.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-
     String userPluginsDir = (String)Gate.getUserConfig().get(GATE_USER_PLUGINS);
-
     final JTextField txtUserPlugins =
-            new JTextField(userPluginsDir == null ? "" : userPluginsDir);
+        new JTextField(userPluginsDir == null ? "" : userPluginsDir);
     txtUserPlugins.setEditable(false);
     JButton btnUserPlugins = new JButton(new OpenFileIcon(24, 24));
     btnUserPlugins.addActionListener(new ActionListener() {
@@ -716,80 +611,60 @@ public class PluginUpdateManager extends JDialog {
         }
       }
     });
-
     pnlUserPlugins.setBorder(BorderFactory
-            .createTitledBorder("User Plugin Directory: "));
+        .createTitledBorder("User Plugin Directory: "));
     pnlUserPlugins.add(txtUserPlugins);
     pnlUserPlugins.add(btnUserPlugins);
-
     JPanel pnlSuppress = new JPanel();
     pnlSuppress.setLayout(new BoxLayout(pnlSuppress, BoxLayout.X_AXIS));
     pnlSuppress.setBorder(BorderFactory
-            .createTitledBorder("Suppress Warning Messages:"));
-
+        .createTitledBorder("Suppress Warning Messages:"));
     final JCheckBox chkUserPlugins =
-            new JCheckBox("User Plugin Directory Not Set", Gate.getUserConfig()
-                    .getBoolean(SUPPRESS_USER_PLUGINS));
+        new JCheckBox("User Plugin Directory Not Set", Gate.getUserConfig()
+            .getBoolean(SUPPRESS_USER_PLUGINS));
     pnlSuppress.add(chkUserPlugins);
     pnlSuppress.add(Box.createHorizontalStrut(10));
     final JCheckBox chkUpdateInsatlled =
-            new JCheckBox("Update Of Installed Plugin", Gate.getUserConfig()
-                    .getBoolean(SUPPRESS_UPDATE_INSTALLED));
+        new JCheckBox("Update Of Installed Plugin", Gate.getUserConfig()
+            .getBoolean(SUPPRESS_UPDATE_INSTALLED));
     pnlSuppress.add(chkUpdateInsatlled);
-
     ActionListener chkListener = new ActionListener() {
-
       @Override
       public void actionPerformed(ActionEvent arg0) {
         Gate.getUserConfig().put(SUPPRESS_USER_PLUGINS,
-                chkUserPlugins.isSelected());
+            chkUserPlugins.isSelected());
         Gate.getUserConfig().put(SUPPRESS_UPDATE_INSTALLED,
-                chkUpdateInsatlled.isSelected());
+            chkUpdateInsatlled.isSelected());
       }
     };
-
     chkUpdateInsatlled.addActionListener(chkListener);
     chkUserPlugins.addActionListener(chkListener);
-
     panel.add(pnlUpdateSites, BorderLayout.CENTER);
     panel.add(pnlUserPlugins, BorderLayout.NORTH);
     panel.add(pnlSuppress, BorderLayout.SOUTH);
-
     panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-
     return panel;
   }
 
   private void downloadFile(String name, URL url, File file) throws IOException {
     InputStream in = null;
     FileOutputStream out = null;
-
     try {
       URLConnection conn = url.openConnection();
-
       in = conn.getInputStream();
-
       int expectedSize = conn.getContentLength();
-
       progressPanel.downloadStarting(name, expectedSize == -1);
-
       int downloaded = 0;
-
       byte[] buf = new byte[1024];
       int length;
-
       out = new FileOutputStream(file);
-
       while((in != null) && ((length = in.read(buf)) != -1)) {
         downloaded += length;
         out.write(buf, 0, length);
-
         if(expectedSize != -1)
           progressPanel.downloadProgress((downloaded * 100) / expectedSize);
       }
-
       out.flush();
-
     } finally {
       progressPanel.downloadFinished();
       if(out != null) out.close();
@@ -803,27 +678,22 @@ public class PluginUpdateManager extends JDialog {
       tabs.setSelectedIndex(0);
       installed.reInit();
       loadData();
-
       if(userPluginDir == null
-              && !Gate.getUserConfig().getBoolean(SUPPRESS_USER_PLUGINS)) {
+          && !Gate.getUserConfig().getBoolean(SUPPRESS_USER_PLUGINS)) {
         JOptionPane
-                .showMessageDialog(
-                        owner,
-                        "<html><body style='width: 350px;'><b>The user plugin folder has not yet been configured!</b><br><br>"
-                                + "In order to install new CREOLE plugins you must choose a user plugins folder. "
-                                + "This can be achieved from the Configuration tab of the CREOLE Plugin Manager.",
-                        "CREOLE Plugin Manager",
-                        JOptionPane.INFORMATION_MESSAGE, new UserPluginIcon(48,
-                                48));
-
+            .showMessageDialog(
+                owner,
+                "<html><body style='width: 350px;'><b>The user plugin folder has not yet been configured!</b><br><br>"
+                    + "In order to install new CREOLE plugins you must choose a user plugins folder. "
+                    + "This can be achieved from the Configuration tab of the CREOLE Plugin Manager.",
+                "CREOLE Plugin Manager", JOptionPane.INFORMATION_MESSAGE,
+                new UserPluginIcon(48, 48));
       }
     }
-
     super.setVisible(visible);
   }
 
   private static class PluginTableModel extends AbstractTableModel {
-
     private int columns;
 
     private List<CreolePlugin> data = new ArrayList<CreolePlugin>();
@@ -844,20 +714,18 @@ public class PluginUpdateManager extends JDialog {
 
     @Override
     public Object getValueAt(int row, int column) {
-
       CreolePlugin plugin = data.get(row);
-
       switch(column){
         case 0:
           return plugin.install;
         case 1:
           return "<html><body>"
-                  + plugin.getName()
-                  + plugin.compatabilityInfo()
-                  + (plugin.description != null
-                          ? "<br><span style='font-size: 80%;'>"
-                                  + plugin.description + "</span>"
-                          : "") + "</body></html>";
+              + plugin.getName()
+              + plugin.compatabilityInfo()
+              + (plugin.description != null
+                  ? "<br><span style='font-size: 80%;'>" + plugin.description
+                      + "</span>"
+                  : "") + "</body></html>";
         case 2:
           return plugin.version;
         case 3:
@@ -870,14 +738,12 @@ public class PluginUpdateManager extends JDialog {
     @Override
     public boolean isCellEditable(int row, int column) {
       if(column != 0) return false;
-
       return data.get(row).compatible;
     }
 
     @Override
     public void setValueAt(Object value, int row, int column) {
       CreolePlugin plugin = data.get(row);
-
       plugin.install = (Boolean)value;
     }
 
@@ -931,7 +797,6 @@ public class PluginUpdateManager extends JDialog {
   }
 
   private class UpdateSiteModel extends AbstractTableModel {
-
     private transient Icon icoSite = new UpdateSiteIcon(32, 32);
 
     private transient Icon icoInvalid = new InvalidIcon(32, 32);
@@ -995,7 +860,6 @@ public class PluginUpdateManager extends JDialog {
     @Override
     public Object getValueAt(int row, int column) {
       RemoteUpdateSite site = updateSites.get(row);
-
       switch(column){
         case 0:
           if(site.valid != null && !site.valid) return icoInvalid;
@@ -1005,8 +869,8 @@ public class PluginUpdateManager extends JDialog {
           return site.enabled;
         case 2:
           return "<html><body>" + site.name
-                  + "<br><span style='font-size: 80%;'>" + site.url
-                  + "</span></body></html>";
+              + "<br><span style='font-size: 80%;'>" + site.url
+              + "</span></body></html>";
         default:
           return null;
       }
