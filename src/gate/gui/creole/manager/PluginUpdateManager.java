@@ -145,7 +145,7 @@ public class PluginUpdateManager extends JDialog {
   private void saveConfig() {
     Map<String, String> sites = new HashMap<String, String>();
     for(RemoteUpdateSite rus : updateSites) {
-      sites.put((rus.enabled ? "1" : "0") + rus.url.toString(), rus.name);
+      sites.put((rus.enabled ? "1" : "0") + rus.uri.toString(), rus.name);
     }
     OptionsMap userConfig = Gate.getUserConfig();
     userConfig.put(GATE_UPDATE_SITES, sites);
@@ -380,13 +380,13 @@ public class PluginUpdateManager extends JDialog {
     }
     
     if(updateSites.size() == 0) {
-      try {
+      /*try {
         // TODO we need to change this to something more sensible
         updateSites.add(new RemoteUpdateSite("Default Test Site", new URI(
             "http://greenwoodma.servehttp.com/gate-plugins/"), true));
       } catch(URISyntaxException e) {
         // this can never happen!
-      }
+      }*/
     }
     
     setTitle("CREOLE Plugin Manager");
@@ -555,7 +555,7 @@ public class PluginUpdateManager extends JDialog {
         if(row == -1) return;
         RemoteUpdateSite site = updateSites.get(row);
         txtName.setText(site.name);
-        txtURL.setText(site.url.toString());
+        txtURL.setText(site.uri.toString());
         if(JOptionPane.showConfirmDialog(PluginUpdateManager.this, pnlEdit,
             "Update Site Info", JOptionPane.OK_CANCEL_OPTION,
             JOptionPane.QUESTION_MESSAGE, new UpdateSiteIcon(48, 48)) != JOptionPane.OK_OPTION)
@@ -564,8 +564,8 @@ public class PluginUpdateManager extends JDialog {
         if(txtURL.getText().trim().equals("")) return;
         try {
           URI url = new URI(txtURL.getText().trim());
-          if(!url.equals(site.url)) {
-            site.url = url;
+          if(!url.equals(site.uri)) {
+            site.uri = url;
             site.plugins = null;
           }
           site.name = txtName.getText().trim();
@@ -863,13 +863,13 @@ public class PluginUpdateManager extends JDialog {
       switch(column){
         case 0:
           if(site.valid != null && !site.valid) return icoInvalid;
-          if(site.url.getHost().equals("gate.ac.uk")) return icoGATE;
+          if(site.uri.getHost().equals("gate.ac.uk")) return icoGATE;
           return icoSite;
         case 1:
           return site.enabled;
         case 2:
           return "<html><body>" + site.name
-              + "<br><span style='font-size: 80%;'>" + site.url
+              + "<br><span style='font-size: 80%;'>" + site.uri
               + "</span></body></html>";
         default:
           return null;

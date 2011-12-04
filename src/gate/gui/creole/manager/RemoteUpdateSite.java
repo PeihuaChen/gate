@@ -24,9 +24,7 @@ import com.thoughtworks.xstream.XStream;
 
 public class RemoteUpdateSite {
 
-  // TODO can we do this with URI instead so that we don't block on non-exist
-  // URLs, or ones that are timing out etc.
-  protected URI url;
+  protected URI uri;
 
   protected String name;
   
@@ -36,9 +34,9 @@ public class RemoteUpdateSite {
 
   protected transient List<CreolePlugin> plugins = null;
 
-  public RemoteUpdateSite(String name, URI url, boolean enabled) {
+  public RemoteUpdateSite(String name, URI uri, boolean enabled) {
     this.name = name;
-    this.url = url;
+    this.uri = uri;
     this.enabled = enabled;
   }
   
@@ -60,7 +58,7 @@ public class RemoteUpdateSite {
       xs.useAttributeFor(CreolePlugin.class, "gateMin");
       xs.useAttributeFor(CreolePlugin.class, "gateMax");
 
-      URLConnection conn = (new URL(url.toURL(), "site.xml")).openConnection();
+      URLConnection conn = (new URL(uri.toURL(), "site.xml")).openConnection();
       conn.setConnectTimeout(5000);
       conn.setReadTimeout(5000);
 
@@ -78,8 +76,7 @@ public class RemoteUpdateSite {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((name == null) ? 0 : name.hashCode());
-    result = prime * result + ((url == null) ? 0 : url.hashCode());
+    result = prime * result + ((uri == null) ? 0 : uri.hashCode());
     return result;
   }
 
@@ -89,12 +86,9 @@ public class RemoteUpdateSite {
     if(obj == null) return false;
     if(getClass() != obj.getClass()) return false;
     RemoteUpdateSite other = (RemoteUpdateSite)obj;
-    if(name == null) {
-      if(other.name != null) return false;
-    } else if(!name.equals(other.name)) return false;
-    if(url == null) {
-      if(other.url != null) return false;
-    } else if(!url.equals(other.url)) return false;
+    if(uri == null) {
+      if(other.uri != null) return false;
+    } else if(!uri.equals(other.uri)) return false;
     return true;
   }
 }
