@@ -279,7 +279,7 @@ public class PluginUpdateManager extends JDialog {
           Expander expander = new Expander();
           expander.setOverwrite(true);
           expander.setDest(getUserPluginsHome());
-
+          
           // store the list of failed plugins
           List<CreolePlugin> failed = new ArrayList<CreolePlugin>();
 
@@ -327,10 +327,7 @@ public class PluginUpdateManager extends JDialog {
               try {
 
                 // download the new version
-                // TODO download this into the tmp directory
-                File downloaded =
-                        new File("pluigin-" + System.currentTimeMillis()
-                                + ".zip");
+                File downloaded = File.createTempFile("gate-plugin", ".zip");                
                 downloadFile(p.getName(), p.downloadURL, downloaded);
 
                 // try to rename the existing plugin folder
@@ -377,9 +374,7 @@ public class PluginUpdateManager extends JDialog {
                               + p.getName());
               try {
                 // download the zip file
-                File downloaded =
-                        new File("pluigin-" + System.currentTimeMillis()
-                                + ".zip");
+                File downloaded = File.createTempFile("gate-plugin", ".zip");
                 downloadFile(p.getName(), p.downloadURL, downloaded);
 
                 // unpack it into the right place
