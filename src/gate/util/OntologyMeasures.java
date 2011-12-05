@@ -418,28 +418,28 @@ public class OntologyMeasures {
       double beta = Double.valueOf(
         measure.substring(1,measure.indexOf('-')));
       if (measure.endsWith("strict")) {
-        row.add(f.format(differ.getRecallStrict()));
         row.add(f.format(differ.getPrecisionStrict()));
+        row.add(f.format(differ.getRecallStrict()));
         row.add(f.format(differ.getFMeasureStrict(beta)));
       } else if (measure.endsWith("strict BDM")) {
-        row.add(f.format(getRecallStrictBdm()));
         row.add(f.format(getPrecisionStrictBdm()));
+        row.add(f.format(getRecallStrictBdm()));
         row.add(f.format(getFMeasureStrictBdm(beta)));
       } else if (measure.endsWith("lenient")) {
-        row.add(f.format(differ.getRecallLenient()));
         row.add(f.format(differ.getPrecisionLenient()));
+        row.add(f.format(differ.getRecallLenient()));
         row.add(f.format(differ.getFMeasureLenient(beta)));
       } else if (measure.endsWith("lenient BDM")) {
-        row.add(f.format(getRecallLenientBdm()));
         row.add(f.format(getPrecisionLenientBdm()));
+        row.add(f.format(getRecallLenientBdm()));
         row.add(f.format(getFMeasureLenientBdm(beta)));
       } else if (measure.endsWith("average")) {
-        row.add(f.format(differ.getRecallAverage()));
         row.add(f.format(differ.getPrecisionAverage()));
+        row.add(f.format(differ.getRecallAverage()));
         row.add(f.format(differ.getFMeasureAverage(beta)));
       } else if (measure.endsWith("average BDM")) {
-        row.add(f.format(getRecallAverageBdm()));
         row.add(f.format(getPrecisionAverageBdm()));
+        row.add(f.format(getRecallAverageBdm()));
         row.add(f.format(getFMeasureAverageBdm(beta)));
       }
     }

@@ -1316,28 +1316,28 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       double beta = (index == -1) ?
         1 : Double.valueOf(measure.substring(1, index));
       if (measure.endsWith("strict")) {
-        values.add(f.format(differ.getRecallStrict()));
         values.add(f.format(differ.getPrecisionStrict()));
+        values.add(f.format(differ.getRecallStrict()));
         values.add(f.format(differ.getFMeasureStrict(beta)));
       } else if (measure.endsWith("strict BDM")) {
-        values.add(f.format(ontologyMeasures.getRecallStrictBdm()));
         values.add(f.format(ontologyMeasures.getPrecisionStrictBdm()));
+        values.add(f.format(ontologyMeasures.getRecallStrictBdm()));
         values.add(f.format(ontologyMeasures.getFMeasureStrictBdm(beta)));
       } else if (measure.endsWith("lenient")) {
-        values.add(f.format(differ.getRecallLenient()));
         values.add(f.format(differ.getPrecisionLenient()));
+        values.add(f.format(differ.getRecallLenient()));
         values.add(f.format(differ.getFMeasureLenient(beta)));
       } else if (measure.endsWith("lenient BDM")) {
-        values.add(f.format(ontologyMeasures.getRecallLenientBdm()));
         values.add(f.format(ontologyMeasures.getPrecisionLenientBdm()));
+        values.add(f.format(ontologyMeasures.getRecallLenientBdm()));
         values.add(f.format(ontologyMeasures.getFMeasureLenientBdm(beta)));
       } else if (measure.endsWith("average")) {
-        values.add(f.format(differ.getRecallAverage()));
         values.add(f.format(differ.getPrecisionAverage()));
+        values.add(f.format(differ.getRecallAverage()));
         values.add(f.format(differ.getFMeasureAverage(beta)));
       } else if (measure.endsWith("average BDM")) {
-        values.add(f.format(ontologyMeasures.getRecallAverageBdm()));
         values.add(f.format(ontologyMeasures.getPrecisionAverageBdm()));
+        values.add(f.format(ontologyMeasures.getRecallAverageBdm()));
         values.add(f.format(ontologyMeasures.getFMeasureAverageBdm(beta)));
       } else if (measure.equals("Observed agreement")) {
         values.add(f.format(classificationMeasures.getObservedAgreement()));
@@ -1418,10 +1418,10 @@ public class CorpusQualityAssurance extends AbstractVisualResource
             .replaceFirst("score lenient", "l.")
             .replaceFirst("score average", "a.")
             .replaceFirst(" BDM", "B.");
-          documentTableModel.addColumn("Rec.B/A");
-          annotationTableModel.addColumn("Rec.B/A");
           documentTableModel.addColumn("Prec.B/A");
           annotationTableModel.addColumn("Prec.B/A");
+          documentTableModel.addColumn("Rec.B/A");
+          annotationTableModel.addColumn("Rec.B/A");
           documentTableModel.addColumn(measureString);
           annotationTableModel.addColumn(measureString);
         }
