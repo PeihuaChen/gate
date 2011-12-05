@@ -49,14 +49,8 @@ public class RemoteUpdateSite {
         xs.setClassLoader(RemoteUpdateSite.class.getClassLoader());
         xs.alias("UpdateSite", List.class);
         xs.alias("CreolePlugin", CreolePlugin.class);
-        xs.useAttributeFor(CreolePlugin.class, "id");
-        xs.useAttributeFor(CreolePlugin.class, "description");
-        xs.useAttributeFor(CreolePlugin.class, "version");
-        xs.useAttributeFor(CreolePlugin.class, "downloadURL");
         xs.useAttributeFor(CreolePlugin.class, "url");
-        xs.useAttributeFor(CreolePlugin.class, "gateMin");
-        xs.useAttributeFor(CreolePlugin.class, "gateMax");
-
+        
         URLConnection conn =
                 (new URL(uri.toURL(), "site.xml")).openConnection();
         conn.setConnectTimeout(5000);
