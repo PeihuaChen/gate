@@ -852,16 +852,16 @@ public class AnnotationDiffer {
       double beta = Double.valueOf(
         measure.substring(1,measure.indexOf('-')));
       if (measure.endsWith("strict")) {
-        row.add(f.format(getRecallStrict()));
         row.add(f.format(getPrecisionStrict()));
+        row.add(f.format(getRecallStrict()));
         row.add(f.format(getFMeasureStrict(beta)));
       } else if (measure.endsWith("lenient")) {
-        row.add(f.format(getRecallLenient()));
         row.add(f.format(getPrecisionLenient()));
+        row.add(f.format(getRecallLenient()));
         row.add(f.format(getFMeasureLenient(beta)));
       } else if (measure.endsWith("average")) {
-        row.add(f.format(getRecallAverage()));
         row.add(f.format(getPrecisionAverage()));
+        row.add(f.format(getRecallAverage()));
         row.add(f.format(getFMeasureAverage(beta)));
       }
     }
