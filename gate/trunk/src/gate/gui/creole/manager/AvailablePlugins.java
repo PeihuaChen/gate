@@ -18,6 +18,7 @@
 package gate.gui.creole.manager;
 
 import gate.Gate;
+import gate.Gate.ResourceInfo;
 import gate.gui.MainFrame;
 import gate.resources.img.svg.AddIcon;
 import gate.resources.img.svg.AvailableIcon;
@@ -176,7 +177,16 @@ public class AvailablePlugins extends JPanel {
     resourcesListModel = new ResourcesListModel();
     resourcesList = new JList(resourcesListModel);
     resourcesList.setCellRenderer(new ResourcesListCellRenderer());
+
+    // this is needed because otherwise the list gets really narrow most of the
+    // time. Strangely if we don't use a custom cell renderer it works fine so
+    // that must be where the actual bug is
+    ResourceInfo prototype =
+            new ResourceInfo("A rather silly long resource name",
+                    "java.lang.String", "this is a comment");
+    resourcesList.setPrototypeCellValue(prototype);
     resourcesList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
     // enable tooltips
     ToolTipManager.sharedInstance().registerComponent(resourcesList);
 
