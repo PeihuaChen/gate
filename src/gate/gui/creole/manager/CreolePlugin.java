@@ -54,11 +54,9 @@ public class CreolePlugin {
       } catch(Exception e) {
         throw new RuntimeException(e);
       }
+    } else {
+      throw new RuntimeException("CREOLE Directory URL Must Be Specified!");
     }
-
-    compatible = VersionComparator.isCompatible(gateMin, gateMax);
-
-    return this;
   }
 
   @Override
@@ -124,6 +122,7 @@ public class CreolePlugin {
     compatible = VersionComparator.isCompatible(this.gateMin, this.gateMax);
   }
 
+  @Override
   public String toString() {
     return getName() + " v" + version;
   }
