@@ -52,7 +52,9 @@ import gate.creole.*;
 import gate.creole.gazetteer.Gazetteer;
 import gate.creole.annic.Constants;
 import gate.event.*;
+import gate.gui.creole.manager.PluginUpdateManager;
 import gate.persist.PersistenceException;
+import gate.resources.img.svg.AvailableIcon;
 import gate.security.*;
 import gate.swing.*;
 import gate.util.*;
@@ -126,7 +128,8 @@ public class MainFrame extends JFrame implements ProgressListener,
 
   protected Splash splash;
 
-  protected PluginManagerUI pluginManager;
+  //protected PluginManagerUI pluginManager;
+  protected PluginUpdateManager pluginManager;
 
   protected LogArea logArea;
 
@@ -2745,19 +2748,19 @@ public class MainFrame extends JFrame implements ProgressListener,
       super("Manage CREOLE Plugins");
       putValue(SHORT_DESCRIPTION,
         "Load, unload, add and remove CREOLE plugins");
-      putValue(SMALL_ICON, getIcon("creole-plugins"));
+      putValue(SMALL_ICON, new AvailableIcon(24,24));
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       if(pluginManager == null) {
-        pluginManager = new PluginManagerUI(MainFrame.this);
+        /*pluginManager = new PluginManagerUI(MainFrame.this);
         // pluginManager.setLocationRelativeTo(MainFrame.this);
         pluginManager.setModal(true);
         getGuiRoots().add(pluginManager);
         pluginManager.pack();
         // size the window so that it doesn't go off-screen
-        Dimension screenSize = /* Toolkit.getDefaultToolkit().getScreenSize(); */
-        getGraphicsConfiguration().getBounds().getSize();
+        Dimension screenSize = getGraphicsConfiguration().getBounds().getSize();
         Dimension dialogSize = pluginManager.getPreferredSize();
         int width =
           dialogSize.width > screenSize.width
@@ -2772,12 +2775,14 @@ public class MainFrame extends JFrame implements ProgressListener,
         // center the window on screen
         int x = (screenSize.width - width) / 2;
         int y = (screenSize.height - height) / 2;
-        pluginManager.setLocation(x, y);
+        pluginManager.setLocation(x, y);*/
+        pluginManager = new PluginUpdateManager(MainFrame.this);
       }
-      fileChooser.setResource(PluginManagerUI.class.getName());
+      /*fileChooser.setResource(PluginManagerUI.class.getName());
       pluginManager.setVisible(true);
       // free resources after the dialog is hidden
-      pluginManager.dispose();
+      pluginManager.dispose();*/
+      pluginManager.setVisible(true);
     }
   }
 
