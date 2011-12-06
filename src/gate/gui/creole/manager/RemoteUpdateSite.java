@@ -51,8 +51,7 @@ public class RemoteUpdateSite {
         xs.alias("CreolePlugin", CreolePlugin.class);
         xs.useAttributeFor(CreolePlugin.class, "url");
         
-        URLConnection conn =
-                (new URL(uri.toURL(), "site.xml")).openConnection();
+        URLConnection conn = uri.toURL().openConnection();
         conn.setConnectTimeout(5000);
         conn.setReadTimeout(5000);
 
