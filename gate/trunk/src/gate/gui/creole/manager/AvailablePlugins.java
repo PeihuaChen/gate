@@ -805,14 +805,18 @@ public class AvailablePlugins extends JPanel {
     };
 
     private int column;
+    
+    private boolean updating = false;
 
     public void update() {
       
-      //TODO return if we are already in the process of updating
+      if (updating) return;
       
+      updating = true;
+            
       TableColumn col = table.getColumnModel().getColumn(table.convertColumnIndexToView((column)));
 
-      int selected = 0, deselected = 0;
+      int selected = 0;
       TableModel m = table.getModel();
       for(int i = 0; i < m.getRowCount(); i++) {
         if(Boolean.TRUE.equals(m.getValueAt(i, column))) {
@@ -829,6 +833,8 @@ public class AvailablePlugins extends JPanel {
       }
 
       table.getTableHeader().repaint();
+      
+      updating = false;
 
     }
 
@@ -836,10 +842,10 @@ public class AvailablePlugins extends JPanel {
       super();
       this.column = column;
       this.table = table;
-      
-      //force the text to be to the right of the icon
+
+      // force the text to be to the right of the icon
       this.setHorizontalTextPosition(TRAILING);
-      
+
       setOpaque(true);
 
       table.getTableHeader().addMouseListener(new MouseAdapter() {
@@ -848,25 +854,25 @@ public class AvailablePlugins extends JPanel {
 
           JTableHeader header = (JTableHeader)e.getSource();
 
-            TableColumnModel columnModel = table.getColumnModel();
-            int vci = columnModel.getColumnIndexAtX(e.getX());
-            int mci = table.convertColumnIndexToModel(vci);
-            if(mci == column) {
-              if(e.getX() <= header.getHeaderRect(vci).x + icon.getIconWidth()) {
+          TableColumnModel columnModel = table.getColumnModel();
+          int vci = columnModel.getColumnIndexAtX(e.getX());
+          int mci = table.convertColumnIndexToModel(vci);
+          if(mci == column) {
+            if(e.getX() <= header.getHeaderRect(vci).x + icon.getIconWidth()) {
               TableColumn column = columnModel.getColumn(vci);
               Object v = column.getHeaderValue();
               boolean b = Status.DESELECTED.equals(v) ? true : false;
-              if (!b) {
-              TableModel m = table.getModel();
-              for(int i = 0; i < m.getRowCount(); i++)
-                m.setValueAt(b, i, mci);
-              column.setHeaderValue(b ? Status.SELECTED : Status.DESELECTED);
+              if(!b) {
+                TableModel m = table.getModel();
+                for(int i = 0; i < m.getRowCount(); i++)
+                  m.setValueAt(b, i, mci);
+                column.setHeaderValue(b ? Status.SELECTED : Status.DESELECTED);
               }
               header.repaint();
-              }
             }
           }
-        });
+        }
+      });
 
       table.getModel().addTableModelListener(new TableModelListener() {
         @Override
