@@ -11,6 +11,7 @@
  * 
  * Mark A. Greenwood, 29/10/2011
  */
+
 package gate.gui.creole.manager;
 
 import gate.Gate;
