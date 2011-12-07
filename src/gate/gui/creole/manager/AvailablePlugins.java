@@ -36,10 +36,15 @@ import gate.util.GateException;
 import gate.util.GateRuntimeException;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -64,6 +69,7 @@ import javax.swing.GroupLayout;
 import javax.swing.Icon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -78,13 +84,21 @@ import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
+import javax.swing.UIManager;
+import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
 
 @SuppressWarnings("serial")
 public class AvailablePlugins extends JPanel {
@@ -162,6 +176,7 @@ public class AvailablePlugins extends JPanel {
     mainTable.setTabSkipUneditableCell(true);
     mainTable.setModel(mainTableModel);
     mainTable.setSortedColumn(NAME_COLUMN);
+
     Collator collator = Collator.getInstance(Locale.ENGLISH);
     collator.setStrength(Collator.TERTIARY);
     mainTable.setComparator(NAME_COLUMN, collator);
@@ -173,6 +188,12 @@ public class AvailablePlugins extends JPanel {
             .setCellRenderer(cbCellRenderer);
     mainTable.getColumnModel().getColumn(LOAD_NOW_COLUMN)
             .setCellRenderer(cbCellRenderer);
+    
+    mainTable.getColumnModel().getColumn(LOAD_ALWAYS_COLUMN)
+            .setHeaderRenderer(new SelectAllHeaderRenderer(mainTable, LOAD_ALWAYS_COLUMN));
+    
+    mainTable.getColumnModel().getColumn(LOAD_NOW_COLUMN)
+    .setHeaderRenderer(new SelectAllHeaderRenderer(mainTable, LOAD_NOW_COLUMN));
 
     resourcesListModel = new ResourcesListModel();
     resourcesList = new JList(resourcesListModel);
@@ -465,16 +486,37 @@ public class AvailablePlugins extends JPanel {
       Gate.DirectoryInfo dInfo =
               Gate.getDirectoryInfo(visibleRows.get(rowIndex));
       if(dInfo == null) { return; }
+      
+      SelectAllHeaderRenderer renderer = null;
+      
       switch(columnIndex){
         case LOAD_NOW_COLUMN:
           loadNowByURL.put(dInfo.getUrl(), valueBoolean);
           // for some reason the focus is sometime lost after editing
           // however it is needed for Enter key to execute OkAction
           mainTable.requestFocusInWindow();
+          
+          renderer =
+                  (SelectAllHeaderRenderer)mainTable
+                          .getColumnModel()
+                          .getColumn(
+                                  mainTable
+                                          .convertColumnIndexToView(LOAD_NOW_COLUMN))
+                          .getHeaderRenderer();
+          renderer.update();
           break;
         case LOAD_ALWAYS_COLUMN:
           loadAlwaysByURL.put(dInfo.getUrl(), valueBoolean);
           mainTable.requestFocusInWindow();
+
+          renderer =
+                  (SelectAllHeaderRenderer)mainTable
+                          .getColumnModel()
+                          .getColumn(
+                                  mainTable
+                                          .convertColumnIndexToView(LOAD_ALWAYS_COLUMN))
+                          .getHeaderRenderer();
+          renderer.update();
           break;
       }
     }
@@ -730,6 +772,167 @@ public class AvailablePlugins extends JPanel {
                                 + "The URL you specified is not valid. Please check the URL and try again.</body></html>",
                         "CREOLE Plugin Manager", JOptionPane.ERROR_MESSAGE);
       }
+    }
+  }
+
+  static class SelectAllHeaderRenderer extends DefaultTableCellRenderer {
+
+    enum Status {
+      SELECTED, DESELECTED, INDETERMINATE
+    }
+
+    private JCheckBox checkBox = new JCheckBox();
+
+    private JTable table;
+
+    private Icon icon = new Icon() {
+
+      @Override
+      public int getIconWidth() {
+        return checkBox.getPreferredSize().width;
+      }
+
+      @Override
+      public int getIconHeight() {
+        return checkBox.getPreferredSize().height;
+      }
+
+      @Override
+      public void paintIcon(Component c, Graphics g, int x, int y) {
+        SwingUtilities.paintComponent(g, checkBox, (Container)c, x, y,
+                getIconWidth(), getIconHeight());
+      }
+    };
+
+    private int column;
+
+    public void update() {
+      
+      TableColumn col = table.getColumnModel().getColumn(table.convertColumnIndexToView((column)));
+
+      int selected = 0, deselected = 0;
+      TableModel m = table.getModel();
+      for(int i = 0; i < m.getRowCount(); i++) {
+        if(Boolean.TRUE.equals(m.getValueAt(i, column))) {
+          selected++;
+        }
+      }
+
+      if(selected == 0) {
+        col.setHeaderValue(SelectAllHeaderRenderer.Status.DESELECTED);
+      } else if(selected == table.getRowCount()) {
+        col.setHeaderValue(SelectAllHeaderRenderer.Status.SELECTED);
+      } else {
+        col.setHeaderValue(SelectAllHeaderRenderer.Status.INDETERMINATE);
+      }
+
+      table.getTableHeader().repaint();
+
+    }
+
+    public SelectAllHeaderRenderer(final JTable table, final int column) {
+      super();
+      this.column = column;
+      this.table = table;
+      
+      //force the text to be to the right of the icon
+      this.setHorizontalTextPosition(TRAILING);
+      
+      setOpaque(true);
+
+      table.getTableHeader().addMouseListener(new MouseAdapter() {
+        @Override
+        public void mouseClicked(MouseEvent e) {
+
+          JTableHeader header = (JTableHeader)e.getSource();
+
+            TableColumnModel columnModel = table.getColumnModel();
+            int vci = columnModel.getColumnIndexAtX(e.getX());
+            int mci = table.convertColumnIndexToModel(vci);
+            if(mci == column) {
+              if(e.getX() <= header.getHeaderRect(vci).x + icon.getIconWidth()) {
+              TableColumn column = columnModel.getColumn(vci);
+              Object v = column.getHeaderValue();
+              boolean b = Status.DESELECTED.equals(v) ? true : false;
+              TableModel m = table.getModel();
+              for(int i = 0; i < m.getRowCount(); i++)
+                m.setValueAt(b, i, mci);
+              column.setHeaderValue(b ? Status.SELECTED : Status.DESELECTED);
+              header.repaint();
+              }
+            }
+          }
+        });
+
+      table.getModel().addTableModelListener(new TableModelListener() {
+        @Override
+        public void tableChanged(TableModelEvent e) {
+          update();
+        }
+      });
+
+      update();
+    }
+
+    @Override
+    public Component getTableCellRendererComponent(JTable table, Object val,
+            boolean isSelected, boolean hasFocus, int row, int col) {
+      super.getTableCellRendererComponent(table, table.getModel()
+              .getColumnName(column), isSelected, hasFocus, row, col);
+
+      JTableHeader header = table.getTableHeader();
+      if(header != null) {
+        Color fgColor = null;
+        Color bgColor = null;
+        if(hasFocus) {
+          fgColor = UIManager.getColor("TableHeader.focusCellForeground");
+          bgColor = UIManager.getColor("TableHeader.focusCellBackground");
+        }
+        if(fgColor == null) {
+          fgColor = header.getForeground();
+        }
+        if(bgColor == null) {
+          bgColor = header.getBackground();
+        }
+        setForeground(fgColor);
+        setBackground(bgColor);
+
+        setFont(header.getFont());
+      }
+
+      if(val instanceof Status) {
+        switch((Status)val){
+          case SELECTED:
+            checkBox.setSelected(true);
+            checkBox.setEnabled(true);
+            break;
+          case DESELECTED:
+            checkBox.setSelected(false);
+            checkBox.setEnabled(true);
+            break;
+          case INDETERMINATE:
+            checkBox.setSelected(true);
+            checkBox.setEnabled(false);
+            break;
+        }
+      } else {
+        checkBox.setSelected(true);
+        checkBox.setEnabled(false);
+      }
+
+      setIcon(icon);
+
+      Border border = null;
+      if(hasFocus) {
+        border = UIManager.getBorder("TableHeader.focusCellBorder");
+      }
+      if(border == null) {
+        border = UIManager.getBorder("TableHeader.cellBorder");
+      }
+
+      setBorder(border);
+
+      return this;
     }
   }
 }
