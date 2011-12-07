@@ -808,6 +808,8 @@ public class AvailablePlugins extends JPanel {
 
     public void update() {
       
+      //TODO return if we are already in the process of updating
+      
       TableColumn col = table.getColumnModel().getColumn(table.convertColumnIndexToView((column)));
 
       int selected = 0, deselected = 0;
@@ -854,10 +856,12 @@ public class AvailablePlugins extends JPanel {
               TableColumn column = columnModel.getColumn(vci);
               Object v = column.getHeaderValue();
               boolean b = Status.DESELECTED.equals(v) ? true : false;
+              if (!b) {
               TableModel m = table.getModel();
               for(int i = 0; i < m.getRowCount(); i++)
                 m.setValueAt(b, i, mci);
               column.setHeaderValue(b ? Status.SELECTED : Status.DESELECTED);
+              }
               header.repaint();
               }
             }
@@ -912,7 +916,7 @@ public class AvailablePlugins extends JPanel {
             break;
           case INDETERMINATE:
             checkBox.setSelected(true);
-            checkBox.setEnabled(false);
+            checkBox.setEnabled(true);
             break;
         }
       } else {
