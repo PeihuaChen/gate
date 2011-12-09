@@ -80,6 +80,9 @@ public class HashGazetteer extends AbstractGazetteer {
     annotationSet = document.getAnnotations(annotationSetName);
 
     String s = document.getContent().toString() + " ";
+    if(!super.caseSensitive.booleanValue()) {
+      s = s.toUpperCase();
+    }
 
     int i = s.length();
     int j = 0;
