@@ -30,7 +30,6 @@ import gate.resources.img.svg.RemoveIcon;
 import gate.resources.img.svg.ResetIcon;
 import gate.resources.img.svg.UserPluginIcon;
 import gate.swing.CheckBoxTableCellRenderer;
-import gate.swing.SelectAllHeaderRenderer;
 import gate.swing.XJFileChooser;
 import gate.swing.XJTable;
 import gate.util.GateException;
@@ -41,7 +40,6 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -87,10 +85,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableModel;
 
 @SuppressWarnings("serial")
 public class AvailablePlugins extends JPanel {
@@ -181,12 +175,6 @@ public class AvailablePlugins extends JPanel {
     mainTable.getColumnModel().getColumn(LOAD_NOW_COLUMN)
             .setCellRenderer(cbCellRenderer);
     
-    mainTable.getColumnModel().getColumn(LOAD_ALWAYS_COLUMN)
-            .setHeaderRenderer(new LoadHeaderRenderer(mainTable, LOAD_ALWAYS_COLUMN));
-    
-    mainTable.getColumnModel().getColumn(LOAD_NOW_COLUMN)
-    .setHeaderRenderer(new LoadHeaderRenderer(mainTable, LOAD_NOW_COLUMN));
-
     resourcesListModel = new ResourcesListModel();
     resourcesList = new JList(resourcesListModel);
     resourcesList.setCellRenderer(new ResourcesListCellRenderer());
@@ -478,37 +466,17 @@ public class AvailablePlugins extends JPanel {
       Gate.DirectoryInfo dInfo =
               Gate.getDirectoryInfo(visibleRows.get(rowIndex));
       if(dInfo == null) { return; }
-      
-      SelectAllHeaderRenderer renderer = null;
-      
+            
       switch(columnIndex){
         case LOAD_NOW_COLUMN:
           loadNowByURL.put(dInfo.getUrl(), valueBoolean);
           // for some reason the focus is sometime lost after editing
           // however it is needed for Enter key to execute OkAction
           mainTable.requestFocusInWindow();
-          
-          renderer =
-                  (LoadHeaderRenderer)mainTable
-                          .getColumnModel()
-                          .getColumn(
-                                  mainTable
-                                          .convertColumnIndexToView(LOAD_NOW_COLUMN))
-                          .getHeaderRenderer();
-          renderer.update();
           break;
         case LOAD_ALWAYS_COLUMN:
           loadAlwaysByURL.put(dInfo.getUrl(), valueBoolean);
           mainTable.requestFocusInWindow();
-
-          renderer =
-                  (LoadHeaderRenderer)mainTable
-                          .getColumnModel()
-                          .getColumn(
-                                  mainTable
-                                          .convertColumnIndexToView(LOAD_ALWAYS_COLUMN))
-                          .getHeaderRenderer();
-          renderer.update();
           break;
       }
     }
@@ -764,36 +732,6 @@ public class AvailablePlugins extends JPanel {
                                 + "The URL you specified is not valid. Please check the URL and try again.</body></html>",
                         "CREOLE Plugin Manager", JOptionPane.ERROR_MESSAGE);
       }
-    }
-  }
-
-  private static class LoadHeaderRenderer extends SelectAllHeaderRenderer {
-    
-    @Override
-    public void clicked(MouseEvent e) {
-      JTableHeader header = (JTableHeader)e.getSource();
-
-      TableColumnModel columnModel = table.getColumnModel();
-      int viewColumn = columnModel.getColumnIndexAtX(e.getX());
-      int modelColumn = table.convertColumnIndexToModel(viewColumn);
-      if(modelColumn == column) {
-        if(e.getX() <= header.getHeaderRect(viewColumn).x + icon.getIconWidth()) {
-          TableColumn column = columnModel.getColumn(viewColumn);
-          Object v = column.getHeaderValue();
-          boolean b = Status.DESELECTED.equals(v) ? true : false;
-          if(!b) {
-            TableModel m = table.getModel();
-            for(int i = 0; i < m.getRowCount(); i++)
-              m.setValueAt(b, i, modelColumn);
-            column.setHeaderValue(b ? Status.SELECTED : Status.DESELECTED);
-          }
-          header.repaint();
-        }
-      }
-    }
-
-    public LoadHeaderRenderer(final JTable table, final int column) {
-      super(table,column);
     }
   }
 }
