@@ -86,6 +86,7 @@ public class LanguageIdentifier extends gate.creole.AbstractLanguageAnalyser {
       for(Annotation annotation : annotations) {
         String text = Utils.stringFor(document, annotation);
         String category = guesser.categorize(text);
+        System.out.println("\n"+text+"\n"+category+"\n"+guesser.getCategoryDistances(text));
         annotation.getFeatures().put(languageFeatureName, category);
       }
     }
