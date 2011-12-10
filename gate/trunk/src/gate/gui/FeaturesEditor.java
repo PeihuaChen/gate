@@ -170,7 +170,7 @@ public class FeaturesEditor extends AbstractVisualResource{
   XJTable table;
   FeaturesTableModel tableModel;
   private FeatureBearer resource;
-  FeatureMap features;
+  //FeatureMap features;
   JTextField newFeatureField;
   JTextField newValueField;
 
