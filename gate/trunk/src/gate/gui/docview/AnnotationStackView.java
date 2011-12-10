@@ -673,7 +673,6 @@ public class AnnotationStackView  extends AbstractDocumentView
   TextualDocumentView textView;
   AnnotationSetsView annotationSetsView;
   AnnotationListView annotationListView;
-  Document document;
 
   // user interface elements
   JLabel targetSetLabel;
