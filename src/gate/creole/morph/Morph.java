@@ -42,10 +42,6 @@ public class Morph
     extends AbstractLanguageAnalyser
     implements ProcessingResource, CustomDuplication {
 
-
-  /** Document to be processed by the morpher, must be provided at Runtime. */
-  protected gate.Document document;
-
   /** File which contains rules to be processed */
   protected URL rulesFile;
 
@@ -223,16 +219,6 @@ public class Morph
     fireProcessFinished();
   }
 
-  // getter and setter method
-  /**
-   * Sets the document to be processed
-   * @param document - document to be processed
-   */
-  public void setDocument(gate.Document document) {
-    this.document = document;
-  }
-
-
   /**
    * This method should only be called after init()
    * @param word
@@ -250,14 +236,6 @@ public class Morph
   public String findAffix(String word, String cat) {
     interpret.runMorpher(word, cat);
     return interpret.getAffix();
-  }
-
-
-  /**
-   * Returns the document under process
-   */
-  public gate.Document getDocument() {
-    return this.document;
   }
 
   /**

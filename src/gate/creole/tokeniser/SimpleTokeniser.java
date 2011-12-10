@@ -565,17 +565,6 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
     return res;
   } // getDFSMgml
 
-  //no doc required: javadoc will copy it from the interface
-  /**    */
-  public FeatureMap getFeatures(){
-    return features;
-  } // getFeatures
-
-  /**    */
-  public void setFeatures(FeatureMap features){
-    this.features = features;
-  } // setFeatures
-
   /**
    * The method that does the actual tokenisation.
    */
@@ -756,9 +745,6 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
   public String getEncoding() {
     return encoding;
   }
-
-  /**    */
-  protected FeatureMap features  = null;
 
   /** the annotations et where the new annotations will be adde
    */
