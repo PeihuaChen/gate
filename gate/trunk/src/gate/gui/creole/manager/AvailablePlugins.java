@@ -51,6 +51,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -174,7 +175,7 @@ public class AvailablePlugins extends JPanel {
             .setCellRenderer(cbCellRenderer);
     mainTable.getColumnModel().getColumn(LOAD_NOW_COLUMN)
             .setCellRenderer(cbCellRenderer);
-    
+
     resourcesListModel = new ResourcesListModel();
     resourcesList = new JList(resourcesListModel);
     resourcesList.setCellRenderer(new ResourcesListCellRenderer());
@@ -466,7 +467,7 @@ public class AvailablePlugins extends JPanel {
       Gate.DirectoryInfo dInfo =
               Gate.getDirectoryInfo(visibleRows.get(rowIndex));
       if(dInfo == null) { return; }
-            
+
       switch(columnIndex){
         case LOAD_NOW_COLUMN:
           loadNowByURL.put(dInfo.getUrl(), valueBoolean);
@@ -545,15 +546,43 @@ public class AvailablePlugins extends JPanel {
     }
   }
 
+  protected boolean unsavedChanges() {
+
+    @SuppressWarnings("unchecked")
+    Set<URL> creoleDirectories = Gate.getCreoleRegister().getDirectories();
+
+    Iterator<URL> pluginIter = loadNowByURL.keySet().iterator();
+    while(pluginIter.hasNext()) {
+      URL aPluginURL = pluginIter.next();
+      boolean load = loadNowByURL.get(aPluginURL);
+      boolean loaded = creoleDirectories.contains(aPluginURL);
+      if(load && !loaded) { return true; }
+      if(!load && loaded) { return true; }
+    }
+
+    pluginIter = loadAlwaysByURL.keySet().iterator();
+    while(pluginIter.hasNext()) {
+      URL aPluginURL = pluginIter.next();
+      boolean load = loadAlwaysByURL.get(aPluginURL);
+      boolean loaded = Gate.getAutoloadPlugins().contains(aPluginURL);
+      if(load && !loaded) { return true; }
+      if(!load && loaded) { return true; }
+    }
+
+    return false;
+  }
+
   protected void updateAvailablePlugins() {
+
+    @SuppressWarnings("unchecked")
+    Set<URL> creoleDirectories = Gate.getCreoleRegister().getDirectories();
 
     // update the data structures to reflect the user's choices
     Iterator<URL> pluginIter = loadNowByURL.keySet().iterator();
     while(pluginIter.hasNext()) {
       URL aPluginURL = pluginIter.next();
       boolean load = loadNowByURL.get(aPluginURL);
-      boolean loaded =
-              Gate.getCreoleRegister().getDirectories().contains(aPluginURL);
+      boolean loaded = creoleDirectories.contains(aPluginURL);
       if(load && !loaded) {
         // load the directory
         try {

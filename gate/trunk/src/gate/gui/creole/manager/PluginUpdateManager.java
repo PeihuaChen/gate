@@ -494,6 +494,36 @@ public class PluginUpdateManager extends JDialog {
     Action cancelAction = new AbstractAction("Close") {
       @Override
       public void actionPerformed(ActionEvent e) {
+
+        boolean changes = false;
+
+        for(CreolePlugin p : availableModel.data) {
+          changes = changes || p.install;
+          if(changes) break;
+        }
+
+        if(!changes) {
+          for(CreolePlugin p : updatesModel.data) {
+            changes = changes || p.install;
+            if(changes) break;
+          }
+        }
+        
+        if (!changes) changes = installed.unsavedChanges();
+
+        if(changes
+                && JOptionPane
+                        .showConfirmDialog(
+                                PluginUpdateManager.this,
+                                "<html><body style='width: 350px;'><b>Changes Have Not Yet Been Applied!</b><br><br>"
+                                        + "You have changed the CREOLE configuration but have not applied the changes. "
+                                        + "Would you like to apply your changes now?</body></html>",
+                                "CREOLE Plugin Manager",
+                                JOptionPane.YES_NO_OPTION,
+                                JOptionPane.QUESTION_MESSAGE) == JOptionPane.OK_OPTION) {
+          applyChanges();
+        }
+
         PluginUpdateManager.this.setVisible(false);
       }
     };
@@ -1045,17 +1075,16 @@ public class PluginUpdateManager extends JDialog {
       site.enabled = (Boolean)value;
       saveConfig();
 
-      if (site.enabled) {
-        //TODO can we do this without a complete reload?
+      if(site.enabled) {
+        // TODO can we do this without a complete reload?
         showProgressPanel(true);
         loadData();
-      }
-      else {
+      } else {
         availableModel.data.removeAll(site.getCreolePlugins());
         updatesModel.data.removeAll(site.getCreolePlugins());
         availableModel.dataChanged();
         updatesModel.dataChanged();
-        tabs.setEnabledAt(1, updatesModel.getRowCount()>0);
+        tabs.setEnabledAt(1, updatesModel.getRowCount() > 0);
       }
     }
 
