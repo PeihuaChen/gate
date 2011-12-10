@@ -13,16 +13,29 @@
  */
 package gate.creole;
 
-import java.lang.reflect.UndeclaredThrowableException;
-import java.util.*;
-
-import org.apache.log4j.Logger;
-
-import gate.*;
+import gate.Controller;
+import gate.Gate;
+import gate.ProcessingResource;
+import gate.Resource;
 import gate.creole.metadata.CreoleResource;
-import gate.event.*;
+import gate.event.ControllerEvent;
+import gate.event.ControllerListener;
+import gate.event.ProgressListener;
+import gate.event.StatusListener;
 import gate.util.Benchmark;
 import gate.util.Benchmarkable;
+
+import java.lang.reflect.UndeclaredThrowableException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
 
 @CreoleResource(icon = "application")
 public abstract class AbstractController extends AbstractResource 
@@ -343,16 +356,6 @@ public abstract class AbstractController extends AbstractResource
     return badPRs.isEmpty() ? null : badPRs;
   }
 
-  /** Sets the name of this resource */
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  /** Returns the name of this resource */
-  public String getName() {
-    return name;
-  }
-
   public synchronized void removeControllerListener(ControllerListener l) {
     if(controllerListeners != null && controllerListeners.contains(l)) {
       Vector v = (Vector)controllerListeners.clone();
@@ -370,8 +373,6 @@ public abstract class AbstractController extends AbstractResource
       controllerListeners = v;
     }
   }
-
-  protected String name;
 
   /**
    * The list of {@link gate.event.StatusListener}s registered with this
