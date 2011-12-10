@@ -289,7 +289,7 @@ public class POSTagger {
   protected String[] classifyWord(String wd){
     String[] result;
 
-    if (wd == staart) return staartLex;
+    if (staart.equals(wd)) return staartLex;
 
     List categories = (List)lexicon.get(wd);
     if(categories != null){
