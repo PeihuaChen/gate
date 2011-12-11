@@ -14,6 +14,7 @@
 
 package gate.gui.creole.manager;
 
+import gate.Gate;
 import gate.Main;
 import gate.util.VersionComparator;
 
@@ -49,6 +50,7 @@ public class CreolePlugin {
 
   private Object readResolve() {
     if(url != null) {
+      url = Gate.normaliseCreoleUrl(url);
       try {
         return load(new URL(url, "creole.xml"));
       } catch(Exception e) {
