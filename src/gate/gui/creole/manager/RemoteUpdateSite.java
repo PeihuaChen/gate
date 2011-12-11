@@ -56,6 +56,7 @@ public class RemoteUpdateSite {
 
         plugins = (List<CreolePlugin>)xs.fromXML(conn.getInputStream());
       } catch(Exception e) {
+        e.printStackTrace();
         valid = false;
         return Collections.EMPTY_LIST;
       }
