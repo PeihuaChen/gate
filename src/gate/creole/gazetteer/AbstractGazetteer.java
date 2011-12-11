@@ -32,9 +32,6 @@ public abstract class AbstractGazetteer
    * generated annotations*/
   protected String annotationSetName;
 
-  /** A map of the features */
-  protected FeatureMap features  = null;
-
   /** the encoding of the gazetteer */
   protected String encoding = "UTF-8";
 
@@ -144,16 +141,6 @@ public abstract class AbstractGazetteer
   public LinearDefinition getLinearDefinition() {
     return definition;
   }
-
-  /**     */
-  public FeatureMap getFeatures(){
-    return features;
-  } // getFeatures
-
-  /**     */
-  public void setFeatures(FeatureMap features){
-    this.features = features;
-  } // setFeatures
 
   public void reInit() throws ResourceInstantiationException {
     super.reInit();
