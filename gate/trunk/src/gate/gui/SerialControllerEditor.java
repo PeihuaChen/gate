@@ -15,37 +15,102 @@
 
 package gate.gui;
 
+import gate.Controller;
+import gate.Corpus;
+import gate.CorpusController;
+import gate.Gate;
+import gate.LanguageResource;
+import gate.ProcessingResource;
+import gate.Resource;
+import gate.creole.AbstractVisualResource;
+import gate.creole.AnalyserRunningStrategy;
+import gate.creole.ConditionalController;
+import gate.creole.ConditionalSerialAnalyserController;
+import gate.creole.ExecutionException;
+import gate.creole.ExecutionInterruptedException;
+import gate.creole.Parameter;
+import gate.creole.ResourceData;
+import gate.creole.ResourceInstantiationException;
+import gate.creole.RunningStrategy;
+import gate.creole.RunningStrategy.UnconditionalRunningStrategy;
+import gate.creole.SerialAnalyserController;
+import gate.creole.SerialController;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.GuiType;
+import gate.event.ControllerEvent;
+import gate.event.ControllerListener;
+import gate.event.CreoleEvent;
+import gate.event.CreoleListener;
+import gate.event.ProgressListener;
+import gate.event.StatusListener;
+import gate.swing.XJPopupMenu;
+import gate.swing.XJTable;
+import gate.util.Benchmark;
+import gate.util.Err;
+import gate.util.GateException;
+import gate.util.GateRuntimeException;
+import gate.util.NameComparator;
+
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.event.*;
-import java.text.NumberFormat;
-import java.util.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.AbstractButton;
+import javax.swing.AbstractListModel;
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.ComboBoxModel;
+import javax.swing.Icon;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.*;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
-
-import gate.*;
-import gate.creole.*;
-import gate.creole.RunningStrategy.UnconditionalRunningStrategy;
-import gate.creole.metadata.CreoleResource;
-import gate.creole.metadata.GuiType;
-import gate.event.*;
-import gate.swing.*;
-import gate.util.*;
 
 @CreoleResource(name = "Serial Application Editor", guiType = GuiType.LARGE,
     resourceDisplayed = "gate.creole.SerialController", mainViewer = true)
@@ -1622,13 +1687,8 @@ public class SerialControllerEditor extends AbstractVisualResource
     }
   }//InternalStatusListener
 
-
-
   /** The controller this editor edits */
   protected SerialController controller;
-
-  /** The {@link Handle} that created this view */
-  protected Handle handle;
 
   /**
    * The list of actions provided by this editor
