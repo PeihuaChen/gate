@@ -1220,7 +1220,7 @@ public class Gate implements GateConstants {
    *          the URL to be normalised
    * @return the (maybe) corrected URL.
    */
-  private static URL normaliseCreoleUrl(URL url) {
+  public static URL normaliseCreoleUrl(URL url) {
     // CREOLE URLs are directory URLs so they should end with "/"
     String urlName = url.toExternalForm();
     String separator = "/";
