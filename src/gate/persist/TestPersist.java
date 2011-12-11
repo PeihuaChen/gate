@@ -1728,13 +1728,33 @@ class Dummy implements Serializable {
     this.floatValue = _float;
   }
 
-  public boolean equals(Object obj) {
-    Dummy d2 = (Dummy)obj;
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + (boolValue ? 1231 : 1237);
+    result = prime * result + Float.floatToIntBits(floatValue);
+    result = prime * result + intValue;
+    result =
+            prime * result
+                    + ((stringValue == null) ? 0 : stringValue.hashCode());
+    return result;
+  }
 
-    return  this.intValue == d2.intValue &&
-            this.stringValue.equals(d2.stringValue)  &&
-            this.boolValue == d2.boolValue &&
-            this.floatValue == d2.floatValue;
+  @Override
+  public boolean equals(Object obj) {
+    if(this == obj) return true;
+    if(obj == null) return false;
+    if(getClass() != obj.getClass()) return false;
+    Dummy other = (Dummy)obj;
+    if(boolValue != other.boolValue) return false;
+    if(Float.floatToIntBits(floatValue) != Float
+            .floatToIntBits(other.floatValue)) return false;
+    if(intValue != other.intValue) return false;
+    if(stringValue == null) {
+      if(other.stringValue != null) return false;
+    } else if(!stringValue.equals(other.stringValue)) return false;
+    return true;
   }
 
   public String toString() {

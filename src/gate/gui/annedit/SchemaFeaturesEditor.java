@@ -7,7 +7,7 @@
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
  *
- *  AbstractDocumentView.java
+ *  SchemaFeaturesEditor.java
  *
  *  Valentin Tablan, Sep 11, 2007
  *
@@ -15,41 +15,31 @@
  */
 package gate.gui.annedit;
 
-import gate.Factory;
 import gate.FeatureMap;
 import gate.creole.AnnotationSchema;
 import gate.creole.FeatureSchema;
-import gate.creole.ResourceInstantiationException;
 import gate.swing.JChoice;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.HeadlessException;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.JToolBar;
 import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -437,65 +427,7 @@ public class SchemaFeaturesEditor extends JPanel{
     }
     initGui();
   }
-  
-  public static void main(String[] args){
-    try {
-      JFrame aFrame = new JFrame("New Annotation Editor");
-
-      AnnotationSchema aSchema = new AnnotationSchema();
-      aSchema.setXmlFileUrl(new File("/home/valyt/tmp/bug/schema.xml").toURI().toURL());
-      aSchema.init();
-      
-      final SchemaFeaturesEditor fsEditor = new SchemaFeaturesEditor(aSchema);
-      
-      aFrame.getContentPane().add(fsEditor, BorderLayout.CENTER);
-      aFrame.pack();
-      aFrame.setVisible(true);
-      
-      JToolBar tBar = new JToolBar();
-      tBar.add(new AbstractAction("New Values!"){
-        /* (non-Javadoc)
-         * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-         */
-        public void actionPerformed(ActionEvent e) {
-          FeatureMap fMap = Factory.newFeatureMap();
-          
-          fMap.put("boolean-false", new Boolean(true));
-          fMap.put("boolean-true", new Boolean(false));
-          fMap.put("nominal-long", "val10");
-          fMap.put("nominal-short", "val6");
-          fMap.put("free-text", "New text!");
-          fsEditor.editFeatureMap(fMap);
-          
-        }
-      });
-      
-      tBar.add(new AbstractAction("Null Values!"){
-        /* (non-Javadoc)
-         * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-         */
-        public void actionPerformed(ActionEvent e) {
-          fsEditor.editFeatureMap(null);
-          
-        }
-      });
-      aFrame.getContentPane().add(tBar, BorderLayout.NORTH);
-      
-      
-    }
-    catch(HeadlessException e) {
-      e.printStackTrace();
-    }
-    catch(MalformedURLException e) {
-      e.printStackTrace();
-    }
-    catch(ResourceInstantiationException e) {
-      e.printStackTrace();
-    }
     
-      
-  }
-  
   protected void initGui(){
     setLayout(new GridBagLayout());   
     GridBagConstraints constraints = new GridBagConstraints();

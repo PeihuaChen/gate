@@ -17,11 +17,25 @@
  */
 package gate.creole.gazetteer;
 
-import java.util.*;
+import gate.AnnotationSet;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Resource;
+import gate.Utils;
+import gate.creole.CustomDuplication;
+import gate.creole.ExecutionException;
+import gate.creole.ExecutionInterruptedException;
+import gate.creole.ResourceInstantiationException;
+import gate.util.GateRuntimeException;
+import gate.util.InvalidOffsetException;
+import gate.util.Strings;
 
-import gate.*;
-import gate.creole.*;
-import gate.util.*;
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /** This component is responsible for doing lists lookup. The implementation is
  * based on finite state machines.
@@ -505,7 +519,7 @@ public class DefaultGazetteer extends AbstractGazetteer
    * class implementing the map using binary search by char as key
    * to retrieve the corresponding object.
    */
-  public static class CharMap
+  public static class CharMap implements Serializable
   {
       char[] itemsKeys = null;
       Object[] itemsObjs = null;
