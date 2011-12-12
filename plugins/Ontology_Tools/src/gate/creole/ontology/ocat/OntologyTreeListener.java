@@ -38,6 +38,7 @@ import javax.swing.text.DefaultHighlighter;
  * @author Niraj Aswani
  * @version 1.0
  */
+@SuppressWarnings("deprecation")
 public class OntologyTreeListener extends MouseAdapter {
 
   /**
