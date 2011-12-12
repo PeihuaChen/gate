@@ -425,7 +425,6 @@ public class PluginUpdateManager extends JDialog {
 
   public PluginUpdateManager(JFrame owner) {
     super(owner, true);
-    MainFrame.getGuiRoots().add(this);
     this.owner = owner;
 
     // get the list of remote update sites so we can fill in the GUI
@@ -943,6 +942,7 @@ public class PluginUpdateManager extends JDialog {
   @Override
   public void setVisible(boolean visible) {
     if(visible) {
+      MainFrame.getGuiRoots().add(this);
       // if the window is about to be made visible then do some quick setup
       tabs.setSelectedIndex(0);
       installed.reInit();
@@ -965,6 +965,8 @@ public class PluginUpdateManager extends JDialog {
 
     // now actually show/hide the window
     super.setVisible(visible);
+    
+    if (!visible) dispose();
   }
 
   private static class PluginTableModel extends AbstractTableModel {
