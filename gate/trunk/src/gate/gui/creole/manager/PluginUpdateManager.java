@@ -667,6 +667,7 @@ public class PluginUpdateManager extends JDialog {
         });
 
         dialog.setContentPane(options);
+        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         dialog.pack();
         dialog.setLocationRelativeTo(PluginUpdateManager.this);
         dialog.setVisible(true);
