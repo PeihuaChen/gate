@@ -966,7 +966,7 @@ public class PluginUpdateManager extends JDialog {
     // now actually show/hide the window
     super.setVisible(visible);
     
-    if (!visible) dispose();
+    dispose();
   }
 
   private static class PluginTableModel extends AbstractTableModel {
