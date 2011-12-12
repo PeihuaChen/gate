@@ -159,9 +159,8 @@ public class AvailablePlugins extends JPanel {
     tbPluginDirs.add(clearFilterButton);
 
     mainTableModel = new MainTableModel();
-    mainTable = new XJTable();
+    mainTable = new XJTable(mainTableModel);
     mainTable.setTabSkipUneditableCell(true);
-    mainTable.setModel(mainTableModel);
     mainTable.setSortedColumn(NAME_COLUMN);
 
     Collator collator = Collator.getInstance(Locale.ENGLISH);
