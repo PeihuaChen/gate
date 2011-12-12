@@ -3183,7 +3183,7 @@ public class OracleDataStore extends JDBCDataStore {
   private String getIntersectionPart(List filter, Vector sqlValues){
     StringBuffer query = new StringBuffer(" ");
 
-    Collections.sort(filter, new RestrictionComepator());
+    Collections.sort(filter, new RestrictionComparator());
     Vector list_of_filters = new Vector();
     for (int i=0; i<filter.size(); i++){
       if (i>0){
@@ -3446,18 +3446,13 @@ public class OracleDataStore extends JDBCDataStore {
     }
   }
 
-  private class RestrictionComepator implements Comparator{
+  private class RestrictionComparator implements Comparator{
+    @Override
     public int compare(Object o1, Object o2){
       Restriction r1 = (Restriction) o1;
       Restriction r2 = (Restriction) o2;
       return r1.getKey().compareTo(r2.getKey());
     }
-
-    public boolean equals(Object o){
-      return false;
-    }
   }
-
-
 }
 

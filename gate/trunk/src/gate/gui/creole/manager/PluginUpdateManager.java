@@ -54,11 +54,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.swing.AbstractAction;
@@ -603,19 +605,36 @@ public class PluginUpdateManager extends JDialog {
     tblUpdates.getColumnModel().getColumn(0).setMaxWidth(100);
     tblUpdates.getColumnModel().getColumn(2).setMaxWidth(100);
     tblUpdates.getColumnModel().getColumn(3).setMaxWidth(100);
+    
+    tblUpdates.setSortable(true);
+    tblUpdates.setSortedColumn(1);
+    Collator collator = Collator.getInstance(Locale.ENGLISH);
+    collator.setStrength(Collator.TERTIARY);
+    tblUpdates.setComparator(1, collator);    
+    
     JScrollPane scroller = new JScrollPane(tblUpdates);
     scroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
     return scroller;
   }
 
   private Component buildAvailable() {
-    XJTable tblAvailable = new XJTable(availableModel);
+    XJTable tblAvailable = new XJTable();
+    tblAvailable.setModel(availableModel);
+    
+    
     tblAvailable.getColumnModel().getColumn(0)
             .setCellRenderer(new CheckBoxTableCellRenderer());
     tblAvailable.setSortable(false);
     tblAvailable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     tblAvailable.getColumnModel().getColumn(0).setMaxWidth(100);
     tblAvailable.getColumnModel().getColumn(2).setMaxWidth(100);
+    
+    tblAvailable.setSortable(true);
+    tblAvailable.setSortedColumn(1);
+    Collator collator = Collator.getInstance(Locale.ENGLISH);
+    collator.setStrength(Collator.TERTIARY);
+    tblAvailable.setComparator(1, collator);
+    
     JScrollPane scroller = new JScrollPane(tblAvailable);
     scroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
     return scroller;
