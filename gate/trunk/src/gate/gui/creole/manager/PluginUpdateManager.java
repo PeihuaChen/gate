@@ -132,6 +132,10 @@ public class PluginUpdateManager extends JDialog {
   private static final String SUPPRESS_UPDATE_INSTALLED =
           "suppress.update.install";
 
+  private static final String[] defaultUpdateSites = new String[]{
+      "OFAI (Austrian Research Institute for AI)",
+      "http://www.ofai.at/~johann.petrak/GATE/gate-update-site.xml"};
+
   public static File getUserPluginsHome() {
     // TODO move this into gate.util.OptionaMap as a getFile() method
     if(userPluginDir == null) {
@@ -438,13 +442,23 @@ public class PluginUpdateManager extends JDialog {
       }
     }
 
-    if(updateSites.size() == 0) {
-      /*
-       * try { // TODO we need to change this to something more sensible
-       * updateSites.add(new RemoteUpdateSite("Default Test Site", new URI(
-       * "http://greenwoodma.servehttp.com/gate-plugins/"), true)); }
-       * catch(URISyntaxException e) { // this can never happen! }
-       */
+    if(defaultUpdateSites.length % 2 == 0) {
+      // TODO the problem here is that we want to make sure new sites show up in
+      // the list, but this means that if a user deletes a site it will respawn
+      // next time they start GATE, not sure if ther is a better solution.
+
+      for(int i = 0; i < defaultUpdateSites.length; ++i) {
+        try {
+          RemoteUpdateSite rus =
+                  new RemoteUpdateSite(defaultUpdateSites[i], new URI(
+                          defaultUpdateSites[++i]), false);
+
+          if(!updateSites.contains(rus)) updateSites.add(rus);
+        } catch(URISyntaxException e) {
+          // this can never happen!
+          e.printStackTrace();
+        }
+      }
     }
 
     // set up the main window
@@ -677,7 +691,7 @@ public class PluginUpdateManager extends JDialog {
         if(txtURL.getText().trim().equals("")) return;
 
         dialog.dispose();
-        
+
         try {
           updateSites.add(new RemoteUpdateSite(txtName.getText().trim(),
                   new URI(txtURL.getText().trim()), true));
@@ -965,7 +979,7 @@ public class PluginUpdateManager extends JDialog {
 
     // now actually show/hide the window
     super.setVisible(visible);
-    
+
     dispose();
   }
 
