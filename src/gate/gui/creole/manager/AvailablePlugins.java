@@ -167,7 +167,7 @@ public class AvailablePlugins extends JPanel {
     Collator collator = Collator.getInstance(Locale.ENGLISH);
     collator.setStrength(Collator.TERTIARY);
     mainTable.setComparator(NAME_COLUMN, collator);
-    mainTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    mainTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     mainTable.getColumnModel().getColumn(ICON_COLUMN)
             .setCellRenderer(new IconTableCellRenderer());
     CheckBoxTableCellRenderer cbCellRenderer = new CheckBoxTableCellRenderer();
@@ -623,16 +623,17 @@ public class AvailablePlugins extends JPanel {
 
     @Override
     public void actionPerformed(ActionEvent arg0) {
-      int row = mainTable.getSelectedRow();
-      if(row == -1) return;
+      int[] rows = mainTable.getSelectedRows();
 
-      int rowModel = mainTable.rowViewToModel(row);
-      URL toDelete = visibleRows.get(rowModel);
+      for(int row : rows) {
+        int rowModel = mainTable.rowViewToModel(row);
+        URL toDelete = visibleRows.get(rowModel);
 
-      Gate.removeKnownPlugin(toDelete);
-      loadAlwaysByURL.remove(toDelete);
-      loadNowByURL.remove(toDelete);
-
+        Gate.removeKnownPlugin(toDelete);
+        loadAlwaysByURL.remove(toDelete);
+        loadNowByURL.remove(toDelete);
+      }
+      
       // redisplay the table with the current filter
       filterRows(filterTextField.getText());
     }
