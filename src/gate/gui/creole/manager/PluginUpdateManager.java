@@ -44,6 +44,8 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -508,8 +510,8 @@ public class PluginUpdateManager extends JDialog {
             if(changes) break;
           }
         }
-        
-        if (!changes) changes = installed.unsavedChanges();
+
+        if(!changes) changes = installed.unsavedChanges();
 
         if(changes
                 && JOptionPane
@@ -632,12 +634,48 @@ public class PluginUpdateManager extends JDialog {
       public void actionPerformed(ActionEvent e) {
         txtName.setText("");
         txtURL.setText("");
-        if(JOptionPane.showConfirmDialog(PluginUpdateManager.this, pnlEdit,
-                "Plugin Repository Info", JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.QUESTION_MESSAGE, new UpdateSiteIcon(48, 48)) != JOptionPane.OK_OPTION)
+
+        final JOptionPane options =
+                new JOptionPane(pnlEdit, JOptionPane.QUESTION_MESSAGE,
+                        JOptionPane.OK_CANCEL_OPTION,
+                        new UpdateSiteIcon(48, 48));
+        final JDialog dialog =
+                new JDialog(PluginUpdateManager.this, "Plugin Repository Info",
+                        true);
+        options.addPropertyChangeListener(new PropertyChangeListener() {
+          public void propertyChange(PropertyChangeEvent e) {
+            String prop = e.getPropertyName();
+
+            if(dialog.isVisible() && (e.getSource() == options)
+                    && (prop.equals(JOptionPane.VALUE_PROPERTY))) {
+
+              if(((Integer)options.getValue()).intValue() == JOptionPane.OK_OPTION) {
+
+                if(txtName.getText().trim().equals("")) {
+                  txtName.requestFocusInWindow();
+                  return;
+                }
+                if(txtURL.getText().trim().equals("")) {
+                  txtURL.requestFocusInWindow();
+                  return;
+                }
+              }
+
+              dialog.setVisible(false);
+            }
+          }
+        });
+
+        dialog.setContentPane(options);
+        dialog.pack();
+        dialog.setLocationRelativeTo(PluginUpdateManager.this);
+        dialog.setVisible(true);
+
+        if(((Integer)options.getValue()).intValue() != JOptionPane.OK_OPTION)
           return;
         if(txtName.getText().trim().equals("")) return;
         if(txtURL.getText().trim().equals("")) return;
+
         try {
           updateSites.add(new RemoteUpdateSite(txtName.getText().trim(),
                   new URI(txtURL.getText().trim()), true));
