@@ -524,14 +524,37 @@ public class ParallelTextView extends JPanel implements AlignmentListener,
           if(alignment.isAnnotationAligned(ah.annotation)) {
             // lets clear the latest selection
             clearLatestAnnotationsSelection();
+          } else {
+            // if user has right clicked and the unit is not already highlighted
+            // highlight it and show the right menu
+            // reducing one click for the user
+            if(!ah.highlighted) {
+              if(color == Color.WHITE)
+                color = AlignmentEditor.getColor(null, 0.5f);
+              ah.setHighlighted(true, color);
+              if(ah.isSourceDocument()) {
+                if(sourceLatestAnnotationsSelection == null) {
+                  sourceLatestAnnotationsSelection = new ArrayList<Annotation>();
+                }
+
+                if(!sourceLatestAnnotationsSelection.contains(ah.annotation))
+                  sourceLatestAnnotationsSelection.add(ah.annotation);
+              } else {
+                if(targetLatestAnnotationsSelection == null) {
+                  targetLatestAnnotationsSelection = new ArrayList<Annotation>();
+                }
+                if(!targetLatestAnnotationsSelection.contains(ah.annotation))
+                  targetLatestAnnotationsSelection.add(ah.annotation);
+              }
+            }
           }
 
           // we should show the option menu here
           JPopupMenu optionsMenu =
-                  alignmentTask.getAlignmentActionsManager()
-                          .prepareOptionsMenu(thisInstance,
-                                  alignment.isAnnotationAligned(ah.annotation),
-                                  ah.highlighted);
+                  alignmentTask.getAlignmentActionsManager().prepareOptionsMenu(
+                          thisInstance,
+                          alignment.isAnnotationAligned(ah.annotation),
+                          ah.highlighted);
           optionsMenu.show(ah, (int)pt.getX(), (int)pt.getY());
           optionsMenu.setVisible(true);
           return;
