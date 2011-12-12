@@ -7,11 +7,8 @@
  */
 package gate.creole.ontology.ocat;
 
-import javax.swing.*;
-import javax.swing.tree.*;
-import java.awt.*;
-
-import gate.*;
+import gate.Annotation;
+import gate.AnnotationSet;
 import gate.creole.ontology.AnnotationProperty;
 import gate.creole.ontology.DatatypeProperty;
 import gate.creole.ontology.Literal;
@@ -21,16 +18,33 @@ import gate.creole.ontology.OInstance;
 import gate.creole.ontology.ObjectProperty;
 import gate.creole.ontology.Ontology;
 import gate.creole.ontology.RDFProperty;
+import gate.gui.docview.AnnotationSetsView;
+import gate.gui.docview.TextualDocumentView;
+import gate.swing.ColorGenerator;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JToolBar;
+import javax.swing.JTree;
+import javax.swing.ToolTipManager;
+import javax.swing.tree.TreeSelectionModel;
 
 import com.ontotext.gate.vr.ClassNode;
-import com.ontotext.gate.vr.OntoTreeModel;
-import gate.swing.*;
-
-import java.util.*;
-import java.util.List;
-
 import com.ontotext.gate.vr.IFolder;
-import gate.gui.docview.*;
+import com.ontotext.gate.vr.OntoTreeModel;
 
 /**
  * This class provides a GUI frame for the OCAT tool, where one of the
@@ -38,6 +52,7 @@ import gate.gui.docview.*;
  * 
  * @author niraj
  */
+@SuppressWarnings("deprecation")
 public class OntologyTreePanel extends JPanel {
 
   /**

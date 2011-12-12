@@ -69,6 +69,7 @@ import com.ontotext.gate.vr.OntoTreeModel;
  * @author niraj
  * 
  */
+@SuppressWarnings("deprecation")
 public class AnnotationEditor extends AbstractAction {
 
   protected JWindow annotationWindow;
