@@ -226,6 +226,12 @@ import org.openrdf.repository.RepositoryConnection;
        BindingSet bindingSet = mResult.next();
        for (String bindingName : mVarnames) {
          Value value = bindingSet.getValue(bindingName);
+         if(value == null) {
+           throw new GateOntologyException("Could not get binding for name "+
+                   bindingName+
+                   " for binding names "+bindingSet.getBindingNames()+
+                   " for qeury "+mQuery);
+         }
          String val = value.stringValue();
          result.add(val);
        }
