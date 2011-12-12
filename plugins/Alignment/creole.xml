@@ -116,8 +116,10 @@
          COMMENT="The document to be processed"  
          RUNTIME="true">gate.Document</PARAMETER>  
       <PARAMETER NAME="segmentAnnotationType" RUNTIME="true" DEFAULT="Section">java.lang.String</PARAMETER>
+      <PARAMETER NAME="segmentAnnotationFeatureName" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
+      <PARAMETER NAME="segmentAnnotationFeatureValue" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="inputASName" RUNTIME="true" OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="controller" RUNTIME="true">gate.CorpusController</PARAMETER>
+      <PARAMETER NAME="analyser" RUNTIME="true">gate.LanguageAnalyser</PARAMETER>
       <ICON>pr.gif</ICON>
     </RESOURCE>
   </CREOLE>
