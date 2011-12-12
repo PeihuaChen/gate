@@ -677,6 +677,8 @@ public class PluginUpdateManager extends JDialog {
         if(txtName.getText().trim().equals("")) return;
         if(txtURL.getText().trim().equals("")) return;
 
+        dialog.dispose();
+        
         try {
           updateSites.add(new RemoteUpdateSite(txtName.getText().trim(),
                   new URI(txtURL.getText().trim()), true));
