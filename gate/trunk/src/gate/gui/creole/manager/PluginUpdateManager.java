@@ -533,7 +533,6 @@ public class PluginUpdateManager extends JDialog {
                         .showConfirmDialog(
                                 PluginUpdateManager.this,
                                 "<html><body style='width: 350px;'><b>Changes Have Not Yet Been Applied!</b><br><br>"
-                                        + "You have changed the CREOLE configuration but have not applied the changes. "
                                         + "Would you like to apply your changes now?</body></html>",
                                 "CREOLE Plugin Manager",
                                 JOptionPane.YES_NO_OPTION,
