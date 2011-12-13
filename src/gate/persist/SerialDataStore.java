@@ -143,10 +143,10 @@ extends AbstractFeatureBearer implements DataStore {
   } // create()
 
   /** The name of the version file */
-  protected static String versionFileName = "__GATE_SerialDataStore__";
+  private static String versionFileName = "__GATE_SerialDataStore__";
 
   /** The protocol version of the currently open data store */
-  protected static String currentProtocolVersion = null;
+  protected String currentProtocolVersion = null;
 
   /** Get a File for the protocol version file. */
   protected File getVersionFile() throws IOException {
@@ -167,16 +167,16 @@ extends AbstractFeatureBearer implements DataStore {
    * This variable stores the version of the current level of the
    * protocol, NOT the level in use in the currently open data store.
    */
-  protected String versionNumber = "1.1";
+  protected static final String versionNumber = "1.1";
 
   /** List of valid protocol version numbers. */
-  protected String[] protocolVersionNumbers = {
+  protected static final String[] protocolVersionNumbers = {
     "1.0",
     "1.1"
   }; // protocolVersionNumbers
 
   /** Check a version number for validity. */
-  protected boolean isValidProtocolVersion(String versionNumber) {
+  protected static boolean isValidProtocolVersion(String versionNumber) {
     if(versionNumber == null)
       return false;
 
@@ -570,7 +570,7 @@ extends AbstractFeatureBearer implements DataStore {
   } // random
 
   /** Random number generator */
-  protected static Random randomiser = new Random();
+  private static final Random randomiser = new Random();
   private transient Vector datastoreListeners;
 
   /** String representation */
