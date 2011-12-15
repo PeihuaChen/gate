@@ -135,7 +135,7 @@ public class PluginUpdateManager extends JDialog {
           "suppress.update.install";
 
   private static final String[] defaultUpdateSites = new String[]{
-      "OFAI (Austrian Research Institute for AI)",
+      "Austrian Research Institute for AI (OFAI)",
       "http://www.ofai.at/~johann.petrak/GATE/gate-update-site.xml"};
 
   public static File getUserPluginsHome() {
