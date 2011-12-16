@@ -108,6 +108,7 @@
 				<pathelement path="${test.classes.dir}" />
 			</classpath>
 		</junit>
-	</target> -->
+	</target>
+	-->
 
 </project>
