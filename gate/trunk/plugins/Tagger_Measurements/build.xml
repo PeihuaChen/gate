@@ -73,6 +73,38 @@
 	</target>
 
 	<target name="build" depends="jar" />
-	<target name="test" />
 	<target name="distro.prepare" depends="clean.classes" />
+
+	<!-- Unit tests -->
+	<property name="test.dir" location="test" />
+	<property name="test.reports.dir" location="${test.dir}/reports" />
+	<property name="test.src.dir" location="${test.dir}/src" />
+	<property name="test.classes.dir" location="${test.dir}/classes" />
+
+
+	<path id="test.classpath">
+		<path refid="compile.classpath" />
+		<pathelement location="${jar.location}" />
+	</path>
+
+	<target name="test.prepare">
+		<mkdir dir="${test.classes.dir}" />
+		<mkdir dir="${test.reports.dir}" />
+	</target>
+
+	<target name="test.compile" depends="test.prepare, build">
+		<javac classpathref="test.classpath" srcdir="${test.src.dir}" destdir="${test.classes.dir}" debug="true" debuglevel="lines,source" source="1.5" />
+	</target>
+
+	<target name="test" depends="test.compile">
+		<junit fork="yes" haltonfailure="no" printsummary="on">
+			<test name="gate.creole.measurements.MeasurementsTest" toDir="${test.reports.dir}" />
+			<formatter type="xml" />
+			<classpath>
+				<path refid="test.classpath" />
+				<pathelement path="${test.classes.dir}" />
+			</classpath>
+		</junit>
+	</target>
+
 </project>
