@@ -74,8 +74,12 @@
 
 	<target name="build" depends="jar" />
 	<target name="distro.prepare" depends="clean.classes" />
+	
+	
+	<target name="test"  />
 
 	<!-- Unit tests -->
+	<!--
 	<property name="test.dir" location="test" />
 	<property name="test.reports.dir" location="${test.dir}/reports" />
 	<property name="test.src.dir" location="${test.dir}/src" />
@@ -106,5 +110,6 @@
 			</classpath>
 		</junit>
 	</target>
+	-->
 
 </project>
