@@ -9,40 +9,34 @@
 
 package gate.creole.measurements;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import junit.framework.TestCase;
 
 /**
  * @author Mark A. Greenwood
  */
-public class MeasurementsTest {
+public class MeasurementsTest extends TestCase {
 
   private static MeasurementsParser parser;
   
-  @BeforeClass
-  public static void setUp() throws MalformedURLException, IOException  {
+  @Override
+  public void setUp() throws MalformedURLException, IOException  {
     parser = new MeasurementsParser((new File("resources/units.dat")).toURI().toURL(), new File("resources/common_words.txt").toURI().toURL());    
   }
 
-  @AfterClass
-  public static void tearDown() {
+  @Override
+  public void tearDown() {
     parser = null;
   }
 
-  @Test
   public void test6Feet() {
     Measurement m = parser.parse(6d, "feet");
     assertNotNull(m);
     
     assertEquals("m", m.getNormalizedUnit());
+    assertEquals(6d, m.getValue());
   }
 }
