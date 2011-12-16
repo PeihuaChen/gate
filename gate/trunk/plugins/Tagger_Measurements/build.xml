@@ -76,10 +76,8 @@
 	<target name="distro.prepare" depends="clean.classes" />
 
 
-	<target name="test"  />
-
 	<!-- Unit tests -->
-	<!--<property name="test.dir" location="test" />
+	<property name="test.dir" location="test" />
 	<property name="test.reports.dir" location="${test.dir}/reports" />
 	<property name="test.src.dir" location="${test.dir}/src" />
 	<property name="test.classes.dir" location="${test.dir}/classes" />
@@ -102,6 +100,8 @@
 	<target name="test" depends="test.compile">
 		<junit fork="yes" haltonfailure="no" printsummary="on">
 			<test name="gate.creole.measurements.MeasurementsTest" toDir="${test.reports.dir}" />
+			<sysproperty key="gate.measurements.plugin.dir"
+				     file="${basedir}" />
 			<formatter type="xml" />
 			<classpath>
 				<path refid="test.classpath" />
@@ -109,6 +109,5 @@
 			</classpath>
 		</junit>
 	</target>
-	-->
 
 </project>

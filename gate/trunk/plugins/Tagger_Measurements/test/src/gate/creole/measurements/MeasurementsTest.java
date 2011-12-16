@@ -24,7 +24,11 @@ public class MeasurementsTest extends TestCase {
   
   @Override
   public void setUp() throws MalformedURLException, IOException  {
-    parser = new MeasurementsParser((new File("resources/units.dat")).toURI().toURL(), new File("resources/common_words.txt").toURI().toURL());    
+    File baseDir = null;
+    if(System.getProperty("gate.measurements.plugin.dir") != null) {
+      baseDir = new File(System.getProperty("gate.measurements.plugin.dir"));
+    }
+    parser = new MeasurementsParser((new File(baseDir, "resources/units.dat")).toURI().toURL(), new File(baseDir, "resources/common_words.txt").toURI().toURL());    
   }
 
   @Override
