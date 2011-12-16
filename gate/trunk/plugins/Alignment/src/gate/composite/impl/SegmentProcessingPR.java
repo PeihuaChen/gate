@@ -4,6 +4,7 @@ import gate.Annotation;
 import gate.AnnotationSet;
 import gate.Corpus;
 import gate.CorpusController;
+import gate.Document;
 import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
@@ -135,6 +136,9 @@ public class SegmentProcessingPR extends AbstractLanguageAnalyser implements
       compoundDoc.addDocument(document.getName(), document);
     }
     Corpus tempCorpus = null;
+    Corpus oldCorpus = analyser.getCorpus();
+    Document oldDoc = analyser.getDocument();
+
     try {
       Map<String, Object> map = new HashMap<String, Object>();
       map.put(CombineFromAnnotID.INPUT_AS_NAME_FEATURE_NAME, inputASName);
@@ -181,7 +185,6 @@ public class SegmentProcessingPR extends AbstractLanguageAnalyser implements
           compoundDoc.setCurrentDocument(nameForCompositeDoc);
           // now run the application on the composite document
           analyser.execute();
-          compoundDoc.removeDocument(nameForCompositeDoc);
         } catch(CombiningMethodException e) {
           throw new ExecutionException(e);
         } finally {
@@ -195,8 +198,14 @@ public class SegmentProcessingPR extends AbstractLanguageAnalyser implements
     } catch(ResourceInstantiationException e) {
       throw new ExecutionException(e);
     } finally {
+      // make sure you are resetting the reference
+      analyser.setCorpus(oldCorpus);
+      analyser.setDocument(oldDoc);
+
       compoundDoc.removeDocument(originalDocument);
       if(tempCorpus != null) {
+        // clear the corpus before deleting it
+        tempCorpus.clear();
         gate.Factory.deleteResource(tempCorpus);
       }
     }
@@ -293,5 +302,13 @@ public class SegmentProcessingPR extends AbstractLanguageAnalyser implements
   public void setSegmentAnnotationFeatureValue(
       String segmentAnnotationFeatureValue) {
     this.segmentAnnotationFeatureValue = segmentAnnotationFeatureValue;
+  }
+
+  /**
+   * must clean up the original compound document.
+   */
+  public void cleanup() {
+    super.cleanup();
+    Factory.deleteResource(compoundDoc);
   }
 } // class SegmentProcessingPR
