@@ -31,6 +31,7 @@ import gate.resources.img.svg.UpdateSiteIcon;
 import gate.resources.img.svg.UpdatesIcon;
 import gate.resources.img.svg.UserPluginIcon;
 import gate.swing.CheckBoxTableCellRenderer;
+import gate.swing.IconTableCellRenderer;
 import gate.swing.SpringUtilities;
 import gate.swing.XJFileChooser;
 import gate.swing.XJTable;
@@ -604,13 +605,13 @@ public class PluginUpdateManager extends JDialog {
     tblUpdates.getColumnModel().getColumn(0).setMaxWidth(100);
     tblUpdates.getColumnModel().getColumn(2).setMaxWidth(100);
     tblUpdates.getColumnModel().getColumn(3).setMaxWidth(100);
-    
+
     tblUpdates.setSortable(true);
     tblUpdates.setSortedColumn(1);
     Collator collator = Collator.getInstance(Locale.ENGLISH);
     collator.setStrength(Collator.TERTIARY);
-    tblUpdates.setComparator(1, collator);    
-    
+    tblUpdates.setComparator(1, collator);
+
     JScrollPane scroller = new JScrollPane(tblUpdates);
     scroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
     return scroller;
@@ -619,21 +620,20 @@ public class PluginUpdateManager extends JDialog {
   private Component buildAvailable() {
     XJTable tblAvailable = new XJTable();
     tblAvailable.setModel(availableModel);
-    
-    
+
     tblAvailable.getColumnModel().getColumn(0)
             .setCellRenderer(new CheckBoxTableCellRenderer());
     tblAvailable.setSortable(false);
     tblAvailable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     tblAvailable.getColumnModel().getColumn(0).setMaxWidth(100);
     tblAvailable.getColumnModel().getColumn(2).setMaxWidth(100);
-    
+
     tblAvailable.setSortable(true);
     tblAvailable.setSortedColumn(1);
     Collator collator = Collator.getInstance(Locale.ENGLISH);
     collator.setStrength(Collator.TERTIARY);
     tblAvailable.setComparator(1, collator);
-    
+
     JScrollPane scroller = new JScrollPane(tblAvailable);
     scroller.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
     return scroller;
@@ -646,6 +646,8 @@ public class PluginUpdateManager extends JDialog {
     pnlUpdateSites.setBorder(BorderFactory
             .createTitledBorder("Plugin Repositories:"));
     final XJTable tblSites = new XJTable(sitesModel);
+    tblSites.getColumnModel().getColumn(0)
+            .setCellRenderer(new IconTableCellRenderer());
     tblSites.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
     JScrollPane scroller = new JScrollPane(tblSites);

@@ -30,6 +30,7 @@ import gate.resources.img.svg.RemoveIcon;
 import gate.resources.img.svg.ResetIcon;
 import gate.resources.img.svg.UserPluginIcon;
 import gate.swing.CheckBoxTableCellRenderer;
+import gate.swing.IconTableCellRenderer;
 import gate.swing.XJFileChooser;
 import gate.swing.XJTable;
 import gate.util.GateException;
@@ -85,7 +86,6 @@ import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
 
 @SuppressWarnings("serial")
 public class AvailablePlugins extends JPanel {
@@ -505,23 +505,6 @@ public class AvailablePlugins extends JPanel {
 
     public void dataChanged() {
       fireContentsChanged(this, 0, getSize() - 1);
-    }
-  }
-
-  private class IconTableCellRenderer extends DefaultTableCellRenderer {
-
-    @Override
-    public Component getTableCellRendererComponent(JTable table, Object value,
-            boolean isSelected, boolean hasFocus, int row, int column) {
-      if(value instanceof Icon) {
-        super.getTableCellRendererComponent(table, "", isSelected, hasFocus,
-                row, column);
-        setIcon((Icon)value);
-        return this;
-      } else {
-        return super.getTableCellRendererComponent(table, value, isSelected,
-                hasFocus, row, column);
-      }
     }
   }
 
