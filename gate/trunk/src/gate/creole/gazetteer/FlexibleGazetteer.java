@@ -96,7 +96,7 @@ implements ProcessingResource {
     }
 
     fireStatusChanged("Creating temporary Document...");
-    StringBuffer newdocString = new StringBuffer(document.getContent().toString());
+    StringBuilder newdocString = new StringBuilder(document.getContent().toString());
     Document tempDoc = null;
 
     if(inputFeatureNames == null || inputFeatureNames.size() == 0) {
@@ -133,7 +133,7 @@ implements ProcessingResource {
       // if the current annotation has a feature value that user
       // wants to paste on and replace the original string
       inner: for(String inputFeatureName : inputFeatureNames) {
-        String[] keyVal = inputFeatureName .split("[.]");
+        String[] keyVal = inputFeatureName .split("\\.");
 
         if(keyVal.length == 2) {
           // keyVal[0] = annotation type
