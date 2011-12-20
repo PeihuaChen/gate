@@ -48,4 +48,13 @@ public class MeasurementsTest extends TestCase {
     assertEquals("m", m.getNormalizedUnit());
     assertEquals(6d, m.getValue());
   }
+  
+  public void test6Inches() {
+    Measurement m = parser.parse(6d, "inches");
+    assertNotNull(m);
+    
+    assertEquals("m", m.getNormalizedUnit());
+    assertEquals(6d, m.getValue());
+  }
+  
 }
