@@ -74,8 +74,6 @@
 	<classpathentry kind="lib" path="plugins/Ontology/lib/commons-io-1.4.jar"/>
 	<classpathentry kind="lib" path="plugins/Ontology/lib/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="lib" path="plugins/Ontology/lib/jewelcli-0.54.jar"/>
-	<classpathentry kind="lib" path="plugins/Ontology/lib/openrdf-sesame-2.5.1-onejar.jar"/>
-	<classpathentry kind="lib" path="plugins/Ontology/lib/owlim-lite-4.2.jar"/>
 	<classpathentry kind="lib" path="plugins/Ontology/lib/slf4j-api-1.5.6.jar"/>
 	<classpathentry kind="lib" path="plugins/Ontology/lib/slf4j-jdk14-1.5.6.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
@@ -137,5 +135,7 @@
 	<classpathentry kind="lib" path="lib/fontbox-1.6.0.jar"/>
 	<classpathentry kind="lib" path="lib/metadata-extractor-2.4.0-beta-1.jar"/>
 	<classpathentry kind="lib" path="plugins/JAPE_Plus/lib/colt-1.2.0-free.jar"/>
+	<classpathentry kind="lib" path="plugins/Ontology/lib/openrdf-sesame-2.6.1-onejar.jar"/>
+	<classpathentry kind="lib" path="plugins/Ontology/lib/owlim-lite-4.3.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
