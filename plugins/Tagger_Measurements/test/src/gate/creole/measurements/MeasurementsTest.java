@@ -9,6 +9,9 @@
 
 package gate.creole.measurements;
 
+import gate.Gate;
+import gate.util.GateException;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -23,11 +26,13 @@ public class MeasurementsTest extends TestCase {
   private static MeasurementsParser parser;
   
   @Override
-  public void setUp() throws MalformedURLException, IOException  {
-    File baseDir = null;
-    if(System.getProperty("gate.measurements.plugin.dir") != null) {
-      baseDir = new File(System.getProperty("gate.measurements.plugin.dir"));
-    }
+  public void setUp() throws MalformedURLException, IOException, GateException  {
+    if (!Gate.isInitialised()) {
+      Gate.init();
+    }    
+    
+    File baseDir = new File(Gate.getPluginsHome(), "Tagger_Measurements");
+    
     parser = new MeasurementsParser((new File(baseDir, "resources/units.dat")).toURI().toURL(), new File(baseDir, "resources/common_words.txt").toURI().toURL());    
   }
 
