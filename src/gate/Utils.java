@@ -30,7 +30,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Level;
@@ -410,7 +409,7 @@ public class Utils {
     AnnotationSet sourceAnnotationSet,
     AnnotationSet containingAnnotationSet,
     String targetType) {
-    if(containingAnnotationSet.size() == 0) {
+    if(containingAnnotationSet.isEmpty() || sourceAnnotationSet.isEmpty()) {
       return new ImmutableAnnotationSetImpl(null,null) { 
         private static final long serialVersionUID = -6703131102439043539L;
       };
@@ -488,7 +487,7 @@ public class Utils {
    * annotation set is empty, an empty set is returned.
    *
    * @param sourceAnnotationSet the annotation set from which to select
-   * @param converedAnnotationSet the annotation set whose range must
+   * @param coveredAnnotationSet the annotation set whose range must
    * be covered by the selected annotations
    * @param targetType the type the selected annotations must have
    * @return the AnnotationSet containing all annotations that fully cover
@@ -498,7 +497,7 @@ public class Utils {
     AnnotationSet sourceAnnotationSet,
     AnnotationSet coveredAnnotationSet,
     String targetType) {
-    if(coveredAnnotationSet.size() == 0) {
+    if(coveredAnnotationSet.isEmpty() || sourceAnnotationSet.isEmpty()) {
       return new ImmutableAnnotationSetImpl(null,null) {
         private static final long serialVersionUID = -2222340068293006646L; 
       };
@@ -506,6 +505,106 @@ public class Utils {
     return sourceAnnotationSet.getCovering(targetType,
         coveredAnnotationSet.firstNode().getOffset(),
         coveredAnnotationSet.lastNode().getOffset());
+  }
+
+  
+  
+  
+  /**
+   * Get all the annotations from the source annotation set that
+   * partly or totally overlap
+   * the range of the specified annotation.
+   * 
+   * @param sourceAnnotationSet the annotation set from which to select
+   * @param overlappedAnnotation the annotation whose range the selected
+   * annotations must overlap
+   * @return the AnnotationSet containing all annotations that fully cover
+   * the offset range of the coveredAnnotation
+   */
+  public static AnnotationSet getOverlappingAnnotations(
+    AnnotationSet sourceAnnotationSet,
+    Annotation overlappedAnnotation) {
+    return getOverlappingAnnotations(sourceAnnotationSet,overlappedAnnotation,"");
+  }
+
+  /**
+   * Get all the annotations of type targetType
+   * from the source annotation set that partly or totally overlap
+   * the range of the specified annotation.
+   *
+   * @param sourceAnnotationSet the annotation set from which to select
+   * @param overlappedAnnotation the annotation whose range the selected
+   * annotations must overlap
+   * @param targetType the type the selected annotations must have. If the
+   * empty string, no filtering on type is done.
+   * @return the AnnotationSet containing all annotations that fully cover
+   * the offset range of the coveredAnnotation
+   */
+  public static AnnotationSet getOverlappingAnnotations(
+    AnnotationSet sourceAnnotationSet,
+    Annotation overlappedAnnotation,
+    String targetType) {
+    
+    
+    if ( (targetType == null) || targetType.isEmpty()) {
+      return sourceAnnotationSet.get(overlappedAnnotation.getStartNode().getOffset(),
+          overlappedAnnotation.getEndNode().getOffset());
+    }
+    
+    return sourceAnnotationSet.get(targetType,
+        overlappedAnnotation.getStartNode().getOffset(),
+        overlappedAnnotation.getEndNode().getOffset());
+  }
+
+  /**
+   * Get all the annotations from the source annotation set that overlap
+   * the range of the specified annotation set. If the overlapped
+   * annotation set is empty, an empty set is returned.
+   *
+   * @param sourceAnnotationSet the annotation set from which to select
+   * @param overlappedAnnotationSet the annotation set whose range must
+   * be overlapped by the selected annotations
+   * @return the AnnotationSet containing all annotations that fully cover
+   * the offset range of the containingAnnotationSet
+   */
+  public static AnnotationSet getOverlappingAnnotations(
+    AnnotationSet sourceAnnotationSet,
+    AnnotationSet overlappedAnnotationSet) {
+    return getOverlappingAnnotations(sourceAnnotationSet,overlappedAnnotationSet,"");
+  }
+
+  
+  /**
+   * Get all the annotations from the source annotation set with a type equal to
+   * targetType that partly or completely overlap the range of the specified 
+   * annotation set. If the specified annotation set is empty, an empty 
+   * set is returned.
+   *
+   * @param sourceAnnotationSet the annotation set from which to select
+   * @param overlappedAnnotationSet the annotation set whose range must
+   * be overlapped by the selected annotations
+   * @param targetType the type the selected annotations must have
+   * @return the AnnotationSet containing all annotations that partly or fully
+   * overlap the offset range of the containingAnnotationSet
+   */
+  public static AnnotationSet getOverlappingAnnotations(
+    AnnotationSet sourceAnnotationSet,
+    AnnotationSet overlappedAnnotationSet,
+    String targetType) {
+    if(overlappedAnnotationSet.isEmpty() || sourceAnnotationSet.isEmpty()) {
+      return new ImmutableAnnotationSetImpl(null,null) {
+        private static final long serialVersionUID = 65686974132550005L;
+      };
+    }
+    
+    if ( (targetType == null) || targetType.isEmpty()) {
+      return sourceAnnotationSet.get(overlappedAnnotationSet.firstNode().getOffset(),
+          overlappedAnnotationSet.lastNode().getOffset());
+    }
+    
+    return sourceAnnotationSet.get(targetType,
+        overlappedAnnotationSet.firstNode().getOffset(),
+        overlappedAnnotationSet.lastNode().getOffset());
   }
 
 
