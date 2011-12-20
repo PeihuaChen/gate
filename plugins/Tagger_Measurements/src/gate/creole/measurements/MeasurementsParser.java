@@ -16,6 +16,7 @@
 package gate.creole.measurements;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -225,27 +226,6 @@ public class MeasurementsParser {
     Measurement v = Measurement.fromAmountAndString(amount, text, index, this);
     if(v == null) return null;
     if(v.getNormalizedUnit().trim().equals("")) return null;
-    if(commonWords.contains(v.origText)) return null;
-    return v;
-  }
-
-  /**
-   * Attempt to parse the string as a measurement. Parsing does not have to
-   * consume the entire string in order for a measurement to be found and
-   * returned.
-   * 
-   * @param text
-   *          the text to parse
-   * @param index
-   *          the index within the text to start parsing from
-   * @return a measurement if one is found, null otherwise
-   */
-  @Deprecated
-  private Measurement parse(String text, int index) {
-    Measurement v = Measurement.fromString(text, index, this);
-    if(v == null) return null;
-    if(v.getNormalizedUnit().trim().equals("")) return null;
-    // v.origText = v.origText.substring(v.origText.indexOf(" ") + 1).trim();
     if(commonWords.contains(v.origText)) return null;
     return v;
   }

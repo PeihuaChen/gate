@@ -28,6 +28,8 @@ class Lexer {
   private int stopped = -1;
 
   private int start;
+  
+  private int previous = -1;
 
   protected Parser.Symbol token; // Next token.
 
@@ -43,6 +45,12 @@ class Lexer {
     this.start = start;
     this.gnuUnits = gnuUnits;
     read();
+  }
+  
+  void rollback() {
+    nxt = previous;
+    pos = previous;
+    stopped = previous;
   }
 
   String getParsedText() throws Parser.Exception {
@@ -72,6 +80,7 @@ class Lexer {
     while(whitespace()) {
       // skip over the whitespace
     }
+    previous = pos;
     pos = nxt;
     if(number()) return;
     if(delimiter()) return;

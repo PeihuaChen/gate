@@ -42,7 +42,7 @@ public class MeasurementsTest extends TestCase {
   }
 
   public void test6Feet() {
-    Measurement m = parser.parse(6d, "feet");
+    Measurement m = parser.parse(6d, "Mark was 6 feet 6 inches tall.", 11);
     assertNotNull(m);
         
     assertEquals("length", m.getDimension());
@@ -56,7 +56,7 @@ public class MeasurementsTest extends TestCase {
   }
   
   public void test6Inches() {
-    Measurement m = parser.parse(6d, "inches");
+    Measurement m = parser.parse(6d, "Mark was 6 feet 6 inches tall.", 18);
     assertNotNull(m);
     
     assertEquals("length", m.getDimension());

@@ -37,7 +37,14 @@ class Parser {
         // construct something like "he ran 100m in 10.5 seconds" where the in
         // is not a valid unit name in this context, so return the result before
         // this expression
-        if(!token(END)) return stack.elementAt(1);// Error(msg_END);
+                
+        if(!token(END)) {
+          
+          // go back to the end of the previous token in the lexer so we
+          // annotate the right bit of document
+          lex.rollback();    
+          return stack.elementAt(1);
+        }
         Semantics.evalUnitExpr(currentProd, gnuUnits);
       } else {
         if(!token(END)) return Error(msg_unitexpr);
