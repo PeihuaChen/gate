@@ -580,7 +580,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
 
         STreeNode leaf = findLeaf(annot.getStartNode(), annot.getEndNode());
         if (leaf == null) {//not found
-          Out.println("Can't find my leaf node for annotation: " + annot);
+          throw new NullPointerException("Can't find leaf node for annotation: " + annot);
         }
 
         JButton button = (JButton) buttons.get(new Integer(leaf.getID()));
