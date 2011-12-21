@@ -71,7 +71,7 @@
 				 that depends on another version of that compiler -->
 			<groupId>gate</groupId>
 			<artifactId>gate-compiler-jdt</artifactId>
-			<version>1.0</version>
+			<version>3.7.1</version>
 		</dependency>		
 		
 		<dependency>
