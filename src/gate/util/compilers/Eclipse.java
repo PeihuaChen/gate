@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright (c) 1995-2010, The University of Sheffield. See the file
+ *  Copyright (c) 1995-2011, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -17,12 +17,11 @@
  */
 package gate.util.compilers;
 
-import java.io.*;
-import java.util.*;
-
-// note that we re-package the org.eclipse.jdt classes into an alternative
-// package using JarJar links (http://code.google.com/p/jarjar/) to avoid
-// version conflicts
+import gate.Gate;
+import gate.util.Err;
+import gate.util.GateClassLoader;
+import gate.util.GateException;
+import gate.util.Strings;
 import gate.util.compilers.eclipse.jdt.core.compiler.IProblem;
 import gate.util.compilers.eclipse.jdt.internal.compiler.ClassFile;
 import gate.util.compilers.eclipse.jdt.internal.compiler.CompilationResult;
@@ -38,11 +37,19 @@ import gate.util.compilers.eclipse.jdt.internal.compiler.env.NameEnvironmentAnsw
 import gate.util.compilers.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import gate.util.compilers.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
 
-import gate.util.*;
-import gate.Gate;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 /**
- * This class copiles a set of java sources using the JDT compiler from the
+ * This class compiles a set of java sources using the JDT compiler from the
  * Eclipse project.  Unlike the Sun compiler, this compiler can load
  * dependencies directly from the GATE class loader, which (a) makes it faster,
  * (b) means the compiler will work when GATE is loaded from a classloader
@@ -70,7 +77,7 @@ public class Eclipse extends gate.util.Javac {
     if(classLoader == null) classLoader = Gate.getClassLoader();
 
     // store any problems that occur douring compilation
-    final Map problems = new HashMap();
+    final Map<String,List<IProblem>> problems = new HashMap<String, List<IProblem>>();
 
     // A class representing a file to be compiled.  An instance of this class
     // is returned by the name environment when one of the classes given in the
@@ -231,7 +238,7 @@ public class Eclipse extends gate.util.Javac {
           return false;
         }
 //        String resourceName = result.replace('.', '/') + ".class";
-        Class theClass = null;
+        Class<?> theClass = null;
         try{
           theClass = classLoader.loadClass(result);
         }catch(Throwable e){};
@@ -274,7 +281,7 @@ public class Eclipse extends gate.util.Javac {
     final IErrorHandlingPolicy policy = 
         DefaultErrorHandlingPolicies.proceedWithAllProblems();
 
-    final Map settings = new HashMap();
+    final Map<String, String> settings = new HashMap<String, String>();
     settings.put(CompilerOptions.OPTION_LineNumberAttribute,
                  CompilerOptions.GENERATE);
     settings.put(CompilerOptions.OPTION_SourceFileAttribute,
@@ -294,11 +301,11 @@ public class Eclipse extends gate.util.Javac {
     settings.put(CompilerOptions.OPTION_ReportRawTypeReference,
                  CompilerOptions.IGNORE);
 
-    // source and target - force 1.5 as GATE only works on 1.5 or later.
+    // source and target - force 1.6 target as GATE only requires 1.6 or later.
     settings.put(CompilerOptions.OPTION_Source,
-                 CompilerOptions.VERSION_1_5);
+                 CompilerOptions.VERSION_1_7);
     settings.put(CompilerOptions.OPTION_TargetPlatform,
-                 CompilerOptions.VERSION_1_5);
+                 CompilerOptions.VERSION_1_6);
 
     final IProblemFactory problemFactory = 
       new DefaultProblemFactory(Locale.getDefault());
@@ -341,9 +348,9 @@ public class Eclipse extends gate.util.Javac {
 
       private void addProblem(IProblem problem) {
         String name = new String(problem.getOriginatingFileName());
-        List problemsForName = (List)problems.get(name);
+        List<IProblem> problemsForName = problems.get(name);
         if(problemsForName == null) {
-          problemsForName = new ArrayList();
+          problemsForName = new ArrayList<IProblem>();
           problems.put(name, problemsForName);
         }
         problemsForName.add(problem);
@@ -353,10 +360,10 @@ public class Eclipse extends gate.util.Javac {
     // Define the list of things to compile
     ICompilationUnit[] compilationUnits = new ICompilationUnit[sources.size()];
     int i = 0;
-    Iterator sourcesIt = sources.keySet().iterator();
+    Iterator<String> sourcesIt = sources.keySet().iterator();
     while(sourcesIt.hasNext()) {
       compilationUnits[i++] =
-        new CompilationUnit((String)sourcesIt.next());
+        new CompilationUnit(sourcesIt.next());
     }
 
     // create the compiler
@@ -371,14 +378,14 @@ public class Eclipse extends gate.util.Javac {
 
     if(!problems.isEmpty()) {
       boolean errors = false;
-      Iterator problemsIt = problems.entrySet().iterator();
+      Iterator<Map.Entry<String, List<IProblem>>> problemsIt = problems.entrySet().iterator();
       while(problemsIt.hasNext()) {
-        Map.Entry prob = (Map.Entry)problemsIt.next();
-        String name = (String)prob.getKey();
-        List probsForName = (List)prob.getValue();
-        Iterator probsForNameIt = probsForName.iterator();
+        Map.Entry<String, List<IProblem>> prob = problemsIt.next();
+        String name = prob.getKey();
+        List<IProblem> probsForName = prob.getValue();
+        Iterator<IProblem> probsForNameIt = probsForName.iterator();
         while(probsForNameIt.hasNext()) {
-          IProblem problem = (IProblem)probsForNameIt.next();
+          IProblem problem = probsForNameIt.next();
           if(problem.isError()) {
             Err.pr("Error: ");
             errors = true;
