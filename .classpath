@@ -111,7 +111,6 @@
 	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-document-annotation.jar"/>
 	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-tools.jar"/>
 	<classpathentry kind="lib" path="plugins/Web_Search_Yahoo/lib/yahoo_search-1.1.0.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/tools.jar"/>
 	<classpathentry kind="lib" path="plugins/Parser_Stanford/lib/stanford-parser.jar"/>
 	<classpathentry kind="lib" path="lib/gate-asm.jar"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
