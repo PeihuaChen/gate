@@ -8,141 +8,8 @@
   <url>http://gate.ac.uk</url>
   <properties>
     <oss.release.repo>https://oss.sonatype.org/service/local/staging/deploy/maven2</oss.release.repo>
-    <oss.snapshot.repo>https://oss.sonatype.org/content/repositories/snapshots</oss.snapshot.repo>
   </properties>
   <profiles>
-    <profile>
-      <id>publish-gate-asm</id>
-      <build>
-	<defaultGoal>verify</defaultGoal>
-	<plugins>
-	  <plugin>
-	    <groupId>org.apache.maven.plugins</groupId>
-	    <artifactId>maven-gpg-plugin</artifactId>
-	    <version>1.1</version>
-	    <executions>
-	      <execution>
-		<id>gate-asm</id>
-		<phase>verify</phase>
-		<goals>
-		  <goal>sign-and-deploy-file</goal>
-		</goals>
-		<configuration>
-		  <file>../../../lib/gate-asm.jar</file>
-		  <repositoryId>gate-oss</repositoryId>
-		  <url>${oss.release.repo}</url>
-		  <pomFile>gate-asm.pom.xml</pomFile>
-		  <keyname>${gate.gpg.keyname}</keyname>
-		  <passphrase>${gate.gpg.passphrase}</passphrase>
-		</configuration>
-	      </execution>
-	      <execution>
-		<id>gate-asm-javadoc</id>
-		<phase>verify</phase>
-		<goals>
-		  <goal>sign-and-deploy-file</goal>
-		</goals>
-		<configuration>
-		  <file>gate-asm-javadoc.jar</file>
-		  <classifier>javadoc</classifier>
-		  <repositoryId>gate-oss</repositoryId>
-		  <url>${oss.release.repo}</url>
-		  <pomFile>gate-asm.pom.xml</pomFile>
-		  <keyname>${gate.gpg.keyname}</keyname>
-		  <passphrase>${gate.gpg.passphrase}</passphrase>
-		</configuration>
-	      </execution>
-	      <execution>
-		<id>gate-asm-sources</id>
-		<phase>verify</phase>
-		<goals>
-		  <goal>sign-and-deploy-file</goal>
-		</goals>
-		<configuration>
-		  <file>gate-asm-sources.jar</file>
-		  <classifier>sources</classifier>
-		  <repositoryId>gate-oss</repositoryId>
-		  <url>${oss.release.repo}</url>
-		  <pomFile>gate-asm.pom.xml</pomFile>
-		  <keyname>${gate.gpg.keyname}</keyname>
-		  <passphrase>${gate.gpg.passphrase}</passphrase>
-		</configuration>
-	      </execution>
-	    </executions>
-	  </plugin>
-	</plugins>
-      </build>
-    </profile>
-    <profile>
-      <id>publish-gate-compiler-jdt</id>
-      <build>
-	<defaultGoal>verify</defaultGoal>
-	<plugins>
-	  <plugin>
-	    <groupId>org.apache.maven.plugins</groupId>
-	    <artifactId>maven-gpg-plugin</artifactId>
-	    <version>1.1</version>
-	    <executions>
-	      <execution>
-		<id>gate-asm</id>
-		<phase>verify</phase>
-		<goals>
-		  <goal>sign-and-deploy-file</goal>
-		</goals>
-		<configuration>
-		  <file>../../../lib/gate-compiler-jdt.jar</file>
-		  <repositoryId>gate-oss</repositoryId>
-		  <url>${oss.release.repo}</url>
-		  <pomFile>gate-compiler-jdt.pom.xml</pomFile>
-		  <keyname>${gate.gpg.keyname}</keyname>
-		  <passphrase>${gate.gpg.passphrase}</passphrase>
-		</configuration>
-	      </execution>
-	      <execution>
-		<id>gate-compiler-jdt-javadoc</id>
-		<phase>verify</phase>
-		<goals>
-		  <goal>sign-and-deploy-file</goal>
-		</goals>
-		<configuration>
-		  <file>gate-compiler-jdt-javadoc.jar</file>
-		  <classifier>javadoc</classifier>
-		  <repositoryId>gate-oss</repositoryId>
-		  <url>${oss.release.repo}</url>
-		  <pomFile>gate-compiler-jdt.pom.xml</pomFile>
-		  <keyname>${gate.gpg.keyname}</keyname>
-		  <passphrase>${gate.gpg.passphrase}</passphrase>
-		</configuration>
-	      </execution>
-	      <execution>
-		<id>gate-compiler-jdt-sources</id>
-		<phase>verify</phase>
-		<goals>
-		  <goal>sign-and-deploy-file</goal>
-		</goals>
-		<configuration>
-		  <file>gate-compiler-jdt-sources.jar</file>
-		  <classifier>sources</classifier>
-		  <repositoryId>gate-oss</repositoryId>
-		  <url>${oss.release.repo}</url>
-		  <pomFile>gate-compiler-jdt.pom.xml</pomFile>
-		  <keyname>${gate.gpg.keyname}</keyname>
-		  <passphrase>${gate.gpg.passphrase}</passphrase>
-		</configuration>
-	      </execution>
-	    </executions>
-	  </plugin>
-	</plugins>
-      </build>
-    </profile>
-    <profile>
-      <!-- use this with publish-generic -->
-      <id>gate-6.0</id>
-      <properties>
-	<pom>gate-core.6.0.pom.xml</pom>
-	<file>/users/benson/x/gate6/stage/gate-core</file>
-      </properties>
-    </profile>
     <profile>
       <id>publish-generic</id>
       <build>
@@ -163,7 +30,7 @@
 		  <file>${file}.jar</file>
 		  <repositoryId>gate-oss</repositoryId>
 		  <url>${oss.release.repo}</url>
-		  <pomFile>${pom}</pomFile>
+		  <pomFile>${file}.pom.xml</pomFile>
 		  <keyname>${gate.gpg.keyname}</keyname>
 		  <passphrase>${gate.gpg.passphrase}</passphrase>
 		</configuration>
@@ -179,7 +46,7 @@
 		  <classifier>javadoc</classifier>
 		  <repositoryId>gate-oss</repositoryId>
 		  <url>${oss.release.repo}</url>
-		  <pomFile>${pom}</pomFile>
+		  <pomFile>${file}.pom.xml</pomFile>
 		  <keyname>${gate.gpg.keyname}</keyname>
 		  <passphrase>${gate.gpg.passphrase}</passphrase>
 		</configuration>
@@ -195,7 +62,7 @@
 		  <classifier>sources</classifier>
 		  <repositoryId>gate-oss</repositoryId>
 		  <url>${oss.release.repo}</url>
-		  <pomFile>${pom}</pomFile>
+		  <pomFile>${file}.pom.xml</pomFile>
 		  <keyname>${gate.gpg.keyname}</keyname>
 		  <passphrase>${gate.gpg.passphrase}</passphrase>
 		</configuration>

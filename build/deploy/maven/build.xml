@@ -49,4 +49,107 @@
             <pom refid="gate-core.pom"/>
         </artifact:deploy>
     </target>
+
+    <!--
+    Additional targets to publish new releases to sonatype staging
+   
+    For this to work you need an account on sonatype OSS, associated with the
+    uk.ac.gate groupId via a ticket on their JIRA, and a suitable GPG key in
+    the public GPG key servers.
+
+    You must create a file ~/.m2/settings.xml similar to the following (with
+    the correct GPG key settings and sonatype account inserted):
+
+    <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                          http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+      <profiles>
+        <profile>
+          <id>gate-release</id>
+          <properties>
+            <gate.gpg.keyname>my-gpg-key-identifier</gate.gpg.keyname>
+            <gate.gpg.passphrase>my-gpg-key-passphrase</gate.gpg.passphrase>
+          </properties>
+        </profile>
+      </profiles>
+
+      <servers>
+        <server>
+          <id>gate-oss</id>
+          <username>sonatype-username</username>
+          <password>sonatype-password</password>
+        </server>
+      </servers>
+    </settings>
+
+    With this in place, you can use the publish.gate, publish.gate-compiler-jdt
+    and publish.gate-asm targets to push releases of ${top}/bin/gate.jar,
+    ${top}/lib/gate-compiler-jdt.jar and ${top}/lib/gate-asm.jar respectively
+    to the Sonatype staging repository.  For JDT and ASM, you should manually
+    update the relevant .pom.xml file first with the correct version number.
+    -->
+
+    <property name="staging.dir" location="stage" />
+
+    <target name="stage.init">
+        <delete dir="${staging.dir}" />
+        <mkdir dir="${staging.dir}" />
+    </target>
+
+    <!-- stage a gate-core release.  The gate.version Ant property is assumed
+    to contain the version number to be published, and should *not* end in
+    -SNAPSHOT -->
+    <target name="stage.gate" depends="stage.init">
+        <property name="basename.to.stage" location="${staging.dir}/gate-core" />
+        <copy tofile="${basename.to.stage}.pom.xml"
+              file="gate-core-SNAPSHOT.pom.template">
+            <filterset>
+                <filter token="gate.version" value="${gate.version}" />
+            </filterset>
+        </copy>
+        <copy tofile="${basename.to.stage}.jar" file="${top}/bin/gate.jar" />
+        <jar destfile="${basename.to.stage}-javadoc.jar" basedir="${top.dir}/doc/javadoc"/>
+        <jar destfile="${basename.to.stage}-sources.jar" basedir="${top.dir}/src"/>
+    </target>
+
+    <target name="stage.gate-compiler-jdt" depends="stage.init">
+        <property name="basename.to.stage" location="${staging.dir}/gate-compiler-jdt" />
+        <copy tofile="${basename.to.stage}.pom.xml"
+              file="gate-compiler-jdt.pom.xml" />
+        <copy tofile="${basename.to.stage}.jar"
+              file="${top}/lib/gate-compiler-jdt.jar" />
+        <jar destfile="${basename.to.stage}-javadoc.jar" basedir="." includes="gate-compiler-jdt-readme.txt"/>
+        <jar destfile="${basename.to.stage}-sources.jar" basedir="." includes="gate-compiler-jdt-readme.txt"/>
+    </target>
+
+    <target name="stage.gate-asm" depends="stage.init">
+        <property name="basename.to.stage" location="${staging.dir}/gate-asm" />
+        <copy tofile="${basename.to.stage}.pom.xml"
+              file="gate-asm.pom.xml" />
+        <copy tofile="${basename.to.stage}.jar"
+              file="${top}/lib/gate-asm.jar" />
+        <jar destfile="${basename.to.stage}-javadoc.jar" basedir="." includes="gate-asm-readme.txt"/>
+        <jar destfile="${basename.to.stage}-sources.jar" basedir="." includes="gate-asm-readme.txt"/>
+    </target>
+
+    <!-- Generic target to publish a release of ${basename.to.stage} -->
+    <target name="publish.release">
+        <artifact:mvn pom="sign-and-deploy.pom.xml">
+            <arg value="-Pgate-release,publish-generic"/>
+            <arg value="-Dfile=${basename.to.stage}" />
+        </artifact:mvn>
+    </target>
+
+    <!-- publish a GATE release -->
+    <target name="publish.gate" depends="stage.gate, publish.release" />
+
+    <!-- publish a new version of gate-compiler-jdt -->
+    <target name="publish.gate-compiler-jdt"
+            depends="stage.gate-compiler-jdt, publish.release" />
+
+    <!-- publish a new version of gate-asm -->
+    <target name="publish.gate-asm"
+            depends="stage.gate-asm, publish.release" />
 </project>
