@@ -100,19 +100,6 @@ public class TestGate {
   /** Status flag for error exit. */
   private static final int STATUS_ERROR = 1;
 
-  private static final String
-                defOracleDriver = "jdbc:oracle:thin:@derwent:1521:dbgate";
-  private static final String
-                saiOracleDriver = "jdbc:oracle:thin:GATEUSER/gate@192.168.128.7:1521:GATE04";
-  private static final String
-                defPSQLDriver = "jdbc:postgresql://redmires/gate";
-  private static final String
-                saiPSQLDriver = "jdbc:postgresql://sirma/gate";
-
-
-  public static String oracleDriver = defOracleDriver;
-  public static String psqlDriver = defPSQLDriver;
-
   /** Main routine for the GATE test suite.
     * Command-line arguments:
     * <UL>
@@ -152,10 +139,6 @@ public class TestGate {
           break;
         case 'a':
           autoloadingMode = true;
-          break;
-        case 's':
-          oracleDriver = saiOracleDriver;
-          psqlDriver = saiPSQLDriver;
           break;
         // -i gate.xml site-wide init file
         case 'i':
@@ -197,11 +180,6 @@ public class TestGate {
       junitArgs[0] = "gate.TestGate";
       junitArgs[1] = "";
 
-      // NOTE: the DB tests fail under this one (doesn't load oracle driver,
-      // even after the Class.forName call)
-      Class clazz = null;
-      clazz = Class.forName("oracle.jdbc.driver.OracleDriver");
-      clazz = null;
       junit.swingui.TestRunner.main(junitArgs);
 
     } else { // by default us the single-run GUI version

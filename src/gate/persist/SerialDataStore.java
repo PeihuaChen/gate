@@ -700,7 +700,7 @@ extends AbstractFeatureBearer implements DataStore {
     throws PersistenceException {
 
     throw new UnsupportedOperationException("security information is not supported "+
-                                            "for DatabaseDataStore");
+                                            "for SerialDataStore");
   }
 
   /** set security information for LR . */
@@ -708,7 +708,7 @@ extends AbstractFeatureBearer implements DataStore {
     throws PersistenceException, gate.security.SecurityException {
 
     throw new UnsupportedOperationException("security information is not supported "+
-                                            "for DatabaseDataStore");
+                                            "for SerialDataStore");
 
   }
 

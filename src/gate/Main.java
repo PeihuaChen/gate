@@ -20,7 +20,6 @@ import gate.gui.MainFrame;
 import gate.gui.OptionsDialog;
 import gate.gui.ShellSlacFrame;
 import gate.gui.Splash;
-import gate.gui.UserGroupEditor;
 import gate.util.BomStrippingInputStreamReader;
 import gate.util.CorpusBenchmarkTool;
 import gate.util.Err;
@@ -45,8 +44,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -118,9 +115,6 @@ public class Main {
     if(batchMode) {
       if(DEBUG) Out.prln("running batch process");
       batchProcess();
-    } else if(dbAdminMode) {
-      if(DEBUG) Out.prln("running dbAdmin");
-      dbAdmin();
     } else {
       runGui();
     }
@@ -325,13 +319,6 @@ public class Main {
     });
     registerCreoleUrls();
   } // runGui()
-
-  /** Run the db admin interface. */
-  private static void dbAdmin() throws GateException {
-    try { UserGroupEditor.main(null); } catch(Exception e) {
-      throw new GateException(e);
-    }
-  } // dbAdmin()
 
   /**
    * Reads the user config data and applies the required settings.
@@ -555,9 +542,6 @@ public class Main {
   /** Are we in batch mode? */
   public static boolean batchMode = false;
 
-  /** Are we in db admin mode? */
-  public static boolean dbAdminMode = false;
-
   /** Don't save collection after batch? */
   private static boolean destroyColl = false;
 
@@ -581,10 +565,6 @@ public class Main {
     int c;
     while( (c = g.getopt()) != -1 )
       switch(c) {
-        // -a
-        case 'a':
-          dbAdminMode = true;
-          break;
         // -h
         case 'h':
           help();

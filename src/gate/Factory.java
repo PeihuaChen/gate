@@ -854,22 +854,6 @@ public abstract class Factory {
     accessControllerPool = new HashMap();
   } // static initialiser
 
-
-  /**
-   * Creates and opens a new AccessController (if not available in the pool).
-  */
-  public static synchronized AccessController createAccessController(String jdbcURL)
-    throws PersistenceException {
-
-    if (false == accessControllerPool.containsKey(jdbcURL)) {
-      AccessController ac = new AccessControllerImpl(jdbcURL);
-      ac.open();
-      accessControllerPool.put(jdbcURL,ac);
-    }
-
-    return (AccessController)accessControllerPool.get(jdbcURL);
-  } // createAccessController()
-
 } // abstract Factory
 
 
