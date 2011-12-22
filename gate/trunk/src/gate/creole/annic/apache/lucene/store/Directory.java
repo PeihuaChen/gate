@@ -25,7 +25,6 @@ import java.io.IOException;
  * <p> Java's i/o APIs not used directly, but rather all i/o is
  * through this API.  This permits things such as: <ul>
  * <li> implementation of RAM-based indices;
- * <li> implementation indices stored in a database, via JDBC;
  * <li> implementation of an index as a single file;
  * </ul>
  *

@@ -96,13 +96,6 @@ public class Gate implements GateConstants {
    */
   public static final int HASH_STH_SIZE = 4;
 
-  /**
-   * The database schema owner (GATEADMIN is default) this one should not be
-   * hardcoded but set in the XML initialization files
-   *
-   */
-  public static final String DB_OWNER = "gateadmin";
-
   /** The list of builtin URLs to search for CREOLE resources. */
   private static String builtinCreoleDirectoryUrls[] = {
   // "http://derwent.dcs.shef.ac.uk/gate.ac.uk/creole/"
