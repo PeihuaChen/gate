@@ -80,19 +80,17 @@ public class OrthoMatcherHelper {
 	   */
 	  public static boolean[] rulesUsedTable=null;
 	  
+	  static {
+	    rulesUsedTable = new boolean[18];
+      for(int i=0;i<rulesUsedTable.length;i++) rulesUsedTable[i]=false;
+	  }
+	  
 	  /**
 	   * It is used for test purposes.
 	   * It sets that a specific rule has returned 'true'. 
 	   */
-	  public static void usedRule(int rule) {
-	    
-	    if (rulesUsedTable==null) {
-	      rulesUsedTable = new boolean[18];
-	      for(int i=0;i<rulesUsedTable.length;i++) rulesUsedTable[i]=false;
-	    }
-	    
+	  public static void usedRule(int rule) {    
 	    rulesUsedTable[rule]=true;
-	    
 	  }
 	  
 	  /**
