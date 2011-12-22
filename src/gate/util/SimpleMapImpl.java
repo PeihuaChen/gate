@@ -458,12 +458,14 @@ class SimpleMapImpl implements Map<Object, Object>,
   private void readObject(ObjectInputStream s)
       throws IOException, ClassNotFoundException {
     s.defaultReadObject();
-    if (theKeysHere == null) {
-      synchronized(SimpleMapImpl.class) {
+    
+    synchronized(SimpleMapImpl.class) {
+      if(theKeysHere == null) {
         theKeysHere = new ConcurrentHashMap();
         theKeysHere.put(nullKey, nullKey);
       }
     }
+    
     for (int i = 0; i < theKeys.length; i++) {
       if(theKeys[i] instanceof NullKey) {
         theKeys[i] = nullKey;
