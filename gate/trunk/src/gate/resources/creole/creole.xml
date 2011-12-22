@@ -13,23 +13,7 @@
       <CLASS>gate.corpora.CorpusImpl</CLASS>
     </RESOURCE>
     <RESOURCE>
-      <NAME>GATE Database Document</NAME>
-      <CLASS>gate.corpora.DatabaseDocumentImpl</CLASS>
-      <COMMENT>GATE persistent document (Oracle or PostgreSQL)</COMMENT>
-      <INTERFACE>gate.Document</INTERFACE>
-      <ICON>document</ICON>
-      <PRIVATE/>
-    </RESOURCE>
-    <RESOURCE>
       <CLASS>gate.corpora.SerialCorpusImpl</CLASS>
-    </RESOURCE>
-    <RESOURCE>
-      <NAME>GATE Database Corpus</NAME>
-      <CLASS>gate.corpora.DatabaseCorpusImpl</CLASS>
-      <COMMENT>GATE persistent corpus (Oracle or PostgreSQL)</COMMENT>
-      <INTERFACE>gate.Corpus</INTERFACE>
-      <ICON>corpus</ICON>
-      <PRIVATE/>
     </RESOURCE>
     <RESOURCE>
       <CLASS>gate.corpora.XmlDocumentFormat</CLASS>
@@ -130,10 +114,6 @@
 
     <RESOURCE>
       <CLASS>gate.gui.SerialDatastoreViewer</CLASS>
-    </RESOURCE>
-
-    <RESOURCE>
-      <CLASS>gate.gui.OracleDatastoreViewer</CLASS>
     </RESOURCE>
 
     <RESOURCE>
