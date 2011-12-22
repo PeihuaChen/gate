@@ -660,14 +660,14 @@ public class PersistenceManager {
         // used to serialize objects.
         xstream = new XStream(
           new Sun14ReflectionProvider(new FieldDictionary(new XStream12FieldKeySorter())),
-          new StaxDriver(new XStream11XmlFriendlyReplacer())) {
+          new StaxDriver(new XStream11NameCoder())) {
           protected boolean useXStream11XmlFriendlyMapper() {
             return true;
           }
         };
         FileWriter fileWriter = new FileWriter(file);
         writer = new PrettyPrintWriter(fileWriter,
-            new XmlFriendlyReplacer("-", "_"));
+            new XmlFriendlyNameCoder("-", "_"));
       }
       else {
         oos = new ObjectOutputStream(new FileOutputStream(file));
@@ -812,7 +812,7 @@ public class PersistenceManager {
           throw new PersistenceException("Error creating reader", xse);
         }
 
-        xstream = new XStream(new StaxDriver(new XStream11XmlFriendlyReplacer())) {
+        xstream = new XStream(new StaxDriver(new XStream11NameCoder())) {
           protected boolean useXStream11XmlFriendlyMapper() {
             return true;
           }
