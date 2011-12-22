@@ -1089,9 +1089,6 @@ public class PersistenceManager {
       registerPersistentEquivalent(SerialAnalyserController.class,
               SerialAnalyserControllerPersistence.class);
 
-      registerPersistentEquivalent(gate.persist.JDBCDataStore.class,
-              JDBCDSPersistence.class);
-
       registerPersistentEquivalent(gate.creole.AnalyserRunningStrategy.class,
               AnalyserRunningStrategyPersistence.class);
       
