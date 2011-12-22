@@ -213,29 +213,4 @@
             scm:svn:https://gate.svn.sourceforge.net/svnroot/gate/gate/trunk</developerConnection>
         <url>http://gate.svn.sourceforge.net/viewvc/gate</url>
     </scm>
-    <profiles>
-        <profile>
-            <id>tools.jar</id>
-            <activation>
-                <property>
-                    <name>java.vendor</name>
-                    <value>Sun Microsystems Inc.</value>
-                </property>
-            </activation>
-            <dependencies>
-                <!-- The local tools.jar from your JDK.  This allows you to use
-                     the Sun compiler (rather than gate-compiler-jdt above) to
-                     load JAPE grammars, but enabling this function requires a
-                     setting in your gate.xml configuration file. -->
-                <dependency>
-                    <groupId>com.sun</groupId>
-                    <artifactId>tools</artifactId>
-                    <version>1.6.0</version>
-                    <scope>system</scope>
-                    <systemPath>${java.home}/../lib/tools.jar</systemPath>
-                    <optional>true</optional>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
 </project>
