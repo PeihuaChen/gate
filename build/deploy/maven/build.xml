@@ -31,7 +31,7 @@
         <property name="gate.core.pom"
                   location="${build}/gate-core.${gate.version}.pom.xml" />
         <copy tofile="${gate.core.pom}"
-              file="gate-core-SNAPSHOT.pom.template">
+              file="gate-core.pom.template">
             <filterset>
                 <filter token="gate.version" value="${gate.version}" />
             </filterset>
@@ -104,7 +104,7 @@
     <target name="stage.gate" depends="stage.init">
         <property name="basename.to.stage" location="${staging.dir}/gate-core" />
         <copy tofile="${basename.to.stage}.pom.xml"
-              file="gate-core-SNAPSHOT.pom.template">
+              file="gate-core.pom.template">
             <filterset>
                 <filter token="gate.version" value="${gate.version}" />
             </filterset>
