@@ -168,7 +168,7 @@ public class XJTable extends JTable{
             if(tColumn.getPreferredWidth() < minWidth) tColumn.setPreferredWidth(minWidth);
 
             //now fix the row height
-            int height = cellComponent.getPreferredSize().height;
+            int height = (cellComponent == null ? 0 : cellComponent.getPreferredSize().height);
             if(newRowHeight < (height + spacing.height)) 
               newRowHeight = height + spacing.height;
           }
