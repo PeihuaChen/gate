@@ -13,11 +13,13 @@
  */
 package gate.fsm;
 
+import java.io.Serializable;
+
 /**
  * @author andrew
  *
  */
-public class RuleTime {
+public class RuleTime implements Serializable {
   private long timeSpent;
   final private String ruleName;
   RuleTime(long my_timeSpent, String my_ruleName) {
