@@ -253,7 +253,7 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
     this.transferAllUnlessFound = value;
   }
 
-  class Mapping {
+  static class Mapping implements Serializable {
     String oldName, newName;
 
     // TODO implement the renaming of features as well as annotations
