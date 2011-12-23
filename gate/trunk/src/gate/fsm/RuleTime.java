@@ -20,6 +20,9 @@ import java.io.Serializable;
  *
  */
 public class RuleTime implements Serializable {
+
+  private static final long serialVersionUID = 1005996578872528959L;
+  
   private long timeSpent;
   final private String ruleName;
   RuleTime(long my_timeSpent, String my_ruleName) {
