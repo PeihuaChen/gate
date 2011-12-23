@@ -254,6 +254,9 @@ public class AnnotationSetTransfer extends AbstractLanguageAnalyser
   }
 
   static class Mapping implements Serializable {
+    
+    private static final long serialVersionUID = 4708558248536631082L;
+    
     String oldName, newName;
 
     // TODO implement the renaming of features as well as annotations
