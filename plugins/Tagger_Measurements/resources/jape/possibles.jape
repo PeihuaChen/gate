@@ -14,12 +14,14 @@ Options: control = all
 
 //TODO deal with - in sup
 //TODO deal with the fact that per is usually category=IN
+//the . was added to fix the Lasix 20 mg p.o. parsing problem although
+//it would be nice to figure out why the parser isn't working properly
 Rule:possible1
 (
 	({Number}):number
 	(({Token.category != "IN", Token.kind != "punctuation"}|
 	  {Token.string == "per"}|
-	  {Token.kind == "punctuation", Token.string =~ "[|~^+/*]"})+):unit
+	  {Token.kind == "punctuation", Token.string =~ "[.|~^+/*]"})+):unit 
 ):all
 -->
 {
