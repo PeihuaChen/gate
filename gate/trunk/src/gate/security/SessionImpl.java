@@ -97,23 +97,32 @@ public class SessionImpl implements Session {
     return this.timeout;
   }
 
-
-  /**
-   *
-   *  this one is necessary for the contains() operations in Lists
-   *  It is possible that two users have two different GroupImpl that refer
-   *  to the very same GATE group in the DB, because they got it from the security
-   *  factory at different times. So we assume that two instances refer the same
-   *  GATE group if NAME1==NAME2
-   *
-   *  */
-  public boolean equals(Object obj)
-  {
-    Assert.assertTrue(obj instanceof Session);
-
-    Session s2 = (Session)obj;
-
-    return (this.id.equals(s2.getID()));
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((id == null) ? 0 : id.hashCode());
+    return result;
   }
 
+  /**
+  *
+  *  this one is necessary for the contains() operations in Lists
+  *  It is possible that two users have two different GroupImpl that refer
+  *  to the very same GATE group in the DB, because they got it from the security
+  *  factory at different times. So we assume that two instances refer the same
+  *  GATE group if NAME1==NAME2
+  *
+  *  */
+  @Override
+  public boolean equals(Object obj) {
+    if(this == obj) return true;
+    if(obj == null) return false;
+    if(getClass() != obj.getClass()) return false;
+    SessionImpl other = (SessionImpl)obj;
+    if(id == null) {
+      if(other.id != null) return false;
+    } else if(!id.equals(other.id)) return false;
+    return true;
+  }
 }

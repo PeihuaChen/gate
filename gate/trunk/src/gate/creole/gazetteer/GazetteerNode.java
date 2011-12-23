@@ -215,6 +215,10 @@ public class GazetteerNode {
     }
     return result;
   }
+  
+  public int hashCode() {
+    return toString().hashCode();
+  }
 
   /**
    * @return the entry

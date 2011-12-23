@@ -514,17 +514,36 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
     gazListsByNode.clear();
     isModified = true;
   }
+  
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((lists == null) ? 0 : lists.hashCode());
+    result = prime * result + ((nodes == null) ? 0 : nodes.hashCode());
+    result =
+            prime * result
+                    + ((nodesByList == null) ? 0 : nodesByList.hashCode());
+    return result;
+  }
 
-  public boolean equals(Object o) {
-    if ( o instanceof LinearDefinition ) {
-      LinearDefinition def = (LinearDefinition) o;
-      return nodes.equals(def.nodes) && 
-             lists.equals(def.lists) && 
-             nodesByList.equals(def.nodesByList);
-    } else {
-      return false;
-    }
-  } // equals()
+  @Override
+  public boolean equals(Object obj) {
+    if(this == obj) return true;
+    if(obj == null) return false;
+    if(getClass() != obj.getClass()) return false;
+    LinearDefinition other = (LinearDefinition)obj;
+    if(lists == null) {
+      if(other.lists != null) return false;
+    } else if(!lists.equals(other.lists)) return false;
+    if(nodes == null) {
+      if(other.nodes != null) return false;
+    } else if(!nodes.equals(other.nodes)) return false;
+    if(nodesByList == null) {
+      if(other.nodesByList != null) return false;
+    } else if(!nodesByList.equals(other.nodesByList)) return false;
+    return true;
+  }  
 
  /*---end of implementation of interface java.util.List---*/
 
@@ -534,7 +553,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
 
  /*-----------internal classes -------------*/
 
- /**SafeIterator class provides an iterator which is safe to be iterated and objects removed from it*/
+/**SafeIterator class provides an iterator which is safe to be iterated and objects removed from it*/
   private class SafeIterator implements Iterator {
     private Iterator iter = LinearDefinition.this.nodes.iterator();
     private boolean removeCalled = false;

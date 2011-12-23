@@ -140,28 +140,36 @@ public class LinearNode {
     return result;
   }
 
-  /**Checks this node vs another one for equality.
-   * @param o another node
-   * @return true if languages,list,major type and minor type match.*/
-  public boolean equals(Object o) {
-     boolean result = false;
-     if ( o instanceof LinearNode ) {
-      LinearNode node = (LinearNode) o;
-      result = true;
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((language == null) ? 0 : language.hashCode());
+    result = prime * result + ((list == null) ? 0 : list.hashCode());
+    result = prime * result + ((major == null) ? 0 : major.hashCode());
+    result = prime * result + ((minor == null) ? 0 : minor.hashCode());
+    return result;
+  }
 
-      if (null != this.getLanguage())
-        result &= this.getLanguage().equals(node.getLanguage());
-
-      if ( null != this.getList())
-        result &= this.getList().equals(node.getList());
-
-      if ( null!=this.getMajorType())
-        result &= this.getMajorType().equals(node.getMajorType());
-
-      if ( null!= this.getMinorType())
-        result &= this.getMinorType().equals(node.getMinorType());
-     }
-     return result;
+  @Override
+  public boolean equals(Object obj) {
+    if(this == obj) return true;
+    if(obj == null) return false;
+    if(getClass() != obj.getClass()) return false;
+    LinearNode other = (LinearNode)obj;
+    if(language == null) {
+      if(other.language != null) return false;
+    } else if(!language.equals(other.language)) return false;
+    if(list == null) {
+      if(other.list != null) return false;
+    } else if(!list.equals(other.list)) return false;
+    if(major == null) {
+      if(other.major != null) return false;
+    } else if(!major.equals(other.major)) return false;
+    if(minor == null) {
+      if(other.minor != null) return false;
+    } else if(!minor.equals(other.minor)) return false;
+    return true;
   }
 
 } // class LinearNode
