@@ -410,9 +410,7 @@ public class Utils {
     AnnotationSet containingAnnotationSet,
     String targetType) {
     if(containingAnnotationSet.isEmpty() || sourceAnnotationSet.isEmpty()) {
-      return new ImmutableAnnotationSetImpl(null,null) { 
-        private static final long serialVersionUID = -6703131102439043539L;
-      };
+      return Factory.createImmutableAnnotationSet(sourceAnnotationSet.getDocument(), null);
     }
     if(targetType.equals("")) {
       return sourceAnnotationSet.getContained(
@@ -498,9 +496,7 @@ public class Utils {
     AnnotationSet coveredAnnotationSet,
     String targetType) {
     if(coveredAnnotationSet.isEmpty() || sourceAnnotationSet.isEmpty()) {
-      return new ImmutableAnnotationSetImpl(null,null) {
-        private static final long serialVersionUID = -2222340068293006646L; 
-      };
+      return Factory.createImmutableAnnotationSet(sourceAnnotationSet.getDocument(), null);
     }
     return sourceAnnotationSet.getCovering(targetType,
         coveredAnnotationSet.firstNode().getOffset(),
@@ -592,9 +588,7 @@ public class Utils {
     AnnotationSet overlappedAnnotationSet,
     String targetType) {
     if(overlappedAnnotationSet.isEmpty() || sourceAnnotationSet.isEmpty()) {
-      return new ImmutableAnnotationSetImpl(null,null) {
-        private static final long serialVersionUID = 65686974132550005L;
-      };
+      return Factory.createImmutableAnnotationSet(sourceAnnotationSet.getDocument(), null);
     }
     
     if ( (targetType == null) || targetType.isEmpty()) {

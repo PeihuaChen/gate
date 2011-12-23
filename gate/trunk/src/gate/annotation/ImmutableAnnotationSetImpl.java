@@ -18,7 +18,7 @@ public class ImmutableAnnotationSetImpl extends AnnotationSetImpl {
    * 
    * @param annotations
    */
-  protected ImmutableAnnotationSetImpl(Document doc,
+  public ImmutableAnnotationSetImpl(Document doc,
           Collection<Annotation> annotations) throws ClassCastException {
     super(doc);
     if(annotations != null) {
