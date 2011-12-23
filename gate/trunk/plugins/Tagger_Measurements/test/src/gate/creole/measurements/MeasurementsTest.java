@@ -67,5 +67,19 @@ public class MeasurementsTest extends TestCase {
     
     assertEquals(0.1524, m.getNormalizedValue());
     assertEquals("m", m.getNormalizedUnit());
-  }  
+  }
+  
+  public void testLasix() {
+    Measurement m = parser.parse(20d, "Lasix 20 mg p.o.", 9);
+    assertNotNull(m);
+    
+    assertEquals("mass", m.getDimension());
+    
+    assertEquals(20d, m.getValue());
+    assertEquals("mg", m.getUnit());
+    assertEquals("mg", m.getParsedText());
+        
+    assertEquals(2.0E-5, m.getNormalizedValue());
+    assertEquals("kg", m.getNormalizedUnit());    
+  }
 }
