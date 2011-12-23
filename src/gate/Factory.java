@@ -480,9 +480,7 @@ public abstract class Factory {
    */
   public static AnnotationSet createImmutableAnnotationSet(Document document, 
           Collection<Annotation> annotations) {
-    return new ImmutableAnnotationSetImpl(document, annotations){
-      private static final long serialVersionUID = -6703131102439043539L;
-    };
+    return new ImmutableAnnotationSetImpl(document, annotations);
   }
   
   /**
