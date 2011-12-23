@@ -21,7 +21,7 @@ Rule:possible1
 	({Number}):number
 	(({Token.category != "IN", Token.kind != "punctuation"}|
 	  {Token.string == "per"}|
-	  {Token.kind == "punctuation", Token.string =~ "[.|~^+/*]"})+):unit 
+	  {Token.kind == "punctuation", Token.string =~ "[.|~^+/*]", !Split})+):unit 
 ):all
 -->
 {
