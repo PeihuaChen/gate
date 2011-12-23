@@ -311,18 +311,25 @@ implements List {
     entries.clear();
   }
 
-
-  public boolean equals(Object o) {
-    boolean result = false;
-    if (o instanceof GazetteerList) {
-      result = true;
-      GazetteerList list2 = (GazetteerList) o;
-      result &= entries.equals(list2.entries);
-    } // if
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((entries == null) ? 0 : entries.hashCode());
     return result;
-  } // equals()
+  }
 
-
+  @Override
+  public boolean equals(Object obj) {
+    if(this == obj) return true;
+    if(obj == null) return false;
+    if(getClass() != obj.getClass()) return false;
+    GazetteerList other = (GazetteerList)obj;
+    if(entries == null) {
+      if(other.entries != null) return false;
+    } else if(!entries.equals(other.entries)) return false;
+    return true;
+  }
 
   public Object get(int index) {
     return entries.get(index);

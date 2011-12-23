@@ -375,6 +375,11 @@ public class DataType {
     }
     return false;
   }
+  
+  @Override
+  public int hashCode() {
+    return getXmlSchemaURIString().hashCode();
+  }
 
   /**
    * Checks whether the provided value is a valid value for the datatype
