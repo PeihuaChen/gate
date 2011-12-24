@@ -33,7 +33,6 @@
 	<classpathentry kind="lib" path="lib/ext/nl.mpi.lookup.jar"/>
 	<classpathentry kind="lib" path="lib/plugins/rdf_backend.jar"/>
 	<classpathentry kind="lib" path="lib/plugins/query_tab.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/pg73jdbc3.jar"/>
 	<classpathentry kind="lib" path="lib/plugins/rdf-api.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jdom.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/junit.jar"/>
@@ -80,7 +79,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="lib" path="lib/javacc.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/servlet-2_3.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/orajdbc9i.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/gate-compiler-jdt.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/concurrent.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/icu4j.jar"/>
