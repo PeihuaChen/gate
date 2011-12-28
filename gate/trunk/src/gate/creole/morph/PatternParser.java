@@ -29,7 +29,7 @@ public class PatternParser {
 			while (true) {
 				System.out.print("Query: ");
 				String line = in.readLine();
-				if (line.length() == -1)
+				if (line == null || line.length() < 1)
 					break;
 
 				getPattern(line);
@@ -59,7 +59,6 @@ public class PatternParser {
 			category = category + ruleParts[0].charAt(i);
 		}
 
-		RHS rhs = new RHS(ruleParts[1], category, (short)0);
 		ruleParts[0] = ruleParts[0].substring(i + 1, ruleParts[0].length()).trim();
 		String regExp = ParsingFunctions.convertToRegExp(ruleParts[0], variables);
 		String[] rules = ParsingFunctions.normlizePattern(regExp);

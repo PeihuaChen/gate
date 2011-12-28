@@ -168,7 +168,7 @@ public class Utils {
   static OResource getOResourceFromMap(Ontology o, String uri) {
     try {
       OURI ouri = o.createOURI(uri);
-      List<OResource> toReturn = new ArrayList<OResource>();
+
       OClass c = o.getOClass(ouri);
       if (c != null) {
         return c;

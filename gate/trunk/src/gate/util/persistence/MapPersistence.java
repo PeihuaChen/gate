@@ -35,8 +35,7 @@ public class MapPersistence implements Persistence {
     mapType = source.getClass();
 
     Map map = (Map)source;
-    List keysList = new ArrayList();
-    List valuesList = new ArrayList();
+    
     localMap = new HashMap(map.size());
     //collect the keys in the order given by the entrySet().iterator();
     Iterator keyIter = map.keySet().iterator();

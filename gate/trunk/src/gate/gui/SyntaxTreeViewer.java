@@ -546,7 +546,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
   private void annotations2Trees() {
     if (document == null) return;
 
-    HashMap processed = new HashMap(); //for all processed annotations
+    Map<Integer, JButton> processed = new HashMap<Integer, JButton>(); //for all processed annotations
 
     //first get all tree nodes in this set, then restrict them by offset
     AnnotationSet tempSet = currentSet.get(treeNodeAnnotationType);
@@ -562,9 +562,6 @@ public class SyntaxTreeViewer extends AbstractVisualResource
     // annotation implements Comparable
     java.util.List nodeAnnots = new ArrayList(treeAnnotations);
     Collections.sort(nodeAnnots, new gate.util.OffsetComparator());
-
-    Vector childrenButtons = new Vector();
-    String oldParent = "";
 
     //find all annotations with no children
     Iterator i = nodeAnnots.iterator();
@@ -619,7 +616,7 @@ public class SyntaxTreeViewer extends AbstractVisualResource
         (int) getVisibleRect().getWidth(), (int) getVisibleRect().getHeight()));
   } //annotations2Trees
 
-  private JButton processChildrenAnnots(Annotation annot, HashMap processed) {
+  private JButton processChildrenAnnots(Annotation annot, Map<Integer, JButton> processed) {
     selection.clear();
     Vector childrenButtons = new Vector();
     java.util.List children =
