@@ -110,7 +110,6 @@ public class NominalCoref extends AbstractCoreferencer
    */
   public void execute() throws ExecutionException{
 
-    HashMap anaphorToAntecedent = new HashMap();
     Annotation[] nominalArray;
 
     //0. preconditions

@@ -210,7 +210,11 @@ public class Profiler {
         do {
           m_currMemory = m_rt.totalMemory() - m_rt.freeMemory();
           m_rt.gc();
-          try {wait(300);} catch (Exception e) {}
+          try {
+            wait(300);
+          } catch(Exception e) {
+            //ignore this as it should never really happen
+          }
           m_rt.gc();
         } while (m_currMemory > m_rt.totalMemory() - m_rt.freeMemory());
       }
