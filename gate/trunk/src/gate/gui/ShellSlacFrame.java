@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 1995-2010, The University of Sheffield. See the file
+ *  Copyright (c) 1995-2011, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -15,27 +15,69 @@
 
 package gate.gui;
 
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.text.NumberFormat;
-import java.util.*;
-import java.util.List;
-
-import javax.swing.*;
-import javax.swing.tree.DefaultMutableTreeNode;
-
-import gate.*;
+import gate.AnnotationSet;
+import gate.Corpus;
+import gate.CorpusController;
+import gate.CreoleRegister;
+import gate.DataStore;
+import gate.Document;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.GateConstants;
+import gate.LanguageResource;
+import gate.Resource;
 import gate.creole.ResourceData;
 import gate.creole.ResourceInstantiationException;
 import gate.event.CreoleEvent;
 import gate.persist.PersistenceException;
 import gate.swing.XJMenuItem;
-import gate.util.*;
-//import guk.im.*;
+import gate.util.BomStrippingInputStreamReader;
+import gate.util.Err;
+import gate.util.ExtensionFileFilter;
+import gate.util.Files;
+import gate.util.GateRuntimeException;
+import gate.util.Out;
+
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Frame;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.StringTokenizer;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JEditorPane;
+import javax.swing.JFileChooser;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
+import javax.swing.tree.DefaultMutableTreeNode;
 
 
 /**
@@ -56,8 +98,6 @@ public class ShellSlacFrame extends MainFrame {
   /** Shell GUI documents DataStore */
   private DataStore dataStore = null;
 
-  /** Keep this action for enable/disable the menu item */
-  private Action saveAction = null;
   /** Keep this action for enable/disable the menu item */
   private Action runOneAction = null;
   private Action runAction = null;
@@ -360,7 +400,6 @@ public class ShellSlacFrame extends MainFrame {
         dataStore.close();
       } // if
       // put documents in datastore
-      saveAction.setEnabled(false);
 
       LanguageResource persCorpus = ds.adopt(corpus, null);
       ds.sync(persCorpus);
@@ -370,7 +409,6 @@ public class ShellSlacFrame extends MainFrame {
       if(application != null) application.setCorpus(corpus);
 
       dataStore = ds;
-      saveAction.setEnabled(true);
     } catch (PersistenceException pex) {
       pex.printStackTrace();
     } catch (gate.security.SecurityException sex) {
