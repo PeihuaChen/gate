@@ -111,7 +111,13 @@ class Parser {
 
   private boolean term_2() throws Exception {
     if(!token(SLASH) && !token(PER)) return false;
-    if(!product()) Error(msg_product);
+    if(!product()) {
+      //we have hit something odd like
+      // 4mg per rectum daily
+      //so roll back to before the per
+      lex.rollback();
+      return true;
+    }
     return true;
   }
 
