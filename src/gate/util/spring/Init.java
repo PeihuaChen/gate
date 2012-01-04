@@ -69,6 +69,14 @@ import java.util.Iterator;
  * is a list of <code>Resource</code>s that will be loaded as GATE
  * plugins after GATE is initialised.
  * </p>
+ *
+ * <p>
+ * Alternatively, instead of specifying <code>gate-home</code>,
+ * <code>plugins-home</code> and the configuration files, specifying
+ * <code>run-in-sandbox="true"</code> will tell GATE to initialize without
+ * reading any configuration files.  See {@link gate.Gate#runInSandbox} for
+ * details.
+ * </p>
  * 
  * <p>
  * As well as any plugins specified using <code>preload-plugins</code>,
@@ -136,6 +144,11 @@ public class Init implements BeanFactoryAware {
   public void setBuiltinCreoleDir(Resource builtinCreoleDir) throws IOException {
     if(!Gate.isInitialised())
       Gate.setBuiltinCreoleDir(builtinCreoleDir.getURL());
+  }
+
+  public void setRunInSandbox(boolean runInSandbox) {
+    if(!Gate.isInitialised())
+      Gate.runInSandbox(runInSandbox);
   }
 
   public void setPreloadPlugins(List<Resource> plugins) {

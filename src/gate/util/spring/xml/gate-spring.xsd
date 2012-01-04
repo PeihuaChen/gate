@@ -44,6 +44,7 @@
           <xsd:attribute name="site-config-file" type="xsd:string" use="optional" />
           <xsd:attribute name="user-config-file" type="xsd:string" use="optional" />
           <xsd:attribute name="builtin-creole-dir" type="xsd:string" use="optional" />
+          <xsd:attribute name="run-in-sandbox" type="xsd:boolean" use="optional" />
         </xsd:extension>
       </xsd:complexContent>
     </xsd:complexType>
