@@ -28,7 +28,6 @@ import java.net.URL;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
-import java.util.Timer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.lang.reflect.Constructor;
@@ -43,8 +42,6 @@ import javax.swing.tree.*;
 
 import org.apache.log4j.*;
 
-import junit.framework.Assert;
-
 import com.ontotext.gate.vr.Gaze;
 
 import gate.*;
@@ -55,7 +52,6 @@ import gate.event.*;
 import gate.gui.creole.manager.PluginUpdateManager;
 import gate.persist.PersistenceException;
 import gate.resources.img.svg.AvailableIcon;
-import gate.security.*;
 import gate.swing.*;
 import gate.util.*;
 import gate.util.persistence.PersistenceManager;
@@ -77,8 +73,6 @@ public class MainFrame extends JFrame implements ProgressListener,
   protected JSplitPane leftSplit;
 
   protected JLabel statusBar;
-
-  protected JButton alertButton;
 
   protected JProgressBar progressBar;
 
@@ -502,7 +496,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     mainSplit.setOneTouchExpandable(true);
 
     // status and progress bars
-    statusBar = new JLabel();
+    statusBar = new JLabel("Welcome to GATE!");
     statusBar.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
 
     UIManager.put("ProgressBar.cellSpacing", 0);
@@ -516,14 +510,6 @@ public class MainFrame extends JFrame implements ProgressListener,
     globalProgressBar.setForeground(new Color(150, 75, 150));
     globalProgressBar.setStringPainted(true);
 
-    Icon alertIcon = getIcon("crystal-clear-app-error");
-    alertButton = new JButton(alertIcon);
-    alertButton.setToolTipText("There was no error");
-    alertButton.setBorder(BorderFactory.createEmptyBorder(0, 3, 0, 5));
-    alertButton.setPreferredSize(new Dimension(alertIcon.getIconWidth(),
-      alertIcon.getIconHeight()));
-    alertButton.setEnabled(false);
-
     JPanel southBox = new JPanel(new GridBagLayout());
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.fill = GridBagConstraints.BOTH;
@@ -535,7 +521,6 @@ public class MainFrame extends JFrame implements ProgressListener,
     gbc.weightx = 0;
     southBox.add(progressBar, gbc);
     southBox.add(globalProgressBar, gbc);
-    southBox.add(alertButton, gbc);
 
     this.getContentPane().add(southBox, BorderLayout.SOUTH);
     progressBar.setVisible(false);
@@ -1691,7 +1676,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         + "application\nmenu.  Your options/session will not be saved if "
         + "you exit\nwith \u2318Q, use the close button at the top-left"
         + "corner\nof this window instead.";
-      alertButton.setAction(new AlertAction(error, message, null));
+        log.error(message, error);
     }
   }
 
@@ -2189,7 +2174,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
     catch(Exception error) {
       String message = "Error when opening the Datastore.";
-      alertButton.setAction(new AlertAction(error, message, null));
+      log.error(message, error);
     }
     return ds;
   } // openWSDataStore()
@@ -2578,7 +2563,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           catch(Exception error) {
             String message =
               "There was an error when loading the ANNIE application.";
-            alertButton.setAction(new AlertAction(error, message, null));
+            log.error(message, error);
           }
           finally {
             unlockGUI();
@@ -2623,7 +2608,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             unlockGUI();
             String message =
               "There was an error when loading the ANNIE application.";
-            alertButton.setAction(new AlertAction(error, message, null));
+            log.error(message, error);
             return;
           }
 
@@ -2664,7 +2649,7 @@ public class MainFrame extends JFrame implements ProgressListener,
                 catch(ResourceInstantiationException error) {
                   String message = "There was an error when creating"
                     + " the resource: " + pr.getName() + ".";
-                  alertButton.setAction(new AlertAction(error, message, null));
+                  log.error(message, error);
                 }
               } // for(Object loadedPR : loadedPRs)
             }
@@ -2717,7 +2702,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             String message =
                     "There was an error when loading the " + pluginDir
                             + " application.";
-            alertButton.setAction(new AlertAction(error, message, null));
+            log.error(message, error);
           } finally {
             unlockGUI();
           }
@@ -2787,7 +2772,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   }
 
   /**
-   * TODO: delete this method as it has moved to {@link PluginManagerUI}
+   * TODO: delete this method as it has moved to PluginManagerUI
    * @deprecated
    */
   class LoadCreoleRepositoryAction extends AbstractAction {
@@ -2861,7 +2846,7 @@ public class MainFrame extends JFrame implements ProgressListener,
         catch(Exception error) {
           String message =
             "There was a problem when registering your CREOLE directory.";
-          alertButton.setAction(new AlertAction(error, message, null));
+          log.error(message, error);
         }
       }
     }
@@ -3565,7 +3550,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           SwingUtilities.invokeLater(new Runnable() {
             public void run() {
               String message = error.getMessage();
-              alertButton.setAction(new AlertAction(error, message, null));
+              log.error(message, error);
             }
           });
         }
@@ -3839,7 +3824,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           }
           catch(GateException error) {
             String message = "Failed to save config data.";
-            alertButton.setAction(new AlertAction(error, message, null));
+            log.error(message, error);
           }
 
           // save the session;
@@ -3862,7 +3847,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             }
             catch(Exception error) {
               String message = "Failed to save session data.";
-              alertButton.setAction(new AlertAction(error, message, null));
+              log.error(message, error);
             }
           }
           else {
@@ -4204,7 +4189,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             PersistenceManager.loadObjectFromFile(file);
           } catch(Exception e) {
             String message = "Couldn't reload application.\n" + e.getMessage();
-            alertButton.setAction(new AlertAction(e, message, null));
+            log.error(message, e);
             if (e instanceof IOException) {
               // remove selected element from the applications list
               locations.put("applications", list.replaceFirst(name + "(;|$)", ""));
@@ -4604,7 +4589,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
       } catch (UnsupportedEncodingException error) {
         String message = "The Character Encoding is not supported.";
-        alertButton.setAction(new AlertAction(error, message, null));
+        log.error(message, error);
       } finally {
         keywords = null;
       }
@@ -4664,13 +4649,6 @@ public class MainFrame extends JFrame implements ProgressListener,
           actualURL.insert(insertPoint + 1, "gateVersion=" + gate.Main.version);
         }
 
-        Action[] actions = {
-          new AbstractAction("Show configuration") {
-            public void actionPerformed(ActionEvent e) {
-              optionsDialog.showDialog();
-              optionsDialog.dispose();
-        }}};
-
         String commandLine = Gate.getUserConfig().getString(
           MainFrame.class.getName()+".browsercommandline");
 
@@ -4708,7 +4686,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             String message = "Unable to determine the default browser.\n"
               + "Will use a Java browser. To use a custom command line\n"
               + "go to the Options menu then Configuration.";
-            alertButton.setAction(new AlertAction(null, message, actions));
+            log.info(message);
             // Java help browser
             displayJavaHelpBrowser(actualURL.toString());
             }}}}}
@@ -4732,7 +4710,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             String message = "Unable to call the custom browser command.\n" +
               "(" +  commandLine + ")\n\n" +
               "Please go to the Options menu then Configuration.";
-            alertButton.setAction(new AlertAction(error, message, actions));
+            log.error(message, error);
           }
 
         } else {
@@ -4761,7 +4739,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       helpFrame.setPage(new URL(urlString));
     } catch (IOException error) {
       String message = "Error when loading help page.";
-      alertButton.setAction(new AlertAction(error, message, null));
+      log.error(message, error);
       return;
     }
     helpFrame.setVisible(false);
@@ -5195,89 +5173,9 @@ public class MainFrame extends JFrame implements ProgressListener,
       }
       catch(ResourceInstantiationException error) {
         String message = "Failed to instanciate the gazetteer editor.";
-        Action[] actions = {
-          new AbstractAction("Load plugins manager") {
-            public void actionPerformed(ActionEvent e) {
-              (new ManagePluginsAction()).actionPerformed(null);
-        }}};
-        alertButton.setAction(new AlertAction(error, message, actions));
+        log.error(message, error);
       }
     }// actionPerformed();
   }// class NewOntologyEditorAction
-
-  class AlertAction extends AbstractAction {
-    private Timer timer =
-      new java.util.Timer("MainFrame alert tooltip hide timer", true);
-
-    /**
-     * Action for the alert button that shows a message in a popup.
-     * A detailed dialog can be shown when the button or popup are clicked.
-     * Log the message and error as soon as the action is created.
-     * @param error can be null in case of info message.
-     * @param message text to be displayed in a popup and dialogue
-     * @param actions actions the user can choose in the dialogue
-     */
-    public AlertAction(Throwable error, String message, Action[] actions) {
-      if (error == null) {
-        log.info(message);
-      } else {
-        log.error(message, error);
-      }
-      String description = "<html>" + (error == null ?
-        "Important information:<br>" : "There was a problem:<br>") +
-        message.substring(0, Math.min(300, message.length()))
-          .replaceAll("(.{40,50}(?:\\b|\\.|/))", "$1<br>") + "</html>";
-      final int lines = description.split("<br>").length;
-      putValue(Action.SMALL_ICON, MainFrame.getIcon("crystal-clear-app-error"));
-      putValue(Action.SHORT_DESCRIPTION, description);
-
-      this.error = error;
-      this.message = message;
-      if (actions == null) {
-        this.actions = new Action[1];
-      } else {
-        this.actions = new Action[actions.length+1];
-        System.arraycopy(actions, 0, this.actions, 0, actions.length);
-      }
-      // add a 'search in mailing list' action
-      this.actions[this.actions.length-1] = new HelpMailingListAction(message);
-      // show for a few seconds a popup with the error message
-      SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-          if (!instance.isShowing()) { return; }
-          alertButton.setEnabled(true);
-          JToolTip toolTip = alertButton.createToolTip();
-          toolTip.setTipText(alertButton.getToolTipText());
-          PopupFactory popupFactory = PopupFactory.getSharedInstance();
-          final Popup popup = popupFactory.getPopup(alertButton, toolTip,
-            instance.getLocationOnScreen().x+instance.getWidth()/2-100,
-            instance.getLocationOnScreen().y+instance.getHeight()-30-(lines*10));
-          toolTip.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-              popup.hide();
-              alertButton.doClick();
-            }
-          });
-          popup.show();
-          Date timeToRun = new Date(System.currentTimeMillis() + 4000);
-          timer.schedule(new TimerTask() {
-            public void run() {
-              SwingUtilities.invokeLater(new Runnable(){
-                public void run() {
-                  popup.hide(); // hide the tooltip after some time
-                }
-              });
-            }
-          }, timeToRun);
-        }
-      });
-    }
-    public void actionPerformed(ActionEvent e) {
-      ErrorDialog.show(error, message, instance, getIcon("root"), actions);
-    }
-    Throwable error;
-    String message;
-    Action[] actions;
-  }
 
 } // class MainFrame
