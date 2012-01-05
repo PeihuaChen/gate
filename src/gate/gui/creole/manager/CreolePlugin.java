@@ -31,11 +31,11 @@ public class CreolePlugin {
 
   protected URL downloadURL, url;
 
-  protected double version;
+  protected String version;
 
   private transient String name;
 
-  protected transient double installed;
+  protected transient String installed;
 
   protected transient File dir;
 
@@ -100,7 +100,7 @@ public class CreolePlugin {
 
     if(name == null || version == null) return null;
 
-    return new CreolePlugin(name, Double.parseDouble(version), new URL(
+    return new CreolePlugin(name, version, new URL(
             creoleURL, "creole.zip"), desc, gateMin, gateMax);
   }
 
@@ -112,7 +112,7 @@ public class CreolePlugin {
     return name;
   }
 
-  public CreolePlugin(String id, double version, URL downloadURL,
+  public CreolePlugin(String id, String version, URL downloadURL,
           String description, String gateMin, String gateMax) {
     this.id = id;
     this.version = version;
