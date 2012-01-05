@@ -37,6 +37,7 @@ import gate.swing.XJFileChooser;
 import gate.swing.XJTable;
 import gate.util.Files;
 import gate.util.OptionsMap;
+import gate.util.VersionComparator;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -191,7 +192,7 @@ public class PluginUpdateManager extends JDialog {
         // reset the info ready for a reload
         availableModel.data.clear();
         updatesModel.data.clear();
-
+       
         // go through all the known update sites and get all the plugins they
         // are making available, skipping those sites which are marked as
         // invalid for some reason
@@ -216,7 +217,7 @@ public class PluginUpdateManager extends JDialog {
                     int index = availableModel.data.indexOf(plugin);
                     if(index != -1) {
                       CreolePlugin ap = availableModel.data.remove(index);
-                      if(ap.version > plugin.version) {
+                      if(VersionComparator.compareVersions(ap.version, plugin.version) > 0){
                         ap.installed = plugin.version;
                         ap.dir = f;
                         updatesModel.data.add(ap);
@@ -1083,9 +1084,9 @@ public class PluginUpdateManager extends JDialog {
         case 1:
           return String.class;
         case 2:
-          return Double.class;
+          return String.class;
         case 3:
-          return Double.class;
+          return String.class;
         default:
           return null;
       }
