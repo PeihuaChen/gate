@@ -1998,7 +1998,7 @@ public class NameBearerHandle implements Handle, StatusListener,
     public void actionPerformed(ActionEvent e) {
       try {
         Corpus corpus = Factory.newCorpus("Corpus for " + target.getName());
-        corpus.add(target);
+        corpus.add((Document)target);
       }
       catch(ResourceInstantiationException rie) {
         Err.println("Exception creating corpus");
