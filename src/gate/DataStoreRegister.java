@@ -29,7 +29,7 @@ import java.util.Vector;
 /**
  * Records all the open DataStores.
  */
-public class DataStoreRegister extends HashSet {
+public class DataStoreRegister extends HashSet<DataStore> {
   private static final long serialVersionUID = 1L;
 
   /**
@@ -64,7 +64,7 @@ public class DataStoreRegister extends HashSet {
    * Adds the specified element to this set if it is not already present.
    * Overriden here for event registration code.
    */
-  public boolean add(Object o) {
+  public boolean add(DataStore o) {
     return super.add(o);
   } // add
 
