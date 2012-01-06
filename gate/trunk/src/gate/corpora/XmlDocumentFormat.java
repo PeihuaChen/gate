@@ -338,7 +338,7 @@ public class XmlDocumentFormat extends TextualDocumentFormat {
     }
     catch(IOException e) {
       throw new DocumentFormatException("I/O exception for "
-              + doc.getSourceUrl().toString(), e);
+              + doc.getSourceUrl(), e);
     }
     finally {
       if(xmlDocHandler != null)
