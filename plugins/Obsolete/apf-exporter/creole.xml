@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <!-- $Id$ -->
 <CREOLE-DIRECTORY>
+  <JAR>apf-exporter.jar</JAR>
   <CREOLE>
     <!-- creole.xml for the APF exporter -->
     <RESOURCE>
