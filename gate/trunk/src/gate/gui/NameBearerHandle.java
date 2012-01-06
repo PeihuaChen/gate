@@ -73,9 +73,7 @@ import java.awt.Frame;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -388,7 +386,7 @@ public class NameBearerHandle implements Handle, StatusListener,
                 new PopulateCorpusFromSingleConcatenatedFileAction(),
                 sListenerProxy));
         staticPopupItems.add(null);
-        staticPopupItems.add(new XJMenuItem(new SaveCorpusAsXmlAction(false),
+        staticPopupItems.add(new XJMenuItem(new SaveCorpusAsXmlAction(),
                 sListenerProxy));
         // staticPopupItems.add(new XJMenuItem(new
         // SaveCorpusAsXmlAction(true), sListenerProxy));
@@ -779,23 +777,14 @@ public class NameBearerHandle implements Handle, StatusListener,
   class SaveCorpusAsXmlAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
 
-    private boolean preserveFormat;
-
-    public SaveCorpusAsXmlAction(boolean preserveFormat) {
+    public SaveCorpusAsXmlAction() {
       super("Save as XML...");
       putValue(SHORT_DESCRIPTION, "Saves each document in GATE XML format");
-      this.preserveFormat = preserveFormat;
-
-      if(preserveFormat) {
-        putValue(NAME, "Save Preserving Format...");
-        putValue(SHORT_DESCRIPTION, "Saves each document preserving its format");
-      } // if
     }// SaveAsXmlAction()
 
     public void actionPerformed(ActionEvent e) {
       Runnable runnable = new Runnable() {
         public void run() {
-          if(preserveFormat) System.out.println("Preserve option set!");
           try {
             // we need a directory
             XJFileChooser fileChooser = MainFrame.getFileChooser();
@@ -914,53 +903,8 @@ public class NameBearerHandle implements Handle, StatusListener,
                 } while(!nameOK);
                 // save the file
                 try {
-                  String content = "";
-                  // check for preserve format flag
-                  if(preserveFormat) {
-                    Set annotationsToDump = null;
-                    // Find the shown document editor.
-                    // If none, just dump the original markup
-                    // annotations,
-                    // i.e., leave the annotationsToDump null
-                    if(largeView instanceof JTabbedPane) {
-                      Component shownComponent = ((JTabbedPane)largeView)
-                              .getSelectedComponent();
-                      if(shownComponent instanceof DocumentEditor) {
-                        // so we only get annotations for dumping
-                        // if they are shown in the table of the
-                        // document editor,
-                        // which is currently in front of the user
-                        annotationsToDump = ((DocumentEditor)shownComponent)
-                                .getDisplayedAnnotations();
-                      }// if we have a document editor
-                    }// if tabbed pane
-
-                    // determine if the features need to be saved first
-                    Boolean featuresSaved = Gate.getUserConfig().getBoolean(
-                            GateConstants.SAVE_FEATURES_WHEN_PRESERVING_FORMAT);
-                    boolean saveFeatures = true;
-                    if(featuresSaved != null)
-                      saveFeatures = featuresSaved.booleanValue();
-
-                    // Write with the toXml() method
-                    content = currentDoc.toXml(annotationsToDump, saveFeatures);
-
-                    // Prepare to write into the xmlFile using the
-                    // original encoding
-                    String encoding = ((gate.TextualDocument)currentDoc)
-                            .getEncoding();
-
-                    OutputStreamWriter writer = new OutputStreamWriter(
-                            new FileOutputStream(docFile), encoding);
-
-                    writer.write(content);
-                    writer.flush();
-                    writer.close();
-                  }
-                  else {
-                    // for GATE XML format, use the direct StAX writer
-                    DocumentStaxUtils.writeDocument(currentDoc, docFile);
-                  } // if
+                  // for GATE XML format, use the direct StAX writer
+                  DocumentStaxUtils.writeDocument(currentDoc, docFile);  
                 }
                 catch(Exception ioe) {
                   MainFrame.unlockGUI();
@@ -1648,7 +1592,7 @@ public class NameBearerHandle implements Handle, StatusListener,
             URL url;
             try {
               url = new URL(corpusFiller.getUrlString());
-              java.util.List extensions = corpusFiller.getExtensions();
+              List extensions = corpusFiller.getExtensions();
               ExtensionFileFilter filter;
               if(extensions == null || extensions.isEmpty()) {
                 filter = null;
