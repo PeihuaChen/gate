@@ -198,7 +198,22 @@ public class PluginUpdateManager extends JDialog {
         // invalid for some reason
         for(RemoteUpdateSite rus : updateSites) {
           if(rus.enabled && (rus.valid == null || rus.valid)) {
-            availableModel.data.addAll(rus.getCreolePlugins());
+            
+            for(CreolePlugin p : rus.getCreolePlugins()) {
+              int index = availableModel.data.indexOf(p);
+              if(index == -1) {
+                availableModel.data.add(p);
+              } else {
+                // if the plugin was already known then replace it if this
+                // instance is a newer version
+                CreolePlugin pp = availableModel.data.get(index);
+
+                if(VersionComparator.compareVersions(p.version, pp.version) > 0) {
+                  availableModel.data.remove(pp);
+                  availableModel.data.add(p);
+                }
+              }
+            }
           }
         }
 
