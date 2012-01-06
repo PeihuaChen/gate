@@ -17,6 +17,8 @@ package gate.gui;
 
 import java.util.List;
 
+import javax.swing.Action;
+
 /**
  * This interface is used to mark resources that publish a list of actions
  * that can be performed on them.
@@ -32,5 +34,5 @@ public interface ActionsPublisher {
    * A <tt>null</tt> value in this list will cause a separator to be created.
    * @return a {@link List} of {@link javax.swing.Action}s.
    */
-  public List getActions();
+  public List<Action> getActions();
 }
