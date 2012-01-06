@@ -84,6 +84,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EventListener;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -206,7 +207,7 @@ public class NameBearerHandle implements Handle, StatusListener,
   public JPopupMenu getPopup() {
     JPopupMenu popup = new XJPopupMenu();
     // first add the static items
-    Iterator itemIter = staticPopupItems.iterator();
+    Iterator<XJMenuItem> itemIter = staticPopupItems.iterator();
     while(itemIter.hasNext()) {
       JMenuItem anItem = (JMenuItem)itemIter.next();
       if(anItem == null)
@@ -215,11 +216,11 @@ public class NameBearerHandle implements Handle, StatusListener,
     }
 
     // next add the dynamic list from the target and its editors
-    Iterator publishersIter = actionPublishers.iterator();
+    Iterator<ActionsPublisher> publishersIter = actionPublishers.iterator();
     while(publishersIter.hasNext()) {
       ActionsPublisher aPublisher = (ActionsPublisher)publishersIter.next();
       if(aPublisher.getActions() != null) {
-        Iterator actionIter = aPublisher.getActions().iterator();
+        Iterator<Action> actionIter = aPublisher.getActions().iterator();
         while(actionIter.hasNext()) {
           Action anAction = (Action)actionIter.next();
           if(anAction == null)
@@ -438,11 +439,11 @@ public class NameBearerHandle implements Handle, StatusListener,
     fireStatusChanged("Building views...");
 
     // build the large views
-    List largeViewNames = Gate.getCreoleRegister().getLargeVRsForResource(
+    List<String> largeViewNames = Gate.getCreoleRegister().getLargeVRsForResource(
             target.getClass().getName());
     if(largeViewNames != null && !largeViewNames.isEmpty()) {
       largeView = new JTabbedPane(JTabbedPane.BOTTOM);
-      Iterator classNameIter = largeViewNames.iterator();
+      Iterator<String> classNameIter = largeViewNames.iterator();
       while(classNameIter.hasNext()) {
         try {
           String className = (String)classNameIter.next();
@@ -457,7 +458,7 @@ public class NameBearerHandle implements Handle, StatusListener,
           view.setHandle(this);
           ((JTabbedPane)largeView).add((Component)view, rData.getName());
           // if view provide actions, add it to the list of action
-          // puiblishers
+          // publishers
           if(view instanceof ActionsPublisher)
             actionPublishers.add((ActionsPublisher)view);
         }
@@ -474,11 +475,11 @@ public class NameBearerHandle implements Handle, StatusListener,
     }
 
     // build the small views
-    List smallViewNames = Gate.getCreoleRegister().getSmallVRsForResource(
+    List<String> smallViewNames = Gate.getCreoleRegister().getSmallVRsForResource(
             target.getClass().getName());
     if(smallViewNames != null && !smallViewNames.isEmpty()) {
       smallView = new JTabbedPane(JTabbedPane.BOTTOM);
-      Iterator classNameIter = smallViewNames.iterator();
+      Iterator<String> classNameIter = smallViewNames.iterator();
       while(classNameIter.hasNext()) {
         try {
           String className = (String)classNameIter.next();
@@ -594,6 +595,8 @@ public class NameBearerHandle implements Handle, StatusListener,
   private transient Vector<StatusListener> statusListeners;
 
   class CloseAction extends AbstractAction {
+    private static final long serialVersionUID = -89664884870963556L;
+
     public CloseAction() {
       super("Close");
       putValue(SHORT_DESCRIPTION, "Close this resource");
@@ -629,6 +632,8 @@ public class NameBearerHandle implements Handle, StatusListener,
   }
 
   class CloseRecursivelyAction extends AbstractAction {
+    private static final long serialVersionUID = 6110698764173549317L;
+
     public CloseRecursivelyAction() {
       super("Close Recursively");
       putValue(SHORT_DESCRIPTION,
@@ -819,17 +824,18 @@ public class NameBearerHandle implements Handle, StatusListener,
               // iterate through all the docs and save each of them as
               // xml
               Corpus corpus = (Corpus)target;
-              Iterator docIter = corpus.iterator();
+              Iterator<Document> docIter = corpus.iterator();
               boolean overwriteAll = false;
               int docCnt = corpus.size();
               int currentDocIndex = 0;
+              Set<String> usedFileNames = new HashSet<String>();
               while(docIter.hasNext()) {
                 boolean docWasLoaded = corpus.isDocumentLoaded(currentDocIndex);
                 Document currentDoc = (Document)docIter.next();
                 URL sourceURL = currentDoc.getSourceUrl();
                 String fileName = null;
                 if(sourceURL != null) {
-                  fileName = sourceURL.getFile();
+                  fileName = sourceURL.getPath();
                   fileName = Files.getLastPathComponent(fileName);
                 }
                 if(fileName == null || fileName.length() == 0) {
@@ -838,6 +844,16 @@ public class NameBearerHandle implements Handle, StatusListener,
                 // makes sure that the filename does not contain any
                 // forbidden character
                 fileName = fileName.replaceAll("[\\/:\\*\\?\"<>|]", "_");
+                if(usedFileNames.contains(fileName)){
+                  // name clash -> add unique ID
+                  String fileNameBase = fileName;
+                  int  uniqId = 0;
+                  fileName = fileNameBase + uniqId;
+                  while(usedFileNames.contains(fileName)) {
+                    uniqId++;
+                    fileName = fileNameBase + uniqId;
+                  }                  
+                }
 
                 if(!fileName.toLowerCase().endsWith(".xml"))
                   fileName += ".xml";
@@ -846,7 +862,7 @@ public class NameBearerHandle implements Handle, StatusListener,
                 do {
                   docFile = new File(dir, fileName);
                   if(docFile.exists() && !overwriteAll) {
-                    // ask the user if we can ovewrite the file
+                    // ask the user if we can overwrite the file
                     Object[] options = new Object[] {"Yes", "All", "No",
                         "Cancel"};
                     MainFrame.unlockGUI();
@@ -1387,7 +1403,7 @@ public class NameBearerHandle implements Handle, StatusListener,
           try {
             DataStoreRegister dsReg = Gate.getDataStoreRegister();
             Map<String, DataStore> dsByName = new HashMap<String, DataStore>();
-            Iterator dsIter = dsReg.iterator();
+            Iterator<DataStore> dsIter = dsReg.iterator();
             while(dsIter.hasNext()) {
               DataStore oneDS = (DataStore)dsIter.next();
               String name;
