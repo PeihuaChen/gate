@@ -67,13 +67,9 @@ import java.util.Vector;
 // always restore the doc, because it has its persistence ID.
 
 @CreoleResource(name = "GATE Serial Corpus", isPrivate = true, comment = "GATE persistent corpus (serialisation)", icon = "corpus", helpURL = "http://gate.ac.uk/userguide/sec:developer:datastores")
-public class SerialCorpusImpl extends AbstractLanguageResource
-                                                              implements
-                                                              Corpus,
-                                                              CreoleListener,
-                                                              DatastoreListener,
-                                                              IndexedCorpus,
-                                                              CustomDuplication {
+public class SerialCorpusImpl extends AbstractLanguageResource 
+    implements Corpus, CreoleListener, DatastoreListener, IndexedCorpus,
+    CustomDuplication {
 
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -86,7 +82,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
 
   // here I keep document index as key (same as the index in docDataList
   // which defines the document order) and Documents as value
-  protected transient List documents = null;
+  protected transient List<Document> documents = null;
 
   protected transient IndexManager indexManager = null;
 
@@ -636,8 +632,8 @@ public class SerialCorpusImpl extends AbstractLanguageResource
             "toArray(Object[] a) is not implemented for SerialCorpusImpl");
   }
 
-  public boolean add(Object o) {
-    if(!(o instanceof Document) || o == null) return false;
+  public boolean add(Document o) {
+    if(o == null) return false;
     Document doc = (Document)o;
 
     // make it accept only docs from its own datastore
@@ -730,9 +726,10 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     return true;
   }
 
-  public boolean addAll(Collection c) {
+  @Override
+  public boolean addAll(Collection<? extends Document> c) {
     boolean allAdded = true;
-    Iterator iter = c.iterator();
+    Iterator<? extends Document> iter = c.iterator();
     while(iter.hasNext()) {
       if(!add(iter.next())) allAdded = false;
     }
@@ -780,10 +777,10 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     return docDataList.hashCode();
   }
 
-  public Object get(int index) {
+  public Document get(int index) {
     if(index >= docDataList.size()) return null;
 
-    Object res = documents.get(index);
+    Document res = documents.get(index);
 
     if(DEBUG)
       Out.prln("SerialCorpusImpl: get(): index " + index + "result: " + res);
@@ -795,7 +792,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
       try {
         parameters.put(DataStore.LR_ID_FEATURE_NAME, ((DocumentData)docDataList
                 .get(index)).getPersistentID());
-        Resource lr = Factory.createResource(((DocumentData)docDataList
+        Document lr = (Document) Factory.createResource(((DocumentData)docDataList
                 .get(index)).getClassType(), parameters);
         if(DEBUG) Out.prln("Loaded document :" + lr.getName());
         // change the result to the newly loaded doc
@@ -813,7 +810,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     return res;
   }
 
-  public Object set(int index, Object element) {
+  public Document set(int index, Document element) {
     throw new gate.util.MethodNotImplementedException();
     // fire the 2 events
     /*
@@ -825,7 +822,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
      */
   }
 
-  public void add(int index, Object o) {
+  public void add(int index, Document o) {
     if(!(o instanceof Document) || o == null) return;
     Document doc = (Document)o;
 
@@ -840,7 +837,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
 
   }
 
-  public Object remove(int index) {
+  public Document remove(int index) {
     if(DEBUG) Out.prln("Remove index called");
     // try to get the actual document if it was loaded
     Document res = isDocumentLoaded(index) ? (Document)get(index) : null;

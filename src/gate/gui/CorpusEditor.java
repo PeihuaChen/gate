@@ -609,7 +609,7 @@ public class CorpusEditor extends AbstractVisualResource
       if(optionPane.getValue().equals(JOptionPane.OK_OPTION)){
         int[] selectedIndices = docList.getSelectedIndices();
         for (int selectedIndice : selectedIndices) {
-          corpus.add(loadedDocuments.get(selectedIndice));
+          corpus.add((Document)loadedDocuments.get(selectedIndice));
         }
       }
       changeMessage();

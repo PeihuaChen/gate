@@ -233,7 +233,7 @@ public class CorpusSaver {
 
         //then store it in the DS and add to corpus
         if (saveMode) {
-          LanguageResource lr = ds.adopt(doc, null);
+          Document lr = (Document)ds.adopt(doc, null);
           theCorpus.add(lr);
           theCorpus.unloadDocument( (Document) lr);
 

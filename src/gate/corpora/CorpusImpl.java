@@ -115,7 +115,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
   /**
    * The underlying list that holds the documents in this corpus.
    */
-  protected List supportList = null;
+  protected List<Document> supportList = null;
 
   /**
    * A proxy list that stores the actual data in an internal list and
@@ -225,7 +225,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
     return supportList.toArray(a);
   }
 
-  public boolean add(Object o) {
+  public boolean add(Document o) {
     return supportList.add(o);
   }
 
@@ -267,19 +267,19 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
     return supportList.hashCode();
   }
 
-  public Object get(int index) {
+  public Document get(int index) {
     return supportList.get(index);
   }
 
-  public Object set(int index, Object element) {
+  public Document set(int index, Document element) {
     return supportList.set(index, element);
   }
 
-  public void add(int index, Object element) {
+  public void add(int index, Document element) {
     supportList.add(index, element);
   }
 
-  public Object remove(int index) {
+  public Document remove(int index) {
     return supportList.remove(index);
   }
 

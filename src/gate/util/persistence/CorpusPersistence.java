@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import gate.Corpus;
+import gate.Document;
 import gate.creole.ResourceInstantiationException;
 import gate.persist.PersistenceException;
 
@@ -69,7 +70,7 @@ public class CorpusPersistence extends LRPersistence {
       if(!docList.isEmpty() && corpus.isEmpty()){
         Iterator docIter = docList.iterator();
         while(docIter.hasNext()){
-          corpus.add(PersistenceManager.
+          corpus.add((Document) PersistenceManager.
                      getTransientRepresentation(docIter.next()));
         }
 
