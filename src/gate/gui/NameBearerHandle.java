@@ -833,17 +833,19 @@ public class NameBearerHandle implements Handle, StatusListener,
                 // makes sure that the filename does not contain any
                 // forbidden character
                 fileName = fileName.replaceAll("[\\/:\\*\\?\"<>|]", "_");
+                if(fileName.toLowerCase().endsWith(".xml")) {
+                 fileName = fileName.substring(0,fileName.length() - 4); 
+                }
                 if(usedFileNames.contains(fileName)){
                   // name clash -> add unique ID
                   String fileNameBase = fileName;
                   int  uniqId = 0;
-                  fileName = fileNameBase + uniqId;
+                  fileName = fileNameBase + "-" + uniqId++;
                   while(usedFileNames.contains(fileName)) {
-                    uniqId++;
-                    fileName = fileNameBase + uniqId;
+                    fileName = fileNameBase + "-" + uniqId++;
                   }                  
                 }
-
+                usedFileNames.add(fileName);
                 if(!fileName.toLowerCase().endsWith(".xml"))
                   fileName += ".xml";
                 File docFile = null;
