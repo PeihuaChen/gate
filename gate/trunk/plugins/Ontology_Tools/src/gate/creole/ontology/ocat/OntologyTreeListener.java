@@ -22,8 +22,6 @@ import gate.creole.ontology.OInstance;
 import gate.creole.ontology.OResource;
 import gate.creole.ontology.OURI;
 import gate.creole.ontology.Ontology;
-import gate.creole.ontology.OntologyUtilities;
-import gate.creole.ontology.URI;
 import gate.gui.MainFrame;
 import gate.util.GateRuntimeException;
 
@@ -593,7 +591,7 @@ public class OntologyTreeListener extends MouseAdapter {
 
     }
     else {
-      URI uri = null;
+      OURI uri = null;
       String classFeature = null;
       OInstance instance = null;
 
@@ -607,8 +605,7 @@ public class OntologyTreeListener extends MouseAdapter {
         classFeature = ((OClass)node.getSource()).getURI().toString();
         if(aResource == null) {
           uri =
-            OntologyUtilities.createURI(ontologyTreePanel.getCurrentOntology(),
-              instanceName, false);
+            ontologyTreePanel.getCurrentOntology().createOURI(instanceName);
 
           instance =
             ontologyTreePanel.getCurrentOntology().addOInstance(uri,
@@ -621,10 +618,8 @@ public class OntologyTreeListener extends MouseAdapter {
               ontologyTreePanel.getCurrentOntology().getOResourceByName(
                 instanceName + index);
             if(tempResource == null) {
-              uri =
-                OntologyUtilities.createURI(ontologyTreePanel
-                  .getCurrentOntology(), instanceName + index, false);
-
+              uri = ontologyTreePanel.getCurrentOntology().createOURI(
+                  instanceName + index);
               instance =
                 ontologyTreePanel.getCurrentOntology().addOInstance(uri,
                   (OClass)node.getSource());
