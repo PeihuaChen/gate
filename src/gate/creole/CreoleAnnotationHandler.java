@@ -415,7 +415,7 @@ public class CreoleAnnotationHandler {
             if(paramElt.getTextTrim().length() == 0) {
               // need to determine the type
               paramElt.setText(method.getParameterTypes()[0].getName());
-              // for collections (but nor GATE Corpora) we also try to determine
+              // for collections (but not GATE Corpora) we also try to determine
               // the item type.
               if((!Corpus.class.isAssignableFrom(
                       method.getParameterTypes()[0])) &&
