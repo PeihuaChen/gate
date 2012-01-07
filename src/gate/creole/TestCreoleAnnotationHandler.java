@@ -64,7 +64,6 @@ public class TestCreoleAnnotationHandler extends TestCase {
     URL originalUrl = Gate.getUrl("tests/creole-annotation-handler/initial-creole.xml");
     org.jdom.Document creoleXml =
       jdomBuilder.build(originalUrl.openStream());
-    
     CreoleAnnotationHandler processor = new CreoleAnnotationHandler(originalUrl);
     processor.processAnnotations(creoleXml);
 
@@ -122,7 +121,7 @@ public class TestCreoleAnnotationHandler extends TestCase {
     }
 
     assertTrue("XML produced by annotation handler does not match expected: "
-        + diff, match);
+        + diff.toString() , match);
   }
 
   /** Test suite routine for the test runner */
