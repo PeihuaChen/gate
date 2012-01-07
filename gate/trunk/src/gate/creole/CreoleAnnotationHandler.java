@@ -16,6 +16,7 @@
 
 package gate.creole;
 
+import gate.Corpus;
 import gate.Gate;
 import gate.Gate.DirectoryInfo;
 import gate.Gate.ResourceInfo;
@@ -414,8 +415,12 @@ public class CreoleAnnotationHandler {
             if(paramElt.getTextTrim().length() == 0) {
               // need to determine the type
               paramElt.setText(method.getParameterTypes()[0].getName());
-              if(Collection.class
-                      .isAssignableFrom(method.getParameterTypes()[0])) {
+              // for collections (but nor GATE Corpora) we also try to determine
+              // the item type.
+              if((!Corpus.class.isAssignableFrom(
+                      method.getParameterTypes()[0])) &&
+                  Collection.class.isAssignableFrom(
+                      method.getParameterTypes()[0])) {
                 determineCollectionElementType(method, paramElt);
               }
             }
