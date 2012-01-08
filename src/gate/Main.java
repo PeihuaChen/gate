@@ -18,7 +18,6 @@ package gate;
 
 import gate.gui.MainFrame;
 import gate.gui.OptionsDialog;
-import gate.gui.ShellSlacFrame;
 import gate.gui.Splash;
 import gate.util.BomStrippingInputStreamReader;
 import gate.util.CorpusBenchmarkTool;
@@ -110,15 +109,7 @@ public class Main {
     Gate.setNetConnected(false);
     Gate.setLocalWebServer(false);
 
-
-    // run the interface or do batch processing
-    if(batchMode) {
-      if(DEBUG) Out.prln("running batch process");
-      batchProcess();
-    } else {
-      runGui();
-    }
-//    Gate.setUseXMLSerialization(false);
+    runGui();
   } // main
 
   /** Register any CREOLE URLs that we got on the command line */
@@ -230,24 +221,13 @@ public class Main {
         applyUserPreferences();
 
         //all the defaults tables have been updated; build the GUI
-        if(Gate.isSlugGui()) {
-          frame = new ShellSlacFrame();
-          if(DEBUG) Out.prln("constructing SLUG GUI");
-        }
-        else {
-          frame = new MainFrame(gc);
-          if(DEBUG) Out.prln("constructing GUI");
-        } // if - SLUG
-
+        frame = new MainFrame(gc);
+        if(DEBUG) Out.prln("constructing GUI");
+        
         // run the GUI
         frame.setTitleChangable(true);
-        if(Gate.isSlugGui()) {
-          frame.setTitle("SLUG application");
-        }
-        else {
-          frame.setTitle(name + " " + version + " build " + build);
-        } // if - SLUG
-
+        frame.setTitle(name + " " + version + " build " + build);
+        
         // Set title from Java properties
         String title =
           System.getProperty(GateConstants.TITLE_JAVA_PROPERTY_NAME);
@@ -291,30 +271,28 @@ public class Main {
           splash.dispose();
         }
 
-        if(!Gate.isSlugGui()) {
-          //load session if required and available;
-          //do everything from a new thread.
-          Runnable runnable = new Runnable(){
-            public void run(){
-              try{
-                File sessionFile = Gate.getUserSessionFile();
-                if(sessionFile.exists()){
-                  MainFrame.lockGUI("Loading saved session...");
-                  gate.util.persistence.PersistenceManager.loadObjectFromFile(sessionFile);
-                }
-              }catch(Exception e){
-                Err.prln("Failed to load session data:");
-                e.printStackTrace(Err.getPrintWriter());
-              }finally{
-                MainFrame.unlockGUI();
+        //load session if required and available;
+        //do everything from a new thread.
+        Runnable runnable = new Runnable(){
+          public void run(){
+            try{
+              File sessionFile = Gate.getUserSessionFile();
+              if(sessionFile.exists()){
+                MainFrame.lockGUI("Loading saved session...");
+                gate.util.persistence.PersistenceManager.loadObjectFromFile(sessionFile);
               }
+            }catch(Exception e){
+              Err.prln("Failed to load session data:");
+              e.printStackTrace(Err.getPrintWriter());
+            }finally{
+              MainFrame.unlockGUI();
             }
-          };
-          Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
-                                     runnable, "Session loader");
-          thread.setPriority(Thread.MIN_PRIORITY);
-          thread.start();
-        } // if - when no SLUG GUI load session
+          }
+        };
+        Thread thread = new Thread(Thread.currentThread().getThreadGroup(),
+                                   runnable, "Session loader");
+        thread.setPriority(Thread.MIN_PRIORITY);
+        thread.start();
       }
     });
     registerCreoleUrls();
@@ -561,7 +539,7 @@ public class Main {
     */
   public static void processArgs(String[] args) {
 
-    Getopt g = new Getopt("GATE main", args, "hd:ei:asj");
+    Getopt g = new Getopt("GATE main", args, "hd:ei:");
     int c;
     while( (c = g.getopt()) != -1 )
       switch(c) {
@@ -615,68 +593,6 @@ public class Main {
             System.exit(-1);
           }
           break;
-        // -s runs the SLUG GUI
-        case 's':
-          Gate.setSlugGui(true);
-          break;
-/*
-        // -c collname
-        case '-c':
-          collName = g.getOptarg();
-          break;
-
-        // -b
-        case '-b':
-          batchMode = true;
-          break;
-
-        // -a annotator(s)
-        case '-a':
-          if(++i == args.length) { usage(); return; }
-          String annotatorName = g.getOptarg();
-          annotatorNames.add(annotatorName);
-// collect any args for the annotator
-          break;
-
-        // -d
-        case '-d':
-          destroyColl = true;
-          break;
-
-        // -f file(s)
-        case '-f':
-          while(++i < args.length)
-            if(args[i].toCharArray()[0] == '-') { // start of another option
-              i--;
-              break;
-            }
-            else
-              fileNames.add(args[i]);
-          break;
-
-        // -p creolepath
-        case '-p':
-          if(++i < args.length)
-            creolePath = args[i];
-          else
-            { usage(); return; }
-          break;
-
-        // -v classname(s)
-        case '-v':
-          verbose = true;
-          Debug.setDebug(true);
-          while(++i < args.length) {
-            if(args[i].toCharArray()[0] == '-') { // start of another option
-              i--;
-              break;
-            }
-            else
-              debugNames.add(args[i]);
-          } // while
-          break;
-*/
-
         case '?':
           // leave the warning to getopt
           System.exit(STATUS_ERROR);
@@ -690,144 +606,6 @@ public class Main {
       } // getopt switch
 
   } // processArgs()
-
-  /** Run commands as a batch process. */
-  private static void batchProcess() throws GateException{
-    // initialise the library and load user CREOLE directories
-    Gate.init();
-    registerCreoleUrls();
-
-/*
-    // turn debugging on where requested
-    if(verbose) {
-      for(ArrayIterator i = debugNames.begin(); ! i.atEnd(); i.advance()) {
-        try { Debug.setDebug(Class.forName(((String) i.get())), true); }
-        catch(ClassNotFoundException e) {
-          System.err.println(
-            "can't debug class " + (String) i.get() + ": " + e.toString()
-          );
-        }
-      } // for
-    } // debugging on
-
-    // collection: does it exist and can we open it?
-    if(collName == null) {
-      System.err.println("no collection name given");
-      usage();
-      return;
-    }
-    File collDir = new File(collName);
-    JdmCollection coll = null;
-    if(collDir.exists()) { // open collection
-      Debug.prnl("opening collection " + collName);
-      try {
-        coll = new JdmCollection(collName);
-      } catch (JdmException e) {
-        System.err.println(
-          "Couldn't open collection " + collName + " " + e.toString()
-        );
-        return;
-      }
-    } else { // create collection and add documents
-      Debug.prnl("creating collection " + collName);
-      JdmAttributeSequence attrs = new JdmAttributeSequence();
-      try {
-        coll = new JdmCollection(collName, attrs);
-      } catch (JdmException e) {
-        System.err.println(
-          "Couldn't create collection " + collName + " " + e.toString()
-        );
-        return;
-      }
-
-      // add the documents to the collection
-      for(ArrayIterator i = fileNames.begin(); ! i.atEnd(); i.advance()) {
-        Debug.prnl("adding document " + (String) i.get());
-        try {
-          JdmDocument doc = coll.createDocument(
-            (String) i.get(),
-            null,
-            new JdmAnnotationSet(),
-            new JdmAttributeSequence()
-          );
-        } catch (JdmException e) {
-          System.err.println(
-             "Can't add document " + (String) i.get() + ": " + e.toString()
-          );
-        } // catch
-      } // for each filename
-    } // collection create
-
-    // run the annotators on each document in the collection
-    // for each document
-    JdmDocument doc = null;
-    if(coll.length() > 0)
-      try{ doc = coll.firstDocument(); } catch(JdmException e) { }
-    for(int i = 0; i<coll.length(); i++) {
-      if(doc == null) continue; // first and next doc shouldn't throw excptns!
-
-      // for each annotator
-      for(ArrayIterator j = annotatorNames.begin(); !j.atEnd(); j.advance()) {
-        String annotatorName = (String) j.get();
-        Debug.prnl(
-          "calling annotator " + annotatorName + " on doc " + doc.getId()
-        );
-
-        // load the annotator class
-        Annotator annotator = null;
-        Class annotatorClass = null;
-        try {
-          // cheat and assume that all annotators are on CLASSPATH
-          annotatorClass = Class.forName(annotatorName);
-        } catch (Exception ex) {
-          System.err.println(
-            "Could load class for CREOLE object " + annotatorName + ": " +
-            ex.toString()
-          );
-          continue;
-        }
-
-        // construct the annotator
-        try {
-          annotator = (Annotator) annotatorClass.newInstance();
-        } catch (Throwable ex) { // naughty chap
-          System.err.println(
-            "Could create instance of CREOLE object " + annotatorName + ": " +
-            ex.toString()
-          );
-          continue;
-        }
-
-        // annotate this document
-        String[] args = (String[]) annotatorArgsMap.get(annotatorName);
-        if(args == null) args = new String[0];
-        annotator.annotate(doc, args);
-      } // for each annotator
-
-      doc = null;
-      try { doc = coll.nextDocument(); } catch(JdmException e) { }
-    } // for each doc, annotate
-
-    // save collection?
-    if(! destroyColl) {
-      Debug.prnl("saving the collection");
-      try {
-        coll.sync();
-      } catch (JdmException e) {
-        System.err.println(
-          "Can't save collection " + collName + ": " + e.toString()
-        );
-      }
-    } else {
-      Debug.prnl("destroying collection");
-      try { coll.destroy(); } catch(JdmException e) {
-        // if we didn't sync we can't destroy, but that's not an error
-      }
-    }
-
-    Debug.prnl("done batch process");
-*/
-  } // batchProcess()
 
   /** Display a usage message */
   public static void usage() {

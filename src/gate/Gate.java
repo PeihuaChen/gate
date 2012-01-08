@@ -1809,19 +1809,6 @@ public class Gate implements GateConstants {
    */
   protected static Map<URL, DirectoryInfo> pluginData;
 
-  /** Flag for SLUG GUI start instead of standart GATE GUI. */
-  private static boolean slugGui = false;
-
-  /** Should we start SLUG GUI. */
-  public static boolean isSlugGui() {
-    return slugGui;
-  }
-
-  /** Tell GATE whether to start SLUG GUI. */
-  public static void setSlugGui(boolean b) {
-    slugGui = b;
-  }
-
   /**
    * Flag for whether to use native serialization or xml serialization when
    * saving applications.
