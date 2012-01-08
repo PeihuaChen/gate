@@ -16,11 +16,14 @@
 
 package gate.html;
 
+import gate.Gate;
+import gate.corpora.MimeType;
+
 import java.util.Map;
 
-import junit.framework.*;
-
-import gate.Gate;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 
 /** Test class for HTML facilities
@@ -59,7 +62,7 @@ public class TestHtml extends TestCase
                                                         doc, doc.getSourceUrl()
                                                         );
     assertTrue( "Bad document Format was produced. HtmlDocumentFormat was expected",
-            docFormat instanceof gate.corpora.HtmlDocumentFormat
+            docFormat.getMimeType().equals(new MimeType("text","html"))
           );
 
 
