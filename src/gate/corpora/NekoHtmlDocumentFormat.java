@@ -36,7 +36,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.xerces.xni.XNIException;
 import org.apache.xerces.xni.parser.XMLInputSource;
 import org.cyberneko.html.HTMLConfiguration;
 
@@ -50,15 +49,10 @@ import org.cyberneko.html.HTMLConfiguration;
  * and script tags is ignored completely, though the set of tags treated
  * in this way is configurable via a CREOLE parameter.
  * </p>
- * <p>
- * This class extends {@link HtmlDocumentFormat} to cause DocumentImpl
- * to put the necessary whitespace normalization information into the
- * format's ampCodingInfo.
- * </p>
  */
 @CreoleResource(name = "GATE HTML Document Format", isPrivate = true,
     autoinstances = {@AutoInstance(hidden = true)})
-public class NekoHtmlDocumentFormat extends HtmlDocumentFormat {
+public class NekoHtmlDocumentFormat extends TextualDocumentFormat {
   /** Debug flag */
   private static final boolean DEBUG = false;
 

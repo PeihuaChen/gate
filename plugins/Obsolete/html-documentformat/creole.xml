@@ -7,6 +7,7 @@ handling modern HTML, but the old format is here for existing applications
 that depend on its behaviour.
 -->
 <CREOLE-DIRECTORY>
+  <JAR>HTMLDocumentFormat.jar</JAR>
   <CREOLE>   
     <!-- creole.xml for the old HTML document format -->
     <RESOURCE>

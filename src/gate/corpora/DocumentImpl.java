@@ -254,7 +254,7 @@ public class DocumentImpl extends AbstractLanguageResource implements
               boolean shouldCorrectCR = docFormat instanceof XmlDocumentFormat;
               collectInformationForAmpCodding(origContent, ampCodingInfo,
                       shouldCorrectCR);
-              if(docFormat instanceof HtmlDocumentFormat) {
+              if(docFormat.getMimeType().equals(new MimeType("text","html"))) {
                 collectInformationForWS(origContent, ampCodingInfo);
               } // if
             } // if
