@@ -13,20 +13,37 @@
  */
 
 package gate.util;
+
 import gate.Gate;
 import gate.corpora.DocumentXmlUtils;
 
-import java.io.*;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.net.URL;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
-import java.nio.charset.CharacterCodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 
@@ -60,7 +77,7 @@ public class Files {
   static long resourceIndex = 0;
 
   /**Where on the classpath the gate resources are to be found*/
-  protected static String resourcePath = "/gate/resources";
+  protected static final String resourcePath = "/gate/resources";
 
   /**Gets the path for the gate resources within the classpath*/
   public static String getResourcePath(){
@@ -130,7 +147,6 @@ public class Files {
     } else {
       resourceReader = new BomStrippingInputStreamReader(resourceStream, encoding);
     }
-    if(resourceReader == null) return null;
     StringBuffer resourceBuffer = new StringBuffer();
 
     int i;
