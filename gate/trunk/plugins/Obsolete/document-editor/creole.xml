@@ -5,6 +5,7 @@ These VRs make up the obsolete document editor.  This editor has been replaced
 by the classes in gate.gui.docview.
 -->
 <CREOLE-DIRECTORY>
+  <JAR>document-editor.jar</JAR>
   <CREOLE>
    <RESOURCE>
       <NAME>OLD Document Editor</NAME>
