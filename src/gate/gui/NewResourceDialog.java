@@ -178,20 +178,25 @@ public class NewResourceDialog extends JDialog {
   }// getSelectedParameters()
 
   public synchronized void show(ResourceData rData) {
-    this.resourceData = rData;
-    nameField.setText("");
-    parametersEditor.init(null,
-                          rData.getParameterList().getInitimeParameters());
-    pack();
-    setLocationRelativeTo(getOwner());
+    if(rData != null) {
+      this.resourceData = rData;
+      nameField.setText("");
+      parametersEditor.init(null,
+                            rData.getParameterList().getInitimeParameters());
+      pack();
+      setLocationRelativeTo(getOwner());
+    } else {
+      // dialog already populated
+    }
     //default case when the dialog just gets closed 
     userCanceled = true;
     //show the dialog
     setVisible(true);
-    //release resources
-    dispose();
-    if(userCanceled) return;
-    else{
+    if(userCanceled){
+      //release resources
+      dispose();
+      return;
+    } else {
       Runnable runnable = new Runnable(){
         public void run(){
           //create the new resource
@@ -211,7 +216,7 @@ public class NewResourceDialog extends JDialog {
           if(pListener != null){
             pListener.progressChanged(0);
           }
-
+          boolean success = true;
           try {
             long startTime = System.currentTimeMillis();
             FeatureMap features = Factory.newFeatureMap();
@@ -226,6 +231,7 @@ public class NewResourceDialog extends JDialog {
                 (double)(endTime - startTime) / 1000) + " seconds");
             if(pListener != null) pListener.processFinished();
           } catch(ResourceInstantiationException rie){
+            success = false;
             JOptionPane.showMessageDialog(getOwner(),
                                           "Resource could not be created!\n" +
                                           rie.toString(),
@@ -237,6 +243,7 @@ public class NewResourceDialog extends JDialog {
                                                           "!");
             if(pListener != null) pListener.processFinished();
           }catch(Throwable thr){
+            success = false;
             JOptionPane.showMessageDialog(getOwner(),
                     "Unhandled error!\n" +
                     thr.toString(),
@@ -247,6 +254,15 @@ public class NewResourceDialog extends JDialog {
                                                 nameField.getText() +
                                                 "!");
             if(pListener != null) pListener.processFinished();
+          } finally {
+            if(!success) {
+              // re-show the dialog, to allow the suer to correct the entry
+              SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                  show(null);    
+                }
+              });
+            }
           }
         }//public void run()
       };
