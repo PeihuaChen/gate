@@ -8,14 +8,12 @@
 	<classpathentry kind="src" output="plugins/Gazetteer_Ontology_Based/build" path="plugins/Gazetteer_Ontology_Based/src"/>
 	<classpathentry kind="src" output="plugins/Parser_Stanford/classes" path="plugins/Parser_Stanford/src"/>
 	<classpathentry kind="src" output="plugins/Lang_Chinese/build" path="plugins/Lang_Chinese/src"/>
-	<classpathentry kind="src" output="plugins/Web_Search_Google/build" path="plugins/Web_Search_Google/src"/>
 	<classpathentry kind="src" output="plugins/UIMA/classes" path="plugins/UIMA/src"/>
 	<classpathentry kind="src" output="plugins/Tagger_Chemistry/classes" path="plugins/Tagger_Chemistry/src"/>
 	<classpathentry kind="src" output="plugins/Parser_Minipar/classes" path="plugins/Parser_Minipar/src"/>
 	<classpathentry kind="src" output="plugins/Lang_Romanian/build" path="plugins/Lang_Romanian/src"/>
 	<classpathentry kind="src" output="plugins/Lang_Hindi/build" path="plugins/Lang_Hindi/src"/>
 	<classpathentry kind="src" output="plugins/Keyphrase_Extraction_Algorithm/build" path="plugins/Keyphrase_Extraction_Algorithm/src"/>
-	<classpathentry kind="src" output="plugins/Web_Search_Yahoo/classes" path="plugins/Web_Search_Yahoo/src"/>
 	<classpathentry kind="src" output="plugins/Web_Crawler_Websphinx/build" path="plugins/Web_Crawler_Websphinx/src"/>
 	<classpathentry kind="src" output="plugins/Parser_RASP/classes" path="plugins/Parser_RASP/src"/>
 	<classpathentry kind="src" output="plugins/Jape_Compiler/build" path="plugins/Jape_Compiler/src"/>
