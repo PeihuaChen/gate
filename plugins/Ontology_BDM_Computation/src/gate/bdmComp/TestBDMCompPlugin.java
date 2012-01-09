@@ -27,7 +27,7 @@ public class TestBDMCompPlugin extends TestCase {
     super(arg0);
     if(!initialized) {
       Gate.init();
-      File owlimPluginHome = new File(new File(Gate.getGateHome(), "plugins/"), "Ontology");
+      File owlimPluginHome = new File(new File(Gate.getGateHome(), "plugins"), "Ontology");
       Gate.getCreoleRegister().addDirectory(owlimPluginHome.toURI().toURL());
       bdmPluginHome = new File(new File(Gate.getGateHome(), "plugins"),
         "Ontology_BDM_Computation");
