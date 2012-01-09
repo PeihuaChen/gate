@@ -16,7 +16,6 @@
 	<classpathentry kind="src" output="plugins/Keyphrase_Extraction_Algorithm/build" path="plugins/Keyphrase_Extraction_Algorithm/src"/>
 	<classpathentry kind="src" output="plugins/Web_Crawler_Websphinx/build" path="plugins/Web_Crawler_Websphinx/src"/>
 	<classpathentry kind="src" output="plugins/Parser_RASP/classes" path="plugins/Parser_RASP/src"/>
-	<classpathentry kind="src" output="plugins/Jape_Compiler/build" path="plugins/Jape_Compiler/src"/>
 	<classpathentry kind="src" output="plugins/Ontology_Tools/build" path="plugins/Ontology_Tools/src"/>
 	<classpathentry kind="src" output="plugins/Tagger_NP_Chunking/classes" path="plugins/Tagger_NP_Chunking/src"/>
 	<classpathentry kind="src" output="plugins/Lang_Arabic/build" path="plugins/Lang_Arabic/src"/>
