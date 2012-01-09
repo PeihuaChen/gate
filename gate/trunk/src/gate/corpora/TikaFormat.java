@@ -95,7 +95,6 @@ public class TikaFormat extends DocumentFormat {
       }
     };
 
-    Parser tikaParser = createParser();
     XmlDocumentHandler ch = new XmlDocumentHandler(doc, this.markupElementsMap,
             this.element2StringMap);
     Metadata metadata = extractParserTips(doc);
@@ -106,6 +105,7 @@ public class TikaFormat extends DocumentFormat {
     ch.setAmpCodingInfo(ampCodingInfo);
     InputStream input = null;	   
     try {
+      Parser tikaParser = new TikaConfig().getParser();      
       input = doc.getSourceUrl().openStream();
       tikaParser.parse(input, ch, metadata, new ParseContext());
       setDocumentFeatures(metadata, doc);
@@ -124,18 +124,6 @@ public class TikaFormat extends DocumentFormat {
     if (doc instanceof DocumentImpl) {
       ((DocumentImpl)doc).setNextAnnotationId(ch.getCustomObjectsId());
     }
-  }
-
-  private Parser createParser() {
-    Parser fallback = new AutoDetectParser();
-    TikaConfig conf = TikaConfig.getDefaultConfig();
-    
-    // This composite parser will always honor the input mime type
-    // if the mimetype isn't recognized it will use the auto detect parser
-    CompositeParser p = new CompositeParser();
-    p.setFallback(fallback);
-    p.setParsers(conf.getParsers());
-    return p;
   }
 
   private void setDocumentFeatures(Metadata metadata, Document doc) {

@@ -122,13 +122,13 @@
 	<classpathentry kind="lib" path="lib/poi-ooxml-3.7.jar"/>
 	<classpathentry kind="lib" path="lib/poi-ooxml-schemas-3.7.jar"/>
 	<classpathentry kind="lib" path="lib/poi-scratchpad-3.7.jar"/>
-	<classpathentry kind="lib" path="lib/tika-core-0.9.jar"/>
-	<classpathentry kind="lib" path="lib/tika-parsers-0.9.jar"/>
 	<classpathentry kind="lib" path="lib/apache-mime4j-0.6.jar"/>
 	<classpathentry kind="lib" path="lib/fontbox-1.6.0.jar"/>
 	<classpathentry kind="lib" path="lib/metadata-extractor-2.4.0-beta-1.jar"/>
 	<classpathentry kind="lib" path="plugins/JAPE_Plus/lib/colt-1.2.0-free.jar"/>
 	<classpathentry kind="lib" path="plugins/Ontology/lib/openrdf-sesame-2.6.1-onejar.jar"/>
 	<classpathentry kind="lib" path="plugins/Ontology/lib/owlim-lite-4.3.jar"/>
+	<classpathentry kind="lib" path="lib/tika-core-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/tika-parsers-1.0.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
