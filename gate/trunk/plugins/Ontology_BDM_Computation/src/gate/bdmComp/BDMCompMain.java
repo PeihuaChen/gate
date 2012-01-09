@@ -56,14 +56,6 @@ ProcessingResource {
   
 	/** Initialise this resource, and return it. */
 	public gate.Resource init() throws ResourceInstantiationException {
-	// step 2: load the Ontology_Tools plugin 
-    File ontoHome = new File(Gate.getPluginsHome(),"Ontology_Tools"); 
-    try {
-      Gate.getCreoleRegister().addDirectory(ontoHome.toURI().toURL());
-    }
-    catch(MalformedURLException e) {
-      e.printStackTrace();
-    }
     bdmScores = new HashSet<BDMOne>();
 		return this;
 	} // init()
@@ -100,8 +92,12 @@ ProcessingResource {
 	    } else { 
 	      // step 3: set the parameters 
 	      FeatureMap fm = Factory.newFeatureMap(); 
-	      fm.put("rdfXmlURL", ontologyURL); 
-	      fm.put("loadImports", Boolean.FALSE);
+	      fm.put("rdfXmlURL", ontologyURL);
+	      
+	      String baseURI=ontologyURL.toURI().toString();
+	      baseURI = baseURI.substring(0,baseURI.lastIndexOf('/')+1);	      
+	      fm.put("baseURI", baseURI);
+	      
 	      // step 4: finally create an instance of ontology 
 	      try {
           ontologyUsed = (Ontology)Factory.createResource("gate.creole.ontology.impl.sesame.OWLIMOntology", fm);
