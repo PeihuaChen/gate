@@ -101,9 +101,10 @@ ProcessingResource {
 	      // step 3: set the parameters 
 	      FeatureMap fm = Factory.newFeatureMap(); 
 	      fm.put("rdfXmlURL", ontologyURL); 
+	      fm.put("loadImports", Boolean.FALSE);
 	      // step 4: finally create an instance of ontology 
 	      try {
-          ontologyUsed = (Ontology)Factory.createResource("gate.creole.ontology.owlim.OWLIMOntologyLR", fm);
+          ontologyUsed = (Ontology)Factory.createResource("gate.creole.ontology.impl.sesame.OWLIMOntology", fm);
         }
         catch(ResourceInstantiationException e) {
           e.printStackTrace();

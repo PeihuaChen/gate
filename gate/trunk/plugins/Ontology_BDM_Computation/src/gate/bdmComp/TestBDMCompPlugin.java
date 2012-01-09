@@ -1,19 +1,14 @@
 package gate.bdmComp;
 
 import gate.Corpus;
-import gate.Document;
 import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
 import gate.GateConstants;
-import gate.util.ExtensionFileFilter;
 import gate.util.GateException;
 
 import java.io.File;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.Comparator;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -32,7 +27,7 @@ public class TestBDMCompPlugin extends TestCase {
     if(!initialized) {
       Gate.init();
       File owlimPluginHome = new File(new File(Gate.getGateHome(), "plugins"),
-        "Ontology_OWLIM2");
+        "Ontology");
       Gate.getCreoleRegister().addDirectory(owlimPluginHome.toURI().toURL());
       bdmPluginHome = new File(new File(Gate.getGateHome(), "plugins"),
         "Ontology_BDM_Computation");
@@ -95,6 +90,7 @@ public class TestBDMCompPlugin extends TestCase {
       BDMCompMain bdmM;
 
       FeatureMap parameters = Factory.newFeatureMap();
+      
       
       bdmM = (BDMCompMain)Factory.createResource(
         "gate.bdmComp.BDMCompMain", parameters);
