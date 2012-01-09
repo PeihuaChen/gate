@@ -9,6 +9,7 @@ package gate.creole.annic.lucene;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -402,10 +403,6 @@ public class LuceneIndexer implements Indexer {
   private List<gate.creole.annic.apache.lucene.document.Document> getLuceneDocuments(
           String corpusPersistenceID, gate.Document gateDoc, String location)
           throws IndexException {
-    ArrayList sets_to_include = new ArrayList((List)parameters
-            .get(Constants.ANNOTATION_SETS_NAMES_TO_INCLUDE));
-    ArrayList sets_to_exclude = new ArrayList((List)parameters
-            .get(Constants.ANNOTATION_SETS_NAMES_TO_EXCLUDE));
 
     String baseTokenAnnotationType = (String)parameters
             .get(Constants.BASE_TOKEN_ANNOTATION_TYPE);
@@ -413,16 +410,16 @@ public class LuceneIndexer implements Indexer {
     String indexUnitAnnotationType = (String)parameters
             .get(Constants.INDEX_UNIT_ANNOTATION_TYPE);
 
-    ArrayList featuresToExclude = new ArrayList((List)parameters
+    List<String> featuresToExclude = new ArrayList<String>((List<String>)parameters
             .get(Constants.FEATURES_TO_EXCLUDE));
 
-    ArrayList featuresToInclude = new ArrayList((List)parameters
+    List<String> featuresToInclude = new ArrayList<String>((List<String>)parameters
             .get(Constants.FEATURES_TO_INCLUDE));
 
-    ArrayList annotationSetsToExclude = new ArrayList((List)parameters
+    List<String> annotationSetsToExclude = new ArrayList<String>((List<String>)parameters
             .get(Constants.ANNOTATION_SETS_NAMES_TO_EXCLUDE));
 
-    ArrayList annotationSetsToInclude = new ArrayList((List)parameters
+    List<String> annotationSetsToInclude = new ArrayList<String>((List<String>)parameters
             .get(Constants.ANNOTATION_SETS_NAMES_TO_INCLUDE));
 
     Boolean createTokensAutomatically = (Boolean) parameters.get(Constants.CREATE_TOKENS_AUTOMATICALLY);
@@ -489,7 +486,7 @@ public class LuceneIndexer implements Indexer {
               new com.thoughtworks.xstream.io.xml.StaxDriver());
   
       // Saving is accomplished just using XML serialization of the map.
-      this.parameters = (HashMap)xstream.fromXML(fileReader);
+      this.parameters = (Map)xstream.fromXML(fileReader);
       // setting the index location URL
       this.parameters.put(Constants.INDEX_LOCATION_URL, indexLocationUrl);
     }
@@ -516,7 +513,7 @@ public class LuceneIndexer implements Indexer {
     }
 
     java.io.FileWriter fileWriter = new java.io.FileWriter(file);
-    HashMap indexInformation = new HashMap();
+    Map indexInformation = new HashMap();
     Iterator iter = parameters.keySet().iterator();
     while(iter.hasNext()) {
       Object key = iter.next();

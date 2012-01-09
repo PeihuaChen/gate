@@ -7,8 +7,12 @@
  */
 package gate.creole.annic.lucene;
 
-import java.io.*;
+import gate.creole.annic.apache.lucene.analysis.Token;
+
+import java.io.BufferedReader;
+import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A Reader that stores the document to read and the token stream
@@ -27,7 +31,7 @@ public class LuceneReader extends BufferedReader {
   /**
    * Token Stream.
    */
-  ArrayList tokenStream;
+  List<Token> tokenStream;
 
   /**
    * Constructor
@@ -35,7 +39,7 @@ public class LuceneReader extends BufferedReader {
    * @param gateDoc
    * @param tokenStream
    */
-  public LuceneReader(gate.Document gateDoc, ArrayList tokenStream) {
+  public LuceneReader(gate.Document gateDoc, List<Token> tokenStream) {
     super(new StringReader(""));
     this.gateDoc = gateDoc;
     this.tokenStream = tokenStream;
@@ -55,7 +59,7 @@ public class LuceneReader extends BufferedReader {
    * 
    * @return
    */
-  public ArrayList getTokenStream() {
+  public List<Token> getTokenStream() {
     return this.tokenStream;
   }
 }

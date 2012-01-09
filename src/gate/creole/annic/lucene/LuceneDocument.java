@@ -60,16 +60,16 @@ public class LuceneDocument {
    */
   public List<Document> createDocuments(String corpusPersistenceID,
     gate.Document gateDoc, String documentID,
-    ArrayList<String> annotSetsToInclude, ArrayList<String> annotSetsToExclude,
-    ArrayList<String> featuresToInclude, ArrayList<String> featuresToExclude,
+    List<String> annotSetsToInclude, List<String> annotSetsToExclude,
+    List<String> featuresToInclude, List<String> featuresToExclude,
     String indexLocation, String baseTokenAnnotationType,
     Boolean createTokensAutomatically, String indexUnitAnnotationType) {
 
     if(baseTokenAnnotationType != null)
       baseTokenAnnotationType = baseTokenAnnotationType.trim();
 
-    ArrayList<Document> toReturnBack = new ArrayList<Document>();
-    ArrayList<String> annotSetsToIndex = new ArrayList<String>();
+    List<Document> toReturnBack = new ArrayList<Document>();
+    List<String> annotSetsToIndex = new ArrayList<String>();
 
     // by default merge set must be created
     //boolean createMergeSet = true;
@@ -334,7 +334,7 @@ public class LuceneDocument {
 
       Set<String> indexedFeatures = new HashSet<String>();
       // tempBaseTokenAnnotationSet is not null
-      ArrayList<Token>[] tokenStreams =
+      List<Token>[] tokenStreams =
         getTokens(gateDoc, aSetToIndex, featuresToInclude, featuresToExclude,
           baseTokenAnnotationType, baseTokenAnnotationSet,
           indexUnitAnnotationType, indexUnitAnnotationSet, indexedFeatures);
@@ -539,7 +539,7 @@ public class LuceneDocument {
    * @param location
    * @throws Exception
    */
-  private void writeOnDisk(ArrayList tokenStream, String folderName,
+  private void writeOnDisk(List<Token> tokenStream, String folderName,
     String fileName, String location) throws Exception {
 
     // before we write it on a disk, we need to change its name to
@@ -603,9 +603,9 @@ public class LuceneDocument {
    * @param indexUnitAnnotationType
    * @return
    */
-  private ArrayList<Token>[] getTokens(gate.Document document,
-    AnnotationSet inputAs, ArrayList<String> featuresToInclude,
-    ArrayList<String> featuresToExclude, String baseTokenAnnotationType,
+  private List<Token>[] getTokens(gate.Document document,
+    AnnotationSet inputAs, List<String> featuresToInclude,
+    List<String> featuresToExclude, String baseTokenAnnotationType,
     AnnotationSet baseTokenSet, String indexUnitAnnotationType,
     AnnotationSet indexUnitSet, Set<String> indexedFeatures) {
 

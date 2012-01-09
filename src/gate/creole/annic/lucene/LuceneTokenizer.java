@@ -19,15 +19,15 @@ import java.util.*;
  */
 public class LuceneTokenizer extends TokenStream {
 	Document document;
-	ArrayList tokens;
-	ArrayList featuresToExclude;
+	List<Token> tokens;
+	List featuresToExclude;
 	int pointer = 0;
 
   /**
    * Constructor
    * @param tokenStream
    */
-	public LuceneTokenizer(ArrayList tokenStream) {
+	public LuceneTokenizer(List<Token> tokenStream) {
 		this.tokens = tokenStream;
 		pointer = 0;
 	}
