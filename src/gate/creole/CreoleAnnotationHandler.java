@@ -16,10 +16,10 @@
 
 package gate.creole;
 
-import gate.Corpus;
 import gate.Gate;
 import gate.Gate.DirectoryInfo;
 import gate.Gate.ResourceInfo;
+import gate.Resource;
 import gate.creole.metadata.AutoInstance;
 import gate.creole.metadata.AutoInstanceParam;
 import gate.creole.metadata.CreoleParameter;
@@ -415,9 +415,9 @@ public class CreoleAnnotationHandler {
             if(paramElt.getTextTrim().length() == 0) {
               // need to determine the type
               paramElt.setText(method.getParameterTypes()[0].getName());
-              // for collections (but not GATE Corpora) we also try to determine
+              // for collections (but not GATE Resources) we also try to determine
               // the item type.
-              if((!Corpus.class.isAssignableFrom(
+              if((!Resource.class.isAssignableFrom(
                       method.getParameterTypes()[0])) &&
                   Collection.class.isAssignableFrom(
                       method.getParameterTypes()[0])) {
