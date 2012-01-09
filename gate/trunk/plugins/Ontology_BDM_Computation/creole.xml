@@ -11,9 +11,9 @@
       <CLASS>gate.bdmComp.BDMCompMain</CLASS>
       <JAR>BDMCompMain.jar</JAR>
 
-      <PARAMETER NAME="ontologyURL"
-        COMMENT="The URL storing the ontology used for BDM computing" RUNTIME="true"
-        OPTIONAL="false">java.net.URL</PARAMETER>
+      <PARAMETER NAME="ontology"
+        COMMENT="The ontology used for BDM computing" RUNTIME="true"
+        OPTIONAL="false">gate.creole.ontology.Ontology</PARAMETER>
 
 	<PARAMETER NAME="outputBDMFile"
         COMMENT="The URL storing the BDM scores" RUNTIME="true"

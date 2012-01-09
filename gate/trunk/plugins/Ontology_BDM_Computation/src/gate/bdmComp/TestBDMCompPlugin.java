@@ -5,6 +5,7 @@ import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
 import gate.GateConstants;
+import gate.creole.ontology.Ontology;
 import gate.util.GateException;
 
 import java.io.File;
@@ -98,7 +99,18 @@ public class TestBDMCompPlugin extends TestCase {
       File testOnto = new File(corpusDirName, "protont.owl");
       File bdmFile = new File(corpusDirName, "protont-bdm.txt");
      
-      bdmM.setOntologyURL(testOnto.toURI().toURL()); //("ann1;ann2;ann3");
+      FeatureMap fm = Factory.newFeatureMap(); 
+      fm.put("rdfXmlURL", testOnto.toURI().toURL());
+      
+      String baseURI=testOnto.getParentFile().toURI().toString();
+      baseURI = baseURI.substring(0,baseURI.lastIndexOf('/')+1);        
+      fm.put("baseURI", baseURI);
+      
+      fm.put("loadImports", Boolean.FALSE);
+      
+      Ontology ontology = (Ontology)Factory.createResource("gate.creole.ontology.impl.sesame.OWLIMOntology", fm);
+             
+      bdmM.setOntology(ontology); //("ann1;ann2;ann3");
       bdmM.setOutputBDMFile(bdmFile.toURI().toURL());
       //bdmM.setAnnTypesAndFeats("Os;sent->Op");
       //bdmM.setVerbosity("0");
