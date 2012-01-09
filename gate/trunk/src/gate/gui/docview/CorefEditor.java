@@ -1116,9 +1116,10 @@ public class CorefEditor
    * @return
    */
   public String getString(Annotation ann) {
-    return document.getContent().toString().substring(ann.
-        getStartNode().getOffset().intValue(),
-        ann.getEndNode().getOffset().intValue());
+  	return document.getContent().toString().substring(ann.
+          getStartNode().getOffset().intValue(),
+          ann.getEndNode().getOffset().intValue()
+          ).replaceAll("\\r\\n|\\r|\\n", " ");
   }
 
   /**
