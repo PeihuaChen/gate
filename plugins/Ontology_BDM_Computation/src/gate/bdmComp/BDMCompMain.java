@@ -14,6 +14,14 @@
 
 package gate.bdmComp;
 
+import gate.Factory;
+import gate.ProcessingResource;
+import gate.creole.AbstractLanguageAnalyser;
+import gate.creole.ExecutionException;
+import gate.creole.ResourceInstantiationException;
+import gate.creole.ontology.OClass;
+import gate.creole.ontology.Ontology;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -21,22 +29,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-
-import gate.Factory;
-import gate.FeatureMap;
-import gate.Gate;
-import gate.ProcessingResource;
-import gate.creole.AbstractLanguageAnalyser;
-import gate.creole.ExecutionException;
-import gate.creole.ResourceInstantiationException;
-import gate.creole.ontology.OClass;
-import gate.creole.ontology.Ontology;
 
 /**
  * TODO: the output file is always growing for each run of the PR
@@ -45,10 +42,8 @@ import gate.creole.ontology.Ontology;
  */
 public class BDMCompMain extends AbstractLanguageAnalyser implements
 ProcessingResource {
-  /** File name or URL storing the ontology. */
-  URL ontologyURL = null;
   /** The ontology used. */
-  Ontology ontologyUsed = null;
+  Ontology ontology = null;
   /** The file storing the BDM score. */
   URL outputBDMFile = null;
   /** store the BDM information for each pair of concepts. */
@@ -87,38 +82,26 @@ ProcessingResource {
     
 	  /** load the ontology. */ 
 	  //if(ontologyUsed == null || ontologyUsed.toString().trim() == "") {
-	    if(ontologyURL == null || ontologyURL.toString().trim() == "") {
+	    if(ontology == null) {
         throw new ExecutionException("No ontology: neither using a loaded ontology nor giving the ontology URL!");
-	    } else { 
-	      // step 3: set the parameters 
-	      FeatureMap fm = Factory.newFeatureMap(); 
-	      fm.put("rdfXmlURL", ontologyURL);
-	      
-	      String baseURI=ontologyURL.toURI().toString();
-	      baseURI = baseURI.substring(0,baseURI.lastIndexOf('/')+1);	      
-	      fm.put("baseURI", baseURI);
-	      
-	      // step 4: finally create an instance of ontology 
-	      try {
-          ontologyUsed = (Ontology)Factory.createResource("gate.creole.ontology.impl.sesame.OWLIMOntology", fm);
-        }
-        catch(ResourceInstantiationException e) {
-          e.printStackTrace();
-        } 
 	    }
+	    /*else { 
+	      // step 3: set the parameters 
+	      
+	    }*/
 	  //}
 	    //write the header of the bdm score file
 	    if(isExistingResultFile) {
 	      bdmResultsWriter.append("##The following are the BDM scores for ");
-	      bdmResultsWriter.append("each pair of concepts in the ontology named "+ontologyUsed.getName()+".\n");
+	      bdmResultsWriter.append("each pair of concepts in the ontology named "+ontology.getName()+".\n");
 	    }
 	    // retrieving a list of top classes 
-	    Set<OClass> topClasses = ontologyUsed.getOClasses(true);
+	    Set<OClass> topClasses = ontology.getOClasses(true);
 	    if(topClasses.size()>1) {
 	      System.out.println("The ontology has "+topClasses.size() +" top classes!!");
 	    }
 	    // retrieving a list of all classes 
-      Set<OClass> allConcepts = ontologyUsed.getOClasses(false);
+      Set<OClass> allConcepts = ontology.getOClasses(false);
       //assign a number id to each class
       
       HashMap<Integer,OClass> id2concept= new HashMap<Integer,OClass>();
@@ -130,7 +113,7 @@ ProcessingResource {
         ++num;
       }
       
-      System.out.println("ontology "+ontologyUsed.getName()+", allConcepts="+allConcepts.size());
+      System.out.println("ontology "+ontology.getName()+", allConcepts="+allConcepts.size());
       
       //for each concept, get the chain from it to the top class
       HashMap<OClass,String> concept2chain = new HashMap<OClass,String>();
@@ -354,7 +337,7 @@ ProcessingResource {
         }
       }
       // unload the ontology
-      if (ontologyUsed != null) Factory.deleteResource(ontologyUsed);
+      if (ontology != null) Factory.deleteResource(ontology);
     }
       
 	  
@@ -377,19 +360,19 @@ ProcessingResource {
 	     // System.out.println("****** curCon="+curCon.getName()+"*"+", num="+superCons.size());
 	    //}
 	    for(OClass oneCon:superCons) {
-	      oneCon = (OClass) ontologyUsed.getOResourceByName(oneCon.getName());
+	      oneCon = (OClass) ontology.getOResourceByName(oneCon.getName());
 	      chainNow +=  obtainAChain(oneCon, chainSofar);
 	    }
 	  }
 	 return chainNow;
 	}
 	
-	public void setOntologyURL(URL ontoU) {
-    this.ontologyURL = ontoU;
+	public void setOntology(Ontology ontology) {
+    this.ontology = ontology;
   }
 
-  public URL getOntologyURL() {
-    return this.ontologyURL;
+  public Ontology getOntology() {
+    return this.ontology;
   }
   public void setOutputBDMFile(URL ontoU) {
     this.outputBDMFile = ontoU;
