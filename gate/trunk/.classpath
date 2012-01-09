@@ -86,7 +86,6 @@
 	<classpathentry kind="lib" path="lib/xmlunit-1.2.jar"/>
 	<classpathentry kind="lib" path="plugins/Learning/lib/weka.jar"/>
 	<classpathentry kind="lib" path="plugins/Web_Crawler_Websphinx/lib/websphinx.jar"/>
-	<classpathentry kind="lib" path="plugins/Web_Search_Google/lib/googleapi.jar"/>
 	<classpathentry kind="lib" path="plugins/Keyphrase_Extraction_Algorithm/lib/weka-3.4.6.jar"/>
 	<classpathentry kind="lib" path="plugins/Machine_Learning/lib/troveForMaxent.jar"/>
 	<classpathentry kind="lib" path="plugins/Parser_SUPPLE/lib/compiler.jar"/>
@@ -107,7 +106,6 @@
 	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-examples.jar"/>
 	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-document-annotation.jar"/>
 	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-tools.jar"/>
-	<classpathentry kind="lib" path="plugins/Web_Search_Yahoo/lib/yahoo_search-1.1.0.jar"/>
 	<classpathentry kind="lib" path="plugins/Parser_Stanford/lib/stanford-parser.jar"/>
 	<classpathentry kind="lib" path="lib/gate-asm.jar"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
