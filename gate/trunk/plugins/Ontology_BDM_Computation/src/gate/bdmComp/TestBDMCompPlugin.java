@@ -27,8 +27,7 @@ public class TestBDMCompPlugin extends TestCase {
     super(arg0);
     if(!initialized) {
       Gate.init();
-      File owlimPluginHome = new File(new File(Gate.getGateHome(), "plugins"),
-        "Ontology");
+      File owlimPluginHome = new File(new File(Gate.getGateHome(), "plugins/"), "Ontology");
       Gate.getCreoleRegister().addDirectory(owlimPluginHome.toURI().toURL());
       bdmPluginHome = new File(new File(Gate.getGateHome(), "plugins"),
         "Ontology_BDM_Computation");
@@ -61,37 +60,15 @@ public class TestBDMCompPlugin extends TestCase {
             GateConstants.DOCUMENT_ADD_SPACE_ON_UNPACK_FEATURE_NAME,
             Boolean.FALSE);
     try {
-      
-      //Gate.setGateHome(new File("C:\\svn\\gate"));
-      //Gate.setUserConfigFile(new File("C:\\svn\\gate.xml"));
-      //Gate.init();
-      //ExtensionFileFilter fileFilter = new ExtensionFileFilter();
-      //fileFilter.addExtension("xml");
-      //iaaPluginHome = new File(new File(Gate.getGateHome(), "plugins"),
-      //"iaaPlugin");
-      //Gate.getCreoleRegister().addDirectory(iaaPluginHome.toURI().toURL());
-
       // Load the documents into a corpus
       Corpus data = Factory.newCorpus("data");
       
       String corpusDirName; 
       corpusDirName = new File(bdmPluginHome, "test/ontology").getAbsolutePath();
       
-      //corpusDirName = "C:\\svn\\gate\\plugins\\bdmComputation\\test\\ontology";
-      
-      
-      //String testDir = "plugins/iaaPlugin/test/";
-      
-      //System.out.println("testDir00=*"+(new File(testDir,"beijing-opera.xml")).getAbsolutePath().toString()+"*");
-      /*Document doc = Factory.newDocument(new File("C:\\svn\\gate\\plugins\\iaaPlugin\\test\\beijing-opera.xml").toURI().toURL(), "UTF-8");
-      Document doc1 = Factory.newDocument(new File("C:\\svn\\gate\\plugins\\iaaPlugin\\test\\beijing-opera-2.xml").toURI().toURL(), "UTF-8");
-      data.add(doc);
-      data.add(doc1);*/
-      
       BDMCompMain bdmM;
 
       FeatureMap parameters = Factory.newFeatureMap();
-      
       
       bdmM = (BDMCompMain)Factory.createResource(
         "gate.bdmComp.BDMCompMain", parameters);
@@ -101,13 +78,7 @@ public class TestBDMCompPlugin extends TestCase {
      
       FeatureMap fm = Factory.newFeatureMap(); 
       fm.put("rdfXmlURL", testOnto.toURI().toURL());
-      
-      String baseURI=testOnto.getParentFile().toURI().toString();
-      baseURI = baseURI.substring(0,baseURI.lastIndexOf('/')+1);        
-      fm.put("baseURI", baseURI);
-      
-      fm.put("loadImports", Boolean.FALSE);
-      
+            
       Ontology ontology = (Ontology)Factory.createResource("gate.creole.ontology.impl.sesame.OWLIMOntology", fm);
              
       bdmM.setOntology(ontology); //("ann1;ann2;ann3");
@@ -151,13 +122,10 @@ public class TestBDMCompPlugin extends TestCase {
       nPwF[2] = (int)Math.ceil((double)bdmTS[2]*1000);
       nPwF[3] = (int)Math.ceil((double)bdmTS[3]*1000);
       //System.out.println("1="+nPwF[0]+", 2="+nPwF[1]+", 3="+nPwF[2]+", 4="+nPwF[3]+".");
-      assertEquals("Wrong value for correct: ", 495, nPwF[0]);
+      assertEquals("Wrong value for correct: ", 488, nPwF[0]);
       assertEquals("Wrong value for correct: ", 0, nPwF[1]);
       assertEquals("Wrong value for correct: ", 0, nPwF[2]);
-      assertEquals("Wrong value for correct: ", 296, nPwF[3]);
-      
-      
-      
+      assertEquals("Wrong value for correct: ", 290, nPwF[3]);
     }
     finally {
       Gate.getUserConfig().put(
