@@ -183,7 +183,8 @@ public class GazetteerEditor extends AbstractVisualResource
         }
       }
     };
-    definitionTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    definitionTable.setSelectionMode(
+      ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     definitionTable.setRowSelectionAllowed(true);
     definitionTable.setColumnSelectionAllowed(false);
     definitionTable.setEnableHidingColumns(true);
@@ -373,11 +374,6 @@ public class GazetteerEditor extends AbstractVisualResource
     listTable.setSortable(true);
     listTable.setSortedColumn(0);
     listPanel.add(new JScrollPane(listTable), BorderLayout.CENTER);
-//    JPanel listBottomPanel = new JPanel(new BorderLayout());
-//    JPanel filterPanel = new JPanel();
-//    listEntryTextField = new JTextField(15);
-//    listEntryTextField.setToolTipText("Filter rows on all column values");
-//    listEntryTextField.setEnabled(false);
     // select all the rows containing the text from filterTextField
 //    listEntryTextField.getDocument().addDocumentListener(
 //        new DocumentListener() {
@@ -398,8 +394,6 @@ public class GazetteerEditor extends AbstractVisualResource
 //        timer.schedule(timerTask, timeToRun);
 //      }
 //    });
-//    filterPanel.add(new JLabel("Filter: "));
-//    filterPanel.add(listEntryTextField);
     listTopPanel.add(caseInsensitiveCheckBox = new JCheckBox("Case Ins."));
     caseInsensitiveCheckBox.setSelected(true);
     caseInsensitiveCheckBox.setToolTipText("Case Insensitive");
@@ -423,9 +417,6 @@ public class GazetteerEditor extends AbstractVisualResource
         listEntryTextField.setText(listEntryTextField.getText());
       }
     });
-//    listBottomPanel.add(filterPanel, BorderLayout.WEST);
-//    listBottomPanel.add(listCountLabel = new JLabel(), BorderLayout.EAST);
-//    listPanel.add(listBottomPanel, BorderLayout.SOUTH);
 
     JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
     splitPane.add(definitionPanel);
@@ -445,12 +436,13 @@ public class GazetteerEditor extends AbstractVisualResource
            || definitionTable.isEditing()) {
             return;
           }
-          if (definitionTable.getSelectedRow() == -1) { // no list selected
+          if (definitionTable.getSelectedRowCount() != 1) {
+            // zero or several lists selected
             listTableModel.setGazetteerList(new GazetteerList());
             selectedLinearNode = null;
             listEntryTextField.setEnabled(false);
             addColumnsButton.setEnabled(false);
-          } else { // list selected
+          } else { // one list selected
             String listName = (String) definitionTable.getValueAt(
               definitionTable.getSelectedRow(),
               definitionTable.convertColumnIndexToView(0));
@@ -564,8 +556,10 @@ public class GazetteerEditor extends AbstractVisualResource
         if (me.isPopupTrigger()
           && table.getSelectedRowCount() > 0) {
           JPopupMenu popup = new JPopupMenu();
-          popup.add(new ReloadGazetteerListAction());
-          popup.addSeparator();
+          if (table.getSelectedRowCount() == 1) {
+            popup.add(new ReloadGazetteerListAction());
+            popup.addSeparator();
+          }
           popup.add(new DeleteSelectedLinearNodeAction());
           popup.show(table, me.getX(), me.getY());
         }
@@ -621,8 +615,6 @@ public class GazetteerEditor extends AbstractVisualResource
     actionMap.put("save", actions.get(0));
     inputMap.put(KeyStroke.getKeyStroke("control shift S"), "save as");
     actionMap.put("save as", actions.get(1));
-    inputMap.put(KeyStroke.getKeyStroke("control R"), "reload list");
-    actionMap.put("reload list", new ReloadGazetteerListAction());
 
     // add key shortcuts for the list table actions
     inputMap = listTable.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
@@ -925,16 +917,16 @@ public class GazetteerEditor extends AbstractVisualResource
     private GazetteerList gazetteerListFiltered;
   }
 
-  public List getActions() {
+  public List<Action> getActions() {
     return actions;
   }
 
   protected class ReloadGazetteerListAction extends AbstractAction {
     public ReloadGazetteerListAction() {
       super("Reload List");
-      putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke("control R"));
     }
     public void actionPerformed(ActionEvent e) {
+      if (selectedLinearNode == null) { return; }
       GazetteerList gazetteerList = (GazetteerList)
         linearDefinition.getListsByNode().get(selectedLinearNode);
       gazetteerList.clear();
