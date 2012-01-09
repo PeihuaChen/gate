@@ -14,12 +14,15 @@
 
 package gate.gui.creole.manager;
 
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collections;
 import java.util.List;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.SingleValueConverter;
 
 public class RemoteUpdateSite {
 
@@ -49,6 +52,26 @@ public class RemoteUpdateSite {
         xs.alias("UpdateSite", List.class);
         xs.alias("CreolePlugin", CreolePlugin.class);
         xs.useAttributeFor(CreolePlugin.class, "url");
+        xs.registerConverter(new SingleValueConverter() {
+          @Override
+          public boolean canConvert(@SuppressWarnings("rawtypes") Class type) {
+            return URL.class.isAssignableFrom(type);
+          }
+          
+          @Override
+          public String toString(Object obj) {
+            throw new UnsupportedOperationException("Converting URLs to Strings is not currently supported");
+          }
+          
+          @Override
+          public Object fromString(String value) {
+            try {
+              return new URL(uri.toURL(), value);
+            } catch(MalformedURLException e) {
+              throw new RuntimeException("Not a valid URL",e);
+            }
+          }
+        });
         
         URLConnection conn = uri.toURL().openConnection();
         conn.setConnectTimeout(5000);
