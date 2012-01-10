@@ -25,10 +25,10 @@ public class ClassNode
   private Vector<ClassNode> children = new Vector<ClassNode>();
   private Object source;
 
-  /** create a structure representing the class hierarchy of an ontology
-   *  @param includeInstances if true, then instances of the ontology
-   *  are also included
-   *  @return the root node of the structure
+  /**
+   * create a structure representing the class hierarchy of an ontology
+   * 
+   * @return the root node of the structure
    */
   public static ClassNode createRootNode(Ontology o) {
     return createRootNode(o, false, false);
