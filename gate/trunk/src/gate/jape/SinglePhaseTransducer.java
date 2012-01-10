@@ -574,8 +574,6 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
 
   /**
    * Return the annotation with the right-most end node
-   * @param annots
-   * @return
    */
   protected Annotation getRightMostAnnotation(Collection<Annotation> annots) {
     long maxOffset = -1;

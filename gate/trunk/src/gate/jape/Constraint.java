@@ -150,8 +150,6 @@ public class Constraint implements JapeConstants, gate.creole.ANNIEConstants,
 
   /**
    * Generate a FeatureMap to perform ontology-related compare.
-   *
-   * @return
    */
   protected FeatureMap getOntFeatureMap() {
     if(ontFeatureMap == null) ontFeatureMap = new SimpleFeatureMapImpl();
@@ -163,7 +161,6 @@ public class Constraint implements JapeConstants, gate.creole.ANNIEConstants,
    * Legacy support for adding an attribute using a jdm attribute.
    *
    * @deprecated
-   * @param attr
    */
   public void addAttribute(JdmAttribute attr) {
     addAttribute(attr.getName(), attr.getValue());
@@ -271,8 +268,6 @@ public class Constraint implements JapeConstants, gate.creole.ANNIEConstants,
   /**
    * Returns string representation of all the attributes that is
    * appropriate for display.
-   *
-   * @return
    */
   public String getAttributesString() {
     StringBuffer retVal = new StringBuffer();
@@ -292,7 +287,7 @@ public class Constraint implements JapeConstants, gate.creole.ANNIEConstants,
   } // shortDesc
 
   /**
-   * Invoke {@link #matches(Annotation, Ontology, Object)} on all provided
+   * Invoke {@link #matches(Annotation, Ontology, AnnotationSet)} on all provided
    * annotations.
    *
    * @param annots collection of Annotations to test
