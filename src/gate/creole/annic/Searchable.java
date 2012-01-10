@@ -31,8 +31,6 @@ public interface Searchable {
 
   /**
    * Returns the Indexer
-   * 
-   * @return
    */
   public Indexer getIndexer();
 
@@ -47,8 +45,6 @@ public interface Searchable {
 
   /**
    * Returns the Searcher
-   * 
-   * @return
    */
   public Searcher getSearcher();
 

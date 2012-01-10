@@ -72,7 +72,6 @@ public class Pattern extends Hit {
    * 
    * @param start
    * @param end
-   * @return
    */
   public List<PatternAnnotation> getPatternAnnotations(int startOffset, int endOffset) {
     ArrayList<PatternAnnotation> annots = new ArrayList<PatternAnnotation>();
@@ -88,8 +87,6 @@ public class Pattern extends Hit {
 
   /**
    * Returns all annotations underlying the pattern
-   * 
-   * @return
    */
   public PatternAnnotation[] getPatternAnnotations() {
     return annotations.toArray(new PatternAnnotation[0]);
@@ -97,9 +94,6 @@ public class Pattern extends Hit {
 
   /**
    * Returns the annotations with the given type
-   * 
-   * @param type
-   * @return
    */
   public PatternAnnotation[] getPatternAnnotations(String type) {
     List<PatternAnnotation> annots = new ArrayList<PatternAnnotation>();
@@ -114,10 +108,6 @@ public class Pattern extends Hit {
 
   /**
    * Returns the annotations with the given type and the feature
-   * 
-   * @param type
-   * @param feature
-   * @return
    */
   public PatternAnnotation[] getPatternAnnotations(String type, String feature) {
     List<PatternAnnotation> annots = new ArrayList<PatternAnnotation>();
@@ -136,8 +126,6 @@ public class Pattern extends Hit {
 
   /**
    * Returns the text of the pattern
-   * 
-   * @return
    */
   public String getPatternText() {
     return patternText;
@@ -145,10 +133,6 @@ public class Pattern extends Hit {
 
   /**
    * Returns the text of the pattern between the given offsets
-   * 
-   * @param startOffset
-   * @param endOffset
-   * @return
    */
   public String getPatternText(int startOffset, int endOffset) {
     return patternText.substring(startOffset - leftContextStartOffset,
@@ -157,8 +141,6 @@ public class Pattern extends Hit {
 
   /**
    * Returns the start offset of the left context
-   * 
-   * @return
    */
   public int getLeftContextStartOffset() {
     return leftContextStartOffset;
@@ -166,8 +148,6 @@ public class Pattern extends Hit {
 
   /**
    * Returns the end offset of the right context
-   * 
-   * @return
    */
   public int getRightContextEndOffset() {
     return rightContextEndOffset;

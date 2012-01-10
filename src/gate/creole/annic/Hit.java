@@ -65,8 +65,6 @@ public class Hit implements java.io.Serializable {
 
   /**
    * Returns the start offset of the matching part (query matched part)
-   * 
-   * @return
    */
   public int getStartOffset() {
     return startOffset;
@@ -74,8 +72,6 @@ public class Hit implements java.io.Serializable {
 
   /**
    * Returns the end offset of the matching part (query matched part)
-   * 
-   * @return
    */
   public int getEndOffset() {
     return endOffset;
@@ -83,8 +79,6 @@ public class Hit implements java.io.Serializable {
 
   /**
    * Returns the document ID
-   * 
-   * @return
    */
   public String getDocumentID() {
     return this.documentID;
@@ -92,8 +86,6 @@ public class Hit implements java.io.Serializable {
 
   /**
    * Returns the query for which the current pattern was matched
-   * 
-   * @return
    */
   public String getQueryString() {
     return this.queryString;
@@ -101,10 +93,8 @@ public class Hit implements java.io.Serializable {
 
   /**
    * Returns the annotation set this pattern belongs to.
-   * @return
    */
   public String getAnnotationSetName() {
     return annotationSetName;
   }
-
 }

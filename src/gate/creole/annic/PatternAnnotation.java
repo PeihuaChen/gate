@@ -114,7 +114,6 @@ public class PatternAnnotation implements Serializable {
 
   /**
    * Gets the Features
-   * @return
    */
   public Map<String, String> getFeatures() {
     return features;
@@ -122,8 +121,6 @@ public class PatternAnnotation implements Serializable {
 
   /**
    * Gets the value of a feature
-   * @param key
-   * @return
    */
   public String getFeature(String key) {
     return (String)features.get(key);
@@ -131,7 +128,6 @@ public class PatternAnnotation implements Serializable {
 
   /**
    * Gets the type of the annotation
-   * @return
    */
   public String getType() {
     return this.type;
@@ -139,7 +135,6 @@ public class PatternAnnotation implements Serializable {
 
   /**
    * Gets the text of the annotation
-   * @return
    */
   public String getText() {
     return this.text;
@@ -147,7 +142,6 @@ public class PatternAnnotation implements Serializable {
 
   /**
    * Gets the start offset
-   * @return
    */
   public int getStartOffset() {
     return stOffset;
@@ -155,7 +149,6 @@ public class PatternAnnotation implements Serializable {
 
   /**
    * Gets the end offset
-   * @return
    */
   public int getEndOffset() {
     return enOffset;
@@ -163,7 +156,6 @@ public class PatternAnnotation implements Serializable {
 
   /**
    * Gets the position of this annotation in the token stream.
-   * @return
    */
   public int getPosition() {
     return position;

@@ -63,15 +63,11 @@ public interface Indexer {
 
   /**
    * Corpus to be indexed
-   * 
-   * @return
    */
   public Corpus getCorpus();
 
   /**
    * Returns the parameters
-   * 
-   * @return
    */
   public Map getParameters();
 }
