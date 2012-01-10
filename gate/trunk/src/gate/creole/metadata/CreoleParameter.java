@@ -47,8 +47,7 @@ import java.util.Collection;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CreoleParameter {
   /**
-   * Dummy type used to signify that no value has been supplied for {@link
-   * collectionElementType()}.
+   * Dummy type used to signify that no value has been supplied for {@link #collectionElementType()}.
    */
   public static interface NoElementType {}
   

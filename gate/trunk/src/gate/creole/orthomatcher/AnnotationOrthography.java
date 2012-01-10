@@ -1,16 +1,15 @@
 package gate.creole.orthomatcher;
 
-import java.io.IOException;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Document;
+import gate.creole.ExecutionException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-
-import gate.Annotation;
-import gate.AnnotationSet;
-import gate.Document;
-import gate.creole.ExecutionException;
 
 /*
  * This interface is used so that one can create an orthography class that that
@@ -19,10 +18,7 @@ import gate.creole.ExecutionException;
 public interface AnnotationOrthography {
   /**
    * Returns normalized content of an annotation - removes extra white spaces.
-   * 
-   * @param a
-   * @param d
-   * @return
+   *
    * @throws ExecutionException
    */
   public String getStringForAnnotation(Annotation a, gate.Document d)

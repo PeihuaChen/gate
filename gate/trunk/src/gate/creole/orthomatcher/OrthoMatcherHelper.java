@@ -34,10 +34,6 @@ public class OrthoMatcherHelper {
 	  /**
 	   * Returns true if only one of s1 and s2 is a single character and the two strings match on that
 	   * initial
-	   * 
-	   * @param s1  
-	   * @param s2
-	   * @return
 	   */
 	  public static boolean initialMatch(String s1, String s2) {
 	    return (((s1.length() == 1) ^ (s2.length() == 1) ) && (s1.charAt(0) == s2.charAt(0)));

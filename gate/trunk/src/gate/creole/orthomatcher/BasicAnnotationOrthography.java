@@ -285,8 +285,6 @@ public class BasicAnnotationOrthography implements AnnotationOrthography {
 
   /**
    * Tables for namematch info (used by the namematch rules)
-   * 
-   * @return
    */
   public HashSet buildTables(AnnotationSet nameAllAnnots) {
     FeatureMap tempMap = Factory.newFeatureMap();
