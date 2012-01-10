@@ -26,18 +26,18 @@ import java.lang.annotation.Target;
  * parameters that are optional.
  *
  * <pre>
- * @Optional
- * @CreoleParameter
+ * &#064;Optional
+ * &#064;CreoleParameter
  * public void setAnnotationTypes(List&lt;String&gt; types) { ... }
  * </pre>
  *
  * While usually used to mark parameters as optional, this annotation
  * also supports an optional boolean flag, so it can be used as
- * <code>@Optional(false)</code> to mark required parameters.  This is not
+ * <code>&#064;Optional(false)</code> to mark required parameters.  This is not
  * generally necessary, as parameters are required by default, however if a
- * given parameter has been annotated as <code>@Optional</code> in a superclass
+ * given parameter has been annotated as <code>&#064;Optional</code> in a superclass
  * this will be inherited.  If you want to change the parameter to be required
- * in a subclass then you must use <code>@Optional(false)</code>.
+ * in a subclass then you must use <code>&#064;Optional(false)</code>.
  */
 @Documented
 @Target( {ElementType.METHOD})

@@ -28,19 +28,19 @@ import java.lang.annotation.Target;
  * {@link java.lang.Runtime} class in java.lang.
  *
  * <pre>
- * @Optional
- * @RunTime
- * @CreoleParameter
+ * &#064;Optional
+ * &#064;RunTime
+ * &#064;CreoleParameter
  * public void setAnnotationTypes(List&lt;String&gt; types) { ... }
  * </pre>
  *
  * While usually used to mark parameters as runtime parameters, this annotation
  * also supports an optional boolean flag, so it can be used as
- * <code>@RunTime(false)</code> to mark init-time parameters.  This is not
+ * <code>&#064;RunTime(false)</code> to mark init-time parameters.  This is not
  * generally necessary, as parameters are init-time by default, however if a
- * given parameter has been annotated as <code>@RunTime</code> in a superclass
+ * given parameter has been annotated as <code>&#064;RunTime</code> in a superclass
  * this will be inherited.  If you want to change the parameter to be init-time
- * in a subclass then you must use <code>@RunTime(false)</code>.
+ * in a subclass then you must use <code>&#064;RunTime(false)</code>.
  */
 @Documented
 @Target( {ElementType.METHOD})
