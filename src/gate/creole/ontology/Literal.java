@@ -50,8 +50,6 @@ public class Literal {
    * Create a plain literal (i.e an untyped literal) without a language tag
    * (the language is null).
    * A plain literal cannot have a data type (the datatype will always be null).
-   * 
-   * @param val
    */
   public Literal(String value) {
     this.value = value;
@@ -125,8 +123,6 @@ public class Literal {
   /**
    * Gets the datatype of the literal. This will return null for all plain
    * literals (i.e. literals that are not associated with a data type).
-   * 
-   * @return
    */
   public DataType getDataType() {
     return dataType;
@@ -134,8 +130,6 @@ public class Literal {
 
   /**
    * Returns the value (lexical form) associated with this instance of literal.
-   * 
-   * @return
    */
   public String getValue() {
     return value;
@@ -146,8 +140,6 @@ public class Literal {
    * Locale object. Note that the only useful information in the Locale
    * object is the language code which can be retrieved with the 
    * getLanguage() method of the Locale object.
-   * 
-   * @return
    * @deprecated Use the method getLanguageTag() instead.
    */
   @Deprecated

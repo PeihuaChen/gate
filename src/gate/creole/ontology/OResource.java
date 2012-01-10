@@ -42,15 +42,11 @@ public interface OResource  {
 
   /**
    * This method returns a set of labels specified on this resource.
-   * 
-   * @return
    */
   public Set<Literal> getLabels();
 
   /**
    * This method returns a set of comments specified on this resource.
-   * 
-   * @return
    * @deprecated
    */
   @Deprecated
@@ -132,41 +128,29 @@ public interface OResource  {
 
   /**
    * This method returns the annotation properties set on this resource.
-   * 
-   * @return
    */
   public Set<AnnotationProperty> getSetAnnotationProperties();
 
   /**
    * This method returns all the set properties set on this resource.
-   * 
-   * @return
    */
   public Set<RDFProperty> getAllSetProperties();
 
   /**
    * This method returns a set of all properties where the current
    * resource has been specified as one of the domain resources.
-   * 
-   * @return
    */
   public Set<RDFProperty> getPropertiesWithResourceAsDomain();
 
   /**
    * This method returns a set of all properties where the current
    * resource has been specified as one of the range resources.
-   * 
-   * @return
    */
   public Set<RDFProperty> getPropertiesWithResourceAsRange();
 
   /**
    * Checks if the resource has the provided annotation property set on
    * it with the specified value.
-   * 
-   * @param aProperty
-   * @param aValue
-   * @return
    */
   public boolean hasAnnotationPropertyWithValue(AnnotationProperty aProperty,
           Literal aValue);
@@ -174,9 +158,6 @@ public interface OResource  {
   /**
    * For the current resource, the method removes the given literal for
    * the given property.
-   * 
-   * @param theAnnotationProperty
-   * @param literal
    */
   public void removeAnnotationPropertyValue(
           AnnotationProperty theAnnotationProperty, Literal literal);

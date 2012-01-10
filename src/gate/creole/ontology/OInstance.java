@@ -60,8 +60,6 @@ public interface OInstance extends OResource {
 
   /**
    * Sets the instance being different from the provided instance.
-   * 
-   * @param theIndividual
    */
   public void setDifferentFrom(OInstance theInstance);
 
@@ -77,7 +75,6 @@ public interface OInstance extends OResource {
    * Checks whether the instance is different from the given instance
    * 
    * @param theInstance
-   * @return
    */
   public boolean isDifferentFrom(OInstance theInstance);
 
@@ -91,16 +88,11 @@ public interface OInstance extends OResource {
   /**
    * Returns a set of {@link OInstance} objects which are explicitly
    * specified as being same as the current instance.
-   * 
-   * @return
    */
   public Set<OInstance> getSameInstance();
 
   /**
    * Checks whether the instance is same as the given instance
-   * 
-   * @param theInstance
-   * @return
    */
   public boolean isSameInstanceAs(OInstance theInstance);
 
@@ -110,9 +102,6 @@ public interface OInstance extends OResource {
 
   /**
    * Adds the value for the given RDFProperty.
-   * 
-   * @param aProperty
-   * @param value
    * @throws InvalidValueException This exception is thrown when a value
    *           is not compatible with the specified property's range.
    * @deprecated this throws an exception in the new implementation
@@ -123,10 +112,6 @@ public interface OInstance extends OResource {
 
   /**
    * Remove the provided value for the given property.
-   * 
-   * @param aProperty
-   * @param value
-   * @return
    * @deprecated
    */
   @Deprecated
@@ -146,15 +131,11 @@ public interface OInstance extends OResource {
 
   /**
    * This method returns the RDF properties set on this resource.
-   * @return
    */
   public Set<RDFProperty> getSetRDFProperties();
 
   /**
    * Checks if the resource has the provided annotation property set on it with the specified value.
-   * @param aProperty
-   * @param aValue
-   * @return
    * @deprecated
    */
   @Deprecated
@@ -163,8 +144,6 @@ public interface OInstance extends OResource {
   
   /**
    * Removes all property values set for the current property.
-   * 
-   * @param aProperty
    * @deprecated 
    */
   @Deprecated
@@ -176,9 +155,6 @@ public interface OInstance extends OResource {
 
   /**
    * Adds the value for the given Property.
-   * 
-   * @param aProperty
-   * @param value
    * @throws InvalidValueException This exception is thrown when a value
    *           is not compatible with the specified property's range.
    */
@@ -187,26 +163,18 @@ public interface OInstance extends OResource {
 
   /**
    * Remove the provided value for the given property.
-   * 
-   * @param aProperty
-   * @param value
-   * @return
    */
   public void removeDatatypePropertyValue(DatatypeProperty aProperty,
           Literal value);
 
   /**
    * Gets a list of values for the given Property.
-   * 
-   * @param aProperty
    * @return a {@link List} of {@link Literal}.
    */
   public List<Literal> getDatatypePropertyValues(DatatypeProperty aProperty);
 
   /**
    * Removes all property values set for the current property.
-   * 
-   * @param aProperty
    */
   public void removeDatatypePropertyValues(DatatypeProperty aProperty);
 
@@ -217,9 +185,6 @@ public interface OInstance extends OResource {
   /**
    * Adds the value for the given property (Object, Symmetric and
    * Transitive).
-   * 
-   * @param aProperty
-   * @param value
    * @throws InvalidValueException This exception is thrown when a value
    *           is not compatible with the specified property's range.
    */
@@ -229,9 +194,6 @@ public interface OInstance extends OResource {
   /**
    * Remove the provided value for the given property (Object, Symmetric
    * and Transitive).
-   * 
-   * @param aProperty
-   * @param value
    * @return true, if the value for the given property is deleted
    *         successfully, otherwise - false.
    */
@@ -241,8 +203,6 @@ public interface OInstance extends OResource {
   /**
    * Gets a list of values for the given Property (Object, Symmetric and
    * Transitive).
-   * 
-   * @param aProperty
    * @return a {@link List} of {@link OInstance}.
    */
   public List<OInstance> getObjectPropertyValues(ObjectProperty aProperty);
@@ -250,38 +210,28 @@ public interface OInstance extends OResource {
   /**
    * Removes all property values set for the current property (Object,
    * Symmetric and Transitive).
-   * 
-   * @param aProperty
    */
   public void removeObjectPropertyValues(ObjectProperty aProperty);
 
   /**
    * This method returns the datatype properties set on this resource.
-   * @return
    */
   public Set<DatatypeProperty> getSetDatatypeProperties();
   
   
   /**
    * This method returns the object properties set on this resource.
-   * @return
    */
   public Set<ObjectProperty> getSetObjectProperties();
   
   
   /**
    * Checks if the resource has the provided datatype property set on it with the specified value.
-   * @param aProperty
-   * @param aValue
-   * @return
    */
   public boolean hasDatatypePropertyWithValue(DatatypeProperty aProperty, Literal aValue);
   
   /**
    * Checks if the resource has the provided object property set on it with the specified value.
-   * @param aProperty
-   * @param aValue
-   * @return
    */
   public boolean hasObjectPropertyWithValue(ObjectProperty aProperty, OInstance aValue);
 

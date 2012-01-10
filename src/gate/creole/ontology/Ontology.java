@@ -283,10 +283,6 @@ public interface Ontology extends LanguageResource {
   /**
    * Set an annotation property for the ontology to the specified literal
    * value.
-   * The annotation property can be one of the predefined system annotation
-   * properties that can be generated with
-   * {@link #getSystemAnnotationProperty(OConstants.SystemAnnotationProperty)} or
-   * a user-defined annotation property.
    *
    * @param ann the annotation property object
    * @param value a Literal object describing the value. This usually should be
@@ -297,10 +293,6 @@ public interface Ontology extends LanguageResource {
 
   /**
    * Get the values of an ontology annotation property.
-   * The annotation property can be one of the predefined system annotation
-   * properties that can be generated with
-   * {@link #getSystemAnnotationProperty(OConstants.SystemAnnotationProperty)} or
-   * a user-defined annotation property.
    *
    * @param ann the annotation property object
    * @return a a list of literals describing the values for the property
@@ -346,7 +338,7 @@ public interface Ontology extends LanguageResource {
    * Retrieves a both named classes and anonymous classes and retrictions that
    * match either the URI or the blank node identifier represented by ONodeID
    * @param theClassID
-   * @returnthe class matching the URI or blank node ID or null if no matches.
+   * @return the class matching the URI or blank node ID or null if no matches.
    */
   public OClass getOClass(ONodeID theClassID);
 
@@ -438,7 +430,6 @@ public interface Ontology extends LanguageResource {
    * Gets all instances in the ontology.
    * 
    * @return a {@link Set} of OInstance objects
-   * {@link #getOInstanceIterator()} instead
    */
   public Set<OInstance> getOInstances();
 
@@ -468,8 +459,8 @@ public interface Ontology extends LanguageResource {
    * indirectly (transitive closure)
    *
    * @param theClass the class of the instances
-   * @param closure either {@link OConstants.Closure.DIRECT_CLOSURE} or
-   * {@link OConstants.Closure.TRANSITIVE_CLOSURE}
+   * @param closure either {@link OConstants.Closure#DIRECT_CLOSURE} or
+   * {@link OConstants.Closure#TRANSITIVE_CLOSURE}
    *
    * @return {@link Set} of OInstance objects
    */
@@ -518,7 +509,6 @@ public interface Ontology extends LanguageResource {
    *          etc.).
    * @param range a set of {@link OResource} (e.g. a Class, a Property
    *          etc.).
-   * @return
    * @deprecated
    */
   @Deprecated
@@ -529,7 +519,7 @@ public interface Ontology extends LanguageResource {
    * Gets the set of RDF Properties in the ontology where for a property
    * there exists a statement <theProperty, RDF:Type, RDF:Property>.
    * 
-   * @return a {@link Set} of {@link Property}.
+   * @return a {@link Set} of {@link RDFProperty}.
    */
   public Set<RDFProperty> getRDFProperties();
 
@@ -548,7 +538,6 @@ public interface Ontology extends LanguageResource {
    * 
    * @param aPropertyURI URI of the property to be added into the
    *          ontology.
-   * @return
    */
   public AnnotationProperty addAnnotationProperty(OURI aPropertyURI);
 
@@ -793,7 +782,6 @@ public interface Ontology extends LanguageResource {
    * 
    * @param onProperty - Specifies the property for which the restriction is being set.
    * @param minCardinalityValue - generally a numeric number.
-   * @return
    * @throws InvalidValueException - if a value is not compatible with the nonNegativeIntegerNumber datatype.
    */
   public MinCardinalityRestriction addMinCardinalityRestriction(
@@ -807,7 +795,6 @@ public interface Ontology extends LanguageResource {
    * 
    * @param onProperty - Specifies the property for which the restriction is being set.
    * @param maxCardinalityValue - generally a numeric number.
-   * @return
    * @throws InvalidValueException - if a value is not compatible with the nonNegativeIntegerNumber datatype.
    */
   public MaxCardinalityRestriction addMaxCardinalityRestriction(
@@ -821,7 +808,6 @@ public interface Ontology extends LanguageResource {
    * 
    * @param onProperty - Specifies the property for which the restriction is being set.
    * @param cardinalityValue - generally a numeric number.
-   * @return
    * @throws InvalidValueException - if a value is not compatible with the nonNegativeIntegerNumber datatype.
    */
   public CardinalityRestriction addCardinalityRestriction(
@@ -835,7 +821,6 @@ public interface Ontology extends LanguageResource {
    * 
    * @param onProperty - Specifies the property for which the restriction is being set.
    * @param hasValue - a resource used as a value for hasValue element of the restriction.
-   * @return
    */
   public HasValueRestriction addHasValueRestriction(
           RDFProperty onProperty, OResource hasValue);
@@ -845,10 +830,9 @@ public interface Ontology extends LanguageResource {
    *
    * @param onProperty - Specifies the property for which the restriction is being set.
    * @param hasValue - a resource used as a value for hasValue element of the restriction.
-   * @return
    * @deprecated - this method is deprecated and kept for backwards compatibility
    * as long as the OntologyOWLIM2 plugin is kept. Use the method
-   * {@link addAllValuesFromRestriction(ObjectProperty, OClass)} instead.
+   * {@link #addAllValuesFromRestriction(ObjectProperty, OClass)} instead.
    */
   @Deprecated
   public AllValuesFromRestriction addAllValuesFromRestriction(
@@ -865,16 +849,11 @@ public interface Ontology extends LanguageResource {
    * 
    * @param onProperty - Specifies the property for which the restriction is being set.
    * @param hasValue - a resource used as a value for hasValue element of the restriction.
-   * @return
    */
   public SomeValuesFromRestriction addSomeValuesFromRestriction(
           RDFProperty onProperty, OResource hasValue);
 
 
-  /**
-   *
-   * @return
-   */
   public AnonymousClass addAnonymousClass();
   
   // *****************************
@@ -897,26 +876,17 @@ public interface Ontology extends LanguageResource {
 
   /**
    * Register the Ontology Modification Listeners
-   * 
-   * @param oml
    */
   public void addOntologyModificationListener(OntologyModificationListener oml);
 
   /**
    * Removed the registered ontology modification listeners
-   * 
-   * @param oml
    */
   public void removeOntologyModificationListener(
           OntologyModificationListener oml);
 
   /**
    * A method to invoke when a resource's property value is changed
-   * 
-   * @param resource
-   * @param property
-   * @param value
-   * @param eventType
    */
   public void fireResourcePropertyValueChanged(OResource resource, RDFProperty property, Object value, int eventType);
 
@@ -968,8 +938,6 @@ public interface Ontology extends LanguageResource {
 
   /**
    * Checks whether the transation is already started.
-   * 
-   * @return
    * @deprecated 
    */
   @Deprecated
@@ -978,8 +946,6 @@ public interface Ontology extends LanguageResource {
   /**
    * Returns the repository created for this particular instance of the
    * ontology.
-   *
-   * @return
    * @deprecated
    */
   @Deprecated
@@ -988,8 +954,6 @@ public interface Ontology extends LanguageResource {
   /**
    * Returns the ID of a Sesame Repository created for this particular
    * instance of the ontology.
-   *
-   * @return
    * @deprecated
    */
   @Deprecated
@@ -999,9 +963,6 @@ public interface Ontology extends LanguageResource {
 
   /**
    * Given a URI object, this method returns its equivalent object
-   * 
-   * @param uri
-   * @return
    * @deprecated
    */
   @Deprecated
@@ -1009,9 +970,6 @@ public interface Ontology extends LanguageResource {
 
   /**
    * Adds the resource to central map
-   * 
-   * @param uri
-   * @param resource
    * @deprecated
    */
   @Deprecated
@@ -1033,9 +991,6 @@ public interface Ontology extends LanguageResource {
    * the first found OResource (without gurantteeing the order) from its
    * list. If user wants to retrieve a list of resources, he/she must
    * use the getOResourcesByName(String resourceName).
-   * 
-   * @param resourceName
-   * @return
    * @deprecated
    */
   @Deprecated
@@ -1050,8 +1005,6 @@ public interface Ontology extends LanguageResource {
    * delete the resource from an ontology. One must use appropriate
    * method from the Ontology interface to delete such resources.
    * 
-   * @param resourceName
-   * @return
    * @deprecated
    */
   public List<OResource> getOResourcesByName(String resourceName);
@@ -1063,7 +1016,6 @@ public interface Ontology extends LanguageResource {
    * ontology. One must use appropriate method from the Ontology
    * interface to delete such resources.
    * 
-   * @return
    * @deprecated
    */
   @Deprecated
@@ -1073,10 +1025,6 @@ public interface Ontology extends LanguageResource {
    * This method given a property (either an annotation or datatype),
    * retrieves a list of resources which have the provided literal set
    * as a value.
-   * 
-   * @param aProperty
-   * @param aValue
-   * @return
    */
   public List<OResource> getOResourcesWith(RDFProperty aProperty, Literal aValue);
 
@@ -1084,10 +1032,6 @@ public interface Ontology extends LanguageResource {
    * This method given a property (either object, transitive, symmetric
    * or rdf), retrieves a list of resources which have the provided
    * resource set as a value.
-   * 
-   * @param aProperty
-   * @param aValue
-   * @return
    */
   public List<OResource> getOResourcesWith(RDFProperty aProperty,
           OResource aValue);
@@ -1095,10 +1039,8 @@ public interface Ontology extends LanguageResource {
   /**
    * The method executes the query on repository and returns the toString()
    * result of the QueryResultTable.
-   * @param serqlQuery
-   * @return
    *
-   * @deprecated  As of release 1.3, replaced by {@link #createQuery()}
+   * @deprecated
    */
   @Deprecated
   public String executeQuery(String serqlQuery);

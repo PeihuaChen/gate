@@ -19,7 +19,7 @@ import java.util.Vector;
 /**
  * This represents a tuple query of the triple store for the ontology.
  * To create a tuple query object you must use the ontology's factory
- * method {@link Ontology.createTupleQuery(String query, QueryLanguage lang)}.
+ * method {@link Ontology#createTupleQuery(String, gate.creole.ontology.OConstants.QueryLanguage)}.
  * <p>
  * NOTE: querying the ontology triple store directly should be avoided and
  * only done in exceptional cases. Using the methods to query and access ontology

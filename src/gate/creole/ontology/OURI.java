@@ -14,7 +14,7 @@ package gate.creole.ontology;
  * these objects using their constructor (clients must never directly use
  * any classes from the inplementing packages below this package!).
  * In order to create OURIs the {@link Ontology} factory methods
- * {@link Ontology#createOURI(String)}, {@link Ontology#createOURIFroName(String)},
+ * {@link Ontology#createOURI(String)}, {@link Ontology#createOURIForName(String)},
  * or {@link Ontology#generateOURI(String)} must be used.
  *
  * @author Johann Petrak
