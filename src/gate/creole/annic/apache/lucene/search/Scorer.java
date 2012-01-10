@@ -49,11 +49,11 @@ public abstract class Scorer {
   public abstract boolean next(Searcher searcher) throws IOException;
   
   /** Returns the current document number.  Initially invalid, until {@link
-   * #next(Searcher))} is called the first time. */
+   * #next(Searcher)} is called the first time. */
   public abstract int doc();
 
   /** Returns the score of the current document.  Initially invalid, until
-   * {@link #next(Searcher))} is called the first time. */
+   * {@link #next(Searcher)} is called the first time. */
   public abstract float score(Searcher searcher) throws IOException;
 
   /** Skips to the first match beyond the current whose document number is
