@@ -73,8 +73,6 @@ public class ProcessManager {
    *
    * @param argv the process command line, suitable for passing to
    * <code>Runtime.exec</code>.
-   * @param dumpOutput should we copy the process output and error streams to
-   * the Java output and error streams or just consume them silently?
    */
   public synchronized int runProcess(String[] argv, File dir, OutputStream out, OutputStream err)
                           throws IOException {

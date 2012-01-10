@@ -79,8 +79,6 @@ public class GateClassLoader extends URLClassLoader {
   /**
    * Given a fully qualified class name, this method returns the instance of Class if it is already loaded using the ClassLoader
    * or it returns null.
-   * @param name
-   * @return
    */
   public synchronized Class<?> findExistingClass(String name) {
 	  return findLoadedClass(name);

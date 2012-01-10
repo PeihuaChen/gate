@@ -15,7 +15,18 @@
  */
 
 package gate.util;
-import java.util.*;
+import java.io.IOException;
+import java.util.AbstractCollection;
+import java.util.AbstractMap;
+import java.util.AbstractSet;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.ConcurrentModificationException;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
 
 /** Slightly modified implementation of java.util.TreeMap in order to return the
   * closest neighbours in the case of a failed search.
@@ -619,7 +630,6 @@ public class RBTreeMap extends AbstractMap
     * <tt>addAll</tt> operations.
     *
     * @return a set view of the mappings contained in this map.
-    * @see Map.Entry
     */
   public Set entrySet() {
     if (entrySet == null) {
