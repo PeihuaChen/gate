@@ -61,8 +61,6 @@ public abstract class EmbeddedConstraintPredicate extends AbstractConstraintPred
 
   /**
    * If there are attribute constraints, filter the set.
-   * @param containedSet
-   * @return
    */
   protected Collection<Annotation> filterMatches(AnnotationSet containedSet) {
     if (containedSet == null)

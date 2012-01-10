@@ -74,9 +74,6 @@ public class ConstraintFactory {
 
   /**
    * Create a new constraint for the given annotation type
-   *
-   * @param annotType
-   * @return
    */
   public Constraint createConstraint(String annotType) {
     return new Constraint(annotType);
@@ -109,7 +106,6 @@ public class ConstraintFactory {
    *
    * @param name feature name associated with the predicate
    * @param value value associated with the predicate
-   * @return
    */
   public ConstraintPredicate createPredicate(String name, Object value) {
     return createPredicate(createDefaultAccessor(name), value);

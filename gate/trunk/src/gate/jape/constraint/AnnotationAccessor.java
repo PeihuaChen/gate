@@ -43,7 +43,6 @@ public interface AnnotationAccessor extends Serializable {
 
   /**
    * Return the key for this accessor.
-   * @return
    */
   public Object getKey();
 
@@ -57,8 +56,6 @@ public interface AnnotationAccessor extends Serializable {
    *          require the context information so it may be null. Some
    *          accessor implementations may throw an exception without
    *          it.
-   *
-   * @return
    */
   public Object getValue(Annotation annot, AnnotationSet context);
 }

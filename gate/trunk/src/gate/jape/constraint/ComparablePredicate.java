@@ -58,9 +58,6 @@ public abstract class ComparablePredicate extends AbstractConstraintPredicate {
    * Use <code>compareTo</code> to compare set value with the given
    * object, doing basic type conversion to get the two objects to the
    * same class.
-   *
-   * @param obj
-   * @return
    * @throws JapeException if the provided object is not a Comparable or
    *           the classes cannot be compared.
    */
