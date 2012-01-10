@@ -22,6 +22,7 @@ import java.beans.Introspector;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import gate.*;
@@ -121,12 +122,12 @@ public class FeaturesSchemaEditor extends XJTable
     getColumnModel().getColumn(DELETE_COL).
       setCellEditor(featureEditorRenderer);
     
-    //the background colour seems to change somewhere when using the GTK+ 
-    //look and feel on Linux, so we copy the value now and set it 
-    Color tableBG = getBackground();
-    //make a copy of the value (as the reference gets changed somewhere)
-    tableBG = new Color(tableBG.getRGB());
-    setBackground(tableBG);
+//    //the background colour seems to change somewhere when using the GTK+ 
+//    //look and feel on Linux, so we copy the value now and set it 
+//    Color tableBG = getBackground();
+//    //make a copy of the value (as the reference gets changed somewhere)
+//    tableBG = new Color(tableBG.getRGB());
+//    setBackground(tableBG);
 
     // allow Tab key to select the next cell in the table
     setSurrendersFocusOnKeystroke(true);
@@ -346,13 +347,14 @@ public class FeaturesSchemaEditor extends XJTable
       defaultComparator = new ObjectComparator();
       editorCombo = (JComboBox)editorComponent;
       editorCombo.setModel(new DefaultComboBoxModel());
-      editorCombo.setBackground(FeaturesSchemaEditor.this.getBackground());
       editorCombo.setEditable(true);
       editorCombo.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent evt){
           stopCellEditing();
         }
       });
+      defaultBackground = editorCombo.getEditor().getEditorComponent()
+          .getBackground();
       
       rendererCombo = new JComboBox(){
         @Override
@@ -365,10 +367,8 @@ public class FeaturesSchemaEditor extends XJTable
         }
       };
       rendererCombo.setModel(new DefaultComboBoxModel());
-      rendererCombo.setBackground(FeaturesSchemaEditor.this.getBackground());
       rendererCombo.setEditable(true);
       rendererCombo.setOpaque(false);
-
       
       requiredIconLabel = new JLabel(){
         public void repaint(long tm, int x, int y, int width, int height){}
@@ -434,9 +434,6 @@ public class FeaturesSchemaEditor extends XJTable
       
       deleteButton = new JButton(MainFrame.getIcon("delete"));
       deleteButton.setMargin(new Insets(0,0,0,0));
-//      deleteButton.setBorderPainted(false);
-//      deleteButton.setContentAreaFilled(false);
-//      deleteButton.setOpaque(false);
       deleteButton.setToolTipText("Delete");
       deleteButton.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent evt){
@@ -466,11 +463,8 @@ public class FeaturesSchemaEditor extends XJTable
                          optionalIconLabel) :
                          nonSchemaIconLabel;  
         case NAME_COL:
-          
           prepareCombo(rendererCombo, row, column);
           rendererCombo.getPreferredSize();
-//          Dimension dim = rendererCombo.getPreferredSize();
-//          rendererCombo.setPreferredSize(new Dimension(dim.width + 5, dim.height));
           return rendererCombo;
         case VALUE_COL:
           prepareCombo(rendererCombo, row, column);
@@ -512,7 +506,7 @@ public class FeaturesSchemaEditor extends XJTable
           for(Iterator nameIter = fNames.iterator(); 
               nameIter.hasNext(); 
               comboModel.addElement(nameIter.next()));
-          combo.getEditor().getEditorComponent().setBackground(FeaturesSchemaEditor.this.getBackground());
+          combo.getEditor().getEditorComponent().setBackground(defaultBackground);          
           combo.setSelectedItem(feature.name);
           break;
         case VALUE_COL:
@@ -528,8 +522,8 @@ public class FeaturesSchemaEditor extends XJTable
               valIter.hasNext(); 
               comboModel.addElement(valIter.next()));
           combo.getEditor().getEditorComponent().setBackground(feature.isCorrect() ?
-                  FeaturesSchemaEditor.this.getBackground() :
-                  (feature.isRequired() ? REQUIRED_WRONG : OPTIONAL_WRONG));
+              defaultBackground :
+              (feature.isRequired() ? REQUIRED_WRONG : OPTIONAL_WRONG));
           combo.setSelectedItem(feature.value);
           break;
         default: ;
@@ -544,6 +538,7 @@ public class FeaturesSchemaEditor extends XJTable
     JComboBox rendererCombo;
     JButton deleteButton;
     ObjectComparator defaultComparator;
+    Color defaultBackground;
   }
   
   /* 
