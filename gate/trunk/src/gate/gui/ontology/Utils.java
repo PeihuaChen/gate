@@ -45,9 +45,6 @@ public class Utils {
    * expression. <BR>
    * 
    * "[a-zA-Z]+(:)(/)+[a-zA-Z0-9\\-]+((\\.)[a-zA-Z0-9\\-]+)+((/)[a-zA-Z0-9\\.\\-_]+)*(#|/)"
-   * 
-   * @param s
-   * @return
    */
   public static boolean isValidNameSpace(String s) {
     String s1 = new String(
@@ -60,9 +57,6 @@ public class Utils {
    * Checks whether the provided resource name is a valid resource name
    * In this version, the resource name must match the following java
    * regular expression <BR>. "[a-zA-Z0-9_-]+"
-   * 
-   * @param s
-   * @return
    */
   public static boolean isValidOntologyResourceName(String s) {
     String s1 = new String("[a-zA-Z0-9_-]+");
@@ -72,9 +66,6 @@ public class Utils {
 
   /**
    * This method returns the details to be added.
-   * 
-   * @param object
-   * @return
    */
   public static List getDetailsToAdd(Object object) {
     ArrayList<Object> toAdd = new ArrayList<Object>();
