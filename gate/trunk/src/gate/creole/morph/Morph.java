@@ -19,17 +19,29 @@ package gate.creole.morph;
  */
 
 
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Factory;
+import gate.Factory.DuplicationContext;
+import gate.FeatureMap;
+import gate.ProcessingResource;
+import gate.Resource;
+import gate.Utils;
+import gate.creole.AbstractLanguageAnalyser;
+import gate.creole.CustomDuplication;
+import gate.creole.ExecutionException;
+import gate.creole.ResourceInstantiationException;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
+import gate.creole.metadata.RunTime;
+import gate.util.GateRuntimeException;
+
 import java.net.URL;
 import java.util.Iterator;
 
-import org.apache.log4j.Logger;
 import org.apache.log4j.Level;
-
-import gate.*;
-import gate.Factory.DuplicationContext;
-import gate.creole.*;
-import gate.creole.metadata.*;
-import gate.util.GateRuntimeException;
+import org.apache.log4j.Logger;
 
 /**
  * Description: This class is a wrapper for {@link gate.creole.morph.Interpret},
@@ -240,7 +252,7 @@ public class Morph
 
   /**
    * Sets the rule file to be processed
-   * @param rulesFileURL - rule File name to be processed
+   * @param rulesFile - rule File name to be processed
    */
   public void setRulesFile(URL rulesFile) {
     this.rulesFile = rulesFile;

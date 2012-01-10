@@ -1,5 +1,7 @@
 package gate.creole.morph;
 
+import gate.creole.ResourceInstantiationException;
+
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -7,10 +9,11 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
-
-import gate.creole.ResourceInstantiationException;
 
 /**
  * <p>
@@ -49,20 +52,18 @@ public class Interpret {
 
 	MorphFunctions morphInst;
 
-	ArrayList patterns = new ArrayList();
-	ArrayList fsms = new ArrayList();
+	List patterns = new ArrayList();
+	List fsms = new ArrayList();
 	
 	/**
 	 * The initial state of the FSM that backs this morpher
 	 */
 	protected FSMState initialState;
 
-	protected HashSet lastStates;
+	protected Set lastStates;
 
 	/**
 	 * It starts the actual program
-	 * 
-	 * @param ruleFileName
 	 */
 	public void init(URL ruleFileURL) throws ResourceInstantiationException {
 		variables = new Storage();
@@ -110,7 +111,7 @@ public class Interpret {
 			fsms.add(new ArrayList());
 		}
 		
-		ArrayList fs = (ArrayList) fsms.get(index);
+		List fs = (List) fsms.get(index);
 		for(int i=0;i<fs.size();i++) {
 			CharClass cc = (CharClass) fs.get(i);
 			if(cc.ch == ch)
@@ -126,7 +127,7 @@ public class Interpret {
 	
 	public FSMState getState(char ch, int index) {
 		if(index >= fsms.size()) return null;
-		ArrayList fs = (ArrayList) fsms.get(index);
+		List fs = (List) fsms.get(index);
 		for(int i=0;i<fs.size();i++) {
 			CharClass cc = (CharClass) fs.get(i);
 			if(cc.ch == ch)
@@ -135,8 +136,8 @@ public class Interpret {
 		return null;
 	}
 	
-	private HashSet getStates(char ch, HashSet states) {
-		HashSet newStates = new HashSet();
+	private Set getStates(char ch, Set states) {
+		Set newStates = new HashSet();
 		Iterator iter = states.iterator();
 		while (iter.hasNext()) {
 			FSMState st = (FSMState) iter.next();
@@ -165,10 +166,6 @@ public class Interpret {
 	}
 	
 	/**
-	 * lookup <br>
-	 * 
-	 * @param singleItem
-	 *            a single string to be looked up by the gazetteer
 	 * @return set of the Lookups associated with the parameter
 	 */
 	public String runMorpher(String word, String category) {
@@ -178,7 +175,7 @@ public class Interpret {
 		}
 		
 		foundRule = false;
-		HashSet states = new HashSet();
+		Set states = new HashSet();
 		states.add(initialState);
 		for (int i = 0; i < word.length(); i++) {
 			char ch = word.charAt(i);
@@ -191,10 +188,8 @@ public class Interpret {
 
 		// we have all states here
 		// we obtain all RHSes
-		TreeSet rhses = new TreeSet(new Comparator() {
-      public int compare(Object o1, Object o2) {
-        RHS r1 = (RHS) o1;
-        RHS r2 = (RHS) o2;
+		SortedSet<RHS> rhses = new TreeSet<RHS>(new Comparator<RHS>() {
+      public int compare(RHS r1, RHS r2) {
         return r1.getPatternIndex() - r2.getPatternIndex();
       }
     });
@@ -217,7 +212,7 @@ public class Interpret {
 	  return patternIndex;
 	}
 	
-	protected String executeRHSes(TreeSet rhses, String word, String category) {
+	protected String executeRHSes(SortedSet rhses, String word, String category) {
     foundRule = false;
     // rhses are in sorted order
     // we need to check if the word is compatible with pattern
@@ -529,9 +524,9 @@ public class Interpret {
 		patterns.add(Pattern.compile(regExp));
 		String[] rules = ParsingFunctions.normlizePattern(regExp);
 		for (int m = 0; m < rules.length; m++) {
-			HashSet lss = new HashSet();
+			Set lss = new HashSet();
 			lss.clear();
-			HashSet newSet = new HashSet();
+			Set newSet = new HashSet();
 			newSet.add(initialState);
 			lss.add(newSet);
 			PatternPart parts[] = ParsingFunctions
@@ -541,7 +536,7 @@ public class Interpret {
 			}
 			Iterator iter = lss.iterator();
 			while (iter.hasNext()) {
-				HashSet set = (HashSet) iter.next();
+				Set set = (HashSet) iter.next();
 				Iterator subIter = set.iterator();
 				while (subIter.hasNext()) {
 					FSMState st = (FSMState) subIter.next();
@@ -552,8 +547,8 @@ public class Interpret {
 		//drawFSM();
 	}
 
-	private HashSet intersect(HashSet a, HashSet b) {
-		HashSet result = new HashSet();
+	private Set intersect(Set a, Set b) {
+		Set result = new HashSet();
 		Iterator iter = a.iterator();
 		while (iter.hasNext()) {
 			FSMState st = (FSMState) iter.next();
