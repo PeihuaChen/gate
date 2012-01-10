@@ -119,7 +119,7 @@ public interface SimpleCorpus extends LanguageResource, List<Document>, NameBear
    * @param documentRootElement content between the start and end of
    *          this element is considered for documents.
    * @param encoding the encoding of the trec file.
-   * @param numberOfFilesToExtract indicates the number of files to
+   * @param numberOfDocumentsToExtract indicates the number of documents to
    *          extract from the concatenated file. -1 to indicate all
    *          files.
    * @param documentNamePrefix the prefix to use for document names when
