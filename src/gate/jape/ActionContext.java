@@ -47,10 +47,8 @@ public interface ActionContext  extends Serializable {
    */
   
   /**
-   * Provide access to the name of the current transducer PR. 
-   * 
-   * @return 
-   */
+   * Provide access to the name of the current transducer PR.
+   */ 
   public String getPRName();
   
   /**
@@ -61,8 +59,6 @@ public interface ActionContext  extends Serializable {
    * the controller is starting or finishing. This method can be used in the
    * controllerStarted or controllerFinished  blocks to prevent any unwanted
    * processing if the PR is disabled.
-   * 
-   * @return
    */
   public boolean isPREnabled();
   

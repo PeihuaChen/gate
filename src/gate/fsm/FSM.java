@@ -641,12 +641,11 @@ public class FSM implements JapeConstants {
    * state, and round otherwise. A node is green if it's an initial state, red
    * if it's a final state, and black otherwise. Final states are also marked
    * with a double-line outline.
-   *
-   * @see for software to translate the output of this method into pretty pictures
-   *  try <a href="http://www.graphviz.org">the GraphViz web site</a>.
+   * 
+   * @see <a href="http://www.graphviz.org">GraphViz for visulization</a>
    * @param includeConstraints
-   *            whether to include a stringified representation of each
-   *            transition object as part of its label. The default is false.
+   *          whether to include a stringified representation of each transition
+   *          object as part of its label. The default is false.
    */
   public String asGraphViz(boolean includeConstraints) {
     StringBuffer result = new StringBuffer();

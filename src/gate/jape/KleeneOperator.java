@@ -65,8 +65,6 @@ public class KleeneOperator implements Serializable {
       /**
        * Conversion routine from the old JapeConstants values to
        * the type class.
-       * @param op
-       * @return
        */
       public static KleeneOperator.Type getFromJapeConstant(int op) {
         switch(op) {
@@ -86,9 +84,6 @@ public class KleeneOperator implements Serializable {
       /**
        * Conversion routine from the string symbol for a type to the type
        * Enum.
-       *
-       * @param symbol
-       * @return
        */
       public static KleeneOperator.Type getFromSymbol(String symbol) {
         for(Type t : Type.values()) {
