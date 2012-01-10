@@ -423,8 +423,6 @@ public abstract class AbstractController extends AbstractResource
 
   /**
    * Returns the benchmark ID of this controller.
-   * 
-   * @return
    */
   public String getBenchmarkId() {
     if(benchmarkID == null) {

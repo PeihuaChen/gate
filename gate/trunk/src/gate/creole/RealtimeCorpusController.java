@@ -11,27 +11,33 @@
  *
  *  $Id$
  *
- */package gate.creole;
+ */
 
-import java.util.Timer;
-import java.util.TimerTask;
+package gate.creole;
+
+import gate.Document;
+import gate.Executable;
+import gate.Factory;
+import gate.LanguageAnalyser;
+import gate.ProcessingResource;
+import gate.Resource;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.util.Err;
+import gate.util.Out;
+import gate.util.profile.Profiler;
+
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.Logger;
 
-import gate.*;
-import gate.creole.metadata.*;
-import gate.util.Err;
-import gate.util.profile.Profiler;
-import gate.util.Out;
 /**
  * A custom GATE controller that interrupts the execution over a document when a
  * specified amount of time has elapsed. It also ignores all errors/exceptions 
@@ -314,7 +320,6 @@ public class RealtimeCorpusController extends SerialAnalyserController {
    * Gets the timeout in milliseconds before execution on a document is 
    * forcibly stopped (forcibly stopping execution may result in memory leaks 
    * and/or unexpected behaviour).
-   * @return
    */
   public Long getTimeout() {
     return timeout;
@@ -325,7 +330,7 @@ public class RealtimeCorpusController extends SerialAnalyserController {
    * Sets the timeout in milliseconds before execution on a document is 
    * forcibly stopped (forcibly stopping execution may result in memory leaks 
    * and/or unexpected behaviour).
-   * @param timeout
+   * @param timeout in milliseconds before execution is forcibly stopped
    */
   @CreoleParameter(defaultValue = "60000",
       comment = "Timeout in milliseconds before execution on a document is forcibly stopped (forcibly stopping execution may result in memory leaks and/or unexpected behaviour)")
@@ -344,7 +349,6 @@ public class RealtimeCorpusController extends SerialAnalyserController {
    * Gets the timeout in milliseconds before execution on a document is 
    * gracefully stopped. Defaults to -1 which disables this functionality and 
    * relies, as previously, on forcibly stopping execution.
-   * @return
    */
   public Long getGracefulTimeout() {
     return graceful;
@@ -354,7 +358,7 @@ public class RealtimeCorpusController extends SerialAnalyserController {
    * Sets the timeout in milliseconds before execution on a document is 
    * gracefully stopped. Defaults to -1 which disables this functionality and 
    * relies, as previously, on forcibly stopping execution.
-   * @param graceful
+   * @param graceful timeout in milliseconds before execution is gracefully stopped
    */
   @CreoleParameter(defaultValue = "-1",
       comment = "Timeout in milliseconds before execution on a document is gracefully stopped. Defaults to -1 which disables this functionality and relies, as previously, on forcibly stoping execution.")

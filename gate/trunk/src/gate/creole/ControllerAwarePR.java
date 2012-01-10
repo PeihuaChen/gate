@@ -38,7 +38,7 @@ import gate.ProcessingResource;
  * a conditional controller the methods defined by this interface are invoked
  * independently of the RunningStrategy for the processing resource: even if
  * the PR is disabled, the methods will get invoked. The method
- * {@see gate.Utils#isEnabled(Controller, ProcessingResource)} can be used
+ * {@link gate.Utils#isEnabled(Controller, ProcessingResource)} can be used
  * inside the implementation of the methods defined in this interface 
  * if necessary to find out if the processing resource has a chance to run
  * in the controller.
