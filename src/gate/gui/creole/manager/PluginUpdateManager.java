@@ -1201,7 +1201,7 @@ public class PluginUpdateManager extends JDialog {
       switch(column){
         case 0:
           if(site.valid != null && !site.valid) return icoInvalid;
-          if(site.uri.getHost().equals("gate.ac.uk")) return icoGATE;
+          if(site.uri.toString().startsWith("http://gate.ac.uk")) return icoGATE;
           return icoSite;
         case 1:
           return site.enabled;
