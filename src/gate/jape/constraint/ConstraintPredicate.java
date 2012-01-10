@@ -70,13 +70,13 @@ public interface ConstraintPredicate extends Serializable {
 
   /**
    * The value used in comparisons against passed in data in
-   * {@link #matches(Annotation)}.
+   * {@link #matches(Annotation, AnnotationSet)}.
    */
   public Object getValue();
 
   /**
    * Set the value used in comparisons against passed in data in
-   * {@link #matches(Annotation)}.
+   * {@link #matches(Annotation, AnnotationSet)}.
    */
   public void setValue(Object value);
 
