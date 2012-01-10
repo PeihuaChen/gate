@@ -16,21 +16,61 @@
 
 package gate.gui.docview;
 
-import java.awt.*;
-import javax.swing.*;
-import javax.swing.tree.*;
-import javax.swing.event.*;
-import java.util.*;
-import gate.*;
-import gate.creole.*;
-import java.io.*;
-import java.awt.event.*;
-import gate.swing.*;
-import gate.event.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.creole.ANNIEConstants;
+import gate.event.AnnotationSetEvent;
+import gate.event.AnnotationSetListener;
 import gate.gui.MainFrame;
+import gate.swing.ColorGenerator;
 
-import javax.swing.text.Highlighter;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.FlowLayout;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
+
+import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
+import javax.swing.ComboBoxEditor;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JColorChooser;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JToggleButton;
+import javax.swing.JTree;
+import javax.swing.JWindow;
+import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
+import javax.swing.UIManager;
+import javax.swing.event.MouseInputAdapter;
 import javax.swing.text.DefaultHighlighter;
+import javax.swing.text.Highlighter;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeCellRenderer;
+import javax.swing.tree.TreePath;
 
 /**
  * Display a tree that contains the co-references type of the document,
@@ -1112,8 +1152,6 @@ public class CorefEditor
 
   /**
    * Given an annotation, this method returns the string of that annotation
-   * @param ann
-   * @return
    */
   public String getString(Annotation ann) {
   	return document.getContent().toString().substring(ann.

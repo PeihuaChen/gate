@@ -241,11 +241,7 @@ public class AnnotationSetsView extends AbstractDocumentView
   /**
    * Create the annotation editor (responsible for creating the window
    * used to edit individual annotations).
-   * 
-   * @param textView
-   * @param asView
-   * @return
-   * @throws ResourceInstantiationException
+   * @throws ResourceInstantiationException if an error occurs
    */
   protected gate.gui.annedit.OwnedAnnotationEditor createAnnotationEditor(
           TextualDocumentView textView, AnnotationSetsView asView)
@@ -1601,9 +1597,6 @@ public class AnnotationSetsView extends AbstractDocumentView
     }
   }
   
-  /**
-   * The beginning is the same as {@link NameBearerHandle.SaveAsXmlAction}.
-   */
   protected class SavePreserveFormatAction extends AbstractAction{
     public SavePreserveFormatAction(){
       super("Save Preserving Format");

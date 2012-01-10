@@ -109,7 +109,6 @@ public class JNullableTextField extends JPanel {
    * Gets the value currently being edited. Unlike {@link JTextField}, this 
    * value may be null (if {@link #setText(String)} was called previously with 
    * a <code>null</code> value, of the delete button was pressed by the user). 
-   * @return
    */
   public String getText() {
     return text;
@@ -118,7 +117,6 @@ public class JNullableTextField extends JPanel {
   /**
    * Sets the number of columns for the included {@link JTextField}, see 
    * {@link JTextField#setColumns(int)}. 
-   * @param cols
    */
   public void setColumns(int cols) {
     textField.setColumns(cols);

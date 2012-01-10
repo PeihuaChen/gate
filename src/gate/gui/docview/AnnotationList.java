@@ -33,8 +33,6 @@ public interface AnnotationList extends DocumentView {
   
   /**
    * Provides the annotation 
-   * @param row
-   * @return
    */
   public AnnotationData getAnnotationAtRow(int row);
 
