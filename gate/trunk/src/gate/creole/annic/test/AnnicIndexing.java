@@ -106,7 +106,6 @@ public class AnnicIndexing {
 
   /**
    * Gets the location of index output directory
-   * @return
    */
   public java.net.URL getIndexOutputDirectoryLocation() {
     return indexOutputDirectoryLocation;
@@ -122,7 +121,6 @@ public class AnnicIndexing {
 
   /**
    * Gets the annotation set name to be indexed
-   * @return
    */
   public String getAnnotationSetName() {
     return annotationSetName;
@@ -142,7 +140,6 @@ public class AnnicIndexing {
 
   /**
    * Gets the base token annotation type
-   * @return
    */
   public String getBaseTokenAnnotationType() {
     return this.baseTokenAnnotationType;
@@ -166,7 +163,6 @@ public class AnnicIndexing {
 
   /**
    * Gets the corpus to index
-   * @return
    */
   public gate.Corpus getCorpus() {
     return this.corpus;
@@ -174,7 +170,6 @@ public class AnnicIndexing {
 
   /**
    * Gets the features of annotation to be excluded from being indexed
-   * @return
    */
   public List getFeaturesToExclude() {
     return featuresToExclude;
@@ -190,7 +185,6 @@ public class AnnicIndexing {
 
   /**
    * Gets the Index Unit Annotation type.
-   * @return
    */
   public String getIndexUnitAnnotationType() {
     return indexUnitAnnotationType;
