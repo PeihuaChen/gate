@@ -642,13 +642,11 @@ public class FSM implements JapeConstants {
    * if it's a final state, and black otherwise. Final states are also marked
    * with a double-line outline.
    *
-   * @see <a href="http://www.graphviz.org/">the GraphViz web site </a> for
-   *      software to translate the output of this method into pretty pictures.
-   *
+   * @see for software to translate the output of this method into pretty pictures
+   *  try <a href="http://www.graphviz.org">the GraphViz web site</a>.
    * @param includeConstraints
    *            whether to include a stringified representation of each
    *            transition object as part of its label. The default is false.
-   * @return
    */
   public String asGraphViz(boolean includeConstraints) {
     StringBuffer result = new StringBuffer();

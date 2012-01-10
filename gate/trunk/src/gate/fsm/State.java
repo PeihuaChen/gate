@@ -65,9 +65,6 @@ public class State implements JapeConstants {
    * Sets the index of the rule for this state.
    * Determines the appropriate rule by recursively searching this state's outbound transitions until
    * we reach a final state.  Record this state in the ruleTimes and ruleNameToIndexMap structures
-   * @param ruleNameToIndexMap
-   * @param ruleTimes
-   * @return
    */
   public int getRuleForState(HashMap<String,Integer> ruleNameToIndexMap,ArrayList<RuleTime>ruleTimes) {
     if (this.getIndexInRuleList() != UNVISITED_INDEX) {
