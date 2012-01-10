@@ -15,9 +15,9 @@ package gate.util;
 import gate.Executable;
 import gate.creole.ExecutionException;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.log4j.Logger;
 
 /**
@@ -114,7 +114,7 @@ public class Benchmark {
   /**
    * Static shared logger used for logging.
    */
-  public static Logger logger = Logger.getLogger(Benchmark.class);
+  public static final Logger logger = Logger.getLogger(Benchmark.class);
 
   /**
    * This returns the current system time.
@@ -152,7 +152,7 @@ public class Benchmark {
    *          logged with this message.
    * @param objectInvokingThisCheckPoint - The benchmarkable object that
    *          invokes this method.
-   * @param features - any features (key-value pairs) that should be
+   * @param benchmarkingFeatures - any features (key-value pairs) that should be
    *          reported in the log message. toString() method will be
    *          invoked on the objects.
    */
@@ -178,7 +178,7 @@ public class Benchmark {
    *          logged with this message.
    * @param objectInvokingThisCheckPoint - The benchmarkable object that
    *          invokes this method.
-   * @param features - any features (key-value pairs) that should be
+   * @param benchmarkingFeatures - any features (key-value pairs) that should be
    *          reported in the log message. toString() method will be
    *          invoked on the objects.
    */
