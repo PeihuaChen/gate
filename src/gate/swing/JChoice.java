@@ -328,8 +328,6 @@ public class JChoice extends JPanel implements ItemSelectable{
   }
 
   /**
-   * @param index
-   * @return
    * @see javax.swing.ListModel#getElementAt(int)
    */
   public Object getElementAt(int index) {
@@ -337,7 +335,6 @@ public class JChoice extends JPanel implements ItemSelectable{
   }
 
   /**
-   * @return
    * @see javax.swing.ComboBoxModel#getSelectedItem()
    */
   public Object getSelectedItem() {
@@ -345,7 +342,6 @@ public class JChoice extends JPanel implements ItemSelectable{
   }
 
   /**
-   * @return
    * @see javax.swing.ListModel#getSize()
    */
   public int getItemCount() {
