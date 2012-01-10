@@ -150,8 +150,6 @@ public class TestAnnic extends TestCase {
   /**
    * A Method that is called from gate.TestGate to invoke the testing
    * methods.
-   * 
-   * @return
    */
   public static Test suite() {
     return new TestSuite(TestAnnic.class);
