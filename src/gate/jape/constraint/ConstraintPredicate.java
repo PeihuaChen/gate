@@ -60,8 +60,6 @@ public interface ConstraintPredicate extends Serializable {
 
   /**
    * The accessor associated with this predicate.
-   *
-   * @return
    */
   public AnnotationAccessor getAccessor();
 
@@ -73,16 +71,12 @@ public interface ConstraintPredicate extends Serializable {
   /**
    * The value used in comparisons against passed in data in
    * {@link #matches(Annotation)}.
-   *
-   * @return
    */
   public Object getValue();
 
   /**
    * Set the value used in comparisons against passed in data in
    * {@link #matches(Annotation)}.
-   *
-   * @param value
    */
   public void setValue(Object value);
 
@@ -95,10 +89,6 @@ public interface ConstraintPredicate extends Serializable {
   /**
    * Evaluates if the provided annotation meets the requirements of the
    * predicate.
-   *
-   * @param annot
-   * @param context
-   * @return
    * @throws JapeException
    */
   public boolean matches(Annotation annot, AnnotationSet context) throws JapeException;
