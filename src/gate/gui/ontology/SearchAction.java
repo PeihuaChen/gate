@@ -291,11 +291,6 @@ public class SearchAction extends AbstractAction {
      */
     private JPanel labelPanel;
     
-    /**
-     * Constructor
-     * 
-     * @param owner
-     */
     public ComboRenderer() {
       label = new JLabel();
       iconLabel = new JLabel();

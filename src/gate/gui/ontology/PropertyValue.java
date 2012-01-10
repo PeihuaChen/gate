@@ -45,8 +45,6 @@ public class PropertyValue {
 
   /**
    * Gets the associated property
-   * 
-   * @return
    */
   public RDFProperty getProperty() {
     return property;
@@ -54,8 +52,6 @@ public class PropertyValue {
 
   /**
    * Gets the set value
-   * 
-   * @return
    */
   public Object getValue() {
     return value;
