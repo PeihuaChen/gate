@@ -105,7 +105,7 @@ public class LinearNode {
   }
 
   /** Sets the minor type
-   *  @return the minor type */
+   */
   public void setMinorType(String minorType) {
     minor = minorType;
   }

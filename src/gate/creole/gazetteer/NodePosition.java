@@ -48,8 +48,6 @@ public class NodePosition {
    * @param oen - old end offset
    * @param nsn - new start offset
    * @param nen - new end offset
-   * @param space - total deducted spaces due to change in the text before
-   * the start offset in the document
    */
   public NodePosition(long osn, long oen, long nsn, long nen) {
     originalStartOffset = osn;
