@@ -47,16 +47,6 @@ public class LuceneDocument {
    * lucene can understand and can store in its indexes. This method also stores
    * the tokenStream on the disk in order to retrieve it at the time of
    * searching
-   * 
-   * @param corpusPersistenceID
-   * @param gateDoc
-   * @param documentID
-   * @param annotSet
-   * @param featuresToExclude
-   * @param indexLocation
-   * @param baseTokenAnnotationType
-   * @param indexUnitAnnotationType
-   * @return
    */
   public List<Document> createDocuments(String corpusPersistenceID,
     gate.Document gateDoc, String documentID,

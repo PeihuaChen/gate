@@ -122,8 +122,6 @@ public class LuceneSearcher implements Searcher {
 
   /**
    * Return the next numberOfHits -1 indicates all
-   * 
-   * @return
    */
   public Hit[] next(int numberOfHits) throws SearchException {
 
@@ -327,8 +325,6 @@ public class LuceneSearcher implements Searcher {
 
   /**
    * Gets the number of base token annotations to show in the context.
-   * 
-   * @return
    */
   public Integer getContextWindow() {
     return new Integer(this.contextWindow);
@@ -366,8 +362,6 @@ public class LuceneSearcher implements Searcher {
    * </p>
    * where, the corpusName is the name of the corpus the annotationSetName
    * belongs to.
-   * 
-   * @return
    */
   public String[] getIndexedAnnotationSetNames() throws SearchException {
     String indexLocation;
@@ -496,9 +490,6 @@ public class LuceneSearcher implements Searcher {
 
   /**
    * Gets the query tokens for the given query.
-   * 
-   * @param query
-   * @return
    */
   public synchronized List<String> getQueryTokens(String query) {
     return queryTokens.get(query);
@@ -506,9 +497,6 @@ public class LuceneSearcher implements Searcher {
 
   /**
    * Adds the query tokens for the given query.
-   * 
-   * @param query
-   * @param queryTokens
    */
   public synchronized void addQueryTokens(String query, List<String> queryTokens) {
     this.queryTokens.put(query, queryTokens);

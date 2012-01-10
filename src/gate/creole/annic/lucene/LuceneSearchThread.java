@@ -137,7 +137,6 @@ public class LuceneSearchThread {
    * This method collects the necessary information from lucene and uses
    * it when the next method is called
    * 
-   * @param limit limit indicates the number of patterns to retrieve
    * @param query query supplied by the user
    * @param patternWindow number of tokens to refer on left and right
    *          context
@@ -1124,10 +1123,6 @@ public class LuceneSearchThread {
 
   /**
    * Checks if two first term positions are identical. 
-   * @param ftp
-   * @param ftp1
-   * @param qType
-   * @return
    */
   private boolean areTheyEqual(List ftp, List ftp1, int qType) {
     if(qType == 1) {
@@ -1154,8 +1149,6 @@ public class LuceneSearchThread {
 
   /**
    * Gets the query.
-   * 
-   * @return
    */
   public String getQuery() {
     return query;

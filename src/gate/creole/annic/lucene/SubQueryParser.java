@@ -159,9 +159,6 @@ public class SubQueryParser {
    * and the arrayList consists of 
    * 1. {A}{C} 
    * 2. {B}{C}
-   * 
-   * @param q1
-   * @return
    * @throws SearchException
    */
   public static ArrayList<String> parseQuery(String q1) throws SearchException {
@@ -337,8 +334,6 @@ public class SubQueryParser {
 
   /**
    * This method checks if query has either | or ( in it.
-   * @param query
-   * @return
    */
   public static boolean scanQueryForOrOrBracket(String query) {
     int index = 0;
@@ -448,8 +443,6 @@ public class SubQueryParser {
    * and ({B}{C})
    * so basically findOrTokens find out all the tokens around
    * | operator
-   * @param query
-   * @return
    */
   public static ArrayList<String> findOrTokens(String query) {
     int balance = 0;

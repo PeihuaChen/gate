@@ -17,14 +17,6 @@ public class StatsCalculator {
    * sure that you close the searcher on your own. Failing to do so may
    * result into many files being opened at the same time and that can
    * cause the problem with your OS.
-   * 
-   * @param searcher
-   * @param corpusToSearchIn
-   * @param annotationSetToSearchIn
-   * @param annotationType
-   * @param featureName
-   * @param value
-   * @return
    * @throws SearchException
    */
   public static int freq(IndexSearcher searcher, String corpusToSearchIn,
@@ -143,15 +135,11 @@ public class StatsCalculator {
 
   /**
    * Allows retrieving frequencies for the given parameters.
-   * @param patternsToSearchIn 
-   * @param annotationType 
-   * @param feature 
    * @param value - set to null if only wants to retrieve frequencies for AT.feature
    * @param inMatchedSpan - true if only interested in frequencies from the matched spans.
    * @param inContext - true if only interested in frequencies from the contexts. Please note that both isMatchedSpan 
    * and inContext can be set to true if interested in frequencies from the entire patterns, but cannot be set false
    * at the same time.
-   * @return
    * @throws SearchException
    */
   public static int freq(List<Hit> patternsToSearchIn,
@@ -200,7 +188,7 @@ public class StatsCalculator {
 
   
   /**
-   * @see #freq(List<Hit>, String, String, String, boolean, boolean)
+   * @see #freq(List, String, String, String, boolean, boolean)
    */
   public static int freq(List<Hit> patternsToSearchIn,
           String annotationType, boolean inMatchedSpan, boolean inContext) throws SearchException {
