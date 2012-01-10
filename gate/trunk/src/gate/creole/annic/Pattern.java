@@ -69,9 +69,6 @@ public class Pattern extends Hit {
 
   /**
    * Returns the annotations lying between the start and the end offsets
-   * 
-   * @param start
-   * @param end
    */
   public List<PatternAnnotation> getPatternAnnotations(int startOffset, int endOffset) {
     ArrayList<PatternAnnotation> annots = new ArrayList<PatternAnnotation>();
