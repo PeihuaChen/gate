@@ -124,10 +124,10 @@
       <HELPURL>http://gate.ac.uk/userguide/sec:gazetteers:flexgazetteer</HELPURL>
       <PARAMETER NAME="document" RUNTIME="true"
         COMMENT="The document to be processed">gate.Document</PARAMETER>
-      <PARAMETER NAME="inputAnnotationSetName" RUNTIME="true"
+      <PARAMETER NAME="inputASName" RUNTIME="true"
         COMMENT="The annotation set to be used for getting features from"
         OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="outputAnnotationSetName" RUNTIME="true"
+      <PARAMETER NAME="outputASName" RUNTIME="true"
         COMMENT="The annotation set to be used for the generated annotations"
         OPTIONAL="true">java.lang.String</PARAMETER>
       <PARAMETER NAME="inputFeatureNames"
