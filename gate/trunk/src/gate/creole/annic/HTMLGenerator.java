@@ -22,9 +22,6 @@ public class HTMLGenerator {
    * This method exports the annic pattern to HTML. The HTML provides a
    * way to look at various annotations that span across the found annic
    * pattern.
-   * 
-   * @param pattern
-   * @return
    */
   public static String generateHTMLTable(Pattern pattern) {
     PatternAnnotation[] patternAnnotations = pattern.getPatternAnnotations();

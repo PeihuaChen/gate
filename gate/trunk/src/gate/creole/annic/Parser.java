@@ -136,9 +136,6 @@ public class Parser {
   /**
    * Given an array of instances of Hit, this method returns an xml
    * representation of the Hit
-   * 
-   * @param hits
-   * @return
    */
   public static String toXML(Hit[] hits) {
     StringBuffer sb = new StringBuffer();
@@ -217,8 +214,6 @@ public class Parser {
   /**
    * This method replaces all the special characters (invalid xml characters) with their respective legal sequences.
    * These includes &, <, >, \ and '.
-   * @param s
-   * @return
    */
   public static String replaceAmpChars(String s) {
     s = s.replaceAll("&", "&amp;");
@@ -231,9 +226,6 @@ public class Parser {
 
   /**
    * Given xml representation of HIT converts them into an array of hits
-   * 
-   * @param xml
-   * @return
    * @throws IOException
    */
   public static Hit[] fromXML(String xml) throws IOException, JDOMException {
@@ -301,10 +293,7 @@ public class Parser {
 
   /**
    * wraps the element into the following format
-   * 
-   * @param elementText
-   * @param elementValue
-   * @return <elementText>elementValue</elementText>\n
+   * @return &lt;elementText&gt;elementValue&lt;/elementText&gt;
    */
   public static String wrap(String elementText, String elementValue) {
     if(elementValue == null) {
@@ -317,9 +306,7 @@ public class Parser {
   /**
    * wraps the element into the following format
    * 
-   * @param elementText
-   * @param elementValue
-   * @return <elementText>elementValue</elementText>\n
+   * @return &lt;elementText&gt;elementValue&lt;/elementText&gt;
    */
   public static String wrap(String elementText, int elementValue) {
     return wrap(elementText, "" + elementValue);
@@ -327,10 +314,7 @@ public class Parser {
 
   /**
    * wraps the element into the following format
-   * 
-   * @param elementText
-   * @param startElement
-   * @return "<" + (startElement ? "" : "/") + elementText + ">\n";
+   * @return "&lt;" + (startElement ? "" : "/") + elementText + "&gt;\n";
    */
   public static String wrap(String elementText, boolean startElement) {
     return "<" + (startElement ? "" : "/") + elementText + ">\n";
