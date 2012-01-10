@@ -88,10 +88,7 @@ public class SessionImpl implements Session {
 
 
   /** returns the timeout (in minutes) of the session
-   *
-   *  @see  AccessControllerImpl#DEFAULT_SESSION_TIMEOUT_MIN
-   *
-   *  */
+   */
   public int getTimeout() {
 
     return this.timeout;

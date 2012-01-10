@@ -23,7 +23,7 @@ import org.apache.tools.ant.util.FileUtils;
 
 /**
  * Class that extracts the list of gazetteer .lst files from a .def.
- * This class extends {@link Path} so it can be used as a nested element
+ * This class extends {@link DataType} so it can be used as a nested element
  * within the extraresourcespath of a packagegapp task.
  */
 public class GazetteerLists extends DataType implements ResourceCollection {
