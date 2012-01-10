@@ -403,12 +403,13 @@ public class DocumentXmlUtils {
   }// buildEntityMapFromString();
 
   /**
-   * This method saves an AnnotationSet as XML.
+   * Converts the Annotation set to XML which is appended to the supplied
+   * StringBuffer instance.
    * 
    * @param anAnnotationSet
    *          The annotation set that has to be saved as XML.
-   * @return a String like this: <AnnotationSet> <Annotation>....
-   *         </AnnotationSet>
+   * @param buffer
+   *          the StringBuffer that the XML representation should be appended to
    */
   public static void annotationSetToXml(AnnotationSet anAnnotationSet,
           StringBuffer buffer) {
@@ -444,17 +445,20 @@ public class DocumentXmlUtils {
     buffer.append("</AnnotationSet>\n");
   }// annotationSetToXml
 
-  
   /**
-   * This method saves an AnnotationSet as XML.
+   * Converts the Annotation set to XML which is appended to the supplied
+   * StringBuffer instance. The standard
+   * {@link #annotationSetToXml(AnnotationSet, StringBuffer) method} uses the
+   * name that belongs to the provided annotation set, however, this method
+   * allows one to store the provided annotation set under a different
+   * annotation set name.
    * 
    * @param anAnnotationSet
-   *          The annotation set that has to be saved as XML.
+   *          the annotation set that has to be saved as XML.
    * @param annotationSetNameToUse
-   *          The standard annotationSetToXml(AnnotaionSet, StringBuffer) uses the name that belongs to the provided annotation set,
-   *          however, this method allows one to store the provided annotation set under a different annotation set name.
-   * @return a String like this: <AnnotationSet> <Annotation>....
-   *         </AnnotationSet>
+   *          the new name for the annotation set being converted to XML
+   * @param buffer
+   *          the StringBuffer that the XML representation should be appended to
    */
   public static void annotationSetToXml(AnnotationSet anAnnotationSet, String annotationSetNameToUse,
           StringBuffer buffer) {

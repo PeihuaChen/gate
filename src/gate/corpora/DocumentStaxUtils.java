@@ -377,7 +377,7 @@ public class DocumentStaxUtils {
    * 
    * @param xsr
    * @param nodeIdToOffsetMap
-   * @return
+   * @return the text content of the document
    */
   public static String readTextWithNodes(XMLStreamReader xsr,
           Map<Integer, Long> nodeIdToOffsetMap) throws XMLStreamException {
@@ -428,8 +428,6 @@ public class DocumentStaxUtils {
    * each with a Name and Value. The reader will be returned positioned
    * on the closing GateDocumentFeatures or Annotation tag.
    * 
-   * @param xsr
-   * @return
    * @throws XMLStreamException
    */
   public static FeatureMap readFeatureMap(XMLStreamReader xsr)
@@ -677,7 +675,7 @@ public class DocumentStaxUtils {
    * <code>cesAna</code> tag and will be left pointing to the
    * corresponding end tag.
    * 
-   * @param reader the XMLStreamReader to read from.
+   * @param xsr the XMLStreamReader to read from.
    * @param as the annotation set to read into.
    * @throws XMLStreamException
    */
@@ -778,8 +776,6 @@ public class DocumentStaxUtils {
    * attributes. The reader will be returned positioned on the closing
    * struct tag.
    * 
-   * @param xsr
-   * @return
    * @throws XMLStreamException
    */
   public static FeatureMap readXcesFeatureMap(XMLStreamReader xsr)

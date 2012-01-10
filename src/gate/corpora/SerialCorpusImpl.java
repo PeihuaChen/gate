@@ -390,7 +390,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
    * Fills the provided corpus with documents extracted from the
    * provided single concatenated file.
    * 
-   * @param trecFile the trec file.
+   * @param singleConcatenatedFile the single concatenated file.
    * @param documentRootElement content between the start and end of
    *          this element is considered for documents.
    * @param encoding the encoding of the trec file.
