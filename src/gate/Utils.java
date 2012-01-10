@@ -250,8 +250,7 @@ public class Utils {
    * whitespace; normalize internal whitespace to single spaces; return an
    * empty String if the input contains nothing but whitespace, but null
    * if the input is null.)
-   * @param input
-   * @return
+   * @return a cleaned version of the input String.
    */
   public static String cleanString(String input) {
     if (input == null) {

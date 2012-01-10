@@ -531,9 +531,7 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
    *
    * @param neededType Type of annotation to return. If empty, all
    *          annotation types will be returned.
-   * @param startOffset
-   * @param endOffset
-   * @return
+   * @return annotations of the given type that completely span the range.
    */
   public AnnotationSet getCovering(String neededType, Long startOffset, Long endOffset) {
     //check the range

@@ -63,8 +63,6 @@ public interface AnnotationSet extends SimpleAnnotationSet, Serializable {
    * @param end the end offset for the new annotation
    * @param type the annotation type
    * @param features the features for the new annotation
-   * @return the newly generated annotation ID, which will be distinct
-   *         from all other annotations in this set.
    * @throws InvalidOffsetException if the start or end offsets are
    *           <code>null</code>, or if the start offset is less than
    *           0 or the end offset is greater than the length of the

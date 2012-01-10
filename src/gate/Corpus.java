@@ -34,7 +34,6 @@ public interface Corpus extends SimpleCorpus {
    * because there would be no way to get the document back
    * again afterwards.
    * @param doc Document to be unloaded from memory.
-   * @return void.
    */
   public void unloadDocument(Document doc);
 

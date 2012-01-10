@@ -16,28 +16,40 @@
 
 package gate;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Serializable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.net.*;
-import java.util.*;
-
-import gate.creole.*;
+import gate.annotation.ImmutableAnnotationSetImpl;
+import gate.creole.AbstractProcessingResource;
+import gate.creole.AbstractResource;
+import gate.creole.AnnotationSchema;
+import gate.creole.ConditionalController;
+import gate.creole.CustomDuplication;
+import gate.creole.ParameterException;
+import gate.creole.ParameterList;
+import gate.creole.ResourceData;
+import gate.creole.ResourceInstantiationException;
 import gate.creole.gazetteer.Gazetteer;
-//import gate.creole.ontology.owlim.OWLIMOntologyLR;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
 import gate.jape.constraint.ConstraintFactory;
 import gate.jape.parser.ParseCpsl;
 import gate.persist.PersistenceException;
 import gate.persist.SerialDataStore;
-import gate.security.*;
 import gate.security.SecurityException;
-import gate.util.*;
-import gate.annotation.ImmutableAnnotationSetImpl;
+import gate.util.BomStrippingInputStreamReader;
+import gate.util.Out;
+import gate.util.SimpleFeatureMapImpl;
+import gate.util.Strings;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
+import java.net.URL;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.Vector;
 
 /** Provides static methods for the creation of Resources.
   */
@@ -777,10 +789,10 @@ public abstract class Factory {
    * Active ConstraintFactory for creating and initializing Jape <b>Constraint</b>s.
    */
   private static ConstraintFactory japeConstraintFactory = new ConstraintFactory();
+
   /**
    * Return the active {@link ConstraintFactory} for creating and initializing Jape
    * <b>Constraint</b>s.
-   * @return
    */
   public static ConstraintFactory getConstraintFactory() {
     return japeConstraintFactory;
