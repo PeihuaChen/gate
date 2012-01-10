@@ -12,7 +12,6 @@
 
 package gate.util;
 
-import org.apache.log4j.Logger;
 
 /**
  * Resources that want to log their progress or results into a shared
@@ -25,8 +24,6 @@ public interface Benchmarkable {
 
   /**
    * Returns the benchmark ID of this resource.
-   * 
-   * @return
    */
   public String getBenchmarkId();
 

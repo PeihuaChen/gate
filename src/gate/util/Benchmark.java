@@ -118,8 +118,6 @@ public class Benchmark {
 
   /**
    * This returns the current system time.
-   * 
-   * @return
    */
   public static long startPoint() {
     return System.currentTimeMillis();
@@ -232,10 +230,6 @@ public class Benchmark {
 
   /**
    * Helper method to generate the benchmark ID.
-   * 
-   * @param resourceName
-   * @param parentBenchmarkID
-   * @return
    */
   public static String createBenchmarkId(String resourceName,
           String parentBenchmarkID) {
@@ -260,8 +254,6 @@ public class Benchmark {
 
   /**
    * Returns if the logging is enabled.
-   * 
-   * @return
    */
   public static boolean isBenchmarkingEnabled() {
     return benchmarkingEnabled;
