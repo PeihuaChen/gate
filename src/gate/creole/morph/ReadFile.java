@@ -2,9 +2,12 @@ package gate.creole.morph;
 
 import gate.util.BomStrippingInputStreamReader;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>Title: ReadFile.java </p>
@@ -20,11 +23,11 @@ public class ReadFile {
   private int pointer = 0;
 
   /** Stores each line of the file as a separate String in the ArrayList */
-  private ArrayList data;
+  private List data;
 
   /**
    * Constructor - Initialise the buffered Reader instance
-   * @param fileName Name of the file to be read
+   * @param fileURL URL of the file to be read
    */
   public ReadFile(URL fileURL) {
 

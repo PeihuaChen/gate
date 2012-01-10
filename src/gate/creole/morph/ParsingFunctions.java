@@ -1,10 +1,9 @@
 package gate.creole.morph;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.Stack;
 
 /**
@@ -380,16 +379,8 @@ public class ParsingFunctions {
 		return parameters;
 	}
 	
-	
-	/**
-	 * 
-	 * @param string
-	 * @param type
-	 * @param initState
-	 * @return
-	 */
-	public static HashSet createFSMs(String string, int type, HashSet initStates, Interpret owner) {
-		HashSet result = new HashSet();
+	public static Set createFSMs(String string, int type, Set initStates, Interpret owner) {
+		Set result = new HashSet();
 		// we create different groups for states 
 		Iterator iter = initStates.iterator();
 		while(iter.hasNext()) {
@@ -443,10 +434,6 @@ public class ParsingFunctions {
 	
 	/**
 	 * (abc) -> a -> b -> c ->
-	 * 
-	 * @param line
-	 * @param initState
-	 * @return
 	 */
 	public static ArrayList andFSMs(String line, HashSet initStates, Interpret owner) {
 		// for the first inital State
@@ -498,9 +485,6 @@ public class ParsingFunctions {
 	 * [abc] -> a, 
 	 * 		 -> b, 
 	 * 		 -> c
-	 * @param line
-	 * @param initState
-	 * @return
 	 */ 
 	public static ArrayList orFSMs(String line, HashSet initStates, Interpret owner) {
 		// for each character in the line
@@ -540,10 +524,6 @@ public class ParsingFunctions {
 	/**
 	 * [abc]+ 
 	 * each element can travel to itself and can travel to next one
-	 * 
-	 * @param line
-	 * @param initState
-	 * @return
 	 */
 	public static ArrayList orPlusFSMs(String line, HashSet initStates, Interpret owner) {
 		// for each character in the line
@@ -595,9 +575,6 @@ public class ParsingFunctions {
 	 * (abc)+ 
 	 * -> a -> b -> c -> null 
 	 * -> a -> b -> c -> a
-	 * @param line
-	 * @param initState
-	 * @return
 	 */
 	public static ArrayList andPlusFSMs(String line, HashSet initStates, Interpret owner) {
 		// for the first inital State
@@ -651,10 +628,6 @@ public class ParsingFunctions {
 	/**
 	 * [abc]* 
 	 * each element can have reference to adjecent ones and to itself
-	 * 
-	 * @param line
-	 * @param initState
-	 * @return
 	 */
 	public static ArrayList orStarFSMs(String line, HashSet initStates, Interpret owner) {
 		// for each character in the line
@@ -706,10 +679,6 @@ public class ParsingFunctions {
 
 	/**
 	 * (abc)*
-	 * 
-	 * @param line
-	 * @param initState
-	 * @return
 	 */
 	public static ArrayList andStarFSMs(String line, HashSet initStates, Interpret owner) {
 		// for the first inital State
