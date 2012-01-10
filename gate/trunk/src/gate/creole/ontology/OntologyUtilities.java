@@ -45,9 +45,6 @@ public class OntologyUtilities {
    * found, attempts to create one using OWLIM implementation with
    * RDF/XML as ontology type and if successful returns the newly
    * created instance of the ontology.
-   * 
-   * @param url
-   * @return
    * @throws ResourceInstantiationException
    * @deprecated - this method should be avoided
    */
@@ -95,9 +92,6 @@ public class OntologyUtilities {
 
   /**
    * Given a URI, this methord returns the name part
-   * 
-   * @param uri
-   * @return
    * @deprecated use {@link OURI#getResourceName} instead
    */
   @Deprecated
@@ -316,9 +310,6 @@ public class OntologyUtilities {
   /**
    * Gets the respective datatype for the given datatype URI. If the URI
    * is invalid, the method returns null.
-   * 
-   * @param datatypeURI
-   * @return
    * @deprecated use {@link DataType#getDataType} instead
    */
   @Deprecated
@@ -329,9 +320,6 @@ public class OntologyUtilities {
   /**
    * Gets the respective locale for the given 2 character language code.
    * If the code doesn't match, the method returns null.
-   * 
-   * @param languageCode
-   * @return
    * @deprecated use {@link DataType#getLocale} instead
    */
   @Deprecated

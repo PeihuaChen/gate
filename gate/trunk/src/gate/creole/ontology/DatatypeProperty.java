@@ -27,7 +27,6 @@ public interface DatatypeProperty extends RDFProperty {
     
   /**
    * This method returns the DataType set for this property
-   * @return
    */
   public DataType getDataType();
 
@@ -35,7 +34,7 @@ public interface DatatypeProperty extends RDFProperty {
    * Checks whether the provided datatype value is compatible with the DataType
    * restrictions on the property.
    * 
-   * @param aValue
+   * @param value
    *          the Value
    * @return true if this datatype value is compatible with the DataType restrictions on
    *         the property. False otherwise.

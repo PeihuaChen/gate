@@ -97,7 +97,7 @@ public class OUtils {
    * particular any % characters in the original string that are not part of a
    * %NN escape sequence will themselves be encoded as %25.
    *
-   * @param uri The uri, in characters specified by RFC 2396 + '#'
+   * @param uriRef The uri, in characters specified by RFC 2396 + '#'
    * @return The corresponding Unicode String
    */ 
   public static String uriEncode(String uriRef) {

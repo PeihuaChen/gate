@@ -595,9 +595,6 @@ public class DataType {
   /**
    * Gets the respective datatype for the given datatype URI. If the URI
    * is invalid, the method returns null.
-   * 
-   * @param datatypeURI
-   * @return
    */
   public static DataType getDataType(String datatypeURI) {
     return datatypeMap.get(datatypeURI);
@@ -606,9 +603,6 @@ public class DataType {
   /**
    * Gets the respective locale for the given 2 character language code.
    * If the code doesn't match, the method returns null.
-   * 
-   * @param languageCode
-   * @return
    */
   public static Locale getLocale(String languageCode) {
     if(languageCode == null) return null;

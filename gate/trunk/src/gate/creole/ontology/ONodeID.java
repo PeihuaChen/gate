@@ -45,9 +45,8 @@ public interface ONodeID extends Comparable<ONodeID> {
    * if the node is a BNodeID, this will return the same string as toString().
    * <p> 
    * NOTE: URI encoding and translation from/to IRIs is not implemented yet!
-   *
-   * @return
    */
+
   public String toASCIIString();
   /**
    * Return the node ID as a unicode string.
@@ -55,24 +54,23 @@ public interface ONodeID extends Comparable<ONodeID> {
    * If the node is a BNodeID, this will return the same sting as toString().
    * <p>
    * NOTE: not implemented yet!
-   *
-   * @return
    */
   public String toDisplayString();
+  
   /**
    * Return if this represents a blank node or a named resource.
    * Returns true if this represents a blank node (is a BNodeID) or a named
    * resource (is a ORUI).
    * <p>
    * NOTE: not implemented yet!
-   * 
-   * @return
    */
   public boolean isAnonymousResource();
 
   public int compareTo(ONodeID other);
+  
   @Override
   public boolean equals(Object other);
+  
   @Override
   public int hashCode();
   /**
@@ -84,9 +82,8 @@ public interface ONodeID extends Comparable<ONodeID> {
    * or the URI as returned by toString() between "<" and ">". This will have
    * to use a proper ASCII representation of the URI or an IRI representation
    * instead.
-   *
-   * @return
    */
+  
   public String toTurtle();
   /**
    * Validate if the string that was passed on as a bnode id or as an URI/IRI

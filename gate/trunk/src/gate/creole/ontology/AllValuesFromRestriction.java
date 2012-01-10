@@ -18,8 +18,6 @@ public interface AllValuesFromRestriction extends Restriction {
      * Returns the resource which is set as a restricted value.
      * For ontologies that conform to OWL-Lite this is always an OClass
      * object.
-     *
-     * @return
      */
     public OResource getHasValue();
     
@@ -30,7 +28,7 @@ public interface AllValuesFromRestriction extends Restriction {
      * 
      * @param resource - the OResource, usually and OClass that should be value
      * of the restriction.
-     * @deprecated - use {@link setHasValue(OClass) } instead
+     * @deprecated - use {@link #setHasValue(OClass) } instead
      */
     @Deprecated
     public void setHasValue(OResource resource);
