@@ -42,8 +42,6 @@ public class PatternValidator {
 
   /**
    * Gets the length of the pattern.
-   * 
-   * @return
    */
   public int getPatternLength() {
     return patLen;
@@ -54,8 +52,6 @@ public class PatternValidator {
    * annotations in which it checks if the annotations exist that are
    * validating for the given query
    * 
-   * @param query String
-   * @param annotations ArrayList
    * @throws SearchException
    * @return int positive number indicates the offset of the last
    *         annotation of the pattern. -1 indicates invalid pattern.

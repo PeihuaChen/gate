@@ -89,8 +89,6 @@ public class LuceneQueryResult {
   /**
    * Returns an arraylist which for each pattern contains a number of
    * annotation in it.
-   * 
-   * @return
    */
   public List<Integer> patternLength() {
     return patternLength;
@@ -98,7 +96,6 @@ public class LuceneQueryResult {
 
   /**
    * Gets the GateAnnotations for each pattern.
-   * @return
    */
   public List<List<PatternAnnotation>> getGateAnnotations() {
     return this.gateAnnotations;
@@ -106,7 +103,6 @@ public class LuceneQueryResult {
 
   /**
    * Returns the main query.
-   * @return
    */
   public String getQuery() {
     return this.query;
@@ -114,7 +110,6 @@ public class LuceneQueryResult {
 
   /**
    * Gets the annotation set Name for this result
-   * @return
    */
   public String getAnnotationSetName() {
     return annotationSetName;

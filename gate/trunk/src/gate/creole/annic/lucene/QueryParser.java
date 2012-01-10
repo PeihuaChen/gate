@@ -56,9 +56,6 @@ public class QueryParser {
 
   /**
    * Returns true if the submitted query is valid.
-   * 
-   * @param query
-   * @return
    */
   public static boolean isValidQuery(String query) {
     QueryParser qp = new QueryParser();
@@ -74,12 +71,6 @@ public class QueryParser {
   /**
    * Given a query, this method parses it to convert it into one or more
    * lucene queries.
-   * 
-   * @param field
-   * @param query
-   * @param baseTokenAnnotationType
-   * @param corpusID
-   * @return
    * @throws gate.creole.ir.SearchException
    */
   public Query[] parse(String field, String query,
@@ -151,9 +142,6 @@ public class QueryParser {
    * When user submits an ANNIC query, one or more instances of lucene
    * queries are created and returned. This method returns the string
    * representation of the query at the given index.
-   * 
-   * @param i
-   * @return
    */
   public String getQueryString(int i) {
     return (String)queries.get(i);
@@ -273,9 +261,6 @@ public class QueryParser {
    * base token term it has to satisify the following terms: 1. If its
    * text is baseTokenAnnotationType and the type is "*" or 2. If its
    * type = "baseTokenAnnotationType.feature"
-   * 
-   * @param t
-   * @return
    */
   private boolean isBaseTokenTerm(Term t) {
     // the term refers to the base token
@@ -298,9 +283,6 @@ public class QueryParser {
   /**
    * Given a query this method returns tokens. Here token is an object
    * of string.
-   * 
-   * @param query
-   * @return
    * @throws gate.creole.ir.SearchException
    */
   public List<String> findTokens(String query)

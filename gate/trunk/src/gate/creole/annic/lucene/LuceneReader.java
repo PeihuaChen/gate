@@ -47,8 +47,6 @@ public class LuceneReader extends BufferedReader {
 
   /**
    * Gets the document object
-   * 
-   * @return
    */
   public gate.Document getDocument() {
     return this.gateDoc;
@@ -56,8 +54,6 @@ public class LuceneReader extends BufferedReader {
 
   /**
    * Gets the token stream associated with this reader
-   * 
-   * @return
    */
   public List<Token> getTokenStream() {
     return this.tokenStream;

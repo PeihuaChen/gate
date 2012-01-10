@@ -123,8 +123,6 @@ public class LuceneIndexer implements Indexer {
 
   /**
    * Returns the indexing parameters
-   * 
-   * @return
    */
   protected Map getIndexParameters() {
     return this.parameters;
@@ -260,9 +258,6 @@ public class LuceneIndexer implements Indexer {
 
   /**
    * Add new documents to Index
-   * 
-   * @param corpusPersistenceID
-   * @param addedDocuments
    * @throws IndexException
    */
   public void add(String corpusPersistenceID, List<gate.Document> added)
@@ -320,7 +315,7 @@ public class LuceneIndexer implements Indexer {
   /**
    * remove documents from the Index
    * 
-   * @param removedDocumentPersistenceIds - when documents are not
+   * @param removedIDs - when documents are not
    *          peristed, Persistence IDs will not be available In that
    *          case provide the document Names instead of their IDs
    * @throws Exception
@@ -393,11 +388,6 @@ public class LuceneIndexer implements Indexer {
    * in the gate document. An array of Lucene document is returned as a
    * call to this method. It uses various indexing parameters set
    * earlier.
-   * 
-   * @param corpusPersistenceID
-   * @param gateDoc
-   * @param location
-   * @return
    * @throws IndexException
    */
   private List<gate.creole.annic.apache.lucene.document.Document> getLuceneDocuments(
@@ -549,8 +539,6 @@ public class LuceneIndexer implements Indexer {
 
   /**
    * This method returns a set of annotation set names that are indexed.
-   * 
-   * @return
    */
   public Set<String> getNamesOfSerializedFiles(String documentID)
           throws IndexException {

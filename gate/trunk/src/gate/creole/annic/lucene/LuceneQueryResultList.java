@@ -42,8 +42,7 @@ public class LuceneQueryResultList {
 	}
 
 	/**
-	 * Total number of patterns
-	 * @return
+	 * @return Total number of patterns
 	 */
 	public int getTotalNumberOfPatterns() {
 		int total = 0;
