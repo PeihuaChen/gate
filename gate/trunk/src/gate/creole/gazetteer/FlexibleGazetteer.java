@@ -1,27 +1,37 @@
 /*
  * FlexibleGazetteer.java
- *
+ * 
  * Copyright (c) 2004-2011, The University of Sheffield.
- *
- * This file is part of GATE (see http://gate.ac.uk/), and is free
- * software, licenced under the GNU Library General Public License,
- * Version 2, June1991.
- *
+ * 
+ * This file is part of GATE (see http://gate.ac.uk/), and is free software,
+ * licenced under the GNU Library General Public License, Version 2, June1991.
+ * 
  * A copy of this licence is included in the distribution in the file
  * licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
- *
- * Niraj Aswani 02/2002
- * $Id$
- *
+ * 
+ * Niraj Aswani 02/2002 $Id: FlexibleGazetteer.java 14808 2011-12-19 13:42:09Z
+ * adamfunk $
  */
-
 package gate.creole.gazetteer;
 
-import java.util.*;
-import gate.util.*;
-import gate.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Document;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.ProcessingResource;
+import gate.Resource;
+import gate.Utils;
 import gate.corpora.DocumentImpl;
-import gate.creole.*;
+import gate.creole.AbstractLanguageAnalyser;
+import gate.creole.ExecutionException;
+import gate.creole.ResourceInstantiationException;
+import gate.util.InvalidOffsetException;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -29,300 +39,253 @@ import gate.creole.*;
  * </p>
  * <p>
  * The Flexible Gazetteer provides users with the flexibility to choose
- * </p>
- * <p>
- * their own customized input and an external Gazetteer. For example,
- * </p>
- * <p>
+ * their own customised input and an external Gazetteer. For example,
  * the user might want to replace words in the text with their base
+ * forms (which is an output of the Morphological Analyser).
  * </p>
- * <p>
- * forms (which is an output of the Morphological Analyser) or to
- * segment
- * </p>
- * <p>
- * a Chinese text (using the Chinese Tokeniser) before running the
- * </p>
- * <p>
- * Gazetteer on the Chinese text.
- * </p>
- * 
  * <p>
  * The Flexible Gazetteer performs lookup over a document based on the
- * </p>
- * <p>
  * values of an arbitrary feature of an arbitrary annotation type, by
- * </p>
- * <p>
  * using an externally provided gazetteer. It is important to use an
- * </p>
- * <p>
  * external gazetteer as this allows the use of any type of gazetteer
- * </p>
- * <p>
  * (e.g. an Ontological gazetteer).
  * </p>
  * 
  * @author niraj aswani
  * @version 1.0
  */
-
-public class FlexibleGazetteer extends AbstractLanguageAnalyser
-implements ProcessingResource {
-
+public class FlexibleGazetteer extends AbstractLanguageAnalyser implements
+                                                               ProcessingResource {
   private static final long serialVersionUID = -1023682327651886920L;
-  
+
   /**
-   * Does the actual loading and parsing of the lists. This method must
-   * be called before the gazetteer can be used
+   * Does the actual loading and parsing of the lists. This method must be
+   * called before the gazetteer can be used
    */
   public Resource init() throws ResourceInstantiationException {
-    if(gazetteerInst == null)  {
-      throw new ResourceInstantiationException("No Gazetteer Provided!");
-    }
+    if(gazetteerInst == null) { throw new ResourceInstantiationException(
+        "No Gazetteer Provided!"); }
     return this;
   }
 
   /**
-   * This method runs the gazetteer. It assumes that all the needed
-   * parameters are set. If they are not, an exception will be fired.
+   * This method runs the gazetteer. It assumes that all the needed parameters
+   * are set. If they are not, an exception will be fired.
    */
   public void execute() throws ExecutionException {
-    annotationMappings = new ArrayList<NodePosition>();
     fireProgressChanged(0);
     fireStatusChanged("Checking Document...");
-    if(document == null) {
-      throw new ExecutionException("No document to process!");
-    }
-
-    fireStatusChanged("Creating temporary Document...");
-    StringBuilder newdocString = new StringBuilder(document.getContent().toString());
-    Document tempDoc = null;
-
-    if(inputFeatureNames == null || inputFeatureNames.size() == 0) {
-      inputFeatureNames = new ArrayList<String>();
-    }
-
-    long totalDeductedSpaces = 0;
-    fireStatusChanged("Replacing contents with the feature value...");
-    outer: for (Annotation currentToken : Utils.inDocumentOrder(document.getAnnotations(inputAnnotationSetName))) {
-      // Where ChineseSplits occur, insert a single space
-      if(currentToken.getType().equals(ANNIEConstants.SPACE_TOKEN_ANNOTATION_TYPE)
-          && ((String)(currentToken.getFeatures().get(ANNIEConstants.TOKEN_KIND_FEATURE_NAME))).equals("ChineseSplit")) {
-
-        // for chinese split startnode and end node are same
-        long startOffset = currentToken.getStartNode().getOffset().longValue();
-
-        // because we are adding a space in place of chinesesplit
-        // the endoffset will become newStartOffset + 1
+    if(document == null) { throw new ExecutionException(
+        "No document to process!"); }
+    // obtain the inputAS
+    AnnotationSet inputAS = document.getAnnotations(inputASName);
+    // anything in the inputFeatureNames?
+    if(inputFeatureNames == null || inputFeatureNames.size() == 0) { throw new ExecutionException(
+        "No input feature names provided!"); }
+    // for each input feature, create a temporary document and run the
+    // gazetteer
+    for(String aFeature : inputFeatureNames) {
+      // find out the feature name user wants us to use
+      String[] keyVal = aFeature.split("\\.");
+      // if invalid feature name
+      if(keyVal.length != 2) {
+        System.err.println("Invalid input feature name:" + aFeature);
+        continue;
+      }
+      // keyVal[0] = annotation type
+      // keyVal[1] = feature name
+      // holds mapping for newly created annotations
+      Map<Long, NodePosition> annotationMappings =
+          new HashMap<Long, NodePosition>();
+      fireStatusChanged("Creating temporary Document for feature " + aFeature);
+      StringBuilder newdocString =
+          new StringBuilder(document.getContent().toString());
+      // sort annotations
+      List<Annotation> annotations =
+          Utils.inDocumentOrder(inputAS.get(keyVal[0]));
+      // remove duplicate annotations
+      removeOverlappingAnnotations(annotations);
+      // initially no space is deducted
+      int totalDeductedSpaces = 0;
+      // now replace the document content with the value of the feature that
+      // user has provided
+      for(Annotation currentAnnotation : annotations) {
+        // if there's no such feature, continue
+        if(!currentAnnotation.getFeatures().containsKey(keyVal[1])) continue;
+        String newTokenValue =
+            currentAnnotation.getFeatures().get(keyVal[1]).toString();
+        // if no value found for this feature
+        if(newTokenValue == null) continue;
+        // feature value found so we need to replace it
+        // find the start and end offsets for this token
+        long startOffset = Utils.start(currentAnnotation);
+        long endOffset = Utils.end(currentAnnotation);
+        // let us find the difference between the lengths of the
+        // actual string and the newTokenValue
+        long actualLength = endOffset - startOffset;
+        long lengthDifference = actualLength - newTokenValue.length();
+        // so lets find out the new startOffset and endOffset
         long newStartOffset = startOffset - totalDeductedSpaces;
-        long newEndOffset = newStartOffset + 1;
-        NodePosition mapping = new NodePosition(startOffset, startOffset,
-                newStartOffset, newEndOffset);
-
-        // here is the addition of space in the document
-        totalDeductedSpaces--;
-        // Should these Splits actually be mappable from the temp document
-        // back to the original one?  (AF)
-        annotationMappings.add(mapping);
-        newdocString = newdocString.insert((int)newStartOffset, ' ');
-        continue outer;
-      } // chineseSplit if
-
-      // search in the provided inputFeaturesNames
-      // if the current annotation has a feature value that user
-      // wants to paste on and replace the original string
-      inner: for(String inputFeatureName : inputFeatureNames) {
-        String[] keyVal = inputFeatureName .split("\\.");
-
-        if(keyVal.length == 2) {
-          // keyVal[0] = annotation type
-          // keyVal[1] = feature name
-          if(currentToken.getType().equals(keyVal[0]) && currentToken.getFeatures().containsKey(keyVal[1])) {
-            String newTokenValue = currentToken.getFeatures().get(keyVal[1]).toString();
-            
-            // feature value found so we need to replace it
-            // find the start and end offsets for this token
-            long startOffset = currentToken.getStartNode().getOffset().longValue();
-            long endOffset = currentToken.getEndNode().getOffset().longValue();
-            
-            // let us find the difference between the lengths of the
-            // actual string and the newTokenValue
-            long actualLength = endOffset - startOffset;
-            long lengthDifference = actualLength - newTokenValue.length();
-            
-            // so lets find out the new startOffset and endOffset
-            long newStartOffset = startOffset - totalDeductedSpaces;
-            long newEndOffset = newStartOffset + newTokenValue.length();
-            totalDeductedSpaces += lengthDifference;
-            
-            // and make the entry for this
-            NodePosition mapping = new NodePosition(startOffset, endOffset,
-                newStartOffset, newEndOffset);
-            annotationMappings.add(mapping);
-            
-            // and finally replace the actual string in the document
-            // with the new document
-            newdocString = newdocString.replace((int)newStartOffset,
-                (int)newStartOffset + (int)actualLength, // replacement code
-                newTokenValue);
-            break inner;
-          }
+        long newEndOffset = newStartOffset + newTokenValue.length();
+        totalDeductedSpaces += lengthDifference;
+        // only include node if there's some difference in the offsets
+        if(startOffset != newStartOffset || endOffset != newEndOffset) {
+          // and make the entry for this
+          NodePosition mapping =
+              new NodePosition(startOffset, endOffset, newStartOffset,
+                  newEndOffset);
+          annotationMappings.put(newEndOffset, mapping);
         }
-      } // END OF "inner" LOOP
-    } // END OF "outer" LOOP
-
-    
-    /* If the conversion table is empty, there were no input annotations in the original
-     * document, so there is no reason to run the underlying gazetteer.  Save time
-     * by ending execution on this document     */
-    if (annotationMappings.isEmpty())  {
-      fireProcessFinished();
-      return;
-    }
-    
-    
-    
-    // make sure the conversion table is in the right order
-    Collections.sort(annotationMappings, new NodePositionComparator());
-
-    fireStatusChanged("New Document to be processed with Gazetteer...");
-    try {
-      FeatureMap params = Factory.newFeatureMap();
-      params.put("stringContent", newdocString.toString());
-      if(document instanceof DocumentImpl) {
-        params.put("encoding", ((DocumentImpl)document).getEncoding());
-        params.put("markupAware", ((DocumentImpl)document).getMarkupAware());
+        // and finally replace the actual string in the document
+        // with the new document
+        newdocString.replace((int)newStartOffset, (int)newStartOffset
+            + (int)actualLength, newTokenValue);
       }
-      
-      FeatureMap features = Factory.newFeatureMap();
-      tempDoc = (Document)Factory.createResource("gate.corpora.DocumentImpl",
-              params, features);
-      
-      /* Mark the temp document with the locations of the input annotations so
-       * that we can later eliminate Lookups that are out of scope.       */
-      for (NodePosition mapping : annotationMappings) {
-        tempDoc.getAnnotations().add(mapping.getNewStartOffset(), mapping.getNewEndOffset(), "Input", Factory.newFeatureMap());
+      // proceed only if there was any replacement Map
+      if(annotationMappings.isEmpty()) continue;
+      // storing end offsets of annotations in an array for quick
+      // lookup later on
+      long[] offsets = new long[annotationMappings.size()];
+      int index = 0;
+      for(Long aKey : annotationMappings.keySet()) {
+        offsets[index] = aKey;
+        index++;
       }
-      
-    }
-    catch(ResourceInstantiationException rie) {
-      throw new ExecutionException("Temporary document cannot be created", rie);
-    } 
-    catch(InvalidOffsetException e) {
-      throw new ExecutionException("Temporary document cannot be created", e);
-    }
-
-    // lets create the gazetteer based on the provided gazetteer name
-    gazetteerInst.setDocument(tempDoc);
-    gazetteerInst.setAnnotationSetName(this.outputAnnotationSetName);
-
-    fireStatusChanged("Executing Gazetteer...");
-    try {
-      gazetteerInst.execute();
-    }
-    finally {
-      gazetteerInst.setDocument(null);
-    }
-
-    // now the tempDoc has been looked up, we need to shift the tokens
-    // from this temp document to the original document
-    fireStatusChanged("Transfering new tags to the original one...");
-    AnnotationSet original = document.getAnnotations(outputAnnotationSetName);
-    AnnotationSet tempInputAS = tempDoc.getAnnotations().get("Input");
-    //System.out.printf("temp Input size = %d\n", tempInputAS.size());
-
-    for (Annotation currentLookup : tempDoc.getAnnotations(outputAnnotationSetName)) {
-      long tempStartOffset = currentLookup.getStartNode().getOffset().longValue();
-      long tempEndOffset = currentLookup.getEndNode().getOffset().longValue();
-
-      /* Ignore Lookups that are out of the range of the input annotations.
-       */
-      if (coveredByInput(tempStartOffset, tempEndOffset, tempInputAS)) {
-        long originalStart = -1L;
-        long originalEnd = document.getContent().size() - 1L;
-        
-        int i = 0;
-        
-        for ( ; i < annotationMappings.size() ; i++) {
-          /* Find the last mapping whose temp start offset is less than or equal 
-           * to the temp lookup's start.
-           * 
-           * If the last matching mapping is the last mapping in the list,
-           * this loop will finish with the correct originalStart value but
-           * without hitting the i-- and break statements.
-           * 
-           * This is also the case if (unusually) there is only 1 mapping
-           * (input annotation).             */ 
-          NodePosition mapping = annotationMappings.get(i);
-          if (mapping.getNewStartOffset() <= tempStartOffset)  {
-            originalStart = mapping.getOriginalStartOffset();
+      // for binary search, offsets need to be in ascending order
+      Arrays.sort(offsets);
+      // otherwise create a temporary document for the new text
+      Document tempDoc = null;
+      // update the status
+      fireStatusChanged("Processing document with Gazetteer...");
+      try {
+        FeatureMap params = Factory.newFeatureMap();
+        params.put("stringContent", newdocString.toString());
+        // set the appropriate encoding
+        if(document instanceof DocumentImpl) {
+          params.put("encoding", ((DocumentImpl)document).getEncoding());
+          params.put("markupAware", ((DocumentImpl)document).getMarkupAware());
+        }
+        FeatureMap features = Factory.newFeatureMap();
+        tempDoc =
+            (Document)Factory.createResource("gate.corpora.DocumentImpl",
+                params, features);
+      } catch(ResourceInstantiationException rie) {
+        throw new ExecutionException("Temporary document cannot be created",
+            rie);
+      }
+      try {
+        // lets create the gazetteer based on the provided gazetteer name
+        gazetteerInst.setDocument(tempDoc);
+        gazetteerInst.setAnnotationSetName(this.outputASName);
+        fireStatusChanged("Executing Gazetteer...");
+        gazetteerInst.execute();
+        // now the tempDoc has been looked up, we need to shift the annotations
+        // from this temp document to the original document
+        fireStatusChanged("Transfering new annotations to the original one...");
+        AnnotationSet original = document.getAnnotations(outputASName);
+        // okay iterate over new annotations and transfer them back to
+        // the original document
+        for(Annotation currentLookup : tempDoc.getAnnotations(outputASName)) {
+          long tempStartOffset = Utils.start(currentLookup);
+          long tempEndOffset = Utils.end(currentLookup);
+          long newStartOffset = tempStartOffset;
+          long newEndOffset = tempEndOffset;
+          long addedSpaces = 0;
+          // we find out the node before the current annotation's startoffset
+          // and it to find out the number of extra characters added
+          index = Arrays.binarySearch(offsets, newStartOffset);
+          // if index <0, the absolute position of it refers to the
+          // position after the node we want to access to
+          // find out the no. of extra characters added before the
+          // current position
+          if(index < 0) {
+            index = Math.abs(index) - 1;
           }
-          else {
-            /* Here, counter i points to the Token after the correct mapping
-             * for the Lookup's start.  We need to back up one position in case
-             * the correct mapping for the Lookup's start is also the correct one
-             * for the Lookup's end.           */
-            i--;
-            break;
+          if(index > 0) {
+            // go back one node
+            index--;
+            NodePosition node = annotationMappings.get(offsets[index]);
+            long oldEnd = node.getOriginalEndOffset();
+            addedSpaces = node.getNewEndOffset() - oldEnd;
+            newStartOffset -= addedSpaces;
           }
-        } // END for FINDING START OFFSET
-        
-        /* If we didn't match the Lookup's start, there's no point in looking
-         * for its end (although the coveredByInput test should prevent
-         * that error).         */
-        if (originalStart >= 0) { 
-          for ( ; i < annotationMappings.size() ; i++) {
-            /* Find the first mapping whose temp end offset is greater than or equal
-             * to the temp lookup's end; typically this will be the same mapping as used for
-             * for the start offset, but it could be a subsequent one.         */
-            NodePosition mapping = annotationMappings.get(i);
-            if (mapping.getNewEndOffset() >= tempEndOffset) {
-              originalEnd = mapping.getOriginalEndOffset();
-              addToOriginal(original, originalStart, originalEnd, tempStartOffset, tempEndOffset, currentLookup, tempDoc);
-              break;
+          // we are trying to find a node which holds information
+          // about the number of new characters added before
+          // the new end offset
+          index = Arrays.binarySearch(offsets, newEndOffset);
+          if(index < 0) {
+            index = Math.abs(index) - 1;
+          }
+          if(index >= 0) {
+            // if the index 0
+            // it means
+            // if points to the length of the array, it means,
+            // we need to refer to the last element
+            if(index == offsets.length) index--;
+            NodePosition node = annotationMappings.get(offsets[index]);
+            if(offsets[index] <= newEndOffset) {
+              long oldEnd = node.getOriginalEndOffset();
+              addedSpaces = node.getNewEndOffset() - oldEnd;
+            } else {
+              long oldStart = node.getOriginalStartOffset();
+              addedSpaces = node.getNewStartOffset() - oldStart;
             }
-          } // END for FINDING END OFFSET
-        } // END if FINDING END OFFSET
-      } // END if coveredByInput(...)
-    } // END for OVER ALL THE Lookups
-
-    // now remove the newDoc
-    Factory.deleteResource(tempDoc);
+          }
+          newEndOffset -= addedSpaces;
+          try {
+            // before we do this, make sure there is no other annotation like
+            // this
+            AnnotationSet tempSet =
+                original.getContained(newStartOffset, newEndOffset).get(
+                    currentLookup.getType(), currentLookup.getFeatures());
+            boolean found = false;
+            for(Annotation annot : tempSet) {
+              if(Utils.start(annot) == newStartOffset
+                  && Utils.end(annot) == newEndOffset
+                  && annot.getFeatures().size() == currentLookup.getFeatures()
+                      .size()) {
+                found = true;
+                break;
+              }
+            }
+            if(!found) {
+              original.add(newStartOffset, newEndOffset,
+                  currentLookup.getType(), currentLookup.getFeatures());
+            }
+          } catch(InvalidOffsetException e) {
+            throw new ExecutionException(e);
+          }
+        } // END for OVER ALL THE Lookups
+      } finally {
+        gazetteerInst.setDocument(null);
+        if(tempDoc != null) {
+          // now remove the newDoc
+          Factory.deleteResource(tempDoc);
+        }
+      }
+    } // for
     fireProcessFinished();
   } // END execute METHOD
 
-  
-  private void addToOriginal(AnnotationSet original, long originalStart, long originalEnd, 
-      long tempStart, long tempEnd, Annotation tempLookup, Document tempDoc) throws ExecutionException {
-    try {
-      original.add(originalStart, originalEnd, tempLookup.getType(), tempLookup.getFeatures());
-    } // This really should no longer happen
-    catch(InvalidOffsetException ioe) {
-      // Better debugging info in case it does
-      String errorDetails = String.format("temp %d, %d [%s]-> original %d, %d\n", tempStart, tempEnd, Utils.stringFor(tempDoc, tempLookup), 
-          originalStart, originalEnd);
-      throw new ExecutionException(errorDetails, ioe);
+  /**
+   * Removes the overlapping annotations. preserves the one that appears first
+   * in the list
+   * 
+   * @param annotations
+   */
+  private void removeOverlappingAnnotations(List<Annotation> annotations) {
+    for(int i = 0; i < annotations.size() - 1; i++) {
+      Annotation annot1 = annotations.get(i);
+      Annotation annot2 = annotations.get(i + 1);
+      long annot2Start = Utils.start(annot2);
+      if(annot2Start >= Utils.start(annot1) && annot2Start < Utils.end(annot1)) {
+        annotations.remove(annot2);
+        i--;
+        continue;
+      }
     }
   }
 
-  
-  /* Is this Lookup within the scope of the input annotations?  It might not be, if Token annotations
-   * have been copied by AST only over the significant sections of the document.
-   */
-  private boolean coveredByInput(long tempStart, long tempEnd, AnnotationSet tempInputAS) {
-    if (tempInputAS.getCovering("Input", tempStart, tempStart).isEmpty()) {
-      return false;
-    }
-    // implied else
-    if (tempInputAS.getCovering("Input", tempEnd, tempEnd).isEmpty()) {
-      return false;
-    }
-    // implied else
-    return true;
-  }
-  
-  
   /**
    * Sets the document to work on
    * 
@@ -342,12 +305,23 @@ implements ProcessingResource {
   }
 
   /**
+   * Sets the name of annotation set that should be used for storing new
+   * annotations
+   * 
+   * @param outputASName
+   */
+  public void setOutputASName(String outputASName) {
+    this.outputASName = outputASName;
+  }
+
+  /**
    * sets the outputAnnotationSetName
    * 
    * @param annName
    */
+  @Deprecated
   public void setOutputAnnotationSetName(String annName) {
-    this.outputAnnotationSetName = annName;
+    setOutputASName(annName);
   }
 
   /**
@@ -355,8 +329,8 @@ implements ProcessingResource {
    * 
    * @return a {@link String} value.
    */
-  public String getOutputAnnotationSetName() {
-    return this.outputAnnotationSetName;
+  public String getOutputASName() {
+    return this.outputASName;
   }
 
   /**
@@ -364,8 +338,18 @@ implements ProcessingResource {
    * 
    * @param annName
    */
+  @Deprecated
   public void setInputAnnotationSetName(String annName) {
-    this.inputAnnotationSetName = annName;
+    setInputASName(annName);
+  }
+
+  /**
+   * sets the input AnnotationSet Name
+   * 
+   * @param inputASName
+   */
+  public void setInputASName(String inputASName) {
+    this.inputASName = inputASName;
   }
 
   /**
@@ -373,15 +357,14 @@ implements ProcessingResource {
    * 
    * @return a {@link String} value.
    */
-  public String getInputAnnotationSetName() {
-    return this.inputAnnotationSetName;
+  public String getInputASName() {
+    return this.inputASName;
   }
 
   /**
-   * Feature names for example: Token.string, Token.root etc... Values
-   * of these features should be used to replace the actual string of
-   * these features. This method allows a user to set the name of such
-   * features
+   * Feature names for example: Token.string, Token.root etc... Values of these
+   * features should be used to replace the actual string of these features.
+   * This method allows a user to set the name of such features
    * 
    * @param inputs
    */
@@ -390,8 +373,8 @@ implements ProcessingResource {
   }
 
   /**
-   * Returns the feature names that are provided by the user to use
-   * their values to replace their actual strings in the document
+   * Returns the feature names that are provided by the user to use their values
+   * to replace their actual strings in the document
    * 
    * @return a {@link List} value.
    */
@@ -407,20 +390,15 @@ implements ProcessingResource {
     this.gazetteerInst = gazetteerInst;
   }
 
-
-
   // Gazetteer Runtime parameters
   private gate.Document document;
 
-  private java.lang.String outputAnnotationSetName;
+  private java.lang.String outputASName;
 
-  private java.lang.String inputAnnotationSetName;
+  private java.lang.String inputASName;
 
   // Flexible Gazetteer parameter
   private Gazetteer gazetteerInst;
 
   private java.util.List<String> inputFeatureNames;
-
-  // parameters required within the program
-  private ArrayList<NodePosition> annotationMappings;
 }

@@ -52,13 +52,6 @@ public class TestFlexibleGazetteer extends TestCase {
 
   /** Tests the flexible gazetteer */
   public void testFlexibleGazetteer() throws Exception {
-
-    // Display the gui for debugging purposes.
-    if (DEBUG) {
-      MainFrame mainFrame = new MainFrame();
-      mainFrame.setVisible(true);
-    }
-
     //get a document - take it from the gate server.
     // tests/doc0.html is a simple html document.
     Document doc = Factory.newDocument(
