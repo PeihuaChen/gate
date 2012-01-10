@@ -184,7 +184,6 @@ public class SerialController extends AbstractController implements
 
   /**
    * Returns the HashMap that lists the total time taken by each PR
-   * @return
    */
   public HashMap<String, Long> getPrTimeMap() {
     return this.prTimeMap;

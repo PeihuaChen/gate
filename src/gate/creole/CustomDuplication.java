@@ -23,7 +23,7 @@ import gate.Factory.DuplicationContext;
  * {@link Factory#duplicate(Resource) Factory.duplicate}). If a Resource
  * class requires custom duplication logic it should implement this
  * interface and provide an implementation of the
- * {@link #duplicate(Resource) duplicate} method to create a new
+ * {@link #duplicate(DuplicationContext) duplicate} method to create a new
  * resource instance that has the same behaviour as <code>this</code>.
  * 
  * @author ian
