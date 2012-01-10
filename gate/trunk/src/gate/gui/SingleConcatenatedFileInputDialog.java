@@ -220,8 +220,6 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
 
   /**
    * Gets the document root element set by user
-   * 
-   * @return
    */
   public String getDocumentRootElement() {
     return documentRootElementTextField.getText();
@@ -229,8 +227,6 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
 
   /**
    * Sets the value for documentRootElement field
-   * 
-   * @param documentRootElement
    */
   public void setDocumentRootElement(String documentRootElement) {
     this.documentRootElementTextField.setText(documentRootElement);
@@ -238,8 +234,6 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
 
   /**
    * Gets the document name prefix set by user
-   * 
-   * @return
    */
   public String getDocumentNamePrefix() {
     return documentNamePrefixTextField.getText();
@@ -247,8 +241,6 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
 
   /**
    * Sets the value for document name prefix
-   * 
-   * @param documentNamePrefix
    */
   public void setDocumentNamePrefix(String documentNamePrefix) {
     this.documentNamePrefixTextField.setText(documentNamePrefix);
@@ -256,8 +248,6 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
 
   /**
    * Gets the selected document type.
-   * 
-   * @return
    */
   public DocType getDocumentType() {
     return (DocType)this.documentTypeComboBox.getSelectedItem();
@@ -265,8 +255,6 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
 
   /**
    * Sets the document type
-   * 
-   * @param documentType
    */
   public void setDocumentType(DocType documentType) {
     this.documentTypeComboBox.setSelectedItem(documentType);
@@ -274,8 +262,6 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
 
   /**
    * Returns the number of documents to fetch
-   * 
-   * @return
    */
   public int getNumOfDocumentsToFetch() {
     if(this.numOfDocumentsToFetchTextField.getText().trim().length() == 0) {
@@ -295,8 +281,6 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
 
   /**
    * Sets the number of documents to fetch
-   * 
-   * @param numOfDocumentsToFetch
    */
   public void setNumOfDocumentsToFetch(int numOfDocumentsToFetch) {
     this.numOfDocumentsToFetchTextField.setText("" + numOfDocumentsToFetch);

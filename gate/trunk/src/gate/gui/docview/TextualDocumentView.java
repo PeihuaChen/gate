@@ -574,13 +574,13 @@ public class TextualDocumentView extends AbstractDocumentView {
   protected Map<AnnotationData, HighlightData> blinkingTagsForAnnotations;
 
   /**
-   * This list stores the {@link HighlightData} values for annotations pending
+   * This list stores the {@link TextualDocumentView.HighlightData} values for annotations pending
    * highlighting
    */
   protected List<HighlightData> highlightsToAdd;
   
   /**
-   * This list stores the {@link HighlightData} values for highlights that need
+   * This list stores the {@link TextualDocumentView.HighlightData} values for highlights that need
    * to be removed
    */
   protected List<HighlightData> highlightsToRemove;
