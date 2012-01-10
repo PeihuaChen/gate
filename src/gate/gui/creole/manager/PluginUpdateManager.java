@@ -750,6 +750,7 @@ public class PluginUpdateManager extends JDialog {
         showProgressPanel(true);
         int row = tblSites.getSelectedRow();
         if(row == -1) return;
+        row = tblSites.rowViewToModel(row);
         updateSites.remove(row);
         saveConfig();
         loadData();
@@ -765,6 +766,7 @@ public class PluginUpdateManager extends JDialog {
       public void actionPerformed(ActionEvent e) {
         int row = tblSites.getSelectedRow();
         if(row == -1) return;
+        row = tblSites.rowViewToModel(row);
         RemoteUpdateSite site = updateSites.get(row);
         txtName.setText(site.name);
         txtURL.setText(site.uri.toString());
@@ -801,6 +803,7 @@ public class PluginUpdateManager extends JDialog {
       public void actionPerformed(ActionEvent arg0) {
         int row = tblSites.getSelectedRow();
         if(row == -1) return;
+        row = tblSites.rowViewToModel(row);
         RemoteUpdateSite site = updateSites.get(row);
         site.plugins = null;
         showProgressPanel(true);
