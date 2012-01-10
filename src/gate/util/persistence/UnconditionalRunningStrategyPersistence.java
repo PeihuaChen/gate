@@ -8,7 +8,7 @@ import gate.persist.PersistenceException;
 import java.io.Serializable;
 
 /**
- * Persistent holder for {@link gate.creole.UnconditionalRunningStrategy}.
+ * Persistent holder for {@link gate.creole.RunningStrategy.UnconditionalRunningStrategy}.
  */
 
 public class UnconditionalRunningStrategyPersistence implements Persistence {

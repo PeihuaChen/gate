@@ -27,7 +27,7 @@ import gate.creole.annic.apache.lucene.index.IndexReader;
  * is then called on the top-level query to compute the query normalization
  * factor (@link Similarity#queryNorm(float)}).  This factor is then passed to
  * {@link #normalize(float)}.  At this point the weighting is complete and a
- * scorer may be constructed by calling {@link #scorer(IndexReader)}.
+ * scorer may be constructed by calling {@link #scorer(IndexReader, Searcher)}.
  */
 public interface Weight extends java.io.Serializable {
 

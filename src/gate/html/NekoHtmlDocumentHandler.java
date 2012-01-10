@@ -613,7 +613,7 @@ public class NekoHtmlDocumentHandler
    * readable form for the final document. This method modifies the
    * content of tmpDocContent.
    * 
-   * @param t the Html tag encounted by the HTML parser
+   * @param tagName the Html tag encounted by the HTML parser
    */
   protected void customizeAppearanceOfDocumentWithStartTag(String tagName) {
     boolean modification = false;
@@ -657,7 +657,7 @@ public class NekoHtmlDocumentHandler
    * readable form for the final document. This method modifies the
    * content of tmpDocContent.
    * 
-   * @param t the Html tag encounted by the HTML parser
+   * @param tagName the Html tag encounted by the HTML parser
    */
   protected void customizeAppearanceOfDocumentWithEndTag(String tagName) {
     boolean modification = false;

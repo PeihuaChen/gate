@@ -23,18 +23,9 @@ import java.util.Iterator;
 
 import gate.creole.annic.apache.lucene.index.IndexReader;
 
-/** The abstract base class for queries.
-    <p>Instantiable subclasses are:
-    <ul>
-    <li> {@link TermQuery}
-    <li> {@link BooleanQuery}
-    <li> {@link PhraseQuery}
-    </ul>
-    <p>A parser for queries is contained in:
-    <ul>
-    <li>{@link gate.creole.annic.apache.lucene.queryParser.QueryParser QueryParser}
-    </ul>
-*/
+/**
+ * The abstract base class for queries.
+ */
 public abstract class Query implements java.io.Serializable, Cloneable {
   private float boost = 1.0f;                     // query boost factor
 
@@ -50,11 +41,9 @@ public abstract class Query implements java.io.Serializable, Cloneable {
    */
   public float getBoost() { return boost; }
 
-  /** Prints a query to a string, with <code>field</code> as the default field
-   * for terms.  <p>The representation used is one that is readable by
-   * {@link gate.creole.annic.apache.lucene.queryParser.QueryParser QueryParser}
-   * (although, if the query was created by the parser, the printed
-   * representation may not be exactly what was parsed).
+  /**
+   * Prints a query to a string, with <code>field</code> as the default field
+   * for terms.
    */
   public abstract String toString(String field);
 

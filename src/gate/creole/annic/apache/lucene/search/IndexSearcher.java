@@ -241,8 +241,6 @@ public class IndexSearcher extends Searcher {
    * document numbers, second list contains first term positions, third
    * list contains the pattern lengths and the fourth one contains the
    * query type for each pattern.
-   * 
-   * @return
    */
   public ArrayList[] getFirstTermPositions() {
     return new ArrayList[] {documentNumbers, firstTermPositions,
