@@ -36,7 +36,6 @@
 	<classpathentry kind="lib" path="lib/ext/guk.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/GnuGetOpt.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/gateHmm.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/stax-api-1.0.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/mail.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/lubm.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-fileupload-1.0.jar"/>
@@ -47,9 +46,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/ant-junit.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ant-contrib-1.0b2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/activation.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/geronimo-ws-metadata_2.0_spec-1.1.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jaxb-api-2.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jaxws-api-2.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/wstx-lgpl-3.2.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/spring-beans-2.0.8.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/spring-core-2.0.8.jar"/>
