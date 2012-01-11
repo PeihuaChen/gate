@@ -1349,11 +1349,8 @@ public class Gate implements GateConstants {
       if(name != null) return name;
 
       name = "";
-      try {
-        name = url.toURI().getPath();
-      } catch(URISyntaxException ex) {
-        // ignore, this should have been checked when adding the URL!
-      }
+      name = url.getPath();
+
       if(name.endsWith("/")) {
         name = name.substring(0, name.length() - 1);
       }
