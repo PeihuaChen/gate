@@ -337,11 +337,15 @@
            includes="guk/**"
            encoding="UTF-8"
            debug="true"
+           deprecation="${deprecation}"
            debuglevel="lines,source"
            source="1.5"
            target="1.5"
-           srcdir="${srcDir}"/>
-		<jar destfile="${libDir}/ext/guk.jar"
+           srcdir="${srcDir}">
+      <compilerarg value="-Xmaxwarns"/>
+      <compilerarg value="${gate.compile.maxwarnings}"/>
+    </javac>
+      <jar destfile="${libDir}/ext/guk.jar"
          update="false"
          index="true">
       <fileset dir="${outputDir}"
@@ -705,9 +709,6 @@
     	        linksource="yes"
               maxmemory="${runtime.max.memory}">
       <fileset dir="${srcDir}" includes="**/*.java" excludes="gate/resources/**"/>
-      <link href="../../plugins/Ontology/doc/javadoc/" />
-      <link href="${gate.home}/plugins/Ontology_Tools/doc/javadoc/" />
-      <link href="${gate.home}/plugins/Ontology_Based_Gazetteer/doc/javadoc/" />
       <link href="http://java.sun.com/j2se/1.5.0/docs/api/" />
     </javadoc>
     <!-- Now replace the ugly Java-html files with a better version -->

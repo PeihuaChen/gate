@@ -106,14 +106,23 @@ public interface RDFProperty extends OResource {
   /**
    * Gets the set of sub-properties for this property.
    * 
-   * @param {@link OConstants#DIRECT_CLOSURE} for direct sub-properties
+   * @param closure {@link OConstants#DIRECT_CLOSURE} for direct sub-properties
    *          only or {@link OConstants#TRANSITIVE_CLOSURE} for all the
    *          sub-properties.
-   * @return a set of {@link Property} values.
+   * @return a set of {@link RDFProperty} values.
+   * @deprecated
    */
   @Deprecated
   public Set<RDFProperty> getSubProperties(byte closure);
 
+  /**
+   * Gets the set of sub-properties for this property.
+   * 
+   * @param closure {@link OConstants.Closure#DIRECT_CLOSURE} for direct sub-properties
+   *          only or {@link OConstants.Closure#TRANSITIVE_CLOSURE} for all the
+   *          sub-properties.
+   * @return a set of {@link RDFProperty} values.
+   */
   public Set<RDFProperty> getSubProperties(Closure closure);
 
   /**
