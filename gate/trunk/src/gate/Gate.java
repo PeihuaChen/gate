@@ -1348,9 +1348,9 @@ public class Gate implements GateConstants {
     public String getName() {
       if(name != null) return name;
 
-      name = "";
+      // url.getPath() works for jar URLs; url.toURI().getPath() doesn't
+      // because jars aren't considered "hierarchical"
       name = url.getPath();
-
       if(name.endsWith("/")) {
         name = name.substring(0, name.length() - 1);
       }
@@ -1358,7 +1358,13 @@ public class Gate implements GateConstants {
       if(lastSlash != -1) {
         name = name.substring(lastSlash + 1);
       }
-
+      try {
+        // convert to (relative) URI and extract path.  This will
+        // decode any %20 escapes in the name.
+        name = new URI(name).getPath();
+      } catch(URISyntaxException ex) {
+        // ignore, this should have been checked when adding the URL!
+      }
       return name;
     }
     
