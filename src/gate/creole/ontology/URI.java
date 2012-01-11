@@ -85,8 +85,6 @@ public class URI implements OURI, ONodeID, OBNodeID {
    * Retrieves the name space part from the URI. In this implementation
    * it retrieves the string that appears before the last occurance of
    * '#' or '/'.
-   * 
-   * @return
    */
   public String getNameSpace() {
     return this.namespace;
@@ -95,9 +93,7 @@ public class URI implements OURI, ONodeID, OBNodeID {
   /**
    * Retrieves the resource name from the given URI. In this
    * implementation it retrieves the string that appears after the last
-   * occurance of '#' or '/'.
-   * 
-   * @return
+   * occurrence of '#' or '/'.
    */
   public String getResourceName() {
     return this.aResourceName;
@@ -113,8 +109,6 @@ public class URI implements OURI, ONodeID, OBNodeID {
 
   /**
    * Indicates whether the URI refers to an anonymous resource
-   * 
-   * @return
    */
   public boolean isAnonymousResource() {
     return this.isAnonymousResource;
