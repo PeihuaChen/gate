@@ -32,14 +32,12 @@ public class PersistenceException extends GateException {
 
   /** Construction from exception */
   public PersistenceException(Exception e) { 
-    super(e.toString());
-    this.exception = e;
+    super(e);
   }
 
   /** Construction from both string and exception */
   public PersistenceException(String s, Exception e) {
-    super(s);
-    this.exception = e;
+    super(s,e);
   }
 
   /**
@@ -56,7 +54,7 @@ public class PersistenceException extends GateException {
     s.flush();
     super.printStackTrace(s);
     s.print("  Caused by:\n");
-    if(exception != null) exception.printStackTrace(s);
+    if(getCause() != null) getCause().printStackTrace(s);
   }
 
   /**
@@ -66,8 +64,6 @@ public class PersistenceException extends GateException {
     s.flush();
     super.printStackTrace(s);
     s.print("  Caused by:\n");
-    if(exception != null) exception.printStackTrace(s);
+    if(getCause() != null) getCause().printStackTrace(s);
   }
-  
-  Exception exception = null;
 } // PersistenceException
