@@ -194,8 +194,6 @@ public interface OInstance extends OResource {
   /**
    * Remove the provided value for the given property (Object, Symmetric
    * and Transitive).
-   * @return true, if the value for the given property is deleted
-   *         successfully, otherwise - false.
    */
   public void removeObjectPropertyValue(ObjectProperty aProperty,
           OInstance value);

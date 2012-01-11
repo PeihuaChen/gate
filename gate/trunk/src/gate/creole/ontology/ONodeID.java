@@ -32,12 +32,13 @@ package gate.creole.ontology;
 public interface ONodeID extends Comparable<ONodeID> {
   public String getNameSpace();
   public String getResourceName();
+
   /**
    * Return the node ID as the string from which the ID was originally created.
-   * @return
    */
   @Override
   public String toString();
+  
   /**
    * Return the node ID as a pure ASCII string.
    * If the node is an OURI, this will return a string that has non ASCII
@@ -46,8 +47,8 @@ public interface ONodeID extends Comparable<ONodeID> {
    * <p> 
    * NOTE: URI encoding and translation from/to IRIs is not implemented yet!
    */
-
   public String toASCIIString();
+  
   /**
    * Return the node ID as a unicode string.
    * If the node is an OURI, this will return a string that is a valid IRI.
@@ -73,6 +74,7 @@ public interface ONodeID extends Comparable<ONodeID> {
   
   @Override
   public int hashCode();
+  
   /**
    * Return a representation of the node that conforms to Turtle syntax.
    * This will return a string that conforms to TURTLE (Terse RDF Triple
@@ -83,8 +85,8 @@ public interface ONodeID extends Comparable<ONodeID> {
    * to use a proper ASCII representation of the URI or an IRI representation
    * instead.
    */
-  
   public String toTurtle();
+  
   /**
    * Validate if the string that was passed on as a bnode id or as an URI/IRI
    * to the constructor of the implementing class can be converted to

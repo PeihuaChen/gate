@@ -52,15 +52,25 @@ public interface RDFProperty extends OResource {
   /**
    * Gets the set of super-properties for this property.
    * 
-   * @param {@link OConstants#DIRECT_CLOSURE} for direct
+   * @param closure {@link OConstants#DIRECT_CLOSURE} for direct
    *          super-properties only or
    *          {@link OConstants#TRANSITIVE_CLOSURE} for all the
    *          super-properties.
-   * @return a set of {@link Property} values.
+   * @return a set of {@link RDFProperty} values.
+   * @deprecated
    */
   @Deprecated
   public Set<RDFProperty> getSuperProperties(byte closure);
 
+  /**
+   * Gets the set of super-properties for this property.
+   * 
+   * @param closure {@link OConstants.Closure#DIRECT_CLOSURE} for direct
+   *          super-properties only or
+   *          {@link OConstants.Closure#TRANSITIVE_CLOSURE} for all the
+   *          super-properties.
+   * @return a set of {@link RDFProperty} values.
+   */
   public Set<RDFProperty> getSuperProperties(Closure closure);
 
   /**
@@ -184,7 +194,6 @@ public interface RDFProperty extends OResource {
 
   /**
    * Returns the set of domain restrictions for this property.
-   * @return
    * @deprecated 
    */
   @Deprecated

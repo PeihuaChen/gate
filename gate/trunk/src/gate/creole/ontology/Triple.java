@@ -24,17 +24,16 @@ public interface Triple {
   public ONodeID getSubject();
   public OURI getPredicate();
   public LiteralOrONodeID getObject();
+
   /**
    * Return a printable representation of the triple, this may be implementation
    * dependent but should ideally adhere to Turtle syntax.
-   * @return
    */
   @Override
   public String toString();
+  
   /**
    * Return the Turtle representation of the triple
-   *
-   * @return
    */
   public String toTurtle();
 
