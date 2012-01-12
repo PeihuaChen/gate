@@ -2,9 +2,9 @@
 <launch4jConfig>
   <dontWrapJar>true</dontWrapJar>
   <headerType>gui</headerType>
-  <jar>lib/ant-launcher.jar</jar>
+  <jar>bin/gateLauncher.jar</jar>
   <errTitle></errTitle>
-  <cmdLine>run</cmdLine>
+  <cmdLine></cmdLine>
   <chdir>.</chdir>
   <priority>normal</priority>
   <downloadUrl>http://java.sun.com/javase/downloads/</downloadUrl>
