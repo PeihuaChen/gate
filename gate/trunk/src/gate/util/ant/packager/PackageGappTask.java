@@ -703,7 +703,7 @@ public class PackageGappTask extends Task {
       // case-insensitively.
       XPath jarXPath =
               XPath
-                      .newInstance("//*[translate(local-name(), 'ajr', 'AJR') = 'JAR']");
+                      .newInstance("//*[translate(local-name(), 'jar', 'JAR') = 'JAR']");
       SAXBuilder builder = new SAXBuilder();
       Document creoleDoc = builder.build(creoleXml);
       // technically unsafe, but we know that the above XPath expression
