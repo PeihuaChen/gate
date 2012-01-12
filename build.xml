@@ -409,6 +409,8 @@
                includes="META-INF/**,gate/**,com/**,hepple/**"/>
 <!--    <zipgroupfileset refid="libs"/> -->
     </jar>
+  	<!-- also build the launcher -->
+  	<ant dir="build/launcher" inheritAll="false" target="jar" />
   </target>
 
     <!-- Optional target useful for creating jars for embedded apps.  It splits
