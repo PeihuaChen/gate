@@ -20,7 +20,6 @@ import gate.gui.MainFrame;
 import gate.gui.OptionsDialog;
 import gate.gui.Splash;
 import gate.util.BomStrippingInputStreamReader;
-import gate.util.CorpusBenchmarkTool;
 import gate.util.Err;
 import gate.util.Files;
 import gate.util.GateException;
@@ -583,15 +582,6 @@ public class Main {
               "Initialisation file " + optionString +
               " recorded for initialisation"
             );
-          break;
-        // -e runs the CorpusBenchmarkTool (e for evaluate)
-        case 'e':
-          try {
-            CorpusBenchmarkTool.main(args);
-          } catch (GateException ex) {
-            Out.prln("Error running the evaluation tool: " + ex.getMessage());
-            System.exit(-1);
-          }
           break;
         case '?':
           // leave the warning to getopt

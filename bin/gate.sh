@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #set -x
 PRG="$0"
 CURDIR="`pwd`"
@@ -26,11 +26,8 @@ cd "$CURDIR"
 ## unknown argument is detected, processing ends and the rest of the
 ## arguments are passed on to ant run
 
-config=
-session=
-initdir=
-log4j=
-rh=
+gateparams=()
+vmparams=()
 while test "$1" != "";
 do
   case "$1" in
@@ -47,35 +44,31 @@ The following options can be passed immediately after the command name:
   -rh path ... set the resources home path, this is a shortcut for 
                -Druntime.gate.user.resourceshome=path 
   -h       ... show this help
-All other options will be passed on to the "ant run" command, for example:
-  -propertyfile <file> ... use <file> instead of \$GATE_HOME/build.properties
-  -Drun.java.io.tmpdir=<somedir>
-Note that gate.sh does not use \$JAVA_OPTS. To adjust allocated memory use:
-  -Druntime.start.memory=<memorysize>
-  -Druntime.max.memory=<memorysize>
+All other options will be passed on to the "java" command, for example:
+  -Djava.io.tmpdir=<somedir>
+  -Xmx<memorysize>
 EOF
-    #exec bin/ant -h
     exit 0
     ;;
   -ld)
-    config="-Drun.gate.user.config=$CURDIR/.gate.xml"
-    session="-Drun.gate.user.session=$CURDIR/.gate.session"
-    initdir="-Drun.gate.user.filechooser.defaultdir=$CURDIR"
+    vmparams=( "${vmparams[@]}" "-Dgate.user.config=$CURDIR/.gate.xml" )
+    vmparams=( "${vmparams[@]}" "-Dgate.user.session=$CURDIR/.gate.session" )
+    vmparams=( "${vmparams[@]}" "-Dgate.user.filechooser.defaultdir=$CURDIR" )
     shift
     ;;
   -ln)
     shift
     base=$1
     shift
-    config="-Drun.gate.user.config=$CURDIR/$base.xml"
-    session="-Drun.gate.user.session=$CURDIR/$base.session"
-    initdir="-Drun.gate.user.filechooser.defaultdir=$CURDIR"
+    vmparams=( "${vmparams[@]}" "-Dgate.user.config=$CURDIR/$base.xml" )
+    vmparams=( "${vmparams[@]}" "-Dgate.user.session=$CURDIR/$base.session" )
+    vmparams=( "${vmparams[@]}" "-Dgate.user.filechooser.defaultdir=$CURDIR" )
     ;;
   -ll)
     shift
     if [ -f "$CURDIR/log4j.properties" ]
     then
-      log4j="-Drun.log4j.configuration=file://$CURDIR/log4j.properties"
+      vmparams=( "${vmparams[@]}" "-Dlog4j.configuration=file://$CURDIR/log4j.properties" )
     fi
     ;;
   -rh)
@@ -83,15 +76,41 @@ EOF
     resourceshome=$1
     resourceshome=`cd "$resourceshome"; pwd -P`
     shift
-    rh="-Drun.gate.user.resourceshome=$resourceshome"
-    ;;  
+    vmparams=( "${vmparams[@]}" "-Dgate.user.resourceshome=$resourceshome" )
+    ;;
+  -d)
+    shift
+    gateparams=( "${gateparams[@]}" "-d" "$1" )
+    shift
+    ;;
+  -i)
+    shift
+    gateparams=( "${gateparams[@]}" "-i" "$1" )
+    shift
+    ;;
   *)
-    break
+    vmparams=( "${vmparams[@]}" "$1" )
+    shift
     ;;
   esac
 done
 
+# Locate JAVA
+if [ -n "$JAVA_HOME" ]; then
+  if [ -x "$JAVA_HOME/bin/java" ]; then
+    JAVACMD="$JAVA_HOME/bin/java"
+  elif [ -x "$JAVA_HOME/jre/bin/java" ]; then
+    JAVACMD="$JAVA_HOME/jre/bin/java"
+  fi
+elif ( which java 2>&1 > /dev/null ); then
+  JAVACMD="`which java`"
+else
+  echo "Couldn't find java, please set JAVA_HOME"
+  exit 1
+fi
 
-echo running: "$GATE_HOME/bin/ant" run -f "$GATE_HOME/build.xml"  "$config" "$sessioni" "$initdir" "$log4j" "$rh" "$@"
-exec "$GATE_HOME/bin/ant" run -f "$GATE_HOME/build.xml" "$config" "$session" "$initdir" "$log4j" "$rh" "$@"
 
+
+echo "Running GATE using Java at $JAVACMD"
+echo "$JAVACMD" "${vmparams[@]}" -jar "$GATE_HOME/bin/gateLauncher.jar" "${gateparams[@]}" 
+exec "$JAVACMD" "${vmparams[@]}" -jar "$GATE_HOME/bin/gateLauncher.jar" "${gateparams[@]}"

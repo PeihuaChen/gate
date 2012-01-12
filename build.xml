@@ -410,7 +410,7 @@
 <!--    <zipgroupfileset refid="libs"/> -->
     </jar>
   	<!-- also build the launcher -->
-  	<ant dir="build/launcher" inheritAll="false" target="jar" />
+  	<ant dir="build/launcher" inheritAll="false" target="jar"/>
   </target>
 
     <!-- Optional target useful for creating jars for embedded apps.  It splits
@@ -568,15 +568,105 @@
 	<target name="all" depends="jar, plugins.build">
 	</target>
 
-  <!-- Run the beast -->
-  <target name="run" depends="run-pre,run-nonmac,run-mac" >
+	
+	<!-- Run the beast using the default GATE launcher -->
+  <target name="run" depends="run-pre, run-nonmac, run-mac">
+  </target>
+	
+	<target name="run-pre">
+    <!-- Prepend extDir to the java.ext.dirs path -->
+    <pathconvert property="ext.dirs">
+      <path>
+        <pathelement location="${extDir}" />
+        <path path="${java.ext.dirs}" />
+      </path>
+    </pathconvert>
+    <!-- Find if the platform is MAC -->
+    <condition property="running.on.mac">
+      <os family="mac"/>
+    </condition>		
+	</target>
+	
+	<target name="run-nonmac" unless="running.on.mac">
+    <!-- Call the GATE Launcher -->
+    <java jar="bin/gateLauncher.jar"
+          fork="true"
+          spawn="${runtime.spawn}"
+          dir="."
+          maxmemory="${runtime.max.memory}">
+      <jvmarg value="${server.or.client}"/>
+      <sysproperty key="java.ext.dirs" value="${ext.dirs}"/>
+    </java>
+	</target>
+	
+	<target name="run-mac" if="running.on.mac">
+    <property name="gate.icon.location"
+              location="GATE.app/Contents/Resources/gate-icon.icns" />
+    <!-- Don't pass a -d32 or -d64 on Tiger (10.4.x) -->
+    <condition property="runtime.arch" value="">
+      <matches pattern="10\.4(?:\..*)?" string="${os.version}" />
+    </condition>
+    <condition property="runtime.arch" value="-d64" else="-d32">
+      <os arch="x86_64" />
+    </condition>
+    <if>
+      <length string="${runtime.arch}" when="greater" length="0" />
+      <then>
+        <echo>Running GATE with ${runtime.arch}</echo>
+      </then>
+    </if>
+		
+    <!-- Call the GATE Launcher -->
+    <java jar="bin/gateLauncher.jar"
+          fork="true"
+          spawn="${runtime.spawn}"
+          dir="."
+          maxmemory="${runtime.max.memory}">
+      <jvmarg value="${server.or.client}"/>
+      <sysproperty key="java.ext.dirs" value="${ext.dirs}"/>
+      <sysproperty key="sun.java2d.opengl" value="true"/>
+      <sysproperty key="apple.laf.useScreenMenuBar" value="true"/>
+      <sysproperty key="apple.awt.antialiasing" value="true"/>
+      <sysproperty key="com.apple.mrj.application.growbox.intrudes" value="false"/>
+      <sysproperty key="com.apple.mrj.application.live-resize" value="true"/>
+      <!-- use "line" rather than "value" as runtime.arch may be empty -->
+      <jvmarg line="${runtime.arch}" />
+      <jvmarg value="-Xdock:name=GATE ${gate.version}"/>
+      <jvmarg value="-Xdock:icon=${gate.icon.location}"/>    	
+    </java>		
+		
+    <java classname="gate.Main"
+          classpathref="run.class.path"
+          fork="true"
+          spawn="${runtime.spawn}"
+          dir="."
+          maxmemory="${runtime.max.memory}">
+<!--       <jvmarg value="-Xms${runtime.start.memory}"/> -->
+       <sysproperty key="gate.home" value="${basedir}"/>
+       <sysproperty key="java.ext.dirs" value="${ext.dirs}"/>
+       <sysproperty key="sun.java2d.opengl" value="true"/>
+       <sysproperty key="apple.laf.useScreenMenuBar" value="true"/>
+       <sysproperty key="apple.awt.antialiasing" value="true"/>
+       <sysproperty key="com.apple.mrj.application.growbox.intrudes" value="false"/>
+       <sysproperty key="com.apple.mrj.application.live-resize" value="true"/>
+       <!-- use "line" rather than "value" as runtime.arch may be empty -->
+       <jvmarg line="${runtime.arch}" />
+       <jvmarg value="-Xdock:name=GATE ${gate.version}"/>
+       <jvmarg value="-Xdock:icon=${gate.icon.location}"/>
+       <syspropertyset refid="run.properties" />
+       <syspropertyset refid="os.properties" />
+     </java>		
+	</target>
+	
+  <!-- Run the beast using ANT as a launcher -->
+  <target name="runWithAnt" depends="runWAnt-pre,runWAnt-nonmac,runWAnt-mac" >
     <echo level="info">
       GATE doesn't start? Consult http://gate.ac.uk/wiki/gate-user-faq.html
     </echo>
   </target>
 
   <!-- Prepares for running GATE -->
-  <target name="run-pre">
+  <target name="runWAnt-pre">
     <property name="class.path.debug" refid="run.class.path"/>
     <echo>
       Starting GATE ${gate.version}, build ${gate.build}
@@ -610,7 +700,7 @@
   </target>
 
   <!-- Starts GATE on non MAC platforms -->
-  <target name="run-nonmac" unless="running.on.mac">
+  <target name="runWAnt-nonmac" unless="running.on.mac">
     <java classname="gate.Main"
           classpathref="run.class.path"
           fork="true"
@@ -629,7 +719,7 @@
   </target>
 
   <!-- Starts GATE on MAC platforms -->
-  <target name="run-mac" if="running.on.mac">
+  <target name="runWAnt-mac" if="running.on.mac">
     <property name="gate.icon.location"
               location="GATE.app/Contents/Resources/gate-icon.icns" />
     <!-- Don't pass a -d32 or -d64 on Tiger (10.4.x) -->
