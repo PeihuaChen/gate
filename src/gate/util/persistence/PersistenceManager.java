@@ -845,6 +845,7 @@ public class PersistenceManager {
           catch(GateException ge) {
             Err.prln("Could not reload creole directory "
                     + anUrl.toExternalForm());
+            ge.printStackTrace(Err.getPrintWriter());
           }
         }
 
