@@ -19,6 +19,11 @@
     <initialHeapSize>0</initialHeapSize>
     <maxHeapSize>0</maxHeapSize>
   </jre>
+  <splash>
+    <file>splash.bmp</file>
+    <waitForWindow>true</waitForWindow>
+    <timeout>60</timeout>
+  </splash>
   <messages>
     <startupErr>An error occurred while starting the installer.</startupErr>
     <bundledJreErr>This application was configured to use a bundled Java Runtime Environment but the runtime is missing or corrupted.</bundledJreErr>

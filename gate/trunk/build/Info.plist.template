@@ -9,7 +9,7 @@
 	<key>CFBundleGetInfoString</key>
 	<string>GATE @version@ - http://gate.ac.uk/</string>
 	<key>CFBundleIconFile</key>
-	<string>gate-launcher.icns</string>
+	<string>gate-icon.icns</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>8.0</string>
 	<key>CFBundleName</key>
@@ -22,18 +22,14 @@
 	<string>8.0</string>
 	<key>Java</key>
 	<dict>
-		<key>Arguments</key>
-		<array>
-			<string>run</string>
-		</array>
 		<key>ClassPath</key>
 		<array>
-			<string>lib/ant-launcher.jar</string>
+			<string>bin/gateLauncher.jar</string>
 		</array>
 		<key>JVMVersion</key>
 		<string>1.6+</string>
 		<key>MainClass</key>
-		<string>org.apache.tools.ant.launch.Launcher</string>
+		<string>gate.Launcher</string>
 		<key>Properties</key>
 		<dict>
 			<key>apple.laf.useScreenMenuBar</key>
@@ -42,7 +38,18 @@
 			<string>true</string>
 			<key>apple.awt.antialiasing</key>
 			<string>true</string>
+			<key>com.apple.mrj.application.live-resize</key>
+			<string>true</string>
+			<key>sun.java2d.opengl</key>
+			<string>true</string>
 		</dict>
+		<key>VMOptions</key>
+		<array>
+			<string>-Xmx1800m</string>
+			<string>-Xms200m</string>
+		</array>
+		<key>SplashFile</key>
+		<string>$APP_PACKAGE/../bin/splash.png</string>
 	</dict>
 </dict>
 </plist>
