@@ -595,11 +595,12 @@
           dir="."
           maxmemory="${runtime.max.memory}">
       <jvmarg value="${server.or.client}"/>
+      <jvmarg value="-splash:bin/splash.png" />
       <sysproperty key="java.ext.dirs" value="${ext.dirs}"/>
     </java>
-	</target>
+  </target>
 	
-	<target name="run-mac" if="running.on.mac">
+  <target name="run-mac" if="running.on.mac">
     <property name="gate.icon.location"
               location="GATE.app/Contents/Resources/gate-icon.icns" />
     <!-- Don't pass a -d32 or -d64 on Tiger (10.4.x) -->
@@ -633,30 +634,9 @@
       <jvmarg line="${runtime.arch}" />
       <jvmarg value="-Xdock:name=GATE ${gate.version}"/>
       <jvmarg value="-Xdock:icon=${gate.icon.location}"/>    	
+      <jvmarg value="-splash:bin/splash.png" />
     </java>		
-		
-    <java classname="gate.Main"
-          classpathref="run.class.path"
-          fork="true"
-          spawn="${runtime.spawn}"
-          dir="."
-          maxmemory="${runtime.max.memory}">
-<!--       <jvmarg value="-Xms${runtime.start.memory}"/> -->
-       <sysproperty key="gate.home" value="${basedir}"/>
-       <sysproperty key="java.ext.dirs" value="${ext.dirs}"/>
-       <sysproperty key="sun.java2d.opengl" value="true"/>
-       <sysproperty key="apple.laf.useScreenMenuBar" value="true"/>
-       <sysproperty key="apple.awt.antialiasing" value="true"/>
-       <sysproperty key="com.apple.mrj.application.growbox.intrudes" value="false"/>
-       <sysproperty key="com.apple.mrj.application.live-resize" value="true"/>
-       <!-- use "line" rather than "value" as runtime.arch may be empty -->
-       <jvmarg line="${runtime.arch}" />
-       <jvmarg value="-Xdock:name=GATE ${gate.version}"/>
-       <jvmarg value="-Xdock:icon=${gate.icon.location}"/>
-       <syspropertyset refid="run.properties" />
-       <syspropertyset refid="os.properties" />
-     </java>		
-	</target>
+  </target>
 	
   <!-- Run the beast using ANT as a launcher -->
   <target name="runWithAnt" depends="runWAnt-pre,runWAnt-nonmac,runWAnt-mac" >

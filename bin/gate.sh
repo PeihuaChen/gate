@@ -27,7 +27,7 @@ cd "$CURDIR"
 ## arguments are passed on to ant run
 
 gateparams=()
-vmparams=()
+vmparams=(-splash:bin/splash.png)
 while test "$1" != "";
 do
   case "$1" in

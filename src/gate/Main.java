@@ -18,7 +18,6 @@ package gate;
 
 import gate.gui.MainFrame;
 import gate.gui.OptionsDialog;
-import gate.gui.Splash;
 import gate.util.BomStrippingInputStreamReader;
 import gate.util.Err;
 import gate.util.Files;
@@ -130,9 +129,6 @@ public class Main {
   /** Main Frame of the GUI; null when no GUI running */
   private static MainFrame frame;
 
-  /** The splash shown when Gate starts*/
-  private static Splash splash;
-
   /**
    * Get the main frame of the GUI. If the GUI isn't running, it
    * is started.
@@ -159,36 +155,6 @@ public class Main {
     }
 
     Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-    //show the splash
-    SwingUtilities.invokeLater(new Runnable(){
-      public void run(){
-        //build the Splash
-        JPanel splashBox = new JPanel();
-        splashBox.setLayout(new GridBagLayout());
-        splashBox.setBackground(Color.white);
-
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.insets = new Insets(2, 2, 2, 2);
-
-        String splashName =
-          System.getProperty(GateConstants.APP_SPLASH_JAVA_PROPERTY_NAME);
-        if(splashName == null)
-          splashName = "splash";
-
-        constraints.fill = GridBagConstraints.NONE;
-        constraints.anchor = GridBagConstraints.CENTER;
-        constraints.gridy = 1;
-        constraints.gridwidth = 1;
-        JLabel gifLbl = new JLabel(MainFrame.getIcon(splashName));
-        splashBox.add(gifLbl, constraints);
-        GraphicsConfiguration gc = GraphicsEnvironment.
-          getLocalGraphicsEnvironment().getDefaultScreenDevice().
-          getDefaultConfiguration();
-
-        splash = new Splash(null, gc, splashBox);
-        splash.showSplash();
-      }
-    });
 
     // initialise the library and load user CREOLE directories
     try{
@@ -208,7 +174,7 @@ public class Main {
     }
 
 
-    //create the main frame, show it and hide the splash
+    //create the main frame, show it
     SwingUtilities.invokeLater(new Runnable(){
       public void run(){
         GraphicsConfiguration gc = GraphicsEnvironment.
@@ -216,7 +182,6 @@ public class Main {
         getDefaultConfiguration();
 
         //this needs to run before any GUI component is constructed.
-        //the initial gate splash is exempted from this rule.
         applyUserPreferences();
 
         //all the defaults tables have been updated; build the GUI
@@ -265,10 +230,6 @@ public class Main {
                           (screenSize.height - frameSize.height) / 2);
 
         frame.setVisible(true);
-        if(splash != null) {
-          splash.setVisible(false);
-          splash.dispose();
-        }
 
         //load session if required and available;
         //do everything from a new thread.
