@@ -1,5 +1,7 @@
 <project name="GATE-launcher" basedir="." default="jar" >
 
+	<!-- Prevent Ant from warning about includeantruntime not being set -->
+	<property name="build.sysclasspath" value="ignore" />
 
   <!-- If gate.home is not set from build.properties or the 
        environment variable GATE_HOME, assume that this

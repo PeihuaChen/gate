@@ -118,10 +118,12 @@ public class Launcher {
       
       String osPrefix = "os." + System.getProperty("os.name") + ".";
       for(String key : buildProperties.stringPropertyNames()) {
-        if(key.startsWith("run.")) {
+        if(key.startsWith("run.") && 
+            System.getProperty(key.substring(4)) == null) {
           System.setProperty(key.substring(4), getPropertyValue(key,
             new HashSet<String>(), buildProperties, System.getProperties()));
-        } else if(key.startsWith(osPrefix)) {
+        } else if(key.startsWith(osPrefix) && 
+              System.getProperty(key.substring(osPrefix.length())) == null ) {
           System.setProperty(key.substring(osPrefix.length()), getPropertyValue(key,
             new HashSet<String>(), buildProperties, System.getProperties()));          
         }
