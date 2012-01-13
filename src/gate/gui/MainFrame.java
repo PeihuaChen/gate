@@ -317,6 +317,18 @@ public class MainFrame extends JFrame implements ProgressListener,
   public MainFrame(boolean isShellSlacGIU, GraphicsConfiguration gc) {
     super(gc);
     instance = this;
+    // set the WM class
+    try {
+      Toolkit xToolkit = Toolkit.getDefaultToolkit();
+      java.lang.reflect.Field awtAppClassNameField =
+      xToolkit.getClass().getDeclaredField("awtAppClassName");
+      awtAppClassNameField.setAccessible(true);
+      awtAppClassNameField.set(xToolkit, "GATE Developer");
+    } catch(Exception e) {
+      // ignore
+      log.warn("Could not set WM Class", e);
+    }
+    
     guiRoots.add(this);
     if(fileChooser == null) {
       fileChooser = new XJFileChooser();
