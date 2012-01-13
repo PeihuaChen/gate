@@ -254,7 +254,6 @@ public class TestGate {
         suite.addTest(TestXSchema.suite());
 
         suite.addTest(TestCreole.suite());
-        suite.addTest(CookBook.suite());
         suite.addTest(TestFiles.suite());
         suite.addTest(TestJavac.suite());
         suite.addTest(TestReload.suite());
