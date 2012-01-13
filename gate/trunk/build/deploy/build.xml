@@ -249,7 +249,7 @@ build/deploy all paths are relative to the top-level GATE directory -->
     <!-- define the IzPack Ant task -->
     <taskdef name="izpack" classname="com.izforge.izpack.ant.IzPackTask">
       <classpath>
-        <pathelement location="build/deploy/lib/standalone-izpack-installer-compiler.jar"/>
+        <pathelement location="build/deploy/lib/standalone-izpack-installer-compiler-4.3.5.jar"/>
       </classpath>
     </taskdef>
     <izpack output="${distDir}/${gate.full.name}-installer.jar"
@@ -261,22 +261,27 @@ build/deploy all paths are relative to the top-level GATE directory -->
 
 <installation version="1.0">
     <info>
-        <appname>GATE</appname>
+        <appname>GATE Developer</appname>
         <appversion>@{installer.version}</appversion>
-        <appsubpath>GATE-@{installer.version}</appsubpath>
-<!--
-        <authors>
-            <author name="JPz" email="jpz@superman.org"/>
-            <author name="Hidden Man" email="hidden@hisdomain.com"/>
-        </authors>
- -->        
+        <appsubpath>GATE_Developer_@{installer.version}</appsubpath>
+      	<uninstaller write="yes" path="${INSTALL_PATH}/uninstaller"
+           name="gate-uninstaller.jar">
+      	  <run-privileged condition="izpack.windowsinstall"/>
+      	</uninstaller>
         <url>http://gate.ac.uk/</url>
-        <javaversion>1.5</javaversion>
-        <run-privileged condition="izpack.windowsinstall.vista"/>
+        <javaversion>1.6</javaversion>
+      	<requiresjdk>no</requiresjdk>
+        <run-privileged condition="izpack.windowsinstall"/>
     </info>
     <!--  Load the native library used for generating Windows shortcuts -->
     <native type="izpack" name="ShellLink.dll"/>
     <native type="izpack" name="ShellLink_x64.dll"/>
+  	<native type="3rdparty" name="COIOSHelper.dll" stage="both">
+  	  <os family="windows"/>
+  	</native>
+  	<native type="3rdparty" name="COIOSHelper_x64.dll" stage="both">
+  	  <os family="windows"/>
+  	</native>      	
     <variables>
       <variable name="app-version" value="@{gate.version}"/>
       <variable name="InstallerFrame.logfilePath" value="default"/>
@@ -297,8 +302,7 @@ build/deploy all paths are relative to the top-level GATE directory -->
     </guiprefs>
     
     <!-- 
-        The locale section.
-        Asks here to include the English and French langpacks.
+        The locale section. Asks here to include the English langpack.
     -->
     <locale>
         <langpack iso3="eng"/>
@@ -306,7 +310,8 @@ build/deploy all paths are relative to the top-level GATE directory -->
     
     <!-- 
         The resources section.
-        The ids must be these ones if you want to use the LicencePanel and/or the InfoPanel.
+        The ids must be these ones if you want to use the LicencePanel and/or 
+      	the InfoPanel.
     -->
     <resources>
         <res id="splash.png" src="src/gate/resources/img/splash.png" />
@@ -314,8 +319,17 @@ build/deploy all paths are relative to the top-level GATE directory -->
         <res id="HTMLLicencePanel.licence" src="licence.html"/>
         <res id="Unix_shortcutSpec.xml" src="build/deploy/unix-shortcuts.xml"/>
         <res id="shortcutSpec.xml" src="build/deploy/windows-shortcuts.xml"/>
+      	<res id="RegistrySpec.xml" src="build/deploy/izpack-win-registry.xml"/>
     </resources>
     
+    <!-- Proper uninstall support in Windows -->
+  	<listeners>
+  	  <listener installer="RegistryInstallerListener"
+  	            uninstaller="RegistryUninstallerListener">
+  	    <os family="windows"/>
+  	  </listener>
+  	</listeners>	
+      	
     <!-- 
         The panels section.
         We indicate here which panels we want to use. The order will be respected.
@@ -357,6 +371,7 @@ build/deploy all paths are relative to the top-level GATE directory -->
             @{bin.executables}
             <executable targetfile="$INSTALL_PATH/GATE.app/Contents/MacOS/GATE" stage="never" keep="true" os="mac"/>
         </pack>
+      	
         <pack name="Plugins"
               required="yes"
               preselected="yes">
@@ -364,12 +379,14 @@ build/deploy all paths are relative to the top-level GATE directory -->
           <fileset dir="plugins" targetdir="$INSTALL_PATH/plugins" />
           @{plugins.executables}
         </pack>
+      	
         <pack name="User guide"
               required="no"
               preselected="yes">
             <description>The GATE User Guide (PDF version).  The latest user guide is always available at http://gate.ac.uk/sale/tao/ but may describe features added since this version of GATE.</description>
             <file src="../sale/tao/tao.pdf" targetdir="$INSTALL_PATH" />
-      	    <file src="build/deploy/mime-application-pdf.png" targetdir="$INSTALL_PATH/icons"/>  	
+      	    <file src="build/deploy/mime-application-pdf.png" targetdir="$INSTALL_PATH/icons"/>
+            <file src="build/deploy/mime-application-pdf.ico" targetdir="$INSTALL_PATH/icons/" os="windows"/>
         </pack>
         <pack name="Developer documentation" 
               required="no"
