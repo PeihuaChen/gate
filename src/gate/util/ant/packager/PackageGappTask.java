@@ -14,6 +14,7 @@
 package gate.util.ant.packager;
 
 import gate.util.Files;
+import gate.util.ant.ExpandIvy;
 import gate.util.persistence.PersistenceManager;
 
 import java.io.File;
@@ -100,6 +101,12 @@ public class PackageGappTask extends Task {
    * declared in an &lt;extrafiles&gt; sub-element.
    */
   private boolean copyPlugins = true;
+  
+  /**
+   * Should we expand any Ivy based dependencies to create a standalone
+   * application. If true then local copies of each dependency will be
+   */
+  private boolean expandIvy = false;
 
   /**
    * Should we copy the complete contents of the parent directories of
@@ -213,6 +220,14 @@ public class PackageGappTask extends Task {
    */
   public void setCopyPlugins(boolean copyPlugins) {
     this.copyPlugins = copyPlugins;
+  }
+  
+  public void setExpandIvy(boolean expandIvy) {
+    this.expandIvy = expandIvy;
+  }
+  
+  public boolean getExpandIvy() {
+    return expandIvy;
   }
 
   /**
@@ -607,14 +622,32 @@ public class PackageGappTask extends Task {
       if(copyPlugins) {
         log("Also copying complete plugin contents", Project.MSG_VERBOSE);
       }
-    }
-    copyDirectories(pluginCopyMap, !copyPlugins);
+      copyDirectories(pluginCopyMap, !copyPlugins);
 
+      if(expandIvy) {
+        ExpandIvy ivyExpander = new ExpandIvy();
+        ivyExpander.setProject(getProject());
+        ivyExpander.setLocation(getLocation());
+        ivyExpander.setTaskName(getTaskName());
+        ivyExpander.setFully(!copyPlugins);
+
+        for(URL url : pluginCopyMap.values()) {
+          File dir = Files.fileFromURL(url);
+          if(dir.exists()) {
+            ivyExpander.setDir(dir);
+            ivyExpander.init();
+            ivyExpander.perform();
+          }
+        }
+      }
+    }
+    
     // handle extra directories
     if(dirCopyMap.size() > 0) {
-      log("Copying " + dirCopyMap.size() + " resource directories");
+      log("Copying " + dirCopyMap.size() + " resource directories");      
+      copyDirectories(dirCopyMap, false);
     }
-    copyDirectories(dirCopyMap, false);
+    
   }
 
   /**
@@ -648,9 +681,7 @@ public class PackageGappTask extends Task {
   private void copyDirectories(Map<URL, URL> copyMap, boolean minimalPlugin) {
     for(Map.Entry<URL, URL> copyEntry : copyMap.entrySet()) {
       File source = Files.fileFromURL(copyEntry.getKey());
-      if(!source.exists()) {
-        return;
-      }
+      if(!source.exists()) { return; }
       File dest = Files.fileFromURL(copyEntry.getValue());
       // set up a copy task to do the copying
       Copy copyTask = new Copy();
@@ -670,16 +701,28 @@ public class PackageGappTask extends Task {
         URL creoleXml;
         try {
           creoleXml =
-                  new URL(copyEntry.getKey().toExternalForm() + "/creole.xml");
-        }
-        catch(MalformedURLException e) {
+              new URL(copyEntry.getKey().toExternalForm() + "/creole.xml");
+        } catch(MalformedURLException e) {
           throw new BuildException(
-                  "Error creating URL for creole.xml in plugin "
-                          + copyEntry.getKey());
+              "Error creating URL for creole.xml in plugin "
+                  + copyEntry.getKey());
         }
+
         for(String jarString : getJars(creoleXml)) {
           NameEntry jarInclude = fileSet.createInclude();
           jarInclude.setName(jarString);
+        }
+
+        // copy the ivy files as either they will be needed to load the plugin
+        // or they will be needed when the expand task is run
+        try {
+          for(Element e : ExpandIvy.getIvyElements(creoleXml)) {
+            NameEntry ivyInclude = fileSet.createInclude();
+            ivyInclude.setName(ExpandIvy.getIvyPath(e));
+          }
+        } catch(Exception e) {
+          throw new BuildException("Error processing IVY includes", e,
+              getLocation());
         }
       }
 
@@ -690,11 +733,11 @@ public class PackageGappTask extends Task {
   }
 
   /**
-   * Extract the text values from any &lt;JAR&gt; elements contained in
-   * the referenced creole.xml file.
+   * Extract the text values from any &lt;JAR&gt; elements contained in the
+   * referenced creole.xml file.
    * 
-   * @return a set with one element for each unique &lt;JAR&gt; entry in
-   *         the given creole.xml.
+   * @return a set with one element for each unique &lt;JAR&gt; entry in the
+   *         given creole.xml.
    */
   private Set<String> getJars(URL creoleXml) {
     try {
@@ -702,29 +745,28 @@ public class PackageGappTask extends Task {
       // the XPath is a bit ugly, but needed to match the element name
       // case-insensitively.
       XPath jarXPath =
-              XPath
-                      .newInstance("//*[translate(local-name(), 'jar', 'JAR') = 'JAR']");
+          XPath
+              .newInstance("//*[translate(local-name(), 'jar', 'JAR') = 'JAR']");
       SAXBuilder builder = new SAXBuilder();
       Document creoleDoc = builder.build(creoleXml);
       // technically unsafe, but we know that the above XPath expression
       // can only match elements.
+      @SuppressWarnings("unchecked")
       List<Element> jarElts = jarXPath.selectNodes(creoleDoc);
       for(Element e : jarElts) {
         jars.add(e.getTextTrim());
       }
 
       return jars;
-    }
-    catch(JDOMException e) {
+    } catch(JDOMException e) {
       throw new BuildException("Error extracting JAR elements from "
-              + creoleXml, e, getLocation());
-    }
-    catch(IOException e) {
+          + creoleXml, e, getLocation());
+    } catch(IOException e) {
       throw new BuildException("Error loading " + creoleXml
-              + " to extract JARs", e, getLocation());
+          + " to extract JARs", e, getLocation());
     }
   }
-
+  
   /**
    * Get a URL for a directory to which the given (unresolved) resource
    * directory should be mapped.

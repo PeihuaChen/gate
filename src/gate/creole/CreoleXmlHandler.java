@@ -16,18 +16,33 @@
 
 package gate.creole;
 
+import gate.CreoleRegister;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.GateConstants;
+import gate.util.GateRuntimeException;
+import gate.util.GateSaxException;
+import gate.util.Out;
+import gate.util.Strings;
+import gate.xml.SimpleErrorHandler;
+
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.Stack;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
 
-import javax.swing.text.html.HTMLDocument.HTMLReader.HiddenAction;
-
-import org.xml.sax.*;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
-
-import gate.*;
-import gate.util.*;
-import gate.xml.SimpleErrorHandler;
 
 /** This is a SAX handler for processing <CODE>creole.xml</CODE> files.
   * It would have been better to write it using DOM or JDOM but....
@@ -41,7 +56,7 @@ public class CreoleXmlHandler extends DefaultHandler {
    *  onto it. Probably. Ok, so I should check, but a) it works, b)
    *  I'm bald already and c) life is short.)
    */
-  private Stack contentStack = new Stack();
+  private Stack<String> contentStack = new Stack<String>();
 
   /** The current resource data object */
   private ResourceData resourceData;
@@ -95,7 +110,7 @@ public class CreoleXmlHandler extends DefaultHandler {
   /** This field holds autoinstanceParams describing the resource that
     * needs to be instantiated
     */
-  private List currentAutoinstances = null;
+  private List<FeatureMap> currentAutoinstances = null;
 
 
   /** This is used to capture all data within two tags before calling the actual characters method */
@@ -171,7 +186,7 @@ public class CreoleXmlHandler extends DefaultHandler {
     if(elementName.toUpperCase().equals("RESOURCE")) {
       resourceData = new ResourceData();
       resourceData.setFeatures(Factory.newFeatureMap());
-      currentAutoinstances = new ArrayList();
+      currentAutoinstances = new ArrayList<FeatureMap>();
     }// End if RESOURCE
 
     // record the attributes of this element
@@ -234,9 +249,9 @@ public class CreoleXmlHandler extends DefaultHandler {
                                 currentAttributes.getValue("ITEM_CLASS_NAME");
       // read the suffixes and transform them to a Set of Strings
       String suffixes = currentAttributes.getValue("SUFFIXES");
-      Set suffiexesSet = null;
+      Set<String> suffiexesSet = null;
       if (suffixes != null){
-        suffiexesSet = new HashSet();
+        suffiexesSet = new HashSet<String>();
         StringTokenizer strTokenizer = new StringTokenizer(suffixes,";");
         while(strTokenizer.hasMoreTokens()){
            suffiexesSet.add(strTokenizer.nextToken());
@@ -302,7 +317,8 @@ public class CreoleXmlHandler extends DefaultHandler {
       // if the resource is auto-loading, try and load it
       if(resourceData.isAutoLoading())
         try {
-          Class resClass = resourceData.getResourceClass();
+          @SuppressWarnings("unused")
+          Class<?> resClass = resourceData.getResourceClass();
 //          Resource res = Factory.createResource(
 //              resourceData.getClassName(), Factory.newFeatureMap()
 //          );
@@ -337,9 +353,9 @@ public class CreoleXmlHandler extends DefaultHandler {
       if(DEBUG) Out.println("added: " + resourceData);
       // Iterate through autoinstances and try to instanciate them
       if ( currentAutoinstances != null && !currentAutoinstances.isEmpty()){
-        Iterator iter = currentAutoinstances.iterator();
+        Iterator<FeatureMap> iter = currentAutoinstances.iterator();
         while (iter.hasNext()){
-          FeatureMap autoinstanceParams = (FeatureMap) iter.next();
+          FeatureMap autoinstanceParams = iter.next();
           iter.remove();
           FeatureMap autoinstanceFeatures = null;
           //if the hidden attribute was set in the parameters, create a feature 
@@ -383,6 +399,10 @@ public class CreoleXmlHandler extends DefaultHandler {
       checkStack("endElement", "NAME");
       resourceData.setName((String) contentStack.pop());
     // End NAME processing
+    //////////////////////////////////////////////////////////////////
+    } else if (elementName.toUpperCase().equals("IVY")) {
+      if (!contentStack.isEmpty()) contentStack.pop();
+    // End IVY processing
     //////////////////////////////////////////////////////////////////
     } else if(elementName.toUpperCase().equals("JAR")) {
       checkStack("endElement", "JAR");
@@ -492,9 +512,9 @@ public class CreoleXmlHandler extends DefaultHandler {
       checkStack("endElement", "RESOURCE_DISPLAYED");
       String resourceDisplayed = (String) contentStack.pop();
       resourceData.setResourceDisplayed(resourceDisplayed);
-      Class resourceDisplayedClass = null;
       try{
-        resourceDisplayedClass = Gate.getClassLoader().
+        @SuppressWarnings("unused")
+        Class<?> resourceDisplayedClass = Gate.getClassLoader().
                                  loadClass(resourceDisplayed);
       } catch (ClassNotFoundException ex){
         throw new GateRuntimeException(
