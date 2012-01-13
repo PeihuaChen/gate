@@ -50,6 +50,14 @@
         </artifact:deploy>
     </target>
 
+    <!-- Install a copy of gate.jar into your local maven cache -->
+    <target name="snapshot-install" depends="clean, prepare.snapshot.pom">
+        <artifact:pom id="gate-core.pom" file="${gate.core.pom}"/>
+        <artifact:install file="${top}/bin/gate.jar">
+            <pom refid="gate-core.pom"/>
+        </artifact:install>
+    </target>
+
     <!--
     Additional targets to publish new releases to sonatype staging
    
