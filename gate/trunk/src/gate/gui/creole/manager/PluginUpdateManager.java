@@ -163,7 +163,8 @@ public class PluginUpdateManager extends JDialog {
     }
     OptionsMap userConfig = Gate.getUserConfig();
     userConfig.put(GATE_UPDATE_SITES, sites);
-    userConfig.put(GATE_USER_PLUGINS, userPluginDir.getAbsolutePath());
+    if(userPluginDir != null)
+      userConfig.put(GATE_USER_PLUGINS, userPluginDir.getAbsolutePath());
   }
 
   /**
