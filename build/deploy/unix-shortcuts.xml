@@ -1,36 +1,63 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 
 <shortcuts>
-
-  <programGroup defaultName="GATE $APP_VER" location="applications"/>
+  <skipIfNotSupported/>
+  
+  <programGroup defaultName="GATE" location="applications"/>
 
    <shortcut
-     name="GATE $APP_VER GUI"
+     name="GATE Developer $APP_VER"
      target="$INSTALL_PATH/bin/gate.sh"
      programGroup="yes"
-     desktop="yes"     
+     desktop="no"      
+     applications="no"
+     startMenu="no"
+     startup="no"     
      workingDirectory="$INSTALL_PATH"
-     description="Starts the GATE $APP_VER GUI"
+     description="Starts GATE Developer $APP_VER"
      initialState="normal"
      iconFile="$INSTALL_PATH/icons/gate-icon.png"
      type="Application"
-     Categories="Development;GATE;"
+     Categories="Development;IDE;"
      encoding="UTF-8">
      <createForPack name="Core"/>
    </shortcut>
 
    <shortcut
-     name="GATE User Guide"
+     name="GATE $APP_VER User Guide"
      target="xdg-open"
      programGroup="yes"
-     desktop="yes"
+     desktop="no"      
+     applications="no"
+     startMenu="no"
+     startup="no"
      workingDirectory="$INSTALL_PATH"
      url="$INSTALL_PATH/tao.pdf"
      commandLine="$INSTALL_PATH/tao.pdf"
      description="The GATE User Guide"
      iconFile="$INSTALL_PATH/icons/mime-application-pdf.png"
      type="Application"
+     Categories="Development;IDE;"
      encoding="UTF-8">
      <createForPack name="User guide"/>
    </shortcut>
+   
+   <shortcut
+     name="Uninstall GATE Developer $APP_VER"
+     programGroup="yes"
+     desktop="no"      
+     applications="no"
+     startMenu="no"
+     startup="no"
+     target="$JAVA_HOME\bin\java"
+     commandLine="&quot;-jar&quot; &quot;$INSTALL_PATH\uninstaller\gate-uninstaller.jar&quot;"
+     description="Remove GATE Developer $APP_VER from your computer"
+     workingDirectory="$USER_HOME"
+     initialState="normal"
+     type="Application"
+     Categories="Development;IDE;"
+     encoding="UTF-8">
+     <createForPack name="Core"/>
+   </shortcut>   
+   
 </shortcuts>
