@@ -3,7 +3,7 @@
 <shortcuts>
   <skipIfNotSupported/>
   
-  <programGroup defaultName="GATE Developer $APP_VER$" location="applications"/>
+  <programGroup defaultName="GATE Developer $APP_VER" location="applications"/>
 
    <shortcut
      name="GATE Developer $APP_VER"
