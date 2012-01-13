@@ -28,21 +28,28 @@ import gate.creole.metadata.GuiType;
 import gate.creole.metadata.HiddenCreoleParameter;
 import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
-import gate.util.GateException;
 import gate.util.Err;
+import gate.util.GateException;
+import gate.util.ant.ExpandIvy;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ivy.Ivy;
+import org.apache.ivy.core.LogOptions;
+import org.apache.ivy.core.report.ArtifactDownloadReport;
+import org.apache.ivy.core.report.ResolveReport;
+import org.apache.ivy.core.resolve.ResolveOptions;
+import org.apache.ivy.util.filter.FilterHelper;
 import org.jdom.Document;
 import org.jdom.Element;
 
@@ -71,8 +78,49 @@ public class CreoleAnnotationHandler {
    * @param jdomDoc JDOM document representing a parsed creole.xml file.
    */
   public void addJarsToClassLoader(Document jdomDoc)
-          throws MalformedURLException {
+          throws IOException {
     addJarsToClassLoader(jdomDoc.getRootElement());
+    addIvyDependencies(jdomDoc);
+  }
+  
+  /**
+   * Extract all the IVY elements from the given JDOM document and then add all
+   * the jars resulting from ivy's dependency resolution to the GateClassLoader.
+   * 
+   * @param creoleDoc
+   *          JDOM document representing a parsed creole.xml file.
+   */
+  private void addIvyDependencies(Document creoleDoc) throws IOException {
+
+    try {
+      List<Element> ivyElts = ExpandIvy.getIvyElements(creoleDoc);
+
+      if(ivyElts.size() > 0) {
+
+        Ivy ivy = ExpandIvy.getIvy(ExpandIvy.getSettingsURL());
+
+        ResolveOptions resolveOptions = new ResolveOptions();
+        resolveOptions.setArtifactFilter(FilterHelper
+            .getArtifactTypeFilter(new String[]{"jar"}));
+        resolveOptions.setLog(LogOptions.LOG_QUIET);
+
+        for(Element e : ivyElts) {
+          URL url = new URL(creoleFileUrl, ExpandIvy.getIvyPath(e));
+
+          ResolveReport report = ivy.resolve(url, resolveOptions);
+          if(report.getAllProblemMessages().size() > 0)
+            throw new Exception("Unable to resolve all IVY dependencies");
+
+          for(ArtifactDownloadReport dlReport : report.getAllArtifactsReports()) {
+            Gate.getClassLoader().addURL(
+                dlReport.getLocalFile().toURI().toURL());
+          }
+
+        }
+      }
+    } catch(Exception ex) {
+      throw new IOException("Error using Ivy to add required dependencies", ex);
+    }
   }
 
   /**
@@ -81,6 +129,7 @@ public class CreoleAnnotationHandler {
    *
    * @param jdomElt JDOM element representing a creole.xml file
    */
+  @SuppressWarnings("unchecked")
   private void addJarsToClassLoader(Element jdomElt)
           throws MalformedURLException {
     if("JAR".equals(jdomElt.getName())) {
@@ -133,6 +182,7 @@ public class CreoleAnnotationHandler {
 
   }
 
+  @SuppressWarnings("unchecked")
   private void findResourceElements(Map<String, Element> map, Element elt) {
     if(elt.getName().equals("RESOURCE")) {
       String className = elt.getChildTextTrim("CLASS");
@@ -165,6 +215,7 @@ public class CreoleAnnotationHandler {
    *
    * @param element the element to process.
    */
+  @SuppressWarnings("unchecked")
   private void processAnnotations(Element element) throws GateException {
     if("RESOURCE".equals(element.getName())) {
       processAnnotationsForResource(element);

@@ -1290,6 +1290,7 @@ public class NameBearerHandle implements Handle, StatusListener,
               task.setDestFile(targetGapp);
               // sensible default settings
               task.setCopyPlugins(true);
+              task.setExpandIvy(true);
               task.setCopyResourceDirs(true);
               task.setOnUnresolved(PackageGappTask.UnresolvedAction.recover);
               task.init();
@@ -2032,20 +2033,20 @@ public class NameBearerHandle implements Handle, StatusListener,
 
   protected void fireProgressChanged(int e) {
     if(progressListeners != null) {
-      Vector listeners = progressListeners;
+      Vector<ProgressListener> listeners = progressListeners;
       int count = listeners.size();
       for(int i = 0; i < count; i++) {
-        ((ProgressListener)listeners.elementAt(i)).progressChanged(e);
+        listeners.elementAt(i).progressChanged(e);
       }
     }
   }// protected void fireProgressChanged(int e)
 
   protected void fireProcessFinished() {
     if(progressListeners != null) {
-      Vector listeners = progressListeners;
+      Vector<ProgressListener> listeners = progressListeners;
       int count = listeners.size();
       for(int i = 0; i < count; i++) {
-        ((ProgressListener)listeners.elementAt(i)).processFinished();
+        listeners.elementAt(i).processFinished();
       }
     }
   }// protected void fireProcessFinished()
@@ -2073,10 +2074,10 @@ public class NameBearerHandle implements Handle, StatusListener,
 
   protected void fireStatusChanged(String e) {
     if(statusListeners != null) {
-      Vector listeners = statusListeners;
+      Vector<StatusListener> listeners = statusListeners;
       int count = listeners.size();
       for(int i = 0; i < count; i++) {
-        ((StatusListener)listeners.elementAt(i)).statusChanged(e);
+        listeners.elementAt(i).statusChanged(e);
       }
     }
   }

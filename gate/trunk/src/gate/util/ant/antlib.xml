@@ -3,6 +3,9 @@
 <antlib>
   <!-- Expand creole.xml (used to regenerate the plugins.html page) -->
   <taskdef name="expandcreoles" classname="gate.util.ant.ExpandCreoleXmls" />
+  
+  <!-- Expand CREOLE plugins to include local copies of Ivy dependencies -->
+  <taskdef name="expandivy" classname="gate.util.ant.ExpandIvy" />
 
   <!-- GAPP file packager -->
   <taskdef name="packagegapp" classname="gate.util.ant.packager.PackageGappTask" />
