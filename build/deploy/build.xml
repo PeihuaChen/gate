@@ -386,7 +386,6 @@ build/deploy all paths are relative to the top-level GATE directory -->
             <description>The GATE User Guide (PDF version).  The latest user guide is always available at http://gate.ac.uk/sale/tao/ but may describe features added since this version of GATE.</description>
             <file src="../sale/tao/tao.pdf" targetdir="$INSTALL_PATH" />
       	    <file src="build/deploy/mime-application-pdf.png" targetdir="$INSTALL_PATH/icons"/>
-            <file src="build/deploy/mime-application-pdf.ico" targetdir="$INSTALL_PATH/icons/" os="windows"/>
         </pack>
         <pack name="Developer documentation" 
               required="no"
