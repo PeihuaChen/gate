@@ -35,7 +35,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/junit.jar"/>
 	<classpathentry kind="lib" path="lib/ext/guk.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/GnuGetOpt.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/gateHmm.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/mail.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/lubm.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-fileupload-1.0.jar"/>

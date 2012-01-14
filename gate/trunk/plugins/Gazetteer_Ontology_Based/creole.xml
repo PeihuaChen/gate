@@ -3,6 +3,7 @@
 <CREOLE-DIRECTORY>
   <CREOLE>   
   <JAR>obg.jar</JAR>
+<JAR>lib/oro-2.0.8</JAR>
 	<!-- creole.xml for Onto Root gazetteer -->
 	<RESOURCE>
 		<NAME>Onto Root Gazetteer</NAME>
