@@ -9,6 +9,7 @@
 
   <!-- set global properties for this build -->
   <property name="src" location="src"/>
+  <property name="lib" location="lib"/>
   <property name="jar.location" location="obg.jar" />
   <property name="build" location="build" />
   <property name="gate.home" location="../.." />
@@ -22,6 +23,9 @@
     <fileset dir="${gate.lib}">
       <include name="**/*.jar" />
       <include name="**/*.zip" />
+    </fileset>
+    <fileset dir="${lib}">
+      <include name="**/*.jar" />
     </fileset>
   </path> 
 
