@@ -72,7 +72,6 @@
 	<classpathentry kind="lib" path="lib/poi-scratchpad-3.8-beta4.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="lib" path="lib/javacc.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/servlet-2_3.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/gate-compiler-jdt.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/concurrent.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/icu4j.jar"/>
