@@ -1579,8 +1579,8 @@ public class MainFrame extends JFrame implements ProgressListener,
       }
     });
 
-    Gate.listeners.put("gate.event.StatusListener", MainFrame.this);
-    Gate.listeners.put("gate.event.ProgressListener", MainFrame.this);
+    Gate.getListeners().put("gate.event.StatusListener", MainFrame.this);
+    Gate.getListeners().put("gate.event.ProgressListener", MainFrame.this);
     if(Gate.runningOnMac()) {
       // mac-specific initialisation
       initMacListeners();
