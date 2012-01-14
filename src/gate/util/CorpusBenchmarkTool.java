@@ -471,8 +471,7 @@ public class CorpusBenchmarkTool {
             );
 
         doc.setName(files[i].getName());
-        if (doc == null)
-          continue;
+        
         processDocument(doc);
         final LanguageResource lr = sds.adopt(doc, null);
         sds.sync(lr);

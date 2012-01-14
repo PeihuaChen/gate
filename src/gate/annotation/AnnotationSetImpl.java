@@ -402,7 +402,6 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
       if (nextNode==null) return emptyAnnotationSet;
       annotationsToAdd = getAnnotsByStartNode(nextNode.getId());
     }
-    if(annotationsToAdd == null) return emptyAnnotationSet;
     return new ImmutableAnnotationSetImpl(doc, annotationsToAdd);
   }
 

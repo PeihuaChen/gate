@@ -112,18 +112,16 @@ public class PRViewer extends AbstractVisualResource {
                                      " is not a " +
                                      Resource.class.getName() + "!");
     }
-    if(target != null){
-      Resource pr = (Resource)target;
-      ResourceData rData = (ResourceData)Gate.getCreoleRegister().
-                                              get(pr.getClass().getName());
-      if(rData != null){
-        editor.init(pr, rData.getParameterList().getInitimeParameters());
-      }else{
-        editor.init(pr, null);
-      }
-    }else{
-      editor.init(null, null);
+
+    Resource pr = (Resource)target;
+    ResourceData rData =
+        (ResourceData)Gate.getCreoleRegister().get(pr.getClass().getName());
+    if(rData != null) {
+      editor.init(pr, rData.getParameterList().getInitimeParameters());
+    } else {
+      editor.init(pr, null);
     }
+
     editor.removeCreoleListenerLink();
   }
 
