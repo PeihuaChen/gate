@@ -24,9 +24,6 @@
       <include name="**/*.jar" />
       <include name="**/*.zip" />
     </fileset>
-    <fileset dir="${lib}">
-      <include name="**/*.jar" />
-    </fileset>
   </path> 
 
 
