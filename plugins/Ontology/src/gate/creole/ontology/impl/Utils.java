@@ -78,9 +78,7 @@ public class Utils {
   public static OClass createOClass(Ontology ontology,
           OntologyService owlim, String uri, byte classType) {
     OClass aClass = null; //(OClass)ontology.getOResourceFromMap(uri);
-    if(aClass != null) {
-      return aClass;
-    }
+    
     switch(classType) {
       case OConstants.HAS_VALUE_RESTRICTION:
         aClass = new HasValueRestrictionImpl(new OBNodeIDImpl(uri), ontology,
@@ -171,28 +169,17 @@ public class Utils {
   
   /**
    * Creates a new instance of Ontology Instance
-   * 
-   * @param repositoryID
-   * @param ontology
-   * @param ontologyService
-   * @param uri
-   * @return
    */
-  public static OInstance createOInstance(
-          Ontology ontology, OntologyService owlim, String uri) {
-    OResource aResource = null; //= ontology.getOResourceFromMap(uri);
-    if(aResource instanceof OInstance || aResource == null){
-      OInstance anInstance = (OInstance)aResource;
-      if(anInstance != null) return anInstance;
-      anInstance = new OInstanceImpl(ontology.createOURI(uri), ontology,
-              owlim);
-      //ontology.addOResourceToMap(uri, anInstance);
-      return anInstance;
-    }else{
-      throw new GateOntologyException("Expecting " + uri + 
-              " to be an instance but it is a \"" + 
-              aResource.getClass().getCanonicalName() + "\" instead!");
-    }
+  public static OInstance createOInstance(Ontology ontology,
+      OntologyService owlim, String uri) {
+    OResource aResource = null; // = ontology.getOResourceFromMap(uri);
+
+    OInstance anInstance = (OInstance)aResource;
+    if(anInstance != null) return anInstance;
+    anInstance = new OInstanceImpl(ontology.createOURI(uri), ontology, owlim);
+    // ontology.addOResourceToMap(uri, anInstance);
+    return anInstance;
+
   }
 
 
