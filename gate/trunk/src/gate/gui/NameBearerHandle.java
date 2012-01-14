@@ -252,106 +252,7 @@ public class NameBearerHandle implements Handle, StatusListener,
   public Action getCloseRecursivelyAction() {
     return new CloseRecursivelyAction();
   }
-
-  /** Fill HMM Save and Save As... actions */
-  private void fillHMMActions(List<XJMenuItem> popupItems) {
-    Action action;
-
-    com.ontotext.gate.hmm.agent.AlternativeHMMAgent hmmPR = (com.ontotext.gate.hmm.agent.AlternativeHMMAgent)target;
-
-    popupItems.add(null);
-    action = new com.ontotext.gate.hmm.agent.SaveAction(hmmPR);
-    action.putValue(Action.SHORT_DESCRIPTION,
-            "Save trained HMM model into PR URL file");
-    // Add Save trained HMM model action
-    popupItems.add(new XJMenuItem(action, sListenerProxy));
-
-    action = new com.ontotext.gate.hmm.agent.SaveAsAction(hmmPR);
-    action.putValue(Action.SHORT_DESCRIPTION,
-            "Save trained HMM model into new file");
-    // Add Save As... trained HMM model action
-    popupItems.add(new XJMenuItem(action, sListenerProxy));
-  } // fillHMMActions(gate.gui.ProtegeWrapper protege)
-
-  // protected JPopupMenu buildPopup(){
-  // //build the popup
-  // JPopupMenu popup = new JPopupMenu();
-  // XJMenuItem closeItem = new XJMenuItem(new CloseAction(),
-  // sListenerProxy);
-  // closeItem.setAccelerator(KeyStroke.getKeyStroke(
-  // KeyEvent.VK_F4, ActionEvent.CTRL_MASK));
-  // popup.add(closeItem);
-  //
-  // if(target instanceof ProcessingResource){
-  // popup.addSeparator();
-  // popup.add(new XJMenuItem(new ReloadAction(), sListenerProxy));
-  // if(target instanceof gate.ml.DataCollector){
-  // popup.add(new DumpArffAction());
-  // }
-  // if(target instanceof
-  // com.ontotext.gate.hmm.agent.AlternativeHMMAgent) {
-  // fillHMMActions(popup);
-  // } // if
-  // }else if(target instanceof LanguageResource) {
-  // //Language Resources
-  // popup.addSeparator();
-  // popup.add(new XJMenuItem(new SaveAction(), sListenerProxy));
-  // popup.add(new XJMenuItem(new SaveToAction(), sListenerProxy));
-  // if(target instanceof gate.TextualDocument){
-  // XJMenuItem saveAsXmlItem =
-  // new XJMenuItem(new SaveAsXmlAction(), sListenerProxy);
-  // saveAsXmlItem.setAccelerator(KeyStroke.getKeyStroke(
-  // KeyEvent.VK_X, ActionEvent.CTRL_MASK));
-  //
-  // popup.add(saveAsXmlItem);
-  // XJMenuItem savePreserveFormatItem =
-  // new XJMenuItem(new DumpPreserveFormatAction(),
-  // sListenerProxy);
-  // popup.add(savePreserveFormatItem);
-  // }else if(target instanceof Corpus){
-  // popup.addSeparator();
-  // corpusFiller = new CorpusFillerComponent();
-  // popup.add(new XJMenuItem(new PopulateCorpusAction(),
-  // sListenerProxy));
-  // popup.addSeparator();
-  // popup.add(new XJMenuItem(new SaveCorpusAsXmlAction(false),
-  // sListenerProxy));
-  // popup.add(new XJMenuItem(new SaveCorpusAsXmlAction(true),
-  // sListenerProxy));
-  // if (target instanceof IndexedCorpus){
-  // popup.addSeparator();
-  // popup.add(new XJMenuItem(new CreateIndexAction(), sListenerProxy));
-  // popup.add(new XJMenuItem(new OptimizeIndexAction(),
-  // sListenerProxy));
-  // popup.add(new XJMenuItem(new DeleteIndexAction(), sListenerProxy));
-  // }
-  // }
-  // if (target instanceof gate.creole.ProtegeProjectName){
-  // fillProtegeActions(popup);
-  // }// End if
-  // }else if(target instanceof Controller){
-  // //Applications
-  // popup.addSeparator();
-  // popup.add(new XJMenuItem(new DumpToFileAction(), sListenerProxy));
-  // }
-  //
-  // //add the custom actions from the resource if any are provided
-  // if(target instanceof ActionsPublisher){
-  // Iterator actionsIter =
-  // ((ActionsPublisher)target).getActions().iterator();
-  // while(actionsIter.hasNext()){
-  // Action anAction = (Action)actionsIter.next();
-  // if(anAction == null) popup.addSeparator();
-  // else{
-  // if(window instanceof StatusListener)
-  // popup.add(new XJMenuItem(anAction, (StatusListener)window));
-  // else popup.add(anAction);
-  // }
-  // }
-  // }
-  // return popup;
-  // }
-
+  
   protected void buildStaticPopupItems() {
     // build the static part of the popup
     staticPopupItems = new ArrayList<XJMenuItem>();
@@ -360,9 +261,6 @@ public class NameBearerHandle implements Handle, StatusListener,
       // actions for PRs (but not Controllers)
       staticPopupItems.add(null);
       staticPopupItems.add(new XJMenuItem(new ReloadAction(), sListenerProxy));
-      if(target instanceof com.ontotext.gate.hmm.agent.AlternativeHMMAgent) {
-        fillHMMActions(staticPopupItems);
-      }
     }
     else if(target instanceof LanguageResource) {
       // Language Resources
