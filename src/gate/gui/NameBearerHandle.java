@@ -842,43 +842,6 @@ public class NameBearerHandle implements Handle, StatusListener,
     }// public void actionPerformed(ActionEvent e)
   }// class SaveCorpusAsXmlAction extends AbstractAction
 
-  /**
-   * Saves a corpus as a set of xml files in a directory.
-   */
-  class ReloadClassAction extends AbstractAction {
-    private static final long serialVersionUID = 1L;
-
-    public ReloadClassAction() {
-      super("Reload Resource Class");
-      putValue(SHORT_DESCRIPTION, "Reloads the java class for this resource");
-    }
-
-    public void actionPerformed(ActionEvent e) {
-      int answer = JOptionPane.showOptionDialog(largeView != null
-              ? largeView
-              : smallView, "This is an advanced option!\n"
-              + "You should not use this unless your name is Hamish.\n"
-              + "Are you sure you want to do this?", "GATE",
-              JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null,
-              null, null);
-      if(answer == JOptionPane.OK_OPTION) {
-        try {
-          String className = target.getClass().getName();
-          Gate.getClassLoader().reloadClass(className);
-          fireStatusChanged("Class " + className + " reloaded!");
-        }
-        catch(Exception ex) {
-          JOptionPane.showMessageDialog(largeView != null
-                  ? largeView
-                  : smallView, "Look what you've done: \n" + ex.toString()
-                  + "\nI told you not to do it...", "GATE",
-                  JOptionPane.ERROR_MESSAGE);
-          ex.printStackTrace(Err.getPrintWriter());
-        }
-      }
-    }
-  }
-  
   class MakeConditionalAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
 
@@ -1665,26 +1628,6 @@ public class NameBearerHandle implements Handle, StatusListener,
               runnable, "PopulateCorpusFromSingleConcatenatedFileAction");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
-    }
-  }
-
-  class CreateIndexAction1 extends AbstractAction {
-    private static final long serialVersionUID = -3951091972912846869L;
-
-    CreateIndexAction1() {
-      super("Create Index");
-      putValue(SHORT_DESCRIPTION, "Create index with documents from a corpus");
-    }
-
-    public void actionPerformed(ActionEvent e) {
-      CreateIndexDialog cid = null;
-      if(getWindow() instanceof Frame) {
-        cid = new CreateIndexDialog((Frame)getWindow(), (IndexedCorpus)target);
-      }
-      if(getWindow() instanceof Dialog) {
-        cid = new CreateIndexDialog((Dialog)getWindow(), (IndexedCorpus)target);
-      }
-      cid.setVisible(true);
     }
   }
 
