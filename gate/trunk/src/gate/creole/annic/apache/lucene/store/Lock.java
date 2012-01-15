@@ -34,7 +34,7 @@ import java.io.IOException;
  * @see Directory#makeLock(String)
  */
 public abstract class Lock {
-  public static long LOCK_POLL_INTERVAL = 1000;
+  public static final long LOCK_POLL_INTERVAL = 1000;
 
   /** Attempts to obtain exclusive access and immediately return
    *  upon success or failure.
