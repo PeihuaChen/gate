@@ -332,6 +332,7 @@
   <!-- This target compiles the GUK classes which are required by the main
        GATE compile task -->
   <target name="guk" depends="prepare, depend">
+    <mkdir dir="${libDir}/ext"/>    
     <javac classpathref="build.class.path"
            destdir="${outputDir}"
            includes="guk/**"
@@ -345,7 +346,8 @@
       <compilerarg value="-Xmaxwarns"/>
       <compilerarg value="${gate.compile.maxwarnings}"/>
     </javac>
-      <jar destfile="${libDir}/ext/guk.jar"
+    
+    <jar destfile="${libDir}/ext/guk.jar"
          update="false"
          index="true">
       <fileset dir="${outputDir}"
