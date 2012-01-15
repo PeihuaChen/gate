@@ -54,7 +54,7 @@ public class IndexWriter {
    * Default value is 1000.  Use <code>gate.creole.annic.apache.lucene.writeLockTimeout</code>
    * system property to override.
    */
-  public static long WRITE_LOCK_TIMEOUT =
+  public static final long WRITE_LOCK_TIMEOUT =
     Integer.parseInt(System.getProperty("gate.creole.annic.apache.lucene.writeLockTimeout",
       "1000"));
 
@@ -62,7 +62,7 @@ public class IndexWriter {
    * Default value is 10000.  Use <code>gate.creole.annic.apache.lucene.commitLockTimeout</code>
    * system property to override.
    */
-  public static long COMMIT_LOCK_TIMEOUT =
+  public static final long COMMIT_LOCK_TIMEOUT =
     Integer.parseInt(System.getProperty("gate.creole.annic.apache.lucene.commitLockTimeout",
       "10000"));
 
