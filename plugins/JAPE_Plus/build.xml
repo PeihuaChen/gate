@@ -25,7 +25,10 @@
   <path id="compile.classpath">
     <pathelement location="${lib.dir}/colt-1.2.0-free.jar" />
     <pathelement location="${gate.home}/bin/gate.jar" />
-    <pathelement location="${gate.home}/lib/log4j-1.2.14.jar" />
+    <fileset dir="${gate.home}/lib">
+      <include name="**/*.jar" />
+      <include name="**/*.zip" />
+    </fileset>
   </path>
 
   <!-- create build directory structure -->
