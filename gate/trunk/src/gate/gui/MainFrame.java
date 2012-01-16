@@ -697,58 +697,6 @@ public class MainFrame extends JFrame implements ProgressListener,
       optionsMenuHasEntries = true;
     }
 
-    JMenu imMenu = null;
-    List<Locale> installedLocales = new ArrayList<Locale>();
-    try {
-      // if this fails guk is not present
-      Class.forName("guk.im.GateIMDescriptor");
-      // add the Gate input methods
-      installedLocales.addAll(Arrays.asList(new guk.im.GateIMDescriptor()
-        .getAvailableLocales()));
-    }
-    catch(Exception e) {
-      // something happened; most probably guk not present.
-      // just drop it, is not vital.
-    }
-    try {
-      // add the MPI IMs
-      // if this fails mpi IM is not present
-      Class.forName("mpi.alt.java.awt.im.spi.lookup.LookupDescriptor");
-
-      installedLocales.addAll(Arrays
-        .asList(new mpi.alt.java.awt.im.spi.lookup.LookupDescriptor()
-          .getAvailableLocales()));
-    }
-    catch(Exception e) {
-      // something happened; most probably MPI not present.
-      // just drop it, is not vital.
-    }
-
-    Collections.sort(installedLocales, new Comparator<Locale>() {
-      public int compare(Locale o1, Locale o2) {
-        return o1.getDisplayName().compareTo(o2.getDisplayName());
-      }
-    });
-    JMenuItem item;
-    if(!installedLocales.isEmpty()) {
-      imMenu = new XJMenu("Input Methods");
-      ButtonGroup bg = new ButtonGroup();
-      item = new LocaleSelectorMenuItem();
-      imMenu.add(item);
-      item.setSelected(true);
-      imMenu.addSeparator();
-      bg.add(item);
-      for(Locale locale : installedLocales) {
-        item = new LocaleSelectorMenuItem(locale);
-        imMenu.add(item);
-        bg.add(item);
-      }
-    }
-    if(imMenu != null) {
-      optionsMenu.add(imMenu);
-      optionsMenuHasEntries = true;
-    }
-
     if(optionsMenuHasEntries) {
       menuBar.add(optionsMenu);
     }
@@ -966,14 +914,6 @@ public class MainFrame extends JFrame implements ProgressListener,
     verboseModeItem =
       new JCheckBoxMenuItem(new VerboseModeCorpusEvalToolAction());
     corpusEvalMenu.add(verboseModeItem);
-    toolsMenu.add(new XJMenuItem(
-      new AbstractAction("Unicode Editor", getIcon("unicode")) {
-      { putValue(SHORT_DESCRIPTION, "Editor for testing character encoding"); }
-      private static final long serialVersionUID = 1L;
-      public void actionPerformed(ActionEvent evt) {
-        new guk.Editor();
-      }
-    }, this));
 
     // add separator.  plugin menu items will appear after this separator
     toolsMenu.addSeparator();
