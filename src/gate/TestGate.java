@@ -22,6 +22,7 @@ import gate.corpora.TestCorpus;
 import gate.corpora.TestDocument;
 import gate.corpora.TestDocumentStaxUtils;
 import gate.corpora.TestSerialCorpus;
+import gate.corpora.TestTikaFormats;
 import gate.creole.TestControllers;
 import gate.creole.TestCreole;
 import gate.creole.TestCreoleAnnotationHandler;
@@ -265,6 +266,7 @@ public class TestGate {
 //        suite.addTest(TestJacl.suite());
         suite.addTest(TestDocument.suite());
         suite.addTest(TestDocumentStaxUtils.suite());
+        suite.addTest(TestTikaFormats.suite());
         suite.addTest(TestRBTreeMap.suite());
         suite.addTest(TestCorpus.suite());
         suite.addTest(TestSerialCorpus.suite());
