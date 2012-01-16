@@ -329,33 +329,7 @@
   </target>
 
 
-  <!-- This target compiles the GUK classes which are required by the main
-       GATE compile task -->
-  <target name="guk" depends="prepare, depend">
-    <mkdir dir="${libDir}/ext"/>    
-    <javac classpathref="build.class.path"
-           destdir="${outputDir}"
-           includes="guk/**"
-           encoding="UTF-8"
-           debug="true"
-           deprecation="${deprecation}"
-           debuglevel="lines,source"
-           source="1.5"
-           target="1.5"
-           srcdir="${srcDir}">
-      <compilerarg value="-Xmaxwarns"/>
-      <compilerarg value="${gate.compile.maxwarnings}"/>
-    </javac>
-    
-    <jar destfile="${libDir}/ext/guk.jar"
-         update="false"
-         index="true">
-      <fileset dir="${outputDir}"
-               includes="guk/**"/>
-      <fileset dir="${srcDir}/guk/resources"
-               excludes="**/CVS,**/CVS/**,**/.cvsignore"/>
-    </jar>
-  </target>
+
 
   <!-- Calculates dependencies for the source code -->
   <target name="depend">
@@ -367,7 +341,7 @@
 
 	<!-- This target compiles all the classes -->
   <target name="compile"
-          depends="prepare, depend, guk"
+          depends="prepare, depend"
           description="compile the source " >
     <!-- Compile the java code from ${srcDir} into ${buildDir} -->
     <javac srcdir="${srcDir}"
@@ -387,7 +361,7 @@
 
 	<!-- This target compiles all the classes including debug information -->
   <target name="compile_debug"
-          depends="prepare, depend, guk"
+          depends="prepare, depend"
           description="compile the source " >
     <!-- Compile the java code from ${srcDir} into ${buildDir} -->
     <javac srcdir="${srcDir}"
@@ -740,14 +714,6 @@
      </java>
   </target>
 
-  <!-- Run the GUK editor -->
-  <target name="gukdemo">
-    <java classname="guk.Editor"
-          fork="true"
-          spawn="false">
-      <sysproperty key="java.ext.dirs" value="${extDir}"/>
-     </java>
-  </target>
 
   <!-- Clear all build output -->
   <target name="clean.gate">
