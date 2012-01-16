@@ -1,4 +1,4 @@
 @echo off
 cd ..
-bin/ant run
+gate.exe
 
