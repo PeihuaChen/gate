@@ -1,13 +1,7 @@
 <?xml version="1.0"?>
 <!-- $Id$ -->
 <CREOLE-DIRECTORY>
-  <CREOLE>   
-    <!-- creole.xml for SearchPR -->
-    <RESOURCE>
-      <JAR SCAN="true">crawl.jar</JAR>
-      <JAR>lib/websphinx.jar</JAR>
-      <NAME>CrawlerPR</NAME>
-      <CLASS>crawl.CrawlPR</CLASS>
-    </RESOURCE>
-  </CREOLE>
+   <JAR SCAN="true">crawl.jar</JAR>
+   <JAR>lib/websphinx.jar</JAR>
+   <JAR>lib/mail.jar</JAR>
 </CREOLE-DIRECTORY>
