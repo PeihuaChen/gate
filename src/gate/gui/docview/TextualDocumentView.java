@@ -113,6 +113,25 @@ public class TextualDocumentView extends AbstractDocumentView {
   }
 
 
+  /**
+   * Set the text orientation in the document.
+   * 
+   * @param orientation
+   *          either left to right or right to left
+   */
+  public void changeOrientation(ComponentOrientation orientation) {
+    // set the orientation
+    textView.setComponentOrientation(orientation);
+    // disable the listener
+    gateDocListener.setActive(false);
+    // this is required as eventhough orientation gets applied,
+    // the screen is not updated unless a character input is
+    // detected by the textView
+    textView.insert("a", 0);
+    textView.replaceRange("", 0, 1);
+    // enabling the listener again
+    gateDocListener.setActive(true);
+  }//changeOrientation
 
   public void scrollAnnotationToVisible(Annotation ann){
     //if at least part of the blinking section is visible then we
