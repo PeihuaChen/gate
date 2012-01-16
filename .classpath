@@ -35,9 +35,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/commons-fileupload-1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-discovery-0.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ant.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/ant-nodeps.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ant-launcher.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/ant-junit.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ant-contrib-1.0b2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/wstx-lgpl-3.2.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/spring-beans-2.0.8.jar"/>
