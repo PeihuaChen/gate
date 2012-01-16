@@ -7,7 +7,7 @@
 	<property name="src.dir" location="src" />
 	<property name="classes.dir" location="classes" />
 	<property name="jar.location" location="MeasurementTagger.jar" />
-	<property name="doc.dir" location="docs" />
+	<property name="doc.dir" location="doc" />
 	<property name="javadoc.dir" location="${doc.dir}/javadoc" />
 
 	<!-- Path to compile - includes gate.jar and GATE/lib/*.jar -->
