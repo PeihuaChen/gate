@@ -72,6 +72,16 @@ public class AnnotationSetsView extends AbstractDocumentView
   }
   
   
+  /**
+   * changes the orientation of the annotation editor component only
+   * 
+   * @param orientation
+   */
+  public void changeOrientation(ComponentOrientation orientation) {
+    if(annotationEditor != null) {
+      annotationEditor.changeOrientation(orientation);
+    }
+  }
 
   /**
    * Queues an an action for selecting the provided annotation
