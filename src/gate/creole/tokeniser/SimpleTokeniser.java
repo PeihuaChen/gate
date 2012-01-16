@@ -25,8 +25,6 @@ import gate.*;
 import gate.creole.*;
 import gate.util.*;
 
-//import EDU.auburn.VGJ.graph.ParseError;
-
 /** Implementation of a Unicode rule based tokeniser.
  * The tokeniser gets its rules from a file an {@link java.io.InputStream
  * InputStream} or a {@link java.io.Reader Reader} which should be sent to one
@@ -212,7 +210,7 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
 
     FSMState currentState = startState;
     boolean orFound = false;
-    List orList = new LinkedList();
+    List<FSMState> orList = new LinkedList<FSMState>();
     String token;
     token = skipIgnoreTokens(st);
 
@@ -228,7 +226,7 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
       } else if(token.equals("\"")){//"unicode_type"
         String sType = parseQuotedString(st, "\"");
         newState = new FSMState(this);
-        typeId = (Integer)stringTypeIds.get(sType);
+        typeId = stringTypeIds.get(sType);
 
         if(null == typeId)
           throw new InvalidRuleException("Invalid type: \"" + sType + "\"");
@@ -238,7 +236,7 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
       } else {// a type with no quotes
         String sType = token;
         newState = new FSMState(this);
-        typeId = (Integer)stringTypeIds.get(sType);
+        typeId = stringTypeIds.get(sType);
 
         if(null == typeId)
           throw new InvalidRuleException("Invalid type: \"" + sType + "\"");
@@ -264,10 +262,10 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
         orFound = false;
         orList.add(newState);
         newState = new FSMState(this);
-        Iterator orListIter = orList.iterator();
+        Iterator<FSMState> orListIter = orList.iterator();
 
         while(orListIter.hasNext())
-          ((FSMState)orListIter.next()).put(null, newState);
+          orListIter.next().put(null, newState);
         orList.clear();
       }
 
@@ -331,7 +329,7 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
    * The ignorable tokens are defined by {@link #ignoreTokens a set}
    */
   protected static String skipIgnoreTokens(StringTokenizer st){
-    Iterator ignorables;
+    Iterator<String> ignorables;
     boolean ignorableFound = false;
     String currentToken;
 
@@ -342,7 +340,7 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
         ignorableFound = false;
 
         while(!ignorableFound && ignorables.hasNext()){
-          if(currentToken.equals((String)ignorables.next()))
+          if(currentToken.equals(ignorables.next()))
             ignorableFound = true;
         }
 
@@ -362,13 +360,13 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
    *
    * @param s
    */
-  private AbstractSet lambdaClosure(Set s){
+  private AbstractSet<FSMState> lambdaClosure(Set<FSMState> s){
 
     //the stack/queue used by the algorithm
-    LinkedList list = new LinkedList(s);
+    LinkedList<FSMState> list = new LinkedList<FSMState>(s);
 
     //the set to be returned
-    AbstractSet lambdaClosure = new HashSet(s);
+    AbstractSet<FSMState> lambdaClosure = new HashSet<FSMState>(s);
 
     FSMState top;
     FSMState currentState;
@@ -376,7 +374,7 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
     Iterator statesIter;
 
     while(!list.isEmpty()) {
-      top = (FSMState)list.removeFirst();
+      top = list.removeFirst();
       nextStates = top.nextSet(null);
 
       if(null != nextStates){
@@ -402,10 +400,10 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
 
     //kalina:clear() faster than init() which is called with init()
     newStates.clear();
-    Set sdStates = new HashSet();
-    LinkedList unmarkedDStates = new LinkedList();
+    Set<Set> sdStates = new HashSet<Set>();
+    LinkedList<Set> unmarkedDStates = new LinkedList<Set>();
     DFSMState dCurrentState = new DFSMState(this);
-    Set sdCurrentState = new HashSet();
+    Set<FSMState> sdCurrentState = new HashSet<FSMState>();
 
     sdCurrentState.add(initialState);
     sdCurrentState = lambdaClosure(sdCurrentState);
@@ -413,14 +411,14 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
     sdStates.add(sdCurrentState);
 
     //find out if the new state is a final one
-    Iterator innerStatesIter = sdCurrentState.iterator();
+    Iterator<FSMState> innerStatesIter = sdCurrentState.iterator();
     String rhs;
     FSMState currentInnerState;
-    Set rhsClashSet = new HashSet();
+    Set<String> rhsClashSet = new HashSet<String>();
     boolean newRhs = false;
 
     while(innerStatesIter.hasNext()){
-      currentInnerState = (FSMState)innerStatesIter.next();
+      currentInnerState = innerStatesIter.next();
       if(currentInnerState.isFinal()){
         rhs = currentInnerState.getRhs();
         rhsClashSet.add(rhs);
@@ -438,25 +436,25 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
     rhsClashSet.clear();
     unmarkedDStates.addFirst(sdCurrentState);
     dInitialState = dCurrentState;
-    Set nextSet;
+    Set<FSMState> nextSet;
 
     while(!unmarkedDStates.isEmpty()){
       //Out.println("\n\n=====================" + unmarkedDStates.size());
-      sdCurrentState = (Set)unmarkedDStates.removeFirst();
+      sdCurrentState = unmarkedDStates.removeFirst();
       for(int type = 0; type < maxTypeId; type++){
       //Out.print(type);
-        nextSet = new HashSet();
+        nextSet = new HashSet<FSMState>();
         innerStatesIter = sdCurrentState.iterator();
 
         while(innerStatesIter.hasNext()){
-          currentInnerState = (FSMState)innerStatesIter.next();
-          Set tempSet = currentInnerState.nextSet(type);
+          currentInnerState = innerStatesIter.next();
+          Set<FSMState> tempSet = currentInnerState.nextSet(type);
           if(null != tempSet) nextSet.addAll(tempSet);
         }//while(innerStatesIter.hasNext())
 
         if(!nextSet.isEmpty()){
           nextSet = lambdaClosure(nextSet);
-          dCurrentState = (DFSMState)newStates.get(nextSet);
+          dCurrentState = newStates.get(nextSet);
 
           if(dCurrentState == null){
 
@@ -470,7 +468,7 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
             newRhs =false;
 
             while(innerStatesIter.hasNext()){
-              currentInnerState = (FSMState)innerStatesIter.next();
+              currentInnerState = innerStatesIter.next();
               if(currentInnerState.isFinal()){
                 rhs = currentInnerState.getRhs();
                 rhsClashSet.add(rhs);
@@ -488,7 +486,7 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
             rhsClashSet.clear();
             newStates.put(nextSet, dCurrentState);
           }
-          ((DFSMState)newStates.get(sdCurrentState)).put(type,dCurrentState);
+          newStates.get(sdCurrentState).put(type,dCurrentState);
         } // if(!nextSet.isEmpty())
 
       } // for(byte type = 0; type < 256; type++)
@@ -608,8 +606,8 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
       currentChar = content.charAt(charIdx);
 //      Out.println(
 //      currentChar + typesMnemonics[Character.getType(currentChar)+128]);
-      nextState = graphPosition.next(((Integer)typeIds.get(
-                  new Integer(Character.getType(currentChar)))).intValue());
+      nextState = graphPosition.next(typeIds.get(
+                  new Integer(Character.getType(currentChar))).intValue());
 
       if( null != nextState ) {
         graphPosition = nextState;
@@ -754,15 +752,15 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
    */
   protected FSMState initialState;
 
-  /** A set containng all the states of the non deterministic machin
+  /** A set containng all the states of the non deterministic machine
    */
   protected Set fsmStates = new HashSet();
 
-  /** The initial state of the deterministic machin
+  /** The initial state of the deterministic machine
    */
   protected DFSMState dInitialState;
 
-  /** A set containng all the states of the deterministic machin
+  /** A set containng all the states of the deterministic machine
    */
   protected Set dfsmStates = new HashSet();
 
@@ -772,7 +770,7 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
 
   /** A set of string representing tokens to be ignored (e.g. blanks
    */
-  static Set ignoreTokens;
+  static Set<String> ignoreTokens;
 
   /** maps from int (the static value on {@link java.lang.Character} to int
    * the internal value used by the tokeniser. The ins values used by the
@@ -780,7 +778,7 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
    * necessary.
    * They map all the public static int members on{@link java.lang.Character}
    */
-  public static Map typeIds;
+  public static final Map<Integer, Integer> typeIds;
 
   /** The maximum int value used internally as a type i
    */
@@ -792,7 +790,7 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
 
   /** Maps from type names to type internal id
    */
-  public static Map stringTypeIds;
+  public static final Map<String, Integer> stringTypeIds;
 
   /**
    * This property holds an URL to the file containing the rules for this tokeniser
@@ -808,7 +806,7 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
   private String encoding;
   private transient Vector progressListeners;
   //kalina: added this as method to minimise too many init() calls
-  protected transient Map newStates = new HashMap();
+  protected transient Map<Set, DFSMState> newStates = new HashMap<Set, DFSMState>();
 
 
   /** The static initialiser will inspect the class {@link java.lang.Character}
@@ -826,7 +824,7 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
       throw new LuckyException("Could not find the java.lang.Character class!");
     }
 
-    Collection staticFields = new LinkedList();
+    Collection<Field> staticFields = new LinkedList<Field>();
     // JDK 1.4 introduced directionality constants that have the same values as
     //character types; we need to skip those as well
     for(int i = 0; i< characterClassFields.length; i++)
@@ -834,33 +832,38 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
          characterClassFields[i].getName().indexOf("DIRECTIONALITY") == -1)
         staticFields.add(characterClassFields[i]);
 
-    typeIds = new HashMap();
+    Map<Integer, Integer> tempTypeIds = new HashMap<Integer, Integer>();
     maxTypeId = staticFields.size() -1;
     typeMnemonics = new String[maxTypeId + 1];
-    stringTypeIds = new HashMap();
+    Map<String, Integer> tempStringTypeIds = new HashMap<String, Integer>();
 
-    Iterator staticFieldsIter = staticFields.iterator();
+    
+    
+    Iterator<Field> staticFieldsIter = staticFields.iterator();
     Field currentField;
     int currentId = 0;
     String fieldName;
 
     try {
       while(staticFieldsIter.hasNext()){
-        currentField = (Field)staticFieldsIter.next();
+        currentField = staticFieldsIter.next();
         if(currentField.getType().toString().equals("byte")){
           fieldName = currentField.getName();
-          typeIds.put(new Integer(currentField.getInt(null)),
+          tempTypeIds.put(new Integer(currentField.getInt(null)),
                                     new Integer(currentId));
           typeMnemonics[currentId] = fieldName;
-          stringTypeIds.put(fieldName, new Integer(currentId));
+          tempStringTypeIds.put(fieldName, new Integer(currentId));
           currentId++;
         }
       }
     } catch(Exception e) {
       throw new LuckyException(e.toString());
     }
+    
+    typeIds = Collections.unmodifiableMap(tempTypeIds);
+    stringTypeIds = Collections.unmodifiableMap(tempStringTypeIds);
 
-    ignoreTokens = new HashSet();
+    ignoreTokens = new HashSet<String>();
     ignoreTokens.add(" ");
     ignoreTokens.add("\t");
     ignoreTokens.add("\f");
