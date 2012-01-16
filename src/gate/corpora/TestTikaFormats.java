@@ -67,6 +67,18 @@ public class TestTikaFormats extends TestCase {
   public void testPDF() throws Exception {
     doTest("pdf");
   }
+  
+  public void testODP() throws Exception {
+    doTest("odp");
+  }
+  
+  public void testPPT() throws Exception {
+    doTest("ppt");
+  }
+  
+  public void testPPTX() throws Exception {
+    doTest("pptx");
+  }
 
   /** Test suite routine for the test runner */
   public static Test suite() {
