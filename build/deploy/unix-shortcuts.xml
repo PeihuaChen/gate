@@ -19,6 +19,7 @@
      iconFile="$INSTALL_PATH/icons/gate-icon.png"
      type="Application"
      Categories="Development;IDE;"
+     startupWmClass="GATE Developer"
      encoding="UTF-8">
      <createForPack name="Core"/>
    </shortcut>
