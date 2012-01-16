@@ -1320,9 +1320,10 @@ public class DocumentStaxUtils {
         // Test value if it is String, Number or Collection
         if(value instanceof java.lang.String
                 || value instanceof java.lang.Number
+                || value instanceof java.lang.Boolean
                 || value instanceof java.util.Collection)
           valueClassName = value.getClass().getName();
-        // Features and values that are not Strings, Numbers or
+        // Features and values that are not Strings, Numbers, Booleans or
         // collections
         // will be discarded.
         if(keyClassName == null || valueClassName == null) continue;
@@ -1353,7 +1354,8 @@ public class DocumentStaxUtils {
           Iterator iter = ((Collection)value).iterator();
           if(iter.hasNext()) {
             item = iter.next();
-            if(item instanceof java.lang.Number)
+            if(item instanceof java.lang.Number 
+                || item instanceof java.lang.Boolean)
               valueItemClassName = item.getClass().getName();
             else valueItemClassName = String.class.getName();
             valueStrBuff.append(item.toString());
