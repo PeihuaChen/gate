@@ -91,9 +91,6 @@
   <!-- Libraries directory for the build process -->
   <property name="libDir"  location="lib"/>
 
-  <!-- Extensions directory for the build process -->
-  <property name="extDir"  location="lib/ext"/>
-
   <!-- Documentation directory -->
   <property name="docDir"  location="doc"/>
 
@@ -116,12 +113,6 @@
     <include name="*.jar"/>
     <include name="*.zip"/>
   </fileset>
-
-	<!-- The extensions -->
-  <fileset id="exts" dir="${extDir}">
-    <include name="*.jar"/>
-  </fileset>
-
 
   <!-- tools.jar path -->
 
@@ -196,7 +187,6 @@
   <path id="build.class.path">
     <path refid="tools.jar.path"/>
     <fileset refid="libs"/>
-    <fileset refid="exts"/>
   </path>
 
   <!-- The run CLASSPATH -->
@@ -452,6 +442,7 @@
       -->
     </target>
 
+
   <!-- Make gate.jar archive -->
   <target name="bigjar" depends="compile,resources">
     <jar destfile="${binDir}/gate.jar"
@@ -550,13 +541,6 @@
   </target>
 	
 	<target name="run-pre">
-    <!-- Prepend extDir to the java.ext.dirs path -->
-    <pathconvert property="ext.dirs">
-      <path>
-        <pathelement location="${extDir}" />
-        <path path="${java.ext.dirs}" />
-      </path>
-    </pathconvert>
     <!-- Find if the platform is MAC -->
     <condition property="running.on.mac">
       <os family="mac"/>
@@ -572,7 +556,6 @@
           maxmemory="${runtime.max.memory}">
       <jvmarg value="${server.or.client}"/>
       <jvmarg value="-splash:bin/splash.png" />
-      <sysproperty key="java.ext.dirs" value="${ext.dirs}"/>
     </java>
   </target>
 	
@@ -600,7 +583,6 @@
           dir="."
           maxmemory="${runtime.max.memory}">
       <jvmarg value="${server.or.client}"/>
-      <sysproperty key="java.ext.dirs" value="${ext.dirs}"/>
       <sysproperty key="sun.java2d.opengl" value="true"/>
       <sysproperty key="apple.laf.useScreenMenuBar" value="true"/>
       <sysproperty key="apple.awt.antialiasing" value="true"/>
@@ -642,13 +624,6 @@
       <propertyref prefix="os.${os.name}." />
       <mapper type="glob" from="os.${os.name}.*" to="*" />
     </propertyset>
-    <!-- Prepend extDir to the java.ext.dirs path -->
-    <pathconvert property="ext.dirs">
-      <path>
-        <pathelement location="${extDir}" />
-        <path path="${java.ext.dirs}" />
-      </path>
-    </pathconvert>
     <!-- Find if the platform is MAC -->
     <condition property="running.on.mac">
       <os family="mac"/>
@@ -666,7 +641,6 @@
 <!--	     <jvmarg value="-Xms${runtime.start.memory}"/> -->
       <jvmarg value="${server.or.client}"/>
     	<sysproperty key="gate.home" value="${basedir}"/>
-       <sysproperty key="java.ext.dirs" value="${ext.dirs}"/>
  <!--<sysproperty key="awt.toolkit" value="sun.awt.motif.MToolkit"/>-->
  <!-- <sysproperty key="sun.java2d.opengl" value="true"/>-->
        <syspropertyset refid="run.properties" />
@@ -699,7 +673,6 @@
           maxmemory="${runtime.max.memory}">
 <!--	     <jvmarg value="-Xms${runtime.start.memory}"/> -->
        <sysproperty key="gate.home" value="${basedir}"/>
-       <sysproperty key="java.ext.dirs" value="${ext.dirs}"/>
        <sysproperty key="sun.java2d.opengl" value="true"/>
        <sysproperty key="apple.laf.useScreenMenuBar" value="true"/>
        <sysproperty key="apple.awt.antialiasing" value="true"/>
@@ -737,7 +710,6 @@
     <javadoc access="protected"
               destdir="${docDir}/javadoc"
               classpathref="run.class.path"
-              Extdirs="${extDir}"
               Encoding="UTF-8"
               Use="yes"
               Windowtitle="GATE JavaDoc"
@@ -775,7 +747,6 @@
    <javadoc access="private"
               destdir="${docDir}/javadoc/internal"
               classpathref="run.class.path"
-              Extdirs="${extDir}"
               Encoding="UTF-8"
               Use="yes"
               Windowtitle="GATE JavaDoc (including private members)"
@@ -871,7 +842,6 @@
       <sysproperty key="gate.config" value="${buildDir}/gate.xml"/>
       <sysproperty key="gate.home" value="${basedir}"/>
       <sysproperty key="load.plugin.path" value="file:${basedir}/plugins/ANNIE;file:${basedir}/plugins/Information_Retrieval;file:${basedir}/plugins/Ontology_Tools;file:${basedir}/plugins/Tools;file:${basedir}/plugins/WordNet"/>
-      <sysproperty key="java.ext.dirs" value="${extDir}"/>
       <sysproperty key="java.awt.headless" value="true"/>
       <!-- set this property to run just a single test case -->
       <syspropertyset>
@@ -919,7 +889,6 @@
        <sysproperty key="gate.home" value="${basedir}"/>
        <sysproperty key="gate.config" value="${buildDir}/gate.xml"/>
        <sysproperty key="load.plugin.path" value="file:${basedir}/plugins/ANNIE;file:${basedir}/plugins/Information_Retrieval;file:${basedir}/plugins/Machine_Learning;file:${basedir}/plugins/Obsolete;file:${basedir}/plugins/Ontology_Tools;file:${basedir}/plugins/Tools;file:${basedir}/plugins/WordNet"/>
-       <sysproperty key="java.ext.dirs" value="${extDir}"/>
        <syspropertyset refid="run.properties" />
       <arg value="gate.TestGate"/>
      </java>
