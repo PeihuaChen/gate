@@ -2,6 +2,7 @@ package gate.creole.morph;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * <p>Title: Storage.java </p>
@@ -14,13 +15,13 @@ public class Storage {
    * Stores variable name as the key, and its variable values as values of these
    * keys
    */
-  private HashMap variables;
+  private Map<String, String> variables;
 
   /**
    * Constructor
    */
   public Storage() {
-    variables = new HashMap();
+    variables = new HashMap<String, String>();
   }
 
   /**
@@ -51,8 +52,7 @@ public class Storage {
    * @return value of the variable if variable found in the table,null otherwise
    */
   public String get(String varName) {
-    String varValue = (String)(variables.get(varName));
-    return varValue;
+    return variables.get(varName);
   }
 
   /**
@@ -61,11 +61,7 @@ public class Storage {
    * @return true if variable exists, false otherwise
    */
   public boolean isExist(String varName) {
-    if(variables.containsKey(varName)) {
-      return true;
-    } else {
-      return false;
-    }
+    return variables.containsKey(varName);
   }
 
   /**
@@ -84,13 +80,6 @@ public class Storage {
    * @return array of Strings - names of the variables
    */
   public String [] getVarNames() {
-    Iterator iter = variables.keySet().iterator();
-    String [] varNames = new String[variables.size()];
-    int i=0;
-    while(iter.hasNext()) {
-      varNames[i] = (String)(iter.next());
-      i++;
-    }
-    return varNames;
+    return variables.keySet().toArray(new String[variables.size()]);
   }
 }

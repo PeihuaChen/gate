@@ -72,7 +72,7 @@ public class PatternParser {
 		}
 	}
 
-	public static Storage variables = new Storage();
+	public final static Storage variables = new Storage();
 	
 	private static void variableDeclarationCommand(String line)
 			throws ResourceInstantiationException {
