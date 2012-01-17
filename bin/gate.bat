@@ -1,4 +1,2 @@
 @echo off
-cd ..
-gate.exe
-
+%~dp0..\gate.exe
