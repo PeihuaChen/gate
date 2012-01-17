@@ -142,12 +142,8 @@ public class Main {
   /** Run the user interface. */
   private static void runGui() throws GateException {
     try {
-      Class rmClass =
-              Gate.class
-                      .getClassLoader()
-                      .loadClass(
-                              "org.jdesktop.swinghelper.debug.CheckThreadViolationRepaintManager");
-
+      Class rmClass =  Gate.class.getClassLoader().loadClass(
+          "org.jdesktop.swinghelper.debug.CheckThreadViolationRepaintManager");
       RepaintManager.setCurrentManager((RepaintManager)rmClass.getConstructor()
               .newInstance());
     } catch(Exception e) {
@@ -172,7 +168,6 @@ public class Main {
         System.exit(1);
       }
     }
-
 
     //create the main frame, show it
     SwingUtilities.invokeLater(new Runnable(){
@@ -357,7 +352,7 @@ public class Main {
       BufferedReader reader = new BomStrippingInputStreamReader(ver, "UTF-8");
       Main.version = reader.readLine();
     } catch(IOException ioe) {
-      Main.version = "6.1";
+      Main.version = "7.0";
     }
 
     // find out the build number
