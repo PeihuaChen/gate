@@ -834,6 +834,15 @@
 
 
   <target name="test.gate" depends="jar">
+    <makeurl property="creole.plugins" separator=";">
+      <path>
+        <pathelement location="${basedir}/plugins/ANNIE/" />
+        <pathelement location="${basedir}/plugins/Information_Retrieval/" />
+        <pathelement location="${basedir}/plugins/Ontology_Tools" />
+        <pathelement location="${basedir}/plugins/Tools/" />
+        <pathelement location="${basedir}/plugins/WordNet" />
+      </path>
+    </makeurl>
     <junit fork="true"
            showoutput="true"
            printsummary="yes"
@@ -841,7 +850,7 @@
       <classpath refid="test.class.path"/>
       <sysproperty key="gate.config" value="${buildDir}/gate.xml"/>
       <sysproperty key="gate.home" value="${basedir}"/>
-      <sysproperty key="load.plugin.path" value="file:${basedir}/plugins/ANNIE;file:${basedir}/plugins/Information_Retrieval;file:${basedir}/plugins/Ontology_Tools;file:${basedir}/plugins/Tools;file:${basedir}/plugins/WordNet"/>
+      <sysproperty key="load.plugin.path" value="${creole.plugins}"/>
       <sysproperty key="java.awt.headless" value="true"/>
       <!-- set this property to run just a single test case -->
       <syspropertyset>
