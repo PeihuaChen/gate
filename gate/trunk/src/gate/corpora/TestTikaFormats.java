@@ -1,16 +1,16 @@
 /*
  * TestTikaFormats.java
- * 
+ *
  * Copyright (c) 1995-2012, The University of Sheffield. See the file
  * COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
- * 
+ *
  * This file is part of GATE (see http://gate.ac.uk/), and is free software,
  * licenced under the GNU Library General Public License, Version 2, June 1991
  * (in the distribution as file licence.html, and also available at
  * http://gate.ac.uk/gate/licence.html).
- * 
+ *
  * Mark A. Greenwood, 16/01/2012
- * 
+ *
  * $Id$
  */
 
@@ -44,14 +44,14 @@ public class TestTikaFormats extends TestCase {
     Document doc = Factory.newDocument(url);
 
     assertNotNull(doc);
-    
+
     assertTrue(doc.getContent().toString().indexOf("Testing Tika Format Parsers") != -1);
   }
-  
+
   public void testDOC() throws Exception {
     doTest("doc");
   }
-  
+
   public void testDOCX() throws Exception {
     doTest("docx");
   }
@@ -59,7 +59,7 @@ public class TestTikaFormats extends TestCase {
   public void testODT() throws Exception {
     doTest("odt");
   }
-  
+
   public void testRTF() throws Exception {
     doTest("rtf");
   }
@@ -67,17 +67,29 @@ public class TestTikaFormats extends TestCase {
   public void testPDF() throws Exception {
     doTest("pdf");
   }
-  
+
   public void testODP() throws Exception {
     doTest("odp");
   }
-  
+
   public void testPPT() throws Exception {
     doTest("ppt");
   }
-  
+
   public void testPPTX() throws Exception {
     doTest("pptx");
+  }
+
+  public void testXLS() throws Exception {
+    doTest("xls");
+  }
+
+  public void testXLSX() throws Exception {
+    doTest("xlsx");
+  }
+
+  public void testODS() throws Exception {
+      doTest("ods");
   }
 
   /** Test suite routine for the test runner */
