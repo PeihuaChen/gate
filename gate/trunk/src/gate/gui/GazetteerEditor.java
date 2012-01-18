@@ -55,7 +55,7 @@ import java.util.regex.PatternSyntaxException;
  * Editor for {@link gate.creole.gazetteer.Gazetteer ANNIE Gazetteer}.
 <pre>
  Main features:
-- left table with 4 columns (List name, Major, Minor, Language) for the
+- left table with 5 columns (List name, Major, Minor, Language, AnnotationType) for the
   definition
 - right table with 1+n columns (Value, Feature 1...Feature n) for the lists
 - 'Save' on the context menu of the resources tree and tab
@@ -79,6 +79,7 @@ public class GazetteerEditor extends AbstractVisualResource
     definitionTableModel.addColumn("Major");
     definitionTableModel.addColumn("Minor");
     definitionTableModel.addColumn("Language");
+    definitionTableModel.addColumn("Annotation type");
     listTableModel = new ListTableModel();
     actions = new ArrayList<Action>();
     actions.add(new SaveAndReinitialiseGazetteerAction());
@@ -476,6 +477,7 @@ public class GazetteerEditor extends AbstractVisualResource
     // update linear nodes with changes in the definition table
     definitionTableModel.addTableModelListener(new TableModelListener() {
       public void tableChanged(TableModelEvent e) {
+        if(selectedLinearNode == null) return;
         int r = e.getFirstRow();
         switch (e.getType()) {
           case TableModelEvent.UPDATE:
@@ -522,10 +524,15 @@ public class GazetteerEditor extends AbstractVisualResource
               if (oldValue != null && oldValue.equals(newValue)) { return; }
               selectedLinearNode.setMinorType(newValue);
               linearDefinition.setModified(true);
-            } else {
+            } else if (c == 3){
               String oldValue = selectedLinearNode.getLanguage();
               if (oldValue != null && oldValue.equals(newValue)) { return; }
               selectedLinearNode.setLanguage(newValue);
+              linearDefinition.setModified(true);
+            } else {
+              String oldValue = selectedLinearNode.getAnnotationType();
+              if (oldValue != null && oldValue.equals(newValue)) { return; }
+              selectedLinearNode.setAnnotationType(newValue);
               linearDefinition.setModified(true);
             }
             break;
@@ -667,6 +674,7 @@ public class GazetteerEditor extends AbstractVisualResource
         values.add(node.getMajorType() == null ? "" : node.getMajorType());
         values.add(node.getMinorType() == null ? "" : node.getMinorType());
         values.add(node.getLanguage() == null ? "" : node.getLanguage());
+        values.add(node.getAnnotationType() == null ? "" : node.getAnnotationType());
         definitionTableModel.addRow(values.toArray());
         values.clear();
       }

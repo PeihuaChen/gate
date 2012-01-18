@@ -17,6 +17,7 @@
 
 package gate.creole.gazetteer;
 
+import gate.creole.ANNIEConstants;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -49,12 +50,25 @@ public class Lookup implements java.io.Serializable {
    * @param major major type
    * @param minor minor type
    * @param theLanguages the languages
+   * @param annotationType
    */
-  public Lookup(String theList, String major, String minor, String theLanguages){
+  public Lookup(String theList, String major, String minor, String theLanguages,String annType){
     majorType = major;
     minorType = minor;
     languages = theLanguages;
     list = theList;
+    annotationType = annType;
+  }
+  /**
+   * Creates a new Lookup value with the given major and minor types and
+   * languages.
+   *
+   * @param major major type
+   * @param minor minor type
+   * @param theLanguages the languages
+   */
+  public Lookup(String theList, String major, String minor, String theLanguages){
+    this(theList,major,minor,theLanguages,ANNIEConstants.LOOKUP_ANNOTATION_TYPE);
   }
 
   /** Tha major type for this lookup, e.g. "Organisation" */
@@ -75,6 +89,9 @@ public class Lookup implements java.io.Serializable {
 
   /** the list represented by this lookup*/
   public String list;
+  
+  /** annotation type that should be used to create a lookup*/
+  public String annotationType;
 
   /**Returns a string representation of this lookup in the format
    * This method is used in equals()

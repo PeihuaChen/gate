@@ -141,7 +141,7 @@ public class DefaultGazetteer extends AbstractGazetteer
    */
    protected void readList(LinearNode node, boolean add) 
        throws ResourceInstantiationException{
-    String listName, majorType, minorType, languages;
+    String listName, majorType, minorType, languages,annotationType;
     if ( null == node ) {
       throw new ResourceInstantiationException(" LinearNode node is null ");
     }
@@ -150,6 +150,7 @@ public class DefaultGazetteer extends AbstractGazetteer
     majorType = node.getMajorType();
     minorType = node.getMinorType();
     languages = node.getLanguage();
+    annotationType = node.getAnnotationType();
     GazetteerList gazList = (GazetteerList)listsByNode.get(node);
     if (null == gazList) {
       throw new ResourceInstantiationException("gazetteer list not found by node");
@@ -158,7 +159,7 @@ public class DefaultGazetteer extends AbstractGazetteer
     Iterator iline = gazList.iterator();
     
     // create default lookup for entries with no arbitrary features
-    Lookup defaultLookup = new Lookup(listName,majorType, minorType, languages);
+    Lookup defaultLookup = new Lookup(listName,majorType, minorType, languages,annotationType);
     defaultLookup.list = node.getList();
     if ( null != mappingDefinition){
       MappingNode mnode = mappingDefinition.getNodeByList(defaultLookup.list);
@@ -179,7 +180,7 @@ public class DefaultGazetteer extends AbstractGazetteer
         lookup = defaultLookup;
       } else {
         // create a new Lookup object with features
-        lookup = new Lookup(listName, majorType, minorType, languages);
+        lookup = new Lookup(listName, majorType, minorType, languages,annotationType);
         lookup.list = node.getList();
         if(null != mappingDefinition) {
           MappingNode mnode = mappingDefinition.getNodeByList(lookup.list);
@@ -430,10 +431,17 @@ public class DefaultGazetteer extends AbstractGazetteer
         fm.putAll(currentLookup.features);
       }
       try{
-        annotationSet.add(new Long(matchedRegionStart),
-                        new Long(matchedRegionEnd + 1),
-                        LOOKUP_ANNOTATION_TYPE,
-                        fm);
+//        if(currentLookup.annotationType==null || "".equals(currentLookup.annotationType)){
+//          annotationSet.add(new Long(matchedRegionStart),
+//                          new Long(matchedRegionEnd + 1),
+//                          LOOKUP_ANNOTATION_TYPE,
+//                          fm);
+//        }else{
+          annotationSet.add(new Long(matchedRegionStart),
+                          new Long(matchedRegionEnd + 1),
+                          currentLookup.annotationType, //this pojo attribute will have Lookup as a default tag.
+                          fm);
+       // }
       } catch(InvalidOffsetException ioe) {
         throw new GateRuntimeException(ioe.toString());
       }
