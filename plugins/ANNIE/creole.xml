@@ -558,20 +558,7 @@
 				</RESOURCE_DISPLAYED>
 			</GUI>
 		</RESOURCE>
-		<!-- VR Gaze - Gazetteers editor -->
-    <RESOURCE>
-      <NAME>Gaze</NAME>
-      <CLASS>com.ontotext.gate.vr.Gaze</CLASS>
-      <COMMENT>HashGazetteer viewer and editor.</COMMENT>
-      <HELPURL>http://gate.ac.uk/userguide/sec:gazetteers:gaze</HELPURL>
-      <GUI TYPE="large">
-        <MAIN_VIEWER />
-        <RESOURCE_DISPLAYED>
-          gate.creole.gazetteer.Gazetteer
-          <!--com.ontotext.gate.gazetteer.HashGazetteer-->
-        </RESOURCE_DISPLAYED>
-      </GUI>
-    </RESOURCE>
+		<!-- Gazetteer editor -->    
     <RESOURCE>
       <NAME>Gazetteer Editor</NAME>
       <CLASS>gate.gui.GazetteerEditor</CLASS>
