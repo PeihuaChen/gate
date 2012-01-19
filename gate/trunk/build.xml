@@ -793,9 +793,7 @@
     </delete>
   </target>
 
-  <!-- Rebuild the JAPE file parser.
-       Uses JavaCC 0.8pre1 from ../lib for the java, and 0.7
-       from ./JavaCC-071.zip for the HTML to avoid JJDoc bug in 0.8pre1 -->
+  <!-- Rebuild the JAPE file parser -->
   <target name="jape">
     <java classname="javacc"
           fork="true"
@@ -819,17 +817,6 @@
 
     <move file="${srcDir}/gate/jape/parser/ParseCpsl.html"
           toFile="${srcDir}/gate/jape/parser/ParseCpslPlain.html"/>
-
-    <java classname="jjdoc"
-          fork="true"
-          spawn="false"
-          dir="${srcDir}/gate/jape/parser">
-      <classpath>
-        <pathelement location="${libDir}/javacc.jar"/>
-      </classpath>
-      <arg value="-ONE_TABLE=false"/>
-      <arg value="ParseCpsl.jj"/>
-    </java>
   </target>
 
 
