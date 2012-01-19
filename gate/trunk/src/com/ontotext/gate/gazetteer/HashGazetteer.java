@@ -84,7 +84,7 @@ public class HashGazetteer extends AbstractGazetteer {
       s = s.toUpperCase();
     }
 
-    int i = s.length();
+    int documentLength = s.length();
     int j = 0;
     int k = 0;
 
@@ -100,8 +100,8 @@ public class HashGazetteer extends AbstractGazetteer {
     int i1 = 0;
     int j1 = 0;
 
-    for(int l1 = 0; l1 < i; l1++) {
-      char c = s.charAt(l1);
+    for(int position = 0; position < documentLength; position++) {
+      char c = s.charAt(position);
       boolean currIsWhitespace = Character.isWhitespace(c);
       if(currIsWhitespace && stringbuffer.length() == 0) {
         j++;
@@ -121,33 +121,33 @@ public class HashGazetteer extends AbstractGazetteer {
       if(k <= j
               && (currIsWhitespace || currIsSymbol || flag11
                       && !currIsLowerCase || !prevIsLetter && currIsLetter))
-        k = l1;
+        k = position;
       boolean flag13 = prevIsLetter
               && (currIsDigit || currIsSymbol || currIsWhitespace)
               || prevIsLetter && currIsLetter && flag11 && !currIsLowerCase
               || prevIsDigit
               && (currIsLetter || currIsSymbol || currIsWhitespace)
               || prevIsSymbol;
-      if(l1 == i - 1) flag13 = true;
+      if(position == documentLength - 1) flag13 = true;
       if(flag13) {
         boolean flag16 = !currIsSymbol && !currIsDigit;
-        if(l1 == i - 1) flag16 = true;
-        String s2 = normalizeWhitespace(stringbuffer.toString());
-        int k1 = s2.length();
+        if(position == documentLength - 1) flag16 = true;
+        String word = normalizeWhitespace(stringbuffer.toString());
+        int k1 = word.length();
         flag16 &= k1 - j1 > 1;
         j1 = k1;
-        if(i1 != j || !s2.equals(s3)) {
-          int l = s2.length();
-          if(l > 0) {
-            boolean flag14 = annotate(s2, j, l1, l);
+        if(i1 != j || !word.equals(s3)) {
+          int wordLength = word.length();
+          if(wordLength > 0) {
+            boolean flag14 = annotate(word, j, position, wordLength);
             if(flag14) {
-              s3 = s2;
+              s3 = word;
               i1 = j;
             }
-            if(!flag14 && flag16 || i - 1 == l1) {
-              if(k <= j) k = l1;
+            if(!flag14 && flag16 || documentLength - 1 == position) {
+              if(k <= j) k = position;
               j = k;
-              l1 = k - 1;
+              position = k - 1;
               stringbuffer.delete(0, stringbuffer.length());
               continue;
             }
@@ -164,14 +164,14 @@ public class HashGazetteer extends AbstractGazetteer {
     fireStatusChanged("Hash Gazetteer processing finished!");
   }
 
-  public boolean add(String s, Lookup lookup1) {
+  public boolean add(String word, Lookup lookup1) {
     if(!super.caseSensitive.booleanValue()) {
-      String s1 = s.toUpperCase();
-      if(!s1.equals(s)) add(s1, lookup1);
+      String s1 = word.toUpperCase();
+      if(!s1.equals(word)) add(s1, lookup1);
     }
-    String s2 = removeTrailingSymbols(s);
-    if(!s2.equals(s)) add(s2, lookup1);
-    String s3 = s + " ";
+    String s2 = removeTrailingSymbols(word);
+    if(!s2.equals(word)) add(s2, lookup1);
+    String s3 = word + " ";
 
     List<Lookup> arraylist = null;
     int j = 0;
@@ -241,12 +241,12 @@ public class HashGazetteer extends AbstractGazetteer {
     }
   }
 
-  private boolean annotate(String s, int i, int j, int k) {
-    if(k >= mapsListSize) return false;
-    Map<String, List<Lookup>> hashmap = mapsList[k];
+  private boolean annotate(String word, int i, int documentPosition, int wordLength) {
+    if(wordLength >= mapsListSize) return false;
+    Map<String, List<Lookup>> hashmap = mapsList[wordLength];
     if(hashmap == null) return false;
-    if(!hashmap.containsKey(s)) return false;
-    List<Lookup> arraylist = hashmap.get(s);
+    if(!hashmap.containsKey(word)) return false;
+    List<Lookup> arraylist = hashmap.get(word);
 
     // TODO shouldn't this return false if arraylist is null?
 
@@ -265,7 +265,7 @@ public class HashGazetteer extends AbstractGazetteer {
             featuremap.put("language", lookup1.languages);
         }
         try {
-          annotationSet.add(new Long(i), new Long(j), "Lookup", featuremap);
+          annotationSet.add(new Long(i), new Long(documentPosition), "Lookup", featuremap);
         }
         catch(InvalidOffsetException invalidoffsetexception) {
           throw new LuckyException(invalidoffsetexception.toString());
@@ -430,16 +430,16 @@ public class HashGazetteer extends AbstractGazetteer {
 
     @SuppressWarnings("unchecked")
     Iterator<GazetteerNode> iterator = gazetteerlist.iterator();
-    String s6 = null;
+    String normalisedWord = null;
 
-    for(; iterator.hasNext(); add(s6, lookup1)) {
-      String s4 = iterator.next().toString();
+    for(; iterator.hasNext(); add(normalisedWord, lookup1)) {
+      String word = iterator.next().toString();
       //s4.trim(); //doesn't do anything so comment it out
-      int i = s4.length();
-      for(int j = 0; j < i; j++) {
-        if(j + 1 != i && !Character.isWhitespace(s4.charAt(j))) continue;
-        if(j + 1 == i) j = i;
-        s6 = s4.substring(0, j).trim();
+      int wordLength = word.length();
+      for(int j = 0; j < wordLength; j++) {
+        if(j + 1 != wordLength && !Character.isWhitespace(word.charAt(j))) continue;
+        if(j + 1 == wordLength) j = wordLength;
+        normalisedWord = word.substring(0, j).trim();
       }
     }
   }
