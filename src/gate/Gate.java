@@ -1854,11 +1854,8 @@ public class Gate implements GateConstants {
    * The keys used are the class names of the listener interface and the
    * values are the actual listeners (e.g "gate.event.StatusListener" ->
    * this).
-   *
-   * Deprecated. Call getListeners instead.
    */
-  @Deprecated
-  public static java.util.Map<String, EventListener> listeners =
+  private static final java.util.Map<String, EventListener> listeners =
     new HashMap<String, EventListener>();
 
 } // class Gate
