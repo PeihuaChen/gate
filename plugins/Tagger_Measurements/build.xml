@@ -9,6 +9,10 @@
 	<property name="jar.location" location="MeasurementTagger.jar" />
 	<property name="doc.dir" location="doc" />
 	<property name="javadoc.dir" location="${doc.dir}/javadoc" />
+	<property name="test.dir" location="test" />
+	<property name="test.reports.dir" location="${test.dir}/reports" />
+	<property name="test.src.dir" location="${test.dir}/src" />
+	<property name="test.classes.dir" location="${test.dir}/classes" />
 
 	<!-- Path to compile - includes gate.jar and GATE/lib/*.jar -->
 	<path id="compile.classpath">
@@ -43,6 +47,8 @@
 	<!-- remove the generated .class files -->
 	<target name="clean.classes">
 		<delete dir="${classes.dir}" />
+                <delete dir="${test.classes.dir}" />
+                <delete dir="${test.reports.dir}" />
 	</target>
 
 	<!-- Clean up - remove .class and .jar files -->
@@ -83,11 +89,6 @@
 
 
 	<!-- Unit tests -->
-	<property name="test.dir" location="test" />
-	<property name="test.reports.dir" location="${test.dir}/reports" />
-	<property name="test.src.dir" location="${test.dir}/src" />
-	<property name="test.classes.dir" location="${test.dir}/classes" />
-
 
 	<path id="test.classpath">
 		<path refid="compile.classpath" />
