@@ -1,7 +1,7 @@
 /*
  *  CorpusAnnotationDiff.java
  *
- *  Copyright (c) 1995-2010, The University of Sheffield. See the file
+ *  Copyright (c) 1995-2012, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -16,19 +16,51 @@
 
 package gate.annotation;
 
-import java.awt.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Corpus;
+import gate.Document;
+import gate.FeatureMap;
+import gate.Resource;
+import gate.creole.AbstractResource;
+import gate.creole.AbstractVisualResource;
+import gate.creole.AnnotationSchema;
+import gate.creole.ResourceInstantiationException;
+import gate.swing.XJTable;
+import gate.util.Err;
+import gate.util.Out;
+import gate.util.Strings;
+
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Rectangle;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.text.NumberFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
-import javax.swing.*;
-import javax.swing.table.*;
-
-import gate.*;
-import gate.creole.*;
-import gate.swing.XJTable;
-import gate.util.*;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTable;
+import javax.swing.Scrollable;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
 
 /**
   * This class compare two annotation sets on annotation type given by the
@@ -37,6 +69,8 @@ import gate.util.*;
   */
 public class CorpusAnnotationDiff extends AbstractVisualResource
   implements  Scrollable{
+
+  private static final long serialVersionUID = 334626622328431740L;
 
   // number of pixels to be used as increment by scroller
   protected int maxUnitIncrement = 10;
@@ -83,7 +117,7 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
   /** A set of feature names bellonging to annotations from keyAnnotList
     * used in isCompatible() and isPartiallyCompatible() methods
     */
-  private Set keyFeatureNamesSet = null;
+  private Set<?> keyFeatureNamesSet = null;
 
   /** The precision strict value (see NLP Information Extraction)*/
   private double precisionStrict = 0.0;
@@ -121,24 +155,24 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
   private String annotationTypeForFalsePositive = null;
 
   /** A number formater for displaying precision and recall*/
-  protected static NumberFormat formatter = NumberFormat.getInstance();
+  private static NumberFormat formatter = NumberFormat.getInstance();
 
   /** The components that will stay into diffPanel*/
   private XJTable diffTable = null;
 
   /** Used to represent the result of diff. See DiffSetElement class.*/
-  private Set diffSet = null;
+  private Set<DiffSetElement> diffSet = null;
 
   /** This field is used in doDiff() and detectKeyType() methods and holds all
    *  partially correct keys */
-  private Set keyPartiallySet = null;
+  private Set<Annotation> keyPartiallySet = null;
   /** This field is used in doDiff() and detectResponseType() methods*/
-  private Set responsePartiallySet = null;
+  private Set<Annotation> responsePartiallySet = null;
 
   /** This list is created from keyAnnotationSet at init() time*/
-  private java.util.List keyAnnotList = null;
+  private List<Annotation> keyAnnotList = null;
   /** This list is created from responseAnnotationSet at init() time*/
-  private java.util.List responseAnnotList = null;
+  private List<Annotation> responseAnnotList = null;
 
   /** This field indicates wheter or not the annot diff should run int the text
    *  mode*/
@@ -179,9 +213,6 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
   private  final Color BLACK = new Color(0,0,0);
   /** The array holding the colours according to the annotation types*/
   private Color colors[] = new Color[MAX_TYPES];
-
-  /** A scroll for the AnnotDiff's table*/
-  private JScrollPane scrollPane = null;
 
   /** Used to store the no. of annotations from response,identified as belonging
     * to one of the previous types.
@@ -242,7 +273,7 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
     * @param aKeyFeatureNamesSet a set containing the feature names from key
     * that will be used in isPartiallyCompatible()
     */
-  public void setKeyFeatureNamesSet(Set aKeyFeatureNamesSet){
+  public void setKeyFeatureNamesSet(Set<?> aKeyFeatureNamesSet){
     keyFeatureNamesSet = aKeyFeatureNamesSet;
   }//setKeyFeatureNamesSet();
 
@@ -250,7 +281,7 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
     * @return A set containing the feature names from key
     * that will be used in isPartiallyCompatible()
     */
-  public Set getKeyFeatureNamesSet(){
+  public Set<?> getKeyFeatureNamesSet(){
     return keyFeatureNamesSet;
   }//getKeyFeatureNamesSet();
 
@@ -305,10 +336,10 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
   }// End setTextMode();
 
   /** Returns a set with all annotations of a specific type*/
-  public Set getAnnotationsOfType(int annotType){
-    HashSet results = new HashSet();
+  public Set<Annotation> getAnnotationsOfType(int annotType){
+    Set<Annotation> results = new HashSet<Annotation>();
     if (diffSet == null) return results;
-    Iterator diffIter = diffSet.iterator();
+    Iterator<DiffSetElement> diffIter = diffSet.iterator();
     while(diffIter.hasNext()){
       DiffSetElement diffElem = (DiffSetElement)diffIter.next();
       switch(annotType){
@@ -515,8 +546,8 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
     colors[MISSING_TYPE] = YELLOW;
 
     // Initialize the partially sets...
-    keyPartiallySet = new HashSet();
-    responsePartiallySet = new HashSet();
+    keyPartiallySet = new HashSet<Annotation>();
+    responsePartiallySet = new HashSet<Annotation>();
 
     // Do the diff, P&R calculation and so on
     AnnotationSet keyAnnotSet = null;
@@ -534,7 +565,7 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
     // init counters and do difference for documents by pairs
     for (int type=0; type < MAX_TYPES; type++)
       typeCounter[type] = 0;
-    diffSet = new HashSet();
+    diffSet = new HashSet<DiffSetElement>();
 
     for(int i=0; i<keyCorpus.size(); ++i) {
       keyDocument = (Document) keyCorpus.get(i);
@@ -571,11 +602,11 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
       if (keyAnnotSet == null)
         // The diff will run with an empty set.All annotations from response
         // would be spurious.
-        keyAnnotList = new LinkedList();
+        keyAnnotList = new LinkedList<Annotation>();
       else
         // The alghoritm will modify this annotation set. It is better to make a
         // separate copy of them.
-        keyAnnotList = new LinkedList(keyAnnotSet);
+        keyAnnotList = new LinkedList<Annotation>(keyAnnotSet);
   
       if (responseAnnotationSetName == null)
         // Get the response AnnotationSet from the default set
@@ -588,11 +619,11 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
       if (responseAnnotSet == null)
         // The diff will run with an empty set.All annotations from key
         // would be missing.
-        responseAnnotList = new LinkedList();
+        responseAnnotList = new LinkedList<Annotation>();
       else
         // The alghoritm will modify this annotation set. It is better to make a
         // separate copy of them.
-        responseAnnotList = new LinkedList(responseAnnotSet);
+        responseAnnotList = new LinkedList<Annotation>(responseAnnotSet);
   
       // Sort them ascending on Start offset (the comparator does that)
       AnnotationSetComparator asComparator = new AnnotationSetComparator();
@@ -824,12 +855,12 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
   } //arangeAllComponents
 
   /** Used internally for debugging */
-  protected void printStructure(Set aDiffSet){
-    Iterator iterator = aDiffSet.iterator();
+  protected void printStructure(Set<DiffSetElement> aDiffSet){
+    Iterator<DiffSetElement> iterator = aDiffSet.iterator();
     String leftAnnot = null;
     String rightAnnot = null;
     while(iterator.hasNext()){
-      DiffSetElement diffElem = (DiffSetElement) iterator.next();
+      DiffSetElement diffElem = iterator.next();
       if (diffElem.getLeftAnnotation() == null)
         leftAnnot = "NULL ";
       else
@@ -850,21 +881,19 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
     * @param aResponseAnnotList a list containing the annotation from response.
     * If this param is <b>null</b> the method will return.
     */
-  protected void doDiff(java.util.List aKeyAnnotList,
-                        java.util.List aResponseAnnotList){
+  protected void doDiff(List<Annotation> aKeyAnnotList,
+                        List<Annotation> aResponseAnnotList){
 
     // If one of the annotation sets is null then is no point in doing the diff.
     if (aKeyAnnotList == null || aResponseAnnotList == null)
       return;
 
-    int responseSize = aResponseAnnotList.size();
-
     // Iterate throught all elements from keyList and find those in the response
     // list which satisfies isCompatible() and isPartiallyCompatible() relations
-    Iterator keyIterator = aKeyAnnotList.iterator();
+    Iterator<Annotation> keyIterator = aKeyAnnotList.iterator();
     while(keyIterator.hasNext()){
       Annotation keyAnnot = (Annotation) keyIterator.next();
-      Iterator responseIterator = aResponseAnnotList.iterator();
+      Iterator<Annotation> responseIterator = aResponseAnnotList.iterator();
 
       DiffSetElement diffElement = null;
       while(responseIterator.hasNext()){
@@ -921,7 +950,7 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
           // agains all annotations in DiffSet to see if there is
           // a previous annotation from response set which is partially
           // compatible with the keyAnnot
-          Iterator respParIter = diffSet.iterator();
+          Iterator<DiffSetElement> respParIter = diffSet.iterator();
           while (respParIter.hasNext()){
             DiffSetElement diffElem = (DiffSetElement) respParIter.next();
             Annotation respAnnot = diffElem.getRightAnnotation();
@@ -952,7 +981,7 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
     } // end while keyIterator
 
     DiffSetElement diffElem = null;
-    Iterator responseIter = aResponseAnnotList.iterator();
+    Iterator<Annotation> responseIter = aResponseAnnotList.iterator();
     while (responseIter.hasNext()){
       Annotation respAnnot = (Annotation) responseIter.next();
       if (responsePartiallySet.contains(respAnnot))
@@ -1050,7 +1079,7 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
     if (anAnnot == null) return NULL_TYPE;
 
     if (keyPartiallySet.contains(anAnnot)) return DEFAULT_TYPE;
-    Iterator iter = responsePartiallySet.iterator();
+    Iterator<Annotation> iter = responsePartiallySet.iterator();
     while(iter.hasNext()){
       Annotation a = (Annotation) iter.next();
       if (anAnnot.isPartiallyCompatible(a,keyFeatureNamesSet))
@@ -1079,7 +1108,7 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
     if (anAnnot == null) return NULL_TYPE;
 
     if (responsePartiallySet.contains(anAnnot)) return PARTIALLY_CORRECT_TYPE;
-    Iterator iter = keyPartiallySet.iterator();
+    Iterator<Annotation> iter = keyPartiallySet.iterator();
     while(iter.hasNext()){
       Annotation a = (Annotation) iter.next();
       if (a.isPartiallyCompatible(anAnnot,keyFeatureNamesSet))
@@ -1126,15 +1155,17 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
     */
   protected class AnnotationDiffTableModel extends AbstractTableModel{
 
+    private static final long serialVersionUID = 1410683181803904176L;
+
     /** Constructs an AnnotationDiffTableModel given a data Collection */
-    public AnnotationDiffTableModel(Collection data){
-      modelData = new ArrayList();
+    public AnnotationDiffTableModel(Collection<DiffSetElement> data){
+      modelData = new ArrayList<DiffSetElement>();
       modelData.addAll(data);
     } // AnnotationDiffTableModel
 
     /** Constructs an AnnotationDiffTableModel */
     public AnnotationDiffTableModel(){
-      modelData = new ArrayList();
+      modelData = new ArrayList<DiffSetElement>();
     } // AnnotationDiffTableModel
 
     /** Return the size of data.*/
@@ -1165,7 +1196,7 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
     } //getColumnName
 
     /** Return the class type for each column. */
-    public Class getColumnClass(int column){
+    public Class<?> getColumnClass(int column){
       switch(column){
         case 0: return String.class;
         case 1: return Long.class;
@@ -1271,7 +1302,7 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
     } //getRawObject
 
     /** Holds the data for TableDiff*/
-    private java.util.List modelData = null;
+    private List<DiffSetElement> modelData = null;
 
   } //Inner class AnnotationDiffTableModel
 
@@ -1283,12 +1314,12 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
     */
   public class AnnotationDiffCellRenderer extends DefaultTableCellRenderer{
 
+    private static final long serialVersionUID = -7804261826021343001L;
+
     /** Constructs a randerer with a table model*/
     public AnnotationDiffCellRenderer() { }  //AnnotationDiffCellRenderer
 
     private Color background = WHITE;
-
-    private Color foreground = BLACK;
 
     /** This method is called by JTable*/
 
@@ -1336,17 +1367,12 @@ public class CorpusAnnotationDiff extends AbstractVisualResource
   /* ********************************************************************
    * INNER CLASS
    * ********************************************************************/
-   class AnnotationSetComparator implements java.util.Comparator {
+   class AnnotationSetComparator implements Comparator<Annotation> {
 
       public AnnotationSetComparator(){}
 
-      public int compare(Object o1, Object o2) {
-        if ( !(o1 instanceof gate.Annotation) ||
-             !(o2 instanceof gate.Annotation)) return 0;
-
-        gate.Annotation a1 = (gate.Annotation) o1;
-        gate.Annotation a2 = (gate.Annotation) o2;
-
+      public int compare(Annotation a1, Annotation a2) {
+        
         Long l1 = a1.getStartNode().getOffset();
         Long l2 = a2.getStartNode().getOffset();
         if (l1 != null)

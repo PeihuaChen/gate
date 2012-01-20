@@ -22,11 +22,11 @@ import javax.swing.*;
 import gate.security.SecurityInfo;
 
 public class AccessRightsDialog {
-  protected static JRadioButton gr_gw = new JRadioButton();
-  protected static JRadioButton gr_ow = new JRadioButton();
-  protected static JRadioButton or_ow = new JRadioButton();
-  protected static JRadioButton wr_gw = new JRadioButton();
-  protected static ButtonGroup group;
+  private static JRadioButton gr_gw = new JRadioButton();
+  private static JRadioButton gr_ow = new JRadioButton();
+  private static JRadioButton or_ow = new JRadioButton();
+  private static JRadioButton wr_gw = new JRadioButton();
+  private static ButtonGroup group;
 
   public static boolean showDialog(Component parentComponent){
     gr_gw.setText("Group read/group write");
