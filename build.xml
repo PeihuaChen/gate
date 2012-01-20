@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <!-- $Id$ -->
 <project name="GATE" default="all" basedir=".">
-    <description>
-        GATE
-        see http://gate.ac.uk
-    </description>
+  <description>
+      GATE
+      see http://gate.ac.uk
+  </description>
 
-    <!-- Prevent Ant from warning about includeantruntime not being set -->
-    <property name="build.sysclasspath" value="ignore" />
+  <!-- Prevent Ant from warning about includeantruntime not being set -->
+  <property name="build.sysclasspath" value="ignore" />
 
   <!-- *******************************************************************
        ****************  USER OPTIONS ************************************
@@ -31,16 +31,7 @@
 
        note that Ant properties are expanded in this file, this can be a
        very powerful tool. -->
-    <property file="build.properties" />
-
-  <!-- TOOLS.JAR -->
-  <!-- GATE will normally try to guess which tools.jar library to use based on
-       your Java installation.
-       If you want to set this manually, put a line such as the following in
-       your build.properties:
-
-       tools.jar.location=w:/jdk/jdk1.5.0/lib/tools.jar
-  -->
+  <property file="build.properties" />
 
   <!-- RUNTIME MEMORY -->
   <property name="runtime.max.memory" value="1200M"/>
@@ -223,7 +214,7 @@
     <echo level="info">
       This is the ANT build script for gate (http://gate.ac.uk).
       The following targets are available
-        -all (default target): compiles GUK and GATE classes and makes the gate.jar archive.
+        -all (default target): compiles the GATE classes and makes the gate.jar archive.
 
         -compile: compiles all the .java files
         -resources: copies the resources to the output directory (${outputDir})
@@ -234,8 +225,6 @@
         -doc: creates the Javadoc and Java2HTML documentation
         -docclean: deletes all built documentation
         -jape: rebuilds the JAPE parser files and associated documentation
-        -guk: compiles the GUK classes and builds the guk.jar archive
-        -gukdemo: starts the GUK Editor (a.k.a. GATE Unicode Editor)
         -test: runs the GATE test suite
 
         -distro: make a GATE distribution (calls all build tasks in the process)
