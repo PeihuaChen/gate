@@ -674,5 +674,5 @@ public class OptionsDialog extends JDialog {
 
   protected JCheckBox viewSelectTreeChk;
 
-  protected static OptionsMap userConfig = Gate.getUserConfig();
+  private static OptionsMap userConfig = Gate.getUserConfig();
 }
