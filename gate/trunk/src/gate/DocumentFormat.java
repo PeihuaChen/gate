@@ -49,25 +49,25 @@ extends AbstractLanguageResource implements LanguageResource{
   /** Map of MimeTypeString to ClassHandler class. This is used to find the
     * language resource that deals with the specific Document format
     */
-  protected static Map<String, DocumentFormat>
-          mimeString2ClassHandlerMap = new HashMap();
+  protected static final Map<String, DocumentFormat>
+          mimeString2ClassHandlerMap = new HashMap<String, DocumentFormat>();
   /** Map of MimeType to DocumentFormat Class. This is used to find the
     * DocumentFormat subclass that deals with a particular MIME type.
     */
-  protected static Map<String, MimeType>
-          mimeString2mimeTypeMap = new HashMap();
+  protected static final Map<String, MimeType>
+          mimeString2mimeTypeMap = new HashMap<String, MimeType>();
 
   /** Map of Set of file suffixes to MimeType. This is used to figure
     * out what MIME type a document is from its file name.
     */
-  protected static Map<String, MimeType>
-          suffixes2mimeTypeMap = new HashMap();
+  protected static final Map<String, MimeType>
+          suffixes2mimeTypeMap = new HashMap<String, MimeType>();
 
   /** Map of Set of magic numbers to MimeType. This is used to guess the
     * MIME type of a document, when we don't have any other clues.
     */
-  protected static Map<String, MimeType>
-          magic2mimeTypeMap = new HashMap();
+  protected static final Map<String, MimeType>
+          magic2mimeTypeMap = new HashMap<String, MimeType>();
 
   /** Map of markup elements to annotation types. If it is null, the
     * unpackMarkup() method will convert all markup, using the element names
@@ -89,7 +89,7 @@ extends AbstractLanguageResource implements LanguageResource{
   public DocumentFormat() {}
 
   /** listeners for status report */
-  private transient Vector statusListeners;
+  private transient Vector<StatusListener> statusListeners;
 
   /** Flag for enable/disable collecting of repositioning information */
   private Boolean shouldCollectRepositioning = new Boolean(false);
@@ -556,13 +556,15 @@ extends AbstractLanguageResource implements LanguageResource{
 
   public synchronized void removeStatusListener(StatusListener l) {
     if (statusListeners != null && statusListeners.contains(l)) {
-      Vector v = (Vector) statusListeners.clone();
+      @SuppressWarnings("unchecked")
+      Vector<StatusListener> v = (Vector<StatusListener>) statusListeners.clone();
       v.removeElement(l);
       statusListeners = v;
     }
   }
   public synchronized void addStatusListener(StatusListener l) {
-    Vector v = statusListeners == null ? new Vector(2) : (Vector) statusListeners.clone();
+    @SuppressWarnings("unchecked")
+    Vector<StatusListener> v = statusListeners == null ? new Vector<StatusListener>(2) : (Vector<StatusListener>) statusListeners.clone();
     if (!v.contains(l)) {
       v.addElement(l);
       statusListeners = v;
@@ -570,10 +572,10 @@ extends AbstractLanguageResource implements LanguageResource{
   }
   protected void fireStatusChanged(String e) {
     if (statusListeners != null) {
-      Vector listeners = statusListeners;
-      int count = listeners.size();
+      
+      int count = statusListeners.size();
       for (int i = 0; i < count; i++) {
-        ((StatusListener) listeners.elementAt(i)).statusChanged(e);
+        statusListeners.elementAt(i).statusChanged(e);
       }
     }
   }
