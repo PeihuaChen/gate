@@ -60,5 +60,16 @@
       <CLASS>gate.gui.docview.OntologyInstanceView</CLASS>
     </RESOURCE>
 
+    <RESOURCE>
+      <NAME>GAZE</NAME>
+      <CLASS>com.ontotext.gate.vr.Gaze</CLASS>
+      <COMMENT>Gazetteer viewer and editor</COMMENT>
+      <HELPURL>http://gate.ac.uk/userguide/sec:gazetteers:onto_gaze</HELPURL>
+      <GUI TYPE="large">
+        <MAIN_VIEWER />
+        <RESOURCE_DISPLAYED>gate.creole.gazetteer.OntoGazetteerImpl</RESOURCE_DISPLAYED>
+      </GUI>
+    </RESOURCE>
+
   </CREOLE>
 </CREOLE-DIRECTORY>

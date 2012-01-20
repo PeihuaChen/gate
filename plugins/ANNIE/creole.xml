@@ -567,7 +567,7 @@
       <GUI TYPE="large">
         <MAIN_VIEWER />
         <RESOURCE_DISPLAYED>
-          gate.creole.gazetteer.DefaultGazetteer
+          gate.creole.gazetteer.AbstractGazetteer
         </RESOURCE_DISPLAYED>
       </GUI>
     </RESOURCE>
