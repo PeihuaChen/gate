@@ -53,7 +53,6 @@ list</a>.</p>
 <li><a href='#Groovy'>Groovy</a></li>
 <li><a href='#Information_Retrieval'>Information_Retrieval</a></li>
 <li><a href='#Inter_Annotator_Agreement'>Inter_Annotator_Agreement</a></li>
-<li><a href='#Jape_Compiler'>Jape_Compiler</a></li>
 <li><a href='#JAPE_Plus'>JAPE_Plus</a></li>
 <li><a href='#Keyphrase_Extraction_Algorithm'>Keyphrase_Extraction_Algorithm</a></li>
 <li><a href='#Language_Identification'>Language_Identification</a></li>
@@ -67,7 +66,6 @@ list</a>.</p>
 <li><a href='#Machine_Learning'>Machine_Learning</a></li>
 <li><a href='#Ontology'>Ontology</a></li>
 <li><a href='#Ontology_BDM_Computation'>Ontology_BDM_Computation</a></li>
-<li><a href='#Ontology_OWLIM2'>Ontology_OWLIM2</a></li>
 <li><a href='#Ontology_Tools'>Ontology_Tools</a></li>
 <li><a href='#OpenNLP'>OpenNLP</a></li>
 <li><a href='#Parser_Minipar'>Parser_Minipar</a></li>
@@ -94,8 +92,6 @@ list</a>.</p>
 <li><a href='#Tools'>Tools</a></li>
 <li><a href='#UIMA'>UIMA</a></li>
 <li><a href='#Web_Crawler_Websphinx'>Web_Crawler_Websphinx</a></li>
-<li><a href='#Web_Search_Google'>Web_Search_Google</a></li>
-<li><a href='#Web_Search_Yahoo'>Web_Search_Yahoo</a></li>
 <li><a href='#Web_Translate_Google'>Web_Translate_Google</a></li>
 <li><a href='#WordNet'>WordNet</a></li>
 </ul>
@@ -240,11 +236,6 @@ list</a>.</p>
 		<td>gate.gui.jape.JapeViewer</td>
 	</tr>
 	<tr>
-		<td>Gaze&nbsp;</td>
-		<td>HashGazetteer viewer and editor. (<a href="http://gate.ac.uk/userguide/sec:gazetteers:gaze">docs</a>)&nbsp;</td>
-		<td>com.ontotext.gate.vr.Gaze</td>
-	</tr>
-	<tr>
 		<td>Gazetteer Editor&nbsp;</td>
 		<td>Gazetteer viewer and editor. (<a href="http://gate.ac.uk/userguide/sec:gazetteers:anniegazeditor">docs</a>)&nbsp;</td>
 		<td>gate.gui.GazetteerEditor</td>
@@ -357,14 +348,6 @@ list</a>.</p>
 		<td>IAA Computation PR&nbsp;</td>
 		<td>Compute inter-annotator agreement (IAA). (<a href="http://gate.ac.uk/userguide/sec:eval:iaaplugin">docs</a>)&nbsp;</td>
 		<td>gate.iaaplugin.IaaMain</td>
-	</tr>
-	<tr>
-		<th colspan='3'><a name='Jape_Compiler'>Jape_Compiler</a></th>
-	</tr>
-	<tr>
-		<td>Ontotext Japec Transducer&nbsp;</td>
-		<td>JAPE compiler. (<a href="http://gate.ac.uk/userguide/sec:misc-creole:japec">docs</a>)&nbsp;</td>
-		<td>com.ontotext.gate.japec.JapecTransducer</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='JAPE_Plus'>JAPE_Plus</a></th>
@@ -610,14 +593,6 @@ list</a>.</p>
 		<td>BDM Computation PR&nbsp;</td>
 		<td>Compute BDM score for each  pair of concepts in the given ontology. (<a href="http://gate.ac.uk/userguide/sec:eval:bdmplugin">docs</a>)&nbsp;</td>
 		<td>gate.bdmComp.BDMCompMain</td>
-	</tr>
-	<tr>
-		<th colspan='3'><a name='Ontology_OWLIM2'>Ontology_OWLIM2</a></th>
-	</tr>
-	<tr>
-		<td>OWLIM2 Ontology LR&nbsp;</td>
-		<td>Ontology based on Sesame1/OWLIM2. Deprecated but kept for backwards compatibility with the pre-GATE 5.1 ontology implementation. (<a href="http://gate.ac.uk/userguide/sec:ontologies:lr">docs</a>)&nbsp;</td>
-		<td>gate.creole.ontology.owlim.OWLIMOntologyLR</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='Ontology_Tools'>Ontology_Tools</a></th>
@@ -959,25 +934,9 @@ list</a>.</p>
 		<th colspan='3'><a name='Web_Crawler_Websphinx'>Web_Crawler_Websphinx</a></th>
 	</tr>
 	<tr>
-		<td>CrawlerPR&nbsp;</td>
+		<td>Crawler PR&nbsp;</td>
 		<td>GATE implementation of the Websphinx crawling API (<a href="http://gate.ac.uk/userguide/sec:misc-creole:crawler">docs</a>)&nbsp;</td>
 		<td>crawl.CrawlPR</td>
-	</tr>
-	<tr>
-		<th colspan='3'><a name='Web_Search_Google'>Web_Search_Google</a></th>
-	</tr>
-	<tr>
-		<td>GooglePR&nbsp;</td>
-		<td>Provides an interface to Google API. (<a href="http://gate.ac.uk/userguide/sec:misc-creole:google">docs</a>)&nbsp;</td>
-		<td>google.GooglePR</td>
-	</tr>
-	<tr>
-		<th colspan='3'><a name='Web_Search_Yahoo'>Web_Search_Yahoo</a></th>
-	</tr>
-	<tr>
-		<td>YahooPR&nbsp;</td>
-		<td>Provides an interface to Yahoo API. (<a href="http://gate.ac.uk/userguide/sec:misc-creole:yahoo">docs</a>)&nbsp;</td>
-		<td>gate.yahoo.YahooPR</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='Web_Translate_Google'>Web_Translate_Google</a></th>
