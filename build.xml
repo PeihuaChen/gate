@@ -314,13 +314,14 @@
 
 
 	<!-- Make gate.jar archive -->
-	<target name="jar" depends="compile,resources,eclipse">
+	<target name="jar" depends="compile,resources">
 		<jar destfile="${binDir}/gate.jar" update="false" index="true">
 			<fileset dir="${outputDir}/" includes="META-INF/**,gate/**,com/**,hepple/**" />
 			<!--    <zipgroupfileset refid="libs"/> -->
 		</jar>
 		<!-- also build the launcher -->
 		<ant dir="build/launcher" inheritAll="false" target="jar" />
+		<antcall target="eclipse" />
 	</target>
 
 	<!-- Optional target useful for creating jars for embedded apps.  It splits
