@@ -282,7 +282,7 @@ public class MainFrame extends JFrame implements ProgressListener,
    * as that would use unnecessary CPU time and memory. Access to this
    * data is available through the {@link #getIcon(String)} method.
    */
-  protected static Map<String, Icon> iconByName = new HashMap<String, Icon>();
+  private static final Map<String, Icon> iconByName = new HashMap<String, Icon>();
 
   private static final Collection<Component> guiRoots =
     new ArrayList<Component>();
