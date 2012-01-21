@@ -180,7 +180,7 @@ public class Main {
         applyUserPreferences();
 
         //all the defaults tables have been updated; build the GUI
-        frame = new MainFrame(gc);
+        frame = MainFrame.getInstance(gc);
         if(DEBUG) Out.prln("constructing GUI");
         
         // run the GUI
