@@ -1,7 +1,7 @@
 /*
  *  DocumentXmlUtils.java
  *
- *  Copyright (c) 1995-2010, The University of Sheffield. See the file
+ *  Copyright (c) 1995-2012, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -15,22 +15,23 @@
  */
 package gate.corpora;
 
-import gate.Document;
-import gate.TextualDocument;
 import gate.Annotation;
 import gate.AnnotationSet;
 import gate.FeatureMap;
+import gate.TextualDocument;
 import gate.event.StatusListener;
-import gate.util.Strings;
 import gate.util.Err;
+import gate.util.Strings;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.HashMap;
-import java.util.TreeMap;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * This class is contains useful static methods for working with the GATE XML
@@ -89,11 +90,11 @@ public class DocumentXmlUtils {
     annotationSetToXml(doc.getAnnotations(), xmlContent);
     // Serialize all others AnnotationSets
     // namedAnnotSets is a Map containing all other named Annotation Sets.
-    Map namedAnnotSets = doc.getNamedAnnotationSets();
+    Map<String,AnnotationSet> namedAnnotSets = doc.getNamedAnnotationSets();
     if(namedAnnotSets != null) {
-      Iterator iter = namedAnnotSets.values().iterator();
+      Iterator<AnnotationSet> iter = namedAnnotSets.values().iterator();
       while(iter.hasNext()) {
-        AnnotationSet annotSet = (AnnotationSet)iter.next();
+        AnnotationSet annotSet = iter.next();
         xmlContent.append("<!-- Named annotation set -->\n\n");
         // Serialize it as XML
         if(sListener != null)
@@ -117,7 +118,7 @@ public class DocumentXmlUtils {
    *          the feature map that has to be saved as XML.
    * @return a String like this: <Feature><Name>...</Name> <Value>...</Value></Feature><Feature>...</Feature>
    */
-  public static StringBuffer featuresToXml(FeatureMap aFeatureMap, Map normalizedFeatureNames) {
+  public static StringBuffer featuresToXml(FeatureMap aFeatureMap, Map<String,StringBuffer> normalizedFeatureNames) {
     if(aFeatureMap == null) return new StringBuffer();
     StringBuffer buffer = new StringBuffer(1024);
     Set keySet = aFeatureMap.keySet();
@@ -300,14 +301,14 @@ public class DocumentXmlUtils {
     if(aText == null) return new String("");
     StringBuffer textWithNodes = filterNonXmlChars(new StringBuffer(aText));
     // Construct a map from offsets to Chars ()
-    TreeMap offsets2CharsMap = new TreeMap();
+    SortedMap<Long, Character> offsets2CharsMap = new TreeMap<Long, Character>();
     if(aText.length() != 0) {
       // Fill the offsets2CharsMap with all the indices where special chars
       // appear
       buildEntityMapFromString(aText, offsets2CharsMap);
     }// End if
     // Construct the offsetsSet for all nodes belonging to this document
-    TreeSet offsetsSet = new TreeSet();
+    SortedSet<Long> offsetsSet = new TreeSet<Long>();
     Iterator<Annotation> annotSetIter = doc.getAnnotations().iterator();
     while(annotSetIter.hasNext()) {
       Annotation annot = annotSetIter.next();
@@ -315,11 +316,11 @@ public class DocumentXmlUtils {
       offsetsSet.add(annot.getEndNode().getOffset());
     }// end While
     // Get the nodes from all other named annotation sets.
-    Map namedAnnotSets = doc.getNamedAnnotationSets();
+    Map<String,AnnotationSet> namedAnnotSets = doc.getNamedAnnotationSets();
     if(namedAnnotSets != null) {
-      Iterator iter = namedAnnotSets.values().iterator();
+      Iterator<AnnotationSet> iter = namedAnnotSets.values().iterator();
       while(iter.hasNext()) {
-        AnnotationSet annotSet = (AnnotationSet)iter.next();
+        AnnotationSet annotSet = iter.next();
         Iterator<Annotation> iter2 = annotSet.iterator();
         while(iter2.hasNext()) {
           Annotation annotTmp = iter2.next();
@@ -342,10 +343,10 @@ public class DocumentXmlUtils {
     // append to buffer all text up to next offset
     // for node or entity
     // we need to iterate on offsetSet and offsets2CharsMap
-    Set allOffsets = new TreeSet();
+    Set<Long> allOffsets = new TreeSet<Long>();
     allOffsets.addAll(offsetsSet);
     allOffsets.addAll(offsets2CharsMap.keySet());
-    Iterator allOffsetsIterator = allOffsets.iterator();
+    Iterator<Long> allOffsetsIterator = allOffsets.iterator();
     while (allOffsetsIterator.hasNext()){
       Long nextOffset = (Long)allOffsetsIterator.next();
       int nextOffsetint = nextOffset.intValue();
@@ -379,14 +380,14 @@ public class DocumentXmlUtils {
    * the offsets where those Chars appear and the Char. If one of the params is
    * null the method simply returns.
    */
-  public static void buildEntityMapFromString(String aScanString, TreeMap aMapToFill) {
+  public static void buildEntityMapFromString(String aScanString, SortedMap<Long, Character> aMapToFill) {
     if(aScanString == null || aMapToFill == null) return;
     if(entitiesMap == null || entitiesMap.isEmpty()) {
       Err.prln("WARNING: Entities map was not initialised !");
       return;
     }// End if
     // Fill the Map with the offsets of the special chars
-    Iterator entitiesMapIterator = entitiesMap.keySet().iterator();
+    Iterator<Character> entitiesMapIterator = entitiesMap.keySet().iterator();
     Character c;
     int fromIndex;
     while(entitiesMapIterator.hasNext()) {
@@ -425,7 +426,7 @@ public class DocumentXmlUtils {
       buffer.append(anAnnotationSet.getName());
       buffer.append("\" >\n");
     }
-    HashMap convertedKeys = new HashMap();
+    Map<String, StringBuffer> convertedKeys = new HashMap<String, StringBuffer>();
     // Iterate through AnnotationSet and save each Annotation as XML
     Iterator<Annotation> iterator = anAnnotationSet.iterator();
     while(iterator.hasNext()) {
@@ -474,7 +475,7 @@ public class DocumentXmlUtils {
       buffer.append(annotationSetNameToUse);
       buffer.append("\" >\n");
     }
-    HashMap convertedKeys = new HashMap();
+    Map<String, StringBuffer> convertedKeys = new HashMap<String, StringBuffer>();
     // Iterate through AnnotationSet and save each Annotation as XML
     Iterator<Annotation> iterator = anAnnotationSet.iterator();
     while(iterator.hasNext()) {
@@ -498,10 +499,9 @@ public class DocumentXmlUtils {
    * A map initialized in init() containing entities that needs to be replaced
    * in strings
    */
-  public static Map entitiesMap = null;
+  public static final Map<Character,String> entitiesMap = new HashMap<Character,String>();
   // Initialize the entities map use when saving as xml
   static {
-    entitiesMap = new HashMap();
     entitiesMap.put(new Character('<'), "&lt;");
     entitiesMap.put(new Character('>'), "&gt;");
     entitiesMap.put(new Character('&'), "&amp;");
