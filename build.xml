@@ -740,9 +740,7 @@
   line.
 
   Notes:
-    1) This target may not work properly with the ant bundled in gate/bin.  If
-       you have problems, try using a standalone ant instead.
-    2) All plugins need to be compiled and in a state where they could be
+    1) All plugins need to be compiled and in a state where they could be
        loaded into GATE from the plugin manager.  Most plugins are handled by
        running "bin/ant all" but you will need to build SUPPLE manually.
   -->
