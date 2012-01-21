@@ -343,17 +343,25 @@ public class Main {
 
   // find out the version and build numbers
   static {
-    // find out the version number
+    
+    // we can't have the possibility of assigning to a final variable twice so
+    // we put the details into a temp variable and then once we are happy assign
+    // it to the static final variable
+    String temp;
+    
+    // find out the version number    
     try {
       InputStream ver = Files.getGateResourceAsStream("version.txt");
       if (ver==null) {
         throw new IOException();
       }
       BufferedReader reader = new BomStrippingInputStreamReader(ver, "UTF-8");
-      Main.version = reader.readLine();
+      temp = reader.readLine();
     } catch(IOException ioe) {
-      Main.version = "7.0";
+      temp = "7.0";
     }
+    
+    version = temp;
 
     // find out the build number
     try{
@@ -362,10 +370,12 @@ public class Main {
         throw new IOException();
       }
       BufferedReader reader = new BomStrippingInputStreamReader(build, "UTF-8");
-      Main.build = reader.readLine();
+      temp = reader.readLine();
     } catch(IOException ioe) {
-      Main.build = "0000";
+      temp = "0000";
     }
+    
+    build = temp;
   } // static initializer finding build and version
 
 
@@ -483,9 +493,9 @@ public class Main {
 
   private static boolean runCorpusBenchmarkTool = false;
 
-  public static String name = "GATE Developer";
-  public static String version;
-  public static String build;
+  public static final String name = "GATE Developer";
+  public static final String version;
+  public static final String build;
 
   /** Process arguments and set up member fields appropriately.
     * Will shut down the process (via System.exit) if there are
