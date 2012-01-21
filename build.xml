@@ -863,22 +863,6 @@
     <antcall target="test.reports" />
   </target>
 
-  <target name="guitest" depends="plugins.build">
-    <java classname="junit.swingui.TestRunner"
-          classpathref="run.class.path"
-          fork="true"
-          spawn="false"
-          dir="."
-          logError="true"
-          maxmemory="${runtime.max.memory}">
-       <sysproperty key="gate.home" value="${basedir}"/>
-       <sysproperty key="gate.config" value="${buildDir}/gate.xml"/>
-       <sysproperty key="load.plugin.path" value="file:${basedir}/plugins/ANNIE;file:${basedir}/plugins/Information_Retrieval;file:${basedir}/plugins/Machine_Learning;file:${basedir}/plugins/Obsolete;file:${basedir}/plugins/Ontology_Tools;file:${basedir}/plugins/Tools;file:${basedir}/plugins/WordNet"/>
-       <syspropertyset refid="run.properties" />
-      <arg value="gate.TestGate"/>
-     </java>
-  </target>
-
   <!-- Make the archives for the GATE Distribution -->
   <target name="distro-zips"
           depends="prepare, compile, jar, doc, plugins.build, plugins.distro.prepare">
