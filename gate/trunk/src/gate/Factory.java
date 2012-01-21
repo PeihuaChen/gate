@@ -46,6 +46,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URL;
 import java.util.Collection;
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -59,9 +60,6 @@ public abstract class Factory {
 
   /** An object to source events from. */
   private static CreoleProxy creoleProxy;
-
-  /** An object to source events from. */
-  private static HashMap accessControllerPool;
 
   /** Create an instance of a resource using default parameter values.
     * @see #createResource(String,FeatureMap)
@@ -342,10 +340,12 @@ public abstract class Factory {
             }
           }
         }
-      }catch(Exception t){
+      } catch (RuntimeException t) {
+        //even runtime exceptions are safe to ignore at this point
+      } catch(Exception t) {
         //there were problems while trying to guess a name
         //we can safely ignore them
-      }finally{
+      } finally{
         //make sure there is a name provided, whatever happened
         if(resourceName == null || resourceName.trim().length() == 0){
           resourceName = resData.getName();
@@ -356,7 +356,7 @@ public abstract class Factory {
     } // else if(res.getName() == null)
     // if res.getName() != null, leave it as it is
 
-    Map listeners = new HashMap(gate.Gate.getListeners());
+    Map<String, EventListener> listeners = new HashMap<String, EventListener>(gate.Gate.getListeners());
     // set the listeners if any
     if(listeners != null && !listeners.isEmpty()) {
       try {
@@ -747,19 +747,20 @@ public abstract class Factory {
     }
   }
 
-  static Class japeParserClass = ParseCpsl.class;
-  public static Class getJapeParserClass() {
+  static Class<ParseCpsl> japeParserClass = ParseCpsl.class;
+  public static Class<ParseCpsl> getJapeParserClass() {
       return japeParserClass;
   }
+  @SuppressWarnings("unchecked")
   public static void setJapeParserClass(Class newClass) {
       if (! ParseCpsl.class.isAssignableFrom(newClass))
           throw new IllegalArgumentException("Parser class must inherit from " + ParseCpsl.class);
       japeParserClass = newClass;
   }
 
-  public static ParseCpsl newJapeParser(java.io.Reader stream, HashMap existingMacros) {
+  public static ParseCpsl newJapeParser(java.io.Reader stream, Map existingMacros) {
       try {
-          Constructor c = japeParserClass.getConstructor
+          Constructor<ParseCpsl> c = japeParserClass.getConstructor
               (new Class[] {java.io.Reader.class, existingMacros.getClass()});
           return (ParseCpsl) c.newInstance(new Object[] {stream, existingMacros});
       } catch (NoSuchMethodException e) { // Shouldn't happen
@@ -861,7 +862,6 @@ public abstract class Factory {
   /** Static initialiser to set up the CreoleProxy event source object */
   static {
     creoleProxy = new CreoleProxy();
-    accessControllerPool = new HashMap();
   } // static initialiser
 
 } // abstract Factory
@@ -876,15 +876,17 @@ class CreoleProxy {
 
   public synchronized void removeCreoleListener(CreoleListener l) {
     if (creoleListeners != null && creoleListeners.contains(l)) {
-      Vector v = (Vector) creoleListeners.clone();
+      @SuppressWarnings("unchecked")
+      Vector<CreoleListener> v = (Vector<CreoleListener>) creoleListeners.clone();
       v.removeElement(l);
       creoleListeners = v;
     }// if
   }// removeCreoleListener(CreoleListener l)
 
   public synchronized void addCreoleListener(CreoleListener l) {
-    Vector v =
-      creoleListeners == null ? new Vector(2) : (Vector) creoleListeners.clone();
+    @SuppressWarnings("unchecked")
+    Vector<CreoleListener> v =
+      creoleListeners == null ? new Vector<CreoleListener>(2) : (Vector<CreoleListener>) creoleListeners.clone();
     if (!v.contains(l)) {
       v.addElement(l);
       creoleListeners = v;
@@ -893,53 +895,48 @@ class CreoleProxy {
 
   protected void fireResourceLoaded(CreoleEvent e) {
     if (creoleListeners != null) {
-      Vector listeners = creoleListeners;
-      int count = listeners.size();
+      int count = creoleListeners.size();
       for (int i = 0; i < count; i++) {
-        ((CreoleListener) listeners.elementAt(i)).resourceLoaded(e);
+        creoleListeners.elementAt(i).resourceLoaded(e);
       }// for
     }// if
   }// fireResourceLoaded(CreoleEvent e)
 
   protected void fireResourceUnloaded(CreoleEvent e) {
     if (creoleListeners != null) {
-      Vector listeners = creoleListeners;
-      int count = listeners.size();
+      int count = creoleListeners.size();
       for (int i = 0; i < count; i++) {
-        ((CreoleListener) listeners.elementAt(i)).resourceUnloaded(e);
+        creoleListeners.elementAt(i).resourceUnloaded(e);
       }// for
     }// if
   }// fireResourceUnloaded(CreoleEvent e)
 
   protected void fireDatastoreOpened(CreoleEvent e) {
     if (creoleListeners != null) {
-      Vector listeners = creoleListeners;
-      int count = listeners.size();
+      int count = creoleListeners.size();
       for (int i = 0; i < count; i++) {
-        ((CreoleListener) listeners.elementAt(i)).datastoreOpened(e);
+        creoleListeners.elementAt(i).datastoreOpened(e);
       }// for
     }// if
   }// fireDatastoreOpened(CreoleEvent e)
 
   protected void fireDatastoreCreated(CreoleEvent e) {
     if (creoleListeners != null) {
-      Vector listeners = creoleListeners;
-      int count = listeners.size();
+      int count = creoleListeners.size();
       for (int i = 0; i < count; i++) {
-        ((CreoleListener) listeners.elementAt(i)).datastoreCreated(e);
+        creoleListeners.elementAt(i).datastoreCreated(e);
       }// for
     }// if
   }// fireDatastoreCreated(CreoleEvent e)
 
   protected void fireDatastoreClosed(CreoleEvent e) {
     if (creoleListeners != null) {
-      Vector listeners = creoleListeners;
-      int count = listeners.size();
+      int count = creoleListeners.size();
       for (int i = 0; i < count; i++) {
-        ((CreoleListener) listeners.elementAt(i)).datastoreClosed(e);
+        creoleListeners.elementAt(i).datastoreClosed(e);
       }// for
     }// if
   }// fireDatastoreClosed(CreoleEvent e)
 
-  private transient Vector creoleListeners;
+  private transient Vector<CreoleListener> creoleListeners;
 }//class CreoleProxy
