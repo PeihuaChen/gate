@@ -264,7 +264,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
   protected static XJFileChooser fileChooser;
 
-  static private MainFrame instance;
+  private static MainFrame instance;
 
   protected OptionsDialog optionsDialog;
 
@@ -319,9 +319,13 @@ public class MainFrame extends JFrame implements ProgressListener,
   }
 
   static public MainFrame getInstance() {
-    if(instance == null) instance = new MainFrame();
-    return instance;
+    return getInstance(null);
   }
+  
+  static synchronized public MainFrame getInstance(GraphicsConfiguration gc) {
+    if(instance == null) instance = new MainFrame(gc);
+    return instance;
+  }  
 
   /**
    * Get the file chooser.
@@ -430,24 +434,37 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
   }// protected void select(ResourceHandle handle)
 
+  /**
+   * @deprecated use {@link #getInstance()} instead
+   */
+  @Deprecated
   public MainFrame() {
     this(null);
   }
-
-  public MainFrame(GraphicsConfiguration gc) {
-    this(false, gc);
-  } // MainFrame
+  
+  /**
+   * @deprecated use {@link #getInstance(GraphicsConfiguration)} instead
+   */
+  @Deprecated
+  public MainFrame(boolean isSlugGUI, GraphicsConfiguration gc) {
+    this(gc);
+  }
 
   /**
    * Construct the frame.
-   * @param isShellSlacGIU true for embedded uses of GATE where a simpler GUI
-   *                       should be displayed.
    * @param gc graphics configuration used,
    *   see {@link javax.swing.JFrame#JFrame(java.awt.GraphicsConfiguration)}
+   * @deprecated use {@link #getInstance(GraphicsConfiguration)} instead
    */
-  public MainFrame(boolean isShellSlacGIU, GraphicsConfiguration gc) {
+  @Deprecated
+  public MainFrame(GraphicsConfiguration gc) {
     super(gc);
+    
+    // TODO we really don't need this here as it is done getInstance() but for
+    // now we need it here in case people are calling the deprecated
+    // constructors instead
     instance = this;
+    
     // set the WM class
     try {
       Toolkit xToolkit = Toolkit.getDefaultToolkit();
@@ -456,8 +473,9 @@ public class MainFrame extends JFrame implements ProgressListener,
       awtAppClassNameField.setAccessible(true);
       awtAppClassNameField.set(xToolkit, "GATE Developer");
     } catch(Exception e) {
-      // ignore
-      log.warn("Could not set WM Class", e);
+      // this happens every time on Windows so hide the exception unless we are
+      // debugging something
+      log.debug("Could not set WM Class", e);
     }
     
     guiRoots.add(this);
@@ -479,23 +497,20 @@ public class MainFrame extends JFrame implements ProgressListener,
       dialog = null;
     }
     enableEvents(AWTEvent.WINDOW_EVENT_MASK);
-    initLocalData(isShellSlacGIU);
-    initGuiComponents(isShellSlacGIU);
-    initListeners(isShellSlacGIU);
+    initLocalData();
+    initGuiComponents();
+    initListeners();
   } // MainFrame(boolean simple)
 
-  protected void initLocalData(boolean isShellSlacGIU) {
+  protected void initLocalData() {
     resourcesTreeRoot = new DefaultMutableTreeNode("GATE", true);
     applicationsRoot = new DefaultMutableTreeNode("Applications", true);
-    if(isShellSlacGIU) {
-      languageResourcesRoot = new DefaultMutableTreeNode("Documents", true);
-    }
-    else {
-      languageResourcesRoot =
+
+    languageResourcesRoot =
         new DefaultMutableTreeNode("Language Resources", true);
-    } // if
+
     processingResourcesRoot =
-      new DefaultMutableTreeNode("Processing Resources", true);
+        new DefaultMutableTreeNode("Processing Resources", true);
     datastoresRoot = new DefaultMutableTreeNode("Datastores", true);
     resourcesTreeRoot.add(applicationsRoot);
     resourcesTreeRoot.add(languageResourcesRoot);
@@ -505,7 +520,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     resourcesTreeModel = new ResourcesTreeModel(resourcesTreeRoot, true);
   }
 
-  protected void initGuiComponents(boolean isShellSlacGUI) {
+  protected void initGuiComponents() {
     this.getContentPane().setLayout(new BorderLayout());
 
     Integer width = Gate.getUserConfig().getInt(GateConstants.MAIN_FRAME_WIDTH);
@@ -1187,7 +1202,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     this.getContentPane().add(toolbar, BorderLayout.NORTH);
   }
 
-  protected void initListeners(boolean isShellSlacGIU) {
+  protected void initListeners() {
     Gate.getCreoleRegister().addCreoleListener(this);
 
     resourcesTree.addKeyListener(new KeyAdapter() {
@@ -1585,27 +1600,6 @@ public class MainFrame extends JFrame implements ProgressListener,
         globalProgressBar.setMinimumSize(new Dimension(80, 0));
       }
     });
-
-    if(isShellSlacGIU) {
-      mainSplit.setDividerSize(0);
-      mainSplit.getTopComponent().setVisible(false);
-      mainSplit.getTopComponent().addComponentListener(new ComponentAdapter() {
-        public void componentHidden(ComponentEvent e) {
-        }
-
-        public void componentMoved(ComponentEvent e) {
-          mainSplit.setDividerLocation(0);
-        }
-
-        public void componentResized(ComponentEvent e) {
-          mainSplit.setDividerLocation(0);
-        }
-
-        public void componentShown(ComponentEvent e) {
-          mainSplit.setDividerLocation(0);
-        }
-      });
-    } // if
 
     // blink the messages tab when new information is displayed
     logArea.getDocument().addDocumentListener(
