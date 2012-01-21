@@ -77,12 +77,6 @@ public class TestXml extends TestCase
     urlList.add(url);
     urlDescription.add(" an HTML document ");
 
-    url = Gate.getUrl("tests/rtf/Sample.rtf");
-    assertTrue("Coudn't create a URL object for defg ",url != null);
-    urlList.add(url);
-    urlDescription.add(" a RTF document ");
-
-
     url = Gate.getUrl("tests/email/test2.eml");
     assertTrue("Coudn't create a URL object for defg ",url != null);
     urlList.add(url);
