@@ -54,7 +54,6 @@ import gate.util.TestTemplate;
 import gate.util.TestTools;
 import gate.xml.TestRepositioningInfo;
 import gate.xml.TestXml;
-import gnu.getopt.Getopt;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -100,94 +99,6 @@ public class TestGate {
 
   /** Status flag for error exit. */
   private static final int STATUS_ERROR = 1;
-
-  /** Main routine for the GATE test suite.
-    * Command-line arguments:
-    * <UL>
-    * <LI>
-    * <B>-a</B> means run the test runner in automatic class reload mode
-    * <LI>
-    * <B>-n</B> means assume there's no net connection
-    * <LI>
-    * <B>-t</B> means run the test runner in text mode
-    * (useful for
-    * debugging, as there's less confusion to do with threads and
-    * class loaders).
-    * <LI>
-    * <B>-i file</B> additional initialisation file (probably called
-    *   <TT>gate.xml</TT>). Used for site-wide initialisation by the
-    *   start-up scripts.
-    * </UL>
-    */
-  public static void main(String[] args) throws Exception {
-    boolean textMode = false;
-    boolean autoloadingMode = false;
-
-    // process command-line options
-    Getopt g = new Getopt("GATE test suite", args, "tnNasi:");
-    int c;
-    while( (c = g.getopt()) != -1 )
-      switch(c) {
-        case 't':
-          textMode = true;
-          break;
-        case 'n':
-          Gate.setNetConnected(false);
-          break;
-        case 'N':
-          Gate.setNetConnected(false);
-          Gate.setLocalWebServer(false);
-          break;
-        case 'a':
-          autoloadingMode = true;
-          break;
-        // -i gate.xml site-wide init file
-        case 'i':
-          String optionString = g.getOptarg();
-          URL u = null;
-          File f = new File(optionString);
-          try {
-            u = f.toURI().toURL();
-          } catch(MalformedURLException e) {
-            Err.prln("Bad initialisation file: " + optionString);
-            Err.prln(e);
-            System.exit(STATUS_ERROR);
-          }
-          Gate.setSiteConfigFile(f);
-          Out.prln(
-            "Initialisation file " + optionString +
-            " recorded for initialisation"
-          );
-          break;
-        case '?':
-          // leave the warning to getopt
-          return;
-        default:
-          Err.prln("getopt() returned " + c + "\n");
-      } // switch
-
-    // set up arguments for the JUnit test runner
-    String junitArgs[] = new String[2];
-    junitArgs[0] = "-noloading";
-    junitArgs[1] = "gate.TestGate";
-
-    // use the next line if you're running with output to console in text mode:
-    // junitArgs[1] = "-wait";
-
-    // execute the JUnit test runner
-    if(textMode) { // text runner mode
-      junit.textui.TestRunner.main(junitArgs);
-    } else if(autoloadingMode) { // autoloading mode
-      junitArgs[0] = "gate.TestGate";
-      junitArgs[1] = "";
-
-      junit.swingui.TestRunner.main(junitArgs);
-
-    } else { // by default us the single-run GUI version
-      junit.swingui.TestRunner.main(junitArgs);
-    }
-
-  } // main
 
   /** GATE test suite. Every test case class has to be
     * registered here.
