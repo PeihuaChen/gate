@@ -203,6 +203,7 @@ public class RealtimeCorpusController extends SerialAnalyserController {
   }
 
   /** Run the Processing Resources in sequence. */
+  @SuppressWarnings("deprecation")
   public void executeImpl() throws ExecutionException{
     interrupted = false;
     if(corpus == null) throw new ExecutionException(

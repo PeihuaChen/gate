@@ -6,12 +6,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.tools.ant.BuildException;
@@ -19,7 +16,6 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.DataType;
 import org.apache.tools.ant.types.ResourceCollection;
 import org.apache.tools.ant.types.resources.FileResourceIterator;
-import org.apache.tools.ant.util.FileUtils;
 
 /**
  * Class that extracts the list of gazetteer .lst files from a .def.
@@ -67,7 +63,7 @@ public class GazetteerLists extends DataType implements ResourceCollection {
       return Collections.EMPTY_LIST.iterator();
     }
     else {
-      return new FileResourceIterator(definition.getParentFile(), listNames);
+      return new FileResourceIterator(getProject(), definition.getParentFile(), listNames);
     }
   }
 
@@ -100,7 +96,7 @@ public class GazetteerLists extends DataType implements ResourceCollection {
     log("definition file: " + definition, Project.MSG_VERBOSE);
 
     Set<String> lists = new HashSet<String>();
-    File definitionDir = definition.getParentFile();
+
     try {
       FileInputStream fis = new FileInputStream(definition);
       try {
