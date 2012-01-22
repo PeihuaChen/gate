@@ -13,12 +13,21 @@
  */
 package gate.gui.ontology;
 
-import gate.creole.ontology.*;
+import gate.creole.ontology.OClass;
+import gate.creole.ontology.OInstance;
+import gate.creole.ontology.OResource;
+import gate.creole.ontology.Ontology;
+import gate.creole.ontology.RDFProperty;
 import gate.gui.MainFrame;
 
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
-import javax.swing.*;
+
+import javax.swing.AbstractAction;
+import javax.swing.Icon;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
@@ -50,7 +59,7 @@ public class DeleteOntologyResourceAction extends AbstractAction implements
       Object object = ((OResourceNode) node.getUserObject()).getResource();
       try {
         if (object instanceof OClass) {
-          if (ontology.containsOClass(((OClass) object).getURI()))
+          if (ontology.containsOClass(((OClass) object).getONodeID()))
             ontology.removeOClass((OClass) object);
           continue;
         }
@@ -61,7 +70,7 @@ public class DeleteOntologyResourceAction extends AbstractAction implements
         }
         if ((object instanceof RDFProperty)
           && Utils.getOResourceFromMap(ontology,
-            ((RDFProperty) object).getURI().toString()) != null)
+            ((RDFProperty) object).getONodeID().toString()) != null)
           ontology.removeProperty((RDFProperty) object);
       }
       catch (Exception re) {

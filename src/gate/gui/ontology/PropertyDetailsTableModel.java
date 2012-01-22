@@ -79,8 +79,6 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
   }
 
   public boolean isCellEditable(int i, int j) {
-    Object obj = getItemForRow(i);
-    //if(obj instanceof PropertyValue && j == 2) return true;
     return false;
   }
 
@@ -139,7 +137,7 @@ public class PropertyDetailsTableModel extends AbstractTableModel {
     
     resourceInfo.getValues().clear();
     resourceInfo.getValues().add(property);
-    resourceInfo.getValues().add(new KeyValuePair(property, "URI", property.getURI().toString(), false));
+    resourceInfo.getValues().add(new KeyValuePair(property, "URI", property.getONodeID().toString(), false));
     
     Set<RDFProperty> dprops = property.getPropertiesWithResourceAsDomain();
     propertyTypes.getValues().addAll(dprops);

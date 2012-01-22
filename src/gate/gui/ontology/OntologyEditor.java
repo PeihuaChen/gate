@@ -423,7 +423,7 @@ public class OntologyEditor extends AbstractVisualResource
                 ValuesSelectionAction vsa = new ValuesSelectionAction();
                 String[] classArray = new String[classList.size()];
                 for(int i = 0; i < classArray.length; i++) {
-                  classArray[i] = classList.get(i).getURI().toString();
+                  classArray[i] = classList.get(i).getONodeID().toString();
                 }
                 vsa.showGUI(candidate.getName() + " is equivalent to :",
                         classArray, new String[0], false, null);
@@ -457,7 +457,7 @@ public class OntologyEditor extends AbstractVisualResource
                 ValuesSelectionAction vsa = new ValuesSelectionAction();
                 String[] instancesArray = new String[instancesList.size()];
                 for(int i = 0; i < instancesArray.length; i++) {
-                  instancesArray[i] = instancesList.get(i).getURI().toString();
+                  instancesArray[i] = instancesList.get(i).getONodeID().toString();
                 }
                 vsa.showGUI(candidate.getName() + " is same As :",
                         instancesArray, new String[0], false, null);
@@ -594,7 +594,7 @@ public class OntologyEditor extends AbstractVisualResource
               ValuesSelectionAction vsa = new ValuesSelectionAction();
               String[] propArray = new String[props.size()];
               for(int i = 0; i < propArray.length; i++) {
-                propArray[i] = iter.next().getURI().toString();
+                propArray[i] = iter.next().getONodeID().toString();
               }
               vsa.showGUI(candidate.getName() + " is equivalent to :",
                       propArray, new String[0], false, null);
@@ -708,7 +708,7 @@ public class OntologyEditor extends AbstractVisualResource
             if(toSelect != null) {
 
               treeToSelectIn.setSelectionPath(new TreePath(uri2TreeNodesListMap
-                      .get(toSelect.getURI().toString()).get(0).getPath()));
+                      .get(toSelect.getONodeID().toString()).get(0).getPath()));
               treeToSelectIn.scrollPathToVisible(treeToSelectIn
                       .getSelectionPath());
 
@@ -938,7 +938,7 @@ public class OntologyEditor extends AbstractVisualResource
             if(toSelect != null) {
 
               treeToSelectIn.setSelectionPath(new TreePath(uri2TreeNodesListMap
-                      .get(toSelect.getURI().toString()).get(0).getPath()));
+                      .get(toSelect.getONodeID().toString()).get(0).getPath()));
               treeToSelectIn.scrollPathToVisible(treeToSelectIn
                       .getSelectionPath());
 
@@ -1090,7 +1090,7 @@ public class OntologyEditor extends AbstractVisualResource
       ArrayList<String> validInstances = new ArrayList<String>();
       for (OInstance instance : instances) {
         if (property.isValidRange(instance)) {
-          validInstances.add(instance.getURI().toString());
+          validInstances.add(instance.getONodeID().toString());
         }
       }
       ValuesSelectionAction vsa = new ValuesSelectionAction();
@@ -1282,7 +1282,7 @@ public class OntologyEditor extends AbstractVisualResource
    * @param comparator the Comparator used to sort the children.
    */
   protected void addChidrenRec(DefaultMutableTreeNode parent,
-          List<OResource> children, Comparator comparator) {
+          List<OResource> children, Comparator<OResource> comparator) {
     for(OResource aChild : children) {
       DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(
               new OResourceNode(aChild));
@@ -1292,16 +1292,16 @@ public class OntologyEditor extends AbstractVisualResource
       // tree
       // nodes
       ArrayList<DefaultMutableTreeNode> list = uri2TreeNodesListMap.get(aChild
-              .getURI().toString());
+              .getONodeID().toString());
       if(list == null) {
         list = new ArrayList<DefaultMutableTreeNode>();
-        uri2TreeNodesListMap.put(aChild.getURI().toString(), list);
+        uri2TreeNodesListMap.put(aChild.getONodeID().toString(), list);
       }
       list.add(childNode);
       reverseMap.put(childNode, aChild.getONodeID());
       if(aChild instanceof OClass) {
-        if(!ontologyClassesURIs.contains(aChild.getURI().toString()))
-          ontologyClassesURIs.add(aChild.getURI().toString());
+        if(!ontologyClassesURIs.contains(aChild.getONodeID().toString()))
+          ontologyClassesURIs.add(aChild.getONodeID().toString());
         childNode.setAllowsChildren(true);
         // add all the subclasses
         OClass aClass = (OClass)aChild;
@@ -1331,7 +1331,7 @@ public class OntologyEditor extends AbstractVisualResource
    * @param comparator the Comparator used to sort the children.
    */
   protected void addPropertyChidrenRec(DefaultMutableTreeNode parent,
-          List<RDFProperty> children, Comparator comparator) {
+          List<RDFProperty> children, Comparator<OResource> comparator) {
     for(RDFProperty aChild : children) {
       DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(
               new OResourceNode(aChild));
@@ -1340,10 +1340,10 @@ public class OntologyEditor extends AbstractVisualResource
       // tree
       // nodes
       ArrayList<DefaultMutableTreeNode> list = uri2TreeNodesListMap.get(aChild
-              .getURI().toString());
+              .getONodeID().toString());
       if(list == null) {
         list = new ArrayList<DefaultMutableTreeNode>();
-        uri2TreeNodesListMap.put(aChild.getURI().toString(), list);
+        uri2TreeNodesListMap.put(aChild.getONodeID().toString(), list);
       }
       list.add(childNode);
       reverseMap.put(childNode, aChild.getONodeID());
@@ -1386,7 +1386,7 @@ public class OntologyEditor extends AbstractVisualResource
       Collections.sort(cs, itemComparator);
       for(OClass c : cs) {
         ArrayList<DefaultMutableTreeNode> superNodeList = uri2TreeNodesListMap
-                .get(c.getURI().toString());
+                .get(c.getONodeID().toString());
         if(superNodeList == null) {
           // this is a result of two classes being created as a result
           // of only one addition
@@ -1436,7 +1436,7 @@ public class OntologyEditor extends AbstractVisualResource
       Collections.sort(sps, itemComparator);
       for(RDFProperty r : sps) {
         ArrayList<DefaultMutableTreeNode> superNodeList = uri2TreeNodesListMap
-                .get(r.getURI().toString());
+                .get(r.getONodeID().toString());
         for(int i = 0; i < superNodeList.size(); i++) {
           DefaultMutableTreeNode node = superNodeList.get(i);
           addPropertyChidrenRec(node, list, itemComparator);
@@ -1453,7 +1453,7 @@ public class OntologyEditor extends AbstractVisualResource
    */
   protected void instanceIsAdded(OInstance anInstance) {
     ArrayList<DefaultMutableTreeNode> newList = uri2TreeNodesListMap
-            .get(anInstance.getURI().toString());
+            .get(anInstance.getONodeID().toString());
     if(newList != null) {
       for(int i = 0; i < newList.size(); i++) {
         DefaultMutableTreeNode node = newList.get(i);
@@ -1468,7 +1468,7 @@ public class OntologyEditor extends AbstractVisualResource
     while(iter.hasNext()) {
       OClass aClass = iter.next();
       ArrayList<DefaultMutableTreeNode> superNodeList = uri2TreeNodesListMap
-              .get(aClass.getURI().toString());
+              .get(aClass.getONodeID().toString());
       for(int i = 0; i < superNodeList.size(); i++) {
         DefaultMutableTreeNode node = superNodeList.get(i);
         addChidrenRec(node, list, itemComparator);
@@ -1480,7 +1480,7 @@ public class OntologyEditor extends AbstractVisualResource
   private void removeFromMap(DefaultTreeModel model, DefaultMutableTreeNode node) {
     if(!node.isLeaf()) {
       Enumeration enumeration = node.children();
-      ArrayList children = new ArrayList();
+      List children = new ArrayList();
       while(enumeration.hasMoreElements()) {
         children.add(enumeration.nextElement());
       }
@@ -1505,7 +1505,7 @@ public class OntologyEditor extends AbstractVisualResource
    */
   protected void subPropertyIsAdded(RDFProperty p) {
     ArrayList<DefaultMutableTreeNode> nodesList = uri2TreeNodesListMap.get(p
-            .getURI().toString());
+            .getONodeID().toString());
     // p is a property where the subProperty is added
     // the property which is added as a subProperty might not have any
     // super RDFProperty before
@@ -1515,7 +1515,7 @@ public class OntologyEditor extends AbstractVisualResource
     Collections.sort(ps, itemComparator);
     for(RDFProperty subP : ps) {
       ArrayList<DefaultMutableTreeNode> subNodesList = uri2TreeNodesListMap
-              .get(subP.getURI().toString());
+              .get(subP.getONodeID().toString());
       if(subNodesList != null) {
         for(int i = 0; i < subNodesList.size(); i++) {
           DefaultMutableTreeNode node = subNodesList.get(i);
@@ -1543,7 +1543,7 @@ public class OntologyEditor extends AbstractVisualResource
    */
   protected void subPropertyIsDeleted(RDFProperty p) {
     ArrayList<DefaultMutableTreeNode> nodeList = uri2TreeNodesListMap.get(p
-            .getURI().toString());
+            .getONodeID().toString());
     if(nodeList == null || nodeList.isEmpty()) {
       // this is already deleted
       return;
@@ -1565,7 +1565,7 @@ public class OntologyEditor extends AbstractVisualResource
       List<RDFProperty> rps = new ArrayList<RDFProperty>(superProperties);
       Collections.sort(rps, itemComparator);
       for(RDFProperty superP : rps) {
-        nodeList = uri2TreeNodesListMap.get(superP.getURI().toString());
+        nodeList = uri2TreeNodesListMap.get(superP.getONodeID().toString());
         for(int i = 0; i < nodeList.size(); i++) {
           DefaultMutableTreeNode superNode = nodeList.get(i);
           addPropertyChidrenRec(superNode, list, itemComparator);
@@ -1586,7 +1586,7 @@ public class OntologyEditor extends AbstractVisualResource
    */
   protected void subClassIsAdded(OClass c) {
     ArrayList<DefaultMutableTreeNode> nodesList = uri2TreeNodesListMap.get(c
-            .getURI().toString());
+            .getONodeID().toString());
     // c is a class where the subClass is added
     // the class which is added as a subClass might not have any
     // super Class before
@@ -1596,7 +1596,7 @@ public class OntologyEditor extends AbstractVisualResource
     Collections.sort(cs, itemComparator);
     for(OClass subC : cs) {
       ArrayList<DefaultMutableTreeNode> subNodesList = uri2TreeNodesListMap
-              .get(subC.getURI().toString());
+              .get(subC.getONodeID().toString());
       if(subNodesList != null) {
         for(int i = 0; i < subNodesList.size(); i++) {
           DefaultMutableTreeNode node = subNodesList.get(i);
@@ -1624,7 +1624,7 @@ public class OntologyEditor extends AbstractVisualResource
    */
   protected void subClassIsDeleted(OClass c) {
     ArrayList<DefaultMutableTreeNode> nodeList = uri2TreeNodesListMap.get(c
-            .getURI().toString());
+            .getONodeID().toString());
     if(nodeList == null || nodeList.isEmpty()) {
       // this is already deleted
       return;
@@ -1683,7 +1683,7 @@ public class OntologyEditor extends AbstractVisualResource
       List<OClass> cs = new ArrayList<OClass>(superClasses);
       Collections.sort(cs, itemComparator);
       for(OClass superC : cs) {
-        nodeList = uri2TreeNodesListMap.get(superC.getURI().toString());
+        nodeList = uri2TreeNodesListMap.get(superC.getONodeID().toString());
         for(int i = 0; i < nodeList.size(); i++) {
           DefaultMutableTreeNode superNode = nodeList.get(i);
           addChidrenRec(superNode, list, itemComparator);
@@ -1729,10 +1729,7 @@ public class OntologyEditor extends AbstractVisualResource
     else {
       probableParentNode = (DefaultMutableTreeNode)aNode.getParent();
     }
-
-    final DefaultMutableTreeNode parentNode = probableParentNode;
-    final ONodeID parentURI = reverseMap.get(parentNode);
-
+    
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         // first hide the tree
@@ -1797,10 +1794,10 @@ public class OntologyEditor extends AbstractVisualResource
                         DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode)en
                                 .nextElement();
                         String toCompare = ((OResourceNode)dmtn.getUserObject())
-                                .getResource().getURI().toString();
+                                .getResource().getONodeID().toString();
                         List<OResource> delete = new ArrayList<OResource>();
                         for(OResource aRes : children) {
-                          if(toCompare.equals(aRes.getURI().toString())) {
+                          if(toCompare.equals(aRes.getONodeID().toString())) {
                             delete.add(aRes);
                           }
                         }
@@ -1825,10 +1822,10 @@ public class OntologyEditor extends AbstractVisualResource
                         DefaultMutableTreeNode dmtn = (DefaultMutableTreeNode)en
                                 .nextElement();
                         String toCompare = ((OResourceNode)dmtn.getUserObject())
-                                .getResource().getURI().toString();
+                                .getResource().getONodeID().toString();
                         List<OResource> delete = new ArrayList<OResource>();
                         for(OResource aRes : children) {
-                          if(toCompare.equals(aRes.getURI().toString())) {
+                          if(toCompare.equals(aRes.getONodeID().toString())) {
                             delete.add(aRes);
                           }
                         }
@@ -1850,10 +1847,10 @@ public class OntologyEditor extends AbstractVisualResource
                                 .nextElement();
                         if(dmtn.getLevel() != 1) continue;
                         String toCompare = ((OResourceNode)dmtn.getUserObject())
-                                .getResource().getURI().toString();
+                                .getResource().getONodeID().toString();
                         List<OResource> delete = new ArrayList<OResource>();
                         for(OResource aRes : children) {
-                          if(toCompare.equals(aRes.getURI().toString())) {
+                          if(toCompare.equals(aRes.getONodeID().toString())) {
                             delete.add(aRes);
                           }
                         }
@@ -1891,10 +1888,10 @@ public class OntologyEditor extends AbstractVisualResource
                                 .nextElement();
                         if(dmtn.getLevel() != 1) continue;
                         String toCompare = ((OResourceNode)dmtn.getUserObject())
-                                .getResource().getURI().toString();
+                                .getResource().getONodeID().toString();
                         List<OResource> delete = new ArrayList<OResource>();
                         for(OResource aRes : subList) {
-                          if(toCompare.equals(aRes.getURI().toString())) {
+                          if(toCompare.equals(aRes.getONodeID().toString())) {
                             delete.add(aRes);
                           }
                         }
@@ -1947,12 +1944,12 @@ public class OntologyEditor extends AbstractVisualResource
 
     if(isItTree) {
       DefaultMutableTreeNode aNode = uri2TreeNodesListMap.get(
-              resource.getURI().toString()).get(0);
+              resource.getONodeID().toString()).get(0);
       tree.setSelectionPath(new TreePath(aNode.getPath()));
     }
     else {
       DefaultMutableTreeNode aNode = uri2TreeNodesListMap.get(
-              resource.getURI().toString()).get(0);
+              resource.getONodeID().toString()).get(0);
       propertyTree.setSelectionPath(new TreePath(aNode.getPath()));
     }
     return;
@@ -2014,13 +2011,13 @@ public class OntologyEditor extends AbstractVisualResource
     if(isItTree) {
       tree.setSelectionPath(path);
       DefaultMutableTreeNode aNode = uri2TreeNodesListMap.get(
-              resource.getURI().toString()).get(0);
+              resource.getONodeID().toString()).get(0);
       tree.setSelectionPath(new TreePath(aNode.getPath()));
     }
     else {
       propertyTree.setSelectionPath(path);
       DefaultMutableTreeNode aNode = uri2TreeNodesListMap.get(
-              resource.getURI().toString()).get(0);
+              resource.getONodeID().toString()).get(0);
       propertyTree.setSelectionPath(new TreePath(aNode.getPath()));
     }
   }
@@ -2255,7 +2252,7 @@ public class OntologyEditor extends AbstractVisualResource
     SwingUtilities.invokeLater(new Runnable() { public void run() {
       tabbedPane.setSelectedComponent(scroller);
       tree.setSelectionPath(new TreePath(uri2TreeNodesListMap.get(
-        resource.getURI().toString()).get(0).getPath()));
+        resource.getONodeID().toString()).get(0).getPath()));
       tree.scrollPathToVisible(tree.getSelectionPath());
     }});
   }

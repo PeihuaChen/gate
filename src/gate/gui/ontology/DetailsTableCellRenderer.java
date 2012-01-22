@@ -13,10 +13,20 @@
  */
 package gate.gui.ontology;
 
-import gate.creole.ontology.*;
+import gate.creole.ontology.AnnotationProperty;
+import gate.creole.ontology.DatatypeProperty;
+import gate.creole.ontology.OClass;
+import gate.creole.ontology.OInstance;
+import gate.creole.ontology.ObjectProperty;
+import gate.creole.ontology.RDFProperty;
+import gate.creole.ontology.Restriction;
+import gate.creole.ontology.SymmetricProperty;
+import gate.creole.ontology.TransitiveProperty;
 import gate.gui.MainFrame;
+
 import java.awt.Component;
-import javax.swing.*;
+
+import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
 /**
@@ -64,19 +74,19 @@ public class DetailsTableCellRenderer extends DefaultTableCellRenderer {
         OClass tclass = (OClass) value;
         setIcon(MainFrame.getIcon("ontology-restriction"));
         setText(tclass.getName());
-        setToolTipText(tclass.getURI().toString());
+        setToolTipText(tclass.getONodeID().toString());
       }
       else if(value instanceof OClass) {
         OClass tclass = (OClass) value;
         setIcon(MainFrame.getIcon("ontology-class"));
         setText(tclass.getName());
-        setToolTipText(tclass.getURI().toString());
+        setToolTipText(tclass.getONodeID().toString());
       }
       else if(value instanceof OInstance) {
         OInstance oinstance = (OInstance) value;
         setIcon(MainFrame.getIcon("ontology-instance"));
         setText(oinstance.getName());
-        setToolTipText(oinstance.getURI().toString());
+        setToolTipText(oinstance.getONodeID().toString());
       }
       else if(value instanceof RDFProperty) {
         RDFProperty property = (RDFProperty) value;
@@ -106,7 +116,7 @@ public class DetailsTableCellRenderer extends DefaultTableCellRenderer {
         setText(s);
         setToolTipText((new StringBuilder()).append(
                 "<HTML><b>" + propertyType + " Property</b><br>").append(
-                property.getURI()).append("</html>").toString());
+                property.getONodeID()).append("</html>").toString());
       }
       else if(value instanceof PropertyValue) {
 
@@ -139,7 +149,7 @@ public class DetailsTableCellRenderer extends DefaultTableCellRenderer {
         setText(s);
         setToolTipText((new StringBuilder()).append(
                 "<HTML><b>" + propertyType + " Property Value</b><br>")
-                .append(property.getProperty().getURI()).append("</html>")
+                .append(property.getProperty().getONodeID()).append("</html>")
                 .toString());
       }
     }

@@ -72,8 +72,7 @@ public class TopClassAction extends AbstractAction {
           "Resource <b>" + s+className.getText() + "</b> already exists.");
         return;
       }
-      ontology.addOClass(new URI(nameSpace.getText() + className.getText(),
-        false), OConstants.OWL_CLASS);
+      ontology.addOClass(ontology.createOURI(nameSpace.getText() + className.getText()));
     }
   }
 

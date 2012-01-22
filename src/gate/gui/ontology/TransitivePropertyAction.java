@@ -59,7 +59,7 @@ public class TransitivePropertyAction extends AbstractAction implements
           if(((OResourceNode)defaultmutabletreenode.getUserObject())
                   .getResource() instanceof OClass)
             arraylist.add((((OResourceNode)defaultmutabletreenode
-                    .getUserObject()).getResource()).getURI().toString());
+                    .getUserObject()).getResource()).getONodeID().toString());
         }
         String as1[] = new String[arraylist.size()];
         for(int k = 0; k < as1.length; k++)
@@ -127,8 +127,8 @@ public class TransitivePropertyAction extends AbstractAction implements
           ontology,rangeSelectedValues[j]);
         rangeSet.add(oclass);
       }
-      ontology.addTransitiveProperty(new URI(nameSpace.getText()
-        + propertyName.getText(), false), domainSet, rangeSet);
+      ontology.addTransitiveProperty(ontology.createOURI(nameSpace.getText()
+        + propertyName.getText()), domainSet, rangeSet);
     }
   }
 
