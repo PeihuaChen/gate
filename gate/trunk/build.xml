@@ -401,7 +401,7 @@
       Stemmer_Snowball Tagger_Abner Tagger_Chemistry Tagger_Framework
       Tagger_MetaMap Tagger_NP_Chunking Tagger_OpenCalais
       Tools UIMA Web_Crawler_Websphinx 
-      Web_Translate_Google WordNet Schema_Tools Tagger_Numbers Tagger_Boilerpipe
+      WordNet Schema_Tools Tagger_Numbers Tagger_Boilerpipe
       Tagger_DateNormalizer Teamware_Tools Tagger_Measurements GENIA Tagger_PennBio
       Tagger_MutationFinder Tagger_NormaGene
     " />
