@@ -34,7 +34,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/commons-discovery-0.2.jar" />
 	<classpathentry exported="true" kind="lib" path="lib/ant.jar" />
 	<classpathentry exported="true" kind="lib" path="lib/ant-launcher.jar" />
-	<classpathentry exported="true" kind="lib" path="lib/ant-contrib-1.0b2.jar" />
 	<classpathentry exported="true" kind="lib" path="lib/wstx-lgpl-3.2.3.jar" />
 	<classpathentry exported="true" kind="lib" path="lib/spring-beans-2.0.8.jar" />
 	<classpathentry exported="true" kind="lib" path="lib/spring-core-2.0.8.jar" />
@@ -115,5 +114,6 @@
 	<classpathentry kind="lib" path="lib/ivy-2.2.0.jar" />
 	<classpathentry kind="lib" path="lib/jsch-0.1.31.jar" />
 	<classpathentry kind="output" path="classes" />
+	<classpathentry kind="lib" exported="true" path="lib/ant-contrib.jar" />
 </classpath>
 
