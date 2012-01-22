@@ -16,6 +16,7 @@ package gate.gui.ontology;
 import gate.creole.ontology.OClass;
 import gate.creole.ontology.OInstance;
 import gate.creole.ontology.OResource;
+import gate.creole.ontology.OURI;
 import gate.creole.ontology.Ontology;
 import gate.creole.ontology.RDFProperty;
 import gate.gui.MainFrame;
@@ -64,7 +65,7 @@ public class DeleteOntologyResourceAction extends AbstractAction implements
           continue;
         }
         if (object instanceof OInstance) {
-          if (ontology.getOInstance(((OInstance) object).getURI()) != null)
+          if (ontology.getOInstance((OURI)((OInstance) object).getONodeID()) != null)
             ontology.removeOInstance((OInstance) object);
           continue;
         }

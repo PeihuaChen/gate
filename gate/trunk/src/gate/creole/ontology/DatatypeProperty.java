@@ -17,6 +17,7 @@ import java.util.Set;
  * @author Niraj Aswani
  * 
  */
+@SuppressWarnings("deprecation")
 public interface DatatypeProperty extends RDFProperty {
 
   /**
