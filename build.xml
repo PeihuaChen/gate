@@ -105,70 +105,12 @@
 		<include name="*.zip" />
 	</fileset>
 
-	<!-- tools.jar path -->
-
-	<!-- GATE will attempt to guess where the Sun Javac classes live -->
-	<!-- First try the two variants of $JAVA_HOME/lib/tools.jar -->
-	<condition property="tools.jar.location" value="${java.home}/../lib/tools.jar">
-		<and>
-			<not>
-				<isset property="tools.jar.location" />
-			</not>
-			<available file="${java.home}/../lib/tools.jar" type="file" />
-		</and>
-	</condition>
-	<condition property="tools.jar.location" value="${java.home}/lib/tools.jar">
-		<and>
-			<not>
-				<isset property="tools.jar.location" />
-			</not>
-			<available file="${java.home}/lib/tools.jar" type="file" />
-		</and>
-	</condition>
-
-	<!-- Maybe this is a Mac?  The following should work for a typical Mac OS X
-       java.home like:
-          /System/Library/Frameworks/JavaVM.framework[/Versions/x.y.z]/Home
-  -->
-	<condition property="tools.jar.location" value="${java.home}/../Classes/classes.jar">
-		<and>
-			<not>
-				<isset property="tools.jar.location" />
-			</not>
-			<available file="${java.home}/../Classes/classes.jar" type="file" />
-		</and>
-	</condition>
-
-	<!-- Save tools.jar as a <path>.  If no tools.jar was found, make an empty
-       path -->
-	<if>
-		<isset property="tools.jar.location" />
-		<then>
-			<path id="tools.jar.path" location="${tools.jar.location}" />
-			<property name="tools.jar.path.property" refid="tools.jar.path" />
-			<property name="toolsjar.debug" value="Using tools.jar at ${tools.jar.path.property}" />
-		</then>
-		<else>
-			<path id="tools.jar.path" />
-			<property name="toolsjar.debug" value="No tools.jar found - Sun compiler not available" />
-			<!-- no tools.jar means we're running on a JRE rather than a JDK.
-           On Windows, this means that only the client VM is available -->
-			<if>
-				<os family="windows" />
-				<then>
-					<property name="server.or.client" value="-client" />
-				</then>
-			</if>
-		</else>
-	</if>
-
 	<!-- Default to the server VM (slower startup but faster running) unless
        overridden above -->
 	<property name="server.or.client" value="-server" />
 
 	<!-- The build CLASSPATH -->
 	<path id="build.class.path">
-		<path refid="tools.jar.path" />
 		<fileset refid="libs" />
 	</path>
 
@@ -176,7 +118,6 @@
 	<path id="run.class.path">
 		<pathelement location="${binDir}" />
 		<pathelement location="${binDir}/gate.jar" />
-		<path refid="tools.jar.path" />
 		<fileset refid="libs" />
 	</path>
 
@@ -184,7 +125,6 @@
 	<path id="test.class.path">
 		<pathelement location="${binDir}" />
 		<pathelement location="${outputDir}" />
-		<path refid="tools.jar.path" />
 		<fileset refid="libs" />
 	</path>
 
@@ -564,7 +504,6 @@
       Using JVM at ${java.home}
       Initial memory ${runtime.start.memory}
       Maximum memory ${runtime.max.memory}
-      ${toolsjar.debug}
       CLASSPATH=${class.path.debug}
     </echo>
 		<!-- Prepare any user-specified "run." properties -->
