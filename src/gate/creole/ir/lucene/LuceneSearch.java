@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Vector;
 
 import org.apache.lucene.analysis.SimpleAnalyzer;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.FSDirectory;
@@ -74,15 +75,13 @@ public class LuceneSearch implements Search {
     List<QueryResult> result = new Vector<QueryResult>();
 
     try {
-      IndexSearcher searcher = new IndexSearcher(
-        FSDirectory.open(
-           new File(indexedCorpus.getIndexDefinition().getIndexLocation())
-           ),
-        true);
+      IndexSearcher searcher =
+          new IndexSearcher(IndexReader.open(FSDirectory.open(new File(
+              indexedCorpus.getIndexDefinition().getIndexLocation())), true));
       QueryParser parser = new QueryParser(
-              Version.LUCENE_29,
+              Version.LUCENE_30,
               "body", 
-              new SimpleAnalyzer());
+              new SimpleAnalyzer(Version.LUCENE_30));
       Query luceneQuery = parser.parse(query);
 
       // JP was for lucene 2.2
@@ -96,13 +95,13 @@ public class LuceneSearch implements Search {
       int resultlength = hits.length;
 
 
-      Vector fieldValues = null;
+      Vector<Term> fieldValues = null;
       for (int i=0; i<resultlength; i++) {
 
         if (fieldNames != null){
-          fieldValues = new Vector();
+          fieldValues = new Vector<Term>();
           for (int j=0; j<fieldNames.size(); j++){
-            fieldValues.add(new gate.creole.ir.Term( 
+            fieldValues.add(new Term( 
                     fieldNames.get(j).toString(), 
                     searcher.doc(hits[i].doc).get(fieldNames.get(j).toString()))
             );

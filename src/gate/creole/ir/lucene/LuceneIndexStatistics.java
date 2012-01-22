@@ -15,9 +15,9 @@
 
 package gate.creole.ir.lucene;
 
-import java.util.HashMap;
-
 import gate.creole.ir.IndexStatistics;
+
+import java.util.Map;
 
 public class LuceneIndexStatistics implements IndexStatistics {
 
@@ -44,7 +44,7 @@ public class LuceneIndexStatistics implements IndexStatistics {
     return null;
   }
 
-  public HashMap getTermFrequency(Long docID, String fieldName){
+  public Map getTermFrequency(Long docID, String fieldName){
     //NOT IMPLEMENTED YET
     return null;
   }

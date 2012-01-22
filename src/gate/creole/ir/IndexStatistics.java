@@ -15,7 +15,7 @@
 
 package gate.creole.ir;
 
-import java.util.HashMap;
+import java.util.Map;
 
 public interface IndexStatistics{
 
@@ -27,6 +27,6 @@ public interface IndexStatistics{
 
   public Long getSpecificity(String term);
 
-  public HashMap getTermFrequency(Long docID, String fieldName);
+  public Map getTermFrequency(Long docID, String fieldName);
 
 }

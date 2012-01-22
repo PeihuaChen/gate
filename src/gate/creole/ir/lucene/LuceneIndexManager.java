@@ -32,6 +32,7 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.Version;
 
 /** This class represents Lucene implementation of IndexManeager interface.*/
 public class LuceneIndexManager implements IndexManager{
@@ -82,7 +83,7 @@ public class LuceneIndexManager implements IndexManager{
 
       IndexWriter writer = new IndexWriter(
               FSDirectory.open(new File(location)),
-              new SimpleAnalyzer(), 
+              new SimpleAnalyzer(Version.LUCENE_30), 
               true,
               new IndexWriter.MaxFieldLength(IndexWriter.DEFAULT_MAX_FIELD_LENGTH)
               );
@@ -116,7 +117,7 @@ public class LuceneIndexManager implements IndexManager{
     try {
       IndexWriter writer = new IndexWriter(
               FSDirectory.open(new File(indexDefinition.getIndexLocation())),
-              new SimpleAnalyzer(), 
+              new SimpleAnalyzer(Version.LUCENE_30), 
               false,
               new IndexWriter.MaxFieldLength(IndexWriter.DEFAULT_MAX_FIELD_LENGTH));
       writer.optimize();
@@ -174,7 +175,7 @@ public class LuceneIndexManager implements IndexManager{
 
       IndexWriter writer = new IndexWriter(
               FSDirectory.open(new File(location)),
-              new SimpleAnalyzer(), 
+              new SimpleAnalyzer(Version.LUCENE_30), 
               false,
               new IndexWriter.MaxFieldLength(IndexWriter.DEFAULT_MAX_FIELD_LENGTH)
               );
@@ -198,7 +199,8 @@ public class LuceneIndexManager implements IndexManager{
   private org.apache.lucene.document.Document getLuceneDoc(gate.Document gateDoc){
     org.apache.lucene.document.Document luceneDoc =
                                      new org.apache.lucene.document.Document();
-    Iterator fields = indexDefinition.getIndexFields();
+    @SuppressWarnings("unchecked")
+    Iterator<IndexField> fields = indexDefinition.getIndexFields();
 
 //    luceneDoc.add(Field.Keyword(DOCUMENT_ID,
 //                                gateDoc.getLRPersistenceId().toString()));
@@ -207,7 +209,7 @@ public class LuceneIndexManager implements IndexManager{
     luceneDoc.add(new Field(DOCUMENT_ID,gateDoc.getLRPersistenceId().toString(),Field.Store.YES,Field.Index.NOT_ANALYZED));
     
     while (fields.hasNext()) {
-      IndexField field = (IndexField) fields.next();
+      IndexField field = fields.next();
       String valueForIndexing;
 
       if (field.getReader() == null){
