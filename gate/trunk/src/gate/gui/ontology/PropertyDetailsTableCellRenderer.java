@@ -68,7 +68,7 @@ public class PropertyDetailsTableCellRenderer extends DefaultTableCellRenderer {
           setIcon(MainFrame.getIcon("ontology-restriction"));
           setFont(getFont().deriveFont(0));
           setText(tclass.getName());
-          setToolTipText(tclass.getURI().toString());
+          setToolTipText(tclass.getONodeID().toString());
           setEnabled(true);
         }
         else if(obj instanceof OClass) {
@@ -76,7 +76,7 @@ public class PropertyDetailsTableCellRenderer extends DefaultTableCellRenderer {
           setIcon(MainFrame.getIcon("ontology-class"));
           setFont(getFont().deriveFont(0));
           setText(tclass.getName());
-          setToolTipText(tclass.getURI().toString());
+          setToolTipText(tclass.getONodeID().toString());
           setEnabled(true);
         }
         else if(obj instanceof OInstance) {
@@ -84,7 +84,7 @@ public class PropertyDetailsTableCellRenderer extends DefaultTableCellRenderer {
           setIcon(MainFrame.getIcon("ontology-instance"));
           setFont(getFont().deriveFont(0));
           setText(oinstance.getName());
-          setToolTipText(oinstance.getURI().toString());
+          setToolTipText(oinstance.getONodeID().toString());
           setEnabled(true);
         }
         else if(obj instanceof RDFProperty) {
@@ -118,7 +118,7 @@ public class PropertyDetailsTableCellRenderer extends DefaultTableCellRenderer {
           setText(s);
           setToolTipText((new StringBuilder()).append(
                   "<HTML><b>" + propertyType + " Property</b><br>").append(
-                  property.getURI()).append("</html>").toString());
+                  property.getONodeID()).append("</html>").toString());
           setEnabled(true);
         }
         else if(obj instanceof PropertyValue) {
@@ -154,7 +154,7 @@ public class PropertyDetailsTableCellRenderer extends DefaultTableCellRenderer {
           setText(s);
           setToolTipText((new StringBuilder()).append(
                   "<HTML><b>" + propertyType + " Property Value</b><br>")
-                  .append(property.getProperty().getURI()).append("</html>")
+                  .append(property.getProperty().getONodeID()).append("</html>")
                   .toString());
           setEnabled(true);
         }

@@ -109,18 +109,18 @@ public class Utils {
           toAdd.add(new KeyValuePair(res, "DATATYPE", datatypeString, false));
           toAdd.add(new KeyValuePair(res, "VALUE", valueString, true));
         } else {
-          valueString = ((OResource)value).getURI().toString();
+          valueString = ((OResource)value).getONodeID().toString();
           toAdd.add(new KeyValuePair((OResource)value, "VALUE", valueString, false));
         }
       }
       else if(res instanceof AllValuesFromRestriction) {
-        valueString = ((AllValuesFromRestriction)res).getHasValue().getURI()
+        valueString = ((AllValuesFromRestriction)res).getHasValue().getONodeID()
                 .toString();
         toAdd.add(new KeyValuePair(((AllValuesFromRestriction)res)
                 .getHasValue(), "VALUE", valueString, false));
       }
       else if(res instanceof SomeValuesFromRestriction) {
-        valueString = ((SomeValuesFromRestriction)res).getHasValue().getURI()
+        valueString = ((SomeValuesFromRestriction)res).getHasValue().getONodeID()
                 .toString();
         toAdd.add(new KeyValuePair(((SomeValuesFromRestriction)res)
                 .getHasValue(), "VALUE", valueString, false));

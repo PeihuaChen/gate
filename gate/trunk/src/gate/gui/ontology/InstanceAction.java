@@ -47,9 +47,9 @@ public class InstanceAction extends AbstractAction implements
   public void actionPerformed(ActionEvent actionevent) {
     OResource selectedNode = ((OResourceNode)selectedNodes.get(0)
       .getUserObject()).getResource();
-    String ns = selectedNode.getURI().getNameSpace();
+    String ns = selectedNode.getONodeID().getNameSpace();
     if(gate.creole.ontology.Utils.hasSystemNameSpace(
-      selectedNode.getURI().toString())) {
+      selectedNode.getONodeID().toString())) {
       ns = ontology.getDefaultNameSpace();
     }
     nameSpace.setText(ns);
@@ -89,8 +89,8 @@ public class InstanceAction extends AbstractAction implements
         Object obj = ((OResourceNode)selectedNodes.get(i)
           .getUserObject()).getResource();
         if(obj instanceof OClass) {
-          ontology.addOInstance(new URI(nameSpace.getText()
-            + instanceName.getText(), false), (OClass)obj);
+          ontology.addOInstance(ontology.createOURI(nameSpace.getText()
+            + instanceName.getText()), (OClass)obj);
         }
       }
     }

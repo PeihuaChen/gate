@@ -59,7 +59,7 @@ public class ObjectPropertyAction extends AbstractAction implements
           if(((OResourceNode)defaultmutabletreenode.getUserObject())
                   .getResource() instanceof OClass)
             arraylist.add((((OResourceNode)defaultmutabletreenode
-                    .getUserObject()).getResource()).getURI().toString());
+                    .getUserObject()).getResource()).getONodeID().toString());
         }
         String as1[] = new String[arraylist.size()];
         for(int k = 0; k < as1.length; k++)
@@ -127,8 +127,8 @@ public class ObjectPropertyAction extends AbstractAction implements
           Utils.getOResourceFromMap(ontology,rangeSelectedValue);
         rangeSet.add(oclass);
       }
-      ontology.addObjectProperty(new URI(nameSpace.getText()
-        + propertyName.getText(), false), domainSet, rangeSet);
+      ontology.addObjectProperty(ontology.createOURI(nameSpace.getText()
+        + propertyName.getText()), domainSet, rangeSet);
     }
   }
 

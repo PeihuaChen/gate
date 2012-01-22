@@ -47,9 +47,9 @@ public class SubClassAction extends AbstractAction implements
   public void actionPerformed(ActionEvent actionevent) {
     OResource selectedNode = ((OResourceNode)selectedNodes.get(0)
       .getUserObject()).getResource();
-    String ns = selectedNode.getURI().getNameSpace();
+    String ns = selectedNode.getONodeID().getNameSpace();
     if(gate.creole.ontology.Utils.hasSystemNameSpace(
-      selectedNode.getURI().toString())) {
+      selectedNode.getONodeID().toString())) {
       ns = ontology.getDefaultNameSpace();
     }
     nameSpace.setText(ns);
@@ -91,8 +91,8 @@ public class SubClassAction extends AbstractAction implements
         return;
       }
 
-      OClass oclassimpl = ontology.addOClass(new URI(s + className.getText(),
-              false), OConstants.OWL_CLASS);
+      OClass oclassimpl =
+          ontology.addOClass(ontology.createOURI(s + className.getText()));
       for(int k = 0; k < arraylist.size(); k++) {
         (arraylist.get(k)).addSubClass(oclassimpl);
       }

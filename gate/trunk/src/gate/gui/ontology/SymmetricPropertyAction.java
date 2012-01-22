@@ -58,7 +58,7 @@ public class SymmetricPropertyAction extends AbstractAction implements
           if(((OResourceNode)defaultmutabletreenode.getUserObject())
                   .getResource() instanceof OClass)
             arraylist.add((((OResourceNode)defaultmutabletreenode
-                    .getUserObject()).getResource()).getURI().toString());
+                    .getUserObject()).getResource()).getONodeID().toString());
         }
         String as1[] = new String[arraylist.size()];
         for(int k = 0; k < as1.length; k++)
@@ -110,8 +110,8 @@ public class SymmetricPropertyAction extends AbstractAction implements
           Utils.getOResourceFromMap(ontology,domainSelectedValues[j]);
         domainSet.add(oclass);
       }
-      ontology.addSymmetricProperty(new URI(nameSpace.getText()
-        + propertyName.getText(), false), domainSet);
+      ontology.addSymmetricProperty(ontology.createOURI(nameSpace.getText()
+        + propertyName.getText()), domainSet);
     }
   }
 

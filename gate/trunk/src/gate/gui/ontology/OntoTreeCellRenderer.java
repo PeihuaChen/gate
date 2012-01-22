@@ -7,11 +7,21 @@
  */
 package gate.gui.ontology;
 
-import gate.creole.ontology.*;
+import gate.creole.ontology.AnnotationProperty;
+import gate.creole.ontology.DatatypeProperty;
+import gate.creole.ontology.OClass;
+import gate.creole.ontology.OInstance;
+import gate.creole.ontology.OResource;
+import gate.creole.ontology.ObjectProperty;
+import gate.creole.ontology.RDFProperty;
+import gate.creole.ontology.Restriction;
+import gate.creole.ontology.SymmetricProperty;
+import gate.creole.ontology.TransitiveProperty;
 import gate.gui.MainFrame;
 
 import java.awt.Color;
 import java.awt.Component;
+
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
@@ -43,53 +53,53 @@ public class OntoTreeCellRenderer extends DefaultTreeCellRenderer {
       if(obj1 instanceof Restriction) {
         icon = MainFrame.getIcon("ontology-restriction");
         s = ((OClass)obj1).getName();
-        if(((OClass)obj1).getURI().isAnonymousResource())
-          setToolTipText(((OClass)obj1).getURI().toString()
+        if(((OClass)obj1).getONodeID().isAnonymousResource())
+          setToolTipText(((OClass)obj1).getONodeID().toString()
                   + " is a restriction");
-        else setToolTipText(((OClass)obj1).getURI().toString());
+        else setToolTipText(((OClass)obj1).getONodeID().toString());
       }
       else if(obj1 instanceof OClass) {
         icon = MainFrame.getIcon("ontology-class");
         s = ((OClass)obj1).getName();
-        if(((OClass)obj1).getURI().isAnonymousResource())
-          setToolTipText(((OClass)obj1).getURI().toString()
+        if(((OClass)obj1).getONodeID().isAnonymousResource())
+          setToolTipText(((OClass)obj1).getONodeID().toString()
                   + " is an annonymous class");
-        else setToolTipText(((OClass)obj1).getURI().toString());
+        else setToolTipText(((OClass)obj1).getONodeID().toString());
       }
       else if(obj1 instanceof OInstance) {
         icon = MainFrame.getIcon("ontology-instance");
         s = ((OInstance)obj1).getName();
-        setToolTipText(((OInstance)obj1).getURI().toString());
+        setToolTipText(((OInstance)obj1).getONodeID().toString());
       }
       else if(obj1 instanceof AnnotationProperty) {
         icon = MainFrame.getIcon("ontology-annotation-property");
         s = ((AnnotationProperty)obj1).getName();
-        setToolTipText(((AnnotationProperty)obj1).getURI().toString());
+        setToolTipText(((AnnotationProperty)obj1).getONodeID().toString());
       }
       else if(obj1 instanceof DatatypeProperty) {
         icon = MainFrame.getIcon("ontology-datatype-property");
         s = ((DatatypeProperty)obj1).getName();
-        setToolTipText(((DatatypeProperty)obj1).getURI().toString());
+        setToolTipText(((DatatypeProperty)obj1).getONodeID().toString());
       }
       else if(obj1 instanceof SymmetricProperty) {
         icon = MainFrame.getIcon("ontology-symmetric-property");
         s = ((SymmetricProperty)obj1).getName();
-        setToolTipText(((SymmetricProperty)obj1).getURI().toString());
+        setToolTipText(((SymmetricProperty)obj1).getONodeID().toString());
       }
       else if(obj1 instanceof TransitiveProperty) {
         icon = MainFrame.getIcon("ontology-transitive-property");
         s = ((TransitiveProperty)obj1).getName();
-        setToolTipText(((TransitiveProperty)obj1).getURI().toString());
+        setToolTipText(((TransitiveProperty)obj1).getONodeID().toString());
       }
       else if(obj1 instanceof ObjectProperty) {
         icon = MainFrame.getIcon("ontology-object-property");
         s = ((ObjectProperty)obj1).getName();
-        setToolTipText(((ObjectProperty)obj1).getURI().toString());
+        setToolTipText(((ObjectProperty)obj1).getONodeID().toString());
       }
       else if(obj1 instanceof RDFProperty) {
         icon = MainFrame.getIcon("ontology-rdf-property");
         s = ((RDFProperty)obj1).getName();
-        setToolTipText(((RDFProperty)obj1).getURI().toString());
+        setToolTipText(((RDFProperty)obj1).getONodeID().toString());
       }
       if(icon != null) {
         if(flag1)

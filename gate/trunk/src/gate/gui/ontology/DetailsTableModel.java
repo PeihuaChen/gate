@@ -13,12 +13,28 @@
  */
 package gate.gui.ontology;
 
-import gate.creole.ontology.*;
+import gate.creole.ontology.AnnotationProperty;
+import gate.creole.ontology.DatatypeProperty;
+import gate.creole.ontology.InvalidValueException;
+import gate.creole.ontology.Literal;
+import gate.creole.ontology.OClass;
+import gate.creole.ontology.OConstants;
+import gate.creole.ontology.OInstance;
+import gate.creole.ontology.OResource;
+import gate.creole.ontology.OValue;
+import gate.creole.ontology.ObjectProperty;
+import gate.creole.ontology.Ontology;
+import gate.creole.ontology.RDFProperty;
+import gate.creole.ontology.Restriction;
 import gate.gui.MainFrame;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import javax.swing.JOptionPane;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.*;
 
 /**
  * A DataModel that is created when a node is selected in the ontology

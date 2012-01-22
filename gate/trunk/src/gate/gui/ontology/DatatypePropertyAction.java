@@ -13,14 +13,30 @@
  */
 package gate.gui.ontology;
 
-import gate.creole.ontology.*;
+import gate.creole.ontology.DataType;
+import gate.creole.ontology.OClass;
+import gate.creole.ontology.OResource;
+import gate.creole.ontology.Ontology;
 import gate.gui.MainFrame;
 
-import java.awt.*;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.*;
-import javax.swing.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
+import javax.swing.AbstractAction;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.Icon;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
@@ -84,7 +100,7 @@ public class DatatypePropertyAction extends AbstractAction implements
           DefaultMutableTreeNode node = selectedNodes.get(j);
           OResource res = ((OResourceNode)node.getUserObject()).getResource();
           if(res instanceof OClass) {
-            arraylist.add(res.getURI().toString());
+            arraylist.add(res.getONodeID().toString());
           }
         }
         String as1[] = new String[arraylist.size()];
@@ -138,8 +154,8 @@ public class DatatypePropertyAction extends AbstractAction implements
       }
       DataType dt = DataType.getDataType((String)
         datatypesComboBox.getSelectedItem());
-      ontology.addDatatypeProperty(new URI(nameSpace.getText()
-        + propertyName.getText(), false), hashset, dt);
+      ontology.addDatatypeProperty(ontology.createOURI(nameSpace.getText()
+        + propertyName.getText()), hashset, dt);
     }
   }
 
@@ -155,7 +171,7 @@ public class DatatypePropertyAction extends AbstractAction implements
     selectedNodes = arraylist;
   }
 
-  public ArrayList getOntologyClassesURIs() {
+  public List<String> getOntologyClassesURIs() {
     return ontologyClassesURIs;
   }
 
@@ -169,7 +185,7 @@ public class DatatypePropertyAction extends AbstractAction implements
   protected JButton domainButton;
   protected JTextField propertyName;
   protected ValuesSelectionAction domainAction;
-  protected ArrayList<String> ontologyClassesURIs;
-  protected ArrayList<DefaultMutableTreeNode> selectedNodes;
+  protected List<String> ontologyClassesURIs;
+  protected List<DefaultMutableTreeNode> selectedNodes;
   protected Ontology ontology;
 }

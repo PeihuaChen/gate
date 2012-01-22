@@ -209,7 +209,7 @@ public class SearchAction extends AbstractAction {
       if(selectedR instanceof RDFProperty) {
         ontologyEditor.propertyTree.setSelectionPath(new TreePath(
                 ontologyEditor.uri2TreeNodesListMap.get(
-                        selectedR.getURI().toString()).get(0).getPath()));
+                        selectedR.getONodeID().toString()).get(0).getPath()));
         ontologyEditor.propertyTree
                 .scrollPathToVisible(ontologyEditor.propertyTree
                         .getSelectionPath());
@@ -219,7 +219,7 @@ public class SearchAction extends AbstractAction {
       else {
         ontologyEditor.tree.setSelectionPath(new TreePath(
                 ontologyEditor.uri2TreeNodesListMap.get(
-                        selectedR.getURI().toString()).get(0).getPath()));
+                        selectedR.getONodeID().toString()).get(0).getPath()));
         ontologyEditor.tree.scrollPathToVisible(ontologyEditor.tree
                 .getSelectionPath());
         ontologyEditor.tabbedPane.setSelectedComponent(ontologyEditor.scroller);
