@@ -293,7 +293,7 @@
 		<!-- build the full classpath using ivy to resolve dependencies -->
 	 	<taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant">
  			<classpath>
-				<pathelement location="${libDir}/ivy-2.2.0.jar" />
+				<pathelement location="${libDir}/ivy.jar" />
 			</classpath>
 		</taskdef>
 
@@ -305,11 +305,11 @@
 		<ivy:report todir="lib" graph="false" />
 
 		<!-- convert the Ivy file into a Maven POM. Note that this is most definately
-                     experimental and doesn't yet replace the one in gate/build/deploy/maven
-		<ivy:makepom ivyfile="gate-ivy.xml" pomfile="gate.pom.xml">
+                     experimental and doesn't yet replace the one in gate/build/deploy/maven  -->
+		<!-- <ivy:makepom ivyfile="gate-ivy.xml" pomfile="gate.pom.xml">
 			<mapping conf="required,compile" scope="compile"/>
 			<mapping conf="required,runtime" scope="runtime"/>
-		</ivy:makepom>  -->
+		</ivy:makepom> -->
 	</target>
 
 
