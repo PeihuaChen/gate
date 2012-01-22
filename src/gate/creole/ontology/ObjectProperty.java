@@ -21,6 +21,7 @@ import java.util.Set;
  * @author Johann Petrak
  * 
  */
+@SuppressWarnings("deprecation")
 public interface ObjectProperty extends RDFProperty {
   /**
    * Returns the set of inverse properties for this property. 
