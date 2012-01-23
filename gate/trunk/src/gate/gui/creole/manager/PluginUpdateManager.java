@@ -140,7 +140,9 @@ public class PluginUpdateManager extends JDialog {
       "Austrian Research Institute for AI (OFAI)",
       "http://www.ofai.at/~johann.petrak/GATE/gate-update-site.xml",
       "Semantic Software Lab",
-      "http://creole.semanticsoftware.info/gate-update-site.xml"};
+      "http://creole.semanticsoftware.info/gate-update-site.xml",
+      "City University Centre for Health Informatics",
+      "http://vega.soi.city.ac.uk/~abdy181/software/GATE/gate-update-site.xml"};
 
   public static File getUserPluginsHome() {
     // TODO move this into gate.util.OptionaMap as a getFile() method
