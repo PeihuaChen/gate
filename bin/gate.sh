@@ -1,4 +1,11 @@
 #!/bin/bash
+
+# Parameters passed to the GATE process
+gateparams=()
+
+# Parameters passed to the Java process
+vmparams=(-splash:bin/splash.png -Xmx1G)
+
 #set -x
 PRG="$0"
 CURDIR="`pwd`"
@@ -22,12 +29,6 @@ export GATE_HOME="`pwd`"
 export ANT_HOME=$GATE_HOME
 cd "$CURDIR"
 
-## Process arguments: known arguments must come first, as soon as an 
-## unknown argument is detected, processing ends and the rest of the
-## arguments are passed on to ant run
-
-gateparams=()
-vmparams=(-splash:bin/splash.png)
 while test "$1" != "";
 do
   case "$1" in
@@ -108,7 +109,6 @@ else
   echo "Couldn't find java, please set JAVA_HOME"
   exit 1
 fi
-
 
 
 echo "Running GATE using Java at $JAVACMD"
