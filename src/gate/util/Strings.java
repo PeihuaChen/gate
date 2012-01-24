@@ -170,7 +170,7 @@ public class Strings {
    * @param base10 if <code>true</code> then the multiplier used is 10^3 (i.e. 
    * 1000 bytes are reported as 1kB, etc.); otherwise 1024 is used as a 
    * multiplier (1024 bytes is 1KiB, etc.).
-   * @return
+   * @return a human readable version of a file size
    */
   public static String humanReadableByteCount(long bytes, boolean base10) {
     int unit = base10 ? 1000 : 1024;
