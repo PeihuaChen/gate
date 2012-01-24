@@ -1,10 +1,21 @@
 #!/bin/bash
 
+# Parameters passed to the Java process
+# You can edit the values below (to e.g. change th maximum amount of memory), or
+# add new parameters, as needed.
+
+vmparams=(-splash:bin/splash.png -Xmx1G)
+
 # Parameters passed to the GATE process
+# This array gets populated from the command line parameters given to the 
+# script. If required, you can set the initial list of parameters here. 
+
 gateparams=()
 
-# Parameters passed to the Java process
-vmparams=(-splash:bin/splash.png -Xmx1G)
+
+############################################################################
+#        USERS SHOULD NOT NEED TO MAKE ANY CHANGES BELOW THIS LINE         #
+############################################################################
 
 #set -x
 PRG="$0"
