@@ -1061,14 +1061,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       new JCheckBoxMenuItem(new VerboseModeCorpusEvalToolAction());
     corpusEvalMenu.add(verboseModeItem);
 
-    // add separator.  plugin menu items will appear after this separator
-    toolsMenu.addSeparator();
-    toolsMenu.staticItemsAdded();
-    if (toolsMenu.getMenuComponent(toolsMenu.getMenuComponentCount()-1)
-        instanceof JSeparator) { // remove separator if no tools
-      toolsMenu.remove(toolsMenu.getMenuComponentCount()-1);
-    }
-
+    toolsMenu.staticItemsAdded();    
     menuBar.add(toolsMenu);
 
     JMenu helpMenu = new XJMenu("Help", null, MainFrame.this);
@@ -4322,7 +4315,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           }
           // if we get to here, we didn't find a menu to use - add one
           XJMenu newMenu = new XJMenu(pathElement, pathElement, this.listener);
-          menuToUse.add(newMenu);
+          menuToUse.insert(newMenu,Math.max(i-1, firstIndex));
           firstIndex = 0;
           menuToUse = newMenu;
         }
