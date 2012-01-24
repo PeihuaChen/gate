@@ -4307,7 +4307,7 @@ public class MainFrame extends JFrame implements ProgressListener,
               menuToUse = (XJMenu)item;
               continue PATH_ELEMENT;
             }
-            else if(item.getText().compareTo(pathElement) < 0) {
+            else if(item.getText().compareTo(pathElement) > 0) {
               // we've gone beyond where this menu should be in alpha
               // order
               break;
@@ -4315,7 +4315,7 @@ public class MainFrame extends JFrame implements ProgressListener,
           }
           // if we get to here, we didn't find a menu to use - add one
           XJMenu newMenu = new XJMenu(pathElement, pathElement, this.listener);
-          menuToUse.insert(newMenu,Math.max(i-1, firstIndex));
+          menuToUse.insert(newMenu,i);
           firstIndex = 0;
           menuToUse = newMenu;
         }
