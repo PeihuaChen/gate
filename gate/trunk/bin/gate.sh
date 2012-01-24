@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Parameters passed to the Java process
-# You can edit the values below (to e.g. change th maximum amount of memory), or
+# You can edit the values below (to e.g. change the maximum amount of memory) or
 # add new parameters, as needed.
 
 vmparams=(-splash:bin/splash.png -Xmx1G)
