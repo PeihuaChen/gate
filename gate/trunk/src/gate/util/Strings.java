@@ -164,6 +164,23 @@ public class Strings {
   }
 
   /**
+   * Converts a size given as a number of bytes (e.g. a file size) to a 
+   * human-readable string.
+   * @param bytes the size to be converted.
+   * @param base10 if <code>true</code> then the multiplier used is 10^3 (i.e. 
+   * 1000 bytes are reported as 1kB, etc.); otherwise 1024 is used as a 
+   * multiplier (1024 bytes is 1KiB, etc.).
+   * @return
+   */
+  public static String humanReadableByteCount(long bytes, boolean base10) {
+    int unit = base10 ? 1000 : 1024;
+    if (bytes < unit) return bytes + " B";
+    int exp = (int) (Math.log(bytes) / Math.log(unit));
+    String pre = (base10 ? "kMGTPE" : "KMGTPE").charAt(exp-1) + (base10 ? "" : "i");
+    return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+  }
+  
+  /**
    * Convert about any object to a human readable string.<br>
    * Use {@link Arrays#deepToString(Object[])} to convert an array or
    * a collection.
