@@ -5,6 +5,6 @@
       <JAR>lib/owlim-lite-4.3.jar</JAR>
       <JAR>lib/slf4j-api-1.5.6.jar</JAR>
       <JAR>lib/slf4j-jdk14-1.5.6.jar</JAR>
-      <JAR>lib/openrdf-sesame-2.6.1-onejar.jar</JAR>
+      <JAR>lib/openrdf-sesame-2.6.3-onejar.jar</JAR>
       <JAR SCAN="true">Ontology.jar</JAR>
 </CREOLE-DIRECTORY>
