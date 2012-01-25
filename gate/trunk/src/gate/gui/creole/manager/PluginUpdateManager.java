@@ -964,6 +964,8 @@ public class PluginUpdateManager extends JDialog {
     try {
       // get a connection to the URL
       URLConnection conn = url.openConnection();
+      conn.setConnectTimeout(10000);
+      conn.setReadTimeout(10000);
 
       // use this to configure the progress info
       int expectedSize = conn.getContentLength();
