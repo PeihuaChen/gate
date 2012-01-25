@@ -10,7 +10,7 @@
 	<JAR>lib/slf4j-log4j12-1.5.11.jar</JAR>
 	<JAR>lib/trove4j-2.0.2.jar</JAR>
 	<JAR>lib/owlim-lite-4.3.jar</JAR>
-	<JAR>lib/openrdf-sesame-2.6.1-onejar.jar</JAR> 
+	<JAR>lib/openrdf-sesame-2.6.3-onejar.jar</JAR> 
 	<JAR>Gazetteer_LKB.jar</JAR>	
 	<CREOLE>
 
