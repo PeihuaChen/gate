@@ -145,7 +145,7 @@ public class SesameCLI {
     }
     if (repo != null) {
       mManager.openRepository(repo);
-    }
+    } 
   }
 
   private static void do_clear() {
@@ -161,6 +161,10 @@ public class SesameCLI {
   }
    
  private static void do_query() {
+    if(optionId == null) {
+      System.err.println("Repository id (--id or -i) is needed");
+      System.exit(1);
+    }
     setManager(optionDir,optionUrl,optionId);
     String optionFrom = "file";
     if (options.isFrom()) {
