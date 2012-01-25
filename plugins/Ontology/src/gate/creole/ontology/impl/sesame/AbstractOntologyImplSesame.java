@@ -24,12 +24,17 @@ import gate.creole.ontology.OntologyTupleQuery;
 import gate.creole.ontology.impl.AbstractOntologyImpl;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 import java.util.Set;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
@@ -57,9 +62,9 @@ public abstract class AbstractOntologyImplSesame extends AbstractOntologyImpl {
 
   public void readOntologyData(java.net.URL theURL, String baseURI,
       OConstants.OntologyFormat format, boolean asImport) {
-    InputStream is;
+    Reader input;
     try {
-      is = theURL.openStream();
+      input = new InputStreamReader(theURL.openStream(), "UTF-8");
     } catch (IOException ex) {
       throw new GateOntologyException("Problem reading from URL " + theURL, ex);
     }
@@ -68,10 +73,11 @@ public abstract class AbstractOntologyImplSesame extends AbstractOntologyImpl {
       isBaseURIset = false;
       baseURI = OConstants.ONTOLOGY_DEFAULT_BASE_URI;
     }
-    ((OntologyServiceImplSesame) ontologyService).readOntologyData(is,
+    ((OntologyServiceImplSesame) ontologyService).readOntologyData(
+        input,
         baseURI, format, asImport);
     try {
-      is.close();
+      input.close();
     } catch (IOException ex) {
       throw new GateOntologyException("Problem closing stream from URL " + theURL, ex);
     }
@@ -89,12 +95,19 @@ public abstract class AbstractOntologyImplSesame extends AbstractOntologyImpl {
 
   public void readOntologyData(File selectedFile, String baseURI,
       OConstants.OntologyFormat format, boolean asImport) {
+    Reader input;
+    try {
+      input = new InputStreamReader(new FileInputStream(selectedFile), "UTF-8");
+    } catch (IOException ex) {
+      throw new GateOntologyException("Problem reading from file " + 
+          selectedFile, ex);
+    }
     boolean isBaseURIset = true;
     if(baseURI == null || baseURI.length() == 0) {
       isBaseURIset = false;
       baseURI = OConstants.ONTOLOGY_DEFAULT_BASE_URI;
     }
-   ((OntologyServiceImplSesame) ontologyService).readOntologyData(selectedFile,
+   ((OntologyServiceImplSesame) ontologyService).readOntologyData(input,
         baseURI, format, asImport);
     if(!asImport) {
       if(isBaseURIset && getDefaultNameSpace() == null) {
@@ -128,12 +141,18 @@ public abstract class AbstractOntologyImplSesame extends AbstractOntologyImpl {
 
   public void readOntologyData(InputStream in, String baseURI,
       OntologyFormat format, boolean asImport) {
+    Reader input;
+    try {
+      input = new InputStreamReader(in, "UTF-8");
+    } catch (IOException ex) {
+      throw new GateOntologyException("Problem reading the input stream.", ex);
+    }
     boolean isBaseURIset = true;
     if(baseURI == null || baseURI.length() == 0) {
       isBaseURIset = false;
       baseURI = OConstants.ONTOLOGY_DEFAULT_BASE_URI;
     }
-    ((OntologyServiceImplSesame) ontologyService).readOntologyData(in,
+    ((OntologyServiceImplSesame) ontologyService).readOntologyData(input,
         baseURI, format, asImport);
     if(!asImport) {
       if(isBaseURIset && getDefaultNameSpace() == null) {
@@ -252,20 +271,27 @@ public abstract class AbstractOntologyImplSesame extends AbstractOntologyImpl {
 
   public void writeOntologyData(File selectedFile,
       OConstants.OntologyFormat format, boolean includeImports) {
-    FileWriter fw;
+    Writer writer;
     try {
-      fw = new FileWriter(selectedFile);
+      writer = new OutputStreamWriter(new FileOutputStream(selectedFile), 
+          "UTF-8");
     } catch (IOException ex) {
       throw new GateOntologyException("Could not open writer for file " +
           selectedFile.getAbsolutePath(), ex);
     }
-    ((OntologyServiceImplSesame) ontologyService).writeOntologyData(fw,
+    ((OntologyServiceImplSesame) ontologyService).writeOntologyData(writer,
         format, includeImports);
   }
 
   public void writeOntologyData(OutputStream out, OntologyFormat format,
       boolean includeImports) {
-    ((OntologyServiceImplSesame) ontologyService).writeOntologyData(out,
+    Writer writer;
+    try {
+      writer = new OutputStreamWriter(out, "UTF-8");
+    } catch (IOException ex) {
+      throw new GateOntologyException("Could not open writer", ex);
+    }
+    ((OntologyServiceImplSesame) ontologyService).writeOntologyData(writer,
         format, includeImports);
   }
 
