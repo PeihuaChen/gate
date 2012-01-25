@@ -260,13 +260,14 @@ public class SesameManager {
     //dirname = dirname.replaceAll("/$", "");
     File dir = new File(dirname);
     if (!dir.exists()) {
-      throw new SesameManagerException("Specified path does not exist: " + dir.getAbsolutePath());
+      throw new SesameManagerException("Specified path does not exist: " + 
+        dir.getAbsolutePath());
     }
     if (!dir.isDirectory()) {
-      throw new SesameManagerException("Specified path is not a directory: " + dir.getAbsolutePath());
+      throw new SesameManagerException("Specified path is not a directory: " + 
+        dir.getAbsolutePath());
     }
-
-		setManager(new LocalRepositoryManager(dir), dir.toString());
+    setManager(new LocalRepositoryManager(dir), dir.toString());
 
   }
   public void connectToLocalLocation(java.net.URL dirname, boolean mustexist) {
@@ -279,13 +280,14 @@ public class SesameManager {
       throw new SesameManagerException("Specified URL is invalid: "+dirname,ex);
     }
     if (!dir.exists()) {
-      throw new SesameManagerException("Specified path does not exist: " + dir.getAbsolutePath());
+      throw new SesameManagerException("Specified path does not exist: " +
+        dir.getAbsolutePath());
     }
     if (!dir.isDirectory()) {
-      throw new SesameManagerException("Specified path is not a directory: " + dir.getAbsolutePath());
+      throw new SesameManagerException("Specified path is not a directory: " + 
+        dir.getAbsolutePath());
     }
-
-		setManager(new LocalRepositoryManager(dir), dir.toString());
+    setManager(new LocalRepositoryManager(dir), dir.toString());
 
   }
 
