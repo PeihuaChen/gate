@@ -62,63 +62,73 @@ public abstract class AbstractOntologyImplSesame extends AbstractOntologyImpl {
 
   public void readOntologyData(java.net.URL theURL, String baseURI,
       OConstants.OntologyFormat format, boolean asImport) {
-    Reader input;
+    Reader input = null;
     try {
       input = new InputStreamReader(theURL.openStream(), "UTF-8");
+      boolean isBaseURIset = true;
+      if(baseURI == null || baseURI.length() == 0) {
+        isBaseURIset = false;
+        baseURI = OConstants.ONTOLOGY_DEFAULT_BASE_URI;
+      }
+      ((OntologyServiceImplSesame) ontologyService).readOntologyData(
+          input,
+          baseURI, format, asImport);
+      if(!asImport) {
+        if(isBaseURIset && getDefaultNameSpace() == null) {
+          setDefaultNameSpace(baseURI);
+        } else {
+          setDefaultNameSpaceFromRepository();
+          if(format.equals(OConstants.OntologyFormat.RDFXML)) {
+            setDefaultNameSpaceByPeeking(theURL);
+          }
+        }
+      }      
     } catch (IOException ex) {
       throw new GateOntologyException("Problem reading from URL " + theURL, ex);
-    }
-    boolean isBaseURIset = true;
-    if(baseURI == null || baseURI.length() == 0) {
-      isBaseURIset = false;
-      baseURI = OConstants.ONTOLOGY_DEFAULT_BASE_URI;
-    }
-    ((OntologyServiceImplSesame) ontologyService).readOntologyData(
-        input,
-        baseURI, format, asImport);
-    try {
-      input.close();
-    } catch (IOException ex) {
-      throw new GateOntologyException("Problem closing stream from URL " + theURL, ex);
-    }
-    if(!asImport) {
-      if(isBaseURIset && getDefaultNameSpace() == null) {
-        setDefaultNameSpace(baseURI);
-      } else {
-        setDefaultNameSpaceFromRepository();
-        if(format.equals(OConstants.OntologyFormat.RDFXML)) {
-          setDefaultNameSpaceByPeeking(theURL);
-        }
+    } finally {
+      try {
+        if(input != null) input.close();
+      } catch (IOException ex) {
+        throw new GateOntologyException("Problem closing stream from URL " + theURL, ex);
       }
+      
     }
   }
 
   public void readOntologyData(File selectedFile, String baseURI,
       OConstants.OntologyFormat format, boolean asImport) {
-    Reader input;
+    Reader input = null;
     try {
       input = new InputStreamReader(new FileInputStream(selectedFile), "UTF-8");
+      boolean isBaseURIset = true;
+      if(baseURI == null || baseURI.length() == 0) {
+        isBaseURIset = false;
+        baseURI = OConstants.ONTOLOGY_DEFAULT_BASE_URI;
+      }
+     ((OntologyServiceImplSesame) ontologyService).readOntologyData(input,
+          baseURI, format, asImport);
+      if(!asImport) {
+        if(isBaseURIset && getDefaultNameSpace() == null) {
+          setDefaultNameSpace(baseURI);
+        } else {
+          setDefaultNameSpaceFromRepository();
+          if(format.equals(OConstants.OntologyFormat.RDFXML)) {
+            setDefaultNameSpaceByPeeking(selectedFile);
+          }
+        }
+      }      
     } catch (IOException ex) {
       throw new GateOntologyException("Problem reading from file " + 
           selectedFile, ex);
-    }
-    boolean isBaseURIset = true;
-    if(baseURI == null || baseURI.length() == 0) {
-      isBaseURIset = false;
-      baseURI = OConstants.ONTOLOGY_DEFAULT_BASE_URI;
-    }
-   ((OntologyServiceImplSesame) ontologyService).readOntologyData(input,
-        baseURI, format, asImport);
-    if(!asImport) {
-      if(isBaseURIset && getDefaultNameSpace() == null) {
-        setDefaultNameSpace(baseURI);
-      } else {
-        setDefaultNameSpaceFromRepository();
-        if(format.equals(OConstants.OntologyFormat.RDFXML)) {
-          setDefaultNameSpaceByPeeking(selectedFile);
-        }
+    } finally {
+      try {
+        if(input != null)  input.close();
+      } catch(IOException e) {
+        throw new GateOntologyException("Problem closing file " + 
+            selectedFile, e);
       }
     }
+
   }
 
   public void readOntologyData(Reader in, String baseURI, OntologyFormat format,
@@ -271,16 +281,24 @@ public abstract class AbstractOntologyImplSesame extends AbstractOntologyImpl {
 
   public void writeOntologyData(File selectedFile,
       OConstants.OntologyFormat format, boolean includeImports) {
-    Writer writer;
+    Writer writer = null;
     try {
       writer = new OutputStreamWriter(new FileOutputStream(selectedFile), 
           "UTF-8");
+      ((OntologyServiceImplSesame) ontologyService).writeOntologyData(writer,
+          format, includeImports);      
     } catch (IOException ex) {
       throw new GateOntologyException("Could not open writer for file " +
           selectedFile.getAbsolutePath(), ex);
+    } finally {
+      try {
+        if(writer != null) writer.close();
+      } catch(IOException e) {
+        throw new GateOntologyException("Could not close writer for file " +
+            selectedFile.getAbsolutePath(), e);
+      }
     }
-    ((OntologyServiceImplSesame) ontologyService).writeOntologyData(writer,
-        format, includeImports);
+
   }
 
   public void writeOntologyData(OutputStream out, OntologyFormat format,
