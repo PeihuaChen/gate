@@ -160,12 +160,14 @@ import org.openrdf.repository.RepositoryConnection;
       }
     }
 
+    // TODO: make this handle optional values correctly!
     public String nextFirstAsString() {
       String ret = nextFirstAsValue().stringValue();
       //logger.debug("QS: "+ret);
       return ret;
     }
 
+    // TODO: make this handle optional values correctly!
     public LiteralOrONodeID nextFirst() {
       Value v = nextFirstAsValue();
       if(v instanceof BNode) {
@@ -182,6 +184,7 @@ import org.openrdf.repository.RepositoryConnection;
     }
 
 
+    // TODO: make this handle optional values correctly!
     public Value nextFirstAsValue() {
       if (mResult == null) {
         throw new GateOntologyException("No prepared query available");
@@ -197,6 +200,7 @@ import org.openrdf.repository.RepositoryConnection;
       return ret;
     }
 
+    // TODO: make this handle optional values correctly!
     public Vector<Value> nextAsValue() {
       if(!hasNext()) {
         throw new GateOntologyException("No more query results but next was called");
@@ -216,7 +220,8 @@ import org.openrdf.repository.RepositoryConnection;
 
     }
 
-
+   // if there are optional values the position in the vector that is not 
+   // bound will return the empty string!
    public Vector<String> nextAsString() {
      if (!hasNext()) {
        throw new GateOntologyException("No more query results but next was called");
@@ -226,14 +231,23 @@ import org.openrdf.repository.RepositoryConnection;
        BindingSet bindingSet = mResult.next();
        for (String bindingName : mVarnames) {
          Value value = bindingSet.getValue(bindingName);
+         /* this is not necessarily an error because a binding can be null if
+          * it was part of an OPTIONAL clause
+          * In that case, null will be added to the return vector.
          if(value == null) {
            throw new GateOntologyException("Could not get binding for name "+
                    bindingName+
                    " for binding names "+bindingSet.getBindingNames()+
                    " for qeury "+mQuery);
          }
-         String val = value.stringValue();
-         result.add(val);
+          * 
+          */
+         if(value != null) {
+           String val = value.stringValue();
+           result.add(val);
+         } else {
+           result.add("");           
+         }
        }
      } catch (QueryEvaluationException e) {
        throw new GateOntologyException("Could not get next query result", e);
@@ -241,6 +255,7 @@ import org.openrdf.repository.RepositoryConnection;
      return result;
    }
 
+   // TODO: make this handle optional values correctly!
     public Vector<LiteralOrONodeID> next() {
       if(!hasNext()) {
         throw new GateOntologyException("No more query results but next was called");
