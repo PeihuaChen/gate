@@ -18,6 +18,7 @@ import gate.annotation.AnnotationSetImpl;
 import gate.creole.*;
 import gate.creole.ontology.OClass;
 import gate.creole.ontology.OConstants;
+import gate.creole.ontology.OConstants.Closure;
 import gate.creole.ontology.OResource;
 import gate.creole.ontology.Ontology;
 import gate.jape.JapeException;
@@ -807,16 +808,62 @@ public class SPTBase extends AbstractLanguageAnalyser {
                         .equals(ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME)) {
           // we need to do ontological match
           // let's first find out the classes with the names
-          OResource superClass = ontology.getOResourceByName(
+          OResource superClass = null;
+          List<OResource> classes = ontology.getOResourcesByName(
               predicate.featureValue.toString());
-          OResource subClass = ontology.getOResourceByName(
-              actualValue.toString());
+          if(classes.isEmpty()) {
+            superClass = null;
+          } else {
+            superClass = classes.get(0);
+            if(classes.size() > 1){
+              StringBuilder str = new StringBuilder("Ontology class name \"" +
+                  predicate.featureValue.toString() +
+                  "\" is ambiguous: [");
+              boolean first = true;
+              for(OResource aClass : classes) {
+                if(first) {
+                  first = false;
+                } else {
+                  str.append(", ");
+                }
+                str.append(aClass.getONodeID().getNameSpace());
+                str.append(aClass.getONodeID().getResourceName());
+              }
+              str.append("].");
+              logger.warn(str.toString());
+            }
+          }
+          OResource subClass = null;
+          classes = ontology.getOResourcesByName(actualValue.toString());
+          if(classes.isEmpty()) {
+            subClass = null;
+          } else {
+            subClass = classes.get(0);
+            if(classes.size() > 1){
+              StringBuilder str = new StringBuilder("Ontology class name \"" +
+                  predicate.featureValue.toString() +
+                  "\" is ambiguous: [");
+              boolean first = true;
+              for(OResource aClass : classes) {
+                if(first) {
+                  first = false;
+                } else {
+                  str.append(", ");
+                }
+                str.append(aClass.getONodeID().getNameSpace());
+                str.append(aClass.getONodeID().getResourceName());
+              }
+              str.append("].");
+              logger.warn(str.toString());
+            }
+          }
+          
           if(superClass == null || !(superClass instanceof OClass) || 
              subClass == null || !(subClass instanceof OClass)) {
             result = false;
           } else {
             result = subClass == superClass || ((OClass)subClass).isSubClassOf(
-                (OClass)superClass, OConstants.TRANSITIVE_CLOSURE);
+                (OClass)superClass, Closure.TRANSITIVE_CLOSURE);
           }
         } else {
           if(actualValue == null) {
