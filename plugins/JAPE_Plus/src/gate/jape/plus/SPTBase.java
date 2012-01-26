@@ -1059,10 +1059,10 @@ public class SPTBase extends AbstractLanguageAnalyser {
         transitions: for(Transition aTransition : states[fsmInstance.state].transitions) {
           if(aTransition.type == TransitionPDA.TYPE_OPENING_ROUND_BRACKET){
             //opening-round-bracket transition
-          FSMInstance nextInstance = fsmInstance.clone();
-          nextInstance.pushNewEmptyBindingSet();
-          nextInstance.state = aTransition.nextState;
-          activeInstances.addLast(nextInstance);
+            FSMInstance nextInstance = fsmInstance.clone();
+            nextInstance.pushNewEmptyBindingSet();
+            nextInstance.state = aTransition.nextState;
+            activeInstances.addLast(nextInstance);
             // we do not advance the annotation index,
             // since opening-round-bracket
             // transitions are treated like epsilon transitions
@@ -1070,10 +1070,10 @@ public class SPTBase extends AbstractLanguageAnalyser {
           }
           if(aTransition.type != TransitionPDA.TYPE_CONSTRAINT){
             // closing-round-bracket transition
-          FSMInstance nextInstance = fsmInstance.clone();
-          nextInstance.popBindingSet(arrayOfBindingNames[aTransition.type]);
-          nextInstance.state = aTransition.nextState;
-          activeInstances.addLast(nextInstance);
+            FSMInstance nextInstance = fsmInstance.clone();
+            nextInstance.popBindingSet(arrayOfBindingNames[aTransition.type]);
+            nextInstance.state = aTransition.nextState;
+            activeInstances.addLast(nextInstance);
             // we do not advance the annotation index,
             // since closing-round-bracket
             // transitions are treated like epsilon transitions
