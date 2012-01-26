@@ -1004,8 +1004,6 @@ public interface Ontology extends LanguageResource {
    * instance from this list (e.g. list.remove(int/Object)) does not
    * delete the resource from an ontology. One must use appropriate
    * method from the Ontology interface to delete such resources.
-   * 
-   * @deprecated
    */
   public List<OResource> getOResourcesByName(String resourceName);
 
