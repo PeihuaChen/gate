@@ -988,7 +988,7 @@ public interface Ontology extends LanguageResource {
    * This method checks in its cache to find out the OResource for the
    * given resource name. However, It is also possible for two resources
    * to have a same name but different name spaces. This method returns
-   * the first found OResource (without gurantteeing the order) from its
+   * the first found OResource (without guaranteeing the order) from its
    * list. If user wants to retrieve a list of resources, he/she must
    * use the getOResourcesByName(String resourceName).
    * @deprecated
