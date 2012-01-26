@@ -54,6 +54,7 @@ public class ConstraintFactory {
     addOperator(ConstraintPredicate.NOT_REGEXP_MATCH, NotRegExpMatchPredicate.class);
     addOperator(ContainsPredicate.OPERATOR, ContainsPredicate.class);
     addOperator(WithinPredicate.OPERATOR, WithinPredicate.class);
+    addOperator(NotWithinPredicate.OPERATOR, NotWithinPredicate.class);
   }
 
   protected void initMetaPropertyMap() {
