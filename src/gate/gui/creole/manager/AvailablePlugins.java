@@ -222,13 +222,20 @@ public class AvailablePlugins extends JPanel {
     mainTable.addKeyListener(new KeyAdapter() {
       @Override
       public void keyTyped(KeyEvent e) {
-        if(e.getKeyChar() != KeyEvent.VK_TAB
-                && e.getKeyChar() != KeyEvent.VK_SPACE
-                && e.getKeyChar() != KeyEvent.VK_BACK_SPACE
-                && e.getKeyChar() != KeyEvent.VK_DELETE) {
-          filterTextField.requestFocusInWindow();
-          filterTextField.setText(String.valueOf(e.getKeyChar()));
-        }
+        // if you are doing something other than Shift+ then you probably don't
+        // want to use it for filtering
+        if(e.getModifiers() > 1) return;
+
+        // these are used for table navigation and not filtering
+        if(e.getKeyChar() == KeyEvent.VK_TAB
+            || e.getKeyChar() == KeyEvent.VK_SPACE
+            || e.getKeyChar() == KeyEvent.VK_BACK_SPACE
+            || e.getKeyChar() == KeyEvent.VK_DELETE) return;
+
+        // we want to filter so move the character to the filter text field
+        filterTextField.requestFocusInWindow();
+        filterTextField.setText(String.valueOf(e.getKeyChar()));
+
       }
     });
 
