@@ -58,6 +58,7 @@ import java.util.TimerTask;
 
 import javax.swing.AbstractAction;
 import javax.swing.AbstractListModel;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -220,17 +221,25 @@ public class AvailablePlugins extends JPanel {
 
     // when typing a character in the table, use it for filtering
     mainTable.addKeyListener(new KeyAdapter() {
+
+      private Action a = new DeleteCreoleRepositoryAction();
+
       @Override
       public void keyTyped(KeyEvent e) {
         // if you are doing something other than Shift+ then you probably don't
         // want to use it for filtering
         if(e.getModifiers() > 1) return;
 
+        // if the user presses delete then act as if they pressed the delete
+        // button on the toolbar
+        if(e.getKeyChar() == KeyEvent.VK_DELETE) {
+          a.actionPerformed(null);
+          return;
+        }
+
         // these are used for table navigation and not filtering
         if(e.getKeyChar() == KeyEvent.VK_TAB
-            || e.getKeyChar() == KeyEvent.VK_SPACE
-            || e.getKeyChar() == KeyEvent.VK_BACK_SPACE
-            || e.getKeyChar() == KeyEvent.VK_DELETE) return;
+            || e.getKeyChar() == KeyEvent.VK_SPACE) return;
 
         // we want to filter so move the character to the filter text field
         filterTextField.requestFocusInWindow();
@@ -445,11 +454,7 @@ public class AvailablePlugins extends JPanel {
           if(!dInfo.isValid()) return invalidIcon;
           if(dInfo.isRemotePlugin()) return remoteIcon;
           if(dInfo.isCorePlugin()) return coreIcon;
-          File userPluginsHome = PluginUpdateManager.getUserPluginsHome();
-          if(userPluginsHome != null
-                  && dInfo.getUrl().toString()
-                          .startsWith(userPluginsHome.toURI().toString()))
-            return userIcon;
+          if(dInfo.isUserPlugin()) return userIcon;
           return otherIcon;
         case LOAD_NOW_COLUMN:
           return getLoadNow(dInfo.getUrl());
@@ -616,13 +621,18 @@ public class AvailablePlugins extends JPanel {
 
       for(int row : rows) {
         int rowModel = mainTable.rowViewToModel(row);
+
         URL toDelete = visibleRows.get(rowModel);
 
-        Gate.removeKnownPlugin(toDelete);
-        loadAlwaysByURL.remove(toDelete);
-        loadNowByURL.remove(toDelete);
+        Gate.DirectoryInfo dInfo = Gate.getDirectoryInfo(toDelete);
+
+        if(!dInfo.isCorePlugin() && !dInfo.isUserPlugin()) {
+          Gate.removeKnownPlugin(toDelete);
+          loadAlwaysByURL.remove(toDelete);
+          loadNowByURL.remove(toDelete);
+        }
       }
-      
+
       // redisplay the table with the current filter
       filterRows(filterTextField.getText());
     }
