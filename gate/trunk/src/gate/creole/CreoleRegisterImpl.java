@@ -114,6 +114,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
     prTypes = new HashSet<String>();
     vrTypes = new LinkedList<String>();
     toolTypes = new HashSet<String>();
+    applicationTypes = new HashSet<String>();
 
     // construct a SAX parser for parsing the CREOLE directory files
     jdomBuilder = new SAXBuilder(false);
@@ -467,6 +468,11 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
       // deserialisation
       controllerTypes.add(rd.getClassName());
     }
+    if (PackagedController.class.isAssignableFrom(resClass)) {
+      if(DEBUG) Out.prln("Application: " + resClass);
+      if (applicationTypes == null) applicationTypes = new HashSet<String>();
+      applicationTypes.add(rd.getClassName());
+    }
 
     // maintain tool types list
     if(rd.isTool()) {
@@ -519,6 +525,9 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
       else if(Controller.class.isAssignableFrom(rd.getResourceClass())) {
         controllerTypes.remove(rd.getClassName());
       }
+      else if (PackagedController.class.isAssignableFrom(rd.getResourceClass())) {
+        applicationTypes.remove(rd.getClassName());
+      }
     }
     catch(ClassNotFoundException cnfe) {
       throw new GateRuntimeException(
@@ -540,6 +549,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
     vrTypes.clear();
     toolTypes.clear();
     directories.clear();
+    applicationTypes.clear();
     super.clear();
   } // clear()
 
@@ -566,6 +576,11 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   /** Get the list of types of TOOL resources in the register. */
   public Set<String> getToolTypes() {
     return Collections.unmodifiableSet(toolTypes);
+  }
+  
+  /** Get the list of types of packaged application resources in the register. */
+  public Set<String>getApplicationTypes() {
+    return Collections.unmodifiableSet(applicationTypes);
   }
 
   /** Get a list of all instantiations of LR in the register. */
@@ -1015,6 +1030,9 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
 
   /** A list of the types of TOOL in the register. */
   protected Set<String> toolTypes;
+  
+  /** A list of the types of Packaged Applications in the register */
+  protected Set<String> applicationTypes;
 
   private transient Vector<CreoleListener> creoleListeners;
 

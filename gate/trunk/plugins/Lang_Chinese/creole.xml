@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 <!-- $Id$ -->
 <CREOLE-DIRECTORY>
+  <JAR SCAN="true">chinese.jar</JAR>
+  <JAR>../Learning/learningapi.jar</JAR>  
+  
   <!-- Processing Resources -->
   <CREOLE>    
     <!-- creole.xml for the Chinese Segmenter PR -->
@@ -9,8 +12,7 @@
       <COMMENT>Segment the Chinese text into words, based on the PAUM learning algorithm.</COMMENT>
       <HELPURL>http://gate.ac.uk/userguide/sec:misc-creole:chineseSeg</HELPURL>
       <CLASS>gate.chineseSeg.ChineseSegMain</CLASS>
-      <JAR>chinese.jar</JAR>
-      <JAR>../Learning/learningapi.jar</JAR>
+      
       <PARAMETER NAME="modelURL"
         COMMENT="The URL referring to one directory containing the model files" RUNTIME="true"
         OPTIONAL="false">java.net.URL</PARAMETER>

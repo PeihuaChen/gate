@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 1995-2010, The University of Sheffield. See the file
+ *  Copyright (c) 1995-2012, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -30,6 +30,7 @@ import gate.ProcessingResource;
 import gate.Resource;
 import gate.VisualResource;
 import gate.creole.ANNIEConstants;
+import gate.creole.PackagedController;
 import gate.creole.ResourceData;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.SerialAnalyserController;
@@ -41,6 +42,7 @@ import gate.event.StatusListener;
 import gate.gui.creole.manager.PluginUpdateManager;
 import gate.persist.PersistenceException;
 import gate.resources.img.svg.AvailableIcon;
+import gate.resources.img.svg.ReadyMadeIcon;
 import gate.swing.JMenuButton;
 import gate.swing.XJFileChooser;
 import gate.swing.XJMenu;
@@ -102,6 +104,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -151,7 +155,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
@@ -217,7 +220,7 @@ public class MainFrame extends JFrame implements ProgressListener,
    * Popup used for right click actions on the Applications node.
    */
   protected JPopupMenu appsPopup;
-
+  
   /**
    * Popup used for right click actions on the Datastores node.
    */
@@ -295,8 +298,11 @@ public class MainFrame extends JFrame implements ProgressListener,
   private static JDialog guiLock = null;
 
   static public Icon getIcon(String baseName) {
+    //is the icon in the cache?
     Icon result = iconByName.get(baseName);
-    for(int i = 0; i < ICON_EXTENSIONS.length && result == null; i++) {
+    if (result != null) return result;
+    
+    for(int i = 0; i < ICON_EXTENSIONS.length ; i++) {
       String extension = ICON_EXTENSIONS[i];
       String fileName = baseName + extension;
       URL iconURL;
@@ -313,9 +319,26 @@ public class MainFrame extends JFrame implements ProgressListener,
       if(iconURL != null) {
         result = new ImageIcon(iconURL);
         iconByName.put(baseName, result);
+        return result;
       }
     }
-    return result;
+    
+    // let's see if this is a new SVG based Icon which is actually a class and
+    // not an image, so we just try and load it via reflection
+    try {
+      @SuppressWarnings("unchecked")
+      Class<Icon> clazz =
+          (Class<Icon>)Class.forName("gate.resources.img.svg." + baseName + "Icon",true,Gate.getClassLoader());
+      Constructor<Icon> con = clazz.getConstructor(int.class,int.class);
+      result = (Icon)con.newInstance(24,24);
+      iconByName.put(baseName, result);
+      return result;
+    } catch(Exception e) {
+      //do nothing
+    }   
+    
+    //if we got to here then we haven't found anything
+    return null;
   }
 
   static public MainFrame getInstance() {
@@ -786,23 +809,19 @@ public class MainFrame extends JFrame implements ProgressListener,
     fileMenu.add(dsMenu);
 
     fileMenu.addSeparator();
+    fileMenu.add(new ReadyMadeMenu());
     fileMenu.add(new XJMenuItem(new LoadResourceFromFileAction(), this));
 
     RecentAppsMenu recentAppsMenu = new RecentAppsMenu();
-    recentAppsMenu.setText("Recent Applications");
-    recentAppsMenu.setIcon(getIcon("open-application"));
     fileMenu.add(recentAppsMenu);
 
-    final JMenu loadANNIEMenu = new XJMenu("Load ANNIE System",
+    /*final JMenu loadANNIEMenu = new XJMenu("Load ANNIE System",
       "Application that adds morphosyntaxic and semantic annotations", this);
     loadANNIEMenu.setIcon(getIcon("annie-application"));
     loadANNIEMenu.add(new XJMenuItem(new LoadANNIEWithDefaultsAction(), this));
     loadANNIEMenu
       .add(new XJMenuItem(new LoadANNIEWithoutDefaultsAction(), this));
     fileMenu.add(loadANNIEMenu);
-
-    // fileMenu.add(new XJMenuItem(new LoadCreoleRepositoryAction(),
-    // this));
 
     // LingPipe action
     fileMenu.add(new XJMenuItem(new LoadApplicationAction(
@@ -812,7 +831,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     // OpenNLP action
     fileMenu.add(new XJMenuItem(new LoadApplicationAction(
             "Load OpenNLP System", "OpenNLP", "resources/opennlp.gapp"), this));
-
+*/
     fileMenu.add(new XJMenuItem(new ManagePluginsAction(), this));
 
     if(!Gate.runningOnMac()) {
@@ -1063,7 +1082,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     toolsMenu.staticItemsAdded();    
     menuBar.add(toolsMenu);
-
+    
     JMenu helpMenu = new XJMenu("Help", null, MainFrame.this);
     helpMenu.setMnemonic(KeyEvent.VK_H);
     helpMenu.add(new XJMenuItem(new HelpUserGuideAction(), this));
@@ -1145,7 +1164,10 @@ public class MainFrame extends JFrame implements ProgressListener,
     toolbar.addSeparator();
 
     JPopupMenu annieMenu = new JPopupMenu();
-    annieMenu.add(new LoadANNIEWithDefaultsAction());
+    annieMenu.add(new XJMenuItem(new LoadApplicationAction("with defaults",
+        "annie-application", new File(new File(Gate.getPluginsHome(),
+            ANNIEConstants.PLUGIN_DIR), ANNIEConstants.DEFAULT_FILE)),
+        MainFrame.this));
     annieMenu.add(new LoadANNIEWithoutDefaultsAction());
     JMenuButton menuButton = new JMenuButton(annieMenu);
     menuButton.setIcon(getIcon("annie-application"));
@@ -1197,7 +1219,7 @@ public class MainFrame extends JFrame implements ProgressListener,
 
   protected void initListeners() {
     Gate.getCreoleRegister().addCreoleListener(this);
-
+   
     resourcesTree.addKeyListener(new KeyAdapter() {
       public void keyPressed(KeyEvent e) {
         if(e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -1247,21 +1269,19 @@ public class MainFrame extends JFrame implements ProgressListener,
           else if(value == applicationsRoot) {
             appsPopup = new XJPopupMenu();
             LiveMenu appsMenu = new LiveMenu(LiveMenu.APP);
-            appsMenu.setText("New");
+            appsMenu.setText("Create New Application");
+            appsMenu.setIcon(MainFrame.getIcon("applications"));
             appsPopup.add(appsMenu);
+            appsPopup.add(new ReadyMadeMenu());
+                        
             guiRoots.add(appsPopup);
             guiRoots.add(appsMenu);
             appsPopup.add(new XJMenuItem(new LoadResourceFromFileAction(),
               MainFrame.this));
-            Component[] components = new RecentAppsMenu().getMenuComponents();
-            if (components.length > 0) {
-              appsPopup.addSeparator();
-              appsPopup.add("Recent Applications:");
-            }
-            for (Component menuItem : components) {
-                // add each menu item from the application recent menu
-                appsPopup.add(menuItem);
-            }
+            
+            RecentAppsMenu recentApps = new RecentAppsMenu();
+            if (recentApps.getMenuComponentCount() > 0) appsPopup.add(recentApps);
+            
             popup = appsPopup;
           }
           else if(value == languageResourcesRoot) {
@@ -2581,72 +2601,6 @@ public class MainFrame extends JFrame implements ProgressListener,
   }// class f
 
   /**
-   * This class represent an action which brings up the corpus
-   * evaluation tool
-   */
-  /*
-   * class DatastoreModeCorpusEvalToolAction extends AbstractAction {
-   * public DatastoreModeCorpusEvalToolAction() { super("Use a datastore
-   * for human annotated texts"); putValue(SHORT_DESCRIPTION,"Use a
-   * datastore for the human annotated texts"); }//
-   * DatastoreModeCorpusEvalToolAction
-   *
-   * public boolean isDatastoreMode() {return datastoreMode;}
-   *
-   * public void actionPerformed(ActionEvent e) { if (! (e.getSource()
-   * instanceof JCheckBoxMenuItem)) return; datastoreMode =
-   * ((JCheckBoxMenuItem)e.getSource()).getState(); }//
-   * actionPerformed(); protected boolean datastoreMode = false;
-   * }//class DatastoreModeCorpusEvalToolListener
-   */
-
-  /**
-   * Loads ANNIE with default parameters.
-   */
-  class LoadANNIEWithDefaultsAction extends AbstractAction implements
-                                                          ANNIEConstants {
-    private static final long serialVersionUID = 1L;
-
-    public LoadANNIEWithDefaultsAction() {
-      super("with Defaults");
-      putValue(SHORT_DESCRIPTION, "Load ANNIE with default parameters");
-      putValue(SMALL_ICON, getIcon("annie-application"));
-    }
-
-    public void actionPerformed(ActionEvent e) {
-      Runnable runnable = new Runnable() {
-        public void run() {
-          lockGUI("ANNIE is being loaded...");
-          try {
-            long startTime = System.currentTimeMillis();
-
-            // load ANNIE as an application from a gapp file
-            PersistenceManager.loadObjectFromFile(new File(new File(
-              Gate.getPluginsHome(), ANNIEConstants.PLUGIN_DIR),
-                ANNIEConstants.DEFAULT_FILE));
-
-            long endTime = System.currentTimeMillis();
-            statusChanged("ANNIE loaded in "
-              + NumberFormat.getInstance().format(
-                (double)(endTime - startTime) / 1000) + " seconds");
-          }
-          catch(Exception error) {
-            String message =
-              "There was an error when loading the ANNIE application.";
-            log.error(message, error);
-          }
-          finally {
-            unlockGUI();
-          }
-        }
-      };
-      Thread thread = new Thread(runnable, "LoadANNIEWithDefaultsAction");
-      thread.setPriority(Thread.MIN_PRIORITY);
-      thread.start();
-    }
-  }// class LoadANNIEWithDefaultsAction
-
-  /**
    * Loads ANNIE without default parameters.
    */
   class LoadANNIEWithoutDefaultsAction extends AbstractAction implements
@@ -2738,39 +2692,84 @@ public class MainFrame extends JFrame implements ProgressListener,
   class LoadApplicationAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
 
-    private String pluginDir = null;
+    private String name, icon;
+    
+    private URL pipelineURL;
 
-    private String applicationFile = null;
-
-    public LoadApplicationAction(String caption, String pluginDir,
-            String applicationFile) {
-      super("Load " + pluginDir + " System");
-      this.pluginDir = pluginDir;
-      this.applicationFile = applicationFile;
-      putValue(SHORT_DESCRIPTION, "Load " + pluginDir
-              + " with default parameters");
-      putValue(SMALL_ICON, getIcon("open-application"));
+    public LoadApplicationAction(String name, URL pipelineURL) {
+      this(name,"application",pipelineURL);
+    }
+    
+    public LoadApplicationAction(String name, File pipelineFile) {
+      this(name,"application",pipelineFile);
+    }
+    
+    public LoadApplicationAction(String name, String icon, File pipelineFile) {
+      super(name,MainFrame.getIcon(icon));
+      if (getValue(Action.SMALL_ICON) == null) putValue(Action.SMALL_ICON, MainFrame.getIcon("application"));
+      this.name = name;
+      this.icon = icon;
+      try {
+        this.pipelineURL = pipelineFile.toURI().toURL();
+      }
+      catch (MalformedURLException e) {
+        throw new RuntimeException("When is a file not a URL? I don't know but this stack trace might help!",e);
+      }
+    }
+    
+    public LoadApplicationAction(String name, String icon, URL pipelineURL) {
+      super(name,MainFrame.getIcon(icon));
+      if (getValue(Action.SMALL_ICON) == null) putValue(Action.SMALL_ICON, MainFrame.getIcon("application"));
+      this.name = name;
+      this.pipelineURL = pipelineURL;
+      this.icon = icon;
     }
 
     public void actionPerformed(ActionEvent e) {
       Runnable runnable = new Runnable() {
         public void run() {
-          lockGUI(pluginDir + " is being loaded...");
+          lockGUI(name + " is being loaded...");
           try {
             long startTime = System.currentTimeMillis();
 
             // load LingPipe as an application from a gapp file
-            PersistenceManager.loadObjectFromFile(new File(new File(Gate
-                    .getPluginsHome(), pluginDir), applicationFile));
+            Controller controller =
+                (Controller)PersistenceManager.loadObjectFromUrl(pipelineURL);
+
+            if(!icon.equals(controller.getFeatures().get("gate.gui.icon"))) {
+              
+              controller.getFeatures().put("gate.gui.icon", icon);
+
+              Enumeration<TreeNode> items =
+                  applicationsRoot.depthFirstEnumeration();
+              while(items.hasMoreElements()) {
+                TreeNode n = items.nextElement();
+                if(n instanceof DefaultMutableTreeNode) {
+                  Object userObject =
+                      ((DefaultMutableTreeNode)n).getUserObject();
+                  if(userObject instanceof NameBearerHandle) {
+                    if(((NameBearerHandle)userObject).getTarget().equals(
+                        controller)) {
+                      ((NameBearerHandle)((DefaultMutableTreeNode)n)
+                          .getUserObject())
+                          .setIcon((Icon)LoadApplicationAction.this
+                              .getValue(Action.SMALL_ICON));
+                      resourcesTree.invalidate();
+                      break;
+                    }
+                  }
+                }
+              }
+            }            
 
             long endTime = System.currentTimeMillis();
-            statusChanged(pluginDir
+            statusChanged(name
                     + " loaded in "
                     + NumberFormat.getInstance().format(
                             (double)(endTime - startTime) / 1000) + " seconds");
           } catch(Exception error) {
             String message =
-                    "There was an error when loading the " + pluginDir
+                    "There was an error when loading the " + name
                             + " application.";
             log.error(message, error);
           } finally {
@@ -2800,7 +2799,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   class ManagePluginsAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public ManagePluginsAction() {
-      super("Manage CREOLE Plugins");
+      super("Manage CREOLE Plugins...");
       putValue(SHORT_DESCRIPTION,
         "Load, unload, add and remove CREOLE plugins");
       putValue(SMALL_ICON, new AvailableIcon(24,24));
@@ -2809,34 +2808,8 @@ public class MainFrame extends JFrame implements ProgressListener,
     @Override
     public void actionPerformed(ActionEvent e) {
       if(pluginManager == null) {
-        /*pluginManager = new PluginManagerUI(MainFrame.this);
-        // pluginManager.setLocationRelativeTo(MainFrame.this);
-        pluginManager.setModal(true);
-        getGuiRoots().add(pluginManager);
-        pluginManager.pack();
-        // size the window so that it doesn't go off-screen
-        Dimension screenSize = getGraphicsConfiguration().getBounds().getSize();
-        Dimension dialogSize = pluginManager.getPreferredSize();
-        int width =
-          dialogSize.width > screenSize.width
-            ? screenSize.width * 3 / 4
-            : dialogSize.width;
-        int height =
-          dialogSize.height > screenSize.height
-            ? screenSize.height * 3 / 4
-            : dialogSize.height;
-        pluginManager.setSize(width, height);
-        pluginManager.validate();
-        // center the window on screen
-        int x = (screenSize.width - width) / 2;
-        int y = (screenSize.height - height) / 2;
-        pluginManager.setLocation(x, y);*/
         pluginManager = new PluginUpdateManager(MainFrame.this);
       }
-      /*fileChooser.setResource(PluginManagerUI.class.getName());
-      pluginManager.setVisible(true);
-      // free resources after the dialog is hidden
-      pluginManager.dispose();*/
       pluginManager.setVisible(true);
     }
   }
@@ -3495,7 +3468,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   class LoadResourceFromFileAction extends AbstractAction {
     private static final long serialVersionUID = 1L;
     public LoadResourceFromFileAction() {
-      super("Restore Application from File");
+      super("Restore Application from File...");
       putValue(SHORT_DESCRIPTION,
         "Restores a previously saved application from a file");
       putValue(SMALL_ICON, getIcon("open-application"));
@@ -4139,7 +4112,8 @@ public class MainFrame extends JFrame implements ProgressListener,
    */
   class RecentAppsMenu extends XJMenu {
     public RecentAppsMenu() {
-      super();
+      super("Reload Recent Application");
+      setIcon(MainFrame.getIcon("open-application"));
       init();
       addMenuItems();
     }
@@ -5125,5 +5099,151 @@ public class MainFrame extends JFrame implements ProgressListener,
 
     JRadioButtonMenuItem me;
   }// //class LocaleSelectorMenuItem extends JRadioButtonMenuItem
+
+  /**
+   * The "Ready Made Applications" menu.
+   * @author Mark A. Greenwood
+   */
+  class ReadyMadeMenu extends XJMenu {
+  
+    private static final long serialVersionUID = -4841440121026127302L;
+
+    public ReadyMadeMenu() {
+      super("Ready Made Applications");
+      setIcon(new ReadyMadeIcon(24, 24));
+      
+      final XJMenu annie = new XJMenu("ANNIE");
+      annie.add(new XJMenuItem(new LoadApplicationAction("ANNIE",
+          "annie-application", new File(new File(Gate.getPluginsHome(),
+              ANNIEConstants.PLUGIN_DIR), ANNIEConstants.DEFAULT_FILE)),
+          MainFrame.this));
+      
+      final XJMenu lingPipe = new XJMenu("LingPipe");
+      lingPipe.add(new XJMenuItem(new LoadApplicationAction("LingPipe IE System",
+          new File(new File(Gate.getPluginsHome(), "LingPipe"),
+              "resources/lingpipe.gapp")), MainFrame.this));
+
+      final XJMenu openNLP = new XJMenu("OpenNLP");
+
+      openNLP.add(new XJMenuItem(
+          new LoadApplicationAction("OpenNLP IE System", new File(new File(Gate
+              .getPluginsHome(), "OpenNLP"), "resources/opennlp.gapp")),
+          MainFrame.this));
+
+      addMenuListener(new MenuListener() {
+        
+        @Override
+        public void menuSelected(MenuEvent arg0) {
+          statusChanged("");
+          
+          removeAll();
+          
+          add(annie);
+          add(lingPipe);
+          add(openNLP);
+          
+          Set<String> toolTypes = Gate.getCreoleRegister().getApplicationTypes();
+          for(String type : toolTypes) {
+            List<Resource> instances = Gate.getCreoleRegister()
+                        .get(type).getInstantiations();
+            for(Resource res : instances) {
+              if(res instanceof PackagedController) {
+                addAppToMenu((PackagedController)res);
+              }
+            }
+          }
+          
+          ReadyMadeMenu.this.revalidate();
+        }
+        
+        @Override
+        public void menuDeselected(MenuEvent arg0) {
+          statusChanged("");
+        }
+        
+        @Override
+        public void menuCanceled(MenuEvent arg0) {
+          // do nothing   
+        }
+      });
+    }
+    
+    private String getPluginName(URL url) {
+
+      // url.getPath() works for jar URLs; url.toURI().getPath() doesn't
+      // because jars aren't considered "hierarchical"
+      String name = url.getPath();
+      
+      //remove the '/creole.xml' from the end
+      name = name.substring(0, name.length() - 11);
+      
+      //get everything after the last /
+      int lastSlash = name.lastIndexOf("/");
+      if(lastSlash != -1) {
+        name = name.substring(lastSlash + 1);
+      }
+      
+      try {
+        // convert to (relative) URI and extract path. This will
+        // decode any %20 escapes in the name.
+        name = new URI(name).getPath();
+      } catch(URISyntaxException ex) {
+        // ignore, this should have been checked when adding the URL!
+      }
+      
+      return name;
+    }
+  
+    protected void addAppToMenu(final PackagedController res) {      
+      
+      ResourceData rd = Gate.getCreoleRegister().get(res.getClass().getName());
+
+      final String[] menus = (res.getMenu() != null ? res.getMenu().toArray(new String[res.getMenu().size()]) : new String[]{getPluginName(rd.getXmlFileUrl())});
+      
+      Action a = new LoadApplicationAction(rd.getName(), rd.getIcon() != null ? rd.getIcon() : "application", res.getPipelineURL());
+            
+      // start by searching this menu
+      XJMenu menuToUse = this;
+
+      // if the action has a menu path set, navigate the path to find the
+      // right menu.
+      if(menus != null) {
+        PATH_ELEMENT: for(String pathElement : menus) {
+          int i;
+          for(i = 0; i < menuToUse.getItemCount(); i++) {
+            JMenuItem item = menuToUse.getItem(i);
+            if(item instanceof XJMenu && item.getText().equals(pathElement)) {
+              // found the menu for this path element, move on to the next one
+              //firstIndex = 0;
+              menuToUse = (XJMenu)item;
+              continue PATH_ELEMENT;
+            }
+            else if(item.getText().compareTo(pathElement) > 0) {
+              // we've gone beyond where this menu should be in alpha
+              // order
+              break;
+            }
+          }
+          // if we get to here, we didn't find a menu to use - add one
+          XJMenu newMenu = new XJMenu(pathElement, pathElement, MainFrame.this);
+          menuToUse.insert(newMenu,i);
+          //firstIndex = 0;
+          menuToUse = newMenu;
+        }
+      }
+  
+      // we now have the right menu, add the action at the right place
+      int pos = 0;//firstIndex;
+      while(pos < menuToUse.getItemCount()) {
+        JMenuItem item = menuToUse.getItem(pos);
+        if(item != null && item.getText().compareTo((String)a.getValue(Action.NAME)) > 0) {
+          break;
+        }
+        pos++;
+      }
+      // finally, add the menu item and return it
+      menuToUse.insert(new XJMenuItem(a, MainFrame.this), pos);
+    }
+  }
 
 } // class MainFrame
