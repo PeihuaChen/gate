@@ -127,29 +127,36 @@ public class NameBearerHandle implements Handle, StatusListener,
     String iconName = null;
     if(target instanceof Resource) {
       rData = Gate.getCreoleRegister().get(target.getClass().getName());
-      if(rData != null) {
-        iconName = rData.getIcon();
-        if(iconName == null) {
-          if(target instanceof Controller)
-            iconName = "application";
-          else if(target instanceof LanguageResource)
-            iconName = "lr";
-          else if(target instanceof ProcessingResource) iconName = "pr";
+      
+      iconName = (String)((Resource)target).getFeatures().get("gate.gui.icon");
+
+      if(iconName == null || MainFrame.getIcon(iconName) == null) {
+        
+        if(rData != null) {
+          iconName = rData.getIcon();
+          if(iconName == null) {
+            if(target instanceof Controller)
+              iconName = "application";
+            else if(target instanceof LanguageResource)
+              iconName = "lr";
+            else if(target instanceof ProcessingResource) iconName = "pr";
+          }          
+        } else {
+          iconName = "lr";
         }
-        if(target instanceof Controller && target.getName().startsWith("ANNIE"))
-          iconName = "annie-application";
-        tooltipText = "<HTML> <b>" + rData.getComment() + "</b><br>(<i>"
-                + rData.getClassName() + "</i>)</HTML>";
       }
-      else {
-        iconName = "lr";
-      }
+      
+      if (rData != null) {
+        tooltipText =
+          "<HTML> <b>" + rData.getComment() + "</b><br>(<i>"
+              + rData.getClassName() + "</i>)</HTML>";
+      }      
     }
     else if(target instanceof DataStore) {
       iconName = ((DataStore)target).getIconName();
       tooltipText = ((DataStore)target).getComment();
-    }
-
+    }    
+    
     this.icon = MainFrame.getIcon(iconName);
 
     Gate.getCreoleRegister().addCreoleListener(this);

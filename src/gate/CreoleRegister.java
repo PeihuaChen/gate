@@ -133,6 +133,9 @@ public interface CreoleRegister extends Map<String, ResourceData>, Serializable,
 
   /** Get the list of types of VR in the register. */
   public Set<String> getControllerTypes();
+  
+  /** Get the list of packaged application types in the register. */
+  public Set<String> getApplicationTypes();
 
   /** Get the list of types of tool in the register. */
   public Set<String> getToolTypes();

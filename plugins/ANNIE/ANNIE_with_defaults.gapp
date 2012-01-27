@@ -131,9 +131,14 @@
       <mapType>gate.util.SimpleFeatureMapImpl</mapType>
       <localMap/>
     </initParams>
-    <features class="gate.util.persistence.MapPersistence">
+   <features class="gate.util.persistence.MapPersistence">
       <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-      <localMap/>
+      <localMap>
+        <entry>
+          <string>gate.gui.icon</string>
+          <string>annie-application</string>
+        </entry>
+      </localMap>
     </features>
   </application>
 </gate.util.persistence.GateApplication>
