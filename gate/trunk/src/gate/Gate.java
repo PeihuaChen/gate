@@ -1321,6 +1321,13 @@ public class Gate implements GateConstants {
       return remote;
     }
     
+    public boolean isUserPlugin() {
+      File userPluginsHome = PluginUpdateManager.getUserPluginsHome();
+      return (userPluginsHome != null
+              && getUrl().toString()
+                      .startsWith(userPluginsHome.toURI().toString()));
+    }
+    
     public String toHTMLString() {
       return html;
     }
