@@ -300,6 +300,8 @@ public class Eclipse extends gate.util.Javac {
                  CompilerOptions.IGNORE);
     settings.put(CompilerOptions.OPTION_ReportRawTypeReference,
                  CompilerOptions.IGNORE);
+    settings.put(CompilerOptions.OPTION_ReportUnusedLabel,
+        CompilerOptions.IGNORE);    
 
     // source and target - force 1.6 target as GATE only requires 1.6 or later.
     settings.put(CompilerOptions.OPTION_Source,
