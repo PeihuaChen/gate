@@ -38,13 +38,10 @@ public class HashGazetteer extends AbstractGazetteer {
 
   private Map<String, List<Lookup>> mapsList[];
 
-  private int mapsListSize;
-
   private AnnotationSet annotationSet = null;
 
   @SuppressWarnings("unchecked")
   public Resource init() throws ResourceInstantiationException {
-    System.out.println("HashGazetteer is being initialized!");
     if(listsURL == null)
       throw new ResourceInstantiationException(
               "No URL provided for gazetteer creation!");
@@ -56,7 +53,6 @@ public class HashGazetteer extends AbstractGazetteer {
       definition.load();
       int i = definition.size();
       listsByNode = definition.loadLists();
-      mapsListSize = mapsList.length;
       categoryList = new ArrayList<Lookup>(i + 1);
       Iterator<LinearNode> iterator = definition.iterator();
       int j = 0;
@@ -166,17 +162,15 @@ public class HashGazetteer extends AbstractGazetteer {
 
   public boolean add(String word, Lookup lookup1) {
     if(!super.caseSensitive.booleanValue()) {
-      String s1 = word.toUpperCase();
-      if(!s1.equals(word)) add(s1, lookup1);
+      word = word.toUpperCase();
     }
+    
     String s2 = removeTrailingSymbols(word);
     if(!s2.equals(word)) add(s2, lookup1);
     String s3 = word + " ";
 
     List<Lookup> arraylist = null;
-    int j = 0;
-    //s3.trim(); //doesn't do anything so comment it out
-    j = s3.length();
+    int j = s3.length();
 
     boolean prevIsLetter = false;
     boolean prevIsDigit = false;
@@ -196,7 +190,10 @@ public class HashGazetteer extends AbstractGazetteer {
               || prevIsLetter && currIsLetter && prevIsLowercase
               && !currIsLowercase || prevIsDigit
               && (currIsLetter || currIsSymbol || currIsWhitespace);
+
+      //if we are on the last character
       if(k + 1 == j) flag18 = true;
+      
       if(flag18) {
         s4 = normalizeWhitespace(s3.substring(0, k));
         int i = s4.length();
@@ -230,7 +227,7 @@ public class HashGazetteer extends AbstractGazetteer {
     Set<Lookup> set = null;
     String s1 = normalizeWhitespace(s);
     int i = s1.length();
-    if(mapsListSize < i) return set;
+    if(mapsList.length < i) return set;
     Map<String, List<Lookup>> hashmap = (HashMap<String, List<Lookup>>)mapsList[i];
     if(hashmap == null) {
       return set;
@@ -242,7 +239,7 @@ public class HashGazetteer extends AbstractGazetteer {
   }
 
   private boolean annotate(String word, int i, int documentPosition, int wordLength) {
-    if(wordLength >= mapsListSize) return false;
+    if(wordLength >= mapsList.length) return false;
     Map<String, List<Lookup>> hashmap = mapsList[wordLength];
     if(hashmap == null) return false;
     if(!hashmap.containsKey(word)) return false;
@@ -285,9 +282,9 @@ public class HashGazetteer extends AbstractGazetteer {
    */
   public boolean remove(String s) {
 
-    String s1 = a(s, true);
+    String s1 = a(s);
     int i = s1.length();
-    if(i > mapsListSize) return false;
+    if(i > mapsList.length) return false;
     Map<String, List<Lookup>> hashmap = mapsList[i];
     if(hashmap == null) return false;
     if(hashmap.containsKey(s1)) {
@@ -350,35 +347,37 @@ public class HashGazetteer extends AbstractGazetteer {
     return stringbuffer.toString();
   }
 
-  private String a(String s, boolean flag) {
+  private String a(String s) {
     StringBuffer stringbuffer = new StringBuffer();
-    boolean flag1 = true;
+    boolean allLettersUppercase = true;
     s = s.trim();
     char ac[] = s.toCharArray();
     int i = s.length();
     if(i <= 1) return s;
-    char c = ac[0];
-    stringbuffer.append(c);
+    
+    char firstCharacter = ac[0];
+    stringbuffer.append(firstCharacter);
     boolean flag2 = true;
-    boolean prevIsLetter = Character.isLetter(c);
-    boolean prevNotLetterOrDigit = !Character.isLetterOrDigit(c);
+    boolean prevIsLetter = Character.isLetter(firstCharacter);
+    boolean prevNotLetterOrDigit = !Character.isLetterOrDigit(firstCharacter);
 
     boolean flag10 = true;
     char c2 = 'p';
 
     for(int j = 1; j < i; j++) {
-      char c1 = ac[j];
-      boolean currNotLetterOrDigit = !Character.isLetterOrDigit(c1);
-      boolean currIsWhitespace = Character.isWhitespace(c1);
-      boolean currIsLetter = Character.isLetter(c1);
-      boolean currIsDigit = Character.isDigit(c1);
-      if(j > 0 && flag2) {
+      char currentCharacter = ac[j];
+      boolean currNotLetterOrDigit = !Character.isLetterOrDigit(currentCharacter);
+      boolean currIsWhitespace = Character.isWhitespace(currentCharacter);
+      boolean currIsLetter = Character.isLetter(currentCharacter);
+      boolean currIsDigit = Character.isDigit(currentCharacter);
+      
+      if(flag2) {
         if(prevNotLetterOrDigit && currIsWhitespace) continue;
         flag2 = prevIsLetter && currNotLetterOrDigit || prevNotLetterOrDigit
                 && currIsLetter;
         if(currNotLetterOrDigit) {
-          if(c2 == 'p') c2 = c1;
-          flag2 = flag10 = c2 == c1;
+          if(c2 == 'p') c2 = currentCharacter;
+          flag2 = flag10 = c2 == currentCharacter;
         }
         if(j > 2 && !flag2 && stringbuffer.length() > 0) {
           char c3 = stringbuffer.charAt(stringbuffer.length() - 1);
@@ -386,18 +385,20 @@ public class HashGazetteer extends AbstractGazetteer {
           stringbuffer.append(Character.toLowerCase(c3));
         }
       }
+      
       if(currIsLetter || currIsDigit) {
-        if(flag && currIsLetter) flag1 &= Character.isUpperCase(c1);
-        if(!flag10) c1 = Character.toLowerCase(c1);
-        stringbuffer.append(c1);
+        if(currIsLetter) allLettersUppercase &= Character.isUpperCase(currentCharacter);
+        if(!flag10) currentCharacter = Character.toLowerCase(currentCharacter);
+        stringbuffer.append(currentCharacter);
       }
       else if(!flag2) flag10 = false;
+      
       prevIsLetter = currIsLetter;
       prevNotLetterOrDigit = currNotLetterOrDigit;
     }
 
     String s1 = stringbuffer.toString();
-    if(flag && flag1) s1 = s1.toUpperCase();
+    if(allLettersUppercase) s1 = s1.toUpperCase();
     return s1;
   }
 
@@ -434,7 +435,6 @@ public class HashGazetteer extends AbstractGazetteer {
 
     for(; iterator.hasNext(); add(normalisedWord, lookup1)) {
       String word = iterator.next().toString();
-      //s4.trim(); //doesn't do anything so comment it out
       int wordLength = word.length();
       for(int j = 0; j < wordLength; j++) {
         if(j + 1 != wordLength && !Character.isWhitespace(word.charAt(j))) continue;
