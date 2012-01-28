@@ -38,7 +38,7 @@
     <dependency org="commons-lang" name="commons-lang" rev="2.6" />
 
     <!-- used to load files into String variables as well as helping to close streams etc. -->
-    <dependency org="commons-io" name="commons-io" rev="1.4" />
+    <dependency org="commons-io" name="commons-io" rev="2.1" />
 
     <!-- the logging framework GATE uses -->
     <dependency org="log4j" name="log4j" rev="1.2.16" />
