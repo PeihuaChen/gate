@@ -5061,45 +5061,6 @@ public class MainFrame extends JFrame implements ProgressListener,
     JLabel imageLabel;
   }
 
-  class LocaleSelectorMenuItem extends JRadioButtonMenuItem {
-    private static final long serialVersionUID = 1L;
-    public LocaleSelectorMenuItem(Locale locale) {
-      super(locale.getDisplayName());
-      me = this;
-      myLocale = locale;
-      this.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          for(Component aRoot : MainFrame.getGuiRoots()) {
-            if(aRoot instanceof Window) {
-              me.setSelected(aRoot.getInputContext()
-                .selectInputMethod(myLocale));
-            }
-          }
-        }
-      });
-    }
-
-    public LocaleSelectorMenuItem() {
-      super("System Default  >>" + Locale.getDefault().getDisplayName() + "<<");
-      me = this;
-      myLocale = Locale.getDefault();
-      this.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          for(Component aRoot : MainFrame.getGuiRoots()) {
-            if(aRoot instanceof Window) {
-              me.setSelected(aRoot.getInputContext()
-                .selectInputMethod(myLocale));
-            }
-          }
-        }
-      });
-    }
-
-    Locale myLocale;
-
-    JRadioButtonMenuItem me;
-  }// //class LocaleSelectorMenuItem extends JRadioButtonMenuItem
-
   /**
    * The "Ready Made Applications" menu.
    * @author Mark A. Greenwood
