@@ -581,7 +581,7 @@
 
 	<!-- Make documentation -->
 	<target name="java2html.taskdef">
-		<taskdef name="java2html" classname="de.java2html.anttasks.Java2HtmlTask" classpath="${buildDir}/lib/java2html.jar" />
+		<taskdef name="java2html" classname="de.java2html.anttasks.Java2HtmlTask" classpath="lib/java2html.jar" />
 	</target>
 
 	<target name="javadoc.core" depends="java2html.taskdef">
