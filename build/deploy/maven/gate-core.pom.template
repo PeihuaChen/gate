@@ -1,5 +1,6 @@
-<?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>uk.ac.gate</groupId>
     <artifactId>gate-core</artifactId>
@@ -19,174 +20,294 @@
     <url>http://gate.ac.uk/</url>
     <packaging>jar</packaging>
     <dependencies>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.1</version>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.16</version>
-        </dependency>
-        <dependency>
-            <groupId>jdom</groupId>
-            <artifactId>jdom</artifactId>
-            <version>1.0</version>
-        </dependency>
+        <!-- things that we repackage under an alternative package name -->
         <dependency>
             <groupId>uk.ac.gate</groupId>
             <artifactId>gate-asm</artifactId>
             <version>3.1</version>
+            <scope>compile</scope>
         </dependency>
-        <!-- Document importing dependencies -->
+        <dependency>
+            <groupId>uk.ac.gate</groupId>
+            <artifactId>gate-compiler-jdt</artifactId>
+            <version>3.7.1</version>
+            <scope>compile</scope>
+        </dependency>
+  
+        <!-- needed to build the JAPE parser -->
+        <dependency>
+            <groupId>net.java.dev.javacc</groupId>
+            <artifactId>javacc</artifactId>
+            <version>5.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- needed to prodcue the nice HTML versions of the Java code that get added to the javadocs -->
+        <dependency>
+            <groupId>de.java2html</groupId>
+            <artifactId>java2html</artifactId>
+            <version>5.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- needed to ensure the same version across configurations -->
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.1.1</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- used for escaping strings in the Annotation Stack and elsewhere -->
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- used to load files into String variables as well as helping to close streams etc. -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.1</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- the logging framework GATE uses -->
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.16</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- used extensively throughout GATE for processing XML files -->
+        <dependency>
+            <groupId>jdom</groupId>
+            <artifactId>jdom</artifactId>
+            <version>1.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- used to parse and load HTML documents into GATE -->        
         <dependency>
             <groupId>net.sourceforge.nekohtml</groupId>
             <artifactId>nekohtml</artifactId>
             <version>1.9.14</version>
-        </dependency>
-        <dependency>
-            <groupId>xerces</groupId>
-            <artifactId>xercesImpl</artifactId>
-            <version>2.9.1</version>
-            <!-- We don't need the xml-apis transitive dep as it's part of
-            Java core -->
+            <scope>compile</scope>
             <exclusions>
+                <!-- exclude stuff that is part of Java 6 core -->
                 <exclusion>
                     <groupId>xml-apis</groupId>
                     <artifactId>xml-apis</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <!-- the actual Tika pased format parsers -->
         <dependency>
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-parsers</artifactId>
             <version>1.0</version>
+            <scope>runtime</scope>
+
+            <exclusions>
+                <!-- we don't currently use the RSS/ATOM aspects of Tika so we don't need ROME -->
+                <exclusion>
+                    <groupId>rome</groupId>
+                    <artifactId>rome</artifactId>
+                </exclusion>
+
+                <!-- we don't currently support netCDF documents so we don't need this -->
+                <exclusion>
+                    <groupId>edu.ucar</groupId>
+                    <artifactId>netcdf</artifactId>
+                </exclusion>
+
+                <!-- we don't use Tika to parse HTML so we don't need it's HTML parser -->
+                <exclusion>
+                    <groupId>org.ccil.cowan.tagsoup</groupId>
+                    <artifactId>tagsoup</artifactId>
+                </exclusion>
+
+                <!-- we don't use Tika to parse Java classes so we don't need ASM -->
+                <exclusion>
+                    <groupId>asm</groupId>
+                    <artifactId>asm</artifactId>
+                </exclusion>
+
+                <!-- we exclude boilerpipe as it isn't required for Tika given the way we
+                     currently configure it, and it contains a copy of NekoHTML which causes
+                     HTML parsing in GATE to change, and the tests to break -->
+                <exclusion>
+                    <groupId>de.l3s.boilerpipe</groupId>
+                    <artifactId>boilerpipe</artifactId>
+                </exclusion>
+
+                <!-- exclude stuff that is part of Java 6 core -->
+                <exclusion>
+                    <groupId>org.apache.geronimo.specs</groupId>
+                    <artifactId>geronimo-stax-api_1.0_spec</artifactId>
+                </exclusion>
+
+            </exclusions>
+
         </dependency>
+
+        <!-- We use Woodstox instead of the default Sun StAX implementation as it seems to behave better.
+             NOTE: I don't know if this is still the case but it seems safer not to break things! -->
         <dependency>
             <groupId>org.codehaus.woodstox</groupId>
             <artifactId>wstx-lgpl</artifactId>
             <version>3.2.3</version>
-            <!-- Exclude the stax-api transitive dependency as GATE 6.1 and
-            later requires Java 6, which includes this API in core -->
+            <scope>compile</scope>
             <exclusions>
+                <!-- exclude stuff that is part of Java 6 core -->
                 <exclusion>
                     <groupId>stax</groupId>
                     <artifactId>stax-api</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <!-- we need Ivy both for processing this file and for creole plugins which use the IVY element -->
         <dependency>
             <groupId>org.apache.ivy</groupId>
             <artifactId>ivy</artifactId>
             <version>2.2.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- ANT is used internally by GATE for some tasks, such as the export for GATECloud.net -->
+        <dependency>
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant</artifactId>
+            <version>1.8.1</version>
+            <scope>compile</scope>
+        </dependency>
+        
+        <!-- this provides the for loop support we use in the build file -->
+        <dependency>
+            <groupId>ant-contrib</groupId>
+            <artifactId>ant-contrib</artifactId>
+            <version>1.0b3</version>
+            <scope>compile</scope>
             <exclusions>
                 <exclusion>
                     <groupId>ant</groupId>
-                    <artifactId>*</artifactId>
+                    <artifactId>ant</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
 
-        <!-- Apache Ant.  Required by the GATE Ant tasks and also by the
-             developer GUI as Ant classes are referenced by NameBearerHandle to
-             implement the "export for GATECloud.net" function. -->
-        <dependency>
-            <groupId>org.apache.ant</groupId>
-            <artifactId>ant</artifactId>
-            <version>${ant.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ant</groupId>
-            <artifactId>ant-launcher</artifactId>
-            <version>${ant.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ant</groupId>
-            <artifactId>ant-junit</artifactId>
-            <version>${ant.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.ant</groupId>
-            <artifactId>ant-nodeps</artifactId>
-            <version>${ant.version}</version>
-        </dependency>
-
-        <!-- Optional dependencies -->
-        <!-- You need to expicitly add the below dependencies in your project, if you
-         intend to use parts of GATE that rely on them. -->
-
-        <!-- XStream (required for loading and saving .gapp files) -->
+        <!--required for loading and saving .gapp files and by sime plugins.
+            we pull in the full XPP3 so we only need XStream's master artifact -->
         <dependency>
             <groupId>com.thoughtworks.xstream</groupId>
             <artifactId>xstream</artifactId>
             <version>1.4.2</version>
-            <optional>true</optional>
+            <scope>compile</scope>
+            <exclusions>
+                <!-- we will pull in the full xpp3 so we don't need these -->                
+                <exclusion>
+                    <groupId>xmlpull</groupId>
+                    <artifactId>xmlpull</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>xpp3</groupId>
+                    <artifactId>xpp3_min</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
+
+        <!-- XPP3 provides the actual implementation under pinning our use of XStream -->
         <dependency>
             <groupId>xpp3</groupId>
             <artifactId>xpp3</artifactId>
             <version>1.1.3.4.O</version>
-            <optional>true</optional>
+            <scope>runtime</scope>
         </dependency>
 
-        <!-- repackaging of the Eclipse JDT compiler under an alternative
-             package name; that way gate can be embedded in software
-             that depends on another version of that compiler.
-             Required in order to be able to load JAPE grammars. -->
+        <!-- needed by XSteam at runtime -->
         <dependency>
-            <groupId>uk.ac.gate</groupId>
-            <artifactId>gate-compiler-jdt</artifactId>
-            <version>3.7.1</version>
-            <optional>true</optional>
+            <groupId>jaxen</groupId>
+            <artifactId>jaxen</artifactId>
+            <version>1.1</version>
+            <scope>runtime</scope>
+            <exclusions>
+                <!-- we don't need any of these dependencies -->
+                <exclusion>
+                    <groupId>xml-apis</groupId>
+                    <artifactId>xml-apis</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>xerces</groupId>
+                    <artifactId>xercesImpl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>xom</groupId>
+                    <artifactId>xom</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
-        <!-- Getopt command-line argument processor.  Required by gate.Main, so
-             you need this if you intend to show the GATE Developer GUI in your
-             application -->
+        <!-- used to parse command line options passed to the GATE GUI -->
         <dependency>
             <groupId>urbanophile</groupId>
             <artifactId>java-getopt</artifactId>
             <version>1.0.9</version>
-            <optional>true</optional>
+            <scope>compile</scope>
         </dependency>
 
-        <!-- Required for Spring Framework support in GATE -->
+        <!-- required for Spring Framework support in GATE -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
-            <version>${spring.version}</version>
-            <optional>true</optional>
+            <version>2.0.8</version>
+            <scope>compile</scope>
         </dependency>
-        <!-- Required when using the <gate:pooled-proxy> decorator in Spring -->
+
+        <!-- required when using the <gate:pooled-proxy> decorator in Spring -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-aop</artifactId>
-            <version>${spring.version}</version>
-            <optional>true</optional>
+            <version>2.0.8</version>
+            <scope>compile</scope>
         </dependency>
 
-        <!-- Apache Lucene.  Required by the ANNIC searchable DataStore. -->
+        <!-- required for indexing datastores (not used by ANNIC) -->
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-core</artifactId>
-            <version>3.0.1</version>
-            <optional>true</optional>
+            <version>3.5.0</version>
+            <scope>compile</scope>
         </dependency>
 
-        <!-- XMLUnit.  Used only by the test suite. -->
+        <!-- Used for comparing XML files during some of the GATE tests -->
         <dependency>
             <groupId>xmlunit</groupId>
             <artifactId>xmlunit</artifactId>
             <version>1.2</version>
-            <optional>true</optional>
-            <scope>test</scope>
+            <scope>compile</scope>
         </dependency>
+
+        <!-- Used for testing GATE -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.10</version>
+            <scope>compile</scope>
+            <exclusions>
+                <!-- we don't use the hamcrest matchers -->
+                <exclusion>
+                    <groupId>org.hamcrest</groupId>
+                    <artifactId>hamcrest-core</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
     </dependencies>
-    <properties>
-        <ant.version>1.8.1</ant.version>
-        <spring.version>2.0.8</spring.version>
-    </properties>
     <developers>
         <developer>
             <id>gate-team</id>
