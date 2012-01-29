@@ -96,9 +96,6 @@
     <dependency org="urbanophile" name="java-getopt" rev="1.0.9" />
 
     <!-- required for Spring Framework support in GATE -->
-    <dependency org="org.springframework" name="spring-beans" rev="2.0.8" />
-
-    <!-- required when using the <gate:pooled-proxy> decorator in Spring -->
     <dependency org="org.springframework" name="spring-aop" rev="2.0.8" />
 
     <!-- required for indexing datastores (not used by ANNIC) -->
