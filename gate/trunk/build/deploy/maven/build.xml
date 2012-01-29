@@ -58,6 +58,33 @@
         </artifact:install>
     </target>
 
+    <target name="test.snapshot" depends="snapshot-install">
+        <artifact:dependencies filesetId="dependency.fileset" versionsId="dependency.versions">        
+            <dependency groupId="uk.ac.gate" artifactId="gate-core" version="${gate.version}"/>
+        </artifact:dependencies>
+        <delete dir="lib"/>        
+        <copy todir="lib">
+            <fileset refid="dependency.fileset" />
+            <!-- This mapper strips off all leading directory information -->
+            <mapper classpathref="maven-ant-tasks.classpath" classname="org.apache.maven.artifact.ant.VersionMapper" from="${dependency.versions}" to="flatten" />
+        </copy>
+
+        <fileset dir="lib" id="onlyinmaven" includes="**/*.jar"> 
+            <present present="srconly" targetdir="${top}/lib"/> 
+        </fileset> 
+        <echo>these files are only in maven/lib : ${toString:onlyinmaven}</echo> 
+
+        <fileset dir="${top}/lib" id="onlyingate" includes="**/*.jar"> 
+            <present present="srconly" targetdir="lib"/> 
+        </fileset> 
+        <echo> these files are only in gate/lib : ${toString:onlyingate}</echo>
+
+        <fileset dir="lib" id="different" includes="**/*.jar" excludes="gate-core.jar">
+            <different targetdir="${top}/lib" ignoreFileTimes="true"/> 
+        </fileset> 
+        <echo>        these files are different : ${toString:different}</echo>
+    </target>
+
     <!--
     Additional targets to publish new releases to sonatype staging
    
