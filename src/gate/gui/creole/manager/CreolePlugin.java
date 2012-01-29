@@ -43,6 +43,10 @@ public class CreolePlugin {
 
   protected transient boolean install = false;
 
+  public URL getHelpURL() {
+    return helpURL;
+  }
+  
   protected void reset() {
     dir = null;
     install = false;
