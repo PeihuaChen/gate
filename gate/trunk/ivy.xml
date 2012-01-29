@@ -50,9 +50,6 @@
     <dependency org="net.sourceforge.nekohtml" name="nekohtml" rev="1.9.14" />
 
     <!-- we use Tika to handle most document formats other than XML, HTML and TXT -->
-    <dependency org="org.apache.tika" name="tika-core" rev="1.0" conf="compile->master,runtime" />
-
-    <!-- the actual Tika pased format parsers -->
     <dependency org="org.apache.tika" name="tika-parsers" rev="1.0" conf="runtime->master,runtime" >
       <!-- we don't currently use the RSS/ATOM aspects of Tika so we don't need ROME -->
       <exclude org="rome" module="rome" />
@@ -105,7 +102,7 @@
     <!-- required when using the <gate:pooled-proxy> decorator in Spring -->
     <dependency org="org.springframework" name="spring-aop" rev="2.0.8" />
 
-    <!-- required by the ANNIC searchable DataStore. -->
+    <!-- required for indexing datastores (not used by ANNIC) -->
     <dependency org="org.apache.lucene" name="lucene-core" rev="3.5.0" />
 
     <!-- Used for comparing XML files during some of the GATE tests -->
