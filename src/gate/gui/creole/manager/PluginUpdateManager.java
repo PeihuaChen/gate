@@ -659,31 +659,6 @@ public class PluginUpdateManager extends JDialog {
     tblAvailable.getColumnModel().getColumn(1)
         .setCellEditor(new JTextPaneTableCellRenderer());
 
-    /*tblAvailable.addMouseListener(new MouseAdapter() {
-      public void mousePressed(final MouseEvent e) {
-        process(e);
-      }
-      
-      public void mouseReleased(final MouseEvent e) {
-        process(e);
-      }
-      
-      public void mouseClicked(final MouseEvent e) {
-        process(e);
-      }
-      
-      private void process(MouseEvent e) {
-        tblAvailable.editCellAt(tblAvailable.rowAtPoint(e.getPoint()),
-              tblAvailable.columnAtPoint(e.getPoint()));
-        if(tblAvailable.columnAtPoint(e.getPoint()) == 1) {
-          e.setSource(tblAvailable.getCellEditor(tblAvailable.rowAtPoint(e.getPoint()),
-              tblAvailable.columnAtPoint(e.getPoint())));
-          EventQueue eq = Toolkit.getDefaultToolkit().getSystemEventQueue();
-          eq.postEvent(e);
-        }
-      }
-    });*/
-
     tblAvailable.setSortable(true);
     tblAvailable.setSortedColumn(1);
     Collator collator = Collator.getInstance(Locale.ENGLISH);

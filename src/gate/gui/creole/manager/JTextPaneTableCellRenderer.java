@@ -4,6 +4,7 @@ import gate.gui.MainFrame;
 
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.event.MouseEvent;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.JTable;
@@ -44,7 +45,7 @@ public class JTextPaneTableCellRenderer extends AbstractCellEditor implements
       }
     });
   }
-
+  
   @Override
   public Object getCellEditorValue() {
     return value;
