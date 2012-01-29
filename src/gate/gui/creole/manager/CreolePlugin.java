@@ -29,7 +29,7 @@ public class CreolePlugin {
 
   protected String id, description, gateMin, gateMax;
 
-  protected URL downloadURL, url;
+  protected URL downloadURL, url, helpURL;
 
   protected String version;
 
@@ -97,11 +97,20 @@ public class CreolePlugin {
     String desc = root.getAttributeValue("DESCRIPTION");
     String gateMin = root.getAttributeValue("GATE-MIN");
     String gateMax = root.getAttributeValue("GATE-MAX");
+    String help = root.getAttributeValue("HELPURL");
 
+    URL helpURL = null;
+    try {
+      helpURL = new URL(creoleURL, help);
+    }
+    catch (Exception e) {
+      //ignore all exceptions and just use null;
+    }
+    
     if(name == null || version == null) return null;
 
     return new CreolePlugin(name, version, new URL(
-            creoleURL, "creole.zip"), desc, gateMin, gateMax);
+            creoleURL, "creole.zip"), desc, helpURL, gateMin, gateMax);
   }
 
   public String getName() {
@@ -112,14 +121,15 @@ public class CreolePlugin {
     return name;
   }
 
-  public CreolePlugin(String id, String version, URL downloadURL,
-          String description, String gateMin, String gateMax) {
+  public CreolePlugin(String id, String version, URL downloadURL, 
+          String description, URL helpURL, String gateMin, String gateMax) {
     this.id = id;
     this.version = version;
     this.downloadURL = downloadURL;
     this.description = description;
     this.gateMin = gateMin;
     this.gateMax = gateMax;
+    this.helpURL = helpURL;
 
     compatible = VersionComparator.isCompatible(this.gateMin, this.gateMax);
   }
