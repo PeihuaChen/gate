@@ -5073,23 +5073,22 @@ public class MainFrame extends JFrame implements ProgressListener,
       super("Ready Made Applications");
       setIcon(new ReadyMadeIcon(24, 24));
       
-      final XJMenu annie = new XJMenu("ANNIE");
-      annie.add(new XJMenuItem(new LoadApplicationAction("ANNIE",
+      
+      final XJMenuItem annie = new XJMenuItem(new LoadApplicationAction("ANNIE",
           "annie-application", new File(new File(Gate.getPluginsHome(),
               ANNIEConstants.PLUGIN_DIR), ANNIEConstants.DEFAULT_FILE)),
-          MainFrame.this));
+          MainFrame.this);
       
-      final XJMenu lingPipe = new XJMenu("LingPipe");
-      lingPipe.add(new XJMenuItem(new LoadApplicationAction("LingPipe IE System",
+      final XJMenuItem lingPipe = new XJMenuItem(new LoadApplicationAction("LingPipe IE System",
           new File(new File(Gate.getPluginsHome(), "LingPipe"),
-              "resources/lingpipe.gapp")), MainFrame.this));
+              "resources/lingpipe.gapp")), MainFrame.this);
 
-      final XJMenu openNLP = new XJMenu("OpenNLP");
+      
 
-      openNLP.add(new XJMenuItem(
+      final XJMenuItem openNLP = new XJMenuItem(
           new LoadApplicationAction("OpenNLP IE System", new File(new File(Gate
               .getPluginsHome(), "OpenNLP"), "resources/opennlp.gapp")),
-          MainFrame.this));
+          MainFrame.this);
 
       addMenuListener(new MenuListener() {
         
@@ -5099,9 +5098,17 @@ public class MainFrame extends JFrame implements ProgressListener,
           
           removeAll();
           
-          add(annie);
-          add(lingPipe);
-          add(openNLP);
+          XJMenu menu = new XJMenu("ANNIE");
+          menu.add(annie);
+          add(menu);
+          
+          menu = new XJMenu("LingPipe");
+          menu.add(lingPipe);
+          add(menu);
+                    
+          menu = new XJMenu("OpenNLP");
+          menu.add(openNLP);
+          add(menu);
           
           Set<String> toolTypes = Gate.getCreoleRegister().getApplicationTypes();
           for(String type : toolTypes) {
