@@ -50,6 +50,9 @@ public interface GateConstants {
 
   /** The key for the main window height */
   public static final String MAIN_FRAME_HEIGHT = "Main_frame_height";
+  
+  /** The key for determining if the main window should be maximized **/
+  public static final String MAIN_FRAME_MAXIMIZED = "Main_frame_maximized";
 
   /** The key for the save options on exit value */
   public static final String SAVE_OPTIONS_ON_EXIT = "Save_options_on_exit";
