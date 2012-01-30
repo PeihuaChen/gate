@@ -39,14 +39,15 @@ import gate.util.Files;
 import gate.util.OptionsMap;
 import gate.util.VersionComparator;
 
+import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.Image;
-import java.awt.Toolkit;
+import java.awt.Robot;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -659,6 +660,40 @@ public class PluginUpdateManager extends JDialog {
     tblAvailable.getColumnModel().getColumn(1)
         .setCellEditor(new JTextPaneTableCellRenderer());
 
+    tblAvailable.addMouseListener(new MouseAdapter() {
+      public void mousePressed(MouseEvent e) {
+        process(e);
+      }
+      
+      public void mouseReleased(MouseEvent e) {
+        process(e);
+      }
+      
+      public void mouseClicked(MouseEvent e) {
+        process(e);
+      }
+      
+      private void process(final MouseEvent e) {
+        //final int row = tblAvailable.rowAtPoint(e.getPoint());
+        final int column = tblAvailable.columnAtPoint(e.getPoint());
+        if (column == 1) {                    
+          SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+              try {
+                Robot robot = new Robot();
+                if (e.getID() == MouseEvent.MOUSE_PRESSED || e.getID() == MouseEvent.MOUSE_CLICKED) robot.mousePress(InputEvent.BUTTON1_MASK);
+                if (e.getID() == MouseEvent.MOUSE_RELEASED || e.getID() == MouseEvent.MOUSE_CLICKED) robot.mouseRelease(InputEvent.BUTTON1_MASK);
+              } catch(AWTException e) {
+                e.printStackTrace();
+              }              
+            }            
+          });
+        }
+      }
+    });
+    
     tblAvailable.setSortable(true);
     tblAvailable.setSortedColumn(1);
     Collator collator = Collator.getInstance(Locale.ENGLISH);
