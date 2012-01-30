@@ -496,9 +496,10 @@ public class MainFrame extends JFrame implements ProgressListener,
       awtAppClassNameField.setAccessible(true);
       awtAppClassNameField.set(xToolkit, "GATE Developer");
     } catch(Exception e) {
-      // this happens every time on Windows so hide the exception unless we are
-      // debugging something
-      log.debug("Could not set WM Class", e);
+      // this happens every time on Windows and Mac so hide the exception
+      // unless we are debugging something
+      log.debug("Could not set WM Class (note that this is normal if you " +
+          "are not on an X11-based window system)", e);
     }
     
     guiRoots.add(this);
