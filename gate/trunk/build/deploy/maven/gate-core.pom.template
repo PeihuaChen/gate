@@ -39,7 +39,8 @@
             <groupId>net.java.dev.javacc</groupId>
             <artifactId>javacc</artifactId>
             <version>5.0</version>
-            <scope>compile</scope>
+            <!-- required for build but not to run -->
+            <scope>provided</scope>
         </dependency>
 
         <!-- needed to prodcue the nice HTML versions of the Java code that get added to the javadocs -->
@@ -47,7 +48,8 @@
             <groupId>de.java2html</groupId>
             <artifactId>java2html</artifactId>
             <version>5.0</version>
-            <scope>compile</scope>
+            <!-- required for build but not to run -->
+            <scope>provided</scope>
         </dependency>
 
         <!-- needed to ensure the same version across configurations -->
@@ -192,7 +194,8 @@
             <groupId>ant-contrib</groupId>
             <artifactId>ant-contrib</artifactId>
             <version>1.0b3</version>
-            <scope>compile</scope>
+            <!-- required for build but not to run -->
+            <scope>provided</scope>
             <exclusions>
                 <exclusion>
                     <groupId>ant</groupId>
@@ -229,7 +232,7 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- needed by XSteam at runtime -->
+        <!-- needed by CreoleAnnotationHandler at runtime -->
         <dependency>
             <groupId>jaxen</groupId>
             <artifactId>jaxen</artifactId>

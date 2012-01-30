@@ -58,10 +58,9 @@
         </artifact:install>
     </target>
 
-    <target name="test.snapshot" depends="snapshot-install">
-        <artifact:dependencies filesetId="dependency.fileset" versionsId="dependency.versions">        
-            <dependency groupId="uk.ac.gate" artifactId="gate-core" version="${gate.version}"/>
-        </artifact:dependencies>
+    <target name="test.snapshot" depends="prepare.snapshot.pom">
+        <artifact:pom id="gate-core.pom" file="${gate.core.pom}"/>
+        <artifact:dependencies filesetId="dependency.fileset" versionsId="dependency.versions" pomRefId="gate-core.pom"/>        
         <delete dir="lib"/>        
         <copy todir="lib">
             <fileset refid="dependency.fileset" />
