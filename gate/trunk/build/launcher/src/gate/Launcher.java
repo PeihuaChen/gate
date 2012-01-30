@@ -46,8 +46,14 @@ public class Launcher {
   public static final String GATE_HOME_PROPERTY_NAME = "gate.home";
   
   protected static final Pattern PLACEHOLDER = Pattern.compile("\\$\\{(.*?)\\}");
-
   
+  protected static final FilenameFilter JAR_FILTER = new FilenameFilter() {
+    @Override
+    public boolean accept(File dir, String name) {
+      return name.toLowerCase().endsWith(".jar");
+    }
+  };
+
   protected File gateHome;
   
   protected URLClassLoader classLoader;
@@ -85,21 +91,43 @@ public class Launcher {
     }
   }
   
+  protected void addUrlsForFile(File file, List<URL> urls) throws
+      MalformedURLException {
+    if(file != null) {
+      if("*".equals(file.getName())) {
+        // Java 6 style "/path/to/directory/*" entry
+        for(File f : file.getParentFile().listFiles(JAR_FILTER)) {
+          addUrlsForFile(f, urls);
+        }
+      } else {
+        urls.add(file.toURI().toURL());
+      }
+    }
+  }
+
   protected void buildClassPath() throws MalformedURLException {
     List<URL> urls = new LinkedList<URL>();
-    File binDir = new File(gateHome, "bin");
-    urls.add(binDir.toURI().toURL());
-    urls.add(new File(binDir, "gate.jar").toURI().toURL());
-    File libDir = new File(gateHome, "lib");
-    FilenameFilter jarFinder = new FilenameFilter() {
-      @Override
-      public boolean accept(File dir, String name) {
-        return name.toLowerCase().endsWith(".jar");
+    // start with any externally-specified entries - gate.class.path system
+    // property wins if it is specified, otherwise GATE_CLASSPATH environment
+    // variable.
+    String extraClassPath = System.getProperty("gate.class.path",
+          System.getenv("GATE_CLASSPATH"));
+    if(extraClassPath != null) {
+      String[] extraEntries = extraClassPath.split(
+          Pattern.quote(File.pathSeparator));
+      for(String entry : extraEntries) {
+        if(!"".equals(entry)) addUrlsForFile(new File(entry), urls);
       }
-    };
-    for(File aJar : libDir.listFiles(jarFinder)) {
-      urls.add(aJar.toURI().toURL());
     }
+    File binDir = new File(gateHome, "bin");
+    // gate/bin (for log4j.properties)
+    addUrlsForFile(binDir, urls);
+    // bin/gate.jar
+    addUrlsForFile(new File(binDir, "gate.jar"), urls);
+    // and lib/*.jar
+    File libDir = new File(gateHome, "lib");
+    addUrlsForFile(new File(libDir, "*"), urls);
+
     classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]),
       Launcher.class.getClassLoader());
   }
