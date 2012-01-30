@@ -552,6 +552,8 @@ public class MainFrame extends JFrame implements ProgressListener,
       Gate.getUserConfig().getInt(GateConstants.MAIN_FRAME_HEIGHT);
     this.setSize(new Dimension(width == null ? 800 : width,
       height == null ? 600 : height));
+    if (Gate.getUserConfig().getBoolean(GateConstants.MAIN_FRAME_MAXIMIZED))
+      setExtendedState(JFrame.MAXIMIZED_BOTH);
 
     this.setIconImage(Toolkit.getDefaultToolkit().getImage(
       Files.getGateResource("/img/gate-icon.png")));
@@ -3773,6 +3775,7 @@ public class MainFrame extends JFrame implements ProgressListener,
             Integer height = MainFrame.this.getHeight();
             userConfig.put(GateConstants.MAIN_FRAME_WIDTH, width);
             userConfig.put(GateConstants.MAIN_FRAME_HEIGHT, height);
+            userConfig.put(GateConstants.MAIN_FRAME_MAXIMIZED, MainFrame.this.getExtendedState() == JFrame.MAXIMIZED_BOTH);
             Gate.writeUserConfig();
           }
           else {
