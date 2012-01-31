@@ -52,6 +52,7 @@ public class RemoteUpdateSite {
         xs.alias("UpdateSite", List.class);
         xs.alias("CreolePlugin", CreolePlugin.class);
         xs.useAttributeFor(CreolePlugin.class, "url");
+        xs.useAttributeFor(CreolePlugin.class, "downloadURL");
         xs.registerConverter(new SingleValueConverter() {
           @Override
           public boolean canConvert(@SuppressWarnings("rawtypes") Class type) {

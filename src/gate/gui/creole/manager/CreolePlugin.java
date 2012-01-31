@@ -56,7 +56,9 @@ public class CreolePlugin {
     if(url != null) {
       url = Gate.normaliseCreoleUrl(url);
       try {
-        return load(new URL(url, "creole.xml"));
+        CreolePlugin p = load(new URL(url, "creole.xml"));
+        if (downloadURL != null) p.downloadURL = downloadURL;
+        return p;
       } catch(Exception e) {
         throw new RuntimeException(e);
       }
