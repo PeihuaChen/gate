@@ -194,6 +194,7 @@ public class SPTBuilder {
                                   StringBuilder out) {
     out.append("package ").append(GENERATED_CLASS_PACKAGE).append(";\n");
     out.append("import gate.jape.Rule;\n");
+    out.append("import gate.jape.JapeException;\n");
     out.append("import gate.jape.plus.Predicate;\n");
     out.append("import gate.jape.plus.SPTBase;\n");
     out.append("import cern.colt.list.IntArrayList;\n");
@@ -265,7 +266,7 @@ public class SPTBuilder {
   
   protected void writeAdvanceInstanceMethod(int tabs, StringBuilder out) {
     out.append(TABS[tabs]).append("@Override\n");
-    out.append(TABS[tabs]).append("protected final boolean advanceInstance(FSMInstance instance) {\n");
+    out.append(TABS[tabs]).append("protected final boolean advanceInstance(FSMInstance instance) throws JapeException {\n");
     tabs++;
     out.append(TABS[tabs]).append("switch(instance.state) {\n");
     tabs++;
@@ -285,7 +286,7 @@ public class SPTBuilder {
   
   protected void writeStateMethod(int stateId, int tabs, StringBuilder out) {
     out.append(TABS[tabs]).append("private final boolean state").append(
-      stateId).append('(').append("FSMInstance instance").append("){\n");
+      stateId).append('(').append("FSMInstance instance").append(") throws JapeException {\n");
     tabs++;
     State state = newStates.get(stateId);
     // if final state
@@ -599,32 +600,32 @@ public class SPTBuilder {
     String operator = oldPredicate.getOperator();
     if(operator == ConstraintPredicate.EQUAL){
       newPredicate.type = PredicateType.EQ;
-    }else if(operator == ConstraintPredicate.GREATER){
+    } else if(operator == ConstraintPredicate.GREATER){
       newPredicate.type = PredicateType.GT;
-    }else if(operator == ConstraintPredicate.GREATER_OR_EQUAL){
+    } else if(operator == ConstraintPredicate.GREATER_OR_EQUAL){
       newPredicate.type = PredicateType.GE;
-    }else if(operator == ConstraintPredicate.LESSER){
+    } else if(operator == ConstraintPredicate.LESSER){
       newPredicate.type = PredicateType.LT;
-    }else if(operator == ConstraintPredicate.LESSER_OR_EQUAL){
+    } else if(operator == ConstraintPredicate.LESSER_OR_EQUAL){
       newPredicate.type = PredicateType.LE;
-    }else if(operator == ConstraintPredicate.NOT_EQUAL){
+    } else if(operator == ConstraintPredicate.NOT_EQUAL){
       newPredicate.type = PredicateType.NOT_EQ;
-    }else if(operator == ConstraintPredicate.NOT_REGEXP_FIND){
+    } else if(operator == ConstraintPredicate.NOT_REGEXP_FIND){
       newPredicate.type = PredicateType.REGEX_NOT_FIND;
-    }else if(operator == ConstraintPredicate.NOT_REGEXP_MATCH){
+    } else if(operator == ConstraintPredicate.NOT_REGEXP_MATCH){
       newPredicate.type = PredicateType.REGEX_NOT_MATCH;
-    }else if(operator == ConstraintPredicate.REGEXP_FIND){
+    } else if(operator == ConstraintPredicate.REGEXP_FIND){
       newPredicate.type = PredicateType.REGEX_FIND;
-    }else if(operator == ConstraintPredicate.REGEXP_MATCH){
+    } else if(operator == ConstraintPredicate.REGEXP_MATCH){
       newPredicate.type = PredicateType.REGEX_MATCH;
-    }else if(operator == ContainsPredicate.OPERATOR){
+    } else if(operator == ContainsPredicate.OPERATOR){
       newPredicate.type = PredicateType.CONTAINS;
-    }else if(operator == WithinPredicate.OPERATOR){
+    } else if(operator == WithinPredicate.OPERATOR){
       newPredicate.type = PredicateType.WITHIN;
-    }else{
-      throw new ResourceInstantiationException(
-              "Constraint predicates with operator \"" + operator +
-              "\" are not supported in JAPE-Plus!");
+    } else {
+      // make it into a custom predicate
+      newPredicate.type = PredicateType.CUSTOM;
+      newPredicate.featureValue = oldPredicate;
     }
     if(newPredicate.type == PredicateType.CONTAINS) {
       String containedAnnType = null;
@@ -690,7 +691,10 @@ public class SPTBuilder {
         newPredValue[predIdx++] = predId;
       }
       newPredicate.featureValue = newPredValue;
+    } else if(newPredicate.type == PredicateType.CUSTOM) {
+      // do nothing
     } else {
+      // for all other types of predicates, copy the value
       newPredicate.featureValue = oldPredicate.getValue();
     }
     //now see if this is a new predicate or not
