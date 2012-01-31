@@ -28,6 +28,8 @@ import gate.event.ProgressListener;
 import gate.event.StatusListener;
 import gate.gui.MainFrame;
 import gate.jape.MultiPhaseTransducer;
+import gate.jape.constraint.AnnotationAccessor;
+import gate.jape.constraint.ConstraintPredicate;
 import gate.jape.parser.ParseException;
 import gate.util.GateException;
 import gate.util.persistence.PersistenceManager;
@@ -109,12 +111,25 @@ public class Transducer extends AbstractLanguageAnalyser
   public void setGrammarURL(URL source) {
     this.grammarURL = source;
   }
-
-
+  
   /**
    * The source from which this transducer is created.
    */
   protected URL grammarURL;
+  
+  /**
+   * List of class names for any custom
+   * {@link gate.jape.constraint.ConstraintPredicate}.
+   */
+  protected List<String> operators = null;
+  
+  /**
+   * List of class names for any custom
+   * {@link gate.jape.constraint.AnnotationAccessor}s.
+   */
+  protected List<String> annotationAccessors = null;
+  
+  
   
   protected String encoding;
   
@@ -157,6 +172,46 @@ public class Transducer extends AbstractLanguageAnalyser
    */
   protected int currentSptIndex = -1;
   
+  /**
+   * Gets the list of class names for any custom boolean operators.
+   * Classes must implement {@link gate.jape.constraint.ConstraintPredicate}.
+   */
+  public List<String> getOperators() {
+    return operators;
+  }
+
+  /**
+   * Sets the list of class names for any custom boolean operators.
+   * Classes must implement {@link gate.jape.constraint.ConstraintPredicate}.
+   */
+  @Optional
+  @CreoleParameter(
+    comment = "Class names that implement gate.jape.constraint.ConstraintPredicate."
+  )
+  public void setOperators(List<String> operators) {
+    this.operators = operators;
+  }
+  
+  /**
+   * Gets the list of class names for any custom
+   * {@link gate.jape.constraint.AnnotationAccessor}s.
+   */
+  public List<String> getAnnotationAccessors() {
+    return annotationAccessors;
+  }
+
+  /**
+   * Sets the list of class names for any custom
+   * {@link gate.jape.constraint.AnnotationAccessor}s.
+   */
+  @Optional
+  @CreoleParameter(
+    comment = "Class names that implement gate.jape.constraint.AnnotationAccessor."
+  )
+  public void setAnnotationAccessors(List<String> annotationAccessors) {
+    this.annotationAccessors = annotationAccessors;
+  }  
+  
   public String getEncoding() {
     return encoding;
   }
@@ -183,6 +238,8 @@ public class Transducer extends AbstractLanguageAnalyser
   @Override
   public Resource init() throws ResourceInstantiationException {
     super.init();
+    initCustomConstraints();
+    
     try {
       parseJape();
     } catch(IOException e) {
@@ -193,33 +250,112 @@ public class Transducer extends AbstractLanguageAnalyser
     actionContext = new DefaultActionContext();
     return this;
   }
+  
+  
+  /**
+   * Loads any custom operators and annotation accessors into the ConstraintFactory.
+   * @throws ResourceInstantiationException
+   */
+  protected void initCustomConstraints() throws ResourceInstantiationException {
+    //Load operators
+    if (operators != null) {
+      for(String opName : operators) {
+        Class<? extends ConstraintPredicate> clazz = null;
+        try {
+          clazz = Class.forName(opName, true, Gate.getClassLoader())
+                        .asSubclass(ConstraintPredicate.class);
+        }
+        catch(ClassNotFoundException e) {
+          //if couldn't find it that way, try with current thread class loader
+          try {
+            clazz = Class.forName(opName, true,
+                Thread.currentThread().getContextClassLoader())
+                  .asSubclass(ConstraintPredicate.class);
+          }
+          catch(ClassNotFoundException e1) {
+            throw new ResourceInstantiationException("Cannot load class for operator: " + opName, e1);
+          }
+        }
+        catch(ClassCastException cce) {
+          throw new ResourceInstantiationException("Operator class '" + opName + "' must implement ConstraintPredicate");
+        }
+
+        //instantiate an instance of the class so can get the operator string
+        try {
+          ConstraintPredicate predicate = clazz.newInstance();
+          String opSymbol = predicate.getOperator();
+          //now store it in ConstraintFactory
+          Factory.getConstraintFactory().addOperator(opSymbol, clazz);
+        }
+        catch(Exception e) {
+          throw new ResourceInstantiationException("Cannot instantiate class for operator: " + opName, e);
+        }
+      }
+    }
+
+    //Load annotationAccessors
+    if (annotationAccessors != null) {
+      for(String accessorName : annotationAccessors) {
+        Class<? extends AnnotationAccessor> clazz = null;
+        try {
+          clazz = Class.forName(accessorName, true, Gate.getClassLoader())
+                     .asSubclass(AnnotationAccessor.class);
+        }
+        catch(ClassNotFoundException e) {
+          //if couldn't find it that way, try with current thread class loader
+          try {
+            clazz = Class.forName(accessorName, true,
+                Thread.currentThread().getContextClassLoader())
+                   .asSubclass(AnnotationAccessor.class);
+          }
+          catch(ClassNotFoundException e1) {
+            throw new ResourceInstantiationException("Cannot load class for accessor: " + accessorName, e1);
+          }
+        }
+        catch(ClassCastException cce) {
+          throw new ResourceInstantiationException("Operator class '" + accessorName + "' must implement AnnotationAccessor");
+        }
+
+        //instantiate an instance of the class so can get the meta-property name string
+        try {
+          AnnotationAccessor aa = clazz.newInstance();
+          String accSymbol = (String)aa.getKey();
+          //now store it in ConstraintFactory
+          Factory.getConstraintFactory().addMetaProperty(accSymbol, clazz);
+        }
+        catch(Exception e) {
+          throw new ResourceInstantiationException("Cannot instantiate class for accessor: " + accessorName, e);
+        }
+
+      }
+    }
+  }
 
   protected void parseJape() throws IOException, ParseException, ResourceInstantiationException{
-	Class oldClass = Factory.getJapeParserClass();
-	Factory.setJapeParserClass(ParseCpslPDA.class);
-	try{
-		ParseCpslPDA parser = (ParseCpslPDA) Factory.newJapeParser(grammarURL, encoding);
-
-	    StatusListener listener = new StatusListener(){
-	      public void statusChanged(String text){
-	        fireStatusChanged(text);
-	      }
-	    };
-	    parser.addStatusListener(listener);
-	    MultiPhaseTransducer intermediate =  parser.MultiPhaseTransducer();
-	    parser.removeStatusListener(listener);
-	    
-	    singlePhaseTransducers = new SPTBase[intermediate.getPhases().size()];
-	    SPTBuilder builder = new SPTBuilder();
-	    for(int i = 0; i < intermediate.getPhases().size(); i++){
-	      singlePhaseTransducers[i] = builder.buildSPT((SinglePhaseTransducerPDA)
-	              intermediate.getPhases().get(i));
-	      singlePhaseTransducers[i].addProgressListener(this);
-	    }
-	}
-	finally{
-		Factory.setJapeParserClass(oldClass);
-	}
+  	Class oldClass = Factory.getJapeParserClass();
+  	Factory.setJapeParserClass(ParseCpslPDA.class);
+  	try{
+  		ParseCpslPDA parser = (ParseCpslPDA) Factory.newJapeParser(grammarURL, encoding);
+  
+  	    StatusListener listener = new StatusListener(){
+  	      public void statusChanged(String text){
+  	        fireStatusChanged(text);
+  	      }
+  	    };
+  	    parser.addStatusListener(listener);
+  	    MultiPhaseTransducer intermediate =  parser.MultiPhaseTransducer();
+  	    parser.removeStatusListener(listener);
+  	    
+  	    singlePhaseTransducers = new SPTBase[intermediate.getPhases().size()];
+  	    SPTBuilder builder = new SPTBuilder();
+  	    for(int i = 0; i < intermediate.getPhases().size(); i++){
+  	      singlePhaseTransducers[i] = builder.buildSPT((SinglePhaseTransducerPDA)
+  	              intermediate.getPhases().get(i));
+  	      singlePhaseTransducers[i].addProgressListener(this);
+  	    }
+  	} finally{
+  		Factory.setJapeParserClass(oldClass);
+  	}
   }
   
   @Override
