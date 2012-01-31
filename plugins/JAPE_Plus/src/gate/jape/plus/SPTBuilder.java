@@ -15,6 +15,7 @@
 
 package gate.jape.plus;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -135,8 +136,20 @@ public class SPTBuilder {
       }
     }
     SPTBase optimisedTransducer = null;
+    
+    // when debugging, this will dump the generated sources where Eclipse can 
+    // see the.
+//    try {
+//      File srcDir = new File("plugins/JAPE_Plus/test/src/japephases/");
+//      srcDir.mkdirs();
+//      FileWriter writer = new FileWriter(new File(srcDir, className + ".java"));
+//      writer.write(sptCode.toString());
+//      writer.close();
+//    } catch(IOException e1) {
+//      e1.printStackTrace();
+//    }
+
     try {
-      
       Map<String, String> classes = new HashMap<String, String>(1);
       String fqcn = GENERATED_CLASS_PACKAGE + "." + className; 
       classes.put(fqcn, sptCode.toString());
@@ -456,8 +469,8 @@ public class SPTBuilder {
       }
       tabs--;
       out.append(TABS[tabs]).append("} // end constraint block\n");
-      
-      out.append(TABS[tabs]).append(
+    }
+    out.append(TABS[tabs]).append(
         "// we finished checking all constraints, and they all succeeded\n");
       out.append(TABS[tabs]).append(
         "// -> apply the transition with all possible bindings combinations\n");
@@ -465,10 +478,7 @@ public class SPTBuilder {
         "// a next step is a set of bound annotations, one for each constraint\n");
       out.append(TABS[tabs]).append(
         "generateAllNewInstances(instance, ").append(
-          transition.nextState).append(", annotsForConstraints);\n");
-    }
-
-
+          transition.nextState).append(", annotsForConstraints);\n");    
   }
   
   protected void writeClassFooter(StringBuilder out) {
