@@ -49,6 +49,7 @@ import cern.colt.bitvector.QuickBitVector;
 import cern.colt.function.IntComparator;
 import cern.colt.list.IntArrayList;
 import gate.jape.ControllerEventBlocksAction;
+import gate.jape.constraint.ConstraintPredicate;
 
 /**
  * An optimised implementation for a JAPE single phase transducer.
@@ -65,7 +66,7 @@ public abstract class SPTBase extends AbstractLanguageAnalyser {
    * @return <code>true</code> if the process should be stopped (e.g. an 
    * accepting instance has been found, and the matching mode is FIRST or ONCE). 
    */
-  protected abstract boolean advanceInstance(FSMInstance instance);
+  protected abstract boolean advanceInstance(FSMInstance instance) throws JapeException;
   
   /**
    * Sets the action context to be used during execution of RHS actions.
@@ -737,8 +738,11 @@ public abstract class SPTBase extends AbstractLanguageAnalyser {
    *          {@link #predicatesByType} array corresponding to the type of the
    *          annotation.
    * @return <code>true</code> iff the annotation is accepted by the predicate.
+   * @throws JapeException if a custom predicate generates it while performing
+   * the test.
    */
-  protected boolean checkPredicate(int annotationId, int predicateId) {
+  protected boolean checkPredicate(int annotationId, int predicateId) 
+      throws JapeException {
     if(!QuickBitVector.get(annotationPredicateComputed[annotationId],
             predicateId)) {
       predicateMisses++;
@@ -791,7 +795,7 @@ public abstract class SPTBase extends AbstractLanguageAnalyser {
             predicateId);
   }
 
-  protected boolean calculatePredicateValue(int annotationId, int predicateId) {
+  protected boolean calculatePredicateValue(int annotationId, int predicateId) throws JapeException {
     Predicate predicate =
             predicatesByType[annotationType[annotationId]][predicateId];
     
@@ -977,74 +981,80 @@ public abstract class SPTBase extends AbstractLanguageAnalyser {
               (String)actualValue).matches();
         }
         break;
-      case CONTAINS:{
-        int[] constraints = (int[])predicate.featureValue;
-        // find all annotations contained in this annotation
-        // annotations are sorted by start offset
-        int currAnnIdx = annotationId;
-        long startOffset = annotation[annotationId].getStartNode().getOffset();
-        long endOffset = annotation[annotationId].getEndNode().getOffset();
-        // move left until we find the first annotation starting here
-        while(currAnnIdx > 0 && 
-            annotation[currAnnIdx -1].getStartNode().getOffset() == startOffset) {
-          currAnnIdx--;
-        }
-        while(currAnnIdx < annotation.length &&
-              annotation[currAnnIdx].getStartNode().getOffset() <= endOffset) {
-          if(annotationType[currAnnIdx] == constraints[0] &&
-             annotation[currAnnIdx].getEndNode().getOffset() <= endOffset) {
-            // annotation is of correct type and contained
-            // now check the constraint predicates
-            boolean predicatesHappy = true;
-            for(int predIdx = 2;
-                predIdx < constraints.length && predicatesHappy; 
-                predIdx++) {
-              predicatesHappy &= (checkPredicate(currAnnIdx, constraints[predIdx]));
-            }
-            if((constraints[1] >= 0 && predicatesHappy) ||
-               // negated constraint 
-               (constraints[1] < 0 && !predicatesHappy)) {
-              result = true;
-              break predtype;
-            }
+      case CONTAINS:
+        {
+          int[] constraints = (int[])predicate.featureValue;
+          // find all annotations contained in this annotation
+          // annotations are sorted by start offset
+          int currAnnIdx = annotationId;
+          long startOffset = annotation[annotationId].getStartNode().getOffset();
+          long endOffset = annotation[annotationId].getEndNode().getOffset();
+          // move left until we find the first annotation starting here
+          while(currAnnIdx > 0 && 
+              annotation[currAnnIdx -1].getStartNode().getOffset() == startOffset) {
+            currAnnIdx--;
           }
-          // try the next ann
-          currAnnIdx++;
-        }
-      }
-      break;
-      case WITHIN: {
-        int[] constraints = (int[])predicate.featureValue;
-        // find all annotations containing this annotation
-        // annotations are sorted by start offset
-        int currAnnIdx = 0;
-        int maxCurrAnn = annotationNextOffset[annotationId];
-        if(maxCurrAnn >= annotation.length) maxCurrAnn = annotation.length;
-        long endOffset = annotation[annotationId].getEndNode().getOffset();
-        // move left until we find the first annotation starting here
-        while(currAnnIdx < maxCurrAnn) {
-          if(annotationType[currAnnIdx] == constraints[0] &&
-             annotation[currAnnIdx].getEndNode().getOffset() >= endOffset) {
-            // annotation is of correct type and contains the current one
-            // now check the constraint predicates
-            boolean predicatesHappy = true;
-            for(int predIdx = 2;
-                predIdx < constraints.length && predicatesHappy; 
-                predIdx++) {
-              predicatesHappy &= (checkPredicate(currAnnIdx, constraints[predIdx]));
+          while(currAnnIdx < annotation.length &&
+                annotation[currAnnIdx].getStartNode().getOffset() <= endOffset) {
+            if(annotationType[currAnnIdx] == constraints[0] &&
+               annotation[currAnnIdx].getEndNode().getOffset() <= endOffset) {
+              // annotation is of correct type and contained
+              // now check the constraint predicates
+              boolean predicatesHappy = true;
+              for(int predIdx = 2;
+                  predIdx < constraints.length && predicatesHappy; 
+                  predIdx++) {
+                predicatesHappy &= (checkPredicate(currAnnIdx, constraints[predIdx]));
+              }
+              if((constraints[1] >= 0 && predicatesHappy) ||
+                 // negated constraint 
+                 (constraints[1] < 0 && !predicatesHappy)) {
+                result = true;
+                break predtype;
+              }
             }
-            if((constraints[1] >= 0 && predicatesHappy) ||
-               // negated constraint 
-               (constraints[1] < 0 && !predicatesHappy)) {
-              result = true;
-              break predtype;
-            }
+            // try the next ann
+            currAnnIdx++;
           }
-          // try the next ann
-          currAnnIdx++;
         }
-      }
-      break;
+        break;
+      case WITHIN: 
+        {
+          int[] constraints = (int[])predicate.featureValue;
+          // find all annotations containing this annotation
+          // annotations are sorted by start offset
+          int currAnnIdx = 0;
+          int maxCurrAnn = annotationNextOffset[annotationId];
+          if(maxCurrAnn >= annotation.length) maxCurrAnn = annotation.length;
+          long endOffset = annotation[annotationId].getEndNode().getOffset();
+          // move left until we find the first annotation starting here
+          while(currAnnIdx < maxCurrAnn) {
+            if(annotationType[currAnnIdx] == constraints[0] &&
+               annotation[currAnnIdx].getEndNode().getOffset() >= endOffset) {
+              // annotation is of correct type and contains the current one
+              // now check the constraint predicates
+              boolean predicatesHappy = true;
+              for(int predIdx = 2;
+                  predIdx < constraints.length && predicatesHappy; 
+                  predIdx++) {
+                predicatesHappy &= (checkPredicate(currAnnIdx, constraints[predIdx]));
+              }
+              if((constraints[1] >= 0 && predicatesHappy) ||
+                 // negated constraint 
+                 (constraints[1] < 0 && !predicatesHappy)) {
+                result = true;
+                break predtype;
+              }
+            }
+            // try the next ann
+            currAnnIdx++;
+          }
+        }
+        break;
+      case CUSTOM:
+        ConstraintPredicate actualConstraint = (ConstraintPredicate)predicate.featureValue;
+        result = actualConstraint.matches(annotation[annotationId], inputAS);
+        break;
       default:
         throw new IllegalArgumentException("Predicate type " + predicate.type
                 + " not implemented");
@@ -1082,7 +1092,11 @@ public abstract class SPTBase extends AbstractLanguageAnalyser {
         // advance the top instance, and queue all resulting instances.
         // get the first instance
         FSMInstance fsmInstance = activeInstances.removeFirst();
-        if(advanceInstance(fsmInstance)) break instances;
+        try {
+          if(advanceInstance(fsmInstance)) break instances;
+        } catch(JapeException e) {
+          throw new ExecutionException(e);
+        }
       }// while activeInstances not empty
       // at this point, there are no more active instances (or we exited due to
       // matching mode being First or Once).

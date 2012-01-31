@@ -16,6 +16,7 @@
 package gate.jape.plus;
 
 import gate.jape.constraint.AnnotationAccessor;
+import gate.jape.constraint.ConstraintPredicate;
 
 import java.util.regex.Pattern;
 
@@ -36,24 +37,29 @@ public class Predicate{
     REGEX_NOT_FIND,
     REGEX_NOT_MATCH,
     CONTAINS,
-    WITHIN
+    WITHIN,
+    CUSTOM
   }
 
   
   /**
    * The annotation feature this predicate refers to.
    */
-//  protected String featureName;
-  
   protected AnnotationAccessor annotationAccessor;
   
   /**
-   * The desired value for the feature. The only allowed types are 
-   * {@link String}, {@link Long}, {@link Double}, {@link Pattern} (for REGEX 
-   * predicates), or an int[] with annotationType, negated, pred1, pred2, ... 
+   * The desired value for the feature. The only allowed types are
+   * <ul>
+   * <li>{@link String}</li>
+   * <li>{@link Long}</li>
+   * <li>{@link Double}</li>
+   * <li>{@link Pattern} (for REGEX predicates)</li> 
+   * <li>int[] with annotationType, negated, pred1, pred2, ... 
    * (i.e. constraints in the same format as 
    * {@link SPTBase.Transition#constraints}) used by CONTAINS and WITHIN 
-   * predicates to validate potential matches!
+   * predicates to validate potential matches</li>
+   * <li>a {@link ConstraintPredicate} value, for CUSTOM predicates.</li>
+   * </ul>
    */
   protected Object featureValue;
   
