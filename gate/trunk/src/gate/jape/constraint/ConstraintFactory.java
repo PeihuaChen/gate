@@ -53,6 +53,7 @@ public class ConstraintFactory {
     addOperator(ConstraintPredicate.REGEXP_MATCH, RegExpMatchPredicate.class);
     addOperator(ConstraintPredicate.NOT_REGEXP_MATCH, NotRegExpMatchPredicate.class);
     addOperator(ContainsPredicate.OPERATOR, ContainsPredicate.class);
+    addOperator(NotContainsPredicate.OPERATOR, NotContainsPredicate.class);
     addOperator(WithinPredicate.OPERATOR, WithinPredicate.class);
     addOperator(NotWithinPredicate.OPERATOR, NotWithinPredicate.class);
   }
