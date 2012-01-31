@@ -179,7 +179,24 @@ public class JapeViewer extends AbstractVisualResource implements
 
   @Override
   public void setTarget(Object target) {
-    if(target == null || !(target instanceof gate.creole.Transducer || target.getClass().getName().equals("gate.jape.plus.Transducer"))) {
+    if(target == null) {
+     throw new NullPointerException("JAPE viewer received a null target");
+    }
+    // check that the target is one we can work with - it needs to be a
+    // LanguageAnalyser that has grammarURL and encoding parameters.
+    boolean targetOK = true;
+    if(target instanceof LanguageAnalyser) {
+      try {
+        ((LanguageAnalyser)target).getParameterValue("grammarURL");
+        ((LanguageAnalyser)target).getParameterValue("encoding");
+      } catch(ResourceInstantiationException rie) {
+        targetOK = false;
+      }
+    } else {
+      targetOK = false;
+    }
+     
+    if(!targetOK) {
       throw new IllegalArgumentException(
               "The GATE jape viewer can only be used with a GATE jape transducer!\n"
                       + target.getClass().toString()
