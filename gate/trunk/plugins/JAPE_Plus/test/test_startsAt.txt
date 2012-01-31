@@ -1,0 +1,4 @@
+this is a document which has a number 
+of words like a, an, and others and this
+document is used to test the startsAt 
+predicate.
