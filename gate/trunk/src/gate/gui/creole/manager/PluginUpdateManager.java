@@ -1,14 +1,14 @@
 /*
  * PluginUpdateManager.java
- * 
+ *
  * Copyright (c) 2011, The University of Sheffield. See the file COPYRIGHT.txt
  * in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
- * 
+ *
  * This file is part of GATE (see http://gate.ac.uk/), and is free software,
  * licenced under the GNU Library General Public License, Version 2, June 1991
  * (in the distribution as file licence.html, and also available at
  * http://gate.ac.uk/gate/licence.html).
- * 
+ *
  * Mark A. Greenwood, 29/10/2011
  */
 
@@ -106,7 +106,7 @@ import org.apache.tools.ant.taskdefs.Expand;
 /**
  * The CREOLE plugin manager which includes the ability to download and
  * install/update plugins from remote update sites.
- * 
+ *
  * @author Mark A. Greenwood
  */
 @SuppressWarnings("serial")
@@ -152,7 +152,7 @@ public class PluginUpdateManager extends JDialog {
   public static File getUserPluginsHome() {
     // TODO move this into gate.util.OptionaMap as a getFile() method
     if(userPluginDir == null) {
-      String upd = Gate.getUserConfig().getString(GATE_USER_PLUGINS);
+	  String upd = System.getProperty(GATE_USER_PLUGINS, Gate.getUserConfig().getString(GATE_USER_PLUGINS));
       if(upd != null) {
         userPluginDir = new File(upd);
       }
@@ -664,19 +664,19 @@ public class PluginUpdateManager extends JDialog {
       public void mousePressed(MouseEvent e) {
         process(e);
       }
-      
+
       public void mouseReleased(MouseEvent e) {
         process(e);
       }
-      
+
       public void mouseClicked(MouseEvent e) {
         process(e);
       }
-      
+
       private void process(final MouseEvent e) {
         //final int row = tblAvailable.rowAtPoint(e.getPoint());
         final int column = tblAvailable.columnAtPoint(e.getPoint());
-        if (column == 1) {                    
+        if (column == 1) {
           SwingUtilities.invokeLater(new Runnable() {
 
             @Override
@@ -687,13 +687,13 @@ public class PluginUpdateManager extends JDialog {
                 if (e.getID() == MouseEvent.MOUSE_RELEASED || e.getID() == MouseEvent.MOUSE_CLICKED) robot.mouseRelease(InputEvent.BUTTON1_MASK);
               } catch(AWTException e) {
                 e.printStackTrace();
-              }              
-            }            
+              }
+            }
           });
         }
       }
     });
-    
+
     tblAvailable.setSortable(true);
     tblAvailable.setSortedColumn(1);
     Collator collator = Collator.getInstance(Locale.ENGLISH);
@@ -890,9 +890,10 @@ public class PluginUpdateManager extends JDialog {
     pnlUserPlugins.setLayout(new BoxLayout(pnlUserPlugins, BoxLayout.X_AXIS));
     pnlUserPlugins.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 
-    String userPluginsDir = (String)Gate.getUserConfig().get(GATE_USER_PLUGINS);
+    //String userPluginsDir = (String)Gate.getUserConfig().get(GATE_USER_PLUGINS);
+    getUserPluginsHome();
     final JTextField txtUserPlugins =
-        new JTextField(userPluginsDir == null ? "" : userPluginsDir);
+        new JTextField(userPluginDir == null ? "" : userPluginDir.getAbsolutePath());
     txtUserPlugins.setEditable(false);
 
     JButton btnUserPlugins = new JButton(new OpenFileIcon(24, 24));
@@ -990,7 +991,7 @@ public class PluginUpdateManager extends JDialog {
   /**
    * Download a file from a URL into a local file while updating the progress
    * panel so the user knows how far through we are
-   * 
+   *
    * @param name
    *          the name of the plugin for the progress feedback
    * @param url
