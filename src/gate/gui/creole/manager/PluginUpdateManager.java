@@ -744,23 +744,22 @@ public class PluginUpdateManager extends JDialog {
                 true);
         options.addPropertyChangeListener(new PropertyChangeListener() {
           public void propertyChange(PropertyChangeEvent e) {
+            if (options.getValue().equals(JOptionPane.UNINITIALIZED_VALUE)) return;
             String prop = e.getPropertyName();
-
             if(dialog.isVisible() && (e.getSource() == options)
                 && (prop.equals(JOptionPane.VALUE_PROPERTY))) {
-
               if(((Integer)options.getValue()).intValue() == JOptionPane.OK_OPTION) {
-
                 if(txtName.getText().trim().equals("")) {
                   txtName.requestFocusInWindow();
+                  options.setValue(JOptionPane.UNINITIALIZED_VALUE);
                   return;
                 }
                 if(txtURL.getText().trim().equals("")) {
                   txtURL.requestFocusInWindow();
+                  options.setValue(JOptionPane.UNINITIALIZED_VALUE);
                   return;
                 }
               }
-
               dialog.setVisible(false);
             }
           }
