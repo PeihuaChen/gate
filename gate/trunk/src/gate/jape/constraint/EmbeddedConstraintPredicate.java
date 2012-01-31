@@ -44,7 +44,7 @@ public abstract class EmbeddedConstraintPredicate extends AbstractConstraintPred
   }
 
   /**
-   * Sets up environment for concreate class to do the specific matching check
+   * Sets up environment for concrete class to do the specific matching check
    */
   public boolean doMatch(Object annotValue, AnnotationSet context)
           throws JapeException {
