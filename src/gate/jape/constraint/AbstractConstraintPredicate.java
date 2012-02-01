@@ -66,8 +66,7 @@ public abstract class AbstractConstraintPredicate implements
     // Numbers), don't.
     Object val = getValue();
     if(val instanceof String) val = "\"" + val + "\"";
-
-    return accessor + getOperator() + val;
+    return accessor + " " + getOperator() + " " + val;
   }
 
   public boolean matches(Annotation annot, AnnotationSet context) throws JapeException {

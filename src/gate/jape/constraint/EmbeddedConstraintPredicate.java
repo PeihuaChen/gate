@@ -105,6 +105,16 @@ public abstract class EmbeddedConstraintPredicate extends AbstractConstraintPred
   public String getAnnotType() {
     return annotType;
   }
+
+  @Override
+  public String toString() {
+    StringBuilder str = new StringBuilder();
+    str.append(getOperator()).append(" ");
+    if(annotType != null)  str.append(annotType).append(": ");
+    if(valueConstraint != null) str.append(valueConstraint);
+    return str.toString();
+  }
+  
   
   
 }
