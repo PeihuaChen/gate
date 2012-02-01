@@ -16,7 +16,7 @@ import javax.swing.text.html.HTMLDocument;
 
 public class JTextPaneTableCellRenderer extends AbstractCellEditor implements
                                                                     TableCellEditor {
-  
+
   private static final long serialVersionUID = 3745411623553392990L;
 
   private JTextPane textPane = new JTextPane();
@@ -26,8 +26,12 @@ public class JTextPaneTableCellRenderer extends AbstractCellEditor implements
   public JTextPaneTableCellRenderer() {
     textPane.setContentType("text/html");
     textPane.setEditable(false);
-    textPane.setOpaque(false);
+    textPane.setOpaque(true);
     textPane.setBorder(null);
+
+    textPane.setForeground(UIManager.getColor("Table.selectionForeground"));
+    textPane.setBackground(UIManager.getColor("Table.selectionBackground"));
+
     Font font = UIManager.getFont("Label.font");
     String bodyRule =
         "body { font-family: " + font.getFamily() + "; " + "font-size: "
@@ -36,15 +40,15 @@ public class JTextPaneTableCellRenderer extends AbstractCellEditor implements
     ((HTMLDocument)textPane.getDocument()).getStyleSheet().addRule(bodyRule);
 
     textPane.addHyperlinkListener(new HyperlinkListener() {
-      
+
       @Override
       public void hyperlinkUpdate(HyperlinkEvent e) {
         if (e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED))
-            MainFrame.getInstance().showHelpFrame(e.getURL().toString(), "CREOLE Plugin Manager");        
+            MainFrame.getInstance().showHelpFrame(e.getURL().toString(), "CREOLE Plugin Manager");
       }
     });
   }
-  
+
   @Override
   public Object getCellEditorValue() {
     return value;
