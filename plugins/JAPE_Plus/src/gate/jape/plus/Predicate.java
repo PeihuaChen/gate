@@ -128,4 +128,25 @@ public class Predicate{
     } else if(!type.equals(other.type)) return false;
     return true;
   }
+
+  @Override
+  public String toString() {
+    StringBuilder str = new StringBuilder();
+    str.append("[").append(annotationAccessor).append(" <").append(type).append("> ");
+    if(type == PredicateType.CONTAINS || type == PredicateType.WITHIN) {
+      // feature value is an int array
+      int[] constraint = (int[])featureValue;
+      str.append("[");
+      str.append(constraint[0]);
+      for(int i = 1; i < constraint.length; i++){
+        str.append(", ");
+        str.append(constraint[i]);
+      }
+      str.append("]");
+    } else {
+      str.append(featureValue);
+    }
+    str.append("]");
+    return str.toString();
+  }
 }
