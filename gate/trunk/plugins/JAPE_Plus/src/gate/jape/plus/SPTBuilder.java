@@ -337,7 +337,7 @@ public class SPTBuilder {
         out.append(TABS[tabs]).append(
           "activeInstances.addLast(nextInstance);\n");
         tabs--;
-        out.append(TABS[tabs]).append("} // end transition block\n\n");
+        out.append(TABS[tabs]).append("} // end transition block\n");
       } else if(transition.type != TransitionPDA.TYPE_CONSTRAINT){
         // closing-round-bracket transition
         out.append(TABS[tabs]).append(
@@ -350,7 +350,7 @@ public class SPTBuilder {
         out.append(TABS[tabs]).append(
             "nextInstance.state = ").append(transition.nextState).append(";\n"); 
         out.append(TABS[tabs]).append(
-            "activeInstances.addLast(nextInstance);\n\n");
+            "activeInstances.addLast(nextInstance);\n");
         tabs--;
         out.append(TABS[tabs]).append("} // end transition block\n");        
       } else {
@@ -498,14 +498,14 @@ public class SPTBuilder {
       StatePDA anOldState = oldStatesQueue.removeFirst();
       if(oldToNewStates.containsKey(anOldState.getIndex())){
         //state already converted
-      }else{
+      } else {
         //new state required
         SPTBase.State newState = new SPTBase.State(); 
         newStates.add(newState);
         oldToNewStates.put(anOldState.getIndex(), newStates.size() -1);
         //queue all old states reachable from this state
         for(gate.fsm.Transition anOldTransition : anOldState.getTransitions()){
-          oldStatesQueue.add((StatePDA) anOldTransition.getTarget());
+          oldStatesQueue.add((StatePDA)anOldTransition.getTarget());
         }
         //if state is final, set the rule value
         newState.rule = -1;
