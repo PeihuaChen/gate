@@ -51,6 +51,7 @@ public class TransitionPDA extends Transition {
 	 * nondeterministic pushdown automata.
 	 */
 	private int type;
+	
 	public static final int TYPE_CONSTRAINT = -1;
 	public static final int TYPE_OPENING_ROUND_BRACKET = -2;
 
