@@ -60,6 +60,11 @@ import gate.util.Javac;
  */
 public class SPTBuilder {
 
+  /**
+   * Flag used when debugging: set to true to enable dumping the generated code
+   * to disk and printing of additional information. 
+   */
+  private static final boolean DEBUG = false;
   
   private static final String[] TABS = new String[]{"", "\t", "\t\t", "\t\t\t",
       "\t\t\t\t", "\t\t\t\t\t", "\t\t\t\t\t\t", "\t\t\t\t\t\t\t", 
@@ -138,16 +143,29 @@ public class SPTBuilder {
     SPTBase optimisedTransducer = null;
     
     // when debugging, this will dump the generated sources where Eclipse can 
-    // see the.
-//    try {
-//      File srcDir = new File("plugins/JAPE_Plus/test/src/japephases/");
-//      srcDir.mkdirs();
-//      FileWriter writer = new FileWriter(new File(srcDir, className + ".java"));
-//      writer.write(sptCode.toString());
-//      writer.close();
-//    } catch(IOException e1) {
-//      e1.printStackTrace();
-//    }
+    // see them.
+    if(DEBUG) {
+      try {
+        File srcDir = new File("plugins/JAPE_Plus/test/src/japephases/");
+        srcDir.mkdirs();
+        FileWriter writer = new FileWriter(new File(srcDir, className + ".java"));
+        writer.write(sptCode.toString());
+        writer.close();
+      } catch(IOException e1) {
+        e1.printStackTrace();
+      }
+      // also print out the predicates used
+      StringBuilder str = new StringBuilder();
+      for(int type = 0; type < predicatesByTypeArray.length; type++) {
+        str.append(annotationTypes.get(type)).append(": ");
+        for(Predicate pred : predicatesByTypeArray[type]) {
+          str.append(pred.toString()).append(" ");
+        }
+        str.append("\n");
+      }
+      str.append("\n\n");
+      System.out.print(str.toString());
+    }
 
     try {
       Map<String, String> classes = new HashMap<String, String>(1);
