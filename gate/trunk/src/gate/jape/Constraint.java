@@ -348,25 +348,13 @@ public class Constraint implements JapeConstants, gate.creole.ANNIEConstants,
         if(predicate == ontLookupClassPred && ontologyLR != null)
           successful = annot.getFeatures().subsumes(ontologyLR, ontFeatureMap);
         else successful = predicate.matches(annot, context);
-      }
-      catch(JapeException je) {
+      } catch(JapeException je) {
         gate.util.Err.println(je.getMessage());
       }
-      if(!successful && !negated) return false;
-      if(successful && negated) return true;
+      if(!successful) return false;
       // else, keep checking the rest of the predicates
     } // checked all predicates
-
-    /*
-     * If all features had to match (ANDed), then we can return true
-     * because no test failed. If at least one feature had to match
-     * (ORed), then we have to return false because no test succeeded.
-     */
-    if(!negated)
-      return true;
-    else // if negated
-    return false;
-
+    return true;
   }
 
   /**
