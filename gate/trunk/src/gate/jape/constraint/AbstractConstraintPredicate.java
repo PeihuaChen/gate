@@ -38,35 +38,36 @@ public abstract class AbstractConstraintPredicate implements
     setValue(value);
   }
 
-  public int hashCode() {
-    int hashCode = getOperator().hashCode();
-    hashCode = 37 * hashCode + ((accessor != null) ? accessor.hashCode() : 0);
-    hashCode = 37 * hashCode + ((value != null) ? value.hashCode() : 0);
-    return hashCode;
-  }
-
-  public boolean equals(Object obj) {
-    if(obj == null) return false;
-    if(obj == this) return true;
-    if(!(this.getClass().equals(obj.getClass()))) return false;
-
-    ConstraintPredicate a = (ConstraintPredicate)obj;
-
-    if(accessor != a.getAccessor() && accessor != null
-            && !accessor.equals(a.getAccessor())) return false;
-
-    if(value != a.getValue() && value != null && !value.equals(a.getValue()))
-      return false;
-
-    return true;
-  }
-
   public String toString() {
     // If value is a String, quote it. Otherwise (for things like
     // Numbers), don't.
     Object val = getValue();
     if(val instanceof String) val = "\"" + val + "\"";
     return accessor + " " + getOperator() + " " + val;
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((accessor == null) ? 0 : accessor.hashCode());
+    result = prime * result + ((value == null) ? 0 : value.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if(this == obj) return true;
+    if(obj == null) return false;
+    if(!(obj instanceof AbstractConstraintPredicate)) return false;
+    AbstractConstraintPredicate other = (AbstractConstraintPredicate)obj;
+    if(accessor == null) {
+      if(other.accessor != null) return false;
+    } else if(!accessor.equals(other.accessor)) return false;
+    if(value == null) {
+      if(other.value != null) return false;
+    } else if(!value.equals(other.value)) return false;
+    return true;
   }
 
   public boolean matches(Annotation annot, AnnotationSet context) throws JapeException {

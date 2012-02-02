@@ -110,11 +110,36 @@ public abstract class EmbeddedConstraintPredicate extends AbstractConstraintPred
   public String toString() {
     StringBuilder str = new StringBuilder();
     str.append(getOperator()).append(" ");
-    if(annotType != null)  str.append(annotType).append(": ");
-    if(valueConstraint != null) str.append(valueConstraint);
+    if(annotType != null)  str.append(annotType);
+    if(valueConstraint != null){
+      str.append(": ").append(valueConstraint);
+    }
     return str.toString();
   }
   
-  
-  
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = super.hashCode();
+    result = prime * result + ((annotType == null) ? 0 : annotType.hashCode());
+    result =
+        prime * result
+            + ((valueConstraint == null) ? 0 : valueConstraint.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if(this == obj) return true;
+    if(!super.equals(obj)) return false;
+    if(!(obj instanceof EmbeddedConstraintPredicate)) return false;
+    EmbeddedConstraintPredicate other = (EmbeddedConstraintPredicate)obj;
+    if(annotType == null) {
+      if(other.annotType != null) return false;
+    } else if(!annotType.equals(other.annotType)) return false;
+    if(valueConstraint == null) {
+      if(other.valueConstraint != null) return false;
+    } else if(!valueConstraint.equals(other.valueConstraint)) return false;
+    return true;
+  }
 }
