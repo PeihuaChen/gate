@@ -110,13 +110,14 @@
               Encoding="UTF-8"
               Use="yes"
               Windowtitle="GATE learning plugin JavaDoc"
-              link="http://java.sun.com/j2se/1.5.0/docs/api/"
               docencoding="UTF-8"
               charset="UTF-8"
-              source="1.5"
+              source="1.6"
               useexternalfile="yes"
               breakiterator="true">
-      <fileset dir="${src}"/>        
+      <fileset dir="${src}"/>
+      <link href="http://docs.oracle.com/javase/6/docs/api/" />
+      <link href="http://gate.ac.uk/gate/doc/javadoc/" />
     </javadoc>
   </target>
   

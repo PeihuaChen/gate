@@ -92,11 +92,11 @@
               Windowtitle="GATE Ontology plugin JavaDoc"
               docencoding="UTF-8"
               charset="UTF-8"
-              source="1.5"
+              source="1.6"
               breakiterator="true">
       <fileset dir="${src}"/>
-      <link href="http://java.sun.com/j2se/1.5.0/docs/api/" />
-      <link href="../../../../doc/javadoc/" />
+      <link href="http://docs.oracle.com/javase/6/docs/api/" />
+      <link href="http://gate.ac.uk/gate/doc/javadoc/" />
     </javadoc>
   </target>
 

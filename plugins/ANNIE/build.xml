@@ -112,10 +112,10 @@
               Encoding="UTF-8"
               Use="yes"
               Windowtitle="GATE JavaDoc"
-              link="http://java.sun.com/j2se/1.4.2/docs/api/"
+              link="http://docs.oracle.com/javase/6/docs/api/"
               docencoding="UTF-8"
               charset="UTF-8"
-              source="1.4"
+              source="1.6"
               breakiterator="true">
       <fileset dir="${srcDir}"/>        
     </javadoc>

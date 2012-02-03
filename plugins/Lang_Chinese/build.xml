@@ -96,11 +96,11 @@
              classpathref="build.class.path"
              encoding="UTF-8"
              windowtitle="${plugin.name} JavaDoc"
-             source="1.5">
+             source="1.6">
       <sourcepath>
         <pathelement location="${srcDir}" />
       </sourcepath>
-      <link href="http://java.sun.com/j2se/1.5.0/docs/api/" />
+      <link href="http://docs.oracle.com/javase/6/docs/api/" />
       <link href="http://gate.ac.uk/gate/doc/javadoc/" />
     </javadoc>
   </target>

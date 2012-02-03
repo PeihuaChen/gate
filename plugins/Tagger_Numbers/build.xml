@@ -65,11 +65,11 @@
 	</target>
 
 	<target name="javadoc" depends="doc.prepare">
-		<javadoc destdir="${javadoc.dir}" packagenames="*" classpathref="compile.classpath" encoding="UTF-8" windowtitle="Numbers Tagger JavaDoc" source="1.5">
+		<javadoc destdir="${javadoc.dir}" packagenames="*" classpathref="compile.classpath" encoding="UTF-8" windowtitle="Numbers Tagger JavaDoc" source="1.6">
 			<sourcepath>
 				<pathelement location="${src.dir}" />
 			</sourcepath>
-			<link href="http://java.sun.com/j2se/1.5.0/docs/api/" />
+			<link href="http://docs.oracle.com/javase/6/docs/api/" />
 			<link href="http://gate.ac.uk/gate/doc/javadoc/" />
 		</javadoc>
 	</target>
