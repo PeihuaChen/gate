@@ -55,13 +55,16 @@ extends PatternElement implements JapeConstants, java.io.Serializable
   /** The set of annotations we have matched. */
   private AnnotationSet matchedAnnots;
 
+  private final boolean negationCompatMode;
+  
   /** Construction. */
-  public BasicPatternElement() {
+  public BasicPatternElement(SinglePhaseTransducer spt) {
     constraintsMap = new HashMap<Object, Constraint>();
     constraints1 = new ArrayList<Constraint>();
     lastFailurePoint = -1;
     //nextAvailable = new MutableInteger();
     matchedAnnots = new AnnotationSetImpl((Document) null);
+    negationCompatMode = spt.isNegationCompatMode();
   } // construction
 
   /** Need cloning for processing of macro references. See comments on
@@ -85,20 +88,28 @@ extends PatternElement implements JapeConstants, java.io.Serializable
     * annotation type and negation state exists.
     */
   public void addConstraint(Constraint newConstraint) {
-    /* if a constraint with the same negation state as this constraint is
-     * already mapped, put it's attributes on the existing constraint, else
-     * add it
-     */
+    // find if we need to merge this new constraint with an existing one
+    Constraint existingConstraint = null;
     String annotType = newConstraint.getAnnotType();
     Pair typeNegKey = new Pair(annotType, newConstraint.isNegated());
+    if(negationCompatMode && newConstraint.isNegated()) {
+      // compatibility mode (pre GATE 7.0) where multiple negative constraints
+      // on the same annotation type do NOT get grouped together and AND'ed 
+      // before the negation is applied
+      existingConstraint = null;
+    } else {
+      // positive constraint OR negated, but in default mode:
+      // if a constraint with the same negation state as this constraint is
+      // already mapped, put its attributes on the existing constraint, else
+      // add it
+      existingConstraint = constraintsMap.get(typeNegKey);
+    }      
 
-    Constraint existingConstraint = constraintsMap.get(typeNegKey);
-    if(existingConstraint == null) {
-      constraintsMap.put(typeNegKey, newConstraint);
-      constraints1.add(newConstraint);
-    }
-    else {
+    if(existingConstraint != null) {
       existingConstraint.addAttributes(newConstraint.getAttributeSeq());
+    } else {
+      constraintsMap.put(typeNegKey, newConstraint);
+      constraints1.add(newConstraint);      
     }
   } // addConstraint
 

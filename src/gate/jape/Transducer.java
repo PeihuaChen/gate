@@ -158,6 +158,13 @@ public abstract class Transducer implements Serializable, Benchmarkable
    * over one and same span with different annotation groups */
   private boolean matchGroupMode = false;
 
+  /**
+   * Switch used to use pre 7.0 style negation, where multiple negative 
+   * predicates are not grouped into a conjunction.
+   */
+  private boolean negationCompatMode;
+  
+  
   private URL baseURL;
 
   private transient Vector progressListeners;
@@ -239,8 +246,18 @@ public abstract class Transducer implements Serializable, Benchmarkable
     this.enableDebugging = enableDebugging;
   }
 
+  
+  
   //ProcessProgressReporter implementation ends here
   
+  public boolean isNegationCompatMode() {
+    return negationCompatMode;
+  }
+
+  public void setNegationCompatMode(boolean negationCompatMode) {
+    this.negationCompatMode = negationCompatMode;
+  }
+
   protected ActionContext actionContext;
   public void setActionContext(ActionContext ac) {
     actionContext = ac;
