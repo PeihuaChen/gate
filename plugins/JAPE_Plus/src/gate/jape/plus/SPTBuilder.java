@@ -20,7 +20,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,7 +27,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import com.ontotext.jape.pda.FSMPDA;
 import com.ontotext.jape.pda.SinglePhaseTransducerPDA;
@@ -49,7 +47,6 @@ import gate.jape.constraint.ConstraintPredicate;
 import gate.jape.constraint.ContainsPredicate;
 import gate.jape.constraint.WithinPredicate;
 import gate.jape.plus.Predicate.PredicateType;
-import gate.jape.plus.SPTBase.FSMInstance;
 import gate.jape.plus.SPTBase.MatchMode;
 import gate.jape.plus.SPTBase.State;
 import gate.util.GateException;
@@ -199,6 +196,7 @@ public class SPTBuilder {
     }
     
     //input types
+    @SuppressWarnings("unchecked")
     Set<String> inputTypes = oldSpt.input;
     optimisedTransducer.inputAnnotationTypes = 
         inputTypes == null || inputTypes.size() == 0 ? 
