@@ -7,3 +7,6 @@ made obsolete.
 
 Obsolete plugins are available via SVN from
 https://gate.svn.sourceforge.net/svnroot/gate/plugins/trunk/obsolete
+
+Obsolete plugins are also available from a GATE Plugin Repository
+http://jenkins.gate.ac.uk/job/GATEPlugins-Obsolete/lastSuccessfulBuild/artifact/site.xml
