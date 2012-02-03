@@ -705,6 +705,13 @@ SinglePhaseTransducer SinglePhaseTransducer(String javaimportblock) :
               t.setMatchGroupMode(true);
             else t.setMatchGroupMode(false);
           }
+          else if(optionNameTok.image.equalsIgnoreCase("negationGrouping")) {
+            if(optionValueTok.image.equalsIgnoreCase("false") ||
+               optionValueTok.image.equalsIgnoreCase("no") ||
+               optionValueTok.image.equalsIgnoreCase("n"))
+              t.setNegationCompatMode(true);
+            else t.setNegationCompatMode(false);
+          }
         }
       )*
     )
@@ -954,7 +961,7 @@ BasicPatternElement BasicPatternElement() :
 {
   Token shortTok = null; // string shorthand token
   Constraint c = null;
-  BasicPatternElement bpe = new BasicPatternElement();
+  BasicPatternElement bpe = new BasicPatternElement(curSPT);
 }
 {
   (

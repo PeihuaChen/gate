@@ -574,6 +574,13 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
               t.setMatchGroupMode(true);
             else t.setMatchGroupMode(false);
           }
+          else if(optionNameTok.image.equalsIgnoreCase("negationGrouping")) {
+            if(optionValueTok.image.equalsIgnoreCase("false") ||
+               optionValueTok.image.equalsIgnoreCase("no") ||
+               optionValueTok.image.equalsIgnoreCase("n"))
+              t.setNegationCompatMode(true);
+            else t.setNegationCompatMode(false);
+          }
         }
         break;
       default:
@@ -904,7 +911,7 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
   final public BasicPatternElement BasicPatternElement() throws ParseException {
   Token shortTok = null; // string shorthand token
   Constraint c = null;
-  BasicPatternElement bpe = new BasicPatternElement();
+  BasicPatternElement bpe = new BasicPatternElement(curSPT);
     switch (jj_nt.kind) {
     case leftBrace:
       jj_consume_token(leftBrace);
@@ -1750,29 +1757,6 @@ AnnotationAccessor accessor = null;
     finally { jj_save(1, xla); }
   }
 
-  private boolean jj_3R_15() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_17()) {
-    jj_scanpos = xsp;
-    if (jj_3R_18()) {
-    jj_scanpos = xsp;
-    if (jj_3R_19()) return true;
-    }
-    }
-    return false;
-  }
-
-  private boolean jj_3R_20() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_22()) {
-    jj_scanpos = xsp;
-    if (jj_3R_23()) return true;
-    }
-    return false;
-  }
-
   private boolean jj_3_1() {
     if (jj_3R_15()) return true;
     return false;
@@ -1817,15 +1801,15 @@ AnnotationAccessor accessor = null;
     return false;
   }
 
-  private boolean jj_3R_19() {
-    if (jj_3R_21()) return true;
-    return false;
-  }
-
   private boolean jj_3R_16() {
     if (jj_scan_token(colon)) return true;
     if (jj_scan_token(ident)) return true;
     if (jj_scan_token(leftBrace)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_19() {
+    if (jj_3R_21()) return true;
     return false;
   }
 
@@ -1847,6 +1831,29 @@ AnnotationAccessor accessor = null;
   private boolean jj_3R_22() {
     if (jj_scan_token(leftBrace)) return true;
     if (jj_3R_25()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_15() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_17()) {
+    jj_scanpos = xsp;
+    if (jj_3R_18()) {
+    jj_scanpos = xsp;
+    if (jj_3R_19()) return true;
+    }
+    }
+    return false;
+  }
+
+  private boolean jj_3R_20() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_22()) {
+    jj_scanpos = xsp;
+    if (jj_3R_23()) return true;
+    }
     return false;
   }
 
