@@ -2,17 +2,13 @@
 
 Build file for SUPPLE
 
-This build file will only work with Ant 1.6.3 or later.  For best results,
-use the copy of Ant supplied with GATE, i.e.
+This build file will only work with Ant 1.6.3 or later.
 
-../../bin/ant
-
-(or ..\..\bin\ant on Windows).  If you are building the SWI or SICStus
-prolog versions of the parser, check the USER MODIFIABLE OPTIONS below
-and set the correct name and/or path to your prolog executable.  You
-will also need to pass this name/path to GATE at runtime.  See the GATE
-User Guide (http://gate.ac.uk/sale/tao/#sec:misc-creole:supple) for full
-details.
+If you are building the SWI or SICStus prolog versions of the parser,
+check the USER MODIFIABLE OPTIONS below and set the correct name and/or
+path to your prolog executable.  You will also need to pass this name/path
+to GATE at runtime.  See the GATE User Guide
+(http://gate.ac.uk/sale/tao/#sec:misc-creole:supple) for full details.
 
 Ian Roberts (i.roberts@dcs.shef.ac.uk), March 2006
 
