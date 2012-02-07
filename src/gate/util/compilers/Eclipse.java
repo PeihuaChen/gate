@@ -48,6 +48,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import org.apache.log4j.Logger;
+
 /**
  * This class compiles a set of java sources using the JDT compiler from the
  * Eclipse project.  Unlike the Sun compiler, this compiler can load
@@ -73,9 +75,25 @@ public class Eclipse extends gate.util.Javac {
    * In the case of warnings the compiled classes are loaded before the error is
    * raised.
    */
-  public void compile(final Map sources) throws GateException {
+  public void compile(Map sources) throws GateException {
+    
+    final Map<String, String> sourcesFiltered = new HashMap<String, String>(sources);
+    
     if(classLoader == null) classLoader = Gate.getClassLoader();
 
+    // filter out classes that are already known
+    Iterator<Map.Entry<String, String>> srcIter = sourcesFiltered.entrySet().iterator();
+    while(srcIter.hasNext()) {
+      String className = srcIter.next().getKey();
+      if(classLoader.findExistingClass(className) != null) {
+        // class already known
+        log.warn("Cannot compile class \"" + className + 
+            "\" as a version already exists in the target class loader.");
+        srcIter.remove();
+      }
+    }
+    if(sourcesFiltered.isEmpty()) return;
+    
     // store any problems that occur douring compilation
     final Map<String,List<IProblem>> problems = new HashMap<String, List<IProblem>>();
 
@@ -94,7 +112,7 @@ public class Eclipse extends gate.util.Javac {
       }
       
       public char[] getContents() {
-        return ((String)sources.get(className)).toCharArray();
+        return ((String)sourcesFiltered.get(className)).toCharArray();
       }
       
       /**
@@ -176,7 +194,7 @@ public class Eclipse extends gate.util.Javac {
           System.err.println("NameEnvironment.findType(" + className +")");
         }
         try {
-          if (sources.containsKey(className)) {
+          if (sourcesFiltered.containsKey(className)) {
             if(DEBUG) {
               System.err.println("Found " + className + " as one of the "
                   + "sources, returning it as a compilation unit");
@@ -234,7 +252,7 @@ public class Eclipse extends gate.util.Javac {
        * Is the requested name a package?  We assume yes if it's not a class.
        */
       private boolean isPackage(String result) {
-        if (sources.containsKey(result)) {
+        if (sourcesFiltered.containsKey(result)) {
           return false;
         }
 //        String resourceName = result.replace('.', '/') + ".class";
@@ -360,9 +378,9 @@ public class Eclipse extends gate.util.Javac {
     };
 
     // Define the list of things to compile
-    ICompilationUnit[] compilationUnits = new ICompilationUnit[sources.size()];
+    ICompilationUnit[] compilationUnits = new ICompilationUnit[sourcesFiltered.size()];
     int i = 0;
-    Iterator<String> sourcesIt = sources.keySet().iterator();
+    Iterator<String> sourcesIt = sourcesFiltered.keySet().iterator();
     while(sourcesIt.hasNext()) {
       compilationUnits[i++] =
         new CompilationUnit(sourcesIt.next());
@@ -401,7 +419,7 @@ public class Eclipse extends gate.util.Javac {
         }
         // print the source for this class, to help the user debug.
         Err.prln("\nThe offending input was:\n");
-        Err.prln(Strings.addLineNumbers((String)sources.get(name)));
+        Err.prln(Strings.addLineNumbers((String)sourcesFiltered.get(name)));
       }
       if(errors) {
         throw new GateException(
@@ -411,4 +429,6 @@ public class Eclipse extends gate.util.Javac {
   }
 
   private static GateClassLoader classLoader;
+  
+  private static final Logger log = Logger.getLogger(Eclipse.class);
 }
