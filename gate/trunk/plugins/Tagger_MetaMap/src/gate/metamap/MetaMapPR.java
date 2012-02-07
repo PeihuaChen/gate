@@ -58,36 +58,59 @@ public class MetaMapPR extends AbstractLanguageAnalyser
     private String metaMapOptions;   // MetaMap command line string
     private Boolean annotateNegEx;  // output NegEx results as features to outputASType
     private TaggerMode taggerMode;  // term tagger behaviour: all instances, first only, or first+coreferences
+    private AnnotNormalizeMode annotNormalize;   // remove determiners from annotation content?
+    private ArrayList<String> excludeIfContains;    // don't process if inputASType contains one of these annots
+    private ArrayList<String> excludeIfWithin;      // don't process if inputASType occurs inside one of these annots
+    // Exit gracefully if exception caught on init()
+    private boolean gracefulExit;
 
     @Override
     public Resource init() throws ResourceInstantiationException {
+        gracefulExit = false;
 
         // check required parameters are set
         if (outputMode == null) {
-            throw new ResourceInstantiationException("outputMode parameter must be set");
+            //throw new ResourceInstantiationException("outputMode parameter must be set");
+            gate.util.Err.println("outputMode parameter must be set");
+            gracefulExit = true;
         }
 
         // check required parameters are set
         if (taggerMode == null) {
-            throw new ResourceInstantiationException("taggerMode parameter must be set");
+            //throw new ResourceInstantiationException("taggerMode parameter must be set");
+            gate.util.Err.println("taggerMode parameter must be set");
+            gracefulExit = true;
         }
 
         return this;
     }
 
+    /* Set gracefulExit flag and clean up */
+    public void gracefulExit(String msg) {
+        gate.util.Err.println(msg);
+        cleanup();
+        fireProcessFinished();
+    }
+
     @Override
     public void execute() throws ExecutionException {
+        // quit if setup failed
+        if (gracefulExit) {
+            gracefulExit("Plugin was not initialised correctly. Exiting ... ");
+            return;
+        }
+
         MetaMapApi mmInst;
 
-        // If no document provided to process throw an exception
+        // If no document provided log the error and exit gracefully
         if (document == null) {
-            fireProcessFinished();
-            throw new ExecutionException("No document to process!");
+            gracefulExit("No document to process!");
+            return;
         }
 
         if (outputASType == null || outputASType.trim().length() == 0) {
-            fireProcessFinished();
-            throw new ExecutionException("outputASType parameter must be set!");
+            gracefulExit("outputASType parameter must be set!");
+            return;
         }
 
 
@@ -95,8 +118,8 @@ public class MetaMapPR extends AbstractLanguageAnalyser
         try {
             mmInst = setUpApi();
         } catch (Exception e) {
-            fireProcessFinished();
-            throw new ExecutionException("unable to create MetaMap session instance");
+            gracefulExit("Unable to create MetaMap session instance");
+            return;
         }
 
         Long lngInitialOffset = Long.valueOf(0);
@@ -107,11 +130,37 @@ public class MetaMapPR extends AbstractLanguageAnalyser
             AnnotationSet outputAS = (outputASName == null || outputASName.trim().length() == 0) ? document.getAnnotations() : document.getAnnotations(outputASName);
 
             // process the content of each annot in inputASTypes
-            for (String inputAnn : inputASTypes) {
-                // Iterator<Annotation> itr = inputAS.get(inputAnn).iterator();
+            for (String inputAnnType : inputASTypes) {
+                // Iterator<Annotation> itr = inputAS.get(inputAnnType).iterator();
+                AnnotationSet inputAnnSet;
+
+                // We allow inputAnnType of the form
+                // Annotation.feature == value
+                String annName = inputAnnType;  // assume just a simple ann name to start with
+                String annFeature;
+                String annFeatureValue;
+                String[] inputAnnArr = inputAnnType.split("(\\.)|(==)");
+                if (inputAnnArr.length == 3 || inputAnnArr.length == 2) {
+                    annName = inputAnnArr[0];
+                    annFeature = inputAnnArr[1];
+                    if (inputAnnArr.length == 2) {
+                        Set<String> feats = new HashSet<String>();
+                        feats.add(annFeature);
+                        inputAnnSet = inputAS.get(annName, feats);
+                    } else {
+                        FeatureMap annFeats = Factory.newFeatureMap();
+                        annFeatureValue = inputAnnArr[2];
+                        annFeats.put(annFeature, annFeatureValue);
+                        inputAnnSet = inputAS.get(annName, annFeats);
+                    }
+
+                } else {
+                    inputAnnSet = inputAS.get(inputAnnType);
+                }
+
 
                 // get annots in document order, so we can just want to process the first instance of each
-                Iterator<Annotation> itr = gate.Utils.inDocumentOrder(inputAS.get(inputAnn)).listIterator();
+                Iterator<Annotation> itr = gate.Utils.inDocumentOrder(inputAnnSet).listIterator();
 
                 // Need to create a map of annotations whose string content appears
                 // elsewhere in the document, as we only want to process each term
@@ -119,24 +168,48 @@ public class MetaMapPR extends AbstractLanguageAnalyser
                 HashMap<Integer, ArrayList<Integer>> termMapById = new HashMap<Integer, ArrayList<Integer>>();        // map of annots with content duplicated by other annots, indexed by annot id
                 HashMap<String, Integer> termMapByString = new HashMap<String, Integer>();    // as above, but indexed by string content
 
-                // iterate over each annot of type inputAnn
+                // iterate over each annot of type inputAnnType
                 while (itr.hasNext()) {
 
                     Annotation ann = itr.next();
+                    boolean skip = false;
+                    Long annStart = ann.getStartNode().getOffset();
+                    Long annEnd = ann.getEndNode().getOffset();
                     String annContent = "";
+
+                    // Don't process this term if it occurs within or wraps any of these annots
+                    if (excludeIfWithin != null && !(excludeIfWithin.isEmpty())) {
+                        for (String excludeAnnName : excludeIfWithin) {
+                            if (!inputAS.getCovering(excludeAnnName, annStart, annEnd).isEmpty()) {
+                                skip = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (excludeIfContains != null && !(excludeIfContains.isEmpty())) {
+                        for (String excludeAnnName : excludeIfContains) {
+                            if (!inputAS.getContained(annStart, annEnd).get(excludeAnnName).isEmpty()) {
+                                skip = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (skip) {
+                        continue;
+                    }
 
                     try {
                         lngEndOffset = null;
-                        lngInitialOffset = ann.getStartNode().getOffset();
+                        lngInitialOffset = annStart;
                         // grab the string content of the annotation, or the
                         // value of the feature inputASTypeFeature if specified
                         annContent = document.getContent().getContent(lngInitialOffset,
-                                ann.getEndNode().getOffset()).toString().toLowerCase();
+                                annEnd).toString().toLowerCase();
                         if (inputASTypeFeature == null || inputASTypeFeature.trim().length() == 0) {
                             // if inputASTypeFeature not specified, continue to pass the string content of the ann
                         } else {
                             Object o = ann.getFeatures().get(inputASTypeFeature);
-                            String annFeatureContent = (o == null) ? null : o.toString();
+                            String annFeatureContent = (o == null) ? null : o.toString().toLowerCase();
                             if (annFeatureContent == null || annFeatureContent.trim().length() == 0) {
                                 // if feature has no value, continue to pass the string content of the ann
                             } else {
@@ -144,14 +217,22 @@ public class MetaMapPR extends AbstractLanguageAnalyser
                                 // and keep track of the ann's end point
                                 // as we will wrap new annots around our existing ann
                                 annContent = annFeatureContent;
-                                lngEndOffset = ann.getEndNode().getOffset();
+                                lngEndOffset = annEnd;
                             }
                         }
+                        // strip leading or all determiners. We'll need to adjust the output annotation end offset
+                        // if any changes were made to the content string of the input annotation
+                        if (annotNormalize != AnnotNormalizeMode.None) {
+                            String tmpContent = stripDeterminers(inputAS, ann, annContent, annotNormalize);
+                            if ( ! tmpContent.equalsIgnoreCase(annContent) ) {
+                                annContent = tmpContent;
+                                lngEndOffset = annEnd;
+                            }
+                        }
+
                     } catch (InvalidOffsetException ioe) {
                         // this should never happen
-                        fireProcessFinished();
-                        throw new ExecutionException(ioe);
-
+                        gate.util.Err.println(ioe.getMessage());
                     } // end try
 
                     Integer annId = ann.getId();
@@ -164,8 +245,7 @@ public class MetaMapPR extends AbstractLanguageAnalyser
                             try {
                                 this.processWithMetaMap(mmInst, annContent, lngInitialOffset, lngEndOffset);
                             } catch (Exception e) {
-                                fireProcessFinished();
-                                throw new ExecutionException(e);
+                                gate.util.Err.println(e.getMessage());
                             }
                         } else {
                             // string annContent already processed, so keep a note
@@ -179,8 +259,7 @@ public class MetaMapPR extends AbstractLanguageAnalyser
                         try {
                             this.processWithMetaMap(mmInst, annContent, lngInitialOffset, lngEndOffset);
                         } catch (Exception e) {
-                            fireProcessFinished();
-                            throw new ExecutionException(e);
+                            gate.util.Err.println(e.getMessage());
                         }
                     }
 
@@ -199,8 +278,7 @@ public class MetaMapPR extends AbstractLanguageAnalyser
             try {
                 this.processWithMetaMap(mmInst, docText, lngInitialOffset, lngEndOffset);
             } catch (Exception e) {
-                fireProcessFinished();
-                throw new ExecutionException(e);
+                gracefulExit(e.getMessage());
             }
         } // end if
 
@@ -213,6 +291,56 @@ public class MetaMapPR extends AbstractLanguageAnalyser
 
     /**
      *
+     * @param ann           Annotation to be classified by MetaMap
+     * @param annContent    Annotation content or user-defined feature value
+     * @param mode          Mode to determine whether to strip just leading determiner or all determiners in the content
+     * @return              Annotation content with leading or all determiners stripped.
+     *                      E.g. his hypertension -> hypertension, disease of the nervous system -> disease of nervous system
+     */
+    public String stripDeterminers(AnnotationSet inputAS, Annotation ann, String annContent, AnnotNormalizeMode mode) {
+        
+
+        Long annStart = ann.getStartNode().getOffset();
+        Long annEnd = ann.getEndNode().getOffset();
+
+        // These will return an empty set if no Tokens/SpaceTokens so don't need to test for null
+        AnnotationSet innerTokAS = inputAS.getContained(annStart, annEnd).get("Token");
+        AnnotationSet innerSpaceTokAS = inputAS.getContained(annStart, annEnd).get("SpaceToken");
+
+        List<Annotation> tokenAS = new ArrayList<Annotation>(innerTokAS);
+        tokenAS.addAll(innerSpaceTokAS);
+
+        Collections.sort(tokenAS, new OffsetComparator());
+        StringBuilder strbuf = new StringBuilder("");
+        String strWord = "";
+        String strPOS = "";
+        boolean skipDeterminer = true;
+        
+        for (Annotation tok : tokenAS) {
+            FeatureMap tokFeats = tok.getFeatures();
+            strWord = (String) tokFeats.get("string");
+            strPOS = (String) tokFeats.get("category");
+            if (skipDeterminer && strPOS != null && (strPOS.equals("DT") || strPOS.equals("PRP") || strPOS.equals("PRP$"))) {
+                if (mode == AnnotNormalizeMode.LeadingDeterminer) {
+                   skipDeterminer = false;
+                }
+                continue;
+            } else {
+                strbuf.append(strWord);
+            } 
+        }
+        
+        // Normalize white space
+        String stripped = strbuf.toString().replaceAll("[\\s\\xA0]+", " ").trim();
+        if (stripped.isEmpty()) {   // if all we had was determiners, or there were no Tokens to process, return the original content
+            return annContent;
+        } else {
+            return stripped;
+        }
+    }
+
+    /**
+     * Requires Tokenizer and POS tagger to have been run on text
      * @param termMapById   HashMap containing first occurrence of each of term
      * @param inputAS   input AnnotationSet
      * @param outputAS  output AnnotationSet
@@ -227,7 +355,7 @@ public class MetaMapPR extends AbstractLanguageAnalyser
             return;
         }
         Set keys = termMapById.keySet();
-        
+
         Iterator keyIter = keys.iterator();
 
         while (keyIter.hasNext()) {
@@ -252,7 +380,7 @@ public class MetaMapPR extends AbstractLanguageAnalyser
                     try {
                         outputAS.add(startOffset, endOffset, outputASType, mmFm);
                     } catch (InvalidOffsetException ie) {
-                        throw new ExecutionException(ie);
+                        gracefulExit(ie.getMessage());
                     }
                 } // end for
 
@@ -295,6 +423,24 @@ public class MetaMapPR extends AbstractLanguageAnalyser
                     mmOptions.add(args[i]);
                     i++;
                     mmOptions.add(args[i]);
+                } else if (args[i].equals("-Q") || args[i].equals("--composite_phrases")) {
+                    mmOptions.add(args[i]);
+                    // if we are using metamap11, this option takes a mandatory integer
+                    // so let's check if we have this option
+                    int q = i;
+                    boolean isInt = true;
+                    try {
+                        String arg = args[++q];
+                        q = Integer.parseInt(arg);
+                    } catch (NumberFormatException ne) {
+                        isInt = false;
+                    } catch (ArrayIndexOutOfBoundsException ae) {
+                        isInt = false;
+                    }
+                    if (isInt) {
+                        i++;
+                        mmOptions.add(args[i]);
+                    }
                 } else if (args[i].equals("-R") || args[i].equals("--restrict_to_sources")) {
                     mmOptions.add(args[i]);
                     i++;
@@ -374,7 +520,7 @@ public class MetaMapPR extends AbstractLanguageAnalyser
         try {
             outputAs.add(lngStartPos, lngEndPos, outputASType, fm);
         } catch (InvalidOffsetException ie) {
-            throw ie;
+            gate.util.Err.println(ie.getMessage());
         }
     }
 
@@ -420,7 +566,7 @@ public class MetaMapPR extends AbstractLanguageAnalyser
                     }
                 }
             } // end if
-            
+
             fm.put("Type", type);
             fm.put("Score", mapEv.getScore());
             fm.put("ConceptId", mapEv.getConceptId());
@@ -447,7 +593,7 @@ public class MetaMapPR extends AbstractLanguageAnalyser
             try {
                 outputAs.add(lngStartPos, lngEndPos, outputASType, fm);
             } catch (InvalidOffsetException ie) {
-                throw ie;
+                gate.util.Err.println(ie.getMessage());
             }
 
         } // end for
@@ -466,7 +612,8 @@ public class MetaMapPR extends AbstractLanguageAnalyser
         List<Mapping> mappings = pcm.getMappingList();
 
         // Sort according to properties of the first map event in each mapping
-        Collections.sort(mappings, new Comparator<Mapping>(){
+        Collections.sort(mappings, new Comparator<Mapping>() {
+
             public int compare(Mapping m1, Mapping m2) {
                 int result = 0;
                 try {
@@ -487,10 +634,10 @@ public class MetaMapPR extends AbstractLanguageAnalyser
                             break;
                         }
                     }
-                    if ( outputMode.equals(OutputMode.HighestMappingMostSources) ) {
+                    if (outputMode.equals(OutputMode.HighestMappingMostSources)) {
                         // return highest number of sources
                         result = m2HeadEvent.getSources().size() - m1HeadEvent.getSources().size();
-                    } else if ( outputMode.equals(OutputMode.HighestMappingLowestCUI) ) {
+                    } else if (outputMode.equals(OutputMode.HighestMappingLowestCUI)) {
                         // return lowest CUI
                         result = m1HeadEvent.getConceptId().compareTo(m2HeadEvent.getConceptId());
                     }
@@ -501,16 +648,14 @@ public class MetaMapPR extends AbstractLanguageAnalyser
                 }
             }
         });
-        
-        
+
+
 
         // By default, mappings are ordered by score, so outputting the first item will give the mapping
         // with the highest score, if requested. Otherwise, the above sorting will be applied
-        if ((
-                outputMode.equals(OutputMode.HighestMappingOnly) ||
-                outputMode.equals(OutputMode.HighestMappingMostSources) ||
-                outputMode.equals(OutputMode.HighestMappingLowestCUI)
-             ) && !(mappings.isEmpty())) {
+        if ((outputMode.equals(OutputMode.HighestMappingOnly)
+                || outputMode.equals(OutputMode.HighestMappingMostSources)
+                || outputMode.equals(OutputMode.HighestMappingLowestCUI)) && !(mappings.isEmpty())) {
             processEvents(mappings.get(0).getEvList(), negList, "Mapping", lngInitialOffset, lngEndOffset);
         } else {
             for (Mapping map : mappings) {
@@ -554,14 +699,11 @@ public class MetaMapPR extends AbstractLanguageAnalyser
                 if (outputMode.equals(OutputMode.AllCandidatesAndMappings) || outputMode.equals(OutputMode.AllCandidates)) {
                     this.processCandidates(pcm, negList, lngInitialOffset, lngEndOffset);
                 }
-                if (
-                        outputMode.equals(OutputMode.AllCandidatesAndMappings)
+                if (outputMode.equals(OutputMode.AllCandidatesAndMappings)
                         || outputMode.equals(OutputMode.AllMappings)
                         || outputMode.equals(OutputMode.HighestMappingOnly)
                         || outputMode.equals(OutputMode.HighestMappingMostSources)
-                        || outputMode.equals(OutputMode.HighestMappingLowestCUI)
-                   )
-                {
+                        || outputMode.equals(OutputMode.HighestMappingLowestCUI)) {
                     this.processMappings(pcm, negList, lngInitialOffset, lngEndOffset);
                 }
 
@@ -739,7 +881,7 @@ public class MetaMapPR extends AbstractLanguageAnalyser
 
     @Optional
     @RunTime
-    @CreoleParameter(defaultValue = "-Xdt",
+    @CreoleParameter(defaultValue = "-Xy",
     comment = "MetaMap runtime options")
     public void setMetaMapOptions(String metaMapOptions) {
         this.metaMapOptions = metaMapOptions;
@@ -760,7 +902,6 @@ public class MetaMapPR extends AbstractLanguageAnalyser
         return annotateNegEx;
     }
 
-
     @RunTime
     @CreoleParameter(defaultValue = "CoReference",
     comment = "Map first instance of a term only, first instance plus coreferences, or all instances independently")
@@ -770,6 +911,39 @@ public class MetaMapPR extends AbstractLanguageAnalyser
 
     public TaggerMode getTaggerMode() {
         return taggerMode;
+    }
+
+    @RunTime
+    @CreoleParameter(defaultValue = "LeadingDeterminer",
+    comment = "Strip determiners from annotation content prior to MetaMap submission?")
+    public void setAnnotNormalize(AnnotNormalizeMode annotNormalize) {
+        this.annotNormalize = annotNormalize;
+    }
+
+    public AnnotNormalizeMode getAnnotNormalize() {
+        return annotNormalize;
+    }
+
+    @Optional
+    @RunTime
+    @CreoleParameter(comment = "Don't process terms that contain these annotations")
+    public void setExcludeIfContains(ArrayList<String> excludeIfContains) {
+        this.excludeIfContains = excludeIfContains;
+    }
+
+    public ArrayList<String> getExcludeIfContains() {
+        return excludeIfContains;
+    }
+
+    @Optional
+    @RunTime
+    @CreoleParameter(comment = "Don't process terms that are within these annotations")
+    public void setExcludeIfWithin(ArrayList<String> excludeIfWithin) {
+        this.excludeIfWithin = excludeIfWithin;
+    }
+
+    public ArrayList<String> getExcludeIfWithin() {
+        return excludeIfWithin;
     }
 } // class MetaMapPR
 
