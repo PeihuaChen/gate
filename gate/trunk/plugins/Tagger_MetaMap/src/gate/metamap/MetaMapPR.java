@@ -86,12 +86,57 @@ public class MetaMapPR extends AbstractLanguageAnalyser
     }
 
     /* Set gracefulExit flag and clean up */
-    public void gracefulExit(String msg) {
+    private void gracefulExit(String msg) {
         gate.util.Err.println(msg);
         cleanup();
         fireProcessFinished();
     }
 
+    /**
+     *
+     * @param inputAS           some input Annotation Set
+     * @param inputAnnExpr      some Annotation or Annotation.feature or Annotation.feature == value expression
+     * @return  inputAS filtered according to inputAnnExpr
+     */
+    private AnnotationSet getFilteredAS(AnnotationSet inputAS, String inputAnnExpr) {
+        // We allow inputAnnExpr of the form
+        // Annotation.feature == value or just Annotation.feature
+        String annFeature;
+        String annFeatureValue;
+        String[] inputAnnArr = inputAnnExpr.split("(\\.)|(\\s*==\\s*)");
+        
+        // Assume a simple ann name unless we have a feature and feature value present
+        String annName = inputAnnArr[0];
+        AnnotationSet filteredAS = inputAS.get(annName);
+        
+        if (inputAnnArr.length == 3 || inputAnnArr.length == 2) {
+            annFeature = inputAnnArr[1];
+            if (inputAnnArr.length == 2) {
+                Set<String> feats = new HashSet<String>();
+                feats.add(annFeature);
+                filteredAS = inputAS.get(annName, feats);
+            } else {
+                FeatureMap annFeats = Factory.newFeatureMap();
+                annFeatureValue = inputAnnArr[2];
+                annFeats.put(annFeature, annFeatureValue);
+                filteredAS = inputAS.get(annName, annFeats);
+            }
+        }
+        return filteredAS;
+    }
+
+
+    /**
+     *
+     * @param expression    an expression of the form Annotation.feature == value
+     * @return              string containing the annotation name from the input expression
+     */
+    private String getAnnNameFromExpression(String expression) {
+        String[] inputAnnArr = expression.split("(\\.)|(\\s*==\\s*)");
+        return inputAnnArr[0];
+    }
+
+    
     @Override
     public void execute() throws ExecutionException {
         // quit if setup failed
@@ -129,35 +174,10 @@ public class MetaMapPR extends AbstractLanguageAnalyser
             AnnotationSet inputAS = (inputASName == null || inputASName.trim().length() == 0) ? document.getAnnotations() : document.getAnnotations(inputASName);
             AnnotationSet outputAS = (outputASName == null || outputASName.trim().length() == 0) ? document.getAnnotations() : document.getAnnotations(outputASName);
 
-            // process the content of each annot in inputASTypes
-            for (String inputAnnType : inputASTypes) {
-                // Iterator<Annotation> itr = inputAS.get(inputAnnType).iterator();
-                AnnotationSet inputAnnSet;
-
-                // We allow inputAnnType of the form
-                // Annotation.feature == value
-                String annName = inputAnnType;  // assume just a simple ann name to start with
-                String annFeature;
-                String annFeatureValue;
-                String[] inputAnnArr = inputAnnType.split("(\\.)|(==)");
-                if (inputAnnArr.length == 3 || inputAnnArr.length == 2) {
-                    annName = inputAnnArr[0];
-                    annFeature = inputAnnArr[1];
-                    if (inputAnnArr.length == 2) {
-                        Set<String> feats = new HashSet<String>();
-                        feats.add(annFeature);
-                        inputAnnSet = inputAS.get(annName, feats);
-                    } else {
-                        FeatureMap annFeats = Factory.newFeatureMap();
-                        annFeatureValue = inputAnnArr[2];
-                        annFeats.put(annFeature, annFeatureValue);
-                        inputAnnSet = inputAS.get(annName, annFeats);
-                    }
-
-                } else {
-                    inputAnnSet = inputAS.get(inputAnnType);
-                }
-
+            // process the content of each annot or expression in inputASTypes
+            for (String inputAnnExpr : inputASTypes) {
+                // Iterator<Annotation> itr = inputAS.get(inputAnnExpr).iterator();
+                AnnotationSet inputAnnSet = getFilteredAS(inputAS, inputAnnExpr);
 
                 // get annots in document order, so we can just want to process the first instance of each
                 Iterator<Annotation> itr = gate.Utils.inDocumentOrder(inputAnnSet).listIterator();
@@ -168,7 +188,7 @@ public class MetaMapPR extends AbstractLanguageAnalyser
                 HashMap<Integer, ArrayList<Integer>> termMapById = new HashMap<Integer, ArrayList<Integer>>();        // map of annots with content duplicated by other annots, indexed by annot id
                 HashMap<String, Integer> termMapByString = new HashMap<String, Integer>();    // as above, but indexed by string content
 
-                // iterate over each annot of type inputAnnType
+                // iterate over each annot of type inputAnnExpr
                 while (itr.hasNext()) {
 
                     Annotation ann = itr.next();
@@ -179,16 +199,21 @@ public class MetaMapPR extends AbstractLanguageAnalyser
 
                     // Don't process this term if it occurs within or wraps any of these annots
                     if (excludeIfWithin != null && !(excludeIfWithin.isEmpty())) {
-                        for (String excludeAnnName : excludeIfWithin) {
-                            if (!inputAS.getCovering(excludeAnnName, annStart, annEnd).isEmpty()) {
+                        for (String excludeAnnExpr : excludeIfWithin) {
+                            String excludeAnnName = getAnnNameFromExpression(excludeAnnExpr);
+                            AnnotationSet tempAS = inputAS.getCovering(excludeAnnName, annStart, annEnd);
+                            AnnotationSet excludeAS = getFilteredAS(tempAS, excludeAnnExpr);
+                            if (!excludeAS.isEmpty()) {
                                 skip = true;
                                 break;
                             }
                         }
                     }
                     if (excludeIfContains != null && !(excludeIfContains.isEmpty())) {
-                        for (String excludeAnnName : excludeIfContains) {
-                            if (!inputAS.getContained(annStart, annEnd).get(excludeAnnName).isEmpty()) {
+                        for (String excludeAnnExpr : excludeIfContains) {
+                            AnnotationSet tempAS = inputAS.getContained(annStart, annEnd);
+                            AnnotationSet excludeAS = getFilteredAS(tempAS, excludeAnnExpr);
+                            if (!excludeAS.isEmpty()) {
                                 skip = true;
                                 break;
                             }
@@ -224,7 +249,7 @@ public class MetaMapPR extends AbstractLanguageAnalyser
                         // if any changes were made to the content string of the input annotation
                         if (annotNormalize != AnnotNormalizeMode.None) {
                             String tmpContent = stripDeterminers(inputAS, ann, annContent, annotNormalize);
-                            if ( ! tmpContent.equalsIgnoreCase(annContent) ) {
+                            if (!tmpContent.equalsIgnoreCase(annContent)) {
                                 annContent = tmpContent;
                                 lngEndOffset = annEnd;
                             }
@@ -298,7 +323,7 @@ public class MetaMapPR extends AbstractLanguageAnalyser
      *                      E.g. his hypertension -> hypertension, disease of the nervous system -> disease of nervous system
      */
     public String stripDeterminers(AnnotationSet inputAS, Annotation ann, String annContent, AnnotNormalizeMode mode) {
-        
+
 
         Long annStart = ann.getStartNode().getOffset();
         Long annEnd = ann.getEndNode().getOffset();
@@ -315,21 +340,21 @@ public class MetaMapPR extends AbstractLanguageAnalyser
         String strWord = "";
         String strPOS = "";
         boolean skipDeterminer = true;
-        
+
         for (Annotation tok : tokenAS) {
             FeatureMap tokFeats = tok.getFeatures();
             strWord = (String) tokFeats.get("string");
             strPOS = (String) tokFeats.get("category");
             if (skipDeterminer && strPOS != null && (strPOS.equals("DT") || strPOS.equals("PRP") || strPOS.equals("PRP$"))) {
                 if (mode == AnnotNormalizeMode.LeadingDeterminer) {
-                   skipDeterminer = false;
+                    skipDeterminer = false;
                 }
                 continue;
             } else {
                 strbuf.append(strWord);
-            } 
+            }
         }
-        
+
         // Normalize white space
         String stripped = strbuf.toString().replaceAll("[\\s\\xA0]+", " ").trim();
         if (stripped.isEmpty()) {   // if all we had was determiners, or there were no Tokens to process, return the original content
