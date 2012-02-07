@@ -236,12 +236,9 @@ public class Transducer extends AbstractLanguageAnalyser
       try {
         Map<String, String> classes = new HashMap<String, String>(1);
         
-        if(Gate.getClassLoader().findExistingClass(className) == null) {
-          classes.put(className, lhsSourceCode.toString());  
-        }
+        classes.put(className, lhsSourceCode.toString());  
         String ceabClassName = className + "CEAB"; 
-        if(controllerEventsSourceCode != null &&
-           Gate.getClassLoader().findExistingClass(ceabClassName) == null) {
+        if(controllerEventsSourceCode != null) {
           classes.put(ceabClassName, controllerEventsSourceCode);  
         }
         if(!classes.isEmpty()) {
