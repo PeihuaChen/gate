@@ -1,3 +1,17 @@
+2012-02-07: Exits processing gracefully for the current document if there's any communication problems between client and server, or if there are any other processing exceptions, rather than dumping an exception and halting the pipeline.
+
+Added new parameter annotNormalize, which can be set to 'None', 'LeadingDeterminer', or 'AllDeterminers' to control whether and how determiners within the content of each of inputASTypes are handled. This is most useful for CoReference mode, so that 'his hypertension' and 'the hypertension' are both processed by MetaMap as simply 'hypertension' and treated as equivalent strings for coreference purposes.
+
+
+2012-02-01: Added new parameters: 
+	excludeIfContains: If an entry within inputASTypes contains any of the annotations in this list, then do not process this instance.
+
+	excludeIfWithin: If an entry within inputASTypes occurs within any of the annotations in this list, then do not process that instance.
+
+
+inputASTypes parameter now also accepts entries in the form Annotation.feature == value so that you can filter your input annotations according to feature value (although regexes for value are not currently allowed).
+
+
 2011-07-25: Added additional outputMode options: 
 - HighestMappingLowestCUI: Where there is more than one highest-scoring mapping, returns the mapping where the head word map event has the lowest CUI.
 - HighestMappingMostSources: Where there is more than one highest-scoring mapping, returns the mapping where the head word map event has the highest number of source vocabulary occurrences.
