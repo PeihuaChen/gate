@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.ontotext.jape.pda.FSMPDA;
-import com.ontotext.jape.pda.SinglePhaseTransducerPDA;
 import com.ontotext.jape.pda.StatePDA;
 import com.ontotext.jape.pda.TransitionPDA;
 
@@ -43,6 +42,7 @@ import gate.jape.Constraint;
 import gate.jape.JapeConstants;
 import gate.jape.RightHandSide;
 import gate.jape.Rule;
+import gate.jape.SinglePhaseTransducer;
 import gate.jape.constraint.ConstraintPredicate;
 import gate.jape.constraint.ContainsPredicate;
 import gate.jape.constraint.WithinPredicate;
@@ -95,7 +95,7 @@ public class SPTBuilder {
    */
   protected OpenIntIntHashMap oldToNewStates;
   
-  public SPTBase buildSPT(SinglePhaseTransducerPDA oldSpt) throws ResourceInstantiationException{
+  public SPTBase buildSPT(SinglePhaseTransducer oldSpt) throws ResourceInstantiationException{
     annotationTypes = new ArrayList<String>();
     predicatesByType = new HashMap<String, List<Predicate>>();
     newStates = new ArrayList<SPTBase.State>();
@@ -234,7 +234,7 @@ public class SPTBuilder {
   }
   
   protected void writeConstructor(String className,
-                                  SinglePhaseTransducerPDA spt,
+                                  SinglePhaseTransducer spt,
                                   int tabs,
                                   StringBuilder out) {
     out.append(TABS[tabs]).append("public ").append(className).append(" ("
