@@ -4,9 +4,9 @@ Added new parameter annotNormalize, which can be set to 'None', 'LeadingDetermin
 
 
 2012-02-01: Added new parameters: 
-	excludeIfContains: If an entry within inputASTypes contains any of the annotations in this list, then do not process this instance.
+	excludeIfContains: If an entry within inputASTypes contains any of the annotations or annotation expressions (of the form Annotation.feature == value) in this list, then do not process this instance.
 
-	excludeIfWithin: If an entry within inputASTypes occurs within any of the annotations in this list, then do not process that instance.
+	excludeIfWithin: If an entry within inputASTypes occurs within any of the annotations or annotation expressions (of the form Annotation.feature == value) in this list, then do not process that instance.
 
 
 inputASTypes parameter now also accepts entries in the form Annotation.feature == value so that you can filter your input annotations according to feature value (although regexes for value are not currently allowed).
