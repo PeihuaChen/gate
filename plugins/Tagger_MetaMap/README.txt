@@ -27,9 +27,9 @@ annotatePhrases: set to true to output MetaMap phrase-level annotations (general
 
 annotNormalize: can be set to 'None', 'LeadingDeterminer', or 'AllDeterminers' to control whether and how determiners within the content of each of inputASTypes are handled. This is most useful for CoReference mode, so that 'his hypertension' and 'the hypertension' are both processed by MetaMap as simply 'hypertension' and treated as equivalent strings for coreference purposes.
 
-excludeIfContains: If an entry within inputASTypes contains any of the annotations in this list, then do not process this instance.
+excludeIfContains: If an entry within inputASTypes contains any of the annotations or annotation expressions (of the form Annotation.feature == value) in this list, then do not process this instance.
 
-excludeIfWithin: If an entry within inputASTypes occurs within any of the annotations in this list, then do not process that instance.
+excludeIfWithin: If an entry within inputASTypes occurs within any of the annotations or annotation expressions (of the form Annotation.feature == value) in this list, then do not process that instance.
 
 inputASName: input Annotation Set name. Use in conjunction with inputASTypes (see below). Unless specified, the entire document content will be sent to MetaMap. 
 
