@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.regex.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import gate.Factory;
 import gate.util.*;
 import gate.jape.*;

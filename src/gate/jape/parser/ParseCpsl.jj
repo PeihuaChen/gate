@@ -32,6 +32,8 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.regex.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import gate.Factory;
 import gate.util.*;
@@ -93,11 +95,27 @@ public class ParseCpsl implements JapeConstants {
   }
 
   protected SinglePhaseTransducer createSinglePhaseTransducer(String name){
-    return new SinglePhaseTransducer(name);
+    try {
+      Constructor<? extends SinglePhaseTransducer> c = sptClass.getConstructor
+          (String.class);
+      return (SinglePhaseTransducer) c.newInstance(name);
+    } catch (NoSuchMethodException e) { // Shouldn't happen
+      throw new RuntimeException(e);
+    } catch (IllegalArgumentException e) { // Shouldn't happen
+      throw new RuntimeException(e);
+    } catch (InstantiationException e) { // Shouldn't happen
+      throw new RuntimeException(e);
+    } catch (IllegalAccessException e) { // Shouldn't happen
+      throw new RuntimeException(e);
+    } catch (InvocationTargetException e) { // Happens if the constructor throws an exception
+      throw new RuntimeException(e);
+    }
   }
 
   protected ParseCpsl spawn(URL sptURL) throws IOException{
-    return new ParseCpsl(sptURL, encoding, macrosMap, templatesMap);
+    ParseCpsl newParser = new ParseCpsl(sptURL, encoding, macrosMap, templatesMap);
+    newParser.setSptClass(this.sptClass);
+    return newParser;
   }
 
   protected void finishSPT(SinglePhaseTransducer t) throws ParseException {
@@ -289,6 +307,10 @@ public class ParseCpsl implements JapeConstants {
   public void setEncoding (String newEncoding) {
     encoding = newEncoding;
   }
+  
+  public void setSptClass(Class<? extends SinglePhaseTransducer> sptClass) {
+    this.sptClass = sptClass;
+  }
 
   private String errorMsgPrefix(Token t) {
     return ((baseURL != null) ? baseURL.toExternalForm() : "(No URL)")+
@@ -318,6 +340,9 @@ public class ParseCpsl implements JapeConstants {
 
   protected URL baseURL;
   protected String encoding;
+  
+  protected Class<? extends SinglePhaseTransducer> sptClass =
+      SinglePhaseTransducer.class;
 
   protected SinglePhaseTransducer curSPT;
 } // class ParseCpsl

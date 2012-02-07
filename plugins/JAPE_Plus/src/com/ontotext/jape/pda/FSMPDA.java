@@ -26,6 +26,7 @@ import gate.jape.LeftHandSide;
 import gate.jape.PatternElement;
 import gate.jape.PrioritisedRuleList;
 import gate.jape.Rule;
+import gate.jape.SinglePhaseTransducer;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -48,7 +49,7 @@ public class FSMPDA extends FSM {
 		return arrayOfBindingNames;
 	}
 
-	public FSMPDA(SinglePhaseTransducerPDA spt) {
+	public FSMPDA(SinglePhaseTransducer spt) {
 		this();
 		setOfBindingNames = new ClosedHashOfStrings();
 		tripleTransitions = new TripleTransitions();

@@ -26,25 +26,39 @@ import gate.event.AnnotationSetEvent;
 import gate.event.AnnotationSetListener;
 import gate.event.ProgressListener;
 import gate.event.StatusListener;
+import gate.fsm.FSM;
+import gate.gui.ActionsPublisher;
 import gate.gui.MainFrame;
 import gate.jape.MultiPhaseTransducer;
+import gate.jape.SinglePhaseTransducer;
 import gate.jape.constraint.AnnotationAccessor;
 import gate.jape.constraint.ConstraintPredicate;
+import gate.jape.parser.ParseCpsl;
 import gate.jape.parser.ParseException;
+import gate.util.Err;
 import gate.util.GateException;
 import gate.util.persistence.PersistenceManager;
 import gate.jape.DefaultActionContext;
 import gate.creole.ControllerAwarePR;
 import gate.creole.ontology.Ontology;
 
+import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
-import com.ontotext.jape.pda.ParseCpslPDA;
-import com.ontotext.jape.pda.SinglePhaseTransducerPDA;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+
+import com.ontotext.jape.pda.FSMPDA;
+
 
 /**
  * A JAPE-Plus transducer (with a {@link LanguageAnalyser} interface.
@@ -52,7 +66,10 @@ import com.ontotext.jape.pda.SinglePhaseTransducerPDA;
 @CreoleResource(name = "JAPE-Plus Transducer", 
     comment = "An optimised, JAPE-compatible transducer.")
 public class Transducer extends AbstractLanguageAnalyser 
-    implements ControllerAwarePR, ProgressListener {
+    implements ControllerAwarePR, ProgressListener /*, ActionsPublisher */ {
+
+  private static final long serialVersionUID = 4194243737624821476L;
+
   /**
    * A comparator for annotations based on start offset and inverse length.
    */
@@ -102,6 +119,69 @@ public class Transducer extends AbstractLanguageAnalyser
     }
   }
   
+  
+  protected class SerialiseTransducerAction extends AbstractAction {
+    public SerialiseTransducerAction() {
+      super("Serialize Transducer");
+      putValue(SHORT_DESCRIPTION, 
+          "Save this JAPE Plus Transducer as a binary file");
+    }
+
+    public void actionPerformed(java.awt.event.ActionEvent evt) {
+      Runnable runnable = new Runnable() {
+        public void run() {
+          JFileChooser fileChooser = MainFrame.getFileChooser();
+          fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
+          fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+          fileChooser.setMultiSelectionEnabled(false);
+          if(fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            try {
+              MainFrame.lockGUI("Serialising JAPE Plus Transducer...");
+              FileOutputStream out = new FileOutputStream(file);
+              ObjectOutputStream s = new ObjectOutputStream(out);
+              //TODO
+              // collect all class objects
+              @SuppressWarnings("unchecked")
+              Class<? extends SPTBase>[] sptClasses = 
+                  new Class[singlePhaseTransducers.length];
+              for(int i = 0; i < singlePhaseTransducers.length; i++) {
+//                singlePhaseTransducers[i].getClass();
+              }
+//              s.writeObject();
+              s.flush();
+              s.close();
+              out.close();
+            } catch(IOException ioe) {
+              JOptionPane.showMessageDialog(MainFrame.getInstance(), "Error!\n" + ioe.toString(),
+                      "GATE", JOptionPane.ERROR_MESSAGE);
+              ioe.printStackTrace(Err.getPrintWriter());
+            } finally {
+              MainFrame.unlockGUI();
+            }
+          }
+        }
+      };
+      Thread thread = new Thread(runnable, "Transducer Serialisation");
+      thread.setPriority(Thread.MIN_PRIORITY);
+      thread.start();
+    }
+  }
+  
+  protected static class SinglePhaseTransducerPDA extends SinglePhaseTransducer {
+
+    public SinglePhaseTransducerPDA(String name) {
+      super(name);
+    }
+
+    @Override
+    protected FSMPDA createFSM() {
+      return new FSMPDA(this);
+    }
+    
+    
+  }
+  
   public URL getGrammarURL() {
     return grammarURL;
   }
@@ -139,6 +219,8 @@ public class Transducer extends AbstractLanguageAnalyser
 
   protected DefaultActionContext actionContext;
   
+  protected List<Action> actions;
+  
   /**
    * Instance of {@link AnnotationComparator} used for sorting annots for the
    * phases.
@@ -164,7 +246,7 @@ public class Transducer extends AbstractLanguageAnalyser
   /**
    * The list of phases used in this transducer.
    */
-  protected SPTBase[] singlePhaseTransducers;
+  protected transient SPTBase[] singlePhaseTransducers;
   
   /**
    * The index in {@link #singlePhaseTransducers} for the SPT currently being
@@ -231,6 +313,9 @@ public class Transducer extends AbstractLanguageAnalyser
     changedTypes = new HashSet<String>();
     inputASListener = new AnnSetListener();
     annotationComparator = new AnnotationComparator();
+    
+    actions = new ArrayList<Action>();
+    actions.add(new SerialiseTransducerAction());
   }
 
  
@@ -250,8 +335,7 @@ public class Transducer extends AbstractLanguageAnalyser
     actionContext = new DefaultActionContext();
     return this;
   }
-  
-  
+
   /**
    * Loads any custom operators and annotation accessors into the ConstraintFactory.
    * @throws ResourceInstantiationException
@@ -332,30 +416,25 @@ public class Transducer extends AbstractLanguageAnalyser
   }
 
   protected void parseJape() throws IOException, ParseException, ResourceInstantiationException{
-  	Class oldClass = Factory.getJapeParserClass();
-  	Factory.setJapeParserClass(ParseCpslPDA.class);
-  	try{
-  		ParseCpslPDA parser = (ParseCpslPDA) Factory.newJapeParser(grammarURL, encoding);
-  
-  	    StatusListener listener = new StatusListener(){
-  	      public void statusChanged(String text){
-  	        fireStatusChanged(text);
-  	      }
-  	    };
-  	    parser.addStatusListener(listener);
-  	    MultiPhaseTransducer intermediate =  parser.MultiPhaseTransducer();
-  	    parser.removeStatusListener(listener);
-  	    
-  	    singlePhaseTransducers = new SPTBase[intermediate.getPhases().size()];
-  	    SPTBuilder builder = new SPTBuilder();
-  	    for(int i = 0; i < intermediate.getPhases().size(); i++){
-  	      singlePhaseTransducers[i] = builder.buildSPT((SinglePhaseTransducerPDA)
-  	              intermediate.getPhases().get(i));
-  	      singlePhaseTransducers[i].addProgressListener(this);
-  	    }
-  	} finally{
-  		Factory.setJapeParserClass(oldClass);
-  	}
+		ParseCpsl parser = Factory.newJapeParser(grammarURL, encoding);
+		parser.setSptClass(SinglePhaseTransducerPDA.class);
+
+    StatusListener listener = new StatusListener(){
+      public void statusChanged(String text){
+        fireStatusChanged(text);
+      }
+    };
+    parser.addStatusListener(listener);
+    MultiPhaseTransducer intermediate =  parser.MultiPhaseTransducer();
+    parser.removeStatusListener(listener);
+    
+    singlePhaseTransducers = new SPTBase[intermediate.getPhases().size()];
+    SPTBuilder builder = new SPTBuilder();
+    for(int i = 0; i < intermediate.getPhases().size(); i++){
+      singlePhaseTransducers[i] = builder.buildSPT(
+          (SinglePhaseTransducer)intermediate.getPhases().get(i));
+      singlePhaseTransducers[i].addProgressListener(this);
+    }
   }
   
   @Override

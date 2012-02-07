@@ -5,6 +5,8 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.regex.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import gate.Factory;
 import gate.util.*;
@@ -66,11 +68,27 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
   }
 
   protected SinglePhaseTransducer createSinglePhaseTransducer(String name){
-    return new SinglePhaseTransducer(name);
+    try {
+      Constructor<? extends SinglePhaseTransducer> c = sptClass.getConstructor
+          (String.class);
+      return (SinglePhaseTransducer) c.newInstance(name);
+    } catch (NoSuchMethodException e) { // Shouldn't happen
+      throw new RuntimeException(e);
+    } catch (IllegalArgumentException e) { // Shouldn't happen
+      throw new RuntimeException(e);
+    } catch (InstantiationException e) { // Shouldn't happen
+      throw new RuntimeException(e);
+    } catch (IllegalAccessException e) { // Shouldn't happen
+      throw new RuntimeException(e);
+    } catch (InvocationTargetException e) { // Happens if the constructor throws an exception
+      throw new RuntimeException(e);
+    }
   }
 
   protected ParseCpsl spawn(URL sptURL) throws IOException{
-    return new ParseCpsl(sptURL, encoding, macrosMap, templatesMap);
+    ParseCpsl newParser = new ParseCpsl(sptURL, encoding, macrosMap, templatesMap);
+    newParser.setSptClass(this.sptClass);
+    return newParser;
   }
 
   protected void finishSPT(SinglePhaseTransducer t) throws ParseException {
@@ -263,6 +281,10 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
     encoding = newEncoding;
   }
 
+  public void setSptClass(Class<? extends SinglePhaseTransducer> sptClass) {
+    this.sptClass = sptClass;
+  }
+
   private String errorMsgPrefix(Token t) {
     return ((baseURL != null) ? baseURL.toExternalForm() : "(No URL)")+
       ( (t == null) ? " " :
@@ -291,6 +313,9 @@ public class ParseCpsl implements JapeConstants, ParseCpslConstants {
 
   protected URL baseURL;
   protected String encoding;
+
+  protected Class<? extends SinglePhaseTransducer> sptClass =
+      SinglePhaseTransducer.class;
 
   protected SinglePhaseTransducer curSPT;
 
@@ -1757,11 +1782,6 @@ AnnotationAccessor accessor = null;
     finally { jj_save(1, xla); }
   }
 
-  private boolean jj_3_1() {
-    if (jj_3R_15()) return true;
-    return false;
-  }
-
   private boolean jj_3R_27() {
     if (jj_scan_token(pling)) return true;
     return false;
@@ -1801,15 +1821,15 @@ AnnotationAccessor accessor = null;
     return false;
   }
 
+  private boolean jj_3R_19() {
+    if (jj_3R_21()) return true;
+    return false;
+  }
+
   private boolean jj_3R_16() {
     if (jj_scan_token(colon)) return true;
     if (jj_scan_token(ident)) return true;
     if (jj_scan_token(leftBrace)) return true;
-    return false;
-  }
-
-  private boolean jj_3R_19() {
-    if (jj_3R_21()) return true;
     return false;
   }
 
@@ -1854,6 +1874,11 @@ AnnotationAccessor accessor = null;
     jj_scanpos = xsp;
     if (jj_3R_23()) return true;
     }
+    return false;
+  }
+
+  private boolean jj_3_1() {
+    if (jj_3R_15()) return true;
     return false;
   }
 
