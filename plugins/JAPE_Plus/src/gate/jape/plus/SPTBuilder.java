@@ -18,6 +18,7 @@ package gate.jape.plus;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -49,6 +50,7 @@ import gate.jape.constraint.WithinPredicate;
 import gate.jape.plus.Predicate.PredicateType;
 import gate.jape.plus.SPTBase.MatchMode;
 import gate.jape.plus.SPTBase.State;
+import gate.jape.plus.Transducer.SPTData;
 import gate.util.GateException;
 import gate.util.Javac;
 
@@ -63,11 +65,13 @@ public class SPTBuilder {
    */
   private static final boolean DEBUG = false;
   
+  public static final String GENERATED_CLASS_PACKAGE = "japephases";
+  
   private static final String[] TABS = new String[]{"", "\t", "\t\t", "\t\t\t",
       "\t\t\t\t", "\t\t\t\t\t", "\t\t\t\t\t\t", "\t\t\t\t\t\t\t", 
       "\t\t\t\t\t\t\t\t"};
   
-  private static final String GENERATED_CLASS_PACKAGE = "japephases";
+  
   
   /**
    * Stores the states for the optimised transducer.
@@ -95,7 +99,7 @@ public class SPTBuilder {
    */
   protected OpenIntIntHashMap oldToNewStates;
   
-  public SPTBase buildSPT(SinglePhaseTransducer oldSpt) throws ResourceInstantiationException{
+  public SPTData buildSPT(SinglePhaseTransducer oldSpt) throws ResourceInstantiationException{
     annotationTypes = new ArrayList<String>();
     predicatesByType = new HashMap<String, List<Predicate>>();
     newStates = new ArrayList<SPTBase.State>();
@@ -137,7 +141,6 @@ public class SPTBuilder {
         predicatesByTypeArray[i] = new Predicate[0];
       }
     }
-    SPTBase optimisedTransducer = null;
     
     // when debugging, this will dump the generated sources where Eclipse can 
     // see them.
@@ -164,51 +167,10 @@ public class SPTBuilder {
       System.out.print(str.toString());
     }
 
-    try {
-      Map<String, String> classes = new HashMap<String, String>(1);
-      String fqcn = GENERATED_CLASS_PACKAGE + "." + className; 
-      classes.put(fqcn, sptCode.toString());
-      Javac.loadClasses(classes);
-      // compile the class
-      @SuppressWarnings("unchecked")
-      Class<? extends SPTBase> sptClass = (Class<? extends SPTBase>)
-          Gate.getClassLoader().loadClass(fqcn);    
-      
-      Constructor<? extends SPTBase> sptConstructor = sptClass.getConstructor(
-        Rule[].class, Predicate[][].class);
-      optimisedTransducer = sptConstructor.newInstance(rules, predicatesByTypeArray);
-    } catch(SecurityException e) {
-      throw new ResourceInstantiationException(e);
-    } catch(NoSuchMethodException e) {
-      throw new ResourceInstantiationException(e);
-    } catch(IllegalArgumentException e) {
-      throw new ResourceInstantiationException(e);
-    } catch(InstantiationException e) {
-      throw new ResourceInstantiationException(e);
-    } catch(IllegalAccessException e) {
-      throw new ResourceInstantiationException(e);
-    } catch(InvocationTargetException e) {
-      throw new ResourceInstantiationException(e);
-    } catch(GateException e) {
-      throw new ResourceInstantiationException(e);
-    } catch(ClassNotFoundException e) {
-      throw new ResourceInstantiationException(e);
-    }
+    SPTData sptData = new SPTData(GENERATED_CLASS_PACKAGE + "." + className, 
+        sptCode.toString(), oldSpt.generateControllerEventBlocksCode(), rules, 
+        predicatesByTypeArray, (Set<String>)oldSpt.input);
     
-    //input types
-    @SuppressWarnings("unchecked")
-    Set<String> inputTypes = oldSpt.input;
-    optimisedTransducer.inputAnnotationTypes = 
-        inputTypes == null || inputTypes.size() == 0 ? 
-        null : new String[inputTypes.size()];
-    if(optimisedTransducer.inputAnnotationTypes != null){
-      optimisedTransducer.inputAnnotationTypes = inputTypes.toArray(
-              optimisedTransducer.inputAnnotationTypes);
-    }
-    
-    optimisedTransducer.
-      setControllerEventBlocksAction(oldSpt.getControllerEventBlocksActionClass());
-
     //cleanup
     annotationTypes = null;
     newStates = null;
@@ -216,7 +178,7 @@ public class SPTBuilder {
     predicatesByType = null;
     rules = null;
     
-    return optimisedTransducer;
+    return sptData;
   }
   
   protected void writeClassHeader(String className,
@@ -721,7 +683,7 @@ public class SPTBuilder {
       // do nothing
     } else {
       // for all other types of predicates, copy the value
-      newPredicate.featureValue = oldPredicate.getValue();
+      newPredicate.featureValue = (Serializable) oldPredicate.getValue();
     }
     //now see if this is a new predicate or not
     List<Predicate> predsOfType = predicatesByType.get(annotationType);

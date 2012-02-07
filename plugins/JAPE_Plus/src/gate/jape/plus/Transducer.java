@@ -29,7 +29,9 @@ import gate.event.StatusListener;
 import gate.fsm.FSM;
 import gate.gui.ActionsPublisher;
 import gate.gui.MainFrame;
+import gate.jape.ControllerEventBlocksAction;
 import gate.jape.MultiPhaseTransducer;
+import gate.jape.Rule;
 import gate.jape.SinglePhaseTransducer;
 import gate.jape.constraint.AnnotationAccessor;
 import gate.jape.constraint.ConstraintPredicate;
@@ -37,25 +39,36 @@ import gate.jape.parser.ParseCpsl;
 import gate.jape.parser.ParseException;
 import gate.util.Err;
 import gate.util.GateException;
+import gate.util.GateRuntimeException;
+import gate.util.Javac;
 import gate.util.persistence.PersistenceManager;
 import gate.jape.DefaultActionContext;
 import gate.creole.ControllerAwarePR;
 import gate.creole.ontology.Ontology;
 
 import java.awt.event.ActionEvent;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+
+import org.apache.log4j.Logger;
 
 import com.ontotext.jape.pda.FSMPDA;
 
@@ -66,10 +79,11 @@ import com.ontotext.jape.pda.FSMPDA;
 @CreoleResource(name = "JAPE-Plus Transducer", 
     comment = "An optimised, JAPE-compatible transducer.")
 public class Transducer extends AbstractLanguageAnalyser 
-    implements ControllerAwarePR, ProgressListener /*, ActionsPublisher */ {
+    implements ControllerAwarePR, ProgressListener , ActionsPublisher {
 
   private static final long serialVersionUID = 4194243737624821476L;
 
+  private static final Logger log = Logger.getLogger(Transducer.class);
   /**
    * A comparator for annotations based on start offset and inverse length.
    */
@@ -136,27 +150,27 @@ public class Transducer extends AbstractLanguageAnalyser
           fileChooser.setMultiSelectionEnabled(false);
           if(fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
+            ObjectOutputStream out = null;
             try {
-              MainFrame.lockGUI("Serialising JAPE Plus Transducer...");
-              FileOutputStream out = new FileOutputStream(file);
-              ObjectOutputStream s = new ObjectOutputStream(out);
-              //TODO
-              // collect all class objects
-              @SuppressWarnings("unchecked")
-              Class<? extends SPTBase>[] sptClasses = 
-                  new Class[singlePhaseTransducers.length];
-              for(int i = 0; i < singlePhaseTransducers.length; i++) {
-//                singlePhaseTransducers[i].getClass();
-              }
-//              s.writeObject();
-              s.flush();
-              s.close();
-              out.close();
+              MainFrame.lockGUI("Saving binary JAPE Plus Transducer...");
+              out = new ObjectOutputStream(
+                  new GZIPOutputStream(
+                  new BufferedOutputStream(
+                  new FileOutputStream(file))));
+              out.writeObject(singlePhaseTransducersData);
             } catch(IOException ioe) {
               JOptionPane.showMessageDialog(MainFrame.getInstance(), "Error!\n" + ioe.toString(),
                       "GATE", JOptionPane.ERROR_MESSAGE);
               ioe.printStackTrace(Err.getPrintWriter());
             } finally {
+              if(out != null) {
+                try {
+                  out.flush();
+                  out.close();
+                } catch(IOException e) {
+                  log.error("Exception while closing output stream.", e);
+                }
+              }
               MainFrame.unlockGUI();
             }
           }
@@ -168,8 +182,11 @@ public class Transducer extends AbstractLanguageAnalyser
     }
   }
   
+  /**
+   * Modified version of SPT that produces a different type of FSM data. This is
+   * used during the parsing of JAPE code.
+   */
   protected static class SinglePhaseTransducerPDA extends SinglePhaseTransducer {
-
     public SinglePhaseTransducerPDA(String name) {
       super(name);
     }
@@ -178,16 +195,113 @@ public class Transducer extends AbstractLanguageAnalyser
     protected FSMPDA createFSM() {
       return new FSMPDA(this);
     }
+  }
+  
+  /**
+   * Class used for storing binary representations of JAPE Plus transducers.
+   */
+  public static class SPTData implements Serializable  {
     
+    private static final long serialVersionUID = -3255640456555757114L;
+
+    private String lhsSourceCode;
     
+    private String controllerEventsSourceCode;
+    
+    private String className;
+    
+    private Rule[] rules;
+    
+    private Predicate[][] predicatesByType;
+    
+    private Set<String> inputTypes;
+    
+
+    public SPTData(String className, String lhsSourceCode,
+        String controllerEventsSourceCode, Rule[] rules,
+        Predicate[][] predicatesByType, Set<String> inputTypes) {
+      super();
+      this.className = className;
+      this.lhsSourceCode = lhsSourceCode;
+      this.controllerEventsSourceCode = controllerEventsSourceCode;
+      this.rules = rules;
+      this.predicatesByType = predicatesByType;
+      this.inputTypes = inputTypes;
+    }    
+    
+    public SPTBase generateSpt() throws ResourceInstantiationException {
+      
+      SPTBase optimisedTransducer = null;
+      
+      try {
+        Map<String, String> classes = new HashMap<String, String>(1);
+        
+        if(Gate.getClassLoader().findExistingClass(className) == null) {
+          classes.put(className, lhsSourceCode.toString());  
+        }
+        String ceabClassName = className + "CEAB"; 
+        if(controllerEventsSourceCode != null &&
+           Gate.getClassLoader().findExistingClass(ceabClassName) == null) {
+          classes.put(ceabClassName, controllerEventsSourceCode);  
+        }
+        if(!classes.isEmpty()) {
+          Javac.loadClasses(classes);
+        }
+        // compile the class
+        @SuppressWarnings("unchecked")
+        Class<? extends SPTBase> sptClass = (Class<? extends SPTBase>)
+            Gate.getClassLoader().loadClass(className);    
+        
+        Constructor<? extends SPTBase> sptConstructor = sptClass.getConstructor(
+          Rule[].class, Predicate[][].class);
+        optimisedTransducer = sptConstructor.newInstance(rules, predicatesByType);
+        if(controllerEventsSourceCode != null) {
+          // attach the events block class
+          optimisedTransducer.setControllerEventBlocksAction(
+              ((Class<? extends ControllerEventBlocksAction>) 
+              Gate.getClassLoader().loadClass(ceabClassName)).newInstance());          
+        }
+      } catch(SecurityException e) {
+        throw new ResourceInstantiationException(e);
+      } catch(NoSuchMethodException e) {
+        throw new ResourceInstantiationException(e);
+      } catch(IllegalArgumentException e) {
+        throw new ResourceInstantiationException(e);
+      } catch(InstantiationException e) {
+        throw new ResourceInstantiationException(e);
+      } catch(IllegalAccessException e) {
+        throw new ResourceInstantiationException(e);
+      } catch(InvocationTargetException e) {
+        throw new ResourceInstantiationException(e);
+      } catch(GateException e) {
+        throw new ResourceInstantiationException(e);
+      } catch(ClassNotFoundException e) {
+        throw new ResourceInstantiationException(e);
+      }
+      
+      //input types
+      optimisedTransducer.inputAnnotationTypes = 
+          inputTypes == null || inputTypes.size() == 0 ? 
+          null : new String[inputTypes.size()];
+      if(optimisedTransducer.inputAnnotationTypes != null){
+        optimisedTransducer.inputAnnotationTypes = inputTypes.toArray(
+                optimisedTransducer.inputAnnotationTypes);
+      }
+      
+      return optimisedTransducer;
+    }
   }
   
   public URL getGrammarURL() {
     return grammarURL;
   }
 
+  
   @CreoleParameter(
-      comment="URL for the data from which this transducer should be built.", suffixes="jape")
+      comment="URL for the data from which this transducer should be built.",
+      suffixes = ".jape",
+      disjunction = "grammar",
+      priority = 1)
   public void setGrammarURL(URL source) {
     this.grammarURL = source;
   }
@@ -222,6 +336,12 @@ public class Transducer extends AbstractLanguageAnalyser
   protected List<Action> actions;
   
   /**
+   * The URL to the serialised jape file used as grammar by this transducer.
+   */
+  protected java.net.URL binaryGrammarURL;
+  
+  
+  /**
    * Instance of {@link AnnotationComparator} used for sorting annots for the
    * phases.
    */
@@ -242,6 +362,8 @@ public class Transducer extends AbstractLanguageAnalyser
    * The listener that keeps track of the annotation types that have changed.
    */
   protected AnnotationSetListener inputASListener;
+  
+  protected SPTData[] singlePhaseTransducersData;
   
   /**
    * The list of phases used in this transducer.
@@ -280,6 +402,11 @@ public class Transducer extends AbstractLanguageAnalyser
    */
   public List<String> getAnnotationAccessors() {
     return annotationAccessors;
+  }
+  
+  @Override
+  public List<Action> getActions() {
+    return new ArrayList<Action>(actions);
   }
 
   /**
@@ -326,10 +453,28 @@ public class Transducer extends AbstractLanguageAnalyser
     initCustomConstraints();
     
     try {
-      parseJape();
+      if(binaryGrammarURL != null){
+        ObjectInputStream ois = new ObjectInputStream(
+            new GZIPInputStream(
+            new BufferedInputStream(binaryGrammarURL.openStream())));
+        singlePhaseTransducersData = (SPTData[])ois.readObject();
+      }else if(grammarURL != null) {
+        parseJape();  
+      } else {
+        throw new ResourceInstantiationException(
+            "Neither grammarURL or binaryGrammarURL parameters are set!");
+      }
+      
+      singlePhaseTransducers = new SPTBase[singlePhaseTransducersData.length];
+      for(int  i = 0; i < singlePhaseTransducersData.length; i++) {
+        singlePhaseTransducers[i] = singlePhaseTransducersData[i].generateSpt();
+        singlePhaseTransducers[i].addProgressListener(this);  
+      }      
     } catch(IOException e) {
       throw new ResourceInstantiationException(e);
     } catch(ParseException e) {
+      throw new ResourceInstantiationException(e);
+    } catch(ClassNotFoundException e) {
       throw new ResourceInstantiationException(e);
     }
     actionContext = new DefaultActionContext();
@@ -428,12 +573,11 @@ public class Transducer extends AbstractLanguageAnalyser
     MultiPhaseTransducer intermediate =  parser.MultiPhaseTransducer();
     parser.removeStatusListener(listener);
     
-    singlePhaseTransducers = new SPTBase[intermediate.getPhases().size()];
+    singlePhaseTransducersData = new SPTData[intermediate.getPhases().size()];
     SPTBuilder builder = new SPTBuilder();
     for(int i = 0; i < intermediate.getPhases().size(); i++){
-      singlePhaseTransducers[i] = builder.buildSPT(
+      singlePhaseTransducersData[i] = builder.buildSPT(
           (SinglePhaseTransducer)intermediate.getPhases().get(i));
-      singlePhaseTransducers[i].addProgressListener(this);
     }
   }
   
@@ -526,6 +670,20 @@ public class Transducer extends AbstractLanguageAnalyser
     return annots;
   }
   
+  public java.net.URL getBinaryGrammarURL() {
+    return binaryGrammarURL;
+  }
+
+  @CreoleParameter(
+    comment = "The URL to the binary grammar file.",
+    suffixes = ".jplus.z",
+    disjunction = "grammar",
+    priority = 100
+  )
+  public void setBinaryGrammarURL(java.net.URL binaryGrammarURL) {
+    this.binaryGrammarURL = binaryGrammarURL;
+  }  
+  
   /**
    * @return the inputASName
    */
@@ -542,7 +700,7 @@ public class Transducer extends AbstractLanguageAnalyser
   public void setInputASName(String inputASName) {
     this.inputASName = inputASName;
   }
-
+  
   /**
    * @return the outputASName
    */
@@ -591,8 +749,6 @@ public class Transducer extends AbstractLanguageAnalyser
   public void controllerExecutionFinished(Controller c)
     throws ExecutionException {
     for(SPTBase aSpt : singlePhaseTransducers){
-      // ontologies not supported yet, pass null
-      Ontology o = null;
       aSpt.runControllerExecutionFinishedBlock(actionContext,c,ontology);
     }
     actionContext.setCorpus(null);
@@ -604,8 +760,6 @@ public class Transducer extends AbstractLanguageAnalyser
   public void controllerExecutionAborted(Controller c, Throwable t)
     throws ExecutionException {
     for(SPTBase aSpt : singlePhaseTransducers){
-      // ontologies not supported yet, pass null
-      Ontology o = null;
       aSpt.runControllerExecutionAbortedBlock(actionContext,c,t,ontology);
     }
     actionContext.setCorpus(null);

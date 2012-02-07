@@ -1177,6 +1177,13 @@ public abstract class SPTBase extends AbstractLanguageAnalyser {
         //no acceptors -> just move to next annotation
         currentAnnotation = annotationNextOffset[currentAnnotation];
       }
+      // check the action context for early stopping
+      if(((DefaultActionContext)actionContext).isPhaseEnded()) {
+        ((DefaultActionContext)actionContext).setPhaseEnded(false);
+        logger.debug("Phase \""  + phaseName + 
+            "\" terminated prematurely by a RHS action.");
+        break topWhile;
+      }
       // fire the progress event
       if(currentAnnotation - lastProgressReportAnnIdx > annotation.length / 10) {
         fireProgressChanged(currentAnnotation * 100 / annotation.length);
