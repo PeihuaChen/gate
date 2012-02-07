@@ -20,6 +20,8 @@ import java.io.*;
 import java.util.*;
 import java.net.*;
 
+import org.apache.log4j.Logger;
+
 import gate.*;
 import gate.creole.*;
 import gate.util.*;
@@ -32,6 +34,11 @@ import gate.gui.MainFrame;
 public class Minipar extends AbstractLanguageAnalyser implements
 		ProcessingResource {
 
+  /**
+   * Shared Log4J logger.
+   */
+  private static final Logger log = Logger.getLogger(Minipar.class);
+  
 	/**
 	 * Name of the temporary file, which is populated with the text of GATE
 	 * document in order to process it with Minipar
@@ -54,7 +61,7 @@ public class Minipar extends AbstractLanguageAnalyser implements
 	 * distributed along with Minipar in GATE.
 	 */
 	private URL miniparBinary;
-
+	
 	/**
 	 * Minipar creates tokens. This variable provides the type name for it.
 	 */
@@ -266,7 +273,20 @@ public class Minipar extends AbstractLanguageAnalyser implements
 			String line;
 			Process p = Runtime.getRuntime().exec(cmdline);
 			BufferedReader input = new BomStrippingInputStreamReader(p.getInputStream());
-
+			final BufferedReader err = new BomStrippingInputStreamReader(p.getErrorStream());
+			new Thread(new Runnable(){
+			  public void run() {
+			    try {
+            String line = null;
+            while((line = err.readLine()) != null) {
+              log.info(line);
+            }
+          } catch(IOException e) {
+            e.printStackTrace();
+          }
+			  }
+			}).start();
+			
 			// this has ArrayList as its each element
 			// this element consists of all annotations for that particular
 			// sentence
