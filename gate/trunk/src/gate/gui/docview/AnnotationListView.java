@@ -1,6 +1,6 @@
 /*
  *  Copyright (c) 2009-2010, Ontotext AD.
- *  Copyright (c) 1995-2010, The University of Sheffield. See the file
+ *  Copyright (c) 1995-2012, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
