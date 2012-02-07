@@ -18,14 +18,15 @@ package gate.jape.plus;
 import gate.jape.constraint.AnnotationAccessor;
 import gate.jape.constraint.ConstraintPredicate;
 
+import java.io.Serializable;
 import java.util.regex.Pattern;
 
 /**
  * An atomic predicate is a single test (that cannot be broken into sub-tests)
  */
-public class Predicate{
+public class Predicate implements Serializable{
 
-  public static enum PredicateType{
+  public static enum PredicateType {
     EQ,
     NOT_EQ,
     LT,
@@ -61,7 +62,7 @@ public class Predicate{
    * <li>a {@link ConstraintPredicate} value, for CUSTOM predicates.</li>
    * </ul>
    */
-  protected Object featureValue;
+  protected Serializable featureValue;
   
   /**
    * The type of this predicate (i.e. which test it refers to).
