@@ -25,9 +25,18 @@ annotateNegEx: set this to true to add NegEx features to annotations (NegExType 
 
 annotatePhrases: set to true to output MetaMap phrase-level annotations (generally noun-phrase chunks). Only phrases containing a MetaMap mapping will be annotated. Can be useful for later post-coordination of phrase-level terms that do not exist in a pre-coordinated form in UMLS.
 
+annotNormalize: can be set to 'None', 'LeadingDeterminer', or 'AllDeterminers' to control whether and how determiners within the content of each of inputASTypes are handled. This is most useful for CoReference mode, so that 'his hypertension' and 'the hypertension' are both processed by MetaMap as simply 'hypertension' and treated as equivalent strings for coreference purposes.
+
+excludeIfContains: If an entry within inputASTypes contains any of the annotations in this list, then do not process this instance.
+
+excludeIfWithin: If an entry within inputASTypes occurs within any of the annotations in this list, then do not process that instance.
+
 inputASName: input Annotation Set name. Use in conjunction with inputASTypes (see below). Unless specified, the entire document content will be sent to MetaMap. 
 
-inputASTypes: only send the content of these annotations within inputASName to MetaMap and add new MetaMap annotations inside each. Unless specified, the entire document content will be sent to MetaMap.
+inputASTypes: only send the content of these annotations within inputASName to MetaMap and add new MetaMap annotations inside each. Unless specified, the entire document content will be sent to MetaMap. 
+
+This parameter also accepts entries in the form Annotation.feature == value so that you can filter your input annotations
+according to feature value (although regexes for value are not currently allowed).
 
 inputASTypeFeature: send the content of this feature within inputASTypes to MetaMap and wrap a new MetaMap annotation around each annotation in inputASTypes. If the feature is empty or does not exist, then the annotation content is sent instead.
 
@@ -47,5 +56,5 @@ outputMode: determines which MetaMap mappings are output as annotations in the G
 
 taggerMode: determines whether all term instances are processed by MetaMap, the first instance only, or the first instance with coreference annotations added. Only used if the inputASTypes parameter has been set.
 - FirstOccurrenceOnly: only process and annotate the first instance of each term in the document
-- CoReference: process and annotate the first instance and coreference following instances
+- CoReference: process and annotate the first instance and coreference following instances of the same term.
 - AllOccurrences: process and annotate all term instances independently
