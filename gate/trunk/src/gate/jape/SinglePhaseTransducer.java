@@ -1023,15 +1023,12 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     controllerAbortedEventBlock = aborted;
     javaImportsBlock = javaimports;
   }
-  public String generateControllerEventBlocksCode(
-    String started,
-    String finished,
-    String aborted,
-    String javaimports) {
+  
+  public String generateControllerEventBlocksCode() {
     String sourceCode = null;
     // if any of the three blocks is not null, set the corpusBlockActionClassSource
     // to the final source code of the class
-    if(started != null || finished != null || aborted != null) {
+    if(controllerStartedEventBlock != null || controllerFinishedEventBlock != null || controllerAbortedEventBlock != null) {
             
       sourceCode =
         controllerEventBlocksActionClassSourceTemplate;
@@ -1056,25 +1053,25 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       
       sourceCode =
         sourceCode.replace("%%javaimports%%",
-          javaimports != null ? javaimports : "// no 'Imports:' block for more imports defined");
+          javaImportsBlock != null ? javaImportsBlock : "// no 'Imports:' block for more imports defined");
       
       int index = sourceCode.indexOf("%%started%%");
       String previousCode = sourceCode.substring(0, index).trim();
       sourceCode =
         sourceCode.replace("%%started%%",
-          started != null ? sourceInfo.addBlock(previousCode, started) : "// no code defined");
+          controllerStartedEventBlock != null ? sourceInfo.addBlock(previousCode, controllerStartedEventBlock) : "// no code defined");
       
       index = sourceCode.indexOf("%%finished%%");
       previousCode = sourceCode.substring(0, index).trim();
       sourceCode =
         sourceCode.replace("%%finished%%",
-          finished != null ? sourceInfo.addBlock(previousCode, finished) : "// no code defined");
+          controllerFinishedEventBlock != null ? sourceInfo.addBlock(previousCode, controllerFinishedEventBlock) : "// no code defined");
       
       index = sourceCode.indexOf("%%aborted%%");
       previousCode = sourceCode.substring(0, index).trim();
       sourceCode =
         sourceCode.replace("%%aborted%%",
-          aborted != null ? sourceInfo.addBlock(previousCode, aborted) : "// no code defined");
+          controllerAbortedEventBlock != null ? sourceInfo.addBlock(previousCode, controllerAbortedEventBlock) : "// no code defined");
     }
     return sourceCode;
   }
@@ -1229,9 +1226,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   }
 
   private void compileEventBlocksActionClass() {
-    String sourceCode = generateControllerEventBlocksCode(
-      controllerStartedEventBlock, controllerFinishedEventBlock,
-      controllerAbortedEventBlock, javaImportsBlock);
+    String sourceCode = generateControllerEventBlocksCode();
     if(sourceCode != null) {
 			Map<String,String> actionClasses = new HashMap<String,String>(1);
 			actionClasses.put(controllerEventBlocksActionClassName,
