@@ -784,7 +784,8 @@ public class MetaMapPR extends AbstractLanguageAnalyser
                             // of the length of the previous result to update the start offset
                             resultLength = resultLength + result.getInputText().length();
                         } else {
-                            throw new Exception("NULL result instance! ");
+                            // throw new Exception("NULL result instance! ");
+                            gracefulExit("NULL MetaMap result instance! ");
                         }
                     }
                 }
@@ -939,7 +940,7 @@ public class MetaMapPR extends AbstractLanguageAnalyser
     }
 
     @RunTime
-    @CreoleParameter(defaultValue = "LeadingDeterminer",
+    @CreoleParameter(defaultValue = "None",
     comment = "Strip determiners from annotation content prior to MetaMap submission?")
     public void setAnnotNormalize(AnnotNormalizeMode annotNormalize) {
         this.annotNormalize = annotNormalize;
