@@ -136,9 +136,9 @@ public class Transducer extends AbstractLanguageAnalyser
   
   protected class SerialiseTransducerAction extends AbstractAction {
     public SerialiseTransducerAction() {
-      super("Serialize Transducer");
+      super("Save as binary file");
       putValue(SHORT_DESCRIPTION, 
-          "Save this JAPE Plus Transducer as a binary file");
+          "Save this JAPE Plus Transducer as a binary grammar file");
     }
 
     public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -159,8 +159,9 @@ public class Transducer extends AbstractLanguageAnalyser
                   new FileOutputStream(file))));
               out.writeObject(singlePhaseTransducersData);
             } catch(IOException ioe) {
-              JOptionPane.showMessageDialog(MainFrame.getInstance(), "Error!\n" + ioe.toString(),
-                      "GATE", JOptionPane.ERROR_MESSAGE);
+              JOptionPane.showMessageDialog(MainFrame.getInstance(), 
+                  "Error!\n" + ioe.toString(), "GATE", 
+                  JOptionPane.ERROR_MESSAGE);
               ioe.printStackTrace(Err.getPrintWriter());
             } finally {
               if(out != null) {
@@ -176,7 +177,7 @@ public class Transducer extends AbstractLanguageAnalyser
           }
         }
       };
-      Thread thread = new Thread(runnable, "Transducer Serialisation");
+      Thread thread = new Thread(runnable, "JAPE Plus binary save thread");
       thread.setPriority(Thread.MIN_PRIORITY);
       thread.start();
     }
