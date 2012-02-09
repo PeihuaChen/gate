@@ -4974,12 +4974,8 @@ public class MainFrame extends JFrame implements ProgressListener,
       imageLabel.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
     }
 
-    public boolean isActive() {
-      boolean res;
-      synchronized(lock) {
-        res = active;
-      }
-      return res;
+    public synchronized boolean isActive() {
+      return active;
     }
 
     public void activate() {
@@ -4990,15 +4986,17 @@ public class MainFrame extends JFrame implements ProgressListener,
         }
       });
       // wake the dormant thread
-      synchronized(lock) {
+      synchronized(this) {
         active = true;
+        notifyAll();
       }
     }
 
     public void deactivate() {
       // send the thread to sleep
-      synchronized(lock) {
+      synchronized(this) {
         active = false;
+        notifyAll();
       }
       // clear the panel
       SwingUtilities.invokeLater(new Runnable() {
@@ -5009,23 +5007,14 @@ public class MainFrame extends JFrame implements ProgressListener,
       });
     }
 
-    public void dispose() {
-      synchronized(lock) {
-        dying = true;
-      }
+    public synchronized void dispose() {
+      dying = true;
+      notifyAll();
     }
 
-    public void run() {
-      boolean isDying;
-      synchronized(lock) {
-        isDying = dying;
-      }
-      while(!isDying) {
-        boolean isActive;
-        synchronized(lock) {
-          isActive = active;
-        }
-        if(isActive && targetPanel.isVisible()) {
+    public synchronized void run() {
+      while(!dying) {
+        if(active && targetPanel.isVisible()) {
           SwingUtilities.invokeLater(new Runnable() {
             public void run() {
               // targetPanel.getParent().validate();
@@ -5039,26 +5028,29 @@ public class MainFrame extends JFrame implements ProgressListener,
               // targetPanel.paintImmediately(targetPanel.getBounds());
             }
           });
-        }
-        // sleep
-        try {
-          Thread.sleep(300);
-        }
-        catch(InterruptedException ie) {
-          log.debug("Animation interrupted", ie);
-        }
 
-        synchronized(lock) {
-          isDying = dying;
+          try {
+            // sleep for a bit then redraw
+            wait(300);
+          }
+          catch(InterruptedException ie) {
+            log.debug("Animation interrupted", ie);
+          }
+        } else {
+          try {
+            // sleep until reactivated
+            wait();
+          }
+          catch(InterruptedException ie) {
+            log.debug("Animation interrupted", ie);
+          }
         }
-      }// while(!isDying)
+      }// while(!dying)
     }
 
     boolean dying;
 
     boolean active;
-
-    final String lock = "lock";
 
     JPanel targetPanel;
 
