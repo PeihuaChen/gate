@@ -25,12 +25,6 @@
     <dependency org="uk.ac.gate" name="gate-asm" rev="3.1" conf="required->master" />
     <dependency org="uk.ac.gate" name="gate-compiler-jdt" rev="3.7.1" conf="required->master" />
 
-    <!-- needed to build the JAPE parser -->
-    <dependency org="net.java.dev.javacc" name="javacc" rev="5.0" conf="compile->master,runtime" />
-
-    <!-- needed to prodcue the nice HTML versions of the Java code that get added to the javadocs -->
-    <dependency org="de.java2html" name="java2html" rev="5.0" conf="compile->master,runtime" />
-
     <!-- needed to ensure the same version across configurations -->
     <dependency org="commons-logging" name="commons-logging" rev="1.1.1" />
 
@@ -78,10 +72,7 @@
 
     <!-- ANT is used internally by GATE for some tasks, such as the export for GATECloud.net -->
     <dependency org="org.apache.ant" name="ant" rev="1.8.1" />
-    
-    <!-- this provides the for loop support we use in the build file -->
-    <dependency org="ant-contrib" name="ant-contrib" rev="1.0b3" conf="required->master" />
-    
+        
     <!--required for loading and saving .gapp files and by sime plugins.
         we pull in the full XPP3 so we only need XStream's master artifact -->
     <dependency org="com.thoughtworks.xstream" name="xstream" rev="1.4.2" conf="required->master" />
