@@ -33,24 +33,6 @@
             <version>3.7.1</version>
             <scope>compile</scope>
         </dependency>
-  
-        <!-- needed to build the JAPE parser -->
-        <dependency>
-            <groupId>net.java.dev.javacc</groupId>
-            <artifactId>javacc</artifactId>
-            <version>5.0</version>
-            <!-- required for build but not to run -->
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- needed to prodcue the nice HTML versions of the Java code that get added to the javadocs -->
-        <dependency>
-            <groupId>de.java2html</groupId>
-            <artifactId>java2html</artifactId>
-            <version>5.0</version>
-            <!-- required for build but not to run -->
-            <scope>provided</scope>
-        </dependency>
 
         <!-- needed to ensure the same version across configurations -->
         <dependency>
@@ -187,21 +169,6 @@
             <artifactId>ant</artifactId>
             <version>1.8.1</version>
             <scope>compile</scope>
-        </dependency>
-        
-        <!-- this provides the for loop support we use in the build file -->
-        <dependency>
-            <groupId>ant-contrib</groupId>
-            <artifactId>ant-contrib</artifactId>
-            <version>1.0b3</version>
-            <!-- required for build but not to run -->
-            <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>ant</groupId>
-                    <artifactId>ant</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <!--required for loading and saving .gapp files and by sime plugins.
