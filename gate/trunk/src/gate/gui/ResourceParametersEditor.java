@@ -394,9 +394,17 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
         @Override
         public Dimension getMinimumSize() {
           //we don't want to be squashed!
-          return getPreferredSize();
+          Dimension size = getPreferredSize();
+          if(size.width < 300) {
+            size.width = 300;
+          }
+          // we should not be larger than the screen
+          Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+          if(size.width > 0.95 * screenSize.width) {
+            size.width = (int)0.95 * screenSize.width;
+          }
+          return size;
         }
-        
       };
       textButtonBox = new JPanel();
       textButtonBox.setLayout(new BoxLayout(textButtonBox, BoxLayout.X_AXIS));
