@@ -78,6 +78,7 @@ public class AnnotationSetsView extends AbstractDocumentView
    * @param orientation
    */
   public void changeOrientation(ComponentOrientation orientation) {
+    currentOrientation = orientation;
     if(annotationEditor != null) {
       annotationEditor.changeOrientation(orientation);
     }
@@ -269,6 +270,9 @@ public class AnnotationSetsView extends AbstractDocumentView
                   .newInstance();
           newEditor.setOwner(this);
           newEditor.init();
+          if(currentOrientation != null) {
+            newEditor.changeOrientation(currentOrientation);
+          }
           return newEditor;
         }
       }
@@ -2238,6 +2242,8 @@ public class AnnotationSetsView extends AbstractDocumentView
   protected String lastAnnotationType = "_New_";
   
   protected List actions;
+
+  protected ComponentOrientation currentOrientation;
   
   protected final static ColorGenerator colourGenerator = new ColorGenerator();
   private static final int NAME_COL = 1;
