@@ -14,6 +14,8 @@
 
 package gate.gui.creole.manager;
 
+import gate.Gate;
+
 import gate.resources.img.svg.DownloadIcon;
 import gate.resources.img.svg.ProgressIcon;
 
@@ -28,9 +30,24 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
 @SuppressWarnings("serial")
 public class ProgressPanel extends JPanel implements ComponentListener {
+  private static class SafeJProgressBar extends JProgressBar {
+    public void setIndeterminate(boolean indeterminate) {
+      // workaround for bug in some versions of Aqua L&F that prevents GATE
+      // from exiting if indeterminate progress bars are used
+      if(Gate.runningOnMac() && (UIManager.getLookAndFeel() == null
+          || UIManager.getLookAndFeel().getClass().getName().equals(
+            UIManager.getSystemLookAndFeelClassName()))) {
+        return;
+      } else {
+        super.setIndeterminate(indeterminate);
+      }
+    }
+  }
+
   private JProgressBar progressTotal, progressSingle;
 
   private JLabel message, dlMsg;
@@ -40,13 +57,13 @@ public class ProgressPanel extends JPanel implements ComponentListener {
 
     setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-    progressTotal = new JProgressBar();
+    progressTotal = new SafeJProgressBar();
     progressTotal.setAlignmentX(CENTER_ALIGNMENT);
     progressTotal.setMaximumSize(new Dimension(250, progressTotal
             .getPreferredSize().height));
     progressTotal.setIndeterminate(true);
 
-    progressSingle = new JProgressBar();
+    progressSingle = new SafeJProgressBar();
     progressSingle.setAlignmentX(CENTER_ALIGNMENT);
     progressSingle.setMaximumSize(new Dimension(250, progressTotal
             .getPreferredSize().height));
