@@ -68,6 +68,11 @@
 	COMMENT="The list of property names to be excluded, comma separated">
 	java.lang.String
 	</PARAMETER>
+	<PARAMETER NAME="typesToConsider" OPTIONAL="true"
+		DEFAULT=""
+	COMMENT="The list of types to be included. Possible values: instance, class, property">
+	java.util.Set
+	</PARAMETER>
 	<PARAMETER NAME="caseSensitive"
 	DEFAULT="false"
 	COMMENT="Should this gazetteer diferentiate on case">
