@@ -22,7 +22,7 @@
     <target name="prepare.extra.jars" depends="init">
         <jar destfile="${build}/gate-core-javadoc.jar"
              basedir="${top}/doc/javadoc"
-             excludes="internal/**" />
+             excludes="internal/**, src-html/**" />
         <jar destfile="${build}/gate-core-sources.jar"
              basedir="${top}/src"/>
     </target>
@@ -144,8 +144,10 @@
             </filterset>
         </copy>
         <copy tofile="${basename.to.stage}.jar" file="${top}/bin/gate.jar" />
-        <jar destfile="${basename.to.stage}-javadoc.jar" basedir="${top.dir}/doc/javadoc"/>
-        <jar destfile="${basename.to.stage}-sources.jar" basedir="${top.dir}/src"/>
+        <jar destfile="${basename.to.stage}-javadoc.jar"
+             basedir="${top}/doc/javadoc"
+             excludes="internal/**, src-html/**" />
+        <jar destfile="${basename.to.stage}-sources.jar" basedir="${top}/src"/>
     </target>
 
     <target name="stage.gate-compiler-jdt" depends="stage.init">
