@@ -92,7 +92,6 @@ list</a>.</p>
 <li><a href='#Tools'>Tools</a></li>
 <li><a href='#UIMA'>UIMA</a></li>
 <li><a href='#Web_Crawler_Websphinx'>Web_Crawler_Websphinx</a></li>
-<li><a href='#Web_Translate_Google'>Web_Translate_Google</a></li>
 <li><a href='#WordNet'>WordNet</a></li>
 </ul>
 <table border='1'>
@@ -458,6 +457,11 @@ list</a>.</p>
 		<td>gate.chineseSeg.ChineseSegMain</td>
 	</tr>
 	<tr>
+		<td>Chinese IE System&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>chinese.ChineseIE</td>
+	</tr>
+	<tr>
 		<th colspan='3'><a name='Lang_Hindi'>Lang_Hindi</a></th>
 	</tr>
 	<tr>
@@ -623,6 +627,11 @@ list</a>.</p>
 		<td>gate.gui.docview.OntologyInstanceView</td>
 	</tr>
 	<tr>
+		<td>GAZE&nbsp;</td>
+		<td>Gazetteer viewer and editor (<a href="http://gate.ac.uk/userguide/sec:gazetteers:onto_gaze">docs</a>)&nbsp;</td>
+		<td>com.ontotext.gate.vr.Gaze</td>
+	</tr>
+	<tr>
 		<th colspan='3'><a name='OpenNLP'>OpenNLP</a></th>
 	</tr>
 	<tr>
@@ -704,6 +713,16 @@ list</a>.</p>
 		<td>StanfordParser&nbsp;</td>
 		<td>Stanford parser wrapper (<a href="http://gate.ac.uk/userguide/sec:parsers:stanford">docs</a>)&nbsp;</td>
 		<td>gate.stanford.Parser</td>
+	</tr>
+	<tr>
+		<td>English Dependency Parser&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>gate.stanford.apps.EnglishDependencies</td>
+	</tr>
+	<tr>
+		<td>English POS Tagger and Dependency Parser&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>gate.stanford.apps.EnglishPOSDependencies</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='Parser_SUPPLE'>Parser_SUPPLE</a></th>
@@ -789,6 +808,11 @@ list</a>.</p>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='Tagger_Measurements'>Tagger_Measurements</a></th>
+	</tr>
+	<tr>
+		<td>ANNIE+Measurements&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>gate.creole.measurements.ANNIEMeasurements</td>
 	</tr>
 	<tr>
 		<td>Measurement Tagger&nbsp;</td>
@@ -937,14 +961,6 @@ list</a>.</p>
 		<td>Crawler PR&nbsp;</td>
 		<td>GATE implementation of the Websphinx crawling API (<a href="http://gate.ac.uk/userguide/sec:misc-creole:crawler">docs</a>)&nbsp;</td>
 		<td>crawl.CrawlPR</td>
-	</tr>
-	<tr>
-		<th colspan='3'><a name='Web_Translate_Google'>Web_Translate_Google</a></th>
-	</tr>
-	<tr>
-		<td>Google Translator PR&nbsp;</td>
-		<td>Runs a google translator over the source member document and produces the translated document. User can also specify if he/she wants to align unitOfTranslation in the source and the target documents.&nbsp;</td>
-		<td>gate.translate.google.GoogleTranslatorPR</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='WordNet'>WordNet</a></th>
