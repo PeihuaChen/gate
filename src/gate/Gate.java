@@ -1341,7 +1341,12 @@ public class Gate implements GateConstants {
 
       remote = !this.url.getProtocol().equalsIgnoreCase("file");
       
-      core = !remote && (url.toString().startsWith(Gate.getPluginsHome().toURI().toString()));
+      if (Gate.isSandboxed() || Gate.getPluginsHome() == null) {
+        core = false;
+      }
+      else {
+        core = !remote && (url.toString().startsWith(Gate.getPluginsHome().toURI().toString()));
+      }
 
       html =
               "<html><body>"
