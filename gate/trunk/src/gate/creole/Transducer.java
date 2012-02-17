@@ -246,6 +246,15 @@ public class Transducer
     }
   }
 
+  /**
+   * Sends a serialized (binary) copy of this transducer to the specified output stream.
+   * Note that this is the same function used by the "Serialize Transducer" menu item
+   * allowing the same functionality to be accessed via code as well as the GUI.
+   **/
+  public void serialize(ObjectOutputStream out) throws IOException {
+    out.writeObject(batch);
+    out.flush();
+  }
 
   /**
    * Saves the Jape Transuder to the binary file.
@@ -271,8 +280,7 @@ public class Transducer
               MainFrame.lockGUI("Serializing JAPE Transducer...");
               FileOutputStream out = new FileOutputStream(file);
               ObjectOutputStream s = new ObjectOutputStream(out);
-              s.writeObject(batch);
-              s.flush();
+     		  serialize(s);
               s.close();
               out.close();
             } catch(IOException ioe) {
@@ -445,7 +453,7 @@ public class Transducer
   public void setAnnotationAccessors(List<String> annotationAccessors) {
     this.annotationAccessors = annotationAccessors;
   }
-  
+
   /**
    * Get the benchmark ID of this Transducers batch.
    */
