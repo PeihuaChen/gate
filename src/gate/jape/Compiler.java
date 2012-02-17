@@ -33,6 +33,9 @@ import gate.util.Out;
  * A utility class for compilig JAPE files.
  * Take a list of .jape files names and compile them to .ser.
  * Also recognises a -v option which makes it chatty.
+ * Note that this is provided as a command line tool. If you
+ * wish to serialize JAPE grammars from code you should use
+ * the Transducer's serialize method instead.
  */
 public class Compiler {
 
@@ -74,14 +77,14 @@ public class Compiler {
    */
   public static void compile(URL jape, File ser) throws Exception {
 
-    SerializableTransducer transducer = new SerializableTransducer();
+    Transducer transducer = new Transducer();
     transducer.setGrammarURL(jape);
     transducer.setEncoding(defaultEncoding);
     transducer.init();
 
     FileOutputStream out = new FileOutputStream(ser);
 	ObjectOutputStream s = new ObjectOutputStream(out);
-	s.writeObject(transducer.getBatch());
+	transducer.serialize(s);
 	s.flush();
 	s.close();
     out.close();
@@ -95,15 +98,5 @@ public class Compiler {
     if(base.toLowerCase().endsWith(".jape"))
       base = base.substring(0, base.length() - 5);
     return new File(base + ".ser");
-  }
-
-  /**
-   * A simple subclass to allow access to the underlying
-   * Batch instance which we need in order to serialize the transducer
-   */
-  private static class SerializableTransducer extends Transducer {
-    public Batch getBatch() {
-	  return batch;
-    }
   }
 }
