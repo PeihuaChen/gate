@@ -121,8 +121,32 @@ public class POSTagger extends AbstractLanguageAnalyser {
     if(outputAnnotationType == null || outputAnnotationType.trim().length()==0) {
         throw new ExecutionException("No AnnotationType provided to store the new feature!");
     }
-    
-    AnnotationSet sentencesAS = inputAS.get(baseSentenceAnnotationType);
+
+    // Allow Sentence annotations of the form Sentence.feature == value (or just plain Sentence)
+    // This allows us to distinguish Sentences of different types, for example
+    // if we want to run two POS taggers, one for uppercase sentences, and one for lowercase sentences
+    String annName = baseSentenceAnnotationType;  // assume just a simple ann name to start with
+    String annFeature;
+    String annFeatureValue;
+    AnnotationSet sentencesAS;
+    String[] sentencesArr = annName.split("(\\.)|(\\s*==\\s*)");
+    if (sentencesArr.length == 3 || sentencesArr.length == 2) {
+      annName = sentencesArr[0];
+      annFeature = sentencesArr[1];
+      if (sentencesArr.length == 2) {
+        Set<String> feats = new HashSet<String>();
+        feats.add(annFeature);
+        sentencesAS = inputAS.get(annName, feats);
+      } else {
+        FeatureMap annFeats = Factory.newFeatureMap();
+        annFeatureValue = sentencesArr[2];
+        annFeats.put(annFeature, annFeatureValue);
+        sentencesAS = inputAS.get(annName, annFeats);
+      }
+    } else {
+      sentencesAS = inputAS.get(annName);
+    }
+
     AnnotationSet tokensAS = inputAS.get(baseTokenAnnotationType);
     if(sentencesAS != null && sentencesAS.size() > 0
        && tokensAS != null && tokensAS.size() > 0){
