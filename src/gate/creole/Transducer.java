@@ -125,12 +125,25 @@ public class Transducer
     } finally {
       fireProcessFinished();
     }
-    actionContext = new DefaultActionContext();
+    actionContext = initActionContext();
     batch.setActionContext(actionContext);
     batch.addProgressListener(new IntervalProgressListener(0, 100));
     return this;
   }
 
+  /**
+   * Method that initialises the ActionContext. This method can be overridden
+   * if somebody wants to extend the Transducer PR class and provide their own
+   * subclass of DefaultActionContext to add some functionality.
+   * 
+   * @return a DefaultActionContext object
+   */
+  protected DefaultActionContext initActionContext() {
+    return new DefaultActionContext();
+  }
+  
+  
+  
   /**
    * Implementation of the run() method from {@link java.lang.Runnable}. This
    * method is responsible for doing all the processing of the input document.

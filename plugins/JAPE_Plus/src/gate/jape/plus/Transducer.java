@@ -71,6 +71,7 @@ import javax.swing.JOptionPane;
 import org.apache.log4j.Logger;
 
 import com.ontotext.jape.pda.FSMPDA;
+import gate.jape.*;
 
 
 /**
@@ -475,10 +476,22 @@ public class Transducer extends AbstractLanguageAnalyser
     } catch(ClassNotFoundException e) {
       throw new ResourceInstantiationException(e);
     }
-    actionContext = new DefaultActionContext();
+    actionContext = initActionContext();
     return this;
   }
 
+  /**
+   * Method that initialises the ActionContext. This method can be overridden
+   * if somebody wants to extend the Transducer PR class and provide their own
+   * subclass of DefaultActionContext to add some functionality.
+   * 
+   * @return a DefaultActionContext object
+   */
+  protected DefaultActionContext initActionContext() {
+    return new DefaultActionContext();
+  }
+  
+  
   /**
    * Loads any custom operators and annotation accessors into the ConstraintFactory.
    * @throws ResourceInstantiationException
@@ -558,9 +571,11 @@ public class Transducer extends AbstractLanguageAnalyser
     }
   }
 
-  protected void parseJape() throws IOException, ParseException, ResourceInstantiationException{
-		ParseCpsl parser = Factory.newJapeParser(grammarURL, encoding);
-		parser.setSptClass(SinglePhaseTransducerPDA.class);
+  protected void parseJape() 
+    throws IOException, ParseException, ResourceInstantiationException
+  {		
+    ParseCpsl parser = Factory.newJapeParser(grammarURL, encoding);
+    parser.setSptClass(SinglePhaseTransducerPDA.class);
 
     StatusListener listener = new StatusListener(){
       public void statusChanged(String text){
