@@ -183,7 +183,7 @@
                   <string>taggerFlags</string>
                   <gate.util.persistence.CollectionPersistence>
                     <localList>
-                      <string>german.tagger</string>
+                      <string>german-fast.tagger</string>
                     </localList>
                     <collectionType>java.util.Arrays$ArrayList</collectionType>
                   </gate.util.persistence.CollectionPersistence>
