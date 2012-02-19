@@ -183,7 +183,7 @@
                   <string>taggerFlags</string>
                   <gate.util.persistence.CollectionPersistence>
                     <localList>
-                      <string>left3words-wsj-0-18.tagger</string>
+                      <string>english-left3words-distsim.tagger</string>
                     </localList>
                     <collectionType>java.util.Arrays$ArrayList</collectionType>
                   </gate.util.persistence.CollectionPersistence>
