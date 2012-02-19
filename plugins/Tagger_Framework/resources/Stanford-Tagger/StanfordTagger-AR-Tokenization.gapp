@@ -115,7 +115,7 @@
                 </entry>
                 <entry>
                   <string>regex</string>
-                  <string>(.+)#(.+)</string>
+                  <string>(.+)/(.+)</string>
                 </entry>
                 <entry>
                   <string>inputASName</string>
@@ -183,7 +183,7 @@
                   <string>taggerFlags</string>
                   <gate.util.persistence.CollectionPersistence>
                     <localList>
-                      <string>arabic.tagger</string>
+                      <string>arabic-fast.tagger</string>
                     </localList>
                     <collectionType>java.util.Arrays$ArrayList</collectionType>
                   </gate.util.persistence.CollectionPersistence>
