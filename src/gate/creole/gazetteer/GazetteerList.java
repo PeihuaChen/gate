@@ -23,6 +23,7 @@ import java.util.*;
 import gate.creole.ResourceInstantiationException;
 import gate.util.BomStrippingInputStreamReader;
 import gate.util.Files;
+import gate.util.GateRuntimeException;
 
 
 /** Gazetteer List provides the means for uploading, managing and
@@ -138,7 +139,16 @@ implements List {
       listReader = new BomStrippingInputStreamReader(
                               (url).openStream(), encoding);
       String line;
+      int linenr = 0;
       while (null != (line = listReader.readLine())) {
+        linenr++;
+        GazetteerNode node = null;
+        try {
+          node = new GazetteerNode(line, separator, isOrdered);
+        } catch (Exception ex) {
+          throw new GateRuntimeException("Could not read gazetteer entry "+
+            linenr+" from URL "+getURL()+": "+ex.getMessage(),ex);
+        }
         entries.add(new GazetteerNode(line, separator, isOrdered));
       } //while
 
