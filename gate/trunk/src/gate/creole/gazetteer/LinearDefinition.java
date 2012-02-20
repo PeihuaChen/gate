@@ -19,10 +19,10 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
-
 import gate.creole.ResourceInstantiationException;
 import gate.util.BomStrippingInputStreamReader;
 import gate.util.Files;
+import gate.util.GateRuntimeException;
 
 
 /** Represents a Linear Definition [lists.def] file <br>
@@ -218,7 +218,15 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
       LinearNode node;
       while (null != (line = defReader.readLine())) {
         node = new LinearNode(line);
-        this.add(node);
+        try {
+          this.add(node);
+        } catch (GateRuntimeException ex) {
+          // The add method cannot throw a checked exception because
+          // it implements the List interface. Therefore it throws
+          // a GateRuntimeException which we re-throw as a 
+          // ResourceInstnatiationException here
+          throw new ResourceInstantiationException(ex);
+        }
       } //while
 
       defReader.close();
@@ -343,6 +351,14 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
     throw new UnsupportedOperationException("this method has not been implemented");
   }
 
+  /**
+   * Add a node to this LinearDefinition. 
+   * <p>
+   * NOTE: this will throw a GateRuntimeException if anything goes
+   * wrong when reading the list.
+   * @param index
+   * @param o 
+   */
   public void add(int index, Object o) {
     if (o instanceof LinearNode) {
       String list = ((LinearNode)o).getList();
@@ -355,7 +371,8 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
           lists.add(list);
           isModified = true;
         } catch (ResourceInstantiationException x) {
-          // do nothing since the list ain't real
+          throw new GateRuntimeException("Error loading list: "+
+            list+": "+x.getMessage(),x);
         }
       } // if unique
     } // if a linear node
@@ -420,7 +437,11 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
   }
 
   /**
-   * adds a new node, only if its list is new and uniquely mapped to this node.
+   * Adds a new node, only if its list is new and uniquely mapped to this node.
+   * <p>
+   * NOTE: this will throw a GateRuntimeException if anything goes wrong
+   * reading the list.
+   * 
    * @param o a node
    * @return true if the list of node is not already mapped with another node.
    */
@@ -437,7 +458,9 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
           lists.add(list);
           isModified=true;
         } catch (ResourceInstantiationException x) {
-          result = false;
+          throw new GateRuntimeException("Error loading list: "+
+            list+": "+x.getMessage(),x);
+          //result = false;
         }
       } // if unique
     } // if a linear node
