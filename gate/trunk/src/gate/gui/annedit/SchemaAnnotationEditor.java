@@ -216,10 +216,28 @@ public class SchemaAnnotationEditor extends AbstractVisualResource implements
             || fSchema.getFeatureValueClass().equals(Byte.class)
             || fSchema.getFeatureValueClass().equals(Float.class)
             || fSchema.getFeatureValueClass().equals(Double.class)) {
-          // just check the right type
-          if(!fSchema.getFeatureValueClass().isAssignableFrom(
+          if(featureValue instanceof String) {
+            // try to convert numbers
+            try {
+              if (fSchema.getFeatureValueClass().equals(Integer.class)) {
+                featureValue = Integer.valueOf((String) featureValue);
+              } else if (fSchema.getFeatureValueClass().equals(Short.class)) {
+                featureValue = Short.valueOf((String) featureValue);
+              } else if (fSchema.getFeatureValueClass().equals(Byte.class)) {
+                featureValue = Byte.valueOf((String) featureValue);
+              } else if (fSchema.getFeatureValueClass().equals(Double.class)) {
+                featureValue = Double.valueOf((String) featureValue);
+              } else if (fSchema.getFeatureValueClass().equals(Float.class)) {
+                featureValue = Float.valueOf((String) featureValue);
+              }
+              annotationFeatures.put(featureName, featureValue);
+            } catch (NumberFormatException e) {
+              // could not convert
+              return false;
+            }            
+          } else if(!fSchema.getFeatureValueClass().isAssignableFrom(
               featureValue.getClass())) {
-            // invalid value type
+            // not a String, nor the exact correct class: invalid value type
             return false;
           }
         } else if(fSchema.getFeatureValueClass().equals(String.class)) {
