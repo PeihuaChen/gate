@@ -1172,12 +1172,6 @@ public class AnnotationSetsView extends AbstractDocumentView
         if(expanded){
           tableRows.remove(setRow + pos + 1);
           tableModel.fireTableRowsDeleted(setRow + pos + 1, setRow + pos + 1);
-//          if(row >= (setRow + pos + 1)) row--;
-        }
-        if(typeHandlers.isEmpty()){
-          //the set has no more handlers
-          setExpanded(false);
-          tableModel.fireTableRowsUpdated(setRow, setRow);
         }
         //restore selection if any
         if(row != -1){
@@ -1889,10 +1883,13 @@ public class AnnotationSetsView extends AbstractDocumentView
             pendingEvents.offer(event);
           }
         }
-        //store selection state
+        //store selection state and expanded sets
         storeSelectedTypes();
-        //release all resources
+        Map<String, Boolean> expandedSets = new HashMap<String, Boolean>();
         for(SetHandler sHandler : setHandlers){
+          // store expanded state
+          expandedSets.put(sHandler.set.getName(), sHandler.isExpanded());
+          // release all resources
           sHandler.typeHandlers.clear();
           sHandler.typeHandlersByType.clear();
           sHandler.set.removeAnnotationSetListener(AnnotationSetsView.this);
@@ -1909,6 +1906,10 @@ public class AnnotationSetsView extends AbstractDocumentView
         //restore the selection
         restoreSelectedTypes();
         tableModel.fireTableDataChanged();
+        // restore expansion state
+        for(SetHandler sHandler : setHandlers){
+          sHandler.setExpanded(expandedSets.get(sHandler.set.getName()));
+        }        
       }catch(Throwable t){
         //something happened, we need to give up
         uiDirty = true;
