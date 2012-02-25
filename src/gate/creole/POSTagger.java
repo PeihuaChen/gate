@@ -72,6 +72,20 @@ public class POSTagger extends AbstractLanguageAnalyser {
   }
   protected Boolean failOnMissingInputAnnotations = true;
   
+  
+  @RunTime
+  @Optional
+  @CreoleParameter(
+    comment = "Should all Tokens be POS tagged or just those within baseSentenceAnnotationType?",
+    defaultValue = "true")  
+  public void setPosTagAllTokens(Boolean allTokens) {
+    posTagAllTokens = allTokens;
+  }
+  public Boolean getPosTagAllTokens() {
+    return posTagAllTokens;
+  }
+  protected Boolean posTagAllTokens = true;  // should all Tokens be POS tagged or just those within baseSentenceAnnotationType
+
   public POSTagger() {
   }
 
@@ -138,30 +152,33 @@ public class POSTagger extends AbstractLanguageAnalyser {
       Comparator offsetComparator = new OffsetComparator();
 
       //read all the tokens and all the sentences
-      List sentencesList = new ArrayList(sentencesAS);
+      List<Annotation> sentencesList = new ArrayList(sentencesAS);
       Collections.sort(sentencesList, offsetComparator);
-      List tokensList = new ArrayList(tokensAS);
+      List<Annotation> tokensList = new ArrayList(tokensAS);
       Collections.sort(tokensList, offsetComparator);
 
-      Iterator sentencesIter = sentencesList.iterator();
-      ListIterator tokensIter = tokensList.listIterator();
+      Iterator<Annotation> sentencesIter = sentencesList.iterator();
+      ListIterator<Annotation> tokensIter = tokensList.listIterator();
 
-      List tokensInCurrentSentence = new ArrayList();
-      Annotation currentToken = (Annotation)tokensIter.next();
+      List<Annotation> tokensInCurrentSentence = new ArrayList();
+      Annotation currentToken = tokensIter.next();
       int sentIndex = 0;
       int sentCnt = sentencesAS.size();
       while(sentencesIter.hasNext()){
-        Annotation currentSentence = (Annotation)sentencesIter.next();
+        Annotation currentSentence = sentencesIter.next();
         tokensInCurrentSentence.clear();
         sentenceForTagger.clear();
         while(currentToken != null
               &&
               currentToken.getEndNode().getOffset().compareTo(
               currentSentence.getEndNode().getOffset()) <= 0){
-          tokensInCurrentSentence.add(currentToken);
-          sentenceForTagger.add(currentToken.getFeatures().
+          // If we're only POS tagging Tokens within baseSentenceAnnotationType, don't add the sentence if the Tokens aren't within the span of baseSentenceAnnotationType
+          if (posTagAllTokens || currentToken.withinSpanOf(currentSentence)) {
+            tokensInCurrentSentence.add(currentToken);
+            sentenceForTagger.add(currentToken.getFeatures().
                                 get(TOKEN_STRING_FEATURE_NAME));
-          currentToken = (Annotation)(tokensIter.hasNext() ?
+          }
+          currentToken = (tokensIter.hasNext() ?
                                      tokensIter.next() : null);
         }
         //run the POS tagger
@@ -177,16 +194,16 @@ public class POSTagger extends AbstractLanguageAnalyser {
                 ") is different from the input size (" +
                 tokensInCurrentSentence.size() + ")!");
           Iterator resIter = taggerResults.iterator();
-          Iterator tokIter = tokensInCurrentSentence.iterator();
+          Iterator<Annotation> tokIter = tokensInCurrentSentence.iterator();
           while(resIter.hasNext()){
-              Annotation annot = (Annotation) tokIter.next();
+              Annotation annot = tokIter.next();
               addFeatures(annot, TOKEN_CATEGORY_FEATURE_NAME, ((String[])resIter.next())[1]);
           }
         }
         fireProgressChanged(sentIndex++ * 100 / sentCnt);
       }//while(sentencesIter.hasNext())
 
-      if(currentToken != null){
+      if(currentToken != null && posTagAllTokens){ // Tag remaining Tokens if we are not considering those only within baseSentenceAnnotationType
         //we have remaining tokens after the last sentence
         tokensInCurrentSentence.clear();
         sentenceForTagger.clear();
@@ -194,7 +211,7 @@ public class POSTagger extends AbstractLanguageAnalyser {
           tokensInCurrentSentence.add(currentToken);
           sentenceForTagger.add(currentToken.getFeatures().
                                 get(TOKEN_STRING_FEATURE_NAME));
-          currentToken = (Annotation)(tokensIter.hasNext() ?
+          currentToken = (tokensIter.hasNext() ?
                                       tokensIter.next() : null);
         }
         //run the POS tagger
@@ -208,9 +225,9 @@ public class POSTagger extends AbstractLanguageAnalyser {
               ") is different from the input size (" +
               tokensInCurrentSentence.size() + ")!");
         Iterator resIter = taggerResults.iterator();
-        Iterator tokIter = tokensInCurrentSentence.iterator();
+        Iterator<Annotation> tokIter = tokensInCurrentSentence.iterator();
         while(resIter.hasNext()){
-            Annotation annot = (Annotation) tokIter.next();
+            Annotation annot = tokIter.next();
             addFeatures(annot, TOKEN_CATEGORY_FEATURE_NAME, ((String[])resIter.next())[1]);
         }
       }//if(currentToken != null)
