@@ -282,7 +282,16 @@ public class RealtimeCorpusController extends SerialAnalyserController {
             logger.info("Execution timeout, worker thread will be forcibly terminated!");
             // using a volatile variable instead of synchronisation
             Thread theThread = currentWorkingThread;
-            if(theThread != null) theThread.stop();
+            if(theThread != null) {
+              theThread.stop();
+              try {
+                // and wait for it to actually die
+                theThread.join();
+              } catch(InterruptedException e) {
+                // current thread has been interrupted: 
+                Thread.currentThread().interrupt();
+              }
+            }
           } catch(InterruptedException e) {
             // the current thread (not the execution thread!) was interrupted
             // throw it forward
