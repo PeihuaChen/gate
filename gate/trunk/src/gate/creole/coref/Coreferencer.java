@@ -18,6 +18,8 @@ package gate.creole.coref;
 
 import java.util.*;
 
+import org.apache.log4j.Logger;
+
 import gate.*;
 import gate.creole.*;
 import gate.util.GateRuntimeException;
@@ -37,6 +39,8 @@ public class Coreferencer extends AbstractLanguageAnalyser implements
   /** --- */
   private static final boolean DEBUG = false;
 
+  private static final Logger log = Logger.getLogger(Coreferencer.class);
+  
   /** --- */
   private PronominalCoref pronominalModule;
 
@@ -157,9 +161,15 @@ public class Coreferencer extends AbstractLanguageAnalyser implements
       List matches = null;
       Object matchesObj = antecedent.getFeatures().get(
           ANNOTATION_COREF_FEATURE_NAME);
-      if(matchesObj != null && matchesObj instanceof List) {
-        matches = (List)matchesObj;  
+      if(matchesObj != null) {
+        if(matchesObj instanceof List) {
+          matches = (List)matchesObj;  
+        } else {
+          log.warn("Illegal value for " + ANNOTATION_COREF_FEATURE_NAME + 
+              " feature was ignored.");
+        }
       }
+        
       if(null == matches) {
         matches = new ArrayList();
         matches.add(antecedent.getId());
