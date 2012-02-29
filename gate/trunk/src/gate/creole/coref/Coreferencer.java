@@ -154,8 +154,12 @@ public class Coreferencer extends AbstractLanguageAnalyser implements
       }
 
       // get the ortho-matches of the antecedent
-      List matches = (List)antecedent.getFeatures().get(
-              ANNOTATION_COREF_FEATURE_NAME);
+      List matches = null;
+      Object matchesObj = antecedent.getFeatures().get(
+          ANNOTATION_COREF_FEATURE_NAME);
+      if(matchesObj != null && matchesObj instanceof List) {
+        matches = (List)matchesObj;  
+      }
       if(null == matches) {
         matches = new ArrayList();
         matches.add(antecedent.getId());
