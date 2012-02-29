@@ -287,7 +287,7 @@ public class RealtimeCorpusController extends SerialAnalyserController {
               try {
                 // and wait for it to actually die
                 theThread.join();
-              } catch(InterruptedException e) {
+              } catch(InterruptedException e2) {
                 // current thread has been interrupted: 
                 Thread.currentThread().interrupt();
               }
