@@ -164,10 +164,9 @@ public class RealtimeCorpusController extends SerialAnalyserController {
         throw (td);
       }
       catch(Throwable cause) {
-        Err.prln("Execution on document " + document.getName()
-                + " has caused an error:\n=========================");
-        cause.printStackTrace(Err.getPrintWriter());
-        Err.prln("=========================\nError ignored...\n");
+        logger.info("Execution on document " + document.getName()
+                + " has caused an error (ignored):\n=========================", cause);
+        logger.info("=========================\nError ignored...\n");
       }
       finally {
         // remove the reference to the thread, as we're now done
@@ -299,10 +298,16 @@ public class RealtimeCorpusController extends SerialAnalyserController {
               theThread.stop();
               try {
                 // and wait for it to actually die
-                theThread.join();
+                docRunnerFuture.get();
               } catch(InterruptedException e2) {
                 // current thread has been interrupted: 
                 Thread.currentThread().interrupt();
+              } catch(java.util.concurrent.ExecutionException ee) {
+                if(ee.getCause() instanceof ThreadDeath) {
+                  // we have just caused this  
+                } else {
+                  logger.error("Real Time Controller Malfunction", ee);
+                }
               }
             }
           } catch(InterruptedException e) {
@@ -322,10 +327,16 @@ public class RealtimeCorpusController extends SerialAnalyserController {
             theThread.stop();
             try {
               // and wait for it to actually die
-              theThread.join();
+              docRunnerFuture.get();
             } catch(InterruptedException e) {
               // current thread has been interrupted: 
               Thread.currentThread().interrupt();
+            } catch(java.util.concurrent.ExecutionException ee) {
+              if(ee.getCause() instanceof ThreadDeath) {
+                // we have just caused this  
+              } else {
+                logger.error("Real Time Controller Malfunction", ee);
+              }
             }
           }
         }
