@@ -1336,7 +1336,7 @@ public class MainFrame extends JFrame implements ProgressListener,
               Object userObject = ((DefaultMutableTreeNode)
                 selectedPath.getLastPathComponent()).getUserObject();
               if (userObject instanceof Handle
-              && ( ((Handle)userObject).getLargeView() == null
+              && ( !((Handle)userObject).viewsBuilt()
                 || (mainTabbedPane.indexOfComponent(
                   ((Handle)userObject).getLargeView()) == -1)) ) {
                 // there is at least one resource not shown
