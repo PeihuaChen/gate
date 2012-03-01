@@ -342,6 +342,7 @@ public class RealtimeCorpusController extends SerialAnalyserController {
         }
       }
       
+      String docName = doc.getName();
       // at this point we finished execution (one way or another)
       if(!docWasLoaded){
         //trigger saving
@@ -349,6 +350,11 @@ public class RealtimeCorpusController extends SerialAnalyserController {
         //close the previously unloaded Doc
         Factory.deleteResource(doc);
       }
+
+      // global progress bar depends on this status message firing at the end
+      // of processing for each document.
+      fireStatusChanged("Finished running " + getName() + " on document " +
+          docName);
     }
   }
   
