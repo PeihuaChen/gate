@@ -73,6 +73,8 @@ public class RealtimeCorpusController extends SerialAnalyserController {
    */
   protected volatile Thread currentWorkingThread;
   
+  protected volatile boolean threadDying;
+  
   public RealtimeCorpusController(){
     super();
     if(DEBUG) {
@@ -122,15 +124,22 @@ public class RealtimeCorpusController extends SerialAnalyserController {
 
           try {
             runComponent(j);
+          } catch(ThreadDeath td) {
+            // we got stopped
+            throw td;
+          } catch(Throwable e) {
+            if(threadDying){
+              // we're in the process of stopping 
+              Err.println("Execution on document " + document.getName()
+                  + " has been stopped");
+              // stop running the rest of the PRs
+              break;
+            } else {
+              // the thread was not in the process of being stopped: 
+              // actual exception during processing: throw upwards
+              throw e;
+            }
           }
-          catch(Throwable e) {
-            if(!Thread.currentThread().isInterrupted()) throw e;
-
-            Err.println("Execution on document " + document.getName()
-                    + " has been stopped");
-            break;
-          }
-
           if(DEBUG) {
             prof.checkPoint("~Execute PR ["
                     + ((ProcessingResource)prList.get(j)).getName() + "]");
@@ -218,6 +227,7 @@ public class RealtimeCorpusController extends SerialAnalyserController {
       boolean docWasLoaded = corpus.isDocumentLoaded(i);
       Document doc = (Document)corpus.get(i);
       // start the execution, in the separate thread
+      threadDying = false;
       Future<?> docRunnerFuture = threadSource.submit(new DocRunner(doc));
       // how long have we already waited 
       long waitSoFar = 0;
@@ -228,6 +238,7 @@ public class RealtimeCorpusController extends SerialAnalyserController {
         } catch(TimeoutException e) {
           // we waited the graceful period, and the task did not finish
           // -> interrupt the job (nicely)
+          threadDying = true;
           waitSoFar += graceful;
           logger.info("Execution timeout, attempting to gracefully stop worker thread...");
           // interrupt the working thread - we can't cancel the future as
@@ -250,6 +261,7 @@ public class RealtimeCorpusController extends SerialAnalyserController {
             docRunnerFuture.get(waitTime, TimeUnit.MILLISECONDS);
           } catch(TimeoutException e1) {
             // the mid point has been reached: try nullify
+            threadDying = true;
             waitSoFar += waitTime;
             logger.info("Execution timeout, attempting to induce exception in order to stop worker thread...");
             for(int j = 0; j < prList.size(); j++){
@@ -279,6 +291,7 @@ public class RealtimeCorpusController extends SerialAnalyserController {
             docRunnerFuture.get(waitTime, TimeUnit.MILLISECONDS);
           } catch(TimeoutException e) {
             // we're out of time: stop the thread
+            threadDying = true;
             logger.info("Execution timeout, worker thread will be forcibly terminated!");
             // using a volatile variable instead of synchronisation
             Thread theThread = currentWorkingThread;
@@ -301,6 +314,7 @@ public class RealtimeCorpusController extends SerialAnalyserController {
           }
         } else {
           // stop now!
+          threadDying = true;
           logger.info("Execution timeout, worker thread will be forcibly terminated!");
           // using a volatile variable instead of synchronisation
           Thread theThread = currentWorkingThread;
