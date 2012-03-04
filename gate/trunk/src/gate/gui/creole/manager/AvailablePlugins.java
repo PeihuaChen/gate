@@ -626,6 +626,8 @@ public class AvailablePlugins extends JPanel {
 
         Gate.DirectoryInfo dInfo = Gate.getDirectoryInfo(toDelete);
 
+        Gate.getCreoleRegister().removeDirectory(toDelete);
+
         if(!dInfo.isCorePlugin() && !dInfo.isUserPlugin()) {
           Gate.removeKnownPlugin(toDelete);
           loadAlwaysByURL.remove(toDelete);
