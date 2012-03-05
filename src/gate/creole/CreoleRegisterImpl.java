@@ -19,12 +19,12 @@ package gate.creole;
 import gate.Controller;
 import gate.CreoleRegister;
 import gate.Gate;
+import gate.Gate.DirectoryInfo;
+import gate.Gate.ResourceInfo;
 import gate.LanguageResource;
 import gate.ProcessingResource;
 import gate.Resource;
 import gate.VisualResource;
-import gate.Gate.DirectoryInfo;
-import gate.Gate.ResourceInfo;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
 import gate.util.CreoleXmlUpperCaseFilter;
@@ -48,6 +48,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -109,7 +110,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   public CreoleRegisterImpl() throws GateException {
 
     // initialise the various maps
-    directories = new HashSet<URL>();
+    directories = new LinkedHashSet<URL>();
     lrTypes = new HashSet<String>();
     prTypes = new HashSet<String>();
     vrTypes = new LinkedList<String>();
