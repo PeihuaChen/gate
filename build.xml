@@ -381,7 +381,9 @@
       </path>
       <sequential>
         <echo>Building plugin @{plugin}</echo>
-        <ant dir="@{plugin}" inheritAll="false" target="build" />
+        <ant dir="@{plugin}" inheritAll="false" target="build" >
+          <property name="gate.home" value="${basedir}" />
+        </ant>
       </sequential>
     </for>
   </target>
