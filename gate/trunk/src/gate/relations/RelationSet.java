@@ -98,7 +98,7 @@ public class RelationSet implements Serializable {
    * {@link String} or even <code>null</code>. However, by convention, names of 
    * annotation sets (and <code>null</code> for the default annotation set) are
    * used to name the <i>principal</i> relation set for each annotation set.   
-   * @return
+   * @return the {@link RelationSet} requested. 
    */
   public static RelationSet getRelations(Document document, String name) {
     Object relMapObj = document.getFeatures().get(
@@ -312,7 +312,7 @@ public class RelationSet implements Serializable {
   /**
    * Calculates the intersection of a set of lists containing relation indexes.
    * @param indexLists the list to be intersected.
-   * @return
+   * @return the list of relations contained in all the supplied index lists. 
    */
   protected List<Relation> intersection(BitSet... indexLists) {
     BitSet relIds = new BitSet(relations.size());
