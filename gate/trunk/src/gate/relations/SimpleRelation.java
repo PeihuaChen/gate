@@ -38,38 +38,6 @@ public class SimpleRelation implements Relation {
     this.members = members;
   }
   
-  /**
-   * De-serialises a value previously produced by calling {@link #toString()}.
-   * @param stringSerialisation a {@link String} representation of a 
-   * {@link SimpleRelation} value.
-   */
-  public SimpleRelation(String stringSerialisation) {
-    // split at round brackets (unless escaped)
-    String[] elems = stringSerialisation.split("(?<!\\\\)(?:\\(|\\))");
-    if(elems.length != 2 && elems.length != 3) {
-      throw new IllegalArgumentException("Invalid string serialisation (\"" + 
-          stringSerialisation +  "\")!");
-    }
-    this.type = elems[0];
-    
-    String memStr[] = elems[1].split(",\\s+");
-    members = new int[memStr.length];
-    for(int  i = 0; i < memStr.length; i++) {
-      try{
-        members[i] = Integer.parseInt(memStr[i]);
-      } catch (NumberFormatException e) {
-        throw new IllegalArgumentException("Could not parse input string (\"" +
-            memStr[i] + "\" is not a number).");  
-      }
-    }
-    
-    if(members.length == 3) {
-      // we have user data
-      //TODO
-    } else {
-      userData = null;
-    }
-  }
 
   /* (non-Javadoc)
    * @see gate.relations.Relation#getType()
@@ -101,34 +69,6 @@ public class SimpleRelation implements Relation {
   @Override
   public void setUserData(Serializable data) {
     this.userData = data;
-  }
-
-  /**
-   * This implementation is used when dumping relation values to GATE XML. The
-   * {@link String} value produced by this method can be parsed by the 
-   * {@link #SimpleRelation(String)} constructor to produce an equivalent 
-   * instance.
-   * 
-   * @see java.lang.Object#toString()
-   */
-  @Override
-  public String toString() {
-    StringBuilder str = new StringBuilder();
-    String typeOut = type.replaceAll("\\(", 
-        Matcher.quoteReplacement("\\(")).replaceAll("\\)", 
-        Matcher.quoteReplacement("\\)"));
-    str.append(typeOut).append("(");
-    for(int i = 0; i < members.length; i++) {
-      if(i > 0) str.append(", ");
-      str.append(members[i]);
-    }
-    str.append(")");
-    if(userData != null) {
-      str.append("#");
-      //TODO: convert user data to Base64
-      str.append("#");
-    }
-    return str.toString();
   }
 
   /* (non-Javadoc)
