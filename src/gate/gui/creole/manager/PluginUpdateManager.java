@@ -495,9 +495,9 @@ public class PluginUpdateManager extends JDialog {
     setTitle("CREOLE Plugin Manager");
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     setLayout(new BorderLayout());
-    setIconImages(Arrays.asList(new Image[]{new GATEIcon(64, 64).getImage(),
-        new GATEIcon(48, 48).getImage(), new GATEIcon(32, 32).getImage(),
-        new GATEIcon(22, 22).getImage(), new GATEIcon(16, 16).getImage()}));
+    //setIconImages(Arrays.asList(new Image[]{new GATEIcon(64, 64).getImage(),
+    //    new GATEIcon(48, 48).getImage(), new GATEIcon(32, 32).getImage(),
+    //    new GATEIcon(22, 22).getImage(), new GATEIcon(16, 16).getImage()}));
 
     // set up the panel that displays the main GUI elements
     panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));

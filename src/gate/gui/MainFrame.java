@@ -42,6 +42,8 @@ import gate.event.StatusListener;
 import gate.gui.creole.manager.PluginUpdateManager;
 import gate.persist.PersistenceException;
 import gate.resources.img.svg.AvailableIcon;
+import gate.resources.img.svg.GATEIcon;
+import gate.resources.img.svg.GATEVersionIcon;
 import gate.resources.img.svg.ReadyMadeIcon;
 import gate.swing.JMenuButton;
 import gate.swing.XJFileChooser;
@@ -74,6 +76,7 @@ import java.awt.Frame;
 import java.awt.GraphicsConfiguration;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.KeyboardFocusManager;
 import java.awt.Point;
@@ -120,7 +123,6 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -554,9 +556,11 @@ public class MainFrame extends JFrame implements ProgressListener,
       height == null ? 600 : height));
     if (Gate.getUserConfig().getBoolean(GateConstants.MAIN_FRAME_MAXIMIZED))
       setExtendedState(JFrame.MAXIMIZED_BOTH);
-
-    this.setIconImage(Toolkit.getDefaultToolkit().getImage(
-      Files.getGateResource("/img/gate-icon.png")));
+    
+    setIconImages(Arrays.asList(new Image[]{new GATEVersionIcon(64, 64).getImage(),
+        new GATEVersionIcon(48, 48).getImage(), new GATEVersionIcon(32, 32).getImage(),
+        new GATEIcon(22, 22).getImage(), new GATEIcon(16, 16).getImage()}));
+    
     resourcesTree = new ResourcesTree();
     resourcesTree.setModel(resourcesTreeModel);
     resourcesTree.setRowHeight(0);
