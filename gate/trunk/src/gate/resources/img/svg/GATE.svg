@@ -187,16 +187,10 @@
        id="path2107"
        sodipodi:nodetypes="zccz"
        inkscape:connector-curvature="0" />
-    <text
-       xml:space="preserve"
+    <path
+       inkscape:connector-curvature="0"
+       id="path3004"
        style="font-size:44px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:justify;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke:#800000;font-family:Good Times;-inkscape-font-specification:Good Times"
-       x="123.20651"
-       y="249.17284"
-       id="text3776"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
-         id="tspan3778"
-         x="123.20651"
-         y="249.17284">G</tspan></text>
+       d="m 159.55051,249.17284 -19.096,0 c -4.37068,0 -7.99334,-1.452 -10.868,-4.356 -2.84533,-2.904 -4.268,-6.57066 -4.268,-11 0,-4.39998 1.408,-7.94931 4.224,-10.648 2.84533,-2.69864 6.48266,-4.04797 10.912,-4.048 l 16.984,0 0,5.236 -16.984,0 c -2.87468,2e-5 -5.25068,0.92402 -7.128,2.772 -1.84801,1.84802 -2.772,4.22401 -2.772,7.128 0,2.87468 0.92399,5.20667 2.772,6.996 1.87732,1.78934 4.25332,2.684 7.128,2.684 l 13.86,0 0,-6.556 -14.256,0 0,-4.796 19.492,0 0,16.588" />
   </g>
 </svg>
