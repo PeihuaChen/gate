@@ -16,6 +16,7 @@
 
 package gate;
 
+import gate.Gate.DirectoryInfo;
 import gate.annotation.ImmutableAnnotationSetImpl;
 import gate.creole.AbstractProcessingResource;
 import gate.creole.AbstractResource;
@@ -50,6 +51,7 @@ import java.util.EventListener;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 /** Provides static methods for the creation of Resources.
@@ -69,15 +71,35 @@ public abstract class Factory {
   {
     // get the resource metadata
     ResourceData resData = (ResourceData) Gate.getCreoleRegister().get(resourceClassName);
-    if(resData == null)
-      throw new ResourceInstantiationException(
-        "Couldn't get resource data for " + resourceClassName + ".\n\n" +
-        "You may need first to load the plugin that contains your resource.\n" +
-        "For example, to create a gate.creole.tokeniser.DefaultTokeniser\n" +
-        "you need first to load the ANNIE plugin.\n\n" +
-        "Go to the menu File->Manage CREOLE plugins or use the method\n" +
-        "Gate.getCreoleRegister().registerDirectories(pluginDirectoryURL)."
-      );
+    if(resData == null) {
+      Set<DirectoryInfo> plugins = Gate.getDirectoryInfo(resourceClassName);
+      
+      StringBuilder msg = new StringBuilder();
+      msg.append("Couldn't get resource data for ").append(resourceClassName).append(".\n\n");
+            
+      if (plugins.isEmpty()) {
+        msg.append("You may need first to load the plugin that contains your resource.\n");
+        msg.append("For example, to create a gate.creole.tokeniser.DefaultTokeniser\n");
+        msg.append("you need first to load the ANNIE plugin.\n\n");
+      }
+      else if (plugins.size() == 1){
+        msg.append(resourceClassName).append(" can be found in the ").append(plugins.iterator().next().getName()).append(" plugin\n\n");
+      }
+      else {
+        msg.append(resourceClassName).append(" can be found in the following plugins\n   ");
+        for (DirectoryInfo dInfo : plugins) {
+          msg.append(dInfo.getName()).append(", ");
+        }
+        
+        msg.setLength(msg.length()-2);
+        msg.append("\n\n");
+      }
+      
+      msg.append("Go to the menu File->Manage CREOLE plugins or use the method\n");
+      msg.append("Gate.getCreoleRegister().registerDirectories(pluginDirectoryURL).");
+      
+      throw new ResourceInstantiationException(msg.toString());
+    }
 
     // get the parameter list and default values
     ParameterList paramList = resData.getParameterList();
@@ -157,15 +179,35 @@ public abstract class Factory {
    {
     // get the resource metadata
     ResourceData resData = (ResourceData) Gate.getCreoleRegister().get(resourceClassName);
-    if(resData == null)
-      throw new ResourceInstantiationException(
-        "Couldn't get resource data for " + resourceClassName + ".\n\n" +
-        "You may need first to load the plugin that contains your resource.\n" +
-        "For example, to create a gate.creole.tokeniser.DefaultTokeniser\n" +
-        "you need first to load the ANNIE plugin.\n\n" +
-        "Go to the menu File->Manage CREOLE plugins or use the method\n" +
-        "Gate.getCreoleRegister().registerDirectories(pluginDirectoryURL)."
-      );
+    if(resData == null) {
+      Set<DirectoryInfo> plugins = Gate.getDirectoryInfo(resourceClassName);
+      
+      StringBuilder msg = new StringBuilder();
+      msg.append("Couldn't get resource data for ").append(resourceClassName).append(".\n\n");
+            
+      if (plugins.isEmpty()) {
+        msg.append("You may need first to load the plugin that contains your resource.\n");
+        msg.append("For example, to create a gate.creole.tokeniser.DefaultTokeniser\n");
+        msg.append("you need first to load the ANNIE plugin.\n\n");
+      }
+      else if (plugins.size() == 1){
+        msg.append(resourceClassName).append(" can be found in the ").append(plugins.iterator().next().getName()).append(" plugin\n\n");
+      }
+      else {
+        msg.append(resourceClassName).append(" can be found in the following plugins\n   ");
+        for (DirectoryInfo dInfo : plugins) {
+          msg.append(dInfo.getName()).append(", ");
+        }
+        
+        msg.setLength(msg.length()-2);
+        msg.append("\n\n");
+      }
+      
+      msg.append("Go to the menu File->Manage CREOLE plugins or use the method\n");
+      msg.append("Gate.getCreoleRegister().registerDirectories(pluginDirectoryURL).");
+      
+      throw new ResourceInstantiationException(msg.toString());
+    }
     // get the default implementation class
     Class resClass = null;
     try {
