@@ -361,8 +361,8 @@
   <!-- Plugins -->
   <!-- Learning plugin needs to be before Lang_Chinese -->
   <filelist id="plugins.to.build" dir="plugins" files="
-      Alignment Annotation_Merging Copy_Annots_Between_Docs Gazetteer_LKB
-      Gazetteer_Ontology_Based Groovy Inter_Annotator_Agreement 
+      Alignment Annotation_Merging Copy_Annots_Between_Docs Coref_Tools 
+      Gazetteer_LKB Gazetteer_Ontology_Based Groovy Inter_Annotator_Agreement 
       JAPE_Plus Keyphrase_Extraction_Algorithm Lang_Arabic Lang_Cebuano Learning
       Lang_Chinese Lang_Hindi Lang_Romanian Language_Identification LingPipe
       Machine_Learning Ontology Ontology_BDM_Computation

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" output="plugins/Coref_Tools/classes" path="plugins/Coref_Tools/src"/>
 	<classpathentry kind="src" output="plugins/JAPE_Plus/classes" path="plugins/JAPE_Plus/src"/>
 	<classpathentry kind="src" output="plugins/Groovy/build" path="plugins/Groovy/src"/>
 	<classpathentry kind="src" output="plugins/OpenNLP/classes" path="plugins/OpenNLP/src"/>
