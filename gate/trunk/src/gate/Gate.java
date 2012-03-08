@@ -695,7 +695,7 @@ public class Gate implements GateConstants {
    */
   public static void registerIREngine(String className) throws GateException,
     ClassNotFoundException {
-    Class aClass = Class.forName(className, true, Gate.getClassLoader());
+    Class<?> aClass = Class.forName(className, true, Gate.getClassLoader());
     if(gate.creole.ir.IREngine.class.isAssignableFrom(aClass)) {
       registeredIREngines.add(className);
     }
@@ -835,7 +835,7 @@ public class Gate implements GateConstants {
     boolean res = getCreoleRegister().containsKey(classname);
     if(!res) {
       try {
-        Class aClass = Class.forName(classname, true, Gate.getClassLoader());
+        Class<?> aClass = Class.forName(classname, true, Gate.getClassLoader());
         res =
           Resource.class.isAssignableFrom(aClass);
       }
@@ -1273,6 +1273,31 @@ public class Gate implements GateConstants {
       pluginData.put(directory, dInfo);
     }
     return dInfo;
+  }
+  
+  /**
+   * Returns information about plugin directories which provide the requested
+   * resource
+   * 
+   * @param resourceClassName
+   *          the class name of the resource you are interested in
+   * @return information about the directories which provide an implementation
+   *         of the requested resource
+   */
+  public static Set<DirectoryInfo> getDirectoryInfo(String resourceClassName) {
+    Set<DirectoryInfo> dirs = new HashSet<DirectoryInfo>();
+    
+    for (URL url : knownPlugins) {
+      DirectoryInfo dInfo = getDirectoryInfo(url);
+      
+      for (ResourceInfo rInfo : dInfo.getResourceInfoList()) {
+        if (rInfo.resourceClassName.equals(resourceClassName)) {
+          dirs.add(dInfo);
+        }
+      }
+    }
+    
+    return dirs;
   }
 
   /**
