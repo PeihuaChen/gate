@@ -92,9 +92,6 @@
     <!-- required for indexing datastores (not used by ANNIC) -->
     <dependency org="org.apache.lucene" name="lucene-core" rev="3.5.0" />
 
-    <!--  Support for Base64 encoding / decoding -->
-    <dependency org="net.iharder" name="base64" rev="2.3.8" />
-    
     <!-- Used for comparing XML files during some of the GATE tests -->
     <dependency org="xmlunit" name="xmlunit" rev="1.2" conf="required->master" />
 
