@@ -260,6 +260,28 @@
     </ivy:makepom> -->
   </target>
 
+  <target name="svg2java" unless="do.not.draw" depends="prepare">
+    <java fork="true" classname="englishcoffeedrinker.svg.in.SVGBatchConverter" failonerror="true">
+      <jvmarg value="-Xmx512m" />
+      <classpath>
+        <fileset dir="${buildDir}/lib">
+          <include name="**/*.jar" />
+        </fileset>
+      	<fileset dir="${libDir}">
+          <include name="**/*.jar" />
+        </fileset>
+      </classpath>
+      <arg value="-n" />
+      <arg value="+Icon" />
+      <arg value="-o" />
+      <arg value="${srcDir}" />
+      <arg value="-p" />
+      <arg value="gate.resources.img.svg" />
+      <arg value="-t" />
+      <arg value="scalable" />
+      <arg value="${srcDir}/gate/resources/img/svg" />
+    </java>
+  </target>
 
   <!-- Calculates dependencies for the source code -->
   <target name="depend">
@@ -267,7 +289,7 @@
   </target>
 
   <!-- This target compiles all the classes -->
-  <target name="compile" depends="prepare, depend" description="compile the source ">
+  <target name="compile" depends="prepare, depend, svg2java" description="compile the source ">
     <!-- Compile the java code from ${srcDir} into ${buildDir} -->
     <javac srcdir="${srcDir}" destdir="${outputDir}" source="1.5" target="1.5" encoding="UTF-8" debug="true" deprecation="${deprecation}" debuglevel="lines,source" includes="gate/**,com/**,hepple/**" classpathref="build.class.path">
       <compilerarg value="-Xmaxwarns" />
