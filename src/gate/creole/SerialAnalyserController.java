@@ -27,6 +27,13 @@ import gate.util.*;
  * {@link gate.LanguageAnalyser}s. It has a {@link gate.Corpus} and its execute
  * method runs all the analysers in turn over each of the documents in the
  * corpus.
+ * <p>
+ * NOTE: if at the time when execute() is invoked, the document is not null,
+ * it is assumed that this controller is invoked from another controller and
+ * only this document is processed while the corpus (which must still be
+ * non-null) is ignored. If the document is null, all documents in the corpus
+ * are processed in sequence. 
+ * 
  */
 @CreoleResource(name = "Corpus Pipeline",
     comment = "A serial controller for PR pipelines over corpora.",

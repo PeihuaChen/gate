@@ -31,6 +31,13 @@ import gate.util.*;
  * being that it inherits from {@link ConditionalSerialController} rather than
  * from {@link SerialController} which makes it a <b>conditional</b> serial
  * analyser controller.
+ * <p>
+ * NOTE: if at the time when execute() is invoked, the document is not null,
+ * it is assumed that this controller is invoked from another controller and
+ * only this document is processed while the corpus (which must still be
+ * non-null) is ignored. If the document is null, all documents in the corpus
+ * are processed in sequence. 
+ * 
  */
 @CreoleResource(name = "Conditional Corpus Pipeline",
     comment = "A serial controller for conditionally run PR pipelines "
