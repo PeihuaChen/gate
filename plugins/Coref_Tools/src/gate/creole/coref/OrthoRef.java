@@ -42,9 +42,7 @@ public class OrthoRef extends CorefBase {
    * @throws IOException
    */
   public static void main(String[] args) throws GateException, IOException{
-    // used to start GATE when debugging in Eclipse
-    gate.Main.main(args);
-/*
+    /*
     Config config = new Config();
     List<Tagger> taggers = new ArrayList<Tagger>();
     config.setTaggers(taggers);
@@ -67,6 +65,6 @@ public class OrthoRef extends CorefBase {
     OutputStream out = new BufferedOutputStream(new FileOutputStream("matcher-config.xml"));
     xstream.toXML(config, out);
     out.close();
-*/    
+  */
   }
 }
