@@ -19,7 +19,7 @@
   <property name="lib.dir" location="lib" />
 	<property name="doc.dir" location="doc" />
   <property name="javadoc.dir" location="${doc.dir}/javadoc" />
-  <property name="jar.location" location="orthoref.jar" />
+  <property name="jar.location" location="coref-tools.jar" />
 	<property name="plugin.name" value="OrthoRef" />
 	
 
