@@ -139,46 +139,6 @@ public class RelationSet implements Serializable {
     return getRelations(annSet.getDocument(), annSet.getName());  
   }
   
-  
-  public RelationSet(String stringSerialisation) {
-    this();
-    if(stringSerialisation.startsWith("[") && 
-        stringSerialisation.endsWith("]")) {
-      stringSerialisation = stringSerialisation.substring(1, 
-        stringSerialisation.length() - 1);
-    } else {
-      throw new IllegalArgumentException("Invalid string serialisation value" +
-          "(not bounded by '[',']').");
-    }
-    String[] elems = stringSerialisation.split(";\\s+");
-    for(String aRelStr : elems) {
-      if(aRelStr.startsWith("(")) {
-        // custom class
-        int closeBracket = aRelStr.indexOf(')');
-        if(closeBracket < 0){
-          throw new IllegalArgumentException("Invalid string serialisation " +
-          		"value (illegal Relation class declaration).");
-        }
-        String className = aRelStr.substring(1, closeBracket);
-        aRelStr = aRelStr.substring(closeBracket);
-        try {
-          @SuppressWarnings("unchecked")
-          Class<? extends Relation> clazz = (Class<? extends Relation>)
-              Class.forName(className, true, Gate.getClassLoader());
-          Constructor<? extends Relation> constructor = 
-              clazz.getConstructor(String.class);
-          addRelation(constructor.newInstance(aRelStr));
-        } catch(Exception e) {
-          throw new IllegalArgumentException(
-            "Could not instantiate custom Relation implementation.", e);
-        }
-      } else {
-        addRelation(new SimpleRelation(aRelStr));  
-      }
-      
-    }
-  }
-  
   protected RelationSet() {
     relations = new ArrayList<Relation>();
     indexByType = new HashMap<String, BitSet>();
@@ -331,32 +291,4 @@ public class RelationSet implements Serializable {
     }
     return res;
   }
-
-  /* (non-Javadoc)
-   * @see java.lang.Object#toString()
-   */
-  @Override
-  public String toString() {
-    StringBuilder str = new StringBuilder();
-    str.append("[");
-    boolean first = true;
-    for(int  i = 0; i < relations.size(); i++) {
-      if(!deleted.get(i)) {
-        if(first) {
-          first = false;
-        } else{ 
-          str.append("; ");
-        }
-        String relStr = relations.get(i).toString();
-        relStr = relStr.replaceAll(";", Matcher.quoteReplacement("\\;"));
-        if(!relations.get(i).getClass().equals(SimpleRelation.class)) {
-          relStr = "(" + relations.get(i).getClass().getName() + ")" + relStr;  
-        }
-        str.append(relStr);
-      }
-    }
-    str.append("]");
-    return str.toString();
-  }
-  
 }

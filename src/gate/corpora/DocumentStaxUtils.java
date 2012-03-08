@@ -74,6 +74,8 @@ public class DocumentStaxUtils {
    */
   public static final char INVALID_CHARACTER_REPLACEMENT = ' ';
 
+  public static final String GATE_XML_VERSION = "2";
+  
   /**
    * The number of &lt; signs after which we encode a string using CDATA
    * rather than writeCharacters.
@@ -594,6 +596,9 @@ public class DocumentStaxUtils {
       Object[] featConstrParams = new Object[1];
       featConstrParams[0] = stringRep.toString();
       Object featObject = featConstr.newInstance(featConstrParams);
+      if(featObject instanceof ObjectWrapper) {
+        featObject = ((ObjectWrapper)featObject).getValue();
+      }
       return featObject;
     }
     catch(Exception e) {
@@ -904,6 +909,7 @@ public class DocumentStaxUtils {
           XMLStreamWriter xsw, String namespaceURI) throws XMLStreamException {
     xsw.setDefaultNamespace(namespaceURI);
     xsw.writeStartElement(namespaceURI, "GateDocument");
+    xsw.writeAttribute("version", GATE_XML_VERSION);
     if(namespaceURI.length() > 0) {
       xsw.writeDefaultNamespace(namespaceURI);
     }
@@ -1314,15 +1320,26 @@ public class DocumentStaxUtils {
         String value2String = value.toString();
         Object item = null;
         // Test key if it is String, Number or Collection
-        if(key instanceof java.lang.String || key instanceof java.lang.Number
-                || key instanceof java.util.Collection)
+        if(key instanceof java.lang.String || 
+           key instanceof java.lang.Number || 
+           key instanceof java.util.Collection) {
           keyClassName = key.getClass().getName();
+        } else {
+          keyClassName = ObjectWrapper.class.getName();
+          key2String = new ObjectWrapper(key).toString();
+        }
+          
         // Test value if it is String, Number or Collection
         if(value instanceof java.lang.String
                 || value instanceof java.lang.Number
                 || value instanceof java.lang.Boolean
-                || value instanceof java.util.Collection)
+                || value instanceof java.util.Collection){
           valueClassName = value.getClass().getName();
+        } else {
+          valueClassName = ObjectWrapper.class.getName();
+          value2String = new ObjectWrapper(value).toString();
+        }
+          
         // Features and values that are not Strings, Numbers, Booleans or
         // collections
         // will be discarded.
