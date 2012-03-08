@@ -494,7 +494,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       java.lang.reflect.Field awtAppClassNameField =
       xToolkit.getClass().getDeclaredField("awtAppClassName");
       awtAppClassNameField.setAccessible(true);
-      awtAppClassNameField.set(xToolkit, "GATE Developer");
+      awtAppClassNameField.set(xToolkit, "GATE Developer " + Main.version);
     } catch(Exception e) {
       // this happens every time on Windows and Mac so hide the exception
       // unless we are debugging something
