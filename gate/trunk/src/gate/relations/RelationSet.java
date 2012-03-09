@@ -291,4 +291,32 @@ public class RelationSet implements Serializable {
     }
     return res;
   }
+
+  /* (non-Javadoc)
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString() {
+    StringBuilder str = new StringBuilder();
+    str.append("[");
+    boolean first = true;
+    for(int  i = 0; i < relations.size(); i++) {
+      if(!deleted.get(i)) {
+        if(first) {
+          first = false;
+        } else{ 
+          str.append("; ");
+        }
+        String relStr = relations.get(i).toString();
+        relStr = relStr.replaceAll(";", Matcher.quoteReplacement("\\;"));
+        if(!relations.get(i).getClass().equals(SimpleRelation.class)) {
+          relStr = "(" + relations.get(i).getClass().getName() + ")" + relStr;  
+        }
+        str.append(relStr);
+      }
+    }
+    str.append("]");
+    return str.toString();
+  }
+  
 }
