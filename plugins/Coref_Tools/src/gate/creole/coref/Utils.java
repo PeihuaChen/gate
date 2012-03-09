@@ -15,6 +15,8 @@
  */
 package gate.creole.coref;
 
+import java.io.File;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -66,7 +68,14 @@ public class Utils {
     return res;
   }
   
+  /**
+   * Given a multi-word expression, this method splits it at whitespace and 
+   * returns its constituent parts. 
+   * @param input the String containing the multi-word expression.
+   * @return the array of parts, in the same order as they occurred in the input
+   * string.
+   */
   public static final String[] partsForMwe(String input) {
     return input.split("\\p{javaWhitespace}+");
-  }
+  }  
 }

@@ -1,4 +1,7 @@
-<project name="OrthoRef" basedir="." default="build" >
+<project name="Coref_Tools" basedir="." default="build" >
+  <!-- Prevent Ant from warning about includeantruntime not being set -->
+  <property name="build.sysclasspath" value="ignore" />
+  
   <property file="build.properties" />
 
   <!-- Make environment variables available -->
