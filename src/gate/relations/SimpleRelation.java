@@ -72,6 +72,29 @@ public class SimpleRelation implements Relation {
   }
 
   /* (non-Javadoc)
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString() {
+    StringBuilder str = new StringBuilder();
+    String typeOut = type.replaceAll("\\(", 
+        Matcher.quoteReplacement("\\(")).replaceAll("\\)", 
+        Matcher.quoteReplacement("\\)"));
+    str.append(typeOut).append("(");
+    for(int i = 0; i < members.length; i++) {
+      if(i > 0) str.append(", ");
+      str.append(members[i]);
+    }
+    str.append(")");
+    if(userData != null) {
+      str.append("#");
+      //TODO: convert user data to Base64
+      str.append("#");
+    }
+    return str.toString();
+  }
+
+  /* (non-Javadoc)
    * @see java.lang.Object#hashCode()
    */
   @Override
