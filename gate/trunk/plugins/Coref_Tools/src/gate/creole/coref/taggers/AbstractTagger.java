@@ -15,6 +15,8 @@
  */
 package gate.creole.coref.taggers;
 
+import gate.creole.ResourceInstantiationException;
+import gate.creole.coref.CorefBase;
 import gate.creole.coref.Tagger;
 
 /**
@@ -35,4 +37,10 @@ public abstract class AbstractTagger implements Tagger {
   public String getAnnotationType() {
     return annotationType;
   }
+
+  /* (non-Javadoc)
+   * @see gate.creole.coref.Tagger#init(gate.creole.coref.CorefBase)
+   */
+  @Override
+  public void init(CorefBase owner) throws ResourceInstantiationException { }
 }

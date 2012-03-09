@@ -18,6 +18,7 @@ package gate.creole.coref.matchers;
 import java.util.List;
 
 import gate.creole.ResourceInstantiationException;
+import gate.creole.coref.CorefBase;
 import gate.creole.coref.Matcher;
 
 /**
@@ -62,4 +63,15 @@ public abstract class CompoundMatcher extends AbstractMatcher {
       }
     }
   }
+
+  /* (non-Javadoc)
+   * @see gate.creole.coref.matchers.AbstractMatcher#init(gate.creole.coref.CorefBase)
+   */
+  @Override
+  public void init(CorefBase owner) throws ResourceInstantiationException {
+    for(Matcher aMatcher : subMatchers) aMatcher.init(owner);
+    
+  }
+  
+  
 }

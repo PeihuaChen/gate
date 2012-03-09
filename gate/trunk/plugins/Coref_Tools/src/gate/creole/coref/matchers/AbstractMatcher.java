@@ -16,6 +16,7 @@
 package gate.creole.coref.matchers;
 
 import gate.Annotation;
+import gate.creole.ResourceInstantiationException;
 import gate.creole.coref.CorefBase;
 import gate.creole.coref.Matcher;
 
@@ -50,4 +51,12 @@ public abstract class AbstractMatcher implements Matcher {
   public String getAntecedentType() {
     return antecedentType;
   }
+
+  /* (non-Javadoc)
+   * @see gate.creole.coref.Matcher#init(gate.creole.coref.CorefBase)
+   */
+  @Override
+  public void init(CorefBase owner) throws ResourceInstantiationException {}
+  
+  
 }

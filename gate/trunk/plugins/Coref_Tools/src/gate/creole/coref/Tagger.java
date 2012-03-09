@@ -16,6 +16,7 @@
 package gate.creole.coref;
 
 import gate.Annotation;
+import gate.creole.ResourceInstantiationException;
 
 import java.util.List;
 import java.util.Set;
@@ -29,5 +30,7 @@ public interface Tagger {
   public String getAnnotationType();
   
   public Set<String> tag(Annotation[] anaphors, int anaphor, CorefBase owner);
+  
+  public void init(CorefBase owner) throws ResourceInstantiationException;
   
 }

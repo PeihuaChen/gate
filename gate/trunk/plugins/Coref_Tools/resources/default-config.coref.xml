@@ -1,4 +1,4 @@
-<coref.Config>
+<coref.Config id="1">
   <taggers>
     <default.taggers.DocumentText annotationType="Organization"/>
     <default.taggers.Initials annotationType="Organization"/>
@@ -7,6 +7,7 @@
     <default.taggers.DocumentText annotationType="Person"/>
     <default.taggers.MwePart annotationType="Person"/>
     <default.taggers.Initials annotationType="Person"/>
+    <default.taggers.AliasTagger id="123" annotationType="Person" aliasFile="nicknames.txt" encoding="UTF-8"/>
     
     <default.taggers.DocumentText annotationType="Location"/>
     <default.taggers.MwePart annotationType="Location"/>
@@ -50,6 +51,7 @@
         <default.matchers.DocumentText annotationType="Person" antecedentType="Person"/>
         <default.matchers.Initials annotationType="Person" antecedentType="Person"/>
         <default.matchers.MwePart annotationType="Person" antecedentType="Person"/>
+        <default.matchers.AliasMatcher annotationType="Person" antecedentType="Person" aliasFile="nicknames.txt" encoding="UTF-8" />
       </default.matchers.Or>
     </default.matchers.TransitiveAnd>
     <default.matchers.TransitiveAnd annotationType="Unknown" antecedentType="Person">

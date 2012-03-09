@@ -16,8 +16,7 @@
 package gate.creole.coref;
 
 import gate.Annotation;
-
-import java.util.List;
+import gate.creole.ResourceInstantiationException;
 
 public interface Matcher {
   
@@ -28,4 +27,6 @@ public interface Matcher {
   
   public boolean matches(Annotation[] anaphors, int antecedent, 
                                   int anaphor, CorefBase owner);
+  
+  public void init(CorefBase owner) throws ResourceInstantiationException;
 }

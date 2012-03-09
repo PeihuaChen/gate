@@ -30,6 +30,7 @@ import java.util.TreeSet;
 import org.apache.log4j.Logger;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.core.ReferenceByIdMarshallingStrategy;
 
 import gate.Annotation;
 import gate.AnnotationSet;
@@ -40,10 +41,12 @@ import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.coref.matchers.AbstractMatcher;
+import gate.creole.coref.matchers.AliasMatcher;
 import gate.creole.coref.matchers.And;
 import gate.creole.coref.matchers.CompoundMatcher;
 import gate.creole.coref.matchers.Or;
 import gate.creole.coref.taggers.AbstractTagger;
+import gate.creole.coref.taggers.AliasTagger;
 import gate.creole.coref.taggers.Collate;
 import gate.creole.coref.taggers.FixedTags;
 import gate.creole.metadata.CreoleParameter;
@@ -142,12 +145,21 @@ public abstract class CorefBase extends AbstractLanguageAnalyser {
   
   protected static XStream getXstream(){
     XStream xstream = new XStream();
+    
+    xstream.setMarshallingStrategy(new ReferenceByIdMarshallingStrategy());
+    
     xstream.setClassLoader(Gate.getClassLoader());
     xstream.alias("coref.Config", Config.class);
     xstream.aliasPackage("default", "gate.creole.coref");
     xstream.useAttributeFor(AbstractTagger.class, "annotationType");
     xstream.useAttributeFor(AbstractMatcher.class, "annotationType");
     xstream.useAttributeFor(AbstractMatcher.class, "antecedentType");
+    
+    xstream.useAttributeFor(AliasTagger.class, "aliasFile");
+    xstream.useAttributeFor(AliasTagger.class, "encoding");
+    
+    xstream.useAttributeFor(AliasMatcher.class, "aliasFile");
+    xstream.useAttributeFor(AliasMatcher.class, "encoding");
     
     xstream.addImplicitCollection(Collate.class, "subTaggers");
     xstream.addImplicitCollection(CompoundMatcher.class, "subMatchers");
@@ -161,6 +173,8 @@ public abstract class CorefBase extends AbstractLanguageAnalyser {
     if(configFileUrl == null) throw new ResourceInstantiationException(
       "No value provided for required \"configFileUrl\" parameter.");
     config = (Config) xstream.fromXML(configFileUrl);
+    for(Tagger aTagger : config.getTaggers()) aTagger.init(this);
+    for(Matcher aMatcher : config.getMatchers()) aMatcher.init(this);
     return super.init();
   }
 
