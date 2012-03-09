@@ -67,7 +67,7 @@ public class OrthoRef extends CorefBase {
     matchers.add(new AliasMatcher("Person", "Person", personTagger));
     
     XStream xstream = getXstream();
-    OutputStream out = new BufferedOutputStream(new FileOutputStream("matcher-config.xml"));
+    OutputStream out = new BufferedOutputStream(new FileOutputStream("plugins/Coref_Tools/matcher-config.xml"));
     xstream.toXML(config, out);
     out.close();
   }
