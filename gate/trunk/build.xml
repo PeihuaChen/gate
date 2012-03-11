@@ -263,6 +263,7 @@
   <target name="svg2java" unless="do.not.draw" depends="prepare">
     <java fork="true" classname="englishcoffeedrinker.svg.in.SVGBatchConverter" failonerror="true">
       <jvmarg value="-Xmx512m" />
+      <jvmarg value="-Djava.awt.headless=true" />
       <classpath>
         <fileset dir="${buildDir}/lib">
           <include name="**/*.jar" />
