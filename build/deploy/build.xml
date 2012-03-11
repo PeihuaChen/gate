@@ -28,6 +28,26 @@ build/deploy all paths are relative to the top-level GATE directory -->
     <isset property="release.build" />
   </condition>
 
+  <target name="make-icon">
+    <java classname="englishcoffeedrinker.svg.utils.Paint2PNG" fork="true" failonerror="true">
+      <jvmarg value="-Djava.awt.headless=true" />
+      <classpath>
+        <fileset dir="${basedir}/build/lib">
+          <include name="**/*.jar" />
+        </fileset>
+      	<fileset dir="${basedir}/lib">
+          <include name="**/*.jar" />
+        </fileset>
+        <fileset file="${basedir}/bin/gate.jar" />
+      </classpath>
+      <arg value="-m" />
+      <arg value="-s" />
+      <arg value="128x128" />
+      <arg value="gate.resources.img.svg.GATEVersionIcon" />
+      <arg value="${basedir}/build/deploy/gate-icon.png" />
+    </java>
+  </target>
+
   <!-- Find all the files in GATE that have the svn:executable property set.
   These are the files that will be put into the installers and zip files with
   executable permissions -->
@@ -59,7 +79,7 @@ build/deploy all paths are relative to the top-level GATE directory -->
   </target>
 
   <!-- build the distribution zip files -->
-  <target name="make-zips" depends="find-executables">
+  <target name="make-zips" depends="find-executables, make-icon">
     <property name="doc.dirname"
               value="${gate.full.name}-DOC"/>
     <property name="doc.archive"
@@ -236,7 +256,7 @@ build/deploy all paths are relative to the top-level GATE directory -->
   </macrodef>
   
   <!-- Build the installer JAR -->
-  <target name="build-installer" depends="find-executables">
+  <target name="build-installer" depends="find-executables, make-icon">
     <delete file="${distDir}/${gate.full.name}-installer.jar" quiet="true"/>
     <mkdir dir="${distDir}" />
     <create-executable-entries property="bin.executables">

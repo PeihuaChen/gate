@@ -272,6 +272,7 @@
           <include name="**/*.jar" />
         </fileset>
       </classpath>
+      <arg value="-e" />      
       <arg value="-n" />
       <arg value="+Icon" />
       <arg value="-o" />
