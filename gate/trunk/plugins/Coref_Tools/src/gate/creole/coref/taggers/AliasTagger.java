@@ -16,11 +16,12 @@
 package gate.creole.coref.taggers;
 
 import gate.Annotation;
-import gate.Utils;
+//import gate.Utils;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.coref.AliasMap;
 import gate.creole.coref.AliasMap.AliasData;
 import gate.creole.coref.CorefBase;
+import gate.creole.coref.Utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -87,14 +88,17 @@ public class AliasTagger extends AbstractTagger {
   @Override
   public Set<String> tag(Annotation[] anaphors, int anaphor, CorefBase owner) {
     Set<String> tags = new HashSet<String>();
-    String key = Utils.cleanStringFor(owner.getDocument(), 
+    String text = gate.Utils.cleanStringFor(owner.getDocument(), 
         anaphors[anaphor]).trim();
-    for(AliasData aliasData : aliasMap.getAliases(key)) {
-      tags.add(aliasData.getAlias().toUpperCase());
+    String[] keys = Utils.isMwe(text) ? Utils.partsForMwe(text) : new String[]{text};
+    for(String key : keys) {
+      for(AliasData aliasData : aliasMap.getAliases(key)) {
+        tags.add(aliasData.getAlias().toUpperCase());
+      }
     }
     if(tags.size() > 0) {
       // we've had some aliases: also add the plain text as uppercase
-      tags.add(key.toUpperCase());
+      tags.add(text.toUpperCase());
     }
     return tags;
   }

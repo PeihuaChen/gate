@@ -24,11 +24,11 @@ import java.util.Map;
 import java.util.Set;
 
 import gate.Annotation;
-import gate.Utils;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.coref.AliasMap;
 import gate.creole.coref.AliasMap.AliasData;
 import gate.creole.coref.CorefBase;
+import gate.creole.coref.Utils;
 import gate.creole.coref.taggers.AliasTagger;
 
 /**
@@ -97,24 +97,37 @@ public class AliasMatcher extends AbstractMatcher {
   @Override
   public boolean matches(Annotation[] anaphors, int antecedent, int anaphor,
       CorefBase owner) {
-    String one = Utils.cleanStringFor(owner.getDocument(), 
+    String one = gate.Utils.cleanStringFor(owner.getDocument(), 
         anaphors[anaphor]).trim().toUpperCase();
-    String other = Utils.cleanStringFor(owner.getDocument(), 
+    String other = gate.Utils.cleanStringFor(owner.getDocument(), 
         anaphors[antecedent]).trim().toUpperCase();
     
     Map<String, AliasData> someAliases = new HashMap<String, AliasMap.AliasData>();
-    for(AliasData aData : aliasMap.getAliases(one)){
-      someAliases.put(aData.getAlias().toUpperCase(), aData);
+    String[] someKeys = Utils.isMwe(one) ? Utils.partsForMwe(one) : new String[]{one};
+    for(String key : someKeys) {
+      for(AliasData aData : aliasMap.getAliases(key)){
+        someAliases.put(aData.getAlias().toUpperCase(), aData);
+      }
     }
     
     Map<String, AliasData> otherAliases = new HashMap<String, AliasMap.AliasData>();
-    for(AliasData aData : aliasMap.getAliases(other)){
-      otherAliases.put(aData.getAlias().toUpperCase(), aData);
+    String[] otherKeys = Utils.isMwe(other) ? Utils.partsForMwe(other) : new String[]{other};
+    for(String key : otherKeys) {
+      for(AliasData aData : aliasMap.getAliases(key)){
+        otherAliases.put(aData.getAlias().toUpperCase(), aData);
+      }
     }
     
-    AliasData match = someAliases.get(other);
+    AliasData match = null;
+    for(String key : otherKeys) {
+      match = someAliases.get(key);
+      if(match != null) break;
+    }
     if(match == null) {
-      match = otherAliases.get(one);
+      for(String key : someKeys) {
+        match = someAliases.get(key);
+        if(match != null) break;
+      } 
     }
     if(match == null) {
       // try alias to alias
