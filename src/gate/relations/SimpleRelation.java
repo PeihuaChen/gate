@@ -87,9 +87,7 @@ public class SimpleRelation implements Relation {
     }
     str.append(")");
     if(userData != null) {
-      str.append("#");
-      //TODO: convert user data to Base64
-      str.append("#");
+      str.append("#").append(userData.toString());
     }
     return str.toString();
   }
