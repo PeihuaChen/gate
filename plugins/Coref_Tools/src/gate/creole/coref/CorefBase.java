@@ -107,6 +107,7 @@ public abstract class CorefBase extends AbstractLanguageAnalyser {
 
   private String annotationSetName;
   
+  private Integer maxLookBehind;
   
   private Config config;
   
@@ -124,6 +125,30 @@ public abstract class CorefBase extends AbstractLanguageAnalyser {
   @RunTime
   public void setAnnotationSetName(String annotationSetName) {
     this.annotationSetName = annotationSetName;
+  }
+
+  
+  /**
+   * @return the maxLookBehind
+   */
+  public Integer getMaxLookBehind() {
+    return maxLookBehind;
+  }
+
+  /**
+   * Set the maximum look behind: the maximum allowed distance between an 
+   * anaphor and its antecedent (implemented as the maximum number of anaphors 
+   * allowed to skip over).  
+   * 
+   * @param maxLookBehind the maxLookBehind to set
+   */
+  @CreoleParameter(comment = "The maximum number of anaphor the system is " +
+  		"allowed to skip over when looking for an antecedent. Use a negative " +
+  		"value for infinite look-behind (not recommended).",  
+  		defaultValue = "10")
+  @RunTime
+  public void setMaxLookBehind(Integer maxLookBehind) {
+    this.maxLookBehind = maxLookBehind;
   }
 
   /**
@@ -191,6 +216,7 @@ public abstract class CorefBase extends AbstractLanguageAnalyser {
   
   @Override
   public void execute() throws ExecutionException {
+    interrupted = false;
     fireStatusChanged("Running co-reference on " + document.getName());
     fireProgressChanged(1);
     // prepare
@@ -235,7 +261,7 @@ public abstract class CorefBase extends AbstractLanguageAnalyser {
     // The set is sorted in reverse order, so that the annotations with higher
     // index (i.e later position in the document) are first.
     Map<String, SortedSet<Integer>> tag2bucket = 
-        new HashMap<String, SortedSet<Integer>>();
+        new HashMap<String, SortedSet<Integer>>(anaphors.length * 3);
     for(int annId = 0; annId < anaphors.length; annId++) {
       // get all tags for the current anaphor
       Set<String> tags = new HashSet<String>();
@@ -245,7 +271,6 @@ public abstract class CorefBase extends AbstractLanguageAnalyser {
       // the IDs for all the antecendents that match 
       SortedSet<Integer> matchingAntecedents = new TreeSet<Integer>(
           Collections.reverseOrder());
-      
       for(String tag : tags) {
         SortedSet<Integer> aBucket = tag2bucket.get(tag);
         if(aBucket != null) {
@@ -253,6 +278,8 @@ public abstract class CorefBase extends AbstractLanguageAnalyser {
           antecedents:for(int antecedentId : aBucket) {
             // buckets are sorted in inverse ID order, 
             // so the closest antecedent is tried first
+            if(maxLookBehind > 0 && 
+               annId - antecedentId > maxLookBehind) break antecedents;
             Set<Matcher> matchers = matchersByType.get(new StringPair(
                 anaphors[annId].getType(), anaphors[antecedentId].getType()));
             if(matchers != null) {
@@ -279,6 +306,14 @@ public abstract class CorefBase extends AbstractLanguageAnalyser {
         // add the relation
         relSet.addRelation(Relation.COREF, anaphors[antecedentId].getId(), 
             anaphors[annId].getId());
+      }
+      if(annId % 20 == 0) {
+        // every 20 annotations we report progress
+        fireProgressChanged(100 * annId / anaphors.length);
+        // and check for interruptions
+        if(isInterrupted()) {
+          throw new ExecutionException("Execution of this was interrupted.");
+        }
       }
     }
     fireStatusChanged("");
