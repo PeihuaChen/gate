@@ -32,7 +32,7 @@ GATE papers
 
 %3* I used the machine learning facilities in GATE:
 
- - Y. Li, K. Bontcheva and H. Cunningham. Adapting SVM for Data Sparseness and Imbalance: A Case Study on Information Extraction. Natural Language Engineering, 15(02), 241-271, 2009. %(http://journals.cambridge.org/repo_A45LfkBD,On-line Link). %(bibtex.html#Li2009, BibTeX).
+ - Y. Li, K. Bontcheva and H. Cunningham. Adapting SVM for Data Sparseness and Imbalance: A Case Study on Information Extraction. Natural Language Engineering, 15(02), 241-271, 2009. %(http://journals.cambridge.org/repo_A45LfkBD,On-line Link). %(../../sale/nle-svm/svm-ie-nle-revision.pdf,Pre-print), %(bibtex.html#Li2009, BibTeX).
 
 %contents
 
