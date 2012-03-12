@@ -77,5 +77,15 @@ public class Utils {
    */
   public static final String[] partsForMwe(String input) {
     return input.split("\\p{javaWhitespace}+");
-  }  
+  }
+  
+  /**
+   * Checks whether the input string is a multi-word reference as recognised by
+   * {@link #MWE_UPPER_INITIAL_PATTERN}.
+   * @param text
+   * @return
+   */
+  public static final boolean isMwe(String text) {
+    return MWE_UPPER_INITIAL_PATTERN.matcher(text).matches();
+  }
 }
