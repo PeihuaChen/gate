@@ -1,9 +1,8 @@
 package gate.creole.coref;
 
-import gate.creole.coref.matchers.AliasMatcher;
+import gate.creole.coref.matchers.Alias;
 import gate.creole.coref.matchers.Or;
 import gate.creole.coref.matchers.TransitiveAnd;
-import gate.creole.coref.taggers.AliasTagger;
 import gate.creole.coref.taggers.DocumentText;
 import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
@@ -53,7 +52,8 @@ public class OrthoRef extends CorefBase {
     taggers.add(new DocumentText("Organization"));
     taggers.add(new DocumentText("Person"));
     taggers.add(new DocumentText("Location"));
-    AliasTagger personTagger = new AliasTagger("Person", "nicknames.txt");
+    gate.creole.coref.taggers.Alias personTagger = 
+        new gate.creole.coref.taggers.Alias("Person", "nicknames.txt");
     taggers.add(personTagger);
     
     
@@ -64,7 +64,7 @@ public class OrthoRef extends CorefBase {
         new gate.creole.coref.matchers.MwePart("Organization", "Organization") 
       })));
     
-    matchers.add(new AliasMatcher("Person", "Person", personTagger));
+    matchers.add(new Alias("Person", "Person", personTagger));
     
     XStream xstream = getXstream();
     OutputStream out = new BufferedOutputStream(new FileOutputStream("plugins/Coref_Tools/matcher-config.xml"));

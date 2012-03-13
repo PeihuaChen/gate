@@ -41,12 +41,8 @@ import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.coref.matchers.AbstractMatcher;
-import gate.creole.coref.matchers.AliasMatcher;
-import gate.creole.coref.matchers.And;
 import gate.creole.coref.matchers.CompoundMatcher;
-import gate.creole.coref.matchers.Or;
 import gate.creole.coref.taggers.AbstractTagger;
-import gate.creole.coref.taggers.AliasTagger;
 import gate.creole.coref.taggers.Collate;
 import gate.creole.coref.taggers.FixedTags;
 import gate.creole.metadata.CreoleParameter;
@@ -180,11 +176,11 @@ public abstract class CorefBase extends AbstractLanguageAnalyser {
     xstream.useAttributeFor(AbstractMatcher.class, "annotationType");
     xstream.useAttributeFor(AbstractMatcher.class, "antecedentType");
     
-    xstream.useAttributeFor(AliasTagger.class, "aliasFile");
-    xstream.useAttributeFor(AliasTagger.class, "encoding");
+    xstream.useAttributeFor(gate.creole.coref.taggers.Alias.class, "aliasFile");
+    xstream.useAttributeFor(gate.creole.coref.taggers.Alias.class, "encoding");
     
-    xstream.useAttributeFor(AliasMatcher.class, "aliasFile");
-    xstream.useAttributeFor(AliasMatcher.class, "encoding");
+    xstream.useAttributeFor(gate.creole.coref.matchers.Alias.class, "aliasFile");
+    xstream.useAttributeFor(gate.creole.coref.matchers.Alias.class, "encoding");
     
     xstream.addImplicitCollection(Collate.class, "subTaggers");
     xstream.addImplicitCollection(CompoundMatcher.class, "subMatchers");
