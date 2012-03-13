@@ -1,5 +1,5 @@
 /*
- *  AliasTagger.java
+ *  Alias.java
  *
  *  Copyright (c) 1995-2012, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
@@ -16,31 +16,24 @@
 package gate.creole.coref.taggers;
 
 import gate.Annotation;
-//import gate.Utils;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.coref.AliasMap;
 import gate.creole.coref.AliasMap.AliasData;
 import gate.creole.coref.CorefBase;
 import gate.creole.coref.Utils;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
 
 /**
  * A tagger using aliases (such as nicknames).
  */
-public class AliasTagger extends AbstractTagger {
+public class Alias extends AbstractTagger {
 
-  private static final Logger log = Logger.getLogger(AliasTagger.class);
-  
   protected String aliasFile;
   
   protected String encoding = "UTF=8";
@@ -50,7 +43,7 @@ public class AliasTagger extends AbstractTagger {
   /**
    * @param annotationType
    */
-  public AliasTagger(String annotationType, String aliasFile) {
+  public Alias(String annotationType, String aliasFile) {
     super(annotationType);
     this.aliasFile = aliasFile;
   }

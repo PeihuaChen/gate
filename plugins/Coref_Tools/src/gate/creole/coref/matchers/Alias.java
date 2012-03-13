@@ -1,5 +1,5 @@
 /*
- *  AliasMatcher.java
+ *  Alias.java
  *
  *  Copyright (c) 1995-2012, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
@@ -29,14 +29,13 @@ import gate.creole.coref.AliasMap;
 import gate.creole.coref.AliasMap.AliasData;
 import gate.creole.coref.CorefBase;
 import gate.creole.coref.Utils;
-import gate.creole.coref.taggers.AliasTagger;
 
 /**
  * A matcher using aliases (e.g. nicknames, such as Alex for Alexander).
  */
-public class AliasMatcher extends AbstractMatcher {
+public class Alias extends AbstractMatcher {
 
-  protected AliasTagger aliasTagger;
+  protected gate.creole.coref.taggers.Alias aliasTagger;
   
   protected String aliasFile;
   
@@ -49,7 +48,7 @@ public class AliasMatcher extends AbstractMatcher {
    * @param annotationType
    * @param antecedentType
    */
-  public AliasMatcher(String annotationType, String antecedentType, 
+  public Alias(String annotationType, String antecedentType, 
       String aliasFile) {
     super(annotationType, antecedentType);
     this.aliasFile = aliasFile;
@@ -60,8 +59,8 @@ public class AliasMatcher extends AbstractMatcher {
    * @param annotationType
    * @param antecedentType
    */
-  public AliasMatcher(String annotationType, String antecedentType, 
-      AliasTagger aliasTagger) {
+  public Alias(String annotationType, String antecedentType, 
+      gate.creole.coref.taggers.Alias aliasTagger) {
     super(annotationType, antecedentType);
     this.aliasTagger = aliasTagger;
   }
