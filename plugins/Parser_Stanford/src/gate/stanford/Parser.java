@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2006-2011, The University of Sheffield. See the file
+ *  Copyright (c) 2006-2012, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -43,26 +43,22 @@ implements ProcessingResource {
 
   /* Type "SyntaxTreeNode" with feature "cat" is compatible with the 
    * classic SyntaxTreeViewer.  */
-  private static final String OUTPUT_PHRASE_TYPE   = "SyntaxTreeNode" ;
-  private static final String PSG_TAG_FEATURE      = "cat" ;
+  public static final String PHRASE_ANNOTATION_TYPE   = "SyntaxTreeNode" ;
+  public static final String PHRASE_CAT_FEATURE      = "cat" ;
   
   /* But "category" feature is compatible with the ANNIE POS tagger.  */
   private static final String  POS_TAG_FEATURE    = ANNIEConstants.TOKEN_CATEGORY_FEATURE_NAME;
 
-  private static final String DEP_ANNOTATION_TYPE   = "Dependency";
-  private static final String DEP_ARG_FEATURE       = "args";
-  private static final String DEP_LABEL_FEATURE     = "kind"; 
+  public static final String DEPENDENCY_ANNOTATION_TYPE   = "Dependency";
+  public static final String DEPENDENCY_ARG_FEATURE       = "args";
+  public static final String DEPENDENCY_LABEL_FEATURE     = "kind"; 
 
   protected String                         annotationSetName;
-  protected AnnotationSet                  annotationSet;
-  protected gate.Document                  document;
   private   URL                            parserFile;
   protected boolean                        debugMode;
   private   boolean                        reusePosTags;
 
-  private OffsetComparator                 offsetComparator;
   private Map<String, String>              tagMap;
-  protected StanfordSentence               stanfordSentence;
   protected GrammaticalStructureFactory    gsf;
   
 
@@ -107,8 +103,6 @@ implements ProcessingResource {
    * method called by a CorpusController.)
    */
   public void execute() throws ExecutionException {
-    annotationSet  = document.getAnnotations(annotationSetName);
-    
     if (debugMode) {
       System.out.println("Parsing document: " + document.getName());
     }
@@ -117,9 +111,8 @@ implements ProcessingResource {
       System.err.println("Warning: no mapping loaded!");
     }
     
-    
-    if (addConstituentAnnotations || addDependencyFeatures || addDependencyAnnotations) {
-      parseSentences();
+    if (addConstituentAnnotations || addDependencyFeatures || addDependencyAnnotations || addPosTags) {
+      parseSentences(document.getAnnotations(annotationSetName));
     }
     else {
       System.err.println("There is nothing for the parser to do.");
@@ -137,7 +130,7 @@ implements ProcessingResource {
     if (mappingFile != null) {
       loadTagMapping(mappingFile);
     }
-    offsetComparator = new OffsetComparator();
+
     super.init();
     
     if(tlppClass == null || tlppClass.equals("")) {
@@ -189,46 +182,22 @@ implements ProcessingResource {
    * scanned for Tokens. You have to run the ANNIE tokenizer and splitter before
    * this PR.)
    */
-  private void parseSentences() { 
-    List<Annotation> sentences = new ArrayList<Annotation>(annotationSet.get(inputSentenceType));
-    java.util.Collections.sort(sentences, offsetComparator);
-    Iterator<Annotation> sentenceIter = sentences.iterator();
+  private void parseSentences(AnnotationSet annotationSet) { 
+    List<Annotation> sentences = gate.Utils.inDocumentOrder(annotationSet.get(inputSentenceType));
+    int sentCtr = 0;
+    int sentCount = sentences.size();
 
-    Tree tree;
-    int debugNbrS, debugS;
-    debugS = 0;
-    debugNbrS = sentences.size();
-
-    while (sentenceIter.hasNext()) {
-      debugS++;
-      tree = parseOneSentence(sentenceIter.next(), debugS);
-      
-      // Here null is the result from an empty Sentence.
-      if (tree != null) {
-        if (addConstituentAnnotations || addPosTags) {
-          annotatePhraseStructureRecursively(tree, tree);
-        }
-
-        if (addDependencyFeatures || addDependencyAnnotations) {
-          annotateDependencies(tree);
-        }
-
-        if (debugMode) {
-          System.out.println("Parsed sentence " + debugS + " of " + debugNbrS);
-        }
-      }
-      
-      else if (debugMode) {
-        System.out.println("Ignored empty sentence " + debugS + " of " + debugNbrS);
-      }
-      
-    }
-  }
+    for (Annotation sentence : sentences) {
+      sentCtr++;
+      parseOneSentence(annotationSet, sentence, sentCtr, sentCount);
+    }  
+   }
+    
 
 
   /**
    * Generate the special data structure for one sentence and pass the List of
-   * Word to the parser.
+   * Word to the parser.  Apply the annotations back to the document.
    * 
    * @param sentence
    *          the Sentence annotation
@@ -238,10 +207,13 @@ implements ProcessingResource {
    *          total number of sentences for debugging output
    * @return  null if the sentence is empty
    */
-  private Tree parseOneSentence(Annotation sentence, int sentenceNo) {
-    Tree result = null;
+  private void parseOneSentence(AnnotationSet annotationSet, Annotation sentence, int sentCtr, int sentCount) {
+    Tree tree;
     
-    stanfordSentence = new StanfordSentence(sentence, inputTokenType, annotationSet, reusePosTags);
+    StanfordSentence stanfordSentence = new StanfordSentence(sentence, inputTokenType, annotationSet, reusePosTags);
+    if (debugMode) {
+      System.out.println(stanfordSentence.toString());
+    }
 
     /* Ignore an empty Sentence (sometimes the regex splitter can create one
      * with no Token annotations in it).
@@ -254,16 +226,29 @@ implements ProcessingResource {
         if (nbrMissingTags > 0)  {
           double percentMissing = Math.ceil(100.0 * ((float) nbrMissingTags) /
                   ((float) stanfordSentence.numberOfTokens()) );
-          System.err.println("Warning (sentence " + sentenceNo + "): " + (int) percentMissing 
+          System.err.println("Warning (sentence " + sentCtr + "): " + (int) percentMissing 
                   + "% of the Tokens are missing POS tags." );
         }
       }
 
-      stanfordParser.parse(wordList);
-      result = stanfordParser.getBestParse();
+      tree = stanfordParser.parseTree(wordList); 
+
+      if (addConstituentAnnotations || addPosTags) {
+        annotatePhraseStructureRecursively(annotationSet, stanfordSentence, tree, tree);
+      }
+
+      if (addDependencyFeatures || addDependencyAnnotations) {
+        annotateDependencies(annotationSet, stanfordSentence, tree);
+      }
+
+      if (debugMode) {
+        System.out.println("Parsed sentence " + sentCtr + " of " + sentCount);
+      }
     }
     
-    return result;
+    else if (debugMode) {
+      System.out.println("Ignored empty sentence " + sentCtr + " of " + sentCount);
+    }
   }
 
 
@@ -276,7 +261,7 @@ implements ProcessingResource {
    * @param rootTree  the whole sentence, used to find the span of the current subtree
    * @return a GATE Annotation of type "SyntaxTreeNode"
    */
-  protected Annotation annotatePhraseStructureRecursively(Tree tree, Tree rootTree) {
+  protected Annotation annotatePhraseStructureRecursively(AnnotationSet annotationSet, StanfordSentence stanfordSentence, Tree tree, Tree rootTree) {
     Annotation annotation = null;
     Annotation child;
     String label   = tree.value();
@@ -304,13 +289,13 @@ implements ProcessingResource {
 
     Iterator<Tree> childIter = children.iterator();
     while (childIter.hasNext()) {
-      child = annotatePhraseStructureRecursively(childIter.next(), rootTree);
+      child = annotatePhraseStructureRecursively(annotationSet, stanfordSentence, childIter.next(), rootTree);
       if  ( (child != null)  &&
         (! child.getType().equals(inputTokenType) )) {
         consists.add(child.getId());
       }
     }
-    annotation = annotatePhraseStructureConstituent(startNode, endNode, label, consists, tree.depth());
+    annotation = annotatePhraseStructureConstituent(annotationSet, startNode, endNode, label, consists, tree.depth());
 
     return annotation;
   }
@@ -327,7 +312,7 @@ implements ProcessingResource {
    * @param depth
    * @return
    */
-  private Annotation annotatePhraseStructureConstituent(Long startOffset, Long endOffset, String label, 
+  private Annotation annotatePhraseStructureConstituent(AnnotationSet annotationSet, Long startOffset, Long endOffset, String label, 
     List<Integer> consists, int depth) {
     Annotation phrAnnotation = null;
     Integer phrID;
@@ -344,7 +329,7 @@ implements ProcessingResource {
       if (addConstituentAnnotations) {
         String text = document.getContent().getContent(startOffset, endOffset).toString();
         FeatureMap fm = gate.Factory.newFeatureMap();
-        fm.put(PSG_TAG_FEATURE, cat);
+        fm.put(PHRASE_CAT_FEATURE, cat);
         fm.put("text", text);
 
         /* Ignore empty list features on the token-equivalent annotations. */
@@ -352,7 +337,7 @@ implements ProcessingResource {
           fm.put("consists", consists);
         }
 
-        phrID  = annotationSet.add(startOffset, endOffset, OUTPUT_PHRASE_TYPE, fm);
+        phrID  = annotationSet.add(startOffset, endOffset, PHRASE_ANNOTATION_TYPE, fm);
         phrAnnotation = annotationSet.get(phrID);
         recordID(annotationSet, phrID);
       }
@@ -385,66 +370,65 @@ implements ProcessingResource {
   
   
   @SuppressWarnings("unchecked")
-  private void annotateDependencies(Tree tree) {
+  private void annotateDependencies(AnnotationSet annotationSet, StanfordSentence stanfordSentence, Tree tree) {
     GrammaticalStructure gs = gsf.newGrammaticalStructure(tree);
-    Collection<TypedDependency> deps = gs.typedDependencies();
+    Collection<TypedDependency> dependencies = gs.typedDependencies();
     String dependencyKind;
     FeatureMap depFeatures;
     Integer dependentTokenID, governorTokenID;
     List<Integer> argList;
     Long offsetLH0, offsetRH0, offsetLH1, offsetRH1, depLH, depRH;
-    Annotation governorToken, dependentToken;
+    Annotation governor, dependent;
 
-    for(TypedDependency d : deps) {
+    for(TypedDependency dependency : dependencies) {
       if(debugMode) {
-        System.out.println(d);
+        System.out.println(dependency);
       }
 
-      int governorIndex = ((HasIndex) d.gov().label()).index() - 1;
-      governorToken  = stanfordSentence.startPos2token(governorIndex);
+      int governorIndex = dependency.gov().label().index() - 1;
+      governor  = stanfordSentence.startPos2token(governorIndex);
       
-      int dependentIndex = ((HasIndex) d.dep().label()).index() - 1;
-      dependentToken = stanfordSentence.startPos2token(dependentIndex);
+      int dependentIndex = dependency.dep().label().index() - 1;
+      dependent = stanfordSentence.startPos2token(dependentIndex);
 
-      dependencyKind = d.reln().toString();
-      governorTokenID = governorToken.getId();
-      dependentTokenID = dependentToken.getId();
-
+      dependencyKind = dependency.reln().toString();
+      governorTokenID = governor.getId();
+      dependentTokenID = dependent.getId();
+      
       if (addDependencyFeatures) {
         List<DependencyRelation> depsForTok =
-          (List<DependencyRelation>) governorToken.getFeatures().get(dependenciesFeature);
-
+          (List<DependencyRelation>) governor.getFeatures().get(dependenciesFeature);
+        
         if(depsForTok == null) {
           depsForTok = new ArrayList<DependencyRelation>();
-          governorToken.getFeatures().put(dependenciesFeature, depsForTok);
+          governor.getFeatures().put(dependenciesFeature, depsForTok);
         }
-
+        
         depsForTok.add(new DependencyRelation(dependencyKind, dependentTokenID));
       }
-      
       
       if (addDependencyAnnotations) {
         depFeatures = gate.Factory.newFeatureMap();
         argList = new ArrayList<Integer>();
         argList.add(governorTokenID);
         argList.add(dependentTokenID);
-        depFeatures.put(DEP_ARG_FEATURE, argList);
-        depFeatures.put(DEP_LABEL_FEATURE, dependencyKind);
-      
-        offsetLH0 = governorToken.getStartNode().getOffset();
-        offsetRH0 = governorToken.getEndNode().getOffset();
-        offsetLH1 = dependentToken.getStartNode().getOffset();
-        offsetRH1 = dependentToken.getEndNode().getOffset();
-      
+        depFeatures.put(DEPENDENCY_ARG_FEATURE, argList);
+        depFeatures.put(DEPENDENCY_LABEL_FEATURE, dependencyKind);
+        
+        offsetLH0 = governor.getStartNode().getOffset();
+        offsetRH0 = governor.getEndNode().getOffset();
+        offsetLH1 = dependent.getStartNode().getOffset();
+        offsetRH1 = dependent.getEndNode().getOffset();
+        
         depLH = Math.min(offsetLH0, offsetLH1);
         depRH = Math.max(offsetRH0, offsetRH1);
-      
+        
         try {
-          annotationSet.add(depLH, depRH, DEP_ANNOTATION_TYPE, depFeatures);
+          annotationSet.add(depLH, depRH, DEPENDENCY_ANNOTATION_TYPE, depFeatures);
         }
         catch(InvalidOffsetException e) {
           e.printStackTrace();
-        }
+        }  
       }
     }
   }
@@ -455,7 +439,7 @@ implements ProcessingResource {
     throws ResourceInstantiationException {
     try {
       String filepath = Files.fileFromURL(parserFile).getAbsolutePath();
-      stanfordParser = new LexicalizedParser(filepath);
+      stanfordParser = LexicalizedParser.getParserFromSerializedFile(filepath);
     }
     catch(Exception e) {
       throw new ResourceInstantiationException(e);
