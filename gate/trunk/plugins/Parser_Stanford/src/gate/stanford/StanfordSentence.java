@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2006-2011, The University of Sheffield. See the file
+ *  Copyright (c) 2006-2012, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -12,11 +12,12 @@
 package gate.stanford;
 
 import java.util.*;
+
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.ling.TaggedWord;
 import gate.*;
 import gate.creole.ANNIEConstants;
-import gate.util.OffsetComparator;
+import gate.util.Strings;
 
 /**
  * The Stanford Parser itself takes as input a List of edu.stanford.nlp.ling.Word.
@@ -29,6 +30,7 @@ public class StanfordSentence {
   private Map<Integer, Long> startPosToOffset;
   private Map<Integer, Long> endPosToOffset;
   private Map<Integer, Annotation> startPosToToken;
+  private Map<Integer, String> startPosToString;
   private List<Word>         words;
   private Long               sentenceStartOffset, sentenceEndOffset;
   private List<Annotation>   tokens;
@@ -47,12 +49,10 @@ public class StanfordSentence {
   public StanfordSentence(Annotation sentence, String tokenType, 
     AnnotationSet inputAS, boolean usePosTags) {
     
-    OffsetComparator  offsetComparator = new OffsetComparator();
-    String tokenString;
-
     startPosToOffset = new HashMap<Integer, Long>();
     endPosToOffset   = new HashMap<Integer, Long>();
     startPosToToken  = new HashMap<Integer, Annotation>();
+    startPosToString = new HashMap<Integer, String>();
     
     sentenceStartOffset = sentence.getStartNode().getOffset();
     sentenceEndOffset   = sentence.getEndNode().getOffset();
@@ -60,15 +60,16 @@ public class StanfordSentence {
     nbrOfTokens   = 0;
     nbrOfMissingPosTags = 0;
     
-    tokens = new ArrayList<Annotation>(inputAS.getContained(sentenceStartOffset, sentenceEndOffset).get(tokenType));
-    java.util.Collections.sort(tokens, offsetComparator);
-
+    tokens = Utils.inDocumentOrder(inputAS.getContained(sentenceStartOffset, sentenceEndOffset).get(tokenType));
     words = new ArrayList<Word>();
+
+    add(-1, sentence, "S");
+    
     int tokenNo = 0;
 
     for (Annotation token : tokens) {
-      tokenString = escapeToken(token.getFeatures().get(STRING_FEATURE).toString());
-      add(tokenNo, token);
+      String tokenString = escapeToken(token.getFeatures().get(STRING_FEATURE).toString());
+      add(tokenNo, token, tokenString);
       
       /* The FAQ says the parser will automatically use existing POS tags
        * if the List elements are of type TaggedWord.  
@@ -86,9 +87,16 @@ public class StanfordSentence {
     }
     
     nbrOfTokens = tokenNo;
-
   }
 
+  
+  public String toString() {
+    StringBuffer output = new StringBuffer();
+    output.append("S: ").append(Strings.toString(startPosToOffset)).append('\n');
+    output.append("   ").append(Strings.toString(startPosToString)).append('\n');
+    output.append("   ").append(Strings.toString(endPosToOffset));
+    return output.toString();
+  }
   
   
   private String getEscapedPosTag(Annotation token)  {
@@ -115,14 +123,14 @@ public class StanfordSentence {
   
 
 
-  private void add(int tokenNbr, Annotation token) {
+  private void add(int tokenNbr, Annotation token, String tokenString) {
     Long tokenStartOffset = token.getStartNode().getOffset();
     Long tokenEndOffset   = token.getEndNode().getOffset();
-    Integer tokenNbrInt = new Integer(tokenNbr);
 
-    startPosToOffset.put(tokenNbrInt, tokenStartOffset);
+    startPosToOffset.put(tokenNbr, tokenStartOffset);
     endPosToOffset.put(new Integer(tokenNbr + 1), tokenEndOffset);
-    startPosToToken.put(tokenNbrInt, token);
+    startPosToToken.put(tokenNbr, token);
+    startPosToString.put(tokenNbr, tokenString);
   }
   
 
@@ -218,7 +226,7 @@ public class StanfordSentence {
    * "Token" that starts there.
    */
   public Annotation startPos2token(int startPos) {
-    return startPosToToken.get(new Integer(startPos));
+    return startPosToToken.get(startPos);
   }
 
   /**
@@ -227,7 +235,7 @@ public class StanfordSentence {
    * @return the offset in the GATE document
    */
   public Long startPos2offset(int startPos) {
-    return startPosToOffset.get(new Integer(startPos));
+    return startPosToOffset.get(startPos);
   }
 
   /**
@@ -236,7 +244,7 @@ public class StanfordSentence {
    * @return the offset in the GATE document
    */
   public Long endPos2offset(int endPos) {
-    return endPosToOffset.get(new Integer(endPos));
+    return endPosToOffset.get(endPos);
   }
 
   
