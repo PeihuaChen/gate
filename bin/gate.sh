@@ -55,10 +55,14 @@ The following options can be passed immediately after the command name:
                this file to configure the logging
   -rh path ... set the resources home path, this is a shortcut for 
                -Druntime.gate.user.resourceshome=path 
+  -d URL   ... register the plugin at URL. Can be used multiple times.
+  -i path  ... use the file at path as the site configuration file
   -h       ... show this help
 All other options will be passed on to the "java" command, for example:
   -Djava.io.tmpdir=<somedir>
   -Xmx<memorysize>
+For more information see the user manual in your GATE distribution or at
+http://gate.ac.uk/userguide/
 EOF
     exit 0
     ;;
