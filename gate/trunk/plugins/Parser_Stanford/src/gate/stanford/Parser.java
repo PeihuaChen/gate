@@ -71,12 +71,14 @@ implements ProcessingResource {
   private boolean                          mappingLoaded = false;
   
   /*  CREOLE parameters: what are we going to annotate, and how?  */
+  private String   inputSentenceType;
+  private String   inputTokenType;
   private boolean  addConstituentAnnotations;
   private boolean  addDependencyFeatures;
   private boolean  addDependencyAnnotations;
   private boolean  addPosTags;
-  private String   inputSentenceType;
-  private String   inputTokenType;
+  private boolean  includeExtraDependencies;
+  private DependencyMode dependencyMode;
   
 
   /**
@@ -170,7 +172,8 @@ implements ProcessingResource {
    * Re-initialize the Parser resource.  In particular, reload the trained
    * data file.
    */
-  @Override public void reInit() throws ResourceInstantiationException {
+  @Override 
+  public void reInit() throws ResourceInstantiationException {
     init();
   }  
 
@@ -372,7 +375,15 @@ implements ProcessingResource {
   @SuppressWarnings("unchecked")
   private void annotateDependencies(AnnotationSet annotationSet, StanfordSentence stanfordSentence, Tree tree) {
     GrammaticalStructure gs = gsf.newGrammaticalStructure(tree);
-    Collection<TypedDependency> dependencies = gs.typedDependencies();
+    Collection<TypedDependency> dependencies = DependencyMode.getDependencies(gs, dependencyMode, includeExtraDependencies);
+
+    if (dependencies == null) {
+      if (debugMode) {
+        System.out.println("dependencies == null");
+      }
+      return;
+    }
+    
     String dependencyKind;
     FeatureMap depFeatures;
     Integer dependentTokenID, governorTokenID;
@@ -668,6 +679,30 @@ implements ProcessingResource {
   public Boolean getAddConstituentAnnotations() {
     return new Boolean(this.addConstituentAnnotations);
   }
+  
+  
+  @RunTime
+  @CreoleParameter(comment = "Dependency Mode (see Stanford documentation for details)",
+      defaultValue = "Typed")
+  public void setDependencyMode(DependencyMode mode) {
+    this.dependencyMode = mode;
+  }
+
+  public DependencyMode getDependencyMode() {
+    return this.dependencyMode;
+  }
+  
+  @RunTime
+  @CreoleParameter(comment = "include extra dependencies (see Stanford documentation for details)",
+      defaultValue = "true")
+  public void setIncludeExtraDependencies(Boolean include) {
+    this.includeExtraDependencies = include;
+  }
+  
+  public Boolean getIncludeExtraDependencies() {
+    return this.includeExtraDependencies;
+  }
+  
   
   /* Made mappingFile an init parameter to simplify things.
    * The CREOLE parameter is called "mappingFile" but it's actually a URL.
