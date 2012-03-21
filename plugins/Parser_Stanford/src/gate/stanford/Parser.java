@@ -682,7 +682,7 @@ implements ProcessingResource {
   
   
   @RunTime
-  @CreoleParameter(comment = "Dependency Mode (see Stanford documentation for details)",
+  @CreoleParameter(comment = "Dependency Mode",
       defaultValue = "Typed")
   public void setDependencyMode(DependencyMode mode) {
     this.dependencyMode = mode;
@@ -693,8 +693,8 @@ implements ProcessingResource {
   }
   
   @RunTime
-  @CreoleParameter(comment = "include extra dependencies (see Stanford documentation for details)",
-      defaultValue = "true")
+  @CreoleParameter(comment = "include extra dependencies",
+      defaultValue = "false")
   public void setIncludeExtraDependencies(Boolean include) {
     this.includeExtraDependencies = include;
   }
