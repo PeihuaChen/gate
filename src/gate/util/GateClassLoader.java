@@ -244,7 +244,7 @@ public class GateClassLoader extends URLClassLoader {
    * Causes the specified classloader to be forgotten, making it and all the
    * class definitions loaded by it available for garbage collection
    * 
-   * @param id
+   * @param classloader
    *          the classloader to forget
    */
   public synchronized void forgetClassLoader(GateClassLoader classloader) {
