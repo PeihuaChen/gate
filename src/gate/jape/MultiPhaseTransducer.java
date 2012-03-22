@@ -17,9 +17,6 @@
 
 package gate.jape;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-
 import gate.AnnotationSet;
 import gate.Controller;
 import gate.Document;
@@ -30,7 +27,11 @@ import gate.event.ProgressListener;
 import gate.event.StatusListener;
 import gate.util.Benchmark;
 import gate.util.Err;
+import gate.util.GateClassLoader;
 import gate.util.Strings;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 
 
 /**
@@ -122,9 +123,9 @@ implements JapeConstants, java.io.Serializable
   /** Finish: replace dynamic data structures with Java arrays; called
     * after parsing.
     */
-  public void finish(){
+  public void finish(GateClassLoader classloader){
     for(Iterator i = phases.iterator(); i.hasNext(); )
-      ((Transducer) i.next()).finish();
+      ((Transducer) i.next()).finish(classloader);
   } // finish
 
 

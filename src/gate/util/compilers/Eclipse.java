@@ -75,12 +75,10 @@ public class Eclipse extends gate.util.Javac {
    * In the case of warnings the compiled classes are loaded before the error is
    * raised.
    */
-  public void compile(Map sources) throws GateException {
+  public void compile(Map<String,String> sources, final GateClassLoader classLoader) throws GateException {
     
     final Map<String, String> sourcesFiltered = new HashMap<String, String>(sources);
     
-    if(classLoader == null) classLoader = Gate.getClassLoader();
-
     // filter out classes that are already known
     Iterator<Map.Entry<String, String>> srcIter = sourcesFiltered.entrySet().iterator();
     while(srcIter.hasNext()) {
@@ -207,7 +205,11 @@ public class Eclipse extends gate.util.Javac {
 
           // otherwise, try and load the class from the GATE classloader.
           String resourceName = className.replace('.', '/') + ".class";
-          InputStream is = classLoader.getResourceAsStream(resourceName);
+          
+          // there is no point looking into the classloader we are compiling
+          // into as it won't contain classes we aren't already compiling (and
+          // even if it did they would be found eventually)
+          InputStream is = Gate.getClassLoader().getResourceAsStream(resourceName);
           if (is != null) {
             if(DEBUG) {
               System.err.println("Found " + className + " in GATE classloader, "
@@ -427,8 +429,6 @@ public class Eclipse extends gate.util.Javac {
       }
     }
   }
-
-  private static GateClassLoader classLoader;
   
   private static final Logger log = Logger.getLogger(Eclipse.class);
 }

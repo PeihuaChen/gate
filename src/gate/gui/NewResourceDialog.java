@@ -15,16 +15,37 @@
 
 package gate.gui;
 
-import gate.*;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.Resource;
 import gate.creole.ResourceData;
 import gate.creole.ResourceInstantiationException;
 import gate.util.Err;
+
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.text.NumberFormat;
-import javax.swing.*;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.InputMap;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellEditor;
 
 public class NewResourceDialog extends JDialog {
@@ -263,6 +284,9 @@ public class NewResourceDialog extends JDialog {
                 }
               });
             }
+            else {
+              dispose();
+            }
           }
         }//public void run()
       };
@@ -271,5 +295,13 @@ public class NewResourceDialog extends JDialog {
       thread.start();
     }
   }// public synchronized Resource show(ResourceData rData)
+  
+  @Override
+  public void dispose() {
+    // when we have finished with the dialog release the data about the resource
+    // we were trying to create so that, at a later date, we can garbage collect
+    // the classloader if the plugin is unloaded
+    resourceData = null;
+  }
 
 }//class NewResourceDialog

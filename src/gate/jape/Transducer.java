@@ -17,20 +17,22 @@
 
 package gate.jape;
 
-import gate.Controller;
-import java.io.Serializable;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Vector;
-
 import gate.AnnotationSet;
+import gate.Controller;
 import gate.Document;
+import gate.Gate;
 import gate.creole.ExecutionException;
 import gate.creole.ontology.Ontology;
 import gate.event.ProgressListener;
 import gate.event.StatusListener;
 import gate.util.Benchmarkable;
+import gate.util.GateClassLoader;
+
+import java.io.Serializable;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Vector;
 
 
 /**
@@ -83,11 +85,12 @@ public abstract class Transducer implements Serializable, Benchmarkable
                                  AnnotationSet outputAS)
                                  throws JapeException, ExecutionException;
 
-  /** Finish: replace dynamic data structures with Java arrays; called
-    * after parsing.
-    */
-  public abstract void finish();
-
+  /**
+   * Finish: parsing is complete so now we need to do some small amount of final
+   * processing before loading the grammars into the specified classloader.
+   */
+  public abstract void finish(GateClassLoader classLoader);
+  
   /** Clean up (delete action class files, for e.g.). */
   public abstract void cleanUp();
 

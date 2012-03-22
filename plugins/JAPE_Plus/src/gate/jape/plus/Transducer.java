@@ -14,22 +14,30 @@
  */
 package gate.jape.plus;
 
-import gate.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Controller;
+import gate.Factory;
+import gate.Gate;
+import gate.LanguageAnalyser;
+import gate.Resource;
 import gate.creole.AbstractLanguageAnalyser;
+import gate.creole.ControllerAwarePR;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
+import gate.creole.ontology.Ontology;
 import gate.event.AnnotationSetEvent;
 import gate.event.AnnotationSetListener;
 import gate.event.ProgressListener;
 import gate.event.StatusListener;
-import gate.fsm.FSM;
 import gate.gui.ActionsPublisher;
 import gate.gui.MainFrame;
 import gate.jape.ControllerEventBlocksAction;
+import gate.jape.DefaultActionContext;
 import gate.jape.MultiPhaseTransducer;
 import gate.jape.Rule;
 import gate.jape.SinglePhaseTransducer;
@@ -38,15 +46,11 @@ import gate.jape.constraint.ConstraintPredicate;
 import gate.jape.parser.ParseCpsl;
 import gate.jape.parser.ParseException;
 import gate.util.Err;
+import gate.util.GateClassLoader;
 import gate.util.GateException;
-import gate.util.GateRuntimeException;
 import gate.util.Javac;
 import gate.util.persistence.PersistenceManager;
-import gate.jape.DefaultActionContext;
-import gate.creole.ControllerAwarePR;
-import gate.creole.ontology.Ontology;
 
-import java.awt.event.ActionEvent;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -57,9 +61,15 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -71,7 +81,6 @@ import javax.swing.JOptionPane;
 import org.apache.log4j.Logger;
 
 import com.ontotext.jape.pda.FSMPDA;
-import gate.jape.*;
 
 
 /**
@@ -231,7 +240,7 @@ public class Transducer extends AbstractLanguageAnalyser
       this.inputTypes = inputTypes;
     }    
     
-    public SPTBase generateSpt() throws ResourceInstantiationException {
+    public SPTBase generateSpt(GateClassLoader classLoader) throws ResourceInstantiationException {
       
       SPTBase optimisedTransducer = null;
       
@@ -244,12 +253,12 @@ public class Transducer extends AbstractLanguageAnalyser
           classes.put(ceabClassName, controllerEventsSourceCode);  
         }
         if(!classes.isEmpty()) {
-          Javac.loadClasses(classes);
+          Javac.loadClasses(classes, classLoader);
         }
         // compile the class
         @SuppressWarnings("unchecked")
         Class<? extends SPTBase> sptClass = (Class<? extends SPTBase>)
-            Gate.getClassLoader().loadClass(className);    
+            classLoader.loadClass(className);
         
         Constructor<? extends SPTBase> sptConstructor = sptClass.getConstructor(
           Rule[].class, Predicate[][].class);
@@ -258,7 +267,7 @@ public class Transducer extends AbstractLanguageAnalyser
           // attach the events block class
           optimisedTransducer.setControllerEventBlocksAction(
               ((Class<? extends ControllerEventBlocksAction>) 
-              Gate.getClassLoader().loadClass(ceabClassName)).newInstance());          
+              classLoader.loadClass(ceabClassName)).newInstance());          
         }
       } catch(SecurityException e) {
         throw new ResourceInstantiationException(e);
@@ -370,6 +379,11 @@ public class Transducer extends AbstractLanguageAnalyser
   protected transient SPTBase[] singlePhaseTransducers;
   
   /**
+   * The classloader instance this Transducer will compile jape classes into
+   */
+  private transient GateClassLoader classLoader = null;
+  
+  /**
    * The index in {@link #singlePhaseTransducers} for the SPT currently being
    * executed, if any, -1 otherwise.
    */
@@ -451,13 +465,19 @@ public class Transducer extends AbstractLanguageAnalyser
     super.init();
     initCustomConstraints();
     
+    if (classLoader != null) {
+      Gate.getClassLoader().forgetClassLoader(classLoader);
+    }
+    
     try {
       if(binaryGrammarURL != null){
         ObjectInputStream ois = new ObjectInputStream(
             new GZIPInputStream(
             new BufferedInputStream(binaryGrammarURL.openStream())));
         singlePhaseTransducersData = (SPTData[])ois.readObject();
+        classLoader = Gate.getClassLoader().getDisposableClassLoader(binaryGrammarURL.toExternalForm()+System.currentTimeMillis());
       }else if(grammarURL != null) {
+        classLoader = Gate.getClassLoader().getDisposableClassLoader(grammarURL.toExternalForm()+System.currentTimeMillis());
         parseJape();  
       } else {
         throw new ResourceInstantiationException(
@@ -466,7 +486,7 @@ public class Transducer extends AbstractLanguageAnalyser
       
       singlePhaseTransducers = new SPTBase[singlePhaseTransducersData.length];
       for(int  i = 0; i < singlePhaseTransducersData.length; i++) {
-        singlePhaseTransducers[i] = singlePhaseTransducersData[i].generateSpt();
+        singlePhaseTransducers[i] = singlePhaseTransducersData[i].generateSpt(classLoader);
         singlePhaseTransducers[i].addProgressListener(this);  
       }      
     } catch(IOException e) {
@@ -590,7 +610,7 @@ public class Transducer extends AbstractLanguageAnalyser
     SPTBuilder builder = new SPTBuilder();
     for(int i = 0; i < intermediate.getPhases().size(); i++){
       singlePhaseTransducersData[i] = builder.buildSPT(
-          (SinglePhaseTransducer)intermediate.getPhases().get(i));
+          (SinglePhaseTransducer)intermediate.getPhases().get(i),classLoader);
     }
   }
   
@@ -601,6 +621,11 @@ public class Transducer extends AbstractLanguageAnalyser
       aSpt.removeProgressListener(this);
       aSpt.cleanup();
     }
+    Gate.getClassLoader().forgetClassLoader(classLoader);
+  }
+  
+  public void finalize() {
+    Gate.getClassLoader().forgetClassLoader(classLoader);
   }
   
   @Override

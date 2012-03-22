@@ -1853,19 +1853,27 @@ public class MainFrame extends JFrame implements ProgressListener,
       || res instanceof VisualResource) return;
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-        NameBearerHandle handle = new NameBearerHandle(res, MainFrame.this);
-        DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);
+        
+        NameBearerHandle handle = null;
+        
         if(res instanceof Controller) {
+          handle = new NameBearerHandle(res, MainFrame.this);
+          DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);
           resourcesTreeModel.insertNodeInto(node, applicationsRoot, 0);
+          
         } else if(res instanceof ProcessingResource) {
+          handle = new NameBearerHandle(res, MainFrame.this);
+          DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);
           resourcesTreeModel.insertNodeInto(node, processingResourcesRoot, 0);
         }
         else if(res instanceof LanguageResource) {
+          handle = new NameBearerHandle(res, MainFrame.this);
+          DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);
           resourcesTreeModel.insertNodeInto(node, languageResourcesRoot, 0);
         }
 
-        handle.addProgressListener(MainFrame.this);
-        handle.addStatusListener(MainFrame.this);
+        if (handle != null) handle.addProgressListener(MainFrame.this);
+        if (handle != null) handle.addStatusListener(MainFrame.this);
       }
     });
 
@@ -4017,14 +4025,19 @@ public class MainFrame extends JFrame implements ProgressListener,
     protected void init() {
       addMenuListener(new MenuListener() {
         public void menuCanceled(MenuEvent e) {
-          // do nothing
+          menuDeselected(e);
         }
+        
         public void menuDeselected(MenuEvent e) {
           // clear the status
           statusChanged("");
-        }
-        public void menuSelected(MenuEvent e) {
+          
+          // clear the menu to release resource data and so that populating the
+          // menu happens quicker next time as it doesn't need to clear it first
           removeAll();
+        }
+        
+        public void menuSelected(MenuEvent e) {
           // find out the available types of LRs and repopulate the menu
           CreoleRegister reg = Gate.getCreoleRegister();
           List<String> resTypes;

@@ -20,6 +20,7 @@ import gate.AnnotationSet;
 import gate.Document;
 import gate.Factory;
 import gate.FeatureMap;
+import gate.Gate;
 import gate.jape.Transducer;
 import gate.jape.parser.ParseCpsl;
 import gate.jape.parser.ParseException;
@@ -1292,7 +1293,7 @@ private final AnnotationCreator annoCreator817Contexts = new BaseAnnotationCreat
     StringReader sr = new StringReader(japeRules);
     ParseCpsl parser = Factory.newJapeParser(sr, new HashMap<Object, Object>());
     Transducer transducer = parser.MultiPhaseTransducer();
-    transducer.finish();
+    transducer.finish(Gate.getClassLoader());
   }
 
   /* Set up for Runners */

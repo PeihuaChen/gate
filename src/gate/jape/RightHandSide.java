@@ -270,7 +270,7 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
 		try{
 			Map<String, String> actionClasses = new HashMap<String, String>();
 			actionClasses.put(className, getActionClassString());
-			gate.util.Javac.loadClasses(actionClasses);
+			gate.util.Javac.loadClasses(actionClasses, Gate.getClassLoader().getDisposableClassLoader(in.toString()));
 		}catch(Exception e1){
 			throw new GateRuntimeException (e1);
 		}

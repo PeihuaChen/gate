@@ -21,6 +21,7 @@ import gate.AnnotationSet;
 import gate.Document;
 import gate.event.ProgressListener;
 import gate.event.StatusListener;
+import gate.util.GateClassLoader;
 import gate.util.Out;
 import gate.util.Strings;
 
@@ -86,7 +87,7 @@ implements JapeConstants, java.io.Serializable
     * bad choice of names: this is not related to the weFinished
     * member or the finished method!
     */
-  public void finish() {
+  public void finish(GateClassLoader classloader) {
     lhs.finish();
   } // finish
 

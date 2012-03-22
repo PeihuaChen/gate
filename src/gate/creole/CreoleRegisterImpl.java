@@ -18,6 +18,7 @@ package gate.creole;
 
 import gate.Controller;
 import gate.CreoleRegister;
+import gate.Factory;
 import gate.Gate;
 import gate.Gate.DirectoryInfo;
 import gate.Gate.ResourceInfo;
@@ -341,8 +342,10 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
       CreoleAnnotationHandler annotationHandler =
         new CreoleAnnotationHandler(creoleFileUrl);
 
+      GateClassLoader gcl = Gate.getClassLoader().getDisposableClassLoader(creoleFileUrl.toExternalForm());
+
       // Add any JARs from the creole.xml to the GATE ClassLoader
-      annotationHandler.addJarsToClassLoader(jdomDoc);
+      annotationHandler.addJarsToClassLoader(gcl,jdomDoc);
 
       // Make sure there is a RESOURCE element for every resource type the
       // directory defines
@@ -429,6 +432,16 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
    */
   public ResourceData put(String key, ResourceData rd) {
 
+    if(super.containsKey(key)) {      
+      ResourceData rData = super.get(key);
+      rData.increaseReferenceCount();
+      if(DEBUG)
+        Out.println(key + " is already defined, new reference will be ignored.");
+
+      // TODO not sure what we should actually return here
+      return rData;
+    }
+    
     // get the resource implementation class
     Class<? extends Resource> resClass = null;
     try {
@@ -495,9 +508,34 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
       DirectoryInfo dInfo = Gate.getDirectoryInfo(directory);
       if(dInfo != null) {
         for(ResourceInfo rInfo : dInfo.getResourceInfoList()) {
+          ResourceData rData = get(rInfo.getResourceClassName());          
+          if (rData.getReferenceCount() == 1) {
+            // we only need to remove resources if we are actually going to
+            // remove the plugin
+            try {
+              List<Resource> loaded =
+                  getAllInstances(rInfo.getResourceClassName(),true);
+              for(Resource r : loaded) {
+                System.out.println(r);
+                Factory.deleteResource(r);
+  
+              }
+            } catch(GateException e) {
+              // not much we can do here other than dump the exception
+              e.printStackTrace();
+            }
+          }
+          
           remove(rInfo.getResourceClassName());
         }
       }
+      try {
+        Gate.getClassLoader().forgetClassLoader(new URL(directory,"creole.xml").toExternalForm());
+      }
+      catch (Exception e) {
+        e.printStackTrace();
+      }
+
       log.info("CREOLE plugin unloaded: " + directory);
     }
   }
@@ -509,10 +547,20 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   public ResourceData remove(Object key) {
     ResourceData rd = get(key);
     if(rd == null) return null;
+    
+    // TODO not sure what we should actually return here
+    if(rd.reduceReferenceCount() > 0) {
+      if(DEBUG)
+        Out.println(key
+            + " is still defined by another plugin so won't be unloaded");
+      return rd;
+    }
+    
     if(DEBUG) {
       Out.prln(key);
       Out.prln(rd);
     }
+    
     try {
       if(LanguageResource.class.isAssignableFrom(rd.getResourceClass())) {
         lrTypes.remove(rd.getClassName());
@@ -578,7 +626,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
   public Set<String> getToolTypes() {
     return Collections.unmodifiableSet(toolTypes);
   }
-  
+
   /** Get the list of types of packaged application resources in the register. */
   public Set<String>getApplicationTypes() {
     return Collections.unmodifiableSet(applicationTypes);
@@ -692,6 +740,11 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
    * doesn't return instances that have the hidden attribute set to "true"
    */
   public List<Resource> getAllInstances(String type) throws GateException {
+    return getAllInstances(type, false);
+  }
+
+
+  public List<Resource> getAllInstances(String type, boolean includeHidden) throws GateException {
     Iterator<String> typesIter = keySet().iterator();
     List<Resource> res = new ArrayList<Resource>();
     Class<? extends Resource> targetClass;
@@ -713,7 +766,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
             get(aType).getInstantiations().iterator();
           while(newInstancesIter.hasNext()) {
             Resource instance = newInstancesIter.next();
-            if(!Gate.getHiddenAttribute(instance.getFeatures())) {
+            if(includeHidden || !Gate.getHiddenAttribute(instance.getFeatures())) {
               res.add(instance);
             }
           }
@@ -1031,7 +1084,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
 
   /** A list of the types of TOOL in the register. */
   protected Set<String> toolTypes;
-  
+
   /** A list of the types of Packaged Applications in the register */
   protected Set<String> applicationTypes;
 

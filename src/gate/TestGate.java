@@ -49,7 +49,6 @@ import gate.util.TestFeatureMap;
 import gate.util.TestFiles;
 import gate.util.TestJavac;
 import gate.util.TestRBTreeMap;
-import gate.util.TestReload;
 import gate.util.TestTemplate;
 import gate.util.TestTools;
 import gate.xml.TestRepositioningInfo;
@@ -168,7 +167,6 @@ public class TestGate {
         suite.addTest(TestCreole.suite());
         suite.addTest(TestFiles.suite());
         suite.addTest(TestJavac.suite());
-        suite.addTest(TestReload.suite());
         suite.addTest(TestJape.suite());
         suite.addTest(TestTemplate.suite());
         /* The TCL tests rely on the application being started from the
