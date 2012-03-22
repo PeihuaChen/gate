@@ -51,6 +51,7 @@ import gate.jape.plus.Predicate.PredicateType;
 import gate.jape.plus.SPTBase.MatchMode;
 import gate.jape.plus.SPTBase.State;
 import gate.jape.plus.Transducer.SPTData;
+import gate.util.GateClassLoader;
 import gate.util.GateException;
 import gate.util.Javac;
 
@@ -99,7 +100,7 @@ public class SPTBuilder {
    */
   protected OpenIntIntHashMap oldToNewStates;
   
-  public SPTData buildSPT(SinglePhaseTransducer oldSpt) throws ResourceInstantiationException{
+  public SPTData buildSPT(SinglePhaseTransducer oldSpt, GateClassLoader classLoader) throws ResourceInstantiationException{
     annotationTypes = new ArrayList<String>();
     predicatesByType = new HashMap<String, List<Predicate>>();
     newStates = new ArrayList<SPTBase.State>();
@@ -108,7 +109,9 @@ public class SPTBuilder {
     rules = new Rule[oldSpt.getRules().size()];
     rules = ((List<Rule>) oldSpt.getRules()).toArray(rules);
     
-    oldSpt.finish();
+    //TODO not sure why this is being called from here but it needs to use the right classloader
+    oldSpt.finish(classLoader);
+    
     // FSM fsm = new FSM(oldSpt);
     FSMPDA fsm = (FSMPDA) oldSpt.getFSM();
     createNewStates(fsm);

@@ -103,7 +103,7 @@ public class ExpandCreoleXmls extends Task {
           Document creoleDoc = builder.build(creoleFile);
           annotationHandler.createResourceElementsForDirInfo(creoleDoc);
           if(!classesOnly) {
-            annotationHandler.addJarsToClassLoader(creoleDoc);
+            annotationHandler.addJarsToClassLoader(Gate.getClassLoader().getDisposableClassLoader(plugin.toURI().toURL().toString()), creoleDoc);
             annotationHandler.processAnnotations(creoleDoc);
           }
           

@@ -29,6 +29,7 @@ import gate.creole.metadata.HiddenCreoleParameter;
 import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
 import gate.util.Err;
+import gate.util.GateClassLoader;
 import gate.util.GateException;
 import gate.util.ant.ExpandIvy;
 
@@ -77,10 +78,10 @@ public class CreoleAnnotationHandler {
    *
    * @param jdomDoc JDOM document representing a parsed creole.xml file.
    */
-  public void addJarsToClassLoader(Document jdomDoc)
+  public void addJarsToClassLoader(GateClassLoader gcl, Document jdomDoc)
           throws IOException {
-    addJarsToClassLoader(jdomDoc.getRootElement());
-    addIvyDependencies(jdomDoc);
+    addJarsToClassLoader(gcl, jdomDoc.getRootElement());
+    addIvyDependencies(gcl, jdomDoc);
   }
   
   /**
@@ -90,7 +91,7 @@ public class CreoleAnnotationHandler {
    * @param creoleDoc
    *          JDOM document representing a parsed creole.xml file.
    */
-  private void addIvyDependencies(Document creoleDoc) throws IOException {
+  private void addIvyDependencies(GateClassLoader gcl, Document creoleDoc) throws IOException {
 
     try {
       List<Element> ivyElts = ExpandIvy.getIvyElements(creoleDoc);
@@ -112,7 +113,7 @@ public class CreoleAnnotationHandler {
             throw new Exception("Unable to resolve all IVY dependencies");
 
           for(ArtifactDownloadReport dlReport : report.getAllArtifactsReports()) {
-            Gate.getClassLoader().addURL(
+            gcl.addURL(
                 dlReport.getLocalFile().toURI().toURL());
           }
 
@@ -130,21 +131,21 @@ public class CreoleAnnotationHandler {
    * @param jdomElt JDOM element representing a creole.xml file
    */
   @SuppressWarnings("unchecked")
-  private void addJarsToClassLoader(Element jdomElt)
+  private void addJarsToClassLoader(GateClassLoader gcl, Element jdomElt)
           throws MalformedURLException {
     if("JAR".equals(jdomElt.getName())) {
       URL url = new URL(creoleFileUrl, jdomElt.getTextTrim());
       try {
         java.io.InputStream s = url.openStream();
         s.close();
-        Gate.getClassLoader().addURL(url);
+        gcl.addURL(url);
       } catch(IOException e) {
         Err.println("Error opening JAR "+url+" specified in creole file "+ creoleFileUrl +": "+e);
       }
     }
     else {
       for(Element child : (List<Element>)jdomElt.getChildren()) {
-        addJarsToClassLoader(child);
+        addJarsToClassLoader(gcl, child);
       }
     }
   }

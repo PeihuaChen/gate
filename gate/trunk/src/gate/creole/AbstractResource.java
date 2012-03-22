@@ -162,7 +162,7 @@ extends AbstractFeatureBearer implements Resource, Serializable
                  .newInstance( new Object[]{parameterValue} );
             } catch(Exception e) {
               //this didn't work; if the parameter value is String
-              //try to use the Parameter implementation for finding the 
+              //try to use the Parameter implementation for finding the
               //value
               if(String.class.isAssignableFrom(paramType)){
                 ResourceData rData = (ResourceData)Gate.getCreoleRegister().
@@ -174,7 +174,7 @@ extends AbstractFeatureBearer implements Resource, Serializable
                   Iterator paramIter = ((List)disjIter.next()).iterator();
                   while(param == null && paramIter.hasNext()){
                     Parameter aParam = (Parameter)paramIter.next();
-                    if(aParam.getName().equals(paramaterName)) param = aParam; 
+                    if(aParam.getName().equals(paramaterName)) param = aParam;
                   }
                 }
                 disjIter = pList.getRuntimeParameters().iterator();
@@ -182,7 +182,7 @@ extends AbstractFeatureBearer implements Resource, Serializable
                   Iterator paramIter = ((List)disjIter.next()).iterator();
                   while(param == null && paramIter.hasNext()){
                     Parameter aParam = (Parameter)paramIter.next();
-                    if(aParam.getName().equals(paramaterName)) param = aParam; 
+                    if(aParam.getName().equals(paramaterName)) param = aParam;
                   }
                 }
                 if(param != null){
@@ -195,7 +195,7 @@ extends AbstractFeatureBearer implements Resource, Serializable
                 }else{
                   //this should never happen
                   throw new LuckyException("Unknown parameter " + paramaterName +
-                          " for resource " + resource.getClass().getName() + 
+                          " for resource " + resource.getClass().getName() +
                           "!");
                 }
               }else{
@@ -413,11 +413,11 @@ extends AbstractFeatureBearer implements Resource, Serializable
               throws ResourceInstantiationException{
     setParameterValues(this, parameters);
   }
-  
+
   /**
    * Get the current values of the given parameters from the given
    * resource.
-   * 
+   *
    * @param res the resource
    * @param params a list of parameter disjunctions such as would
    *         be returned by {@link ParameterList#getInitimeParameters()}
@@ -433,7 +433,7 @@ extends AbstractFeatureBearer implements Resource, Serializable
     }
     return fm;
   }
-  
+
   /**
    * Get the current values for all of a specified resource's
    * registered init-time parameters.
@@ -450,7 +450,7 @@ extends AbstractFeatureBearer implements Resource, Serializable
 
     return getParameterValues(res, params.getInitimeParameters());
   }
-  
+
   /**
    * Get the current values for all this resource's registered
    * init-time parameters.
@@ -459,18 +459,7 @@ extends AbstractFeatureBearer implements Resource, Serializable
     return getInitParameterValues(this);
   }
 
-  private static int beanCount = 0;
-  private static Hashtable beanInfoCache = new Hashtable();
-
-  public static BeanInfo getBeanInfo (Class c) throws IntrospectionException
-  {
-    beanCount = beanCount + 1;
-    BeanInfo r = ((BeanInfo) beanInfoCache.get(c));
-    if (r == null) {
-      r = Introspector.getBeanInfo(c, Object.class);
-      beanInfoCache.put(c, r);
-    }
-    return r;
+  public static BeanInfo getBeanInfo (Class c) throws IntrospectionException {
+    return Introspector.getBeanInfo(c, Object.class);
   }
-
 } // class AbstractResource

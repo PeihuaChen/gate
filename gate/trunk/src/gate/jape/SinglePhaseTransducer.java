@@ -142,7 +142,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
    * Finish: replace dynamic data structures with Java arrays; called
    * after parsing.
    */
-  public void finish() {
+  public void finish(GateClassLoader classLoader) {
     // both MPT and SPT have finish called on them by the parser...
     if(finishedAlready) return;
     finishedAlready = true;
@@ -155,20 +155,20 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     // get duplicate class names.
     // Instead, we should modify and increment the classname until
     // we find one that is not already taken.
-    Map actionClasses = new HashMap(rules.size());
-    for(Iterator i = rules.iterator(); i.hasNext();) {
-      Rule rule = (Rule)i.next();
-      rule.finish();
+    Map<String,String> actionClasses = new HashMap<String,String>(rules.size());
+    for(Iterator<Rule> i = rules.iterator(); i.hasNext();) {
+      Rule rule = i.next();
+      rule.finish(classLoader);
       actionClasses.put(rule.getRHS().getActionClassName(), rule.getRHS()
               .getActionClassString());
     }
     try {
-      gate.util.Javac.loadClasses(actionClasses);
+      gate.util.Javac.loadClasses(actionClasses, classLoader);
     }
     catch(Exception e) {
       throw new GateRuntimeException(e);
     }
-    compileEventBlocksActionClass();
+    compileEventBlocksActionClass(classLoader);
 
     // build the finite state machine transition graph
     fsm = createFSM();
@@ -1222,17 +1222,17 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   private void readObject(java.io.ObjectInputStream in)
   throws IOException, ClassNotFoundException{
     in.defaultReadObject();
-    compileEventBlocksActionClass();
+    compileEventBlocksActionClass(Gate.getClassLoader());
   }
 
-  private void compileEventBlocksActionClass() {
+  private void compileEventBlocksActionClass(GateClassLoader classloader) {
     String sourceCode = generateControllerEventBlocksCode();
     if(sourceCode != null) {
 			Map<String,String> actionClasses = new HashMap<String,String>(1);
 			actionClasses.put(controllerEventBlocksActionClassName,
 			        sourceCode);
       try {
-			    gate.util.Javac.loadClasses(actionClasses);
+			    gate.util.Javac.loadClasses(actionClasses, classloader);
           controllerEventBlocksActionClass =
             Gate.getClassLoader().
               loadClass(controllerEventBlocksActionClassName).newInstance();

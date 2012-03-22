@@ -67,7 +67,7 @@ public class TestJavac extends TestCase{
       //load the class
       Map sources = new HashMap();
       sources.put("foo.bar.Outer", javaSource);
-      Javac.loadClasses(sources);
+      Javac.loadClasses(sources, Gate.getClassLoader());
       //try to access the class
       Class testClass = Gate.getClassLoader().loadClass("foo.bar.Outer");
       assertNotNull("Could not find decalred class", testClass);
@@ -110,7 +110,7 @@ public class TestJavac extends TestCase{
     sources.put("foo.bar.X", javaSource);
     boolean gotException = false;
     try {
-      Javac.loadClasses(sources);
+      Javac.loadClasses(sources,Gate.getClassLoader());
     }
     catch (GateException ge) {
       gotException = true;

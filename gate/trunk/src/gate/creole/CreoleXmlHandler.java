@@ -353,33 +353,52 @@ public class CreoleXmlHandler extends DefaultHandler {
       if(DEBUG) Out.println("added: " + resourceData);
       // Iterate through autoinstances and try to instanciate them
       if ( currentAutoinstances != null && !currentAutoinstances.isEmpty()){
-        Iterator<FeatureMap> iter = currentAutoinstances.iterator();
-        while (iter.hasNext()){
-          FeatureMap autoinstanceParams = iter.next();
-          iter.remove();
-          FeatureMap autoinstanceFeatures = null;
-          //if the hidden attribute was set in the parameters, create a feature 
-          //map and move the hidden attribute there.
-          if(Gate.getHiddenAttribute(autoinstanceParams)){
-            autoinstanceFeatures = Factory.newFeatureMap();
-            Gate.setHiddenAttribute(autoinstanceFeatures, true);
-            autoinstanceParams.remove(GateConstants.HIDDEN_FEATURE_KEY);
-          }
-          // Try to create the resource.
-          try {
-            // Resource res = 
-            Factory.createResource(
-                              resourceData.getClassName(), autoinstanceParams, 
-                              autoinstanceFeatures);
-            //resourceData.makeInstantiationPersistant(res);
-            // all resource instantiations are persistent
-          } catch(ResourceInstantiationException e) {
-            throw new GateSaxException(
-              "Couldn't auto-instantiate resource: " +
-              resourceData.getName() + "; problem was: " + e
-            );
-          }// End try
-        }// End while
+        ResourceData rd = Gate.getCreoleRegister().get(resourceData.getClassName());
+        ParameterList existingParameters = null;
+        if (rd.getReferenceCount() > 1) {
+          // we aren't going to redefine a resource but we do need to use the
+          // parameters from the new instance so we get the right base URL and
+          // default values etc.
+          existingParameters = rd.getParameterList();
+          rd.setParameterList(resourceData.getParameterList());
+        }
+        
+        try {
+          Iterator<FeatureMap> iter = currentAutoinstances.iterator();
+          while (iter.hasNext()){
+            FeatureMap autoinstanceParams = iter.next();
+            iter.remove();
+            FeatureMap autoinstanceFeatures = null;
+            //if the hidden attribute was set in the parameters, create a feature 
+            //map and move the hidden attribute there.
+            if(Gate.getHiddenAttribute(autoinstanceParams)){
+              autoinstanceFeatures = Factory.newFeatureMap();
+              Gate.setHiddenAttribute(autoinstanceFeatures, true);
+              autoinstanceParams.remove(GateConstants.HIDDEN_FEATURE_KEY);
+            }
+            
+            // Try to create the resource.
+            try {
+              // Resource res = 
+              Factory.createResource(
+                                resourceData.getClassName(), autoinstanceParams, 
+                                autoinstanceFeatures);
+              //resourceData.makeInstantiationPersistant(res);
+              // all resource instantiations are persistent
+            } catch(ResourceInstantiationException e) {
+              throw new GateSaxException(
+                "Couldn't auto-instantiate resource: " +
+                resourceData.getName() + "; problem was: " + e
+              );
+            }// End try
+          }// End while
+        }
+        finally {
+          // if we played around with the parameters of an already loaded
+          // resource then put them back before we break something
+          if (existingParameters != null)
+            rd.setParameterList(existingParameters);
+        }
       }// End if
       currentAutoinstances = null;
     // End RESOURCE processing

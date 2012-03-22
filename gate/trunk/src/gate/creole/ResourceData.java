@@ -54,6 +54,20 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
   protected static final String DEFAULT_OTHER_ICON = "application";
   /** Construction */
   public ResourceData() {  }// ResourceData
+  
+  private int refCount = 1;
+  
+  public int getReferenceCount() {
+    return refCount;
+  }
+  
+  public int reduceReferenceCount() {
+    return --refCount;
+  }
+  
+  public int increaseReferenceCount() {
+    return ++refCount;
+  }
 
   /** String representation */
   public String toString() {
@@ -111,35 +125,35 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
   public void setIcon(String icon) { this.icon = icon; }
 
   /** Get method for the resource icon */
-  public String getIcon() { 
+  public String getIcon() {
     //if icon not set try and guess it
     if(icon == null){
       icon = guessIcon();
     }
-    return icon; 
+    return icon;
   }
 
   /**
-   * Makes the best attempt of guessing an appropriate icon for this resource 
+   * Makes the best attempt of guessing an appropriate icon for this resource
    * type based on whether it is a Language Resource, a Processing Resource, or
    * something else.
-   * @return a String representing the file name for most appropriate icon for 
+   * @return a String representing the file name for most appropriate icon for
    * this resource type.
    */
   protected String guessIcon(){
     //if no class set we can't do any guessing
     if(className == null) return DEFAULT_OTHER_ICON;
     if(resourceClass == null) return DEFAULT_OTHER_ICON;
-    if(LanguageResource.class.isAssignableFrom(resourceClass)) 
+    if(LanguageResource.class.isAssignableFrom(resourceClass))
       return DEFAULT_LR_ICON;
-    if(ProcessingResource.class.isAssignableFrom(resourceClass)) 
+    if(ProcessingResource.class.isAssignableFrom(resourceClass))
       return DEFAULT_PR_ICON;
     return DEFAULT_OTHER_ICON;
   }
-  
+
   /** The stack of instantiations */
   protected List<Resource> instantiationStack = new CopyOnWriteArrayList<Resource>();
-  
+
   /**
    * Unmodifiable view of the instantiation stack, returned by
    * getInstantiations to ensure that the only way to modify the list is
@@ -150,7 +164,7 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
 
   /** This list contains all instances loaded from creole.xml with
    *  AUTOINSTANCE tag.
-   *  
+   *
    *  @deprecated No longer necessary as we don't use weak references
    *  for the instantiations.
    */
@@ -170,7 +184,7 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
   /** This method makes a certain resource persistent by adding it into a
     * persistantInstantiationList. It is used especially with AUTOINSTANCE tag
     * in creole xml.
-    * 
+    *
     * @deprecated No longer needed as we don't use weak references in the
     * instantiations stack.  Left for compatibility as a no-op.
     */
@@ -191,7 +205,7 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
 
   /**
    * Bump an instantiation to the top of the instantiation stack
-   * 
+   *
    * @deprecated This operation is no longer supported, and does nothing.
    */
   @Deprecated
@@ -232,7 +246,8 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
     */
   public Class<? extends Resource> getResourceClass() throws ClassNotFoundException {
     if(resourceClass == null) {
-      GateClassLoader classLoader = Gate.getClassLoader();
+      GateClassLoader classLoader = Gate.getClassLoader().getDisposableClassLoader(xmlFileUrl.toExternalForm());
+      if (classLoader == null) classLoader = Gate.getClassLoader();
       resourceClass = classLoader.loadClass(className).asSubclass(Resource.class);
     }
 
@@ -282,13 +297,13 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
 
   /** The helpURL string */
   protected String helpURL;
-  
+
   /** Get method for the resource helpURL */
   public String getHelpURL() { return helpURL; }
-  
+
   /** Set method for the resource helpURL */
   public void setHelpURL(String helpURL) { this.helpURL = helpURL; }
-  
+
   /** The set of parameter lists */
   protected ParameterList parameterList = new ParameterList();
 
@@ -396,10 +411,10 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
   }// setAnnotationTypeDisplayed
   /** A simple accessor for annotationTypeDisplayed field*/
   public String getAnnotationTypeDisplayed(){return annotationTypeDisplayed;}
-  
+
   // Sharable properties for duplication
   protected Collection<String> sharableProperties = new HashSet<String>();
-  
+
   /**
    * Get the collection of property names that should be treated as
    * sharable state when duplicating resources of this type.  The
@@ -409,7 +424,7 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
   public Collection<String> getSharableProperties() {
     return sharableProperties;
   }
-  
+
   /**
    * Initialize this ResourceData.  Called by CreoleXmlHandler once all
    * the properties of this ResourceData specified in the XML have been
@@ -418,7 +433,7 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
   public void init() throws Exception {
     determineSharableProperties(getResourceClass(), new HashSet<String>());
   }
-  
+
   private void determineSharableProperties(Class<?> cls, Collection<String> hiddenPropertyNames) throws GateException {
     for(Method m : cls.getDeclaredMethods()) {
       Sharable sharableAnnot = m.getAnnotation(Sharable.class);
@@ -444,7 +459,7 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
         }
       }
     }
-    
+
     // go up the class tree
     if(cls.getSuperclass() != null) {
       determineSharableProperties(cls.getSuperclass(), hiddenPropertyNames);
