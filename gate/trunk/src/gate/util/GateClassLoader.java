@@ -218,6 +218,9 @@ public class GateClassLoader extends URLClassLoader {
    *         classloader
    */
   public synchronized GateClassLoader getDisposableClassLoader(String id) {
+    
+    if (true) return this;
+    
     GateClassLoader gcl = childClassLoaders.get(id);
 
     if(gcl == null) {
