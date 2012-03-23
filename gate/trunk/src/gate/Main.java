@@ -25,22 +25,20 @@ import gate.util.GateException;
 import gate.util.OptionsMap;
 import gate.util.Out;
 import gate.util.Strings;
+import gate.util.ThreadWarningSystem;
 import gnu.getopt.Getopt;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.management.ThreadInfo;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -49,9 +47,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.RepaintManager;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -87,6 +83,20 @@ public class Main {
     * </UL>
     */
   public static void main(String[] args) throws GateException {
+    
+    ThreadWarningSystem tws = new ThreadWarningSystem();
+    tws.addListener(new ThreadWarningSystem.Listener() {
+      public void deadlockDetected(ThreadInfo inf) {
+        System.out.println("Deadlocked Thread:");
+        System.out.println("------------------");
+        System.out.println(inf);
+        for (StackTraceElement ste : inf.getStackTrace()) {
+          System.out.println("\t" + ste);
+        }
+      }
+      public void thresholdExceeded(ThreadInfo[] threads) { }
+    });
+    
     Main.annotatorArgsMap = null;
     // check we have a useable JDK
     if(

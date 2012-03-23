@@ -83,7 +83,7 @@ public class GateClassLoader extends URLClassLoader {
   }
 
   @Override
-  public synchronized URL getResource(String name) {
+  public URL getResource(String name) {
     URL result = null;
 
     result = super.getResource(name);
@@ -123,24 +123,22 @@ public class GateClassLoader extends URLClassLoader {
   public synchronized Class<?> loadClass(String name, boolean resolve,
       boolean localOnly) throws ClassNotFoundException {
 
-    try {
-      // first we see if we can find the class via the system class path
-      Class<?> found = findSystemClass(name);
-
+    if (!this.equals(Gate.getClassLoader())) {
       try {
-        super.findClass(name);
-        Err.println(name
-            + " is available via both the system classpath and a plugin; the plugin classes will be ignored");
+        // first we see if we can find the class via the system class path
+        Class<?> found = Gate.getClassLoader().getParent().loadClass(name);
+  
+        URL url = findResource(name.replace('.', '/') + ".class");
+        if (url != null)  Err.println(name
+              + " is available via both the system classpath and a plugin; the plugin classes will be ignored");
+  
+        // if we got to here then the class has been found via the system
+        // classpath so return it and stop looking
+        return found;
+  
       } catch(ClassNotFoundException e) {
-        // ignore this
+        // this can safely be ignored
       }
-
-      // if we got to here then the class has been found via the system
-      // classpath so return it and stop looking
-      return found;
-
-    } catch(ClassNotFoundException e) {
-      // this can safely be ignored
     }
 
     try {
@@ -218,8 +216,6 @@ public class GateClassLoader extends URLClassLoader {
    *         classloader
    */
   public synchronized GateClassLoader getDisposableClassLoader(String id) {
-    
-    if (true) return this;
     
     GateClassLoader gcl = childClassLoaders.get(id);
 
