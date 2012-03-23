@@ -26,7 +26,9 @@ import gate.Gate;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * GATE's class loader, which allows loading of classes over the net. A list of
@@ -94,7 +96,8 @@ public class GateClassLoader extends URLClassLoader {
       if(result != null) return result;
     }
 
-    for(GateClassLoader cl : childClassLoaders.values()) {
+    Set<GateClassLoader> children = new LinkedHashSet<GateClassLoader>(childClassLoaders.values());    
+    for(GateClassLoader cl : children) {
       result = cl.getResource(name);
       if(result != null) return result;
     }
