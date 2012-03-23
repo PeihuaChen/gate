@@ -25,7 +25,6 @@ import gate.util.GateException;
 import gate.util.OptionsMap;
 import gate.util.Out;
 import gate.util.Strings;
-import gate.util.ThreadWarningSystem;
 import gnu.getopt.Getopt;
 
 import java.awt.Dimension;
@@ -83,19 +82,6 @@ public class Main {
     * </UL>
     */
   public static void main(String[] args) throws GateException {
-    
-    ThreadWarningSystem tws = new ThreadWarningSystem();
-    tws.addListener(new ThreadWarningSystem.Listener() {
-      public void deadlockDetected(ThreadInfo inf) {
-        System.out.println("Deadlocked Thread:");
-        System.out.println("------------------");
-        System.out.println(inf);
-        for (StackTraceElement ste : inf.getStackTrace()) {
-          System.out.println("\t" + ste);
-        }
-      }
-      public void thresholdExceeded(ThreadInfo[] threads) { }
-    });
     
     Main.annotatorArgsMap = null;
     // check we have a useable JDK
