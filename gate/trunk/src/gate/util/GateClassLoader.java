@@ -30,6 +30,8 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 /**
  * GATE's class loader, which allows loading of classes over the net. A list of
  * URLs is searched, which should point at .jar files or to directories
@@ -37,6 +39,8 @@ import java.util.Set;
  * RHS action classes.
  */
 public class GateClassLoader extends URLClassLoader {
+
+  protected static final Logger log = Logger.getLogger(GateClassLoader.class);
 
   /** Debug flag */
   private static final boolean DEBUG = false;
@@ -96,7 +100,8 @@ public class GateClassLoader extends URLClassLoader {
       if(result != null) return result;
     }
 
-    Set<GateClassLoader> children = new LinkedHashSet<GateClassLoader>(childClassLoaders.values());    
+    Set<GateClassLoader> children =
+        new LinkedHashSet<GateClassLoader>(childClassLoaders.values());
     for(GateClassLoader cl : children) {
       result = cl.getResource(name);
       if(result != null) return result;
@@ -126,19 +131,20 @@ public class GateClassLoader extends URLClassLoader {
   public synchronized Class<?> loadClass(String name, boolean resolve,
       boolean localOnly) throws ClassNotFoundException {
 
-    if (!this.equals(Gate.getClassLoader())) {
+    if(!this.equals(Gate.getClassLoader())) {
       try {
         // first we see if we can find the class via the system class path
         Class<?> found = Gate.getClassLoader().getParent().loadClass(name);
-  
+
         URL url = findResource(name.replace('.', '/') + ".class");
-        if (url != null)  Err.println(name
+        if(url != null)
+          log.warn(name
               + " is available via both the system classpath and a plugin; the plugin classes will be ignored");
-  
+
         // if we got to here then the class has been found via the system
         // classpath so return it and stop looking
         return found;
-  
+
       } catch(ClassNotFoundException e) {
         // this can safely be ignored
       }
@@ -219,7 +225,7 @@ public class GateClassLoader extends URLClassLoader {
    *         classloader
    */
   public synchronized GateClassLoader getDisposableClassLoader(String id) {
-    
+
     GateClassLoader gcl = childClassLoaders.get(id);
 
     if(gcl == null) {

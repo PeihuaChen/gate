@@ -247,7 +247,6 @@ public class ResourceData extends AbstractFeatureBearer implements Serializable
   public Class<? extends Resource> getResourceClass() throws ClassNotFoundException {
     if(resourceClass == null) {
       GateClassLoader classLoader = Gate.getClassLoader().getDisposableClassLoader(xmlFileUrl.toExternalForm());
-      if (classLoader == null) classLoader = Gate.getClassLoader();
       resourceClass = classLoader.loadClass(className).asSubclass(Resource.class);
     }
 
