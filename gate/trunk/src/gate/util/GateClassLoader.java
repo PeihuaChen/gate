@@ -67,7 +67,7 @@ public class GateClassLoader extends URLClassLoader {
   public GateClassLoader(String name, URL[] urls, ClassLoader parent) {
     super(urls, parent);
     this.id = name;
-  } // Chaining constructor with URLs list.
+  }
 
   private String id = null;
 
@@ -111,7 +111,7 @@ public class GateClassLoader extends URLClassLoader {
   }
 
   @Override
-  public synchronized Class<?> loadClass(String name)
+  public Class<?> loadClass(String name)
       throws ClassNotFoundException {
     return loadClass(name, false, false);
   }
@@ -120,7 +120,7 @@ public class GateClassLoader extends URLClassLoader {
    * Delegate loading to the super class (loadClass has protected access there).
    */
   @Override
-  public synchronized Class<?> loadClass(String name, boolean resolve)
+  public Class<?> loadClass(String name, boolean resolve)
       throws ClassNotFoundException {
     return loadClass(name, resolve, false);
   }
@@ -128,7 +128,7 @@ public class GateClassLoader extends URLClassLoader {
   /**
    * Delegate loading to the super class (loadClass has protected access there).
    */
-  public synchronized Class<?> loadClass(String name, boolean resolve,
+  public Class<?> loadClass(String name, boolean resolve,
       boolean localOnly) throws ClassNotFoundException {
 
     if(!this.equals(Gate.getClassLoader())) {
@@ -171,7 +171,9 @@ public class GateClassLoader extends URLClassLoader {
         }
       }
 
-      for(GateClassLoader cl : childClassLoaders.values()) {
+      Set<GateClassLoader> children =
+        new LinkedHashSet<GateClassLoader>(childClassLoaders.values());
+      for(GateClassLoader cl : children) {      
         // the class isn't to be found in either this classloader or the main
         // GATE classloader so let's check all the other disposable classloaders
         try {
@@ -191,16 +193,16 @@ public class GateClassLoader extends URLClassLoader {
    * Forward a call to super.defineClass, which is protected and final in super.
    * This is used by JAPE and the Jdk compiler class.
    */
-  public synchronized Class<?> defineGateClass(String name, byte[] bytes,
+  public Class<?> defineGateClass(String name, byte[] bytes,
       int offset, int len) {
     return super.defineClass(name, bytes, offset, len);
-  } // defineGateClass(name, bytes, offset, len);
+  }
 
   /**
    * Forward a call to super.resolveClass, which is protected and final in
    * super. This is used by JAPE and the Jdk compiler class
    */
-  public synchronized void resolveGateClass(Class<?> c) {
+  public void resolveGateClass(Class<?> c) {
     super.resolveClass(c);
   }
 
@@ -208,7 +210,7 @@ public class GateClassLoader extends URLClassLoader {
    * Given a fully qualified class name, this method returns the instance of
    * Class if it is already loaded using the ClassLoader or it returns null.
    */
-  public synchronized Class<?> findExistingClass(String name) {
+  public Class<?> findExistingClass(String name) {
     return findLoadedClass(name);
   }
 
@@ -243,7 +245,7 @@ public class GateClassLoader extends URLClassLoader {
    * @param id
    *          the id of the classloader to forget
    */
-  public synchronized void forgetClassLoader(String id) {
+  public void forgetClassLoader(String id) {
     java.beans.Introspector.flushCaches();
     childClassLoaders.remove(id);
   }
@@ -255,7 +257,7 @@ public class GateClassLoader extends URLClassLoader {
    * @param classloader
    *          the classloader to forget
    */
-  public synchronized void forgetClassLoader(GateClassLoader classloader) {
+  public void forgetClassLoader(GateClassLoader classloader) {
     if(classloader != null) forgetClassLoader(classloader.getID());
   }
 }
