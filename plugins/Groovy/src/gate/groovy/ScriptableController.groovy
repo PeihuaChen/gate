@@ -95,7 +95,7 @@ eachDocument {
    */
   protected void parseScript() throws ExecutionException {
     try {
-      script = new GroovyShell(Gate.getClassLoader()).parse(
+      script = new GroovyShell(ScriptableController.class.getClassLoader()).parse(
           controlScript + "\n\n\n" + GroovySupport.STANDARD_IMPORTS)
       // replace the binding with our "active" one that delegates
       // corpus, controller and prs variables through to the controller

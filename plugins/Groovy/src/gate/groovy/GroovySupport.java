@@ -80,7 +80,7 @@ public class GroovySupport extends AbstractResource implements ActionsPublisher 
     catch(PersistenceException e) {
       throw new ResourceInstantiationException(e);
     }
-    
+
     return this;
   }
 
@@ -105,9 +105,9 @@ public class GroovySupport extends AbstractResource implements ActionsPublisher 
       DefaultGroovyMethods.mixin(clazz, classToMix);
     }
   }
-  
+
   private List<Action> actions;
-  
+
   public List getActions() {
     if(actions == null) {
       actions = new ArrayList<Action>();
@@ -118,7 +118,7 @@ public class GroovySupport extends AbstractResource implements ActionsPublisher 
         }
         private static final long serialVersionUID = 1L;
         public void actionPerformed(ActionEvent evt) {
-          groovy.ui.Console console = new groovy.ui.Console(Gate.getClassLoader()) {
+          groovy.ui.Console console = new groovy.ui.Console(GroovySupport.class.getClassLoader()) {
 
             /**
              * Overridden to (a) install a Binding that knows about the
@@ -137,7 +137,7 @@ public class GroovySupport extends AbstractResource implements ActionsPublisher 
                 }
               });
             }
-            
+
             /**
              * This is a workaround for a strange behaviour in Groovy. At some
              * point the superclass attempts to do "scriptRunning = false" from
@@ -159,7 +159,7 @@ public class GroovySupport extends AbstractResource implements ActionsPublisher 
               catch(Exception e) {
                 // give up
               }
-            } 
+            }
           };
           console.run();
         }
@@ -167,7 +167,7 @@ public class GroovySupport extends AbstractResource implements ActionsPublisher 
     }
     return actions;
   }
-  
+
   /**
    * Special Binding subclass that handles requests for the variables
    * corpora, docs, prs and apps by delegating to the creole register.
@@ -176,7 +176,7 @@ public class GroovySupport extends AbstractResource implements ActionsPublisher 
     GateBinding(Binding delegateBinding) {
       super(delegateBinding.getVariables());
     }
-    
+
     /**
      * Overridden to intercept requests for the 'pseudo-variables'
      * corpora, docs, prs and apps and direct them to the relevant
