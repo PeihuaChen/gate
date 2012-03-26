@@ -1,11 +1,11 @@
 /*
  * Copyright (c) 2010, The University of Sheffield.
- * 
+ *
  * This file is part of the GATE/Groovy integration layer, and is free software,
  * released under the terms of the GNU Lesser General Public Licence, version
  * 2.1 (or any later version). A copy of this licence is provided in the file
  * LICENCE in the distribution.
- * 
+ *
  * Groovy is developed by The Codehaus, details are available from
  * http://groovy.codehaus.org
  */
@@ -44,7 +44,7 @@ import org.codehaus.groovy.runtime.InvokerInvocationException;
 
 /**
  * Groovy Script PR.
- * 
+ *
  * @author Angus Roberts, Ian Roberts
  */
 @CreoleResource(name = "Groovy scripting PR", comment = "Runs a Groovy script as a processing resource", helpURL = "http://gate.ac.uk/userguide/sec:api:groovy", icon = "/gate/groovy/script-pr")
@@ -96,7 +96,7 @@ public class ScriptPR extends AbstractLanguageAnalyser implements
 
     // Create the shell, with the GateClassLoader as its parent (so the script
     // will have access to plugin classes)
-    GroovyShell groovyShell = new GroovyShell(Gate.getClassLoader());
+    GroovyShell groovyShell = new GroovyShell(ScriptPR.class.getClassLoader());
     StringBuilder scriptText = new StringBuilder();
 
     char[] buf = new char[4096];
@@ -166,7 +166,7 @@ public class ScriptPR extends AbstractLanguageAnalyser implements
    * Check whether the script declares a method with the given name that takes a
    * corpus parameter, and if so, call it passing the corpus from the given
    * controller. If the controller is not a CorpusController, do nothing.
-   * 
+   *
    * @throws ExecutionException
    *           if the script method throws an ExecutionException we re-throw it
    */
@@ -251,7 +251,7 @@ public class ScriptPR extends AbstractLanguageAnalyser implements
 
   /**
    * gets name of the output annotation set
-   * 
+   *
    * @return
    */
   public String getOutputASName() {
@@ -260,7 +260,7 @@ public class ScriptPR extends AbstractLanguageAnalyser implements
 
   /**
    * sets name of the output annotaiton set
-   * 
+   *
    * @param outputAS
    */
   @Optional
@@ -272,7 +272,7 @@ public class ScriptPR extends AbstractLanguageAnalyser implements
 
   /**
    * gets name of the input annotation set
-   * 
+   *
    * @return
    */
   public String getInputASName() {
@@ -281,7 +281,7 @@ public class ScriptPR extends AbstractLanguageAnalyser implements
 
   /**
    * sets name of the input annotaiton set
-   * 
+   *
    * @param inputAS
    */
   @Optional
@@ -293,7 +293,7 @@ public class ScriptPR extends AbstractLanguageAnalyser implements
 
   /**
    * gets URL of the Groovy script
-   * 
+   *
    * @return
    */
   public URL getScriptURL() {
@@ -302,7 +302,7 @@ public class ScriptPR extends AbstractLanguageAnalyser implements
 
   /**
    * sets File of the Groovy script
-   * 
+   *
    * @param script
    */
   @CreoleParameter(comment = "Location of the Groovy script that will be "
@@ -329,7 +329,7 @@ public class ScriptPR extends AbstractLanguageAnalyser implements
 
   /**
    * Get Map of parameters for the Groovy script
-   * 
+   *
    * @return
    */
   public FeatureMap getScriptParams() {
@@ -338,7 +338,7 @@ public class ScriptPR extends AbstractLanguageAnalyser implements
 
   /**
    * Set Map of parameters for the Groovy script
-   * 
+   *
    * @return
    */
   @Optional
@@ -351,7 +351,7 @@ public class ScriptPR extends AbstractLanguageAnalyser implements
 
   /**
    * Return the source of the loaded groovy script
-   * 
+   *
    * @return the source of the loaded groovy script
    */
   public String getGroovySrc() {
