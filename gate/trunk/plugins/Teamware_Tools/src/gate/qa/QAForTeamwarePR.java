@@ -53,11 +53,11 @@ import java.util.Set;
  * individual annotators. It also compares each individual annotator's
  * annotations with those available in the consensus annotation set in
  * the respective documents.
- * 
+ *
  * @author niraj
- * 
+ *
  */
-@CreoleResource(name = "QA Summariser for Teamware", 
+@CreoleResource(name = "QA Summariser for Teamware",
                 comment = "The Quality Assurance PR for teamware",
                 helpURL = "http://gate.ac.uk/userguide/sec:eval:qaForTW")
 public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
@@ -129,18 +129,6 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
   public Resource init() throws ResourceInstantiationException {
     f.setMaximumFractionDigits(2); // format used for all decimal values
     f.setMinimumFractionDigits(2);
-
-    // need to load the Tools plugin to load the quality assurance PR
-    File toolsPlugin = new File(Gate.getPluginsHome(), "Tools");
-    try {
-      Gate.getCreoleRegister().registerDirectories(toolsPlugin.toURI().toURL());
-    }
-    catch(MalformedURLException e) {
-      throw new ResourceInstantiationException(e);
-    }
-    catch(GateException e) {
-      throw new ResourceInstantiationException(e);
-    }
 
     // using QualityAssurancePR internally to calculate QA stats
     // but hiding this PR just in case
@@ -661,12 +649,12 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
               + (f.format((double)consensusMicro
                       / (columnAuthorNames.size() - 1))));
     }
-    
-    // if consensus annotation set exists, make sure the number used in 
-    // demoninator does not include consensus as one annotator 
-    int totalAuthors = consensusExists ? 
+
+    // if consensus annotation set exists, make sure the number used in
+    // demoninator does not include consensus as one annotator
+    int totalAuthors = consensusExists ?
             columnAuthorNames.size() - 1 : columnAuthorNames.size();
-    
+
     buffer.append("<br><b>Avg. IAA macro avg:</b> "
             + (f
                     .format((double)annotatorMacro
@@ -706,7 +694,7 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
    * the value of macro and micro figures. See documentation of the
    * getStyleTag(double) for more information on how cell backgrounds
    * are color coded.
-   * 
+   *
    * @param buffer
    * @param macro
    * @param micro
@@ -723,14 +711,14 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
 
   /**
    * Gets the style tag based on the score.
-   * 
+   *
    * The color green is used for a cell background to indicate full
    * agreement (i.e. 1.0). The background color becomes lighter as the
    * agreement reduces towards 0.5. At 0.5 agreement, the background
    * color of a cell is fully white. From 0.5 downwards, the color red
    * is used and as the agreement reduces further, the color becomes
    * darker with dark red at 0.0 agreement.
-   * 
+   *
    * @param score
    * @return
    */
@@ -759,7 +747,7 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
   /**
    * Given the annotator name, the method finds out the annotation set
    * which contains annotations for that annotator
-   * 
+   *
    * @param doc
    * @param annotatorName
    * @return
@@ -778,7 +766,7 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
 
   /**
    * Creating a temporary annotation set
-   * 
+   *
    * @param doc
    * @param inputAS
    * @param outputAS
@@ -796,7 +784,7 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
 
   /**
    * A method that calculates IAA between the given annotation sets
-   * 
+   *
    * @param corpus
    * @param keyAS
    * @param responseAS
@@ -851,7 +839,7 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
 
   /**
    * Annotation types for which the stats should be calculated
-   * 
+   *
    * @return
    */
   public List<String> getAnnotationTypes() {
@@ -860,7 +848,7 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
 
   /**
    * Annotation types for which the stats should be calculated
-   * 
+   *
    * @param annotationTypes
    */
   @RunTime
@@ -871,7 +859,7 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
 
   /**
    * Features names for which the stats should be calculated
-   * 
+   *
    * @return
    */
   public List<String> getFeatureNames() {
@@ -880,7 +868,7 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
 
   /**
    * Features names for which the stats should be calculated
-   * 
+   *
    * @param featureNames
    */
   @RunTime
@@ -892,7 +880,7 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
 
   /**
    * Measure to use for stats calculation
-   * 
+   *
    * @return
    */
   public Measure getMeasure() {
@@ -901,7 +889,7 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
 
   /**
    * Measure to use for stats calculation
-   * 
+   *
    * @param measure
    */
   @RunTime
@@ -912,7 +900,7 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
 
   /**
    * URL of the folder to store output files into
-   * 
+   *
    * @return
    */
   public URL getOutputFolderUrl() {
@@ -921,7 +909,7 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
 
   /**
    * URL of the folder to store output files into
-   * 
+   *
    * @param outputFolderUrl
    */
   @RunTime
@@ -932,7 +920,7 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
 
   /**
    * Storing individual results for each pair of annotators
-   * 
+   *
    * @author niraj
    */
   class Result {
