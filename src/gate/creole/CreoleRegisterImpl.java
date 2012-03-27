@@ -509,7 +509,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
       if(dInfo != null) {
         for(ResourceInfo rInfo : dInfo.getResourceInfoList()) {
           ResourceData rData = get(rInfo.getResourceClassName());          
-          if (rData.getReferenceCount() == 1) {
+          if (rData != null && rData.getReferenceCount() == 1) {
             // we only need to remove resources if we are actually going to
             // remove the plugin
             try {
