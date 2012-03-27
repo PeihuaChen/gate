@@ -582,7 +582,11 @@ public class AvailablePlugins extends JPanel {
         try {
           Gate.getCreoleRegister().registerDirectories(aPluginURL);
         } catch(GateException ge) {
-          throw new GateRuntimeException(ge);
+          //throw new GateRuntimeException(ge);
+          
+          //temp error message before I implement recursion to try and
+          //solve this problem
+          System.err.println("failed to register "+aPluginURL);
         }
       }
       if(!load && loaded) {

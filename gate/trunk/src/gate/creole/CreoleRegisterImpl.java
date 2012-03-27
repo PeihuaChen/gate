@@ -318,10 +318,10 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
           directoryXmlFileUrl);
         log.info("CREOLE plugin loaded: " + urlName);
       }
-      catch(GateException e) {
+      catch(Throwable e) {
         // it failed: remove it
         directories.remove(directoryUrl);
-        Gate.removeKnownPlugin(directoryUrl);
+        //Gate.removeKnownPlugin(directoryUrl);
         throw (new GateException("couldn't open creole.xml",e));
       }
     }
