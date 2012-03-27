@@ -516,9 +516,8 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
               List<Resource> loaded =
                   getAllInstances(rInfo.getResourceClassName(),true);
               for(Resource r : loaded) {
-                System.out.println(r);
-                Factory.deleteResource(r);
-  
+                //System.out.println(r);
+                Factory.deleteResource(r);  
               }
             } catch(GateException e) {
               // not much we can do here other than dump the exception
