@@ -100,8 +100,12 @@ public class GateClassLoader extends URLClassLoader {
       if(result != null) return result;
     }
 
-    Set<GateClassLoader> children =
+    Set<GateClassLoader> children;
+    synchronized(childClassLoaders) {
+      children =
         new LinkedHashSet<GateClassLoader>(childClassLoaders.values());
+    }
+    
     for(GateClassLoader cl : children) {
       result = cl.getResource(name);
       if(result != null) return result;
@@ -171,8 +175,12 @@ public class GateClassLoader extends URLClassLoader {
         }
       }
 
-      Set<GateClassLoader> children =
-        new LinkedHashSet<GateClassLoader>(childClassLoaders.values());
+      Set<GateClassLoader> children;
+      synchronized(childClassLoaders) {
+        children =
+          new LinkedHashSet<GateClassLoader>(childClassLoaders.values());
+      }
+      
       for(GateClassLoader cl : children) {      
         // the class isn't to be found in either this classloader or the main
         // GATE classloader so let's check all the other disposable classloaders
