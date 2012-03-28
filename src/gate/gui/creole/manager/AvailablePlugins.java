@@ -607,6 +607,7 @@ public class AvailablePlugins extends JPanel {
     while(!toLoad.isEmpty()) {
       //lets finally try loading all the plugings
       int numToLoad = toLoad.size();
+      List<Throwable> errors = new ArrayList<Throwable>();
       
       pluginIter = toLoad.iterator();
       while(pluginIter.hasNext()) {
@@ -616,15 +617,20 @@ public class AvailablePlugins extends JPanel {
         try {
           Gate.getCreoleRegister().registerDirectories(aPluginURL);
           pluginIter.remove();
-        } catch(GateException ge) {
+        } catch(Throwable ge) {
           //TODO suppress the errors unless we are going to break out of the loop
-          ge.printStackTrace();
+          //ge.printStackTrace();
+          errors.add(ge);
         }
       }
       
       if (numToLoad == toLoad.size()) {
         //we tried loading all the plugins and yet
         //we didn't actually achieve anything
+        for (Throwable t : errors) {
+          t.printStackTrace();
+        }        
+        
         break;
       }
     }
