@@ -41,13 +41,13 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -573,21 +573,15 @@ public class AvailablePlugins extends JPanel {
 
     // update the data structures to reflect the user's choices
     Iterator<URL> pluginIter = loadNowByURL.keySet().iterator();
+    
+    Set<URL> toLoad = new HashSet<URL>();
     while(pluginIter.hasNext()) {
       URL aPluginURL = pluginIter.next();
       boolean load = loadNowByURL.get(aPluginURL);
       boolean loaded = creoleDirectories.contains(aPluginURL);
       if(load && !loaded) {
-        // load the directory
-        try {
-          Gate.getCreoleRegister().registerDirectories(aPluginURL);
-        } catch(GateException ge) {
-          //throw new GateRuntimeException(ge);
-          
-          //temp error message before I implement recursion to try and
-          //solve this problem
-          System.err.println("failed to register "+aPluginURL);
-        }
+        // remember that we need to load this plugin
+        toLoad.add(aPluginURL);
       }
       if(!load && loaded) {
         // remove the directory
@@ -609,6 +603,24 @@ public class AvailablePlugins extends JPanel {
         Gate.removeAutoloadPlugin(aPluginURL);
       }
     }
+    
+    //lets finally try loading all the plugings
+    pluginIter = toLoad.iterator();
+    while(pluginIter.hasNext()) {
+      URL aPluginURL = pluginIter.next();
+      
+      // load the directory
+      try {
+        Gate.getCreoleRegister().registerDirectories(aPluginURL);
+      } catch(GateException ge) {
+        //throw new GateRuntimeException(ge);
+        
+        //temp error message before I implement recursion to try and
+        //solve this problem
+        System.err.println("failed to register "+aPluginURL);
+      }
+    }
+    
     loadNowByURL.clear();
     loadAlwaysByURL.clear();
   }
