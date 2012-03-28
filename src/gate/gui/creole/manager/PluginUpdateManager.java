@@ -21,7 +21,6 @@ import gate.resources.img.svg.AdvancedIcon;
 import gate.resources.img.svg.AvailableIcon;
 import gate.resources.img.svg.DownloadIcon;
 import gate.resources.img.svg.EditIcon;
-import gate.resources.img.svg.GATEIcon;
 import gate.resources.img.svg.GATEUpdateSiteIcon;
 import gate.resources.img.svg.InvalidIcon;
 import gate.resources.img.svg.OpenFileIcon;
@@ -43,7 +42,6 @@ import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Image;
 import java.awt.Robot;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -63,12 +61,12 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -443,7 +441,19 @@ public class PluginUpdateManager extends JDialog {
 
         // (un)load already installed plugins
         progressPanel.messageChanged("Updating CREOLE Plugin Configuration...");
-        installed.updateAvailablePlugins();
+        
+        Set<URL> failedPlugins = installed.updateAvailablePlugins();
+        if (!failedPlugins.isEmpty()) {
+          JOptionPane
+          .showMessageDialog(
+              PluginUpdateManager.this,
+              "<html><body style='width: 350px;'><b>Loading of "
+                  + failedPlugins.size()
+                  + " plugins failed!</b><br><br>"
+                  + "See the message pane for more details.</body></html>",
+              PluginUpdateManager.this.getTitle(),
+              JOptionPane.ERROR_MESSAGE);
+        }
 
         // refresh the tables to reflect what we have just done
         loadData();
