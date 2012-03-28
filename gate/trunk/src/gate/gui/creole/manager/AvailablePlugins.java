@@ -566,7 +566,7 @@ public class AvailablePlugins extends JPanel {
     return false;
   }
 
-  protected void updateAvailablePlugins() {
+  protected Set<URL> updateAvailablePlugins() {
 
     @SuppressWarnings("unchecked")
     Set<URL> creoleDirectories = Gate.getCreoleRegister().getDirectories();
@@ -604,25 +604,31 @@ public class AvailablePlugins extends JPanel {
       }
     }
     
-    //lets finally try loading all the plugings
-    pluginIter = toLoad.iterator();
-    while(pluginIter.hasNext()) {
-      URL aPluginURL = pluginIter.next();
-      
-      // load the directory
-      try {
-        Gate.getCreoleRegister().registerDirectories(aPluginURL);
-      } catch(GateException ge) {
-        //throw new GateRuntimeException(ge);
+    while(!toLoad.isEmpty()) {
+      //lets finally try loading all the plugings
+      pluginIter = toLoad.iterator();
+      while(pluginIter.hasNext()) {
+        URL aPluginURL = pluginIter.next();
         
-        //temp error message before I implement recursion to try and
-        //solve this problem
-        System.err.println("failed to register "+aPluginURL);
+        // load the directory
+        try {
+          Gate.getCreoleRegister().registerDirectories(aPluginURL);
+        } catch(GateException ge) {
+          //temp error message before I implement recursion to try and
+          //solve this problem
+          ge.printStackTrace();
+        }
       }
+      
+      //TODO iterate round to try loading any plugins
+      //which haven't been loaded yet 
+      break;
     }
     
     loadNowByURL.clear();
     loadAlwaysByURL.clear();
+    
+    return toLoad;
   }
 
   private class DeleteCreoleRepositoryAction extends AbstractAction {
