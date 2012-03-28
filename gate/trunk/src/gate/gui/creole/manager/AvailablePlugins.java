@@ -606,6 +606,8 @@ public class AvailablePlugins extends JPanel {
     
     while(!toLoad.isEmpty()) {
       //lets finally try loading all the plugings
+      int numToLoad = toLoad.size();
+      
       pluginIter = toLoad.iterator();
       while(pluginIter.hasNext()) {
         URL aPluginURL = pluginIter.next();
@@ -613,16 +615,18 @@ public class AvailablePlugins extends JPanel {
         // load the directory
         try {
           Gate.getCreoleRegister().registerDirectories(aPluginURL);
+          pluginIter.remove();
         } catch(GateException ge) {
-          //temp error message before I implement recursion to try and
-          //solve this problem
+          //TODO suppress the errors unless we are going to break out of the loop
           ge.printStackTrace();
         }
       }
       
-      //TODO iterate round to try loading any plugins
-      //which haven't been loaded yet 
-      break;
+      if (numToLoad == toLoad.size()) {
+        //we tried loading all the plugins and yet
+        //we didn't actually achieve anything
+        break;
+      }
     }
     
     loadNowByURL.clear();
