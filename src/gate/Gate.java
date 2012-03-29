@@ -418,7 +418,7 @@ public class Gate implements GateConstants {
     
     // register plugins installed in the user plugin directory
     File userPluginsHome = PluginUpdateManager.getUserPluginsHome();
-    if (userPluginsHome != null) {
+    if (userPluginsHome != null && userPluginsHome.isDirectory()) {
       for (File dir : userPluginsHome.listFiles()) {
         File creoleFile = new File(dir, "creole.xml");
         if(creoleFile.exists()) {
