@@ -50,6 +50,8 @@ import javax.swing.RepaintManager;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
+import org.apache.log4j.Logger;
+
 
 /** Top-level entry point for the GATE command-line and GUI interfaces.
   * <P>
@@ -151,6 +153,7 @@ public class Main {
     try{
       Gate.init();
     }catch(Throwable t){
+      log.error("Problem while initialising GATE", t);
       int selection = JOptionPane.showOptionDialog(
         null,
         "Error during initialisation:\n" + t.toString() +
@@ -159,7 +162,6 @@ public class Main {
         null, new String[]{"Cancel", "Start anyway"},
         "Cancel");
       if(selection != 1){
-        t.printStackTrace();
         System.exit(1);
       }
     }
@@ -199,7 +201,7 @@ public class Main {
             frame.setIconImage(Toolkit.getDefaultToolkit().getImage(
                   new URL(iconName)));
           } catch(MalformedURLException mue){
-            mue.printStackTrace(Err.getPrintWriter());
+            log.warn("Could not load application icon.", mue);
           }
         } // if
 
@@ -232,8 +234,7 @@ public class Main {
                 gate.util.persistence.PersistenceManager.loadObjectFromFile(sessionFile);
               }
             }catch(Exception e){
-              Err.prln("Failed to load session data:");
-              e.printStackTrace(Err.getPrintWriter());
+              log.warn("Failed to load session data", e);
             }finally{
               MainFrame.unlockGUI();
             }
@@ -491,6 +492,8 @@ public class Main {
   public static final String name = "GATE Developer";
   public static final String version;
   public static final String build;
+  
+  private static final Logger log = Logger.getLogger(Main.class);
 
   /** Process arguments and set up member fields appropriately.
     * Will shut down the process (via System.exit) if there are
