@@ -109,6 +109,7 @@ import org.apache.tools.ant.taskdefs.Expand;
  */
 @SuppressWarnings("serial")
 public class PluginUpdateManager extends JDialog {
+
   private PluginTableModel availableModel = new PluginTableModel(3);
 
   private PluginTableModel updatesModel = new PluginTableModel(4);
@@ -148,11 +149,16 @@ public class PluginUpdateManager extends JDialog {
       "http://vega.soi.city.ac.uk/~abdy181/software/GATE/gate-update-site.xml"};
 
   public static File getUserPluginsHome() {
-    // TODO move this into gate.util.OptionaMap as a getFile() method
+    
     if(userPluginDir == null) {
-	  String upd = System.getProperty(GATE_USER_PLUGINS, Gate.getUserConfig().getString(GATE_USER_PLUGINS));
+      String upd = System.getProperty(GATE_USER_PLUGINS, Gate.getUserConfig().getString(GATE_USER_PLUGINS));
       if(upd != null) {
         userPluginDir = new File(upd);
+        
+        if(!userPluginDir.exists() || !userPluginDir.isDirectory() || !userPluginDir.canWrite()) {
+          userPluginDir = null;
+          Gate.getUserConfig().remove(GATE_USER_PLUGINS);
+        }
       }
     }
     return userPluginDir;
