@@ -672,7 +672,6 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
     return Collections.unmodifiableList(instances);
   } // getVrInstances()
 
-  /** Get a list of instantiations of a type of LR in the register. */
   public List<LanguageResource> getLrInstances(String resourceTypeName) {
     ResourceData resData = get(resourceTypeName);
     if(resData == null) return Collections.emptyList();
@@ -681,7 +680,6 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
       LanguageResource.class);
   } // getLrInstances
 
-  /** Get a list of instantiations of a type of PR in the register. */
   public List<ProcessingResource> getPrInstances(String resourceTypeName) {
     ResourceData resData = get(resourceTypeName);
     if(resData == null) return Collections.emptyList();
@@ -690,7 +688,6 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
       .getInstantiations(), ProcessingResource.class);
   } // getPrInstances
 
-  /** Get a list of instantiations of a type of VR in the register. */
   public List<VisualResource> getVrInstances(String resourceTypeName) {
     ResourceData resData = get(resourceTypeName);
     if(resData == null) return Collections.emptyList();
@@ -734,10 +731,6 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
     return Collections.unmodifiableList(getPublicTypes(getControllerTypes()));
   }// getPublicPrTypes()
 
-  /**
-   * Gets all the instantiations of a given type and all its derivate types; It
-   * doesn't return instances that have the hidden attribute set to "true"
-   */
   public List<Resource> getAllInstances(String type) throws GateException {
     return getAllInstances(type, false);
   }

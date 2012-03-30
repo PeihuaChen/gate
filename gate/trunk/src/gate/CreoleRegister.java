@@ -149,13 +149,31 @@ public interface CreoleRegister extends Map<String, ResourceData>, Serializable,
   /** Get a list of all instantiations of VR in the register. */
   public List<VisualResource> getVrInstances();
 
-  /** Get a list of instantiations of a type of LR in the register. */
+  /**
+   * Get a list of all the known Language Resource instances in the register
+   * whose class is <code>resourceTypeName</code>.  This is only direct
+   * instances of the specified class, not its sub-classes, so if
+   * <code>resourceTypeName</code> refers to an interface or abstract class an
+   * empty list will be returned.
+   */
   public List<LanguageResource> getLrInstances(String resourceTypeName);
 
-  /** Get a list of instantiations of a type of PR in the register. */
+  /**
+   * Get a list of all the known Processing Resource instances in the register
+   * whose class is <code>resourceTypeName</code>.  This is only direct
+   * instances of the specified class, not its sub-classes, so if
+   * <code>resourceTypeName</code> refers to an interface or abstract class an
+   * empty list will be returned.
+   */
   public List<ProcessingResource> getPrInstances(String resourceTypeName);
 
-  /** Get a list of instantiations of a type of VR in the register. */
+  /**
+   * Get a list of all the known Visual Resource instances in the register
+   * whose class is <code>resourceTypeName</code>.  This is only direct
+   * instances of the specified class, not its sub-classes, so if
+   * <code>resourceTypeName</code> refers to an interface or abstract class an
+   * empty list will be returned.
+   */
   public List<VisualResource> getVrInstances(String resourceTypeName);
 
   /** Get a list of all non-private instantiations of LR in the register. */
@@ -180,8 +198,15 @@ public interface CreoleRegister extends Map<String, ResourceData>, Serializable,
   public List<String> getPublicControllerTypes();
 
   /**
-   * Gets all the instantiations of a given type and all its derivate types;
-   * It doesn't return instances that have the hidden attribute set to "true"
+   * Get a list of all the known Resource instances in the register that are of
+   * the specified (class or interface) type or one of its sub-types.
+   * Specifically, all known Resources <code>r</code> such that
+   * <pre>
+   * Gate.getClassLoader().loadClass(type).isInstance(r)
+   * </pre>
+   *
+   * Instances that are hidden (<code>Gate.getHiddenAttribute(r.getFeatures())
+   * == true</code>) are not included in the returned list.
    */
   public List<Resource> getAllInstances(String type) throws GateException;
 
