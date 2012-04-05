@@ -25,6 +25,7 @@ import gate.util.GateException;
 import gate.util.OptionsMap;
 import gate.util.Out;
 import gate.util.Strings;
+import gate.util.ThreadWarningSystem;
 import gnu.getopt.Getopt;
 
 import java.awt.Dimension;
@@ -37,6 +38,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
+import java.lang.management.ThreadInfo;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -94,6 +97,22 @@ public class Main {
         "GATE requires JDK " + Gate.getMinJdkVersion() + " or newer"
       );
     }
+    
+    ThreadWarningSystem tws = new ThreadWarningSystem();
+    tws.addListener(new ThreadWarningSystem.Listener() {
+      
+      final PrintStream out = System.out;
+      
+      public void deadlockDetected(ThreadInfo inf) {
+        out.println("Deadlocked Thread:");
+        out.println("------------------");
+        out.println(inf);
+        for (StackTraceElement ste : inf.getStackTrace()) {
+          out.println("\t" + ste);
+        }
+      }
+      public void thresholdExceeded(ThreadInfo[] threads) { }
+    });
 
     // process command-line options
     processArgs(args);
