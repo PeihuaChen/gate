@@ -22,7 +22,9 @@
 package gate.util;
 
 import gate.Gate;
+import gate.creole.AbstractResource;
 
+import java.beans.Introspector;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.LinkedHashMap;
@@ -254,7 +256,8 @@ public class GateClassLoader extends URLClassLoader {
    *          the id of the classloader to forget
    */
   public void forgetClassLoader(String id) {
-    java.beans.Introspector.flushCaches();
+    Introspector.flushCaches();
+    AbstractResource.flushBeanInfoCache();
     childClassLoaders.remove(id);
   }
 
