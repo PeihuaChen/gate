@@ -16,15 +16,30 @@
 
 package gate.creole;
 
-import java.beans.*;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.Resource;
+import gate.util.AbstractFeatureBearer;
+import gate.util.Err;
+import gate.util.GateException;
+import gate.util.LuckyException;
+import gate.util.Strings;
+import gate.util.Tools;
+
+import java.beans.BeanInfo;
+import java.beans.EventSetDescriptor;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
-
-import gate.*;
-import gate.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 
 /** A convenience implementation of Resource with some default code.
@@ -459,7 +474,19 @@ extends AbstractFeatureBearer implements Resource, Serializable
     return getInitParameterValues(this);
   }
 
-  public static BeanInfo getBeanInfo (Class c) throws IntrospectionException {
-    return Introspector.getBeanInfo(c, Object.class);
+  private static Map<Class<? extends Resource>, BeanInfo> beanInfoCache = new HashMap<Class<? extends Resource>,BeanInfo>();
+  
+  public static BeanInfo getBeanInfo(Class<? extends Resource> c) throws IntrospectionException {
+    
+    BeanInfo r = beanInfoCache.get(c);
+    if(r == null) {
+      r = Introspector.getBeanInfo(c, Object.class);
+      beanInfoCache.put(c, r);
+    }
+    return r;
   }
-} // class AbstractResource
+  
+  public static void flushBeanInfoCache() {
+    beanInfoCache.clear();
+  }
+}
