@@ -212,7 +212,7 @@ public class DefaultGazetteer extends AbstractGazetteer
 
     for(int i = 0; i< text.length(); i++) {
         currentChar = text.charAt(i);
-        isSpace = Character.isWhitespace(currentChar);
+        isSpace = Character.isSpaceChar(currentChar) || Character.isWhitespace(currentChar);
         if(isSpace) currentChar = ' ';
         else currentChar = (caseSensitive.booleanValue()) ?
                           currentChar :
@@ -244,7 +244,7 @@ public class DefaultGazetteer extends AbstractGazetteer
 
     for(int i = 0; i< text.length(); i++) {
         currentChar = text.charAt(i);
-        if(Character.isWhitespace(currentChar)) currentChar = ' ';
+        if ( Character.isSpaceChar(currentChar) || Character.isWhitespace(currentChar) ) currentChar = ' ';
         nextState = currentState.next(currentChar);
         if(nextState == null) return;//nothing to remove
         currentState = nextState;
@@ -326,7 +326,7 @@ public class DefaultGazetteer extends AbstractGazetteer
 
     while(charIdx < length) {
       currentChar = content.charAt(charIdx);
-      if(Character.isWhitespace(currentChar)) currentChar = ' ';
+      if( Character.isSpaceChar(currentChar) || Character.isWhitespace(currentChar) ) currentChar = ' ';
       else currentChar = caseSensitive.booleanValue() ?
                           currentChar :
                           Character.toUpperCase(currentChar);
@@ -467,7 +467,7 @@ public class DefaultGazetteer extends AbstractGazetteer
 
     for(int i = 0; i< singleItem.length(); i++) {
         currentChar = singleItem.charAt(i);
-        if(Character.isWhitespace(currentChar)) currentChar = ' ';
+        if ( Character.isSpaceChar(currentChar) || Character.isWhitespace(currentChar) ) currentChar = ' ';
         nextState = currentState.next(currentChar);
         if(nextState == null) {
           return set;
@@ -486,7 +486,7 @@ public class DefaultGazetteer extends AbstractGazetteer
 
     for(int i = 0; i< singleItem.length(); i++) {
         currentChar = singleItem.charAt(i);
-        if(Character.isWhitespace(currentChar)) currentChar = ' ';
+        if ( Character.isSpaceChar(currentChar) || Character.isWhitespace(currentChar) ) currentChar = ' ';
         nextState = currentState.next(currentChar);
         if(nextState == null) {
           return false;
