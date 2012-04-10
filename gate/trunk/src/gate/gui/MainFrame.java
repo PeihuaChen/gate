@@ -2016,12 +2016,13 @@ public class MainFrame extends JFrame implements ProgressListener,
           resourcesTreeModel.removeNodeFromParent(node);
           NameBearerHandle handle = (NameBearerHandle)node.getUserObject();
 
-          if(handle.viewsBuilt()
-            && mainTabbedPane.indexOfComponent(handle.getLargeView()) != -1) {
-            mainTabbedPane.remove(handle.getLargeView());
-          }
-          if(lowerScroll.getViewport().getView() == handle.getSmallView()) {
-            lowerScroll.getViewport().setView(null);
+          if(handle.viewsBuilt()) {
+            if(mainTabbedPane.indexOfComponent(handle.getLargeView()) != -1) {
+              mainTabbedPane.remove(handle.getLargeView());
+            }
+            if(lowerScroll.getViewport().getView() == handle.getSmallView()) {
+              lowerScroll.getViewport().setView(null);
+            }
           }
           return;
         }
@@ -2032,7 +2033,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   public void resourceRenamed(Resource resource, String oldName, String newName) {
     //first find the handle for the renamed resource
     Handle handle = findHandleForResource(resource);
-    if(handle != null){
+    if(handle != null && handle.viewsBuilt()){
       //next see if there is a tab for this resource and rename it
       for(int i = 0; i < mainTabbedPane.getTabCount(); i++) {
         if(mainTabbedPane.getTitleAt(i).equals(oldName) &&
@@ -2325,6 +2326,7 @@ public class MainFrame extends JFrame implements ProgressListener,
       while(nodesEnum.hasMoreElements()) {
         node = (DefaultMutableTreeNode)nodesEnum.nextElement();
         if ((node.getUserObject() instanceof Handle)
+         && ((Handle)node.getUserObject()).viewsBuilt()
          && (mainTabbedPane.getSelectedComponent().equals(
             ((Handle)node.getUserObject()).getLargeView()))) {
           handle = (Handle)node.getUserObject();
