@@ -114,6 +114,20 @@
     </junit>
   </target>
 
+  <target name="testtuplequery" depends="jar">
+    <junit fork="true" showoutput="yes" printsummary="yes"  maxmemory="${run.memory}">
+      <classpath>
+        <pathelement location="Ontology.jar" />
+        <path refid="classpath" />
+      </classpath>
+                        <!-- run headless -->
+      <sysproperty key="java.awt.headless" value="true" />
+      <formatter type="plain" />
+
+      <test name="gate.creole.ontology.impl.test.Test_TupleQuery" />
+    </junit>
+  </target>
+
 
   <target name="testtriplestore" depends="jar">
     <junit fork="true" showoutput="yes" printsummary="yes"  maxmemory="${run.memory}">
@@ -190,7 +204,7 @@
     </junit>
   </target>
 
-  <target name="test" depends="testowlim,testw3tests,testontotest1,testtriplestore,testontowine" />
+  <target name="test" depends="testowlim,testw3tests,testontotest1,testtuplequery,testtriplestore,testontowine" />
 
   <!-- Targets used by the main GATE build file -->
   <target name="build" depends="jar" />
