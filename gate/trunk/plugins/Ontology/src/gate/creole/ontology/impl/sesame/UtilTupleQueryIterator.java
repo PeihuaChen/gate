@@ -161,14 +161,21 @@ import org.openrdf.repository.RepositoryConnection;
       }
     }
 
-    // TODO: make this handle optional values correctly!
+    /**
+     * Returns the first variable of the next result row as a String.
+     * If the variable is unbound it is returned as an empty String.
+     * 
+     * @return 
+     */
     public String nextFirstAsString() {
-      String ret = nextFirstAsValue().stringValue();
-      //logger.debug("QS: "+ret);
-      return ret;
+      Value ret = nextFirstAsValue();
+      if(ret == null) {
+        return "";
+      } else {
+        return ret.stringValue();
+      }
     }
 
-    // TODO: make this handle optional values correctly!
     public LiteralOrONodeID nextFirst() {
       Value v = nextFirstAsValue();
       if(v instanceof BNode) {
@@ -185,7 +192,6 @@ import org.openrdf.repository.RepositoryConnection;
     }
 
 
-    // TODO: make this handle optional values correctly!
     public Value nextFirstAsValue() {
       if (mResult == null) {
         throw new GateOntologyException("No prepared query available");
@@ -201,7 +207,6 @@ import org.openrdf.repository.RepositoryConnection;
       return ret;
     }
 
-    // TODO: make this handle optional values correctly!
     public Vector<Value> nextAsValue() {
       if(!hasNext()) {
         throw new GateOntologyException("No more query results but next was called");
