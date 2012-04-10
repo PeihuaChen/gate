@@ -22,6 +22,7 @@ import gate.creole.ontology.ONodeID;
 import gate.creole.ontology.OConstants;
 import gate.creole.ontology.OntologyTupleQuery;
 import gate.creole.ontology.impl.LiteralOrONodeIDImpl;
+import gate.util.GateRuntimeException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -255,13 +256,19 @@ import org.openrdf.repository.RepositoryConnection;
      return result;
    }
 
-   // TODO: make this handle optional values correctly!
+   
+   /**
+    * Returns a vector of LiterOrONodeID object that represent a result row
+    * from the query. If a variable cannot be bound, the corresponding element
+    * in the vector is null.
+    * 
+    * @return 
+    */
     public Vector<LiteralOrONodeID> next() {
       if(!hasNext()) {
         throw new GateOntologyException("No more query results but next was called");
       }
       Vector<LiteralOrONodeID> result = new Vector<LiteralOrONodeID>();
-
       try { 
         BindingSet bindingSet = mResult.next();
         for (String bindingName : mVarnames) {
@@ -274,6 +281,14 @@ import org.openrdf.repository.RepositoryConnection;
           } else if(value instanceof org.openrdf.model.URI) {
              URI u = (URI)value;
              result.add(new LiteralOrONodeIDImpl(new OURIImpl(u.stringValue())));
+          } else {
+            // none of the above, this MUST be null, representing an anbound
+            // projection variable
+            if(value != null) {
+              throw new GateOntologyException("Odd result from SPARQL query: "+value+
+                " Query was: "+mQuery);
+            }
+            result.add(null);
           }
         }
       } catch (QueryEvaluationException e) {
