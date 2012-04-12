@@ -737,7 +737,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
 
 
   public List<Resource> getAllInstances(String type, boolean includeHidden) throws GateException {
-    Iterator<String> typesIter = keySet().iterator();
+    
     List<Resource> res = new ArrayList<Resource>();
     Class<? extends Resource> targetClass;
     try {
@@ -747,11 +747,11 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
     catch(ClassNotFoundException cnfe) {
       throw new GateException("Invalid type " + type);
     }
-    while(typesIter.hasNext()) {
-      String aType = typesIter.next();
+    for(Map.Entry<String,ResourceData> entry : entrySet()) {
+      String aType = entry.getKey();
       Class<?> aClass;
       try {
-        aClass = Gate.getClassLoader().loadClass(aType);
+        aClass = entry.getValue().getResourceClass();
         if(targetClass.isAssignableFrom(aClass)) {
           // filter out hidden instances
           Iterator<? extends Resource> newInstancesIter =
