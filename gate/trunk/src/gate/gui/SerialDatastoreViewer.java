@@ -14,25 +14,48 @@
  */
 package gate.gui;
 
-import java.awt.Point;
-import java.awt.event.*;
-import java.beans.BeanInfo;
-import java.beans.Introspector;
-import java.text.NumberFormat;
-import java.util.*;
-
-import javax.swing.*;
-import javax.swing.tree.*;
-
-import gate.*;
-import gate.creole.*;
+import gate.CreoleRegister;
+import gate.DataStore;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.Resource;
+import gate.VisualResource;
+import gate.creole.AbstractResource;
+import gate.creole.ResourceData;
+import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.GuiType;
 import gate.event.DatastoreEvent;
 import gate.event.DatastoreListener;
 import gate.persist.PersistenceException;
 import gate.security.SecurityException;
-import gate.util.*;
+import gate.util.Err;
+import gate.util.GateRuntimeException;
+import gate.util.Strings;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.text.NumberFormat;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Vector;
+
+import javax.swing.AbstractAction;
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
+import javax.swing.SwingUtilities;
+import javax.swing.event.TreeExpansionEvent;
+import javax.swing.event.TreeWillExpandListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.DefaultTreeSelectionModel;
+import javax.swing.tree.TreePath;
 
 @CreoleResource(name = "Serial Datastore Viewer", guiType = GuiType.LARGE,
     resourceDisplayed = "gate.persist.SerialDataStore", mainViewer = true)
@@ -161,25 +184,52 @@ public class SerialDatastoreViewer extends JScrollPane implements
     mainTree.setModel(treeModel);
     mainTree.setExpandsSelectedPaths(true);
     mainTree.expandPath(new TreePath(treeRoot));
+    
+    mainTree.addTreeWillExpandListener(new TreeWillExpandListener() {
+      @Override
+      public void treeWillCollapse(TreeExpansionEvent e) {
+        //ignore these events as we don't care about collapsing trees, timmmmmmmmmber!
+      }
+
+      @Override
+      public void treeWillExpand(TreeExpansionEvent e) {
+        TreePath path = e.getPath();
+        
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
+
+        if(node.getChildCount() == 0 && node.getUserObject() instanceof DSType) {
+          DSType dsType = (DSType)node.getUserObject();
+          if (dsType.expanded) return;
+          node.removeAllChildren();
+          try {
+            Iterator lrIDsIter = datastore.getLrIds(dsType.type).iterator();
+            while(lrIDsIter.hasNext()) {
+              String id = (String)lrIDsIter.next();
+              DSEntry entry =
+                  new DSEntry(datastore.getLrName(id), id, dsType.type);
+              DefaultMutableTreeNode lrNode =
+                  new DefaultMutableTreeNode(entry, false);
+              treeModel.insertNodeInto(lrNode, node, node.getChildCount());
+              node.add(lrNode);
+            }
+            dsType.expanded = true;
+          } catch(PersistenceException pe) {
+            throw new GateRuntimeException(pe.toString());
+          }
+        }
+      }
+    });
+    
     try {
       Iterator lrTypesIter = datastore.getLrTypes().iterator();
       CreoleRegister cReg = Gate.getCreoleRegister();
       while(lrTypesIter.hasNext()) {
         String type = (String)lrTypesIter.next();
         ResourceData rData = (ResourceData)cReg.get(type);
-        DefaultMutableTreeNode node = new DefaultMutableTreeNode(rData
-                .getName());
+        DSType dsType = new DSType(rData.getName(), type);
+        DefaultMutableTreeNode node = new DefaultMutableTreeNode(dsType);
+               
         treeModel.insertNodeInto(node, treeRoot, treeRoot.getChildCount());
-        mainTree.expandPath(new TreePath(new Object[] {treeRoot, node}));
-        Iterator lrIDsIter = datastore.getLrIds(type).iterator();
-        while(lrIDsIter.hasNext()) {
-          String id = (String)lrIDsIter.next();
-          DSEntry entry = new DSEntry(datastore.getLrName(id), id, type);
-          DefaultMutableTreeNode lrNode = new DefaultMutableTreeNode(entry,
-                  false);
-          treeModel.insertNodeInto(lrNode, node, node.getChildCount());
-          node.add(lrNode);
-        }
       }
     }
     catch(PersistenceException pe) {
@@ -386,7 +436,7 @@ public class SerialDatastoreViewer extends JScrollPane implements
     }
   }
 
-  class DSEntry {
+  static class DSEntry {
     DSEntry(String name, String id, String type) {
       this.name = name;
       this.type = type;
@@ -405,6 +455,20 @@ public class SerialDatastoreViewer extends JScrollPane implements
     String id;
 
   }// class DSEntry
+  
+  static class DSType {
+    String name, type;
+    boolean expanded = false;
+    
+    DSType(String name, String type) {
+      this.name = name;
+      this.type = type;
+    }
+    
+    public String toString() {
+      return name;
+    }
+  }
 
   DefaultMutableTreeNode treeRoot;
 
@@ -472,15 +536,21 @@ public class SerialDatastoreViewer extends JScrollPane implements
     boolean found = false;
     while(childrenEnum.hasMoreElements() && !found) {
       node = (DefaultMutableTreeNode)childrenEnum.nextElement();
-      found = node.getUserObject().equals(resType);
+      if (node.getUserObject() instanceof DSType) {
+        found = ((DSType)node.getUserObject()).name.equals(resType);
+      }
     }
     if(!found) {
       // exhausted the children without finding the node -> new type
       node = new DefaultMutableTreeNode(resType);
       treeModel.insertNodeInto(node, parent, parent.getChildCount());
     }
-    mainTree.expandPath(new TreePath(new Object[] {parent, node}));
+    //mainTree.expandPath(new TreePath(new Object[] {parent, node}));
 
+    if (node.getUserObject() instanceof DSType) {
+      if (!((DSType)node.getUserObject()).expanded) return;
+    }
+    
     // now look for the resource node
     parent = node;
     childrenEnum = parent.children();
