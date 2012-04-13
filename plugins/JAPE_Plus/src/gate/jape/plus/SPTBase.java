@@ -900,8 +900,9 @@ public abstract class SPTBase extends AbstractLanguageAnalyser {
              subClass == null || !(subClass instanceof OClass)) {
             result = false;
           } else {
-            result = subClass == superClass || ((OClass)subClass).isSubClassOf(
-                (OClass)superClass, Closure.TRANSITIVE_CLOSURE);
+            result = subClass.getONodeID().equals(superClass.getONodeID())  || 
+                ((OClass)subClass).isSubClassOf(
+                    (OClass)superClass, Closure.TRANSITIVE_CLOSURE);
           }
         } else {
           if(actualValue == null) {
