@@ -654,6 +654,7 @@ public class Transducer extends AbstractLanguageAnalyser
         actionContext.setPRFeatures(features);
         aSpt.setActionContext(actionContext);
         aSpt.setOntology(ontology);
+        aSpt.setUseLocalOntologyCache(useLocalOntologyCache);
         aSpt.execute();
         aSpt.setCorpus(null);
         aSpt.setDocument(null);
@@ -766,8 +767,32 @@ public class Transducer extends AbstractLanguageAnalyser
   public Ontology getOntology() {
     return ontology;
   }
+  
+  /**
+   * @return the useLocalOntologyCache
+   */
+  public Boolean getUseLocalOntologyCache() {
+    return useLocalOntologyCache;
+  }
+
+
+  /**
+   * @param useLocalOntologyCache the useLocalOntologyCache to set
+   */
+  @CreoleParameter(comment="<html>Should the transducer usea local cache to speed up " +
+  		"ontology based hierarchical matches? <br><b>You should only set this to true " +
+  		"if your rules do not modify the ontology</b>.</html>", 
+  		defaultValue="false")
+  @Optional
+  @RunTime  
+  public void setUseLocalOntologyCache(Boolean useLocalOntologyCache) {
+    this.useLocalOntologyCache = useLocalOntologyCache;
+  }
 
   protected Ontology ontology = null;
+  
+  protected Boolean useLocalOntologyCache = false;
+  
 
   // methods implementing ControllerAwarePR
   @Override
