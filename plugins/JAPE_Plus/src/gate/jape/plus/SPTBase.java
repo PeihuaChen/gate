@@ -302,7 +302,6 @@ public abstract class SPTBase extends AbstractLanguageAnalyser {
    */
   protected Ontology ontology;
 
-  protected Boolean useLocalOntologyCache = false;
   
   /**
    * The name for the input annotation set.
@@ -471,12 +470,6 @@ public abstract class SPTBase extends AbstractLanguageAnalyser {
    */
   protected List<FSMInstance> acceptingInstances;
 
-  
-  /**
-   * Local cache used when evaluating ontological subClass relations.
-   */
-  protected final transient Map<String, Map<Boolean, Set<String>>> ontologySubclassCache;
-  
   protected SPTBase(String phaseName, 
                     String[] bindingNames, 
                     String[] annotationTypes,
@@ -495,19 +488,6 @@ public abstract class SPTBase extends AbstractLanguageAnalyser {
     this.matchMode = matchMode;
     this.rules = rules;
     this.predicatesByType = predicatesByType;
-    
-    this.ontologySubclassCache = new LinkedHashMap<String, Map<Boolean, Set<String>>>(
-        1024, 0.75f, true) {
-      private static final long serialVersionUID = -955117556466694233L;
-      /* (non-Javadoc)
-       * @see java.util.LinkedHashMap#removeEldestEntry(java.util.Map.Entry)
-       */
-      @Override
-      protected boolean removeEldestEntry(Entry<String, 
-          Map<Boolean, Set<String>>> eldest) {
-        return size() > 1024;
-      }
-    };
   }
   
   
@@ -868,9 +848,14 @@ public abstract class SPTBase extends AbstractLanguageAnalyser {
         if(ontology != null && actualValue != null 
                 && predicate.annotationAccessor.getKey().toString()
                         .equals(ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME)) {
-          // we need to do ontological match: use the local cache
-          result = isSubClass(predicate.featureValue.toString(),
-              actualValue.toString(), ontology);
+          // we need to do ontological match
+          FeatureMap annFm = Factory.newFeatureMap();
+          annFm.put(ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME, 
+              actualValue.toString());
+          FeatureMap predFm = Factory.newFeatureMap();
+          predFm.put(ANNIEConstants.LOOKUP_CLASS_FEATURE_NAME, 
+              predicate.featureValue.toString());
+          result = annFm.subsumes(ontology, predFm);
         } else {
           if(actualValue == null) {
             result = false;
@@ -1029,102 +1014,6 @@ public abstract class SPTBase extends AbstractLanguageAnalyser {
     }
     return result;
   }
-  
-  /**
-   * 
-   * @param superClassName
-   * @param subClassName
-   * @return
-   */
-  protected boolean isSubClass(String superClassName, String subClassName, 
-      Ontology ontology){
-    Set<String> superclasses = null;
-    Set<String> nonsuperclasses = null;
-    if(useLocalOntologyCache){
-      Map<Boolean, Set<String>> classData = ontologySubclassCache.get(subClassName);
-      if(classData == null) {
-        classData = new HashMap<Boolean, Set<String>>();
-        classData.put(true, new HashSet<String>());
-        classData.put(false, new HashSet<String>());
-        ontologySubclassCache.put(subClassName, classData);
-      }
-      superclasses = classData.get(true);
-      nonsuperclasses = classData.get(false);
-      if(superclasses.contains(superClassName)){
-        return true;
-      } else if(nonsuperclasses.contains(superClassName)) {
-        return false;
-      }      
-    }
-    
-    // cache miss: calculate the real value
-    // let's first find out the classes with the names
-    OResource superClass = null;
-    List<OResource> classes = ontology.getOResourcesByName(superClassName);
-    if(classes.isEmpty()) {
-      superClass = null;
-    } else {
-      superClass = classes.get(0);
-      if(classes.size() > 1){
-        StringBuilder str = new StringBuilder("Ontology class name \"" +
-            superClassName + "\" is ambiguous: [");
-        boolean first = true;
-        for(OResource aClass : classes) {
-          if(first) {
-            first = false;
-          } else {
-            str.append(", ");
-          }
-          str.append(aClass.getONodeID().getNameSpace());
-          str.append(aClass.getONodeID().getResourceName());
-        }
-        str.append("].");
-        logger.warn(str.toString());
-      }
-    }
-    OResource subClass = null;
-    classes = ontology.getOResourcesByName(subClassName);
-    if(classes.isEmpty()) {
-      subClass = null;
-    } else {
-      subClass = classes.get(0);
-      if(classes.size() > 1){
-        StringBuilder str = new StringBuilder("Ontology class name \"" +
-            subClassName + "\" is ambiguous: [");
-        boolean first = true;
-        for(OResource aClass : classes) {
-          if(first) {
-            first = false;
-          } else {
-            str.append(", ");
-          }
-          str.append(aClass.getONodeID().getNameSpace());
-          str.append(aClass.getONodeID().getResourceName());
-        }
-        str.append("].");
-        logger.warn(str.toString());
-      }
-    }
-    boolean result;
-    if(superClass == null || !(superClass instanceof OClass) || 
-       subClass == null || !(subClass instanceof OClass)) {
-      result = false;
-    } else {
-      result = subClass.getONodeID().equals(superClass.getONodeID())  || 
-          ((OClass)subClass).isSubClassOf(
-              (OClass)superClass, Closure.TRANSITIVE_CLOSURE);
-    }
-    
-    if(useLocalOntologyCache) {
-      if(result) {
-        superclasses.add(superClassName);
-      } else {
-        nonsuperclasses.add(superClassName);
-      }      
-    }
-    return result;
-  }
-  
 
   /**
    * Runs the transducer.
@@ -1403,14 +1292,6 @@ public abstract class SPTBase extends AbstractLanguageAnalyser {
   public void setOntology(Ontology onto) {
     ontology = onto;
   }
-  
-  /**
-   * @param useLocalOntologyCache the useLocalOntologyCache to set
-   */
-  public void setUseLocalOntologyCache(Boolean useLocalOntologyCache) {
-    this.useLocalOntologyCache = useLocalOntologyCache;
-  }
-
 
   ControllerEventBlocksAction actionblocks;
   public void setControllerEventBlocksAction(ControllerEventBlocksAction abs) {
