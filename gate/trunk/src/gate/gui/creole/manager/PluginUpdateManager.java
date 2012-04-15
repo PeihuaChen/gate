@@ -974,11 +974,11 @@ public class PluginUpdateManager extends JDialog {
     pnlSuppress.setLayout(new BoxLayout(pnlSuppress, BoxLayout.X_AXIS));
     pnlSuppress.setBorder(BorderFactory
         .createTitledBorder("Suppress Warning Messages:"));
-    final JCheckBox chkUserPlugins =
-        new JCheckBox("User Plugin Directory Not Set", Gate.getUserConfig()
-            .getBoolean(SUPPRESS_USER_PLUGINS));
-    pnlSuppress.add(chkUserPlugins);
-    pnlSuppress.add(Box.createHorizontalStrut(10));
+    //final JCheckBox chkUserPlugins =
+    //    new JCheckBox("User Plugin Directory Not Set", Gate.getUserConfig()
+    //        .getBoolean(SUPPRESS_USER_PLUGINS));
+    //pnlSuppress.add(chkUserPlugins);
+    //pnlSuppress.add(Box.createHorizontalStrut(10));
     final JCheckBox chkUpdateInsatlled =
         new JCheckBox("Update Of Installed Plugin", Gate.getUserConfig()
             .getBoolean(SUPPRESS_UPDATE_INSTALLED));
@@ -986,14 +986,14 @@ public class PluginUpdateManager extends JDialog {
     ActionListener chkListener = new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent arg0) {
-        Gate.getUserConfig().put(SUPPRESS_USER_PLUGINS,
-            chkUserPlugins.isSelected());
+        //Gate.getUserConfig().put(SUPPRESS_USER_PLUGINS,
+        //    chkUserPlugins.isSelected());
         Gate.getUserConfig().put(SUPPRESS_UPDATE_INSTALLED,
             chkUpdateInsatlled.isSelected());
       }
     };
     chkUpdateInsatlled.addActionListener(chkListener);
-    chkUserPlugins.addActionListener(chkListener);
+    //chkUserPlugins.addActionListener(chkListener);
 
     // assemble the full panel and return it
     JPanel panel = new JPanel(new BorderLayout());
@@ -1071,7 +1071,7 @@ public class PluginUpdateManager extends JDialog {
       loadData();
 
       // warn the user if their plugni dir isn't set
-      if(userPluginDir == null
+      /*if(userPluginDir == null
           && !Gate.getUserConfig().getBoolean(SUPPRESS_USER_PLUGINS)) {
         JOptionPane
             .showMessageDialog(
@@ -1081,7 +1081,7 @@ public class PluginUpdateManager extends JDialog {
                     + "This can be achieved from the Configuration tab of the CREOLE Plugin Manager.",
                 "CREOLE Plugin Manager", JOptionPane.INFORMATION_MESSAGE,
                 new UserPluginIcon(48, 48));
-      }
+      }*/
     }
 
     // now actually show/hide the window
