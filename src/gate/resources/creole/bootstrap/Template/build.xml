@@ -14,8 +14,6 @@
 
    where {gate.home} is the directory in which GATE was installed.
 
-   $Id$
-
 =======================================================================-->
 <project name="Template" basedir="." default="all">
 
@@ -173,6 +171,5 @@
   <target name="build" depends="jar" />
   <target name="test" />
   <target name="distro.prepare" depends="clean.classes, clean.tests" />
-
 
 </project>
