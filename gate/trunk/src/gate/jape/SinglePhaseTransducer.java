@@ -976,7 +976,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   private String controllerEventBlocksActionClassName;
   private static final String nl = Strings.getNl();
   private static final String controllerEventBlocksActionClassSourceTemplate =
-    "package japeactionclasses;"+nl+
+    "package %%packagename%%;"+nl+
     "import java.io.*;"+nl+
     "import java.util.*;"+nl+
     "import gate.*;"+nl+
@@ -1024,7 +1024,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
     javaImportsBlock = javaimports;
   }
   
-  public String generateControllerEventBlocksCode() {
+  public String generateControllerEventBlocksCode(String packageName, String className) {
     String sourceCode = null;
     // if any of the three blocks is not null, set the corpusBlockActionClassSource
     // to the final source code of the class
@@ -1033,21 +1033,28 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
       sourceCode =
         controllerEventBlocksActionClassSourceTemplate;
 
-      boolean neednewclassname = true;
-      String  ceb_classname = "";
-      while(neednewclassname) {
-        ceb_classname =  "ControllerEventBlocksActionClass" +
-          actionClassNumber.getAndIncrement();
-        controllerEventBlocksActionClassName = "japeactionclasses." + ceb_classname;
-        try {
-          Gate.getClassLoader().loadClass(controllerEventBlocksActionClassName);
-          neednewclassname = true;
-        } catch (ClassNotFoundException e) {
-          neednewclassname = false;
+      // if this method is called with a classname, use that (this happens 
+      // when we are called from gate.jape.plus.SPTBuilder.buildSPT
+      // If we get null or the empty string as a classname, generate our own
+      String  ceb_classname = className;
+      if(className == null || className.isEmpty()) {
+        boolean neednewclassname = true;
+        while(neednewclassname) {
+          ceb_classname =  "ControllerEventBlocksActionClass" +
+            actionClassNumber.getAndIncrement();
+          controllerEventBlocksActionClassName = packageName + "." + ceb_classname;
+          try {
+            Gate.getClassLoader().loadClass(controllerEventBlocksActionClassName);
+            neednewclassname = true;
+          } catch (ClassNotFoundException e) {
+            neednewclassname = false;
+          }
         }
-      }
-      sourceCode =
-        sourceCode.replace("%%classname%%",ceb_classname);
+      } 
+      sourceCode = sourceCode
+        .replace("%%classname%%",ceb_classname)
+        .replace("%%packagename%%", packageName);
+        
       
       sourceInfo = new SourceInfo(controllerEventBlocksActionClassName,name,"controllerEvents");
       
@@ -1226,7 +1233,7 @@ public class SinglePhaseTransducer extends Transducer implements JapeConstants,
   }
 
   private void compileEventBlocksActionClass(GateClassLoader classloader) {
-    String sourceCode = generateControllerEventBlocksCode();
+    String sourceCode = generateControllerEventBlocksCode("japeactionclasses","");
     if(sourceCode != null) {
 			Map<String,String> actionClasses = new HashMap<String,String>(1);
 			actionClasses.put(controllerEventBlocksActionClassName,

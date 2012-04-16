@@ -171,7 +171,8 @@ public class SPTBuilder {
     }
 
     SPTData sptData = new SPTData(GENERATED_CLASS_PACKAGE + "." + className, 
-        sptCode.toString(), oldSpt.generateControllerEventBlocksCode(), rules, 
+        sptCode.toString(), 
+        oldSpt.generateControllerEventBlocksCode(GENERATED_CLASS_PACKAGE,className+"CEAB"), rules, 
         predicatesByTypeArray, (Set<String>)oldSpt.input);
     
     //cleanup
