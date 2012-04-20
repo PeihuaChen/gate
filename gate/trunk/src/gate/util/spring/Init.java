@@ -125,30 +125,42 @@ public class Init implements BeanFactoryAware {
     this.beanFactory = beanFactory;
   }
 
+  private File gateHome = null;
+
   public void setGateHome(Resource gateHome) throws IOException {
-    if(!Gate.isInitialised()) Gate.setGateHome(gateHome.getFile());
+    this.gateHome = gateHome.getFile();
   }
+
+  private File pluginsHome = null;
 
   public void setPluginsHome(Resource pluginsHome) throws IOException {
-    if(!Gate.isInitialised()) Gate.setPluginsHome(pluginsHome.getFile());
+    this.pluginsHome = pluginsHome.getFile();
   }
+
+  private File siteConfigFile = null;
 
   public void setSiteConfigFile(Resource siteConfigFile) throws IOException {
-    if(!Gate.isInitialised()) Gate.setSiteConfigFile(siteConfigFile.getFile());
+    this.siteConfigFile = siteConfigFile.getFile();
   }
+
+  private File userConfigFile = null;
 
   public void setUserConfigFile(Resource userConfigFile) throws IOException {
-    if(!Gate.isInitialised()) Gate.setUserConfigFile(userConfigFile.getFile());
+    this.userConfigFile = userConfigFile.getFile();
   }
+
+  private URL builtinCreoleDir = null;
 
   public void setBuiltinCreoleDir(Resource builtinCreoleDir) throws IOException {
-    if(!Gate.isInitialised())
-      Gate.setBuiltinCreoleDir(builtinCreoleDir.getURL());
+    this.builtinCreoleDir = builtinCreoleDir.getURL();
   }
 
+  // use Boolean rather than boolean so we can distinguish "set to false" from
+  // "not set"
+  private Boolean runInSandbox = null;
+
   public void setRunInSandbox(boolean runInSandbox) {
-    if(!Gate.isInitialised())
-      Gate.runInSandbox(runInSandbox);
+    this.runInSandbox = Boolean.valueOf(runInSandbox);
   }
 
   public void setPreloadPlugins(List<Resource> plugins) {
@@ -163,6 +175,14 @@ public class Init implements BeanFactoryAware {
   public void init() throws Exception {
     if(!Gate.isInitialised()) {
       log.info("Initialising GATE");
+
+      if(gateHome != null) Gate.setGateHome(gateHome);
+      if(pluginsHome != null) Gate.setPluginsHome(pluginsHome);
+      if(siteConfigFile != null) Gate.setSiteConfigFile(siteConfigFile);
+      if(userConfigFile != null) Gate.setUserConfigFile(userConfigFile);
+      if(builtinCreoleDir != null) Gate.setBuiltinCreoleDir(builtinCreoleDir);
+      if(runInSandbox != null) Gate.runInSandbox(runInSandbox.booleanValue());
+
       Gate.init();
     }
     else {
