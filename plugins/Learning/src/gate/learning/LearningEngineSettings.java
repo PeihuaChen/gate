@@ -103,6 +103,14 @@ public class LearningEngineSettings {
    * warning information.
    */
   public int verbosityLogService = LogService.NORMAL;
+  
+  public org.jdom.Document jdomDocSaved = null;
+  // After loading the learning settings from the URL this is either null
+  // for a non-file URL or the File correspinding to the settings if it
+  // is a file URL
+  public File configFile = null;
+  
+  public String experimentId = "";
 
   /** Loading the learning settings from the configuration file. */
   public static LearningEngineSettings loadLearningSettingsFromFile(
@@ -121,6 +129,13 @@ public class LearningEngineSettings {
           + "\" instead of \"ML-CONFIG\"!");
     // Create a learning setting object
     LearningEngineSettings learningSettings = new LearningEngineSettings();
+    if(xmlengines.getProtocol().equalsIgnoreCase("file")) { 
+      learningSettings.configFile = gate.util.Files.fileFromURL(xmlengines); 
+    }
+    learningSettings.jdomDocSaved = jdomDoc;
+    if(rootElement.getChild("EXPERIMENT-ID") != null) {
+      learningSettings.experimentId = rootElement.getChild("EXPERIMENT-ID").getTextTrim();
+    }
     learningSettings.surround = false;
     if(rootElement.getChild("SURROUND") != null) {
       String value = rootElement.getChild("SURROUND").getAttribute("value")

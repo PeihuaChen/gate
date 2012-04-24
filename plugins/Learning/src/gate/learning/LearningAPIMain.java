@@ -13,25 +13,16 @@ import gate.ProcessingResource;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
-import gate.util.Benchmark;
-import gate.util.Benchmarkable;
-import gate.util.BomStrippingInputStreamReader;
-import gate.util.Files;
-import gate.util.GateException;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import gate.util.*;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-
 import org.apache.log4j.Logger;
+import org.jdom.output.XMLOutputter;
 
 /**
  * The main object of the ML Api. It does initialiation, read parameter values
@@ -105,6 +96,9 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
 
   int maxNumApp;
 
+  String date_time_loaded = "";
+  static final DateFormat dateTimeStampFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+  
   /** Trivial constructor. */
   public LearningAPIMain() {
     // do nothing
@@ -158,9 +152,24 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
     try {
       // Creat the sub-directory of the workingdirectroy where the data
       // files will be stored in
+      long now = System.currentTimeMillis();
+      date_time_loaded = dateTimeStampFormat.format(new Date(now));
+      String startmsg = "A new session for NLP learning is starting: "+
+                date_time_loaded+
+                (learningSettings.experimentId.isEmpty() ? 
+                  "" : " experiment id "+learningSettings.experimentId);
+      String configMsg = configFileURL.toString();
+      if(learningSettings.configFile != null) {
+        long lastMod = learningSettings.configFile.lastModified();
+        configMsg += " (saved "+dateTimeStampFormat.format(new Date(lastMod))+
+                ", "+((now-lastMod)/1000)+"secs ago)";
+      }
+
       if(LogService.minVerbosityLevel > 0) {
         System.out.println("\n\n*************************");
-        System.out.println("A new session for NLP learning is starting.\n");
+        System.out.println(startmsg);
+        System.out.println(configMsg);
+        System.out.println();
       }
       wdResults =
               new File(wd, gate.learning.ConstantParameters.SUBDIRFORRESULTS);
@@ -171,7 +180,8 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
       LogService.init(logFile, true, learningSettings.verbosityLogService);
       StringBuffer logMessage = new StringBuffer();
       logMessage.append("\n\n*************************\n");
-      logMessage.append("A new session for NLP learning is starting.\n");
+      logMessage.append(startmsg);
+      logMessage.append(configMsg);
       // adding WorkingDirectory parameter in the benchmarkingFeatures
       benchmarkingFeatures.put("workingDirectory", wd.getAbsolutePath());
       logMessage.append("The initiliased time of NLP learning: "
@@ -739,14 +749,95 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
             }
             break;
           case EVALUATION:
-            if(LogService.minVerbosityLevel > 0)
-              System.out.println("** Evaluation mode:");
+            if(LogService.minVerbosityLevel > 0) {
+              System.out.println("** Evaluation mode started:");
+            }
             LogService.logMessage("** Evaluation mode:", 1);
             evaluation =
                     new EvaluationBasedOnDocs(corpus, wdResults, inputASName);
             benchmarkingFeatures.put("numDocs", corpus.size());
             startTime = Benchmark.startPoint();
+            String date_time_started = dateTimeStampFormat.format(startTime);
             evaluation.evaluation(learningSettings, lightWeightApi);
+            // Save the current learning settings and the evaluation result
+            // to an XML file in the same directory as the configuration file.
+            // The name is made up from the name of the config file, the
+            // value of EXPERIMENT-ID in the config file and the date and 
+            // time of the evaluation run.
+            if(getRunProtocolDir() != null) {
+              File configDir = learningSettings.configFile.getParentFile();
+              String fileNameBase = 
+                      learningSettings.configFile.getName().replaceAll("\\.xml$","");
+              String date_time_ended = dateTimeStampFormat.format(new Date());
+              String fileName = fileNameBase + 
+                ( learningSettings.experimentId.isEmpty() ? 
+                  "" : 
+                  "_" + learningSettings.experimentId) + "_" +
+                "evaluation_" + date_time_ended + ".xml";
+              File outFile = new File(configDir,fileName);
+              FileWriter fow;
+              PrintWriter log = null;
+              try {
+                fow = new FileWriter(outFile);
+                log = new PrintWriter(fow);
+              } catch (Exception ex) {
+                System.err.println("Got an exception creating the writers: "+ex);
+                ex.printStackTrace(System.err);
+              } 
+              if(log != null) {
+                // TODO: we probably should do this with jdom methods instead ...
+                log.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+                log.println("<ML-RUN>");
+                log.println("<learningMode>EVALUATION</learningMode>");
+                log.println("<corpus><![CDATA["+corpus.getName()+"]]></corpus>");
+                log.println("<date-loaded>"+date_time_loaded.substring(0,8)+"</date-loaded>"+
+                            "<time-loaded>"+date_time_loaded.substring(8)+"</time-loaded>");
+                log.println("<date-started>"+date_time_started.substring(0,8)+"</date-started>"+
+                            "<time-started>"+date_time_started.substring(8)+"</time-started>");
+                log.println("<date-ended>"+date_time_ended.substring(0,8)+"</date-ended>"+
+                            "<time-ended>"+date_time_ended.substring(8)+"</time-ended>");
+                for(int i=0;i<learningSettings.evaluationconfig.kk;i++) {
+                  
+                }
+                log.println("<overall>");
+                log.println("  <correct>"+evaluation.macroMeasuresOfResults.correct+"</correct>");
+                log.println("  <partialCorrect>"+evaluation.macroMeasuresOfResults.partialCor+"</partialCorrect>");
+                log.println("  <spurious>"+evaluation.macroMeasuresOfResults.spurious+"</spurious>");
+                log.println("  <missing>"+evaluation.macroMeasuresOfResults.missing+"</missing>");
+                log.println("  <precision>"+evaluation.macroMeasuresOfResults.precision+"</precision>");
+                log.println("  <recall>"+evaluation.macroMeasuresOfResults.recall+"</recall>");
+                log.println("  <f1>"+evaluation.macroMeasuresOfResults.f1+"</f1>");
+                log.println("  <precisionLenient>"+evaluation.macroMeasuresOfResults.precisionLenient+"</precisionLenient>");
+                log.println("  <recallLenient>"+evaluation.macroMeasuresOfResults.recallLenient+"</recallLenient>");
+                log.println("  <f1Lenient>"+evaluation.macroMeasuresOfResults.f1Lenient+"</f1Lenient>");
+                log.println("</overall>");
+                log.println("<per-run>");
+                for(int i=0;i<learningSettings.evaluationconfig.kk;i++) {
+                  log.println("  <run>");                  
+                  log.println("    <run-nr>"+i+"</run-nr>");
+                  EvaluationMeasuresComputation measuresPerRun = 
+                          evaluation.macroMeasuresOfResultsPerRun.get(i);
+                  log.println("    <correct>"+measuresPerRun.correct+"</correct>");
+                  log.println("    <partialCorrect>"+measuresPerRun.partialCor+"</partialCorrect>");
+                  log.println("    <spurious>"+measuresPerRun.spurious+"</spurious>");
+                  log.println("    <missing>"+measuresPerRun.missing+"</missing>");
+                  log.println("    <precision>"+measuresPerRun.precision+"</precision>");
+                  log.println("    <recall>"+measuresPerRun.recall+"</recall>");
+                  log.println("    <f1>"+measuresPerRun.f1+"</f1>");
+                  log.println("    <precisionLenient>"+measuresPerRun.precisionLenient+"</precisionLenient>");
+                  log.println("    <recallLenient>"+measuresPerRun.recallLenient+"</recallLenient>");
+                  log.println("    <f1Lenient>"+measuresPerRun.f1Lenient+"</f1Lenient>");                  
+                  log.println("  </run>");
+                }
+                log.println("</per-run>");
+                String jdomDocString = new XMLOutputter().outputString(learningSettings.jdomDocSaved.getRootElement());
+                log.println(jdomDocString);
+                log.println("</ML-RUN>");
+              } else {
+                System.err.println("No writer to write to!");
+              }
+              log.close();
+            }
             Benchmark.checkPoint(startTime, getBenchmarkId() + "."
                     + Benchmark.EVALUATION, this, benchmarkingFeatures);
             benchmarkingFeatures.remove("numDocs");
@@ -974,6 +1065,17 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
     return this.evaluation = eval;
   }
 
+  public void setRunProtocolDir(URL dir) {    
+    if(dir != null && !dir.getProtocol().startsWith("file")) {
+      throw new GateRuntimeException("runProtocolDir mut be a file URL");
+    }
+    runProtocolDir = dir;
+  }
+  public URL getRunProtocolDir() {
+    return runProtocolDir;
+  }
+  private URL runProtocolDir = null;
+  
   // /////// Benchmarkable ////////////////
   private String parentBenchmarkID;
 
