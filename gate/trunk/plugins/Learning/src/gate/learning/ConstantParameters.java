@@ -12,7 +12,7 @@ package gate.learning;
  */
 public class ConstantParameters {
   /** Maximal number of the unique NLP features. */
-  public static final long MAXIMUMFEATURES = 150000; // 5000000;
+  public static final long MAXIMUMFEATURES = 900000; // 5000000;
   /** Default name of configuration file. */
   public static final String NAMECONFIGURATIONFILE = "engines.xml";
   /** Name of file extension for all the files saved from the ML Api. */

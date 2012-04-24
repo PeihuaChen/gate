@@ -18,7 +18,10 @@
         OPTIONAL="false">java.net.URL</PARAMETER>
 
       <PARAMETER NAME="corpus" COMMENT="Corpus to be processed"
-        RUNTIME="true" OPTIONAL="false">gate.Corpus</PARAMETER>
+	      RUNTIME="true" OPTIONAL="false">gate.Corpus</PARAMETER>
+
+      <PARAMETER NAME="runProtocolDir" COMMENT="Directory to hold the run protocol files, no protocol files if not specified"
+	      RUNTIME="true" OPTIONAL="true">java.net.URL</PARAMETER>
 
       <PARAMETER NAME="learningMode"
         COMMENT="Train or classify the documents" RUNTIME="true" DEFAULT="TRAINING"
