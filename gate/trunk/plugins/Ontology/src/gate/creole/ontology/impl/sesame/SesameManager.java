@@ -628,7 +628,7 @@ public class SesameManager {
       try {
         mRepositoryConnection.add(from,baseURI,sesameFormat);
       } catch(Exception e) {
-        throw new SesameManagerException("Could not import: "+e);
+        throw new SesameManagerException("Could not import",e);
       }
     } else {
       throw new SesameManagerException("Cannot import, no connection");
