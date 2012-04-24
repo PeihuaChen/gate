@@ -54,7 +54,8 @@ public interface SesameCLIOptions {
   String getBaseURI();
   boolean isBaseURI();
 
-  @Option(shortName="t",longName="format",defaultValue="xml",description="Format: xml or turtle for triples, sparql or serql for queries ")
+  @Option(shortName="t",longName="format",defaultValue="rdf/xml",
+    description="Format: rdf/xml, turtle, n-triples, n3, trix, or trig for triples (if the file has a known extension, the format is ignored), sparql or serql for queries ")
   String getFormat();
   boolean isFormat();
 
