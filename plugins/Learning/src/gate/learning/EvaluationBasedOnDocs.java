@@ -54,6 +54,8 @@ public class EvaluationBasedOnDocs {
   String inputASName;
   /** Storing the macro averaged overall F-measure results of the evaluation. */
   public EvaluationMeasuresComputation macroMeasuresOfResults = new EvaluationMeasuresComputation();
+  public List<EvaluationMeasuresComputation> macroMeasuresOfResultsPerRun =
+          new ArrayList<EvaluationMeasuresComputation>();
   /** Storing the macro averaged results of every label. */
   HashMap labels2MMR = new HashMap();
   /**
@@ -195,6 +197,14 @@ public class EvaluationBasedOnDocs {
       // Add to the macro averaged figures
       add2MacroMeasure(measuresOfResults, labels2MR, macroMeasuresOfResults,
         labels2MMR, labels2RunsNum);
+      // calculate fold-specific measures
+      EvaluationMeasuresComputation foldMeasures = 
+              createRunMeasures(measuresOfResults, labels2MR);
+      macroMeasuresOfResultsPerRun.add(foldMeasures);
+      // show fold-specific measures if verbosity is not 0
+      if(LogService.minVerbosityLevel > 0) {
+        System.out.println("XVAL Fold "+nr+": "+foldMeasures.printResults());
+      }
     }
     macroMeasuresOfResults.macroAverage(k);
     for(Object obj : labels2MMR.keySet()) {
@@ -203,6 +213,26 @@ public class EvaluationBasedOnDocs {
       num = (int)(new Float(labels2InstNum.get(obj).toString()).floatValue() / num);
       labels2InstNum.put(obj, new Integer(num));
     }
+  }
+  
+  private EvaluationMeasuresComputation createRunMeasures(
+          EvaluationMeasuresComputation curResults, HashMap labels2MR) { 
+    
+      HashMap foldLabels2MMR = new HashMap();
+      HashMap foldLabels2RunsNum = new HashMap();
+      HashMap foldLabels2InstNum = new HashMap();
+      foldLabels2InstNum.putAll(labels2InstNum);
+      EvaluationMeasuresComputation retResults = 
+              new EvaluationMeasuresComputation();
+      add2MacroMeasure(curResults, labels2MR, retResults,
+              foldLabels2MMR, foldLabels2RunsNum);
+      for(Object obj : foldLabels2MMR.keySet()) {
+        int num = new Integer(foldLabels2RunsNum.get(obj).toString()).intValue();
+        ((EvaluationMeasuresComputation)foldLabels2MMR.get(obj)).macroAverage(num);
+        num = (int)(new Float(foldLabels2InstNum.get(obj).toString()).floatValue() / num);
+        foldLabels2InstNum.put(obj, new Integer(num));
+      }
+      return retResults;
   }
 
   /** Hold-out testing. */
@@ -307,6 +337,14 @@ public class EvaluationBasedOnDocs {
       // Add to the macro averaged figures
       add2MacroMeasure(measuresOfResults, labels2MR, macroMeasuresOfResults,
         labels2MMR, labels2RunsNum);
+      // calculate fold-specific measures
+      EvaluationMeasuresComputation foldMeasures = 
+              createRunMeasures(measuresOfResults, labels2MR);
+      macroMeasuresOfResultsPerRun.add(foldMeasures);
+      // show fold-specific measures if verbosity is not 0
+      if(LogService.minVerbosityLevel > 0) {
+        System.out.println("HOLDOUT Fold "+nr+": "+foldMeasures.printResults());
+      }
     }
     macroMeasuresOfResults.macroAverage(k);
     for(Object obj : labels2MMR.keySet()) {
