@@ -625,6 +625,10 @@ public class SesameManager {
   public void importIntoRepository(File from, String baseURI, String format) {
     if(mRepositoryConnection != null) {
       RDFFormat sesameFormat = RDFFormat.valueOf(format);
+      if(sesameFormat==null) {
+        throw new SesameManagerException(
+          "Could not import - format not supported: "+format);
+      }
       try {
         mRepositoryConnection.add(from,baseURI,sesameFormat);
       } catch(Exception e) {
