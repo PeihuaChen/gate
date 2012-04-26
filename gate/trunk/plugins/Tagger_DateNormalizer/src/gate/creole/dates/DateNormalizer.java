@@ -255,7 +255,6 @@ public class DateNormalizer extends AbstractLanguageAnalyser {
       if (word.length() > 0) pattern.append("|(").append(word).append(")");
     }    
     pattern.append(")\\b");
-    System.out.println(pattern.toString());
     Pattern finder = Pattern.compile(pattern.toString(),Pattern.CASE_INSENSITIVE);
     
     // get handles to the document content and the input and output annotation
