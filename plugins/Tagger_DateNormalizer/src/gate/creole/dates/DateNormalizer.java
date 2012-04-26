@@ -17,7 +17,6 @@ import gate.AnnotationSet;
 import gate.Factory;
 import gate.FeatureMap;
 import gate.Resource;
-import gate.Utils;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ExecutionInterruptedException;
@@ -26,7 +25,6 @@ import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
-import gate.util.OffsetComparator;
 
 import java.text.DateFormat;
 import java.text.NumberFormat;
@@ -37,12 +35,12 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import mark.util.DateParser;
 import mark.util.ParsePositionEx;
 
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 /**
@@ -205,7 +203,7 @@ public class DateNormalizer extends AbstractLanguageAnalyser {
   public Boolean getFailOnMissingInputAnnotations() {
     return failOnMissingInputAnnotations;
   }
-
+  
   @Override
   public Resource init() throws ResourceInstantiationException {
     // if a locale was specified in the init params then try and create such a
@@ -215,7 +213,8 @@ public class DateNormalizer extends AbstractLanguageAnalyser {
       if(locale == null)
         throw new ResourceInstantiationException("The locale specified, '"
             + localeName + "' is not valid");
-    }
+    }   
+    
     return this;
   }
 
@@ -249,6 +248,15 @@ public class DateNormalizer extends AbstractLanguageAnalyser {
     if(docLocale == null) docLocale = Locale.getDefault();
     // create an instance of the parser
     DateParser dp = new DateParser(docLocale);
+    
+    //now we have a parser create a regexp to look for possible dates
+    StringBuilder pattern = new StringBuilder("\\b(\\p{Alpha}");    
+    for (String word : dp.getWords()) {
+      pattern.append("|").append(word);
+    }    
+    pattern.append(")");    
+    Pattern finder = Pattern.compile(pattern.toString(),Pattern.CASE_INSENSITIVE);
+    
     // get handles to the document content and the input and output annotation
     // sets so that we can easily refer to them later
     String docContent = document.getContent().toString();
@@ -324,58 +332,31 @@ public class DateNormalizer extends AbstractLanguageAnalyser {
           (numericOutput ? Integer.parseInt(df.format(documentDate)) : df
               .format(documentDate)));
     }
-    // get a list of Token annotations
-    List<Annotation> tokens =
-        new ArrayList<Annotation>(inputAS.get(TOKEN_ANNOTATION_TYPE,
-            Factory.newFeatureMap()));
-    if(tokens.size() == 0) {
-      // if there are no tokens then either fail or print a warning
-      if(failOnMissingInputAnnotations) {
-        throw new ExecutionException(
-            "Either "
-                + document.getName()
-                + " does not have any contents or \n you need to run the tokenizer first");
-      } else {
-        Utils
-            .logOnce(
-                logger,
-                Level.INFO,
-                "Date Normalization: either a document does not have any text or you need to run the tokenizer first - see debug log for details.");
-        logger.debug("No input annotations in document " + document.getName());
-        return;
-      }
-    }
-    // sort the list of tokens so they are in document order
-    Collections.sort(tokens, new OffsetComparator());
-    // lets start at the beginning of the document
-    long start = 0;
-    // get the list of keywords from the parser (this includes things like
-    // today, tomorrow and the names of the days of the week and months of the
-    // year)
-    Set<String> words = dp.getWords();
-    for(Annotation token : tokens) {
-      // for each annotation...
+    
+    //get a matcher for possible dates over the content
+    Matcher m = finder.matcher(docContent);
+    
+    int start = 0;
+    while (m.find(start)) {
+            
+      // for each match of the regexp....
+      
       // if we have been asked to stop then do so
       if(isInterrupted()) { throw new ExecutionInterruptedException(
           "The execution of the \"" + getName()
               + "\" Date Normalizer has been abruptly interrupted!"); }
-      // if the token is before where we need to start from then skip it
-      if(token.getStartNode().getOffset() < start) continue;
+
       try {
-        // if the token isn't a number or a keyword then skip it as it can't
-        // possibly be the start of a date
-        if(!Character.isDigit(token.getFeatures().get("string").toString()
-            .charAt(0))
-            && !words.contains(token.getFeatures().get("string").toString()
-                .toLowerCase())) continue;
         // try and parse the document content starting from the beginning of the
         // current token
         Date d =
-            dp.parse(docContent,
-                pp.reset(token.getStartNode().getOffset().intValue()),
-                documentDate);
-        // if the text didn't parse skip on to the next token
-        if(d == null) continue;
+            dp.parse(docContent, pp.reset(m.start(1)), documentDate);
+        
+        if(d == null) {
+       // if the text didn't parse skip on to the next character and try again
+          start++;
+          continue;
+        }
         // create a FeatureMap to hold the parameters of the annotation we are
         // about to create
         FeatureMap params = Factory.newFeatureMap();
@@ -392,20 +373,21 @@ public class DateNormalizer extends AbstractLanguageAnalyser {
         // copy the relative date feature from the parser into the feature map
         params.put("relative", pp.getFeatures().get("relative"));
         // now create the annotation
-        outputAS.add(token.getStartNode().getOffset(), (long)pp.getIndex(),
-            annotationName, params);
+        outputAS.add((long)m.start(1), (long)pp.getIndex(), annotationName, params);
         // move parsing on to the end of the annotation we have just created in
         // order to avoid overlapping annotations
         start = pp.getIndex();
       } catch(Exception e) {
+        e.printStackTrace();
         // not quite sure how we got here but continue on by moving parsing to
-        // the end of the current token
-        start = token.getEndNode().getOffset();
+        // the next character in the document
+        start++;
       }
       // calcualte percentage complete using the parsing position within the
       // document content
       fireProgressChanged((int)(start / docContent.length()) * 100);
     }
+    
     // we have finished so update anyone who cares
     fireProcessFinished();
     fireStatusChanged("Dates detected and normalized in \""
