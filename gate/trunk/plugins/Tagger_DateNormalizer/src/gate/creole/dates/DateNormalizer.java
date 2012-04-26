@@ -250,11 +250,12 @@ public class DateNormalizer extends AbstractLanguageAnalyser {
     DateParser dp = new DateParser(docLocale);
     
     //now we have a parser create a regexp to look for possible dates
-    StringBuilder pattern = new StringBuilder("\\b(\\p{Alpha}");    
+    StringBuilder pattern = new StringBuilder("\\b([0-9]{1,4}");    
     for (String word : dp.getWords()) {
-      pattern.append("|").append(word);
+      if (word.length() > 0) pattern.append("|(").append(word).append(")");
     }    
-    pattern.append(")");    
+    pattern.append(")\\b");
+    System.out.println(pattern.toString());
     Pattern finder = Pattern.compile(pattern.toString(),Pattern.CASE_INSENSITIVE);
     
     // get handles to the document content and the input and output annotation
@@ -337,8 +338,10 @@ public class DateNormalizer extends AbstractLanguageAnalyser {
     Matcher m = finder.matcher(docContent);
     
     int start = 0;
-    while (m.find(start)) {
+    while (m.find()) {
             
+      if (m.start(1) <= start) continue;
+      
       // for each match of the regexp....
       
       // if we have been asked to stop then do so
