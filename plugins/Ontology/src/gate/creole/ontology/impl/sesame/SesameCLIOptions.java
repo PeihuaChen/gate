@@ -68,6 +68,9 @@ public interface SesameCLIOptions {
   String getColsep();
   boolean isColsep();
 
+  @Option(longName="addheader",description="(query only) if present, add the variable names in a header row to the output")
+  boolean isAddHeader();
+
   @Option(shortName="d")
   boolean isDebug();
   

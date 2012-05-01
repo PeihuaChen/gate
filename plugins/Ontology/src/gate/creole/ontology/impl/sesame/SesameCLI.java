@@ -26,6 +26,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
@@ -196,7 +197,7 @@ public class SesameCLI {
       System.err.println("from must be stdin or file (onyl file implemented yet)");
       System.exit(0);
     }
-    doQuery(queryString, max, colsep);
+    doQuery(queryString, max, colsep, options.isAddHeader());
 
   }
  
@@ -331,8 +332,20 @@ public class SesameCLI {
   }
 
 
-  private static void doQuery(String query, int max, String colsep) {
-    OntologyTupleQuery sq = mManager.createQuery(query);
+  private static void doQuery(String query, int max, String colsep, boolean addheaders) {
+    UtilTupleQueryIterator sq = (UtilTupleQueryIterator)mManager.createQuery(query);
+    sq.evaluate();
+    if(addheaders) {
+      int i = 0;
+      List<String> headers = sq.getBindingNames();
+      for(String varname : headers) {
+        System.out.print(varname);
+        if (i < headers.size()) {
+          System.out.print(colsep);
+        }  
+      }
+      System.out.println();
+    }
     int n = 0;
     // for now we remove a trailing new line and replace embedded newlines
     // and any occurrence of the colsep with a space.
