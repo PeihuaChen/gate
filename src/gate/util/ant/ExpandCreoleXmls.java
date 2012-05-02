@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import gate.Gate;
@@ -19,6 +20,10 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.FileSet;
 import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.filter.AbstractFilter;
+import org.jdom.filter.ElementFilter;
+import org.jdom.filter.Filter;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
 
@@ -105,6 +110,16 @@ public class ExpandCreoleXmls extends Task {
           if(!classesOnly) {
             annotationHandler.addJarsToClassLoader(Gate.getClassLoader().getDisposableClassLoader(plugin.toURI().toURL().toString()), creoleDoc);
             annotationHandler.processAnnotations(creoleDoc);
+          }
+          
+          // strip out SCAN="true" attributes as scanning has now been done
+          Iterator scannedJars = creoleDoc.getDescendants(new ElementFilter("JAR").and(new Filter() {
+            public boolean matches(Object o) {
+              return "true".equalsIgnoreCase(((Element)o).getAttributeValue("SCAN"));
+            }
+          }));
+          while(scannedJars.hasNext()) {
+            ((Element)scannedJars.next()).removeAttribute("SCAN");
           }
           
           destPlugin.mkdirs();
