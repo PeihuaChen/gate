@@ -47,11 +47,13 @@ import org.jdom.output.XMLOutputter;
  */
 public class ExpandCreoleXmls extends Task {
 
-  private static boolean gateInited = false;
-  
   private List<FileSet> srcFiles = new ArrayList<FileSet>();
   
   private File toDir;
+  
+  private File gateHome = null;
+  
+  private File pluginsHome = null;
 
   private boolean classesOnly = false;
   
@@ -85,8 +87,12 @@ public class ExpandCreoleXmls extends Task {
       throw new BuildException("Destination already exists and is not a directory", getLocation());
     }
 
-    if(!gateInited) {
+    if(Gate.isInitialised()) {
+      log("GATE already initialised, gatehome and pluginshome attributes ignored", Project.MSG_VERBOSE);
+    } else {
       try {
+        Gate.setGateHome(gateHome);
+        Gate.setPluginsHome(pluginsHome);
         Gate.init();
       }
       catch(GateException e) {
@@ -143,11 +149,11 @@ public class ExpandCreoleXmls extends Task {
   }
 
   public void setGateHome(File gateHome) {
-    Gate.setGateHome(gateHome);
+    this.gateHome = gateHome;
   }
   
   public void setPluginsHome(File pluginsHome) {
-    Gate.setPluginsHome(pluginsHome);
+    this.pluginsHome = pluginsHome;
   }
 
 }
