@@ -87,6 +87,30 @@ public interface OntologyTripleStore {
   public void addOntologyTripleStoreListener(
     OntologyTripleStoreListener listener);
   
+  /**
+   * Check if a given triple with an URI object is part of the ontology.
+   * 
+   * @param subject
+   * @param predicate
+   * @param object
+   * @return true if the triple with the given subject, predicate and object
+   * is either asserted or inferred in the ontology.
+   */
+  public boolean hasTriple(ONodeID subject, OURI predicate, ONodeID object);
+  
+  /**
+   * Check if a given triple with a literal object is part of the ontology.
+   * 
+   * @param subject
+   * @param predicate
+   * @param object
+   * @return true if the triple with the given subject, predicate and object
+   * is either asserted or inferred in the ontology.
+   */
+  public boolean hasTriple(ONodeID subject, OURI predicate, 
+    gate.creole.ontology.Literal object);
+  
+  
   /** 
    * Remove an existing listener for ontology triple store additions and removals. 
    * 
