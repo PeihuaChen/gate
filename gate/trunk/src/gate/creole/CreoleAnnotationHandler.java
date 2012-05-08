@@ -28,7 +28,6 @@ import gate.creole.metadata.GuiType;
 import gate.creole.metadata.HiddenCreoleParameter;
 import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
-import gate.util.Err;
 import gate.util.GateClassLoader;
 import gate.util.GateException;
 import gate.util.ant.ExpandIvy;
@@ -51,6 +50,7 @@ import org.apache.ivy.core.report.ArtifactDownloadReport;
 import org.apache.ivy.core.report.ResolveReport;
 import org.apache.ivy.core.resolve.ResolveOptions;
 import org.apache.ivy.util.filter.FilterHelper;
+import org.apache.log4j.Logger;
 import org.jdom.Document;
 import org.jdom.Element;
 
@@ -60,6 +60,8 @@ import org.jdom.Element;
  * declares.
  */
 public class CreoleAnnotationHandler {
+  
+  private static final Logger log = Logger.getLogger(CreoleAnnotationHandler.class);
 
   private URL creoleFileUrl;
   
@@ -140,7 +142,8 @@ public class CreoleAnnotationHandler {
         s.close();
         gcl.addURL(url);
       } catch(IOException e) {
-        Err.println("Error opening JAR "+url+" specified in creole file "+ creoleFileUrl +": "+e);
+        log.debug("Unable to add JAR " + url + " specified in creole file " + creoleFileUrl +
+            " to class loader, hopefully the required classes are already on the classpath.");
       }
     }
     else {
@@ -246,7 +249,8 @@ public class CreoleAnnotationHandler {
       resourceClass = Gate.getClassLoader().loadClass(className);
     }
     catch(ClassNotFoundException e) {
-      e.printStackTrace();
+      log.debug("Couldn't load class " + className + " for resource in "
+          + creoleFileUrl, e);
       throw new GateException("Couldn't load class " + className
               + " for resource in " + creoleFileUrl);
     }
