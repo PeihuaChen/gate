@@ -29,6 +29,7 @@ import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
+import gate.creole.metadata.Sharable;
 import gate.creole.ontology.Ontology;
 import gate.event.AnnotationSetEvent;
 import gate.event.AnnotationSetListener;
@@ -51,6 +52,7 @@ import gate.util.GateException;
 import gate.util.Javac;
 import gate.util.persistence.PersistenceManager;
 
+import java.awt.event.ActionEvent;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -70,6 +72,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -94,6 +97,9 @@ public class Transducer extends AbstractLanguageAnalyser
   private static final long serialVersionUID = 4194243737624821476L;
 
   private static final Logger log = Logger.getLogger(Transducer.class);
+  
+  private static final boolean DEBUG_DUPLICATION = false;
+  
   /**
    * A comparator for annotations based on start offset and inverse length.
    */
@@ -238,7 +244,19 @@ public class Transducer extends AbstractLanguageAnalyser
       this.rules = rules;
       this.predicatesByType = predicatesByType;
       this.inputTypes = inputTypes;
-    }    
+    }
+    
+    /**
+     * Copy constructor used when a Transducer is duplicated, to
+     * set up the singlePhaseTransducersData array with the same Rule
+     * instances that the duplicated SPTBases are using.
+     * @param that the SPTData we are duplicating
+     * @param duplicatedRules the Rule[] from the corresponding SPTBase.
+     */
+    SPTData(SPTData that, Rule[] duplicatedRules) {
+      this(that.className, that.lhsSourceCode, that.controllerEventsSourceCode,
+          duplicatedRules, that.predicatesByType, that.inputTypes);
+    }
     
     public SPTBase generateSpt(GateClassLoader classLoader) throws ResourceInstantiationException {
       
@@ -383,6 +401,30 @@ public class Transducer extends AbstractLanguageAnalyser
    */
   private transient GateClassLoader classLoader = null;
   
+  public GateClassLoader getClassLoader() {
+    return classLoader;
+  }
+
+  @Sharable
+  public void setClassLoader(GateClassLoader classLoader) {
+    this.classLoader = classLoader;
+  }
+  
+  /**
+   * Reference counter used when sharing the classLoader among duplicates of
+   * this transducer.
+   */
+  private transient AtomicInteger classLoaderRefCount = new AtomicInteger(0);
+
+  public AtomicInteger getClassLoaderRefCount() {
+    return classLoaderRefCount;
+  }
+
+  @Sharable
+  public void setClassLoaderRefCount(AtomicInteger classLoaderRefCount) {
+    this.classLoaderRefCount = classLoaderRefCount;
+  }
+
   /**
    * The index in {@link #singlePhaseTransducers} for the SPT currently being
    * executed, if any, -1 otherwise.
@@ -443,8 +485,24 @@ public class Transducer extends AbstractLanguageAnalyser
   public void setEncoding(String encoding) {
     this.encoding = encoding;
   }
-
   
+  private Transducer existingTransducer;
+  
+
+  public Transducer getExistingTransducer() {
+    if(existingTransducer == null) {
+      return this;
+    } else {
+      return existingTransducer;
+    }
+  }
+
+  @Sharable
+  public void setExistingTransducer(Transducer existingTransducer) {
+    this.existingTransducer = existingTransducer;
+  }
+
+
   /**
    * 
    */
@@ -456,48 +514,100 @@ public class Transducer extends AbstractLanguageAnalyser
     
     actions = new ArrayList<Action>();
     actions.add(new SerialiseTransducerAction());
+    if(DEBUG_DUPLICATION) {
+      actions.add(new AbstractAction("Duplicate") {
+  
+        @Override
+        public void actionPerformed(ActionEvent arg0) {
+          try {
+            Factory.duplicate(Transducer.this);
+          } catch(ResourceInstantiationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+        }          
+        
+      });
+    }
   }
 
  
   
   @Override
   public Resource init() throws ResourceInstantiationException {
-    super.init();
-    initCustomConstraints();
-    
-    if (classLoader != null) {
-      Gate.getClassLoader().forgetClassLoader(classLoader);
-    }
-    
     try {
-      if(binaryGrammarURL != null){
-        ObjectInputStream ois = new ObjectInputStream(
-            new GZIPInputStream(
-            new BufferedInputStream(binaryGrammarURL.openStream())));
-        singlePhaseTransducersData = (SPTData[])ois.readObject();
-        classLoader = Gate.getClassLoader().getDisposableClassLoader(binaryGrammarURL.toExternalForm()+System.currentTimeMillis());
-      }else if(grammarURL != null) {
-        classLoader = Gate.getClassLoader().getDisposableClassLoader(grammarURL.toExternalForm()+System.currentTimeMillis());
-        parseJape();  
-      } else {
-        throw new ResourceInstantiationException(
-            "Neither grammarURL or binaryGrammarURL parameters are set!");
-      }
+      super.init();
+      initCustomConstraints();
       
-      singlePhaseTransducers = new SPTBase[singlePhaseTransducersData.length];
-      for(int  i = 0; i < singlePhaseTransducersData.length; i++) {
-        singlePhaseTransducers[i] = singlePhaseTransducersData[i].generateSpt(classLoader);
-        singlePhaseTransducers[i].addProgressListener(this);  
-      }      
-    } catch(IOException e) {
-      throw new ResourceInstantiationException(e);
-    } catch(ParseException e) {
-      throw new ResourceInstantiationException(e);
-    } catch(ClassNotFoundException e) {
-      throw new ResourceInstantiationException(e);
+      if(existingTransducer != null) {
+        // we are duplicating
+        // we are sharing the same class loader, increment its ref count
+        classLoaderRefCount.incrementAndGet();
+        
+        this.singlePhaseTransducers = new SPTBase[existingTransducer.singlePhaseTransducers.length];
+        this.singlePhaseTransducersData = new SPTData[existingTransducer.singlePhaseTransducersData.length];
+        // spts and sptsData are guaranteed to be non-null and the same length
+        for(int i = 0; i < this.singlePhaseTransducers.length; i++) {
+          this.singlePhaseTransducers[i] = existingTransducer.singlePhaseTransducers[i].duplicate();
+          this.singlePhaseTransducers[i].addProgressListener(this);
+          // this duplicate's SPTData needs to refer to the same Rule[] as the
+          // *duplicated* SPTBase, not the original one.
+          this.singlePhaseTransducersData[i] = new SPTData(
+              existingTransducer.singlePhaseTransducersData[i],
+              this.singlePhaseTransducers[i].rules);
+        }
+      } else {
+        if (classLoader != null) {
+          if(classLoaderRefCount.decrementAndGet() == 0) {
+            Gate.getClassLoader().forgetClassLoader(classLoader);
+          }
+        }
+        
+        // sanity check parameters
+        if(binaryGrammarURL == null && grammarURL == null) {
+          throw new ResourceInstantiationException(
+              "Neither grammarURL or binaryGrammarURL parameters are set!");        
+        }
+        
+        try {
+          if(binaryGrammarURL != null){
+            ObjectInputStream ois = new ObjectInputStream(
+                new GZIPInputStream(
+                new BufferedInputStream(binaryGrammarURL.openStream())));
+            singlePhaseTransducersData = (SPTData[])ois.readObject();
+            classLoader = Gate.getClassLoader().getDisposableClassLoader(binaryGrammarURL.toExternalForm()+System.currentTimeMillis());
+            classLoaderRefCount.incrementAndGet();
+          }else if(grammarURL != null) {
+            classLoader = Gate.getClassLoader().getDisposableClassLoader(grammarURL.toExternalForm()+System.currentTimeMillis());
+            classLoaderRefCount.incrementAndGet();
+            parseJape();  
+          }
+          
+          singlePhaseTransducers = new SPTBase[singlePhaseTransducersData.length];
+          for(int  i = 0; i < singlePhaseTransducersData.length; i++) {
+            singlePhaseTransducers[i] = singlePhaseTransducersData[i].generateSpt(classLoader);
+            singlePhaseTransducers[i].addProgressListener(this);  
+          }      
+        } catch(IOException e) {
+          throw new ResourceInstantiationException(e);
+        } catch(ParseException e) {
+          throw new ResourceInstantiationException(e);
+        } catch(ClassNotFoundException e) {
+          throw new ResourceInstantiationException(e);
+        }
+      }
+      actionContext = initActionContext();
+      return this;
+    } catch(Exception e) {
+      if(classLoaderRefCount.decrementAndGet() == 0) {
+        Gate.getClassLoader().forgetClassLoader(classLoader);
+      }
+      if(e instanceof ResourceInstantiationException) {
+        throw (ResourceInstantiationException)e;
+      } else {
+        throw (RuntimeException)e;
+      }
     }
-    actionContext = initActionContext();
-    return this;
   }
 
   /**
@@ -621,11 +731,9 @@ public class Transducer extends AbstractLanguageAnalyser
       aSpt.removeProgressListener(this);
       aSpt.cleanup();
     }
-    Gate.getClassLoader().forgetClassLoader(classLoader);
-  }
-  
-  public void finalize() {
-    Gate.getClassLoader().forgetClassLoader(classLoader);
+    if(classLoaderRefCount.decrementAndGet() == 0) {
+      Gate.getClassLoader().forgetClassLoader(classLoader);
+    }
   }
   
   @Override

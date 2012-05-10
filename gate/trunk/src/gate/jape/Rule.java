@@ -45,6 +45,15 @@ implements JapeConstants, java.io.Serializable
     this.lhs = lhs;
     this.rhs = rhs;
   } // Construction
+  
+  /** Copy constructor */
+  public Rule(Rule existingRule) {
+    this.name = existingRule.name;
+    this.position = existingRule.position;
+    this.priority = existingRule.priority;
+    this.lhs = existingRule.lhs;
+    this.rhs = new RightHandSide(existingRule.rhs);
+  }
 
   /** The LHS or pattern of the rule. */
   private LeftHandSide lhs;
