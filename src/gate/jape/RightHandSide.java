@@ -157,6 +157,24 @@ public class RightHandSide implements JapeConstants, java.io.Serializable
     
     sourceInfo = new SourceInfo(actionClassQualifiedName, phaseName, ruleName);
   } // Construction from lhs
+  
+  /** Construction from an existing RHS */
+  public RightHandSide(RightHandSide existingRhs) {
+    this.lhs = existingRhs.lhs;
+    this.phaseName = existingRhs.phaseName;
+    this.ruleName = existingRhs.ruleName;
+    this.actionClassName = existingRhs.actionClassName;
+    this.blockNames = existingRhs.blockNames;
+    this.actionClassString = existingRhs.actionClassString;
+    this.actionClassJavaFileName = existingRhs.actionClassJavaFileName;
+    this.actionClassQualifiedName = existingRhs.actionClassQualifiedName;
+    this.actionClassClassFileName = existingRhs.actionClassClassFileName;
+    this.sourceInfo = existingRhs.sourceInfo;
+    
+    // this is the important bit - the cloned RHS needs to create its own
+    // instance of the action class the first time its transduce() is called.
+    this.theActionObject = null;
+  } // Construction from existing RHS
 
   /** Add an anonymous block to the action class */
   public void addBlock(String anonymousBlock) {

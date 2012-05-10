@@ -72,6 +72,22 @@ public abstract class SPTBase extends AbstractLanguageAnalyser {
   protected abstract boolean advanceInstance(FSMInstance instance) throws JapeException;
   
   /**
+   * Create an independent copy of this SPT.
+   */
+  protected abstract SPTBase duplicate();
+  
+  protected Rule[] copyRules() {
+    if(rules == null) {
+      return null;
+    }
+    Rule[] newRules = new Rule[rules.length];
+    for(int i = 0; i < newRules.length; i++) {
+      newRules[i] = new Rule(rules[i]);
+    }
+    return newRules;
+  }
+  
+  /**
    * Sets the action context to be used during execution of RHS actions.
    * @param ac
    */

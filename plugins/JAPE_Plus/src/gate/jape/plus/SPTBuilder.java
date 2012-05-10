@@ -124,6 +124,7 @@ public class SPTBuilder {
 
     writeClassHeader(className, sptCode);
     writeConstructor(className, oldSpt, 1, sptCode);
+    writeDuplicate(className, 1, sptCode);
     writeAdvanceInstanceMethod(1, sptCode);
     for(int stateId = 0; stateId < newStates.size(); stateId++) {
       writeStateMethod(stateId, 1, sptCode);
@@ -259,6 +260,15 @@ public class SPTBuilder {
     out.append(TABS[tabs]).append("}\n\n"); // end constructor
   }
   
+  private void writeDuplicate(String className, int tabs, StringBuilder out) {
+    out.append(TABS[tabs]).append("@Override\n");
+    out.append(TABS[tabs]).append("protected ").append(className).append(" duplicate() {\n");
+    tabs++;
+    out.append(TABS[tabs]).append("return new ").append(className).append("(copyRules(), predicatesByType);\n");
+    tabs--;
+    out.append(TABS[tabs]).append("}\n\n"); // end method
+  }
+
   protected void writeAdvanceInstanceMethod(int tabs, StringBuilder out) {
     out.append(TABS[tabs]).append("@Override\n");
     out.append(TABS[tabs]).append("protected final boolean advanceInstance(FSMInstance instance) throws JapeException {\n");
