@@ -401,10 +401,18 @@ public class Transducer extends AbstractLanguageAnalyser
    */
   private transient GateClassLoader classLoader = null;
   
+  /**
+   * <em>This method is public only for the benefit of {@link Factory#duplicate}
+   * and should not be called directly</em>
+   */
   public GateClassLoader getClassLoader() {
     return classLoader;
   }
 
+  /**
+   * <em>This method is public only for the benefit of {@link Factory#duplicate}
+   * and should not be called directly</em>
+   */
   @Sharable
   public void setClassLoader(GateClassLoader classLoader) {
     this.classLoader = classLoader;
@@ -416,10 +424,18 @@ public class Transducer extends AbstractLanguageAnalyser
    */
   private transient AtomicInteger classLoaderRefCount = new AtomicInteger(0);
 
+  /**
+   * <em>This method is public only for the benefit of {@link Factory#duplicate}
+   * and should not be called directly</em>
+   */
   public AtomicInteger getClassLoaderRefCount() {
     return classLoaderRefCount;
   }
 
+  /**
+   * <em>This method is public only for the benefit of {@link Factory#duplicate}
+   * and should not be called directly</em>
+   */
   @Sharable
   public void setClassLoaderRefCount(AtomicInteger classLoaderRefCount) {
     this.classLoaderRefCount = classLoaderRefCount;
@@ -489,6 +505,10 @@ public class Transducer extends AbstractLanguageAnalyser
   private Transducer existingTransducer;
   
 
+  /**
+   * <em>This method is public only for the benefit of {@link Factory#duplicate}
+   * and should not be called directly</em>
+   */
   public Transducer getExistingTransducer() {
     if(existingTransducer == null) {
       return this;
@@ -497,6 +517,10 @@ public class Transducer extends AbstractLanguageAnalyser
     }
   }
 
+  /**
+   * <em>This method is public only for the benefit of {@link Factory#duplicate}
+   * and should not be called directly</em>
+   */
   @Sharable
   public void setExistingTransducer(Transducer existingTransducer) {
     this.existingTransducer = existingTransducer;
