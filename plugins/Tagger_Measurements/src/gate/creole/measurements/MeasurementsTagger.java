@@ -13,22 +13,22 @@ import gate.AnnotationSet;
 import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
+import gate.LanguageAnalyser;
 import gate.Resource;
 import gate.Utils;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
-import gate.creole.Transducer;
 import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
+import gate.creole.metadata.Sharable;
 import gate.event.ProgressListener;
 
 import java.io.IOException;
 import java.net.URL;
 import java.text.NumberFormat;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Level;
@@ -72,6 +72,18 @@ public class MeasurementsTagger extends AbstractLanguageAnalyser implements
   private Boolean consumeNumberAnnotations = Boolean.TRUE;
 
   private Set<String> ignore = null;
+  
+  private MeasurementsTagger existingTagger = null;
+  
+  protected MeasurementsTagger getExistingTagger() {
+    if (existingTagger ==null) return this;    
+    return existingTagger;
+  }
+
+  @Sharable
+  protected void setExistingTagger(MeasurementsTagger existingTagger) {
+    this.existingTagger = existingTagger;
+  }
 
   @RunTime
   @Optional
@@ -135,7 +147,7 @@ public class MeasurementsTagger extends AbstractLanguageAnalyser implements
     this.outputASName = outputASName;
   }
 
-  private Transducer jape = null;
+  private LanguageAnalyser jape = null;
 
   public URL getCommonURL() {
     return commonURL;
@@ -216,24 +228,35 @@ public class MeasurementsTagger extends AbstractLanguageAnalyser implements
       throw new ResourceInstantiationException(e);
     }
 
-    // create the init params for the embedded JAPE grammar
-    FeatureMap params = Factory.newFeatureMap();
-    params.put("grammarURL", japeURL);
-    params.put("encoding", encoding);
-
-    if(jape == null) {
-      // if this is the first time we are running init then actually create a
-      // new transducer as we don't already have one
-      FeatureMap hidden = Factory.newFeatureMap();
-      Gate.setHiddenAttribute(hidden, true);
-      jape =
-              (Transducer)Factory.createResource("gate.creole.Transducer",
-                      params, hidden);
-    } else {
-      // we are being run through a call to reInit so simply re-init the
-      // underlying JAPE transducer
-      jape.setParameterValues(params);
-      jape.reInit();
+    if (existingTagger != null) {
+      if (jape != null) {
+        Factory.deleteResource(jape);
+      }
+      
+      jape = (LanguageAnalyser)Factory.duplicate(existingTagger.jape);
+      
+      //TODO might need to duplicate the parsers as well if we can
+    }
+    else {
+      // create the init params for the embedded JAPE grammar
+      FeatureMap params = Factory.newFeatureMap();
+      params.put("grammarURL", japeURL);
+      params.put("encoding", encoding);
+  
+      if(jape == null) {
+        // if this is the first time we are running init then actually create a
+        // new transducer as we don't already have one
+        FeatureMap hidden = Factory.newFeatureMap();
+        Gate.setHiddenAttribute(hidden, true);
+        jape =
+                (LanguageAnalyser)Factory.createResource("gate.jape.plus.Transducer",
+                        params, hidden);
+      } else {
+        // we are being run through a call to reInit so simply re-init the
+        // underlying JAPE transducer
+        jape.setParameterValues(params);
+        jape.reInit();
+      }
     }
 
     // we have been successful so return ourselves to whoever wanted us
@@ -314,12 +337,21 @@ public class MeasurementsTagger extends AbstractLanguageAnalyser implements
     // through the ActionContext
     jape.getFeatures().put("measurementsParser", parser);
     jape.getFeatures().put("consumeNumberAnnotations", consumeNumberAnnotations);
-    jape.setInputASName(inputASName);
-    jape.setOutputASName(outputASName);
+    
+    try {
+      jape.setParameterValue("inputASName", inputASName);
+      jape.setParameterValue("outputASName", outputASName);
+    }
+    catch (ResourceInstantiationException rie) {
+      throw new ExecutionException(rie);
+    }
+    
+    //jape.setInputASName(inputASName);
+    //jape.setOutputASName(outputASName);
     jape.setDocument(getDocument());
 
     // use the progress of the JAPE as the progress of this whole PR
-    jape.addProgressListener(this);
+    //jape.addProgressListener(this);
 
     // run the JAPE and then clean up properly
     try {
