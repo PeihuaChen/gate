@@ -107,20 +107,16 @@ public class NumbersTagger extends AbstractLanguageAnalyser implements ActionsPu
 
   private Pattern numericPattern;
   
-  private LanguageAnalyser existingJape;
+  private NumbersTagger existingTagger;
   
-  public LanguageAnalyser getExistingJape() {
-    if (existingJape == null) {
-      return jape;
-    }
-    else {
-      return existingJape;
-    }
+  public NumbersTagger getExistingTagger() {
+    if (existingTagger == null) return this;
+    return existingTagger;
   }
 
   @Sharable
-  public void setExistingJape(LanguageAnalyser existingJape) {
-    this.existingJape = existingJape;
+  public void setExistingTagger(NumbersTagger existingTagger) {
+    this.existingTagger = existingTagger;
   }
 
   @RunTime
@@ -161,7 +157,7 @@ public class NumbersTagger extends AbstractLanguageAnalyser implements ActionsPu
   }
   
   public NumbersTagger() {
-    boolean DEBUG_DUPLICATION = false;
+    boolean DEBUG_DUPLICATION = true;
     if(DEBUG_DUPLICATION) {
       actions.add(new AbstractAction("Duplicate") {
   
@@ -665,21 +661,24 @@ public class NumbersTagger extends AbstractLanguageAnalyser implements ActionsPu
     FeatureMap params = Factory.newFeatureMap();
     params.put("grammarURL", postProcessURL);
 
-    if (existingJape != null) {
+    if (existingTagger != null) {
       if (jape != null) Factory.deleteResource(jape);      
-      jape = (LanguageAnalyser)Factory.duplicate(existingJape);
-    }
-    else if(jape == null) {
-      // only create the transducer if it doesn't already exist
-      FeatureMap hidden = Factory.newFeatureMap();
-      Gate.setHiddenAttribute(hidden, true);
-      jape = (LanguageAnalyser)Factory.createResource("gate.jape.plus.Transducer",
-              params, hidden);
+      jape = (LanguageAnalyser)Factory.duplicate(existingTagger.jape);
     }
     else {
-      // if it exists just reinitialize it
-      jape.setParameterValues(params);
-      jape.reInit();
+      if(jape == null) {
+      
+        // only create the transducer if it doesn't already exist
+        FeatureMap hidden = Factory.newFeatureMap();
+        Gate.setHiddenAttribute(hidden, true);
+        jape = (LanguageAnalyser)Factory.createResource("gate.jape.plus.Transducer",
+                params, hidden);
+      }
+      else {
+        // if it exists just reinitialize it
+        jape.setParameterValues(params);
+        jape.reInit();
+      }
     }
 
     return this;
