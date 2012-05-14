@@ -25,14 +25,16 @@ import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ExecutionInterruptedException;
 import gate.creole.ResourceInstantiationException;
-import gate.creole.Transducer;
 import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
+import gate.creole.metadata.Sharable;
+import gate.gui.ActionsPublisher;
 import gate.util.BomStrippingInputStreamReader;
 import gate.util.InvalidOffsetException;
 
+import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.net.URL;
 import java.text.NumberFormat;
@@ -47,6 +49,9 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -72,7 +77,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * @author Thomas Heitz
  */
 @CreoleResource(name = "Numbers Tagger", comment = "Finds numbers in (both words and digits) and annotates them with their numeric value", icon = "numbers.png", helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:numbers:numbers")
-public class NumbersTagger extends AbstractLanguageAnalyser {
+public class NumbersTagger extends AbstractLanguageAnalyser implements ActionsPublisher {
 
   private static final long serialVersionUID = 8568794158677464398L;
 
@@ -101,6 +106,22 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
   private Pattern subPattern;
 
   private Pattern numericPattern;
+  
+  private LanguageAnalyser existingJape;
+  
+  public LanguageAnalyser getExistingJape() {
+    if (existingJape == null) {
+      return jape;
+    }
+    else {
+      return existingJape;
+    }
+  }
+
+  @Sharable
+  public void setExistingJape(LanguageAnalyser existingJape) {
+    this.existingJape = existingJape;
+  }
 
   @RunTime
   @Optional
@@ -137,6 +158,25 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
 
   public String getAnnotationSetName() {
     return annotationSetName;
+  }
+  
+  public NumbersTagger() {
+    boolean DEBUG_DUPLICATION = false;
+    if(DEBUG_DUPLICATION) {
+      actions.add(new AbstractAction("Duplicate") {
+  
+        @Override
+        public void actionPerformed(ActionEvent arg0) {
+          try {
+            Factory.duplicate(NumbersTagger.this);
+          } catch(ResourceInstantiationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+        }          
+        
+      });
+    }
   }
 
   @RunTime
@@ -625,11 +665,15 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
     FeatureMap params = Factory.newFeatureMap();
     params.put("grammarURL", postProcessURL);
 
-    if(jape == null) {
+    if (existingJape != null) {
+      if (jape != null) Factory.deleteResource(jape);      
+      jape = (LanguageAnalyser)Factory.duplicate(existingJape);
+    }
+    else if(jape == null) {
       // only create the transducer if it doesn't already exist
       FeatureMap hidden = Factory.newFeatureMap();
       Gate.setHiddenAttribute(hidden, true);
-      jape = (Transducer)Factory.createResource("gate.creole.Transducer",
+      jape = (LanguageAnalyser)Factory.createResource("gate.jape.plus.Transducer",
               params, hidden);
     }
     else {
@@ -865,6 +909,13 @@ public class NumbersTagger extends AbstractLanguageAnalyser {
       this.value = value;
       this.type = Type.get(type);
     }
+  }
+  
+  private List<Action> actions = new ArrayList<Action>();
+
+  @Override
+  public List<Action> getActions() {
+    return actions;
   }
 }
 
