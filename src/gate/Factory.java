@@ -54,11 +54,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 /** Provides static methods for the creation of Resources.
   */
 public abstract class Factory {
   /** Debug flag */
   private static final boolean DEBUG = false;
+  
+  private static final boolean DEBUG_DUPLICATION = false;
+  
+  private static final Logger log = Logger.getLogger(Factory.class);
 
   /** An object to source events from. */
   private static CreoleProxy creoleProxy;
@@ -598,6 +604,8 @@ public abstract class Factory {
     }
   }
 
+  private static long dupIndex = 0;
+  
   /**
    * Create a duplicate of the given resource, using the provided context.
    * This method is intended for use by resources that implement the
@@ -617,28 +625,44 @@ public abstract class Factory {
   public static Resource duplicate(Resource res,
           DuplicationContext ctx)
             throws ResourceInstantiationException {
-    checkDuplicationContext(ctx);
-    // check for null
-    if(res == null) {
-      return null;
+    long myDupIndex = -1, startTime = -1;
+    if(DEBUG_DUPLICATION) {
+      myDupIndex = dupIndex++;
+      log.debug(myDupIndex + ": Duplicating \"" + ((res == null) ? "null" : res.getName())
+          + "\" (a " + ((res == null) ? "null" : res.getClass().getName()) + ")");
+      startTime = System.currentTimeMillis();
     }
-    // check if we've seen this resource before
-    else if(ctx.knownResources.containsKey(res)) {
-      return ctx.knownResources.get(res);
-    }
-    else {
-      // create the duplicate
-      Resource newRes = null;
-      if(res instanceof CustomDuplication) {
-        // use custom duplicate if available
-        newRes = ((CustomDuplication)res).duplicate(ctx);
+    try {
+      checkDuplicationContext(ctx);
+      // check for null
+      if(res == null) {
+        return null;
+      }
+      // check if we've seen this resource before
+      else if(ctx.knownResources.containsKey(res)) {
+        if(DEBUG_DUPLICATION) {
+          log.debug(myDupIndex + ": Resource already duplicated in context");
+        }
+        return ctx.knownResources.get(res);
       }
       else {
-        newRes = defaultDuplicate(res, ctx);
+        // create the duplicate
+        Resource newRes = null;
+        if(res instanceof CustomDuplication) {
+          // use custom duplicate if available
+          newRes = ((CustomDuplication)res).duplicate(ctx);
+        }
+        else {
+          newRes = defaultDuplicate(res, ctx);
+        }
+        // remember this duplicate in the context
+        ctx.knownResources.put(res, newRes);
+        return newRes;
       }
-      // remember this duplicate in the context
-      ctx.knownResources.put(res, newRes);
-      return newRes;
+    } finally {
+      if(DEBUG_DUPLICATION) {
+        log.debug(myDupIndex + ": Duplication took " + (System.currentTimeMillis() - startTime) + " ms");
+      }
     }
   }
 
