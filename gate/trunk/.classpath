@@ -40,6 +40,8 @@
 	<classpathentry kind="lib" path="plugins/Ontology/lib/jewelcli-0.54.jar"/>
 	<classpathentry kind="lib" path="plugins/Ontology/lib/slf4j-api-1.5.6.jar"/>
 	<classpathentry kind="lib" path="plugins/Ontology/lib/slf4j-jdk14-1.5.6.jar"/>
+	<classpathentry kind="lib" path="plugins/Ontology/lib/openrdf-sesame-2.6.5-onejar.jar"/>
+	<classpathentry kind="lib" path="plugins/Ontology/lib/owlim-lite-5.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="lib" path="lib/gate-compiler-jdt.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/xercesImpl.jar"/>
@@ -71,7 +73,6 @@
 	<classpathentry kind="lib" path="plugins/Groovy/lib/groovy-all-1.7.6.jar"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_DSL_SUPPORT"/>
 	<classpathentry kind="lib" path="plugins/JAPE_Plus/lib/colt-1.2.0-free.jar"/>
-	<classpathentry kind="lib" path="plugins/Ontology/lib/owlim-lite-4.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/spring-core.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ivy.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/pdfbox.jar"/>
@@ -107,6 +108,5 @@
 	<classpathentry exported="true" kind="lib" path="lib/poi.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/spring-beans.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/metadata-extractor.jar"/>
-	<classpathentry kind="lib" path="plugins/Ontology/lib/openrdf-sesame-2.6.3-onejar.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
