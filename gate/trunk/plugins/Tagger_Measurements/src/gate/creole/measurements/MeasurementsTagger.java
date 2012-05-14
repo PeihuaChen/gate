@@ -75,13 +75,13 @@ public class MeasurementsTagger extends AbstractLanguageAnalyser implements
   
   private MeasurementsTagger existingTagger = null;
   
-  protected MeasurementsTagger getExistingTagger() {
+  public MeasurementsTagger getExistingTagger() {
     if (existingTagger ==null) return this;    
     return existingTagger;
   }
 
   @Sharable
-  protected void setExistingTagger(MeasurementsTagger existingTagger) {
+  public void setExistingTagger(MeasurementsTagger existingTagger) {
     this.existingTagger = existingTagger;
   }
 
