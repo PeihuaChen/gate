@@ -455,10 +455,12 @@ extends AbstractLanguageResource implements LanguageResource{
     List<String> res = new LinkedList<String>();
     if (url != null){
       // get the file name from the URL
-      String fileName = url.getFile();
-      int pos = fileName.indexOf('.', 1);
+      String fileName = url.getPath();
+      int pos = fileName.lastIndexOf('/');
+      if(pos  > 0) fileName = fileName.substring(pos);
+      pos = fileName.indexOf('.', 1);
       while(pos > 0 && pos < fileName.length() - 1) {
-        res.add(fileName.substring(pos));
+        res.add(fileName.substring(pos + 1));
         pos = fileName.indexOf('.', pos + 1);
       }
     }
