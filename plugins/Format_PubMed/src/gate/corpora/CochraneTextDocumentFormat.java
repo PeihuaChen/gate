@@ -38,12 +38,14 @@ import gate.util.InvalidOffsetException;
 import gate.util.Strings;
 
 /**
- * A document format analyser for PubMed text documents. Use mime type value 
- * "text/x-pubmed" to access this document format. 
+ * A document format analyser for Cochrane text documents. Use mime type value 
+ * "text/x-cochrane", or file extension ".cochrane.txt" to access this document
+ * format. 
  */
-@CreoleResource(name="Cochrane .txt document format",
+@CreoleResource(name="GATE .cochrane.txt document format",
   comment="<html>Load this to allow the opening of Cochrane text documents, " +
-      "and choose the mime type <strong>\"text/x-cochrane\"</strong>.", 
+      "and choose the mime type <strong>\"text/x-cochrane\"</strong>, or use " +
+      "the correct file extension.", 
   autoinstances = {@AutoInstance(hidden=true)},
   isPrivate = true)
 public class CochraneTextDocumentFormat extends TextualDocumentFormat {
