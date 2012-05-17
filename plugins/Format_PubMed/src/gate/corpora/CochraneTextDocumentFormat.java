@@ -1,5 +1,5 @@
 /*
- *  PubmedTextDocumentFormat.java
+ *  CochraneTextDocumentFormat.java
  *
  *  Copyright (c) 1995-2012, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
@@ -41,22 +41,20 @@ import gate.util.Strings;
  * A document format analyser for PubMed text documents. Use mime type value 
  * "text/x-pubmed" to access this document format. 
  */
-@CreoleResource(name="PubMed .txt document format",
-  comment="<html>Load this to allow the opening of PubMed text documents, " +
-  		"and choose the mime type <strong>\"text/x-pubmed\"</strong>.", 
+@CreoleResource(name="Cochrane .txt document format",
+  comment="<html>Load this to allow the opening of Cochrane text documents, " +
+      "and choose the mime type <strong>\"text/x-cochrane\"</strong>.", 
   autoinstances = {@AutoInstance(hidden=true)},
   isPrivate = true)
-public class PubmedTextDocumentFormat extends TextualDocumentFormat {
-  
-  private static final long serialVersionUID = -2188662654167010328L;
+public class CochraneTextDocumentFormat extends TextualDocumentFormat {
 
-  public static final String PUBMED_TITLE = "TI";
   
-  public static final String PUBMED_ABSTRACT = "AB";
+  private static final String COCHRANE_TITLE = "TI";
   
+  private static final String COCHRANE_ABSTRACT = "AB";
   
   protected static final Logger logger = Logger.getLogger(
-      PubmedTextDocumentFormat.class);
+      CochraneTextDocumentFormat.class);
   
   /* (non-Javadoc)
    * @see gate.DocumentFormat#supportsRepositioning()
@@ -72,20 +70,19 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
    */
   @Override
   public Resource init() throws ResourceInstantiationException {
-    MimeType mime = new MimeType("text","x-pubmed");
+    MimeType mime = new MimeType("text","x-cochrane");
     // Register the class handler for this mime type
     mimeString2ClassHandlerMap.put(mime.getType()+ "/" + mime.getSubtype(),
                                                                           this);
     // Register the mime type with mine string
     mimeString2mimeTypeMap.put(mime.getType() + "/" + mime.getSubtype(), mime);
     // Register file sufixes for this mime type
-    suffixes2mimeTypeMap.put("pubmed.txt", mime);
+    suffixes2mimeTypeMap.put("cochrane.txt", mime);
     // Set the mimeType for this language resource
     setMimeType(mime);
     return this;
-  }
-
-
+  }  
+  
   /* (non-Javadoc)
    * @see gate.corpora.TextualDocumentFormat#unpackMarkup(gate.Document)
    */
@@ -98,7 +95,7 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
       String line = content.readLine();
       String key = null;
       StringBuilder value = new StringBuilder();
-      Pattern linePatt =  Pattern.compile("(....)- (.*)");
+      Pattern linePatt =  Pattern.compile("([A-Z]+): (.*)");
       while(line!= null) {
         Matcher matcher = linePatt.matcher(line);
         if(matcher.matches()) {
@@ -114,7 +111,7 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
           // a non-assignment line -> append to previous value
           if(value.length() == 0) {
             logger.warn("Ignoring invalid input line:\""  +
-            	line +	"\"");
+              line +  "\"");
           } else {
             value.append(Strings.getNl()).append(line.trim());
           }
@@ -128,7 +125,7 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
       StringBuilder docText = new StringBuilder();
       // add document title
       int titleStart = docText.length();
-      String aField = fields.remove(PUBMED_TITLE);
+      String aField = fields.remove(COCHRANE_TITLE);
       if(aField != null) {
         docText.append(aField);        
       } else {
@@ -139,10 +136,10 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
       int titleEnd = docText.length();
       docText.append(Strings.getNl()).append(Strings.getNl());
       // and the document abstract
-      aField = fields.remove(PUBMED_ABSTRACT);
+      aField = fields.remove(COCHRANE_ABSTRACT);
       int absStart = docText.length();
       if(aField != null) {
-        docText.append(aField);
+        docText.append(aField);        
       } else {
         String docName = doc.getName();  
         logger.warn("Could not find document abstract in document " + 
@@ -171,6 +168,6 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
     
     // now let the text unpacker also do its job
     super.unpackMarkup(doc);
-  }
+  }  
   
 }
