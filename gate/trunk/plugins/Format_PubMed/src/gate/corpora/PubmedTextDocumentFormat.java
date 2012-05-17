@@ -39,11 +39,13 @@ import gate.util.Strings;
 
 /**
  * A document format analyser for PubMed text documents. Use mime type value 
- * "text/x-pubmed" to access this document format. 
+ * "text/x-pubmed", or file extension ".pubmed.txt" to access this document 
+ * format. 
  */
-@CreoleResource(name="PubMed .txt document format",
+@CreoleResource(name="GATE .pubMed.txt document format",
   comment="<html>Load this to allow the opening of PubMed text documents, " +
-  		"and choose the mime type <strong>\"text/x-pubmed\"</strong>.", 
+  		"and choose the mime type <strong>\"text/x-pubmed\"</strong>or use " +
+      "the correct file extension.", 
   autoinstances = {@AutoInstance(hidden=true)},
   isPrivate = true)
 public class PubmedTextDocumentFormat extends TextualDocumentFormat {
