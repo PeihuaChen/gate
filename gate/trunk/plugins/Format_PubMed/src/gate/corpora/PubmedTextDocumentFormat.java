@@ -41,10 +41,11 @@ import gate.util.Strings;
  * A document format analyser for PubMed text documents. Use mime type value 
  * "text/x-pubmed" to access this document format. 
  */
-@CreoleResource(name="Document Format for PubMed .txt documents",
+@CreoleResource(name="PubMed .txt document format",
   comment="<html>Load this to allow the opening of PubMed text documents, " +
   		"and choose the mime type <strong>\"text/x-pubmed\"</strong>.", 
-  autoinstances = {@AutoInstance(hidden=true)})
+  autoinstances = {@AutoInstance(hidden=true)},
+  isPrivate = true)
 public class PubmedTextDocumentFormat extends TextualDocumentFormat {
   
   private static final long serialVersionUID = -2188662654167010328L;
@@ -78,7 +79,7 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
     // Register the mime type with mine string
     mimeString2mimeTypeMap.put(mime.getType() + "/" + mime.getSubtype(), mime);
     // Register file sufixes for this mime type
-    suffixes2mimeTypeMap.put("pubmed.txt",mime);
+    suffixes2mimeTypeMap.put("pubmed.txt", mime);
     // Set the mimeType for this language resource
     setMimeType(mime);
     return this;
@@ -120,6 +121,10 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
         }
         line = content.readLine();
       }
+      if(key != null) {
+        // save old value
+        fields.put(key, value.toString());
+      }
       StringBuilder docText = new StringBuilder();
       // add document title
       int titleStart = docText.length();
@@ -137,7 +142,7 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
       aField = fields.remove(PUBMED_ABSTRACT);
       int absStart = docText.length();
       if(aField != null) {
-        docText.append(aField);        
+        docText.append(aField);
       } else {
         String docName = doc.getName();  
         logger.warn("Could not find document abstract in document " + 
@@ -148,10 +153,14 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
       
       AnnotationSet origMkups = doc.getAnnotations(
           GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
-      origMkups.add((long)titleStart, (long)titleEnd, "title", 
-          Factory.newFeatureMap());
-      origMkups.add((long)absStart, (long)absEnd, "abstract", 
-          Factory.newFeatureMap());      
+      if(titleEnd > titleStart){
+        origMkups.add((long)titleStart, (long)titleEnd, "title", 
+            Factory.newFeatureMap());
+      }
+      if(absEnd > absStart) {
+        origMkups.add((long)absStart, (long)absEnd, "abstract", 
+            Factory.newFeatureMap());
+      }
       // everything else becomes document features
       doc.getFeatures().putAll(fields);
     } catch(IOException e) {
