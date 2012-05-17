@@ -129,13 +129,13 @@ extends AbstractLanguageResource implements LanguageResource{
                                         RepositioningInfo ampCodingInfo)
                                       throws DocumentFormatException;
   /** Unpack the markup in the document. This method calls unpackMarkup on the
-    * GATE document, but after it saves its content as a feature atached to
-    * the document. This method is usefull if one wants to save the content
+    * GATE document, but after it saves its content as a feature attached to
+    * the document. This method is useful if one wants to save the content
     * of the document being unpacked. After the markups have been unpacked,
     * the content of the document will be replaced with a new one containing
     * the text between markups.
     *
-    * @param doc the document that will be upacked
+    * @param doc the document that will be unpacked
     * @param originalContentFeatureType the name of the feature that will hold
     * the document's content.
     */
