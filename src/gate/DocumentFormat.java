@@ -179,7 +179,6 @@ extends AbstractLanguageResource implements LanguageResource{
     MimeType mimeTypeFromWebServer = null;
     MimeType mimeTypeFromFileSuffix = null;
     MimeType mimeTypeFromMagicNumbers = null;
-    String fileSufix = null;
 
     if (url == null)
       return null;
@@ -226,10 +225,11 @@ extends AbstractLanguageResource implements LanguageResource{
     // Return the corresponding MimeType with WebServer from the associated MAP
     mimeTypeFromWebServer = mimeString2mimeTypeMap.get(mimeTypeString);
     // Let's try a file suffix detection
-    // Get the file sufix from the URL.See method definition for more details
-    fileSufix = getFileSufix(url);
-    // Get the mime type based on the on file sufix
-    mimeTypeFromFileSuffix = getMimeType(fileSufix);
+    // mimeTypeFromFileSuffix = getMimeType(getFileSuffix(url));    
+    for(String suffix : getFileSuffixes(url)) {
+      mimeTypeFromFileSuffix = getMimeType(suffix);
+      if(mimeTypeFromFileSuffix != null) break;
+    }
 
     // Let's perform a magic numbers guess..
     mimeTypeFromMagicNumbers = guessTypeUsingMagicNumbers(is,
@@ -421,7 +421,7 @@ extends AbstractLanguageResource implements LanguageResource{
     * Return the fileSuffix or null if the url doesn't have a file suffix
     * If the url is null then the file suffix will be null also
     */
-  private static String getFileSufix(URL url){
+  private static String getFileSuffix(URL url){
     String fileName = null;
     String fileSuffix = null;
 
@@ -442,6 +442,30 @@ extends AbstractLanguageResource implements LanguageResource{
     return fileSuffix;
   }//getFileSufix
 
+  /**
+   * Given a URL, this method returns all the 'file extensions' for the file
+   * part of the URL. For this purposes, a 'file extension' is any sequence of
+   * .-separated tokens (such as .gate.xml.gz). The order the extensions are 
+   * returned in is from the most specific (longest) to the most generic 
+   * (shortest) one, e.g. [.gate.xml.gz, .xml.gz, .gz]. 
+   * @param url
+   * @return
+   */
+  private static List<String> getFileSuffixes(URL url){
+    List<String> res = new LinkedList<String>();
+    if (url != null){
+      // get the file name from the URL
+      String fileName = url.getFile();
+      int pos = fileName.indexOf('.', 1);
+      while(pos > 0 && pos < fileName.length() - 1) {
+        res.add(fileName.substring(pos));
+        pos = fileName.indexOf('.', pos + 1);
+      }
+    }
+    return res;
+  }
+  
+  
   /**
     * Find a DocumentFormat implementation that deals with a particular
     * MIME type, given that type.
