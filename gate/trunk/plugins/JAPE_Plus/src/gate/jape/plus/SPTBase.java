@@ -353,7 +353,7 @@ public abstract class SPTBase extends AbstractLanguageAnalyser {
 
   /**
    * Stores all the atomic predicates used in this transducer. For each
-   * annotation type, an arrays is kept, with predicates relevant to that
+   * annotation type, an array is kept, with predicates relevant to that
    * annotation type.
    */
   protected final Predicate[][] predicatesByType;
@@ -1309,7 +1309,7 @@ public abstract class SPTBase extends AbstractLanguageAnalyser {
     ontology = onto;
   }
 
-  ControllerEventBlocksAction actionblocks;
+  protected ControllerEventBlocksAction actionblocks;
   public void setControllerEventBlocksAction(ControllerEventBlocksAction abs) {
     this.actionblocks = abs;
   }
