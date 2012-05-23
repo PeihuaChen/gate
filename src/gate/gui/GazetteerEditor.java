@@ -640,7 +640,7 @@ public class GazetteerEditor extends AbstractVisualResource
         "and not " + target.getClass());
     }
     if(((Gazetteer)target).getListsURL() == null) {
-      // not as file based gazetteer: we cannot display it.
+      // not a file based gazetteer: we cannot display it.
       throw new IllegalArgumentException("Not a file-based gazetteer.");
     }
     ((Gazetteer) target).addGazetteerListener(this);
