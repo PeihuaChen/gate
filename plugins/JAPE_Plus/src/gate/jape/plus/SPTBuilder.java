@@ -264,7 +264,9 @@ public class SPTBuilder {
     out.append(TABS[tabs]).append("@Override\n");
     out.append(TABS[tabs]).append("protected ").append(className).append(" duplicate() {\n");
     tabs++;
-    out.append(TABS[tabs]).append("return new ").append(className).append("(copyRules(), predicatesByType);\n");
+    out.append(TABS[tabs]).append(className).append(" copy = new ").append(className).append("(copyRules(), predicatesByType);\n");
+    out.append(TABS[tabs]).append("copy.inputAnnotationTypes = this.inputAnnotationTypes;\n");
+    out.append(TABS[tabs]).append("return copy;");
     tabs--;
     out.append(TABS[tabs]).append("}\n\n"); // end method
   }
