@@ -639,6 +639,10 @@ public class GazetteerEditor extends AbstractVisualResource
         "The resource set must be of type gate.creole.gazetteer.Gazetteer\n"+
         "and not " + target.getClass());
     }
+    if(((Gazetteer)target).getListsURL() == null) {
+      // not as file based gazetteer: we cannot display it.
+      throw new IllegalArgumentException("Not a file-based gazetteer.");
+    }
     ((Gazetteer) target).addGazetteerListener(this);
     processGazetteerEvent(new GazetteerEvent(target, GazetteerEvent.REINIT));
   }
