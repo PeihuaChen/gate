@@ -28,8 +28,11 @@ public interface VisualResource extends Resource{
    * specific object.
    * @param target the object (be it a {@link gate.Resource},
    * {@link gate.DataStore} or whatever) this viewer has to display
+   * 
+   * @throws IllegalArgumentException if the view is incapable of displaying 
+   * the supplied target resource, for whatever reason.   
    */
-  public void setTarget(Object target);
+  public void setTarget(Object target) throws IllegalArgumentException;
 
 
   /**

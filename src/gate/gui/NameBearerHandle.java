@@ -357,24 +357,28 @@ public class NameBearerHandle implements Handle, StatusListener,
           Gate.setHiddenAttribute(features, true);
           VisualResource view = (VisualResource)Factory.createResource(
                   className, params, features);
-          view.setTarget(target);
-          view.setHandle(this);
-          ((JTabbedPane)largeView).add((Component)view, rData.getName());
-          // if view provide actions, add it to the list of action
-          // publishers
-          if(view instanceof ActionsPublisher)
-            actionPublishers.add((ActionsPublisher)view);
+          try{
+            view.setTarget(target);
+          } catch (IllegalArgumentException iae) {
+            // the view cannot display this particular target
+            Factory.deleteResource(view);
+            view = null;
+          }
+          if(view != null) {
+            view.setHandle(this);
+            ((JTabbedPane)largeView).add((Component)view, rData.getName());
+            // if view provide actions, add it to the list of action
+            // publishers
+            if(view instanceof ActionsPublisher)
+              actionPublishers.add((ActionsPublisher)view);            
+          }
         }
         catch(ResourceInstantiationException rie) {
           rie.printStackTrace(Err.getPrintWriter());
         }
       }
-      if(largeViewNames.size() == 1) {
-        largeView = (JComponent)((JTabbedPane)largeView).getComponentAt(0);
-      }
-      else {
-        ((JTabbedPane)largeView).setSelectedIndex(0);
-      }
+      // select the first view by default
+      ((JTabbedPane)largeView).setSelectedIndex(0);
     }
 
     // build the small views
@@ -393,22 +397,25 @@ public class NameBearerHandle implements Handle, StatusListener,
           Gate.setHiddenAttribute(features, true);
           VisualResource view = (VisualResource)Factory.createResource(
                   className, params, features);
-          view.setTarget(target);
-          view.setHandle(this);
-          ((JTabbedPane)smallView).add((Component)view, rData.getName());
-          if(view instanceof ActionsPublisher)
-            actionPublishers.add((ActionsPublisher)view);
+          try{
+            view.setTarget(target);
+          } catch (IllegalArgumentException iae) {
+            // the view cannot display this particular target
+            Factory.deleteResource(view);
+            view = null;
+          }
+          if(view != null) {
+            view.setHandle(this);
+            ((JTabbedPane)smallView).add((Component)view, rData.getName());
+            if(view instanceof ActionsPublisher)
+              actionPublishers.add((ActionsPublisher)view);
+          }
         }
         catch(ResourceInstantiationException rie) {
           rie.printStackTrace(Err.getPrintWriter());
         }
       }
-      if(smallViewNames.size() == 1) {
-        smallView = (JComponent)((JTabbedPane)smallView).getComponentAt(0);
-      }
-      else {
-        ((JTabbedPane)smallView).setSelectedIndex(0);
-      }
+      ((JTabbedPane)smallView).setSelectedIndex(0);
     }
     fireStatusChanged("Views built!");
 
