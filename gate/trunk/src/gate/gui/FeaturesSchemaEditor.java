@@ -34,7 +34,7 @@ import gate.util.*;
 
 /**
  */
-@CreoleResource(name = "Features", guiType = GuiType.SMALL,
+@CreoleResource(name = "Resource Features", guiType = GuiType.SMALL,
     resourceDisplayed = "gate.util.FeatureBearer")
 public class FeaturesSchemaEditor extends XJTable
         implements ResizableVisualResource, FeatureMapListener{
