@@ -19,6 +19,7 @@ import gate.AnnotationSet;
 import gate.Document;
 import gate.Factory;
 import gate.FeatureMap;
+import gate.Gate;
 import gate.ProcessingResource;
 import gate.Resource;
 import gate.Utils;
@@ -166,6 +167,7 @@ public class FlexibleGazetteer extends AbstractLanguageAnalyser implements
           params.put("markupAware", ((DocumentImpl)document).getMarkupAware());
         }
         FeatureMap features = Factory.newFeatureMap();
+        Gate.setHiddenAttribute(features, true);
         tempDoc =
             (Document)Factory.createResource("gate.corpora.DocumentImpl",
                 params, features);
