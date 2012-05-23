@@ -544,7 +544,8 @@ public class Transducer extends AbstractLanguageAnalyser
         @Override
         public void actionPerformed(ActionEvent arg0) {
           try {
-            Factory.duplicate(Transducer.this);
+            Resource res = Factory.duplicate(Transducer.this);
+            res.setName(getName() + "-copy");
           } catch(ResourceInstantiationException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
