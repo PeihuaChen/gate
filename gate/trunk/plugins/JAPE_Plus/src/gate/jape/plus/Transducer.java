@@ -270,10 +270,10 @@ public class Transducer extends AbstractLanguageAnalyser
         if(controllerEventsSourceCode != null) {
           classes.put(ceabClassName, controllerEventsSourceCode);  
         }
+        // compile the class[es]
         if(!classes.isEmpty()) {
           Javac.loadClasses(classes, classLoader);
         }
-        // compile the class
         @SuppressWarnings("unchecked")
         Class<? extends SPTBase> sptClass = (Class<? extends SPTBase>)
             classLoader.loadClass(className);

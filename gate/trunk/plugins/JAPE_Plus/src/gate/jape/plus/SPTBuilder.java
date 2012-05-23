@@ -193,6 +193,7 @@ public class SPTBuilder {
     out.append("import gate.jape.JapeException;\n");
     out.append("import gate.jape.plus.Predicate;\n");
     out.append("import gate.jape.plus.SPTBase;\n");
+    out.append("import gate.creole.ResourceInstantiationException;\n");
     out.append("import cern.colt.list.IntArrayList;\n");
     out.append("import static gate.jape.plus.SPTBase.MatchMode.*;\n\n");
     out.append("public class ").append(className).append(" extends SPTBase {\n\n");
@@ -262,11 +263,24 @@ public class SPTBuilder {
   
   private void writeDuplicate(String className, int tabs, StringBuilder out) {
     out.append(TABS[tabs]).append("@Override\n");
-    out.append(TABS[tabs]).append("protected ").append(className).append(" duplicate() {\n");
+    out.append(TABS[tabs]).append("protected ").append(className).append(" duplicate() throws ResourceInstantiationException {\n");
     tabs++;
     out.append(TABS[tabs]).append(className).append(" copy = new ").append(className).append("(copyRules(), predicatesByType);\n");
     out.append(TABS[tabs]).append("copy.inputAnnotationTypes = this.inputAnnotationTypes;\n");
-    out.append(TABS[tabs]).append("return copy;");
+    out.append(TABS[tabs]).append("if(actionblocks != null) {\n");
+    tabs++;
+    out.append(TABS[tabs]).append("try{\n");
+    tabs++;
+    out.append(TABS[tabs]).append("copy.actionblocks = actionblocks.getClass().newInstance();\n");
+    tabs--;
+    out.append(TABS[tabs]).append("} catch (Exception e) {\n");
+    tabs++;
+    out.append(TABS[tabs]).append("throw new ResourceInstantiationException(e);\n");
+    tabs--;
+    out.append(TABS[tabs]).append("}\n");
+    tabs--;
+    out.append(TABS[tabs]).append("}\n");
+    out.append(TABS[tabs]).append("return copy;\n");
     tabs--;
     out.append(TABS[tabs]).append("}\n\n"); // end method
   }
