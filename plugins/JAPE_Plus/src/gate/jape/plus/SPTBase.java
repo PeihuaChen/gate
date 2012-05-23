@@ -74,7 +74,7 @@ public abstract class SPTBase extends AbstractLanguageAnalyser {
   /**
    * Create an independent copy of this SPT.
    */
-  protected abstract SPTBase duplicate();
+  protected abstract SPTBase duplicate() throws ResourceInstantiationException;
   
   protected Rule[] copyRules() {
     if(rules == null) {
