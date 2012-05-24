@@ -90,7 +90,8 @@ import com.ontotext.jape.pda.FSMPDA;
  * A JAPE-Plus transducer (with a {@link LanguageAnalyser} interface.
  */
 @CreoleResource(name = "JAPE-Plus Transducer", 
-    comment = "An optimised, JAPE-compatible transducer.")
+    comment = "An optimised, JAPE-compatible transducer.", 
+    icon="JapePlus")
 public class Transducer extends AbstractLanguageAnalyser 
     implements ControllerAwarePR, ProgressListener , ActionsPublisher {
 
