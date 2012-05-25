@@ -26,6 +26,7 @@ import gate.util.OptionsMap;
 import gate.util.Out;
 import gate.util.Strings;
 import gate.util.ThreadWarningSystem;
+import gate.util.persistence.PersistenceManager;
 import gnu.getopt.Getopt;
 
 import java.awt.Dimension;
@@ -250,7 +251,7 @@ public class Main {
               File sessionFile = Gate.getUserSessionFile();
               if(sessionFile.exists()){
                 MainFrame.lockGUI("Loading saved session...");
-                gate.util.persistence.PersistenceManager.loadObjectFromFile(sessionFile);
+                PersistenceManager.loadObjectFromFile(sessionFile);
               }
             }catch(Exception e){
               log.warn("Failed to load session data", e);
