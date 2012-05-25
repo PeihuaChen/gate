@@ -236,13 +236,17 @@ public class GateClassLoader extends URLClassLoader {
    * @return either an existing classloader with the given id or a new
    *         classloader
    */
-  public synchronized GateClassLoader getDisposableClassLoader(String id) {
+  public GateClassLoader getDisposableClassLoader(String id) {
 
-    GateClassLoader gcl = childClassLoaders.get(id);
+    GateClassLoader gcl = null;
+    
+    synchronized(childClassLoaders) {
+      gcl = childClassLoaders.get(id);
 
-    if(gcl == null) {
-      gcl = new GateClassLoader(id, new URL[0], null);
-      childClassLoaders.put(id, gcl);
+      if(gcl == null) {
+        gcl = new GateClassLoader(id, new URL[0], null);
+        childClassLoaders.put(id, gcl);
+      }
     }
 
     return gcl;
@@ -258,7 +262,9 @@ public class GateClassLoader extends URLClassLoader {
   public void forgetClassLoader(String id) {
     Introspector.flushCaches();
     AbstractResource.flushBeanInfoCache();
-    childClassLoaders.remove(id);
+    synchronized(childClassLoaders) {
+      childClassLoaders.remove(id);
+    }    
   }
 
   /**
