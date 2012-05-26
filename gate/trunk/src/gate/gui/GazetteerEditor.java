@@ -55,8 +55,8 @@ import java.util.regex.PatternSyntaxException;
  * Editor for {@link gate.creole.gazetteer.Gazetteer ANNIE Gazetteer}.
 <pre>
  Main features:
-- left table with 5 columns (List name, Major, Minor, Language, AnnotationType) for the
-  definition
+- left table with 5 columns (List name, Major, Minor, Language, AnnotationType)
+ for the definition
 - right table with 1+n columns (Value, Feature 1...Feature n) for the lists
 - 'Save' on the context menu of the resources tree and tab
 - context menu on both tables to delete selected rows
@@ -154,15 +154,29 @@ public class GazetteerEditor extends AbstractVisualResource
         String listName = (String) newListComboBox.getEditor().getItem();
         newListComboBox.removeItem(listName);
         // update the table
-        definitionTableModel.addRow(new Object[]{listName, "", "", ""});
+        definitionTableModel.addRow(new Object[]{listName, "", "", "", ""});
         // update the gazetteer
-        linearDefinition.add(new LinearNode(listName, "", "", ""));
+        selectedLinearNode = new LinearNode(listName, "", "", "", "");
+        linearDefinition.add(selectedLinearNode);
+        linearDefinition.getNodesByListNames()
+          .put(listName, selectedLinearNode);
+        GazetteerList gazetteerList;
+        try {
+          gazetteerList = linearDefinition.loadSingleList(listName, true);
+        } catch (ResourceInstantiationException rie) {
+          rie.printStackTrace();
+          return;
+        }
+        linearDefinition.getListsByNode()
+          .put(selectedLinearNode, gazetteerList);
+        // select the new list
         final int row = definitionTable.rowModelToView(
           definitionTable.getRowCount()-1);
         final int column = definitionTable.convertColumnIndexToView(0);
         definitionTable.setRowSelectionInterval(row, row);
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
+            // scroll to the selected new list
             definitionTable.scrollRectToVisible(
               definitionTable.getCellRect(row, column, true));
             definitionTable.requestFocusInWindow();
@@ -478,13 +492,14 @@ public class GazetteerEditor extends AbstractVisualResource
     definitionTableModel.addTableModelListener(new TableModelListener() {
       public void tableChanged(TableModelEvent e) {
         if(selectedLinearNode == null) return;
-        int r = e.getFirstRow();
+        int row = e.getFirstRow();
+        int column = e.getColumn();
         switch (e.getType()) {
           case TableModelEvent.UPDATE:
-            int c = e.getColumn();
-            if (r == -1 || c == -1) { return; }
-            String newValue = (String) definitionTableModel.getValueAt(r, c);
-            if (c == 0) {
+            if (row == -1 || column == -1) { return; }
+            String newValue = (String)
+              definitionTableModel.getValueAt(row, column);
+            if (column == 0) {
               String oldValue = selectedLinearNode.getList();
               if (oldValue != null && oldValue.equals(newValue)) { return; }
               // save the previous list and copy it to the new name of the list
@@ -514,22 +529,22 @@ public class GazetteerEditor extends AbstractVisualResource
               }
 
               selectedLinearNode.setList(newValue);
-            } else if (c == 1) {
+            } else if (column == 1) {
               String oldValue = selectedLinearNode.getMajorType();
               if (oldValue != null && oldValue.equals(newValue)) { return; }
               selectedLinearNode.setMajorType(newValue);
               linearDefinition.setModified(true);
-            } else if (c == 2) {
+            } else if (column == 2) {
               String oldValue = selectedLinearNode.getMinorType();
               if (oldValue != null && oldValue.equals(newValue)) { return; }
               selectedLinearNode.setMinorType(newValue);
               linearDefinition.setModified(true);
-            } else if (c == 3){
+            } else if (column == 3) {
               String oldValue = selectedLinearNode.getLanguage();
               if (oldValue != null && oldValue.equals(newValue)) { return; }
               selectedLinearNode.setLanguage(newValue);
               linearDefinition.setModified(true);
-            } else {
+            } else  if (column == 4) {
               String oldValue = selectedLinearNode.getAnnotationType();
               if (oldValue != null && oldValue.equals(newValue)) { return; }
               selectedLinearNode.setAnnotationType(newValue);

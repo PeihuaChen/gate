@@ -125,6 +125,16 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
    *  @throws ResourceInstantiationException*/
   public GazetteerList loadSingleList(String listName)
   throws ResourceInstantiationException {
+    return loadSingleList(listName, false);
+  }
+
+  /** Loads a single gazetteer list given a name
+   *  @param listName the name of the list to be loaded
+   *  @param isOrdered true if the feature maps used should be ordered
+   *  @return the loaded gazetteer list
+   *  @throws ResourceInstantiationException*/
+  public GazetteerList loadSingleList(String listName, boolean isOrdered)
+  throws ResourceInstantiationException {
     GazetteerList list = new GazetteerList();
     list.setSeparator(separator);
     try {
@@ -139,7 +149,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
       try {
         URL lurl = new URL(url,listName);
         list.setURL(lurl);
-        list.load();
+        list.load(isOrdered);
       } catch (Exception x) {
         String path = turl.getPath();
         int slash = path.lastIndexOf("/");
@@ -154,7 +164,7 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
 
         URL lurl = new URL(url,listName);
         list.setURL(lurl);
-        list.load();
+        list.load(isOrdered);
 
       }
 
