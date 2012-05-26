@@ -147,7 +147,9 @@ public class GazetteerEditor extends AbstractVisualResource
         }
       }
     });
-    newListButton.setToolTipText("Add a list in the gazetteer");
+    newListButton.setToolTipText("<html>Add a list in the gazetteer"
+      + "&nbsp;&nbsp;<font color=#667799><small>Enter"
+      + "&nbsp;&nbsp;</small></font></html>");
     newListButton.setMargin(new Insets(2, 2, 2, 2));
     newListButton.addActionListener(new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
@@ -250,7 +252,9 @@ public class GazetteerEditor extends AbstractVisualResource
       }
     });
     final JButton newEntryButton = new JButton("Add");
-    newEntryButton.setToolTipText("Add the text in the list");
+    newEntryButton.setToolTipText("<html>Add the text in the list"
+      + "&nbsp;&nbsp;<font color=#667799><small>Enter"
+      + "&nbsp;&nbsp;</small></font></html>");
     newEntryButton.setMargin(new Insets(2, 2, 2, 2));
     newEntryButton.setEnabled(false);
     newEntryButton.addActionListener(new AbstractAction() {

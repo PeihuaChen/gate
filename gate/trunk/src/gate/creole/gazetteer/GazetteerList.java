@@ -19,6 +19,7 @@ package gate.creole.gazetteer;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import gate.creole.ResourceInstantiationException;
 import gate.util.BomStrippingInputStreamReader;
@@ -140,8 +141,13 @@ implements List {
                               (url).openStream(), encoding);
       String line;
       int linenr = 0;
+      Pattern emptyPattern = Pattern.compile("\\s*");
       while (null != (line = listReader.readLine())) {
         linenr++;
+        if (emptyPattern.matcher(line).matches()) {
+          // skip empty line
+          continue;
+        }
         GazetteerNode node = null;
         try {
           node = new GazetteerNode(line, separator, isOrdered);
