@@ -158,10 +158,9 @@ public class GazetteerEditor extends AbstractVisualResource
         // update the table
         definitionTableModel.addRow(new Object[]{listName, "", "", "", ""});
         // update the gazetteer
-        selectedLinearNode = new LinearNode(listName, "", "", "", "");
-        linearDefinition.add(selectedLinearNode);
-        linearDefinition.getNodesByListNames()
-          .put(listName, selectedLinearNode);
+        LinearNode linearNode = new LinearNode(listName, "", "", "", "");
+        linearDefinition.add(linearNode);
+        linearDefinition.getNodesByListNames().put(listName, linearNode);
         GazetteerList gazetteerList;
         try {
           gazetteerList = linearDefinition.loadSingleList(listName, true);
@@ -169,8 +168,7 @@ public class GazetteerEditor extends AbstractVisualResource
           rie.printStackTrace();
           return;
         }
-        linearDefinition.getListsByNode()
-          .put(selectedLinearNode, gazetteerList);
+        linearDefinition.getListsByNode().put(linearNode, gazetteerList);
         // select the new list
         final int row = definitionTable.rowModelToView(
           definitionTable.getRowCount()-1);
@@ -495,63 +493,98 @@ public class GazetteerEditor extends AbstractVisualResource
     // update linear nodes with changes in the definition table
     definitionTableModel.addTableModelListener(new TableModelListener() {
       public void tableChanged(TableModelEvent e) {
-        if(selectedLinearNode == null) return;
+        if (selectedLinearNode == null) { return; }
         int row = e.getFirstRow();
         int column = e.getColumn();
+        GazetteerList gazetteerList = (GazetteerList)
+          linearDefinition.getListsByNode().get(selectedLinearNode);
         switch (e.getType()) {
           case TableModelEvent.UPDATE:
             if (row == -1 || column == -1) { return; }
-            String newValue = (String)
-              definitionTableModel.getValueAt(row, column);
-            if (column == 0) {
-              String oldValue = selectedLinearNode.getList();
-              if (oldValue != null && oldValue.equals(newValue)) { return; }
-              // save the previous list and copy it to the new name of the list
-              try {
-                GazetteerList gazetteerList = (GazetteerList)
-                  linearDefinition.getListsByNode().get(selectedLinearNode);
-                // save the previous list
+            if (column == 0) { // list filename
+              String newListFileName = (String)
+                definitionTableModel.getValueAt(row, column);
+              String oldListFileName = selectedLinearNode.getList();
+              if (oldListFileName != null
+               && oldListFileName.equals(newListFileName)) { return; }
+              try { // save the previous list
                 gazetteerList.store();
                 MainFrame.getInstance().statusChanged("Previous list saved in "
                   + gazetteerList.getURL().getPath());
+              } catch (ResourceInstantiationException rie) {
+                Err.prln("Unable to save the list.\n" + rie.getMessage());
+                return;
+              }
+              try { // change the list URL
                 File source = Files.fileFromURL(gazetteerList.getURL());
-                File destination = new File(source.getParentFile(), newValue);
-                // change the list URL to the new list name
+                File destination = new File(source.getParentFile(),
+                  newListFileName);
                 gazetteerList.setURL(destination.toURI().toURL());
                 gazetteerList.setModified(false);
-                // change the key of the node in the map
-                linearDefinition.getNodesByListNames()
-                  .remove(selectedLinearNode.getList());
-                linearDefinition.getNodesByListNames()
-                  .put(newValue, selectedLinearNode);
-                linearDefinition.setModified(true);
-
-              } catch (Exception ex) {
-                MainFrame.getInstance().statusChanged(
-                  "Unable to save the list.");
-                Err.prln("Unable to save the list.\n" + ex.getMessage());
+              } catch (MalformedURLException mue) {
+                Err.prln("File name invalid.\n" + mue.getMessage());
+                return;
               }
-
-              selectedLinearNode.setList(newValue);
-            } else if (column == 1) {
-              String oldValue = selectedLinearNode.getMajorType();
-              if (oldValue != null && oldValue.equals(newValue)) { return; }
-              selectedLinearNode.setMajorType(newValue);
+              linearDefinition.getListsByNode().remove(selectedLinearNode);
+              // update the node with the new list file name
+              selectedLinearNode.setList(newListFileName);
+              linearDefinition.getListsByNode()
+                .put(selectedLinearNode, gazetteerList);
+              linearDefinition.getNodesByListNames().remove(oldListFileName);
+              linearDefinition.getNodesByListNames()
+                .put(newListFileName, selectedLinearNode);
               linearDefinition.setModified(true);
-            } else if (column == 2) {
-              String oldValue = selectedLinearNode.getMinorType();
-              if (oldValue != null && oldValue.equals(newValue)) { return; }
-              selectedLinearNode.setMinorType(newValue);
+            } else if (column == 1) { // major type
+              String newMajorType = (String)
+                definitionTableModel.getValueAt(row, column);
+              String oldMajorType = selectedLinearNode.getMajorType();
+              if (oldMajorType != null
+               && oldMajorType.equals(newMajorType)) { return; }
+              linearDefinition.getListsByNode().remove(selectedLinearNode);
+              selectedLinearNode.setMajorType(newMajorType);
+              linearDefinition.getListsByNode()
+                .put(selectedLinearNode, gazetteerList);
+              linearDefinition.getNodesByListNames()
+                .put(selectedLinearNode.getList(), selectedLinearNode);
               linearDefinition.setModified(true);
-            } else if (column == 3) {
-              String oldValue = selectedLinearNode.getLanguage();
-              if (oldValue != null && oldValue.equals(newValue)) { return; }
-              selectedLinearNode.setLanguage(newValue);
+            } else if (column == 2) { // minor type
+              String newMinorType = (String)
+                definitionTableModel.getValueAt(row, column);
+              String oldMinorType = selectedLinearNode.getMinorType();
+              if (oldMinorType != null
+               && oldMinorType.equals(newMinorType)) { return; }
+              linearDefinition.getListsByNode().remove(selectedLinearNode);
+              selectedLinearNode.setMinorType(newMinorType);
+              linearDefinition.getListsByNode()
+                .put(selectedLinearNode, gazetteerList);
+              linearDefinition.getNodesByListNames()
+                .put(selectedLinearNode.getList(), selectedLinearNode);
               linearDefinition.setModified(true);
-            } else  if (column == 4) {
-              String oldValue = selectedLinearNode.getAnnotationType();
-              if (oldValue != null && oldValue.equals(newValue)) { return; }
-              selectedLinearNode.setAnnotationType(newValue);
+            } else if (column == 3) { // language
+              String newLanguage = (String)
+                definitionTableModel.getValueAt(row, column);
+              String oldLanguage = selectedLinearNode.getLanguage();
+              if (oldLanguage != null
+               && oldLanguage.equals(newLanguage)) { return; }
+              linearDefinition.getListsByNode().remove(selectedLinearNode);
+              selectedLinearNode.setLanguage(newLanguage);
+              linearDefinition.getListsByNode()
+                .put(selectedLinearNode, gazetteerList);
+              linearDefinition.getNodesByListNames()
+                .put(selectedLinearNode.getList(), selectedLinearNode);
+              linearDefinition.setModified(true);
+            } else  if (column == 4) { // annotation type
+              String newAnnotationType = (String)
+                definitionTableModel.getValueAt(row, column);
+              String oldAnnotationType = selectedLinearNode.getAnnotationType();
+              if (oldAnnotationType != null
+               && oldAnnotationType.equals(newAnnotationType)) { return; }
+              linearDefinition.getListsByNode().remove(selectedLinearNode);
+              selectedLinearNode.setAnnotationType(newAnnotationType);
+              linearDefinition.getListsByNode()
+                .put(selectedLinearNode, gazetteerList);
+              linearDefinition.getNodesByListNames()
+                .put(selectedLinearNode.getList(), selectedLinearNode);
               linearDefinition.setModified(true);
             }
             break;
