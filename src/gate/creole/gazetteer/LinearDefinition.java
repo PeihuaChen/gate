@@ -15,10 +15,23 @@
  */
 package gate.creole.gazetteer;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
+
 import gate.creole.ResourceInstantiationException;
 import gate.util.BomStrippingInputStreamReader;
 import gate.util.Files;
@@ -221,6 +234,9 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
       throw new ResourceInstantiationException("URL not set (null).");
     }
     try {
+      File definitionFile = Files.fileFromURL(url);
+      // create an new definition file only if not existing
+      definitionFile.createNewFile();
       BufferedReader defReader =
       new BomStrippingInputStreamReader((url).openStream(), ENCODING);
 
