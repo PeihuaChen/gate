@@ -234,9 +234,11 @@ public class LinearDefinition extends gate.creole.AbstractLanguageResource
       throw new ResourceInstantiationException("URL not set (null).");
     }
     try {
-      File definitionFile = Files.fileFromURL(url);
-      // create an new definition file only if not existing
-      definitionFile.createNewFile();
+      if("file".equals(url.getProtocol())) {
+        File definitionFile = Files.fileFromURL(url);
+        // create an new definition file only if not existing
+        definitionFile.createNewFile();
+      }
       BufferedReader defReader =
       new BomStrippingInputStreamReader((url).openStream(), ENCODING);
 
