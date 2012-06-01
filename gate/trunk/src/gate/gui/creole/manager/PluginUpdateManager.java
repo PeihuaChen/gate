@@ -146,7 +146,9 @@ public class PluginUpdateManager extends JDialog {
       "Semantic Software Lab",
       "http://creole.semanticsoftware.info/gate-update-site.xml",
       "City University Centre for Health Informatics",
-      "http://vega.soi.city.ac.uk/~abdy181/software/GATE/gate-update-site.xml"};
+      "http://vega.soi.city.ac.uk/~abdy181/software/GATE/gate-update-site.xml",
+      "Moonlytics",
+      "http://word-correction-gate-plugin.googlecode.com/svn/trunk/site.xml"};
 
   public static File getUserPluginsHome() {
     
