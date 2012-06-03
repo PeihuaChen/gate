@@ -57,13 +57,9 @@ Macro: ADVS
 Macro: NEGATION
 
 (
-
-({Token.category == RB, Token.string == "not"})
-
-|
-
-({Token.category == RB, Token.string == "n't"})
-
+({Token.string == "not"}) |
+({Token.string == "n't"}) |
+({Token.string == "never"})
 )
 
 
@@ -1375,13 +1371,11 @@ type = "MODAL",
 tense = "none",
 voice = "active",
 neg = "yes",
-rule = "Modal1"
-
+rule = "Modal1Neg"
 }
 
 Rule: Modal1
 // can walk
-
 (
 (MODALS)
 (ADVS)?
@@ -1394,6 +1388,24 @@ tense = "none",
 voice = "active",
 rule = "Modal1"
 
+}
+
+Rule: Modal2Neg
+// might not be walking
+
+(
+(MODAL_NEG) | ((MODALS) (NEGATION))
+(ADVS)?
+{Token.string == "be"}
+{Token.category == VBG}
+):annotate 
+-->
+:annotate.VG = {
+type = "MODAL",
+tense = "BeVBG",
+voice = "active",
+neg = "yes",
+rule = "Modal2Neg"
 }
 
 
@@ -1415,6 +1427,24 @@ rule = "Modal2"
 }
 
 
+Rule: Modal3Neg
+// might not have walked
+
+(
+(MODAL_NEG) | ((MODALS) (NEGATION))
+(ADVS)?
+{Token.string == "have"}
+{Token.category == VBN}
+):annotate 
+-->
+:annotate.VG = {
+type = "MODAL",
+tense = "HaveVBN",
+voice = "active",
+neg = "yes",
+rule = "Modal3Neg"
+}
+
 Rule: Modal3
 // might have walked
 
@@ -1433,6 +1463,24 @@ rule = "Modal3"
 }
 
 
+Rule: Modal4Neg
+// might not be walked
+
+(
+(MODALS)
+(ADVS)?
+{Token.string == "be"}
+{Token.category == VBN}
+):annotate 
+-->
+:annotate.VG = {
+type = "MODAL",
+tense = "BeVBN",
+voice = "passive",
+neg = "yes",
+rule = "Modal4Neg"
+}
+
 Rule: Modal4
 // might be walked
 
@@ -1450,6 +1498,24 @@ voice = "passive",
 rule = "Modal4"
 }
 
+Rule: Modal5Neg
+// might not have been walking
+
+(
+(MODALS)
+(ADVS)?
+{Token.string == "have"}
+{Token.string == "been"}
+{Token.category == VBG}
+):annotate 
+-->
+:annotate.VG = {
+type = "MODAL",
+tense = "HaveBeenVBG",
+voice = "active",
+neg = "yes",
+rule = "Modal5"
+}
 
 Rule: Modal5
 // might have been walking
