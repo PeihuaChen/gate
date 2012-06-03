@@ -69,25 +69,38 @@ class Lexicon extends HashMap {
   public Lexicon(URL lexiconURL, String encoding) throws IOException{
     this.encoding = encoding;
     String line;
-    BufferedReader lexiconReader;
-    if(encoding == null) {
-      lexiconReader = new BomStrippingInputStreamReader(lexiconURL.openStream());
-    } else {
-      lexiconReader = new BomStrippingInputStreamReader(lexiconURL.openStream(),encoding);
-    }
-
-    line = lexiconReader.readLine();
-    String entry;
-    List categories;
-    while(line != null){
-      StringTokenizer tokens = new StringTokenizer(line);
-      entry = tokens.nextToken();
-      categories = new ArrayList();
-      while(tokens.hasMoreTokens()) categories.add(tokens.nextToken());
-      put(entry, categories);
-
+    BufferedReader lexiconReader = null;
+    
+    try {
+      if(encoding == null) {
+        lexiconReader = new BomStrippingInputStreamReader(lexiconURL.openStream());
+      } else {
+        lexiconReader = new BomStrippingInputStreamReader(lexiconURL.openStream(),encoding);
+      }
+  
       line = lexiconReader.readLine();
-    }//while(line != null)
+      String entry;
+      List categories;
+      while(line != null){
+        StringTokenizer tokens = new StringTokenizer(line);
+        entry = tokens.nextToken();
+        categories = new ArrayList();
+        while(tokens.hasMoreTokens()) categories.add(tokens.nextToken());
+        put(entry, categories);
+  
+        line = lexiconReader.readLine();
+      }//while(line != null)
+    }
+    finally {
+      if (lexiconReader != null) {
+        try {
+          lexiconReader.close();
+        }
+        catch (IOException ioe) {
+          //ignore this as there is nothing we can do about it
+        }
+      }
+    }
   }//public Lexicon(URL lexiconURL) throws IOException
 
 }//class Lexicon

@@ -246,36 +246,49 @@ public class POSTagger {
    * Reads the rules from the rules input file
    */
   public void readRules(URL rulesURL) throws IOException, InvalidRuleException{
-    BufferedReader rulesReader;
-    if(encoding == null) {
-      rulesReader = new BomStrippingInputStreamReader(rulesURL.
-          openStream());
-    } else {
-      rulesReader = new BomStrippingInputStreamReader(rulesURL.
-          openStream(), this.encoding);
-    }
-
-    String line;
-    Rule newRule;
-
-    line = rulesReader.readLine();
-    while(line != null){
-      List ruleParts = new ArrayList();
-      StringTokenizer tokens = new StringTokenizer(line);
-      while (tokens.hasMoreTokens()) ruleParts.add(tokens.nextToken());
-      if (ruleParts.size() < 3) throw new InvalidRuleException(line);
-
-      newRule = createNewRule((String)ruleParts.get(2));
-      newRule.initialise(ruleParts);
-      List existingRules = (List)rules.get(newRule.from);
-      if(existingRules == null){
-        existingRules = new ArrayList();
-        rules.put(newRule.from, existingRules);
+    BufferedReader rulesReader = null;
+    
+    try {
+      if(encoding == null) {
+        rulesReader = new BomStrippingInputStreamReader(rulesURL.
+            openStream());
+      } else {
+        rulesReader = new BomStrippingInputStreamReader(rulesURL.
+            openStream(), this.encoding);
       }
-      existingRules.add(newRule);
-
+  
+      String line;
+      Rule newRule;
+  
       line = rulesReader.readLine();
-    }//while(line != null)
+      while(line != null){
+        List ruleParts = new ArrayList();
+        StringTokenizer tokens = new StringTokenizer(line);
+        while (tokens.hasMoreTokens()) ruleParts.add(tokens.nextToken());
+        if (ruleParts.size() < 3) throw new InvalidRuleException(line);
+  
+        newRule = createNewRule((String)ruleParts.get(2));
+        newRule.initialise(ruleParts);
+        List existingRules = (List)rules.get(newRule.from);
+        if(existingRules == null){
+          existingRules = new ArrayList();
+          rules.put(newRule.from, existingRules);
+        }
+        existingRules.add(newRule);
+  
+        line = rulesReader.readLine();
+      }//while(line != null)
+    }
+    finally {
+      if (rulesReader != null) {
+        try {
+          rulesReader.close();
+        }
+        catch(IOException ioe) {
+          //ignore this as there is nothing we can do
+        }
+      }
+    }
   }//public void readRules()
 
   public void showRules(){
