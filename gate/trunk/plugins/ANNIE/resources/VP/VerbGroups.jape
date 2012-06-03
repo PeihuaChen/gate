@@ -27,6 +27,11 @@ Macro: MODALS
 
 )
 
+Macro: MODAL_NEG
+(
+ {Token.string == "cannot"}
+ )
+
 Macro: TO
 
 (
@@ -38,18 +43,7 @@ Macro: TO
 Macro: ADVS
 
 (
-
-({Token.category == RB})?
-
-
-|
-
-({Token.category == RB} {Token.category == RB})
-
-|
-
-({Token.category == RB} {Token.category == RB} {Token.category == RB})
-
+({Token.category == RB})[1,3]
 )
 
 
@@ -75,7 +69,7 @@ Macro: NEGATION
 
 
   
-Rule: FVGSimPrePas
+Rule: FVGSimPrePasNeg
 // Simple Present Passive: is eaten or are eaten
 // (is | are) VBN
 
@@ -83,7 +77,7 @@ Rule: FVGSimPrePas
 
 ({Token.string == "is" } | { Token.string == "are" })
 
-(NEGATION) (ADVS)
+(NEGATION) (ADVS)?
 
 {Token.category == "VBN"}
 
@@ -94,11 +88,12 @@ Rule: FVGSimPrePas
 { type = "FVG",
   tense = "SimPre",
   voice = "passive",
-  neg = "yes"
+  neg = "yes",
+  rule = "FVGSimPrePasNeg"
 }
 
 
-Rule: FVGPreConAct
+Rule: FVGPreConActNeg
 // Present Continuous Active: is eating or are eating
 // (is | are) VBG
 
@@ -106,7 +101,7 @@ Rule: FVGPreConAct
 
 ({Token.string == "is"} | {Token.string == "are"})
 
-(NEGATION) (ADVS)
+(NEGATION) (ADVS)?
 
 {Token.category == "VBG"}
 
@@ -116,10 +111,12 @@ Rule: FVGPreConAct
 { type = "FVG",
   tense = "PreCon",
   voice = "active",
-  neg = "yes" }
+  neg = "yes" ,
+  rule  = "FVGPreConActNeg"
+  }
 
 
-Rule: FVGPreConPas
+Rule: FVGPreConPasNeg
 // Present Continuous Passive: is being  eaten or are being  eaten
 // (is | are) being  VBN
 
@@ -127,7 +124,7 @@ Rule: FVGPreConPas
 
 ({Token.string == "is"} | {Token.string == "are"})
 
-(NEGATION) (ADVS)
+(NEGATION) (ADVS)?
 {Token.string == "being"}
 
 
@@ -141,9 +138,10 @@ Rule: FVGPreConPas
 { type = "FVG",
   tense = "PreCon",
   voice = "active",
-  neg = "yes" }
+  neg = "yes" ,
+  rule = "FVGPreConPasNeg"}
 
-Rule: FVGPrePerAct
+Rule: FVGPrePerActNeg
 // Present Perfect Active: has eaten
 // (has | have) VBN
 
@@ -151,7 +149,7 @@ Rule: FVGPrePerAct
 
 ({Token.string == "has"} | {Token.string == "have"})
 
-(NEGATION) (ADVS)
+(NEGATION) (ADVS)?
 
 {Token.category == VBN}
 
@@ -161,17 +159,18 @@ Rule: FVGPrePerAct
 type = "FVG",
 tense = "PrePer",
 voice = "active",
-neg = "yes"
+neg = "yes",
+rule = "FVGPrePerActNeg"
 }
 
-Rule: FVGPrePerPas
+Rule: FVGPrePerPasNeg
 // Present Perfect Active: has been eaten
 // (has | have) been VBN
 
 (
 
 ({Token.string == "has"} | {Token.string == "have"})
-(NEGATION) (ADVS)
+(NEGATION) (ADVS)?
 {Token.string == "been"}
 
 {Token.category == VBN}
@@ -182,10 +181,11 @@ Rule: FVGPrePerPas
 type = "FVG",
 tense = "PrePer",
 voice = "passive",
-neg = "yes"
+neg = "yes",
+rule = "FVGPrePerPasNeg"
 }
 
-Rule: FVGPrePerConAct
+Rule: FVGPrePerConActNeg
 // Present Perfect Continuous Active: has been eating
 // (has | have) been VBG
 
@@ -193,7 +193,7 @@ Rule: FVGPrePerConAct
 ({Token.string == "has"} | {Token.string == "have"})
 
 
-(NEGATION) (ADVS)
+(NEGATION) (ADVS)?
 {Token.string == "been"}
 
 {Token.category == VBG}
@@ -204,17 +204,18 @@ Rule: FVGPrePerConAct
 type = "FVG",
 tense = "PrePerCon",
 voice = "active",
-neg = "yes"
+neg = "yes",
+rule = "FVGPrePerConActNeg"
 }
 
-Rule: FVGPrePerConPas
+Rule: FVGPrePerConPasNeg
 // Present Perfect Continuous Active: (very rare) has been being eaten
 // (has | have) been being VBN
 
 (
 ({Token.string == "has"} | {Token.string == "have"})
 
-(NEGATION) (ADVS)
+(NEGATION) (ADVS)?
 
 
 {Token.string == "been"}
@@ -228,58 +229,60 @@ Rule: FVGPrePerConPas
 type = "FVG",
 tense = "PrePerCon",
 voice = "passive",
-neg = "yes"
+neg = "yes",
+rule = "FVGPrePerConPasNeg"
 
 }
 
 
 
-Rule: FVGSimPasPas
+Rule: FVGSimPasPasNeg
 // Simple Past Pasive: was eaten
 // (was | were) VBN
 
 (
 ({Token.string == "was"} | {Token.string == "were"})
-(NEGATION) (ADVS)
+(NEGATION) (ADVS)?
 {Token.category == VBN}
 ):annotate -->
 :annotate.VG = {
 type = "FVG",
 tense = "SimPas",
 voice = "passive",
-neg = "yes"
+neg = "yes",
+rule = "FVGSimPasPasNeg"
 
 
 }
 
 
-Rule: FVGPasConAct
+Rule: FVGPasConActNeg
 // Past Continuous Active: was eating
 // (was | were) VBG
 
 (
 ({Token.string == "was"} | {Token.string == "were"})
-(NEGATION) (ADVS)
+(NEGATION) (ADVS)?
 {Token.category == VBG}
 ):annotate -->
 :annotate.VG = {
 type = "FVG",
 tense = "PasCon",
 voice = "active",
-neg = "yes"
-
+neg = "yes",
+rule = "FVGPasConActNeg"
 
 }
 
 
-Rule: FVGPasConPas
+Rule: FVGPasConPasNeg
 // Past Continuous Passive: was eating
 // (was | were) being VBN
 
 (
 ({Token.string == "was"} | {Token.string == "were"})
 
-(NEGATION) (ADVS)
+(NEGATION) (ADVS)?
 {Token.string == "being"}
 
 {Token.category == VBN}
@@ -288,38 +291,38 @@ Rule: FVGPasConPas
 type = "FVG",
 tense = "PasCon",
 voice = "passive",
-neg = "yes"
-
+neg = "yes",
+rule = "FVGPasConPasNeg"
 
 }
 
-Rule: FVGPasPerAct
+Rule: FVGPasPerActNeg
 // Past Perfect Active: had eaten
 //  had VBN
 
 (
 {Token.string == "had"}
-(NEGATION) (ADVS)
+(NEGATION) (ADVS)?
 {Token.category == VBN}
 ):annotate -->
 :annotate.VG = {
 type = "FVG",
 tense = "PasPer",
 voice = "active",
-neg = "yes"
-
+neg = "yes",
+rule = "FVGPasPerActNeg"
 
 }
 
 
-Rule: FVGPasPerPas
+Rule: FVGPasPerPasNeg
 // Past Perfect Passive: had been eaten
 //  had been VBN
 
 (
 {Token.string == "had"}
 
-(NEGATION) (ADVS)
+(NEGATION) (ADVS)?
 {Token.string == "been"}
 
 {Token.category == VBN}
@@ -328,18 +331,18 @@ Rule: FVGPasPerPas
 type = "FVG",
 tense = "PasPer",
 voice = "passive",
-neg = "yes"
-
+neg = "yes",
+rule = "FVGPasPerPasNeg"
 
 }
 
-Rule: FVGPasPerConAct
+Rule: FVGPasPerConActNeg
 // Past Perfect Continuous Active: had been eating
 //  had been VBG
 
 (
 {Token.string == "had"}
-(NEGATION) (ADVS)
+(NEGATION) (ADVS)?
 {Token.string == "been"}
 
 {Token.category == VBG}
@@ -348,18 +351,17 @@ Rule: FVGPasPerConAct
 type = "FVG",
 tense = "PasPerCon",
 voice = "active",
-neg = "yes"
-
-
+neg = "yes",
+rule = "FVGPasPerConActNeg"
 }
 
-Rule: FVGPasPerConPas
+Rule: FVGPasPerConPasNeg
 // Past Perfect Continuous Passive: had been being eaten
 //  had been VBG
 
 (
 {Token.string == "had"}
-(NEGATION) (ADVS)
+(NEGATION) (ADVS)?
 {Token.string == "been"}
 {Token.string == "being"}
 
@@ -369,13 +371,13 @@ Rule: FVGPasPerConPas
 type = "FVG",
 tense = "PasPerCon",
 voice = "passive",
-neg = "yes"
-
+neg = "yes",
+rule = "FVGPasPerConPasNeg"
 
 }
 
 
-Rule: FVGSimFutAct
+Rule: FVGSimFutActNeg
 // Simple Future Active: will eat
 // (will | shall) VB
 
@@ -383,19 +385,19 @@ Rule: FVGSimFutAct
 ({Token.string == "will"} | {Token.string == "shall"}
 | {Token.string == "wo"} | {Token.string == "'ll"})
 
-(NEGATION) (ADVS)
+(NEGATION) (ADVS)?
 {Token.category == VB}
 ):annotate -->
 :annotate.VG = {
 type = "FVG",
 tense = "SimFut",
 voice = "active",
-neg = "yes"
-
+neg = "yes",
+rule = "FVGSimFutActNeg"
 }
 
 
-Rule: FVGSimFutPas
+Rule: FVGSimFutPasNeg
 // Simple Future Active: will be eaten
 // (will | shall) be  VBN
 
@@ -405,7 +407,7 @@ Rule: FVGSimFutPas
 | {Token.string == "wo"} | {Token.string == "'ll"}
 
 )
-(NEGATION) (ADVS)
+(NEGATION) (ADVS)?
 {Token.string == "be"}
 
 {Token.category == VB}
@@ -414,12 +416,13 @@ Rule: FVGSimFutPas
 type = "FVG",
 tense = "SimFut",
 voice = "passive",
-neg = "yes"
+neg = "yes",
+rule = "FVGSimFutPasNeg"
 
 }
 
 
-Rule: FVGFutConAct
+Rule: FVGFutConActNeg
 // Future Continuous Active: will be eating
 // (will | shall) be VBG
 
@@ -430,7 +433,7 @@ Rule: FVGFutConAct
 )
 
 
-(NEGATION) (ADVS)
+(NEGATION) (ADVS)?
 {Token.string == "be"}
 
 {Token.category == VBG}
@@ -439,12 +442,12 @@ Rule: FVGFutConAct
 type = "FVG",
 tense = "FutCon",
 voice = "active",
-neg = "yes"
-
+neg = "yes",
+rule = "FVGFutConActNeg"
 
 }
 
-Rule: FVGFutConPas
+Rule: FVGFutConPasNeg
 // Future Continuous Pasive: will be being  eaten
 // (will | shall) be being VBN
 
@@ -453,7 +456,7 @@ Rule: FVGFutConPas
 | {Token.string == "wo"} | {Token.string == "'ll"}
 
 )
-(NEGATION) (ADVS)
+(NEGATION) (ADVS)?
 {Token.string == "be"}
 {Token.string == "being"}
 
@@ -463,13 +466,13 @@ Rule: FVGFutConPas
 type = "FVG",
 tense = "FutCon",
 voice = "passive",
-neg = "yes"
-
+neg = "yes",
+rule = "FVGFutConPasNeg"
 
 }
 
 
-Rule: FVGFutPerAct
+Rule: FVGFutPerActNeg
 // Future Pefect Active: will have eaten
 // (will | shall) have  VBN
 
@@ -478,7 +481,7 @@ Rule: FVGFutPerAct
 
 | {Token.string == "wo"} | {Token.string == "'ll"}
 )
-(NEGATION) (ADVS)
+(NEGATION) (ADVS)?
 {Token.string == "have"}
 
 {Token.category == VBN}
@@ -487,12 +490,12 @@ Rule: FVGFutPerAct
 type = "FVG",
 tense = "FutPer",
 voice = "active",
-neg = "yes"
-
+neg = "yes",
+rule = "FVGFutPerActNeg"
 
 }
 
-Rule: FVGFutPerPas
+Rule: FVGFutPerPasNeg
 // Future Pefect Active: will have being eaten
 // (will | shall) have  been VBN
 
@@ -500,7 +503,7 @@ Rule: FVGFutPerPas
 ({Token.string == "will"} | {Token.string == "shall"}
 | {Token.string == "wo"} | {Token.string == "'ll"}
 )
-(NEGATION) (ADVS)
+(NEGATION) (ADVS)?
 {Token.string == "have"}
 {Token.string == "been"}
 
@@ -510,13 +513,13 @@ Rule: FVGFutPerPas
 type = "FVG",
 tense = "FutPer",
 voice = "passive",
-neg = "yes"
-
+neg = "yes",
+rule = "FVGFutPerPasNeg"
 
 }
 
 
-Rule: FVGFutPerConAct
+Rule: FVGFutPerConActNeg
 // Future Pefect Continuous Active: will have been eating
 // (will | shall) have been VBG
 
@@ -524,7 +527,7 @@ Rule: FVGFutPerConAct
 ({Token.string == "will"} | {Token.string == "shall"}
 | {Token.string == "wo"} | {Token.string == "'ll"}
 )
-(NEGATION) (ADVS)
+(NEGATION) (ADVS)?
 {Token.string == "have"}
 {Token.string == "been"}
 
@@ -534,13 +537,13 @@ Rule: FVGFutPerConAct
 type = "FVG",
 tense = "FutPerCon",
 voice = "active",
-neg = "yes"
-
+neg = "yes",
+rule = "FVGFutPerConActNeg"
 }
 
 
 
-Rule: FVGFutPerConPas
+Rule: FVGFutPerConPasNeg
 // Future Pefect Continuous Passive: will have been being eaten
 // (will | shall) have been being VBN
 
@@ -550,7 +553,7 @@ Rule: FVGFutPerConPas
 | {Token.string == "wo"} | {Token.string == "'ll"}
 )
 
-(NEGATION) (ADVS)
+(NEGATION) (ADVS)?
 {Token.string == "have"}
 
 {Token.string == "been"}
@@ -562,7 +565,8 @@ Rule: FVGFutPerConPas
 type = "FVG",
 tense = "FutPerCon",
 voice = "passive",
-neg = "yes"
+neg = "yes",
+rule = "FVGFutPerConPasNeg"
 
 }
 
@@ -571,50 +575,35 @@ Rule: FVGSimPreActNeg
 
 (
 (
-
 ({ Token.string == "do"})
 |
-
 ({ Token.string == "does"})
-
 )
-
-
-(NEGATION) (ADVS)
-
+(NEGATION) (ADVS)?
 ({Token.category == "VB"})
-
 )
 :annotate --> :annotate.VG = 
-
 { type = "FVG",
   tense = "SimPre",
   voice = "active",
-neg = "yes"
+neg = "yes",
+rule = "FVGSimPreActNeg"
 }
 
 
 Rule: FVGSimPasActNeg
 
 (
-
-
-
 ({ Token.string == "did"})
-
-
-
-(NEGATION) (ADVS)
-
+(NEGATION) (ADVS)?
 ({Token.category == "VB"})
-
 )
 :annotate --> :annotate.VG = 
-
 { type = "FVG",
   tense = "SimPas",
   voice = "active",
-neg = "yes"
+neg = "yes",
+rule = "FVGSimPasActNeg"
 }
 
 
@@ -623,8 +612,6 @@ Rule: FVGSimPreActNeg
 // VB not
 
 (
-
-
 (
 ({ Token.string == "is"})
 |
@@ -637,18 +624,16 @@ Rule: FVGSimPreActNeg
 ({ Token.string == "have"})
 |
 ({ Token.string == "has"})
-
-
 )
 (NEGATION) 
-
 )
 :annotate --> :annotate.VG = 
 
 { type = "FVG",
   tense = "SimPre",
   voice = "active",
-neg = "yes"}
+neg = "yes",
+rule = "FVGSimPreActNeg"}
 
 
 Rule: FVGSimPasActNeg
@@ -656,26 +641,21 @@ Rule: FVGSimPasActNeg
 // VB not
 
 (
-
-
 (
 ({ Token.string == "was"})
 |
 ({ Token.string == "were"})
 |
 ({ Token.string == "had"})
-
-
 )
 (NEGATION) 
-
 )
 :annotate --> :annotate.VG = 
-
 { type = "FVG",
   tense = "SimPas",
   voice = "active",
-neg = "yes"}
+neg = "yes",
+rule = "FVGSimPasActNeg"}
 
 
 
@@ -684,31 +664,21 @@ Rule: FVGPreConActNeg
 // not  VBG
 
 (
-
-
-
-(NEGATION) (ADVS)
-
+(NEGATION) (ADVS)?
 {Token.category == "VBG"}
-
-
 ):annotate -->
 :annotate.VG  = 
 { type = "FVG",
   tense = "PreCon",
   voice = "active" ,
-neg = "yes"}
+neg = "yes",
+rule = "FVGPreConActNeg"}
 
 
-
-
-
+////////////////////////////////////////////////////////////
 // fvg.jape
 
 // Finite Verb Groups
-
-
-
 
 Rule: FVGSimPreAct
 // Simple Present Active: eats or eat
@@ -716,7 +686,7 @@ Rule: FVGSimPreAct
 
 (
 
-//(ADVS)
+//(ADVS)?
 
 (
 {Token.category == "VBP"}
@@ -740,7 +710,7 @@ Rule: FVGSimPrePas
 
 ({Token.string == "is" } | { Token.string == "are" })
 
-(ADVS)
+(ADVS)?
 
 {Token.category == "VBN"}
 
@@ -761,7 +731,7 @@ Rule: FVGPreConAct
 
 ({Token.string == "is"} | {Token.string == "are"})
 
-(ADVS)
+(ADVS)?
 
 {Token.category == "VBG"}
 
@@ -784,7 +754,7 @@ Rule: FVGPreConPas
 
 {Token.string == "being"}
 
-(ADVS)
+(ADVS)?
 {Token.category == "VBN"}
 
 
@@ -802,7 +772,7 @@ Rule: FVGPrePerAct
 
 ({Token.string == "has"} | {Token.string == "have"})
 
-(ADVS)
+(ADVS)?
 
 {Token.category == VBN}
 
@@ -822,7 +792,7 @@ Rule: FVGPrePerPas
 
 ({Token.string == "has"} | {Token.string == "have"})
 {Token.string == "been"}
-(ADVS)
+(ADVS)?
 {Token.category == VBN}
 
 ):annotate -->
@@ -843,7 +813,7 @@ Rule: FVGPrePerConAct
 
 
 {Token.string == "been"}
-(ADVS)
+(ADVS)?
 {Token.category == VBG}
 
 ):annotate -->
@@ -866,7 +836,7 @@ Rule: FVGPrePerConPas
 
 {Token.string == "been"}
 {Token.string == "being"}
-(ADVS)
+(ADVS)?
 {Token.category == VBN}
 
 ):annotate -->
@@ -883,7 +853,7 @@ Rule: FVGSimPasAct
 // VBD
 
 (
-//(ADVS)
+//(ADVS)?
 {Token.category == VBD}
 ):annotate -->
 :annotate.VG = {
@@ -901,7 +871,7 @@ Rule: FVGSimPasPas
 
 (
 ({Token.string == "was"} | {Token.string == "were"})
-(ADVS)
+(ADVS)?
 {Token.category == VBN}
 ):annotate -->
 :annotate.VG = {
@@ -919,7 +889,7 @@ Rule: FVGPasConAct
 
 (
 ({Token.string == "was"} | {Token.string == "were"})
-(ADVS)
+(ADVS)?
 {Token.category == VBG}
 ):annotate -->
 :annotate.VG = {
@@ -939,7 +909,7 @@ Rule: FVGPasConPas
 ({Token.string == "was"} | {Token.string == "were"})
 
 {Token.string == "being"}
-(ADVS)
+(ADVS)?
 {Token.category == VBN}
 ):annotate -->
 :annotate.VG = {
@@ -956,7 +926,7 @@ Rule: FVGPasPerAct
 
 (
 {Token.string == "had"}
-(ADVS)
+(ADVS)?
 {Token.category == VBN}
 ):annotate -->
 :annotate.VG = {
@@ -976,7 +946,7 @@ Rule: FVGPasPerPas
 {Token.string == "had"}
 
 {Token.string == "been"}
-(ADVS)
+(ADVS)?
 {Token.category == VBN}
 ):annotate -->
 :annotate.VG = {
@@ -995,7 +965,7 @@ Rule: FVGPasPerConAct
 {Token.string == "had"}
 
 {Token.string == "been"}
-(ADVS)
+(ADVS)?
 {Token.category == VBG}
 ):annotate -->
 :annotate.VG = {
@@ -1015,7 +985,7 @@ Rule: FVGPasPerConPas
 
 {Token.string == "been"}
 {Token.string == "being"}
-(ADVS)
+(ADVS)?
 {Token.category == VBN}
 ):annotate -->
 :annotate.VG = {
@@ -1035,7 +1005,7 @@ Rule: FVGSimFutAct
 ({Token.string == "will"} | {Token.string == "shall"}
 | {Token.string == "wo"} | {Token.string == "'ll"}
 )
-(ADVS)
+(ADVS)?
 {Token.category == VB}
 ):annotate -->
 :annotate.VG = {
@@ -1057,7 +1027,7 @@ Rule: FVGSimFutPas
 )
 
 {Token.string == "be"}
-(ADVS)
+(ADVS)?
 {Token.category == VB}
 ):annotate -->
 :annotate.VG = {
@@ -1080,7 +1050,7 @@ Rule: FVGFutConAct
 )
 
 {Token.string == "be"}
-(ADVS)
+(ADVS)?
 {Token.category == VBG}
 ):annotate -->
 :annotate.VG = {
@@ -1104,7 +1074,7 @@ Rule: FVGFutConPas
 
 {Token.string == "be"}
 {Token.string == "being"}
-(ADVS)
+(ADVS)?
 {Token.category == VBN}
 ):annotate -->
 :annotate.VG = {
@@ -1127,7 +1097,7 @@ Rule: FVGFutPerAct
 )
 
 {Token.string == "have"}
-(ADVS)
+(ADVS)?
 {Token.category == VBN}
 ):annotate -->
 :annotate.VG = {
@@ -1151,7 +1121,7 @@ Rule: FVGFutPerPas
 
 {Token.string == "have"}
 {Token.string == "been"}
-(ADVS)
+(ADVS)?
 {Token.category == VBN}
 ):annotate -->
 :annotate.VG = {
@@ -1175,7 +1145,7 @@ Rule: FVGFutPerConAct
 
 {Token.string == "have"}
 {Token.string == "been"}
-(ADVS)
+(ADVS)?
 {Token.category == VBG}
 ):annotate -->
 :annotate.VG = {
@@ -1202,7 +1172,7 @@ Rule: FVGFutPerConPas
 {Token.string == "have"}
 {Token.string == "been"}
 {Token.string == "being"}
-(ADVS)
+(ADVS)?
 {Token.category == VBN}
 ):annotate -->
 :annotate.VG = {
@@ -1226,7 +1196,7 @@ Rule: NFVGInfAct
 
 (
 (TO)
-(ADVS)
+(ADVS)?
 {Token.category == VB}
 ):annotate -->
 
@@ -1260,7 +1230,7 @@ Rule: NFVGInfPas
 (
 (TO)
 {Token.string == "be"}
-(ADVS)
+(ADVS)?
 {Token.category == VBN}
 ):annotate -->
 
@@ -1280,7 +1250,7 @@ Rule: NFVGPreConAct
 (
 (TO)
 {Token.string == "be"}
-(ADVS)
+(ADVS)?
 {Token.category == VBG}
 ):annotate -->
 
@@ -1300,7 +1270,7 @@ Rule: NFVGPreConPas
 (TO)
 {Token.string == "be"}
 {Token.string == "being"}
-(ADVS)
+(ADVS)?
 {Token.category == VBN}
 ):annotate -->
 
@@ -1319,7 +1289,7 @@ Rule: NFVGPerAct
 (
 (TO)
 {Token.string == "have"}
-(ADVS)
+(ADVS)?
 {Token.category == VBN}
 ):annotate -->
 
@@ -1338,7 +1308,7 @@ Rule: NFVGPerPas
 (TO)
 {Token.string == "have"}
 {Token.string == "been"}
-(ADVS)
+(ADVS)?
 {Token.category == VBN}
 ):annotate -->
 
@@ -1357,7 +1327,7 @@ Rule: NFVGPerConAct
 (TO)
 {Token.string == "have"}
 {Token.string == "being"}
-(ADVS)
+(ADVS)?
 {Token.category == VBG}
 ):annotate -->
 
@@ -1377,38 +1347,52 @@ Rule: NFVGPerConPas
 {Token.string == "have"}
 {Token.string == "been"}
 {Token.string == "being"}
-(ADVS)
+(ADVS)?
 {Token.category == VBN}
-):annotate -->
-
+):annotate 
+-->
 :annotate.VG = {
 type = "NFVG",
 tense = "PerCon",
 voice = "passive"
-
 }
 
 
-
+////////////////////////////////////////////////////////////////
 // modals
 
+Rule: Modal1Neg
+// cannot walk
 
+(
+(MODAL_NEG) | ((MODALS) (NEGATION))
+(ADVS)?
+{Token.category == VB}
+):annotate 
+-->
+:annotate.VG = {
+type = "MODAL",
+tense = "none",
+voice = "active",
+neg = "yes",
+rule = "Modal1"
 
+}
 
 Rule: Modal1
 // can walk
 
 (
 (MODALS)
-(ADVS)
-
+(ADVS)?
 {Token.category == VB}
-
-):annotate -->
+):annotate 
+-->
 :annotate.VG = {
 type = "MODAL",
 tense = "none",
-voice = "none"
+voice = "active",
+rule = "Modal1"
 
 }
 
@@ -1418,17 +1402,16 @@ Rule: Modal2
 
 (
 (MODALS)
-(ADVS)
+(ADVS)?
 {Token.string == "be"}
-
 {Token.category == VBG}
-
-):annotate -->
+):annotate 
+-->
 :annotate.VG = {
 type = "MODAL",
 tense = "BeVBG",
-voice = "none"
-
+voice = "active",
+rule = "Modal2"
 }
 
 
@@ -1437,19 +1420,16 @@ Rule: Modal3
 
 (
 (MODALS)
-(ADVS)
+(ADVS)?
 {Token.string == "have"}
-
-
-
 {Token.category == VBN}
-
-):annotate -->
+):annotate 
+-->
 :annotate.VG = {
 type = "MODAL",
 tense = "HaveVBN",
-voice = "none"
-
+voice = "active",
+rule = "Modal3"
 }
 
 
@@ -1458,16 +1438,16 @@ Rule: Modal4
 
 (
 (MODALS)
-(ADVS)
+(ADVS)?
 {Token.string == "be"}
 {Token.category == VBN}
-
-):annotate -->
+):annotate 
+-->
 :annotate.VG = {
 type = "MODAL",
 tense = "BeVBN",
-voice = "none"
-
+voice = "passive",
+rule = "Modal4"
 }
 
 
@@ -1476,21 +1456,20 @@ Rule: Modal5
 
 (
 (MODALS)
-(ADVS)
+(ADVS)?
 {Token.string == "have"}
 {Token.string == "been"}
-
 {Token.category == VBG}
-
-):annotate -->
+):annotate 
+-->
 :annotate.VG = {
 type = "MODAL",
 tense = "HaveBeenVBG",
-voice = "none"
-
+voice = "active",
+rule = "Modal5"
 }
 
-
+/////////////////////////////////////////////////
 
 
 // participles.jape
@@ -1523,7 +1502,7 @@ Rule: PARTPrePas
 
 (
 {Token.string == "being"}
-(ADVS)
+(ADVS)?
 {Token.category == VBN}
 
 ):annotate -->
@@ -1542,7 +1521,7 @@ Rule: PARTPrePerAct
 
 (
 {Token.string == "having"}
-(ADVS)
+(ADVS)?
 {Token.category == VBN}
 
 ):annotate -->
@@ -1561,7 +1540,7 @@ Rule: PARTPrePerPas
 (
 {Token.string == "having"}
 {Token.string == "been"}
-(ADVS)
+(ADVS)?
 {Token.category == VBN}
 
 ):annotate -->
@@ -1580,7 +1559,7 @@ Rule: PARTPrePerConAct
 (
 {Token.string == "having"}
 {Token.string == "been"}
-(ADVS)
+(ADVS)?
 {Token.category == VBG}
 
 ):annotate -->
@@ -1600,7 +1579,7 @@ Rule: PARTPrePerConPas
 {Token.string == "having"}
 {Token.string == "been"}
 {Token.string == "being"}
-(ADVS)
+(ADVS)?
 {Token.category == VB}
 
 ):annotate -->
@@ -1640,7 +1619,7 @@ Rule: PARTPasPer
 
 (
 {Token.string == "been"}
-(ADVS)
+(ADVS)?
 {Token.category == VBN}
 
 ):annotate -->
@@ -1762,7 +1741,7 @@ Rule: Special1
 
 (
 (SPECIALS)
-(ADVS)
+(ADVS)?
 {Token.category == VB}
 
 ):annotate -->
@@ -1779,7 +1758,7 @@ Rule: Special2
 
 (
 (SPECIALS)
-(ADVS)
+(ADVS)?
 {Token.category == VBN}
 
 ):annotate -->
