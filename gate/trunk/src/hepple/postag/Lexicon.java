@@ -31,6 +31,8 @@ import java.util.*;
 import java.io.*;
 import java.net.URL;
 
+import org.apache.commons.io.IOUtils;
+
 /**
  * A {@link java.util.HashMap} that maps from lexical entry
  * ({@link java.lang.String}) to possible POS categories
@@ -70,21 +72,24 @@ class Lexicon extends HashMap {
     this.encoding = encoding;
     String line;
     BufferedReader lexiconReader = null;
+    InputStream lexiconStream = null;
     
     try {
+      lexiconStream = lexiconURL.openStream();
+      
       if(encoding == null) {
-        lexiconReader = new BomStrippingInputStreamReader(lexiconURL.openStream());
+        lexiconReader = new BomStrippingInputStreamReader(lexiconStream);
       } else {
-        lexiconReader = new BomStrippingInputStreamReader(lexiconURL.openStream(),encoding);
+        lexiconReader = new BomStrippingInputStreamReader(lexiconStream,encoding);
       }
   
       line = lexiconReader.readLine();
       String entry;
-      List categories;
+      List<String> categories;
       while(line != null){
         StringTokenizer tokens = new StringTokenizer(line);
         entry = tokens.nextToken();
-        categories = new ArrayList();
+        categories = new ArrayList<String>();
         while(tokens.hasMoreTokens()) categories.add(tokens.nextToken());
         put(entry, categories);
   
@@ -92,14 +97,8 @@ class Lexicon extends HashMap {
       }//while(line != null)
     }
     finally {
-      if (lexiconReader != null) {
-        try {
-          lexiconReader.close();
-        }
-        catch (IOException ioe) {
-          //ignore this as there is nothing we can do about it
-        }
-      }
+      IOUtils.closeQuietly(lexiconReader);
+      IOUtils.closeQuietly(lexiconStream);
     }
   }//public Lexicon(URL lexiconURL) throws IOException
 
