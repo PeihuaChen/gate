@@ -66,6 +66,7 @@ Rule: FVGSimPreActNeg
 // Simple Present Active: does not eat
 
 (
+(DO)
 (NEGATION)
 (
 {Token.category == "VB"}
