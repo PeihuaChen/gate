@@ -39,14 +39,24 @@
 package hepple.postag;
 
 
-import java.io.*;
-import java.net.URL;
-import java.util.*;
-
 import gate.util.BomStrippingInputStreamReader;
-import gnu.getopt.*;
+import gnu.getopt.Getopt;
+import gnu.getopt.LongOpt;
 
-import hepple.postag.rules.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
+
+import org.apache.commons.io.IOUtils;
 
 /**
  * A Java POS Tagger
@@ -247,14 +257,13 @@ public class POSTagger {
    */
   public void readRules(URL rulesURL) throws IOException, InvalidRuleException{
     BufferedReader rulesReader = null;
-    
+    InputStream rulesStream = null;
     try {
+      rulesStream = rulesURL.openStream();
       if(encoding == null) {
-        rulesReader = new BomStrippingInputStreamReader(rulesURL.
-            openStream());
+        rulesReader = new BomStrippingInputStreamReader(rulesStream);
       } else {
-        rulesReader = new BomStrippingInputStreamReader(rulesURL.
-            openStream(), this.encoding);
+        rulesReader = new BomStrippingInputStreamReader(rulesStream, this.encoding);
       }
   
       String line;
@@ -262,16 +271,16 @@ public class POSTagger {
   
       line = rulesReader.readLine();
       while(line != null){
-        List ruleParts = new ArrayList();
+        List<String> ruleParts = new ArrayList<String>();
         StringTokenizer tokens = new StringTokenizer(line);
         while (tokens.hasMoreTokens()) ruleParts.add(tokens.nextToken());
         if (ruleParts.size() < 3) throw new InvalidRuleException(line);
   
         newRule = createNewRule((String)ruleParts.get(2));
         newRule.initialise(ruleParts);
-        List existingRules = (List)rules.get(newRule.from);
+        List<Rule> existingRules = (List)rules.get(newRule.from);
         if(existingRules == null){
-          existingRules = new ArrayList();
+          existingRules = new ArrayList<Rule>();
           rules.put(newRule.from, existingRules);
         }
         existingRules.add(newRule);
@@ -280,14 +289,8 @@ public class POSTagger {
       }//while(line != null)
     }
     finally {
-      if (rulesReader != null) {
-        try {
-          rulesReader.close();
-        }
-        catch(IOException ioe) {
-          //ignore this as there is nothing we can do
-        }
-      }
+      IOUtils.closeQuietly(rulesReader);
+      IOUtils.closeQuietly(rulesStream);
     }
   }//public void readRules()
 

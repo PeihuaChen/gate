@@ -16,12 +16,16 @@
 
 package gate.corpora;
 
-import java.io.*;
-import java.net.URL;
-
 import gate.DocumentContent;
 import gate.util.BomStrippingInputStreamReader;
 import gate.util.InvalidOffsetException;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+
+import org.apache.commons.io.IOUtils;
 
 /** Represents the commonalities between all sorts of document contents.
   */
@@ -49,43 +53,50 @@ public class DocumentContentImpl implements DocumentContent
     char[] readBuffer = new char[INTERNAL_BUFFER_SIZE];
 
     BufferedReader uReader = null;
+    InputStream uStream = null;
     StringBuffer buf = new StringBuffer();
-    char c;
-    long s = 0, e = Long.MAX_VALUE, counter = 0;
+
+    long s = 0, e = Long.MAX_VALUE;
     if(start != null && end != null) {
       s = start.longValue();
       e = end.longValue();
     }
 
-    if(encoding != null && !encoding.equalsIgnoreCase("")) {
-      uReader = new BomStrippingInputStreamReader(u.openStream(), encoding, INTERNAL_BUFFER_SIZE);
-    } else {
-      uReader = new BomStrippingInputStreamReader(u.openStream(), INTERNAL_BUFFER_SIZE);
-    };
-
-    // 1. skip S characters
-    uReader.skip(s);
-
-    // 2. how many character shall I read?
-    long toRead = e - s;
-
-    // 3. read gtom source into buffer
-    while (
-      toRead > 0 &&
-      (readLength = uReader.read(readBuffer, 0, INTERNAL_BUFFER_SIZE)) != -1
-    ) {
-      if (toRead <  readLength) {
-        //well, if toRead(long) is less than readLenght(int)
-        //then there can be no overflow, so the cast is safe
-        readLength = (int)toRead;
+    try {
+      uStream = u.openStream();
+      
+      if(encoding != null && !encoding.equalsIgnoreCase("")) {
+        uReader = new BomStrippingInputStreamReader(uStream, encoding, INTERNAL_BUFFER_SIZE);
+      } else {
+        uReader = new BomStrippingInputStreamReader(uStream, INTERNAL_BUFFER_SIZE);
+      };
+  
+      // 1. skip S characters
+      uReader.skip(s);
+  
+      // 2. how many character shall I read?
+      long toRead = e - s;
+  
+      // 3. read gtom source into buffer
+      while (
+        toRead > 0 &&
+        (readLength = uReader.read(readBuffer, 0, INTERNAL_BUFFER_SIZE)) != -1
+      ) {
+        if (toRead <  readLength) {
+          //well, if toRead(long) is less than readLenght(int)
+          //then there can be no overflow, so the cast is safe
+          readLength = (int)toRead;
+        }
+  
+        buf.append(readBuffer, 0, readLength);
+        toRead -= readLength;
       }
-
-      buf.append(readBuffer, 0, readLength);
-      toRead -= readLength;
     }
-
-    // 4.close reader
-    uReader.close();
+    finally {
+      // 4.close reader
+      IOUtils.closeQuietly(uReader);
+      IOUtils.closeQuietly(uStream);
+    }
 
     content = new String(buf);
     originalContent = content;
