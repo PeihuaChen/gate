@@ -156,6 +156,15 @@ public class ConditionalSerialController extends SerialController
                       getBenchmarkId()), this, benchmarkFeatures);
 
       benchmarkFeatures.remove(Benchmark.PR_NAME_FEATURE);
+      
+      // calculate the time taken by the PR
+      long timeTakenByThePR = System.currentTimeMillis() - startTime;
+      Long time = prTimeMap.get(currentPR.getName());
+      if(time == null) {
+        time = new Long(0);
+      }
+      time = new Long(time.longValue() + timeTakenByThePR);
+      prTimeMap.put(currentPR.getName(), time);
     }
 
 
