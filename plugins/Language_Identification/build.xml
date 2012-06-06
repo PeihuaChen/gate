@@ -36,11 +36,6 @@
   <!-- JavaDoc documentation directory -->
   <property name="javadoc.dir" location="${doc.dir}/javadoc" />
 
-  <!-- lib directory - put any additional JAR files your plugin requires into
-       this directory.  You will also need to add them as <JAR> entries in
-       creole.xml -->
-  <property name="lib.dir" location="lib" />
-
   <!-- location for the generated JAR file -->
   <property name="jar.location" location="languageID.jar" />
 
@@ -54,7 +49,6 @@
       <include name="**/*.jar" />
       <include name="**/*.zip" />
     </fileset>
-    <fileset dir="${lib.dir}" includes="**/*.jar" />
   </path>
   
   <!--====================== Targets ============================-->
