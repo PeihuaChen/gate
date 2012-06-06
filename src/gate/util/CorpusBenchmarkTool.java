@@ -76,7 +76,7 @@ public class CorpusBenchmarkTool {
   public void init() {
     //first read the corpus_tool.properties file
     File propFile = new File("corpus_tool.properties");
-    Out.prln(propFile.getAbsolutePath());
+    Out.prln("Loading properties from " + propFile.getAbsolutePath());
     if (propFile.exists()) {
       try {
         InputStream inputStream = new FileInputStream(propFile);
@@ -144,12 +144,13 @@ public class CorpusBenchmarkTool {
 
       }
       catch (IOException ex) {
-        //just ignore the file and go on with the defaults
-        this.configs = new Properties();
+        throw new GateRuntimeException("Error loading " + propFile.getAbsolutePath(), ex);
       }
     }
-    else
+    else {
+      Err.prln(propFile.getAbsolutePath() + " does not exist, using default settings");
       this.configs = new Properties();
+    }
 
     //we only initialise the PRs if they are going to be used
     //for processing unprocessed documents
