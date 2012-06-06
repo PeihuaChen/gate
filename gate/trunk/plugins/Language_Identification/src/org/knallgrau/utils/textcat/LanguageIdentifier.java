@@ -44,13 +44,8 @@ public class LanguageIdentifier extends gate.creole.AbstractLanguageAnalyser {
 
   public LanguageIdentifier init() throws ResourceInstantiationException {
     try {
-      if(configURL != null) {
         guesser =
-                new TextCategorizer(Files.fileFromURL(configURL)
-                        .getAbsolutePath());
-      } else {
-        guesser = new TextCategorizer();
-      }
+                new TextCategorizer(configURL);
     } catch(Exception e) {
       throw new ResourceInstantiationException(
               "unable to load TextCat config file", e);
