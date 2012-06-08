@@ -12,7 +12,7 @@
   <property name="jar.location" location="../../bin/gateLauncher.jar" />
 
   <!-- The libraries -->
-   <fileset id="libs" dir="${libDir}">
+   <fileset id="libs" dir="${lib.dir}">
      <include name="*.jar" />
    </fileset>
 
