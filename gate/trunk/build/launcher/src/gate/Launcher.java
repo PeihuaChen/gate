@@ -29,13 +29,16 @@ import java.net.URLClassLoader;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.filechooser.FileFilter;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+
+import org.java.ayatana.ApplicationMenu;
+import org.java.ayatana.AyatanaDesktop;
 
 
 /**
@@ -68,6 +71,28 @@ public class Launcher {
     Thread.currentThread().setContextClassLoader(classLoader);
     Class.forName("gate.Main", true, classLoader).getDeclaredMethod(
       "main", new Class[]{String[].class}).invoke(null, new Object[] {args});
+    // try to register with Unity
+    if (AyatanaDesktop.isSupported()){
+      // the previous call will create a gate.gui.MainFrame in the swing thread
+      // we queue an action to be called once that completes.
+      SwingUtilities.invokeLater(new Runnable() {
+        @Override
+        public void run() {
+          // get the MainFrame class
+          try {
+            JFrame mainFrame = (JFrame) Class.forName("gate.gui.MainFrame", 
+              true, classLoader).getDeclaredMethod("getInstance").invoke(
+              null, (Object[])null);
+            if(mainFrame != null){
+              ApplicationMenu.tryInstall(mainFrame);
+            }
+          } catch(Exception e) {
+            // could not do registration... 
+            // ignore
+          }
+        }
+      });      
+    }
   }
   
   protected void findGateHome() throws URISyntaxException {

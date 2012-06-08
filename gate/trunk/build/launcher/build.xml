@@ -8,8 +8,19 @@
        plugin is in GATE Developer's plugin directory -->
   <property name="src.dir" location="src" />
   <property name="classes.dir" location="classes" />
+  <property name="lib.dir" location="lib" />
   <property name="jar.location" location="../../bin/gateLauncher.jar" />
 
+  <!-- The libraries -->
+   <fileset id="libs" dir="${libDir}">
+     <include name="*.jar" />
+   </fileset>
+
+   <!-- The build CLASSPATH -->
+   <path id="build.class.path">
+     <fileset refid="libs" />
+   </path>
+  
   <!-- create build directory structure -->
   <target name="prepare">
     <mkdir dir="${classes.dir}" />
@@ -19,20 +30,27 @@
   <target name="compile" depends="prepare">
     <javac srcdir="${src.dir}"
            destdir="${classes.dir}"
+           classpathref="build.class.path"
            debug="true"
            debuglevel="lines,source"
            encoding="UTF-8"
-           source="1.6" target="1.6" />
+           source="1.6" 
+           target="1.6" />
   </target>
 
   <!-- create the JAR file -->
   <target name="jar" depends="compile" >
     <jar destfile="${jar.location}"
-         update="false"
-         basedir="${classes.dir}">
+         update="false">
     	<manifest>
     		<attribute name="Main-Class" value="gate.Launcher" />
   	  </manifest>
+      <fileset dir="${classes.dir}" />
+      <archives>
+        <zips>
+          <fileset dir="${lib.dir}" includes="*.jar" />
+        </zips>
+      </archives>  
     </jar>
   </target>
 
