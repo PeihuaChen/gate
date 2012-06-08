@@ -17,7 +17,7 @@
    </fileset>
 
    <!-- The build CLASSPATH -->
-   <path id="build.class.path">
+   <path id="launcher.build.class.path">
      <fileset refid="libs" />
    </path>
   
@@ -30,7 +30,7 @@
   <target name="compile" depends="prepare">
     <javac srcdir="${src.dir}"
            destdir="${classes.dir}"
-           classpathref="build.class.path"
+           classpathref="launcher.build.class.path"
            debug="true"
            debuglevel="lines,source"
            encoding="UTF-8"
