@@ -20,6 +20,7 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 
+import gate.corpora.DocumentStaxUtils;
 import gate.event.DocumentListener;
 import gate.util.InvalidOffsetException;
 
@@ -130,7 +131,14 @@ public interface Document extends SimpleDocument {
   public Boolean getCollectRepositioningInfo();
 
   /** Returns a GateXml document. This document is actually a serialization of
-   *  a Gate Document in XML.
+   *  a Gate Document in XML. The <code>writeDocument</code> methods of
+   *  {@link DocumentStaxUtils} provide the standard implementation of this
+   *  serialization format which will work for any Document implementation.
+   *  Implementations of <code>toXml</code> will typically delegate to
+   *  <code>DocumentStaxUtils</code>, and in many cases it will be more
+   *  efficient for callers to use that directly rather than calling
+   *  <code>toXml</code>.
+   *  @see DocumentStaxUtils
     * @return a string representing a Gate Xml document
     */
   public String toXml();
