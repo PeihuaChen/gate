@@ -67,7 +67,14 @@ public class DocFeatureVectors {
         if(feat[j] != null && Pattern.matches((".+\\[[-0-9]+\\]$"), feat[j])) {
           int ind = feat[j].lastIndexOf('[');
           String positionStr = feat[j].substring(ind + 1, feat[j].length() - 1);
-          positionCurr = Integer.parseInt(positionStr);
+          try {
+	      positionCurr = Integer.parseInt(positionStr);
+	  }
+	  catch(NumberFormatException e) {
+	      // FIXME: Learning PR bug
+	      e.printStackTrace();
+	      break;
+	  }
           feat[j] = feat[j].substring(0, ind);
         }
         if(prevPosition != positionCurr && tempSize > 0) {
