@@ -380,7 +380,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
                   + " found in the document.");
         } 
         else {
-          Utils.logOnce(logger,Level.INFO,"POS tagger: no sentence or token annotations in input document - see debug log for details.");
+          Utils.logOnce(logger,Level.INFO,"GenericTagger: no sentence or token annotations in input document - see debug log for details.");
           logger.debug("No input annotations in document "+document.getName());
           return null;
         }
