@@ -7,6 +7,7 @@ import gate.FeatureMap;
 import gate.Gate;
 import gate.ProcessingResource;
 import gate.Resource;
+import gate.Utils;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
@@ -43,6 +44,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 /**
  * This processing resource is designed to allow the easy use of a
  * number of external (non Java) taggers within GATE. A number of
@@ -54,9 +58,12 @@ import java.util.regex.Pattern;
  * @author Mark A. Greenwood
  * @author Rene Witte
  */
-@CreoleResource(comment = "The Generic Tagger is Generic!", helpURL = "http://gate.ac.uk/userguide/sec:parsers:taggerframework")
+@CreoleResource(comment = "The Generic Tagger is Generic!", 
+    helpURL = "http://gate.ac.uk/userguide/sec:parsers:taggerframework")
 public class GenericTagger extends AbstractLanguageAnalyser implements
                                                            ProcessingResource {
+
+  private static final long serialVersionUID = 1065568768231638007L;
 
   // Pattern to match ${...} placeholder sequences in the inputTemplate
   protected static final Pattern PLACEHOLDER_PATTERN = Pattern
@@ -88,7 +95,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   // fail if mapping between charsets fails
   // display debug information
   // update or replace existing output annotations
-  private Boolean failOnUnmappableCharacter, debug, updateAnnotations;
+  private Boolean failOnUnmappableCharacter, debug, updateAnnotations, failOnMissingInputAnnotations;
 
   // The type of the input and output annotations
   private String inputAnnotationType, outputAnnotationType;
@@ -107,6 +114,9 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   
   //a util class for dealing with external processes, i.e. the tagger
   private ProcessManager processManager = new ProcessManager();
+
+  
+  protected Logger logger = Logger.getLogger(this.getClass().getName());
 
   /**
    * This method initialises the tagger. This involves loading the pre
@@ -221,6 +231,12 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
 
     // get current text from GATE for the tagger
     File textfile = getCurrentText();
+    if (textfile == null) {
+      /* This handles the null return value from getCurrentText() when
+       * there are no input annotations in the document and
+       * parameter failOnMissingInputAnnotations is false.       */
+      return;
+    }
 
     // build the command line for running the tagger
     String[] taggerCmd = buildCommandLine(textfile);
@@ -245,10 +261,6 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
 
     // delete the temporary text file
     if(!debug) if(!textfile.delete()) textfile.deleteOnExit();
-
-    // make sure we don't hold onto the document so that it can be
-    // correctly garbage collected
-    document = null;
   }
 
   /**
@@ -360,12 +372,18 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
       // filter the set so we just get the input annotations we need for
       // the tagger
       annotSet = annotSet.get(inputAnnotationType);
-
       if(annotSet == null || annotSet.size() == 0) {
-        // if there are no input annotations then we can't do anything
-        // so throw an exception
-        throw new ExecutionException("No " + inputAnnotationType
-                + " found in the document.");
+        if(failOnMissingInputAnnotations) {
+          // if there are no input annotations then we can't do anything
+          // so throw an exception
+          throw new ExecutionException("No " + inputAnnotationType
+                  + " found in the document.");
+        } 
+        else {
+          Utils.logOnce(logger,Level.INFO,"POS tagger: no sentence or token annotations in input document - see debug log for details.");
+          logger.debug("No input annotations in document "+document.getName());
+          return null;
+        }
       }
 
       // sort tokens according to their offsets
@@ -861,4 +879,19 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
   public void setPostProcessURL(URL postProcessURL) {
     this.postProcessURL = postProcessURL;
   }
+  
+  
+  @RunTime
+  @Optional
+  @CreoleParameter(
+    comment = "Throw an exception when there are none of the required input annotations",
+    defaultValue = "true")  
+  public void setFailOnMissingInputAnnotations(Boolean fail) {
+    failOnMissingInputAnnotations = fail;
+  }
+  
+  public Boolean getFailOnMissingInputAnnotations() {
+    return failOnMissingInputAnnotations;
+  }
+  
 }
