@@ -31,6 +31,8 @@ import org.apache.log4j.Level;
         comment = "Mark Hepple's Brill-style POS tagger")
 public class POSTagger extends AbstractLanguageAnalyser {
 
+  private static final long serialVersionUID = 7680938864165071808L;
+
   public static final String
     TAG_DOCUMENT_PARAMETER_NAME = "document";
 
@@ -62,7 +64,7 @@ public class POSTagger extends AbstractLanguageAnalyser {
   @RunTime
   @Optional
   @CreoleParameter(
-    comment = "Throw and exception when there are none of the required input annotations",
+    comment = "Throw an exception when there are none of the required input annotations",
     defaultValue = "true")  
   public void setFailOnMissingInputAnnotations(Boolean fail) {
     failOnMissingInputAnnotations = fail;
