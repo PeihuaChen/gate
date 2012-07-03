@@ -1308,7 +1308,7 @@ public class DocumentStaxUtils {
 
     Set keySet = features.keySet();
     Iterator keySetIterator = keySet.iterator();
-    while(keySetIterator.hasNext()) {
+    FEATURES:while(keySetIterator.hasNext()) {
       Object key = keySetIterator.next();
       Object value = features.get(key);
       if(key != null && value != null) {
@@ -1352,6 +1352,7 @@ public class DocumentStaxUtils {
           Iterator iter = ((Collection)key).iterator();
           if(iter.hasNext()) {
             item = iter.next();
+            if(item == null) continue FEATURES;
             if(item instanceof java.lang.Number)
               keyItemClassName = item.getClass().getName();
             else keyItemClassName = String.class.getName();
@@ -1359,6 +1360,7 @@ public class DocumentStaxUtils {
           }// End if
           while(iter.hasNext()) {
             item = iter.next();
+            if(item == null) continue FEATURES;
             keyStrBuff.append(";").append(item.toString());
           }// End while
           key2String = keyStrBuff.toString();
@@ -1371,6 +1373,7 @@ public class DocumentStaxUtils {
           Iterator iter = ((Collection)value).iterator();
           if(iter.hasNext()) {
             item = iter.next();
+            if(item == null) continue FEATURES;
             if(item instanceof java.lang.Number 
                 || item instanceof java.lang.Boolean)
               valueItemClassName = item.getClass().getName();
@@ -1379,6 +1382,7 @@ public class DocumentStaxUtils {
           }// End if
           while(iter.hasNext()) {
             item = iter.next();
+            if(item == null) continue FEATURES;
             valueStrBuff.append(";").append(item.toString());
           }// End while
           value2String = valueStrBuff.toString();
