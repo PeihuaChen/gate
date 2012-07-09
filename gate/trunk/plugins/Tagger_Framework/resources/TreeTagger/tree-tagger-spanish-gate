@@ -21,7 +21,8 @@ PARFILE=${LIB}/spanish.par
 cat $* |
 # remove empty lines
 grep -v '^$' |
-# recognition of MWLs
-$MWL -f ${LIB}/spanish-mwls |
+# recognition of MWLs 
+# -- disabled for use with GATE tokens
+# $MWL -f ${LIB}/spanish-mwls |
 # tagging
 $TAGGER $PARFILE -token -lemma -sgml
