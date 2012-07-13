@@ -7,47 +7,44 @@
  */
 package gate.creole.ontology.impl.test;
 
-import gate.creole.ontology.*;
-import gate.util.GateException;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Set;
-
 import gate.Factory;
 import gate.FeatureMap;
 import gate.Gate;
 import gate.creole.ResourceInstantiationException;
+import gate.creole.ontology.DatatypeProperty;
+import gate.creole.ontology.OClass;
+import gate.creole.ontology.OConstants;
 import gate.creole.ontology.OConstants.Closure;
+import gate.creole.ontology.OInstance;
+import gate.creole.ontology.OResource;
+import gate.creole.ontology.OURI;
+import gate.creole.ontology.ObjectProperty;
+import gate.creole.ontology.Ontology;
 import gate.creole.ontology.impl.AbstractOntologyImpl;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.Collections;
+import gate.util.GateException;
+
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import java.util.Set;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 /**
  * Run tests on the wine ontology
  */
-public class Test_OntoWine extends TestCase {
-  public static void main(String[] args) throws GateException, MalformedURLException {
-    System.out.println("Running main");
-    junit.textui.TestRunner.run(Test_OntoWine.class);
-  }
-
-  public Test_OntoWine(String arg0) throws GateException, MalformedURLException {
-    super(arg0);
-  }
-
-  File ontologiesDir = null;
-  File configDir = null;
-  File tmpDir = null;
+public class Test_OntoWine {
+  static File ontologiesDir = null;
+  static File configDir = null;
+  static File tmpDir = null;
   // TODO: it seems we cannot use a static as intended here: the
   // init code still gets run for each fixture?
   static boolean isInitialized = false;
@@ -57,7 +54,8 @@ public class Test_OntoWine extends TestCase {
 
   // global preparation stuff - check if stuff already initialized, if
   // yes, do nothing
-  protected void init() throws GateException, MalformedURLException {
+  @BeforeClass
+  public static void init() throws GateException, MalformedURLException {
     if(!isInitialized) {
     System.out.println("Inititalizing ...");
     Gate.init();
@@ -79,20 +77,14 @@ public class Test_OntoWine extends TestCase {
     }
   }
 
-
-  /**
-   * per-test set up stuff
-   * @throws Exception
-   */
-  protected void setUp() throws Exception {
-    super.setUp();
-    init();
+  @AfterClass
+  public static void cleanup() throws Exception {
+    if(tmpDir != null) {
+      FileUtils.deleteDirectory(tmpDir);
+    }
   }
 
-  protected void tearDown() throws Exception {
-    super.tearDown();
-  }
-
+  @Test
   public void testWineOntology() throws MalformedURLException,
           ResourceInstantiationException {
     FeatureMap fm = Factory.newFeatureMap();
@@ -310,9 +302,4 @@ public class Test_OntoWine extends TestCase {
     return o.createOURIForName(uri);
   }
 
-  /** Test suite routine for the test runner */
-  public static Test suite() {
-    System.out.println("Running suite");
-    return new TestSuite(Test_OntoWine.class);
-  } // suite
 }

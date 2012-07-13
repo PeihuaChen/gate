@@ -21,27 +21,21 @@ import gate.creole.ResourceInstantiationException;
 import gate.creole.ontology.OConstants.Closure;
 import java.util.HashSet;
 import java.util.List;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 /**
  * Run tests on the test1.ttl ontology
  */
-public class Test_OntoTest1 extends TestCase {
-  public static void main(String[] args) throws GateException, MalformedURLException {
-    System.out.println("Running main");
-    junit.textui.TestRunner.run(Test_OntoTest1.class);
-  }
-
-  public Test_OntoTest1(String arg0) throws GateException, MalformedURLException {
-    super(arg0);
-  }
-
-  File ontologiesDir = null;
-  File configDir = null;
-  File tmpDir = null;
+public class Test_OntoTest1 {
+  static File ontologiesDir = null;
+  static File configDir = null;
+  static File tmpDir = null;
   // TODO: it seems we cannot use a static as intended here: the
   // init code still gets run for each fixture?
   static boolean isInitialized = false;
@@ -51,7 +45,8 @@ public class Test_OntoTest1 extends TestCase {
 
   // global preparation stuff - check if stuff already initialized, if
   // yes, do nothing
-  protected void init() throws GateException, MalformedURLException {
+  @BeforeClass
+  public static void init() throws GateException, MalformedURLException {
     if(!isInitialized) {
     System.out.println("Inititalizing ...");
     Gate.init();
@@ -73,21 +68,15 @@ public class Test_OntoTest1 extends TestCase {
     }
   }
 
-
-  /**
-   * per-test set up stuff
-   * @throws Exception
-   */
-  protected void setUp() throws Exception {
-    super.setUp();
-    init();
+  @AfterClass
+  public static void cleanup() throws Exception {
+    if(tmpDir != null) {
+      FileUtils.deleteDirectory(tmpDir);
+    }
   }
+  
 
-  protected void tearDown() throws Exception {
-    super.tearDown();
-  }
-
-
+  @Test
   public void testOntologyTest1() throws ResourceInstantiationException, MalformedURLException {
     FeatureMap fm = Factory.newFeatureMap();
     File demoFile = new File(ontologiesDir,"test1.ttl");
@@ -324,9 +313,4 @@ public class Test_OntoTest1 extends TestCase {
     return o.createOURIForName(uri);
   }
 
-  /** Test suite routine for the test runner */
-  public static Test suite() {
-    System.out.println("Running suite");
-    return new TestSuite(Test_OntoTest1.class);
-  } // suite
 }

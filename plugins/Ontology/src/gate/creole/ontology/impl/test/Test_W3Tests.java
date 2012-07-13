@@ -18,32 +18,27 @@ import gate.Gate;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.ontology.OConstants.Closure;
 import java.util.HashSet;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.junit.Assert.*;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 /**
  * Run tests based on selected examples from the W3 ontology test suite
  */
-public class Test_W3Tests extends TestCase {
-  public static void main(String[] args) throws GateException, MalformedURLException {
-    junit.textui.TestRunner.run(Test_W3Tests.class);
-  }
-
-  public Test_W3Tests(String arg0) throws GateException, MalformedURLException {
-    super(arg0);
-  }
-
-  File ontologiesDir = null;
-  File configDir = null;
-  File tmpDir = null;
+public class Test_W3Tests {
+  static File ontologiesDir = null;
+  static File configDir = null;
+  static File tmpDir = null;
 
   Logger log =  Logger.getLogger(this.getClass());
   OConstants.Closure DIRECT_CLOSURE = Closure.DIRECT_CLOSURE;
   OConstants.Closure TRANSITIVE_CLOSURE = Closure.TRANSITIVE_CLOSURE;
 
-  protected void init() throws GateException, MalformedURLException {
+  @BeforeClass
+  public static void init() throws GateException, MalformedURLException {
     System.out.println("Inititalizing ...");
     Gate.init();
     File pluginHome =
@@ -61,32 +56,19 @@ public class Test_W3Tests extends TestCase {
     System.out.println("Init complete");
   }
 
-
-  /**
-   * per-test set up stuff
-   * @throws Exception
-   */
-  protected void setUp() throws Exception {
-    super.setUp();
-    init();
+  @AfterClass
+  public static void cleanup() throws Exception {
+    if(tmpDir != null) {
+      FileUtils.deleteDirectory(tmpDir);
+    }
   }
-
-  protected void tearDown() throws Exception {
-    super.tearDown();
-  }
-
-  /** Test suite routine for the test runner */
-  public static Test suite() {
-    System.out.println("Running suite");
-    return new TestSuite(Test_W3Tests.class);
-  } // suite
-
+  
   // ************************************ TESTS ***************************
   // **********************************************************************
 
 
 
-
+  @Test
   public void testAPI01()
       throws MalformedURLException,
           ResourceInstantiationException {
