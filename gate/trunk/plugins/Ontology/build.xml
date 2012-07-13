@@ -108,7 +108,7 @@
       </classpath>
                         <!-- run headless -->
       <sysproperty key="java.awt.headless" value="true" />
-      <formatter type="plain" />
+      <formatter type="xml" />
 
       <test name="gate.creole.ontology.impl.test.Test_OntoTest1" />
     </junit>
@@ -122,7 +122,7 @@
       </classpath>
                         <!-- run headless -->
       <sysproperty key="java.awt.headless" value="true" />
-      <formatter type="plain" />
+      <formatter type="xml" />
 
       <test name="gate.creole.ontology.impl.test.Test_TupleQuery" />
     </junit>
@@ -137,7 +137,7 @@
       </classpath>
                         <!-- run headless -->
       <sysproperty key="java.awt.headless" value="true" />
-      <formatter type="plain" />
+      <formatter type="xml" />
 
       <test name="gate.creole.ontology.impl.test.Test_TripleStore" />
     </junit>
@@ -153,7 +153,7 @@
       </classpath>
                         <!-- run headless -->
       <sysproperty key="java.awt.headless" value="true" />
-      <formatter type="plain" />
+      <formatter type="xml" />
 
       <test name="gate.creole.ontology.impl.test.Test_OntoWine" />
     </junit>
@@ -168,7 +168,7 @@
       </classpath>
                         <!-- run headless -->
       <sysproperty key="java.awt.headless" value="true" />
-      <formatter type="plain" />
+      <formatter type="xml" />
 
       <test name="gate.creole.ontology.impl.test.Test_OWLIMOntology" />
     </junit>
@@ -183,7 +183,7 @@
       </classpath>
                         <!-- run headless -->
       <sysproperty key="java.awt.headless" value="true" />
-      <formatter type="plain" />
+      <formatter type="xml" />
 
       <test name="gate.creole.ontology.impl.test.Test_W3Tests" />
     </junit>
@@ -198,7 +198,7 @@
                         <!-- run headless -->
       <sysproperty key="java.awt.headless" value="true" />
       <syspropertyset refid="log4j.properties" />
-      <formatter type="plain" />
+      <formatter type="xml" />
 
       <test name="gate.creole.ontology.impl.test.Test4Develop" />
     </junit>

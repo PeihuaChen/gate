@@ -26,33 +26,25 @@ import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * Simple test class that load an ontology available online and accesses
  * its content via the ontology API
  */
-public class Test4Develop extends TestCase {
-  public static void main(String[] args) {
-    junit.textui.TestRunner.run(Test4Develop.class);
-  }
-
-  // TODO: benchmark with long start = System.nanoTime();
-
-  public Test4Develop(String arg0) {
-    super(arg0);
-  }
-
+public class Test4Develop {
   File testingDir = null;
   File owlimConfig = null;
   File configDir = null;
   File tmpDir = null;
 
   // establish file paths etc.
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
     System.out.println("Starting up");
     Gate.init();
     File pluginHome = 
@@ -84,16 +76,10 @@ public class Test4Develop extends TestCase {
     System.out.println("Start up complete");
   }
 
-  protected void tearDown() throws Exception {
-    super.tearDown();
-    System.out.println("Tearing down");
-
-    System.out.println("Tear down complete");
-  }
-
   // easiest way to run this test:
   // 1) mkdir /tmp/repo
   // 2) repeat: "rm -rf /tmp/repo/* ; ant test4develop"
+  @Test
   public void testCreateSesameOntology() throws Exception {
     /*
     System.out.println("++++ RUNNING testCreateSesameOntology");
@@ -115,6 +101,7 @@ public class Test4Develop extends TestCase {
      * */
   }
 
+  @Test
   public void testOWLIMOntology() throws Exception {
     System.out.println("++++ RUNNING testOWLIMOntology");
     FeatureMap fm = Factory.newFeatureMap();
@@ -490,11 +477,6 @@ public class Test4Develop extends TestCase {
      return td;
   }
 
-
-  /** Test suite routine for the test runner */
-  public static Test suite() {
-    return new TestSuite(Test4Develop.class);
-  } // suite
 }
 
 
