@@ -62,7 +62,7 @@
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
-            <version>1.2.16</version>
+            <version>1.2.17</version>
             <scope>compile</scope>
         </dependency>
 
@@ -143,13 +143,13 @@
              NOTE: I don't know if this is still the case but it seems safer not to break things! -->
         <dependency>
             <groupId>org.codehaus.woodstox</groupId>
-            <artifactId>wstx-lgpl</artifactId>
-            <version>3.2.3</version>
+            <artifactId>woodstox-core-lgpl</artifactId>
+            <version>4.1.3</version>
             <scope>compile</scope>
             <exclusions>
                 <!-- exclude stuff that is part of Java 6 core -->
                 <exclusion>
-                    <groupId>stax</groupId>
+                    <groupId>javax.xml.stream</groupId>
                     <artifactId>stax-api</artifactId>
                 </exclusion>
             </exclusions>
