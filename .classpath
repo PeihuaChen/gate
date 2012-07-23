@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" output="plugins/Tools/classes" path="plugins/Tools/src"/>
 	<classpathentry kind="src" output="plugins/Coref_Tools/classes" path="plugins/Coref_Tools/src"/>
 	<classpathentry kind="src" output="plugins/JAPE_Plus/classes" path="plugins/JAPE_Plus/src"/>
 	<classpathentry kind="src" output="plugins/Groovy/build" path="plugins/Groovy/src"/>
@@ -101,7 +102,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/commons-lang.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/bcprov-jdk15.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/poi-scratchpad.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/wstx-lgpl.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/dom4j.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/lucene-core.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/fontbox.jar"/>
@@ -110,5 +110,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/poi.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/spring-beans.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/metadata-extractor.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/woodstox-core-lgpl.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/stax2-api.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
