@@ -9,7 +9,9 @@
  *  Version 2, June 1991 (in the distribution as file licence.html,
  *  and also available at http://gate.ac.uk/gate/licence.html).
  *  
- *  $id$
+ *  Genevieve Gorrell, 23 Jul 2012
+ *  
+ *  $Id$
  */
 
 package gate.configurableexporter;
