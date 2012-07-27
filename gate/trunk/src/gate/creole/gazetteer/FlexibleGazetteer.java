@@ -1,7 +1,7 @@
 /*
  * FlexibleGazetteer.java
  * 
- * Copyright (c) 2004-2011, The University of Sheffield.
+ * Copyright (c) 2004-2012, The University of Sheffield.
  * 
  * This file is part of GATE (see http://gate.ac.uk/), and is free software,
  * licenced under the GNU Library General Public License, Version 2, June1991.
@@ -9,8 +9,8 @@
  * A copy of this licence is included in the distribution in the file
  * licence.html, and is also available at http://gate.ac.uk/gate/licence.html.
  * 
- * Niraj Aswani 02/2002 $Id: FlexibleGazetteer.java 14808 2011-12-19 13:42:09Z
- * adamfunk $
+ * Niraj Aswani 02/2002
+ * $Id$
  */
 package gate.creole.gazetteer;
 
@@ -28,11 +28,8 @@ import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
 import gate.util.InvalidOffsetException;
-
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
 
 /**
  * <p>
@@ -55,9 +52,15 @@ import java.util.Map;
  * @author niraj aswani
  * @version 1.0
  */
-public class FlexibleGazetteer extends AbstractLanguageAnalyser implements
-                                                               ProcessingResource {
+public class FlexibleGazetteer extends AbstractLanguageAnalyser 
+  implements ProcessingResource {
+  
   private static final long serialVersionUID = -1023682327651886920L;
+  private static final String wrappedOutputASName = "Output";
+  private static final String wrappedInputASName = "Input";
+  
+  // SET TO false BEFORE CHECKING IN
+  private static final boolean DEBUG = false;
 
   /**
    * Does the actual loading and parsing of the lists. This method must be
@@ -96,15 +99,16 @@ public class FlexibleGazetteer extends AbstractLanguageAnalyser implements
       // keyVal[0] = annotation type
       // keyVal[1] = feature name
       // holds mapping for newly created annotations
-      Map<Long, NodePosition> annotationMappings =
-          new HashMap<Long, NodePosition>();
+      FlexGazMappingTable mappingTable = new FlexGazMappingTable();
       fireStatusChanged("Creating temporary Document for feature " + aFeature);
       StringBuilder newdocString =
           new StringBuilder(document.getContent().toString());
       // sort annotations
       List<Annotation> annotations =
           Utils.inDocumentOrder(inputAS.get(keyVal[0]));
+
       // remove duplicate annotations
+      // (this makes the reverse mapping much easier)
       removeOverlappingAnnotations(annotations);
       // initially no space is deducted
       int totalDeductedSpaces = 0;
@@ -129,31 +133,22 @@ public class FlexibleGazetteer extends AbstractLanguageAnalyser implements
         long newStartOffset = startOffset - totalDeductedSpaces;
         long newEndOffset = newStartOffset + newTokenValue.length();
         totalDeductedSpaces += lengthDifference;
-        // only include node if there's some difference in the offsets
-        if(startOffset != newStartOffset || endOffset != newEndOffset) {
-          // and make the entry for this
-          NodePosition mapping =
-              new NodePosition(startOffset, endOffset, newStartOffset,
-                  newEndOffset);
-          annotationMappings.put(newEndOffset, mapping);
-        }
+
+        mappingTable.add(startOffset, endOffset, newStartOffset, newEndOffset);
+        
         // and finally replace the actual string in the document
         // with the new document
         newdocString.replace((int)newStartOffset, (int)newStartOffset
             + (int)actualLength, newTokenValue);
       }
+
       // proceed only if there was any replacement Map
-      if(annotationMappings.isEmpty()) continue;
-      // storing end offsets of annotations in an array for quick
-      // lookup later on
-      long[] offsets = new long[annotationMappings.size()];
-      int index = 0;
-      for(Long aKey : annotationMappings.keySet()) {
-        offsets[index] = aKey;
-        index++;
-      }
-      // for binary search, offsets need to be in ascending order
-      Arrays.sort(offsets);
+      if(mappingTable.isEmpty()) continue;
+      
+      /* All the binary search stuff is done inside FlexGazMappingTable
+       * now, so it's guaranteed to return valid original annotation start
+       * and end offsets.       */
+      
       // otherwise create a temporary document for the new text
       Document tempDoc = null;
       // update the status
@@ -171,94 +166,73 @@ public class FlexibleGazetteer extends AbstractLanguageAnalyser implements
         tempDoc =
             (Document)Factory.createResource("gate.corpora.DocumentImpl",
                 params, features);
-      } catch(ResourceInstantiationException rie) {
-        throw new ExecutionException("Temporary document cannot be created",
-            rie);
+
+        /* Mark the temp document with the locations of the input annotations so
+         * that we can later eliminate Lookups that are out of scope.       */
+        for (NodePosition mapping : mappingTable.getMappings()) {
+          tempDoc.getAnnotations(wrappedInputASName).add(mapping.getTempStartOffset(), 
+              mapping.getTempEndOffset(), "Input", Factory.newFeatureMap());
+        }
+      } 
+      catch(ResourceInstantiationException rie) {
+        throw new ExecutionException("Temporary document cannot be created", rie);
+      } 
+      catch(InvalidOffsetException e) {
+        throw new ExecutionException("Error duplicating Input annotations", e);
       }
       try {
         // lets create the gazetteer based on the provided gazetteer name
         gazetteerInst.setDocument(tempDoc);
-        gazetteerInst.setAnnotationSetName(this.outputASName);
+        gazetteerInst.setAnnotationSetName(wrappedOutputASName);
         fireStatusChanged("Executing Gazetteer...");
         gazetteerInst.execute();
         // now the tempDoc has been looked up, we need to shift the annotations
         // from this temp document to the original document
         fireStatusChanged("Transfering new annotations to the original one...");
-        AnnotationSet original = document.getAnnotations(outputASName);
-        // okay iterate over new annotations and transfer them back to
-        // the original document
-        for(Annotation currentLookup : tempDoc.getAnnotations(outputASName)) {
+        AnnotationSet originalDocOutput = document.getAnnotations(outputASName);
+        
+        if (DEBUG) {
+          mappingTable.dump();
+        }
+        
+        // Now iterate over the new annotations and transfer them from the 
+        // temp document back to the real one
+        for(Annotation currentLookup : tempDoc.getAnnotations(wrappedOutputASName)) {
           long tempStartOffset = Utils.start(currentLookup);
           long tempEndOffset = Utils.end(currentLookup);
-          long newStartOffset = tempStartOffset;
-          long newEndOffset = tempEndOffset;
-          long addedSpaces = 0;
-          // we find out the node before the current annotation's startoffset
-          // and it to find out the number of extra characters added
-          index = Arrays.binarySearch(offsets, newStartOffset);
-          // if index <0, the absolute position of it refers to the
-          // position after the node we want to access to
-          // find out the no. of extra characters added before the
-          // current position
-          if(index < 0) {
-            index = Math.abs(index) - 1;
-          }
-          if(index > 0) {
-            // go back one node
-            index--;
-            NodePosition node = annotationMappings.get(offsets[index]);
-            long oldEnd = node.getOriginalEndOffset();
-            addedSpaces = node.getNewEndOffset() - oldEnd;
-            newStartOffset -= addedSpaces;
-          }
-          // we are trying to find a node which holds information
-          // about the number of new characters added before
-          // the new end offset
-          index = Arrays.binarySearch(offsets, newEndOffset);
-          if(index < 0) {
-            index = Math.abs(index) - 1;
-          }
-          if(index >= 0) {
-            // if the index 0
-            // it means
-            // if points to the length of the array, it means,
-            // we need to refer to the last element
-            if(index == offsets.length) index--;
-            NodePosition node = annotationMappings.get(offsets[index]);
-            if(offsets[index] <= newEndOffset) {
-              long oldEnd = node.getOriginalEndOffset();
-              addedSpaces = node.getNewEndOffset() - oldEnd;
-            } else {
-              long oldStart = node.getOriginalStartOffset();
-              addedSpaces = node.getNewStartOffset() - oldStart;
-            }
-          }
-          newEndOffset -= addedSpaces;
-          try {
-            // before we do this, make sure there is no other annotation like
-            // this
-            AnnotationSet tempSet =
-                original.getContained(newStartOffset, newEndOffset).get(
-                    currentLookup.getType(), currentLookup.getFeatures());
-            boolean found = false;
-            for(Annotation annot : tempSet) {
-              if(Utils.start(annot) == newStartOffset
-                  && Utils.end(annot) == newEndOffset
-                  && annot.getFeatures().size() == currentLookup.getFeatures()
-                      .size()) {
-                found = true;
-                break;
+
+          /* Ignore annotations that fall entirely outside the input annotations,
+           * so that we don't get dodgy Lookups outside the area covered by
+           * Tokens copied into a restricted working set by the AST PR
+           * (for example)           */
+          if (coveredByInput(tempStartOffset, tempEndOffset, tempDoc.getAnnotations(wrappedInputASName)))  {
+            long destinationStart = mappingTable.getBestOriginalStart(tempStartOffset);
+            long destinationEnd = mappingTable.getBestOriginalEnd(tempEndOffset);
+
+            boolean valid = (destinationStart >= 0) && (destinationEnd >= 0);  
+
+            if (valid) {
+              // Now make sure there is no other annotation like this
+              AnnotationSet testSet = originalDocOutput.getContained(destinationStart, destinationEnd).get(
+                  currentLookup.getType(), currentLookup.getFeatures());
+              for(Annotation annot : testSet) {
+                if(Utils.start(annot) == destinationStart
+                    && Utils.end(annot) == destinationEnd
+                    && annot.getFeatures().size() == currentLookup.getFeatures().size()) {
+                  valid = false;
+                  break;
+                }
               }
             }
-            if(!found) {
-              original.add(newStartOffset, newEndOffset,
-                  currentLookup.getType(), currentLookup.getFeatures());
+            
+            if(valid) {
+              addToOriginal(originalDocOutput, destinationStart, destinationEnd, 
+                  tempStartOffset, tempEndOffset, currentLookup, tempDoc);
             }
-          } catch(InvalidOffsetException e) {
-            throw new ExecutionException(e);
-          }
+          } // END if coveredByInput(...)
         } // END for OVER ALL THE Lookups
-      } finally {
+      } 
+      finally {
         gazetteerInst.setDocument(null);
         if(tempDoc != null) {
           // now remove the newDoc
@@ -269,9 +243,10 @@ public class FlexibleGazetteer extends AbstractLanguageAnalyser implements
     fireProcessFinished();
   } // END execute METHOD
 
+  
   /**
    * Removes the overlapping annotations. preserves the one that appears first
-   * in the list
+   * in the list.  This assumes the list has been sorted already.
    * 
    * @param annotations
    */
@@ -288,6 +263,40 @@ public class FlexibleGazetteer extends AbstractLanguageAnalyser implements
     }
   }
 
+  
+  /* We try hard not to cause InvalidOffsetExceptions, but let's have
+   * some better debugging info in case they happen.
+   */
+  private void addToOriginal(AnnotationSet original, long originalStart, long originalEnd, 
+      long tempStart, long tempEnd, Annotation tempLookup, Document tempDoc) throws ExecutionException {
+    try {
+      original.add(originalStart, originalEnd, tempLookup.getType(), tempLookup.getFeatures());
+    }
+    catch(InvalidOffsetException ioe) {
+      String errorDetails = String.format("temp %d, %d [%s]-> original %d, %d  ", tempStart, tempEnd, Utils.stringFor(tempDoc, tempLookup), 
+          originalStart, originalEnd);
+      throw new ExecutionException(errorDetails, ioe);
+    }
+  }
+
+  
+  
+  /* Is this Lookup within the scope of the input annotations?  It might not be, if Token annotations
+   * have been copied by AST only over the significant sections of the document.
+   */
+  private boolean coveredByInput(long tempStart, long tempEnd, AnnotationSet tempInputAS) {
+    if (tempInputAS.getCovering(wrappedInputASName, tempStart, tempStart).isEmpty()) {
+      return false;
+    }
+    // implied else
+    if (tempInputAS.getCovering(wrappedInputASName, tempEnd, tempEnd).isEmpty()) {
+      return false;
+    }
+    // implied else
+    return true;
+  }
+
+  
   /**
    * Sets the document to work on
    * 

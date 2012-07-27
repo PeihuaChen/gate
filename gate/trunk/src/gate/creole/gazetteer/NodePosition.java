@@ -37,10 +37,10 @@ public class NodePosition {
   private long originalEndOffset;
 
   /** The new start offset after the changes */
-  private long newStartOffset;
+  private long tempStartOffset;
 
   /** The new end offset after the changes */
-  private long newEndOffset;
+  private long tempEndOffset;
 
   /**
    * constructor
@@ -52,8 +52,8 @@ public class NodePosition {
   public NodePosition(long osn, long oen, long nsn, long nen) {
     originalStartOffset = osn;
     originalEndOffset = oen;
-    newStartOffset = nsn;
-    newEndOffset = nen;
+    tempStartOffset = nsn;
+    tempEndOffset = nen;
   }
 
   /**
@@ -76,16 +76,16 @@ public class NodePosition {
    * Returns new start offset
    * @return  a <tt>long</tt> value.
    */
-  public long getNewStartOffset() {
-    return newStartOffset;
+  public long getTempStartOffset() {
+    return tempStartOffset;
   }
 
   /**
    * Returns the new end offset
    * @return a <tt>long</tt> value.
    */
-  public long getNewEndOffset() {
-    return newEndOffset;
+  public long getTempEndOffset() {
+    return tempEndOffset;
   }
 
 }
@@ -94,12 +94,12 @@ public class NodePosition {
 class NodePositionComparator implements Comparator<NodePosition> {
 
   public int compare(NodePosition arg0, NodePosition arg1) {
-    long diff = arg0.getNewStartOffset() - arg1.getNewStartOffset();
+    long diff = arg0.getTempStartOffset() - arg1.getTempStartOffset();
     if (diff != 0L) {
       return (int) Long.signum(diff);
     }
     // implied else
-    diff = arg0.getNewEndOffset() - arg1.getNewEndOffset();
+    diff = arg0.getTempEndOffset() - arg1.getTempEndOffset();
     if (diff != 0L) {
       return (int) Long.signum(diff);
     }
