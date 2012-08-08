@@ -263,7 +263,7 @@ public class NumbersTagger extends AbstractLanguageAnalyser implements ActionsPu
         if(multiplier.type.equals(Multiplier.Type.FRACTION)) {
           double sum = 0;
           for(double power : values.keySet()) {
-            System.out.println(power+", "+values.get(power)+", " +(values.get(power) / value));
+            //System.out.println(power+", "+values.get(power)+", " +(values.get(power) / value));
             values.put(power, values.get(power) / value);
             sum += values.get(power);
           }
