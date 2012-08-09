@@ -252,6 +252,7 @@ public class ConfigurableExporter extends AbstractLanguageAnalyser implements
         if(annsToInsert[i][0] != null) {
           List<Annotation> typedAnnotations = Utils.inDocumentOrder(
               inputAS.get(this.annsToInsert[i][0]));
+	 if(typedAnnotations.size() > 0) {
           Annotation annotationToPrint = typedAnnotations.get(0);
           if(this.annsToInsert[i][1] != null) {
             this.outputStream.print(annotationToPrint.getFeatures().get(
@@ -269,6 +270,7 @@ public class ConfigurableExporter extends AbstractLanguageAnalyser implements
             }
             this.outputStream.print(annotationText);
           }
+	 }
         }
       }
       if(this.numberOfBridgeTextSlots > this.numberOfAnnotationSlots) {
