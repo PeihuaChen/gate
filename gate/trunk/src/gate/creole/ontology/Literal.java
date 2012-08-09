@@ -204,9 +204,9 @@ public class Literal {
 
   @Override
   public int hashCode() {
-    int hash = 17 + value.hashCode();
-    hash = 37*hash + language.hashCode();
-    hash = 37*hash + dataType.hashCode();
+    int hash = 17 + (value == null ? 0 : value.hashCode());
+    hash = 37*hash + (language == null ? 0 :  language.hashCode());
+    hash = 37*hash + (dataType == null ? 0 : dataType.hashCode());
     return hash;
   }
 
