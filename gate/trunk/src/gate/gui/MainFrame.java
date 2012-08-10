@@ -4599,6 +4599,7 @@ public class MainFrame extends JFrame implements ProgressListener,
     if (resourceName == null) { resourceName = "unknown"; }
     if (urlString != null
     && !urlString.startsWith("http://")
+    && !urlString.startsWith("https://")
     && !urlString.startsWith("file://")) {
       urlString = "http://gate.ac.uk/userguide/" + urlString;
     }
