@@ -372,6 +372,11 @@ public class DateNormalizer extends AbstractLanguageAnalyser {
         } else {
           params.put("complete", "false");
         }
+        
+        //store the inferred flags from the parser so people can have fine
+        //grained control if they need it
+        params.put("inferred", pp.getFeatures().get("inferred"));
+        
         // copy the relative date feature from the parser into the feature map
         params.put("relative", pp.getFeatures().get("relative"));
         // now create the annotation
