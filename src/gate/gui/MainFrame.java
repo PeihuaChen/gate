@@ -877,151 +877,127 @@ public class MainFrame extends JFrame implements ProgressListener,
     toolsMenu.setMnemonic(KeyEvent.VK_T);
     toolsMenu.add(new XJMenuItem(new NewAnnotDiffAction(), this));
 
-    final JMenuItem reportClearMenuItem = new XJMenuItem(
-      new AbstractAction("Clear Profiling History") {
-      { putValue(SHORT_DESCRIPTION,
-        "Clear profiling history otherwise the report is cumulative."); }
-      public void actionPerformed(ActionEvent evt) {
-        // create a new log file
-        File logFile = new File(System.getProperty("java.io.tmpdir"),
-          "gate-benchmark-log.txt");
-        logFile.deleteOnExit();
-        if (logFile.exists() && !logFile.delete()) {
-          log.info("Error when deleting the file:\n" +
-            logFile.getAbsolutePath());
-        }
-      }
-    }, this);
-    JMenu reportMenu = new XJMenu("Profiling Reports",
-      "Generates profiling reports from processing resources", this);
-    reportMenu.setIcon(getIcon("gazetteer"));
-    reportMenu.add(new XJMenuItem(
-      new AbstractAction("Start Profiling Applications") {
-      { putValue(SHORT_DESCRIPTION,
-        "Toggles the profiling of processing resources"); }
-
-      // stores the value held by the benchmarking switch before we started
-      // this profiling run.
-      boolean benchmarkWasEnabled;
-
-      public void actionPerformed(ActionEvent evt) {
-        if (getValue(NAME).equals("Start Profiling Applications")) {
-          reportClearMenuItem.setEnabled(false);
-          // store old value of benchmark switch
-          benchmarkWasEnabled = Benchmark.isBenchmarkingEnabled();
-          Benchmark.setBenchmarkingEnabled(true);
-          Layout layout = new PatternLayout("%m%n");
+    try {
+      // Check if log4j is present on the classpath, in order to avoid failures
+      // in cases when running the GATE GUI in the same JVM with a system which
+      // uses SLF4J and the log4j bridge.
+      // The log4j-over-slf4j bridge does not include org.apache.log4j.Appender, so
+      // if the class is not present we assume the lack of a log4j jar in the classpath
+      // and do not populate the menu.
+      Class.forName("org.apache.log4j.Appender"); 
+  
+    
+      final JMenuItem reportClearMenuItem = new XJMenuItem(
+        new AbstractAction("Clear Profiling History") {
+        { putValue(SHORT_DESCRIPTION,
+          "Clear profiling history otherwise the report is cumulative."); }
+        public void actionPerformed(ActionEvent evt) {
+          // create a new log file
           File logFile = new File(System.getProperty("java.io.tmpdir"),
             "gate-benchmark-log.txt");
           logFile.deleteOnExit();
-          Appender appender;
-          try {
-            appender =
-              new FileAppender(layout, logFile.getAbsolutePath(), true);
-          } catch (IOException e) {
-            e.printStackTrace();
-            return;
+          if (logFile.exists() && !logFile.delete()) {
+            log.info("Error when deleting the file:\n" +
+              logFile.getAbsolutePath());
           }
-          appender.setName("gate-benchmark");
-          Benchmark.logger.addAppender(appender);
-          putValue(NAME, "Stop Profiling Applications");
-        } else {
-          // reset old value of benchmark switch - i.e. if benchmarking was
-          // disabled before the user selected "start profiling" then we
-          // disable it again now, but if it was already enabled before they
-          // started profiling then we assume it was turned on explicitly and
-          // leave it alone.
-          Benchmark.setBenchmarkingEnabled(benchmarkWasEnabled);
-          Benchmark.logger.removeAppender("gate-benchmark");
-          putValue(NAME, "Start Profiling Applications");
-          reportClearMenuItem.setEnabled(true);
         }
-      }
-    }, this));
-    reportMenu.add(reportClearMenuItem);
-    reportMenu.add(new XJMenuItem(new AbstractAction("Help on this tool") {
-      public void actionPerformed(ActionEvent e) {
-        showHelpFrame("chap:profiling", "Profiling Processing Resources");
-      }
-    }, this));
-    reportMenu.addSeparator();
-
-    final JCheckBoxMenuItem reportZeroTimesCheckBox = new JCheckBoxMenuItem();
-    reportZeroTimesCheckBox.setAction(
-      new AbstractAction("Report Zero Time Entries") {
-      public void actionPerformed(ActionEvent evt) {
-        Gate.getUserConfig().put(MainFrame.class.getName()+".reportzerotime",
-          reportZeroTimesCheckBox.isSelected());
-      }
-    });
-    reportZeroTimesCheckBox.setSelected(Gate.getUserConfig().getBoolean(
-        MainFrame.class.getName()+".reportzerotimes"));
-    ButtonGroup group = new ButtonGroup();
-    final JRadioButtonMenuItem reportSortExecution = new JRadioButtonMenuItem();
-    reportSortExecution.setAction(new AbstractAction("Sort by Execution") {
-      public void actionPerformed(ActionEvent evt) {
-        Gate.getUserConfig().put(
-          MainFrame.class.getName()+".reportsorttime", false);
-      }
-    });
-    reportSortExecution.setSelected(!Gate.getUserConfig().getBoolean(
-      MainFrame.class.getName()+".reportsorttime"));
-    group.add(reportSortExecution);
-    final JRadioButtonMenuItem reportSortTime = new JRadioButtonMenuItem();
-    reportSortTime.setAction(new AbstractAction("Sort by Time") {
-      public void actionPerformed(ActionEvent evt) {
-        Gate.getUserConfig().put(
-          MainFrame.class.getName()+".reportsorttime", true);
-      }
-    });
-    reportSortTime.setSelected(Gate.getUserConfig().getBoolean(
-      MainFrame.class.getName()+".reportsorttime"));
-    group.add(reportSortTime);
-    reportMenu.add(new XJMenuItem(
-      new AbstractAction("Report on Processing Resources") {
-      { putValue(SHORT_DESCRIPTION,
-        "Report time taken by each processing resource"); }
-      public void actionPerformed(ActionEvent evt) {
-        PRTimeReporter report = new PRTimeReporter();
-        report.setBenchmarkFile(new File(System.getProperty("java.io.tmpdir"),
-          "gate-benchmark-log.txt"));
-        report.setSuppressZeroTimeEntries(!reportZeroTimesCheckBox.isSelected());
-        report.setSortOrder(reportSortTime.isSelected() ?
-          PRTimeReporter.SORT_TIME_TAKEN : PRTimeReporter.SORT_EXEC_ORDER);
-        try {
-          report.executeReport();
-        } catch (BenchmarkReportException e) {
-          e.printStackTrace();
-          return;
-        }
-        showHelpFrame("file://" + report.getReportFile(),
-          "processing times report");
-      }
-    }, this));
-    reportMenu.add(reportZeroTimesCheckBox);
-    reportMenu.add(reportSortTime);
-    reportMenu.add(reportSortExecution);
-    reportMenu.addSeparator();
-
-    reportMenu.add(new XJMenuItem(
-      new AbstractAction("Report on Documents Processed") {
-        { putValue(SHORT_DESCRIPTION, "Report most time consuming documents"); }
+      }, this);
+      JMenu reportMenu = new XJMenu("Profiling Reports",
+        "Generates profiling reports from processing resources", this);
+      reportMenu.setIcon(getIcon("gazetteer"));
+      reportMenu.add(new XJMenuItem(
+        new AbstractAction("Start Profiling Applications") {
+        { putValue(SHORT_DESCRIPTION,
+          "Toggles the profiling of processing resources"); }
+  
+        // stores the value held by the benchmarking switch before we started
+        // this profiling run.
+        boolean benchmarkWasEnabled;
+  
         public void actionPerformed(ActionEvent evt) {
-          DocTimeReporter report = new DocTimeReporter();
+          if (getValue(NAME).equals("Start Profiling Applications")) {
+            reportClearMenuItem.setEnabled(false);
+            // store old value of benchmark switch
+            benchmarkWasEnabled = Benchmark.isBenchmarkingEnabled();
+            Benchmark.setBenchmarkingEnabled(true);
+            Layout layout = new PatternLayout("%m%n");
+            File logFile = new File(System.getProperty("java.io.tmpdir"),
+              "gate-benchmark-log.txt");
+            logFile.deleteOnExit();
+            Appender appender;
+            try {
+              appender =
+                new FileAppender(layout, logFile.getAbsolutePath(), true);
+            } catch (IOException e) {
+              e.printStackTrace();
+              return;
+            }
+            appender.setName("gate-benchmark");
+            Benchmark.logger.addAppender(appender);
+            putValue(NAME, "Stop Profiling Applications");
+          } else {
+            // reset old value of benchmark switch - i.e. if benchmarking was
+            // disabled before the user selected "start profiling" then we
+            // disable it again now, but if it was already enabled before they
+            // started profiling then we assume it was turned on explicitly and
+            // leave it alone.
+            Benchmark.setBenchmarkingEnabled(benchmarkWasEnabled);
+            Benchmark.logger.removeAppender("gate-benchmark");
+            putValue(NAME, "Start Profiling Applications");
+            reportClearMenuItem.setEnabled(true);
+          }
+        }
+      }, this));
+      reportMenu.add(reportClearMenuItem);
+      reportMenu.add(new XJMenuItem(new AbstractAction("Help on this tool") {
+        public void actionPerformed(ActionEvent e) {
+          showHelpFrame("chap:profiling", "Profiling Processing Resources");
+        }
+      }, this));
+      reportMenu.addSeparator();
+  
+      final JCheckBoxMenuItem reportZeroTimesCheckBox = new JCheckBoxMenuItem();
+      reportZeroTimesCheckBox.setAction(
+        new AbstractAction("Report Zero Time Entries") {
+        public void actionPerformed(ActionEvent evt) {
+          Gate.getUserConfig().put(MainFrame.class.getName()+".reportzerotime",
+            reportZeroTimesCheckBox.isSelected());
+        }
+      });
+      reportZeroTimesCheckBox.setSelected(Gate.getUserConfig().getBoolean(
+          MainFrame.class.getName()+".reportzerotimes"));
+      ButtonGroup group = new ButtonGroup();
+      final JRadioButtonMenuItem reportSortExecution = new JRadioButtonMenuItem();
+      reportSortExecution.setAction(new AbstractAction("Sort by Execution") {
+        public void actionPerformed(ActionEvent evt) {
+          Gate.getUserConfig().put(
+            MainFrame.class.getName()+".reportsorttime", false);
+        }
+      });
+      reportSortExecution.setSelected(!Gate.getUserConfig().getBoolean(
+        MainFrame.class.getName()+".reportsorttime"));
+      group.add(reportSortExecution);
+      final JRadioButtonMenuItem reportSortTime = new JRadioButtonMenuItem();
+      reportSortTime.setAction(new AbstractAction("Sort by Time") {
+        public void actionPerformed(ActionEvent evt) {
+          Gate.getUserConfig().put(
+            MainFrame.class.getName()+".reportsorttime", true);
+        }
+      });
+      reportSortTime.setSelected(Gate.getUserConfig().getBoolean(
+        MainFrame.class.getName()+".reportsorttime"));
+      group.add(reportSortTime);
+      reportMenu.add(new XJMenuItem(
+        new AbstractAction("Report on Processing Resources") {
+        { putValue(SHORT_DESCRIPTION,
+          "Report time taken by each processing resource"); }
+        public void actionPerformed(ActionEvent evt) {
+          PRTimeReporter report = new PRTimeReporter();
           report.setBenchmarkFile(new File(System.getProperty("java.io.tmpdir"),
             "gate-benchmark-log.txt"));
-          String maxDocs = Gate.getUserConfig().getString(
-            MainFrame.class.getName()+".reportmaxdocs");
-          if (maxDocs != null) {
-            report.setMaxDocumentInReport((maxDocs.equals("All")) ?
-              DocTimeReporter.ALL_DOCS : Integer.valueOf(maxDocs));
-          }
-          String prRegex = Gate.getUserConfig().getString(
-            MainFrame.class.getName()+".reportprregex");
-          if (prRegex != null) {
-            report.setPRMatchingRegex((prRegex.equals("")) ?
-              DocTimeReporter.MATCH_ALL_PR_REGEX : prRegex);
-          }
+          report.setSuppressZeroTimeEntries(!reportZeroTimesCheckBox.isSelected());
+          report.setSortOrder(reportSortTime.isSelected() ?
+            PRTimeReporter.SORT_TIME_TAKEN : PRTimeReporter.SORT_EXEC_ORDER);
           try {
             report.executeReport();
           } catch (BenchmarkReportException e) {
@@ -1029,45 +1005,82 @@ public class MainFrame extends JFrame implements ProgressListener,
             return;
           }
           showHelpFrame("file://" + report.getReportFile(),
-            "documents time report");
+            "processing times report");
         }
       }, this));
-    String maxDocs = Gate.getUserConfig().getString(
-      MainFrame.class.getName()+".reportmaxdocs");
-    if (maxDocs == null) { maxDocs = "10"; }
-    reportMenu.add(new XJMenuItem(
-      new AbstractAction("Set Max Documents (" + maxDocs + ")") {
-        public void actionPerformed(ActionEvent evt) {
-          Object response = JOptionPane.showInputDialog(instance,
-              "Set the maximum of documents to report", "Report options",
-              JOptionPane.QUESTION_MESSAGE, null,
-              new Object[]{"All", "10", "20", "30", "40", "50", "100"}, "10");
-          if (response != null) {
-            Gate.getUserConfig().put(
-              MainFrame.class.getName()+".reportmaxdocs",response);
-            putValue(NAME, "Set Max Documents (" + response + ")");
+      reportMenu.add(reportZeroTimesCheckBox);
+      reportMenu.add(reportSortTime);
+      reportMenu.add(reportSortExecution);
+      reportMenu.addSeparator();
+  
+      reportMenu.add(new XJMenuItem(
+        new AbstractAction("Report on Documents Processed") {
+          { putValue(SHORT_DESCRIPTION, "Report most time consuming documents"); }
+          public void actionPerformed(ActionEvent evt) {
+            DocTimeReporter report = new DocTimeReporter();
+            report.setBenchmarkFile(new File(System.getProperty("java.io.tmpdir"),
+              "gate-benchmark-log.txt"));
+            String maxDocs = Gate.getUserConfig().getString(
+              MainFrame.class.getName()+".reportmaxdocs");
+            if (maxDocs != null) {
+              report.setMaxDocumentInReport((maxDocs.equals("All")) ?
+                DocTimeReporter.ALL_DOCS : Integer.valueOf(maxDocs));
+            }
+            String prRegex = Gate.getUserConfig().getString(
+              MainFrame.class.getName()+".reportprregex");
+            if (prRegex != null) {
+              report.setPRMatchingRegex((prRegex.equals("")) ?
+                DocTimeReporter.MATCH_ALL_PR_REGEX : prRegex);
+            }
+            try {
+              report.executeReport();
+            } catch (BenchmarkReportException e) {
+              e.printStackTrace();
+              return;
+            }
+            showHelpFrame("file://" + report.getReportFile(),
+              "documents time report");
           }
-        }
-      }, this));
-    String prRegex = Gate.getUserConfig().getString(
-      MainFrame.class.getName()+".reportprregex");
-    if (prRegex == null || prRegex.equals("")) { prRegex = "All"; }
-    reportMenu.add(new XJMenuItem(
-      new AbstractAction("Set PR Matching Regex (" + prRegex + ")") {
-        public void actionPerformed(ActionEvent evt) {
-          Object response = JOptionPane.showInputDialog(instance,
-            "Set the processing resource regex filter\n" +
-            "Leave empty to not filter", "Report options",
-              JOptionPane.QUESTION_MESSAGE);
-          if (response != null) {
-            Gate.getUserConfig().put(
-              MainFrame.class.getName()+".reportprregex",response);
-            if (response.equals("")) { response = "All"; }
-            putValue(NAME, "Set PR Matching Regex (" + response + ")");
+        }, this));
+      String maxDocs = Gate.getUserConfig().getString(
+        MainFrame.class.getName()+".reportmaxdocs");
+      if (maxDocs == null) { maxDocs = "10"; }
+      reportMenu.add(new XJMenuItem(
+        new AbstractAction("Set Max Documents (" + maxDocs + ")") {
+          public void actionPerformed(ActionEvent evt) {
+            Object response = JOptionPane.showInputDialog(instance,
+                "Set the maximum of documents to report", "Report options",
+                JOptionPane.QUESTION_MESSAGE, null,
+                new Object[]{"All", "10", "20", "30", "40", "50", "100"}, "10");
+            if (response != null) {
+              Gate.getUserConfig().put(
+                MainFrame.class.getName()+".reportmaxdocs",response);
+              putValue(NAME, "Set Max Documents (" + response + ")");
+            }
           }
-        }
-      }, this));
-    toolsMenu.add(reportMenu);
+        }, this));
+      String prRegex = Gate.getUserConfig().getString(
+        MainFrame.class.getName()+".reportprregex");
+      if (prRegex == null || prRegex.equals("")) { prRegex = "All"; }
+      reportMenu.add(new XJMenuItem(
+        new AbstractAction("Set PR Matching Regex (" + prRegex + ")") {
+          public void actionPerformed(ActionEvent evt) {
+            Object response = JOptionPane.showInputDialog(instance,
+              "Set the processing resource regex filter\n" +
+              "Leave empty to not filter", "Report options",
+                JOptionPane.QUESTION_MESSAGE);
+            if (response != null) {
+              Gate.getUserConfig().put(
+                MainFrame.class.getName()+".reportprregex",response);
+              if (response.equals("")) { response = "All"; }
+              putValue(NAME, "Set PR Matching Regex (" + response + ")");
+            }
+          }
+        }, this));
+      toolsMenu.add(reportMenu);
+    } catch (ClassNotFoundException e) {
+      log.warn("log4j.jar not found on the classpath, disabling profiling reports.");
+    }
 
     toolsMenu.add(new XJMenuItem(new NewBootStrapAction(), this));
     final JMenu corpusEvalMenu = new XJMenu("Corpus Benchmark",
