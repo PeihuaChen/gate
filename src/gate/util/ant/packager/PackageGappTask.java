@@ -880,11 +880,20 @@ public class PackageGappTask extends Task {
     }
 
     /**
+     * This was the pre-ant 1.8 version of addProperty, Ant 1.8 uses the
+     * version that takes an <code>Object</code> as value rather than a
+     * <code>String</code>.
+     */
+    protected void addProperty(String n, String v) {
+      addProperty(n, (Object)v);
+    }
+
+    /**
      * Rather than adding properties to the project, add mapping hints
      * to the task.
      */
-    @Override
-    protected void addProperty(String n, String v) {
+    protected void addProperty(String n, Object vObj) {
+      String v = (vObj == null) ? null : vObj.toString();
       try {
         // resolve relative paths against project basedir
         File source = getProject().resolveFile(n);
