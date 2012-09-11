@@ -152,6 +152,10 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     }
   }
   
+  /**
+   * Clears out the annotation set by clearing the underlying set as well as
+   * clearing all the associated indexes etc.
+   */
   @Override
   public void clear() {
     super.clear();
