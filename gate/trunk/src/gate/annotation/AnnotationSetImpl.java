@@ -155,9 +155,11 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   @Override
   public void clear() {
     super.clear();
-    annotsById.clear();
+    annotsById = new HashMap<Integer, Annotation>();
+    nodesByOffset = null;
     annotsByStartNode = null;
     annotsByType = null;
+    longestAnnot = 0l;
   }
 
   /**
