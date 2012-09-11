@@ -151,6 +151,14 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
       }
     }
   }
+  
+  @Override
+  public void clear() {
+    super.clear();
+    annotsById.clear();
+    annotsByStartNode = null;
+    annotsByType = null;
+  }
 
   /**
    * This inner class serves as the return value from the iterator() method.
