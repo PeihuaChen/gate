@@ -153,12 +153,11 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   }
   
   /**
-   * Clears out the annotation set by clearing the underlying set as well as
-   * clearing all the associated indexes etc.
+   * An efficient (and more importantly working) method to
+   * clear the annotation set by removing all annotations
    */
   @Override
   public void clear() {
-    super.clear();
     annotsById = new HashMap<Integer, Annotation>();
     nodesByOffset = null;
     annotsByStartNode = null;
