@@ -111,13 +111,6 @@ public class AnnotationImpl extends AbstractFeatureBearer
         + ((type == null) ? 0 : type.hashCode());
     hashCodeRes = 31*hashCodeRes
         + ((id == null) ? 0 : id.hashCode());
-    hashCodeRes = 31*hashCodeRes
-        + ((start == null || start.getOffset() == null)
-            ? 0 : start.getOffset().hashCode());
-    hashCodeRes = 31*hashCodeRes
-        + ((end == null || end.getOffset() == null)
-            ? 0 : end.getOffset().hashCode());
-
     return  hashCodeRes;
   }// hashCode
 
