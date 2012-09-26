@@ -16,6 +16,7 @@ package gate.util.persistence;
 import gate.util.persistence.*;
 import java.io.*;
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.xml.StaxDriver;
 
 /* (non-Javadoc)
  * Note that this class is not part of the GATE persistence API, but must be in
@@ -76,7 +77,7 @@ public class UpdateSavedApp {
     persistApp.application = obj;
 
     // create XStream for writing new file
-    XStream xs = new XStream();
+    XStream xs = new XStream(new StaxDriver());
 
     // save XML application
     FileWriter fw = new FileWriter(newFile);
