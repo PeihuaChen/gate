@@ -23,6 +23,7 @@ import java.util.List;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.SingleValueConverter;
+import com.thoughtworks.xstream.io.xml.StaxDriver;
 
 public class RemoteUpdateSite {
 
@@ -47,7 +48,7 @@ public class RemoteUpdateSite {
     if(plugins == null) {
       valid = true;
       try {
-        XStream xs = new XStream();
+        XStream xs = new XStream(new StaxDriver());
         xs.setClassLoader(RemoteUpdateSite.class.getClassLoader());
         xs.alias("UpdateSite", List.class);
         xs.alias("CreolePlugin", CreolePlugin.class);

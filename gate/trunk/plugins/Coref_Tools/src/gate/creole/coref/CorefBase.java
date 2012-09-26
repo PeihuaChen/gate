@@ -31,6 +31,7 @@ import org.apache.log4j.Logger;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.core.ReferenceByIdMarshallingStrategy;
+import com.thoughtworks.xstream.io.xml.StaxDriver;
 
 import gate.Annotation;
 import gate.AnnotationSet;
@@ -165,7 +166,7 @@ public abstract class CorefBase extends AbstractLanguageAnalyser {
   
   
   protected static XStream getXstream(){
-    XStream xstream = new XStream();
+    XStream xstream = new XStream(new StaxDriver());
     
     xstream.setMarshallingStrategy(new ReferenceByIdMarshallingStrategy());
     

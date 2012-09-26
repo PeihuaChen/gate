@@ -62,6 +62,7 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import com.thoughtworks.xstream.io.xml.StaxDriver;
 
 /**
  * A GATE PR which annotates numbers which appear as both words or
@@ -790,7 +791,7 @@ public class NumbersTagger extends AbstractLanguageAnalyser implements ActionsPu
         throw new IllegalArgumentException(
                 "You must specify the URL of the file you are processing");
 
-      XStream xstream = new XStream();
+      XStream xstream = new XStream(new StaxDriver());
       if(cl != null) xstream.setClassLoader(cl);
 
       xstream.alias("config", Config.class);

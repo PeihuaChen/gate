@@ -20,6 +20,7 @@ import java.io.StringWriter;
 import org.apache.log4j.Logger;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.xml.StaxDriver;
 
 /**
  * Class used to wrap arbitrary values prior to saving as GATE XML. The 
@@ -52,7 +53,7 @@ public class ObjectWrapper {
    * {@link ObjectWrapper} instance.
    */
   public ObjectWrapper(String xmlSerialisation) {
-    XStream xstream = new XStream();
+    XStream xstream = new XStream(new StaxDriver());
     Object other = xstream.fromXML(xmlSerialisation);
     if(other instanceof ObjectWrapper) {
       this.value = ((ObjectWrapper)other).value;
@@ -72,7 +73,7 @@ public class ObjectWrapper {
    */
   @Override
   public String toString() {
-    XStream xstream = new XStream();
+    XStream xstream = new XStream(new StaxDriver());
     StringWriter out  = new StringWriter();
     xstream.toXML(this, out);
     return out.toString();
