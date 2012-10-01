@@ -123,14 +123,17 @@ public class FlexGazMappingTable {
   public long getBestOriginalEnd(long tempEndOffset) {
     update();
     int i = Arrays.binarySearch(tempEndOffsets, tempEndOffset);
-    if (i > 0) {
+    
+    // Exact key is found in the array:
+    if (i >= 0) {
       return endMap.get(tempEndOffsets[i]).getOriginalEndOffset();
     }
     
-    /* Acc. to the binarySearch API, i = - insPt - 1
+    /* Exact key is not in the array; according
+     * to the binarySearch API, i = - insPt - 1
      * We want the insertion point, but if that is past the 
      * existing end of the array, then 
-     * we have overshot the first original annotation    */
+     * we have overshot the first input annotation    */
     i = - i - 1;
     if (i >= size) {
       return -1L;
