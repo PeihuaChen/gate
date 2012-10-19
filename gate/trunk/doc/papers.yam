@@ -38,6 +38,11 @@ GATE papers
 
 %1 Journals and Conference papers
 
+%2* Forthcoming
+
+- V. Tablan, I. Roberts, H. Cunningham, K. Bontcheva. GATECloud.net: a Platform for Large-Scale, Open-Source Text Processing on the Cloud. %(http://rsta.royalsocietypublishing.org/, Philosophical Transactions of the Royal Society A). In Press. %(http://gate.ac.uk/sale/ahm11/journal/gatecloud-journal.pdf, Pre-Print PDF).
+
+- D. Maynard, K. Bontcheva. Natural Language Processing. In J. Lehmann and J. Voelker editors, Perspectives of Ontology Learning. IOS Press. (in preparation)
 
 %2* 2012
 
@@ -52,6 +57,8 @@ GATE papers
 - M. A. Greenwood, N. Aswani, K. Bontcheva: Reputation Profiling with GATE. CLEF (Online Working Notes/Labs/Workshop). 2012. %(http://gate.ac.uk/sale/replab2012-clef/GATE-RepLab2012.pdf, PDF)
 
 %2* 2011
+
+- K. Bontcheva, H. Cunningham. Semantic Annotations and Retrieval: Manual, Semi-automatic and Automatic Generation. Domingue, John; Fensel, Dieter; Hendler, James A. (Eds.). %(http://www.springer.com/computer/database+management+%26+information+retrieval/book/978-3-540-92912-3, Handbook of Semantic Web Technologies). 2011.
 
 - T. Risse, S. Dietze, D. Maynard and N. Tahmasebi.  Using Events for Content Appraisal and Selection in Web Archives. In Proceedings of DeRiVE 2011: Workshop in conjunction with the 10th International Semantic Web Conference 2011, October 2011, Bonn, Germany. %(http://gate.ac.uk/sale/iswc11/Derive.pdf, PDF)
 
