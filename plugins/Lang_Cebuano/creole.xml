@@ -4,12 +4,12 @@
 <CREOLE-DIRECTORY>
   <!-- Processing Resources -->
   <CREOLE>
-     
+    <JAR SCAN="true">cebuano.jar</JAR>     
     <!-- creole.xml for the Englishtokeniser -->
   
- <RESOURCE>
+    <RESOURCE>
       <NAME>Cebuano Tokeniser</NAME>
- <JAR>cebuano.jar</JAR>
+      <JAR>cebuano.jar</JAR>
       <CLASS>cebuano.CebuanoTokeniser</CLASS>
       <COMMENT>A customisable Cebuano tokeniser.</COMMENT>
       <PARAMETER NAME="document" COMMENT="The document to be tokenised"
