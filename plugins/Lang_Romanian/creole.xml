@@ -4,12 +4,12 @@
 <CREOLE-DIRECTORY>
   <!-- Processing Resources -->
   <CREOLE>
-     
+    <JAR SCAN="true">romanian.jar</JAR>
     <!-- creole.xml for the Englishtokeniser -->
   
- <RESOURCE>
+    <RESOURCE>
       <NAME>Romanian Tokeniser</NAME>
- <JAR>romanian.jar</JAR>
+      <JAR>romanian.jar</JAR>
       <CLASS>romanian.RomanianTokeniser</CLASS>
       <COMMENT>A customisable Romanian tokeniser.</COMMENT>
       <PARAMETER NAME="document" COMMENT="The document to be tokenised"
