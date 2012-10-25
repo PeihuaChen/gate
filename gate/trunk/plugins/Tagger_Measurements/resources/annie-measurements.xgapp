@@ -118,7 +118,12 @@
         <gate.util.persistence.LanguageAnalyserPersistence>
           <runtimeParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-            <localMap/>
+            <localMap>
+              <entry>
+                <string>allowWithinWords</string>
+                <string>true</string>
+              </entry>
+            </localMap>
           </runtimeParams>
           <resourceType>gate.creole.numbers.NumbersTagger</resourceType>
           <resourceName>Numbers Tagger</resourceName>
