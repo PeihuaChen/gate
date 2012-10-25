@@ -40,7 +40,7 @@ gate.AnnotationSet firstPerson = (gate.AnnotationSet)personSet.get("TempPerson")
 if (firstPerson != null && firstPerson.size()>0)
 {
   gate.Annotation personAnn = (gate.Annotation)firstPerson.iterator().next();
-  features.put("gender", personAnn.getFeatures().get("gender"));
+  if (personAnn.getFeatures().containsKey("gender")) features.put("gender", personAnn.getFeatures().get("gender"));
 }
   features.put("rule1", person1Ann.getFeatures().get("rule"));
   features.put("rule", "PersonFinal");
