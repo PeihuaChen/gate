@@ -206,15 +206,27 @@
 
   <target name="test" depends="testowlim,testw3tests,testontotest1,testtuplequery,testtriplestore,testontowine" />
 
-  <!-- Targets used by the main GATE build file -->
-  <target name="build" depends="jar" />
-  <target name="distro.prepare" depends="clean.classes">
-    <!-- do not delete jar -->
-    <delete dir="${build}" />
+  <target name="test.reports" depends="test.reports.prepare,test">
+    <junitreport>
+      <fileset dir=".">
+        <include name="TEST-*.xml" />
+      </fileset>
+      <report todir="." format="noframes" />
+    </junitreport>
+  </target> 
+
+  <target name="test.reports.prepare">
     <delete>
       <fileset dir="." includes="TEST*.xml" />
       <fileset dir="." includes="TEST*.txt" />
     </delete>
+  </target>
+
+  <!-- Targets used by the main GATE build file -->
+  <target name="build" depends="jar" />
+  <target name="distro.prepare" depends="clean.classes,test.reports.prepare">
+    <!-- do not delete jar -->
+    <delete dir="${build}" />
   </target>
   
 </project>
