@@ -1,4 +1,4 @@
-<project name="Tagger_PennBio" basedir=".">
+<project name="Tagger_PennBio" basedir="." default="jar">
   <!-- Prevent Ant from warning about includeantruntime not being set -->
   <property name="build.sysclasspath" value="ignore" />
   
