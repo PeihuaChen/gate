@@ -396,7 +396,7 @@
       Tools UIMA Web_Crawler_Websphinx 
       WordNet Schema_Tools Tagger_Numbers Tagger_Boilerpipe
       Tagger_DateNormalizer Teamware_Tools Tagger_Measurements GENIA Tagger_PennBio
-      Tagger_MutationFinder Tagger_NormaGene Format_PubMed
+      Tagger_MutationFinder Tagger_NormaGene Format_PubMed Lang_French
     " />
   <target name="plugins.build" depends="jar">
     <for param="plugin">
