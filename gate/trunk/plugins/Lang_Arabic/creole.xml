@@ -3,10 +3,11 @@
 <CREOLE-DIRECTORY>
   <!-- Processing Resources -->
   <CREOLE>
-   
-  <RESOURCE>
+    <JAR SCAN="true">arabic.jar</JAR>   
+
+    <RESOURCE>
       <NAME>Arabic Tokeniser</NAME>
- <JAR>arabic.jar</JAR>
+      <JAR>arabic.jar</JAR>
       <CLASS>arabic.ArabicTokeniser</CLASS>
       <COMMENT>A customisable Arabic tokeniser.</COMMENT>
       <PARAMETER NAME="document" COMMENT="The document to be tokenised"
@@ -29,6 +30,7 @@
     </RESOURCE>
 
    <!-- creole.xml for Arabic gazetteer -->
+<!--
     <RESOURCE>
       <NAME>Arabic Gazetteer</NAME>
       <JAR>arabic.jar</JAR>
@@ -54,7 +56,7 @@
         NAME="wholeWordsOnly">java.lang.Boolean</PARAMETER>
       <ICON>shefGazetteer.gif</ICON>
     </RESOURCE>
-
+-->
 
 <!-- creole.xml for Arabic Infered gazetteer -->
     <RESOURCE>

@@ -2,16 +2,13 @@
   <urlList class="gate.util.persistence.CollectionPersistence">
     <localList>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../../../../../../creole</urlString>
+        <urlString>$relpath$..</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../../chinese/application/creole</urlString>
+        <urlString>$relpath$../../ANNIE</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>http://www.creolehome.net/_all</urlString>
-      </gate.util.persistence.PersistenceManager-URLHolder>
-      <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$creole</urlString>
+        <urlString>$relpath$../../Tools</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
     </localList>
     <collectionType>java.util.ArrayList</collectionType>
@@ -98,7 +95,7 @@
             </localMap>
           </runtimeParams>
           <resourceType>gate.creole.GazetteerListsCollector</resourceType>
-          <resourceName>chinese list collector</resourceName>
+          <resourceName>arabic list collector</resourceName>
           <initParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap/>
@@ -113,7 +110,7 @@
       <collectionType>java.util.ArrayList</collectionType>
     </prList>
     <resourceType>gate.creole.SerialAnalyserController</resourceType>
-    <resourceName>lists collector</resourceName>
+    <resourceName>Arabic Gazetteer Collector</resourceName>
     <initParams class="gate.util.persistence.MapPersistence">
       <mapType>gate.util.SimpleFeatureMapImpl</mapType>
       <localMap/>
