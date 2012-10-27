@@ -29,36 +29,7 @@
         COMMENT="The URL for the postprocessing transducer" SUFFIXES="jape">
         java.net.URL</PARAMETER>
       <ICON>shefTokeniser.gif</ICON>
-    </RESOURCE>
-
-   <!-- creole.xml for gazetteer 
-    <RESOURCE>
-      <NAME>Cebuano Gazetteer Tokeniser</NAME>
-      <JAR>cebuano.jar</JAR>
-      <CLASS>cebuano.CebuanoGazetteerTokeniser</CLASS>
-      <COMMENT>A list lookup component.</COMMENT>
-      <PARAMETER NAME="document" RUNTIME="true"
-        COMMENT="The document to be processed">gate.corpora.DocumentImpl</PARAMETER>
-      <PARAMETER NAME="annotationSetName" RUNTIME="true"
-        COMMENT="The annotation set to be used for the generated annotations"
-        OPTIONAL="true">java.lang.String</PARAMETER>
-      <PARAMETER NAME="listsURL"
-        DEFAULT="resources/tokeniser/lists.def"
-        COMMENT="The URL to the file with list of lists" SUFFIXES="def">
-        java.net.URL</PARAMETER>
-      <PARAMETER DEFAULT="UTF-8"
-        COMMENT="The encoding used for reading the definitions" NAME="encoding">
-        java.lang.String</PARAMETER>
-      <PARAMETER DEFAULT="true"
-        COMMENT="Should this gazetteer diferentiate on case"
-        NAME="caseSensitive">java.lang.Boolean</PARAMETER>
-      <PARAMETER DEFAULT="true"
-        COMMENT="Should this gazetteer only match whole words"
-        NAME="wholeWordsOnly">java.lang.Boolean</PARAMETER>
-      <ICON>shefGazetteer.gif</ICON>
-    </RESOURCE>
-    -->
-   
+    </RESOURCE>  
     
     <!-- creole.xml for JapeTransducer -->
     <RESOURCE>
