@@ -101,36 +101,7 @@
 
 		<!-- creole.xml for the Englishtokeniser -->
 		<RESOURCE>
-			<NAME>ANNIE English Tokeniser</NAME>
-			<CLASS>gate.creole.tokeniser.DefaultTokeniser</CLASS>
-			<COMMENT>A customisable English tokeniser.</COMMENT>
-			<HELPURL>http://gate.ac.uk/userguide/sec:annie:tokeniser</HELPURL>
-			<PARAMETER NAME="document"
-				COMMENT="The document to be tokenised" RUNTIME="true">
-				gate.Document
-			</PARAMETER>
-			<PARAMETER NAME="annotationSetName" RUNTIME="true"
-				COMMENT="The annotation set to be used for the generated annotations"
-				OPTIONAL="true">
-				java.lang.String
-			</PARAMETER>
-			<PARAMETER NAME="tokeniserRulesURL"
-				DEFAULT="resources/tokeniser/DefaultTokeniser.rules"
-				COMMENT="The URL to the rules file" SUFFIXES="rules">
-				java.net.URL
-			</PARAMETER>
-			<PARAMETER NAME="transducerGrammarURL"
-				DEFAULT="resources/tokeniser/postprocess.jape"
-				COMMENT="The URL to the postprocessing transducer"
-				SUFFIXES="jape">
-				java.net.URL
-			</PARAMETER>
-			<PARAMETER NAME="encoding"
-				COMMENT="The encoding used for reading the definitions"
-				DEFAULT="UTF-8">
-				java.lang.String
-			</PARAMETER>
-			<ICON>tokeniser</ICON>
+			<CLASS>gate.creole.tokeniser.DefaultTokeniser</CLASS>			
 		</RESOURCE>
 
 		<!-- creole.xml for gazetteer -->
