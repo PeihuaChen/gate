@@ -1,7 +1,18 @@
 package gate.creole.tokeniser;
 
-import gate.*;
-import gate.creole.*;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.Resource;
+import gate.creole.AbstractLanguageAnalyser;
+import gate.creole.ExecutionException;
+import gate.creole.ExecutionInterruptedException;
+import gate.creole.ResourceInstantiationException;
+import gate.creole.Transducer;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
+import gate.creole.metadata.RunTime;
 import gate.event.ProgressListener;
 import gate.event.StatusListener;
 import gate.util.Benchmark;
@@ -14,6 +25,7 @@ import gate.util.Out;
  * The simple tokeniser tokenises the document and the transducer processes its
  * output.
  */
+@CreoleResource(name = "ANNIE English Tokeniser", comment = "A customisable English tokeniser.", helpURL = "http://gate.ac.uk/userguide/sec:annie:tokeniser", icon = "tokeniser")
 public class DefaultTokeniser extends AbstractLanguageAnalyser implements Benchmarkable {
 
   public static final String
@@ -180,18 +192,23 @@ public class DefaultTokeniser extends AbstractLanguageAnalyser implements Benchm
     transducer.interrupt();
   }
 
+  @CreoleParameter(defaultValue="resources/tokeniser/DefaultTokeniser.rules", comment="The URL to the rules file", suffixes="rules")
   public void setTokeniserRulesURL(java.net.URL tokeniserRulesURL) {
     this.tokeniserRulesURL = tokeniserRulesURL;
   }
   public java.net.URL getTokeniserRulesURL() {
     return tokeniserRulesURL;
   }
+  
+  @CreoleParameter(defaultValue="UTF-8", comment="The encoding used for reading the definitions")
   public void setEncoding(String encoding) {
     this.encoding = encoding;
   }
   public String getEncoding() {
     return encoding;
   }
+  
+  @CreoleParameter(defaultValue="resources/tokeniser/postprocess.jape", comment="The URL to the postprocessing transducer", suffixes="jape")
   public void setTransducerGrammarURL(java.net.URL transducerGrammarURL) {
     this.transducerGrammarURL = transducerGrammarURL;
   }
@@ -213,7 +230,9 @@ public class DefaultTokeniser extends AbstractLanguageAnalyser implements Benchm
   private String annotationSetName;
   private String benchmarkId;
 
-
+  @RunTime
+  @Optional
+  @CreoleParameter(comment="The annotation set to be used for the generated annotations")
   public void setAnnotationSetName(String annotationSetName) {
     this.annotationSetName = annotationSetName;
   }
