@@ -26,6 +26,10 @@ import gate.creole.CustomDuplication;
 import gate.creole.ExecutionException;
 import gate.creole.ExecutionInterruptedException;
 import gate.creole.ResourceInstantiationException;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
+import gate.creole.metadata.RunTime;
 import gate.util.GateRuntimeException;
 import gate.util.InvalidOffsetException;
 import gate.util.Strings;
@@ -60,6 +64,7 @@ import java.util.Set;
  * will generate annotations of type Lookup having the attributes specified in
  * the definition file.
  */
+@CreoleResource(name="ANNIE Gazetteer", comment="A list lookup component.", icon="gazetteer", helpURL="http://gate.ac.uk/userguide/sec:annie:gazetteer")
 public class DefaultGazetteer extends AbstractGazetteer
                               implements CustomDuplication {
 
@@ -596,6 +601,9 @@ public class DefaultGazetteer extends AbstractGazetteer
   /**
    * @param gazetteerFeatureSeparator the gazetteerFeatureSeparator to set
    */
+  @RunTime
+  @Optional
+  @CreoleParameter(comment="The character used to separate features for entries in gazetteer lists. Accepts strings like &quot;\t&quot; and will unescape it to the relevant character. If not specified, this gazetteer does not support extra features.")
   public void setGazetteerFeatureSeparator(String gazetteerFeatureSeparator) {
     this.gazetteerFeatureSeparator = gazetteerFeatureSeparator;
   }
