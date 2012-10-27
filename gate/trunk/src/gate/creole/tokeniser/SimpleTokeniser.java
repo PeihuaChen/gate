@@ -23,6 +23,10 @@ import java.util.*;
 
 import gate.*;
 import gate.creole.*;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
+import gate.creole.metadata.RunTime;
 import gate.util.*;
 
 /** Implementation of a Unicode rule based tokeniser.
@@ -91,6 +95,7 @@ import gate.util.*;
  * //.
  *
  */
+@CreoleResource(name="GATE Unicode Tokeniser", comment="A customisable Unicode tokeniser.", helpURL="http://gate.ac.uk/userguide/sec:annie:tokeniser", icon="tokeniser")
 public class SimpleTokeniser extends AbstractLanguageAnalyser{
   public static final String
     SIMP_TOK_DOCUMENT_PARAMETER_NAME = "document";
@@ -713,6 +718,7 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
    * to the file containing the rules for this tokeniser.
    * @param newRulesURL
    */
+  @CreoleParameter(defaultValue="resources/tokeniser/DefaultTokeniser.rules", comment="The URL to the rules file", suffixes="rules")
   public void setRulesURL(java.net.URL newRulesURL) {
     rulesURL = newRulesURL;
   }
@@ -723,7 +729,10 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
   public java.net.URL getRulesURL() {
     return rulesURL;
   }
-  /**    */
+    
+  @RunTime
+  @Optional
+  @CreoleParameter(comment="The annotation set to be used for the generated annotations")
   public void setAnnotationSetName(String newAnnotationSetName) {
     annotationSetName = newAnnotationSetName;
   }
@@ -737,6 +746,8 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
   public String getRulesResourceName() {
     return rulesResourceName;
   }
+  
+  @CreoleParameter(defaultValue="UTF-8", comment="The encoding used for reading the definitions")
   public void setEncoding(String newEncoding) {
     encoding = newEncoding;
   }
