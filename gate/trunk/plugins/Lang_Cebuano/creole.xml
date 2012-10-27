@@ -34,7 +34,7 @@
 
    
     
-    <!-- creole.xml for gazetteer -->
+    <!-- creole.xml for gazetteer --><!--
     <RESOURCE>
       <NAME>Cebuano Gazetteer</NAME>
       <JAR>cebuano.jar</JAR>
@@ -59,8 +59,9 @@
         COMMENT="Should this gazetteer only match whole words"
         NAME="wholeWordsOnly">java.lang.Boolean</PARAMETER>
       <ICON>shefGazetteer.gif</ICON>
-    </RESOURCE>
 
+    </RESOURCE>
+-->
 
    <!-- creole.xml for gazetteer -->
     <RESOURCE>

@@ -135,52 +135,7 @@
 
 		<!-- creole.xml for gazetteer -->
 		<RESOURCE>
-			<NAME>ANNIE Gazetteer</NAME>
 			<CLASS>gate.creole.gazetteer.DefaultGazetteer</CLASS>
-			<COMMENT>A list lookup component.</COMMENT>
-			<HELPURL>http://gate.ac.uk/userguide/sec:annie:gazetteer</HELPURL>
-			<PARAMETER NAME="document" RUNTIME="true"
-				COMMENT="The document to be processed">
-				gate.Document
-			</PARAMETER>
-      <PARAMETER NAME="gazetteerFeatureSeparator"
-        COMMENT="The character used to separate features for entries in gazetteer lists. Accepts strings like &quot;\t&quot; and will unescape it to the relevant character. If not specified, this gazetteer does not support extra features."
-        OPTIONAL="true">
-        java.lang.String
-      </PARAMETER>
-			<PARAMETER NAME="listsURL"
-				DEFAULT="resources/gazetteer/lists.def"
-				COMMENT="The URL to the file with list of lists" SUFFIXES="def">
-				java.net.URL
-			</PARAMETER>
-      <PARAMETER NAME="caseSensitive"
-        DEFAULT="true"
-        COMMENT="Should this gazetteer diferentiate on case?">
-        java.lang.Boolean
-      </PARAMETER>
-			<PARAMETER NAME="encoding"
-        DEFAULT="UTF-8"
-				COMMENT="The encoding used for reading the definitions">
-				java.lang.String
-			</PARAMETER>
-      <PARAMETER NAME="annotationSetName" RUNTIME="true"
-        COMMENT="The annotation set to be used for the generated annotations"
-        OPTIONAL="true">
-        java.lang.String
-      </PARAMETER>
-			<PARAMETER NAME="wholeWordsOnly"
-        DEFAULT="true"
-				COMMENT="Should this gazetteer only match whole words?"
-        RUNTIME="true">
-				java.lang.Boolean
-			</PARAMETER>
-      <PARAMETER NAME="longestMatchOnly"
-        DEFAULT="true"
-        COMMENT="Should this gazetteer only match the longest string starting from any offset?"
-        RUNTIME="true">
-        java.lang.Boolean
-      </PARAMETER>
-			<ICON>gazetteer</ICON>
 		</RESOURCE>
 
         <!-- creole.xml for a SharedDefaultGazetteer instance -->

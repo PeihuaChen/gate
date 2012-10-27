@@ -19,6 +19,10 @@ import java.util.*;
 
 import gate.FeatureMap;
 import gate.creole.ResourceInstantiationException;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
+import gate.creole.metadata.RunTime;
 
 /**AbstractGazetteer
  * This class implements the common-for-all methods of the Gazetteer interface*/
@@ -76,6 +80,9 @@ public abstract class AbstractGazetteer
    * Sets the AnnotationSet that will be used at the next run for the newly
    * produced annotations.
    */
+  @RunTime
+  @Optional
+  @CreoleParameter(comment="The annotation set to be used for the generated annotations")
   public void setAnnotationSetName(String newAnnotationSetName) {
     annotationSetName = newAnnotationSetName;
   }
@@ -88,6 +95,7 @@ public abstract class AbstractGazetteer
     return annotationSetName;
   }
 
+  @CreoleParameter(comment="The encoding used for reading the definitions", defaultValue="UTF-8")
   public void setEncoding(String newEncoding) {
     encoding = newEncoding;
   }
@@ -100,10 +108,12 @@ public abstract class AbstractGazetteer
     return listsURL;
   }
 
+  @CreoleParameter(comment="The URL to the file with list of lists", suffixes="def", defaultValue="resources/gazetteer/lists.def")
   public void setListsURL(java.net.URL newListsURL) {
     listsURL = newListsURL;
   }
 
+  @CreoleParameter(comment="Should this gazetteer diferentiate on case?", defaultValue="true")
   public void setCaseSensitive(Boolean newCaseSensitive) {
     caseSensitive = newCaseSensitive;
   }
@@ -130,6 +140,8 @@ public abstract class AbstractGazetteer
   /**
    * @param longestMatchOnly the longestMatchOnly to set
    */
+  @RunTime
+  @CreoleParameter(comment="Should this gazetteer only match the longest string starting from any offset?", defaultValue="true")
   public void setLongestMatchOnly(Boolean longestMatchOnly) {
     this.longestMatchOnly = longestMatchOnly;
   }
@@ -180,6 +192,8 @@ public abstract class AbstractGazetteer
    * Sets the value for the {@link #wholeWordsOnly} parameter.
    * @param wholeWordsOnly a Boolean value.
    */
+  @RunTime
+  @CreoleParameter(comment="Should this gazetteer only match whole words?", defaultValue="true")
   public void setWholeWordsOnly(Boolean wholeWordsOnly) {
     this.wholeWordsOnly = wholeWordsOnly;
   }
