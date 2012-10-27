@@ -72,31 +72,7 @@
 	<CREOLE>
 		<!-- creole.xml for the Unicode tokeniser -->
 		<RESOURCE>
-			<NAME>GATE Unicode Tokeniser</NAME>
-			<CLASS>gate.creole.tokeniser.SimpleTokeniser</CLASS>
-			<COMMENT>A customisable Unicode tokeniser.</COMMENT>
-			<HELPURL>http://gate.ac.uk/userguide/sec:annie:tokeniser</HELPURL>
-			<PARAMETER NAME="document"
-				COMMENT="The document to be tokenised" RUNTIME="true">
-				gate.Document
-			</PARAMETER>
-			<PARAMETER NAME="annotationSetName" RUNTIME="true"
-				COMMENT="The annotation set to be used for the generated annotations"
-				OPTIONAL="true">
-				java.lang.String
-			</PARAMETER>
-			<PARAMETER
-				DEFAULT="resources/tokeniser/DefaultTokeniser.rules"
-				COMMENT="The URL to the rules file" SUFFIXES="rules"
-				NAME="rulesURL">
-				java.net.URL
-			</PARAMETER>
-			<PARAMETER DEFAULT="UTF-8"
-				COMMENT="The encoding used for reading the definitions"
-				NAME="encoding">
-				java.lang.String
-			</PARAMETER>
-			<ICON>tokeniser</ICON>
+			<CLASS>gate.creole.tokeniser.SimpleTokeniser</CLASS>			
 		</RESOURCE>
 
 		<!-- creole.xml for the Englishtokeniser -->
