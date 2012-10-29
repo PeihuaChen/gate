@@ -33,7 +33,7 @@
 
 	<!-- compile the source -->
 	<target name="compile" depends="prepare">
-		<javac classpathref="compile.classpath" srcdir="${src.dir}" destdir="${classes.dir}" debug="true" debuglevel="lines,source" source="1.5" />
+		<javac classpathref="compile.classpath" srcdir="${src.dir}" destdir="${classes.dir}" debug="true" debuglevel="lines,source" source="1.5" target="1.5" />
 	</target>
 
 	<target name="resources" depends="prepare">

@@ -80,7 +80,8 @@
            destdir="${core.classes.dir}"
            debug="true"
            debuglevel="lines,source"
-           source="1.4" >
+           source="1.4"
+           target="1.4" >
       <src path="${core.src.dir}" />
     </javac>
   </target>
@@ -175,7 +176,8 @@
     <javac destdir="${examples.classes.dir}"
            debug="true"
            debuglevel="lines,source"
-           source="1.4" >
+           source="1.4"
+           target="1.4" >
       <classpath>
         <path refid="gate.and.uima.path" />
         <pathelement location="${jar.location}" />
@@ -264,6 +266,7 @@
            debug="true"
            debuglevel="lines,source"
            source="1.4"
+           target="1.4"
            srcdir="${test.src.dir}"/>
   </target>
 
