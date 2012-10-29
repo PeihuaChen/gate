@@ -385,18 +385,17 @@
   <!-- Plugins -->
   <!-- Learning plugin needs to be before Lang_Chinese -->
   <filelist id="plugins.to.build" dir="plugins" files="
-      Alignment Annotation_Merging Copy_Annots_Between_Docs Coref_Tools 
-      Gazetteer_LKB Gazetteer_Ontology_Based Groovy Inter_Annotator_Agreement 
-      JAPE_Plus Keyphrase_Extraction_Algorithm Lang_Arabic Lang_Cebuano Learning
-      Lang_Chinese Lang_Hindi Lang_Romanian Language_Identification LingPipe
-      Machine_Learning Ontology Ontology_BDM_Computation
-      Ontology_Tools OpenNLP Parser_Minipar Parser_RASP Parser_Stanford
-      Stemmer_Snowball Tagger_Abner Tagger_Chemistry Tagger_Framework
-      Tagger_MetaMap Tagger_NP_Chunking Tagger_OpenCalais
-      Tools UIMA Web_Crawler_Websphinx 
-      WordNet Schema_Tools Tagger_Numbers Tagger_Boilerpipe
-      Tagger_DateNormalizer Teamware_Tools Tagger_Measurements GENIA Tagger_PennBio
-      Tagger_MutationFinder Tagger_NormaGene Format_PubMed Lang_French Lang_German
+      Alignment Annotation_Merging Copy_Annots_Between_Docs Coref_Tools
+      Format_PubMed Gazetteer_LKB Gazetteer_Ontology_Based GENIA Groovy
+      Inter_Annotator_Agreement JAPE_Plus Keyphrase_Extraction_Algorithm
+      Lang_Arabic Lang_Cebuano Learning Lang_Chinese Lang_French Lang_German
+      Lang_Hindi Lang_Romanian Language_Identification LingPipe
+      Machine_Learning Ontology Ontology_BDM_Computation Ontology_Tools OpenNLP
+      Parser_Minipar Parser_RASP Parser_Stanford Schema_Tools Stemmer_Snowball
+      Tagger_Abner Tagger_Boilerpipe Tagger_Chemistry Tagger_DateNormalizer
+      Tagger_Framework Tagger_Measurements Tagger_MetaMap Tagger_MutationFinder
+      Tagger_NormaGene Tagger_NP_Chunking Tagger_Numbers Tagger_OpenCalais
+      Tagger_PennBio Teamware_Tools Tools UIMA Web_Crawler_Websphinx WordNet
     " />
   <target name="plugins.build" depends="jar">
     <for param="plugin">
