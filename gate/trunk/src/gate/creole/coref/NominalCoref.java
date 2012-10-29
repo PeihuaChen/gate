@@ -14,12 +14,30 @@
 
 package gate.creole.coref;
 
-import java.util.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Document;
+import gate.FeatureMap;
+import gate.ProcessingResource;
+import gate.Resource;
+import gate.creole.ANNIEConstants;
+import gate.creole.ExecutionException;
+import gate.creole.ResourceInstantiationException;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
+import gate.creole.metadata.RunTime;
+import gate.util.Err;
+import gate.util.OffsetComparator;
+import gate.util.SimpleFeatureMapImpl;
 
-import gate.*;
-import gate.creole.*;
-import gate.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
+@CreoleResource(name="ANNIE Nominal Coreferencer", comment="Nominal Coreference resolution component", helpURL="http://gate.ac.uk/userguide/sec:annie:pronom-coref", icon="nominal-coreferencer")
 public class NominalCoref extends AbstractCoreferencer
     implements ProcessingResource, ANNIEConstants {
 
@@ -87,6 +105,9 @@ public class NominalCoref extends AbstractCoreferencer
   }
 
   /** --- */
+  @RunTime
+  @Optional
+  @CreoleParameter(comment="The annotation set to be used for the generated annotations")
   public void setAnnotationSetName(String annotationSetName) {
     this.annotationSetName = annotationSetName;
   }
