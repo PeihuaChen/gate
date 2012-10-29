@@ -18,6 +18,8 @@ import gate.creole.gazetteer.LinearDefinition;
 import gate.creole.gazetteer.LinearNode;
 import gate.creole.gazetteer.Lookup;
 import gate.creole.gazetteer.MappingNode;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.HiddenCreoleParameter;
 import gate.util.InvalidOffsetException;
 import gate.util.LuckyException;
 
@@ -29,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@CreoleResource(name="Hash Gazetteer", icon="gazetteer", comment="A list lookup component implemented by OntoText Lab. The licence information is also available in licence.ontotext.html in the lib folder of GATE", helpURL="http://www.ontotext.com/downloads/index.html#gazetteer")
 public class HashGazetteer extends AbstractGazetteer {
   private static final long serialVersionUID = -4603155688378104052L;
 
@@ -442,5 +445,15 @@ public class HashGazetteer extends AbstractGazetteer {
         normalisedWord = word.substring(0, j).trim();
       }
     }
+  }
+  
+  @HiddenCreoleParameter
+  public void setWholeWordsOnly(Boolean wholeWordsOnly) {
+    super.setWholeWordsOnly(wholeWordsOnly);
+  }
+  
+  @HiddenCreoleParameter
+  public void setLongestMatchOnly(Boolean longestMatchOnly) {
+    super.setLongestMatchOnly(longestMatchOnly);
   }
 }

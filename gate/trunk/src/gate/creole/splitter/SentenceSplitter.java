@@ -25,6 +25,10 @@ import gate.creole.ExecutionInterruptedException;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.Transducer;
 import gate.creole.gazetteer.DefaultGazetteer;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
+import gate.creole.metadata.RunTime;
 import gate.event.ProgressListener;
 import gate.event.StatusListener;
 import gate.util.Benchmark;
@@ -39,6 +43,7 @@ import gate.util.InvalidOffsetException;
  * some minor processing after running the components in order to extract the
  * results in a usable form.
  */
+@CreoleResource(name="ANNIE Sentence Splitter", comment="ANNIE sentence splitter.", helpURL="http://gate.ac.uk/userguide/sec:annie:splitter", icon="sentence-splitter")
 public class SentenceSplitter extends AbstractLanguageAnalyser implements Benchmarkable{
 
   public static final String
@@ -230,6 +235,8 @@ public class SentenceSplitter extends AbstractLanguageAnalyser implements Benchm
     transducer.interrupt();
   }
 
+  @Optional
+  @CreoleParameter(defaultValue="resources/sentenceSplitter/grammar/main.jape", comment="The URL to the custom Jape grammar file", suffixes="jape")
   public void setTransducerURL(java.net.URL newTransducerURL) {
     transducerURL = newTransducerURL;
   }
@@ -243,18 +250,26 @@ public class SentenceSplitter extends AbstractLanguageAnalyser implements Benchm
   private java.net.URL gazetteerListsURL;
 
 
+  @CreoleParameter(comment="The encoding used for reading the definition files", defaultValue="UTF-8")
   public void setEncoding(String newEncoding) {
     encoding = newEncoding;
   }
   public String getEncoding() {
     return encoding;
   }
+  
+  @Optional
+  @CreoleParameter(defaultValue="resources/sentenceSplitter/gazetteer/lists.def", comment="The URL to the custom list lookup definition file", suffixes="def")
   public void setGazetteerListsURL(java.net.URL newGazetteerListsURL) {
     gazetteerListsURL = newGazetteerListsURL;
   }
   public java.net.URL getGazetteerListsURL() {
     return gazetteerListsURL;
   }
+  
+  @RunTime
+  @Optional
+  @CreoleParameter(comment="The annotation set to be used as input that must contain 'Token' annotations")
   public void setInputASName(String newInputASName) {
     inputASName = newInputASName;
   }
@@ -262,6 +277,10 @@ public class SentenceSplitter extends AbstractLanguageAnalyser implements Benchm
   public String getInputASName() {
     return inputASName;
   }
+  
+  @RunTime
+  @Optional
+  @CreoleParameter(comment="The annotation set to be used as output for 'Sentence' and 'Split' annotations")
   public void setOutputASName(String newOutputASName) {
     outputASName = newOutputASName;
   }
