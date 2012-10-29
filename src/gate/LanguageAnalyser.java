@@ -18,6 +18,7 @@ package gate;
 
 import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
 
 /**
@@ -36,6 +37,7 @@ public interface LanguageAnalyser extends ProcessingResource {
   public Document getDocument();
 
   /** Set the corpus property for this analyser. */
+  @Optional
   @RunTime
   @CreoleParameter(comment = "The corpus containing the document to process")
   public void setCorpus(Corpus corpus);
