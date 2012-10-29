@@ -30,18 +30,38 @@
 
 package gate.creole.orthomatcher;
 
-import java.io.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Resource;
+import gate.creole.AbstractLanguageAnalyser;
+import gate.creole.ExecutionException;
+import gate.creole.ResourceInstantiationException;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
+import gate.creole.metadata.RunTime;
+import gate.util.BomStrippingInputStreamReader;
+import gate.util.GateRuntimeException;
+import gate.util.InvalidOffsetException;
+import gate.util.OffsetComparator;
+import gate.util.Out;
+
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
-
-import gate.*;
-import gate.creole.*;
-import gate.util.*;
-
+@CreoleResource(name="ANNIE OrthoMatcher", comment="ANNIE orthographical coreference component.", helpURL="http://gate.ac.uk/userguide/sec:annie:orthomatcher", icon="ortho-matcher")
 public class OrthoMatcher extends AbstractLanguageAnalyser {
   protected static final Logger log = Logger.getLogger(OrthoMatcher.class);
 
@@ -1140,34 +1160,50 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
 
 
   /** set the extLists flag */
+  @Optional
+  @CreoleParameter(comment="External lists otherwise internal", defaultValue="true")
   public void setExtLists(Boolean newExtLists) {
     extLists = newExtLists.booleanValue();
   }//setextLists
 
   /** set the caseSensitive flag */
+  @Optional
+  @CreoleParameter(comment="Should this resource diferentiate on case?",defaultValue="false")
   public void setCaseSensitive(Boolean newCase) {
     caseSensitive = newCase.booleanValue();
   }//setextLists
 
   /** set the annotation set name*/
+  @RunTime
+  @Optional
+  @CreoleParameter(comment="Annotation set name where are the annotation types (annotationTypes)")
   public void setAnnotationSetName(String newAnnotationSetName) {
     annotationSetName = newAnnotationSetName;
   }//setAnnotationSetName
 
   /** set the types of the annotations*/
+  @RunTime
+  @Optional
+  @CreoleParameter(comment="Name of the annotation types to use", defaultValue="Organization;Person;Location;Date")
   public void setAnnotationTypes(List newType) {
     annotationTypes = newType;
   }//setAnnotationTypes
 
   /** set whether to process the Unknown annotations*/
+  @Optional
+  @CreoleParameter(comment="Should we process 'Unknown' annotations?", defaultValue="true")
   public void setProcessUnknown(Boolean processOrNot) {
     this.matchingUnknowns = processOrNot.booleanValue();
   }//setAnnotationTypes
 
+  @Optional
+  @CreoleParameter(comment="Annotation name for the organizations", defaultValue="Organization")
   public void setOrganizationType(String newOrganizationType) {
     organizationType = newOrganizationType;
   }//setOrganizationType
 
+  @Optional
+  @CreoleParameter(comment="Annotation name for the persons", defaultValue="Person")
   public void setPersonType(String newPersonType) {
     personType = newPersonType;
   }//setPersonType
@@ -1319,6 +1355,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
     return false;
   }//noMatchRule2
 
+  @CreoleParameter(comment="The URL to the definition file", defaultValue="resources/othomatcher/listsNM.def", suffixes="def")
   public void setDefinitionFileURL(java.net.URL definitionFileURL) {
     this.definitionFileURL = definitionFileURL;
   }
@@ -1326,6 +1363,8 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
   public java.net.URL getDefinitionFileURL() {
     return definitionFileURL;
   }
+  
+  @CreoleParameter(comment="The encoding used for reading the definition file", defaultValue="UTF-8")
   public void setEncoding(String encoding) {
     this.encoding = encoding;
   }
@@ -1338,6 +1377,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
     return minimumNicknameLikelihood;
   }
 
+  @CreoleParameter(comment="Minimum likelihood that a name is a nickname", defaultValue="0.50")
   public void setMinimumNicknameLikelihood(Double minimumNicknameLikelihood) {
     this.minimumNicknameLikelihood = minimumNicknameLikelihood;
   }
@@ -1352,6 +1392,8 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
   /**
    * @param highPrecisionOrgs the highPrecisionOrgs to set
    */
+  @Optional
+  @CreoleParameter(comment="Use very safe features for matching orgs, such as ACME = ACME, Inc.", defaultValue="false")  
   public void setHighPrecisionOrgs(Boolean highPrecisionOrgs) {
     this.highPrecisionOrgs = highPrecisionOrgs;
   }
