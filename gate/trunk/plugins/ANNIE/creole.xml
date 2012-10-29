@@ -117,99 +117,12 @@
 
 	<!-- creole.xml for namematch -->
 	<RESOURCE>
-		<NAME>ANNIE OrthoMatcher</NAME>
 		<CLASS>gate.creole.orthomatcher.OrthoMatcher</CLASS>
-		<COMMENT>ANNIE orthographical coreference component.</COMMENT>
-		<HELPURL>http://gate.ac.uk/userguide/sec:annie:orthomatcher
-	</HELPURL>
-		<PARAMETER DEFAULT="resources/othomatcher/listsNM.def"
-			COMMENT="The URL to the definition file" SUFFIXES="def"
-			NAME="definitionFileURL">
-			java.net.URL
-		</PARAMETER>
-		<PARAMETER DEFAULT="0.50"
-			COMMENT="Minimum likelihood that a name is a nickname"
-			NAME="minimumNicknameLikelihood">
-			java.lang.Double
-		</PARAMETER>
-		<PARAMETER NAME="highPrecisionOrgs" DEFAULT="false"
-		  COMMENT="Use very safe features for matching orgs, such as ACME = ACME, Inc."
-			OPTIONAL="true">
-			java.lang.Boolean
-		</PARAMETER>
-		<PARAMETER DEFAULT="UTF-8"
-			COMMENT="The encoding used for reading the definition file"
-			NAME="encoding">
-			java.lang.String
-		</PARAMETER>
-		<PARAMETER NAME="document" RUNTIME="true">
-			gate.Document
-		</PARAMETER>
-		<PARAMETER NAME="annotationSetName" RUNTIME="true"
-	COMMENT="Annotation set name where are the annotation types (annotationTypes)"
-			OPTIONAL="true">
-			java.lang.String
-		</PARAMETER>
-		<PARAMETER NAME="caseSensitive" DEFAULT="false"
-	COMMENT="Should this resource diferentiate on case?"
-			OPTIONAL="true">
-			java.lang.Boolean
-		</PARAMETER>
-		<PARAMETER NAME="annotationTypes"
-			DEFAULT="Organization;Person;Location;Date" RUNTIME="true"
-	COMMENT="Name of the annotation types to use"
-			OPTIONAL="true">
-			java.util.ArrayList
-		</PARAMETER>
-		<PARAMETER NAME="processUnknown" DEFAULT="true"
-	COMMENT="Should we process 'Unknown' annotations?"
-			OPTIONAL="true">
-			java.lang.Boolean
-		</PARAMETER>
-		<PARAMETER NAME="organizationType" DEFAULT="Organization"
-	COMMENT="Annotation name for the organizations"
-			OPTIONAL="true">
-			java.lang.String
-		</PARAMETER>
-		<PARAMETER NAME="personType" DEFAULT="Person"
-	COMMENT="Annotation name for the persons"
-			OPTIONAL="true">
-			java.lang.String
-		</PARAMETER>
-		<PARAMETER NAME="extLists" DEFAULT="true" OPTIONAL="true"
-	COMMENT="External lists otherwise internal">
-			java.lang.Boolean
-		</PARAMETER>
-		<ICON>ortho-matcher</ICON>
 	</RESOURCE>
 
 	<!--  creole.xml for the coreferencer -->
 	<RESOURCE>
-		<NAME>ANNIE Pronominal Coreferencer</NAME>
 		<CLASS>gate.creole.coref.Coreferencer</CLASS>
-		<COMMENT>Pronominal Coreference resolution component.</COMMENT>
-		<HELPURL>http://gate.ac.uk/userguide/sec:annie:pronom-coref
-		</HELPURL>
-		<PARAMETER NAME="document" RUNTIME="true"
-			COMMENT="The document to be processed">
-			gate.Document
-		</PARAMETER>
-		<PARAMETER NAME="annotationSetName" RUNTIME="true"
-			COMMENT="The annotation set to be used for the generated annotations"
-			OPTIONAL="true">
-			java.lang.String
-		</PARAMETER>
-		<PARAMETER NAME="inanimatedEntityTypes" RUNTIME="true"
-	COMMENT="List of annotation types for non animated entities"
-	DEFAULT="Organization;Location"
-	OPTIONAL="true">java.lang.String
-	</PARAMETER>
-		<PARAMETER NAME="resolveIt" RUNTIME="true"
-			COMMENT="Whether or not to resolve it pronouns" DEFAULT="false"
-			OPTIONAL="true">
-			java.lang.Boolean
-		</PARAMETER>
-		<ICON>pronominal-coreferencer</ICON>
 	</RESOURCE>
 
 	<!--  creole.xml for the coreferencer -->
@@ -226,31 +139,12 @@
 
 	<!-- creole.xml for the jape viewer -->
 	<RESOURCE>
-		<NAME>Jape Viewer</NAME>
 		<CLASS>gate.gui.jape.JapeViewer</CLASS>
-		<COMMENT>A JAPE grammar file viewer.</COMMENT>
-		<HELPURL>http://gate.ac.uk/userguide/chap:jape</HELPURL>
-		<!-- type values can be "large" or "small"-->
-		<GUI TYPE="large">
-			<MAIN_VIEWER />
-			<RESOURCE_DISPLAYED>
-				gate.creole.Transducer
-			</RESOURCE_DISPLAYED>
-		</GUI>
 	</RESOURCE>
 
 	<!-- Gazetteer editor -->	
 	<RESOURCE>
-		<NAME>Gazetteer Editor</NAME>
 		<CLASS>gate.gui.GazetteerEditor</CLASS>
-		<COMMENT>Gazetteer viewer and editor.</COMMENT>
-		<HELPURL>http://gate.ac.uk/userguide/sec:gazetteers:anniegazeditor</HELPURL>
-		<GUI TYPE="large">
-		<MAIN_VIEWER />
-		<RESOURCE_DISPLAYED>
-			gate.creole.gazetteer.AbstractGazetteer
-		</RESOURCE_DISPLAYED>
-		</GUI>
 	</RESOURCE>
 
 </CREOLE-DIRECTORY>

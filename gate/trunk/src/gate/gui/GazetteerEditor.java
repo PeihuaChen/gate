@@ -19,6 +19,8 @@ import gate.Resource;
 import gate.creole.AbstractVisualResource;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.gazetteer.*;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.GuiType;
 import gate.swing.XJFileChooser;
 import gate.swing.XJTable;
 import gate.util.Err;
@@ -70,6 +72,7 @@ import java.util.regex.PatternSyntaxException;
 - remove feature/value columns when containing only spaces or empty
 </pre>
 */
+@CreoleResource(name="Gazetteer Editor", comment="Gazetteer viewer and editor.", helpURL="http://gate.ac.uk/userguide/sec:gazetteers:anniegazeditor", guiType=GuiType.LARGE, mainViewer=true, resourceDisplayed="gate.creole.gazetteer.AbstractGazetteer")
 public class GazetteerEditor extends AbstractVisualResource
     implements GazetteerListener, ActionsPublisher {
 

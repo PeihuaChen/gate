@@ -6,6 +6,8 @@ import gate.creole.ANNIEConstants;
 import gate.creole.AbstractProcessingResource;
 import gate.creole.AbstractVisualResource;
 import gate.creole.ResourceInstantiationException;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.GuiType;
 import gate.event.ProgressListener;
 import gate.jape.parser.ParseCpslConstants;
 import gate.jape.parser.ParseCpslTokenManager;
@@ -46,6 +48,7 @@ import javax.swing.tree.TreeSelectionModel;
  *
  * @author Mark A. Greenwood
  */
+@CreoleResource(name="Jape Viewer", comment="A JAPE grammar file viewer", helpURL="http://gate.ac.uk/userguide/chap:jape", guiType=GuiType.LARGE, mainViewer=true, resourceDisplayed="gate.creole.Transducer")
 public class JapeViewer extends AbstractVisualResource implements
                                                       ANNIEConstants,
                                                       ProgressListener {

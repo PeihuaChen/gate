@@ -16,15 +16,31 @@
 
 package gate.creole.coref;
 
-import java.util.*;
-
-import org.apache.log4j.Logger;
-
-import gate.*;
-import gate.creole.*;
+import gate.Annotation;
+import gate.AnnotationSet;
+import gate.Document;
+import gate.FeatureMap;
+import gate.ProcessingResource;
+import gate.Resource;
+import gate.creole.AbstractLanguageAnalyser;
+import gate.creole.ExecutionException;
+import gate.creole.ResourceInstantiationException;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
+import gate.creole.metadata.RunTime;
 import gate.util.GateRuntimeException;
 import gate.util.SimpleFeatureMapImpl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.log4j.Logger;
+
+@CreoleResource(name="ANNIE Pronominal Coreferencer", comment="Pronominal Coreference resolution component.", helpURL="http://gate.ac.uk/userguide/sec:annie:pronom-coref", icon="pronominal-coreferencer")
 public class Coreferencer extends AbstractLanguageAnalyser implements
                                                           ProcessingResource {
 
@@ -82,6 +98,9 @@ public class Coreferencer extends AbstractLanguageAnalyser implements
   }
 
   /** --- */
+  @RunTime
+  @Optional
+  @CreoleParameter(comment="The annotation set to be used for the generated annotations")
   public void setAnnotationSetName(String annotationSetName) {
     this.pronominalModule.setAnnotationSetName(annotationSetName);
   }
@@ -92,6 +111,9 @@ public class Coreferencer extends AbstractLanguageAnalyser implements
   }
 
   /** --- */
+  @RunTime
+  @Optional
+  @CreoleParameter(comment="Whether or not to resolve it pronouns", defaultValue="false")
   public void setResolveIt(Boolean newValue) {
     this.pronominalModule.setResolveIt(newValue);
   }
@@ -223,6 +245,9 @@ public class Coreferencer extends AbstractLanguageAnalyser implements
     return this.pronominalModule.getInanimatedEntityTypes();
   }
 
+  @RunTime
+  @Optional
+  @CreoleParameter(comment="List of annotation types for non animated entities", defaultValue="Organization;Location")
   public void setInanimatedEntityTypes(String inanimatedEntityTypes) {
     this.pronominalModule.setInanimatedEntityTypes(inanimatedEntityTypes);
   }
