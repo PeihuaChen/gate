@@ -24,11 +24,14 @@ import org.jdom.Namespace;
 import org.jdom.input.SAXBuilder;
 
 import gate.Resource;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
 
 /** This class handles annotation schemas.An annotation schema is a
   * representation of an annotation, together with its types and their
   * attributes, values and types.
   */
+@CreoleResource(name="Annotation Schema", comment="An annotation type and its features.", helpURL="http://gate.ac.uk/userguide/sec:corpora:schemas")
 public class AnnotationSchema extends AbstractLanguageResource{
   public static final String FILE_URL_PARAM_NAME = "xmlFileUrl";
 
@@ -132,6 +135,7 @@ public class AnnotationSchema extends AbstractLanguageResource{
   protected Namespace namespace;
 
   /** Set method for the resource xml file URL */
+  @CreoleParameter(comment="The url to the definition file", suffixes="xml;xsd")
   public void setXmlFileUrl(URL xmlFileUrl) { this.xmlFileUrl = xmlFileUrl; }
 
   /** Get method for the resource xml file URL */

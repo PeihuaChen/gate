@@ -28,7 +28,7 @@ import org.apache.log4j.Level;
  */
 @CreoleResource(name = "ANNIE POS Tagger",
         helpURL = "http://gate.ac.uk/userguide/sec:annie:tagger",
-        comment = "Mark Hepple's Brill-style POS tagger")
+        comment = "Mark Hepple's Brill-style POS tagger", icon="pos-tagger")
 public class POSTagger extends AbstractLanguageAnalyser {
 
   private static final long serialVersionUID = 7680938864165071808L;
@@ -381,15 +381,23 @@ Out.prln("POS after execution time:" + postTime);
       }
   }
   
+  @Optional
+  @CreoleParameter(comment="The URL to the lexicon file", defaultValue="resources/heptag/lexicon")
   public void setLexiconURL(java.net.URL newLexiconURL) {
     lexiconURL = newLexiconURL;
   }
   public java.net.URL getLexiconURL() {
     return lexiconURL;
   }
+  
+  @Optional
+  @CreoleParameter(comment="The URL to the ruleset file", defaultValue="resources/heptag/ruleset")
   public void setRulesURL(java.net.URL newRulesURL) {
     rulesURL = newRulesURL;
   }
+  
+  @Optional
+  @CreoleParameter(comment="The encoding used for reading rules and lexicons")
   public void setEncoding(String encoding) {
     this.encoding = encoding;
   }
@@ -397,6 +405,10 @@ Out.prln("POS after execution time:" + postTime);
   public java.net.URL getRulesURL() {
     return rulesURL;
   }
+  
+  @RunTime
+  @Optional
+  @CreoleParameter(comment="The annotation set to be used as input that must contain 'Token' and 'Sentence' annotations")
   public void setInputASName(String newInputASName) {
     inputASName = newInputASName;
   }
@@ -419,14 +431,20 @@ Out.prln("POS after execution time:" + postTime);
       return this.outputAnnotationType;
   }
   
+  @RunTime
+  @CreoleParameter(comment="The name of the base 'Token' annotation type", defaultValue="Token")
   public void setBaseTokenAnnotationType(String baseTokenAnnotationType) {
       this.baseTokenAnnotationType = baseTokenAnnotationType;
   }
   
+  @RunTime
+  @CreoleParameter(comment="The name of the base 'Sentence' annotation type", defaultValue="Sentence")
   public void setBaseSentenceAnnotationType(String baseSentenceAnnotationtype) {
       this.baseSentenceAnnotationType = baseSentenceAnnotationtype;
   }
   
+  @RunTime
+  @CreoleParameter(comment="The name of the annotation type where the new features should be added", defaultValue="Token")
   public void setOutputAnnotationType(String outputAnnotationType) {
       this.outputAnnotationType = outputAnnotationType;
   }
@@ -435,6 +453,9 @@ Out.prln("POS after execution time:" + postTime);
       return this.outputASName;
   }
   
+  @RunTime
+  @Optional
+  @CreoleParameter(comment="The annotation set to be used as output for POS annotations")
   public void setOutputASName(String outputASName) {
       this.outputASName = outputASName;
   }
