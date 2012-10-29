@@ -4,6 +4,8 @@ import gate.Factory;
 import gate.Resource;
 import gate.creole.CustomDuplication;
 import gate.creole.ResourceInstantiationException;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
 
 /**
  * Provides a way to efficiently multi-thread a DefaultGazetteer.
@@ -27,6 +29,7 @@ import gate.creole.ResourceInstantiationException;
  *
  * @author Matt Nathan
  */
+@CreoleResource(isPrivate=true, name="Sharable Gazettee")
 public class SharedDefaultGazetteer extends DefaultGazetteer {
 
     public static final String SDEF_GAZ_BOOTSTRAP_GAZETTEER_PROPERTY_NAME = "bootstrapGazetteer";
@@ -69,6 +72,7 @@ public class SharedDefaultGazetteer extends DefaultGazetteer {
         return bootstrapGazetteer;
     }
 
+    @CreoleParameter(comment="The DefaultGazetteer that is to be used to bootstrap this shared instance")
     public void setBootstrapGazetteer(DefaultGazetteer bootstrapGazetteer) {
         this.bootstrapGazetteer = bootstrapGazetteer;
     }

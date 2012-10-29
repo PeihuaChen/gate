@@ -21,11 +21,16 @@ import java.util.regex.*;
 
 import gate.*;
 import gate.creole.*;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
+import gate.creole.metadata.RunTime;
 import gate.util.*;
 
 /**
  * A fast sentence splitter replacement based on regular expressions.
  */
+@CreoleResource(name="RegEx Sentence Splitter", icon="sentence-splitter", comment="A sentence splitter based on regular expressions.", helpURL="http://gate.ac.uk/userguide/sec:annie:regex-splitter")
 public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
 
   /**
@@ -362,6 +367,9 @@ public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
   /**
    * @param outputASName the outputASName to set
    */
+  @RunTime
+  @Optional
+  @CreoleParameter(comment="The annotation set to be used as output for 'Sentence' and 'Split' annotations")
   public void setOutputASName(String outputASName) {
     this.outputASName = outputASName;
   }
@@ -376,6 +384,7 @@ public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
   /**
    * @param encoding the encoding to set
    */
+  @CreoleParameter(comment="The encoding used for reading the definition files", defaultValue="UTF-8")
   public void setEncoding(String encoding) {
     this.encoding = encoding;
   }
@@ -390,6 +399,7 @@ public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
   /**
    * @param internalSplitListURL the internalSplitListURL to set
    */
+  @CreoleParameter(defaultValue="resources/regex-splitter/internal-split-patterns.txt", suffixes="txt", comment="The URL to the internal splits pattern list")
   public void setInternalSplitListURL(URL internalSplitListURL) {
     this.internalSplitListURL = internalSplitListURL;
   }
@@ -404,6 +414,7 @@ public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
   /**
    * @param externalSplitListURL the externalSplitListURL to set
    */
+  @CreoleParameter(defaultValue="resources/regex-splitter/external-split-patterns.txt", comment="The URL to the external splits pattern list", suffixes="txt")
   public void setExternalSplitListURL(URL externalSplitListURL) {
     this.externalSplitListURL = externalSplitListURL;
   }
@@ -418,6 +429,7 @@ public class RegexSentenceSplitter extends AbstractLanguageAnalyser {
   /**
    * @param nonSplitListURL the nonSplitListURL to set
    */
+  @CreoleParameter(defaultValue="resources/regex-splitter/non-split-patterns.txt", comment="The URL to the non splits pattern list", suffixes="txt")
   public void setNonSplitListURL(URL nonSplitListURL) {
     this.nonSplitListURL = nonSplitListURL;
   }
