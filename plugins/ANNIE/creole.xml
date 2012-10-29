@@ -2,24 +2,19 @@
 <!-- $Id$ -->
 <!-- creole.xml directory file for ANNIE Processing resources -->
 <CREOLE-DIRECTORY>
-	<!-- Language Resources -->
+	<!-- LANGUAGE RESOURCES -->
 
 	<!-- Annotation schema -->
 	<RESOURCE>
-		<NAME>Annotation Schema</NAME>
-		<CLASS>gate.creole.AnnotationSchema</CLASS>
-		<COMMENT>An annotation type and its features.</COMMENT>
-		<HELPURL>http://gate.ac.uk/userguide/sec:corpora:schemas</HELPURL>
-		<PARAMETER NAME="xmlFileUrl"
-			COMMENT="The url to the definition file" SUFFIXES="xml;xsd">
-			java.net.URL
-		</PARAMETER>
+		<CLASS>gate.creole.AnnotationSchema</CLASS>		
+
 		<HIDDEN-AUTOINSTANCE>
 			<PARAM NAME="xmlFileUrl"
 				VALUE="resources/schema/AddressSchema.xml" />
 		</HIDDEN-AUTOINSTANCE>
 		<HIDDEN-AUTOINSTANCE>
-			<PARAM NAME="xmlFileUrl" VALUE="resources/schema/DateSchema.xml" />
+			<PARAM NAME="xmlFileUrl"
+				VALUE="resources/schema/DateSchema.xml" />
 		</HIDDEN-AUTOINSTANCE>
 		<HIDDEN-AUTOINSTANCE>
 			<PARAM NAME="xmlFileUrl"
@@ -63,11 +58,13 @@
 				VALUE="resources/schema/SyntaxTreeNodeSchema.xml" />
 		</HIDDEN-AUTOINSTANCE>
 		<HIDDEN-AUTOINSTANCE>
-			<PARAM NAME="xmlFileUrl" VALUE="resources/schema/CorefSchema.xml" />
+			<PARAM NAME="xmlFileUrl"
+				VALUE="resources/schema/CorefSchema.xml" />
 		</HIDDEN-AUTOINSTANCE>
 	</RESOURCE>
 
-	<!-- Processing Resources -->
+	<!-- PROCESSING RESOURCES -->
+
 	<!-- creole.xml for the Unicode tokeniser -->
 	<RESOURCE>
 		<CLASS>gate.creole.tokeniser.SimpleTokeniser</CLASS>			
@@ -115,55 +112,7 @@
 
 	<!-- creole.xml for HepTag (Mark Hepple's POS tagger)-->
 	<RESOURCE>
-		<NAME>ANNIE POS Tagger</NAME>
-		<COMMENT>Mark Hepple's Brill-style POS tagger.</COMMENT>
-		<HELPURL>http://gate.ac.uk/userguide/sec:annie:tagger</HELPURL>
-		<CLASS>gate.creole.POSTagger</CLASS>
-		<PARAMETER NAME="document"
-			COMMENT="The document to be processed" RUNTIME="true">
-			gate.Document
-		</PARAMETER>
-		<PARAMETER NAME="inputASName"
-	COMMENT="The annotation set to be used as input that must contain 'Token' and 'Sentence' annotations"
-			RUNTIME="true" OPTIONAL="true">
-			java.lang.String
-		</PARAMETER>
-		<PARAMETER NAME="outputASName"
-	COMMENT="The annotation set to be used as output for POS annotations"
-			RUNTIME="true" OPTIONAL="true">
-			java.lang.String
-		</PARAMETER>
-		<PARAMETER NAME="encoding"
-			COMMENT="The encoding used for reading rules and lexicons"
-			OPTIONAL="true">
-			java.lang.String
-		</PARAMETER>
-		<PARAMETER NAME="lexiconURL"
-			DEFAULT="resources/heptag/lexicon"
-			COMMENT="The URL to the lexicon file" OPTIONAL="true">
-			java.net.URL
-		</PARAMETER>
-		<PARAMETER NAME="rulesURL"
-			DEFAULT="resources/heptag/ruleset"
-			COMMENT="The URL to the ruleset file" OPTIONAL="true">
-			java.net.URL
-		</PARAMETER>
-		<PARAMETER NAME="baseTokenAnnotationType"
-			COMMENT="The name of the base 'Token' annotation type" RUNTIME="true"
-			OPTIONAL="false" DEFAULT="Token">
-			java.lang.String
-		</PARAMETER>
-		<PARAMETER NAME="baseSentenceAnnotationType"
-			COMMENT="The name of the base 'Sentence' annotation type"
-			RUNTIME="true" OPTIONAL="false" DEFAULT="Sentence">
-			java.lang.String
-		</PARAMETER>
-		<PARAMETER NAME="outputAnnotationType"
-			COMMENT="The name of the annotation type where the new features should be added"
-			RUNTIME="true" OPTIONAL="false" DEFAULT="Token">
-			java.lang.String
-		</PARAMETER>
-		<ICON>pos-tagger</ICON>
+		<CLASS>gate.creole.POSTagger</CLASS>		
 	</RESOURCE>
 
 	<!-- creole.xml for namematch -->
@@ -282,6 +231,7 @@
 		<ICON>nominal-coreferencer</ICON>
 	</RESOURCE>
 
+	<!--  creole.xml for the document reset -->
 	<RESOURCE>
 		<NAME>Document Reset PR</NAME>
 		<CLASS>gate.creole.annotdelete.AnnotationDeletePR</CLASS>
@@ -309,7 +259,9 @@
 		<ICON>document-reset</ICON>
 	</RESOURCE>
 
-	<!-- creole.xml for Visual Resources -->
+	<!-- VISUAL RESOURCES -->
+
+	<!-- creole.xml for the jape viewer -->
 	<RESOURCE>
 		<NAME>Jape Viewer</NAME>
 		<CLASS>gate.gui.jape.JapeViewer</CLASS>
@@ -323,8 +275,8 @@
 			</RESOURCE_DISPLAYED>
 		</GUI>
 	</RESOURCE>
-	<!-- Gazetteer editor -->    
-	
+
+	<!-- Gazetteer editor -->	
 	<RESOURCE>
 		<NAME>Gazetteer Editor</NAME>
 		<CLASS>gate.gui.GazetteerEditor</CLASS>
