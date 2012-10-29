@@ -97,7 +97,8 @@
            debug="true"
            debuglevel="lines,source"
     	   encoding="UTF-8"
-           source="1.5" />
+           source="1.6"
+           target="1.6" />
   </target>
 
   <!-- copy resources (anything non-.java) from src to classes -->

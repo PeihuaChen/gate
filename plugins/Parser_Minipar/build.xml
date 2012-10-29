@@ -34,7 +34,8 @@
            destdir="${classes.dir}"
            debug="true"
            debuglevel="lines,source"
-           source="1.4" />
+           source="1.4"
+           target="1.4" />
   </target>
 
   <!-- Build JavaDoc documentation -->

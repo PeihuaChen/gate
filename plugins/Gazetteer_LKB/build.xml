@@ -84,7 +84,8 @@
            destdir="${classes.dir}"
            debug="true"
            debuglevel="lines,source"
-           source="1.5" />
+           source="1.5"
+           target="1.5" />
   </target>
 
   <!-- copy resources (anything non-.java) from src to classes -->
