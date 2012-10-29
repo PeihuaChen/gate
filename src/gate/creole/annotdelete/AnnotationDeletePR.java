@@ -32,8 +32,9 @@ import gate.util.GateRuntimeException;
  * If put at the start of an application, it'll ensure that the
  * document is restored to its clean state before being processed.
  */
-@CreoleResource(name = "Document Reset PR",
-        comment = "Remove named annotation sets or reset the default annotation set")
+@CreoleResource(name = "Document Reset PR", icon = "document-reset",
+        comment = "Remove named annotation sets or reset the default annotation set",
+        helpURL = "http://gate.ac.uk/userguide/sec:misc-creole:reset")
 public class AnnotationDeletePR extends AbstractLanguageAnalyser
   implements ProcessingResource {
 
@@ -272,6 +273,9 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
     return this.annotationTypes;
   }
 
+  @RunTime
+  @Optional
+  @CreoleParameter(comment="The annotation types to delete otherwise delete all")
   public void setAnnotationTypes(List newTypes) {
     annotationTypes = newTypes;
   }
@@ -280,6 +284,9 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
     return this.setsToKeep;
   }
 
+  @RunTime
+  @Optional
+  @CreoleParameter(comment="The annotation sets to keep otherwise delete all", defaultValue="Key")
   public void setSetsToKeep(List newSetNames) {
     //we need to modify this list sometimes, so to make sure it's not some
     //unmodifiable version, we'll create our own
@@ -292,6 +299,9 @@ public class AnnotationDeletePR extends AbstractLanguageAnalyser
     return keepOriginalMarkupsAS;
   }
 
+  @RunTime
+  @Optional
+  @CreoleParameter(comment="Should we keep the 'Original markups' annotation set?", defaultValue="true")
   public void setKeepOriginalMarkupsAS(Boolean emptyDefaultAnnotationSet) {
     this.keepOriginalMarkupsAS = emptyDefaultAnnotationSet;
   }

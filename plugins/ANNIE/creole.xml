@@ -214,49 +214,12 @@
 
 	<!--  creole.xml for the coreferencer -->
 	<RESOURCE>
-		<NAME>ANNIE Nominal Coreferencer</NAME>
-		<CLASS>gate.creole.coref.NominalCoref</CLASS>
-		<COMMENT>Nominal Coreference resolution component</COMMENT>
-		<HELPURL>http://gate.ac.uk/userguide/sec:annie:pronom-coref
-		</HELPURL>
-		<PARAMETER NAME="document" RUNTIME="true"
-			COMMENT="The document to be processed">
-			gate.Document
-		</PARAMETER>
-		<PARAMETER NAME="annotationSetName" RUNTIME="true"
-			COMMENT="The annotation set to be used for the generated annotations"
-			OPTIONAL="true">
-			java.lang.String
-		</PARAMETER>
-		<ICON>nominal-coreferencer</ICON>
+		<CLASS>gate.creole.coref.NominalCoref</CLASS>		
 	</RESOURCE>
 
 	<!--  creole.xml for the document reset -->
 	<RESOURCE>
-		<NAME>Document Reset PR</NAME>
 		<CLASS>gate.creole.annotdelete.AnnotationDeletePR</CLASS>
-		<COMMENT>Document cleaner.</COMMENT>
-		<HELPURL>http://gate.ac.uk/userguide/sec:misc-creole:reset
-		</HELPURL>
-		<PARAMETER NAME="document" RUNTIME="true">
-			gate.Document
-		</PARAMETER>
-		<PARAMETER NAME="annotationTypes" RUNTIME="true"
-	COMMENT="The annotation types to delete otherwise delete all"
-			OPTIONAL="true" ITEM_CLASS_NAME="java.lang.String">
-			java.util.ArrayList
-		</PARAMETER>
-		<PARAMETER NAME="setsToKeep" RUNTIME="true" OPTIONAL="true"
-	COMMENT="The annotation sets to keep otherwise delete all" DEFAULT="Key"
-			ITEM_CLASS_NAME="java.lang.String">
-			java.util.ArrayList
-		</PARAMETER>
-		<PARAMETER NAME="keepOriginalMarkupsAS" RUNTIME="true"
-	COMMENT="Should we keep the 'Original markups' annotation set?"
-	OPTIONAL="true" DEFAULT="true">
-			java.lang.Boolean
-		</PARAMETER>
-		<ICON>document-reset</ICON>
 	</RESOURCE>
 
 	<!-- VISUAL RESOURCES -->
