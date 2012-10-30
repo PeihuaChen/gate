@@ -13,7 +13,9 @@ public abstract class PackagedController extends AbstractResource {
   protected URL url;
 
   @CreoleParameter
-  public abstract void setPipelineURL(URL url);
+  public void setPipelineURL(URL url) {
+    this.url = url;
+  }
 
   public URL getPipelineURL() {
     return url;
