@@ -9,7 +9,6 @@
   
     <RESOURCE>
       <NAME>Romanian Tokeniser</NAME>
-      <JAR>romanian.jar</JAR>
       <CLASS>romanian.RomanianTokeniser</CLASS>
       <COMMENT>A customisable Romanian tokeniser.</COMMENT>
       <PARAMETER NAME="document" COMMENT="The document to be tokenised"
@@ -34,7 +33,6 @@
     <!-- creole.xml for gazetteer -->
     <RESOURCE>
       <NAME>Romanian Gazetteer</NAME>
-      <JAR>romanian.jar</JAR>
       <CLASS>romanian.RomanianGazetteer</CLASS>
       <COMMENT>A list lookup component.</COMMENT>
       <PARAMETER NAME="document" RUNTIME="true"
@@ -58,12 +56,9 @@
       <ICON>shefGazetteer.gif</ICON>
     </RESOURCE>
     
-   
-    
     <!-- creole.xml for JapeTransducer -->
     <RESOURCE>
       <NAME>Romanian Transducer</NAME>
-      <JAR>romanian.jar</JAR>
       <CLASS>romanian.RomanianTransducer</CLASS>
       <COMMENT>A module for executing Jape grammars</COMMENT>
       <PARAMETER NAME="document" RUNTIME="true"
