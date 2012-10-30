@@ -2,7 +2,7 @@
 <!-- $Id$ -->
 <CREOLE-DIRECTORY>
   <JAR SCAN="true">chinese.jar</JAR>
-  <JAR>../Learning/learningapi.jar</JAR>  
+  <JAR>../Learning/learningapi.jar</JAR>
   
   <!-- Processing Resources -->
   <CREOLE>    
