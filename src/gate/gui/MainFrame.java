@@ -53,6 +53,7 @@ import gate.swing.XJPopupMenu;
 import gate.swing.XJTabbedPane;
 import gate.util.Benchmark;
 import gate.util.CorpusBenchmarkTool;
+import gate.util.Err;
 import gate.util.ExtensionFileFilter;
 import gate.util.Files;
 import gate.util.GateException;
@@ -2756,6 +2757,11 @@ public class MainFrame extends JFrame implements ProgressListener,
     }
 
     public void actionPerformed(ActionEvent e) {
+      if (pipelineURL == null) {
+        System.err.println("The URL of the application has not been correctly set and cannot be loaded.");
+        return;
+      }
+      
       Runnable runnable = new Runnable() {
         public void run() {
           lockGUI(name + " is being loaded...");
