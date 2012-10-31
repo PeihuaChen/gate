@@ -44,8 +44,6 @@
 	<classpathentry kind="lib" path="plugins/Ontology/lib/jewelcli-0.54.jar"/>
 	<classpathentry kind="lib" path="plugins/Ontology/lib/slf4j-api-1.5.6.jar"/>
 	<classpathentry kind="lib" path="plugins/Ontology/lib/slf4j-jdk14-1.5.6.jar"/>
-	<classpathentry kind="lib" path="plugins/Ontology/lib/openrdf-sesame-2.6.5-onejar.jar"/>
-	<classpathentry kind="lib" path="plugins/Ontology/lib/owlim-lite-5.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="lib" path="lib/gate-compiler-jdt.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/xercesImpl.jar"/>
@@ -113,5 +111,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/metadata-extractor.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/woodstox-core-lgpl.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/stax2-api.jar"/>
+	<classpathentry kind="lib" path="plugins/Ontology/lib/openrdf-sesame-2.6.8-onejar.jar"/>
+	<classpathentry kind="lib" path="plugins/Ontology/lib/owlim-lite-5.2.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
