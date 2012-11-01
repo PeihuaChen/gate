@@ -1559,7 +1559,7 @@ public class NameBearerHandle implements Handle, StatusListener,
     public void actionPerformed(ActionEvent e) {
       scfInputDialog.setEncoding("");
       final boolean answer = OkCancelDialog.showDialog(window, scfInputDialog,
-              "Select a trecweb file");
+              "Populate from Single Concatenated File");
       Runnable runnable = new Runnable() {
         public void run() {
           if(answer) {

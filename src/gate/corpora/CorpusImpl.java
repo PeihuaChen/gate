@@ -542,23 +542,6 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
             .trim()
             + "_";
 
-    // starting to read the file
-    File dir = null;
-    try {
-      dir = new File(singleConcatenatedFile.toURI());
-    }
-    catch(URISyntaxException use) {
-      throw new IOException(use.getMessage());
-    }
-
-    // it must exist
-    if(!dir.exists()) throw new FileNotFoundException(dir.toString());
-
-    // we are expecting a file
-    if(dir.isDirectory())
-      throw new IllegalArgumentException(dir.getAbsolutePath()
-              + " is a directory!");
-
     // we start a new document when we find <documentRootElement> and
     // close it
     // when we find </documentRootElement>
@@ -566,7 +549,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
     try {
       String encodingLine = "";
       if(encoding != null && encoding.trim().length() != 0) {
-        br = new BomStrippingInputStreamReader(new FileInputStream(dir),
+        br = new BomStrippingInputStreamReader(singleConcatenatedFile.openStream(),
                 encoding, 10485760);
 
         // if xml add the xml line at the top
@@ -575,7 +558,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
                   + "\" ?>";
       }
       else {
-        br = new BomStrippingInputStreamReader(new FileInputStream(dir),
+        br = new BomStrippingInputStreamReader(singleConcatenatedFile.openStream(),
                 10485760);
 
         // if xml add the xml line at the top
