@@ -577,9 +577,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
       // continue until reached the end of file
       while(line != null) {
 
-        // already extracted requested num of documents?
-        if(numberOfDocumentsToExtract != -1
-                && (count - 1) == numberOfDocumentsToExtract) break;
+       
 
         // lowercase the line in order to match documentRootElement in any case
         String lowerCasedLine = line.toLowerCase();
@@ -604,7 +602,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
           }
           
           line = br.readLine();
-        }        
+        }
         else {
 
           // now searching for last element
@@ -647,6 +645,10 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
                 corpus.unloadDocument(doc);
                 Factory.deleteResource(doc);
               }
+              
+              // already extracted requested num of documents?
+              if(numberOfDocumentsToExtract != -1
+                      && (count - 1) == numberOfDocumentsToExtract) break;
             }
             catch(Throwable t) {
               String nl = Strings.getNl();
