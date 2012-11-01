@@ -648,60 +648,11 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
               sListener.statusChanged("Reading File Number :" + count);
             String docName = documentNamePrefix + count + "_" + Gate.genSym();
             FeatureMap params = Factory.newFeatureMap();
-
-            // lets store this on a disc
-            File tempOutputFile = null;
-            String suffix = "";
-            if(documentType == DocType.XML) {
-              suffix = ".xml";
-            }
-            else if(documentType == DocType.HTML) {
-              suffix = ".html";
-            }
-
-            tempOutputFile = File.createTempFile(docName, suffix);
-            if(sListener != null)
-              sListener.statusChanged("Writing it on disk :"
-                      + tempOutputFile.getAbsolutePath());
-
-            BufferedWriter writer = null;
-
-            // proper handing of io calls
-            try {
-              if(encoding != null && encoding.trim().length() > 0) {
-                writer = new BufferedWriter(new OutputStreamWriter(
-                        new FileOutputStream(tempOutputFile), encoding));
-              }
-              else {
-                writer = new BufferedWriter(new FileWriter(tempOutputFile));
-              }
-
-              if(documentType == DocType.XML)
-                writer.write(replaceAmpChars(documentString.toString()));
-              else writer.write(documentString.toString());
-            }
-            catch(IOException ioe) {
-              String nl = Strings.getNl();
-              Err
-                      .prln("WARNING: Corpus.populate could not instantiate document"
-                              + nl
-                              + "  Document name was: "
-                              + docName
-                              + nl
-                              + "  Exception was: " + ioe + nl + nl);
-              ioe.printStackTrace();
-            }
-            finally {
-              if(writer != null) writer.close();
-            }
-
-            // lets create the gate document
-            if(sListener != null)
-              sListener.statusChanged("Creating GATE document for :"
-                      + tempOutputFile.getAbsolutePath());
-
-            params.put(Document.DOCUMENT_URL_PARAMETER_NAME, tempOutputFile
-                    .toURI().toURL());
+            
+            if (documentType.equals(DocType.HTML)) params.put(Document.DOCUMENT_MIME_TYPE_PARAMETER_NAME, "text/html");
+            if (documentType.equals(DocType.XML)) params.put(Document.DOCUMENT_MIME_TYPE_PARAMETER_NAME, "text/xml");
+            
+            params.put(Document.DOCUMENT_STRING_CONTENT_PARAMETER_NAME, documentString.toString());
 
             // calculate the length
             lengthInBytes += documentString.toString().getBytes().length;
@@ -730,12 +681,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
                               + "  Exception was: " + t + nl + nl);
               t.printStackTrace();
             }
-            finally {
-              // delete the temporary file created for this document
-              writer = null;
-              tempOutputFile.delete();
-            }
-
+            
             documentString = new StringBuilder();
             if(sListener != null)
               sListener.statusChanged(docName + " created!");
