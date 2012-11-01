@@ -526,11 +526,26 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
    * @return total length of populated documents in the corpus in number
    *         of bytes
    * @throws java.io.IOException
+   * @deprecated
    */
   public static long populate(Corpus corpus, URL singleConcatenatedFile,
-          String documentRootElement, String encoding,
-          int numberOfDocumentsToExtract, String documentNamePrefix,
-          DocType documentType) throws IOException {
+      String documentRootElement, String encoding,
+      int numberOfDocumentsToExtract, String documentNamePrefix,
+      DocType documentType) throws IOException {
+    String mimeType = null;
+
+    if(DocType.XML.equals(documentType))
+      mimeType = "text/xml";
+    else if(DocType.HTML.equals(documentType)) mimeType = "text/html";
+
+    return populate(corpus, singleConcatenatedFile, documentRootElement,
+        encoding, numberOfDocumentsToExtract, documentNamePrefix, mimeType, true);
+  }
+  
+  public static long populate(Corpus corpus, URL singleConcatenatedFile,
+      String documentRootElement, String encoding,
+      int numberOfDocumentsToExtract, String documentNamePrefix,
+      String mimeType, boolean includeRootElement) throws IOException { 
 
     // obtain the root element that user has provided
     // content between the start and end of root element is considered
@@ -551,19 +566,10 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
       if(encoding != null && encoding.trim().length() != 0) {
         br = new BomStrippingInputStreamReader(singleConcatenatedFile.openStream(),
                 encoding, 10485760);
-
-        // if xml add the xml line at the top
-        if(documentType == DocType.XML)
-          encodingLine = "<?xml version=\"1.0\" encoding=\"" + encoding
-                  + "\" ?>";
       }
       else {
         br = new BomStrippingInputStreamReader(singleConcatenatedFile.openStream(),
                 10485760);
-
-        // if xml add the xml line at the top
-        if(documentType == DocType.XML)
-          encodingLine = "<?xml version=\"1.0\" ?>";
       }
 
       // reading line by line
@@ -647,11 +653,9 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
             if(sListener != null)
               sListener.statusChanged("Reading File Number :" + count);
             String docName = documentNamePrefix + count + "_" + Gate.genSym();
+            
             FeatureMap params = Factory.newFeatureMap();
-            
-            if (documentType.equals(DocType.HTML)) params.put(Document.DOCUMENT_MIME_TYPE_PARAMETER_NAME, "text/html");
-            if (documentType.equals(DocType.XML)) params.put(Document.DOCUMENT_MIME_TYPE_PARAMETER_NAME, "text/xml");
-            
+            if (mimeType != null) params.put(Document.DOCUMENT_MIME_TYPE_PARAMETER_NAME, mimeType);            
             params.put(Document.DOCUMENT_STRING_CONTENT_PARAMETER_NAME, documentString.toString());
 
             // calculate the length
