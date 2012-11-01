@@ -496,15 +496,6 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
     populate(this, directory, filter, encoding, mimeType, recurseDirectories);
   }
 
-  private static String replaceAmpChars(String s) {
-    s = s.replaceAll("&", "&amp;");
-    // s = s.replaceAll("<","&lt;");
-    // s = s.replaceAll(">","&gt;");
-    // s = s.replaceAll("\"","&quot;");
-    // s = s.replaceAll("'","&apos;");
-    return s;
-  }
-
   /**
    * Fills the provided corpus with documents extracted from the
    * provided trec file.
