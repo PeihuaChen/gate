@@ -549,7 +549,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
     // close it when we find </documentRootElement>
     BufferedReader br = null;
     try {
-      String encodingLine = "";
+      
       if(encoding != null && encoding.trim().length() != 0) {
         br = new BomStrippingInputStreamReader(singleConcatenatedFile.openStream(),
                 encoding, 10485760);
@@ -597,11 +597,12 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
           // skip the current line and start reading from the next line
           if(index != -1) {
             // if found, that's the first line
-            documentString.append(encodingLine + "\n" + line.substring(index) + "\n");
+            line = line.substring(index);
             searchingForStartElement = false;
           }
-          
-          line = br.readLine();
+          else {
+            line = br.readLine();
+          }
         }
         else {
 
