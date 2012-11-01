@@ -547,6 +547,8 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
       int numberOfDocumentsToExtract, String documentNamePrefix,
       String mimeType, boolean includeRootElement) throws IOException { 
 
+    StatusListener sListener = (StatusListener)gate.Gate.getListeners().get("gate.event.StatusListener");
+    
     // obtain the root element that user has provided
     // content between the start and end of root element is considered
     // for creating documents
@@ -558,8 +560,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
             + "_";
 
     // we start a new document when we find <documentRootElement> and
-    // close it
-    // when we find </documentRootElement>
+    // close it when we find </documentRootElement>
     BufferedReader br = null;
     try {
       String encodingLine = "";
@@ -594,8 +595,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
         if(numberOfDocumentsToExtract != -1
                 && (count - 1) == numberOfDocumentsToExtract) break;
 
-        // lowercase the line in order to match documentRootElement in
-        // any case
+        // lowercase the line in order to match documentRootElement in any case
         String lowerCasedLine = line.toLowerCase();
 
         // if searching for startElement?
@@ -609,23 +609,16 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
             index = lowerCasedLine.indexOf("<" + documentRootElement + ">");
           }
 
-          // if index <0, we are out of the content boundaries, so
-          // simply
+          // if index <0, we are out of the content boundaries, so simply
           // skip the current line and start reading from the next line
-          if(index < 0) {
-            line = br.readLine();
-            continue;
-          }
-          else {
-
+          if(index != -1) {
             // if found, that's the first line
-            documentString.append(encodingLine + "\n" + line.substring(index)
-                    + "\n");
+            documentString.append(encodingLine + "\n" + line.substring(index) + "\n");
             searchingForStartElement = false;
-            line = br.readLine();
-            continue;
           }
-        }
+          
+          line = br.readLine();
+        }        
         else {
 
           // now searching for last element
@@ -635,39 +628,34 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
           if(index < 0) {
             documentString.append(line + "\n");
             line = br.readLine();
-            continue;
           }
           else {
 
             // found.. then end the document
-            documentString.append(line.substring(0, index
-                    + documentRootElement.length() + 3));
+            documentString.append(line.substring(0, index + documentRootElement.length() + 3));
 
             // getting ready for the next document
             searchingForStartElement = true;
 
-            // here lets create a new document
-            // create the doc
-            StatusListener sListener = (StatusListener)gate.Gate.getListeners()
-                    .get("gate.event.StatusListener");
-            if(sListener != null)
-              sListener.statusChanged("Reading File Number :" + count);
+            // here lets create a new document create the doc
+            if(sListener != null) sListener.statusChanged("Creating File Number :" + count);
+            
             String docName = documentNamePrefix + count + "_" + Gate.genSym();
             
             FeatureMap params = Factory.newFeatureMap();
             if (mimeType != null) params.put(Document.DOCUMENT_MIME_TYPE_PARAMETER_NAME, mimeType);            
             params.put(Document.DOCUMENT_STRING_CONTENT_PARAMETER_NAME, documentString.toString());
-
-            // calculate the length
-            lengthInBytes += documentString.toString().getBytes().length;
             if(encoding != null && encoding.trim().length() > 0)
               params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, encoding);
 
+            // calculate the length
+            lengthInBytes += documentString.toString().getBytes().length;            
+
             try {
-              Document doc = (Document)Factory.createResource(
-                      DocumentImpl.class.getName(), params, null, docName);
+              Document doc = (Document)Factory.createResource(DocumentImpl.class.getName(), params, null, docName);
               count++;
               corpus.add(doc);
+              
               if(corpus.getLRPersistenceId() != null) {
                 // persistent corpus -> unload the document
                 corpus.unloadDocument(doc);
@@ -676,25 +664,19 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
             }
             catch(Throwable t) {
               String nl = Strings.getNl();
-              Err
-                      .prln("WARNING: Corpus.populate could not instantiate document"
-                              + nl
-                              + "  Document name was: "
-                              + docName
-                              + nl
-                              + "  Exception was: " + t + nl + nl);
+              Err.prln("WARNING: Corpus.populate could not instantiate document" + nl
+                  + "  Document name was: " + docName + nl
+                  + "  Exception was: " + t + nl + nl);
               t.printStackTrace();
             }
             
             documentString = new StringBuilder();
-            if(sListener != null)
-              sListener.statusChanged(docName + " created!");
+            if(sListener != null) sListener.statusChanged(docName + " created!");
 
+            //TODO where do the 7 and 6 come from!
             if(line.length() > index + 7)
               line = line.substring(index + 6);
             else line = br.readLine();
-
-            continue;
           }
         }
       }
