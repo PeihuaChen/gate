@@ -591,7 +591,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
           int index = lowerCasedLine.indexOf("<" + documentRootElement + " ");
 
           // may be no attributes?
-          if(index < 0) {
+          if(index == -1) {
             index = lowerCasedLine.indexOf("<" + documentRootElement + ">");
           }
 
@@ -611,7 +611,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
           int index = lowerCasedLine.indexOf("</" + documentRootElement + ">");
 
           // if not found.. this is the content of a new document
-          if(index < 0) {
+          if(index == -1) {
             documentString.append(line + "\n");
             line = br.readLine();
           }
