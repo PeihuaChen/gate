@@ -37,6 +37,7 @@ import javax.swing.UIManager;
  * encoding
  */
 
+@SuppressWarnings("deprecation")
 public class SingleConcatenatedFileInputDialog extends JPanel {
 
   public SingleConcatenatedFileInputDialog() {
@@ -47,6 +48,7 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
   /**
    * Creates the UI
    */
+  @SuppressWarnings("deprecation")
   protected void initGUIComponents() {
     setLayout(new GridBagLayout());
     // first row
@@ -249,6 +251,7 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
   /**
    * Gets the selected document type.
    */
+  @SuppressWarnings("deprecation")
   public DocType getDocumentType() {
     return (DocType)this.documentTypeComboBox.getSelectedItem();
   }
@@ -256,6 +259,7 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
   /**
    * Sets the document type
    */
+  @SuppressWarnings("deprecation")
   public void setDocumentType(DocType documentType) {
     this.documentTypeComboBox.setSelectedItem(documentType);
   }

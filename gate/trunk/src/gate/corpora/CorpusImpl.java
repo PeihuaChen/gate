@@ -513,6 +513,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
    * @throws java.io.IOException
    * @deprecated
    */
+  @SuppressWarnings("deprecation")
   public static long populate(Corpus corpus, URL singleConcatenatedFile,
       String documentRootElement, String encoding,
       int numberOfDocumentsToExtract, String documentNamePrefix,
@@ -688,6 +689,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
    * @return total length of populated documents in the corpus in number
    *         of bytes
    */
+  @SuppressWarnings("deprecation")
   public long populate(URL singleConcatenatedFile, String documentRootElement,
           String encoding, int numberOfFilesToExtract,
           String documentNamePrefix, DocType documentType) throws IOException,
