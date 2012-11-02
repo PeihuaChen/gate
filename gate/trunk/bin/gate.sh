@@ -4,7 +4,7 @@
 # You can edit the values below (to e.g. change the maximum amount of memory) or
 # add new parameters, as needed.
 
-vmparams=(-splash:bin/splash.png -Xmx1G)
+vmparams=( -Xmx1G )
 
 # Parameters passed to the GATE process
 # This array gets populated from the command line parameters given to the 
@@ -39,6 +39,8 @@ cd "$GATE_HOME"
 export GATE_HOME="`pwd`"
 export ANT_HOME=$GATE_HOME
 cd "$CURDIR"
+
+vmparams=( "${vmparams[@]}" "-splash:$GATE_HOME/bin/splash.png" )
 
 while test "$1" != "";
 do
@@ -120,6 +122,10 @@ if [ -n "$JAVA_HOME" ]; then
   fi
 elif ( which java 2>&1 > /dev/null ); then
   JAVACMD="`which java`"
+elif [ -x /usr/libexec/java_home ]; then
+  # Mac OS X - use /usr/libexec/java_home -R --exec java ...
+  JAVACMD=/usr/libexec/java_home
+  vmparams=( "-R" "--exec" "java" "${vmparams[@]}" )
 else
   echo "Couldn't find java, please set JAVA_HOME"
   exit 1
