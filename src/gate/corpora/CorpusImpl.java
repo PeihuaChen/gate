@@ -513,6 +513,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
    * @throws java.io.IOException
    */
   @Deprecated
+  @SuppressWarnings("deprecation")
   public static long populate(Corpus corpus, URL singleConcatenatedFile,
       String documentRootElement, String encoding,
       int numberOfDocumentsToExtract, String documentNamePrefix,
@@ -657,12 +658,9 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
             
             documentString = new StringBuilder();
             if(sListener != null) sListener.statusChanged(docName + " created!");
-
-            //TODO where do the 7 and 6 come from!
-            if(line.length() > index + 7) {
-              line = line.substring(index + 6);
-            }
-            else line = br.readLine();
+           
+            line = line.substring(index + documentRootElement.length() + 3);
+            if (line.trim().equals("")) line = br.readLine();
           }
         }
       }
@@ -690,6 +688,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
    *         of bytes
    */
   @Deprecated
+  @SuppressWarnings("deprecation")
   public long populate(URL singleConcatenatedFile, String documentRootElement,
           String encoding, int numberOfFilesToExtract,
           String documentNamePrefix, DocType documentType) throws IOException,
