@@ -23,6 +23,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -105,10 +106,28 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
     constraints.fill = GridBagConstraints.HORIZONTAL;
     add(documentRootElementTextField = new JTextField("DOC", 40), constraints);
 
-    // fourth row
+    // fifth row
     constraints = new GridBagConstraints();
     constraints.gridx = GridBagConstraints.RELATIVE;
     constraints.gridy = 3;
+    constraints.gridwidth = 2;
+    constraints.anchor = GridBagConstraints.WEST;
+    constraints.fill = GridBagConstraints.NONE;
+    constraints.insets = new Insets(0, 0, 0, 5);
+    add(new JLabel("Include Root Element:"), constraints);
+
+    constraints = new GridBagConstraints();
+    constraints.gridx = GridBagConstraints.RELATIVE;
+    constraints.gridy = 3;
+    constraints.gridwidth = 4;
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    add(chkIncludeRoot = new JCheckBox(), constraints);
+    chkIncludeRoot.setSelected(true);
+    
+    // fourth row
+    constraints = new GridBagConstraints();
+    constraints.gridx = GridBagConstraints.RELATIVE;
+    constraints.gridy = 4;
     constraints.gridwidth = 2;
     constraints.anchor = GridBagConstraints.WEST;
     constraints.fill = GridBagConstraints.NONE;
@@ -117,15 +136,15 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
 
     constraints = new GridBagConstraints();
     constraints.gridx = GridBagConstraints.RELATIVE;
-    constraints.gridy = 3;
+    constraints.gridy = 4;
     constraints.gridwidth = 4;
     constraints.fill = GridBagConstraints.HORIZONTAL;
     add(documentMimeTypeTextField = new JTextField("text/html", 40), constraints);
-
+    
     // fifth row
     constraints = new GridBagConstraints();
     constraints.gridx = GridBagConstraints.RELATIVE;
-    constraints.gridy = 4;
+    constraints.gridy = 5;
     constraints.gridwidth = 2;
     constraints.anchor = GridBagConstraints.WEST;
     constraints.fill = GridBagConstraints.NONE;
@@ -134,7 +153,7 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
 
     constraints = new GridBagConstraints();
     constraints.gridx = GridBagConstraints.RELATIVE;
-    constraints.gridy = 4;
+    constraints.gridy = 5;
     constraints.gridwidth = 4;
     constraints.fill = GridBagConstraints.HORIZONTAL;
     add(numOfDocumentsToFetchTextField = new JTextField("-1", 40), constraints);
@@ -142,7 +161,7 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
     // sixth row
     constraints = new GridBagConstraints();
     constraints.gridx = GridBagConstraints.RELATIVE;
-    constraints.gridy = 5;
+    constraints.gridy = 6;
     constraints.gridwidth = 2;
     constraints.anchor = GridBagConstraints.WEST;
     constraints.fill = GridBagConstraints.NONE;
@@ -151,7 +170,7 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
 
     constraints = new GridBagConstraints();
     constraints.gridx = GridBagConstraints.RELATIVE;
-    constraints.gridy = 5;
+    constraints.gridy = 6;
     constraints.gridwidth = 4;
     constraints.fill = GridBagConstraints.HORIZONTAL;
     add(documentNamePrefixTextField = new JTextField("Document", 40),
@@ -254,6 +273,10 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
   public void setDocumentMimeType(String mimeType) {
     this.documentMimeTypeTextField.setText(mimeType);
   }
+  
+  public boolean includeRootElement() {
+    return chkIncludeRoot.isSelected();
+  }
 
   /**
    * Returns the number of documents to fetch
@@ -338,5 +361,7 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
    * Number of documents to extract from the big document
    */
   JTextField numOfDocumentsToFetchTextField;
+  
+  JCheckBox chkIncludeRoot;
 
 }
