@@ -626,14 +626,19 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
             
             String docName = documentNamePrefix + count + "_" + Gate.genSym();
             
+            String docContent = documentString.toString();
+            
+            if (!includeRootElement)
+              docContent = docContent.substring(docContent.indexOf(">")+1, docContent.lastIndexOf("<"));
+            
             FeatureMap params = Factory.newFeatureMap();
             if (mimeType != null) params.put(Document.DOCUMENT_MIME_TYPE_PARAMETER_NAME, mimeType);            
-            params.put(Document.DOCUMENT_STRING_CONTENT_PARAMETER_NAME, documentString.toString());
+            params.put(Document.DOCUMENT_STRING_CONTENT_PARAMETER_NAME, docContent);
             if(encoding != null && encoding.trim().length() > 0)
-              params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, encoding);
-
+              params.put(Document.DOCUMENT_ENCODING_PARAMETER_NAME, encoding); 
+            
             // calculate the length
-            lengthInBytes += documentString.toString().getBytes().length;            
+            lengthInBytes += docContent.getBytes().length;            
 
             try {
               Document doc = (Document)Factory.createResource(DocumentImpl.class.getName(), params, null, docName);
