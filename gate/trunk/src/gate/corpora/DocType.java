@@ -16,8 +16,8 @@ package gate.corpora;
 /**
  * Enum for different types of documents.
  * @author niraj
- * @deprecated
  */
+@Deprecated
 public enum DocType {
   HTML, XML, OTHER;
 }
