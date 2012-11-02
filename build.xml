@@ -175,7 +175,7 @@
           <available file="GATE.app/Contents" />
           <not>
             <uptodate targetfile="GATE.app/Contents/Info.plist">
-              <srcfiles dir="${buildDir}" includes="version.txt, build.txt" />
+              <srcfiles dir="${buildDir}" includes="version.txt, build.txt, Info.plist.template" />
             </uptodate>
           </not>
         </and>
