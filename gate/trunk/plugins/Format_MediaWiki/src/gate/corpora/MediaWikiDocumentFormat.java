@@ -17,6 +17,8 @@ package gate.corpora;
 import java.net.URL;
 import java.util.Map;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 import gate.Document;
 import gate.Resource;
 import gate.creole.ResourceInstantiationException;
@@ -89,9 +91,13 @@ public class MediaWikiDocumentFormat extends NekoHtmlDocumentFormat {
       
       // get the model ready for parsing
       model.setUp();    
-    
+
+      //unescape any HTML entities so that the MediaWiki parser can process
+      //them properly otherwise they get ignored and passed straight through
+      String unescaped = StringEscapeUtils.unescapeHtml(doc.getContent().toString());
+      
       // convert the mediawiki markup to HTML
-      String htmlText = model.render(doc.getContent().toString());
+      String htmlText = model.render(unescaped);
       
       // use the HTML to update the document content
       doc.setContent(new DocumentContentImpl(htmlText));
