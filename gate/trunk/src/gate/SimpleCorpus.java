@@ -27,6 +27,7 @@ import java.util.List;
 /**
  * Corpora are lists of Document. TIPSTER equivalent: Collection.
  */
+@SuppressWarnings("deprecation")
 public interface SimpleCorpus extends LanguageResource, List<Document>, NameBearer {
 
   public static final String CORPUS_NAME_PARAMETER_NAME = "name";
@@ -128,7 +129,6 @@ public interface SimpleCorpus extends LanguageResource, List<Document>, NameBear
    *         of bytes
    */
   @Deprecated
-  @SuppressWarnings("deprecation")
   public long populate(URL singleConcatenatedFile, String documentRootElement,
           String encoding, int numberOfDocumentsToExtract,
           String documentNamePrefix, gate.corpora.DocType documentType) throws IOException,
