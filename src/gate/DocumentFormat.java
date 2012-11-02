@@ -163,6 +163,10 @@ extends AbstractLanguageResource implements LanguageResource{
     if(fileSufix == null) return null;
     return  suffixes2mimeTypeMap.get(fileSufix.toLowerCase());
   }//getMimeType
+  
+  public static Set<String> getSupportedMimeTypes() {
+    return Collections.unmodifiableSet(mimeString2mimeTypeMap.keySet());
+  }
 
   /**
     * Returns a MymeType having as input a URL object. If the MimeType wasn't

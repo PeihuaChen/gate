@@ -511,9 +511,8 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
    * @return total length of populated documents in the corpus in number
    *         of bytes
    * @throws java.io.IOException
-   * @deprecated
    */
-  @SuppressWarnings("deprecation")
+  @Deprecated
   public static long populate(Corpus corpus, URL singleConcatenatedFile,
       String documentRootElement, String encoding,
       int numberOfDocumentsToExtract, String documentNamePrefix,
@@ -532,7 +531,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
       String documentRootElement, String encoding,
       int numberOfDocumentsToExtract, String documentNamePrefix,
       String mimeType, boolean includeRootElement) throws IOException { 
-
+    
     StatusListener sListener = (StatusListener)gate.Gate.getListeners().get("gate.event.StatusListener");
     
     // obtain the root element that user has provided
@@ -576,8 +575,6 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
 
       // continue until reached the end of file
       while(line != null) {
-
-       
 
         // lowercase the line in order to match documentRootElement in any case
         String lowerCasedLine = line.toLowerCase();
@@ -623,7 +620,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
             searchingForStartElement = true;
 
             // here lets create a new document create the doc
-            if(sListener != null) sListener.statusChanged("Creating File Number :" + count);
+            if(sListener != null) sListener.statusChanged("Creating Document Number :" + count);
             
             String docName = documentNamePrefix + count + "_" + Gate.genSym();
             
@@ -648,8 +645,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
               }
               
               // already extracted requested num of documents?
-              if(numberOfDocumentsToExtract != -1
-                      && (count - 1) == numberOfDocumentsToExtract) break;
+              if((count - 1) == numberOfDocumentsToExtract) break;
             }
             catch(Throwable t) {
               String nl = Strings.getNl();
@@ -663,8 +659,9 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
             if(sListener != null) sListener.statusChanged(docName + " created!");
 
             //TODO where do the 7 and 6 come from!
-            if(line.length() > index + 7)
+            if(line.length() > index + 7) {
               line = line.substring(index + 6);
+            }
             else line = br.readLine();
           }
         }
@@ -692,7 +689,7 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
    * @return total length of populated documents in the corpus in number
    *         of bytes
    */
-  @SuppressWarnings("deprecation")
+  @Deprecated
   public long populate(URL singleConcatenatedFile, String documentRootElement,
           String encoding, int numberOfFilesToExtract,
           String documentNamePrefix, DocType documentType) throws IOException,
@@ -700,6 +697,15 @@ public class CorpusImpl extends AbstractLanguageResource implements Corpus,
     return populate(this, singleConcatenatedFile, documentRootElement,
             encoding, numberOfFilesToExtract, documentNamePrefix, documentType);
   }
+  
+  public long populate(URL singleConcatenatedFile, String documentRootElement,
+      String encoding, int numberOfFilesToExtract,
+      String documentNamePrefix, String mimeType, boolean includeRootElement) throws IOException,
+      ResourceInstantiationException {
+    return CorpusImpl.populate(this, singleConcatenatedFile,
+        documentRootElement, encoding, numberOfFilesToExtract,
+        documentNamePrefix, mimeType, includeRootElement);
+}
 
   public synchronized void removeCorpusListener(CorpusListener l) {
     if(corpusListeners != null && corpusListeners.contains(l)) {

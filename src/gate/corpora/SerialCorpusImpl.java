@@ -403,7 +403,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
    * @return total length of populated documents in the corpus in number
    *         of bytes
    */
-  @SuppressWarnings("deprecation")
+  @Deprecated
   public long populate(URL singleConcatenatedFile, String documentRootElement,
           String encoding, int numberOfFilesToExtract,
           String documentNamePrefix, DocType documentType) throws IOException,
@@ -411,6 +411,15 @@ public class SerialCorpusImpl extends AbstractLanguageResource
     return CorpusImpl.populate(this, singleConcatenatedFile,
             documentRootElement, encoding, numberOfFilesToExtract,
             documentNamePrefix, documentType);
+  }
+  
+  public long populate(URL singleConcatenatedFile, String documentRootElement,
+          String encoding, int numberOfFilesToExtract,
+          String documentNamePrefix, String mimeType, boolean includeRootElement) throws IOException,
+          ResourceInstantiationException {
+    return CorpusImpl.populate(this, singleConcatenatedFile,
+            documentRootElement, encoding, numberOfFilesToExtract,
+            documentNamePrefix, mimeType, includeRootElement);
   }
 
   public synchronized void removeCorpusListener(CorpusListener l) {

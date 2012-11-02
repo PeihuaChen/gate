@@ -16,7 +16,6 @@
 
 package gate;
 
-import gate.corpora.DocType;
 import gate.creole.ResourceInstantiationException;
 import gate.util.NameBearer;
 
@@ -128,9 +127,15 @@ public interface SimpleCorpus extends LanguageResource, List<Document>, NameBear
    * @return total length of populated documents in the corpus in number
    *         of bytes
    */
+  @Deprecated
   public long populate(URL singleConcatenatedFile, String documentRootElement,
           String encoding, int numberOfDocumentsToExtract,
-          String documentNamePrefix, DocType documentType) throws IOException,
+          String documentNamePrefix, gate.corpora.DocType documentType) throws IOException,
           ResourceInstantiationException;
+  
+  public long populate(URL singleConcatenatedFile, String documentRootElement,
+      String encoding, int numberOfDocumentsToExtract,
+      String documentNamePrefix, String mimeType, boolean includeRootElement) throws IOException,
+      ResourceInstantiationException;
 
 } // interface SimpleCorpus

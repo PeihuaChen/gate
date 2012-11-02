@@ -1589,7 +1589,7 @@ public class NameBearerHandle implements Handle, StatusListener,
                       .getDocumentRootElement(), scfInputDialog.getEncoding(),
                       scfInputDialog.getNumOfDocumentsToFetch(), scfInputDialog
                               .getDocumentNamePrefix(), scfInputDialog
-                              .getDocumentType());
+                              .getDocumentMimeType(), true);
               if(((Corpus)target).getDataStore() != null) {
                 ((LanguageResource)target).getDataStore().sync(
                         (LanguageResource)target);

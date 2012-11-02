@@ -13,8 +13,8 @@
  */
 package gate.gui;
 
+import gate.DocumentFormat;
 import gate.Gate;
-import gate.corpora.DocType;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -22,6 +22,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -36,8 +37,6 @@ import javax.swing.UIManager;
  * A simple component that allows the user to select a trec web file and
  * encoding
  */
-
-@SuppressWarnings("deprecation")
 public class SingleConcatenatedFileInputDialog extends JPanel {
 
   public SingleConcatenatedFileInputDialog() {
@@ -117,15 +116,18 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
     constraints.anchor = GridBagConstraints.WEST;
     constraints.fill = GridBagConstraints.NONE;
     constraints.insets = new Insets(0, 0, 0, 5);
-    add(new JLabel("Document type:"), constraints);
+    add(new JLabel("Document Mime Type:"), constraints);
 
     constraints = new GridBagConstraints();
     constraints.gridx = GridBagConstraints.RELATIVE;
     constraints.gridy = 3;
     constraints.gridwidth = 4;
     constraints.fill = GridBagConstraints.HORIZONTAL;
-    documentTypeComboBox = new JComboBox(DocType.values());
+    Object[] mimeTypes = DocumentFormat.getSupportedMimeTypes().toArray();
+    Arrays.sort(mimeTypes);
+    documentTypeComboBox = new JComboBox(mimeTypes);
     documentTypeComboBox.setEditable(false);
+    documentTypeComboBox.setSelectedItem("text/html");
     add(documentTypeComboBox, constraints);
 
     // fifth row
@@ -250,15 +252,15 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
   /**
    * Gets the selected document type.
    */
-  public DocType getDocumentType() {
-    return (DocType)this.documentTypeComboBox.getSelectedItem();
+  public String getDocumentMimeType() {
+    return (String)this.documentTypeComboBox.getSelectedItem();
   }
 
   /**
    * Sets the document type
    */
-  public void setDocumentType(DocType documentType) {
-    this.documentTypeComboBox.setSelectedItem(documentType);
+  public void setDocumentMimeType(String mimeType) {
+    this.documentTypeComboBox.setSelectedItem(mimeType);
   }
 
   /**
