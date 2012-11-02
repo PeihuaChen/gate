@@ -1557,7 +1557,7 @@ public class NameBearerHandle implements Handle, StatusListener,
     }
 
     public void actionPerformed(ActionEvent e) {
-      scfInputDialog.setEncoding("");
+      scfInputDialog.reset();
       final boolean answer = OkCancelDialog.showDialog(window, scfInputDialog,
               "Populate from Single Concatenated File");
       Runnable runnable = new Runnable() {

@@ -89,7 +89,7 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
     constraints.gridy = 1;
     constraints.gridwidth = 4;
     constraints.fill = GridBagConstraints.HORIZONTAL;
-    add(encodingTextField = new JTextField(15), constraints);
+    add(encodingTextField = new JTextField(40), constraints);
 
     // third row
     constraints = new GridBagConstraints();
@@ -106,7 +106,7 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
     constraints.gridy = 2;
     constraints.gridwidth = 4;
     constraints.fill = GridBagConstraints.HORIZONTAL;
-    add(documentRootElementTextField = new JTextField("DOC", 15), constraints);
+    add(documentRootElementTextField = new JTextField("DOC", 40), constraints);
 
     // fourth row
     constraints = new GridBagConstraints();
@@ -123,12 +123,7 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
     constraints.gridy = 3;
     constraints.gridwidth = 4;
     constraints.fill = GridBagConstraints.HORIZONTAL;
-    Object[] mimeTypes = DocumentFormat.getSupportedMimeTypes().toArray();
-    Arrays.sort(mimeTypes);
-    documentTypeComboBox = new JComboBox(mimeTypes);
-    documentTypeComboBox.setEditable(false);
-    documentTypeComboBox.setSelectedItem("text/html");
-    add(documentTypeComboBox, constraints);
+    add(documentMimeTypeTextField = new JTextField("text/html", 40), constraints);
 
     // fifth row
     constraints = new GridBagConstraints();
@@ -145,7 +140,7 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
     constraints.gridy = 4;
     constraints.gridwidth = 4;
     constraints.fill = GridBagConstraints.HORIZONTAL;
-    add(numOfDocumentsToFetchTextField = new JTextField("-1", 15), constraints);
+    add(numOfDocumentsToFetchTextField = new JTextField("-1", 40), constraints);
 
     // sixth row
     constraints = new GridBagConstraints();
@@ -162,7 +157,7 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
     constraints.gridy = 5;
     constraints.gridwidth = 4;
     constraints.fill = GridBagConstraints.HORIZONTAL;
-    add(documentNamePrefixTextField = new JTextField("Document", 15),
+    add(documentNamePrefixTextField = new JTextField("Document", 40),
             constraints);
   }
 
@@ -253,14 +248,14 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
    * Gets the selected document type.
    */
   public String getDocumentMimeType() {
-    return (String)this.documentTypeComboBox.getSelectedItem();
+    return this.documentMimeTypeTextField.getText();
   }
 
   /**
    * Sets the document type
    */
   public void setDocumentMimeType(String mimeType) {
-    this.documentTypeComboBox.setSelectedItem(mimeType);
+    this.documentMimeTypeTextField.setText(mimeType);
   }
 
   /**
@@ -287,6 +282,10 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
    */
   public void setNumOfDocumentsToFetch(int numOfDocumentsToFetch) {
     this.numOfDocumentsToFetchTextField.setText("" + numOfDocumentsToFetch);
+  }
+  
+  public void reset() {
+    setEncoding("");
   }
 
   /**
@@ -336,7 +335,7 @@ public class SingleConcatenatedFileInputDialog extends JPanel {
   /**
    * Dropdown box with available document types
    */
-  JComboBox documentTypeComboBox;
+  JTextField documentMimeTypeTextField;
 
   /**
    * Number of documents to extract from the big document

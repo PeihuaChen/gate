@@ -404,6 +404,7 @@ public class SerialCorpusImpl extends AbstractLanguageResource
    *         of bytes
    */
   @Deprecated
+  @SuppressWarnings("deprecation")
   public long populate(URL singleConcatenatedFile, String documentRootElement,
           String encoding, int numberOfFilesToExtract,
           String documentNamePrefix, DocType documentType) throws IOException,

@@ -128,6 +128,7 @@ public interface SimpleCorpus extends LanguageResource, List<Document>, NameBear
    *         of bytes
    */
   @Deprecated
+  @SuppressWarnings("deprecation")
   public long populate(URL singleConcatenatedFile, String documentRootElement,
           String encoding, int numberOfDocumentsToExtract,
           String documentNamePrefix, gate.corpora.DocType documentType) throws IOException,
