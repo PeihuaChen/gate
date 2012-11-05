@@ -292,85 +292,100 @@ public class OpenCalais extends AbstractLanguageAnalyser implements
               "Problem talking to OpenCalais service: " + openCalaisURL);
     }
 
-
-    // Parse the output into GATE annotations
-    //Start by putting the entire output into one String
-    String jsonstr = new String("");
-    try{
-      String nextLine = results.readLine();
-      while(nextLine != null) {
-        //System.out.println(nextLine);
-    	  jsonstr=jsonstr + nextLine;
-        nextLine = results.readLine();
-      }
-    } catch (IOException ioe) {
-      throw new ExecutionException(
-              "Problem reading output from OpenCalais");
-    }
     
-    //System.out.println(jsonstr+"\n\n");
-    
+    String firstline = "";
     try {
-	    JSONObject obj = new JSONObject(jsonstr);
-	  
-	    //The doc has a bunch of top level sections. Doc etc., later entities.
-	    Iterator docit=obj.keys();
-	    while(docit.hasNext()){
-	    	String key=(String)docit.next();
-	    	//System.out.println("Top: "+key);
-	    	JSONObject thisSubObj=(JSONObject)obj.get(key);
-	    	Iterator subdocit=thisSubObj.keys();
-	    	FeatureMap fm=Factory.newFeatureMap();
-	    	//int isanent=0;
-	    	while(subdocit.hasNext()){
-		    	String key2=(String)subdocit.next();
-		    	//System.out.println("Second level: "+key2);
-		    			    		
-		    	if(key2.equals("instances")){
-		    		//If there are instances we can create annotations
-		    		JSONArray inst=(JSONArray)thisSubObj.get(key2);
-	    			String offset=null;
-	    			String length=null;
-		    		for(int k=0;k<inst.length();k++){
-		    			JSONObject instobj=(JSONObject)inst.get(k);
-		    			Iterator instit=instobj.keys();
-			    		while(instit.hasNext()){
-			    			String itkey=(String)instit.next();
-			    			//System.out.println(itkey);
-			    			if(itkey.equals("offset")){
-			    				offset=instobj.getString("offset");
-			    			} else if(itkey.equals("length")){
-			    				length=instobj.getString("length");
-			    			}
-			    		}
-			    		//Make a new copy of fm to add to the annotation.
-		    			FeatureMap fmforthis=Factory.newFeatureMap();
-			    		if(fm!=null){
-			    			fmforthis.putAll(fm);
-			    		} else {
-			    			System.out.println("Null feature map.");
-			    		}
-		    			Long start=Long.valueOf(offset);
-		    			Long len=Long.valueOf(length);
-		    			Long end=start+len;
-		    			outputAS.add(start, end, "OpenCalais", fmforthis);
-		    			offset=null;
-		    			length=null;
-		    		}
-		    	} else {
-		    		if(fm!=null){
-			    		fm.put(key2, thisSubObj.getString(key2));
-			    	} else {
-			    		System.out.println("Null feature map.");
-			    	}
-		    	}
-	    	}
-    	}
-	    
-    } catch (Exception e){
-    	System.out.println(e);
+      firstline = results.readLine();
+    } catch(Exception e){
+      e.printStackTrace();
     }
-
+    
+    //If OpenCalais returns an error, it will be an invalid JSONObject
+    //text, and will not begin with a { at character 1. In that case,
+    //just print it, don't process it.
+    if(firstline.charAt(0)!='{'){
+      System.out.println(doc.getName() + ", OpenCalais returns: " + firstline);
+    } else {
+        
+      
+      // Parse the output into GATE annotations
+      //Start by putting the entire output into one String
+      String jsonstr = firstline;
+      try{
+        String nextLine = results.readLine();
+        while(nextLine != null) {
+          //System.out.println(nextLine);
+      	  jsonstr=jsonstr + nextLine;
+          nextLine = results.readLine();
+        }
+      } catch (IOException ioe) {
+        throw new ExecutionException(
+                "Problem reading output from OpenCalais");
+      }
+      
+      //System.out.println(jsonstr+"\n\n");
+      
+      try {
+  	    JSONObject obj = new JSONObject(jsonstr);
+  	  
+  	    //The doc has a bunch of top level sections. Doc etc., later entities.
+  	    Iterator docit=obj.keys();
+  	    while(docit.hasNext()){
+  	    	String key=(String)docit.next();
+  	    	//System.out.println("Top: "+key);
+  	    	JSONObject thisSubObj=(JSONObject)obj.get(key);
+  	    	Iterator subdocit=thisSubObj.keys();
+  	    	FeatureMap fm=Factory.newFeatureMap();
+  	    	//int isanent=0;
+  	    	while(subdocit.hasNext()){
+  		    	String key2=(String)subdocit.next();
+  		    	//System.out.println("Second level: "+key2);
+  		    			    		
+  		    	if(key2.equals("instances")){
+  		    		//If there are instances we can create annotations
+  		    		JSONArray inst=(JSONArray)thisSubObj.get(key2);
+  	    			String offset=null;
+  	    			String length=null;
+  		    		for(int k=0;k<inst.length();k++){
+  		    			JSONObject instobj=(JSONObject)inst.get(k);
+  		    			Iterator instit=instobj.keys();
+  			    		while(instit.hasNext()){
+  			    			String itkey=(String)instit.next();
+  			    			//System.out.println(itkey);
+  			    			if(itkey.equals("offset")){
+  			    				offset=instobj.getString("offset");
+  			    			} else if(itkey.equals("length")){
+  			    				length=instobj.getString("length");
+  			    			}
+  			    		}
+  			    		//Make a new copy of fm to add to the annotation.
+  		    			FeatureMap fmforthis=Factory.newFeatureMap();
+  			    		if(fm!=null){
+  			    			fmforthis.putAll(fm);
+  			    		} else {
+  			    			System.out.println("Null feature map.");
+  			    		}
+  		    			Long start=Long.valueOf(offset);
+  		    			Long len=Long.valueOf(length);
+  		    			Long end=start+len;
+  		    			outputAS.add(start, end, "OpenCalais", fmforthis);
+  		    			offset=null;
+  		    			length=null;
+  		    		}
+  		    	} else {
+  		    		if(fm!=null){
+  			    		fm.put(key2, thisSubObj.getString(key2));
+  			    	} else {
+  			    		System.out.println("Null feature map.");
+  			    	}
+  		    	}
+  	    	}
+      	}
+  	    
+      } catch (Exception e){
+      	System.out.println(e);
+      }
+    }
   }
   
 
