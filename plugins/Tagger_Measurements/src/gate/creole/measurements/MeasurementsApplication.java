@@ -6,12 +6,9 @@ import gate.creole.metadata.AutoInstanceParam;
 import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 
-import java.net.URL;
-import java.util.List;
-
-@CreoleResource(name = "ANNIE+Measurements", icon = "measurements", autoinstances = @AutoInstance(parameters = {
-	@AutoInstanceParam(name="pipelineURL", value="resources/annie-measurements.xgapp"),
+@CreoleResource(name = "Measurements", icon = "measurements", autoinstances = @AutoInstance(parameters = {
+	@AutoInstanceParam(name="pipelineURL", value="resources/measurements.xgapp"),
 	@AutoInstanceParam(name="menu", value="Measurements")}))
-public class ANNIEMeasurements extends PackagedController {
+public class MeasurementsApplication extends PackagedController {
 
 }
