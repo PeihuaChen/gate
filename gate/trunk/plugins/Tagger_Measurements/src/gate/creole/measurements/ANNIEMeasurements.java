@@ -11,7 +11,7 @@ import java.util.List;
 
 @CreoleResource(name = "ANNIE+Measurements", icon = "measurements", autoinstances = @AutoInstance(parameters = {
 	@AutoInstanceParam(name="pipelineURL", value="resources/annie-measurements.xgapp"),
-	@AutoInstanceParam(name="menu", value="ANNIE")}))
+	@AutoInstanceParam(name="menu", value="Measurements")}))
 public class ANNIEMeasurements extends PackagedController {
 
 }
