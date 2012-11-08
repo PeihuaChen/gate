@@ -138,6 +138,12 @@
           <string>gate.gui.icon</string>
           <string>annie-application</string>
         </entry>
+        <entry>
+          <string>gate.app.MetadataURL</string>
+          <gate.util.persistence.PersistenceManager-URLHolder>
+            <urlString>$relpath$.annie-defaults-metadata/metadata.xml</urlString>
+          </gate.util.persistence.PersistenceManager-URLHolder>
+        </entry>
       </localMap>
     </features>
   </application>
