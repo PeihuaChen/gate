@@ -123,5 +123,9 @@
       <CLASS>gate.gui.LuceneDataStoreSearchGUI</CLASS>
     </RESOURCE>
 
+    <RESOURCE>
+      <CLASS>gate.gui.ControllerMetadataViewer</CLASS>
+    </RESOURCE>
+
   </CREOLE>
 </CREOLE-DIRECTORY>
