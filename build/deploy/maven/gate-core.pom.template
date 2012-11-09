@@ -246,6 +246,14 @@
             <scope>compile</scope>
         </dependency>
 
+        <!-- required for the new controller metadata viewer -->
+        <dependency>
+            <groupId>org.xhtmlrenderer</groupId>
+            <artifactId>flying-saucer-core</artifactId>
+            <version>9.0.1</version>
+            <scope>compile</scope>
+        </dependency>
+
         <!-- Used for comparing XML files during some of the GATE tests -->
         <dependency>
             <groupId>xmlunit</groupId>

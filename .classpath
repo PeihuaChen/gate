@@ -1,117 +1,119 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" output="plugins/Tools/classes" path="plugins/Tools/src"/>
-	<classpathentry kind="src" output="plugins/Coref_Tools/classes" path="plugins/Coref_Tools/src"/>
-	<classpathentry kind="src" output="plugins/JAPE_Plus/classes" path="plugins/JAPE_Plus/src"/>
-	<classpathentry kind="src" output="plugins/Groovy/build" path="plugins/Groovy/src"/>
-	<classpathentry kind="src" output="plugins/OpenNLP/classes" path="plugins/OpenNLP/src"/>
-	<classpathentry kind="src" output="plugins/Tagger_Framework/classes" path="plugins/Tagger_Framework/src"/>
-	<classpathentry kind="src" output="plugins/Gazetteer_Ontology_Based/build" path="plugins/Gazetteer_Ontology_Based/src"/>
-	<classpathentry kind="src" output="plugins/Parser_Stanford/classes" path="plugins/Parser_Stanford/src"/>
-	<classpathentry kind="src" output="plugins/Lang_Chinese/build" path="plugins/Lang_Chinese/src"/>
-	<classpathentry kind="src" output="plugins/UIMA/classes" path="plugins/UIMA/src"/>
-	<classpathentry kind="src" output="plugins/Tagger_Chemistry/classes" path="plugins/Tagger_Chemistry/src"/>
-	<classpathentry kind="src" output="plugins/Parser_Minipar/classes" path="plugins/Parser_Minipar/src"/>
-	<classpathentry kind="src" output="plugins/Lang_Romanian/build" path="plugins/Lang_Romanian/src"/>
-	<classpathentry kind="src" output="plugins/Lang_Hindi/build" path="plugins/Lang_Hindi/src"/>
-	<classpathentry kind="src" output="plugins/Keyphrase_Extraction_Algorithm/build" path="plugins/Keyphrase_Extraction_Algorithm/src"/>
-	<classpathentry kind="src" output="plugins/Web_Crawler_Websphinx/build" path="plugins/Web_Crawler_Websphinx/src"/>
-	<classpathentry kind="src" output="plugins/Parser_RASP/classes" path="plugins/Parser_RASP/src"/>
-	<classpathentry kind="src" output="plugins/Ontology_Tools/build" path="plugins/Ontology_Tools/src"/>
-	<classpathentry kind="src" output="plugins/Tagger_NP_Chunking/classes" path="plugins/Tagger_NP_Chunking/src"/>
-	<classpathentry kind="src" output="plugins/Lang_Arabic/build" path="plugins/Lang_Arabic/src"/>
-	<classpathentry kind="src" output="plugins/Lang_Cebuano/build" path="plugins/Lang_Cebuano/src"/>
-	<classpathentry kind="src" output="plugins/Alignment/classes" path="plugins/Alignment/src"/>
-	<classpathentry kind="src" output="plugins/Learning/build" path="plugins/Learning/src"/>
-	<classpathentry kind="src" output="plugins/Stemmer_Snowball/classes" path="plugins/Stemmer_Snowball/src"/>
-	<classpathentry kind="src" output="plugins/WordNet/classes" path="plugins/WordNet/src"/>
-	<classpathentry kind="src" output="plugins/LingPipe/build" path="plugins/LingPipe/src"/>
-	<classpathentry kind="src" output="plugins/Ontology/build" path="plugins/Ontology/src"/>
-	<classpathentry kind="src" output="plugins/Format_PubMed/classes" path="plugins/Format_PubMed/src"/>
-	<classpathentry kind="src" path="plugins/Language_Identification/src"/>
-	<classpathentry kind="src" output="plugins/Tagger_Numbers/classes" path="plugins/Tagger_Numbers/src"/>
-	<classpathentry exported="true" kind="lib" path="lib/jdom.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/junit.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/ant.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/ant-launcher.jar"/>
-	<classpathentry kind="lib" path="plugins/Gazetteer_Ontology_Based/lib/oro-2.0.8.jar"/>
-	<classpathentry kind="lib" path="plugins/OpenNLP/lib/maxent-2.5.2.jar"/>
-	<classpathentry kind="lib" path="plugins/OpenNLP/lib/opennlp-tools-1.1.0.jar"/>
-	<classpathentry kind="lib" path="plugins/WordNet/lib/jwnl.jar"/>
-	<classpathentry kind="lib" path="plugins/LingPipe/lib/lingpipe-4.0.1.jar"/>
-	<classpathentry kind="lib" path="plugins/Ontology/lib/commons-httpclient-3.1.jar"/>
-	<classpathentry kind="lib" path="plugins/Ontology/lib/jewelcli-0.54.jar"/>
-	<classpathentry kind="lib" path="plugins/Ontology/lib/slf4j-api-1.5.6.jar"/>
-	<classpathentry kind="lib" path="plugins/Ontology/lib/slf4j-jdk14-1.5.6.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry exported="true" kind="lib" path="lib/gate-compiler-jdt.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/xercesImpl.jar"/>
-	<classpathentry kind="lib" path="plugins/Learning/lib/weka.jar"/>
-	<classpathentry kind="lib" path="plugins/Web_Crawler_Websphinx/lib/websphinx.jar"/>
-	<classpathentry kind="lib" path="plugins/Keyphrase_Extraction_Algorithm/lib/weka-3.4.6.jar"/>
-	<classpathentry kind="lib" path="plugins/Machine_Learning/lib/troveForMaxent.jar"/>
-	<classpathentry kind="lib" path="plugins/Parser_SUPPLE/lib/compiler.jar"/>
-	<classpathentry kind="lib" path="plugins/Parser_SUPPLE/lib/jpl.jar"/>
-	<classpathentry kind="lib" path="plugins/Parser_SUPPLE/lib/plcafe.jar"/>
-	<classpathentry kind="lib" path="plugins/UIMA/lib/activation.jar"/>
-	<classpathentry kind="lib" path="plugins/UIMA/lib/axis.jar"/>
-	<classpathentry kind="lib" path="plugins/UIMA/lib/commons-discovery-0.2.jar"/>
-	<classpathentry kind="lib" path="plugins/UIMA/lib/commons-logging-1.0.4.jar"/>
-	<classpathentry kind="lib" path="plugins/UIMA/lib/jaxrpc.jar"/>
-	<classpathentry kind="lib" path="plugins/UIMA/lib/jVinci.jar"/>
-	<classpathentry kind="lib" path="plugins/UIMA/lib/mail.jar"/>
-	<classpathentry kind="lib" path="plugins/UIMA/lib/saaj.jar"/>
-	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-adapter-soap.jar"/>
-	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-adapter-vinci.jar"/>
-	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-core.jar"/>
-	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-cpe.jar"/>
-	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-examples.jar"/>
-	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-document-annotation.jar"/>
-	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-tools.jar"/>
-	<classpathentry kind="lib" path="plugins/Parser_Stanford/lib/stanford-parser.jar"/>
-	<classpathentry kind="lib" path="lib/gate-asm.jar"/>
-	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
-	<classpathentry kind="lib" path="plugins/Groovy/lib/groovy-all-1.7.6.jar"/>
-	<classpathentry exported="true" kind="con" path="GROOVY_DSL_SUPPORT"/>
-	<classpathentry kind="lib" path="plugins/JAPE_Plus/lib/colt-1.2.0-free.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/spring-core.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/ivy.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/pdfbox.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jempbox.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/tika-core.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/xstream.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-core.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/xpp3.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/nekohtml.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/xmlunit.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/xmlbeans.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-compress.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/bcmail-jdk15.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-io.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/poi-ooxml.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/tika-parsers.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/log4j.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/poi-ooxml-schemas.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jaxen.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/aopalliance.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-dom.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-logging.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/java-getopt.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-lang.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/bcprov-jdk15.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/poi-scratchpad.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/dom4j.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/lucene-core.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/fontbox.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/spring-aop.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-codec.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/poi.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/spring-beans.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/metadata-extractor.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/woodstox-core-lgpl.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/stax2-api.jar"/>
-	<classpathentry kind="lib" path="plugins/Ontology/lib/openrdf-sesame-2.6.8-onejar.jar"/>
-	<classpathentry kind="lib" path="plugins/Ontology/lib/owlim-lite-5.2.jar"/>
-	<classpathentry kind="output" path="classes"/>
+	<classpathentry kind="src" path="src" />
+	<classpathentry kind="src" output="plugins/Tools/classes" path="plugins/Tools/src" />
+	<classpathentry kind="src" output="plugins/Coref_Tools/classes" path="plugins/Coref_Tools/src" />
+	<classpathentry kind="src" output="plugins/JAPE_Plus/classes" path="plugins/JAPE_Plus/src" />
+	<classpathentry kind="src" output="plugins/Groovy/build" path="plugins/Groovy/src" />
+	<classpathentry kind="src" output="plugins/OpenNLP/classes" path="plugins/OpenNLP/src" />
+	<classpathentry kind="src" output="plugins/Tagger_Framework/classes" path="plugins/Tagger_Framework/src" />
+	<classpathentry kind="src" output="plugins/Gazetteer_Ontology_Based/build" path="plugins/Gazetteer_Ontology_Based/src" />
+	<classpathentry kind="src" output="plugins/Parser_Stanford/classes" path="plugins/Parser_Stanford/src" />
+	<classpathentry kind="src" output="plugins/Lang_Chinese/build" path="plugins/Lang_Chinese/src" />
+	<classpathentry kind="src" output="plugins/UIMA/classes" path="plugins/UIMA/src" />
+	<classpathentry kind="src" output="plugins/Tagger_Chemistry/classes" path="plugins/Tagger_Chemistry/src" />
+	<classpathentry kind="src" output="plugins/Parser_Minipar/classes" path="plugins/Parser_Minipar/src" />
+	<classpathentry kind="src" output="plugins/Lang_Romanian/build" path="plugins/Lang_Romanian/src" />
+	<classpathentry kind="src" output="plugins/Lang_Hindi/build" path="plugins/Lang_Hindi/src" />
+	<classpathentry kind="src" output="plugins/Keyphrase_Extraction_Algorithm/build" path="plugins/Keyphrase_Extraction_Algorithm/src" />
+	<classpathentry kind="src" output="plugins/Web_Crawler_Websphinx/build" path="plugins/Web_Crawler_Websphinx/src" />
+	<classpathentry kind="src" output="plugins/Parser_RASP/classes" path="plugins/Parser_RASP/src" />
+	<classpathentry kind="src" output="plugins/Ontology_Tools/build" path="plugins/Ontology_Tools/src" />
+	<classpathentry kind="src" output="plugins/Tagger_NP_Chunking/classes" path="plugins/Tagger_NP_Chunking/src" />
+	<classpathentry kind="src" output="plugins/Lang_Arabic/build" path="plugins/Lang_Arabic/src" />
+	<classpathentry kind="src" output="plugins/Lang_Cebuano/build" path="plugins/Lang_Cebuano/src" />
+	<classpathentry kind="src" output="plugins/Alignment/classes" path="plugins/Alignment/src" />
+	<classpathentry kind="src" output="plugins/Learning/build" path="plugins/Learning/src" />
+	<classpathentry kind="src" output="plugins/Stemmer_Snowball/classes" path="plugins/Stemmer_Snowball/src" />
+	<classpathentry kind="src" output="plugins/WordNet/classes" path="plugins/WordNet/src" />
+	<classpathentry kind="src" output="plugins/LingPipe/build" path="plugins/LingPipe/src" />
+	<classpathentry kind="src" output="plugins/Ontology/build" path="plugins/Ontology/src" />
+	<classpathentry kind="src" output="plugins/Format_PubMed/classes" path="plugins/Format_PubMed/src" />
+	<classpathentry kind="src" path="plugins/Language_Identification/src" />
+	<classpathentry kind="src" output="plugins/Tagger_Numbers/classes" path="plugins/Tagger_Numbers/src" />
+	<classpathentry exported="true" kind="lib" path="lib/jdom.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/junit.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/ant.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/ant-launcher.jar" />
+	<classpathentry kind="lib" path="plugins/Gazetteer_Ontology_Based/lib/oro-2.0.8.jar" />
+	<classpathentry kind="lib" path="plugins/OpenNLP/lib/maxent-2.5.2.jar" />
+	<classpathentry kind="lib" path="plugins/OpenNLP/lib/opennlp-tools-1.1.0.jar" />
+	<classpathentry kind="lib" path="plugins/WordNet/lib/jwnl.jar" />
+	<classpathentry kind="lib" path="plugins/LingPipe/lib/lingpipe-4.0.1.jar" />
+	<classpathentry kind="lib" path="plugins/Ontology/lib/commons-httpclient-3.1.jar" />
+	<classpathentry kind="lib" path="plugins/Ontology/lib/jewelcli-0.54.jar" />
+	<classpathentry kind="lib" path="plugins/Ontology/lib/slf4j-api-1.5.6.jar" />
+	<classpathentry kind="lib" path="plugins/Ontology/lib/slf4j-jdk14-1.5.6.jar" />
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER" />
+	<classpathentry exported="true" kind="lib" path="lib/gate-compiler-jdt.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/xercesImpl.jar" />
+	<classpathentry kind="lib" path="plugins/Learning/lib/weka.jar" />
+	<classpathentry kind="lib" path="plugins/Web_Crawler_Websphinx/lib/websphinx.jar" />
+	<classpathentry kind="lib" path="plugins/Keyphrase_Extraction_Algorithm/lib/weka-3.4.6.jar" />
+	<classpathentry kind="lib" path="plugins/Machine_Learning/lib/troveForMaxent.jar" />
+	<classpathentry kind="lib" path="plugins/Parser_SUPPLE/lib/compiler.jar" />
+	<classpathentry kind="lib" path="plugins/Parser_SUPPLE/lib/jpl.jar" />
+	<classpathentry kind="lib" path="plugins/Parser_SUPPLE/lib/plcafe.jar" />
+	<classpathentry kind="lib" path="plugins/UIMA/lib/activation.jar" />
+	<classpathentry kind="lib" path="plugins/UIMA/lib/axis.jar" />
+	<classpathentry kind="lib" path="plugins/UIMA/lib/commons-discovery-0.2.jar" />
+	<classpathentry kind="lib" path="plugins/UIMA/lib/commons-logging-1.0.4.jar" />
+	<classpathentry kind="lib" path="plugins/UIMA/lib/jaxrpc.jar" />
+	<classpathentry kind="lib" path="plugins/UIMA/lib/jVinci.jar" />
+	<classpathentry kind="lib" path="plugins/UIMA/lib/mail.jar" />
+	<classpathentry kind="lib" path="plugins/UIMA/lib/saaj.jar" />
+	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-adapter-soap.jar" />
+	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-adapter-vinci.jar" />
+	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-core.jar" />
+	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-cpe.jar" />
+	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-examples.jar" />
+	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-document-annotation.jar" />
+	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-tools.jar" />
+	<classpathentry kind="lib" path="plugins/Parser_Stanford/lib/stanford-parser.jar" />
+	<classpathentry kind="lib" path="lib/gate-asm.jar" />
+	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT" />
+	<classpathentry kind="lib" path="plugins/Groovy/lib/groovy-all-1.7.6.jar" />
+	<classpathentry exported="true" kind="con" path="GROOVY_DSL_SUPPORT" />
+	<classpathentry kind="lib" path="plugins/JAPE_Plus/lib/colt-1.2.0-free.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/spring-core.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/ivy.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/pdfbox.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/jempbox.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/tika-core.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/xstream.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-core.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/xpp3.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/nekohtml.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/xmlunit.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/xmlbeans.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/commons-compress.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/bcmail-jdk15.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/commons-io.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/poi-ooxml.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/tika-parsers.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/log4j.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/poi-ooxml-schemas.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/jaxen.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/aopalliance.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-dom.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/commons-logging.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/java-getopt.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/commons-lang.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/bcprov-jdk15.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/poi-scratchpad.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/dom4j.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/lucene-core.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/fontbox.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/spring-aop.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/commons-codec.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/poi.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/spring-beans.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/metadata-extractor.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/woodstox-core-lgpl.jar" />
+	<classpathentry exported="true" kind="lib" path="lib/stax2-api.jar" />
+	<classpathentry kind="lib" path="plugins/Ontology/lib/openrdf-sesame-2.6.8-onejar.jar" />
+	<classpathentry kind="lib" path="plugins/Ontology/lib/owlim-lite-5.2.jar" />
+	<classpathentry kind="output" path="classes" />
+	<classpathentry kind="lib" exported="true" path="lib/flying-saucer-core.jar" />
 </classpath>
+
