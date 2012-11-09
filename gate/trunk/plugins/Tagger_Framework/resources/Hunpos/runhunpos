@@ -1,7 +1,7 @@
 #!/bin/sh
 # 
 # shell script to run the hunpos tagger from the GenericTagger PR in GATE
-# see http://mokk.bme.hu/resources/hunpos
+# see http://code.google.com/p/hunpos/
 #
 
 # set the correct location of your hunpos installation here
