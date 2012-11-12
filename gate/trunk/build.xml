@@ -393,9 +393,10 @@
       Machine_Learning Ontology Ontology_BDM_Computation Ontology_Tools OpenNLP
       Parser_Minipar Parser_RASP Parser_Stanford Schema_Tools Stemmer_Snowball
       Tagger_Abner Tagger_Boilerpipe Tagger_Chemistry Tagger_DateNormalizer
-      Tagger_Framework Tagger_Measurements Tagger_MetaMap Tagger_MutationFinder
-      Tagger_NormaGene Tagger_NP_Chunking Tagger_Numbers Tagger_OpenCalais
-      Tagger_PennBio Teamware_Tools Tools UIMA Web_Crawler_Websphinx WordNet
+      Tagger_Framework Tagger_Lupedia Tagger_Measurements Tagger_MetaMap 
+      Tagger_MutationFinder Tagger_NormaGene Tagger_NP_Chunking Tagger_Numbers 
+      Tagger_OpenCalais Tagger_PennBio Tagger_Zemanta Teamware_Tools 
+      Tools UIMA Web_Crawler_Websphinx WordNet
     " />
   <target name="plugins.build" depends="jar">
     <for param="plugin">
