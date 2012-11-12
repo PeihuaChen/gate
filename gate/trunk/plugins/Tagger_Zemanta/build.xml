@@ -13,6 +13,10 @@
 	<property name="jar.location" location="ZemantaTagger.jar" />
 	<property name="doc.dir" location="doc" />
 	<property name="javadoc.dir" location="${doc.dir}/javadoc" />
+	<property name="test.dir" location="test" />
+	<property name="test.reports.dir" location="${test.dir}/reports" />
+	<property name="test.src.dir" location="${test.dir}/src" />
+	<property name="test.classes.dir" location="${test.dir}/classes" />
 
 	<!-- Path to compile - includes gate.jar and GATE/lib/*.jar -->
 	<path id="compile.classpath">
@@ -80,5 +84,25 @@
 		<delete>
 			<fileset dir="." includes="TEST*.xml" />
 		</delete>
+	</target>
+
+	<!-- Unit tests -->
+
+	<path id="test.classpath">
+		<path refid="compile.classpath" />
+		<pathelement location="${jar.location}" />
+	</path>
+
+	<target name="test.prepare">
+		<mkdir dir="${test.classes.dir}" />
+		<mkdir dir="${test.reports.dir}" />
+	</target>
+
+	<target name="test.compile" depends="test.prepare, build">
+
+	</target>
+
+	<target name="test" depends="test.compile">
+
 	</target>
 </project>
