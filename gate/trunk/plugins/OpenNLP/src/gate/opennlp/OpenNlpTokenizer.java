@@ -1,154 +1,133 @@
+/*
+ *  Copyright (c) 1995-2012, The University of Sheffield. See the file
+ *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  $Id$
+ */
 package gate.opennlp;
 
-import java.io.DataInputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.io.InputStream;
 import java.net.URL;
-import java.util.Iterator;
-import java.util.zip.GZIPInputStream;
-
+import java.util.*;
 import org.apache.log4j.Logger;
-
-import opennlp.maxent.MaxentModel;
-import opennlp.maxent.io.BinaryGISModelReader;
-import opennlp.tools.sentdetect.SentenceDetectorME;
 import opennlp.tools.tokenize.TokenizerME;
+import opennlp.tools.tokenize.TokenizerModel;
 import opennlp.tools.util.Span;
-import gate.Annotation;
-import gate.AnnotationSet;
-import gate.Factory;
-import gate.FeatureMap;
-import gate.Resource;
-import gate.creole.AbstractLanguageAnalyser;
-import gate.creole.ExecutionException;
-import gate.creole.ResourceInstantiationException;
+import gate.*;
+import gate.creole.*;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.RunTime;
 import gate.util.InvalidOffsetException;
 
 /**
- * Wrapper for the opennlp tokenizer
- * @author <A HREF="mailto:georgiev@ontotext.com>georgi.georgiev@ontotext.com</A>
- * Created: Thu Dec 11 16:25:59 EET 2008
+ * Wrapper PR for the OpenNLP tokenizer.
  */
+@CreoleResource(name = "OpenNLP Tokenizer", 
+    comment = "Tokenizer using an OpenNLP maxent model",
+    helpURL = "http://gate.ac.uk/sale/tao/splitch21.html#sec:misc-creole:opennlp")
+public class OpenNlpTokenizer extends AbstractLanguageAnalyser {
 
-public @SuppressWarnings("all") class OpenNlpTokenizer extends AbstractLanguageAnalyser {
+  private static final long serialVersionUID = 6965074842061250720L;
+  private static final Logger logger = Logger.getLogger(OpenNlpTokenizer.class);
 
-	public static final long serialVersionUID = 1L;
-	
-	private static final Logger logger = Logger.getLogger(OpenNlpTokenizer.class);
-	
-	String inputASName;
-
-	public String getInputASName() {
-		return inputASName;
-	}
-
-	public void setInputASName(String inputASName) {
-		this.inputASName = inputASName;
-	}
-
-	// private members
+  
+	/* CREOLE PARAMETERS & SUCH*/
 	private String annotationSetName = null;
-	TokenizerME tokenizer = null;
-	URL model;
+	private TokenizerME tokenizer = null;
+	private TokenizerModel model = null;
+	private URL modelUrl;
+  private String tokenType = ANNIEConstants.TOKEN_ANNOTATION_TYPE;
+  private String spaceTokenType = ANNIEConstants.SPACE_TOKEN_ANNOTATION_TYPE;
+  private String stringFeature = ANNIEConstants.TOKEN_STRING_FEATURE_NAME;
+  
+	
 
-	@Override
 	public void execute() throws ExecutionException {
-		// text doc annotations
-		AnnotationSet annotations;
-		if (annotationSetName != null && annotationSetName.length() > 0)
-			annotations = document.getAnnotations(annotationSetName);
-		else
-			annotations = document.getAnnotations();
-
-		// get sentence annotations
-		//AnnotationSet sentences = document.getAnnotations("Sentence");
-
-		// getdoc.get text
+		AnnotationSet annotations = document.getAnnotations(annotationSetName);
 		String text = document.getContent().toString();
-		// run tokenizer
 		Span[] spans = tokenizer.tokenizePos(text);
-		// compare the resulting
-		// spans and add annotations
+		
+		/* The spans ought to be ordered, but the OpenNLP
+		 * API is unclear.	We need them in order so we can 
+		 * spot the gaps and put SpaceToken annotations
+		 * in them.	 */
+		Arrays.sort(spans);
+		long previousEnd = 0;
+		
+		for (Span span : spans) {
+      long start = (long) span.getStart();
+      long end   = (long) span.getEnd();
 
-		for (int i = 0; i < spans.length; i++) {
-
+      if (start > previousEnd) {
+        FeatureMap sfm = Factory.newFeatureMap();
+        sfm.put("source", "OpenNLP");
+        try {
+          annotations.add(previousEnd, start, spaceTokenType, sfm);
+        }
+        catch (InvalidOffsetException e) {
+          throw new ExecutionException(e);
+        }
+      }
+      
+      previousEnd = end;
+      
 			FeatureMap fm = Factory.newFeatureMap();
-			// type
-			fm.put("source", "openNLP");
-			fm.put("string", text.substring(spans[i].getStart(), spans[i]
-					.getEnd()));
-			// source
-//			fm.put("type", "urn:lsid:ontotext.com:kim:iextraction:Token");
-
+			fm.put("source", "OpenNLP");
+			fm.put(stringFeature, text.substring(span.getStart(), span.getEnd()));
 			try {
-				annotations.add(Long.valueOf(spans[i].getStart()), Long
-						.valueOf(spans[i].getEnd()), "Token", fm);
-
-			} catch (InvalidOffsetException e) {
-				e.printStackTrace();
-				throw new RuntimeException(e);
+				annotations.add(start, end, tokenType, fm);
+			} 
+			catch (InvalidOffsetException e) {
+				throw new ExecutionException(e);
 			}
-
-			//startSpan = spans[i].getEnd() + countSpaces(spans[i].getEnd());
 		}
 	}
 
-	int countSpaces(int lastSpan) {
 
-		int ws = 0;
-		String text = document.getContent().toString();
-
-		char[] context = text.substring(lastSpan - 1,
-				text.length() >= lastSpan + 50 ? lastSpan + 50 : text.length())
-				.toCharArray();
-
-		for (int i = 0; i < context.length; i++) {
-
-			if (Character.isWhitespace(context[i]))
-				ws++;
-			else
-				break;
-		}
-
-		return ws;
-	}
-
-	@Override
 	public Resource init() throws ResourceInstantiationException {
-		//logger.info("The string of Tokenizer file is: "+model);
-		tokenizer = new TokenizerME(
-				getModel(model));
+	  InputStream modelInput = null;
+    try {
+      modelInput = modelUrl.openStream();
+      this.model = new TokenizerModel(modelInput);
+      this.tokenizer = new TokenizerME(model);
+      logger.info("OpenNLP Tokenizer initialized!");
+    } 
+    catch(IOException e) {
+      throw new ResourceInstantiationException(e);
+    }
+    finally {
+      if (modelInput != null) {
+        try {
+          modelInput.close();
+        }
+        catch (IOException e) {
+          throw new ResourceInstantiationException(e);
+        }
+      }
+    }
 		
-		logger.warn("OpenNLP Tokenizer initialized!");//System.out.println("OpenNLP Tokenizer initialized!");
-		
+		super.init();
 		return this;
-
 	}
 
-	@Override
+
 	public void reInit() throws ResourceInstantiationException {
 		init();
 	}
 
-	/**
-	 * @author georgiev
-	 * @return MaxentModel
-	 * @param String
-	 *            path to MaxentModel
-	 */
-	public static MaxentModel getModel(URL name) {
-		try {
-			return new BinaryGISModelReader(new DataInputStream(
-					new GZIPInputStream(name.openStream()))).getModel();
-		} catch (IOException E) {
-			E.printStackTrace();
-			logger.error("OpenNLP Tokenizer can not be initialized!");
-			throw new RuntimeException("OpenNLP Tokenizer can not be initialized!", E);
-		}
-	}
 
-	/* getters and setters for the PR */
-	/* public members */
+	/* CREOLE PARAMETERS */
+
+	@RunTime
+	@CreoleParameter(defaultValue = "",
+	    comment = "Output AS for Tokens")
 	public void setAnnotationSetName(String a) {
 		annotationSetName = a;
 	}
@@ -156,14 +135,16 @@ public @SuppressWarnings("all") class OpenNlpTokenizer extends AbstractLanguageA
 	public String getAnnotationSetName() {
 		return annotationSetName;
 	}
-
+	
+	
+	@CreoleParameter(defaultValue = "models/english/en-token.bin",
+	    comment = "location of the tokenizer model")
+  public void setModel(URL model) {
+    this.modelUrl = model;
+  }
+  
 	public URL getModel() {
-		return model;
+		return modelUrl;
 	}
-
-	public void setModel(URL model) {
-
-		this.model = model;
-	}/* getters and setters for the PR */
 
 }

@@ -9,7 +9,7 @@
   <property name="gate.jar" location="${gate.home}/bin/gate.jar" />
   <property name="src.dir" location="src" />
   <property name="classes.dir" location="classes" />
-  <property name="jar.location" location="opennlp.jar" />
+  <property name="jar.location" location="gate-opennlp.jar" />
   <property name="doc.dir" location="doc" />
   <property name="javadoc.dir" location="${doc.dir}/javadoc" />
 
