@@ -19,6 +19,8 @@ import gate.creole.metadata.RunTime;
 import gate.util.InvalidOffsetException;
 import java.io.*;
 import java.net.URL;
+import java.text.NumberFormat;
+
 import opennlp.tools.chunker.ChunkerME;
 import opennlp.tools.chunker.ChunkerModel;
 import org.apache.log4j.Logger;
@@ -49,11 +51,22 @@ public class OpenNlpChunker extends AbstractLanguageAnalyser {
 
 	@Override
 	public void execute() throws ExecutionException {
-	  AnnotationSet inputAS = document.getAnnotations(inputASName);
+    interrupted = false;
+    long startTime = System.currentTimeMillis();
+    if(document == null) {
+      throw new ExecutionException("No document to process!");
+    }
+    fireStatusChanged("Running " + this.getName() + " on " + document.getName());
+    fireProgressChanged(0);
+
+AnnotationSet inputAS = document.getAnnotations(inputASName);
 	  AnnotationSet outputAS = document.getAnnotations(outputASName);
 	  boolean sameAS = inputAS.equals(outputAS);
 
 		AnnotationSet sentences = inputAS.get(sentenceType);
+    int nbrDone = 0;
+    int nbrSentences = sentences.size();
+
 		for (Annotation sentence : sentences)  {
 		  AnnotationSet tokenSet = Utils.getContainedAnnotations(inputAS, sentence, tokenType);
       Sentence tokens = new Sentence(tokenSet, stringFeature, posFeature);
@@ -85,8 +98,21 @@ public class OpenNlpChunker extends AbstractLanguageAnalyser {
             throw new ExecutionException(e);
           }
         }
-      }
-		}
+        if(isInterrupted()) { 
+          throw new ExecutionInterruptedException("Execution of " + 
+              this.getName() + " has been abruptly interrupted!");
+        }
+      } // end loop over chunk tags within one sentence
+      
+      nbrDone++;
+      fireProgressChanged((int)(100 * nbrDone / nbrSentences));
+		} // end for sentence : sentences
+		
+    fireProcessFinished();
+    fireStatusChanged("Finished " + this.getName() + " on " + document.getName()
+        + " in " + NumberFormat.getInstance().format(
+            (double)(System.currentTimeMillis() - startTime) / 1000)
+        + " seconds!");
 	}
 	
 		
@@ -98,7 +124,7 @@ public class OpenNlpChunker extends AbstractLanguageAnalyser {
       modelInput = modelUrl.openStream();
       this.model = new ChunkerModel(modelInput);
       this.chunker = new ChunkerME(model);
-      logger.info("OpenNLP POS Chunker initialized!");
+      logger.info("OpenNLP POS Chunker: " + modelUrl.toString());
     }
     catch(IOException e) {
       throw new ResourceInstantiationException(e);

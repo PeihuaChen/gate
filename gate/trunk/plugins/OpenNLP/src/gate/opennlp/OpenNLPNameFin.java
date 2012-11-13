@@ -13,6 +13,7 @@ package gate.opennlp;
 
 import java.io.*;
 import java.net.URL;
+import java.text.NumberFormat;
 import java.util.*;
 
 import org.apache.log4j.Logger;
@@ -52,9 +53,20 @@ public class OpenNLPNameFin extends AbstractLanguageAnalyser {
 
 	@Override
 	public void execute() throws ExecutionException {
+    interrupted = false;
+    long startTime = System.currentTimeMillis();
+    if(document == null) {
+      throw new ExecutionException("No document to process!");
+    }
+    fireStatusChanged("Running " + this.getName() + " on " + document.getName());
+    fireProgressChanged(0);
+
 	  AnnotationSet inputAS = document.getAnnotations(inputASName);
 	  AnnotationSet outputAS = document.getAnnotations(outputASName);
 	  AnnotationSet sentences = inputAS.get(sentenceType);
+
+	  int nbrDone = 0;
+	  int nbrSentences = sentences.size();
 		
 		for (Annotation sentence : sentences) {
 		  /* For each input Sentence annotation, produce a list of
@@ -81,9 +93,22 @@ public class OpenNLPNameFin extends AbstractLanguageAnalyser {
 		      catch (InvalidOffsetException e) {
 		        throw new ExecutionException(e);
 		      }
-		    }
-		  }
-		}
+		      
+		      if(isInterrupted()) { 
+		        throw new ExecutionInterruptedException("Execution of " + 
+		            this.getName() + " has been abruptly interrupted!");
+		      }
+		    } // end loop over names from 1 finder in 1 sentence
+		  } // end loop over NameFinders within one sentence
+      nbrDone++;
+      fireProgressChanged((int)(100 * nbrDone / nbrSentences));
+		} // end for sentence : sentences
+		
+    fireProcessFinished();
+    fireStatusChanged("Finished " + this.getName() + " on " + document.getName()
+        + " in " + NumberFormat.getInstance().format(
+            (double)(System.currentTimeMillis() - startTime) / 1000)
+        + " seconds!");
 	}
 
 	
