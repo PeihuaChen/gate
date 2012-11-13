@@ -14,6 +14,7 @@ package gate.opennlp;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.text.NumberFormat;
 import java.util.*;
 import org.apache.log4j.Logger;
 import opennlp.tools.tokenize.TokenizerME;
@@ -50,18 +51,28 @@ public class OpenNlpTokenizer extends AbstractLanguageAnalyser {
 	
 
 	public void execute() throws ExecutionException {
-		AnnotationSet annotations = document.getAnnotations(annotationSetName);
+    interrupted = false;
+    long startTime = System.currentTimeMillis();
+    if(document == null) {
+      throw new ExecutionException("No document to process!");
+    }
+    fireStatusChanged("Running " + this.getName() + " on " + document.getName());
+    fireProgressChanged(0);
+
+    AnnotationSet annotations = document.getAnnotations(annotationSetName);
 		String text = document.getContent().toString();
+    checkInterruption();
 		Span[] spans = tokenizer.tokenizePos(text);
 		
 		/* The spans ought to be ordered, but the OpenNLP
-		 * API is unclear.	We need them in order so we can 
-		 * spot the gaps and put SpaceToken annotations
-		 * in them.	 */
+		 * API is unclear.	We need to be sure they are in 
+		 * order so we can spot the gaps and put Space
+		 * Token annotations on them.	 */
 		Arrays.sort(spans);
 		long previousEnd = 0;
 		
 		for (Span span : spans) {
+	    checkInterruption();
       long start = (long) span.getStart();
       long end   = (long) span.getEnd();
 
@@ -88,16 +99,30 @@ public class OpenNlpTokenizer extends AbstractLanguageAnalyser {
 				throw new ExecutionException(e);
 			}
 		}
+
+		fireProcessFinished();
+    fireStatusChanged("Finished " + this.getName() + " on " + document.getName()
+        + " in " + NumberFormat.getInstance().format(
+            (double)(System.currentTimeMillis() - startTime) / 1000)
+        + " seconds!");
 	}
 
 
+	private void checkInterruption() throws ExecutionInterruptedException {
+    if(isInterrupted()) { 
+      throw new ExecutionInterruptedException("Execution of " + 
+          this.getName() + " has been abruptly interrupted!");
+    }
+	}
+	
+	
 	public Resource init() throws ResourceInstantiationException {
 	  InputStream modelInput = null;
     try {
       modelInput = modelUrl.openStream();
       this.model = new TokenizerModel(modelInput);
       this.tokenizer = new TokenizerME(model);
-      logger.info("OpenNLP Tokenizer initialized!");
+      logger.info("OpenNLP Tokenizer: " + modelUrl.toString());
     } 
     catch(IOException e) {
       throw new ResourceInstantiationException(e);

@@ -108,6 +108,7 @@ public class OpenNlpPOS extends AbstractLanguageAnalyser {
         throw new ExecutionInterruptedException("Execution of " + 
             this.getName() + " has been abruptly interrupted!");
       }
+      nbrDone++;
       fireProgressChanged((int)(100 * nbrDone / nbrSentences));
 		} // for sentence : sentences
 		
@@ -126,7 +127,7 @@ public class OpenNlpPOS extends AbstractLanguageAnalyser {
       modelInput = modelUrl.openStream();
       this.model = new POSModel(modelInput);
       this.tagger = new POSTaggerME(model);
-      logger.info("OpenNLP POS Tagger initialized!");
+      logger.info("OpenNLP POS Tagger: " + modelUrl.toString());
     }
     catch(IOException e) {
       throw new ResourceInstantiationException(e);

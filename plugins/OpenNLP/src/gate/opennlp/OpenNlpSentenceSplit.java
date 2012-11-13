@@ -19,6 +19,8 @@ import gate.creole.metadata.RunTime;
 import gate.util.InvalidOffsetException;
 import java.io.*;
 import java.net.URL;
+import java.text.NumberFormat;
+
 import opennlp.tools.sentdetect.*;
 import opennlp.tools.util.Span;
 import org.apache.log4j.Logger;
@@ -47,11 +49,21 @@ public class OpenNlpSentenceSplit extends AbstractLanguageAnalyser {
 
 	@Override
 	public void execute() throws ExecutionException {
+    interrupted = false;
+    long startTime = System.currentTimeMillis();
+    if(document == null) {
+      throw new ExecutionException("No document to process!");
+    }
+    fireStatusChanged("Running " + this.getName() + " on " + document.getName());
+    fireProgressChanged(0);
+	  
 		AnnotationSet annotations = document.getAnnotations(annotationSetName);
 		String text = document.getContent().toString();
+		checkInterruption();
 		Span[] spans = splitter.sentPosDetect(text);
 
 		for (Span span : spans) {
+		  checkInterruption();
 			FeatureMap fm = Factory.newFeatureMap();
 			fm.put("source", "OpenNLP");
       long start = (long) span.getStart();
@@ -65,7 +77,16 @@ public class OpenNlpSentenceSplit extends AbstractLanguageAnalyser {
 			}
 		}
 		
-		//TODO: generate Split annotations!
+		//TODO: generate Split annotations.
+		
+		//TODO: maybe generate SpaceToken annotations where the 
+		// Sentence ones don't meet.
+		
+    fireProcessFinished();
+    fireStatusChanged("Finished " + this.getName() + " on " + document.getName()
+        + " in " + NumberFormat.getInstance().format(
+            (double)(System.currentTimeMillis() - startTime) / 1000)
+        + " seconds!");
 	}
 
 
@@ -76,7 +97,7 @@ public class OpenNlpSentenceSplit extends AbstractLanguageAnalyser {
 	      modelInput = modelUrl.openStream();
 	      this.model = new SentenceModel(modelInput);
 	      this.splitter = new SentenceDetectorME(model);
-	      logger.info("OpenNLP Splitter initialized!");
+	      logger.info("OpenNLP Splitter: " + modelUrl.toString());
 	    } 
 	    catch(IOException e) {
 	      throw new ResourceInstantiationException(e);
@@ -101,6 +122,14 @@ public class OpenNlpSentenceSplit extends AbstractLanguageAnalyser {
 	public void reInit() throws ResourceInstantiationException {
 		init();
 	}
+
+	
+	 private void checkInterruption() throws ExecutionInterruptedException {
+	    if(isInterrupted()) { 
+	      throw new ExecutionInterruptedException("Execution of " + 
+	          this.getName() + " has been abruptly interrupted!");
+	    }
+	  }
 
 	
 	/* CREOLE PARAMETERS */
