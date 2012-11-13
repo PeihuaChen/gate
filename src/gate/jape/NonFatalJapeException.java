@@ -16,6 +16,14 @@ package gate.jape;
 
 public class NonFatalJapeException extends JapeException {
 
+  public NonFatalJapeException() {
+    super();
+  }
+  
+  public NonFatalJapeException(String message) {
+    super(message);
+  }
+  
   public NonFatalJapeException(Throwable cause) {
     super(cause);
   }
