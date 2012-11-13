@@ -1,236 +1,191 @@
+/*
+ *  Copyright (c) 1995-2012, The University of Sheffield. See the file
+ *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  $Id$
+ */
 package gate.opennlp;
 
 import gate.Annotation;
 import gate.AnnotationSet;
+import gate.Factory;
 import gate.FeatureMap;
 import gate.Resource;
-import gate.creole.AbstractLanguageAnalyser;
-import gate.creole.ExecutionException;
-import gate.creole.ResourceInstantiationException;
-import gate.util.BomStrippingInputStreamReader;
-
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import gate.Utils;
+import gate.creole.*;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.RunTime;
+import gate.util.InvalidOffsetException;
+import java.io.*;
 import java.net.URL;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.zip.GZIPInputStream;
-
-import opennlp.maxent.MaxentModel;
-import opennlp.maxent.io.BinaryGISModelReader;
-import opennlp.tools.postag.POSDictionary;
+import java.text.NumberFormat;
+import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTaggerME;
-
 import org.apache.log4j.Logger;
 
 /**
- * Wrapper for the open nlp pos tagger
- *
- * @author <A
- *         HREF="mailto:georgiev@ontotext.com">georgi.georgiev@ontotext.com</A>
- *         Created: Thu Dec 11 16:25:59 EET 2008
+ * Wrapper for the OpenNLP POS Tagger
  */
+@CreoleResource(name = "OpenNLP POS Tagger", 
+    comment = "POS Tagger using an OpenNLP maxent model",
+    helpURL = "http://gate.ac.uk/sale/tao/splitch21.html#sec:misc-creole:opennlp")
+public class OpenNlpPOS extends AbstractLanguageAnalyser {
 
-public @SuppressWarnings("all")
-class OpenNlpPOS extends AbstractLanguageAnalyser {
+  private static final long serialVersionUID = 4010938787910114221L;
+  private static final Logger logger = Logger.getLogger(OpenNlpPOS.class);
 
-	public static final long serialVersionUID = 1L;
+  
+  
+  /* CREOLE PARAMETERS & SUCH*/
+  private String inputASName, outputASName;
+  private URL modelUrl;
+  private POSModel model;
+  private POSTaggerME tagger;
+  private String tokenType = ANNIEConstants.TOKEN_ANNOTATION_TYPE;
+  private String sentenceType = ANNIEConstants.SENTENCE_ANNOTATION_TYPE;
+  private String stringFeature = ANNIEConstants.TOKEN_STRING_FEATURE_NAME;
+  private String posFeature = ANNIEConstants.TOKEN_CATEGORY_FEATURE_NAME;
 
-	private static final Logger logger = Logger.getLogger(OpenNlpPOS.class);
-
-	String inputASName;
-
-	public String getInputASName() {
-		return inputASName;
-	}
-
-	public void setInputASName(String inputASName) {
-		this.inputASName = inputASName;
-	}
-
-	// private members
-	private String annotationSetName = null;
-	POSTaggerME pos = null;
-	URL model;
-	URL dictionary;
-	private String dictionaryEncoding = "UTF-8";
 
 	@Override
 	public void execute() throws ExecutionException {
-		// text doc annotations
-		AnnotationSet annotations;
-		if (annotationSetName != null && annotationSetName.length() > 0)
-			annotations = document.getAnnotations(annotationSetName);
-		else
-			annotations = document.getAnnotations();
+    interrupted = false;
+    long startTime = System.currentTimeMillis();
+    if(document == null) {
+      throw new ExecutionException("No document to process!");
+    }
+    fireStatusChanged("Running " + this.getName() + " on " + document.getName());
+    fireProgressChanged(0);
+	  
+	  AnnotationSet inputAS = document.getAnnotations(inputASName);
+	  AnnotationSet outputAS = document.getAnnotations(outputASName);
+	  boolean sameAS = inputAS.equals(outputAS);
 
-		// getdoc.get text
-		String text = document.getContent().toString();
+		AnnotationSet sentences = inputAS.get(sentenceType);
+		int nbrDone = 0;
+		int nbrSentences = sentences.size();
 
-		// get sentence annotations
-		AnnotationSet sentences = annotations.get("Sentence");
+		for (Annotation sentence : sentences) {
+		  AnnotationSet tokenSet = Utils.getContainedAnnotations(inputAS, sentence, tokenType);
+		  Sentence tokens = new Sentence(tokenSet, stringFeature, null);
+		  String[] strings = tokens.getStrings();
 
-		// order sentences
-
-		List<Annotation> sentList = new LinkedList<Annotation>();
-
-		for (Iterator iterator = sentences.iterator(); iterator.hasNext();) {
-			sentList.add((Annotation) iterator.next());
-
-		}
-
-		java.util.Collections.sort(sentList, new gate.util.OffsetComparator());
-
-		// for each sentence get token annotations
-		for (Iterator iterator = sentList.iterator(); iterator.hasNext();) {
-			Annotation annotation = (Annotation) iterator.next();
-
-			AnnotationSet sentenceTokens = annotations.get("Token", annotation
-					.getStartNode().getOffset(), annotation.getEndNode()
-					.getOffset());
-
-			// create a list
-
-			List<Annotation> tokenList = new LinkedList<Annotation>();
-
-			for (Iterator iterator2 = sentenceTokens.iterator(); iterator2
-					.hasNext();) {
-				tokenList.add((Annotation) iterator2.next());
-
-			}
-
-			// order on offset
-
-			Collections.sort(tokenList, new gate.util.OffsetComparator());
-
-			// make the array be string[] sentence
-			String[] sentence = new String[tokenList.size()];
-			int i = 0;
-			for (Iterator iterator2 = tokenList.iterator(); iterator2.hasNext();) {
-
-				Annotation token = (Annotation) iterator2.next();
-
-				sentence[i] = token.getFeatures().get("string").toString()
-						.replaceAll("\\s+", "").trim();
-
-				i++;
-			}
-
-			StringBuffer buf = new StringBuffer();
-			for (int j = 0; j < sentence.length; j++) {
-				buf.append(sentence[j] + "@@@");
-			}
-
-			// run pos tagger
-			String[] postags = null;
-			/**
-			 * we will make shure to not allow smth to breack the tagger
-			 */
-			try {
-				postags = pos.tag(sentence);
-			} catch (Exception e) {
-				e.printStackTrace();
-				System.out
-						.println("There is a problem....\n with this sentence");
-				System.out.println(buf);
-				continue;
-			}
-
-			// add tohose spans to token annotations
-
-			int j = 0;
-			for (Iterator iterator2 = tokenList.iterator(); iterator2.hasNext();) {
-				Annotation token = (Annotation) iterator2.next();
-
-				FeatureMap fm = token.getFeatures();
-				fm.put("category", postags[j]);
-
-				token.setFeatures(fm);
-
-				j++;
-
-			}
-		}
+		  if (strings.length > 0) {
+		    /* Run the OpenNLP tagger on this sentence,
+		     * then apply the tags. 	   */
+		    String[] tags = tagger.tag(strings);
+		    
+		    for (int i=0 ; i < tags.length ; i++) {
+		      if (sameAS) { 
+		        // add feature to existing annotation
+		        tokens.get(i).getFeatures().put(posFeature, tags[i]);
+		      }
+		      else { 
+		        // new annotation with old features and new one
+		        Annotation oldToken = tokens.get(i);
+		        long start = oldToken.getStartNode().getOffset();
+		        long end   = oldToken.getEndNode().getOffset();
+		        FeatureMap fm = Factory.newFeatureMap();
+		        fm.putAll(oldToken.getFeatures());
+		        fm.put(posFeature, tags[i]);
+		        try {
+		          outputAS.add(start, end, tokenType, fm);
+		        }
+		        catch (InvalidOffsetException e) {
+		          throw new ExecutionException(e);
+		        }
+		      }
+		    } // for loop applying tags
+		  } // if strings is not empty
+		  
+      if(isInterrupted()) { 
+        throw new ExecutionInterruptedException("Execution of " + 
+            this.getName() + " has been abruptly interrupted!");
+      }
+      fireProgressChanged((int)(100 * nbrDone / nbrSentences));
+		} // for sentence : sentences
+		
+    fireProcessFinished();
+    fireStatusChanged("Finished " + this.getName() + " on " + document.getName()
+        + " in " + NumberFormat.getInstance().format(
+            (double)(System.currentTimeMillis() - startTime) / 1000)
+        + " seconds!");
 	}
 
+	
 	@Override
 	public Resource init() throws ResourceInstantiationException {
-		// logger.warn("OpenNLP POS initializing strings are: model - " +
-		// model.getFile() +
-		// " dictionary: "+dictionary.getFile());
-		try {
-			BufferedReader dictionaryReader = new BomStrippingInputStreamReader(dictionary.openStream(),
-							dictionaryEncoding);
-			pos = new POSTaggerME(getModel(model), new POSDictionary(
-					dictionaryReader, true));
-		} catch (IOException e) {
-			e.printStackTrace();
-			logger.error("OpenNLP POS can not be initialized!");
-			throw new RuntimeException("OpenNLP POS can not be initialized!", e);
-		}
-		logger.warn("OpenNLP POS initialized!");// System.out.println("OpenNLP POS initialized!");
-		return this;
-
+    InputStream modelInput = null;
+    try {
+      modelInput = modelUrl.openStream();
+      this.model = new POSModel(modelInput);
+      this.tagger = new POSTaggerME(model);
+      logger.info("OpenNLP POS Tagger initialized!");
+    }
+    catch(IOException e) {
+      throw new ResourceInstantiationException(e);
+    }
+    finally {
+      if (modelInput != null) {
+        try {
+          modelInput.close();
+        }
+        catch (IOException e) {
+          throw new ResourceInstantiationException(e);
+        }
+      }
+    }
+    
+    super.init();
+    return this;
 	}
 
+	
 	@Override
 	public void reInit() throws ResourceInstantiationException {
 		init();
 	}
 
-	/**
-	 * @author georgiev
-	 * @return MaxentModel
-	 * @param String
-	 *            path to MaxentModel
-	 */
-	public static MaxentModel getModel(URL name) {
-		try {
-			return new BinaryGISModelReader(new DataInputStream(
-					new GZIPInputStream(name.openStream()))).getModel();
-		} catch (IOException E) {
-			E.printStackTrace();
-			return null;
-		}
-	}
+	
+	/* CREOLE PARAMETERS */
+	
+  @RunTime
+  @CreoleParameter(defaultValue = "",
+      comment = "Input AS with Token and Sentence annotations")
+  public void setInputASName(String name) {
+    this.inputASName = name;
+  }
+  
+  public String getInputASName() {
+    return this.inputASName;
+  }
 
-	/* getters and setters for the PR */
-	/* public members */
+  @RunTime
+  @CreoleParameter(defaultValue = "",
+      comment = "Output AS for POS-tagged tokens")
+  public void setOutputASName(String name) {
+    this.outputASName = name;
+  }
+  
+  public String getOutputASName() {
+    return this.outputASName;
+  }
 
-	public void setAnnotationSetName(String a) {
-		annotationSetName = a;
-	}
+  
+  @CreoleParameter(defaultValue = "models/english/en-pos-maxent.bin",
+      comment = "location of the tagger model")
+  public void setModel(URL model) {
+    this.modelUrl = model;
+  }
 
-	public String getAnnotationSetName() {
-		return annotationSetName;
-	}
-
-	public URL getModel() {
-		return model;
-	}
-
-	public void setModel(URL model) {
-		this.model = model;
-	}
-
-	public URL getDictionary() {
-		return dictionary;
-	}
-
-	public void setDictionary(URL dictionary) {
-		this.dictionary = dictionary;
-	}
-
-	public void setDictionaryEncoding(String a) {
-		dictionaryEncoding = a;
-	}
-
-	public String getDictionaryEncoding() {
-		return dictionaryEncoding;
-	}
+  public URL getModel() {
+    return modelUrl;
+  }
 
 }

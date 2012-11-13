@@ -1,215 +1,170 @@
+/*
+ *  Copyright (c) 1995-2012, The University of Sheffield. See the file
+ *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
+ *
+ *  This file is part of GATE (see http://gate.ac.uk/), and is free
+ *  software, licenced under the GNU Library General Public License,
+ *  Version 2, June 1991 (in the distribution as file licence.html,
+ *  and also available at http://gate.ac.uk/gate/licence.html).
+ *
+ *  $Id$
+ */
 package gate.opennlp;
 
-import gate.Annotation;
-import gate.AnnotationSet;
-import gate.FeatureMap;
-import gate.Resource;
-import gate.creole.AbstractLanguageAnalyser;
-import gate.creole.ExecutionException;
-import gate.creole.ResourceInstantiationException;
-
-import java.io.DataInputStream;
-import java.io.IOException;
+import gate.*;
+import gate.creole.*;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.RunTime;
+import gate.util.InvalidOffsetException;
+import java.io.*;
 import java.net.URL;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.zip.GZIPInputStream;
-
-import opennlp.maxent.MaxentModel;
-import opennlp.maxent.io.BinaryGISModelReader;
 import opennlp.tools.chunker.ChunkerME;
-
+import opennlp.tools.chunker.ChunkerModel;
 import org.apache.log4j.Logger;
 
 /**
- * Wrapper for the opennlp chuncker
- * 
- * @author <A
- *         HREF="mailto:georgiev@ontotext.com">georgi.georgiev@ontotext.com</A>
- *         Created: Thu Dec 11 16:25:59 EET 2008
+ * Wrapper PR for the OpenNLP chunker.
  */
+@CreoleResource(name = "OpenNLP Chunker", 
+    comment = "Chunker using an OpenNLP maxent model",
+    helpURL = "http://gate.ac.uk/sale/tao/splitch21.html#sec:misc-creole:opennlp")
+public class OpenNlpChunker extends AbstractLanguageAnalyser {
 
-public @SuppressWarnings("all")
-class OpenNlpChunker extends AbstractLanguageAnalyser {
+  private static final long serialVersionUID = 3254481728303447340L;
+  private static final Logger logger = Logger.getLogger(OpenNlpChunker.class);
 
-	public static final long serialVersionUID = 1L;
+  
+  /* CREOLE PARAMETERS & SUCH*/
+  private String inputASName, outputASName, chunkFeature;
+  private URL modelUrl;
+  private ChunkerModel model;
+  private ChunkerME chunker;
+  private String tokenType = ANNIEConstants.TOKEN_ANNOTATION_TYPE;
+  private String sentenceType = ANNIEConstants.SENTENCE_ANNOTATION_TYPE;
+  private String posFeature = ANNIEConstants.TOKEN_CATEGORY_FEATURE_NAME;
+  private String stringFeature = ANNIEConstants.TOKEN_STRING_FEATURE_NAME;
 
-	private static final Logger logger = Logger.getLogger(OpenNlpChunker.class);
 
-	String inputASName;
 
-	public String getInputASName() {
-		return inputASName;
-	}
-
-	public void setInputASName(String inputASName) {
-		this.inputASName = inputASName;
-	}
-
-	/**
-	 * @author georgi georgiev
-	 * @return MaxentModel
-	 * @param String
-	 *            path to MaxentModel
-	 */
-	public static MaxentModel getModel(URL name) {
-		try {
-			return new BinaryGISModelReader(new DataInputStream(
-					new GZIPInputStream(name.openStream()))).getModel();
-		} catch (IOException E) {
-			E.printStackTrace();
-			return null;
-		}
-	}
-
-	// private members
-	private String annotationSetName = null;
-	ChunkerME chunker = null;
-
-	private URL model;
-
-	@SuppressWarnings("unchecked")
 	@Override
 	public void execute() throws ExecutionException {
-		// text doc annotations
-		AnnotationSet annotations;
-		if (annotationSetName != null && annotationSetName.length() > 0) {
-			annotations = document.getAnnotations(annotationSetName);
-		} else {
-			annotations = document.getAnnotations();
-		}
+	  AnnotationSet inputAS = document.getAnnotations(inputASName);
+	  AnnotationSet outputAS = document.getAnnotations(outputASName);
+	  boolean sameAS = inputAS.equals(outputAS);
 
-		// getdoc.get text
-		// String text = document.getContent().toString();
+		AnnotationSet sentences = inputAS.get(sentenceType);
+		for (Annotation sentence : sentences)  {
+		  AnnotationSet tokenSet = Utils.getContainedAnnotations(inputAS, sentence, tokenType);
+      Sentence tokens = new Sentence(tokenSet, stringFeature, posFeature);
+      String[] strings = tokens.getStrings();
+      String[] posTags = tokens.getTags();
 
-		// get token and sentence annotations
-		AnnotationSet sentences = annotations.get("Sentence");
-		AnnotationSet tokensAS = annotations.get("Token");
-
-		if (sentences != null && sentences.size() > 0 && tokensAS != null
-				&& tokensAS.size() > 0) {
-
-			// order them
-			List<Annotation> sentList = new LinkedList<Annotation>();
-
-			for (Iterator iterator = sentences.iterator(); iterator.hasNext();) {
-				sentList.add((Annotation) iterator.next());
-
-			}
-
-			java.util.Collections.sort(sentList,
-					new gate.util.OffsetComparator());
-
-			// for each sentence get token annotations
-			for (Iterator iterator = sentList.iterator(); iterator.hasNext();) {
-				Annotation annotation = (Annotation) iterator.next();
-
-				AnnotationSet sentenceTokens = annotations.get("Token",
-						annotation.getStartNode().getOffset(), annotation
-								.getEndNode().getOffset());
-
-				// create a list
-
-				List<Annotation> annList = new LinkedList<Annotation>();
-
-				for (Iterator<Annotation> iterator2 = sentenceTokens.iterator(); iterator2
-						.hasNext();) {
-					annList.add(iterator2.next());
-
-				}
-
-				// order on offset
-				Collections.sort(annList, new gate.util.OffsetComparator());
-
-				// make the array be string[] sentence
-				String[] tokens = new String[sentenceTokens.size()];
-				String[] postags = new String[sentenceTokens.size()];
-				int i = 0;
-				for (Iterator iterator3 = annList.iterator(); iterator3
-						.hasNext();) {
-
-					Annotation token = (Annotation) iterator3.next();
-
-					tokens[i] = token.getFeatures().get("string").toString();
-					Object posObj = token.getFeatures().get("category");
-					if (posObj == null) {
-						throw new ExecutionException(
-								"Token found with no POS tag category!\n"
-										+ "Did you run a POS tagger before the OpenNLPChunker?");
-					}
-					postags[i] = posObj.toString();
-
-					i++;
-				}
-
-				// run pos chunker
-				String[] chunks = chunker.chunk(tokens, postags);
-
-				// add tohose chunk tags to token annotations
-
-				int j = 0;
-
-				for (Iterator iterator4 = annList.iterator(); iterator4
-						.hasNext();) {
-					Annotation token = (Annotation) iterator4.next();
-
-					FeatureMap fm = token.getFeatures();
-					fm.put("chunk", chunks[j]);
-
-					token.setFeatures(fm);
-
-					j++;
-
-				}
-			}
-		} else {
-			throw new ExecutionException("No sentences or tokens to process!\n"
-					+ "Please run a sentence splitter "
-					+ "and tokeniser first!");
-
+      String[] chunkTags = chunker.chunk(strings, posTags);
+      
+      
+      
+      for (int i=0 ; i < chunkTags.length ; i++) {
+        
+        if (sameAS) { 
+          // add feature to existing annotation
+          tokens.get(i).getFeatures().put(chunkFeature, chunkTags[i]);
+        }
+        else { 
+          // new annotation with old features and new one
+          Annotation oldToken = tokens.get(i);
+          long start = oldToken.getStartNode().getOffset();
+          long end   = oldToken.getEndNode().getOffset();
+          FeatureMap fm = Factory.newFeatureMap();
+          fm.putAll(oldToken.getFeatures());
+          fm.put(chunkFeature, chunkTags[i]);
+          try {
+            outputAS.add(start, end, tokenType, fm);
+          }
+          catch (InvalidOffsetException e) {
+            throw new ExecutionException(e);
+          }
+        }
+      }
 		}
 	}
-
-	public String getAnnotationSetName() {
-		return annotationSetName;
-	}
-
-	public URL getModel() {
-		return model;
-	}
-
-	/* getters and setters for the PR */
-	/* public members */
-
+	
+		
+		
 	@Override
 	public Resource init() throws ResourceInstantiationException {
-		// logger.error("Chunker url is: " + model.getFile());
-		try {
-			chunker = new ChunkerME(getModel(model));
-			// "/home/joro/work/m_learning/models/Chunker_Genia.bin.gz"));
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error("Chunker can not be initialized!");
-			throw new RuntimeException("Chunker cannot be initialized!", e);
-		}
-
-		return this;
-
+    InputStream modelInput = null;
+    try {
+      modelInput = modelUrl.openStream();
+      this.model = new ChunkerModel(modelInput);
+      this.chunker = new ChunkerME(model);
+      logger.info("OpenNLP POS Chunker initialized!");
+    }
+    catch(IOException e) {
+      throw new ResourceInstantiationException(e);
+    }
+    finally {
+      if (modelInput != null) {
+        try {
+          modelInput.close();
+        }
+        catch (IOException e) {
+          throw new ResourceInstantiationException(e);
+        }
+      }
+    }
+    
+    super.init();
+    return this;
 	}
 
-	@Override
-	public void reInit() throws ResourceInstantiationException {
-		init();
-	}
+	
+	
+ /* CREOLE PARAMETERS */
+  
+  @RunTime
+  @CreoleParameter(defaultValue = "",
+      comment = "annotation set containing tokens and sentences")
+  public void setInputASName(String name) {
+    this.inputASName = name;
+  }
+  
+  public String getInputASName() {
+    return this.inputASName;
+  }
 
-	public void setAnnotationSetName(String a) {
-		annotationSetName = a;
-	}
+  @RunTime
+  @CreoleParameter(defaultValue = "",
+      comment = "annotation set for tagged tokens")
+  public void setOutputASName(String name) {
+    this.outputASName = name;
+  }
+  
+  public String getOutputASName() {
+    return this.outputASName;
+  }
 
-	public void setModel(URL model) {
-		this.model = model;
-	}
+  
+  @RunTime
+  @CreoleParameter(defaultValue = "chunk",
+      comment = "feature for chunk tags")
+  public void setChunkFeature(String name) {
+    this.chunkFeature = name;
+  }
+  
+  public String getChunkFeature() {
+    return this.chunkFeature;
+  }
+
+  
+  @CreoleParameter(defaultValue = "models/english/en-chunker.bin",
+      comment = "location of the tagger model")
+  public void setModel(URL model) {
+    this.modelUrl = model;
+  }
+
+  public URL getModel() {
+    return modelUrl;
+  }
 
 }
