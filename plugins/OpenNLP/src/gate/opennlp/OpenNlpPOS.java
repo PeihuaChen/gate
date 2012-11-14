@@ -39,120 +39,114 @@ public class OpenNlpPOS extends AbstractLanguageAnalyser {
 
   private static final long serialVersionUID = 4010938787910114221L;
   private static final Logger logger = Logger.getLogger(OpenNlpPOS.class);
-
   
   
-  /* CREOLE PARAMETERS & SUCH*/
+  /* CREOLE PARAMETERS & WRAPPED COMPONENTS */
   private String inputASName, outputASName;
   private URL modelUrl;
   private POSModel model;
   private POSTaggerME tagger;
-  private String tokenType = ANNIEConstants.TOKEN_ANNOTATION_TYPE;
-  private String sentenceType = ANNIEConstants.SENTENCE_ANNOTATION_TYPE;
-  private String stringFeature = ANNIEConstants.TOKEN_STRING_FEATURE_NAME;
-  private String posFeature = ANNIEConstants.TOKEN_CATEGORY_FEATURE_NAME;
 
 
 	@Override
-	public void execute() throws ExecutionException {
+  public void execute() throws ExecutionException {
     interrupted = false;
     long startTime = System.currentTimeMillis();
-    if(document == null) {
-      throw new ExecutionException("No document to process!");
-    }
+    if(document == null) { throw new ExecutionException(
+        "No document to process!"); }
     fireStatusChanged("Running " + this.getName() + " on " + document.getName());
     fireProgressChanged(0);
-	  
-	  AnnotationSet inputAS = document.getAnnotations(inputASName);
-	  AnnotationSet outputAS = document.getAnnotations(outputASName);
-	  boolean sameAS = inputAS.equals(outputAS);
 
-		AnnotationSet sentences = inputAS.get(sentenceType);
-		int nbrDone = 0;
-		int nbrSentences = sentences.size();
+    AnnotationSet inputAS = document.getAnnotations(inputASName);
+    AnnotationSet outputAS = document.getAnnotations(outputASName);
+    boolean sameAS = inputAS.equals(outputAS);
 
-		for (Annotation sentence : sentences) {
-		  AnnotationSet tokenSet = Utils.getContainedAnnotations(inputAS, sentence, tokenType);
-		  Sentence tokens = new Sentence(tokenSet, stringFeature, null);
-		  String[] strings = tokens.getStrings();
+    AnnotationSet sentences = inputAS.get(SENTENCE_ANNOTATION_TYPE);
+    int nbrDone = 0;
+    int nbrSentences = sentences.size();
 
-		  if (strings.length > 0) {
-		    /* Run the OpenNLP tagger on this sentence,
-		     * then apply the tags. 	   */
-		    String[] tags = tagger.tag(strings);
-		    
-		    for (int i=0 ; i < tags.length ; i++) {
-		      if (sameAS) { 
-		        // add feature to existing annotation
-		        tokens.get(i).getFeatures().put(posFeature, tags[i]);
-		      }
-		      else { 
-		        // new annotation with old features and new one
-		        Annotation oldToken = tokens.get(i);
-		        long start = oldToken.getStartNode().getOffset();
-		        long end   = oldToken.getEndNode().getOffset();
-		        FeatureMap fm = Factory.newFeatureMap();
-		        fm.putAll(oldToken.getFeatures());
-		        fm.put(posFeature, tags[i]);
-		        try {
-		          outputAS.add(start, end, tokenType, fm);
-		        }
-		        catch (InvalidOffsetException e) {
-		          throw new ExecutionException(e);
-		        }
-		      }
-		    } // for loop applying tags
-		  } // if strings is not empty
-		  
-      if(isInterrupted()) { 
-        throw new ExecutionInterruptedException("Execution of " + 
-            this.getName() + " has been abruptly interrupted!");
-      }
+    for(Annotation sentence : sentences) {
+      AnnotationSet tokenSet =
+          Utils.getContainedAnnotations(inputAS, sentence,
+              TOKEN_ANNOTATION_TYPE);
+      Sentence tokens = new Sentence(tokenSet, TOKEN_STRING_FEATURE_NAME, null);
+      String[] strings = tokens.getStrings();
+
+      if(strings.length > 0) {
+        /*
+         * Run the OpenNLP tagger on this sentence, then apply the tags.
+         */
+        String[] tags = tagger.tag(strings);
+
+        for(int i = 0; i < tags.length; i++) {
+          if(sameAS) {
+            // add feature to existing annotation
+            tokens.get(i).getFeatures()
+                .put(TOKEN_CATEGORY_FEATURE_NAME, tags[i]);
+          } else {
+            // new annotation with old features and new one
+            Annotation oldToken = tokens.get(i);
+            long start = oldToken.getStartNode().getOffset();
+            long end = oldToken.getEndNode().getOffset();
+            FeatureMap fm = Factory.newFeatureMap();
+            fm.putAll(oldToken.getFeatures());
+            fm.put(TOKEN_CATEGORY_FEATURE_NAME, tags[i]);
+            try {
+              outputAS.add(start, end, TOKEN_ANNOTATION_TYPE, fm);
+            } catch(InvalidOffsetException e) {
+              throw new ExecutionException(e);
+            }
+          }
+        } // for loop applying tags
+      } // if strings is not empty
+
+      if(isInterrupted()) { throw new ExecutionInterruptedException(
+          "Execution of " + this.getName() + " has been abruptly interrupted!"); }
       nbrDone++;
       fireProgressChanged((int)(100 * nbrDone / nbrSentences));
-		} // for sentence : sentences
-		
+    } // for sentence : sentences
+
     fireProcessFinished();
-    fireStatusChanged("Finished " + this.getName() + " on " + document.getName()
-        + " in " + NumberFormat.getInstance().format(
+    fireStatusChanged("Finished "
+        + this.getName()
+        + " on "
+        + document.getName()
+        + " in "
+        + NumberFormat.getInstance().format(
             (double)(System.currentTimeMillis() - startTime) / 1000)
         + " seconds!");
-	}
+  }
 
 	
-	@Override
-	public Resource init() throws ResourceInstantiationException {
+  @Override
+  public Resource init() throws ResourceInstantiationException {
     InputStream modelInput = null;
     try {
       modelInput = modelUrl.openStream();
       this.model = new POSModel(modelInput);
       this.tagger = new POSTaggerME(model);
       logger.info("OpenNLP POS Tagger: " + modelUrl.toString());
-    }
-    catch(IOException e) {
+    } catch(IOException e) {
       throw new ResourceInstantiationException(e);
-    }
-    finally {
-      if (modelInput != null) {
+    } finally {
+      if(modelInput != null) {
         try {
           modelInput.close();
-        }
-        catch (IOException e) {
+        } catch(IOException e) {
           throw new ResourceInstantiationException(e);
         }
       }
     }
-    
+
     super.init();
     return this;
-	}
+  }
+  
 
-	
-	@Override
-	public void reInit() throws ResourceInstantiationException {
-		init();
-	}
-
+  @Override
+  public void reInit() throws ResourceInstantiationException {
+    init();
+  }
 	
 	/* CREOLE PARAMETERS */
 	

@@ -38,116 +38,114 @@ public class OpenNlpTokenizer extends AbstractLanguageAnalyser {
   private static final long serialVersionUID = 6965074842061250720L;
   private static final Logger logger = Logger.getLogger(OpenNlpTokenizer.class);
 
-  
-	/* CREOLE PARAMETERS & SUCH*/
-	private String annotationSetName = null;
-	private TokenizerME tokenizer = null;
-	private TokenizerModel model = null;
-	private URL modelUrl;
-  private String tokenType = ANNIEConstants.TOKEN_ANNOTATION_TYPE;
-  private String spaceTokenType = ANNIEConstants.SPACE_TOKEN_ANNOTATION_TYPE;
-  private String stringFeature = ANNIEConstants.TOKEN_STRING_FEATURE_NAME;
-  
-	
+  /* CREOLE PARAMETERS & WRAPPED COMPONENTS */
+  private String annotationSetName = null;
+  private URL modelUrl;
+  private TokenizerME tokenizer = null;
+  private TokenizerModel model = null;	
 
-	public void execute() throws ExecutionException {
+  
+  public void execute() throws ExecutionException {
     interrupted = false;
     long startTime = System.currentTimeMillis();
-    if(document == null) {
-      throw new ExecutionException("No document to process!");
-    }
+    if(document == null) { throw new ExecutionException(
+        "No document to process!"); }
     fireStatusChanged("Running " + this.getName() + " on " + document.getName());
     fireProgressChanged(0);
 
     AnnotationSet annotations = document.getAnnotations(annotationSetName);
-		String text = document.getContent().toString();
+    String text = document.getContent().toString();
     checkInterruption();
-		Span[] spans = tokenizer.tokenizePos(text);
-		
-		/* The spans ought to be ordered, but the OpenNLP
-		 * API is unclear.	We need to be sure they are in 
-		 * order so we can spot the gaps and put Space
-		 * Token annotations on them.	 */
-		Arrays.sort(spans);
-		long previousEnd = 0;
-		
-		for (Span span : spans) {
-	    checkInterruption();
-      long start = (long) span.getStart();
-      long end   = (long) span.getEnd();
+    Span[] spans = tokenizer.tokenizePos(text);
 
-      if (start > previousEnd) {
+    /*
+     * The spans ought to be ordered, but the OpenNLP API is unclear. We need to
+     * be sure they are in order so we can spot the gaps and put Space Token
+     * annotations on them.
+     */
+    Arrays.sort(spans);
+    int previousEnd = 0;
+
+    for(Span span : spans) {
+      checkInterruption();
+      int tokenStart = span.getStart();
+      int tokenEnd = span.getEnd();
+
+      if(tokenStart > previousEnd) {
         FeatureMap sfm = Factory.newFeatureMap();
         sfm.put("source", "OpenNLP");
+        sfm.put(TOKEN_STRING_FEATURE_NAME,
+            text.substring(previousEnd, tokenStart));
+        sfm.put(TOKEN_LENGTH_FEATURE_NAME, tokenStart - previousEnd);
         try {
-          annotations.add(previousEnd, start, spaceTokenType, sfm);
-        }
-        catch (InvalidOffsetException e) {
+          annotations.add((long)previousEnd, (long)tokenStart,
+              SPACE_TOKEN_ANNOTATION_TYPE, sfm);
+        } catch(InvalidOffsetException e) {
           throw new ExecutionException(e);
         }
       }
-      
-      previousEnd = end;
-      
-			FeatureMap fm = Factory.newFeatureMap();
-			fm.put("source", "OpenNLP");
-			fm.put(stringFeature, text.substring(span.getStart(), span.getEnd()));
-			try {
-				annotations.add(start, end, tokenType, fm);
-			} 
-			catch (InvalidOffsetException e) {
-				throw new ExecutionException(e);
-			}
-		}
 
-		fireProcessFinished();
-    fireStatusChanged("Finished " + this.getName() + " on " + document.getName()
-        + " in " + NumberFormat.getInstance().format(
+      previousEnd = tokenEnd;
+
+      FeatureMap fm = Factory.newFeatureMap();
+      fm.put("source", "OpenNLP");
+      fm.put(TOKEN_STRING_FEATURE_NAME, text.substring(tokenStart, tokenEnd));
+      fm.put(TOKEN_LENGTH_FEATURE_NAME, span.length());
+      try {
+        annotations.add((long)tokenStart, (long)tokenEnd,
+            TOKEN_ANNOTATION_TYPE, fm);
+      } catch(InvalidOffsetException e) {
+        throw new ExecutionException(e);
+      }
+    }
+
+    fireProcessFinished();
+    fireStatusChanged("Finished "
+        + this.getName()
+        + " on "
+        + document.getName()
+        + " in "
+        + NumberFormat.getInstance().format(
             (double)(System.currentTimeMillis() - startTime) / 1000)
         + " seconds!");
-	}
+  }
 
+  
+  private void checkInterruption() throws ExecutionInterruptedException {
+    if(isInterrupted()) { throw new ExecutionInterruptedException(
+        "Execution of " + this.getName() + " has been abruptly interrupted!"); }
+  }
 
-	private void checkInterruption() throws ExecutionInterruptedException {
-    if(isInterrupted()) { 
-      throw new ExecutionInterruptedException("Execution of " + 
-          this.getName() + " has been abruptly interrupted!");
-    }
-	}
-	
-	
-	public Resource init() throws ResourceInstantiationException {
-	  InputStream modelInput = null;
+  
+  public Resource init() throws ResourceInstantiationException {
+    InputStream modelInput = null;
     try {
       modelInput = modelUrl.openStream();
       this.model = new TokenizerModel(modelInput);
       this.tokenizer = new TokenizerME(model);
       logger.info("OpenNLP Tokenizer: " + modelUrl.toString());
-    } 
-    catch(IOException e) {
+    } catch(IOException e) {
       throw new ResourceInstantiationException(e);
-    }
-    finally {
-      if (modelInput != null) {
+    } finally {
+      if(modelInput != null) {
         try {
           modelInput.close();
-        }
-        catch (IOException e) {
+        } catch(IOException e) {
           throw new ResourceInstantiationException(e);
         }
       }
     }
-		
-		super.init();
-		return this;
-	}
 
+    super.init();
+    return this;
+  }
+  
 
-	public void reInit() throws ResourceInstantiationException {
-		init();
-	}
+  public void reInit() throws ResourceInstantiationException {
+    init();
+  }
 
-
+  
 	/* CREOLE PARAMETERS */
 
 	@RunTime

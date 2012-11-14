@@ -67,7 +67,7 @@ public class Sentence
    * @param i
    * @return the GATE-style start offset in characters
    */
-public long getStartOffset(Span span) {
+  public long getStartOffset(Span span) {
     int start = span.getStart();
     if ( (start >= 0) && (start < size) ) {
       return this.tokens.get(start).getStartNode().getOffset();

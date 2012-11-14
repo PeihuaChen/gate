@@ -35,24 +35,19 @@ import gate.util.InvalidOffsetException;
     comment = "NER PR using a set of OpenNLP maxent models",
     helpURL = "http://gate.ac.uk/sale/tao/splitch21.html#sec:misc-creole:opennlp")
 public class OpenNLPNameFin extends AbstractLanguageAnalyser {
-	
+
   private static final long serialVersionUID = -5507338627058320125L;
   private static final Logger logger = Logger.getLogger(OpenNLPNameFin.class);
-	
-	
-  /* CREOLE PARAMETERS & SUCH*/
+
+
+  /* CREOLE PARAMETERS & WRAPPED COMPONENTS */
   private String inputASName, outputASName;
   private URL configUrl;
   private Map<NameFinderME, String> finders;
 
-  private String tokenType = ANNIEConstants.TOKEN_ANNOTATION_TYPE;
-  private String sentenceType = ANNIEConstants.SENTENCE_ANNOTATION_TYPE;
-  private String posFeature = ANNIEConstants.TOKEN_CATEGORY_FEATURE_NAME;
-  private String stringFeature = ANNIEConstants.TOKEN_STRING_FEATURE_NAME;
 
-
-	@Override
-	public void execute() throws ExecutionException {
+  @Override
+  public void execute() throws ExecutionException {
     interrupted = false;
     long startTime = System.currentTimeMillis();
     if(document == null) {
@@ -61,111 +56,117 @@ public class OpenNLPNameFin extends AbstractLanguageAnalyser {
     fireStatusChanged("Running " + this.getName() + " on " + document.getName());
     fireProgressChanged(0);
 
-	  AnnotationSet inputAS = document.getAnnotations(inputASName);
-	  AnnotationSet outputAS = document.getAnnotations(outputASName);
-	  AnnotationSet sentences = inputAS.get(sentenceType);
+    AnnotationSet inputAS = document.getAnnotations(inputASName);
+    AnnotationSet outputAS = document.getAnnotations(outputASName);
+    AnnotationSet sentences = inputAS.get(SENTENCE_ANNOTATION_TYPE);
 
-	  int nbrDone = 0;
-	  int nbrSentences = sentences.size();
-		
-		for (Annotation sentence : sentences) {
-		  /* For each input Sentence annotation, produce a list of
-		   * Token.string values and the data structure for translating
-		   * offsets.		   */
-		  AnnotationSet tokenSet = Utils.getContainedAnnotations(inputAS, sentence, tokenType);
-		  Sentence tokens = new Sentence(tokenSet, stringFeature, posFeature);
-		  String[] strings = tokens.getStrings();
-		  
-		  // Run each NameFinder over the sentence
-		  for (NameFinderME finder : finders.keySet()) {
-		    String type = finders.get(finder);
-		    Span[] spans = finder.find(strings);
+    int nbrDone = 0;
+    int nbrSentences = sentences.size();
 
-		    for (Span span : spans) {
-		      // Translate the offsets and create the output NE annotation
-		      long start = tokens.getStartOffset(span);
-		      long end = tokens.getEndOffset(span);
-		      FeatureMap fm = Factory.newFeatureMap();
-		      fm.put("source", "OpenNLP");
-		      try {
-		        outputAS.add(start, end, type, fm);
-		      }
-		      catch (InvalidOffsetException e) {
-		        throw new ExecutionException(e);
-		      }
-		      
-		      if(isInterrupted()) { 
-		        throw new ExecutionInterruptedException("Execution of " + 
-		            this.getName() + " has been abruptly interrupted!");
-		      }
-		    } // end loop over names from 1 finder in 1 sentence
-		  } // end loop over NameFinders within one sentence
+    for (Annotation sentence : sentences) {
+      /* For each input Sentence annotation, produce a list of
+       * Token.string values and the data structure for translating
+       * offsets.		   */
+      AnnotationSet tokenSet = Utils.getContainedAnnotations(inputAS, sentence, TOKEN_ANNOTATION_TYPE);
+      Sentence tokens = new Sentence(tokenSet, TOKEN_STRING_FEATURE_NAME, TOKEN_CATEGORY_FEATURE_NAME);
+      String[] strings = tokens.getStrings();
+
+      // Run each NameFinder over the sentence
+      for (NameFinderME finder : finders.keySet()) {
+        String type = finders.get(finder);
+        Span[] spans = finder.find(strings);
+
+        for (Span span : spans) {
+          // Translate the offsets and create the output NE annotation
+          long start = tokens.getStartOffset(span);
+          long end = tokens.getEndOffset(span);
+          FeatureMap fm = Factory.newFeatureMap();
+          fm.put("source", "OpenNLP");
+          try {
+            outputAS.add(start, end, type, fm);
+          }
+          catch (InvalidOffsetException e) {
+            throw new ExecutionException(e);
+          }
+
+          if(isInterrupted()) { 
+            throw new ExecutionInterruptedException("Execution of " + 
+                this.getName() + " has been abruptly interrupted!");
+          }
+        } // end loop over names from 1 finder in 1 sentence
+      } // end loop over NameFinders within one sentence
       nbrDone++;
       fireProgressChanged((int)(100 * nbrDone / nbrSentences));
-		} // end for sentence : sentences
-		
+    } // end for sentence : sentences
+
     fireProcessFinished();
     fireStatusChanged("Finished " + this.getName() + " on " + document.getName()
         + " in " + NumberFormat.getInstance().format(
             (double)(System.currentTimeMillis() - startTime) / 1000)
-        + " seconds!");
-	}
+            + " seconds!");
+  }
 
-	
-	@Override
-	public Resource init() throws ResourceInstantiationException {
-	  try {
-	    loadModels(this.configUrl);
-	  }
-	  catch (IOException e) {
-	    throw new ResourceInstantiationException(e);
-	  }
+
+  @Override
+  public Resource init() throws ResourceInstantiationException {
+    try {
+      loadModels(this.configUrl);
+    }
+    catch (IOException e) {
+      throw new ResourceInstantiationException(e);
+    }
     super.init();
     return this;
-	}
+  }
 
-	
-	private void loadModels(URL configUrl) throws IOException  {
-	  this.finders = new HashMap<NameFinderME, String>();
-	  Properties properties = new Properties();
-	  InputStream configInput = null;
-	  try {
-	    configInput = configUrl.openStream();
-	    properties.load(configInput);
-	  }
-	  finally {
-	    if (configInput != null) {
-	      configInput.close();
-	    }
-	  }
-	  
-	  Set<String> modelFiles = properties.stringPropertyNames();
-	  for (String filename : modelFiles) {
-	    InputStream modelInput = null;
-	    try {
-	      URL modelUrl = new URL(configUrl, filename);
-	      String type = properties.getProperty(filename);
-	      modelInput = modelUrl.openStream();
-	      TokenNameFinderModel model = new TokenNameFinderModel(modelInput);
-	      NameFinderME finder = new NameFinderME(model);
-	      this.finders.put(finder, type);
-	      logger.info("OpenNLP NameFinder: " + modelUrl.toString() + " -> " + type);
-	    }
-	    finally {
-	      if (modelInput != null) {
-	        modelInput.close();
-	      }
-	    }
-	  }
-	}
-	
-	
-	@Override
-	public void reInit() throws ResourceInstantiationException {
-		init();
-	}
 
-	
+  private void loadModels(URL configUrl) throws IOException  {
+    // Make an empty finder->annotationType table
+    this.finders = new HashMap<NameFinderME, String>();
+    
+    // Load the config file (flat table, 2 columns)
+    Properties properties = new Properties();
+    InputStream configInput = null;
+    try {
+      configInput = configUrl.openStream();
+      properties.load(configInput);
+    }
+    finally {
+      if (configInput != null) {
+        configInput.close();
+      }
+    }
+
+    // Go through the config entries
+    Set<String> modelFiles = properties.stringPropertyNames();
+    for (String filename : modelFiles) {
+      InputStream modelInput = null;
+      try {
+        // Initialize a NameFinder with this model
+        URL modelUrl = new URL(configUrl, filename);
+        String type = properties.getProperty(filename);
+        modelInput = modelUrl.openStream();
+        TokenNameFinderModel model = new TokenNameFinderModel(modelInput);
+        NameFinderME finder = new NameFinderME(model);
+        // Add it to the table with its annotation type
+        this.finders.put(finder, type);
+        logger.info("OpenNLP NameFinder: " + modelUrl.toString() + " -> " + type);
+      }
+      finally {
+        if (modelInput != null) {
+          modelInput.close();
+        }
+      }
+    }
+  }
+
+
+  @Override
+  public void reInit() throws ResourceInstantiationException {
+    init();
+  }
+
+
  /* CREOLE PARAMETERS */
   
   @RunTime
@@ -174,7 +175,7 @@ public class OpenNLPNameFin extends AbstractLanguageAnalyser {
   public void setInputASName(String name) {
     this.inputASName = name;
   }
-  
+
   public String getInputASName() {
     return this.inputASName;
   }
@@ -185,7 +186,7 @@ public class OpenNLPNameFin extends AbstractLanguageAnalyser {
   public void setOutputASName(String name) {
     this.outputASName = name;
   }
-  
+
   public String getOutputASName() {
     return this.outputASName;
   }

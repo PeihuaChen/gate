@@ -31,26 +31,21 @@ import org.apache.log4j.Logger;
 @CreoleResource(name = "OpenNLP Chunker", 
     comment = "Chunker using an OpenNLP maxent model",
     helpURL = "http://gate.ac.uk/sale/tao/splitch21.html#sec:misc-creole:opennlp")
-public class OpenNlpChunker extends AbstractLanguageAnalyser {
+public class OpenNlpChunker extends AbstractLanguageAnalyser  {
 
   private static final long serialVersionUID = 3254481728303447340L;
   private static final Logger logger = Logger.getLogger(OpenNlpChunker.class);
 
-  
+
   /* CREOLE PARAMETERS & SUCH*/
   private String inputASName, outputASName, chunkFeature;
   private URL modelUrl;
   private ChunkerModel model;
   private ChunkerME chunker;
-  private String tokenType = ANNIEConstants.TOKEN_ANNOTATION_TYPE;
-  private String sentenceType = ANNIEConstants.SENTENCE_ANNOTATION_TYPE;
-  private String posFeature = ANNIEConstants.TOKEN_CATEGORY_FEATURE_NAME;
-  private String stringFeature = ANNIEConstants.TOKEN_STRING_FEATURE_NAME;
 
 
-
-	@Override
-	public void execute() throws ExecutionException {
+  @Override
+  public void execute() throws ExecutionException {
     interrupted = false;
     long startTime = System.currentTimeMillis();
     if(document == null) {
@@ -59,26 +54,26 @@ public class OpenNlpChunker extends AbstractLanguageAnalyser {
     fireStatusChanged("Running " + this.getName() + " on " + document.getName());
     fireProgressChanged(0);
 
-AnnotationSet inputAS = document.getAnnotations(inputASName);
-	  AnnotationSet outputAS = document.getAnnotations(outputASName);
-	  boolean sameAS = inputAS.equals(outputAS);
+    AnnotationSet inputAS = document.getAnnotations(inputASName);
+    AnnotationSet outputAS = document.getAnnotations(outputASName);
+    boolean sameAS = inputAS.equals(outputAS);
 
-		AnnotationSet sentences = inputAS.get(sentenceType);
+    AnnotationSet sentences = inputAS.get(SENTENCE_ANNOTATION_TYPE);
     int nbrDone = 0;
     int nbrSentences = sentences.size();
 
-		for (Annotation sentence : sentences)  {
-		  AnnotationSet tokenSet = Utils.getContainedAnnotations(inputAS, sentence, tokenType);
-      Sentence tokens = new Sentence(tokenSet, stringFeature, posFeature);
+    for (Annotation sentence : sentences)  {
+      AnnotationSet tokenSet = Utils.getContainedAnnotations(inputAS, sentence, TOKEN_ANNOTATION_TYPE);
+      Sentence tokens = new Sentence(tokenSet, TOKEN_STRING_FEATURE_NAME, TOKEN_CATEGORY_FEATURE_NAME);
       String[] strings = tokens.getStrings();
       String[] posTags = tokens.getTags();
 
       String[] chunkTags = chunker.chunk(strings, posTags);
-      
-      
-      
+
+
+
       for (int i=0 ; i < chunkTags.length ; i++) {
-        
+
         if (sameAS) { 
           // add feature to existing annotation
           tokens.get(i).getFeatures().put(chunkFeature, chunkTags[i]);
@@ -92,7 +87,7 @@ AnnotationSet inputAS = document.getAnnotations(inputASName);
           fm.putAll(oldToken.getFeatures());
           fm.put(chunkFeature, chunkTags[i]);
           try {
-            outputAS.add(start, end, tokenType, fm);
+            outputAS.add(start, end, TOKEN_ANNOTATION_TYPE, fm);
           }
           catch (InvalidOffsetException e) {
             throw new ExecutionException(e);
@@ -103,22 +98,22 @@ AnnotationSet inputAS = document.getAnnotations(inputASName);
               this.getName() + " has been abruptly interrupted!");
         }
       } // end loop over chunk tags within one sentence
-      
+
       nbrDone++;
       fireProgressChanged((int)(100 * nbrDone / nbrSentences));
-		} // end for sentence : sentences
-		
+    } // end for sentence : sentences
+
     fireProcessFinished();
     fireStatusChanged("Finished " + this.getName() + " on " + document.getName()
         + " in " + NumberFormat.getInstance().format(
             (double)(System.currentTimeMillis() - startTime) / 1000)
-        + " seconds!");
-	}
-	
-		
-		
-	@Override
-	public Resource init() throws ResourceInstantiationException {
+            + " seconds!");
+  }
+
+
+
+  @Override
+  public Resource init() throws ResourceInstantiationException {
     InputStream modelInput = null;
     try {
       modelInput = modelUrl.openStream();
@@ -139,22 +134,22 @@ AnnotationSet inputAS = document.getAnnotations(inputASName);
         }
       }
     }
-    
+
     super.init();
     return this;
-	}
+  }
 
-	
-	
- /* CREOLE PARAMETERS */
-  
+
+
+  /* CREOLE PARAMETERS */
+
   @RunTime
   @CreoleParameter(defaultValue = "",
       comment = "annotation set containing tokens and sentences")
   public void setInputASName(String name) {
     this.inputASName = name;
   }
-  
+
   public String getInputASName() {
     return this.inputASName;
   }
@@ -165,24 +160,24 @@ AnnotationSet inputAS = document.getAnnotations(inputASName);
   public void setOutputASName(String name) {
     this.outputASName = name;
   }
-  
+
   public String getOutputASName() {
     return this.outputASName;
   }
 
-  
+
   @RunTime
   @CreoleParameter(defaultValue = "chunk",
       comment = "feature for chunk tags")
   public void setChunkFeature(String name) {
     this.chunkFeature = name;
   }
-  
+
   public String getChunkFeature() {
     return this.chunkFeature;
   }
 
-  
+
   @CreoleParameter(defaultValue = "models/english/en-chunker.bin",
       comment = "location of the tagger model")
   public void setModel(URL model) {
