@@ -14,31 +14,72 @@
  */
 package gate.util.persistence;
 
+import gate.Controller;
+import gate.Corpus;
+import gate.DataStore;
+import gate.Gate;
+import gate.LanguageAnalyser;
+import gate.LanguageResource;
+import gate.ProcessingResource;
+import gate.VisualResource;
+import gate.creole.ConditionalController;
+import gate.creole.ConditionalSerialAnalyserController;
+import gate.creole.ResourceInstantiationException;
+import gate.creole.SerialAnalyserController;
+import gate.event.ProgressListener;
+import gate.event.StatusListener;
+import gate.persist.GateAwareObjectInputStream;
+import gate.persist.PersistenceException;
+import gate.util.BomStrippingInputStreamReader;
+import gate.util.Err;
+import gate.util.Files;
+import gate.util.GateException;
+import gate.util.GateRuntimeException;
+import gate.util.NameBearer;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Reader;
+import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
+import org.apache.log4j.Logger;
+
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.reflection.FieldDictionary;
 import com.thoughtworks.xstream.converters.reflection.Sun14ReflectionProvider;
 import com.thoughtworks.xstream.converters.reflection.XStream12FieldKeySorter;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-import com.thoughtworks.xstream.io.xml.*;
-
-import java.io.*;
-import java.net.*;
-import java.text.NumberFormat;
-import java.util.*;
-
-import java.util.logging.Level;
-import javax.xml.stream.*;
-
-import org.apache.log4j.Logger;
-
-import gate.*;
-import gate.creole.*;
-import gate.event.ProgressListener;
-import gate.event.StatusListener;
-import gate.persist.GateAwareObjectInputStream;
-import gate.persist.PersistenceException;
-import gate.util.*;
+import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
+import com.thoughtworks.xstream.io.xml.QNameMap;
+import com.thoughtworks.xstream.io.xml.StaxDriver;
+import com.thoughtworks.xstream.io.xml.StaxReader;
+import com.thoughtworks.xstream.io.xml.XStream11NameCoder;
+import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
 
 /**
  * This class provides utility methods for saving resources through
@@ -115,7 +156,7 @@ public class PersistenceManager {
    * will actually be stored, except when the URL refers to a resource
    * within the current GATE home directory in which case the relative path
    * to the GATE home directory will be stored. If the property 
-   * gate.user.resourceshom is set to a directory path and the URL refers 
+   * gate.user.resourceshome is set to a directory path and the URL refers 
    * to a resource inside this directory, the relative path to this directory
    * will be stored. If resources are stored relative to gate home or
    * resources home, a warning will also be logged.
@@ -133,7 +174,10 @@ public class PersistenceManager {
         if(url.getProtocol().equals("file")) {
           try {
             String pathMarker = relativePathMarker;
+            
             File gateHomePath = getGateHomePath();
+            File resourceshomeDir = getResourceshomePath();
+            
             URL urlPersistenceFilePath = 
               getCanonicalFileIfPossible(currentPersistenceFile()).toURI().toURL();
             File urlPath = 
@@ -153,21 +197,10 @@ public class PersistenceManager {
             // If URL can be made relative to both gatehome and projecthome,
             // gatehome is preferred.
             if(currentUseGateHome() || currentWarnAboutGateHome()) {
-              String persistenceFilePathName =
-                urlPersistenceFilePath.getPath();
-              String gateHomePathName = gateHomePath.getPath();
-              String urlPathName = urlPath.getPath();
-              String resourceshomePathName = null;
-              if(getResourceshomePath() != null) {
-                resourceshomePathName = getResourceshomePath().getPath();
-              }
-              //logger.debug("urlPathName:           "+urlPathName);
-              //logger.debug("persistenFilePathName: "+persistenceFilePathName);
-              //logger.debug("gateHomePathName:      "+gateHomePathName);
-              //logger.debug("resourceshomePathName:   "+resourceshomePathName);
-              if(!persistenceFilePathName.startsWith(gateHomePathName) &&
-                 urlPathName.startsWith(gateHomePathName)) {
-                //logger.debug("Setting path marker to "+gatehomePathMarker);
+              
+              if (!isContainedWithin(currentPersistenceFile(), gateHomePath) &&
+                  isContainedWithin(urlPath, gateHomePath)) {
+                logger.debug("Setting path marker to "+gatehomePathMarker);
                 if(currentWarnAboutGateHome()) {
                   if(!currentHaveWarnedAboutGateHome().getValue()) {
                     logger.warn(
@@ -184,9 +217,9 @@ public class PersistenceManager {
                 if(currentUseGateHome()) {
                   pathMarker = gatehomePathMarker;
                 }
-              } else if(resourceshomePathName != null &&
-                 !persistenceFilePathName.startsWith(resourceshomePathName) &&
-                 urlPathName.startsWith(resourceshomePathName)) {
+              } else if(resourceshomeDir != null &&
+                  isContainedWithin(currentPersistenceFile(), resourceshomeDir) &&
+                  isContainedWithin(urlPath,resourceshomeDir)) {
                  if(currentWarnAboutGateHome()) {
                   if(!currentHaveWarnedAboutResourceshome().getValue()) {
                     logger.warn(
@@ -532,7 +565,29 @@ public class PersistenceManager {
     // we got out the while loop without finding anything; return null;
     return null;
   }
-
+  
+  /**
+   * This method can be used to determine if a specified file (or directory) is
+   * contained within a given directory.
+   * 
+   * @param file
+   *          is this file contained within
+   * @param directory
+   *          this directory
+   * @return true if the file is contained within the directory, false otherwise
+   */
+  public static boolean isContainedWithin(File file, File directory) {
+    
+    File parent = file.getParentFile();
+    while (parent != null)
+    {
+      if (parent.equals(directory)) return true;
+      parent = parent.getParentFile();
+    }
+    
+    return false;
+  }
+  
   /**
    * Calculates the relative path for a file: URL starting from a given
    * context which is also a file: URL.
@@ -544,92 +599,91 @@ public class PersistenceManager {
    *         result in the target URL.
    */
   public static String getRelativePath(URL context, URL target) {
-    if(context.getProtocol().equals("file")
-            && target.getProtocol().equals("file")) {
-      File contextFile = Files.fileFromURL(context);
-      File targetFile = Files.fileFromURL(target);
+    if(!context.getProtocol().equals("file")
+        || !target.getProtocol().equals("file"))
+      throw new GateRuntimeException(
+          "Both the target and the context URLs need to be \"file:\" URLs!");
 
-      // if the original context URL ends with a slash (i.e. denotes
-      // a directory), then we pretend we're taking a path relative to
-      // some file in that directory.  This is because the relative
-      // path from context file:/home/foo/bar to file:/home/foo/bar/baz
-      // is bar/baz, whereas the path from file:/home/foo/bar/ - with
-      // the trailing slash - is just baz.
-      if(context.toExternalForm().endsWith("/")) {
-        contextFile = new File(contextFile, "__dummy__");
+    File contextFile = Files.fileFromURL(context);
+    File targetFile = Files.fileFromURL(target);
+    // if the original context ends with a slash (i.e. denotes
+    // a directory), then we pretend we're taking a path relative to
+    // some file in that directory. This is because the relative
+    // path from context /home/foo/bar to /home/foo/bar/baz
+    // is bar/baz, whereas the path from /home/foo/bar/ - with
+    // the trailing slash - is just baz.
+    if(contextFile.isDirectory()) {
+      contextFile = new File(contextFile, "__dummy__");
+    }
+
+    List<File> targetPathComponents = new ArrayList<File>();
+    File aFile = targetFile.getParentFile();
+    while(aFile != null) {
+      targetPathComponents.add(0, aFile);
+      aFile = aFile.getParentFile();
+    }
+
+    List<File> contextPathComponents = new ArrayList<File>();
+    aFile = contextFile.getParentFile();
+    while(aFile != null) {
+      contextPathComponents.add(0, aFile);
+      aFile = aFile.getParentFile();
+    }
+
+    // the two lists can have 0..n common elements (0 when the files
+    // are on separate roots
+    int commonPathElements = 0;
+    while(commonPathElements < targetPathComponents.size()
+        && commonPathElements < contextPathComponents.size()
+        && targetPathComponents.get(commonPathElements).equals(
+            contextPathComponents.get(commonPathElements)))
+      commonPathElements++;
+
+    if(commonPathElements == 0) return targetFile.getAbsolutePath();
+
+    // construct the string for the relative URL
+    StringBuilder relativePath = new StringBuilder();
+    for(int i = commonPathElements; i < contextPathComponents.size(); i++) {
+      if(relativePath.length() == 0)
+        relativePath.append("..");
+      else relativePath.append("/..");
+    }
+
+    for(int i = commonPathElements; i < targetPathComponents.size(); i++) {
+      File f = targetPathComponents.get(i);
+      String aDirName = f.getName();
+      if(aDirName.length() == 0) {
+        aDirName = f.getAbsolutePath();
+        if(aDirName.endsWith(File.separator)) {
+          aDirName =
+              aDirName
+                  .substring(0, aDirName.length() - File.separator.length());
+        }
       }
 
-      List targetPathComponents = new ArrayList();
-      File aFile = targetFile.getParentFile();
-      while(aFile != null) {
-        targetPathComponents.add(0, aFile);
-        aFile = aFile.getParentFile();
-      }
-      List contextPathComponents = new ArrayList();
-      aFile = contextFile.getParentFile();
-      while(aFile != null) {
-        contextPathComponents.add(0, aFile);
-        aFile = aFile.getParentFile();
-      }
-      // the two lists can have 0..n common elements (0 when the files
-      // are
-      // on separate roots
-      int commonPathElements = 0;
-      while(commonPathElements < targetPathComponents.size()
-              && commonPathElements < contextPathComponents.size()
-              && targetPathComponents.get(commonPathElements).equals(
-                      contextPathComponents.get(commonPathElements)))
-        commonPathElements++;
-      // construct the string for the relative URL
-      String relativePath = "";
-      for(int i = commonPathElements; i < contextPathComponents.size(); i++) {
-        if(relativePath.length() == 0)
-          relativePath += "..";
-        else relativePath += "/..";
-      }
-      for(int i = commonPathElements; i < targetPathComponents.size(); i++) {
-        String aDirName = ((File)targetPathComponents.get(i)).getName();
-        if(aDirName.length() == 0) {
-          aDirName = ((File)targetPathComponents.get(i)).getAbsolutePath();
-          if(aDirName.endsWith(File.separator)) {
-            aDirName = aDirName.substring(0, aDirName.length()
-                    - File.separator.length());
-          }
-        }
-        // Out.prln("Adding \"" + aDirName + "\" name for " +
-        // targetPathComponents.get(i));
-        if(relativePath.length() == 0) {
-          relativePath += aDirName;
-        }
-        else {
-          relativePath += "/" + aDirName;
-        }
-      }
-      // we have the directory; add the file name
       if(relativePath.length() == 0) {
-        relativePath += targetFile.getName();
+        relativePath.append(aDirName);
+      } else {
+        relativePath.append("/").append(aDirName);
       }
-      else {
-        relativePath += "/" + targetFile.getName();
-      }
+    }
 
-      if(target.toExternalForm().endsWith("/")) {
-        // original target ended with a slash, so relative path should do too
-        relativePath += "/";
-      }
-      try {
-        URI relativeURI = new URI(null, null, relativePath, null, null);
-        return relativeURI.getRawPath();
-      }
-      catch(URISyntaxException use) {
-        throw new GateRuntimeException("Failed to generate relative path " +
-            "between context: " + context + " and target: " + target, use);
-      }
+    // we have the directory; add the file name
+    if(relativePath.length() == 0) {
+      relativePath.append(targetFile.getName());
+    } else {
+      relativePath.append("/").append(targetFile.getName());
     }
-    else {
-      throw new GateRuntimeException("Both the target and the context URLs "
-              + "need to be \"file:\" URLs!");
+
+    try {
+      URI relativeURI =
+          new URI(null, null, relativePath.toString(), null, null);
+      return relativeURI.getRawPath();
+    } catch(URISyntaxException use) {
+      throw new GateRuntimeException("Failed to generate relative path "
+          + "between context: " + context + " and target: " + target, use);
     }
+
   }
 
   public static void saveObjectToFile(Object obj, File file)
