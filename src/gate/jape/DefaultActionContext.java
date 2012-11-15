@@ -33,7 +33,6 @@ public class DefaultActionContext implements ActionContext {
   protected FeatureMap prfeatures;
   protected String prname;
   protected Controller controller;
-  protected boolean endPhaseSupported;
   protected boolean phaseEnded = false;
   protected ProcessingResource pr;
 
@@ -76,10 +75,6 @@ public class DefaultActionContext implements ActionContext {
 
   public boolean endPhase() {
     phaseEnded = true;
-    // all transducers using this ActionContext implementation support
-    // ending a phase. If another implementation does not support it,
-    // use a different ActionContext implementation (e.g. a subclass of this)
-    // or change the way singalling this is implemented.
     return true;
   }
 
