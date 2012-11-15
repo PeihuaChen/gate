@@ -188,7 +188,7 @@
                 <entry>
                   <string>taggerBinary</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>$relpath$../../../../../../GATE/gate/plugins/TaggerFramework/resources/Hunpos/runhunpos</urlString>
+                    <urlString>$relpath$runhunpos</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
                 <entry>
