@@ -20,6 +20,7 @@ import gate.creole.metadata.*;
 
 import java.io.*;
 import java.net.*;
+import java.text.NumberFormat;
 import java.util.*;
 
 import edu.stanford.nlp.ling.*;
@@ -105,6 +106,14 @@ implements ProcessingResource {
    * method called by a CorpusController.)
    */
   public void execute() throws ExecutionException {
+    interrupted = false;
+    long startTime = System.currentTimeMillis();
+    if(document == null) {
+      throw new ExecutionException("No document to process!");
+    }
+    fireStatusChanged("Running " + this.getName() + " on " + document.getName());
+    fireProgressChanged(0);
+
     if (debugMode) {
       System.out.println("Parsing document: " + document.getName());
     }
@@ -113,6 +122,7 @@ implements ProcessingResource {
       System.err.println("Warning: no mapping loaded!");
     }
     
+    checkInterruption();
     if (addConstituentAnnotations || addDependencyFeatures || addDependencyAnnotations || addPosTags) {
       parseSentences(document.getAnnotations(annotationSetName));
     }
@@ -120,6 +130,12 @@ implements ProcessingResource {
       System.err.println("There is nothing for the parser to do.");
       System.err.println("Please enable at least one of the \"add...\" options.");
     }
+    
+    fireProcessFinished();
+    fireStatusChanged("Finished " + this.getName() + " on " + document.getName()
+        + " in " + NumberFormat.getInstance().format(
+            (double)(System.currentTimeMillis() - startTime) / 1000)
+            + " seconds!");
   }
 
   
@@ -185,16 +201,22 @@ implements ProcessingResource {
    * sentence at a time and storing the result in the output AS. (Sentences are
    * scanned for Tokens. You have to run the ANNIE tokenizer and splitter before
    * this PR.)
+   * @throws ExecutionInterruptedException 
    */
-  private void parseSentences(AnnotationSet annotationSet) { 
+  private void parseSentences(AnnotationSet annotationSet) throws ExecutionInterruptedException { 
     List<Annotation> sentences = gate.Utils.inDocumentOrder(annotationSet.get(inputSentenceType));
-    int sentCtr = 0;
-    int sentCount = sentences.size();
+    int sentencesDone = 0;
+    int nbrSentences = sentences.size();
 
     for (Annotation sentence : sentences) {
-      sentCtr++;
-      parseOneSentence(annotationSet, sentence, sentCtr, sentCount);
-    }  
+      parseOneSentence(annotationSet, sentence, sentencesDone, nbrSentences);
+      sentencesDone++;
+      checkInterruption();
+    }
+    
+    sentencesDone++;
+    fireProgressChanged((int)(100 * sentencesDone / nbrSentences));
+
    }
     
 
@@ -210,8 +232,9 @@ implements ProcessingResource {
    * @param ofS
    *          total number of sentences for debugging output
    * @return  null if the sentence is empty
+   * @throws ExecutionInterruptedException 
    */
-  private void parseOneSentence(AnnotationSet annotationSet, Annotation sentence, int sentCtr, int sentCount) {
+  private void parseOneSentence(AnnotationSet annotationSet, Annotation sentence, int sentCtr, int sentCount) throws ExecutionInterruptedException {
     Tree tree;
     
     StanfordSentence stanfordSentence = new StanfordSentence(sentence, inputTokenType, annotationSet, reusePosTags);
@@ -236,11 +259,13 @@ implements ProcessingResource {
       }
 
       tree = stanfordParser.parseTree(wordList); 
+      checkInterruption();
 
       if (addConstituentAnnotations || addPosTags) {
         annotatePhraseStructureRecursively(annotationSet, stanfordSentence, tree, tree);
       }
 
+      checkInterruption();
       if (addDependencyFeatures || addDependencyAnnotations) {
         annotateDependencies(annotationSet, stanfordSentence, tree);
       }
@@ -515,6 +540,12 @@ implements ProcessingResource {
    */
   private void recordID(AnnotationSet annSet, Integer annotationID) {
     annSet.get(annotationID).getFeatures().put("ID", annotationID);
+  }
+
+  
+  private void checkInterruption() throws ExecutionInterruptedException {
+    if(isInterrupted()) { throw new ExecutionInterruptedException(
+        "Execution of " + this.getName() + " has been abruptly interrupted!"); }
   }
 
 
