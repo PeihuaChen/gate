@@ -39,7 +39,7 @@ implements ProcessingResource {
 
   private static final long serialVersionUID = -3062171258011850283L;
 
-  protected edu.stanford.nlp.parser.lexparser.LexicalizedParser stanfordParser;
+  protected LexicalizedParser stanfordParser;
 
   /* Type "SyntaxTreeNode" with feature "cat" is compatible with the 
    * classic SyntaxTreeViewer.  */
@@ -174,6 +174,7 @@ implements ProcessingResource {
    */
   @Override 
   public void reInit() throws ResourceInstantiationException {
+    stanfordParser = null;
     init();
   }  
 
@@ -448,6 +449,8 @@ implements ProcessingResource {
 
   private void instantiateStanfordParser()
     throws ResourceInstantiationException {
+    if(stanfordParser != null) return;
+    
     try {
       String filepath = Files.fileFromURL(parserFile).getAbsolutePath();
       stanfordParser = LexicalizedParser.getParserFromSerializedFile(filepath);
@@ -729,5 +732,23 @@ implements ProcessingResource {
     return this.mappingFileURL;
   }
 
+  /**
+   * Inject an existing instance of the LexicalizedParser.
+   * <b>This method is intended for use by {@link Factory#ducplicate}
+   * and should not be called directly.</b>
+   */
+  @Sharable
+  public void setStanfordParser(LexicalizedParser parser) {
+    this.stanfordParser = parser;
+  }
+  
+  /**
+   * Get the LexicalizedParser used internally by this PR.
+   * <b>This method is intended for use by {@link Factory#ducplicate}
+   * and should not be called directly.</b>
+   */
+  public LexicalizedParser getStanfordParser() {
+    return stanfordParser;
+  }
 
 }
