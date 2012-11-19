@@ -588,7 +588,7 @@ public class PersistenceManager {
     return false;
   }
   
-  /**
+   /**
    * Calculates the relative path for a file: URL starting from a given
    * context which is also a file: URL.
    *
@@ -599,91 +599,92 @@ public class PersistenceManager {
    *         result in the target URL.
    */
   public static String getRelativePath(URL context, URL target) {
-    if(!context.getProtocol().equals("file")
-        || !target.getProtocol().equals("file"))
-      throw new GateRuntimeException(
-          "Both the target and the context URLs need to be \"file:\" URLs!");
+    if(context.getProtocol().equals("file")
+            && target.getProtocol().equals("file")) {
+      File contextFile = Files.fileFromURL(context);
+      File targetFile = Files.fileFromURL(target);
 
-    File contextFile = Files.fileFromURL(context);
-    File targetFile = Files.fileFromURL(target);
-    // if the original context ends with a slash (i.e. denotes
-    // a directory), then we pretend we're taking a path relative to
-    // some file in that directory. This is because the relative
-    // path from context /home/foo/bar to /home/foo/bar/baz
-    // is bar/baz, whereas the path from /home/foo/bar/ - with
-    // the trailing slash - is just baz.
-    if(contextFile.isDirectory()) {
-      contextFile = new File(contextFile, "__dummy__");
-    }
+      // if the original context URL ends with a slash (i.e. denotes
+      // a directory), then we pretend we're taking a path relative to
+      // some file in that directory.  This is because the relative
+      // path from context file:/home/foo/bar to file:/home/foo/bar/baz
+      // is bar/baz, whereas the path from file:/home/foo/bar/ - with
+      // the trailing slash - is just baz.
+      if(context.toExternalForm().endsWith("/")) {
+        contextFile = new File(contextFile, "__dummy__");
+      }
 
-    List<File> targetPathComponents = new ArrayList<File>();
-    File aFile = targetFile.getParentFile();
-    while(aFile != null) {
-      targetPathComponents.add(0, aFile);
-      aFile = aFile.getParentFile();
-    }
-
-    List<File> contextPathComponents = new ArrayList<File>();
-    aFile = contextFile.getParentFile();
-    while(aFile != null) {
-      contextPathComponents.add(0, aFile);
-      aFile = aFile.getParentFile();
-    }
-
-    // the two lists can have 0..n common elements (0 when the files
-    // are on separate roots
-    int commonPathElements = 0;
-    while(commonPathElements < targetPathComponents.size()
-        && commonPathElements < contextPathComponents.size()
-        && targetPathComponents.get(commonPathElements).equals(
-            contextPathComponents.get(commonPathElements)))
-      commonPathElements++;
-
-    if(commonPathElements == 0) return targetFile.getAbsolutePath();
-
-    // construct the string for the relative URL
-    StringBuilder relativePath = new StringBuilder();
-    for(int i = commonPathElements; i < contextPathComponents.size(); i++) {
-      if(relativePath.length() == 0)
-        relativePath.append("..");
-      else relativePath.append("/..");
-    }
-
-    for(int i = commonPathElements; i < targetPathComponents.size(); i++) {
-      File f = targetPathComponents.get(i);
-      String aDirName = f.getName();
-      if(aDirName.length() == 0) {
-        aDirName = f.getAbsolutePath();
-        if(aDirName.endsWith(File.separator)) {
-          aDirName =
-              aDirName
-                  .substring(0, aDirName.length() - File.separator.length());
+      List targetPathComponents = new ArrayList();
+      File aFile = targetFile.getParentFile();
+      while(aFile != null) {
+        targetPathComponents.add(0, aFile);
+        aFile = aFile.getParentFile();
+      }
+      List contextPathComponents = new ArrayList();
+      aFile = contextFile.getParentFile();
+      while(aFile != null) {
+        contextPathComponents.add(0, aFile);
+        aFile = aFile.getParentFile();
+      }
+      // the two lists can have 0..n common elements (0 when the files
+      // are
+      // on separate roots
+      int commonPathElements = 0;
+      while(commonPathElements < targetPathComponents.size()
+              && commonPathElements < contextPathComponents.size()
+              && targetPathComponents.get(commonPathElements).equals(
+                      contextPathComponents.get(commonPathElements)))
+        commonPathElements++;
+      // construct the string for the relative URL
+      String relativePath = "";
+      for(int i = commonPathElements; i < contextPathComponents.size(); i++) {
+        if(relativePath.length() == 0)
+          relativePath += "..";
+        else relativePath += "/..";
+      }
+      for(int i = commonPathElements; i < targetPathComponents.size(); i++) {
+        String aDirName = ((File)targetPathComponents.get(i)).getName();
+        if(aDirName.length() == 0) {
+          aDirName = ((File)targetPathComponents.get(i)).getAbsolutePath();
+          if(aDirName.endsWith(File.separator)) {
+            aDirName = aDirName.substring(0, aDirName.length()
+                    - File.separator.length());
+          }
+        }
+        // Out.prln("Adding \"" + aDirName + "\" name for " +
+        // targetPathComponents.get(i));
+        if(relativePath.length() == 0) {
+          relativePath += aDirName;
+        }
+        else {
+          relativePath += "/" + aDirName;
         }
       }
-
+      // we have the directory; add the file name
       if(relativePath.length() == 0) {
-        relativePath.append(aDirName);
-      } else {
-        relativePath.append("/").append(aDirName);
+        relativePath += targetFile.getName();
+      }
+      else {
+        relativePath += "/" + targetFile.getName();
+      }
+
+      if(target.toExternalForm().endsWith("/")) {
+        // original target ended with a slash, so relative path should do too
+        relativePath += "/";
+      }
+      try {
+        URI relativeURI = new URI(null, null, relativePath, null, null);
+        return relativeURI.getRawPath();
+      }
+      catch(URISyntaxException use) {
+        throw new GateRuntimeException("Failed to generate relative path " +
+            "between context: " + context + " and target: " + target, use);
       }
     }
-
-    // we have the directory; add the file name
-    if(relativePath.length() == 0) {
-      relativePath.append(targetFile.getName());
-    } else {
-      relativePath.append("/").append(targetFile.getName());
+    else {
+      throw new GateRuntimeException("Both the target and the context URLs "
+              + "need to be \"file:\" URLs!");
     }
-
-    try {
-      URI relativeURI =
-          new URI(null, null, relativePath.toString(), null, null);
-      return relativeURI.getRawPath();
-    } catch(URISyntaxException use) {
-      throw new GateRuntimeException("Failed to generate relative path "
-          + "between context: " + context + " and target: " + target, use);
-    }
-
   }
 
   public static void saveObjectToFile(Object obj, File file)
