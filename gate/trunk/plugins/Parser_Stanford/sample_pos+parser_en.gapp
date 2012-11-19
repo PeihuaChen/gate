@@ -304,7 +304,14 @@
     </initParams>
     <features class="gate.util.persistence.MapPersistence">
       <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-      <localMap/>
+      <localMap>
+        <entry>
+          <string>gate.app.MetadataURL</string>
+          <gate.util.persistence.PersistenceManager-URLHolder>
+            <urlString>$relpath$.sample_pos+parser_en-metadata/metadata.xml</urlString>
+          </gate.util.persistence.PersistenceManager-URLHolder>
+        </entry>
+      </localMap>
     </features>
   </application>
 </gate.util.persistence.GateApplication>
