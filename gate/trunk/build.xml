@@ -396,6 +396,7 @@
       Tagger_Framework Tagger_Lupedia Tagger_Measurements Tagger_MetaMap 
       Tagger_MutationFinder Tagger_NormaGene Tagger_NP_Chunking Tagger_Numbers 
       Tagger_OpenCalais Tagger_PennBio Tagger_Zemanta Teamware_Tools 
+      TermRaider
       Tools UIMA Web_Crawler_Websphinx WordNet
     " />
   <target name="plugins.build" depends="jar">

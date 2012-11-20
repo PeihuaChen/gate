@@ -31,6 +31,7 @@
 	<classpathentry kind="src" output="plugins/Format_PubMed/classes" path="plugins/Format_PubMed/src"/>
 	<classpathentry kind="src" path="plugins/Language_Identification/src"/>
 	<classpathentry kind="src" output="plugins/Tagger_Numbers/classes" path="plugins/Tagger_Numbers/src"/>
+	<classpathentry kind="src" output="plugins/TermRaider/classes" path="plugins/TermRaider/src"/>
 	<classpathentry exported="true" kind="lib" path="lib/jdom.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/junit.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ant.jar"/>
