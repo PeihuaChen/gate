@@ -41,7 +41,7 @@ public class ActionMakeOntology
   }
 
   public void actionPerformed(ActionEvent ae) {
-    JDialog ontologyDialog = new JDialog(MainFrame.getInstance(), "Generate an ontology from this Termbank", true);
+    JDialog ontologyDialog = new JDialog(MainFrame.getInstance(), "Generate an ontology from this Termbank (EXPERIMENTAL)", true);
     MainFrame.getGuiRoots().add(ontologyDialog);
     ontologyDialog.setLayout(new BorderLayout());
     SliderPanel sliderPanel = new SliderPanel(termbank, "populate the ontology", true, null);

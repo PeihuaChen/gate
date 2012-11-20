@@ -125,8 +125,8 @@ public abstract class AbstractTermbank extends AbstractBank
   
   protected void createActions() {
     actionsList = new ArrayList<Action>();
-    actionsList.add(new ActionMakeOntology("Generate GATE Ontology...", this));
-    actionsList.add(new ActionSaveRdf("Save as RDF-XML...", this));
+    actionsList.add(new ActionMakeOntology("Generate GATE Ontology... (EXPERIMENTAL)", this));
+    actionsList.add(new ActionSaveRdf("Save as RDF-XML... (EXPERIMENTAL)", this));
     actionsList.add(new ActionSaveCsv("Save as CSV...", this));
   }
   

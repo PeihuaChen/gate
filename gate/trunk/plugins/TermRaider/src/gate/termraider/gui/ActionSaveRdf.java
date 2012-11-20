@@ -40,7 +40,7 @@ public class ActionSaveRdf
   }
 
   public void actionPerformed(ActionEvent ae) {
-    JDialog saveDialog = new JDialog(MainFrame.getInstance(), "Save Termbank as RDF-XML", true);
+    JDialog saveDialog = new JDialog(MainFrame.getInstance(), "Save Termbank as RDF-XML (EXPERIMENTAL)", true);
     MainFrame.getGuiRoots().add(saveDialog);
     saveDialog.setLayout(new BorderLayout());
     SliderPanel sliderPanel = new SliderPanel(termbank, "save", true, null);
