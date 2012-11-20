@@ -44,11 +44,10 @@ public class TestSuite
          f=new File(creoleURL);
          reg.registerDirectories(f.toURI().toURL());
 
-         if (gate.Main.version.startsWith("3"))
-         {
-            f = new File(System.getProperty("gate.home"),"plugins/Tools/");
-            reg.registerDirectories(f.toURI().toURL());
-         }
+         f = new File(System.getProperty("gate.home"),"plugins/Tools/");
+         reg.registerDirectories(f.toURI().toURL());
+         f = new File(System.getProperty("gate.home"),"plugins/ANNIE/");
+         reg.registerDirectories(f.toURI().toURL());
 
          SerialAnalyserController controller = (SerialAnalyserController)Factory.createResource("gate.creole.SerialAnalyserController");
 
