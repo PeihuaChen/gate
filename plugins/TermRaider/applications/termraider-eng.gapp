@@ -2,28 +2,22 @@
   <urlList class="gate.util.persistence.CollectionPersistence">
     <localList>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$gatehome$plugins/ANNIE/</urlString>
+        <urlString>$relpath$../../ANNIE/</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$gatehome$plugins/TermRaider/</urlString>
+        <urlString>$relpath$../../TermRaider/</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$gatehome$plugins/Tools/</urlString>
+        <urlString>$relpath$../../Tools/</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$gatehome$plugins/Ontology/</urlString>
+        <urlString>$relpath$../../Ontology/</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$gatehome$plugins/Groovy/</urlString>
+        <urlString>$relpath$../../Groovy/</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$gatehome$plugins/Ontology_Tools/</urlString>
-      </gate.util.persistence.PersistenceManager-URLHolder>
-      <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$gatehome$plugins/Language_Identification/</urlString>
-      </gate.util.persistence.PersistenceManager-URLHolder>
-      <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$gatehome$plugins/TermRaider/</urlString>
+        <urlString>$relpath$../../Ontology_Tools/</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
     </localList>
     <collectionType>java.util.ArrayList</collectionType>
@@ -187,7 +181,7 @@ kyotoCopierPR.setParameterValue(&quot;termbank&quot;, null);
               <entry>
                 <string>rulesURL</string>
                 <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$gatehome$plugins/ANNIE/resources/tokeniser/DefaultTokeniser.rules</urlString>
+                  <urlString>$relpath$../../ANNIE/resources/tokeniser/DefaultTokeniser.rules</urlString>
                 </gate.util.persistence.PersistenceManager-URLHolder>
               </entry>
             </localMap>
@@ -227,19 +221,19 @@ kyotoCopierPR.setParameterValue(&quot;termbank&quot;, null);
               <entry>
                 <string>externalSplitListURL</string>
                 <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$gatehome$plugins/ANNIE/resources/regex-splitter/external-split-patterns.txt</urlString>
+                  <urlString>$relpath$../../ANNIE/resources/regex-splitter/external-split-patterns.txt</urlString>
                 </gate.util.persistence.PersistenceManager-URLHolder>
               </entry>
               <entry>
                 <string>nonSplitListURL</string>
                 <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$gatehome$plugins/ANNIE/resources/regex-splitter/non-split-patterns.txt</urlString>
+                  <urlString>$relpath$../../ANNIE/resources/regex-splitter/non-split-patterns.txt</urlString>
                 </gate.util.persistence.PersistenceManager-URLHolder>
               </entry>
               <entry>
                 <string>internalSplitListURL</string>
                 <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$gatehome$plugins/ANNIE/resources/regex-splitter/internal-split-patterns.txt</urlString>
+                  <urlString>$relpath$../../ANNIE/resources/regex-splitter/internal-split-patterns.txt</urlString>
                 </gate.util.persistence.PersistenceManager-URLHolder>
               </entry>
             </localMap>
@@ -291,7 +285,7 @@ kyotoCopierPR.setParameterValue(&quot;termbank&quot;, null);
               <entry>
                 <string>listsURL</string>
                 <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$gatehome$plugins/ANNIE/resources/gazetteer/lists.def</urlString>
+                  <urlString>$relpath$../../ANNIE/resources/gazetteer/lists.def</urlString>
                 </gate.util.persistence.PersistenceManager-URLHolder>
               </entry>
               <entry>
@@ -359,13 +353,13 @@ kyotoCopierPR.setParameterValue(&quot;termbank&quot;, null);
               <entry>
                 <string>rulesURL</string>
                 <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$gatehome$plugins/ANNIE/resources/heptag/ruleset</urlString>
+                  <urlString>$relpath$../../ANNIE/resources/heptag/ruleset</urlString>
                 </gate.util.persistence.PersistenceManager-URLHolder>
               </entry>
               <entry>
                 <string>lexiconURL</string>
                 <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$gatehome$plugins/ANNIE/resources/heptag/lexicon</urlString>
+                  <urlString>$relpath$../../ANNIE/resources/heptag/lexicon</urlString>
                 </gate.util.persistence.PersistenceManager-URLHolder>
               </entry>
             </localMap>
@@ -421,7 +415,7 @@ kyotoCopierPR.setParameterValue(&quot;termbank&quot;, null);
               <entry>
                 <string>rulesFile</string>
                 <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$gatehome$plugins/Tools/resources/morph/default.rul</urlString>
+                  <urlString>$relpath$../../Tools/resources/morph/default.rul</urlString>
                 </gate.util.persistence.PersistenceManager-URLHolder>
               </entry>
             </localMap>
@@ -477,7 +471,7 @@ kyotoCopierPR.setParameterValue(&quot;termbank&quot;, null);
               <entry>
                 <string>grammarURL</string>
                 <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$gatehome$plugins/ANNIE/resources/NE/main.jape</urlString>
+                  <urlString>$relpath$../../ANNIE/resources/NE/main.jape</urlString>
                 </gate.util.persistence.PersistenceManager-URLHolder>
               </entry>
               <entry>
@@ -529,7 +523,7 @@ kyotoCopierPR.setParameterValue(&quot;termbank&quot;, null);
               <entry>
                 <string>definitionFileURL</string>
                 <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$gatehome$plugins/ANNIE/resources/othomatcher/listsNM.def</urlString>
+                  <urlString>$relpath$../../ANNIE/resources/othomatcher/listsNM.def</urlString>
                 </gate.util.persistence.PersistenceManager-URLHolder>
               </entry>
               <entry>
@@ -942,7 +936,7 @@ kyotoCopierPR.setParameterValue(&quot;termbank&quot;, null);
       <collectionType>java.util.ArrayList</collectionType>
     </prList>
     <resourceType>gate.groovy.ScriptableController</resourceType>
-    <resourceName>TermRaider2-EN</resourceName>
+    <resourceName>TermRaider-English</resourceName>
     <initParams class="gate.util.persistence.MapPersistence">
       <mapType>gate.util.SimpleFeatureMapImpl</mapType>
       <localMap/>
