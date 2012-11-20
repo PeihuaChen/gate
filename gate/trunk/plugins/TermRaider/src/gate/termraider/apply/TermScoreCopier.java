@@ -14,17 +14,21 @@ package gate.termraider.apply;
 import gate.*;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
+import gate.creole.ExecutionInterruptedException;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.RunTime;
 import gate.termraider.bank.AbstractTermbank;
 import gate.termraider.util.*;
+
+import java.text.NumberFormat;
 import java.util.*;
 
 
 @CreoleResource(name = "Termbank Score Copier",
-        comment = "Copy scores from Termbanks back to their source annotations")
+    icon = "termbank-lr.png",
+    comment = "Copy scores from Termbanks back to their source annotations")
 public class TermScoreCopier extends AbstractLanguageAnalyser
   implements  ProcessingResource {
 
@@ -47,6 +51,13 @@ public class TermScoreCopier extends AbstractLanguageAnalyser
   
   
   public void execute() throws ExecutionException {
+    interrupted = false;
+    long startTime = System.currentTimeMillis();
+    if(document == null) { throw new ExecutionException(
+        "No document to process!"); }
+    fireStatusChanged("Running " + this.getName() + " on " + document.getName());
+    fireProgressChanged(0);
+
     if (this.termbank == null) {
       throw new ExecutionException("Termbank must be set!");
     }
@@ -58,6 +69,8 @@ public class TermScoreCopier extends AbstractLanguageAnalyser
     String rawScoreFeature = scoreFeature + ".raw";
     
     AnnotationSet candidates = document.getAnnotations(annotationSetName).get(annotationTypes);
+    checkInterruption();
+    
     for (Annotation candidate : candidates) {
       Term term = AbstractBank.makeTerm(candidate, document, languageFeature, termFeature);
       FeatureMap fm = candidate.getFeatures();
@@ -70,9 +83,23 @@ public class TermScoreCopier extends AbstractLanguageAnalyser
       if (rawScore != null) {
         fm.put(rawScoreFeature, rawScore);
       }
-    }
-  }
+      checkInterruption();
+    } // end for candidates loop
+    
+    fireProcessFinished();
+    fireStatusChanged("Finished " + this.getName() + " on "
+        + document.getName() + " in "
+        + NumberFormat.getInstance().format(
+            (double)(System.currentTimeMillis() - startTime) / 1000)
+        + " seconds!");
+  } // end execute()
   
+  
+  private void checkInterruption() throws ExecutionInterruptedException {
+    if(isInterrupted()) { throw new ExecutionInterruptedException(
+        "Execution of " + this.getName() + " has been abruptly interrupted!"); }
+  }
+
   
   /* CREOLE METHODS */
   

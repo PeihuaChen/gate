@@ -21,9 +21,8 @@ import java.util.*;
 
 
 @CreoleResource(name = "AnnotationTermbank",
-        icon = "termbank-lr.png",
-        comment = "TermRaider Termbank derived from document annotations")
-
+    icon = "termbank-lr.png",
+    comment = "TermRaider Termbank derived from document annotations")
 public class AnnotationTermbank extends AbstractTermbank
     implements ActionsPublisher  {
   private static final long serialVersionUID = 5433955185886301874L;
