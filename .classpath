@@ -111,8 +111,8 @@
 	<classpathentry exported="true" kind="lib" path="lib/metadata-extractor.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/woodstox-core-lgpl.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/stax2-api.jar"/>
-	<classpathentry kind="lib" path="plugins/Ontology/lib/openrdf-sesame-2.6.8-onejar.jar"/>
-	<classpathentry kind="lib" path="plugins/Ontology/lib/owlim-lite-5.2.jar"/>
+	<classpathentry kind="lib" path="plugins/Ontology/lib/openrdf-sesame-2.6.10-onejar.jar"/>
+	<classpathentry kind="lib" path="plugins/Ontology/lib/owlim-lite-5.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/flying-saucer-core.jar"/>
 	<classpathentry kind="lib" path="plugins/OpenNLP/lib/opennlp-maxent-3.0.2-incubating.jar"/>
 	<classpathentry kind="output" path="classes"/>
