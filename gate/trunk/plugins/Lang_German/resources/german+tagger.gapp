@@ -2,10 +2,10 @@
   <urlList class="gate.util.persistence.CollectionPersistence">
     <localList>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$gatehome$plugins/ANNIE/</urlString>
+        <urlString>$relpath$../../ANNIE/</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$gatehome$plugins/Tagger_Framework/</urlString>
+        <urlString>$relpath$../../Tagger_Framework/</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
     </localList>
     <collectionType>java.util.ArrayList</collectionType>
@@ -91,7 +91,7 @@
                 <entry>
                   <string>rulesURL</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>$gatehome$plugins/ANNIE/resources/tokeniser/DefaultTokeniser.rules</urlString>
+                    <urlString>$relpath$../../ANNIE/resources/tokeniser/DefaultTokeniser.rules</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
                 <entry>
@@ -140,13 +140,13 @@
                 <entry>
                   <string>gazetteerListsURL</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>$gatehome$plugins/ANNIE/resources/sentenceSplitter/gazetteer/lists.def</urlString>
+                    <urlString>$relpath$../../ANNIE/resources/sentenceSplitter/gazetteer/lists.def</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
                 <entry>
                   <string>transducerURL</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>$gatehome$plugins/ANNIE/resources/sentenceSplitter/grammar/main.jape</urlString>
+                    <urlString>$relpath$../../ANNIE/resources/sentenceSplitter/grammar/main.jape</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
               </localMap>
@@ -208,7 +208,7 @@
                 <entry>
                   <string>taggerBinary</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>$gatehome$plugins/Tagger_Framework/resources/TreeTagger/tree-tagger-german-gate</urlString>
+                    <urlString>$relpath$../../Tagger_Framework/resources/TreeTagger/tree-tagger-german-gate</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
                 <entry>
@@ -489,7 +489,7 @@
                 <entry>
                   <string>definitionFileURL</string>
                   <gate.util.persistence.PersistenceManager-URLHolder>
-                    <urlString>$gatehome$plugins/ANNIE/resources/othomatcher/listsNM.def</urlString>
+                    <urlString>$relpath$../../ANNIE/resources/othomatcher/listsNM.def</urlString>
                   </gate.util.persistence.PersistenceManager-URLHolder>
                 </entry>
                 <entry>
