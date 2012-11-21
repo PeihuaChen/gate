@@ -720,7 +720,7 @@ eachDocument {
                   <localMap>
                     <entry>
                       <string>defaultLanguage</string>
-                      <string>eng</string>
+                      <string>english</string>
                     </entry>
                   </localMap>
                 </gate.util.persistence.MapPersistence>
