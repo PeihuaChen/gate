@@ -2,7 +2,7 @@
   <urlList class="gate.util.persistence.CollectionPersistence">
     <localList>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../</urlString>
+        <urlString>$relpath$../../TermRaider/</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
         <urlString>$relpath$../../ANNIE/</urlString>
@@ -19,6 +19,9 @@
       <gate.util.persistence.PersistenceManager-URLHolder>
         <urlString>$relpath$../../Ontology_Tools/</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
+      <gate.util.persistence.PersistenceManager-URLHolder>
+        <urlString>$relpath$../../Language_Identification/</urlString>
+      </gate.util.persistence.PersistenceManager-URLHolder>
     </localList>
     <collectionType>java.util.ArrayList</collectionType>
   </urlList>
@@ -33,7 +36,7 @@ eachDocument {
     tokenizer();
     //stopwords();
     splitter();
-    //textCat();
+    textCat();
     annieGazetteer();
     posTagger();
     lemmatizer();
@@ -214,6 +217,50 @@ eachDocument {
                 <string>internalSplitListURL</string>
                 <gate.util.persistence.PersistenceManager-URLHolder>
                   <urlString>$relpath$../../ANNIE/resources/regex-splitter/internal-split-patterns.txt</urlString>
+                </gate.util.persistence.PersistenceManager-URLHolder>
+              </entry>
+            </localMap>
+          </initParams>
+          <features class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap/>
+          </features>
+        </gate.util.persistence.LanguageAnalyserPersistence>
+        <gate.util.persistence.LanguageAnalyserPersistence>
+          <runtimeParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap>
+              <entry>
+                <string>document</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>corpus</string>
+                <null/>
+              </entry>
+              <entry>
+                <string>annotationSetName</string>
+                <string></string>
+              </entry>
+              <entry>
+                <string>languageFeatureName</string>
+                <string>lang</string>
+              </entry>
+              <entry>
+                <string>annotationType</string>
+                <string>Sentence</string>
+              </entry>
+            </localMap>
+          </runtimeParams>
+          <resourceType>org.knallgrau.utils.textcat.LanguageIdentifier</resourceType>
+          <resourceName>textCat</resourceName>
+          <initParams class="gate.util.persistence.MapPersistence">
+            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
+            <localMap>
+              <entry>
+                <string>configURL</string>
+                <gate.util.persistence.PersistenceManager-URLHolder>
+                  <urlString>$relpath$../../Language_Identification/resources/default-names.conf</urlString>
                 </gate.util.persistence.PersistenceManager-URLHolder>
               </entry>
             </localMap>
@@ -916,7 +963,7 @@ eachDocument {
       <collectionType>java.util.ArrayList</collectionType>
     </prList>
     <resourceType>gate.groovy.ScriptableController</resourceType>
-    <resourceName>TermRaider-English</resourceName>
+    <resourceName>TermRaider-Multilingual</resourceName>
     <initParams class="gate.util.persistence.MapPersistence">
       <mapType>gate.util.SimpleFeatureMapImpl</mapType>
       <localMap/>

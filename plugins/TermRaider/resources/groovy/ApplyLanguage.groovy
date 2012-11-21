@@ -19,9 +19,7 @@ for (Annotation candidate : candidates) {
   if (sentences != null) {
     for (Annotation sentence : sentences) {
       if (sentence.getFeatures().containsKey("lang")) {
-        // This works for "eng" and "ger"; so sue me.
-        // I mean, I'll fix it later when we need other things.
-        String language = sentence.getFeatures().get("lang").toString().substring(0,3);
+        String language = sentence.getFeatures().get("lang").toString();
         candidate.getFeatures().put("lang", language);
       }
       else if (defaultLanguage != null) {
