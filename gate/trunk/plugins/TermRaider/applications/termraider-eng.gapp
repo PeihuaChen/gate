@@ -2,10 +2,10 @@
   <urlList class="gate.util.persistence.CollectionPersistence">
     <localList>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../../ANNIE/</urlString>
+        <urlString>$relpath$../</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../</urlString>
+        <urlString>$relpath$../../ANNIE/</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
         <urlString>$relpath$../../Tools/</urlString>
@@ -24,9 +24,7 @@
   </urlList>
   <application class="gate.groovy.ScriptableControllerPersistence">
     <controlScript class="string">import gate.termraider.*;
-def tfIdfCopierPR = prs.find { it.name == &quot;tfIdfCopier&quot; }
-def augTfIdfCopierPR = prs.find { it.name == &quot;augTfIdfCopier&quot; }
-def kyotoCopierPR = prs.find { it.name == &quot;kyotoCopier&quot; }
+
 String instNamespace = gate.termraider.output.OntologyGenerator.generateInstanceNamespace();
 
 // equivalent to old preprocessor
@@ -49,59 +47,41 @@ eachDocument {
 }
 
 // create the TfIdfTermbank LR
-String termbankName0 = &quot;gate.termraider.bank.TfIdfTermbank&quot;;
-FeatureMap parameters0 = Factory.newFeatureMap();
-Set&lt;Corpus&gt; corporaSL = Collections.singleton(corpus);
-Set&lt;String&gt; inputTypes = new HashSet&lt;String&gt;();
-inputTypes.add(&quot;SingleWord&quot;);
-inputTypes.add(&quot;MultiWord&quot;);
-parameters0.put(&quot;corpora&quot;, corporaSL);
-parameters0.put(&quot;inputAnnotationTypes&quot;, inputTypes);
-parameters0.put(&quot;debugMode&quot;, true);
-parameters0.put(&quot;namespaceBase&quot;, instNamespace);
-LanguageResource termbank0 = (LanguageResource) Factory.createResource(termbankName0, parameters0);
+def termbank0 = Factory.createResource(&quot;gate.termraider.bank.TfIdfTermbank&quot;, [
+  corpora:[corpus],
+  inputAnnotationTypes:&apos;SingleWord;MultiWord&apos;,
+  debugMode:true,
+  namespaceBase:instNamespace
+].toFeatureMap())
 
-tfIdfCopierPR.setParameterValue(&quot;termbank&quot;, termbank0);
 eachDocument {
-    tfIdfCopier();
+    tfIdfCopier(termbank:termbank0);
     augmentation();
 }
-tfIdfCopierPR.setParameterValue(&quot;termbank&quot;, null);
 
 // create the AugmentedTermbank LR
-String termbankName1 = &quot;gate.termraider.bank.AnnotationTermbank&quot;;
-FeatureMap parameters1 = Factory.newFeatureMap();
-parameters1.put(&quot;corpora&quot;, corporaSL);
-parameters1.put(&quot;inputAnnotationTypes&quot;, inputTypes);
-parameters1.put(&quot;debugMode&quot;, true);
-parameters1.put(&quot;inputScoreFeature&quot;, &quot;localAugTfIdf&quot;);
-parameters1.put(&quot;namespaceBase&quot;, instNamespace);
-
-LanguageResource termbank1 = (LanguageResource) Factory.createResource(termbankName1, parameters1);
+def termbank1 = Factory.createResource(&quot;gate.termraider.bank.AnnotationTermbank&quot;, [
+  corpora:[corpus],
+  inputAnnotationTypes:&apos;SingleWord;MultiWord&apos;,
+  debugMode:true,
+  namespaceBase:instNamespace,
+  inputScoreFeature:&apos;localAugTfIdf&apos;
+].toFeatureMap())
 
 // create the HyponymyTermbank LR
-String termbankName2 = &quot;gate.termraider.bank.HyponymyTermbank&quot;;
-FeatureMap parameters2 = Factory.newFeatureMap();
-List&lt;String&gt; t2features = new ArrayList&lt;String&gt;();
-t2features.add(&quot;head&quot;);
-t2features.add(&quot;canonical&quot;);
-parameters2.put(&quot;inputHeadFeatures&quot;, t2features);
-parameters2.put(&quot;inputAnnotationTypes&quot;, inputTypes);
-parameters2.put(&quot;inputAnnotationFeature&quot;, &quot;canonical&quot;);
-parameters2.put(&quot;corpora&quot;, corporaSL);
-parameters2.put(&quot;debugMode&quot;, true);
-parameters2.put(&quot;namespaceBase&quot;, instNamespace);
+def termbank2 = Factory.createResource(&quot;gate.termraider.bank.HyponymyTermbank&quot;, [
+  corpora:[corpus],
+  inputAnnotationTypes:&apos;SingleWord;MultiWord&apos;,
+  debugMode:true,
+  namespaceBase:instNamespace,
+  inputHeadFeatures:&apos;head;canonical&apos;,
+  inputAnnotationFeature:&apos;canonical&apos;
+].toFeatureMap())
 
-LanguageResource termbank2 = (LanguageResource) Factory.createResource(termbankName2, parameters2);
-
-augTfIdfCopierPR.setParameterValue(&quot;termbank&quot;, termbank1);
-kyotoCopierPR.setParameterValue(&quot;termbank&quot;, termbank2);
 eachDocument {
-    augTfIdfCopier();
-    kyotoCopier();
+    augTfIdfCopier(termbank:termbank1);
+    kyotoCopier(termbank:termbank2);
 }
-augTfIdfCopierPR.setParameterValue(&quot;termbank&quot;, null);
-kyotoCopierPR.setParameterValue(&quot;termbank&quot;, null);
 </controlScript>
     <prList class="gate.util.persistence.CollectionPersistence">
       <localList>
