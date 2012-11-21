@@ -1,12 +1,13 @@
 <CREOLE-DIRECTORY>
   <CREOLE>
+    <JAR SCAN="true">Chunker.jar</JAR>
     
     <RESOURCE>
       <NAME>Noun Phrase Chunker</NAME>
       <COMMENT>Implementation of the Ramshaw and Marcus base noun phrase chunker</COMMENT>
       <HELPURL>http://gate.ac.uk/userguide/sec:parsers:npchunker</HELPURL>
-      <JAR>Chunker.jar</JAR>
       <CLASS>mark.chunking.GATEWrapper</CLASS>
+      <ICON>NpChunker</ICON>
       <PARAMETER NAME="document"
         COMMENT="The document to be analysed."
         RUNTIME="true">gate.Document</PARAMETER>
