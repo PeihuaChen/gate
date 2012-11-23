@@ -72,7 +72,7 @@ public class TermScoreCopier extends AbstractLanguageAnalyser
     checkInterruption();
     
     for (Annotation candidate : candidates) {
-      Term term = AbstractBank.makeTerm(candidate, document, languageFeature, termFeature);
+      Term term = new Term(candidate, document, languageFeature, termFeature);
       FeatureMap fm = candidate.getFeatures();
       Double score = termbank.getScore(term);
       if (score != null) {

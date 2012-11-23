@@ -76,20 +76,10 @@ public abstract class AbstractBank extends AbstractLanguageResource {
   
   
   public Term makeTerm(Annotation annotation, Document document) {
-    return makeTerm(annotation, document, 
+    return new Term(annotation, document, 
             this.languageFeature, this.inputAnnotationFeature);
   }
 
-  
-  public static Term makeTerm(Annotation annotation, Document document, String languageFeature,
-          String stringFeature) {
-    String type = annotation.getType();
-    String string = Utilities.getFeatureOrString(document, annotation, stringFeature);
-    String language = Utilities.getLanguage(annotation, languageFeature);
-    return new Term(string, language, type);
-  }
-
-  
   
   /* CREOLE */
   

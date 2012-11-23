@@ -64,8 +64,6 @@ public abstract class AbstractTermbank extends AbstractBank
   public void cleanup() {
     super.cleanup();
   }
-
-  
   
   
   public List<Term> getTermsByDescendingScore() {

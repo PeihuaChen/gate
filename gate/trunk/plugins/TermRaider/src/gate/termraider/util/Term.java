@@ -11,12 +11,17 @@
  */
 package gate.termraider.util;
 
+import gate.Annotation;
+import gate.Document;
+import gate.FeatureMap;
+
 import java.io.Serializable;
 
 
 public class Term  implements Comparable<Term>, Serializable {
   
   private static final long serialVersionUID = -4849144989013687570L;
+  public static final String LANGUAGE_ERROR_CODE = "___";
   
   private String termString, languageCode, type;
   private boolean typed;
@@ -37,6 +42,16 @@ public class Term  implements Comparable<Term>, Serializable {
     this.type = "";
     this.setup();
   }
+  
+  
+  public  Term(Annotation annotation, Document document, String languageFeature,
+      String stringFeature) {
+    this.type = annotation.getType();
+    this.termString = Term.getFeatureOrString(document, annotation, stringFeature);
+    this.languageCode = Term.getLanguage(annotation, languageFeature);
+    this.setup();
+  }
+
 
   private void setup() {
     if (type == null) {
@@ -100,6 +115,25 @@ public class Term  implements Comparable<Term>, Serializable {
     comp = this.getType().compareTo(other.getType());
     return comp;
   }
+  
+  
+  
+  public static String getLanguage(Annotation annotation, String languageFeature) {
+    String language = LANGUAGE_ERROR_CODE;
+    if (annotation.getFeatures().containsKey(languageFeature)) {
+      language = annotation.getFeatures().get(languageFeature).toString();
+    }
+    return language;
+  }
 
+  
+  public static String getFeatureOrString(Document document, Annotation annotation, String key) {
+    FeatureMap fm = annotation.getFeatures();
+    if (fm.containsKey(key)) {
+      return fm.get(key).toString();
+    }
+    // implied else
+    return gate.Utils.cleanStringFor(document, annotation);
+  }
   
 }
