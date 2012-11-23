@@ -3635,33 +3635,6 @@ public class OntologyServiceImplSesame implements OntologyService {
     }
   }
 
-  void addUULStatement(String subject, String predicate, String object,
-      String language) throws GateOntologyException {
-    if (debug) {
-      logger.debug("addUULStatement for " + subject + " / " + predicate + " / " + object);
-    }
-    try {
-      startTransaction(null);
-      Resource s = subject != null ? getResource(subject) : null;
-      URI p =
-          predicate != null ? repositoryConnection.getValueFactory().createURI(predicate) : null;
-      Literal o = null;
-      if (language == null) {
-        o =
-            object != null ? repositoryConnection.getValueFactory().createLiteral(object) : null;
-      } else {
-        o =
-            object != null
-            ? repositoryConnection.getValueFactory().createLiteral(object, language)
-            : null;
-      }
-      repositoryConnection.add(s, p, o, getContextURI());
-      endTransaction(null);
-    } catch (Exception e) {
-      throw new GateOntologyException(
-          "error while adding statement into the repository where subject:" + subject + " predicate:" + predicate + " objectURI:" + object, e);
-    }
-  }
 
   void addUUDStatement(String subject,
       String predicate, String object, String datatype)
