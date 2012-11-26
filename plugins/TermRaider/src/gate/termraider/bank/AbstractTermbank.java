@@ -86,6 +86,17 @@ public abstract class AbstractTermbank extends AbstractBank
     return this.termDocuments;
   }
   
+  
+  public Set<String> getDocumentsForTerm(Term term) {
+    if (this.termDocuments.containsKey(term)) {
+      return this.termDocuments.get(term);
+    }
+    
+    // implied else: empty set
+    return new HashSet<String>();
+  }
+  
+  
   public Map<Term, Integer> getTermFrequencies() {
     return this.termFrequencies;
   }
