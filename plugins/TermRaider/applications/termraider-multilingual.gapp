@@ -2,7 +2,7 @@
   <urlList class="gate.util.persistence.CollectionPersistence">
     <localList>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../</urlString>
+        <urlString>$relpath$../../TermRaider/</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
         <urlString>$relpath$../../ANNIE/</urlString>
@@ -753,12 +753,7 @@ eachDocument {
                 <string>scriptParams</string>
                 <gate.util.persistence.MapPersistence>
                   <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-                  <localMap>
-                    <entry>
-                      <string>defaultLanguage</string>
-                      <string>english</string>
-                    </entry>
-                  </localMap>
+                  <localMap/>
                 </gate.util.persistence.MapPersistence>
               </entry>
               <entry>
