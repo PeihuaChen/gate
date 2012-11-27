@@ -185,11 +185,5 @@ public class HyponymyTermbank extends AbstractTermbank
     super.setScoreProperty(name);
   }
 
-  
-  /* override default value from AbstractTermbank   */
-  @CreoleParameter(defaultValue = "docFrequency")
-  public void setDocFreqProperty(String name) {
-    super.setDocFreqProperty(name);
-  }
 
 }

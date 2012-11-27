@@ -34,7 +34,6 @@ public abstract class AbstractTermbank extends AbstractBank
   protected boolean debugMode;
   protected String inputASName;
   protected Set<String> inputAnnotationTypes;
-  protected String docFreqProperty;
 
   // transient to allow serialization
   protected transient List<Action> actionsList;
@@ -296,17 +295,5 @@ public abstract class AbstractTermbank extends AbstractBank
     return this.debugMode;
   }
   
-  
-
-  /* Default value is overridden in the implementations   */
-  @CreoleParameter(comment = "name of doc frequency property",
-          defaultValue = "")
-  public void setDocFreqProperty(String name) {
-    this.docFreqProperty = name;
-  }
-
-  public String getDocFreqProperty() {
-    return this.docFreqProperty;
-  }
 
 }
