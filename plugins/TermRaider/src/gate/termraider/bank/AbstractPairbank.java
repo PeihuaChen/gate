@@ -110,9 +110,6 @@ public abstract class AbstractPairbank extends AbstractBank
   
   protected void createActions() {
     actionsList = new ArrayList<Action>();
-    //TODO: add constructors for these things for AbstractPairBank    
-    //actionsList.add(new ActionMakeOntology("Generate GATE Ontology...", this));
-    //actionsList.add(new ActionSaveRdf("Save as RDF-XML...", this));
     actionsList.add(new ActionSaveCsv("Save as CSV...", this));
   }
   
