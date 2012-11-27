@@ -22,9 +22,6 @@ for (Annotation candidate : candidates) {
         String language = sentence.getFeatures().get("lang").toString();
         candidate.getFeatures().put("lang", language);
       }
-      else if (defaultLanguage != null) {
-        candidate.getFeatures().put("lang", defaultLanguage);
-      }
     }
   }
 }

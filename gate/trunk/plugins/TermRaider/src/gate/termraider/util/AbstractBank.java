@@ -29,11 +29,7 @@ import java.util.*;
 public abstract class AbstractBank extends AbstractLanguageResource {
   private static final long serialVersionUID = -9168657973312733783L;
 
-  public static final String randomNsBase = "http://www.gate.ac.uk/ns/arcomem/";
-
-  
   protected Set<String> languages, types;
-  
   
   public abstract Double getMinScore();
   
@@ -122,11 +118,5 @@ public abstract class AbstractBank extends AbstractLanguageResource {
   public Set<Corpus> getCorpora() {
     return this.corpora;
   }
-
-  
-  public static String generateInstanceNamespace() {
-    return Utilities.generateID(randomNsBase, "#");
-  }
-
   
 }

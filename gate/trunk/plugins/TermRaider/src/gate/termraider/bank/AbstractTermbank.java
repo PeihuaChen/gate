@@ -35,7 +35,6 @@ public abstract class AbstractTermbank extends AbstractBank
   protected String inputASName;
   protected Set<String> inputAnnotationTypes;
   protected String docFreqProperty;
-  protected String namespaceBase;
 
   // transient to allow serialization
   protected transient List<Action> actionsList;
@@ -298,23 +297,9 @@ public abstract class AbstractTermbank extends AbstractBank
   }
   
   
-  /* The following parameters are just used for ontology and CSV generation */
-
-  /* Set this in the application for consistency between termbanks;
-   * otherwise it will be randomly generated. */
-  @CreoleParameter(comment = "Namespace base (including '#') for ontology generation",
-          defaultValue = "")
-  public void setNamespaceBase(String nsb) {
-    this.namespaceBase = nsb;
-  }
-
-  public String getNamespaceBase() {
-    return this.namespaceBase;
-  }
-
 
   /* Default value is overridden in the implementations   */
-  @CreoleParameter(comment = "name of ontology doc frequency property",
+  @CreoleParameter(comment = "name of doc frequency property",
           defaultValue = "")
   public void setDocFreqProperty(String name) {
     this.docFreqProperty = name;
