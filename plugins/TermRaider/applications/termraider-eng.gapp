@@ -2,7 +2,7 @@
   <urlList class="gate.util.persistence.CollectionPersistence">
     <localList>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../</urlString>
+        <urlString>$relpath$../../TermRaider/</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
         <urlString>$relpath$../../ANNIE/</urlString>
@@ -19,25 +19,19 @@
   <application class="gate.groovy.ScriptableControllerPersistence">
     <controlScript class="string">import gate.termraider.*;
 
-String instNamespace = gate.termraider.util.AbstractBank.generateInstanceNamespace();
-
 // equivalent to old preprocessor
 eachDocument {
     docReset();
     tokenizer();
-    //stopwords();
     splitter();
-    //textCat();
     annieGazetteer();
     posTagger();
     lemmatizer();
     annieJape();
     orthomatcher();
-    //stopwordsJape();
     selectTokens();
     multiwordJape();
     deduplicateMW();
-    applyLanguage();
 }
 
 // create the TfIdfTermbank LR
@@ -45,7 +39,6 @@ def termbank0 = Factory.createResource(&quot;gate.termraider.bank.TfIdfTermbank&
   corpora:[corpus],
   inputAnnotationTypes:&apos;SingleWord;MultiWord&apos;,
   debugMode:true,
-  namespaceBase:instNamespace
 ].toFeatureMap())
 
 eachDocument {
@@ -58,7 +51,6 @@ def termbank1 = Factory.createResource(&quot;gate.termraider.bank.AnnotationTerm
   corpora:[corpus],
   inputAnnotationTypes:&apos;SingleWord;MultiWord&apos;,
   debugMode:true,
-  namespaceBase:instNamespace,
   inputScoreFeature:&apos;localAugTfIdf&apos;
 ].toFeatureMap())
 
@@ -67,7 +59,6 @@ def termbank2 = Factory.createResource(&quot;gate.termraider.bank.HyponymyTermba
   corpora:[corpus],
   inputAnnotationTypes:&apos;SingleWord;MultiWord&apos;,
   debugMode:true,
-  namespaceBase:instNamespace,
   inputHeadFeatures:&apos;head;canonical&apos;,
   inputAnnotationFeature:&apos;canonical&apos;
 ].toFeatureMap())
@@ -682,62 +673,6 @@ eachDocument {
                 <string>scriptURL</string>
                 <gate.util.persistence.PersistenceManager-URLHolder>
                   <urlString>$relpath$../resources/groovy/DeduplicateMultiWord.groovy</urlString>
-                </gate.util.persistence.PersistenceManager-URLHolder>
-              </entry>
-            </localMap>
-          </initParams>
-          <features class="gate.util.persistence.MapPersistence">
-            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-            <localMap/>
-          </features>
-        </gate.util.persistence.PRPersistence>
-        <gate.util.persistence.PRPersistence>
-          <runtimeParams class="gate.util.persistence.MapPersistence">
-            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-            <localMap>
-              <entry>
-                <string>outputASName</string>
-                <null/>
-              </entry>
-              <entry>
-                <string>document</string>
-                <null/>
-              </entry>
-              <entry>
-                <string>corpus</string>
-                <null/>
-              </entry>
-              <entry>
-                <string>scriptParams</string>
-                <gate.util.persistence.MapPersistence>
-                  <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-                  <localMap>
-                    <entry>
-                      <string>defaultLanguage</string>
-                      <string>english</string>
-                    </entry>
-                  </localMap>
-                </gate.util.persistence.MapPersistence>
-              </entry>
-              <entry>
-                <string>inputASName</string>
-                <null/>
-              </entry>
-            </localMap>
-          </runtimeParams>
-          <resourceType>gate.groovy.ScriptPR</resourceType>
-          <resourceName>applyLanguage</resourceName>
-          <initParams class="gate.util.persistence.MapPersistence">
-            <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-            <localMap>
-              <entry>
-                <string>encoding</string>
-                <string>UTF-8</string>
-              </entry>
-              <entry>
-                <string>scriptURL</string>
-                <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$relpath$../resources/groovy/ApplyLanguage.groovy</urlString>
                 </gate.util.persistence.PersistenceManager-URLHolder>
               </entry>
             </localMap>

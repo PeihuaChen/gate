@@ -21,10 +21,8 @@ import java.io.Serializable;
 public class Term  implements Comparable<Term>, Serializable {
   
   private static final long serialVersionUID = -4849144989013687570L;
-  public static final String LANGUAGE_ERROR_CODE = "___";
   
   private String termString, languageCode, type;
-  private boolean typed;
   private int hashCode;
   private String toString;
   
@@ -36,13 +34,6 @@ public class Term  implements Comparable<Term>, Serializable {
     this.setup();
   }
 
-  public Term(String termString, String languageCode) {
-    this.termString = termString;
-    this.languageCode = languageCode;
-    this.type = "";
-    this.setup();
-  }
-  
   
   public  Term(Annotation annotation, Document document, String languageFeature,
       String stringFeature) {
@@ -54,25 +45,21 @@ public class Term  implements Comparable<Term>, Serializable {
 
 
   private void setup() {
-    if (type == null) {
-      type = "";
+    if (languageCode == null) {
+      languageCode = "";
     }
-    typed = ! type.isEmpty();
-    hashCode = termString.hashCode() + languageCode.hashCode();
-    if (typed) {
-      hashCode = termString.hashCode() + languageCode.hashCode() + type.hashCode();
-      toString = termString + " (" + languageCode + "," + type + ")";
+
+    hashCode = termString.hashCode() + languageCode.hashCode() + type.hashCode();
+
+    if (languageCode.isEmpty()) {
+      toString = termString + " (" + type + ")";
     }
     else {
-      hashCode = termString.hashCode() + languageCode.hashCode();
-      toString = termString + " (" + languageCode + ")";
+      toString = termString + " (" + languageCode + "," + type + ")";
     }
   }
   
-  public boolean typed() {
-    return typed;
-  }
-  
+
   public String toString() {
     return toString;
   }
@@ -119,7 +106,7 @@ public class Term  implements Comparable<Term>, Serializable {
   
   
   public static String getLanguage(Annotation annotation, String languageFeature) {
-    String language = LANGUAGE_ERROR_CODE;
+    String language = "";
     if (annotation.getFeatures().containsKey(languageFeature)) {
       language = annotation.getFeatures().get(languageFeature).toString();
     }

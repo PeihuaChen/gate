@@ -22,8 +22,6 @@
   <application class="gate.groovy.ScriptableControllerPersistence">
     <controlScript class="string">import gate.termraider.*;
 
-String instNamespace = gate.termraider.util.AbstractBank.generateInstanceNamespace();
-
 // equivalent to old preprocessor
 eachDocument {
     docReset();
@@ -48,7 +46,6 @@ def termbank0 = Factory.createResource(&quot;gate.termraider.bank.TfIdfTermbank&
   corpora:[corpus],
   inputAnnotationTypes:&apos;SingleWord;MultiWord&apos;,
   debugMode:true,
-  namespaceBase:instNamespace
 ].toFeatureMap())
 
 eachDocument {
@@ -61,7 +58,6 @@ def termbank1 = Factory.createResource(&quot;gate.termraider.bank.AnnotationTerm
   corpora:[corpus],
   inputAnnotationTypes:&apos;SingleWord;MultiWord&apos;,
   debugMode:true,
-  namespaceBase:instNamespace,
   inputScoreFeature:&apos;localAugTfIdf&apos;
 ].toFeatureMap())
 
@@ -70,7 +66,6 @@ def termbank2 = Factory.createResource(&quot;gate.termraider.bank.HyponymyTermba
   corpora:[corpus],
   inputAnnotationTypes:&apos;SingleWord;MultiWord&apos;,
   debugMode:true,
-  namespaceBase:instNamespace,
   inputHeadFeatures:&apos;head;canonical&apos;,
   inputAnnotationFeature:&apos;canonical&apos;
 ].toFeatureMap())
