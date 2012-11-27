@@ -88,6 +88,11 @@ public class Term  implements Comparable<Term>, Serializable {
     return hashCode;
   }
   
+  
+  /**
+   * This is used for alphabetical sorting.  The Term instance
+   * does not know what its score is.
+   */
   public int compareTo(Term other)  {
     int comp = this.getTermString().compareTo(other.getTermString());
     if (comp != 0) {
