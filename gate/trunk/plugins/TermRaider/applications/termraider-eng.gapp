@@ -11,13 +11,7 @@
         <urlString>$relpath$../../Tools/</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
       <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../../Ontology/</urlString>
-      </gate.util.persistence.PersistenceManager-URLHolder>
-      <gate.util.persistence.PersistenceManager-URLHolder>
         <urlString>$relpath$../../Groovy/</urlString>
-      </gate.util.persistence.PersistenceManager-URLHolder>
-      <gate.util.persistence.PersistenceManager-URLHolder>
-        <urlString>$relpath$../../Ontology_Tools/</urlString>
       </gate.util.persistence.PersistenceManager-URLHolder>
     </localList>
     <collectionType>java.util.ArrayList</collectionType>
@@ -25,7 +19,7 @@
   <application class="gate.groovy.ScriptableControllerPersistence">
     <controlScript class="string">import gate.termraider.*;
 
-String instNamespace = gate.termraider.output.OntologyGenerator.generateInstanceNamespace();
+String instNamespace = gate.termraider.util.AbstractBank.generateInstanceNamespace();
 
 // equivalent to old preprocessor
 eachDocument {

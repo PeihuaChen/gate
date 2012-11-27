@@ -13,7 +13,6 @@ package gate.termraider.bank;
 
 import gate.creole.*;
 import gate.creole.metadata.*;
-import gate.creole.ontology.*;
 import gate.gui.ActionsPublisher;
 import gate.util.*;
 import gate.*;
@@ -134,8 +133,6 @@ public abstract class AbstractTermbank extends AbstractBank
   
   protected void createActions() {
     actionsList = new ArrayList<Action>();
-    actionsList.add(new ActionMakeOntology("Generate GATE Ontology... (EXPERIMENTAL)", this));
-    actionsList.add(new ActionSaveRdf("Save as RDF-XML... (EXPERIMENTAL)", this));
     actionsList.add(new ActionSaveCsv("Save as CSV...", this));
   }
   
@@ -227,115 +224,6 @@ public abstract class AbstractTermbank extends AbstractBank
   }
 
   
-  
-  /* Methods for generating a GATE ontology */
-  public void makeOntology(double threshold, String ontologyName, String instanceNamespace) throws GateException {
-    OntologyGenerator generator = new OntologyGenerator(this);
-    generator.generateOntology(threshold, ontologyName, instanceNamespace);
-  }
-  
-  public Ontology makeOntology(String ontologyName,
-          String instanceNamespace) throws GateException {
-    double threshold = this.getMinScore();
-    OntologyGenerator generator = new OntologyGenerator(this);
-    return generator.generateOntology(threshold, ontologyName, instanceNamespace);
-  }
-  
-  public Ontology makeOntology(String ontologyName, float topPart) throws GateException {
-    double threshold = this.getMaxScore();
-    if (topPart >= 1.0F) {
-      threshold = this.getMinScore(); 
-    }
-    else if (topPart >= 0.0F) {
-      threshold = this.getMaxScore() - (this.getMaxScore() - this.getMinScore()) * topPart;
-    }
-    
-    OntologyGenerator generator = new OntologyGenerator(this);
-    if ( (this.namespaceBase == null) || this.namespaceBase.isEmpty() ) {
-      return generator.generateOntology(threshold, ontologyName, null);
-    }
-    else {
-      return generator.generateOntology(threshold, ontologyName, this.namespaceBase);
-    }
-  }
-
-  
-  public Ontology makeOntology(String ontologyName) throws GateException {
-    double threshold = this.getMinScore(); 
-    OntologyGenerator generator = new OntologyGenerator(this);
-    if ( (this.namespaceBase == null) || this.namespaceBase.isEmpty() ) {
-      return generator.generateOntology(threshold, ontologyName, null);
-    }
-    else {
-      return generator.generateOntology(threshold, ontologyName, this.namespaceBase);
-    }
-  }
-
-  
-  /* Methods for saving as RDF-XML */
-  
-  public Ontology saveAsRdf(double threshold, File outputFile) throws GateException {
-    OntologyGenerator generator = new OntologyGenerator(this);
-    Ontology ontology = generator.generateOntology(threshold, 
-            this.getName() + "_ontology", OntologyGenerator.generateInstanceNamespace());
-    FileWriter outputWriter;
-    try {
-      outputWriter = new FileWriter(outputFile);
-      ontology.writeOntologyData(outputWriter, OConstants.OntologyFormat.RDFXML, false);
-      if (debugMode) {
-        System.out.println("Termbank: saved RDF in " + outputFile.getAbsolutePath());
-      }
-      outputWriter.flush();
-      outputWriter.close();
-    } 
-    catch(IOException e) {
-      throw new GateException(e);
-    }
-    return ontology;
-  }
-  
-  
-  public Ontology writeRdf(double threshold, OutputStream stream) throws GateException {
-    try {
-      OntologyGenerator generator = new OntologyGenerator(this);
-      Ontology ontology = generator.generateOntology(threshold, 
-              this.getName() + "_ontology", OntologyGenerator.generateInstanceNamespace());
-      ontology.writeOntologyData(stream, OConstants.OntologyFormat.RDFXML, false);
-      stream.flush();
-      return ontology;
-    }
-    catch (IOException e) {
-      throw new GateException(e);
-    }
-  }
-  
-  
-  /**
-   * Convenience method to save everything in the termbank.
-   * @param outputFile
-   * @throws GateException
-   */
-  public Ontology saveAsRdf(File outputFile) throws GateException {
-    double threshold = this.getMinScore();
-    return this.saveAsRdf(threshold, outputFile);
-  }
-  
-  public void saveAsRdfAndDeleteOntology(File outputFile) throws GateException {
-    Ontology ontology = this.saveAsRdf(outputFile);
-    Factory.deleteResource(ontology);
-  }
-
-  public void saveAsRdfAndDeleteOntology(double threshold, File outputFile) throws GateException {
-    Ontology ontology = this.saveAsRdf(threshold, outputFile);
-    Factory.deleteResource(ontology);
-  }
-
-  public void writeRdfAndDeleteOntology(double threshold, OutputStream stream)
-    throws GateException {
-    Ontology ontology = this.writeRdf(threshold, stream);
-    Factory.deleteResource(ontology);
-  }
-
   
   /* Methods for saving as CSV */
   
