@@ -17,7 +17,6 @@ import gate.creole.AbstractLanguageResource;
 import gate.creole.metadata.CreoleParameter;
 import gate.util.GateException;
 import java.io.File;
-import java.io.OutputStream;
 import org.apache.commons.lang.StringUtils;
 import java.util.*;
 
@@ -29,6 +28,8 @@ import java.util.*;
  */
 public abstract class AbstractBank extends AbstractLanguageResource {
   private static final long serialVersionUID = -9168657973312733783L;
+
+  public static final String randomNsBase = "http://www.gate.ac.uk/ns/arcomem/";
 
   
   protected Set<String> languages, types;
@@ -42,15 +43,6 @@ public abstract class AbstractBank extends AbstractLanguageResource {
     throws GateException;
 
   public abstract void saveAsCsv(File file)
-    throws GateException;
-  
-  public abstract void saveAsRdfAndDeleteOntology(double threshold, File file)
-    throws GateException;
-
-  public abstract void saveAsRdfAndDeleteOntology(File file)
-    throws GateException;
-  
-  public abstract void writeRdfAndDeleteOntology(double threshold, OutputStream stream)
     throws GateException;
   
   public Set<String> getLanguages() {
@@ -132,5 +124,9 @@ public abstract class AbstractBank extends AbstractLanguageResource {
   }
 
   
+  public static String generateInstanceNamespace() {
+    return Utilities.generateID(randomNsBase, "#");
+  }
+
   
 }

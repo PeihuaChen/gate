@@ -52,19 +52,10 @@ for (Annotation candidate : candidates) {
     inputAS.remove(candidate);  
   }
   
-  if (! gate.Utils.getContainedAnnotations(inputAS, candidate, "StrongStop").isEmpty()) {
+  else if (! gate.Utils.getContainedAnnotations(inputAS, candidate, "StrongStop").isEmpty()) {
     FeatureMap newf = Factory.newFeatureMap();
     newf.putAll(candidate.getFeatures());
     String newType = "deleted_SS_" + candidate.getType();
-    inputAS.add(candidate.getStartNode(), candidate.getEndNode(), newType, newf);
-    inputAS.remove(candidate);  
-  }
-    
-  // suppress Greek tokens that slip through
-  else if (gate.termraider.util.Utilities.greekness(candidate, "canonical") > 0.0) {
-    FeatureMap newf = Factory.newFeatureMap();
-    newf.putAll(candidate.getFeatures());
-    String newType = "deleted_Gk_" + candidate.getType();
     inputAS.add(candidate.getStartNode(), candidate.getEndNode(), newType, newf);
     inputAS.remove(candidate);  
   }
