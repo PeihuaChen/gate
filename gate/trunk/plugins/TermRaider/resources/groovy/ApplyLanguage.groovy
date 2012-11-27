@@ -8,11 +8,6 @@ termTypes.add("VG");
 termTypes.add("SingleWord");
 termTypes.add("MultiWord");
 
-String defaultLanguage = null;
-if ((scriptParams != null) && scriptParams.containsKey("defaultLanguage")) {
-    defaultLanguage = scriptParams.get("defaultLanguage").toString();
-}
-
 AnnotationSet candidates = inputAS.get(termTypes);
 for (Annotation candidate : candidates) {
   AnnotationSet sentences = gate.Utils.getCoveringAnnotations(inputAS, candidate, "Sentence");
