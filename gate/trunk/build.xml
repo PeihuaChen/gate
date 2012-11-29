@@ -750,7 +750,8 @@
     <!-- expand the plugin creole.xml files with information from any
          @CreoleResource annotations on their resources -->
     <expandcreoles todir="build/plugins" gatehome="${basedir}">
-      <fileset dir="plugins" includes="*/creole.xml" />
+      <fileset dir="plugins" includes="Tools/creole.xml" />
+      <fileset dir="plugins" includes="*/creole.xml" excludes="Tools/creole.xml" />
     </expandcreoles>
 
     <exec dir="bin" executable="${perl.bin}">
