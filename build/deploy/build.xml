@@ -429,45 +429,6 @@ build/deploy all paths are relative to the top-level GATE directory -->
     
   </target>
 
-  <!-- build the Mac-specific installer disk image.  This task will only work
-       when run on a Mac, so it is not part of the nightly build.
-       This target uses the JarBundler task from
-       http://jarbundler.sourceforge.net -->
-  <target name="mac-installer">
-    <property name="mac-installer.dir" location="build/deploy/mac-installer" />
-    <property name="mac-installer.name" value="Install GATE ${gate.version}" />
-
-    <mkdir dir="${mac-installer.dir}" />
-
-    <taskdef name="jarbundler" classname="net.sourceforge.jarbundler.JarBundler">
-      <classpath>
-        <pathelement location="build/deploy/lib/jarbundler-1.9.jar" />
-        <!-- With ant 1.8 the task no longer picks up Xerces without help -->
-        <pathelement location="lib/xercesImpl.jar" />
-      </classpath>
-    </taskdef>
-
-    <jarbundler dir="${mac-installer.dir}" name="${mac-installer.name}"
-                mainclass="com.izforge.izpack.installer.Installer"
-                jar="${distDir}/${gate.full.name}-installer.jar"
-                jvmversion="1.5+" shortname="Install GATE"
-                version="${gate.version}" build="${gate.build}"
-                icon="build/deploy/gate-installer.icns">
-      <javaproperty name="apple.laf.useScreenMenuBar" value="true" />
-      <javaproperty name="apple.awt.antialiasing" value="true" />
-    </jarbundler>
-
-    <!-- run hdiutil to make the DMG -->
-    <exec executable="hdiutil">
-      <arg value="create" />
-      <arg value="-srcfolder" />
-      <arg file="${mac-installer.dir}" />
-      <arg value="-volname" />
-      <arg value="GATE ${gate.version}" />
-      <arg file="${distDir}/${gate.full.name}-installer-mac.dmg" />
-    </exec>
-  </target>
-
   <target name="launch4j-taskdef">
     <available file="${launch4j.home}/launch4j.jar" 
                property="launch4j.available" />
