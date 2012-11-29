@@ -109,9 +109,6 @@
   <target name="clean.classes" >
     <delete failonerror="false"
 	    dir="${classes.dir}" />
-    <delete failonerror="false" >
-      <file file="${termraider.jar.location}" />
-    </delete>
   </target>
 
 
@@ -126,7 +123,7 @@
 
   <!-- Clean up - remove .class and .jar files -->
   <target name="clean" depends="clean.classes, test.clean" >
-    <delete file="${jar.location}" />
+    <delete file="${termraider.jar.location}" />
   </target>
 
 
