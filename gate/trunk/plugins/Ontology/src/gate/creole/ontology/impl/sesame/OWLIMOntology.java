@@ -23,6 +23,7 @@ import gate.creole.metadata.Optional;
 import gate.creole.ontology.OConstants;
 import gate.creole.ontology.OConstants.OntologyFormat;
 import gate.util.Files;
+import gate.util.GateRuntimeException;
 
 import java.io.File;
 import java.io.IOException;
@@ -276,11 +277,8 @@ public class OWLIMOntology
               "Not a directory: "+dataDirectory.getAbsolutePath());
         }
       }
-      String storageFolderName = "GATE_OWLIMOntology_" +
-          Long.toString(System.currentTimeMillis(),36);
-      storageFolderDir = new File(dataDirectory,storageFolderName);
-      storageFolderDir.mkdir();
-      // TODO: replace by logger.info
+      storageFolderDir = createTmpDir(dataDirectory,"GATE_OWLIMOntology_");
+      
       logger.info("Storing data in folder: "+storageFolderDir.getAbsolutePath());
 
       // get the configuration file , check if the system import files
@@ -379,6 +377,32 @@ public class OWLIMOntology
    
   }
 
+  /**
+   * Creates a temporary directory or throws an exception if something goes wrong.
+   * This will retry several (1000) times to create a temporary directory inside the 
+   * parentDirectory folder. The name of that directory starts with the given
+   * namePrefix which is followed by some random string. The function tries 
+   * 1000 times to create the directory in case some other process already created
+   * a directory with the same name. If creation of the directory does not succeed
+   * after 10 trials, a GateRuntimeException is thrown. 
+   * 
+   * @param parentDirectory the directory in which the temporary directory will be created
+   * @param namePrefix the prefix of the temporary directory name
+   * @return the File representing the newly created directory
+   */
+  private File createTmpDir(File parentDirectory, String namePrefix) {
+    File tmpDir = null;
+    String prefixWithTimeStamp = namePrefix + Long.toString(System.currentTimeMillis(),36);
+    for (int trial = 0; trial < 1000; trial++) {
+      tmpDir = new File(parentDirectory, prefixWithTimeStamp + trial );
+      if (tmpDir.mkdir()) {
+        return tmpDir;
+      }
+    }
+    throw new GateRuntimeException("Could not create temporary directory  "
+        + tmpDir + " after 1000 unique retries");
+  }
+  
   public void cleanup() {
     super.cleanup();
     if(!isPersistent && dataDirectory != null) {
