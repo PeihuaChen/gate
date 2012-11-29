@@ -112,6 +112,12 @@
 
       <test name="gate.creole.ontology.impl.test.Test_OntoTest1" />
     </junit>
+    <junitreport>
+      <fileset dir=".">
+        <include name="TEST-*.xml" />
+      </fileset>
+      <report todir="." format="noframes" />
+    </junitreport>
   </target>
 
   <target name="testtuplequery" depends="jar">
@@ -126,6 +132,12 @@
 
       <test name="gate.creole.ontology.impl.test.Test_TupleQuery" />
     </junit>
+    <junitreport>
+      <fileset dir=".">
+        <include name="TEST-*.xml" />
+      </fileset>
+      <report todir="." format="noframes" />
+    </junitreport>
   </target>
 
 
@@ -141,6 +153,12 @@
 
       <test name="gate.creole.ontology.impl.test.Test_TripleStore" />
     </junit>
+    <junitreport>
+      <fileset dir=".">
+        <include name="TEST-*.xml" />
+      </fileset>
+      <report todir="." format="noframes" />
+    </junitreport>
   </target>
 
 
@@ -157,6 +175,12 @@
 
       <test name="gate.creole.ontology.impl.test.Test_OntoWine" />
     </junit>
+    <junitreport>
+      <fileset dir=".">
+        <include name="TEST-*.xml" />
+      </fileset>
+      <report todir="." format="noframes" />
+    </junitreport>
   </target>
 
 
@@ -172,6 +196,12 @@
 
       <test name="gate.creole.ontology.impl.test.Test_OWLIMOntology" />
     </junit>
+    <junitreport>
+      <fileset dir=".">
+        <include name="TEST-*.xml" />
+      </fileset>
+      <report todir="." format="noframes" />
+    </junitreport>
   </target>
 
 
@@ -187,6 +217,12 @@
 
       <test name="gate.creole.ontology.impl.test.Test_W3Tests" />
     </junit>
+    <junitreport>
+      <fileset dir=".">
+        <include name="TEST-*.xml" />
+      </fileset>
+      <report todir="." format="noframes" />
+    </junitreport>
   </target>
 
   <target name="test4develop" depends="jar">
@@ -202,20 +238,17 @@
 
       <test name="gate.creole.ontology.impl.test.Test4Develop" />
     </junit>
-  </target>
-
-  <target name="test" depends="testowlim,testw3tests,testontotest1,testtuplequery,testtriplestore,testontowine" />
-
-  <target name="test.reports" depends="test.reports.prepare,test">
     <junitreport>
       <fileset dir=".">
         <include name="TEST-*.xml" />
       </fileset>
       <report todir="." format="noframes" />
     </junitreport>
-  </target> 
+  </target>
 
-  <target name="test.reports.prepare">
+  <target name="test" depends="test.prepare,testowlim,testw3tests,testontotest1,testtuplequery,testtriplestore,testontowine" />
+
+  <target name="test.prepare">
     <delete>
       <fileset dir="." includes="TEST*.xml" />
       <fileset dir="." includes="TEST*.txt" />
@@ -224,7 +257,7 @@
 
   <!-- Targets used by the main GATE build file -->
   <target name="build" depends="jar" />
-  <target name="distro.prepare" depends="clean.classes,test.reports.prepare">
+  <target name="distro.prepare" depends="clean.classes,test.prepare">
     <!-- do not delete jar -->
     <delete dir="${build}" />
   </target>
