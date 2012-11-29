@@ -122,7 +122,31 @@ public class Test_OWLIMOntology {
     ontology.cleanup();
   }
 
+  /**
+   * Create lots of ontologies in quick succession to test if the creation
+   * of temporary storage location directories for them works.
+   * (many more than 50 ontologies cannot be created here or we would run into
+   * heap memory problems with the default memory settings used when the 
+   * tests are run) 
+   * @throws ResourceInstantiationException 
+   */
+  @Test
+  public void testFastCreation() throws ResourceInstantiationException  {
+    Set<Ontology> ontologies = new HashSet<Ontology>();
+    for (int i=0; i<50; i++) {
+      FeatureMap fm = Factory.newFeatureMap();
+      Ontology ontology = (Ontology)Factory.createResource(
+              "gate.creole.ontology.impl.sesame.OWLIMOntology", fm);
+      ontologies.add(ontology);
+    }
+    for(Ontology ontology : ontologies) {
+      ontology.cleanup();
+    }
+  }
 
+
+  
+  
   // testAccessOldNew: test ontology methods that were already present in the old
   // implementation - output measurements and do some benchmarking so
   // we can compare.
