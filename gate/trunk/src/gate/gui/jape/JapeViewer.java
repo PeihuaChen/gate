@@ -32,6 +32,7 @@ import java.util.Map;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.JTree;
+import javax.swing.SwingUtilities;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.text.Style;
@@ -181,7 +182,7 @@ public class JapeViewer extends AbstractVisualResource implements
   }
 
   @Override
-  public void setTarget(Object target) {
+  public void setTarget(final Object target) {
     if(target == null) {
      throw new NullPointerException("JAPE viewer received a null target");
     }
@@ -205,39 +206,49 @@ public class JapeViewer extends AbstractVisualResource implements
                       + target.getClass().toString()
                       + " is not a GATE Jape Transducer!");
     }
-
-    if(transducer != null && transducer instanceof AbstractProcessingResource) {
-      ((AbstractProcessingResource)transducer).removeProgressListener(this);
-    }
-
-    transducer = (LanguageAnalyser)target;
-    URL japeFileURL = null;
     
-    try {
-      japeFileURL = (URL)transducer.getParameterValue("grammarURL");
-    }
-    catch (ResourceInstantiationException rie) {
-      //ignore this for now and let the null catch take over
-      rie.printStackTrace();
-    }
+    SwingUtilities.invokeLater(new Runnable() {
 
-    if(japeFileURL == null) {
-      textArea.setText("The source for this JAPE grammar is not available!");
-      remove(treeScroll);
-      return;
-    }
+      @Override
+      public void run() {
 
-    String japePhaseName = japeFileURL.getFile();
-    japePhaseName = japePhaseName.substring(japePhaseName.lastIndexOf("/") + 1,
-            japePhaseName.length() - 5);
-    treePhases.setModel(new DefaultTreeModel(new DefaultMutableTreeNode(
-            japePhaseName)));
-    treePhases.setSelectionRow(0);
+        if(transducer != null && transducer instanceof AbstractProcessingResource) {
+          ((AbstractProcessingResource)transducer).removeProgressListener(JapeViewer.this);
+        }
+    
+        transducer = (LanguageAnalyser)target;
+        URL japeFileURL = null;
+        
+        try {
+          japeFileURL = (URL)transducer.getParameterValue("grammarURL");
+        }
+        catch (ResourceInstantiationException rie) {
+          //ignore this for now and let the null catch take over
+          rie.printStackTrace();
+        }
 
-    readJAPEFileContents(japeFileURL);
-    if(transducer instanceof AbstractProcessingResource) {
-      ((AbstractProcessingResource)transducer).addProgressListener(this);
-    }
+
+        if(japeFileURL == null) {
+          textArea.setText("The source for this JAPE grammar is not available!");
+          remove(treeScroll);
+          return;
+        }
+
+        String japePhaseName = japeFileURL.getFile();
+        japePhaseName = japePhaseName.substring(japePhaseName.lastIndexOf("/") + 1,
+                japePhaseName.length() - 5);
+        treePhases.setModel(new DefaultTreeModel(new DefaultMutableTreeNode(
+                japePhaseName)));
+        treePhases.setSelectionRow(0);
+
+        readJAPEFileContents(japeFileURL);
+        if(transducer instanceof AbstractProcessingResource) {
+          ((AbstractProcessingResource)transducer).addProgressListener(JapeViewer.this);
+        }
+      }
+      
+    });
+    
   }
 
   private void readJAPEFileContents(URL url) {
