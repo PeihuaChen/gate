@@ -4296,13 +4296,20 @@ public class MainFrame extends JFrame implements ProgressListener,
      * places on the Tools menu.
      * @param res the tool instance (which must implement ActionsPublisher)
      */
-    protected void toolLoaded(Resource res) {
-      List<Action> actions = ((ActionsPublisher)res).getActions();
-      List<JMenuItem> items = new ArrayList<JMenuItem>();
-      for(Action a : actions) {
-        items.add(addMenuItem(a));
-      }
-      itemsByResource.put(res, items);
+    protected void toolLoaded(final Resource res) {
+      SwingUtilities.invokeLater(new Runnable() {
+
+        @Override
+        public void run() {
+          // TODO Auto-generated method stub
+          List<Action> actions = ((ActionsPublisher)res).getActions();
+          List<JMenuItem> items = new ArrayList<JMenuItem>();
+          for(Action a : actions) {
+            items.add(addMenuItem(a));
+          }
+          itemsByResource.put(res, items);
+        }
+      });
     }
 
     protected JMenuItem addMenuItem(Action a) {
