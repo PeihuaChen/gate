@@ -1619,27 +1619,46 @@ public class SerialControllerEditor extends AbstractVisualResource
             Benchmark.executeWithBenchmarking(controller,
                     Benchmark.createBenchmarkId(controller.getName(), null),
                     RunAction.this, null);
-          }catch(ExecutionInterruptedException eie){
-            MainFrame.unlockGUI();
-            JOptionPane.showMessageDialog(
-              SerialControllerEditor.this,
-              "Interrupted!\n" + eie.toString(),
-              "GATE", JOptionPane.ERROR_MESSAGE);
-          }catch(ExecutionException ee) {
-            ee.printStackTrace(Err.getPrintWriter());
-            MainFrame.unlockGUI();
-            JOptionPane.showMessageDialog(
-              SerialControllerEditor.this,
-              "Execution error while running \"" + controller.getName() +
-              "\" :\nSee \"Messages\" tab for details!",
-              "GATE", JOptionPane.ERROR_MESSAGE);
-          }catch(Exception e){
-            MainFrame.unlockGUI();
-            JOptionPane.showMessageDialog(SerialControllerEditor.this,
-                                          "Unhandled execution error!\n " +
-                                          "See \"Messages\" tab for details!",
-                                          "GATE", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace(Err.getPrintWriter());
+          }catch(final ExecutionInterruptedException eie){
+            SwingUtilities.invokeLater(new Runnable(){
+
+              @Override
+              public void run() {
+                MainFrame.unlockGUI();
+                JOptionPane.showMessageDialog(
+                  SerialControllerEditor.this,
+                  "Interrupted!\n" + eie.toString(),
+                  "GATE", JOptionPane.ERROR_MESSAGE);                
+              }              
+            });            
+          }catch(final ExecutionException ee) {
+            SwingUtilities.invokeLater(new Runnable(){
+
+              @Override
+              public void run() {
+                ee.printStackTrace(Err.getPrintWriter());
+                MainFrame.unlockGUI();
+                JOptionPane.showMessageDialog(
+                  SerialControllerEditor.this,
+                  "Execution error while running \"" + controller.getName() +
+                  "\" :\nSee \"Messages\" tab for details!",
+                  "GATE", JOptionPane.ERROR_MESSAGE);
+              }              
+            });            
+          }catch(final Exception e){
+            SwingUtilities.invokeLater(new Runnable(){
+
+              @Override
+              public void run() {
+                MainFrame.unlockGUI();
+                JOptionPane.showMessageDialog(SerialControllerEditor.this,
+                                              "Unhandled execution error!\n " +
+                                              "See \"Messages\" tab for details!",
+                                              "GATE", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace(Err.getPrintWriter());                
+              }              
+            });
+            
           }finally{
             MainFrame.unlockGUI();
             Gate.setExecutable(null);
