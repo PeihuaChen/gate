@@ -17,7 +17,7 @@
 package gate.util;
 import gate.FeatureMap;
 
-/** Classes that have features.
+/** Classes whose instances each have a FeatureMap.
   */
 public interface FeatureBearer
 {

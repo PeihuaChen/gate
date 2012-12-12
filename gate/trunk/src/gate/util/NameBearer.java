@@ -16,7 +16,7 @@
 
 package gate.util;
 
-/** Classes that have features.
+/** Classes whose instances each have a name.
   */
 public interface NameBearer
 {
