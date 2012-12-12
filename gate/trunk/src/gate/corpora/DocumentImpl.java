@@ -177,10 +177,10 @@ public class DocumentImpl extends AbstractLanguageResource implements
     /** We will attempt to serialize namespace if
      *  three parameters are set in the global or local config file:
      *  ADD_NAMESPACE_FEATURES: boolean flag
-     *  ELEMENT_NAMESPACE_URI: feature name used to hold namespace uri
+     *  ELEMENT_NAMESPACE_URI: feature name used to hold namespace URI
      *  ELEMENT_NAMESPACE_PREFIX: feature name used to hold namespace prefix
      */
-    Map configData = Gate.getUserConfig();
+    OptionsMap configData = Gate.getUserConfig();
 
     boolean addNSFeature = Boolean.parseBoolean((String)configData.get(GateConstants.ADD_NAMESPACE_FEATURES));
     namespaceURIFeature = (String) configData.get(GateConstants.ELEMENT_NAMESPACE_URI);
@@ -2029,15 +2029,21 @@ public class DocumentImpl extends AbstractLanguageResource implements
   }// annotationSetToXml
 
   /**
-   * Returns a map with the named annotation sets. It returns <code>null</code>
+   * Returns a map (possibly empty) with the named annotation sets. It returns <code>null</code>
    * if no named annotaton set exists.
    */
   public Map<String, AnnotationSet> getNamedAnnotationSets() {
+    if (namedAnnotSets == null) {
+      namedAnnotSets = new HashMap<String, AnnotationSet>();
+    }
     return namedAnnotSets;
   } // getNamedAnnotationSets
 
   public Set<String> getAnnotationSetNames() {
-    return (namedAnnotSets == null) ? null : namedAnnotSets.keySet();
+    if (namedAnnotSets == null) {
+      namedAnnotSets = new HashMap<String, AnnotationSet>();
+    }
+    return namedAnnotSets.keySet();
   }
 
   /**
