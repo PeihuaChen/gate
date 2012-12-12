@@ -99,6 +99,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 
 import org.apache.log4j.Logger;
 import org.apache.tools.ant.BuildEvent;
@@ -1504,38 +1505,69 @@ public class NameBearerHandle implements Handle, StatusListener,
                       + " seconds!");
 
             }
-            catch(MalformedURLException mue) {
-              JOptionPane.showMessageDialog(getLargeView(), "Invalid URL!\n "
+            catch(final MalformedURLException mue) {
+              SwingUtilities.invokeLater(new Runnable() {
+                
+                @Override
+                public void run() {
+                  JOptionPane.showMessageDialog(MainFrame.getInstance(), "Invalid URL!\n "
                       + "See \"Messages\" tab for details!", "GATE",
                       JOptionPane.ERROR_MESSAGE);
-              mue.printStackTrace(Err.getPrintWriter());
+                  mue.printStackTrace(Err.getPrintWriter());                  
+                }
+              });              
             }
-            catch(IOException ioe) {
-              JOptionPane.showMessageDialog(getLargeView(), "I/O error!\n "
+            catch(final IOException ioe) {
+              SwingUtilities.invokeLater(new Runnable() {
+                
+                @Override
+                public void run() {
+                  JOptionPane.showMessageDialog(MainFrame.getInstance(), "I/O error!\n "
                       + "See \"Messages\" tab for details!", "GATE",
                       JOptionPane.ERROR_MESSAGE);
-              ioe.printStackTrace(Err.getPrintWriter());
+                  ioe.printStackTrace(Err.getPrintWriter());                  
+                }
+              });              
             }
-            catch(ResourceInstantiationException rie) {
-              JOptionPane.showMessageDialog(getLargeView(),
+            catch(final ResourceInstantiationException rie) {
+              SwingUtilities.invokeLater(new Runnable() {
+                
+                @Override
+                public void run() {
+                  JOptionPane.showMessageDialog(MainFrame.getInstance(),
                       "Could not create document!\n "
                               + "See \"Messages\" tab for details!", "GATE",
                       JOptionPane.ERROR_MESSAGE);
-              rie.printStackTrace(Err.getPrintWriter());
+                  rie.printStackTrace(Err.getPrintWriter());                  
+                }
+              });              
             }
-            catch(PersistenceException pe) {
-              JOptionPane.showMessageDialog(getLargeView(),
+            catch(final PersistenceException pe) {
+              SwingUtilities.invokeLater(new Runnable() {
+                
+                @Override
+                public void run() {
+                  JOptionPane.showMessageDialog(MainFrame.getInstance(),
                       "Corpus couldn't be synchronized!\n "
                               + "See \"Messages\" tab for details!", "GATE",
                       JOptionPane.ERROR_MESSAGE);
-              pe.printStackTrace(Err.getPrintWriter());
+                  pe.printStackTrace(Err.getPrintWriter());
+                  
+                }
+              });              
             }
-            catch(SecurityException pe) {
-              JOptionPane.showMessageDialog(getLargeView(),
+            catch(final SecurityException pe) {
+              SwingUtilities.invokeLater(new Runnable() {
+                
+                @Override
+                public void run() {
+                  JOptionPane.showMessageDialog(MainFrame.getInstance(),
                       "Corpus couldn't be synchronized!\n "
                               + "See \"Messages\" tab for details!", "GATE",
                       JOptionPane.ERROR_MESSAGE);
-              pe.printStackTrace(Err.getPrintWriter());
+                  pe.printStackTrace(Err.getPrintWriter());                  
+                }
+              });              
             }
           }
         }
