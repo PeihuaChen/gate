@@ -203,7 +203,6 @@
     <RESOURCE>
       <NAME>Hindi POS Tagger</NAME>
       <COMMENT>Mark Hepple's Brill-style POS tagger, adapted for languages where entries are multiword</COMMENT>
-      <JAR>resources/creole/cebtag.jar</JAR>
       <CLASS>cebtag.postag.CebuanoPOSTagger</CLASS>
       <PARAMETER NAME="document"
         COMMENT="The document to be processed"
