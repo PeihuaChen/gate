@@ -276,8 +276,13 @@ public class Main {
    */
   public static void applyUserPreferences(){
     //look and feel
-    String lnfClassName = Gate.getUserConfig().
-                          getString(GateConstants.LOOK_AND_FEEL);
+    String lnfClassName;
+    if(System.getProperty("swing.defaultlaf") != null) {
+      lnfClassName = System.getProperty("swing.defaultlaf");
+    } else {
+      lnfClassName = Gate.getUserConfig().
+                            getString(GateConstants.LOOK_AND_FEEL);
+    }
     if(lnfClassName == null){
       //if running on Linux, default to Metal rather than GTK because GTK LnF
       //doesn't play nicely with most Gnome themes
@@ -286,8 +291,7 @@ public class Main {
         lnfClassName = UIManager.getCrossPlatformLookAndFeelClassName();
       }else{
         lnfClassName = UIManager.getSystemLookAndFeelClassName();
-      }
-      Gate.getUserConfig().put(GateConstants.LOOK_AND_FEEL, lnfClassName);
+      }      
     }
     try {
       UIManager.setLookAndFeel(lnfClassName);
@@ -303,19 +307,15 @@ public class Main {
                 e1.toString() + "\nGiving up on Look and Feel.");
       }
     }
-
+    Gate.getUserConfig().put(GateConstants.LOOK_AND_FEEL, lnfClassName);
+    
     //read the user config data
     OptionsMap userConfig = Gate.getUserConfig();
 
     //text font
     Font font = userConfig.getFont(GateConstants.TEXT_COMPONENTS_FONT);
     if(font == null){
-      String fontName = Gate.guessUnicodeFont();
-      if(fontName != null){
-        font = new Font(fontName, Font.PLAIN, 12);
-      }else{
-        font = UIManager.getFont("TextPane.font");
-      }
+      font = UIManager.getFont("TextPane.font");
     }
 
     if(font != null){
@@ -325,12 +325,7 @@ public class Main {
     //menus font
     font = userConfig.getFont(GateConstants.MENUS_FONT);
     if(font == null){
-      String fontName = Gate.guessUnicodeFont();
-      if(fontName != null){
-        font = new Font(fontName, Font.PLAIN, 12);
-      }else{
-        font = UIManager.getFont("Menu.font");
-      }
+      font = UIManager.getFont("Menu.font");
     }
 
     if(font != null){
@@ -340,18 +335,12 @@ public class Main {
     //other gui font
     font = userConfig.getFont(GateConstants.OTHER_COMPONENTS_FONT);
     if(font == null){
-      String fontName = Gate.guessUnicodeFont();
-      if(fontName != null){
-        font = new Font(fontName, Font.PLAIN, 12);
-      }else{
-        font = UIManager.getFont("Button.font");
-      }
+      font = UIManager.getFont("Button.font");
     }
 
     if(font != null){
       OptionsDialog.setComponentsFont(font);
     }
-
 
   }
 

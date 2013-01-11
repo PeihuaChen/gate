@@ -555,27 +555,6 @@ public class Gate implements GateConstants {
   } // initConfigData()
 
   /**
-   * Attempts to guess the Unicode font for the platform.
-   */
-  public static String guessUnicodeFont() {
-    // guess the Unicode font for the platform
-    String[] fontNames =
-      java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment()
-        .getAvailableFontFamilyNames();
-    String unicodeFontName = null;
-    for(int i = 0; i < fontNames.length; i++) {
-      if(fontNames[i].equalsIgnoreCase("Arial Unicode MS")) {
-        unicodeFontName = fontNames[i];
-        break;
-      }
-      if(fontNames[i].toLowerCase().indexOf("unicode") != -1) {
-        unicodeFontName = fontNames[i];
-      }
-    }// for(int i = 0; i < fontNames.length; i++)
-    return unicodeFontName;
-  }
-
-  /**
    * Get a URL that points to either an HTTP server or a file system that
    * contains GATE files (such as test cases). The following locations are tried
    * in sequence:
