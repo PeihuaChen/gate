@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <metadata xmlns="http://gate.ac.uk/ns/pipeline-metadata">
   <pipeline-name>OpenNLP German Pipeline</pipeline-name>
+  <annotation-selectors>:Date, :Location, :Organization, :Person</annotation-selectors>
+  <tags>
+    <tag>German</tag>
+    <tag>OpenNLP</tag>
+    <tag>Named Entity</tag>
+  </tags>  
 </metadata>
