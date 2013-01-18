@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <metadata xmlns="http://gate.ac.uk/ns/pipeline-metadata">
   <pipeline-name>PennBio Tagger</pipeline-name>
+  <annotation-selectors>:gene, :location, :malignancy-type, :state-altered, :state-original, :type, :variation</annotation-selectors>
+  <tags>
+    <tag>Biomed</tag>
+    <tag>Tagger</tag>
+    <tag>Genes</tag>
+  </tags>
 </metadata>
