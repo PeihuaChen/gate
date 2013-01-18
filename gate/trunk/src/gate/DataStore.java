@@ -93,8 +93,11 @@ public interface DataStore extends FeatureBearer, NameBearer {
 
   /**
    * Get a resource from the persistent store.
-   * <B>Don't use this method - use Factory.createResource with
-   * DataStore and DataStoreInstanceId parameters set instead.</B>
+   * <B>You should never call this method directly, instead use the following:</B>
+   * <pre> FeatureMap params = Factory.newFeatureMap();
+   * params.put(DataStore.DATASTORE_FEATURE_NAME, datastore);
+   * params.put(DataStore.LR_ID_FEATURE_NAME, lrID);
+   * LanguageResource lr = (LanguageResource)Factory.createResource(lrClassName, params);</pre>
    */
   LanguageResource getLr(String lrClassName, Object lrId)
   throws PersistenceException,SecurityException;

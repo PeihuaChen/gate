@@ -444,11 +444,6 @@ extends AbstractFeatureBearer implements DataStore {
     return lrName + "___" + new Date().getTime() + "___" + random();
   } // constructPersistenceId
 
-  /** Get a resource from the persistent store.
-    * <B>Don't use this method - use Factory.createResource with
-    * DataStore and DataStoreInstanceId parameters set instead.</B>
-    * (Sometimes I wish Java had "friend" declarations...)
-    */
   public LanguageResource getLr(String lrClassName, Object lrPersistenceId)
   throws PersistenceException,SecurityException {
 
