@@ -17,8 +17,10 @@ package gate.corpora;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.StringReader;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -96,7 +98,7 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
     try {
       BufferedReader content = new BufferedReader(new StringReader(
           doc.getContent().toString()));
-      Map<String, String> fields = new HashMap<String, String>();
+      Map<String, Serializable> fields = new HashMap<String, Serializable>();
       String line = content.readLine();
       String key = null;
       StringBuilder value = new StringBuilder();
@@ -107,7 +109,7 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
           // new field
           if(key != null) {
             // save old value
-            fields.put(key, value.toString());
+            PubmedUtils.addFieldValue(key, value.toString(), fields);
           }
           key = matcher.group(1).trim();
           value.delete(0, value.length());
@@ -125,14 +127,14 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
       }
       if(key != null) {
         // save old value
-        fields.put(key, value.toString());
+        PubmedUtils.addFieldValue(key, value.toString(), fields);
       }
       StringBuilder docText = new StringBuilder();
       // add document title
       int titleStart = docText.length();
-      String aField = fields.remove(PUBMED_TITLE);
+      Serializable aField = fields.remove(PUBMED_TITLE);
       if(aField != null) {
-        docText.append(aField);        
+        docText.append(aField.toString());        
       } else {
         String docName = doc.getName();  
         logger.warn("Could not find document title in document " + 
@@ -144,7 +146,7 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
       aField = fields.remove(PUBMED_ABSTRACT);
       int absStart = docText.length();
       if(aField != null) {
-        docText.append(aField);
+        docText.append(aField.toString());
       } else {
         String docName = doc.getName();  
         logger.warn("Could not find document abstract in document " + 
