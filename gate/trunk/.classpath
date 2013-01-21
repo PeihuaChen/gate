@@ -32,10 +32,6 @@
 	<classpathentry kind="src" path="plugins/Language_Identification/src"/>
 	<classpathentry kind="src" output="plugins/Tagger_Numbers/classes" path="plugins/Tagger_Numbers/src"/>
 	<classpathentry kind="src" output="plugins/TermRaider/classes" path="plugins/TermRaider/src"/>
-	<classpathentry exported="true" kind="lib" path="lib/jdom.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/junit.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/ant.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/ant-launcher.jar"/>
 	<classpathentry kind="lib" path="plugins/Gazetteer_Ontology_Based/lib/oro-2.0.8.jar"/>
 	<classpathentry kind="lib" path="plugins/WordNet/lib/jwnl.jar"/>
 	<classpathentry kind="lib" path="plugins/LingPipe/lib/lingpipe-4.0.1.jar"/>
@@ -45,8 +41,6 @@
 	<classpathentry kind="lib" path="plugins/Ontology/lib/slf4j-jdk14-1.5.6.jar"/>
 	<classpathentry kind="lib" path="plugins/OpenNLP/lib/opennlp-tools-1.5.2-incubating.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry exported="true" kind="lib" path="lib/gate-compiler-jdt.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/xercesImpl.jar"/>
 	<classpathentry kind="lib" path="plugins/Learning/lib/weka.jar"/>
 	<classpathentry kind="lib" path="plugins/Web_Crawler_Websphinx/lib/websphinx.jar"/>
 	<classpathentry kind="lib" path="plugins/Keyphrase_Extraction_Algorithm/lib/weka-3.4.6.jar"/>
@@ -70,50 +64,14 @@
 	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-document-annotation.jar"/>
 	<classpathentry kind="lib" path="plugins/UIMA/lib/uima-tools.jar"/>
 	<classpathentry kind="lib" path="plugins/Parser_Stanford/lib/stanford-parser.jar"/>
-	<classpathentry kind="lib" path="lib/gate-asm.jar"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
 	<classpathentry kind="lib" path="plugins/Groovy/lib/groovy-all-1.7.6.jar"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_DSL_SUPPORT"/>
 	<classpathentry kind="lib" path="plugins/JAPE_Plus/lib/colt-1.2.0-free.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/spring-core.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/ivy.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/pdfbox.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jempbox.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/tika-core.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/xstream.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-core.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/xpp3.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/nekohtml.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/xmlunit.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/xmlbeans.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-compress.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/bcmail-jdk15.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-io.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/poi-ooxml.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/tika-parsers.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/log4j.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/poi-ooxml-schemas.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jaxen.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/aopalliance.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-dom.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-logging.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/java-getopt.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-lang.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/bcprov-jdk15.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/poi-scratchpad.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/dom4j.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/lucene-core.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/fontbox.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/spring-aop.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-codec.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/poi.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/spring-beans.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/metadata-extractor.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/woodstox-core-lgpl.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/stax2-api.jar"/>
 	<classpathentry kind="lib" path="plugins/Ontology/lib/openrdf-sesame-2.6.10-onejar.jar"/>
 	<classpathentry kind="lib" path="plugins/Ontology/lib/owlim-lite-5.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/flying-saucer-core.jar"/>
 	<classpathentry kind="lib" path="plugins/OpenNLP/lib/opennlp-maxent-3.0.2-incubating.jar"/>
+	<classpathentry kind="con" path="org.apache.ivyde.eclipse.cpcontainer.IVYDE_CONTAINER/?project=GATE&amp;ivyXmlPath=ivy.xml&amp;confs=*"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
