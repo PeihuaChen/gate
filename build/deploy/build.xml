@@ -174,7 +174,6 @@ build/deploy all paths are relative to the top-level GATE directory -->
         <filename name="GATE.app/**" />
         <filename name="plugins/**" />
         <filename name="licence.html"/>
-        <filename name="build.xml"/>
         <filename name="gate.xml"/>
         <filename name="build/version.txt"/>
         <filename name="build/persist/**"/>
@@ -377,7 +376,6 @@ build/deploy all paths are relative to the top-level GATE directory -->
             <fileset dir="lib" targetdir="$INSTALL_PATH/lib"/>
             <file src="licence.html" targetdir="$INSTALL_PATH"/>
             <file src="index.html" targetdir="$INSTALL_PATH"/>
-            <file src="build.xml" targetdir="$INSTALL_PATH"/>          
             <file src="gate.xml" targetdir="$INSTALL_PATH"/>
             <file src="gate.exe" targetdir="$INSTALL_PATH" os="windows"/>
             <file src="gate.l4j.ini" targetdir="$INSTALL_PATH" os="windows"/>
@@ -421,6 +419,7 @@ build/deploy all paths are relative to the top-level GATE directory -->
               preselected="no">
             <description>The full source code for GATE.  You should only need to install this if you want to modify and rebuild the core GATE code.</description>
             <fileset dir="src" targetdir="$INSTALL_PATH/src"/>
+            <file src="build.xml" targetdir="$INSTALL_PATH"/>          	
         </pack>
     </packs>
 </installation>
