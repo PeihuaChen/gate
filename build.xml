@@ -293,8 +293,6 @@
     </jar>
     <!-- also build the launcher -->
     <ant dir="build/launcher" inheritAll="false" target="jar" />
-    <typedef resource="gate/util/ant/antlib.xml" classpathref="run.class.path" />
-    <synceclipse dir="lib" />
   </target>
 
   <!-- Optional target useful for creating jars for embedded apps.  It splits
