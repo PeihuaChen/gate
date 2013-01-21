@@ -68,10 +68,10 @@
 	<classpathentry kind="lib" path="plugins/Groovy/lib/groovy-all-1.7.6.jar"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_DSL_SUPPORT"/>
 	<classpathentry kind="lib" path="plugins/JAPE_Plus/lib/colt-1.2.0-free.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/woodstox-core-lgpl.jar"/>
+	<classpathentry kind="lib" path="lib/woodstox-core-lgpl.jar"/>
 	<classpathentry kind="lib" path="plugins/Ontology/lib/openrdf-sesame-2.6.10-onejar.jar"/>
 	<classpathentry kind="lib" path="plugins/Ontology/lib/owlim-lite-5.3.jar"/>
 	<classpathentry kind="lib" path="plugins/OpenNLP/lib/opennlp-maxent-3.0.2-incubating.jar"/>
-	<classpathentry kind="con" path="org.apache.ivyde.eclipse.cpcontainer.IVYDE_CONTAINER/?project=GATE&amp;ivyXmlPath=ivy.xml&amp;confs=*"/>
+	<classpathentry exported="true" kind="con" path="org.apache.ivyde.eclipse.cpcontainer.IVYDE_CONTAINER/?project=GATE&amp;ivyXmlPath=ivy.xml&amp;confs=*"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
