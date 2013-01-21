@@ -85,6 +85,16 @@
   <!-- Documentation directory -->
   <property name="docDir" location="doc" />
 
+  <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant">
+    <classpath>
+      <pathelement location="${buildDir}/lib/ivy.jar" />
+    </classpath>
+  </taskdef>
+  <ivy:retrieve sync="true" pattern="${libDir}/[artifact].[ext]" />
+
+  <!-- generate the pretty HTML report for what we just retrieved -->
+  <ivy:report todir="${libDir}" graph="false" />
+
   <!-- load ant-contrib for the "if" task -->
   <taskdef resource="net/sf/antcontrib/antlib.xml">
     <classpath>
@@ -229,37 +239,6 @@
     </copy>
   </target>
 
-  <target name="prepare.lib">
-    <!-- build the full classpath using ivy to resolve dependencies -->
-     <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant">
-       <classpath>
-        <pathelement location="${buildDir}/lib/ivy.jar" />
-      </classpath>
-    </taskdef>
-
-    <!-- retrieve everything and put the jars in lib without version
-                      numbers to simplify build scripts, eclipse classpaths etc. -->
-    <ivy:retrieve sync="true" pattern="lib/[artifact].[ext]" />
-
-    <!-- generate the pretty HTML report for what we just retrieved -->
-    <ivy:report todir="lib" graph="false" />
-
-    <echoxml file="lib/index.html" append="true">
-      <html>
-        <body>
-          For details of the 3rd party libraries, and their licences, see the <a href="uk.ac.gate-gate-core-all.html">Ivy reports</a>
-        </body>
-      </html>
-    </echoxml>
-
-    <!-- convert the Ivy file into a Maven POM. Note that this is most definately
-                     experimental and doesn't yet replace the one in gate/build/deploy/maven  -->
-    <!-- <ivy:makepom ivyfile="gate-ivy.xml" pomfile="gate.pom.xml">
-      <mapping conf="required,compile" scope="compile"/>
-      <mapping conf="required,runtime" scope="runtime"/>
-    </ivy:makepom> -->
-  </target>
-
   <target name="svg2java" unless="do.not.draw" depends="prepare">
     <java fork="true" classname="englishcoffeedrinker.svg.in.SVGBatchConverter" failonerror="true">
       <jvmarg value="-Xmx512m" />
@@ -314,7 +293,8 @@
     </jar>
     <!-- also build the launcher -->
     <ant dir="build/launcher" inheritAll="false" target="jar" />
-    <antcall target="eclipse" />
+    <typedef resource="gate/util/ant/antlib.xml" classpathref="run.class.path" />
+    <synceclipse dir="lib" />
   </target>
 
   <!-- Optional target useful for creating jars for embedded apps.  It splits
@@ -709,12 +689,6 @@
       <param name="write.xml" value="true" />
     </antcall>
     <antcall target="test.reports" />
-  </target>
-
-  <!-- ensures the .classpath file matches the lib folder -->
-  <target name="eclipse">
-    <typedef resource="gate/util/ant/antlib.xml" classpathref="run.class.path" />
-    <synceclipse dir="lib" />
   </target>
 
   <!-- Make the archives for the GATE Distribution -->
