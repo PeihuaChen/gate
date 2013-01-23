@@ -208,10 +208,14 @@ extends AbstractFeatureBearer implements Resource, Serializable
                     throw new ResourceInstantiationException(pe);
                   }
                 }else{
-                  //this should never happen
-                  throw new LuckyException("Unknown parameter " + paramaterName +
-                          " for resource " + resource.getClass().getName() +
-                          "!");
+                  // if this happens it means that the class has the specified parameter
+                  // name does indeed correspond to a getter/setter pair on the class
+                  // but there is no associated CREOLE metadata for that parameter name
+                  throw new ResourceInstantiationException("Property " + paramaterName +
+                      " of resource class " + resource.getClass().getName() +
+                      " is not declared as a CREOLE parameter.  Automatic" +
+                      " conversion of string values to other types is only" +
+                      " supported for declared parameters."); 
                 }
               }else{
                 throw new ResourceInstantiationException(
