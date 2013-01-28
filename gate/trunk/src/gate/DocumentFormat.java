@@ -18,6 +18,7 @@ package gate;
 
 import java.io.*;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.*;
 
 import org.apache.commons.io.IOUtils;
@@ -193,8 +194,9 @@ extends AbstractLanguageResource implements LanguageResource{
 
     try {
     try{
-      is = url.openConnection().getInputStream();
-      contentType = url.openConnection().getContentType();
+      URLConnection urlconn = url.openConnection();
+      is = urlconn.getInputStream();
+      contentType = urlconn.getContentType();
     } catch (IOException e){
       // Failed to get the content type with te Web server.
       // Let's try some other methods like FileSuffix or magic numbers.
