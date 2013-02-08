@@ -114,7 +114,7 @@ public class JSONTweetFormat extends TextualDocumentFormat {
     //Tweet tweet = new Tweet(); 
     String[] lines = string.split("[\\n\\r]+");
     for (String line : lines) {
-      System.out.println("Item " + i + "\n" + line);
+      //System.out.println("Item " + i + "\n" + line);
       if (line.length() > 0) {
         JsonNode jnode = mapper.readTree(line);
         tweets.add(new Tweet(jnode));
