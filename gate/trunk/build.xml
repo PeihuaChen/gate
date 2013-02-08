@@ -363,8 +363,9 @@
   <!-- Plugins -->
   <!-- Learning plugin needs to be before Lang_Chinese -->
   <filelist id="plugins.to.build" dir="plugins" files="
-      Alignment Annotation_Merging Copy_Annots_Between_Docs Coref_Tools Format_MediaWiki
-      Format_PubMed Gazetteer_LKB Gazetteer_Ontology_Based GENIA Groovy
+      Alignment Annotation_Merging Copy_Annots_Between_Docs Coref_Tools 
+      Format_MediaWiki Format_PubMed Format_Twitter
+      Gazetteer_LKB Gazetteer_Ontology_Based GENIA Groovy
       Inter_Annotator_Agreement JAPE_Plus Keyphrase_Extraction_Algorithm
       Lang_Arabic Lang_Cebuano Learning Lang_Chinese Lang_French Lang_German
       Lang_Hindi Lang_Romanian Language_Identification LingPipe
