@@ -11,9 +11,9 @@ GATE papers
 
  - H. Cunningham, D. Maynard, K. Bontcheva, V. Tablan. GATE: A Framework and Graphical Development Environment for Robust NLP Tools and Applications. Proceedings of the 40th Anniversary Meeting of the Association for Computational Linguistics (ACL'02). Philadelphia, July 2002. %(../../sale/acl02/acl-main.pdf,PDF). %(bibtex.html#Cunningham2002, BibTeX).
 
-%3* I used the ontology features in GATE:
+%3* I used %(http://gatecloud.net, GATECloud.net):
 
- - K. Bontcheva, V. Tablan, D. Maynard, H. Cunningham. Evolving GATE to Meet New Challenges in Language Engineering. Natural Language Engineering. 10 (3/4), pp. 349-373. 2004. %(../../sale/jnle03/jnle-final.pdf,Pre-print). %(bibtex.html#Bontcheva2004, BibTeX).
+- V. Tablan, I. Roberts, H. Cunningham, and K. Bontcheva. GATECloud.net: a Platform for Large-Scale, Open-Source Text Processing on the Cloud. %(http://rsta.royalsocietypublishing.org/, Philosophical Transactions of the Royal Society A), 371(1983), 2013 %(http://dx.doi.org/10.1098/rsta.2012.0071, doi:10.1098/rsta.2012.0071). %(http://gate.ac.uk/sale/ahm11/journal/revised-sumission-preprint.pdf, A pre-print).
 
 %3* I used GATE Mímir:
 
@@ -21,7 +21,15 @@ GATE papers
 
 %3* I used GATE Teamware:
 
-- K. Bontcheva, H. Cunningham, I. Roberts, V. Tablan. Web-based Collaborative Corpus Annotation: Requirements and a Framework Implementation. In "New Challenges for NLP Frameworks" workshop at LREC, Malta, May 2010.%(http://gate.ac.uk/sale/lrec2010/teamware/teamware-lrec10.pdf,PDF)
+- K. Bontcheva, H. Cunningham, I. Roberts, A. Roberts, V. Tablan, N. Aswani, G. Gorrell. Teamware: A Web-based, Collaborative Text Annotation Framework.  Language Resources and Evaluation. In Press. %(http://gate.ac.uk/sale/teamware-lre2012/teamware.pdf,A pre-print)
+
+%3* I used the machine learning facilities in GATE:
+
+ - Y. Li, K. Bontcheva and H. Cunningham. Adapting SVM for Data Sparseness and Imbalance: A Case Study on Information Extraction. Natural Language Engineering, 15(02), 241-271, 2009. %(http://journals.cambridge.org/repo_A45LfkBD,On-line Link). %(../../sale/nle-svm/svm-ie-nle-revision.pdf,Pre-print), %(bibtex.html#Li2009, BibTeX).
+
+%3* I used the ontology features in GATE:
+
+ - K. Bontcheva, V. Tablan, D. Maynard, H. Cunningham. Evolving GATE to Meet New Challenges in Language Engineering. Natural Language Engineering. 10 (3/4), pp. 349-373. 2004. %(../../sale/jnle03/jnle-final.pdf,Pre-print). %(bibtex.html#Bontcheva2004, BibTeX).
 
 %3* I used GATE for Information Retrieval
 
@@ -31,26 +39,35 @@ GATE papers
 
  - M. Dowman, V. Tablan, H. Cunningham and B. Popov. Web-Assisted Annotation, Semantic Indexing and Search of Television and Radio News. 14th International World Wide Web Conference. Chiba, Japan, 2005. %(http://gate.ac.uk/sale/www05/web-assisted-annotation.pdf,PDF). %(bibtex.html#Dowman2005, BibTeX).
 
-%3* I used the machine learning facilities in GATE:
-
- - Y. Li, K. Bontcheva and H. Cunningham. Adapting SVM for Data Sparseness and Imbalance: A Case Study on Information Extraction. Natural Language Engineering, 15(02), 241-271, 2009. %(http://journals.cambridge.org/repo_A45LfkBD,On-line Link). %(../../sale/nle-svm/svm-ie-nle-revision.pdf,Pre-print), %(bibtex.html#Li2009, BibTeX).
-
 %contents
 
 %1 Book Chapters, Journals and Conference papers
 
 %2* Forthcoming
 
-- Thomas Risse, Wim Peters, Pierre Senellart, Diana Maynard. Documenting Contemporary Society by Preserving Relevant Information from Twitter. In 'Twitter and Society', edited by Katrin Weller, Axel Bruns, Jean Burgess, Merja Mahrt and Cornelius Puschmann. In Press.
+- L. Derczynski, B. Yang, C.S. Jensen. Towards Context-Aware Search and Analysis on Social Media Data. In Proceedings of the Extending Database Technology conference (EDBT 2013), Genoa, Italy.
+
+- D. Rout, K. Bontcheva, M. Hepple. Reliably Evaluating Summaries of Twitter Timelines. Analyzing Microtext. 
+AAAI 2013 Spring Symposium. March 25-27, Stanford, California, 2013.
+
+- L. Derczynski, D. Maynard, N. Aswani, K. Bontcheva. Microblog-Genre Noise and Impact on Semantic
+Annotation Accuracy. 24th ACM Conference on Hypertext and Social Media, 1–3 May, Paris, France. 2013.
+
+- D. Rout, D. Preotiuc-Pietro, K. Bontcheva, T. Cohn. Where’s @wally? A Classification Approach to Geolocating Users Based on their Social Ties.  24th ACM Conference on Hypertext and Social Media, 1–3 May, Paris, France. 2013.
+
+- T. Risse, W. Peters, P. Senellart, D. Maynard. Documenting Contemporary Society by Preserving Relevant Information from Twitter. In 'Twitter and Society', edited by K. Weller, A. Bruns, J. Burgess, M. Mahrt and C. Puschmann. In Press.
 
 - D. Maynard, K. Bontcheva. Natural Language Processing. In J. Lehmann and J. Voelker editors, Perspectives of Ontology Learning. IOS Press. 
-
-- L. Derczynski, B. Yang, C.S. Jensen. Towards Context-Aware Search and Analysis on Social Media Data. In Proceedings of the Extending Database Technology conference (EDBT 2013), Genoa, Italy.
 
 %2* 2013
 
 - Cunningham H, Tablan V, Roberts A, Bontcheva K (2013) Getting More Out of Biomedical Documents with GATE's Full Lifecycle Open Source Text Analytics. PLoS Comput Biol 9(2): e1002854. doi:10.1371/journal.pcbi.1002854 -- http://tinyurl.com/gate-life-sci/
+
 - V. Tablan, I. Roberts, H. Cunningham, and K. Bontcheva. GATECloud.net: a Platform for Large-Scale, Open-Source Text Processing on the Cloud. %(http://rsta.royalsocietypublishing.org/, Philosophical Transactions of the Royal Society A), 371(1983), 2013 %(http://dx.doi.org/10.1098/rsta.2012.0071, doi:10.1098/rsta.2012.0071).
+
+- K. Bontcheva, D. Rout. Making Sense of Social Media through Semantics: A Survey. Semantic Web - Interoperability, Usability, Applicability. IOS Press. In Press.
+%(http://www.semantic-web-journal.net/sites/default/files/semantics-4-social-media-final.pdf, Pre-print).
+
 
 %2* 2012
 
