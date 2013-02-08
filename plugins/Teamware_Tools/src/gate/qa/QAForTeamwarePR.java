@@ -107,7 +107,7 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
    * ignore annotators
    */
   private List<String> annotatorsToIgnore = null;
-  
+
   /**
    * Controller with QA PR as part of it.
    */
@@ -180,19 +180,18 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
         }
       }
     }
-    
     // we need to ignore some of the annotators
     if(annotatorsToIgnore != null && !annotatorsToIgnore.isEmpty()) {
       annotators.removeAll(annotatorsToIgnore);
     }
-    
     // if no annotators found print a warning
-    if(annotators.isEmpty()) {
-      System.err.println("No annotators found for the document " +
-        document.getName() + "\n" +
-        "Please make sure the document is annotated using Teamware!");
+    if(annotators.isEmpty() || annotators.size() == 1) {
+      System.err
+        .println("No annotators or only one annotator found for the document " +
+          document.getName() + "\n" +
+          "Please make sure the document is annotated using Teamware and " +
+          "annotated by atleast two annotators!");
     }
-    
     // if documents are loaded from datastore, we store only the
     // persistence Ids
     // or the document object itself
@@ -367,6 +366,13 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
     double consensusMicro = 0.0D;
     double annotatorMacro = 0.0D;
     double annotatorMicro = 0.0D;
+    // no result file found so quitting the execution
+    if(resultFiles == null) {
+      System.err
+        .println("WARNING: not enough information (most probably annotators)"
+          + " found for the summary to be generated!");
+      return;
+    }
     // one file at a time
     for(File file : resultFiles) {
       // finding author names
@@ -802,6 +808,7 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
 
   /**
    * annotators to ignore when computing IAA
+   * 
    * @return
    */
   public List<String> getAnnotatorsToIgnore() {
@@ -810,6 +817,7 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
 
   /**
    * annotators to ingore when computing IAA
+   * 
    * @param annotatorsToIgnore
    */
   @RunTime
@@ -818,7 +826,6 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
   public void setAnnotatorsToIgnore(List<String> annotatorsToIgnore) {
     this.annotatorsToIgnore = annotatorsToIgnore;
   }
-
 
   /**
    * Storing individual results for each pair of annotators
