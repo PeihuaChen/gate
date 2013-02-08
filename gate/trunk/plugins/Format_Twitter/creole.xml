@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<CREOLE-DIRECTORY>
+  <JAR SCAN="true">format-twitter.jar</JAR>
+  <JAR>lib/jackson-databind-2.1.1.jar</JAR>
+  <JAR>lib/jackson-core-2.1.1.jar</JAR>
+  <JAR>lib/jackson-annotations-2.1.1.jar</JAR>
+</CREOLE-DIRECTORY>
