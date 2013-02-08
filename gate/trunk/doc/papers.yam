@@ -5,6 +5,7 @@ GATE papers
 %3* I used GATE:
 
 - H. Cunningham, et al. Text Processing with GATE (Version 6). University of Sheffield Department of Computer Science. 15 April 2011. ISBN 0956599311. %(http://tinyurl.com/gatebook, Available from Amazon). %(bibtex.html#Cunningham2011a, BibTex).
+- Cunningham H, Tablan V, Roberts A, Bontcheva K (2013) Getting More Out of Biomedical Documents with GATE's Full Lifecycle Open Source Text Analytics. PLoS Comput Biol 9(2): e1002854. doi:10.1371/journal.pcbi.1002854 -- http://tinyurl.com/gate-life-sci/
 
 %3* I Used ANNIE:
 
@@ -48,6 +49,7 @@ GATE papers
 
 %2* 2013
 
+- Cunningham H, Tablan V, Roberts A, Bontcheva K (2013) Getting More Out of Biomedical Documents with GATE's Full Lifecycle Open Source Text Analytics. PLoS Comput Biol 9(2): e1002854. doi:10.1371/journal.pcbi.1002854 -- http://tinyurl.com/gate-life-sci/
 - V. Tablan, I. Roberts, H. Cunningham, and K. Bontcheva. GATECloud.net: a Platform for Large-Scale, Open-Source Text Processing on the Cloud. %(http://rsta.royalsocietypublishing.org/, Philosophical Transactions of the Royal Society A), 371(1983), 2013 %(http://dx.doi.org/10.1098/rsta.2012.0071, doi:10.1098/rsta.2012.0071).
 
 %2* 2012
