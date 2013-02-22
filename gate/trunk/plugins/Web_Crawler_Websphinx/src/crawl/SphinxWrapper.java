@@ -20,7 +20,10 @@ import gate.corpora.*;
 import gate.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.io.UnsupportedEncodingException;
 import java.net.*;
+import java.nio.charset.Charset;
+
 import javax.mail.internet.ContentType;
 import javax.mail.internet.ParseException;
 import org.apache.commons.lang.StringUtils;
@@ -226,12 +229,8 @@ public class SphinxWrapper extends Crawler{
  
   private static Document makeDocument(Page page) {
     String url = page.toURL();
-    String content = page.getContent();
     FeatureMap params = Factory.newFeatureMap();
     
-    // This is more efficient than creating the gate.Document from the URL
-    // (by downloading it again).
-    params.put(Document.DOCUMENT_STRING_CONTENT_PARAMETER_NAME, content);
     Document doc = null;
 
     String docName = shortenUrl(url).replaceAll("[^\\p{ASCII}]", "_") + "_" + Gate.genSym();
@@ -246,6 +245,12 @@ public class SphinxWrapper extends Crawler{
         ContentType contentType = new ContentType(contentTypeStr);
         String mimeType = contentType.getBaseType();
         String encoding = contentType.getParameter("charset");
+        
+        // get the content as bytes, and convert it to string using the correct
+        // encoding (thanks to Christian Wartena for patch)
+        byte[] bContent = page.getContentBytes();
+        String sContent = new String(bContent,Charset.forName(encoding));
+        params.put(Document.DOCUMENT_STRING_CONTENT_PARAMETER_NAME, sContent);
 
         if (mimeType != null) {
           if (convertXmlTypes) {
