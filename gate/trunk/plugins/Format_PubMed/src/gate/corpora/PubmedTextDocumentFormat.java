@@ -58,6 +58,9 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
   
   public static final String PUBMED_ABSTRACT = "AB";
   
+  public static final String PUBMED_AUTHORS = "AU";
+  
+  public static final String PUBMED_ID = "PMID";
   
   protected static final Logger logger = Logger.getLogger(
       PubmedTextDocumentFormat.class);
@@ -132,16 +135,43 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
       StringBuilder docText = new StringBuilder();
       // add document title
       int titleStart = docText.length();
+      int titleEnd = titleStart;
       Serializable aField = fields.remove(PUBMED_TITLE);
       if(aField != null) {
-        docText.append(aField.toString());        
+        docText.append(aField.toString());
+        titleEnd = docText.length();
+        docText.append(Strings.getNl()).append(Strings.getNl());
       } else {
         String docName = doc.getName();  
         logger.warn("Could not find document title in document " + 
             (docName != null ? docName : ""));
       }
-      int titleEnd = docText.length();
-      docText.append(Strings.getNl()).append(Strings.getNl());
+      // add ID
+      int idStart = docText.length();
+      int idEnd = idStart;
+      aField = fields.get(PUBMED_ID);
+      if(aField != null) {
+        docText.append(aField.toString());
+        idEnd = docText.length();
+        docText.append(Strings.getNl()).append(Strings.getNl());
+      } else {
+        String docName = doc.getName();  
+        logger.warn("Could not find document ID in document " + 
+            (docName != null ? docName : ""));
+      }
+      // add authors
+      int authorStart = docText.length();
+      int authorEnd = authorStart;
+      aField = fields.get(PUBMED_AUTHORS);
+      if(aField != null) {
+        docText.append(aField.toString());
+        authorEnd = docText.length();
+        docText.append(Strings.getNl()).append(Strings.getNl());
+      } else {
+        String docName = doc.getName();  
+        logger.warn("Could not find document authors in document " + 
+            (docName != null ? docName : ""));
+      }
       // and the document abstract
       aField = fields.remove(PUBMED_ABSTRACT);
       int absStart = docText.length();
@@ -159,6 +189,14 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
           GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
       if(titleEnd > titleStart){
         origMkups.add((long)titleStart, (long)titleEnd, "title", 
+            Factory.newFeatureMap());
+      }
+      if(idEnd > idStart){
+        origMkups.add((long)idStart, (long)idEnd, "id", 
+            Factory.newFeatureMap());
+      }
+      if(authorEnd > authorStart) {
+        origMkups.add((long)authorStart, (long)authorEnd, "authors", 
             Factory.newFeatureMap());
       }
       if(absEnd > absStart) {

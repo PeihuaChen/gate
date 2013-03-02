@@ -56,6 +56,10 @@ public class CochraneTextDocumentFormat extends TextualDocumentFormat {
   
   private static final String COCHRANE_ABSTRACT = "AB";
   
+  private static final String COCHRANE_AUTHORS = "AU";
+  
+  private static final String COCHRANE_ID = "ID";
+  
   protected static final Logger logger = Logger.getLogger(
       CochraneTextDocumentFormat.class);
   
@@ -128,21 +132,48 @@ public class CochraneTextDocumentFormat extends TextualDocumentFormat {
       StringBuilder docText = new StringBuilder();
       // add document title
       int titleStart = docText.length();
+      int titleEnd = titleStart;
       Serializable aField = fields.remove(COCHRANE_TITLE);
       if(aField != null) {
-        docText.append(aField.toString());        
+        docText.append(aField.toString());
+        titleEnd = docText.length();
+        docText.append(Strings.getNl()).append(Strings.getNl());
       } else {
         String docName = doc.getName();  
         logger.warn("Could not find document title in document " + 
             (docName != null ? docName : ""));
       }
-      int titleEnd = docText.length();
-      docText.append(Strings.getNl()).append(Strings.getNl());
+      // add ID
+      int idStart = docText.length();
+      int idEnd = idStart;
+      aField = fields.get(COCHRANE_ID);
+      if(aField != null) {
+        docText.append(aField.toString());
+        idEnd = docText.length();
+        docText.append(Strings.getNl()).append(Strings.getNl());
+      } else {
+        String docName = doc.getName();  
+        logger.warn("Could not find document ID in document " + 
+            (docName != null ? docName : ""));
+      }      
+      // add authors
+      int authorStart = docText.length();
+      int authorEnd = authorStart;
+      aField = fields.get(COCHRANE_AUTHORS);
+      if(aField != null) {
+        docText.append(aField.toString());
+        authorEnd = docText.length();
+        docText.append(Strings.getNl()).append(Strings.getNl());
+      } else {
+        String docName = doc.getName();  
+        logger.warn("Could not find document authors in document " + 
+            (docName != null ? docName : ""));
+      }
       // and the document abstract
       aField = fields.remove(COCHRANE_ABSTRACT);
       int absStart = docText.length();
       if(aField != null) {
-        docText.append(aField.toString());        
+        docText.append(aField.toString());
       } else {
         String docName = doc.getName();  
         logger.warn("Could not find document abstract in document " + 
@@ -157,6 +188,14 @@ public class CochraneTextDocumentFormat extends TextualDocumentFormat {
         origMkups.add((long)titleStart, (long)titleEnd, "title", 
             Factory.newFeatureMap());
       }
+      if(idEnd > idStart){
+        origMkups.add((long)idStart, (long)idEnd, "id", 
+            Factory.newFeatureMap());
+      }      
+      if(authorEnd > authorStart) {
+        origMkups.add((long)authorStart, (long)authorEnd, "authors", 
+            Factory.newFeatureMap());
+      }      
       if(absEnd > absStart) {
         origMkups.add((long)absStart, (long)absEnd, "abstract", 
             Factory.newFeatureMap());
