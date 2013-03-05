@@ -68,7 +68,7 @@ public class PubmedUtils {
       return (String) fieldValue;
     } else if(fieldValue instanceof List<?>) {
       StringBuilder str = new StringBuilder();
-      boolean first = false;
+      boolean first = true;
       for(Object val : (List<?>) fieldValue) {
         if(!first){
           str.append(", ");
