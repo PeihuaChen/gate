@@ -60,8 +60,6 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
   
   public static final String PUBMED_AUTHORS = "AU";
   
-  public static final String PUBMED_ID = "PMID";
-  
   protected static final Logger logger = Logger.getLogger(
       PubmedTextDocumentFormat.class);
   
@@ -138,7 +136,7 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
       int titleEnd = titleStart;
       Serializable aField = fields.remove(PUBMED_TITLE);
       if(aField != null) {
-        docText.append(aField.toString());
+        docText.append(PubmedUtils.getFieldValueString(aField));
         titleEnd = docText.length();
         docText.append(Strings.getNl()).append(Strings.getNl());
       } else {
@@ -146,25 +144,12 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
         logger.warn("Could not find document title in document " + 
             (docName != null ? docName : ""));
       }
-      // add ID
-      int idStart = docText.length();
-      int idEnd = idStart;
-      aField = fields.get(PUBMED_ID);
-      if(aField != null) {
-        docText.append(aField.toString());
-        idEnd = docText.length();
-        docText.append(Strings.getNl()).append(Strings.getNl());
-      } else {
-        String docName = doc.getName();  
-        logger.warn("Could not find document ID in document " + 
-            (docName != null ? docName : ""));
-      }
       // add authors
       int authorStart = docText.length();
       int authorEnd = authorStart;
       aField = fields.get(PUBMED_AUTHORS);
       if(aField != null) {
-        docText.append(aField.toString());
+        docText.append(PubmedUtils.getFieldValueString(aField));
         authorEnd = docText.length();
         docText.append(Strings.getNl()).append(Strings.getNl());
       } else {
@@ -176,7 +161,7 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
       aField = fields.remove(PUBMED_ABSTRACT);
       int absStart = docText.length();
       if(aField != null) {
-        docText.append(aField.toString());
+        docText.append(PubmedUtils.getFieldValueString(aField));
       } else {
         String docName = doc.getName();  
         logger.warn("Could not find document abstract in document " + 
@@ -189,10 +174,6 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
           GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
       if(titleEnd > titleStart){
         origMkups.add((long)titleStart, (long)titleEnd, "title", 
-            Factory.newFeatureMap());
-      }
-      if(idEnd > idStart){
-        origMkups.add((long)idStart, (long)idEnd, "id", 
             Factory.newFeatureMap());
       }
       if(authorEnd > authorStart) {

@@ -17,6 +17,7 @@ package gate.corpora;
 
 import java.io.Serializable;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -54,5 +55,42 @@ public class PubmedUtils {
     } 
   }
 
-  
+  /**
+   * Given a metadata field (which may be a String or a List<String> value), 
+   * this produces the corresponding String representation, while trapping all
+   * exceptions.
+   * @param fieldValue
+   * @return a String representation for the supplied field value. 
+   */
+  public static String getFieldValueString(Object fieldValue) {
+    if(fieldValue == null) return "";
+    if(fieldValue instanceof String) {
+      return (String) fieldValue;
+    } else if(fieldValue instanceof List<?>) {
+      StringBuilder str = new StringBuilder();
+      boolean first = false;
+      for(Object val : (List<?>) fieldValue) {
+        if(!first){
+          str.append(", ");
+        }
+        if(val != null){
+          try{
+            str.append(val.toString());
+            if(first){
+              first = false;
+            }
+          } catch (Exception e) {
+            // ignore
+          }
+        }
+      }
+      return str.toString();
+    } else {
+      try{
+        return fieldValue.toString();
+      } catch (Exception e) {
+        return "";
+      }
+    }
+  }
 }
