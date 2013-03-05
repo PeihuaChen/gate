@@ -60,6 +60,8 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
   
   public static final String PUBMED_AUTHORS = "AU";
   
+  public static final String PUBMED_ID = "PMID";
+  
   protected static final Logger logger = Logger.getLogger(
       PubmedTextDocumentFormat.class);
   
@@ -144,6 +146,19 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
         logger.warn("Could not find document title in document " + 
             (docName != null ? docName : ""));
       }
+      // add ID
+      int idStart = docText.length();
+      int idEnd = idStart;
+      aField = fields.get(PUBMED_ID);
+      if(aField != null) {
+        docText.append(PubmedUtils.getFieldValueString(aField));
+        idEnd = docText.length();
+        docText.append(Strings.getNl()).append(Strings.getNl());
+      } else {
+        String docName = doc.getName();  
+        logger.warn("Could not find document ID in document " + 
+            (docName != null ? docName : ""));
+      }
       // add authors
       int authorStart = docText.length();
       int authorEnd = authorStart;
@@ -174,6 +189,10 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
           GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
       if(titleEnd > titleStart){
         origMkups.add((long)titleStart, (long)titleEnd, "title", 
+            Factory.newFeatureMap());
+      }
+      if(idEnd > idStart){
+        origMkups.add((long)idStart, (long)idEnd, "id", 
             Factory.newFeatureMap());
       }
       if(authorEnd > authorStart) {
