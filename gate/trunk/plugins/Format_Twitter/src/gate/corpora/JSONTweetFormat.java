@@ -64,6 +64,17 @@ public class JSONTweetFormat extends TextualDocumentFormat {
     setMimeType(mime);
     return this;
   }
+  
+  @Override
+  public void cleanup() {
+    super.cleanup();
+    
+    MimeType mime = getMimeType();
+    
+    mimeString2ClassHandlerMap.remove(mime.getType()+ "/" + mime.getSubtype());
+    mimeString2mimeTypeMap.remove(mime.getType() + "/" + mime.getSubtype());
+    suffixes2mimeTypeMap.remove("json");
+  }
 
   public void unpackMarkup(gate.Document doc) throws DocumentFormatException{
     if ( (doc == null) || (doc.getSourceUrl() == null && doc.getContent() == null) ) {
