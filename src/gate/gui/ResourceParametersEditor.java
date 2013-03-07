@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 1995-2012, The University of Sheffield. See the file
+ *  Copyright (c) 1995-2013, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -15,24 +15,65 @@
 
 package gate.gui;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.List;
-
-import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.table.*;
-
-import gate.*;
-import gate.creole.*;
+import gate.DocumentFormat;
+import gate.Factory;
+import gate.FeatureMap;
+import gate.Gate;
+import gate.Resource;
+import gate.corpora.DocumentImpl;
+import gate.creole.Parameter;
+import gate.creole.ResourceData;
+import gate.creole.ResourceInstantiationException;
 import gate.event.CreoleEvent;
 import gate.event.CreoleListener;
-import gate.swing.XJTable;
 import gate.swing.XJFileChooser;
-import gate.util.*;
+import gate.swing.XJTable;
+import gate.util.Err;
+import gate.util.ExtensionFileFilter;
+import gate.util.GateException;
+import gate.util.LuckyException;
+import gate.util.NameBearer;
+
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import javax.swing.AbstractCellEditor;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.DefaultCellEditor;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.ListCellRenderer;
+import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellEditor;
 
 /**
  * Allows the editing of a set of parameters for a resource. It needs a
@@ -53,18 +94,11 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
     setTabSkipUneditableCell(true);
     setEditCellAsSoonAsFocus(true);
   }
-
-  /**
-   * Initialises this GUI component.
-   * 
-   * @param resource the resource for which the parameters need to be
-   *          set.
-   * @param parameters a list of lists of {@link Parameter} representing
-   *          parameter disjunctions.
-   */
-  public void init(Resource resource, List parameters) {
+  
+  public void init(Resource resource, ResourceData resourceData, List<List<Parameter>> parameters) {
     cleanup();
     this.resource = resource;
+    this.resourceData = resourceData;
     if(parameters != null) {
       parameterDisjunctions = new ArrayList<ParameterDisjunction>(parameters.size());
       for(int i = 0; i < parameters.size(); i++) {
@@ -81,10 +115,23 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
     fileChooserResource = (resource != null) ?
       resource.getClass().getName() : fileChooser.getResource();
   }
+  
+  /**
+   * Initialises this GUI component.
+   * 
+   * @param resource the resource for which the parameters need to be
+   *          set.
+   * @param parameters a list of lists of {@link Parameter} representing
+   *          parameter disjunctions.
+   */
+  public void init(Resource resource, List parameters) {
+    init(resource, null, parameters);
+  }
 
   protected void initLocalData() {
     resource = null;
     parameterDisjunctions = null;
+    resourceData = null;
   }// protected void initLocalData()
 
   protected void initGuiComponents() {
@@ -117,6 +164,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
       }
     }
     resource = null;
+    resourceData = null;
   }
 
   /**
@@ -218,6 +266,8 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
   ParametersTableModel tableModel;
 
   Resource resource;
+  
+  ResourceData resourceData;
 
   /**
    * A pointer to the filechooser from MainFrame.
@@ -778,12 +828,26 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
           fileChooser.setAcceptAllFileFilterUsed(true);
           fileChooser.setFileFilter(fileChooser.getAcceptAllFileFilter());
           Parameter param = pDisj.getParameter();
-          Set sufixes = param.getSuffixes();
+          
+          Set<String> sufixes = null;          
+          
+          //This handles the special case of the sourceUrl param when creating documents
+          //so that we get the suffix list from the set of loaded document formats rather
+          //than from the data for the resource type we are loading.
+          if (resourceData != null) {
+            if (param.getName().equals("sourceUrl") && resourceData.getClassName().equals(DocumentImpl.class.getName())) {
+              sufixes = DocumentFormat.getSupportedFileSuffixes();
+            }
+          }
+          
+          //if we haven't loaded any suffixes then fall back to the original behaviour
+          if (sufixes == null || sufixes.isEmpty()) sufixes = param.getSuffixes();
+          
           if(sufixes != null) {
             ExtensionFileFilter fileFilter = new ExtensionFileFilter();
-            Iterator sufIter = sufixes.iterator();
+            Iterator<String> sufIter = sufixes.iterator();
             while(sufIter.hasNext()) {
-              fileFilter.addExtension((String)sufIter.next());
+              fileFilter.addExtension(sufIter.next());
             }
             fileFilter.setDescription("Known file types " + sufixes.toString());
             fileChooser.addChoosableFileFilter(fileFilter);
