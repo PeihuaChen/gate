@@ -15,7 +15,6 @@ package gate.corpora;
 
 import java.io.*;
 import java.util.*;
-import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.*;
 import gate.*;
 import gate.corpora.DocumentContentImpl;
@@ -111,7 +110,6 @@ public class JSONTweetFormat extends TextualDocumentFormat {
     int i = 0;
 
     // just not null, so we can use it in the loop 
-    //Tweet tweet = new Tweet(); 
     String[] lines = string.split("[\\n\\r]+");
     for (String line : lines) {
       //System.out.println("Item " + i + "\n" + line);
@@ -122,29 +120,6 @@ public class JSONTweetFormat extends TextualDocumentFormat {
       i++;
     }
     
-    
-    
-//    while (tweet != null) {
-//      String currentName = parser.getCurrentName();
-//      JsonToken token = parser.nextToken();
-//      
-//      
-//        //! finished && ( (jnode = mapper.readTree(reader)) != null) ) {
-//      System.out.println("Item " + i + "\n" + jnode.toString());
-//      
-//      // This could be a list of tweet objects
-//      if (jnode.isArray()) {
-//        for (JsonNode item : jnode) {
-//          tweets.add(new Tweet(item));
-//        }
-//      }
-//
-//      // or it could be a single tweet object
-//      else if (jnode.isObject()) {
-//        tweets.add(new Tweet(jnode));
-//      }
-//    }
-
     return tweets;
   }
 
@@ -189,7 +164,7 @@ class Tweet {
     while (keys.hasNext()) {
       String key = keys.next();
       if (key.equals("text")) {
-        string = json.get(key).toString();
+        string = json.get(key).asText();
       }
       else {
         features.put(key.toString(), process(json.get(key)));
