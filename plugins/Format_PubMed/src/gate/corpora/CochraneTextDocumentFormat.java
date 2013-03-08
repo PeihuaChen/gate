@@ -88,7 +88,21 @@ public class CochraneTextDocumentFormat extends TextualDocumentFormat {
     // Set the mimeType for this language resource
     setMimeType(mime);
     return this;
-  }  
+  }
+  
+  /* (non-Javadoc)
+   * @see gate.corpora.TextualDocumentFormat#cleanup()
+   */
+  @Override
+  public void cleanup() {
+    super.cleanup();
+    
+    MimeType mime = getMimeType();
+    
+    mimeString2ClassHandlerMap.remove(mime.getType()+ "/" + mime.getSubtype());
+    mimeString2mimeTypeMap.remove(mime.getType() + "/" + mime.getSubtype());
+    suffixes2mimeTypeMap.remove("cochrane.txt");
+  }
   
   /* (non-Javadoc)
    * @see gate.corpora.TextualDocumentFormat#unpackMarkup(gate.Document)
