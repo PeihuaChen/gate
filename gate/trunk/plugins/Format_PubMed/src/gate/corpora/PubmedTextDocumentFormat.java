@@ -91,6 +91,20 @@ public class PubmedTextDocumentFormat extends TextualDocumentFormat {
     setMimeType(mime);
     return this;
   }
+  
+  /* (non-Javadoc)
+   * @see gate.corpora.TextualDocumentFormat#cleanup()
+   */
+  @Override
+  public void cleanup() {
+    super.cleanup();
+    
+    MimeType mime = getMimeType();
+    
+    mimeString2ClassHandlerMap.remove(mime.getType()+ "/" + mime.getSubtype());
+    mimeString2mimeTypeMap.remove(mime.getType() + "/" + mime.getSubtype());
+    suffixes2mimeTypeMap.remove("pubmed.txt");
+  }
 
 
   /* (non-Javadoc)

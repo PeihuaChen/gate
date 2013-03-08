@@ -17,6 +17,7 @@ package gate.corpora;
 import gate.Document;
 import gate.FeatureMap;
 import gate.Resource;
+import gate.corpora.MimeType;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.AutoInstance;
 import gate.creole.metadata.CreoleResource;
@@ -91,6 +92,19 @@ public class MediaWikiXMLDocumentFormat extends NekoHtmlDocumentFormat {
     setMimeType(mime);
     
     return this;
+  }
+  
+  /* (non-Javadoc)
+   * @see gate.corpora.TextualDocumentFormat#cleanup()
+   */
+  @Override
+  public void cleanup() {
+    super.cleanup();
+    
+    MimeType mime = getMimeType();
+    
+    mimeString2ClassHandlerMap.remove(mime.getType()+ "/" + mime.getSubtype());
+    mimeString2mimeTypeMap.remove(mime.getType() + "/" + mime.getSubtype());
   }
 
   @Override
