@@ -46,11 +46,7 @@ GATE papers
 
 %2* Forthcoming
 
-- L. Derczynski, B. Yang, C.S. Jensen. Towards Context-Aware Search and Analysis on Social Media Data. In Proceedings of the Extending Database Technology conference (EDBT 2013), Genoa, Italy.
-
 - D. Rout, K. Bontcheva, M. Hepple. Reliably Evaluating Summaries of Twitter Timelines. Analyzing Microtext. AAAI 2013 Spring Symposium. March 25-27, Stanford, California, 2013.
-
-- L. Derczynski, D. Maynard, N. Aswani, K. Bontcheva. Microblog-Genre Noise and Impact on Semantic Annotation Accuracy. 24th ACM Conference on Hypertext and Social Media, 1–3 May, Paris, France. 2013.
 
 - D. Rout, D. Preotiuc-Pietro, K. Bontcheva, T. Cohn. Where’s @wally? A Classification Approach to Geolocating Users Based on their Social Ties.  24th ACM Conference on Hypertext and Social Media, 1–3 May, Paris, France. 2013.
 
@@ -59,6 +55,10 @@ GATE papers
 - D. Maynard, K. Bontcheva. Natural Language Processing. In J. Lehmann and J. Voelker editors, Perspectives of Ontology Learning. IOS Press. 
 
 %2* 2013
+
+- L. Derczynski, D. Maynard, N. Aswani, K. Bontcheva. Microblog-Genre Noise and Impact on Semantic Annotation Accuracy. 24th ACM Conference on Hypertext and Social Media, 1–3 May, Paris, France. 2013. %(http://derczynski.com/sheffield/papers/ner_issues.pdf,PDF)
+
+- L. Derczynski, B. Yang, C.S. Jensen. Towards Context-Aware Search and Analysis on Social Media Data. In Proceedings of the Extending Database Technology conference (EDBT 2013), Genoa, Italy. %(http://derczynski.com/sheffield/papers/scalable_sm.pdf,PDF)
 
 - Cunningham H, Tablan V, Roberts A, Bontcheva K (2013) Getting More Out of Biomedical Documents with GATE's Full Lifecycle Open Source Text Analytics. PLoS Comput Biol 9(2): e1002854. doi:10.1371/journal.pcbi.1002854 -- http://tinyurl.com/gate-life-sci/
 
