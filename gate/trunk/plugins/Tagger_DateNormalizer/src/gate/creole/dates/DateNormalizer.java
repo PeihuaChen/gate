@@ -93,7 +93,7 @@ public class DateNormalizer extends AbstractLanguageAnalyser {
 
   @RunTime
   @Optional
-  @CreoleParameter(comment = "the annotation set used as input to this PR")
+  @CreoleParameter(comment = "the annotation set containing document date annotations to use for normalization")
   public void setInputASName(String name) {
     inputASName = name;
   }
