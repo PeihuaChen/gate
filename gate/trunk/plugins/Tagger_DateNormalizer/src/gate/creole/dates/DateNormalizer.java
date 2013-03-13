@@ -1,7 +1,7 @@
 /*
- * Normalizer.java
+ * DateNormalizer.java
  * 
- * Copyright (c) 2010-2011, The University of Sheffield.
+ * Copyright (c) 2010-2013, The University of Sheffield.
  * 
  * This file is part of GATE (see http://gate.ac.uk/), and is free software,
  * licenced under the GNU Library General Public License, Version 3, June 2007
@@ -17,6 +17,7 @@ import gate.AnnotationSet;
 import gate.Factory;
 import gate.FeatureMap;
 import gate.Resource;
+import gate.Utils;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ExecutionInterruptedException;
@@ -41,8 +42,6 @@ import java.util.regex.Pattern;
 import mark.util.DateParser;
 import mark.util.ParsePositionEx;
 
-import org.apache.log4j.Logger;
-
 /**
  * A GATE PR which attempts to normalise dates within a document against the
  * date at which the document was written or published. This PR wraps the open
@@ -57,8 +56,6 @@ import org.apache.log4j.Logger;
 @CreoleResource(name = "Date Normalizer", interfaceName = "gate.ProcessingResource", icon = "date-normalizer.png", comment = "provides normalized values for all known dates")
 public class DateNormalizer extends AbstractLanguageAnalyser {
   private static final long serialVersionUID = -6580533128028166284L;
-
-  private transient Logger logger = Logger.getLogger(this.getClass().getName());
 
   /**
    * A comparator that orders annotations by priority (an Integer annotation
@@ -246,22 +243,15 @@ public class DateNormalizer extends AbstractLanguageAnalyser {
         DateParser.getLocale((String)document.getFeatures().get("locale"));
     if(docLocale == null) docLocale = locale;
     if(docLocale == null) docLocale = Locale.getDefault();
+
     // create an instance of the parser
+    //TODO cache the parser for the init time locale
     DateParser dp = new DateParser(docLocale);
-    
-    //now we have a parser create a regexp to look for possible dates
-    StringBuilder pattern = new StringBuilder("\\b([0-9]{1,4}");    
-    for (String word : dp.getWords()) {
-      if (word.length() > 0) pattern.append("|(").append(word).append(")");
-    }    
-    pattern.append(")\\b");
-    Pattern finder = Pattern.compile(pattern.toString(),Pattern.CASE_INSENSITIVE);
     
     // get handles to the document content and the input and output annotation
     // sets so that we can easily refer to them later
-    String docContent = document.getContent().toString();
     AnnotationSet inputAS = document.getAnnotations(inputASName);
-    AnnotationSet outputAS = document.getAnnotations(outputASName);
+    
     // a parse position that will help us to parse the document dates
     ParsePositionEx pp = new ParsePositionEx();
     // lets try and figure out what date the document was written on
@@ -287,8 +277,7 @@ public class DateNormalizer extends AbstractLanguageAnalyser {
               // either from the specified feature or from the underlying string
               if(parts.length == 1) {
                 dd =
-                    docContent.substring(a.getStartNode().getOffset()
-                        .intValue(), a.getEndNode().getOffset().intValue());
+                    Utils.stringFor(document, a);
               } else {
                 dd = (String)a.getFeatures().get(parts[1]);
               }
@@ -333,8 +322,40 @@ public class DateNormalizer extends AbstractLanguageAnalyser {
               .format(documentDate)));
     }
     
+    annotate(documentDate, dp, df);
+    
+    // we have finished so update anyone who cares
+    fireProcessFinished();
+    fireStatusChanged("Dates detected and normalized in \""
+        + document.getName()
+        + "\" in "
+        + NumberFormat.getInstance().format(
+            (double)(System.currentTimeMillis() - startTime) / 1000)
+        + " seconds!");
+  }
+  
+  /**
+   * This method actually does all the work, but it is here so it can be
+   * overriden by subclasses to do things differently
+   */
+  protected void annotate(Date documentDate, DateParser dp, DateFormat df) throws ExecutionException {
+    
+    //now we have a parser create a regexp to look for possible dates
+    StringBuilder pattern = new StringBuilder("\\b([0-9]{1,4}");    
+    for (String word : dp.getWords()) {
+      if (word.length() > 0) pattern.append("|(").append(word).append(")");
+    }    
+    pattern.append(")");
+    Pattern finder = Pattern.compile(pattern.toString(),Pattern.CASE_INSENSITIVE);
+    
+    String docContent = document.getContent().toString();
+    
     //get a matcher for possible dates over the content
     Matcher m = finder.matcher(docContent);
+    
+    ParsePositionEx pp = new ParsePositionEx();
+    
+    AnnotationSet outputAS = document.getAnnotations(outputASName);
     
     int start = 0;
     while (m.find()) {
@@ -390,18 +411,9 @@ public class DateNormalizer extends AbstractLanguageAnalyser {
         // the next character in the document
         start++;
       }
-      // calcualte percentage complete using the parsing position within the
+      // Calculate percentage complete using the parsing position within the
       // document content
-      fireProgressChanged((int)(start / docContent.length()) * 100);
+      fireProgressChanged((int)(((float)start / docContent.length()) * 100));
     }
-    
-    // we have finished so update anyone who cares
-    fireProcessFinished();
-    fireStatusChanged("Dates detected and normalized in \""
-        + document.getName()
-        + "\" in "
-        + NumberFormat.getInstance().format(
-            (double)(System.currentTimeMillis() - startTime) / 1000)
-        + " seconds!");
   }
 }
