@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.math.RoundingMode;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
@@ -1268,8 +1269,9 @@ public class CorpusQualityAssurance extends AbstractVisualResource
       ontologyMeasures = (OntologyMeasures) measureObject;
     }
     NumberFormat f = NumberFormat.getInstance(Locale.ENGLISH);
-    f.setMaximumFractionDigits(2);
-    f.setMinimumFractionDigits(2);
+    f.setMaximumFractionDigits(4);
+    f.setMinimumFractionDigits(4);
+    f.setRoundingMode(RoundingMode.HALF_UP);
     List<Object> values = new ArrayList<Object>();
 
     // average measures by document
