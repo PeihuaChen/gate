@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.RoundingMode;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.NumberFormat;
@@ -136,8 +137,10 @@ public class QAForTeamwarePR extends AbstractLanguageAnalyser implements
 
 	/** Initialise this resource, and return it. */
 	public Resource init() throws ResourceInstantiationException {
-		f.setMaximumFractionDigits(2); // format used for all decimal values
-		f.setMinimumFractionDigits(2);
+		f.setMaximumFractionDigits(4); // format used for all decimal values
+		f.setMinimumFractionDigits(4);
+		f.setRoundingMode(RoundingMode.HALF_UP);
+		
 		// using QualityAssurancePR internally to calculate QA stats
 		// but hiding this PR just in case
 		FeatureMap hideParams = Factory.newFeatureMap();
