@@ -278,6 +278,8 @@ public class NekoHtmlDocumentFormat extends TextualDocumentFormat {
             this);
     // Register the mime type with mine string
     mimeString2mimeTypeMap.put(mime.getType() + "/" + mime.getSubtype(), mime);
+    // sometimes XHTML file appear as application/xhtml+xml
+    mimeString2mimeTypeMap.put("application/xhtml+xml", mime);
     // Register file sufixes for this mime type
     suffixes2mimeTypeMap.put("html", mime);
     suffixes2mimeTypeMap.put("htm", mime);
