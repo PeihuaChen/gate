@@ -591,7 +591,6 @@ implements ProcessingResource {
     return this.annotationSetName;
   }
 
-  @Optional
   @CreoleParameter(comment = "path to the parser's grammar file",
       defaultValue = "resources/englishPCFG.ser.gz")
   public void setParserFile(URL parserFile) {
