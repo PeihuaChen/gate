@@ -14,6 +14,7 @@
  */
 package gate.util;
 
+import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.*;
 
@@ -62,7 +63,7 @@ public class AnnotationDiffer {
       responseCount += differ.getResponsesCount();
     }
     keyList = new ArrayList<Annotation>(Collections.nCopies(keyCount, (Annotation) null));
-    responseList = new ArrayList<Annotation>(Collections.nCopies(responseCount, (Annotation) null));
+    responseList = new ArrayList<Annotation>(Collections.nCopies(responseCount, (Annotation) null));    
   }
 
   public AnnotationDiffer() {
@@ -839,8 +840,10 @@ public class AnnotationDiffer {
 
   public List<String> getMeasuresRow(Object[] measures, String title) {
     NumberFormat f = NumberFormat.getInstance(Locale.ENGLISH);
-    f.setMaximumFractionDigits(2);
-    f.setMinimumFractionDigits(2);
+    f.setMaximumFractionDigits(4);
+    f.setMinimumFractionDigits(4);
+    f.setRoundingMode(RoundingMode.HALF_UP);
+    
     List<String> row = new ArrayList<String>();
     row.add(title);
     row.add(Integer.toString(getCorrectMatches()));
