@@ -15,6 +15,7 @@ package gate.creole.boilerpipe;
 
 import de.l3s.boilerpipe.BoilerpipeExtractor;
 import de.l3s.boilerpipe.extractors.ArticleExtractor;
+import de.l3s.boilerpipe.extractors.ArticleSentencesExtractor;
 import de.l3s.boilerpipe.extractors.CanolaExtractor;
 import de.l3s.boilerpipe.extractors.DefaultExtractor;
 import de.l3s.boilerpipe.extractors.LargestContentExtractor;
@@ -30,6 +31,7 @@ import de.l3s.boilerpipe.extractors.NumWordsRulesExtractor;
 public enum Extractor {
 
   ARTICLE("Article", ArticleExtractor.INSTANCE),
+  ARTICLE_SENTENCES("Article Sentences", ArticleSentencesExtractor.INSTANCE),
 
   /**
    * Trained on the <a

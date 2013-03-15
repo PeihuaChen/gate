@@ -556,12 +556,16 @@ public class BoilerPipe extends AbstractLanguageAnalyser {
       if(debug) {
         // if we are in debug mode dump everything we know about this block into
         // the feature map
-        params.put("content", block.isContent());
-        params.put("start", block.getOffsetBlocksStart());
+        params.put("ld", block.getLinkDensity());
+        params.put("nw", block.getNumWords());
+        params.put("nwiat", block.getNumWordsInAnchorText());
         params.put("end", block.getOffsetBlocksEnd());
+        params.put("start", block.getOffsetBlocksStart());
+        params.put("tl", block.getTagLevel());
+        params.put("td", block.getTextDensity());
+        params.put("content", block.isContent());
         params.put("nwiwl", block.getNumWordsInWrappedLines());
         params.put("nwl", block.getNumWrappedLines());
-        params.put("ld", block.getLinkDensity());
       }
 
       // now actually create and add the annotation to the annotation set
