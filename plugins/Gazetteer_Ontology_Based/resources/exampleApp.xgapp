@@ -85,24 +85,7 @@
         <gate.util.persistence.PRPersistence>
           <runtimeParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-            <localMap>
-              <entry>
-                <string>document</string>
-                <null/>
-              </entry>
-              <entry>
-                <string>setsToKeep</string>
-                <null/>
-              </entry>
-              <entry>
-                <string>annotationTypes</string>
-                <null/>
-              </entry>
-              <entry>
-                <string>keepOriginalMarkupsAS</string>
-                <boolean>true</boolean>
-              </entry>
-            </localMap>
+            <localMap/>
           </runtimeParams>
           <resourceType>gate.creole.annotdelete.AnnotationDeletePR</resourceType>
           <resourceName>DocumentReset</resourceName>
@@ -118,39 +101,13 @@
         <gate.util.persistence.LanguageAnalyserPersistence>
           <runtimeParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-            <localMap>
-              <entry>
-                <string>document</string>
-                <null/>
-              </entry>
-              <entry>
-                <string>annotationSetName</string>
-                <null/>
-              </entry>
-            </localMap>
+            <localMap/>
           </runtimeParams>
           <resourceType>gate.creole.tokeniser.DefaultTokeniser</resourceType>
           <resourceName>Tokeniser</resourceName>
           <initParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-            <localMap>
-              <entry>
-                <string>encoding</string>
-                <string>UTF-8</string>
-              </entry>
-              <entry>
-                <string>tokeniserRulesURL</string>
-                <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$relpath$../../ANNIE/resources/tokeniser/DefaultTokeniser.rules</urlString>
-                </gate.util.persistence.PersistenceManager-URLHolder>
-              </entry>
-              <entry>
-                <string>transducerGrammarURL</string>
-                <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$relpath$../../ANNIE/resources/tokeniser/postprocess.jape</urlString>
-                </gate.util.persistence.PersistenceManager-URLHolder>
-              </entry>
-            </localMap>
+            <localMap/>
           </initParams>
           <features class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
@@ -161,45 +118,13 @@
         <gate.util.persistence.LanguageAnalyserPersistence>
           <runtimeParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-            <localMap>
-              <entry>
-                <string>document</string>
-                <null/>
-              </entry>
-              <entry>
-                <string>outputASName</string>
-                <null/>
-              </entry>
-            </localMap>
+            <localMap/>
           </runtimeParams>
           <resourceType>gate.creole.splitter.RegexSentenceSplitter</resourceType>
           <resourceName>RegexSentenceSplitter</resourceName>
           <initParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-            <localMap>
-              <entry>
-                <string>encoding</string>
-                <string>UTF-8</string>
-              </entry>
-              <entry>
-                <string>nonSplitListURL</string>
-                <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$relpath$../../ANNIE/resources/regex-splitter/non-split-patterns.txt</urlString>
-                </gate.util.persistence.PersistenceManager-URLHolder>
-              </entry>
-              <entry>
-                <string>internalSplitListURL</string>
-                <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$relpath$../../ANNIE/resources/regex-splitter/internal-split-patterns.txt</urlString>
-                </gate.util.persistence.PersistenceManager-URLHolder>
-              </entry>
-              <entry>
-                <string>externalSplitListURL</string>
-                <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$relpath$../../ANNIE/resources/regex-splitter/external-split-patterns.txt</urlString>
-                </gate.util.persistence.PersistenceManager-URLHolder>
-              </entry>
-            </localMap>
+            <localMap/>
           </initParams>
           <features class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
@@ -210,55 +135,13 @@
         <gate.util.persistence.LanguageAnalyserPersistence>
           <runtimeParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-            <localMap>
-              <entry>
-                <string>document</string>
-                <null/>
-              </entry>
-              <entry>
-                <string>baseTokenAnnotationType</string>
-                <string>Token</string>
-              </entry>
-              <entry>
-                <string>outputAnnotationType</string>
-                <string>Token</string>
-              </entry>
-              <entry>
-                <string>inputASName</string>
-                <null/>
-              </entry>
-              <entry>
-                <string>baseSentenceAnnotationType</string>
-                <string>Sentence</string>
-              </entry>
-              <entry>
-                <string>outputASName</string>
-                <null/>
-              </entry>
-            </localMap>
+            <localMap/>
           </runtimeParams>
           <resourceType>gate.creole.POSTagger</resourceType>
           <resourceName>POSTagger</resourceName>
           <initParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-            <localMap>
-              <entry>
-                <string>lexiconURL</string>
-                <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$relpath$../../ANNIE/resources/heptag/lexicon</urlString>
-                </gate.util.persistence.PersistenceManager-URLHolder>
-              </entry>
-              <entry>
-                <string>rulesURL</string>
-                <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$relpath$../../ANNIE/resources/heptag/ruleset</urlString>
-                </gate.util.persistence.PersistenceManager-URLHolder>
-              </entry>
-              <entry>
-                <string>encoding</string>
-                <null/>
-              </entry>
-            </localMap>
+            <localMap/>
           </initParams>
           <features class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
@@ -270,24 +153,8 @@
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
             <localMap>
               <entry>
-                <string>document</string>
-                <null/>
-              </entry>
-              <entry>
-                <string>affixFeatureName</string>
-                <string>affix</string>
-              </entry>
-              <entry>
-                <string>rootFeatureName</string>
-                <string>root</string>
-              </entry>
-              <entry>
                 <string>considerPOSTag</string>
                 <boolean>true</boolean>
-              </entry>
-              <entry>
-                <string>annotationSetName</string>
-                <null/>
               </entry>
             </localMap>
           </runtimeParams>
@@ -300,12 +167,6 @@
                 <string>caseSensitive</string>
                 <boolean>false</boolean>
               </entry>
-              <entry>
-                <string>rulesFile</string>
-                <gate.util.persistence.PersistenceManager-URLHolder>
-                  <urlString>$relpath$../../Tools/resources/morph/default.rul</urlString>
-                </gate.util.persistence.PersistenceManager-URLHolder>
-              </entry>
             </localMap>
           </initParams>
           <features class="gate.util.persistence.MapPersistence">
@@ -316,20 +177,7 @@
         <gate.util.persistence.PRPersistence>
           <runtimeParams class="gate.util.persistence.MapPersistence">
             <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-            <localMap>
-              <entry>
-                <string>document</string>
-                <null/>
-              </entry>
-              <entry>
-                <string>inputAnnotationSetName</string>
-                <null/>
-              </entry>
-              <entry>
-                <string>outputAnnotationSetName</string>
-                <null/>
-              </entry>
-            </localMap>
+            <localMap/>
           </runtimeParams>
           <resourceType>gate.creole.gazetteer.FlexibleGazetteer</resourceType>
           <resourceName>FlexibleGazetteer</resourceName>
@@ -341,24 +189,7 @@
                 <gate.util.persistence.LanguageAnalyserPersistence>
                   <runtimeParams class="gate.util.persistence.MapPersistence">
                     <mapType>gate.util.SimpleFeatureMapImpl</mapType>
-                    <localMap>
-                      <entry>
-                        <string>document</string>
-                        <null/>
-                      </entry>
-                      <entry>
-                        <string>wholeWordsOnly</string>
-                        <boolean>true</boolean>
-                      </entry>
-                      <entry>
-                        <string>longestMatchOnly</string>
-                        <boolean>true</boolean>
-                      </entry>
-                      <entry>
-                        <string>annotationSetName</string>
-                        <null/>
-                      </entry>
-                    </localMap>
+                    <localMap/>
                   </runtimeParams>
                   <resourceType>gate.clone.ql.OntoRootGaz</resourceType>
                   <resourceName>OntoRootGazetteer</resourceName>
@@ -390,14 +221,6 @@
                                 <gate.util.persistence.PersistenceManager-URLHolder>
                                   <urlString>http://gate.ac.uk/ns/gate-kb</urlString>
                                 </gate.util.persistence.PersistenceManager-URLHolder>
-                              </entry>
-                              <entry>
-                                <string>ntriplesURL</string>
-                                <null/>
-                              </entry>
-                              <entry>
-                                <string>turtleURL</string>
-                                <null/>
                               </entry>
                               <entry>
                                 <string>defaultNameSpace</string>
