@@ -69,7 +69,7 @@
 	java.lang.String
 	</PARAMETER>
 	<PARAMETER NAME="typesToConsider" OPTIONAL="true"
-		DEFAULT=""
+		DEFAULT="class;instance;property"
 	COMMENT="The list of types to be included. Possible values: instance, class, property">
 	java.util.Set
 	</PARAMETER>
