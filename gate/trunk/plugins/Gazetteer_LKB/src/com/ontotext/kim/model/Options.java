@@ -1,5 +1,7 @@
 package com.ontotext.kim.model;
 
+import gate.util.Strings;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -89,6 +91,12 @@ public class Options {
   public String getCaseSensitivity() {    
     String res = opts.get("casesensitivity");
     return res != null ? res : INSENSITIVE;
+  }
+  
+  public String getSeparator() {
+    String ret = opts.get("gazetteerfeatureseparator");
+    if(ret == null) { ret = ""; }
+    return Strings.unescape(ret);
   }
   
   public Map<String, String> getMap() {

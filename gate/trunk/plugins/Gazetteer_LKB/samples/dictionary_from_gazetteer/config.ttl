@@ -19,4 +19,13 @@ lkbg:DictionaryConfiguration
    # of the modifications API.
    
    #A list of labels to be ignored, one per line.
-   lkbg:ignoreList "ignoreList.txt" .
+   lkbg:ignoreList "ignoreList.txt" ;
+
+   # if the cache is loaded from a gazetteer list file, the separator character to use
+   # to split each line into entry, inst and class feature. If this is set to
+   # the empty string or not set, no splitting is done. Otherwise the string is split]
+   # and the first part is taken to be the gazetteer entry. The remaining parts are
+   # checked to see if they have the form "inst=URI" or "class=URI" and if yes, are
+   # the URI is used to set the inst or class feature for that entry.
+   lkbg:gazetteerFeatureSeparator "" .
+
