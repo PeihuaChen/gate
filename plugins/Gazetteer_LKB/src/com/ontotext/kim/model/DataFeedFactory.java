@@ -62,7 +62,7 @@ public class DataFeedFactory {
 		}
     
 		if (result == null && !FileUtils.listFiles(dictionaryPath, new String[]{"def"}, false).isEmpty()) {
-		  result = new GazetteerListFeed(dictionaryPath);
+		  result = new GazetteerListFeed(dictionaryPath,opt);
 		}
 		if (result == null) {
 			result = new DummyFeed(dictionaryPath);

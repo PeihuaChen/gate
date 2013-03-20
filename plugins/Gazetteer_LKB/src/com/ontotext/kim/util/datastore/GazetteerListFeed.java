@@ -21,6 +21,7 @@ import org.openrdf.model.impl.URIImpl;
 import com.ontotext.kim.client.query.KIMQueryException;
 import com.ontotext.kim.client.semanticrepository.QueryResultListener;
 import com.ontotext.kim.client.semanticrepository.QueryResultListener.Feed;
+import com.ontotext.kim.model.Options;
 
 /**
  * @author mnozchev
@@ -33,9 +34,11 @@ public class GazetteerListFeed implements Feed {
   private static Logger log = Logger.getLogger(GazetteerListFeed.class);
   
   private final File dictionaryPath;
+  private Options options;
 
-  public GazetteerListFeed(File dictionaryPath) {
+  public GazetteerListFeed(File dictionaryPath, Options opt) {
     this.dictionaryPath = dictionaryPath;
+    this.options = opt;
   }
 
   /**
@@ -85,6 +88,7 @@ public class GazetteerListFeed implements Feed {
           LinearDefinition definition) throws ResourceInstantiationException,
           IOException {
 
+    String separator = options.getSeparator();
     Map listsByNode = definition.loadLists();
     Iterator inodes = definition.iterator();
     LinearNode node;
@@ -107,19 +111,43 @@ public class GazetteerListFeed implements Feed {
       Iterator iline = gazList.iterator();
       while(iline.hasNext()) {
         GazetteerNode gazNode = (GazetteerNode)iline.next();
-        addEntity(listener, node.getMinorType(), node.getMajorType(),
-                gazNode.getEntry());
+        String clazz = "urn:"+node.getMajorType();
+        String inst = "urn:"+node.getMinorType();
+        String entry = gazNode.getEntry();
+        // if a separator string is set, attempt to split the gazetteer
+        // line by that separator and try to get the inst and/or class feature
+        // values.
+        if(!separator.equals("")) {
+          // If the entry contains the separator, split it up and try to find
+          // features class and inst. 
+          if(entry.contains(separator)) {
+            String fields[] = entry.split(separator);
+            entry = fields[0];
+            for(int i = 1; i<fields.length; i++) {
+              if(fields[i].startsWith("inst=")) {
+                inst = fields[i].substring(5);
+              } else if(fields[i].startsWith("class=")) {
+                clazz = fields[i].substring(6);
+              }
+            }
+          }
+        }
+        
+        addEntity(listener, inst, clazz,entry);
       }
+      
+      
+      
     }
   }
 
-  private void addEntity(QueryResultListener listener, String minorType,
-          String majorType, String label) throws IOException {
+  private void addEntity(QueryResultListener listener, String inst,
+          String clazz, String label) throws IOException {
 
     listener.startTuple();
     listener.tupleValue(new LiteralImpl(label));
-    listener.tupleValue(new URIImpl("urn:" + minorType));
-    listener.tupleValue(new URIImpl("urn:" + majorType));
+    listener.tupleValue(new URIImpl(inst));
+    listener.tupleValue(new URIImpl(clazz));
     listener.endTuple();
   }
 
