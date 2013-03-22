@@ -271,15 +271,18 @@ public class Minipar extends AbstractLanguageAnalyser implements
     // run minipar and save output
     try {
       String line;
-      Process p = Runtime.getRuntime().exec(cmdline);
-      BufferedReader input = new BomStrippingInputStreamReader(p.getInputStream());
-      final BufferedReader err = new BomStrippingInputStreamReader(p.getErrorStream());
+      final Process p = Runtime.getRuntime().exec(cmdline);
       new Thread(new Runnable(){
         public void run() {
           try {
-            String line = null;
-            while((line = err.readLine()) != null) {
-              log.info(line);
+            BufferedReader err = new BomStrippingInputStreamReader(p.getErrorStream());
+            try {
+              String line = null;
+              while((line = err.readLine()) != null) {
+                log.info(line);
+              }
+            } finally {
+              err.close();
             }
           } catch(IOException e) {
             e.printStackTrace();
@@ -287,6 +290,8 @@ public class Minipar extends AbstractLanguageAnalyser implements
         }
       }).start();
       
+      BufferedReader input = new BomStrippingInputStreamReader(p.getInputStream());
+
       // this has ArrayList as its each element
       // this element consists of all annotations for that particular
       // sentence
@@ -294,78 +299,82 @@ public class Minipar extends AbstractLanguageAnalyser implements
 
       // this will have an annotation for each line begining with a number
       ArrayList tokens = new ArrayList();
-      outer: while ((line = input.readLine()) != null) {
-        WordToken wt = new WordToken();
-        // so here whatever we get in line
-        // is of our interest only if it begins with any number
-        // each line is deliminated with a tab sign
-        String[] output = line.split("\t");
-        if (output.length < 5)
-          continue;
-        for (int i = 0; i < output.length; i++) {
-          // we ignore case 2 and 3 and 6 and after.. because we don't
-          // want
-          // that information
-          switch (i) {
-          case 0:
-            // this is a word number
-            try {
-              int number = Integer.parseInt(output[i].trim());
-              // yes this is correct line
-              // we need to check if the line number is 1
-              // it may be the begining of new sentence
-              if (number == 1 && tokens.size() > 0) {
-                // we need to add tokens to the sentenceTokens
-                sentenceTokens.add(tokens);
-                tokens = new ArrayList();
+      try {
+        outer: while ((line = input.readLine()) != null) {
+          WordToken wt = new WordToken();
+          // so here whatever we get in line
+          // is of our interest only if it begins with any number
+          // each line is deliminated with a tab sign
+          String[] output = line.split("\t");
+          if (output.length < 5)
+            continue;
+          for (int i = 0; i < output.length; i++) {
+            // we ignore case 2 and 3 and 6 and after.. because we don't
+            // want
+            // that information
+            switch (i) {
+            case 0:
+              // this is a word number
+              try {
+                int number = Integer.parseInt(output[i].trim());
+                // yes this is correct line
+                // we need to check if the line number is 1
+                // it may be the begining of new sentence
+                if (number == 1 && tokens.size() > 0) {
+                  // we need to add tokens to the sentenceTokens
+                  sentenceTokens.add(tokens);
+                  tokens = new ArrayList();
+                }
+              } catch (NumberFormatException infe) {
+                // if we are here, there is something wrong with
+                // number
+                // ignore this line and continue with next line
+                continue outer;
               }
-            } catch (NumberFormatException infe) {
-              // if we are here, there is something wrong with
-              // number
-              // ignore this line and continue with next line
-              continue outer;
+              break;
+            case 1:
+              // this is the actual word (Token.string)
+              wt.word = output[i];
+              break;
+            case 4:
+              // this should be the number and if it is not
+              // then we leave it and do not add any head
+              try {
+                int head = Integer.parseInt(output[i].trim());
+                // yes this is the correct head number
+                wt.headNumber = head;
+              } catch (NumberFormatException nfe) {
+                // if we are here, there is something wrong with
+                // number
+                // ignore this and make headNumber -1 letter on to
+                // remember that we don't want headnumber to be
+                // inserted as a
+                // feature
+                wt.headNumber = -1;
+              }
+              break;
+            case 5:
+              // this is the relation between head and the current
+              // node
+              wt.relationWithHead = output[i];
+              break;
+            default:
+              break;
             }
-            break;
-          case 1:
-            // this is the actual word (Token.string)
-            wt.word = output[i];
-            break;
-          case 4:
-            // this should be the number and if it is not
-            // then we leave it and do not add any head
-            try {
-              int head = Integer.parseInt(output[i].trim());
-              // yes this is the correct head number
-              wt.headNumber = head;
-            } catch (NumberFormatException nfe) {
-              // if we are here, there is something wrong with
-              // number
-              // ignore this and make headNumber -1 letter on to
-              // remember that we don't want headnumber to be
-              // inserted as a
-              // feature
-              wt.headNumber = -1;
-            }
-            break;
-          case 5:
-            // this is the relation between head and the current
-            // node
-            wt.relationWithHead = output[i];
-            break;
-          default:
-            break;
           }
-        }
 
-        // here we have parsed the one line and thus now we should add
-        // it to the
-        // tokens for letter use
-        tokens.add(wt);
+          // here we have parsed the one line and thus now we should add
+          // it to the
+          // tokens for letter use
+          tokens.add(wt);
+        }
+        if (tokens.size() > 0) {
+          sentenceTokens.add(tokens);
+        }
+      } finally {
+        input.close();
+        p.waitFor();
       }
-      if (tokens.size() > 0) {
-        sentenceTokens.add(tokens);
-      }
-      input.close();
 
       // ok so here we have all the information we need from the minipar
       // in
