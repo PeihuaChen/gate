@@ -63,13 +63,13 @@ import org.apache.log4j.Logger;
 public class Main {
 
   /** Debug flag */
-  private static final boolean DEBUG = false;
+  protected static final boolean DEBUG = false;
 
   /** Status flag for normal exit. */
-  private static final int STATUS_NORMAL = 0;
+  protected static final int STATUS_NORMAL = 0;
 
   /** Status flag for error exit. */
-  private static final int STATUS_ERROR = 1;
+  protected static final int STATUS_ERROR = 1;
 
   /** Main routine for GATE.
     * Command-line arguments:
@@ -128,7 +128,7 @@ public class Main {
   } // main
 
   /** Register any CREOLE URLs that we got on the command line */
-  private static void registerCreoleUrls() {
+  protected static void registerCreoleUrls() {
     CreoleRegister reg = Gate.getCreoleRegister();
     Iterator<URL> iter = pendingCreoleUrls.iterator();
     while(iter.hasNext()) {
@@ -144,7 +144,7 @@ public class Main {
   } // registerCreoleUrls()
 
   /** Main Frame of the GUI; null when no GUI running */
-  private static MainFrame frame;
+  protected static MainFrame frame;
 
   /**
    * Get the main frame of the GUI. If the GUI isn't running, it
@@ -157,7 +157,7 @@ public class Main {
   } // getMainFrame()
 
   /** Run the user interface. */
-  private static void runGui() throws GateException {
+  protected static void runGui() throws GateException {
     try {
       Class rmClass =  Gate.class.getClassLoader().loadClass(
           "org.jdesktop.swinghelper.debug.CheckThreadViolationRepaintManager");
@@ -482,7 +482,7 @@ public class Main {
   private static List annotatorNames = new ArrayList();
 
   /** Map of annotator arguments. */
-  private static Map annotatorArgsMap = new HashMap();
+  protected static Map annotatorArgsMap = new HashMap();
 
   /** List of classes we were asked to debug. */
   private static List debugNames = new ArrayList();
@@ -590,6 +590,6 @@ public class Main {
   } // help()
 
   /** The list of pending URLs to add to the CREOLE register */
-  private static List<URL> pendingCreoleUrls = new ArrayList<URL>();
+  protected static List<URL> pendingCreoleUrls = new ArrayList<URL>();
 
 } // class Main
