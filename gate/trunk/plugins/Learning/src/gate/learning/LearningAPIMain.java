@@ -1005,6 +1005,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
   public void cleanup() {
     if(applicationTempDir != null && !applicationTempDir.equals(wdResults)) {
       deleteRecursively(applicationTempDir);
+      applicationTempDir = null;
     }
   }
 
