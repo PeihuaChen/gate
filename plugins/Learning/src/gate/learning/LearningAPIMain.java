@@ -14,6 +14,7 @@ import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
 import gate.util.*;
+
 import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -319,9 +320,8 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
                   wdResults.toString() + File.separator
                           + ConstantParameters.FILENAMEOFModels;
           if(!new File(modelFileName).exists()) {
-            System.out
-                    .println("Warning: the model is not available at the moment!!");
-            return;
+            throw new ExecutionException("The model is not available at " + 
+                modelFileName + "!");
           }
           BufferedWriter outNLPFeatures = null;
           BufferedReader inNLPFeatures = null;
@@ -660,9 +660,8 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
                     wdResults.toString() + File.separator
                             + ConstantParameters.FILENAMEOFModels;
             if(!new File(modelFileName).exists()) {
-              System.out
-                      .println("Warning: the model is not available at the moment!");
-              return;
+              throw new ExecutionException("The model is not available at " + 
+                  modelFileName + "!");
             }
             if(endDocIdApp > startDocIdApp) {
               if(LogService.minVerbosityLevel > 0)
