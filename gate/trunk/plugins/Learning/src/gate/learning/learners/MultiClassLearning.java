@@ -134,10 +134,14 @@ public class MultiClassLearning {
       + array1.size(), 1);
     // Open the mode file for writing the model into it
     try {
-      if(modelFile.exists() && !modelFile.isDirectory()) {
-        if(!modelFile.delete()) { throw new IOException(
-          "Existing single-file model " + modelFile + " could not be deleted."); }
+      if(modelFile.exists()) {
+        deleteRecursively(modelFile);
       }
+      
+//      if(modelFile.exists() && !modelFile.isDirectory()) {
+//        if(!modelFile.delete()) { throw new IOException(
+//          "Existing single-file model " + modelFile + " could not be deleted."); }
+//      }
       if(!modelFile.exists()) {
         if(!modelFile.mkdirs()) { throw new IOException(
           "Couldn't create directory for model files"); }
