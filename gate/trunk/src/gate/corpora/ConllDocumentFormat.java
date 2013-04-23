@@ -112,6 +112,33 @@ public class ConllDocumentFormat extends TextualDocumentFormat {
             finishAllTags(inProgress, annotanda, oldEnd);
           }
           
+          // "U-FOO": unigram, single-token "FOO"
+          // annotation, after closing any "FOO" already in progress
+          else if ( (items[column].length() > 2) &&
+              items[column].startsWith("U-") ) {
+            String type = items[column].substring(2);
+            finishTag(type, inProgress, annotanda, oldEnd);
+            annotanda.add(new Annotandum(type, start, end, column, true));
+          }
+          
+          // "L-FOO": last bit of "FOO": extend and 
+          // close any "FOO" already in progress
+          else if ( (items[column].length() > 2) &&
+              items[column].startsWith("L-") ) {
+            String type = items[column].substring(2);
+            
+            if (inProgress.containsKey(type)) {
+              // good L-FOO, so update the end offset
+              inProgress.get(type).endOffset = end;
+            }
+            else {
+              // bad data, containing I-FOO without a B-FOO, so treat as if B-FOO
+              inProgress.put(type, new Annotandum(type, start, end, column, true));
+            }
+
+            finishTag(type, inProgress, annotanda, end);
+          }
+          
           // "B-FOO": start a new "FOO" annotation
           // after closing any "FOO" already in progress
           else if ( (items[column].length() > 2) &&
@@ -138,7 +165,7 @@ public class ConllDocumentFormat extends TextualDocumentFormat {
           
           // "FOO": treat as single-token annotation (such as POS tag)
           else { 
-            Annotandum tag = new Annotandum(items[1], start, end, column, false);
+            Annotandum tag = new Annotandum(items[column], start, end, column, false);
             annotanda.add(tag);
           }
         }
@@ -236,7 +263,7 @@ class Annotandum {
   }
   
   /* Note that chunkiness is determined by the tag structure.  A "B-Foo"
-   * that spans only one token is chunky.  Tags outside the B/I/O system
+   * that spans only one token is chunky.  Tags outside the B/I/L/U system
    * get the kind==token feature; tags in the system get kind==chunky.   */
   protected Annotandum(String type, Long startOffset, Long endOffset, int column, boolean chunky) {
     this.features = Factory.newFeatureMap();
