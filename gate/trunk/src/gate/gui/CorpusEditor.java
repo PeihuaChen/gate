@@ -690,13 +690,18 @@ public class CorpusEditor extends AbstractVisualResource
         "<li>right click on the corpus in the resources tree and choose 'Populate'" +
         "</ul></html>");
       messageLabel.setVisible(true);
-    } else if (documentsLoadedCount > 0
+    } 
+    // This is a really stupid way of checking if all the open documents are in the
+    //corpus and it seems to be causing more problems than it might possibly be trying
+    //to solve
+    /*else if (documentsLoadedCount > 0
             && documentsLoadedCount == corpus.size()) {
       newDocumentAction.setEnabled(false);
       messageLabel.setText("All the documents loaded in the " +
         "system are in this corpus.");
       messageLabel.setVisible(true);
-    } else if (documentsLoadedCount == 0) {
+    } */
+    else if (documentsLoadedCount == 0) {
       newDocumentAction.setEnabled(false);
       if (corpus.getDataStore() == null) {
         messageLabel.setText(
