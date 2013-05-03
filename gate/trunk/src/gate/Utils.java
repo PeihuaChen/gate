@@ -11,17 +11,17 @@
  *
  *  Johann Petrak, 2010-02-05
  *
- *  $Id: Main.java 12006 2009-12-01 17:24:28Z thomas_heitz $
  */
 
 package gate;
 
 import gate.annotation.AnnotationSetImpl;
-import gate.annotation.ImmutableAnnotationSetImpl;
 import gate.creole.ConditionalSerialController;
 import gate.creole.RunningStrategy;
 import gate.util.GateRuntimeException;
+import gate.util.InvalidOffsetException;
 import gate.util.OffsetComparator;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,9 +30,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+
 import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 /**
  * Various utility methods to make often-needed tasks more easy and
@@ -755,4 +755,88 @@ public class Utils {
   private static final Set<String> alreadyLoggedMessages = 
     Collections.synchronizedSet(new HashSet<String>());
 
+  
+  /**
+   * Returns the only annotation that annset is expected to contains, throws an
+   * exception if there is not exactly one annotation. This is useful when a
+   * binding set is expected to contain exactly one interesting annotation.
+   * 
+   * @param annset the annotation set that is expected to contain exactly one annotation  
+   * @return the one annotation or throws an exception if there are 0 or more than one annotations
+   * 
+   */
+  public static Annotation getOnlyAnn(AnnotationSet annset) {
+    if (annset.size() != 1) {
+      throw new GateRuntimeException(
+          "Annotation set does not contain exactly 1 annotation but "
+              + annset.size());
+    } else {
+      return annset.iterator().next();
+    }
+  }
+
+  /**
+   * Add a new annotation to the output annotation set outSet, spanning the same
+   * region as spanSet, and having the given type and feature map. The start and
+   * end nodes of the new annotation will be new nodes. This method will convert
+   * the checked InvalidOffsetException that can be raised by 
+   * AnnotationSet.add to a GateRuntimeException.
+   * 
+   * @param outSet the annotation set where the new annotation will be added
+   * @param spanSet an annotation set representing the span of the new annotation
+   * @param type the annotation type of the new annotation
+   * @param fm the feature map to use for the new annotation
+   */
+  public static void addAnn(AnnotationSet outSet, AnnotationSet spanSet,
+      String type, FeatureMap fm) {
+    try {
+      outSet.add(start(spanSet), end(spanSet), type, fm);
+    } catch (InvalidOffsetException ex) {
+      throw new GateRuntimeException("Offset error when trying to add new annotation: ", ex);
+    }
+  }
+
+  /**
+   * Add a new annotation to the output annotation set outSet, spanning the 
+   * given offset range, and having the given type and feature map. The start and
+   * end nodes of the new annotation will be new nodes. This method will convert
+   * the checked InvalidOffsetException that can be raised by 
+   * AnnotationSet.add to a GateRuntimeException.
+   * 
+   * @param outSet outSet the annotation set where the new annotation will be added
+   * @param startOffset the start offset of the new annotation
+   * @param endOffset the end offset of the new annotation
+   * @param type the annotation type of the new annotation
+   * @param fm the feature map to use for the new annotation
+   */
+  public static void addAnn(AnnotationSet outSet, long startOffset, long endOffset,
+      String type, FeatureMap fm) {
+    try {
+      outSet.add(startOffset, endOffset, type, fm);
+    } catch (InvalidOffsetException ex) {
+      throw new GateRuntimeException("Offset error when trying to add new annotation: ", ex);
+    }
+  }
+
+  /**
+   * Add a new annotation to the output annotation set outSet, covering the same
+   * region as the annotation spanAnn, and having the given type and feature map. The start and
+   * end nodes of the new annotation will be new nodes. This method will convert
+   * the checked InvalidOffsetException that can be raised by 
+   * AnnotationSet.add to a GateRuntimeException.
+   * 
+   * @param outSet the annotation set where the new annotation will be added
+   * @param spanAnn an annotation representing the span of the new annotation
+   * @param type the annotation type of the new annotation
+   * @param fm the feature map to use for the new annotation
+   */
+  public static void addAnn(AnnotationSet outSet, Annotation spanAnn,
+      String type, FeatureMap fm) {
+    try {
+      outSet.add(start(spanAnn), end(spanAnn), type, fm);
+    } catch (InvalidOffsetException ex) {
+      throw new GateRuntimeException("Offset error adding new annotation: ", ex);
+    }
+  }
+  
 }
