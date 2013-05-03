@@ -196,8 +196,7 @@ public class PersistenceManager {
             // is stored relative to $resourceshome$
             // If URL can be made relative to both gatehome and projecthome,
             // gatehome is preferred.
-            if(currentUseGateHome() || currentWarnAboutGateHome()) {
-              
+            if(currentUseGateHome() || currentWarnAboutGateHome()) {              
               if (!isContainedWithin(currentPersistenceFile(), gateHomePath) &&
                   isContainedWithin(urlPath, gateHomePath)) {
                 logger.debug("Setting path marker to "+gatehomePathMarker);
@@ -218,7 +217,7 @@ public class PersistenceManager {
                   pathMarker = gatehomePathMarker;
                 }
               } else if(resourceshomeDir != null &&
-                  isContainedWithin(currentPersistenceFile(), resourceshomeDir) &&
+                  !isContainedWithin(currentPersistenceFile(), resourceshomeDir) &&
                   isContainedWithin(urlPath,resourceshomeDir)) {
                  if(currentWarnAboutGateHome()) {
                   if(!currentHaveWarnedAboutResourceshome().getValue()) {
@@ -336,7 +335,6 @@ public class PersistenceManager {
         resourceshomePath = new File(resourceshomeString);
         resourceshomePath = getCanonicalFileIfPossible(resourceshomePath);
         haveResourceshomePath = true;
-        System.out.println("Found project home path "+resourceshomePath);
         return resourceshomePath;
       } else if(haveResourceshomePath) {
         return resourceshomePath;
