@@ -31,7 +31,13 @@ public enum Behaviour {
    * If the mime type of the document being processed is not in the list then
    * it's entire body will be tagged as content.
    */
-  NOT_LISTED("If Mime Type Is NOT Listed");
+  NOT_LISTED("If Mime Type Is NOT Listed"),
+
+  /**
+   * The mime type list is ignored, all documents will be analysed to determine
+   * content.
+   */
+  IGNORE_LIST("Ignore the List");
 
   /**
    * The human readable description that will get displayed in the GATE gui
