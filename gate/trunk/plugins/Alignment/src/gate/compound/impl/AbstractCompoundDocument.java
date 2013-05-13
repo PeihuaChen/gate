@@ -105,6 +105,7 @@ public abstract class AbstractCompoundDocument extends DocumentImpl implements
 
   /** Clear all the data members of the object. */
   public void cleanup() {
+    super.cleanup();
     setCurrentDocument(null);
     Iterator<Document> iter = documents.values().iterator();
     while(iter.hasNext()) {
