@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import org.apache.log4j.Logger;
+import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
 /**
@@ -790,11 +791,11 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
                 log.println("<learningMode>EVALUATION</learningMode>");
                 log.println("<corpus><![CDATA["+corpus.getName()+"]]></corpus>");
                 log.println("<date-loaded>"+date_time_loaded.substring(0,8)+"</date-loaded>"+
-                            "<time-loaded>"+date_time_loaded.substring(8)+"</time-loaded>");
+                            "<time-loaded>"+date_time_loaded.substring(9)+"</time-loaded>");
                 log.println("<date-started>"+date_time_started.substring(0,8)+"</date-started>"+
-                            "<time-started>"+date_time_started.substring(8)+"</time-started>");
+                            "<time-started>"+date_time_started.substring(9)+"</time-started>");
                 log.println("<date-ended>"+date_time_ended.substring(0,8)+"</date-ended>"+
-                            "<time-ended>"+date_time_ended.substring(8)+"</time-ended>");
+                            "<time-ended>"+date_time_ended.substring(9)+"</time-ended>");
                 for(int i=0;i<learningSettings.evaluationconfig.kk;i++) {
                   
                 }
@@ -829,6 +830,9 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
                   log.println("  </run>");
                 }
                 log.println("</per-run>");
+                Format outputFormat = Format.getPrettyFormat();
+                outputFormat.setLineSeparator("\n");
+                outputFormat.setEncoding("UTF-8");
                 String jdomDocString = new XMLOutputter().outputString(learningSettings.jdomDocSaved.getRootElement());
                 log.println(jdomDocString);
                 log.println("</ML-RUN>");
