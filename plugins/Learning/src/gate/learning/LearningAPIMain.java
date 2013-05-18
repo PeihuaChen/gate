@@ -774,7 +774,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
                   "" : 
                   "_" + learningSettings.experimentId) + "_" +
                 "evaluation_" + date_time_ended + ".xml";
-              File outFile = new File(configDir,fileName);
+              File outFile = new File(Files.fileFromURL(getRunProtocolDir()),fileName);
               FileWriter fow;
               PrintWriter log = null;
               try {
@@ -1036,7 +1036,7 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
   public URL getConfigFileURL() {
     return this.configFileURL;
   }
-
+  
   public void setInputASName(String iasn) {
     this.inputASName = iasn;
   }
