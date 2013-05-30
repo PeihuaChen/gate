@@ -855,6 +855,7 @@ public class PersistenceManager {
                 rawStream = url.openStream());
         try {
           XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+          inputFactory.setProperty(XMLInputFactory.IS_COALESCING, true);
           XMLStreamReader xsr = inputFactory.createXMLStreamReader(
               url.toExternalForm(), inputReader);
           reader = new StaxReader(new QNameMap(), xsr);
