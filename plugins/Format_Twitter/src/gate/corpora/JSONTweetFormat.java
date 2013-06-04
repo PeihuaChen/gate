@@ -1,7 +1,7 @@
 /*
  *  JSONTweetFormat.java
  *
- *  Copyright (c) 1995-2012, The University of Sheffield. See the file
+ *  Copyright (c) 1995-2013, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -15,7 +15,12 @@ package gate.corpora;
 
 import java.io.*;
 import java.util.*;
+
+import org.apache.commons.lang.StringUtils;
+
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+
 import gate.*;
 import gate.corpora.DocumentContentImpl;
 import gate.corpora.MimeType;
@@ -28,6 +33,8 @@ import gate.util.InvalidOffsetException;
 
 // JSON API
 // http://json-lib.sourceforge.net/apidocs/jdk15/index.html
+// Jackson API
+// http://wiki.fasterxml.com/JacksonHome
 
 // Standard: RFC 4627
 // https://tools.ietf.org/html/rfc4627
@@ -82,7 +89,7 @@ public class JSONTweetFormat extends TextualDocumentFormat {
     }
 
     setNewLineProperty(doc);
-    String jsonString = doc.getContent().toString();
+    String jsonString = StringUtils.trimToEmpty(doc.getContent().toString());
     try {
       // Parse the String
       List<Tweet> tweets = readTweets(jsonString);
@@ -113,7 +120,29 @@ public class JSONTweetFormat extends TextualDocumentFormat {
   }
   
   
+  
+  private List<Tweet> readTweetList(String string) throws IOException {
+    ObjectMapper mapper = new ObjectMapper();
+    List<Tweet> tweets = new ArrayList<Tweet>();
+    ArrayNode jarray = (ArrayNode) mapper.readTree(string);
+    for (JsonNode jnode : jarray) {
+      tweets.add(new Tweet(jnode));
+    }
+    return tweets;
+  }
+  
+  
   private List<Tweet> readTweets(String string) throws IOException {
+    if (string.startsWith("[")) {
+      return readTweetList(string);
+    }
+
+    // implied else
+    return readTweetLines(string);
+  }
+  
+  
+  private List<Tweet>readTweetLines(String string) throws IOException {
     ObjectMapper mapper = new ObjectMapper();
     //JsonFactory jfactory = new JsonFactory();
     //JsonParser parser = jfactory.createJsonParser(reader);
