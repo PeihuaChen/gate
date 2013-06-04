@@ -230,9 +230,12 @@ public class Literal {
     if ((this.value == null) && (other.value == null)) {
       return true;
     }
-    if(!this.dataType.equals(other.dataType) ||
-       !this.language.equals(other.language) ||
-       !this.value.equals(other.value)) {
+    if(!(this.dataType == null ?
+          other.dataType == null : this.dataType.equals(other.dataType)) ||
+       !(this.language == null ?
+          other.language == null : this.language.equals(other.language)) ||
+       !(this.value == null ?
+          other.value == null : this.value.equals(other.value))) {
       return false;
     }
     return true;
