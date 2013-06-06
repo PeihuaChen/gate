@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2008--2012, The University of Sheffield. See the file
+ *  Copyright (c) 2008--2013, The University of Sheffield. See the file
  *  COPYRIGHT.txt in the software or at http://gate.ac.uk/gate/COPYRIGHT.txt
  *
  *  This file is part of GATE (see http://gate.ac.uk/), and is free
@@ -201,23 +201,10 @@ public abstract class AbstractPairbank extends AbstractBank
   }
   
   
-  public void saveAsRdfAndDeleteOntology(double threshold, File outputFile) throws GateException {
-    System.out.println("Saving as RDF not implemented yet for Pairbanks");
-  }
-
-  public void saveAsRdfAndDeleteOntology(File outputFile) throws GateException {
-    saveAsRdfAndDeleteOntology(0.0, outputFile);
-  }
-
-  public void writeRdfAndDeleteOntology(double threshold, OutputStream stream) throws GateException {
-    System.out.println("Saving as RDF not implemented yet for Pairbanks");
-  }
-
-
   
   @Override
   public List<Action> getActions() {
-    // lazy instantation because it's transient
+    // lazy instantiation because it's transient
     if (this.actionsList == null) {
       createActions();
     }
