@@ -398,7 +398,7 @@ public class ClassificationMeasures {
     matrix.add(row); // title
     SortedSet<String> features = new TreeSet<String>(getFeatureValues());
     row = new ArrayList<String>();
-    row.add("");
+    row.add("A \\ B");
     row.addAll(features);
     matrix.add(row); // heading horizontal
     for (float[] confusionValues : getConfusionMatrix()) {
