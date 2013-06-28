@@ -230,8 +230,7 @@ public interface AnnotationSet extends SimpleAnnotationSet, Serializable {
    * they appear in the document. If more than one annotation starts at a specific offset
    * the order of these annotations is unspecified.
    * 
-   * @return a list of annotations ordered by increasing start offset. If a positional
-   * index does not exist, it is created.
+   * @return a list of annotations ordered by increasing start offset.
    */
   public List<Annotation> inDocumentOrder();
   
