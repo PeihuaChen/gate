@@ -21,6 +21,7 @@ import gate.event.GateListener;
 import gate.util.InvalidOffsetException;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -224,6 +225,17 @@ public interface AnnotationSet extends SimpleAnnotationSet, Serializable {
    */
   public AnnotationSet getContained(Long startOffset, Long endOffset);
 
+  /**
+   * Return a list of annotations sorted by increasing start offset, i.e. in the order
+   * they appear in the document. If more than one annotation starts at a specific offset
+   * the order of these annotations is unspecified.
+   * 
+   * @return a list of annotations ordered by increasing start offset. If a positional
+   * index does not exist, it is created.
+   */
+  public List<Annotation> inDocumentOrder();
+  
+  
   /**
    * Get the node with the smallest offset
    */

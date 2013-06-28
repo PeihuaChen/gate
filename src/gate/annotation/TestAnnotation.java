@@ -1154,6 +1154,41 @@ public class TestAnnotation extends TestCase
       return new AnnotationImpl(id, start, end, type, features);
   }
 
+  /** Test inDocumentOrder() and getStartingAt(long) */
+  public void testDocumentOrder() throws Exception {
+    FeatureMap params = Factory.newFeatureMap();
+    params.put(Document.DOCUMENT_URL_PARAMETER_NAME, Gate.getUrl("tests/doc0.html"));
+    params.put(Document.DOCUMENT_MARKUP_AWARE_PARAMETER_NAME, "true");
+    Document doc = (Document)Factory.createResource("gate.corpora.DocumentImpl",
+                                                    params);
+
+    AnnotationSet originals = doc.getAnnotations("Original markups");
+    if(originals instanceof AnnotationSetImpl) {
+      AnnotationSetImpl origimpl = (AnnotationSetImpl)originals;
+      List<Annotation> ordered = origimpl.inDocumentOrder();
+      assertNotNull(ordered);
+      assertEquals(20, ordered.size());
+      assertEquals(33, ordered.get(4).getStartNode().getOffset().intValue());
+      for(int i=1;i<ordered.size();i++) {
+        assertTrue("Elements "+(i-1)+"/"+i,
+            ordered.get(i-1).getStartNode().getOffset() <= ordered.get(i).getStartNode().getOffset());
+      }
+      AnnotationSet anns;
+      anns = origimpl.getStartingAt(0);
+      assertEquals(4,anns.size());
+      anns = origimpl.getStartingAt(1);
+      assertEquals(0,anns.size());
+      anns = origimpl.getStartingAt(33);
+      assertEquals(4,anns.size());
+      anns = origimpl.getStartingAt(48);
+      assertEquals(1,anns.size());
+      anns = origimpl.getStartingAt(251);
+      assertEquals(1,anns.size());
+    }
+  } // testDocumentOrder()
+  
+  
+  
   public static void main(String[] args){
 
     try{
