@@ -420,6 +420,47 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
     return new ImmutableAnnotationSetImpl(doc, annotationsToAdd);
   }
 
+  
+  /**
+   * Select annotations by offset. This returns the set of annotations that
+   * start exactly at the given offset. If a
+   * positional index doesn't exist it is created. If there are no annotations
+   * at the given offset then an empty annotation set is returned.
+   * 
+   * @param offset The starting offset for which to return annotations 
+   * @return a ImmutableAnnotationSetImpl containing all annotations starting at the given
+   *   offset (possibly empty).
+   */
+  public AnnotationSet getStartingAt(long offset) {
+    if(annotsByStartNode == null) indexByStartOffset();
+    Node node = (Node)nodesByOffset.get(offset);
+    if(node == null) { // no nodes at or beyond this offset
+      return emptyAnnotationSet;
+    }
+    return new ImmutableAnnotationSetImpl(doc, getAnnotsByStartNode(node.getId()));
+  }
+  
+  /**
+   * Return a list of annotations sorted by increasing start offset, i.e. in the order
+   * they appear in the document. If more than one annotation starts at a specific offset
+   * the order of these annotations is unspecified.
+   * 
+   * @return a list of annotations ordered by increasing start offset. If a positional
+   * index does not exist, it is created.
+   */
+  public List<Annotation> inDocumentOrder() {
+    if(annotsByStartNode == null) indexByStartOffset();
+    Collection<Object> values = nodesByOffset.values();
+    List<Annotation> result = new ArrayList<Annotation>();
+    for(Object nodeObj : values) {
+      Collection<Annotation> anns = getAnnotsByStartNode(((Node)nodeObj).getId());
+      if(anns != null) {
+        result.addAll(anns);
+      }
+    }
+    return result;
+  }
+  
   /**
    * Select annotations by offset. This returns the set of annotations that
    * overlap totaly or partially with the interval defined by the two provided
