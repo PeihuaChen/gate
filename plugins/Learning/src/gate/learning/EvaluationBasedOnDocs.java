@@ -31,7 +31,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -720,6 +722,19 @@ public class EvaluationBasedOnDocs {
     return logMes.toString();
   }
 
+  /** Get the measures per label */
+  public Map<String,EvaluationMeasuresComputation> getMeasuresForEachLabel() {
+    List labels = new ArrayList(labels2InstNum.keySet());
+    Map<String,EvaluationMeasuresComputation> ret = new LinkedHashMap<String,EvaluationMeasuresComputation>();
+    Collections.sort(labels);
+    for(int i = 0; i < labels.size(); ++i) {
+      String labelName = labels.get(i).toString();
+      ret.put(labelName, (EvaluationMeasuresComputation)labels2MMR.get(labelName));
+    }
+    return ret;
+  }
+  
+  
   /** Evaluate the test document by using the AnnotationDiff class. */
   public void evaluateAnnDiff(Document doc, String classTypeOriginal,
     String classTypeTest, String classFeat, Set labelSet, HashMap labels2MR) {
