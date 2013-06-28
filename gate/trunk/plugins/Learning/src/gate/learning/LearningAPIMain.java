@@ -22,6 +22,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.log4j.Logger;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
@@ -796,9 +798,6 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
                             "<time-started>"+date_time_started.substring(9)+"</time-started>");
                 log.println("<date-ended>"+date_time_ended.substring(0,8)+"</date-ended>"+
                             "<time-ended>"+date_time_ended.substring(9)+"</time-ended>");
-                for(int i=0;i<learningSettings.evaluationconfig.kk;i++) {
-                  
-                }
                 log.println("<overall>");
                 log.println("  <correct>"+evaluation.macroMeasuresOfResults.correct+"</correct>");
                 log.println("  <partialCorrect>"+evaluation.macroMeasuresOfResults.partialCor+"</partialCorrect>");
@@ -830,6 +829,25 @@ public class LearningAPIMain extends AbstractLanguageAnalyser
                   log.println("  </run>");
                 }
                 log.println("</per-run>");
+                log.println("<per-class>");
+                Map<String,EvaluationMeasuresComputation> perLabel = evaluation.getMeasuresForEachLabel();
+                for(String label : perLabel.keySet()) {
+                  EvaluationMeasuresComputation oneLabel = perLabel.get(label);
+                  log.println("  <class>");
+                  log.println("    <class-label><![CDATA["+label+"]]></class-label>");                  
+                  log.println("    <correct>"+oneLabel.correct+"</correct>");
+                  log.println("    <partialCorrect>"+oneLabel.partialCor+"</partialCorrect>");
+                  log.println("    <spurious>"+oneLabel.spurious+"</spurious>");
+                  log.println("    <missing>"+oneLabel.missing+"</missing>");
+                  log.println("    <precision>"+oneLabel.precision+"</precision>");
+                  log.println("    <recall>"+oneLabel.recall+"</recall>");
+                  log.println("    <f1>"+oneLabel.f1+"</f1>");
+                  log.println("    <precisionLenient>"+oneLabel.precisionLenient+"</precisionLenient>");
+                  log.println("    <recallLenient>"+oneLabel.recallLenient+"</recallLenient>");
+                  log.println("    <f1Lenient>"+oneLabel.f1Lenient+"</f1Lenient>");
+                  log.println("  </class>");
+                }
+                log.println("</per-class>");
                 Format outputFormat = Format.getPrettyFormat();
                 outputFormat.setLineSeparator("\n");
                 outputFormat.setEncoding("UTF-8");
