@@ -504,9 +504,12 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
    * @param directory
    */
   public void removeDirectory(URL directory) {
+    int prCount = 0;
+    
     if(directories.remove(directory)) {
       DirectoryInfo dInfo = Gate.getDirectoryInfo(directory);
       if(dInfo != null) {
+        
         for(ResourceInfo rInfo : dInfo.getResourceInfoList()) {
           ResourceData rData = get(rInfo.getResourceClassName());          
           if (rData != null && rData.getReferenceCount() == 1) {
@@ -515,6 +518,7 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
             try {
               List<Resource> loaded =
                   getAllInstances(rInfo.getResourceClassName(),true);
+              prCount += loaded.size();
               for(Resource r : loaded) {
                 //System.out.println(r);
                 Factory.deleteResource(r);  
@@ -536,6 +540,8 @@ public class CreoleRegisterImpl extends HashMap<String, ResourceData>
       }
 
       log.info("CREOLE plugin unloaded: " + directory);
+      if (prCount > 0)
+        log.warn(prCount+" resources were deleted as they relied on the " + dInfo.getName() +" plugin");
     }
   }
 
