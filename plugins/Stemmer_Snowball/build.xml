@@ -6,8 +6,12 @@
     <!-- Prevent Ant from warning about includeantruntime not being set -->
     <property name="build.sysclasspath" value="ignore" />
 
-	
   <!-- set global properties for this build -->
+  <property environment="env"/>
+  <property file="build.properties" />
+  <condition property="gate.home" value="${env.GATE_HOME}">
+    <isset property="env.GATE_HOME" />
+  </condition>
   <property name="src" location="src"/>
   <property name="build" location="classes"/>
   <property name="jar.location" location="stemmer.jar" />
