@@ -32,6 +32,6 @@ import java.lang.annotation.Target;
  * method with this annotation.  GATE will then ignore the inherited parameter.
  */
 @Documented
-@Target( {ElementType.METHOD})
+@Target( {ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface HiddenCreoleParameter {}

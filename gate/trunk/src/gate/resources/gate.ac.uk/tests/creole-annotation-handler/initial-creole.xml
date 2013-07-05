@@ -16,5 +16,9 @@
     <RESOURCE>
       <CLASS>gate.creole.metadata.test.TestSubclassProcessingResource</CLASS>
     </RESOURCE>
+
+    <RESOURCE>
+      <CLASS>gate.creole.metadata.test.TestFieldAnnotatedProcessingResource</CLASS>
+    </RESOURCE>
   </CREOLE>
 </CREOLE-DIRECTORY>

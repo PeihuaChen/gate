@@ -25,25 +25,33 @@ import java.util.Collection;
 /**
  * <p>
  * Annotation used to define a parameter to a CREOLE resource. This annotation
- * should be used to annotate the <code>set</code> method corresponding to the
- * parameter. The parameter's name is inferred from the method name, and its
- * type is inferred from the type of the method's argument. When annotating a
- * method whose argument type is a subtype of {@link Collection}, GATE also
- * attempts to infer the collection element type from any generic type
- * arguments given. If the collection type is a raw type then you will need to
- * supply the collectionElementType explicitly in the annotation.
+ * should be used in one of two ways:
+ * 
+ * <ol>
+ * <li>To annotate the <code>set</code> method corresponding to the parameter.
+ * The parameter's name is inferred from the method name, and its type is
+ * inferred from the type of the method's argument.</li>
+ * <li>To annotate the field for the parameter itself. The corresponding get and
+ * set methods must exist for the field</li>
+ * </ol>
+ * 
+ * When annotating a method whose argument type is a subtype of
+ * {@link Collection}, GATE also attempts to infer the collection element type
+ * from any generic type arguments given. If the collection type is a raw type
+ * then you will need to supply the collectionElementType explicitly in the
+ * annotation.
  * </p>
- *
+ * 
  * <p>
  * Parameters can be marked as optional or runtime parameters using the
  * appropriate additional annotations.
  * </p>
- *
+ * 
  * @see Optional
  * @see RunTime
  */
 @Documented
-@Target( {ElementType.METHOD})
+@Target( {ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CreoleParameter {
   /**

@@ -21,6 +21,7 @@ import gate.util.GateException;
 
 import junit.framework.*;
 import org.custommonkey.xmlunit.*;
+import org.jdom.input.DOMBuilder;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.DOMOutputter;
 import org.jdom.output.XMLOutputter;
@@ -117,6 +118,7 @@ public class TestCreoleAnnotationHandler extends TestCase {
     if(!match) {
       // if comparison failed, output the "actual" result document for
       // debugging purposes
+      System.err.println("---------actual-----------");   	
       new XMLOutputter(Format.getPrettyFormat()).output(creoleXml, System.err);
     }
 
